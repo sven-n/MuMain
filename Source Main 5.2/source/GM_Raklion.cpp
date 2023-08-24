@@ -403,7 +403,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         else
         if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if(rand()%10==0) {
+            if(rand_fps_check(10)) {
                 CreateParticle ( BITMAP_SMOKE+1, o->Position, o->Angle, Light );
             }
         }
@@ -466,12 +466,12 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                     for (int i = 0; i < b->NumBones; ++i)
                     {
                         b->TransformByObjectBone(vPos, o, i);
-                        if (rand() % 5 == 0)
+                        if (rand_fps_check(5))
                         {
                             Vector(0.0f, 1.f, 0.2f, vLight);
                             CreateParticle(BITMAP_WATERFALL_5, vPos, o->Angle, vLight, 8, 2.0f);
                         }
-                        if (rand() % 5 == 0)
+                        if (rand_fps_check(5))
                         {
                             Vector(0.1f, 1.f, 0.1f, vLight);
                             CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 8, 2.5f);
@@ -479,7 +479,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                     }
                 }
 
-                if (rand() % 3 == 0)
+                if (rand_fps_check(3))
                 {
                     VectorCopy(o->Position, vPos);
                     vPos[0] += (float)(rand() % 200 - 100);
@@ -529,7 +529,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                     vPos[2] = Hero->Object.Position[2] + 300.0f + (float)(rand() % 10) * 100.0f;
                     float fScale = 1.0f + (rand() % 10) / 5.0f;
                     int iIndex = MODEL_EFFECT_BROKEN_ICE1;
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         iIndex = MODEL_EFFECT_BROKEN_ICE3;
                     }
@@ -685,12 +685,12 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 for (int i = 0; i < b->NumBones; ++i)
                 {
                     b->TransformByObjectBone(vPos, o, i);
-                    if (rand() % 5 == 0)
+                    if (rand_fps_check(5))
                     {
                         Vector(0.0f, 1.f, 0.2f, vLight);
                         CreateParticle(BITMAP_WATERFALL_5, vPos, o->Angle, vLight, 8, 2.0f);
                     }
-                    if (rand() % 5 == 0)
+                    if (rand_fps_check(5))
                     {
                         Vector(0.1f, 1.f, 0.1f, vLight);
                         CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 8, 2.5f);
@@ -698,7 +698,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 }
             }
 
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 VectorCopy(o->Position, vPos);
                 vPos[0] += (float)(rand() % 400 - 200);
@@ -739,7 +739,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
             Vector(1.0f, 0.1f, 0.1f, vLight);
             for (int k = 0; k < 1; ++k)
             {
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     vec3_t vPos1, vPos2;
                     b->TransformByObjectBone(vPos1, o, 34);
@@ -788,7 +788,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 Vector(0.2f, 0.4f, 1.0f, vLight);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 11, 1.2f);
 
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     VectorCopy(o->Position, vPos);
                     vPos[0] += (float)(rand() % 200 - 100);
@@ -854,7 +854,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         else
         if(o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if(rand()%10==0) {
+            if(rand_fps_check(10)) {
                 CreateParticle ( BITMAP_SMOKE+1, o->Position, o->Angle, Light );
             }
         }
@@ -917,12 +917,12 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                     for (int i = 0; i < b->NumBones; ++i)
                     {
                         b->TransformByObjectBone(vPos, o, i);
-                        if (rand() % 5 == 0)
+                        if (rand_fps_check(5))
                         {
                             Vector(0.0f, 1.f, 0.2f, vLight);
                             CreateParticle(BITMAP_WATERFALL_5, vPos, o->Angle, vLight, 8, 2.0f);
                         }
-                        if (rand() % 5 == 0)
+                        if (rand_fps_check(5))
                         {
                             Vector(0.1f, 1.f, 0.1f, vLight);
                             CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 8, 2.5f);
@@ -930,7 +930,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                     }
                 }
 
-                if (rand() % 3 == 0)
+                if (rand_fps_check(3))
                 {
                     VectorCopy(o->Position, vPos);
                     vPos[0] += (float)(rand() % 200 - 100);
@@ -1606,33 +1606,33 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
                 {
                     b->TransformByObjectBone(vPos, o, 57);
                     CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand() % 100 == 0)
+                    if (rand_fps_check(100))
                         CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
                 }
                 else if (o->Type == MODEL_MONSTER01 + 152)
                 {
                     b->TransformByObjectBone(vPos, o, 95);
                     CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand() % 100 == 0)
+                    if (rand_fps_check(100))
                         CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
                     b->TransformByObjectBone(vPos, o, 115);
                     CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand() % 100 == 0)
+                    if (rand_fps_check(100))
                         CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
                 }
                 else
                 {
                     b->TransformByObjectBone(vPos, o, 95);
                     CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand() % 100 == 0)
+                    if (rand_fps_check(100))
                         CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
                     b->TransformByObjectBone(vPos, o, 115);
                     CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand() % 100 == 0)
+                    if (rand_fps_check(100))
                         CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
                     b->TransformByObjectBone(vPos, o, 173);
                     CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand() % 100 == 0)
+                    if (rand_fps_check(100))
                         CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
                 }
             }
@@ -2219,7 +2219,7 @@ bool CGM_Raklion::CreateSnow(PARTICLE* o)
 
     o->Type = BITMAP_LEAF1;
     o->Scale = (float)(rand() % 10 + 3);
-    if (rand() % 10 == 0)
+    if (rand_fps_check(10))
     {
         o->Scale = (float)(rand() % 3 + 10);
     }
@@ -2536,7 +2536,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         }
         else if (MONSTER01_WALK == o->CurrentAction)
         {
-            if (rand() % 20 == 0)
+            if (rand_fps_check(20))
             {
                 PlayBuffer(SOUND_RAKLION_ICEWALKER_MOVE);
             }
@@ -2556,7 +2556,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         else
             if (o->CurrentAction == MONSTER01_WALK)
             {
-                if (rand() % 100 == 0)
+                if (rand_fps_check(100))
                 {
                     PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_MOVE);
                 }
@@ -2570,7 +2570,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
     case MODEL_MONSTER01 + 147:
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_RAKLION_ICEGIANT_MOVE);
             }
@@ -2587,7 +2587,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         }
         else if (MONSTER01_WALK == o->CurrentAction)
         {
-            if (rand() % 20 == 0)
+            if (rand_fps_check(20))
             {
                 PlayBuffer(SOUND_RAKLION_COOLERTIN_MOVE);
             }
@@ -2637,7 +2637,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         }
         else if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_MOVE);
             }
@@ -2650,7 +2650,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
     case MODEL_MONSTER01 + 206:
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_RAKLION_ICEGIANT_MOVE);
             }
@@ -2681,7 +2681,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         }
         else if (MONSTER01_WALK == o->CurrentAction)
         {
-            if (rand() % 20 == 0)
+            if (rand_fps_check(20))
             {
                 PlayBuffer(SOUND_RAKLION_COOLERTIN_MOVE);
             }
@@ -2793,7 +2793,7 @@ void CGM_Raklion::MoveEffect()
         }
         else
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 CreateMapEffect();
             }

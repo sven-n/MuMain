@@ -2508,7 +2508,7 @@ void MainScene(HDC hDC)
                 break;
             case WD_3NORIA:
                 PlayBuffer(SOUND_WIND01, NULL, true);
-                if (rand() % 512 == 0)
+                if (rand_fps_check(512))
                     PlayBuffer(SOUND_FOREST01);
                 break;
             case WD_4LOSTTOWER:
@@ -2525,11 +2525,11 @@ void MainScene(HDC hDC)
                 break;
             case WD_10HEAVEN:
                 PlayBuffer(SOUND_HEAVEN01, NULL, true);
-                if ((rand() % 100) == 0)
+                if (rand_fps_check(100))
                 {
                     //                PlayBuffer(SOUND_HEAVEN01);
                 }
-                else if ((rand() % 10) == 0)
+                else if (rand_fps_check(10))
                 {
                     //                PlayBuffer(SOUND_THUNDERS02);
                 }

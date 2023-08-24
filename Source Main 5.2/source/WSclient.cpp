@@ -2832,7 +2832,7 @@ void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
         else
         {
             if (c->MonsterIndex == 275);
-            else if (rand() % 2 == 0)
+            else if (rand_fps_check(2))
                 SetPlayerShock(c, Damage);
         }
 
@@ -2933,7 +2933,7 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
             if (c->MonsterIndex == 275)
             {
             }
-            else if (rand() % 2 == 0)
+            else if (rand_fps_check(2))
             {
                 SetPlayerShock(c, Damage);
             }
@@ -5164,7 +5164,7 @@ void ReceiveMagicPosition(const BYTE* ReceiveBuffer, int Size)
         int TargetKey = ((int)(Data2->KeyH) << 8) + Data2->KeyL;
         CHARACTER* tc = &CharactersClient[FindCharacterIndex(TargetKey)];
         OBJECT* to = &tc->Object;
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
             SetPlayerShock(tc, tc->Hit);
         if (tc->Hit > 0)
         {

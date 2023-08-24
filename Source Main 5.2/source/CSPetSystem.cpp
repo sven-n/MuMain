@@ -448,7 +448,7 @@ void CSPetDarkSpirit::MovePet(void)
         }
 
         float Speed = 0;
-        if (rand() % speedRandom == 0)
+        if (rand_fps_check(speedRandom))
         {
             if (Distance >= FlyRange * FlyRange)
             {
@@ -566,7 +566,7 @@ void CSPetDarkSpirit::MovePet(void)
             c->AttackTime = 15;
         }
     }
-    if ((rand() % 100) == 0 && (rand() % 60) == 0)
+    if (rand_fps_check(100) && rand_fps_check(60))
     {
         PlayBuffer(SOUND_DSPIRIT_SHOUT, o);
     }

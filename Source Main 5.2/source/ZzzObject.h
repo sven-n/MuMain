@@ -9,8 +9,8 @@ extern OBJECT       Fishs[];
 extern float EarthQuake;
 extern bool EnableShadow;
 extern float AmbientShadowAngle;
-extern int RainTarget;
-extern int RainCurrent;
+extern float RainTarget;
+extern float RainCurrent;
 
 void CopyShadowAngle(OBJECT* o, BMD* b);
 void CreateShadowAngle();

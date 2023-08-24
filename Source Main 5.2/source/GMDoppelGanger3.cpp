@@ -328,7 +328,7 @@ bool CGMDoppelGanger3::RenderObjectVisual(OBJECT* o, BMD* b)
     }
     return true;
     case 48:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             vec3_t Light, vPos;
             Vector(0.6f, 0.8f, 1.0f, Light);
@@ -351,7 +351,7 @@ bool CGMDoppelGanger3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
     case MODEL_MONSTER01 + 189:
     case MODEL_MONSTER01 + 190:
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             b->TransformByObjectBone(vPos, o, 6);
             vPos[1] += 50.0f;
@@ -359,7 +359,7 @@ bool CGMDoppelGanger3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(1.0f, 1.0f, 1.0f, vLight);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 61);
         }
-        if (c->Dead == 0 && rand() % 4 == 0)
+        if (c->Dead == 0 && rand_fps_check(4))
         {
             Vector(o->Position[0] + (float)(rand() % 64 - 32),
                 o->Position[1] + (float)(rand() % 64 - 32),

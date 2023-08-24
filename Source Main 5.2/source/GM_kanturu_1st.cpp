@@ -149,7 +149,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
     }
     break;
     case 59:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, pObject->Position, pObject->Angle,
@@ -157,7 +157,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
         }
         break;
     case 61:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_TRUE_FIRE, pObject->Position, pObject->Angle,
@@ -187,7 +187,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
         break;
     case 81:
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
             CreateParticle(BITMAP_WATERFALL_1, pObject->Position,
                 pObject->Angle, Light, 2, pObject->Scale);
         break;
@@ -198,7 +198,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
         break;
     case 83:
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
             CreateParticle(BITMAP_WATERFALL_2, pObject->Position,
                 pObject->Angle, Light, 2, pObject->Scale);
         break;
@@ -237,7 +237,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
         pModel->StreamMesh = -1;
         break;
     case 98:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             vec3_t vPos;
             Vector(0.0f, 0.0f, 0.0f, vPos);
@@ -267,7 +267,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
         EndPos[1] += rand() % 50;
         StartPos[2] += 10.0f;
         EndPos[2] += 10.f;
-        if (rand() % 20 == 0)
+        if (rand_fps_check(20))
             CreateJoint(BITMAP_JOINT_THUNDER, StartPos, EndPos,
                 pObject->Angle, 8, NULL, 40.f);
     }
@@ -601,7 +601,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
     case 351:
     case 352:
     {
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
             SetAction(o, MONSTER01_ATTACK1);
         else
             SetAction(o, MONSTER01_ATTACK2);
@@ -644,7 +644,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
     break;
     case 555:
     {
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
             SetAction(o, MONSTER01_ATTACK1);
         else
             SetAction(o, MONSTER01_ATTACK2);
@@ -1093,7 +1093,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_BER_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1135,7 +1135,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_GIGAN_MOVE1);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1184,7 +1184,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_GENO_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1226,7 +1226,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_SWOLF_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1265,7 +1265,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
             if (o->CurrentAction == MONSTER01_WALK)
             {
-                if (rand() % 15 == 0)
+                if (rand_fps_check(15))
                     PlayBuffer(SOUND_KANTURU_1ST_IR_MOVE1 + rand() % 2);
             }
             else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1298,7 +1298,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_SATI_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1346,7 +1346,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         }
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 10 == 0)
+            if (rand_fps_check(10))
             {
                 if (gMapManager.WorldActive != WD_39KANTURU_3RD)
                     CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light);
@@ -1376,7 +1376,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_KENTA_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1416,7 +1416,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         else
             if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
             {
-                if (rand() % 10 == 0) {
+                if (rand_fps_check(10)) {
                     CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light);
                 }
             }
@@ -1426,7 +1426,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_BER_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1465,7 +1465,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_KENTA_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1506,7 +1506,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         {
             if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
             {
-                if (rand() % 10 == 0) {
+                if (rand_fps_check(10)) {
                     CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light);
                 }
             }
@@ -1517,7 +1517,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_GIGAN_MOVE1);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1563,7 +1563,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_1ST_GENO_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)

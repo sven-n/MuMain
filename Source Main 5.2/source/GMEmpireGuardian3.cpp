@@ -906,7 +906,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
     case 84:
     {
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 8 == 0)
+        if (rand_fps_check(8))
         {
             CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 4, o->Scale);
         }
@@ -932,7 +932,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 86:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.05f, 0.02f, 0.01f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 21, o->Scale, o);
@@ -941,7 +941,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 129:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.01f, 0.02f, 0.05f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 21, o->Scale, o);
@@ -950,7 +950,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 130:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.01f, 0.05f, 0.02f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 21, o->Scale, o);
@@ -959,7 +959,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 131:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 22, o->Scale);
@@ -971,7 +971,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 132:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 60, o->Scale, o);
@@ -1045,7 +1045,7 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         CreateSprite(BITMAP_LIGHT_RED, Position, 1.2f, Light, o);
 
         Vector(0.9f, 0.9f, 0.9f, Light);
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             b->TransformByObjectBone(Position, o, 54);
             CreateParticle(BITMAP_SMOKELINE2, Position, o->Angle, Light, 3, 0.2f);

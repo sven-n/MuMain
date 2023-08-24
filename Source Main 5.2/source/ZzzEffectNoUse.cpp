@@ -347,7 +347,7 @@ void MappingEffect(int SrcIndex, int DstIndex, int Flag)
             int Index = (i * 256 + j) * 3;
             if (s[Index] >= 96)
             {
-                //if(rand()%2==0)
+                //if(rand_fps_check(2))
                 {
                     for (k = 0; k < 3; k++)
                     {

@@ -417,7 +417,7 @@ bool CGMDoppelGanger2::RenderObjectVisual(OBJECT* o, BMD* b)
     case 1:
     {
         o->HiddenMesh = -2;
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 60, o->Scale, o);
@@ -428,7 +428,7 @@ bool CGMDoppelGanger2::RenderObjectVisual(OBJECT* o, BMD* b)
     {
         o->HiddenMesh = -2;
         vec3_t  Light;
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(0.f, 0.f, 0.f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 16, o->Scale, o);
@@ -438,7 +438,7 @@ bool CGMDoppelGanger2::RenderObjectVisual(OBJECT* o, BMD* b)
     case 3:
     {
         o->HiddenMesh = -2;
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             float fRed = (rand() % 3) * 0.01f + 0.015f;
             Vector(fRed, 0.0f, 0.0f, Light);
@@ -451,7 +451,7 @@ bool CGMDoppelGanger2::RenderObjectVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         Vector(1.0f, 0.4f, 0.4f, Light);
         vec3_t vAngle;
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector((float)(rand() % 40 + 120), 0.f, (float)(rand() % 30), vAngle);
             VectorAdd(vAngle, o->Angle, vAngle);
@@ -463,7 +463,7 @@ bool CGMDoppelGanger2::RenderObjectVisual(OBJECT* o, BMD* b)
     case 5:
     {
         o->HiddenMesh = -2;
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(0.3f, 0.3f, 0.3f, o->Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 21, o->Scale);
@@ -515,7 +515,7 @@ bool CGMDoppelGanger2::RenderObjectVisual(OBJECT* o, BMD* b)
     }
     return true;
     case 48:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             vec3_t Light, vPos;
             Vector(0.6f, 0.8f, 1.0f, Light);
@@ -539,7 +539,7 @@ bool CGMDoppelGanger2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
     case MODEL_MONSTER01 + 189:
     case MODEL_MONSTER01 + 190:
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             b->TransformByObjectBone(vPos, o, 6);
             vPos[1] += 50.0f;
@@ -547,7 +547,7 @@ bool CGMDoppelGanger2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(1.0f, 1.0f, 1.0f, vLight);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 61);
         }
-        if (c->Dead == 0 && rand() % 4 == 0)
+        if (c->Dead == 0 && rand_fps_check(4))
         {
             Vector(o->Position[0] + (float)(rand() % 64 - 32),
                 o->Position[1] + (float)(rand() % 64 - 32),

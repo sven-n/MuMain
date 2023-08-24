@@ -3330,7 +3330,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     if (o->SubType == 2)
                     {
                         CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 4, o, 60.f + rand() % 10);
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                             CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 4, o, 60.f + rand() % 10);
                     }
                 }
@@ -3666,7 +3666,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 {
                     float angle = 45.f + (-90.f * o->SubType);
 
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         if (o->SubType)
                         {
@@ -4053,12 +4053,12 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             {
                 if (o->Type == MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN)
                 {
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                         o->Type = MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED;
                 }
                 else if (o->Type == MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED)
                 {
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                         o->Type = MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN;
                 }
 
@@ -4194,7 +4194,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
 
                     default:
                         o->m_vDeadPosition[0] = Hero->Object.Position[0] + (rand() % 16 - 8) * TERRAIN_SCALE;
-                        if (rand() % 5 == 0)
+                        if (rand_fps_check(5))
                             o->m_vDeadPosition[1] = 114 * TERRAIN_SCALE;
                         else
                             o->m_vDeadPosition[1] = (rand() % 33 + 98) * TERRAIN_SCALE;
@@ -4506,7 +4506,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     else if (irandom >= 6 && irandom <= 7)
                     {
                         o->Scale -= (0.2f) * FPS_ANIMATION_FACTOR;
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                             p_b->TransformPosition(BoneTransform[50], vPos, o->Position, false);
                         else
                             p_b->TransformPosition(BoneTransform[51], vPos, o->Position, false);
@@ -6608,13 +6608,13 @@ void CreateBomb3(vec3_t vPos, int iSubType, float fScale)
     {
         if (iSubType == 2)
         {
-            if (rand() % 10 == 0) break;
+            if (rand_fps_check(10)) break;
             Vector(vPos[0] + rand() % 150 - 75, vPos[1] + rand() % 150 - 75, vPos[2] + rand() % 130 + 30, vBombPos);
         }
         else if (iSubType == 1)
         {
             if (i == 1) break;
-            else if (rand() % 5 == 0) break;
+            else if (rand_fps_check(5)) break;
             Vector(vPos[0] + rand() % 80 - 40, vPos[1] + rand() % 80 - 40, vPos[2] + rand() % 120 + 30, vBombPos);
         }
         else if (iSubType == 3)
@@ -6769,7 +6769,7 @@ void CheckClientArrow(OBJECT* o)
     }
     else
     {
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
             if (o->Owner == &Hero->Object)
             {
                 float range = 100.f;
@@ -6981,9 +6981,9 @@ void MoveEffect(OBJECT* o, int iIndex)
         OBJECT* pOwner = o->Owner;
         if (o->SubType == 1)
         {
-            o->Light[0] *= 0.95f;
-            o->Light[1] *= 0.95f;
-            o->Light[2] *= 0.95f;
+            o->Light[0] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.95f, FPS_ANIMATION_FACTOR);
         }
         VectorTransform(tmp, pOwner->BoneTransform[29], o->Position);
         VectorScale(o->Position, pOwner->Scale, o->Position);
@@ -6998,16 +6998,16 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         if (o->SubType == 0)
         {
-            o->Light[0] *= 0.95f;
-            o->Light[1] *= 0.95f;
-            o->Light[2] *= 0.95f;
+            o->Light[0] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.95f, FPS_ANIMATION_FACTOR);
             VectorCopy(o->Owner->Position, o->Position);
         }
         else if (o->SubType == 1)
         {
-            o->Light[0] *= 0.98f;
-            o->Light[1] *= 0.98f;
-            o->Light[2] *= 0.98f;
+            o->Light[0] *= pow(0.98f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.98f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.98f, FPS_ANIMATION_FACTOR);
             if (o->LifeTime == 40)
                 CreateEffect(MODEL_INFINITY_ARROW3, o->Position, o->Angle, o->Light, 2, o);
             else
@@ -7017,16 +7017,16 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         else if (o->SubType == 2)
         {
-            o->Light[0] *= 0.98f;
-            o->Light[1] *= 0.98f;
-            o->Light[2] *= 0.98f;
+            o->Light[0] *= pow(0.98f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.98f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.98f, FPS_ANIMATION_FACTOR);
             VectorCopy(o->Owner->Position, o->Position);
         }
         else if (o->SubType == 3)
         {
-            o->Light[0] *= 0.98f;
-            o->Light[1] *= 0.98f;
-            o->Light[2] *= 0.98f;
+            o->Light[0] *= pow(0.98f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.98f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.98f, FPS_ANIMATION_FACTOR);
             VectorCopy(o->Owner->Position, o->Position);
         }
     }
@@ -7035,10 +7035,10 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         vec3_t tmp = { 0.f, 0.f, 0.f };
         OBJECT* pOwner = o->Owner;
-        o->Scale *= 1.2f;
-        o->Light[0] *= 0.9f;
-        o->Light[1] *= 0.9f;
-        o->Light[2] *= 0.9f;
+        o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
+        o->Light[0] *= pow(0.9f, FPS_ANIMATION_FACTOR);
+        o->Light[1] *= pow(0.9f, FPS_ANIMATION_FACTOR);
+        o->Light[2] *= pow(0.9f, FPS_ANIMATION_FACTOR);
 
         VectorTransform(tmp, pOwner->BoneTransform[29], o->Position);
         VectorScale(o->Position, pOwner->Scale, o->Position);
@@ -7132,12 +7132,12 @@ void MoveEffect(OBJECT* o, int iIndex)
 
     case MODEL_IRON_RIDER_ARROW:
     {
-        o->Scale *= 1.05f;
+        o->Scale *= pow(1.05f, FPS_ANIMATION_FACTOR);
         if (o->LifeTime < 5)
         {
-            o->Light[0] *= 0.7f;
-            o->Light[1] *= 0.7f;
-            o->Light[2] *= 0.7f;
+            o->Light[0] *= pow(0.7f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.7f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.7f, FPS_ANIMATION_FACTOR);
         }
         vec3_t vPos;
         VectorScale(o->Direction, o->Velocity, vPos);
@@ -7261,7 +7261,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         if (o->LifeTime <= 24)
         {
-            o->Scale *= 1.05f;
+            o->Scale *= pow(1.05f, FPS_ANIMATION_FACTOR);
             vec3_t vLight = { 0.3f, 0.5f, 1.f };
             vec3_t vPos;
             VectorScale(o->Direction, o->Velocity, vPos);
@@ -7347,7 +7347,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         else
             o->Angle[2] -= (rand() % 10) * FPS_ANIMATION_FACTOR;
 
-        if (rand() % 32 == 0)
+        if (rand_fps_check(32))
         {
             o->Direction[2] = (float)(rand() % 15 - 7) * 1.f;
         }
@@ -7355,12 +7355,12 @@ void MoveEffect(OBJECT* o, int iIndex)
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height + 50.f)
         {
-            o->Direction[2] *= 0.8f;
+            o->Direction[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
             o->Direction[2] += (1.f) * FPS_ANIMATION_FACTOR;
         }
         if (o->Position[2] > Height + 150.f)
         {
-            o->Direction[2] *= 0.8f;
+            o->Direction[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
             o->Direction[2] -= (1.f) * FPS_ANIMATION_FACTOR;
         }
         o->Position[2] += ((float)(rand() % 15 - 7) * 0.3f) * FPS_ANIMATION_FACTOR;
@@ -7378,7 +7378,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         else if (o->SubType == 3)
         {
             Vector(Luminosity * 0.7f, Luminosity * 0.9f, Luminosity * 0.5f, Light);
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 vec3_t Position;
                 Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
@@ -7545,7 +7545,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (o->Type == MODEL_HALLOWEEN_CANDY_HOBAK)
             {
-                if (rand() % 3 == 0)
+                if (rand_fps_check(3))
                 {
                     CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 5, 0.4f + rand() % 10 * 0.01f);
                 }
@@ -7627,7 +7627,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             //CreateParticle(BITMAP_SMOKE, o->Position, o->Angle,o->Light, 23, 1.0f);
             //CreateParticle(BITMAP_SMOKE, o->Position, o->Angle,o->Light, 8, 1.0f);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 11, 1.0f);
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, o->Light, 3, 3.f);
             }
@@ -7838,7 +7838,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
             else
             {
-                if (Hero->SafeZone/* || rand()%100 == 0*/ || sinf(WorldTime * 0.0004f + o->Skill * 0.024f) < 0.3f)
+                if (Hero->SafeZone/* || rand_fps_check(100)*/ || sinf(WorldTime * 0.0004f + o->Skill * 0.024f) < 0.3f)
                     o->Kind = 1;
                 if (o->Alpha < 1.0f) o->Alpha += 0.03f;
             }
@@ -7852,7 +7852,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         else if (o->SubType == 1)
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 OBJECT* pObject = o->Owner;
                 if (pObject->Live == false)
@@ -7889,7 +7889,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
             else
             {
-                if (Hero->SafeZone/* || rand()%100 == 0*/ || sinf(WorldTime * 0.0004f + o->Skill * 0.024f) < 0.3f)
+                if (Hero->SafeZone/* || rand_fps_check(100)*/ || sinf(WorldTime * 0.0004f + o->Skill * 0.024f) < 0.3f)
                     o->Kind = 1;
                 if (o->Alpha < 1.0f) o->Alpha += 0.03f;
             }
@@ -7900,7 +7900,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             vec3_t vLight;
             Vector(o->Alpha, o->Alpha, o->Alpha, vLight);
             CreateParticle(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
                 CreateParticle(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
 
             //DeleteJoint(MODEL_SPEARSKILL, o, 15);
@@ -8066,7 +8066,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->AnimationFrame >= 11.0f)
         {
             CreateBomb3(o->Position, o->SubType);
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
                 PlayBuffer(SOUND_SUMMON_EXPLOSION);
         }
 
@@ -8235,9 +8235,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->LifeTime <= 10)
             {
                 o->Alpha -= (0.05f) * FPS_ANIMATION_FACTOR;
-                o->Light[0] *= o->Alpha;
-                o->Light[1] *= o->Alpha;
-                o->Light[2] *= o->Alpha;
+                o->Light[0] *= pow(o->Alpha, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(o->Alpha, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(o->Alpha, FPS_ANIMATION_FACTOR);
             }
         }
         else if (o->SubType == 12)
@@ -8255,14 +8255,14 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->Scale > 5.0f)
             {
                 //o->Scale = 5.0f;
-                o->Light[0] *= 0.5f;
-                o->Light[1] *= 0.5f;
-                o->Light[2] *= 0.5f;
+                o->Light[0] *= pow(0.5f, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(0.5f, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(0.5f, FPS_ANIMATION_FACTOR);
             }
         }
         else if (o->SubType == 13)
         {
-            o->Scale *= 1.1f;
+            o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.95f, o->Light);
             if (o->Scale > 8)
             {
@@ -8275,7 +8275,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         else if (o->SubType == 14)
         {
-            o->Scale *= 1.1f;
+            o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.95f, o->Light);
             if (o->Scale > 8)
             {
@@ -8413,7 +8413,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     pModel->TransformPosition(o->Owner->BoneTransform[iBone], vRelativePos, vWorldPos, false);
                     VectorScale(vWorldPos, pModel->BodyScale, vWorldPos);
                     VectorAdd(vWorldPos, o->Owner->Position, vWorldPos);
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         vWorldPos[2] -= 20.f;
                         CreateParticle(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
@@ -8462,7 +8462,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[0] = o->Position[0] + (float)(rand() % 500 - 250);
             Position[1] = o->Position[1] + (float)(rand() % 500 - 250);
             Position[2] = o->Position[2] - (float)(rand() % 100) + 150.0f;
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 if (o->SubType == 3)
                     CreateParticle(o->Type, Position, o->Angle, o->Light, 1, o->Scale);
@@ -8486,7 +8486,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     pModel->TransformPosition(o->Owner->BoneTransform[iBone], vRelativePos, vWorldPos, false);
                     VectorScale(vWorldPos, pModel->BodyScale, vWorldPos);
                     VectorAdd(vWorldPos, o->Owner->Position, vWorldPos);
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         vWorldPos[2] -= 20.f;
                         CreateParticle(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
@@ -8542,7 +8542,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             o->LifeTime = 100;
 
-            if (rand() % 60 == 0)
+            if (rand_fps_check(60))
                 CreateParticle(o->Type, o->Position, o->Angle, o->Light, o->SubType, 0.5f, o->Owner);
         }
         break;
@@ -8637,14 +8637,14 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         if (o->LifeTime > 10)
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
                 CreateEffect(BITMAP_MAGIC + 1, vPosition, o->Angle, vLight, 11, o);
         }
 
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
             CreateParticle(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
 
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, vLight, 13);
         }
@@ -8652,11 +8652,11 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->LifeTime > 5)
         {
             Vector(0.15f, 0.15f, 0.4f, vLight);
-            if (rand() % 5 == 0)
+            if (rand_fps_check(5))
                 CreateEffect(BITMAP_CHROME_ENERGY2, vPosition, o->Angle, vLight, 0);
         }
 
-        if (o->Owner != NULL && rand() % 5 == 0 && o->Owner->BoneTransform != NULL)
+        if (o->Owner != NULL && rand_fps_check(5) && o->Owner->BoneTransform != NULL)
         {
             BMD* pTargetModel = &Models[o->Owner->Type];
             int iNumBones = pTargetModel->NumBones;
@@ -8725,44 +8725,55 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             for (int j = 0; j < 6; j++)
             {
+                //if (!rand_fps_check(1)) continue;
                 Vector((float)(rand() % 50 - 25), (float)(rand() % 50 - 25), 0.f, Position);
                 VectorAdd(Position, o->Position, Position);
                 CreateParticle(BITMAP_FLAME, Position, o->Angle, Light);
             }
-            if ((int)WorldTime % 16)
+            if (rand_fps_check(8))
+            {
                 CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+            }
 
             Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
-            if (o->Owner == &Hero->Object)
-                if ((int)o->LifeTime % 20 == 0)
-                    AttackCharacterRange(o->Skill, o->Position, 150.f, o->Weapon, o->PKKey);
+            if (o->Owner == &Hero->Object && (int)o->LifeTime % 20 == 0)
+            {
+                o->LifeTime = ((int)o->LifeTime / 20) * 19.9f;
+                AttackCharacterRange(o->Skill, o->Position, 150.f, o->Weapon, o->PKKey);
+            }
         }
         else if (o->SubType == 1 || o->SubType == 2)
         {
             for (int j = 0; j < 18; j++)
             {
-                Vector(0.f, 250.f, 0.f, p);
-                Vector(0.f, 0.f, j * 20.f, Angle);
-                AngleMatrix(Angle, Matrix);
-                VectorRotate(p, Matrix, Position);
-                VectorAdd(Position, o->Position, Position);
-                Position[0] += rand() % 64 - 32;
-                Position[1] += rand() % 64 - 32;
-                if (o->SubType == 1)
-                    CreateParticle(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
-                else if (o->SubType == 2)
-                    CreateParticle(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
+                if (rand_fps_check(1))
+                {
+                    Vector(0.f, 250.f, 0.f, p);
+                    Vector(0.f, 0.f, j * 20.f, Angle);
+                    AngleMatrix(Angle, Matrix);
+                    VectorRotate(p, Matrix, Position);
+                    VectorAdd(Position, o->Position, Position);
+                    Position[0] += rand() % 64 - 32;
+                    Position[1] += rand() % 64 - 32;
+                    if (o->SubType == 1)
+                        CreateParticle(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
+                    else if (o->SubType == 2)
+                        CreateParticle(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
+                }
             }
         }
         else if (o->SubType == 3)
         {
             for (int j = 0; j < 3; j++)
             {
-                CreateParticle(BITMAP_FLAME, o->Position, o->Angle, Light, 6);
-                Vector((float)(rand() % 10 - 5), (float)(rand() % 10 - 5), 40.f, Position);
-                VectorAdd(Position, o->Position, Position);
-                CreateParticle(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 0, 2.8f);
+                if (rand_fps_check(1))
+                {
+                    CreateParticle(BITMAP_FLAME, o->Position, o->Angle, Light, 6);
+                    Vector((float)(rand() % 10 - 5), (float)(rand() % 10 - 5), 40.f, Position);
+                    VectorAdd(Position, o->Position, Position);
+                    CreateParticle(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 0, 2.8f);
+                }
             }
             Vector((float)(rand() % 10 - 5), (float)(rand() % 10 - 5), -40.f, Position);
             VectorAdd(Position, o->Position, Position);
@@ -8778,14 +8789,17 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Scale += (20.f) * FPS_ANIMATION_FACTOR;
             for (int j = 0; j < 18; j++)
             {
-                Vector(0.f, 150.f - o->Scale, 0.f, p);
-                Vector(0.f, 0.f, j * 20.f, Angle);
-                AngleMatrix(Angle, Matrix);
-                VectorRotate(p, Matrix, Position);
-                VectorAdd(Position, o->Position, Position);
-                Position[0] += rand() % 64 - 32;
-                Position[1] += rand() % 64 - 32;
-                CreateParticle(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
+                if (rand_fps_check(1))
+                {
+                    Vector(0.f, 150.f - o->Scale, 0.f, p);
+                    Vector(0.f, 0.f, j * 20.f, Angle);
+                    AngleMatrix(Angle, Matrix);
+                    VectorRotate(p, Matrix, Position);
+                    VectorAdd(Position, o->Position, Position);
+                    Position[0] += rand() % 64 - 32;
+                    Position[1] += rand() % 64 - 32;
+                    CreateParticle(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
+                }
             }
             CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 12);
         }
@@ -8826,7 +8840,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     CreateParticle(BITMAP_FLAME, Position, o->Angle, o->Light, 11, 1.4f);
                 }
 
-                if (rand() % 8 == 0)
+                if (rand_fps_check(8))
                 {
                     CreateEffect(MODEL_ICE_SMALL, Position, o->Angle, o->Light, 0);
                 }
@@ -8836,14 +8850,17 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             for (int j = 0; j < 9; j++)
             {
-                Vector(0.f, 250.f, 0.f, p);
-                Vector(0.f, 0.f, j * 40.f, Angle);
-                AngleMatrix(Angle, Matrix);
-                VectorRotate(p, Matrix, Position);
-                VectorAdd(Position, o->Position, Position);
-                Position[0] += rand() % 64 - 32;
-                Position[1] += rand() % 64 - 32;
-                CreateParticle(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
+                if (rand_fps_check(1))
+                {
+                    Vector(0.f, 250.f, 0.f, p);
+                    Vector(0.f, 0.f, j * 40.f, Angle);
+                    AngleMatrix(Angle, Matrix);
+                    VectorRotate(p, Matrix, Position);
+                    VectorAdd(Position, o->Position, Position);
+                    Position[0] += rand() % 64 - 32;
+                    Position[1] += rand() % 64 - 32;
+                    CreateParticle(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
+                }
             }
         }
         break;
@@ -8871,11 +8888,14 @@ void MoveEffect(OBJECT* o, int iIndex)
         float Scale = 6.f;
         for (int j = 0; j < 18; j++)
         {
-            Position[2] += Scale * 4.f;
-            if (j == 0)
-                CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale * 2.f);
-            else
-                CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale);
+            if (rand_fps_check(1))
+            {
+                Position[2] += Scale * 4.f;
+                if (j == 0)
+                    CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale * 2.f);
+                else
+                    CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale);
+            }
         }
         break;
     }
@@ -9191,7 +9211,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Vector(0.4f, 0.4f, 0.8f, vLight);
                 //CreateParticle( BITMAP_LIGHT, vTargetPos, pTargetObj->Angle, vLight, 14, 3.5f);
 
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     VectorCopy(pSourceObj->Position, vSourcePos);
                     vSourcePos[2] += 80.0f;
@@ -9360,7 +9380,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     }
                     else if (o->SubType == 4)
                     {
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                         {
                             vWorldPos[2] -= 20.f;
                             CreateParticle(BITMAP_TWINTAIL_WATER, vWorldPos, o->Angle, o->Light, 2);
@@ -9482,7 +9502,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             for (int i = 0; i < 2; i++)
                 CreateParticle(BITMAP_SMOKE, vPosition, o->Angle, vLight, 58);
 
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Vector(1.0f, 0.0f, 0.0f, vLight);
                 CreateParticle(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
@@ -9505,13 +9525,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                     pTargetModel->TransformPosition(o->Owner->BoneTransform[i], vRelativePos, vPos, true);
 
                     Vector(0.8f, 0.0f, 0.0f, vLight);
-                    if (rand() % 60 == 0)
+                    if (rand_fps_check(60))
                     {
                         fRandom = 5.0f + ((float)(rand() % 20 - 10) * 0.1f);
                         CreateParticle(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
                     }
                     Vector(1.0f, 0.8f, 0.4f, vLight);
-                    if (rand() % 5 == 0)
+                    if (rand_fps_check(5))
                     {
                         fRandom = (float)(rand() % 70 + 22) * 0.01f * 1.0f;
                         CreateParticle(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, vAngle, vLight, 0, fRandom);
@@ -9522,7 +9542,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 //for(i=0; i<2; i++)
                 CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 58);
 
-                if (rand() % 4 == 0)
+                if (rand_fps_check(4))
                 {
                     Vector(1.0f, 0.0f, 0.0f, vLight);
                     CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 54, 2.8f);
@@ -9640,7 +9660,10 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector(o->Position[0], o->Position[1], o->Position[2] + 80.f, Position);
             for (int j = 0; j < 6; j++)
             {
-                CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                if (rand_fps_check(1))
+                {
+                    CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                }
             }
             CreateParticle(BITMAP_SHINY + 4, Position, o->Angle, Light);
             CreateParticle(BITMAP_EXPLOTION, Position, o->Angle, Light);
@@ -9691,9 +9714,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Scale += (0.04f) * FPS_ANIMATION_FACTOR;
             if (o->LifeTime < 10)
             {
-                o->Light[0] *= 0.8f;
-                o->Light[1] *= 0.8f;
-                o->Light[2] *= 0.8f;
+                o->Light[0] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
             }
         }
         else if (o->SubType == 3)
@@ -9785,7 +9808,12 @@ void MoveEffect(OBJECT* o, int iIndex)
                 o->Live = false;
                 EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
                 for (int j = 0; j < 5; j++)
-                    CreateEffect(MODEL_METEO1 + rand() % 2, o->Position, o->Angle, o->Light, 0);
+                {
+                    if (rand_fps_check(1))
+                    {
+                        CreateEffect(MODEL_METEO1 + rand() % 2, o->Position, o->Angle, o->Light, 0);
+                    }
+                }
             }
         }
         VectorAdd(o->Position, o->Direction, o->Position);
@@ -9869,13 +9897,16 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             for (int j = 0; j < 4; j++)
             {
-                Vector((float)(rand() % 60 + 60 - 90), 0.f, (float)(rand() % 30 + 90), Angle);
-                VectorAdd(Angle, o->Angle, Angle);
-                VectorCopy(o->Position, Position);
-                Position[0] += rand() % 20 - 10;
-                Position[1] += rand() % 20 - 10;
-                CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
-                if (j == 0) CreateParticle(BITMAP_SPARK, Position, Angle, Light);
+                if (rand_fps_check(1))
+                {
+                    Vector((float)(rand() % 60 + 60 - 90), 0.f, (float)(rand() % 30 + 90), Angle);
+                    VectorAdd(Angle, o->Angle, Angle);
+                    VectorCopy(o->Position, Position);
+                    Position[0] += rand() % 20 - 10;
+                    Position[1] += rand() % 20 - 10;
+                    CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
+                    if (rand_fps_check(4)) CreateParticle(BITMAP_SPARK, Position, Angle, Light);
+                }
             }
         }
         VectorCopy(o->Position, Position);
@@ -9929,7 +9960,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         EarthQuake = (float)(rand() % 4 - 2) * 0.1f;
 
-        if (rand() % 2 == 0) {
+        if (rand_fps_check(2)) {
             Vector(0.f, (float)(rand() % 150) + 300.f, 0.f, p);
             Vector(0.f, 0.f, (float)(rand() % 360), Angle);
             AngleMatrix(Angle, Matrix);
@@ -9943,7 +9974,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
         Vector(1.f, 1.f, 1.f, Light);
         for (int i = 0; i < pModel->NumBones; i++) {
-            if (!pModel->Bones[i].Dummy && rand() % 12 == 0)
+            if (!pModel->Bones[i].Dummy && rand_fps_check(12))
             {
                 Vector(0.f, 0.f, 0.f, p);
                 pModel->TransformPosition(BoneTransform[i], p, Position, true);
@@ -10003,13 +10034,16 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Vector((float)(rand() % 60 - 60.f), 0.f, (float)(rand() % 30 + 90), Angle);
-                    VectorAdd(Angle, o->Angle, Angle);
-                    VectorCopy(o->StartPosition, Position);
-                    Position[0] += rand() % 20 - 10;
-                    Position[1] += rand() % 20 - 10;
-                    CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
-                    if (j == 0) CreateParticle(BITMAP_SPARK, Position, Angle, Light);
+                    if (rand_fps_check(1))
+                    {
+                        Vector((float)(rand() % 60 - 60.f), 0.f, (float)(rand() % 30 + 90), Angle);
+                        VectorAdd(Angle, o->Angle, Angle);
+                        VectorCopy(o->StartPosition, Position);
+                        Position[0] += rand() % 20 - 10;
+                        Position[1] += rand() % 20 - 10;
+                        CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
+                        if (rand_fps_check(8)) CreateParticle(BITMAP_SPARK, Position, Angle, Light);
+                    }
                 }
             }
             Vector(0.f, 0.f, 0.f, Angle);
@@ -10121,7 +10155,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 count = 12.5;
                 addAngle = 18.f;
-                if (o->LifeTime == 15) o->Gravity *= -1;
+                if (o->LifeTime == 15) o->Gravity *= pow(-1, FPS_ANIMATION_FACTOR);
             }
 
             if (o->Kind == 0)
@@ -10209,7 +10243,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
             o->BlendMeshLight = (o->LifeTime * 0.1f);
 
-            if (o->LifeTime >= 5 && rand() % 10 == 0)
+            if (o->LifeTime >= 5 && rand_fps_check(10))
             {
                 vec3_t p, Position;
                 vec3_t Angle;
@@ -10261,7 +10295,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             o->BlendMeshLight = (o->LifeTime * 0.1f);
 
-            if (o->LifeTime >= 5 && rand() % 15 == 0)
+            if (o->LifeTime >= 5 && rand_fps_check(15))
             {
                 vec3_t p, Position;
                 vec3_t Angle;
@@ -10307,7 +10341,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Position[2] -= (0.5f) * FPS_ANIMATION_FACTOR;
         }
 
-        if (o->LifeTime >= 13 && rand() % 5 == 0)
+        if (o->LifeTime >= 13 && rand_fps_check(5))
         {
             vec3_t Position;
 
@@ -10345,7 +10379,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         vec3_t  Loc;
         int STwo = 2;
-        if (rand() % STwo == 0)
+        if (rand_fps_check(STwo))
         {
             //               Vector(0.f,0.f,(float)(rand()%360),o->Angle);
 
@@ -10499,18 +10533,18 @@ void MoveEffect(OBJECT* o, int iIndex)
             //VectorAdd(o->Position,o->Direction,o->Position);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
             Vector(90.f, 0.f, o->Angle[2], Angle);
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Vector(o->Position[0] - 200.f, o->Position[1], o->Position[2] + 700.f, Position);
                 CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 10.f);
             }
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Vector(o->Position[0] + 200.f, o->Position[1], o->Position[2] + 700.f, Position);
                 CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 10.f);
             }
             o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-            if (rand() % 4 == 0)
+            if (rand_fps_check(4))
                 CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
             Vector(-Luminosity * 0.4f, -Luminosity * 0.3f, -Luminosity * 0.2f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 5, PrimaryTerrainLight);
@@ -10568,7 +10602,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 28);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 29);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 30);
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
                 CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
             break;
         case 8:
@@ -10586,9 +10620,9 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         if (o->LifeTime >= 30)
         {
-            o->Light[0] *= 1.03f;
-            o->Light[1] *= 1.03f;
-            o->Light[2] *= 1.03f;
+            o->Light[0] *= pow(1.03f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(1.03f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(1.03f, FPS_ANIMATION_FACTOR);
         }
         else
         {
@@ -10689,7 +10723,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         for (int i = 0; i < 5; i++)
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 vec3_t Pos1, Pos2;
 
@@ -10780,7 +10814,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         else
             o->Angle[0] -= (o->Scale * 32.f) * FPS_ANIMATION_FACTOR;
 
-        if (rand() % 10 == 0)
+        if (rand_fps_check(10))
             CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 15);
     }
     break;
@@ -10908,7 +10942,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.01f;
             EarthQuake = (float)(rand() % 6 - 6) * 0.1f;
 
-            if (rand() % value == 0)
+            if (rand_fps_check(value))
             {
                 vec3_t p, Position;
                 vec3_t Angle;
@@ -10934,7 +10968,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             o->BlendMeshLight = min(0.5f, o->BlendMeshLight);
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.01f;
-            if (o->LifeTime > 30 && rand() % value == 0)
+            if (o->LifeTime > 30 && rand_fps_check(value))
             {
                 vec3_t p, Position;
                 vec3_t Angle;
@@ -10967,7 +11001,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             o->BlendMeshLight = min(0.5f, o->BlendMeshLight);
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.01f;
-            if (rand() % value == 0 && o->LifeTime > 5)
+            if (rand_fps_check(value) && o->LifeTime > 5)
             {
                 vec3_t p, Position;
                 vec3_t Angle;
@@ -11000,7 +11034,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             if (o->LifeTime < 10)
             {
-                o->Alpha *= 0.8f;
+                o->Alpha *= pow(0.8f, FPS_ANIMATION_FACTOR);
             }
             break;
         }
@@ -11018,8 +11052,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->Position[2] + o->Direction[2] <= Height)
             {
                 o->Position[2] = Height;
-                o->HeadAngle[0] *= 0.6f;
-                o->HeadAngle[1] *= 0.6f;
+                o->HeadAngle[0] *= pow(0.6f, FPS_ANIMATION_FACTOR);
+                o->HeadAngle[1] *= pow(0.6f, FPS_ANIMATION_FACTOR);
                 o->HeadAngle[2] += (1.0f * o->LifeTime) * FPS_ANIMATION_FACTOR;
                 if (o->HeadAngle[2] < 0.5f)
                     o->HeadAngle[2] = 0;
@@ -11027,7 +11061,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 o->Alpha -= (0.1f) * FPS_ANIMATION_FACTOR;
             }
 
-            // 			if (rand()%3==0)
+            // 			if (rand_fps_check(3))
             // 			{
             // 				CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, o->Light, 0, 1, o);
             // 			}
@@ -11086,7 +11120,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             else
                 o->Angle[0] -= (o->Scale * 32.f) * FPS_ANIMATION_FACTOR;
 
-            if ((o->SubType == 0 || o->SubType == 12 || o->SubType == 13) && rand() % 10 == 0)
+            if ((o->SubType == 0 || o->SubType == 12 || o->SubType == 13) && rand_fps_check(10))
             {
                 if (o->Type == MODEL_ICE_SMALL || o->Type == MODEL_METEO1 || o->Type == MODEL_METEO2)
                     CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
@@ -11134,8 +11168,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->Position[2] + o->Direction[2] <= Height)
             {
                 o->Position[2] = Height;
-                o->HeadAngle[0] *= 0.6f;
-                o->HeadAngle[1] *= 0.6f;
+                o->HeadAngle[0] *= pow(0.6f, FPS_ANIMATION_FACTOR);
+                o->HeadAngle[1] *= pow(0.6f, FPS_ANIMATION_FACTOR);
                 o->HeadAngle[2] += (1.0f * o->LifeTime) * FPS_ANIMATION_FACTOR;
                 if (o->HeadAngle[2] < 0.5f)
                     o->HeadAngle[2] = 0;
@@ -11143,7 +11177,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 o->Alpha -= (0.1f) * FPS_ANIMATION_FACTOR;
             }
 
-            if (rand() % 30 == 0)
+            if (rand_fps_check(30))
                 CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
         }
         else if (o->SubType == 1)
@@ -11226,8 +11260,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->Position[2] + o->Direction[2] <= Height)
             {
                 o->Position[2] = Height;
-                o->HeadAngle[0] *= 0.6f;
-                o->HeadAngle[1] *= 0.6f;
+                o->HeadAngle[0] *= pow(0.6f, FPS_ANIMATION_FACTOR);
+                o->HeadAngle[1] *= pow(0.6f, FPS_ANIMATION_FACTOR);
                 o->HeadAngle[2] += (1.0f * o->LifeTime) * FPS_ANIMATION_FACTOR;
                 if (o->HeadAngle[2] < 0.5f)
                     o->HeadAngle[2] = 0;
@@ -11258,8 +11292,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->HeadAngle[2] += ((float)(rand() % 32 - 16) * 0.8f) * FPS_ANIMATION_FACTOR;
             o->Angle[0] += (o->HeadAngle[0]) * FPS_ANIMATION_FACTOR;
             o->Angle[2] += (o->HeadAngle[2]) * FPS_ANIMATION_FACTOR;
-            o->HeadAngle[0] *= 0.6f;
-            o->HeadAngle[2] *= 0.8f;
+            o->HeadAngle[0] *= pow(0.6f, FPS_ANIMATION_FACTOR);
+            o->HeadAngle[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
 
             if (o->LifeTime < 10)
             {
@@ -11390,7 +11424,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 if (o->SubType != 2 && o->LifeTime > 200 + 50 + 135)
                 {
                     vec3_t Angle = { 0.0f, 0.0f, 0.0f };
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         //Angle[2] = ( float)i * 10.0f;
                         Angle[0] = 0;//( float)( rand() % 360);
@@ -11399,11 +11433,11 @@ void MoveEffect(OBJECT* o, int iIndex)
                         vec3_t Position;
                         VectorCopy(o->Position, Position);
                         //Position[2] += 100.f;
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                             CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 8, NULL, 50.f, 0, 0);
                     }
 
-                    if (rand() % 3 == 0)
+                    if (rand_fps_check(3))
                     {
                         vec3_t Light;
                         Vector(0.5f, 0.5f, 0.5f, Light);
@@ -11539,8 +11573,8 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->Position[2] + o->Direction[2] <= Height)
         {
             o->Position[2] = Height;
-            o->HeadAngle[0] *= 0.8f;
-            o->HeadAngle[1] *= 0.8f;
+            o->HeadAngle[0] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+            o->HeadAngle[1] *= pow(0.8f, FPS_ANIMATION_FACTOR);
             o->HeadAngle[2] += (0.6f * o->LifeTime) * FPS_ANIMATION_FACTOR;
             if (o->HeadAngle[2] < 5.0f)
                 o->HeadAngle[2] = 0;
@@ -11573,16 +11607,16 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         if (o->LifeTime < 10)
         {
-            o->Light[0] *= 0.8f;
-            o->Light[1] *= 0.8f;
-            o->Light[2] *= 0.8f;
+            o->Light[0] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
         }
 
         if (o->Position[2] + o->Direction[2] <= Height)
         {
             o->Position[2] = Height;
-            o->HeadAngle[0] *= 0.8f;
-            o->HeadAngle[1] *= 0.8f;
+            o->HeadAngle[0] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+            o->HeadAngle[1] *= pow(0.8f, FPS_ANIMATION_FACTOR);
             o->HeadAngle[2] += (1.6f * o->LifeTime) * FPS_ANIMATION_FACTOR;
             if (o->HeadAngle[2] < 5.0f)
                 o->HeadAngle[2] = 0;
@@ -11638,8 +11672,8 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->Position[2] + o->Direction[2] <= Height)
         {
             o->Position[2] = Height;
-            o->HeadAngle[0] *= 0.5f;
-            o->HeadAngle[1] *= 0.5f;
+            o->HeadAngle[0] *= pow(0.5f, FPS_ANIMATION_FACTOR);
+            o->HeadAngle[1] *= pow(0.5f, FPS_ANIMATION_FACTOR);
             o->HeadAngle[2] += (0.6f * o->LifeTime) * FPS_ANIMATION_FACTOR;
             if (o->HeadAngle[2] < 5.0f)
                 o->HeadAngle[2] = 0;
@@ -11735,7 +11769,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         break;
 
     case MODEL_PIERCING + 1:
-        if ((rand() % 2) == 0)
+        if (rand_fps_check(2))
         {
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 0);
         }
@@ -12168,11 +12202,11 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
         case 4:
         {
-            o->Light[0] *= 0.97f;
-            o->Light[1] *= 0.97f;
-            o->Light[2] *= 0.97f;
+            o->Light[0] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
-            o->Alpha *= 0.97f;
+            o->Alpha *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
             VectorAdd(o->EyeRight, o->Angle, o->Angle);
         }
@@ -12200,7 +12234,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->AnimationFrame >= 5.f)
             {
                 o->Velocity = 0.f;
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     vec3_t Position;
                     Vector(o->Position[0] + (float)(rand() % 64 - 32),
@@ -12427,8 +12461,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 o->Gravity = 10.f;
                 o->Position[2] += (10.f) * FPS_ANIMATION_FACTOR;
-                o->Direction[1] *= 0.5f;
-                o->Scale *= 1.1f;
+                o->Direction[1] *= pow(0.5f, FPS_ANIMATION_FACTOR);
+                o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
             }
 
             int PositionX = (int)(o->Position[0] / TERRAIN_SCALE);
@@ -12552,7 +12586,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             int iSubType = rand() % 30;
             Vector((rand() % 3) * .3f + .4f, (rand() % 4) * .1f, .0f, Light);
             //for ( int j = 0; j < 200; ++j)
-            for (int j = 0; j < 80; ++j)
+            for (int j = 0; j < 80 * FPS_ANIMATION_FACTOR; ++j)
             {
                 CreateParticle(BITMAP_FIRECRACKER, o->Position, o->Angle, Light, iSubType);
             }
@@ -12575,7 +12609,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     break;
     case BITMAP_FIRECRACKER0002:
     {
-        if (rand() % 5 == 0)
+        if (rand_fps_check(5))
         {
             vec3_t vLight;
             Vector(0.3f + (rand() % 700) * 0.001f, 0.3f + (rand() % 700) * 0.001f, 0.3f + (rand() % 700) * 0.001f, vLight);
@@ -12606,7 +12640,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Light[0] /= 1.05f;
             o->Light[1] /= 1.05f;
             o->Light[2] /= 1.05f;
-            o->Scale *= 1.02f;
+            o->Scale *= pow(1.02f, FPS_ANIMATION_FACTOR);
         }
         CreateSprite(BITMAP_FIRECRACKER0001 + iFrame, o->Position, o->Scale, o->Light, o, o->Angle[2]);
     }
@@ -12675,7 +12709,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Position[2] += 50.f;
                     CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
 
-                    if ((rand() % 5) == 0)
+                    if (rand_fps_check(5))
                         CreateEffect(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
                 }
             }
@@ -12733,7 +12767,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         else
             o->Angle[0] -= (o->Scale * 16.f) * FPS_ANIMATION_FACTOR;
 
-        if ((rand() % 10) == 0)
+        if (rand_fps_check(10))
         {
             CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
         }
@@ -12763,7 +12797,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Angle[0] -= (o->Scale * 16.f) * FPS_ANIMATION_FACTOR;
 
         o->Alpha = o->LifeTime / 10.f;
-        if ((rand() % 10) == 0)
+        if (rand_fps_check(10))
         {
             CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
         }
@@ -12792,7 +12826,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->StartPosition[0] -= (10.f) * FPS_ANIMATION_FACTOR;
 
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 0, 1.5f);
-            if ((rand() % 2) == 0)
+            if (rand_fps_check(2))
             {
                 CreateParticle(BITMAP_ENERGY, o->Position, o->Angle, Light, 1, 0.5f);
             }
@@ -12815,7 +12849,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Position[2] += 50.f;
                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
 
-                if ((rand() % 5) == 0)
+                if (rand_fps_check(5))
                 {
                     CreateEffect(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
                 }
@@ -12844,7 +12878,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
             if (o->Position[2] > Height)
             {
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 7, o->Scale);
                 }
@@ -13115,7 +13149,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                                 arrEachBonePos[iBone02],
                                 vLightBlur, iTypeBlur, false, iBlurIdentity, 20);
 
-                            if (rand() % 10 == 0)
+                            if (rand_fps_check(10))
                             {
                                 vec3_t	vAngle, vRandomDir, vRandomDirPosition, vResultRandomPosition;
                                 vec34_t	matRandomRotation;
@@ -13154,7 +13188,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 float Distance;
                 for (int i = 1; i < o->Gravity; ++i)
                 {
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         if (o->Angle[0] < -90)
                             o->Angle[0] += (20.f) * FPS_ANIMATION_FACTOR;
@@ -13206,7 +13240,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 float Distance;
                 for (int i = 1; i < o->Gravity; ++i)
                 {
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         if (o->Angle[0] < -90)
                             o->Angle[0] += (20.f) * FPS_ANIMATION_FACTOR;
@@ -13498,9 +13532,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 //o->Scale = 6.0f;
 
-                o->Light[0] *= 0.5f;
-                o->Light[1] *= 0.5f;
-                o->Light[2] *= 0.5f;
+                o->Light[0] *= pow(0.5f, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(0.5f, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(0.5f, FPS_ANIMATION_FACTOR);
             }
         }
         break;
@@ -13528,7 +13562,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     CreateJoint(BITMAP_FLARE_BLUE, Position, Position, o->Angle, 14, o, 40.f);
                     CreateJoint(BITMAP_FLARE_BLUE, Position, Position, o->Angle, 15, o, 40.f);
 
-                    if ((rand() % 2) == 0 && o->LifeTime > 5 && o->LifeTime < 15)
+                    if (rand_fps_check(2) && o->LifeTime > 5 && o->LifeTime < 15)
                     {
                         Vector(o->Position[0] - 200.f, o->Position[1], o->Position[2] + 700.f, Position);
                         CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 20.f);
@@ -13557,7 +13591,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[0] = o->Position[0];
             Position[1] = o->Position[1];
             Position[2] = 350;
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Angle[2] = (float)(rand() % 24 * 30);
                 CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 14, NULL, 100.f, 0, 0);
@@ -13948,7 +13982,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 o->HiddenMesh = -1;
                 Vector(1.f, 1.f, 1.f, Light);
 
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light, 1, 2.f);
                 }
@@ -14081,12 +14115,12 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Vector(0.f, 0.f, 0.f, o->Angle);
                 o->HiddenMesh = 0;
 
-                if (rand() % 10 == 0)
+                if (rand_fps_check(10))
                     CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 1.25f * o->Scale);
             }
             else
             {
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                     CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 0.2f);
             }
             break;
@@ -14120,17 +14154,17 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->Alpha = o->LifeTime / 10.f;
         if (o->Type == MODEL_GOLEM_STONE)
         {
-            if (rand() % 4 == 0) {
+            if (rand_fps_check(4)) {
                 CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, 2.8f);
                 CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, 1.8f);
             }
-            if ((rand() % 10) == 0) {
+            if (rand_fps_check(10)) {
                 CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
             }
         }
         else if (o->Type == MODEL_BIG_STONE_PART1 && o->SubType == 2)
         {
-            if ((rand() % 10) == 0) {
+            if (rand_fps_check(10)) {
                 Vector(0.2f, 0.5f, 0.35f, Light);
                 o->Position[2] = Height;
                 CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, 2.f);
@@ -14162,7 +14196,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         else
             o->Angle[0] -= (o->Scale * 16.f) * FPS_ANIMATION_FACTOR;
 
-        if ((rand() % 10) == 0)
+        if (rand_fps_check(10))
         {
             CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
         }
@@ -14300,8 +14334,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->Position[2] + o->Direction[2] <= fHeight)
             {
                 o->Position[2] = fHeight;
-                o->HeadAngle[0] *= 0.6f;
-                o->HeadAngle[1] *= 0.6f;
+                o->HeadAngle[0] *= pow(0.6f, FPS_ANIMATION_FACTOR);
+                o->HeadAngle[1] *= pow(0.6f, FPS_ANIMATION_FACTOR);
                 o->HeadAngle[2] += (1.0f * o->LifeTime) * FPS_ANIMATION_FACTOR;
                 if (o->HeadAngle[2] < 0.5f)
                     o->HeadAngle[2] = 0;
@@ -14441,9 +14475,9 @@ void MoveEffect(OBJECT* o, int iIndex)
     case BITMAP_CHROME_ENERGY2:
         if (o->LifeTime < 10)
         {
-            o->Light[0] *= 0.8f;
-            o->Light[1] *= 0.8f;
-            o->Light[2] *= 0.8f;
+            o->Light[0] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
         }
         break;
 
@@ -14813,9 +14847,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->LifeTime <= 10)
             {
                 o->BlendMeshLight -= (0.05f) * FPS_ANIMATION_FACTOR;
-                o->Light[0] *= o->BlendMeshLight;
-                o->Light[1] *= o->BlendMeshLight;
-                o->Light[2] *= o->BlendMeshLight;
+                o->Light[0] *= pow(o->BlendMeshLight, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(o->BlendMeshLight, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(o->BlendMeshLight, FPS_ANIMATION_FACTOR);
             }
         }
     }
@@ -14832,9 +14866,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->LifeTime <= 10)
             {
                 o->Alpha -= (0.05f) * FPS_ANIMATION_FACTOR;
-                o->Light[0] *= o->Alpha;
-                o->Light[1] *= o->Alpha;
-                o->Light[2] *= o->Alpha;
+                o->Light[0] *= pow(o->Alpha, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(o->Alpha, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(o->Alpha, FPS_ANIMATION_FACTOR);
             }
         }
     }
@@ -14864,9 +14898,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->LifeTime <= 10)
             {
                 o->Alpha -= (0.05f) * FPS_ANIMATION_FACTOR;
-                o->Light[0] *= o->Alpha;
-                o->Light[1] *= o->Alpha;
-                o->Light[2] *= o->Alpha;
+                o->Light[0] *= pow(o->Alpha, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(o->Alpha, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(o->Alpha, FPS_ANIMATION_FACTOR);
             }
         }
     }
@@ -15002,7 +15036,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         o->Owner->PriorAnimationFrame, o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
                     characterBMD->TransformPosition(o->Owner->BoneTransform[20], vRelativePos, vtaWorldPos, false);
 
-                    if (rand() % 2 == 0) {
+                    if (rand_fps_check(2)) {
                         vtaWorldPos[0] += rand() % 40 + 10;
                     }
                     else {
@@ -15016,7 +15050,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     for (int k = 0; k < 70; ++k)
                     {
-                        if (rand() % 3 == 0) {
+                        if (rand_fps_check(3)) {
                             CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.4f);
                         }
                         CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_FLOWER, vtaWorldPos, o->Angle, rand() % 4 == 3 ? vLight2 : vLight1, 0, 0.4f);
@@ -15108,10 +15142,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                         vPos[2] += rand() % 300 - 150;
                         float fScale = 1.6f + rand() % 10 * 0.1f;
                         Vector(0.5f, 0.5f, 1.0f, vLight);
-                        int index = (rand() % 2 == 0) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
+                        int index = (rand_fps_check(2)) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
                         CreateParticle(index, vPos, o->Angle, vLight, 8, fScale);
                         Vector(1.0f, 1.0f, 1.0f, vLight);
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                         {
                             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, 1.f);
                         }
@@ -15193,7 +15227,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             //if (o->LifeTime < 10)
             {
-                o->Alpha *= 0.9f;
+                o->Alpha *= pow(0.9f, FPS_ANIMATION_FACTOR);
             }
         }
         break;
@@ -15371,11 +15405,11 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (o->LifeTime >= 15)
             {
-                o->Scale *= 1.05f;
+                o->Scale *= pow(1.05f, FPS_ANIMATION_FACTOR);
             }
             else
             {
-                o->Scale *= 0.95f;
+                o->Scale *= pow(0.95f, FPS_ANIMATION_FACTOR);
             }
 
             CreateSprite(BITMAP_LIGHT, o->Position, o->Scale, o->Light, o->Owner);
@@ -15383,7 +15417,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (o->LifeTime <= 10)
             {
-                o->Alpha *= 0.95f;
+                o->Alpha *= pow(0.95f, FPS_ANIMATION_FACTOR);
             }
         }
 #ifdef PJH_ADD_PANDA_CHANGERING
@@ -15396,7 +15430,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (o->LifeTime > 15)
             {
-                o->Scale *= 0.9f;
+                o->Scale *= pow(0.9f, FPS_ANIMATION_FACTOR);
             }
             else
                 if (o->LifeTime == 15)
@@ -15405,7 +15439,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 }
                 else
                 {
-                    o->Scale *= 0.65f;
+                    o->Scale *= pow(0.65f, FPS_ANIMATION_FACTOR);
                 }
 
             if (o->PKKey == 0)
@@ -15426,7 +15460,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (o->LifeTime <= 10)
             {
-                o->Alpha *= 0.95f;
+                o->Alpha *= pow(0.95f, FPS_ANIMATION_FACTOR);
             }
         }
 #endif //PJH_ADD_PANDA_CHANGERING
@@ -15461,11 +15495,11 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             if (o->LifeTime <= 10)
             {
-                o->Scale *= 0.9f;
-                o->Alpha *= 0.9f;
-                o->Light[0] *= 0.9f;
-                o->Light[1] *= 0.9f;
-                o->Light[2] *= 0.9f;
+                o->Scale *= pow(0.9f, FPS_ANIMATION_FACTOR);
+                o->Alpha *= pow(0.9f, FPS_ANIMATION_FACTOR);
+                o->Light[0] *= pow(0.9f, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(0.9f, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(0.9f, FPS_ANIMATION_FACTOR);
             }
             else if (o->LifeTime <= 20)
             {
@@ -15473,11 +15507,11 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
             else if (o->LifeTime <= 30)
             {
-                o->Scale *= 1.1f;
-                o->Alpha *= 1.1f;
-                o->Light[0] *= 1.1f;
-                o->Light[1] *= 1.1f;
-                o->Light[2] *= 1.1f;
+                o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
+                o->Alpha *= pow(1.1f, FPS_ANIMATION_FACTOR);
+                o->Light[0] *= pow(1.1f, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(1.1f, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(1.1f, FPS_ANIMATION_FACTOR);
             }
 
             CreateSprite(BITMAP_SHINY, o->Position, o->Scale, o->Light, o, o->Angle[0]);
@@ -15489,47 +15523,47 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
         case 2:
         {
-            o->Light[0] *= 0.97f;
-            o->Light[1] *= 0.97f;
-            o->Light[2] *= 0.97f;
+            o->Light[0] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
-            o->Scale *= 0.97f;
-            o->Alpha *= 0.97f;
+            o->Scale *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Alpha *= pow(0.97f, FPS_ANIMATION_FACTOR);
             VectorAdd(o->EyeRight, o->Angle, o->Angle);
         }
         break;
         case 0:
         {
-            o->Light[0] *= 0.97f;
-            o->Light[1] *= 0.97f;
-            o->Light[2] *= 0.97f;
+            o->Light[0] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
-            o->Alpha *= 0.97f;
+            o->Alpha *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
             VectorAdd(o->EyeRight, o->Angle, o->Angle);
         }
         break;
         case 3:
         {
-            o->Light[0] *= 0.97f;
-            o->Light[1] *= 0.97f;
-            o->Light[2] *= 0.97f;
+            o->Light[0] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
-            o->Alpha *= 0.97f;
+            o->Alpha *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
-            o->Scale *= 0.97f;
+            o->Scale *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
             VectorAdd(o->EyeRight, o->Angle, o->Angle);
         }break;
         case 1:
         {
-            o->Light[0] *= 0.97f;
-            o->Light[1] *= 0.97f;
-            o->Light[2] *= 0.97f;
+            o->Light[0] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(0.97f, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
-            o->Alpha *= 0.97f;
+            o->Alpha *= pow(0.97f, FPS_ANIMATION_FACTOR);
 
-            o->Scale *= 0.99f;
+            o->Scale *= pow(0.99f, FPS_ANIMATION_FACTOR);
 
             VectorAdd(o->EyeRight, o->Angle, o->Angle);
         }break;
@@ -15620,8 +15654,8 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->Position[2] + o->Direction[2] <= Height)
         {
             o->Position[2] = Height;
-            o->HeadAngle[0] *= 0.8f;
-            o->HeadAngle[1] *= 0.8f;
+            o->HeadAngle[0] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+            o->HeadAngle[1] *= pow(0.8f, FPS_ANIMATION_FACTOR);
             o->HeadAngle[2] += (0.6f * o->LifeTime) * FPS_ANIMATION_FACTOR;
             if (o->HeadAngle[2] < 5.0f)
                 o->HeadAngle[2] = 0;
@@ -15679,9 +15713,9 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->Alpha <= 0.0f)
             o->Live = false;
 
-        o->Light[0] *= 0.93f;
-        o->Light[1] *= 0.93f;
-        o->Light[2] *= 0.93f;
+        o->Light[0] *= pow(0.93f, FPS_ANIMATION_FACTOR);
+        o->Light[1] *= pow(0.93f, FPS_ANIMATION_FACTOR);
+        o->Light[2] *= pow(0.93f, FPS_ANIMATION_FACTOR);
     }
     break;
     case MODEL_PROJECTILE:
@@ -15746,15 +15780,15 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->Position[2] + o->Direction[2] <= Height)
         {
             o->Position[2] = Height;
-            o->HeadAngle[0] *= 0.8f;
-            o->HeadAngle[1] *= 0.8f;
+            o->HeadAngle[0] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+            o->HeadAngle[1] *= pow(0.8f, FPS_ANIMATION_FACTOR);
             o->HeadAngle[2] += (0.6f * o->LifeTime) * FPS_ANIMATION_FACTOR;
             if (o->HeadAngle[2] < 5.0f)
                 o->HeadAngle[2] = 0;
 
             o->Alpha -= (0.05f) * FPS_ANIMATION_FACTOR;
 
-            if (rand() % 4 == 0)
+            if (rand_fps_check(4))
             {
                 Vector(0.f, (float)(rand() % 80) + 50.f, 0.f, p);
                 Vector(0.f, 0.f, (float)(rand() % 360), Angle);
@@ -15779,7 +15813,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
         }
 
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light, 6);
         }
@@ -16027,7 +16061,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                                     arrEachBonePos[iBone02],
                                     vLightBlur, iTypeBlur, false, iBlurIdentity, 25);
 
-                                if (rand() % 2 == 0)
+                                if (rand_fps_check(2))
                                 {
                                     vec3_t	vAngle, vRandomDir, vRandomDirPosition, vResultRandomPosition;
                                     vec34_t	matRandomRotation;
@@ -16228,7 +16262,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                         for (int j = 0; j < 11; ++j)
                         {
-                            if (rand() % 20 == 0)
+                            if (rand_fps_check(20))
                             {
                                 CreateEffect(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
                             }
@@ -16261,7 +16295,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         v3PosModify[0] = arrEachBonePos[i][0] + (float)((rand() % 80) - 40);
                         v3PosModify[1] = arrEachBonePos[i][1] + (float)((rand() % 80) - 40);
                         v3PosModify[2] = arrEachBonePos[i][2] + (float)((rand() % 80) - 40);
-                        if (rand() % 10 == 0)
+                        if (rand_fps_check(10))
                         {
                             CreateEffect(BITMAP_FIRE_CURSEDLICH, v3PosModify, vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale * 1.5f);
                         }
@@ -16563,7 +16597,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     for (int j = 0; j < 11; ++j)
                     {
                         Vector(1.0f, 1.0f, 1.0f, v3LightModify);
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                         {
                             CreateParticle(BITMAP_POUNDING_BALL, arrEachBonePos[j], o->Angle, v3LightModify, 3, 1.3f);
                         }
@@ -16577,7 +16611,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     for (int j = 0; j < 11; ++j)
                     {
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                         {
                             CreateParticle(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
                         }
@@ -16590,7 +16624,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     for (int j = 0; j < 11; ++j)
                     {
-                        if (rand() % 20 == 0)
+                        if (rand_fps_check(20))
                         {
                             CreateEffect(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
                         }
@@ -16662,7 +16696,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Vector(0.3f, 0.4f, 1.0f, v3LightModify);
                     for (int j = 0; j < 11; ++j)
                     {
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                         {
                             CreateParticle(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
                         }
@@ -16784,10 +16818,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                         vPos[2] += rand() % 400 - 200;
                         float fScale = (o->Scale * 1.6f) + rand() % 10 * 0.1f;
                         Vector(0.3f, 0.3f, 1.0f, vLight);
-                        int index = (rand() % 2 == 0) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
+                        int index = (rand_fps_check(2)) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
                         CreateParticle(index, vPos, o->Angle, vLight, 8, fScale);
                         Vector(1.0f, 1.0f, 1.0f, vLight);
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                         {
                             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, o->Scale * 0.9f);
                         }
@@ -16878,7 +16912,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Light[0] /= 1.4f;
             o->Light[1] /= 1.4f;
             o->Light[2] /= 1.4f;
-            o->Scale *= 1.1f;
+            o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
         }
         CreateSprite(BITMAP_SHOCK_WAVE, o->Position, o->Scale, o->Light, o->Owner);
         CreateParticle(BITMAP_FIRE + 2, o->Position, o->Angle, o->Light, 16, 2.5f);
@@ -16903,10 +16937,10 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->Distance += (2.1f) * FPS_ANIMATION_FACTOR;
         o->Angle[0] += (0.7f) * FPS_ANIMATION_FACTOR;
 
-        o->Light[0] *= 0.95f;
-        o->Light[1] *= 0.95f;
-        o->Light[2] *= 0.95f;
-        //o->Alpha *= 0.92f;
+        o->Light[0] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+        o->Light[1] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+        o->Light[2] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+        //o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
 
         vec3_t vPos;
         for (int i = 0; i < 3; i++)
@@ -17153,8 +17187,8 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->SubType == 1 || o->SubType == 2)
         {
             o->Alpha = 1.0f;
-            o->Scale *= 1.24f;
-            o->Position[2] *= 1.19f;
+            o->Scale *= pow(1.24f, FPS_ANIMATION_FACTOR);
+            o->Position[2] *= pow(1.19f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.45f, o->Light);
             if (o->Light[0] < 0.001f)
             {
@@ -17163,7 +17197,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         else if (o->SubType == 3)
         {
-            o->Scale *= 1.15f;
+            o->Scale *= pow(1.15f, FPS_ANIMATION_FACTOR);
             VectorScale(o->StartPosition, 0.99f, o->StartPosition);
             VectorSubtract(o->Position, o->StartPosition, o->Position);
             VectorScale(o->Light, 0.7f, o->Light);
@@ -17175,7 +17209,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         else if (o->SubType == 4)
         {
-            o->Scale *= 1.15f;
+            o->Scale *= pow(1.15f, FPS_ANIMATION_FACTOR);
             VectorScale(o->StartPosition, 1.04f, o->StartPosition);
             VectorSubtract(o->Position, o->StartPosition, o->Position);
             VectorScale(o->Light, 1.5f, o->Light);
@@ -17187,7 +17221,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         else if (o->SubType == 5)
         {
-            o->Scale *= 1.15f;
+            o->Scale *= pow(1.15f, FPS_ANIMATION_FACTOR);
             VectorScale(o->StartPosition, 1.04f, o->StartPosition);
             VectorSubtract(o->Position, o->StartPosition, o->Position);
             VectorScale(o->Light, 0.5f, o->Light);
@@ -17235,7 +17269,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     break;
     case MODEL_SHOCKWAVE_SPIN01:
     {
-        o->Scale *= 1.01f;
+        o->Scale *= pow(1.01f, FPS_ANIMATION_FACTOR);
         o->Angle[1] -= (10.0f) * FPS_ANIMATION_FACTOR;
         if (o->SubType == 1)
         {
@@ -17249,7 +17283,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         if (o->SubType == 1)
         {
-            o->Scale *= 1.08f;
+            o->Scale *= pow(1.08f, FPS_ANIMATION_FACTOR);
             if (o->Scale > 5)
             {
                 o->Scale = 5.0f;
@@ -17259,7 +17293,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         else
         {
-            o->Scale *= 1.08f;
+            o->Scale *= pow(1.08f, FPS_ANIMATION_FACTOR);
             if (o->Scale > 3)
             {
                 o->Scale = 3.0f;
@@ -17280,7 +17314,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 o->Scale = 3;
             }
-            o->Alpha *= 0.92f;
+            o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.9f, o->Light);
             if (o->LifeTime == 40 || o->LifeTime == 30)
             {
@@ -17331,7 +17365,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 o->Scale = 3;
             }
-            o->Alpha *= 0.92f;
+            o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.85f, o->Light);
 
             if (o->LifeTime == 60 || o->LifeTime == 50)
@@ -17349,7 +17383,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 o->Scale = 3;
             }
-            o->Alpha *= 0.92f;
+            o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.85f, o->Light);
         }
     }
@@ -17418,7 +17452,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 {
                     VectorCopy(o->Position, Position);
                     Vector(1.0f, 0.12f, 0.0f, Light);
-                    b->TransformByObjectBone(Position, o->Owner, (rand() % 2 == 0) ? 26 : 35);
+                    b->TransformByObjectBone(Position, o->Owner, (rand_fps_check(2)) ? 26 : 35);
                     CreateParticle(BITMAP_SMOKELINE1, Position, o->Angle, Light, 5, 0.005f, o->Owner);
                 }
             }
@@ -17434,7 +17468,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             break;
         }
         o->Angle[2] = (int)WorldTime * 0.4f;
-        o->Scale *= 1.015f;
+        o->Scale *= pow(1.015f, FPS_ANIMATION_FACTOR);
 
         if (o->Scale > 1.5f)
         {
@@ -17536,17 +17570,17 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         if (o->SubType == 1)
         {
-            o->Scale *= 1.2f;
+            o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.9f, o->Light);
         }
         else if (o->SubType == 2)
         {
-            o->Scale *= 1.2f;
+            o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.7f, o->Light);
         }
         else
         {
-            o->Scale *= 1.2f;
+            o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.8f, o->Light);
         }
     }
@@ -17758,7 +17792,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             CreateEffect(BITMAP_LIGHT_RED, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 15.0f);
             o->LifeTime = 80;
         }
-        o->Alpha *= 0.96f;
+        o->Alpha *= pow(0.96f, FPS_ANIMATION_FACTOR);
     }
     break;
     case MODEL_TARGETMON_EFFECT:
@@ -17888,8 +17922,8 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->Position[2] + o->Direction[2] <= Height)
         {
             o->Position[2] = Height;
-            o->HeadAngle[0] *= 0.6f;
-            o->HeadAngle[1] *= 0.6f;
+            o->HeadAngle[0] *= pow(0.6f, FPS_ANIMATION_FACTOR);
+            o->HeadAngle[1] *= pow(0.6f, FPS_ANIMATION_FACTOR);
             o->HeadAngle[2] += (1.0f * o->LifeTime) * FPS_ANIMATION_FACTOR;
             if (o->HeadAngle[2] < 0.5f)
                 o->HeadAngle[2] = 0;
@@ -17991,19 +18025,18 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         switch (o->Type)
         {
-        case BITMAP_LIGHT:
-        {
-            if (o->SubType == 0 && 0 != ((int)o->LifeTime % 2))
-                MoveEffect(o, iIndex);
-        }
-        break;
-        case MODEL_FIRE:
-            if (o->SubType == 3)
-            {
-                if (0 != ((int)o->LifeTime % 2))
+            case BITMAP_LIGHT:
+                if (o->SubType == 0 && rand_fps_check(2))
+                {
                     MoveEffect(o, iIndex);
-            }
-            break;
+                }
+                break;
+            case MODEL_FIRE:
+                if (o->SubType == 3 && rand_fps_check(2))
+                {
+                    MoveEffect(o, iIndex);
+                }
+                break;
         }
     }
 }
@@ -18339,7 +18372,7 @@ void RenderEffects(bool bRenderBlendMesh)
                             CreateSprite(BITMAP_SHINY + 6, vPos, o->Scale * 0.3f, vLight, NULL);
                         }
 
-                        if (rand() % 5 == 0)
+                        if (rand_fps_check(5))
                         {
                             int nBones = Models[o->Type].NumBones;
                             pModel->TransformByObjectBone(vPos, o, rand() % nBones);
@@ -18375,6 +18408,8 @@ void RenderEffects(bool bRenderBlendMesh)
                     VectorCopy(o->Position, Position);
                     for (int j = 0; j < 20; j++)
                     {
+                        if (!rand_fps_check(1)) continue;
+
                         if (o->SubType == 1)
                         {
                             o->Angle[2] -= (0.1f) * FPS_ANIMATION_FACTOR;
@@ -18688,9 +18723,9 @@ void RenderEffects(bool bRenderBlendMesh)
                     }
                     else
                     {
-                        o->Light[0] *= fLight;
-                        o->Light[1] *= fLight;
-                        o->Light[2] *= fLight;
+                        o->Light[0] *= pow(fLight, FPS_ANIMATION_FACTOR);
+                        o->Light[1] *= pow(fLight, FPS_ANIMATION_FACTOR);
+                        o->Light[2] *= pow(fLight, FPS_ANIMATION_FACTOR);
                     }
                     BMD* pModel = &Models[o->Owner->Type];
                     vec3_t vPos;

@@ -65,7 +65,7 @@ void MovePointers()
             switch (o->Type)
             {
             case BITMAP_CURSOR + 5:
-                o->Scale -= 0.05f;
+                o->Scale -= 0.05f * FPS_ANIMATION_FACTOR;
                 if (o->Scale < 0.1f) o->Live = false;
                 break;
             case BITMAP_BLOOD:
@@ -73,7 +73,7 @@ void MovePointers()
             case BITMAP_FOOT:
                 if (o->Type == BITMAP_BLOOD)
                 {
-                    o->Scale += 0.004f;
+                    o->Scale += 0.004f * FPS_ANIMATION_FACTOR;
                 }
                 Vector(0.1f, 0.f, 0.f, o->Light);
                 if (o->LifeTime <= 0) o->Live = false;

@@ -491,7 +491,7 @@ void MoveHead(CHARACTER* c)
     {
         if (o->CurrentAction == MONSTER01_STOP1)
         {
-            if (rand() % 32 == 0)
+            if (rand_fps_check(32))
             {
                 o->HeadTargetAngle[0] = (float)(rand() % 128 - 64);
                 o->HeadTargetAngle[1] = (float)(rand() % 48 - 16);
@@ -781,6 +781,11 @@ double   FPS;
 float   FPS_ANIMATION_FACTOR;
 double   FPS_AVG;
 double   WorldTime = 0.0;
+
+bool rand_fps_check(int reference_frames)
+{
+    return rand() % reference_frames == 0;
+}
 
 void CalcFPS()
 {

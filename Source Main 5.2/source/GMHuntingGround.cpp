@@ -124,13 +124,13 @@ bool M31HuntingGround::RenderHuntingGroundObjectVisual(OBJECT* pObject, BMD* pMo
     switch (pObject->Type)
     {
     case 3:
-        if (rand() % 3 == 0) {
+        if (rand_fps_check(3)) {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 3, pObject->Scale);
         }
         break;
     case 53:
-        if (rand() % 3 == 0) {
+        if (rand_fps_check(3)) {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, pObject->Position, pObject->Angle, Light, 22, pObject->Scale);
         }
@@ -373,7 +373,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0) {
+            if (rand_fps_check(15)) {
                 PlayBuffer(SOUND_BC_LIZARDWARRIOR_MOVE1 + rand() % 2);
             }
         }
@@ -425,7 +425,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             BoneManager::GetBonePosition(pObject, "Monster82_Back", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 0.8f);
 
-            if (rand() % 20 == 0) {
+            if (rand_fps_check(20)) {
                 PlayBuffer(SOUND_BC_FIREGOLEM_MOVE1 + rand() % 2);
             }
         }
@@ -553,8 +553,8 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 
             vec3_t Angle;
             Vector(-55.f, sinf(WorldTime * 0.03f) * 45.f, pObject->Angle[2], Angle);
-            if (rand() % 2 == 0) {
-                if (rand() % 2 == 0)
+            if (rand_fps_check(2)) {
+                if (rand_fps_check(2))
                     BoneManager::GetBonePosition(pObject, "Monster84_PoisonRight", Position);
                 else
                     BoneManager::GetBonePosition(pObject, "Monster84_PoisonLeft", Position);
@@ -577,15 +577,15 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.05f);
         }
 
-        if (rand() % 10 == 0) {
+        if (rand_fps_check(10)) {
             BoneManager::GetBonePosition(pObject, "Monster84_PoisonTop", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 23);
         }
-        if (rand() % 10 == 0) {
+        if (rand_fps_check(10)) {
             BoneManager::GetBonePosition(pObject, "Monster84_PoisonRight", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 23);
         }
-        if (rand() % 10 == 0) {
+        if (rand_fps_check(10)) {
             BoneManager::GetBonePosition(pObject, "Monster84_PoisonLeft", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 23);
         }
@@ -606,7 +606,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         //. Walking & Running Scene Processing
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 10 == 0) {
+            if (rand_fps_check(10)) {
                 CreateParticle(BITMAP_SMOKE + 1, pObject->Position, pObject->Angle, Light);
                 PlayBuffer(SOUND_BC_AXEWARRIOR_MOVE1 + rand() % 2);
             }
@@ -921,7 +921,7 @@ bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
     if (!IsInHuntingGroundSection2(Hero->Object.Position))
         return false;
 
-    if (rand() % 30 == 0) {
+    if (rand_fps_check(30)) {
         vec3_t Light;
         Vector(0.05f, 0.05f, 0.1f, Light);
 
@@ -971,7 +971,7 @@ bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
             VectorRotate(Velocity, Matrix, Direction);
             VectorAdd(TargetPosition, Direction, TargetPosition);
         }
-        if (Hero->Movement || (rand() % 2 == 0)) {
+        if (Hero->Movement || (rand_fps_check(2))) {
             TargetPosition[2] = (rand() % 20) + RequestTerrainHeight(TargetPosition[0], TargetPosition[1]);
             CreateParticle(BITMAP_CLOUD, TargetPosition, TargetAngle, Light, 8, 0.4f);
         }

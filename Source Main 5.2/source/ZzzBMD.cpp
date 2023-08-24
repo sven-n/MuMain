@@ -1687,11 +1687,11 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
             case MODEL_STONE_COFFIN:
                 if (iSubType == 0)
                 {
-                    if ((rand() % 2) == 0)
+                    if (rand_fps_check(2))
                     {
                         CreateEffect(MODEL_STONE_COFFIN + 1, VertexTransform[i][vi], angle, Light);
                     }
-                    if ((rand() % 10) == 0)
+                    if (rand_fps_check(10))
                     {
                         CreateEffect(MODEL_STONE_COFFIN, VertexTransform[i][vi], angle, Light);
                     }
@@ -1713,11 +1713,11 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
                 if (iSubType == 1)
                 {
                     Vector(0.2f, 0.2f, 0.2f, Light);
-                    if ((rand() % 5) == 0)
+                    if (rand_fps_check(5))
                     {
                         CreateEffect(MODEL_GATE + 1, VertexTransform[i][vi], angle, Light, 2);
                     }
-                    if ((rand() % 10) == 0)
+                    if (rand_fps_check(10))
                     {
                         CreateEffect(MODEL_GATE, VertexTransform[i][vi], angle, Light, 2);
                     }
@@ -1725,32 +1725,32 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
                 else if (iSubType == 0)
                 {
                     Vector(0.2f, 0.2f, 0.2f, Light);
-                    if ((rand() % 12) == 0)
+                    if (rand_fps_check(12))
                     {
                         CreateEffect(MODEL_GATE + 1, VertexTransform[i][vi], angle, Light);
                     }
-                    if ((rand() % 50) == 0)
+                    if (rand_fps_check(50))
                     {
                         CreateEffect(MODEL_GATE, VertexTransform[i][vi], angle, Light);
                     }
                 }
                 break;
             case MODEL_BIG_STONE_PART1:
-                if ((rand() % 3) == 0)
+                if (rand_fps_check(3))
                 {
                     CreateEffect(MODEL_BIG_STONE_PART1 + rand() % 2, VertexTransform[i][vi], angle, Light, 1);
                 }
                 break;
 
             case MODEL_BIG_STONE_PART2:
-                if ((rand() % 3) == 0)
+                if (rand_fps_check(3))
                 {
                     CreateEffect(MODEL_BIG_STONE_PART1 + rand() % 2, VertexTransform[i][vi], angle, Light);
                 }
                 break;
 
             case MODEL_WALL_PART1:
-                if ((rand() % 3) == 0)
+                if (rand_fps_check(3))
                 {
                     CreateEffect(MODEL_WALL_PART1 + rand() % 2, VertexTransform[i][vi], angle, Light);
                 }
@@ -1758,21 +1758,21 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
 
             case MODEL_GATE_PART1:
                 Vector(0.2f, 0.2f, 0.2f, Light);
-                if ((rand() % 12) == 0)
+                if (rand_fps_check(12))
                 {
                     CreateEffect(MODEL_GATE_PART1 + 1, VertexTransform[i][vi], angle, Light);
                 }
-                if ((rand() % 40) == 0)
+                if (rand_fps_check(40))
                 {
                     CreateEffect(MODEL_GATE_PART1, VertexTransform[i][vi], angle, Light);
                 }
-                if ((rand() % 40) == 0)
+                if (rand_fps_check(40))
                 {
                     CreateEffect(MODEL_GATE_PART1 + 2, VertexTransform[i][vi], angle, Light);
                 }
                 break;
             case MODEL_GOLEM_STONE:
-                if ((rand() % 45) == 0 && iEffectCount < 20)
+                if (rand_fps_check(45) && iEffectCount < 20)
                 {
                     if (iSubType == 0) {	//. ºÒ°ñ·½
                         CreateEffect(MODEL_GOLEM_STONE, VertexTransform[i][vi], angle, Light);
@@ -1785,7 +1785,7 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
                 }
                 break;
             case MODEL_SKIN_SHELL:
-                if ((rand() % 8) == 0)
+                if (rand_fps_check(8))
                 {
                     CreateEffect(MODEL_SKIN_SHELL, VertexTransform[i][vi], angle, Light, iSubType);
                 }
@@ -1812,7 +1812,7 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
                 break;
             case BITMAP_BUBBLE:
                 Vector(1.f, 1.f, 1.f, Light);
-                if ((rand() % 30) == 0)
+                if (rand_fps_check(30))
                 {
                     CreateParticle(BITMAP_BUBBLE, VertexTransform[i][vi], angle, Light, 2);
                 }

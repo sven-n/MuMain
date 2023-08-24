@@ -569,7 +569,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         break;
         case 70:
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
@@ -579,7 +579,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 71:
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(221.f / 256.f * fLumi, 121.f / 256.f * fLumi, 201.f / 256.f * fLumi, Light);
@@ -589,7 +589,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 72:
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
@@ -601,7 +601,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 73:
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 float fLumi = (rand() % 10) * 0.002f + 0.03f;
                 Vector(1.2f * fLumi, 1.2f * fLumi, 1.2f * fLumi, Light);
@@ -611,7 +611,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 74:
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Vector(0.f, 0.f, 0.f, Light);
                 CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 16, o->Scale, o);
@@ -685,7 +685,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 79:
         {
-            if (rand() % 1 == 0)
+            if (rand_fps_check(1))
             {
                 for (int i = 0; i < 5; ++i)
                 {

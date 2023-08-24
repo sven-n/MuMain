@@ -714,25 +714,25 @@ namespace battleCastle
         }
 
         PlayBuffer(SOUND_BC_AMBIENT);
-        if (IsBattleCastleStart() && rand() % 10 == 0)
+        if (IsBattleCastleStart() && rand_fps_check(10))
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE1);
             }
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE2);
             }
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE3);
             }
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE4);
             }
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE5);
             }
@@ -870,10 +870,10 @@ namespace battleCastle
                     Position[2] = 350.f;
 
                     BYTE subtype = 3;
-                    if (HeroY < 82 || HeroY>112 || rand() % 10 == 0)
+                    if (HeroY < 82 || HeroY>112 || rand_fps_check(10))
                     {
                         subtype = 4;
-                        if (rand() % 10 == 0)
+                        if (rand_fps_check(10))
                         {
                             subtype = 3;
                         }
@@ -1120,7 +1120,7 @@ namespace battleCastle
         switch (o->Type)
         {
         case 0:
-            if (IsBattleCastleStart() == false && rand() % 3 == 0)
+            if (IsBattleCastleStart() == false && rand_fps_check(3))
             {
                 Vector(1.f, 1.f, 1.f, Light);
                 CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 0, o->Scale);
@@ -1132,7 +1132,7 @@ namespace battleCastle
             break;
 
         case 42:
-            if (IsBattleCastleStart() && rand() % 3 == 0)
+            if (IsBattleCastleStart() && rand_fps_check(3))
             {
                 Vector(1.f, 1.f, 1.f, Light);
                 CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
@@ -1146,7 +1146,7 @@ namespace battleCastle
             }
             break;
         case 53:
-            if (IsBattleCastleStart() && rand() % 3 == 0)
+            if (IsBattleCastleStart() && rand_fps_check(3))
             {
                 Vector(1.f, 1.f, 1.f, Light);
                 CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 0, o->Scale);
@@ -2073,7 +2073,7 @@ namespace battleCastle
             vec3_t Position;
             for (int i = 0; i < 5; i++)
             {
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     Position[0] = o->Position[0];
                     Position[1] = o->Position[1];

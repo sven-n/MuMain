@@ -356,7 +356,7 @@ void SetPlayerStop(CHARACTER* c)
             SetAction(&c->Object, MONSTER01_STOP1);
     }
 
-    if (rand() % 16 == 0)
+    if (rand_fps_check(16))
     {
         if (o->Type != MODEL_PLAYER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
         {
@@ -372,7 +372,7 @@ void SetPlayerStop(CHARACTER* c)
         }
         else if (c->Helper.Type == MODEL_HELPER + 37)
         {
-            if ((rand() % 3) == 0)
+            if (rand_fps_check(3))
             {
                 PlayBuffer(SOUND_FENRIR_IDLE_1 + rand() % 2, o);
             }
@@ -718,7 +718,7 @@ void SetPlayerWalk(CHARACTER* c)
     {
         PlayBuffer(SOUND_FENRIR_RUN_1 + rand() % 2, o);
     }
-    else if ((c == Hero && rand() % 64 == 0) || (c != Hero && rand() % 16 == 0))
+    else if ((c == Hero && rand_fps_check(64)) || (c != Hero && rand_fps_check(16)))
     {
         if (o->Type != MODEL_PLAYER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
         {
@@ -1226,7 +1226,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
             if (c->Helper.Type == MODEL_HELPER + 37)
             {
                 SetAction_Fenrir_Damage(c, &c->Object);
-                if ((rand() % 3) == 0)
+                if (rand_fps_check(3))
                     PlayBuffer(SOUND_FENRIR_DAMAGE_1 + rand() % 2, o);
             }
             else
@@ -1279,7 +1279,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
             vec3_t Position;
             for (int i = 0; i < 5; i++)
             {
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     Position[0] = o->Position[0] + (rand() % 128 - 64);
                     Position[1] = o->Position[1];
@@ -1499,7 +1499,7 @@ void AttackEffect(CHARACTER* c)
     case 143:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if ((rand() % 2) == 0)
+            if (rand_fps_check(2))
             {
                 if ((int)c->AttackTime == 1)
                 {
@@ -1850,7 +1850,7 @@ void AttackEffect(CHARACTER* c)
                 {
                     if ((int)c->AttackTime == 8)
                     {
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                         {
                             CreateEffect(MODEL_SKILL_BLAST, to->Position, o->Angle, o->Light, 0, o);
                             CreateEffect(MODEL_SKILL_BLAST, to->Position, o->Angle, o->Light, 0, o);
@@ -3097,7 +3097,7 @@ void HeroAttributeCalc(CHARACTER* c)
 
 void OnlyNpcChatProcess(CHARACTER* c, OBJECT* o)
 {
-    if (o->Kind == KIND_NPC && (rand() % 2) == 0)
+    if (o->Kind == KIND_NPC && rand_fps_check(2))
     {
         switch (o->Type)
         {
@@ -3467,7 +3467,7 @@ void AnimationCharacter(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_DEVIAS_TRADER:
         if (b->CurrentAnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
         {
-            if (rand() % 32 == 0)
+            if (rand_fps_check(32))
                 SetAction(o, 1);
             else
                 SetAction(o, 0);
@@ -3476,7 +3476,7 @@ void AnimationCharacter(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_MONSTER01 + 128:
         if (o->CurrentAction <= 1 && b->CurrentAnimationFrame == b->Actions[o->CurrentAction].NumAnimationKeys - 1)
         {
-            if (rand() % 10 == 0)
+            if (rand_fps_check(10))
                 SetAction(o, 1);
             else
                 SetAction(o, 0);
@@ -4612,7 +4612,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                 {
                     for (int i = 0; i < 5; i++)
                     {
-                        if ((rand() % 2) == 0)
+                        if (rand_fps_check(2))
                         {
                             Position[0] = to->Position[0];
                             Position[1] = to->Position[1];
@@ -5396,7 +5396,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         {
             if (o->Type != MODEL_PLAYER)
                 MoveHead(c);
-            if (c != Hero && c->Dead == 0 && rand() % 32 == 0)
+            if (c != Hero && c->Dead == 0 && rand_fps_check(32))
             {
                 o->HeadTargetAngle[0] = (float)(rand() % 128 - 64);
                 o->HeadTargetAngle[1] = (float)(rand() % 32 - 16);
@@ -5420,9 +5420,9 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
                 Vector(o->Position[0] + (float)(rand() % 64 - 32),
                     o->Position[1] + (float)(rand() % 64 - 32),
                     o->Position[2] + (float)(rand() % 32 - 16), Position);
-                if (rand() % 10 == 0)
+                if (rand_fps_check(10))
                     CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light, 1);
-                if (rand() % 10 == 0)
+                if (rand_fps_check(10))
                     CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
             }
         }
@@ -5444,7 +5444,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         }
         if (c->Freeze > 0.f)
         {
-            if (c->FreezeType == BITMAP_ICE && rand() % 4 == 0)
+            if (c->FreezeType == BITMAP_ICE && rand_fps_check(4))
             {
                 Vector(o->Position[0] + (float)(rand() % 100 - 50), o->Position[1] + (float)(rand() % 100 - 50), o->Position[2] + (float)(rand() % 180), Position);
                 //CreateParticle(BITMAP_SHINY,Position,o->Angle,o->Light);
@@ -5483,12 +5483,12 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             Vector(-15.f, 0.f, 0.f, p);
             if (gMapManager.InDevilSquare() == true)
             {
-                if (rand() % 4 == 0)
+                if (rand_fps_check(4))
                 {
                     b->TransformPosition(o->BoneTransform[26], p, Position, true);
                     CreateParticle(BITMAP_RAIN_CIRCLE + 1, Position, o->Angle, Light);
                 }
-                if (rand() % 4 == 0)
+                if (rand_fps_check(4))
                 {
                     b->TransformPosition(o->BoneTransform[35], p, Position, true);
                     CreateParticle(BITMAP_RAIN_CIRCLE + 1, Position, o->Angle, Light);
@@ -5748,7 +5748,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         case MODEL_MONSTER01 + 29:
             o->BlendMesh = 3;
             o->BlendMeshTexCoordV = -(float)((int)(WorldTime) % 1000) * 0.001f;
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Vector(0.f, 0.f, 0.f, p);
                 b->TransformPosition(o->BoneTransform[2], p, Position, true);
@@ -5820,11 +5820,11 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             o->BlendMeshTexCoordV = -(float)((int)(WorldTime) % 2000) * 0.0005f;
             break;
         case MODEL_MIX_NPC:
-            if (rand() % 64 == 0)
+            if (rand_fps_check(64))
                 PlayBuffer(SOUND_NPC + 1);
             break;
         case MODEL_ELF_WIZARD:
-            if (rand() % 256 == 0)
+            if (rand_fps_check(256))
                 PlayBuffer(SOUND_NPC);
             break;
         case MODEL_SMITH:
@@ -5896,7 +5896,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
                 Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
                 CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o);
             }
-            if (c->Dead == 0 && rand() % 4 == 0)
+            if (c->Dead == 0 && rand_fps_check(4))
             {
                 Vector(o->Position[0] + (float)(rand() % 64 - 32),
                     o->Position[1] + (float)(rand() % 64 - 32),
@@ -5908,7 +5908,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             }
             break;
         case MODEL_MONSTER01 + 33:
-            if (c->Dead == 0 && c->Level == 1 && rand() % 4 == 0)
+            if (c->Dead == 0 && c->Level == 1 && rand_fps_check(4))
             {
                 Vector(o->Position[0] + (float)(rand() % 64 - 32),
                     o->Position[1] + (float)(rand() % 64 - 32),
@@ -5921,7 +5921,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             break;
         case MODEL_MONSTER01 + 12:
         case MODEL_MONSTER01 + 13:
-            if (rand() % 4 == 0)
+            if (rand_fps_check(4))
             {
                 Vector(0.f, 0.f, 0.f, p);
                 b->TransformPosition(o->BoneTransform[22], p, Position, true);
@@ -5938,7 +5938,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
                     (o->AnimationFrame >= 5.f && o->AnimationFrame <= 6.f))) Smoke = true;
             if (Smoke)
             {
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     Vector(0.f, -4.f, 0.f, p);
                     b->TransformPosition(o->BoneTransform[24], p, Position, true);
@@ -6731,7 +6731,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             Vector(i * 30.f - 180.f, -40.f, 0.f, p);
             b->TransformPosition(BoneTransform[0], p, Position, true);
 
-            if ((rand() % 3) == 0)
+            if (rand_fps_check(3))
             {
                 CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
             }
@@ -6951,7 +6951,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             CreateSprite(BITMAP_LIGHT, Position, 1.1f, Light, o);
         }
 
-        if (o->CurrentAction == PLAYER_RUN_TWO_HAND_SWORD_TWO && gMapManager.WorldActive != WD_10HEAVEN && rand() % 2 == 0)
+        if (o->CurrentAction == PLAYER_RUN_TWO_HAND_SWORD_TWO && gMapManager.WorldActive != WD_10HEAVEN && rand_fps_check(2))
         {
             if (!g_Direction.m_CKanturu.IsMayaScene())
             {
@@ -7154,7 +7154,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             Vector(0.4f, 0.4f, 0.4f, Light2);
             b->TransformPosition(BoneTransform[i + 2], p, Position, true);
 
-            if ((rand() % 3) == 0)
+            if (rand_fps_check(3))
             {
                 CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
             }
@@ -7185,7 +7185,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
                     Vector(0.f,i*30.f-10.f,0.f,p);
                     b->TransformPosition(BoneTransform[0],p,Position,true);
 
-                    if ( (rand()%3)==0 )
+                    if ( rand_fps_check(3) )
                     {
                         CreateSprite(BITMAP_SHINY+1,Position,0.6f,Light2, o, ( float)( rand()%360));
                     }
@@ -7308,7 +7308,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         vec3_t Light2;
         Vector(0.4f, 0.4f, 0.4f, Light2);
         b->TransformPosition(BoneTransform[0], p, Position, true);
-        if ((rand() % 3) == 0)
+        if (rand_fps_check(3))
         {
             CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
         }
@@ -7354,7 +7354,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     break;
     case MODEL_SWORD + 21:
     case MODEL_SWORD + 31:
-        if (o->CurrentAction == PLAYER_RUN_TWO_HAND_SWORD_TWO && gMapManager.WorldActive != WD_10HEAVEN && rand() % 2 == 0)
+        if (o->CurrentAction == PLAYER_RUN_TWO_HAND_SWORD_TWO && gMapManager.WorldActive != WD_10HEAVEN && rand_fps_check(2))
         {
             if (!g_Direction.m_CKanturu.IsMayaScene())
             {
@@ -7536,7 +7536,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         vDPos[1] = Position[1] + ((float)(rand() % 20 - 10) * 3.f);
         vDPos[2] = Position[2] + ((float)(rand() % 20 - 10) * 3.f);
 
-        if (rand() % 10 == 0)
+        if (rand_fps_check(10))
         {
             CreateEffect(MODEL_STAR_SHINE, vDPos, o->Angle, Light, 0, Object, -1, 0, 0, 0, 0.22f);
         }
@@ -8717,14 +8717,14 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         float Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
         Vector(0.5f + Luminosity, 0.0f + Luminosity, 0.0f + Luminosity, Light);
 
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             VectorCopy(o->Position, b->BodyOrigin);
             b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
             b->TransformPosition(BoneTransform[43], vRelativePos, vtaWorldPos, false);
             vtaWorldPos[2] += 20.f;
 
-            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 3 == 0 ? vLight : vLight1, 1, 0.3f);
+            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand_fps_check(3) ? vLight : vLight1, 1, 0.3f);
         }
 
         VectorCopy(o->Position, b->BodyOrigin);
@@ -8732,8 +8732,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         b->TransformPosition(BoneTransform[43], vRelativePos, vtaWorldPos, false);
         vtaWorldPos[2] += 20.f;
 
-        CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, rand() % 3 == 0 ? vLight2 : vLight1, 25, Scale + 0.2f);
-        CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, rand() % 2 == 0 ? vLight2 : vLight1, 25, Scale + 0.3f);
+        CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, rand_fps_check(3) ? vLight2 : vLight1, 25, Scale + 0.2f);
+        CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, rand_fps_check(2) ? vLight2 : vLight1, 25, Scale + 0.3f);
 
         Vector(0.7f, 0.5f, 0.2f, vLight);
         CreateSprite(BITMAP_LIGHT, vtaWorldPos, 2.f, vLight, o, 0.f);
@@ -8753,10 +8753,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
             CreateSprite(BITMAP_LIGHT, vtaWorldPos, 1.5f, vLight, o, 0.f);
 
-            if (rand() % 3 == 0) {
+            if (rand_fps_check(3)) {
                 auto randpos = (float)(rand() % 30 + 5);
 
-                if (rand() % 2 == 0) {
+                if (rand_fps_check(2)) {
                     vtaWorldPos[0] += randpos;
                 }
                 else {
@@ -10009,7 +10009,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                         CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 23, 1.0f);
 #ifdef ASG_ADD_ETERNALWING_STICK_EFFECT
-                        if (rand() % 20 == 0)
+                        if (rand_fps_check(20))
                             CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 20, 1.0f);
                         Vector(1.0f, 0.0f, 0.0f, Light);
                         RenderBrightEffect(b, BITMAP_LIGHT, 2, 3.0f, Light, o);
@@ -10136,7 +10136,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                 if (o->AnimationFrame < 2.f)
                 {
-                    if (PartyNumber > 0 /*&& rand()%2==0*/)
+                    if (PartyNumber > 0 /*&& rand_fps_check(2)*/)
                     {
                         if (g_pPartyManager->IsPartyMemberChar(c) == false)
                             break;
@@ -10606,7 +10606,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                             Vector(0.6f, 0.3f, 0.4f, o->Light);
                         if (EquipmentLevelSet == 10)
                         {
-                            if ((rand() % 4) == 0)
+                            if (rand_fps_check(4))
                             {
                                 Vector(0.0f, -18.0f, 50.0f, p);
                                 b->TransformPosition(o->BoneTransform[0], p, Position, true);
@@ -10621,7 +10621,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 11)
                         {
-                            if ((rand() % 3) == 0)
+                            if (rand_fps_check(3))
                             {
                                 Vector(0.0f, -18.0f, 50.0f, p);
                                 b->TransformPosition(o->BoneTransform[0], p, Position, true);
@@ -10636,7 +10636,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 12)
                         {
-                            if ((rand() % 2) == 0)
+                            if (rand_fps_check(2))
                             {
                                 Vector(0.0f, -18.0f, 50.0f, p);
                                 b->TransformPosition(o->BoneTransform[0], p, Position, true);
@@ -10690,7 +10690,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 }
                 if (EquipmentLevelSet > 9)
                 {
-                    if ((rand() % 20) == 0)//(o->CurrentAction<PLAYER_WALK_MALE || o->CurrentAction>PLAYER_RUN_RIDE_WEAPON) && (rand()%6)==0)
+                    if (rand_fps_check(20))//(o->CurrentAction<PLAYER_WALK_MALE || o->CurrentAction>PLAYER_RUN_RIDE_WEAPON) && rand_fps_check(6))
                     {
                         VectorCopy(o->Light, Light);
                         Vector(1.f, 1.f, 1.f, o->Light);
@@ -10701,7 +10701,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 11)
                         {
-                            if ((rand() % 8) == 0)
+                            if (rand_fps_check(8))
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 0, o);
                             }
@@ -10712,25 +10712,25 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 12)
                         {
-                            if ((rand() % 6) == 0)
+                            if (rand_fps_check(6))
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
-                            else if ((rand() % 3) == 0)
+                            else if (rand_fps_check(3))
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                             }
                         }
                         else if (EquipmentLevelSet == 13)
                         {
-                            if ((rand() % 6) == 0)
+                            if (rand_fps_check(6))
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if ((rand() % 4) == 0)
+                            if (rand_fps_check(4))
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -10738,13 +10738,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 14)
                         {
-                            if ((rand() % 6) == 0)
+                            if (rand_fps_check(6))
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if ((rand() % 4) == 0)
+                            if (rand_fps_check(4))
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -10752,13 +10752,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         }
                         else if (EquipmentLevelSet == 15)
                         {
-                            if ((rand() % 6) == 0)
+                            if (rand_fps_check(6))
                             {
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
                                 CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
                             }
 
-                            if ((rand() % 4) == 0)
+                            if (rand_fps_check(4))
                             {
                                 CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
                                 CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
@@ -10855,7 +10855,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, (WorldTime / 50.0f));
         CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, ((-WorldTime) / 50.0f));
 
-        if (rand() % 30 == 0)
+        if (rand_fps_check(30))
         {
             p[0] = Position[0] + rand() % 100 - 50;
             p[1] = Position[1] + rand() % 100 - 50;
@@ -10886,7 +10886,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
         CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
 
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             Vector(-20.0f, 10.0f, 0.0f, vRelative);
             b->TransformPosition(
@@ -10931,7 +10931,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         CreateSprite(BITMAP_SHINY + 1, Position, 2.5f, Light, o, 0.f, 1);
                     else
                         CreateSprite(BITMAP_MAGIC + 1, Position, 0.8f, Light, o, 0.f);
-                    if (rand() % 4 == 0 && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)
+                    if (rand_fps_check(4) && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)
                     {
                         CreateParticle(BITMAP_ENERGY, Position, o->Angle, Light);
                     }
@@ -14447,9 +14447,9 @@ BOOL PlayMonsterSoundGlobal(OBJECT* pObject)
     case MODEL_MONSTER01 + 155:
         if (pObject->CurrentAction == MONSTER01_STOP1)
         {
-            // 			if (rand() % 10 == 0)
+            // 			if (rand_fps_check(10))
             {
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                     PlayBuffer(SOUND_XMAS_SANTA_IDLE_1);
                 else
                     PlayBuffer(SOUND_XMAS_SANTA_IDLE_2);
@@ -14457,9 +14457,9 @@ BOOL PlayMonsterSoundGlobal(OBJECT* pObject)
         }
         else if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            //if (rand() % 10 == 0)
+            //if (rand_fps_check(10))
             {
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                     PlayBuffer(SOUND_XMAS_SANTA_WALK_1);
                 else
                     PlayBuffer(SOUND_XMAS_SANTA_WALK_2);
@@ -14471,7 +14471,7 @@ BOOL PlayMonsterSoundGlobal(OBJECT* pObject)
         }
         else if (pObject->CurrentAction == MONSTER01_SHOCK)
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
                 PlayBuffer(SOUND_XMAS_SANTA_DAMAGE_1);
             else
                 PlayBuffer(SOUND_XMAS_SANTA_DAMAGE_2);
@@ -14516,7 +14516,7 @@ BOOL PlayMonsterSoundGlobal(OBJECT* pObject)
     case MODEL_DOPPELGANGER_NPC_LUGARD:
         if (pObject->CurrentAction == MONSTER01_STOP1)
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
                 PlayBuffer(SOUND_DOPPELGANGER_LUGARD_BREATH);
         }
         return TRUE;

@@ -129,7 +129,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
     }
     return true;
     case 114:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             vec3_t vLight;
             Vector(0.2f, 0.2f, 0.2f, vLight);
@@ -146,7 +146,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
         }
         return true;
     case 116:
-        if (rand() % 8 == 0)
+        if (rand_fps_check(8))
         {
             vec3_t vLight;
             Vector(0.5f, 0.9f, 0.5f, vLight);
@@ -190,7 +190,7 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 66:
         if (o->AnimationFrame >= 19)
         {
-            SetAction(o, rand() % 10 == 0 ? 1 : 0);
+            SetAction(o, rand_fps_check(10) ? 1 : 0);
         }
         o->m_bRenderAfterCharacter = true;
         return true;

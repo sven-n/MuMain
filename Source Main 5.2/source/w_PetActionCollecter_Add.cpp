@@ -238,7 +238,7 @@ bool PetActionCollecterAdd::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey,
     b->TransformPosition(BoneTransform[7], vRelativePos, Position, false);
 
     //CreateParticle(BITMAP_LIGHT+3, Position, obj->Angle, Light, 7 );
-    if (rand() % 3 == 0)
+    if (rand_fps_check(3))
     {
         Vector(0.6f, 1.0f, 0.4f, Light);
         CreateParticle(BITMAP_LIGHT + 3, Position, obj->Angle, Light, 1, 1.f);
@@ -564,7 +564,7 @@ bool PetActionCollecterSkeleton::Effect(OBJECT* obj, CHARACTER* Owner, int targe
 
         for (int i = 0; i < 2; ++i)
         {
-            if (i == 1 && rand() % 2 == 0) continue;
+            if (i == 1 && rand_fps_check(2)) continue;
 
             switch (rand() % 3)
             {

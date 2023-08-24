@@ -131,9 +131,9 @@ void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER* pCharacter, OBJECT
     {
         vec3_t vPos;
         VectorCopy(pObject->Position, vPos);
-        if (rand() % 2 == 0) vPos[0] += rand() % 300 + 150;
+        if (rand_fps_check(2)) vPos[0] += rand() % 300 + 150;
         else vPos[0] -= rand() % 250 + 150;
-        if (rand() % 2 == 0) vPos[1] += rand() % 300 + 150;
+        if (rand_fps_check(2)) vPos[1] += rand() % 300 + 150;
         else vPos[1] -= rand() % 250 + 150;
 
         vec3_t vTargetPos;

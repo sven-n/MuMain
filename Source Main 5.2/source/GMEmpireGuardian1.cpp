@@ -1695,7 +1695,7 @@ bool GMEmpireGuardian1::RenderObjectVisual(OBJECT* o, BMD* b)
     case 84:
     {
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 8 == 0)
+        if (rand_fps_check(8))
         {
             CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 4, o->Scale);
         }
@@ -1722,7 +1722,7 @@ bool GMEmpireGuardian1::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 86:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.05f, 0.02f, 0.01f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 21, o->Scale, o);
@@ -1732,7 +1732,7 @@ bool GMEmpireGuardian1::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 129:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.01f, 0.02f, 0.05f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 21, o->Scale, o);
@@ -1742,7 +1742,7 @@ bool GMEmpireGuardian1::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 130:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.01f, 0.05f, 0.02f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 21, o->Scale, o);
@@ -1752,7 +1752,7 @@ bool GMEmpireGuardian1::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 131:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 22, o->Scale);
@@ -1765,7 +1765,7 @@ bool GMEmpireGuardian1::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 132:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 60, o->Scale, o);
@@ -2217,11 +2217,11 @@ bool GMEmpireGuardian1::CreateRain(PARTICLE* o)
 
         VectorAdd(o->Position, o->Velocity, o->Position);
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             o->Live = false;
             o->Position[2] = Height + 10.f;
-            if (rand() % 4 == 0)
+            if (rand_fps_check(4))
                 CreateParticle(BITMAP_RAIN_CIRCLE, o->Position, o->Angle, o->Light);
             else
                 CreateParticle(BITMAP_RAIN_CIRCLE + 1, o->Position, o->Angle, o->Light);
@@ -2248,7 +2248,7 @@ void GMEmpireGuardian1::RenderFrontSideVisual()
     break;
     case WEATHER_STORM:
     {
-        if (rand() % 20 == 0)
+        if (rand_fps_check(20))
         {
             EnableAlphaBlend();
             glColor3f(0.7f, 0.7f, 0.9f);
@@ -2594,7 +2594,7 @@ bool GMEmpireGuardian1::PlayMonsterSound(OBJECT* o)
         {
         case MONSTER01_WALK:
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01);
             }

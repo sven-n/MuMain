@@ -92,7 +92,7 @@ void MovePoints()
                     o->Live = false;
                 if (o->Type != -2)
                 {
-                    o->Scale -= 5.f;//20.f;
+                    o->Scale -= 5.f * FPS_ANIMATION_FACTOR;//20.f;
                     if (o->Scale < 15.f)
                         o->Scale = 15.f;
                 }

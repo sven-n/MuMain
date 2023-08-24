@@ -2460,7 +2460,7 @@ void CUIPhotoViewer::Render()
 
     if (o->AnimationFrame < m_iCurrentFrame)
     {
-        if (m_bActionRepeatCheck == FALSE && rand() % 4 == 0)
+        if (m_bActionRepeatCheck == FALSE && rand_fps_check(4))
         {
             m_bActionRepeatCheck = TRUE;
             SetPhotoPose(m_iSettingAnimation);

@@ -226,7 +226,7 @@ void CSWaterTerrain::addSineWave(int x, int y, int radiusX, int radiusY, int hei
 void    CSWaterTerrain::calcBaseWave(void)
 {
     /*
-        if ( (rand()%10)==0 )
+        if ( rand_fps_check(10) )
         {
             m_iSelectWaveX = rand()%WATER_TERRAIN_SIZE;
             m_iSelectWaveY = rand()%WATER_TERRAIN_SIZE;

@@ -327,13 +327,13 @@ bool MoveHellasObjectSetting(int& objCount, int object)
         }
     }
 
-    if ((rand() % 10) == 0 && object)
+    if (rand_fps_check(10) && object)
     {
         objCount = rand() % object;
         return true;
     }
 
-    if ((rand() % 5) == 0)
+    if (rand_fps_check(5))
     {
         vec3_t Position, Light;
 
@@ -345,7 +345,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
 
         CreateParticle(BITMAP_LIGHT, Position, Hero->Object.Angle, Light, 7, 1.f, &Hero->Object);
 
-        if ((rand() % 15) == 0)
+        if (rand_fps_check(15))
         {
             vec3_t Angle = { 0.f, 0.f, 0.f };
             Position[2] = Hero->Object.Position[2] + 800.f;
@@ -479,7 +479,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
         break;
     case 38:
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             CreateParticle(BITMAP_WATERFALL_1, o->Position, o->Angle, Light, 0);
         }
@@ -493,7 +493,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
         break;
     case 40:
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 0);
         }
@@ -667,7 +667,7 @@ void MoveBigMon(OBJECT* o)
 {
     o->Angle[2] += o->Gravity;
 
-    if (rand() % 5 == 0)
+    if (rand_fps_check(5))
     {
         o->Gravity *= -1;
     }
@@ -1434,7 +1434,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
         return true;
 
     case MODEL_MONSTER01 + 64:
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             Vector(2.f, 30.f, 0.f, p);
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
@@ -1459,7 +1459,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
     case MODEL_MONSTER01 + 69:
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Vector(2.f, 30.f, 0.f, p);
                 b->TransformPosition(o->BoneTransform[31], p, Position, true);
@@ -1523,7 +1523,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[i + 74], p, Position, true);
                 CreateSprite(BITMAP_LIGHT, Position, 1.5f - (0.2f * i), Light, o, WorldTime);
                 CreateSprite(BITMAP_LIGHT, Position, 1.5f - (0.2f * i), Light, o, WorldTime);
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_BUBBLE, Position, o->Angle, Light, 1);
                 }
@@ -1531,7 +1531,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[i + 62], p, Position, true);
                 CreateSprite(BITMAP_LIGHT, Position, 1.5f - (0.2f * i), Light, o, WorldTime);
                 CreateSprite(BITMAP_LIGHT, Position, 1.5f - (0.2f * i), Light, o, WorldTime);
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_BUBBLE, Position, o->Angle, Light, 1);
                 }
@@ -1629,7 +1629,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     fRoar = 1.0f;
                     CreateSprite(BITMAP_FLARE_BLUE, Position, (1.2f + (sinf(WorldTime * 0.001f) * 0.3f)), Light, o, 0.f);
                 }
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 13, fRoar);
                 }
@@ -1849,7 +1849,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[0], p, Position, true);
                 CreateSprite(BITMAP_FLARE_BLUE, Position, 2.f + (sinf(WorldTime * 0.001f) * 0.3f), Light, o, 0.f);
 
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 13);
                 }
@@ -1914,7 +1914,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[63 + i], p, Position, true);
                 CreateSprite(BITMAP_LIGHT, Position, 0.5f + (sinf(WorldTime * 0.001f) * 0.2f), Light, o, 0.f);
 
-                if ((o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2) && (rand() % 50) == 0)
+                if ((o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2) && rand_fps_check(50))
                 {
                     Angle[0] = (float)(rand() % 360);
                     Angle[2] = (float)(rand() % 360);

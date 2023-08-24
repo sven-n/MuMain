@@ -136,7 +136,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     {
     case 57:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_TRUE_FIRE, pObject->Position, pObject->Angle, Light, 5, pObject->Scale);
@@ -146,7 +146,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     break;
     case 71:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_TRUE_FIRE, pObject->Position, pObject->Angle, Light, 5, pObject->Scale);
@@ -155,7 +155,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     break;
     case 72:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             vec3_t Position;
             VectorCopy(pObject->Position, Position);
@@ -170,7 +170,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         break;
     case 74:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, pObject->Position, pObject->Angle, Light, 21, pObject->Scale * 2.0f);
@@ -179,7 +179,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     break;
     case 77:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.04f, 0.06f, 0.03f, Light);
             CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 20, pObject->Scale, pObject);
@@ -188,7 +188,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     break;
     case 78:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.03f, 0.03f, 0.05f, Light);
             CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 20, pObject->Scale, pObject);
@@ -567,7 +567,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                     Vector(0.0f, 1.0f, 0.5f, vColor);
                     for (int i = 0; i < 2; ++i)
                     {
-                        if (i == 1 && rand() % 2 == 0) continue;
+                        if (i == 1 && rand_fps_check(2)) continue;
 
                         switch (rand() % 3)
                         {
@@ -1090,7 +1090,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         CreateSprite(BITMAP_SHOCK_WAVE, vPos, 0.22f, vColor, pObject);
         Vector(0.9f, 1.0f, 0.9f, vColor);
         CreateSprite(BITMAP_SHINY + 1, vPos, 1.2f, vColor, pObject);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             CreateEffect(BITMAP_WATERFALL_4, vPos, pObject->Angle, vColor, 0, pObject, 68);
         }
@@ -1126,7 +1126,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         {
             pObject->m_bRenderShadow = false;
 
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 Vector(0.4f, 0.9f, 0.6f, vColor);
                 pModel->TransformByObjectBone(vPos, pObject, 0);
@@ -1264,14 +1264,14 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 137:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01);
             }
         }
         else if (pObject->CurrentAction == MONSTER01_DIE)
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_DEATH01);
             }
@@ -1280,14 +1280,14 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 138:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_TRES_ATTACK01);
             }
         }
         else if (pObject->CurrentAction == MONSTER01_DIE)
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_DEATH01);
             }
@@ -1326,7 +1326,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 142:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_THUNDER_NAIPIN_BREATH01);
             }
@@ -1343,7 +1343,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 143:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_GHOST_NAIPIN_BREATH01);
             }
@@ -1360,7 +1360,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 144:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01);
             }
@@ -1382,14 +1382,14 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 204:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01);
             }
         }
         else if (pObject->CurrentAction == MONSTER01_DIE)
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_SAPI_DEATH01);
             }
@@ -1398,7 +1398,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 202:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01);
             }
