@@ -2215,7 +2215,7 @@ bool GMEmpireGuardian1::CreateRain(PARTICLE* o)
             VectorRotate(Velocity, Matrix, o->Velocity);
         }
 
-        VectorAdd(o->Position, o->Velocity, o->Position);
+        VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (rand_fps_check(2))
         {

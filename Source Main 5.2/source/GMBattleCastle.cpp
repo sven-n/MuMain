@@ -180,7 +180,7 @@ namespace battleCastle
                         {
                             if (o->m_bCollisionCheck && o->ExtState == 0)
                             {
-                                o->Timer += 0.3f;
+                                o->Timer += 0.3f * FPS_ANIMATION_FACTOR;
                                 if (o->Timer >= 5)
                                 {
                                     o->ExtState = 99;
@@ -195,7 +195,7 @@ namespace battleCastle
                                 {
                                     if (o->ExtState == 0)
                                     {
-                                        o->Timer++;
+                                        o->Timer += FPS_ANIMATION_FACTOR;
                                         if (o->Timer >= 5)
                                         {
                                             o->ExtState = 99;

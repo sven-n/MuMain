@@ -67,7 +67,7 @@ bool CGMDoppelGanger3::MoveObject(OBJECT* o)
     {
     case 22:
         o->HiddenMesh = -2;
-        o->Timer += 0.1f;
+        o->Timer += 0.1f * FPS_ANIMATION_FACTOR;
         if (o->Timer > 10.f)
             o->Timer = 0.f;
         if (o->Timer > 5.f)

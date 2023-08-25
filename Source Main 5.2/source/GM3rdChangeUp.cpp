@@ -142,14 +142,14 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     {
         Vector(1.f, 1.f, 1.f, Light);
         if (rand_fps_check(2)) {
-            if ((int)((pObject->Timer++) + 2) % 4 == 0)
+            if ((int)((pObject->Timer+=FPS_ANIMATION_FACTOR) + 2) % 4 == 0)
             {
                 CreateParticle(BITMAP_ADV_SMOKE + 1, pObject->Position, pObject->Angle, Light);
                 CreateParticle(BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 0);
             }
         }
         if (rand_fps_check(2)) {
-            if ((int)(pObject->Timer++) % 4 == 0)
+            if ((int)(pObject->Timer+=FPS_ANIMATION_FACTOR) % 4 == 0)
             {
                 CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 6);
                 CreateParticle(BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 1);
@@ -188,7 +188,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     case 85:
         if (rand_fps_check(2))
         {
-            if ((int)((pObject->Timer++) + 2) % 4 == 0)
+            if ((int)((pObject->Timer+=FPS_ANIMATION_FACTOR) + 2) % 4 == 0)
             {
                 if (rand_fps_check(2))
                 {
@@ -202,7 +202,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(1.f, 0.4f, 0.4f, Light);
         if (rand_fps_check(2))
         {
-            if ((int)(pObject->Timer++) % 4 == 0)
+            if ((int)(pObject->Timer+=FPS_ANIMATION_FACTOR) % 4 == 0)
             {
                 CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 14, pObject->Scale, 0);
                 CreateParticle(BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 2, pObject->Scale * 2);

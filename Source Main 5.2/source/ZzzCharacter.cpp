@@ -1936,8 +1936,9 @@ void AttackEffect(CHARACTER* c)
                     for (int i = 0; i < 4; ++i)
                     {
                         CreateJoint(BITMAP_FLARE, o->Position, o->Position, Angle, 7, to, 50.f);
-                        CreateJoint(BITMAP_FLARE, Position, Position, Angle, 7, to, 50.f);
+                        // CreateJoint(BITMAP_FLARE, Position, Position, Angle, 7, to, 50.f);
                     }
+                    c->AttackTime = 2;
                 }
                 break;
             case 61:
@@ -2236,13 +2237,13 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
             PlaySpeed *= 1.5f;
         if (o->CurrentAction == PLAYER_SKILL_VITALITY && o->AnimationFrame > 6.f)
         {
-            PlaySpeed /= 2.f;
+            PlaySpeed *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
         }
         else if ((o->CurrentAction == PLAYER_ATTACK_TELEPORT || o->CurrentAction == PLAYER_ATTACK_RIDE_TELEPORT
             || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT
             ) && o->AnimationFrame > 5.5f)
         {
-            PlaySpeed /= 10.f;
+            PlaySpeed *= pow(1.0f / (10.f), FPS_ANIMATION_FACTOR);
         }
         else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD &&
             (o->CurrentAction == PLAYER_SKILL_FLASH || o->CurrentAction == PLAYER_ATTACK_RIDE_ATTACK_FLASH
@@ -2252,16 +2253,16 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         {
             if (g_pPartyManager->IsPartyMemberChar(c) == false)
             {
-                PlaySpeed /= 2.f;
+                PlaySpeed *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
             }
             else
             {
-                PlaySpeed /= 8.f;
+                PlaySpeed *= pow(1.0f / (8.f), FPS_ANIMATION_FACTOR);
             }
         }
         if (o->CurrentAction == PLAYER_SKILL_HELL_BEGIN)
         {
-            PlaySpeed /= 2.f;
+            PlaySpeed *= powf(1.0f / (2.f), FPS_ANIMATION_FACTOR);
         }
         if (o->Type != MODEL_PLAYER)
         {
@@ -2269,7 +2270,7 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
             {
             case MODEL_MONSTER01 + 64:
                 if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 6)
-                    PlaySpeed *= 4.0f;
+                    PlaySpeed *= pow(4.0f, FPS_ANIMATION_FACTOR);
                 break;
             case MODEL_FACE:
             case MODEL_FACE + 1:
@@ -2278,14 +2279,14 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
             case MODEL_FACE + 4:
             case MODEL_FACE + 5:
             case MODEL_FACE + 6:
-                PlaySpeed *= 2.0f;
+                PlaySpeed *= powf(2.0f, FPS_ANIMATION_FACTOR);
                 break;
             }
         }
         if (o->Type == MODEL_MONSTER01 + 87)
         {
             if (o->CurrentAction == MONSTER01_DIE)
-                PlaySpeed /= 2.f;
+                PlaySpeed *= pow(1.0f / (2.f), FPS_ANIMATION_FACTOR);
         }
     }
 
@@ -6008,11 +6009,12 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
 
             AngleMatrix(o->Angle, Matrix);
             VectorRotate(p, Matrix, Position);
-            VectorAdd(o->Position, Position, Position);
+            VectorAddScaled(o->Position, Position, Position, FPS_ANIMATION_FACTOR);
 
             Position[0] += rand() % 64 - 32.f;
             Position[1] += rand() % 64 - 32.f;
             Position[2] += 50.f;
+            VectorScale(Position, FPS_ANIMATION_FACTOR, Position)
 
             CreateParticle(BITMAP_WATERFALL_5, Position, o->Angle, Light, 1);
         }
@@ -6106,20 +6108,15 @@ float CharacterMoveSpeed(CHARACTER* c)
     return Speed;
 }
 
-float ScaledCharacterMoveSpeed(CHARACTER* c)
-{
-    return CharacterMoveSpeed(c) * FPS_ANIMATION_FACTOR;
-}
-
 void MoveCharacterPosition(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     vec3_t v, Velocity;
-    Vector(0.f, -ScaledCharacterMoveSpeed(c), 0.f, v);
+    Vector(0.f, -CharacterMoveSpeed(c), 0.f, v);
     VectorRotate(v, Matrix, Velocity);
-    VectorAdd(o->Position, Velocity, o->Position);
+    VectorAddScaled(o->Position, Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
     if (gMapManager.WorldActive == -1 || c->Helper.Type != MODEL_HELPER + 3 || c->SafeZone)
     {
@@ -6134,9 +6131,9 @@ void MoveCharacterPosition(CHARACTER* c)
     }
     if (o->Type == MODEL_MONSTER01 + 2)
     {
-        o->Position[2] += -absf(sinf(o->Timer)) * 70.f + 70.f;
+        o->Position[2] += (-absf(sinf(o->Timer)) * 70.f + 70.f) * FPS_ANIMATION_FACTOR;
     }
-    o->Timer += 0.15f;
+    o->Timer += 0.15f * FPS_ANIMATION_FACTOR;
 }
 
 void MoveMonsterClient(CHARACTER* c, OBJECT* o)
@@ -7732,7 +7729,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         CreateSprite(BITMAP_SHOCK_WAVE, Position, 0.65f, Light, o, -((int)(WorldTime * 0.05f) % 360));
         // Object->Timer
         // Object->EyeRight
-        Object->Timer += 0.01f;
+        Object->Timer += 0.01f * FPS_ANIMATION_FACTOR;
         if (Object->Timer <= 0.1f || Object->Timer > 0.9f)
         {
             Object->Timer = 0.15f;
@@ -9651,11 +9648,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             constexpr float CritDamageEffectInterval = 1200.0f;
             if (g_isCharacterBuff(o, eBuff_AddCriticalDamage) && o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && (c->LastCritDamageEffect < WorldTime - CritDamageEffectInterval))
             {
+                c->LastCritDamageEffect = WorldTime;
                 bool    renderSkillWave = (rand() % 20) ? true : false;
                 short   weaponType = -1;
                 Vector(0.f, 0.f, 0.f, p);
                 Vector(1.f, 0.6f, 0.3f, Light);
-                if (c->Weapon[0].Type != MODEL_BOW + 15)//&& ( c->Weapon[0].Type<MODEL_SHIELD || c->Weapon[0].Type>=MODEL_SHIELD+MAX_ITEM_INDEX ) )
+                if (c->Weapon[0].Type != -1 && c->Weapon[0].Type != MODEL_BOW + 15)//&& ( c->Weapon[0].Type<MODEL_SHIELD || c->Weapon[0].Type>=MODEL_SHIELD+MAX_ITEM_INDEX ) )
                 {
                     b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
                     if (c->Weapon[0].Type >= MODEL_BOW && c->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)
@@ -9668,7 +9666,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         CreateEffect(MODEL_DARKLORD_SKILL, Position, o->Angle, Light, 0);
                     }
                 }
-                if (c->Weapon[1].Type != MODEL_BOW + 7 && (c->Weapon[1].Type < MODEL_SHIELD || c->Weapon[1].Type >= MODEL_SHIELD + MAX_ITEM_INDEX))
+                if (c->Weapon[1].Type != -1 && c->Weapon[1].Type != MODEL_BOW + 7 && (c->Weapon[1].Type < MODEL_SHIELD || c->Weapon[1].Type >= MODEL_SHIELD + MAX_ITEM_INDEX))
                 {
                     b->TransformPosition(o->BoneTransform[c->Weapon[1].LinkBone], p, Position, true);
                     if (c->Weapon[1].Type >= MODEL_BOW && c->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)

@@ -107,7 +107,7 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
         break;
     case 97:
         pObject->HiddenMesh = -2;
-        pObject->Timer += 0.1f;
+        pObject->Timer += 0.1f * FPS_ANIMATION_FACTOR;
         if (pObject->Timer > 10.f)
             pObject->Timer = 0.f;
         if (pObject->Timer > 5.f)

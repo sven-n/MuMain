@@ -487,7 +487,7 @@ void CSPetDarkSpirit::MovePet(void)
         AngleMatrix(o->Angle, o->Matrix);
         Vector(0.f, -o->Velocity, 0.f, p);
         VectorRotate(p, o->Matrix, Pos);
-        VectorAdd(o->Position, Pos, o->Position);
+        VectorAddScaled(o->Position, Pos, o->Position, FPS_ANIMATION_FACTOR);
 
         if (o->AI == PET_ATTACK)
         {
@@ -546,7 +546,7 @@ void CSPetDarkSpirit::MovePet(void)
         {
             Vector(0.f, -o->Velocity, 0.f, p);
             VectorRotate(p, o->Matrix, Pos);
-            VectorAdd(o->Position, Pos, o->Position);
+            VectorAddScaled(o->Position, Pos, o->Position, FPS_ANIMATION_FACTOR);
         }
         Vector(0.f, 0.f, 0.f, p);
         b->TransformPosition(Owner->BoneTransform[42], p, Pos, true);
@@ -710,7 +710,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
             {
                 CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL, (float)(rand() % 40 + 20));
             }
-            if (c->AttackTime == 1)
+            if ((int)c->AttackTime == 1)
             {
                 vec3_t Angle, Light;
 

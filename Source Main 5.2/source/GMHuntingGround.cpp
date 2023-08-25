@@ -967,9 +967,9 @@ bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
             float Matrix[3][4];
             AngleMatrix(Hero->Object.Angle, Matrix);
             vec3_t Velocity, Direction;
-            Vector(0.f, -45.f * ScaledCharacterMoveSpeed(Hero), 0.f, Velocity);
+            Vector(0.f, -45.f * CharacterMoveSpeed(Hero), 0.f, Velocity);
             VectorRotate(Velocity, Matrix, Direction);
-            VectorAdd(TargetPosition, Direction, TargetPosition);
+            VectorAddScaled(TargetPosition, Direction, TargetPosition, FPS_ANIMATION_FACTOR);
         }
         if (Hero->Movement || (rand_fps_check(2))) {
             TargetPosition[2] = (rand() % 20) + RequestTerrainHeight(TargetPosition[0], TargetPosition[1]);

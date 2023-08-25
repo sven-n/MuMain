@@ -538,7 +538,7 @@ bool GMUnitedMarketPlace::MoveRain(PARTICLE* o)
 
     if (o->Type == BITMAP_RAIN)
     {
-        VectorAdd(o->Position, o->Velocity, o->Position);
+        VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height)
         {
@@ -555,7 +555,7 @@ bool GMUnitedMarketPlace::MoveRain(PARTICLE* o)
         o->Velocity[0] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
         o->Velocity[1] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
         o->Velocity[2] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
-        VectorAdd(o->Position, o->Velocity, o->Position);
+        VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
         o->TurningForce[0] += (float)(rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
         o->TurningForce[1] += (float)(rand() % 16 - 8) * 0.02f * FPS_ANIMATION_FACTOR;

@@ -1534,7 +1534,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         if (o->CurrentAction == MONSTER01_DIE)
         {
             float fBlendLight = 20.f - o->AnimationFrame;
-            fBlendLight /= 15;
+            fBlendLight *= pow(1.0f / (15), FPS_ANIMATION_FACTOR);
             vec3_t vOriginPos;
             VectorCopy(o->Position, vOriginPos);
 

@@ -403,9 +403,9 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         {
             if (g_Direction.m_CKanturu.GetMayaExplotion())
             {
-                o->Light[0] /= 1.02f;
-                o->Light[1] /= 1.02f;
-                o->Light[2] /= 1.02f;
+                o->Light[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
 
                 VectorCopy(o->Light, b->BodyLight);
 
@@ -441,9 +441,9 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
             if (g_Direction.m_CKanturu.GetMayaExplotion())
             {
-                o->StartPosition[0] /= 1.02f;
-                o->StartPosition[1] /= 1.02f;
-                o->StartPosition[2] /= 1.02f;
+                o->StartPosition[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+                o->StartPosition[1] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+                o->StartPosition[2] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
 
                 VectorCopy(o->StartPosition, b->BodyLight);
             }

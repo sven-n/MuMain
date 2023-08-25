@@ -68,7 +68,7 @@ void SetCharacterClass(CHARACTER* c);
 void SetCharacterScale(CHARACTER* c);
 void SetChangeClass(CHARACTER* c);
 int LevelConvert(BYTE Level);
-float ScaledCharacterMoveSpeed(CHARACTER* c);
+float CharacterMoveSpeed(CHARACTER* c);
 
 bool CheckMonsterSkill(CHARACTER* c, OBJECT* o);
 bool CheckMonsterInRange(CHARACTER* c, float Range);

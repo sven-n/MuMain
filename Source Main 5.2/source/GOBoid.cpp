@@ -636,7 +636,7 @@ bool MoveMount(OBJECT* o, bool bForceRender)
             AngleMatrix(o->Angle, o->Matrix);
             vec3_t Direction;
             VectorRotate(o->Direction, o->Matrix, Direction);
-            VectorAdd(o->Position, Direction, o->Position);
+            VectorAddScaled(o->Position, Direction, o->Position, FPS_ANIMATION_FACTOR);
             o->Position[2] += (float)(rand() % 16 - 8);
             if (rand_fps_check(32))
             {
@@ -752,7 +752,7 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
                 Angle[2] += 60.f;
                 AngleMatrix(Angle, Matrix);
                 VectorRotate(p, Matrix, Position);
-                VectorAdd(o->Position, Position, Position);
+                VectorAddScaled(o->Position, Position, Position, FPS_ANIMATION_FACTOR);
 
                 CreateEffect(MODEL_GROUND_STONE + rand() % 2, Position, o->Angle, o->Light);
             }
@@ -924,7 +924,7 @@ void MoveBat(OBJECT* o)
 {
     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
     o->Position[2] += ( - absf(sinf(o->Timer)) * 150.f + 350.f) * FPS_ANIMATION_FACTOR;
-    o->Timer += 0.2f;
+    o->Timer += 0.2f * FPS_ANIMATION_FACTOR;
 }
 
 void MoveButterFly(OBJECT* o)
@@ -1138,17 +1138,17 @@ void MoveBoidGroup(OBJECT* o, int index)
             {
                 if (index < 35)
                 {
-                    Vector(FPS_ANIMATION_FACTOR * o->Velocity * (float)(rand() % 16 + 8), 0.f, o->Direction[2], Direction);
+                    Vector(o->Velocity * (float)(rand() % 16 + 8), 0.f, o->Direction[2], Direction);
                 }
                 else
                 {
-                    Vector(FPS_ANIMATION_FACTOR * o->Velocity * (float)(rand() % 16 + 16), 0.f, o->Direction[2], Direction);
+                    Vector(o->Velocity * (float)(rand() % 16 + 16), 0.f, o->Direction[2], Direction);
                 }
                 o->Gravity = 15;
             }
             else
             {
-                Vector(FPS_ANIMATION_FACTOR * o->Velocity * (float)(rand() % 32 + 32), 0.f, o->Direction[2], Direction);
+                Vector(o->Velocity * (float)(rand() % 32 + 32), 0.f, o->Direction[2], Direction);
                 o->Gravity = 5;
             }
             o->Timer += 0.1f * FPS_ANIMATION_FACTOR;
@@ -1159,10 +1159,10 @@ void MoveBoidGroup(OBJECT* o, int index)
         }
         else
         {
-            Vector(FPS_ANIMATION_FACTOR * o->Velocity * 25.f, 0.f, o->Direction[2], Direction);
+            Vector(o->Velocity * 25.f, 0.f, o->Direction[2], Direction);
         }
         VectorRotate(Direction, o->Matrix, p);
-        VectorAdd(o->Position, p, o->Position);
+        VectorAddScaled(o->Position, p, o->Position, FPS_ANIMATION_FACTOR);
         o->Direction[0] = o->Position[0] + 3.f * p[0];
         o->Direction[1] = o->Position[1] + 3.f * p[1];
 
@@ -1407,9 +1407,9 @@ void MoveBoids()
                 b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, PlaySpeed, o->Position, o->Angle);
                 AngleMatrix(o->Angle, o->Matrix);
                 vec3_t Position, Direction;
-                Vector(o->Scale * 40.f * FPS_ANIMATION_FACTOR, 0.f, 0.f, Position);
+                Vector(o->Scale * 40.f, 0.f, 0.f, Position);
                 VectorRotate(Position, o->Matrix, Direction);
-                VectorAdd(o->Position, Direction, o->Position);
+                VectorAddScaled(o->Position, Direction, o->Position, FPS_ANIMATION_FACTOR);
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 300.f;
                 o->Position[2] += -absf(sinf(o->Timer)) * 100.f + 100.f;
                 o->Timer += o->Scale * 0.05f * FPS_ANIMATION_FACTOR;
@@ -1818,9 +1818,9 @@ void MoveFishs()
                 MoveBoid(o, i, Fishs, MAX_FISHS);
                 AngleMatrix(o->Angle, o->Matrix);
                 vec3_t Position, Direction;
-                Vector(o->Velocity * (float)(rand() % 4 + 6) * FPS_ANIMATION_FACTOR, 0.f, 0.f, Position);
+                Vector(o->Velocity * (float)(rand() % 4 + 6), 0.f, 0.f, Position);
                 VectorRotate(Position, o->Matrix, Direction);
-                VectorAdd(o->Position, Direction, o->Position);
+                VectorAddScaled(o->Position, Direction, o->Position, FPS_ANIMATION_FACTOR);
                 if (gMapManager.WorldActive != 7 || gMapManager.InHellas() == false || gMapManager.WorldActive != WD_67DOPPLEGANGER3)
                 {
                     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);

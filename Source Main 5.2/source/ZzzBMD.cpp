@@ -463,7 +463,7 @@ bool BMD::PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsig
         }
     }
     CurrentAnimation = *AnimationFrame;
-    CurrentAnimationFrame = (int)CurrentAnimation;
+    CurrentAnimationFrame = (int)maxf(0, CurrentAnimation);
 
     return Loop;
 }

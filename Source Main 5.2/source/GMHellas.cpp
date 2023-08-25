@@ -420,7 +420,7 @@ void CheckGrass(OBJECT* o)
 
         VectorScale(o->Direction, 0.6f, o->Direction);
         VectorScale(o->HeadAngle, 0.6f, o->HeadAngle);
-        VectorAdd(o->Position, o->Direction, o->Position);
+        VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
         VectorAdd(o->Angle, o->HeadAngle, o->Angle);
     }
 }
@@ -674,9 +674,9 @@ void MoveBigMon(OBJECT* o)
 
     if (o->LifeTime < 20)
     {
-        o->Alpha /= 1.2f;
-        o->Velocity += 0.5f;
-        o->Angle[0] += 2.f;
+        o->Alpha *= pow(1.0f / (1.2f), FPS_ANIMATION_FACTOR);
+        o->Velocity += 0.5f * FPS_ANIMATION_FACTOR;
+        o->Angle[0] += 2.f * FPS_ANIMATION_FACTOR;
     }
 
     if (o->LifeTime < 0) o->Live = false;
