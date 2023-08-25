@@ -4933,12 +4933,12 @@ void MoveParticles()
                     if (o->SubType == 2)
                     {
                         Vector(0.03f, 0.03f, 0.03f, Light);
-                        VectorSubtract(o->Light, Light, o->Light);
+                        VectorSubtractScaled(o->Light, Light, o->Light, FPS_ANIMATION_FACTOR);
                     }
                     else
                     {
                         Vector(0.05f, 0.05f, 0.05f, Light);
-                        VectorSubtract(o->Light, Light, o->Light);
+                        VectorSubtractScaled(o->Light, Light, o->Light, FPS_ANIMATION_FACTOR);
                     }
                 }
                 break;

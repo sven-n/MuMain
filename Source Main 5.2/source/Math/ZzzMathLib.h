@@ -26,6 +26,7 @@ extern "C" {
 #define Vector(a,b,c,d) {(d)[0]=a;(d)[1]=b;(d)[2]=c;}
 #define VectorAvg(a) ( ( (a)[0] + (a)[1] + (a)[2] ) / 3 )
 #define VectorSubtract(a,b,c) {(c)[0]=(a)[0]-(b)[0];(c)[1]=(a)[1]-(b)[1];(c)[2]=(a)[2]-(b)[2];}
+#define VectorSubtractScaled(a,b,c,d) {(c)[0]=(a)[0]-(b)[0]*(d);(c)[1]=(a)[1]-(b)[1]*(d);(c)[2]=(a)[2]-(b)[2]*(d);}
 #define VectorAdd(a,b,c) {(c)[0]=(a)[0]+(b)[0];(c)[1]=(a)[1]+(b)[1];(c)[2]=(a)[2]+(b)[2];}
 #define VectorAddScaled(a,b,c,d) {(c)[0]=(a)[0]+(b)[0]*(d);(c)[1]=(a)[1]+(b)[1]*(d);(c)[2]=(a)[2]+(b)[2]*(d);}
 #define VectorCopy(a,b) {(b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2];}
