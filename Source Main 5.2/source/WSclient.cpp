@@ -4644,6 +4644,9 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
     sc->Skill = MagicNumber;
 
+    if (MagicNumber == AT_SKILL_PLASMA_STORM_FENRIR)
+        sc->m_iFenrirSkillTarget = FindCharacterIndex(Key);
+
     so->Angle[2] = (Data->Angle / 255.f) * 360.f;
 
     if (so->Type == MODEL_PLAYER)
