@@ -66,10 +66,6 @@ void CmuConsoleDebug::UpdateMainScene()
 
 bool CmuConsoleDebug::CheckCommand(const std::string& strCommand)
 {
-#ifdef CSK_LH_DEBUG_CONSOLE
-    if (!m_bInit)
-        return false;
-
     if (strCommand._Starts_with("$fps"))
     {
         auto fps_str = strCommand.substr(5);
@@ -77,6 +73,10 @@ bool CmuConsoleDebug::CheckCommand(const std::string& strCommand)
         SetTargetFps(target_fps);
         return true;
     }
+
+#ifdef CSK_LH_DEBUG_CONSOLE
+    if (!m_bInit)
+        return false;
 
     if (strCommand.compare("$open") == NULL)
     {
