@@ -325,7 +325,7 @@ bool GMEmpireGuardian1::MoveMonsterVisual(OBJECT* o, BMD* b)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 o->LifeTime = 90;
 
@@ -340,7 +340,7 @@ bool GMEmpireGuardian1::MoveMonsterVisual(OBJECT* o, BMD* b)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 o->LifeTime = 90;
 

@@ -7008,10 +7008,10 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Light[0] *= pow(0.98f, FPS_ANIMATION_FACTOR);
             o->Light[1] *= pow(0.98f, FPS_ANIMATION_FACTOR);
             o->Light[2] *= pow(0.98f, FPS_ANIMATION_FACTOR);
-            if (o->LifeTime == 40)
+            if ((int)o->LifeTime == 40)
                 CreateEffect(MODEL_INFINITY_ARROW3, o->Position, o->Angle, o->Light, 2, o);
             else
-                if (o->LifeTime == 20)
+                if ((int)o->LifeTime == 20)
                     CreateEffect(MODEL_INFINITY_ARROW3, o->Position, o->Angle, o->Light, 3, o);
             VectorCopy(o->Owner->Position, o->Position);
         }
@@ -7064,7 +7064,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorScale(o->Direction, ftmp, o->Light);
         }
 
-        if (o->LifeTime == 23)
+        if ((int)o->LifeTime == 23)
         {
             if (o->SubType == 1)
             {
@@ -7250,7 +7250,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     break;
     case MODEL_KENTAUROS_ARROW:
     {
-        if (o->LifeTime == 24)
+        if ((int)o->LifeTime == 24)
         {
             vec3_t vDir;
             vec34_t vMat;
@@ -8300,7 +8300,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 #ifdef ENABLE_POTION_EFFECT
         if (o->SubType == 15)
         {
-            if (o->LifeTime == 1)
+            if ((int)o->LifeTime == 1)
             {
                 if ((o->State & STATE_HP_RECOVERY) == STATE_HP_RECOVERY)
                     o->State ^= STATE_HP_RECOVERY;
@@ -9196,7 +9196,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
         }
 
-        if (o->LifeTime == 64)
+        if ((int)o->LifeTime == 64)
         {
             VectorCopy(pSourceObj->Position, pSourceModel->BodyOrigin);
             pSourceModel->TransformPosition(pSourceObj->BoneTransform[18], vRelativePos, vSourcePos, true);
@@ -9923,7 +9923,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         break;
     case MODEL_SKILL_FISSURE:
     {
-        if (o->LifeTime == 8)
+        if ((int)o->LifeTime == 8)
         {
             for (int i = 0; i < 16; ++i)
             {
@@ -9942,7 +9942,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 CreateJoint(BITMAP_FLARE, Position, Position, Angle, 24, NULL, 90);
             }
         }
-        else if (o->LifeTime == 2)
+        else if ((int)o->LifeTime == 2)
         {
             Vector(0.f, 0.f, rand() % 360, Angle);
             CreateEffect(MODEL_FISSURE, o->Position, Angle, o->Light, 0, o);
@@ -10155,7 +10155,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 count = 12.5;
                 addAngle = 18.f;
-                if (o->LifeTime == 15)
+                if ((int)o->LifeTime == 15)
                     o->Gravity *= pow(-1, FPS_ANIMATION_FACTOR);
             }
 
@@ -10431,16 +10431,16 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         if (o->SubType == 0)
         {
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 CreateEffect(MODEL_CHANGE_UP_NASA, o->Position, o->Angle, o->Light, 1, o);
             }
             else
-                if (o->LifeTime == 70)
+                if ((int)o->LifeTime == 70)
                 {
                     CreateEffect(MODEL_CHANGE_UP_NASA, o->Position, o->Angle, o->Light, 2, o);
                 }
-            if (o->LifeTime == 40)
+            if ((int)o->LifeTime == 40)
             {
                 CreateEffect(MODEL_CHANGE_UP_NASA, o->Position, o->Angle, o->Light, 3, o);
             }
@@ -10889,7 +10889,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Position[2] += 100.f;
                     CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 6, o, 60.f, 0, 0);
 
-                    if (o->LifeTime == (44 - o->Owner->m_bySkillCount + 1))
+                    if ((int)o->LifeTime == (44 - o->Owner->m_bySkillCount + 1))
                     {
                         Angle[2] = i * 10.f;
                         CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 7, o, 60.f, 0, 0);
@@ -11822,7 +11822,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             o->Angle[1] += (60.f) * FPS_ANIMATION_FACTOR;
 
-            if (o->LifeTime == 13)
+            if ((int)o->LifeTime == 13)
                 CreateEffect(MODEL_PIERCING, o->Position, o->Angle, o->Light, 3, o);
             CheckClientArrow(o);
 
@@ -11838,11 +11838,11 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (o->SubType != 0)
             {
-                if (o->LifeTime == 13)
+                if ((int)o->LifeTime == 13)
                 {
                     CreateEffect(MODEL_PIERCING, o->Position, o->Angle, o->Light, 0, o);
                 }
-                else if (o->LifeTime == 30)
+                else if ((int)o->LifeTime == 30)
                 {
                     o->AttackPoint[0] = 0;
                     o->Kind = 1;
@@ -12123,7 +12123,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             CreateParticle(BITMAP_BUBBLE, Position, o->Angle, o->Light, 1);
         }
         MoveJump(o);
-        if (o->LifeTime == 1)
+        if ((int)o->LifeTime == 1)
         {
             CreateBomb(o->Position, true);
             if (o->Owner == &Hero->Object && o->SubType != 99)
@@ -12161,7 +12161,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         CreateSprite(BITMAP_LIGHT, vPos, 3.0f, Light, o);
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, Light, o);
 
-        if (o->LifeTime == 30 || o->LifeTime == 28 || o->LifeTime == 26 || o->LifeTime == 24)
+        if ((int)o->LifeTime == 30 || (int)o->LifeTime == 28 || (int)o->LifeTime == 26 || (int)o->LifeTime == 24)
         {
             int iNumCreateFeather = rand() % 3;
             Vector(0.6f, 0.7f, 0.9f, Light);
@@ -12173,7 +12173,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
         }
 
-        if (o->LifeTime == 30)
+        if ((int)o->LifeTime == 30)
         {
             pModel->TransformByObjectBone(vPos, o, 1);
             Vector(0.4f, 0.4f, 0.9f, Light);
@@ -12478,7 +12478,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             int WallIndex = TERRAIN_INDEX_REPEAT(PositionX, PositionY);
             int Wall = TerrainWall[WallIndex] & TW_NOGROUND;
 
-            if (o->LifeTime == 1 || Wall == TW_NOGROUND)
+            if ((int)o->LifeTime == 1 || Wall == TW_NOGROUND)
             {
                 o->Position[2] = Height;
 
@@ -12606,8 +12606,8 @@ void MoveEffect(OBJECT* o, int iIndex)
         break;
     case BITMAP_FIRECRACKER0001:
     {
-        if (o->LifeTime == 1 || o->LifeTime == 9 || o->LifeTime == 17
-            || o->LifeTime == 24 || o->LifeTime == 31)
+        if ((int)o->LifeTime == 1 || (int)o->LifeTime == 9 || (int)o->LifeTime == 17
+            || (int)o->LifeTime == 24 || (int)o->LifeTime == 31)
         {
             Vector(o->Position[0] + (rand() % 200 - 100), o->Position[1] + (rand() % 200 - 100),
                 o->Position[2], Position);
@@ -12654,7 +12654,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     }
     break;
     case BITMAP_SWORD_FORCE:
-        if (o->LifeTime == 30)
+        if ((int)o->LifeTime == 30)
         {
             VectorCopy(o->Position, Position);
             Position[2] += 100.f;
@@ -12745,7 +12745,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         VectorAdd(o->Position, Position, o->StartPosition);
         CreateParticle(BITMAP_FIRE + 2, o->StartPosition, o->Angle, Light, 10, o->Scale);
 
-        if (o->LifeTime == 1)
+        if ((int)o->LifeTime == 1)
         {
             CreateBomb2(o->Position, false);
         }
@@ -12871,7 +12871,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             o->BlendMeshLight *= pow(1.0f / (1.1f), FPS_ANIMATION_FACTOR);
 
-            if (o->LifeTime == 18 && o->PKKey == 1)
+            if ((int)o->LifeTime == 18 && o->PKKey == 1)
                 PlayBuffer(SOUND_SUDDEN_ICE2);
         }
         else if (o->SubType == 2)
@@ -12909,7 +12909,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 13);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 13);
 
-            if (o->LifeTime == 1)
+            if ((int)o->LifeTime == 1)
             {
                 CreateBomb(o->Position, true);
             }
@@ -13218,7 +13218,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     CreateEffect(MODEL_TAIL, o->Position, o->Angle, o->Light, 0, o);
                 }
-                if (Distance < 40 && o->LifeTime == 5)
+                if (Distance < 40 && (int)o->LifeTime == 5)
                 {
                     VectorCopy(o->Position, Position);
                     Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
@@ -13269,7 +13269,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     CreateEffect(MODEL_PIER_PART, o->Position, o->Angle, o->Light, 1, o);
                 }
-                if (Distance < 40 && o->LifeTime == 5)
+                if (Distance < 40 && (int)o->LifeTime == 5)
                 {
                     VectorCopy(o->Position, Position);
                     Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
@@ -13665,7 +13665,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     case MODEL_CUNDUN_SKILL:
         if (o->SubType == 0)
         {
-            if (o->LifeTime == 30)
+            if ((int)o->LifeTime == 30)
             {
                 for (int i = 0; i < 10; ++i)
                 {
@@ -13680,7 +13680,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             vec3_t Angle;
             Angle[0] = 0;
             Angle[1] = 0;
-            if (o->LifeTime == 30)
+            if ((int)o->LifeTime == 30)
             {
                 for (int i = 0; i < 20; ++i)
                 {
@@ -14939,7 +14939,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             CheckTargetRange(o);
 
-            if (o->LifeTime == 1)
+            if ((int)o->LifeTime == 1)
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -15034,7 +15034,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.5f);
                 }
 
-                if (o->LifeTime == 30 || o->LifeTime == 15 || o->LifeTime == 4)
+                if ((int)o->LifeTime == 30 || (int)o->LifeTime == 15 || (int)o->LifeTime == 4)
                 {
                     vec3_t vAngle;
 
@@ -15345,7 +15345,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             vec3_t vLight, vPos;
 
             Vector(0.4f, 0.3f, 0.9f, vLight);
-            if (o->LifeTime == 45 || o->LifeTime == 35 || o->LifeTime == 25)
+            if ((int)o->LifeTime == 45 || (int)o->LifeTime == 35 || (int)o->LifeTime == 25)
             {
                 CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 14, o, -1, 0, 0, 0, 5.0f);
                 CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 14, o, -1, 0, 0, 0, 5.0f);
@@ -15367,7 +15367,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
 
             Vector(0.2f, 0.2f, 0.9f, vLight);
-            if (o->LifeTime == 45)
+            if ((int)o->LifeTime == 45)
             {
                 pModel->TransformByObjectBone(vPos, o->Owner, 28);
                 CreateEffect(MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 28);
@@ -15442,7 +15442,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 o->Scale *= pow(0.9f, FPS_ANIMATION_FACTOR);
             }
             else
-                if (o->LifeTime == 15)
+                if ((int)o->LifeTime == 15)
                 {
                     o->Scale = 2.f;
                 }
@@ -16325,7 +16325,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
             case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
             {
-                if (o->LifeTime == 5)
+                if ((int)o->LifeTime == 5)
                 {
                     CreateEffect(o->Type, o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
                 }
@@ -16334,7 +16334,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
             case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
             {
-                if (o->LifeTime == 3)
+                if ((int)o->LifeTime == 3)
                 {
                     CreateEffect(o->Type, o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
                 }
@@ -16342,7 +16342,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             break;
             case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
             {
-                if (o->LifeTime == 10)
+                if ((int)o->LifeTime == 10)
                 {
                     CreateEffect(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_,
                         o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
@@ -16351,7 +16351,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             break;
             case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
             {
-                if (o->LifeTime == 1)
+                if ((int)o->LifeTime == 1)
                 {
                     CreateEffect(MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE,
                         o->Position, o->Angle, o->Light, 1,
@@ -16365,7 +16365,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
             case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
             {
-                if (o->LifeTime == o->ExtState - 1)
+                if ((int)o->LifeTime == o->ExtState - 1)
                 {
                     //PlayBuffer( SOUND_ASSASSIN );
                     PlayBuffer(SOUND_BLOODATTACK);
@@ -16375,7 +16375,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
             case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
             {
-                if (o->LifeTime == o->ExtState - 1)
+                if ((int)o->LifeTime == o->ExtState - 1)
                 {
                     PlayBuffer(SOUND_ATTACK01 + 4);
                     //PlayBuffer( SOUND_ASSASSIN );
@@ -16384,7 +16384,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             break;
             case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
             {
-                if (o->LifeTime == o->ExtState - 5)
+                if ((int)o->LifeTime == o->ExtState - 5)
                 {
                     PlayBuffer(SOUND_SKILL_FLAME_STRIKE);
                 }
@@ -16436,7 +16436,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
             {
                 // - SWORD POSTEFFECT
-                if (o->LifeTime == 0)
+                if ((int)o->LifeTime == 0)
                 {
                     OBJECT* oHighHier = o->Owner;
 
@@ -16456,7 +16456,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             break;
             case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
             {
-                if (o->LifeTime == 40)
+                if ((int)o->LifeTime == 40)
                 {
                     vec34_t Matrix;
                     vec3_t vAngle, vDirection, vPosition, vLight;
@@ -16531,7 +16531,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             break;
             }
 
-            if (o->LifeTime == 15)
+            if ((int)o->LifeTime == 15)
             {
                 CreateEffect(o->Type, o->Position, o->Angle, o->Light, 12, o->Owner, -1, 0, 0, 0, o->Scale);
             }
@@ -16542,17 +16542,17 @@ void MoveEffect(OBJECT* o, int iIndex)
                 EarthQuake = (float)(rand() % 2 - 2) * 0.5f;
             }
 
-            if (o->LifeTime == o->ExtState)
+            if ((int)o->LifeTime == o->ExtState)
             {
                 PlayBuffer(SOUND_ASSASSIN);
             }
 
-            if (o->LifeTime == o->ExtState / 2 + 2)
+            if ((int)o->LifeTime == o->ExtState / 2 + 2)
             {
                 PlayBuffer(SOUND_SKILL_GIGANTIC_STORM);
             }
 
-            if (o->LifeTime == (o->ExtState / 2) + 5)
+            if ((int)o->LifeTime == (o->ExtState / 2) + 5)
             {
                 PlayBuffer(SOUND_FURY_STRIKE2);
             }
@@ -16773,7 +16773,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     EarthQuake = 0.f;
                 }
 
-                if (o->LifeTime == 23)
+                if ((int)o->LifeTime == 23)
                 {
                     Vector(0.3f, 0.3f, 1.0f, vLight);
                     //CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
@@ -16837,7 +16837,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     }
                 }
 
-                if (o->LifeTime == 23)
+                if ((int)o->LifeTime == 23)
                 {
                     vec3_t vLight;
                     Vector(0.5f, 0.5f, 1.f, vLight);
@@ -16874,7 +16874,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         if (o->SubType == 0)
         {
-            if (o->LifeTime == 20)
+            if ((int)o->LifeTime == 20)
                 break;
 
             o->Scale += (0.1f) * FPS_ANIMATION_FACTOR;
@@ -16890,7 +16890,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         if (o->SubType == 0)
         {
-            if (o->LifeTime == 28 || o->LifeTime == 18 || o->LifeTime == 8)
+            if ((int)o->LifeTime == 28 || (int)o->LifeTime == 18 || (int)o->LifeTime == 8)
             {
                 vec3_t vLight;
                 Vector(1.0f, 0.2f, 0.5f, vLight);
@@ -17041,7 +17041,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             float Scale = 1.5f + (rand() % 10 * 0.02f);
             CreateParticle(BITMAP_SBUMB, vPosition, o->Angle, vLight, 0, Scale * o->Scale, o->Owner);
         }
-        if (o->LifeTime == 15 || o->LifeTime == 9 || o->LifeTime == 6)
+        if ((int)o->LifeTime == 15 || (int)o->LifeTime == 9 || (int)o->LifeTime == 6)
         {
             StopBuffer(SOUND_RAGESKILL_THRUST_ATTACK, true);
             PlayBuffer(SOUND_RAGESKILL_THRUST_ATTACK);
@@ -17325,7 +17325,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
             o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.9f, o->Light);
-            if (o->LifeTime == 40 || o->LifeTime == 30)
+            if ((int)o->LifeTime == 40 || (int)o->LifeTime == 30)
             {
                 vec3_t vLight;
                 if (o->SubType == 0)
@@ -17377,7 +17377,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
             VectorScale(o->Light, 0.85f, o->Light);
 
-            if (o->LifeTime == 60 || o->LifeTime == 50)
+            if ((int)o->LifeTime == 60 || (int)o->LifeTime == 50)
             {
                 vec3_t vLight;
                 Vector(1.0f, 0.5f, 0.0f, vLight);
@@ -17495,7 +17495,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         if ((int)o->LifeTime % 3 != 0)
             CreateParticle(BITMAP_SWORD_EFFECT_MONO, o->Position, o->Angle, o->Light, 0, o->Scale, o);
 
-        if (o->LifeTime == 14)
+        if ((int)o->LifeTime == 14)
         {
             Vector(0.4f, 0.4f, 1.0f, vLight);
             if (o->SubType == 0)
@@ -17674,7 +17674,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 o->LifeTime = 150;
             }
-            if (o->LifeTime == 150)
+            if ((int)o->LifeTime == 150)
             {
                 PlayBuffer(SOUND_RAGESKILL_DRAGONKICK_ATTACK);
             }
@@ -17870,7 +17870,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 break;
             }
 
-            if (o->LifeTime == 10)
+            if ((int)o->LifeTime == 10)
             {
                 for (int i = 0; i < 4; ++i)
                 {
@@ -17905,7 +17905,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 break;
             }
 
-            if (o->LifeTime == 2)
+            if ((int)o->LifeTime == 2)
             {
                 CreateEffect(MODEL_VOLCANO_OF_MONK, o->Position, o->Angle, o->Light, 1, o, -1, 0, 0, 0, 1.0f);
                 o->LifeTime = 0;

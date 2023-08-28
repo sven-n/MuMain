@@ -768,7 +768,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else					//o->CurrentAction == MONSTER01_DIE
         {
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 o->LifeTime = 90;
                 o->m_bRenderShadow = false;
@@ -930,7 +930,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 switch (o->Type)
                 {

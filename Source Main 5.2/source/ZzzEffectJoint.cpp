@@ -3629,7 +3629,7 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else if (o->SubType != 7 && o->SubType != 8 && o->SubType != 12)
             {
-                if (o->LifeTime == 1)
+                if ((int)o->LifeTime == 1)
                 {
                     CreateSprite(BITMAP_SHINY + 1, p, (float)(rand() % 8 + 8) * 0.2f, o->Light, o->Target, (float)(rand() % 360));
                 }
@@ -4017,7 +4017,7 @@ void MoveJoint(JOINT* o, int iIndex)
             vec3_t Position, Angle;
             VectorCopy(o->Position, Position);
 
-            if (o->LifeTime == 100)//% 10 == 0)
+            if ((int)o->LifeTime == 100)//% 10 == 0)
             {
                 for (int i = 0; i < 120; ++i)
                 {
@@ -4124,7 +4124,7 @@ void MoveJoint(JOINT* o, int iIndex)
             CreateSprite(BITMAP_LIGHT, o->Position, 0.5f, o->Light, o->Target);
             CreateSprite(BITMAP_DS_SHOCK, o->Position, 0.15f, o->Light, o->Target);
 
-            if (o->LifeTime == 10)
+            if ((int)o->LifeTime == 10)
             {
                 CreateEffect(BITMAP_FIRECRACKER0002, o->Position, o->Angle, o->Light, o->Skill);
             }

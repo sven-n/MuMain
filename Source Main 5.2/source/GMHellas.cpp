@@ -1494,13 +1494,14 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             VectorCopy(o->Position, Position);
             Position[2] += 20.f;
 
-            if (o->LifeTime == 0)
+            if ((int)o->LifeTime == 0)
             {
                 Vector(0.f, 0.f, 0.f, p);
                 b->TransformPosition(o->BoneTransform[8], p, Position, true);
                 Vector(1.f, 0.1f, 0.1f, Light);
                 CreateParticle(BITMAP_HOLE, Position, o->Angle, Light, 0, 3.f);
             }
+
             o->LifeTime += FPS_ANIMATION_FACTOR;
             if (o->LifeTime >= 5)
             {
@@ -1639,14 +1640,14 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             {
                 if (o->AnimationFrame < 2.0f)
                 {
-                    if (o->LifeTime != 100)
+                    if ((int)o->LifeTime != 100)
                     {
                         o->LifeTime = 100;
 
                         PlayBuffer(SOUND_KUNDUN_ROAR);
                     }
                 }
-                if (o->LifeTime == 100 && o->AnimationFrame > 4.0f)
+                if ((int)o->LifeTime == 100 && o->AnimationFrame > 4.0f)
                 {
                     o->LifeTime = 101;
                     if (gMapManager.InHellas())
@@ -1680,7 +1681,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 {
                     o->LifeTime = 100;
                 }
-                if (o->LifeTime == 100 && o->AnimationFrame > 3.0f)
+                if ((int)o->LifeTime == 100 && o->AnimationFrame > 3.0f)
                 {
                     o->LifeTime = 101;
                     vec3_t Position;
@@ -1696,7 +1697,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 {
                     o->LifeTime = 100;
                 }
-                if (o->LifeTime == 100 && o->AnimationFrame > 5.0f)
+                if ((int)o->LifeTime == 100 && o->AnimationFrame > 5.0f)
                 {
                     o->LifeTime = 101;
 
@@ -1706,7 +1707,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     Position[2] = 400;
                     CreateEffect(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 1);
                 }
-                if (o->LifeTime == 101 && o->AnimationFrame > 6.0f)
+                if ((int)o->LifeTime == 101 && o->AnimationFrame > 6.0f)
                 {
                     o->LifeTime = 102;
 
@@ -1727,7 +1728,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                         AddWaterWave((c->PositionX), (c->PositionY), 2, 2000);
                     }
                 }
-                if (o->LifeTime == 102 && o->AnimationFrame > 9.0f)
+                if ((int)o->LifeTime == 102 && o->AnimationFrame > 9.0f)
                 {
                     o->LifeTime = 103;
                     if (gMapManager.InHellas())
@@ -2011,7 +2012,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     else if (o->Type == MODEL_MONSTER01 + 64)
     {
-        if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && o->LifeTime == 90)
+        if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && (int)o->LifeTime == 90)
         {
             if (o->LifeTime != 10)
             {

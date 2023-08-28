@@ -468,7 +468,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
                 for (int j = 0; j < 6; ++j)
                     CreateEffect(MODEL_CONDRA_STONE + rand() % 6, vPos, o->Angle, vLight, 0);
             }
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 o->LifeTime = 90;
                 o->m_bRenderShadow = false;
@@ -541,7 +541,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
                 for (int j = 0; j < 4; ++j)
                     CreateEffect(MODEL_NARCONDRA_STONE + rand() % 4, vPos, o->Angle, vLight, 0);
             }
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 o->LifeTime = 90;
                 o->m_bRenderShadow = false;

@@ -1844,7 +1844,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 {
                     if (o->CurrentAction == MONSTER01_DIE)
                     {
-                        if (o->LifeTime == 100)
+                        if ((int)o->LifeTime == 100)
                         {
                             o->LifeTime = 90;
                             o->m_bRenderShadow = false;

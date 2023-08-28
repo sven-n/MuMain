@@ -1769,7 +1769,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             CreateInferno(o->Position, 5);
         }
-        else if (o->CurrentAction == MONSTER01_DIE && o->LifeTime == 100)
+        else if (o->CurrentAction == MONSTER01_DIE && (int)o->LifeTime == 100)
         {
             const int nBonesCount = 8;
             int iBones[nBonesCount] = { 4, 7, 10, 22, 39, 44, 12, 24 };
@@ -2026,7 +2026,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             CreateInferno(o->Position, 5);
         }
-        else if (o->CurrentAction == MONSTER01_DIE && o->LifeTime == 100)
+        else if (o->CurrentAction == MONSTER01_DIE && (int)o->LifeTime == 100)
         {
             const int nBonesCount = 8;
             int iBones[nBonesCount] = { 4, 7, 10, 22, 39, 44, 12, 24 };

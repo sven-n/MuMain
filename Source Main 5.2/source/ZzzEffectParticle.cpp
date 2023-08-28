@@ -4792,7 +4792,7 @@ void MoveParticles()
                 switch (o->SubType)
                 {
                 case 1:
-                    if (o->LifeTime == 10)
+                    if ((int)o->LifeTime == 10)
                     {
                         o->Velocity[1] += (32 * 0.2f) * FPS_ANIMATION_FACTOR;
                         o->Scale -= 0.15f * FPS_ANIMATION_FACTOR;
@@ -4803,7 +4803,7 @@ void MoveParticles()
                     o->Light[2] -= (0.05f) * FPS_ANIMATION_FACTOR;
                     break;
                 case 5:
-                    if (o->LifeTime == 10)
+                    if ((int)o->LifeTime == 10)
                     {
                         o->Velocity[1] += (32 * 0.2f) * FPS_ANIMATION_FACTOR;
                         o->Scale *= pow(0.8f, FPS_ANIMATION_FACTOR);
@@ -6897,7 +6897,7 @@ void MoveParticles()
                 break;
                 case 25:
                 {
-                    if (o->LifeTime == 19)
+                    if ((int)o->LifeTime == 19)
                     {
                         o->Velocity[0] -= (1.f) * FPS_ANIMATION_FACTOR;
                         o->Velocity[1] -= (1.f) * FPS_ANIMATION_FACTOR;
@@ -7255,7 +7255,7 @@ void MoveParticles()
                 }
                 else if (o->SubType == 1)
                 {
-                    if (o->LifeTime == 69)
+                    if ((int)o->LifeTime == 69)
                     {
                         o->Velocity[0] -= (1.f) * FPS_ANIMATION_FACTOR;
                         o->Velocity[1] -= (1.f) * FPS_ANIMATION_FACTOR;
