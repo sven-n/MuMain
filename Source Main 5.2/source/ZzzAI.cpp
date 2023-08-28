@@ -812,7 +812,7 @@ void CalcFPS()
         FPS = 1000 / differenceMs;
     }
 
-    FPS_ANIMATION_FACTOR = static_cast<float>(REFERENCE_FPS / FPS);
+    FPS_ANIMATION_FACTOR = minf(static_cast<float>(REFERENCE_FPS / FPS), 2.5f); // no less than 10 fps
 
     // Calculate average fps every 2 seconds or 25 frames
     const double diffSinceStart = WorldTime - start;
