@@ -590,7 +590,7 @@ bool CMonkSystem::SendDarksideAtt(OBJECT* _pObj)
         return false;
     }
 
-    SendRequestMagic(AT_SKILL_DARKSIDE, _DarksideTargetIndex);
+    // SendRequestMagic(AT_SKILL_DARKSIDE, _DarksideTargetIndex);
     m_nDarksideCnt++;
     return true;
 }
