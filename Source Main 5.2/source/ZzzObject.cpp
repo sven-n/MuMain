@@ -9523,7 +9523,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
     {
         if (Level <= 6)
         {
-            Level *= pow(2, FPS_ANIMATION_FACTOR);
+            Level /= 2;
         }
         else
         {
