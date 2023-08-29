@@ -25,6 +25,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_bSlideHelp = true;
     m_iVolumeLevel = 0;
     m_iRenderLevel = 4;
+    m_bRenderAllEffects = true;
 }
 
 SEASON3B::CNewUIOptionWindow::~CNewUIOptionWindow()
