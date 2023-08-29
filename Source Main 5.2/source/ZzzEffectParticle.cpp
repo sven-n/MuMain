@@ -16,6 +16,7 @@
 #include "WSClient.h"
 #include "GMCrywolf1st.h"
 #include "MapManager.h"
+#include "NewUISystem.h"
 
 vec3_t g_vParticleWind = { 0.0f, 0.0f, 0.0f };
 vec3_t g_vParticleWindVelo = { 0.0f, 0.0f, 0.0f };
@@ -41,6 +42,11 @@ void HandPosition(PARTICLE* o)
 
 int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, float Scale, OBJECT* Owner)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return false;
+    }
+
     for (int i = 0; i < MAX_PARTICLES; i++)
     {
         PARTICLE* o = &Particles[i];
@@ -3852,6 +3858,11 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
 void MoveParticles()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < 2; ++i)
     {
         g_vParticleWindVelo[i] += (rand() % 2001 - 1000) * (0.001f * 0.6f);
@@ -8904,6 +8915,11 @@ void MoveParticles()
 
 void RenderParticles(BYTE byRenderOneMore)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_PARTICLES; i++)
     {
         PARTICLE* o = &Particles[i];

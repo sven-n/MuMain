@@ -10572,7 +10572,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 }
                 c->ExtendStateTime += min(1, FPS_ANIMATION_FACTOR);
             }
-            if (fullset)
+
+            if (fullset && g_pOption->GetRenderLevel() >= 2)
             {
                 PartObjectColor(c->BodyPart[5].Type, o->Alpha, 0.5f, Light);
 
@@ -10686,6 +10687,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         VectorCopy(Light, o->Light);
                     }
                 }
+
                 if (EquipmentLevelSet > 9)
                 {
                     if (rand_fps_check(20))//(o->CurrentAction<PLAYER_WALK_MALE || o->CurrentAction>PLAYER_RUN_RIDE_WEAPON) && rand_fps_check(6))
@@ -10765,7 +10767,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         VectorCopy(Light, o->Light);
                     }
 
-                    if (EquipmentLevelSet == 15)
+                    if (EquipmentLevelSet == 15 && g_pOption->GetRenderLevel() >= 4)
                     {
                         //left
                         vec3_t vColor;

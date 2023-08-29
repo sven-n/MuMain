@@ -12,6 +12,9 @@
 #include "ZzzCharacter.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzAI.h"
+
+#include <random>
+
 #include "ZzzTexture.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzInterface.h"
@@ -782,9 +785,20 @@ float   FPS_ANIMATION_FACTOR;
 double   FPS_AVG;
 double   WorldTime = 0.0;
 
+std::random_device rd;  // a seed source for the random number engine
+std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+std::uniform_real_distribution<> distrib(0.0, 1.0);
+
 bool rand_fps_check(int reference_frames)
 {
     return rand() % reference_frames == 0;
+    const auto animation_factor = min(1.0, static_cast<double>(FPS_ANIMATION_FACTOR));
+    const auto rand_value = distrib(gen);// *1.5;
+    const auto chance = reference_frames == 1
+        ? animation_factor
+        : (1.0 / reference_frames) * animation_factor;
+
+    return rand_value <= chance;
 }
 
 void CalcFPS()

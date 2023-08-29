@@ -19,6 +19,7 @@
 #include "UIMng.h"
 #include "CameraMove.h"
 #include "PhysicsManager.h"
+#include "NewUISystem.h"
 
 //BMD Models[MAX_MODELS];
 BMD* Models;
@@ -2267,6 +2268,11 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
 
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber, const int endMeshNumber, void* pClothes, const int clothesCount)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     if (NumMeshs == 0 && clothesCount == 0)
     {
         return;

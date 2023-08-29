@@ -24,6 +24,7 @@
 #include "GM3rdChangeUp.h"
 #include "MapManager.h"
 #include "w_MapHeaders.h"
+#include "NewUISystem.h"
 
 float RainTarget = 0;
 float RainCurrent = 0.f;
@@ -229,6 +230,11 @@ bool CreateLorenciaLeaf(PARTICLE* o)
 
 bool CreateHeavenRain(PARTICLE* o, int index)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return false;
+    }
+
     if (gMapManager.WorldActive != WD_10HEAVEN) return false;
 
     int Rainly = RainCurrent * MAX_LEAVES / 100;
@@ -400,6 +406,11 @@ void MoveEtcLeaf(PARTICLE* o)
 
 bool MoveLeaves()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return false;
+    }
+
     int iMaxLeaves = (gMapManager.InDevilSquare() == true) ? MAX_LEAVES : 80;
 
     if (gMapManager.WorldActive == WD_10HEAVEN)
@@ -480,6 +491,11 @@ bool MoveLeaves()
 
 void RenderLeaves()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     if (gMapManager.WorldActive == WD_2DEVIAS || gMapManager.WorldActive == WD_7ATLANSE || gMapManager.WorldActive == WD_10HEAVEN
         || IsIceCity()
         || IsSantaTown()

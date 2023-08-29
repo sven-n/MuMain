@@ -13,6 +13,7 @@
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
 #include "WSClient.h"
+#include "NewUISystem.h"
 
 PARTICLE  Points[MAX_POINTS];
 
@@ -20,6 +21,11 @@ int g_iLatestPoint = -1;
 
 void CreatePoint(vec3_t Position, int Value, vec3_t Color, float scale, bool bMove, bool bRepeatedly)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_POINTS; i++)
     {
         PARTICLE* o = &Points[i];
@@ -43,6 +49,11 @@ void CreatePoint(vec3_t Position, int Value, vec3_t Color, float scale, bool bMo
 
 void RenderPoints(BYTE byRenderOneMore)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     EnableAlphaTest();
     DisableDepthTest();
     for (int i = 0; i < MAX_POINTS; i++)
@@ -70,6 +81,11 @@ void RenderPoints(BYTE byRenderOneMore)
 
 void MovePoints()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_POINTS; i++)
     {
         PARTICLE* o = &Points[i];

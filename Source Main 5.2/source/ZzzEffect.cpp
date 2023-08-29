@@ -308,6 +308,11 @@ void DeleteEffect(int efftype)
 
 bool DeleteParticle(int iType)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return false;
+    }
+
     for (int i = 0; i < MAX_PARTICLES; ++i)
     {
         PARTICLE* o = &Particles[i];
@@ -19146,6 +19151,11 @@ void RenderAfterEffects(bool bRenderBlendMesh)
 
 void RenderEffectShadows()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
     for (int i = 0; i < iEffectSize; ++i)
     {

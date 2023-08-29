@@ -21,6 +21,7 @@
 #include "DSPlaySound.h"
 #include "MapManager.h"
 #include "CameraMove.h"
+#include "NewUISystem.h"
 
 int EnableEvent = 0;
 
@@ -1123,6 +1124,11 @@ void MoveTornado(OBJECT* o)
 
 void MoveBoidGroup(OBJECT* o, int index)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     if (o->AI != BOID_GROUND)
     {
         if (o->Type != MODEL_BUTTERFLY01 || rand_fps_check(4))
@@ -1202,6 +1208,11 @@ void MoveBoidGroup(OBJECT* o, int index)
 
 void MoveBoids()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     if (EnableEvent != 0)
     {
         OBJECT* o = &Hero->Object;
@@ -1520,6 +1531,11 @@ void MoveBoids()
 
 void RenderBoids(bool bAfterCharacter)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_BOIDS; i++)
     {
         OBJECT* o = &Boids[i];
@@ -1629,6 +1645,11 @@ void RenderBoids(bool bAfterCharacter)
 
 void RenderFishs()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_FISHS; i++)
     {
         OBJECT* o = &Fishs[i];
@@ -1665,6 +1686,11 @@ void RenderFishs()
 
 void MoveFishs()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_FISHS; i++)
     {
         if (gMapManager.WorldActive != WD_7ATLANSE && gMapManager.WorldActive != WD_8TARKAN

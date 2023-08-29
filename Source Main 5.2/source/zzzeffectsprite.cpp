@@ -13,11 +13,17 @@
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
 #include "WSClient.h"
+#include "NewUISystem.h"
 
 OBJECT	Sprites[MAX_SPRITES];
 
 int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation, int SubType)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return false;
+    }
+
     for (int i = 0; i < MAX_SPRITES; i++)
     {
         OBJECT* o = &Sprites[i];
@@ -112,6 +118,11 @@ void RenderSprite(OBJECT* o, OBJECT* Owner)
 
 void RenderSprites(BYTE byRenderOneMore)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_SPRITES; i++)
     {
         OBJECT* o = &Sprites[i];
@@ -165,6 +176,11 @@ void RenderSprites(BYTE byRenderOneMore)
 
 void CheckSprites()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_SPRITES; i++)
     {
         OBJECT* o = &Sprites[i];
