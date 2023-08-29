@@ -997,7 +997,7 @@ extern int  EnableUse;
 			EnableUse = 10;\
 			CStreamPacketEngine spe;\
 			spe.Init( 0xC3, 0x26);\
-			spe << ( BYTE)( ( p_Index)+12) << ( BYTE)( p_Target);\
+			spe << ( BYTE)( ( p_Index)) << ( BYTE)( p_Target);\
 			spe << (BYTE)g_byItemUseType;\
 			spe.Send();\
 			ITEM* pItem = g_pMyInventory->FindItem(p_Index);\
@@ -1031,7 +1031,7 @@ __forceinline void SendRequestUse(int Index, int Target)
     spe << (BYTE)g_byItemUseType;
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x26 [SendRequestUse(%d)]", Index + 12);
+    g_ConsoleDebug->Write(MCD_SEND, "0x26 [SendRequestUse(%d)]", Index);
 }
 #endif //ENABLE_EDIT
 
@@ -1423,7 +1423,7 @@ __forceinline bool SendRequestMixExit()
 {	\
 	CStreamPacketEngine spe;\
 	spe.Init( 0xC1, 0x90);\
-	spe << ( BYTE)( bySquareNumber) << ( BYTE)( ( iItemIndex)+12);\
+	spe << ( BYTE)( bySquareNumber) << ( BYTE)( ( iItemIndex));\
 	spe.Send();\
 }
 
