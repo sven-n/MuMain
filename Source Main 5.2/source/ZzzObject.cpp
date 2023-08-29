@@ -6440,11 +6440,11 @@ void RenderItems()
                 VectorCopy(o->Position, vBackup);
                 if (gMapManager.WorldActive == WD_10HEAVEN)
                 {
-                    o->Position[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
                 }
                 else if (gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.IsMayaScene())
                 {
-                    o->Position[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
                 }
                 else if (gMapManager.InHellas() == true)
                 {
