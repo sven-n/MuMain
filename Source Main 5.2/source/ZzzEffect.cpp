@@ -9596,6 +9596,11 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (g_isCharacterBuff(o->Owner, eBuff_Cloaking)) break;
 
+            if (!rand_fps_check(1))
+            {
+                break;
+            }
+
             Vector(1.f, 0.5f, 0.1f, Light);
             Vector(0.f, 0.f, 0.f, Angle);
 
