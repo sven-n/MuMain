@@ -9880,10 +9880,12 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             Vector(0.f, -150.f, 0.f, p);
         }
+
         AngleMatrix(o->Angle, Matrix);
         VectorRotate(p, Matrix, Position);
-        VectorAdd(Position, o->Owner->Position, o->Position);
-        o->Angle[2] -= 18;//
+        VectorAdd(o->Owner->Position, Position, o->Position);
+        o->Angle[2] -= 18 * FPS_ANIMATION_FACTOR;
+
         CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
         Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -18084,7 +18086,7 @@ void RenderWheelWeapon(OBJECT* o)
     VectorCopy(o->Angle, TempAngle);
 
     o->Direction[2] -= (30) * FPS_ANIMATION_FACTOR;
-    o->Angle[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
+    o->Angle[2] += o->Direction[2];
     o->Angle[1] = 90;
     o->Position[2] += (100.f) * FPS_ANIMATION_FACTOR;
 
