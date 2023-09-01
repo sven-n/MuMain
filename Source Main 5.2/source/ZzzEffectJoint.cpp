@@ -2743,13 +2743,13 @@ bool SearchJoint(int Type, OBJECT* Target, int SubType)
 
 void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
 {
-    o->NumTails++;
+    o->NumTails += FPS_ANIMATION_FACTOR;
     if (o->NumTails > o->MaxTails - 1)
     {
         o->NumTails = o->MaxTails - 1;
     }
 
-    for (int j = o->NumTails - 1; j >= 0; j--)
+    for (int j = (int)(o->NumTails - 1); j >= 0; j--)
     {
         for (int k = 0; k < 4; k++)
             VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
@@ -2796,7 +2796,7 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
         int i = 0;
         for (i = 0; i < 2; i++)
         {
-            o->NumTails++;
+            o->NumTails += FPS_ANIMATION_FACTOR;
             if (o->NumTails > o->MaxTails - 1)
             {
                 o->NumTails = o->MaxTails - 1;
@@ -2808,34 +2808,34 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
                     VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
             }
 
-            if (i == 0 && o->NumTails > 1)
+            if (i == 0 && (int)o->NumTails > 1)
             {
                 vec3_t Position, p;
                 Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
                 VectorRotate(Position, Matrix, p);
-                // VectorAddScaled(o->Position, p, o->Tails[0][0], FPS_ANIMATION_FACTOR);
+                //VectorAddScaled(o->Position, p, o->Tails[0][0], FPS_ANIMATION_FACTOR);
                 VectorAdd(o->Position, p, o->Tails[0][0]);
                 o->Tails[0][0][0] = (o->Tails[0][0][0] + o->Tails[1][0][0]) / 2.f;
                 o->Tails[0][0][1] = (o->Tails[0][0][1] + o->Tails[1][0][1]) / 2.f;
                 o->Tails[0][0][2] = (o->Tails[0][0][2] + o->Tails[1][0][2]) / 2.f;
                 Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
                 VectorRotate(Position, Matrix, p);
-                // VectorAddScaled(o->Position, p, o->Tails[0][1], FPS_ANIMATION_FACTOR);
+                //VectorAddScaled(o->Position, p, o->Tails[0][1], FPS_ANIMATION_FACTOR);
                 VectorAdd(o->Position, p, o->Tails[0][1]);
                 o->Tails[0][1][0] = (o->Tails[0][1][0] + o->Tails[1][1][0]) / 2.f;
                 o->Tails[0][1][1] = (o->Tails[0][1][1] + o->Tails[1][1][1]) / 2.f;
                 o->Tails[0][1][2] = (o->Tails[0][1][2] + o->Tails[1][1][2]) / 2.f;
                 Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
                 VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][2]);
-                //VectorAddScaled(o->Position, p, o->Tails[0][2], FPS_ANIMATION_FACTOR);
+                // VectorAdd(o->Position, p, o->Tails[0][2]);
+                VectorAddScaled(o->Position, p, o->Tails[0][2], FPS_ANIMATION_FACTOR);
                 o->Tails[0][2][0] = (o->Tails[0][2][0] + o->Tails[1][2][0]) / 2.f;
                 o->Tails[0][2][1] = (o->Tails[0][2][1] + o->Tails[1][2][1]) / 2.f;
                 o->Tails[0][2][2] = (o->Tails[0][2][2] + o->Tails[1][2][2]) / 2.f;
                 Vector(0.f, 0.f, o->Scale * 0.5f, Position);
                 VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][3]);
-                //VectorAddScaled(o->Position, p, o->Tails[0][3], FPS_ANIMATION_FACTOR);
+                // VectorAdd(o->Position, p, o->Tails[0][3]);
+                VectorAddScaled(o->Position, p, o->Tails[0][3], FPS_ANIMATION_FACTOR);
                 o->Tails[0][3][0] = (o->Tails[0][3][0] + o->Tails[1][3][0]) / 2.f;
                 o->Tails[0][3][1] = (o->Tails[0][3][1] + o->Tails[1][3][1]) / 2.f;
                 o->Tails[0][3][2] = (o->Tails[0][3][2] + o->Tails[1][3][2]) / 2.f;
@@ -2843,28 +2843,32 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
             else
             {
                 vec3_t Position, p;
+
                 Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
                 VectorRotate(Position, Matrix, p);
                 VectorAdd(o->Position, p, o->Tails[0][0]);
                 //VectorAddScaled(o->Position, p, o->Tails[0][0], FPS_ANIMATION_FACTOR);
+
                 Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
                 VectorRotate(Position, Matrix, p);
                 VectorAdd(o->Position, p, o->Tails[0][1]);
                 //VectorAddScaled(o->Position, p, o->Tails[0][1], FPS_ANIMATION_FACTOR);
+
                 Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
                 VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][2]);
-                //VectorAddScaled(o->Position, p, o->Tails[0][2], FPS_ANIMATION_FACTOR);
+                // VectorAdd(o->Position, p, o->Tails[0][2]);
+                VectorAddScaled(o->Position, p, o->Tails[0][2], FPS_ANIMATION_FACTOR);
+
                 Vector(0.f, 0.f, o->Scale * 0.5f, Position);
                 VectorRotate(Position, Matrix, p);
-                VectorAdd(o->Position, p, o->Tails[0][3]);
-                //VectorAddScaled(o->Position, p, o->Tails[0][3], FPS_ANIMATION_FACTOR);
+                // VectorAdd(o->Position, p, o->Tails[0][3]);
+                VectorAddScaled(o->Position, p, o->Tails[0][3], FPS_ANIMATION_FACTOR);
             }
         }
     }
     else
     {
-        o->NumTails++;
+        o->NumTails += FPS_ANIMATION_FACTOR;
         if (o->NumTails > o->MaxTails - 1)
         {
             o->NumTails = o->MaxTails - 1;
@@ -2877,22 +2881,26 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
         }
 
         vec3_t Position, p;
+
         Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
         VectorRotate(Position, Matrix, p);
         VectorAdd(o->Position, p, o->Tails[0][0]);
         //VectorAddScaled(o->Position, p, o->Tails[0][0], FPS_ANIMATION_FACTOR);
+
         Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
         VectorRotate(Position, Matrix, p);
         VectorAdd(o->Position, p, o->Tails[0][1]);
-        //VectorAddScaled(o->Position, p, o->Tails[0][1], FPS_ANIMATION_FACTOR);
+        // VectorAddScaled(o->Position, p, o->Tails[0][1], FPS_ANIMATION_FACTOR);
+
         Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
         VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][2]);
-        //VectorAddScaled(o->Position, p, o->Tails[0][2], FPS_ANIMATION_FACTOR);
+        // VectorAdd(o->Position, p, o->Tails[0][2]);
+        VectorAddScaled(o->Position, p, o->Tails[0][2], FPS_ANIMATION_FACTOR);
+
         Vector(0.f, 0.f, o->Scale * 0.5f, Position);
         VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][3]);
-        //VectorAddScaled(o->Position, p, o->Tails[0][3], FPS_ANIMATION_FACTOR);
+        //VectorAdd(o->Position, p, o->Tails[0][3]);
+        VectorAddScaled(o->Position, p, o->Tails[0][3], FPS_ANIMATION_FACTOR);
     }
 }
 
@@ -3783,9 +3791,9 @@ void MoveJoint(JOINT* o, int iIndex)
                 if (rand_fps_check(2))
                 {
                     if (o->Angle[0] < -90)
-                        o->Angle[0] += (20.f) * FPS_ANIMATION_FACTOR;
+                        o->Angle[0] += (20.f);
                     else
-                        o->Angle[0] -= (20.f) * FPS_ANIMATION_FACTOR;
+                        o->Angle[0] -= (20.f);
                 }
                 float Distance;
                 if (o->SubType == 13)
@@ -4553,7 +4561,6 @@ void MoveJoint(JOINT* o, int iIndex)
     case MODEL_FENRIR_SKILL_THUNDER:
         for (int j = 0; j < o->MaxTails; j++)
         {
-            if (!rand_fps_check(1)) continue;
             if (o->Target)
             {
                 VectorCopy(o->Target->Position, o->TargetPosition);
@@ -4604,7 +4611,6 @@ void MoveJoint(JOINT* o, int iIndex)
 
         for (int j = 0; j < o->MaxTails; j++)
         {
-            if (!rand_fps_check(1)) continue;
             if (o->SubType == 2)
             {
             }
@@ -4700,7 +4706,7 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->SubType == 15)
                 break;
-            if (!rand_fps_check(1)) continue;
+
             switch (o->SubType)
             {
             case 0:
@@ -5006,7 +5012,6 @@ void MoveJoint(JOINT* o, int iIndex)
 
                 for (int j = 0; j < o->MaxTails; j++)
                 {
-                    if (!rand_fps_check(1)) continue;
                     Distance = MoveHumming(o->Position, o->Angle, Position, (float)(rand() % 80 + 60.f));
 
                     o->Direction[0] = (float)(rand() % 1400 - 700) / o->Scale;
@@ -5472,7 +5477,9 @@ void MoveJoint(JOINT* o, int iIndex)
             vec3_t vPos;
             vec3_t backPos;
             o->m_bCreateTails = false;
-            if (o->NumTails != 0) o->NumTails = 0;
+            o->NumTails = 0;
+            
+
             VectorCopy(o->Position, backPos);
             for (int i = 0; i < MAX_TAILS; ++i)
             {
@@ -6097,7 +6104,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 VectorRotate(o->Direction, Matrix, position);
                 VectorAdd(o->TargetPosition, position, o->Position);
 
-                if (o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
+                if ((int)o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
                     CreateTail(o, Mat);
             }
         }
@@ -6126,7 +6133,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 VectorRotate(o->Direction, Matrix, position);
                 VectorAdd(o->TargetPosition, position, o->Position);
 
-                if (o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
+                if ((int)o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
                     CreateTail(o, Mat);
             }
         }
@@ -6155,7 +6162,7 @@ void MoveJoint(JOINT* o, int iIndex)
                     VectorRotate(o->Direction, Matrix, position);
                     VectorAdd(o->TargetPosition, position, o->Position);
 
-                    if (o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
+                    if ((int)o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
                         CreateTail(o, Mat);
                 }
 
@@ -6180,8 +6187,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             for (int j = 0; j < 8; ++j)
             {
-                if (!rand_fps_check(1)) continue;
-                if (o->NumTails < o->MaxTails - 1)
+                if ((int)o->NumTails < o->MaxTails - 1)
                 {
                     VectorCopy(o->Position, Light);
                     AngleMatrix(o->Direction, Matrix);
@@ -6257,8 +6263,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
                 for (int j = 0; j < 8; ++j)
                 {
-                    if (!rand_fps_check(1)) continue;
-                    if (o->NumTails < o->MaxTails - 1)
+                    if ((int)o->NumTails < o->MaxTails - 1)
                     {
                         VectorCopy(o->Position, Light);
                         AngleMatrix(o->Direction, Matrix);
@@ -6990,15 +6995,13 @@ void RenderJoints(BYTE bRenderOneMore)
 
             BindTexture(o->TexType);
 
-            for (int j = 0; j < o->NumTails; j++)
+            for (int j = 0; j < (int)o->NumTails; j++)
             {
-                if (!rand_fps_check(1)) continue;
-
                 if (o->Type == BITMAP_SMOKE && o->SubType == 0 && j < 1)
                 {
                     continue;
                 }
-                else if (o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10) && j == o->NumTails - 1)
+                else if (o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10) && j == (int)o->NumTails - 1)
                 {
                     continue;
                 }
@@ -7006,8 +7009,8 @@ void RenderJoints(BYTE bRenderOneMore)
                 float Light1, Light2;
                 if (o->bTileMapping)
                 {
-                    Light1 = (o->NumTails - (j)) / 16.f;
-                    Light2 = (o->NumTails - (j + 1)) / 16.f;
+                    Light1 = ((int)o->NumTails - (j)) / 16.f;
+                    Light2 = ((int)o->NumTails - (j + 1)) / 16.f;
                 }
                 else if (o->m_byReverseUV == 3)
                 {
@@ -7016,8 +7019,8 @@ void RenderJoints(BYTE bRenderOneMore)
                 }
                 else
                 {
-                    Light1 = (o->NumTails - (j)) / (float)(o->MaxTails - 1);
-                    Light2 = (o->NumTails - (j + 1)) / (float)(o->MaxTails - 1);
+                    Light1 = ((int)o->NumTails - (j)) / (float)(o->MaxTails - 1);
+                    Light2 = ((int)o->NumTails - (j + 1)) / (float)(o->MaxTails - 1);
                 }
 
                 float Scroll = (float)((int)WorldTime % 1000) * 0.001f;
@@ -7032,8 +7035,8 @@ void RenderJoints(BYTE bRenderOneMore)
                     || (o->SubType >= 11 && o->SubType <= 13)	//^ 펜릴 스킬 관련
                     )
                 {
-                    Light1 = (o->NumTails - (j)) / (float)((o->MaxTails - 1) / 2);
-                    Light2 = (o->NumTails - (j + 1)) / (float)((o->MaxTails - 1) / 2);
+                    Light1 = ((int)o->NumTails - (j)) / (float)((o->MaxTails - 1) / 2);
+                    Light2 = ((int)o->NumTails - (j + 1)) / (float)((o->MaxTails - 1) / 2);
                     Light1 -= Scroll;
                     Light2 -= Scroll;
                 }
@@ -7091,7 +7094,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             glColor3f(1.f, 1.f, 1.f);
                         }
 
-                        if (j == (o->NumTails / 2))
+                        if (j == ((int)o->NumTails / 2))
                         {
                             vec3_t  Position;
 
@@ -7182,13 +7185,13 @@ void RenderJoints(BYTE bRenderOneMore)
                         || (o->SubType >= 11 && o->SubType <= 13)
                         )
                     {
-                        float Luminosity = ((float)((o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
+                        float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
 
                         glColor3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
                     }
                     else if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 1)
                     {
-                        float Luminosity = (1.f - (o->NumTails - j) / (float)(o->NumTails)) * 2.f;
+                        float Luminosity = (1.f - ((int)o->NumTails - j) / (float)(o->NumTails)) * 2.f;
 
                         glColor3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
                     }

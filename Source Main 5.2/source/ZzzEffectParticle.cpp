@@ -4232,7 +4232,6 @@ void MoveParticles()
                         o->LifeTime = 19.9f;
                         for (int j = 0; j < 18; j++)
                         {
-                            if (!rand_fps_check(1)) continue;
                             Vector(0.f, 200.f, 0.f, p);
                             Vector(0.f, 0.f, j * 20.f, Angle);
                             AngleMatrix(Angle, Matrix);

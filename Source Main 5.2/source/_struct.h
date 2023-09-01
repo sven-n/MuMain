@@ -524,7 +524,7 @@ typedef struct
     OBJECT* Target;
     vec3_t      TargetPosition;
     BYTE        byOnlyOneRender;
-    int			NumTails;
+    float		NumTails;
     int			MaxTails;
     vec3_t		Tails[MAX_TAILS][4];
     float  		LifeTime;

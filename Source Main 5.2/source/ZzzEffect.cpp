@@ -8730,7 +8730,6 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             for (int j = 0; j < 6; j++)
             {
-                //if (!rand_fps_check(1)) continue;
                 Vector((float)(rand() % 50 - 25), (float)(rand() % 50 - 25), 0.f, Position);
                 VectorAdd(Position, o->Position, Position);
                 CreateParticle(BITMAP_FLAME, Position, o->Angle, Light);
@@ -18422,8 +18421,6 @@ void RenderEffects(bool bRenderBlendMesh)
                     VectorCopy(o->Position, Position);
                     for (int j = 0; j < 20; j++)
                     {
-                        if (!rand_fps_check(1)) continue;
-
                         if (o->SubType == 1)
                         {
                             o->Angle[2] -= (0.1f) * FPS_ANIMATION_FACTOR;

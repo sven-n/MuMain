@@ -791,7 +791,7 @@ std::uniform_real_distribution<> distrib(0.0, 1.0);
 
 bool rand_fps_check(int reference_frames)
 {
-    return rand() % reference_frames == 0;
+    // return rand() % reference_frames == 0;
     const auto animation_factor = min(1.0, static_cast<double>(FPS_ANIMATION_FACTOR));
     const auto rand_value = distrib(gen);// *1.5;
     const auto chance = reference_frames == 1
