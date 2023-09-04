@@ -166,7 +166,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     break;
     case 56:
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             CreateParticle(BITMAP_WATERFALL_1, pObject->Position, pObject->Angle, Light, 2, pObject->Scale);
         }
@@ -177,7 +177,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
         break;
     case 58:
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             CreateParticle(BITMAP_WATERFALL_2, pObject->Position, pObject->Angle, Light, 2, pObject->Scale);
         }
@@ -541,7 +541,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -573,7 +573,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -609,7 +609,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -637,7 +637,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -673,7 +673,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -726,7 +726,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -810,7 +810,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -885,7 +885,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -919,7 +919,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -952,7 +952,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_DEATHTREE_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -1026,7 +1026,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_HELL_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -1088,7 +1088,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -1131,7 +1131,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -1175,7 +1175,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -1260,7 +1260,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2);
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
@@ -1465,7 +1465,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
     case 304:
     {
-        if (pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
+        if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
@@ -1475,7 +1475,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
     return true;
     case 308:
     {
-        if (pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
+        if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
@@ -1487,7 +1487,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
         for (int i = 0; i < 5; i++)
         {
-            if (pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK1)
+            if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK1)
             {
                 vec3_t Light;
                 Vector(1.f, 1.f, 1.f, Light);
@@ -1498,7 +1498,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
     return true;
     case 552:
     {
-        if (pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
+        if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);

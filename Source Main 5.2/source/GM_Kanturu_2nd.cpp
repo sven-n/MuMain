@@ -365,7 +365,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
         EndPos[1] += rand() % 50;
         StartPos[2] += 10.0f;
         EndPos[2] += 10.f;
-        if (rand() % 20 == 0)
+        if (rand_fps_check(20))
         {
             CreateJoint(BITMAP_JOINT_THUNDER, StartPos, EndPos, o->Angle, 18, NULL, 40.f);
         }
@@ -373,7 +373,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 10:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             vec3_t vPos;
             VectorCopy(o->Position, vPos);
@@ -424,7 +424,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 48:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             vec3_t  Light;
             Vector(0.2f, 0.2f, 0.2f, Light);
@@ -447,7 +447,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 50:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             float fBlue = (rand() % 3) * 0.01f + 0.02f;
             vec3_t  Light;
@@ -458,7 +458,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 51:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             float fRed = (rand() % 3) * 0.01f + 0.01f;
             vec3_t  Light;
@@ -469,7 +469,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 52:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 7, o->Scale);
@@ -478,7 +478,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 53:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(0.4f, 0.6f, 0.7f, Light);
             CreateParticle(BITMAP_TWINTAIL_WATER, o->Position, o->Angle, Light, 1);
@@ -487,7 +487,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 54:
     {
-        if (rand() % 20 == 0)
+        if (rand_fps_check(20))
         {
             CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 8, NULL, 30.f + rand() % 10);
         }
@@ -495,7 +495,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 55:
     {
-        if (rand() % 5 == 0)
+        if (rand_fps_check(5))
         {
             Vector(0.8f, 0.8f, 1.0f, Light);
             CreateEffect(MODEL_FENRIR_THUNDER, o->Position, o->Angle, Light, 1, o);
@@ -504,7 +504,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 56:
     {
-        if (rand() % 10 == 0)
+        if (rand_fps_check(10))
         {
             CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 9, NULL, 30.f + rand() % 10);
         }
@@ -512,7 +512,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 65:
     {
-        if (rand() % 10 == 0)
+        if (rand_fps_check(10))
         {
             CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 10, NULL, 30.f + rand() % 10);
         }
@@ -763,7 +763,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
             {
                 PlayBuffer(SOUND_KANTURU_2ND_PERSO_MOVE1 + rand() % 2);
             }
@@ -805,12 +805,12 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         BoneManager::GetBonePosition(o, "PRSona_A1", vPos);
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o);
 
-        if (rand() % 5 == 0)
+        if (rand_fps_check(5))
         {
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 40);
         }
 
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(0.5f, 0.5f, 0.5f, vLight);
             BoneManager::GetBonePosition(o, "PRSona_Tail", vPos);
@@ -1009,7 +1009,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
             {
                 PlayBuffer(SOUND_KANTURU_2ND_DRED_MOVE1 + rand() % 2);
             }
@@ -1046,14 +1046,14 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 
         if (o->CurrentAction != MONSTER01_STOP1 && o->CurrentAction != MONSTER01_DIE && gMapManager.WorldActive != WD_39KANTURU_3RD)
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 BoneManager::GetBonePosition(o, "Dreadfear_Wing32", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 0);
                 BoneManager::GetBonePosition(o, "Dreadfear_Wing34", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 0);
             }
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 BoneManager::GetBonePosition(o, "Dreadfear_Wing51", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 0);
@@ -1098,7 +1098,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
             Vector(1.0f, 1.0f, 2.0f, vLight);
             if (iAnimationFrame < 40)
             {
-                if (rand() % 4 == 0)
+                if (rand_fps_check(4))
                 {
                     BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_1", vPos);
                     CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 18, 1.0f);
@@ -1118,7 +1118,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
             }
 
             Vector(1.0f, 1.0f, 2.f, vLight);
-            if (rand() % 4 == 0)
+            if (rand_fps_check(4))
             {
                 BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_8", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 2, 2.f);
@@ -1256,7 +1256,7 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1282,13 +1282,13 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(0.f, 0.f, 0.f, vRelative);
             if (gMapManager.WorldActive == WD_39KANTURU_3RD)
             {
-                if (rand() % 4 == 0)
+                if (rand_fps_check(4))
                 {
                     BoneManager::GetBonePosition(o, "Twintail_Hair24", vRelative, vPos);
                     CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
                 }
 
-                if (rand() % 4 == 0)
+                if (rand_fps_check(4))
                 {
                     BoneManager::GetBonePosition(o, "Twintail_Hair32", vRelative, vPos);
                     CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
@@ -1296,13 +1296,13 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             }
             else
             {
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     BoneManager::GetBonePosition(o, "Twintail_Hair24", vRelative, vPos);
                     CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
                 }
 
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     BoneManager::GetBonePosition(o, "Twintail_Hair32", vRelative, vPos);
                     CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
@@ -1322,7 +1322,7 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1401,7 +1401,7 @@ void CTrapCanon::Render_Object(OBJECT* o, BMD* b)
 
 void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (c->AttackTime == 0)
+    if ((int)c->AttackTime == 0)
     {
         float fLumi;
         vec3_t vPos, vLight;
@@ -1421,7 +1421,7 @@ void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 
 void CTrapCanon::Render_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (c->AttackTime == 1)
+    if ((int)c->AttackTime == 1)
     {
         CHARACTER* tc = &CharactersClient[c->TargetCharacter];
         OBJECT* to = &tc->Object;

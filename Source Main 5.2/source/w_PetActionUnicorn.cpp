@@ -258,7 +258,7 @@ bool PetActionUnicorn::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWOR
     CreateSprite(BITMAP_MAGIC, Position, 0.15f, Light, obj);
 
     Vector(1.0f, 0.7f, 0.3f, Light);
-    if (rand() % 3 == 0)
+    if (rand_fps_check(3))
         CreateEffect(BITMAP_PIN_LIGHT, Position, obj->Angle, Light, 4, obj, -1, 0, 0, 0, 0.45f);
 
     b->TransformPosition(BoneTransform[4], vRelativePos, Position, false);
@@ -267,7 +267,7 @@ bool PetActionUnicorn::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWOR
     CreateSprite(BITMAP_SMOKE, Position, 1.2f, Light, obj);
     CreateSprite(BITMAP_LIGHT, Position, 4.0f, Light, obj);
 
-    if (rand() % 2 == 0)
+    if (rand_fps_check(2))
         CreateParticle(BITMAP_SMOKE, Position, obj->Angle, Light, 67, 1.0f);
 
     Vector(0.7f, 0.7f, 1.0f, Light);

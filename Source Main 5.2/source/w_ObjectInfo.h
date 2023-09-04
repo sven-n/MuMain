@@ -153,7 +153,6 @@ public:
 public:
     short         ScreenX;
     short         ScreenY;
-    short         PKKey;
     short         Weapon;
 
 public:
@@ -161,7 +160,7 @@ public:
     int           SubType;
     int			  m_iAnimation;
     int           HiddenMesh;
-    int           LifeTime;
+    float           LifeTime;
     int           BlendMesh;
     int           AttackPoint[2];
     int           RenderType;
@@ -190,6 +189,7 @@ public:
 
 
     float       LastHorseWaveEffect;
+    float         PKKey;
 
 public:
     vec3_t        Light;

@@ -327,13 +327,13 @@ bool MoveHellasObjectSetting(int& objCount, int object)
         }
     }
 
-    if ((rand() % 10) == 0 && object)
+    if (rand_fps_check(10) && object)
     {
         objCount = rand() % object;
         return true;
     }
 
-    if ((rand() % 5) == 0)
+    if (rand_fps_check(5))
     {
         vec3_t Position, Light;
 
@@ -345,7 +345,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
 
         CreateParticle(BITMAP_LIGHT, Position, Hero->Object.Angle, Light, 7, 1.f, &Hero->Object);
 
-        if ((rand() % 15) == 0)
+        if (rand_fps_check(15))
         {
             vec3_t Angle = { 0.f, 0.f, 0.f };
             Position[2] = Hero->Object.Position[2] + 800.f;
@@ -420,7 +420,7 @@ void CheckGrass(OBJECT* o)
 
         VectorScale(o->Direction, 0.6f, o->Direction);
         VectorScale(o->HeadAngle, 0.6f, o->HeadAngle);
-        VectorAdd(o->Position, o->Direction, o->Position);
+        VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
         VectorAdd(o->Angle, o->HeadAngle, o->Angle);
     }
 }
@@ -479,7 +479,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
         break;
     case 38:
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             CreateParticle(BITMAP_WATERFALL_1, o->Position, o->Angle, Light, 0);
         }
@@ -493,7 +493,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
         break;
     case 40:
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 0);
         }
@@ -667,16 +667,16 @@ void MoveBigMon(OBJECT* o)
 {
     o->Angle[2] += o->Gravity;
 
-    if (rand() % 5 == 0)
+    if (rand_fps_check(5))
     {
         o->Gravity *= -1;
     }
 
     if (o->LifeTime < 20)
     {
-        o->Alpha /= 1.2f;
-        o->Velocity += 0.5f;
-        o->Angle[0] += 2.f;
+        o->Alpha *= pow(1.0f / (1.2f), FPS_ANIMATION_FACTOR);
+        o->Velocity += 0.5f * FPS_ANIMATION_FACTOR;
+        o->Angle[0] += 2.f * FPS_ANIMATION_FACTOR;
     }
 
     if (o->LifeTime < 0) o->Live = false;
@@ -1078,7 +1078,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case 260:
     case 268:
     case 276:
-        if (c->AttackTime == 14)
+        if ((int)c->AttackTime == 14)
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1122,7 +1122,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_MAGIC_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 c->AttackTime = 15;
@@ -1131,7 +1131,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_PHY_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_Defense);
                 c->AttackTime = 15;
@@ -1157,7 +1157,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case 262:
     case 270:
     case 278:
-        if (c->AttackTime == 14)
+        if ((int)c->AttackTime == 14)
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1197,7 +1197,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
-            if (c->AttackTime == 14)
+            if ((int)c->AttackTime == 14)
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 1, o, -1, 0, 1);
             }
@@ -1218,7 +1218,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
-            if (c->AttackTime == 14)
+            if ((int)c->AttackTime == 14)
             {
                 vec3_t Light, Position;
 
@@ -1236,7 +1236,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_ENERGYBALL:
-            if (c->AttackTime == 14)
+            if ((int)c->AttackTime == 14)
             {
                 if (c->TargetCharacter >= 0 && c->TargetCharacter < MAX_CHARACTERS_CLIENT)
                 {
@@ -1298,7 +1298,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_MAGIC_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 c->AttackTime = 15;
@@ -1307,7 +1307,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_PHY_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_Defense);
                 c->AttackTime = 15;
@@ -1321,11 +1321,11 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (c->AttackTime == 7)
+            if ((int)c->AttackTime == 7)
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 0);
             }
-            else if (c->AttackTime >= 13)
+            else if ((int)c->AttackTime >= 13)
             {
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 0, o);
                 CreateEffect(BITMAP_FLAME, o->Position, o->Angle, o->Light, 1, o);
@@ -1354,7 +1354,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_MAGIC_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 c->AttackTime = 15;
@@ -1364,7 +1364,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             break;
 
         case AT_SKILL_MONSTER_PHY_DEF:
-            if (c->AttackTime >= 13)
+            if ((int)c->AttackTime >= 13)
             {
                 g_CharacterRegisterBuff(o, eBuff_Defense);
                 c->AttackTime = 15;
@@ -1434,7 +1434,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
         return true;
 
     case MODEL_MONSTER01 + 64:
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             Vector(2.f, 30.f, 0.f, p);
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
@@ -1459,7 +1459,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
     case MODEL_MONSTER01 + 69:
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Vector(2.f, 30.f, 0.f, p);
                 b->TransformPosition(o->BoneTransform[31], p, Position, true);
@@ -1494,14 +1494,15 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             VectorCopy(o->Position, Position);
             Position[2] += 20.f;
 
-            if (o->LifeTime == 0)
+            if ((int)o->LifeTime == 0)
             {
                 Vector(0.f, 0.f, 0.f, p);
                 b->TransformPosition(o->BoneTransform[8], p, Position, true);
                 Vector(1.f, 0.1f, 0.1f, Light);
                 CreateParticle(BITMAP_HOLE, Position, o->Angle, Light, 0, 3.f);
             }
-            o->LifeTime++;
+
+            o->LifeTime += FPS_ANIMATION_FACTOR;
             if (o->LifeTime >= 5)
             {
                 o->LifeTime = 0;
@@ -1523,7 +1524,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[i + 74], p, Position, true);
                 CreateSprite(BITMAP_LIGHT, Position, 1.5f - (0.2f * i), Light, o, WorldTime);
                 CreateSprite(BITMAP_LIGHT, Position, 1.5f - (0.2f * i), Light, o, WorldTime);
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_BUBBLE, Position, o->Angle, Light, 1);
                 }
@@ -1531,7 +1532,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[i + 62], p, Position, true);
                 CreateSprite(BITMAP_LIGHT, Position, 1.5f - (0.2f * i), Light, o, WorldTime);
                 CreateSprite(BITMAP_LIGHT, Position, 1.5f - (0.2f * i), Light, o, WorldTime);
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_BUBBLE, Position, o->Angle, Light, 1);
                 }
@@ -1629,7 +1630,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     fRoar = 1.0f;
                     CreateSprite(BITMAP_FLARE_BLUE, Position, (1.2f + (sinf(WorldTime * 0.001f) * 0.3f)), Light, o, 0.f);
                 }
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 13, fRoar);
                 }
@@ -1639,14 +1640,14 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             {
                 if (o->AnimationFrame < 2.0f)
                 {
-                    if (o->LifeTime != 100)
+                    if ((int)o->LifeTime != 100)
                     {
                         o->LifeTime = 100;
 
                         PlayBuffer(SOUND_KUNDUN_ROAR);
                     }
                 }
-                if (o->LifeTime == 100 && o->AnimationFrame > 4.0f)
+                if ((int)o->LifeTime == 100 && o->AnimationFrame > 4.0f)
                 {
                     o->LifeTime = 101;
                     if (gMapManager.InHellas())
@@ -1680,7 +1681,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 {
                     o->LifeTime = 100;
                 }
-                if (o->LifeTime == 100 && o->AnimationFrame > 3.0f)
+                if ((int)o->LifeTime == 100 && o->AnimationFrame > 3.0f)
                 {
                     o->LifeTime = 101;
                     vec3_t Position;
@@ -1696,7 +1697,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 {
                     o->LifeTime = 100;
                 }
-                if (o->LifeTime == 100 && o->AnimationFrame > 5.0f)
+                if ((int)o->LifeTime == 100 && o->AnimationFrame > 5.0f)
                 {
                     o->LifeTime = 101;
 
@@ -1706,7 +1707,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     Position[2] = 400;
                     CreateEffect(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 1);
                 }
-                if (o->LifeTime == 101 && o->AnimationFrame > 6.0f)
+                if ((int)o->LifeTime == 101 && o->AnimationFrame > 6.0f)
                 {
                     o->LifeTime = 102;
 
@@ -1727,7 +1728,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                         AddWaterWave((c->PositionX), (c->PositionY), 2, 2000);
                     }
                 }
-                if (o->LifeTime == 102 && o->AnimationFrame > 9.0f)
+                if ((int)o->LifeTime == 102 && o->AnimationFrame > 9.0f)
                 {
                     o->LifeTime = 103;
                     if (gMapManager.InHellas())
@@ -1849,7 +1850,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[0], p, Position, true);
                 CreateSprite(BITMAP_FLARE_BLUE, Position, 2.f + (sinf(WorldTime * 0.001f) * 0.3f), Light, o, 0.f);
 
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 13);
                 }
@@ -1914,7 +1915,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[63 + i], p, Position, true);
                 CreateSprite(BITMAP_LIGHT, Position, 0.5f + (sinf(WorldTime * 0.001f) * 0.2f), Light, o, 0.f);
 
-                if ((o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2) && (rand() % 50) == 0)
+                if ((o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2) && rand_fps_check(50))
                 {
                     Angle[0] = (float)(rand() % 360);
                     Angle[2] = (float)(rand() % 360);
@@ -2011,7 +2012,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     else if (o->Type == MODEL_MONSTER01 + 64)
     {
-        if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && o->LifeTime == 90)
+        if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && (int)o->LifeTime == 90)
         {
             if (o->LifeTime != 10)
             {

@@ -24,9 +24,10 @@
 #include "GM3rdChangeUp.h"
 #include "MapManager.h"
 #include "w_MapHeaders.h"
+#include "NewUISystem.h"
 
-int RainTarget = 0;
-int RainCurrent = 0;
+float RainTarget = 0;
+float RainCurrent = 0.f;
 
 static  int RainSpeed = 30;
 static  int RainAngle = 0;
@@ -40,7 +41,7 @@ void CreateBonfire(vec3_t Position, vec3_t Angle)
     vec3_t Light;
     Vector(1.f, 1.f, 1.f, Light);
     CreateParticle(BITMAP_FIRE, Position, Angle, Light, rand() % 4);
-    if (rand() % 4 == 0)
+    if (rand_fps_check(4))
     {
         CreateParticle(BITMAP_SPARK, Position, Angle, Light);
         vec3_t a;
@@ -70,16 +71,16 @@ void CreateFire(int Type, OBJECT* o, float x, float y, float z)
     case 0:
         Luminosity = (float)(rand() % 6 + 6) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.4f, Light);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
             CreateParticle(BITMAP_FIRE, Position, o->Angle, Light, rand() % 4);
         AddTerrainLight(Position[0], Position[1], Light, 4, PrimaryTerrainLight);
         break;
     case 1:
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
             CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
         break;
     case 2:
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
             CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light, 2);
         break;
     }
@@ -108,7 +109,7 @@ void CheckSkull(OBJECT* o)
     }
     VectorScale(o->Direction, 0.6f, o->Direction);
     VectorScale(o->HeadAngle, 0.6f, o->HeadAngle);
-    VectorAdd(o->Position, o->Direction, o->Position);
+    VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
     VectorAdd(o->Angle, o->HeadAngle, o->Angle);
 }
 
@@ -141,7 +142,8 @@ bool CreateDevilSquareRain(PARTICLE* o, int Index)
             Hero->Object.Position[2] + (float)(rand() % 200 + 300),
             o->Position);
     }
-    if (rand() % 2 == 0)
+
+    if (rand_fps_check(2))
     {
         Vector((float)(-(rand() % 20 + 20)), 0.f, 0.f, o->Angle);
     }
@@ -149,8 +151,9 @@ bool CreateDevilSquareRain(PARTICLE* o, int Index)
     {
         Vector((float)(-(rand() % 20 + 30 + RainAngle)), 0.f, 0.f, o->Angle);
     }
+
     vec3_t Velocity;
-    Vector(0.f, 0.f, -(float)(rand() % 40 + RainSpeed), Velocity);
+    Vector(0.f, 0.f, -(float)((rand() % 40 + RainSpeed) * FPS_ANIMATION_FACTOR), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -181,7 +184,7 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
             Hero->Object.Position[2] + (float)(rand() % 200 + 300),
             o->Position);
     }
-    if (rand() % 2 == 0)
+    if (rand_fps_check(2))
     {
         Vector((float)(-(rand() % 20 + 20)), 0.f, 0.f, o->Angle);
     }
@@ -190,7 +193,7 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
         Vector((float)(-(rand() % 20 + 30 + RainAngle)), 0.f, 0.f, o->Angle);
     }
     vec3_t Velocity;
-    Vector(0.f, 0.f, -(float)(rand() % 40 + RainSpeed + 20), Velocity);
+    Vector(0.f, 0.f, -(float)((rand() % 40 + RainSpeed + 20) * FPS_ANIMATION_FACTOR), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -210,9 +213,14 @@ bool CreateLorenciaLeaf(PARTICLE* o)
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
     o->Velocity[0] = -(float)(rand() % 64 + 64) * 0.1f;
-    if (Position[1] < CameraPosition[1] + 400.f) o->Velocity[0] = -o->Velocity[0] + 3.2f;
-    o->Velocity[1] = (float)(rand() % 32 - 16) * 0.1f;
-    o->Velocity[2] = (float)(rand() % 32 - 16) * 0.1f;
+    if (Position[1] < CameraPosition[1] + 400.f)
+    {
+        o->Velocity[0] = -o->Velocity[0] + 3.2f;
+    }
+
+    o->Velocity[0] *= FPS_ANIMATION_FACTOR;
+    o->Velocity[1] = (float)(rand() % 32 - 16) * 0.1f * FPS_ANIMATION_FACTOR;
+    o->Velocity[2] = (float)(rand() % 32 - 16) * 0.1f * FPS_ANIMATION_FACTOR;
     o->TurningForce[0] = (float)(rand() % 16 - 8) * 0.1f;
     o->TurningForce[1] = (float)(rand() % 64 - 32) * 0.1f;
     o->TurningForce[2] = (float)(rand() % 16 - 8) * 0.1f;
@@ -222,13 +230,20 @@ bool CreateLorenciaLeaf(PARTICLE* o)
 
 bool CreateHeavenRain(PARTICLE* o, int index)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return false;
+    }
+
     if (gMapManager.WorldActive != WD_10HEAVEN) return false;
 
     int Rainly = RainCurrent * MAX_LEAVES / 100;
     if (index < Rainly)
     {
         o->Type = BITMAP_RAIN;
-        Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800), Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
+        Vector(
+            Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
+            Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
             Hero->Object.Position[2] + (float)(rand() % 200 + 200),
             o->Position);
         Vector(-30.f, 0.f, 0.f, o->Angle);
@@ -247,12 +262,13 @@ bool CreateDeviasSnow(PARTICLE* o)
 
     o->Type = BITMAP_LEAF1;
     o->Scale = 5.f;
-    if (rand() % 10 == 0)
+    if (rand_fps_check(10))
     {
         o->Type = BITMAP_LEAF2;
         o->Scale = 10.f;
     }
-    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800), Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
+    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
+        Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
         Hero->Object.Position[2] + (float)(rand() % 200 + 200),
         o->Position);
     Vector(-30.f, 0.f, 0.f, o->Angle);
@@ -271,7 +287,8 @@ bool CreateAtlanseLeaf(PARTICLE* o)
 
     o->Type = BITMAP_LEAF1;
     vec3_t Position;
-    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800), Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
+    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
+        Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
         Hero->Object.Position[2] + (float)(rand() % 300 + 50),
         Position);
     VectorCopy(Position, o->Position);
@@ -297,13 +314,13 @@ bool MoveDevilSquareRain(PARTICLE* o)
     if (gMapManager.WorldActive == WD_34CRYWOLF_1ST && weather != 1)
         return false;
 
-    VectorAdd(o->Position, o->Velocity, o->Position);
+    VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
     float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
     if (o->Position[2] < Height)
     {
         o->Live = false;
         o->Position[2] = Height + 10.f;
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
             CreateParticle(BITMAP_RAIN_CIRCLE, o->Position, o->Angle, o->Light);
         else
             CreateParticle(BITMAP_RAIN_CIRCLE + 1, o->Position, o->Angle, o->Light);
@@ -315,13 +332,13 @@ bool MoveChaosCastleRain(PARTICLE* o)
 {
     if (gMapManager.InChaosCastle() == false) return false;
 
-    VectorAdd(o->Position, o->Velocity, o->Position);
+    VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
     float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
     if (o->Position[2] < Height && (TERRAIN_ATTRIBUTE(o->Position[0], o->Position[1]) & TW_NOGROUND) != TW_NOGROUND)
     {
         o->Live = false;
         o->Position[2] = Height + 10.f;
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
             CreateParticle(BITMAP_RAIN_CIRCLE, o->Position, o->Angle, o->Light);
         else
             CreateParticle(BITMAP_RAIN_CIRCLE + 1, o->Position, o->Angle, o->Light);
@@ -335,7 +352,7 @@ bool MoveHeavenRain(PARTICLE* o)
 
     if (o->Type == BITMAP_RAIN)
     {
-        VectorAdd(o->Position, o->Velocity, o->Position);
+        VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height)
         {
@@ -347,14 +364,14 @@ bool MoveHeavenRain(PARTICLE* o)
     }
     else
     {
-        o->Velocity[0] += (float)(rand() % 16 - 8) * 0.1f;
-        o->Velocity[1] += (float)(rand() % 16 - 8) * 0.1f;
-        o->Velocity[2] += (float)(rand() % 16 - 8) * 0.1f;
-        VectorAdd(o->Position, o->Velocity, o->Position);
+        o->Velocity[0] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[1] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[2] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
-        o->TurningForce[0] += (float)(rand() % 8 - 4) * 0.02f;
-        o->TurningForce[1] += (float)(rand() % 16 - 8) * 0.02f;
-        o->TurningForce[2] += (float)(rand() % 8 - 4) * 0.02f;
+        o->TurningForce[0] += (float)(rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[1] += (float)(rand() % 16 - 8) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[2] += (float)(rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
         VectorAdd(o->Angle, o->TurningForce, o->Angle);
 
         vec3_t Range;
@@ -372,23 +389,28 @@ void MoveEtcLeaf(PARTICLE* o)
     if (o->Position[2] <= Height)
     {
         o->Position[2] = Height;
-        o->Light[0] -= 0.05f;
-        o->Light[1] -= 0.05f;
-        o->Light[2] -= 0.05f;
+        o->Light[0] -= 0.05f * FPS_ANIMATION_FACTOR;
+        o->Light[1] -= 0.05f * FPS_ANIMATION_FACTOR;
+        o->Light[2] -= 0.05f * FPS_ANIMATION_FACTOR;
         if (o->Light[0] <= 0.f)
             o->Live = false;
     }
     else
     {
-        o->Velocity[0] += (float)(rand() % 16 - 8) * 0.1f;
-        o->Velocity[1] += (float)(rand() % 16 - 8) * 0.1f;
-        o->Velocity[2] += (float)(rand() % 16 - 8) * 0.1f;
-        VectorAdd(o->Position, o->Velocity, o->Position);
+        o->Velocity[0] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[1] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[2] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
     }
 }
 
 bool MoveLeaves()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return false;
+    }
+
     int iMaxLeaves = (gMapManager.InDevilSquare() == true) ? MAX_LEAVES : 80;
 
     if (gMapManager.WorldActive == WD_10HEAVEN)
@@ -417,13 +439,13 @@ bool MoveLeaves()
                 iMaxLeaves = 50;
     }
     if (RainCurrent > RainTarget)
-        RainCurrent--;
+        RainCurrent -= FPS_ANIMATION_FACTOR;
     else if (RainCurrent < RainTarget)
-        RainCurrent++;
+        RainCurrent += FPS_ANIMATION_FACTOR;
 
-    RainSpeed = (int)sinf(WorldTime * 0.001f) * 10 + 30;
-    RainAngle = (int)sinf(WorldTime * 0.0005f + 50.f) * 20;
-    RainPosition += 20;
+    RainSpeed = ((int)sinf(WorldTime * 0.001f) * 10 + 30) * FPS_ANIMATION_FACTOR;
+    RainAngle = (int)sinf(WorldTime * 0.0005f + 50.f) * 20 * FPS_ANIMATION_FACTOR;
+    RainPosition += 20 * FPS_ANIMATION_FACTOR;
     RainPosition %= 2000;
 
     for (int i = 0; i < iMaxLeaves; i++)
@@ -469,6 +491,11 @@ bool MoveLeaves()
 
 void RenderLeaves()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     if (gMapManager.WorldActive == WD_2DEVIAS || gMapManager.WorldActive == WD_7ATLANSE || gMapManager.WorldActive == WD_10HEAVEN
         || IsIceCity()
         || IsSantaTown()

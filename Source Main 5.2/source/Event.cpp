@@ -278,12 +278,12 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction >= MONSTER01_STOP1 && o->CurrentAction <= MONSTER01_ATTACK2)
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 Vector(1.0f, 0.4f, 0.0f, vLight);
                 CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, vLight, 0, 0.28f);
 
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     Vector(0.8f, 0.6f, 0.1f, vLight);
                 }
@@ -302,7 +302,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == MONSTER01_SHOCK || o->CurrentAction == MONSTER01_DIE)
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 Vector(1.0f, 0.4f, 0.0f, vLight);
                 float fScale;
@@ -313,7 +313,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
                 for (int i = 0; i < 5; ++i)
                 {
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         Vector(0.8f, 0.6f, 0.1f, vLight);
                     }
@@ -330,7 +330,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     CreateParticle(BITMAP_SHINY, vWorldPos, o->Angle, vLight, 4, 0.8f);
                 }
             }
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Vector(0.3f, 0.3f, 0.8f, vLight);
                 CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, vLight, 1, 1.f);
@@ -343,7 +343,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             {
                 o->m_iAnimation = rand() % 6 + MODEL_NEWYEARSDAY_EVENT_BEKSULKI;
                 CreateParticle(BITMAP_EXPLOTION, vWorldPos, o->Angle, vLight, 0, 0.5f);
-                if (rand() % 4 == 0) o->m_iAnimation = MODEL_NEWYEARSDAY_EVENT_PIG;
+                if (rand_fps_check(4)) o->m_iAnimation = MODEL_NEWYEARSDAY_EVENT_PIG;
 
                 PlayBuffer(SOUND_NEWYEARSDAY_DIE);
             }
@@ -351,7 +351,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             if (o->AnimationFrame >= 4.5f)
                 CreateEffect(MODEL_NEWYEARSDAY_EVENT_MONEY, vWorldPos, o->Angle, vLight);
 
-            if (o->m_iAnimation != 0 && rand() % 3 == 0)
+            if (o->m_iAnimation != 0 && rand_fps_check(3))
             {
                 if (o->AnimationFrame >= 4.5f)
                     CreateEffect(o->m_iAnimation, vWorldPos, o->Angle, vLight);

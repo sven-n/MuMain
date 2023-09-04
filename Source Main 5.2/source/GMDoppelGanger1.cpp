@@ -159,7 +159,7 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[0].Type = MODEL_MACE + 10;
         pCharacter->Weapon[1].Type = MODEL_SHIELD + 7;
         pCharacter->Helper.Type = MODEL_HELPER + 4;
-        CreateBug(MODEL_DARK_HORSE, pCharacter->Object.Position, &pCharacter->Object, 1);
+        CreateMount(MODEL_DARK_HORSE, pCharacter->Object.Position, &pCharacter->Object, 1);
         break;
     case 539:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
@@ -331,7 +331,7 @@ void CGMDoppelGanger1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
         vec3_t StartPos, StartRelative;
         vec3_t EndPos, EndRelative;
 
-        float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+        float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fSpeedPerFrame = fActionSpeed / 10.f;
         float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
         for (int i = 0; i < 10; i++)
@@ -469,7 +469,7 @@ bool CGMDoppelGanger1::RenderObjectVisual(OBJECT* o, BMD* b)
         }
         return true;
     case 101:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             vec3_t Light, vPos;
             Vector(0.6f, 0.8f, 1.0f, Light);
@@ -493,7 +493,7 @@ bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
     case MODEL_MONSTER01 + 189:
     case MODEL_MONSTER01 + 190:
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             b->TransformByObjectBone(vPos, o, 6);
             vPos[1] += 50.0f;
@@ -501,7 +501,7 @@ bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(1.0f, 1.0f, 1.0f, vLight);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 61);
         }
-        if (c->Dead == 0 && rand() % 4 == 0)
+        if (c->Dead == 0 && rand_fps_check(4))
         {
             Vector(o->Position[0] + (float)(rand() % 64 - 32),
                 o->Position[1] + (float)(rand() % 64 - 32),
@@ -621,7 +621,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
         }
         else if (MONSTER01_WALK == o->CurrentAction)
         {
-            if (rand() % 20 == 0)
+            if (rand_fps_check(20))
             {
                 PlayBuffer(SOUND_RAKLION_ICEWALKER_MOVE);
             }

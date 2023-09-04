@@ -120,7 +120,7 @@
 //struct
 #define MAX_BOIDS         40
 #define MAX_FISHS         10
-#define MAX_BUTTERFLES    10
+#define MAX_MOUNTS    10
 //bodypart
 #define BODYPART_HEAD   0
 #define BODYPART_HELM   1
@@ -469,7 +469,7 @@ enum struct STORAGE_TYPE
 #define REGIMENT_ATTACK     2
 
 #define MAX_JOINTS 500
-#define MAX_TAILS  50
+#define MAX_TAILS  200
 
 #define RENDER_FACE_ONE 0x01
 #define RENDER_FACE_TWO 0x02

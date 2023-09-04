@@ -236,7 +236,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
             float fDelay = 5.0f;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / fDelay;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < fDelay; i++)
@@ -380,7 +380,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
     case 1:
     {
         o->HiddenMesh = -2;
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 60, o->Scale, o);
@@ -391,7 +391,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
     {
         o->HiddenMesh = -2;
         vec3_t  Light;
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(0.f, 0.f, 0.f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 16, o->Scale, o);
@@ -401,7 +401,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
     case 3:
     {
         o->HiddenMesh = -2;
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             float fRed = (rand() % 3) * 0.01f + 0.015f;
             Vector(fRed, 0.0f, 0.0f, Light);
@@ -414,7 +414,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         Vector(1.0f, 0.4f, 0.4f, Light);
         vec3_t vAngle;
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector((float)(rand() % 40 + 120), 0.f, (float)(rand() % 30), vAngle);
             VectorAdd(vAngle, o->Angle, vAngle);
@@ -426,7 +426,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
     case 5:
     {
         o->HiddenMesh = -2;
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(0.3f, 0.3f, 0.3f, o->Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 21, o->Scale);
@@ -701,7 +701,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_MONSTER01 + 159:
     {
         vec3_t p, Position;
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             Vector(0.0f, 50.0f, 0.0f, p);
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
@@ -768,7 +768,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else					//o->CurrentAction == MONSTER01_DIE
         {
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 o->LifeTime = 90;
                 o->m_bRenderShadow = false;
@@ -854,7 +854,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
 
         vec3_t p, Position;
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             Vector(0.0f, 50.0f, 0.0f, p);
             b->TransformPosition(o->BoneTransform[7], p, Position, true);
@@ -930,7 +930,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 switch (o->Type)
                 {
@@ -1092,7 +1092,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         }
         else if (MONSTER01_WALK == o->CurrentAction)
         {
-            if (rand() % 20 == 0)
+            if (rand_fps_check(20))
             {
                 PlayBuffer(SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE01);
             }
@@ -1118,7 +1118,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         }
         else if (MONSTER01_WALK == o->CurrentAction)
         {
-            if (rand() % 20 == 0)
+            if (rand_fps_check(20))
             {
                 PlayBuffer(SOUND_PKFIELD_RAISEDGLADIATOR_MOVE01);
             }
@@ -1144,7 +1144,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         }
         else if (MONSTER01_WALK == o->CurrentAction)
         {
-            if (rand() % 20 == 0)
+            if (rand_fps_check(20))
             {
                 PlayBuffer(SOUND_PKFIELD_ASHESBUTCHER_MOVE01);
             }
@@ -1171,7 +1171,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         }
         else if (MONSTER01_WALK == o->CurrentAction)
         {
-            if (rand() % 20 == 0)
+            if (rand_fps_check(20))
             {
                 PlayBuffer(SOUND_PKFIELD_BLOODASSASSIN_MOVE01);
             }
@@ -1202,7 +1202,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         }
         else if (MONSTER01_WALK == o->CurrentAction)
         {
-            if (rand() % 20 == 0)
+            if (rand_fps_check(20))
             {
                 PlayBuffer(SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01);
             }

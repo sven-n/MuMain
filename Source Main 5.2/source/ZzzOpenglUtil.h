@@ -7,11 +7,13 @@ extern int OpenglWindowHeight;
 extern unsigned int WindowWidth;
 extern unsigned int WindowHeight;
 extern vec3_t CollisionPosition;
-extern float  FPS;
+extern double  FPS;
+extern double  FPS_AVG;
+extern float  FPS_ANIMATION_FACTOR;
 #if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)		// 실FPS.(고정 20FPS 상황에서 추정용.)
 extern float g_fFrameEstimate;
 #endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-extern float  WorldTime;
+extern double  WorldTime;
 extern bool   CameraTopViewEnable;
 extern float  CameraViewNear;
 extern float  CameraViewFar;
@@ -106,3 +108,4 @@ void InitCollisionDetectLineToFace();
 bool CollisionDetectLineToFace(vec3_t Position, vec3_t Target, int Polygon, float* v1, float* v2, float* v3, float* v4, vec3_t Normal, bool Collision = true);
 bool CollisionDetectLineToOBB(vec3_t p1, vec3_t p2, OBB_t obb);
 void CalcFPS();
+bool rand_fps_check(int reference_frames);

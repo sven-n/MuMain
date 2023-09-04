@@ -12,6 +12,9 @@
 #include "ZzzCharacter.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzAI.h"
+
+#include <random>
+
 #include "ZzzTexture.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzInterface.h"
@@ -23,7 +26,7 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 
-inline float CreateAngle2D(const vec3_t from, const vec2_t to)
+float CreateAngle2D(const vec3_t from, const vec2_t to)
 {
     return CreateAngle(from[0], from[1], to[0], to[1]);
 }
@@ -134,22 +137,26 @@ int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY)
 
 float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn)
 {
+    float scaledTurn = Turn * FPS_ANIMATION_FACTOR;
     float targetAngle = CreateAngle2D(Position, TargetPosition);
-    Angle[2] = TurnAngle2(Angle[2], targetAngle, Turn);
+    Angle[2] = TurnAngle2(Angle[2], targetAngle, scaledTurn);
     vec3_t Range;
     VectorSubtract(Position, TargetPosition, Range);
     float distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
     targetAngle = 360.f - CreateAngle(Position[2], distance, TargetPosition[2], 0.f);
-    Angle[0] = TurnAngle2(Angle[0], targetAngle, Turn);
+    Angle[0] = TurnAngle2(Angle[0], targetAngle, scaledTurn);
     return VectorLength(Range);
 }
 
 void MovePosition(vec3_t Position, vec3_t Angle, vec3_t Speed)
 {
+
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
+
     vec3_t Velocity;
     VectorRotate(Speed, Matrix, Velocity);
+    VectorScale(Velocity, FPS_ANIMATION_FACTOR, Velocity)
     VectorAdd(Position, Velocity, Position);
 }
 
@@ -217,6 +224,9 @@ void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
                     xdist += t->Direction[0] - o->Position[0];
                     ydist += t->Direction[1] - o->Position[1];
                 }
+
+                xdist *= FPS_ANIMATION_FACTOR;
+                ydist *= FPS_ANIMATION_FACTOR;
                 float pdist = sqrtf(xdist * xdist + ydist * ydist);
                 TargetX += xdist / pdist;
                 TargetY += ydist / pdist;
@@ -485,7 +495,7 @@ void MoveHead(CHARACTER* c)
     {
         if (o->CurrentAction == MONSTER01_STOP1)
         {
-            if (rand() % 32 == 0)
+            if (rand_fps_check(32))
             {
                 o->HeadTargetAngle[0] = (float)(rand() % 128 - 64);
                 o->HeadTargetAngle[1] = (float)(rand() % 48 - 16);
@@ -761,59 +771,77 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
     return false;
 }
 
-float   DeltaT = 0.1f;
-float   FPS;
-float   WorldTime = 0.f;
+CTimer* g_WorldTime = new CTimer();
 
-float WorldTimeWrapOffset = 0.f;
+double   FPS;
+
+/**
+ * \brief A factor which should applied to all values which get an added offset, frame-by-frame.
+ * E.g. you have an object which moves by 10 x positions at every frame on a 25fps basis,
+ * you'll simply multiply this 10 positions with this factor. If you have a current
+ * frame rate of 50 fps, this factor is 0.5f, so it moves just 5 positions in this frame.
+ * Therefore, the speed of the game is maintained even when the FPS change dynamically.
+ */
+float   FPS_ANIMATION_FACTOR;
+double   FPS_AVG;
+double   WorldTime = 0.0;
+
+std::random_device rd;  // a seed source for the random number engine
+std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+bool rand_fps_check(int reference_frames)
+{
+    // return rand() % reference_frames == 0;
+    const auto animation_factor = min(1.0, static_cast<double>(FPS_ANIMATION_FACTOR));
+    const auto rand_value = distrib(gen);// *1.5;
+    const auto chance = reference_frames == 1
+        ? animation_factor
+        : (1.0 / reference_frames) * animation_factor;
+
+    return rand_value <= chance;
+}
 
 void CalcFPS()
 {
     static int timeinit = 0;
-    static long start, start2, current, last;
-    static int frame = 0, frame2 = 0;
+    static double start, last;
+    static int frame = 0;
     if (!timeinit)
     {
-        frame = 0;
-        start = timeGetTime();
+        g_WorldTime->ResetTimer();
+        start = g_WorldTime->GetTimeElapsed();
         timeinit = 1;
     }
+
     frame++;
-    frame2++;
+    WorldTime = g_WorldTime->GetTimeElapsed();
 
-    current = timeGetTime(); // found in winmm.
-
-    auto currentFloat = static_cast<float>(current);
-    if (WorldTime > (currentFloat + WorldTimeWrapOffset))
+    const double differenceMs = WorldTime - last;
+    if (differenceMs <= 0)
     {
-        // every 49,71 days without reboot, the value gets wrapped around 0 again.
-        // so we simply add this to an offset.
-        WorldTimeWrapOffset += 4294967295.0f;
+        FPS = 0.01;
+    }
+    else
+    {
+        FPS = 1000 / differenceMs;
     }
 
-    WorldTime = currentFloat + WorldTimeWrapOffset;
+    FPS_ANIMATION_FACTOR = minf(static_cast<float>(REFERENCE_FPS / FPS), 2.5f); // no less than 10 fps
 
-    int    difTime = current - last;
-    double dif = (double)(current - start) / CLOCKS_PER_SEC;
-    double rv = (dif) ? (double)frame / (double)dif : -1.0;
-    if (dif > 2.0 && frame > 10)
+    // Calculate average fps every 2 seconds or 25 frames
+    const double diffSinceStart = WorldTime - start;
+    if (diffSinceStart > 2000.0 || frame > 25)
     {
-        start = start2;
-        frame = frame2;
-        start2 = timeGetTime();
-        frame2 = 0;
+        FPS_AVG = (1000 * frame) / diffSinceStart;
+        start = WorldTime;
+        frame = 0;
     }
-    DeltaT = (float)(current - last) / CLOCKS_PER_SEC;
-    if (current == last)
-    {
-        DeltaT = 0.1f / CLOCKS_PER_SEC;  // it just cant be 0
-    }
-    // if(DeltaT>1.0) DeltaT=1.0;
-    FPS = (float)rv;
-    last = current;
+
+    last = WorldTime;
 
     if (SceneFlag == MAIN_SCENE)
     {
-        gSkillManager.CalcSkillDelay(difTime);
+        gSkillManager.CalcSkillDelay(static_cast<int>(differenceMs));
     }
 }

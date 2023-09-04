@@ -1764,7 +1764,7 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     gMapManager.WorldActive = WD_0LORENCIA;
     MoveCharacter(c, o);
     MoveCharacterVisual(c, o);
-    MoveBug(&m_PhotoHelper, TRUE);
+    MoveMount(&m_PhotoHelper, TRUE);
     gMapManager.WorldActive = WorldBackup;
 
     glMatrixMode(GL_PROJECTION);
@@ -1818,7 +1818,7 @@ void CUIPhotoViewer::RenderPhotoCharacter()
         m_PhotoHelper.Position[2] += 10;
     else if (c->Helper.Type == MODEL_HELPER + 3)
         m_PhotoHelper.Position[2] += 25;
-    RenderBug(&m_PhotoHelper, TRUE);
+    RenderMount(&m_PhotoHelper, TRUE);
     if (c->Helper.Type == MODEL_HELPER + 2)
         m_PhotoHelper.Position[2] -= 10;
     else if (c->Helper.Type == MODEL_HELPER + 3)
@@ -2258,26 +2258,26 @@ void CUIPhotoViewer::CopyPlayer()
         m_PhotoHelper.Live = false;
         switch (m_PhotoChar.Helper.Type - MODEL_HELPER)
         {
-        case 0:CreateBugSub(MODEL_HELPER, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
-        case 2:CreateBugSub(MODEL_UNICON, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
-        case 3:CreateBugSub(MODEL_PEGASUS, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
-        case 4:CreateBugSub(MODEL_DARK_HORSE, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
+        case 0:CreateMountSub(MODEL_HELPER, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
+        case 2:CreateMountSub(MODEL_UNICON, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
+        case 3:CreateMountSub(MODEL_PEGASUS, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
+        case 4:CreateMountSub(MODEL_DARK_HORSE, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
         case 37:	//^ 펜릴 편지 관련
             if (m_PhotoChar.Helper.Option1 == 0x01)
             {
-                CreateBugSub(MODEL_FENRIR_BLACK, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
+                CreateMountSub(MODEL_FENRIR_BLACK, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
             else if (m_PhotoChar.Helper.Option1 == 0x02)
             {
-                CreateBugSub(MODEL_FENRIR_BLUE, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
+                CreateMountSub(MODEL_FENRIR_BLUE, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
             else if (m_PhotoChar.Helper.Option1 == 0x04)
             {
-                CreateBugSub(MODEL_FENRIR_GOLD, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
+                CreateMountSub(MODEL_FENRIR_GOLD, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
             else
             {
-                CreateBugSub(MODEL_FENRIR_RED, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
+                CreateMountSub(MODEL_FENRIR_RED, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
             break;
         }
@@ -2460,7 +2460,7 @@ void CUIPhotoViewer::Render()
 
     if (o->AnimationFrame < m_iCurrentFrame)
     {
-        if (m_bActionRepeatCheck == FALSE && rand() % 4 == 0)
+        if (m_bActionRepeatCheck == FALSE && rand_fps_check(4))
         {
             m_bActionRepeatCheck = TRUE;
             SetPhotoPose(m_iSettingAnimation);

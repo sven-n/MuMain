@@ -30,7 +30,7 @@ class CCameraMove
 
     float m_CameraStartPos[3];
     float m_fCameraStartDistanceLevel;
-    int m_iDelayCount;
+    double m_iDelayCount;
 
     DWORD m_dwCameraWalkState;
     float m_CurrentCameraPos[3];

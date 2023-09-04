@@ -254,7 +254,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(OBJECT* o, BMD* b)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 o->LifeTime = 90;
 
@@ -473,10 +473,8 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 vec3_t vPosBlur01, vPosBlurRelative01;
                 vec3_t vPosBlur02, vPosBlurRelative02;
 
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
-
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
                 float fSpeedPerFrame = fActionSpeed / 10.f;
-
                 float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
                 int iSwordForceType = 0;
@@ -514,7 +512,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
             if (8.0f <= o->AnimationFrame && o->AnimationFrame < 10.1f)
             {
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
                 float fSpeedPerFrame = fActionSpeed / 10.f;
                 float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -556,7 +554,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 vec3_t vPosBlur01, vPosBlurRelative01;
                 vec3_t vPosBlur02, vPosBlurRelative02;
 
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
                 float fSpeedPerFrame = fActionSpeed / 10.f;
                 float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -596,7 +594,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 vec3_t vPosBlur03, vPosBlurRelative03;
                 vec3_t vPosBlur04, vPosBlurRelative04;
 
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
                 float fSpeedPerFrame = fActionSpeed / 10.f;
 
                 float fAnimationFrame = o->AnimationFrame - fActionSpeed;
@@ -931,7 +929,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
     case 84:
     {
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 8 == 0)
+        if (rand_fps_check(8))
         {
             CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 4, o->Scale);
         }
@@ -957,7 +955,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 86:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.05f, 0.02f, 0.01f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 21, o->Scale, o);
@@ -967,7 +965,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 129:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.01f, 0.02f, 0.05f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 21, o->Scale, o);
@@ -977,7 +975,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 130:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.01f, 0.05f, 0.02f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 21, o->Scale, o);
@@ -987,7 +985,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 131:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 22, o->Scale);
@@ -1000,7 +998,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
 
     case 132:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 60, o->Scale, o);
@@ -1497,7 +1495,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
         {
         case MONSTER01_WALK:
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01);
             }

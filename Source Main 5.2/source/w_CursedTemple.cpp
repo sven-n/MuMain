@@ -382,7 +382,7 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
 {
     if (!gMapManager.IsCursedTemple()) return;
 
-    float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+    float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
 
     switch (o->Type)
     {
@@ -494,7 +494,7 @@ void CursedTemple::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -569,7 +569,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         break;
         case 70:
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
@@ -579,7 +579,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 71:
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(221.f / 256.f * fLumi, 121.f / 256.f * fLumi, 201.f / 256.f * fLumi, Light);
@@ -589,7 +589,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 72:
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
@@ -601,7 +601,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 73:
         {
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
             {
                 float fLumi = (rand() % 10) * 0.002f + 0.03f;
                 Vector(1.2f * fLumi, 1.2f * fLumi, 1.2f * fLumi, Light);
@@ -611,7 +611,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 74:
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
             {
                 Vector(0.f, 0.f, 0.f, Light);
                 CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 16, o->Scale, o);
@@ -685,7 +685,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 79:
         {
-            if (rand() % 1 == 0)
+            if (rand_fps_check(1))
             {
                 for (int i = 0; i < 5; ++i)
                 {
@@ -778,7 +778,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_STOP2)
         {
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
 
             if (o->AnimationFrame > 0.5f && o->AnimationFrame < (8.5f + fActionSpeed))
             {
@@ -1228,7 +1228,7 @@ void CursedTemple::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
                 BMD* b = &Models[o->Type];
                 VectorCopy(o->Position, b->BodyOrigin);
 
-                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+                float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
 
                 float fSpeedPerFrame = fActionSpeed / 10.f;
 

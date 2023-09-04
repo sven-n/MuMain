@@ -144,7 +144,7 @@ bool M39Kanturu3rd::MoveKanturu3rdObject(OBJECT* o)
     break;
     case 45:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             o->HiddenMesh = -2;
             Luminosity = (float)(rand() % 4 + 3) * 0.3f;
@@ -160,7 +160,7 @@ bool M39Kanturu3rd::MoveKanturu3rdObject(OBJECT* o)
     break;
     case 50:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Luminosity = (float)(rand() % 10) * 0.2f;
             Vector(Luminosity, Luminosity, Luminosity, Light);
@@ -288,7 +288,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
     break;
     case 32:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(0.4f, 0.6f, 0.7f, Light);
             CreateParticle(BITMAP_TWINTAIL_WATER, o->Position, o->Angle, Light, 1);
@@ -315,20 +315,20 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
             o->HiddenMesh = -2;
         else
         {
-            if (rand() % 5 == 0)
+            if (rand_fps_check(5))
                 CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 11, NULL, o->Scale * 15.0f);
         }
     }
     break;
     case 47:
     {
-        if (rand() % 5 == 0)
+        if (rand_fps_check(5))
             CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 11, NULL, o->Scale * 15.0f);
     }
     break;
     case 48:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, o->Light, 10, o->Scale, o);
         }
@@ -364,7 +364,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
     break;
     case 52:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(0.5f, 1.f, 0.7f, o->Light);
             CreateParticle(BITMAP_TRUE_BLUE, o->Position, o->Angle, o->Light, 1, o->Scale);
@@ -373,7 +373,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
     break;
     case 53:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(0.3f, 0.3f, 0.3f, o->Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 46, o->Scale);
@@ -382,7 +382,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
     break;
     case 54:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             o->HiddenMesh = -1;
             CreateJoint(BITMAP_JOINT_THUNDER, o->Position, o->Position, o->Angle, 19, NULL, o->Scale * 10.0f);
@@ -403,9 +403,9 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         {
             if (g_Direction.m_CKanturu.GetMayaExplotion())
             {
-                o->Light[0] /= 1.02f;
-                o->Light[1] /= 1.02f;
-                o->Light[2] /= 1.02f;
+                o->Light[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+                o->Light[1] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+                o->Light[2] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
 
                 VectorCopy(o->Light, b->BodyLight);
 
@@ -441,9 +441,9 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
             if (g_Direction.m_CKanturu.GetMayaExplotion())
             {
-                o->StartPosition[0] /= 1.02f;
-                o->StartPosition[1] /= 1.02f;
-                o->StartPosition[2] /= 1.02f;
+                o->StartPosition[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+                o->StartPosition[1] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+                o->StartPosition[2] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
 
                 VectorCopy(o->StartPosition, b->BodyLight);
             }
@@ -799,7 +799,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_KANTURU_3RD_NIGHTMARE_IDLE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -969,7 +969,7 @@ void M39Kanturu3rd::MoveKanturu3rdBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1083,7 +1083,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.3f, Light, o);
 
         BoneManager::GetBonePosition(o, "Windmill_Bone1", Position);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 16, 1.0f);
     }
     return true;
@@ -1224,7 +1224,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         Position[1] = o->Position[1] + (float)(rand() % 250 - 125);
         Position[2] = o->Position[2] - (float)(rand() % 100) + 50.0f;
 
-        if (rand() % 10 == 0)
+        if (rand_fps_check(10))
         {
             Vector(0.5f, 1.0f, 0.8f, Light);
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 17, 0.6f);
@@ -1369,7 +1369,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (c->AttackTime == 14)
+            if ((int)c->AttackTime == 14)
             {
                 vec3_t vPos, vRelative, Light;
                 Vector(140.f, 0.f, -30.f, vRelative);
@@ -1399,16 +1399,16 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             CreateInferno(o->Position);
-            if (c->AttackTime == 10)
+            if ((int)c->AttackTime == 10)
                 CreateEffect(MODEL_CIRCLE, o->Position, o->Angle, Light, 4, o);
-            else if (c->AttackTime == 14)
+            else if ((int)c->AttackTime == 14)
                 CreateEffect(MODEL_CIRCLE, o->Position, o->Angle, Light, 4, o);
         }
     }
     return true;
     case 362:
     {
-        if (o->CurrentAction == MONSTER01_ATTACK1 && c->AttackTime == 14)
+        if (o->CurrentAction == MONSTER01_ATTACK1 && (int)c->AttackTime == 14)
         {
             CreateInferno(o->Position, 2);
             Vector(0.0f, 0.5f, 1.0f, Light);
@@ -1416,7 +1416,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYAHAND_ATTACK1);
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK2 && c->AttackTime == 14)
+        else if (o->CurrentAction == MONSTER01_ATTACK2 && (int)c->AttackTime == 14)
         {
             float Matrix[3][4];
             Vector(0.0f, 0.0f, 0.0f, Angle);
@@ -1434,7 +1434,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
     return true;
     case 363:
     {
-        if (o->CurrentAction == MONSTER01_ATTACK1 && c->AttackTime == 14)
+        if (o->CurrentAction == MONSTER01_ATTACK1 && (int)c->AttackTime == 14)
         {
             CreateInferno(o->Position, 3);
             Vector(1.0f, 0.5f, 0.0f, Light);
@@ -1442,7 +1442,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYAHAND_ATTACK1);
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK2 && c->AttackTime == 14)
+        else if (o->CurrentAction == MONSTER01_ATTACK2 && (int)c->AttackTime == 14)
         {
             float Matrix[3][4];
             Vector(0.0f, 0.0f, 0.0f, Angle);
@@ -1569,7 +1569,7 @@ void M39Kanturu3rd::MayaAction(OBJECT* o, BMD* b)
 
             if (iMayaDie_Counter == 0)
             {
-                if (rand() % 5 == 0)
+                if (rand_fps_check(5))
                 {
                     for (int j = 0; j < 3; j++)
                     {

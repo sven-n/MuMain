@@ -25,6 +25,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_bSlideHelp = true;
     m_iVolumeLevel = 0;
     m_iRenderLevel = 4;
+    m_bRenderAllEffects = true;
 }
 
 SEASON3B::CNewUIOptionWindow::~CNewUIOptionWindow()
@@ -50,7 +51,7 @@ void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 209, 54, 30);
+    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 229, 54, 30);
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
@@ -91,6 +92,11 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
     if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 150, m_Pos.y + 127, 15, 15))
     {
         m_bSlideHelp = !m_bSlideHelp;
+    }
+
+    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 150, m_Pos.y + 210, 15, 15))
+    {
+        m_bRenderAllEffects = !m_bRenderAllEffects;
     }
 
     if (CheckMouseIn(m_Pos.x + 33 - 8, m_Pos.y + 104, 124 + 8, 16))
@@ -143,7 +149,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
         }
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 249) == true)
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 269) == true)
     {
         return false;
     }
@@ -239,10 +245,10 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
     float x, y;
     x = m_Pos.x;
     y = m_Pos.y;
-    RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, 249.f);
+    RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, 269.f);
     RenderImage(IMAGE_OPTION_FRAME_UP, x, y, 190.f, 64.f);
     y += 64.f;
-    for (int i = 0; i < 14; ++i)
+    for (int i = 0; i < 16; ++i)
     {
         RenderImage(IMAGE_OPTION_FRAME_LEFT, x, y, 21.f, 10.f);
         RenderImage(IMAGE_OPTION_FRAME_RIGHT, x + 190 - 21, y, 21.f, 10.f);
@@ -257,6 +263,9 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
     y += 40.f;
     RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);
     y += 22.f;
+    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);
+
+    y += 60.f;
     RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);
 }
 
@@ -275,6 +284,9 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     y += 22.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);
 
+    y += 60.f;
+    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);
+
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0);
@@ -283,6 +295,7 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 92, GlobalText[389]);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 132, GlobalText[919]);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 154, GlobalText[1840]);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 154+60, "Render Full Effects");
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()
@@ -326,6 +339,15 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
     if (m_iRenderLevel >= 0)
     {
         RenderImage(IMAGE_OPTION_EFFECT_COLOR, m_Pos.x + 25, m_Pos.y + 168, 141.f * 0.2f * (m_iRenderLevel + 1), 29.f);
+    }
+
+    if (m_bRenderAllEffects)
+    {
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 210, 15, 15, 0, 0);
+    }
+    else
+    {
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 210, 15, 15, 0, 15.f);
     }
 }
 
@@ -377,4 +399,14 @@ void SEASON3B::CNewUIOptionWindow::SetRenderLevel(int iRender)
 int SEASON3B::CNewUIOptionWindow::GetRenderLevel()
 {
     return m_iRenderLevel;
+}
+
+void SEASON3B::CNewUIOptionWindow::SetRenderAllEffects(bool bRenderAllEffects)
+{
+    m_bRenderAllEffects = bRenderAllEffects;
+}
+
+bool SEASON3B::CNewUIOptionWindow::GetRenderAllEffects()
+{
+    return m_bRenderAllEffects;
 }

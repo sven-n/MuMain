@@ -1,6 +1,16 @@
+#pragma once
+
+/**
+ * \brief It's the FPS for which the game was initially developed.
+ * All speeds of animations, positional movements, etc. are based on it.
+ * Increasing this value means increasing the speed on which the game is running.
+ * It's not recommended to change this value.
+ */
+constexpr double REFERENCE_FPS = 25.0;
+
 int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY);
 float CreateAngle(float x1, float y1, float x2, float y2);
-inline float CreateAngle2D(const vec3_t from, const vec2_t to);
+float CreateAngle2D(const vec3_t from, const vec2_t to);
 int TurnAngle(int iTheta, int iHeading, int maxTURN);
 float TurnAngle2(float angle, float a, float d);
 float FarAngle(float angle1, float angle2, bool abs = true);

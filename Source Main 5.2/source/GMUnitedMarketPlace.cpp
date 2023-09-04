@@ -289,7 +289,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
     case 56:
     {
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 8 == 0)
+        if (rand_fps_check(8))
         {
             CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 4, o->Scale);
         }
@@ -538,13 +538,13 @@ bool GMUnitedMarketPlace::MoveRain(PARTICLE* o)
 
     if (o->Type == BITMAP_RAIN)
     {
-        VectorAdd(o->Position, o->Velocity, o->Position);
+        VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height)
         {
             o->Live = false;
             o->Position[2] = Height + 10.f;
-            if (rand() % 4 == 0)
+            if (rand_fps_check(4))
                 CreateParticle(BITMAP_RAIN_CIRCLE, o->Position, o->Angle, o->Light, 2);
             else
                 CreateParticle(BITMAP_RAIN_CIRCLE + 1, o->Position, o->Angle, o->Light, 2);
@@ -552,14 +552,14 @@ bool GMUnitedMarketPlace::MoveRain(PARTICLE* o)
     }
     else
     {
-        o->Velocity[0] += (float)(rand() % 16 - 8) * 0.1f;
-        o->Velocity[1] += (float)(rand() % 16 - 8) * 0.1f;
-        o->Velocity[2] += (float)(rand() % 16 - 8) * 0.1f;
-        VectorAdd(o->Position, o->Velocity, o->Position);
+        o->Velocity[0] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[1] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[2] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
-        o->TurningForce[0] += (float)(rand() % 8 - 4) * 0.02f;
-        o->TurningForce[1] += (float)(rand() % 16 - 8) * 0.02f;
-        o->TurningForce[2] += (float)(rand() % 8 - 4) * 0.02f;
+        o->TurningForce[0] += (float)(rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[1] += (float)(rand() % 16 - 8) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[2] += (float)(rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
         VectorAdd(o->Angle, o->TurningForce, o->Angle);
 
         vec3_t Range;

@@ -5,8 +5,8 @@
 
 struct TimeCheck
 {
+    double		iBackupTime;	// 시간 관련 백업
     int		iIndex;			// 시간 관련 번호
-    int		iBackupTime;	// 시간 관련 백업
     bool	bTimeCheck;		// 시간 관련 체크
 };
 

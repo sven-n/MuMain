@@ -65,6 +65,8 @@ namespace SEASON3B
         int GetVolumeLevel();
         void SetRenderLevel(int iRender);
         int GetRenderLevel();
+        void SetRenderAllEffects(bool bRenderAllEffects);
+        bool GetRenderAllEffects();
 
     private:
         void LoadImages();
@@ -87,6 +89,7 @@ namespace SEASON3B
         bool m_bSlideHelp;		// 슬라이드 도움말
         int m_iVolumeLevel;		// 볼륨조절
         int m_iRenderLevel;		// 효과제한
+        bool m_bRenderAllEffects;
     };
 }
 

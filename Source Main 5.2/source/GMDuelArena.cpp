@@ -129,7 +129,7 @@ bool CGMDuelArena::RenderObjectVisual(OBJECT* o, BMD* b)
     case 35:
     {
         vec3_t vLight;
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, vLight);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 14, o->Scale, o);

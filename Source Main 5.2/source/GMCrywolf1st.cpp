@@ -415,7 +415,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
     }
     break;
     case 84:
-        if (rand() % 3 == 0 && m_OccupationState == CRYWOLF_OCCUPATION_STATE_OCCUPIED)
+        if (rand_fps_check(3) && m_OccupationState == CRYWOLF_OCCUPATION_STATE_OCCUPIED)
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
@@ -460,7 +460,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
 
             Vector(Color, Color, Color, Light);
 
-            if (rand() % 3 == 0)
+            if (rand_fps_check(3))
                 CreateEffect(BITMAP_MAGIC, o->Position, o->Angle, Light, 3, o, 4.0f);
         }
     }
@@ -471,7 +471,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
         return true;
     case 57:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
@@ -481,7 +481,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
     return true;
     case 71:
     {
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
@@ -490,7 +490,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
     return true;
     case 72:
     {
-        if (rand() % 10 == 0)
+        if (rand_fps_check(10))
         {
             vec3_t Position;
             VectorCopy(o->Position, Position);
@@ -509,7 +509,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
     return true;
     case 74:
     {
-        if (rand() % 3 == 0 && m_OccupationState == CRYWOLF_OCCUPATION_STATE_OCCUPIED)
+        if (rand_fps_check(3) && m_OccupationState == CRYWOLF_OCCUPATION_STATE_OCCUPIED)
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
@@ -518,7 +518,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
     return true;
     case 77:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             //	Vector(0.02f,0.02f,0.03f,Light);
             Vector(0.02f, 0.03f, 0.02f, Light);
@@ -528,7 +528,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
     return true;
     case 78:
     {
-        if (rand() % 6 == 0)
+        if (rand_fps_check(6))
         {
             Vector(0.03f, 0.06f, 0.05f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 9, o->Scale, o);
@@ -724,7 +724,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
     case MODEL_MONSTER01 + 98:
     {
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
         vec3_t Light;
@@ -748,7 +748,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         else
             if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
             {
-                if (rand() % 10 == 0) {
+                if (rand_fps_check(10)) {
                     CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
                 }
             }
@@ -756,7 +756,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     break;
     case MODEL_MONSTER01 + 94:
     {
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t Light;
         vec3_t EndPos, EndRelative;
         Vector(1.f, 1.f, 1.f, Light);
@@ -787,7 +787,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         else
             if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
             {
-                if (rand() % 10 == 0) {
+                if (rand_fps_check(10)) {
                     CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
                 }
             }
@@ -796,7 +796,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_MONSTER01 + 89:
     {
         MoveEye(o, b, 9, 10);
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
         vec3_t Light;
@@ -819,7 +819,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         else
             if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
             {
-                if (rand() % 10 == 0) {
+                if (rand_fps_check(10)) {
                     CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
                 }
             }
@@ -831,7 +831,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         Vector(0.9f, 0.2f, 0.1f, Light);
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 10 == 0) {
+            if (rand_fps_check(10)) {
                 CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
             }
         }
@@ -867,7 +867,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         Vector(0.9f, 0.2f, 0.1f, Light);
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 10 == 0) {
+            if (rand_fps_check(10)) {
                 CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
             }
         }
@@ -884,7 +884,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             CreateSprite(BITMAP_LIGHT, Position, 3.5f, Light, o);
         }
 
-        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+        float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t EndPos, EndRelative;
         Vector(1.f, 1.f, 1.f, Light);
 
@@ -907,7 +907,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                         //. Walking & Running Scene Processing
             if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
             {
-                if (rand() % 10 == 0) {
+                if (rand_fps_check(10)) {
                     CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
                 }
             }
@@ -958,7 +958,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
         if (m_CrywolfState == CRYWOLF_STATE_START)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 SetAction(o, MONSTER01_ATTACK1);
                 o->Timer = 1;
@@ -996,7 +996,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     {
     case MODEL_MONSTER01 + 96:
     {
-        if (c->AttackTime == 14)
+        if ((int)c->AttackTime == 14)
         {
             CreateEffect(MODEL_ARROW_NATURE, o->Position, o->Angle, o->Light, 1, o, o->PKKey);
             return true;
@@ -1005,7 +1005,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     break;
     case MODEL_MONSTER01 + 91:
     {
-        if (c->AttackTime == 14)
+        if ((int)c->AttackTime == 14)
         {
             CreateEffect(MODEL_ARROW_HOLY, o->Position, o->Angle, o->Light, 1, o, o->PKKey);
             return true;
@@ -1015,11 +1015,11 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     case MODEL_MONSTER01 + 42:
     {
         vec3_t Angle;
-        if (c->AttackTime == 1)
+        if ((int)c->AttackTime == 1)
         {
             CreateInferno(o->Position);
         }
-        if (c->AttackTime == 14)
+        if ((int)c->AttackTime == 14)
         {
             if (c->MonsterIndex == 59)
             {
@@ -1052,7 +1052,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                 CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 10.f);
             }
         }
-        if (c->AttackTime == 1)
+        if ((int)c->AttackTime == 1)
             PlayBuffer(SOUND_EVIL);
 
         for (int i = 0; i < 4; i++)
@@ -1069,7 +1069,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     break;
     case MODEL_MONSTER01 + 99:
     {
-        if (c->AttackTime == 15)
+        if ((int)c->AttackTime == 15)
         {
             CreateEffect(MODEL_ARROW_TANKER, o->Position, o->Angle, o->Light, 1, o, o->PKKey);
             return true;
@@ -1105,7 +1105,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             //				vec3_t StartPos;//, StartRelative;
             vec3_t EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             VectorCopy(o->Angle, TempAngle);
@@ -1160,7 +1160,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1197,7 +1197,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -1248,7 +1248,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -1292,7 +1292,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
@@ -1340,7 +1340,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -1375,7 +1375,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed;
+            float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -1608,7 +1608,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_CRY1ST_BALGAS_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1655,7 +1655,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_CRY1ST_DARKELF_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1723,7 +1723,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_CRY1ST_DEATHSPIRIT_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1767,7 +1767,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         BoneManager::GetBonePosition(o, "Monster94_zx01", Position);
         Vector(0.1f, 0.0f, 0.6f, Light);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, Rot);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             Vector(0.7f, 0.7f, 1.0f, Light);
             CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, 360.f - Rot);
@@ -1780,7 +1780,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_CRY1ST_BALRAM_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1812,7 +1812,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_CRY1ST_SORAM_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1854,14 +1854,14 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         //. Walking & Running Scene Processing
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 10 == 0) {
+            if (rand_fps_check(10)) {
                 CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
             }
         }
 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_CRY1ST_WWOLF_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1904,7 +1904,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         }
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_CRY1ST_SCOUT2_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1959,7 +1959,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_CRY1ST_SCOUT3_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1992,7 +1992,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 15 == 0)
+            if (rand_fps_check(15))
                 PlayBuffer(SOUND_CRY1ST_SCOUT1_MOVE1 + rand() % 2);
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -2029,7 +2029,7 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
     if (!IsCyrWolf1st())
         return false;
 
-    if (rand() % 30 == 0) {
+    if (rand_fps_check(30)) {
         vec3_t Light;
         Vector(0.07f, 0.07f, 0.07f, Light);
         int ff = 200.0f;
@@ -2078,9 +2078,9 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
             vec3_t Velocity, Direction;
             Vector(0.f, -45.f * CharacterMoveSpeed(Hero), 0.f, Velocity);
             VectorRotate(Velocity, Matrix, Direction);
-            VectorAdd(TargetPosition, Direction, TargetPosition);
+            VectorAddScaled(TargetPosition, Direction, TargetPosition, FPS_ANIMATION_FACTOR);
         }
-        if (Hero->Movement || (rand() % 2 == 0))
+        if (Hero->Movement || (rand_fps_check(2)))
         {
             CreateParticle(BITMAP_CLOUD, TargetPosition, TargetAngle, Light, 8, 0.4f);
         }

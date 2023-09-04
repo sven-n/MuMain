@@ -1505,7 +1505,7 @@ void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
         float Water4 = 0.f;
         if (gMapManager.WorldActive == WD_34CRYWOLF_1ST && Texture == 5)
         {
-            if (rand() % 50 == 0)
+            if (rand_fps_check(50))
             {
                 float sx = xf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
                 float sy = yf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
@@ -2361,7 +2361,7 @@ void DeleteAllFrustrum()
     return true;
 }*/
 
-extern int RainCurrent;
+extern float RainCurrent;
 extern int EnableEvent;
 
 void InitTerrainLight()

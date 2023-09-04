@@ -425,7 +425,7 @@ void CDirection::SetNextDirectionPosition(int x, int y, int z, float Speed)
 
 bool CDirection::GetTimeCheck(int DelayTime)
 {
-    int PresentTime = timeGetTime();
+    int PresentTime = WorldTime;
 
     if (m_bTimeCheck)
     {

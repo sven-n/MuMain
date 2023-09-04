@@ -203,7 +203,7 @@ bool CGMSantaTown::CreateSnow(PARTICLE* o)
 
     o->Type = BITMAP_LEAF1;
     o->Scale = (float)(rand() % 10 + 5);
-    if (rand() % 10 == 0)
+    if (rand_fps_check(10))
     {
         o->Type = BITMAP_LEAF2;
         o->Scale = 12.f;

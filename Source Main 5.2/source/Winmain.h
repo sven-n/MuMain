@@ -57,7 +57,7 @@
 
 extern bool ashies;
 extern int weather;
-extern int Time_Effect;
+extern float Time_Effect;
 extern HWND      g_hWnd;
 extern HINSTANCE g_hInst;
 extern HDC       g_hDC;

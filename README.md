@@ -1,4 +1,4 @@
-# MU Online Client Sources
+﻿# MU Online Client Sources
 
 This is my special fork of the Season 5.2 client sources [uploaded by Luois](https://github.com/LouisEmulator/Main5.2).
 
@@ -6,17 +6,16 @@ The ultimate goal is to clean it up and make it compatible and feature complete
 to Season 6 Episode 3.
 
 What I have done so far:
-  * Replaced the network stack with MUnique.OpenMU.Network to make it easier to
+  * 🔥 The framerate has been increased to 60 fps and can be adjusted with the chat
+    command `$fps <value>`. The options menu includes a checkbox to reduce effects.
+  * 🔥 Added inventory and vault extensions.
+  * 🔥 Replaced the network stack with MUnique.OpenMU.Network to make it easier to
     apply changes. I included a .NET 7 runtime for this and had to change some
     code to allow async networking.
-  * The network protocol has been adapted for Season 6 Episode 3 - there is probably
+  * 🔥 The network protocol has been adapted for Season 6 Episode 3 - there is probably
     still some work to do, but it connects to [OpenMU](https://github.com/MUnique/OpenMU)
     and is playable.
-  * The framerate has been increased to 30 fps. However, some further adjustments
-    so that some animations (which rely on frame counting) can run at normal speed.
-    Once that's fixed, we can go even higher.
-  * Added inventory and vault extensions.
-  * Significant changes from Qubit have been incorporated, such as
+  * 🔥 Significant changes from Qubit have been incorporated, such as
     * Rage Fighter class
     * Visual bug when Dark Lord walks with Raven
     * Item equipping with right mouse click

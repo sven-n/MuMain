@@ -76,7 +76,7 @@ void MovePlanes()
         OBJECT* o = &Planes[i];
         if (o->Live)
         {
-            o->LifeTime--;
+            o->LifeTime -= FPS_ANIMATION_FACTOR;
             if (o->LifeTime <= 0)
                 o->Live = false;
             MoveParticle(o, true);
@@ -85,7 +85,7 @@ void MovePlanes()
                 float Light = (float)o->LifeTime * 0.1f;
                 Vector(Light * 0.6f, Light, Light * 0.8f, o->Light);
             }
-            o->Angle[2] -= o->LifeTime;
+            o->Angle[2] -= o->LifeTime * FPS_ANIMATION_FACTOR;
         }
     }
 }
@@ -107,7 +107,7 @@ void RenderShpere(int Type, vec3_t ShperePosition, float Scale, vec3_t ShpereLig
 {
     vec3_t ObjectPosition;
     VectorCopy(ShperePosition, ObjectPosition);
-    ObjectPosition[2] += Scale;
+    ObjectPosition[2] += Scale * FPS_ANIMATION_FACTOR;
     BindTexture(Type);
 
     float Width = 18.f;
@@ -347,7 +347,7 @@ void MappingEffect(int SrcIndex, int DstIndex, int Flag)
             int Index = (i * 256 + j) * 3;
             if (s[Index] >= 96)
             {
-                //if(rand()%2==0)
+                //if(rand_fps_check(2))
                 {
                     for (k = 0; k < 3; k++)
                     {

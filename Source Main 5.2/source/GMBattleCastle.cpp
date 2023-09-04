@@ -180,7 +180,7 @@ namespace battleCastle
                         {
                             if (o->m_bCollisionCheck && o->ExtState == 0)
                             {
-                                o->Timer += 0.3f;
+                                o->Timer += 0.3f * FPS_ANIMATION_FACTOR;
                                 if (o->Timer >= 5)
                                 {
                                     o->ExtState = 99;
@@ -195,7 +195,7 @@ namespace battleCastle
                                 {
                                     if (o->ExtState == 0)
                                     {
-                                        o->Timer++;
+                                        o->Timer += FPS_ANIMATION_FACTOR;
                                         if (o->Timer >= 5)
                                         {
                                             o->ExtState = 99;
@@ -544,9 +544,9 @@ namespace battleCastle
                 o->Live = false;
                 BoneManager::UnregisterBone(c);
 
-                for (int j = 0; j < MAX_BUTTERFLES; j++)
+                for (int j = 0; j < MAX_MOUNTS; j++)
                 {
-                    OBJECT* b = &Butterfles[j];
+                    OBJECT* b = &Mounts[j];
                     if (b->Live && b->Owner == o)
                         b->Live = false;
                 }
@@ -714,25 +714,25 @@ namespace battleCastle
         }
 
         PlayBuffer(SOUND_BC_AMBIENT);
-        if (IsBattleCastleStart() && rand() % 10 == 0)
+        if (IsBattleCastleStart() && rand_fps_check(10))
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE1);
             }
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE2);
             }
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE3);
             }
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE4);
             }
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE5);
             }
@@ -870,10 +870,10 @@ namespace battleCastle
                     Position[2] = 350.f;
 
                     BYTE subtype = 3;
-                    if (HeroY < 82 || HeroY>112 || rand() % 10 == 0)
+                    if (HeroY < 82 || HeroY>112 || rand_fps_check(10))
                     {
                         subtype = 4;
-                        if (rand() % 10 == 0)
+                        if (rand_fps_check(10))
                         {
                             subtype = 3;
                         }
@@ -1120,7 +1120,7 @@ namespace battleCastle
         switch (o->Type)
         {
         case 0:
-            if (IsBattleCastleStart() == false && rand() % 3 == 0)
+            if (IsBattleCastleStart() == false && rand_fps_check(3))
             {
                 Vector(1.f, 1.f, 1.f, Light);
                 CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 0, o->Scale);
@@ -1132,7 +1132,7 @@ namespace battleCastle
             break;
 
         case 42:
-            if (IsBattleCastleStart() && rand() % 3 == 0)
+            if (IsBattleCastleStart() && rand_fps_check(3))
             {
                 Vector(1.f, 1.f, 1.f, Light);
                 CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
@@ -1146,7 +1146,7 @@ namespace battleCastle
             }
             break;
         case 53:
-            if (IsBattleCastleStart() && rand() % 3 == 0)
+            if (IsBattleCastleStart() && rand_fps_check(3))
             {
                 Vector(1.f, 1.f, 1.f, Light);
                 CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 0, o->Scale);
@@ -1707,7 +1707,7 @@ namespace battleCastle
         switch (c->MonsterIndex)
         {
         case 104:
-            if (c->AttackTime == 5)
+            if ((int)c->AttackTime == 5)
             {
                 VectorCopy(o->Position, Position);
                 Position[2] += 500.f;
@@ -2073,7 +2073,7 @@ namespace battleCastle
             vec3_t Position;
             for (int i = 0; i < 5; i++)
             {
-                if ((rand() % 2) == 0)
+                if (rand_fps_check(2))
                 {
                     Position[0] = o->Position[0];
                     Position[1] = o->Position[1];

@@ -129,7 +129,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
     }
     return true;
     case 114:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             vec3_t vLight;
             Vector(0.2f, 0.2f, 0.2f, vLight);
@@ -146,7 +146,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
         }
         return true;
     case 116:
-        if (rand() % 8 == 0)
+        if (rand_fps_check(8))
         {
             vec3_t vLight;
             Vector(0.5f, 0.9f, 0.5f, vLight);
@@ -190,7 +190,7 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 66:
         if (o->AnimationFrame >= 19)
         {
-            SetAction(o, rand() % 10 == 0 ? 1 : 0);
+            SetAction(o, rand_fps_check(10) ? 1 : 0);
         }
         o->m_bRenderAfterCharacter = true;
         return true;
@@ -468,7 +468,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
                 for (int j = 0; j < 6; ++j)
                     CreateEffect(MODEL_CONDRA_STONE + rand() % 6, vPos, o->Angle, vLight, 0);
             }
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 o->LifeTime = 90;
                 o->m_bRenderShadow = false;
@@ -541,7 +541,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
                 for (int j = 0; j < 4; ++j)
                     CreateEffect(MODEL_NARCONDRA_STONE + rand() % 4, vPos, o->Angle, vLight, 0);
             }
-            if (o->LifeTime == 100)
+            if ((int)o->LifeTime == 100)
             {
                 o->LifeTime = 90;
                 o->m_bRenderShadow = false;
@@ -641,7 +641,7 @@ void CGMKarutan1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; ++i)
@@ -673,7 +673,7 @@ void CGMKarutan1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             int i;

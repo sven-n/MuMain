@@ -24,7 +24,7 @@
 
 extern bool g_PetEnableDuel;
 
-extern  float   WorldTime;
+extern  double   WorldTime;
 extern	char    TextList[50][100];
 extern	int     TextListColor[50];
 extern	int     TextBold[50];
@@ -448,7 +448,7 @@ void CSPetDarkSpirit::MovePet(void)
         }
 
         float Speed = 0;
-        if (rand() % speedRandom == 0)
+        if (rand_fps_check(speedRandom))
         {
             if (Distance >= FlyRange * FlyRange)
             {
@@ -457,10 +457,10 @@ void CSPetDarkSpirit::MovePet(void)
             else
             {
                 Speed = -(float)(rand() % 8 + 32) * 0.1f;
-                o->Angle[2] += (float)(rand() % 60);
+                o->Angle[2] += (float)(rand() % 60) * FPS_ANIMATION_FACTOR;
             }
 
-            Speed += o->Direction[1];
+            Speed += o->Direction[1] * FPS_ANIMATION_FACTOR;
             Speed = Speed / 2.f;
 
             o->Direction[0] = 0.f;
@@ -487,11 +487,11 @@ void CSPetDarkSpirit::MovePet(void)
         AngleMatrix(o->Angle, o->Matrix);
         Vector(0.f, -o->Velocity, 0.f, p);
         VectorRotate(p, o->Matrix, Pos);
-        VectorAdd(o->Position, Pos, o->Position);
+        VectorAddScaled(o->Position, Pos, o->Position, FPS_ANIMATION_FACTOR);
 
         if (o->AI == PET_ATTACK)
         {
-            TargetPosition[2] += 50.f;
+            TargetPosition[2] += 50.f * FPS_ANIMATION_FACTOR;
             float Distance = MoveHumming(o->Position, o->Angle, TargetPosition, o->Velocity);
             if (Distance < 20 || o->LifeTime>20)
             {
@@ -502,9 +502,9 @@ void CSPetDarkSpirit::MovePet(void)
                     o->m_bActionStart = false;
                 }
             }
-            o->Velocity += o->Gravity;
-            o->Gravity += 0.2f;
-            o->LifeTime++;
+            o->Velocity += o->Gravity * FPS_ANIMATION_FACTOR;
+            o->Gravity += 0.2f * FPS_ANIMATION_FACTOR;
+            o->LifeTime+= FPS_ANIMATION_FACTOR;
         }
         else if (o->AI == PET_ESCAPE)
         {
@@ -513,7 +513,7 @@ void CSPetDarkSpirit::MovePet(void)
             {
                 SetAI(PET_FLYING);
             }
-            o->Velocity -= 1.f;
+            o->Velocity -= 1.f * FPS_ANIMATION_FACTOR;
         }
         SetAction(o, 3);
     }
@@ -546,7 +546,7 @@ void CSPetDarkSpirit::MovePet(void)
         {
             Vector(0.f, -o->Velocity, 0.f, p);
             VectorRotate(p, o->Matrix, Pos);
-            VectorAdd(o->Position, Pos, o->Position);
+            VectorAddScaled(o->Position, Pos, o->Position, FPS_ANIMATION_FACTOR);
         }
         Vector(0.f, 0.f, 0.f, p);
         b->TransformPosition(Owner->BoneTransform[42], p, Pos, true);
@@ -560,13 +560,13 @@ void CSPetDarkSpirit::MovePet(void)
     }
     if (o->AI >= PET_ATTACK && o->AI <= PET_ATTACK_MAGIC)
     {
-        c->AttackTime++;
+        c->AttackTime += FPS_ANIMATION_FACTOR;
         if (c->AttackTime >= 15)
         {
             c->AttackTime = 15;
         }
     }
-    if ((rand() % 100) == 0 && (rand() % 60) == 0)
+    if (rand_fps_check(100) && rand_fps_check(60))
     {
         PlayBuffer(SOUND_DSPIRIT_SHOUT, o);
     }
@@ -576,13 +576,13 @@ void CSPetDarkSpirit::MovePet(void)
     float Distance = Range[0] * Range[0] + Range[1] * Range[1];
     if (o->Position[2] < (TargetPosition[2] - 200.f) || Distance>409600.f)
     {
-        o->LifeTime++;
+        o->LifeTime += FPS_ANIMATION_FACTOR;
     }
     if (o->LifeTime > 90)
     {
         o->LifeTime = 0;
         VectorCopy(TargetPosition, o->Position);
-        o->Position[2] += 250.f;
+        o->Position[2] += 250.f * FPS_ANIMATION_FACTOR;
     }
 }
 
@@ -710,7 +710,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
             {
                 CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL, (float)(rand() % 40 + 20));
             }
-            if (c->AttackTime == 1)
+            if ((int)c->AttackTime == 1)
             {
                 vec3_t Angle, Light;
 
@@ -719,7 +719,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
                 CreateEffect(MODEL_DARKLORD_SKILL, o->Position, Angle, Light, 3);
             }
         }
-        if (c->AttackTime > 3 && c->AttackTime % 2)
+        if (c->AttackTime > 3 && (int)c->AttackTime % 2)
         {
             if (o->Position[2] > (m_PetOwner->Object.Position[2] + 100.f))
             {
@@ -732,7 +732,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
         break;
 
     case PET_ATTACK_MAGIC:
-        if (c->AttackTime <= 14)
+        if (c->AttackTime < 15)
         {
             if (o->BoneTransform != NULL)
             {
@@ -748,7 +748,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
                 }
             }
         }
-        else if (c->AttackTime == 15)
+        else if (c->AttackTime >= 15)
         {
             if (c->TargetCharacter != -1)
             {

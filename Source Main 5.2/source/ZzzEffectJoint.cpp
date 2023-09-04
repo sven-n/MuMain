@@ -548,7 +548,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 {
                     o->RenderType = RENDER_TYPE_ALPHA_BLEND_MINUS;
                     o->Velocity = 40.f + rand() % 20;
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                         o->LifeTime = 67;
                     else
                         o->LifeTime = 75;
@@ -581,7 +581,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->Position[0] += vRandPos[0];
                     o->Position[1] += vRandPos[1];
                     o->Position[2] = (rand() % 100) + 200;
-                    o->TargetPosition[2] = o->Position[2] - (rand() % 100 - 100) * (rand() % 2 == 0 ? 1 : -1);
+                    o->TargetPosition[2] = o->Position[2] - (rand() % 100 - 100) * (rand_fps_check(2) ? 1 : -1);
 
                     VectorSubtract(o->TargetPosition, o->Position, o->Direction);
 
@@ -662,7 +662,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                             Position[0] = o->StartPosition[0];// + rand()%8-4;
                             Position[1] = o->StartPosition[1];// + rand()%8-4;
                         }
-                        VectorAdd(o->Position, Position, o->Position);
+                        VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
                         CreateTail(o, Matrix);
                         o->Position[0] -= Position[0];
                         o->Position[0] += o->StartPosition[0];
@@ -965,7 +965,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 break;
             case MODEL_FENRIR_SKILL_THUNDER:
                 o->Scale = Scale;
-                o->MaxTails = MAX_TAILS;
+                o->MaxTails = 50;
                 o->Velocity = 50.f;
                 o->LifeTime = 20;
                 o->bTileMapping = true;
@@ -1017,7 +1017,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
             case BITMAP_BLUR + 1:
                 o->Scale = 60.f;
                 o->Velocity = 40.f;
-                o->MaxTails = MAX_TAILS;
+                o->MaxTails = 50;
                 o->LifeTime = 2;
                 if (o->SubType == 0)
                 {
@@ -1043,7 +1043,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 break;
             case BITMAP_JOINT_THUNDER:
                 o->Scale = Scale;
-                o->MaxTails = MAX_TAILS;
+                o->MaxTails = 50;
                 o->Velocity = 50.f;
                 switch (o->SubType)
                 {
@@ -1163,7 +1163,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                             Position[0] = o->StartPosition[0] + rand() % 16 - 8;
                             Position[1] = o->StartPosition[1] + rand() % 16 - 8;
                         }
-                        VectorAdd(o->Position, Position, o->Position);
+                        VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
                         CreateTail(o, Matrix);
                         o->Position[0] -= Position[0];
                         o->Position[0] += o->StartPosition[0];
@@ -1213,7 +1213,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                             Position[0] = o->StartPosition[0];
                             Position[1] = o->StartPosition[1];
                         }
-                        VectorAdd(o->Position, Position, o->Position);
+                        VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
                         CreateTail(o, Matrix);
                         o->Position[0] -= Position[0];
                         o->Position[0] += o->StartPosition[0];
@@ -1240,8 +1240,8 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                         float Distance = sqrtf(dx * dx + dy * dy);
                         if (Distance <= 400 && to->Live && tc->Dead == 0 && to->Kind == KIND_MONSTER && to->Visible && to != Target)
                         {
-                            o->TargetIndex[o->MultiUse] = j;
-                            o->MultiUse++;
+                            o->TargetIndex[(int)o->MultiUse] = j;
+                            o->MultiUse += FPS_ANIMATION_FACTOR;
                         }
 
                         if (o->MultiUse > 5) break;
@@ -1324,7 +1324,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
 
                 if (o->SubType == 0)
                 {
-                    o->MaxTails = MAX_TAILS;
+                    o->MaxTails = 50;
 
                     o->Velocity = 80.f + (float)(rand() % 20);
                     o->LifeTime = 20;
@@ -1334,7 +1334,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 }
                 else if (o->SubType == 1 || o->SubType == 2 || o->SubType == 3 || o->SubType == 5 || o->SubType == 6 || o->SubType == 7)
                 {
-                    o->MaxTails = MAX_TAILS;
+                    o->MaxTails = 50;
                     o->LifeTime = 20;
                     o->Position[0] += (float)(rand() % 10 - 5);
                     o->Position[1] += rand() % 10 - 5;
@@ -1370,7 +1370,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 }
                 else if (o->SubType == 4)
                 {
-                    o->MaxTails = MAX_TAILS;
+                    o->MaxTails = 50;
                     o->LifeTime = 20;
                     o->m_bCreateTails = false;
                     o->byOnlyOneRender = 2;
@@ -1386,7 +1386,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 }
                 else if (o->SubType == 8)
                 {
-                    o->MaxTails = MAX_TAILS;
+                    o->MaxTails = 50;
                     o->LifeTime = 20;
                     o->m_bCreateTails = false;
 
@@ -1400,7 +1400,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 }
                 else if (o->SubType == 9)
                 {
-                    o->MaxTails = MAX_TAILS;
+                    o->MaxTails = 50;
                     o->LifeTime = 20;
                     o->m_bCreateTails = false;
 
@@ -1412,7 +1412,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 }
                 else if (o->SubType == 10)
                 {
-                    o->MaxTails = MAX_TAILS;
+                    o->MaxTails = 50;
                     o->LifeTime = 20;
                     o->m_bCreateTails = false;
 
@@ -1446,7 +1446,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     VectorRotate(p1, Matrix, p2);
 
                     Vector(p2[0] * o->Scale / 2.0f, p2[1] * o->Scale / 2.0f, p2[2] * o->Scale / 2.0f, p2);
-                    VectorAdd(o->Position, p2, o->Position);
+                    VectorAddScaled(o->Position, p2, o->Position, FPS_ANIMATION_FACTOR);
                     VectorCopy(o->Position, o->StartPosition);
 
                     int iScale = 1;
@@ -1764,7 +1764,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 {
                     o->Scale = Scale;
                     o->LifeTime = 50;
-                    o->MaxTails = MAX_TAILS;
+                    o->MaxTails = 50;
                     Vector(1.f, 1.f, 1.f, o->Light);
 
                     o->Direction[0] = -2.0f * (float)sinf(-o->Angle[2] * Q_PI / 180.0f);
@@ -1777,7 +1777,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 {
                     o->Scale = Scale;
                     o->LifeTime = 40;
-                    o->MaxTails = MAX_TAILS;
+                    o->MaxTails = 50;
                     float rbias = (float)(rand() % 300) / 1000;
                     float gbias = (float)(rand() % 300) / 1000;
                     Vector(1.f - rbias, 1.f - gbias, 1.f, o->Light);
@@ -1788,7 +1788,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->Direction[1] = -15.f;
                     AngleMatrix(o->Angle, Matrix);
                     VectorRotate(o->Direction, Matrix, Position);
-                    VectorAdd(o->Position, Position, o->Position);
+                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
                     VectorCopy(o->Position, o->StartPosition);
                     o->Direction[1] = -50.f;
                     o->m_bCreateTails = false;
@@ -1815,7 +1815,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     AngleMatrix(o->Angle, Matrix);
                     Vector(0.f, 100, 0.f, p);
                     VectorRotate(p, Matrix, Position);
-                    VectorAdd(o->Position, Position, o->Position);
+                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
                     CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.3f, o->Light, NULL, (float)(rand() % 360));
 
@@ -1952,7 +1952,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     VectorCopy(o->Angle, o->HeadAngle);
 
                     o->MultiUse = PKKey;
-                    switch (o->MultiUse)
+                    switch ((int)o->MultiUse)
                     {
                     case 0: o->HeadAngle[2] += 90.f; o->Position[2] += 200.f; break;
                     case 1: o->HeadAngle[2] += 90.f; o->Position[2] += 10.f; break;
@@ -2012,7 +2012,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
             case BITMAP_FLARE + 1:
                 o->LifeTime = PKKey;
                 o->PKKey = 0;
-                o->MaxTails = MAX_TAILS;
+                o->MaxTails = 50;
                 switch (o->Skill)
                 {
                 case 0:
@@ -2344,7 +2344,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
 
                     AngleMatrix(o->Angle, Matrix);
                     VectorRotate(p, Matrix, Position);
-                    VectorAdd(o->Position, Position, o->Position);
+                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
                     //					Vector(1.f,1.f,1.f,o->Light);
                 }
                 else if (o->SubType == 20)	// SubType : 7
@@ -2404,7 +2404,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->Velocity = 20.f;
                     Vector(-90.f, 0.f, Angle[2], o->Angle);
                     Vector(0.f, 0.f, 0.f, o->Direction);
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         Vector(1.f, 0.8f, 0.6f, o->Light);
                     }
@@ -2425,7 +2425,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->Velocity = 20.f;
                     Vector(-90.f, 0.f, Angle[2], o->Angle);
                     Vector(0.f, 0.f, 0.f, o->Direction);
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         Vector(1.f, 0.8f, 0.6f, o->Light);
                     }
@@ -2444,7 +2444,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 o->Scale = Scale;
                 o->MultiUse = 1;
                 o->Velocity = -3.f;
-                o->Position[2] += 150.f;
+                o->Position[2] += 150.f * FPS_ANIMATION_FACTOR;
                 Vector(0.f, 0.f, 0.f, o->Direction);
                 Vector(0.f, 0.f, 0.f, o->TargetPosition);
                 Vector(1.f, 0.8f, 1.f, o->Light);
@@ -2620,7 +2620,7 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     o->RenderType = RENDER_TYPE_ALPHA_BLEND;
 
                     // o->Target
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         o->Angle[2] += 90.f;
                     }
@@ -2696,8 +2696,15 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
             }
             break;
             }
+
+            // Because the Tails will be too short when FPS is high, we need to
+            // increase the MaxTails.
+            o->MaxTails = static_cast<int>(o->MaxTails / FPS_ANIMATION_FACTOR);
             if (o->MaxTails > MAX_TAILS)
+            {
                 o->MaxTails = MAX_TAILS;
+            }
+
             return;
         }
     }
@@ -2743,13 +2750,13 @@ bool SearchJoint(int Type, OBJECT* Target, int SubType)
 
 void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
 {
-    o->NumTails++;
+    o->NumTails += FPS_ANIMATION_FACTOR;
     if (o->NumTails > o->MaxTails - 1)
     {
         o->NumTails = o->MaxTails - 1;
     }
 
-    for (int j = o->NumTails - 1; j >= 0; j--)
+    for (int j = (int)(o->NumTails - 1); j >= 0; j--)
     {
         for (int k = 0; k < 4; k++)
             VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
@@ -2788,55 +2795,9 @@ void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
     }
 }
 
-void CreateTailAxis(JOINT* o, float Matrix[3][4], float ScaleX, float ScaleY, BYTE axis)
-{
-    o->NumTails++;
-    if (o->NumTails > o->MaxTails - 1)
-    {
-        o->NumTails = o->MaxTails - 1;
-    }
-
-    for (int j = o->NumTails - 1; j >= 0; j--)
-    {
-        for (int k = 0; k < 4; k++)
-            VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
-    }
-
-    vec3_t Position, p;
-    if (axis == 0)
-    {
-        Vector(-ScaleX * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][0]);
-        Vector(ScaleX * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][1]);
-        Vector(0.f, 0.f, -ScaleY * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][2]);
-        Vector(0.f, 0.f, ScaleY * 0.5f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][3]);
-    }
-    else
-    {
-        Vector(-ScaleX * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][0]);
-        Vector(ScaleX * 0.5f, 0.f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][1]);
-        Vector(0.f, -ScaleY * 0.5f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][2]);
-        Vector(0.f, ScaleY * 0.5f, 0.f, Position);
-        VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Tails[0][3]);
-    }
-}
-
 void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
 {
+    //return; // TODO
     if (Blur == true)
     {
         int i = 0;
@@ -2854,7 +2815,7 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
                     VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
             }
 
-            if (i == 0 && o->NumTails > 1)
+            if (i == 0 && (int)o->NumTails > 1)
             {
                 vec3_t Position, p;
                 Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
@@ -2885,15 +2846,19 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
             else
             {
                 vec3_t Position, p;
+
                 Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
                 VectorRotate(Position, Matrix, p);
                 VectorAdd(o->Position, p, o->Tails[0][0]);
+
                 Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
                 VectorRotate(Position, Matrix, p);
                 VectorAdd(o->Position, p, o->Tails[0][1]);
+
                 Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
                 VectorRotate(Position, Matrix, p);
                 VectorAdd(o->Position, p, o->Tails[0][2]);
+
                 Vector(0.f, 0.f, o->Scale * 0.5f, Position);
                 VectorRotate(Position, Matrix, p);
                 VectorAdd(o->Position, p, o->Tails[0][3]);
@@ -2908,6 +2873,8 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
             o->NumTails = o->MaxTails - 1;
         }
 
+        // TODO: Instead of copying, leave it and add new tail values at the end
+        // We need something like a circular buffer here ...
         for (int j = o->NumTails - 1; j >= 0; j--)
         {
             for (int k = 0; k < 4; k++)
@@ -2915,49 +2882,25 @@ void CreateTail(JOINT* o, float Matrix[3][4], bool Blur)
         }
 
         vec3_t Position, p;
+
         Vector(-o->Scale * 0.5f, 0.f, 0.f, Position);
         VectorRotate(Position, Matrix, p);
         VectorAdd(o->Position, p, o->Tails[0][0]);
+
         Vector(o->Scale * 0.5f, 0.f, 0.f, Position);
         VectorRotate(Position, Matrix, p);
         VectorAdd(o->Position, p, o->Tails[0][1]);
+
         Vector(0.f, 0.f, -o->Scale * 0.5f, Position);
         VectorRotate(Position, Matrix, p);
         VectorAdd(o->Position, p, o->Tails[0][2]);
+
         Vector(0.f, 0.f, o->Scale * 0.5f, Position);
         VectorRotate(Position, Matrix, p);
         VectorAdd(o->Position, p, o->Tails[0][3]);
     }
 }
 
-void CreateTail(JOINT* o, float Matrix[3][4], float ScaleX, float ScaleY)
-{
-    o->NumTails++;
-    if (o->NumTails > o->MaxTails - 1)
-    {
-        o->NumTails = o->MaxTails - 1;
-    }
-
-    for (int j = o->NumTails - 1; j >= 0; j--)
-    {
-        for (int k = 0; k < 4; k++)
-            VectorCopy(o->Tails[j][k], o->Tails[j + 1][k]);
-    }
-
-    vec3_t Position, p;
-    Vector(-ScaleX * 0.5f, 0.f, 0.f, Position);
-    VectorRotate(Position, Matrix, p);
-    VectorAdd(o->Position, p, o->Tails[0][0]);
-    Vector(ScaleX * 0.5f, 0.f, 0.f, Position);
-    VectorRotate(Position, Matrix, p);
-    VectorAdd(o->Position, p, o->Tails[0][1]);
-    Vector(0.f, 0.f, -ScaleY * 0.5f, Position);
-    VectorRotate(Position, Matrix, p);
-    VectorAdd(o->Position, p, o->Tails[0][2]);
-    Vector(0.f, 0.f, ScaleY * 0.5f, Position);
-    VectorRotate(Position, Matrix, p);
-    VectorAdd(o->Position, p, o->Tails[0][3]);
-}
 
 /*void MoveShpere(vec3_t Position,vec3_t Angle)
 {
@@ -2974,7 +2917,7 @@ Angle[2] = TurnAngle2(Angle[2],Rotation,FarAngle(Angle[2],Rotation)*0.2f);
 else Angle[2] = TurnAngle2(Angle[2],0.f,FarAngle(Angle[2],0.f)*0.5f);
 }*/
 
-LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+//LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 void MoveJoint(JOINT* o, int iIndex)
 {
@@ -3002,7 +2945,7 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             Vector(0.f, -o->Velocity, 0.f, p);
             VectorRotate(p, Matrix, Position);
-            VectorAdd(o->Position, Position, o->Position);
+            VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
         }
     }
 
@@ -3016,7 +2959,7 @@ void MoveJoint(JOINT* o, int iIndex)
         MoveHumming(o->Position, o->Angle, o->TargetPosition, 3000.f / Distance);
         //MoveHumming(o->Position,o->Angle,o->TargetPosition,10.f);
         //MoveHumming(o->Position,o->Angle,o->TargetPosition,0.f);
-        if (!o->Collision && Distance <= o->Velocity * 2.f)
+        if (!o->Collision && Distance <= o->Velocity * 2.f * FPS_ANIMATION_FACTOR)
         {
             o->Collision = true;
             o->LifeTime = 5;
@@ -3098,7 +3041,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 VectorCopy(o->Target->EyeLeft, o->Position);
                 if (o->SubType == 8)
                 {
-                    o->Scale += 10.1f;
+                    o->Scale += (10.1f) * FPS_ANIMATION_FACTOR;
                 }
                 break;
             case 20:
@@ -3246,58 +3189,58 @@ void MoveJoint(JOINT* o, int iIndex)
             {
                 if (o->SubType == 0)
                 {
-                    o->Angle[2] += 10.f;
-                    o->Position[2] += 6.f;
+                    o->Angle[2] += (10.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (6.f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 45)
                 {
-                    o->Angle[2] += 10.f;
-                    o->Position[2] += 6.f;
+                    o->Angle[2] += (10.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (6.f) * FPS_ANIMATION_FACTOR;
                     //VectorCopy(o->Target->Position, o->TargetPosition);
-                    //o->TargetPosition[2] += 120.f;
+                    //o->TargetPosition[2] += (120.f);
                     //Distance = MoveHumming(o->Position, o->Angle, o->TargetPosition, o->Velocity);
                 }
                 else if (o->SubType == 12)
                 {
-                    o->Angle[2] += 15.f;
-                    o->Position[0] += o->MultiUse * rand() % 5;
-                    o->Position[1] += o->MultiUse * rand() % 5;
-                    o->Position[2] += 6.f;
+                    o->Angle[2] += (15.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (o->MultiUse * (rand() % 5)) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (o->MultiUse * (rand() % 5)) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (6.f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 16
                     || o->SubType == 46
                     )
                 {
-                    o->Angle[2] -= o->MultiUse * 20.f;
-                    o->Position[0] += o->MultiUse * (rand() % 5 + 3);
-                    o->Position[1] += o->MultiUse * (rand() % 5 + 3);
-                    o->Position[2] += 8.f;
+                    o->Angle[2] -= (o->MultiUse * 20.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (o->MultiUse * (rand() % 5 + 3)) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (o->MultiUse * (rand() % 5 + 3)) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (8.f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 13)
                 {
-                    o->Angle[2] -= 20.f;
-                    o->Position[0] += o->MultiUse * rand() % 5;
-                    o->Position[1] += o->MultiUse * rand() % 5;
-                    o->Position[2] += 6.f;
+                    o->Angle[2] -= (20.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (o->MultiUse * (rand() % 5)) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (o->MultiUse * (rand() % 5)) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (6.f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 44)
                 {
-                    o->Angle[2] -= 20.f;
-                    o->Position[0] += o->MultiUse * rand() % 5 + cosf(Q_PI / (float)(rand() % 180) * 20.0f);
-                    o->Position[1] += o->MultiUse * rand() % 5 + sinf(Q_PI / (float)(rand() % 180) * 20.0f);
-                    o->Position[2] += 6.f;
+                    o->Angle[2] -= (20.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += (o->MultiUse * (rand() % 5) + cosf(Q_PI / (float)(rand() % 180) * 20.0f)) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (o->MultiUse * (rand() % 5) + sinf(Q_PI / (float)(rand() % 180) * 20.0f)) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (6.f) * FPS_ANIMATION_FACTOR;
                 }
                 else
                 {
-                    o->Angle[2] -= 10.f;
-                    o->Position[2] += 5.f;
+                    o->Angle[2] -= (10.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (5.f) * FPS_ANIMATION_FACTOR;
                 }
             }
             else if (o->SubType == 44 && o->LifeTime <= 120 && o->LifeTime >= 10)
             {
                 if (o->LifeTime >= 20)
                 {
-                    o->Velocity += 10.f;
+                    o->Velocity += FPS_ANIMATION_FACTOR * 10.f;
                     if (o->Velocity >= 20.f) o->Velocity = 20.f;
 
                     VectorCopy(o->Target->Position, o->TargetPosition);
@@ -3306,7 +3249,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 }
                 else
                 {
-                    o->Velocity += 12.f;
+                    o->Velocity += FPS_ANIMATION_FACTOR * 12.f;
                     if (o->Velocity >= 20.f) o->Velocity = 20.f;
 
                     //VectorCopy(o->Target->Position, o->TargetPosition);
@@ -3315,9 +3258,9 @@ void MoveJoint(JOINT* o, int iIndex)
                     //o->Angle[1] = o->TargetPosition[1]-o->Position[1];
                     //o->Angle[2] = o->TargetPosition[2]-o->Position[2];
 
-                    o->Position[0] += cosf(Q_PI / (float)(rand() % 180 + 150));
-                    o->Position[1] += sinf(Q_PI / (float)(rand() % 180 + 150));
-                    //o->Position[2] += cosf(Q_PI / (float)(rand()%180));
+                    o->Position[0] += (cosf(Q_PI / (float)(rand() % 180 + 150))) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (sinf(Q_PI / (float)(rand() % 180 + 150))) * FPS_ANIMATION_FACTOR;
+                    //o->Position[2] += (cosf(Q_PI / (float)(rand()%180))) * FPS_ANIMATION_FACTOR;
 
                     Distance = MoveHumming(o->Position, o->Angle, o->TargetPosition, o->Velocity);
                 }
@@ -3328,13 +3271,13 @@ void MoveJoint(JOINT* o, int iIndex)
                     || o->SubType == 46
                     )
                 {
-                    o->Velocity += 7.f;
+                    o->Velocity += FPS_ANIMATION_FACTOR * 7.f;
                     if (o->Velocity >= 40.f)
                         o->Velocity = 40.f;
                 }
                 else
                 {
-                    o->Velocity += 5.f;
+                    o->Velocity += FPS_ANIMATION_FACTOR * 5.f;
                     if (o->Velocity >= 30.f)
                         o->Velocity = 30.f;
                 }
@@ -3347,7 +3290,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 }
                 else if (o->SubType == 7)
                 {
-                    o->Position[2] += o->Velocity;
+                    o->Position[2] += (o->Velocity) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 44)
                 {
@@ -3370,7 +3313,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 else if (Distance <= 70.0f && fabs(fOldAngle - o->Angle[2]) > 20.0f)
                 {
                     if (o->Velocity >= 20.f)
-                        o->Velocity -= 10.f;
+                        o->Velocity -= FPS_ANIMATION_FACTOR * 10.f;
                 }
             }
             Luminosity = (float)(rand() % 4 + 8) * 0.03f;
@@ -3416,15 +3359,15 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->LifeTime >= 60)
             {
-                o->Position[2] += 1.f;
-                o->Light[0] += 0.4f * 0.005f;
-                o->Light[1] += 0.3f * 0.005f;
-                o->Light[2] += 2.2f * 0.005f;
+                o->Position[2] += (1.f) * FPS_ANIMATION_FACTOR;
+                o->Light[0] += (0.4f * 0.005f) * FPS_ANIMATION_FACTOR;
+                o->Light[1] += (0.3f * 0.005f) * FPS_ANIMATION_FACTOR;
+                o->Light[2] += (2.2f * 0.005f) * FPS_ANIMATION_FACTOR;
             }
             else
             {
                 Vector(0.4f, 0.3f, 2.2f, o->Light);
-                o->Velocity += 5.f;
+                o->Velocity += FPS_ANIMATION_FACTOR * 5.f;
                 if (o->Velocity >= 30.f)
                 {
                     o->Velocity = 30.f;
@@ -3444,7 +3387,7 @@ void MoveJoint(JOINT* o, int iIndex)
             else if (Distance <= 70.0f && fabs(fOldAngle - o->Angle[2]) > 20.0f)
             {
                 if (o->Velocity >= 20.f)
-                    o->Velocity -= 10.f;
+                    o->Velocity -= FPS_ANIMATION_FACTOR * 10.f;
             }
 
             Luminosity = (float)(rand() % 4 + 8) * 0.03f;
@@ -3456,7 +3399,7 @@ void MoveJoint(JOINT* o, int iIndex)
         break;
         case 43:
         {
-            o->Velocity += 5.f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 5.f;
             if (o->Velocity >= 40.f)
             {
                 o->Velocity = 40.f;
@@ -3474,7 +3417,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 o->Live = false;
                 vec3_t vPos;
                 VectorCopy(o->Position, vPos);
-                vPos[2] -= 60.f;
+                vPos[2] -= (60.f) * FPS_ANIMATION_FACTOR;
                 CreateBomb(vPos, true, 4);
             }
             else if (Distance >= 550.0f)
@@ -3510,8 +3453,8 @@ void MoveJoint(JOINT* o, int iIndex)
             VectorCopy(o->Target->Position, o->Position);
             VectorAdd(o->TargetPosition, o->Position, o->Position);
 
-            o->Position[2] += o->Velocity;
-            o->Velocity += 10.f;
+            o->Position[2] += o->Velocity * FPS_ANIMATION_FACTOR;
+            o->Velocity += FPS_ANIMATION_FACTOR * 10.f;
             Luminosity = (12 - o->LifeTime) * 0.1f;
             Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, o->Light);
         }
@@ -3522,6 +3465,7 @@ void MoveJoint(JOINT* o, int iIndex)
         }
         else if (o->SubType == 9)
         {
+            // Ancient blur
             VectorSubtract(o->TargetPosition, o->Target->Position, Position);
             VectorCopy(o->Target->Position, o->TargetPosition);
             for (int j = o->NumTails - 1; j >= 0; j--)
@@ -3534,8 +3478,8 @@ void MoveJoint(JOINT* o, int iIndex)
             o->Position[1] = o->TargetPosition[1] + cosf(o->MultiUse * 0.1f) * o->Direction[0];
             o->Position[2] = o->TargetPosition[2] + 10 + (90 - o->LifeTime);
 
-            o->MultiUse += 2;
-            o->Direction[0] -= 1.f;
+            o->MultiUse += 2 * FPS_ANIMATION_FACTOR;
+            o->Direction[0] -= 1.f * FPS_ANIMATION_FACTOR;
 
             if (o->Direction[0] < 0)
             {
@@ -3545,13 +3489,11 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 50)
             {
-                o->Light[0] /= 1.1f;
-                o->Light[1] /= 1.1f;
-                o->Light[2] /= 1.1f;
+                VectorScale(o->Light, powf(1.f / 1.1f, FPS_ANIMATION_FACTOR), o->Light);
             }
             else if (o->LifeTime > 80)
             {
-                VectorScale(o->Light, 1.25f, o->Light);
+                VectorScale(o->Light, powf(1.f / 1.25f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 10)
@@ -3570,13 +3512,13 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->Collision)
             {
-                o->MultiUse += 2;
+                o->MultiUse += (2) * FPS_ANIMATION_FACTOR;
             }
             else
             {
-                o->MultiUse -= 2;
+                o->MultiUse -= (2) * FPS_ANIMATION_FACTOR;
             }
-            o->Direction[0] -= 1.f;
+            o->Direction[0] -= (1.f) * FPS_ANIMATION_FACTOR;
 
             if (o->Direction[0] < 0)
             {
@@ -3586,50 +3528,44 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 40)
             {
-                o->Light[0] /= 1.1f;
-                o->Light[1] /= 1.1f;
-                o->Light[2] /= 1.1f;
+                VectorScale(o->Light, powf(1.f / 1.1f, FPS_ANIMATION_FACTOR), o->Light);
             }
             else if (o->LifeTime > 68)
             {
-                VectorScale(o->Light, 1.2f, o->Light);
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 14)
         {
             if (o->LifeTime < 5)
             {
-                float fLumi = o->LifeTime / 5.f;
+                float fLumi = o->LifeTime / 5.f; VectorScale(o->Light, powf(1.f / 1.1f, FPS_ANIMATION_FACTOR), o->Light);
                 VectorScale(o->Light, fLumi, o->Light);
             }
-            o->Scale *= 1.05f;
+            o->Scale *= powf(1.05f, FPS_ANIMATION_FACTOR);
             VectorCopy(o->Target->Position, o->Position);
         }
         else if (o->SubType == 15)
         {
-            o->Velocity += 4.f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 4.f;
 
             VectorCopy(o->Target->Position, p);
 
             MoveHumming(o->Position, o->Angle, p, 10.f);
 
-            o->Light[0] /= 1.08f;
-            o->Light[1] /= 1.08f;
-            o->Light[2] /= 1.08f;
+            VectorScale(o->Light, powf(1.f / 1.08f, FPS_ANIMATION_FACTOR), o->Light);
 
             CreateSprite(BITMAP_SHINY + 1, p, (float)(rand() % 4 + 4) * 0.2f, o->Light, o->Target, (float)(rand() % 360));
         }
         else if (o->SubType == 16)
         {
-            o->Velocity += 4.f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 4.f;
 
             VectorCopy(o->Target->Position, p);
 
             MoveHumming(o->Position, o->Angle, p, 10.f);
 
-            o->Light[0] /= 1.08f;
-            o->Light[1] /= 1.08f;
-            o->Light[2] /= 1.08f;
+            VectorScale(o->Light, powf(1.f / 1.08f, FPS_ANIMATION_FACTOR), o->Light);
 
             CreateSprite(BITMAP_SHINY + 1, p, (float)(rand() % 4 + 4) * 0.2f, o->Light, o->Target, (float)(rand() % 360), 1);
         }
@@ -3637,11 +3573,11 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->SubType == 6 || o->SubType == 7)
             {
-                o->Velocity += 2.f;
+                o->Velocity += FPS_ANIMATION_FACTOR * 2.f;
             }
             else
             {
-                o->Velocity += 4.f;
+                o->Velocity += FPS_ANIMATION_FACTOR * 4.f;
             }
 
             if (o->SubType == 6 || o->SubType == 7 || o->SubType == 12)
@@ -3660,9 +3596,7 @@ void MoveJoint(JOINT* o, int iIndex)
                     }
                     else if (o->LifeTime < 6)
                     {
-                        o->Light[0] /= 1.8f;
-                        o->Light[1] /= 1.8f;
-                        o->Light[2] /= 1.8f;
+                        VectorScale(o->Light, powf(1.f / 1.8f, FPS_ANIMATION_FACTOR), o->Light);
                     }
 
                     if (o->SubType == 13)
@@ -3673,7 +3607,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 else
                 {
                     VectorCopy(o->Target->Position, p);
-                    p[2] += 120.f;
+                    p[2] += 120.f * FPS_ANIMATION_FACTOR;
 
                     MoveHumming(o->Position, o->Angle, p, 10.f);
                 }
@@ -3699,7 +3633,7 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else if (o->SubType != 7 && o->SubType != 8 && o->SubType != 12)
             {
-                if (o->LifeTime == 1)
+                if ((int)o->LifeTime == 1)
                 {
                     CreateSprite(BITMAP_SHINY + 1, p, (float)(rand() % 8 + 8) * 0.2f, o->Light, o->Target, (float)(rand() % 360));
                 }
@@ -3716,15 +3650,15 @@ void MoveJoint(JOINT* o, int iIndex)
     {
         if (o->SubType == 0)
         {
-            if (o->LifeTime % 16 <= 7)
+            if ((int)o->LifeTime % 16 <= 7)
             {
                 o->m_sTargetIndex = 10;
-                o->Angle[2] += o->m_sTargetIndex;
+                o->Angle[2] += (o->m_sTargetIndex) * FPS_ANIMATION_FACTOR;
             }
             else
             {
                 o->m_sTargetIndex = -10;
-                o->Angle[2] += o->m_sTargetIndex;
+                o->Angle[2] += (o->m_sTargetIndex) * FPS_ANIMATION_FACTOR;
             }
             CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 59, 1.0f);
         }
@@ -3759,7 +3693,9 @@ void MoveJoint(JOINT* o, int iIndex)
                 if (o->SubType == 5)
                     CreateEffect(MODEL_LASER, o->Position, o->Angle, o->Light, 3);
                 else
+                {
                     CreateEffect(MODEL_LASER, o->Position, o->Angle, o->Light);
+                }
 
                 if (battleCastle::IsBattleCastleStart())
                 {
@@ -3767,13 +3703,13 @@ void MoveJoint(JOINT* o, int iIndex)
                     if ((att & TW_NOATTACKZONE) == TW_NOATTACKZONE)
                     {
                         o->Velocity = 0.f;
-                        o->LifeTime /= 5.f;
+                        o->LifeTime *= powf(1.f / 5.f, FPS_ANIMATION_FACTOR);
                         break;
                     }
                 }
 
 #ifndef CSK_EVIL_SKILL
-                if (o->LifeTime % 15 == 0)
+                if ((int)o->LifeTime % 15 == 0)
                 {
                     if (o->Target == &Hero->Object)
                         AttackCharacterRange(o->Skill, o->Position, 150.f, o->Weapon, o->PKKey, o->m_bySkillSerialNum);
@@ -3789,10 +3725,14 @@ void MoveJoint(JOINT* o, int iIndex)
 
             Distance = sqrtf(dx * dx + dy * dy);
             if (o->SubType == 5)
+            {
                 MoveHumming(o->Position, o->Angle, o->TargetPosition, 2.f);
+            }
             else
+            {
                 MoveHumming(o->Position, o->Angle, o->TargetPosition, 10.f);
-            if (!o->Collision && Distance <= o->Velocity * 2.f)
+            }
+            if (!o->Collision && Distance <= o->Velocity * 2.f * FPS_ANIMATION_FACTOR)
             {
                 o->Collision = true;
             }
@@ -3802,12 +3742,12 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else
             {
-                o->Direction[0] += (float)(rand() % 32 - 16) * 0.2f;
-                o->Direction[2] += (float)(rand() % 32 - 16) * 0.8f;
-                o->Angle[0] += o->Direction[0];
-                o->Angle[2] += o->Direction[2];
-                o->Direction[0] *= 0.6f;
-                o->Direction[2] *= 0.8f;
+                o->Direction[0] += ((float)(rand() % 32 - 16) * 0.2f);
+                o->Direction[2] += ((float)(rand() % 32 - 16) * 0.8f);
+                o->Angle[0] += (o->Direction[0]) * FPS_ANIMATION_FACTOR;
+                o->Angle[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
+                o->Direction[0] *= 0.6f;// powf(0.6f, FPS_ANIMATION_FACTOR);
+                o->Direction[2] *= 0.8f; // powf(0.8f, FPS_ANIMATION_FACTOR);
             }
 
             Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
@@ -3850,20 +3790,20 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else if (o->Target != NULL)
             {
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     if (o->Angle[0] < -90)
-                        o->Angle[0] += 20.f;
+                        o->Angle[0] += (20.f);
                     else
-                        o->Angle[0] -= 20.f;
+                        o->Angle[0] -= (20.f);
                 }
                 float Distance;
                 if (o->SubType == 13)
                 {
                     VectorCopy(o->Target->Position, Position);
-                    Position[0] += rand() % 150 - 70.f;
-                    Position[1] += rand() % 150 - 70.f;
-                    Position[2] += 50.f;
+                    Position[0] += (rand() % 150 - 70.f) * FPS_ANIMATION_FACTOR;
+                    Position[1] += (rand() % 150 - 70.f) * FPS_ANIMATION_FACTOR;
+                    Position[2] += (50.f) * FPS_ANIMATION_FACTOR;
                     Distance = MoveHumming(o->Position, o->Angle, Position, (o->Velocity - 20));
                 }
                 else
@@ -3873,17 +3813,15 @@ void MoveJoint(JOINT* o, int iIndex)
                 if (o->Velocity > 50.f)
                     o->Velocity = 50.f;
                 else
-                    o->Velocity++;
+                    o->Velocity += FPS_ANIMATION_FACTOR;
 
                 if (Distance < 50.f)
                 {
-                    o->LifeTime--;
+                    o->LifeTime -= FPS_ANIMATION_FACTOR;
                 }
                 if (o->LifeTime < 10)
                 {
-                    o->Light[0] /= 1.2f;
-                    o->Light[1] /= 1.2f;
-                    o->Light[2] /= 1.2f;
+                    VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
                     VectorCopy(o->Light, Light);
                 }
                 if (o->SubType == 13)
@@ -3925,9 +3863,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 10)
             {
-                o->Light[0] /= 1.2f;
-                o->Light[1] /= 1.2f;
-                o->Light[2] /= 1.2f;
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
                 VectorCopy(o->Light, Light);
             }
             else if (o->LifeTime > 18 && o->LifeTime < 20 && (o->SubType == 2 || o->SubType == 21))
@@ -3949,7 +3885,7 @@ void MoveJoint(JOINT* o, int iIndex)
             else
                 CreateSprite(BITMAP_LIGHT, o->Position, (4.0f + (20 - o->LifeTime) / 5), Light, o->Target, (float)(rand() % 360), 0);
 
-            o->Velocity += 5.f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 5.f;
         }
         else if (8 == o->SubType)
         {
@@ -3959,7 +3895,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 if (o->Angle[0] <= 180.0f)
                     o->Angle[0] = 180.0f;
                 if (o->Angle[0] <= 360.0f)
-                    o->Angle[0] += rand() % 3 + 2.0f;
+                    o->Angle[0] += (rand() % 3 + 2.0f) * FPS_ANIMATION_FACTOR;
             }
             else
             {
@@ -3970,20 +3906,18 @@ void MoveJoint(JOINT* o, int iIndex)
         else if (10 == o->SubType)
         {
             o->Velocity = 50.f;
-            o->Angle[2] -= 50.0f;
+            o->Angle[2] -= (50.0f) * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 9)
         {
-            o->Position[0] += rand() % 10 - 5.f;
-            o->Position[1] += rand() % 10 - 5.f;
-            o->Position[2] += o->Velocity;
-            o->Velocity += 1.f;
+            o->Position[0] += (rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
+            o->Position[1] += (rand() % 10 - 5.f) * FPS_ANIMATION_FACTOR;
+            o->Position[2] += (o->Velocity) * FPS_ANIMATION_FACTOR;
+            o->Velocity += FPS_ANIMATION_FACTOR * 1.f;
 
             if (o->LifeTime < 10)
             {
-                o->Light[0] /= 1.15f;
-                o->Light[1] /= 1.15f;
-                o->Light[2] /= 1.15f;
+                VectorScale(o->Light, powf(1.f / 1.15f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 11)
@@ -3994,13 +3928,13 @@ void MoveJoint(JOINT* o, int iIndex)
 
             o->Angle[0] = (float)o->LifeTime;	// 임시로 -_-
             CreateParticle(BITMAP_FIRE + 1, Position, o->Angle, Light, 5, 0.9f);
-            if (rand() % 200 == 0)
+            if (rand_fps_check(200))
             {
                 CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, o->Angle, 12, NULL, 0.9f);
             }
             //			CreateSprite(BITMAP_FIRE+1,Position,2.0f,Light,o->Target,(float)(rand()%360),0);
-            o->Position[0] += cosf(o->Angle[2]) * 20.0f;
-            o->Position[1] += sinf(o->Angle[2]) * 20.0f;
+            o->Position[0] += (cosf(o->Angle[2]) * 20.0f) * FPS_ANIMATION_FACTOR;
+            o->Position[1] += (sinf(o->Angle[2]) * 20.0f) * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 12)
         {
@@ -4021,7 +3955,7 @@ void MoveJoint(JOINT* o, int iIndex)
             vec3_t Position;
             VectorCopy(o->Position, Position);
 
-            o->Angle[0] -= 2.0f;
+            o->Angle[0] -= (2.0f) * FPS_ANIMATION_FACTOR;
             int r = rand() % 5;
             if (r == 0)
                 CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, o->Light, 2);
@@ -4035,16 +3969,16 @@ void MoveJoint(JOINT* o, int iIndex)
             Vector(1, 1, 1, Light);
             vec3_t Position;
             VectorCopy(o->Position, Position);
-            o->PKKey += 30;
+            o->PKKey += (30) * FPS_ANIMATION_FACTOR;
 
             if (o->LifeTime < 35)
             {
                 CreateParticle(BITMAP_FIRE, Position, o->Angle, Light, 7, 1.0f);
 
-                if (rand() % 2 == 0)//if (o->LifeTime % 2 == 0)
+                if (rand_fps_check(2))//if ((int)o->LifeTime % 2 == 0)
                 {
-                    Position[0] -= sinf(o->Angle[2]) * (40.0f - o->PKKey * 0.1f);
-                    Position[1] += cosf(o->Angle[2]) * (40.0f - o->PKKey * 0.1f);
+                    Position[0] -= (sinf(o->Angle[2]) * (40.0f - o->PKKey * 0.1f)) * FPS_ANIMATION_FACTOR;
+                    Position[1] += (cosf(o->Angle[2]) * (40.0f - o->PKKey * 0.1f)) * FPS_ANIMATION_FACTOR;
                     Position[2] = 350;
                     vec3_t Angle;
 
@@ -4061,8 +3995,8 @@ void MoveJoint(JOINT* o, int iIndex)
                     if (o->Target->LifeTime > 5)
                         o->Target->Alpha = 1.0f;
                     VectorCopy(o->Position, Position);
-                    Position[0] += sinf(o->Angle[2]) * (30.0f + o->PKKey * 0.1f);
-                    Position[1] -= cosf(o->Angle[2]) * (30.0f + o->PKKey * 0.1f);
+                    Position[0] += (sinf(o->Angle[2]) * (30.0f + o->PKKey * 0.1f)) * FPS_ANIMATION_FACTOR;
+                    Position[1] -= (cosf(o->Angle[2]) * (30.0f + o->PKKey * 0.1f)) * FPS_ANIMATION_FACTOR;
                     //Position[2] = 350;
                     VectorCopy(Position, o->Target->Position);
                     if (o->Target->Angle[0] != 0)
@@ -4073,8 +4007,8 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             //CreateParticle(BITMAP_FIRE+1,Position,o->Angle,Light,5,0.9f);
             //			CreateSprite(BITMAP_FIRE+1,Position,2.0f,Light,o->Target,(float)(rand()%360),0);
-            o->Position[0] += sinf(o->Angle[2]) * (30.0f + o->PKKey * 0.1f);
-            o->Position[1] -= cosf(o->Angle[2]) * (30.0f + o->PKKey * 0.1f);
+            o->Position[0] += (sinf(o->Angle[2]) * (30.0f + o->PKKey * 0.1f)) * FPS_ANIMATION_FACTOR;
+            o->Position[1] -= (cosf(o->Angle[2]) * (30.0f + o->PKKey * 0.1f)) * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 16)
         {
@@ -4084,8 +4018,8 @@ void MoveJoint(JOINT* o, int iIndex)
 
             o->Angle[0] = (float)o->LifeTime;
             CreateParticle(BITMAP_WATERFALL_5, o->Position, o->Angle, o->Light, 4);
-            o->Position[0] += cosf(o->Angle[2]) * 30.0f;
-            o->Position[1] += sinf(o->Angle[2]) * 30.0f;
+            o->Position[0] += (cosf(o->Angle[2]) * 30.0f) * FPS_ANIMATION_FACTOR;
+            o->Position[1] += (sinf(o->Angle[2]) * 30.0f) * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 17)
         {
@@ -4093,7 +4027,7 @@ void MoveJoint(JOINT* o, int iIndex)
             vec3_t Position, Angle;
             VectorCopy(o->Position, Position);
 
-            if (o->LifeTime == 100)//% 10 == 0)
+            if ((int)o->LifeTime == 100)//% 10 == 0)
             {
                 for (int i = 0; i < 120; ++i)
                 {
@@ -4104,17 +4038,17 @@ void MoveJoint(JOINT* o, int iIndex)
         }
         else if (o->SubType == 18)
         {
-            o->Velocity += 3.0f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 3.0f;
             o->Angle[0] = -90.0f;
 
-            int add = o->LifeTime % 12;
+            int add = (int)o->LifeTime % 12;
             if (add <= 5)
-                o->PKKey += 6;
+                o->PKKey += (6) * FPS_ANIMATION_FACTOR;
             else
-                o->PKKey -= 6;
+                o->PKKey -= (6) * FPS_ANIMATION_FACTOR;
 
-            o->Angle[0] -= o->PKKey;
-            o->Angle[2] += 10;
+            o->Angle[0] -= (o->PKKey) * FPS_ANIMATION_FACTOR;
+            o->Angle[2] += (10) * FPS_ANIMATION_FACTOR;
 
             if (o->Target != NULL)
             {
@@ -4135,7 +4069,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 if (o->Angle[0] <= 180.0f)
                     o->Angle[0] = 180.0f;
                 if (o->Angle[0] <= 360.0f)
-                    o->Angle[0] += rand() % 3 + 2.0f;
+                    o->Angle[0] += (rand() % 3 + 2.0f) * FPS_ANIMATION_FACTOR;
             }
             else
             {
@@ -4153,16 +4087,16 @@ void MoveJoint(JOINT* o, int iIndex)
 
             vec3_t vPos;
             VectorCopy(o->TargetPosition, vPos);
-            vPos[2] += 80.f;
+            vPos[2] += (80.f) * FPS_ANIMATION_FACTOR;
 
             MoveHumming(o->Position, o->Angle, vPos, 5.f);
 
-            o->Direction[0] += (float)(rand() % 32 - 16) * 0.2f;
-            o->Direction[2] += (float)(rand() % 32 - 16) * 0.8f;
-            o->Angle[0] += o->Direction[0];
-            o->Angle[2] += o->Direction[2];
-            o->Direction[0] *= 0.6f;
-            o->Direction[2] *= 0.8f;
+            o->Direction[0] += ((float)(rand() % 32 - 16) * 0.2f) * FPS_ANIMATION_FACTOR;
+            o->Direction[2] += ((float)(rand() % 32 - 16) * 0.8f) * FPS_ANIMATION_FACTOR;
+            o->Angle[0] += (o->Direction[0]) * FPS_ANIMATION_FACTOR;
+            o->Angle[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
+            o->Direction[0] *= powf(0.6f, FPS_ANIMATION_FACTOR);
+            o->Direction[2] *= powf(0.8f, FPS_ANIMATION_FACTOR);
 
             if (o->LifeTime < 30)
                 Luminosity = o->LifeTime / 30.f;
@@ -4182,27 +4116,25 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->LifeTime < 10)
             {
-                o->Light[0] /= 1.45f;
-                o->Light[1] /= 1.45f;
-                o->Light[2] /= 1.45f;
+                VectorScale(o->Light, powf(1.f / 1.45f, FPS_ANIMATION_FACTOR), o->Light);
 
                 if (o->Light[0] < 0.2f)
                     o->Live = false;
             }
             else
             {
-                o->Position[0] += rand() % 16 - 8.f;
-                o->Position[1] += rand() % 16 - 8.f;
-                o->Position[2] += o->Velocity;
-                //o->Velocity += 1.f;
+                o->Position[0] += (rand() % 16 - 8.f) * FPS_ANIMATION_FACTOR;
+                o->Position[1] += (rand() % 16 - 8.f) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += (o->Velocity) * FPS_ANIMATION_FACTOR;
+                //o->Velocity += FPS_ANIMATION_FACTOR * 1.f;
 
-                o->Scale += 3.0f;
+                o->Scale += (3.0f) * FPS_ANIMATION_FACTOR;
             }
 
             CreateSprite(BITMAP_LIGHT, o->Position, 0.5f, o->Light, o->Target);
             CreateSprite(BITMAP_DS_SHOCK, o->Position, 0.15f, o->Light, o->Target);
 
-            if (o->LifeTime == 10)
+            if ((int)o->LifeTime == 10)
             {
                 CreateEffect(BITMAP_FIRECRACKER0002, o->Position, o->Angle, o->Light, o->Skill);
             }
@@ -4211,22 +4143,22 @@ void MoveJoint(JOINT* o, int iIndex)
     case BITMAP_JOINT_SPARK:
         if (o->SubType == 1)
         {
-            o->Velocity += 0.3f;
-            o->Light[0] /= 1.4f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 0.3f;
+            o->Light[0] *= powf(1.f / 1.4f, FPS_ANIMATION_FACTOR);
             o->Light[1] = o->Light[0];
             o->Light[2] = o->Light[0];
         }
         else if (o->SubType == 3)
         {
-            o->Velocity += 0.1f;
-            o->Light[0] /= 1.1f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 0.1f;
+            o->Light[0] *= powf(1.f / 1.1f, FPS_ANIMATION_FACTOR);
             o->Light[1] = o->Light[0];
             o->Light[2] = o->Light[0];
         }
         else if (o->SubType == 4)
         {
-            o->Velocity += 0.1f;
-            o->Light[0] /= 1.1f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 0.1f;
+            o->Light[0] *= powf(1.f / 1.1f, FPS_ANIMATION_FACTOR);
             o->Light[1] = o->Light[0];
             o->Light[2] = o->Light[0];
         }
@@ -4250,9 +4182,9 @@ void MoveJoint(JOINT* o, int iIndex)
         Luminosity = (float)(rand() % 4 + 4) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 4, PrimaryTerrainLight);
-        Vector(0.f, -o->Velocity, 0.f, Position);
+        Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, Position);
         VectorRotate(Position, Matrix, p);
-        VectorAdd(o->Position, p, o->Position);
+        VectorAddScaled(o->Position, p, o->Position, FPS_ANIMATION_FACTOR);
         break;
     case MODEL_SPEARSKILL:	// 방어막
         CHARACTER* c;
@@ -4307,7 +4239,7 @@ void MoveJoint(JOINT* o, int iIndex)
             VectorAdd(MagicPos, o->TargetPosition, MagicPos);
             vec3_t TargetPos;
             VectorCopy(o->Target->m_vPosSword, TargetPos);
-            //TargetPos[2] += 120.0f;
+            //TargetPos[2] += (120.0f) * FPS_ANIMATION_FACTOR;
 
             for (int i = 0; i < 3; ++i)
             {
@@ -4322,16 +4254,16 @@ void MoveJoint(JOINT* o, int iIndex)
                 o->Live = false;
                 break;
             }
-            if ((rand() % 5) == 0)
+            if (rand_fps_check(5))
             {
-                o->LifeTime -= 5;
+                o->LifeTime -= 5 * FPS_ANIMATION_FACTOR;
             }
-            else if ((rand() % 2) == 0)
+            else if (rand_fps_check(2))
             {
-                o->LifeTime++;
+                o->LifeTime += FPS_ANIMATION_FACTOR;
             }
             o->Direction[0] = sinf((o->LifeTime - o->Direction[1]) * 0.05f) * 3.f;
-            o->Position[0] += o->Direction[0];
+            o->Position[0] += (o->Direction[0]) * FPS_ANIMATION_FACTOR;
 
             float fAlpha;
             if (o->Target != NULL)
@@ -4356,7 +4288,7 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             for (int i = 0; i < 3; ++i)
             {
-                o->Angle[2] += 10.f;
+                o->Angle[2] += (10.f) * FPS_ANIMATION_FACTOR;
                 AngleMatrix(o->Angle, Matrix);
                 VectorRotate(o->Direction, Matrix, Position);
                 VectorAdd(o->StartPosition, Position, o->Position);
@@ -4364,14 +4296,14 @@ void MoveJoint(JOINT* o, int iIndex)
 
                 if (o->Weapon == 0)
                 {
-                    o->Direction[1] *= 0.95f;
+                    o->Direction[1] *= powf(0.95f, FPS_ANIMATION_FACTOR);
                     if (o->Direction[1] < 10.f) o->Direction[1] = -10.f;
                 }
                 if (o->Weapon > 40)
                 {
-                    o->Direction[1] -= 20.f;
-                    o->Angle[2] -= 5.f;
-                    o->Scale += 15.f;
+                    o->Direction[1] -= (20.f) * FPS_ANIMATION_FACTOR;
+                    o->Angle[2] -= (5.f) * FPS_ANIMATION_FACTOR;
+                    o->Scale += (15.f) * FPS_ANIMATION_FACTOR;
                 }
                 if (o->Direction[1] < 0)
                 {
@@ -4379,7 +4311,7 @@ void MoveJoint(JOINT* o, int iIndex)
                     {
                         CreateEffect(BITMAP_SHOCK_WAVE, o->StartPosition, o->Angle, o->Light, 3);
                     }
-                    o->Weapon++;
+                    o->Weapon += FPS_ANIMATION_FACTOR;
 
                     if (o->Weapon < 20)
                     {
@@ -4388,27 +4320,27 @@ void MoveJoint(JOINT* o, int iIndex)
                     }
                     else
                     {
-                        o->StartPosition[2] += 5.f;
+                        o->StartPosition[2] += (5.f) * FPS_ANIMATION_FACTOR;
                     }
                 }
             }
+
             if (o->LifeTime < 10)
             {
-                o->Light[0] /= 1.2f;
-                o->Light[1] /= 1.2f;
-                o->Light[2] /= 1.2f;
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
             }
-            o->Scale -= 5.f;
+
+            o->Scale -= (5.f) * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 8)
         {
-            o->Angle[2] += 25.f;
+            o->Angle[2] += (25.f) * FPS_ANIMATION_FACTOR;
             AngleMatrix(o->Angle, Matrix);
             VectorRotate(o->Direction, Matrix, Position);
             VectorAdd(o->StartPosition, Position, o->Position);
             CreateTail(o, Matrix);
 
-            o->StartPosition[2] += 15.f;
+            o->StartPosition[2] += (15.f) * FPS_ANIMATION_FACTOR;
         }
         else
         {
@@ -4425,9 +4357,9 @@ void MoveJoint(JOINT* o, int iIndex)
                 Vector(fLumi * 1.5f, fLumi * 0.6f, fLumi * 0.6f, Light);
                 AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
 
-                if (rand() % 10 == 0)
+                if (rand_fps_check(10))
                 {
-                    fLumi *= 0.2f;
+                    fLumi *= powf(0.2f, FPS_ANIMATION_FACTOR);
                     Vector(0.9f + fLumi, 0.5f + fLumi, 0.5f + fLumi, Light);
                     CreateParticle(BITMAP_SPARK + 1, o->Position, o->Angle, Light, 19);
                 }
@@ -4530,6 +4462,7 @@ void MoveJoint(JOINT* o, int iIndex)
             vDir[2] = vDirTemp[0];
             vDir[1] = fSinAdd * vDirTemp[1] + fCosAdd * vDirTemp[2];
             vDir[0] = fCosAdd * vDirTemp[1] - fSinAdd * vDirTemp[2];
+            // VectorScale(vDir, FPS_ANIMATION_FACTOR, vDir);
 
             switch (o->SubType)
             {
@@ -4653,7 +4586,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     CreateParticle(BITMAP_ENERGY, o->Position, o->Angle, o->Light);
                     vec3_t Position;
-                    if (rand() % 8 == 0)
+                    if (rand_fps_check(8))
                     {
                         Vector((float)(rand() % 64 - 32), (float)(rand() % 64 - 32), (float)(rand() % 64 - 32), Position);
                         VectorAdd(Position, o->TargetPosition, Position);
@@ -4670,9 +4603,9 @@ void MoveJoint(JOINT* o, int iIndex)
                 AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
             }
 
-            Vector(0.f, -o->Velocity, 0.f, Position);
+            Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, Position);
             VectorRotate(Position, Matrix, p);
-            VectorAdd(o->Position, p, o->Position);
+            VectorAddScaled(o->Position, p, o->Position, FPS_ANIMATION_FACTOR);
         }
         break;
     case BITMAP_BLUR + 1:
@@ -4688,11 +4621,12 @@ void MoveJoint(JOINT* o, int iIndex)
                 VectorCopy(o->Target->Position, o->TargetPosition);
                 o->TargetPosition[2] += 80.f;
             }
+
             Distance = MoveHumming(o->Position, o->Angle, o->TargetPosition, 25.f);
             //float Distance = MoveHumming(o,0.f);
-            o->Direction[0] += (float)(rand() % 256 - 128) / o->Scale;
-            o->Direction[2] += (float)(rand() % 256 - 128) / o->Scale;
-            VectorScale(o->Direction, 0.8f, o->Direction);
+            o->Direction[0] += (float)(FPS_ANIMATION_FACTOR * (rand() % 256 - 128) / o->Scale);
+            o->Direction[2] += (float)(FPS_ANIMATION_FACTOR * (rand() % 256 - 128) / o->Scale);
+            VectorScale(o->Direction, powf(0.8f, FPS_ANIMATION_FACTOR), o->Direction);
 
             vec3_t Angle;
             VectorAdd(o->Angle, o->Direction, Angle);
@@ -4700,10 +4634,10 @@ void MoveJoint(JOINT* o, int iIndex)
             AngleMatrix(Angle, Matrix);
             CreateTail(o, Matrix);
 
-            if (Distance <= o->Velocity * 2.f)
+            if (Distance <= o->Velocity * 2.f * FPS_ANIMATION_FACTOR)
             {
                 vec3_t Position;
-                if (rand() % 2 == 0)
+                if (rand_fps_check(2))
                 {
                     Vector((float)(rand() % 64 - 32), (float)(rand() % 64 - 32), (float)(rand() % 64 - 32), Position);
                     VectorAdd(Position, o->TargetPosition, Position);
@@ -4735,9 +4669,10 @@ void MoveJoint(JOINT* o, int iIndex)
                 Vector(Luminosity * 0.f, Luminosity * 0.1f, Luminosity * 0.2f, Light);
             }
             AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
-            Vector(0.f, -o->Velocity, 0.f, Position);
+            Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, Position);
             VectorRotate(Position, Matrix, p);
-            VectorAdd(o->Position, p, o->Position);
+            VectorScale(p, FPS_ANIMATION_FACTOR, p)
+            VectorAddScaled(o->Position, p, o->Position, FPS_ANIMATION_FACTOR);
         }
         break;
     case BITMAP_JOINT_THUNDER:
@@ -4752,7 +4687,7 @@ void MoveJoint(JOINT* o, int iIndex)
             if (o->SubType == 4)
             {
                 VectorCopy(o->TargetPosition, Position);
-                Position[2] += 30.f;
+                Position[2] += (30.f) * FPS_ANIMATION_FACTOR;
                 CreateSprite(BITMAP_SHINY + 1, Position, (float)(rand() % 8 + 8) * 0.2f, o->Light, NULL, (float)(rand() % 360));
             }
             break;
@@ -4814,9 +4749,9 @@ void MoveJoint(JOINT* o, int iIndex)
 
             case 6:
                 VectorCopy(o->Target->Position, o->TargetPosition);
-                o->TargetPosition[0] += (2050.f + rand() % 200);
-                o->TargetPosition[1] += (2050.f + rand() % 200);
-                o->TargetPosition[2] -= 10000.f;
+                o->TargetPosition[0] += ((2050.f + rand() % 200)) * FPS_ANIMATION_FACTOR;
+                o->TargetPosition[1] += ((2050.f + rand() % 200)) * FPS_ANIMATION_FACTOR;
+                o->TargetPosition[2] -= (10000.f) * FPS_ANIMATION_FACTOR;
 
                 Distance = MoveHumming(o->Position, o->Angle, o->TargetPosition, (float)(rand() % 100 + 50));//-25.f);
                 break;
@@ -4872,7 +4807,7 @@ void MoveJoint(JOINT* o, int iIndex)
                         else if (o->SubType == 24)
                         {
                             VectorCopy(pSourceObj->Position, vPos);
-                            vPos[2] += 80.0f;
+                            vPos[2] += (80.0f) * FPS_ANIMATION_FACTOR;
                         }
 
                         o->Direction[0] = (float)(rand() % 1024 - 512 / o->Scale);
@@ -4958,7 +4893,7 @@ void MoveJoint(JOINT* o, int iIndex)
             }
 
             vec3_t Angle;
-            VectorAdd(o->Angle, o->Direction, Angle);
+            VectorAddScaled(o->Angle, o->Direction, Angle, FPS_ANIMATION_FACTOR);
             float Matrix[3][4];
             AngleMatrix(Angle, Matrix);
             CreateTail(o, Matrix);
@@ -4977,7 +4912,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     CreateParticle(BITMAP_ENERGY, o->Position, o->Angle, o->Light);
                     vec3_t Position;
-                    if (rand() % 8 == 0)
+                    if (rand_fps_check(8))
                     {
                         Vector((float)(rand() % 64 - 32), (float)(rand() % 64 - 32), (float)(rand() % 64 - 32), Position);
                         VectorAdd(Position, o->TargetPosition, Position);
@@ -4985,7 +4920,7 @@ void MoveJoint(JOINT* o, int iIndex)
                     }
                     if (o->SubType == 0 || o->SubType == 27)
                     {
-                        if ((int)WorldTime % 1000 < 500 && rand() % 16 == 0)
+                        if ((int)WorldTime % 1000 < 500 && rand_fps_check(16))
                         {
                             Vector((float)(rand() % 100 - 50), (float)(rand() % 100 - 50), (float)(rand() % 120 - 60), Position);
                             VectorAdd(Position, o->TargetPosition, Position);
@@ -5018,16 +4953,16 @@ void MoveJoint(JOINT* o, int iIndex)
                 }
             }
 
-            Vector(0.f, -o->Velocity, 0.f, Position);
+            Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, Position);
             VectorRotate(Position, Matrix, p);
-            VectorAdd(o->Position, p, o->Position);
+            VectorAddScaled(o->Position, p, o->Position, FPS_ANIMATION_FACTOR);
         }
         if (o->SubType == 7 || o->SubType == 18)
         {
             VectorCopy(o->TargetPosition, o->Position);
         }
 
-        else if (o->SubType == 15 && (o->LifeTime % 2) == 0)
+        else if (o->SubType == 15 && ((int)o->LifeTime % 2) == 0)
         {
             CreateJoint(BITMAP_JOINT_THUNDER, o->Position, o->StartPosition, o->Angle, 0, NULL, 50.f);
             CreateJoint(BITMAP_JOINT_THUNDER, o->Position, o->StartPosition, o->Angle, 0, NULL, 10.f);
@@ -5035,7 +4970,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             vec3_t Angle;
             VectorCopy(o->StartPosition, Position);
-            Position[2] += 100.f;
+            Position[2] += (100.f) * FPS_ANIMATION_FACTOR;
 
             for (int i = 0; i < o->MultiUse; ++i)
             {
@@ -5061,8 +4996,8 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->MultiUse < o->Weapon)
             {
-                if ((o->LifeTime % 2) == 0)
-                    o->MultiUse++;
+                if (((int)o->LifeTime % 2) == 0)
+                    o->MultiUse+=FPS_ANIMATION_FACTOR;
             }
         }
         break;
@@ -5090,16 +5025,16 @@ void MoveJoint(JOINT* o, int iIndex)
                     AngleMatrix(Angle, Matrix);
                     CreateTail(o, Matrix);
 
-                    Vector(0.f, -o->Velocity, 0.f, p);
+                    Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, p);
                     vec3_t vTempPos;
                     VectorCopy(p, vTempPos);
                     VectorRotate(vTempPos, Matrix, p);
-                    VectorAdd(o->Position, p, o->Position);
+                    VectorAddScaled(o->Position, p, o->Position, FPS_ANIMATION_FACTOR);
                 }
             }
             else
             {
-                o->Light[2] -= 10.12f;
+                o->Light[2] -= (10.12f) * FPS_ANIMATION_FACTOR;
             }
         }
         else if (o->SubType == 1 || o->SubType == 2 || o->SubType == 3 || o->SubType == 5 || o->SubType == 6 || o->SubType == 7) //  위에서 아래로 내려오는 번개.
@@ -5111,22 +5046,22 @@ void MoveJoint(JOINT* o, int iIndex)
             {
                 if (o->SubType == 6)
                 {
-                    o->Position[0] += rand() % 20 - 10;
-                    o->Position[1] += rand() % 20 - 10;
-                    o->Position[2] -= 13.f;
+                    o->Position[0] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] -= (13.f) * FPS_ANIMATION_FACTOR;
                 }
                 else
                 {
-                    o->Position[0] += rand() % 20 - 10;
-                    o->Position[1] += rand() % 20 - 10;
+                    o->Position[0] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
 
                     if (o->SubType == 7)
                     {
-                        o->Position[2] -= 20.0f;
+                        o->Position[2] -= (20.0f) * FPS_ANIMATION_FACTOR;
                     }
                     else
                     {
-                        o->Position[2] -= 16.f;
+                        o->Position[2] -= (16.f) * FPS_ANIMATION_FACTOR;
                     }
                 }
                 CreateTail(o, Matrix);
@@ -5136,9 +5071,9 @@ void MoveJoint(JOINT* o, int iIndex)
 
             for (int i = o->MaxTails - 5; i < o->MaxTails - 1; ++i)
             {
-                VectorAdd(o->Position, Position, o->Position);
-                o->Position[0] += rand() % 20 - 10;
-                o->Position[1] += rand() % 20 - 10;
+                VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                o->Position[0] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
+                o->Position[1] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
                 CreateTail(o, Matrix);
             }
             VectorCopy(o->TargetPosition, o->Position);
@@ -5146,9 +5081,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 4)
             {
-                o->Light[0] /= 1.2f;
-                o->Light[1] /= 1.2f;
-                o->Light[2] /= 1.2f;
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
             }
 
             if (o->SubType == 2)
@@ -5184,10 +5117,10 @@ void MoveJoint(JOINT* o, int iIndex)
                 for (int i = 0; i < o->TargetIndex[0]; ++i)
                 {
                     CreateTail(o, Matrix);
-                    VectorAdd(o->Position, Position, o->Position);
-                    o->Position[0] += rand() % 20 - 10;
-                    o->Position[1] += rand() % 20 - 10;
-                    o->Position[2] += rand() % 20 - 10;
+                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                    o->Position[0] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
                 }
 
                 float width = o->TargetIndex[1] / 2.f;
@@ -5197,7 +5130,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
                 for (int i = o->TargetIndex[0]; i < o->TargetIndex[1]; ++i)
                 {
-                    VectorAdd(o->Position, Position, o->Position);
+                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
                     CreateTail(o, Matrix);
                 }
                 VectorCopy(o->TargetPosition, o->Position);
@@ -5207,9 +5140,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 CreateSprite(BITMAP_SHINY + 1, o->TargetPosition, 1.5f, o->Light, NULL, (float)((rand() % 360)));
                 if (o->LifeTime < 8)
                 {
-                    o->Light[0] /= 1.4f;
-                    o->Light[1] /= 1.4f;
-                    o->Light[2] /= 1.4f;
+                    VectorScale(o->Light, powf(1.f / 1.4f, FPS_ANIMATION_FACTOR), o->Light);
                 }
             }
             else
@@ -5223,9 +5154,9 @@ void MoveJoint(JOINT* o, int iIndex)
             AngleMatrix(o->Angle, Matrix);
             for (int i = 0; i < o->MaxTails - 5; ++i)
             {
-                o->Position[0] += rand() % 10 - 5;
-                o->Position[1] += rand() % 10 - 5;
-                o->Position[2] -= 20.0f;
+                o->Position[0] += (rand() % 10 - 5) * FPS_ANIMATION_FACTOR;
+                o->Position[1] += (rand() % 10 - 5) * FPS_ANIMATION_FACTOR;
+                o->Position[2] -= (20.0f) * FPS_ANIMATION_FACTOR;
                 CreateTail(o, Matrix);
             }
             VectorSubtract(o->TargetPosition, o->Position, Position);
@@ -5233,9 +5164,9 @@ void MoveJoint(JOINT* o, int iIndex)
 
             for (int i = o->MaxTails - 5; i < o->MaxTails - 1; ++i)
             {
-                VectorAdd(o->Position, Position, o->Position);
-                o->Position[0] += rand() % 10 - 5;
-                o->Position[1] += rand() % 10 - 5;
+                VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                o->Position[0] += (rand() % 10 - 5) * FPS_ANIMATION_FACTOR;
+                o->Position[1] += (rand() % 10 - 5) * FPS_ANIMATION_FACTOR;
                 CreateTail(o, Matrix);
             }
             VectorCopy(o->TargetPosition, o->Position);
@@ -5243,9 +5174,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 4)
             {
-                o->Light[0] /= 1.2f;
-                o->Light[1] /= 1.2f;
-                o->Light[2] /= 1.2f;
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 9)
@@ -5254,7 +5183,7 @@ void MoveJoint(JOINT* o, int iIndex)
             AngleMatrix(o->Angle, Matrix);
             for (int i = 0; i < o->MaxTails - 5; ++i)
             {
-                o->Position[0] += 21.0f;
+                o->Position[0] += (21.0f) * FPS_ANIMATION_FACTOR;
                 CreateTail(o, Matrix);
             }
             VectorSubtract(o->TargetPosition, o->Position, Position);
@@ -5262,9 +5191,9 @@ void MoveJoint(JOINT* o, int iIndex)
 
             for (int i = o->MaxTails - 5; i < o->MaxTails - 1; ++i)
             {
-                VectorAdd(o->Position, Position, o->Position);
-                o->Position[1] += rand() % 20 - 10;
-                o->Position[2] += rand() % 20 - 10;
+                VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                o->Position[1] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
                 CreateTail(o, Matrix);
             }
             VectorCopy(o->TargetPosition, o->Position);
@@ -5272,9 +5201,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 4)
             {
-                o->Light[0] /= 1.2f;
-                o->Light[1] /= 1.2f;
-                o->Light[2] /= 1.2f;
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 10)
@@ -5283,7 +5210,7 @@ void MoveJoint(JOINT* o, int iIndex)
             AngleMatrix(o->Angle, Matrix);
             for (int i = 0; i < o->MaxTails - 5; ++i)
             {
-                o->Position[1] += 20.0f;
+                o->Position[1] += (20.0f) * FPS_ANIMATION_FACTOR;
                 CreateTail(o, Matrix);
             }
             VectorSubtract(o->TargetPosition, o->Position, Position);
@@ -5291,9 +5218,9 @@ void MoveJoint(JOINT* o, int iIndex)
 
             for (int i = o->MaxTails - 5; i < o->MaxTails - 1; ++i)
             {
-                VectorAdd(o->Position, Position, o->Position);
-                o->Position[0] += rand() % 20 - 10;
-                o->Position[2] += rand() % 20 - 10;
+                VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
+                o->Position[0] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += (rand() % 20 - 10) * FPS_ANIMATION_FACTOR;
                 CreateTail(o, Matrix);
             }
             VectorCopy(o->TargetPosition, o->Position);
@@ -5301,9 +5228,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 4)
             {
-                o->Light[0] /= 1.2f;
-                o->Light[1] /= 1.2f;
-                o->Light[2] /= 1.2f;
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 11)
@@ -5316,7 +5241,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             for (int i = 0; i < o->MaxTails - 5; i++)
             {
-                VectorAdd(o->Position, p2, o->Position);
+                VectorAddScaled(o->Position, p2, o->Position, FPS_ANIMATION_FACTOR);
                 CreateTail(o, Matrix);
                 VectorCopy(o->Position, o->TargetPosition);
             }
@@ -5325,11 +5250,11 @@ void MoveJoint(JOINT* o, int iIndex)
             for (int i = 0; i < o->MaxTails - 5; i++)
             {
                 int iScale = 1;
-                VectorAdd(o->Position, p2, o->Position);
+                VectorAddScaled(o->Position, p2, o->Position, FPS_ANIMATION_FACTOR);
                 iScale = (int)(o->Scale / 8.0f);
-                o->Position[0] += rand() % (iScale * 2) - iScale;
-                o->Position[1] += rand() % (iScale * 2) - iScale;
-                o->Position[2] += rand() % (iScale * 2) - iScale;
+                o->Position[0] += (rand() % (iScale * 2) - iScale) * FPS_ANIMATION_FACTOR;
+                o->Position[1] += (rand() % (iScale * 2) - iScale) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += (rand() % (iScale * 2) - iScale) * FPS_ANIMATION_FACTOR;
                 CreateTail(o, Matrix);
             }
             VectorCopy(o->TargetPosition, o->Position);
@@ -5343,13 +5268,13 @@ void MoveJoint(JOINT* o, int iIndex)
             {
                 int iScale = 1;
                 iScale = (int)(o->Scale / 5.0f);
-                o->Position[0] += rand() % (iScale * 2) - iScale;
-                o->Position[1] += rand() % (iScale * 2) - iScale;
-                o->Position[2] += rand() % (iScale * 2) - iScale;
+                o->Position[0] += (rand() % (iScale * 2) - iScale) * FPS_ANIMATION_FACTOR;
+                o->Position[1] += (rand() % (iScale * 2) - iScale) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += (rand() % (iScale * 2) - iScale) * FPS_ANIMATION_FACTOR;
                 CreateTail(o, Matrix);
                 VectorSubtract(o->TargetPosition, o->Position, Position);
                 VectorScale(Position, 0.08f, Position);
-                VectorAdd(o->Position, Position, o->Position);
+                VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
             }
             VectorCopy(o->TargetPosition, o->Position);
             CreateTail(o, Matrix);
@@ -5371,15 +5296,15 @@ void MoveJoint(JOINT* o, int iIndex)
     case BITMAP_SPARK + 1:
         if (o->SubType == 0)
         {
-            o->Direction[2] += 5.f;
+            o->Direction[2] += (5.f) * FPS_ANIMATION_FACTOR;
             o->Position[0] = o->TargetPosition[0];
             o->Position[1] = o->TargetPosition[1];
-            o->Position[2] += o->Direction[2];
+            o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
         }
         if (o->SubType == 1)
         {
-            o->Velocity += 0.1f;
-            o->Light[0] /= 1.1f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 0.1f;
+            o->Light[0] *= powf(1.f / 1.1f, FPS_ANIMATION_FACTOR);
             o->Light[1] = o->Light[0];
             o->Light[2] = o->Light[0];
         }
@@ -5387,9 +5312,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 5)
             {
-                o->Light[0] /= 1.3f;
-                o->Light[1] /= 1.3f;
-                o->Light[2] /= 1.3f;
+                VectorScale(o->Light, powf(1.f / 1.3f, FPS_ANIMATION_FACTOR), o->Light);
             }
         break;
     case BITMAP_FLARE:
@@ -5406,7 +5329,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 count = (o->Direction[1] + (o->LifeTime * 2)) * 0.1f;
                 if (o->Skill == 1)
                 {
-                    count *= -1;
+                    count *= powf(-1, FPS_ANIMATION_FACTOR);
                 }
             }
             else
@@ -5417,14 +5340,14 @@ void MoveJoint(JOINT* o, int iIndex)
             o->Position[1] = o->TargetPosition[1] - sinf(count) * o->Velocity;
 
             if (o->SubType == 0)
-                o->Position[2] += o->Direction[2];
+                o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             else if (o->SubType == 10)
-                o->Position[2] -= o->Direction[2];
+                o->Position[2] -= (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             else if (o->SubType == 18)
             {
-                o->Position[2] += (o->Direction[2] * 1.1f);
-                o->Velocity += 0.1f;
-                o->Scale += 0.2f;
+                o->Position[2] += ((o->Direction[2] * 1.1f)) * FPS_ANIMATION_FACTOR;
+                o->Velocity += FPS_ANIMATION_FACTOR * 0.1f;
+                o->Scale += (0.2f) * FPS_ANIMATION_FACTOR;
             }
         }
         else if (o->SubType == 20)
@@ -5449,35 +5372,35 @@ void MoveJoint(JOINT* o, int iIndex)
                 count = o->Direction[1] * 0.1f;
                 if (o->SubType == 15)
                 {
-                    count *= -1;
+                    count *= powf(-1, FPS_ANIMATION_FACTOR);
                 }
                 o->Position[0] = o->TargetPosition[0] + cosf(count) * o->Velocity;
                 o->Position[1] = o->TargetPosition[1] - sinf(count) * o->Velocity;
-                o->Position[2] += o->Direction[2];
+                o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
                 if (o->LifeTime < 20)
                 {
-                    o->Velocity += 5.f;
+                    o->Velocity += FPS_ANIMATION_FACTOR * 5.f;
                 }
-                o->Scale += 1;
-                o->Direction[1] += 4;
-                o->Direction[2] += (rand() % 200 + 200) / 100.f;
+                o->Scale += (1) * FPS_ANIMATION_FACTOR;
+                o->Direction[1] += (4) * FPS_ANIMATION_FACTOR;
+                o->Direction[2] += ((rand() % 200 + 200) / 100.f) * FPS_ANIMATION_FACTOR;
             }
         }
         else if (o->SubType == 2 || o->SubType == 24 || o->SubType == 50 || o->SubType == 51)
         {
             if (o->SubType == 51)
             {
-                o->Direction[2] += 10.f;
+                o->Direction[2] += (10.f) * FPS_ANIMATION_FACTOR;
                 o->Position[0] = o->TargetPosition[0];
                 o->Position[1] = o->TargetPosition[1];
-                o->Position[2] += o->Direction[2];
+                o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             }
             if (o->LifeTime <= 25 || o->SubType == 50)
             {
-                o->Direction[2] += 5.f;
+                o->Direction[2] += (5.f) * FPS_ANIMATION_FACTOR;
                 o->Position[0] = o->TargetPosition[0];
                 o->Position[1] = o->TargetPosition[1];
-                o->Position[2] += o->Direction[2];
+                o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             }
         }
 #ifdef GUILD_WAR_EVENT
@@ -5485,20 +5408,20 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->LifeTime <= 25)
             {
-                o->Direction[2] += 5.f;
+                o->Direction[2] += (5.f) * FPS_ANIMATION_FACTOR;
                 o->Position[0] = o->TargetPosition[0];
                 o->Position[1] = o->TargetPosition[1];
-                o->Position[2] += o->Direction[2];
+                o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             }
         }
         else if (o->SubType == 22)
         {
             if (o->LifeTime <= 25)
             {
-                o->Direction[2] += 5.f;
+                o->Direction[2] += (5.f) * FPS_ANIMATION_FACTOR;
                 o->Position[0] = o->TargetPosition[0];
                 o->Position[1] = o->TargetPosition[1];
-                o->Position[2] += o->Direction[2];
+                o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             }
         }
 #endif //GUILD_WAR_EVENT
@@ -5506,19 +5429,17 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->LifeTime <= 20)
             {
-                o->Direction[2] += 1.f;
+                o->Direction[2] += (1.f) * FPS_ANIMATION_FACTOR;
                 o->Position[0] = o->TargetPosition[0];
                 o->Position[1] = o->TargetPosition[1];
-                o->Position[2] += o->Direction[2];
-                o->Light[0] /= 1.1f;
-                o->Light[1] /= 1.1f;
-                o->Light[2] /= 1.1f;
+                o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
+                VectorScale(o->Light, powf(1.f / 1.1f, FPS_ANIMATION_FACTOR), o->Light);
             }
             AddTerrainLight(o->Position[0], o->Position[1], o->Light, 1, PrimaryTerrainLight);
         }
         else if (o->SubType == 42)
         {
-            o->Angle[2] += 15.f;
+            o->Angle[2] += (15.f) * FPS_ANIMATION_FACTOR;
 
             if (o->Target->Live)
                 o->LifeTime = 100.f;
@@ -5545,10 +5466,10 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->LifeTime <= 25)
             {
-                o->Direction[2] -= 5.f;
+                o->Direction[2] -= (5.f) * FPS_ANIMATION_FACTOR;
                 o->Position[0] = o->TargetPosition[0];
                 o->Position[1] = o->TargetPosition[1];
-                o->Position[2] += o->Direction[2];
+                o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             }
         }
         else if (o->SubType == 40)
@@ -5558,7 +5479,9 @@ void MoveJoint(JOINT* o, int iIndex)
             vec3_t vPos;
             vec3_t backPos;
             o->m_bCreateTails = false;
-            if (o->NumTails != 0) o->NumTails = 0;
+            o->NumTails = 0;
+            
+
             VectorCopy(o->Position, backPos);
             for (int i = 0; i < MAX_TAILS; ++i)
             {
@@ -5568,18 +5491,18 @@ void MoveJoint(JOINT* o, int iIndex)
                 vPos[0] = rCos * cosf((90.f - o->Angle[2]) * Q_PI / 180.f);
                 vPos[1] = rCos * sinf((90.f - o->Angle[2]) * Q_PI / 180.f);
                 vPos[2] = rSin;
-                o->TargetPosition[0] += o->Direction[0] * (lMax - o->LifeTime);
-                o->TargetPosition[1] += o->Direction[1] * (lMax - o->LifeTime);
+                o->TargetPosition[0] += (o->Direction[0] * (lMax - o->LifeTime)) * FPS_ANIMATION_FACTOR;
+                o->TargetPosition[1] += (o->Direction[1] * (lMax - o->LifeTime)) * FPS_ANIMATION_FACTOR;
                 VectorAdd(o->TargetPosition, vPos, o->Position);
                 AngleMatrix(o->Angle, Matrix);
                 CreateTail(o, Matrix);
             }
             VectorCopy(backPos, o->Position);
-            o->Position[0] += o->Direction[0] * 12;
-            o->Position[1] += o->Direction[1] * 12;
+            o->Position[0] += (o->Direction[0] * 12) * FPS_ANIMATION_FACTOR;
+            o->Position[1] += (o->Direction[1] * 12) * FPS_ANIMATION_FACTOR;
             VectorCopy(o->Position, o->TargetPosition);
 
-            o->Scale *= 1.1f;
+            o->Scale *= powf(1.1f, FPS_ANIMATION_FACTOR);
             o->Light[0] = 0.5f + (float)(rand() % 64) / 255;
             o->Light[1] = 0.5f + (float)(rand() % 64) / 255;
             o->Light[2] = 0.5f + (float)(rand() % 128) / 255;
@@ -5614,18 +5537,18 @@ void MoveJoint(JOINT* o, int iIndex)
                 vPos[1] = sinf(count) * ((float)max(o->LifeTime + 40, 10) * .65f);
             }
             vPos[2] = 0.0f;
-            o->TargetPosition[0] += o->Direction[1];
-            o->TargetPosition[1] += o->Direction[2];
+            o->TargetPosition[0] += (o->Direction[1]) * FPS_ANIMATION_FACTOR;
+            o->TargetPosition[1] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             o->Position[0] = vPos[0] * sinf((90.0f - o->Angle[2]) * Q_PI / 180.0f) + o->TargetPosition[0];
             o->Position[1] = vPos[0] * cosf((90.0f - o->Angle[2]) * Q_PI / 180.0f) + o->TargetPosition[1];
             o->Position[2] = vPos[1] + o->TargetPosition[2];
         }
         else if (o->SubType == 5)
         {
-            o->Direction[2] -= 60.f;
+            o->Direction[2] -= (60.f) * FPS_ANIMATION_FACTOR;
             o->Position[0] = o->TargetPosition[0];
             o->Position[1] = o->TargetPosition[1];
-            o->Position[2] += o->Direction[2];
+            o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             o->Scale = rand() % 4 + 6.f;
         }
         else if (o->SubType == 7 || o->SubType == 11 || o->SubType == 25 || o->SubType == 45 || o->SubType == 46 || o->SubType == 47)
@@ -5663,6 +5586,8 @@ void MoveJoint(JOINT* o, int iIndex)
             vDir[1] = fSinAdd * vDirTemp[1] + fCosAdd * vDirTemp[2];
             vDir[0] = fCosAdd * vDirTemp[1] - fSinAdd * vDirTemp[2];
 
+            // VectorScale(vDir, FPS_ANIMATION_FACTOR, vDir);
+
             float fLife = (float)o->LifeTime * 40.f / 30.f;
             float fPos;
 
@@ -5689,7 +5614,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 }
             }
             fPos = fPos / (float)(30 + o->MultiUse) * 30.f;
-            if (o->LifeTime == 30)
+            if ((int)o->LifeTime == 30)
             {
                 PlayBuffer(SOUND_METEORITE01);
             }
@@ -5710,12 +5635,11 @@ void MoveJoint(JOINT* o, int iIndex)
             float fLastTarget;
             for (int k = 0; k < 3; ++k)
             {
-                if (o->SubType == 11)
-                    fLastTarget = (100.f - fPos) * (o->Target->StartPosition[k] + 25.f * cosf((float)(iIndex * 51231 + k * 3711 + iFrame / 10) * 0.01f));
-                else if (o->SubType == 25)
+                if (o->SubType == 11 || o->SubType == 25)
                     fLastTarget = (100.f - fPos) * (o->Target->StartPosition[k] + 25.f * cosf((float)(iIndex * 51231 + k * 3711 + iFrame / 10) * 0.01f));
                 else
                     fLastTarget = (100.f - fPos) * (o->Target->Position[k] + 25.f * cosf((float)(iIndex * 51231 + k * 3711 + iFrame / 10) * 0.01f));
+
                 o->Position[k] = (fPos * o->Position[k] + fLastTarget) * 0.01f;
             }
             if (o->SubType != 11 && o->SubType != 25)
@@ -5757,7 +5681,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 }
             }
 
-            if (o->SubType != 11 && 1 == o->LifeTime && o->SubType != 45 && o->SubType != 46 && o->SubType != 47)
+            if (o->SubType != 11 && 1 == (int)o->LifeTime && o->SubType != 45 && o->SubType != 46 && o->SubType != 47)
             {
                 vec3_t Angle = { 0.0f, 0.0f, 0.0f };
                 vec3_t Light = { 1.f, 1.f, 1.f };
@@ -5788,10 +5712,10 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->LifeTime <= 25)
             {
-                o->Direction[2] += 1.f;
+                o->Direction[2] += (1.f) * FPS_ANIMATION_FACTOR;
                 o->Position[0] = o->TargetPosition[0];
                 o->Position[1] = o->TargetPosition[1];
-                o->Position[2] += o->Direction[2];
+                o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
             }
         }
         else if (o->SubType == 17)
@@ -5800,13 +5724,13 @@ void MoveJoint(JOINT* o, int iIndex)
                 (o->Target->CurrentAction >= PLAYER_ATTACK_SKILL_SWORD1 && o->Target->CurrentAction <= PLAYER_ATTACK_SKILL_SWORD5)
                 && (o->Target->CurrentAction != PLAYER_RAGE_UNI_STOP_ONE_RIGHT)))
             {
-                o->LifeTime -= 10;
+                o->LifeTime -= 10 * FPS_ANIMATION_FACTOR;
             }
             else
             {
-                o->Direction[0] += sinf(rand() % 360 * 0.1f) * 4.f;
-                o->Direction[1] += cosf(rand() % 360 * 0.1f) * 4.f;
-                o->Direction[2] += o->Velocity;
+                o->Direction[0] += (sinf(rand() % 360 * 0.1f) * 4.f) * FPS_ANIMATION_FACTOR;
+                o->Direction[1] += (cosf(rand() % 360 * 0.1f) * 4.f) * FPS_ANIMATION_FACTOR;
+                o->Direction[2] += (o->Velocity) * FPS_ANIMATION_FACTOR;
                 o->Position[0] = o->TargetPosition[0] + o->Direction[0];
                 o->Position[1] = o->TargetPosition[1] + o->Direction[1];
                 o->Position[2] = o->TargetPosition[2] + o->Direction[2];
@@ -5814,9 +5738,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 12)
             {
-                o->Light[0] /= 1.3f;
-                o->Light[1] /= 1.3f;
-                o->Light[2] /= 1.3f;
+                VectorScale(o->Light, powf(1.f / 1.3f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 16 && o->Target != NULL)
@@ -5832,9 +5754,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 20)
             {
-                o->Light[0] /= 1.1f;
-                o->Light[1] /= 1.1f;
-                o->Light[2] /= 1.1f;
+                VectorScale(o->Light, powf(1.f / 1.1f, FPS_ANIMATION_FACTOR), o->Light);
             }
             else if (o->LifeTime < 40)
             {
@@ -5844,9 +5764,9 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else
             {
-                o->Light[0] *= 1.04f;
-                o->Light[1] *= 1.04f;
-                o->Light[2] *= 1.04f;
+                o->Light[0] *= powf(1.04f, FPS_ANIMATION_FACTOR);
+                o->Light[1] *= powf(1.04f, FPS_ANIMATION_FACTOR);
+                o->Light[2] *= powf(1.04f, FPS_ANIMATION_FACTOR);
             }
         }
         else if (o->SubType == 23)
@@ -5864,15 +5784,15 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     for (float i = 0; i < o->Direction[2]; ++i)
                     {
-                        o->Direction[1] += 1.5f;
-                        switch (o->MultiUse)
+                        o->Direction[1] += (1.5f) * FPS_ANIMATION_FACTOR;
+                        switch ((int)o->MultiUse)
                         {
-                        case 0: o->HeadAngle[0] += 3.f; o->HeadAngle[2] -= o->Direction[1]; break;
-                        case 1: o->HeadAngle[0] -= 3.f; o->HeadAngle[2] -= o->Direction[1]; break;
-                        case 2: o->HeadAngle[0] += 3.f; o->HeadAngle[2] += o->Direction[1]; break;
-                        case 3: o->HeadAngle[0] -= 3.f; o->HeadAngle[2] += o->Direction[1]; break;
-                        case 4: o->HeadAngle[2] -= o->Direction[1]; break;
-                        case 5: o->HeadAngle[0] -= o->Direction[1]; break;
+                        case 0: o->HeadAngle[0] += 3.f * FPS_ANIMATION_FACTOR; o->HeadAngle[2] -= o->Direction[1] * FPS_ANIMATION_FACTOR; break;
+                        case 1: o->HeadAngle[0] -= 3.f * FPS_ANIMATION_FACTOR; o->HeadAngle[2] -= o->Direction[1] * FPS_ANIMATION_FACTOR; break;
+                        case 2: o->HeadAngle[0] += 3.f * FPS_ANIMATION_FACTOR; o->HeadAngle[2] += o->Direction[1] * FPS_ANIMATION_FACTOR; break;
+                        case 3: o->HeadAngle[0] -= 3.f * FPS_ANIMATION_FACTOR; o->HeadAngle[2] += o->Direction[1] * FPS_ANIMATION_FACTOR; break;
+                        case 4: o->HeadAngle[2] -= o->Direction[1] * FPS_ANIMATION_FACTOR; break;
+                        case 5: o->HeadAngle[0] -= o->Direction[1] * FPS_ANIMATION_FACTOR; break;
                         }
                         if (o->Direction[1] > 15.f)
                         {
@@ -5880,7 +5800,7 @@ void MoveJoint(JOINT* o, int iIndex)
                         }
 
                         AngleMatrix(o->HeadAngle, Matrix);
-                        Vector(0.f, -o->Velocity, 0.f, p);
+                        Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, p);
                         VectorRotate(p, Matrix, Position);
                         VectorAdd(o->StartPosition, Position, o->Position);
 
@@ -5892,7 +5812,7 @@ void MoveJoint(JOINT* o, int iIndex)
                             break;
                         }
                     }
-                    o->Direction[2] += 4.f;
+                    o->Direction[2] += (4.f) * FPS_ANIMATION_FACTOR;
                 }
             }
         }
@@ -5902,12 +5822,12 @@ void MoveJoint(JOINT* o, int iIndex)
             {
                 o->LifeTime = 100.f; //무한
 
-                if (rand() % 3 == 0)
+                if (rand_fps_check(3))
                 {
                     VectorCopy(o->Target->Position, o->Position);
-                    o->Position[2] += 30.f;
-                    o->Position[0] += (rand() % 60 - 30);
-                    o->Position[1] += (rand() % 60 - 30);
+                    o->Position[2] += (30.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[0] += ((rand() % 60 - 30)) * FPS_ANIMATION_FACTOR;
+                    o->Position[1] += ((rand() % 60 - 30)) * FPS_ANIMATION_FACTOR;
                     CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 44, o->Target, o->Scale, 0, 0, 0, 0, o->Light);
                 }
             }
@@ -5928,13 +5848,11 @@ void MoveJoint(JOINT* o, int iIndex)
             {
                 if (o->LifeTime <= 20)
                 {
-                    o->Direction[2] += 1.0f;
+                    o->Direction[2] += (1.0f) * FPS_ANIMATION_FACTOR;
                     o->Position[0] = o->TargetPosition[0];
                     o->Position[1] = o->TargetPosition[1];
-                    o->Position[2] += o->Direction[2];
-                    o->Light[0] /= 1.05f;
-                    o->Light[1] /= 1.05f;
-                    o->Light[2] /= 1.05f;
+                    o->Position[2] += (o->Direction[2]) * FPS_ANIMATION_FACTOR;
+                    VectorScale(o->Light, powf(1.f / 1.05f, FPS_ANIMATION_FACTOR), o->Light);
 
                     CreateSprite(BITMAP_PIN_LIGHT, o->Position, 1.5f, o->Light, NULL);
                     CreateSprite(BITMAP_PIN_LIGHT, o->Position, 0.5f, o->Light, NULL);
@@ -5951,9 +5869,7 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->LifeTime < 10)
             {
-                o->Light[0] /= 1.3f;
-                o->Light[1] /= 1.3f;
-                o->Light[2] /= 1.3f;
+                VectorScale(o->Light, powf(1.f / 1.3f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
 
@@ -5974,12 +5890,12 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->LifeTime >= 25)
             {
-                o->Angle[2] -= 10.f;
-                o->Position[2] += 2.5f;
+                o->Angle[2] -= (10.f) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += (2.5f) * FPS_ANIMATION_FACTOR;
             }
             else
             {
-                o->Velocity += 5.f;
+                o->Velocity += FPS_ANIMATION_FACTOR * 5.f;
                 if (o->Velocity >= 30.f)
                     o->Velocity = 30.f;
 
@@ -5990,12 +5906,12 @@ void MoveJoint(JOINT* o, int iIndex)
                 if (Distance <= 70.0f && fabs(fOldAngle - o->Angle[2]) > 20.0f)
                 {
                     if (o->Velocity >= 20.f)
-                        o->Velocity -= 5.f;
+                        o->Velocity -= FPS_ANIMATION_FACTOR * 5.f;
                 }
 
                 if (o->LifeTime < 10)
                 {
-                    o->Light[0] /= 1.2f;
+                    o->Light[0] *= powf(1.0f / 1.2f, FPS_ANIMATION_FACTOR);
                     o->Light[1] = o->Light[0];
                     o->Light[2] = o->Light[0];
                 }
@@ -6008,12 +5924,12 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->LifeTime >= 25)
             {
-                o->Angle[2] -= 10.f;
-                o->Position[2] += 2.5f;
+                o->Angle[2] -= (10.f) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += (2.5f) * FPS_ANIMATION_FACTOR;
             }
             else
             {
-                o->Velocity += 5.f;
+                o->Velocity += FPS_ANIMATION_FACTOR * 5.f;
                 if (o->Velocity >= 30.f)
                     o->Velocity = 30.f;
 
@@ -6025,12 +5941,12 @@ void MoveJoint(JOINT* o, int iIndex)
                 if (Distance <= 70.0f && fabs(fOldAngle - o->Angle[2]) > 20.0f)
                 {
                     if (o->Velocity >= 20.f)
-                        o->Velocity -= 10.f;
+                        o->Velocity -= FPS_ANIMATION_FACTOR * 10.f;
                 }
 
                 if (o->LifeTime < 10)
                 {
-                    o->Light[0] /= 1.2f;
+                    o->Light[0] *= powf(1.0f / 1.2f, FPS_ANIMATION_FACTOR);
                     o->Light[1] = o->Light[0];
                     o->Light[2] = o->Light[0];
                 }
@@ -6045,17 +5961,17 @@ void MoveJoint(JOINT* o, int iIndex)
             {
                 if (o->LifeTime >= 30)
                 {
-                    o->Angle[2] -= 10.f;
-                    o->Position[2] += 2.5f;
+                    o->Angle[2] -= (10.f) * FPS_ANIMATION_FACTOR;
+                    o->Position[2] += (2.5f) * FPS_ANIMATION_FACTOR;
                 }
 
-                o->Velocity += 5.f;
+                o->Velocity += FPS_ANIMATION_FACTOR * 5.f;
                 if (o->Velocity >= 30.f)
                     o->Velocity = 30.f;
 
                 float fOldAngle = o->Angle[2];
                 VectorCopy(o->Target->Position, Position);
-                Position[2] += 150.f;
+                Position[2] += (150.f) * FPS_ANIMATION_FACTOR;
                 Distance = MoveHumming(o->Position, o->Angle, Position, o->Velocity);
 
                 //박종훈테스트
@@ -6065,12 +5981,12 @@ void MoveJoint(JOINT* o, int iIndex)
                 if (Distance <= 70.0f && fabs(fOldAngle - o->Angle[2]) > 20.0f)
                 {
                     if (o->Velocity >= 20.f)
-                        o->Velocity -= 10.f;
+                        o->Velocity -= FPS_ANIMATION_FACTOR * 10.f;
                 }
 
                 if (o->LifeTime < 15)
                 {
-                    o->Light[0] /= 1.2f;
+                    o->Light[0] *= powf(1.0f / 1.2f, FPS_ANIMATION_FACTOR);
                     o->Light[1] = o->Light[0];
                     o->Light[2] = o->Light[0];
                 }
@@ -6087,15 +6003,13 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             o->Position[0] = o->StartPosition[0] + sinf(o->LifeTime / 2.5f) * o->Direction[0];
             o->Position[1] = o->StartPosition[1];
-            o->Position[2] += o->Velocity;
-            o->Velocity -= 0.1f;
-            o->Direction[0] -= 0.1f;
+            o->Position[2] += o->Velocity * FPS_ANIMATION_FACTOR;
+            o->Velocity -= FPS_ANIMATION_FACTOR * 0.1f;
+            o->Direction[0] -= 0.1f * FPS_ANIMATION_FACTOR;
 
             if (o->LifeTime < 15)
             {
-                o->Light[0] /= 1.2f;
-                o->Light[1] /= 1.2f;
-                o->Light[2] /= 1.2f;
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 8 || o->SubType == 9)
@@ -6115,7 +6029,7 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else if (o->SubType == 9)
             {
-                o->Position[2] += o->MultiUse;
+                o->Position[2] += (o->MultiUse) * FPS_ANIMATION_FACTOR;
             }
         }
         else if (o->SubType == 12 || o->SubType == 13 || o->SubType == 14 || o->SubType == 17 || o->SubType == 15 || o->SubType == 18)
@@ -6149,9 +6063,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
                 if (o->LifeTime < 15)
                 {
-                    o->Light[0] /= 1.2f;
-                    o->Light[1] /= 1.2f;
-                    o->Light[2] /= 1.2f;
+                    VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
                 }
 
                 if (o->SubType != 18)
@@ -6177,12 +6089,14 @@ void MoveJoint(JOINT* o, int iIndex)
             //VectorCopy( o->Target->HeadAngle, Angle );
             AngleMatrix(o->Angle, Mat);
 
-            pos[0] /= 3.f; pos[1] /= 3.f; pos[2] /= 3.f;
-            //Angle[1] += o->Velocity - 90;
+            pos[0] /= 3.f;
+            pos[1] /= 3.f;
+            pos[2] /= 3.f;
+            //Angle[1] += (o->Velocity - 90) * FPS_ANIMATION_FACTOR;
 
             for (int j = 0; j < 3; j++)
             {
-                Angle[1] += 30.f;
+                Angle[1] += (30.f) * FPS_ANIMATION_FACTOR;
 
                 VectorAdd(o->TargetPosition, pos, o->TargetPosition);
 
@@ -6191,7 +6105,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 VectorRotate(o->Direction, Matrix, position);
                 VectorAdd(o->TargetPosition, position, o->Position);
 
-                if (o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
+                if ((int)o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
                     CreateTail(o, Mat);
             }
         }
@@ -6206,8 +6120,10 @@ void MoveJoint(JOINT* o, int iIndex)
             //VectorCopy( o->Target->HeadAngle, Angle );
             AngleMatrix(o->Angle, Mat);
 
-            pos[0] /= 3.f; pos[1] /= 3.f; pos[2] /= 3.f;
-            //Angle[1] += o->Velocity - 90;
+            pos[0] /= 3.f;
+            pos[1] /= 3.f;
+            pos[2] /= 3.f;
+            //Angle[1] += (o->Velocity - 90) * FPS_ANIMATION_FACTOR;
 
             for (int j = 0; j < 3; j++)
             {
@@ -6218,7 +6134,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 VectorRotate(o->Direction, Matrix, position);
                 VectorAdd(o->TargetPosition, position, o->Position);
 
-                if (o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
+                if ((int)o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
                     CreateTail(o, Mat);
             }
         }
@@ -6235,11 +6151,11 @@ void MoveJoint(JOINT* o, int iIndex)
                 AngleMatrix(o->Angle, Mat);
 
                 pos[0] /= 3.f; pos[1] /= 3.f; pos[2] /= 3.f;
-                Angle[1] += o->Velocity - 90;
+                Angle[1] += (o->Velocity - 90) * FPS_ANIMATION_FACTOR;
 
                 for (int j = 0; j < 3; j++)
                 {
-                    Angle[1] += 30.f;
+                    Angle[1] += (30.f) * FPS_ANIMATION_FACTOR;
                     VectorAdd(o->TargetPosition, pos, o->TargetPosition);
 
                     vec3_t  position;
@@ -6247,22 +6163,20 @@ void MoveJoint(JOINT* o, int iIndex)
                     VectorRotate(o->Direction, Matrix, position);
                     VectorAdd(o->TargetPosition, position, o->Position);
 
-                    if (o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
+                    if ((int)o->NumTails < (o->MaxTails - 1) || o->Skill != 0)
                         CreateTail(o, Mat);
                 }
 
                 if (o->LifeTime < 15)
                 {
-                    o->Light[0] /= 1.5f;//o->LifeTime/60.f;
-                    o->Light[1] /= 1.5f;
-                    o->Light[2] /= 1.5f;
+                    VectorScale(o->Light, powf(1.f / 1.5f, FPS_ANIMATION_FACTOR), o->Light);
                 }
             }
             else
             {
                 o->LifeTime = -1;
                 VectorCopy(o->TargetPosition, o->Position);
-                o->Position[2] += 50.f;
+                o->Position[2] += (50.f) * FPS_ANIMATION_FACTOR;
             }
         }
         break;
@@ -6274,7 +6188,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             for (int j = 0; j < 8; ++j)
             {
-                if (o->NumTails < o->MaxTails - 1)
+                if ((int)o->NumTails < o->MaxTails - 1)
                 {
                     VectorCopy(o->Position, Light);
                     AngleMatrix(o->Direction, Matrix);
@@ -6283,10 +6197,10 @@ void MoveJoint(JOINT* o, int iIndex)
                     AngleMatrix(o->Angle, Matrix);
                     CreateTail(o, Matrix);
 
-                    o->Direction[2] -= 11.f;
+                    o->Direction[2] -= (11.f) * FPS_ANIMATION_FACTOR;
                     if (o->SubType == 10)
                     {
-                        if ((rand() % 2) == 0)
+                        if (rand_fps_check(2))
                         {
                             CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 0);
                         }
@@ -6313,7 +6227,7 @@ void MoveJoint(JOINT* o, int iIndex)
                                 if ((att & TW_NOATTACKZONE) == TW_NOATTACKZONE)
                                 {
                                     o->Velocity = 0.f;
-                                    o->LifeTime /= 5.f;
+                                    o->LifeTime *= powf(1.f / 5.f, FPS_ANIMATION_FACTOR);
                                     break;
                                 }
                             }
@@ -6350,7 +6264,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
                 for (int j = 0; j < 8; ++j)
                 {
-                    if (o->NumTails < o->MaxTails - 1)
+                    if ((int)o->NumTails < o->MaxTails - 1)
                     {
                         VectorCopy(o->Position, Light);
                         AngleMatrix(o->Direction, Matrix);
@@ -6359,10 +6273,10 @@ void MoveJoint(JOINT* o, int iIndex)
                         AngleMatrix(o->Angle, Matrix);
                         CreateTail(o, Matrix);
 
-                        o->Direction[2] -= 11.f;
+                        o->Direction[2] -= (11.f) * FPS_ANIMATION_FACTOR;
                         if (o->SubType == 0)
                         {
-                            if ((rand() % 2) == 0)
+                            if (rand_fps_check(2))
                             {
                                 CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 0);
                             }
@@ -6384,7 +6298,7 @@ void MoveJoint(JOINT* o, int iIndex)
                                     if ((att & TW_NOATTACKZONE) == TW_NOATTACKZONE)
                                     {
                                         o->Velocity = 0.f;
-                                        o->LifeTime /= 5.f;
+                                        o->LifeTime *= powf(1.f / 5.f, FPS_ANIMATION_FACTOR);
                                         break;
                                     }
                                 }
@@ -6410,26 +6324,24 @@ void MoveJoint(JOINT* o, int iIndex)
                 o->Live = o->Target->Live;
                 VectorCopy(o->Target->Position, o->Position);
 
-                o->Scale -= 1.f;
-                o->Position[2] += 100.f;
+                o->Scale -= (1.f) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += (100.f) * FPS_ANIMATION_FACTOR;
 
                 if (o->LifeTime < 15)
                 {
-                    o->Light[0] /= 1.3f;
-                    o->Light[1] /= 1.3f;
-                    o->Light[2] /= 1.3f;
+                    VectorScale(o->Light, powf(1.f / 1.3f, FPS_ANIMATION_FACTOR), o->Light);
                 }
             }
             else if (o->SubType >= 2 && o->SubType <= 6)
             {
-                o->Velocity += o->Direction[2];
+                o->Velocity += FPS_ANIMATION_FACTOR * o->Direction[2];
                 if (o->LifeTime < 15)
                 {
-                    o->Direction[2] += 0.5f;
+                    o->Direction[2] += (0.5f) * FPS_ANIMATION_FACTOR;
                 }
                 else
                 {
-                    o->Direction[2] += o->Direction[0];
+                    o->Direction[2] += (o->Direction[0]) * FPS_ANIMATION_FACTOR;
                 }
                 if (o->SubType != 4)
                 {
@@ -6440,11 +6352,9 @@ void MoveJoint(JOINT* o, int iIndex)
                 }
                 if (o->LifeTime < o->MultiUse)
                 {
-                    o->Light[0] /= 1.3f;
-                    o->Light[1] /= 1.3f;
-                    o->Light[2] /= 1.3f;
+                    VectorScale(o->Light, powf(1.f / 1.3f, FPS_ANIMATION_FACTOR), o->Light);
                 }
-                if (o->LifeTime % 5 == 0 && o->SubType == 2)
+                if ((int)o->LifeTime % 5 == 0 && o->SubType == 2)
                 {
                     CreateEffect(MODEL_SKILL_INFERNO, o->StartPosition, o->HeadAngle, o->Light, 6, NULL, 20, 0);
                 }
@@ -6459,14 +6369,14 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else if (o->SubType == 7 || o->SubType == 20)
             {
-                o->Velocity += o->Direction[2];
+                o->Velocity += FPS_ANIMATION_FACTOR * o->Direction[2];
                 if (o->LifeTime < 20)
                 {
-                    o->Direction[2] += 0.5f;
+                    o->Direction[2] += (0.5f) * FPS_ANIMATION_FACTOR;
                 }
                 else
                 {
-                    o->Direction[2] += o->Direction[0];
+                    o->Direction[2] += (o->Direction[0]) * FPS_ANIMATION_FACTOR;
                 }
                 if (o->NumTails >= o->MaxTails - 1)
                 {
@@ -6474,9 +6384,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 }
                 if (o->LifeTime < o->MultiUse)
                 {
-                    o->Light[0] /= 1.3f;
-                    o->Light[1] /= 1.3f;
-                    o->Light[2] /= 1.3f;
+                    VectorScale(o->Light, powf(1.f / 1.3f, FPS_ANIMATION_FACTOR), o->Light);
                 }
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 3.f;
             }
@@ -6493,7 +6401,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     CreateTail(o, Matrix);
 
-                    Vector(0.f, -o->Velocity, 0.f, p);
+                    Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, p);
                     vec3_t vPos;
                     VectorRotate(p, Matrix, vPos);
                     VectorAdd(o->Position, vPos, o->Position);
@@ -6510,17 +6418,16 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     CreateTail(o, Matrix);
 
-                    Vector(0.f, -o->Velocity, 0.f, p);
+                    Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, p);
                     vec3_t vPos;
                     VectorRotate(p, Matrix, vPos);
                     VectorAdd(o->Position, vPos, o->Position);
-                    o->Velocity += 0.5f;
+                    o->Velocity += FPS_ANIMATION_FACTOR * 0.5f;
                 }
             }
         }
-        o->Light[0] /= 1.2f;
-        o->Light[1] /= 1.2f;
-        o->Light[2] /= 1.2f;
+
+        VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
         break;
     case BITMAP_PIERCING:
         if (o->SubType == 0)
@@ -6533,16 +6440,14 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     CreateTail(o, Matrix);
 
-                    Vector(0.f, 0.f, -o->Velocity, p);
+                    Vector(0.f, 0.f, -o->Velocity * FPS_ANIMATION_FACTOR, p);
                     VectorRotate(p, Matrix, Position);
-                    VectorAdd(o->Position, Position, o->Position);
+                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
                 }
             }
-            o->Velocity -= 2.f;
+            o->Velocity -= FPS_ANIMATION_FACTOR * 2.f;
 
-            o->Light[0] /= 1.4f;
-            o->Light[1] /= 1.4f;
-            o->Light[2] /= 1.4f;
+            VectorScale(o->Light, powf(1.f / 1.4f, FPS_ANIMATION_FACTOR), o->Light);
         }
         else if (o->SubType == 1)
         {
@@ -6554,16 +6459,14 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     CreateTail(o, Matrix);
 
-                    Vector(0.f, 0.f, -o->Velocity, p);
+                    Vector(0.f, 0.f, -o->Velocity * FPS_ANIMATION_FACTOR, p);
                     VectorRotate(p, Matrix, Position);
-                    VectorAdd(o->Position, Position, o->Position);
+                    VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
                 }
             }
-            o->Velocity -= 2.f;
+            o->Velocity -= FPS_ANIMATION_FACTOR * 2.f;
 
-            o->Light[0] /= 1.4f;
-            o->Light[1] /= 1.4f;
-            o->Light[2] /= 1.4f;
+            VectorScale(o->Light, powf(1.f / 1.4f, FPS_ANIMATION_FACTOR), o->Light);
         }
         break;
     case BITMAP_FLARE_FORCE:
@@ -6577,7 +6480,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 VectorCopy(o->Direction, Direction);
                 BMD* b = &Models[o->Target->Type];
                 VectorCopy(o->Target->Position, b->BodyOrigin);
-                b->TransformPosition(o->Target->BoneTransform[o->MultiUse], p, o->StartPosition, true);
+                b->TransformPosition(o->Target->BoneTransform[(int)o->MultiUse], p, o->StartPosition, true);
                 VectorCopy(o->StartPosition, o->Position);
 
                 o->NumTails = 0;
@@ -6587,29 +6490,32 @@ void MoveJoint(JOINT* o, int iIndex)
 
                 for (int i = 0; i < MaxTails; ++i)
                 {
-                    VectorRotate(Direction, o->Target->BoneTransform[o->MultiUse], Position);
-                    VectorAdd(o->StartPosition, Position, o->StartPosition);
+                    VectorRotate(Direction, o->Target->BoneTransform[(int)o->MultiUse], Position);
+                    VectorAddScaled(o->StartPosition, Position, o->StartPosition, FPS_ANIMATION_FACTOR);
+                    // VectorAdd(o->StartPosition, Position, o->StartPosition);
 
                     if (o->SubType % 2)
                     {
-                        o->TargetPosition[1] += 40.f;
+                        o->TargetPosition[1] += (40.f);
                     }
                     else
                     {
-                        o->TargetPosition[1] -= 40.f;
+                        o->TargetPosition[1] -= (40.f);
                     }
+
                     Vector(o->TargetPosition[1], 0.f, 0.f, Angle);
                     AngleMatrix(Angle, Matrix);
                     Vector(0.f, 0.f, o->TargetPosition[0], p);
                     VectorRotate(p, Matrix, Position);
                     VectorAdd(o->StartPosition, Position, o->Position);
+                    // VectorAddScaled(o->StartPosition, Position, o->Position, FPS_ANIMATION_FACTOR);
 
-                    CreateTail(o, o->Target->BoneTransform[o->MultiUse]);
+                    CreateTail(o, o->Target->BoneTransform[0]);//(int)o->MultiUse]);
 
-                    o->TargetPosition[0] -= 0.15f;
+                    o->TargetPosition[0] -= (0.15f) * FPS_ANIMATION_FACTOR;
 
                     if (o->PKKey == -1)
-                        Direction[1] -= 0.1f;
+                        Direction[1] -= (0.1f) * FPS_ANIMATION_FACTOR;
 
                     if ((i % 2) == 0)
                     {
@@ -6624,9 +6530,7 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             if (o->LifeTime < 7)
             {
-                o->Light[0] /= 1.5f;
-                o->Light[1] /= 1.5f;
-                o->Light[2] /= 1.5f;
+                VectorScale(o->Light, powf(1.f / 1.5f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->NumTails < o->MaxTails - 1)
@@ -6638,16 +6542,16 @@ void MoveJoint(JOINT* o, int iIndex)
                     AngleMatrix(o->Angle, Matrix);
 
                     CreateTail(o, Matrix);
-                    Vector(0.f, o->Velocity, 0.f, p);
+                    Vector(0.f, o->Velocity * FPS_ANIMATION_FACTOR, 0.f, p);
                     VectorRotate(p, Matrix, Position);
                     VectorAdd(o->StartPosition, Position, o->StartPosition);
 
                     o->Position[0] = o->StartPosition[0];
                     o->Position[1] = o->StartPosition[1];
                     o->Position[2] = o->StartPosition[2];
-                    o->Velocity -= 2.f;
+                    o->Velocity -= FPS_ANIMATION_FACTOR * 2.f;
                 }
-                o->MultiUse += 2;
+                o->MultiUse += (2) * FPS_ANIMATION_FACTOR;
             }
             else if (o->SubType >= 1 && o->SubType <= 4
                 || (o->SubType >= 11 && o->SubType <= 13)
@@ -6660,21 +6564,21 @@ void MoveJoint(JOINT* o, int iIndex)
                     {
                         AngleMatrix(o->Angle, Matrix);
                         CreateTail(o, Matrix);
-                        Vector(0.f, o->Velocity, 0.f, p);
+                        Vector(0.f, o->Velocity * FPS_ANIMATION_FACTOR, 0.f, p);
                         VectorRotate(p, Matrix, Position);
                         VectorAdd(o->StartPosition, Position, o->StartPosition);
 
                         if (o->SubType == 2 || o->SubType == 4)
                         {
-                            o->TargetPosition[1] -= 20.f;
+                            o->TargetPosition[1] -= (20.f) * FPS_ANIMATION_FACTOR;
                         }
                         else if (o->SubType >= 11 || o->SubType <= 13)
                         {
-                            o->TargetPosition[1] -= 20.f;
+                            o->TargetPosition[1] -= (20.f) * FPS_ANIMATION_FACTOR;
                         }
                         else
                         {
-                            o->TargetPosition[1] += 20.f;
+                            o->TargetPosition[1] += (20.f) * FPS_ANIMATION_FACTOR;
                         }
                         Vector(0.f, o->TargetPosition[1], o->Angle[2], Angle);
                         AngleMatrix(Angle, Matrix);
@@ -6693,14 +6597,14 @@ void MoveJoint(JOINT* o, int iIndex)
                         o->Position[0] = Position[0];
                         o->Position[1] = Position[1];
                         o->Position[2] = Position[2];
-                        o->Velocity -= 2.f;
-                        o->TargetPosition[0] -= 2.5f;
+                        o->Velocity -= FPS_ANIMATION_FACTOR * 2.f;
+                        o->TargetPosition[0] -= (2.5f) * FPS_ANIMATION_FACTOR;
                     }
-                    o->MultiUse += 2;
+                    o->MultiUse += (2) * FPS_ANIMATION_FACTOR;
                 }
                 else
                 {
-                    o->Weapon--;
+                    o->Weapon -= FPS_ANIMATION_FACTOR;
                 }
             }
         }
@@ -6709,9 +6613,7 @@ void MoveJoint(JOINT* o, int iIndex)
             || (o->SubType >= 11 && o->SubType <= 13)
             ) && o->LifeTime < 10)
         {
-            o->Light[0] /= 1.3f;
-            o->Light[1] /= 1.3f;
-            o->Light[2] /= 1.3f;
+            VectorScale(o->Light, powf(1.f / 1.3f, FPS_ANIMATION_FACTOR), o->Light);
         }
         break;
 
@@ -6720,21 +6622,21 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             if (o->SubType == 2)
             {
-                o->Angle[2] += rand() % 10 + 10.f;
+                o->Angle[2] += (rand() % 10 + 10.f) * FPS_ANIMATION_FACTOR;
             }
 
-            o->Velocity += 10.f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 10.f;
             if (o->m_bCreateTails)
             {
                 AngleMatrix(o->Angle, Matrix);
                 CreateTail(o, Matrix);
             }
 
-            o->Velocity += 10.f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 10.f;
             AngleMatrix(o->HeadAngle, Matrix);
-            Vector(0.f, -o->Velocity, 0.f, p);
+            Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, p);
             VectorRotate(p, Matrix, Position);
-            VectorAdd(o->Position, Position, o->Position);
+            VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
             Height = RequestTerrainHeight(o->Position[0], o->Position[1]) - o->MultiUse;
             if (o->Position[2] < Height)
@@ -6783,9 +6685,7 @@ void MoveJoint(JOINT* o, int iIndex)
                     o->m_bCreateTails = false;
                 }
 
-                o->Light[0] /= 1.2f;
-                o->Light[1] /= 1.2f;
-                o->Light[2] /= 1.2f;
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
             }
             if (o->SubType < 2)
             {
@@ -6813,21 +6713,19 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < 15)
             {
-                o->Light[0] /= 1.3f;
-                o->Light[1] /= 1.3f;
-                o->Light[2] /= 1.3f;
+                VectorScale(o->Light, powf(1.f / 1.3f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 6)
         {
             int fr = rand() % 5 - 2;
-            //			o->Direction[0] += fr;
-            o->Direction[1] += fr;
-            o->Direction[2] -= 10.f;
+            //			o->Direction[0] += (fr) * FPS_ANIMATION_FACTOR;
+            o->Direction[1] += (fr) * FPS_ANIMATION_FACTOR;
+            o->Direction[2] -= (10.f) * FPS_ANIMATION_FACTOR;
 
             AngleMatrix(o->Angle, Matrix);
             VectorRotate(o->Direction, Matrix, Position);
-            VectorAdd(o->Position, Position, o->Position);
+            VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
             if ((o->Weapon - o->LifeTime) < 10)
             {
@@ -6857,9 +6755,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->LifeTime < (o->Weapon / 2))
             {
-                o->Light[0] /= 1.3f;
-                o->Light[1] /= 1.3f;
-                o->Light[2] /= 1.3f;
+                VectorScale(o->Light, powf(1.f / 1.3f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         break;
@@ -6877,13 +6773,11 @@ void MoveJoint(JOINT* o, int iIndex)
 
             Distance = MoveHumming(o->Position, o->Angle, vTargetPos, o->Velocity);
 
-            o->Velocity += 2.f;
+            o->Velocity += FPS_ANIMATION_FACTOR * 2.f;
 
             if (o->LifeTime < 10)
             {
-                o->Light[0] /= 1.2f;
-                o->Light[1] /= 1.2f;
-                o->Light[2] /= 1.2f;
+                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
                 VectorCopy(o->Light, Light);
             }
 
@@ -6898,8 +6792,8 @@ void MoveJoint(JOINT* o, int iIndex)
     }break;
     case BITMAP_PIN_LIGHT:
     {
-        o->Velocity += 0.1f;
-        VectorScale(o->Light, 0.9f, o->Light);
+        o->Velocity += FPS_ANIMATION_FACTOR * 0.1f;
+        VectorScale(o->Light, powf(0.9f, FPS_ANIMATION_FACTOR), o->Light);
     }
     break;
     case BITMAP_FORCEPILLAR:
@@ -6941,8 +6835,8 @@ void MoveJoint(JOINT* o, int iIndex)
 
         Models[o->Target->Type].TransformByObjectBone(o->Position, o->Target, 2);
 
-        o->Position[2] += 20.0f;
-        VectorScale(o->Light, 0.7f, o->Light);
+        o->Position[2] += (20.0f) * FPS_ANIMATION_FACTOR;
+        VectorScale(o->Light, powf(0.7f, FPS_ANIMATION_FACTOR), o->Light);
     }
     break;
     case BITMAP_LAVA:
@@ -6969,7 +6863,7 @@ void MoveJoint(JOINT* o, int iIndex)
         {
             Models[o->Target->Type].TransformByObjectBone(o->Position, o->Target, 36);
         }
-        VectorScale(o->Light, 0.8f, o->Light);
+        VectorScale(o->Light, powf(0.8f, FPS_ANIMATION_FACTOR), o->Light);
     }
     break;
     }
@@ -6982,12 +6876,12 @@ void MoveJoint(JOINT* o, int iIndex)
             CreateTail(o, Matrix);
     }
 
-    o->LifeTime--;
+    o->LifeTime -= FPS_ANIMATION_FACTOR;
     if (o->LifeTime < 0)
     {
         o->Live = false;
     }
-    else if (0 != (o->LifeTime % 12))
+    else if (0 != (((int)o->LifeTime) % 12))
     {
         switch (o->Type)
         {
@@ -7102,22 +6996,26 @@ void RenderJoints(BYTE bRenderOneMore)
 
             BindTexture(o->TexType);
 
-            for (int j = 0; j < o->NumTails; j++)
+            for (int j = 0; j < (int)o->NumTails; j++)
             {
                 if (o->Type == BITMAP_SMOKE && o->SubType == 0 && j < 1)
                 {
                     continue;
                 }
-                else if (o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10) && j == o->NumTails - 1)
+
+                if (o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10) && j == (int)o->NumTails - 1)
                 {
                     continue;
                 }
 
+                auto currentTail = o->Tails[j];
+                auto nextTail = o->Tails[j + 1];
+
                 float Light1, Light2;
                 if (o->bTileMapping)
                 {
-                    Light1 = (o->NumTails - (j)) / 16.f;
-                    Light2 = (o->NumTails - (j + 1)) / 16.f;
+                    Light1 = ((int)o->NumTails - (j)) / 16.f;
+                    Light2 = ((int)o->NumTails - (j + 1)) / 16.f;
                 }
                 else if (o->m_byReverseUV == 3)
                 {
@@ -7126,15 +7024,15 @@ void RenderJoints(BYTE bRenderOneMore)
                 }
                 else
                 {
-                    Light1 = (o->NumTails - (j)) / (float)(o->MaxTails - 1);
-                    Light2 = (o->NumTails - (j + 1)) / (float)(o->MaxTails - 1);
+                    Light1 = ((int)o->NumTails - (j)) / (float)(o->MaxTails - 1);
+                    Light2 = ((int)o->NumTails - (j + 1)) / (float)(o->MaxTails - 1);
                 }
 
                 float Scroll = (float)((int)WorldTime % 1000) * 0.001f;
                 if (o->Type == BITMAP_JOINT_THUNDER || o->Type == BITMAP_JOINT_THUNDER + 1)
                 {
-                    Light1 *= 2.f;
-                    Light2 *= 2.f;
+                    Light1 *= powf(2.f, FPS_ANIMATION_FACTOR);
+                    Light2 *= powf(2.f, FPS_ANIMATION_FACTOR);
                     Light1 -= Scroll;
                     Light2 -= Scroll;
                 }
@@ -7142,30 +7040,30 @@ void RenderJoints(BYTE bRenderOneMore)
                     || (o->SubType >= 11 && o->SubType <= 13)	//^ 펜릴 스킬 관련
                     )
                 {
-                    Light1 = (o->NumTails - (j)) / (float)((o->MaxTails - 1) / 2);
-                    Light2 = (o->NumTails - (j + 1)) / (float)((o->MaxTails - 1) / 2);
+                    Light1 = ((int)o->NumTails - (j)) / (float)((o->MaxTails - 1) / 2);
+                    Light2 = ((int)o->NumTails - (j + 1)) / (float)((o->MaxTails - 1) / 2);
                     Light1 -= Scroll;
                     Light2 -= Scroll;
                 }
                 if (o->bTileMapping)
                 {
-                    Scroll *= 2.f;
-                    Light1 *= 2.f;
-                    Light2 *= 2.f;
+                    Scroll *= powf(2.f, FPS_ANIMATION_FACTOR);
+                    Light1 *= powf(2.f, FPS_ANIMATION_FACTOR);
+                    Light2 *= powf(2.f, FPS_ANIMATION_FACTOR);
                     Light1 -= Scroll;
                     Light2 -= Scroll;
                 }
                 if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 0)
                 {
                     float Luminosity = ((float)((o->MaxTails - j) / (float)(o->MaxTails)) * 2);
-                    Luminosity *= o->Light[0];
+                    Luminosity *= powf(o->Light[0], FPS_ANIMATION_FACTOR);
                     glColor3f(Luminosity, Luminosity, Luminosity);
 
                     glBegin(GL_QUADS);
-                    glTexCoord2f(Light1, 0.f); glVertex3fv(o->Tails[j][0]);
-                    glTexCoord2f(Light1, 1.f); glVertex3fv(o->Tails[j][1]);
-                    glTexCoord2f(Light2, 1.f); glVertex3fv(o->Tails[j + 1][1]);
-                    glTexCoord2f(Light2, 0.f); glVertex3fv(o->Tails[j + 1][0]);
+                    glTexCoord2f(Light1, 0.f); glVertex3fv(currentTail[0]);
+                    glTexCoord2f(Light1, 1.f); glVertex3fv(currentTail[1]);
+                    glTexCoord2f(Light2, 1.f); glVertex3fv(nextTail[1]);
+                    glTexCoord2f(Light2, 0.f); glVertex3fv(nextTail[0]);
                     glEnd();
                 }
                 else
@@ -7181,9 +7079,9 @@ void RenderJoints(BYTE bRenderOneMore)
                             float fJointHeight;
 
                             if (o->SubType == 9)
-                                fJointHeight = (o->Tails[j][0][2] - (o->Target->Position[2] + 180)) * 0.01f;
+                                fJointHeight = (currentTail[0][2] - (o->Target->Position[2] + 180)) * 0.01f;
                             else
-                                fJointHeight = (o->Tails[j][0][2] - (o->Target->Position[2] + 50)) * 0.01f;
+                                fJointHeight = (currentTail[0][2] - (o->Target->Position[2] + 50)) * 0.01f;
 
                             if (fJointHeight > 0)
                             {
@@ -7201,14 +7099,14 @@ void RenderJoints(BYTE bRenderOneMore)
                             glColor3f(1.f, 1.f, 1.f);
                         }
 
-                        if (j == (o->NumTails / 2))
+                        if (j == ((int)o->NumTails / 2))
                         {
                             vec3_t  Position;
 
                             Vector(0.f, 0.f, 0.f, Position);
                             for (int k = 0; k < 4; ++k)
                             {
-                                VectorAdd(o->Tails[j][k], Position, Position);
+                                VectorAdd(currentTail[k], Position, Position);
                             }
                             VectorScale(Position, 0.25f, Position);
 
@@ -7222,7 +7120,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             float  scale = 0.7f;
                             vec3_t Light;
                             float  fJointHeight = (j) * 0.01f;
-                            VectorScale(o->Light, 0.9978f, o->Light);
+                            VectorScale(o->Light, powf(0.9978f, FPS_ANIMATION_FACTOR), o->Light);
                             Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight, Light);
                             glColor3fv(Light);
 
@@ -7231,7 +7129,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             Vector(0.f, 0.f, 0.f, Position);
                             for (int k = 0; k < 4; ++k)
                             {
-                                VectorAdd(o->Tails[j][k], Position, Position);
+                                VectorAdd(currentTail[k], Position, Position);
                             }
                             VectorScale(Position, 0.25f, Position);
 
@@ -7264,7 +7162,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             Vector(0.f, 0.f, 0.f, Position);
                             for (int k = 0; k < 4; ++k)
                             {
-                                VectorAdd(o->Tails[j][k], Position, Position);
+                                VectorAdd(currentTail[k], Position, Position);
                             }
                             VectorScale(Position, 0.25f, Position);
 
@@ -7280,7 +7178,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             Vector(0.f, 0.f, 0.f, Position);
                             for (int k = 0; k < 4; ++k)
                             {
-                                VectorAdd(o->Tails[j][k], Position, Position);
+                                VectorAdd(currentTail[k], Position, Position);
                             }
                             VectorScale(Position, 0.25f, Position);
 
@@ -7292,13 +7190,13 @@ void RenderJoints(BYTE bRenderOneMore)
                         || (o->SubType >= 11 && o->SubType <= 13)
                         )
                     {
-                        float Luminosity = ((float)((o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
+                        float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
 
                         glColor3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
                     }
                     else if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 1)
                     {
-                        float Luminosity = (1.f - (o->NumTails - j) / (float)(o->NumTails)) * 2.f;
+                        float Luminosity = (1.f - ((int)o->NumTails - j) / (float)(o->NumTails)) * 2.f;
 
                         glColor3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
                     }
@@ -7312,12 +7210,12 @@ void RenderJoints(BYTE bRenderOneMore)
                         glTranslatef(t_bias[0], t_bias[1], t_bias[2]);
 
                         glBegin(GL_QUADS);
-                        glTexCoord2f(Light1, 1.f); glVertex3fv(o->Tails[j][2]);
-                        glTexCoord2f(Light1, 0.f); glVertex3fv(o->Tails[j][3]);
+                        glTexCoord2f(Light1, 1.f); glVertex3fv(currentTail[2]);
+                        glTexCoord2f(Light1, 0.f); glVertex3fv(currentTail[3]);
                         glTexCoord2f(Light2, 0.f); glVertex3fv(o->Tails[j + 1][3]);
                         glTexCoord2f(Light2, 1.f); glVertex3fv(o->Tails[j + 1][2]);
-                        glTexCoord2f(Light1, 0.f); glVertex3fv(o->Tails[j][0]);
-                        glTexCoord2f(Light1, 1.f); glVertex3fv(o->Tails[j][1]);
+                        glTexCoord2f(Light1, 0.f); glVertex3fv(currentTail[0]);
+                        glTexCoord2f(Light1, 1.f); glVertex3fv(currentTail[1]);
                         glTexCoord2f(Light2, 1.f); glVertex3fv(o->Tails[j + 1][1]);
                         glTexCoord2f(Light2, 0.f); glVertex3fv(o->Tails[j + 1][0]);
                         glEnd();
@@ -7345,10 +7243,10 @@ void RenderJoints(BYTE bRenderOneMore)
                     if ((o->RenderFace & RENDER_FACE_ONE) == RENDER_FACE_ONE)
                     {
                         glBegin(GL_QUADS);
-                        glTexCoord2f(L1, V2); glVertex3fv(o->Tails[j][2]);
-                        glTexCoord2f(L1, V1); glVertex3fv(o->Tails[j][3]);
-                        glTexCoord2f(L2, V1); glVertex3fv(o->Tails[j + 1][3]);
-                        glTexCoord2f(L2, V2); glVertex3fv(o->Tails[j + 1][2]);
+                        glTexCoord2f(L1, V2); glVertex3fv(currentTail[2]);
+                        glTexCoord2f(L1, V1); glVertex3fv(currentTail[3]);
+                        glTexCoord2f(L2, V1); glVertex3fv(nextTail[3]);
+                        glTexCoord2f(L2, V2); glVertex3fv(nextTail[2]);
                         glEnd();
                     }
 
@@ -7360,10 +7258,10 @@ void RenderJoints(BYTE bRenderOneMore)
                             L2 += Scroll * 2.f;
                         }
                         glBegin(GL_QUADS);
-                        glTexCoord2f(L1, V1); glVertex3fv(o->Tails[j][0]);
-                        glTexCoord2f(L1, V2); glVertex3fv(o->Tails[j][1]);
-                        glTexCoord2f(L2, V2); glVertex3fv(o->Tails[j + 1][1]);
-                        glTexCoord2f(L2, V1); glVertex3fv(o->Tails[j + 1][0]);
+                        glTexCoord2f(L1, V1); glVertex3fv(currentTail[0]);
+                        glTexCoord2f(L1, V2); glVertex3fv(currentTail[1]);
+                        glTexCoord2f(L2, V2); glVertex3fv(nextTail[1]);
+                        glTexCoord2f(L2, V1); glVertex3fv(nextTail[0]);
                         glEnd();
                     }
                 }
@@ -7374,10 +7272,10 @@ void RenderJoints(BYTE bRenderOneMore)
                 EnableDepthTest();
             }
             if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 6)
-            {
+            { 
                 vec3_t Light;
                 EnableAlphaBlend();
-                o->Velocity /= 1.1f;
+                o->Velocity *= powf(1.f / 1.1f, FPS_ANIMATION_FACTOR);
                 Vector(o->Velocity, o->Velocity, o->Velocity, Light);
                 RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->TargetPosition[0], o->TargetPosition[1], 2.f, 2.f, Light);
                 DisableAlphaBlend();
@@ -7392,9 +7290,9 @@ void GetMagicScrew(int iParam, vec3_t vResult, float fSpeedRate)
 
     vec3_t vDirTemp;
     float fSpeed[3] = { 0.048f, 0.0613f, 0.1113f };
-    fSpeed[0] *= fSpeedRate;
-    fSpeed[1] *= fSpeedRate;
-    fSpeed[2] *= fSpeedRate;
+    fSpeed[0] *= powf(fSpeedRate, FPS_ANIMATION_FACTOR);
+    fSpeed[1] *= powf(fSpeedRate, FPS_ANIMATION_FACTOR);
+    fSpeed[2] *= powf(fSpeedRate, FPS_ANIMATION_FACTOR);
     vDirTemp[0] = sinf((float)(iParam + 55555) * fSpeed[0]) * cosf((float)iParam * fSpeed[1]);
     vDirTemp[1] = sinf((float)(iParam + 55555) * fSpeed[0]) * sinf((float)iParam * fSpeed[1]);
     vDirTemp[2] = cosf((float)(iParam + 55555) * fSpeed[0]);

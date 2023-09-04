@@ -295,7 +295,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     switch (pObject->Type)
     {
     case 0:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_TRUE_FIRE, pObject->Position, pObject->Angle, Light, 0, pObject->Scale);
@@ -303,7 +303,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         break;
     case 54:
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 4 == 0)
+        if (rand_fps_check(4))
         {
             CreateParticle(BITMAP_WATERFALL_2, pObject->Position, pObject->Angle, Light, 4, pObject->Scale);
         }
@@ -333,7 +333,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         }
         break;
     case 61:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_TRUE_BLUE, pObject->Position, pObject->Angle, Light, 0, pObject->Scale);
@@ -354,7 +354,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     case 110:
         Vector(1.0f, 1.0f, 1.0f, Light);
         Vector(0.f, 0.f, 70.f, p);
-        if (rand() % 2 == 0)
+        if (rand_fps_check(2))
         {
             p[0] = (float)cosf(WorldTime * 0.03f) * (30.f + rand() % 5);
             p[1] = (float)sinf(WorldTime * 0.03f) * (30.f + rand() % 5);
@@ -465,7 +465,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Weapon[1].Level = 0;
                 pCharacter->Wing.Type = MODEL_WING + 5;
                 pCharacter->Helper.Type = MODEL_HELPER + 37;
-                CreateBug(MODEL_FENRIR_BLUE, pNewObject->Position, pNewObject);
+                CreateMount(MODEL_FENRIR_BLUE, pNewObject->Position, pNewObject);
                 break;
                 // 			case 137:
             case 138:
@@ -576,7 +576,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Weapon[1].Level = 0;
                 pCharacter->Wing.Type = MODEL_HELPER + 30;
                 pCharacter->Helper.Type = MODEL_HELPER + 4;
-                CreateBug(MODEL_DARK_HORSE, pNewObject->Position, pNewObject);
+                CreateMount(MODEL_DARK_HORSE, pNewObject->Position, pNewObject);
                 CreatePetDarkSpirit_Now(pCharacter);
                 break;
             case 147:
@@ -668,7 +668,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
             {
                 if (pObject->Type == 133)
                 {
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         pCharacter->Helper.Type = -1;
                         SetPlayerAttack(pCharacter);
@@ -687,7 +687,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 }
                 else if (pObject->Type == 134)
                 {
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         SetAction(pObject->Owner, PLAYER_ATTACK_SKILL_WHEEL);
                         pCharacter->Skill = AT_SKILL_WHEEL;
@@ -710,7 +710,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 }
                 else if (pObject->Type == 138)
                 {
-                    if (rand() % 2 == 0)
+                    if (rand_fps_check(2))
                     {
                         SetPlayerAttack(pCharacter);
                     }
@@ -759,7 +759,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 }
                 else if ((pObject->Type >= 152 && pObject->Type <= 155))
                 {
-                    if (rand() % 2 == 0) SetAction(pObject->Owner, MONSTER01_ATTACK1);
+                    if (rand_fps_check(2)) SetAction(pObject->Owner, MONSTER01_ATTACK1);
                     else SetAction(pObject->Owner, MONSTER01_SHOCK);
                 }
                 else if ((pObject->Type >= 149 && pObject->Type <= 151))
@@ -1114,7 +1114,7 @@ void GMNewTown::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pMod
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
@@ -1147,7 +1147,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
     switch (pObject->Type)
     {
     case MODEL_ELBELAND_RHEA:
-        if (pObject->CurrentAction == 0 && rand() % 5 == 0)
+        if (pObject->CurrentAction == 0 && rand_fps_check(5))
         {
             Vector((rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, Light);
             fScale = (rand() % 5 + 5) * 0.1f;
@@ -1273,7 +1273,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 129:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_ELBELAND_RABBITUGLY_BREATH01);
             }
@@ -1291,7 +1291,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
         if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2
             || pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 30 == 0)
+            if (rand_fps_check(30))
             {
                 PlayBuffer(SOUND_ELBELAND_WOLFHUMAN_MOVE02);
             }
@@ -1308,7 +1308,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 131:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_ELBELAND_BUTTERFLYPOLLUTION_MOVE01);
             }
@@ -1321,7 +1321,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 132:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_ELBELAND_CURSERICH_MOVE01);
             }
@@ -1338,7 +1338,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 133:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
                 PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_MOVE01);
             else
                 PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_MOVE02);
@@ -1359,7 +1359,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 134:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_ELBELAND_BEASTWOO_MOVE01);
             }
@@ -1376,7 +1376,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
     case MODEL_MONSTER01 + 135:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
-            if (rand() % 100 == 0)
+            if (rand_fps_check(100))
             {
                 PlayBuffer(SOUND_ELBELAND_BEASTWOOLEADER_MOVE01);
             }

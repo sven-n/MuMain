@@ -59,14 +59,14 @@ bool M34CryingWolf2nd::RenderCryingWolf2ndObjectVisual(OBJECT* pObject, BMD* pMo
     switch (pObject->Type)
     {
     case 2:
-        if (rand() % 3 == 0)
+        if (rand_fps_check(3))
         {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_SMOKE, pObject->Position, pObject->Angle, Light, 21, pObject->Scale);
         }
         break;
     case 3:
-        if (rand() % 2 == 0) {
+        if (rand_fps_check(2)) {
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticle(BITMAP_TRUE_FIRE, pObject->Position, pObject->Angle, Light, 5, pObject->Scale);
         }
@@ -74,15 +74,15 @@ bool M34CryingWolf2nd::RenderCryingWolf2ndObjectVisual(OBJECT* pObject, BMD* pMo
     case 5:
     {
         Vector(1.f, 1.f, 1.f, Light);
-        if (rand() % 2 == 0) {
-            if ((int)((pObject->Timer++) + 2) % 4 == 0)
+        if (rand_fps_check(2)) {
+            if ((int)((pObject->Timer += FPS_ANIMATION_FACTOR) + 2) % 4 == 0)
             {
                 CreateParticle(BITMAP_ADV_SMOKE + 1, pObject->Position, pObject->Angle, Light);
                 CreateParticle(BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 0);
             }
         }
-        if (rand() % 2 == 0) {
-            if ((int)(pObject->Timer++) % 4 == 0)
+        if (rand_fps_check(2)) {
+            if ((int)(pObject->Timer += FPS_ANIMATION_FACTOR) % 4 == 0)
             {
                 CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 6);
                 CreateParticle(BITMAP_ADV_SMOKE, pObject->Position, pObject->Angle, Light, 1);
@@ -204,7 +204,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         //. Walking & Running Scene Processing
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
-            if (rand() % 10 == 0) {
+            if (rand_fps_check(10)) {
                 CreateParticle(BITMAP_SMOKE + 1, pObject->Position, pObject->Angle, Light);
             }
         }
@@ -280,7 +280,7 @@ void M34CryingWolf2nd::MoveCryingWolf2ndBlurEffect(CHARACTER* pCharacter, OBJECT
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -315,7 +315,7 @@ void M34CryingWolf2nd::MoveCryingWolf2ndBlurEffect(CHARACTER* pCharacter, OBJECT
             vec3_t StartPos, StartRelative;
             vec3_t EndPos, EndRelative;
 
-            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed;
+            float fActionSpeed = pModel->Actions[pObject->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
             float fSpeedPerFrame = fActionSpeed / 10.f;
             float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++) {
@@ -345,7 +345,7 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
     {
     case MODEL_MONSTER01 + 96:
     {
-        if (pCharacter->AttackTime == 14)
+        if ((int)pCharacter->AttackTime == 14)
         {
             CreateEffect(MODEL_ARROW_NATURE, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, pObject->PKKey);
             return true;
@@ -354,7 +354,7 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
     break;
     case MODEL_MONSTER01 + 91:
     {
-        if (pCharacter->AttackTime == 14)
+        if ((int)pCharacter->AttackTime == 14)
         {
             CreateEffect(MODEL_ARROW_HOLY, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, pObject->PKKey);
             return true;

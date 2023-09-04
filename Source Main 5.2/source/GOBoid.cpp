@@ -21,6 +21,7 @@
 #include "DSPlaySound.h"
 #include "MapManager.h"
 #include "CameraMove.h"
+#include "NewUISystem.h"
 
 int EnableEvent = 0;
 
@@ -29,11 +30,11 @@ static  const   BYTE    BOID_DOWN = 1;
 static  const   BYTE    BOID_GROUND = 2;
 static  const   BYTE    BOID_UP = 3;
 
-void DeleteBug(OBJECT* Owner)
+void DeleteMount(OBJECT* Owner)
 {
-    for (int i = 0; i < MAX_BUTTERFLES; i++)
+    for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Butterfles[i];
+        OBJECT* o = &Mounts[i];
         if (o->Live)
         {
             if (o->Owner == Owner)
@@ -42,7 +43,7 @@ void DeleteBug(OBJECT* Owner)
     }
 }
 
-bool IsBug(ITEM* pItem)
+bool IsMount(ITEM* pItem)
 {
     if (pItem == NULL)
     {
@@ -64,9 +65,12 @@ bool IsBug(ITEM* pItem)
     return false;
 }
 
-bool CreateBugSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int SubType, int LinkBone)
+bool CreateMountSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int SubType, int LinkBone)
 {
-    if (gMapManager.InChaosCastle() == true) return false;
+    if (gMapManager.InChaosCastle() == true)
+    {
+        return false;
+    }
 
     if (!o->Live)
     {
@@ -122,26 +126,32 @@ bool CreateBugSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int SubTy
             o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + (float)(rand() % 100);
             break;
         }
+
         return FALSE;
     }
+
     return TRUE;
 }
 
-void CreateBug(int Type, vec3_t Position, OBJECT* Owner, int SubType, int LinkBone)
+void CreateMount(int Type, vec3_t Position, OBJECT* Owner, int SubType, int LinkBone)
 {
     if (gMapManager.InChaosCastle() == true) return;
 
     if (Owner->Type != MODEL_PLAYER && Type != MODEL_HELPER)
         return;
 
-    for (int i = 0; i < MAX_BUTTERFLES; i++)
+    for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Butterfles[i];
-        if (CreateBugSub(Type, Position, Owner, o, SubType, LinkBone) == FALSE) return;
+        OBJECT* o = &Mounts[i];
+        if (CreateMountSub(Type, Position, Owner, o, SubType, LinkBone) == FALSE)
+        {
+            // False means, it has been successful ...
+            return;
+        }
     }
 }
 
-bool MoveBug(OBJECT* o, bool bForceRender)
+bool MoveMount(OBJECT* o, bool bForceRender)
 {
     if (o->Live)
     {
@@ -295,7 +305,7 @@ bool MoveBug(OBJECT* o, bool bForceRender)
                         }
                     }
                 }
-                else if (rand() % 3 == 0 && !gMapManager.InHellas())
+                else if (rand_fps_check(3) && !gMapManager.InHellas())
                 {
                     if (o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking))
                     {
@@ -321,10 +331,11 @@ bool MoveBug(OBJECT* o, bool bForceRender)
 
             b->BoneHead = 7;
 
+            // Take riders position and angle:
             VectorCopy(o->Owner->HeadAngle, o->HeadAngle);
             VectorCopy(o->Owner->Position, o->Position);
-
             VectorCopy(o->Owner->Angle, o->Angle);
+
             if (o->Owner->CurrentAction == PLAYER_ATTACK_DARKHORSE)
             {
                 SetAction(o, 3);
@@ -377,19 +388,19 @@ bool MoveBug(OBJECT* o, bool bForceRender)
                         }
                     }
                 }
-                else if (rand() % 2 == 0 && !gMapManager.InHellas())
+                else if (rand_fps_check(2) && !gMapManager.InHellas())
                 {
                     if (o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking))
                     {
+                        // Smoke at the back feet of the horse.
                         Vector(o->Position[0] + (float)(rand() % 64 - 32),
                             o->Position[1] + (float)(rand() % 64 - 32),
                             o->Position[2] + (float)(rand() % 32 - 16), Position);
 
                         if (gMapManager.WorldActive == WD_2DEVIAS)
                             CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light);
-                        else if (gMapManager.WorldActive != WD_10HEAVEN)
-                            if (!g_Direction.m_CKanturu.IsMayaScene())
-                                CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
+                        else if (gMapManager.WorldActive != WD_10HEAVEN && !g_Direction.m_CKanturu.IsMayaScene())
+                            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
                     }
                 }
 
@@ -417,11 +428,12 @@ bool MoveBug(OBJECT* o, bool bForceRender)
                 o->Velocity = 0.3f;
             }
 
-            if (o->CurrentAction != 1)
+            // Breathing smoke/bubbles:
+            //if (o->CurrentAction != 1)
             {
                 if (o->Owner && !g_isCharacterBuff(o->Owner, eBuff_Cloaking))
                 {
-                    if (rand() % 3 == 0)
+                    if (rand_fps_check(3))
                     {
                         vec3_t p = { 50.f, -4.f, 0.f };
                         b->TransformPosition(BoneTransform[27], p, Position);
@@ -528,7 +540,7 @@ bool MoveBug(OBJECT* o, bool bForceRender)
                     SetAction(o, 2);
                 }
 
-                if (rand() % 2 == 0 && gMapManager.WorldActive != WD_10HEAVEN)
+                if (rand_fps_check(2) && gMapManager.WorldActive != WD_10HEAVEN)
                 {
                     if (!g_Direction.m_CKanturu.IsMayaScene())
 
@@ -588,7 +600,7 @@ bool MoveBug(OBJECT* o, bool bForceRender)
         case MODEL_BUTTERFLY01:
             FlyRange = 100.f;
             Vector(0.4f, 0.6f, 1.f, Light);
-            if (rand() % 2 == 0)
+            if (rand_fps_check(2))
                 CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 1);
             break;
         case MODEL_HELPER:
@@ -609,6 +621,7 @@ bool MoveBug(OBJECT* o, bool bForceRender)
             break;
         }
         b->CurrentAction = o->CurrentAction;
+
         b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity, o->Position, o->Angle);
 
         if (o->Type == MODEL_HELPER || o->Type == MODEL_HELPER + 1)
@@ -624,9 +637,9 @@ bool MoveBug(OBJECT* o, bool bForceRender)
             AngleMatrix(o->Angle, o->Matrix);
             vec3_t Direction;
             VectorRotate(o->Direction, o->Matrix, Direction);
-            VectorAdd(o->Position, Direction, o->Position);
+            VectorAddScaled(o->Position, Direction, o->Position, FPS_ANIMATION_FACTOR);
             o->Position[2] += (float)(rand() % 16 - 8);
-            if (rand() % 32 == 0)
+            if (rand_fps_check(32))
             {
                 float Speed = 0;
                 if (Distance >= FlyRange * FlyRange)
@@ -646,16 +659,16 @@ bool MoveBug(OBJECT* o, bool bForceRender)
     }
     return TRUE;
 }
-void MoveBugs()
+void MoveMounts()
 {
-    for (int i = 0; i < MAX_BUTTERFLES; i++)
+    for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Butterfles[i];
-        if (MoveBug(o) == FALSE) return;
+        OBJECT* o = &Mounts[i];
+        if (MoveMount(o) == FALSE) return;
     }
 }
 
-bool RenderBug(OBJECT* o, bool bForceRender)
+bool RenderMount(OBJECT* o, bool bForceRender)
 {
     if (o->Live)
     {
@@ -701,12 +714,12 @@ bool RenderBug(OBJECT* o, bool bForceRender)
     return TRUE;
 }
 
-void RenderBugs()
+void RenderMount()
 {
-    for (int i = 0; i < MAX_BUTTERFLES; i++)
+    for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Butterfles[i];
-        if (RenderBug(o) == FALSE)
+        OBJECT* o = &Mounts[i];
+        if (RenderMount(o) == FALSE)
         {
             return;
         }
@@ -720,7 +733,10 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
     if (o == NULL)	return;
     if (b == NULL)	return;
 
+    // The weapon level is misused here to count how many frames have been rendered
+    // for this effect...
     o->WeaponLevel++;
+
     if (o->LastHorseWaveEffect < WorldTime - HorseEffectInterval)
     {
         CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, o->Light);
@@ -729,11 +745,11 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
 
     if (o->AnimationFrame >= 8.f && o->AnimationFrame <= 9.5f)
     {
-        if ((o->WeaponLevel % 2) == 1)
+        if (rand_fps_check(2))
         {
             float  Matrix[3][4];
             vec3_t Angle, p, Position;
-            Vector(0.f, 150.f * (o->WeaponLevel / 2), 0.f, p);
+            Vector(0.f, 150.f * (o->WeaponLevel / 2) * FPS_ANIMATION_FACTOR, 0.f, p);
             Vector(0.f, 0.f, (float)(rand() % 360), Angle);
             for (int i = 0; i < 6; ++i)
             {
@@ -747,7 +763,7 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
         }
         EarthQuake = (rand() % 3 - 3) * 0.7f;
     }
-    else if (o->WeaponLevel == 19)
+    else if (o->WeaponLevel == (BYTE)(19.f / FPS_ANIMATION_FACTOR))
     {
         CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 2);
         o->WeaponLevel = -3;
@@ -771,7 +787,7 @@ void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
         o->WeaponLevel == iMaxSkill - 1 ||
         o->WeaponLevel == iMaxSkill - 0)
     {
-        Vector(0.f, 40.f * (o->WeaponLevel / 2), 0.f, p);
+        Vector(0.f, 40.f * (o->WeaponLevel / 2) * FPS_ANIMATION_FACTOR, 0.f, p);
         Vector(0.f, 0.f, (float)(rand() % 360), Angle);
         for (int i = 0; i < 6; ++i)
         {
@@ -911,28 +927,28 @@ int CreateAtlanseFish(OBJECT* o)
 void MoveBat(OBJECT* o)
 {
     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-    o->Position[2] += -absf(sinf(o->Timer)) * 150.f + 350.f;
-    o->Timer += 0.2f;
+    o->Position[2] += ( - absf(sinf(o->Timer)) * 150.f + 350.f) * FPS_ANIMATION_FACTOR;
+    o->Timer += 0.2f * FPS_ANIMATION_FACTOR;
 }
 
 void MoveButterFly(OBJECT* o)
 {
-    if (rand() % 32 == 0)
+    if (rand_fps_check(32))
     {
         o->Angle[2] = (float)(rand() % 360);
         o->Direction[2] = (float)(rand() % 15 - 7) * 1.f;
     }
-    o->Direction[2] += (float)(rand() % 15 - 7) * 0.2f;
+    o->Direction[2] += (float)(rand() % 15 - 7) * 0.2f * FPS_ANIMATION_FACTOR;
     float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
     if (o->Position[2] < Height + 50.f)
     {
-        o->Direction[2] *= 0.8f;
-        o->Direction[2] += 1.f;
+        o->Direction[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+        o->Direction[2] += 1.f * FPS_ANIMATION_FACTOR;
     }
     if (o->Position[2] > Height + 300.f)
     {
-        o->Direction[2] *= 0.8f;
-        o->Direction[2] -= 1.f;
+        o->Direction[2] *= pow(0.8f, FPS_ANIMATION_FACTOR);
+        o->Direction[2] -= 1.f * FPS_ANIMATION_FACTOR;
     }
     o->Position[2] += (float)(rand() % 15 - 7) * 0.3f;
 }
@@ -954,13 +970,13 @@ void MoveBird(OBJECT* o)
             }
         }
         o->Velocity = 1.f;
-        o->Position[2] += (float)(rand() % 16 - 8);
+        o->Position[2] += (float)(rand() % 16 - 8) * FPS_ANIMATION_FACTOR;
         if (o->Position[2] < 200.f) o->Direction[2] = 10.f;
         else if (o->Position[2] > 600.f) o->Direction[2] = -10.f;
     }
     if (o->AI == BOID_DOWN)
     {
-        //o->Velocity *= 0.95f;
+        //o->Velocity *= pow(0.95f, FPS_ANIMATION_FACTOR);
         o->Direction[2] = -20.f;
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height)
@@ -973,7 +989,7 @@ void MoveBird(OBJECT* o)
     }
     if (o->AI == BOID_GROUND)
     {
-        if (Hero->Object.CurrentAction >= PLAYER_WALK_MALE || rand() % 256 == 0)
+        if (Hero->Object.CurrentAction >= PLAYER_WALK_MALE || rand_fps_check(256))
         {
             o->AI = BOID_UP;
             o->Velocity = 1.1f;
@@ -983,8 +999,8 @@ void MoveBird(OBJECT* o)
     }
     if (o->AI == BOID_UP)
     {
-        o->Position[2] += (float)(rand() % 16 - 8);
-        o->Velocity -= 0.005f;
+        o->Position[2] += (float)(rand() % 16 - 8) * FPS_ANIMATION_FACTOR;
+        o->Velocity -= 0.005f * FPS_ANIMATION_FACTOR;
         if (o->Velocity <= 1.f)
         {
             o->AI = BOID_FLY;
@@ -996,16 +1012,16 @@ void MoveHeavenBug(OBJECT* o, int index)
 {
     const float iFrame = WorldTime / 40.0f;
 
-    o->Position[0] += o->Velocity * (float)sinf(o->Angle[2]);
-    o->Position[1] -= o->Velocity * (float)cosf(o->Angle[2]);
-    o->Angle[2] += 0.01f * cosf((float)(34571 + iFrame + index * 41273) * 0.0003f) * sinf((float)(17732 + iFrame + index * 5161) * 0.0003f);
+    o->Position[0] += o->Velocity * (float)sinf(o->Angle[2]) * FPS_ANIMATION_FACTOR;
+    o->Position[1] -= o->Velocity * (float)cosf(o->Angle[2]) * FPS_ANIMATION_FACTOR;
+    o->Angle[2] += 0.01f * cosf((float)(34571 + iFrame + index * 41273) * 0.0003f) * sinf((float)(17732 + iFrame + index * 5161) * 0.0003f) * FPS_ANIMATION_FACTOR;
 
     float dx = o->Position[0] - Hero->Object.Position[0];
     float dy = o->Position[1] - Hero->Object.Position[1];
     float Range = sqrtf(dx * dx + dy * dy);
     if (Range >= 1500.f)
         o->Live = false;
-    if (rand() % 5120 == 0)
+    if (rand_fps_check(5120))
         o->Live = false;
 
     if (gMapManager.InBloodCastle())
@@ -1019,7 +1035,7 @@ void MoveHeavenBug(OBJECT* o, int index)
 
 void MoveEagle(OBJECT* o)
 {
-    if (o->SubType == 0 && rand() % 120 == 0)
+    if (o->SubType == 0 && rand_fps_check(120))
     {
         o->SubType = 1;
         o->AnimationFrame = 0;
@@ -1038,7 +1054,7 @@ void MoveEagle(OBJECT* o)
     }
 
     float fSeedAngle = WorldTime * 0.001f;
-    float fFlyRange = o->Gravity;
+    float fFlyRange = o->Gravity * FPS_ANIMATION_FACTOR;
     float fAngle = 0;
     if (o->AI == BOID_FLY)
     {
@@ -1083,8 +1099,8 @@ void MoveEagle(OBJECT* o)
             o->AI = BOID_FLY;
             o->HeadAngle[2] = 0;
 
-            o->HeadAngle[0] = cosf(fSeedAngle) * fFlyRange;
-            o->HeadAngle[1] = sinf(fSeedAngle) * fFlyRange;
+            o->HeadAngle[0] = cosf(fSeedAngle) * fFlyRange * FPS_ANIMATION_FACTOR;
+            o->HeadAngle[1] = sinf(fSeedAngle) * fFlyRange * FPS_ANIMATION_FACTOR;
             fAngle = CreateAngle(o->Position[0], o->Position[1], o->Position[0] + o->HeadAngle[0], o->Position[1] + o->HeadAngle[1]);
         }
     }
@@ -1099,22 +1115,30 @@ void MoveEagle(OBJECT* o)
 void MoveTornado(OBJECT* o)
 {
     o->Scale = 1.0f;
-    if (rand() % 500 == 0)
+    if (rand_fps_check(500))
     {
         o->HeadAngle[0] = (rand() % 314) / 100.0f;
     }
-    o->Position[0] += sinf(o->HeadAngle[0]) * 2.0f;
-    o->Position[1] += cosf(o->HeadAngle[0]) * 2.0f;
+    o->Position[0] += sinf(o->HeadAngle[0]) * 2.0f * FPS_ANIMATION_FACTOR;
+    o->Position[1] += cosf(o->HeadAngle[0]) * 2.0f * FPS_ANIMATION_FACTOR;
     o->Angle[2] = 0;
-    if (o->BlendMeshLight < 1.0f) o->BlendMeshLight += 0.1f;
+    if (o->BlendMeshLight < 1.0f) o->BlendMeshLight += 0.1f * FPS_ANIMATION_FACTOR;
 }
 
 void MoveBoidGroup(OBJECT* o, int index)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     if (o->AI != BOID_GROUND)
     {
-        if (o->Type != MODEL_BUTTERFLY01 || rand() % 4 == 0)
+        if (o->Type != MODEL_BUTTERFLY01 || rand_fps_check(4))
+        {
             MoveBoid(o, index, Boids, MAX_BOIDS);
+        }
+
         AngleMatrix(o->Angle, o->Matrix);
         vec3_t p, Direction;
         if (gMapManager.WorldActive == WD_7ATLANSE || gMapManager.WorldActive == WD_67DOPPLEGANGER3)
@@ -1136,7 +1160,7 @@ void MoveBoidGroup(OBJECT* o, int index)
                 Vector(o->Velocity * (float)(rand() % 32 + 32), 0.f, o->Direction[2], Direction);
                 o->Gravity = 5;
             }
-            o->Timer += 0.1f;
+            o->Timer += 0.1f * FPS_ANIMATION_FACTOR;
             if (o->Timer >= 10)
             {
                 o->Timer = 0.f;
@@ -1147,7 +1171,7 @@ void MoveBoidGroup(OBJECT* o, int index)
             Vector(o->Velocity * 25.f, 0.f, o->Direction[2], Direction);
         }
         VectorRotate(Direction, o->Matrix, p);
-        VectorAdd(o->Position, p, o->Position);
+        VectorAddScaled(o->Position, p, o->Position, FPS_ANIMATION_FACTOR);
         o->Direction[0] = o->Position[0] + 3.f * p[0];
         o->Direction[1] = o->Position[1] + 3.f * p[1];
 
@@ -1171,7 +1195,7 @@ void MoveBoidGroup(OBJECT* o, int index)
             );
         else
         {
-            if (rand() % 512 == 0)
+            if (rand_fps_check(512))
                 o->Live = false;
         }
 #ifndef PJH_NEW_SERVER_SELECT_MAP
@@ -1187,15 +1211,21 @@ void MoveBoidGroup(OBJECT* o, int index)
 
 void MoveBoids()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     if (EnableEvent != 0)
     {
         OBJECT* o = &Hero->Object;
         vec3_t Position, Angle, Light;
-        if (rand() % 40 == 0)
+        if (rand_fps_check(40))
         {
-            Vector(Hero->Object.Position[0] + (float)(rand() % 600 - 200),
-                Hero->Object.Position[1] + (float)(rand() % 400 + 200),
-                Hero->Object.Position[2] + 300.f, Position);
+            Vector(Hero->Object.Position[0] + (float)(rand() % 600 - 200) * FPS_ANIMATION_FACTOR,
+                Hero->Object.Position[1] + (float)(rand() % 400 + 200) * FPS_ANIMATION_FACTOR,
+                Hero->Object.Position[2] + 300.f * FPS_ANIMATION_FACTOR,
+                Position);
             Vector(0.f, 0.f, 0.f, Angle);
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(MODEL_FIRE, Position, Angle, Light, 3);
@@ -1265,7 +1295,7 @@ void MoveBoids()
         {
             if (EnableEvent != 0)
             {
-                if (rand() % 300 == 0)
+                if (rand_fps_check(300))
                 {
                     o->Live = true;
                     OpenMonsterModel(31);
@@ -1288,7 +1318,8 @@ void MoveBoids()
                     }
                     Vector(Hero->Object.Position[0] + (float)(rand() % 600 - 100),
                         Hero->Object.Position[1] + (float)(rand() % 400 + 200),
-                        Hero->Object.Position[2] + 300.f, o->Position);
+                        Hero->Object.Position[2] + 300.f,
+                        o->Position);
                 }
             }
             else if (gMapManager.WorldActive == WD_0LORENCIA
@@ -1299,7 +1330,7 @@ void MoveBoids()
                 || ((gMapManager.WorldActive == WD_7ATLANSE || gMapManager.WorldActive == WD_67DOPPLEGANGER3) && (TerrainWall[Index] == 0 || TerrainWall[Index] == TW_CHARACTER))
                 || gMapManager.InBloodCastle()
                 || gMapManager.InHellas()
-                || (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && i < 1 && rand() % 500 == 0 && Hero->SafeZone != true)
+                || (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && i < 1 && rand_fps_check(500) && Hero->SafeZone != true)
                 )
             {
                 int iCreateBoid = 0;
@@ -1392,14 +1423,14 @@ void MoveBoids()
                 vec3_t Position, Direction;
                 Vector(o->Scale * 40.f, 0.f, 0.f, Position);
                 VectorRotate(Position, o->Matrix, Direction);
-                VectorAdd(o->Position, Direction, o->Position);
+                VectorAddScaled(o->Position, Direction, o->Position, FPS_ANIMATION_FACTOR);
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 300.f;
                 o->Position[2] += -absf(sinf(o->Timer)) * 100.f + 100.f;
-                o->Timer += o->Scale * 0.05f;
-                o->LifeTime--;
+                o->Timer += o->Scale * 0.05f * FPS_ANIMATION_FACTOR;
+                o->LifeTime -= FPS_ANIMATION_FACTOR;
                 if (o->LifeTime <= 0)
                     o->Live = false;
-                if (rand() % 128 == 0)
+                if (rand_fps_check(128))
                     PlayBuffer(SOUND_MONSTER + 124);
             }
             else
@@ -1458,9 +1489,16 @@ void MoveBoids()
                     o->SubType++;
                 }
 
-                if (o->Type == MODEL_EAGLE || o->Type == MODEL_MAP_TORNADO);
-                else if (o->SubType >= 2) o->Live = false;
-                o->LifeTime--;
+                if (o->Type == MODEL_EAGLE || o->Type == MODEL_MAP_TORNADO)
+                {
+                    // do nothing?
+                }
+                else if (o->SubType >= 2)
+                {
+                    o->Live = false;
+                }
+
+                o->LifeTime -= FPS_ANIMATION_FACTOR;
 
                 float dx = o->Position[0] - Hero->Object.Position[0];
                 float dy = o->Position[1] - Hero->Object.Position[1];
@@ -1469,21 +1507,21 @@ void MoveBoids()
                 {
                     if (o->Type == MODEL_BIRD01)
                     {
-                        if (rand() % 512 == 0)
+                        if (rand_fps_check(512))
                             PlayBuffer(SOUND_BIRD01, o);
-                        if (rand() % 512 == 0)
+                        if (rand_fps_check(512))
                             PlayBuffer(SOUND_BIRD02, o);
                     }
                     else if (o->Type == MODEL_BAT01)
                     {
-                        if (rand() % 256 == 0)
+                        if (rand_fps_check(256))
                             PlayBuffer(SOUND_BAT01, o);
                     }
                     else if (o->Type == MODEL_CROW)
                     {
                         if (TerrainWall[Index] == TW_SAFEZONE)
                         {
-                            if (rand() % 128 == 0)
+                            if (rand_fps_check(128))
                                 PlayBuffer(SOUND_CROW, o);
                         }
                     }
@@ -1496,6 +1534,11 @@ void MoveBoids()
 
 void RenderBoids(bool bAfterCharacter)
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_BOIDS; i++)
     {
         OBJECT* o = &Boids[i];
@@ -1605,6 +1648,11 @@ void RenderBoids(bool bAfterCharacter)
 
 void RenderFishs()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_FISHS; i++)
     {
         OBJECT* o = &Fishs[i];
@@ -1641,6 +1689,11 @@ void RenderFishs()
 
 void MoveFishs()
 {
+    if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+
     for (int i = 0; i < MAX_FISHS; i++)
     {
         if (gMapManager.WorldActive != WD_7ATLANSE && gMapManager.WorldActive != WD_8TARKAN
@@ -1732,7 +1785,7 @@ void MoveFishs()
                     {
                         o->Type = MODEL_FISH01 + 1 + 2 + rand() % 4;
                         o->Velocity = 1.f / o->Scale;
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                             o->Gravity = 2;
                         else
                             o->Gravity = 3;
@@ -1746,7 +1799,7 @@ void MoveFishs()
                             o->BlendMeshLight = 1.f;
                         }
                         o->Velocity = 0.5f / o->Scale;
-                        if (rand() % 2 == 0)
+                        if (rand_fps_check(2))
                             o->Gravity = 1;
                         else
                             o->Gravity = 2;
@@ -1779,7 +1832,7 @@ void MoveFishs()
             if (o->Type == MODEL_FISH01 + 7 || o->Type == MODEL_FISH01 + 8)
             {
                 o->BlendMeshLight = sinf(o->Timer) * 0.4f + 0.5f;
-                o->Timer += 0.1f;
+                o->Timer += 0.1f * FPS_ANIMATION_FACTOR;
             }
 
             if ((o->Type >= MODEL_FISH01 && o->Type <= MODEL_FISH01 + 10) ||
@@ -1796,7 +1849,7 @@ void MoveFishs()
                 vec3_t Position, Direction;
                 Vector(o->Velocity * (float)(rand() % 4 + 6), 0.f, 0.f, Position);
                 VectorRotate(Position, o->Matrix, Direction);
-                VectorAdd(o->Position, Direction, o->Position);
+                VectorAddScaled(o->Position, Direction, o->Position, FPS_ANIMATION_FACTOR);
                 if (gMapManager.WorldActive != 7 || gMapManager.InHellas() == false || gMapManager.WorldActive != WD_67DOPPLEGANGER3)
                 {
                     o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
@@ -1851,7 +1904,7 @@ void MoveFishs()
                     o->Live = false;
 
                 if (Range < 600.f)
-                    if (o->Type == MODEL_RAT01 && rand() % 256 == 0)
+                    if (o->Type == MODEL_RAT01 && rand_fps_check(256))
                         PlayBuffer(SOUND_RAT01, o);
             }
             else
@@ -1859,7 +1912,7 @@ void MoveFishs()
                 SetAction(o, 0);
             }
 
-            o->LifeTime--;
+            o->LifeTime -= FPS_ANIMATION_FACTOR;
             if (o->LifeTime <= 0)
             {
                 if (o->Type == MODEL_BUG01)
@@ -1867,7 +1920,7 @@ void MoveFishs()
                 }
                 else
                 {
-                    if (rand() % 64 == 0)
+                    if (rand_fps_check(64))
                         o->LifeTime = rand() % 128;
                 }
             }

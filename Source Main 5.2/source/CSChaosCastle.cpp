@@ -93,13 +93,13 @@ bool MoveChaosCastleObjectSetting(int& objCount, int object)
 {
     if (gMapManager.InChaosCastle() == false) return false;
 
-    if ((rand() % 10) == 0 && object)
+    if (rand_fps_check(10) && object)
     {
         objCount = rand() % object;
         return true;
     }
 
-    if (!Hero->SafeZone && (rand() % 10) == 0)
+    if (!Hero->SafeZone && rand_fps_check(10))
     {
         vec3_t Position;
 
@@ -448,7 +448,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         {
             Vector(0.f, 0.f, 0.f, p);
             b->TransformPosition(BoneTransform[1], p, Position);
-            if (o->LifeTime == 10)
+            if ((int)o->LifeTime == 10)
             {
                 CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL, 60.f + rand() % 10);
 
@@ -462,7 +462,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
             }
             else
             {
-                o->LifeTime--;
+                o->LifeTime -= FPS_ANIMATION_FACTOR;
             }
         }
     case    4:
@@ -527,7 +527,7 @@ void RenderTerrainVisual(int xi, int yi)
         Position[2] = Hero->Object.Position[2];
         CreateParticle(BITMAP_SMOKE + 4, Position, Angle, Light, 0, 1.5f);
 
-        if (rand() % 5 == 0)
+        if (rand_fps_check(5))
         {
             EarthQuake = (float)(rand() % 3 - 3) * 0.1f;
         }

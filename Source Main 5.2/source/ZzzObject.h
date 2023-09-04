@@ -2,15 +2,15 @@
 #define ZZZ_OBJECT_H
 
 extern OBJECT_BLOCK ObjectBlock[256];
-extern OBJECT       Butterfles[];
+extern OBJECT       Mounts[];
 extern OBJECT       Boids[];
 extern OBJECT       Fishs[];
 
 extern float EarthQuake;
 extern bool EnableShadow;
 extern float AmbientShadowAngle;
-extern int RainTarget;
-extern int RainCurrent;
+extern float RainTarget;
+extern float RainCurrent;
 
 void CopyShadowAngle(OBJECT* o, BMD* b);
 void CreateShadowAngle();
