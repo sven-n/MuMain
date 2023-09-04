@@ -1239,15 +1239,15 @@ void CMapManager::LoadWorld(int Map)
     char WorldName[32];
     int  iMapWorld = this->WorldActive + 1;
 
-    if (InBloodCastle() == true)
+    if (InBloodCastle(Map) == true)
     {
         iMapWorld = WD_11BLOODCASTLE1 + 1;
     }
-    else if (gMapManager.InHellas() == true)
+    else if (gMapManager.InHellas(Map) == true)
     {
         iMapWorld = WD_24HELLAS + 1;
     }
-    else if (InChaosCastle() == true)
+    else if (InChaosCastle(Map) == true)
     {
         iMapWorld = WD_18CHAOS_CASTLE + 1;
     }
