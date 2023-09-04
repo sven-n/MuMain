@@ -524,9 +524,6 @@ typedef struct
     OBJECT* Target;
     vec3_t      TargetPosition;
     BYTE        byOnlyOneRender;
-    float		NumTails;
-    int			MaxTails;
-    vec3_t		Tails[MAX_TAILS][4];
     float  		LifeTime;
     bool        Collision;
     float		Velocity;
@@ -537,11 +534,16 @@ typedef struct
     float		MultiUse;
     bool        bTileMapping;
     BYTE        m_byReverseUV;
-    bool        m_bCreateTails;
     int			TargetIndex[5];
     BYTE		m_bySkillSerialNum;
     int			m_iChaIndex;
     short int	m_sTargetIndex;
+
+    // Fields about the "Tails" of effects:
+    bool        m_bCreateTails; // Flag, if tails are created.
+    int         NumTails; // The number of currently used tail entries. Usually this gets increased by one in every frame until the maximum is reached.
+    int         MaxTails; // The maximum number of tail entries to use.
+    vec3_t      Tails[MAX_TAILS][4]; // The tail entries, which are getting moved back by one in every frame.
 } JOINT;
 //character end
 

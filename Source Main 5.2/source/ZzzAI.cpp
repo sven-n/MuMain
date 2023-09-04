@@ -137,13 +137,14 @@ int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY)
 
 float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn)
 {
+    float scaledTurn = Turn * FPS_ANIMATION_FACTOR;
     float targetAngle = CreateAngle2D(Position, TargetPosition);
-    Angle[2] = TurnAngle2(Angle[2], targetAngle, Turn);
+    Angle[2] = TurnAngle2(Angle[2], targetAngle, scaledTurn);
     vec3_t Range;
     VectorSubtract(Position, TargetPosition, Range);
     float distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
     targetAngle = 360.f - CreateAngle(Position[2], distance, TargetPosition[2], 0.f);
-    Angle[0] = TurnAngle2(Angle[0], targetAngle, Turn);
+    Angle[0] = TurnAngle2(Angle[0], targetAngle, scaledTurn);
     return VectorLength(Range);
 }
 

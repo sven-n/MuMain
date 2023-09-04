@@ -9921,8 +9921,12 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         {
             b->TransformPosition(BoneTransform[22 - i], p, posCenter, true);
             b->TransformPosition(BoneTransform[30 - i], p, Position, true);
-            CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
-            CreateJoint(BITMAP_JOINT_SPIRIT, posCenter, Position, o->Angle, 4, o, Scale + 5);
+            if (rand_fps_check(1))
+            {
+                CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
+                CreateJoint(BITMAP_JOINT_SPIRIT, posCenter, Position, o->Angle, 4, o, Scale + 5);
+            }
+
             CreateSprite(BITMAP_FLARE_BLUE, posCenter, Scale / 28.f, Light, o);
         }
 
@@ -9930,8 +9934,12 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         {
             b->TransformPosition(BoneTransform[7 - i], p, posCenter, true);
             b->TransformPosition(BoneTransform[11 + i], p, Position, true);
-            CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
-            CreateJoint(BITMAP_JOINT_SPIRIT, posCenter, Position, o->Angle, 4, o, Scale + 5);
+            if (rand_fps_check(1))
+            {
+                CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
+                CreateJoint(BITMAP_JOINT_SPIRIT, posCenter, Position, o->Angle, 4, o, Scale + 5);
+            }
+
             CreateSprite(BITMAP_FLARE_BLUE, posCenter, Scale / 28.f, Light, o);
         }
     }
@@ -10056,7 +10064,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         float fLumi = (sinf(WorldTime * 0.004f) + 1.0f) * 0.05f;
         Vector(0.8f + fLumi, 0.8f + fLumi, 0.3f + fLumi, Light);
         CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o, 0.5f);
-        if (rand() % 15 >= 8)
+        if (rand_fps_check(2))
         {
             b->TransformPosition(BoneTransform[13], p, Position, true);
             CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 5, 0.5f);
@@ -10093,28 +10101,32 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         {
             b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
             for (int j = 0; j < iNumParticle; ++j)
-                CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.1f);
+                if (rand_fps_check(1))
+                    CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.1f);
         }
 
         for (int i = 6; i < 18; ++i)
         {
             b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
             for (int j = 0; j < iNumParticle; ++j)
-                CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.3f);
+                if (rand_fps_check(1))
+                    CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.3f);
         }
 
         for (int i = 18; i < 30; ++i)
         {
             b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
             for (int j = 0; j < iNumParticle; ++j)
-                CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.5f);
+                if (rand_fps_check(1))
+                    CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.5f);
         }
 
         for (int i = 30; i < 38; ++i)
         {
             b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
             for (int j = 0; j < iNumParticle; ++j)
-                CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.7f);
+                if (rand_fps_check(1))
+                    CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.7f);
         }
     }
     else if (Type == MODEL_WING + 43)

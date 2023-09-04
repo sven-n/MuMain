@@ -511,7 +511,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 o->LifeTime = 1000;
                 o->Gravity = 1.0f;
                 o->Distance = 1.0f;
-                o->Position[2] += (3400.f) * FPS_ANIMATION_FACTOR;
+                o->Position[2] += 3400.f;
                 Vector(0.f, -35.0f, 0.f, o->Direction);
                 VectorCopy(o->Position, o->StartPosition);
                 Vector(1.0f, 1.0f, 1.0f, o->Light);
@@ -1476,7 +1476,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 o->LifeTime = 20;
 
                 VectorCopy(o->Position, o->StartPosition);
-                o->StartPosition[2] += (800.0f) * FPS_ANIMATION_FACTOR;
+                o->StartPosition[2] += (800.0f);
             }
             break;
             case MODEL_STAFF + 8:
@@ -7851,9 +7851,12 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (pObject->Live)
                 o->LifeTime = 100.f;
 
-            vec3_t vLight;
-            Vector(o->Alpha * 0.3f, o->Alpha * 0.3f, o->Alpha * 0.3f, vLight);
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 1, 1, pObject);
+            if (rand_fps_check(1))
+            {
+                vec3_t vLight;
+                Vector(o->Alpha * 0.3f, o->Alpha * 0.3f, o->Alpha * 0.3f, vLight);
+                CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 1, 1, pObject);
+            }
         }
         else if (o->SubType == 1)
         {
@@ -7904,10 +7907,15 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             vec3_t vLight;
             Vector(o->Alpha, o->Alpha, o->Alpha, vLight);
-            CreateParticle(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
-            if (rand_fps_check(2))
+            if (rand_fps_check(1))
+            {
                 CreateParticle(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
+            }
 
+            if (rand_fps_check(2))
+            {
+                CreateParticle(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
+            }
             //DeleteJoint(MODEL_SPEARSKILL, o, 15);
         }
         else if (o->SubType == 1)
@@ -7953,9 +7961,12 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (pObject->Live)
             o->LifeTime = 100.f;
 
-        vec3_t vLight;
-        Vector(o->Alpha * 0.7f, o->Alpha * 0.3f, o->Alpha * 1.f, vLight);
-        CreateParticle(BITMAP_CLUD64, o->Position, o->Angle, vLight, 10, 1.f, pObject);
+        if (rand_fps_check(1))
+        {
+            vec3_t vLight;
+            Vector(o->Alpha * 0.7f, o->Alpha * 0.3f, o->Alpha * 1.f, vLight);
+            CreateParticle(BITMAP_CLUD64, o->Position, o->Angle, vLight, 10, 1.f, pObject);
+        }
     }
     case MODEL_SUMMONER_CASTING_EFFECT1:
     case MODEL_SUMMONER_CASTING_EFFECT11:
@@ -8565,7 +8576,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->SubType == 1 || o->SubType == 2)
         {
             BMD* b = &Models[o->Owner->Type];
-            Vector(0.f, 0.f, 10.f, p);
+            Vector(0.f, 0.f, 10.f * FPS_ANIMATION_FACTOR, p);
             VectorCopy(o->StartPosition, b->BodyOrigin);
             b->TransformPosition(o->Owner->BoneTransform[33], p, o->Position, true);
         }
@@ -8583,6 +8594,11 @@ void MoveEffect(OBJECT* o, int iIndex)
             AngleMatrix(Angle, Matrix);
             VectorRotate(p, Matrix, Position);
             VectorAdd(o->Position, Position, Position);
+
+            if (!rand_fps_check(1))
+            {
+                break;
+            }
 
             if (o->SubType == 1)
             {
@@ -8626,7 +8642,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         vPosition[0] += rand() % 100 - 50;
         vPosition[1] += rand() % 100 - 50;
 
-        if (rand() % 10 > 4)
+        if (rand_fps_check(2))
         {
             if (o->SubType == 1)
             {
@@ -9886,11 +9902,13 @@ void MoveEffect(OBJECT* o, int iIndex)
         VectorAdd(o->Owner->Position, Position, o->Position);
         o->Angle[2] -= 18 * FPS_ANIMATION_FACTOR;
 
-        CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
-        Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
-        AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
-        Vector(1.f, 1.f, 1.f, Light);
+        if (rand_fps_check(1)) {
+            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
+            Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
+            AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
+        }
 
+        Vector(1.f, 1.f, 1.f, Light);
         Height = 20.f;
         if (gMapManager.InHellas())
         {
@@ -10508,7 +10526,8 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         for (int j = 0; j < 6; j++)
         {
-            CreateParticle(BITMAP_SMOKE, Position, Angle, o->Light, 25);
+            if (rand_fps_check(1))
+                CreateParticle(BITMAP_SMOKE, Position, Angle, o->Light, 25);
         }
         Vector(Luminosity * 0.3f, Luminosity * 0.6f, Luminosity, Light);
         AddTerrainLight(Position[0], Position[1], Light, 3, PrimaryTerrainLight);
@@ -10521,7 +10540,8 @@ void MoveEffect(OBJECT* o, int iIndex)
         //VectorAdd(o->Position,o->Direction,o->Position);
 
         for (int j = 0; j < 4; j++)
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
+            if (rand_fps_check(1))
+                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
 
         Vector(Luminosity * 0.3f, Luminosity * 0.6f, Luminosity, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -10533,7 +10553,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorCopy(o->Angle, Angle);
             VectorCopy(o->Position, Position);
             Angle[2] += rand() % 10 - 5;
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.015f);
+            if (rand_fps_check(1))
+                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.015f);
 
             Vector(1.f, 1.f, 1.f, Light2);
             Position[2] += 50.f;
@@ -12665,7 +12686,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     }
     break;
     case BITMAP_SWORD_FORCE:
-        if ((int)o->LifeTime == 30)
+        if (o->LifeTime == 30.f) // at the first frame of the effect
         {
             VectorCopy(o->Position, Position);
             Position[2] += 100.f;
@@ -17706,13 +17727,13 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->LifeTime = 0;
             break;
         }
-        if (o->Owner->AnimationFrame > 2 && o->Owner->AnimationFrame < 8)
+        if (o->Owner->AnimationFrame > 2 && o->Owner->AnimationFrame < 8 & rand_fps_check(1))
         {
             BMD* pModel = &Models[o->Owner->Type];
             vec3_t _StartPos, _EndPos;
 
-            float fDelay = o->Velocity * 10.0f;
-            float fActionSpeed = pModel->Actions[o->Owner->CurrentAction].PlaySpeed * FPS_ANIMATION_FACTOR;
+            float fDelay = o->Velocity * 10.0f * FPS_ANIMATION_FACTOR;
+            float fActionSpeed = pModel->Actions[o->Owner->CurrentAction].PlaySpeed;
             float fSpeedPerFrame = fActionSpeed / fDelay;
             float fAnimationFrame = o->Owner->AnimationFrame - fActionSpeed;
 

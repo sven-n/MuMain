@@ -733,7 +733,10 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
     if (o == NULL)	return;
     if (b == NULL)	return;
 
+    // The weapon level is misused here to count how many frames have been rendered
+    // for this effect...
     o->WeaponLevel++;
+
     if (o->LastHorseWaveEffect < WorldTime - HorseEffectInterval)
     {
         CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, o->Light);
@@ -742,25 +745,25 @@ void RenderDarkHorseSkill(OBJECT* o, BMD* b)
 
     if (o->AnimationFrame >= 8.f && o->AnimationFrame <= 9.5f)
     {
-        if ((o->WeaponLevel % 2) == 1)
+        if (rand_fps_check(2))
         {
             float  Matrix[3][4];
             vec3_t Angle, p, Position;
-            Vector(0.f, 150.f * (o->WeaponLevel / 2), 0.f, p);
+            Vector(0.f, 150.f * (o->WeaponLevel / 2) * FPS_ANIMATION_FACTOR, 0.f, p);
             Vector(0.f, 0.f, (float)(rand() % 360), Angle);
             for (int i = 0; i < 6; ++i)
             {
                 Angle[2] += 60.f;
                 AngleMatrix(Angle, Matrix);
                 VectorRotate(p, Matrix, Position);
-                VectorAddScaled(o->Position, Position, Position, FPS_ANIMATION_FACTOR);
+                VectorAdd(o->Position, Position, Position);
 
                 CreateEffect(MODEL_GROUND_STONE + rand() % 2, Position, o->Angle, o->Light);
             }
         }
         EarthQuake = (rand() % 3 - 3) * 0.7f;
     }
-    else if (o->WeaponLevel == 19)
+    else if (o->WeaponLevel == (BYTE)(19.f / FPS_ANIMATION_FACTOR))
     {
         CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 2);
         o->WeaponLevel = -3;
@@ -784,7 +787,7 @@ void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
         o->WeaponLevel == iMaxSkill - 1 ||
         o->WeaponLevel == iMaxSkill - 0)
     {
-        Vector(0.f, 40.f * (o->WeaponLevel / 2), 0.f, p);
+        Vector(0.f, 40.f * (o->WeaponLevel / 2) * FPS_ANIMATION_FACTOR, 0.f, p);
         Vector(0.f, 0.f, (float)(rand() % 360), Angle);
         for (int i = 0; i < 6; ++i)
         {
