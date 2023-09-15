@@ -8,6 +8,8 @@ to Season 6 Episode 3.
 What I have done so far:
   * 🔥 The framerate has been increased to 60 fps and can be adjusted with the chat
     command `$fps <value>`. The options menu includes a checkbox to reduce effects.
+  * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
+    a better frame rate when many players and objects are visible.
   * 🔥 Added inventory and vault extensions.
   * 🔥 Replaced the network stack with MUnique.OpenMU.Network to make it easier to
     apply changes. I included a .NET 7 runtime for this and had to change some
