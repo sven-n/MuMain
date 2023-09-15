@@ -37,6 +37,10 @@ vec3_t NormalTransform[MAX_MESH][MAX_VERTICES];
 float  IntensityTransform[MAX_MESH][MAX_VERTICES];
 vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
 
+vec3_t RenderArrayVertices[MAX_MESH][MAX_VERTICES * 3];
+vec4_t RenderArrayColors[MAX_MESH][MAX_VERTICES * 3];
+vec2_t RenderArrayTexCoords[MAX_MESH][MAX_VERTICES * 3];
+
 unsigned char ShadowBuffer[256 * 256];
 int           ShadowBufferWidth = 256;
 int           ShadowBufferHeight = 256;
@@ -1252,9 +1256,9 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     if (enableColor) glEnableClientState(GL_COLOR_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    auto vertices = new vec3_t[m->NumTriangles * 3];
-    auto colors = new vec4_t[m->NumTriangles * 3];
-    auto texCoords = new vec2_t[m->NumTriangles * 3];
+    auto vertices = RenderArrayVertices[meshIndex];
+    auto colors = RenderArrayColors[meshIndex];
+    auto texCoords = RenderArrayTexCoords[meshIndex];
 
     int target_vertex_index = -1;
     for (int j = 0; j < m->NumTriangles; j++)
@@ -1343,10 +1347,6 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     if (enableColor) glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
-
-    SAFE_DELETE(vertices);
-    SAFE_DELETE(colors);
-    SAFE_DELETE(texCoords);
 }
 
 void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
