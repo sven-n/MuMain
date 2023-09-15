@@ -2212,7 +2212,9 @@ __forceinline void GetClothShadowPosition(vec3_t* target, CPhysicsCloth* pCloth,
 
 void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const float sx, const float sy) const
 {
-    glBegin(GL_TRIANGLES);
+    auto vertices = RenderArrayVertices;
+    int target_vertex_index = -1;
+    
     for (int i = 0; i < clothesCount; i++)
     {
         auto* const pCloth = &static_cast<CPhysicsCloth*>(pClothes)[i];
@@ -2236,26 +2238,42 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
                 GetClothShadowPosition(&posB, pCloth, b, BodyOrigin, sx, sy);
                 GetClothShadowPosition(&posC, pCloth, c, BodyOrigin, sx, sy);
                 GetClothShadowPosition(&posD, pCloth, d, BodyOrigin, sx, sy);
-                
+
                 // A-Triangle:
-                glVertex3fv(posA);
-                glVertex3fv(posB);
-                glVertex3fv(posC);
+                target_vertex_index++;
+                VectorCopy(posA, vertices[target_vertex_index]);
+                target_vertex_index++;
+                VectorCopy(posB, vertices[target_vertex_index]);
+                target_vertex_index++;
+                VectorCopy(posC, vertices[target_vertex_index]);
 
                 // V-Triangle:
-                glVertex3fv(posD);
-                glVertex3fv(posB);
-                glVertex3fv(posC);
+                target_vertex_index++;
+                VectorCopy(posD, vertices[target_vertex_index]);
+                target_vertex_index++;
+                VectorCopy(posB, vertices[target_vertex_index]);
+                target_vertex_index++;
+                VectorCopy(posC, vertices[target_vertex_index]);
             }
         }
     }
 
-    glEnd();
+    if (target_vertex_index < 0)
+    {
+        return;
+    }
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh, const float sx, const float sy) const
 {
-    glBegin(GL_TRIANGLES);
+    auto vertices = RenderArrayVertices;
+    int target_vertex_index = -1;
+
     for (int i = startMesh; i < endMesh; i++)
     {
         if (i == hiddenMesh)
@@ -2274,16 +2292,25 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
             const auto* tp = &mesh->Triangles[j];
             for (int k = 0; k < tp->Polygon; k++)
             {
-                const int vertexIndex = tp->VertexIndex[k];
-                vec3_t position{};
-                VectorCopy(VertexTransform[i][vertexIndex], position);
-                CalcShadowPosition(&position, BodyOrigin, sx, sy);
-                glVertex3fv(position);
+                const int source_vertex_index = tp->VertexIndex[k];
+                target_vertex_index++;
+
+                VectorCopy(VertexTransform[i][source_vertex_index], vertices[target_vertex_index]);
+                
+                CalcShadowPosition(&vertices[target_vertex_index], BodyOrigin, sx, sy);
             }
         }
     }
 
-    glEnd();
+    if (target_vertex_index < 0)
+    {
+        return;
+    }
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber, const int endMeshNumber, void* pClothes, const int clothesCount)
