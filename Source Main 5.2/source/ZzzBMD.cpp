@@ -2461,8 +2461,6 @@ void BlurShadow()
 
 void BMD::Release()
 {
-    // glDeleteVertexArrays(1, &VertexArrayObject);
-
     for (int i = 0; i < NumBones; i++)
     {
         Bone_t* b = &Bones[i];
@@ -3060,9 +3058,6 @@ void BMD::Init(bool Dummy)
     BoneHead = -1;
     StreamMesh = -1;
     CreateBoundingBox();
-
-    //glGenVertexArrays(1, &VertexArrayObject);
-    //glBindVertexArray(VertexArrayObject);
 }
 
 void BMD::CreateBoundingBox()
