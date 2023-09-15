@@ -24,6 +24,7 @@ extern "C" {
     bool QuaternionCompare(const vec4_t v1, const vec4_t v2);
 
 #define Vector(a,b,c,d) {(d)[0]=a;(d)[1]=b;(d)[2]=c;}
+#define Vector4(a,b,c,d,target) {(target)[0]=a;(target)[1]=b;(target)[2]=c;(target)[3]=d;}
 #define VectorAvg(a) ( ( (a)[0] + (a)[1] + (a)[2] ) / 3 )
 #define VectorSubtract(a,b,c) {(c)[0]=(a)[0]-(b)[0];(c)[1]=(a)[1]-(b)[1];(c)[2]=(a)[2]-(b)[2];}
 #define VectorSubtractScaled(a,b,c,d) {(c)[0]=(a)[0]-(b)[0]*(d);(c)[1]=(a)[1]-(b)[1]*(d);(c)[2]=(a)[2]-(b)[2]*(d);}
