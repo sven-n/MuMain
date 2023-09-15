@@ -1247,62 +1247,70 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     glEnableClientState(GL_COLOR_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    auto vertices = new vec3_t[m->NumVertices];
-    auto colors = new vec4_t[m->NumVertices];
-    auto texCoords = new TexCoord_t[m->NumVertices];
+    auto vertices = new vec3_t[m->NumTriangles * 3];
+    auto colors = new vec4_t[m->NumTriangles * 3];
+    auto texCoords = new vec2_t[m->NumTriangles * 3];
 
+    int target_vertex_index = -1;
     for (int j = 0; j < m->NumTriangles; j++)
     {
         const auto triangle = &m->Triangles[j];
         for (int k = 0; k < triangle->Polygon; k++)
         {
-            const int i = triangle->VertexIndex[k];
-            VectorCopy(m->Vertices[i].Position, vertices[i]);
-            Vector4(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[i]);
-            texCoords[i].TexCoordU = m->TexCoords[triangle->TexCoordIndex[k]].TexCoordU;
-            texCoords[i].TexCoordV = m->TexCoords[triangle->TexCoordIndex[k]].TexCoordV;
+            const int source_vertex_index = triangle->VertexIndex[k];
+            target_vertex_index++;
+
+            VectorCopy(VertexTransform[meshIndex][source_vertex_index], vertices[target_vertex_index]);
+
+            Vector4(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
+
+            auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
+            texCoords[target_vertex_index][0] = texco.TexCoordU;
+            texCoords[target_vertex_index][1] = texco.TexCoordV;
 
             int normalIndex = triangle->NormalIndex[k];
             switch (finalRenderFlags)
             {
-            case RENDER_TEXTURE:
-            {
-                if (EnableWave)
+                case RENDER_TEXTURE:
                 {
-                    texCoords[i].TexCoordU += blendMeshTextureCoordU;
-                    texCoords[i].TexCoordV += blendMeshTextureCoordV;
-                }
+                    if (EnableWave)
+                    {
+                        texCoords[target_vertex_index][0] += blendMeshTextureCoordU;
+                        texCoords[target_vertex_index][1] += blendMeshTextureCoordV;
+                    }
 
-                if (enableLight)
+                    if (enableLight)
+                    {
+                        auto light = LightTransform[meshIndex][source_vertex_index];
+                        Vector4(light[0], light[1], light[2], alpha, colors[target_vertex_index]);
+                    }
+
+                    break;
+                }
+                case RENDER_CHROME:
                 {
-                    auto light = LightTransform[meshIndex][i];
-                    Vector4(light[0], light[1], light[2], alpha, colors[i]);
+                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0];
+                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1];
+                    break;
                 }
-
-                break;
-            }
-            case RENDER_CHROME:
-            {
-                texCoords[i] = { g_chrome[normalIndex][0], g_chrome[normalIndex][1] };
-                break;
-            }
-            case RENDER_CHROME4:
-            {
-                texCoords[i] = { g_chrome[normalIndex][0] + blendMeshTextureCoordU, g_chrome[normalIndex][1] + blendMeshTextureCoordV };
-                break;
-            }
-            case RENDER_OIL:
-            {
-                texCoords[i].TexCoordU = g_chrome[normalIndex][0] * texCoords[i].TexCoordU + blendMeshTextureCoordU;
-                texCoords[i].TexCoordV = g_chrome[normalIndex][0] * texCoords[i].TexCoordV + blendMeshTextureCoordV;
-                break;
-            }
+                case RENDER_CHROME4:
+                {
+                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0] + blendMeshTextureCoordU;
+                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1] + blendMeshTextureCoordV;
+                    break;
+                }
+                case RENDER_OIL:
+                {
+                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0] * texCoords[target_vertex_index][0] + blendMeshTextureCoordU;
+                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1] * texCoords[target_vertex_index][1] + blendMeshTextureCoordV;
+                    break;
+                }
             }
 
             if ((renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP)
             {
-                auto pos = vertices[i];
-                VectorSubtract(VertexTransform[meshIndex][i], BodyOrigin, pos);
+                vec3_t pos;
+                VectorSubtract(vertices[target_vertex_index], BodyOrigin, pos);
 
                 pos[0] += pos[2] * (pos[0] + 2000.f) / (pos[2] - 4000.f);
                 pos[2] = 5.f;
@@ -1311,21 +1319,12 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             }
             else if ((renderFlags & RENDER_WAVE) == RENDER_WAVE)
             {
-                float fParam = (float)((int)WorldTime + i * 931) * 0.007f;
-                float fSin = sinf(fParam);
-                float fCos = cosf(fParam);
-
-                int ni = triangle->NormalIndex[k];
-                Normal_t* np = &m->Normals[ni];
-                float* Normal = NormalTransform[meshIndex][ni];
+                float time_sin = sinf((float)((int)WorldTime + source_vertex_index * 931) * 0.007f) * 28.0f;
+                float* normal = NormalTransform[meshIndex][normalIndex];
                 for (int iCoord = 0; iCoord < 3; ++iCoord)
                 {
-                    vertices[i][iCoord] = VertexTransform[meshIndex][i][iCoord] + Normal[iCoord] * fSin * 28.0f;
+                    vertices[target_vertex_index][iCoord] = VertexTransform[meshIndex][source_vertex_index][iCoord] + normal[iCoord] * time_sin;
                 }
-            }
-            else
-            {
-                VectorCopy(VertexTransform[meshIndex][i], vertices[i]);
             }
         }
     }
@@ -1334,7 +1333,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     glColorPointer(4, GL_FLOAT, 0, colors);
     glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
 
-    glDrawArrays(GL_TRIANGLES, 0, m->NumVertices);
+    glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3);
 
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
