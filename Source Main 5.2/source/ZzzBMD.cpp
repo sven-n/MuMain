@@ -1243,8 +1243,13 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         }
     }
 
+    bool enableColor = (enableLight && finalRenderFlags == RENDER_TEXTURE)
+        || finalRenderFlags == RENDER_CHROME
+        || finalRenderFlags == RENDER_CHROME4
+        || finalRenderFlags == RENDER_OIL;
+
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
+    if (enableColor) glEnableClientState(GL_COLOR_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     auto vertices = new vec3_t[m->NumTriangles * 3];
@@ -1281,7 +1286,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
                     if (enableLight)
                     {
-                        auto light = LightTransform[meshIndex][source_vertex_index];
+                        auto light = LightTransform[meshIndex][normalIndex];
                         Vector4(light[0], light[1], light[2], alpha, colors[target_vertex_index]);
                     }
 
@@ -1323,136 +1328,25 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                 float* normal = NormalTransform[meshIndex][normalIndex];
                 for (int iCoord = 0; iCoord < 3; ++iCoord)
                 {
-                    vertices[target_vertex_index][iCoord] = VertexTransform[meshIndex][source_vertex_index][iCoord] + normal[iCoord] * time_sin;
+                    vertices[target_vertex_index][iCoord] += normal[iCoord] * time_sin;
                 }
             }
         }
     }
 
     glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glColorPointer(4, GL_FLOAT, 0, colors);
+    if (enableColor) glColorPointer(4, GL_FLOAT, 0, colors);
     glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
 
     glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3);
 
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
+    if (enableColor) glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 
     SAFE_DELETE(vertices);
     SAFE_DELETE(colors);
     SAFE_DELETE(texCoords);
-    /*
-    // ver 1.0 (triangle)
-    glBegin(GL_TRIANGLES);
-
-    for (int j = 0; j < m->NumTriangles; j++)
-    {
-        const auto triangle = &m->Triangles[j];
-        for (int k = 0; k < triangle->Polygon; k++)
-        {
-            const int vertexIndex = triangle->VertexIndex[k];
-            switch (finalRenderFlags)
-            {
-                case RENDER_TEXTURE:
-                {
-                    const auto texp = &m->TexCoords[triangle->TexCoordIndex[k]];
-                    if (EnableWave)
-                    {
-                        glTexCoord2f(texp->TexCoordU + blendMeshTextureCoordU, texp->TexCoordV + blendMeshTextureCoordV);
-                    }
-                    else
-                    {
-                        glTexCoord2f(texp->TexCoordU, texp->TexCoordV);
-                    }
-
-                    if (enableLight)
-                    {
-                        int normalIndex = triangle->NormalIndex[k];
-
-                        if (alpha >= 0.99f)
-                        {
-                            glColor3fv(LightTransform[meshIndex][normalIndex]);
-                        }
-                        else
-                        {
-                            float* Light = LightTransform[meshIndex][normalIndex];
-                            glColor4f(Light[0], Light[1], Light[2], alpha);
-                        }
-                    }
-                    break;
-                }
-                case RENDER_CHROME:
-                {
-                    if (alpha >= 0.99f)
-                        glColor3fv(BodyLight);
-                    else
-                        glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], alpha);
-                    int ni = triangle->NormalIndex[k];
-                    glTexCoord2f(g_chrome[ni][0], g_chrome[ni][1]);
-                    break;
-                }
-                case RENDER_CHROME4:
-                {
-                    if (alpha >= 0.99f)
-                        glColor3fv(BodyLight);
-                    else
-                        glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], alpha);
-                    int ni = triangle->NormalIndex[k];
-                    glTexCoord2f(g_chrome[ni][0] + blendMeshTextureCoordU, g_chrome[ni][1] + blendMeshTextureCoordV);
-                    //					glTexCoord2f(BlendMeshTexCoordU,BlendMeshTexCoordV);
-                }
-                break;
-
-                case RENDER_OIL:
-                {
-                    if (alpha >= 0.99f)
-                        glColor3fv(BodyLight);
-                    else
-                        glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], alpha);
-                    TexCoord_t* texp = &m->TexCoords[triangle->TexCoordIndex[k]];
-                    int ni = triangle->VertexIndex[k];
-                    glTexCoord2f(g_chrome[ni][0] * texp->TexCoordU + blendMeshTextureCoordU, g_chrome[ni][1] * texp->TexCoordV + blendMeshTextureCoordV);
-                    break;
-                }
-            }
-
-            if ((renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP)
-            {
-                int vi = triangle->VertexIndex[k];
-                vec3_t Position;
-                VectorSubtract(VertexTransform[meshIndex][vi], BodyOrigin, Position);
-
-                Position[0] += Position[2] * (Position[0] + 2000.f) / (Position[2] - 4000.f);
-                Position[2] = 5.f;
-
-                VectorAdd(Position, BodyOrigin, Position);
-                glVertex3fv(Position);
-            }
-            else if ((renderFlags & RENDER_WAVE) == RENDER_WAVE)
-            {
-                float vPos[3];
-                float fParam = (float)((int)WorldTime + vertexIndex * 931) * 0.007f;
-                float fSin = sinf(fParam);
-                float fCos = cosf(fParam);
-
-                int ni = triangle->NormalIndex[k];
-                Normal_t* np = &m->Normals[ni];
-                float* Normal = NormalTransform[meshIndex][ni];
-                for (int iCoord = 0; iCoord < 3; ++iCoord)
-                {
-                    vPos[iCoord] = VertexTransform[meshIndex][vertexIndex][iCoord] + Normal[iCoord] * fSin * 28.0f;
-                }
-                glVertex3fv(vPos);
-            }
-            else
-            {
-                glVertex3fv(VertexTransform[meshIndex][vertexIndex]);
-            }
-        }
-    }
-
-    glEnd();*/
 }
 
 void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
