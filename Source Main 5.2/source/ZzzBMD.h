@@ -284,7 +284,18 @@ public:
 
     void RenderMeshEffect(int i, int iType, int iSubType = 0, vec3_t Angle = 0, VOID* obj = NULL);
 
-    void RenderMesh(int i, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int Texture = -1);
+    /**
+     * \brief Renders a mesh of the BMD file.
+     * \param meshIndex The index of the mesh in the file.
+     * \param renderFlags The render flags.
+     * \param alpha The alpha for the texture of the mesh.
+     * \param blendMeshIndex The blend mesh index, if available.
+     * \param blendMeshAlpha The blend mesh alpha, if available.
+     * \param blendMeshTextureCoordU The blend mesh texture U-coordinate.
+     * \param blendMeshTextureCoordV The blend mesh texture V-coordinate.
+     * \param textureIndex The texture index of the mesh, if another texture should be used, other than defined in the BMD.
+     */
+    void RenderMesh(int meshIndex, int renderFlags, float alpha = 1.f, int blendMeshIndex = -1, float blendMeshAlpha = 1.f, float blendMeshTextureCoordU = 0.f, float blendMeshTextureCoordV = 0.f, int textureIndex = -1);
     void RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int Texture = -1);
     void RenderBody(int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
     void RenderBodyAlternative(int iRndExtFlag, int iParam, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
