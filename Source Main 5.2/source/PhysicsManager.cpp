@@ -945,7 +945,6 @@ void CPhysicsClothMesh::Clear(void)
     CPhysicsCloth::Destroy();
 }
 
-extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern float BoneScale;
 
 BOOL CPhysicsClothMesh::Create(OBJECT* o, int iMesh, int iBone, DWORD dwType, int iBMDType)

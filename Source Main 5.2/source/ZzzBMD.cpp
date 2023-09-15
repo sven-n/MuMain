@@ -37,6 +37,10 @@ vec3_t NormalTransform[MAX_MESH][MAX_VERTICES];
 float  IntensityTransform[MAX_MESH][MAX_VERTICES];
 vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
 
+vec3_t RenderArrayVertices[MAX_VERTICES * 3];
+vec4_t RenderArrayColors[MAX_VERTICES * 3];
+vec2_t RenderArrayTexCoords[MAX_VERTICES * 3];
+
 unsigned char ShadowBuffer[256 * 256];
 int           ShadowBufferWidth = 256;
 int           ShadowBufferHeight = 256;
@@ -911,103 +915,120 @@ void BMD::EndRender()
 extern double WorldTime;
 extern int WaterTextureNumber;
 
-void BMD::RenderMesh(int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
+void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshIndex, float blendMeshAlpha, float blendMeshTextureCoordU, float blendMeshTextureCoordV, int explicitTextureIndex)
 {
-    if (i >= NumMeshs || i < 0) return;
+    if (meshIndex >= NumMeshs || meshIndex < 0) return;
 
-    Mesh_t* m = &Meshs[i];
+    Mesh_t* m = &Meshs[meshIndex];
     if (m->NumTriangles == 0) return;
 
-    float Wave = (long)WorldTime % 10000 * 0.0001f;
+    float wave = static_cast<long>(WorldTime) % 10000 * 0.0001f;
 
-    int Texture = IndexTexture[m->Texture];
-    if (Texture == BITMAP_HIDE)
+    int textureIndex = IndexTexture[m->Texture];
+    if (textureIndex == BITMAP_HIDE)
         return;
-    else if (Texture == BITMAP_SKIN)
+
+    if (textureIndex == BITMAP_SKIN)
+    {
+        if (HideSkin)
+        {
+            return;
+        }
+
+        textureIndex = BITMAP_SKIN + Skin;
+    }
+    else if (textureIndex == BITMAP_WATER)
+    {
+        textureIndex = BITMAP_WATER + WaterTextureNumber;
+    }
+    else  if (textureIndex == BITMAP_HAIR)
     {
         if (HideSkin) return;
-        Texture = BITMAP_SKIN + Skin;
-    }
-    else if (Texture == BITMAP_WATER)
-    {
-        Texture = BITMAP_WATER + WaterTextureNumber;
-    }
-    else  if (Texture == BITMAP_HAIR)
-    {
-        if (HideSkin) return;
-        Texture = BITMAP_HAIR + (Skin - 8);
+        textureIndex = BITMAP_HAIR + (Skin - 8);
     }
 
-    if (MeshTexture != -1)
-        Texture = MeshTexture;
+    if (explicitTextureIndex != -1)
+    {
+        textureIndex = explicitTextureIndex;
+    }
 
-    BITMAP_t* pBitmap = Bitmaps.GetTexture(Texture);
+    const auto texture = Bitmaps.GetTexture(textureIndex);
 
     bool EnableWave = false;
-    int streamMesh = StreamMesh;
-    if (m->m_csTScript != NULL)
+    int streamMesh = static_cast<u_char>(this->StreamMesh);
+    if (m->m_csTScript != nullptr)
     {
         if (m->m_csTScript->getStreamMesh())
         {
-            streamMesh = i;
+            streamMesh = meshIndex;
         }
     }
-    if ((i == BlendMesh || i == streamMesh) && (BlendMeshTexCoordU != 0.f || BlendMeshTexCoordV != 0.f))
-        EnableWave = true;
 
-    bool EnableLight = LightEnable;
-    if (i == StreamMesh)
+    if ((meshIndex == blendMeshIndex || meshIndex == streamMesh)
+        && (blendMeshTextureCoordU != 0.f || blendMeshTextureCoordV != 0.f))
+    {
+        EnableWave = true;
+    }
+
+    bool enableLight = LightEnable;
+    if (meshIndex == StreamMesh)
     {
         glColor3fv(BodyLight);
-        EnableLight = false;
+        enableLight = false;
     }
-    else if (EnableLight)
+    else if (enableLight)
     {
         for (int j = 0; j < m->NumNormals; j++)
         {
-            VectorScale(BodyLight, IntensityTransform[i][j], LightTransform[i][j]);
+            VectorScale(BodyLight, IntensityTransform[meshIndex][j], LightTransform[meshIndex][j]);
         }
     }
 
-    int Render = RenderFlag;
-    if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
+    int finalRenderFlags = renderFlags;
+    if ((renderFlags & RENDER_COLOR) == RENDER_COLOR)
     {
-        Render = RENDER_COLOR;
-        if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+        finalRenderFlags = RENDER_COLOR;
+        if ((renderFlags & RENDER_BRIGHT) == RENDER_BRIGHT)
+        {
             EnableAlphaBlend();
-        else if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+        }
+        else if ((renderFlags & RENDER_DARK) == RENDER_DARK)
+        {
             EnableAlphaBlendMinus();
+        }
         else
+        {
             DisableAlphaBlend();
+        }
 
-        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        if ((renderFlags & RENDER_NODEPTH) == RENDER_NODEPTH)
         {
             DisableDepthTest();
         }
 
         DisableTexture();
-        if (Alpha >= 0.99f)
+        if (alpha >= 0.99f)
         {
             glColor3fv(BodyLight);
         }
         else
         {
             EnableAlphaTest();
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
+            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], alpha);
         }
     }
-    else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME ||
-        (RenderFlag & RENDER_CHROME2) == RENDER_CHROME2 ||
-        (RenderFlag & RENDER_CHROME3) == RENDER_CHROME3 ||
-        (RenderFlag & RENDER_CHROME4) == RENDER_CHROME4 ||
-        (RenderFlag & RENDER_CHROME5) == RENDER_CHROME5 ||
-        (RenderFlag & RENDER_CHROME6) == RENDER_CHROME6 ||
-        (RenderFlag & RENDER_CHROME7) == RENDER_CHROME7 ||
-        (RenderFlag & RENDER_METAL) == RENDER_METAL ||
-        (RenderFlag & RENDER_OIL) == RENDER_OIL
+    else if ((renderFlags & RENDER_CHROME) == RENDER_CHROME ||
+        (renderFlags & RENDER_CHROME2) == RENDER_CHROME2 ||
+        (renderFlags & RENDER_CHROME3) == RENDER_CHROME3 ||
+        (renderFlags & RENDER_CHROME4) == RENDER_CHROME4 ||
+        (renderFlags & RENDER_CHROME5) == RENDER_CHROME5 ||
+        (renderFlags & RENDER_CHROME6) == RENDER_CHROME6 ||
+        (renderFlags & RENDER_CHROME7) == RENDER_CHROME7 ||
+        (renderFlags & RENDER_METAL) == RENDER_METAL ||
+        (renderFlags & RENDER_OIL) == RENDER_OIL
         )
     {
-        if (m->m_csTScript != NULL)
+        if (m->m_csTScript != nullptr)
         {
             if (m->m_csTScript->getNoneBlendMesh()) return;
         }
@@ -1015,14 +1036,14 @@ void BMD::RenderMesh(int i, int RenderFlag, float Alpha, int BlendMesh, float Bl
         if (m->NoneBlendMesh)
             return;
 
-        Render = RENDER_CHROME;
-        if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4)
+        finalRenderFlags = RENDER_CHROME;
+        if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
         {
-            Render = RENDER_CHROME4;
+            finalRenderFlags = RENDER_CHROME4;
         }
-        if ((RenderFlag & RENDER_OIL) == RENDER_OIL)
+        if ((renderFlags & RENDER_OIL) == RENDER_OIL)
         {
-            Render = RENDER_OIL;
+            finalRenderFlags = RENDER_OIL;
         }
 
         float Wave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;
@@ -1031,84 +1052,80 @@ void BMD::RenderMesh(int i, int RenderFlag, float Alpha, int BlendMesh, float Bl
         for (int j = 0; j < m->NumNormals; j++)
         {
             if (j > MAX_VERTICES) break;
-            float* Normal = NormalTransform[i][j];
+            const auto normal = NormalTransform[meshIndex][j];
 
-            if ((RenderFlag & RENDER_CHROME2) == RENDER_CHROME2)
+            if ((renderFlags & RENDER_CHROME2) == RENDER_CHROME2)
             {
-                g_chrome[j][0] = (Normal[2] + Normal[0]) * 0.8f + Wave2 * 2.f;
-                g_chrome[j][1] = (Normal[1] + Normal[0]) * 1.0f + Wave2 * 3.f;
+                g_chrome[j][0] = (normal[2] + normal[0]) * 0.8f + Wave2 * 2.f;
+                g_chrome[j][1] = (normal[1] + normal[0]) * 1.0f + Wave2 * 3.f;
             }
-            else if ((RenderFlag & RENDER_CHROME3) == RENDER_CHROME3)
+            else if ((renderFlags & RENDER_CHROME3) == RENDER_CHROME3)
             {
-                g_chrome[j][0] = DotProduct(Normal, LightVector);
-                g_chrome[j][1] = 1.f - DotProduct(Normal, LightVector);
+                g_chrome[j][0] = DotProduct(normal, LightVector);
+                g_chrome[j][1] = 1.f - DotProduct(normal, LightVector);
             }
-            else if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4)
+            else if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
             {
-                g_chrome[j][0] = DotProduct(Normal, L);
-                g_chrome[j][1] = 1.f - DotProduct(Normal, L);
-                g_chrome[j][1] -= Normal[2] * 0.5f + Wave * 3.f;
-                g_chrome[j][0] += Normal[1] * 0.5f + L[1] * 3.f;
+                g_chrome[j][0] = DotProduct(normal, L);
+                g_chrome[j][1] = 1.f - DotProduct(normal, L);
+                g_chrome[j][1] -= normal[2] * 0.5f + wave * 3.f;
+                g_chrome[j][0] += normal[1] * 0.5f + L[1] * 3.f;
             }
-            else if ((RenderFlag & RENDER_CHROME5) == RENDER_CHROME5)
+            else if ((renderFlags & RENDER_CHROME5) == RENDER_CHROME5)
             {
-                g_chrome[j][0] = DotProduct(Normal, L);
-                g_chrome[j][1] = 1.f - DotProduct(Normal, L);
-                g_chrome[j][1] -= Normal[2] * 2.5f + Wave * 1.f;
-                g_chrome[j][0] += Normal[1] * 3.f + L[1] * 5.f;
+                g_chrome[j][0] = DotProduct(normal, L);
+                g_chrome[j][1] = 1.f - DotProduct(normal, L);
+                g_chrome[j][1] -= normal[2] * 2.5f + wave * 1.f;
+                g_chrome[j][0] += normal[1] * 3.f + L[1] * 5.f;
             }
-            else if ((RenderFlag & RENDER_CHROME6) == RENDER_CHROME6)
+            else if ((renderFlags & RENDER_CHROME6) == RENDER_CHROME6)
             {
-                g_chrome[j][0] = (Normal[2] + Normal[0]) * 0.8f + Wave2 * 2.f;
-                g_chrome[j][1] = (Normal[2] + Normal[0]) * 0.8f + Wave2 * 2.f;
+                g_chrome[j][0] = (normal[2] + normal[0]) * 0.8f + Wave2 * 2.f;
+                g_chrome[j][1] = (normal[2] + normal[0]) * 0.8f + Wave2 * 2.f;
             }
-            else if ((RenderFlag & RENDER_CHROME7) == RENDER_CHROME7)
+            else if ((renderFlags & RENDER_CHROME7) == RENDER_CHROME7)
             {
-                g_chrome[j][0] = (Normal[2] + Normal[0]) * 0.8f + WorldTime * 0.00006f;
-                g_chrome[j][1] = (Normal[2] + Normal[0]) * 0.8f + WorldTime * 0.00006f;
+                g_chrome[j][0] = (normal[2] + normal[0]) * 0.8f + static_cast<float>(WorldTime) * 0.00006f;
+                g_chrome[j][1] = (normal[2] + normal[0]) * 0.8f + static_cast<float>(WorldTime) * 0.00006f;
             }
-            else if ((RenderFlag & RENDER_OIL) == RENDER_OIL)
+            else if ((renderFlags & RENDER_OIL) == RENDER_OIL)
             {
-                g_chrome[j][0] = Normal[0];
-                g_chrome[j][1] = Normal[1];
+                g_chrome[j][0] = normal[0];
+                g_chrome[j][1] = normal[1];
             }
-            else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME)
+            else if ((renderFlags & RENDER_CHROME) == RENDER_CHROME)
             {
-                g_chrome[j][0] = Normal[2] * 0.5f + Wave;
-                g_chrome[j][1] = Normal[1] * 0.5f + Wave * 2.f;
+                g_chrome[j][0] = normal[2] * 0.5f + wave;
+                g_chrome[j][1] = normal[1] * 0.5f + wave * 2.f;
             }
             else
             {
-                g_chrome[j][0] = Normal[2] * 0.5f + 0.2f;
-                g_chrome[j][1] = Normal[1] * 0.5f + 0.5f;
+                g_chrome[j][0] = normal[2] * 0.5f + 0.2f;
+                g_chrome[j][1] = normal[1] * 0.5f + 0.5f;
             }
         }
 
-        if ((RenderFlag & RENDER_CHROME3) == RENDER_CHROME3
-            || (RenderFlag & RENDER_CHROME4) == RENDER_CHROME4
-            || (RenderFlag & RENDER_CHROME5) == RENDER_CHROME5
-            || (RenderFlag & RENDER_CHROME7) == RENDER_CHROME7
+        if ((renderFlags & RENDER_CHROME3) == RENDER_CHROME3
+            || (renderFlags & RENDER_CHROME4) == RENDER_CHROME4
+            || (renderFlags & RENDER_CHROME5) == RENDER_CHROME5
+            || (renderFlags & RENDER_CHROME7) == RENDER_CHROME7
+            || (renderFlags & RENDER_BRIGHT) == RENDER_BRIGHT
             )
         {
-            if (Alpha < 0.99f)
+            if (alpha < 0.99f)
             {
-                BodyLight[0] *= Alpha; BodyLight[1] *= Alpha; BodyLight[2] *= Alpha;
+                BodyLight[0] *= alpha;
+                BodyLight[1] *= alpha;
+                BodyLight[2] *= alpha;
             }
+
             EnableAlphaBlend();
         }
-        else if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
-        {
-            if (Alpha < 0.99f)
-            {
-                BodyLight[0] *= Alpha; BodyLight[1] *= Alpha; BodyLight[2] *= Alpha;
-            }
-            EnableAlphaBlend();
-        }
-        else if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+        else if ((renderFlags & RENDER_DARK) == RENDER_DARK)
             EnableAlphaBlendMinus();
-        else if ((RenderFlag & RENDER_LIGHTMAP) == RENDER_LIGHTMAP)
+        else if ((renderFlags & RENDER_LIGHTMAP) == RENDER_LIGHTMAP)
             EnableLightMap();
-        else if (Alpha >= 0.99f)
+        else if (alpha >= 0.99f)
         {
             DisableAlphaBlend();
         }
@@ -1117,65 +1134,76 @@ void BMD::RenderMesh(int i, int RenderFlag, float Alpha, int BlendMesh, float Bl
             EnableAlphaTest();
         }
 
-        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        if ((renderFlags & RENDER_NODEPTH) == RENDER_NODEPTH)
         {
             DisableDepthTest();
         }
 
-        if ((RenderFlag & RENDER_CHROME2) == RENDER_CHROME2 && MeshTexture == -1)
+        if (explicitTextureIndex == -1)
         {
-            BindTexture(BITMAP_CHROME2);
+            if ((renderFlags & RENDER_CHROME2) == RENDER_CHROME2)
+            {
+                BindTexture(BITMAP_CHROME2);
+            }
+            else if ((renderFlags & RENDER_CHROME3) == RENDER_CHROME3)
+            {
+                BindTexture(BITMAP_CHROME2);
+            }
+            else if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
+            {
+                BindTexture(BITMAP_CHROME2);
+            }
+            else if ((renderFlags & RENDER_CHROME6) == RENDER_CHROME6)
+            {
+                BindTexture(BITMAP_CHROME6);
+            }
+            else if ((renderFlags & RENDER_CHROME) == RENDER_CHROME)
+            {
+                BindTexture(BITMAP_CHROME);
+            }
+            else if ((renderFlags & RENDER_METAL) == RENDER_METAL)
+            {
+                BindTexture(BITMAP_SHINY);
+            }
         }
-        else if ((RenderFlag & RENDER_CHROME3) == RENDER_CHROME3 && MeshTexture == -1)
-        {
-            BindTexture(BITMAP_CHROME2);
-        }
-        else if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4 && MeshTexture == -1)
-        {
-            BindTexture(BITMAP_CHROME2);
-        }
-        else if ((RenderFlag & RENDER_CHROME6) == RENDER_CHROME6 && MeshTexture == -1)
-        {
-            BindTexture(BITMAP_CHROME6);
-        }
-        else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME && MeshTexture == -1)
-            BindTexture(BITMAP_CHROME);
-        else if ((RenderFlag & RENDER_METAL) == RENDER_METAL && MeshTexture == -1)
-            BindTexture(BITMAP_SHINY);
         else
-            BindTexture(Texture);
+        {
+            BindTexture(textureIndex);
+        }
     }
-    else if (BlendMesh <= -2 || m->Texture == BlendMesh)
+    else if (blendMeshIndex <= -2 || m->Texture == blendMeshIndex)
     {
-        Render = RENDER_TEXTURE;
-        BindTexture(Texture);
-        if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+        finalRenderFlags = RENDER_TEXTURE;
+        BindTexture(textureIndex);
+        if ((renderFlags & RENDER_DARK) == RENDER_DARK)
             EnableAlphaBlendMinus();
         else
             EnableAlphaBlend();
 
-        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        if ((renderFlags & RENDER_NODEPTH) == RENDER_NODEPTH)
         {
             DisableDepthTest();
         }
 
-        glColor3f(BodyLight[0] * BlendMeshLight, BodyLight[1] * BlendMeshLight, BodyLight[2] * BlendMeshLight);
+        glColor3f(BodyLight[0] * blendMeshAlpha, 
+            BodyLight[1] * blendMeshAlpha,
+            BodyLight[2] * blendMeshAlpha);
         //glColor3f(BlendMeshLight,BlendMeshLight,BlendMeshLight);
-        EnableLight = false;
+        enableLight = false;
     }
-    else if ((RenderFlag & RENDER_TEXTURE) == RENDER_TEXTURE)
+    else if ((renderFlags & RENDER_TEXTURE) == RENDER_TEXTURE)
     {
-        Render = RENDER_TEXTURE;
-        BindTexture(Texture);
-        if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+        finalRenderFlags = RENDER_TEXTURE;
+        BindTexture(textureIndex);
+        if ((renderFlags & RENDER_BRIGHT) == RENDER_BRIGHT)
         {
             EnableAlphaBlend();
         }
-        else if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+        else if ((renderFlags & RENDER_DARK) == RENDER_DARK)
         {
             EnableAlphaBlendMinus();
         }
-        else if (Alpha < 0.99f || pBitmap->Components == 4)
+        else if (alpha < 0.99f || texture->Components == 4)
         {
             EnableAlphaTest();
         }
@@ -1184,149 +1212,141 @@ void BMD::RenderMesh(int i, int RenderFlag, float Alpha, int BlendMesh, float Bl
             DisableAlphaBlend();
         }
 
-        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        if ((renderFlags & RENDER_NODEPTH) == RENDER_NODEPTH)
         {
             DisableDepthTest();
         }
     }
-    else if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+    else if ((renderFlags & RENDER_BRIGHT) == RENDER_BRIGHT)
     {
-        if (pBitmap->Components == 4 || m->Texture == BlendMesh)
+        if (texture->Components == 4 || m->Texture == blendMeshIndex)
         {
             return;
         }
 
-        Render = RENDER_BRIGHT;
+        finalRenderFlags = RENDER_BRIGHT;
         EnableAlphaBlend();
         DisableTexture();
         DisableDepthMask();
 
-        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        if ((renderFlags & RENDER_NODEPTH) == RENDER_NODEPTH)
         {
             DisableDepthTest();
         }
     }
     else
     {
-        Render = RENDER_TEXTURE;
+        finalRenderFlags = RENDER_TEXTURE;
     }
-    if (RenderFlag & RENDER_DOPPELGANGER)
+    if (renderFlags & RENDER_DOPPELGANGER)
     {
-        if (pBitmap->Components != 4)
+        if (texture->Components != 4)
         {
             EnableCullFace();
             EnableDepthMask();
         }
     }
 
-    // ver 1.0 (triangle)
-    glBegin(GL_TRIANGLES);
+    bool enableColor = (enableLight && finalRenderFlags == RENDER_TEXTURE)
+        || finalRenderFlags == RENDER_CHROME
+        || finalRenderFlags == RENDER_CHROME4
+        || finalRenderFlags == RENDER_OIL;
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    if (enableColor) glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    auto vertices = RenderArrayVertices;
+    auto colors = RenderArrayColors;
+    auto texCoords = RenderArrayTexCoords;
+
+    int target_vertex_index = -1;
     for (int j = 0; j < m->NumTriangles; j++)
     {
-        Triangle_t* tp = &m->Triangles[j];
-        for (int k = 0; k < tp->Polygon; k++)
+        const auto triangle = &m->Triangles[j];
+        for (int k = 0; k < triangle->Polygon; k++)
         {
-            int vi = tp->VertexIndex[k];
-            switch (Render)
-            {
-            case RENDER_TEXTURE:
-            {
-                TexCoord_t* texp = &m->TexCoords[tp->TexCoordIndex[k]];
-                if (EnableWave)
-                {
-                    glTexCoord2f(texp->TexCoordU + BlendMeshTexCoordU, texp->TexCoordV + BlendMeshTexCoordV);
-                }
-                else
-                {
-                    glTexCoord2f(texp->TexCoordU, texp->TexCoordV);
-                }
+            const int source_vertex_index = triangle->VertexIndex[k];
+            target_vertex_index++;
 
-                if (EnableLight)
-                {
-                    int ni = tp->NormalIndex[k];
+            VectorCopy(VertexTransform[meshIndex][source_vertex_index], vertices[target_vertex_index]);
 
-                    if (Alpha >= 0.99f)
+            Vector4(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
+
+            auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
+            texCoords[target_vertex_index][0] = texco.TexCoordU;
+            texCoords[target_vertex_index][1] = texco.TexCoordV;
+
+            int normalIndex = triangle->NormalIndex[k];
+            switch (finalRenderFlags)
+            {
+                case RENDER_TEXTURE:
+                {
+                    if (EnableWave)
                     {
-                        glColor3fv(LightTransform[i][ni]);
+                        texCoords[target_vertex_index][0] += blendMeshTextureCoordU;
+                        texCoords[target_vertex_index][1] += blendMeshTextureCoordV;
                     }
-                    else
+
+                    if (enableLight)
                     {
-                        float* Light = LightTransform[i][ni];
-                        glColor4f(Light[0], Light[1], Light[2], Alpha);
+                        auto light = LightTransform[meshIndex][normalIndex];
+                        Vector4(light[0], light[1], light[2], alpha, colors[target_vertex_index]);
                     }
+
+                    break;
                 }
-                break;
-            }
-            case RENDER_CHROME:
-            {
-                if (Alpha >= 0.99f)
-                    glColor3fv(BodyLight);
-                else
-                    glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-                int ni = tp->NormalIndex[k];
-                glTexCoord2f(g_chrome[ni][0], g_chrome[ni][1]);
-                break;
-            }
-            case RENDER_CHROME4:
-            {
-                if (Alpha >= 0.99f)
-                    glColor3fv(BodyLight);
-                else
-                    glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-                int ni = tp->NormalIndex[k];
-                glTexCoord2f(g_chrome[ni][0] + BlendMeshTexCoordU, g_chrome[ni][1] + BlendMeshTexCoordV);
-                //					glTexCoord2f(BlendMeshTexCoordU,BlendMeshTexCoordV);
-            }
-            break;
-
-            case RENDER_OIL:
-            {
-                if (Alpha >= 0.99f)
-                    glColor3fv(BodyLight);
-                else
-                    glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-                TexCoord_t* texp = &m->TexCoords[tp->TexCoordIndex[k]];
-                int ni = tp->VertexIndex[k];
-                glTexCoord2f(g_chrome[ni][0] * texp->TexCoordU + BlendMeshTexCoordU, g_chrome[ni][1] * texp->TexCoordV + BlendMeshTexCoordV);
-                break;
-            }
+                case RENDER_CHROME:
+                {
+                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0];
+                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1];
+                    break;
+                }
+                case RENDER_CHROME4:
+                {
+                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0] + blendMeshTextureCoordU;
+                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1] + blendMeshTextureCoordV;
+                    break;
+                }
+                case RENDER_OIL:
+                {
+                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0] * texCoords[target_vertex_index][0] + blendMeshTextureCoordU;
+                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1] * texCoords[target_vertex_index][1] + blendMeshTextureCoordV;
+                    break;
+                }
             }
 
-            if ((RenderFlag & RENDER_SHADOWMAP) == RENDER_SHADOWMAP)
+            if ((renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP)
             {
-                int vi = tp->VertexIndex[k];
-                vec3_t Position;
-                VectorSubtract(VertexTransform[i][vi], BodyOrigin, Position);
+                vec3_t pos;
+                VectorSubtract(vertices[target_vertex_index], BodyOrigin, pos);
 
-                Position[0] += Position[2] * (Position[0] + 2000.f) / (Position[2] - 4000.f);
-                Position[2] = 5.f;
+                pos[0] += pos[2] * (pos[0] + 2000.f) / (pos[2] - 4000.f);
+                pos[2] = 5.f;
 
-                VectorAdd(Position, BodyOrigin, Position);
-                glVertex3fv(Position);
+                VectorAdd(pos, BodyOrigin, pos);
             }
-            else if ((RenderFlag & RENDER_WAVE) == RENDER_WAVE)
+            else if ((renderFlags & RENDER_WAVE) == RENDER_WAVE)
             {
-                float vPos[3];
-                float fParam = (float)((int)WorldTime + vi * 931) * 0.007f;
-                float fSin = sinf(fParam);
-                float fCos = cosf(fParam);
-
-                int ni = tp->NormalIndex[k];
-                Normal_t* np = &m->Normals[ni];
-                float* Normal = NormalTransform[i][ni];
+                float time_sin = sinf((float)((int)WorldTime + source_vertex_index * 931) * 0.007f) * 28.0f;
+                float* normal = NormalTransform[meshIndex][normalIndex];
                 for (int iCoord = 0; iCoord < 3; ++iCoord)
                 {
-                    vPos[iCoord] = VertexTransform[i][vi][iCoord] + Normal[iCoord] * fSin * 28.0f;
+                    vertices[target_vertex_index][iCoord] += normal[iCoord] * time_sin;
                 }
-                glVertex3fv(vPos);
-            }
-            else
-            {
-                glVertex3fv(VertexTransform[i][vi]);
             }
         }
     }
-    glEnd();
+
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    if (enableColor) glColorPointer(4, GL_FLOAT, 0, colors);
+    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+
+    glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3);
+
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (enableColor) glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
@@ -2192,7 +2212,9 @@ __forceinline void GetClothShadowPosition(vec3_t* target, CPhysicsCloth* pCloth,
 
 void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const float sx, const float sy) const
 {
-    glBegin(GL_TRIANGLES);
+    auto vertices = RenderArrayVertices;
+    int target_vertex_index = -1;
+    
     for (int i = 0; i < clothesCount; i++)
     {
         auto* const pCloth = &static_cast<CPhysicsCloth*>(pClothes)[i];
@@ -2216,26 +2238,42 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
                 GetClothShadowPosition(&posB, pCloth, b, BodyOrigin, sx, sy);
                 GetClothShadowPosition(&posC, pCloth, c, BodyOrigin, sx, sy);
                 GetClothShadowPosition(&posD, pCloth, d, BodyOrigin, sx, sy);
-                
+
                 // A-Triangle:
-                glVertex3fv(posA);
-                glVertex3fv(posB);
-                glVertex3fv(posC);
+                target_vertex_index++;
+                VectorCopy(posA, vertices[target_vertex_index]);
+                target_vertex_index++;
+                VectorCopy(posB, vertices[target_vertex_index]);
+                target_vertex_index++;
+                VectorCopy(posC, vertices[target_vertex_index]);
 
                 // V-Triangle:
-                glVertex3fv(posD);
-                glVertex3fv(posB);
-                glVertex3fv(posC);
+                target_vertex_index++;
+                VectorCopy(posD, vertices[target_vertex_index]);
+                target_vertex_index++;
+                VectorCopy(posB, vertices[target_vertex_index]);
+                target_vertex_index++;
+                VectorCopy(posC, vertices[target_vertex_index]);
             }
         }
     }
 
-    glEnd();
+    if (target_vertex_index < 0)
+    {
+        return;
+    }
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh, const float sx, const float sy) const
 {
-    glBegin(GL_TRIANGLES);
+    auto vertices = RenderArrayVertices;
+    int target_vertex_index = -1;
+
     for (int i = startMesh; i < endMesh; i++)
     {
         if (i == hiddenMesh)
@@ -2254,16 +2292,25 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
             const auto* tp = &mesh->Triangles[j];
             for (int k = 0; k < tp->Polygon; k++)
             {
-                const int vertexIndex = tp->VertexIndex[k];
-                vec3_t position{};
-                VectorCopy(VertexTransform[i][vertexIndex], position);
-                CalcShadowPosition(&position, BodyOrigin, sx, sy);
-                glVertex3fv(position);
+                const int source_vertex_index = tp->VertexIndex[k];
+                target_vertex_index++;
+
+                VectorCopy(VertexTransform[i][source_vertex_index], vertices[target_vertex_index]);
+                
+                CalcShadowPosition(&vertices[target_vertex_index], BodyOrigin, sx, sy);
             }
         }
     }
 
-    glEnd();
+    if (target_vertex_index < 0)
+    {
+        return;
+    }
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber, const int endMeshNumber, void* pClothes, const int clothesCount)
