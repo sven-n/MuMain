@@ -11294,15 +11294,16 @@ bool IsExistUndecidedPrice()
 {
     bool bResult = true;
 
+    auto inventoryCtrl = g_pMyShopInventory->GetInventoryCtrl();
     for (int i = 0; i < MAX_PERSONALSHOP_INVEN; ++i)
     {
         int iPrice = 0;
         int iIndex;
-        ITEM* pItem = g_pMyShopInventory->FindItem(i);
+        ITEM* pItem = inventoryCtrl->GetItem(i);
         if (pItem)
         {
             bResult = false;
-            iIndex = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(pItem);
+            int iIndex = inventoryCtrl->GetIndexByItem(pItem);
             if (GetPersonalItemPrice(iIndex, iPrice, g_IsPurchaseShop) == false)
             {
                 return true;

@@ -8404,9 +8404,7 @@ void ReceiveCreatePersonalShop(const BYTE* ReceiveBuffer)
     if (Header->byResult == 0x01)
     {
         g_pMyShopInventory->ChangePersonal(true);
-        unicode::t_string title;
-        g_pMyShopInventory->GetTitle(title);
-        AddShopTitle(Hero->Key, Hero, title.c_str());
+        AddShopTitle(Hero->Key, Hero, g_szPersonalShopTitle);
     }
     else
     {
