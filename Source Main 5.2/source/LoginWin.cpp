@@ -58,7 +58,7 @@ void CLoginWin::Create()
 
     m_pIDInputBox = new CUITextInputBox;
     m_pIDInputBox->Init(g_hWnd, 140, 14, MAX_ID_SIZE);
-    m_pIDInputBox->SetBackColor(0, 0, 0, 255);
+    m_pIDInputBox->SetBackColor(0, 0, 0, 25);
     m_pIDInputBox->SetTextColor(255, 255, 230, 210);
     m_pIDInputBox->SetFont(g_hFixFont);
     m_pIDInputBox->SetState(UISTATE_NORMAL);

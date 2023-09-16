@@ -197,10 +197,7 @@ BOOL CMultiLanguage::_GetTextExtentPoint32(HDC hdc, LPCWSTR lpString, int cbStri
 
 BOOL CMultiLanguage::_GetTextExtentPoint32(HDC hdc, LPCSTR lpString, int cbString, LPSIZE lpSize)
 {
-    std::wstring wstrText = L"";
-    ConvertCharToWideStr(wstrText, lpString);
-
-    return GetTextExtentPoint32W(hdc, wstrText.c_str(), wstrText.length(), lpSize);
+    return GetTextExtentPoint32(hdc, lpString, cbString, lpSize);
 }
 
 BOOL CMultiLanguage::_TextOut(HDC hdc, int nXStart, int nYStart, LPCWSTR lpString, int cbString)

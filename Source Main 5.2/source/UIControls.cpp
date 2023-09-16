@@ -2972,7 +2972,8 @@ CUITextInputBox::CUITextInputBox()
     m_dwTextColor = _ARGB(255, 255, 255, 255);
     m_dwBackColor = _ARGB(255, 0, 0, 0);
     m_dwSelectBackColor = _ARGB(255, 150, 150, 150);
-    m_iCaretBlinkTemp = 0;
+
+    m_caretTimer.ResetTimer();
     m_fCaretWidth = 0;
     m_fCaretHeight = 0;
 
@@ -3059,7 +3060,7 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         || HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128
         || HIBYTE(GetAsyncKeyState(VK_RIGHT)) == 128)
     {
-        pTextInputBox->m_iCaretBlinkTemp = 0;
+        pTextInputBox->m_caretTimer.ResetTimer();
     }
 
     switch (msg)
@@ -3070,7 +3071,7 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     break;
     case WM_CHAR:
-        pTextInputBox->m_iCaretBlinkTemp = 0;
+        pTextInputBox->m_caretTimer.ResetTimer();
         switch (wParam)
         {
         case VK_ESCAPE:
@@ -3095,7 +3096,7 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (pTextInputBox->GetTabTarget() != NULL && pTextInputBox->GetTabTarget()->GetState() == UISTATE_NORMAL)
             {
                 pTextInputBox->GetTabTarget()->GiveFocus(TRUE);
-                pTextInputBox->GetTabTarget()->m_iCaretBlinkTemp = 0;
+                pTextInputBox->m_caretTimer.ResetTimer();
             }
             else if (pTextInputBox->GetParentUIID() == 0)
             {
@@ -3400,7 +3401,10 @@ void CUITextInputBox::UploadText(int sx, int sy, int Width, int Height)
 
 void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 {
-    BOOL bIsCaretTime = (GetFocus() == m_hEditWnd && m_iCaretBlinkTemp % 24 < 12);
+    bool isFocused = GetFocus() == m_hEditWnd;
+    bool isCaretTime = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / 530) % 2 == 0;
+    bool showCaret = isFocused && isCaretTime;
+
     POINT pt;
     GetCaretPos(&pt);
 
@@ -3412,6 +3416,7 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
     int iSectionY = iOffset / (iPitch * LIMIT_HEIGHT);
 
     RECT rcCaret = { pt.x - LIMIT_WIDTH * iSectionX, pt.y - LIMIT_HEIGHT * iSectionY,pt.x - LIMIT_WIDTH * iSectionX + m_fCaretWidth, pt.y - LIMIT_HEIGHT * iSectionY + m_fCaretHeight };
+    const auto caretColor = _ARGB(255, 200, 200, 200);
 
     BITMAP_t* pBitmapFont = &Bitmaps[BITMAP_FONT];
     for (int y = 0; y < iHeight; ++y)
@@ -3431,22 +3436,22 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 
             if (*(m_pFontBuffer + SrcIndex) == 255)
             {
-                if (bIsCaretTime && PtInRect(&rcCaret, ptProcessing))
+                if (showCaret && PtInRect(&rcCaret, ptProcessing))
                     *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
                 else
                     *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwTextColor;
             }
             else if (*(m_pFontBuffer + SrcIndex) == 0)
             {
-                if (bIsCaretTime && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = _ARGB(255, 200, 200, 200);
+                if (showCaret && PtInRect(&rcCaret, ptProcessing))
+                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = caretColor;
                 else
                     *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
             }
             else
             {
-                if (bIsCaretTime && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = _ARGB(255, 200, 200, 200);
+                if (showCaret && PtInRect(&rcCaret, ptProcessing))
+                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = caretColor;
                 else
                     *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwSelectBackColor;
             }
@@ -3520,7 +3525,9 @@ void CUITextInputBox::Render()
         {
             SIZE RealSectionLine = { LIMIT_WIDTH, RealTextLine.cy };
             if (i == iNumberOfSections - 1)
-                RealSectionLine.cx = RealTextLine.cx % LIMIT_WIDTH;
+            {
+                RealSectionLine.cx = RealTextLine.cx % LIMIT_WIDTH + m_fCaretWidth * 2;
+            }
 
             WriteText(LIMIT_WIDTH * i * 3, RealSectionLine.cx, RealSectionLine.cy);
             UploadText(RealWndPos.x + LIMIT_WIDTH * i, RealWndPos.y, RealSectionLine.cx, RealSectionLine.cy);
@@ -3556,8 +3563,6 @@ void CUITextInputBox::Render()
 #endif //PBG_ADD_INGAMESHOPMSGBOX
             RenderScrollbar();
     }
-
-    ++m_iCaretBlinkTemp;
 }
 
 void CUITextInputBox::RenderScrollbar()
@@ -3882,7 +3887,7 @@ void CUIChatInputBox::MoveHistory(int iDegree)
                 {
                     SetText(TRUE, m_szTempText, FALSE, NULL);
                     SendMessage(m_TextInputBox.GetHandle(), EM_SETSEL, (WPARAM)10000, (LPARAM)-1);
-                    m_TextInputBox.m_iCaretBlinkTemp = 0;
+                    m_TextInputBox.m_caretTimer.ResetTimer();
                     m_bHistoryMode = FALSE;
                 }
                 return;
@@ -3908,7 +3913,7 @@ void CUIChatInputBox::MoveHistory(int iDegree)
     }
     SetText(TRUE, *m_CurrentHistoryLine, FALSE, NULL);
     SendMessage(m_TextInputBox.GetHandle(), EM_SETSEL, (WPARAM)10000, (LPARAM)-1);
-    m_TextInputBox.m_iCaretBlinkTemp = 0;
+    m_TextInputBox.m_caretTimer.ResetTimer();
 }
 
 void CUIChatInputBox::RemoveHistory(BOOL bClear)

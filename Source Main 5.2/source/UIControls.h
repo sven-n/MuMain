@@ -3,6 +3,7 @@
 
 #include "zzzinfomation.h"
 #include "MultiLanguage.h"
+#include "Time/Timer.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #define UIMAX_TEXT_LINE			150
@@ -857,7 +858,7 @@ protected:
 
 public:
     WNDPROC m_hOldProc;
-    int m_iCaretBlinkTemp;
+    CTimer m_caretTimer = { };
 
 protected:
     HWND m_hParentWnd;
