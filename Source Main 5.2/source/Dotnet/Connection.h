@@ -23,4 +23,6 @@ public:
     bool IsConnected();
     void Send(const BYTE* data, const int32_t length);
     void Close();
+
+    int32_t GetHandle() const { return _handle; }
 };

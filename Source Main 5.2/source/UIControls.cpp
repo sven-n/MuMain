@@ -3214,12 +3214,6 @@ void CUITextInputBox::GetText(wchar_t* pwszText, int iGetLenght)
 
 void CUITextInputBox::SetText(const char* pszText)
 {
-    if (pszText == NULL)
-    {
-        const auto strText = L"";
-        PostMessageW(m_hEditWnd, WM_SETTEXT, 0, (LPARAM)&strText);
-        return;
-    }
 
     std::wstring wstrText;
     g_pMultiLanguage->ConvertCharToWideStr(wstrText, pszText);

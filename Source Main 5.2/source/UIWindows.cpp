@@ -897,6 +897,11 @@ void CUIBaseWindow::Init(const char* pszTitle, DWORD dwParentID)
     SetSize(213, 170);
 }
 
+void CUIBaseWindow::InitControls()
+{
+    // can be overwritten, if needed
+}
+
 void CUIBaseWindow::SetTitle(const char* pszTitle)
 {
     if (pszTitle == NULL) return;
@@ -964,6 +969,12 @@ void CUIBaseWindow::SetControlButtonColor(int iSelect)
 
 void CUIBaseWindow::Render()
 {
+    if (!_controlsInitialized)
+    {
+        InitControls();
+        _controlsInitialized = true;
+    }
+
     EnableAlphaTest();
 
     if (m_iOptions == UIWINDOWSTYLE_NULL);
@@ -1287,6 +1298,34 @@ CUIChatWindow::~CUIChatWindow()
     DisconnectToChatServer();
 }
 
+void CUIChatWindow::InitControls()
+{
+    m_TextInputBox.Init(g_hWnd, 238, 14, 50);
+    m_TextInputBox.SetSize(180, 14);
+    m_TextInputBox.SetParentUIID(m_dwUIID);
+    m_TextInputBox.SetFont(g_hFont);
+
+    m_TextInputBox.SetOption(UIOPTION_ENTERIMECHKOFF);
+    m_TextInputBox.SetBackColor(0, 0, 0, 0);
+
+    m_TextInputBox.SetParentUIID(GetUIID());
+    m_TextInputBox.SetArrangeType(2, 2, 12);
+    m_TextInputBox.SetState(UISTATE_NORMAL);
+    m_TextInputBox.SetTextLimit(MAX_CHATROOM_TEXT_LENGTH_UTF16 - 1);
+
+    m_InviteButton.Init(1, GlobalText[993]);
+    m_InviteButton.SetParentUIID(GetUIID());
+    m_InviteButton.SetSize(53, 13);
+    m_InviteButton.SetArrangeType(3, 54, 14);
+
+    m_CloseInviteButton.Init(2, GlobalText[993]);
+    m_CloseInviteButton.SetParentUIID(GetUIID());
+    m_CloseInviteButton.SetSize(73, 13);
+    m_CloseInviteButton.SetArrangeType(3, 74, 14);
+    _controlsInitialized = true;
+    Refresh();
+}
+
 void CUIChatWindow::Init(const char* pszTitle, DWORD dwParentID)
 {
     memset(m_szLastText, 0, MAX_CHATROOM_TEXT_LENGTH);
@@ -1298,13 +1337,13 @@ void CUIChatWindow::Init(const char* pszTitle, DWORD dwParentID)
     SetSize(250, 170);
     SetLimitSize(250, 150);
 
-    m_TextInputBox.Init(g_hWnd, 238, 14, 50);
-    m_TextInputBox.SetSize(180, 14);
-    m_TextInputBox.SetParentUIID(m_dwUIID);
-    m_TextInputBox.SetFont(g_hFont);
+    m_ChatListBox.SetParentUIID(GetUIID());
+    m_ChatListBox.SetArrangeType(2, 0, 16);
+    m_ChatListBox.SetResizeType(3, 0, -16);
 
-    m_TextInputBox.SetOption(UIOPTION_ENTERIMECHKOFF);
-    m_TextInputBox.SetBackColor(0, 0, 0, 0);
+    m_PalListBox.SetParentUIID(GetUIID());
+    m_PalListBox.SetArrangeType(3, 75, 16);
+    m_PalListBox.SetResizeType(2, 75, -16);
 
     //	m_PalListBox.AddText("이름네자", 1, 1);
     //	m_PalListBox.AddText("이름넉자", 1, 1);
@@ -1319,38 +1358,22 @@ void CUIChatWindow::Init(const char* pszTitle, DWORD dwParentID)
     //	m_PalListBox.AddText("이름8넷", 1, 1);
     //	m_PalListBox.AddText("이름9넷", 1, 1);
 
-    m_ChatListBox.SetParentUIID(GetUIID());
-    m_ChatListBox.SetArrangeType(2, 0, 16);
-    m_ChatListBox.SetResizeType(3, 0, -16);
-
-    m_PalListBox.SetParentUIID(GetUIID());
-    m_PalListBox.SetArrangeType(3, 75, 16);
-    m_PalListBox.SetResizeType(2, 75, -16);
-
-    m_TextInputBox.SetParentUIID(GetUIID());
-    m_TextInputBox.SetArrangeType(2, 2, 12);
-    m_TextInputBox.SetState(UISTATE_NORMAL);
-    m_TextInputBox.SetTextLimit(MAX_CHATROOM_TEXT_LENGTH_UTF16 - 1);
+    
 
     m_InvitePalListBox.SetParentUIID(GetUIID());
     m_InvitePalListBox.SetArrangeType(3, 75, 16);
     m_InvitePalListBox.SetResizeType(2, 75, -16);
-
-    m_InviteButton.Init(1, GlobalText[993]);
-    m_InviteButton.SetParentUIID(GetUIID());
-    m_InviteButton.SetSize(53, 13);
-    m_InviteButton.SetArrangeType(3, 54, 14);
-
-    m_CloseInviteButton.Init(2, GlobalText[993]);
-    m_CloseInviteButton.SetParentUIID(GetUIID());
-    m_CloseInviteButton.SetSize(73, 13);
-    m_CloseInviteButton.SetArrangeType(3, 74, 14);
 
     m_iPrevWidth = 0;
 }
 
 void CUIChatWindow::Refresh()
 {
+    if (!_controlsInitialized)
+    {
+        return;
+    }
+
     m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
     m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
     m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
@@ -1371,10 +1394,15 @@ void CUIChatWindow::Refresh()
     g_dwKeyFocusUIID = m_PalListBox.GetUIID();
 }
 
+
+void TranslateChattingProtocol(DWORD dwWindowUIID, const BYTE* ReceiveBuffer, int Size);
+
 void CUIChatWindow::HandlePacketS(int32_t handle, const BYTE* ReceiveBuffer, int32_t Size)
 {
-    // todo: map connection handle to CUIChatWindow
-    //TranslateChattingProtocol(ReceiveBuffer, Size);
+    if (const auto uuid = ConnectionHandleToWindowUuid.find(handle)->second)
+    {
+        TranslateChattingProtocol(uuid, ReceiveBuffer, Size);
+    }
 }
 
 void CUIChatWindow::ConnectToChatServer(const char* pszIP, DWORD dwRoomNumber, DWORD dwTicket)
@@ -1388,6 +1416,8 @@ void CUIChatWindow::ConnectToChatServer(const char* pszIP, DWORD dwRoomNumber, D
         // todo: write message, that it failed?
         return;
     }
+
+    ConnectionHandleToWindowUuid[_connection->GetHandle()] = this->GetUIID();
 
     // Convert the ticket into a string:
     char szTicketStr[11] = { 0 };
@@ -1409,6 +1439,11 @@ void CUIChatWindow::DisconnectToChatServer()
 
 int CUIChatWindow::AddChatPal(const char* pszID, BYTE Number, BYTE Server)
 {
+    if (!_controlsInitialized)
+    {
+        ;
+        // oops
+    }
     BOOL bFind = FALSE;
     for (std::deque<GUILDLIST_TEXT>::iterator iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
     {
@@ -2510,16 +2545,8 @@ void CUIPhotoViewer::Render()
     }
 }
 
-void CUILetterWriteWindow::Init(const char* pszTitle, DWORD dwParentID)
+void CUILetterWriteWindow::InitControls()
 {
-    SetTitle(pszTitle);
-    SetParentUIID(dwParentID);
-
-    SetPosition(50, 50);
-    SetSize(250, 216);
-    SetLimitSize(250, 150);
-    SetOption(UIWINDOWSTYLE_TITLEBAR | UIWINDOWSTYLE_FRAME | UIWINDOWSTYLE_MOVEABLE | UIWINDOWSTYLE_MINBUTTON);
-
     SIZE size;
     g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1000], lstrlen(GlobalText[1000]), &size);
 
@@ -2598,6 +2625,17 @@ void CUILetterWriteWindow::Init(const char* pszTitle, DWORD dwParentID)
     m_Photo.SetAutoupdatePlayer(TRUE);
     m_Photo.SetAnimation(AT_STAND1);
     m_Photo.SetAngle(90);
+}
+
+void CUILetterWriteWindow::Init(const char* pszTitle, DWORD dwParentID)
+{
+    SetTitle(pszTitle);
+    SetParentUIID(dwParentID);
+
+    SetPosition(50, 50);
+    SetSize(250, 216);
+    SetLimitSize(250, 150);
+    SetOption(UIWINDOWSTYLE_TITLEBAR | UIWINDOWSTYLE_FRAME | UIWINDOWSTYLE_MOVEABLE | UIWINDOWSTYLE_MINBUTTON);
 
     m_iShowType = 1;
     SetSize(GetWidth() + 120, GetHeight());
@@ -3701,7 +3739,7 @@ CHATROOM_SOCKET * CChatRoomSocketList::GetChatRoomSocketData(DWORD dwRoomID)
     return m_ChatRoomSocketMapIter->second;
 }*/
 
-void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_CHAT_JOIN_RESULT)ReceiveBuffer;
     switch (Data->Result)
@@ -3716,7 +3754,7 @@ void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
     };
 }
 
-void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_CHAT_CHANGE_STATE)ReceiveBuffer;
     auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
@@ -3752,7 +3790,7 @@ void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
         pChatWindow->UpdateInvitePalList();
 }
 
-void ReceiveChatRoomUserList(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+void ReceiveChatRoomUserList(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 {
     auto Header = (LPFS_CHAT_USERLIST_HEADER)ReceiveBuffer;
     int iMoveOffset = sizeof(FS_CHAT_USERLIST_HEADER);
@@ -3767,7 +3805,7 @@ void ReceiveChatRoomUserList(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
     }
 }
 
-void ReceiveChatRoomChatText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+void ReceiveChatRoomChatText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
     auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
@@ -3796,7 +3834,7 @@ void ReceiveChatRoomChatText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
     pChatWindow->AddChatText(Data->Index, (char*)ChatMsg, 3, 0);
 }
 
-void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
+void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
     Data->Msg[99] = '\0';
@@ -3808,8 +3846,24 @@ void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, BYTE* ReceiveBuffer)
     g_pChatListBox->AddText("", (char*)Data->Msg, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
-void TranslateChattingProtocol(DWORD dwWindowUIID, int HeadCode, BYTE* ReceiveBuffer, int Size, BOOL bEcrypted)
+void TranslateChattingProtocol(DWORD dwWindowUIID, const BYTE* ReceiveBuffer, int Size)
 {
+    if (Size < 4)
+    {
+        return;
+    }
+
+    int HeadCode;
+    BOOL bIsC1C3 = ReceiveBuffer[0] % 2 == 1;
+    if (bIsC1C3) // C1 and C3
+    {
+        HeadCode = ReceiveBuffer[2];
+    }
+    else
+    {
+        HeadCode = ReceiveBuffer[3];
+    }
+
     switch (HeadCode)
     {
     case 0x00:
@@ -4894,18 +4948,8 @@ void CUIFriendWindow::DoMouseActionSub()
     }
 }
 
-void CUITextInputWindow::Init(const char* pszTitle, DWORD dwParentID)
+void CUITextInputWindow::InitControls()
 {
-    SetTitle(pszTitle);
-    SetParentUIID(0);
-    m_dwReturnWindowUIID = dwParentID;
-
-    SetPosition(50, 50);
-    //SetSize(213, 170);
-    SetSize(150, 100);
-    SetLimitSize(150, 100);
-    SetOption(UIWINDOWSTYLE_FIXED);
-
     m_TextInputBox.Init(g_hWnd, 80, 14, 10);
     m_TextInputBox.SetParentUIID(m_dwUIID);
     m_TextInputBox.SetFont(g_hFont);
@@ -4924,6 +4968,20 @@ void CUITextInputWindow::Init(const char* pszTitle, DWORD dwParentID)
     m_CancelButton.SetParentUIID(GetUIID());
     m_CancelButton.SetArrangeType(0, 73, 40);
     m_CancelButton.SetSize(50, 20);
+}
+
+
+void CUITextInputWindow::Init(const char* pszTitle, DWORD dwParentID)
+{
+    SetTitle(pszTitle);
+    SetParentUIID(0);
+    m_dwReturnWindowUIID = dwParentID;
+
+    SetPosition(50, 50);
+    //SetSize(213, 170);
+    SetSize(150, 100);
+    SetLimitSize(150, 100);
+    SetOption(UIWINDOWSTYLE_FIXED);
 }
 
 void CUITextInputWindow::Refresh()

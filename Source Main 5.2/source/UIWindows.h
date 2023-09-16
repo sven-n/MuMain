@@ -48,11 +48,13 @@ const int UIPHOTOVIEWER_CANCONTROL = 1;
 
 class CUIBaseWindow : public CUIControl
 {
+    bool _controlsInitialized = false;
 public:
     CUIBaseWindow();
     virtual ~CUIBaseWindow();
 
     virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    
     virtual void Refresh() {}
     void SetLimitSize(int iMinWidth, int iMinHeight, int iMaxWidth = 0, int iMaxHeight = 0)
     {
@@ -82,6 +84,8 @@ public:
 protected:
     BOOL DoMouseAction();
 
+    virtual void InitControls();
+
     virtual void RenderSub() {}
     virtual void RenderOver() {}
     virtual void DoActionSub(BOOL bMessageOnly) {			}
@@ -106,7 +110,10 @@ protected:
 class CUIChatWindow : public CUIBaseWindow
 {
     static void HandlePacketS(int32_t handle, const BYTE* ReceiveBuffer, int32_t Size);
+    inline static std::map<int32_t, DWORD> ConnectionHandleToWindowUuid = { };
     Connection* _connection;
+    bool _controlsInitialized = false;
+
 public:
     CUIChatWindow();
     virtual ~CUIChatWindow();
@@ -133,7 +140,7 @@ protected:
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
     virtual void DoMouseActionSub();
-
+    void InitControls() override;
 protected:
     int m_iShowType;
     CUITextInputBox m_TextInputBox;
@@ -242,6 +249,7 @@ public:
     virtual ~CUILetterWriteWindow() {}
 
     virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    
     virtual void Refresh();
     void SetMailtoText(const char* pszText);
     void SetMainTitleText(const char* pszText);
@@ -252,6 +260,7 @@ public:
     virtual BOOL CloseCheck();
 
 protected:
+    void InitControls() override;
     virtual void RenderSub();
     virtual void RenderOver();
     virtual BOOL HandleMessage();
@@ -487,6 +496,7 @@ public:
     virtual ~CUITextInputWindow() {}
 
     virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    void InitControls() override;
     virtual void Refresh();
     void SetText(const char* pszText) { m_TextInputBox.SetText(pszText); m_TextInputBox.GiveFocus(TRUE); }
 
