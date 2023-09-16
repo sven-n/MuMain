@@ -2056,8 +2056,7 @@ void CreateFrustrum2D(vec3_t Position)
                 }
                 else
                 {
-                    // Width = (float)GetScreenWidth()/640.f;
-                    Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
+                    Width = (float)GetScreenWidth()/640.f * 1.1f;
                 }
 
                 if (SceneFlag == LOG_IN_SCENE)
@@ -2089,8 +2088,8 @@ void CreateFrustrum2D(vec3_t Position)
                 {
                     CameraViewNear = CameraViewFar * 0.19f;//0.22
                     CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                    WidthFar = 1190.f * Width; // 1140.f
-                    WidthNear = 540.f * Width; // 540.f
+                    WidthFar = 1190.f * Width * sqrtf(CameraFOV / 33.f); // 1140.f
+                    WidthNear = 540.f * Width * sqrtf(CameraFOV / 33.f); // 540.f
                 }
                 break;
             case 1:
