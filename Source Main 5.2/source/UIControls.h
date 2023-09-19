@@ -866,6 +866,9 @@ protected:
     HDC m_hMemDC;
     HBITMAP m_hBitmap;
     BYTE* m_pFontBuffer;
+    bool m_bSetText = false;
+    std::wstring m_sTextToSet;
+
 
     CUITextInputBox* m_pTabTarget;
 

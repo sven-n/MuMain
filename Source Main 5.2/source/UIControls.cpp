@@ -3220,7 +3220,9 @@ void CUITextInputBox::SetText(const char* pszText)
     g_pMultiLanguage->ConvertCharToWideStr(wstrText, pszText);
 
     if (wstrText.length() > MAX_TEXT_LENGTH) return;
-    SetWindowTextW(m_hEditWnd, wstrText.c_str());
+
+    m_sTextToSet = wstrText;
+    m_bSetText = true;
 }
 
 void CUITextInputBox::SetTextLimit(int iLimit)
@@ -3462,6 +3464,12 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 }
 void CUITextInputBox::Render()
 {
+    if (m_bSetText)
+    {
+        SetWindowTextW(m_hEditWnd, m_sTextToSet.c_str());
+        m_bSetText = false;
+    }
+
     m_bIsReady = TRUE;
     if (m_hEditWnd == NULL || IsWindowVisible(m_hEditWnd) == FALSE) return;
 
