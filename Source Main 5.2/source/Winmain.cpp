@@ -1411,19 +1411,19 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         g_ErrorReport.Write(".net runtime failed to load :(");
     }
 
-    switch (WindowWidth)
+    switch (WindowHeight)
     {
-    case 640: FontHeight = 10; break;
-    case 800: FontHeight = 12; break;
-    case 1024: FontHeight = 13; break;
-    case 1280: FontHeight = 13; break;
-    case 1366: FontHeight = 14; break;
-    case 1440: FontHeight = 16; break;
-    case 1864: FontHeight = 16; break;
-    case 1600: FontHeight = 16; break;
-    case 1680: FontHeight = 16; break;
-    case 1920: FontHeight = 18; break;
-    case 2560: FontHeight = 20; break;
+        case 480:FontHeight = 12; break;
+        case 600:FontHeight = 13; break;
+        case 768:FontHeight = 14; break;
+        case 900:FontHeight = 14; break;
+        case 1024:FontHeight = 14; break;
+        case 1050:FontHeight = 15; break;
+        case 1080: FontHeight = 15; break;
+        case 1200: FontHeight = 16; break;
+        case 1280: FontHeight = 16; break;
+        case 1400: FontHeight = 17; break;
+        case 1440: FontHeight = 18; break;
     }
 
     int nFixFontHeight = 13;
