@@ -171,7 +171,7 @@
     <PostBuildEvent>
       <Command>xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\bin" "$(OutDir)"
 xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtimeconfig.json" "$(OutDir)"</Command>
-</PostBuildEvent>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Global Debug|x64'">
     <Midl>
@@ -362,7 +362,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <OutputFile>.\tmp/Global_Release/Main.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-<Command>xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\bin" "$(OutDir)"
+      <Command>xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\bin" "$(OutDir)"
 xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtimeconfig.json" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -389,6 +389,9 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Dotnet\PacketFunctions_ChatServer.cpp" />
+    <ClCompile Include="source\Dotnet\PacketFunctions_ClientToServer.cpp" />
+    <ClCompile Include="source\Dotnet\PacketFunctions_ConnectServer.cpp" />
     <ClCompile Include="source\NewUIInventoryExtension.cpp" />
     <ClCompile Include="source\Dotnet\DotNetRuntime.cpp" />
     <ClCompile Include="source\BlackWin.cpp" />
@@ -773,6 +776,12 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="afxres.h" />
+    <ClInclude Include="source\Dotnet\PacketBindings_ChatServer.h" />
+    <ClInclude Include="source\Dotnet\PacketBindings_ClientToServer.h" />
+    <ClInclude Include="source\Dotnet\PacketBindings_ConnectServer.h" />
+    <ClInclude Include="source\Dotnet\PacketFunctions_ChatServer.h" />
+    <ClInclude Include="source\Dotnet\PacketFunctions_ClientToServer.h" />
+    <ClInclude Include="source\Dotnet\PacketFunctions_ConnectServer.h" />
     <ClInclude Include="source\NewUIInventoryExtension.h" />
     <ClInclude Include="source\Dotnet\DotNetRuntime.h" />
     <ClInclude Include="source\BaseCls.h" />

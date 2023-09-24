@@ -1189,6 +1189,15 @@
     <ClCompile Include="source\NewUIStorageInventoryExt.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Dotnet\PacketFunctions_ChatServer.cpp">
+      <Filter>MU\Dotnet</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Dotnet\PacketFunctions_ClientToServer.cpp">
+      <Filter>MU\Dotnet</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Dotnet\PacketFunctions_ConnectServer.cpp">
+      <Filter>MU\Dotnet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\BlackWin.h">
@@ -2264,6 +2273,24 @@
     </ClInclude>
     <ClInclude Include="source\SpinLock.h">
       <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketFunctions_ChatServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketFunctions_ClientToServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketFunctions_ConnectServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketBindings_ChatServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketBindings_ClientToServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketBindings_ConnectServer.h">
+      <Filter>MU\Dotnet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

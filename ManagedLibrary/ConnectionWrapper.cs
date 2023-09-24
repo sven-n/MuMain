@@ -1,4 +1,6 @@
-﻿namespace MUnique.Client.ManagedLibrary;
+﻿using System.IO.Pipelines;
+
+namespace MUnique.Client.ManagedLibrary;
 
 using MUnique.OpenMU.Network;
 using Nito.AsyncEx.Synchronous;
@@ -51,6 +53,11 @@ public sealed class ConnectionWrapper : IDisposable
         connection.PacketReceived += this.OnPacketReceivedAsync;
         connection.Disconnected += this.OnDisconnectedAsync;
     }
+
+    /// <summary>
+    /// Gets the output pipe writer.
+    /// </summary>
+    internal PipeWriter Output => this._connection.Output;
 
     /// <summary>
     /// Begins receiving packets from the client.

@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 /// Class which manages the connections which are created through the game client.
 /// To identify each connection, we use handles (a simple number).
 /// </summary>
-public unsafe class ConnectionManager
+public unsafe partial class ConnectionManager
 {
     /// <summary>
     /// The currently active connections, with their handle as key.
