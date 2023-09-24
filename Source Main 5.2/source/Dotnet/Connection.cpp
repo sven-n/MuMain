@@ -66,6 +66,10 @@ Connection::Connection(const char* host, int32_t port, void(*packetHandler)(int3
         connections[this->_handle] = this;
         dotnet_beginreceive(this->_handle);
 
+        _chatServer = new PacketFunctions_ChatServer();
+        _connectServer = new PacketFunctions_ConnectServer();
+        _gameServer = new PacketFunctions_ClientToServer();
+
         _chatServer->SetHandle(this->_handle);
         _connectServer->SetHandle(this->_handle);
         _gameServer->SetHandle(this->_handle);
