@@ -21,6 +21,7 @@ namespace MUnique.Client.ManagedLibrary;
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using MUnique.OpenMU.Network;
 using MUnique.OpenMU.Network.Packets;
@@ -53,12 +54,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = AuthenticateRef.Length;
-            var packet = new AuthenticateRef(connection.Output.GetSpan(length)[..length]);
-            packet.RoomId = @roomId;
-            packet.Token = Marshal.PtrToStringAnsi(@token, (int)tokenByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = AuthenticateRef.Length;
+                var packet = new AuthenticateRef(pipeWriter.GetSpan(length)[..length]);
+                packet.RoomId = @roomId;
+                packet.Token = Marshal.PtrToStringAuto(@token, (int)tokenByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -87,12 +91,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ChatRoomClientJoinedRef.Length;
-            var packet = new ChatRoomClientJoinedRef(connection.Output.GetSpan(length)[..length]);
-            packet.ClientIndex = @clientIndex;
-            packet.Name = Marshal.PtrToStringAnsi(@name, (int)nameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChatRoomClientJoinedRef.Length;
+                var packet = new ChatRoomClientJoinedRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ClientIndex = @clientIndex;
+                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -121,12 +128,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ChatRoomClientLeftRef.Length;
-            var packet = new ChatRoomClientLeftRef(connection.Output.GetSpan(length)[..length]);
-            packet.ClientIndex = @clientIndex;
-            packet.Name = Marshal.PtrToStringAnsi(@name, (int)nameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChatRoomClientLeftRef.Length;
+                var packet = new ChatRoomClientLeftRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ClientIndex = @clientIndex;
+                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -156,13 +166,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ChatMessageRef.GetRequiredSize((int)messageByteLength);
-            var packet = new ChatMessageRef(connection.Output.GetSpan(length)[..length]);
-            packet.SenderIndex = @senderIndex;
-            packet.MessageLength = @messageLength;
-            packet.Message = Marshal.PtrToStringAnsi(@message, (int)messageByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChatMessageRef.GetRequiredSize((int)messageByteLength);
+                var packet = new ChatMessageRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SenderIndex = @senderIndex;
+                packet.MessageLength = @messageLength;
+                packet.Message = Marshal.PtrToStringAuto(@message, (int)messageByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -188,9 +201,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = KeepAliveRef.Length;
-            var packet = new KeepAliveRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = KeepAliveRef.Length;
+                var packet = new KeepAliveRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {

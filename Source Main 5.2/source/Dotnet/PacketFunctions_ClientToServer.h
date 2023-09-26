@@ -60,7 +60,7 @@ public:
     /// Is sent by the client when: A player sends a public chat message.
     /// Causes reaction on server side: The message is forwarded to all surrounding players, including the sender.
     /// </remarks>
-    void SendPublicChatMessage(char* character, uint32_t characterByteLength, char* message, uint32_t messageByteLength);
+    void SendPublicChatMessage(const wchar_t* character, uint32_t characterByteLength, const wchar_t* message, uint32_t messageByteLength);
 
     /// <summary>
     /// Sends a WhisperMessage to this connection.
@@ -73,14 +73,14 @@ public:
     /// Is sent by the client when: A player sends a private chat message to a specific target player.
     /// Causes reaction on server side: The message is forwarded to the target player.
     /// </remarks>
-    void SendWhisperMessage(char* receiverName, uint32_t receiverNameByteLength, char* message, uint32_t messageByteLength);
+    void SendWhisperMessage(const wchar_t* receiverName, uint32_t receiverNameByteLength, const wchar_t* message, uint32_t messageByteLength);
 
     /// <summary>
     /// Sends a LoginLongPassword to this connection.
     /// </summary>
-    /// <param name="username">The user name, "encrypted" with Xor3.</param>
+    /// <param name="username">The user name, L"encrypted" with Xor3.</param>
     /// <param name="usernameByteLength">The length of <paramref name="username"/> in bytes.
-    /// <param name="password">The password, "encrypted" with Xor3.</param>
+    /// <param name="password">The password, L"encrypted" with Xor3.</param>
     /// <param name="passwordByteLength">The length of <paramref name="password"/> in bytes.
     /// <param name="tickCount">The tick count.</param>
     /// <param name="clientVersion">The client version.</param>
@@ -91,14 +91,14 @@ public:
     /// Is sent by the client when: The player tries to log into the game.
     /// Causes reaction on server side: The server is authenticating the sent login name and password. If it's correct, the state of the player is proceeding to be logged in.
     /// </remarks>
-    void SendLoginLongPassword(BYTE* username, uint32_t usernameByteLength, BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, BYTE* clientVersion, uint32_t clientVersionByteLength, BYTE* clientSerial, uint32_t clientSerialByteLength);
+    void SendLoginLongPassword(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength);
 
     /// <summary>
     /// Sends a LoginShortPassword to this connection.
     /// </summary>
-    /// <param name="username">The user name, "encrypted" with Xor3.</param>
+    /// <param name="username">The user name, L"encrypted" with Xor3.</param>
     /// <param name="usernameByteLength">The length of <paramref name="username"/> in bytes.
-    /// <param name="password">The password, "encrypted" with Xor3.</param>
+    /// <param name="password">The password, L"encrypted" with Xor3.</param>
     /// <param name="passwordByteLength">The length of <paramref name="password"/> in bytes.
     /// <param name="tickCount">The tick count.</param>
     /// <param name="clientVersion">The client version.</param>
@@ -109,14 +109,14 @@ public:
     /// Is sent by the client when: The player tries to log into the game.
     /// Causes reaction on server side: The server is authenticating the sent login name and password. If it's correct, the state of the player is proceeding to be logged in.
     /// </remarks>
-    void SendLoginShortPassword(BYTE* username, uint32_t usernameByteLength, BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, BYTE* clientVersion, uint32_t clientVersionByteLength, BYTE* clientSerial, uint32_t clientSerialByteLength);
+    void SendLoginShortPassword(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength);
 
     /// <summary>
     /// Sends a Login075 to this connection.
     /// </summary>
-    /// <param name="username">The user name, "encrypted" with Xor3.</param>
+    /// <param name="username">The user name, L"encrypted" with Xor3.</param>
     /// <param name="usernameByteLength">The length of <paramref name="username"/> in bytes.
-    /// <param name="password">The password, "encrypted" with Xor3.</param>
+    /// <param name="password">The password, L"encrypted" with Xor3.</param>
     /// <param name="passwordByteLength">The length of <paramref name="password"/> in bytes.
     /// <param name="tickCount">The tick count.</param>
     /// <param name="clientVersion">The client version.</param>
@@ -127,7 +127,7 @@ public:
     /// Is sent by the client when: The player tries to log into the game.
     /// Causes reaction on server side: The server is authenticating the sent login name and password. If it's correct, the state of the player is proceeding to be logged in.
     /// </remarks>
-    void SendLogin075(BYTE* username, uint32_t usernameByteLength, BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, BYTE* clientVersion, uint32_t clientVersionByteLength, BYTE* clientSerial, uint32_t clientSerialByteLength);
+    void SendLogin075(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength);
 
     /// <summary>
     /// Sends a LogOut to this connection.
@@ -179,7 +179,7 @@ public:
     /// Is sent by the client when: The player wants to open his personal item shop.
     /// Causes reaction on server side: The personal item shop is opened and the surrounding players are informed about it, including the own player.
     /// </remarks>
-    void SendPlayerShopOpen(char* storeName, uint32_t storeNameByteLength);
+    void SendPlayerShopOpen(const wchar_t* storeName, uint32_t storeNameByteLength);
 
     /// <summary>
     /// Sends a PlayerShopClose to this connection.
@@ -200,7 +200,7 @@ public:
     /// Is sent by the client when: A player opens a shop of another player.
     /// Causes reaction on server side: The list of items is sent back, if the shop of the player is currently open.
     /// </remarks>
-    void SendPlayerShopItemListRequest(uint16_t playerId, char* playerName, uint32_t playerNameByteLength);
+    void SendPlayerShopItemListRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength);
 
     /// <summary>
     /// Sends a PlayerShopItemBuyRequest to this connection.
@@ -213,7 +213,7 @@ public:
     /// Is sent by the client when: A player wants to buy the item of another players shop.
     /// Causes reaction on server side: If the buyer has enough money, the item is sold to the player. Both players will get notifications about that.
     /// </remarks>
-    void SendPlayerShopItemBuyRequest(uint16_t playerId, char* playerName, uint32_t playerNameByteLength, BYTE itemSlot);
+    void SendPlayerShopItemBuyRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength, BYTE itemSlot);
 
     /// <summary>
     /// Sends a PickupItemRequest to this connection.
@@ -260,7 +260,7 @@ public:
     /// Is sent by the client when: A player requests to move an item within or between his available item storage, such as inventory, vault, trade or chaos machine.
     /// Causes reaction on server side: 
     /// </remarks>
-    void SendItemMoveRequest(uint32_t fromStorage, BYTE fromSlot, BYTE* itemData, uint32_t itemDataByteLength, uint32_t toStorage, BYTE toSlot);
+    void SendItemMoveRequest(uint32_t fromStorage, BYTE fromSlot, const BYTE* itemData, uint32_t itemDataByteLength, uint32_t toStorage, BYTE toSlot);
 
     /// <summary>
     /// Sends a ConsumeItemRequest to this connection.
@@ -402,7 +402,7 @@ public:
     /// Is sent by the client when: After the client connected to another server due map change.
     /// Causes reaction on server side: The player spawns on the new server.
     /// </remarks>
-    void SendServerChangeAuthentication(BYTE* accountXor3, uint32_t accountXor3ByteLength, BYTE* characterNameXor3, uint32_t characterNameXor3ByteLength, uint32_t authCode1, uint32_t authCode2, uint32_t authCode3, uint32_t authCode4, uint32_t tickCount, BYTE* clientVersion, uint32_t clientVersionByteLength, BYTE* clientSerial, uint32_t clientSerialByteLength);
+    void SendServerChangeAuthentication(const BYTE* accountXor3, uint32_t accountXor3ByteLength, const BYTE* characterNameXor3, uint32_t characterNameXor3ByteLength, uint32_t authCode1, uint32_t authCode2, uint32_t authCode3, uint32_t authCode4, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength);
 
     /// <summary>
     /// Sends a CastleSiegeStatusRequest to this connection.
@@ -785,7 +785,7 @@ public:
     /// Is sent by the client when: The player wants to send a gift to another player.
     /// Causes reaction on server side: The server buys the item with the credits of the player and sends it as gift to the other player.
     /// </remarks>
-    void SendCashShopItemGiftRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag, char* giftReceiverName, uint32_t giftReceiverNameByteLength, char* giftText, uint32_t giftTextByteLength);
+    void SendCashShopItemGiftRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag, const wchar_t* giftReceiverName, uint32_t giftReceiverNameByteLength, const wchar_t* giftText, uint32_t giftTextByteLength);
 
     /// <summary>
     /// Sends a CashShopStorageListRequest to this connection.
@@ -853,7 +853,7 @@ public:
     /// Is sent by the client when: The player wants to set a new pin for the vault when it's in unlocked state.
     /// Causes reaction on server side: The vault pin is set. VaultProtectionInformation is sent as response.
     /// </remarks>
-    void SendSetVaultPin(uint16_t pin, char* password, uint32_t passwordByteLength);
+    void SendSetVaultPin(uint16_t pin, const wchar_t* password, uint32_t passwordByteLength);
 
     /// <summary>
     /// Sends a RemoveVaultPin to this connection.
@@ -864,7 +864,7 @@ public:
     /// Is sent by the client when: The player wants to remove the pin for the vault when it's in unlocked state.
     /// Causes reaction on server side: The vault pin is removed. VaultProtectionInformation is sent as response.
     /// </remarks>
-    void SendRemoveVaultPin(char* password, uint32_t passwordByteLength);
+    void SendRemoveVaultPin(const wchar_t* password, uint32_t passwordByteLength);
 
     /// <summary>
     /// Sends a VaultClosed to this connection.
@@ -952,7 +952,7 @@ public:
     /// Is sent by the client when: A player wants to walk on the game map.
     /// Causes reaction on server side: The player gets moved on the map, visible for other surrounding players.
     /// </remarks>
-    void SendWalkRequest(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, BYTE* directions, uint32_t directionsByteLength);
+    void SendWalkRequest(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, const BYTE* directions, uint32_t directionsByteLength);
 
     /// <summary>
     /// Sends a WalkRequest075 to this connection.
@@ -967,7 +967,7 @@ public:
     /// Is sent by the client when: A player wants to walk on the game map.
     /// Causes reaction on server side: The player gets moved on the map, visible for other surrounding players.
     /// </remarks>
-    void SendWalkRequest075(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, BYTE* directions, uint32_t directionsByteLength);
+    void SendWalkRequest075(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, const BYTE* directions, uint32_t directionsByteLength);
 
     /// <summary>
     /// Sends a InstantMoveRequest to this connection.
@@ -1011,7 +1011,7 @@ public:
     /// Is sent by the client when: The game client is at the character selection screen and the player requests to add a new character.
     /// Causes reaction on server side: The server checks if the player is allowed to create the character and sends a response back.
     /// </remarks>
-    void SendCreateCharacter(char* name, uint32_t nameByteLength, uint32_t class_);
+    void SendCreateCharacter(const wchar_t* name, uint32_t nameByteLength, uint32_t class_);
 
     /// <summary>
     /// Sends a DeleteCharacter to this connection.
@@ -1024,7 +1024,7 @@ public:
     /// Is sent by the client when: The game client is at the character selection screen and the player requests to delete an existing character.
     /// Causes reaction on server side: The server checks if the player transmitted the correct security code and if the character actually exists. If all is valid, it deletes the character from the account. It then sends a response with a result code back to the game client.
     /// </remarks>
-    void SendDeleteCharacter(char* name, uint32_t nameByteLength, char* securityCode, uint32_t securityCodeByteLength);
+    void SendDeleteCharacter(const wchar_t* name, uint32_t nameByteLength, const wchar_t* securityCode, uint32_t securityCodeByteLength);
 
     /// <summary>
     /// Sends a SelectCharacter to this connection.
@@ -1035,7 +1035,7 @@ public:
     /// Is sent by the client when: The player selects a character to enter the game world on the character selection screen.
     /// Causes reaction on server side: The player joins the game world with the specified character.
     /// </remarks>
-    void SendSelectCharacter(char* name, uint32_t nameByteLength);
+    void SendSelectCharacter(const wchar_t* name, uint32_t nameByteLength);
 
     /// <summary>
     /// Sends a FocusCharacter to this connection.
@@ -1046,7 +1046,7 @@ public:
     /// Is sent by the client when: The player focuses (clicks on it) a character with which he plans to enter the game world on the character selection screen.
     /// Causes reaction on server side: The server checks if this character exists and sends a response back. If successful, the game client highlights the focused character.
     /// </remarks>
-    void SendFocusCharacter(char* name, uint32_t nameByteLength);
+    void SendFocusCharacter(const wchar_t* name, uint32_t nameByteLength);
 
     /// <summary>
     /// Sends a IncreaseCharacterStatPoint to this connection.
@@ -1076,7 +1076,7 @@ public:
     /// Is sent by the client when: When leaving the game world with a character.
     /// Causes reaction on server side: The server saves this configuration in its database.
     /// </remarks>
-    void SendSaveKeyConfiguration(BYTE* configuration, uint32_t configurationByteLength);
+    void SendSaveKeyConfiguration(const BYTE* configuration, uint32_t configurationByteLength);
 
     /// <summary>
     /// Sends a AddMasterSkillPoint to this connection.
@@ -1292,7 +1292,7 @@ public:
     /// Is sent by the client when: A player wants to send a letter to another players character.
     /// Causes reaction on server side: The letter is sent to the other character, if it exists and the player has the required money.
     /// </remarks>
-    void SendLetterSendRequest(uint32_t letterId, char* receiver, uint32_t receiverByteLength, char* title, uint32_t titleByteLength, BYTE rotation, BYTE animation, uint16_t messageLength, char* message, uint32_t messageByteLength);
+    void SendLetterSendRequest(uint32_t letterId, const wchar_t* receiver, uint32_t receiverByteLength, const wchar_t* title, uint32_t titleByteLength, BYTE rotation, BYTE animation, uint16_t messageLength, const wchar_t* message, uint32_t messageByteLength);
 
     /// <summary>
     /// Sends a LetterReadRequest to this connection.
@@ -1315,7 +1315,7 @@ public:
     /// Is sent by the client when: A guild member wants to kick himself or a guild master wants to kick another player from its guild.
     /// Causes reaction on server side: If the player is allowed to kick the player, it's removed from the guild. If the guild master kicks himself, the guild is disbanded. Corresponding responses are sent to all involved players.
     /// </remarks>
-    void SendGuildKickPlayerRequest(char* playerName, uint32_t playerNameByteLength, char* securityCode, uint32_t securityCodeByteLength);
+    void SendGuildKickPlayerRequest(const wchar_t* playerName, uint32_t playerNameByteLength, const wchar_t* securityCode, uint32_t securityCodeByteLength);
 
     /// <summary>
     /// Sends a GuildJoinRequest to this connection.
@@ -1358,7 +1358,7 @@ public:
     /// Is sent by the client when: When a player wants to create a guild.
     /// Causes reaction on server side: The guild is created and the player is set as the new guild master of the guild.
     /// </remarks>
-    void SendGuildCreateRequest(char* guildName, uint32_t guildNameByteLength, BYTE* guildEmblem, uint32_t guildEmblemByteLength);
+    void SendGuildCreateRequest(const wchar_t* guildName, uint32_t guildNameByteLength, const BYTE* guildEmblem, uint32_t guildEmblemByteLength);
 
     /// <summary>
     /// Sends a GuildCreateRequest075 to this connection.
@@ -1371,7 +1371,7 @@ public:
     /// Is sent by the client when: When a player wants to create a guild.
     /// Causes reaction on server side: The guild is created and the player is set as the new guild master of the guild.
     /// </remarks>
-    void SendGuildCreateRequest075(char* guildName, uint32_t guildNameByteLength, BYTE* guildEmblem, uint32_t guildEmblemByteLength);
+    void SendGuildCreateRequest075(const wchar_t* guildName, uint32_t guildNameByteLength, const BYTE* guildEmblem, uint32_t guildEmblemByteLength);
 
     /// <summary>
     /// Sends a GuildMasterAnswer to this connection.
@@ -1423,7 +1423,7 @@ public:
     /// Is sent by the client when: A guild master wants to change the role of a guild member.
     /// Causes reaction on server side: The server changes the role of the guild member.
     /// </remarks>
-    void SendGuildRoleAssignRequest(uint32_t role, char* playerName, uint32_t playerNameByteLength, BYTE type = 1);
+    void SendGuildRoleAssignRequest(uint32_t role, const wchar_t* playerName, uint32_t playerNameByteLength, BYTE type = 1);
 
     /// <summary>
     /// Sends a GuildTypeChangeRequest to this connection.
@@ -1478,7 +1478,7 @@ public:
     /// Is sent by the client when: An alliance guild master wants to remove a guild from the alliance.
     /// Causes reaction on server side: The server removes the guild from the alliance.
     /// </remarks>
-    void SendRemoveAllianceGuildRequest(char* guildName, uint32_t guildNameByteLength);
+    void SendRemoveAllianceGuildRequest(const wchar_t* guildName, uint32_t guildNameByteLength);
 
     /// <summary>
     /// Sends a PingResponse to this connection.
@@ -1537,7 +1537,7 @@ public:
     /// Is sent by the client when: A player wants to add another players character into his friend list of the messenger.
     /// Causes reaction on server side: A request is sent to the other player. If the player is currently offline, the request will be sent as soon as he is online again.
     /// </remarks>
-    void SendFriendAddRequest(char* friendName, uint32_t friendNameByteLength);
+    void SendFriendAddRequest(const wchar_t* friendName, uint32_t friendNameByteLength);
 
     /// <summary>
     /// Sends a FriendDelete to this connection.
@@ -1548,7 +1548,7 @@ public:
     /// Is sent by the client when: A player wants to delete another players character from his friend list of the messenger.
     /// Causes reaction on server side: The entry in the friend list is removed. The player is shown as offline in the other players friends list.
     /// </remarks>
-    void SendFriendDelete(char* friendName, uint32_t friendNameByteLength);
+    void SendFriendDelete(const wchar_t* friendName, uint32_t friendNameByteLength);
 
     /// <summary>
     /// Sends a ChatRoomCreateRequest to this connection.
@@ -1559,7 +1559,7 @@ public:
     /// Is sent by the client when: A player wants to open a chat with another player of his friend list.
     /// Causes reaction on server side: If both players are online, a chat room is created on the chat server. Authentication data is sent to both game clients, which will then try to connect to the chat server using this data.
     /// </remarks>
-    void SendChatRoomCreateRequest(char* friendName, uint32_t friendNameByteLength);
+    void SendChatRoomCreateRequest(const wchar_t* friendName, uint32_t friendNameByteLength);
 
     /// <summary>
     /// Sends a FriendAddResponse to this connection.
@@ -1571,7 +1571,7 @@ public:
     /// Is sent by the client when: A player received a friend request from another player and responded to it.
     /// Causes reaction on server side: If the player accepted, the friend is added to the players friend list and both players get subscribed about each others online status.
     /// </remarks>
-    void SendFriendAddResponse(BYTE accepted, char* friendRequesterName, uint32_t friendRequesterNameByteLength);
+    void SendFriendAddResponse(BYTE accepted, const wchar_t* friendRequesterName, uint32_t friendRequesterNameByteLength);
 
     /// <summary>
     /// Sends a SetFriendOnlineState to this connection.
@@ -1594,7 +1594,7 @@ public:
     /// Is sent by the client when: A player wants to invite additional players from his friend list to an existing chat room.
     /// Causes reaction on server side: The player additional gets authentication data sent to his game client. It then connects to the chat server and joins the chat room.
     /// </remarks>
-    void SendChatRoomInvitationRequest(char* friendName, uint32_t friendNameByteLength, uint16_t roomId, uint32_t requestId);
+    void SendChatRoomInvitationRequest(const wchar_t* friendName, uint32_t friendNameByteLength, uint16_t roomId, uint32_t requestId);
 
     /// <summary>
     /// Sends a LegacyQuestStateRequest to this connection.
@@ -1738,7 +1738,7 @@ public:
     /// Is sent by the client when: The client want to save current MU Helper data.
     /// Causes reaction on server side: The server should save supplied MU Helper data.
     /// </remarks>
-    void SendMuHelperSaveDataRequest(BYTE* helperData, uint32_t helperDataByteLength);
+    void SendMuHelperSaveDataRequest(const BYTE* helperData, uint32_t helperDataByteLength);
 
     /// <summary>
     /// Sends a QuestSelectRequest to this connection.
@@ -1962,7 +1962,7 @@ public:
     /// Is sent by the client when: Unknown?
     /// Causes reaction on server side: Unknown?
     /// </remarks>
-    void SendServerImmigrationRequest(char* securityCode, uint32_t securityCodeByteLength);
+    void SendServerImmigrationRequest(const wchar_t* securityCode, uint32_t securityCodeByteLength);
 
     /// <summary>
     /// Sends a LuckyNumberRequest to this connection.
@@ -1977,7 +1977,7 @@ public:
     /// Is sent by the client when: The player requests to redeem a coupon code (lucky number) which is 12 alphanumeric digits long.
     /// Causes reaction on server side: A response is sent back to the client with the result. An item could be rewarded to the inventory.
     /// </remarks>
-    void SendLuckyNumberRequest(char* serial1, uint32_t serial1ByteLength, char* serial2, uint32_t serial2ByteLength, char* serial3, uint32_t serial3ByteLength);
+    void SendLuckyNumberRequest(const wchar_t* serial1, uint32_t serial1ByteLength, const wchar_t* serial2, uint32_t serial2ByteLength, const wchar_t* serial3, uint32_t serial3ByteLength);
 
     /// <summary>
     /// Sends a BloodCastleEnterRequest to this connection.
@@ -2032,7 +2032,7 @@ public:
     /// Is sent by the client when: The player requests to start a duel with another player.
     /// Causes reaction on server side: The server sends a request to the other player.
     /// </remarks>
-    void SendDuelStartRequest(uint16_t playerId, char* playerName, uint32_t playerNameByteLength);
+    void SendDuelStartRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength);
 
     /// <summary>
     /// Sends a DuelStartResponse to this connection.
@@ -2045,7 +2045,7 @@ public:
     /// Is sent by the client when: A player requested to start a duel with the sending player.
     /// Causes reaction on server side: Depending on the response, the server starts the duel, or not.
     /// </remarks>
-    void SendDuelStartResponse(BYTE response, uint16_t playerId, char* playerName, uint32_t playerNameByteLength);
+    void SendDuelStartResponse(BYTE response, uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength);
 
     /// <summary>
     /// Sends a DuelStopRequest to this connection.

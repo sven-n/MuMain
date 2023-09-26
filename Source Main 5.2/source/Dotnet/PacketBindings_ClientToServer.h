@@ -25,19 +25,19 @@ inline SendPing dotnet_SendPing = reinterpret_cast<SendPing>(g_dotnet->get_metho
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChecksumResponse)(int32_t, uint32_t );
 inline SendChecksumResponse dotnet_SendChecksumResponse = reinterpret_cast<SendChecksumResponse>(g_dotnet->get_method(type_name_connection_manager, L"SendChecksumResponse"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendPublicChatMessage)(int32_t, char* , uint32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendPublicChatMessage)(int32_t, const wchar_t* , uint32_t, const wchar_t* , uint32_t);
 inline SendPublicChatMessage dotnet_SendPublicChatMessage = reinterpret_cast<SendPublicChatMessage>(g_dotnet->get_method(type_name_connection_manager, L"SendPublicChatMessage"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendWhisperMessage)(int32_t, char* , uint32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendWhisperMessage)(int32_t, const wchar_t* , uint32_t, const wchar_t* , uint32_t);
 inline SendWhisperMessage dotnet_SendWhisperMessage = reinterpret_cast<SendWhisperMessage>(g_dotnet->get_method(type_name_connection_manager, L"SendWhisperMessage"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendLoginLongPassword)(int32_t, BYTE* , uint32_t, BYTE* , uint32_t, uint32_t , BYTE* , uint32_t, BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLoginLongPassword)(int32_t, const BYTE* , uint32_t, const BYTE* , uint32_t, uint32_t , const BYTE* , uint32_t, const BYTE* , uint32_t);
 inline SendLoginLongPassword dotnet_SendLoginLongPassword = reinterpret_cast<SendLoginLongPassword>(g_dotnet->get_method(type_name_connection_manager, L"SendLoginLongPassword"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendLoginShortPassword)(int32_t, BYTE* , uint32_t, BYTE* , uint32_t, uint32_t , BYTE* , uint32_t, BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLoginShortPassword)(int32_t, const BYTE* , uint32_t, const BYTE* , uint32_t, uint32_t , const BYTE* , uint32_t, const BYTE* , uint32_t);
 inline SendLoginShortPassword dotnet_SendLoginShortPassword = reinterpret_cast<SendLoginShortPassword>(g_dotnet->get_method(type_name_connection_manager, L"SendLoginShortPassword"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendLogin075)(int32_t, BYTE* , uint32_t, BYTE* , uint32_t, uint32_t , BYTE* , uint32_t, BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLogin075)(int32_t, const BYTE* , uint32_t, const BYTE* , uint32_t, uint32_t , const BYTE* , uint32_t, const BYTE* , uint32_t);
 inline SendLogin075 dotnet_SendLogin075 = reinterpret_cast<SendLogin075>(g_dotnet->get_method(type_name_connection_manager, L"SendLogin075"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLogOut)(int32_t, uint32_t );
@@ -52,16 +52,16 @@ inline SendResetCharacterPointRequest dotnet_SendResetCharacterPointRequest = re
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopSetItemPrice)(int32_t, BYTE , uint32_t );
 inline SendPlayerShopSetItemPrice dotnet_SendPlayerShopSetItemPrice = reinterpret_cast<SendPlayerShopSetItemPrice>(g_dotnet->get_method(type_name_connection_manager, L"SendPlayerShopSetItemPrice"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopOpen)(int32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopOpen)(int32_t, const wchar_t* , uint32_t);
 inline SendPlayerShopOpen dotnet_SendPlayerShopOpen = reinterpret_cast<SendPlayerShopOpen>(g_dotnet->get_method(type_name_connection_manager, L"SendPlayerShopOpen"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopClose)(int32_t);
 inline SendPlayerShopClose dotnet_SendPlayerShopClose = reinterpret_cast<SendPlayerShopClose>(g_dotnet->get_method(type_name_connection_manager, L"SendPlayerShopClose"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopItemListRequest)(int32_t, uint16_t , char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopItemListRequest)(int32_t, uint16_t , const wchar_t* , uint32_t);
 inline SendPlayerShopItemListRequest dotnet_SendPlayerShopItemListRequest = reinterpret_cast<SendPlayerShopItemListRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendPlayerShopItemListRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopItemBuyRequest)(int32_t, uint16_t , char* , uint32_t, BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopItemBuyRequest)(int32_t, uint16_t , const wchar_t* , uint32_t, BYTE );
 inline SendPlayerShopItemBuyRequest dotnet_SendPlayerShopItemBuyRequest = reinterpret_cast<SendPlayerShopItemBuyRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendPlayerShopItemBuyRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPickupItemRequest)(int32_t, uint16_t );
@@ -73,7 +73,7 @@ inline SendPickupItemRequest075 dotnet_SendPickupItemRequest075 = reinterpret_ca
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendDropItemRequest)(int32_t, BYTE , BYTE , BYTE );
 inline SendDropItemRequest dotnet_SendDropItemRequest = reinterpret_cast<SendDropItemRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendDropItemRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendItemMoveRequest)(int32_t, uint32_t , BYTE , BYTE* , uint32_t, uint32_t , BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendItemMoveRequest)(int32_t, uint32_t , BYTE , const BYTE* , uint32_t, uint32_t , BYTE );
 inline SendItemMoveRequest dotnet_SendItemMoveRequest = reinterpret_cast<SendItemMoveRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendItemMoveRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendConsumeItemRequest)(int32_t, BYTE , BYTE , uint32_t );
@@ -109,7 +109,7 @@ inline SendEnterGateRequest075 dotnet_SendEnterGateRequest075 = reinterpret_cast
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendTeleportTarget)(int32_t, uint16_t , BYTE , BYTE );
 inline SendTeleportTarget dotnet_SendTeleportTarget = reinterpret_cast<SendTeleportTarget>(g_dotnet->get_method(type_name_connection_manager, L"SendTeleportTarget"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendServerChangeAuthentication)(int32_t, BYTE* , uint32_t, BYTE* , uint32_t, uint32_t , uint32_t , uint32_t , uint32_t , uint32_t , BYTE* , uint32_t, BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendServerChangeAuthentication)(int32_t, const BYTE* , uint32_t, const BYTE* , uint32_t, uint32_t , uint32_t , uint32_t , uint32_t , uint32_t , const BYTE* , uint32_t, const BYTE* , uint32_t);
 inline SendServerChangeAuthentication dotnet_SendServerChangeAuthentication = reinterpret_cast<SendServerChangeAuthentication>(g_dotnet->get_method(type_name_connection_manager, L"SendServerChangeAuthentication"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendCastleSiegeStatusRequest)(int32_t);
@@ -223,7 +223,7 @@ inline SendCashShopOpenState dotnet_SendCashShopOpenState = reinterpret_cast<Sen
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendCashShopItemBuyRequest)(int32_t, uint32_t , uint32_t , uint32_t , uint16_t , uint32_t , BYTE );
 inline SendCashShopItemBuyRequest dotnet_SendCashShopItemBuyRequest = reinterpret_cast<SendCashShopItemBuyRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendCashShopItemBuyRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendCashShopItemGiftRequest)(int32_t, uint32_t , uint32_t , uint32_t , uint16_t , uint32_t , BYTE , char* , uint32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendCashShopItemGiftRequest)(int32_t, uint32_t , uint32_t , uint32_t , uint16_t , uint32_t , BYTE , const wchar_t* , uint32_t, const wchar_t* , uint32_t);
 inline SendCashShopItemGiftRequest dotnet_SendCashShopItemGiftRequest = reinterpret_cast<SendCashShopItemGiftRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendCashShopItemGiftRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendCashShopStorageListRequest)(int32_t, uint32_t , BYTE );
@@ -241,10 +241,10 @@ inline SendCashShopEventItemListRequest dotnet_SendCashShopEventItemListRequest 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendUnlockVault)(int32_t, uint16_t );
 inline SendUnlockVault dotnet_SendUnlockVault = reinterpret_cast<SendUnlockVault>(g_dotnet->get_method(type_name_connection_manager, L"SendUnlockVault"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendSetVaultPin)(int32_t, uint16_t , char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendSetVaultPin)(int32_t, uint16_t , const wchar_t* , uint32_t);
 inline SendSetVaultPin dotnet_SendSetVaultPin = reinterpret_cast<SendSetVaultPin>(g_dotnet->get_method(type_name_connection_manager, L"SendSetVaultPin"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendRemoveVaultPin)(int32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendRemoveVaultPin)(int32_t, const wchar_t* , uint32_t);
 inline SendRemoveVaultPin dotnet_SendRemoveVaultPin = reinterpret_cast<SendRemoveVaultPin>(g_dotnet->get_method(type_name_connection_manager, L"SendRemoveVaultPin"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendVaultClosed)(int32_t);
@@ -268,10 +268,10 @@ inline SendPartyInviteRequest dotnet_SendPartyInviteRequest = reinterpret_cast<S
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPartyInviteResponse)(int32_t, BYTE , uint16_t );
 inline SendPartyInviteResponse dotnet_SendPartyInviteResponse = reinterpret_cast<SendPartyInviteResponse>(g_dotnet->get_method(type_name_connection_manager, L"SendPartyInviteResponse"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendWalkRequest)(int32_t, BYTE , BYTE , BYTE , BYTE , BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendWalkRequest)(int32_t, BYTE , BYTE , BYTE , BYTE , const BYTE* , uint32_t);
 inline SendWalkRequest dotnet_SendWalkRequest = reinterpret_cast<SendWalkRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendWalkRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendWalkRequest075)(int32_t, BYTE , BYTE , BYTE , BYTE , BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendWalkRequest075)(int32_t, BYTE , BYTE , BYTE , BYTE , const BYTE* , uint32_t);
 inline SendWalkRequest075 dotnet_SendWalkRequest075 = reinterpret_cast<SendWalkRequest075>(g_dotnet->get_method(type_name_connection_manager, L"SendWalkRequest075"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendInstantMoveRequest)(int32_t, BYTE , BYTE );
@@ -283,16 +283,16 @@ inline SendAnimationRequest dotnet_SendAnimationRequest = reinterpret_cast<SendA
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendRequestCharacterList)(int32_t, BYTE );
 inline SendRequestCharacterList dotnet_SendRequestCharacterList = reinterpret_cast<SendRequestCharacterList>(g_dotnet->get_method(type_name_connection_manager, L"SendRequestCharacterList"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendCreateCharacter)(int32_t, char* , uint32_t, uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendCreateCharacter)(int32_t, const wchar_t* , uint32_t, uint32_t );
 inline SendCreateCharacter dotnet_SendCreateCharacter = reinterpret_cast<SendCreateCharacter>(g_dotnet->get_method(type_name_connection_manager, L"SendCreateCharacter"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendDeleteCharacter)(int32_t, char* , uint32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendDeleteCharacter)(int32_t, const wchar_t* , uint32_t, const wchar_t* , uint32_t);
 inline SendDeleteCharacter dotnet_SendDeleteCharacter = reinterpret_cast<SendDeleteCharacter>(g_dotnet->get_method(type_name_connection_manager, L"SendDeleteCharacter"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendSelectCharacter)(int32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendSelectCharacter)(int32_t, const wchar_t* , uint32_t);
 inline SendSelectCharacter dotnet_SendSelectCharacter = reinterpret_cast<SendSelectCharacter>(g_dotnet->get_method(type_name_connection_manager, L"SendSelectCharacter"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendFocusCharacter)(int32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendFocusCharacter)(int32_t, const wchar_t* , uint32_t);
 inline SendFocusCharacter dotnet_SendFocusCharacter = reinterpret_cast<SendFocusCharacter>(g_dotnet->get_method(type_name_connection_manager, L"SendFocusCharacter"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendIncreaseCharacterStatPoint)(int32_t, uint32_t );
@@ -301,7 +301,7 @@ inline SendIncreaseCharacterStatPoint dotnet_SendIncreaseCharacterStatPoint = re
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendClientReadyAfterMapChange)(int32_t);
 inline SendClientReadyAfterMapChange dotnet_SendClientReadyAfterMapChange = reinterpret_cast<SendClientReadyAfterMapChange>(g_dotnet->get_method(type_name_connection_manager, L"SendClientReadyAfterMapChange"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendSaveKeyConfiguration)(int32_t, BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendSaveKeyConfiguration)(int32_t, const BYTE* , uint32_t);
 inline SendSaveKeyConfiguration dotnet_SendSaveKeyConfiguration = reinterpret_cast<SendSaveKeyConfiguration>(g_dotnet->get_method(type_name_connection_manager, L"SendSaveKeyConfiguration"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAddMasterSkillPoint)(int32_t, uint16_t );
@@ -358,13 +358,13 @@ inline SendLetterDeleteRequest dotnet_SendLetterDeleteRequest = reinterpret_cast
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLetterListRequest)(int32_t);
 inline SendLetterListRequest dotnet_SendLetterListRequest = reinterpret_cast<SendLetterListRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendLetterListRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendLetterSendRequest)(int32_t, uint32_t , char* , uint32_t, char* , uint32_t, BYTE , BYTE , uint16_t , char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLetterSendRequest)(int32_t, uint32_t , const wchar_t* , uint32_t, const wchar_t* , uint32_t, BYTE , BYTE , uint16_t , const wchar_t* , uint32_t);
 inline SendLetterSendRequest dotnet_SendLetterSendRequest = reinterpret_cast<SendLetterSendRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendLetterSendRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLetterReadRequest)(int32_t, uint16_t );
 inline SendLetterReadRequest dotnet_SendLetterReadRequest = reinterpret_cast<SendLetterReadRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendLetterReadRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildKickPlayerRequest)(int32_t, char* , uint32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildKickPlayerRequest)(int32_t, const wchar_t* , uint32_t, const wchar_t* , uint32_t);
 inline SendGuildKickPlayerRequest dotnet_SendGuildKickPlayerRequest = reinterpret_cast<SendGuildKickPlayerRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendGuildKickPlayerRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildJoinRequest)(int32_t, uint16_t );
@@ -376,10 +376,10 @@ inline SendGuildJoinResponse dotnet_SendGuildJoinResponse = reinterpret_cast<Sen
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildListRequest)(int32_t);
 inline SendGuildListRequest dotnet_SendGuildListRequest = reinterpret_cast<SendGuildListRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendGuildListRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildCreateRequest)(int32_t, char* , uint32_t, BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildCreateRequest)(int32_t, const wchar_t* , uint32_t, const BYTE* , uint32_t);
 inline SendGuildCreateRequest dotnet_SendGuildCreateRequest = reinterpret_cast<SendGuildCreateRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendGuildCreateRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildCreateRequest075)(int32_t, char* , uint32_t, BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildCreateRequest075)(int32_t, const wchar_t* , uint32_t, const BYTE* , uint32_t);
 inline SendGuildCreateRequest075 dotnet_SendGuildCreateRequest075 = reinterpret_cast<SendGuildCreateRequest075>(g_dotnet->get_method(type_name_connection_manager, L"SendGuildCreateRequest075"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildMasterAnswer)(int32_t, BYTE );
@@ -394,7 +394,7 @@ inline SendGuildWarResponse dotnet_SendGuildWarResponse = reinterpret_cast<SendG
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildInfoRequest)(int32_t, uint32_t );
 inline SendGuildInfoRequest dotnet_SendGuildInfoRequest = reinterpret_cast<SendGuildInfoRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendGuildInfoRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildRoleAssignRequest)(int32_t, uint32_t , char* , uint32_t, BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildRoleAssignRequest)(int32_t, uint32_t , const wchar_t* , uint32_t, BYTE );
 inline SendGuildRoleAssignRequest dotnet_SendGuildRoleAssignRequest = reinterpret_cast<SendGuildRoleAssignRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendGuildRoleAssignRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildTypeChangeRequest)(int32_t, BYTE );
@@ -409,7 +409,7 @@ inline SendGuildRelationshipChangeResponse dotnet_SendGuildRelationshipChangeRes
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendRequestAllianceList)(int32_t);
 inline SendRequestAllianceList dotnet_SendRequestAllianceList = reinterpret_cast<SendRequestAllianceList>(g_dotnet->get_method(type_name_connection_manager, L"SendRequestAllianceList"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendRemoveAllianceGuildRequest)(int32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendRemoveAllianceGuildRequest)(int32_t, const wchar_t* , uint32_t);
 inline SendRemoveAllianceGuildRequest dotnet_SendRemoveAllianceGuildRequest = reinterpret_cast<SendRemoveAllianceGuildRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendRemoveAllianceGuildRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPingResponse)(int32_t);
@@ -427,22 +427,22 @@ inline SendCraftingDialogCloseRequest dotnet_SendCraftingDialogCloseRequest = re
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendFriendListRequest)(int32_t);
 inline SendFriendListRequest dotnet_SendFriendListRequest = reinterpret_cast<SendFriendListRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendFriendListRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendFriendAddRequest)(int32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendFriendAddRequest)(int32_t, const wchar_t* , uint32_t);
 inline SendFriendAddRequest dotnet_SendFriendAddRequest = reinterpret_cast<SendFriendAddRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendFriendAddRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendFriendDelete)(int32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendFriendDelete)(int32_t, const wchar_t* , uint32_t);
 inline SendFriendDelete dotnet_SendFriendDelete = reinterpret_cast<SendFriendDelete>(g_dotnet->get_method(type_name_connection_manager, L"SendFriendDelete"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomCreateRequest)(int32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomCreateRequest)(int32_t, const wchar_t* , uint32_t);
 inline SendChatRoomCreateRequest dotnet_SendChatRoomCreateRequest = reinterpret_cast<SendChatRoomCreateRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendChatRoomCreateRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendFriendAddResponse)(int32_t, BYTE , char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendFriendAddResponse)(int32_t, BYTE , const wchar_t* , uint32_t);
 inline SendFriendAddResponse dotnet_SendFriendAddResponse = reinterpret_cast<SendFriendAddResponse>(g_dotnet->get_method(type_name_connection_manager, L"SendFriendAddResponse"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendSetFriendOnlineState)(int32_t, BYTE );
 inline SendSetFriendOnlineState dotnet_SendSetFriendOnlineState = reinterpret_cast<SendSetFriendOnlineState>(g_dotnet->get_method(type_name_connection_manager, L"SendSetFriendOnlineState"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomInvitationRequest)(int32_t, char* , uint32_t, uint16_t , uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomInvitationRequest)(int32_t, const wchar_t* , uint32_t, uint16_t , uint32_t );
 inline SendChatRoomInvitationRequest dotnet_SendChatRoomInvitationRequest = reinterpret_cast<SendChatRoomInvitationRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendChatRoomInvitationRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLegacyQuestStateRequest)(int32_t);
@@ -484,7 +484,7 @@ inline SendEnterMarketPlaceRequest dotnet_SendEnterMarketPlaceRequest = reinterp
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendMuHelperStatusChangeRequest)(int32_t, BYTE );
 inline SendMuHelperStatusChangeRequest dotnet_SendMuHelperStatusChangeRequest = reinterpret_cast<SendMuHelperStatusChangeRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendMuHelperStatusChangeRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendMuHelperSaveDataRequest)(int32_t, BYTE* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendMuHelperSaveDataRequest)(int32_t, const BYTE* , uint32_t);
 inline SendMuHelperSaveDataRequest dotnet_SendMuHelperSaveDataRequest = reinterpret_cast<SendMuHelperSaveDataRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendMuHelperSaveDataRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendQuestSelectRequest)(int32_t, uint16_t , uint16_t , BYTE );
@@ -550,10 +550,10 @@ inline SendEventChipExitDialog dotnet_SendEventChipExitDialog = reinterpret_cast
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendEventChipExchangeRequest)(int32_t, BYTE );
 inline SendEventChipExchangeRequest dotnet_SendEventChipExchangeRequest = reinterpret_cast<SendEventChipExchangeRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendEventChipExchangeRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendServerImmigrationRequest)(int32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendServerImmigrationRequest)(int32_t, const wchar_t* , uint32_t);
 inline SendServerImmigrationRequest dotnet_SendServerImmigrationRequest = reinterpret_cast<SendServerImmigrationRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendServerImmigrationRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendLuckyNumberRequest)(int32_t, char* , uint32_t, char* , uint32_t, char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLuckyNumberRequest)(int32_t, const wchar_t* , uint32_t, const wchar_t* , uint32_t, const wchar_t* , uint32_t);
 inline SendLuckyNumberRequest dotnet_SendLuckyNumberRequest = reinterpret_cast<SendLuckyNumberRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendLuckyNumberRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendBloodCastleEnterRequest)(int32_t, BYTE , BYTE );
@@ -568,10 +568,10 @@ inline SendChaosCastleEnterRequest dotnet_SendChaosCastleEnterRequest = reinterp
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChaosCastlePositionSet)(int32_t, BYTE , BYTE );
 inline SendChaosCastlePositionSet dotnet_SendChaosCastlePositionSet = reinterpret_cast<SendChaosCastlePositionSet>(g_dotnet->get_method(type_name_connection_manager, L"SendChaosCastlePositionSet"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelStartRequest)(int32_t, uint16_t , char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelStartRequest)(int32_t, uint16_t , const wchar_t* , uint32_t);
 inline SendDuelStartRequest dotnet_SendDuelStartRequest = reinterpret_cast<SendDuelStartRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendDuelStartRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelStartResponse)(int32_t, BYTE , uint16_t , char* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelStartResponse)(int32_t, BYTE , uint16_t , const wchar_t* , uint32_t);
 inline SendDuelStartResponse dotnet_SendDuelStartResponse = reinterpret_cast<SendDuelStartResponse>(g_dotnet->get_method(type_name_connection_manager, L"SendDuelStartResponse"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelStopRequest)(int32_t);

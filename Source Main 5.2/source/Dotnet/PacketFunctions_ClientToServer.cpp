@@ -26,27 +26,27 @@ void PacketFunctions_ClientToServer::SendChecksumResponse(uint32_t checksum)
     dotnet_SendChecksumResponse(this->_handle, checksum);
 }
 
-void PacketFunctions_ClientToServer::SendPublicChatMessage(char* character, uint32_t characterByteLength, char* message, uint32_t messageByteLength)
+void PacketFunctions_ClientToServer::SendPublicChatMessage(const wchar_t* character, uint32_t characterByteLength, const wchar_t* message, uint32_t messageByteLength)
 {
     dotnet_SendPublicChatMessage(this->_handle, character, characterByteLength, message, messageByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendWhisperMessage(char* receiverName, uint32_t receiverNameByteLength, char* message, uint32_t messageByteLength)
+void PacketFunctions_ClientToServer::SendWhisperMessage(const wchar_t* receiverName, uint32_t receiverNameByteLength, const wchar_t* message, uint32_t messageByteLength)
 {
     dotnet_SendWhisperMessage(this->_handle, receiverName, receiverNameByteLength, message, messageByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendLoginLongPassword(BYTE* username, uint32_t usernameByteLength, BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, BYTE* clientVersion, uint32_t clientVersionByteLength, BYTE* clientSerial, uint32_t clientSerialByteLength)
+void PacketFunctions_ClientToServer::SendLoginLongPassword(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
     dotnet_SendLoginLongPassword(this->_handle, username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendLoginShortPassword(BYTE* username, uint32_t usernameByteLength, BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, BYTE* clientVersion, uint32_t clientVersionByteLength, BYTE* clientSerial, uint32_t clientSerialByteLength)
+void PacketFunctions_ClientToServer::SendLoginShortPassword(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
     dotnet_SendLoginShortPassword(this->_handle, username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendLogin075(BYTE* username, uint32_t usernameByteLength, BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, BYTE* clientVersion, uint32_t clientVersionByteLength, BYTE* clientSerial, uint32_t clientSerialByteLength)
+void PacketFunctions_ClientToServer::SendLogin075(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
     dotnet_SendLogin075(this->_handle, username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
@@ -71,7 +71,7 @@ void PacketFunctions_ClientToServer::SendPlayerShopSetItemPrice(BYTE itemSlot, u
     dotnet_SendPlayerShopSetItemPrice(this->_handle, itemSlot, price);
 }
 
-void PacketFunctions_ClientToServer::SendPlayerShopOpen(char* storeName, uint32_t storeNameByteLength)
+void PacketFunctions_ClientToServer::SendPlayerShopOpen(const wchar_t* storeName, uint32_t storeNameByteLength)
 {
     dotnet_SendPlayerShopOpen(this->_handle, storeName, storeNameByteLength);
 }
@@ -81,12 +81,12 @@ void PacketFunctions_ClientToServer::SendPlayerShopClose()
     dotnet_SendPlayerShopClose(this->_handle);
 }
 
-void PacketFunctions_ClientToServer::SendPlayerShopItemListRequest(uint16_t playerId, char* playerName, uint32_t playerNameByteLength)
+void PacketFunctions_ClientToServer::SendPlayerShopItemListRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength)
 {
     dotnet_SendPlayerShopItemListRequest(this->_handle, playerId, playerName, playerNameByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendPlayerShopItemBuyRequest(uint16_t playerId, char* playerName, uint32_t playerNameByteLength, BYTE itemSlot)
+void PacketFunctions_ClientToServer::SendPlayerShopItemBuyRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength, BYTE itemSlot)
 {
     dotnet_SendPlayerShopItemBuyRequest(this->_handle, playerId, playerName, playerNameByteLength, itemSlot);
 }
@@ -106,7 +106,7 @@ void PacketFunctions_ClientToServer::SendDropItemRequest(BYTE targetX, BYTE targ
     dotnet_SendDropItemRequest(this->_handle, targetX, targetY, itemSlot);
 }
 
-void PacketFunctions_ClientToServer::SendItemMoveRequest(uint32_t fromStorage, BYTE fromSlot, BYTE* itemData, uint32_t itemDataByteLength, uint32_t toStorage, BYTE toSlot)
+void PacketFunctions_ClientToServer::SendItemMoveRequest(uint32_t fromStorage, BYTE fromSlot, const BYTE* itemData, uint32_t itemDataByteLength, uint32_t toStorage, BYTE toSlot)
 {
     dotnet_SendItemMoveRequest(this->_handle, fromStorage, fromSlot, itemData, itemDataByteLength, toStorage, toSlot);
 }
@@ -166,7 +166,7 @@ void PacketFunctions_ClientToServer::SendTeleportTarget(uint16_t targetId, BYTE 
     dotnet_SendTeleportTarget(this->_handle, targetId, teleportTargetX, teleportTargetY);
 }
 
-void PacketFunctions_ClientToServer::SendServerChangeAuthentication(BYTE* accountXor3, uint32_t accountXor3ByteLength, BYTE* characterNameXor3, uint32_t characterNameXor3ByteLength, uint32_t authCode1, uint32_t authCode2, uint32_t authCode3, uint32_t authCode4, uint32_t tickCount, BYTE* clientVersion, uint32_t clientVersionByteLength, BYTE* clientSerial, uint32_t clientSerialByteLength)
+void PacketFunctions_ClientToServer::SendServerChangeAuthentication(const BYTE* accountXor3, uint32_t accountXor3ByteLength, const BYTE* characterNameXor3, uint32_t characterNameXor3ByteLength, uint32_t authCode1, uint32_t authCode2, uint32_t authCode3, uint32_t authCode4, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
     dotnet_SendServerChangeAuthentication(this->_handle, accountXor3, accountXor3ByteLength, characterNameXor3, characterNameXor3ByteLength, authCode1, authCode2, authCode3, authCode4, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
@@ -356,7 +356,7 @@ void PacketFunctions_ClientToServer::SendCashShopItemBuyRequest(uint32_t package
     dotnet_SendCashShopItemBuyRequest(this->_handle, packageMainIndex, category, productMainIndex, itemIndex, coinIndex, mileageFlag);
 }
 
-void PacketFunctions_ClientToServer::SendCashShopItemGiftRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag, char* giftReceiverName, uint32_t giftReceiverNameByteLength, char* giftText, uint32_t giftTextByteLength)
+void PacketFunctions_ClientToServer::SendCashShopItemGiftRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag, const wchar_t* giftReceiverName, uint32_t giftReceiverNameByteLength, const wchar_t* giftText, uint32_t giftTextByteLength)
 {
     dotnet_SendCashShopItemGiftRequest(this->_handle, packageMainIndex, category, productMainIndex, itemIndex, coinIndex, mileageFlag, giftReceiverName, giftReceiverNameByteLength, giftText, giftTextByteLength);
 }
@@ -386,12 +386,12 @@ void PacketFunctions_ClientToServer::SendUnlockVault(uint16_t pin)
     dotnet_SendUnlockVault(this->_handle, pin);
 }
 
-void PacketFunctions_ClientToServer::SendSetVaultPin(uint16_t pin, char* password, uint32_t passwordByteLength)
+void PacketFunctions_ClientToServer::SendSetVaultPin(uint16_t pin, const wchar_t* password, uint32_t passwordByteLength)
 {
     dotnet_SendSetVaultPin(this->_handle, pin, password, passwordByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendRemoveVaultPin(char* password, uint32_t passwordByteLength)
+void PacketFunctions_ClientToServer::SendRemoveVaultPin(const wchar_t* password, uint32_t passwordByteLength)
 {
     dotnet_SendRemoveVaultPin(this->_handle, password, passwordByteLength);
 }
@@ -431,12 +431,12 @@ void PacketFunctions_ClientToServer::SendPartyInviteResponse(BYTE accepted, uint
     dotnet_SendPartyInviteResponse(this->_handle, accepted, requesterId);
 }
 
-void PacketFunctions_ClientToServer::SendWalkRequest(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, BYTE* directions, uint32_t directionsByteLength)
+void PacketFunctions_ClientToServer::SendWalkRequest(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, const BYTE* directions, uint32_t directionsByteLength)
 {
     dotnet_SendWalkRequest(this->_handle, sourceX, sourceY, stepCount, targetRotation, directions, directionsByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendWalkRequest075(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, BYTE* directions, uint32_t directionsByteLength)
+void PacketFunctions_ClientToServer::SendWalkRequest075(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, const BYTE* directions, uint32_t directionsByteLength)
 {
     dotnet_SendWalkRequest075(this->_handle, sourceX, sourceY, stepCount, targetRotation, directions, directionsByteLength);
 }
@@ -456,22 +456,22 @@ void PacketFunctions_ClientToServer::SendRequestCharacterList(BYTE language)
     dotnet_SendRequestCharacterList(this->_handle, language);
 }
 
-void PacketFunctions_ClientToServer::SendCreateCharacter(char* name, uint32_t nameByteLength, uint32_t class_)
+void PacketFunctions_ClientToServer::SendCreateCharacter(const wchar_t* name, uint32_t nameByteLength, uint32_t class_)
 {
     dotnet_SendCreateCharacter(this->_handle, name, nameByteLength, class_);
 }
 
-void PacketFunctions_ClientToServer::SendDeleteCharacter(char* name, uint32_t nameByteLength, char* securityCode, uint32_t securityCodeByteLength)
+void PacketFunctions_ClientToServer::SendDeleteCharacter(const wchar_t* name, uint32_t nameByteLength, const wchar_t* securityCode, uint32_t securityCodeByteLength)
 {
     dotnet_SendDeleteCharacter(this->_handle, name, nameByteLength, securityCode, securityCodeByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendSelectCharacter(char* name, uint32_t nameByteLength)
+void PacketFunctions_ClientToServer::SendSelectCharacter(const wchar_t* name, uint32_t nameByteLength)
 {
     dotnet_SendSelectCharacter(this->_handle, name, nameByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendFocusCharacter(char* name, uint32_t nameByteLength)
+void PacketFunctions_ClientToServer::SendFocusCharacter(const wchar_t* name, uint32_t nameByteLength)
 {
     dotnet_SendFocusCharacter(this->_handle, name, nameByteLength);
 }
@@ -486,7 +486,7 @@ void PacketFunctions_ClientToServer::SendClientReadyAfterMapChange()
     dotnet_SendClientReadyAfterMapChange(this->_handle);
 }
 
-void PacketFunctions_ClientToServer::SendSaveKeyConfiguration(BYTE* configuration, uint32_t configurationByteLength)
+void PacketFunctions_ClientToServer::SendSaveKeyConfiguration(const BYTE* configuration, uint32_t configurationByteLength)
 {
     dotnet_SendSaveKeyConfiguration(this->_handle, configuration, configurationByteLength);
 }
@@ -581,7 +581,7 @@ void PacketFunctions_ClientToServer::SendLetterListRequest()
     dotnet_SendLetterListRequest(this->_handle);
 }
 
-void PacketFunctions_ClientToServer::SendLetterSendRequest(uint32_t letterId, char* receiver, uint32_t receiverByteLength, char* title, uint32_t titleByteLength, BYTE rotation, BYTE animation, uint16_t messageLength, char* message, uint32_t messageByteLength)
+void PacketFunctions_ClientToServer::SendLetterSendRequest(uint32_t letterId, const wchar_t* receiver, uint32_t receiverByteLength, const wchar_t* title, uint32_t titleByteLength, BYTE rotation, BYTE animation, uint16_t messageLength, const wchar_t* message, uint32_t messageByteLength)
 {
     dotnet_SendLetterSendRequest(this->_handle, letterId, receiver, receiverByteLength, title, titleByteLength, rotation, animation, messageLength, message, messageByteLength);
 }
@@ -591,7 +591,7 @@ void PacketFunctions_ClientToServer::SendLetterReadRequest(uint16_t letterIndex)
     dotnet_SendLetterReadRequest(this->_handle, letterIndex);
 }
 
-void PacketFunctions_ClientToServer::SendGuildKickPlayerRequest(char* playerName, uint32_t playerNameByteLength, char* securityCode, uint32_t securityCodeByteLength)
+void PacketFunctions_ClientToServer::SendGuildKickPlayerRequest(const wchar_t* playerName, uint32_t playerNameByteLength, const wchar_t* securityCode, uint32_t securityCodeByteLength)
 {
     dotnet_SendGuildKickPlayerRequest(this->_handle, playerName, playerNameByteLength, securityCode, securityCodeByteLength);
 }
@@ -611,12 +611,12 @@ void PacketFunctions_ClientToServer::SendGuildListRequest()
     dotnet_SendGuildListRequest(this->_handle);
 }
 
-void PacketFunctions_ClientToServer::SendGuildCreateRequest(char* guildName, uint32_t guildNameByteLength, BYTE* guildEmblem, uint32_t guildEmblemByteLength)
+void PacketFunctions_ClientToServer::SendGuildCreateRequest(const wchar_t* guildName, uint32_t guildNameByteLength, const BYTE* guildEmblem, uint32_t guildEmblemByteLength)
 {
     dotnet_SendGuildCreateRequest(this->_handle, guildName, guildNameByteLength, guildEmblem, guildEmblemByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendGuildCreateRequest075(char* guildName, uint32_t guildNameByteLength, BYTE* guildEmblem, uint32_t guildEmblemByteLength)
+void PacketFunctions_ClientToServer::SendGuildCreateRequest075(const wchar_t* guildName, uint32_t guildNameByteLength, const BYTE* guildEmblem, uint32_t guildEmblemByteLength)
 {
     dotnet_SendGuildCreateRequest075(this->_handle, guildName, guildNameByteLength, guildEmblem, guildEmblemByteLength);
 }
@@ -641,7 +641,7 @@ void PacketFunctions_ClientToServer::SendGuildInfoRequest(uint32_t guildId)
     dotnet_SendGuildInfoRequest(this->_handle, guildId);
 }
 
-void PacketFunctions_ClientToServer::SendGuildRoleAssignRequest(uint32_t role, char* playerName, uint32_t playerNameByteLength, BYTE type)
+void PacketFunctions_ClientToServer::SendGuildRoleAssignRequest(uint32_t role, const wchar_t* playerName, uint32_t playerNameByteLength, BYTE type)
 {
     dotnet_SendGuildRoleAssignRequest(this->_handle, role, playerName, playerNameByteLength, type);
 }
@@ -666,7 +666,7 @@ void PacketFunctions_ClientToServer::SendRequestAllianceList()
     dotnet_SendRequestAllianceList(this->_handle);
 }
 
-void PacketFunctions_ClientToServer::SendRemoveAllianceGuildRequest(char* guildName, uint32_t guildNameByteLength)
+void PacketFunctions_ClientToServer::SendRemoveAllianceGuildRequest(const wchar_t* guildName, uint32_t guildNameByteLength)
 {
     dotnet_SendRemoveAllianceGuildRequest(this->_handle, guildName, guildNameByteLength);
 }
@@ -696,22 +696,22 @@ void PacketFunctions_ClientToServer::SendFriendListRequest()
     dotnet_SendFriendListRequest(this->_handle);
 }
 
-void PacketFunctions_ClientToServer::SendFriendAddRequest(char* friendName, uint32_t friendNameByteLength)
+void PacketFunctions_ClientToServer::SendFriendAddRequest(const wchar_t* friendName, uint32_t friendNameByteLength)
 {
     dotnet_SendFriendAddRequest(this->_handle, friendName, friendNameByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendFriendDelete(char* friendName, uint32_t friendNameByteLength)
+void PacketFunctions_ClientToServer::SendFriendDelete(const wchar_t* friendName, uint32_t friendNameByteLength)
 {
     dotnet_SendFriendDelete(this->_handle, friendName, friendNameByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendChatRoomCreateRequest(char* friendName, uint32_t friendNameByteLength)
+void PacketFunctions_ClientToServer::SendChatRoomCreateRequest(const wchar_t* friendName, uint32_t friendNameByteLength)
 {
     dotnet_SendChatRoomCreateRequest(this->_handle, friendName, friendNameByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendFriendAddResponse(BYTE accepted, char* friendRequesterName, uint32_t friendRequesterNameByteLength)
+void PacketFunctions_ClientToServer::SendFriendAddResponse(BYTE accepted, const wchar_t* friendRequesterName, uint32_t friendRequesterNameByteLength)
 {
     dotnet_SendFriendAddResponse(this->_handle, accepted, friendRequesterName, friendRequesterNameByteLength);
 }
@@ -721,7 +721,7 @@ void PacketFunctions_ClientToServer::SendSetFriendOnlineState(BYTE onlineState)
     dotnet_SendSetFriendOnlineState(this->_handle, onlineState);
 }
 
-void PacketFunctions_ClientToServer::SendChatRoomInvitationRequest(char* friendName, uint32_t friendNameByteLength, uint16_t roomId, uint32_t requestId)
+void PacketFunctions_ClientToServer::SendChatRoomInvitationRequest(const wchar_t* friendName, uint32_t friendNameByteLength, uint16_t roomId, uint32_t requestId)
 {
     dotnet_SendChatRoomInvitationRequest(this->_handle, friendName, friendNameByteLength, roomId, requestId);
 }
@@ -791,7 +791,7 @@ void PacketFunctions_ClientToServer::SendMuHelperStatusChangeRequest(BYTE pauseS
     dotnet_SendMuHelperStatusChangeRequest(this->_handle, pauseStatus);
 }
 
-void PacketFunctions_ClientToServer::SendMuHelperSaveDataRequest(BYTE* helperData, uint32_t helperDataByteLength)
+void PacketFunctions_ClientToServer::SendMuHelperSaveDataRequest(const BYTE* helperData, uint32_t helperDataByteLength)
 {
     dotnet_SendMuHelperSaveDataRequest(this->_handle, helperData, helperDataByteLength);
 }
@@ -901,12 +901,12 @@ void PacketFunctions_ClientToServer::SendEventChipExchangeRequest(BYTE type)
     dotnet_SendEventChipExchangeRequest(this->_handle, type);
 }
 
-void PacketFunctions_ClientToServer::SendServerImmigrationRequest(char* securityCode, uint32_t securityCodeByteLength)
+void PacketFunctions_ClientToServer::SendServerImmigrationRequest(const wchar_t* securityCode, uint32_t securityCodeByteLength)
 {
     dotnet_SendServerImmigrationRequest(this->_handle, securityCode, securityCodeByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendLuckyNumberRequest(char* serial1, uint32_t serial1ByteLength, char* serial2, uint32_t serial2ByteLength, char* serial3, uint32_t serial3ByteLength)
+void PacketFunctions_ClientToServer::SendLuckyNumberRequest(const wchar_t* serial1, uint32_t serial1ByteLength, const wchar_t* serial2, uint32_t serial2ByteLength, const wchar_t* serial3, uint32_t serial3ByteLength)
 {
     dotnet_SendLuckyNumberRequest(this->_handle, serial1, serial1ByteLength, serial2, serial2ByteLength, serial3, serial3ByteLength);
 }
@@ -931,12 +931,12 @@ void PacketFunctions_ClientToServer::SendChaosCastlePositionSet(BYTE positionX, 
     dotnet_SendChaosCastlePositionSet(this->_handle, positionX, positionY);
 }
 
-void PacketFunctions_ClientToServer::SendDuelStartRequest(uint16_t playerId, char* playerName, uint32_t playerNameByteLength)
+void PacketFunctions_ClientToServer::SendDuelStartRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength)
 {
     dotnet_SendDuelStartRequest(this->_handle, playerId, playerName, playerNameByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendDuelStartResponse(BYTE response, uint16_t playerId, char* playerName, uint32_t playerNameByteLength)
+void PacketFunctions_ClientToServer::SendDuelStartResponse(BYTE response, uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength)
 {
     dotnet_SendDuelStartResponse(this->_handle, response, playerId, playerName, playerNameByteLength);
 }

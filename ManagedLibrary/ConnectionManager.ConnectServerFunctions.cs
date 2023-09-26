@@ -21,6 +21,7 @@ namespace MUnique.Client.ManagedLibrary;
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using MUnique.OpenMU.Network;
 using MUnique.OpenMU.Network.Packets;
@@ -51,11 +52,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ConnectionInfoRequest075Ref.Length;
-            var packet = new ConnectionInfoRequest075Ref(connection.Output.GetSpan(length)[..length]);
-            packet.ServerId = @serverId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ConnectionInfoRequest075Ref.Length;
+                var packet = new ConnectionInfoRequest075Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.ServerId = @serverId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -82,11 +86,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ConnectionInfoRequestRef.Length;
-            var packet = new ConnectionInfoRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.ServerId = @serverId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ConnectionInfoRequestRef.Length;
+                var packet = new ConnectionInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ServerId = @serverId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -115,12 +122,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ConnectionInfoRef.Length;
-            var packet = new ConnectionInfoRef(connection.Output.GetSpan(length)[..length]);
-            packet.IpAddress = Marshal.PtrToStringAnsi(@ipAddress, (int)ipAddressByteLength);
-            packet.Port = @port;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ConnectionInfoRef.Length;
+                var packet = new ConnectionInfoRef(pipeWriter.GetSpan(length)[..length]);
+                packet.IpAddress = Marshal.PtrToStringAuto(@ipAddress, (int)ipAddressByteLength);
+                packet.Port = @port;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -146,9 +156,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ServerListRequestRef.Length;
-            var packet = new ServerListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ServerListRequestRef.Length;
+                var packet = new ServerListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -174,9 +187,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ServerListRequestOldRef.Length;
-            var packet = new ServerListRequestOldRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ServerListRequestOldRef.Length;
+                var packet = new ServerListRequestOldRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -202,9 +218,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = HelloRef.Length;
-            var packet = new HelloRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = HelloRef.Length;
+                var packet = new HelloRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -233,13 +252,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PatchCheckRequestRef.Length;
-            var packet = new PatchCheckRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.MajorVersion = @majorVersion;
-            packet.MinorVersion = @minorVersion;
-            packet.PatchVersion = @patchVersion;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PatchCheckRequestRef.Length;
+                var packet = new PatchCheckRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.MajorVersion = @majorVersion;
+                packet.MinorVersion = @minorVersion;
+                packet.PatchVersion = @patchVersion;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -265,9 +287,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PatchVersionOkayRef.Length;
-            var packet = new PatchVersionOkayRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PatchVersionOkayRef.Length;
+                var packet = new PatchVersionOkayRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -296,12 +321,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ClientNeedsPatchRef.Length;
-            var packet = new ClientNeedsPatchRef(connection.Output.GetSpan(length)[..length]);
-            packet.PatchVersion = @patchVersion;
-            packet.PatchAddress = Marshal.PtrToStringAnsi(@patchAddress, (int)patchAddressByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ClientNeedsPatchRef.Length;
+                var packet = new ClientNeedsPatchRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PatchVersion = @patchVersion;
+                packet.PatchAddress = Marshal.PtrToStringAuto(@patchAddress, (int)patchAddressByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {

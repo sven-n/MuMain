@@ -107,6 +107,18 @@ public sealed class ConnectionWrapper : IDisposable
         this._connection.Output.FlushAsync().AsTask().WaitAndUnwrapException();
     }
 
+    /// <summary>
+    /// Sends the specified bytes.
+    /// </summary>
+    /// <param name="packetFactory">The factory which creates the packet and returns the length of it.</param>
+    public void CreateAndSend(Func<PipeWriter, int> packetFactory)
+    {
+        using var l = this._connection.OutputLock.Lock();
+        var length = packetFactory(this._connection.Output);
+        this._connection.Output.Advance(length);
+        this._connection.Output.FlushAsync().AsTask().WaitAndUnwrapException();
+    }
+
     private unsafe ValueTask OnPacketReceivedAsync(ReadOnlySequence<byte> args)
     {
         using var memoryOwner = MemoryPool<byte>.Shared.Rent((int)args.Length);

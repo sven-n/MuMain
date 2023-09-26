@@ -31,6 +31,7 @@ namespace MUnique.Client.ManagedLibrary;
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using MUnique.OpenMU.Network;
 using MUnique.OpenMU.Network.Packets;
@@ -80,7 +81,9 @@ public unsafe partial class ConnectionManager
         try</xsl:text>
     <xsl:text>
         {
-            var length = </xsl:text>
+            connection.CreateAndSend(pipeWriter =&gt;
+            {
+                var length = </xsl:text>
     <xsl:choose>
       <xsl:when test="pd:Length">
         <xsl:apply-templates select="pd:Name" />
@@ -97,15 +100,16 @@ public unsafe partial class ConnectionManager
       </xsl:otherwise>
     </xsl:choose>
     <xsl:text>;
-            var packet = new </xsl:text>
+                var packet = new </xsl:text>
     <xsl:apply-templates select="pd:Name" />
-    <xsl:text>Ref(connection.Output.GetSpan(length)[..length]);</xsl:text>
+    <xsl:text>Ref(pipeWriter.GetSpan(length)[..length]);</xsl:text>
     <xsl:if test="pd:Fields/pd:Field">
       <xsl:value-of select="$newline"/>
       <xsl:apply-templates select="pd:Fields/pd:Field" mode="assignment" />
     </xsl:if>
     <xsl:text>
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -182,7 +186,7 @@ public unsafe partial class ConnectionManager
   <xsl:template match="pd:Field" mode="assignment">
     <xsl:choose>
       <xsl:when test="pd:Type='Binary'">
-        <xsl:text>            new Span&lt;byte&gt;(@</xsl:text>
+        <xsl:text>                new Span&lt;byte&gt;(@</xsl:text>
         <xsl:call-template name="LowerCaseName" />
         <xsl:text>, (int)</xsl:text>
         <xsl:call-template name="LowerCaseName" />
@@ -191,23 +195,23 @@ public unsafe partial class ConnectionManager
         <xsl:text>);</xsl:text>
       </xsl:when>
       <xsl:when test="pd:Type='Boolean'">
-        <xsl:text>            packet.</xsl:text>
+        <xsl:text>                packet.</xsl:text>
         <xsl:value-of select="pd:Name"/>
         <xsl:text> = @</xsl:text>
         <xsl:call-template name="LowerCaseName" />
         <xsl:text> == 1;</xsl:text>
       </xsl:when>
       <xsl:when test="pd:Type='String'">
-        <xsl:text>            packet.</xsl:text>
+        <xsl:text>                packet.</xsl:text>
         <xsl:value-of select="pd:Name"/>
-        <xsl:text> = Marshal.PtrToStringAnsi(@</xsl:text>
+        <xsl:text> = Marshal.PtrToStringAuto(@</xsl:text>
         <xsl:call-template name="LowerCaseName" />
         <xsl:text>, (int)</xsl:text>
         <xsl:call-template name="LowerCaseName" />
         <xsl:text>ByteLength);</xsl:text>
       </xsl:when>
       <xsl:when test="pd:Type='Binary'">
-        <xsl:text>            packet.</xsl:text>
+        <xsl:text>                packet.</xsl:text>
         <xsl:value-of select="pd:Name"/>
         <xsl:text> = new Span&lt;byte&gt;(@</xsl:text>
         <xsl:call-template name="LowerCaseName" />
@@ -216,7 +220,7 @@ public unsafe partial class ConnectionManager
         <xsl:text>ByteLength);</xsl:text>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:text>            packet.</xsl:text>
+        <xsl:text>                packet.</xsl:text>
         <xsl:value-of select="pd:Name"/>
         <xsl:text> = @</xsl:text>
         <xsl:call-template name="LowerCaseName" />

@@ -21,6 +21,7 @@ namespace MUnique.Client.ManagedLibrary;
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using MUnique.OpenMU.Network;
 using MUnique.OpenMU.Network.Packets;
@@ -52,12 +53,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PingRef.Length;
-            var packet = new PingRef(connection.Output.GetSpan(length)[..length]);
-            packet.TickCount = @tickCount;
-            packet.AttackSpeed = @attackSpeed;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PingRef.Length;
+                var packet = new PingRef(pipeWriter.GetSpan(length)[..length]);
+                packet.TickCount = @tickCount;
+                packet.AttackSpeed = @attackSpeed;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -84,11 +88,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ChecksumResponseRef.Length;
-            var packet = new ChecksumResponseRef(connection.Output.GetSpan(length)[..length]);
-            packet.Checksum = @checksum;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChecksumResponseRef.Length;
+                var packet = new ChecksumResponseRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Checksum = @checksum;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -118,12 +125,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PublicChatMessageRef.GetRequiredSize((int)messageByteLength);
-            var packet = new PublicChatMessageRef(connection.Output.GetSpan(length)[..length]);
-            packet.Character = Marshal.PtrToStringAnsi(@character, (int)characterByteLength);
-            packet.Message = Marshal.PtrToStringAnsi(@message, (int)messageByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PublicChatMessageRef.GetRequiredSize((int)messageByteLength);
+                var packet = new PublicChatMessageRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Character = Marshal.PtrToStringAuto(@character, (int)characterByteLength);
+                packet.Message = Marshal.PtrToStringAuto(@message, (int)messageByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -153,12 +163,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = WhisperMessageRef.GetRequiredSize((int)messageByteLength);
-            var packet = new WhisperMessageRef(connection.Output.GetSpan(length)[..length]);
-            packet.ReceiverName = Marshal.PtrToStringAnsi(@receiverName, (int)receiverNameByteLength);
-            packet.Message = Marshal.PtrToStringAnsi(@message, (int)messageByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = WhisperMessageRef.GetRequiredSize((int)messageByteLength);
+                var packet = new WhisperMessageRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ReceiverName = Marshal.PtrToStringAuto(@receiverName, (int)receiverNameByteLength);
+                packet.Message = Marshal.PtrToStringAuto(@message, (int)messageByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -193,15 +206,18 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LoginLongPasswordRef.Length;
-            var packet = new LoginLongPasswordRef(connection.Output.GetSpan(length)[..length]);
-            new Span<byte>(@username, (int)usernameByteLength).CopyTo(packet.Username);
-            new Span<byte>(@password, (int)passwordByteLength).CopyTo(packet.Password);
-            packet.TickCount = @tickCount;
-            new Span<byte>(@clientVersion, (int)clientVersionByteLength).CopyTo(packet.ClientVersion);
-            new Span<byte>(@clientSerial, (int)clientSerialByteLength).CopyTo(packet.ClientSerial);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LoginLongPasswordRef.Length;
+                var packet = new LoginLongPasswordRef(pipeWriter.GetSpan(length)[..length]);
+                new Span<byte>(@username, (int)usernameByteLength).CopyTo(packet.Username);
+                new Span<byte>(@password, (int)passwordByteLength).CopyTo(packet.Password);
+                packet.TickCount = @tickCount;
+                new Span<byte>(@clientVersion, (int)clientVersionByteLength).CopyTo(packet.ClientVersion);
+                new Span<byte>(@clientSerial, (int)clientSerialByteLength).CopyTo(packet.ClientSerial);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -236,15 +252,18 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LoginShortPasswordRef.Length;
-            var packet = new LoginShortPasswordRef(connection.Output.GetSpan(length)[..length]);
-            new Span<byte>(@username, (int)usernameByteLength).CopyTo(packet.Username);
-            new Span<byte>(@password, (int)passwordByteLength).CopyTo(packet.Password);
-            packet.TickCount = @tickCount;
-            new Span<byte>(@clientVersion, (int)clientVersionByteLength).CopyTo(packet.ClientVersion);
-            new Span<byte>(@clientSerial, (int)clientSerialByteLength).CopyTo(packet.ClientSerial);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LoginShortPasswordRef.Length;
+                var packet = new LoginShortPasswordRef(pipeWriter.GetSpan(length)[..length]);
+                new Span<byte>(@username, (int)usernameByteLength).CopyTo(packet.Username);
+                new Span<byte>(@password, (int)passwordByteLength).CopyTo(packet.Password);
+                packet.TickCount = @tickCount;
+                new Span<byte>(@clientVersion, (int)clientVersionByteLength).CopyTo(packet.ClientVersion);
+                new Span<byte>(@clientSerial, (int)clientSerialByteLength).CopyTo(packet.ClientSerial);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -279,15 +298,18 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = Login075Ref.Length;
-            var packet = new Login075Ref(connection.Output.GetSpan(length)[..length]);
-            new Span<byte>(@username, (int)usernameByteLength).CopyTo(packet.Username);
-            new Span<byte>(@password, (int)passwordByteLength).CopyTo(packet.Password);
-            packet.TickCount = @tickCount;
-            new Span<byte>(@clientVersion, (int)clientVersionByteLength).CopyTo(packet.ClientVersion);
-            new Span<byte>(@clientSerial, (int)clientSerialByteLength).CopyTo(packet.ClientSerial);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = Login075Ref.Length;
+                var packet = new Login075Ref(pipeWriter.GetSpan(length)[..length]);
+                new Span<byte>(@username, (int)usernameByteLength).CopyTo(packet.Username);
+                new Span<byte>(@password, (int)passwordByteLength).CopyTo(packet.Password);
+                packet.TickCount = @tickCount;
+                new Span<byte>(@clientVersion, (int)clientVersionByteLength).CopyTo(packet.ClientVersion);
+                new Span<byte>(@clientSerial, (int)clientSerialByteLength).CopyTo(packet.ClientSerial);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -314,11 +336,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LogOutRef.Length;
-            var packet = new LogOutRef(connection.Output.GetSpan(length)[..length]);
-            packet.Type = @type;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LogOutRef.Length;
+                var packet = new LogOutRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Type = @type;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -346,12 +371,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LogOutByCheatDetectionRef.Length;
-            var packet = new LogOutByCheatDetectionRef(connection.Output.GetSpan(length)[..length]);
-            packet.Type = @type;
-            packet.Param = @param;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LogOutByCheatDetectionRef.Length;
+                var packet = new LogOutByCheatDetectionRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Type = @type;
+                packet.Param = @param;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -377,9 +405,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ResetCharacterPointRequestRef.Length;
-            var packet = new ResetCharacterPointRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ResetCharacterPointRequestRef.Length;
+                var packet = new ResetCharacterPointRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -407,12 +438,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PlayerShopSetItemPriceRef.Length;
-            var packet = new PlayerShopSetItemPriceRef(connection.Output.GetSpan(length)[..length]);
-            packet.ItemSlot = @itemSlot;
-            packet.Price = @price;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PlayerShopSetItemPriceRef.Length;
+                var packet = new PlayerShopSetItemPriceRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemSlot = @itemSlot;
+                packet.Price = @price;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -440,11 +474,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PlayerShopOpenRef.Length;
-            var packet = new PlayerShopOpenRef(connection.Output.GetSpan(length)[..length]);
-            packet.StoreName = Marshal.PtrToStringAnsi(@storeName, (int)storeNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PlayerShopOpenRef.Length;
+                var packet = new PlayerShopOpenRef(pipeWriter.GetSpan(length)[..length]);
+                packet.StoreName = Marshal.PtrToStringAuto(@storeName, (int)storeNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -470,9 +507,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PlayerShopCloseRef.Length;
-            var packet = new PlayerShopCloseRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PlayerShopCloseRef.Length;
+                var packet = new PlayerShopCloseRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -501,12 +541,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PlayerShopItemListRequestRef.Length;
-            var packet = new PlayerShopItemListRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PlayerId = @playerId;
-            packet.PlayerName = Marshal.PtrToStringAnsi(@playerName, (int)playerNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PlayerShopItemListRequestRef.Length;
+                var packet = new PlayerShopItemListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PlayerId = @playerId;
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -536,13 +579,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PlayerShopItemBuyRequestRef.Length;
-            var packet = new PlayerShopItemBuyRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PlayerId = @playerId;
-            packet.PlayerName = Marshal.PtrToStringAnsi(@playerName, (int)playerNameByteLength);
-            packet.ItemSlot = @itemSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PlayerShopItemBuyRequestRef.Length;
+                var packet = new PlayerShopItemBuyRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PlayerId = @playerId;
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
+                packet.ItemSlot = @itemSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -569,11 +615,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PickupItemRequestRef.Length;
-            var packet = new PickupItemRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.ItemId = @itemId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PickupItemRequestRef.Length;
+                var packet = new PickupItemRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemId = @itemId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -600,11 +649,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PickupItemRequest075Ref.Length;
-            var packet = new PickupItemRequest075Ref(connection.Output.GetSpan(length)[..length]);
-            packet.ItemId = @itemId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PickupItemRequest075Ref.Length;
+                var packet = new PickupItemRequest075Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemId = @itemId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -633,13 +685,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = DropItemRequestRef.Length;
-            var packet = new DropItemRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.TargetX = @targetX;
-            packet.TargetY = @targetY;
-            packet.ItemSlot = @itemSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DropItemRequestRef.Length;
+                var packet = new DropItemRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.TargetX = @targetX;
+                packet.TargetY = @targetY;
+                packet.ItemSlot = @itemSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -671,15 +726,18 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ItemMoveRequestRef.Length;
-            var packet = new ItemMoveRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.FromStorage = @fromStorage;
-            packet.FromSlot = @fromSlot;
-            new Span<byte>(@itemData, (int)itemDataByteLength).CopyTo(packet.ItemData);
-            packet.ToStorage = @toStorage;
-            packet.ToSlot = @toSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ItemMoveRequestRef.Length;
+                var packet = new ItemMoveRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.FromStorage = @fromStorage;
+                packet.FromSlot = @fromSlot;
+                new Span<byte>(@itemData, (int)itemDataByteLength).CopyTo(packet.ItemData);
+                packet.ToStorage = @toStorage;
+                packet.ToSlot = @toSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -708,13 +766,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ConsumeItemRequestRef.Length;
-            var packet = new ConsumeItemRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.ItemSlot = @itemSlot;
-            packet.TargetSlot = @targetSlot;
-            packet.FruitConsumption = @fruitConsumption;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ConsumeItemRequestRef.Length;
+                var packet = new ConsumeItemRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemSlot = @itemSlot;
+                packet.TargetSlot = @targetSlot;
+                packet.FruitConsumption = @fruitConsumption;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -742,12 +803,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ConsumeItemRequest075Ref.Length;
-            var packet = new ConsumeItemRequest075Ref(connection.Output.GetSpan(length)[..length]);
-            packet.ItemSlot = @itemSlot;
-            packet.TargetSlot = @targetSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ConsumeItemRequest075Ref.Length;
+                var packet = new ConsumeItemRequest075Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemSlot = @itemSlot;
+                packet.TargetSlot = @targetSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -774,11 +838,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = TalkToNpcRequestRef.Length;
-            var packet = new TalkToNpcRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.NpcId = @npcId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = TalkToNpcRequestRef.Length;
+                var packet = new TalkToNpcRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.NpcId = @npcId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -804,9 +871,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CloseNpcRequestRef.Length;
-            var packet = new CloseNpcRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CloseNpcRequestRef.Length;
+                var packet = new CloseNpcRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -833,11 +903,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = BuyItemFromNpcRequestRef.Length;
-            var packet = new BuyItemFromNpcRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.ItemSlot = @itemSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = BuyItemFromNpcRequestRef.Length;
+                var packet = new BuyItemFromNpcRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemSlot = @itemSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -864,11 +937,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = SellItemToNpcRequestRef.Length;
-            var packet = new SellItemToNpcRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.ItemSlot = @itemSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = SellItemToNpcRequestRef.Length;
+                var packet = new SellItemToNpcRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemSlot = @itemSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -896,12 +972,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = RepairItemRequestRef.Length;
-            var packet = new RepairItemRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.ItemSlot = @itemSlot;
-            packet.IsSelfRepair = @isSelfRepair == 1;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = RepairItemRequestRef.Length;
+                var packet = new RepairItemRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemSlot = @itemSlot;
+                packet.IsSelfRepair = @isSelfRepair == 1;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -929,12 +1008,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = WarpCommandRequestRef.Length;
-            var packet = new WarpCommandRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.CommandKey = @commandKey;
-            packet.WarpInfoIndex = @warpInfoIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = WarpCommandRequestRef.Length;
+                var packet = new WarpCommandRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.CommandKey = @commandKey;
+                packet.WarpInfoIndex = @warpInfoIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -963,13 +1045,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EnterGateRequestRef.Length;
-            var packet = new EnterGateRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.GateNumber = @gateNumber;
-            packet.TeleportTargetX = @teleportTargetX;
-            packet.TeleportTargetY = @teleportTargetY;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EnterGateRequestRef.Length;
+                var packet = new EnterGateRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.GateNumber = @gateNumber;
+                packet.TeleportTargetX = @teleportTargetX;
+                packet.TeleportTargetY = @teleportTargetY;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -998,13 +1083,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EnterGateRequest075Ref.Length;
-            var packet = new EnterGateRequest075Ref(connection.Output.GetSpan(length)[..length]);
-            packet.GateNumber = @gateNumber;
-            packet.TeleportTargetX = @teleportTargetX;
-            packet.TeleportTargetY = @teleportTargetY;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EnterGateRequest075Ref.Length;
+                var packet = new EnterGateRequest075Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.GateNumber = @gateNumber;
+                packet.TeleportTargetX = @teleportTargetX;
+                packet.TeleportTargetY = @teleportTargetY;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1033,13 +1121,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = TeleportTargetRef.Length;
-            var packet = new TeleportTargetRef(connection.Output.GetSpan(length)[..length]);
-            packet.TargetId = @targetId;
-            packet.TeleportTargetX = @teleportTargetX;
-            packet.TeleportTargetY = @teleportTargetY;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = TeleportTargetRef.Length;
+                var packet = new TeleportTargetRef(pipeWriter.GetSpan(length)[..length]);
+                packet.TargetId = @targetId;
+                packet.TeleportTargetX = @teleportTargetX;
+                packet.TeleportTargetY = @teleportTargetY;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1078,19 +1169,22 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ServerChangeAuthenticationRef.Length;
-            var packet = new ServerChangeAuthenticationRef(connection.Output.GetSpan(length)[..length]);
-            new Span<byte>(@accountXor3, (int)accountXor3ByteLength).CopyTo(packet.AccountXor3);
-            new Span<byte>(@characterNameXor3, (int)characterNameXor3ByteLength).CopyTo(packet.CharacterNameXor3);
-            packet.AuthCode1 = @authCode1;
-            packet.AuthCode2 = @authCode2;
-            packet.AuthCode3 = @authCode3;
-            packet.AuthCode4 = @authCode4;
-            packet.TickCount = @tickCount;
-            new Span<byte>(@clientVersion, (int)clientVersionByteLength).CopyTo(packet.ClientVersion);
-            new Span<byte>(@clientSerial, (int)clientSerialByteLength).CopyTo(packet.ClientSerial);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ServerChangeAuthenticationRef.Length;
+                var packet = new ServerChangeAuthenticationRef(pipeWriter.GetSpan(length)[..length]);
+                new Span<byte>(@accountXor3, (int)accountXor3ByteLength).CopyTo(packet.AccountXor3);
+                new Span<byte>(@characterNameXor3, (int)characterNameXor3ByteLength).CopyTo(packet.CharacterNameXor3);
+                packet.AuthCode1 = @authCode1;
+                packet.AuthCode2 = @authCode2;
+                packet.AuthCode3 = @authCode3;
+                packet.AuthCode4 = @authCode4;
+                packet.TickCount = @tickCount;
+                new Span<byte>(@clientVersion, (int)clientVersionByteLength).CopyTo(packet.ClientVersion);
+                new Span<byte>(@clientSerial, (int)clientSerialByteLength).CopyTo(packet.ClientSerial);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1116,9 +1210,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeStatusRequestRef.Length;
-            var packet = new CastleSiegeStatusRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeStatusRequestRef.Length;
+                var packet = new CastleSiegeStatusRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1144,9 +1241,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeRegistrationRequestRef.Length;
-            var packet = new CastleSiegeRegistrationRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeRegistrationRequestRef.Length;
+                var packet = new CastleSiegeRegistrationRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1172,9 +1272,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeUnregisterRequestRef.Length;
-            var packet = new CastleSiegeUnregisterRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeUnregisterRequestRef.Length;
+                var packet = new CastleSiegeUnregisterRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1200,9 +1303,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeRegistrationStateRequestRef.Length;
-            var packet = new CastleSiegeRegistrationStateRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeRegistrationStateRequestRef.Length;
+                var packet = new CastleSiegeRegistrationStateRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1229,11 +1335,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeMarkRegistrationRef.Length;
-            var packet = new CastleSiegeMarkRegistrationRef(connection.Output.GetSpan(length)[..length]);
-            packet.ItemIndex = @itemIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeMarkRegistrationRef.Length;
+                var packet = new CastleSiegeMarkRegistrationRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemIndex = @itemIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1261,12 +1370,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeDefenseBuyRequestRef.Length;
-            var packet = new CastleSiegeDefenseBuyRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.NpcNumber = @npcNumber;
-            packet.NpcIndex = @npcIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeDefenseBuyRequestRef.Length;
+                var packet = new CastleSiegeDefenseBuyRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.NpcNumber = @npcNumber;
+                packet.NpcIndex = @npcIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1294,12 +1406,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeDefenseRepairRequestRef.Length;
-            var packet = new CastleSiegeDefenseRepairRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.NpcNumber = @npcNumber;
-            packet.NpcIndex = @npcIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeDefenseRepairRequestRef.Length;
+                var packet = new CastleSiegeDefenseRepairRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.NpcNumber = @npcNumber;
+                packet.NpcIndex = @npcIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1329,14 +1444,17 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeDefenseUpgradeRequestRef.Length;
-            var packet = new CastleSiegeDefenseUpgradeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.NpcNumber = @npcNumber;
-            packet.NpcIndex = @npcIndex;
-            packet.NpcUpgradeType = @npcUpgradeType;
-            packet.NpcUpgradeValue = @npcUpgradeValue;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeDefenseUpgradeRequestRef.Length;
+                var packet = new CastleSiegeDefenseUpgradeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.NpcNumber = @npcNumber;
+                packet.NpcIndex = @npcIndex;
+                packet.NpcUpgradeType = @npcUpgradeType;
+                packet.NpcUpgradeValue = @npcUpgradeValue;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1362,9 +1480,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeTaxInfoRequestRef.Length;
-            var packet = new CastleSiegeTaxInfoRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeTaxInfoRequestRef.Length;
+                var packet = new CastleSiegeTaxInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1392,12 +1513,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeTaxChangeRequestRef.Length;
-            var packet = new CastleSiegeTaxChangeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.TaxType = @taxType;
-            packet.TaxRate = @taxRate;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeTaxChangeRequestRef.Length;
+                var packet = new CastleSiegeTaxChangeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.TaxType = @taxType;
+                packet.TaxRate = @taxRate;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1424,11 +1548,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeTaxMoneyWithdrawRef.Length;
-            var packet = new CastleSiegeTaxMoneyWithdrawRef(connection.Output.GetSpan(length)[..length]);
-            packet.Amount = @amount;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeTaxMoneyWithdrawRef.Length;
+                var packet = new CastleSiegeTaxMoneyWithdrawRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Amount = @amount;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1456,12 +1583,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ToggleCastleGateRequestRef.Length;
-            var packet = new ToggleCastleGateRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.CloseState = @closeState == 1;
-            packet.GateId = @gateId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ToggleCastleGateRequestRef.Length;
+                var packet = new ToggleCastleGateRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.CloseState = @closeState == 1;
+                packet.GateId = @gateId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1491,14 +1621,17 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleGuildCommandRef.Length;
-            var packet = new CastleGuildCommandRef(connection.Output.GetSpan(length)[..length]);
-            packet.Team = @team;
-            packet.PositionX = @positionX;
-            packet.PositionY = @positionY;
-            packet.Command = @command;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleGuildCommandRef.Length;
+                var packet = new CastleGuildCommandRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Team = @team;
+                packet.PositionX = @positionX;
+                packet.PositionY = @positionY;
+                packet.Command = @command;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1525,11 +1658,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeHuntingZoneEntranceSettingRef.Length;
-            var packet = new CastleSiegeHuntingZoneEntranceSettingRef(connection.Output.GetSpan(length)[..length]);
-            packet.IsPublic = @isPublic == 1;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeHuntingZoneEntranceSettingRef.Length;
+                var packet = new CastleSiegeHuntingZoneEntranceSettingRef(pipeWriter.GetSpan(length)[..length]);
+                packet.IsPublic = @isPublic == 1;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1555,9 +1691,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeGateListRequestRef.Length;
-            var packet = new CastleSiegeGateListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeGateListRequestRef.Length;
+                var packet = new CastleSiegeGateListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1583,9 +1722,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeStatueListRequestRef.Length;
-            var packet = new CastleSiegeStatueListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeStatueListRequestRef.Length;
+                var packet = new CastleSiegeStatueListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1611,9 +1753,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeRegisteredGuildsListRequestRef.Length;
-            var packet = new CastleSiegeRegisteredGuildsListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeRegisteredGuildsListRequestRef.Length;
+                var packet = new CastleSiegeRegisteredGuildsListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1639,9 +1784,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleOwnerListRequestRef.Length;
-            var packet = new CastleOwnerListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleOwnerListRequestRef.Length;
+                var packet = new CastleOwnerListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1669,12 +1817,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = FireCatapultRequestRef.Length;
-            var packet = new FireCatapultRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.CatapultId = @catapultId;
-            packet.TargetAreaIndex = @targetAreaIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = FireCatapultRequestRef.Length;
+                var packet = new FireCatapultRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.CatapultId = @catapultId;
+                packet.TargetAreaIndex = @targetAreaIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1701,11 +1852,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = WeaponExplosionRequestRef.Length;
-            var packet = new WeaponExplosionRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.CatapultId = @catapultId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = WeaponExplosionRequestRef.Length;
+                var packet = new WeaponExplosionRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.CatapultId = @catapultId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1731,9 +1885,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildLogoOfCastleOwnerRequestRef.Length;
-            var packet = new GuildLogoOfCastleOwnerRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildLogoOfCastleOwnerRequestRef.Length;
+                var packet = new GuildLogoOfCastleOwnerRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1760,11 +1917,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CastleSiegeHuntingZoneEnterRequestRef.Length;
-            var packet = new CastleSiegeHuntingZoneEnterRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.Money = @money;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CastleSiegeHuntingZoneEnterRequestRef.Length;
+                var packet = new CastleSiegeHuntingZoneEnterRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Money = @money;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1790,9 +1950,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CrywolfInfoRequestRef.Length;
-            var packet = new CrywolfInfoRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CrywolfInfoRequestRef.Length;
+                var packet = new CrywolfInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1819,11 +1982,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CrywolfContractRequestRef.Length;
-            var packet = new CrywolfContractRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.StatueId = @statueId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CrywolfContractRequestRef.Length;
+                var packet = new CrywolfContractRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.StatueId = @statueId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -1849,9 +2015,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CrywolfChaosRateBenefitRequestRef.Length;
-            var packet = new CrywolfChaosRateBenefitRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CrywolfChaosRateBenefitRequestRef.Length;
+                var packet = new CrywolfChaosRateBenefitRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1877,9 +2046,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = WhiteAngelItemRequestRef.Length;
-            var packet = new WhiteAngelItemRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = WhiteAngelItemRequestRef.Length;
+                var packet = new WhiteAngelItemRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1905,9 +2077,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EnterOnWerewolfRequestRef.Length;
-            var packet = new EnterOnWerewolfRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EnterOnWerewolfRequestRef.Length;
+                var packet = new EnterOnWerewolfRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1933,9 +2108,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EnterOnGatekeeperRequestRef.Length;
-            var packet = new EnterOnGatekeeperRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EnterOnGatekeeperRequestRef.Length;
+                var packet = new EnterOnGatekeeperRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1961,9 +2139,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LeoHelperItemRequestRef.Length;
-            var packet = new LeoHelperItemRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LeoHelperItemRequestRef.Length;
+                var packet = new LeoHelperItemRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -1989,9 +2170,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = MoveToDeviasBySnowmanRequestRef.Length;
-            var packet = new MoveToDeviasBySnowmanRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = MoveToDeviasBySnowmanRequestRef.Length;
+                var packet = new MoveToDeviasBySnowmanRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -2017,9 +2201,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = SantaClausItemRequestRef.Length;
-            var packet = new SantaClausItemRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = SantaClausItemRequestRef.Length;
+                var packet = new SantaClausItemRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -2045,9 +2232,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = KanturuInfoRequestRef.Length;
-            var packet = new KanturuInfoRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = KanturuInfoRequestRef.Length;
+                var packet = new KanturuInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -2073,9 +2263,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = KanturuEnterRequestRef.Length;
-            var packet = new KanturuEnterRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = KanturuEnterRequestRef.Length;
+                var packet = new KanturuEnterRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -2101,9 +2294,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = RaklionStateInfoRequestRef.Length;
-            var packet = new RaklionStateInfoRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = RaklionStateInfoRequestRef.Length;
+                var packet = new RaklionStateInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -2129,9 +2325,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CashShopPointInfoRequestRef.Length;
-            var packet = new CashShopPointInfoRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CashShopPointInfoRequestRef.Length;
+                var packet = new CashShopPointInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -2158,11 +2357,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CashShopOpenStateRef.Length;
-            var packet = new CashShopOpenStateRef(connection.Output.GetSpan(length)[..length]);
-            packet.IsClosed = @isClosed == 1;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CashShopOpenStateRef.Length;
+                var packet = new CashShopOpenStateRef(pipeWriter.GetSpan(length)[..length]);
+                packet.IsClosed = @isClosed == 1;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2194,16 +2396,19 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CashShopItemBuyRequestRef.Length;
-            var packet = new CashShopItemBuyRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PackageMainIndex = @packageMainIndex;
-            packet.Category = @category;
-            packet.ProductMainIndex = @productMainIndex;
-            packet.ItemIndex = @itemIndex;
-            packet.CoinIndex = @coinIndex;
-            packet.MileageFlag = @mileageFlag;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CashShopItemBuyRequestRef.Length;
+                var packet = new CashShopItemBuyRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PackageMainIndex = @packageMainIndex;
+                packet.Category = @category;
+                packet.ProductMainIndex = @productMainIndex;
+                packet.ItemIndex = @itemIndex;
+                packet.CoinIndex = @coinIndex;
+                packet.MileageFlag = @mileageFlag;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2239,18 +2444,21 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CashShopItemGiftRequestRef.Length;
-            var packet = new CashShopItemGiftRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PackageMainIndex = @packageMainIndex;
-            packet.Category = @category;
-            packet.ProductMainIndex = @productMainIndex;
-            packet.ItemIndex = @itemIndex;
-            packet.CoinIndex = @coinIndex;
-            packet.MileageFlag = @mileageFlag;
-            packet.GiftReceiverName = Marshal.PtrToStringAnsi(@giftReceiverName, (int)giftReceiverNameByteLength);
-            packet.GiftText = Marshal.PtrToStringAnsi(@giftText, (int)giftTextByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CashShopItemGiftRequestRef.Length;
+                var packet = new CashShopItemGiftRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PackageMainIndex = @packageMainIndex;
+                packet.Category = @category;
+                packet.ProductMainIndex = @productMainIndex;
+                packet.ItemIndex = @itemIndex;
+                packet.CoinIndex = @coinIndex;
+                packet.MileageFlag = @mileageFlag;
+                packet.GiftReceiverName = Marshal.PtrToStringAuto(@giftReceiverName, (int)giftReceiverNameByteLength);
+                packet.GiftText = Marshal.PtrToStringAuto(@giftText, (int)giftTextByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2278,12 +2486,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CashShopStorageListRequestRef.Length;
-            var packet = new CashShopStorageListRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PageIndex = @pageIndex;
-            packet.InventoryType = @inventoryType;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CashShopStorageListRequestRef.Length;
+                var packet = new CashShopStorageListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PageIndex = @pageIndex;
+                packet.InventoryType = @inventoryType;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2312,13 +2523,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CashShopDeleteStorageItemRequestRef.Length;
-            var packet = new CashShopDeleteStorageItemRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.BaseItemCode = @baseItemCode;
-            packet.MainItemCode = @mainItemCode;
-            packet.ProductType = @productType;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CashShopDeleteStorageItemRequestRef.Length;
+                var packet = new CashShopDeleteStorageItemRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.BaseItemCode = @baseItemCode;
+                packet.MainItemCode = @mainItemCode;
+                packet.ProductType = @productType;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2348,14 +2562,17 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CashShopStorageItemConsumeRequestRef.Length;
-            var packet = new CashShopStorageItemConsumeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.BaseItemCode = @baseItemCode;
-            packet.MainItemCode = @mainItemCode;
-            packet.ItemIndex = @itemIndex;
-            packet.ProductType = @productType;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CashShopStorageItemConsumeRequestRef.Length;
+                var packet = new CashShopStorageItemConsumeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.BaseItemCode = @baseItemCode;
+                packet.MainItemCode = @mainItemCode;
+                packet.ItemIndex = @itemIndex;
+                packet.ProductType = @productType;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2382,11 +2599,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CashShopEventItemListRequestRef.Length;
-            var packet = new CashShopEventItemListRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.CategoryIndex = @categoryIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CashShopEventItemListRequestRef.Length;
+                var packet = new CashShopEventItemListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.CategoryIndex = @categoryIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2413,11 +2633,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = UnlockVaultRef.Length;
-            var packet = new UnlockVaultRef(connection.Output.GetSpan(length)[..length]);
-            packet.Pin = @pin;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = UnlockVaultRef.Length;
+                var packet = new UnlockVaultRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Pin = @pin;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2446,12 +2669,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = SetVaultPinRef.Length;
-            var packet = new SetVaultPinRef(connection.Output.GetSpan(length)[..length]);
-            packet.Pin = @pin;
-            packet.Password = Marshal.PtrToStringAnsi(@password, (int)passwordByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = SetVaultPinRef.Length;
+                var packet = new SetVaultPinRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Pin = @pin;
+                packet.Password = Marshal.PtrToStringAuto(@password, (int)passwordByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2479,11 +2705,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = RemoveVaultPinRef.Length;
-            var packet = new RemoveVaultPinRef(connection.Output.GetSpan(length)[..length]);
-            packet.Password = Marshal.PtrToStringAnsi(@password, (int)passwordByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = RemoveVaultPinRef.Length;
+                var packet = new RemoveVaultPinRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Password = Marshal.PtrToStringAuto(@password, (int)passwordByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2509,9 +2738,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = VaultClosedRef.Length;
-            var packet = new VaultClosedRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = VaultClosedRef.Length;
+                var packet = new VaultClosedRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -2539,12 +2771,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = VaultMoveMoneyRequestRef.Length;
-            var packet = new VaultMoveMoneyRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.Direction = @direction;
-            packet.Amount = @amount;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = VaultMoveMoneyRequestRef.Length;
+                var packet = new VaultMoveMoneyRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Direction = @direction;
+                packet.Amount = @amount;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2574,14 +2809,17 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LahapJewelMixRequestRef.Length;
-            var packet = new LahapJewelMixRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.Operation = @operation;
-            packet.Item = @item;
-            packet.MixingStackSize = @mixingStackSize;
-            packet.UnmixingSourceSlot = @unmixingSourceSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LahapJewelMixRequestRef.Length;
+                var packet = new LahapJewelMixRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Operation = @operation;
+                packet.Item = @item;
+                packet.MixingStackSize = @mixingStackSize;
+                packet.UnmixingSourceSlot = @unmixingSourceSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2607,9 +2845,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PartyListRequestRef.Length;
-            var packet = new PartyListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PartyListRequestRef.Length;
+                var packet = new PartyListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -2636,11 +2877,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PartyPlayerKickRequestRef.Length;
-            var packet = new PartyPlayerKickRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PlayerIndex = @playerIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PartyPlayerKickRequestRef.Length;
+                var packet = new PartyPlayerKickRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PlayerIndex = @playerIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2667,11 +2911,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PartyInviteRequestRef.Length;
-            var packet = new PartyInviteRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.TargetPlayerId = @targetPlayerId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PartyInviteRequestRef.Length;
+                var packet = new PartyInviteRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.TargetPlayerId = @targetPlayerId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2699,12 +2946,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PartyInviteResponseRef.Length;
-            var packet = new PartyInviteResponseRef(connection.Output.GetSpan(length)[..length]);
-            packet.Accepted = @accepted == 1;
-            packet.RequesterId = @requesterId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PartyInviteResponseRef.Length;
+                var packet = new PartyInviteResponseRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Accepted = @accepted == 1;
+                packet.RequesterId = @requesterId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2736,15 +2986,18 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = WalkRequestRef.GetRequiredSize((int)directionsByteLength);
-            var packet = new WalkRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.SourceX = @sourceX;
-            packet.SourceY = @sourceY;
-            packet.StepCount = @stepCount;
-            packet.TargetRotation = @targetRotation;
-            new Span<byte>(@directions, (int)directionsByteLength).CopyTo(packet.Directions);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = WalkRequestRef.GetRequiredSize((int)directionsByteLength);
+                var packet = new WalkRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SourceX = @sourceX;
+                packet.SourceY = @sourceY;
+                packet.StepCount = @stepCount;
+                packet.TargetRotation = @targetRotation;
+                new Span<byte>(@directions, (int)directionsByteLength).CopyTo(packet.Directions);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2776,15 +3029,18 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = WalkRequest075Ref.GetRequiredSize((int)directionsByteLength);
-            var packet = new WalkRequest075Ref(connection.Output.GetSpan(length)[..length]);
-            packet.SourceX = @sourceX;
-            packet.SourceY = @sourceY;
-            packet.StepCount = @stepCount;
-            packet.TargetRotation = @targetRotation;
-            new Span<byte>(@directions, (int)directionsByteLength).CopyTo(packet.Directions);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = WalkRequest075Ref.GetRequiredSize((int)directionsByteLength);
+                var packet = new WalkRequest075Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.SourceX = @sourceX;
+                packet.SourceY = @sourceY;
+                packet.StepCount = @stepCount;
+                packet.TargetRotation = @targetRotation;
+                new Span<byte>(@directions, (int)directionsByteLength).CopyTo(packet.Directions);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2812,12 +3068,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = InstantMoveRequestRef.Length;
-            var packet = new InstantMoveRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.TargetX = @targetX;
-            packet.TargetY = @targetY;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = InstantMoveRequestRef.Length;
+                var packet = new InstantMoveRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.TargetX = @targetX;
+                packet.TargetY = @targetY;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2845,12 +3104,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = AnimationRequestRef.Length;
-            var packet = new AnimationRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.Rotation = @rotation;
-            packet.AnimationNumber = @animationNumber;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = AnimationRequestRef.Length;
+                var packet = new AnimationRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Rotation = @rotation;
+                packet.AnimationNumber = @animationNumber;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2877,11 +3139,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = RequestCharacterListRef.Length;
-            var packet = new RequestCharacterListRef(connection.Output.GetSpan(length)[..length]);
-            packet.Language = @language;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = RequestCharacterListRef.Length;
+                var packet = new RequestCharacterListRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Language = @language;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2910,12 +3175,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CreateCharacterRef.Length;
-            var packet = new CreateCharacterRef(connection.Output.GetSpan(length)[..length]);
-            packet.Name = Marshal.PtrToStringAnsi(@name, (int)nameByteLength);
-            packet.Class = @class_;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CreateCharacterRef.Length;
+                var packet = new CreateCharacterRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
+                packet.Class = @class_;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2945,12 +3213,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = DeleteCharacterRef.Length;
-            var packet = new DeleteCharacterRef(connection.Output.GetSpan(length)[..length]);
-            packet.Name = Marshal.PtrToStringAnsi(@name, (int)nameByteLength);
-            packet.SecurityCode = Marshal.PtrToStringAnsi(@securityCode, (int)securityCodeByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DeleteCharacterRef.Length;
+                var packet = new DeleteCharacterRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
+                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode, (int)securityCodeByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -2978,11 +3249,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = SelectCharacterRef.Length;
-            var packet = new SelectCharacterRef(connection.Output.GetSpan(length)[..length]);
-            packet.Name = Marshal.PtrToStringAnsi(@name, (int)nameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = SelectCharacterRef.Length;
+                var packet = new SelectCharacterRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3010,11 +3284,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = FocusCharacterRef.Length;
-            var packet = new FocusCharacterRef(connection.Output.GetSpan(length)[..length]);
-            packet.Name = Marshal.PtrToStringAnsi(@name, (int)nameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = FocusCharacterRef.Length;
+                var packet = new FocusCharacterRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3041,11 +3318,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = IncreaseCharacterStatPointRef.Length;
-            var packet = new IncreaseCharacterStatPointRef(connection.Output.GetSpan(length)[..length]);
-            packet.StatType = @statType;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = IncreaseCharacterStatPointRef.Length;
+                var packet = new IncreaseCharacterStatPointRef(pipeWriter.GetSpan(length)[..length]);
+                packet.StatType = @statType;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3071,9 +3351,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ClientReadyAfterMapChangeRef.Length;
-            var packet = new ClientReadyAfterMapChangeRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ClientReadyAfterMapChangeRef.Length;
+                var packet = new ClientReadyAfterMapChangeRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -3101,11 +3384,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = SaveKeyConfigurationRef.GetRequiredSize((int)configurationByteLength);
-            var packet = new SaveKeyConfigurationRef(connection.Output.GetSpan(length)[..length]);
-            new Span<byte>(@configuration, (int)configurationByteLength).CopyTo(packet.Configuration);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = SaveKeyConfigurationRef.GetRequiredSize((int)configurationByteLength);
+                var packet = new SaveKeyConfigurationRef(pipeWriter.GetSpan(length)[..length]);
+                new Span<byte>(@configuration, (int)configurationByteLength).CopyTo(packet.Configuration);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3132,11 +3418,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = AddMasterSkillPointRef.Length;
-            var packet = new AddMasterSkillPointRef(connection.Output.GetSpan(length)[..length]);
-            packet.SkillId = @skillId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = AddMasterSkillPointRef.Length;
+                var packet = new AddMasterSkillPointRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillId = @skillId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3165,13 +3454,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = HitRequestRef.Length;
-            var packet = new HitRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.TargetId = @targetId;
-            packet.AttackAnimation = @attackAnimation;
-            packet.LookingDirection = @lookingDirection;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = HitRequestRef.Length;
+                var packet = new HitRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.TargetId = @targetId;
+                packet.AttackAnimation = @attackAnimation;
+                packet.LookingDirection = @lookingDirection;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3199,12 +3491,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = TargetedSkillRef.Length;
-            var packet = new TargetedSkillRef(connection.Output.GetSpan(length)[..length]);
-            packet.SkillId = @skillId;
-            packet.TargetId = @targetId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = TargetedSkillRef.Length;
+                var packet = new TargetedSkillRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillId = @skillId;
+                packet.TargetId = @targetId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3232,12 +3527,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = TargetedSkill075Ref.Length;
-            var packet = new TargetedSkill075Ref(connection.Output.GetSpan(length)[..length]);
-            packet.SkillIndex = @skillIndex;
-            packet.TargetId = @targetId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = TargetedSkill075Ref.Length;
+                var packet = new TargetedSkill075Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillIndex = @skillIndex;
+                packet.TargetId = @targetId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3265,12 +3563,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = TargetedSkill095Ref.Length;
-            var packet = new TargetedSkill095Ref(connection.Output.GetSpan(length)[..length]);
-            packet.SkillIndex = @skillIndex;
-            packet.TargetId = @targetId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = TargetedSkill095Ref.Length;
+                var packet = new TargetedSkill095Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillIndex = @skillIndex;
+                packet.TargetId = @targetId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3298,12 +3599,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = MagicEffectCancelRequestRef.Length;
-            var packet = new MagicEffectCancelRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.SkillId = @skillId;
-            packet.PlayerId = @playerId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = MagicEffectCancelRequestRef.Length;
+                var packet = new MagicEffectCancelRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillId = @skillId;
+                packet.PlayerId = @playerId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3335,16 +3639,19 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = AreaSkillRef.Length;
-            var packet = new AreaSkillRef(connection.Output.GetSpan(length)[..length]);
-            packet.SkillId = @skillId;
-            packet.TargetX = @targetX;
-            packet.TargetY = @targetY;
-            packet.Rotation = @rotation;
-            packet.ExtraTargetId = @extraTargetId;
-            packet.AnimationCounter = @animationCounter;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = AreaSkillRef.Length;
+                var packet = new AreaSkillRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillId = @skillId;
+                packet.TargetX = @targetX;
+                packet.TargetY = @targetY;
+                packet.Rotation = @rotation;
+                packet.ExtraTargetId = @extraTargetId;
+                packet.AnimationCounter = @animationCounter;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3374,14 +3681,17 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = AreaSkill075Ref.Length;
-            var packet = new AreaSkill075Ref(connection.Output.GetSpan(length)[..length]);
-            packet.SkillIndex = @skillIndex;
-            packet.TargetX = @targetX;
-            packet.TargetY = @targetY;
-            packet.Rotation = @rotation;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = AreaSkill075Ref.Length;
+                var packet = new AreaSkill075Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillIndex = @skillIndex;
+                packet.TargetX = @targetX;
+                packet.TargetY = @targetY;
+                packet.Rotation = @rotation;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3411,14 +3721,17 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = AreaSkill095Ref.Length;
-            var packet = new AreaSkill095Ref(connection.Output.GetSpan(length)[..length]);
-            packet.SkillIndex = @skillIndex;
-            packet.TargetX = @targetX;
-            packet.TargetY = @targetY;
-            packet.Rotation = @rotation;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = AreaSkill095Ref.Length;
+                var packet = new AreaSkill095Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillIndex = @skillIndex;
+                packet.TargetX = @targetX;
+                packet.TargetY = @targetY;
+                packet.Rotation = @rotation;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3446,12 +3759,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = RageAttackRequestRef.Length;
-            var packet = new RageAttackRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.SkillId = @skillId;
-            packet.TargetId = @targetId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = RageAttackRequestRef.Length;
+                var packet = new RageAttackRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillId = @skillId;
+                packet.TargetId = @targetId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3479,12 +3795,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = RageAttackRangeRequestRef.Length;
-            var packet = new RageAttackRangeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.SkillId = @skillId;
-            packet.TargetId = @targetId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = RageAttackRangeRequestRef.Length;
+                var packet = new RageAttackRangeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillId = @skillId;
+                packet.TargetId = @targetId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3510,9 +3829,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = TradeCancelRef.Length;
-            var packet = new TradeCancelRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = TradeCancelRef.Length;
+                var packet = new TradeCancelRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -3539,11 +3861,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = TradeButtonStateChangeRef.Length;
-            var packet = new TradeButtonStateChangeRef(connection.Output.GetSpan(length)[..length]);
-            packet.NewState = @newState;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = TradeButtonStateChangeRef.Length;
+                var packet = new TradeButtonStateChangeRef(pipeWriter.GetSpan(length)[..length]);
+                packet.NewState = @newState;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3570,11 +3895,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = TradeRequestRef.Length;
-            var packet = new TradeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PlayerId = @playerId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = TradeRequestRef.Length;
+                var packet = new TradeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PlayerId = @playerId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3601,11 +3929,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = TradeRequestResponseRef.Length;
-            var packet = new TradeRequestResponseRef(connection.Output.GetSpan(length)[..length]);
-            packet.TradeAccepted = @tradeAccepted == 1;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = TradeRequestResponseRef.Length;
+                var packet = new TradeRequestResponseRef(pipeWriter.GetSpan(length)[..length]);
+                packet.TradeAccepted = @tradeAccepted == 1;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3632,11 +3963,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = SetTradeMoneyRef.Length;
-            var packet = new SetTradeMoneyRef(connection.Output.GetSpan(length)[..length]);
-            packet.Amount = @amount;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = SetTradeMoneyRef.Length;
+                var packet = new SetTradeMoneyRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Amount = @amount;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3663,11 +3997,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LetterDeleteRequestRef.Length;
-            var packet = new LetterDeleteRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.LetterIndex = @letterIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LetterDeleteRequestRef.Length;
+                var packet = new LetterDeleteRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.LetterIndex = @letterIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3693,9 +4030,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LetterListRequestRef.Length;
-            var packet = new LetterListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LetterListRequestRef.Length;
+                var packet = new LetterListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -3731,17 +4071,20 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LetterSendRequestRef.GetRequiredSize((int)messageByteLength);
-            var packet = new LetterSendRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.LetterId = @letterId;
-            packet.Receiver = Marshal.PtrToStringAnsi(@receiver, (int)receiverByteLength);
-            packet.Title = Marshal.PtrToStringAnsi(@title, (int)titleByteLength);
-            packet.Rotation = @rotation;
-            packet.Animation = @animation;
-            packet.MessageLength = @messageLength;
-            packet.Message = Marshal.PtrToStringAnsi(@message, (int)messageByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LetterSendRequestRef.GetRequiredSize((int)messageByteLength);
+                var packet = new LetterSendRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.LetterId = @letterId;
+                packet.Receiver = Marshal.PtrToStringAuto(@receiver, (int)receiverByteLength);
+                packet.Title = Marshal.PtrToStringAuto(@title, (int)titleByteLength);
+                packet.Rotation = @rotation;
+                packet.Animation = @animation;
+                packet.MessageLength = @messageLength;
+                packet.Message = Marshal.PtrToStringAuto(@message, (int)messageByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3768,11 +4111,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LetterReadRequestRef.Length;
-            var packet = new LetterReadRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.LetterIndex = @letterIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LetterReadRequestRef.Length;
+                var packet = new LetterReadRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.LetterIndex = @letterIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3802,12 +4148,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildKickPlayerRequestRef.GetRequiredSize((int)securityCodeByteLength);
-            var packet = new GuildKickPlayerRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PlayerName = Marshal.PtrToStringAnsi(@playerName, (int)playerNameByteLength);
-            packet.SecurityCode = Marshal.PtrToStringAnsi(@securityCode, (int)securityCodeByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildKickPlayerRequestRef.GetRequiredSize((int)securityCodeByteLength);
+                var packet = new GuildKickPlayerRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
+                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode, (int)securityCodeByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3834,11 +4183,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildJoinRequestRef.Length;
-            var packet = new GuildJoinRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.GuildMasterPlayerId = @guildMasterPlayerId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildJoinRequestRef.Length;
+                var packet = new GuildJoinRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.GuildMasterPlayerId = @guildMasterPlayerId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3866,12 +4218,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildJoinResponseRef.Length;
-            var packet = new GuildJoinResponseRef(connection.Output.GetSpan(length)[..length]);
-            packet.Accepted = @accepted == 1;
-            packet.RequesterId = @requesterId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildJoinResponseRef.Length;
+                var packet = new GuildJoinResponseRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Accepted = @accepted == 1;
+                packet.RequesterId = @requesterId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3897,9 +4252,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildListRequestRef.Length;
-            var packet = new GuildListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildListRequestRef.Length;
+                var packet = new GuildListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -3929,12 +4287,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildCreateRequestRef.Length;
-            var packet = new GuildCreateRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.GuildName = Marshal.PtrToStringAnsi(@guildName, (int)guildNameByteLength);
-            new Span<byte>(@guildEmblem, (int)guildEmblemByteLength).CopyTo(packet.GuildEmblem);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildCreateRequestRef.Length;
+                var packet = new GuildCreateRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.GuildName = Marshal.PtrToStringAuto(@guildName, (int)guildNameByteLength);
+                new Span<byte>(@guildEmblem, (int)guildEmblemByteLength).CopyTo(packet.GuildEmblem);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3964,12 +4325,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildCreateRequest075Ref.Length;
-            var packet = new GuildCreateRequest075Ref(connection.Output.GetSpan(length)[..length]);
-            packet.GuildName = Marshal.PtrToStringAnsi(@guildName, (int)guildNameByteLength);
-            new Span<byte>(@guildEmblem, (int)guildEmblemByteLength).CopyTo(packet.GuildEmblem);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildCreateRequest075Ref.Length;
+                var packet = new GuildCreateRequest075Ref(pipeWriter.GetSpan(length)[..length]);
+                packet.GuildName = Marshal.PtrToStringAuto(@guildName, (int)guildNameByteLength);
+                new Span<byte>(@guildEmblem, (int)guildEmblemByteLength).CopyTo(packet.GuildEmblem);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -3996,11 +4360,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildMasterAnswerRef.Length;
-            var packet = new GuildMasterAnswerRef(connection.Output.GetSpan(length)[..length]);
-            packet.ShowCreationDialog = @showCreationDialog == 1;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildMasterAnswerRef.Length;
+                var packet = new GuildMasterAnswerRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ShowCreationDialog = @showCreationDialog == 1;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4026,9 +4393,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CancelGuildCreationRef.Length;
-            var packet = new CancelGuildCreationRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CancelGuildCreationRef.Length;
+                var packet = new CancelGuildCreationRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -4055,11 +4425,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildWarResponseRef.Length;
-            var packet = new GuildWarResponseRef(connection.Output.GetSpan(length)[..length]);
-            packet.Accepted = @accepted == 1;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildWarResponseRef.Length;
+                var packet = new GuildWarResponseRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Accepted = @accepted == 1;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4086,11 +4459,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildInfoRequestRef.Length;
-            var packet = new GuildInfoRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.GuildId = @guildId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildInfoRequestRef.Length;
+                var packet = new GuildInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.GuildId = @guildId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4120,13 +4496,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildRoleAssignRequestRef.Length;
-            var packet = new GuildRoleAssignRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.Type = @type;
-            packet.Role = @role;
-            packet.PlayerName = Marshal.PtrToStringAnsi(@playerName, (int)playerNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildRoleAssignRequestRef.Length;
+                var packet = new GuildRoleAssignRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Type = @type;
+                packet.Role = @role;
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4153,11 +4532,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildTypeChangeRequestRef.Length;
-            var packet = new GuildTypeChangeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.GuildType = @guildType;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildTypeChangeRequestRef.Length;
+                var packet = new GuildTypeChangeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.GuildType = @guildType;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4186,13 +4568,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildRelationshipChangeRequestRef.Length;
-            var packet = new GuildRelationshipChangeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.RelationshipType = @relationshipType;
-            packet.RequestType = @requestType;
-            packet.TargetPlayerId = @targetPlayerId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildRelationshipChangeRequestRef.Length;
+                var packet = new GuildRelationshipChangeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.RelationshipType = @relationshipType;
+                packet.RequestType = @requestType;
+                packet.TargetPlayerId = @targetPlayerId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4222,14 +4607,17 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GuildRelationshipChangeResponseRef.Length;
-            var packet = new GuildRelationshipChangeResponseRef(connection.Output.GetSpan(length)[..length]);
-            packet.RelationshipType = @relationshipType;
-            packet.RequestType = @requestType;
-            packet.Response = @response == 1;
-            packet.TargetPlayerId = @targetPlayerId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GuildRelationshipChangeResponseRef.Length;
+                var packet = new GuildRelationshipChangeResponseRef(pipeWriter.GetSpan(length)[..length]);
+                packet.RelationshipType = @relationshipType;
+                packet.RequestType = @requestType;
+                packet.Response = @response == 1;
+                packet.TargetPlayerId = @targetPlayerId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4255,9 +4643,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = RequestAllianceListRef.Length;
-            var packet = new RequestAllianceListRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = RequestAllianceListRef.Length;
+                var packet = new RequestAllianceListRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -4285,11 +4676,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = RemoveAllianceGuildRequestRef.Length;
-            var packet = new RemoveAllianceGuildRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.GuildName = Marshal.PtrToStringAnsi(@guildName, (int)guildNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = RemoveAllianceGuildRequestRef.Length;
+                var packet = new RemoveAllianceGuildRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.GuildName = Marshal.PtrToStringAuto(@guildName, (int)guildNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4315,9 +4709,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PingResponseRef.Length;
-            var packet = new PingResponseRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PingResponseRef.Length;
+                var packet = new PingResponseRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -4344,11 +4741,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ItemRepairRef.Length;
-            var packet = new ItemRepairRef(connection.Output.GetSpan(length)[..length]);
-            packet.InventoryItemSlot = @inventoryItemSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ItemRepairRef.Length;
+                var packet = new ItemRepairRef(pipeWriter.GetSpan(length)[..length]);
+                packet.InventoryItemSlot = @inventoryItemSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4376,12 +4776,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ChaosMachineMixRequestRef.Length;
-            var packet = new ChaosMachineMixRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.MixType = @mixType;
-            packet.SocketSlot = @socketSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChaosMachineMixRequestRef.Length;
+                var packet = new ChaosMachineMixRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.MixType = @mixType;
+                packet.SocketSlot = @socketSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4407,9 +4810,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = CraftingDialogCloseRequestRef.Length;
-            var packet = new CraftingDialogCloseRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = CraftingDialogCloseRequestRef.Length;
+                var packet = new CraftingDialogCloseRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -4435,9 +4841,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = FriendListRequestRef.Length;
-            var packet = new FriendListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = FriendListRequestRef.Length;
+                var packet = new FriendListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -4465,11 +4874,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = FriendAddRequestRef.Length;
-            var packet = new FriendAddRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.FriendName = Marshal.PtrToStringAnsi(@friendName, (int)friendNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = FriendAddRequestRef.Length;
+                var packet = new FriendAddRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.FriendName = Marshal.PtrToStringAuto(@friendName, (int)friendNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4497,11 +4909,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = FriendDeleteRef.Length;
-            var packet = new FriendDeleteRef(connection.Output.GetSpan(length)[..length]);
-            packet.FriendName = Marshal.PtrToStringAnsi(@friendName, (int)friendNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = FriendDeleteRef.Length;
+                var packet = new FriendDeleteRef(pipeWriter.GetSpan(length)[..length]);
+                packet.FriendName = Marshal.PtrToStringAuto(@friendName, (int)friendNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4529,11 +4944,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ChatRoomCreateRequestRef.Length;
-            var packet = new ChatRoomCreateRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.FriendName = Marshal.PtrToStringAnsi(@friendName, (int)friendNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChatRoomCreateRequestRef.Length;
+                var packet = new ChatRoomCreateRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.FriendName = Marshal.PtrToStringAuto(@friendName, (int)friendNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4562,12 +4980,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = FriendAddResponseRef.Length;
-            var packet = new FriendAddResponseRef(connection.Output.GetSpan(length)[..length]);
-            packet.Accepted = @accepted == 1;
-            packet.FriendRequesterName = Marshal.PtrToStringAnsi(@friendRequesterName, (int)friendRequesterNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = FriendAddResponseRef.Length;
+                var packet = new FriendAddResponseRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Accepted = @accepted == 1;
+                packet.FriendRequesterName = Marshal.PtrToStringAuto(@friendRequesterName, (int)friendRequesterNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4594,11 +5015,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = SetFriendOnlineStateRef.Length;
-            var packet = new SetFriendOnlineStateRef(connection.Output.GetSpan(length)[..length]);
-            packet.OnlineState = @onlineState == 1;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = SetFriendOnlineStateRef.Length;
+                var packet = new SetFriendOnlineStateRef(pipeWriter.GetSpan(length)[..length]);
+                packet.OnlineState = @onlineState == 1;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4628,13 +5052,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ChatRoomInvitationRequestRef.Length;
-            var packet = new ChatRoomInvitationRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.FriendName = Marshal.PtrToStringAnsi(@friendName, (int)friendNameByteLength);
-            packet.RoomId = @roomId;
-            packet.RequestId = @requestId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChatRoomInvitationRequestRef.Length;
+                var packet = new ChatRoomInvitationRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.FriendName = Marshal.PtrToStringAuto(@friendName, (int)friendNameByteLength);
+                packet.RoomId = @roomId;
+                packet.RequestId = @requestId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4660,9 +5087,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LegacyQuestStateRequestRef.Length;
-            var packet = new LegacyQuestStateRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LegacyQuestStateRequestRef.Length;
+                var packet = new LegacyQuestStateRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -4690,12 +5120,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LegacyQuestStateSetRequestRef.Length;
-            var packet = new LegacyQuestStateSetRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.QuestNumber = @questNumber;
-            packet.NewState = @newState;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LegacyQuestStateSetRequestRef.Length;
+                var packet = new LegacyQuestStateSetRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.QuestNumber = @questNumber;
+                packet.NewState = @newState;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4724,13 +5157,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PetCommandRequestRef.Length;
-            var packet = new PetCommandRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PetType = @petType;
-            packet.CommandMode = @commandMode;
-            packet.TargetId = @targetId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PetCommandRequestRef.Length;
+                var packet = new PetCommandRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PetType = @petType;
+                packet.CommandMode = @commandMode;
+                packet.TargetId = @targetId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4759,13 +5195,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = PetInfoRequestRef.Length;
-            var packet = new PetInfoRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.Pet = @pet;
-            packet.Storage = @storage;
-            packet.ItemSlot = @itemSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PetInfoRequestRef.Length;
+                var packet = new PetInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Pet = @pet;
+                packet.Storage = @storage;
+                packet.ItemSlot = @itemSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4793,12 +5232,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = IllusionTempleEnterRequestRef.Length;
-            var packet = new IllusionTempleEnterRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.MapNumber = @mapNumber;
-            packet.ItemSlot = @itemSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = IllusionTempleEnterRequestRef.Length;
+                var packet = new IllusionTempleEnterRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.MapNumber = @mapNumber;
+                packet.ItemSlot = @itemSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4827,13 +5269,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = IllusionTempleSkillRequestRef.Length;
-            var packet = new IllusionTempleSkillRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.SkillNumber = @skillNumber;
-            packet.TargetObjectIndex = @targetObjectIndex;
-            packet.Distance = @distance;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = IllusionTempleSkillRequestRef.Length;
+                var packet = new IllusionTempleSkillRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SkillNumber = @skillNumber;
+                packet.TargetObjectIndex = @targetObjectIndex;
+                packet.Distance = @distance;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4859,9 +5304,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = IllusionTempleRewardRequestRef.Length;
-            var packet = new IllusionTempleRewardRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = IllusionTempleRewardRequestRef.Length;
+                var packet = new IllusionTempleRewardRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -4887,9 +5335,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LuckyCoinCountRequestRef.Length;
-            var packet = new LuckyCoinCountRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LuckyCoinCountRequestRef.Length;
+                var packet = new LuckyCoinCountRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -4915,9 +5366,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LuckyCoinRegistrationRequestRef.Length;
-            var packet = new LuckyCoinRegistrationRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LuckyCoinRegistrationRequestRef.Length;
+                var packet = new LuckyCoinRegistrationRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -4944,11 +5398,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LuckyCoinExchangeRequestRef.Length;
-            var packet = new LuckyCoinExchangeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.CoinCount = @coinCount;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LuckyCoinExchangeRequestRef.Length;
+                var packet = new LuckyCoinExchangeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.CoinCount = @coinCount;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -4975,11 +5432,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = DoppelgangerEnterRequestRef.Length;
-            var packet = new DoppelgangerEnterRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.TicketItemSlot = @ticketItemSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DoppelgangerEnterRequestRef.Length;
+                var packet = new DoppelgangerEnterRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.TicketItemSlot = @ticketItemSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5005,9 +5465,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EnterMarketPlaceRequestRef.Length;
-            var packet = new EnterMarketPlaceRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EnterMarketPlaceRequestRef.Length;
+                var packet = new EnterMarketPlaceRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -5034,11 +5497,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = MuHelperStatusChangeRequestRef.Length;
-            var packet = new MuHelperStatusChangeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PauseStatus = @pauseStatus == 1;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = MuHelperStatusChangeRequestRef.Length;
+                var packet = new MuHelperStatusChangeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PauseStatus = @pauseStatus == 1;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5066,11 +5532,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = MuHelperSaveDataRequestRef.Length;
-            var packet = new MuHelperSaveDataRequestRef(connection.Output.GetSpan(length)[..length]);
-            new Span<byte>(@helperData, (int)helperDataByteLength).CopyTo(packet.HelperData);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = MuHelperSaveDataRequestRef.Length;
+                var packet = new MuHelperSaveDataRequestRef(pipeWriter.GetSpan(length)[..length]);
+                new Span<byte>(@helperData, (int)helperDataByteLength).CopyTo(packet.HelperData);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5099,13 +5568,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = QuestSelectRequestRef.Length;
-            var packet = new QuestSelectRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.QuestNumber = @questNumber;
-            packet.QuestGroup = @questGroup;
-            packet.SelectedTextIndex = @selectedTextIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = QuestSelectRequestRef.Length;
+                var packet = new QuestSelectRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.QuestNumber = @questNumber;
+                packet.QuestGroup = @questGroup;
+                packet.SelectedTextIndex = @selectedTextIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5134,13 +5606,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = QuestProceedRequestRef.Length;
-            var packet = new QuestProceedRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.QuestNumber = @questNumber;
-            packet.QuestGroup = @questGroup;
-            packet.ProceedAction = @proceedAction;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = QuestProceedRequestRef.Length;
+                var packet = new QuestProceedRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.QuestNumber = @questNumber;
+                packet.QuestGroup = @questGroup;
+                packet.ProceedAction = @proceedAction;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5168,12 +5643,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = QuestCompletionRequestRef.Length;
-            var packet = new QuestCompletionRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.QuestNumber = @questNumber;
-            packet.QuestGroup = @questGroup;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = QuestCompletionRequestRef.Length;
+                var packet = new QuestCompletionRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.QuestNumber = @questNumber;
+                packet.QuestGroup = @questGroup;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5201,12 +5679,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = QuestCancelRequestRef.Length;
-            var packet = new QuestCancelRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.QuestNumber = @questNumber;
-            packet.QuestGroup = @questGroup;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = QuestCancelRequestRef.Length;
+                var packet = new QuestCancelRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.QuestNumber = @questNumber;
+                packet.QuestGroup = @questGroup;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5234,12 +5715,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = QuestClientActionRequestRef.Length;
-            var packet = new QuestClientActionRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.QuestNumber = @questNumber;
-            packet.QuestGroup = @questGroup;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = QuestClientActionRequestRef.Length;
+                var packet = new QuestClientActionRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.QuestNumber = @questNumber;
+                packet.QuestGroup = @questGroup;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5265,9 +5749,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ActiveQuestListRequestRef.Length;
-            var packet = new ActiveQuestListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ActiveQuestListRequestRef.Length;
+                var packet = new ActiveQuestListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -5295,12 +5782,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = QuestStateRequestRef.Length;
-            var packet = new QuestStateRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.QuestNumber = @questNumber;
-            packet.QuestGroup = @questGroup;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = QuestStateRequestRef.Length;
+                var packet = new QuestStateRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.QuestNumber = @questNumber;
+                packet.QuestGroup = @questGroup;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5326,9 +5816,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EventQuestStateListRequestRef.Length;
-            var packet = new EventQuestStateListRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EventQuestStateListRequestRef.Length;
+                var packet = new EventQuestStateListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -5354,9 +5847,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = AvailableQuestsRequestRef.Length;
-            var packet = new AvailableQuestsRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = AvailableQuestsRequestRef.Length;
+                var packet = new AvailableQuestsRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -5382,9 +5878,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = NpcBuffRequestRef.Length;
-            var packet = new NpcBuffRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = NpcBuffRequestRef.Length;
+                var packet = new NpcBuffRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -5411,11 +5910,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EnterEmpireGuardianEventRef.Length;
-            var packet = new EnterEmpireGuardianEventRef(connection.Output.GetSpan(length)[..length]);
-            packet.ItemSlot = @itemSlot;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EnterEmpireGuardianEventRef.Length;
+                var packet = new EnterEmpireGuardianEventRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ItemSlot = @itemSlot;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5442,11 +5944,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GensJoinRequestRef.Length;
-            var packet = new GensJoinRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.GensType = @gensType;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GensJoinRequestRef.Length;
+                var packet = new GensJoinRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.GensType = @gensType;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5472,9 +5977,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GensLeaveRequestRef.Length;
-            var packet = new GensLeaveRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GensLeaveRequestRef.Length;
+                var packet = new GensLeaveRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -5501,11 +6009,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GensRewardRequestRef.Length;
-            var packet = new GensRewardRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.GensType = @gensType;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GensRewardRequestRef.Length;
+                var packet = new GensRewardRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.GensType = @gensType;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5531,9 +6042,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = GensRankingRequestRef.Length;
-            var packet = new GensRankingRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = GensRankingRequestRef.Length;
+                var packet = new GensRankingRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -5561,12 +6075,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = DevilSquareEnterRequestRef.Length;
-            var packet = new DevilSquareEnterRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.SquareLevel = @squareLevel;
-            packet.TicketItemInventoryIndex = @ticketItemInventoryIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DevilSquareEnterRequestRef.Length;
+                var packet = new DevilSquareEnterRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SquareLevel = @squareLevel;
+                packet.TicketItemInventoryIndex = @ticketItemInventoryIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5594,12 +6111,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = MiniGameOpeningStateRequestRef.Length;
-            var packet = new MiniGameOpeningStateRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.EventType = @eventType;
-            packet.EventLevel = @eventLevel;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = MiniGameOpeningStateRequestRef.Length;
+                var packet = new MiniGameOpeningStateRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.EventType = @eventType;
+                packet.EventLevel = @eventLevel;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5627,12 +6147,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EventChipRegistrationRequestRef.Length;
-            var packet = new EventChipRegistrationRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.Type = @type;
-            packet.ItemIndex = @itemIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EventChipRegistrationRequestRef.Length;
+                var packet = new EventChipRegistrationRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Type = @type;
+                packet.ItemIndex = @itemIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5658,9 +6181,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = MutoNumberRequestRef.Length;
-            var packet = new MutoNumberRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = MutoNumberRequestRef.Length;
+                var packet = new MutoNumberRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -5686,9 +6212,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EventChipExitDialogRef.Length;
-            var packet = new EventChipExitDialogRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EventChipExitDialogRef.Length;
+                var packet = new EventChipExitDialogRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -5715,11 +6244,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = EventChipExchangeRequestRef.Length;
-            var packet = new EventChipExchangeRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.Type = @type;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = EventChipExchangeRequestRef.Length;
+                var packet = new EventChipExchangeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Type = @type;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5747,11 +6279,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ServerImmigrationRequestRef.GetRequiredSize((int)securityCodeByteLength);
-            var packet = new ServerImmigrationRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.SecurityCode = Marshal.PtrToStringAnsi(@securityCode, (int)securityCodeByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ServerImmigrationRequestRef.GetRequiredSize((int)securityCodeByteLength);
+                var packet = new ServerImmigrationRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode, (int)securityCodeByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5783,13 +6318,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = LuckyNumberRequestRef.Length;
-            var packet = new LuckyNumberRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.Serial1 = Marshal.PtrToStringAnsi(@serial1, (int)serial1ByteLength);
-            packet.Serial2 = Marshal.PtrToStringAnsi(@serial2, (int)serial2ByteLength);
-            packet.Serial3 = Marshal.PtrToStringAnsi(@serial3, (int)serial3ByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LuckyNumberRequestRef.Length;
+                var packet = new LuckyNumberRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Serial1 = Marshal.PtrToStringAuto(@serial1, (int)serial1ByteLength);
+                packet.Serial2 = Marshal.PtrToStringAuto(@serial2, (int)serial2ByteLength);
+                packet.Serial3 = Marshal.PtrToStringAuto(@serial3, (int)serial3ByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5817,12 +6355,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = BloodCastleEnterRequestRef.Length;
-            var packet = new BloodCastleEnterRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.CastleLevel = @castleLevel;
-            packet.TicketItemInventoryIndex = @ticketItemInventoryIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = BloodCastleEnterRequestRef.Length;
+                var packet = new BloodCastleEnterRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.CastleLevel = @castleLevel;
+                packet.TicketItemInventoryIndex = @ticketItemInventoryIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5849,11 +6390,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = MiniGameEventCountRequestRef.Length;
-            var packet = new MiniGameEventCountRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.MiniGame = @miniGame;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = MiniGameEventCountRequestRef.Length;
+                var packet = new MiniGameEventCountRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.MiniGame = @miniGame;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5881,12 +6425,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ChaosCastleEnterRequestRef.Length;
-            var packet = new ChaosCastleEnterRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.CastleLevel = @castleLevel;
-            packet.TicketItemInventoryIndex = @ticketItemInventoryIndex;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChaosCastleEnterRequestRef.Length;
+                var packet = new ChaosCastleEnterRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.CastleLevel = @castleLevel;
+                packet.TicketItemInventoryIndex = @ticketItemInventoryIndex;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5914,12 +6461,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = ChaosCastlePositionSetRef.Length;
-            var packet = new ChaosCastlePositionSetRef(connection.Output.GetSpan(length)[..length]);
-            packet.PositionX = @positionX;
-            packet.PositionY = @positionY;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ChaosCastlePositionSetRef.Length;
+                var packet = new ChaosCastlePositionSetRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PositionX = @positionX;
+                packet.PositionY = @positionY;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5948,12 +6498,15 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = DuelStartRequestRef.Length;
-            var packet = new DuelStartRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.PlayerId = @playerId;
-            packet.PlayerName = Marshal.PtrToStringAnsi(@playerName, (int)playerNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DuelStartRequestRef.Length;
+                var packet = new DuelStartRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PlayerId = @playerId;
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -5983,13 +6536,16 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = DuelStartResponseRef.Length;
-            var packet = new DuelStartResponseRef(connection.Output.GetSpan(length)[..length]);
-            packet.Response = @response == 1;
-            packet.PlayerId = @playerId;
-            packet.PlayerName = Marshal.PtrToStringAnsi(@playerName, (int)playerNameByteLength);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DuelStartResponseRef.Length;
+                var packet = new DuelStartResponseRef(pipeWriter.GetSpan(length)[..length]);
+                packet.Response = @response == 1;
+                packet.PlayerId = @playerId;
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -6015,9 +6571,12 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = DuelStopRequestRef.Length;
-            var packet = new DuelStopRequestRef(connection.Output.GetSpan(length)[..length]);
-            connection.Send(packet);
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DuelStopRequestRef.Length;
+                var packet = new DuelStopRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
         }
         catch
         {
@@ -6044,11 +6603,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = DuelChannelJoinRequestRef.Length;
-            var packet = new DuelChannelJoinRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.ChannelId = @channelId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DuelChannelJoinRequestRef.Length;
+                var packet = new DuelChannelJoinRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ChannelId = @channelId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {
@@ -6075,11 +6637,14 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var length = DuelChannelQuitRequestRef.Length;
-            var packet = new DuelChannelQuitRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.ChannelId = @channelId;
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DuelChannelQuitRequestRef.Length;
+                var packet = new DuelChannelQuitRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.ChannelId = @channelId;
 
-            connection.Send(packet);
+                return length;
+            });
         }
         catch
         {

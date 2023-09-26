@@ -16,22 +16,22 @@
 #include "PacketBindings_ChatServer.h"
 
 
-void PacketFunctions_ChatServer::SendAuthenticate(uint16_t roomId, char* token, uint32_t tokenByteLength)
+void PacketFunctions_ChatServer::SendAuthenticate(uint16_t roomId, const wchar_t* token, uint32_t tokenByteLength)
 {
     dotnet_SendAuthenticate(this->_handle, roomId, token, tokenByteLength);
 }
 
-void PacketFunctions_ChatServer::SendChatRoomClientJoined(BYTE clientIndex, char* name, uint32_t nameByteLength)
+void PacketFunctions_ChatServer::SendChatRoomClientJoined(BYTE clientIndex, const wchar_t* name, uint32_t nameByteLength)
 {
     dotnet_SendChatRoomClientJoined(this->_handle, clientIndex, name, nameByteLength);
 }
 
-void PacketFunctions_ChatServer::SendChatRoomClientLeft(BYTE clientIndex, char* name, uint32_t nameByteLength)
+void PacketFunctions_ChatServer::SendChatRoomClientLeft(BYTE clientIndex, const wchar_t* name, uint32_t nameByteLength)
 {
     dotnet_SendChatRoomClientLeft(this->_handle, clientIndex, name, nameByteLength);
 }
 
-void PacketFunctions_ChatServer::SendChatMessage(BYTE senderIndex, BYTE messageLength, char* message, uint32_t messageByteLength)
+void PacketFunctions_ChatServer::SendChatMessage(BYTE senderIndex, BYTE messageLength, const wchar_t* message, uint32_t messageByteLength)
 {
     dotnet_SendChatMessage(this->_handle, senderIndex, messageLength, message, messageByteLength);
 }

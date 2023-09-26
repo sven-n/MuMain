@@ -26,7 +26,7 @@ void PacketFunctions_ConnectServer::SendConnectionInfoRequest(uint16_t serverId)
     dotnet_SendConnectionInfoRequest(this->_handle, serverId);
 }
 
-void PacketFunctions_ConnectServer::SendConnectionInfo(char* ipAddress, uint32_t ipAddressByteLength, uint16_t port)
+void PacketFunctions_ConnectServer::SendConnectionInfo(const wchar_t* ipAddress, uint32_t ipAddressByteLength, uint16_t port)
 {
     dotnet_SendConnectionInfo(this->_handle, ipAddress, ipAddressByteLength, port);
 }
@@ -56,7 +56,7 @@ void PacketFunctions_ConnectServer::SendPatchVersionOkay()
     dotnet_SendPatchVersionOkay(this->_handle);
 }
 
-void PacketFunctions_ConnectServer::SendClientNeedsPatch(BYTE patchVersion, char* patchAddress, uint32_t patchAddressByteLength)
+void PacketFunctions_ConnectServer::SendClientNeedsPatch(BYTE patchVersion, const wchar_t* patchAddress, uint32_t patchAddressByteLength)
 {
     dotnet_SendClientNeedsPatch(this->_handle, patchVersion, patchAddress, patchAddressByteLength);
 }
