@@ -44,12 +44,12 @@ protected:
 
     DWORD			m_dwPopupID;
     int				m_nPopupTextCount;
-    char			m_szPopupText[MAX_POPUP_TEXTLINE][MAX_POPUP_TEXTLENGTH];
+    wchar_t			m_szPopupText[MAX_POPUP_TEXTLINE][MAX_POPUP_TEXTLENGTH];
     int				m_PopupType;
     SIZE			m_sizePopup;
     POPUP_ALIGN		m_Align;
 
-    char			m_szInputText[1024];
+    wchar_t			m_szInputText[1024];
     int				m_nInputSize;
     int				m_nInputTextLength;
     UIOPTIONS		m_InputOptions;
@@ -68,12 +68,12 @@ protected:
 
 public:
     void Init();
-    DWORD SetPopup(const char* pszText, int nLineCount, int nBufferSize, int Type, int (*ResultFunc)(POPUP_RESULT Result), POPUP_ALIGN Align = PA_CENTER);
+    DWORD SetPopup(const wchar_t* pszText, int nLineCount, int nBufferSize, int Type, int (*ResultFunc)(POPUP_RESULT Result), POPUP_ALIGN Align = PA_CENTER);
     void SetPopupExtraFunc(void (*InputFunc)(), void (*RenderFunc)());
     void SetInputMode(int nSize, int nTextLength, UIOPTIONS Options);
     bool IsInputEnable();
     void SetTimeOut(DWORD dwElapseTime);
-    char* GetInputText();
+    wchar_t* GetInputText();
     DWORD GetPopupID();
     void Close();
     void CancelPopup();

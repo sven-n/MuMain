@@ -2619,12 +2619,12 @@ void BMD::FindTriangleForEdge(int iMesh, int iTri1, int iIndex11)
 }
 //#endif //USE_SHADOWVOLUME
 
-bool BMD::Open(char* DirName, char* ModelFileName)
+bool BMD::Open(wchar_t* DirName, wchar_t* ModelFileName)
 {
-    char ModelName[64];
-    strcpy(ModelName, DirName);
-    strcat(ModelName, ModelFileName);
-    FILE* fp = fopen(ModelName, "rb");
+    wchar_t ModelName[64];
+    wcscpy(ModelName, DirName);
+    wcscat(ModelName, ModelFileName);
+    FILE* fp = _wfopen(ModelName, L"rb");
     if (fp == NULL)
     {
         return false;
@@ -2638,7 +2638,7 @@ bool BMD::Open(char* DirName, char* ModelFileName)
 
     int Size;
     int DataPtr = 3;
-    Version = *((char*)(Data + DataPtr)); DataPtr += 1;
+    Version = *((wchar_t*)(Data + DataPtr)); DataPtr += 1;
     memcpy(Name, Data + DataPtr, 32); DataPtr += 32;
     NumMeshs = *((short*)(Data + DataPtr)); DataPtr += 2;
     NumBones = *((short*)(Data + DataPtr)); DataPtr += 2;
@@ -2685,7 +2685,7 @@ bool BMD::Open(char* DirName, char* ModelFileName)
 
         TextureScriptParsing TSParsing;
 
-        if (TSParsing.parsingTScript(Textures[i].FileName))
+        if (TSParsing.parsingTScriptA(Textures[i].FileName))
         {
             m->m_csTScript = new TextureScript;
             m->m_csTScript->setScript((TextureScript&)TSParsing);
@@ -2721,7 +2721,7 @@ bool BMD::Open(char* DirName, char* ModelFileName)
     for (i = 0; i < NumBones; i++)
     {
         Bone_t* b = &Bones[i];
-        b->Dummy = *((char*)(Data + DataPtr)); DataPtr += 1;
+        b->Dummy = *((wchar_t*)(Data + DataPtr)); DataPtr += 1;
         if (!b->Dummy)
         {
             memcpy(b->Name, Data + DataPtr, 32); DataPtr += 32;
@@ -2749,12 +2749,12 @@ bool BMD::Open(char* DirName, char* ModelFileName)
     return true;
 }
 
-bool BMD::Save(char* DirName, char* ModelFileName)
+bool BMD::Save(wchar_t* DirName, wchar_t* ModelFileName)
 {
-    char ModelName[64];
-    strcpy(ModelName, DirName);
-    strcat(ModelName, ModelFileName);
-    FILE* fp = fopen(ModelName, "wb");
+    wchar_t ModelName[64];
+    wcscpy(ModelName, DirName);
+    wcscat(ModelName, ModelFileName);
+    FILE* fp = _wfopen(ModelName, L"wb");
     if (fp == NULL) return false;
     putc('B', fp);
     putc('M', fp);
@@ -2815,7 +2815,7 @@ bool BMD::Save(char* DirName, char* ModelFileName)
     return true;
 }
 
-bool BMD::Open2(char* DirName, char* ModelFileName, bool bReAlloc)
+bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
 {
     if (true == m_bCompletedAlloc)
     {
@@ -2830,10 +2830,10 @@ bool BMD::Open2(char* DirName, char* ModelFileName, bool bReAlloc)
         }
     }
 
-    char ModelName[64];
-    strcpy(ModelName, DirName);
-    strcat(ModelName, ModelFileName);
-    FILE* fp = fopen(ModelName, "rb");
+    wchar_t ModelName[64];
+    wcscpy(ModelName, DirName);
+    wcscat(ModelName, ModelFileName);
+    FILE* fp = _wfopen(ModelName, L"rb");
     if (fp == NULL)
     {
         m_bCompletedAlloc = false;
@@ -2849,7 +2849,7 @@ bool BMD::Open2(char* DirName, char* ModelFileName, bool bReAlloc)
 
     int Size;
     int DataPtr = 3;
-    Version = *((char*)(Data + DataPtr)); DataPtr += 1;
+    Version = *((wchar_t*)(Data + DataPtr)); DataPtr += 1;
     if (Version == 12)
     {
         long lSize = *((long*)(Data + DataPtr)); DataPtr += sizeof(long);
@@ -2911,7 +2911,7 @@ bool BMD::Open2(char* DirName, char* ModelFileName, bool bReAlloc)
 
         TextureScriptParsing TSParsing;
 
-        if (TSParsing.parsingTScript(Textures[i].FileName))
+        if (TSParsing.parsingTScriptA(Textures[i].FileName))
         {
             m->m_csTScript = new TextureScript;
             m->m_csTScript->setScript((TextureScript&)TSParsing);
@@ -2943,7 +2943,7 @@ bool BMD::Open2(char* DirName, char* ModelFileName, bool bReAlloc)
     for (i = 0; i < NumBones; i++)
     {
         Bone_t* b = &Bones[i];
-        b->Dummy = *((char*)(Data + DataPtr)); DataPtr += 1;
+        b->Dummy = *((wchar_t*)(Data + DataPtr)); DataPtr += 1;
         if (!b->Dummy)
         {
             memcpy(b->Name, Data + DataPtr, 32); DataPtr += 32;
@@ -2974,12 +2974,12 @@ bool BMD::Open2(char* DirName, char* ModelFileName, bool bReAlloc)
     return true;
 }
 
-bool BMD::Save2(char* DirName, char* ModelFileName)
+bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
 {
-    char ModelName[64];
-    strcpy(ModelName, DirName);
-    strcat(ModelName, ModelFileName);
-    FILE* fp = fopen(ModelName, "wb");
+    wchar_t ModelName[64];
+    wcscpy(ModelName, DirName);
+    wcscat(ModelName, ModelFileName);
+    FILE* fp = _wfopen(ModelName, L"wb");
     if (fp == NULL) return false;
     putc('B', fp);
     putc('M', fp);

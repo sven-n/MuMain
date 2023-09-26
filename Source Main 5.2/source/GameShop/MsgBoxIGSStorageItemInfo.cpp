@@ -50,16 +50,16 @@ bool CMsgBoxIGSStorageItemInfo::IsVisible() const
     return true;
 }
 
-void CMsgBoxIGSStorageItemInfo::Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, unicode::t_char szItemType, unicode::t_char* pszName, unicode::t_char* pszNum, unicode::t_char* pszPeriod)
+void CMsgBoxIGSStorageItemInfo::Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, char szItemType, wchar_t* pszName, wchar_t* pszNum, wchar_t* pszPeriod)
 {
     m_iStorageSeq = iStorageSeq;
     m_iStorageItemSeq = iStorageItemSeq;
     m_wItemCode = wItemCode;
     m_szItemType = szItemType;
 
-    strcpy(m_szName, pszName);
-    sprintf(m_szNum, GlobalText[3040], pszNum);
-    sprintf(m_szPeriod, GlobalText[3039], pszPeriod);
+    wcscpy(m_szName, pszName);
+    wsprintf(m_szNum, GlobalText[3040], pszNum);
+    wsprintf(m_szPeriod, GlobalText[3039], pszPeriod);
 }
 
 void CMsgBoxIGSStorageItemInfo::Release()
@@ -187,20 +187,20 @@ void CMsgBoxIGSStorageItemInfo::RenderTexts()
 
 #ifdef FOR_WORK
     // debug
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        sprintf(szText, "Bad Item Index");
+        wsprintf(szText, L"Bad Item Index");
     }
     else
     {
-        sprintf(szText, "ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+        wsprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
     }
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Storage Seq : %d", m_iStorageSeq);
+    wsprintf(szText, L"Storage Seq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Storage ItemSeq : %d", m_iStorageItemSeq);
+    wsprintf(szText, L"Storage ItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }
@@ -213,8 +213,8 @@ void CMsgBoxIGSStorageItemInfo::RenderButtons()
 
 void CMsgBoxIGSStorageItemInfo::LoadImages()
 {
-    LoadBitmap("Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\InGameShop\\ingame_Box_List_A.tga", IMAGE_IGS_FRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\ingame_Box_List_A.tga", IMAGE_IGS_FRAME, GL_LINEAR);
 }
 
 void CMsgBoxIGSStorageItemInfo::UnloadImages()

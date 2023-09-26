@@ -16,7 +16,7 @@ extern int MouseX, MouseY;
 extern bool g_bWndActive;
 #endif	// ASG_FIX_ACTIVATE_APP_INPUT
 
-bool SEASON3B::CreateOkMessageBox(const unicode::t_string& strMsg, DWORD dwColor, float fPriority)
+bool SEASON3B::CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor, float fPriority)
 {
     CNewUICommonMessageBox* pMsgBox = g_MessageBox->NewMessageBox(MSGBOX_CLASS(CNewUICommonMessageBox));
     if (pMsgBox)

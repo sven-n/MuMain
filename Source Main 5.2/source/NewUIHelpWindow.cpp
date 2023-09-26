@@ -95,7 +95,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
     EnableAlphaTest();
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-    extern char TextList[50][100];
+    extern wchar_t TextList[50][100];
     extern int TextListColor[50];
     extern int TextBold[50];
 
@@ -103,7 +103,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
     {
         int iTextNum = 0;
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         unicode::_strcpy(TextList[iTextNum], GlobalText[120]);
@@ -111,7 +111,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         TextBold[iTextNum] = true;
         iTextNum++;
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         for (int i = 0; i < 19; ++i)
@@ -122,7 +122,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
             iTextNum++;
         }
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         RenderTipTextList(1, 1, iTextNum, 0, RT3_SORT_CENTER);
@@ -131,7 +131,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
     {
         int iTextNum = 0;
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         unicode::_strcpy(TextList[iTextNum], GlobalText[140]);
@@ -139,7 +139,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         TextBold[iTextNum] = true;
         iTextNum++;
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         for (int i = 0; i < 16; ++i)
@@ -150,7 +150,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
             iTextNum++;
         }
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         RenderTipTextList(1, 1, iTextNum, 0, RT3_SORT_CENTER);
@@ -159,7 +159,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
     {
         int iTextNum = 0;
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         unicode::_strcpy(TextList[iTextNum], GlobalText[2421]);
@@ -175,7 +175,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
             iTextNum++;
         }
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         RenderTipTextList(1, 1, iTextNum, 0, RT3_SORT_LEFT);
@@ -184,7 +184,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
     {
         int iTextNum = 0;
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         unicode::_strcpy(TextList[iTextNum], GlobalText[2446]);
@@ -209,7 +209,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
             }
         }
 
-        unicode::_sprintf(TextList[iTextNum], "\n");
+        wsprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
         RenderTipTextList(1, 1, iTextNum, 0, RT3_SORT_LEFT);

@@ -195,7 +195,7 @@ void COptionWin::RenderControls()
         int((m_winBack.GetYPos() + 10) / g_fScreenRate_y),
         GlobalText[385], m_winBack.GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
 
-    const char* apszBtnText[3] =
+    const wchar_t* apszBtnText[3] =
     { GlobalText[386], GlobalText[387], GlobalText[919] };
     for (int i = 0; i <= OW_BTN_SLIDE_HELP; ++i)
     {
@@ -204,17 +204,17 @@ void COptionWin::RenderControls()
     }
 
     int nTextPosY;
-    const char* apszSldText[OW_SLD_MAX] = { GlobalText[389], GlobalText[1840] };
+    const wchar_t* apszSldText[OW_SLD_MAX] = { GlobalText[389], GlobalText[1840] };
     int anVal[OW_SLD_MAX] = { g_pOption->GetVolumeLevel(), g_pOption->GetRenderLevel() * 2 + 5 };
 
-    char szVal[3];
+    wchar_t szVal[3];
 
     for (int i = 0; i < OW_SLD_MAX; ++i)
     {
         nTextPosY = int((m_aSlider[i].GetYPos() - 18) / g_fScreenRate_y);
         g_pRenderText->RenderText(int(m_aSlider[i].GetXPos() / g_fScreenRate_x), nTextPosY, apszSldText[i]);
 
-        ::_itoa(anVal[i], szVal, 10);
+        ::_itow(anVal[i], szVal, 10);
         g_pRenderText->RenderText(int((m_aSlider[i].GetXPos() + 85) / g_fScreenRate_x), nTextPosY, szVal);
 
         m_aSlider[i].Render();

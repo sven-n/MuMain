@@ -23,12 +23,12 @@ class TGlobalText
 
     class CKeyCode
     {
-        std::string	m_strKeyCode;
+        std::wstring	m_strKeyCode;
     public:
         CKeyCode(int key)
         {
-            char szKeyCode[12] = { 0, };
-            itoa(key, szKeyCode, 10);
+            wchar_t szKeyCode[12] = { 0, };
+            _itow(key, szKeyCode, 10);
             m_strKeyCode = szKeyCode;
 
             if (m_strKeyCode.size() < 9)
@@ -42,18 +42,18 @@ class TGlobalText
 
         WORD GetTypeCode()
         {
-            std::string strTypeCode(m_strKeyCode, 0, 2);
-            return atoi(strTypeCode.c_str());
+            std::wstring strTypeCode(m_strKeyCode, 0, 2);
+            return _wtoi(strTypeCode.c_str());
         }
         WORD GetCountryCode()
         {
-            std::string strCountryCode(m_strKeyCode, 2, 3);
-            return atoi(strCountryCode.c_str());
+            std::wstring strCountryCode(m_strKeyCode, 2, 3);
+            return _wtoi(strCountryCode.c_str());
         }
         WORD GetIndexCode()
         {
-            std::string strIndexCode(m_strKeyCode, 5, 4);
-            return atoi(strIndexCode.c_str());
+            std::wstring strIndexCode(m_strKeyCode, 5, 4);
+            return _wtoi(strIndexCode.c_str());
         }
     };
 
@@ -85,9 +85,9 @@ public:
         LD_ALL_TEXTS = 0xFFFFFFFF
     };
 
-    bool Load(const std::string& strFilePath, DWORD dwLoadDisposition)
+    bool Load(const std::wstring& strFilePath, DWORD dwLoadDisposition)
     {
-        FILE* fp = fopen(strFilePath.c_str(), "rb");
+        FILE* fp = _wfopen(strFilePath.c_str(), L"rb");
         if (NULL == fp)
             return false;
 
@@ -117,9 +117,9 @@ public:
         fclose(fp);
         return true;
     }
-    bool Save(const std::string& strFilePath)
+    bool Save(const std::wstring& strFilePath)
     {
-        FILE* fp = fopen(strFilePath.c_str(), "wb");
+        FILE* fp = _wfopen(strFilePath.c_str(), L"wb");
         if (NULL == fp)
             return false;
 
@@ -162,18 +162,18 @@ public:
     const T* Get(int key) { return m_StringSet[key]; }
     size_t GetStringSize(int key) { return m_StringSet.FindObj(key).size(); }
 
-    WORD GetNumCountryCode(const std::string& strAlpha3Code)
+    WORD GetNumCountryCode(const std::wstring& strAlpha3Code)
     {	//. strAlpha3Code: Official Alpha-3 Code
-        if (0 == strAlpha3Code.compare("USA") || 0 == strAlpha3Code.compare("CAN")) return 130;
-        if (0 == strAlpha3Code.compare("JPN")) return 450;
-        if (0 == strAlpha3Code.compare("TPE")) return 471;
-        if (0 == strAlpha3Code.compare("PHI")) return 480;
-        if (0 == strAlpha3Code.compare("CHN")) return 690;
-        if (0 == strAlpha3Code.compare("BRA")) return 789;
-        if (0 == strAlpha3Code.compare("KOR")) return 880;
-        if (0 == strAlpha3Code.compare("THA")) return 885;
-        if (0 == strAlpha3Code.compare("VIE")) return 893;
-        if (0 == strAlpha3Code.compare("FRN")) return 995;
+        if (0 == strAlpha3Code.compare(L"USA") || 0 == strAlpha3Code.compare(L"CAN")) return 130;
+        if (0 == strAlpha3Code.compare(L"JPN")) return 450;
+        if (0 == strAlpha3Code.compare(L"TPE")) return 471;
+        if (0 == strAlpha3Code.compare(L"PHI")) return 480;
+        if (0 == strAlpha3Code.compare(L"CHN")) return 690;
+        if (0 == strAlpha3Code.compare(L"BRA")) return 789;
+        if (0 == strAlpha3Code.compare(L"KOR")) return 880;
+        if (0 == strAlpha3Code.compare(L"THA")) return 885;
+        if (0 == strAlpha3Code.compare(L"VIE")) return 893;
+        if (0 == strAlpha3Code.compare(L"FRN")) return 995;
 
         return 0;
     }
@@ -196,34 +196,34 @@ protected:
     {
         CKeyCode KeyCode(key);
         if (((dwLoadDisposition & LD_USA_CANADA_TEXTS) == LD_USA_CANADA_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("USA") || KeyCode.GetCountryCode() == GetNumCountryCode("CAN")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"USA") || KeyCode.GetCountryCode() == GetNumCountryCode(L"CAN")))
             return true;
         if (((dwLoadDisposition & LD_JAPAN_A_TEXTS) == LD_JAPAN_A_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("JPN")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"JPN")))
             return true;
         if (((dwLoadDisposition & LD_TAIWAN_TEXTS) == LD_TAIWAN_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("TPE")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"TPE")))
             return true;
         if (((dwLoadDisposition & LD_PHILIPPINES_TEXTS) == LD_PHILIPPINES_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("PHI")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"PHI")))
             return true;
         if (((dwLoadDisposition & LD_CHINA_A_TEXTS) == LD_CHINA_A_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("CHN")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"CHN")))
             return true;
         if (((dwLoadDisposition & LD_BRAZIL_A_TEXTS) == LD_BRAZIL_A_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("BRA")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"BRA")))
             return true;
         if (((dwLoadDisposition & LD_SOUTH_KOREA_TEXTS) == LD_SOUTH_KOREA_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("KOR")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"KOR")))
             return true;
         if (((dwLoadDisposition & LD_THAILAND_TEXTS) == LD_THAILAND_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("THA")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"THA")))
             return true;
         if (((dwLoadDisposition & LD_VIETNAM_TEXTS) == LD_VIETNAM_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("VIE")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"VIE")))
             return true;
         if (((dwLoadDisposition & LD_FOREIGN_TEXTS) == LD_FOREIGN_TEXTS) &&
-            (KeyCode.GetCountryCode() == GetNumCountryCode("FRN")))
+            (KeyCode.GetCountryCode() == GetNumCountryCode(L"FRN")))
             return true;
         return false;
     }
@@ -232,6 +232,6 @@ protected:
 typedef TGlobalText<char>		CGlobalText;
 typedef TGlobalText<wchar_t>	CGlobalTextW;
 
-extern CGlobalText GlobalText;
+extern CGlobalTextW GlobalText;
 
 #endif /* _GLOBALTEXT_H_ */

@@ -243,7 +243,7 @@ void CNewUITrade::RenderBackImage()
 
 void CNewUITrade::RenderText()
 {
-    unicode::t_char szTemp[128];
+    wchar_t szTemp[128];
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
@@ -275,14 +275,14 @@ void CNewUITrade::RenderText()
     ConvertYourLevel(nLevel, dwColor);
     if (nLevel == 400)
     {
-        unicode::_sprintf(szTemp, "%d", nLevel);
+        wsprintf(szTemp, L"%d", nLevel);
     }
     else
     {
-        unicode::_sprintf(szTemp, GlobalText[369], nLevel);
+        wsprintf(szTemp, GlobalText[369], nLevel);
     }
     g_pRenderText->SetTextColor(dwColor);
-    g_pRenderText->RenderText(m_Pos.x + 134, m_Pos.y + 48, "Lv.");
+    g_pRenderText->RenderText(m_Pos.x + 134, m_Pos.y + 48, L"Lv.");
     g_pRenderText->RenderText(m_Pos.x + 148, m_Pos.y + 48, szTemp);
 
     ::ConvertGold(m_nYourTradeGold, szTemp);
@@ -387,18 +387,18 @@ float CNewUITrade::GetLayerDepth()
 
 void CNewUITrade::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_TRADE_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_TRADE_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_TRADE_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_TRADE_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_TRADE_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_TRADE_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Account_title.tga", IMAGE_TRADE_NICK_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_money.tga", IMAGE_TRADE_MONEY, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_accept.tga", IMAGE_TRADE_CONFIRM, GL_LINEAR);
-    LoadBitmap("Interface\\CursorSitDown.tga", IMAGE_TRADE_WARNING_ARROW, GL_LINEAR, GL_CLAMP);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_TRADE_BTN_CLOSE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_money01.tga", IMAGE_TRADE_BTN_ZEN_INPUT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_TRADE_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_TRADE_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_TRADE_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_TRADE_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_TRADE_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_TRADE_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Account_title.tga", IMAGE_TRADE_NICK_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_money.tga", IMAGE_TRADE_MONEY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_accept.tga", IMAGE_TRADE_CONFIRM, GL_LINEAR);
+    LoadBitmap(L"Interface\\CursorSitDown.tga", IMAGE_TRADE_WARNING_ARROW, GL_LINEAR, GL_CLAMP);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_TRADE_BTN_CLOSE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_money01.tga", IMAGE_TRADE_BTN_ZEN_INPUT, GL_LINEAR);
 }
 
 void CNewUITrade::UnloadImages()
@@ -470,7 +470,7 @@ void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
     if (::IsTradeBan(pItemObj))
     {
         g_pChatListBox->AddText(
-            "", GlobalText[494], SEASON3B::TYPE_ERROR_MESSAGE);
+            L"", GlobalText[494], SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else
     {
@@ -580,9 +580,9 @@ void CNewUITrade::AlertTrade()
     SendRequestTradeResult(m_bMyConfirm);
 }
 
-void CNewUITrade::GetYourID(char* pszYourID)
+void CNewUITrade::GetYourID(wchar_t* pszYourID)
 {
-    ::strcpy(pszYourID, m_szYourID);
+    ::wcscpy(pszYourID, m_szYourID);
 }
 
 void CNewUITrade::ProcessToReceiveTradeRequest(BYTE* pbyYourID)
@@ -606,11 +606,11 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
     switch (pTradeData->SubCode)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 2:
-        g_pChatListBox->AddText("", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 1:
@@ -621,11 +621,11 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
         int x = 260 * MouseX / 640;
         ::SetCursorPos(x * WindowWidth / 640, MouseY * WindowHeight / 480);
 
-        char szTempID[MAX_ID_SIZE + 1];
+        wchar_t szTempID[MAX_ID_SIZE + 1];
         ::memcpy(szTempID, pTradeData->ID, MAX_ID_SIZE);
         szTempID[MAX_ID_SIZE] = NULL;
 
-        if (!m_bTradeAlert && ::strcmp(m_szYourID, szTempID))
+        if (!m_bTradeAlert && ::wcscmp(m_szYourID, szTempID))
             InitYourInvenBackUp();
 
         m_bTradeAlert = false;
@@ -796,7 +796,7 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     {
     case 0:
     {
-        g_pChatListBox->AddText("", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
 
         m_bTradeAlert = false;
 
@@ -807,15 +807,15 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     break;
 
     case 2:
-        g_pChatListBox->AddText("", GlobalText[495], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[495], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 3:
-        g_pChatListBox->AddText("", GlobalText[496], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[496], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 4:
-        g_pChatListBox->AddText("", GlobalText[2108], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2108], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
 

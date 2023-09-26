@@ -17,15 +17,15 @@ CLoadData::~CLoadData() // OK
 {
 }
 
-void CLoadData::AccessModel(int Type, char* Dir, char* FileName, int i)
+void CLoadData::AccessModel(int Type, wchar_t* Dir, wchar_t* FileName, int i)
 {
-    char Name[64];
+    wchar_t Name[64];
     if (i == -1)
-        sprintf(Name, "%s.bmd", FileName);
+        wsprintf(Name, L"%s.bmd", FileName);
     else if (i < 10)
-        sprintf(Name, "%s0%d.bmd", FileName, i);
+        wsprintf(Name, L"%s0%d.bmd", FileName, i);
     else
-        sprintf(Name, "%s%d.bmd", FileName, i);
+        wsprintf(Name, L"%s%d.bmd", FileName, i);
 
     bool Success = false;
 
@@ -33,16 +33,16 @@ void CLoadData::AccessModel(int Type, char* Dir, char* FileName, int i)
 
     Success = Models[Type].Open2(Dir, Name);
 
-    if (Success == false && (strcmp(FileName, "Monster") == NULL || strcmp(FileName, "Player") == NULL || strcmp(FileName, "PlayerTest") == NULL || strcmp(FileName, "Angel") == NULL))
+    if (Success == false && (wcscmp(FileName, L"Monster") == NULL || wcscmp(FileName, L"Player") == NULL || wcscmp(FileName, L"PlayerTest") == NULL || wcscmp(FileName, L"Angel") == NULL))
     {
-        char Text[256];
-        sprintf(Text, "%s file does not exist.", Name);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s file does not exist.", Name);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
 }
 
-void CLoadData::OpenTexture(int Model, char* SubFolder, int Wrap, int Type, bool Check)
+void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, bool Check)
 {
     BMD* pModel = &Models[Model];
 
@@ -50,18 +50,19 @@ void CLoadData::OpenTexture(int Model, char* SubFolder, int Wrap, int Type, bool
     {
         Texture_t* pTexture = &pModel->Textures[i];
 
-        char szFullPath[256] = { 0, };
-        strcpy(szFullPath, "Data\\");
-        strcat(szFullPath, SubFolder);
-        strcat(szFullPath, pTexture->FileName);
+        // todo convert texture filename
+        wchar_t szFullPath[256] = { 0, };
+        wcscpy(szFullPath, L"Data\\");
+        wcscat(szFullPath, SubFolder);
+        wcscat(szFullPath, pTexture->FileName);
 
-        char __ext[_MAX_EXT] = { 0, };
-        _splitpath(pTexture->FileName, NULL, NULL, NULL, __ext);
+        wchar_t __ext[_MAX_EXT] = { 0, };
+        _wsplitpath(pTexture->FileName, NULL, NULL, NULL, __ext);
         if (pTexture->FileName[0] == 's' && pTexture->FileName[1] == 'k' && pTexture->FileName[2] == 'i')
         {
             pModel->IndexTexture[i] = BITMAP_SKIN;
         }
-        else if (!strnicmp(pTexture->FileName, "level", 5))
+        else if (!wcsnicmp(pTexture->FileName, L"level", 5))
         {
             pModel->IndexTexture[i] = BITMAP_SKIN;
         }
@@ -92,8 +93,8 @@ void CLoadData::OpenTexture(int Model, char* SubFolder, int Wrap, int Type, bool
             }
             else
             {
-                char szErrorMsg[256] = { 0, };
-                sprintf(szErrorMsg, "OpenTexture Failed: %s of %s", szFullPath, pModel->Name);
+                wchar_t szErrorMsg[256] = { 0, };
+                wsprintf(szErrorMsg, L"OpenTexture Failed: %s of %s", szFullPath, pModel->Name);
 #ifdef FOR_WORK
                 PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK

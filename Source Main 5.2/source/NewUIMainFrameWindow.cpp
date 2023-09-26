@@ -55,22 +55,22 @@ SEASON3B::CNewUIMainFrameWindow::~CNewUIMainFrameWindow()
 
 void SEASON3B::CNewUIMainFrameWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_menu01.jpg", IMAGE_MENU_1, GL_LINEAR);
-    LoadBitmap("Interface\\newui_menu02.jpg", IMAGE_MENU_2, GL_LINEAR);
-    LoadBitmap("Interface\\partCharge1\\newui_menu03.jpg", IMAGE_MENU_3, GL_LINEAR);
-    LoadBitmap("Interface\\newui_menu02-03.jpg", IMAGE_MENU_2_1, GL_LINEAR);
-    LoadBitmap("Interface\\newui_menu_blue.jpg", IMAGE_GAUGE_BLUE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_menu_green.jpg", IMAGE_GAUGE_GREEN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_menu_red.jpg", IMAGE_GAUGE_RED, GL_LINEAR);
-    LoadBitmap("Interface\\newui_menu_ag.jpg", IMAGE_GAUGE_AG, GL_LINEAR);
-    LoadBitmap("Interface\\newui_menu_sd.jpg", IMAGE_GAUGE_SD, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exbar.jpg", IMAGE_GAUGE_EXBAR, GL_LINEAR);
-    LoadBitmap("Interface\\Exbar_Master.jpg", IMAGE_MASTER_GAUGE_BAR, GL_LINEAR);
-    LoadBitmap("Interface\\partCharge1\\newui_menu_Bt05.jpg", IMAGE_MENU_BTN_CSHOP, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\partCharge1\\newui_menu_Bt01.jpg", IMAGE_MENU_BTN_CHAINFO, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\partCharge1\\newui_menu_Bt02.jpg", IMAGE_MENU_BTN_MYINVEN, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\partCharge1\\newui_menu_Bt03.jpg", IMAGE_MENU_BTN_FRIEND, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\partCharge1\\newui_menu_Bt04.jpg", IMAGE_MENU_BTN_WINDOW, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\newui_menu01.jpg", IMAGE_MENU_1, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_menu02.jpg", IMAGE_MENU_2, GL_LINEAR);
+    LoadBitmap(L"Interface\\partCharge1\\newui_menu03.jpg", IMAGE_MENU_3, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_menu02-03.jpg", IMAGE_MENU_2_1, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_menu_blue.jpg", IMAGE_GAUGE_BLUE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_menu_green.jpg", IMAGE_GAUGE_GREEN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_menu_red.jpg", IMAGE_GAUGE_RED, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_menu_ag.jpg", IMAGE_GAUGE_AG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_menu_sd.jpg", IMAGE_GAUGE_SD, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exbar.jpg", IMAGE_GAUGE_EXBAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\Exbar_Master.jpg", IMAGE_MASTER_GAUGE_BAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt05.jpg", IMAGE_MENU_BTN_CSHOP, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt01.jpg", IMAGE_MENU_BTN_CHAINFO, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt02.jpg", IMAGE_MENU_BTN_MYINVEN, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt03.jpg", IMAGE_MENU_BTN_FRIEND, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt04.jpg", IMAGE_MENU_BTN_WINDOW, GL_LINEAR, GL_CLAMP_TO_EDGE);
 }
 
 void SEASON3B::CNewUIMainFrameWindow::UnloadImages()
@@ -297,10 +297,10 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 
     SEASON3B::RenderNumber(x + 25, 480 - 18, wLife);
 
-    char strTipText[256];
+    wchar_t strTipText[256];
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
-        sprintf(strTipText, GlobalText[358], wLife, wLifeMax);
+        wsprintf(strTipText, GlobalText[358], wLife, wLifeMax);
         RenderTipText((int)x, (int)418, strTipText);
     }
 
@@ -320,7 +320,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
     // mana
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
-        sprintf(strTipText, GlobalText[359], wMana, wManaMax);
+        wsprintf(strTipText, GlobalText[359], wMana, wManaMax);
         RenderTipText((int)x, (int)418, strTipText);
     }
 }
@@ -361,9 +361,9 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
 
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
-        char strTipText[256];
+        wchar_t strTipText[256];
 
-        sprintf(strTipText, GlobalText[214], dwSkillMana, dwMaxSkillMana);
+        wsprintf(strTipText, GlobalText[214], dwSkillMana, dwMaxSkillMana);
         RenderTipText((int)x - 20, (int)418, strTipText);
     }
 }
@@ -406,9 +406,9 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
     y = 480.f - 10.f - 39.f;
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
-        char strTipText[256];
+        wchar_t strTipText[256];
 
-        sprintf(strTipText, GlobalText[2037], wShield, wMaxShield);
+        wsprintf(strTipText, GlobalText[2037], wShield, wMaxShield);
         RenderTipText((int)x - 20, (int)418, strTipText);
     }
 }
@@ -537,9 +537,9 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
         x = 2.f; y = 473.f; width = 629.f; height = 4.f;
         if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
         {
-            char strTipText[256];
+            wchar_t strTipText[256];
 
-            sprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
+            wsprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
             RenderTipText(280, 418, strTipText);
         }
     }
@@ -638,9 +638,9 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
         x = 2.f; y = 473.f; width = 629.f; height = 4.f;
         if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
         {
-            char strTipText[256];
+            wchar_t strTipText[256];
 
-            sprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
+            wsprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
             RenderTipText(280, 418, strTipText);
         }
     }
@@ -796,7 +796,7 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
             {
                 if (g_pChatListBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
                 {
-                    g_pChatListBox->AddText("", GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pChatListBox->AddText(L"", GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else
@@ -1352,16 +1352,16 @@ void SEASON3B::CNewUISkillList::Reset()
 
 void SEASON3B::CNewUISkillList::LoadImages()
 {
-    LoadBitmap("Interface\\newui_skill.jpg", IMAGE_SKILL1, GL_LINEAR);
-    LoadBitmap("Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
-    LoadBitmap("Interface\\newui_command.jpg", IMAGE_COMMAND, GL_LINEAR);
-    LoadBitmap("Interface\\newui_skillbox.jpg", IMAGE_SKILLBOX, GL_LINEAR);
-    LoadBitmap("Interface\\newui_skillbox2.jpg", IMAGE_SKILLBOX_USE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_non_skill.jpg", IMAGE_NON_SKILL1, GL_LINEAR);
-    LoadBitmap("Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
-    LoadBitmap("Interface\\newui_non_command.jpg", IMAGE_NON_COMMAND, GL_LINEAR);
-    LoadBitmap("Interface\\newui_skill3.jpg", IMAGE_SKILL3, GL_LINEAR);
-    LoadBitmap("Interface\\newui_non_skill3.jpg", IMAGE_NON_SKILL3, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skill.jpg", IMAGE_SKILL1, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_command.jpg", IMAGE_COMMAND, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skillbox.jpg", IMAGE_SKILLBOX, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skillbox2.jpg", IMAGE_SKILLBOX_USE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_non_skill.jpg", IMAGE_NON_SKILL1, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_non_command.jpg", IMAGE_NON_COMMAND, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skill3.jpg", IMAGE_SKILL3, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_non_skill3.jpg", IMAGE_NON_SKILL3, GL_LINEAR);
 }
 
 void SEASON3B::CNewUISkillList::UnloadImages()

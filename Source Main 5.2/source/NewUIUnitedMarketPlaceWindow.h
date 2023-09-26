@@ -71,7 +71,7 @@ namespace SEASON3B
         bool BtnProcess();
         void RenderItem3D();
 
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption);
+        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
 
         int m_iRemainTime;
         BOOL m_bIsEnterButtonLocked;

@@ -58,7 +58,7 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
 {
     int iProductSeq;
     int iValue = 0;
-    unicode::t_char szText[MAX_TEXT_LENGTH] = { '\0', };
+    wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
 
     m_iPackageSeq = pPackage->PackageProductSeq;
     m_iDisplaySeq = pPackage->ProductDisplaySeq;
@@ -73,9 +73,9 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
         m_BtnPresent.SetEnable(false);
     }
 
-    strncpy(m_szPackageName, pPackage->PackageProductName, MAX_TEXT_LENGTH);
+    wcsncpy(m_szPackageName, pPackage->PackageProductName, MAX_TEXT_LENGTH);
     ConvertGold(pPackage->Price, szText);
-    sprintf(m_szPrice, "%s %s", szText, pPackage->PricUnitName);
+    wsprintf(m_szPrice, L"%s %s", szText, pPackage->PricUnitName);
 
     // Period
     pPackage->SetProductSeqFirst();
@@ -85,14 +85,14 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
 
     if (iValue > 0)
     {
-        sprintf(m_szPeriod, "%d %s", iValue, szText);
+        wsprintf(m_szPeriod, L"%d %s", iValue, szText);
     }
     else
     {
-        sprintf(m_szPeriod, "-");
+        wsprintf(m_szPeriod, L"-");
     }
 
-    m_wItemCode = atoi(pPackage->InGamePackageID);
+    m_wItemCode = _wtoi(pPackage->InGamePackageID);
 
     ZeroMemory(m_szDescription, sizeof(unicode::t_char) * UIMAX_TEXT_LINE * MAX_TEXT_LENGTH);
 
@@ -183,24 +183,24 @@ void CMsgBoxIGSBuyPackageItem::RenderTexts()
     g_pRenderText->RenderText(GetPos().x + IGS_TEXT_PRICE_POS_X, GetPos().y + IGS_TEXT_PRICE_POX_Y, m_szPrice, IGS_TEXT_PRICE_WIDTH, 0, RT3_SORT_RIGHT);
 
 #ifdef FOR_WORK
-    unicode::t_char szText[256] = { '\0', };
+    wchar_t szText[256] = { '\0', };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        sprintf(szText, "아이템코드가 없습니다.");
+        wsprintf(szText, L"아이템코드가 없습니다.");
     }
     else
     {
-        sprintf(szText, "ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+        wsprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
     }
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 200, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Package Seq : %d", m_iPackageSeq);
+    wsprintf(szText, L"Package Seq : %d", m_iPackageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 200, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Display Seq : %d", m_iDisplaySeq);
+    wsprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 200, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Price Seq : 0");
+    wsprintf(szText, L"Price Seq : 0");
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 200, 0, RT3_SORT_LEFT);
-    sprintf(szText, "CashType : %d", m_iCashType);
+    wsprintf(szText, L"CashType : %d", m_iCashType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 50, szText, 200, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }
@@ -292,8 +292,8 @@ CALLBACK_RESULT CMsgBoxIGSBuyPackageItem::CancelBtnDown(class CNewUIMessageBoxBa
 
 void CMsgBoxIGSBuyPackageItem::LoadImages()
 {
-    LoadBitmap("Interface\\InGameShop\\Ingame_pack_back01.tga", IMAGE_IGS_FRAME, GL_LINEAR);
-    LoadBitmap("Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_pack_back01.tga", IMAGE_IGS_FRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
 }
 
 void CMsgBoxIGSBuyPackageItem::UnloadImages()

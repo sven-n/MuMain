@@ -724,7 +724,7 @@ void CUIMng::Render()
     }
 }
 
-void CUIMng::PopUpMsgWin(int nMsgCode, char* pszMsg)
+void CUIMng::PopUpMsgWin(int nMsgCode, wchar_t* pszMsg)
 {
     if (UIM_SCENE_NONE == m_nScene || UIM_SCENE_TITLE == m_nScene || UIM_SCENE_LOADING == m_nScene)
         return;
@@ -734,7 +734,7 @@ void CUIMng::PopUpMsgWin(int nMsgCode, char* pszMsg)
     m_MsgWin.PopUp(nMsgCode, pszMsg);
 }
 
-void CUIMng::AddServerMsg(char* pszMsg)
+void CUIMng::AddServerMsg(wchar_t* pszMsg)
 {
     if (UIM_SCENE_CHARACTER != m_nScene)
         return;

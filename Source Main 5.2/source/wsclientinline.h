@@ -1,5 +1,7 @@
 #pragma once
 
+#include <istream>
+
 #include "dsplaysound.h"
 #include "zzzscene.h"
 #include "zzzinterface.h"
@@ -14,14 +16,14 @@ extern ItemAddOptioninfo* g_pItemAddOptioninfo;
 
 #ifdef _DEBUG
 #define SAVE_PACKET
-#define PACKET_SAVE_FILE	"PacketList.txt"
+#define PACKET_SAVE_FILE	L"PacketList.txt"
 #include "./ExternalObject/leaf/stdleaf.h"
 #endif
 
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "NewUISystem.h"
 #include "ProtocolSend.h"
-#include "Utilities\Log\DebugAngel.h"
+
 
 // English Protocol:
 #define PACKET_MOVE         0xD4
@@ -39,10 +41,10 @@ extern int DirTable[16];
 
 void BuxConvert(BYTE* Buffer, int Size);
 
-__forceinline bool FindText2(char* Text, char* Token, bool First = false)
+__forceinline bool FindText2(wchar_t* Text, wchar_t* Token, bool First = false)
 {
-    int LengthToken = (int)strlen(Token);
-    int Length = (int)strlen(Text) - LengthToken;
+    int LengthToken = (int)wcslen(Token);
+    int Length = (int)wcslen(Text) - LengthToken;
     if (First)
         Length = 0;
     if (Length < 0)
@@ -70,9 +72,9 @@ __forceinline void SendPacket(const BYTE* buf, int32_t len)
 {
 #ifdef SAVE_PACKET
     LPPHEADER_DEFAULT_SUBCODE pData = (LPPHEADER_DEFAULT_SUBCODE)buf;
-    std::string timeString;
-    leaf::GetTimeString(timeString);
-    DebugAngel_Write((char*)PACKET_SAVE_FILE, "%s Send \t0x%02X 0x%02X (size = %d)\r\n", timeString.c_str(), pData->Header.HeadCode, pData->SubCode, len);
+    //std::wstring timeString;
+    //leaf::GetTimeString(timeString);
+    //DebugAngel_Write((wchar_t*)PACKET_SAVE_FILE, L"%s Send \t0x%02X 0x%02X (size = %d)\r\n", timeString.c_str(), pData->Header.HeadCode, pData->SubCode, len);
 #endif
 
     // TODO: this code is pure bullshit, i know. We should get rid of global variables.
@@ -107,12 +109,12 @@ __forceinline void SendPacket(const BYTE* buf, int32_t len)
 	WORD Index = ( WORD)( p_Index);\
 	spe.AddData( &Index, 2, FALSE);\
 	spe.Send();\
-	g_pChatListBox->AddText("",GlobalText[470],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	g_pChatListBox->AddText("",GlobalText[471],SEASON3B::TYPE_SYSTEM_MESSAGE);\
+	g_pChatListBox->AddText(L"",GlobalText[470],SEASON3B::TYPE_SYSTEM_MESSAGE);\
+	g_pChatListBox->AddText(L"",GlobalText[471],SEASON3B::TYPE_SYSTEM_MESSAGE);\
 }
 
 extern int  LogIn;
-extern char LogInID[MAX_ID_SIZE + 1];
+extern wchar_t LogInID[MAX_ID_SIZE + 1];
 
 extern bool First;
 extern int FirstTime;
@@ -127,7 +129,7 @@ __forceinline void SendCheck(void)
 
     //gProtocolSend.SendPingTest();
 
-    g_ConsoleDebug->Write(MCD_SEND, "SendCheck");
+    g_ConsoleDebug->Write(MCD_SEND, L"SendCheck");
 
     CStreamPacketEngine spe;
     spe.Init(0xC3, 0x0E);
@@ -176,32 +178,16 @@ __forceinline void SendCheck(void)
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 
-#define SendRequestLogIn( p_lpszID, p_lpszPassword)\
-{\
-	LogIn = 1;\
-	strcpy(LogInID, ( p_lpszID));\
-	CurrentProtocolState = REQUEST_LOG_IN;\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0xF1);\
-	spe << ( BYTE)0x01;\
-	char lpszID[MAX_ID_SIZE+1];\
-	char lpszPass[MAX_PASSWORD_SIZE+1];\
-	ZeroMemory( lpszID, MAX_ID_SIZE+1);\
-	ZeroMemory( lpszPass, MAX_PASSWORD_SIZE+1);\
-	strncpy(lpszID, p_lpszID, MAX_ID_SIZE);\
-	strncpy(lpszPass, p_lpszPassword, MAX_PASSWORD_SIZE);\
-	BuxConvert(( BYTE*)lpszID,MAX_ID_SIZE);\
-	BuxConvert(( BYTE*)lpszPass,MAX_PASSWORD_SIZE);\
-	spe.AddData( lpszID, MAX_ID_SIZE);\
-	spe.AddData( lpszPass, MAX_PASSWORD_SIZE);\
-	spe << GetTickCount();\
-	for(int i=0;i<SIZE_PROTOCOLVERSION;i++)\
-	spe << ( BYTE)( Version[i]-(i+1));\
-	for(int i=0;i<SIZE_PROTOCOLSERIAL;i++)\
-	spe << Serial[i];\
-	spe.Send();\
-	g_pChatListBox->AddText("",GlobalText[472],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	g_pChatListBox->AddText("",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
+__forceinline void SendRequestLogIn(wchar_t* p_lpszID, wchar_t* p_lpszPassword)
+{
+	LogIn = 1;
+	wcscpy(LogInID, ( p_lpszID));
+	CurrentProtocolState = REQUEST_LOG_IN;
+
+    //SocketClient->ToGameServer()->SendLoginLongPasswordStr(p_lpszID, p_lpszPassword, GetTickCount(), Version, Serial);
+	
+	g_pChatListBox->AddText(L"",GlobalText[472],SEASON3B::TYPE_SYSTEM_MESSAGE);\
+	g_pChatListBox->AddText(L"",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
 }
 
 extern bool LogOut;
@@ -214,12 +200,12 @@ __forceinline void SendRequestLogOut(int Flag)
     spe << (BYTE)0x02 << (BYTE)Flag;
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0xF1 [SendRequestLogOut]");
+    g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut]");
 }
 
-extern char Password[MAX_ID_SIZE + 1];
-extern char QuestionID[MAX_ID_SIZE + 1];
-extern char Question[31];
+extern wchar_t Password[MAX_ID_SIZE + 1];
+extern wchar_t QuestionID[MAX_ID_SIZE + 1];
+extern wchar_t Question[31];
 
 #define SendRequestCharactersList( byLanguage)\
 {\
@@ -237,8 +223,8 @@ extern char Question[31];
 	CStreamPacketEngine spe;\
 	spe.Init( 0xC1, 0xF3);\
 	spe << ( BYTE)0x01;\
-	spe.AddData( ( p_ID), strlen( p_ID));\
-	spe.AddNullData( MAX_ID_SIZE - strlen( p_ID));\
+	spe.AddData( ( p_ID), wcslen( p_ID));\
+	spe.AddNullData( MAX_ID_SIZE - wcslen( p_ID));\
 	spe << ( BYTE)( (( p_Class)<<4)+( p_Skin));\
 	spe.Send();\
 }
@@ -249,8 +235,8 @@ extern char Question[31];
 	CStreamPacketEngine spe;\
 	spe.Init( 0xC1, 0xF3);\
 	spe << ( BYTE)0x02;\
-	spe.AddData( ( p_ID), strlen( p_ID));\
-	spe.AddNullData( MAX_ID_SIZE - strlen( p_ID));\
+	spe.AddData( ( p_ID), wcslen( p_ID));\
+	spe.AddNullData( MAX_ID_SIZE - wcslen( p_ID));\
 	spe.AddData( ( p_Resident), 20);\
 	spe.Send();\
 }
@@ -261,8 +247,8 @@ extern char Question[31];
 	CStreamPacketEngine spe;\
 	spe.Init( 0xC1, 0xF3);\
 	spe << ( BYTE)0x03;\
-	spe.AddData( ( p_ID), strlen( ( p_ID)));\
-	spe.AddNullData( MAX_ID_SIZE - strlen( ( p_ID)));\
+	spe.AddData( ( p_ID), wcslen( ( p_ID)));\
+	spe.AddNullData( MAX_ID_SIZE - wcslen( ( p_ID)));\
 	spe.Send();\
 }
 
@@ -280,70 +266,68 @@ extern DWORD g_dwLatestZoneMoving;
 	g_bWhileMovingZone = FALSE;\
 }
 
-inline char ChatText[256];
+inline wchar_t ChatText[256];
 
-__forceinline void SendChat(const char* Text)
+inline bool IsWebzenCharacter()
 {
-    strcpy(ChatText, Text);
+	const std::wstring character_name = std::wstring(Hero->ID);
 
-    if (FindText2(Hero->ID, (char*)"webzen"))
-    {
-        BOOL bReturn = TRUE;
-        char* lspzCommand[2] = { "/", "!" };
-        for (int i = 0; i < sizeof(lspzCommand) / sizeof(char*); i++)
-        {
-            if (0 == strncmp(Text, lspzCommand[i], strlen(lspzCommand[i])))
-            {
-                bReturn = FALSE;
-                break;
-            }
-        }
-
-        if (bReturn)
-        {
-            return;
-        }
-    }
-    if (Hero->Dead > 0)
-    {
-        if (strlen(GlobalText[260]) > 0 && !strncmp(Text, GlobalText[260], strlen(GlobalText[260])))
-        {
-            return;
-        }
-    }
-    else if (Text[0] == '/')
-    {
-        if (strlen(GlobalText[264]) > 0 && !strncmp(Text, GlobalText[264], strlen(GlobalText[264])))
-        {
-            g_pChatInputBox->SetBlockWhisper(true);
-            g_pChatListBox->AddText("", GlobalText[267], SEASON3B::TYPE_SYSTEM_MESSAGE);
-            return;
-        }
-        else if (strlen(GlobalText[265]) && !strncmp(Text, GlobalText[265], strlen(GlobalText[265])))
-        {
-            g_pChatInputBox->SetBlockWhisper(false);
-            g_pChatListBox->AddText("", GlobalText[268], SEASON3B::TYPE_SYSTEM_MESSAGE);
-            return;
-        }
-    }
-
-    CStreamPacketEngine spe;
-    spe.Init(0xC1, 0x00);
-    spe.AddData(Hero->ID, MAX_ID_SIZE);
-    spe.AddData((void*)Text, (WORD)min(strlen(Text) + 1, MAX_CHAT_SIZE));
-    spe.Send();
+	return character_name.find(L"webzen") >= 0;
 }
 
-extern char ChatWhisperID[MAX_ID_SIZE + 1];
+__forceinline void SendChat(const std::wstring& chat_text)
+{
+	chat_text.copy(ChatText, chat_text.length());
+    //wcscpy(ChatText, Text);
+	
+
+    if (IsWebzenCharacter() && (chat_text.find(L"/") == 0 || chat_text.find(L"!") == 0))
+    {
+        return;
+    }
+
+    if (Hero->Dead > 0)
+    {
+        if (GlobalText.GetStringSize(260) > 0 && chat_text.find(GlobalText[260]) != 0)
+        {
+            return;
+        }
+    }
+    else if (chat_text[0] == '/')
+    {
+        if (GlobalText.GetStringSize(264) > 0 && chat_text.find(GlobalText[264]) != 0)
+        {
+            g_pChatInputBox->SetBlockWhisper(true);
+            g_pChatListBox->AddText(L"", GlobalText[267], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            return;
+        }
+
+        if (GlobalText.GetStringSize(265) > 0 && chat_text.find(GlobalText[265]) != 0)
+        {
+            g_pChatInputBox->SetBlockWhisper(false);
+            g_pChatListBox->AddText(L"", GlobalText[268], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            return;
+        }
+    }
+
+	SocketClient->ToGameServer()->SendPublicChatMessage(Hero->ID, MAX_ID_SIZE, chat_text.c_str(), chat_text.length());
+    //CStreamPacketEngine spe;
+    //spe.Init(0xC1, 0x00);
+    //spe.AddData(Hero->ID, MAX_ID_SIZE);
+    //spe.AddData((void*)Text, (WORD)min(wcslen(Text) + 1, MAX_CHAT_SIZE));
+    //spe.Send();
+}
+
+extern wchar_t ChatWhisperID[MAX_ID_SIZE + 1];
 
 #define SendChatWhisper( p_TargetID, p_Text)\
 {\
-    if(!FindText2(Hero->ID,"webzen"))\
+    if(!IsWebzenCharacter())\
 	{\
 		CStreamPacketEngine spe;\
 		spe.Init( 0xC1, 0x02);\
 		spe.AddData( ( p_TargetID), MAX_ID_SIZE);\
-		spe.AddData( ( p_Text), min( strlen( p_Text) + 1, MAX_CHAT_SIZE));\
+		spe.AddData( ( p_Text), min( wcslen( p_Text) + 1, MAX_CHAT_SIZE));\
 		spe.Send();\
 \
 		memcpy(ChatWhisperID, ( p_TargetID),MAX_ID_SIZE);\
@@ -429,7 +413,7 @@ __forceinline void SendCharacterMove(unsigned short Key, float Angle, unsigned c
 
 #define SendRequestAttack( p_Key, p_Dir)\
 {\
-    if(!FindText2(Hero->ID,"webzen"))\
+    if(!IsWebzenCharacter())\
 	{\
 		CStreamPacketEngine spe;\
 		spe.Init( 0xC1, PACKET_ATTACK);\
@@ -444,7 +428,7 @@ extern DWORD g_dwLatestMagicTick;
 
 #define SendRequestMagic( p_Type, p_Key)\
 {\
-	if(!FindText2(Hero->ID,"webzen") && ( p_Type==40 || p_Type==263 || p_Type==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))\
+	if(!IsWebzenCharacter() && ( p_Type==40 || p_Type==263 || p_Type==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))\
 	{\
 		g_dwLatestMagicTick = GetTickCount();\
 		CStreamPacketEngine spe;\
@@ -460,7 +444,7 @@ __forceinline void SendRequestMagic(int Type, int Key)
     if (!IsCanBCSkill(Type))
         return;
 
-    if (!FindText2(Hero->ID, "webzen") && (Type == 40 || Type == 263 || Type == 261 || abs((int)(GetTickCount() - g_dwLatestMagicTick)) > 300))
+    if (!IsWebzenCharacter() && (Type == 40 || Type == 263 || Type == 261 || abs((int)(GetTickCount() - g_dwLatestMagicTick)) > 300))
     {
         g_dwLatestMagicTick = GetTickCount();
         CStreamPacketEngine spe;
@@ -470,7 +454,7 @@ __forceinline void SendRequestMagic(int Type, int Key)
         spe << (BYTE)(HIBYTE(p_Type)) << (BYTE)(LOBYTE(p_Type)) << (BYTE)(Key >> 8) << (BYTE)(Key & 0xff);
         spe.Send();
 
-        g_ConsoleDebug->Write(MCD_SEND, "0x19 [SendRequestMagic(%d %d)]", Type, Key);
+        g_ConsoleDebug->Write(MCD_SEND, L"0x19 [SendRequestMagic(%d %d)]", Type, Key);
     }
 }
 #endif //_DEBUG
@@ -489,7 +473,7 @@ BYTE MakeSkillSerialNumber(BYTE* pSerialNumber);
 #ifndef ENABLE_EDIT
 #define SendRequestMagicAttack( p_Type, p_x, p_y, p_Serial, p_Count, p_Key, p_SkillSerial)\
 {\
-    if(!FindText2(Hero->ID,"webzen"))\
+    if(!IsWebzenCharacter())\
 	{\
 		CStreamPacketEngine spe;\
 		spe.Init( 0xC3, PACKET_MAGIC_ATTACK );\
@@ -507,7 +491,7 @@ BYTE MakeSkillSerialNumber(BYTE* pSerialNumber);
 #else // ENABLE_EDIT
 __forceinline void SendRequestMagicAttack(int Type, int x, int y, BYTE Serial, int Count, int* Key, WORD SkillSerial)
 {
-    if (FindText2(Hero->ID, "webzen")) return;
+    if (IsWebzenCharacter()) return;
     CStreamPacketEngine spe;
     WORD p_Type = (WORD)Type;
 
@@ -520,7 +504,7 @@ __forceinline void SendRequestMagicAttack(int Type, int x, int y, BYTE Serial, i
     }
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x1D [SendRequestMagicAttack(%d)]", Serial);
+    g_ConsoleDebug->Write(MCD_SEND, L"0x1D [SendRequestMagicAttack(%d)]", Serial);
 }
 #endif //ENABLE_EDIT
 
@@ -544,7 +528,7 @@ inline BYTE GetDestValue(int xPos, int yPos, int xDst, int yDst)
 #ifndef ENABLE_EDIT
 #define SendRequestMagicContinue( p_Type, p_x, p_y,p_Angle,p_Dest,p_Tpos,p_TKey,p_SkillSerial)\
 {\
-    if(!FindText2(Hero->ID,"webzen"))\
+    if(!IsWebzenCharacter())\
 	{\
 		CurrentSkill = p_Type;\
 		CStreamPacketEngine spe;\
@@ -560,7 +544,7 @@ __forceinline void SendRequestMagicContinue(int Type, int x, int y, int Angle, B
     BYTE* pSkillSerial
 )
 {
-    if (FindText2(Hero->ID, "webzen")) return;
+    if (IsWebzenCharacter()) return;
     CurrentSkill = Type;
     CStreamPacketEngine spe;
     WORD p_Type = (WORD)Type;
@@ -570,7 +554,7 @@ __forceinline void SendRequestMagicContinue(int Type, int x, int y, int Angle, B
     spe << MakeSkillSerialNumber(pSkillSerial);
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x1E [SendRequestMagicContinue]");
+    g_ConsoleDebug->Write(MCD_SEND, L"0x1E [SendRequestMagicContinue]");
 }
 #endif //ENABLE_EDIT
 
@@ -652,7 +636,7 @@ __forceinline void SendRequestBuy(int Index, int Cost)
     spe.Send();
     BuyCost = Cost;
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x32 [SendRequestBuy(%d)]", Index);
+    g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", Index);
 }
 
 #define SendRequestRepair( p_Index, p_AddGold)\
@@ -925,7 +909,7 @@ __forceinline bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex
 #endif // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", iSrcIndex, iDstIndex, iSrcType, iDstType, (pItem->Type & 0x1FFF), (BYTE)(pItem->Level), (BYTE)(pItem->Durability));
+    g_ConsoleDebug->Write(MCD_SEND, L"0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", iSrcIndex, iDstIndex, iSrcType, iDstType, (pItem->Type & 0x1FFF), (BYTE)(pItem->Level), (BYTE)(pItem->Durability));
 
     return true;
 }
@@ -977,7 +961,7 @@ __forceinline void SendRequestEquipmentItem(int SrcFlag, int SrcIndex, int DstFl
         << (BYTE)DstFlag << (BYTE)DstIndex;
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", SrcIndex, DstIndex, SrcFlag, DstFlag, (PickItem.Type & 0x1FFF), (BYTE)(PickItem.Level), (BYTE)(PickItem.Durability));
+    g_ConsoleDebug->Write(MCD_SEND, L"0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", SrcIndex, DstIndex, SrcFlag, DstFlag, (PickItem.Type & 0x1FFF), (BYTE)(PickItem.Level), (BYTE)(PickItem.Durability));
 }
 
 extern int  EnableUse;
@@ -988,7 +972,7 @@ extern int  EnableUse;
 {\
 	if( !IsCanUseItem() )\
 	{\
-		g_pChatListBox->AddText("",GlobalText[474],SEASON3B::TYPE_ERROR_MESSAGE);\
+		g_pChatListBox->AddText(L"",GlobalText[474],SEASON3B::TYPE_ERROR_MESSAGE);\
 	}\
 	else\
 	{\
@@ -1017,7 +1001,7 @@ __forceinline void SendRequestUse(int Index, int Target)
 {
     if (!IsCanUseItem())
     {
-        g_pChatListBox->AddText("", GlobalText[474], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[474], SEASON3B::TYPE_ERROR_MESSAGE);
         return;
     }
     if (EnableUse > 0)
@@ -1031,7 +1015,7 @@ __forceinline void SendRequestUse(int Index, int Target)
     spe << (BYTE)g_byItemUseType;
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x26 [SendRequestUse(%d)]", Index);
+    g_ConsoleDebug->Write(MCD_SEND, L"0x26 [SendRequestUse(%d)]", Index);
 }
 #endif //ENABLE_EDIT
 
@@ -1088,9 +1072,9 @@ extern int SendDropItem;
 		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
 		spe.Send();\
 \
-		char Text[100];\
-		sprintf(Text,GlobalText[475],CharactersClient[FindCharacterIndex(p_Key)].ID);\
-		g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);\
+		wchar_t Text[100];\
+		wsprintf(Text,GlobalText[475],CharactersClient[FindCharacterIndex(p_Key)].ID);\
+		g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);\
 	}\
 }
 
@@ -1141,7 +1125,7 @@ __forceinline void SendRequestMoveMap(DWORD dwBlockKey, WORD wMapIndex)
         spe << (DWORD)dwBlockKey << (WORD)wMapIndex;
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x8E [SendRequestMoveMap(%d %d)]", dwBlockKey, wMapIndex);
+    g_ConsoleDebug->Write(MCD_SEND, L"0x8E [SendRequestMoveMap(%d %d)]", dwBlockKey, wMapIndex);
 }
 
 __forceinline void SendRequestStorageGold(int Flag, int Gold)
@@ -1151,7 +1135,7 @@ __forceinline void SendRequestStorageGold(int Flag, int Gold)
     spe << (BYTE)Flag << (DWORD)Gold;
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x81 Send [SendRequestStorageGold(%d %d)]", Flag, Gold);
+    g_ConsoleDebug->Write(MCD_SEND, L"0x81 Send [SendRequestStorageGold(%d %d)]", Flag, Gold);
 }
 
 __forceinline bool SendRequestStorageExit()
@@ -1160,7 +1144,7 @@ __forceinline bool SendRequestStorageExit()
     spe.Init(0xC1, 0x82);
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x82 Send [SendRequestStorageExit]");
+    g_ConsoleDebug->Write(MCD_SEND, L"0x82 Send [SendRequestStorageExit]");
     return true;
 }
 
@@ -1183,9 +1167,9 @@ __forceinline bool SendRequestStorageExit()
 		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
 		spe.Send();\
 \
-		char Text[100];\
-		sprintf(Text,GlobalText[476],CharactersClient[FindCharacterIndex(p_Key)].ID);\
-		g_pChatListBox->AddText("",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
+		wchar_t Text[100];\
+		wsprintf(Text,GlobalText[476],CharactersClient[FindCharacterIndex(p_Key)].ID);\
+		g_pChatListBox->AddText(L"",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
 	}\
 }
 
@@ -1249,14 +1233,14 @@ __forceinline bool SendRequestStorageExit()
 	spe.Send();\
 	char szTmp[100];\
 	if( RelationType == 0x01 && RequestType == 0x01 )\
-		sprintf(szTmp,GlobalText[1358],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
+		wsprintf(szTmp,GlobalText[1358],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
 	else if( RelationType == 0x01 && RequestType == 0x02 )\
-		sprintf(szTmp,GlobalText[1387]);\
+		wsprintf(szTmp,GlobalText[1387]);\
 	else if( RelationType == 0x02 && RequestType == 0x01 )\
-		sprintf(szTmp,GlobalText[1359],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
+		wsprintf(szTmp,GlobalText[1359],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
 	else if( RelationType == 0x02 && RequestType == 0x02 )\
-		sprintf(szTmp,GlobalText[1360],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
-	g_pChatListBox->AddText("",szTmp,SEASON3B::TYPE_SYSTEM_MESSAGE);\
+		wsprintf(szTmp,GlobalText[1360],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
+	g_pChatListBox->AddText(L"",szTmp,SEASON3B::TYPE_SYSTEM_MESSAGE);\
 }
 
 #define SendRequestGuildRelationShipResult( Type, RequestType, Result, TargetUserIndexH, TargetUserIndexL )\
@@ -1305,9 +1289,9 @@ __forceinline bool SendRequestStorageExit()
 		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
 		spe.Send();\
 \
-		char Text[100];\
-		sprintf(Text,GlobalText[477],CharactersClient[FindCharacterIndex(p_Key)].ID);\
-		g_pChatListBox->AddText("",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
+		wchar_t Text[100];\
+		wsprintf(Text,GlobalText[477],CharactersClient[FindCharacterIndex(p_Key)].ID);\
+		g_pChatListBox->AddText(L"",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
 	}\
 }
 
@@ -1398,7 +1382,7 @@ __forceinline bool SendRequestMixExit()
     spe.Init(0xC1, 0x87);
     spe.Send();
 
-    g_ConsoleDebug->Write(MCD_SEND, "0x87 [SendRequestMixExit]");
+    g_ConsoleDebug->Write(MCD_SEND, L"0x87 [SendRequestMixExit]");
     return true;
 }
 #define SendRequestGemMix( iType, iLevel )\
@@ -1772,8 +1756,8 @@ __forceinline bool SendRequestMixExit()
 	char lpszCHR[MAX_ID_SIZE+2];\
 	ZeroMemory( lpszID, MAX_ID_SIZE+2);\
 	ZeroMemory( lpszCHR, MAX_ID_SIZE+2);\
-	strcpy( lpszID, lpID);\
-	strcpy( lpszCHR, lpChr);\
+	wcscpy( lpszID, lpID);\
+	wcscpy( lpszCHR, lpChr);\
 	BuxConvert(( BYTE*)lpszID,MAX_ID_SIZE+2);\
 	spe.AddData( lpszID, MAX_ID_SIZE+2);\
 	spe.AddData( lpszCHR, MAX_ID_SIZE+2);\
@@ -2384,7 +2368,7 @@ __forceinline bool SendRequestEquippingInventoryItem(int iItemPos, int iValue)
     spe.Send();
 
 #ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_SEND, "0xBF, 0x20 [SendRequestEquippingInventoryItem(%d, %d)]", iItemPos, iValue);
+    g_ConsoleDebug->Write(MCD_SEND, L"0xBF, 0x20 [SendRequestEquippingInventoryItem(%d, %d)]", iItemPos, iValue);
 #endif // CONSOLE_DEBUG
     return true;
 }
@@ -2395,7 +2379,7 @@ __forceinline void SendRequestRageAtt(int Type, int Key)
 {
     if (!IsCanBCSkill(Type))
         return;
-    if (!FindText2(Hero->ID, "webzen"))
+    if (!IsWebzenCharacter())
     {
         CStreamPacketEngine spe;
         WORD p_Type = (WORD)Type;
@@ -2415,7 +2399,7 @@ __forceinline void SendRequestDarkside(WORD nSkill, int Key)
 #else //_DEBUG
 #define SendRequestRageAtt( p_Type, p_Key)\
 {\
-    if(!FindText2(Hero->ID,"webzen"))\
+    if(!IsWebzenCharacter())\
 	{\
 		CStreamPacketEngine spe;\
 		WORD Type = (WORD)p_Type;\

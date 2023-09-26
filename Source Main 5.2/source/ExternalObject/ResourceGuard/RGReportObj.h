@@ -19,7 +19,7 @@ namespace ResourceGuard {
     class IRGReportObj
     {
     public:
-        virtual void WriteMessage(const std::string& msg, DWORD dwMsgType = MSG_TYPE_NORMAL, long lParam = 0) = 0;
+        virtual void WriteMessage(const std::wstring& msg, DWORD dwMsgType = MSG_TYPE_NORMAL, long lParam = 0) = 0;
     };
 }
 

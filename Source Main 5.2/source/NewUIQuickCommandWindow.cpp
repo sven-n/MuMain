@@ -170,7 +170,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::Update()
     {
         CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
 
-        if (strcmp(pCha->ID, m_strID) != 0
+        if (wcscmp(pCha->ID, m_strID) != 0
             || pCha->Object.Live == false
             || pCha->Object.Kind != KIND_PLAYER)
         {
@@ -313,13 +313,13 @@ void SEASON3B::CNewUIQuickCommandWindow::ClosingProcess()
 
 void SEASON3B::CNewUIQuickCommandWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_QUICKCOMMAND_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_commamd04.tga", IMAGE_QUICKCOMMAND_FRAME_UP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_commamd02.tga", IMAGE_QUICKCOMMAND_FRAME_MIDDLE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_commamd03.tga", IMAGE_QUICKCOMMAND_FRAME_DOWN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_commamd_Line.jpg", IMAGE_QUICKCOMMAND_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_arrow(L).tga", IMAGE_QUICKCOMMAND_ARROWL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_arrow(R).tga", IMAGE_QUICKCOMMAND_ARROWR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_QUICKCOMMAND_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_commamd04.tga", IMAGE_QUICKCOMMAND_FRAME_UP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_commamd02.tga", IMAGE_QUICKCOMMAND_FRAME_MIDDLE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_commamd03.tga", IMAGE_QUICKCOMMAND_FRAME_DOWN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_commamd_Line.jpg", IMAGE_QUICKCOMMAND_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_arrow(L).tga", IMAGE_QUICKCOMMAND_ARROWL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_arrow(R).tga", IMAGE_QUICKCOMMAND_ARROWR, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIQuickCommandWindow::UnloadImages()
@@ -333,7 +333,7 @@ void SEASON3B::CNewUIQuickCommandWindow::UnloadImages()
     DeleteBitmap(IMAGE_QUICKCOMMAND_ARROWR);
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::OpenQuickCommand(const char* strID, int iIndex, int x, int y)
+void SEASON3B::CNewUIQuickCommandWindow::OpenQuickCommand(const wchar_t* strID, int iIndex, int x, int y)
 {
     g_pNewUISystem->Show(SEASON3B::INTERFACE_QUICK_COMMAND);
 
@@ -350,9 +350,9 @@ void SEASON3B::CNewUIQuickCommandWindow::CloseQuickCommand()
     }
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::SetID(const char* strID)
+void SEASON3B::CNewUIQuickCommandWindow::SetID(const wchar_t* strID)
 {
-    strcpy(m_strID, strID);
+    wcscpy(m_strID, strID);
 }
 
 void SEASON3B::CNewUIQuickCommandWindow::SetSelectedCharacterIndex(int iIndex)

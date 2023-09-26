@@ -1016,7 +1016,7 @@ typedef struct {
     BYTE         Count;
     DWORD        TotalScore;
     BYTE         Score;
-    char		szRivalGuildName[MAX_GUILDNAME];
+    wchar_t		szRivalGuildName[MAX_GUILDNAME];
 } PRECEIVE_GUILD_LISTS, * LPPRECEIVE_GUILD_LISTS;
 
 //send guild leave
@@ -1108,7 +1108,7 @@ typedef struct
     PBMSG_HEADER	Header;
     BYTE			byType;
     BYTE			byResult;
-    char			szTargetName[MAX_ID_SIZE];
+    wchar_t			szTargetName[MAX_ID_SIZE];
 } PRECEIVE_GUILD_ASSIGN, * LPPRECEIVE_GUILD_ASSIGN;
 
 typedef struct
@@ -1124,7 +1124,7 @@ typedef struct
 {
     BYTE			byMemberCount;
     BYTE			GuildMark[32];
-    char			szGuildName[MAX_GUILDNAME];
+    wchar_t			szGuildName[MAX_GUILDNAME];
 } PMSG_UNIONLIST, * LPPMSG_UNIONLIST;
 
 typedef struct
@@ -1164,7 +1164,7 @@ typedef struct {
     BYTE			byKeyL;
     int				nGuildKey;
     BYTE			byGuildRelationShip;
-    char			szUnionName[MAX_GUILDNAME];
+    wchar_t			szUnionName[MAX_GUILDNAME];
 } PMSG_UNION_VIEWPORT_NOTIFY, * LPPMSG_UNION_VIEWPORT_NOTIFY;
 
 //receive gold
@@ -1248,7 +1248,7 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE		 m_byIsRegistered;
-    char		 m_strGiftName[64];
+    wchar_t		 m_strGiftName[64];
 } PRECEIVE_SCRATCH_TICKET_EVENT, * LPPRECEIVE_SCRATCH_TICKET_EVENT;
 
 typedef struct {
@@ -1528,7 +1528,7 @@ typedef struct
     BYTE		nResult;
     BYTE		bIndexH;
     BYTE		bIndexL;
-    CHAR		szID[MAX_ID_SIZE];
+    wchar_t		szID[MAX_ID_SIZE];
 } PMSG_ANS_DUEL_INVITE, * LPPMSG_ANS_DUEL_INVITE;
 
 typedef struct _tagPMSG_REQ_DUEL_ANSWER		// SC2
@@ -1537,7 +1537,7 @@ typedef struct _tagPMSG_REQ_DUEL_ANSWER		// SC2
     BYTE         SubCode;
     BYTE		bIndexH;
     BYTE		bIndexL;
-    CHAR		szID[MAX_ID_SIZE];
+    wchar_t		szID[MAX_ID_SIZE];
 } PMSG_REQ_DUEL_ANSWER, * LPPMSG_REQ_DUEL_ANSWER;
 
 typedef struct
@@ -1547,7 +1547,7 @@ typedef struct
     BYTE		nResult;
     BYTE		bIndexH;
     BYTE		bIndexL;
-    CHAR		szID[MAX_ID_SIZE];
+    wchar_t		szID[MAX_ID_SIZE];
 } PMSG_ANS_DUEL_EXIT, * LPPMSG_ANS_DUEL_EXIT;
 
 typedef struct
@@ -1581,8 +1581,8 @@ typedef struct
     PBMSG_HEADER Header;
     BYTE         SubCode;
     struct {
-        CHAR	szID1[MAX_ID_SIZE];
-        CHAR	szID2[MAX_ID_SIZE];
+        wchar_t	szID1[MAX_ID_SIZE];
+        wchar_t	szID2[MAX_ID_SIZE];
         BYTE	bStart;
         BYTE	bWatch;
     } channel[4];
@@ -1594,8 +1594,8 @@ typedef struct
     BYTE         SubCode;
     BYTE		nResult;
     BYTE		nChannelId;
-    CHAR		szID1[MAX_ID_SIZE];
-    CHAR		szID2[MAX_ID_SIZE];
+    wchar_t		szID1[MAX_ID_SIZE];
+    wchar_t		szID2[MAX_ID_SIZE];
     BYTE		bIndexH1;
     BYTE		bIndexL1;
     BYTE		bIndexH2;
@@ -1606,7 +1606,7 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    CHAR		szID[MAX_ID_SIZE];
+    wchar_t		szID[MAX_ID_SIZE];
 } PMSG_DUEL_JOINCNANNEL_BROADCAST, * LPPMSG_DUEL_JOINCNANNEL_BROADCAST;
 
 typedef struct
@@ -1620,7 +1620,7 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    CHAR		szID[MAX_ID_SIZE];
+    wchar_t		szID[MAX_ID_SIZE];
 } PMSG_DUEL_LEAVECNANNEL_BROADCAST, * LPPMSG_DUEL_LEAVECNANNEL_BROADCAST;
 
 typedef struct
@@ -1629,7 +1629,7 @@ typedef struct
     BYTE         SubCode;
     BYTE		nCount;
     struct {
-        CHAR	szID[MAX_ID_SIZE];
+        wchar_t	szID[MAX_ID_SIZE];
     } user[10];
 } PMSG_DUEL_OBSERVERLIST_BROADCAST, * LPPMSG_DUEL_OBSERVERLIST_BROADCAST;
 
@@ -1637,8 +1637,8 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    CHAR		szWinner[MAX_ID_SIZE];
-    CHAR		szLoser[MAX_ID_SIZE];
+    wchar_t		szWinner[MAX_ID_SIZE];
+    wchar_t		szLoser[MAX_ID_SIZE];
 } PMSG_DUEL_RESULT_BROADCAST, * LPPMSG_DUEL_RESULT_BROADCAST;
 
 typedef struct
@@ -1908,10 +1908,10 @@ typedef struct
     BYTE			m_subCode;
     BYTE			m_Type;
 
-    char			m_MatchTeamName1[MAX_ID_SIZE];
+    wchar_t			m_MatchTeamName1[MAX_ID_SIZE];
     WORD			m_Score1;
 
-    char			m_MatchTeamName2[MAX_ID_SIZE];
+    wchar_t			m_MatchTeamName2[MAX_ID_SIZE];
     WORD			m_Score2;
 }PMSG_MATCH_RESULT, * LPPMSG_MATCH_RESULT;
 
@@ -1974,8 +1974,8 @@ typedef struct
     BYTE		btSiegeStartDay;
     BYTE		btSiegeStartHour;
     BYTE		btSiegeStartMinute;
-    CHAR		cOwnerGuild[8];
-    CHAR		cOwnerGuildMaster[10];
+    wchar_t		cOwnerGuild[8];
+    wchar_t		cOwnerGuildMaster[10];
 
     CHAR		btStateLeftSec1;
     CHAR		btStateLeftSec2;
@@ -1990,7 +1990,7 @@ typedef struct
 {
     PREQUEST_DEFAULT_SUBCODE	Header;
     BYTE		btResult;
-    CHAR		szGuildName[8];
+    wchar_t		szGuildName[8];
 } PMSG_ANS_REGCASTLESIEGE, * LPPMSG_ANS_REGCASTLESIEGE;
 
 //----------------------------------------------------------------------------
@@ -2001,7 +2001,7 @@ typedef struct
     PREQUEST_DEFAULT_SUBCODE	Header;
     BYTE		btResult;
     BYTE		btIsGiveUp;
-    CHAR		szGuildName[8];
+    wchar_t		szGuildName[8];
 } PMSG_ANS_GIVEUPCASTLESIEGE, * LPPMSG_ANS_GIVEUPCASTLESIEGE;
 
 //----------------------------------------------------------------------------
@@ -2011,7 +2011,7 @@ typedef struct
 {
     PREQUEST_DEFAULT_SUBCODE	Header;
     BYTE		btResult;
-    CHAR		szGuildName[8];
+    wchar_t		szGuildName[8];
     BYTE		btGuildMark1;
     BYTE		btGuildMark2;
     BYTE		btGuildMark3;
@@ -2027,7 +2027,7 @@ typedef struct
 {
     PREQUEST_DEFAULT_SUBCODE	Header;
     BYTE		btResult;
-    CHAR		szGuildName[8];
+    wchar_t		szGuildName[8];
     BYTE		btGuildMark1;
     BYTE		btGuildMark2;
     BYTE		btGuildMark3;
@@ -2164,7 +2164,7 @@ typedef struct
 } PMSG_ANS_CSREGGUILDLIST, * LPPMSG_ANS_CSREGGUILDLIST;
 typedef struct
 {
-    CHAR		szGuildName[8];
+    wchar_t		szGuildName[8];
     BYTE		btRegMarks1;
     BYTE		btRegMarks2;
     BYTE		btRegMarks3;
@@ -2186,7 +2186,7 @@ typedef struct
 {
     BYTE		btCsJoinSide;
     BYTE		btGuildInvolved;
-    CHAR		szGuildName[8];
+    wchar_t		szGuildName[8];
     INT			iGuildScore;
 } PMSG_CSATTKGUILDLIST, * LPPMSG_CSATTKGUILDLIST;
 
@@ -2525,7 +2525,7 @@ typedef struct
 typedef struct
 {
     BYTE iRank;
-    char szHeroName[MAX_ID_SIZE];
+    wchar_t szHeroName[MAX_ID_SIZE];
     int iHeroScore;
     BYTE btHeroClass;
 } PMSG_ANS_CRYWOLF_HERO_LIST_INFO, * LPPMSG_ANS_CRYWOLF_HERO_LIST_INFO;
@@ -2710,7 +2710,7 @@ typedef struct
 
 typedef struct
 {
-    char		GameId[MAX_ID_SIZE];
+    wchar_t		GameId[MAX_ID_SIZE];
     BYTE		byMapNumber;
     BYTE		btTeam;
     BYTE		btClass;
@@ -2746,7 +2746,7 @@ typedef struct
 {
     PBMSG_HEADER2 h;
     WORD		wUserIndex;
-    char		Name[MAX_ID_SIZE];
+    wchar_t		Name[MAX_ID_SIZE];
 } PMSG_RELICS_GET_USER, * LPPMSG_RELICS_GET_USER;
 
 //----------------------------------------------------------------------------
@@ -3184,8 +3184,8 @@ typedef struct
     long				lDiftItemDisplaySeq;
     long				lGiftItemPriceSeq;
     long				lSaleZone;
-    char				chReceiveUserID[MAX_ID_SIZE + 1];
-    char				chMessage[MAX_GIFT_MESSAGE_SIZE];
+    wchar_t				chReceiveUserID[MAX_ID_SIZE + 1];
+    wchar_t				chMessage[MAX_GIFT_MESSAGE_SIZE];
 }PMSG_CASHSHOP_GIFTSEND_REQ, * LPPMSG_CASHSHOP_GIFTSEND_REQ;
 
 //----------------------------------------------------------------------------
@@ -3253,8 +3253,8 @@ typedef struct
     double				dCashPoint;
     char				chItemType;
 
-    char				chSendUserName[MAX_ID_SIZE + 1];
-    char				chMessage[MAX_GIFT_MESSAGE_SIZE];
+    wchar_t				chSendUserName[MAX_ID_SIZE + 1];
+    wchar_t				chMessage[MAX_GIFT_MESSAGE_SIZE];
 }PMSG_CASHSHOP_GIFTSTORAGELIST, * LPPMSG_CASHSHOP_GIFTSTORAGELIST;
 
 //----------------------------------------------------------------------------
@@ -3266,8 +3266,8 @@ typedef struct
 
     double				dCashValue;
 
-    char				chReceiveUserID[MAX_ID_SIZE + 1];
-    char				chMessage[MAX_GIFT_MESSAGE_SIZE];
+    wchar_t				chReceiveUserID[MAX_ID_SIZE + 1];
+    wchar_t				chMessage[MAX_GIFT_MESSAGE_SIZE];
 }PMSG_CASHSHOP_CASHSEND_REQ, * LPPMSG_CASHSHOP_CASHSEND_REQ;
 
 //----------------------------------------------------------------------------
@@ -3476,13 +3476,13 @@ extern int SendDropItem;
 
 extern bool EnableGuildWar;
 extern int  GuildWarIndex;
-extern char GuildWarName[8 + 1];
+extern wchar_t GuildWarName[8 + 1];
 extern int  GuildWarScore[2];
 
 extern bool EnableSoccer;
 extern BYTE HeroSoccerTeam;
 extern int  SoccerTime;
-extern char SoccerTeamName[2][8 + 1];
+extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
 #ifdef ACC_PACKETSIZE

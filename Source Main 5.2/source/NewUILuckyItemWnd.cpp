@@ -208,7 +208,7 @@ void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, BYTE* _pbyItemPa
         break;
     }
 
-    if (nMessage > nDefault)	g_pChatListBox->AddText("", GlobalText[nMessage], SEASON3B::TYPE_ERROR_MESSAGE);
+    if (nMessage > nDefault)	g_pChatListBox->AddText(L"", GlobalText[nMessage], SEASON3B::TYPE_ERROR_MESSAGE);
     if (nPlaySound > nDefault)	PlayBuffer(nPlaySound);
     if (bInitInven)			g_pLuckyItemWnd->Process_InventoryCtrl_DeleteItem(-1);
     if (nAddInven > nDefault)	Process_InventoryCtrl_InsertItem(nAddInven, _pbyItemPacket);
@@ -225,7 +225,7 @@ void CNewUILuckyItemWnd::LoadImg(void)
     float	fLineX = 21.0f;
     float	fLineY = fSizeY - fTop - fBottom;
 
-    char* szFileName[] = { "Interface\\newui_msgbox_back.jpg",
+    wchar_t* szFileName[] = { "Interface\\newui_msgbox_back.jpg",
                              "Interface\\newui_item_back04.tga",
                              "Interface\\newui_item_back02-L.tga",
                              "Interface\\newui_item_back02-R.tga",
@@ -313,7 +313,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
     switch (m_eType)
     {
     case eLuckyItemType_Trade:
-        unicode::_sprintf(m_szSubject, "%s", GlobalText[3288]);
+        wsprintf(m_szSubject, L"%s", GlobalText[3288]);
         AddText(3291, 0xFF0000FF, RT3_SORT_LEFT), AddText(0), AddText(0), AddText(3292), AddText(3293), AddText(3294);
         AddText(0), AddText(0);
         AddText(2223, 0xFF00FFFF);
@@ -322,7 +322,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
         m_BtnMix.ChangeToolTipText(GlobalText[591], true); // а╤гу
         break;
     case eLuckyItemType_Refinery:
-        unicode::_sprintf(m_szSubject, "%s", GlobalText[3289]);
+        wsprintf(m_szSubject, L"%s", GlobalText[3289]);
         AddText(2346, 0xFF0000FF, RT3_SORT_LEFT), AddText(0), AddText(0);
         AddText(3300), AddText(3301);
         AddText(0), AddText(0), AddText(0);
@@ -364,7 +364,7 @@ bool CNewUILuckyItemWnd::ClosingProcess(void)
 {
     if (GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
     {
-        g_pChatListBox->AddText("", GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -503,12 +503,12 @@ bool CNewUILuckyItemWnd::Process_BTN_Action(void)
 
     if (!Check_LuckyItem_InWnd())
     {
-        g_pChatListBox->AddText("", GlobalText[1817], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1817], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
     if (!Check_LuckyItem(m_pNewInventoryCtrl->GetItem(0)))
     {
-        g_pChatListBox->AddText("", GlobalText[1812], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1812], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 #ifdef LEM_FIX_LUCKYITEM_SLOTCHECK
@@ -517,7 +517,7 @@ bool CNewUILuckyItemWnd::Process_BTN_Action(void)
     if (g_pMyInventory->GetInventoryCtrl()->FindEmptySlot(4, 4) == -1)
 #endif // LEM_FIX_LUCKYITEM_SLOTCHECK
     {
-        g_pChatListBox->AddText("", GlobalText[1815], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1815], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 

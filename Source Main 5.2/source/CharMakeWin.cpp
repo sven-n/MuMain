@@ -272,7 +272,10 @@ void CCharMakeWin::RequestCreateCharacter()
 
     CUIMng& rUIMng = CUIMng::Instance();
 
-    if (::strlen(InputText[0]) < 4)
+    const auto character_name = std::wstring(InputText[0]);
+
+    // todo: check with regex from server
+    if (character_name.length() < 4)
         rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
     else if (::CheckName())
         rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);
@@ -280,7 +283,9 @@ void CCharMakeWin::RequestCreateCharacter()
         rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
     else
     {
-        SendRequestCreateCharacter(InputText[0], CharacterView.Class, CharacterView.Skin);
+        BYTE classByte = (BYTE)(((CharacterView.Class) << 4) + (CharacterView.Skin));
+        SocketClient->ToGameServer()->SendCreateCharacter(InputText[0], character_name.length(), classByte);
+        //SendRequestCreateCharacter(InputText[0], CharacterView.Class, CharacterView.Skin);
         rUIMng.HideWin(this);
         rUIMng.PopUpMsgWin(MESSAGE_WAIT);
     }
@@ -301,15 +306,15 @@ void CCharMakeWin::RenderControls()
     g_pRenderText->SetTextColor(CLRDW_WHITE);
     g_pRenderText->SetBgColor(0);
 
-    char* apszStat[MAX_CLASS][4] =
+    wchar_t* apszStat[MAX_CLASS][4] =
     {
-        "18", "18", "15", "30",
-        "28", "20", "25", "10",
-        "22", "25", "20", "15",
-        "26", "26", "26", "26",
-        "26", "20", "20", "15",
-        "21", "21", "18", "23",
-        "32", "27", "25", "20",
+        L"18", L"18", L"15", L"30",
+        L"28", L"20", L"25", L"10",
+        L"22", L"25", L"20", L"15",
+        L"26", L"26", L"26", L"26",
+        L"26", L"20", L"20", L"15",
+        L"21", L"21", L"18", L"23",
+        L"32", L"27", L"25", L"20",
     };
     int nStatBaseX = m_asprBack[CMW_SPR_STAT].GetXPos() + 22;
     int nStatY;
@@ -331,7 +336,7 @@ void CCharMakeWin::RenderControls()
         nStatY = int((m_asprBack[CMW_SPR_STAT].GetYPos() + 10 + 4 * 17) / g_fScreenRate_y);
 
         g_pRenderText->SetTextColor(CLRDW_ORANGE);
-        g_pRenderText->RenderText(int((nStatBaseX + 54) / g_fScreenRate_x), nStatY, "25");
+        g_pRenderText->RenderText(int((nStatBaseX + 54) / g_fScreenRate_x), nStatY, L"25");
         g_pRenderText->SetTextColor(CLRDW_WHITE);
         g_pRenderText->RenderText(int(nStatBaseX / g_fScreenRate_x), nStatY, GlobalText[1738]);
     }

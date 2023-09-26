@@ -9,7 +9,7 @@
 
 #pragma once
 
-typedef std::map<int, std::string> ImgPathMap;
+typedef std::map<int, std::wstring> ImgPathMap;
 
 class CUIMapName
 {
@@ -39,6 +39,6 @@ protected:
     void InitImgPathMap();
 };
 
-extern std::string g_strSelectedML;
+extern std::wstring g_strSelectedML;
 
 #endif // !defined(AFX_UIMAPNAME_H__6771C771_B81D_4D5C_8484_63D6961ED6C0__INCLUDED_)

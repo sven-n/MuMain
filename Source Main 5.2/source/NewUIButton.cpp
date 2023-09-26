@@ -20,7 +20,7 @@ namespace
         p.x = x; p.y = y;
     }
 
-    void RenderText(const char* text, int x, int y, int sx, int sy, HFONT hFont, DWORD color, DWORD backcolor, int sort)
+    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, HFONT hFont, DWORD color, DWORD backcolor, int sort)
     {
         g_pRenderText->SetFont(hFont);
 
@@ -932,7 +932,7 @@ void CNewUIRadioGroupButton::ChangeRadioButtonInfo(bool iswidth, int x, int y, i
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-void CNewUIRadioGroupButton::ChangeRadioText(std::list<unicode::t_string>& textlist)
+void CNewUIRadioGroupButton::ChangeRadioText(std::list<std::wstring>& textlist)
 {
     auto textiter = textlist.begin();
 
@@ -944,7 +944,7 @@ void CNewUIRadioGroupButton::ChangeRadioText(std::list<unicode::t_string>& textl
 
         auto curtextiter = textiter;
         ++textiter;
-        unicode::t_string text = (*curtextiter);
+       std::wstring text = (*curtextiter);
 
         button->ChangeText(text);
 
@@ -1155,7 +1155,7 @@ void SEASON3B::CNewUICheckBox::RegisterBoxState(bool eventstate)
     State = eventstate;
 }
 
-void SEASON3B::CNewUICheckBox::ChangeText(unicode::t_string btname)
+void SEASON3B::CNewUICheckBox::ChangeText(std::wstring btname)
 {
     m_Name = btname;
 }

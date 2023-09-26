@@ -2,4 +2,4 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-extern bool CheckSpecialText(char* Text);
+extern bool CheckSpecialText(wchar_t* Text);

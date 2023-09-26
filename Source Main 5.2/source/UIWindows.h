@@ -53,15 +53,15 @@ public:
     CUIBaseWindow();
     virtual ~CUIBaseWindow();
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     
     virtual void Refresh() {}
     void SetLimitSize(int iMinWidth, int iMinHeight, int iMaxWidth = 0, int iMaxHeight = 0)
     {
         m_iMinWidth = iMinWidth; m_iMinHeight = iMinHeight; m_iMaxWidth = iMaxWidth; m_iMaxHeight = iMaxHeight;
     }
-    virtual void SetTitle(const char* pszTitle);
-    const char* GetTitle() { return m_pszTitle; }
+    virtual void SetTitle(const wchar_t* pszTitle);
+    const wchar_t* GetTitle() { return m_pszTitle; }
     virtual void Maximize();
 
     void Render();
@@ -98,7 +98,7 @@ protected:
     int m_iResizeDir;
     int m_iMinWidth, m_iMinHeight;
     int m_iMaxWidth, m_iMaxHeight;
-    char* m_pszTitle;
+    wchar_t* m_pszTitle;
     BOOL m_bHaveTextBox;
     int m_iControlButtonClick;
     BOOL m_bIsMaximize;
@@ -118,19 +118,19 @@ public:
     CUIChatWindow();
     virtual ~CUIChatWindow();
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     virtual void Refresh();
     void FocusReset() { m_TextInputBox.GiveFocus(); }
-    int AddChatPal(const char* pszID, BYTE Number, BYTE Server);
-    void RemoveChatPal(const char* pszID);
-    void AddChatText(BYTE byIndex, const char* pszText, int iType, int iColor);
+    int AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server);
+    void RemoveChatPal(const wchar_t* pszID);
+    void AddChatText(BYTE byIndex, const wchar_t* pszText, int iType, int iColor);
     void ConnectToChatServer(const char* pszIP, DWORD dwRoomNumber, DWORD dwTicket);
     void DisconnectToChatServer();
     Connection* GetCurrentSocket() { return _connection; }
     GUILDLIST_TEXT* GetCurrentInvitePal() { return m_InvitePalListBox.GetSelectedText(); }
     void UpdateInvitePalList();
     int GetShowType() { return m_iShowType; }
-    const char* GetChatFriend(int* piResult = NULL);
+    const wchar_t* GetChatFriend(int* piResult = NULL);
     int GetUserCount() { return m_PalListBox.GetLineNum(); }
     DWORD GetRoomNumber() { return m_dwRoomNumber; }
     void Lock(BOOL bFlag);
@@ -152,7 +152,7 @@ protected:
     DWORD m_dwRoomNumber;
     int m_iPrevWidth;
     const int MAX_CHATROOM_TEXT_LENGTH_UTF16;
-    char m_szLastText[MAX_CHATROOM_TEXT_LENGTH];
+    wchar_t m_szLastText[MAX_CHATROOM_TEXT_LENGTH];
 };
 
 class CUIPhotoViewer : public CUIControl
@@ -174,8 +174,8 @@ public:
     virtual void SetAnimation(int iAnimationType);
     virtual void ChangeAnimation(int iMoveDir = 0);
 
-    void SetID(const char* pszID);
-    const char* GetID() { return m_PhotoChar.ID; }
+    void SetID(const wchar_t* pszID);
+    const wchar_t* GetID() { return m_PhotoChar.ID; }
     float GetCurrentAngle() { return m_fCurrentAngle; }
     int GetCurrentAction() { return m_iSettingAnimation; }
     float GetCurrentZoom() { return m_fCurrentZoom; }
@@ -216,9 +216,9 @@ public:
     CUILetterReadWindow() :m_iShowType(2) {}
     virtual ~CUILetterReadWindow();
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     virtual void Refresh();
-    void SetLetter(LETTERLIST_TEXT* pLetterHead, const char* pLetterText);
+    void SetLetter(LETTERLIST_TEXT* pLetterHead, const wchar_t* pLetterText);
 
 protected:
     virtual void RenderSub();
@@ -248,12 +248,12 @@ public:
     CUILetterWriteWindow() :m_iShowType(0), m_bIsSend(FALSE) {}
     virtual ~CUILetterWriteWindow() {}
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     
     virtual void Refresh();
-    void SetMailtoText(const char* pszText);
-    void SetMainTitleText(const char* pszText);
-    void SetMailContextText(const char* pszText);
+    void SetMailtoText(const wchar_t* pszText);
+    void SetMainTitleText(const wchar_t* pszText);
+    void SetMailContextText(const wchar_t* pszText);
 
     void SetSendState(BOOL bFlag) { m_bIsSend = bFlag; }
 
@@ -300,11 +300,11 @@ class CFriendList
 public:
     CFriendList() :m_iCurrentSortType(0) {}
     ~CFriendList() { ClearFriendList(); }
-    void AddFriend(const char* pszID, BYTE Number, BYTE Server);
-    void RemoveFriend(const char* pszID);
+    void AddFriend(const wchar_t* pszID, BYTE Number, BYTE Server);
+    void RemoveFriend(const wchar_t* pszID);
     void ClearFriendList();
-    int UpdateFriendList(std::deque<GUILDLIST_TEXT>& pDestData, const char* pszID);
-    void UpdateFriendState(const char* pszID, BYTE Number, BYTE Server);
+    int UpdateFriendList(std::deque<GUILDLIST_TEXT>& pDestData, const wchar_t* pszID);
+    void UpdateFriendState(const wchar_t* pszID, BYTE Number, BYTE Server);
     void UpdateAllFriendState(BYTE Number, BYTE Server);
     void Sort(int iType = -1);
     int GetCurrentSortType() { return m_iCurrentSortType; }
@@ -320,9 +320,9 @@ public:
     CUIFriendListTabWindow() {}
     virtual ~CUIFriendListTabWindow() {}
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     virtual void Refresh();
-    const char* GetCurrentSelectedFriend(BYTE* pNumber = NULL, BYTE* pServer = NULL);
+    const wchar_t* GetCurrentSelectedFriend(BYTE* pNumber = NULL, BYTE* pServer = NULL);
     DWORD GetKeyMoveListUIID() { return m_PalListBox.GetUIID(); }
     void RefreshPalList();
 
@@ -348,9 +348,9 @@ public:
     CUIChatRoomListTabWindow() {}
     virtual ~CUIChatRoomListTabWindow() {}
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     virtual void Refresh();
-    void AddWindow(DWORD dwUIID, const char* pszTitle);
+    void AddWindow(DWORD dwUIID, const wchar_t* pszTitle);
     void RemoveWindow(DWORD dwUIID);
     DWORD GetCurrentSelectedWindow();
     DWORD GetKeyMoveListUIID() { return m_WindowListBox.GetUIID(); }
@@ -372,7 +372,7 @@ class CLetterList
 public:
     CLetterList() :m_iCurrentSortType(0) {}
     ~CLetterList() { ClearLetterList(); }
-    void AddLetter(DWORD dwLetterID, const char* pszID, const char* pszText, const char* pszDate, const char* pszTime, BOOL bIsRead);
+    void AddLetter(DWORD dwLetterID, const wchar_t* pszID, const wchar_t* pszText, const wchar_t* pszDate, const wchar_t* pszTime, BOOL bIsRead);
     void RemoveLetter(DWORD dwLetterID);
     void ClearLetterList();
     int UpdateLetterList(std::deque<LETTERLIST_TEXT>& pDestData, DWORD dwSelectLineNum);
@@ -407,7 +407,7 @@ public:
     CUILetterBoxTabWindow() :m_bCheckAllState(FALSE) {}
     virtual ~CUILetterBoxTabWindow() {}
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     virtual void Refresh();
     LETTERLIST_TEXT* GetCurrentSelectedLetter();
     DWORD GetKeyMoveListUIID() { return m_LetterListBox.GetUIID(); }
@@ -437,15 +437,15 @@ public:
     CUIFriendWindow() :m_iTabIndex(0), m_iTabMouseOverIndex(0) {}
     virtual ~CUIFriendWindow() {}
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     virtual void Refresh();
     void Reset();
     void Close();
     void RefreshPalList() { m_FriendListWnd.RefreshPalList(); }
-    //	const char* GetCurrentSelectedFriend()
+    //	const wchar_t* GetCurrentSelectedFriend()
     //	{ return m_FriendListWnd.GetCurrentSelectedFriend(); }
 
-    void AddWindow(DWORD dwUIID, const char* pszTitle)
+    void AddWindow(DWORD dwUIID, const wchar_t* pszTitle)
     {
         m_ChatRoomListWnd.AddWindow(dwUIID, pszTitle);
     }
@@ -495,10 +495,10 @@ public:
     CUITextInputWindow() :m_dwReturnWindowUIID(0) {}
     virtual ~CUITextInputWindow() {}
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     void InitControls() override;
     virtual void Refresh();
-    void SetText(const char* pszText) { m_TextInputBox.SetText(pszText); m_TextInputBox.GiveFocus(TRUE); }
+    void SetText(const wchar_t* pszText) { m_TextInputBox.SetText(pszText); m_TextInputBox.GiveFocus(TRUE); }
 
 protected:
     virtual void RenderSub();
@@ -521,10 +521,10 @@ public:
     CUIQuestionWindow(int iDialogType = 0) :m_dwReturnWindowUIID(0), m_iDialogType(iDialogType) {}
     virtual ~CUIQuestionWindow() {}
 
-    virtual void Init(const char* pszTitle, DWORD dwParentID = 0);
+    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
     virtual void Refresh();
 
-    void SaveID(const char* pszText);
+    void SaveID(const wchar_t* pszText);
 
 protected:
     virtual void RenderSub();
@@ -534,8 +534,8 @@ protected:
 protected:
     DWORD m_dwReturnWindowUIID;
     int m_iDialogType;	// 0: Y/N, 1: OK
-    char m_szCaption[2][MAX_TEXT_LENGTH + 1];
-    char m_szSaveID[MAX_ID_SIZE + 1];
+    wchar_t m_szCaption[2][MAX_TEXT_LENGTH + 1];
+    wchar_t m_szSaveID[MAX_ID_SIZE + 1];
     CUIButton m_AddButton;
     CUIButton m_CancelButton;
 };
@@ -549,7 +549,7 @@ public:
     virtual ~CUIWindowMgr();
 
     void Reset();
-    DWORD AddWindow(int iWindowType, int iPos_x, int iPos_y, const char* pszTitle, DWORD dwParentID = 0, int iOption = UIADDWND_NULL);
+    DWORD AddWindow(int iWindowType, int iPos_x, int iPos_y, const wchar_t* pszTitle, DWORD dwParentID = 0, int iOption = UIADDWND_NULL);
     void RemoveWindow(DWORD dwUIID);
     void Render();
     void DoAction();
@@ -658,15 +658,15 @@ public:
 
     void RenderFriendButton();
 
-    DWORD CheckChatRoomDuplication(const char* pszTargetName);
+    DWORD CheckChatRoomDuplication(const wchar_t* pszTargetName);
     void SendChatRoomConnectCheck();
     void UpdateAllChatWindowInviteList();
 
     BOOL IsHotkeyEnable() { return m_bHotKey; }
 
-    void AddRequestWindow(const char* szTargetName);
-    BOOL IsRequestWindow(const char* szTargetName);
-    void RemoveRequestWindow(const char* szTargetName);
+    void AddRequestWindow(const wchar_t* szTargetName);
+    BOOL IsRequestWindow(const wchar_t* szTargetName);
+    void RemoveRequestWindow(const wchar_t* szTargetName);
     void RemoveAllRequestWindow();
 
     void CloseAllChatWindow();
@@ -692,8 +692,8 @@ protected:
     int m_iBlinkTemp;
     int m_iLetterBlink;
     BOOL m_bHotKey;
-    std::deque<char*> m_RequestChatWindowList;
-    std::deque<char*>::iterator m_RequestChatWindowListIter;
+    std::deque<wchar_t*> m_RequestChatWindowList;
+    std::deque<wchar_t*>::iterator m_RequestChatWindowListIter;
 };
 
 #endif	// __UIWINDOW_H__

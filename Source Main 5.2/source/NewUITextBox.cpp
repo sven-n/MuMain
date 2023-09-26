@@ -49,7 +49,7 @@ void CNewUITextBox::SetPos(int iX, int iY, int iWidth, int iHeight)
     SIZE Fontsize;
     g_pRenderText->SetFont(g_hFont);
 
-    unicode::t_string strTemp = _T("A");
+   std::wstring strTemp = _T(L"A");
 
     g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &Fontsize);
 
@@ -107,9 +107,9 @@ bool CNewUITextBox::Render()
     return true;
 }
 
-void CNewUITextBox::AddText(unicode::t_char* strText)
+void CNewUITextBox::AddText(wchar_t* strText)
 {
-    unicode::t_char strTemp[iMAX_TEXT_LINE][iMAX_TEXT_LINE];
+    wchar_t strTemp[iMAX_TEXT_LINE][iMAX_TEXT_LINE];
     ::memset(strTemp[0], 0, sizeof(char) * iMAX_TEXT_LINE * iMAX_TEXT_LINE);
 
     int iTextLine = ::DivideStringByPixel(&strTemp[0][0], iMAX_TEXT_LINE, iMAX_TEXT_LINE, strText, m_iWidth, true, '#');
@@ -120,17 +120,17 @@ void CNewUITextBox::AddText(unicode::t_char* strText)
     }
 }
 
-void CNewUITextBox::AddText(const unicode::t_char* strText)
+void CNewUITextBox::AddText(const wchar_t* strText)
 {
-    unicode::t_char strTempText[iMAX_TEXT_LINE] = { 0, };
-    sprintf(strTempText, strText);
+    wchar_t strTempText[iMAX_TEXT_LINE] = { 0, };
+    wsprintf(strTempText, strText);
 
     AddText(strTempText);
 }
 
-unicode::t_string CNewUITextBox::GetFullText()
+std::wstring CNewUITextBox::GetFullText()
 {
-    unicode::t_string strTemp;
+   std::wstring strTemp;
 
     auto vi = m_vecText.begin();
     for (; vi != m_vecText.end(); vi++)
@@ -141,10 +141,10 @@ unicode::t_string CNewUITextBox::GetFullText()
     return strTemp;
 }
 
-unicode::t_string CNewUITextBox::GetLineText(int iLineIndex)
+std::wstring CNewUITextBox::GetLineText(int iLineIndex)
 {
     if (0 > iLineIndex || (int)m_vecText.size() <= iLineIndex)
-        return "";
+        return L"";
 
     return m_vecText[iLineIndex];
 }

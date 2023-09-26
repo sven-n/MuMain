@@ -46,7 +46,7 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     LoadImages();
 
-    std::list<unicode::t_string> ltext;
+    std::list<std::wstring> ltext;
     ltext.push_back(GlobalText[1589]);
     ltext.push_back(GlobalText[1590]);
     ltext.push_back(GlobalText[1591]);
@@ -83,7 +83,7 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUICastleWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption)
+void CNewUICastleWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -223,28 +223,28 @@ float CNewUICastleWindow::GetLayerDepth()
 
 void CNewUICastleWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_CASTLEWINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_CASTLEWINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_CASTLEWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_CASTLEWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_CASTLEWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_CASTLEWINDOW_EXIT_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_guild_tab04.tga", IMAGE_CASTLEWINDOW_TAB_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_CASTLEWINDOW_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_CASTLEWINDOW_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CASTLEWINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_CASTLEWINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_CASTLEWINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_CASTLEWINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_CASTLEWINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_CASTLEWINDOW_EXIT_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_guild_tab04.tga", IMAGE_CASTLEWINDOW_TAB_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_CASTLEWINDOW_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_CASTLEWINDOW_BUTTON, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_item_table01(L).tga", IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT);
-    LoadBitmap("Interface\\newui_item_table01(R).tga", IMAGE_CASTLEWINDOW_TABLE_TOP_RIGHT);
-    LoadBitmap("Interface\\newui_item_table02(L).tga", IMAGE_CASTLEWINDOW_TABLE_BOTTOM_LEFT);
-    LoadBitmap("Interface\\newui_item_table02(R).tga", IMAGE_CASTLEWINDOW_TABLE_BOTTOM_RIGHT);
-    LoadBitmap("Interface\\newui_item_table03(Up).tga", IMAGE_CASTLEWINDOW_TABLE_TOP_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(Dw).tga", IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(L).tga", IMAGE_CASTLEWINDOW_TABLE_LEFT_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(R).tga", IMAGE_CASTLEWINDOW_TABLE_RIGHT_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_CASTLEWINDOW_TABLE_TOP_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_CASTLEWINDOW_TABLE_BOTTOM_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_CASTLEWINDOW_TABLE_BOTTOM_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_CASTLEWINDOW_TABLE_TOP_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_CASTLEWINDOW_TABLE_LEFT_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_CASTLEWINDOW_TABLE_RIGHT_PIXEL);
 
-    LoadBitmap("Interface\\newui_item_money2.tga", IMAGE_CASTLEWINDOW_MONEY, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_scroll_up.jpg", IMAGE_CASTLEWINDOW_SCROLL_UP_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_scroll_dn.jpg", IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_money2.tga", IMAGE_CASTLEWINDOW_MONEY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_scroll_up.jpg", IMAGE_CASTLEWINDOW_SCROLL_UP_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_scroll_dn.jpg", IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN, GL_LINEAR);
 }
 void CNewUICastleWindow::UnloadImages()
 {
@@ -278,7 +278,7 @@ void CNewUICastleWindow::RenderFrame()
     RenderImage(IMAGE_CASTLEWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
     RenderImage(IMAGE_CASTLEWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
     float fLine_y = 13.0f;
 
@@ -286,7 +286,7 @@ void CNewUICastleWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    unicode::_sprintf(szText, "%s", GlobalText[1588]);
+    wsprintf(szText, L"%s", GlobalText[1588]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -333,13 +333,13 @@ void CNewUICastleWindow::UpdateGateManagingTab()
     }
 
     SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     if (m_BtnBuy.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_GATE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(GlobalText[1551]);
-        unicode::_sprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
+        wsprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1612]);
@@ -349,7 +349,7 @@ void CNewUICastleWindow::UpdateGateManagingTab()
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_GATE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(GlobalText[1552]);
-        unicode::_sprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
+        wsprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1612]);
@@ -361,11 +361,11 @@ void CNewUICastleWindow::UpdateGateManagingTab()
         pMsgBox->AddMsg(GlobalText[1555]);
 
         if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrGateInfo()) == 0)
-            unicode::_sprintf(szText, GlobalText[1553], 2, 1000000);
+            wsprintf(szText, GlobalText[1553], 2, 1000000);
         else if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrGateInfo()) == 1)
-            unicode::_sprintf(szText, GlobalText[1553], 3, 1000000);
+            wsprintf(szText, GlobalText[1553], 3, 1000000);
         else
-            unicode::_sprintf(szText, GlobalText[1553], 4, 1000000);
+            wsprintf(szText, GlobalText[1553], 4, 1000000);
         InsertComma(szText, 1000000);
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1554]);
@@ -376,11 +376,11 @@ void CNewUICastleWindow::UpdateGateManagingTab()
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(GlobalText[1556]);
         if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrGateInfo()) == 0)
-            unicode::_sprintf(szText, GlobalText[1553], 2, 3000000);
+            wsprintf(szText, GlobalText[1553], 2, 3000000);
         else if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrGateInfo()) == 1)
-            unicode::_sprintf(szText, GlobalText[1553], 3, 3000000);
+            wsprintf(szText, GlobalText[1553], 3, 3000000);
         else
-            unicode::_sprintf(szText, GlobalText[1553], 4, 3000000);
+            wsprintf(szText, GlobalText[1553], 4, 3000000);
         InsertComma(szText, 3000000);
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1554]);
@@ -407,13 +407,13 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
     }
 
     SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     if (m_BtnBuy.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_STATUE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(GlobalText[1610]);
-        unicode::_sprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
+        wsprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1612]);
@@ -423,7 +423,7 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_STATUE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(GlobalText[1611]);
-        unicode::_sprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
+        wsprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1554]);
@@ -435,11 +435,11 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
         pMsgBox->AddMsg(GlobalText[1613]);
 
         if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
-            unicode::_sprintf(szText, GlobalText[1553], 3, 1000000);
+            wsprintf(szText, GlobalText[1553], 3, 1000000);
         else if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 1)
-            unicode::_sprintf(szText, GlobalText[1553], 5, 1000000);
+            wsprintf(szText, GlobalText[1553], 5, 1000000);
         else
-            unicode::_sprintf(szText, GlobalText[1553], 7, 1000000);
+            wsprintf(szText, GlobalText[1553], 7, 1000000);
         InsertComma(szText, 1000000);
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1554]);
@@ -451,11 +451,11 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
         pMsgBox->AddMsg(GlobalText[1614]);
 
         if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
-            unicode::_sprintf(szText, GlobalText[1553], 3, 3000000);
+            wsprintf(szText, GlobalText[1553], 3, 3000000);
         else if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 1)
-            unicode::_sprintf(szText, GlobalText[1553], 5, 3000000);
+            wsprintf(szText, GlobalText[1553], 5, 3000000);
         else
-            unicode::_sprintf(szText, GlobalText[1553], 7, 3000000);
+            wsprintf(szText, GlobalText[1553], 7, 3000000);
         InsertComma(szText, 3000000);
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1554]);
@@ -467,11 +467,11 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
         pMsgBox->AddMsg(GlobalText[1615]);
 
         if (g_SenatusInfo.GetRecoverLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
-            unicode::_sprintf(szText, GlobalText[1553], 3, 5000000);
+            wsprintf(szText, GlobalText[1553], 3, 5000000);
         else if (g_SenatusInfo.GetRecoverLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 1)
-            unicode::_sprintf(szText, GlobalText[1553], 5, 5000000);
+            wsprintf(szText, GlobalText[1553], 5, 5000000);
         else
-            unicode::_sprintf(szText, GlobalText[1553], 7, 5000000);
+            wsprintf(szText, GlobalText[1553], 7, 5000000);
         InsertComma(szText, 5000000);
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1554]);
@@ -481,14 +481,14 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
 void CNewUICastleWindow::UpdateTaxManagingTab()
 {
     SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     if (m_BtnApplyTax.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_APPLY_TAX);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        unicode::_sprintf(szText, GlobalText[1566], g_SenatusInfo.GetChaosTaxRate());
+        wsprintf(szText, GlobalText[1566], g_SenatusInfo.GetChaosTaxRate());
         pMsgBox->AddMsg(szText);
-        unicode::_sprintf(szText, GlobalText[1567], g_SenatusInfo.GetNormalTaxRate());
+        wsprintf(szText, GlobalText[1567], g_SenatusInfo.GetNormalTaxRate());
         pMsgBox->AddMsg(szText);
         pMsgBox->AddMsg(GlobalText[1568]);
     }
@@ -616,13 +616,13 @@ void CNewUICastleWindow::RenderGateManagingTab()
         g_pRenderText->SetBgColor(0x00000000);
         g_pRenderText->SetTextColor(0xFFFFFFFF);
 
-        unicode::t_char szTemp[256];
-        unicode::_sprintf(szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
+        wchar_t szTemp[256];
+        wsprintf(szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
         InsertComma(szTemp, pNPCInfo->iNpcHp);
         InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
         ptOrigin.y += 13;
-        unicode::_sprintf(szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
+        wsprintf(szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
 
         ptOrigin.y += 35;
@@ -634,11 +634,11 @@ void CNewUICastleWindow::RenderGateManagingTab()
         g_pRenderText->SetFont(g_hFont);
 
         ptOrigin.y += 24;
-        unicode::_sprintf(szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP(pNPCInfo));
+        wsprintf(szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddHP(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
         ptOrigin.y += 23;
-        unicode::_sprintf(szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense(pNPCInfo));
+        wsprintf(szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
     }
@@ -729,16 +729,16 @@ void CNewUICastleWindow::RenderStatueManagingTab()
         g_pRenderText->SetTextColor(0xFFFFFFFF);
         g_pRenderText->SetBgColor(0);
 
-        unicode::t_char szTemp[256];
-        unicode::_sprintf(szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
+        wchar_t szTemp[256];
+        wsprintf(szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
         InsertComma(szTemp, pNPCInfo->iNpcHp);
         InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
         ptOrigin.y += 13;
-        unicode::_sprintf(szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
+        wsprintf(szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
         ptOrigin.y += 13;
-        unicode::_sprintf(szTemp, GlobalText[1562], g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber, pNPCInfo->iNpcRgLevel));
+        wsprintf(szTemp, GlobalText[1562], g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber, pNPCInfo->iNpcRgLevel));
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
 
         ptOrigin.y += 22;
@@ -749,15 +749,15 @@ void CNewUICastleWindow::RenderStatueManagingTab()
         g_pRenderText->SetFont(g_hFont);
 
         ptOrigin.y += 24;
-        unicode::_sprintf(szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP(pNPCInfo));
+        wsprintf(szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddHP(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
         ptOrigin.y += 23;
-        unicode::_sprintf(szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense(pNPCInfo));
+        wsprintf(szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
         ptOrigin.y += 23;
-        unicode::_sprintf(szTemp, GlobalText[1565], g_SenatusInfo.GetNextAddRecover(pNPCInfo));
+        wsprintf(szTemp, GlobalText[1565], g_SenatusInfo.GetNextAddRecover(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddRecover(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
     }
@@ -790,15 +790,15 @@ void CNewUICastleWindow::RenderTaxManagingTab()
     m_BtnNPCTaxUp.Render();
     m_BtnNPCTaxDn.Render();
 
-    unicode::t_char szTemp[256];
+    wchar_t szTemp[256];
     ptOrigin.y += 23;
     g_pRenderText->SetFont(g_hFont);
 
-    unicode::_sprintf(szTemp, GlobalText[1573], g_SenatusInfo.GetRealTaxRateChaos(), g_SenatusInfo.GetChaosTaxRate());
+    wsprintf(szTemp, GlobalText[1573], g_SenatusInfo.GetRealTaxRateChaos(), g_SenatusInfo.GetChaosTaxRate());
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 175, 0, RT3_SORT_CENTER);
     ptOrigin.y += 25;
 
-    unicode::_sprintf(szTemp, GlobalText[1574], g_SenatusInfo.GetRealTaxRateStore(), g_SenatusInfo.GetNormalTaxRate());
+    wsprintf(szTemp, GlobalText[1574], g_SenatusInfo.GetRealTaxRateStore(), g_SenatusInfo.GetNormalTaxRate());
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 175, 0, RT3_SORT_CENTER);
 
     m_BtnApplyTax.Render();
@@ -814,11 +814,11 @@ void CNewUICastleWindow::RenderTaxManagingTab()
     g_pRenderText->SetTextColor(0xFF947BBB);
 
     ptOrigin.y += 20;
-    unicode::_sprintf(szTemp, GlobalText[1578]);
+    wsprintf(szTemp, GlobalText[1578]);
     g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, szTemp, 160, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 12;
-    unicode::_sprintf(szTemp, GlobalText[1579]);
+    wsprintf(szTemp, GlobalText[1579]);
     g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, szTemp, 160, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 12;
@@ -839,13 +839,13 @@ void CNewUICastleWindow::RenderTaxManagingTab()
     ptOrigin.y += 18;
     RenderImage(IMAGE_CASTLEWINDOW_MONEY, ptOrigin.x + 10, ptOrigin.y, 170.f, 24.f);
 
-    unicode::_sprintf(szTemp, GlobalText[1246]);
+    wsprintf(szTemp, GlobalText[1246]);
     g_pRenderText->RenderText(ptOrigin.x + 14, ptOrigin.y + 7, szTemp);
 
     //unicode::t_char szGoldText[32];
     //ConvertGold(g_SenatusInfo.GetCastleMoney(),szGoldText);
 
-    unicode::_sprintf(szTemp, "%I64d", g_SenatusInfo.GetCastleMoney());
+    wsprintf(szTemp, L"%I64d", g_SenatusInfo.GetCastleMoney());
     InsertComma64(szTemp, g_SenatusInfo.GetCastleMoney());
     g_pRenderText->RenderText(ptOrigin.x + 90, ptOrigin.y + 7, szTemp, 80, 0, RT3_SORT_RIGHT);
 
@@ -932,34 +932,34 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
     EnableAlphaTest();
 }
 
-void CNewUICastleWindow::InsertComma(unicode::t_char* pszText, DWORD dwNumber)
+void CNewUICastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)
 {
-    unicode::t_char szNumber[32];
-    unicode::_sprintf(szNumber, "%d", dwNumber);
+    wchar_t szNumber[32];
+    wsprintf(szNumber, L"%d", dwNumber);
 
-    unicode::t_char szTemp[256];
-    unicode::_strncpy(szTemp, pszText, 256);
-    unicode::t_char* pszTextBegin = szTemp;
-    unicode::t_char* pszTextFound = unicode::_strstr(szTemp, szNumber);
-    unicode::t_char* pszTextNext = pszTextFound + unicode::_strlen(szNumber);
+    wchar_t szTemp[256];
+    wcscpy_s(szTemp, 256, pszText);
+    wchar_t* pszTextBegin = szTemp;
+    wchar_t* pszTextFound = unicode::_strstr(szTemp, szNumber);
+    wchar_t* pszTextNext = pszTextFound + wcslen(szNumber);
     *pszTextFound = '\0';
     ConvertGold(dwNumber, szNumber);
 
-    unicode::_sprintf(pszText, "%s%s%s", pszTextBegin, szNumber, pszTextNext);
+    wsprintf(pszText, L"%s%s%s", pszTextBegin, szNumber, pszTextNext);
 }
 
-void CNewUICastleWindow::InsertComma64(unicode::t_char* pszText, __int64 iNumber)
+void CNewUICastleWindow::InsertComma64(wchar_t* pszText, __int64 iNumber)
 {
-    unicode::t_char szNumber[32];
-    unicode::_sprintf(szNumber, "%I64d", iNumber);
+    wchar_t szNumber[32];
+    wsprintf(szNumber, L"%I64d", iNumber);
 
-    unicode::t_char szTemp[256];
-    unicode::_strncpy(szTemp, pszText, 256);
-    unicode::t_char* pszTextBegin = szTemp;
-    unicode::t_char* pszTextFound = unicode::_strstr(szTemp, szNumber);
-    unicode::t_char* pszTextNext = pszTextFound + unicode::_strlen(szNumber);
+    wchar_t szTemp[256];
+    wcscpy_s(szTemp, 256, pszText);
+    wchar_t* pszTextBegin = szTemp;
+    wchar_t* pszTextFound = unicode::_strstr(szTemp, szNumber);
+    wchar_t* pszTextNext = pszTextFound + wcslen(szNumber);
     *pszTextFound = '\0';
     ConvertGold64(iNumber, szNumber);
 
-    unicode::_sprintf(pszText, "%s%s%s", pszTextBegin, szNumber, pszTextNext);
+    wsprintf(pszText, L"%s%s%s", pszTextBegin, szNumber, pszTextNext);
 }

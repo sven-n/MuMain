@@ -21,11 +21,11 @@ namespace leaf {
         CRegKey() {}
         ~CRegKey() {}
 
-        void SetKey(_HKEY hKey, const std::string& subkey) {
+        void SetKey(_HKEY hKey, const std::wstring& subkey) {
             m_hKey = (HKEY)hKey;
             m_subkey = subkey;
         }
-        bool ReadDword(const std::string& name, DWORD& value) {
+        bool ReadDword(const std::wstring& name, DWORD& value) {
             HKEY	hKey = NULL;
             DWORD	dwDisp;
             DWORD	dwType = REG_DWORD;
@@ -42,8 +42,8 @@ namespace leaf {
             RegCloseKey(hKey);
             return true;
         }
-        bool ReadString(const std::string& name, std::string& value) {
-            char	szTempKey[256];
+        bool ReadString(const std::wstring& name, std::wstring& value) {
+            wchar_t	szTempKey[256];
             HKEY	hKey = NULL;
             DWORD	dwDisp;
             DWORD	dwType = REG_EXPAND_SZ;
@@ -60,7 +60,7 @@ namespace leaf {
             RegCloseKey(hKey);
             return true;
         }
-        bool WriteDword(const std::string& name, DWORD value) {
+        bool WriteDword(const std::wstring& name, DWORD value) {
             HKEY	hKey = NULL;
             DWORD	dwDisp;
             DWORD	dwSize = sizeof(DWORD);
@@ -72,7 +72,7 @@ namespace leaf {
             RegCloseKey(hKey);
             return true;
         }
-        bool WriteString(const std::string& name, const std::string& value) {
+        bool WriteString(const std::wstring& name, const std::wstring& value) {
             HKEY	hKey = NULL;
             DWORD	dwDisp;
             DWORD	dwSize = value.size();
@@ -89,7 +89,7 @@ namespace leaf {
                 return false;
             return true;
         }
-        bool DeleteValue(const std::string& name) {
+        bool DeleteValue(const std::wstring& name) {
             HKEY	hKey = NULL;
             if (ERROR_SUCCESS != RegOpenKeyEx(m_hKey, m_subkey.c_str(), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, &hKey))
                 return false;
@@ -101,7 +101,7 @@ namespace leaf {
 
     private:
         HKEY	m_hKey;
-        std::string	m_subkey;
+        std::wstring	m_subkey;
     };
 }
 

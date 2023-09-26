@@ -9,10 +9,10 @@
 
 #include <crtdbg.h>
 
-#define	QM_NPCDIALOGUE_FILE			"Data\\Local\\NPCDialogue.bmd"
-#define	QM_QUESTPROGRESS_FILE		"Data\\Local\\QuestProgress.bmd"
+#define	QM_NPCDIALOGUE_FILE			L"Data\\Local\\NPCDialogue.bmd"
+#define	QM_QUESTPROGRESS_FILE		L"Data\\Local\\QuestProgress.bmd"
 
-#define	QM_QUESTWORDS_FILE			std::string("Data\\Local\\"+g_strSelectedML+"\\QuestWords_"+g_strSelectedML+".bmd").c_str()
+#define	QM_QUESTWORDS_FILE			std::wstring(L"Data\\Local\\"+g_strSelectedML+L"\\QuestWords_"+g_strSelectedML+L".bmd").c_str()
 
 CQuestMng g_QuestMng;
 
@@ -35,11 +35,11 @@ void CQuestMng::LoadQuestScript()
 
 void CQuestMng::LoadNPCDialogueScript()
 {
-    FILE* fp = ::fopen(QM_NPCDIALOGUE_FILE, "rb");
+    FILE* fp = ::_wfopen(QM_NPCDIALOGUE_FILE, L"rb");
     if (fp == NULL)
     {
-        char szMessage[256];
-        ::sprintf(szMessage, "%s file not found.\r\n", QM_NPCDIALOGUE_FILE);
+        wchar_t szMessage[256];
+        wsprintf(szMessage, L"%s file not found.\r\n", QM_NPCDIALOGUE_FILE);
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -66,11 +66,11 @@ void CQuestMng::LoadNPCDialogueScript()
 
 void CQuestMng::LoadQuestProgressScript()
 {
-    FILE* fp = ::fopen(QM_QUESTPROGRESS_FILE, "rb");
+    FILE* fp = ::_wfopen(QM_QUESTPROGRESS_FILE, L"rb");
     if (fp == NULL)
     {
-        char szMessage[256];
-        ::sprintf(szMessage, "%s file not found.\r\n", QM_QUESTPROGRESS_FILE);
+        wchar_t szMessage[256];
+        ::wsprintf(szMessage, L"%s file not found.\r\n", QM_QUESTPROGRESS_FILE);
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -97,11 +97,11 @@ void CQuestMng::LoadQuestProgressScript()
 
 void CQuestMng::LoadQuestWordsScript()
 {
-    FILE* fp = ::fopen(QM_QUESTWORDS_FILE, "rb");
+    FILE* fp = ::_wfopen(QM_QUESTWORDS_FILE, L"rb");
     if (fp == NULL)
     {
-        char szMessage[256];
-        ::sprintf(szMessage, "%s file not found.\r\n", QM_QUESTWORDS_FILE);
+        wchar_t szMessage[256];
+        ::wsprintf(szMessage, L"%s file not found.\r\n", QM_QUESTWORDS_FILE);
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -118,8 +118,8 @@ void CQuestMng::LoadQuestWordsScript()
 
     int nSize = sizeof(SQuestWordsHeader);
     SQuestWordsHeader sQuestWordsHeader;
-    char szWords[1024];
-    std::string	strWords;
+    wchar_t szWords[1024];
+    std::wstring	strWords;
 
     while (0 != ::fread(&sQuestWordsHeader, nSize, 1, fp))
     {
@@ -244,7 +244,7 @@ const SQuestRequestReward* CQuestMng::GetRequestReward(DWORD dwQuestIndex)
 void CQuestMng::SetNPC(int nNPCIndex)
 {
     m_nNPCIndex = nNPCIndex;
-    ::strcpy(m_szNPCName, ::getMonsterName(nNPCIndex));
+    ::wcscpy(m_szNPCName, ::getMonsterName(nNPCIndex));
 }
 
 int CQuestMng::GetNPCIndex()
@@ -252,7 +252,7 @@ int CQuestMng::GetNPCIndex()
     return m_nNPCIndex;
 }
 
-char* CQuestMng::GetNPCName()
+wchar_t* CQuestMng::GetNPCName()
 {
     return m_szNPCName;
 }
@@ -268,7 +268,7 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
 
-        g_pChatListBox->AddText("", GlobalText[2814], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2814], SEASON3B::TYPE_ERROR_MESSAGE);
 
         return;
     }
@@ -287,7 +287,7 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
     }
 }
 
-const char* CQuestMng::GetWords(int nWordsIndex)
+const wchar_t* CQuestMng::GetWords(int nWordsIndex)
 {
     QuestWordsMap::const_iterator iter = m_mapQuestWords.find(nWordsIndex);
     if (iter == m_mapQuestWords.end())
@@ -296,7 +296,7 @@ const char* CQuestMng::GetWords(int nWordsIndex)
     return iter->second.c_str();
 }
 
-const char* CQuestMng::GetNPCDlgNPCWords(DWORD dwDlgState)
+const wchar_t* CQuestMng::GetNPCDlgNPCWords(DWORD dwDlgState)
 {
     if (0 == m_nNPCIndex)
         return NULL;
@@ -310,7 +310,7 @@ const char* CQuestMng::GetNPCDlgNPCWords(DWORD dwDlgState)
     return GetWords(iter->second.m_nNPCWords);
 }
 
-const char* CQuestMng::GetNPCDlgAnswer(DWORD dwDlgState, int nAnswer)
+const wchar_t* CQuestMng::GetNPCDlgAnswer(DWORD dwDlgState, int nAnswer)
 {
     if (0 == m_nNPCIndex)
         return NULL;
@@ -350,7 +350,7 @@ int CQuestMng::GetNPCDlgAnswerResult(DWORD dwDlgState, int nAnswer)
     return iter->second.m_anAnswer[nAnswer * 2 + 1];
 }
 
-const char* CQuestMng::GetNPCWords(DWORD dwQuestIndex)
+const wchar_t* CQuestMng::GetNPCWords(DWORD dwQuestIndex)
 {
     QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
     if (iter == m_mapQuestProgress.end())
@@ -359,7 +359,7 @@ const char* CQuestMng::GetNPCWords(DWORD dwQuestIndex)
     return GetWords(iter->second.m_nNPCWords);
 }
 
-const char* CQuestMng::GetPlayerWords(DWORD dwQuestIndex)
+const wchar_t* CQuestMng::GetPlayerWords(DWORD dwQuestIndex)
 {
     QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
     if (iter == m_mapQuestProgress.end())
@@ -368,7 +368,7 @@ const char* CQuestMng::GetPlayerWords(DWORD dwQuestIndex)
     return GetWords(iter->second.m_nPlayerWords);
 }
 
-const char* CQuestMng::GetAnswer(DWORD dwQuestIndex, int nAnswer)
+const wchar_t* CQuestMng::GetAnswer(DWORD dwQuestIndex, int nAnswer)
 {
     _ASSERT(0 <= nAnswer || nAnswer < QM_MAX_ANSWER);
 
@@ -383,7 +383,7 @@ const char* CQuestMng::GetAnswer(DWORD dwQuestIndex, int nAnswer)
     return GetWords(nNowAnswer);
 }
 
-const char* CQuestMng::GetSubject(DWORD dwQuestIndex)
+const wchar_t* CQuestMng::GetSubject(DWORD dwQuestIndex)
 {
     QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
     if (iter == m_mapQuestProgress.end())
@@ -392,7 +392,7 @@ const char* CQuestMng::GetSubject(DWORD dwQuestIndex)
     return GetWords(iter->second.m_nSubject);
 }
 
-const char* CQuestMng::GetSummary(DWORD dwQuestIndex)
+const wchar_t* CQuestMng::GetSummary(DWORD dwQuestIndex)
 {
     QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
     if (iter == m_mapQuestProgress.end())
@@ -427,7 +427,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
     aDest[nLine].m_hFont = g_hFontBold;
     aDest[nLine].m_dwColor = ARGB(255, 179, 230, 77);
-    ::strcpy(aDest[nLine++].m_szText, GlobalText[2809]);
+    wcscpy(aDest[nLine++].m_szText, GlobalText[2809]);
 
     SQuestRequest* pRequestInfo;
     for (i = 0; i < pRequestReward->m_byRequestCount; ++i, ++nLine)
@@ -444,7 +444,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         {
         case QUEST_REQUEST_NONE:
             aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
-            ::strcpy(aDest[nLine].m_szText, GlobalText[1361]);
+            wcscpy(aDest[nLine].m_szText, GlobalText[1361]);
             break;
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
@@ -464,30 +464,30 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             switch (pRequestInfo->m_dwType)
             {
             case QUEST_REQUEST_MONSTER:
-                ::sprintf(aDest[nLine].m_szText, "Mon.: %s x %lu/%lu",
+                ::wsprintf(aDest[nLine].m_szText, L"Mon.: %s x %lu/%lu",
                     ::getMonsterName(int(pRequestInfo->m_wIndex)),
                     MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
                     pRequestInfo->m_dwValue);
                 break;
             case QUEST_REQUEST_ITEM:
             {
-                char szItemName[32];
+                wchar_t szItemName[32];
                 ::GetItemName((int)pRequestInfo->m_pItem->Type,
                     (pRequestInfo->m_pItem->Level >> 3) & 15, szItemName);
-                ::sprintf(aDest[nLine].m_szText, "Item: %s x %lu/%lu", szItemName,
+                ::wsprintf(aDest[nLine].m_szText, L"Item: %s x %lu/%lu", szItemName,
                     MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
                     pRequestInfo->m_dwValue);
             }
             break;
             case QUEST_REQUEST_LEVEL:
-                ::sprintf(aDest[nLine].m_szText, "Level: %lu %s",
+                ::wsprintf(aDest[nLine].m_szText, L"Level: %lu %s",
                     pRequestInfo->m_dwValue, GlobalText[2812]);
                 break;
             case QUEST_REQUEST_ZEN:
-                ::sprintf(aDest[nLine].m_szText, "Zen : %lu", pRequestInfo->m_dwValue);
+                ::wsprintf(aDest[nLine].m_szText, L"Zen : %lu", pRequestInfo->m_dwValue);
                 break;
             case QUEST_REQUEST_PVP_POINT:
-                ::sprintf(aDest[nLine].m_szText, GlobalText[3278],
+                ::wprintf(aDest[nLine].m_szText, GlobalText[3278],
                     MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
                     pRequestInfo->m_dwValue);
                 break;
@@ -505,7 +505,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
-            ::sprintf(aDest[nLine].m_szText, "Mon.: %s x %lu/%lu",
+            ::wsprintf(aDest[nLine].m_szText, L"Mon.: %s x %lu/%lu",
                 ::getMonsterName(int(pRequestInfo->m_wIndex)),
                 MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
                 pRequestInfo->m_dwValue);
@@ -525,7 +525,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
-            ::sprintf(aDest[nLine].m_szText, "Skill: %s",
+            ::wsprintf(aDest[nLine].m_szText, L"Skill: %s",
                 SkillAttribute[pRequestInfo->m_wIndex].Name);
             break;
 
@@ -539,10 +539,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
-            char szItemName[32];
+            wchar_t szItemName[32];
             ::GetItemName((int)pRequestInfo->m_pItem->Type, (pRequestInfo->m_pItem->Level >> 3) & 15,
                 szItemName);
-            ::sprintf(aDest[nLine].m_szText, "Item: %s x %lu/%lu", szItemName,
+            ::wsprintf(aDest[nLine].m_szText, L"Item: %s x %lu/%lu", szItemName,
                 MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
                 pRequestInfo->m_dwValue);
             break;
@@ -556,7 +556,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
-            ::sprintf(aDest[nLine].m_szText, "Level: %lu %s",
+            ::wsprintf(aDest[nLine].m_szText, L"Level: %lu %s",
                 pRequestInfo->m_dwValue, GlobalText[2812]);
             break;
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
@@ -577,10 +577,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             switch (dwQuestIndex)
             {
             case 0x10009:
-                ::sprintf(aDest[nLine].m_szText, "%s", GlobalText[2819]);
+                ::wprintf(aDest[nLine].m_szText, L"%s", GlobalText[2819]);
                 break;
             case 0x1000F:
-                ::sprintf(aDest[nLine].m_szText, "%s", GlobalText[2820]);
+                ::wprintf(aDest[nLine].m_szText, L"%s", GlobalText[2820]);
                 break;
             }
             break;
@@ -600,7 +600,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
             const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRequestInfo->m_wIndex);
-            ::sprintf(aDest[nLine].m_szText, "Bonus: %s", buffinfo.s_BuffName);
+            ::wsprintf(aDest[nLine].m_szText, L"Bonus: %s", buffinfo.s_BuffName);
         }
         break;
 
@@ -637,7 +637,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 nTextIndex = 3079;
                 break;
             }
-            ::sprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex,
+            ::wprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex,
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
                 MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
 #else	// ASG_ADD_TIME_LIMIT_QUEST
@@ -680,7 +680,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 nTextIndex = 3081;
                 break;
             }
-            ::sprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex);
+            ::wprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex);
         }
         break;
         }
@@ -694,9 +694,9 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
     for (j = 0; j < 2; ++j)
     {
         if (0 == j && pRequestReward->m_byGeneralRewardCount)
-            ::strcpy(aDest[nLine].m_szText, GlobalText[2810]);
+            ::wcscpy(aDest[nLine].m_szText, GlobalText[2810]);
         else if (1 == j && pRequestReward->m_byRandRewardCount)
-            ::sprintf(aDest[nLine].m_szText, GlobalText[3082], pRequestReward->m_byRandGiveCount);
+            ::wprintf(aDest[nLine].m_szText, GlobalText[3082], pRequestReward->m_byRandGiveCount);
         else
             continue;
         aDest[nLine].m_hFont = g_hFontBold;
@@ -719,36 +719,36 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             switch (pRewardInfo->m_dwType)
             {
             case QUEST_REWARD_NONE:
-                ::strcpy(aDest[nLine].m_szText, GlobalText[1361]);
+                ::wcscpy(aDest[nLine].m_szText, GlobalText[1361]);
                 break;
 
             case QUEST_REWARD_EXP:
-                ::sprintf(aDest[nLine].m_szText, "Exp.: %lu", pRewardInfo->m_dwValue);
+                ::wsprintf(aDest[nLine].m_szText, L"Exp.: %lu", pRewardInfo->m_dwValue);
                 break;
 
             case QUEST_REWARD_ZEN:
-                ::sprintf(aDest[nLine].m_szText, "Zen: %lu", pRewardInfo->m_dwValue);
+                ::wsprintf(aDest[nLine].m_szText, L"Zen: %lu", pRewardInfo->m_dwValue);
                 break;
 
             case QUEST_REWARD_ITEM:
-                char szItemName[32];
+                wchar_t szItemName[32];
                 ::GetItemName((int)pRewardInfo->m_pItem->Type, (pRewardInfo->m_pItem->Level >> 3) & 15,
                     szItemName);
-                ::sprintf(aDest[nLine].m_szText, "Item: %s x %lu",
+                ::wsprintf(aDest[nLine].m_szText, L"Item: %s x %lu",
                     szItemName, pRewardInfo->m_dwValue);
                 break;
 
             case QUEST_REWARD_BUFF:
             {
                 const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRewardInfo->m_wIndex);
-                ::sprintf(aDest[nLine].m_szText, "Bonus: %s x %lu%s", buffinfo.s_BuffName,
+                ::wsprintf(aDest[nLine].m_szText, L"Bonus: %s x %lu%s", buffinfo.s_BuffName,
                     pRewardInfo->m_dwValue, GlobalText[2300]);
             }
             break;
 
 #ifdef ASG_ADD_GENS_SYSTEM
             case QUEST_REWARD_CONTRIBUTE:
-                ::sprintf(aDest[nLine].m_szText, GlobalText[2994], pRewardInfo->m_dwValue);
+                ::wprintf(aDest[nLine].m_szText, GlobalText[2994], pRewardInfo->m_dwValue);
                 break;
 #endif	// ASG_ADD_GENS_SYSTEM
             }

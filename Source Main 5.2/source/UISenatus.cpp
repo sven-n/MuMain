@@ -294,9 +294,9 @@ void CSenatusInfo::DoApplyTaxAction()
 
 void CSenatusInfo::DoWithdrawAction(DWORD dwMoney)
 {
-    //char* szTmp = g_pUIPopup->GetInputText();
+    //wchar_t* szTmp = g_pUIPopup->GetInputText();
     //DWORD dwMoney;
-    //sscanf( szTmp, "%u", &dwMoney );
+    //sscanf( szTmp, L"%u", &dwMoney );
     BYTE* p = (BYTE*)&dwMoney;
     SendRequestBCWithdraw((*p), (*(p + 1)), (*(p + 2)), (*(p + 3)));
 }

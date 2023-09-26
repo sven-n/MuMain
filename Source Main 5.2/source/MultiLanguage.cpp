@@ -6,23 +6,23 @@
 
 CMultiLanguage* CMultiLanguage::ms_Singleton = NULL;
 
-CMultiLanguage::CMultiLanguage(std::string strSelectedML)
+CMultiLanguage::CMultiLanguage(std::wstring strSelectedML)
 {
     ms_Singleton = this;
 
-    if (_stricmp(strSelectedML.c_str(), "ENG") == 0)
+    if (wcsicmp(strSelectedML.c_str(), L"ENG") == 0)
     {
         byLanguage = 0;
         iCodePage = 1252;
         iNumByteForOneCharUTF8 = 2;
     }
-    else if (_stricmp(strSelectedML.c_str(), "POR") == 0)
+    else if (wcsicmp(strSelectedML.c_str(), L"POR") == 0)
     {
         byLanguage = 1;
         iCodePage = 1252;
         iNumByteForOneCharUTF8 = 2;
     }
-    else if (_stricmp(strSelectedML.c_str(), "SPN") == 0)
+    else if (wcsicmp(strSelectedML.c_str(), L"SPN") == 0)
     {
         byLanguage = 2;
         iCodePage = 1252;
@@ -51,12 +51,12 @@ int CMultiLanguage::GetNumByteForOneCharUTF8()
     return iNumByteForOneCharUTF8;
 }
 
-BOOL CMultiLanguage::IsCharUTF8(const char* pszText)
+BOOL CMultiLanguage::IsCharUTF8(const wchar_t* pszText)
 {
-    if (pszText == NULL || strlen(pszText) <= 0)
+    if (pszText == NULL || wcslen(pszText) <= 0)
         return TRUE;
 
-    const char* pbyCurr = pszText;
+    const wchar_t* pbyCurr = pszText;
     BOOL        bUTF8 = TRUE;
 
     while ((*pbyCurr != 0x00) && bUTF8)
@@ -91,69 +91,69 @@ BOOL CMultiLanguage::IsCharUTF8(const char* pszText)
     return bUTF8;
 }
 
-int CMultiLanguage::ConvertCharToWideStr(std::wstring& wstrDest, LPCSTR lpString)
-{
-    wstrDest = L"";
+//int CMultiLanguage::ConvertCharToWideStr(std::wstring& wstrDest, LPCSTR lpString)
+//{
+//    wstrDest = L"";
+//
+//    if (lpString == NULL || wcslen(lpString) <= 0)
+//        return 0;
+//
+//    int nLenOfWideCharStr;
+//    int iConversionType;
+//
+//    iConversionType = (IsCharUTF8(lpString)) ? CP_UTF8 : iCodePage;
+//
+//    // calculate the number of characters needed to hold the wide-character version of the string.
+//    nLenOfWideCharStr = MultiByteToWideChar(iConversionType, 0, lpString, -1, NULL, 0);
+//    // memory allocation
+//    auto* pwszStr = new wchar_t[nLenOfWideCharStr];
+//
+//    // convert the multi-byte string to a wide-character string.
+//    MultiByteToWideChar(iConversionType, 0, lpString, -1, pwszStr, nLenOfWideCharStr);
+//
+//    //assign
+//    wstrDest += pwszStr;
+//
+//    // release the allocated memory.
+//    delete[] pwszStr;
+//
+//    return nLenOfWideCharStr - 1;
+//}
 
-    if (lpString == NULL || strlen(lpString) <= 0)
-        return 0;
+//int CMultiLanguage::ConvertWideCharToStr(std::wstring& strDest, LPCWSTR lpwString, int iConversionType)
+//{
+//    strDest = "";
+//
+//    if (lpwString == NULL || wcslen(lpwString) <= 0)
+//        return 0;
+//
+//    int nLenOfWideCharStr;
+//
+//    // calculate the number of characters needed to hold the wide-character version of the string.
+//    nLenOfWideCharStr = WideCharToMultiByte(iConversionType, 0, lpwString, -1, NULL, 0, 0, 0);
+//    // memory allocation
+//    wchar_t* pszStr = new char[nLenOfWideCharStr];
+//
+//    // convert the multi-byte string to a wide-character string.
+//    WideCharToMultiByte(iConversionType, 0, lpwString, -1, pszStr, nLenOfWideCharStr, 0, 0);
+//
+//    //assign
+//    strDest += pszStr;
+//
+//    // release the allocated memory.
+//    delete[] pszStr;
+//
+//    return nLenOfWideCharStr - 1;
+//}
 
-    int nLenOfWideCharStr;
-    int iConversionType;
-
-    iConversionType = (IsCharUTF8(lpString)) ? CP_UTF8 : iCodePage;
-
-    // calculate the number of characters needed to hold the wide-character version of the string.
-    nLenOfWideCharStr = MultiByteToWideChar(iConversionType, 0, lpString, -1, NULL, 0);
-    // memory allocation
-    auto* pwszStr = new wchar_t[nLenOfWideCharStr];
-
-    // convert the multi-byte string to a wide-character string.
-    MultiByteToWideChar(iConversionType, 0, lpString, -1, pwszStr, nLenOfWideCharStr);
-
-    //assign
-    wstrDest += pwszStr;
-
-    // release the allocated memory.
-    delete[] pwszStr;
-
-    return nLenOfWideCharStr - 1;
-}
-
-int CMultiLanguage::ConvertWideCharToStr(std::string& strDest, LPCWSTR lpwString, int iConversionType)
-{
-    strDest = "";
-
-    if (lpwString == NULL || wcslen(lpwString) <= 0)
-        return 0;
-
-    int nLenOfWideCharStr;
-
-    // calculate the number of characters needed to hold the wide-character version of the string.
-    nLenOfWideCharStr = WideCharToMultiByte(iConversionType, 0, lpwString, -1, NULL, 0, 0, 0);
-    // memory allocation
-    char* pszStr = new char[nLenOfWideCharStr];
-
-    // convert the multi-byte string to a wide-character string.
-    WideCharToMultiByte(iConversionType, 0, lpwString, -1, pszStr, nLenOfWideCharStr, 0, 0);
-
-    //assign
-    strDest += pszStr;
-
-    // release the allocated memory.
-    delete[] pszStr;
-
-    return nLenOfWideCharStr - 1;
-}
-
-void CMultiLanguage::ConvertANSIToUTF8OrViceVersa(std::string& strDest, LPCSTR lpString)
-{
-    std::wstring wstrUTF16 = L"";
-    int iDestType = (IsCharUTF8(lpString)) ? CP_ACP : CP_UTF8;
-
-    ConvertCharToWideStr(wstrUTF16, lpString);
-    ConvertWideCharToStr(strDest, wstrUTF16.c_str(), iDestType);
-}
+//void CMultiLanguage::ConvertANSIToUTF8OrViceVersa(std::wstring& strDest, LPCSTR lpString)
+//{
+//    std::wstring wstrUTF16 = L"";
+//    int iDestType = (IsCharUTF8(lpString)) ? CP_ACP : CP_UTF8;
+//
+//    ConvertCharToWideStr(wstrUTF16, lpString);
+//    ConvertWideCharToStr(strDest, wstrUTF16.c_str(), iDestType);
+//}
 
 int	CMultiLanguage::GetClosestBlankFromCenter(const std::wstring wstrTarget)
 {
@@ -197,7 +197,7 @@ BOOL CMultiLanguage::_GetTextExtentPoint32(HDC hdc, LPCWSTR lpString, int cbStri
 
 BOOL CMultiLanguage::_GetTextExtentPoint32(HDC hdc, LPCSTR lpString, int cbString, LPSIZE lpSize)
 {
-    return GetTextExtentPoint32(hdc, lpString, cbString, lpSize);
+    return GetTextExtentPoint32A(hdc, lpString, cbString, lpSize);
 }
 
 BOOL CMultiLanguage::_TextOut(HDC hdc, int nXStart, int nYStart, LPCWSTR lpString, int cbString)
@@ -207,10 +207,7 @@ BOOL CMultiLanguage::_TextOut(HDC hdc, int nXStart, int nYStart, LPCWSTR lpStrin
 
 BOOL CMultiLanguage::_TextOut(HDC hdc, int nXStart, int nYStart, LPCSTR lpString, int cbString)
 {
-    std::wstring wstrText = L"";
-    ConvertCharToWideStr(wstrText, lpString);
-
-    return TextOutW(hdc, nXStart, nYStart, wstrText.c_str(), wstrText.length());
+    return TextOutA(hdc, nXStart, nYStart, lpString, cbString);
 }
 
 WPARAM CMultiLanguage::ConvertFulltoHalfWidthChar(DWORD wParam)

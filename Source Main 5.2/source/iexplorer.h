@@ -6,10 +6,10 @@
 namespace leaf {
     /* Open URL for default web-browser    */
     /* This function return process handle */
-    inline bool OpenExplorer(const std::string& url)
+    inline bool OpenExplorer(const std::wstring& url)
     {
         // SW_SHOW
-        if (32 < (UINT)ShellExecute(NULL, "open", url.c_str(), NULL, NULL, SW_NORMAL))
+        if (32 < (UINT)ShellExecute(NULL, L"open", url.c_str(), NULL, NULL, SW_NORMAL))
             return true;
         return false;
     }

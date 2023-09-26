@@ -282,14 +282,14 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
     ::memset(TextListColor, 0, sizeof(int) * 30);
     ::memset(TextBold, 0, sizeof(int) * 30);
 
-    std::list<std::string> tooltipinfo;
+    std::list<std::wstring> tooltipinfo;
     g_BuffToolTipString(tooltipinfo, eBuffType);
 
-    for (std::list<std::string>::iterator iter = tooltipinfo.begin(); iter != tooltipinfo.end(); ++iter)
+    for (std::list<std::wstring>::iterator iter = tooltipinfo.begin(); iter != tooltipinfo.end(); ++iter)
     {
-        std::string& temp = *iter;
+        std::wstring& temp = *iter;
 
-        unicode::_sprintf(TextList[TextNum], temp.c_str());
+        wsprintf(TextList[TextNum], temp.c_str());
 
         if (TextNum == 0)
         {
@@ -305,12 +305,12 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
         TextNum += 1;
     }
 
-    std::string bufftime;
+    std::wstring bufftime;
     g_BuffStringTime(eBuffType, bufftime);
 
     if (bufftime.size() != 0)
     {
-        unicode::_sprintf(TextList[TextNum], GlobalText[2533], bufftime.c_str());
+        wsprintf(TextList[TextNum], GlobalText[2533], bufftime.c_str());
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum += 1;
@@ -336,8 +336,8 @@ void SEASON3B::CNewUIBuffWindow::ClosingProcess()
 
 void SEASON3B::CNewUIBuffWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_statusicon.jpg", IMAGE_BUFF_STATUS, GL_LINEAR);
-    LoadBitmap("Interface\\newui_statusicon2.jpg", IMAGE_BUFF_STATUS2, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_statusicon.jpg", IMAGE_BUFF_STATUS, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_statusicon2.jpg", IMAGE_BUFF_STATUS2, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIBuffWindow::UnloadImages()

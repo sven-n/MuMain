@@ -49,7 +49,7 @@ namespace SEASON3B
 
         DWORD	m_dwCurQuestIndex;
 
-        char	m_aszNPCWords[QPE_NPC_LINE_MAX][QPE_WORDS_ROW_MAX];
+        wchar_t	m_aszNPCWords[QPE_NPC_LINE_MAX][QPE_WORDS_ROW_MAX];
         int		m_nSelNPCPage;
         int		m_nMaxNPCPage;
 
@@ -61,7 +61,7 @@ namespace SEASON3B
         };
         LOWER_VIEW_MODE	m_eLowerView;
 
-        char	m_aszPlayerWords[QPE_PLAYER_LINE_MAX][QPE_WORDS_ROW_MAX];
+        wchar_t	m_aszPlayerWords[QPE_PLAYER_LINE_MAX][QPE_WORDS_ROW_MAX];
         int		m_anAnswerLine[QM_MAX_ANSWER];
         int		m_nSelAnswer;
 

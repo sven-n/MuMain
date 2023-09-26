@@ -15,17 +15,17 @@ private:
     CMultiLanguage() { ms_Singleton = this; };
 
 public:
-    CMultiLanguage(std::string strSelectedML);
+    CMultiLanguage(std::wstring strSelectedML);
     ~CMultiLanguage() { ms_Singleton = 0; };
 
     BYTE GetLanguage();				// Getters
     int GetCodePage();
     int GetNumByteForOneCharUTF8();
 
-    BOOL IsCharUTF8(const char* pszText);
-    int	 ConvertCharToWideStr(std::wstring& wstrDest, LPCSTR lpString);
-    int  ConvertWideCharToStr(std::string& strDest, LPCWSTR lpwString, int iConversionType = CP_UTF8);
-    void ConvertANSIToUTF8OrViceVersa(std::string& strDest, LPCSTR lpString);
+    BOOL IsCharUTF8(const wchar_t* pszText);
+    //int	 ConvertCharToWideStr(std::wstring& wstrDest, LPCSTR lpString);
+    //int  ConvertWideCharToStr(std::wstring& strDest, LPCWSTR lpwString, int iConversionType = CP_UTF8);
+    //void ConvertANSIToUTF8OrViceVersa(std::wstring& strDest, LPCSTR lpString);
     int	 GetClosestBlankFromCenter(const std::wstring wstrTarget);
 
     WPARAM ConvertFulltoHalfWidthChar(DWORD wParam);

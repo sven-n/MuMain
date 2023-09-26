@@ -12,8 +12,8 @@
 extern bool bCheckNPC;
 extern int g_iNumLineMessageBoxCustom;
 extern int g_iNumAnswer;
-extern char g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
-extern char g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
+extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
+extern wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 extern int g_iCurrentDialogScript;
 
 using namespace SEASON3B;
@@ -210,7 +210,7 @@ bool CNewUINPCQuest::Render()
         g_pRenderText->SetTextColor(255, 220, 150, 255);
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 368, GlobalText[198]);
 
-        unicode::t_char szTemp[128];
+        wchar_t szTemp[128];
         g_pRenderText->SetTextColor(::getGoldColor(g_csQuest.GetNeedZen()));
         ::ConvertGold(g_csQuest.GetNeedZen(), szTemp);
         g_pRenderText->RenderText(m_Pos.x + 170, m_Pos.y + 368, szTemp, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
@@ -305,7 +305,7 @@ bool CNewUINPCQuest::RenderItemMobText()
 {
     bool bCompletion = true;
 
-    unicode::t_char szTemp[128];
+    wchar_t szTemp[128];
     int nPosY = m_Pos.y + 244;
 
     g_pRenderText->SetFont(g_hFontBold);
@@ -336,9 +336,9 @@ bool CNewUINPCQuest::RenderItemMobText()
                 bCompletion = false;
             }
 
-            unicode::t_char szItemName[128];
+            wchar_t szItemName[128];
             GetItemName(nItemType, nItemLevel, szItemName);
-            unicode::_sprintf(szTemp, "%s x %d", szItemName, nItemNum);
+            wsprintf(szTemp, L"%s x %d", szItemName, nItemNum);
             g_pRenderText->RenderText(m_Pos.x + 60, nPosY, szTemp);
         }
         break;
@@ -359,7 +359,7 @@ bool CNewUINPCQuest::RenderItemMobText()
                 bCompletion = false;
             }
 
-            unicode::_sprintf(szTemp, "%s x %d/%d",
+            wsprintf(szTemp, L"%s x %d/%d",
                 ::getMonsterName(int(pQuest->QuestAct[i].wItemType)),
                 nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
 
@@ -425,16 +425,16 @@ float CNewUINPCQuest::GetLayerDepth()
 
 void CNewUINPCQuest::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_NPCQUEST_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_NPCQUEST_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_NPCQUEST_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_NPCQUEST_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_NPCQUEST_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_NPCQUEST_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_NPCQUEST_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_NPCQUEST_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_NPCQUEST_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_NPCQUEST_BOTTOM, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_NPCQUEST_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_money2.tga", IMAGE_NPCQUEST_ZEN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_NPCQUEST_BTN_COMPLETE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_NPCQUEST_BTN_CLOSE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_NPCQUEST_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_money2.tga", IMAGE_NPCQUEST_ZEN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_NPCQUEST_BTN_COMPLETE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_NPCQUEST_BTN_CLOSE, GL_LINEAR);
 }
 
 void CNewUINPCQuest::UnloadImages()

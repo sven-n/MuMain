@@ -12,8 +12,8 @@ namespace SEASON3B
         typedef struct tagMOVEREQ
         {
             int		index;
-            char	szMainMapName[32];
-            char	szSubMapName[32];
+            wchar_t	szMainMapName[32];
+            wchar_t	szSubMapName[32];
             int		iReqLevel;
             int		m_iReqMaxLevel;
             int		iReqZen;
@@ -40,14 +40,14 @@ namespace SEASON3B
 
     public:
         static CMoveCommandData* GetInstance();
-        static bool OpenMoveReqScript(const std::string& filename);
+        static bool OpenMoveReqScript(const std::wstring& filename);
 
         int GetNumMoveMap();
         const MOVEINFODATA* GetMoveCommandDataByIndex(int iIndex);
         const std::list<MOVEINFODATA*>& GetMoveCommandDatalist();
 
     protected:
-        bool Create(const std::string& filename);
+        bool Create(const std::wstring& filename);
         void Release();
         void BuxConvert(BYTE* pBuffer, int size);
     };

@@ -262,7 +262,7 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
             Open(INTERFACE_INVENTORY);
 
             if (g_iPShopWndType != PSHOPWNDTYPE_NONE) {
-                g_ErrorReport.Write("@ OpenPersonalShop : SendRequestInventory\n");
+                g_ErrorReport.Write(L"@ OpenPersonalShop : SendRequestInventory\n");
                 SendRequestInventory();
             }
 
@@ -281,7 +281,7 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
             Open(INTERFACE_INVENTORY);
 
             if (g_iPShopWndType != PSHOPWNDTYPE_NONE) {
-                g_ErrorReport.Write("@ OpenPersonalShop : SendRequestInventory\n");
+                g_ErrorReport.Write(L"@ OpenPersonalShop : SendRequestInventory\n");
                 SendRequestInventory();
             }
             CreatePersonalItemTable();

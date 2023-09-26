@@ -41,20 +41,20 @@ namespace SEASON3B
 
         typedef struct _MSGBOX_TEXTDATA
         {
-            unicode::t_string strMsg;
+            std::wstring strMsg;
             DWORD dwColor;
             BYTE byFontType;
 
             _MSGBOX_TEXTDATA()
             {
-                strMsg = "";
+                strMsg = L"";
                 dwColor = 0xffffffff;
                 byFontType = MSGBOX_FONT_NORMAL;
             }
         } MSGBOX_TEXTDATA;
 
         typedef std::vector<MSGBOX_TEXTDATA*> type_vector_msgdata;
-        typedef unicode::t_string type_string;
+        typedef std::wstring type_string;
 
     public:
         CNewUITextInputMsgBox();
@@ -72,7 +72,7 @@ namespace SEASON3B
 
         DWORD GetMsgBoxType();
 
-        void GetInputBoxText(unicode::t_char* strText);
+        void GetInputBoxText(wchar_t* strText);
         void SetInputBoxOption(int iOption);
         void SetInputBoxPosition(int x, int y);
         void SetInputBoxSize(int width, int height);
@@ -125,20 +125,20 @@ namespace SEASON3B
 
         typedef struct _MSGBOX_TEXTDATA
         {
-            unicode::t_string strMsg;
+            std::wstring strMsg;
             DWORD dwColor;
             BYTE byFontType;
 
             _MSGBOX_TEXTDATA()
             {
-                strMsg = "";
+                strMsg = L"";
                 dwColor = 0xffffffff;
                 byFontType = MSGBOX_FONT_NORMAL;
             }
         } MSGBOX_TEXTDATA;
 
         typedef std::vector<MSGBOX_TEXTDATA*> type_vector_msgdata;
-        typedef unicode::t_string type_string;
+        typedef std::wstring type_string;
 
     public:
         CNewUIKeyPadMsgBox();
@@ -155,8 +155,8 @@ namespace SEASON3B
         int GetInputLimit();
         int GetInputSize();
         void ClearInput();
-        const char* GetInputText();
-        void SetCheckInputText(const char* strInput);
+        const wchar_t* GetInputText();
+        void SetCheckInputText(const wchar_t* strInput);
         bool IsCheckInput();
         bool IsAllSameNumber();
 
@@ -183,8 +183,8 @@ namespace SEASON3B
 
         int m_iInputLimit;
         int m_iKeyPadMapping[MAX_KEYPADINPUT];
-        char m_strKeyPadInput[MAX_PASSWORD_SIZE + 1];
-        char m_strCheckKeyPadInput[MAX_KEYPADINPUT + 1];
+        wchar_t m_strKeyPadInput[MAX_PASSWORD_SIZE + 1];
+        wchar_t m_strCheckKeyPadInput[MAX_KEYPADINPUT + 1];
 
         WORD m_wStoragePassword;
         type_vector_msgdata m_MsgTextList;
@@ -776,7 +776,7 @@ namespace SEASON3B
         static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
-        void SetIDs(char* pszWinnerID, char* pszLoserID);
+        void SetIDs(wchar_t* pszWinnerID, wchar_t* pszLoserID);
 
     private:
         void SetAddCallbackFunc();
@@ -788,8 +788,8 @@ namespace SEASON3B
 
         // button
         CNewUIMessageBoxButton m_BtnOk;
-        char m_szWinnerID[24];
-        char m_szLoserID[24];
+        wchar_t m_szWinnerID[24];
+        wchar_t m_szLoserID[24];
     };
 
     class CGuild_ToPerson_Position : public CNewUIMessageBoxBase

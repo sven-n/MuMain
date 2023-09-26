@@ -23,7 +23,7 @@ HTTPConnecter::~HTTPConnecter()
 
 WZResult		HTTPConnecter::CreateSession(HINTERNET& hSession)
 {
-    char path[MAX_PATH] = { 0 };
+    wchar_t path[MAX_PATH] = { 0 };
 
     Path::GetCurrentFileName(path);
 
@@ -33,7 +33,7 @@ WZResult		HTTPConnecter::CreateSession(HINTERNET& hSession)
     }
     else
     {
-        this->m_Result.SetResult(DL_CREATE_SESSION, GetLastError(), "[HTTPConnecter::CreateSession] Fail : InternetOpen, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_CREATE_SESSION, GetLastError(), L"[HTTPConnecter::CreateSession] Fail : InternetOpen, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;
@@ -44,7 +44,7 @@ WZResult		HTTPConnecter::CreateConnection(HINTERNET& hSession,
 {
     this->m_pServerInfo->GetPassword();
 
-    if ((hConnection = InternetConnectA(hSession,
+    if ((hConnection = InternetConnect(hSession,
         this->m_pServerInfo->GetServerURL(),
         this->m_pServerInfo->GetPort(),
         this->m_pServerInfo->GetUserID(),
@@ -58,7 +58,7 @@ WZResult		HTTPConnecter::CreateConnection(HINTERNET& hSession,
     }
     else
     {
-        this->m_Result.SetResult(DL_CREATE_CONNECTION, GetLastError(), "[HTTPConnecter::CreateConnection] Fail : InternetConnect, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_CREATE_CONNECTION, GetLastError(), L"[HTTPConnecter::CreateConnection] Fail : InternetConnect, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;
@@ -68,13 +68,13 @@ WZResult		HTTPConnecter::OpenRemoteFile(HINTERNET& hConnection,
     HINTERNET& hRemoteFile,
     ULONGLONG& nFileLength)
 {
-    hRemoteFile = HttpOpenRequest(hConnection, "GET", this->m_pFileInfo->GetRemoteFilePath(), "HTTP/1.0", 0, 0, 0x80000000, 0);
+    hRemoteFile = HttpOpenRequest(hConnection, L"GET", this->m_pFileInfo->GetRemoteFilePath(), L"HTTP/1.0", 0, 0, 0x80000000, 0);
 
     if (hRemoteFile)
     {
         HttpSendRequest(hRemoteFile, 0, 0, 0, 0);
 
-        char buffer[32];
+        wchar_t buffer[32];
 
         memset(buffer, 0, sizeof(buffer));
 
@@ -82,34 +82,34 @@ WZResult		HTTPConnecter::OpenRemoteFile(HINTERNET& hConnection,
 
         if (HttpQueryInfo(hRemoteFile, HTTP_QUERY_STATUS_CODE, buffer, &dwBufferLength, 0))
         {
-            if (_atoi64(buffer) == HTTP_STATUS_OK)
+            if (_wtoi64(buffer) == HTTP_STATUS_OK)
             {
                 memset(buffer, 0, sizeof(buffer));
                 dwBufferLength = 32;
 
                 if (HttpQueryInfo(hRemoteFile, HTTP_QUERY_CONTENT_LENGTH, buffer, &dwBufferLength, 0))
                 {
-                    nFileLength = _atoi64(buffer);
+                    nFileLength = _wtoi64(buffer);
                     this->m_Result.SetSuccessResult();
                 }
                 else
                 {
-                    this->m_Result.SetResult(DL_GET_FILE_LENGTH, GetLastError(), "[HTTPConnecter::OpenRemoteFile] Fail : HttpQueryInfo - HTTP_QUERY_CONTENT_LENGTH, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+                    this->m_Result.SetResult(DL_GET_FILE_LENGTH, GetLastError(), L"[HTTPConnecter::OpenRemoteFile] Fail : HttpQueryInfo - HTTP_QUERY_CONTENT_LENGTH, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
                 }
             }
             else
             {
-                this->m_Result.SetResult(DL_HTTP_STATUS_NOT_OK, 0, "[HTTPConnecter::OpenRemoteFile] Fail : Not HTTP_STATUS_OK, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+                this->m_Result.SetResult(DL_HTTP_STATUS_NOT_OK, 0, L"[HTTPConnecter::OpenRemoteFile] Fail : Not HTTP_STATUS_OK, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
             }
         }
         else
         {
-            this->m_Result.SetResult(DL_HTTP_QUERY_INFO, GetLastError(), "[HTTPConnecter::OpenRemoteFile] Fail : HttpQueryInfo - HTTP_QUERY_STATUS_CODE, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+            this->m_Result.SetResult(DL_HTTP_QUERY_INFO, GetLastError(), L"[HTTPConnecter::OpenRemoteFile] Fail : HttpQueryInfo - HTTP_QUERY_STATUS_CODE, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
         }
     }
     else
     {
-        this->m_Result.SetResult(DL_OPEN_REMOTEFILE, GetLastError(), "[HTTPConnecter::OpenRemoteFile] Fail : HttpOpenRequest, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_OPEN_REMOTEFILE, GetLastError(), L"[HTTPConnecter::OpenRemoteFile] Fail : HttpOpenRequest, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;
@@ -131,7 +131,7 @@ WZResult		HTTPConnecter::ReadRemoteFile(HINTERNET& hRemoteFile,
     }
     else
     {
-        this->m_Result.SetResult(DL_READ_REMOTEFILE, GetLastError(), "[HTTPConnecter::ReadRemoteFile] Fail : InternetReadFile, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_READ_REMOTEFILE, GetLastError(), L"[HTTPConnecter::ReadRemoteFile] Fail : InternetReadFile, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;

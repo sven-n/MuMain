@@ -62,17 +62,17 @@ BOOL CDuelMgr::IsPetDuelEnabled()
     return m_bIsPetDuelEnabled;
 }
 
-void CDuelMgr::SetDuelPlayer(int iPlayerNum, int iIndex, char* pszID)
+void CDuelMgr::SetDuelPlayer(int iPlayerNum, int iIndex, wchar_t* pszID)
 {
     m_DuelPlayer[iPlayerNum].m_iIndex = iIndex;
-    strncpy(m_DuelPlayer[iPlayerNum].m_szID, pszID, MAX_ID_SIZE);
+    wcsncpy(m_DuelPlayer[iPlayerNum].m_szID, pszID, MAX_ID_SIZE);
     m_DuelPlayer[iPlayerNum].m_szID[MAX_ID_SIZE] = '\0';
 }
 
 void CDuelMgr::SetHeroAsDuelPlayer(int iPlayerNum)
 {
     m_DuelPlayer[iPlayerNum].m_iIndex = Hero->Key;
-    strncpy(m_DuelPlayer[iPlayerNum].m_szID, Hero->ID, MAX_ID_SIZE);
+    wcsncpy(m_DuelPlayer[iPlayerNum].m_szID, Hero->ID, MAX_ID_SIZE);
     m_DuelPlayer[iPlayerNum].m_szID[MAX_ID_SIZE] = '\0';
 }
 
@@ -91,7 +91,7 @@ void CDuelMgr::SetSD(int iPlayerNum, int iRate)
     m_DuelPlayer[iPlayerNum].m_fSDRate = iRate * 0.01f;
 }
 
-char* CDuelMgr::GetDuelPlayerID(int iPlayerNum)
+wchar_t* CDuelMgr::GetDuelPlayerID(int iPlayerNum)
 {
     return m_DuelPlayer[iPlayerNum].m_szID;
 }
@@ -113,11 +113,11 @@ float CDuelMgr::GetSD(int iPlayerNum)
 
 BOOL CDuelMgr::IsDuelPlayer(CHARACTER* pCharacter, int iPlayerNum, BOOL bIncludeSummon)
 {
-    if (pCharacter->Key == m_DuelPlayer[iPlayerNum].m_iIndex && strncmp(pCharacter->ID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
+    if (pCharacter->Key == m_DuelPlayer[iPlayerNum].m_iIndex && wcsncmp(pCharacter->ID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
     {
         return TRUE;
     }
-    else if (bIncludeSummon == TRUE && gCharacterManager.GetBaseClass(pCharacter->Class) == 0 && strncmp(pCharacter->OwnerID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
+    else if (bIncludeSummon == TRUE && gCharacterManager.GetBaseClass(pCharacter->Class) == 0 && wcsncmp(pCharacter->OwnerID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
     {
         return TRUE;
     }
@@ -135,13 +135,13 @@ void CDuelMgr::SendDuelRequestAnswer(int iPlayerNum, BOOL bOK)
     SendRequestDuelOk(bOK, m_DuelPlayer[iPlayerNum].m_iIndex, m_DuelPlayer[iPlayerNum].m_szID);
 }
 
-void CDuelMgr::SetDuelChannel(int iChannelIndex, BOOL bEnable, BOOL bJoinable, char* pszID1, char* pszID2)
+void CDuelMgr::SetDuelChannel(int iChannelIndex, BOOL bEnable, BOOL bJoinable, wchar_t* pszID1, wchar_t* pszID2)
 {
     m_DuelChannels[iChannelIndex].m_bEnable = bEnable;
     m_DuelChannels[iChannelIndex].m_bJoinable = bJoinable;
-    strncpy(m_DuelChannels[iChannelIndex].m_szID1, pszID1, MAX_ID_SIZE);
+    wcscpy_s(m_DuelChannels[iChannelIndex].m_szID1, MAX_ID_SIZE, pszID1);
     m_DuelChannels[iChannelIndex].m_szID1[MAX_ID_SIZE] = '\0';
-    strncpy(m_DuelChannels[iChannelIndex].m_szID2, pszID2, MAX_ID_SIZE);
+    wcscpy_s(m_DuelChannels[iChannelIndex].m_szID2, MAX_ID_SIZE, pszID2);
     m_DuelChannels[iChannelIndex].m_szID2[MAX_ID_SIZE] = '\0';
 }
 
@@ -150,40 +150,40 @@ void CDuelMgr::RemoveAllDuelWatchUser()
     m_DuelWatchUserList.clear();
 }
 
-void CDuelMgr::AddDuelWatchUser(char* pszUserID)
+void CDuelMgr::AddDuelWatchUser(wchar_t* pszUserID)
 {
-    char szUserID[24] = { 0, };
-    strncpy(szUserID, pszUserID, MAX_ID_SIZE);
+    wchar_t szUserID[24] = { 0, };
+    wcscpy_s(szUserID, MAX_ID_SIZE, pszUserID);
     szUserID[MAX_ID_SIZE] = '\0';
     m_DuelWatchUserList.push_back(szUserID);
 }
 
-void CDuelMgr::RemoveDuelWatchUser(char* pszUserID)
+void CDuelMgr::RemoveDuelWatchUser(wchar_t* pszUserID)
 {
-    std::list<std::string>::iterator iter;
+    std::list<std::wstring>::iterator iter;
     for (iter = m_DuelWatchUserList.begin(); iter != m_DuelWatchUserList.end(); ++iter)
     {
-        if (strncmp(iter->c_str(), pszUserID, MAX_ID_SIZE) == 0)
+        if (wcsncmp(iter->c_str(), pszUserID, MAX_ID_SIZE) == 0)
         {
             m_DuelWatchUserList.erase(iter);
             return;
         }
     }
-    assert(!"RemoveDuelWatchUser!");
+    assert(!L"RemoveDuelWatchUser!");
 }
 
-char* CDuelMgr::GetDuelWatchUser(int iIndex)
+wchar_t* CDuelMgr::GetDuelWatchUser(int iIndex)
 {
     if (m_DuelWatchUserList.size() <= (DWORD)iIndex)
         return NULL;
 
     int i = 0;
-    std::list<std::string>::iterator iter;
+    std::list<std::wstring>::iterator iter;
     for (iter = m_DuelWatchUserList.begin(); iter != m_DuelWatchUserList.end(); ++iter, ++i)
     {
         if (i == iIndex)
         {
-            return (char*)iter->c_str();
+            return (wchar_t*)iter->c_str();
         }
     }
     return NULL;

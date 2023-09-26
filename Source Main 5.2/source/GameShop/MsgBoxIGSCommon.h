@@ -66,7 +66,7 @@ public:
     bool Update();
     bool Render();
 
-    void Initialize(const unicode::t_char* pszTitle, const unicode::t_char* pszText);
+    void Initialize(const wchar_t* pszTitle, const wchar_t* pszText);
 
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -86,8 +86,8 @@ private:
 private:
     CNewUIMessageBoxButton m_BtnOk;
 
-    unicode::t_char		m_szTitle[MAX_TEXT_LENGTH];
-    unicode::t_char		m_szText[NUM_LINE_CMB][MAX_TEXT_LENGTH];
+    wchar_t m_szTitle[MAX_TEXT_LENGTH];
+    wchar_t m_szText[NUM_LINE_CMB][MAX_TEXT_LENGTH];
 
     int	m_iMsgBoxWidth;
     int m_iMsgBoxHeight;

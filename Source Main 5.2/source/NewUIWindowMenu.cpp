@@ -276,13 +276,13 @@ void SEASON3B::CNewUIWindowMenu::ClosingProcess()
 
 void SEASON3B::CNewUIWindowMenu::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_WINDOW_MENU_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_commamd01.tga", IMAGE_WINDOW_MENU_FRAME_UP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_commamd02.tga", IMAGE_WINDOW_MENU_FRAME_MIDDLE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_commamd03.tga", IMAGE_WINDOW_MENU_FRAME_DOWN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_commamd_Line.jpg", IMAGE_WINDOW_MENU_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_arrow(L).tga", IMAGE_WINDOW_MENU_ARROWL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_arrow(R).tga", IMAGE_WINDOW_MENU_ARROWR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_WINDOW_MENU_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_commamd01.tga", IMAGE_WINDOW_MENU_FRAME_UP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_commamd02.tga", IMAGE_WINDOW_MENU_FRAME_MIDDLE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_commamd03.tga", IMAGE_WINDOW_MENU_FRAME_DOWN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_commamd_Line.jpg", IMAGE_WINDOW_MENU_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_arrow(L).tga", IMAGE_WINDOW_MENU_ARROWL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_arrow(R).tga", IMAGE_WINDOW_MENU_ARROWR, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIWindowMenu::UnloadImages()

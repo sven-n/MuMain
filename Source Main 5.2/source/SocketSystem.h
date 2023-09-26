@@ -86,7 +86,7 @@ namespace SEASON4A
     {
         int m_iOptionID;
         int m_iOptionCategory;
-        char m_szOptionName[MAX_SOCKET_OPTION_NAME_LENGTH];
+        wchar_t m_szOptionName[MAX_SOCKET_OPTION_NAME_LENGTH];
         char m_bOptionType;
         int m_iOptionValue[5];
         BYTE m_bySocketCheckInfo[6];
@@ -133,7 +133,7 @@ namespace SEASON4A
         BOOL IsSocketSetOptionEnabled();
         void RenderToolTipForSocketSetOption(int iPos_x, int iPos_y);
 
-        void CreateSocketOptionText(char* pszOptionText, int iSeedID, int iSphereLv);
+        void CreateSocketOptionText(wchar_t* pszOptionText, int iSeedID, int iSphereLv);
 
 #ifdef KJW_FIX_SOCKET_BONUS_BIT_OPERATION
         __int64 CalcSocketBonusItemValue(const ITEM* pItem, __int64 iOrgGold);
@@ -146,12 +146,12 @@ namespace SEASON4A
         void CalcSocketStatusBonus();
         SOCKET_OPTION_STATUS_BONUS m_StatusBonus;
 
-        void OpenSocketItemScript(const unicode::t_char* szFileName);
+        void OpenSocketItemScript(const wchar_t* szFileName);
 
     protected:
         BOOL IsSocketItem(int iItemType);
 
-        void CalcSocketOptionValueText(char* pszOptionValueText, int iOptionType, float fOptionValue);
+        void CalcSocketOptionValueText(wchar_t* pszOptionValueText, int iOptionType, float fOptionValue);
         int CalcSocketOptionValue(int iOptionType, float fOptionValue);
 
     protected:

@@ -49,11 +49,11 @@ void SEASON3A::CGameCensorship::Create()
 
 void SEASON3A::CGameCensorship::LoadImage()
 {
-    LoadBitmap("Interface\\gamecensorship_12.tga", IMAGE_12, GL_LINEAR);
-    LoadBitmap("Interface\\gamecensorship_15.tga", IMAGE_15, GL_LINEAR);
-    LoadBitmap("Interface\\gamecensorship_18.tga", IMAGE_18, GL_LINEAR);
-    LoadBitmap("Interface\\gamecensorship_fear.tga", IMAGE_FEAR, GL_LINEAR);
-    LoadBitmap("Interface\\gamecensorship_vio.tga", IMAGE_VIOLENCE, GL_LINEAR);
+    LoadBitmap(L"Interface\\gamecensorship_12.tga", IMAGE_12, GL_LINEAR);
+    LoadBitmap(L"Interface\\gamecensorship_15.tga", IMAGE_15, GL_LINEAR);
+    LoadBitmap(L"Interface\\gamecensorship_18.tga", IMAGE_18, GL_LINEAR);
+    LoadBitmap(L"Interface\\gamecensorship_fear.tga", IMAGE_FEAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\gamecensorship_vio.tga", IMAGE_VIOLENCE, GL_LINEAR);
 }
 
 void SEASON3A::CGameCensorship::Release()

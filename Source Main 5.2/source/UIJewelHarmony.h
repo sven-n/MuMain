@@ -13,7 +13,7 @@
 struct HarmonyJewelOption
 {
     int OptionType;
-    char Name[60];
+    wchar_t Name[60];
     int Minlevel;
     int HarmonyJewelLevel[14];
     int Zen[14];
@@ -100,7 +100,7 @@ public:
 
 private:
     JewelHarmonyInfo();
-    const bool OpenJewelHarmonyInfoFile(const std::string& filename);
+    const bool OpenJewelHarmonyInfoFile(const std::wstring& filename);
 
 private:
     HARMONYJEWELOPTION		m_OptionData[MAXHARMONYJEWELOPTIONTYPE][MAXHARMONYJEWELOPTIONINDEX];
@@ -112,6 +112,6 @@ const HARMONYJEWELOPTION& JewelHarmonyInfo::GetHarmonyJewelOptionInfo(int type, 
     return m_OptionData[type][option - 1];
 }
 
-extern std::string g_strSelectedML;
+extern std::wstring g_strSelectedML;
 
 #endif // !defined(AFX_UIREFINERY_H__29D29488_91BA_4EB6_AEE3_F936A9C872EE__INCLUDED_)

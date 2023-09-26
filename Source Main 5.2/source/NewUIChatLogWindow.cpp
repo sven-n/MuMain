@@ -42,12 +42,12 @@ void SEASON3B::CNewUIChatLogWindow::Init()
 
 void SEASON3B::CNewUIChatLogWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_scrollbar_up.tga", IMAGE_SCROLL_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_scrollbar_m.tga", IMAGE_SCROLL_MIDDLE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_scrollbar_down.tga", IMAGE_SCROLL_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_scroll_on.tga", IMAGE_SCROLLBAR_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_scroll_off.tga", IMAGE_SCROLLBAR_OFF, GL_LINEAR);
-    LoadBitmap("Interface\\newui_scrollbar_stretch.jpg", IMAGE_DRAG_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_SCROLL_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_SCROLL_MIDDLE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scrollbar_down.tga", IMAGE_SCROLL_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scroll_on.tga", IMAGE_SCROLLBAR_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scroll_off.tga", IMAGE_SCROLLBAR_OFF, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scrollbar_stretch.jpg", IMAGE_DRAG_BTN, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIChatLogWindow::UnloadImages()
@@ -171,9 +171,9 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
                     g_pRenderText->SetBgColor(30, 30, 30, 180);
                     g_pRenderText->SetTextColor(255, 128, 255, 255);
                 }
-                std::string strIDUTF8 = "";
-                g_pMultiLanguage->ConvertANSIToUTF8OrViceVersa(strIDUTF8, (pMsgText->GetID()).c_str());
-                type_string strLine = strIDUTF8 + " : " + pMsgText->GetText();
+                //std::wstring strIDUTF8 = "";
+                //g_pMultiLanguage->ConvertANSIToUTF8OrViceVersa(strIDUTF8, (pMsgText->GetID()).c_str());
+                type_string strLine = std::wstring( pMsgText->GetID()) + L" : " + pMsgText->GetText();
                 g_pRenderText->RenderText(ptRenderPos.x, ptRenderPos.y, strLine.c_str());
             }
             else
@@ -370,7 +370,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
         if (!strText2.empty())
         {
             const auto pMsgText = new CMessageText;
-            if (!pMsgText->Create("", strText2, MsgType))
+            if (!pMsgText->Create(L"", strText2, MsgType))
                 delete pMsgText;
             else
             {
@@ -378,7 +378,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
             }
 
             const auto pAllMsgText = new CMessageText;
-            if (!pAllMsgText->Create("", strText2, MsgType))
+            if (!pAllMsgText->Create(L"", strText2, MsgType))
                 delete pAllMsgText;
             else
             {
@@ -395,7 +395,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
                 }
 
                 const auto pErrMsgText = new CMessageText;
-                if (!pErrMsgText->Create("", strText2, MsgType))
+                if (!pErrMsgText->Create(L"", strText2, MsgType))
                     delete pErrMsgText;
                 else
                 {
@@ -560,16 +560,17 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
         ResetFilter();
     }
 
-    unicode::t_char szTemp[MAX_CHAT_BUFFER_SIZE + 1] = { 0, };
-    unicode::_strncpy(szTemp, strFilterText.c_str(), MAX_CHAT_BUFFER_SIZE);
+    wchar_t szTemp[MAX_CHAT_BUFFER_SIZE + 1] = { 0, };
+    strFilterText.copy(szTemp, MAX_CHAT_BUFFER_SIZE);
     szTemp[MAX_CHAT_BUFFER_SIZE] = '\0';
-    unicode::t_char* token = unicode::_strtok(szTemp, " ");
-    token = unicode::_strtok(nullptr, " ");
+
+    wchar_t* token = _wcstok(szTemp, L" ");
+    token = _wcstok(nullptr, L" ");
 
     if (token == nullptr)
     {
         ResetFilter();
-        AddText("", GlobalText[756], TYPE_SYSTEM_MESSAGE);
+        AddText(L"", GlobalText[756], TYPE_SYSTEM_MESSAGE);
     }
     else
     {
@@ -580,10 +581,10 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
                 break;
             }
             AddFilterWord(token);
-            token = unicode::_strtok(nullptr, " ");
+            token = _wcstok(nullptr, L" ");
         }
 
-        AddText("", GlobalText[755], TYPE_SYSTEM_MESSAGE);
+        AddText(L"", GlobalText[755], TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -731,7 +732,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
                     m_bPointedMessage = true;
                     m_iPointedMessageIndex = i;
 
-                    std::string strID = pMsgText->GetID();
+                    std::wstring strID = pMsgText->GetID();
                     if (SEASON3B::IsPress(VK_RBUTTON) && strID.empty() == false)
                     {
                         g_pChatInputBox->SetWhsprID(strID.c_str());
@@ -914,35 +915,34 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
     extern float g_fScreenRate_x;
 
     SIZE TextSize;
-    type_string strIDPart = strID + " : ";
-    std::wstring wstrUTF16 = L"";
-
-    g_pMultiLanguage->ConvertCharToWideStr(wstrUTF16, strIDPart.c_str());
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), wstrUTF16.c_str(), wstrUTF16.length(), &TextSize);
+    type_string strIDPart = strID + L" : ";
+    
+    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
     size_t MaxFirstLineWidth = CLIENT_WIDTH - (size_t)(TextSize.cx / g_fScreenRate_x);
 
-    g_pMultiLanguage->ConvertCharToWideStr(wstrUTF16, strText.c_str());
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), wstrUTF16.c_str(), wstrUTF16.length(), &TextSize);
+    
+    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
 
-    BOOL bSpaceExist = (wstrUTF16.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
-    int iLocToken = wstrUTF16.length();
+    BOOL bSpaceExist = (strIDPart.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
+    int iLocToken = strIDPart.length();
 
     while (((size_t)(TextSize.cx / g_fScreenRate_x) > MaxFirstLineWidth) && (iLocToken > -1))
     {
-        iLocToken = (bSpaceExist) ? wstrUTF16.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
+        iLocToken = (bSpaceExist) ? strIDPart.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (wstrUTF16.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
+        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (strIDPart.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
     }
 
-    g_pMultiLanguage->ConvertWideCharToStr(strText1, (wstrUTF16.substr(0, iLocToken)).c_str(), CP_UTF8);
-    g_pMultiLanguage->ConvertWideCharToStr(strText2, (wstrUTF16.substr(iLocToken, wstrUTF16.length() - iLocToken)).c_str(), CP_UTF8);
+    strText1 = strIDPart.substr(0, iLocToken);
+    strText2 = strIDPart.substr(iLocToken, strIDPart.length() - iLocToken) + strText;
 }
+
 bool SEASON3B::CNewUIChatLogWindow::CheckFilterText(const type_string& strTestText)
 {
     auto vi_filters = m_vecFilters.begin();
     for (; vi_filters != m_vecFilters.end(); vi_filters++)
     {
-        if (FindText(strTestText.c_str(), (*vi_filters).c_str()) == true)
+        if (vi_filters->find(strTestText))
         {
             return true;
         }

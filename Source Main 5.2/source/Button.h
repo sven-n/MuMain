@@ -31,7 +31,7 @@ protected:
 
     int		m_anImgMap[BTN_IMG_MAX];
 
-    char* m_szText;
+    wchar_t* m_szText;
     DWORD* m_adwTextColorMap;
     DWORD	m_dwTextColor;
     float	m_fTextAddYPos;
@@ -53,8 +53,8 @@ public:
     bool IsClick() { return m_bClick; }
     void SetCheck(bool bCheck = true) { m_bCheck = bCheck; }
     bool IsCheck() { return m_bCheck; }
-    void SetText(const char* pszText, DWORD* adwColor);
-    char* GetText() const { return m_szText; }
+    void SetText(const wchar_t* pszText, DWORD* adwColor);
+    wchar_t* GetText() const { return m_szText; }
 
 protected:
     void ReleaseText();

@@ -35,7 +35,7 @@ namespace SEASON3B
     template <class T>
     class TMessageText
     {
-        typedef std::basic_string<T, std::char_traits<T>, std::allocator<T> > type_string;
+        typedef std::wstring type_string;
 
         type_string	m_strID, m_strText;
         MESSAGE_TYPE m_MsgType;
@@ -68,7 +68,7 @@ namespace SEASON3B
         MESSAGE_TYPE GetType() const { return m_MsgType; }
     };
 
-    typedef TMessageText<unicode::t_char> CMessageText;
+    typedef TMessageText<wchar_t> CMessageText;
 
     class CNewUIChatLogWindow : public CNewUIObj
     {
@@ -111,7 +111,7 @@ namespace SEASON3B
             EVENT_RESIZING_BTN_UP,
         };
 
-        typedef std::basic_string<unicode::t_char, std::char_traits<unicode::t_char>, std::allocator<unicode::t_char> > type_string;
+        typedef std::wstring type_string;
         typedef std::vector<CMessageText*>	type_vector_msgs;
         typedef std::vector<type_string>	type_vector_filters;
 

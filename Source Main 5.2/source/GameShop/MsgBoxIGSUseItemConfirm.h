@@ -69,7 +69,7 @@ public:
     bool Update();
     bool Render();
 
-    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, unicode::t_char szItemType, unicode::t_char* pszItemName);
+    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, wchar_t szItemType, wchar_t* pszItemName);
 
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -93,15 +93,15 @@ private:
 
     int m_iMiddleCount;
 
-    unicode::t_char m_szDescription[UIMAX_TEXT_LINE][MAX_TEXT_LENGTH];
+    wchar_t m_szDescription[UIMAX_TEXT_LINE][MAX_TEXT_LENGTH];
 
     int			m_iDesciptionLine;
 
     int			m_iStorageSeq;			// 보관함 순번
     int			m_iStorageItemSeq;		// 보관함 상품 순번
     WORD		m_wItemCode;			// 아이템 코드
-    unicode::t_char m_szItemName[MAX_TEXT_LENGTH];		// 아이템이름
-    unicode::t_char m_szItemType;		// 상품구분 (C : 캐시, P : 상품)
+    wchar_t m_szItemName[MAX_TEXT_LENGTH];		// 아이템이름
+    wchar_t m_szItemType;		// 상품구분 (C : 캐시, P : 상품)
 };
 
 ////////////////////////////////////////////////////////////////////

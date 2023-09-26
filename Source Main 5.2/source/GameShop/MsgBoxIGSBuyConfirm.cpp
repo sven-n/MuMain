@@ -44,7 +44,7 @@ bool CMsgBoxIGSBuyConfirm::Create(float fPriority)
     return true;
 }
 
-void CMsgBoxIGSBuyConfirm::Initialize(WORD wItemCode, int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iCashType, unicode::t_char* pszName, unicode::t_char* pszPrice, unicode::t_char* pszPeriod)
+void CMsgBoxIGSBuyConfirm::Initialize(WORD wItemCode, int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iCashType, wchar_t* pszName, wchar_t* pszPrice, wchar_t* pszPeriod)
 {
     m_wItemCode = wItemCode;
     m_iPackageSeq = iPackageSeq;
@@ -52,9 +52,9 @@ void CMsgBoxIGSBuyConfirm::Initialize(WORD wItemCode, int iPackageSeq, int iDisp
     m_iPriceSeq = iPriceSeq;
     m_iCashType = iCashType;
 
-    sprintf(m_szItemName, GlobalText[3037], pszName);
-    sprintf(m_szItemPrice, GlobalText[3038], pszPrice);
-    sprintf(m_szItemPeriod, GlobalText[3039], pszPeriod);
+    wsprintf(m_szItemName, GlobalText[3037], pszName);
+    wsprintf(m_szItemPrice, GlobalText[3038], pszPrice);
+    wsprintf(m_szItemPeriod, GlobalText[3039], pszPeriod);
 
     //int m_iNumNoticeLine = SeparateTextIntoLines( GlobalText[2898], txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
     m_iNumNoticeLine = ::DivideStringByPixel(&m_szNotice[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, GlobalText[2898], IGS_TEXT_NOTICE_WIDTH);
@@ -180,24 +180,24 @@ void CMsgBoxIGSBuyConfirm::RenderTexts()
     }
 
 #ifdef FOR_WORK
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        sprintf(szText, "Bad Item index");
+        wsprintf(szText, L"Bad Item index");
     }
     else
     {
-        sprintf(szText, "ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+        wsprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
     }
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 200, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Package Seq : %d", m_iPackageSeq);
+    wsprintf(szText, L"Package Seq : %d", m_iPackageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 100, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Display Seq : %d", m_iDisplaySeq);
+    wsprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 100, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Price Seq : %d", m_iPriceSeq);
+    wsprintf(szText, L"Price Seq : %d", m_iPriceSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 100, 0, RT3_SORT_LEFT);
-    sprintf(szText, "CashType : %d", m_iCashType);
+    wsprintf(szText, L"CashType : %d", m_iCashType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 50, szText, 100, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }
@@ -210,13 +210,13 @@ void CMsgBoxIGSBuyConfirm::RenderButtons()
 
 void CMsgBoxIGSBuyConfirm::LoadImages()
 {
-    LoadBitmap("Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_IGS_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_IGS_DOWN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_top.tga", IMAGE_IGS_UP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_back06(L).tga", IMAGE_IGS_LEFTLINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_back06(R).tga", IMAGE_IGS_RIGHTLINE, GL_LINEAR);
-    LoadBitmap("Interface\\InGameShop\\ingame_box.tga", IMAGE_IGS_TEXTBOX, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_IGS_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_IGS_DOWN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_top.tga", IMAGE_IGS_UP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_back06(L).tga", IMAGE_IGS_LEFTLINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_back06(R).tga", IMAGE_IGS_RIGHTLINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\ingame_box.tga", IMAGE_IGS_TEXTBOX, GL_LINEAR);
 }
 
 void CMsgBoxIGSBuyConfirm::UnloadImages()

@@ -32,21 +32,21 @@ private:
 private:
     void	Init();
     void	ToggleFullScreen();
-    BOOL	IsWindowsMediaFile(char* strFileName);
-    BOOL	IsFileInFolder(char* strFileName);
+    BOOL	IsWindowsMediaFile(wchar_t* strFileName);
+    BOOL	IsFileInFolder(wchar_t* strFileName);
     void	CreateFilter(REFCLSID clsid, IBaseFilter** ppFilter);
     HRESULT RenderOutputPins(IGraphBuilder* pGB, IBaseFilter* pFilter);
 
 public:
     void	InitOpenGLClear(HDC hDC);
-    void	Initialize_DirectShow(HWND hWnd, char* strFileName);
+    void	Initialize_DirectShow(HWND hWnd, wchar_t* strFileName);
     void	PlayMovie();
     BOOL	IsEndMovie();
     BOOL	IsFile();
     BOOL	IsFailDirectShow();
     int		GetPlayNum();
-    void	OpenMovieTxt(char* strFileName);
-    void	SaveMovieTxt(char* strFileName);
+    void	OpenMovieTxt(wchar_t* strFileName);
+    void	SaveMovieTxt(wchar_t* strFileName);
     void	Destroy();
     CMovieScene();
     virtual ~CMovieScene();

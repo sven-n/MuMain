@@ -23,9 +23,9 @@ private:
     BYTE    m_byRenderOptionList;
     BYTE    m_bySelectedItemOption;
     BYTE    m_bySameSetItem;
-    char    m_strSetName[2][32];
+    wchar_t    m_strSetName[2][32];
 
-    typedef std::map<int, std::string>	MAP_EQUIPPEDSETITEMNAME;
+    typedef std::map<int, std::wstring>	MAP_EQUIPPEDSETITEMNAME;
     typedef std::map<BYTE, int>		MAP_EQUIPPEDSETITEM_SEQUENCE;
 
     MAP_EQUIPPEDSETITEMNAME			m_mapEquippedSetItemName;
@@ -36,19 +36,19 @@ private:
     MAP_EQUIPPEDSETITEM_SEQUENCE::iterator
         m_iterESIS;
 private:
-    int		Search_From_EquippedSetItemNameMapTable(char* szSetItemname)
+    int		Search_From_EquippedSetItemNameMapTable(wchar_t* szSetItemname)
     {
-        int		iSizeFindName = strlen(szSetItemname);
+        int		iSizeFindName = wcslen(szSetItemname);
 
         for (m_iterESIN = m_mapEquippedSetItemName.begin(); m_iterESIN != m_mapEquippedSetItemName.end(); ++m_iterESIN)
         {
-            std::string	strCur;
+            std::wstring	strCur;
 
             strCur = m_iterESIN->second;
             int iSizeCurName = strCur.size();
 
-            if (!strncmp(szSetItemname, strCur.c_str(), iSizeFindName)
-                && !strncmp(szSetItemname, strCur.c_str(), iSizeCurName))
+            if (!wcsncmp(szSetItemname, strCur.c_str(), iSizeFindName)
+                && !wcsncmp(szSetItemname, strCur.c_str(), iSizeCurName))
             {
                 return m_iterESIN->first;
             }
@@ -57,7 +57,7 @@ private:
     }
 
 public:
-    bool	Find_From_EquippedSetItemNameMapTable(char* szSetItemname)
+    bool	Find_From_EquippedSetItemNameMapTable(wchar_t* szSetItemname)
     {
         int iResult = Search_From_EquippedSetItemNameMapTable(szSetItemname);
 
@@ -71,7 +71,7 @@ public:
         }
     }
 
-    BYTE Search_From_EquippedSetItemNameSequence(char* szSetItemname)
+    BYTE Search_From_EquippedSetItemNameSequence(wchar_t* szSetItemname)
     {
         BYTE	byCur = 0;
         int		iResult = Search_From_EquippedSetItemNameMapTable(szSetItemname);
@@ -97,14 +97,14 @@ public:
     BYTE	m_bySetOptionListOnOff[16];
     int     m_iSetOptionListValue[16][2];
 
-    bool	OpenItemSetType(const char* filename);
-    bool	OpenItemSetOption(const char* filename);
+    bool	OpenItemSetType(const wchar_t* filename);
+    bool	OpenItemSetOption(const wchar_t* filename);
 
     void	checkItemType(BYTE* optioList, const int iType, const int setType);
 
     void	calcSetOptionList(BYTE* optioList);
 
-    void	getExplainText(char* text, const BYTE option, const BYTE value, const BYTE SetA);
+    void	getExplainText(wchar_t* text, const BYTE option, const BYTE value, const BYTE SetA);
 
     void    getAllAddState(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma);
     int     GetSetItmeCount(const ITEM* pselecteditem);
@@ -122,7 +122,7 @@ public:
 
     void init(void)
     {
-        memset(m_strSetName, 0, sizeof(char) * 32 * 2);
+        memset(m_strSetName, 0, sizeof(wchar_t) * 32 * 2);
 
         m_bViewOptionList = false;
         m_byRenderOptionList = 0;
@@ -138,7 +138,7 @@ public:
     bool    IsDisableSkill(int Type, int Energy, int Charisma = 0);
     BYTE    IsChangeSetItem(const int Type, const int SubType);
     WORD    GetMixItemLevel(const int Type);
-    bool	GetSetItemName(char* strName, const int iType, const int setType);
+    bool	GetSetItemName(wchar_t* strName, const int iType, const int setType);
 
     void	PlusSpecial(WORD* Value, const int Special);
     void	PlusSpecialPercent(WORD* Value, const int Special);
@@ -152,7 +152,7 @@ public:
     void	GetSpecialPercent(WORD* Value, int Special);
     void	GetSpecialLevel(WORD* Value, const WORD SrcValue, int Special);
     int     GetDefaultOptionValue(ITEM* ip, WORD* Value);
-    bool    GetDefaultOptionText(const ITEM* ip, char* Text);
+    bool    GetDefaultOptionText(const ITEM* ip, wchar_t* Text);
     int     RenderDefaultOptionText(const ITEM* ip, int TextNum);
 
     bool    Special_Option_Check(int Kind = 0);
@@ -205,7 +205,7 @@ public:
     int     RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem = false);
 
     void    ClearOptionHelper(void) { m_byRenderOptionList = 0; }
-    void    CheckRenderOptionHelper(const char* FilterName);
+    void    CheckRenderOptionHelper(const wchar_t* FilterName);
     void    RenderOptionHelper(void);
 
     BYTE GetSetOptionANum();
@@ -217,6 +217,6 @@ public:
 
 #define g_csItemOption CSItemOption::GetSingleton ()
 
-extern std::string g_strSelectedML;
+extern std::wstring g_strSelectedML;
 
 #endif

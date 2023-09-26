@@ -79,7 +79,7 @@ namespace SEASON3B
         {
             int iNumTab;
             POINT m_Pos;
-            unicode::t_string m_Name;
+           std::wstring m_Name;
             BYTE class_character[MAX_CLASS];
         } cTextName;
 
@@ -102,13 +102,13 @@ namespace SEASON3B
         int UpdateMouseBtnList();
         void RegisterBtnCharacter(BYTE class_character, int Identificador);
         void RegisterButton(int Identificador, CButtonTap button);
-        void InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, unicode::t_string btname, unicode::t_string tooltiptext, int Identificador, int iNumTab);
+        void InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identificador, int iNumTab);
         //--
         void RenderBoxList();
         int UpdateMouseBoxList();
         void RegisterBoxCharacter(BYTE class_character, int Identificador);
         void RegisterCheckBox(int Identificador, CheckBoxTap button);
-        void InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg, unicode::t_string btname, int Identificador, int iNumTab);
+        void InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg,std::wstring btname, int Identificador, int iNumTab);
         //--
         void RenderTextureList();
         int UpdateTextureList();
@@ -119,7 +119,7 @@ namespace SEASON3B
         void RenderTextList();
         void RegisterTextCharacter(BYTE class_character, int Identificador);
         void RegisterTextur(int Identificador, cTextName button);
-        void InsertText(int x, int y, unicode::t_string Name, int Identificador, int iNumTab);
+        void InsertText(int x, int y,std::wstring Name, int Identificador, int iNumTab);
     public:
         CNewUIMuHelper();
         virtual ~CNewUIMuHelper();

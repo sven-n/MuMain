@@ -72,19 +72,19 @@ void M39Kanturu3rd::CheckSuccessBattle(BYTE State, BYTE DetailState)
     if (gMapManager.WorldActive != WD_39KANTURU_3RD)
         return;
 
-    char FileName[64];
-    char WorldName[32];
-    sprintf(WorldName, "World%d", gMapManager.WorldActive + 1);
+    wchar_t FileName[64];
+    wchar_t WorldName[32];
+    wsprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
 
     //
     if (KanturuSuccessMap)
     {
         PlayBuffer(SOUND_KANTURU_3RD_MAP_SOUND02);
-        sprintf(FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
+        wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
     }
     else
     {
-        sprintf(FileName, "Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
+        wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
     }
 
     OpenTerrainAttribute(FileName);
@@ -673,36 +673,36 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(c, "Body_Bone1", 61);
-        BoneManager::RegisterBone(c, "Body_Bone2", 62);
-        BoneManager::RegisterBone(c, "Body_Bone3", 54);
-        BoneManager::RegisterBone(c, "Body_Bone4", 55);
-        BoneManager::RegisterBone(c, "Body_Bone5", 21);
-        BoneManager::RegisterBone(c, "Body_Bone6", 22);
-        BoneManager::RegisterBone(c, "Body_Bone7", 25);
-        BoneManager::RegisterBone(c, "Body_Bone8", 26);
-        BoneManager::RegisterBone(c, "Body_Bone9", 71);
-        BoneManager::RegisterBone(c, "Body_Bone10", 70);
-        BoneManager::RegisterBone(c, "Body_Bone11", 43);
-        BoneManager::RegisterBone(c, "Body_Bone12", 44);
+        BoneManager::RegisterBone(c, L"Body_Bone1", 61);
+        BoneManager::RegisterBone(c, L"Body_Bone2", 62);
+        BoneManager::RegisterBone(c, L"Body_Bone3", 54);
+        BoneManager::RegisterBone(c, L"Body_Bone4", 55);
+        BoneManager::RegisterBone(c, L"Body_Bone5", 21);
+        BoneManager::RegisterBone(c, L"Body_Bone6", 22);
+        BoneManager::RegisterBone(c, L"Body_Bone7", 25);
+        BoneManager::RegisterBone(c, L"Body_Bone8", 26);
+        BoneManager::RegisterBone(c, L"Body_Bone9", 71);
+        BoneManager::RegisterBone(c, L"Body_Bone10", 70);
+        BoneManager::RegisterBone(c, L"Body_Bone11", 43);
+        BoneManager::RegisterBone(c, L"Body_Bone12", 44);
 
-        BoneManager::RegisterBone(c, "LHand_Bone", 14);
+        BoneManager::RegisterBone(c, L"LHand_Bone", 14);
 
-        BoneManager::RegisterBone(c, "Body_Bone13", 63);
+        BoneManager::RegisterBone(c, L"Body_Bone13", 63);
 
-        BoneManager::RegisterBone(c, "Sword_Bone1", 39);
-        BoneManager::RegisterBone(c, "Sword_Bone2", 40);
+        BoneManager::RegisterBone(c, L"Sword_Bone1", 39);
+        BoneManager::RegisterBone(c, L"Sword_Bone2", 40);
 
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 20, &c->Object, 10.f);
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 21, &c->Object, 10.f);
 
-        BoneManager::RegisterBone(c, "Eye_Bone1", 9);
-        BoneManager::RegisterBone(c, "Eye_Bone2", 10);
+        BoneManager::RegisterBone(c, L"Eye_Bone1", 9);
+        BoneManager::RegisterBone(c, L"Eye_Bone2", 10);
 
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 18, &c->Object, 10.f);
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 19, &c->Object, 10.f);
 
-        BoneManager::RegisterBone(c, "Windmill_Bone1", 47);
+        BoneManager::RegisterBone(c, L"Windmill_Bone1", 47);
     }
     break;
     case 362:
@@ -713,23 +713,23 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(c, "L_Hand01", 7);
-        BoneManager::RegisterBone(c, "L_Hand02", 13);
-        BoneManager::RegisterBone(c, "L_Hand03", 19);
-        BoneManager::RegisterBone(c, "L_Hand04", 25);
-        BoneManager::RegisterBone(c, "L_Hand05", 31);
+        BoneManager::RegisterBone(c, L"L_Hand01", 7);
+        BoneManager::RegisterBone(c, L"L_Hand02", 13);
+        BoneManager::RegisterBone(c, L"L_Hand03", 19);
+        BoneManager::RegisterBone(c, L"L_Hand04", 25);
+        BoneManager::RegisterBone(c, L"L_Hand05", 31);
 
-        BoneManager::RegisterBone(c, "L_Hand11", 11);
-        BoneManager::RegisterBone(c, "L_Hand12", 17);
-        BoneManager::RegisterBone(c, "L_Hand13", 23);
-        BoneManager::RegisterBone(c, "L_Hand14", 29);
-        BoneManager::RegisterBone(c, "L_Hand15", 5);
+        BoneManager::RegisterBone(c, L"L_Hand11", 11);
+        BoneManager::RegisterBone(c, L"L_Hand12", 17);
+        BoneManager::RegisterBone(c, L"L_Hand13", 23);
+        BoneManager::RegisterBone(c, L"L_Hand14", 29);
+        BoneManager::RegisterBone(c, L"L_Hand15", 5);
 
-        BoneManager::RegisterBone(c, "L_Hand21", 12);
-        BoneManager::RegisterBone(c, "L_Hand22", 18);
-        BoneManager::RegisterBone(c, "L_Hand23", 24);
-        BoneManager::RegisterBone(c, "L_Hand24", 30);
-        BoneManager::RegisterBone(c, "L_Hand25", 6);
+        BoneManager::RegisterBone(c, L"L_Hand21", 12);
+        BoneManager::RegisterBone(c, L"L_Hand22", 18);
+        BoneManager::RegisterBone(c, L"L_Hand23", 24);
+        BoneManager::RegisterBone(c, L"L_Hand24", 30);
+        BoneManager::RegisterBone(c, L"L_Hand25", 6);
 
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 18, &c->Object, 15.f);
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 19, &c->Object, 15.f);
@@ -746,23 +746,23 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(c, "R_Hand01", 59);
-        BoneManager::RegisterBone(c, "R_Hand02", 48);
-        BoneManager::RegisterBone(c, "R_Hand03", 11);
-        BoneManager::RegisterBone(c, "R_Hand04", 37);
-        BoneManager::RegisterBone(c, "R_Hand05", 26);
+        BoneManager::RegisterBone(c, L"R_Hand01", 59);
+        BoneManager::RegisterBone(c, L"R_Hand02", 48);
+        BoneManager::RegisterBone(c, L"R_Hand03", 11);
+        BoneManager::RegisterBone(c, L"R_Hand04", 37);
+        BoneManager::RegisterBone(c, L"R_Hand05", 26);
 
-        BoneManager::RegisterBone(c, "R_Hand11", 54);
-        BoneManager::RegisterBone(c, "R_Hand12", 43);
-        BoneManager::RegisterBone(c, "R_Hand13", 32);
-        BoneManager::RegisterBone(c, "R_Hand14", 6);
-        BoneManager::RegisterBone(c, "R_Hand15", 21);
+        BoneManager::RegisterBone(c, L"R_Hand11", 54);
+        BoneManager::RegisterBone(c, L"R_Hand12", 43);
+        BoneManager::RegisterBone(c, L"R_Hand13", 32);
+        BoneManager::RegisterBone(c, L"R_Hand14", 6);
+        BoneManager::RegisterBone(c, L"R_Hand15", 21);
 
-        BoneManager::RegisterBone(c, "R_Hand21", 5);
-        BoneManager::RegisterBone(c, "R_Hand22", 53);
-        BoneManager::RegisterBone(c, "R_Hand23", 42);
-        BoneManager::RegisterBone(c, "R_Hand24", 20);
-        BoneManager::RegisterBone(c, "R_Hand25", 31);
+        BoneManager::RegisterBone(c, L"R_Hand21", 5);
+        BoneManager::RegisterBone(c, L"R_Hand22", 53);
+        BoneManager::RegisterBone(c, L"R_Hand23", 42);
+        BoneManager::RegisterBone(c, L"R_Hand24", 20);
+        BoneManager::RegisterBone(c, L"R_Hand25", 31);
 
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 28, &c->Object, 15.f);
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 29, &c->Object, 15.f);
@@ -859,14 +859,14 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
             VectorRotate(Direction, Matrix, Position);
 
             Vector(0.5f, 0.7f, 1.0f, Light);
-            BoneManager::GetBonePosition(o, "LHand_Bone", Position, Position);
+            BoneManager::GetBonePosition(o, L"LHand_Bone", Position, Position);
             CreateEffect(MODEL_STORM2, Position, o->Angle, Light, 0);
             CreateEffect(BITMAP_BOSS_LASER, Position, o->Angle, Light, 2);
         }
         else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 3.0f)
         {
             vec3_t Position;
-            BoneManager::GetBonePosition(o, "Body_Bone13", Position);
+            BoneManager::GetBonePosition(o, L"Body_Bone13", Position);
             CreateParticle(BITMAP_SMOKE + 3, Position, o->Angle, Light, 3, 1.5f);
             CreateParticle(BITMAP_SMOKE + 3, Position, o->Angle, Light, 3, 1.5f);
 
@@ -1022,67 +1022,67 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         Vector(1.0f, 1.0f, 1.0f, Light);
         Vector(0.0f, 0.0f, 0.0f, Position);
 
-        BoneManager::GetBonePosition(o, "Body_Bone1", Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone1", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.3f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.5f, Light, o);
-        BoneManager::GetBonePosition(o, "Body_Bone2", Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone2", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.3f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.5f, Light, o);
-        BoneManager::GetBonePosition(o, "Body_Bone3", Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone3", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.3f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.5f, Light, o);
-        BoneManager::GetBonePosition(o, "Body_Bone4", Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone4", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.3f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.5f, Light, o);
         Vector(5.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "Body_Bone5", Position, Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone5", Position, Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.3f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.5f, Light, o);
         Vector(9.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "Body_Bone6", Position, Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone6", Position, Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.3f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.5f, Light, o);
         Vector(6.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "Body_Bone7", Position, Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone7", Position, Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
-        BoneManager::GetBonePosition(o, "Body_Bone8", Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone8", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
-        BoneManager::GetBonePosition(o, "Body_Bone9", Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone9", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
-        BoneManager::GetBonePosition(o, "Body_Bone10", Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone10", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
         Vector(10.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "Body_Bone11", Position, Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone11", Position, Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
-        BoneManager::GetBonePosition(o, "Body_Bone12", Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone12", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
 
-        BoneManager::GetBonePosition(o, "Body_Bone13", Position);
+        BoneManager::GetBonePosition(o, L"Body_Bone13", Position);
         CreateParticle(BITMAP_FIRE + 1, Position, o->Angle, Light, 3, 1.7f);
 
         Vector(3.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "Sword_Bone1", Position, Position);
+        BoneManager::GetBonePosition(o, L"Sword_Bone1", Position, Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.3f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.6f, Light, o);
         Vector(3.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "Sword_Bone2", Position, Position);
+        BoneManager::GetBonePosition(o, L"Sword_Bone2", Position, Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.3f, Light, o);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.6f, Light, o);
 
         Vector(0.0f, -2.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "Eye_Bone1", Position, Position);
+        BoneManager::GetBonePosition(o, L"Eye_Bone1", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.3f, Light, o);
         Vector(4.0f, -4.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "Eye_Bone2", Position, Position);
+        BoneManager::GetBonePosition(o, L"Eye_Bone2", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.3f, Light, o);
 
-        BoneManager::GetBonePosition(o, "Windmill_Bone1", Position);
+        BoneManager::GetBonePosition(o, L"Windmill_Bone1", Position);
         if (rand_fps_check(2))
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 16, 1.0f);
     }
@@ -1099,54 +1099,54 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         Vector(0.5f, 0.5f, 0.8f, Light);
 
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand01", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand01", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.3f, Light, o);
         Vector(-10.0f, 0.0f, 3.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand01", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand01", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
 
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand02", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand02", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.3f, Light, o);
         Vector(-12.0f, 5.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand02", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand02", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
 
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand03", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand03", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.3f, Light, o);
         Vector(-12.0f, 5.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand03", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand03", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
 
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand04", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand04", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.3f, Light, o);
         Vector(-10.0f, 5.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand04", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand04", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
 
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand05", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand05", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.3f, Light, o);
         Vector(-8.0f, 9.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand05", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand05", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
 
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand21", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand21", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.0f, Light, o);
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand22", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand22", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.0f, Light, o);
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand23", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand23", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.0f, Light, o);
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand24", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand24", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.0f, Light, o);
         Vector(0.0f, 0.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "L_Hand25", Position, Position);
+        BoneManager::GetBonePosition(o, L"L_Hand25", Position, Position);
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.0f, Light, o);
     }
     return true;
@@ -1162,54 +1162,54 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         Vector(0.5f, 0.3f, 0.3f, Light);
 
         Vector(-2.0f, 0.0f, 4.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand01", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand01", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.5f, Light, o);
         Vector(-10.0f, -3.0f, 3.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand01", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand01", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 0.7f, Light, o);
 
         Vector(-1.0f, -2.0f, 4.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand02", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand02", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.5f, Light, o);
         Vector(-10.0f, -3.0f, 5.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand02", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand02", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 0.7f, Light, o);
 
         Vector(0.0f, 0.0f, 4.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand03", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand03", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.3f, Light, o);
         Vector(-10.0f, 0.0f, 4.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand03", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand03", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 0.7f, Light, o);
 
         Vector(0.0f, 0.0f, 4.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand04", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand04", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.3f, Light, o);
         Vector(-10.0f, 1.0f, 4.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand04", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand04", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 0.7f, Light, o);
 
         Vector(6.0f, 3.0f, 3.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand05", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand05", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.3f, Light, o);
         Vector(-5.0f, 10.0f, 5.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand05", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand05", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 0.7f, Light, o);
 
         Vector(0.0f, 0.0f, -5.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand11", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand11", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.0f, Light, o);
         Vector(0.0f, 0.0f, -2.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand12", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand12", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.0f, Light, o);
         Vector(0.0f, 0.0f, -5.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand13", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand13", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.0f, Light, o);
         Vector(0.0f, 0.0f, -5.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand14", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand14", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.0f, Light, o);
         Vector(10.0f, -4.0f, 0.0f, Position);
-        BoneManager::GetBonePosition(o, "R_Hand15", Position, Position);
+        BoneManager::GetBonePosition(o, L"R_Hand15", Position, Position);
         CreateSprite(BITMAP_FLARE_RED, Position, 1.0f, Light, o);
     }
     return true;
@@ -1374,7 +1374,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
                 vec3_t vPos, vRelative, Light;
                 Vector(140.f, 0.f, -30.f, vRelative);
                 Vector(0.2f, 0.2f, 1.f, Light);
-                BoneManager::GetBonePosition(o, "BLADE_L_HAND", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"BLADE_L_HAND", vRelative, vPos);
 
                 CreateEffect(MODEL_BLADE_SKILL, vPos, o->Angle, Light, 0);
 

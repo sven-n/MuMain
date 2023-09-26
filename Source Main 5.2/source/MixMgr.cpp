@@ -545,7 +545,7 @@ int CMixRecipes::GetCurMixID()
     return m_Recipes[m_iCurMixIndex - 1]->m_iMixID;
 }
 
-BOOL CMixRecipes::GetCurRecipeName(unicode::t_char* pszNameOut, int iNameLine)
+BOOL CMixRecipes::GetCurRecipeName(wchar_t* pszNameOut, int iNameLine)
 {
     if (!IsReadyToMix())
     {
@@ -554,19 +554,19 @@ BOOL CMixRecipes::GetCurRecipeName(unicode::t_char* pszNameOut, int iNameLine)
             switch (g_MixRecipeMgr.GetMixInventoryType())
             {
             case MIXTYPE_TRAINER:
-                unicode::_sprintf(pszNameOut, GlobalText[1213], GlobalText[1212]);
+                wsprintf(pszNameOut, GlobalText[1213], GlobalText[1212]);
                 break;
             case MIXTYPE_OSBOURNE:
-                unicode::_sprintf(pszNameOut, GlobalText[1213], GlobalText[2061]);
+                wsprintf(pszNameOut, GlobalText[1213], GlobalText[2061]);
                 break;
             case MIXTYPE_JERRIDON:
-                unicode::_sprintf(pszNameOut, GlobalText[1213], GlobalText[2062]);
+                wsprintf(pszNameOut, GlobalText[1213], GlobalText[2062]);
                 break;
             case MIXTYPE_ELPIS:
-                unicode::_sprintf(pszNameOut, GlobalText[1213], GlobalText[2063]);
+                wsprintf(pszNameOut, GlobalText[1213], GlobalText[2063]);
                 break;
             default:
-                unicode::_sprintf(pszNameOut, "%s", GlobalText[601]);
+                wsprintf(pszNameOut, L"%s", GlobalText[601]);
                 break;
             }
             return TRUE;
@@ -576,33 +576,33 @@ BOOL CMixRecipes::GetCurRecipeName(unicode::t_char* pszNameOut, int iNameLine)
     return GetRecipeName(GetCurRecipe(), pszNameOut, iNameLine, FALSE);
 }
 
-BOOL CMixRecipes::GetRecipeName(MIX_RECIPE* pRecipe, unicode::t_char* pszNameOut, int iNameLine, BOOL bSimilarRecipe)
+BOOL CMixRecipes::GetRecipeName(MIX_RECIPE* pRecipe, wchar_t* pszNameOut, int iNameLine, BOOL bSimilarRecipe)
 {
     if (pRecipe == NULL) return FALSE;
     if (iNameLine > 2 || iNameLine < 1) return FALSE;
     if (pRecipe->m_bMixOption == 'C')
     {
-        std::vector<std::string> optionTextlist;
+        std::vector<std::wstring> optionTextlist;
 
         g_pItemAddOptioninfo->GetItemAddOtioninfoText(optionTextlist, m_iFirstItemType);
         if (optionTextlist.empty() || bSimilarRecipe)
         {
             if (iNameLine == 1)
             {
-                unicode::_sprintf(pszNameOut, "%s", GlobalText[2194]);
+                wsprintf(pszNameOut, L"%s", GlobalText[2194]);
                 return TRUE;
             }
             return FALSE;
         }
-        assert(optionTextlist.size() == 2 && "옵션은 2개여야 함");
+        assert(optionTextlist.size() == 2 && L"옵션은 2개여야 함");
         if (iNameLine == 1)
         {
-            unicode::_strcpy(pszNameOut, optionTextlist[0].c_str());
+            wcscpy(pszNameOut, optionTextlist[0].c_str());
             return TRUE;
         }
         else if (iNameLine == 2)
         {
-            unicode::_strcpy(pszNameOut, optionTextlist[1].c_str());
+            wcscpy(pszNameOut, optionTextlist[1].c_str());
             return TRUE;
         }
         return FALSE;
@@ -612,11 +612,11 @@ BOOL CMixRecipes::GetRecipeName(MIX_RECIPE* pRecipe, unicode::t_char* pszNameOut
         if (iNameLine == 1)
         {
             if (pRecipe->m_iMixName[1] == 0)
-                unicode::_sprintf(pszNameOut, "%s", GlobalText[pRecipe->m_iMixName[0]]);
+                wsprintf(pszNameOut, L"%s", GlobalText[pRecipe->m_iMixName[0]]);
             else if (pRecipe->m_iMixName[2] == 0)
-                unicode::_sprintf(pszNameOut, "%s %s", GlobalText[pRecipe->m_iMixName[0]], GlobalText[pRecipe->m_iMixName[1]]);
+                wsprintf(pszNameOut, L"%s %s", GlobalText[pRecipe->m_iMixName[0]], GlobalText[pRecipe->m_iMixName[1]]);
             else
-                unicode::_sprintf(pszNameOut, "%s %s %s", GlobalText[pRecipe->m_iMixName[0]],
+                wsprintf(pszNameOut, L"%s %s %s", GlobalText[pRecipe->m_iMixName[0]],
                     GlobalText[pRecipe->m_iMixName[1]], GlobalText[pRecipe->m_iMixName[2]]);
             return TRUE;
         }
@@ -624,35 +624,35 @@ BOOL CMixRecipes::GetRecipeName(MIX_RECIPE* pRecipe, unicode::t_char* pszNameOut
     }
 }
 
-BOOL CMixRecipes::GetCurRecipeDesc(unicode::t_char* pszDescOut, int iDescLine)
+BOOL CMixRecipes::GetCurRecipeDesc(wchar_t* pszDescOut, int iDescLine)
 {
     if (iDescLine > 3 || iDescLine < 1) return FALSE;
     if (GetCurRecipe() == NULL) return FALSE;
     if (GetCurRecipe()->m_iMixDesc[iDescLine - 1] > 0)
-        unicode::_strcpy(pszDescOut, GlobalText[GetCurRecipe()->m_iMixDesc[iDescLine - 1]]);
+        wcscpy(pszDescOut, GlobalText[GetCurRecipe()->m_iMixDesc[iDescLine - 1]]);
     else
         return FALSE;
     return TRUE;
 }
 
-BOOL CMixRecipes::GetMostSimilarRecipeName(unicode::t_char* pszNameOut, int iNameLine)
+BOOL CMixRecipes::GetMostSimilarRecipeName(wchar_t* pszNameOut, int iNameLine)
 {
     return GetRecipeName(GetMostSimilarRecipe(), pszNameOut, iNameLine, TRUE);
 }
 
-BOOL CMixRecipes::GetRecipeAdvice(unicode::t_char* pszAdviceOut, int iAdivceLine)
+BOOL CMixRecipes::GetRecipeAdvice(wchar_t* pszAdviceOut, int iAdivceLine)
 {
     if (GetMostSimilarRecipe() == NULL) return FALSE;
     if (iAdivceLine > 3 || iAdivceLine < 1) return FALSE;
 
     if (GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1] > 0)
-        unicode::_strcpy(pszAdviceOut, GlobalText[GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1]]);
+        wcscpy(pszAdviceOut, GlobalText[GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1]]);
     else
         return FALSE;
     return TRUE;
 }
 
-int CMixRecipes::GetSourceName(int iItemNum, unicode::t_char* pszNameOut, int iNumMixItems, CMixItem* pMixItems)
+int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixItems, CMixItem* pMixItems)
 {
     if (iNumMixItems < 0)	return MIX_SOURCE_ERROR;
     if (pMixItems == NULL)	return MIX_SOURCE_ERROR;
@@ -662,7 +662,7 @@ int CMixRecipes::GetSourceName(int iItemNum, unicode::t_char* pszNameOut, int iN
 
     MIX_RECIPE_ITEM* pMixRecipeItem = &GetMostSimilarRecipe()->m_MixSources[iItemNum];
 
-    unicode::t_char szTempName[100];
+    wchar_t szTempName[100];
     GetItemName(pMixRecipeItem->m_sTypeMin, pMixRecipeItem->m_iLevelMin, szTempName);
 
     if (pMixRecipeItem->m_sTypeMin == pMixRecipeItem->m_sTypeMax &&
@@ -670,101 +670,101 @@ int CMixRecipes::GetSourceName(int iItemNum, unicode::t_char* pszNameOut, int iN
         (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax || (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255)))
     {
         if (pMixRecipeItem->m_iDurabilityMin == pMixRecipeItem->m_iDurabilityMax)
-            unicode::_sprintf(szTempName, "%s(%d)", szTempName, pMixRecipeItem->m_iDurabilityMin);
+            wsprintf(szTempName, L"%s(%d)", szTempName, pMixRecipeItem->m_iDurabilityMin);
     }
     else
     {
         if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_ADD380ITEM)
-            unicode::_sprintf(szTempName, GlobalText[2335]);
+            wsprintf(szTempName, GlobalText[2335]);
         else if (pMixRecipeItem->m_sTypeMin == 0 && pMixRecipeItem->m_sTypeMax == ITEM_BOOTS + MAX_ITEM_INDEX - 1)
-            unicode::_sprintf(szTempName, GlobalText[2336]);
+            wsprintf(szTempName, GlobalText[2336]);
         else if (pMixRecipeItem->m_sTypeMin == 0 && pMixRecipeItem->m_sTypeMax == ITEM_HELPER + MAX_ITEM_INDEX - 1)
-            unicode::_sprintf(szTempName, GlobalText[2336]);
+            wsprintf(szTempName, GlobalText[2336]);
         else if (pMixRecipeItem->m_sTypeMin == 0 && pMixRecipeItem->m_sTypeMax == ITEM_STAFF + MAX_ITEM_INDEX - 1)
-            unicode::_sprintf(szTempName, GlobalText[2337]);
+            wsprintf(szTempName, GlobalText[2337]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_SHIELD && pMixRecipeItem->m_sTypeMax == ITEM_BOOTS + MAX_ITEM_INDEX - 1)
-            unicode::_sprintf(szTempName, GlobalText[2338]);
+            wsprintf(szTempName, GlobalText[2338]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING && pMixRecipeItem->m_sTypeMax == ITEM_WING + 2)
-            unicode::_sprintf(szTempName, GlobalText[2339]);
+            wsprintf(szTempName, GlobalText[2339]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 3 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 6)
-            unicode::_sprintf(szTempName, GlobalText[2348]);
+            wsprintf(szTempName, GlobalText[2348]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 41 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 41)
-            unicode::_sprintf(szTempName, GlobalText[2339]);
+            wsprintf(szTempName, GlobalText[2339]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 42 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 42)
-            unicode::_sprintf(szTempName, GlobalText[2348]);
+            wsprintf(szTempName, GlobalText[2348]);
         else if (pMixRecipeItem->m_sTypeMin == pMixRecipeItem->m_sTypeMax &&
             (pMixRecipeItem->m_sTypeMin == ITEM_MACE + 6 || pMixRecipeItem->m_sTypeMin == ITEM_BOW + 6 || pMixRecipeItem->m_sTypeMin == ITEM_STAFF + 7))
-            unicode::_sprintf(szTempName, GlobalText[2340]);
+            wsprintf(szTempName, GlobalText[2340]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 60 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 65)
-            unicode::_sprintf(szTempName, GlobalText[2680]);
+            wsprintf(szTempName, GlobalText[2680]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 70 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 74)
-            unicode::_sprintf(szTempName, GlobalText[2681]);
+            wsprintf(szTempName, GlobalText[2681]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 100 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 129)
-            unicode::_sprintf(szTempName, GlobalText[2682]);
+            wsprintf(szTempName, GlobalText[2682]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 100 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 128)
-            unicode::_sprintf(szTempName, "%s (%s)", GlobalText[2682], GlobalText[2684]);
+            wsprintf(szTempName, L"%s (%s)", GlobalText[2682], GlobalText[2684]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 101 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 129)
-            unicode::_sprintf(szTempName, "%s (%s)", GlobalText[2682], GlobalText[2685]);
+            wsprintf(szTempName, L"%s (%s)", GlobalText[2682], GlobalText[2685]);
         else
         {
-            int iNameLen = unicode::_strlen(szTempName);
+            int iNameLen = wcslen(szTempName);
             for (int j = 1; j <= 3 && iNameLen - j - 1 >= 0; ++j)
                 if (szTempName[iNameLen - j] == '+') szTempName[iNameLen - j - 1] = '\0';
         }
         if (pMixRecipeItem->m_iDurabilityMin == pMixRecipeItem->m_iDurabilityMax)
-            unicode::_sprintf(szTempName, "%s(%d)", szTempName, pMixRecipeItem->m_iDurabilityMin);
+            wsprintf(szTempName, L"%s(%d)", szTempName, pMixRecipeItem->m_iDurabilityMin);
 
         if (pMixRecipeItem->m_iLevelMin == 0 && pMixRecipeItem->m_iLevelMax == 255);
         else if (pMixRecipeItem->m_iLevelMin == pMixRecipeItem->m_iLevelMax)
-            unicode::_sprintf(szTempName, "%s +%d", szTempName, pMixRecipeItem->m_iLevelMin);
+            wsprintf(szTempName, L"%s +%d", szTempName, pMixRecipeItem->m_iLevelMin);
         else if (pMixRecipeItem->m_iLevelMin == 0)
-            unicode::_sprintf(szTempName, "%s +%d%s", szTempName, pMixRecipeItem->m_iLevelMax, GlobalText[2342]);
+            wsprintf(szTempName, L"%s +%d%s", szTempName, pMixRecipeItem->m_iLevelMax, GlobalText[2342]);
         else if (pMixRecipeItem->m_iLevelMax == 255)
-            unicode::_sprintf(szTempName, "%s +%d%s", szTempName, pMixRecipeItem->m_iLevelMin, GlobalText[2341]);
+            wsprintf(szTempName, L"%s +%d%s", szTempName, pMixRecipeItem->m_iLevelMin, GlobalText[2341]);
         else
-            unicode::_sprintf(szTempName, "%s +%d~%d", szTempName, pMixRecipeItem->m_iLevelMin, pMixRecipeItem->m_iLevelMax);
+            wsprintf(szTempName, L"%s +%d~%d", szTempName, pMixRecipeItem->m_iLevelMin, pMixRecipeItem->m_iLevelMax);
 
         if (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255);
         else if (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax)
-            unicode::_sprintf(szTempName, "%s +%d%s", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343]);
+            wsprintf(szTempName, L"%s +%d%s", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343]);
         else if (pMixRecipeItem->m_iOptionMin == 0)
-            unicode::_sprintf(szTempName, "%s +%d%s%s", szTempName, pMixRecipeItem->m_iOptionMax, GlobalText[2343], GlobalText[2342]);
+            wsprintf(szTempName, L"%s +%d%s%s", szTempName, pMixRecipeItem->m_iOptionMax, GlobalText[2343], GlobalText[2342]);
         else if (pMixRecipeItem->m_iOptionMax == 255)
-            unicode::_sprintf(szTempName, "%s +%d%s%s", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343], GlobalText[2341]);
+            wsprintf(szTempName, L"%s +%d%s%s", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343], GlobalText[2341]);
         else
-            unicode::_sprintf(szTempName, "%s +%d~%d%s", szTempName, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax, GlobalText[2343]);
+            wsprintf(szTempName, L"%s +%d~%d%s", szTempName, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax, GlobalText[2343]);
     }
 
     if (pMixRecipeItem->m_iCountMin == 0 && pMixRecipeItem->m_iCountMax == 255)
-        unicode::_sprintf(szTempName, "%s (%s)", szTempName, GlobalText[2344]);
+        wsprintf(szTempName, L"%s (%s)", szTempName, GlobalText[2344]);
     else if (pMixRecipeItem->m_iCountMin == pMixRecipeItem->m_iCountMax)
-        unicode::_sprintf(szTempName, "%s %d%s", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345]);
+        wsprintf(szTempName, L"%s %d%s", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345]);
     else if (pMixRecipeItem->m_iCountMin == 0)
-        unicode::_sprintf(szTempName, "%s %d%s %s", szTempName, pMixRecipeItem->m_iCountMax, GlobalText[2345], GlobalText[2342]);
+        wsprintf(szTempName, L"%s %d%s %s", szTempName, pMixRecipeItem->m_iCountMax, GlobalText[2345], GlobalText[2342]);
     else if (pMixRecipeItem->m_iCountMax == 255)
-        unicode::_sprintf(szTempName, "%s %d%s %s", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345], GlobalText[2341]);
+        wsprintf(szTempName, L"%s %d%s %s", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345], GlobalText[2341]);
     else
-        unicode::_sprintf(szTempName, "%s %d~%d%s", szTempName, pMixRecipeItem->m_iCountMin, pMixRecipeItem->m_iCountMax, GlobalText[2345]);
+        wsprintf(szTempName, L"%s %d~%d%s", szTempName, pMixRecipeItem->m_iCountMin, pMixRecipeItem->m_iCountMax, GlobalText[2345]);
 
     BOOL bPreName = FALSE;
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_EXCELLENT)
     {
-        unicode::_sprintf(pszNameOut, "%s %s", GlobalText[620], szTempName);
+        wsprintf(pszNameOut, L"%s %s", GlobalText[620], szTempName);
         bPreName = TRUE;
     }
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_SETITEM)
     {
-        unicode::_sprintf(pszNameOut, "%s %s", GlobalText[1089], szTempName);
+        wsprintf(pszNameOut, L"%s %s", GlobalText[1089], szTempName);
         bPreName = TRUE;
     }
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_HARMONY)
     {
-        unicode::_sprintf(pszNameOut, "%s %s", GlobalText[1550], szTempName);
+        wsprintf(pszNameOut, L"%s %s", GlobalText[1550], szTempName);
         bPreName = TRUE;
     }
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_SOCKETITEM)
     {
-        unicode::_sprintf(pszNameOut, "%s %s", GlobalText[2650], szTempName);
+        wsprintf(pszNameOut, L"%s %s", GlobalText[2650], szTempName);
         bPreName = TRUE;
     }
     if (bPreName == FALSE)
@@ -1098,7 +1098,7 @@ BOOL CMixRecipes::IsJewelItem(CMixItem& rSource)
     return rSource.m_bIsJewelItem;
 }
 
-void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char* szFileName)
+void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
 {
     int i, j;
     for (j = 0; j < MAX_MIX_TYPES; ++j)
@@ -1106,11 +1106,11 @@ void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char* szFileName)
         m_MixRecipe[j].Reset();
     }
 
-    FILE* fp = fopen(szFileName, "rb");
+    FILE* fp = _wfopen(szFileName, L"rb");
     if (fp == NULL)
     {
-        unicode::t_char Text[256];
-        unicode::_sprintf(Text, "%s - File not exist.", szFileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", szFileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -1127,8 +1127,8 @@ void CMixRecipeMgr::OpenRecipeFile(const unicode::t_char* szFileName)
     {
         if (feof(fp) || iNumMixRecipes[j] > 1000)
         {
-            unicode::t_char Text[256];
-            unicode::_sprintf(Text, "%s - Version not matched.", szFileName);
+            wchar_t Text[256];
+            wsprintf(Text, L"%s - Version not matched.", szFileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);

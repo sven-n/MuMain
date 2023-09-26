@@ -28,7 +28,7 @@ void SetTargetFps(float targetFps);
 
 BOOL	ShowCheckBox(int num, int index, int message = MESSAGE_TRADE_CHECK);
 
-int	SeparateTextIntoLines(const char* lpszText, char* lpszSeparated, int iMaxLine, int iLineSize);
+int	SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int iMaxLine, int iLineSize);
 
 bool	GetTimeCheck(int DelayTime);
 void	SetEffectVolumeLevel(int level);

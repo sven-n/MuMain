@@ -136,7 +136,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster95_Head", 6);
+        BoneManager::RegisterBone(pCharacter, L"Monster95_Head", 6);
     }
     break;
     case 316:
@@ -147,9 +147,9 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster96_Top", 27);
-        BoneManager::RegisterBone(pCharacter, "Monster96_Center", 28);
-        BoneManager::RegisterBone(pCharacter, "Monster96_Bottom", 29);
+        BoneManager::RegisterBone(pCharacter, L"Monster96_Top", 27);
+        BoneManager::RegisterBone(pCharacter, L"Monster96_Center", 28);
+        BoneManager::RegisterBone(pCharacter, L"Monster96_Bottom", 29);
     }
     break;
     case 317:
@@ -196,7 +196,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
 
         if (pObject->CurrentAction != MONSTER01_DIE) {
             Vector(0.9f, 0.2f, 0.1f, Light);
-            BoneManager::GetBonePosition(pObject, "Monster95_Head", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster95_Head", Position);
             CreateSprite(BITMAP_LIGHT, Position, 3.5f, Light, pObject);
         }
 
@@ -238,17 +238,17 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
             fScalePercent = .5f;
 
-        BoneManager::GetBonePosition(pObject, "Monster96_Center", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster96_Center", Position);
         Vector(Luminosity * 0.f, Luminosity * 0.5f, Luminosity * 0.1f, Light);
         CreateSprite(BITMAP_LIGHT, Position, fScalePercent, Light, pObject);
 
         Vector(0.5f, 0.5f, 0.5f, Light);
 
-        BoneManager::GetBonePosition(pObject, "Monster96_Top", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster96_Top", Position);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, pObject, Rotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, pObject, 360.f - Rotation);
 
-        BoneManager::GetBonePosition(pObject, "Monster96_Bottom", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster96_Bottom", Position);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, pObject, Rotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, pObject, 360.f - Rotation);
     }

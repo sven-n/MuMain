@@ -3,6 +3,9 @@
 
 #include "stdafx.h"
 #include "ZzzInfomation.h"
+
+#include <codecvt>
+
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -43,11 +46,11 @@ static void BuxConvert(BYTE* Buffer, int Size)
         Buffer[i] ^= bBuxCode[i % 3];
 }
 
-CGlobalText GlobalText;
+CGlobalTextW GlobalText;
 
-void SaveTextFile(char* FileName)
+void SaveTextFile(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "wb");
+    FILE* fp = _wfopen(FileName, L"wb");
 
     int Size = MAX_GLOBAL_TEXT_STRING;
     BYTE* Buffer = new BYTE[Size];
@@ -61,18 +64,18 @@ void SaveTextFile(char* FileName)
     fclose(fp);
 }
 
-char AbuseFilter[MAX_FILTERS][20];
-char AbuseNameFilter[MAX_NAMEFILTERS][20];
+wchar_t AbuseFilter[MAX_FILTERS][20];
+wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
 int  AbuseFilterNumber = 0;
 int  AbuseNameFilterNumber = 0;
 
-void OpenFilterFile(char* FileName)
+void OpenFilterFile(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -105,13 +108,13 @@ void OpenFilterFile(char* FileName)
     fclose(fp);
 }
 
-void OpenNameFilterFile(char* FileName)
+void OpenNameFilterFile(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -127,8 +130,8 @@ void OpenNameFilterFile(char* FileName)
     fclose(fp);
     if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
     {
-        char Text[256];
-        sprintf(Text, "%s - File corrupted.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File corrupted.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -155,9 +158,9 @@ void OpenNameFilterFile(char* FileName)
 // gate
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGateScript(char* FileName)
+void OpenGateScript(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
     {
         int Size = sizeof(GATE_ATTRIBUTE);
@@ -173,19 +176,19 @@ void OpenGateScript(char* FileName)
     }
     else
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
 }
 
-void OpenMonsterSkillScript(char* FileName)
+void OpenMonsterSkillScript(wchar_t* FileName)
 {
     memset(MonsterSkill, -1, sizeof(Script_Skill));
 
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
     {
         int Size = (sizeof(Script_Skill) + sizeof(int));
@@ -209,20 +212,20 @@ void OpenMonsterSkillScript(char* FileName)
     }
     else
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
 }
 
-void OpenNpcScript(char* FileName)
+void OpenNpcScript(wchar_t* FileName)
 {
-    if ((SMDFile = fopen(FileName, "rb")) == NULL)
+    if ((SMDFile = _wfopen(FileName, L"rb")) == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -246,9 +249,9 @@ void OpenNpcScript(char* FileName)
     fclose(SMDFile);
 }
 
-void OpenSkillScript(char* FileName)
+void OpenSkillScript(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
     {
         int Size = sizeof(SKILL_ATTRIBUTE);
@@ -261,8 +264,8 @@ void OpenSkillScript(char* FileName)
         fclose(fp);
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_SKILLS, 0x5A18))
         {
-            char Text[256];
-            sprintf(Text, "%s - File corrupted.", FileName);
+            wchar_t Text[256];
+            wsprintf(Text, L"%s - File corrupted.", FileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -282,8 +285,8 @@ void OpenSkillScript(char* FileName)
     }
     else
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -344,13 +347,13 @@ BOOL IsCorrectSkillType_CommonAttack(INT iSkillSeq)
 int g_iCurrentDialog = -1;
 DIALOG_SCRIPT g_DialogScript[MAX_DIALOG];
 
-void OpenDialogFile(char* FileName)
+void OpenDialogFile(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -379,9 +382,9 @@ int ConvertItemType(BYTE* Item)
     return ret;
 }
 
-void OpenItemScript(char* FileName)
+void OpenItemScript(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
     {
         int Size = sizeof(ITEM_ATTRIBUTE);
@@ -393,8 +396,8 @@ void OpenItemScript(char* FileName)
         fclose(fp);
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE2F1))
         {
-            char Text[256];
-            sprintf(Text, "%s - File corrupted.", FileName);
+            wchar_t Text[256];
+            wsprintf(Text, L"%s - File corrupted.", FileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -413,25 +416,25 @@ void OpenItemScript(char* FileName)
     }
     else
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
 }
 
-void PrintItem(char* FileName)
+void PrintItem(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "wt");
-    fprintf(fp, "                이름  최소공격력 최대공격력 방어력 방어율 필요힘 필요민첩 필요에너지\n");
-    //fprintf(fp,"                이름    카오스성공확률\n");
+    FILE* fp = _wfopen(FileName, L"wt");
+    fwprintf(fp, L"                이름  최소공격력 최대공격력 방어력 방어율 필요힘 필요민첩 필요에너지\n");
+    //fwprintf(fp,"                이름    카오스성공확률\n");
     bool Excellent = true;
     for (int i = 0; i < 16 * MAX_ITEM_INDEX; i++)
     {
         if ((i & 0x1FF) == 0)
         {
-            fprintf(fp, "------------------------------------------------------------------------------------------------------\n");
+            fwprintf(fp, L"------------------------------------------------------------------------------------------------------\n");
         }
         ITEM_ATTRIBUTE* p = &ItemAttribute[i];
         if (p->Name[0] != NULL)
@@ -525,13 +528,13 @@ void PrintItem(char* FileName)
                 ItemValue(&ip, 0);
 
                 if (j == 0)
-                    fprintf(fp, "%20s %8d %8d %8d %8d %8d %8d %8d %8d %8d\n", p->Name, DamageMin, DamageMax, Defense, SuccessfulBlocking, RequireStrength, RequireDexterity, RequireEnergy, p->WeaponSpeed, ItemValue(&ip));
-                //fprintf(fp,"%20s %4d%%",p->Name, iRate);
+                    fwprintf(fp, L"%20s %8d %8d %8d %8d %8d %8d %8d %8d %8d\n", p->Name, DamageMin, DamageMax, Defense, SuccessfulBlocking, RequireStrength, RequireDexterity, RequireEnergy, p->WeaponSpeed, ItemValue(&ip));
+                //fwprintf(fp,"%20s %4d%%",p->Name, iRate);
                 else
-                    fprintf(fp, "%17s +%d %8d %8d %8d %8d %8d %8d %8d %8d %8d\n", "", Level, DamageMin, DamageMax, Defense, SuccessfulBlocking, RequireStrength, RequireDexterity, RequireEnergy, p->WeaponSpeed, ItemValue(&ip));
-                //fprintf(fp,"%4d%%<+%d>",iRate,Level);
+                    fwprintf(fp, L"%17s +%d %8d %8d %8d %8d %8d %8d %8d %8d %8d\n", L"", Level, DamageMin, DamageMax, Defense, SuccessfulBlocking, RequireStrength, RequireDexterity, RequireEnergy, p->WeaponSpeed, ItemValue(&ip));
+                //fwprintf(fp,"%4d%%<+%d>",iRate,Level);
             }
-            fprintf(fp, "\n");
+            fwprintf(fp, L"\n");
         }
     }
     fclose(fp);
@@ -2245,7 +2248,7 @@ int ItemValue(ITEM* ip, int goldType)
 
     if (goldType == 1 && !(ip->Type >= ITEM_HELPER + 32 && ip->Type <= ITEM_HELPER + 37))
     {
-        //        char Text[100];
+        //        wchar_t Text[100];
                 //int repairGold = ConvertRepairGold(Gold,ip->Durability, p->Durability, ip->Type, Text);
         DWORD maxDurability = calcMaxDurability(ip, p, Level);
         float persent = 1.f - ((float)ip->Durability / (float)maxDurability);
@@ -2421,12 +2424,12 @@ WORD ItemWalkSpeed(ITEM* Item)
 int EditMonsterNumber = 0;
 int MonsterKey = 0;
 
-void OpenMonsterScript(char* FileName)
+void OpenMonsterScript(wchar_t* FileName)
 {
-    if ((SMDFile = fopen(FileName, "rb")) == nullptr)
+    if ((SMDFile = _wfopen(FileName, L"rb")) == nullptr)
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         return;
@@ -2448,17 +2451,18 @@ void OpenMonsterScript(char* FileName)
     fclose(SMDFile);
 }
 
-char* getMonsterName(int type)
+const wchar_t* getMonsterName(int type)
 {
     for (int i = 0; i < MAX_MONSTER; ++i)
     {
         if (MonsterScript[i].Type == type)
         {
-            return MonsterScript[i].Name;
+            std::wstring_convert<std::codecvt_utf8_utf16<char>> converter;
+            return converter.from_bytes(MonsterScript[i].Name).c_str();
         }
     }
 
-    return R"("")";
+    return L"(L"")";
 }
 
 void MonsterConvert(MONSTER* m, int Level)

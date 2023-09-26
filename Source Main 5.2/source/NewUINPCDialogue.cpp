@@ -323,8 +323,8 @@ void CNewUINPCDialogue::RenderContributePoint()
     {
         RenderImage(IMAGE_ND_CONTRIBUTE_BG, m_Pos.x + 11, m_Pos.y + 27, 168.f, 18.f);
 
-        char szContribute[32];
-        ::sprintf(szContribute, GlobalText[2986], m_dwContributePoint);
+        wchar_t szContribute[32];
+        ::wprintf(szContribute, GlobalText[2986], m_dwContributePoint);
         g_pRenderText->SetTextColor(255, 230, 210, 255);
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 30, szContribute, ND_WIDTH, 0, RT3_SORT_CENTER);
     }
@@ -342,17 +342,17 @@ float CNewUINPCDialogue::GetLayerDepth()
 
 void CNewUINPCDialogue::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_ND_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_ND_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_ND_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_ND_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_ND_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_ND_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_ND_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_ND_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_ND_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_ND_BOTTOM, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_ND_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\Quest_bt_L.tga", IMAGE_ND_BTN_L, GL_LINEAR);
-    LoadBitmap("Interface\\Quest_bt_R.tga", IMAGE_ND_BTN_R, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_ND_BTN_CLOSE, GL_LINEAR);
-    LoadBitmap("Interface\\Gens_point.tga", IMAGE_ND_CONTRIBUTE_BG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_ND_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\Quest_bt_L.tga", IMAGE_ND_BTN_L, GL_LINEAR);
+    LoadBitmap(L"Interface\\Quest_bt_R.tga", IMAGE_ND_BTN_R, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_ND_BTN_CLOSE, GL_LINEAR);
+    LoadBitmap(L"Interface\\Gens_point.tga", IMAGE_ND_CONTRIBUTE_BG, GL_LINEAR);
 }
 
 void CNewUINPCDialogue::UnloadImages()
@@ -403,7 +403,7 @@ void CNewUINPCDialogue::SetCurNPCWords(int nQuestListCount)
     ::memset(m_aszNPCWords[0], 0, sizeof(char) * ND_NPC_LINE_MAX * ND_WORDS_ROW_MAX);
 
     g_pRenderText->SetFont(g_hFont);
-    const char* pszSrc;
+    const wchar_t* pszSrc;
     if (m_bQuestListMode)
         pszSrc = 0 < nQuestListCount ? g_QuestMng.GetWords(1501) : g_QuestMng.GetWords(1502);
     else
@@ -437,17 +437,17 @@ void CNewUINPCDialogue::SetCurSelTexts()
 
     g_pRenderText->SetFont(g_hFont);
 
-    char szAnswer[2 * ND_WORDS_ROW_MAX];
-    const char* pszAnswer;
+    wchar_t szAnswer[2 * ND_WORDS_ROW_MAX];
+    const wchar_t* pszAnswer;
     int nSelTextLineSum = 0;
     int i;
     for (i = 0; i < QM_MAX_ND_ANSWER; ++i)
     {
-        ::sprintf(szAnswer, "%d. ", i + 1);
+        ::wsprintf(szAnswer, L"%d. ", i + 1);
         pszAnswer = g_QuestMng.GetNPCDlgAnswer(m_dwCurDlgIndex, i);
         if (NULL == pszAnswer)
             break;
-        ::strcat(szAnswer, pszAnswer);
+        ::wcscat(szAnswer, pszAnswer);
 
         m_anSelTextLine[i] = ::DivideStringByPixel(&m_aszSelTexts[nSelTextLineSum][0], 2, ND_WORDS_ROW_MAX, szAnswer, 160, false);
 
@@ -504,8 +504,8 @@ void CNewUINPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCoun
     ::memset(m_aszSelTexts[0], 0, sizeof(char) * ND_SEL_TEXT_LINE_MAX * ND_WORDS_ROW_MAX);
     ::memset(m_anSelTextLine, 0, sizeof(int) * (ND_QUEST_INDEX_MAX_COUNT + 1));
 
-    char szSelText[2 * ND_WORDS_ROW_MAX];
-    const char* pszSelText;
+    wchar_t szSelText[2 * ND_WORDS_ROW_MAX];
+    const wchar_t* pszSelText;
     int nSelTextRow = 0;
     g_pRenderText->SetFont(g_hFont);
     int i;
@@ -513,18 +513,18 @@ void CNewUINPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCoun
     {
         if (m_nSelTextCount - 1 == i)
         {
-            ::sprintf(szSelText, "%d. ", i + 1);
+            ::wsprintf(szSelText, L"%d. ", i + 1);
             pszSelText = g_QuestMng.GetWords(1007);
         }
         else
         {
-            ::sprintf(szSelText, "%d. [Q]", i + 1);
+            ::wsprintf(szSelText, L"%d. [Q]", i + 1);
             pszSelText = g_QuestMng.GetSubject(m_adwQuestIndex[i]);
         }
 
         if (NULL == pszSelText)
             break;
-        ::strcat(szSelText, pszSelText);
+        ::wcscat(szSelText, pszSelText);
 
         m_anSelTextLine[i] = ::DivideStringByPixel(&m_aszSelTexts[nSelTextRow][0],
             2, ND_WORDS_ROW_MAX, szSelText, 160, false);

@@ -56,7 +56,7 @@ bool CMsgBoxIGSDeleteItemConfirm::Create(float fPriority)
 
 //--------------------------------------------
 // Initialize
-void CMsgBoxIGSDeleteItemConfirm::Initialize(int iStorageSeq, int iStorageItemSeq, unicode::t_char szItemType)
+void CMsgBoxIGSDeleteItemConfirm::Initialize(int iStorageSeq, int iStorageItemSeq, wchar_t szItemType)
 {
     m_iStorageSeq = iStorageSeq;
     m_iStorageItemSeq = iStorageItemSeq;
@@ -214,13 +214,13 @@ void CMsgBoxIGSDeleteItemConfirm::RenderTexts()
     }
 
 #ifdef FOR_WORK
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
-    sprintf(szText, "m_iStorageSeq : %d", m_iStorageSeq);
+    wsprintf(szText, L"m_iStorageSeq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "m_iStorageItemSeq : %d", m_iStorageItemSeq);
+    wsprintf(szText, L"m_iStorageItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "m_szItemType : %c", m_szItemType);
+    wsprintf(szText, L"m_szItemType : %c", m_szItemType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }
@@ -237,12 +237,12 @@ void CMsgBoxIGSDeleteItemConfirm::RenderButtons()
 // LoadImages
 void CMsgBoxIGSDeleteItemConfirm::LoadImages()
 {
-    LoadBitmap("Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_IGS_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_IGS_DOWN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_top.tga", IMAGE_IGS_UP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_back06(L).tga", IMAGE_IGS_LEFTLINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_back06(R).tga", IMAGE_IGS_RIGHTLINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_IGS_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_IGS_DOWN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_top.tga", IMAGE_IGS_UP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_back06(L).tga", IMAGE_IGS_LEFTLINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_back06(R).tga", IMAGE_IGS_RIGHTLINE, GL_LINEAR);
 }
 
 //--------------------------------------------

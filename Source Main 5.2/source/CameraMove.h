@@ -48,9 +48,9 @@ public:
     };
     ~CCameraMove();
 
-    bool LoadCameraWalkScript(const std::string& filename);
+    bool LoadCameraWalkScript(const std::wstring& filename);
     void UnLoadCameraWalkScript();
-    bool SaveCameraWalkScript(const std::string& filename);
+    bool SaveCameraWalkScript(const std::wstring& filename);
 
     void AddWayPoint(int iGridX, int iGridY, float fCameraMoveAccel, float fCameraDistanceLevel, int iDelay);
     void RemoveWayPoint(int iGridX, int iGridY);

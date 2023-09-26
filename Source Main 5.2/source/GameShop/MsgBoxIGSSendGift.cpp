@@ -77,7 +77,7 @@ void CMsgBoxIGSSendGift::InitInputBox()
     m_IDInputBox.GiveFocus();
 }
 
-void CMsgBoxIGSSendGift::Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, unicode::t_char* pszName, unicode::t_char* pszPrice, unicode::t_char* pszPeriod)
+void CMsgBoxIGSSendGift::Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, wchar_t* pszName, wchar_t* pszPrice, wchar_t* pszPeriod)
 {
     m_iPackageSeq = iPackageSeq;
     m_iDisplaySeq = iDisplaySeq;
@@ -85,9 +85,9 @@ void CMsgBoxIGSSendGift::Initialize(int iPackageSeq, int iDisplaySeq, int iPrice
     m_wItemCode = wItemCode;
     m_iCashType = iCashType;
 
-    sprintf(m_szName, GlobalText[3037], pszName);
-    sprintf(m_szPrice, GlobalText[3038], pszPrice);
-    sprintf(m_szPeriod, GlobalText[3039], pszPeriod);
+    wsprintf(m_szName, GlobalText[3037], pszName);
+    wsprintf(m_szPrice, GlobalText[3038], pszPrice);
+    wsprintf(m_szPeriod, GlobalText[3039], pszPeriod);
 
     m_iNumNoticeLine = ::DivideStringByPixel(&m_szNotice[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, GlobalText[2920], IGS_TEXT_NOTICE_WIDTH);
 }
@@ -176,7 +176,7 @@ CALLBACK_RESULT CMsgBoxIGSSendGift::OKButtonDown(class CNewUIMessageBoxBase* pOw
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[3028], GlobalText[3031]);
     }
-    else if (strcmp(pOwnMsgBox->m_szID, Hero->ID) == 0)
+    else if (wcscmp(pOwnMsgBox->m_szID, Hero->ID) == 0)
     {
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
@@ -247,17 +247,17 @@ void CMsgBoxIGSSendGift::RenderTexts()
     }
 
 #ifdef FOR_WORK
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
-    sprintf(szText, "Package Seq : %d", m_iPackageSeq);
+    wsprintf(szText, L"Package Seq : %d", m_iPackageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 200, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Display Seq : %d", m_iDisplaySeq);
+    wsprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 200, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Price Seq : %d", m_iPriceSeq);
+    wsprintf(szText, L"Price Seq : %d", m_iPriceSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 200, 0, RT3_SORT_LEFT);
-    sprintf(szText, "ItemCode : %d", m_wItemCode);
+    wsprintf(szText, L"ItemCode : %d", m_wItemCode);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 200, 0, RT3_SORT_LEFT);
-    sprintf(szText, "CashType : %d", m_iCashType);
+    wsprintf(szText, L"CashType : %d", m_iCashType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 50, szText, 200, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }
@@ -286,10 +286,10 @@ void CMsgBoxIGSSendGift::ChangeInputBoxFocus()
 
 void CMsgBoxIGSSendGift::LoadImages()
 {
-    LoadBitmap("Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\InGameShop\\ingame_gift_back01.tga", IMAGE_IGS_FRAME, GL_LINEAR);
-    LoadBitmap("Interface\\InGameShop\\ingame_gift_icon.tga", IMAGE_IGS_DECO, GL_LINEAR);
-    LoadBitmap("Interface\\InGameShop\\ingame_gift_namebox.tga", IMAGE_IGS_INPUTTEXT, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\ingame_gift_back01.tga", IMAGE_IGS_FRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\ingame_gift_icon.tga", IMAGE_IGS_DECO, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\ingame_gift_namebox.tga", IMAGE_IGS_INPUTTEXT, GL_LINEAR);
 }
 
 void CMsgBoxIGSSendGift::UnloadImages()

@@ -89,7 +89,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     extern int ItemHelp;
-    extern char TextList[50][100];
+    extern wchar_t TextList[50][100];
     extern int TextListColor[50];
     extern int TextBold[50];
     extern int TextNum;
@@ -183,24 +183,24 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     ComputeItemInfo(ItemHelp);
 
     TextNum = 0;
-    sprintf(TextList[TextNum], "\n");
+    wsprintf(TextList[TextNum], L"\n");
     TextNum++;
 
-    strcpy(TextList[TextNum], GlobalText[160]);
+    wcscpy(TextList[TextNum], GlobalText[160]);
     TextListColor[TextNum] = TEXT_COLOR_BLUE;
     TextBold[TextNum] = true;
     TextNum++;
 
-    sprintf(TextList[TextNum], "%s", p->Name);
+    wsprintf(TextList[TextNum], L"%s", p->Name);
     TextListColor[TextNum] = TEXT_COLOR_WHITE;
     TextBold[TextNum] = true;
     TextNum++;
 
-    sprintf(TextList[TextNum], "\n");
+    wsprintf(TextList[TextNum], L"\n");
     TextNum++;
-    sprintf(TextList[TextNum], " ");
+    wsprintf(TextList[TextNum], L" ");
     TextNum++;
-    sprintf(TextList[TextNum], "\n");
+    wsprintf(TextList[TextNum], L"\n");
     TextNum++;
 
     float fNumAdd = 1.0f;
@@ -259,26 +259,26 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     WORD mixLevel = g_csItemOption.GetMixItemLevel ( ItemHelp );
     if ( HIBYTE( mixLevel)<=3 )
     {
-        char Text[100];
+        wchar_t Text[100];
         if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 1 ) )
         {
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            sprintf(TextList[TextNum],"%s %s %s:(%s+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], HIBYTE( mixLevel ) );TextNum++;
+            wsprintf(TextList[TextNum],"%s %s %s:(%s+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], HIBYTE( mixLevel ) );TextNum++;
         }
     }
     if ( LOBYTE( mixLevel)<=3 )
     {
-        char Text[100];
+        wchar_t Text[100];
         if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 2 ) )
         {
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            sprintf(TextList[TextNum],"%s %s %s:(%s+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], LOBYTE( mixLevel ) );TextNum++;
+            wsprintf(TextList[TextNum],"%s %s %s:(%s+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], LOBYTE( mixLevel ) );TextNum++;
         }
     }
     */
 
     RequireClass(p);
-    sprintf(TextList[TextNum], "\n");
+    wsprintf(TextList[TextNum], L"\n");
     TextNum++;
     RenderTipTextList(1, 1, TextNum, iInfoWidth, RT3_SORT_CENTER);
     EnableAlphaTest();
@@ -288,14 +288,14 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     if (iType != 5)
     {
         RenderHelpCategory(_COLUMN_TYPE_LEVEL, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_LEVEL, "+%d", TabSpace, "000000", iDataHeight, iType);
+        RenderHelpLine(_COLUMN_TYPE_LEVEL, L"+%d", TabSpace, L"000000", iDataHeight, iType);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_REQNLV] > 0)
     {
         TabSpace += 2;
         RenderHelpCategory(_COLUMN_TYPE_REQNLV, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_REQNLV, "%3d", TabSpace, "00000", iDataHeight, iType);
+        RenderHelpLine(_COLUMN_TYPE_REQNLV, L"%3d", TabSpace, L"00000", iDataHeight, iType);
         TabSpace += 14;
     }
 
@@ -304,10 +304,10 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     }
     else
     {
-        RenderHelpLine(_COLUMN_TYPE_ATTMIN, "%3d", TabSpace, "00 ", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_ATTMIN, L"%3d", TabSpace, L"00 ", iDataHeight);
         RenderHelpCategory(_COLUMN_TYPE_ATTMIN, TabSpace, iLabelHeight);
         TabSpace += 2;
-        RenderHelpLine(_COLUMN_TYPE_LEVEL, "~", TabSpace, " 00", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_LEVEL, L"~", TabSpace, L" 00", iDataHeight);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_ATTMAX] <= 0 || (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX))
@@ -315,67 +315,67 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     }
     else
     {
-        RenderHelpLine(_COLUMN_TYPE_ATTMAX, "%3d", TabSpace, "00000", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_ATTMAX, L"%3d", TabSpace, L"00000", iDataHeight);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_MAGIC] > 0)
     {
         RenderHelpCategory(_COLUMN_TYPE_MAGIC, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_MAGIC, "%2d%%", TabSpace, "00000", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_MAGIC, L"%2d%%", TabSpace, L"00000", iDataHeight);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_CURSE] > 0)
     {
         RenderHelpCategory(_COLUMN_TYPE_CURSE, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_CURSE, "%2d", TabSpace, "00000", iDataHeight, iType);
+        RenderHelpLine(_COLUMN_TYPE_CURSE, L"%2d", TabSpace, L"00000", iDataHeight, iType);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_PET_ATTACK] > 0)
     {
         RenderHelpCategory(_COLUMN_TYPE_PET_ATTACK, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_PET_ATTACK, "%2d%%", TabSpace, "00000", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_PET_ATTACK, L"%2d%%", TabSpace, L"00000", iDataHeight);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_DEFENCE] > 0)
     {
         RenderHelpCategory(_COLUMN_TYPE_DEFENCE, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_DEFENCE, "%3d", TabSpace, "000000", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_DEFENCE, L"%3d", TabSpace, L"000000", iDataHeight);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_DEFRATE] > 0)
     {
         RenderHelpCategory(_COLUMN_TYPE_DEFRATE, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_DEFRATE, "%3d", TabSpace, "000000", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_DEFRATE, L"%3d", TabSpace, L"000000", iDataHeight);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_REQSTR] > 0)
     {
         RenderHelpCategory(_COLUMN_TYPE_REQSTR, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_REQSTR, "%3d", TabSpace, "00000", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_REQSTR, L"%3d", TabSpace, L"00000", iDataHeight);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_REQDEX] > 0 || ItemHelp < ITEM_ETC)
     {
         RenderHelpCategory(_COLUMN_TYPE_REQDEX, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_REQDEX, "%3d", TabSpace, "00000", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_REQDEX, L"%3d", TabSpace, L"00000", iDataHeight);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_REQVIT] > 0)
     {
         RenderHelpCategory(_COLUMN_TYPE_REQVIT, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_REQVIT, "%3d", TabSpace, "00000", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_REQVIT, L"%3d", TabSpace, L"00000", iDataHeight);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_REQENG] > 0)
     {
         RenderHelpCategory(_COLUMN_TYPE_REQENG, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_REQENG, "%3d", TabSpace, "00000", iDataHeight, iType);
+        RenderHelpLine(_COLUMN_TYPE_REQENG, L"%3d", TabSpace, L"00000", iDataHeight, iType);
     }
 
     if (g_iItemInfo[0][_COLUMN_TYPE_REQCHA] > 0)
     {
         RenderHelpCategory(_COLUMN_TYPE_REQCHA, TabSpace, iLabelHeight);
-        RenderHelpLine(_COLUMN_TYPE_REQCHA, "%3d", TabSpace, "00000", iDataHeight);
+        RenderHelpLine(_COLUMN_TYPE_REQCHA, L"%3d", TabSpace, L"00000", iDataHeight);
     }
 
     DisableAlphaBlend();

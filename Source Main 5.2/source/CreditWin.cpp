@@ -23,7 +23,7 @@
 #define	CRW_TEXT_FADE_TIME		300.0
 #define	CRW_NAME_SHOW_TIME		2300.0
 
-#define	CRW_DATA_FILE		"Data\\Local\\credit.bmd"
+#define	CRW_DATA_FILE		L"Data\\Local\\credit.bmd"
 
 extern float g_fScreenRate_x;
 extern char* g_lpszMp3[NUM_MUSIC];
@@ -61,22 +61,22 @@ void CCreditWin::Create()
     CWin::RegisterButton(&m_btnClose);
 
     m_eIllustState = HIDE;
-    m_apszIllustPath[0][0] = (char*)"Interface\\im1_1.jpg";
-    m_apszIllustPath[0][1] = (char*)"Interface\\im1_2.jpg";
-    m_apszIllustPath[1][0] = (char*)"Interface\\im2_1.jpg";
-    m_apszIllustPath[1][1] = (char*)"Interface\\im2_2.jpg";
-    m_apszIllustPath[2][0] = (char*)"Interface\\im3_1.jpg";
-    m_apszIllustPath[2][1] = (char*)"Interface\\im3_2.jpg";
-    m_apszIllustPath[3][0] = (char*)"Interface\\im4_1.jpg";
-    m_apszIllustPath[3][1] = (char*)"Interface\\im4_2.jpg";
-    m_apszIllustPath[4][0] = (char*)"Interface\\im5_1.jpg";
-    m_apszIllustPath[4][1] = (char*)"Interface\\im5_2.jpg";
-    m_apszIllustPath[5][0] = (char*)"Interface\\im6_1.jpg";
-    m_apszIllustPath[5][1] = (char*)"Interface\\im6_2.jpg";
-    m_apszIllustPath[6][0] = (char*)"Interface\\im7_1.jpg";
-    m_apszIllustPath[6][1] = (char*)"Interface\\im7_2.jpg";
-    m_apszIllustPath[7][0] = (char*)"Interface\\im8_1.jpg";
-    m_apszIllustPath[7][1] = (char*)"Interface\\im8_2.jpg";
+    m_apszIllustPath[0][0] = (wchar_t*)"Interface\\im1_1.jpg";
+    m_apszIllustPath[0][1] = (wchar_t*)"Interface\\im1_2.jpg";
+    m_apszIllustPath[1][0] = (wchar_t*)"Interface\\im2_1.jpg";
+    m_apszIllustPath[1][1] = (wchar_t*)"Interface\\im2_2.jpg";
+    m_apszIllustPath[2][0] = (wchar_t*)"Interface\\im3_1.jpg";
+    m_apszIllustPath[2][1] = (wchar_t*)"Interface\\im3_2.jpg";
+    m_apszIllustPath[3][0] = (wchar_t*)"Interface\\im4_1.jpg";
+    m_apszIllustPath[3][1] = (wchar_t*)"Interface\\im4_2.jpg";
+    m_apszIllustPath[4][0] = (wchar_t*)"Interface\\im5_1.jpg";
+    m_apszIllustPath[4][1] = (wchar_t*)"Interface\\im5_2.jpg";
+    m_apszIllustPath[5][0] = (wchar_t*)"Interface\\im6_1.jpg";
+    m_apszIllustPath[5][1] = (wchar_t*)"Interface\\im6_2.jpg";
+    m_apszIllustPath[6][0] = (wchar_t*)"Interface\\im7_1.jpg";
+    m_apszIllustPath[6][1] = (wchar_t*)"Interface\\im7_2.jpg";
+    m_apszIllustPath[7][0] = (wchar_t*)"Interface\\im8_1.jpg";
+    m_apszIllustPath[7][1] = (wchar_t*)"Interface\\im8_2.jpg";
 
     int nFontSize = 10;
     switch (rInput.GetScreenWidth())
@@ -226,7 +226,9 @@ void CCreditWin::CloseWin()
 {
     CUIMng::Instance().HideWin(this);
 
-    SendRequestServerList();
+    // old: SendRequestServerList();
+    SocketClient->ToConnectServer()->SendServerListRequest();
+    
 
     ::StopMp3(g_lpszMp3[MUSIC_MUTHEME]);
     ::PlayMp3(g_lpszMp3[MUSIC_MAIN_THEME]);
@@ -314,11 +316,11 @@ void BuxConvert(BYTE* Buffer, int Size);
 
 void CCreditWin::LoadText()
 {
-    FILE* fp = ::fopen(CRW_DATA_FILE, "rb");
+    FILE* fp = ::_wfopen(CRW_DATA_FILE, L"rb");
     if (fp == NULL)
     {
-        char szMessage[256];
-        ::sprintf(szMessage, "%s file not found.\r\n", CRW_DATA_FILE);
+        wchar_t szMessage[256];
+        wsprintf(szMessage, L"%s file not found.\r\n", CRW_DATA_FILE);
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);

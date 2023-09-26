@@ -31,7 +31,7 @@ namespace
     const int EnterMinLevel[EnterLevelCount] = { 220, 271, 321, 351, 381 };
     const int EnterMaxLevel[EnterLevelCount] = { 270, 320, 350, 380, 400 };
 
-    void DrawText(char* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
+    void DrawText(wchar_t* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
     {
         if (isbold)
         {
@@ -198,7 +198,7 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
         }
         else
         {
-            g_pChatListBox->AddText("", GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
         }
 
         return false;
@@ -239,11 +239,11 @@ bool SEASON3B::CNewUICursedTempleEnter::Update()
 
 void SEASON3B::CNewUICursedTempleEnter::RenderText()
 {
-    unicode::t_char Text[100];
+    wchar_t Text[100];
 
     memset(&Text, 0, sizeof(unicode::t_char));
 
-    sprintf(Text, GlobalText[2358]);
+    wsprintf(Text, GlobalText[2358]);
     DrawText(Text, m_Pos.x, m_Pos.y + 13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, true);
 
     int enterlevel = -1;
@@ -252,7 +252,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
     {
         memset(&Text, 0, sizeof(Text));
 
-        sprintf(Text, GlobalText[2370], enterlevel);
+        wsprintf(Text, GlobalText[2370], enterlevel);
         DrawText(Text, m_Pos.x + 3, m_Pos.y + 42, 0xffffffff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
 
         for (int i = 0; i < EnterLevelCount + 1; ++i)
@@ -265,31 +265,31 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
             }
             else
             {
-                sprintf(Text, GlobalText[2371], EnterMinLevel[i], EnterMaxLevel[i]);
+                wsprintf(Text, GlobalText[2371], EnterMinLevel[i], EnterMaxLevel[i]);
             }
 
             if (enterlevel == i + 1)
             {
                 DisableAlphaBlend();
-                sprintf(Text, "%s %s", Text, GlobalText[2412]);
+                wsprintf(Text, L"%s %s", Text, GlobalText[2412]);
                 DrawText(Text, m_Pos.x + 3, m_Pos.y + 67 + (i * 15), 0xffffffff, 0xff0000ff, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
                 EnableAlphaTest();
             }
             else
             {
-                sprintf(Text, "%s %s", Text, GlobalText[2413]);
+                wsprintf(Text, L"%s %s", Text, GlobalText[2413]);
                 DrawText(Text, m_Pos.x + 3, m_Pos.y + 67 + (i * 15), 0xffffffff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
             }
         }
 
         memset(&Text, 0, sizeof(char));
-        sprintf(Text, GlobalText[2373], m_EnterCount);
+        wsprintf(Text, GlobalText[2373], m_EnterCount);
         DrawText(Text, m_Pos.x + 3, m_Pos.y + 70 + ((EnterLevelCount + 1) * 15), 0xff0000ff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
     }
     else
     {
         memset(&Text, 0, sizeof(char));
-        sprintf(Text, GlobalText[2366]);
+        wsprintf(Text, GlobalText[2366]);
         DrawText(Text, m_Pos.x, m_Pos.y + 52, 0xff0000ff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, false);
     }
 }

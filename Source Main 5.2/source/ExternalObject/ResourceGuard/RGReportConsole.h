@@ -21,12 +21,12 @@ namespace ResourceGuard {
         void EnableMsgWriting() { m_bMsgWriting = true; }
         void DisableMsgWriting() { m_bMsgWriting = false; }
 
-        void WriteMessage(const std::string& msg, DWORD dwMsgType = MSG_TYPE_NORMAL, long lParam = 0)
+        void WriteMessage(const std::wstring& msg, DWORD dwMsgType = MSG_TYPE_NORMAL, long lParam = 0)
         {
             if ((m_bErrorWriting && dwMsgType == MSG_TYPE_ERROR)
                 || (m_bMsgWriting && dwMsgType == MSG_TYPE_NORMAL))
             {
-                std::string output;
+                std::wstring output;
 
                 if ((lParam & MSG_PARAM_HEAD) == MSG_PARAM_HEAD)
                     output = "[ResourceGuard] ";

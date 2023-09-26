@@ -16,9 +16,9 @@ extern int			SelectMarkColor;
 
 namespace
 {
-    BOOL IsGuildName(const char* szName)
+    BOOL IsGuildName(const wchar_t* szName)
     {
-        if (strlen(szName) >= 4)
+        if (wcslen(szName) >= 4)
             return TRUE;
         else
             return FALSE;
@@ -126,7 +126,7 @@ namespace
         RenderBitmap(BITMAP_INVENTORY, x + sx, y, 2, sy, 1.f / 256.f, 5 / 16.f, 2.f / 256.f, 125.f / 256.f);
     }
 
-    void RenderText(char* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
+    void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
     {
         g_pRenderText->SetFont(g_hFont);
 
@@ -214,15 +214,15 @@ void CNewUIGuildMakeWindow::Release()
 
 void CNewUIGuildMakeWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_GUILDMAKE_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_GUILDMAKE_MAKEBUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_small.tga", IMAGE_GUILDMAKE_NEXTBUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_GUILDMAKE_BACK_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_GUILDMAKE_BACK_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_GUILDMAKE_BACK_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_GUILDMAKE_BACK_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_GUILDMAKE_BTN_EXIT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_guildmakeeditbox.tga", IMAGE_GUILDMAKE_EDITBOX, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GUILDMAKE_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GUILDMAKE_MAKEBUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_GUILDMAKE_NEXTBUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GUILDMAKE_BACK_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_GUILDMAKE_BACK_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_GUILDMAKE_BACK_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_GUILDMAKE_BACK_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GUILDMAKE_BTN_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_guildmakeeditbox.tga", IMAGE_GUILDMAKE_EDITBOX, GL_LINEAR);
 }
 
 void CNewUIGuildMakeWindow::UnloadImages()
@@ -312,7 +312,7 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
     if (m_Button[GUILDMAKEBUTTON_MARK_RNEXT].UpdateMouseEvent())
     {
-        char tempText[100];
+        wchar_t tempText[100];
         memset(&tempText, 0, sizeof(char) * 100);
 
         m_EditBox->GetText(tempText);
@@ -331,7 +331,7 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
         }
         else
         {
-            strcpy(GuildMark[MARK_EDIT].GuildName, tempText);
+            wcscpy(GuildMark[MARK_EDIT].GuildName, tempText);
             ChangeWindowState(GUILDMAKE_RESULTINFO);
             ChangeEditBox(UISTATE_HIDE);
 
@@ -378,10 +378,10 @@ bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
 
 void CNewUIGuildMakeWindow::RenderGMInfo()
 {
-    char Text[100];
+    wchar_t Text[100];
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[181]);
+    wsprintf(Text, GlobalText[181]);
     RenderText(Text, m_Pos.x, m_Pos.y + 50, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     m_Button[GUILDMAKEBUTTON_INFO_MAKE].Render();
@@ -392,9 +392,9 @@ void CNewUIGuildMakeWindow::RenderGMInfo()
 void CNewUIGuildMakeWindow::RenderGMMark()
 {
     //edit box
-    char Text[100];
+    wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[182]);
+    wsprintf(Text, GlobalText[182]);
     RenderText(Text, m_Pos.x + 10, m_Pos.y + 66, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_LEFT);
 
     RenderImage(IMAGE_GUILDMAKE_EDITBOX, m_Pos.x + 45, m_Pos.y + 60, 108.f, 23.f);
@@ -414,9 +414,9 @@ void CNewUIGuildMakeWindow::RenderGMResultInfo()
     CreateGuildMark(MARK_EDIT);
     RenderBitmap(BITMAP_GUILD, m_Pos.x + 72, m_Pos.y + 74, 48, 48);
 
-    char Text[100];
+    wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, "%s : %s", GlobalText[182], GuildMark[MARK_EDIT].GuildName);
+    wsprintf(Text, L"%s : %s", GlobalText[182], GuildMark[MARK_EDIT].GuildName);
     RenderText(Text, m_Pos.x, m_Pos.y + 140, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 
     m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].Render();
@@ -431,9 +431,9 @@ void CNewUIGuildMakeWindow::RenderFrame()
     RenderImage(IMAGE_GUILDMAKE_BACK_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, 320.f);
     RenderImage(IMAGE_GUILDMAKE_BACK_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
 
-    char Text[100];
+    wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[180]);
+    wsprintf(Text, GlobalText[180]);
     RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 

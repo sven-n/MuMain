@@ -18,7 +18,7 @@ namespace info
     class ExplanationInfo : public InfoFile
     {
     public:
-        static ExplanationInfoPtr MakeInfo(const std::string& filename);
+        static ExplanationInfoPtr MakeInfo(const std::wstring& filename);
         virtual ~ExplanationInfo();
 
     protected:
@@ -26,15 +26,15 @@ namespace info
         virtual void clear();
 
     public:
-        const char* GetData(int index);
+        const wchar_t* GetData(int index);
 
     private:
-        bool OpenFile(const std::string& filename);
-        ExplanationInfo(const std::string& filename);
+        bool OpenFile(const std::wstring& filename);
+        ExplanationInfo(const std::wstring& filename);
 
     private:
         bool m_IsOpenFile;
-        char m_Info[MAX_TEXTS][MAX_GLOBAL_TEXT_STRING];
+        wchar_t m_Info[MAX_TEXTS][MAX_GLOBAL_TEXT_STRING];
     };
 };
 inline
@@ -49,7 +49,7 @@ void info::ExplanationInfo::clear()
 }
 
 inline
-const char* info::ExplanationInfo::GetData(int index)
+const wchar_t* info::ExplanationInfo::GetData(int index)
 {
     if (index >= MAX_TEXTS)
         assert(0);

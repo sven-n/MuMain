@@ -45,7 +45,7 @@ void CSysMenuWin::Create()
     };
     m_winBack.Create(aiiBack, 1, 10);
 
-    const char* apszBtnText[SMW_BTN_MAX] =
+    const wchar_t* apszBtnText[SMW_BTN_MAX] =
     { GlobalText[381], GlobalText[382], GlobalText[385], GlobalText[388] };
     DWORD adwBtnClr[4] =
     { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 };
@@ -122,7 +122,7 @@ void CSysMenuWin::UpdateWhileActive(double dDeltaTick)
     }
     else if (m_aBtn[SMW_BTN_SERVER_SEL].IsClick())
     {
-        g_ErrorReport.Write("> Menu - Join another server.");
+        g_ErrorReport.Write(L"> Menu - Join another server.");
         g_ErrorReport.WriteCurrentTime();
         SendRequestLogOut(2);
 

@@ -288,7 +288,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 441:
         OpenMonsterModel(136);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 136, PosX, PosY);
-        strcpy(pCharacter->ID, "»çÇÇ-¿ì´©½º");
+        wcscpy(pCharacter->ID, L"»çÇÇ-¿ì´©½º");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -306,7 +306,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 442:
         OpenMonsterModel(137);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 137, PosX, PosY);
-        strcpy(pCharacter->ID, "»çÇÇ-µÎ¿À");
+        wcscpy(pCharacter->ID, L"»çÇÇ-µÎ¿À");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -324,7 +324,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 443:
         OpenMonsterModel(138);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 138, PosX, PosY);
-        strcpy(pCharacter->ID, "»çÇÇ-Æ®·¹½º");
+        wcscpy(pCharacter->ID, L"»çÇÇ-Æ®·¹½º");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -342,7 +342,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 444:
         OpenMonsterModel(139);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 139, PosX, PosY);
-        strcpy(pCharacter->ID, "½¦µµ¿ì Æ");
+        wcscpy(pCharacter->ID, L"½¦µµ¿ì Æ");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -351,7 +351,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 445:
         OpenMonsterModel(140);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 140, PosX, PosY);
-        strcpy(pCharacter->ID, "½¦µµ¿ì ³ªÀÌÆ®");
+        wcscpy(pCharacter->ID, L"½¦µµ¿ì ³ªÀÌÆ®");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -360,7 +360,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 446:
         OpenMonsterModel(141);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 141, PosX, PosY);
-        strcpy(pCharacter->ID, "½¦µµ¿ì ·è");
+        wcscpy(pCharacter->ID, L"½¦µµ¿ì ·è");
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -369,7 +369,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 447:
         OpenMonsterModel(142);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 142, PosX, PosY);
-        strcpy(pCharacter->ID, "½ã´õ ³×ÀÌÇÉ");
+        wcscpy(pCharacter->ID, L"½ã´õ ³×ÀÌÇÉ");
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -377,7 +377,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 448:
         OpenMonsterModel(143);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 143, PosX, PosY);
-        strcpy(pCharacter->ID, "°í½ºÆ® ³×ÀÌÇÉ");
+        wcscpy(pCharacter->ID, L"°í½ºÆ® ³×ÀÌÇÉ");
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -385,7 +385,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 449:
         OpenMonsterModel(144);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 144, PosX, PosY);
-        strcpy(pCharacter->ID, "ºí·¹ÀÌÁî ³×ÀÌÇÉ");
+        wcscpy(pCharacter->ID, L"ºí·¹ÀÌÁî ³×ÀÌÇÉ");
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -393,7 +393,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 561:
         OpenMonsterModel(192);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 192, PosX, PosY);
-        strcpy(pCharacter->ID, "¸Þµà»ç");
+        wcscpy(pCharacter->ID, L"¸Þµà»ç");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.LifeTime = 100;
         break;
@@ -401,7 +401,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 560:
         OpenMonsterModel(201);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 201, PosX, PosY);
-        strcpy(pCharacter->ID, "»çÇÇÄý");
+        wcscpy(pCharacter->ID, L"»çÇÇÄý");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -409,7 +409,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 558:
         OpenMonsterModel(202);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 202, PosX, PosY);
-        strcpy(pCharacter->ID, "¾ÆÀÌ½º ³×ÀÌÇÉ");
+        wcscpy(pCharacter->ID, L"¾ÆÀÌ½º ³×ÀÌÇÉ");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -417,7 +417,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 559:
         OpenMonsterModel(203);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 203, PosX, PosY);
-        strcpy(pCharacter->ID, "½¦µµ¿ì ¸¶½ºÅÍ");
+        wcscpy(pCharacter->ID, L"½¦µµ¿ì ¸¶½ºÅÍ");
         pCharacter->Object.Scale = 1.56f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;

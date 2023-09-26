@@ -21,25 +21,25 @@ CChangeRingManager::~CChangeRingManager()
 
 void CChangeRingManager::LoadItemModel()
 {
-    gLoadData.AccessModel(MODEL_HELPER + 10, "Data\\Item\\", "Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 39, "Data\\Item\\", "Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 40, "Data\\Item\\", "Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 41, "Data\\Item\\", "Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 42, "Data\\Item\\", "Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 68, "Data\\Item\\xmas\\", "xmasring");
-    gLoadData.AccessModel(MODEL_HELPER + 76, "Data\\Item\\", "PandaPetRing");
-    gLoadData.AccessModel(MODEL_HELPER + 122, "Data\\Item\\", "SkeletonRing");
+    gLoadData.AccessModel(MODEL_HELPER + 10, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_HELPER + 39, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_HELPER + 40, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_HELPER + 41, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_HELPER + 42, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_HELPER + 68, L"Data\\Item\\xmas\\", L"xmasring");
+    gLoadData.AccessModel(MODEL_HELPER + 76, L"Data\\Item\\", L"PandaPetRing");
+    gLoadData.AccessModel(MODEL_HELPER + 122, L"Data\\Item\\", L"SkeletonRing");
 }
 
 void CChangeRingManager::LoadItemTexture()
 {
-    gLoadData.OpenTexture(MODEL_HELPER + 39, "Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 41, "Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 40, "Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 42, "Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 68, "Item\\xmas\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 76, "Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 122, "Item\\");
+    gLoadData.OpenTexture(MODEL_HELPER + 39, L"Item\\");
+    gLoadData.OpenTexture(MODEL_HELPER + 41, L"Item\\");
+    gLoadData.OpenTexture(MODEL_HELPER + 40, L"Item\\");
+    gLoadData.OpenTexture(MODEL_HELPER + 42, L"Item\\");
+    gLoadData.OpenTexture(MODEL_HELPER + 68, L"Item\\xmas\\");
+    gLoadData.OpenTexture(MODEL_HELPER + 76, L"Item\\");
+    gLoadData.OpenTexture(MODEL_HELPER + 122, L"Item\\");
 }
 
 bool CChangeRingManager::CheckDarkLordHair(int iType)

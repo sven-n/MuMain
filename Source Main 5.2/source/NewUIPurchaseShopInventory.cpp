@@ -10,7 +10,7 @@
 
 namespace
 {
-    void RenderText(const char* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort, HFONT hFont = g_hFont)
+    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort, HFONT hFont = g_hFont)
     {
         g_pRenderText->SetFont(hFont);
 
@@ -120,13 +120,13 @@ ITEM* SEASON3B::CNewUIPurchaseShopInventory::FindItem(int iLinealPos)
 
 void SEASON3B::CNewUIPurchaseShopInventory::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_MSGBOX_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_INVENTORY_BACK_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_INVENTORY_BACK_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_INVENTORY_BACK_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Box_openTitle.tga", IMAGE_MYSHOPINVENTORY_EDIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MSGBOX_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_INVENTORY_BACK_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_INVENTORY_BACK_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_INVENTORY_BACK_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Box_openTitle.tga", IMAGE_MYSHOPINVENTORY_EDIT, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIPurchaseShopInventory::UnloadImages()
@@ -231,38 +231,38 @@ void SEASON3B::CNewUIPurchaseShopInventory::RenderTextInfo()
 {
     RenderText(GlobalText[1102], m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
     RenderText(m_TitleText.c_str(), m_Pos.x, m_Pos.y + 58, 190, 0, RGBA(0, 255, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold);
-    unicode::t_char Text[100];
+    wchar_t Text[100];
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[370]);
+    wsprintf(Text, GlobalText[370]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1109]);
+    wsprintf(Text, GlobalText[1109]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 250, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1111]);
+    wsprintf(Text, GlobalText[1111]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 262, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1112]);
+    wsprintf(Text, GlobalText[1112]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 274, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1114]);
+    wsprintf(Text, GlobalText[1114]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 286, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1115]);
+    wsprintf(Text, GlobalText[1115]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 298, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1134]);
+    wsprintf(Text, GlobalText[1134]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 320, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1135]);
+    wsprintf(Text, GlobalText[1135]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 }
 
@@ -292,7 +292,7 @@ void SEASON3B::CNewUIPurchaseShopInventory::ClosingProcess()
     if (m_pNewInventoryCtrl)
     {
         m_pNewInventoryCtrl->RemoveAllItems();
-        g_ErrorReport.Write("@ [Notice] CNewUIPurchaseShopInventory::ClosingProcess():m_pNewInventoryCtrl->RemoveAllItems(); )\n");
+        g_ErrorReport.Write(L"@ [Notice] CNewUIPurchaseShopInventory::ClosingProcess():m_pNewInventoryCtrl->RemoveAllItems(); )\n");
     }
 
     m_ShopCharacterIndex = -1;

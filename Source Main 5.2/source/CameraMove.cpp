@@ -41,11 +41,11 @@ void CCameraMove::Init()
 #endif //PJH_NEW_SERVER_SELECT_MAP
 }
 
-bool CCameraMove::LoadCameraWalkScript(const std::string& filename)
+bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
 {
     UnLoadCameraWalkScript();
 
-    FILE* fp = fopen(filename.c_str(), "rb");
+    FILE* fp = _wfopen(filename.c_str(), L"rb");
     if (fp == NULL)
         return false;
 
@@ -76,10 +76,10 @@ void CCameraMove::UnLoadCameraWalkScript()
 
     Init();
 }
-bool CCameraMove::SaveCameraWalkScript(const std::string& filename)
+bool CCameraMove::SaveCameraWalkScript(const std::wstring& filename)
 {
     if (!m_listWayPoint.empty()) {
-        FILE* fp = fopen(filename.c_str(), "wb");
+        FILE* fp = _wfopen(filename.c_str(), L"wb");
         if (fp == NULL)
             return false;
 

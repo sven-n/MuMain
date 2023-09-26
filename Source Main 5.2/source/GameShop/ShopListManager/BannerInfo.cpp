@@ -29,38 +29,38 @@ CBannerInfo::~CBannerInfo() // OK
 {
 }
 
-bool	CBannerInfo::SetBanner(std::string strdata, std::string strDirPath, bool bDonwLoad) // OK
+bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool bDonwLoad) // OK
 {
     if (strdata.empty())
         return 0;
 
-    CStringToken Token(strdata, "@");
+    CStringToken Token(strdata, L"@");
 
     if (Token.hasMoreTokens() == 0)
         return 0;
 
-    this->BannerSeq = atoi(Token.nextToken().c_str());
+    this->BannerSeq = _wtoi(Token.nextToken().c_str());
 
     StringCchCopy(this->BannerName, sizeof(this->BannerName), Token.nextToken().c_str());
 
     StringCchCopy(this->BannerImageURL, sizeof(this->BannerImageURL), Token.nextToken().c_str());
 
-    this->BannerOrder = atoi(Token.nextToken().c_str());
-    this->BannerDirection = atoi(Token.nextToken().c_str());
+    this->BannerOrder = _wtoi(Token.nextToken().c_str());
+    this->BannerDirection = _wtoi(Token.nextToken().c_str());
 
     CStringMethod::ConvertStringToDateTime(this->BannerStartDate, Token.nextToken());
     CStringMethod::ConvertStringToDateTime(this->BannerEndDate, Token.nextToken());
 
     StringCchCopy(this->BannerLinkURL, sizeof(this->BannerLinkURL), Token.nextToken().c_str());
 
-    std::string url = this->BannerImageURL;
-    std::size_t pos = url.rfind("/", std::string::npos);
+    std::wstring url = this->BannerImageURL;
+    std::size_t pos = url.rfind(L"/", std::wstring::npos);
 
-    if (pos != std::string::npos)
+    if (pos != std::wstring::npos)
     {
-        std::string sub = url.substr(pos + 1, url.length() - pos - 1);
+        std::wstring sub = url.substr(pos + 1, url.length() - pos - 1);
 
-        StringCchPrintf(this->BannerImagePath, sizeof(this->BannerImagePath), "%s%s", strDirPath.c_str(), sub.c_str());
+        StringCchPrintf(this->BannerImagePath, sizeof(this->BannerImagePath), L"%s%s", strDirPath.c_str(), sub.c_str());
 
         if (bDonwLoad || GetFileAttributes(this->BannerImagePath) == INVALID_FILE_ATTRIBUTES)
         {

@@ -5,44 +5,44 @@
 
 #include "GlobalText.h"
 
-void SaveTextFile(char* FileName);
+void SaveTextFile(wchar_t* FileName);
 
-extern char AbuseFilter[MAX_FILTERS][20];
-extern char AbuseNameFilter[MAX_NAMEFILTERS][20];
+extern wchar_t AbuseFilter[MAX_FILTERS][20];
+extern wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
 extern int  AbuseFilterNumber;
 extern int  AbuseNameFilterNumber;
 
-void OpenFilterFile(char* FileName);
-void OpenNameFilterFile(char* FileName);
+void OpenFilterFile(wchar_t* FileName);
+void OpenNameFilterFile(wchar_t* FileName);
 
 extern GATE_ATTRIBUTE* GateAttribute;
 
-void OpenGateScript(char* FileName);
-void OpenMonsterSkillScript(char* FileName);
+void OpenGateScript(wchar_t* FileName);
+void OpenMonsterSkillScript(wchar_t* FileName);
 
 extern DIALOG_SCRIPT g_DialogScript[MAX_DIALOG];
 
-void OpenDialogFile(char* FileName);
+void OpenDialogFile(wchar_t* FileName);
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
 extern int  ConvertItemType(BYTE* Item);
-extern void OpenItemScript(char* FileName);
+extern void OpenItemScript(wchar_t* FileName);
 extern BYTE getSkillIndexByBook(int Type);
 extern void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE Attribute3);
 extern float CalcDurabilityPercent(BYTE dur, BYTE maxDur, int Level, int option, int ExtOption = 0);
 extern int ItemValue(ITEM* ip, int goldType = 1);
-extern void PrintItem(char* FileName);
+extern void PrintItem(wchar_t* FileName);
 
 extern MONSTER_SCRIPT MonsterScript[MAX_MONSTER];
 
-extern void  OpenMonsterScript(char* FileName);
+extern void  OpenMonsterScript(wchar_t* FileName);
 extern void  MonsterConvert(MONSTER* m, int Level);
-extern char* getMonsterName(int type);
+extern const wchar_t* getMonsterName(int type);
 
 extern SKILL_ATTRIBUTE* SkillAttribute;
 
-void OpenSkillScript(char* FileName);
+void OpenSkillScript(wchar_t* FileName);
 
 BOOL IsValidateSkillIdx(INT iSkillIdx);
 BOOL IsCorrectSkillType(INT iSkillSeq, eTypeSkill iSkillTypeIdx);

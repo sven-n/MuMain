@@ -36,11 +36,11 @@ namespace leaf {
 
     /* Public Console Functions */
 
-    bool OpenConsoleWindow(const std::string& title);
+    bool OpenConsoleWindow(const std::wstring& title);
     void CloseConsoleWindow();
 
-    bool SetConsoleTitle(const std::string& title);
-    const std::string& GetConsoleTitle();
+    bool SetConsoleTitle(const std::wstring& title);
+    const std::wstring& GetConsoleTitle();
 
     HWND GetConsoleWndHandle();
 
@@ -55,7 +55,7 @@ namespace leaf {
     void ActivateCloseButton(bool bActive = true);
     bool IsActiveCloseButton();
 
-    bool SaveConsoleScreenBuffer(const std::string& filename);
+    bool SaveConsoleScreenBuffer(const std::wstring& filename);
 
     /* CConsoleWindow singleton class */
 
@@ -68,11 +68,11 @@ namespace leaf {
     public:
         ~CConsoleWindow();
 
-        bool Open(const std::string& title);
+        bool Open(const std::wstring& title);
         void Close();
 
-        bool SetTitle(const std::string& title);
-        const std::string& GetTitle();
+        bool SetTitle(const std::wstring& title);
+        const std::wstring& GetTitle();
 
         HWND GetWndHandle();
 
@@ -87,7 +87,7 @@ namespace leaf {
         void ActivateCloseButton(bool bActive = true);
         bool IsActiveCloseButton() const;
 
-        bool SaveScreenBuffer(const std::string& filename);
+        bool SaveScreenBuffer(const std::wstring& filename);
 
         static CConsoleWindow* GetInstance();
 

@@ -20,7 +20,7 @@ class CSMServer : public Singleton<CSMServer>
 {
 private:
     bool        m_bFillServerInfo;
-    std::string m_strHeroID;
+    std::wstring m_strHeroID;
     MServerInfo m_vServerInfo;
 
 public:
@@ -29,12 +29,12 @@ public:
 
     void    Init(void);
 
-    void    SetHeroID(char* ID);
+    void    SetHeroID(wchar_t* ID);
 
     void    SetServerInfo(MServerInfo sInfo);
     void    GetServerInfo(MServerInfo& sInfo);
 
-    void    GetServerAddress(char* szAddress);
+    void    GetServerAddress(wchar_t* szAddress);
     WORD    GetServerPort(void) { return (m_bFillServerInfo ? m_vServerInfo.m_wMapSvrPort : 0); }
     WORD    GetServerCode(void) { return (m_bFillServerInfo ? m_vServerInfo.m_wMapSvrCode : 0); }
 

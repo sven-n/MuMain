@@ -10,7 +10,7 @@
 #include "ItemAddOptioninfo.h"
 #include "wsclientinline.h"
 
-#define ITEMADDOPTION_DATA_FILE "Data\\Local\\ItemAddOption.bmd"
+#define ITEMADDOPTION_DATA_FILE L"Data\\Local\\ItemAddOption.bmd"
 
 ItemAddOptioninfo* ItemAddOptioninfo::MakeInfo()
 {
@@ -26,8 +26,8 @@ ItemAddOptioninfo::ItemAddOptioninfo()
 
     if (!Result)
     {
-        char szMessage[256];
-        ::sprintf(szMessage, "%s file not found.\r\n", ITEMADDOPTION_DATA_FILE);
+        wchar_t szMessage[256];
+        ::wsprintf(szMessage, L"%s file not found.\r\n", ITEMADDOPTION_DATA_FILE);
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -38,9 +38,9 @@ ItemAddOptioninfo::~ItemAddOptioninfo()
 {
 }
 
-const bool ItemAddOptioninfo::OpenItemAddOptionInfoFile(const std::string& filename)
+const bool ItemAddOptioninfo::OpenItemAddOptionInfoFile(const std::wstring& filename)
 {
-    FILE* fp = ::fopen(filename.c_str(), "rb");
+    FILE* fp = ::_wfopen(filename.c_str(), L"rb");
     if (fp != NULL)
     {
         int nSize = sizeof(ITEM_ADD_OPTION) * MAX_ITEM;
@@ -54,15 +54,15 @@ const bool ItemAddOptioninfo::OpenItemAddOptionInfoFile(const std::string& filen
     return false;
 }
 
-void ItemAddOptioninfo::GetItemAddOtioninfoText(std::vector<std::string>& outtextlist, int type)
+void ItemAddOptioninfo::GetItemAddOtioninfoText(std::vector<std::wstring>& outtextlist, int type)
 {
     int optiontype = 0;
     int optionvalue = 0;
 
     for (int i = 0; i < 2; ++i)
     {
-        std::string text;
-        char TempText[100];
+        std::wstring text;
+        wchar_t TempText[100];
 
         if (i == 0)
         {
@@ -77,21 +77,21 @@ void ItemAddOptioninfo::GetItemAddOtioninfoText(std::vector<std::string>& outtex
 
         switch (optiontype)
         {
-        case 1: sprintf(TempText, GlobalText[2184], optionvalue);
+        case 1: wsprintf(TempText, GlobalText[2184], optionvalue);
             break;
-        case 2: sprintf(TempText, GlobalText[2185], optionvalue);
+        case 2: wsprintf(TempText, GlobalText[2185], optionvalue);
             break;
-        case 3: sprintf(TempText, GlobalText[2186], optionvalue);
+        case 3: wsprintf(TempText, GlobalText[2186], optionvalue);
             break;
-        case 4: sprintf(TempText, GlobalText[2187], optionvalue);
+        case 4: wsprintf(TempText, GlobalText[2187], optionvalue);
             break;
-        case 5: sprintf(TempText, GlobalText[2188], optionvalue);
+        case 5: wsprintf(TempText, GlobalText[2188], optionvalue);
             break;
-        case 6: sprintf(TempText, GlobalText[2189], optionvalue);
+        case 6: wsprintf(TempText, GlobalText[2189], optionvalue);
             break;
-        case 7: sprintf(TempText, GlobalText[2190]);
+        case 7: wsprintf(TempText, GlobalText[2190]);
             break;
-        case 8: sprintf(TempText, GlobalText[2191], optionvalue);
+        case 8: wsprintf(TempText, GlobalText[2191], optionvalue);
             break;
         }
 

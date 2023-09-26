@@ -59,7 +59,7 @@ namespace SEASON3B
 
         void SetCurHeroPosition(int x, int y);
         void MoveTextTipPos(CNewUIButton* m_Btn, int iX, int iY);
-        void SetButtonInfo(CNewUIButton* m_Btn, int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, unicode::t_string btname, unicode::t_string tooltiptext, bool istoppos);
+        void SetButtonInfo(CNewUIButton* m_Btn, int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, bool istoppos);
     private:
         void LoadImages();
         void UnloadImages();

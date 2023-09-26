@@ -45,7 +45,7 @@ bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     LoadImages();
 
-    std::list<unicode::t_string> ltext;
+    std::list<std::wstring> ltext;
     ltext.push_back(GlobalText[1448]);
     ltext.push_back(GlobalText[1439]);
     ltext.push_back(GlobalText[1449]);
@@ -68,7 +68,7 @@ bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIGuardWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption)
+void CNewUIGuardWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -166,7 +166,7 @@ bool CNewUIGuardWindow::Render()
 
     RenderFrame();
 
-    static std::list<unicode::t_string> ltext;
+    static std::list<std::wstring> ltext;
     if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE)
     {
         ltext.push_back(GlobalText[1448]);
@@ -225,25 +225,25 @@ float CNewUIGuardWindow::GetLayerDepth()
 
 void CNewUIGuardWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_GUARDWINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_GUARDWINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_GUARDWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_GUARDWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_GUARDWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_GUARDWINDOW_EXIT_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_guild_tab04.tga", IMAGE_GUARDWINDOW_TAB_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_GUARDWINDOW_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GUARDWINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GUARDWINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_GUARDWINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_GUARDWINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_GUARDWINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GUARDWINDOW_EXIT_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_guild_tab04.tga", IMAGE_GUARDWINDOW_TAB_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_GUARDWINDOW_BUTTON, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_item_table03(Up).tga", IMAGE_GUARDWINDOW_TOP_PIXEL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_table03(Dw).tga", IMAGE_GUARDWINDOW_BOTTOM_PIXEL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_table03(L).tga", IMAGE_GUARDWINDOW_LEFT_PIXEL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_table03(R).tga", IMAGE_GUARDWINDOW_RIGHT_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_GUARDWINDOW_TOP_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_GUARDWINDOW_BOTTOM_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_GUARDWINDOW_LEFT_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_GUARDWINDOW_RIGHT_PIXEL, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_scrollbar_up.tga", IMAGE_GUARDWINDOW_SCROLL_TOP);
-    LoadBitmap("Interface\\newui_scrollbar_m.tga", IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
-    LoadBitmap("Interface\\newui_scrollbar_down.tga", IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
-    LoadBitmap("Interface\\newui_scroll_on.tga", IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_scroll_off.tga", IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_GUARDWINDOW_SCROLL_TOP);
+    LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
+    LoadBitmap(L"Interface\\newui_scrollbar_down.tga", IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
+    LoadBitmap(L"Interface\\newui_scroll_on.tga", IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scroll_off.tga", IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
 }
 void CNewUIGuardWindow::UnloadImages()
 {
@@ -276,7 +276,7 @@ void CNewUIGuardWindow::RenderFrame()
     RenderImage(IMAGE_GUARDWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
     RenderImage(IMAGE_GUARDWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
     float fLine_y = 13.0f;
 
@@ -284,7 +284,7 @@ void CNewUIGuardWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    unicode::_sprintf(szText, "%s", GlobalText[1445]);
+    wsprintf(szText, L"%s", GlobalText[1445]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
@@ -292,22 +292,22 @@ void CNewUIGuardWindow::RenderFrame()
 
     if (m_szOwnerGuildMaster[0])
     {
-        unicode::_sprintf(szText, GlobalText[1446], m_szOwnerGuildMaster);
+        wsprintf(szText, GlobalText[1446], m_szOwnerGuildMaster);
     }
     else
     {
-        unicode::_sprintf(szText, GlobalText[1446], GlobalText[1361]);
+        wsprintf(szText, GlobalText[1446], GlobalText[1361]);
     }
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 15;
     if (m_szOwnerGuild[0])
     {
-        unicode::_sprintf(szText, GlobalText[1447], m_szOwnerGuild);
+        wsprintf(szText, GlobalText[1447], m_szOwnerGuild);
     }
     else
     {
-        unicode::_sprintf(szText, GlobalText[1447], GlobalText[1361]);
+        wsprintf(szText, GlobalText[1447], GlobalText[1361]);
     }
 
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
@@ -400,14 +400,14 @@ void CNewUIGuardWindow::UpdateRegisterInfoTab()
 void CNewUIGuardWindow::RenderSeigeInfoTab()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 125 };
-    unicode::t_char szTemp[256];
+    wchar_t szTemp[256];
 
     g_pRenderText->SetFont(g_hFont);
-    sprintf(szTemp, GlobalText[1533], m_wStartYear, m_byStartMonth, m_byStartDay, m_byStartHour, m_byStartMinute);
+    wsprintf(szTemp, GlobalText[1533], m_wStartYear, m_byStartMonth, m_byStartDay, m_byStartHour, m_byStartMinute);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 14;
-    sprintf(szTemp, GlobalText[1534], m_wEndYear, m_byEndMonth, m_byEndDay, m_byEndHour, m_byEndMinute);
+    wsprintf(szTemp, GlobalText[1534], m_wEndYear, m_byEndMonth, m_byEndDay, m_byEndHour, m_byEndMinute);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 14;
@@ -452,11 +452,11 @@ void CNewUIGuardWindow::RenderSeigeInfoTab()
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1545], 190, 0, RT3_SORT_CENTER);
 
         ptOrigin.y += 14;
-        sprintf(szTemp, GlobalText[1546], m_wSiegeStartYear, m_bySiegeStartMonth, m_bySiegeStartDay, m_bySiegeStartHour, m_bySiegeStartMinute);
+        wsprintf(szTemp, GlobalText[1546], m_wSiegeStartYear, m_bySiegeStartMonth, m_bySiegeStartDay, m_bySiegeStartHour, m_bySiegeStartMinute);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
 
         ptOrigin.y += 35;
-        sprintf(szTemp, GlobalText[1421], m_dwStateLeftSec / 3600, (m_dwStateLeftSec % 3600) / 60, (m_dwStateLeftSec % 3600) % 60);
+        wsprintf(szTemp, GlobalText[1421], m_dwStateLeftSec / 3600, (m_dwStateLeftSec % 3600) / 60, (m_dwStateLeftSec % 3600) % 60);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
     }
 }
@@ -477,8 +477,8 @@ void CNewUIGuardWindow::RenderRegisterTab()
         {
             if (!g_GuardsMan.HasRegistered())
             {
-                if (!strcmp(GuildMark[Hero->GuildMarkIndex].UnionName, m_szOwnerGuild)
-                    || !strcmp(GuildMark[Hero->GuildMarkIndex].GuildName, m_szOwnerGuild))
+                if (!wcscmp(GuildMark[Hero->GuildMarkIndex].UnionName, m_szOwnerGuild)
+                    || !wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, m_szOwnerGuild))
                 {
                     m_BtnProclaim.Lock();
                     m_BtnProclaim.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
@@ -513,12 +513,12 @@ void CNewUIGuardWindow::RenderRegisterTab()
             ptOrigin.y += 30;
 
             int nMarkCount = g_GuardsMan.GetMyMarkCount();
-            unicode::t_char szBuffer[256];
-            unicode::_sprintf(szBuffer, GlobalText[1437], nMarkCount);
+            wchar_t szBuffer[256];
+            wsprintf(szBuffer, GlobalText[1437], nMarkCount);
             g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
 
             ptOrigin.y += 14;
-            unicode::_sprintf(szBuffer, GlobalText[1438], g_GuardsMan.GetRegMarkCount());
+            wsprintf(szBuffer, GlobalText[1438], g_GuardsMan.GetRegMarkCount());
             g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
 
             if (nMarkCount > 0)
@@ -600,8 +600,8 @@ void CNewUIGuardWindow::RenderRegisterInfoTab()
     }
     else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY)
     {
-        unicode::t_char szBuffer[256];
-        unicode::_sprintf(szBuffer, GlobalText[1443], 1, 1);
+        wchar_t szBuffer[256];
+        wsprintf(szBuffer, GlobalText[1443], 1, 1);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
         ptOrigin.y += 14;
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1444], 190, 0, RT3_SORT_CENTER);
@@ -627,8 +627,8 @@ void CNewUIGuardWindow::SetData(LPPMSG_ANS_CASTLESIEGESTATE Info)
     memset(m_szOwnerGuildMaster, 0, sizeof(char) * 11);
 
     m_eTimeType = (CASTLESIEGE_STATE)Info->cCastleSiegeState;
-    strncpy(m_szOwnerGuild, Info->cOwnerGuild, sizeof(char) * 8);
-    strncpy(m_szOwnerGuildMaster, Info->cOwnerGuildMaster, sizeof(char) * 10);
+    wcsncpy(m_szOwnerGuild, Info->cOwnerGuild, sizeof(char) * 8);
+    wcsncpy(m_szOwnerGuildMaster, Info->cOwnerGuildMaster, sizeof(char) * 10);
 
     m_wStartYear = MAKEWORD(Info->btStartYearL, Info->btStartYearH);
     m_byStartMonth = Info->btStartMonth;
@@ -649,7 +649,7 @@ void CNewUIGuardWindow::SetData(LPPMSG_ANS_CASTLESIEGESTATE Info)
     //m_dwStateLeftSec = Info->btStateLeftSec1<<24 | Info->btStateLeftSec2<<16 | Info->btStateLeftSec3<<8 | Info->btStateLeftSec4;
 }
 
-void CNewUIGuardWindow::AddDeclareGuildList(char* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum)
+void CNewUIGuardWindow::AddDeclareGuildList(wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum)
 {
     m_DeclareGuildListBox.AddText(szGuildName, nMarkCount, byIsGiveUP, bySeqNum);
 }
@@ -664,7 +664,7 @@ void CNewUIGuardWindow::SortDeclareGuildList()
     m_DeclareGuildListBox.Sort();
 }
 
-void CNewUIGuardWindow::AddGuildList(char* szGuildName, BYTE byCsJoinSide, BYTE byGuildInvolved, int iGuildScore)
+void CNewUIGuardWindow::AddGuildList(wchar_t* szGuildName, BYTE byCsJoinSide, BYTE byGuildInvolved, int iGuildScore)
 {
     m_GuildListBox.AddText(szGuildName, byCsJoinSide, byGuildInvolved, iGuildScore);
 }

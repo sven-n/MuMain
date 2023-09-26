@@ -17,7 +17,7 @@ namespace info
     class CreditInfo : public InfoFile
     {
     public:
-        static CreditInfoPtr MakeInfo(const std::string& filename);
+        static CreditInfoPtr MakeInfo(const std::wstring& filename);
         virtual ~CreditInfo();
 
     protected:
@@ -28,8 +28,8 @@ namespace info
         const Script_Credit* GetData(int index) const;
 
     private:
-        bool OpenFile(const std::string& filename);
-        CreditInfo(const std::string& filename);
+        bool OpenFile(const std::wstring& filename);
+        CreditInfo(const std::wstring& filename);
 
     private:
         typedef std::vector<Script_Credit>		CreditVECTOR;

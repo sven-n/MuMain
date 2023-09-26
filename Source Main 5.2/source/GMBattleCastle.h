@@ -18,7 +18,7 @@ namespace   battleCastle
     bool    GetGuildMaster(CHARACTER* c);
     void    SettingBattleKing(CHARACTER* c);
     void    DeleteBattleFormation(CHARACTER* c, eBuffState state);
-    void    ChangeBattleFormation(char* GuildName, bool bEffect = false);
+    void    ChangeBattleFormation(wchar_t* GuildName, bool bEffect = false);
     void    CreateBattleCastleCharacter_Visual(CHARACTER* c, OBJECT* o);
     void    DeleteTmpCharacter(void);
     void    CreateGuardStoneHealingVisual(CHARACTER* c, float Range);

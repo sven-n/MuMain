@@ -9,7 +9,7 @@
 
 namespace SEASON3B
 {
-    bool CreateOkMessageBox(const unicode::t_string& strMsg, DWORD dwColor = 0xffffffff, float fPriority = 3.f);
+    bool CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor = 0xffffffff, float fPriority = 3.f);
 
     int IsPurchaseShop();
 #define g_IsPurchaseShop SEASON3B::IsPurchaseShop()

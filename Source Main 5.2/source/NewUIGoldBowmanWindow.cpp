@@ -10,7 +10,7 @@
 
 namespace
 {
-    void RenderText(char* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
+    void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
     {
         g_pRenderText->SetFont(g_hFont);
 
@@ -146,17 +146,17 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
         }
         else
         {
-            char strSerial[12];
+            wchar_t strSerial[12];
             memset(&strSerial, 0, sizeof(char) * 12);
             m_EditBox->GetText(strSerial);
 
-            char strSerial1[5] = "0,";
+            wchar_t strSerial1[5] = L"0,";
             memcpy(strSerial1, strSerial, sizeof(char) * 4); strSerial1[4] = 0;
 
-            char strSerial2[5] = "0,";
+            wchar_t strSerial2[5] = L"0,";
             memcpy(strSerial2, strSerial + 4, sizeof(char) * 4); strSerial2[4] = 0;
 
-            char strSerial3[5] = "0,";
+            wchar_t strSerial3[5] = L"0,";
             memcpy(strSerial3, strSerial + 8, sizeof(char) * 4); strSerial3[4] = 0;
 
             SendRequestScratchSerial(strSerial1, strSerial2, strSerial3);
@@ -238,47 +238,47 @@ void CNewUIGoldBowmanWindow::RenderFrame()
 
 void CNewUIGoldBowmanWindow::RenderTexts()
 {
-    char Text[100];
+    wchar_t Text[100];
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, getMonsterName(236)); // npc Name file
+    wsprintf(Text, getMonsterName(236)); // npc Name file
     RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[891]); //"100%%
+    wsprintf(Text, GlobalText[891]); //"100%%
     RenderText(Text, m_Pos.x, m_Pos.y + 80, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[892]);
+    wsprintf(Text, GlobalText[892]);
     RenderText(Text, m_Pos.x, m_Pos.y + 95, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[897]);
+    wsprintf(Text, GlobalText[897]);
     RenderText(Text, m_Pos.x, m_Pos.y + 110, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[898]);
+    wsprintf(Text, GlobalText[898]);
     RenderText(Text, m_Pos.x, m_Pos.y + 125, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     /////////////////////////////// bottom text /////////////////////////////////////////////////////
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[893]);
+    wsprintf(Text, GlobalText[893]);
     RenderText(Text, m_Pos.x, m_Pos.y + 180, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[894]);
+    wsprintf(Text, GlobalText[894]);
     RenderText(Text, m_Pos.x, m_Pos.y + 195, 190, 0, 0xFF18FF00, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[916]);
+    wsprintf(Text, GlobalText[916]);
     RenderText(Text, m_Pos.x, m_Pos.y + 210, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, GlobalText[917]);
+    wsprintf(Text, GlobalText[917]);
     RenderText(Text, m_Pos.x, m_Pos.y + 225, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
-    if (strcmp(g_strGiftName, ""))
+    if (wcscmp(g_strGiftName, L""))
     {
         RenderText(g_strGiftName, m_Pos.x, m_Pos.y + 330, 190, 0, 0xFFFFD200, 0x00000000, RT3_SORT_CENTER);
     }
@@ -313,15 +313,15 @@ float CNewUIGoldBowmanWindow::GetLayerDepth()
 
 void CNewUIGoldBowmanWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_GB_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_GB_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_GB_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_GB_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_GB_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_GB_EXCHANGEBTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_GB_BTN_SERIAL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_GB_BTN_EXIT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_guildmakeeditbox.tga", IMAGE_GB_EDITBOX, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GB_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_GB_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_GB_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_GB_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_GB_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GB_EXCHANGEBTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GB_BTN_SERIAL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GB_BTN_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_guildmakeeditbox.tga", IMAGE_GB_EDITBOX, GL_LINEAR);
 }
 
 void CNewUIGoldBowmanWindow::UnloadImages()

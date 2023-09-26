@@ -21,9 +21,9 @@ CMoveCommandData* CMoveCommandData::GetInstance()
     return &s_Instance;
 }
 
-bool CMoveCommandData::Create(const std::string& filename)
+bool CMoveCommandData::Create(const std::wstring& filename)
 {
-    FILE* fp = fopen(filename.c_str(), "rb");
+    FILE* fp = _wfopen(filename.c_str(), L"rb");
     if (fp == NULL) return false;
 
     int count = 0;
@@ -56,7 +56,7 @@ void CMoveCommandData::BuxConvert(BYTE* pBuffer, int size)
         pBuffer[i] ^= bBuxCode[i % 3];
 }
 
-bool CMoveCommandData::OpenMoveReqScript(const std::string& filename)
+bool CMoveCommandData::OpenMoveReqScript(const std::wstring& filename)
 {
     return CMoveCommandData::GetInstance()->Create(filename);
 }

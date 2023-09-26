@@ -103,7 +103,7 @@ BOOL CHashTable<T, S>::Insert(T Data, S Key)
         dwIndex = (dwIndex + 1) % m_dwTableSize;
     }
 
-    g_ErrorReport.Write("Hash table full!!! - Insert\r\n");
+    g_ErrorReport.Write(L"Hash table full!!! - Insert\r\n");
     return (FALSE);
 }
 
@@ -127,7 +127,7 @@ DWORD CHashTable<T, S>::GetIndex(S Key)
         dwIndex = (dwIndex + 1) % m_dwTableSize;
     }
 
-    g_ErrorReport.Write("Hash table full!!! - GetIndex\r\n");
+    g_ErrorReport.Write(L"Hash table full!!! - GetIndex\r\n");
     return (HASH_ERROR);
 }
 

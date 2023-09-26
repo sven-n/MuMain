@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CBTMessageBox.h"
 
-int leaf::CBTMessageBox(HWND hWnd, const std::string& text, const std::string& caption, UINT uType, bool bAlwaysOnTop)
+int leaf::CBTMessageBox(HWND hWnd, const std::wstring& text, const std::wstring& caption, UINT uType, bool bAlwaysOnTop)
 {
     return CCBTMessageBox::GetInstance()->OpenMessageBox(hWnd, text.c_str(), caption.c_str(), uType, bAlwaysOnTop);
 }
@@ -13,7 +13,7 @@ CCBTMessageBox::CCBTMessageBox() : m_hParentWnd(NULL), m_hCBT(NULL), m_bAlwaysOn
 CCBTMessageBox::~CCBTMessageBox()
 {}
 
-int CCBTMessageBox::OpenMessageBox(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, bool bAlwaysOnTop)
+int CCBTMessageBox::OpenMessageBox(HWND hWnd, const wchar_t* lpText, const wchar_t* lpCaption, UINT uType, bool bAlwaysOnTop)
 {
     if (hWnd != NULL) {
         m_hParentWnd = hWnd;

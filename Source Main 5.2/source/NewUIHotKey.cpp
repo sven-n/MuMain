@@ -101,7 +101,7 @@ bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
             }
             else
             {
-                g_pChatListBox->AddText("", GlobalText[1388], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[1388], SEASON3B::TYPE_ERROR_MESSAGE);
                 g_pQuickCommand->CloseQuickCommand();
             }
 
@@ -181,7 +181,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         {
             if (g_pChatListBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
             {
-                g_pChatListBox->AddText("", GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
         else
@@ -248,7 +248,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         if (::IsStrifeMap(gMapManager.WorldActive))
         {
             if (g_pChatListBox->CheckChatRedundancy(GlobalText[2989]) == FALSE)
-                g_pChatListBox->AddText("", GlobalText[2989], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[2989], SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
         else
         {
@@ -291,7 +291,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     else if (SEASON3B::IsPress('X') == true)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, "InGameShopStatue.Txt CallStack - CNewUIHotKey.UpdateKeyEvent()");
+        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUIHotKey.UpdateKeyEvent()");
         if (g_pInGameShop->IsInGameShopOpen() == false)
             return false;
 

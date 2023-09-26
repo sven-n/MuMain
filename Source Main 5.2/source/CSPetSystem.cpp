@@ -25,7 +25,7 @@
 extern bool g_PetEnableDuel;
 
 extern  double   WorldTime;
-extern	char    TextList[50][100];
+extern	wchar_t    TextList[50][100];
 extern	int     TextListColor[50];
 extern	int     TextBold[50];
 extern  float   g_fScreenRate_x;

@@ -54,7 +54,7 @@ bool CNewUIDoppelGangerWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMn
     return true;
 }
 
-void CNewUIDoppelGangerWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption)
+void CNewUIDoppelGangerWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -133,10 +133,10 @@ bool CNewUIDoppelGangerWindow::Render()
     RenderFrame();
 
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
-    char szText[256];
+    wchar_t szText[256];
 
     g_pRenderText->SetFont(g_hFont);
-    char szTextOut[2][300];
+    wchar_t szTextOut[2][300];
     CutStr(GlobalText[2757], szTextOut[0], 140, 2, 300);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTextOut[0], 190, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 15, szTextOut[1], 190, 0, RT3_SORT_CENTER);
@@ -172,11 +172,11 @@ bool CNewUIDoppelGangerWindow::Render()
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 210, GlobalText[2761], 190, 0, RT3_SORT_CENTER);
     if (m_iRemainTime == 0)
     {
-        sprintf(szText, GlobalText[2164]);
+        wsprintf(szText, GlobalText[2164]);
     }
     else
     {
-        sprintf(szText, GlobalText[2762], m_iRemainTime);
+        wsprintf(szText, GlobalText[2762], m_iRemainTime);
     }
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 230, szText, 190, 0, RT3_SORT_CENTER);
 
@@ -219,13 +219,13 @@ float CNewUIDoppelGangerWindow::GetLayerDepth()
 
 void CNewUIDoppelGangerWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_DOPPELGANGERWINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_DOPPELGANGERWINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_DOPPELGANGERWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_DOPPELGANGERWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_DOPPELGANGERWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_DOPPELGANGERWINDOW_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_DOPPELGANGERWINDOW_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_DOPPELGANGERWINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_DOPPELGANGERWINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_DOPPELGANGERWINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_DOPPELGANGERWINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_DOPPELGANGERWINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_DOPPELGANGERWINDOW_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_DOPPELGANGERWINDOW_LINE, GL_LINEAR);
 }
 
 void CNewUIDoppelGangerWindow::UnloadImages()
@@ -247,7 +247,7 @@ void CNewUIDoppelGangerWindow::RenderFrame()
     RenderImage(IMAGE_DOPPELGANGERWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
     RenderImage(IMAGE_DOPPELGANGERWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
     float fLine_y = 13.0f;
 
@@ -255,7 +255,7 @@ void CNewUIDoppelGangerWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    unicode::_sprintf(szText, "%s", GlobalText[2756]);
+    wsprintf(szText, L"%s", GlobalText[2756]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 

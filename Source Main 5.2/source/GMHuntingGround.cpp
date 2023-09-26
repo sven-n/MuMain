@@ -204,8 +204,8 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster81_EyeRight", 29);
-        BoneManager::RegisterBone(pCharacter, "Monster81_EyeLeft", 30);
+        BoneManager::RegisterBone(pCharacter, L"Monster81_EyeRight", 29);
+        BoneManager::RegisterBone(pCharacter, L"Monster81_EyeLeft", 30);
     }
     break;
     case 291:
@@ -216,10 +216,10 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster82_RHand", 45);
-        BoneManager::RegisterBone(pCharacter, "Monster82_LHand", 34);
-        BoneManager::RegisterBone(pCharacter, "Monster82_Eye", 48);
-        BoneManager::RegisterBone(pCharacter, "Monster82_Back", 46);
+        BoneManager::RegisterBone(pCharacter, L"Monster82_RHand", 45);
+        BoneManager::RegisterBone(pCharacter, L"Monster82_LHand", 34);
+        BoneManager::RegisterBone(pCharacter, L"Monster82_Eye", 48);
+        BoneManager::RegisterBone(pCharacter, L"Monster82_Back", 46);
     }
     break;
     case 292:
@@ -230,7 +230,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster83_Tail", 62);
+        BoneManager::RegisterBone(pCharacter, L"Monster83_Tail", 62);
     }
     break;
     case 303:
@@ -242,11 +242,11 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster84_PoisonTop", 53);
-        BoneManager::RegisterBone(pCharacter, "Monster84_PoisonRight", 54);
-        BoneManager::RegisterBone(pCharacter, "Monster84_PoisonLeft", 55);
-        BoneManager::RegisterBone(pCharacter, "Monster84_LeftHand", 37);
-        BoneManager::RegisterBone(pCharacter, "Monster84_RightHand", 50);
+        BoneManager::RegisterBone(pCharacter, L"Monster84_PoisonTop", 53);
+        BoneManager::RegisterBone(pCharacter, L"Monster84_PoisonRight", 54);
+        BoneManager::RegisterBone(pCharacter, L"Monster84_PoisonLeft", 55);
+        BoneManager::RegisterBone(pCharacter, L"Monster84_LeftHand", 37);
+        BoneManager::RegisterBone(pCharacter, L"Monster84_RightHand", 50);
     }
     break;
     case 302:
@@ -258,8 +258,8 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster85_LeftEye", 18);
-        BoneManager::RegisterBone(pCharacter, "Monster85_RightEye", 19);
+        BoneManager::RegisterBone(pCharacter, L"Monster85_LeftEye", 18);
+        BoneManager::RegisterBone(pCharacter, L"Monster85_RightEye", 19);
     }
     break;
     case 295:
@@ -270,9 +270,9 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster87_LeftEye", 8);
-        BoneManager::RegisterBone(pCharacter, "Monster87_RightEye", 9);
-        BoneManager::RegisterBone(pCharacter, "Monster87_LeftHand", 16);
+        BoneManager::RegisterBone(pCharacter, L"Monster87_LeftEye", 8);
+        BoneManager::RegisterBone(pCharacter, L"Monster87_RightEye", 9);
+        BoneManager::RegisterBone(pCharacter, L"Monster87_LeftHand", 16);
 
         PlayBuffer(SOUND_BC_EROHIM_ENTER);
     }
@@ -280,7 +280,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 297:
     {
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
-        strcpy(pCharacter->ID, "저주받은 기사");
+        wcscpy(pCharacter->ID, L"저주받은 기사");
         pCharacter->Skin = 1;	//. 기사
         pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 1;
         pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 1;
@@ -366,9 +366,9 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
     {
         vec3_t Position, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
-        BoneManager::GetBonePosition(pObject, "Monster81_EyeRight", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster81_EyeRight", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster81_EyeLeft", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster81_EyeLeft", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, pObject);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
@@ -409,20 +409,20 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         }
         else {
             Vector(5.f, 10.f, 5.f, Relative);
-            BoneManager::GetBonePosition(pObject, "Monster82_LHand", Relative, Position);
+            BoneManager::GetBonePosition(pObject, L"Monster82_LHand", Relative, Position);
             CreateParticle(BITMAP_TRUE_FIRE, Position, pObject->Angle, Light, 3, 3.4f, pObject);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 2.5f);
 
-            BoneManager::GetBonePosition(pObject, "Monster82_RHand", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster82_RHand", Position);
             CreateParticle(BITMAP_TRUE_FIRE, Position, pObject->Angle, Light, 4, 3.4f, pObject);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 2.5f);
 
             Vector(-20.f, -2.f, -10.f, Relative);
-            BoneManager::GetBonePosition(pObject, "Monster82_Eye", Relative, Position);
+            BoneManager::GetBonePosition(pObject, L"Monster82_Eye", Relative, Position);
             CreateParticle(BITMAP_TRUE_FIRE, Position, pObject->Angle, Light, 0, 0.8f);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 0.8f);
 
-            BoneManager::GetBonePosition(pObject, "Monster82_Back", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster82_Back", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 0.8f);
 
             if (rand_fps_check(20)) {
@@ -437,7 +437,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             {
                 pObject->SubType = TRUE;
 
-                BoneManager::GetBonePosition(pObject, "Monster82_RHand", Position);
+                BoneManager::GetBonePosition(pObject, L"Monster82_RHand", Position);
                 Position[2] = pObject->Position[2];
 
                 vec3_t Angle;
@@ -473,7 +473,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
                 pObject->SubType = TRUE;
 
                 Vector(80.f, 40.f, -25.f, Relative);
-                BoneManager::GetBonePosition(pObject, "Monster82_LHand", Relative, Position);
+                BoneManager::GetBonePosition(pObject, L"Monster82_LHand", Relative, Position);
                 CreateBomb(Position, true);
 
                 PlayBuffer(SOUND_BC_FIREGOLEM_ATTACK2);
@@ -507,7 +507,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         if (pObject->CurrentAction == MONSTER01_ATTACK2) {
             vec3_t Position, Relative;
             Vector(rand() % 12 - 6, rand() % 12 - 6, rand() % 12 - 6, Relative);
-            BoneManager::GetBonePosition(pObject, "Monster83_Tail", Relative, Position);
+            BoneManager::GetBonePosition(pObject, L"Monster83_Tail", Relative, Position);
 
             vec3_t Light;
             Vector(1.f, 0.3f, 0.f, Light);
@@ -555,9 +555,9 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             Vector(-55.f, sinf(WorldTime * 0.03f) * 45.f, pObject->Angle[2], Angle);
             if (rand_fps_check(2)) {
                 if (rand_fps_check(2))
-                    BoneManager::GetBonePosition(pObject, "Monster84_PoisonRight", Position);
+                    BoneManager::GetBonePosition(pObject, L"Monster84_PoisonRight", Position);
                 else
-                    BoneManager::GetBonePosition(pObject, "Monster84_PoisonLeft", Position);
+                    BoneManager::GetBonePosition(pObject, L"Monster84_PoisonLeft", Position);
                 CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.025f);
             }
             CreateEffect(MODEL_BIG_STONE_PART2, Position, Angle, Light, 3);
@@ -568,25 +568,25 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
                 PlayBuffer(SOUND_BC_POISONGOLEM_ATTACK1 + rand() % 2);
             }
 
-            BoneManager::GetBonePosition(pObject, "Monster84_RightHand", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster84_RightHand", Position);
             Position[2] = pObject->Position[2];
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.05f);
 
-            BoneManager::GetBonePosition(pObject, "Monster84_LeftHand", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster84_LeftHand", Position);
             Position[2] = pObject->Position[2];
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.05f);
         }
 
         if (rand_fps_check(10)) {
-            BoneManager::GetBonePosition(pObject, "Monster84_PoisonTop", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster84_PoisonTop", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 23);
         }
         if (rand_fps_check(10)) {
-            BoneManager::GetBonePosition(pObject, "Monster84_PoisonRight", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster84_PoisonRight", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 23);
         }
         if (rand_fps_check(10)) {
-            BoneManager::GetBonePosition(pObject, "Monster84_PoisonLeft", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster84_PoisonLeft", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 23);
         }
         if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
@@ -598,9 +598,9 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
     {
         vec3_t Position, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
-        BoneManager::GetBonePosition(pObject, "Monster85_LeftEye", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster85_LeftEye", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.7f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster85_RightEye", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster85_RightEye", Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.7f, Light, pObject);
 
         //. Walking & Running Scene Processing
@@ -632,10 +632,10 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         vec3_t Position, Relative, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
         Vector(0.f, -2.f, 0.f, Relative);
-        BoneManager::GetBonePosition(pObject, "Monster87_LeftEye", Relative, Position);
+        BoneManager::GetBonePosition(pObject, L"Monster87_LeftEye", Relative, Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, pObject);
         CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster87_RightEye", Relative, Position);
+        BoneManager::GetBonePosition(pObject, L"Monster87_RightEye", Relative, Position);
         CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, pObject);
         CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, pObject);
 
@@ -659,7 +659,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
                 PlayBuffer(SOUND_BC_EROHIM_ATTACK3);
             }
             Vector(0.f, 0.f, -10.f, Relative);
-            BoneManager::GetBonePosition(pObject, "Monster87_LeftHand", Relative, Position);
+            BoneManager::GetBonePosition(pObject, L"Monster87_LeftHand", Relative, Position);
             CreateParticle(BITMAP_TRUE_FIRE, Position, pObject->Angle, Light, 3, 3.f, pObject);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 2.f);
         }

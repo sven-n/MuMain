@@ -74,8 +74,8 @@ namespace SEASON3B
         // UI 출력 값
         CASTLESIEGE_STATE	m_eTimeType;
 
-        char		m_szOwnerGuild[8 + 1];
-        char		m_szOwnerGuildMaster[10 + 1];
+        wchar_t		m_szOwnerGuild[8 + 1];
+        wchar_t		m_szOwnerGuildMaster[10 + 1];
 
         WORD		m_wStartYear;
         BYTE		m_byStartMonth;
@@ -118,10 +118,10 @@ namespace SEASON3B
 
         void SetData(LPPMSG_ANS_CASTLESIEGESTATE Info);	// 서버에서 받아 화면 표시 설정
 
-        void AddDeclareGuildList(char* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum);
+        void AddDeclareGuildList(wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum);
         void ClearDeclareGuildList();
         void SortDeclareGuildList();
-        void AddGuildList(char* szGuildName, BYTE byCsJoinSide, BYTE byGuildInvolved, int iGuildScore);
+        void AddGuildList(wchar_t* szGuildName, BYTE byCsJoinSide, BYTE byGuildInvolved, int iGuildScore);
         void ClearGuildList();
 
     private:
@@ -131,7 +131,7 @@ namespace SEASON3B
         void RenderFrame();
         bool BtnProcess();
 
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption);
+        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
 
         void UpdateSeigeInfoTab();
         void UpdateRegisterTab();

@@ -99,7 +99,7 @@ bool CNewUIBloodCastle::Render()
     EnableAlphaTest();
     glColor4f(1.f, 1.f, 1.f, 1.f);
 
-    unicode::t_char szText[256] = { NULL, };
+    wchar_t szText[256] = { NULL, };
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0);
@@ -112,11 +112,11 @@ bool CNewUIBloodCastle::Render()
     {
         if (g_csMatchInfo->GetMatchType() == 5)
         {
-            unicode::_sprintf(szText, GlobalText[866], m_iKilledMonster, m_iMaxKillMonster);
+            wsprintf(szText, GlobalText[866], m_iKilledMonster, m_iMaxKillMonster);
         }
         else
         {
-            unicode::_sprintf(szText, GlobalText[864], m_iKilledMonster, m_iMaxKillMonster);
+            wsprintf(szText, GlobalText[864], m_iKilledMonster, m_iMaxKillMonster);
         }
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, szText, BLOODCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
     }
@@ -154,7 +154,7 @@ void CNewUIBloodCastle::ClosingProcess()
 
 void CNewUIBloodCastle::LoadImages()
 {
-    LoadBitmap("Interface\\newui_Figure_blood.tga", IMAGE_BLOODCASTLE_TIME_WINDOW, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Figure_blood.tga", IMAGE_BLOODCASTLE_TIME_WINDOW, GL_LINEAR);
 }
 
 void CNewUIBloodCastle::UnloadImages()
@@ -167,7 +167,7 @@ void CNewUIBloodCastle::SetTime(int iTime)
     m_iTime = iTime;
 
     int iMinute = m_iTime / 60;
-    unicode::_sprintf(m_szTime, " %.2d:%.2d:%.2d", iMinute, m_iTime % 60, (int)WorldTime % 60);
+    wsprintf(m_szTime, L" %.2d:%.2d:%.2d", iMinute, m_iTime % 60, (int)WorldTime % 60);
 
     if (iMinute < 5)
     {

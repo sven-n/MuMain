@@ -87,19 +87,20 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(164);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 164, PosX, PosY);
-        strcpy(pCharacter->ID, "가이온 카레인");
+        memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
+        std::wstring(L"Gayion The Gladiator").copy(pCharacter->ID, 19);
 
-        gLoadData.AccessModel(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, "Data\\Monster\\", "Boss_Karane_sword_left01");
-        gLoadData.AccessModel(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, "Data\\Monster\\", "Boss_Karane_sword_left02");
-        gLoadData.AccessModel(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, "Data\\Monster\\", "Boss_Karane_sword_right01");
-        gLoadData.AccessModel(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, "Data\\Monster\\", "Boss_Karane_sword_right02");
-        gLoadData.AccessModel(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, "Data\\Monster\\", "Boss_Karane_sword_main01");
+        gLoadData.AccessModel(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\", L"Boss_Karane_sword_left01");
+        gLoadData.AccessModel(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\", L"Boss_Karane_sword_left02");
+        gLoadData.AccessModel(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\", L"Boss_Karane_sword_right01");
+        gLoadData.AccessModel(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\", L"Boss_Karane_sword_right02");
+        gLoadData.AccessModel(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, L"Data\\Monster\\", L"Boss_Karane_sword_main01");
 
-        gLoadData.OpenTexture(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\");
-        gLoadData.OpenTexture(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\");
-        gLoadData.OpenTexture(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\");
-        gLoadData.OpenTexture(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\");
-        gLoadData.OpenTexture(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, "Monster\\");
+        gLoadData.OpenTexture(MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
+        gLoadData.OpenTexture(MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
+        gLoadData.OpenTexture(MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
+        gLoadData.OpenTexture(MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
+        gLoadData.OpenTexture(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, L"Monster\\");
 
         pCharacter->Object.Scale = 1.40f;
 
@@ -111,8 +112,8 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(165);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 165, PosX, PosY);
-        strcpy(pCharacter->ID, "제린트");
-
+        memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
+        std::wstring(L"Jerry The Adviseru").copy(pCharacter->ID, 19);
         pCharacter->Object.Scale = 1.45f;
 
         m_bCurrentIsRage_Jerint = false;
@@ -122,7 +123,8 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(186);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 186, PosX, PosY);
-        strcpy(pCharacter->ID, "주말 창살 성문");
+        memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
+        std::wstring(L"Star Gate").copy(pCharacter->ID, 10);
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.Scale = 1.25f;
     }
@@ -132,7 +134,8 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(187);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 187, PosX, PosY);
-        strcpy(pCharacter->ID, "주말 성문");
+        memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
+        std::wstring(L"Rush Gate").copy(pCharacter->ID, 10);
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.LifeTime = 100;
         pCharacter->Object.Scale = 1.25f;

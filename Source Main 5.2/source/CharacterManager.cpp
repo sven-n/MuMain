@@ -170,7 +170,7 @@ bool CCharacterManager::IsMasterLevel(const BYTE byClass)
     return this->IsThirdClass(byClass);
 }
 
-const char* CCharacterManager::GetCharacterClassText(const BYTE byClass)
+const wchar_t* CCharacterManager::GetCharacterClassText(const BYTE byClass)
 {
     BYTE byCharacterClass = this->GetCharacterClass(byClass);
 

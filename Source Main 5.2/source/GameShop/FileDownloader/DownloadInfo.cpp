@@ -128,7 +128,7 @@ BOOL DownloadServerInfo::IsPassive() // OK
 
 void DownloadServerInfo::SetServerInfo(TCHAR* szServerURL, INTERNET_PORT nPort, TCHAR* szUserID, TCHAR* szPassword) // OK
 {
-    char* search = _tcschr(szServerURL, ':');
+    auto* search = wcschr(szServerURL, ':');
     if (search && search[1] == '/' && search[2] == '/')
         StringCchCopy(this->m_szServerURL, sizeof(this->m_szServerURL), search + 3);
     else

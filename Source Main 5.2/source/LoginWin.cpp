@@ -161,7 +161,7 @@ void CLoginWin::RenderControls()
 {
     if (this->FirstLoad == 1)
     {
-        if (strlen(m_ID) > 0)
+        if (wcslen(m_ID) > 0)
             CUIMng::Instance().m_LoginWin.GetPassInputBox()->GiveFocus();
         else
             CUIMng::Instance().m_LoginWin.GetIDInputBox()->GiveFocus();
@@ -184,11 +184,11 @@ void CLoginWin::RenderControls()
     g_pRenderText->RenderText(int((CWin::GetXPos() + 30) / g_fScreenRate_x),
         int((CWin::GetYPos() + 139) / g_fScreenRate_y), GlobalText[451]);
 
-    unicode::t_char szServerName[MAX_TEXT_LENGTH];
+    wchar_t szServerName[MAX_TEXT_LENGTH];
 
-    const char* apszGlobalText[4]
+    const wchar_t* apszGlobalText[4]
         = { GlobalText[461], GlobalText[460], GlobalText[3130], GlobalText[3131] };
-    sprintf(szServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
+    wsprintf(szServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
         g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
 
     g_pRenderText->RenderText(int((CWin::GetXPos() + 111) / g_fScreenRate_x),
@@ -202,23 +202,23 @@ void CLoginWin::RequestLogin()
 
     CUIMng::Instance().HideWin(this);
 
-    char szID[MAX_ID_SIZE + 1] = { 0, };
-    char szPass[MAX_PASSWORD_SIZE + 1] = { 0, };
+    wchar_t szID[MAX_ID_SIZE + 1] = { 0, };
+    wchar_t szPass[MAX_PASSWORD_SIZE + 1] = { 0, };
     m_pIDInputBox->GetText(szID, MAX_ID_SIZE + 1);
     m_pPassInputBox->GetText(szPass, MAX_PASSWORD_SIZE + 1);
 
-    if (unicode::_strlen(szID) <= 0)
+    if (wcslen(szID) <= 0)
         CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_ID);
-    else if (unicode::_strlen(szPass) <= 0)
+    else if (wcslen(szPass) <= 0)
         CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_PASSWORD);
     else
     {
         if (CurrentProtocolState == RECEIVE_JOIN_SERVER_SUCCESS)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, "Login with the following account: %s", szID);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %s", szID);
 
-            g_ErrorReport.Write("> Login Request.\r\n");
-            g_ErrorReport.Write("> Try to Login \"%s\"\r\n", szID);
+            g_ErrorReport.Write(L"> Login Request.\r\n");
+            g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", szID);
 
             SendRequestLogIn(szID, szPass);
         }

@@ -8,7 +8,7 @@ public:
     CBannerInfoList(void);
     ~CBannerInfoList(void);
 
-    WZResult LoadBanner(std::string strDirPath, std::string strScriptFileName, bool bDonwLoad);
+    WZResult LoadBanner(std::wstring strDirPath, std::wstring strScriptFileName, bool bDonwLoad);
 
     void Clear();
     int GetSize();

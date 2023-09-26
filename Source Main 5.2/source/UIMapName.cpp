@@ -44,94 +44,82 @@ CUIMapName::~CUIMapName()
 
 void CUIMapName::InitImgPathMap()
 {
-    std::string strFolderName = "Local\\" + g_strSelectedML + "\\ImgsMapName\\";
+    std::wstring strFolderName = L"Local\\" + g_strSelectedML + L"\\ImgsMapName\\";
 
-    m_mapImgPath[0] = strFolderName + "lorencia.tga";
-    m_mapImgPath[1] = strFolderName + "dungeun.tga";
-    m_mapImgPath[2] = strFolderName + "devias.tga";
-    m_mapImgPath[3] = strFolderName + "noria.tga";
-    m_mapImgPath[4] = strFolderName + "losttower.tga";
+    m_mapImgPath[0] = strFolderName + L"lorencia.tga";
+    m_mapImgPath[1] = strFolderName + L"dungeun.tga";
+    m_mapImgPath[2] = strFolderName + L"devias.tga";
+    m_mapImgPath[3] = strFolderName + L"noria.tga";
+    m_mapImgPath[4] = strFolderName + L"losttower.tga";
+    m_mapImgPath[6] = strFolderName + L"stadium.tga";
+    m_mapImgPath[7] = strFolderName + L"atlans.tga";
+    m_mapImgPath[8] = strFolderName + L"tarcan.tga";
+    m_mapImgPath[9] = strFolderName + L"devilsquare.tga";
+    m_mapImgPath[10] = strFolderName + L"Icarus.tga";
+    m_mapImgPath[11] = strFolderName + L"bloodcastle.tga";
+    m_mapImgPath[12] = strFolderName + L"bloodcastle.tga";
+    m_mapImgPath[13] = strFolderName + L"bloodcastle.tga";
+    m_mapImgPath[14] = strFolderName + L"bloodcastle.tga";
+    m_mapImgPath[15] = strFolderName + L"bloodcastle.tga";
+    m_mapImgPath[16] = strFolderName + L"bloodcastle.tga";
+    m_mapImgPath[17] = strFolderName + L"bloodcastle.tga";
+    m_mapImgPath[18] = strFolderName + L"chaoscastle.tga";
+    m_mapImgPath[19] = strFolderName + L"chaoscastle.tga";
+    m_mapImgPath[20] = strFolderName + L"chaoscastle.tga";
+    m_mapImgPath[21] = strFolderName + L"chaoscastle.tga";
+    m_mapImgPath[22] = strFolderName + L"chaoscastle.tga";
+    m_mapImgPath[23] = strFolderName + L"chaoscastle.tga";
+    m_mapImgPath[24] = strFolderName + L"Kalima.tga";
+    m_mapImgPath[25] = strFolderName + L"Kalima.tga";
+    m_mapImgPath[26] = strFolderName + L"Kalima.tga";
+    m_mapImgPath[27] = strFolderName + L"Kalima.tga";
+    m_mapImgPath[28] = strFolderName + L"Kalima.tga";
+    m_mapImgPath[29] = strFolderName + L"Kalima.tga";
+    m_mapImgPath[30] = strFolderName + L"loren.tga";
+    m_mapImgPath[31] = strFolderName + L"ordeal.tga";
 
-    m_mapImgPath[6] = strFolderName + "stadium.tga";
-    m_mapImgPath[7] = strFolderName + "atlans.tga";
-    m_mapImgPath[8] = strFolderName + "tarcan.tga";
-    m_mapImgPath[9] = strFolderName + "devilsquare.tga";
-    m_mapImgPath[10] = strFolderName + "Icarus.tga";
-    m_mapImgPath[11] = strFolderName + "bloodcastle.tga";
-    m_mapImgPath[12] = strFolderName + "bloodcastle.tga";
-    m_mapImgPath[13] = strFolderName + "bloodcastle.tga";
-    m_mapImgPath[14] = strFolderName + "bloodcastle.tga";
-    m_mapImgPath[15] = strFolderName + "bloodcastle.tga";
-    m_mapImgPath[16] = strFolderName + "bloodcastle.tga";
-    m_mapImgPath[17] = strFolderName + "bloodcastle.tga";
-    m_mapImgPath[18] = strFolderName + "chaoscastle.tga";
-    m_mapImgPath[19] = strFolderName + "chaoscastle.tga";
-    m_mapImgPath[20] = strFolderName + "chaoscastle.tga";
-    m_mapImgPath[21] = strFolderName + "chaoscastle.tga";
-    m_mapImgPath[22] = strFolderName + "chaoscastle.tga";
-    m_mapImgPath[23] = strFolderName + "chaoscastle.tga";
-    m_mapImgPath[24] = strFolderName + "Kalima.tga";
-    m_mapImgPath[25] = strFolderName + "Kalima.tga";
-    m_mapImgPath[26] = strFolderName + "Kalima.tga";
-    m_mapImgPath[27] = strFolderName + "Kalima.tga";
-    m_mapImgPath[28] = strFolderName + "Kalima.tga";
-    m_mapImgPath[29] = strFolderName + "Kalima.tga";
-    m_mapImgPath[30] = strFolderName + "loren.tga";
-    m_mapImgPath[31] = strFolderName + "ordeal.tga";
+    m_mapImgPath[33] = strFolderName + L"aida.tga";
+    m_mapImgPath[34] = strFolderName + L"crywolffortress.tga";
 
-    m_mapImgPath[33] = strFolderName + "aida.tga";
-    m_mapImgPath[34] = strFolderName + "crywolffortress.tga";
+    m_mapImgPath[36] = strFolderName + L"lostkalima.tga";
+    m_mapImgPath[37] = strFolderName + L"kantru.tga";
+    m_mapImgPath[38] = strFolderName + L"kantru.tga";
+    m_mapImgPath[39] = strFolderName + L"kantru.tga";
 
-    m_mapImgPath[36] = strFolderName + "lostkalima.tga";
-    m_mapImgPath[37] = strFolderName + "kantru.tga";
-    m_mapImgPath[38] = strFolderName + "kantru.tga";
-    m_mapImgPath[39] = strFolderName + "kantru.tga";
+    m_mapImgPath[41] = strFolderName + L"BalgasBarrack.tga";
+    m_mapImgPath[42] = strFolderName + L"BalgasRefuge.tga";
 
-    m_mapImgPath[41] = strFolderName + "BalgasBarrack.tga";
-    m_mapImgPath[42] = strFolderName + "BalgasRefuge.tga";
+    m_mapImgPath[45] = strFolderName + L"IllusionTemple.tga";
+    m_mapImgPath[46] = strFolderName + L"IllusionTemple.tga";
+    m_mapImgPath[47] = strFolderName + L"IllusionTemple.tga";
+    m_mapImgPath[48] = strFolderName + L"IllusionTemple.tga";
+    m_mapImgPath[49] = strFolderName + L"IllusionTemple.tga";
+    m_mapImgPath[50] = strFolderName + L"IllusionTemple.tga";
 
-    m_mapImgPath[45] = strFolderName + "IllusionTemple.tga";
-    m_mapImgPath[46] = strFolderName + "IllusionTemple.tga";
-    m_mapImgPath[47] = strFolderName + "IllusionTemple.tga";
-    m_mapImgPath[48] = strFolderName + "IllusionTemple.tga";
-    m_mapImgPath[49] = strFolderName + "IllusionTemple.tga";
-    m_mapImgPath[50] = strFolderName + "IllusionTemple.tga";
+    m_mapImgPath[51] = strFolderName + L"Elbeland.tga";
+    m_mapImgPath[52] = strFolderName + L"bloodcastle.tga";
+    m_mapImgPath[53] = strFolderName + L"chaoscastle.tga";
 
-    m_mapImgPath[51] = strFolderName + "Elbeland.tga";
-    m_mapImgPath[52] = strFolderName + "bloodcastle.tga";
-    m_mapImgPath[53] = strFolderName + "chaoscastle.tga";
+    m_mapImgPath[56] = strFolderName + L"SwampOfCalmness.tga";
+    m_mapImgPath[57] = strFolderName + L"mapname_raklion.tga";
+    m_mapImgPath[58] = strFolderName + L"mapname_raklionboss.tga";
 
-    m_mapImgPath[56] = strFolderName + "SwampOfCalmness.tga";
-    m_mapImgPath[57] = strFolderName + "mapname_raklion.tga";
-    m_mapImgPath[58] = strFolderName + "mapname_raklionboss.tga";
-
-    m_mapImgPath[62] = strFolderName + "santatown.tga";
-
-    m_mapImgPath[63] = strFolderName + "pkfield.tga";
-
-    m_mapImgPath[64] = strFolderName + "duelarena.tga";
-
-    m_mapImgPath[65] = strFolderName + "doppelganger.tga";
-
-    m_mapImgPath[66] = strFolderName + "doppelganger.tga";
-
-    m_mapImgPath[67] = strFolderName + "doppelganger.tga";
-
-    m_mapImgPath[68] = strFolderName + "doppelganger.tga";
-
-    m_mapImgPath[69] = strFolderName + "EmpireGuardian.tga";
-
-    m_mapImgPath[70] = strFolderName + "EmpireGuardian.tga";
-
-    m_mapImgPath[71] = strFolderName + "EmpireGuardian.tga";
-
-    m_mapImgPath[72] = strFolderName + "EmpireGuardian.tga";
-
-    m_mapImgPath[79] = strFolderName + "MapName_MarketRolen.tga";
+    m_mapImgPath[62] = strFolderName + L"santatown.tga";
+    m_mapImgPath[63] = strFolderName + L"pkfield.tga";
+    m_mapImgPath[64] = strFolderName + L"duelarena.tga";
+    m_mapImgPath[65] = strFolderName + L"doppelganger.tga";
+    m_mapImgPath[66] = strFolderName + L"doppelganger.tga";
+    m_mapImgPath[67] = strFolderName + L"doppelganger.tga";
+    m_mapImgPath[68] = strFolderName + L"doppelganger.tga";
+    m_mapImgPath[69] = strFolderName + L"EmpireGuardian.tga";
+    m_mapImgPath[70] = strFolderName + L"EmpireGuardian.tga";
+    m_mapImgPath[71] = strFolderName + L"EmpireGuardian.tga";
+    m_mapImgPath[72] = strFolderName + L"EmpireGuardian.tga";
+    m_mapImgPath[79] = strFolderName + L"MapName_MarketRolen.tga";
 
 #ifdef ASG_ADD_MAP_KARUTAN
-    m_mapImgPath[80] = strFolderName + "MapName_Karutan.tga";
-    m_mapImgPath[81] = strFolderName + "MapName_Karutan.tga";
+    m_mapImgPath[80] = strFolderName + L"MapName_Karutan.tga";
+    m_mapImgPath[81] = strFolderName + L"MapName_Karutan.tga";
 #endif	// ASG_ADD_MAP_KARUTAN
 }
 
@@ -161,8 +149,8 @@ void CUIMapName::ShowMapName()
 
     if (m_nOldWorld != gMapManager.WorldActive)
     {
-        char szImgPath[128];
-        ::strcpy(szImgPath, m_mapImgPath[gMapManager.WorldActive].data());
+        wchar_t szImgPath[128];
+        ::wcscpy(szImgPath, m_mapImgPath[gMapManager.WorldActive].data());
 
         DeleteBitmap(BITMAP_INTERFACE_EX + 45);
         LoadBitmap(szImgPath, BITMAP_INTERFACE_EX + 45);

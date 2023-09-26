@@ -21,7 +21,7 @@ namespace info
 {
     struct Script_Item
     {
-        char Name[30];
+        wchar_t Name[30];
         bool TwoHand;
         WORD Level;
         BYTE m_byItemSlot;
@@ -53,31 +53,31 @@ namespace info
 
     struct Script_Silde
     {
-        typedef std::vector<char*>     SildeVECTOR;
+        typedef std::vector<wchar_t*>     SildeVECTOR;
         SildeVECTOR					   Sildelist;
     };
 
     struct Script_Dialog
     {
-        char m_lpszText[MAX_LENGTH_DIALOG];
+        wchar_t m_lpszText[MAX_LENGTH_DIALOG];
         int m_iNumAnswer;
         int m_iLinkForAnswer[MAX_ANSWER_FOR_DIALOG];
         int m_iReturnForAnswer[MAX_ANSWER_FOR_DIALOG];
-        char m_lpszAnswer[MAX_ANSWER_FOR_DIALOG][MAX_LENGTH_ANSWER];
+        wchar_t m_lpszAnswer[MAX_ANSWER_FOR_DIALOG][MAX_LENGTH_ANSWER];
     };
 
     struct Script_Credit
     {
         BYTE	byClass;
-        char	szName[32];
+        wchar_t	szName[32];
         //char	szName[CRW_NAME_MAX];
     };
 
     struct Script_Movereq
     {
         int index;
-        char szMainMapName[32];			//. Main map name
-        char szSubMapName[32];			//. Substitute map name
+        wchar_t szMainMapName[32];			//. Main map name
+        wchar_t szSubMapName[32];			//. Substitute map name
         int	iReqLevel;					//. required level
         int iReqZen;					//. required zen
         int iGateNum;					//. Gate number
@@ -113,7 +113,7 @@ namespace info
         short   shQuestConditionNum;
         short   shQuestRequestNum;
         WORD    wNpcType;
-        char    strQuestName[32];
+        wchar_t    strQuestName[32];
 
         Script_Quest_Class_Act     QuestAct[MAX_QUEST_CONDITION];
         Script_Quest_Class_Request QuestRequest[MAX_QUEST_REQUEST];
@@ -137,16 +137,16 @@ typedef struct
 
 typedef struct
 {
-    char m_lpszText[MAX_LENGTH_DIALOG];
+    wchar_t m_lpszText[MAX_LENGTH_DIALOG];
     int m_iNumAnswer;
     int m_iLinkForAnswer[MAX_ANSWER_FOR_DIALOG];
     int m_iReturnForAnswer[MAX_ANSWER_FOR_DIALOG];
-    char m_lpszAnswer[MAX_ANSWER_FOR_DIALOG][MAX_LENGTH_ANSWER];
+    wchar_t m_lpszAnswer[MAX_ANSWER_FOR_DIALOG][MAX_LENGTH_ANSWER];
 } DIALOG_SCRIPT;//Script_Dialog
 
 typedef struct
 {
-    char Name[30];
+    wchar_t Name[30];
     bool TwoHand;
     WORD Level;
     BYTE m_byItemSlot;
@@ -187,7 +187,7 @@ typedef struct _MINI_MAP
     BYTE Kind;
     int	 Location[2];
     int  Rotation;
-    char Name[100];
+    wchar_t Name[100];
 }MINI_MAP;
 
 #pragma pack(push, 1)
@@ -291,7 +291,7 @@ typedef struct
 
 typedef struct
 {
-    /*+00*/	char Name[32];
+    /*+00*/	wchar_t Name[32];
     /*+32*/	WORD Level;
     /*+34*/	WORD Damage;
     /*+36*/	WORD Mana;
@@ -318,7 +318,7 @@ typedef struct
 /*
 typedef struct
 {
-    char Name[32];
+    wchar_t Name[32];
     BYTE Level;
     WORD Damage;
     WORD Mana;
@@ -362,7 +362,7 @@ typedef struct
 
 typedef struct
 {
-    char Name[MAX_ID_SIZE + 1];
+    wchar_t Name[MAX_ID_SIZE + 1];
     BYTE Class;
     BYTE Skin;
     BYTE InventoryExtensions;
@@ -550,7 +550,7 @@ typedef struct
 //inventory start
 typedef struct
 {
-    char Name[MAX_ID_SIZE + 1];
+    wchar_t Name[MAX_ID_SIZE + 1];
     BYTE Number;
     BYTE Server;
     BYTE GuildStatus;
@@ -559,14 +559,14 @@ typedef struct
 typedef struct
 {
     int  Key;
-    char UnionName[8 + 1];
-    char GuildName[8 + 1];
+    wchar_t UnionName[8 + 1];
+    wchar_t GuildName[8 + 1];
     BYTE Mark[64];
 } MARK_t;
 
 typedef struct
 {
-    char    Name[MAX_ID_SIZE + 1];
+    wchar_t    Name[MAX_ID_SIZE + 1];
     BYTE    Number;
     BYTE    Map;
     BYTE    x;
@@ -581,8 +581,8 @@ typedef struct
 //interface start
 typedef struct
 {
-    char      ID[MAX_ID_SIZE + 1];
-    char      Text[256];
+    wchar_t      ID[MAX_ID_SIZE + 1];
+    wchar_t      Text[256];
     int       Type;
     int       LifeTime;
     int       Width;
@@ -599,7 +599,7 @@ typedef struct
 //matchevent start
 typedef struct
 {
-    char	m_lpID[MAX_ID_SIZE];
+    wchar_t	m_lpID[MAX_ID_SIZE];
     int		m_iScore;
     DWORD	m_dwExp;
     int		m_iZen;
@@ -609,7 +609,7 @@ typedef struct
 //gmhellas start
 typedef struct
 {
-    char    m_strName[64];
+    wchar_t    m_strName[64];
     vec3_t  m_vPos;
 }ObjectDescript;
 //gmhellas end
@@ -646,7 +646,7 @@ typedef struct
     short   shQuestRequestNum;
     WORD	wNpcType;
 
-    unicode::t_char strQuestName[32];
+    wchar_t strQuestName[32];
 
     QUEST_CLASS_ACT     QuestAct[MAX_QUEST_CONDITION];
     QUEST_CLASS_REQUEST QuestRequest[MAX_QUEST_REQUEST];
@@ -693,7 +693,7 @@ typedef	struct
 
 typedef struct
 {
-    char	strSetName[64];
+    wchar_t	strSetName[64];
     BYTE	byStandardOption[6][2];
     BYTE	byStandardOptionValue[6][2];
     BYTE	byExtOption[2];
@@ -708,7 +708,7 @@ typedef struct
 //cseventmatch start
 typedef struct
 {
-    char	m_lpID[MAX_ID_SIZE];
+    wchar_t	m_lpID[MAX_ID_SIZE];
     int		m_iScore;
     DWORD	m_dwExp;
     int		m_iZen;

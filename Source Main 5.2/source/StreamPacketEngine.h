@@ -40,7 +40,7 @@ public:
             AddData(&m_wSize, 2, FALSE);
             break;
         default:
-            assert("StreamPacketEngine type error(Start)");
+            assert(L"StreamPacketEngine type error(Start)");
             return;
         }
         AddData(&byHeadCode, sizeof(BYTE), FALSE);
@@ -59,7 +59,7 @@ public:
             memcpy(&m_byBuffer[2], &m_wSize, 1);
             break;
         default:
-            assert("StreamPacketEngine type error(End)");
+            assert(L"StreamPacketEngine type error(End)");
             return (NULL);
         }
 
@@ -70,7 +70,7 @@ public:
     {
         if (m_wSize + wSize > MAX_SPE_BUFFERSIZE)
         {
-            assert("StreamPacketEngine buffer overflow");
+            assert(L"StreamPacketEngine buffer overflow");
             return;
         }
         memcpy(&(m_byBuffer[m_wSize]), pSrc, wSize);

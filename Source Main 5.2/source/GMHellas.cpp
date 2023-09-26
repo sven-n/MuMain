@@ -22,7 +22,7 @@
 #include "SkillManager.h"
 
 extern  int  WaterTextureNumber;
-extern	char TextList[50][100];
+extern	wchar_t TextList[50][100];
 extern  int  TextListColor[50];
 extern	int  TextBold[50];
 
@@ -181,7 +181,7 @@ bool GetUseLostMap(bool bDrawAlert)
 
     if (bDrawAlert && Hero->SafeZone)
     {
-        g_pChatListBox->AddText("", GlobalText[1238], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1238], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -192,9 +192,9 @@ bool GetUseLostMap(bool bDrawAlert)
 
     if (bDrawAlert)
     {
-        char Text[100];
-        sprintf(Text, GlobalText[1123], g_iKalimaLevel[startIndex][0]);
-        g_pChatListBox->AddText("", Text, SEASON3B::TYPE_ERROR_MESSAGE);
+        wchar_t Text[100];
+        wsprintf(Text, GlobalText[1123], g_iKalimaLevel[startIndex][0]);
+        g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_ERROR_MESSAGE);
     }
 
     return false;
@@ -218,10 +218,10 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
         int ItemLevel = (ip->Level >> 3) & 15;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], "%s %s       %s    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        wsprintf(TextList[TextNum], L"%s %s       %s    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         for (int i = 0; i < NUM_HELLAS; i++)
         {
-            sprintf(TextList[TextNum], "        %d             %3d~%3d     ", i + 1, g_iKalimaLevel[startIndex + i][0], min(400, g_iKalimaLevel[startIndex + i][1]));
+            wsprintf(TextList[TextNum], L"        %d             %3d~%3d     ", i + 1, g_iKalimaLevel[startIndex + i][0], min(400, g_iKalimaLevel[startIndex + i][1]));
 
             if (ItemLevel == i + 1)
             {
@@ -234,27 +234,27 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
             TextBold[TextNum] = false; TextNum++;
         }
 
-        sprintf(TextList[TextNum], "\n"); TextNum++;
-        sprintf(TextList[TextNum], GlobalText[1184]);  TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
+        wsprintf(TextList[TextNum], L"\n"); TextNum++;
+        wsprintf(TextList[TextNum], GlobalText[1184]);  TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
 
         if (HeroLevel < g_iKalimaLevel[startIndex][0])
         {
-            sprintf(TextList[TextNum], "\n"); TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1123], g_iKalimaLevel[startIndex][0]);  TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextNum++;
+            wsprintf(TextList[TextNum], L"\n"); TextNum++;
+            wsprintf(TextList[TextNum], GlobalText[1123], g_iKalimaLevel[startIndex][0]);  TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextNum++;
         }
     }
     break;
 
     case ITEM_POTION + 29:
     {
-        sprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5); TextNum++;
+        wsprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5); TextNum++;
         if (ip->Durability >= 5)
         {
-            sprintf(TextList[TextNum], GlobalText[1182]); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
+            wsprintf(TextList[TextNum], GlobalText[1182]); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
         }
         else
         {
-            sprintf(TextList[TextNum], GlobalText[1183], (5 - ip->Durability)); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
+            wsprintf(TextList[TextNum], GlobalText[1183], (5 - ip->Durability)); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
         }
     }
     break;
@@ -263,7 +263,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
     return TextNum;
 }
 
-void AddObjectDescription(char* Text, vec3_t position)
+void AddObjectDescription(wchar_t* Text, vec3_t position)
 {
     ObjectDescript QD;
 
@@ -794,7 +794,7 @@ CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
         c->Object.Scale = 1.2f;
         o = &c->Object;
         o->BlendMesh = 1;
-        strcpy(c->ID, "장수거북");
+        wcscpy(c->ID, L"장수거북");
         break;
     case 145:
     case 175:
@@ -811,7 +811,7 @@ CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
         o = &c->Object;
         o->SubType = 9;
         o->BlendMesh = 0;
-        strcpy(c->ID, "대형 블루나이트");
+        wcscpy(c->ID, L"대형 블루나이트");
         break;
     case 146:
     case 176:
@@ -826,7 +826,7 @@ CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
         c->Weapon[0].Level = 0;
         c->Object.Scale = 0.8f;
         o = &c->Object;
-        strcpy(c->ID, "랍스터");
+        wcscpy(c->ID, L"랍스터");
         break;
     case 147:
     case 177:
@@ -842,7 +842,7 @@ CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
         c->Object.Scale = 1.4f;
         o = &c->Object;
         o->BlendMesh = 1;
-        strcpy(c->ID, "가오리");
+        wcscpy(c->ID, L"가오리");
         break;
     case 148:
     case 178:
@@ -858,7 +858,7 @@ CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
         c->Object.Scale = 1.f;
         o = &c->Object;
         o->BlendMesh = 0;
-        strcpy(c->ID, "블루나이트");
+        wcscpy(c->ID, L"블루나이트");
         break;
     case 149:
     case 179:
@@ -874,7 +874,7 @@ CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
         c->Object.Scale = 1.2f;
         o = &c->Object;
         o->BlendMesh = 3;
-        strcpy(c->ID, "마린보이");
+        wcscpy(c->ID, L"마린보이");
         break;
     case 160:
     case 180:
@@ -891,7 +891,7 @@ CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
         c->Weapon[1].Level = 0;
         c->Object.Scale = 1.2f;
         o = &c->Object;
-        strcpy(c->ID, "쿤둔후보");
+        wcscpy(c->ID, L"쿤둔후보");
         break;
     case 161:
     case 181:
@@ -908,7 +908,7 @@ CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
         o = &c->Object;
         o->SubType = 9;
         o->Scale = 1.5f;
-        strcpy(c->ID, "쿤둔후보");
+        wcscpy(c->ID, L"쿤둔후보");
         break;
 
     case 275:
@@ -919,7 +919,7 @@ CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
         c->Object.Scale = 2.0f;
         //		c->Object.Scale = 1.9f;
         o = &c->Object;
-        strcpy(c->ID, "진짜쿤둔");
+        wcscpy(c->ID, L"진짜쿤둔");
         o->LifeTime = 100;
         break;
     }

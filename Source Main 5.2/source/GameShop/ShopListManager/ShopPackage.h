@@ -32,7 +32,7 @@ public:
     CShopPackage();
     virtual ~CShopPackage();
 
-    bool	SetPackage(std::string strdata);
+    bool	SetPackage(std::wstring strdata);
     void	SetLeftCount(int nCount);
 
     int		GetProductCount();									// 패키지 내부의 상품 수 가져오기
@@ -49,23 +49,23 @@ public:
     int		ProductDisplaySeq;									//  1. 패키지가 속해있는 카테고리 번호
     int		ViewOrder;											//  2. 노출 순서
     int		PackageProductSeq;									//  3. 패키지 번호
-    char	PackageProductName[SHOPLIST_LENGTH_PACKAGENAME];	//  4. 패키지 명
+    wchar_t	PackageProductName[SHOPLIST_LENGTH_PACKAGENAME];	//  4. 패키지 명
     int		PackageProductType;									//  5. 패키지 유형 (170:일반 상품, 171:이벤트 상품)
     int		Price;												//  6. 가격
-    char	Description[SHOPLIST_LENGTH_PACKAGEDESC];			//  7. 상세 설명
-    char	Caution[SHOPLIST_LENGTH_PACKAGECAUTION];			//  8. 주의 사항
+    wchar_t	Description[SHOPLIST_LENGTH_PACKAGEDESC];			//  7. 상세 설명
+    wchar_t	Caution[SHOPLIST_LENGTH_PACKAGECAUTION];			//  8. 주의 사항
     int		SalesFlag;											//  9. 구매 가능 여부(구매버튼 노출여부) (182:가능, 183:불가)
     int		GiftFlag;											// 10. 선물 가능 여부(선물버튼 노출여부) (184:가능, 185:불가)
     tm		StartDate;											// 11. 판매 시작일
     tm		EndDate;											// 12. 판매 종료일
     int		CapsuleFlag;										// 13. 캡슐 상품 구분 (176:캡슐, 177:일반)
     int		CapsuleCount;										// 14. 패키지에 포함된 상품 개수
-    char	ProductCashName[SHOPLIST_LENGTH_PACKAGECASHNAME];	// 15. 소진 캐시 명
-    char	PricUnitName[SHOPLIST_LENGTH_PACKAGEPRICEUNIT];		// 16. 가격 단위 표시 명
+    wchar_t	ProductCashName[SHOPLIST_LENGTH_PACKAGECASHNAME];	// 15. 소진 캐시 명
+    wchar_t	PricUnitName[SHOPLIST_LENGTH_PACKAGEPRICEUNIT];		// 16. 가격 단위 표시 명
     int		DeleteFlag;											// 17. 삭제 여부 (180:삭제, 181:활성)
     int		EventFlag;											// 18. 이벤트 상품 여부 (199:이벤트 상품, 200:일반 상품)
     int		ProductAmount;										// 19. 한정 상품 여부
-    char	InGamePackageID[SHOPLIST_LENGTH_INGAMEPACKAGEID];	// 21. 패키지 아이템 코드
+    wchar_t	InGamePackageID[SHOPLIST_LENGTH_INGAMEPACKAGEID];	// 21. 패키지 아이템 코드
     int		ProductCashSeq;										// 22. 소진 캐시 유형 코드
     int		PriceCount;											// 23. 단위 상품 가격 정책 보유 개수 (단위 상품이 1개인 경우에만 PriceSeq가 여러 개일 수 있다.)
     bool	DeductMileageFlag;									// 25. 마일리지로 차감 상품 여부 (false : 일반, true : 마일리지 차감 상품)
@@ -75,8 +75,8 @@ public:
     int		LeftCount;											// 잔여 개수
 
 private:
-    void	SetProductSeqList(std::string strdata);
-    void	SetPriceSeqList(std::string strdata);
+    void	SetProductSeqList(std::wstring strdata);
+    void	SetPriceSeqList(std::wstring strdata);
 
     std::vector<int> ProductSeqList;							// 20. 패키지에 포함된 상품 번호 목록
     std::vector<int>::iterator ProductSeqIter;

@@ -70,7 +70,7 @@ namespace SEASON3B
 
         void OpenningProcess();
         void ClosingProcess();
-        void OpenMasterLevel(const char* filename);
+        void OpenMasterLevel(const wchar_t* filename);
         CNewUIButton m_BtnToolTip;	// ≈¯∆¡¡§∫∏....
 
     private:

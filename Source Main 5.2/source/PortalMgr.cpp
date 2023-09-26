@@ -87,7 +87,7 @@ BOOL CPortalMgr::IsRevivePositionSaved()
     return (m_iReviveWorld != -1);
 }
 
-void CPortalMgr::GetPortalPositionText(char* pszOut)
+void CPortalMgr::GetPortalPositionText(wchar_t* pszOut)
 {
     if (pszOut == NULL) return;
 
@@ -97,11 +97,11 @@ void CPortalMgr::GetPortalPositionText(char* pszOut)
     }
     else
     {
-        sprintf(pszOut, "%s (%d, %d)", gMapManager.GetMapName(m_iPortalWorld), m_iPortalPosition_x, m_iPortalPosition_y);
+        wsprintf(pszOut, L"%s (%d, %d)", gMapManager.GetMapName(m_iPortalWorld), m_iPortalPosition_x, m_iPortalPosition_y);
     }
 }
 
-void CPortalMgr::GetRevivePositionText(char* pszOut)
+void CPortalMgr::GetRevivePositionText(wchar_t* pszOut)
 {
     if (pszOut == NULL) return;
 
@@ -111,6 +111,6 @@ void CPortalMgr::GetRevivePositionText(char* pszOut)
     }
     else
     {
-        sprintf(pszOut, "%s (%d, %d)", gMapManager.GetMapName(m_iReviveWorld), m_iRevivePosition_x, m_iRevivePosition_y);
+        wsprintf(pszOut, L"%s (%d, %d)", gMapManager.GetMapName(m_iReviveWorld), m_iRevivePosition_x, m_iRevivePosition_y);
     }
 }

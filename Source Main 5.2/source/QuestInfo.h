@@ -17,11 +17,11 @@ namespace info
     class QuestInfo : public InfoFile
     {
     private:
-        bool OpenFile(const std::string& filename);
-        QuestInfo(const std::string& filename);
+        bool OpenFile(const std::wstring& filename);
+        QuestInfo(const std::wstring& filename);
 
     public:
-        static QuestInfoPtr MakeInfo(const std::string& filename);
+        static QuestInfoPtr MakeInfo(const std::wstring& filename);
         virtual ~QuestInfo();
 
     protected:

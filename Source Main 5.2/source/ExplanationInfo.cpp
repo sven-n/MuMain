@@ -12,13 +12,13 @@
 
 using namespace info;
 
-ExplanationInfoPtr ExplanationInfo::MakeInfo(const std::string& filename)
+ExplanationInfoPtr ExplanationInfo::MakeInfo(const std::wstring& filename)
 {
     ExplanationInfoPtr info(new ExplanationInfo(filename));
     return info;
 }
 
-ExplanationInfo::ExplanationInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
+ExplanationInfo::ExplanationInfo(const std::wstring& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
     m_IsOpenFile = OpenFile(filename);
 
@@ -33,7 +33,7 @@ ExplanationInfo::~ExplanationInfo()
     clear();
 }
 
-bool ExplanationInfo::OpenFile(const std::string& filename)
+bool ExplanationInfo::OpenFile(const std::wstring& filename)
 {
     return true;
 }

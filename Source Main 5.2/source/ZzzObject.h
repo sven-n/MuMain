@@ -31,10 +31,10 @@ void MoveObjects();
 void DeleteObjectTile(int x, int y);
 void DeleteObject(OBJECT* o, OBJECT_BLOCK* ob);
 OBJECT* CreateObject(int Type, vec3_t Position, vec3_t Angle, float Scale = 1.f);
-bool SaveObjects(char* FileName, int iMapNumber);
-int OpenObjects(char* FileName);
-int OpenObjectsEnc(char* FileName);
-void SaveTrapObjects(char* FileName);
+bool SaveObjects(wchar_t* FileName, int iMapNumber);
+int OpenObjects(wchar_t* FileName);
+int OpenObjectsEnc(wchar_t* FileName);
+void SaveTrapObjects(wchar_t* FileName);
 
 ///////////////////////////////////////////////////////////////////////////////
 // npc

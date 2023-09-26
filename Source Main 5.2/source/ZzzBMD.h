@@ -165,7 +165,7 @@ typedef struct _Mesh_t
 class BMD
 {
 public:
-    char          Name[32];
+    wchar_t          Name[32];
     char          Version;
     short         NumBones;
     short         NumMeshs;
@@ -225,10 +225,10 @@ public:
     ~BMD();
     //utility
     void Init(bool Dummy);
-    bool Open(char* DirName, char* FileName);
-    bool Save(char* DirName, char* FileName);
-    bool Open2(char* DirName, char* FileName, bool bReAlloc = true);
-    bool Save2(char* DirName, char* FileName);
+    bool Open(wchar_t* DirName, wchar_t* FileName);
+    bool Save(wchar_t* DirName, wchar_t* FileName);
+    bool Open2(wchar_t* DirName, wchar_t* FileName, bool bReAlloc = true);
+    bool Save2(wchar_t* DirName, wchar_t* FileName);
     void Release();
     void CreateBoundingBox();
 

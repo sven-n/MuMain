@@ -18,7 +18,7 @@ public:
     CShopCategory();
     virtual ~CShopCategory();
 
-    bool SetCategory(std::string strdata);
+    bool SetCategory(std::wstring strdata);
 
     void SetCategoryFirst();							// 하위 카테고리 목록의 첫 번째 항록을 가리키도록 설정한다.
     bool GetCategoryNext(int& CategorySeq);				// 하위 카테고리 번호를 리턴하고 다음 하위 카테고리 번호를 가리킨다.
@@ -31,7 +31,7 @@ public:
 
 public:
     int ProductDisplaySeq;								// 1. 카테고리 번호
-    char CategroyName[SHOPLIST_LENGTH_CATEGORYNAME];	// 2. 카테고리 이름
+    wchar_t CategroyName[SHOPLIST_LENGTH_CATEGORYNAME];	// 2. 카테고리 이름
     int EventFlag;										// 3. 이벤트 카테고리 여부 (199:이벤트, 200:일반)
     int OpenFlag;										// 4. 공개 여부 (201:공개, 202: 비공개)
     int ParentProductDisplaySeq;						// 5. 부모 카테고리 번호

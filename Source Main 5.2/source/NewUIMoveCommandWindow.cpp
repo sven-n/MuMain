@@ -21,17 +21,17 @@ namespace
 {
     const int MapNameCount = 6;
 
-    const std::string MapName[MapNameCount] =
+    const std::wstring MapName[MapNameCount] =
     {
-        "Lorencia",
-        "Noria",
-        "Elbeland",
-        "Dungeon",
-        "Devias",
-        "LostTower",
+        L"Lorencia",
+        L"Noria",
+        L"Elbeland",
+        L"Dungeon",
+        L"Devias",
+        L"LostTower",
     };
 
-    const bool IsLuckySeal(const std::string& name)
+    const bool IsLuckySeal(const std::wstring& name)
     {
         if (name.size() != 0) {
             for (int i = 0; i < MapNameCount; ++i) {
@@ -227,7 +227,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsLuckySealBuff()
     return false;
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::string& src)
+bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
 {
     if (Hero->Object.Kind == KIND_PLAYER
         && Hero->Object.Type == MODEL_PLAYER
@@ -242,18 +242,18 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::string& src)
     }
 
     if (IsLuckySealBuff() == false) {
-        char lpszStr1[1024]; char* lpszStr2 = NULL;
-        if (src.find(GlobalText[260]) != std::string::npos) {
-            std::string temp = GlobalText[260];
+        wchar_t lpszStr1[1024]; wchar_t* lpszStr2 = NULL;
+        if (src.find(GlobalText[260]) != std::wstring::npos) {
+            std::wstring temp = GlobalText[260];
             temp += ' ';
             wsprintf(lpszStr1, src.c_str());
-            lpszStr2 = strtok(lpszStr1, temp.c_str());
+            lpszStr2 = _wcstok(lpszStr1, temp.c_str());
             if (lpszStr2 == NULL) return false;
 
             SettingCanMoveMap();
             auto li = m_listMoveInfoData.begin();
             for (int i = 0; i < m_iRenderEndTextIndex; i++, li++) {
-                if (!strcmp(lpszStr2, (*li)->_ReqInfo.szMainMapName)) {
+                if (!wcscmp(lpszStr2, (*li)->_ReqInfo.szMainMapName)) {
                     if ((*li)->_bCanMove == true) {
                         return IsLuckySeal((*li)->_ReqInfo.szSubMapName);
                     }
@@ -261,17 +261,17 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::string& src)
             }
             return false;
         }
-        else if (src.find("/move") != std::string::npos) {
-            std::string temp = "/move";
+        else if (src.find(L"/move") != std::wstring::npos) {
+            std::wstring temp = L"/move";
             temp += ' ';
             wsprintf(lpszStr1, src.c_str());
-            lpszStr2 = strtok(lpszStr1, temp.c_str());
+            lpszStr2 = _wcstok(lpszStr1, temp.c_str());
             if (lpszStr2 == NULL) return false;
 
             SettingCanMoveMap();
             auto li = m_listMoveInfoData.begin();
             for (int i = 0; i < m_iRenderEndTextIndex; i++, li++) {
-                if (!stricmp(lpszStr2, (*li)->_ReqInfo.szMainMapName)) {
+                if (!wcsicmp(lpszStr2, (*li)->_ReqInfo.szMainMapName)) {
                     if ((*li)->_bCanMove == true) {
                         return IsLuckySeal((*li)->_ReqInfo.szSubMapName);
                     }
@@ -369,7 +369,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
             ITEM* pEquipedHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
             ITEM* pEquipedWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
 
-            if (strcmp((*li)->_ReqInfo.szMainMapName, GlobalText[55]) == 0)
+            if (wcscmp((*li)->_ReqInfo.szMainMapName, GlobalText[55]) == 0)
             {
                 if (
                     (
@@ -393,7 +393,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
                     (*li)->_bCanMove = false;
                 }
             }
-            else if (strncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], 8) == 0)
+            else if (wcsncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], 8) == 0)
             {
                 if (pEquipedHelper->Type == ITEM_HELPER + 2 || pEquipedHelper->Type == ITEM_HELPER + 3)
                 {
@@ -404,7 +404,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
                     (*li)->_bCanMove = true;
                 }
             }
-            else if ((g_ServerListManager->IsNonPvP() == true) && (strcmp((*li)->_ReqInfo.szMainMapName, GlobalText[2686]) == 0))
+            else if ((g_ServerListManager->IsNonPvP() == true) && (wcscmp((*li)->_ReqInfo.szMainMapName, GlobalText[2686]) == 0))
             {
                 (*li)->_bCanMove = false;
             }
@@ -601,17 +601,17 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
             //m_iAcumMoveMouseScrollPixel = 0;
             RecursiveCalcScroll(m_iAcumMoveMouseScrollPixel, &iMovePixel, false);
 
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
 
             m_ScrollBtnPos.y += iMovePixel;
             m_iAcumMoveMouseScrollPixel -= iMovePixel;
 
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
-            g_ConsoleDebug->Write(MCD_NORMAL, "iMoveValue : (%d)", -iMoveValue);
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"iMoveValue : (%d)", -iMoveValue);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
         }
     }
 }
@@ -630,17 +630,17 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollDown(int iMoveValue)
         {
             RecursiveCalcScroll(m_iAcumMoveMouseScrollPixel, &iMovePixel, true);
 
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
 
             m_iAcumMoveMouseScrollPixel -= iMovePixel;
             m_ScrollBtnPos.y += iMovePixel;
 
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
-            g_ConsoleDebug->Write(MCD_NORMAL, "iMoveValue : (%d)", iMoveValue);
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, "m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"iMoveValue : (%d)", iMoveValue);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
         }
     }
 }
@@ -797,7 +797,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
     int iLevel = CharacterAttribute->Level;
     DWORD iZen = CharacterMachine->Gold;
     int iReqLevel;
-    char szText[24];
+    wchar_t szText[24];
 
     int iCurRenderTextIndex = 0;
     for (int i = 0; i < m_iRenderEndTextIndex; i++, li++)
@@ -830,9 +830,9 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
             if ((*li)->_bStrife)
                 g_pRenderText->RenderText(m_StrifePos.x, iY, GlobalText[2987], 0, 0, RT3_WRITE_CENTER);
             g_pRenderText->RenderText(m_MapNamePos.x, iY, (*li)->_ReqInfo.szMainMapName, 0, 0, RT3_WRITE_CENTER);
-            itoa(iReqLevel, szText, 10);
+            _itow(iReqLevel, szText, 10);
             g_pRenderText->RenderText(m_ReqLevelPos.x, iY, szText, 0, 0, RT3_WRITE_CENTER);
-            itoa((*li)->_ReqInfo.iReqZen, szText, 10);
+            _itow((*li)->_ReqInfo.iReqZen, szText, 10);
             g_pRenderText->RenderText(m_ReqZenPos.x, iY, szText, 0, 0, RT3_WRITE_CENTER);
 
             if ((*li)->_bSelected == true)
@@ -852,7 +852,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 
             g_pRenderText->RenderText(m_MapNamePos.x, iY, (*li)->_ReqInfo.szMainMapName, 0, 0, RT3_WRITE_CENTER);
 
-            itoa(iReqLevel, szText, 10);
+            _itow(iReqLevel, szText, 10);
             if (iReqLevel > iLevel)
             {
                 g_pRenderText->SetTextColor(255, 51, 26, 255);
@@ -863,7 +863,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
             }
             g_pRenderText->RenderText(m_ReqLevelPos.x, iY, szText, 0, 0, RT3_WRITE_CENTER);
 
-            itoa((*li)->_ReqInfo.iReqZen, szText, 10);
+            _itow((*li)->_ReqInfo.iReqZen, szText, 10);
             if ((*li)->_ReqInfo.iReqZen > (int)iZen)
             {
                 g_pRenderText->SetTextColor(255, 51, 26, 255);
@@ -913,11 +913,11 @@ float SEASON3B::CNewUIMoveCommandWindow::GetLayerDepth()
 
 void SEASON3B::CNewUIMoveCommandWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_scrollbar_up.tga", IMAGE_MOVECOMMAND_SCROLL_TOP);
-    LoadBitmap("Interface\\newui_scrollbar_m.tga", IMAGE_MOVECOMMAND_SCROLL_MIDDLE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_scrollbar_down.tga", IMAGE_MOVECOMMAND_SCROLL_BOTTOM);
-    LoadBitmap("Interface\\newui_scroll_on.tga", IMAGE_MOVECOMMAND_SCROLLBAR_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_scroll_off.tga", IMAGE_MOVECOMMAND_SCROLLBAR_OFF, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_MOVECOMMAND_SCROLL_TOP);
+    LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_MOVECOMMAND_SCROLL_MIDDLE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scrollbar_down.tga", IMAGE_MOVECOMMAND_SCROLL_BOTTOM);
+    LoadBitmap(L"Interface\\newui_scroll_on.tga", IMAGE_MOVECOMMAND_SCROLLBAR_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scroll_off.tga", IMAGE_MOVECOMMAND_SCROLLBAR_OFF, GL_LINEAR);
 }
 
 void CNewUIMoveCommandWindow::UnloadImages()
@@ -956,7 +956,7 @@ BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex,
     return bInOtherServer;
 }
 
-int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const char* pszMapName)
+int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const wchar_t* pszMapName)
 {
     if (pszMapName == NULL)
         return -1;
@@ -965,7 +965,7 @@ int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const char* pszMapName)
     std::list<CMoveCommandData::MOVEINFODATA*>::iterator li;
     for (li = m_listMoveInfoData.begin(); li != m_listMoveInfoData.end(); li++)
     {
-        if (stricmp((*li)->_ReqInfo.szMainMapName, pszMapName) == 0 || stricmp((*li)->_ReqInfo.szSubMapName, pszMapName) == 0)
+        if (wcsicmp((*li)->_ReqInfo.szMainMapName, pszMapName) == 0 || wcsicmp((*li)->_ReqInfo.szSubMapName, pszMapName) == 0)
         {
             iMapIndex = (*li)->_ReqInfo.index;
             break;

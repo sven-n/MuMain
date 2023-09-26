@@ -14,9 +14,9 @@ extern inline int TERRAIN_INDEX(int x, int y);
 extern inline int TERRAIN_INDEX_REPEAT(int x, int y);
 extern inline BYTE TERRAIN_ATTRIBUTE(float x, float y);
 
-bool OpenTerrainHeight(char* name);
-void SaveTerrainHeight(char* name);
-bool OpenTerrainHeightNew(const char* strFilename);
+bool OpenTerrainHeight(wchar_t* name);
+void SaveTerrainHeight(wchar_t* name);
+bool OpenTerrainHeightNew(const wchar_t* strFilename);
 
 void PrefixTerrainHeight();
 
@@ -25,14 +25,14 @@ void CreateTerrainLight();
 void CreateTerrainNormal_Part(int xi, int yi);
 void CreateTerrainLight_Part(int xi, int yi);
 
-void CreateTerrain(char* FileName, bool bNew = false);
+void CreateTerrain(wchar_t* FileName, bool bNew = false);
 
 bool IsTerrainHeightExtMap(int iWorld);
 
-int OpenTerrainMapping(char* FileName);
-bool SaveTerrainMapping(char* FileName, int iMapNumber);
-int OpenTerrainAttribute(char* FileName);
-bool SaveTerrainAttribute(char* FileName, int iMapNumber);
+int OpenTerrainMapping(wchar_t* FileName);
+bool SaveTerrainMapping(wchar_t* FileName, int iMapNumber);
+int OpenTerrainAttribute(wchar_t* FileName);
+bool SaveTerrainAttribute(wchar_t* FileName, int iMapNumber);
 
 //  속성 변경.
 void AddTerrainAttribute(int x, int y, BYTE att);
@@ -53,8 +53,8 @@ void SetTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer
 void AddTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
 void AddTerrainLightClip(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer);
 void RequestTerrainLight(float xf, float yf, vec3_t Light);
-void OpenTerrainLight(char* FileName);
-void SaveTerrainLight(char* FileName);
+void OpenTerrainLight(wchar_t* FileName);
+void SaveTerrainLight(wchar_t* FileName);
 
 void CreateFrustrum(float Aspect, vec3_t position);
 void CreateLodBuffer();

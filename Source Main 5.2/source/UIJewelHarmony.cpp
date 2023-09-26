@@ -7,22 +7,22 @@
 #include "UIJewelHarmony.h"
 #include "wsclientinline.h"
 
-#define HARMONYJEWELOPTION_DATA_FILE std::string("Data\\Local\\"+g_strSelectedML+"\\JewelOfHarmonyOption_"+g_strSelectedML+".bmd").c_str()
-#define NOTSMELTING_DATA_FILE std::string("Data\\Local\\"+g_strSelectedML+"\\JewelOfHarmonySmelt_"+g_strSelectedML+".bmd").c_str()
+#define HARMONYJEWELOPTION_DATA_FILE std::wstring(L"Data\\Local\\"+g_strSelectedML+L"\\JewelOfHarmonyOption_"+g_strSelectedML+L".bmd").c_str()
+#define NOTSMELTING_DATA_FILE std::wstring(L"Data\\Local\\"+g_strSelectedML+"L\\JewelOfHarmonySmelt_"+g_strSelectedML+L".bmd").c_str()
 
 extern float		g_fScreenRate_x;
 extern float		g_fScreenRate_y;
 
 namespace
 {
-    int GetTextLines(const char* inText, char* outText, int maxLine, int lineSize)
+    int GetTextLines(const wchar_t* inText, wchar_t* outText, int maxLine, int lineSize)
     {
         int iLine = 0;
-        const char* lpLineStart = inText;
-        char* lpDst = outText;
-        const char* lpSpace = NULL;
+        const wchar_t* lpLineStart = inText;
+        wchar_t* lpDst = outText;
+        const wchar_t* lpSpace = NULL;
         int iMbclen = 0;
-        for (const char* lpSeek = inText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
+        for (const wchar_t* lpSeek = inText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
         {
             iMbclen = _mbclen((unsigned char*)lpSeek);
             if (iMbclen + (int)(lpSeek - lpLineStart) >= lineSize)
@@ -72,8 +72,8 @@ JewelHarmonyInfo::JewelHarmonyInfo()
 
     if (!Result)
     {
-        char szMessage[256];
-        ::sprintf(szMessage, "%s file not found.\r\n", "JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd");
+        wchar_t szMessage[256];
+        ::wsprintf(szMessage, L"%s file not found.\r\n", L"JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd");
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -84,9 +84,9 @@ JewelHarmonyInfo::~JewelHarmonyInfo()
 {
 }
 
-const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::string& filename)
+const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filename)
 {
-    FILE* fp = ::fopen(filename.c_str(), "rb");
+    FILE* fp = ::_wfopen(filename.c_str(), L"rb");
     if (fp != NULL)
     {
         int nSize = sizeof(HARMONYJEWELOPTION) * MAXHARMONYJEWELOPTIONTYPE * MAXHARMONYJEWELOPTIONINDEX;

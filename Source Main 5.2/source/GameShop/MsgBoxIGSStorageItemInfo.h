@@ -67,8 +67,8 @@ public:
 
     void Render3D();
 
-    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, unicode::t_char szItemType,
-        unicode::t_char* pszName, unicode::t_char* pszNum, unicode::t_char* pszPeriod);
+    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, char szItemType,
+        wchar_t* pszName, wchar_t* pszNum, wchar_t* pszPeriod);
 
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -94,10 +94,10 @@ private:
     int		m_iStorageItemSeq;		// 보관함 상품 순번
     WORD	m_wItemCode;			// 아이템 코드
 
-    unicode::t_char	m_szName[MAX_TEXT_LENGTH];		// 아이템 이름
-    unicode::t_char	m_szNum[MAX_TEXT_LENGTH];
-    unicode::t_char	m_szPeriod[MAX_TEXT_LENGTH];
-    unicode::t_char m_szItemType;	// 상품구분 (C : 캐시, P : 상품)
+    wchar_t m_szName[MAX_TEXT_LENGTH];		// 아이템 이름
+    wchar_t m_szNum[MAX_TEXT_LENGTH];
+    wchar_t m_szPeriod[MAX_TEXT_LENGTH];
+    char    m_szItemType;	// 상품구분 (C : 캐시, P : 상품)
 };
 
 ////////////////////////////////////////////////////////////////////

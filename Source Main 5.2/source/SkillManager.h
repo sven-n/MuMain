@@ -207,7 +207,7 @@ enum ActionSkillType
 typedef struct DemendConditionInfo
 {
     WORD SkillType;
-    char SkillName[100];
+    wchar_t SkillName[100];
     WORD SkillLevel;
     WORD SkillStrength;
     WORD SkillDexterity;
@@ -233,7 +233,7 @@ public:
     CSkillManager();
     virtual ~CSkillManager();
     bool FindHeroSkill(ActionSkillType eSkillType);
-    void GetSkillInformation(int iType, int iLevel, char* lpszName, int* piMana, int* piDistance, int* piSkillMana = NULL);
+    void GetSkillInformation(int iType, int iLevel, wchar_t* lpszName, int* piMana, int* piDistance, int* piSkillMana = NULL);
     void GetSkillInformation_Energy(int iType, int* piEnergy);
     void GetSkillInformation_Charisma(int iType, int* piCharisma);
     float GetSkillDistance(int Index, CHARACTER* c = NULL);

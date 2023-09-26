@@ -90,10 +90,10 @@ void SEASON3B::CNewUIDuelWindow::RenderFrame()
 
 void SEASON3B::CNewUIDuelWindow::RenderContents()
 {
-    unicode::t_char strMyScore[12];
-    unicode::t_char strDuelScore[12];
-    unicode::_sprintf(strMyScore, "%d", g_DuelMgr.GetScore(DUEL_HERO));
-    unicode::_sprintf(strDuelScore, "%d", g_DuelMgr.GetScore(DUEL_ENEMY));
+    wchar_t strMyScore[12];
+    wchar_t strDuelScore[12];
+    wsprintf(strMyScore, L"%d", g_DuelMgr.GetScore(DUEL_HERO));
+    wsprintf(strDuelScore, L"%d", g_DuelMgr.GetScore(DUEL_ENEMY));
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0, 0, 0, 255);
@@ -113,7 +113,7 @@ float SEASON3B::CNewUIDuelWindow::GetLayerDepth()
 
 void SEASON3B::CNewUIDuelWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_Figure_ground.tga", IMAGE_DUEL_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Figure_ground.tga", IMAGE_DUEL_BACK, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIDuelWindow::UnloadImages()

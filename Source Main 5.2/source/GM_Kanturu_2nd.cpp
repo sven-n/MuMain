@@ -63,9 +63,9 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "PRSona_A1", 73);
-        BoneManager::RegisterBone(pCharacter, "PRSona_Tail", 76);
-        BoneManager::RegisterBone(pCharacter, "PRSona_Tail1", 77);
+        BoneManager::RegisterBone(pCharacter, L"PRSona_A1", 73);
+        BoneManager::RegisterBone(pCharacter, L"PRSona_Tail", 76);
+        BoneManager::RegisterBone(pCharacter, L"PRSona_Tail1", 77);
     }
     break;
     case 359:
@@ -79,8 +79,8 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Twintail_Hair24", 16);
-        BoneManager::RegisterBone(pCharacter, "Twintail_Hair32", 24);
+        BoneManager::RegisterBone(pCharacter, L"Twintail_Hair24", 16);
+        BoneManager::RegisterBone(pCharacter, L"Twintail_Hair32", 24);
     }
     break;
     case 439:
@@ -95,19 +95,19 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Dreadfear_Wing32", 71);
-        BoneManager::RegisterBone(pCharacter, "Dreadfear_Wing34", 68);
-        BoneManager::RegisterBone(pCharacter, "Dreadfear_Wing51", 50);
-        BoneManager::RegisterBone(pCharacter, "Dreadfear_Wing53", 47);
-        BoneManager::RegisterBone(pCharacter, "Dreadfear_Eye52", 9);
-        BoneManager::RegisterBone(pCharacter, "Dreadfear_Eye54", 10);
+        BoneManager::RegisterBone(pCharacter, L"Dreadfear_Wing32", 71);
+        BoneManager::RegisterBone(pCharacter, L"Dreadfear_Wing34", 68);
+        BoneManager::RegisterBone(pCharacter, L"Dreadfear_Wing51", 50);
+        BoneManager::RegisterBone(pCharacter, L"Dreadfear_Wing53", 47);
+        BoneManager::RegisterBone(pCharacter, L"Dreadfear_Eye52", 9);
+        BoneManager::RegisterBone(pCharacter, L"Dreadfear_Eye54", 10);
     }
     break;
     case 367:
     {
         OpenNpc(MODEL_KANTURU2ND_ENTER_NPC);
         pCharacter = CreateCharacter(Key, MODEL_KANTURU2ND_ENTER_NPC, PosX, PosY);
-        strcpy(pCharacter->ID, "출입 관리 장치");
+        wcscpy(pCharacter->ID, L"출입 관리 장치");
         pCharacter->Object.Scale = 4.76f;
         pCharacter->Object.Position[0] -= 20.0f;
         pCharacter->Object.Position[1] -= 200.0f;
@@ -117,20 +117,20 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         g_pKanturu2ndEnterNpc->SetNpcObject(&pCharacter->Object);
         g_pKanturu2ndEnterNpc->SetNpcAnimation(false);
 
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_1", 37);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_2", 38);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_3", 39);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_4", 40);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_5", 41);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_6", 42);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_7", 43);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_8", 6);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_9", 7);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_10", 8);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_11", 15);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_12", 16);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_13", 17);
-        BoneManager::RegisterBone(pCharacter, "KANTURU2ND_ENTER_NPC_14", 10);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_1", 37);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_2", 38);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_3", 39);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_4", 40);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_5", 41);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_6", 42);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_7", 43);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_8", 6);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_9", 7);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_10", 8);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_11", 15);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_12", 16);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_13", 17);
+        BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_14", 10);
     }
     break;
     case 105:
@@ -802,7 +802,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
         Vector(Luminosity * 0.5f, Luminosity * 0.6f, Luminosity * 1.0f, vLight);
 
-        BoneManager::GetBonePosition(o, "PRSona_A1", vPos);
+        BoneManager::GetBonePosition(o, L"PRSona_A1", vPos);
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o);
 
         if (rand_fps_check(5))
@@ -813,9 +813,9 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         if (rand_fps_check(3))
         {
             Vector(0.5f, 0.5f, 0.5f, vLight);
-            BoneManager::GetBonePosition(o, "PRSona_Tail", vPos);
+            BoneManager::GetBonePosition(o, L"PRSona_Tail", vPos);
             CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 5, 0.8f, o);
-            BoneManager::GetBonePosition(o, "PRSona_Tail1", vPos);
+            BoneManager::GetBonePosition(o, L"PRSona_Tail1", vPos);
             CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 5, 0.8f, o);
         }
 
@@ -846,9 +846,9 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         {
             o->BlendMesh = -2;
             Vector(0.5f, 0.5f, 0.5f, vLight);
-            BoneManager::GetBonePosition(o, "PRSona_Tail", vPos);
+            BoneManager::GetBonePosition(o, L"PRSona_Tail", vPos);
             CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 6, 0.8f, o);
-            BoneManager::GetBonePosition(o, "PRSona_Tail1", vPos);
+            BoneManager::GetBonePosition(o, L"PRSona_Tail1", vPos);
             CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 6, 0.8f, o);
 
             for (int i = 0; i < 5; i++)
@@ -931,13 +931,13 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
                 if (o->m_iAnimation % 2 == 1)
                 {
                     Vector(0.0f, 0.0f, 0.0f, vRelative);
-                    BoneManager::GetBonePosition(o, "Twintail_Hair32", vRelative, vPos);
+                    BoneManager::GetBonePosition(o, L"Twintail_Hair32", vRelative, vPos);
                     CreateEffect(MODEL_TWINTAIL_EFFECT, vPos, o->Angle, vLight, 0, o);
                 }
                 else if (o->m_iAnimation % 2 == 0)
                 {
                     Vector(0.0f, 0.0f, 0.0f, vRelative);
-                    BoneManager::GetBonePosition(o, "Twintail_Hair24", vRelative, vPos);
+                    BoneManager::GetBonePosition(o, L"Twintail_Hair24", vRelative, vPos);
                     CreateEffect(MODEL_TWINTAIL_EFFECT, vPos, o->Angle, vLight, 0, o);
                 }
 
@@ -1048,16 +1048,16 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         {
             if (rand_fps_check(3))
             {
-                BoneManager::GetBonePosition(o, "Dreadfear_Wing32", vPos);
+                BoneManager::GetBonePosition(o, L"Dreadfear_Wing32", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 0);
-                BoneManager::GetBonePosition(o, "Dreadfear_Wing34", vPos);
+                BoneManager::GetBonePosition(o, L"Dreadfear_Wing34", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 0);
             }
             if (rand_fps_check(3))
             {
-                BoneManager::GetBonePosition(o, "Dreadfear_Wing51", vPos);
+                BoneManager::GetBonePosition(o, L"Dreadfear_Wing51", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 0);
-                BoneManager::GetBonePosition(o, "Dreadfear_Wing53", vPos);
+                BoneManager::GetBonePosition(o, L"Dreadfear_Wing53", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 0);
             }
         }
@@ -1065,21 +1065,21 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         {
             vec3_t vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
-            BoneManager::GetBonePosition(o, "Dreadfear_Wing32", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"Dreadfear_Wing32", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 3, 1.0f);
-            BoneManager::GetBonePosition(o, "Dreadfear_Wing34", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"Dreadfear_Wing34", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 3, 1.0f);
-            BoneManager::GetBonePosition(o, "Dreadfear_Wing51", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"Dreadfear_Wing51", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 3, 1.0f);
-            BoneManager::GetBonePosition(o, "Dreadfear_Wing53", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"Dreadfear_Wing53", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 3, 1.0f);
         }
 
         Vector(0.25f, 0.7f, 0.6f, vLight);
         fScale = (rand() % 10 - 5) * 0.01f;
-        BoneManager::GetBonePosition(o, "Dreadfear_Eye52", vPos);
+        BoneManager::GetBonePosition(o, L"Dreadfear_Eye52", vPos);
         CreateSprite(BITMAP_LIGHT + 1, vPos, 0.5f + fScale, vLight, o);
-        BoneManager::GetBonePosition(o, "Dreadfear_Eye54", vPos);
+        BoneManager::GetBonePosition(o, L"Dreadfear_Eye54", vPos);
         CreateSprite(BITMAP_LIGHT + 1, vPos, 0.5f + fScale, vLight, o);
 
         return true;
@@ -1100,19 +1100,19 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
             {
                 if (rand_fps_check(4))
                 {
-                    BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_1", vPos);
+                    BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_1", vPos);
                     CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 18, 1.0f);
-                    BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_2", vPos);
+                    BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_2", vPos);
                     CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 18, 1.0f);
-                    BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_3", vPos);
+                    BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_3", vPos);
                     CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 18, 1.0f);
-                    BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_4", vPos);
+                    BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_4", vPos);
                     CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 18, 1.0f);
-                    BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_5", vPos);
+                    BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_5", vPos);
                     CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 18, 1.0f);
-                    BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_6", vPos);
+                    BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_6", vPos);
                     CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 18, 1.0f);
-                    BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_7", vPos);
+                    BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_7", vPos);
                     CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 18, 1.0f);
                 }
             }
@@ -1120,17 +1120,17 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
             Vector(1.0f, 1.0f, 2.f, vLight);
             if (rand_fps_check(4))
             {
-                BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_8", vPos);
+                BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_8", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 2, 2.f);
-                BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_9", vPos);
+                BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_9", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 2, 2.f);
-                BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_10", vPos);
+                BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_10", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 2, 2.f);
-                BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_11", vPos);
+                BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_11", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 2, 2.f);
-                BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_12", vPos);
+                BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_12", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 2, 2.f);
-                BoneManager::GetBonePosition(o, "KANTURU2ND_ENTER_NPC_13", vPos);
+                BoneManager::GetBonePosition(o, L"KANTURU2ND_ENTER_NPC_13", vPos);
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 2, 2.f);
             }
 
@@ -1284,13 +1284,13 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             {
                 if (rand_fps_check(4))
                 {
-                    BoneManager::GetBonePosition(o, "Twintail_Hair24", vRelative, vPos);
+                    BoneManager::GetBonePosition(o, L"Twintail_Hair24", vRelative, vPos);
                     CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
                 }
 
                 if (rand_fps_check(4))
                 {
-                    BoneManager::GetBonePosition(o, "Twintail_Hair32", vRelative, vPos);
+                    BoneManager::GetBonePosition(o, L"Twintail_Hair32", vRelative, vPos);
                     CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
                 }
             }
@@ -1298,13 +1298,13 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             {
                 if (rand_fps_check(2))
                 {
-                    BoneManager::GetBonePosition(o, "Twintail_Hair24", vRelative, vPos);
+                    BoneManager::GetBonePosition(o, L"Twintail_Hair24", vRelative, vPos);
                     CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
                 }
 
                 if (rand_fps_check(2))
                 {
-                    BoneManager::GetBonePosition(o, "Twintail_Hair32", vRelative, vPos);
+                    BoneManager::GetBonePosition(o, L"Twintail_Hair32", vRelative, vPos);
                     CreateJoint(BITMAP_JOINT_ENERGY, vPos, to->Position, o->Angle, 0, to, 30.f);
                 }
             }
@@ -1377,8 +1377,8 @@ void CTrapCanon::Destroy()
 
 void CTrapCanon::Open_TrapCanon()
 {
-    gLoadData.AccessModel(MODEL_TRAP_CANON, "Data\\Npc\\", "c_mon");
-    gLoadData.OpenTexture(MODEL_TRAP_CANON, "Npc\\");
+    gLoadData.AccessModel(MODEL_TRAP_CANON, L"Data\\Npc\\", L"c_mon");
+    gLoadData.OpenTexture(MODEL_TRAP_CANON, L"Npc\\");
 }
 
 CHARACTER* CTrapCanon::Create_TrapCanon(int iPosX, int iPosY, int iKey)

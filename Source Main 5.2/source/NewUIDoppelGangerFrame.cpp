@@ -88,7 +88,7 @@ bool CNewUIDoppelGangerFrame::Render()
 
     RenderImage(IMAGE_DOPPELGANGER_FRAME_WINDOW, m_Pos.x, m_Pos.y, float(DOPPELGANGER_FRAME_WINDOW_WIDTH), float(DOPPELGANGER_FRAME_WINDOW_HEIGHT));
 
-    char szText[256] = { NULL, };
+    wchar_t szText[256] = { NULL, };
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0);
 
@@ -105,7 +105,7 @@ bool CNewUIDoppelGangerFrame::Render()
         g_pRenderText->SetTextColor(255, 0, 0, 255);
     }
 
-    sprintf(szText, GlobalText[2772], m_iEnteredMonsters, m_iMaxMonsters);
+    wsprintf(szText, GlobalText[2772], m_iEnteredMonsters, m_iMaxMonsters);
     g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 13, szText, 110, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(255, 150, 0, 255);
@@ -117,7 +117,8 @@ bool CNewUIDoppelGangerFrame::Render()
     {
         iSecond = 0;
     }
-    sprintf(szText, "%.2d:%.2d:%.2d", iMinute, m_iTime % 60, iSecond);
+
+    wsprintf(szText, L"%.2d:%.2d:%.2d", iMinute, m_iTime % 60, iSecond);
     g_pRenderText->SetFont(g_hFontBig);
     g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 50, szText, 110, 0, RT3_SORT_CENTER);
 
@@ -239,13 +240,13 @@ void CNewUIDoppelGangerFrame::ClosingProcess()
 
 void CNewUIDoppelGangerFrame::LoadImages()
 {
-    LoadBitmap("Interface\\Double_back.tga", IMAGE_DOPPELGANGER_FRAME_WINDOW, GL_LINEAR);
-    LoadBitmap("Interface\\Double_bar(R).jpg", IMAGE_DOPPELGANGER_GUAGE_RED, GL_LINEAR);
-    LoadBitmap("Interface\\Double_bar(O).jpg", IMAGE_DOPPELGANGER_GUAGE_ORANGE, GL_LINEAR);
-    LoadBitmap("Interface\\Double_bar(Y).jpg", IMAGE_DOPPELGANGER_GUAGE_YELLOW, GL_LINEAR);
-    LoadBitmap("Interface\\Double_Baricon04.tga", IMAGE_DOPPELGANGER_GUAGE_PLAYER, GL_LINEAR);
-    LoadBitmap("Interface\\Double_Baricon01.tga", IMAGE_DOPPELGANGER_GUAGE_PARTY_MEMBER, GL_LINEAR);
-    LoadBitmap("Interface\\Double_Micon01.tga", IMAGE_DOPPELGANGER_GUAGE_ICEWALKER, GL_LINEAR);
+    LoadBitmap(L"Interface\\Double_back.tga", IMAGE_DOPPELGANGER_FRAME_WINDOW, GL_LINEAR);
+    LoadBitmap(L"Interface\\Double_bar(R).jpg", IMAGE_DOPPELGANGER_GUAGE_RED, GL_LINEAR);
+    LoadBitmap(L"Interface\\Double_bar(O).jpg", IMAGE_DOPPELGANGER_GUAGE_ORANGE, GL_LINEAR);
+    LoadBitmap(L"Interface\\Double_bar(Y).jpg", IMAGE_DOPPELGANGER_GUAGE_YELLOW, GL_LINEAR);
+    LoadBitmap(L"Interface\\Double_Baricon04.tga", IMAGE_DOPPELGANGER_GUAGE_PLAYER, GL_LINEAR);
+    LoadBitmap(L"Interface\\Double_Baricon01.tga", IMAGE_DOPPELGANGER_GUAGE_PARTY_MEMBER, GL_LINEAR);
+    LoadBitmap(L"Interface\\Double_Micon01.tga", IMAGE_DOPPELGANGER_GUAGE_ICEWALKER, GL_LINEAR);
 }
 
 void CNewUIDoppelGangerFrame::UnloadImages()

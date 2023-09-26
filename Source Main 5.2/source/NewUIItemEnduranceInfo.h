@@ -95,9 +95,9 @@ namespace SEASON3B
         void RenderLeft();
         void RenderRight();
 
-        void RenderHPUI(int iX, int iY, unicode::t_char* pszName, int iLife, int iMaxLife = 255, bool bWarning = false);
+        void RenderHPUI(int iX, int iY, wchar_t* pszName, int iLife, int iMaxLife = 255, bool bWarning = false);
         void RenderTooltip(int iX, int iY, const ITEM* pItem, const DWORD& dwTextColor);
-        //void RenderItemDurIcon( int iImageIndex, int iX, int iY, int iWidth, int iHeight, DWORD dwColor, unicode::t_char* pszName );
+        //void RenderItemDurIcon( int iImageIndex, int iX, int iY, int iWidth, int iHeight, DWORD dwColor, wchar_t* pszName );
         bool RenderEquipedHelperLife(int iX, int iY);
         bool RenderEquipedPetLife(int iX, int iY);
         bool RenderSummonMonsterLife(int iX, int iY);

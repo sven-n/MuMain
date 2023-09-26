@@ -93,7 +93,7 @@ namespace SEASON3B
             EVENT_CLIENT_WND_HOVER,
         };
 
-        typedef std::basic_string<unicode::t_char, std::char_traits<unicode::t_char>, std::allocator<unicode::t_char> > type_string;
+        typedef std::wstring type_string;
         typedef std::vector<type_string>	type_vec_history;
 
         const uint64_t ChatCooldownMs = 1000; // 1 Second
@@ -170,7 +170,7 @@ namespace SEASON3B
         void OpenningProcess();
         void ClosingProcess();
 
-        void SetWhsprID(const char* strWhsprID);
+        void SetWhsprID(const wchar_t* strWhsprID);
 
     protected:
         void GetChatText(type_string& strText);

@@ -15,18 +15,18 @@ CPersonalShopTitleImp::~CPersonalShopTitleImp()
     RemoveAllShopTitle();
 }
 
-bool CPersonalShopTitleImp::AddShopTitle(int key, CHARACTER* pPlayer, const std::string& title)
+bool CPersonalShopTitleImp::AddShopTitle(int key, CHARACTER* pPlayer, const std::wstring& title)
 {
     if (pPlayer == NULL)
         return false;
     if (pPlayer->Object.Kind != KIND_PLAYER)
     {
-        g_ErrorReport.Write("@ AddShopTitle - there is NOT player object(id : %s) \n", pPlayer->ID);
+        g_ErrorReport.Write(L"@ AddShopTitle - there is NOT player object(id : %s) \n", pPlayer->ID);
         return false;
     }
 
-    std::string full_name = pPlayer->ID;
-    std::string topTitle, bottomTitle;
+    std::wstring full_name = pPlayer->ID;
+    std::wstring topTitle, bottomTitle;
 
     auto mi = m_listShopTitleDrawObj.find(pPlayer);
     if (mi != m_listShopTitleDrawObj.end())
@@ -39,7 +39,7 @@ bool CPersonalShopTitleImp::AddShopTitle(int key, CHARACTER* pPlayer, const std:
         }
         else
         {
-            g_ErrorReport.Write("@ AddShopTitle - player key-value dismatch(id : %s) \n", pPlayer->ID);
+            g_ErrorReport.Write(L"@ AddShopTitle - player key-value dismatch(id : %s) \n", pPlayer->ID);
         }
     }
     else
@@ -154,18 +154,18 @@ bool CPersonalShopTitleImp::IsInViewport(CHARACTER* pPlayer)
     }
     return false;
 }
-void CPersonalShopTitleImp::GetShopTitle(CHARACTER* pPlayer, std::string& title)
+void CPersonalShopTitleImp::GetShopTitle(CHARACTER* pPlayer, std::wstring& title)
 {
     auto mi = m_listShopTitleDrawObj.find(pPlayer);
     if (mi != m_listShopTitleDrawObj.end()) {
         (*mi).second->GetFullTitle(title);
     }
 }
-void CPersonalShopTitleImp::GetShopTitleSummary(CHARACTER* pPlayer, std::string& summary)
+void CPersonalShopTitleImp::GetShopTitleSummary(CHARACTER* pPlayer, std::wstring& summary)
 {
     auto mi = m_listShopTitleDrawObj.find(pPlayer);
     if (mi != m_listShopTitleDrawObj.end()) {
-        std::string full_title;
+        std::wstring full_title;
         (*mi).second->GetFullTitle(full_title);
         if (full_title.size() > 14) {
             int offset = 0;
@@ -176,7 +176,7 @@ void CPersonalShopTitleImp::GetShopTitleSummary(CHARACTER* pPlayer, std::string&
                     offset++;
             }
             summary.assign(full_title, 0, offset);
-            summary += "..";
+            summary += L"..";
         }
         else {
             summary = full_title;
@@ -384,14 +384,14 @@ void CPersonalShopTitleImp::CheckKeyIntegrity()
         {
             delete pDrawObj;
             mi = m_listShopTitleDrawObj.erase(mi);
-            g_ErrorReport.Write("@ CheckKeyIntegrity - player key-value dismatch(id : %s, server's key : %d, client array's key : %d) \n",
+            g_ErrorReport.Write(L"@ CheckKeyIntegrity - player key-value dismatch(id : %s, server's key : %d, client array's key : %d) \n",
                 pPlayer->ID, pDrawObj->GetKey(), pPlayer->Key);
         }
         else if (pPlayer->Object.Kind != KIND_PLAYER)
         {
             delete pDrawObj;
             mi = m_listShopTitleDrawObj.erase(mi);
-            g_ErrorReport.Write("@ CheckKeyIntegrity - player type invalid(id : %s, server's key : %d, client array's key : %d) \n",
+            g_ErrorReport.Write(L"@ CheckKeyIntegrity - player type invalid(id : %s, server's key : %d, client array's key : %d) \n",
                 pPlayer->ID, pDrawObj->GetKey(), pPlayer->Key);
         }
         else
@@ -421,9 +421,9 @@ CPersonalShopTitleImp::CShopTitleDrawObj::~CShopTitleDrawObj() {}
 void CPersonalShopTitleImp::CShopTitleDrawObj::Init()
 {
     //. initialize
-    m_fullname = "";
-    m_topTitle = "";
-    m_bottomTitle = "";
+    m_fullname = L"";
+    m_topTitle = L"";
+    m_bottomTitle = L"";
 
     m_key = -1;
     m_bDraw = false;
@@ -433,7 +433,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Init()
     m_bHighlight = false;
 }
 
-bool CPersonalShopTitleImp::CShopTitleDrawObj::Create(int key, const std::string& name, const std::string& title, POINT& pos)
+bool CPersonalShopTitleImp::CShopTitleDrawObj::Create(int key, const std::wstring& name, const std::wstring& title, POINT& pos)
 {
     m_key = key & 0x7FFF;
     SetBoxContent(name, title);
@@ -452,13 +452,13 @@ int CPersonalShopTitleImp::CShopTitleDrawObj::GetKey() const
     return m_key;
 }
 
-void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxContent(const std::string& name, const std::string& title)
+void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxContent(const std::wstring& name, const std::wstring& title)
 {
     m_fullname = name;
     m_fulltitle = title;
 
     g_pRenderText->SetFont(g_hFontBold);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], strlen(GlobalText[1104]), &m_icon);
+    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], GlobalText.GetStringSize(1104), &m_icon);
 
     SeparateShopTitle(title, m_topTitle, m_bottomTitle);
     CalculateBooleanSize(name, m_topTitle, m_bottomTitle, m_size);
@@ -485,7 +485,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::GetBoxRect(RECT& rect)
     rect.right = m_pos.x + m_size.cx;
     rect.bottom = m_pos.y + m_size.cy;
 }
-void CPersonalShopTitleImp::CShopTitleDrawObj::GetFullTitle(std::string& title)
+void CPersonalShopTitleImp::CShopTitleDrawObj::GetFullTitle(std::wstring& title)
 {
     title = m_fulltitle;
 }
@@ -581,16 +581,16 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
         g_pRenderText->RenderText(RenderPos.x, RenderPos.y, m_topTitle.c_str(), RenderBoxSize.cx, iLineHeight);
     }
 }
-void CPersonalShopTitleImp::CShopTitleDrawObj::SeparateShopTitle(const std::string& title, std::string& topTitle, std::string& bottomTitle)
+void CPersonalShopTitleImp::CShopTitleDrawObj::SeparateShopTitle(const std::wstring& title, std::wstring& topTitle, std::wstring& bottomTitle)
 {
-    char pszTopTitle[MAX_SHOPTITLE] = { '\0' };
-    char pszBottonTitle[MAX_SHOPTITLE] = { '\0' };
+    wchar_t pszTopTitle[MAX_SHOPTITLE] = { '\0' };
+    wchar_t pszBottonTitle[MAX_SHOPTITLE] = { '\0' };
     CutText(title.c_str(), pszBottonTitle, pszTopTitle, title.length());
 
     topTitle = pszTopTitle;
     bottomTitle = pszBottonTitle;
 }
-void CPersonalShopTitleImp::CShopTitleDrawObj::CalculateBooleanSize(IN const std::string& name, IN const std::string& topTitle, IN const std::string& bottomTitle, OUT SIZE& size)
+void CPersonalShopTitleImp::CShopTitleDrawObj::CalculateBooleanSize(IN const std::wstring& name, IN const std::wstring& topTitle, IN const std::wstring& bottomTitle, OUT SIZE& size)
 {
     SIZE text_size[3];
     g_pRenderText->SetFont(g_hFontBold);

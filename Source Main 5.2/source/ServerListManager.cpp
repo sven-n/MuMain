@@ -46,12 +46,12 @@ void CServerListManager::BuxConvert(BYTE* pbyBuffer, int nSize)
 
 void CServerListManager::LoadServerListScript()
 {
-    FILE* fp = ::fopen("Data\\Local\\ServerList.bmd", "rb");
+    FILE* fp = ::_wfopen(L"Data\\Local\\ServerList.bmd", L"rb");
 
     if (fp == NULL)
     {
-        char szMessage[256];
-        ::sprintf(szMessage, "Data\\Local\\ServerList.bmd file not found.\r\n");
+        wchar_t szMessage[256];
+        ::wsprintf(szMessage, L"Data\\Local\\ServerList.bmd file not found.\r\n");
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -62,7 +62,7 @@ void CServerListManager::LoadServerListScript()
     typedef struct _SERVER_GROUP_INFO
     {
         WORD	m_wIndex;
-        char	m_szName[SLM_MAX_SERVER_NAME_LENGTH];
+        wchar_t	m_szName[SLM_MAX_SERVER_NAME_LENGTH];
         BYTE	m_byPos;
         BYTE	m_bySequence;
         BYTE	m_abyNonPVP[SLM_MAX_SERVER_COUNT];
@@ -72,7 +72,7 @@ void CServerListManager::LoadServerListScript()
 
     int nSize = sizeof(SERVER_GROUP_INFO);
     SERVER_GROUP_INFO sServerGroupScript;
-    char szDescript[1024];
+    wchar_t szDescript[1024];
     SServerGroupInfo sServerGroupInfo;
     int i;
 
@@ -81,7 +81,7 @@ void CServerListManager::LoadServerListScript()
         BuxConvert((BYTE*)&sServerGroupScript, nSize);
         ::fread(szDescript, sServerGroupScript.m_nDescriptLen, 1, fp);
         BuxConvert((BYTE*)szDescript, sServerGroupScript.m_nDescriptLen);
-        ::strncpy(sServerGroupInfo.m_szName, sServerGroupScript.m_szName, SLM_MAX_SERVER_NAME_LENGTH);
+        ::wcsncpy(sServerGroupInfo.m_szName, sServerGroupScript.m_szName, SLM_MAX_SERVER_NAME_LENGTH);
         sServerGroupInfo.m_byPos = sServerGroupScript.m_byPos;
         sServerGroupInfo.m_bySequence = sServerGroupScript.m_bySequence;
         for (i = 0; i < SLM_MAX_SERVER_COUNT; ++i)
@@ -146,8 +146,8 @@ bool CServerListManager::MakeServerGroup(IN int iServerGroupIndex, OUT CServerGr
     if (NULL == pServerGroupInfo)
         return false;
 
-    ::strcpy(pServerGroup->m_szName, pServerGroupInfo->m_szName);
-    ::strcpy(pServerGroup->m_szDescription, pServerGroupInfo->m_strDescript.c_str());
+    ::wcscpy(pServerGroup->m_szName, pServerGroupInfo->m_szName);
+    ::wcscpy(pServerGroup->m_szDescription, pServerGroupInfo->m_strDescript.c_str());
     pServerGroup->m_iSequence = (int)pServerGroupInfo->m_bySequence;
     pServerGroup->m_iWidthPos = (int)pServerGroupInfo->m_byPos;
     pServerGroup->m_iServerIndex = iServerGroupIndex;
@@ -191,22 +191,22 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     switch (pServerInfo->m_byNonPvP)
     {
     case 0:
-        sprintf(pServerInfo->m_bName, "%s-%d %s", pServerGroup->m_szName,
+        wsprintf(pServerInfo->m_bName, L"%s-%d %s", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 1:
-        sprintf(pServerInfo->m_bName, "%s-%d(Non-PVP) %s", pServerGroup->m_szName,
+        wsprintf(pServerInfo->m_bName, L"%s-%d(Non-PVP) %s", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 2:
-        sprintf(pServerInfo->m_bName, "%s-%d(Gold PVP) %s", pServerGroup->m_szName,
+        wsprintf(pServerInfo->m_bName, L"%s-%d(Gold PVP) %s", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 3:
-        sprintf(pServerInfo->m_bName, "%s-%d(Gold) %s", pServerGroup->m_szName,
+        wsprintf(pServerInfo->m_bName, L"%s-%d(Gold) %s", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
     }
@@ -255,16 +255,16 @@ CServerGroup* CServerListManager::GetServerGroupByBtnPos(int iBtnPos)
     return NULL;
 }
 
-void CServerListManager::SetSelectServerInfo(unicode::t_char* pszName, int iIndex, int iCensorshipIndex, BYTE byNonPvP, bool bTestServer)
+void CServerListManager::SetSelectServerInfo(wchar_t* pszName, int iIndex, int iCensorshipIndex, BYTE byNonPvP, bool bTestServer)
 {
-    strcpy(m_szSelectServerName, pszName);
+    wcscpy(m_szSelectServerName, pszName);
     m_iSelectServerIndex = iIndex;
     m_iCensorshipIndex = iCensorshipIndex;
     m_byNonPvP = byNonPvP;
     m_bTestServer = bTestServer;
 }
 
-unicode::t_char* CServerListManager::GetSelectServerName()
+wchar_t* CServerListManager::GetSelectServerName()
 {
     return m_szSelectServerName;
 }

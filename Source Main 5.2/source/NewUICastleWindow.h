@@ -120,8 +120,8 @@ namespace SEASON3B
         bool BtnProcess();
 
         void SetCurrMsgBoxRequest(int iMsgBoxRequest) { m_iCurrMsgBoxRequest = iMsgBoxRequest; }
-        void InsertComma(unicode::t_char* pszText, DWORD dwNumber);
-        void InsertComma64(unicode::t_char* pszText, __int64 iNumber);
+        void InsertComma(wchar_t* pszText, DWORD dwNumber);
+        void InsertComma64(wchar_t* pszText, __int64 iNumber);
 
         void UpdateGateManagingTab();
         void UpdateStatueManagingTab();
@@ -132,7 +132,7 @@ namespace SEASON3B
         void RenderTaxManagingTab();
 
         void RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST pInfo);
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption);
+        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
 
         void RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight);
         void RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight);

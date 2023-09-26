@@ -197,14 +197,14 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
                 m_dDeltaTickSum = 0.0;
                 if (--m_nGameExit == 0)
                 {
-                    g_ErrorReport.Write("> Menu - Exit game.");
+                    g_ErrorReport.Write(L"> Menu - Exit game.");
                     g_ErrorReport.WriteCurrentTime();
                     ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
                 }
                 else
                 {
-                    char szMsg[64];
-                    ::sprintf(szMsg, GlobalText[380], m_nGameExit);
+                    wchar_t szMsg[64];
+                    wsprintf(szMsg, GlobalText[380], m_nGameExit);
                     SetMsg(m_eType, szMsg);
                 }
             }
@@ -267,34 +267,33 @@ void CMsgWin::RenderControls()
     CWin::RenderButtons();
 }
 
-void CMsgWin::SetMsg(MSG_WIN_TYPE eType, LPCTSTR lpszMsg, LPCTSTR lpszMsg2)
+void CMsgWin::SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2)
 {
-    _ASSERT(lpszMsg);
+    //_ASSERTE(lpszMsg);
 
     m_eType = eType;
 
     SetCtrlPosition();
 
-    if (NULL == lpszMsg2)
+    if (lpszMsg2.empty())
     {
-        m_nMsgLine = ::SeparateTextIntoLines(
-            (char*)lpszMsg, m_aszMsg[0], MW_MSG_LINE_MAX, MW_MSG_ROW_MAX);
+        m_nMsgLine = ::SeparateTextIntoLines(lpszMsg.c_str(), m_aszMsg[0], MW_MSG_LINE_MAX, MW_MSG_ROW_MAX);
     }
     else
     {
-        strcpy(m_aszMsg[0], lpszMsg);
-        strcpy(m_aszMsg[1], lpszMsg2);
+        lpszMsg.copy(m_aszMsg[0], MW_MSG_ROW_MAX - 1);
+        lpszMsg2.copy(m_aszMsg[1], MW_MSG_ROW_MAX - 1);
         m_nMsgLine = 2;
     }
 }
 
-void CMsgWin::PopUp(int nMsgCode, char* pszMsg)
+void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
 {
     CUIMng& rUIMng = CUIMng::Instance();
-    LPCTSTR lpszMsg = NULL, lpszMsg2 = NULL;
+    std::wstring lpszMsg = NULL, lpszMsg2 = NULL;
     MSG_WIN_TYPE eType = MWT_BTN_OK;
     m_nMsgCode = nMsgCode;
-    char szTempMsg[128];
+    wchar_t szTempMsg[128];
 
     switch (m_nMsgCode)
     {
@@ -304,7 +303,7 @@ void CMsgWin::PopUp(int nMsgCode, char* pszMsg)
         break;
     case MESSAGE_GAME_END_COUNTDOWN:
         m_nGameExit = 5;
-        ::sprintf(szTempMsg, GlobalText[380], m_nGameExit);
+        wsprintf(szTempMsg, GlobalText[380], m_nGameExit);
         lpszMsg = szTempMsg;
         eType = MWT_NON;
         break;
@@ -387,11 +386,11 @@ void CMsgWin::PopUp(int nMsgCode, char* pszMsg)
         lpszMsg = GlobalText[1654];
         break;
     case MESSAGE_DELETE_CHARACTER_WARNING:
-        sprintf(szTempMsg, GlobalText[1711], CHAR_DEL_LIMIT_LV);
+        wsprintf(szTempMsg, GlobalText[1711], CHAR_DEL_LIMIT_LV);
         lpszMsg = szTempMsg;
         break;
     case MESSAGE_DELETE_CHARACTER_CONFIRM:
-        sprintf(szTempMsg, GlobalText[1712], CharactersClient[SelectedHero].ID);
+        wsprintf(szTempMsg, GlobalText[1712], CharactersClient[SelectedHero].ID);
         lpszMsg = szTempMsg;
         eType = MWT_BTN_BOTH;
         break;

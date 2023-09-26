@@ -33,7 +33,7 @@ DWORD  WZResult::GetErrorCode() // OK
     return this->m_dwErrorCode;
 }
 
-char* WZResult::GetErrorMessage() // OK
+wchar_t* WZResult::GetErrorMessage() // OK
 {
     return this->m_szErrorMessage;
 }
@@ -65,7 +65,7 @@ void WZResult::SetSuccessResult() // OK
 {
     this->m_dwErrorCode = WZ_SUCCESS;
     this->m_dwWindowErrorCode = ERROR_SUCCESS;
-    StringCchCopy(this->m_szErrorMessage, sizeof(this->m_szErrorMessage), "Success");
+    StringCchCopy(this->m_szErrorMessage, sizeof(this->m_szErrorMessage), L"Success");
 }
 
 WZResult WZResult::BuildSuccessResult() // OK
@@ -80,7 +80,7 @@ WZResult WZResult::BuildSuccessResult() // OK
 WZResult WZResult::BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, TCHAR* szFormat, ...) // OK
 {
     WZResult result;
-    char Buffer[MAX_ERROR_MESSAGE];
+    wchar_t Buffer[MAX_ERROR_MESSAGE];
     va_list args;
 
     va_start(args, szFormat);

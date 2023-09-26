@@ -474,14 +474,14 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         ITEM* pItemObj = pPickedItem->GetItem();
         if (pItemObj && pItemObj->Jewel_Of_Harmony_Option != 0)
         {
-            g_pChatListBox->AddText("", GlobalText[2217], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2217], TYPE_ERROR_MESSAGE);
 
             ResetMouseLButton();
             return false;
         }
         if (pItemObj && IsHighValueItem(pItemObj) == true)
         {
-            g_pChatListBox->AddText("", GlobalText[269], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[269], TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
@@ -489,7 +489,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         }
         if (pItemObj && IsDropBan(pItemObj))
         {
-            g_pChatListBox->AddText("", GlobalText[1915], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[1915], TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
@@ -706,8 +706,8 @@ void CNewUIMyInventory::RenderSetOption()
         g_pRenderText->SetTextColor(100, 100, 100, 255);
     }
 
-    unicode::t_char strText[128];
-    unicode::_sprintf(strText, "[%s]", GlobalText[989]);
+    wchar_t strText[128];
+    wsprintf(strText, L"[%s]", GlobalText[989]);
     g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.2f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
 
     if (g_csItemOption.IsViewOptionList() == true)
@@ -730,8 +730,8 @@ void CNewUIMyInventory::RenderSocketOption()
         g_pRenderText->SetTextColor(100, 100, 100, 255);
     }
 
-    unicode::t_char strText[128];
-    unicode::_sprintf(strText, "[%s]", GlobalText[2651]);
+    wchar_t strText[128];
+    wsprintf(strText, L"[%s]", GlobalText[2651]);
     g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
 
     if (CheckMouseIn(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 20, INVENTORY_WIDTH * 0.5f, 15) == true)
@@ -1151,29 +1151,29 @@ void CNewUIMyInventory::SetButtonInfo()
 
 void CNewUIMyInventory::LoadImages() const
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_INVENTORY_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_INVENTORY_BACK_TOP2, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_INVENTORY_BACK_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_INVENTORY_BACK_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_INVENTORY_BACK_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_boots.tga", IMAGE_INVENTORY_ITEM_BOOT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_cap.tga", IMAGE_INVENTORY_ITEM_HELM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_fairy.tga", IMAGE_INVENTORY_ITEM_FAIRY, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_wing.tga", IMAGE_INVENTORY_ITEM_WING, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_weapon(L).tga", IMAGE_INVENTORY_ITEM_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_weapon(R).tga", IMAGE_INVENTORY_ITEM_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_upper.tga", IMAGE_INVENTORY_ITEM_ARMOR, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_gloves.tga", IMAGE_INVENTORY_ITEM_GLOVES, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_lower.tga", IMAGE_INVENTORY_ITEM_PANTS, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_ring.tga", IMAGE_INVENTORY_ITEM_RING, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_necklace.tga", IMAGE_INVENTORY_ITEM_NECKLACE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_money.tga", IMAGE_INVENTORY_MONEY, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_repair_00.tga", IMAGE_INVENTORY_REPAIR_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_expansion_btn.tga", IMAGE_INVENTORY_EXPAND_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_openshop.tga", IMAGE_INVENTORY_MYSHOP_OPEN_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_closeshop.tga", IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_INVENTORY_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_INVENTORY_BACK_TOP2, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_INVENTORY_BACK_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_INVENTORY_BACK_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_INVENTORY_BACK_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_boots.tga", IMAGE_INVENTORY_ITEM_BOOT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_cap.tga", IMAGE_INVENTORY_ITEM_HELM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_fairy.tga", IMAGE_INVENTORY_ITEM_FAIRY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_wing.tga", IMAGE_INVENTORY_ITEM_WING, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_weapon(L).tga", IMAGE_INVENTORY_ITEM_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_weapon(R).tga", IMAGE_INVENTORY_ITEM_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_upper.tga", IMAGE_INVENTORY_ITEM_ARMOR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_gloves.tga", IMAGE_INVENTORY_ITEM_GLOVES, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_lower.tga", IMAGE_INVENTORY_ITEM_PANTS, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_ring.tga", IMAGE_INVENTORY_ITEM_RING, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_necklace.tga", IMAGE_INVENTORY_ITEM_NECKLACE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_money.tga", IMAGE_INVENTORY_MONEY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_repair_00.tga", IMAGE_INVENTORY_REPAIR_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_expansion_btn.tga", IMAGE_INVENTORY_EXPAND_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_openshop.tga", IMAGE_INVENTORY_MYSHOP_OPEN_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_closeshop.tga", IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, GL_LINEAR);
 }
 
 void CNewUIMyInventory::UnloadImages()
@@ -1339,7 +1339,7 @@ void CNewUIMyInventory::RenderInventoryDetails() const
 
     const DWORD dwZen = CharacterMachine->Gold;
 
-    unicode::t_char Text[256] = { 0, };
+    wchar_t Text[256] = { 0, };
     ConvertGold(dwZen, Text);
 
     g_pRenderText->SetTextColor(getGoldColor(dwZen));
@@ -1361,7 +1361,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
             const int iTargetIndex = m_iPointedSlot;
             if (pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
             {
-                g_pChatListBox->AddText("", GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
                 CNewUIInventoryCtrl::BackupPickedItem();
 
                 ResetMouseLButton();
@@ -1381,7 +1381,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
                 if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
                 {
-                    g_pChatListBox->AddText("", GlobalText[2285], TYPE_ERROR_MESSAGE);
+                    g_pChatListBox->AddText(L"", GlobalText[2285], TYPE_ERROR_MESSAGE);
                     CNewUIInventoryCtrl::BackupPickedItem();
 
                     ResetMouseLButton();
@@ -1736,7 +1736,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         point[3] = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
         point[4] = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 
-        char nStat[MAX_CLASS][5] =
+        wchar_t nStat[MAX_CLASS][5] =
         {
             18, 18, 15, 30,	0,
             28, 20, 25, 10,	0,
@@ -1771,8 +1771,8 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     {
         if (IsUnitedMarketPlace())
         {
-            char	szOutputText[512];
-            sprintf(szOutputText, "%s %s", GlobalText[3014], GlobalText[3015]);
+            wchar_t	szOutputText[512];
+            wsprintf(szOutputText, L"%s %s", GlobalText[3014], GlobalText[3015]);
 
             CreateOkMessageBox(szOutputText);
             return true;
@@ -1807,7 +1807,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     {
         if (Hero->SafeZone || gMapManager.InHellas())
         {
-            g_pChatListBox->AddText("", GlobalText[1238], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[1238], TYPE_ERROR_MESSAGE);
             return false;
         }
 
@@ -1851,7 +1851,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     {
         if (pItem->Level == 0)
         {
-            g_pChatListBox->AddText("", GlobalText[2089], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2089], TYPE_ERROR_MESSAGE);
         }
         else
         {

@@ -55,13 +55,13 @@ namespace SEASON3B
         float GetLayerDepth();	//. 3.2f
         CNewUIInventoryCtrl* GetInventoryCtrl() const;
         const int GetShopCharacterIndex();
-        const unicode::t_string& GetTitleText();
+        const std::wstring& GetTitleText();
         const int GetSourceIndex();
         int GetPointedItemIndex();
 
     public:
         void ChangeShopCharacterIndex(int index);
-        void ChangeTitleText(unicode::t_string& text);
+        void ChangeTitleText(std::wstring& text);
         void ChangeSourceIndex(int sindex);
 
     public:
@@ -85,7 +85,7 @@ namespace SEASON3B
         CNewUIInventoryCtrl* m_pNewInventoryCtrl;
         POINT					m_Pos;
         int						m_ShopCharacterIndex;
-        unicode::t_string		m_TitleText;
+       std::wstring		m_TitleText;
         CNewUIButton* m_Button;
         int						m_SourceIndex;
     };
@@ -103,7 +103,7 @@ namespace SEASON3B
     }
 
     inline
-        void CNewUIPurchaseShopInventory::ChangeTitleText(unicode::t_string& text)
+        void CNewUIPurchaseShopInventory::ChangeTitleText(std::wstring& text)
     {
         m_TitleText = text;
     }
@@ -133,7 +133,7 @@ namespace SEASON3B
     }
 
     inline
-        const unicode::t_string& CNewUIPurchaseShopInventory::GetTitleText()
+        const std::wstring& CNewUIPurchaseShopInventory::GetTitleText()
     {
         return m_TitleText;
     }

@@ -83,11 +83,11 @@ bool CNewUIEmpireGuardianTimer::Render()
 
     RenderImage(IMAGE_EMPIREGUARDIAN_TIMER_WINDOW, m_Pos.x, m_Pos.y, float(TIMER_WINDOW_WIDTH), float(TIMER_WINDOW_HEIGHT));
 
-    char szText[256] = { NULL, };
+    wchar_t szText[256] = { NULL, };
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0);
 
-    sprintf(szText, GlobalText[2805], m_iDay, m_iZone);
+    wsprintf(szText, GlobalText[2805], m_iDay, m_iZone);
     g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 13, szText, 110, 0, RT3_SORT_CENTER);
 
     switch (m_iType)
@@ -99,7 +99,7 @@ bool CNewUIEmpireGuardianTimer::Render()
         break;
     case 2:
         g_pRenderText->SetTextColor(255, 150, 0, 255);
-        sprintf(szText, "%s (%s)", GlobalText[865], GlobalText[2845]);
+        wsprintf(szText, L"%s (%s)", GlobalText[865], GlobalText[2845]);
         g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 38, szText, 110, 0, RT3_SORT_CENTER);
         break;
     }
@@ -119,7 +119,8 @@ bool CNewUIEmpireGuardianTimer::Render()
     {
         g_pRenderText->SetTextColor(255, 0, 0, 255);
     }
-    sprintf(szText, "%.2d:%.2d(%d)", iMinute, iSecond % 60, m_iMonsterCount);
+
+    wsprintf(szText, L"%.2d:%.2d(%d)", iMinute, iSecond % 60, m_iMonsterCount);
     g_pRenderText->SetFont(g_hFontBig);
     g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 50, szText, 110, 0, RT3_SORT_CENTER);
 
@@ -148,7 +149,7 @@ void CNewUIEmpireGuardianTimer::ClosingProcess()
 
 void CNewUIEmpireGuardianTimer::LoadImages()
 {
-    LoadBitmap("Interface\\newui_Figure_blood.tga", IMAGE_EMPIREGUARDIAN_TIMER_WINDOW, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Figure_blood.tga", IMAGE_EMPIREGUARDIAN_TIMER_WINDOW, GL_LINEAR);
 }
 
 void CNewUIEmpireGuardianTimer::UnloadImages()

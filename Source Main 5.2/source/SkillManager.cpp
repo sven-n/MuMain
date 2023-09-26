@@ -30,12 +30,12 @@ bool CSkillManager::FindHeroSkill(ActionSkillType eSkillType)
     return false;
 }
 
-void CSkillManager::GetSkillInformation(int iType, int iLevel, char* lpszName, int* piMana, int* piDistance, int* piSkillMana)
+void CSkillManager::GetSkillInformation(int iType, int iLevel, wchar_t* lpszName, int* piMana, int* piDistance, int* piSkillMana)
 {
     SKILL_ATTRIBUTE* p = &SkillAttribute[iType];
     if (lpszName)
     {
-        strcpy(lpszName, p->Name);
+        wcscpy(lpszName, p->Name);
     }
     if (piMana)
     {

@@ -32,7 +32,7 @@ public:
     const eBuffState GetBuff(int iterindex);
     const DWORD GetBuffCount(eBuffState buffstate);
     void ClearBuff();
-    bool IsEqualBuffType(IN int iBuffType, OUT unicode::t_char* szBuffName);
+    bool IsEqualBuffType(IN int iBuffType, OUT wchar_t* szBuffName);
 
 public:
     BuffStateMap			m_Buff;

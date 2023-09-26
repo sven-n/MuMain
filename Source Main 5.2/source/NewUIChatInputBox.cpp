@@ -43,17 +43,17 @@ void SEASON3B::CNewUIChatInputBox::Init()
 
 void SEASON3B::CNewUIChatInputBox::LoadImages()
 {
-    LoadBitmap("Interface\\newui_chat_back.jpg", IMAGE_INPUTBOX_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_normal_on.jpg", IMAGE_INPUTBOX_NORMAL_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_party_on.jpg", IMAGE_INPUTBOX_PARTY_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_guild_on.jpg", IMAGE_INPUTBOX_GUILD_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_gens_on.jpg", IMAGE_INPUTBOX_GENS_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_whisper_on.jpg", IMAGE_INPUTBOX_WHISPER_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_system_on.jpg", IMAGE_INPUTBOX_SYSTEM_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_chat_on.jpg", IMAGE_INPUTBOX_CHATLOG_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_frame_on.jpg", IMAGE_INPUTBOX_FRAME_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_btn_size.jpg", IMAGE_INPUTBOX_BTN_SIZE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_chat_btn_alpha.jpg", IMAGE_INPUTBOX_BTN_TRANSPARENCY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_back.jpg", IMAGE_INPUTBOX_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_normal_on.jpg", IMAGE_INPUTBOX_NORMAL_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_party_on.jpg", IMAGE_INPUTBOX_PARTY_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_guild_on.jpg", IMAGE_INPUTBOX_GUILD_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_gens_on.jpg", IMAGE_INPUTBOX_GENS_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_whisper_on.jpg", IMAGE_INPUTBOX_WHISPER_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_system_on.jpg", IMAGE_INPUTBOX_SYSTEM_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_chat_on.jpg", IMAGE_INPUTBOX_CHATLOG_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_frame_on.jpg", IMAGE_INPUTBOX_FRAME_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_btn_size.jpg", IMAGE_INPUTBOX_BTN_SIZE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chat_btn_alpha.jpg", IMAGE_INPUTBOX_BTN_TRANSPARENCY, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIChatInputBox::UnloadImages()
@@ -481,8 +481,8 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
         && m_lastChatTime < currentTickCount - ChatCooldownMs)
     {
         m_lastChatTime = currentTickCount;
-        char	szChatText[MAX_CHAT_SIZE + 1] = { '\0' };
-        char	szWhisperID[MAX_ID_SIZE + 1] = { '\0' };
+        wchar_t	szChatText[MAX_CHAT_SIZE + 1] = { '\0' };
+        wchar_t	szWhisperID[MAX_ID_SIZE + 1] = { '\0' };
         auto* szReceivedChat = new wchar_t[MAX_CHAT_SIZE_UTF16];
 
         m_pChatInputBox->GetText(szReceivedChat, MAX_CHAT_SIZE_UTF16);
@@ -513,32 +513,25 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 
         delete[] szReceivedChat;
 
-        std::string strText;
-
-        g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), g_pMultiLanguage->GetCodePage());
-        strncpy(szChatText, strText.c_str(), sizeof szChatText);
-
-        if (unicode::_strlen(szChatText) != 0)
+        if (wcslen(szChatText) != 0)
         {
             if (!CheckCommand(szChatText))
             {
                 {
                     if (CheckAbuseFilter(szChatText))
                     {
-                        g_pMultiLanguage->ConvertCharToWideStr(wstrText, GlobalText[570]);
+                        wstrText = GlobalText[570];
                     }
 
-                    if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && unicode::_strlen(szChatText) && strlen(szWhisperID) > 0)
+                    if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && wcslen(szChatText) && wcslen(szWhisperID) > 0)
                     {
-                        g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), CP_UTF8);
-                        strncpy(szChatText, strText.c_str(), sizeof szChatText);
-                        SendChatWhisper(szWhisperID, szChatText);
+                        SocketClient->ToGameServer()->SendWhisperMessage(szWhisperID, MAX_ID_SIZE, wstrText.c_str(), wstrText.length());
                         g_pChatListBox->AddText(Hero->ID, szChatText, SEASON3B::TYPE_WHISPER_MESSAGE);
                         AddWhsprIDHistory(szWhisperID);
                     }
-                    else if (strncmp(szChatText, GlobalText[260], strlen(GlobalText[260])) == 0)
+                    else if (wcsncmp(szChatText, GlobalText[260], GlobalText.GetStringSize(260)) == 0)
                     {
-                        char* pszMapName = szChatText + strlen(GlobalText[260]) + 1;
+                        wchar_t* pszMapName = szChatText + GlobalText.GetStringSize(260) + 1;
                         int iMapIndex = g_pMoveCommandWindow->GetMapIndexFromMovereq(pszMapName);
 
                         if (g_pMoveCommandWindow->IsTheMapInDifferentServer(gMapManager.WorldActive, iMapIndex))
@@ -555,15 +548,13 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                             CheckChatText(szChatText);
                         }
 
-                        g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), CP_UTF8);
-                        strncpy(szChatText, strText.c_str(), sizeof szChatText);
-                        SendChat(szChatText);
-                        AddChatHistory(szChatText);
+                        SendChat(wstrText);
+                        AddChatHistory(wstrText);
                     }
                 }
             }
         }
-        m_pChatInputBox->SetText("");
+        m_pChatInputBox->SetText(L"");
         m_iCurChatHistory = m_iCurWhisperIDHistory = 0;
 
         SaveIMEStatus();
@@ -684,7 +675,7 @@ bool SEASON3B::CNewUIChatInputBox::Render()
 
     if (m_bWhisperSend == false)
     {
-        char szWhisperID[32];
+        wchar_t szWhisperID[32];
         m_pWhsprIDInputBox->GetText(szWhisperID, 32);
         g_pRenderText->SetTextColor(255, 255, 255, 100);
         g_pRenderText->RenderText(m_pWhsprIDInputBox->GetPosition_x(), m_pWhsprIDInputBox->GetPosition_y(), szWhisperID);
@@ -744,17 +735,17 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
         return;
     }
 
-    unicode::t_char strTooltip[256];
+    wchar_t strTooltip[256];
 
     const int iTextIndex[10] = {
         1681, 1682, 1683, 3321,
         1684, 1685, 750, 1686, 751, 752 };
 
-    unicode::_sprintf(strTooltip, "%s", GlobalText[iTextIndex[m_iTooltipType]]);
+    wsprintf(strTooltip, L"%s", GlobalText[iTextIndex[m_iTooltipType]]);
 
     SIZE fontsize;
     g_pRenderText->SetFont(g_hFont);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, unicode::_strlen(strTooltip), &fontsize);
+    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, wcslen(strTooltip), &fontsize);
 
     const auto multiplier = ((float)WindowHeight / 480);
     fontsize.cx = fontsize.cx / multiplier;
@@ -790,7 +781,7 @@ void SEASON3B::CNewUIChatInputBox::OpenningProcess()
 {
     m_pChatInputBox->GiveFocus();
     m_pChatInputBox->SetState(UISTATE_NORMAL);
-    m_pChatInputBox->SetText("");
+    m_pChatInputBox->SetText(L"");
 
     if (m_bWhisperSend == true)
     {
@@ -814,18 +805,18 @@ void SEASON3B::CNewUIChatInputBox::ClosingProcess()
 
 void SEASON3B::CNewUIChatInputBox::GetChatText(type_string& strText)
 {
-    unicode::t_char szChatText[256];
+    wchar_t szChatText[256];
     m_pChatInputBox->GetText(szChatText, 256);
     strText = szChatText;
 }
 void SEASON3B::CNewUIChatInputBox::GetWhsprID(type_string& strWhsprID)
 {
-    char szWhisperID[32];
+    wchar_t szWhisperID[32];
     m_pWhsprIDInputBox->GetText(szWhisperID, 32);
     strWhsprID = szWhisperID;
 }
 
-void SEASON3B::CNewUIChatInputBox::SetWhsprID(const char* strWhsprID)
+void SEASON3B::CNewUIChatInputBox::SetWhsprID(const wchar_t* strWhsprID)
 {
     m_pWhsprIDInputBox->SetText(strWhsprID);
 }

@@ -318,7 +318,7 @@ void SMD2BMDModel(int ID, int Actions)
 
         TextureScriptParsing TSParsing;
 
-        if (TSParsing.parsingTScript(bmd->Textures[i].FileName))
+        if (TSParsing.parsingTScriptA(bmd->Textures[i].FileName))
         {
             m->m_csTScript = new TextureScript;
             m->m_csTScript->setScript((TextureScript&)TSParsing);

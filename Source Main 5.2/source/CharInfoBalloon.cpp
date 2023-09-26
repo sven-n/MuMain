@@ -107,17 +107,17 @@ void CCharInfoBalloon::SetInfo()
     else
         m_dwNameColor = CLRDW_WHITE;
 
-    strcpy(m_szName, m_pCharInfo->ID);
+    wcscpy(m_szName, m_pCharInfo->ID);
 
     int nText = 0;
     switch (m_pCharInfo->GuildStatus)
     {
-    case 255:	nText = 488;	break;
-    case 0:		nText = 1330;	break;
-    case 32:	nText = 1302;	break;
-    case 64:	nText = 1301;	break;
-    case 128:	nText = 1300;	break;
+        case 255:	nText = 488;	break;
+        case 0:		nText = 1330;	break;
+        case 32:	nText = 1302;	break;
+        case 64:	nText = 1301;	break;
+        case 128:	nText = 1300;	break;
     }
-    sprintf(m_szGuild, "(%s)", GlobalText[nText]);
-    sprintf(m_szClass, "%s %d", gCharacterManager.GetCharacterClassText(m_pCharInfo->Class), m_pCharInfo->Level);
+    wsprintf(m_szGuild, L"(%s)", GlobalText[nText]);
+    wsprintf(m_szClass, L"%s %d", gCharacterManager.GetCharacterClassText(m_pCharInfo->Class), m_pCharInfo->Level);
 }

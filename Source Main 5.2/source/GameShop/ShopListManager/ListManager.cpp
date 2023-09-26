@@ -30,11 +30,11 @@ CListManager::~CListManager() // OK
 }
 
 void			CListManager::SetListManagerInfo(DownloaderType type,
-    char* ServerIP,
-    char* UserID,
-    char* Pwd,
-    char* RemotePath,
-    char* LocalPath,
+    wchar_t* ServerIP,
+    wchar_t* UserID,
+    wchar_t* Pwd,
+    wchar_t* RemotePath,
+    wchar_t* LocalPath,
     CListVersionInfo Version,
     DWORD dwDownloadMaxTime)
 {
@@ -47,12 +47,12 @@ void			CListManager::SetListManagerInfo(DownloaderType type,
 }
 
 void			CListManager::SetListManagerInfo(DownloaderType type,
-    char* ServerIP,
+    wchar_t* ServerIP,
     unsigned short PortNum,
-    char* UserID,
-    char* Pwd,
-    char* RemotePath,
-    char* LocalPath,
+    wchar_t* UserID,
+    wchar_t* Pwd,
+    wchar_t* RemotePath,
+    wchar_t* LocalPath,
     FTP_SERVICE_MODE ftpMode,
     CListVersionInfo Version,
     DWORD dwDownloadMaxTime) // OK
@@ -71,14 +71,14 @@ void			CListManager::SetListManagerInfo(DownloaderType type,
     if (GetFileAttributes(LocalPath) == INVALID_FILE_ATTRIBUTES)
         CreateDirectory(LocalPath, 0);
 
-    if (this->m_ListManagerInfo.m_strLocalPath.substr(this->m_ListManagerInfo.m_strLocalPath.size(), 1) != "\\")
+    if (this->m_ListManagerInfo.m_strLocalPath.substr(this->m_ListManagerInfo.m_strLocalPath.size(), 1) != L"\\")
     {
-        this->m_ListManagerInfo.m_strLocalPath += "\\";
+        this->m_ListManagerInfo.m_strLocalPath += L"\\";
     }
 
-    if (this->m_ListManagerInfo.m_strRemotePath.substr(this->m_ListManagerInfo.m_strRemotePath.size(), 1) != "/")
+    if (this->m_ListManagerInfo.m_strRemotePath.substr(this->m_ListManagerInfo.m_strRemotePath.size(), 1) != L"/")
     {
-        this->m_ListManagerInfo.m_strRemotePath += "/";
+        this->m_ListManagerInfo.m_strRemotePath += L"/";
     }
 }
 
@@ -111,7 +111,7 @@ WZResult		CListManager::LoadScriptList(bool bDonwLoad) // OK
     {
         this->DeleteScriptFiles();
 
-        this->m_Result.SetResult(2, 0, "File Size Zero");
+        this->m_Result.SetResult(2, 0, L"File Size Zero");
     }
 
     return this->m_Result;
@@ -119,11 +119,11 @@ WZResult		CListManager::LoadScriptList(bool bDonwLoad) // OK
 
 bool			CListManager::IsScriptFileExist() // OK
 {
-    std::string path = this->GetScriptPath();
+    std::wstring path = this->GetScriptPath();
 
-    for (std::vector<std::string>::iterator it = this->m_vScriptFiles.begin(); it != this->m_vScriptFiles.end(); it++)
+    for (std::vector<std::wstring>::iterator it = this->m_vScriptFiles.begin(); it != this->m_vScriptFiles.end(); it++)
     {
-        std::string file_path = path + *(it);
+        std::wstring file_path = path + *(it);
 
         if (GetFileAttributes(file_path.c_str()) == INVALID_FILE_ATTRIBUTES)
         {
@@ -134,29 +134,29 @@ bool			CListManager::IsScriptFileExist() // OK
     return 1;
 }
 
-std::string		CListManager::GetScriptPath() // OK
+std::wstring		CListManager::GetScriptPath() // OK
 {
     TCHAR buff[MAX_PATH] = { 0 };
 
-    StringCchPrintf(buff, sizeof(buff), "%03d.%04d.%03d",
+    StringCchPrintf(buff, sizeof(buff), L"%03d.%04d.%03d",
         m_ListManagerInfo.m_Version.Zone,
         m_ListManagerInfo.m_Version.year,
         m_ListManagerInfo.m_Version.yearId);
 
-    std::string path = this->m_ListManagerInfo.m_strLocalPath;
+    std::wstring path = this->m_ListManagerInfo.m_strLocalPath;
     path += buff;
-    path += "\\";
+    path += L"\\";
 
     return path;
 }
 
 void			CListManager::DeleteScriptFiles() // OK
 {
-    std::string path = this->GetScriptPath();
+    std::wstring path = this->GetScriptPath();
 
-    for (std::vector<std::string>::iterator it = this->m_vScriptFiles.begin(); it != this->m_vScriptFiles.end(); it++)
+    for (std::vector<std::wstring>::iterator it = this->m_vScriptFiles.begin(); it != this->m_vScriptFiles.end(); it++)
     {
-        std::string file_path = path + (*it);
+        std::wstring file_path = path + (*it);
 
         DeleteFile(file_path.c_str());
     }
@@ -172,7 +172,7 @@ WZResult		CListManager::FileDownLoad() // OK
 
         if (hHandle == INVALID_HANDLE_VALUE)
         {
-            this->m_Result.BuildResult(8, GetLastError(), "Fail : _beginthreadex");
+            this->m_Result.BuildResult(8, GetLastError(), L"Fail : _beginthreadex");
         }
         else if (WaitForSingleObject(hHandle, this->m_ListManagerInfo.m_dwDownloadMaxTime) == WAIT_TIMEOUT)
         {
@@ -189,7 +189,7 @@ WZResult		CListManager::FileDownLoad() // OK
 
             CloseHandle(hHandle);
 
-            this->m_Result.BuildResult(1, 0, "Time Out!");
+            this->m_Result.BuildResult(1, 0, L"Time Out!");
         }
         else
         {

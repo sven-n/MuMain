@@ -37,55 +37,55 @@ CXmasEvent::~CXmasEvent(void)
 
 void CXmasEvent::LoadXmasEvent()
 {
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_CHA_SSANTA, "Data\\Skill\\", "xmassanta");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHA_SSANTA, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_CHA_SSANTA, L"Data\\Skill\\", L"xmassanta");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHA_SSANTA, L"Skill\\");
 
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_CHA_SNOWMAN, "Data\\Skill\\", "xmassnowman");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHA_SNOWMAN, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_CHA_SNOWMAN, L"Data\\Skill\\", L"xmassnowman");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHA_SNOWMAN, L"Skill\\");
 
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_CHA_DEER, "Data\\Skill\\", "xmassaum");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHA_DEER, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_CHA_DEER, L"Data\\Skill\\", L"xmassaum");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHA_DEER, L"Skill\\");
 
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_CHANGE_GIRL, "Data\\Skill\\", "santa");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHANGE_GIRL, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_CHANGE_GIRL, L"Data\\Skill\\", L"santa");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CHANGE_GIRL, L"Skill\\");
 
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_EARRING, "Data\\Skill\\", "ring");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_EARRING, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_EARRING, L"Data\\Skill\\", L"ring");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_EARRING, L"Skill\\");
 
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_ICEHEART, "Data\\Skill\\", "xmaseicehart");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_ICEHEART, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_ICEHEART, L"Data\\Skill\\", L"xmaseicehart");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_ICEHEART, L"Skill\\");
 
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_BOX, "Data\\Skill\\", "xmasebox");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_BOX, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_BOX, L"Data\\Skill\\", L"xmasebox");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_BOX, L"Skill\\");
 
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_CANDY, "Data\\Skill\\", "xmasecandy");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CANDY, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_CANDY, L"Data\\Skill\\", L"xmasecandy");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_CANDY, L"Skill\\");
 
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_TREE, "Data\\Skill\\", "xmasetree");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_TREE, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_TREE, L"Data\\Skill\\", L"xmasetree");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_TREE, L"Skill\\");
 
-    gLoadData.AccessModel(MODEL_XMAS_EVENT_SOCKS, "Data\\Skill\\", "xmaseyangbal");
-    gLoadData.OpenTexture(MODEL_XMAS_EVENT_SOCKS, "Skill\\");
+    gLoadData.AccessModel(MODEL_XMAS_EVENT_SOCKS, L"Data\\Skill\\", L"xmaseyangbal");
+    gLoadData.OpenTexture(MODEL_XMAS_EVENT_SOCKS, L"Skill\\");
 }
 
 void CXmasEvent::LoadXmasEventEffect()
 {
-    LoadBitmap("Effect\\snowseff01.jpg", BITMAP_SNOW_EFFECT_1, GL_LINEAR, GL_CLAMP);
-    LoadBitmap("Effect\\snowseff02.jpg", BITMAP_SNOW_EFFECT_2, GL_LINEAR, GL_CLAMP);
+    LoadBitmap(L"Effect\\snowseff01.jpg", BITMAP_SNOW_EFFECT_1, GL_LINEAR, GL_CLAMP);
+    LoadBitmap(L"Effect\\snowseff02.jpg", BITMAP_SNOW_EFFECT_2, GL_LINEAR, GL_CLAMP);
 }
 
 void CXmasEvent::LoadXmasEventItem()
 {
-    gLoadData.AccessModel(MODEL_POTION + 51, "Data\\Item\\", "MagicBox", 2);
-    gLoadData.OpenTexture(MODEL_POTION + 51, "Item\\");
+    gLoadData.AccessModel(MODEL_POTION + 51, L"Data\\Item\\", L"MagicBox", 2);
+    gLoadData.OpenTexture(MODEL_POTION + 51, L"Item\\");
 }
 
 void CXmasEvent::LoadXmasEventSound()
 {
-    LoadWaveFile(SOUND_XMAS_JUMP_SNOWMAN, "Data\\Sound\\xmasjumpsnowman.wav", 1);
-    LoadWaveFile(SOUND_XMAS_JUMP_DEER, "Data\\Sound\\xmasjumpsasum.wav", 1);
-    LoadWaveFile(SOUND_XMAS_JUMP_SANTA, "Data\\Sound\\xmasjumpsanta.wav", 1);
-    LoadWaveFile(SOUND_XMAS_TURN, "Data\\Sound\\xmasturn.wav", 1);
+    LoadWaveFile(SOUND_XMAS_JUMP_SNOWMAN, L"Data\\Sound\\xmasjumpsnowman.wav", 1);
+    LoadWaveFile(SOUND_XMAS_JUMP_DEER, L"Data\\Sound\\xmasjumpsasum.wav", 1);
+    LoadWaveFile(SOUND_XMAS_JUMP_SANTA, L"Data\\Sound\\xmasjumpsanta.wav", 1);
+    LoadWaveFile(SOUND_XMAS_TURN, L"Data\\Sound\\xmasturn.wav", 1);
 }
 
 void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType)
@@ -107,13 +107,13 @@ void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType)
     switch (c->Object.SubType)
     {
     case MODEL_XMAS_EVENT_CHA_SSANTA:
-        ::strcpy(c->ID, GlobalText[2245]);	// 2245
+        ::wcscpy(c->ID, GlobalText[2245]);	// 2245
         break;
     case MODEL_XMAS_EVENT_CHA_DEER:
-        ::strcpy(c->ID, GlobalText[2246]);	// 2246
+        ::wcscpy(c->ID, GlobalText[2246]);	// 2246
         break;
     case MODEL_XMAS_EVENT_CHA_SNOWMAN:
-        ::strcpy(c->ID, GlobalText[2247]);	// 2247
+        ::wcscpy(c->ID, GlobalText[2247]);	// 2247
         break;
     }
 
@@ -214,31 +214,31 @@ CNewYearsDayEvent::~CNewYearsDayEvent()
 
 void CNewYearsDayEvent::LoadModel()
 {
-    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, "Data\\Monster\\", "sulbeksulki");
-    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, "Monster\\");
+    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, L"Data\\Monster\\", L"sulbeksulki");
+    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, L"Monster\\");
 
-    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_CANDY, "Data\\Monster\\", "sulcandy");
-    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_CANDY, "Monster\\");
+    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_CANDY, L"Data\\Monster\\", L"sulcandy");
+    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_CANDY, L"Monster\\");
 
-    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_MONEY, "Data\\Monster\\", "sulgold");
-    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_MONEY, "Monster\\");
+    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_MONEY, L"Data\\Monster\\", L"sulgold");
+    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_MONEY, L"Monster\\");
 
-    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN, "Data\\Monster\\", "sulgreengochu");
-    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN, "Monster\\");
+    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN, L"Data\\Monster\\", L"sulgreengochu");
+    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN, L"Monster\\");
 
-    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED, "Data\\Monster\\", "sulredgochu");
-    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED, "Monster\\");
+    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED, L"Data\\Monster\\", L"sulredgochu");
+    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED, L"Monster\\");
 
-    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_PIG, "Data\\Monster\\", "sulpeg");
-    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_PIG, "Monster\\");
+    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_PIG, L"Data\\Monster\\", L"sulpeg");
+    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_PIG, L"Monster\\");
 
-    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_YUT, "Data\\Monster\\", "sulyutnulre");
-    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_YUT, "Monster\\");
+    gLoadData.AccessModel(MODEL_NEWYEARSDAY_EVENT_YUT, L"Data\\Monster\\", L"sulyutnulre");
+    gLoadData.OpenTexture(MODEL_NEWYEARSDAY_EVENT_YUT, L"Monster\\");
 }
 
 void CNewYearsDayEvent::LoadSound()
 {
-    LoadWaveFile(SOUND_NEWYEARSDAY_DIE, "Data\\Sound\\newyeardie.wav", 1);
+    LoadWaveFile(SOUND_NEWYEARSDAY_DIE, L"Data\\Sound\\newyeardie.wav", 1);
 }
 
 CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int iKey)
@@ -251,7 +251,7 @@ CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int
     {
         OpenMonsterModel(122);
         pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 122, iPosX, iPosY);
-        strcpy(pCharacter->ID, "복주머니");
+        wcscpy(pCharacter->ID, L"Fortune Pouch");
         pCharacter->Object.Scale = 1.5f;
     }
     break;
@@ -419,10 +419,10 @@ void C09SummerEvent::LoadModel()
 
 void C09SummerEvent::LoadSound()
 {
-    LoadWaveFile(SOUND_UMBRELLA_MONSTER_WALK1, "Data\\Sound\\UmbMon_Walk01.wav", 1);
-    LoadWaveFile(SOUND_UMBRELLA_MONSTER_WALK2, "Data\\Sound\\UmbMon_Walk02.wav", 1);
-    LoadWaveFile(SOUND_UMBRELLA_MONSTER_DAMAGE, "Data\\Sound\\UmbMon_Damage01.wav", 1);
-    LoadWaveFile(SOUND_UMBRELLA_MONSTER_DEAD, "Data\\Sound\\UmbMon_Dead.wav", 1);
+    LoadWaveFile(SOUND_UMBRELLA_MONSTER_WALK1, L"Data\\Sound\\UmbMon_Walk01.wav", 1);
+    LoadWaveFile(SOUND_UMBRELLA_MONSTER_WALK2, L"Data\\Sound\\UmbMon_Walk02.wav", 1);
+    LoadWaveFile(SOUND_UMBRELLA_MONSTER_DAMAGE, L"Data\\Sound\\UmbMon_Damage01.wav", 1);
+    LoadWaveFile(SOUND_UMBRELLA_MONSTER_DEAD, L"Data\\Sound\\UmbMon_Dead.wav", 1);
 }
 
 CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iKey)
@@ -433,7 +433,7 @@ CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iK
     {
         OpenMonsterModel(154);
         pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 154, iPosX, iPosY);
-        strcpy(pCharacter->ID, "우산");
+        wcscpy(pCharacter->ID, L"Initial Helper");
         pCharacter->Object.Scale = 0.8f;
         pCharacter->Object.HiddenMesh = 2;
         pCharacter->Object.m_iAnimation = 0;

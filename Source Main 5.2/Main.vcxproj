@@ -121,7 +121,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)source\;$(SolutionDir)dependencies\include;$(SolutionDir)dependencies\netcore\includes</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;UNICODE;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -430,8 +430,6 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClCompile Include="source\ExternalObject\Leaf\callstackdmp.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\checkintegrity.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\ExceptionHandler.cpp" />
-    <ClCompile Include="source\ExternalObject\Leaf\html_log.cpp" />
-    <ClCompile Include="source\ExternalObject\Leaf\peimage.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\stdleaf.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\sysinfo.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\xortrans.cpp" />
@@ -677,7 +675,6 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClCompile Include="source\UISenatus.cpp" />
     <ClCompile Include="source\UIWindows.cpp" />
     <ClCompile Include="source\UsefulDef.cpp" />
-    <ClCompile Include="source\Utilities\Log\DebugAngel.cpp" />
     <ClCompile Include="source\Utilities\Log\ErrorReport.cpp" />
     <ClCompile Include="source\Utilities\Log\muConsoleDebug.cpp" />
     <ClCompile Include="source\Utilities\Log\WindowsConsole.cpp" />
@@ -823,8 +820,6 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClInclude Include="source\ExternalObject\Leaf\callstackdmp.h" />
     <ClInclude Include="source\ExternalObject\Leaf\checkintegrity.h" />
     <ClInclude Include="source\ExternalObject\Leaf\ExceptionHandler.h" />
-    <ClInclude Include="source\ExternalObject\Leaf\html_log.h" />
-    <ClInclude Include="source\ExternalObject\Leaf\peimage.h" />
     <ClInclude Include="source\ExternalObject\Leaf\rdtsc.h" />
     <ClInclude Include="source\ExternalObject\Leaf\regkey.h" />
     <ClInclude Include="source\ExternalObject\Leaf\stdleaf.h" />
@@ -1085,7 +1080,6 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClInclude Include="source\UISenatus.h" />
     <ClInclude Include="source\UIWindows.h" />
     <ClInclude Include="source\UsefulDef.h" />
-    <ClInclude Include="source\Utilities\Log\DebugAngel.h" />
     <ClInclude Include="source\Utilities\Log\ErrorReport.h" />
     <ClInclude Include="source\Utilities\Log\muConsoleDebug.h" />
     <ClInclude Include="source\Utilities\Log\WindowsConsole.h" />

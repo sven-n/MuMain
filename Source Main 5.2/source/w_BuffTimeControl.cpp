@@ -119,7 +119,7 @@ bool BuffTimeControl::UnRegisterBuffTime(eBuffState bufftype)
     if (iter != m_BuffTimeList.end())
     {
         ::KillTimer(g_hWnd, bufftimetype);
-        g_ConsoleDebug->Write(MCD_NORMAL, "[Buff End] No. %d\r\n", bufftimetype);
+        g_ConsoleDebug->Write(MCD_NORMAL, L"[Buff End] No. %d\r\n", bufftimetype);
 
         m_BuffTimeList.erase(iter);
         return true;
@@ -128,7 +128,7 @@ bool BuffTimeControl::UnRegisterBuffTime(eBuffState bufftype)
     return false;
 }
 
-void BuffTimeControl::GetBuffStringTime(eBuffState bufftype, std::string& timeText)
+void BuffTimeControl::GetBuffStringTime(eBuffState bufftype, std::wstring& timeText)
 {
     for (BuffTimeInfoMap::iterator iter = m_BuffTimeList.begin(); iter != m_BuffTimeList.end(); ++iter)
     {
@@ -142,7 +142,7 @@ void BuffTimeControl::GetBuffStringTime(eBuffState bufftype, std::string& timeTe
     }
 }
 
-void BuffTimeControl::GetBuffStringTime(DWORD type, std::string& timeText, bool issecond)
+void BuffTimeControl::GetBuffStringTime(DWORD type, std::wstring& timeText, bool issecond)
 {
     auto iter = m_BuffTimeList.find(type);
 
@@ -167,9 +167,9 @@ const DWORD BuffTimeControl::GetBuffTime(DWORD type)
     return 0;
 }
 
-void BuffTimeControl::GetStringTime(DWORD time, std::string& timeText, bool isSecond)
+void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isSecond)
 {
-    char buffer[100];
+    wchar_t buffer[100];
 
     if (isSecond)
     {
@@ -180,22 +180,22 @@ void BuffTimeControl::GetStringTime(DWORD time, std::string& timeText, bool isSe
 
         if (day != 0)
         {
-            std::sprintf(buffer, "%d %s %d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            wsprintf(buffer, L"%d %s %d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buffer;
         }
         else if (day == 0 && oClock != 0)
         {
-            std::sprintf(buffer, "%d %s %d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            wsprintf(buffer, L"%d %s %d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buffer;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            std::sprintf(buffer, "%d %s %d %s", minutes, GlobalText[2300], second, GlobalText[2301]);
+            wsprintf(buffer, L"%d %s %d %s", minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buffer;
         }
         else if (day == 0 && oClock == 0 && minutes == 0)
         {
-            std::sprintf(buffer, "%s", GlobalText[2308]);
+            wsprintf(buffer, L"%s", GlobalText[2308]);
             timeText = buffer;
         }
     }
@@ -207,17 +207,17 @@ void BuffTimeControl::GetStringTime(DWORD time, std::string& timeText, bool isSe
 
         if (day != 0)
         {
-            std::sprintf(buffer, "%d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            wsprintf(buffer, L"%d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
             timeText = buffer;
         }
         else if (day == 0 && oClock != 0)
         {
-            std::sprintf(buffer, "%d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            wsprintf(buffer, L"%d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300]);
             timeText = buffer;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            std::sprintf(buffer, "%d %s", minutes, GlobalText[2300]);
+            wsprintf(buffer, L"%d %s", minutes, GlobalText[2300]);
             timeText = buffer;
         }
     }

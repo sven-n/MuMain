@@ -6,11 +6,11 @@
 #include "ZzzInterface.h"
 #include "./Utilities/Log/ErrorReport.h"
 
-void BoneManager::RegisterBone(CHARACTER* pCharacter, const std::string& name, int nBone)
+void BoneManager::RegisterBone(CHARACTER* pCharacter, const std::wstring& name, int nBone)
 {
     CBoneManager::GetInstance()->RegisterBone(pCharacter, name, nBone);
 }
-void BoneManager::UnregisterBone(CHARACTER* pCharacter, const std::string& name)
+void BoneManager::UnregisterBone(CHARACTER* pCharacter, const std::wstring& name)
 {
     CBoneManager::GetInstance()->UnregisterBone(pCharacter, name);
 }
@@ -23,19 +23,19 @@ void BoneManager::UnregisterAll()
     CBoneManager::GetInstance()->UnregisterAll();
 }
 
-CHARACTER* BoneManager::GetOwnCharacter(OBJECT* pObject, const std::string& name)
+CHARACTER* BoneManager::GetOwnCharacter(OBJECT* pObject, const std::wstring& name)
 {
     return CBoneManager::GetInstance()->GetOwnCharacter(pObject, name);
 }
-int BoneManager::GetBoneNumber(OBJECT* pObject, const std::string& name)
+int BoneManager::GetBoneNumber(OBJECT* pObject, const std::wstring& name)
 {
     return CBoneManager::GetInstance()->GetBoneNumber(pObject, name);
 }
-bool BoneManager::GetBonePosition(OBJECT* pObject, const std::string& name, OUT vec3_t Position)
+bool BoneManager::GetBonePosition(OBJECT* pObject, const std::wstring& name, OUT vec3_t Position)
 {
     return CBoneManager::GetInstance()->GetBonePosition(pObject, name, Position);
 }
-bool BoneManager::GetBonePosition(OBJECT* pObject, const std::string& name, IN vec3_t Relative, OUT vec3_t Position)
+bool BoneManager::GetBonePosition(OBJECT* pObject, const std::wstring& name, IN vec3_t Relative, OUT vec3_t Position)
 {
     return CBoneManager::GetInstance()->GetBonePosition(pObject, name, Relative, Position);
 }
@@ -47,7 +47,7 @@ CBoneManager::~CBoneManager()
     UnregisterAll();
 }
 
-void CBoneManager::RegisterBone(CHARACTER* pCharacter, const std::string& name, int nBone)
+void CBoneManager::RegisterBone(CHARACTER* pCharacter, const std::wstring& name, int nBone)
 {
     if (pCharacter != NULL)
     {
@@ -66,7 +66,7 @@ void CBoneManager::RegisterBone(CHARACTER* pCharacter, const std::string& name, 
         }
     }
 }
-void CBoneManager::UnregisterBone(CHARACTER* pCharacter, const std::string& name)
+void CBoneManager::UnregisterBone(CHARACTER* pCharacter, const std::wstring& name)
 {
     if (pCharacter != NULL) {
         LPBONEINFO _lpBoneInfo = FindBone(&pCharacter->Object, name);
@@ -97,21 +97,21 @@ void CBoneManager::UnregisterAll()
     m_listBone.clear();
 }
 
-CHARACTER* CBoneManager::GetOwnCharacter(OBJECT* pObject, const std::string& name)
+CHARACTER* CBoneManager::GetOwnCharacter(OBJECT* pObject, const std::wstring& name)
 {
     LPBONEINFO _lpBoneInfo = FindBone(pObject, name);
     if (_lpBoneInfo)
         return _lpBoneInfo->pCharacter;
     return NULL;
 }
-int CBoneManager::GetBoneNumber(OBJECT* pObject, const std::string& name)
+int CBoneManager::GetBoneNumber(OBJECT* pObject, const std::wstring& name)
 {
     LPBONEINFO _lpBoneInfo = FindBone(pObject, name);
     if (_lpBoneInfo)
         return _lpBoneInfo->nBone;
     return -1;
 }
-bool CBoneManager::GetBonePosition(OBJECT* pObject, const std::string& name, OUT vec3_t Position)
+bool CBoneManager::GetBonePosition(OBJECT* pObject, const std::wstring& name, OUT vec3_t Position)
 {
     LPBONEINFO _lpBoneInfo = FindBone(pObject, name);
     if (_lpBoneInfo) {
@@ -124,7 +124,7 @@ bool CBoneManager::GetBonePosition(OBJECT* pObject, const std::string& name, OUT
     }
     return false;
 }
-bool CBoneManager::GetBonePosition(OBJECT* pObject, const std::string& name, IN vec3_t Relative, OUT vec3_t Position)
+bool CBoneManager::GetBonePosition(OBJECT* pObject, const std::wstring& name, IN vec3_t Relative, OUT vec3_t Position)
 {
     LPBONEINFO _lpBoneInfo = FindBone(pObject, name);
     if (_lpBoneInfo) {
@@ -143,7 +143,7 @@ CBoneManager* CBoneManager::GetInstance()
     return &s_Instace;
 }
 
-CBoneManager::LPBONEINFO CBoneManager::FindBone(OBJECT* pObject, const std::string& name)
+CBoneManager::LPBONEINFO CBoneManager::FindBone(OBJECT* pObject, const std::wstring& name)
 {
     auto iter = m_listBone.begin();
     for (; iter != m_listBone.end(); iter++)

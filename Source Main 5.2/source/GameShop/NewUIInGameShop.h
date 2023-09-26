@@ -193,7 +193,7 @@ namespace SEASON3B
         void InitZoneBtn();
         void InitCategoryBtn();
 
-        void AddStorageItem(int iStorageSeq, int iStorageItemSeq, int iStorageGroupCode, int iProductSeq, int iPriceSeq, int iCashPoint, unicode::t_char chItemType, unicode::t_char* pszUserName = NULL, unicode::t_char* pszMessage = NULL);
+        void AddStorageItem(int iStorageSeq, int iStorageItemSeq, int iStorageGroupCode, int iProductSeq, int iPriceSeq, int iCashPoint, wchar_t chItemType, wchar_t* pszUserName = NULL, wchar_t* pszMessage = NULL);
 
         void ClearAllStorageItem();
 
@@ -204,7 +204,7 @@ namespace SEASON3B
         void StorageNextPage();
         void UpdateStorageItemList();
 
-        void InitBanner(unicode::t_char* pszFileName, unicode::t_char* pszBannerURL);
+        void InitBanner(wchar_t* pszFileName, wchar_t* pszBannerURL);
         void ReleaseBanner();
 
         void SetRateScale(int _ItemType);
@@ -253,7 +253,7 @@ namespace SEASON3B
 
         bool m_bLoadBanner;
         bool m_bBannerLink;
-        unicode::t_char m_szBannerURL[INTERNET_MAX_URL_LENGTH];
+        wchar_t m_szBannerURL[INTERNET_MAX_URL_LENGTH];
 
         int		m_iStorageTotalItemCnt;
         int		m_iStorageCurrentPageItemCnt;

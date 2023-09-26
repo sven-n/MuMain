@@ -107,10 +107,10 @@ private:
     WORD	m_wItemCode;
     int		m_iCashType;
 
-    unicode::t_char		m_szPackageName[MAX_TEXT_LENGTH];
-    unicode::t_char		m_szPrice[MAX_TEXT_LENGTH];
-    unicode::t_char		m_szPeriod[MAX_TEXT_LENGTH];
-    unicode::t_char		m_szDescription[UIMAX_TEXT_LINE][MAX_TEXT_LENGTH];
+    wchar_t m_szPackageName[MAX_TEXT_LENGTH];
+    wchar_t m_szPrice[MAX_TEXT_LENGTH];
+    wchar_t m_szPeriod[MAX_TEXT_LENGTH];
+    wchar_t m_szDescription[UIMAX_TEXT_LINE][MAX_TEXT_LENGTH];
 };
 
 class CMsgBoxBuyPackageItemLayout : public TMsgBoxLayout<CMsgBoxIGSBuyPackageItem>

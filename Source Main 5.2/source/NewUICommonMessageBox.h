@@ -58,20 +58,20 @@ namespace SEASON3B
 
     typedef struct _MSGBOX_TEXTDATA
     {
-        unicode::t_string strMsg;
+        std::wstring strMsg;
         DWORD dwColor;
         BYTE byFontType;
 
         _MSGBOX_TEXTDATA()
         {
-            strMsg = "";
+            strMsg = L"";
             dwColor = 0xffffffff;
             byFontType = MSGBOX_FONT_NORMAL;
         }
     } MSGBOX_TEXTDATA;
 
     typedef std::vector<MSGBOX_TEXTDATA*> type_vector_msgdata;
-    typedef unicode::t_string type_string;
+    typedef std::wstring type_string;
 
     class CNewUIMessageBoxButton
     {
@@ -102,7 +102,7 @@ namespace SEASON3B
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
         void SetInfo(DWORD dwTexType, float x, float y, float width, float height, DWORD dwSizeType = MSGBOX_BTN_SIZE_OK);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-        void SetText(const unicode::t_char* strText);
+        void SetText(const wchar_t* strText);
         void AddBlank(int iAddLine);
 
         void SetEnable(bool bEnable) { m_bEnable = bEnable; }
@@ -125,7 +125,7 @@ namespace SEASON3B
         DWORD m_dwTexType;
         DWORD m_dwSizeType;
 
-        unicode::t_string m_strText;
+       std::wstring m_strText;
         float m_x, m_y, m_width, m_height;
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
         float m_fButtonWidth;

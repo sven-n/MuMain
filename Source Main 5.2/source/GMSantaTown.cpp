@@ -61,13 +61,13 @@ CHARACTER* CGMSantaTown::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 465:
         OpenNpc(MODEL_XMAS2008_SANTA_NPC);
         pCharacter = CreateCharacter(Key, MODEL_XMAS2008_SANTA_NPC, PosX, PosY);
-        ::strcpy(pCharacter->ID, "산타클로스");
+        ::wcscpy(pCharacter->ID, L"산타클로스");
         pCharacter->Object.Scale = 1.7f;
         break;
     case 467:
         OpenNpc(MODEL_XMAS2008_SNOWMAN_NPC);
         pCharacter = CreateCharacter(Key, MODEL_XMAS2008_SNOWMAN_NPC, PosX, PosY);
-        ::strcpy(pCharacter->ID, "눈사람");
+        ::wcscpy(pCharacter->ID, L"눈사람");
         pCharacter->Object.Scale = 1.3f;
         break;
     }

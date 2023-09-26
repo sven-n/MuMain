@@ -197,14 +197,14 @@ void CNewUIStorageInventory::RenderBackImage()
 
 void CNewUIStorageInventory::RenderText()
 {
-    unicode::t_char szTemp[128];
+    wchar_t szTemp[128];
     int nTempZen;
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
 
-    unicode::_sprintf(
-        szTemp, "%s (%s)", GlobalText[234], GlobalText[m_bLock ? 241 : 240]);
+    wsprintf(
+        szTemp, L"%s (%s)", GlobalText[234], GlobalText[m_bLock ? 241 : 240]);
     if (m_bLock)
         g_pRenderText->SetTextColor(240, 32, 32, 255);
     else
@@ -249,16 +249,16 @@ CNewUIInventoryCtrl* CNewUIStorageInventory::GetInventoryCtrl() const
 
 void CNewUIStorageInventory::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_STORAGE_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_STORAGE_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_STORAGE_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_STORAGE_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_STORAGE_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_money01.tga", IMAGE_STORAGE_BTN_INSERT_ZEN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_money02.tga", IMAGE_STORAGE_BTN_TAKE_ZEN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_lock02.tga", IMAGE_STORAGE_BTN_UNLOCK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_lock.tga", IMAGE_STORAGE_BTN_LOCK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_money3.tga", IMAGE_STORAGE_MONEY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_STORAGE_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_STORAGE_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_STORAGE_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_STORAGE_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_STORAGE_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_money01.tga", IMAGE_STORAGE_BTN_INSERT_ZEN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_money02.tga", IMAGE_STORAGE_BTN_TAKE_ZEN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_lock02.tga", IMAGE_STORAGE_BTN_UNLOCK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_lock.tga", IMAGE_STORAGE_BTN_LOCK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_money3.tga", IMAGE_STORAGE_MONEY, GL_LINEAR);
 }
 
 void CNewUIStorageInventory::UnloadImages()
@@ -441,7 +441,7 @@ void CNewUIStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInven
         pMsgBox->Initialize(GlobalText[3028], GlobalText[667]);
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
-        g_pChatListBox->AddText("", GlobalText[667], TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[667], TYPE_ERROR_MESSAGE);
         CNewUIInventoryCtrl::BackupPickedItem();
 
         if (IsItemAutoMove())

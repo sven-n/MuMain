@@ -34,7 +34,7 @@ namespace SEASON3B
         // wrapping
         void Init() { m_pSlideMgr->Init(); }
         void CreateSlideText() { m_pSlideMgr->CreateSlideText(); }
-        void AddSlide(int iLoopCount, int iLoopDelay, const char* strText, int iType, float fSpeed, DWORD dwTextColor = (255 << 24) + (200 << 16) + (220 << 8) + (230))
+        void AddSlide(int iLoopCount, int iLoopDelay, const wchar_t* strText, int iType, float fSpeed, DWORD dwTextColor = (255 << 24) + (200 << 16) + (220 << 8) + (230))
         {
             m_pSlideMgr->AddSlide(iLoopCount, iLoopDelay, strText, iType, fSpeed, dwTextColor);
         }
@@ -44,6 +44,6 @@ namespace SEASON3B
     };
 }
 
-extern std::string g_strSelectedML;
+extern std::wstring g_strSelectedML;
 
 #endif // !defined(AFX_NEWUISLIDEWINDOW_H__9A5B5D3E_1F9A_4778_8DC7_5367287F45AC__INCLUDED_)

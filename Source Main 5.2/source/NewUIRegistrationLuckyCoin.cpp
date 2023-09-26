@@ -66,32 +66,32 @@ namespace SEASON3B
 
     void CNewUIRegistrationLuckyCoin::RenderTexts()
     {
-        unicode::t_char szText[256] = { 0, };
+        wchar_t szText[256] = { 0, };
         float _x = GetPos().x;
         float _y = GetPos().y + 25;
 
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetFont(g_hFontBold);
-        sprintf(szText, GlobalText[1891]);
+        wsprintf(szText, GlobalText[1891]);
         g_pRenderText->RenderText(_x, _y, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetFont(g_hFont);
-        sprintf(szText, GlobalText[2855]);
+        wsprintf(szText, GlobalText[2855]);
         g_pRenderText->RenderText(_x, _y + 40, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        sprintf(szText, GlobalText[2856]);
+        wsprintf(szText, GlobalText[2856]);
         g_pRenderText->RenderText(_x, _y + 60, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        sprintf(szText, GlobalText[2857]);
+        wsprintf(szText, GlobalText[2857]);
         g_pRenderText->RenderText(_x, _y + 80, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        sprintf(szText, GlobalText[2858]);
+        wsprintf(szText, GlobalText[2858]);
         g_pRenderText->RenderText(_x, _y + 100, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetFont(g_hFontBold);
 
-        sprintf(szText, GlobalText[1889]);
+        wsprintf(szText, GlobalText[1889]);
         g_pRenderText->RenderText(_x, _y + 120, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 
-        sprintf(szText, GlobalText[1893], GetRegistCount());
+        wsprintf(szText, GlobalText[1893], GetRegistCount());
         g_pRenderText->RenderText(_x + 24, _y + 150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
     }
 
@@ -263,12 +263,12 @@ namespace SEASON3B
 
     void CNewUIRegistrationLuckyCoin::LoadImages()
     {
-        LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_BACK, GL_LINEAR);
-        LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_TOP, GL_LINEAR);
-        LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_LEFT, GL_LINEAR);
-        LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_RIGHT, GL_LINEAR);
-        LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_BOTTOM, GL_LINEAR);
-        LoadBitmap("Interface\\newui_btn_empty_small.tga", IMAGE_CLOSE_REGIST, GL_LINEAR);
+        LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_BACK, GL_LINEAR);
+        LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_TOP, GL_LINEAR);
+        LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_LEFT, GL_LINEAR);
+        LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_RIGHT, GL_LINEAR);
+        LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_BOTTOM, GL_LINEAR);
+        LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_CLOSE_REGIST, GL_LINEAR);
     }
 
     void CNewUIRegistrationLuckyCoin::UnloadImages()

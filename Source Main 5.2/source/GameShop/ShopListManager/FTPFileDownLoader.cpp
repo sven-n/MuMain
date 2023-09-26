@@ -23,15 +23,15 @@ CFTPFileDownLoader::~CFTPFileDownLoader() // OK
 }
 
 WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type,
-    std::string strServerIP,
+    std::wstring strServerIP,
     unsigned short PortNum,
-    std::string strUserName,
-    std::string strPWD,
-    std::string strRemotepath,
-    std::string strlocalpath,
+    std::wstring strUserName,
+    std::wstring strPWD,
+    std::wstring strRemotepath,
+    std::wstring strlocalpath,
     bool bPassiveMode,
     CListVersionInfo Version,
-    std::vector<std::string>	vScriptFiles) // OK
+    std::vector<std::wstring>	vScriptFiles) // OK
 {
     static WZResult result;
 
@@ -46,19 +46,19 @@ WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type,
     ServerInfo.SetConnectTimeout(3000);
     ServerInfo.SetServerInfo((TCHAR*)strServerIP.c_str(), PortNum, (TCHAR*)strUserName.c_str(), (TCHAR*)strPWD.c_str());
 
-    char Buffer[MAX_PATH] = { 0 };
+    wchar_t Buffer[MAX_PATH] = { 0 };
 
-    StringCchPrintfA(Buffer, sizeof(Buffer), "%03d.%04d.%03d", Version.Zone, Version.year, Version.yearId);
+    StringCchPrintf(Buffer, sizeof(Buffer), L"%03d.%04d.%03d", Version.Zone, Version.year, Version.yearId);
 
     strRemotepath += Buffer;
-    strRemotepath += "/";
+    strRemotepath += L"/";
     strlocalpath += Buffer;
-    strlocalpath += "\\";
+    strlocalpath += L"\\";
 
-    for (std::vector<std::string>::iterator it = vScriptFiles.begin(); it != vScriptFiles.end(); it++)
+    for (std::vector<std::wstring>::iterator it = vScriptFiles.begin(); it != vScriptFiles.end(); it++)
     {
-        std::string lPath = strlocalpath + (*it);
-        std::string rPath = strRemotepath + (*it);
+        std::wstring lPath = strlocalpath + (*it);
+        std::wstring rPath = strRemotepath + (*it);
 
         FileInfo.SetFilePath((TCHAR*)it->c_str(), (TCHAR*)lPath.c_str(), (TCHAR*)rPath.c_str(), NULL);
 
@@ -70,7 +70,7 @@ WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type,
 
         if (this->m_Break != 0)
         {
-            result.SetResult(1, 0, "Time Out Break");
+            result.SetResult(1, 0, L"Time Out Break");
             break;
         }
 
@@ -90,7 +90,7 @@ void	CFTPFileDownLoader::Break() // OK
         m_pFileDownloader->Break();
 }
 
-BOOL CFTPFileDownLoader::CreateFolder(std::string strFilePath) // OK
+BOOL CFTPFileDownLoader::CreateFolder(std::wstring strFilePath) // OK
 {
     if (GetFileAttributes(strFilePath.c_str()) == INVALID_FILE_ATTRIBUTES)
     {

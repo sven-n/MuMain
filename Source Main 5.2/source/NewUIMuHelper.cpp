@@ -60,7 +60,7 @@ void SEASON3B::CNewUIMuHelper::SetPos(int x, int y)
 
 void SEASON3B::CNewUIMuHelper::InitButtons()
 {
-    std::list<unicode::t_string> ltext;
+    std::list<std::wstring> ltext;
     ltext.push_back(GlobalText[3500]);
     ltext.push_back(GlobalText[3501]);
     ltext.push_back(GlobalText[3590]);
@@ -70,23 +70,23 @@ void SEASON3B::CNewUIMuHelper::InitButtons()
     m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 10.f, m_Pos.y + 48.f, 56, 22);
     m_TabBtn.ChangeFrame(m_iNumCurOpenTab);
 
-    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, "", "", 0, 0);
-    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, "", "", 1, 0);
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 191, 38, 24, 1, 0, 1, 1, GlobalText[3502], "", 2, 0); //-- skill 2
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 243, 38, 24, 1, 0, 1, 1, GlobalText[3502], "", 3, 0); //-- skill 3
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], "", 4, 0); //-- Buff
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 79, 38, 24, 1, 0, 1, 1, GlobalText[3502], "", 5, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], "", 6, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], "", 7, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], "", 8, 0); //-- potion
-    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, "", "", 9, 1);
-    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, "", "", 10, 1);
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 208, 38, 24, 1, 0, 1, 1, GlobalText[3505], "", 11, 1); //-- Buff
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 309, 38, 24, 1, 0, 1, 1, GlobalText[3506], "", 12, 1); //-- Buff
+    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 0, 0);
+    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 1, 0);
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 191, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 2, 0); //-- skill 2
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 243, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 3, 0); //-- skill 3
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 4, 0); //-- Buff
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 79, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 5, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 6, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 7, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 8, 0); //-- potion
+    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 9, 1);
+    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 10, 1);
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 208, 38, 24, 1, 0, 1, 1, GlobalText[3505], L"", 11, 1); //-- Buff
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 309, 38, 24, 1, 0, 1, 1, GlobalText[3506], L"", 12, 1); //-- Buff
     //--
-    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 120, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3503], "", 13, -1);
-    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 65, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3504], "", 14, -1);
-    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_Pos.x + 20, m_Pos.y + 388, 36, 29, 0, 0, 0, 0, "", GlobalText[388], 15, -1);
+    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 120, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3503], L"", 13, -1);
+    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 65, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3504], L"", 14, -1);
+    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_Pos.x + 20, m_Pos.y + 388, 36, 29, 0, 0, 0, 0, L"", GlobalText[388], 15, -1);
 
     RegisterBtnCharacter(0xFF, 0);
     RegisterBtnCharacter(0xFF, 1);
@@ -236,7 +236,7 @@ void SEASON3B::CNewUIMuHelper::InitImage()
 void SEASON3B::CNewUIMuHelper::InitText()
 {
     InsertText(m_Pos.x + 18, m_Pos.y + 78, GlobalText[3526], 1, 0);
-    InsertText(m_Pos.x + 18, m_Pos.y + 83, "________", 2, 0);
+    InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 2, 0);
     InsertText(m_Pos.x + 113, m_Pos.y + 141, GlobalText[3527], 3, 0);
     InsertText(m_Pos.x + 162, m_Pos.y + 141, GlobalText[3528], 4, 0);
     InsertText(m_Pos.x + 18, m_Pos.y + 160, GlobalText[3529], 5, 0);
@@ -246,7 +246,7 @@ void SEASON3B::CNewUIMuHelper::InitText()
 
     InsertText(m_Pos.x + 162, m_Pos.y + 230, GlobalText[3528], 10, 0);
     InsertText(m_Pos.x + 18, m_Pos.y + 78, GlobalText[3532], 11, 1);
-    InsertText(m_Pos.x + 18, m_Pos.y + 83, "________", 12, 1);
+    InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 12, 1);
 
     RegisterTextCharacter(0xFF, 1);
     RegisterTextCharacter(0xFF, 2);
@@ -314,7 +314,7 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
 
     int Identificador = UpdateMouseBtnList();
 
-    //g_ConsoleDebug->Write(MCD_RECEIVE, "MouseBtn Identificador: %d", Identificador);
+    //g_ConsoleDebug->Write(MCD_RECEIVE, L"MouseBtn Identificador: %d", Identificador);
 
     if (Identificador == 15)
     {
@@ -449,12 +449,12 @@ void SEASON3B::CNewUIMuHelper::RenderBack(int x, int y, int width, int height)
 
 void SEASON3B::CNewUIMuHelper::LoadImages()
 {
-    LoadBitmap("Interface\\MacroUI\\MacroUI_RangeMinus.tga", IMAGE_MACROUI_HELPER_RAGEMINUS, GL_LINEAR, GL_CLAMP, 1, 0);
-    LoadBitmap("Interface\\MacroUI\\MacroUI_OptionButton.tga", IMAGE_MACROUI_HELPER_OPTIONBUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
-    LoadBitmap("Interface\\MacroUI\\MacroUI_InputNumber.tga", IMAGE_MACROUI_HELPER_INPUTNUMBER, GL_LINEAR, GL_CLAMP, 1, 0);
-    LoadBitmap("Interface\\MacroUI\\MacroUI_InputString.tga", IMAGE_MACROUI_HELPER_INPUTSTRING, GL_LINEAR, GL_CLAMP, 1, 0);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_RangeMinus.tga", IMAGE_MACROUI_HELPER_RAGEMINUS, GL_LINEAR, GL_CLAMP, 1, 0);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_OptionButton.tga", IMAGE_MACROUI_HELPER_OPTIONBUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_InputNumber.tga", IMAGE_MACROUI_HELPER_INPUTNUMBER, GL_LINEAR, GL_CLAMP, 1, 0);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_InputString.tga", IMAGE_MACROUI_HELPER_INPUTSTRING, GL_LINEAR, GL_CLAMP, 1, 0);
     //--
-    LoadBitmap("Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
 }
 
 void SEASON3B::CNewUIMuHelper::UnloadImages()
@@ -493,7 +493,7 @@ void SEASON3B::CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Id
     }
 }
 
-void SEASON3B::CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, unicode::t_string btname, unicode::t_string tooltiptext, int Identificador, int iNumTab)
+void SEASON3B::CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identificador, int iNumTab)
 {
     CButtonTap cBTN;
     auto* button = new CNewUIButton();
@@ -579,7 +579,7 @@ void SEASON3B::CNewUIMuHelper::RegisterCheckBox(int Identificador, CheckBoxTap b
     m_CheckBoxList.insert(std::pair<int, CheckBoxTap>(Identificador, button));
 }
 
-void SEASON3B::CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg, unicode::t_string btname, int Identificador, int iNumTab)
+void SEASON3B::CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg,std::wstring btname, int Identificador, int iNumTab)
 {
     CheckBoxTap cBOX;
 
@@ -756,7 +756,7 @@ void SEASON3B::CNewUIMuHelper::RegisterTextur(int Identificador, cTextName butto
     m_TextNameList.insert(std::pair<int, cTextName>(Identificador, button));
 }
 
-void SEASON3B::CNewUIMuHelper::InsertText(int x, int y, unicode::t_string Name, int Identificador, int iNumTab)
+void SEASON3B::CNewUIMuHelper::InsertText(int x, int y,std::wstring Name, int Identificador, int iNumTab)
 {
     cTextName cText;
 

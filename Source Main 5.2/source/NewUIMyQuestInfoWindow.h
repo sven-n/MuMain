@@ -109,7 +109,7 @@ namespace SEASON3B
 
         CUICurQuestListBox		m_CurQuestListBox;
         CUIQuestContentsListBox	m_QuestContentsListBox;
-        char			m_aszMsg[2][64];
+        wchar_t			m_aszMsg[2][64];
         int				m_nMsgLine;
     };
 }

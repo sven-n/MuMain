@@ -28,9 +28,9 @@ namespace
             Buffer[i] ^= wBuxCode[i % 3];
     }
 
-    void CutTokenString(char* pcCuttoken, std::list<std::string>& out)
+    void CutTokenString(wchar_t* pcCuttoken, std::list<std::wstring>& out)
     {
-        if (unicode::_strlen(pcCuttoken) == 0) return;
+        if (wcslen(pcCuttoken) == 0) return;
 
         int cutpos = 0;
 
@@ -38,8 +38,8 @@ namespace
         {
             if (pcCuttoken[i] == '/' || pcCuttoken[i] == 0)
             {
-                char Temp[MAX_DESCRIPT_LENGTH] = { 0, };
-                strncpy(Temp, pcCuttoken + cutpos, i - cutpos);
+                wchar_t Temp[MAX_DESCRIPT_LENGTH] = { 0, };
+                wcsncpy(Temp, pcCuttoken + cutpos, i - cutpos);
                 out.push_back(Temp);
                 cutpos = i + 1;
 
@@ -68,7 +68,7 @@ BuffScriptLoaderPtr BuffScriptLoader::Make()
 
 BuffScriptLoader::BuffScriptLoader()
 {
-    std::string filename = "data/local/" + g_strSelectedML + "/BuffEffect_" + g_strSelectedML + ".bmd";
+    std::wstring filename = L"data/local/" + g_strSelectedML + L"/BuffEffect_" + g_strSelectedML + L".bmd";
 
     if (!Load(filename))
     {
@@ -80,9 +80,9 @@ BuffScriptLoader::~BuffScriptLoader()
 {
 }
 
-bool BuffScriptLoader::Load(const std::string& pchFileName)
+bool BuffScriptLoader::Load(const std::wstring& pchFileName)
 {
-    FILE* fp = fopen(pchFileName.c_str(), "rb");
+    FILE* fp = _wfopen(pchFileName.c_str(), L"rb");
 
     if (fp != NULL)
     {
@@ -100,8 +100,8 @@ bool BuffScriptLoader::Load(const std::string& pchFileName)
         fclose(fp);
         if (dwCheckSum != GenerateCheckSum2(Buffer, structsize * listsize, 0xE2F1))
         {
-            char Text[256];
-            sprintf(Text, "%s - File corrupted.", pchFileName);
+            wchar_t Text[256];
+            wsprintf(Text, L"%s - File corrupted.", pchFileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -138,8 +138,8 @@ bool BuffScriptLoader::Load(const std::string& pchFileName)
     }
     else
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", pchFileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", pchFileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);

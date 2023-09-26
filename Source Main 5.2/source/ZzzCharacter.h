@@ -11,7 +11,7 @@ extern CHARACTER* Hero;
 DWORD GetGuildRelationShipTextColor(BYTE GuildRelationShip);
 DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip);
 
-CHARACTER* FindCharacterByID(char* szName);
+CHARACTER* FindCharacterByID(wchar_t* szName);
 
 void CreateMonsterServer(int Type, vec3_t Position, vec3_t Angle, int Level = 0);
 void CreateWeapon(int Type, int Level, CHARACTER* c, int Hand);

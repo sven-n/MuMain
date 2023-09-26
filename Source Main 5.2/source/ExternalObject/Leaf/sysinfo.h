@@ -9,8 +9,8 @@
 namespace leaf {
     //. Interface Declaration
 
-    bool GetOSInfoString(OUT std::string& osinfo);		//. Get OS infomation
-    void GetCPUInfoString(OUT std::string& cpuinfo);	//. Get CPU infomation (Do NOT support duel CPU.)
+    bool GetOSInfoString(OUT std::wstring& osinfo);		//. Get OS infomation
+    void GetCPUInfoString(OUT std::wstring& cpuinfo);	//. Get CPU infomation (Do NOT support duel CPU.)
 }
 
 #endif // _SYSINFO_H_

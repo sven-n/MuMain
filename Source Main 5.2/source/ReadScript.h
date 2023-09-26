@@ -4,8 +4,8 @@ static enum SMDToken
     NUMBER,
     END,
     COMMAND = '#',
-    LP = '{',
-    RP = '}',
+    LBRACKET = '{',
+    RBRACKET = '}',
     COMMA = ',',
     SEMICOLON = ';',
     SMD_ERROR
@@ -39,9 +39,9 @@ static SMDToken GetToken()
     case ',':
         return CurrentToken = COMMA;
     case '{':
-        return CurrentToken = LP;
+        return CurrentToken = LBRACKET;
     case '}':
-        return CurrentToken = RP;
+        return CurrentToken = RBRACKET;
     case '0':	case '1':	case '2':	case '3':	case '4':
     case '5':	case '6':	case '7':	case '8':	case '9':
     case '.':	case '-':
@@ -50,6 +50,7 @@ static SMDToken GetToken()
         while (((ch = (char)getc(SMDFile)) != EOF) && (ch == '.' || isdigit(ch) || ch == '-'))
             *p++ = ch;
         *p = 0;
+        
         TokenNumber = (float)atof(TempString);
         //			sscanf(TempString," %f ",&TokenNumber);
         return CurrentToken = NUMBER;

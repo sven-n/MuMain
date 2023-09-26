@@ -14,14 +14,14 @@ namespace leaf {
 
         size_t GetKeyTableSize() const;
 
-        bool LoadKeyTable(const std::string& filename);
+        bool LoadKeyTable(const std::wstring& filename);
         bool LoadKeyTable(const void* pKey, size_t size);
         void UnloadKeyTable();
 
-        bool AppendKeyTable(const std::string& filename);
+        bool AppendKeyTable(const std::wstring& filename);
         bool AppendKeyTable(const void* pKey, size_t size);
         void JumbleKeyTable();
-        bool SaveKeyTable(const std::string& filename);
+        bool SaveKeyTable(const std::wstring& filename);
 
         bool Trans(const void* src, size_t size, void* dest, DWORD dwStreamKey);
         bool Trans(const void* src, size_t size, xstreambuf& out, DWORD dwStreamKey);

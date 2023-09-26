@@ -136,7 +136,7 @@ bool CNewUIMixInventory::ClosingProcess()
 {
     if (g_pMixInventory->GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
     {
-        g_pChatListBox->AddText("", GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -225,19 +225,19 @@ bool CNewUIMixInventory::Update()
         {
             if (m_SocketListBox.GetLineNum() == 0)
             {
-                char szText[64] = { 0, };
-                char szSocketText[64] = { 0, };
+                wchar_t szText[64] = { 0, };
+                wchar_t szSocketText[64] = { 0, };
                 for (int i = 0; i < g_MixRecipeMgr.GetFirstItemSocketCount(); ++i)
                 {
                     if (g_MixRecipeMgr.GetFirstItemSocketSeedID(i) == SOCKET_EMPTY)
                     {
-                        sprintf(szSocketText, GlobalText[2652]);
+                        wsprintf(szSocketText, GlobalText[2652]);
                     }
                     else
                     {
                         g_SocketItemMgr.CreateSocketOptionText(szSocketText, g_MixRecipeMgr.GetFirstItemSocketSeedID(i), g_MixRecipeMgr.GetFirstItemSocketShpereLv(i));
                     }
-                    sprintf(szText, "%d: %s", i + 1, szSocketText);
+                    wsprintf(szText, L"%d: %s", i + 1, szSocketText);
                     m_SocketListBox.AddText(i, szText);
                 }
                 m_SocketListBox.SLSetSelectLine(0);
@@ -296,18 +296,18 @@ void CNewUIMixInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD
 
 void CNewUIMixInventory::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_MIXINVENTORY_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_MIXINVENTORY_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_MIXINVENTORY_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_MIXINVENTORY_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_MIXINVENTORY_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_bt_mix.tga", IMAGE_MIXINVENTORY_MIXBTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MIXINVENTORY_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_MIXINVENTORY_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_MIXINVENTORY_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_MIXINVENTORY_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_MIXINVENTORY_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_bt_mix.tga", IMAGE_MIXINVENTORY_MIXBTN, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_scrollbar_up.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
-    LoadBitmap("Interface\\newui_scrollbar_m.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
-    LoadBitmap("Interface\\newui_scrollbar_down.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
-    LoadBitmap("Interface\\newui_scroll_on.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_scroll_off.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scrollbar_up.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
+    LoadBitmap(L"Interface\\newui_scrollbar_m.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
+    LoadBitmap(L"Interface\\newui_scrollbar_down.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
+    LoadBitmap(L"Interface\\newui_scroll_on.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scroll_off.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
 }
 void CNewUIMixInventory::UnloadImages()
 {
@@ -333,7 +333,7 @@ void CNewUIMixInventory::RenderFrame()
     RenderImage(IMAGE_MIXINVENTORY_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
     RenderImage(IMAGE_MIXINVENTORY_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
     float fLine_y = 13.0f;
 
@@ -344,60 +344,60 @@ void CNewUIMixInventory::RenderFrame()
     switch (g_MixRecipeMgr.GetMixInventoryType())
     {
     case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        unicode::_sprintf(szText, "%s", GlobalText[735]);
+        wsprintf(szText, L"%s", GlobalText[735]);
         break;
     case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        unicode::_sprintf(szText, "%s", GlobalText[736]);
+        wsprintf(szText, L"%s", GlobalText[736]);
         break;
     case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        unicode::_sprintf(szText, "%s", GlobalText[2193]);
+        wsprintf(szText, L"%s", GlobalText[2193]);
         break;
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[1640]);
+        wsprintf(szText, L"%s", GlobalText[1640]);
         break;
     case SEASON3A::MIXTYPE_TRAINER:
-        unicode::_sprintf(szText, "%s", GlobalText[1205]);
+        wsprintf(szText, L"%s", GlobalText[1205]);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[2061]);
+        wsprintf(szText, L"%s", GlobalText[2061]);
         break;
     case SEASON3A::MIXTYPE_JERRIDON:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[2062]);
+        wsprintf(szText, L"%s", GlobalText[2062]);
         break;
     case SEASON3A::MIXTYPE_ELPIS:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[2063]);
+        wsprintf(szText, L"%s", GlobalText[2063]);
         break;
     case SEASON3A::MIXTYPE_CHAOS_CARD:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[2265]);
+        wsprintf(szText, L"%s", GlobalText[2265]);
         break;
     case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[2563]);
+        wsprintf(szText, L"%s", GlobalText[2563]);
         break;
     case SEASON3A::MIXTYPE_EXTRACT_SEED:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[2660]);
+        wsprintf(szText, L"%s", GlobalText[2660]);
         break;
     case SEASON3A::MIXTYPE_SEED_SPHERE:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[2661]);
+        wsprintf(szText, L"%s", GlobalText[2661]);
         break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[2662]);
+        wsprintf(szText, L"%s", GlobalText[2662]);
         break;
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[2663]);
+        wsprintf(szText, L"%s", GlobalText[2663]);
         break;
     default:
         fLine_y += 5.0f;
-        unicode::_sprintf(szText, "%s", GlobalText[583]);
+        wsprintf(szText, L"%s", GlobalText[583]);
         break;
     }
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
@@ -409,7 +409,7 @@ void CNewUIMixInventory::RenderFrame()
     case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
     case SEASON3A::MIXTYPE_GOBLIN_ADD380:
     case SEASON3A::MIXTYPE_TRAINER:
-        unicode::_sprintf(szText, GlobalText[1623], g_nChaosTaxRate);
+        wsprintf(szText, GlobalText[1623], g_nChaosTaxRate);
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
         break;
     default:
@@ -451,8 +451,8 @@ void CNewUIMixInventory::RenderFrame()
         {
             g_pRenderText->SetTextColor(255, 255, 48, 255);
             g_pRenderText->SetBgColor(40, 40, 40, 128);
-            unicode::_sprintf(szText, GlobalText[584], GlobalText[591], g_MixRecipeMgr.GetSuccessRate());
-            unicode::_sprintf(szText, "%s + %d%%", szText, g_MixRecipeMgr.GetPlusChaosRate());
+            wsprintf(szText, GlobalText[584], GlobalText[591], g_MixRecipeMgr.GetSuccessRate());
+            wsprintf(szText, L"%s + %d%%", szText, g_MixRecipeMgr.GetPlusChaosRate());
             g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
             g_pRenderText->SetTextColor(210, 230, 255, 255);
         }
@@ -467,16 +467,16 @@ void CNewUIMixInventory::RenderFrame()
             case SEASON3A::MIXTYPE_GOBLIN_ADD380:
             case SEASON3A::MIXTYPE_EXTRACT_SEED:
             case SEASON3A::MIXTYPE_SEED_SPHERE:
-                unicode::_sprintf(szText, GlobalText[584], GlobalText[591], g_MixRecipeMgr.GetSuccessRate());
+                wsprintf(szText, GlobalText[584], GlobalText[591], g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_TRAINER:
-                unicode::_sprintf(szText, GlobalText[584], GlobalText[1212], g_MixRecipeMgr.GetSuccessRate());
+                wsprintf(szText, GlobalText[584], GlobalText[1212], g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_OSBOURNE:
-                unicode::_sprintf(szText, GlobalText[584], GlobalText[2061], g_MixRecipeMgr.GetSuccessRate());
+                wsprintf(szText, GlobalText[584], GlobalText[2061], g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_ELPIS:
-                unicode::_sprintf(szText, GlobalText[584], GlobalText[2063], g_MixRecipeMgr.GetSuccessRate());
+                wsprintf(szText, GlobalText[584], GlobalText[2063], g_MixRecipeMgr.GetSuccessRate());
                 break;
             }
             g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
@@ -498,18 +498,18 @@ void CNewUIMixInventory::RenderFrame()
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
     {
-        unicode::t_char szGoldText[32];
-        unicode::t_char szGoldText2[32];
+        wchar_t szGoldText[32];
+        wchar_t szGoldText2[32];
 
         ConvertGold(g_MixRecipeMgr.GetReqiredZen(), szGoldText);
         ConvertChaosTaxGold(g_MixRecipeMgr.GetReqiredZen(), szGoldText2);
         if (g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetCurRecipe()->m_bRequiredZenType == 'C')
         {
-            unicode::_sprintf(szText, GlobalText[1636], szGoldText2, szGoldText);
+            wsprintf(szText, GlobalText[1636], szGoldText2, szGoldText);
         }
         else
         {
-            unicode::_sprintf(szText, GlobalText[1622], szGoldText2, szGoldText);
+            wsprintf(szText, GlobalText[1622], szGoldText2, szGoldText);
         }
 
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
@@ -525,11 +525,11 @@ void CNewUIMixInventory::RenderFrame()
         g_pRenderText->SetTextColor(220, 220, 220, 255);
         g_pRenderText->SetBgColor(40, 40, 40, 128);
 
-        unicode::t_char szTempText[2][100];
+        wchar_t szTempText[2][100];
         int iTextLines = 0;
         if (!g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetMostSimilarRecipeName(szTempText[0], 1) == TRUE)
         {
-            unicode::_sprintf(szText, GlobalText[2334], szTempText[0]);
+            wsprintf(szText, GlobalText[2334], szTempText[0]);
             iTextLines = CutStr(szText, szTempText[0], 150, 2, 100);
 
             for (int i = 0; i < iTextLines; i++)
@@ -567,7 +567,7 @@ void CNewUIMixInventory::RenderFrame()
         g_pRenderText->SetTextColor(255, 50, 20, 255);
         g_pRenderText->SetBgColor(40, 40, 40, 128);
 
-        unicode::_sprintf(szText, GlobalText[2346]);
+        wsprintf(szText, GlobalText[2346]);
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
         iTextPos_y++;
     }
@@ -576,10 +576,10 @@ void CNewUIMixInventory::RenderFrame()
         g_pRenderText->SetTextColor(255, 50, 20, 255);
         g_pRenderText->SetBgColor(40, 40, 40, 128);
 
-        unicode::_sprintf(szText, GlobalText[2334], " ");
+        wsprintf(szText, GlobalText[2334], L" ");
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
 
-        unicode::_sprintf(szText, GlobalText[601]);
+        wsprintf(szText, GlobalText[601]);
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (++iTextPos_y) * 15, szText);
     }
 
@@ -666,7 +666,7 @@ bool CNewUIMixInventory::BtnProcess()
 
 void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
 {
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     switch (g_MixRecipeMgr.GetMixInventoryType())
     {
     case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
@@ -687,16 +687,16 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
     {
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        unicode::_sprintf(szText, GlobalText[2220]);
+        wsprintf(szText, GlobalText[2220]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2221]);
+        wsprintf(szText, GlobalText[2221]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2084], GlobalText[2061], GlobalText[2082]);
+        wsprintf(szText, GlobalText[2084], GlobalText[2061], GlobalText[2082]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2098]);
+        wsprintf(szText, GlobalText[2098]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 3 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         g_pRenderText->SetTextColor(255, 0, 0, 255);
-        unicode::_sprintf(szText, GlobalText[2222]);
+        wsprintf(szText, GlobalText[2222]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 4 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
     }
     break;
@@ -704,28 +704,28 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
     {
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        unicode::_sprintf(szText, GlobalText[2102]);
+        wsprintf(szText, GlobalText[2102]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2103]);
+        wsprintf(szText, GlobalText[2103]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2104]);
+        wsprintf(szText, GlobalText[2104]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2088]);
+        wsprintf(szText, GlobalText[2088]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 3 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2100]);
+        wsprintf(szText, GlobalText[2100]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 4 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2101]);
+        wsprintf(szText, GlobalText[2101]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 5 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
     }
     break;
     case SEASON3A::MIXTYPE_ELPIS:
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        unicode::_sprintf(szText, GlobalText[2071]);
+        wsprintf(szText, GlobalText[2071]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2095]);
+        wsprintf(szText, GlobalText[2095]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        unicode::_sprintf(szText, GlobalText[2096]);
+        wsprintf(szText, GlobalText[2096]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         break;
     case SEASON3A::MIXTYPE_CHAOS_CARD:
@@ -733,19 +733,19 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
         g_pRenderText->SetBgColor(0, 0, 0, 0);
 
         g_pRenderText->SetTextColor(255, 40, 20, 255);
-        unicode::_sprintf(szText, GlobalText[2223]);
+        wsprintf(szText, GlobalText[2223]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 4 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        unicode::_sprintf(szText, GlobalText[2262]);
+        wsprintf(szText, GlobalText[2262]);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 6 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        unicode::_sprintf(szText, GlobalText[2306]);
+        wsprintf(szText, GlobalText[2306]);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 7 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        unicode::_sprintf(szText, GlobalText[2261]);
+        wsprintf(szText, GlobalText[2261]);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 8 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
     }
     break;
@@ -754,33 +754,33 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
         g_pRenderText->SetBgColor(0, 0, 0, 0);
 
         g_pRenderText->SetTextColor(255, 40, 20, 255);
-        unicode::_sprintf(szText, GlobalText[2223]);
+        wsprintf(szText, GlobalText[2223]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        unicode::_sprintf(szText, GlobalText[2565]);
+        wsprintf(szText, GlobalText[2565]);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_LEFT);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        unicode::_sprintf(szText, GlobalText[2540]);
+        wsprintf(szText, GlobalText[2540]);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 3 * 13, szText, 180.0f, 0, RT3_SORT_LEFT);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        unicode::_sprintf(szText, GlobalText[2306]);
+        wsprintf(szText, GlobalText[2306]);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 4 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
     }
     break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(200, 200, 200, 255);
-        unicode::_sprintf(szText, GlobalText[2674]);
+        wsprintf(szText, GlobalText[2674]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 280 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         m_SocketListBox.Render();
         break;
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(200, 200, 200, 255);
-        unicode::_sprintf(szText, GlobalText[2675]);
+        wsprintf(szText, GlobalText[2675]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 280 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         m_SocketListBox.Render();
         break;
@@ -806,33 +806,33 @@ bool CNewUIMixInventory::Mix()
 
     if (nMixZen > (int)dwGold)
     {
-        g_pChatListBox->AddText("", GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
     if (!g_MixRecipeMgr.IsReadyToMix())
     {
-        unicode::t_char szText[100];
-        unicode::_sprintf(szText, GlobalText[580], GlobalText[591]);
-        g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        wchar_t szText[100];
+        wsprintf(szText, GlobalText[580], GlobalText[591]);
+        g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
     int iLevel = CharacterAttribute->Level;
     if (iLevel < g_MixRecipeMgr.GetCurRecipe()->m_iRequiredLevel)
     {
-        unicode::t_char szText[100];
-        unicode::t_char szText2[100];
+        wchar_t szText[100];
+        wchar_t szText2[100];
         g_MixRecipeMgr.GetCurRecipeName(szText2, 1);
         wsprintf(szText, GlobalText[2347], g_MixRecipeMgr.GetCurRecipe()->m_iRequiredLevel, szText2);
-        g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
     if (g_MixRecipeMgr.GetCurRecipe()->m_iWidth != -1 &&
         g_pMyInventory->FindEmptySlot(g_MixRecipeMgr.GetCurRecipe()->m_iWidth, g_MixRecipeMgr.GetCurRecipe()->m_iHeight) == -1)
     {
-        g_pChatListBox->AddText("", GlobalText[581], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[581], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -848,7 +848,7 @@ bool CNewUIMixInventory::Mix()
                 BYTE bySeedSphereID = g_MixRecipeMgr.GetSeedSphereID(0);
                 if (bySocketSeedID == bySeedSphereID)
                 {
-                    g_pChatListBox->AddText("", GlobalText[2683], SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pChatListBox->AddText(L"", GlobalText[2683], SEASON3B::TYPE_ERROR_MESSAGE);
                     return false;
                 }
             }
@@ -856,13 +856,13 @@ bool CNewUIMixInventory::Mix()
 
         if (m_SocketListBox.SLGetSelectLineNum() == 0)
         {
-            g_pChatListBox->AddText("", GlobalText[2676], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2676], SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
         else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
             || g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) != SOCKET_EMPTY)
         {
-            g_pChatListBox->AddText("", GlobalText[2677], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2677], SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
 
@@ -873,13 +873,13 @@ bool CNewUIMixInventory::Mix()
         int iSelectedLine = m_SocketListBox.GetLineNum() - m_SocketListBox.SLGetSelectLineNum();
         if (m_SocketListBox.SLGetSelectLineNum() == 0)
         {
-            g_pChatListBox->AddText("", GlobalText[2678], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2678], SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
         else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
             || g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) == SOCKET_EMPTY)
         {
-            g_pChatListBox->AddText("", GlobalText[2679], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2679], SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
         g_MixRecipeMgr.SetMixSubType(iSelectedLine);
@@ -888,7 +888,7 @@ bool CNewUIMixInventory::Mix()
 #ifdef LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
     if (g_MixRecipeMgr.GetTotalChaosCharmCount() > 0 && g_MixRecipeMgr.GetTotalCharmCount() > 0)
     {
-        g_pChatListBox->AddText("", GlobalText[3286], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[3286], SEASON3B::TYPE_ERROR_MESSAGE);
         return FALSE;
     }
 #endif //LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY

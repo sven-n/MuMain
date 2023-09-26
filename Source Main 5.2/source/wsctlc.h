@@ -78,9 +78,9 @@ public:
 			{
 				if( WSAGetLastError() != WSAEWOULDBLOCK )
 				{
-					g_ConsoleDebug->Write(MCD_ERROR, "[Send Packet Error] WSAGetLastError() != WSAEWOULDBLOCK");
-					g_ConsoleDebug->Write(MCD_ERROR, "[Send Packet Error] WSAGetLastError = %d", WSAGetLastError());
-					g_ErrorReport.Write("[Send Packet Error] WSAGetLastError() != WSAEWOULDBLOCK\r\n");
+					g_ConsoleDebug->Write(MCD_ERROR, L"[Send Packet Error] WSAGetLastError() != WSAEWOULDBLOCK");
+					g_ConsoleDebug->Write(MCD_ERROR, L"[Send Packet Error] WSAGetLastError = %d", WSAGetLastError());
+					g_ErrorReport.Write(L"[Send Packet Error] WSAGetLastError() != WSAEWOULDBLOCK\r\n");
 					Close();
 					return FALSE;
 				}
@@ -88,9 +88,9 @@ public:
 				{
 					if( (m_nSendBufLen+len) > MAX_SENDBUF )
 					{
-						g_ConsoleDebug->Write(MCD_ERROR, "[Send Packet Error] SendBuffer Overflow");
-						g_ConsoleDebug->Write(MCD_ERROR, "[Send Packet Error] WSAGetLastError = %d", WSAGetLastError());
-						g_ErrorReport.Write("[Send Packet Error] SendBuffer Overflow\r\n");
+						g_ConsoleDebug->Write(MCD_ERROR, L"[Send Packet Error] SendBuffer Overflow");
+						g_ConsoleDebug->Write(MCD_ERROR, L"[Send Packet Error] WSAGetLastError = %d", WSAGetLastError());
+						g_ErrorReport.Write(L"[Send Packet Error] SendBuffer Overflow\r\n");
 						Close();
 						return FALSE;
 					}

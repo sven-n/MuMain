@@ -247,7 +247,7 @@ void CBitmapCache::Update()
         }
 
 #ifdef DEBUG_BITMAP_CACHE
-        g_ConsoleDebug->Write(MCD_NORMAL, "M,P,I,E : (%d, %d, %d, %d)", m_mapCacheMain.size(),
+        g_ConsoleDebug->Write(MCD_NORMAL, L"M,P,I,E : (%d, %d, %d, %d)", m_mapCacheMain.size(),
             m_mapCachePlayer.size(), m_mapCacheInterface.size(), m_mapCacheEffect.size());
 #endif // DEBUG_BITMAP_CACHE
     }
@@ -338,14 +338,14 @@ void CGlobalBitmap::Init()
     m_dwUsedTextureMemory = 0;
 }
 
-GLuint CGlobalBitmap::LoadImage(const std::string& filename, GLuint uiFilter, GLuint uiWrapMode)
+GLuint CGlobalBitmap::LoadImage(const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
     BITMAP_t* pBitmap = FindTexture(filename);
     if (pBitmap)
     {
         if (pBitmap->Ref > 0)
         {
-            if (0 == _stricmp(pBitmap->FileName, filename.c_str()))
+            if (0 == _wcsicmp(pBitmap->FileName, filename.c_str()))
             {
                 pBitmap->Ref++;
 
@@ -365,7 +365,7 @@ GLuint CGlobalBitmap::LoadImage(const std::string& filename, GLuint uiFilter, GL
     }
     return BITMAP_UNKNOWN;
 }
-bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter, GLuint uiWrapMode)
+bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
     unsigned int UICLAMP = GL_CLAMP_TO_EDGE;
     unsigned int UIREPEAT = GL_REPEAT;
@@ -376,9 +376,9 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename,
         static unsigned int	uiCnt2 = 0;
         int			iBuff;	iBuff = 0;
 
-        char		szDebugOutput[256];
+        wchar_t		szDebugOutput[256];
 
-        iBuff = iBuff + sprintf(iBuff + szDebugOutput, "%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
+        iBuff = iBuff + wsprintf(iBuff + szDebugOutput, L"%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
         OutputDebugString(szDebugOutput);
 #endif
     }
@@ -389,25 +389,25 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::string& filename,
         BITMAP_t* pBitmap = (*mi).second;
         if (pBitmap->Ref > 0)
         {
-            if (0 == _stricmp(pBitmap->FileName, filename.c_str()))
+            if (0 == _wcsicmp(pBitmap->FileName, filename.c_str()))
             {
                 pBitmap->Ref++;
                 return true;
             }
             else
             {
-                g_ErrorReport.Write("File not found %s (%d)->%s\r\n", pBitmap->FileName, uiBitmapIndex, filename.c_str());
+                g_ErrorReport.Write(L"File not found %s (%d)->%s\r\n", pBitmap->FileName, uiBitmapIndex, filename.c_str());
                 UnloadImage(uiBitmapIndex, true);
             }
         }
     }
 
-    std::string ext;
+    std::wstring ext;
     SplitExt(filename, ext, false);
 
-    if (0 == _stricmp(ext.c_str(), "jpg"))
+    if (0 == _wcsicmp(ext.c_str(), L"jpg"))
         return OpenJpeg(uiBitmapIndex, filename, uiFilter, uiWrapMode);
-    else if (0 == _stricmp(ext.c_str(), "tga"))
+    else if (0 == _wcsicmp(ext.c_str(), L"tga"))
         return OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode);
 
     return false;
@@ -441,7 +441,7 @@ void CGlobalBitmap::UnloadAllImages()
 {
 #ifdef _DEBUG
     if (!m_mapBitmap.empty())
-        g_ErrorReport.Write("Unload Images\r\n");
+        g_ErrorReport.Write(L"Unload Images\r\n");
 #endif // _DEBUG
 
     auto mi = m_mapBitmap.begin();
@@ -452,7 +452,7 @@ void CGlobalBitmap::UnloadAllImages()
 #ifdef _DEBUG
         if (pBitmap->Ref > 1)
         {
-            g_ErrorReport.Write("Bitmap %s(RefCount= %d)\r\n", pBitmap->FileName, pBitmap->Ref);
+            g_ErrorReport.Write(L"Bitmap %s(RefCount= %d)\r\n", pBitmap->FileName, pBitmap->Ref);
         }
 #endif // _DEBUG
         delete[] pBitmap->Buffer;
@@ -480,7 +480,7 @@ BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
     {
         static BITMAP_t s_Error;
         memset(&s_Error, 0, sizeof(BITMAP_t));
-        strcpy(s_Error.FileName, "CGlobalBitmap::GetTexture Error!!!");
+        wcscpy(s_Error.FileName, L"CGlobalBitmap::GetTexture Error!!!");
         pBitmap = &s_Error;
     }
     return pBitmap;
@@ -499,27 +499,27 @@ BITMAP_t* CGlobalBitmap::FindTexture(GLuint uiBitmapIndex)
     return pBitmap;
 }
 
-BITMAP_t* CGlobalBitmap::FindTexture(const std::string& filename)
+BITMAP_t* CGlobalBitmap::FindTexture(const std::wstring& filename)
 {
     auto mi = m_mapBitmap.begin();
     for (; mi != m_mapBitmap.end(); mi++)
     {
         BITMAP_t* pBitmap = (*mi).second;
-        if (0 == stricmp(filename.c_str(), pBitmap->FileName))
+        if (0 == wcsicmp(filename.c_str(), pBitmap->FileName))
             return pBitmap;
     }
     return NULL;
 }
 
-BITMAP_t* CGlobalBitmap::FindTextureByName(const std::string& name)
+BITMAP_t* CGlobalBitmap::FindTextureByName(const std::wstring& name)
 {
     auto mi = m_mapBitmap.begin();
     for (; mi != m_mapBitmap.end(); mi++)
     {
         BITMAP_t* pBitmap = (*mi).second;
-        std::string texname;
+        std::wstring texname;
         SplitFileName(pBitmap->FileName, texname, true);
-        if (0 == stricmp(texname.c_str(), name.c_str()))
+        if (0 == wcsicmp(texname.c_str(), name.c_str()))
             return pBitmap;
     }
     return NULL;
@@ -540,7 +540,7 @@ void CGlobalBitmap::Manage()
     m_DebugOutputTimer.UpdateTime();
     if (m_DebugOutputTimer.IsTime())
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, "CacheSize=%d(NumberOfTexture=%d)", m_BitmapCache.GetCacheSize(), GetNumberOfTexture());
+        g_ConsoleDebug->Write(MCD_NORMAL, L"CacheSize=%d(NumberOfTexture=%d)", m_BitmapCache.GetCacheSize(), GetNumberOfTexture());
     }
 #endif // DEBUG_BITMAP_CACHE
     m_BitmapCache.Update();
@@ -568,12 +568,12 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
     return uiSeed + 1;
 }
 
-bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter, GLuint uiWrapMode)
+bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
-    std::string filename_ozj;
-    ExchangeExt(filename, "OZJ", filename_ozj);
+    std::wstring filename_ozj;
+    ExchangeExt(filename, L"OZJ", filename_ozj);
 
-    FILE* infile = fopen(filename_ozj.c_str(), "rb");
+    FILE* infile = _wfopen(filename_ozj.c_str(), L"rb");
     if (infile == NULL)
     {
         return false;
@@ -662,12 +662,12 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, 
     fclose(infile);
     return true;
 }
-bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter, GLuint uiWrapMode)
+bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
-    std::string filename_ozt;
-    ExchangeExt(filename, "OZT", filename_ozt);
+    std::wstring filename_ozt;
+    ExchangeExt(filename, L"OZT", filename_ozt);
 
-    FILE* fp = fopen(filename_ozt.c_str(), "rb");
+    FILE* fp = _wfopen(filename_ozt.c_str(), L"rb");
     if (fp == NULL)
     {
         return false;
@@ -685,7 +685,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
     index += 4;
     short nx = *((short*)(PakBuffer + index)); index += 2;
     short ny = *((short*)(PakBuffer + index)); index += 2;
-    char bit = *((char*)(PakBuffer + index)); index += 1;
+    char bit = *((wchar_t*)(PakBuffer + index)); index += 1;
     index += 1;
 
     if (bit != 32 || nx > MAX_WIDTH || ny > MAX_HEIGHT)
@@ -762,19 +762,19 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::string& filename, G
     return true;
 }
 
-void CGlobalBitmap::SplitFileName(IN const std::string& filepath, OUT std::string& filename, bool bIncludeExt)
+void CGlobalBitmap::SplitFileName(IN const std::wstring& filepath, OUT std::wstring& filename, bool bIncludeExt)
 {
-    char __fname[_MAX_FNAME] = { 0, };
-    char __ext[_MAX_EXT] = { 0, };
-    _splitpath(filepath.c_str(), NULL, NULL, __fname, __ext);
+    wchar_t __fname[_MAX_FNAME] = { 0, };
+    wchar_t __ext[_MAX_EXT] = { 0, };
+    _wsplitpath(filepath.c_str(), NULL, NULL, __fname, __ext);
     filename = __fname;
     if (bIncludeExt)
         filename += __ext;
 }
-void CGlobalBitmap::SplitExt(IN const std::string& filepath, OUT std::string& ext, bool bIncludeDot)
+void CGlobalBitmap::SplitExt(IN const std::wstring& filepath, OUT std::wstring& ext, bool bIncludeDot)
 {
-    char __ext[_MAX_EXT] = { 0, };
-    _splitpath(filepath.c_str(), NULL, NULL, NULL, __ext);
+    wchar_t __ext[_MAX_EXT] = { 0, };
+    _wsplitpath(filepath.c_str(), NULL, NULL, NULL, __ext);
     if (bIncludeDot) {
         ext = __ext;
     }
@@ -783,12 +783,12 @@ void CGlobalBitmap::SplitExt(IN const std::string& filepath, OUT std::string& ex
             ext = __ext + 1;
     }
 }
-void CGlobalBitmap::ExchangeExt(IN const std::string& in_filepath, IN const std::string& ext, OUT std::string& out_filepath)
+void CGlobalBitmap::ExchangeExt(IN const std::wstring& in_filepath, IN const std::wstring& ext, OUT std::wstring& out_filepath)
 {
-    char __drive[_MAX_DRIVE] = { 0, };
-    char __dir[_MAX_DIR] = { 0, };
-    char __fname[_MAX_FNAME] = { 0, };
-    _splitpath(in_filepath.c_str(), __drive, __dir, __fname, NULL);
+    wchar_t __drive[_MAX_DRIVE] = { 0, };
+    wchar_t __dir[_MAX_DIR] = { 0, };
+    wchar_t __fname[_MAX_FNAME] = { 0, };
+    _wsplitpath(in_filepath.c_str(), __drive, __dir, __fname, NULL);
 
     out_filepath = __drive;
     out_filepath += __dir;
@@ -797,31 +797,31 @@ void CGlobalBitmap::ExchangeExt(IN const std::string& in_filepath, IN const std:
     out_filepath += ext;
 }
 
-bool CGlobalBitmap::Convert_Format(const unicode::t_string& filename)
+bool CGlobalBitmap::Convert_Format(const std::wstring& filename)
 {
-    char drive[_MAX_DRIVE];
-    char dir[_MAX_DIR];
-    char fname[_MAX_FNAME];
-    char ext[_MAX_EXT];
+    wchar_t drive[_MAX_DRIVE];
+    wchar_t dir[_MAX_DIR];
+    wchar_t fname[_MAX_FNAME];
+    wchar_t ext[_MAX_EXT];
 
-    ::_splitpath(filename.c_str(), drive, dir, fname, ext);
+    ::_wsplitpath(filename.c_str(), drive, dir, fname, ext);
 
-    std::string strPath = drive; strPath += dir;
-    std::string strName = fname;
+    std::wstring strPath = drive; strPath += dir;
+    std::wstring strName = fname;
 
-    if (_stricmp(ext, ".jpg") == 0)
+    if (_wcsicmp(ext, L".jpg") == 0)
     {
-        unicode::t_string strSaveName = strPath + strName + ".OZJ";
+        auto strSaveName = strPath + strName + L".OZJ";
         return Save_Image(filename, strSaveName.c_str(), 24);
     }
-    else if (_stricmp(ext, ".tga") == 0)
+    else if (_wcsicmp(ext, L".tga") == 0)
     {
-        unicode::t_string strSaveName = strPath + strName + ".OZT";
+        auto strSaveName = strPath + strName + L".OZT";
         return Save_Image(filename, strSaveName.c_str(), 4);
     }
-    else if (_stricmp(ext, ".bmp") == 0)
+    else if (_wcsicmp(ext, L".bmp") == 0)
     {
-        unicode::t_string strSaveName = strPath + strName + ".OZB";
+        auto strSaveName = strPath + strName + L".OZB";
         return Save_Image(filename, strSaveName.c_str(), 4);
     }
     else
@@ -831,9 +831,9 @@ bool CGlobalBitmap::Convert_Format(const unicode::t_string& filename)
     return false;
 }
 
-bool CGlobalBitmap::Save_Image(const unicode::t_string& src, const unicode::t_string& dest, int cDumpHeader)
+bool CGlobalBitmap::Save_Image(const std::wstring& src, const std::wstring& dest, int cDumpHeader)
 {
-    FILE* fp = fopen(src.c_str(), "rb");
+    FILE* fp = _wfopen(src.c_str(), L"rb");
     if (fp == NULL)
     {
         return false;
@@ -847,7 +847,7 @@ bool CGlobalBitmap::Save_Image(const unicode::t_string& src, const unicode::t_st
     fread(pTempBuf, 1, size, fp);
     fclose(fp);
 
-    fp = fopen(dest.c_str(), "wb");
+    fp = _wfopen(dest.c_str(), L"wb");
     if (fp == NULL)
         return false;
 

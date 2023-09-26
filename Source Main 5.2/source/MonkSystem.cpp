@@ -89,50 +89,50 @@ void CMonkSystem::RegistItem()
 
 void CMonkSystem::LoadModelItem()
 {
-    gLoadData.AccessModel(MODEL_SWORD + 32, "Data\\Item\\", "Sword33");
-    gLoadData.AccessModel(MODEL_SWORD_32_LEFT, "Data\\Item\\", "SwordL33");
-    gLoadData.AccessModel(MODEL_SWORD_32_RIGHT, "Data\\Item\\", "SwordR33");
+    gLoadData.AccessModel(MODEL_SWORD + 32, L"Data\\Item\\", L"Sword33");
+    gLoadData.AccessModel(MODEL_SWORD_32_LEFT, L"Data\\Item\\", L"SwordL33");
+    gLoadData.AccessModel(MODEL_SWORD_32_RIGHT, L"Data\\Item\\", L"SwordR33");
 
-    gLoadData.AccessModel(MODEL_SWORD + 33, "Data\\Item\\", "Sword34");
-    gLoadData.AccessModel(MODEL_SWORD_33_LEFT, "Data\\Item\\", "SwordL34");
-    gLoadData.AccessModel(MODEL_SWORD_33_RIGHT, "Data\\Item\\", "SwordR34");
+    gLoadData.AccessModel(MODEL_SWORD + 33, L"Data\\Item\\", L"Sword34");
+    gLoadData.AccessModel(MODEL_SWORD_33_LEFT, L"Data\\Item\\", L"SwordL34");
+    gLoadData.AccessModel(MODEL_SWORD_33_RIGHT, L"Data\\Item\\", L"SwordR34");
 
-    gLoadData.AccessModel(MODEL_SWORD + 34, "Data\\Item\\", "Sword35");
-    gLoadData.AccessModel(MODEL_SWORD_34_LEFT, "Data\\Item\\", "SwordL35");
-    gLoadData.AccessModel(MODEL_SWORD_34_RIGHT, "Data\\Item\\", "SwordR35");
+    gLoadData.AccessModel(MODEL_SWORD + 34, L"Data\\Item\\", L"Sword35");
+    gLoadData.AccessModel(MODEL_SWORD_34_LEFT, L"Data\\Item\\", L"SwordL35");
+    gLoadData.AccessModel(MODEL_SWORD_34_RIGHT, L"Data\\Item\\", L"SwordR35");
 
-    gLoadData.AccessModel(MODEL_SWORD + 35, "Data\\Item\\", "Sword36");
-    gLoadData.AccessModel(MODEL_SWORD_35_LEFT, "Data\\Item\\", "Sword36L");
-    gLoadData.AccessModel(MODEL_SWORD_35_RIGHT, "Data\\Item\\", "Sword36R");
+    gLoadData.AccessModel(MODEL_SWORD + 35, L"Data\\Item\\", L"Sword36");
+    gLoadData.AccessModel(MODEL_SWORD_35_LEFT, L"Data\\Item\\", L"Sword36L");
+    gLoadData.AccessModel(MODEL_SWORD_35_RIGHT, L"Data\\Item\\", L"Sword36R");
 
-    gLoadData.AccessModel(MODEL_ARMORINVEN_60, "Data\\player\\", "Armor_inventory60");
-    gLoadData.AccessModel(MODEL_ARMORINVEN_61, "Data\\player\\", "ArmorMale61_inventory");
-    gLoadData.AccessModel(MODEL_ARMORINVEN_62, "Data\\player\\", "ArmorMale62_inventory");
-    gLoadData.AccessModel(MODEL_ARMORINVEN_74, "Data\\player\\", "ArmorMale74_inven");
+    gLoadData.AccessModel(MODEL_ARMORINVEN_60, L"Data\\player\\", L"Armor_inventory60");
+    gLoadData.AccessModel(MODEL_ARMORINVEN_61, L"Data\\player\\", L"ArmorMale61_inventory");
+    gLoadData.AccessModel(MODEL_ARMORINVEN_62, L"Data\\player\\", L"ArmorMale62_inventory");
+    gLoadData.AccessModel(MODEL_ARMORINVEN_74, L"Data\\player\\", L"ArmorMale74_inven");
 }
 
 void CMonkSystem::LoadModelItemTexture()
 {
-    gLoadData.OpenTexture(MODEL_SWORD + 32, "player\\");
-    gLoadData.OpenTexture(MODEL_SWORD_32_LEFT, "player\\");
-    gLoadData.OpenTexture(MODEL_SWORD_32_RIGHT, "player\\");
+    gLoadData.OpenTexture(MODEL_SWORD + 32, L"player\\");
+    gLoadData.OpenTexture(MODEL_SWORD_32_LEFT, L"player\\");
+    gLoadData.OpenTexture(MODEL_SWORD_32_RIGHT, L"player\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 33, "Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD_33_LEFT, "Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD_33_RIGHT, "Item\\");
+    gLoadData.OpenTexture(MODEL_SWORD + 33, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SWORD_33_LEFT, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SWORD_33_RIGHT, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 34, "player\\");
-    gLoadData.OpenTexture(MODEL_SWORD_34_LEFT, "player\\");
-    gLoadData.OpenTexture(MODEL_SWORD_34_RIGHT, "player\\");
+    gLoadData.OpenTexture(MODEL_SWORD + 34, L"player\\");
+    gLoadData.OpenTexture(MODEL_SWORD_34_LEFT, L"player\\");
+    gLoadData.OpenTexture(MODEL_SWORD_34_RIGHT, L"player\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 35, "player\\");
-    gLoadData.OpenTexture(MODEL_SWORD_35_LEFT, "player\\");
-    gLoadData.OpenTexture(MODEL_SWORD_35_RIGHT, "player\\");
+    gLoadData.OpenTexture(MODEL_SWORD + 35, L"player\\");
+    gLoadData.OpenTexture(MODEL_SWORD_35_LEFT, L"player\\");
+    gLoadData.OpenTexture(MODEL_SWORD_35_RIGHT, L"player\\");
 
-    gLoadData.OpenTexture(MODEL_ARMORINVEN_60, "player\\");
-    gLoadData.OpenTexture(MODEL_ARMORINVEN_61, "player\\");
-    gLoadData.OpenTexture(MODEL_ARMORINVEN_62, "player\\");
-    gLoadData.OpenTexture(MODEL_ARMORINVEN_74, "player\\");
+    gLoadData.OpenTexture(MODEL_ARMORINVEN_60, L"player\\");
+    gLoadData.OpenTexture(MODEL_ARMORINVEN_61, L"player\\");
+    gLoadData.OpenTexture(MODEL_ARMORINVEN_62, L"player\\");
+    gLoadData.OpenTexture(MODEL_ARMORINVEN_74, L"player\\");
 }
 
 int CMonkSystem::GetSubItemType(int _Type, int _Left)

@@ -18,7 +18,7 @@ bool    GetUseLostMap(bool bDrawAlert = false);
 int     RenderHellasItemInfo(ITEM* ip, int textNum);
 bool	EnableKalima(int Class, int Level, int ItemLevel);
 
-void    AddObjectDescription(char* Text, vec3_t position);
+void    AddObjectDescription(wchar_t* Text, vec3_t position);
 void    RenderObjectDescription(void);
 
 bool    CreateHellasObject(OBJECT* o);

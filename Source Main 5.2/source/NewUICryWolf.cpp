@@ -20,7 +20,7 @@ extern char	Suc_Or_Fail;
 extern char	View_Suc_Or_Fail;
 extern float Deco_Insert;
 extern char Message_Box;
-extern char   Box_String[2][200];
+extern wchar_t   Box_String[2][200];
 extern int  Dark_elf_Num;
 extern int Button_Down;
 extern int BackUp_Key;
@@ -37,7 +37,7 @@ extern int Exp;
 extern BYTE Ranking[5];
 extern BYTE HeroClass[5];
 extern int HeroScore[5];
-extern char HeroName[5][MAX_ID_SIZE + 1];
+extern wchar_t HeroName[5][MAX_ID_SIZE + 1];
 
 extern int BackUpMin;
 extern bool TimeStart;
@@ -138,7 +138,7 @@ bool SEASON3B::CNewUICryWolf::Render()
     EnableAlphaTest();
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-    char Text[300];
+    wchar_t Text[300];
 
     float Main[] = { 518.f,278.f,122.f,119.f,120.f / 128.f,118.f / 128.f };
     float Number[5][6] = { {565.f,280.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
@@ -532,51 +532,51 @@ void SEASON3B::CNewUICryWolf::InitTime()
 
 void SEASON3B::CNewUICryWolf::LoadImages()
 {
-    LoadBitmap("Interface\\in_bar.tga", IMAGE_MVP_INTERFACE, GL_LINEAR);
-    LoadBitmap("Interface\\in_bar2.jpg", IMAGE_MVP_INTERFACE + 1, GL_LINEAR);
-    LoadBitmap("Interface\\in_deco.tga", IMAGE_MVP_INTERFACE + 2, GL_LINEAR);
-    LoadBitmap("Interface\\in_main-New.tga", IMAGE_MVP_INTERFACE + 3, GL_LINEAR);
-    LoadBitmap("Interface\\in_main_icon_bal1.tga", IMAGE_MVP_INTERFACE + 4, GL_LINEAR);
-    LoadBitmap("Interface\\in_main_icon_dl1.tga", IMAGE_MVP_INTERFACE + 5, GL_LINEAR);
-    LoadBitmap("Interface\\in_main_icon_dl2.tga", IMAGE_MVP_INTERFACE + 6, GL_LINEAR);
-    LoadBitmap("Interface\\in_main_number1.tga", IMAGE_MVP_INTERFACE + 7, GL_LINEAR);
-    LoadBitmap("Interface\\in_main_number2.tga", IMAGE_MVP_INTERFACE + 8, GL_LINEAR);
-    LoadBitmap("Interface\\in_main2-New.tga", IMAGE_MVP_INTERFACE + 9, GL_LINEAR);
-    LoadBitmap("Interface\\icon_failure.tga", IMAGE_MVP_INTERFACE + 10, GL_LINEAR);
-    LoadBitmap("Interface\\icon_success.tga", IMAGE_MVP_INTERFACE + 11, GL_LINEAR);
-    LoadBitmap("Interface\\t_main-New.tga", IMAGE_MVP_INTERFACE + 12, GL_LINEAR);
-    LoadBitmap("Interface\\m_b_no1.tga", IMAGE_MVP_INTERFACE + 13, GL_LINEAR);
-    LoadBitmap("Interface\\m_b_no2.tga", IMAGE_MVP_INTERFACE + 14, GL_LINEAR);
-    LoadBitmap("Interface\\m_b_no3.tga", IMAGE_MVP_INTERFACE + 15, GL_LINEAR);
-    LoadBitmap("Interface\\m_b_ok1.tga", IMAGE_MVP_INTERFACE + 16, GL_LINEAR);
-    LoadBitmap("Interface\\m_b_ok2.tga", IMAGE_MVP_INTERFACE + 17, GL_LINEAR);
-    LoadBitmap("Interface\\m_b_ok3.tga", IMAGE_MVP_INTERFACE + 18, GL_LINEAR);
-    LoadBitmap("Interface\\m_b_yes1.tga", IMAGE_MVP_INTERFACE + 19, GL_LINEAR);
-    LoadBitmap("Interface\\m_b_yes2.tga", IMAGE_MVP_INTERFACE + 20, GL_LINEAR);
-    LoadBitmap("Interface\\m_b_yes3.tga", IMAGE_MVP_INTERFACE + 21, GL_LINEAR);
-    LoadBitmap("Interface\\m_main.tga", IMAGE_MVP_INTERFACE + 22, GL_LINEAR);
-    LoadBitmap("Interface\\in_main_number1_1.tga", IMAGE_MVP_INTERFACE + 23, GL_LINEAR);
-    LoadBitmap("Interface\\in_main_number2_1.tga", IMAGE_MVP_INTERFACE + 24, GL_LINEAR);
-    LoadBitmap("Interface\\in_main_number0_2.tga", IMAGE_MVP_INTERFACE + 25, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_table.tga", IMAGE_MVP_INTERFACE + 26, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_rank.tga", IMAGE_MVP_INTERFACE + 27, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_D.tga", IMAGE_MVP_INTERFACE + 28, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_C.tga", IMAGE_MVP_INTERFACE + 29, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_B.tga", IMAGE_MVP_INTERFACE + 30, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_A.tga", IMAGE_MVP_INTERFACE + 31, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_S.tga", IMAGE_MVP_INTERFACE + 32, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_0.tga", IMAGE_MVP_INTERFACE + 33, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_1.tga", IMAGE_MVP_INTERFACE + 34, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_2.tga", IMAGE_MVP_INTERFACE + 35, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_3.tga", IMAGE_MVP_INTERFACE + 36, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_4.tga", IMAGE_MVP_INTERFACE + 37, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_5.tga", IMAGE_MVP_INTERFACE + 38, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_6.tga", IMAGE_MVP_INTERFACE + 39, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_7.tga", IMAGE_MVP_INTERFACE + 40, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_8.tga", IMAGE_MVP_INTERFACE + 41, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_9.tga", IMAGE_MVP_INTERFACE + 42, GL_LINEAR);
-    LoadBitmap("Interface\\icon_Rank_exp.tga", IMAGE_MVP_INTERFACE + 43, GL_LINEAR);
-    LoadBitmap("Interface\\m_main_rank.tga", IMAGE_MVP_INTERFACE + 44, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_bar.tga", IMAGE_MVP_INTERFACE, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_bar2.jpg", IMAGE_MVP_INTERFACE + 1, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_deco.tga", IMAGE_MVP_INTERFACE + 2, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main-New.tga", IMAGE_MVP_INTERFACE + 3, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main_icon_bal1.tga", IMAGE_MVP_INTERFACE + 4, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main_icon_dl1.tga", IMAGE_MVP_INTERFACE + 5, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main_icon_dl2.tga", IMAGE_MVP_INTERFACE + 6, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main_number1.tga", IMAGE_MVP_INTERFACE + 7, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main_number2.tga", IMAGE_MVP_INTERFACE + 8, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main2-New.tga", IMAGE_MVP_INTERFACE + 9, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_failure.tga", IMAGE_MVP_INTERFACE + 10, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_success.tga", IMAGE_MVP_INTERFACE + 11, GL_LINEAR);
+    LoadBitmap(L"Interface\\t_main-New.tga", IMAGE_MVP_INTERFACE + 12, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_b_no1.tga", IMAGE_MVP_INTERFACE + 13, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_b_no2.tga", IMAGE_MVP_INTERFACE + 14, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_b_no3.tga", IMAGE_MVP_INTERFACE + 15, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_b_ok1.tga", IMAGE_MVP_INTERFACE + 16, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_b_ok2.tga", IMAGE_MVP_INTERFACE + 17, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_b_ok3.tga", IMAGE_MVP_INTERFACE + 18, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_b_yes1.tga", IMAGE_MVP_INTERFACE + 19, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_b_yes2.tga", IMAGE_MVP_INTERFACE + 20, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_b_yes3.tga", IMAGE_MVP_INTERFACE + 21, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_main.tga", IMAGE_MVP_INTERFACE + 22, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main_number1_1.tga", IMAGE_MVP_INTERFACE + 23, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main_number2_1.tga", IMAGE_MVP_INTERFACE + 24, GL_LINEAR);
+    LoadBitmap(L"Interface\\in_main_number0_2.tga", IMAGE_MVP_INTERFACE + 25, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_table.tga", IMAGE_MVP_INTERFACE + 26, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_rank.tga", IMAGE_MVP_INTERFACE + 27, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_D.tga", IMAGE_MVP_INTERFACE + 28, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_C.tga", IMAGE_MVP_INTERFACE + 29, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_B.tga", IMAGE_MVP_INTERFACE + 30, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_A.tga", IMAGE_MVP_INTERFACE + 31, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_S.tga", IMAGE_MVP_INTERFACE + 32, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_0.tga", IMAGE_MVP_INTERFACE + 33, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_1.tga", IMAGE_MVP_INTERFACE + 34, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_2.tga", IMAGE_MVP_INTERFACE + 35, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_3.tga", IMAGE_MVP_INTERFACE + 36, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_4.tga", IMAGE_MVP_INTERFACE + 37, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_5.tga", IMAGE_MVP_INTERFACE + 38, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_6.tga", IMAGE_MVP_INTERFACE + 39, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_7.tga", IMAGE_MVP_INTERFACE + 40, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_8.tga", IMAGE_MVP_INTERFACE + 41, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_9.tga", IMAGE_MVP_INTERFACE + 42, GL_LINEAR);
+    LoadBitmap(L"Interface\\icon_Rank_exp.tga", IMAGE_MVP_INTERFACE + 43, GL_LINEAR);
+    LoadBitmap(L"Interface\\m_main_rank.tga", IMAGE_MVP_INTERFACE + 44, GL_LINEAR);
 }
 
 void SEASON3B::CNewUICryWolf::UnloadImages()

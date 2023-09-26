@@ -58,13 +58,13 @@ public:
     virtual ~ItemAddOptioninfo();
 
 public:
-    void GetItemAddOtioninfoText(std::vector<std::string>& outtextlist, int type);
+    void GetItemAddOtioninfoText(std::vector<std::wstring>& outtextlist, int type);
 
 public://inline
     const ITEM_ADD_OPTION& GetItemAddOtioninfo(int type);
 
 private:
-    const bool OpenItemAddOptionInfoFile(const std::string& filename);
+    const bool OpenItemAddOptionInfoFile(const std::wstring& filename);
     ItemAddOptioninfo();
 
 private:

@@ -52,7 +52,7 @@ namespace leaf {
         {
             return write(sz, strlen(sz) + 1);
         }
-        xstreambuf& operator << (std::string str)
+        xstreambuf& operator << (std::wstring str)
         {
             return write(str.data(), str.size() + 1);
         }
@@ -62,13 +62,13 @@ namespace leaf {
             return read((char*)&data, sizeof(data));
         }
 
-        xstreambuf& operator >> (char* sz)
+        xstreambuf& operator >> (wchar_t* sz)
         {
             return read(sz, strlen((const char*)(m_pBuffer)+m_offset) + 1);
         }
-        xstreambuf& operator >> (std::string str)
+        xstreambuf& operator >> (std::wstring str)
         {
-            str = (const char*)(m_pBuffer)+m_offset;
+            str = (const wchar_t*)(m_pBuffer)+m_offset;
             m_offset += str.length();
             return *this;
         }
@@ -90,11 +90,11 @@ namespace leaf {
     public:
         xfstreambuf();
         xfstreambuf(const xstreambuf& xbuf);
-        xfstreambuf(const std::string& filename);
+        xfstreambuf(const std::wstring& filename);
         virtual ~xfstreambuf();
 
-        bool load(const std::string& filename);
-        bool save(const std::string& filename);
+        bool load(const std::wstring& filename);
+        bool save(const std::wstring& filename);
     };
 }
 

@@ -27,7 +27,7 @@ METHODDEF(void) my_error_exit(j_common_ptr cinfo)
     longjmp(myerr->setjmp_buffer, 1);
 }
 
-bool WriteJpeg(char* filename, int Width, int Height, unsigned char* Buffer, int quality)
+bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality)
 {
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -38,9 +38,9 @@ bool WriteJpeg(char* filename, int Width, int Height, unsigned char* Buffer, int
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
 
-    if ((outfile = fopen(filename, "wb")) == NULL)
+    if ((outfile = _wfopen(filename, L"wb")) == NULL)
     {
-        //fprintf(stderr, "can't open %s\n", filename);
+        //fprintf(stderr, L"can't open %s\n", filename);
         //exit(1);
         return FALSE;
     }
@@ -67,14 +67,14 @@ bool WriteJpeg(char* filename, int Width, int Height, unsigned char* Buffer, int
     return TRUE;
 }
 
-void SaveImage(int HeaderSize, char* Ext, char* filename, BYTE* PakBuffer, int Size)
+void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer, int Size)
 {
     if (PakBuffer == NULL || Size == 0)
     {
-        char OpenFileName[256];
-        strcpy(OpenFileName, "Data2\\");
-        strcat(OpenFileName, filename);
-        FILE* fp = fopen(OpenFileName, "rb");
+        wchar_t OpenFileName[256];
+        wcscpy(OpenFileName, L"Data2\\");
+        wcscat(OpenFileName, filename);
+        FILE* fp = _wfopen(OpenFileName, L"rb");
         if (fp == NULL)
         {
             return;
@@ -87,23 +87,23 @@ void SaveImage(int HeaderSize, char* Ext, char* filename, BYTE* PakBuffer, int S
         fclose(fp);
     }
 
-    char Header[24];
+    wchar_t Header[24];
     memcpy(Header, PakBuffer, HeaderSize);
 
-    char NewFileName[256];
+    wchar_t NewFileName[256];
     int iTextcnt = 0;
-    for (int i = 0; i < (int)strlen(filename); i++)
+    for (int i = 0; i < (int)wcslen(filename); i++)
     {
         iTextcnt = i;
         NewFileName[i] = filename[i];
         if (filename[i] == '.') break;
     }
     NewFileName[iTextcnt + 1] = NULL;
-    strcat(NewFileName, Ext);
-    char SaveFileName[256];
-    strcpy(SaveFileName, "Data\\");
-    strcat(SaveFileName, NewFileName);
-    FILE* fp = fopen(SaveFileName, "wb");
+    wcscat(NewFileName, Ext);
+    wchar_t SaveFileName[256];
+    wcscpy(SaveFileName, L"Data\\");
+    wcscat(SaveFileName, NewFileName);
+    FILE* fp = _wfopen(SaveFileName, L"wb");
     if (fp == NULL) return;
     fwrite(Header, 1, HeaderSize, fp);
     fwrite(PakBuffer, 1, Size, fp);
@@ -115,7 +115,7 @@ void SaveImage(int HeaderSize, char* Ext, char* filename, BYTE* PakBuffer, int S
     }
 }
 
-bool OpenJpegBuffer(char* filename, float* BufferFloat)
+bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
 {
     struct jpeg_decompress_struct cinfo;
     struct my_error_mgr jerr;
@@ -123,27 +123,27 @@ bool OpenJpegBuffer(char* filename, float* BufferFloat)
     JSAMPARRAY buffer;
     int row_stride;
 
-    char FileName[256];
+    wchar_t FileName[256];
 
-    char NewFileName[256];
+    wchar_t NewFileName[256];
     int iTextcnt = 0;
-    for (int i = 0; i < (int)strlen(filename); i++)
+    for (int i = 0; i < (int)wcslen(filename); i++)
     {
         iTextcnt = i;
         NewFileName[i] = filename[i];
         if (filename[i] == '.') break;
     }
     NewFileName[iTextcnt + 1] = NULL;
-    strcpy(FileName, "Data\\");
-    strcat(FileName, NewFileName);
-    strcat(FileName, "OZJ");
+    wcscpy(FileName, L"Data\\");
+    wcscat(FileName, NewFileName);
+    wcscat(FileName, L"OZJ");
 
-    if ((infile = fopen(FileName, "rb")) == NULL)
+    if ((infile = _wfopen(FileName, L"rb")) == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
-        g_ErrorReport.Write("\r\n");
+        g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -195,32 +195,32 @@ bool OpenJpegBuffer(char* filename, float* BufferFloat)
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-bool LoadBitmap(const char* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck, bool bFullPath)
+bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck, bool bFullPath)
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-bool LoadBitmap(const char* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck)
+bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck)
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 {
-    char szFullPath[256] = { 0, };
+    wchar_t szFullPath[256] = { 0, };
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     if (bFullPath == true)
     {
-        strcpy(szFullPath, szFileName);
+        wcscpy(szFullPath, szFileName);
     }
     else
     {
-        strcpy(szFullPath, "Data\\");
-        strcat(szFullPath, szFileName);
+        wcscpy(szFullPath, L"Data\\");
+        wcscat(szFullPath, szFileName);
     }
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    strcpy(szFullPath, "Data\\");
-    strcat(szFullPath, szFileName);
+    wcscpy(szFullPath, L"Data\\");
+    wcscat(szFullPath, szFileName);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
     if (bCheck)
     {
         if (false == Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode))
         {
-            char szErrorMsg[256] = { 0, };
-            sprintf(szErrorMsg, "LoadBitmap Failed: %s", szFullPath);
+            wchar_t szErrorMsg[256] = { 0, };
+            wsprintf(szErrorMsg, L"LoadBitmap Failed: %s", szFullPath);
 #ifdef FOR_WORK
             PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK
@@ -236,18 +236,18 @@ void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
 {
     Bitmaps.UnloadImage(uiTextureIndex, bForce);
 }
-void PopUpErrorCheckMsgBox(const char* szErrorMsg, bool bForceDestroy)
+void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
 {
-    char szMsg[1024] = { 0, };
-    strcpy(szMsg, szErrorMsg);
+    wchar_t szMsg[1024] = { 0, };
+    wcscpy(szMsg, szErrorMsg);
 
     if (bForceDestroy)
     {
-        MessageBox(g_hWnd, szErrorMsg, "ErrorCheckBox", MB_OK | MB_ICONERROR);
+        MessageBox(g_hWnd, szErrorMsg, L"ErrorCheckBox", MB_OK | MB_ICONERROR);
     }
     else
     {
-        int iResult = MessageBox(g_hWnd, szMsg, "ErrorCheckBox", MB_YESNO | MB_ICONERROR);
+        int iResult = MessageBox(g_hWnd, szMsg, L"ErrorCheckBox", MB_YESNO | MB_ICONERROR);
         if (IDYES == iResult)
         {
             return;

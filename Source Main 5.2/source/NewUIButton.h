@@ -137,7 +137,7 @@ namespace SEASON3B
 
     public:
         void ChangeImgColor(BUTTON_STATE eventstate, unsigned int color);
-        void ChangeText(unicode::t_string btname);
+        void ChangeText(std::wstring btname);
         void SetFont(HFONT hFont);
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -149,7 +149,7 @@ namespace SEASON3B
         void ChangeTextBackColor(const DWORD bcolor);
         void ChangeTextColor(const DWORD color);
 
-        void ChangeToolTipText(unicode::t_string tooltiptext, bool istoppos = false);
+        void ChangeToolTipText(std::wstring tooltiptext, bool istoppos = false);
         void ChangeToolTipTextColor(const DWORD color);
         void SetToolTipFont(HFONT hFont);
 
@@ -170,8 +170,8 @@ namespace SEASON3B
         ButtonStateMap           m_ButtonInfo;
 
     private:
-        unicode::t_string		m_Name;
-        unicode::t_string		m_TooltipText;
+       std::wstring		m_Name;
+       std::wstring		m_TooltipText;
 
         HFONT					m_hTextFont;
         HFONT					m_hToolTipFont;
@@ -200,14 +200,12 @@ namespace SEASON3B
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
     };
 
-    inline
-        void CNewUIButton::ChangeImgWidth(bool isimgwidth)
+    inline void CNewUIButton::ChangeImgWidth(bool isimgwidth)
     {
         m_IsImgWidth = isimgwidth;
     }
 
-    inline
-        void CNewUIButton::ChangeText(unicode::t_string btname)
+    inline void CNewUIButton::ChangeText(std::wstring btname)
     {
         m_Name = btname;
     }
@@ -231,7 +229,7 @@ namespace SEASON3B
     }
 
     inline
-        void CNewUIButton::ChangeToolTipText(unicode::t_string tooltiptext, bool istoppos)
+        void CNewUIButton::ChangeToolTipText(std::wstring tooltiptext, bool istoppos)
     {
         m_TooltipText = tooltiptext;
         m_IsTopPos = istoppos;
@@ -267,7 +265,7 @@ namespace SEASON3B
 
     public:
         void ChangeImgColor(BUTTON_STATE eventstate, unsigned int color);
-        void ChangeText(unicode::t_string btname);
+        void ChangeText(std::wstring btname);
         void ChangeTextBackColor(const DWORD bcolor);
         void ChangeTextColor(const DWORD color);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -294,7 +292,7 @@ namespace SEASON3B
 
     private:
         ButtonStateMap           m_RadioButtonInfo;
-        unicode::t_string		 m_Name;
+       std::wstring		 m_Name;
 
         DWORD					m_NameColor;
         DWORD					m_NameBackColor;
@@ -313,7 +311,7 @@ namespace SEASON3B
     };
 
     inline
-        void CNewUIRadioButton::ChangeText(unicode::t_string btname)
+        void CNewUIRadioButton::ChangeText(std::wstring btname)
     {
         m_Name = btname;
     }
@@ -353,7 +351,7 @@ namespace SEASON3B
         void CreateRadioGroup(int radiocount, int imgindex);
         void ChangeRadioButtonInfo(bool iswidth, int x, int y, int sx, int sy);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-        void ChangeRadioText(std::list<unicode::t_string>& textlist);
+        void ChangeRadioText(std::list<std::wstring>& textlist);
         void ChangeFrame(int buttonIndex);
         void LockButtonindex(int buttonIndex);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -415,7 +413,7 @@ namespace SEASON3B
         virtual ~CNewUICheckBox();
         void CheckBoxImgState(int imgindex);
         void RegisterBoxState(bool eventstate);
-        void ChangeText(unicode::t_string btname);
+        void ChangeText(std::wstring btname);
         void CheckBoxInfo(int x, int y, int sx, int sy);
         bool GetBoxState();
 
@@ -425,7 +423,7 @@ namespace SEASON3B
         int						s_ImgIndex;
         POINT					m_Pos;
         POINT					m_Size;
-        unicode::t_string		m_Name;
+       std::wstring		m_Name;
         HFONT					m_hTextFont;
         DWORD					m_NameColor;
         DWORD					m_NameBackColor;

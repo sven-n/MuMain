@@ -692,23 +692,23 @@ bool MovePath(CHARACTER* c, bool Turn)
 
 #ifdef SAVE_PATH_TIME
 
-void WriteDebugInfoStr(char* lpszFileName, char* lpszToWrite)
+void WriteDebugInfoStr(wchar_t* lpszFileName, wchar_t* lpszToWrite)
 {
     HANDLE hFile = CreateFile(lpszFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS,
         FILE_ATTRIBUTE_NORMAL, NULL);
     SetFilePointer(hFile, 0, NULL, FILE_END);
     DWORD dwNumber;
-    WriteFile(hFile, lpszToWrite, strlen(lpszToWrite), &dwNumber, NULL);
+    WriteFile(hFile, lpszToWrite, wcslen(lpszToWrite), &dwNumber, NULL);
     CloseHandle(hFile);
 }
 
-void DebugUtil_Write(char* lpszFileName, ...)
+void DebugUtil_Write(wchar_t* lpszFileName, ...)
 {
-    char lpszBuffer[1024];
+    wchar_t lpszBuffer[1024];
     va_list va;
     va_start(va, lpszFileName);
-    char* lpszFormat = va_arg(va, char*);
-    wvsprintf(lpszBuffer, lpszFormat, va);
+    wchar_t* lpszFormat = va_arg(va, wchar_t*);
+    wvswprintf(lpszBuffer, lpszFormat, va);
     WriteDebugInfoStr(lpszFileName, lpszBuffer);
     va_end(va);
 }

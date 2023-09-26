@@ -128,6 +128,6 @@ void Connection::OnDisconnected()
 
 void Connection::OnPacketReceived(const BYTE* data, const int32_t size)
 {
-    printf("Received packet, size %d", size);
+    wprintf(L"Received packet, size %d", size);
     this->_packetHandler(this->_handle, data, size);
 }

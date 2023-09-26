@@ -24,7 +24,7 @@ protected:
     CSprite			m_sprBack;
     CSprite			m_sprInput;
     CButton			m_aBtn[2];
-    char			m_aszMsg[MW_MSG_LINE_MAX][MW_MSG_ROW_MAX];
+    wchar_t			m_aszMsg[MW_MSG_LINE_MAX][MW_MSG_ROW_MAX];
     int				m_nMsgLine;
     int				m_nMsgCode;
     MSG_WIN_TYPE	m_eType;
@@ -38,14 +38,14 @@ public:
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow);
     bool CursorInWin(int nArea);
-    void PopUp(int nMsgCode, char* pszMsg = NULL);
+    void PopUp(int nMsgCode, wchar_t* pszMsg = NULL);
 
 protected:
     void PreRelease();
     void UpdateWhileActive(double dDeltaTick);
     void RenderControls();
     void SetCtrlPosition();
-    void SetMsg(MSG_WIN_TYPE eType, LPCTSTR lpszMsg, LPCTSTR lpszMsg2 = NULL);
+    void SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2 = NULL);
     void ManageOKClick();
     void ManageCancelClick();
     void InitResidentNumInput();

@@ -259,15 +259,15 @@ float CNewUIDuelWatchMainFrameWindow::GetLayerDepth()
 
 void CNewUIDuelWatchMainFrameWindow::LoadImages()
 {
-    LoadBitmap("Interface\\menu_pk_01.jpg", IMAGE_DUELWATCH_MAINFRAME_BACK1, GL_LINEAR);
-    LoadBitmap("Interface\\menu_pk_02.jpg", IMAGE_DUELWATCH_MAINFRAME_BACK2, GL_LINEAR);
-    LoadBitmap("Interface\\menu_pk_03.jpg", IMAGE_DUELWATCH_MAINFRAME_BACK3, GL_LINEAR);
-    LoadBitmap("Interface\\menu_pk_bt02.tga", IMAGE_DUELWATCH_MAINFRAME_SCORE, GL_LINEAR);
-    LoadBitmap("Interface\\menu_pk_hp03(bar2).jpg", IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, GL_LINEAR);
-    LoadBitmap("Interface\\menu_pk_sd03(bar2).jpg", IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE, GL_LINEAR);
-    LoadBitmap("Interface\\menu_pk_hp06(bar).jpg", IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE_FX, GL_LINEAR);
-    LoadBitmap("Interface\\menu_pk_sd05(bar).jpg", IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE_FX, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\menu_pk_01.jpg", IMAGE_DUELWATCH_MAINFRAME_BACK1, GL_LINEAR);
+    LoadBitmap(L"Interface\\menu_pk_02.jpg", IMAGE_DUELWATCH_MAINFRAME_BACK2, GL_LINEAR);
+    LoadBitmap(L"Interface\\menu_pk_03.jpg", IMAGE_DUELWATCH_MAINFRAME_BACK3, GL_LINEAR);
+    LoadBitmap(L"Interface\\menu_pk_bt02.tga", IMAGE_DUELWATCH_MAINFRAME_SCORE, GL_LINEAR);
+    LoadBitmap(L"Interface\\menu_pk_hp03(bar2).jpg", IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE, GL_LINEAR);
+    LoadBitmap(L"Interface\\menu_pk_sd03(bar2).jpg", IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE, GL_LINEAR);
+    LoadBitmap(L"Interface\\menu_pk_hp06(bar).jpg", IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE_FX, GL_LINEAR);
+    LoadBitmap(L"Interface\\menu_pk_sd05(bar).jpg", IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE_FX, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
 }
 
 void CNewUIDuelWatchMainFrameWindow::UnloadImages()

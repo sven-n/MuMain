@@ -69,8 +69,8 @@ extern HFONT     g_hFixFont;
 extern bool      Destroy;
 extern int       RandomTable[];
 
-extern char m_ID[];
-extern char m_Version[];
+extern wchar_t m_ID[];
+extern wchar_t m_Version[];
 extern int  m_SoundOnOff;
 extern int  m_MusicOnOff;
 extern int  m_Resolution;

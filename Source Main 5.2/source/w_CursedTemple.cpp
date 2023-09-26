@@ -29,7 +29,7 @@ extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 
 extern int TextNum;
-extern char TextList[50][100];
+extern wchar_t TextList[50][100];
 extern int  TextListColor[50];
 extern char* g_lpszMp3[NUM_MUSIC];
 
@@ -135,8 +135,8 @@ bool CursedTemple::IsPartyMember(DWORD selectcharacterindex)
     for (int i = 0; i < PartyNumber; ++i)
     {
         PARTY_t* p = &Party[i];
-        int length = max(1, strlen(c->ID));
-        if (!strncmp(p->Name, c->ID, length)) return true;
+        int length = max(1, wcslen(c->ID));
+        if (!wcsncmp(p->Name, c->ID, length)) return true;
     }
     return false;
 }
@@ -170,7 +170,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenNpc(MODEL_CURSEDTEMPLE_STATUE);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_STATUE, iPosX, iPosY);
-        strcpy(pCharacter->ID, "석상");
+        wcscpy(pCharacter->ID, L"석상");
         pCharacter->Object.EnableShadow = false;
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.m_fEdgeScale = 1.03f;
@@ -181,7 +181,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_NPC, iPosX, iPosY);
-        strcpy(pCharacter->ID, "EventMap NPC");
+        wcscpy(pCharacter->ID, L"EventMap NPC");
         pCharacter->Object.Scale = 1.2f;
     }
     break;
@@ -189,7 +189,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION_NPC, iPosX, iPosY);
-        strcpy(pCharacter->ID, "EventMap NPC");
+        wcscpy(pCharacter->ID, L"EventMap NPC");
         pCharacter->Object.Scale = 1.2f;
     }
     break;
@@ -197,7 +197,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_BASKET, iPosX, iPosY);
-        strcpy(pCharacter->ID, "연합군 성물보관함");
+        wcscpy(pCharacter->ID, L"연합군 성물보관함");
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowAlliedPointEffect = false;
@@ -207,7 +207,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION__BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION__BASKET, iPosX, iPosY);
-        strcpy(pCharacter->ID, "환영교단 성물보관함");
+        wcscpy(pCharacter->ID, L"환영교단 성물보관함");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowIllusionPointEffect = false;
@@ -217,7 +217,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ENTER_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ENTER_NPC, iPosX, iPosY);
-        strcpy(pCharacter->ID, "EventMap NPC");
+        wcscpy(pCharacter->ID, L"EventMap NPC");
         pCharacter->Object.Scale = 0.95f;
     }
     break;
@@ -230,7 +230,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenMonsterModel(123);
         pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 123, iPosX, iPosY);
-        strcpy(pCharacter->ID, "환영교단의 망령(번개)");
+        wcscpy(pCharacter->ID, L"환영교단의 망령(번개)");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -245,7 +245,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenMonsterModel(124);
         pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 124, iPosX, iPosY);
-        strcpy(pCharacter->ID, "환영교단의 망령(얼음)");
+        wcscpy(pCharacter->ID, L"환영교단의 망령(얼음)");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -260,7 +260,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenMonsterModel(125);
         pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 125, iPosX, iPosY);
-        strcpy(pCharacter->ID, "환영교단의 망령(독)");
+        wcscpy(pCharacter->ID, L"환영교단의 망령(독)");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -269,7 +269,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     case 404:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        strcpy(pCharacter->ID, "뮤연합");
+        wcscpy(pCharacter->ID, L"뮤연합");
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ALLIED_PLAYER;
     }
@@ -277,7 +277,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     case 405:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        strcpy(pCharacter->ID, "환영교단");
+        wcscpy(pCharacter->ID, L"환영교단");
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ILLUSION_PLAYER;
     }
@@ -992,8 +992,8 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
 void CursedTemple::UpdateTempleSystemMsg(int _Value)
 {
-    unicode::t_char szText[256] = { 0, };
-    unicode::_sprintf(szText, GlobalText[2367]);
+    wchar_t szText[256] = { 0, };
+    wsprintf(szText, GlobalText[2367]);
     switch (_Value)
     {
     case 0:
@@ -1003,22 +1003,22 @@ void CursedTemple::UpdateTempleSystemMsg(int _Value)
     case 2:
         break;
     case 3:
-        g_pChatListBox->AddText("", GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 4:
-        g_pChatListBox->AddText("", GlobalText[2368], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2368], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 5:
-        unicode::_sprintf(szText, GlobalText[829], 6);
-        g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        wsprintf(szText, GlobalText[829], 6);
+        g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 6:
         break;
     case 7:
-        g_pChatListBox->AddText("", GlobalText[2865], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2865], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 8:
-        g_pChatListBox->AddText("", GlobalText[2175], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2175], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
 }

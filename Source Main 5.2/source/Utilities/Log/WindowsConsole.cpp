@@ -4,7 +4,7 @@
 
 #include "WindowsConsole.h"
 
-bool leaf::OpenConsoleWindow(const std::string& title)
+bool leaf::OpenConsoleWindow(const std::wstring& title)
 {
     return CConsoleWindow::GetInstance()->Open(title);
 }
@@ -13,11 +13,11 @@ void leaf::CloseConsoleWindow()
     CConsoleWindow::GetInstance()->Close();
 }
 
-bool leaf::SetConsoleTitle(const std::string& title)
+bool leaf::SetConsoleTitle(const std::wstring& title)
 {
     return CConsoleWindow::GetInstance()->SetTitle(title);
 }
-const std::string& leaf::GetConsoleTitle()
+const std::wstring& leaf::GetConsoleTitle()
 {
     return CConsoleWindow::GetInstance()->GetTitle();
 }
@@ -59,7 +59,7 @@ bool leaf::IsActiveCloseButton()
     return CConsoleWindow::GetInstance()->IsActiveCloseButton();
 }
 
-bool leaf::SaveConsoleScreenBuffer(const std::string& filename)
+bool leaf::SaveConsoleScreenBuffer(const std::wstring& filename)
 {
     return CConsoleWindow::GetInstance()->SaveScreenBuffer(filename);
 }
@@ -76,16 +76,16 @@ CConsoleWindow::CConsoleWindow()
 }
 CConsoleWindow::~CConsoleWindow() {}
 
-bool CConsoleWindow::Open(const std::string& title)
+bool CConsoleWindow::Open(const std::wstring& title)
 {
     Close();
 
     if (FALSE == ::AllocConsole())
         return false;
 
-    freopen("CONIN$", "rb", stdin);
-    freopen("CONOUT$", "wb", stdout);
-    freopen("CONOUT$", "wb", stderr);
+    _wfreopen(L"CONIN$", L"rb", stdin);
+    _wfreopen(L"CONOUT$", L"wb", stdout);
+    _wfreopen(L"CONOUT$", L"wb", stderr);
 
     ::SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE),
         ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
@@ -122,18 +122,18 @@ void CConsoleWindow::Close()
     m_hWnd = NULL;
 }
 
-bool CConsoleWindow::SetTitle(const std::string& title)
+bool CConsoleWindow::SetTitle(const std::wstring& title)
 {
     if (FALSE == ::SetConsoleTitle(title.c_str()))
         return false;
     return true;
 }
-const std::string& CConsoleWindow::GetTitle()
+const std::wstring& CConsoleWindow::GetTitle()
 {
-    char szConsoleTile[1024] = { 0, };
+    wchar_t szConsoleTile[1024] = { 0, };
     ::GetConsoleTitle(szConsoleTile, 1024);
 
-    static std::string s_title = szConsoleTile;
+    static std::wstring s_title = szConsoleTile;
     return s_title;
 }
 
@@ -232,7 +232,7 @@ void CConsoleWindow::ActivateCloseButton(bool bActive)
 }
 bool CConsoleWindow::IsActiveCloseButton() const { return m_bActiveCloseButton; }
 
-bool CConsoleWindow::SaveScreenBuffer(const std::string& filename)
+bool CConsoleWindow::SaveScreenBuffer(const std::wstring& filename)
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi; /* to get buffer info */
 
@@ -293,9 +293,9 @@ BOOL CALLBACK CConsoleWindow::EnumChildProc(HWND hWnd, LPARAM lParam)
     if (GetWindowThreadProcessId(hWnd, &dwProcessId) == GetCurrentThreadId()
         && dwProcessId == GetCurrentProcessId())
     {
-        char szClassName[512] = { 0, };
+        wchar_t szClassName[512] = { 0, };
         GetClassName(hWnd, szClassName, 512);
-        if (0 == strcmp(szClassName, "ConsoleWindowClass"))
+        if (0 == wcscmp(szClassName, L"ConsoleWindowClass"))
         {
             if (!pConsoleWnd->GetWndHandle())
                 pConsoleWnd->SetWndHandle(hWnd);

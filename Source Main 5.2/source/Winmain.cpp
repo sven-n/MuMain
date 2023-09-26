@@ -162,7 +162,7 @@ int GetMp3PlayPosition()
 }
 
 extern int  LogIn;
-extern char LogInID[];
+extern wchar_t LogInID[];
 
 void CheckHack(void)
 {
@@ -176,8 +176,8 @@ GLvoid KillGLWindow(GLvoid)
         wglMakeCurrent(nullptr, nullptr);
         if (!wglDeleteContext(g_hRC))
         {
-            g_ErrorReport.Write("GL - Release Rendering Context Failed\r\n");
-            MessageBox(NULL, "Release Rendering Context Failed.", "Error", MB_OK | MB_ICONINFORMATION);
+            g_ErrorReport.Write(L"GL - Release Rendering Context Failed\r\n");
+            MessageBox(NULL, L"Release Rendering Context Failed.", L"Error", MB_OK | MB_ICONINFORMATION);
         }
 
         g_hRC = NULL;
@@ -185,8 +185,8 @@ GLvoid KillGLWindow(GLvoid)
 
     if (g_hDC && !ReleaseDC(g_hWnd, g_hDC))
     {
-        g_ErrorReport.Write("GL - OpenGL Release Error\r\n");
-        MessageBox(NULL, "OpenGL Release Error.", "Error", MB_OK | MB_ICONINFORMATION);
+        g_ErrorReport.Write(L"GL - OpenGL Release Error\r\n");
+        MessageBox(NULL, L"OpenGL Release Error.", L"Error", MB_OK | MB_ICONINFORMATION);
         g_hDC = NULL;
     }
 
@@ -209,28 +209,28 @@ GLvoid KillGLWindow(GLvoid)
 #endif	//WINDOWMODE(#else)
 }
 
-BOOL GetFileNameOfFilePath(char* lpszFile, char* lpszPath)
+BOOL GetFileNameOfFilePath(wchar_t* lpszFile, wchar_t* lpszPath)
 {
     int iFind = (int)'\\';
-    char* lpFound = lpszPath;
-    char* lpOld = lpFound;
+    wchar_t* lpFound = lpszPath;
+    wchar_t* lpOld = lpFound;
     while (lpFound)
     {
         lpOld = lpFound;
-        lpFound = strchr(lpFound + 1, iFind);
+        lpFound = wcschr(lpFound + 1, iFind);
     }
 
-    if (strchr(lpszPath, iFind))
+    if (wcschr(lpszPath, iFind))
     {
-        strcpy(lpszFile, lpOld + 1);
+        wcscpy(lpszFile, lpOld + 1);
     }
     else
     {
-        strcpy(lpszFile, lpOld);
+        wcscpy(lpszFile, lpOld);
     }
 
     BOOL bCheck = TRUE;
-    for (char* lpTemp = lpszFile; bCheck; ++lpTemp)
+    for (wchar_t* lpTemp = lpszFile; bCheck; ++lpTemp)
     {
         switch (*lpTemp)
         {
@@ -255,13 +255,13 @@ BOOL OpenMainExe(void)
 #ifdef _DEBUG
     return (TRUE);
 #endif
-    char lpszFile[MAX_PATH];
-    char* lpszCommandLine = GetCommandLine();
-    GetFileNameOfFilePath(lpszFile, lpszCommandLine);
+    //char lpszFile[MAX_PATH];
+    //wchar_t* lpszCommandLine = GetCommandLine();
+    //GetFileNameOfFilePath(lpszFile, lpszCommandLine);
 
-    g_hMainExe = CreateFile((char*)lpszFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    //g_hMainExe = CreateFile((wchar_t*)lpszFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
-    return (INVALID_HANDLE_VALUE != g_hMainExe);
+    //return (INVALID_HANDLE_VALUE != g_hMainExe);
 }
 
 void CloseMainExe(void)
@@ -311,11 +311,11 @@ DWORD GetCheckSum(WORD wKey)
 {
     wKey = DecryptCheckSumKey(wKey);
 
-    char lpszFile[MAX_PATH];
+    wchar_t lpszFile[MAX_PATH];
 
-    strcpy(lpszFile, "data\\local\\Gameguard.csr");
+    wcscpy(lpszFile, L"data\\local\\Gameguard.csr");
 
-    HANDLE hFile = CreateFile((char*)lpszFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    HANDLE hFile = CreateFile(lpszFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     if (INVALID_HANDLE_VALUE == hFile)
     {
         return (0);
@@ -333,7 +333,7 @@ DWORD GetCheckSum(WORD wKey)
     return (dwCheckSum);
 }
 
-BOOL GetFileVersion(char* lpszFileName, WORD* pwVersion)
+BOOL GetFileVersion(wchar_t* lpszFileName, WORD* pwVersion)
 {
     DWORD dwHandle;
     DWORD dwLen = GetFileVersionInfoSize(lpszFileName, &dwHandle);
@@ -351,7 +351,7 @@ BOOL GetFileVersion(char* lpszFileName, WORD* pwVersion)
 
     VS_FIXEDFILEINFO* pffi;
     UINT uLen;
-    if (!VerQueryValue(pbyData, "\\", (LPVOID*)&pffi, &uLen))
+    if (!VerQueryValue(pbyData, L"\\", (LPVOID*)&pffi, &uLen))
     {
         delete[] pbyData;
         return (FALSE);
@@ -372,8 +372,8 @@ void DestroyWindow()
 {
     //. save volume level
     leaf::CRegKey regkey;
-    regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu\\Config");
-    regkey.WriteDword("VolumeLevel", g_pOption->GetVolumeLevel());
+    regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config");
+    regkey.WriteDword(L"VolumeLevel", g_pOption->GetVolumeLevel());
 
     CUIMng::Instance().Release();
 
@@ -451,9 +451,9 @@ void DestroyWindow()
     BoostRest(g_MapProcess);
     BoostRest(g_petProcess);
 
-    g_ErrorReport.Write("Destroy");
+    g_ErrorReport.Write(L"Destroy");
 
-    HWND shWnd = FindWindow(NULL, "MuPlayer");
+    HWND shWnd = FindWindow(NULL, L"MuPlayer");
     if (shWnd)
         SendMessage(shWnd, WM_DESTROY, 0, 0);
 }
@@ -563,7 +563,7 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_NPROTECT_EXIT_TWO:
         SendHackingChecked(0x04, 0);
         SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, NULL);
-        MessageBox(NULL, GlobalText[16], "Error", MB_OK);
+        MessageBox(NULL, GlobalText[16], L"Error", MB_OK);
         break;
     case WM_ASYNCSELECTMSG:
         switch (WSAGETSELECTEVENT(lParam))
@@ -573,18 +573,18 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case FD_READ:
             break;
         case FD_CLOSE:
-            g_pChatListBox->AddText("", GlobalText[3], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[3], SEASON3B::TYPE_SYSTEM_MESSAGE);
 #ifdef CONSOLE_DEBUG
             switch (WSAGETSELECTERROR(lParam))
             {
             case WSAECONNRESET:
-                g_ConsoleDebug->Write(MCD_ERROR, "The connection was reset by the remote side.");
-                g_ErrorReport.Write("The connection was reset by the remote side.\r\n");
+                g_ConsoleDebug->Write(MCD_ERROR, L"The connection was reset by the remote side.");
+                g_ErrorReport.Write(L"The connection was reset by the remote side.\r\n");
                 g_ErrorReport.WriteCurrentTime();
                 break;
             case WSAECONNABORTED:
-                g_ConsoleDebug->Write(MCD_ERROR, "The connection was terminated due to a time-out or other failure.");
-                g_ErrorReport.Write("The connection was terminated due to a time-out or other failure.\r\n");
+                g_ConsoleDebug->Write(MCD_ERROR, L"The connection was terminated due to a time-out or other failure.");
+                g_ErrorReport.Write(L"The connection was terminated due to a time-out or other failure.\r\n");
                 g_ErrorReport.WriteCurrentTime();
                 break;
             }
@@ -786,9 +786,9 @@ bool CreateOpenglWindow()
 
     if (!(g_hDC = GetDC(g_hWnd)))
     {
-        g_ErrorReport.Write("OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
+        g_ErrorReport.Write(L"OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(NULL, GlobalText[4], "OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL, GlobalText[4], L"OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -796,33 +796,33 @@ bool CreateOpenglWindow()
 
     if (!(PixelFormat = ChoosePixelFormat(g_hDC, &pfd)))
     {
-        g_ErrorReport.Write("OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
+        g_ErrorReport.Write(L"OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(NULL, GlobalText[4], "OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL, GlobalText[4], L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
     if (!SetPixelFormat(g_hDC, PixelFormat, &pfd))
     {
-        g_ErrorReport.Write("OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
+        g_ErrorReport.Write(L"OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(NULL, GlobalText[4], "OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL, GlobalText[4], L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
     if (!(g_hRC = wglCreateContext(g_hDC)))
     {
-        g_ErrorReport.Write("OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
+        g_ErrorReport.Write(L"OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(NULL, GlobalText[4], "OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL, GlobalText[4], L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
     if (!wglMakeCurrent(g_hDC, g_hRC))
     {
-        g_ErrorReport.Write("OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
+        g_ErrorReport.Write(L"OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(NULL, GlobalText[4], "OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(NULL, GlobalText[4], L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -834,7 +834,7 @@ bool CreateOpenglWindow()
 
 HWND StartWindow(HINSTANCE hInstance, int nCmdShow)
 {
-    char* windowName = "MU Online";
+    wchar_t* windowName = L"MU Online";
     WNDCLASS wndClass;
     HWND hWnd;
 
@@ -851,7 +851,7 @@ HWND StartWindow(HINSTANCE hInstance, int nCmdShow)
 
     if (!RegisterClass(&wndClass))
     {
-        MessageBox(NULL, "Windows aplication error!", "Aplication Error", MB_ICONERROR);
+        MessageBox(NULL, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
         return 0;
     }
 
@@ -882,44 +882,44 @@ HWND StartWindow(HINSTANCE hInstance, int nCmdShow)
     return hWnd;
 }
 
-char m_ID[11];
-char m_Version[11];
-char m_ExeVersion[11];
+wchar_t m_ID[11];
+wchar_t m_Version[11];
+wchar_t m_ExeVersion[11];
 int  m_SoundOnOff;
 int  m_MusicOnOff;
 int  m_Resolution;
 int	m_nColorDepth;
 int	g_iRenderTextType = 0;
 
-char g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = { '\0' };
-std::string g_strSelectedML = "";
+wchar_t g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = { '\0' };
+std::wstring g_strSelectedML = L"";
 
 BOOL OpenInitFile()
 {
     //char szTemp[50];
-    char szIniFilePath[256 + 20] = "";
-    char szCurrentDir[256];
+    wchar_t szIniFilePath[256 + 20] = L"";
+    wchar_t szCurrentDir[256];
 
     GetCurrentDirectory(256, szCurrentDir);
 
-    strcpy(szIniFilePath, szCurrentDir);
-    if (szCurrentDir[strlen(szCurrentDir) - 1] == '\\')
-        strcat(szIniFilePath, "config.ini");
-    else strcat(szIniFilePath, "\\config.ini");
+    wcscpy(szIniFilePath, szCurrentDir);
+    if (szCurrentDir[wcslen(szCurrentDir) - 1] == '\\')
+        wcscat(szIniFilePath, L"config.ini");
+    else wcscat(szIniFilePath, L"\\config.ini");
 
-    GetPrivateProfileString("LOGIN", "Version", "", m_Version, 11, szIniFilePath);
+    GetPrivateProfileString(L"LOGIN", L"Version", L"", m_Version, 11, szIniFilePath);
 
-    char* lpszCommandLine = GetCommandLine();
-    char lpszFile[MAX_PATH];
+    wchar_t* lpszCommandLine = GetCommandLine();
+    wchar_t lpszFile[MAX_PATH];
     if (GetFileNameOfFilePath(lpszFile, lpszCommandLine))
     {
         WORD wVersion[4];
         if (GetFileVersion(lpszFile, wVersion))
         {
-            sprintf(m_ExeVersion, "%d.%02d", wVersion[0], wVersion[1]);
+            wsprintf(m_ExeVersion, L"%d.%02d", wVersion[0], wVersion[1]);
             if (wVersion[2] > 0)
             {
-                char lpszMinorVersion[3] = "a";
+                wchar_t lpszMinorVersion[3] = L"a";
                 if (wVersion[2] > 26)
                 {
                     lpszMinorVersion[0] = 'A';
@@ -930,17 +930,17 @@ BOOL OpenInitFile()
                 {
                     lpszMinorVersion[0] += (wVersion[2] - 1);
                 }
-                strcat(m_ExeVersion, lpszMinorVersion);
+                wcscat(m_ExeVersion, lpszMinorVersion);
             }
         }
         else
         {
-            strcpy(m_ExeVersion, m_Version);
+            wcscpy(m_ExeVersion, m_Version);
         }
     }
     else
     {
-        strcpy(m_ExeVersion, m_Version);
+        wcscpy(m_ExeVersion, m_Version);
     }
 
     //#ifdef _DEBUG
@@ -954,35 +954,35 @@ BOOL OpenInitFile()
     HKEY hKey;
     DWORD dwDisp;
     DWORD dwSize;
-    if (ERROR_SUCCESS == RegCreateKeyEx(HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu\\Config", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
+    if (ERROR_SUCCESS == RegCreateKeyEx(HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
     {
         dwSize = 11;
-        if (RegQueryValueEx(hKey, "ID", 0, NULL, (LPBYTE)m_ID, &dwSize) != ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, L"ID", 0, NULL, (LPBYTE)m_ID, &dwSize) != ERROR_SUCCESS)
         {
         }
         dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, "SoundOnOff", 0, NULL, (LPBYTE)&m_SoundOnOff, &dwSize) != ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, L"SoundOnOff", 0, NULL, (LPBYTE)&m_SoundOnOff, &dwSize) != ERROR_SUCCESS)
         {
             m_SoundOnOff = true;
         }
         dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, "MusicOnOff", 0, NULL, (LPBYTE)&m_MusicOnOff, &dwSize) != ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, L"MusicOnOff", 0, NULL, (LPBYTE)&m_MusicOnOff, &dwSize) != ERROR_SUCCESS)
         {
             m_MusicOnOff = false;
         }
         dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, "Resolution", 0, NULL, (LPBYTE)&m_Resolution, &dwSize) != ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, L"Resolution", 0, NULL, (LPBYTE)&m_Resolution, &dwSize) != ERROR_SUCCESS)
             m_Resolution = 1;
 
         if (0 == m_Resolution)
             m_Resolution = 1;
 
-        if (RegQueryValueEx(hKey, "ColorDepth", 0, NULL, (LPBYTE)&m_nColorDepth, &dwSize) != ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, L"ColorDepth", 0, NULL, (LPBYTE)&m_nColorDepth, &dwSize) != ERROR_SUCCESS)
         {
             m_nColorDepth = 0;
         }
         dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, "TextOut", 0, NULL, (LPBYTE)&g_iRenderTextType, &dwSize) != ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, L"TextOut", 0, NULL, (LPBYTE)&g_iRenderTextType, &dwSize) != ERROR_SUCCESS)
         {
             g_iRenderTextType = 0;
         }
@@ -990,15 +990,15 @@ BOOL OpenInitFile()
         g_iChatInputType = 1;
 
         dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, "WindowMode", 0, NULL, (LPBYTE)&g_bUseWindowMode, &dwSize) != ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, L"WindowMode", 0, NULL, (LPBYTE)&g_bUseWindowMode, &dwSize) != ERROR_SUCCESS)
         {
             g_bUseWindowMode = FALSE;
         }
 
         dwSize = MAX_LANGUAGE_NAME_LENGTH;
-        if (RegQueryValueEx(hKey, "LangSelection", 0, NULL, (LPBYTE)g_aszMLSelection, &dwSize) != ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, L"LangSelection", 0, NULL, (LPBYTE)g_aszMLSelection, &dwSize) != ERROR_SUCCESS)
         {
-            strcpy(g_aszMLSelection, "Eng");
+            wcscpy(g_aszMLSelection, L"Eng");
         }
         g_strSelectedML = g_aszMLSelection;
     }
@@ -1100,7 +1100,7 @@ BOOL Util_CheckOption(char* lpszCommandLine, unsigned char cOption, char* lpszSt
     return (FALSE);
 }
 
-BOOL UpdateFile(char* lpszOld, char* lpszNew)
+BOOL UpdateFile(wchar_t* lpszOld, wchar_t* lpszNew)
 {
     SetFileAttributes(lpszOld, FILE_ATTRIBUTE_NORMAL);
     SetFileAttributes(lpszNew, FILE_ATTRIBUTE_NORMAL);
@@ -1113,13 +1113,13 @@ BOOL UpdateFile(char* lpszOld, char* lpszNew)
             return (TRUE);
         }
     }
-    g_ErrorReport.Write("%s to %s CopyFile Error : %d\r\n", lpszNew, lpszOld, GetLastError());
+    g_ErrorReport.Write(L"%s to %s CopyFile Error : %d\r\n", lpszNew, lpszOld, GetLastError());
     return (FALSE);
 }
 
 #include <tlhelp32.h>
 
-BOOL KillExeProcess(char* lpszExe)
+BOOL KillExeProcess(wchar_t* lpszExe)
 {
     HANDLE hProcessSnap = NULL;
     BOOL bRet = FALSE;
@@ -1143,7 +1143,7 @@ BOOL KillExeProcess(char* lpszExe)
     {
         do
         {
-            if (stricmp(pe32.szExeFile, lpszExe) == 0)
+            if (wcsicmp(pe32.szExeFile, lpszExe) == 0)
             {
                 HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID);
 
@@ -1183,7 +1183,8 @@ BOOL GetConnectServerInfo(PSTR szCmdLine, char* lpszURL, WORD* pwPort)
                 lpszTemp[j] -= bySuffle[j % 4];
             *pwPort = atoi(lpszTemp);
         }
-        g_ErrorReport.Write("[Virtual Connection] Connect IP : %s, Port : %d\r\n", lpszURL, *pwPort);
+
+        g_ErrorReport.Write(L"[Virtual Connection] Connect IP : %s, Port : %d\r\n", lpszURL, *pwPort);
         return (TRUE);
     }
     if (!Util_CheckOption(szCmdLine, 'u', lpszTemp))
@@ -1276,31 +1277,31 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 {
     leaf::AttachExceptionHandler(ExceptionCallback);
 
-    char lpszExeVersion[256] = "unknown";
+    wchar_t lpszExeVersion[256] = L"unknown";
 
-    char* lpszCommandLine = GetCommandLine();
-    char lpszFile[MAX_PATH];
+    wchar_t* lpszCommandLine = GetCommandLine();
+    wchar_t lpszFile[MAX_PATH];
     WORD wVersion[4] = { 0, };
     if (GetFileNameOfFilePath(lpszFile, lpszCommandLine))
     {
         if (GetFileVersion(lpszFile, wVersion))
         {
-            sprintf(lpszExeVersion, "%d.%02d", wVersion[0], wVersion[1]);
+            wsprintf(lpszExeVersion, L"%d.%02d", wVersion[0], wVersion[1]);
             if (wVersion[2] > 0)
             {
-                char lpszMinorVersion[2] = "a";
+                wchar_t lpszMinorVersion[2] = L"a";
                 lpszMinorVersion[0] += (wVersion[2] - 1);
-                strcat(lpszExeVersion, lpszMinorVersion);
+                wcscat(lpszExeVersion, lpszMinorVersion);
             }
         }
     }
 
-    g_ErrorReport.Write("\r\n");
+    g_ErrorReport.Write(L"\r\n");
     g_ErrorReport.WriteLogBegin();
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write("Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, "Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+    g_ErrorReport.Write(L"Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, L"Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 
-    g_ConsoleDebug->Write(MCD_NORMAL, "Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 
     g_ErrorReport.WriteCurrentTime();
     ER_SystemInfo si;
@@ -1325,10 +1326,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
             return false;
         }
 
-    g_ErrorReport.Write("> To read config.ini.\r\n");
+    g_ErrorReport.Write(L"> To read config.ini.\r\n");
     if (OpenInitFile() == FALSE)
     {
-        g_ErrorReport.Write("config.ini read error\r\n");
+        g_ErrorReport.Write(L"config.ini read error\r\n");
         return false;
     }
 
@@ -1337,7 +1338,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (g_iChatInputType == 1)
         ShowCursor(FALSE);
 
-    g_ErrorReport.Write("> Enum display settings.\r\n");
+    g_ErrorReport.Write(L"> Enum display settings.\r\n");
     DEVMODE DevMode;
     DEVMODE* pDevmodes;
     int nModes = 0;
@@ -1369,7 +1370,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         {
             if (pDevmodes[n2].dmPelsWidth == WindowWidth && pDevmodes[n2].dmPelsHeight == WindowHeight && pDevmodes[n2].dmBitsPerPel == dwBitsPerPel)
             {
-                g_ErrorReport.Write("> Change display setting %dx%d.\r\n", pDevmodes[n2].dmPelsWidth, pDevmodes[n2].dmPelsHeight);
+                g_ErrorReport.Write(L"> Change display setting %dx%d.\r\n", pDevmodes[n2].dmPelsWidth, pDevmodes[n2].dmPelsHeight);
                 ChangeDisplaySettings(&pDevmodes[n2], 0);
                 break;
             }
@@ -1379,18 +1380,18 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     delete[] pDevmodes;
 
-    g_ErrorReport.Write("> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
+    g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
 
     g_hInst = hInstance;
     g_hWnd = StartWindow(hInstance, nCmdShow);
-    g_ErrorReport.Write("> Start window success.\r\n");
+    g_ErrorReport.Write(L"> Start window success.\r\n");
 
     if (!CreateOpenglWindow())
     {
         return FALSE;
     }
 
-    g_ErrorReport.Write("> OpenGL init success.\r\n");
+    g_ErrorReport.Write(L"> OpenGL init success.\r\n");
     g_ErrorReport.AddSeparator();
     //g_ErrorReport.WriteOpenGLInfo();
     g_ErrorReport.AddSeparator();
@@ -1404,11 +1405,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     if (g_dotnet->is_initialized())
     {
-        g_ErrorReport.Write(".net runtime loaded :)");
+        g_ErrorReport.Write(L".net runtime loaded :)");
     }
     else
     {
-        g_ErrorReport.Write(".net runtime failed to load :(");
+        g_ErrorReport.Write(L".net runtime failed to load :(L");
     }
 
     switch (WindowHeight)
@@ -1433,10 +1434,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     iFontSize = FontHeight - 1;
     nFixFontSize = nFixFontHeight - 1;
 
-    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Tahoma");
-    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Tahoma");
-    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Tahoma");
-    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Tahoma");
+    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
 
     //g_hFont		= CreateFont(iFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
     //g_hFontBold = CreateFont(iFontSize,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
@@ -1459,12 +1460,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         InitDirectSound(g_hWnd);
         leaf::CRegKey regkey;
-        regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, "SOFTWARE\\Webzen\\Mu\\Config");
+        regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config");
         DWORD value;
-        if (!regkey.ReadDword("VolumeLevel", value))
+        if (!regkey.ReadDword(L"VolumeLevel", value))
         {
             value = 5;	//. default setting
-            regkey.WriteDword("VolumeLevel", value);
+            regkey.WriteDword(L"VolumeLevel", value);
         }
         if (value < 0 || value >= 10)
             value = 5;

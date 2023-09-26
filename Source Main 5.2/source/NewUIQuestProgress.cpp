@@ -265,7 +265,7 @@ void CNewUIQuestProgress::RenderText()
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(230, 230, 230, 255);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, "Quest", QP_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, L"Quest", QP_WIDTH, 0, RT3_SORT_CENTER);
     g_pRenderText->SetTextColor(36, 242, 252, 255);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, g_QuestMng.GetSubject(m_dwCurQuestIndex), QP_WIDTH, 0, RT3_SORT_CENTER);
 
@@ -312,16 +312,16 @@ float CNewUIQuestProgress::GetLayerDepth()
 
 void CNewUIQuestProgress::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_QP_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_QP_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_QP_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_QP_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_QP_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_QP_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\Quest_bt_L.tga", IMAGE_QP_BTN_L, GL_LINEAR);
-    LoadBitmap("Interface\\Quest_bt_R.tga", IMAGE_QP_BTN_R, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_QP_BTN_COMPLETE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_QP_BTN_CLOSE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_QP_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_QP_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_QP_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_QP_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_QP_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_QP_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\Quest_bt_L.tga", IMAGE_QP_BTN_L, GL_LINEAR);
+    LoadBitmap(L"Interface\\Quest_bt_R.tga", IMAGE_QP_BTN_R, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_QP_BTN_COMPLETE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_QP_BTN_CLOSE, GL_LINEAR);
 }
 
 void CNewUIQuestProgress::UnloadImages()
@@ -413,17 +413,16 @@ void CNewUIQuestProgress::SetCurPlayerWords()
 
     ::DivideStringByPixel(&m_aszPlayerWords[0][0], 2, QP_WORDS_ROW_MAX, g_QuestMng.GetPlayerWords(m_dwCurQuestIndex), 160);
 
-    char szAnswer[2 * QP_WORDS_ROW_MAX];
-    const char* pszAnswer;
+    wchar_t szAnswer[2 * QP_WORDS_ROW_MAX];
     int nPlayerWordsRow = 2;
     int i;
     for (i = 0; i < QM_MAX_ANSWER; ++i)
     {
-        ::sprintf(szAnswer, "%d.", i + 1);
-        pszAnswer = g_QuestMng.GetAnswer(m_dwCurQuestIndex, i);
+        wsprintf(szAnswer, L"%d.", i + 1);
+        const auto pszAnswer = g_QuestMng.GetAnswer(m_dwCurQuestIndex, i);
         if (NULL == pszAnswer)
             break;
-        ::strcat(szAnswer, pszAnswer);
+        wcscat(szAnswer, pszAnswer);
 
         m_anAnswerLine[i] = ::DivideStringByPixel(&m_aszPlayerWords[nPlayerWordsRow][0], 2, QP_WORDS_ROW_MAX, szAnswer, 160, false);
 
@@ -459,12 +458,12 @@ void CNewUIQuestProgress::SetCurRequestReward()
         }
         else if (1 == j && pQuestRequestReward->m_byGeneralRewardCount)
         {
-            m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");
+            m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, L" ");
             nLoop = 1 + pQuestRequestReward->m_byGeneralRewardCount + i;
         }
         else if (2 == j && pQuestRequestReward->m_byRandRewardCount)
         {
-            m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");
+            m_RequestRewardListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, L" ");
             nLoop = 1 + pQuestRequestReward->m_byRandRewardCount + i;
         }
         else

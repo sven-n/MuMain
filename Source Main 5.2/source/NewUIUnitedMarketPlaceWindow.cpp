@@ -57,7 +57,7 @@ bool CNewUIUnitedMarketPlaceWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRen
     return true;
 }
 
-void CNewUIUnitedMarketPlaceWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption)
+void CNewUIUnitedMarketPlaceWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -235,14 +235,14 @@ float CNewUIUnitedMarketPlaceWindow::GetLayerDepth()
 
 void CNewUIUnitedMarketPlaceWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_UNITEDMARKETPLACEWINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_UNITEDMARKETPLACEWINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_UNITEDMARKETPLACEWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_UNITEDMARKETPLACEWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_UNITEDMARKETPLACEWINDOW_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BTN_CLOSE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_UNITEDMARKETPLACEWINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_UNITEDMARKETPLACEWINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_UNITEDMARKETPLACEWINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_UNITEDMARKETPLACEWINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_UNITEDMARKETPLACEWINDOW_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BTN_CLOSE, GL_LINEAR);
 }
 
 void CNewUIUnitedMarketPlaceWindow::UnloadImages()
@@ -264,7 +264,7 @@ void CNewUIUnitedMarketPlaceWindow::RenderFrame()
     RenderImage(IMAGE_UNITEDMARKETPLACEWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
     RenderImage(IMAGE_UNITEDMARKETPLACEWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
     float fLine_y = 13.0f;
 
@@ -272,7 +272,7 @@ void CNewUIUnitedMarketPlaceWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    unicode::_sprintf(szText, "%s", GlobalText[3000]);
+    wsprintf(szText, L"%s", GlobalText[3000]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 

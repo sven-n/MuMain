@@ -18,7 +18,7 @@
 #include "NewUISystem.h"
 #include "SkillManager.h"
 
-extern	char TextList[50][100];
+extern	wchar_t TextList[50][100];
 extern	int  TextListColor[50];
 extern	int  TextBold[50];
 extern float g_fScreenRate_x;
@@ -36,20 +36,20 @@ static void BuxConvert(BYTE* Buffer, int Size)
 
 bool CSItemOption::OpenItemSetScript(bool bTestServer)
 {
-    std::string strFileName = "";
-    std::string strTest = (bTestServer) ? "Test" : "";
+    std::wstring strFileName = L"";
+    std::wstring strTest = (bTestServer) ? L"Test" : L"";
 
-    strFileName = "Data\\Local\\ItemSetType" + strTest + ".bmd";
+    strFileName = L"Data\\Local\\ItemSetType" + strTest + L".bmd";
     if (!OpenItemSetType(strFileName.c_str()))		return false;
 
-    strFileName = "Data\\Local\\" + g_strSelectedML + "\\ItemSetOption" + strTest + "_" + g_strSelectedML + ".bmd";
+    strFileName = L"Data\\Local\\" + g_strSelectedML + L"\\ItemSetOption" + strTest + L"_" + g_strSelectedML + L".bmd";
     if (!OpenItemSetOption(strFileName.c_str()))	 	return false;
     return true;
 }
 
-bool	CSItemOption::OpenItemSetType(const char* filename)
+bool CSItemOption::OpenItemSetType(const wchar_t* filename)
 {
-    FILE* fp = fopen(filename, "rb");
+    FILE* fp = _wfopen(filename, L"rb");
     if (fp != NULL)
     {
         int Size = sizeof(ITEM_SET_TYPE);
@@ -62,8 +62,8 @@ bool	CSItemOption::OpenItemSetType(const char* filename)
 
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE5F1))
         {
-            char Text[256];
-            sprintf(Text, "%s - File corrupted.", filename);
+            wchar_t Text[256];
+            wsprintf(Text, L"%s - File corrupted.", filename);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -83,8 +83,8 @@ bool	CSItemOption::OpenItemSetType(const char* filename)
     }
     else
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", filename);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", filename);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -93,9 +93,9 @@ bool	CSItemOption::OpenItemSetType(const char* filename)
     return true;
 }
 
-bool CSItemOption::OpenItemSetOption(const char* filename)
+bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
 {
-    FILE* fp = fopen(filename, "rb");
+    FILE* fp = _wfopen(filename, L"rb");
     if (fp != NULL)
     {
         int Size = sizeof(ITEM_SET_OPTION);
@@ -108,8 +108,8 @@ bool CSItemOption::OpenItemSetOption(const char* filename)
 
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_SET_OPTION, 0xA2F1))
         {
-            char Text[256];
-            sprintf(Text, "%s - File corrupted.", filename);
+            wchar_t Text[256];
+            wsprintf(Text, L"%s - File corrupted.", filename);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -129,8 +129,8 @@ bool CSItemOption::OpenItemSetOption(const char* filename)
     }
     else
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", filename);
+        wchar_t Text[256];
+        wsprintf(Text, L"%s - File not exist.", filename);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -257,7 +257,7 @@ WORD CSItemOption::GetMixItemLevel(const int Type)
     return MixLevel;
 }
 
-bool	CSItemOption::GetSetItemName(char* strName, const int iType, const int setType)
+bool	CSItemOption::GetSetItemName(wchar_t* strName, const int iType, const int setType)
 {
     int setItemType = (setType % 0x04);
 
@@ -267,8 +267,11 @@ bool	CSItemOption::GetSetItemName(char* strName, const int iType, const int setT
         if (itemSType.byOption[setItemType - 1] != 255 && itemSType.byOption[setItemType - 1] != 0)
         {
             ITEM_SET_OPTION& itemOption = m_ItemSetOption[itemSType.byOption[setItemType - 1]];
-            memcpy(strName, itemOption.strSetName, sizeof(char) * 32);
-            int length = strlen(strName);
+
+            // TODO
+            memcpy(strName, itemOption.strSetName, sizeof(wchar_t) * 32);
+
+            int length = wcslen(strName);
             strName[length] = ' ';
             strName[length + 1] = 0;
             return true;
@@ -362,25 +365,25 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
             if (itemOption.byRequireClass[6] == 1 && Class == CLASS_RAGEFIGHTER && ExClass) RequireClass = 1;
             setType = optionList[i + 2];
             m_bySetOptionIndex[setType] = optionList[i];
-            if (m_strSetName[setType][0] != 0 && strcmp(m_strSetName[setType], itemOption.strSetName) != NULL)
+            if (m_strSetName[setType][0] != 0 && wcscmp(m_strSetName[setType], itemOption.strSetName) != NULL)
             {
                 if (m_strSetName[0][0] == 0)
-                    strcpy(m_strSetName[0], itemOption.strSetName);
+                    wcscpy(m_strSetName[0], itemOption.strSetName);
                 else
-                    strcpy(m_strSetName[1], itemOption.strSetName);
+                    wcscpy(m_strSetName[1], itemOption.strSetName);
                 m_bySameSetItem = count;
             }
             else
             {
-                strcpy(m_strSetName[setType], itemOption.strSetName);
+                wcscpy(m_strSetName[setType], itemOption.strSetName);
             }
 
             bool	bFind = false;
             for (m_iterESIN = m_mapEquippedSetItemName.begin(); m_iterESIN != m_mapEquippedSetItemName.end(); ++m_iterESIN)
             {
-                std::string strCur = m_iterESIN->second;
+                std::wstring strCur = m_iterESIN->second;
 
-                if (strcmp(itemOption.strSetName, strCur.c_str()) == 0)
+                if (wcscmp(itemOption.strSetName, strCur.c_str()) == 0)
                 {
                     bFind = true;
                     break;
@@ -390,7 +393,7 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
             if (false == bFind)
             {
                 iCurrentSetItemTypeSequence = iSetItemTypeSequence++;
-                m_mapEquippedSetItemName.insert(std::pair<int, std::string>(iCurrentSetItemTypeSequence, itemOption.strSetName));
+                m_mapEquippedSetItemName.insert(std::pair<int, std::wstring>(iCurrentSetItemTypeSequence, itemOption.strSetName));
             }
 
             BYTE option[2];
@@ -511,12 +514,12 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
     m_bySetOptionBNum = optionCount[1];
 }
 
-void CSItemOption::getExplainText(char* text, const BYTE option, const BYTE value, const BYTE SetIndex)
+void CSItemOption::getExplainText(wchar_t* text, const BYTE option, const BYTE value, const BYTE SetIndex)
 {
     switch (option + AT_SET_OPTION_IMPROVE_STRENGTH)
     {
     case AT_SET_OPTION_IMPROVE_MAGIC_POWER:
-        sprintf(text, GlobalText[632], value);
+        wsprintf(text, GlobalText[632], value);
         break;
 
     case AT_SET_OPTION_IMPROVE_STRENGTH:
@@ -526,7 +529,7 @@ void CSItemOption::getExplainText(char* text, const BYTE option, const BYTE valu
     case AT_SET_OPTION_IMPROVE_CHARISMA:
     case AT_SET_OPTION_IMPROVE_ATTACK_MIN:
     case AT_SET_OPTION_IMPROVE_ATTACK_MAX:
-        sprintf(text, GlobalText[950 + option], value);
+        wsprintf(text, GlobalText[950 + option], value);
         break;
 
     case AT_SET_OPTION_IMPROVE_DAMAGE:
@@ -542,19 +545,19 @@ void CSItemOption::getExplainText(char* text, const BYTE option, const BYTE valu
     case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE:
     case AT_SET_OPTION_IMPROVE_SKILL_ATTACK:
     case AT_SET_OPTION_DOUBLE_DAMAGE:
-        sprintf(text, GlobalText[949 + option], value);
+        wsprintf(text, GlobalText[949 + option], value);
         break;
 
     case AT_SET_OPTION_DISABLE_DEFENCE:
-        sprintf(text, GlobalText[970], value);
+        wsprintf(text, GlobalText[970], value);
         break;
 
     case AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE:
-        sprintf(text, GlobalText[983], value);
+        wsprintf(text, GlobalText[983], value);
         break;
 
     case AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE:
-        sprintf(text, GlobalText[984], value);
+        wsprintf(text, GlobalText[984], value);
         break;
 
     case AT_SET_OPTION_IMPROVE_ATTACK_1:
@@ -571,7 +574,7 @@ void CSItemOption::getExplainText(char* text, const BYTE option, const BYTE valu
     case AT_SET_OPTION_WATER_MASTERY:
     case AT_SET_OPTION_WIND_MASTERY:
     case AT_SET_OPTION_EARTH_MASTERY:
-        sprintf(text, GlobalText[971 + (option + AT_SET_OPTION_IMPROVE_STRENGTH - AT_SET_OPTION_IMPROVE_ATTACK_2)], value);
+        wsprintf(text, GlobalText[971 + (option + AT_SET_OPTION_IMPROVE_STRENGTH - AT_SET_OPTION_IMPROVE_ATTACK_2)], value);
         break;
     }
 }
@@ -742,26 +745,26 @@ int CSItemOption::GetDefaultOptionValue(ITEM* ip, WORD* Value)
     return p->AttType;
 }
 
-bool CSItemOption::GetDefaultOptionText(const ITEM* ip, char* Text)
+bool CSItemOption::GetDefaultOptionText(const ITEM* ip, wchar_t* Text)
 {
     if (((ip->ExtOption >> 2) % 0x04) <= 0) return false;
 
     switch (ItemAttribute[ip->Type].AttType)
     {
     case SET_OPTION_STRENGTH:
-        sprintf(Text, GlobalText[950], ((ip->ExtOption >> 2) % 0x04) * 5);
+        wsprintf(Text, GlobalText[950], ((ip->ExtOption >> 2) % 0x04) * 5);
         break;
 
     case SET_OPTION_DEXTERITY:
-        sprintf(Text, GlobalText[951], ((ip->ExtOption >> 2) % 0x04) * 5);
+        wsprintf(Text, GlobalText[951], ((ip->ExtOption >> 2) % 0x04) * 5);
         break;
 
     case SET_OPTION_ENERGY:
-        sprintf(Text, GlobalText[952], ((ip->ExtOption >> 2) % 0x04) * 5);
+        wsprintf(Text, GlobalText[952], ((ip->ExtOption >> 2) % 0x04) * 5);
         break;
 
     case SET_OPTION_VITALITY:
-        sprintf(Text, GlobalText[953], ((ip->ExtOption >> 2) % 0x04) * 5);
+        wsprintf(Text, GlobalText[953], ((ip->ExtOption >> 2) % 0x04) * 5);
         break;
 
     default:
@@ -811,7 +814,7 @@ int CSItemOption::RenderDefaultOptionText(const ITEM* ip, int TextNum)
 
         if ((ip->Type >= ITEM_HELPER + 8 && ip->Type <= ITEM_HELPER + 9) || (ip->Type >= ITEM_HELPER + 12 && ip->Type <= ITEM_HELPER + 13) || (ip->Type >= ITEM_HELPER + 21 && ip->Type <= ITEM_HELPER + 27))
         {
-            sprintf(TextList[TNum], GlobalText[1165]);
+            wsprintf(TextList[TNum], GlobalText[1165]);
             TextListColor[TNum] = TEXT_COLOR_BLUE;
             TNum++;
         }
@@ -1018,7 +1021,7 @@ void CSItemOption::MoveSetOptionList(const int StartX, const int StartY)
 void CSItemOption::RenderSetOptionButton(const int StartX, const int StartY)
 {
     float x, y, Width, Height;
-    char  Text[100];
+    wchar_t  Text[100];
 
     Width = 162.f; Height = 20.f; x = (float)StartX + 14; y = (float)StartY + 22;
     RenderBitmap(BITMAP_INTERFACE_EX + 21, x, y, Width, Height, 0.f, 0.f, Width / 256.f, Height / 32.f);
@@ -1026,7 +1029,7 @@ void CSItemOption::RenderSetOptionButton(const int StartX, const int StartY)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0, 0, 0, 255);
     g_pRenderText->SetBgColor(100, 0, 0, 0);
-    sprintf(Text, "[%s]", GlobalText[989]);
+    wsprintf(Text, L"[%s]", GlobalText[989]);
     g_pRenderText->RenderText(StartX + 96, (int)(y + 3), Text, 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetTextColor(0xffffffff);
@@ -1054,15 +1057,15 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
         BYTE SkipNum = 0;
         BYTE setIndex = 0;
 
-        sprintf(TextList[TextNum], "\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], "\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], "\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
+        wsprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
+        wsprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
+        wsprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
 
         int		iCurSetItemTypeSequence = 0, iCurSetItemType = -1;
 
         for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
         {
-            std::string	strCurrent;
+            std::wstring	strCurrent;
 
             m_iterESIS = m_mapEquippedSetItemSequence.find(i);
 
@@ -1085,7 +1088,7 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
                 {
                     strCurrent = m_iterESIN->second;
 
-                    sprintf(TextList[TextNum], "%s %s", strCurrent.c_str(), GlobalText[1089]);
+                    wsprintf(TextList[TextNum], L"%s %s", strCurrent.c_str(), GlobalText[1089]);
                     TextListColor[TextNum] = 3;
                     TextBold[TextNum] = true;
                     TextNum++;
@@ -1105,24 +1108,24 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
     }
 }
 
-void CSItemOption::CheckRenderOptionHelper(const char* FilterName)
+void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
 {
-    char Name[256];
+    wchar_t Name[256];
 
     if (FilterName[0] != '/') return;
 
-    int Length1 = strlen(FilterName);
+    auto Length1 = wcslen(FilterName);
     for (int i = 0; i < MAX_SET_OPTION; ++i)
     {
         ITEM_SET_OPTION& setOption = m_ItemSetOption[i];
         if (setOption.byOptionCount < 255)
         {
-            sprintf(Name, "/%s", setOption.strSetName);
+            wsprintf(Name, L"/%s", setOption.strSetName);
 
-            int Length2 = strlen(Name);
+            auto Length2 = wcslen(Name);
 
             m_byRenderOptionList = 0;
-            if (strncmp(FilterName, Name, Length1) == NULL && strncmp(FilterName, Name, Length2) == NULL)
+            if (wcsncmp(FilterName, Name, Length1) == NULL && wcsncmp(FilterName, Name, Length2) == NULL)
             {
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_HELP);
@@ -1158,13 +1161,13 @@ void CSItemOption::RenderOptionHelper(void)
     BYTE    option2 = 255;
     BYTE    value1 = 255;
     BYTE    value2 = 255;
-    sprintf(TextList[TextNum], "\n"); TextNum++;
-    sprintf(TextList[TextNum], "%s %s %s", setOption.strSetName, GlobalText[1089], GlobalText[159]);
+    wsprintf(TextList[TextNum], L"\n"); TextNum++;
+    wsprintf(TextList[TextNum], L"%s %s %s", setOption.strSetName, GlobalText[1089], GlobalText[159]);
     TextListColor[TextNum] = TEXT_COLOR_YELLOW;
     TextNum++;
 
-    sprintf(TextList[TextNum], "\n"); TextNum++;
-    sprintf(TextList[TextNum], "\n"); TextNum++;
+    wsprintf(TextList[TextNum], L"\n"); TextNum++;
+    wsprintf(TextList[TextNum], L"\n"); TextNum++;
 
     for (int i = 0; i < 13; ++i)
     {
@@ -1198,8 +1201,9 @@ void CSItemOption::RenderOptionHelper(void)
             TextBold[TextNum] = false; TextNum++;
         }
     }
-    sprintf(TextList[TextNum], "\n"); TextNum++;
-    sprintf(TextList[TextNum], "\n"); TextNum++;
+
+    wsprintf(TextList[TextNum], L"\n"); TextNum++;
+    wsprintf(TextList[TextNum], L"\n"); TextNum++;
 
     SIZE TextSize = { 0, 0 };
     g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
@@ -1261,7 +1265,7 @@ bool CSItemOption::isFullseteffect(const ITEM* pselecteditem)
             BYTE myItemOption = myitemSType.byOption[(p->ExtOption % 0x04) - 1];
             ITEM_SET_OPTION& setOption = m_ItemSetOption[myItemOption];
 
-            if (strcmp(selecteditemoption.strSetName, setOption.strSetName) == NULL)
+            if (wcscmp(selecteditemoption.strSetName, setOption.strSetName) == NULL)
             {
                 Cmp_Buff[mysetitemcount] = p->Type;
                 mysetitemcount++;
@@ -1319,13 +1323,13 @@ int     CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, boo
         byLimitOptionNum = abs((m_bySetOptionANum + m_bySetOptionBNum) - m_bySameSetItem);
     }
 
-    sprintf(TextList[TNum], "\n"); TNum += 1;
-    sprintf(TextList[TNum], "%s %s", GlobalText[1089], GlobalText[159]);
+    wsprintf(TextList[TNum], L"\n"); TNum += 1;
+    wsprintf(TextList[TNum], L"%s %s", GlobalText[1089], GlobalText[159]);
     TextListColor[TNum] = TEXT_COLOR_YELLOW;
     TNum++;
 
-    sprintf(TextList[TNum], "\n"); TNum++;
-    sprintf(TextList[TNum], "\n"); TNum++;
+    wsprintf(TextList[TNum], L"\n"); TNum++;
+    wsprintf(TextList[TNum], L"\n"); TNum++;
 
     bool isfulloption = isFullseteffect(ip);
 
@@ -1422,8 +1426,8 @@ int     CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, boo
             TextBold[TNum] = false; TNum++;
         }
     }
-    sprintf(TextList[TNum], "\n"); TNum++;
-    sprintf(TextList[TNum], "\n"); TNum++;
+    wsprintf(TextList[TNum], L"\n"); TNum++;
+    wsprintf(TextList[TNum], L"\n"); TNum++;
 
     return TNum;
 }
