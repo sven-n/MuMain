@@ -496,14 +496,14 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         ID[MAX_ID_SIZE];
-    BYTE         ChatText[MAX_CHAT_SIZE];
+    char         ChatText[MAX_CHAT_SIZE];
 } PCHATING, * LPPCHATING;
 
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         KeyH;
     BYTE         KeyL;
-    BYTE         ChatText[MAX_CHAT_SIZE];
+    char         ChatText[MAX_CHAT_SIZE];
 } PCHATING_KEY, * LPPCHATING_KEY;
 
 typedef struct {

@@ -309,12 +309,12 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0xF4 [ReceiveServerList]");
 }
-void ReceiveServerConnect(const BYTE* ReceiveBuffer) //Recebe informação do ConnectServer sobre a sala e envia a conexão para a sala escolhida
+void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SERVER_ADDRESS)ReceiveBuffer;
-    wchar_t IP[16];
+    char IP[16];
     memset(IP, 0, 16);
-    memcpy(IP, (wchar_t*)Data->IP, 15);
+    memcpy(IP, Data->IP, 15);
     g_ErrorReport.Write(L"[ReceiveServerConnect]");
     if (SocketClient != nullptr)
     {
@@ -1438,9 +1438,10 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
         }
         else
         {
-            auto text = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes((char*)Data->ChatText);
+            int wchars_num = MultiByteToWideChar(CP_UTF8, 0, Data->ChatText, -1, NULL, 0);
+            MultiByteToWideChar(CP_UTF8, 0, Data->ChatText, -1, Text, wchars_num);
+            Text[wchars_num] = L'\0';
 
-            memcpy(Text, text.c_str(), messageSize);
             CHARACTER* pFindGm = NULL;
             for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
             {

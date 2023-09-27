@@ -3,6 +3,10 @@
 
 #include "stdafx.h"
 #include "LoadData.h"
+
+#include <codecvt>
+#include <locale>
+
 #include "GlobalBitmap.h"
 #include "ZzzBMD.h"
 #include "ZzzTexture.h"
@@ -50,19 +54,23 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
     {
         Texture_t* pTexture = &pModel->Textures[i];
 
+        int wchars_num = MultiByteToWideChar(CP_UTF8, 0, pTexture->FileName, -1, NULL, 0);
+        auto* textureFileName = new wchar_t[wchars_num];
+        MultiByteToWideChar(CP_UTF8, 0, pTexture->FileName, -1, textureFileName, wchars_num);
+
         // todo convert texture filename
         wchar_t szFullPath[256] = { 0, };
         wcscpy(szFullPath, L"Data\\");
         wcscat(szFullPath, SubFolder);
-        wcscat(szFullPath, pTexture->FileName);
+        wcscat(szFullPath, textureFileName);
 
         wchar_t __ext[_MAX_EXT] = { 0, };
-        _wsplitpath(pTexture->FileName, NULL, NULL, NULL, __ext);
+        _wsplitpath(textureFileName, NULL, NULL, NULL, __ext);
         if (pTexture->FileName[0] == 's' && pTexture->FileName[1] == 'k' && pTexture->FileName[2] == 'i')
         {
             pModel->IndexTexture[i] = BITMAP_SKIN;
         }
-        else if (!wcsnicmp(pTexture->FileName, L"level", 5))
+        else if (!wcsnicmp(textureFileName, L"level", 5))
         {
             pModel->IndexTexture[i] = BITMAP_SKIN;
         }
@@ -85,7 +93,7 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
 
         if (pModel->IndexTexture[i] == BITMAP_UNKNOWN)
         {
-            BITMAP_t* pBitmap = Bitmaps.FindTextureByName(pTexture->FileName);
+            BITMAP_t* pBitmap = Bitmaps.FindTextureByName(textureFileName);
             if (pBitmap)
             {
                 Bitmaps.LoadImage(pBitmap->BitmapIndex, pBitmap->FileName);
@@ -103,5 +111,7 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
                 break;
             }
         }
+
+        delete[] textureFileName;
     }
 }

@@ -2457,8 +2457,10 @@ const wchar_t* getMonsterName(int type)
     {
         if (MonsterScript[i].Type == type)
         {
-            std::wstring_convert<std::codecvt_utf8_utf16<char>> converter;
-            return converter.from_bytes(MonsterScript[i].Name).c_str();
+            int wchars_num = MultiByteToWideChar(CP_UTF8, 0, MonsterScript[i].Name, -1, NULL, 0);
+            auto* name = new wchar_t[wchars_num];
+            MultiByteToWideChar(CP_UTF8, 0, MonsterScript[i].Name, -1, name, wchars_num);
+            return name;
         }
     }
 

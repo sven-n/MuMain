@@ -8909,8 +8909,14 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         for (int i = 0; i < b->NumMeshs; ++i)
         {
             Texture_t* pTexture = &b->Textures[i];
-            // todo: convert texture filename
-            int SkinTexture = (!wcsnicmp(pTexture->FileName, pSkinTextureName, nLen)) ? BITMAP_SKIN + 14 : -1;
+            int wchars_num = MultiByteToWideChar(CP_UTF8, 0, pTexture->FileName, -1, NULL, 0);
+            wchar_t* name = new wchar_t[wchars_num];
+            MultiByteToWideChar(CP_UTF8, 0, pTexture->FileName, -1, name, wchars_num);
+
+            // todo: optimize that, because calling this in the render loop again and again is not optimal
+            
+            int SkinTexture = (!wcsnicmp(name, pSkinTextureName, nLen)) ? BITMAP_SKIN + 14 : -1;
+            delete[] name;
             b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, SkinTexture);
         }
     }
