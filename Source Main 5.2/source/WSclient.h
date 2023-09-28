@@ -969,7 +969,7 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    BYTE         IP[15];
+    char         IP[15];
     WORD         Port;
 } PRECEIVE_SERVER_ADDRESS, * LPPRECEIVE_SERVER_ADDRESS;
 
@@ -1796,11 +1796,11 @@ typedef struct {
 
 typedef struct {
     PBMSG_HEADER    Header;
-    BYTE			IP[15];
+    char			IP[15];
     WORD			RoomNumber;
     DWORD			Ticket;
     BYTE			Type;
-    BYTE			ID[10];
+    char			ID[10];
     BYTE			Result;
 } FS_CHAT_CREATE_RESULT, * LPFS_CHAT_CREATE_RESULT;
 
@@ -3491,7 +3491,7 @@ extern int g_iTotalPacketSend;
 extern DWORD g_dwPacketInitialTick;
 #endif //ACC_PACKETSIZE
 
-BOOL CreateSocket(char* IpAddr, unsigned short Port);
+BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port);
 void DeleteSocket();
 //void ProtocolCompiler( CWsctlc *pSocketClient = &SocketClient, int iTranslation = 0, int iParam = 0);
 void ReceiveCharacterList(const BYTE* ReceiveBuffer);

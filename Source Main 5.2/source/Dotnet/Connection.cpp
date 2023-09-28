@@ -13,7 +13,7 @@ std::map<int32_t, Connection*> connections;
 using onPacketReceived = void(int32_t, int32_t, BYTE*);
 using onDisconnected = void(int32_t);
 
-typedef int32_t(CORECLR_DELEGATE_CALLTYPE* Connect)(const char*, int32_t, onPacketReceived, onDisconnected);
+typedef int32_t(CORECLR_DELEGATE_CALLTYPE* Connect)(const wchar_t*, int32_t, onPacketReceived, onDisconnected);
 typedef void(CORECLR_DELEGATE_CALLTYPE* Disconnect)(int32_t);
 typedef void(CORECLR_DELEGATE_CALLTYPE* BeginReceive)(int32_t);
 typedef void(CORECLR_DELEGATE_CALLTYPE* Send)(int32_t, const BYTE*, int32_t);
@@ -56,7 +56,7 @@ void Connection::OnDisconnectedS(const int32_t handle)
     }
 }
 
-Connection::Connection(const char* host, int32_t port, void(*packetHandler)(int32_t, const BYTE*, int32_t))
+Connection::Connection(const wchar_t* host, int32_t port, void(*packetHandler)(int32_t, const BYTE*, int32_t))
 {
     this->_packetHandler = packetHandler;
     this->_handle = dotnet_connect(host, port, &OnPacketReceivedS, &OnDisconnectedS);

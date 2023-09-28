@@ -105,7 +105,7 @@ bool EnableEdit    = false;
 
 int g_iLengthAuthorityCode = 20;
 
-char* szServerIpAddress = "127.127.127.127";
+wchar_t* szServerIpAddress = L"127.127.127.127";
 //char *szServerIpAddress = "210.181.89.215";
 WORD g_ServerPort = 55900;
 
@@ -205,7 +205,7 @@ void StopMusic()
     }
 }
 
-bool CheckAbuseFilter(std::wstring Text, bool bCheckSlash)
+bool CheckAbuseFilter(wchar_t* Text, bool bCheckSlash)
 {
     if (bCheckSlash == true)
     {
@@ -217,7 +217,7 @@ bool CheckAbuseFilter(std::wstring Text, bool bCheckSlash)
 
     int icntText = 0;
     wchar_t TmpText[2048];
-    for (int i = 0; i < Text.length(); ++i)
+    for (int i = 0; i < wcslen(Text); ++i)
     {
         if (Text[i] != 32)
         {
@@ -237,11 +237,11 @@ bool CheckAbuseFilter(std::wstring Text, bool bCheckSlash)
     return false;
 }
 
-bool CheckAbuseNameFilter(std::wstring Text)
+bool CheckAbuseNameFilter(wchar_t* Text)
 {
     int icntText = 0;
     wchar_t TmpText[256];
-    for (int i = 0; i < Text.length(); ++i)
+    for (int i = 0; i < wcslen(Text); ++i)
     {
         if (Text[i] != 32)
         {

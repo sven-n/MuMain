@@ -124,7 +124,7 @@ public:
     int AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server);
     void RemoveChatPal(const wchar_t* pszID);
     void AddChatText(BYTE byIndex, const wchar_t* pszText, int iType, int iColor);
-    void ConnectToChatServer(const char* pszIP, DWORD dwRoomNumber, DWORD dwTicket);
+    void ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber, DWORD dwTicket);
     void DisconnectToChatServer();
     Connection* GetCurrentSocket() { return _connection; }
     GUILDLIST_TEXT* GetCurrentInvitePal() { return m_InvitePalListBox.GetSelectedText(); }

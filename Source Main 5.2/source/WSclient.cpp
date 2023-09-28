@@ -99,7 +99,7 @@ extern  short   g_shCameraLevel;
 
 extern BYTE DebugText[MAX_DEBUG_MAX][256];
 extern int  DebugTextLength[MAX_DEBUG_MAX];
-extern wchar_t DebugTextCount;
+extern char DebugTextCount;
 extern int  TotalPacketSize;
 extern int g_iKeyPadEnable;
 
@@ -163,7 +163,7 @@ void AddDebugText(const unsigned char* Buffer, int Size)
 // Forward declaration
 static void HandleIncomingPacketLocked(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
 
-BOOL CreateSocket(char* IpAddr, unsigned short Port)
+BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
     g_byPacketSerialSend = 0;
@@ -273,7 +273,7 @@ void InitGuildWar()
     }
 }
 
-BOOL Util_CheckOption(wchar_t* lpszCommandLine, unsigned wchar_t cOption, wchar_t* lpszString);
+BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString);
 
 void ReceiveServerList(const BYTE* ReceiveBuffer)
 {
@@ -312,9 +312,11 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
 void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SERVER_ADDRESS)ReceiveBuffer;
-    char IP[16];
-    memset(IP, 0, 16);
-    memcpy(IP, Data->IP, 15);
+    wchar_t IP[16];
+    int wchars_ip = MultiByteToWideChar(CP_UTF8, 0, Data->IP, -1, nullptr, 0);
+    MultiByteToWideChar(CP_UTF8, 0, Data->IP, -1, IP, wchars_ip);
+    IP[15] = L'\0';
+
     g_ErrorReport.Write(L"[ReceiveServerConnect]");
     if (SocketClient != nullptr)
     {
@@ -381,7 +383,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
     if (Data2->Result == 0x01)
     {
         wchar_t lpszTemp[256];
-        if (Util_CheckOption(GetCommandLine(), 'i', lpszTemp))
+        if (Util_CheckOption(GetCommandLineW(), L'i', lpszTemp))
         {
             g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", m_ID);
             SendRequestLogIn(m_ID, lpszTemp);
@@ -9010,12 +9012,17 @@ void ReceiveLetterDeleteResult(const BYTE* ReceiveBuffer)
 void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_CHAT_CREATE_RESULT)ReceiveBuffer;
+
     wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
-    wcsncpy(szName, (const wchar_t*)Data->ID, MAX_ID_SIZE);
-    szName[MAX_ID_SIZE] = '\0';
+    int wchars_name = MultiByteToWideChar(CP_UTF8, 0, Data->ID, -1, nullptr, 0);
+    MultiByteToWideChar(CP_UTF8, 0, Data->ID, -1, szName, wchars_name);
+    szName[MAX_ID_SIZE] = L'\0';
+
     wchar_t szIP[16];
-    memset(szIP, 0, 16);
-    memcpy(szIP, Data->IP, 15);
+    int wchars_ip = MultiByteToWideChar(CP_UTF8, 0, Data->IP, -1, nullptr, 0);
+    MultiByteToWideChar(CP_UTF8, 0, Data->IP, -1, szIP, wchars_ip);
+    szIP[15] = L'\0';
+
     switch (Data->Result)
     {
     case 0x00:
@@ -9027,7 +9034,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
         {
             g_pFriendMenu->RemoveRequestWindow(szName);
             DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, GlobalText[994]);
-            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char*)szIP, Data->RoomNumber, Data->Ticket);
+            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
         }
         else if (Data->Type == 1)
         {
@@ -9035,7 +9042,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
             if (dwUIID == 0)
             {
                 dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);
-                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char*)szIP, Data->RoomNumber, Data->Ticket);
+                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
                 g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
                 g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
                 if (g_pWindowMgr->GetFriendMainWindow() != NULL)
@@ -9045,7 +9052,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
             else
             {
                 ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->DisconnectToChatServer();
-                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char*)szIP, Data->RoomNumber, Data->Ticket);
+                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
 
                 //				SendRequestCRDisconnectRoom(((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->GetCurrentSocket());
                 //				DWORD dwOldRoomNumber = ((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->GetRoomNumber();
@@ -9056,7 +9063,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
         else if (Data->Type == 2)
         {
             DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);
-            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char*)szIP, Data->RoomNumber, Data->Ticket);
+            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
             g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
             g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
             if (g_pWindowMgr->GetFriendMainWindow() != NULL)

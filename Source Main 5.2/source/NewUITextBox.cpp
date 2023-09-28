@@ -49,7 +49,7 @@ void CNewUITextBox::SetPos(int iX, int iY, int iWidth, int iHeight)
     SIZE Fontsize;
     g_pRenderText->SetFont(g_hFont);
 
-   std::wstring strTemp = _T(L"A");
+    std::wstring strTemp = L"A";
 
     g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &Fontsize);
 

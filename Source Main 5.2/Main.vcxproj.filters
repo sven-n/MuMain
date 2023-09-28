@@ -1159,12 +1159,6 @@
     <ClCompile Include="source\ExternalObject\Leaf\sysinfo.cpp">
       <Filter>External Object\Leaf</Filter>
     </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\xortrans.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
     <ClCompile Include="source\Dotnet\DotNetRuntime.cpp">
       <Filter>MU\Dotnet</Filter>
     </ClCompile>
@@ -1188,6 +1182,12 @@
     </ClCompile>
     <ClCompile Include="source\Dotnet\PacketFunctions_ConnectServer.cpp">
       <Filter>MU\Dotnet</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ExternalObject\Leaf\xortrans.cpp">
+      <Filter>MU\Client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp">
+      <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2229,12 +2229,6 @@
     <ClInclude Include="source\ExternalObject\Leaf\sysinfo.h">
       <Filter>External Object\Leaf</Filter>
     </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\xortrans.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\xstreambuf.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
     <ClInclude Include="afxres.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
@@ -2273,6 +2267,12 @@
     </ClInclude>
     <ClInclude Include="source\Dotnet\PacketBindings_ConnectServer.h">
       <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ExternalObject\Leaf\xortrans.h">
+      <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ExternalObject\Leaf\xstreambuf.h">
+      <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

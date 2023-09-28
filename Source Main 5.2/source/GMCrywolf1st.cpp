@@ -48,7 +48,7 @@ int Exp = 0;
 BYTE Ranking[5];
 BYTE HeroClass[5];
 int HeroScore[5] = { -1,-1,-1,-1,-1 };
-char HeroName[5][MAX_ID_SIZE + 1];
+wchar_t HeroName[5][MAX_ID_SIZE + 1];
 
 int BackUpMin = 0;
 bool TimeStart = false;

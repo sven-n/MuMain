@@ -27,7 +27,7 @@ private:
     void OnPacketReceived(const BYTE* data, const int32_t length);
 
 public:
-    Connection(const char* host, int32_t port, void(*packetHandler)(int32_t, const BYTE*, int32_t));
+    Connection(const wchar_t* host, int32_t port, void(*packetHandler)(int32_t, const BYTE*, int32_t));
     ~Connection();
 
     bool IsConnected();

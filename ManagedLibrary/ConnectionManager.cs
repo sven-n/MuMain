@@ -54,7 +54,7 @@ public unsafe partial class ConnectionManager
     {
         try
         {
-            var host = Marshal.PtrToStringAnsi(hostPtr) ?? throw new ArgumentNullException(nameof(hostPtr));
+            var host = Marshal.PtrToStringAuto(hostPtr) ?? throw new ArgumentNullException(nameof(hostPtr));
             return ConnectInner(host, port, onPacketReceived, onDisconnected);
         }
         catch (Exception ex)

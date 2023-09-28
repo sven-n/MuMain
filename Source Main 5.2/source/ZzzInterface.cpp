@@ -1102,7 +1102,7 @@ void AddGuildName(CHAT* c, CHARACTER* Owner)
     }
 }
 
-void CreateChat(const wchar_t* character_name, const wchar_t* chat_text, CHARACTER* Owner, int Flag, int SetColor)
+void CreateChat(wchar_t* character_name, const wchar_t* chat_text, CHARACTER* Owner, int Flag, int SetColor)
 {
     OBJECT* o = &Owner->Object;
     if (!o->Live || !o->Visible) return;

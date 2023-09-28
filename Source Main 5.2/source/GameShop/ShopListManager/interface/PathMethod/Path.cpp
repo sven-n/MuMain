@@ -162,7 +162,6 @@ TCHAR* Path::ChangeBackSlashToSlash(TCHAR* szPath)
     return szPath;
 }
 
-/*
 BOOL			Path::ReadFileLastLine(TCHAR* szFile, TCHAR* szLastLine)
 {
     std::ifstream ifs(szFile, std::ifstream::in | std::ifstream::binary);
@@ -180,8 +179,9 @@ BOOL			Path::ReadFileLastLine(TCHAR* szFile, TCHAR* szLastLine)
             len = 0;
             StringCchLengthA(buff, sizeof(buff), &len);
 
-            if (len > 1)
-                StringCchCopy(szLastLine, sizeof(buff), buff);
+            // TODO convert buff to utf8
+            //if (len > 1)
+            //    StringCchCopy(szLastLine, sizeof(buff), buff);
         }
 
         ifs.close();
@@ -248,5 +248,5 @@ BOOL			Path::CreateDirectorys(TCHAR* szFilePath, BOOL bIsFile)
     }
 
     return 0;
-}*/
+}
 #endif

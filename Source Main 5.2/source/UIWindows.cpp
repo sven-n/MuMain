@@ -1405,7 +1405,7 @@ void CUIChatWindow::HandlePacketS(int32_t handle, const BYTE* ReceiveBuffer, int
     }
 }
 
-void CUIChatWindow::ConnectToChatServer(const char* pszIP, DWORD dwRoomNumber, DWORD dwTicket)
+void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber, DWORD dwTicket)
 {
     m_dwRoomNumber = dwRoomNumber;
 

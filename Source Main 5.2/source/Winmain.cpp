@@ -1062,9 +1062,9 @@ BOOL OpenInitFile()
     return TRUE;
 }
 
-BOOL Util_CheckOption(char* lpszCommandLine, unsigned char cOption, char* lpszString)
+BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString)
 {
-    unsigned char cComp[2];
+    wchar_t cComp[2];
     cComp[0] = cOption; cComp[1] = cOption;
     if (islower((int)cOption))
     {
@@ -1075,24 +1075,25 @@ BOOL Util_CheckOption(char* lpszCommandLine, unsigned char cOption, char* lpszSt
         cComp[1] = tolower((int)cOption);
     }
 
-    int nFind = (int)'/';
-    auto* lpFound = (unsigned char*)lpszCommandLine;
+    const wchar_t nFind = L'/';
+    auto* lpFound = lpszCommandLine;
     while (lpFound)
     {
-        lpFound = (unsigned char*)strchr((char*)(lpFound + 1), nFind);
+        lpFound = wcschr(lpFound + 1, nFind);
         if (lpFound && (*(lpFound + 1) == cComp[0] || *(lpFound + 1) == cComp[1]))
-        {	// ¹ß°ß
+        {
             if (lpszString)
             {
                 int nCount = 0;
-                for (unsigned char* lpSeek = lpFound + 2; *lpSeek != ' ' && *lpSeek != '\0'; lpSeek++)
+                for (wchar_t* lpSeek = lpFound + 2; *lpSeek != L' ' && *lpSeek != L'\0'; lpSeek++)
                 {
                     nCount++;
                 }
 
-                memcpy(lpszString, lpFound + 2, nCount);
-                lpszString[nCount] = '\0';
+                wcscpy_s(lpszString, nCount, lpFound + 2);
+                lpszString[nCount] = L'\0';
             }
+
             return (TRUE);
         }
     }
@@ -1165,38 +1166,38 @@ BOOL KillExeProcess(wchar_t* lpszExe)
     return bRet;
 }
 
-char g_lpszCmdURL[50];
-BOOL GetConnectServerInfo(PSTR szCmdLine, char* lpszURL, WORD* pwPort)
+wchar_t g_lpszCmdURL[50];
+BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
 {
-    char lpszTemp[256] = { 0, };
-    if (Util_CheckOption(szCmdLine, 'y', lpszTemp))
+    wchar_t lpszTemp[256] = { 0, };
+    if (Util_CheckOption(szCmdLine, L'y', lpszTemp))
     {
         BYTE bySuffle[] = { 0x0C, 0x07, 0x03, 0x13 };
 
-        for (int i = 0; i < (int)strlen(lpszTemp); i++)
+        for (int i = 0; i < (int)wcslen(lpszTemp); i++)
             lpszTemp[i] -= bySuffle[i % 4];
-        strcpy(lpszURL, lpszTemp);
+        wcscpy(lpszURL, lpszTemp);
 
-        if (Util_CheckOption(szCmdLine, 'z', lpszTemp))
+        if (Util_CheckOption(szCmdLine, L'z', lpszTemp))
         {
-            for (int j = 0; j < (int)strlen(lpszTemp); j++)
+            for (int j = 0; j < (int)wcslen(lpszTemp); j++)
                 lpszTemp[j] -= bySuffle[j % 4];
-            *pwPort = atoi(lpszTemp);
+            *pwPort = _wtoi(lpszTemp);
         }
 
         g_ErrorReport.Write(L"[Virtual Connection] Connect IP : %s, Port : %d\r\n", lpszURL, *pwPort);
         return (TRUE);
     }
-    if (!Util_CheckOption(szCmdLine, 'u', lpszTemp))
+    if (!Util_CheckOption(szCmdLine, L'u', lpszTemp))
     {
         return (FALSE);
     }
-    strcpy(lpszURL, lpszTemp);
-    if (!Util_CheckOption(szCmdLine, 'p', lpszTemp))
+    wcscpy(lpszURL, lpszTemp);
+    if (!Util_CheckOption(szCmdLine, L'p', lpszTemp))
     {
         return (FALSE);
     }
-    *pwPort = atoi(lpszTemp);
+    *pwPort = _wtoi(lpszTemp);
 
     return (TRUE);
 }
@@ -1314,7 +1315,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     // PKD_ADD_BINARY_PROTECTION
     VM_START
         WORD wPortNumber;
-    if (GetConnectServerInfo(szCmdLine, g_lpszCmdURL, &wPortNumber))
+    if (GetConnectServerInfo(GetCommandLine(), g_lpszCmdURL, &wPortNumber))
     {
         szServerIpAddress = g_lpszCmdURL;
         g_ServerPort = wPortNumber;
