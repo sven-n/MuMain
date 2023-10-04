@@ -592,13 +592,32 @@ void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
         return;
     }
 
-    int iSize = sizeof(SOCKET_OPTION_INFO);
+    int iSize = sizeof(SOCKET_OPTION_INFO_FILE);
     for (int j = 0; j < MAX_SOCKET_OPTION_TYPES; ++j)
     {
         for (int i = 0; i < MAX_SOCKET_OPTION; ++i)
         {
-            fread(&m_SocketOptionInfo[j][i], iSize, 1, fp);
-            BuxConvert((BYTE*)&m_SocketOptionInfo[j][i], iSize);
+            SOCKET_OPTION_INFO_FILE current;
+            fread(&current, iSize, 1, fp);
+            BuxConvert((BYTE*)&current, iSize);
+
+            auto target = &m_SocketOptionInfo[j][i];
+            target->m_iOptionCategory = current.m_iOptionCategory;
+            target->m_iOptionID = current.m_iOptionID;
+            target->m_bOptionType = current.m_bOptionType;
+            target->m_iOptionValue[0] = current.m_iOptionValue[0];
+            target->m_iOptionValue[1] = current.m_iOptionValue[1];
+            target->m_iOptionValue[2] = current.m_iOptionValue[2];
+            target->m_iOptionValue[3] = current.m_iOptionValue[3];
+            target->m_iOptionValue[4] = current.m_iOptionValue[4];
+            target->m_bySocketCheckInfo[0] = current.m_bySocketCheckInfo[0];
+            target->m_bySocketCheckInfo[1] = current.m_bySocketCheckInfo[1];
+            target->m_bySocketCheckInfo[2] = current.m_bySocketCheckInfo[2];
+            target->m_bySocketCheckInfo[3] = current.m_bySocketCheckInfo[3];
+            target->m_bySocketCheckInfo[4] = current.m_bySocketCheckInfo[4];
+            target->m_bySocketCheckInfo[5] = current.m_bySocketCheckInfo[5];
+
+            CMultiLanguage::ConvertFromUtf8(target->m_szOptionName, current.m_szOptionName);
         }
     }
 

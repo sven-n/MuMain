@@ -79,9 +79,9 @@ BYTE CSQuest::getCurrQuestState(void)
     return CheckQuestState();
 }
 
-const wchar_t* CSQuest::GetNPCName(BYTE byQuestIndex)
+const void CSQuest::GetNPCName(BYTE byQuestIndex, wchar_t* name)
 {
-    return getMonsterName(int(m_Quest[byQuestIndex].wNpcType));
+    return getMonsterName(int(m_Quest[byQuestIndex].wNpcType), name);
 }
 
 wchar_t* CSQuest::getQuestTitle()
@@ -447,8 +447,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
     g_iCurrentDialogScript = iDialogIndex;
 
     wchar_t Text[300];
-    int wchars_num = MultiByteToWideChar(CP_UTF8, 0, g_DialogScript[g_iCurrentDialogScript].m_lpszText, -1, NULL, 0);
-    MultiByteToWideChar(CP_UTF8, 0, g_DialogScript[g_iCurrentDialogScript].m_lpszText, -1, Text, wchars_num);
+    CMultiLanguage::ConvertFromUtf8(Text, g_DialogScript[g_iCurrentDialogScript].m_lpszText);
 
     g_iNumLineMessageBoxCustom = SeparateTextIntoLines(Text, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 
@@ -460,12 +459,15 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     for (int i = 0; i < g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer; ++i)
     {
-        swprintf(lpszAnswer, L"%d) %s", i + 1, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
+        wchar_t answerText[64];
+        CMultiLanguage::ConvertFromUtf8(answerText, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
+        swprintf(lpszAnswer, L"%d) %s", i + 1, answerText);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)
         {
             g_lpszDialogAnswer[i][iNumLine][0] = '\0';
         }
+
         g_iNumAnswer++;
         iTextSize = i;
     }

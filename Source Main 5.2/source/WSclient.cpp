@@ -313,9 +313,7 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SERVER_ADDRESS)ReceiveBuffer;
     wchar_t IP[16];
-    int wchars_ip = MultiByteToWideChar(CP_UTF8, 0, Data->IP, -1, nullptr, 0);
-    MultiByteToWideChar(CP_UTF8, 0, Data->IP, -1, IP, wchars_ip);
-    IP[15] = L'\0';
+    CMultiLanguage::ConvertFromUtf8(IP, Data->IP);
 
     g_ErrorReport.Write(L"[ReceiveServerConnect]");
     if (SocketClient != nullptr)
@@ -7385,8 +7383,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         if (pMsgBox)
         {
             wchar_t Text[300];
-            int wchars_num = MultiByteToWideChar(CP_UTF8, 0, g_DialogScript[Data->Cmd2].m_lpszText, -1, NULL, 0);
-            MultiByteToWideChar(CP_UTF8, 0, g_DialogScript[Data->Cmd2].m_lpszText, -1, Text, wchars_num);
+            CMultiLanguage::ConvertFromUtf8(Text, g_DialogScript[Data->Cmd2].m_lpszText);
             pMsgBox->AddMsg(Text);
         }
     }
@@ -9010,14 +9007,10 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
     auto Data = (LPFS_CHAT_CREATE_RESULT)ReceiveBuffer;
 
     wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
-    int wchars_name = MultiByteToWideChar(CP_UTF8, 0, Data->ID, -1, nullptr, 0);
-    MultiByteToWideChar(CP_UTF8, 0, Data->ID, -1, szName, wchars_name);
-    szName[MAX_ID_SIZE] = L'\0';
+    CMultiLanguage::ConvertFromUtf8(szName, Data->ID);
 
     wchar_t szIP[16];
-    int wchars_ip = MultiByteToWideChar(CP_UTF8, 0, Data->IP, -1, nullptr, 0);
-    MultiByteToWideChar(CP_UTF8, 0, Data->IP, -1, szIP, wchars_ip);
-    szIP[15] = L'\0';
+    CMultiLanguage::ConvertFromUtf8(szIP, Data->IP);
 
     switch (Data->Result)
     {

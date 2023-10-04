@@ -82,7 +82,7 @@ namespace SEASON4A
         SBOPT_MAX_LIFE_BONUS,
     };
 
-    typedef struct _SOCKET_OPTION_INFO
+    typedef struct
     {
         int m_iOptionID;
         int m_iOptionCategory;
@@ -91,6 +91,16 @@ namespace SEASON4A
         int m_iOptionValue[5];
         BYTE m_bySocketCheckInfo[6];
     } SOCKET_OPTION_INFO;
+
+    typedef struct
+    {
+        int m_iOptionID;
+        int m_iOptionCategory;
+        char m_szOptionName[MAX_SOCKET_OPTION_NAME_LENGTH];
+        char m_bOptionType;
+        int m_iOptionValue[5];
+        BYTE m_bySocketCheckInfo[6];
+    } SOCKET_OPTION_INFO_FILE;
 
     typedef struct _SOCKET_OPTION_STATUS_BONUS
     {

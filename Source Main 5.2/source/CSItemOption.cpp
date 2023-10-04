@@ -125,8 +125,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
                 ITEM_SET_OPTION_FILE current{ };
                 memcpy(&current, pSeek, Size);
                 auto target = &m_ItemSetOption[i];
-                int wchars_num = MultiByteToWideChar(CP_UTF8, 0, current.strSetName, -1, NULL, 0);
-                MultiByteToWideChar(CP_UTF8, 0, current.strSetName, -1, target->strSetName, wchars_num);
+                CMultiLanguage::ConvertFromUtf8(target->strSetName, current.strSetName);
                 memcpy(&target + MAX_ITEM_SET_NAME * sizeof(wchar_t), pSeek + MAX_ITEM_SET_NAME, Size);
 
                 pSeek += Size;

@@ -12409,10 +12409,7 @@ void Setting_Monster(CHARACTER* c, int Type, int PositionX, int PositionY)
         {
             if (Type == MonsterScript[i].Type)
             {
-                int wchars_num = MultiByteToWideChar(CP_UTF8, 0, MonsterScript[i].Name, -1, NULL, 0);
-                wchar_t* name = new wchar_t[wchars_num];
-                MultiByteToWideChar(CP_UTF8, 0, MonsterScript[i].Name, -1, name, wchars_num);
-                delete[] name;
+                CMultiLanguage::ConvertFromUtf8(c->ID, MonsterScript[i].Name);
                 break;
             }
         }

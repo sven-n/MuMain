@@ -104,34 +104,37 @@ bool TextureScriptParsing::parsingTScript(wchar_t* filename)
             {
                 switch (strTokenFile[i])
                 {
-                case 'R':
+                case L'R':
                     m_bBright = true;
                     m_bBeScript = true;
                     break;
 
-                case 'H':
+                case L'H':
                     m_bHiddenMesh = true;
                     m_bBeScript = true;
                     break;
 
-                case 'S':
+                case L'S':
                     m_bStreamMesh = true;
                     m_bBeScript = true;
                     break;
 
-                case 'N':
+                case L'N':
                     m_bNoneBlendMesh = true;
                     m_bBeScript = true;
                     break;
 
-                case 'DC':
-                    m_byShadowMesh = 1; //  NoneTexture.
-                    m_bBeScript = true;
-                    break;
-
-                case 'DT':
-                    m_byShadowMesh = 2; //  Texture.
-                    m_bBeScript = true;
+                case L'D':
+                    if (strTokenFile[i + 1] == L'C')
+                    {
+                                               m_byShadowMesh = 1; //  NoneTexture.
+                        m_bBeScript = true;
+                    }
+                    else if (strTokenFile[i + 1] == L'T')
+                    {
+                                               m_byShadowMesh = 2; //  Texture.
+                        m_bBeScript = true;
+                    }
                     break;
 
                 default:

@@ -281,10 +281,7 @@ void OpenSkillScript(wchar_t* FileName)
                 SKILL_ATTRIBUTE_FILE current{ };
                 memcpy(&current, pSeek, Size);
                 auto target = &SkillAttribute[i];
-                int wchars_num = MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, NULL, 0);
-                MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, target->Name, wchars_num);
-                //target->Name[wchars_num] = L'\0';
-
+                CMultiLanguage::ConvertFromUtf8(target->Name, current.Name);
                 memcpy(&target + MAX_SKILL_NAME * sizeof(wchar_t), pSeek + MAX_SKILL_NAME, Size);
 
                 pSeek += Size;
@@ -421,8 +418,7 @@ void OpenItemScript(wchar_t* FileName)
                 ITEM_ATTRIBUTE_FILE current { };
                 memcpy(&current, pSeek, Size);
                 auto target = &ItemAttribute[i];
-                int wchars_num = MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, NULL, 0);
-                MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, target->Name, wchars_num);
+                CMultiLanguage::ConvertFromUtf8(target->Name, current.Name);
                 memcpy(&target + MAX_ITEM_NAME * sizeof(wchar_t), pSeek + MAX_ITEM_NAME, Size);
 
                 pSeek += Size;
@@ -2467,20 +2463,18 @@ void OpenMonsterScript(wchar_t* FileName)
     fclose(SMDFile);
 }
 
-const wchar_t* getMonsterName(int type)
+const void getMonsterName(int type, wchar_t* name)
 {
     for (int i = 0; i < MAX_MONSTER; ++i)
     {
         if (MonsterScript[i].Type == type)
         {
-            int wchars_num = MultiByteToWideChar(CP_UTF8, 0, MonsterScript[i].Name, -1, NULL, 0);
-            auto* name = new wchar_t[wchars_num];
-            MultiByteToWideChar(CP_UTF8, 0, MonsterScript[i].Name, -1, name, wchars_num);
-            return name;
+            CMultiLanguage::ConvertFromUtf8(name, MonsterScript[i].Name);
+            return;
         }
     }
 
-    return L"(L"")";
+    name = L"()";
 }
 
 void MonsterConvert(MONSTER* m, int Level)

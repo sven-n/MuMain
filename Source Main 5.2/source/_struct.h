@@ -316,7 +316,7 @@ typedef struct
 typedef struct
 {
     WORD				Type;
-    char				Name[32];
+    char				Name[MAX_MONSTER_NAME];
     WORD				Level;
     MONSTER_ATTRIBUTE	Attribute;
 } MONSTER_SCRIPT;

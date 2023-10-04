@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "ServerListManager.h"
+
+#include "MultiLanguage.h"
 #include "./Utilities/Log/ErrorReport.h"
 
 CServerListManager::CServerListManager()
@@ -82,11 +84,7 @@ void CServerListManager::LoadServerListScript()
         ::fread(szDescript, sServerGroupScript.m_nDescriptLen, 1, fp);
         BuxConvert((BYTE*)szDescript, sServerGroupScript.m_nDescriptLen);
 
-        // ::wcsncpy(sServerGroupInfo.m_szName, sServerGroupScript.m_szName, SLM_MAX_SERVER_NAME_LENGTH);
-        int wchars_num = MultiByteToWideChar(CP_UTF8, 0, sServerGroupScript.m_szName, -1, NULL, 0);
-        MultiByteToWideChar(CP_UTF8, 0, sServerGroupScript.m_szName, -1, sServerGroupInfo.m_szName, wchars_num);
-        //sServerGroupInfo.m_szName[wchars_num] = L'\0';
-
+        CMultiLanguage::ConvertFromUtf8(sServerGroupInfo.m_szName, sServerGroupScript.m_szName);
 
         sServerGroupInfo.m_byPos = sServerGroupScript.m_byPos;
         sServerGroupInfo.m_bySequence = sServerGroupScript.m_bySequence;

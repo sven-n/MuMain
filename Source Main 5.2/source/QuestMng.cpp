@@ -244,7 +244,7 @@ const SQuestRequestReward* CQuestMng::GetRequestReward(DWORD dwQuestIndex)
 void CQuestMng::SetNPC(int nNPCIndex)
 {
     m_nNPCIndex = nNPCIndex;
-    ::wcscpy(m_szNPCName, ::getMonsterName(nNPCIndex));
+    getMonsterName(nNPCIndex, m_szNPCName);
 }
 
 int CQuestMng::GetNPCIndex()
@@ -503,12 +503,18 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 bRequestComplete = false;
             }
             else
+            {
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
+            }
 
-            ::swprintf(aDest[nLine].m_szText, L"Mon.: %s x %lu/%lu",
-                ::getMonsterName(int(pRequestInfo->m_wIndex)),
-                MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
-                pRequestInfo->m_dwValue);
+            {
+                wchar_t text[MAX_MONSTER_NAME]{ 0 };
+                getMonsterName(int(pRequestInfo->m_wIndex), text);
+                swprintf(aDest[nLine].m_szText, L"Mon.: %s x %lu/%lu",
+                    text,
+                    MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
+                    pRequestInfo->m_dwValue);
+            }
             break;
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 

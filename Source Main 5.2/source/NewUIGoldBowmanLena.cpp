@@ -211,7 +211,7 @@ void CNewUIGoldBowmanLena::RenderTexts()
     wchar_t Text[100];
 
     memset(&Text, 0, sizeof(char) * 100);
-    swprintf(Text, getMonsterName(236));
+    getMonsterName(236, Text);
     RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     for (int i = 0; i < 3; ++i) {

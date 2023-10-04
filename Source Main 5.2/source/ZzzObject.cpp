@@ -8904,19 +8904,12 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     else if (Type == MODEL_BODY_ARMOR + (MAX_CLASS * 2) + CLASS_RAGEFIGHTER || Type == MODEL_BODY_PANTS + (MAX_CLASS * 2) + CLASS_RAGEFIGHTER
         || Type == MODEL_BODY_GLOVES + (MAX_CLASS * 2) + CLASS_RAGEFIGHTER || Type == MODEL_BODY_BOOTS + (MAX_CLASS * 2) + CLASS_RAGEFIGHTER)
     {
-        const wchar_t* pSkinTextureName = L"LevelClass207_1";
-        int nLen = wcslen(pSkinTextureName);
+        const char* pSkinTextureName = "LevelClass207_1";
+        int nLen = strlen(pSkinTextureName);
         for (int i = 0; i < b->NumMeshs; ++i)
         {
             Texture_t* pTexture = &b->Textures[i];
-            int wchars_num = MultiByteToWideChar(CP_UTF8, 0, pTexture->FileName, -1, NULL, 0);
-            wchar_t* name = new wchar_t[wchars_num];
-            MultiByteToWideChar(CP_UTF8, 0, pTexture->FileName, -1, name, wchars_num);
-
-            // todo: optimize that, because calling this in the render loop again and again is not optimal
-            
-            int SkinTexture = (!wcsnicmp(name, pSkinTextureName, nLen)) ? BITMAP_SKIN + 14 : -1;
-            delete[] name;
+            int SkinTexture = (!strnicmp(pTexture->FileName, pSkinTextureName, nLen)) ? BITMAP_SKIN + 14 : -1;
             b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, SkinTexture);
         }
     }

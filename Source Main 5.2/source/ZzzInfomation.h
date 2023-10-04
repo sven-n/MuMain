@@ -38,7 +38,7 @@ extern MONSTER_SCRIPT MonsterScript[MAX_MONSTER];
 
 extern void  OpenMonsterScript(wchar_t* FileName);
 extern void  MonsterConvert(MONSTER* m, int Level);
-extern const wchar_t* getMonsterName(int type);
+extern const void getMonsterName(int type, wchar_t* name);
 
 extern SKILL_ATTRIBUTE* SkillAttribute;
 
