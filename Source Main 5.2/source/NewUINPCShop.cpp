@@ -241,7 +241,7 @@ void SEASON3B::CNewUINPCShop::RenderTexts()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, GlobalText[230], NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
 
     wchar_t strText[256];
-    wsprintf(strText, GlobalText[1623], m_iTaxRate);
+    swprintf(strText, GlobalText[1623], m_iTaxRate);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strText, NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
 }
 

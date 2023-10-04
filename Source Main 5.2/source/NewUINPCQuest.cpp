@@ -338,7 +338,7 @@ bool CNewUINPCQuest::RenderItemMobText()
 
             wchar_t szItemName[128];
             GetItemName(nItemType, nItemLevel, szItemName);
-            wsprintf(szTemp, L"%s x %d", szItemName, nItemNum);
+            swprintf(szTemp, L"%s x %d", szItemName, nItemNum);
             g_pRenderText->RenderText(m_Pos.x + 60, nPosY, szTemp);
         }
         break;
@@ -359,7 +359,7 @@ bool CNewUINPCQuest::RenderItemMobText()
                 bCompletion = false;
             }
 
-            wsprintf(szTemp, L"%s x %d/%d",
+            swprintf(szTemp, L"%s x %d/%d",
                 ::getMonsterName(int(pQuest->QuestAct[i].wItemType)),
                 nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
 

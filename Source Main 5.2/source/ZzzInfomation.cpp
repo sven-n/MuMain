@@ -75,7 +75,7 @@ void OpenFilterFile(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -114,7 +114,7 @@ void OpenNameFilterFile(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -131,7 +131,7 @@ void OpenNameFilterFile(wchar_t* FileName)
     if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File corrupted.", FileName);
+        swprintf(Text, L"%s - File corrupted.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -177,7 +177,7 @@ void OpenGateScript(wchar_t* FileName)
     else
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -213,7 +213,7 @@ void OpenMonsterSkillScript(wchar_t* FileName)
     else
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -225,7 +225,7 @@ void OpenNpcScript(wchar_t* FileName)
     if ((SMDFile = _wfopen(FileName, L"rb")) == NULL)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -254,7 +254,7 @@ void OpenSkillScript(wchar_t* FileName)
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
     {
-        int Size = sizeof(SKILL_ATTRIBUTE);
+        int Size = sizeof(SKILL_ATTRIBUTE_FILE);
         // ÀÐ±â
         BYTE* Buffer = new BYTE[Size * MAX_SKILLS];
         fread(Buffer, Size * MAX_SKILLS, 1, fp);
@@ -265,7 +265,7 @@ void OpenSkillScript(wchar_t* FileName)
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_SKILLS, 0x5A18))
         {
             wchar_t Text[256];
-            wsprintf(Text, L"%s - File corrupted.", FileName);
+            swprintf(Text, L"%s - File corrupted.", FileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -276,7 +276,16 @@ void OpenSkillScript(wchar_t* FileName)
             for (int i = 0; i < MAX_SKILLS; i++)
             {
                 BuxConvert(pSeek, Size);
-                memcpy(&SkillAttribute[i], pSeek, Size);
+                // memcpy(&SkillAttribute[i], pSeek, Size);
+
+                SKILL_ATTRIBUTE_FILE current{ };
+                memcpy(&current, pSeek, Size);
+                auto target = &SkillAttribute[i];
+                int wchars_num = MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, NULL, 0);
+                MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, target->Name, wchars_num);
+                //target->Name[wchars_num] = L'\0';
+
+                memcpy(&target + MAX_SKILL_NAME * sizeof(wchar_t), pSeek + MAX_SKILL_NAME, Size);
 
                 pSeek += Size;
             }
@@ -286,7 +295,7 @@ void OpenSkillScript(wchar_t* FileName)
     else
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -353,7 +362,7 @@ void OpenDialogFile(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -387,7 +396,7 @@ void OpenItemScript(wchar_t* FileName)
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
     {
-        int Size = sizeof(ITEM_ATTRIBUTE);
+        int Size = sizeof(ITEM_ATTRIBUTE_FILE);
         BYTE* Buffer = new BYTE[Size * MAX_ITEM];
         fread(Buffer, Size * MAX_ITEM, 1, fp);
         // crc
@@ -397,7 +406,7 @@ void OpenItemScript(wchar_t* FileName)
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE2F1))
         {
             wchar_t Text[256];
-            wsprintf(Text, L"%s - File corrupted.", FileName);
+            swprintf(Text, L"%s - File corrupted.", FileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -408,7 +417,14 @@ void OpenItemScript(wchar_t* FileName)
             for (int i = 0; i < MAX_ITEM; i++)
             {
                 BuxConvert(pSeek, Size);
-                memcpy(&ItemAttribute[i], pSeek, Size);
+
+                ITEM_ATTRIBUTE_FILE current { };
+                memcpy(&current, pSeek, Size);
+                auto target = &ItemAttribute[i];
+                int wchars_num = MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, NULL, 0);
+                MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, target->Name, wchars_num);
+                memcpy(&target + MAX_ITEM_NAME * sizeof(wchar_t), pSeek + MAX_ITEM_NAME, Size);
+
                 pSeek += Size;
             }
         }
@@ -417,7 +433,7 @@ void OpenItemScript(wchar_t* FileName)
     else
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -2429,7 +2445,7 @@ void OpenMonsterScript(wchar_t* FileName)
     if ((SMDFile = _wfopen(FileName, L"rb")) == nullptr)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         return;

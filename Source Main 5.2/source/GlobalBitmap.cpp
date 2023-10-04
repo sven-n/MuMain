@@ -3,10 +3,30 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "turbojpeg.h"
+#include <Jpeglib.h>
 
 #include "GlobalBitmap.h"
+
 #include "./Utilities/Log/ErrorReport.h"
 #include "./Utilities/Log/muConsoleDebug.h"
+
+
+
+struct my_error_mgr
+{
+    struct jpeg_error_mgr pub;
+    jmp_buf setjmp_buffer;
+};
+typedef struct my_error_mgr* my_error_ptr;
+
+
+void my_error_exit(j_common_ptr cinfo)
+{
+    auto myerr = (my_error_ptr)cinfo->err;
+    (*cinfo->err->output_message) (cinfo);
+    longjmp(myerr->setjmp_buffer, 1);
+}
 
 CBitmapCache::CBitmapCache()
 {
@@ -378,7 +398,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
 
         wchar_t		szDebugOutput[256];
 
-        iBuff = iBuff + wsprintf(iBuff + szDebugOutput, L"%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
+        iBuff = iBuff + swprintf(iBuff + szDebugOutput, L"%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
         OutputDebugString(szDebugOutput);
 #endif
     }
@@ -406,7 +426,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     SplitExt(filename, ext, false);
 
     if (0 == _wcsicmp(ext.c_str(), L"jpg"))
-        return OpenJpeg(uiBitmapIndex, filename, uiFilter, uiWrapMode);
+        return OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode);
     else if (0 == _wcsicmp(ext.c_str(), L"tga"))
         return OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode);
 
@@ -657,11 +677,145 @@ bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::wstring& filename,
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
     }
+
     (void)jpeg_finish_decompress(&cinfo);
     jpeg_destroy_decompress(&cinfo);
     fclose(infile);
+
     return true;
 }
+
+bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
+{
+    // create a reuseable buffer with the maximum size of the uncompressed image
+    static unsigned char buffer[MAX_WIDTH * MAX_HEIGHT * 3];
+
+    std::wstring filename_ozj;
+    ExchangeExt(filename, L"OZJ", filename_ozj);
+
+    auto* compressedFile = _wfopen(filename_ozj.c_str(), L"rb");
+    if (compressedFile == nullptr)
+    {
+        return false;
+    }
+
+    fseek(compressedFile, 0, SEEK_END);
+    const auto fileSize = ftell(compressedFile);
+    assert(fileSize > 24);
+
+    // Skip first 24 bytes, because these are added by the OZJ format
+    fseek(compressedFile, 24, SEEK_SET);
+
+    const auto jpegSize = fileSize - 24;
+    int jpegWidth = 0, jpegHeight = 0;
+    int jpegSubsamp = TJSAMP_444;
+    int jpegColorspace = TJCS_RGB;
+
+    auto tjhandle = tjInitDecompress();
+
+    auto* jpegBuf = new unsigned char[jpegSize];
+    fread(jpegBuf, 1, jpegSize, compressedFile);
+    fclose(compressedFile);
+
+    // First reading the header with the size information
+    auto result = tjDecompressHeader3(tjhandle, jpegBuf, jpegSize, &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
+    if (result != 0)
+    {
+        auto errorstr = tjGetErrorStr();
+        auto errorCode = tjGetErrorCode(compressedFile);
+        assert(false);
+    }
+    //assert(jpegColorspace == TJCS_RGB);
+    assert(jpegWidth <= MAX_WIDTH);
+    assert(jpegHeight <= MAX_HEIGHT);
+
+
+
+    // decompress into the buffer
+    result = tjDecompress2(tjhandle, jpegBuf, jpegSize, buffer, jpegWidth, 0, jpegHeight, TJPF_RGB, TJFLAG_FASTDCT);
+    if (result != 0)
+    {
+        auto errorstr = tjGetErrorStr();
+        auto errorCode = tjGetErrorCode(compressedFile);
+        assert(false);
+    }
+    delete[] jpegBuf;
+    jpegBuf = nullptr;
+
+    // now we can cleanup already
+    tjDestroy(tjhandle);
+
+
+    if (jpegWidth <= MAX_WIDTH && jpegHeight <= MAX_HEIGHT)
+    {
+        // rounds up to the next n^2 value, because that's what OpenGL supports
+        int textureWidth = 0, textureHeight = 0;
+        for (int i = 1; i <= MAX_WIDTH; i <<= 1)
+        {
+            textureWidth = i;
+            if (i >= jpegWidth) break;
+        }
+        for (int i = 1; i <= MAX_HEIGHT; i <<= 1)
+        {
+            textureHeight = i;
+            if (i >= jpegHeight) break;
+        }
+
+        auto* pNewBitmap = new BITMAP_t;
+        memset(pNewBitmap, 0, sizeof(BITMAP_t));
+
+        pNewBitmap->BitmapIndex = uiBitmapIndex;
+
+        filename._Copy_s(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME, MAX_BITMAP_FILE_NAME);
+
+        pNewBitmap->Width = static_cast<float>(textureWidth);
+        pNewBitmap->Height = static_cast<float>(textureHeight);
+        pNewBitmap->Components = 3;
+        pNewBitmap->Ref = 1;
+
+        const auto textureBufferSize = textureWidth * textureHeight * pNewBitmap->Components;
+        pNewBitmap->Buffer = new BYTE[textureBufferSize];
+        m_dwUsedTextureMemory += textureBufferSize;
+
+        int offset = 0;
+        int jpeg_row_size = jpegWidth * 3;
+        int texture_row_size = textureWidth * 3;
+        int rows = min(jpegHeight, textureHeight);
+        if (jpegWidth != textureWidth)
+        {
+            // we need copy it line by line
+            for (int row = 0; row < rows; row++)
+            {
+                memcpy(&pNewBitmap->Buffer[offset], &buffer[row * jpeg_row_size], jpeg_row_size);
+                offset += texture_row_size;
+            }
+        }
+        else
+        {
+            // we can copy it 1:1
+            memcpy(pNewBitmap->Buffer, buffer, jpegHeight * jpegWidth * 3);
+        }
+
+        m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, pNewBitmap));
+
+        glGenTextures(1, &(pNewBitmap->TextureNumber));
+
+        glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
+    }
+
+    return true;
+}
+
 bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
     std::wstring filename_ozt;
@@ -685,7 +839,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     index += 4;
     short nx = *((short*)(PakBuffer + index)); index += 2;
     short ny = *((short*)(PakBuffer + index)); index += 2;
-    char bit = *((wchar_t*)(PakBuffer + index)); index += 1;
+    char bit = *((char*)(PakBuffer + index)); index += 1;
     index += 1;
 
     if (bit != 32 || nx > MAX_WIDTH || ny > MAX_HEIGHT)
@@ -858,11 +1012,4 @@ bool CGlobalBitmap::Save_Image(const std::wstring& src, const std::wstring& dest
     delete[] pTempBuf;
 
     return true;
-}
-
-void CGlobalBitmap::my_error_exit(j_common_ptr cinfo)
-{
-    auto myerr = (my_error_ptr)cinfo->err;
-    (*cinfo->err->output_message) (cinfo);
-    longjmp(myerr->setjmp_buffer, 1);
 }

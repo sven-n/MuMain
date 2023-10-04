@@ -65,7 +65,7 @@ void SEASON3B::CNewUICommandWindow::Release()
 void SEASON3B::CNewUICommandWindow::InitButtons()
 {
     wchar_t szText[256] = { NULL, };
-    wsprintf(szText, GlobalText[927], L"D");
+    swprintf(szText, GlobalText[927], L"D");
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
@@ -602,7 +602,7 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     if (iLevel < 30)
     {
         wchar_t szError[48] = L"";
-        wsprintf(szError, GlobalText[2704], 30);
+        swprintf(szError, GlobalText[2704], 30);
         g_pChatListBox->AddText(L"", szError, SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
@@ -619,7 +619,7 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     else if (!g_DuelMgr.IsDuelEnabled())
     {
         SendRequestDuelStart(pSelectedCha->Key, pSelectedCha->ID);
-        SocketClient->ToGameServer()->SendDuelStartRequest(pSelectedCha->Key, pSelectedCha->ID, wcslen(pSelectedCha->ID));
+        SocketClient->ToGameServer()->SendDuelStartRequest(pSelectedCha->Key, pSelectedCha->ID);
         return 1;
     }
     else if (g_DuelMgr.IsDuelEnabled() && g_DuelMgr.IsDuelPlayer(pSelectedCha, DUEL_ENEMY))

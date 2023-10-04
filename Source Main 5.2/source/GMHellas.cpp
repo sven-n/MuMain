@@ -193,7 +193,7 @@ bool GetUseLostMap(bool bDrawAlert)
     if (bDrawAlert)
     {
         wchar_t Text[100];
-        wsprintf(Text, GlobalText[1123], g_iKalimaLevel[startIndex][0]);
+        swprintf(Text, GlobalText[1123], g_iKalimaLevel[startIndex][0]);
         g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_ERROR_MESSAGE);
     }
 
@@ -218,10 +218,10 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
         int ItemLevel = (ip->Level >> 3) & 15;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        wsprintf(TextList[TextNum], L"%s %s       %s    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], L"%s %s       %s    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         for (int i = 0; i < NUM_HELLAS; i++)
         {
-            wsprintf(TextList[TextNum], L"        %d             %3d~%3d     ", i + 1, g_iKalimaLevel[startIndex + i][0], min(400, g_iKalimaLevel[startIndex + i][1]));
+            swprintf(TextList[TextNum], L"        %d             %3d~%3d     ", i + 1, g_iKalimaLevel[startIndex + i][0], min(400, g_iKalimaLevel[startIndex + i][1]));
 
             if (ItemLevel == i + 1)
             {
@@ -234,27 +234,27 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
             TextBold[TextNum] = false; TextNum++;
         }
 
-        wsprintf(TextList[TextNum], L"\n"); TextNum++;
-        wsprintf(TextList[TextNum], GlobalText[1184]);  TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++;
+        swprintf(TextList[TextNum], GlobalText[1184]);  TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
 
         if (HeroLevel < g_iKalimaLevel[startIndex][0])
         {
-            wsprintf(TextList[TextNum], L"\n"); TextNum++;
-            wsprintf(TextList[TextNum], GlobalText[1123], g_iKalimaLevel[startIndex][0]);  TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++;
+            swprintf(TextList[TextNum], GlobalText[1123], g_iKalimaLevel[startIndex][0]);  TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextNum++;
         }
     }
     break;
 
     case ITEM_POTION + 29:
     {
-        wsprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5); TextNum++;
+        swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5); TextNum++;
         if (ip->Durability >= 5)
         {
-            wsprintf(TextList[TextNum], GlobalText[1182]); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[1182]); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
         }
         else
         {
-            wsprintf(TextList[TextNum], GlobalText[1183], (5 - ip->Durability)); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[1183], (5 - ip->Durability)); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
         }
     }
     break;

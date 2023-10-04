@@ -916,7 +916,7 @@ BOOL OpenInitFile()
         WORD wVersion[4];
         if (GetFileVersion(lpszFile, wVersion))
         {
-            wsprintf(m_ExeVersion, L"%d.%02d", wVersion[0], wVersion[1]);
+            swprintf(m_ExeVersion, L"%d.%02d", wVersion[0], wVersion[1]);
             if (wVersion[2] > 0)
             {
                 wchar_t lpszMinorVersion[3] = L"a";
@@ -1287,7 +1287,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         if (GetFileVersion(lpszFile, wVersion))
         {
-            wsprintf(lpszExeVersion, L"%d.%02d", wVersion[0], wVersion[1]);
+            swprintf(lpszExeVersion, L"%d.%02d", wVersion[0], wVersion[1]);
             if (wVersion[2] > 0)
             {
                 wchar_t lpszMinorVersion[2] = L"a";

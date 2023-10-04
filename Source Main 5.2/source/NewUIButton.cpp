@@ -418,7 +418,7 @@ bool SEASON3B::CNewUIButton::Render(bool RendOption)
     {
         SIZE Fontsize;
         g_pRenderText->SetFont(m_hTextFont);
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
 
         Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
         Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
@@ -446,7 +446,7 @@ bool SEASON3B::CNewUIButton::Render(bool RendOption)
         {
             SIZE Fontsize;
             g_pRenderText->SetFont(m_hToolTipFont);
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
 
             Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
             Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
@@ -746,7 +746,7 @@ bool CNewUIRadioButton::Render()
         g_pRenderText->SetFont(g_hFont);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
 
         Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
         Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);

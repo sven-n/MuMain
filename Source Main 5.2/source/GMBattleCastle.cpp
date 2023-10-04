@@ -87,21 +87,21 @@ namespace battleCastle
             wchar_t FileName[64];
             wchar_t WorldName[32];
 
-            wsprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
+            swprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
             if (g_bBattleCastleStart)
             {
-                wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
+                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
                 OpenTerrainAttribute(FileName);
 
-                wsprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
+                swprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
                 OpenTerrainLight(FileName);
             }
             else
             {
-                wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
+                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
                 OpenTerrainAttribute(FileName);
 
-                wsprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
+                swprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
             }
 
             g_iMp3PlayTime = 0;

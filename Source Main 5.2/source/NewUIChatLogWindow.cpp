@@ -917,11 +917,11 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
     SIZE TextSize;
     type_string strIDPart = strID + L" : ";
     
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
     size_t MaxFirstLineWidth = CLIENT_WIDTH - (size_t)(TextSize.cx / g_fScreenRate_x);
 
     
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
 
     BOOL bSpaceExist = (strIDPart.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
     int iLocToken = strIDPart.length();
@@ -930,7 +930,7 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
     {
         iLocToken = (bSpaceExist) ? strIDPart.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (strIDPart.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (strIDPart.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
     }
 
     strText1 = strIDPart.substr(0, iLocToken);

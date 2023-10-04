@@ -286,13 +286,13 @@ void CExceptionHandler::GetExceptionCodeString(IN PEXCEPTION_RECORD pExceptionRe
         if (pExceptionRecord->ExceptionInformation[0] == 0)
         {
             wchar_t szExceptionInfo[64];
-            wsprintf(szExceptionInfo, L" : reading inaccessible 0x%08X", pExceptionRecord->ExceptionInformation[1]);
+            swprintf(szExceptionInfo, L" : reading inaccessible 0x%08X", pExceptionRecord->ExceptionInformation[1]);
             strType += szExceptionInfo;
         }
         else
         {
             wchar_t szExceptionInfo[64];
-            wsprintf(szExceptionInfo, L" : writing inaccessible 0x%08X", pExceptionRecord->ExceptionInformation[1]);
+            swprintf(szExceptionInfo, L" : writing inaccessible 0x%08X", pExceptionRecord->ExceptionInformation[1]);
             strType += szExceptionInfo;
         }
         break;

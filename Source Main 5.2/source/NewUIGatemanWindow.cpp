@@ -215,7 +215,7 @@ void CNewUIGatemanWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    wsprintf(szText, L"%s", GlobalText[1596]);
+    swprintf(szText, L"%s", GlobalText[1596]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -309,7 +309,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
     wchar_t szGold[64];
     ptOrigin.y += 18;
     ConvertGold(g_pUIGateKeeper->GetEnteranceFee(), szGold);
-    wsprintf(szText, GlobalText[1602], szGold);
+    swprintf(szText, GlobalText[1602], szGold);
     g_pRenderText->RenderText(ptOrigin.x + 35, ptOrigin.y, szText);
 
     glColor4f(0.f, 0.f, 0.f, 0.3f);
@@ -325,7 +325,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
     g_pRenderText->SetFont(g_hFont);
     ConvertGold(g_pUIGateKeeper->GetViewEnteranceFee(), szGold);
 
-    wsprintf(szText, L"%s %s", szGold, GlobalText[224]);
+    swprintf(szText, L"%s %s", szGold, GlobalText[224]);
     g_pRenderText->RenderText(ptOrigin.x + 30 + 50, ptOrigin.y + 32, szText, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     ptOrigin.y += 20;
@@ -341,7 +341,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
     g_pRenderText->SetBgColor(0x00000000);
     g_pRenderText->SetTextColor(0xFFFFFFFF);
     ConvertGold(g_pUIGateKeeper->GetMaxEnteranceFee(), szGold);
-    wsprintf(szText, GlobalText[1600], szGold);
+    swprintf(szText, GlobalText[1600], szGold);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 13;
@@ -349,7 +349,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
 
     ptOrigin.y += 13;
     ConvertGold(g_pUIGateKeeper->GetAddEnteranceFee(), szGold);
-    wsprintf(szText, GlobalText[1618], szGold);
+    swprintf(szText, GlobalText[1618], szGold);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 50;
@@ -375,7 +375,7 @@ void CNewUIGatemanWindow::RenderGuestMode()
         wchar_t szText[256];
         wchar_t szGold[64];
         ConvertGold(g_pUIGateKeeper->GetEnteranceFee(), szGold);
-        wsprintf(szText, GlobalText[1632], szGold);
+        swprintf(szText, GlobalText[1632], szGold);
 
         if (g_pUIGateKeeper->GetEnteranceFee() > (int)CharacterMachine->Gold)
         {

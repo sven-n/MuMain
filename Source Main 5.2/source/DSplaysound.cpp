@@ -290,7 +290,7 @@ HRESULT FillBuffer(int Buffer, int MaxChannel, bool Enable)
 // Name: LoadWaveFile()
 // Desc: Loads the wave file into a secondary static DirectSound buffer
 //-----------------------------------------------------------------------------
-VOID LoadWaveFile(int Buffer, const TCHAR* strFileName, int MaxChannel, bool Enable)
+VOID LoadWaveFile(int Buffer, wchar_t* strFileName, int MaxChannel, bool Enable)
 {
     if (!g_EnableSound)
         return;
@@ -307,15 +307,13 @@ VOID LoadWaveFile(int Buffer, const TCHAR* strFileName, int MaxChannel, bool Ena
         Enable = false;
     }
 
-    auto* filename = new TCHAR[wcslen(strFileName)];
-    wcscpy(filename, strFileName);
-
     // Create the sound buffer object from the wave file data
-    if (FAILED(CreateStaticBuffer(Buffer, filename, MaxChannel, Enable)))
+    if (FAILED(CreateStaticBuffer(Buffer, strFileName, MaxChannel, Enable)))
     {
         return;
     }
-    else if (FAILED(FillBuffer(Buffer, MaxChannel, Enable)))  // The sound buffer was successfully created
+
+    if (FAILED(FillBuffer(Buffer, MaxChannel, Enable)))  // The sound buffer was successfully created
     {
         return;
     }
@@ -328,8 +326,6 @@ VOID LoadWaveFile(int Buffer, const TCHAR* strFileName, int MaxChannel, bool Ena
     SoundLoadCount++;
 
     SetVolume(Buffer, g_MasterVolume);
-
-    SAFE_DELETE(filename)
 }
 
 //-----------------------------------------------------------------------------

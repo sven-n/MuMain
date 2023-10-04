@@ -394,7 +394,7 @@ void CUIGuildMaster::RenderCreateInfo()
     g_pRenderText->SetBgColor(0);
 
     RenderGoldRect(ptOrigin.x, ptOrigin.y, 140, 20.f);
-    wsprintf(szTemp, L"%s : %s", GlobalText[182], GuildMark[MARK_EDIT].GuildName);
+    swprintf(szTemp, L"%s : %s", GlobalText[182], GuildMark[MARK_EDIT].GuildName);
     ptOrigin.y += 6;
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140, 0, RT3_SORT_CENTER);
 
@@ -440,7 +440,7 @@ void CUIGuildMaster::RenderEditGuildMark()
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[182]);
 
     wchar_t Text[100];
-    wsprintf(Text, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
+    swprintf(Text, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, Text, 140 * g_fScreenRate_x, 0, RT3_SORT_CENTER);
     g_pRenderText->SetFont(g_hFont);
 
@@ -496,7 +496,7 @@ void CUIGuildMaster::RenderGuildMasterMain()
     if (Hero->GuildStatus != G_NONE)
     {
         wchar_t Text[100];
-        wsprintf(Text, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
+        swprintf(Text, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, Text, 140 * g_fScreenRate_x, 0, RT3_SORT_CENTER);
         m_CreateGuildButton.SetState(UISTATE_DISABLE);
         m_EditGuildMarkButton.SetState(UISTATE_NORMAL);
@@ -553,30 +553,30 @@ void CUIGuildMaster::ReceiveGuildRelationShip(BYTE byRelationShipType, BYTE byRe
     {
         if (m_byRelationShipRequestType == 0x01)	// Join
         {
-            wsprintf(szText[0], GlobalText[1280]);
-            wsprintf(szText[1], GlobalText[1281], pPlayer->ID);
-            wsprintf(szText[2], GlobalText[1283]);
+            swprintf(szText[0], GlobalText[1280]);
+            swprintf(szText[1], GlobalText[1281], pPlayer->ID);
+            swprintf(szText[2], GlobalText[1283]);
         }
         else										// Break Off
         {
-            wsprintf(szText[0], GlobalText[1280]);
-            wsprintf(szText[1], GlobalText[1282], pPlayer->ID);
-            wsprintf(szText[2], GlobalText[1283]);
+            swprintf(szText[0], GlobalText[1280]);
+            swprintf(szText[1], GlobalText[1282], pPlayer->ID);
+            swprintf(szText[2], GlobalText[1283]);
         }
     }
     else if (m_byRelationShipType == 0x02)		// Rival
     {
         if (m_byRelationShipRequestType == 0x01)	// Join
         {
-            wsprintf(szText[0], GlobalText[1284], pPlayer->ID);
-            wsprintf(szText[1], GlobalText[1286]);
-            wsprintf(szText[2], GlobalText[1283]);
+            swprintf(szText[0], GlobalText[1284], pPlayer->ID);
+            swprintf(szText[1], GlobalText[1286]);
+            swprintf(szText[2], GlobalText[1283]);
         }
         else										// Break Off
         {
-            wsprintf(szText[0], GlobalText[1284], pPlayer->ID);
-            wsprintf(szText[1], GlobalText[1285]);
-            wsprintf(szText[2], GlobalText[1283]);
+            swprintf(szText[0], GlobalText[1284], pPlayer->ID);
+            swprintf(szText[1], GlobalText[1285]);
+            swprintf(szText[2], GlobalText[1283]);
         }
     }
 

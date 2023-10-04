@@ -155,20 +155,20 @@ void CNewBloodCastleSystem::RenderMatchResult(void)
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(210, 255, 210, 255);
-    wsprintf(lpszStr, GlobalText[861], pResult->m_dwExp);
+    swprintf(lpszStr, GlobalText[861], pResult->m_dwExp);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
     yPos += 24;
 
     if (m_iNumResult)
     {
         g_pRenderText->SetTextColor(255, 210, 210, 255);
-        wsprintf(lpszStr, GlobalText[862], pResult->m_iZen);
+        swprintf(lpszStr, GlobalText[862], pResult->m_iZen);
         g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
         yPos += 24;
     }
 
     g_pRenderText->SetTextColor(210, 210, 255, 255);
-    wsprintf(lpszStr, GlobalText[863], pResult->m_iScore);
+    swprintf(lpszStr, GlobalText[863], pResult->m_iScore);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
 
     DisableAlphaBlend();

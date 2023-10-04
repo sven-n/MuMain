@@ -9,7 +9,6 @@
 #include <deque>
 #include <string>
 #include <setjmp.h>
-#include "Jpeglib.h"
 #include "./Time/Timer.h"
 
 #define MAX_BITMAP_FILE_NAME 256
@@ -87,13 +86,6 @@ public:
 
 class CGlobalBitmap
 {
-    struct my_error_mgr
-    {
-        struct jpeg_error_mgr pub;
-        jmp_buf setjmp_buffer;
-    };
-    typedef struct my_error_mgr* my_error_ptr;
-
     enum
     {
         MAX_WIDTH = 1024,
@@ -143,6 +135,7 @@ protected:
     GLuint GenerateTextureIndex();
     GLuint FindAvailableTextureIndex(GLuint uiSeed);
 
+    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     bool OpenJpeg(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     void SplitFileName(IN const std::wstring& filepath, OUT std::wstring& filename, bool bIncludeExt);
@@ -150,8 +143,6 @@ protected:
     void ExchangeExt(IN const std::wstring& in_filepath, IN const std::wstring& ext, OUT std::wstring& out_filepath);
 
     bool Save_Image(const std::wstring& src, const std::wstring& dest, int cDumpHeader);
-
-    static void my_error_exit(j_common_ptr cinfo);
 };
 
 extern CGlobalBitmap Bitmaps;

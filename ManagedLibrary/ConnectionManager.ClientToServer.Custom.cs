@@ -51,7 +51,7 @@ public unsafe partial class ConnectionManager
     /// Causes reaction on server side: The server is authenticating the sent login name and password. If it's correct, the state of the player is proceeding to be logged in.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendLoginLongPasswordStr(int handle, IntPtr username, IntPtr password, uint @tickCount, byte* @clientVersion, byte* @clientSerial)
+    public static void SendLogin(int handle, IntPtr username, IntPtr password, uint @tickCount, byte* @clientVersion, byte* @clientSerial)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {

@@ -102,14 +102,19 @@ public:
             GLOBALTEXT_STRING_HEADER GTStringHeader;
             fread(&GTStringHeader, sizeof(GLOBALTEXT_STRING_HEADER), 1, fp);
 
-            T* pStringBuffer = new T[GTStringHeader.dwSizeOfString + 1];
-            fread(pStringBuffer, sizeof(T), GTStringHeader.dwSizeOfString, fp);
+            char* pStringBuffer = new char[GTStringHeader.dwSizeOfString + 1];
+            fread(pStringBuffer, sizeof(char), GTStringHeader.dwSizeOfString, fp);
 
             if (CheckLoadDisposition(GTStringHeader.dwKey, dwLoadDisposition) || GTStringHeader.dwKey < MAX_NUMBER_OF_TEXTS)
             {
-                BuxConvert(pStringBuffer, sizeof(T) * GTStringHeader.dwSizeOfString);		//. decoding
+                BuxConvert(pStringBuffer, sizeof(char) * GTStringHeader.dwSizeOfString);		//. decoding
                 pStringBuffer[GTStringHeader.dwSizeOfString] = '\0';
-                m_StringSet.Add(GTStringHeader.dwKey, pStringBuffer);
+
+                int wchars_num = MultiByteToWideChar(CP_UTF8, 0, pStringBuffer, -1, NULL, 0);
+                auto* text = new wchar_t[wchars_num];
+                MultiByteToWideChar(CP_UTF8, 0, pStringBuffer, -1, text, wchars_num);
+
+                m_StringSet.Add(GTStringHeader.dwKey, text);
             }
 
             delete[] pStringBuffer;

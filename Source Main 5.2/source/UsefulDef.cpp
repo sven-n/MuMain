@@ -16,7 +16,7 @@ extern float g_fScreenRate_x;
 bool ReduceStringByPixel(LPTSTR lpszDst, int nDstSize, LPCTSTR lpszSrc, int nPixel)
 {
     SIZE size;
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), lpszSrc, lstrlen(lpszSrc), &size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), lpszSrc, lstrlen(lpszSrc), &size);
     int nSrcWidth = int(size.cx / g_fScreenRate_x);
 
     if (nSrcWidth <= nPixel)
@@ -48,7 +48,7 @@ int DivideStringByPixel(LPTSTR alpszDst, int nDstRow, int nDstColumn, LPCTSTR lp
     {
         if (bSpaceInsert)
         {
-            ::wsprintf(szWorkToken, L" %s", pszToken);
+            ::swprintf(szWorkToken, L" %s", pszToken);
             nLine += ::CutText3(szWorkToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
         else

@@ -17,11 +17,11 @@ struct _BUFFINFO
     BYTE	s_BuffEffectType;
     BYTE	s_ItemType;
     BYTE	s_ItemIndex;
-    wchar_t	s_BuffName[MAX_BUFF_NAME_LENGTH];
+    char	s_BuffName[MAX_BUFF_NAME_LENGTH];
     BYTE	s_BuffClassType;
     BYTE	s_NoticeType;
     BYTE	s_ClearType;
-    wchar_t	s_BuffDescript[MAX_DESCRIPT_LENGTH];
+    char	s_BuffDescript[MAX_DESCRIPT_LENGTH];
 };
 
 class BuffInfo

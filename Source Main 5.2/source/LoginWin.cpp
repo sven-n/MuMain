@@ -188,7 +188,7 @@ void CLoginWin::RenderControls()
 
     const wchar_t* apszGlobalText[4]
         = { GlobalText[461], GlobalText[460], GlobalText[3130], GlobalText[3131] };
-    wsprintf(szServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
+    swprintf(szServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
         g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
 
     g_pRenderText->RenderText(int((CWin::GetXPos() + 111) / g_fScreenRate_x),

@@ -120,8 +120,6 @@ namespace SEASON3B
         CNewUIButton m_BtnSize;
         CNewUIButton m_BtnTransparency;
 
-        const int MAX_CHAT_SIZE_UTF16;
-
         void Init();
 
         void LoadImages();

@@ -95,30 +95,30 @@ void Builder::InitBuilder()
 
 #ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
 #ifdef _LANGUAGE_KOR
-    wsprintf(m_Language, L"(%s)", L"Kor");
+    swprintf(m_Language, L"(%s)", L"Kor");
 #elif _LANGUAGE_ENG
-    wsprintf(m_Language, L"(%s)", L"Eng");
+    swprintf(m_Language, L"(%s)", L"Eng");
 #elif _LANGUAGE_TAI
-    wsprintf(m_Language, L"(%s)", L"Tai");
+    swprintf(m_Language, L"(%s)", L"Tai");
 #elif _LANGUAGE_CHS
-    wsprintf(m_Language, L"(%s)", L"Chs");
+    swprintf(m_Language, L"(%s)", L"Chs");
 #elif _LANGUAGE_JPN
-    wsprintf(m_Language, L"(%s)", L"Jpn");
+    swprintf(m_Language, L"(%s)", L"Jpn");
 #elif _LANGUAGE_PHI
-    wsprintf(m_Language, L"(%s)", L"Phi");
+    swprintf(m_Language, L"(%s)", L"Phi");
 #elif _LANGUAGE_VIE
-    wsprintf(m_Language, L"(%s)", L"Vie");
+    swprintf(m_Language, L"(%s)", L"Vie");
 #endif
 #else // KJH_MOD_NATION_LANGUAGE_REDEFINE
     switch (SELECTED_LANGUAGE)
     {
-    case LANGUAGE_KOREAN:		wsprintf(m_Language, L"(%s)", L"Kor"); break;
-    case LANGUAGE_ENGLISH:		wsprintf(m_Language, L"(%s)", L"Eng"); break;
-    case LANGUAGE_TAIWANESE:	wsprintf(m_Language, L"(%s)", L"Tai"); break;
-    case LANGUAGE_CHINESE:		wsprintf(m_Language, L"(%s)", L"Chs"); break;
-    case LANGUAGE_JAPANESE:		wsprintf(m_Language, L"(%s)", L"Jpn"); break;
-    case LANGUAGE_PHILIPPINES:	wsprintf(m_Language, L"(%s)", L"Phi"); break;
-    case LANGUAGE_VIETNAMESE:	wsprintf(m_Language, L"(%s)", L"Vie"); break;
+    case LANGUAGE_KOREAN:		swprintf(m_Language, L"(%s)", L"Kor"); break;
+    case LANGUAGE_ENGLISH:		swprintf(m_Language, L"(%s)", L"Eng"); break;
+    case LANGUAGE_TAIWANESE:	swprintf(m_Language, L"(%s)", L"Tai"); break;
+    case LANGUAGE_CHINESE:		swprintf(m_Language, L"(%s)", L"Chs"); break;
+    case LANGUAGE_JAPANESE:		swprintf(m_Language, L"(%s)", L"Jpn"); break;
+    case LANGUAGE_PHILIPPINES:	swprintf(m_Language, L"(%s)", L"Phi"); break;
+    case LANGUAGE_VIETNAMESE:	swprintf(m_Language, L"(%s)", L"Vie"); break;
     }
 #endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
 
@@ -150,7 +150,7 @@ BoostSmart_Ptr(InfoFile) Builder::MakeInfo(InfoTextType type)
 
     wchar_t TextFileName[512];
 
-    wsprintf(TextFileName, L"%s%s%s%s%s", //경로, 파일명, 테스트, 나라별, 확장명
+    swprintf(TextFileName, L"%s%s%s%s%s", //경로, 파일명, 테스트, 나라별, 확장명
         TEXTFILEPOSITION,
         TEXTFILENAME[type],
         m_isTestServer ? TEXTFILETESTSERVER : "",

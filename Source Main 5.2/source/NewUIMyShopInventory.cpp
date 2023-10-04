@@ -30,7 +30,7 @@ namespace
 
 using namespace SEASON3B;
 
-SEASON3B::CNewUIMyShopInventory::CNewUIMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop(false), MAX_SHOPTITLE_UTF16(min(26, (int)(MAX_SHOPTITLE / g_pMultiLanguage->GetNumByteForOneCharUTF8())))
+SEASON3B::CNewUIMyShopInventory::CNewUIMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop(false)
 {
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
@@ -491,7 +491,7 @@ void SEASON3B::CNewUIMyShopInventory::RenderFrame()
     RenderImage(IMAGE_MYSHOPINVENTORY_EDIT, m_Pos.x + 12, m_Pos.y + 49, 169.f, 26.f);
 
     wchar_t Text[100] = {};
-    wsprintf(Text, GlobalText[1102]);
+    swprintf(Text, GlobalText[1102]);
     RenderText(Text, m_Pos.x, m_Pos.y + 15, INVENTORY_WIDTH, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 
@@ -505,35 +505,35 @@ void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
     }
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    wsprintf(Text, GlobalText[370]);
+    swprintf(Text, GlobalText[370]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    wsprintf(Text, GlobalText[1109]);
+    swprintf(Text, GlobalText[1109]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 250, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    wsprintf(Text, GlobalText[1111]);
+    swprintf(Text, GlobalText[1111]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 262, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    wsprintf(Text, GlobalText[1112]);
+    swprintf(Text, GlobalText[1112]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 274, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    wsprintf(Text, GlobalText[1113]);
+    swprintf(Text, GlobalText[1113]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 286, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    wsprintf(Text, GlobalText[1115]);
+    swprintf(Text, GlobalText[1115]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 298, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    wsprintf(Text, GlobalText[1134]);
+    swprintf(Text, GlobalText[1134]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 320, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    wsprintf(Text, GlobalText[1135]);
+    swprintf(Text, GlobalText[1135]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 }
 

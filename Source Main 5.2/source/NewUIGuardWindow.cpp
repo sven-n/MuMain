@@ -284,7 +284,7 @@ void CNewUIGuardWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    wsprintf(szText, L"%s", GlobalText[1445]);
+    swprintf(szText, L"%s", GlobalText[1445]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
@@ -292,22 +292,22 @@ void CNewUIGuardWindow::RenderFrame()
 
     if (m_szOwnerGuildMaster[0])
     {
-        wsprintf(szText, GlobalText[1446], m_szOwnerGuildMaster);
+        swprintf(szText, GlobalText[1446], m_szOwnerGuildMaster);
     }
     else
     {
-        wsprintf(szText, GlobalText[1446], GlobalText[1361]);
+        swprintf(szText, GlobalText[1446], GlobalText[1361]);
     }
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 15;
     if (m_szOwnerGuild[0])
     {
-        wsprintf(szText, GlobalText[1447], m_szOwnerGuild);
+        swprintf(szText, GlobalText[1447], m_szOwnerGuild);
     }
     else
     {
-        wsprintf(szText, GlobalText[1447], GlobalText[1361]);
+        swprintf(szText, GlobalText[1447], GlobalText[1361]);
     }
 
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
@@ -403,11 +403,11 @@ void CNewUIGuardWindow::RenderSeigeInfoTab()
     wchar_t szTemp[256];
 
     g_pRenderText->SetFont(g_hFont);
-    wsprintf(szTemp, GlobalText[1533], m_wStartYear, m_byStartMonth, m_byStartDay, m_byStartHour, m_byStartMinute);
+    swprintf(szTemp, GlobalText[1533], m_wStartYear, m_byStartMonth, m_byStartDay, m_byStartHour, m_byStartMinute);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 14;
-    wsprintf(szTemp, GlobalText[1534], m_wEndYear, m_byEndMonth, m_byEndDay, m_byEndHour, m_byEndMinute);
+    swprintf(szTemp, GlobalText[1534], m_wEndYear, m_byEndMonth, m_byEndDay, m_byEndHour, m_byEndMinute);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 14;
@@ -452,11 +452,11 @@ void CNewUIGuardWindow::RenderSeigeInfoTab()
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1545], 190, 0, RT3_SORT_CENTER);
 
         ptOrigin.y += 14;
-        wsprintf(szTemp, GlobalText[1546], m_wSiegeStartYear, m_bySiegeStartMonth, m_bySiegeStartDay, m_bySiegeStartHour, m_bySiegeStartMinute);
+        swprintf(szTemp, GlobalText[1546], m_wSiegeStartYear, m_bySiegeStartMonth, m_bySiegeStartDay, m_bySiegeStartHour, m_bySiegeStartMinute);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
 
         ptOrigin.y += 35;
-        wsprintf(szTemp, GlobalText[1421], m_dwStateLeftSec / 3600, (m_dwStateLeftSec % 3600) / 60, (m_dwStateLeftSec % 3600) % 60);
+        swprintf(szTemp, GlobalText[1421], m_dwStateLeftSec / 3600, (m_dwStateLeftSec % 3600) / 60, (m_dwStateLeftSec % 3600) % 60);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 190, 0, RT3_SORT_CENTER);
     }
 }
@@ -514,11 +514,11 @@ void CNewUIGuardWindow::RenderRegisterTab()
 
             int nMarkCount = g_GuardsMan.GetMyMarkCount();
             wchar_t szBuffer[256];
-            wsprintf(szBuffer, GlobalText[1437], nMarkCount);
+            swprintf(szBuffer, GlobalText[1437], nMarkCount);
             g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
 
             ptOrigin.y += 14;
-            wsprintf(szBuffer, GlobalText[1438], g_GuardsMan.GetRegMarkCount());
+            swprintf(szBuffer, GlobalText[1438], g_GuardsMan.GetRegMarkCount());
             g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
 
             if (nMarkCount > 0)
@@ -601,7 +601,7 @@ void CNewUIGuardWindow::RenderRegisterInfoTab()
     else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY)
     {
         wchar_t szBuffer[256];
-        wsprintf(szBuffer, GlobalText[1443], 1, 1);
+        swprintf(szBuffer, GlobalText[1443], 1, 1);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szBuffer, 190, 0, RT3_SORT_CENTER);
         ptOrigin.y += 14;
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1444], 190, 0, RT3_SORT_CENTER);

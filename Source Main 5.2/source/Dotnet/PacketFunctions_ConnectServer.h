@@ -14,19 +14,15 @@
 #pragma once
 
 #include "stdafx.h"
-
+#include "PacketFunctions_Custom.h"
 #include <coreclr_delegates.h>
 
 /// <summary>
 /// Extension methods to start writing messages of this namespace on a <see cref="Connection"/>.
 /// </summary>
-class PacketFunctions_ConnectServer
+class PacketFunctions_ConnectServer : public PacketFunctions_ConnectServer_Custom
 {
-private:
-    int32_t _handle;
 public:
-    void SetHandle(int32_t handle) { _handle = handle; }
-
 
     /// <summary>
     /// Sends a ConnectionInfoRequest075 to this connection.
@@ -52,13 +48,12 @@ public:
     /// Sends a ConnectionInfo to this connection.
     /// </summary>
     /// <param name="ipAddress">The ip address.</param>
-    /// <param name="ipAddressByteLength">The length of <paramref name="ipAddress"/> in bytes.
     /// <param name="port">The port.</param>
     /// <remarks>
     /// Is sent by the server when: This packet is sent by the server after the client requested the connection information of a server. This happens after the user clicked on a server.
     /// Causes reaction on client side: The client will try to connect to the server with the specified information.
     /// </remarks>
-    void SendConnectionInfo(const wchar_t* ipAddress, uint32_t ipAddressByteLength, uint16_t port);
+    void SendConnectionInfo(const wchar_t* ipAddress, uint16_t port);
 
     /// <summary>
     /// Sends a ServerListRequest to this connection.
@@ -113,10 +108,9 @@ public:
     /// </summary>
     /// <param name="patchVersion">The patch version.</param>
     /// <param name="patchAddress">The patch address, usually to a ftp server. The address is usually "encrypted" with the 3-byte XOR key (FC CF AB).</param>
-    /// <param name="patchAddressByteLength">The length of <paramref name="patchAddress"/> in bytes.
     /// <remarks>
     /// Is sent by the server when: This packet is sent by the server after the client (launcher) requested to check the patch version and it requires an update.
     /// Causes reaction on client side: The launcher will download the required patches and then activate the start button.
     /// </remarks>
-    void SendClientNeedsPatch(BYTE patchVersion, const wchar_t* patchAddress, uint32_t patchAddressByteLength);
+    void SendClientNeedsPatch(BYTE patchVersion, const wchar_t* patchAddress);
 };

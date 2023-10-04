@@ -114,7 +114,6 @@ namespace SEASON3B
 
         CNewUIButton* m_Button;
         CUITextInputBox* m_EditBox;
-        const int MAX_SHOPTITLE_UTF16;
     };
 
     inline

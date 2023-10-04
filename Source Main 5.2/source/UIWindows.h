@@ -103,8 +103,6 @@ protected:
     int m_iControlButtonClick;
     BOOL m_bIsMaximize;
     int m_iBackPos_y, m_iBackHeight;
-
-    const int MAX_LETTER_TITLE_LENGTH_UTF16, MAX_LETTER_TEXT_LENGTH_UTF16;
 };
 
 class CUIChatWindow : public CUIBaseWindow
@@ -151,7 +149,6 @@ protected:
     CUIButton m_CloseInviteButton;
     DWORD m_dwRoomNumber;
     int m_iPrevWidth;
-    const int MAX_CHATROOM_TEXT_LENGTH_UTF16;
     wchar_t m_szLastText[MAX_CHATROOM_TEXT_LENGTH];
 };
 

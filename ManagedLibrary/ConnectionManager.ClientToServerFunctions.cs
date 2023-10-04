@@ -108,15 +108,13 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="character">The character.</param>
-    /// <param name="characterByteLength">The length of <paramref name="character"/>.</param>
     /// <param name="message">The message.</param>
-    /// <param name="messageByteLength">The length of <paramref name="message"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A player sends a public chat message.
     /// Causes reaction on server side: The message is forwarded to all surrounding players, including the sender.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendPublicChatMessage(int handle, IntPtr @character, uint characterByteLength, IntPtr @message, uint messageByteLength)
+    public static void SendPublicChatMessage(int handle, IntPtr @character, IntPtr @message)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -127,10 +125,10 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = PublicChatMessageRef.GetRequiredSize((int)messageByteLength);
+                var length = PublicChatMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@message)!));
                 var packet = new PublicChatMessageRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Character = Marshal.PtrToStringAuto(@character, (int)characterByteLength);
-                packet.Message = Marshal.PtrToStringAuto(@message, (int)messageByteLength);
+                packet.Character = Marshal.PtrToStringAuto(@character);
+                packet.Message = Marshal.PtrToStringAuto(@message);
 
                 return length;
             });
@@ -146,15 +144,13 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="receiverName">The receiver name.</param>
-    /// <param name="receiverNameByteLength">The length of <paramref name="receiverName"/>.</param>
     /// <param name="message">The message.</param>
-    /// <param name="messageByteLength">The length of <paramref name="message"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A player sends a private chat message to a specific target player.
     /// Causes reaction on server side: The message is forwarded to the target player.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendWhisperMessage(int handle, IntPtr @receiverName, uint receiverNameByteLength, IntPtr @message, uint messageByteLength)
+    public static void SendWhisperMessage(int handle, IntPtr @receiverName, IntPtr @message)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -165,10 +161,10 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = WhisperMessageRef.GetRequiredSize((int)messageByteLength);
+                var length = WhisperMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@message)!));
                 var packet = new WhisperMessageRef(pipeWriter.GetSpan(length)[..length]);
-                packet.ReceiverName = Marshal.PtrToStringAuto(@receiverName, (int)receiverNameByteLength);
-                packet.Message = Marshal.PtrToStringAuto(@message, (int)messageByteLength);
+                packet.ReceiverName = Marshal.PtrToStringAuto(@receiverName);
+                packet.Message = Marshal.PtrToStringAuto(@message);
 
                 return length;
             });
@@ -459,13 +455,12 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="storeName">The store name.</param>
-    /// <param name="storeNameByteLength">The length of <paramref name="storeName"/>.</param>
     /// <remarks>
     /// Is sent by the client when: The player wants to open his personal item shop.
     /// Causes reaction on server side: The personal item shop is opened and the surrounding players are informed about it, including the own player.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendPlayerShopOpen(int handle, IntPtr @storeName, uint storeNameByteLength)
+    public static void SendPlayerShopOpen(int handle, IntPtr @storeName)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -478,7 +473,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = PlayerShopOpenRef.Length;
                 var packet = new PlayerShopOpenRef(pipeWriter.GetSpan(length)[..length]);
-                packet.StoreName = Marshal.PtrToStringAuto(@storeName, (int)storeNameByteLength);
+                packet.StoreName = Marshal.PtrToStringAuto(@storeName);
 
                 return length;
             });
@@ -526,13 +521,12 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="playerId">The player id.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A player opens a shop of another player.
     /// Causes reaction on server side: The list of items is sent back, if the shop of the player is currently open.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendPlayerShopItemListRequest(int handle, ushort @playerId, IntPtr @playerName, uint playerNameByteLength)
+    public static void SendPlayerShopItemListRequest(int handle, ushort @playerId, IntPtr @playerName)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -546,7 +540,7 @@ public unsafe partial class ConnectionManager
                 var length = PlayerShopItemListRequestRef.Length;
                 var packet = new PlayerShopItemListRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
 
                 return length;
             });
@@ -563,14 +557,13 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="playerId">The player id.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/>.</param>
     /// <param name="itemSlot">The item slot.</param>
     /// <remarks>
     /// Is sent by the client when: A player wants to buy the item of another players shop.
     /// Causes reaction on server side: If the buyer has enough money, the item is sold to the player. Both players will get notifications about that.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendPlayerShopItemBuyRequest(int handle, ushort @playerId, IntPtr @playerName, uint playerNameByteLength, byte @itemSlot)
+    public static void SendPlayerShopItemBuyRequest(int handle, ushort @playerId, IntPtr @playerName, byte @itemSlot)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -584,7 +577,7 @@ public unsafe partial class ConnectionManager
                 var length = PlayerShopItemBuyRequestRef.Length;
                 var packet = new PlayerShopItemBuyRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
                 packet.ItemSlot = @itemSlot;
 
                 return length;
@@ -2427,15 +2420,13 @@ public unsafe partial class ConnectionManager
     /// <param name="coinIndex">The coin index.</param>
     /// <param name="mileageFlag">The mileage flag.</param>
     /// <param name="giftReceiverName">The gift receiver name.</param>
-    /// <param name="giftReceiverNameByteLength">The length of <paramref name="giftReceiverName"/>.</param>
     /// <param name="giftText">The gift text.</param>
-    /// <param name="giftTextByteLength">The length of <paramref name="giftText"/>.</param>
     /// <remarks>
     /// Is sent by the client when: The player wants to send a gift to another player.
     /// Causes reaction on server side: The server buys the item with the credits of the player and sends it as gift to the other player.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendCashShopItemGiftRequest(int handle, uint @packageMainIndex, uint @category, uint @productMainIndex, ushort @itemIndex, uint @coinIndex, byte @mileageFlag, IntPtr @giftReceiverName, uint giftReceiverNameByteLength, IntPtr @giftText, uint giftTextByteLength)
+    public static void SendCashShopItemGiftRequest(int handle, uint @packageMainIndex, uint @category, uint @productMainIndex, ushort @itemIndex, uint @coinIndex, byte @mileageFlag, IntPtr @giftReceiverName, IntPtr @giftText)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -2454,8 +2445,8 @@ public unsafe partial class ConnectionManager
                 packet.ItemIndex = @itemIndex;
                 packet.CoinIndex = @coinIndex;
                 packet.MileageFlag = @mileageFlag;
-                packet.GiftReceiverName = Marshal.PtrToStringAuto(@giftReceiverName, (int)giftReceiverNameByteLength);
-                packet.GiftText = Marshal.PtrToStringAuto(@giftText, (int)giftTextByteLength);
+                packet.GiftReceiverName = Marshal.PtrToStringAuto(@giftReceiverName);
+                packet.GiftText = Marshal.PtrToStringAuto(@giftText);
 
                 return length;
             });
@@ -2654,13 +2645,12 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="pin">The pin.</param>
     /// <param name="password">The password of the account, which is required to set a new vault pin.</param>
-    /// <param name="passwordByteLength">The length of <paramref name="password"/>.</param>
     /// <remarks>
     /// Is sent by the client when: The player wants to set a new pin for the vault when it's in unlocked state.
     /// Causes reaction on server side: The vault pin is set. VaultProtectionInformation is sent as response.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendSetVaultPin(int handle, ushort @pin, IntPtr @password, uint passwordByteLength)
+    public static void SendSetVaultPin(int handle, ushort @pin, IntPtr @password)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -2674,7 +2664,7 @@ public unsafe partial class ConnectionManager
                 var length = SetVaultPinRef.Length;
                 var packet = new SetVaultPinRef(pipeWriter.GetSpan(length)[..length]);
                 packet.Pin = @pin;
-                packet.Password = Marshal.PtrToStringAuto(@password, (int)passwordByteLength);
+                packet.Password = Marshal.PtrToStringAuto(@password);
 
                 return length;
             });
@@ -2690,13 +2680,12 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="password">The password of the account, which is required to remove the vault pin.</param>
-    /// <param name="passwordByteLength">The length of <paramref name="password"/>.</param>
     /// <remarks>
     /// Is sent by the client when: The player wants to remove the pin for the vault when it's in unlocked state.
     /// Causes reaction on server side: The vault pin is removed. VaultProtectionInformation is sent as response.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendRemoveVaultPin(int handle, IntPtr @password, uint passwordByteLength)
+    public static void SendRemoveVaultPin(int handle, IntPtr @password)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -2709,7 +2698,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = RemoveVaultPinRef.Length;
                 var packet = new RemoveVaultPinRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Password = Marshal.PtrToStringAuto(@password, (int)passwordByteLength);
+                packet.Password = Marshal.PtrToStringAuto(@password);
 
                 return length;
             });
@@ -3159,14 +3148,13 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="name">The name of the character which should be created.</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/>.</param>
     /// <param name="class_">The character class of the character which should be created.</param>
     /// <remarks>
     /// Is sent by the client when: The game client is at the character selection screen and the player requests to add a new character.
     /// Causes reaction on server side: The server checks if the player is allowed to create the character and sends a response back.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendCreateCharacter(int handle, IntPtr @name, uint nameByteLength, CharacterClassNumber @class_)
+    public static void SendCreateCharacter(int handle, IntPtr @name, CharacterClassNumber @class_)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -3179,7 +3167,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = CreateCharacterRef.Length;
                 var packet = new CreateCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
+                packet.Name = Marshal.PtrToStringAuto(@name);
                 packet.Class = @class_;
 
                 return length;
@@ -3196,15 +3184,13 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="name">The name of the character which should be deleted.</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/>.</param>
     /// <param name="securityCode">A security code (7 bytes long). Some game clients/servers also expect to transmit the account password (up to 20 bytes long) here. In OpenMU, we work with the security here, but are not limiting to a length of 7 bytes.</param>
-    /// <param name="securityCodeByteLength">The length of <paramref name="securityCode"/>.</param>
     /// <remarks>
     /// Is sent by the client when: The game client is at the character selection screen and the player requests to delete an existing character.
     /// Causes reaction on server side: The server checks if the player transmitted the correct security code and if the character actually exists. If all is valid, it deletes the character from the account. It then sends a response with a result code back to the game client.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendDeleteCharacter(int handle, IntPtr @name, uint nameByteLength, IntPtr @securityCode, uint securityCodeByteLength)
+    public static void SendDeleteCharacter(int handle, IntPtr @name, IntPtr @securityCode)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -3217,8 +3203,8 @@ public unsafe partial class ConnectionManager
             {
                 var length = DeleteCharacterRef.Length;
                 var packet = new DeleteCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
-                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode, (int)securityCodeByteLength);
+                packet.Name = Marshal.PtrToStringAuto(@name);
+                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode);
 
                 return length;
             });
@@ -3234,13 +3220,12 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="name">The name of the character with which the player wants to join the game world</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/>.</param>
     /// <remarks>
     /// Is sent by the client when: The player selects a character to enter the game world on the character selection screen.
     /// Causes reaction on server side: The player joins the game world with the specified character.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendSelectCharacter(int handle, IntPtr @name, uint nameByteLength)
+    public static void SendSelectCharacter(int handle, IntPtr @name)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -3253,7 +3238,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = SelectCharacterRef.Length;
                 var packet = new SelectCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
+                packet.Name = Marshal.PtrToStringAuto(@name);
 
                 return length;
             });
@@ -3269,13 +3254,12 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="name">The name.</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/>.</param>
     /// <remarks>
     /// Is sent by the client when: The player focuses (clicks on it) a character with which he plans to enter the game world on the character selection screen.
     /// Causes reaction on server side: The server checks if this character exists and sends a response back. If successful, the game client highlights the focused character.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendFocusCharacter(int handle, IntPtr @name, uint nameByteLength)
+    public static void SendFocusCharacter(int handle, IntPtr @name)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -3288,7 +3272,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = FocusCharacterRef.Length;
                 var packet = new FocusCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
+                packet.Name = Marshal.PtrToStringAuto(@name);
 
                 return length;
             });
@@ -4049,20 +4033,17 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="letterId">The letter id.</param>
     /// <param name="receiver">The receiver.</param>
-    /// <param name="receiverByteLength">The length of <paramref name="receiver"/>.</param>
     /// <param name="title">The title.</param>
-    /// <param name="titleByteLength">The length of <paramref name="title"/>.</param>
     /// <param name="rotation">The rotation.</param>
     /// <param name="animation">The animation.</param>
     /// <param name="messageLength">The message length.</param>
     /// <param name="message">The message.</param>
-    /// <param name="messageByteLength">The length of <paramref name="message"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A player wants to send a letter to another players character.
     /// Causes reaction on server side: The letter is sent to the other character, if it exists and the player has the required money.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendLetterSendRequest(int handle, uint @letterId, IntPtr @receiver, uint receiverByteLength, IntPtr @title, uint titleByteLength, byte @rotation, byte @animation, ushort @messageLength, IntPtr @message, uint messageByteLength)
+    public static void SendLetterSendRequest(int handle, uint @letterId, IntPtr @receiver, IntPtr @title, byte @rotation, byte @animation, ushort @messageLength, IntPtr @message)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4073,15 +4054,15 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = LetterSendRequestRef.GetRequiredSize((int)messageByteLength);
+                var length = LetterSendRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@message)!));
                 var packet = new LetterSendRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.LetterId = @letterId;
-                packet.Receiver = Marshal.PtrToStringAuto(@receiver, (int)receiverByteLength);
-                packet.Title = Marshal.PtrToStringAuto(@title, (int)titleByteLength);
+                packet.Receiver = Marshal.PtrToStringAuto(@receiver);
+                packet.Title = Marshal.PtrToStringAuto(@title);
                 packet.Rotation = @rotation;
                 packet.Animation = @animation;
                 packet.MessageLength = @messageLength;
-                packet.Message = Marshal.PtrToStringAuto(@message, (int)messageByteLength);
+                packet.Message = Marshal.PtrToStringAuto(@message);
 
                 return length;
             });
@@ -4131,15 +4112,13 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/>.</param>
     /// <param name="securityCode">The security code.</param>
-    /// <param name="securityCodeByteLength">The length of <paramref name="securityCode"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A guild member wants to kick himself or a guild master wants to kick another player from its guild.
     /// Causes reaction on server side: If the player is allowed to kick the player, it's removed from the guild. If the guild master kicks himself, the guild is disbanded. Corresponding responses are sent to all involved players.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendGuildKickPlayerRequest(int handle, IntPtr @playerName, uint playerNameByteLength, IntPtr @securityCode, uint securityCodeByteLength)
+    public static void SendGuildKickPlayerRequest(int handle, IntPtr @playerName, IntPtr @securityCode)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4150,10 +4129,10 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = GuildKickPlayerRequestRef.GetRequiredSize((int)securityCodeByteLength);
+                var length = GuildKickPlayerRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@securityCode)!));
                 var packet = new GuildKickPlayerRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
-                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode, (int)securityCodeByteLength);
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
+                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode);
 
                 return length;
             });
@@ -4270,7 +4249,6 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="guildName">The guild name.</param>
-    /// <param name="guildNameByteLength">The length of <paramref name="guildName"/>.</param>
     /// <param name="guildEmblem">The guild emblem in a custom bitmap format. It supports 16 colors (one transparent) per pixel and has a size of 8 * 8 pixel.</param>
     /// <param name="guildEmblemByteLength">The length of <paramref name="guildEmblem"/>.</param>
     /// <remarks>
@@ -4278,7 +4256,7 @@ public unsafe partial class ConnectionManager
     /// Causes reaction on server side: The guild is created and the player is set as the new guild master of the guild.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendGuildCreateRequest(int handle, IntPtr @guildName, uint guildNameByteLength, byte* @guildEmblem, uint guildEmblemByteLength)
+    public static void SendGuildCreateRequest(int handle, IntPtr @guildName, byte* @guildEmblem, uint guildEmblemByteLength)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4291,7 +4269,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = GuildCreateRequestRef.Length;
                 var packet = new GuildCreateRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.GuildName = Marshal.PtrToStringAuto(@guildName, (int)guildNameByteLength);
+                packet.GuildName = Marshal.PtrToStringAuto(@guildName);
                 new Span<byte>(@guildEmblem, (int)guildEmblemByteLength).CopyTo(packet.GuildEmblem);
 
                 return length;
@@ -4308,7 +4286,6 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="guildName">The guild name.</param>
-    /// <param name="guildNameByteLength">The length of <paramref name="guildName"/>.</param>
     /// <param name="guildEmblem">The guild emblem in a custom bitmap format. It supports 16 colors (one transparent) per pixel and has a size of 8 * 8 pixel.</param>
     /// <param name="guildEmblemByteLength">The length of <paramref name="guildEmblem"/>.</param>
     /// <remarks>
@@ -4316,7 +4293,7 @@ public unsafe partial class ConnectionManager
     /// Causes reaction on server side: The guild is created and the player is set as the new guild master of the guild.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendGuildCreateRequest075(int handle, IntPtr @guildName, uint guildNameByteLength, byte* @guildEmblem, uint guildEmblemByteLength)
+    public static void SendGuildCreateRequest075(int handle, IntPtr @guildName, byte* @guildEmblem, uint guildEmblemByteLength)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4329,7 +4306,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = GuildCreateRequest075Ref.Length;
                 var packet = new GuildCreateRequest075Ref(pipeWriter.GetSpan(length)[..length]);
-                packet.GuildName = Marshal.PtrToStringAuto(@guildName, (int)guildNameByteLength);
+                packet.GuildName = Marshal.PtrToStringAuto(@guildName);
                 new Span<byte>(@guildEmblem, (int)guildEmblemByteLength).CopyTo(packet.GuildEmblem);
 
                 return length;
@@ -4480,14 +4457,13 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="role">The role.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/>.</param>
     /// <param name="type">Unknown value between 1 and 3.</param>
     /// <remarks>
     /// Is sent by the client when: A guild master wants to change the role of a guild member.
     /// Causes reaction on server side: The server changes the role of the guild member.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendGuildRoleAssignRequest(int handle, MUnique.OpenMU.Network.Packets.ServerToClient.GuildMemberRole @role, IntPtr @playerName, uint playerNameByteLength, byte @type = 1)
+    public static void SendGuildRoleAssignRequest(int handle, MUnique.OpenMU.Network.Packets.ServerToClient.GuildMemberRole @role, IntPtr @playerName, byte @type = 1)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4502,7 +4478,7 @@ public unsafe partial class ConnectionManager
                 var packet = new GuildRoleAssignRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.Type = @type;
                 packet.Role = @role;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
 
                 return length;
             });
@@ -4661,13 +4637,12 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="guildName">The guild name.</param>
-    /// <param name="guildNameByteLength">The length of <paramref name="guildName"/>.</param>
     /// <remarks>
     /// Is sent by the client when: An alliance guild master wants to remove a guild from the alliance.
     /// Causes reaction on server side: The server removes the guild from the alliance.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendRemoveAllianceGuildRequest(int handle, IntPtr @guildName, uint guildNameByteLength)
+    public static void SendRemoveAllianceGuildRequest(int handle, IntPtr @guildName)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4680,7 +4655,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = RemoveAllianceGuildRequestRef.Length;
                 var packet = new RemoveAllianceGuildRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.GuildName = Marshal.PtrToStringAuto(@guildName, (int)guildNameByteLength);
+                packet.GuildName = Marshal.PtrToStringAuto(@guildName);
 
                 return length;
             });
@@ -4859,13 +4834,12 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="friendName">The friend name.</param>
-    /// <param name="friendNameByteLength">The length of <paramref name="friendName"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A player wants to add another players character into his friend list of the messenger.
     /// Causes reaction on server side: A request is sent to the other player. If the player is currently offline, the request will be sent as soon as he is online again.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendFriendAddRequest(int handle, IntPtr @friendName, uint friendNameByteLength)
+    public static void SendFriendAddRequest(int handle, IntPtr @friendName)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4878,7 +4852,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = FriendAddRequestRef.Length;
                 var packet = new FriendAddRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = Marshal.PtrToStringAuto(@friendName, (int)friendNameByteLength);
+                packet.FriendName = Marshal.PtrToStringAuto(@friendName);
 
                 return length;
             });
@@ -4894,13 +4868,12 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="friendName">The friend name.</param>
-    /// <param name="friendNameByteLength">The length of <paramref name="friendName"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A player wants to delete another players character from his friend list of the messenger.
     /// Causes reaction on server side: The entry in the friend list is removed. The player is shown as offline in the other players friends list.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendFriendDelete(int handle, IntPtr @friendName, uint friendNameByteLength)
+    public static void SendFriendDelete(int handle, IntPtr @friendName)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4913,7 +4886,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = FriendDeleteRef.Length;
                 var packet = new FriendDeleteRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = Marshal.PtrToStringAuto(@friendName, (int)friendNameByteLength);
+                packet.FriendName = Marshal.PtrToStringAuto(@friendName);
 
                 return length;
             });
@@ -4929,13 +4902,12 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="friendName">The friend name.</param>
-    /// <param name="friendNameByteLength">The length of <paramref name="friendName"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A player wants to open a chat with another player of his friend list.
     /// Causes reaction on server side: If both players are online, a chat room is created on the chat server. Authentication data is sent to both game clients, which will then try to connect to the chat server using this data.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendChatRoomCreateRequest(int handle, IntPtr @friendName, uint friendNameByteLength)
+    public static void SendChatRoomCreateRequest(int handle, IntPtr @friendName)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4948,7 +4920,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = ChatRoomCreateRequestRef.Length;
                 var packet = new ChatRoomCreateRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = Marshal.PtrToStringAuto(@friendName, (int)friendNameByteLength);
+                packet.FriendName = Marshal.PtrToStringAuto(@friendName);
 
                 return length;
             });
@@ -4965,13 +4937,12 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="accepted">The accepted.</param>
     /// <param name="friendRequesterName">The friend requester name.</param>
-    /// <param name="friendRequesterNameByteLength">The length of <paramref name="friendRequesterName"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A player received a friend request from another player and responded to it.
     /// Causes reaction on server side: If the player accepted, the friend is added to the players friend list and both players get subscribed about each others online status.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendFriendAddResponse(int handle, byte @accepted, IntPtr @friendRequesterName, uint friendRequesterNameByteLength)
+    public static void SendFriendAddResponse(int handle, byte @accepted, IntPtr @friendRequesterName)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -4985,7 +4956,7 @@ public unsafe partial class ConnectionManager
                 var length = FriendAddResponseRef.Length;
                 var packet = new FriendAddResponseRef(pipeWriter.GetSpan(length)[..length]);
                 packet.Accepted = @accepted == 1;
-                packet.FriendRequesterName = Marshal.PtrToStringAuto(@friendRequesterName, (int)friendRequesterNameByteLength);
+                packet.FriendRequesterName = Marshal.PtrToStringAuto(@friendRequesterName);
 
                 return length;
             });
@@ -5035,7 +5006,6 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="friendName">The friend name.</param>
-    /// <param name="friendNameByteLength">The length of <paramref name="friendName"/>.</param>
     /// <param name="roomId">The room id.</param>
     /// <param name="requestId">The request id.</param>
     /// <remarks>
@@ -5043,7 +5013,7 @@ public unsafe partial class ConnectionManager
     /// Causes reaction on server side: The player additional gets authentication data sent to his game client. It then connects to the chat server and joins the chat room.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendChatRoomInvitationRequest(int handle, IntPtr @friendName, uint friendNameByteLength, ushort @roomId, uint @requestId)
+    public static void SendChatRoomInvitationRequest(int handle, IntPtr @friendName, ushort @roomId, uint @requestId)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -5056,7 +5026,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = ChatRoomInvitationRequestRef.Length;
                 var packet = new ChatRoomInvitationRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = Marshal.PtrToStringAuto(@friendName, (int)friendNameByteLength);
+                packet.FriendName = Marshal.PtrToStringAuto(@friendName);
                 packet.RoomId = @roomId;
                 packet.RequestId = @requestId;
 
@@ -6264,13 +6234,12 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="securityCode">The security code.</param>
-    /// <param name="securityCodeByteLength">The length of <paramref name="securityCode"/>.</param>
     /// <remarks>
     /// Is sent by the client when: Unknown?
     /// Causes reaction on server side: Unknown?
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendServerImmigrationRequest(int handle, IntPtr @securityCode, uint securityCodeByteLength)
+    public static void SendServerImmigrationRequest(int handle, IntPtr @securityCode)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -6281,9 +6250,9 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = ServerImmigrationRequestRef.GetRequiredSize((int)securityCodeByteLength);
+                var length = ServerImmigrationRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@securityCode)!));
                 var packet = new ServerImmigrationRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode, (int)securityCodeByteLength);
+                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode);
 
                 return length;
             });
@@ -6299,17 +6268,14 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="serial1">The serial 1.</param>
-    /// <param name="serial1ByteLength">The length of <paramref name="serial1"/>.</param>
     /// <param name="serial2">The serial 2.</param>
-    /// <param name="serial2ByteLength">The length of <paramref name="serial2"/>.</param>
     /// <param name="serial3">The serial 3.</param>
-    /// <param name="serial3ByteLength">The length of <paramref name="serial3"/>.</param>
     /// <remarks>
     /// Is sent by the client when: The player requests to redeem a coupon code (lucky number) which is 12 alphanumeric digits long.
     /// Causes reaction on server side: A response is sent back to the client with the result. An item could be rewarded to the inventory.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendLuckyNumberRequest(int handle, IntPtr @serial1, uint serial1ByteLength, IntPtr @serial2, uint serial2ByteLength, IntPtr @serial3, uint serial3ByteLength)
+    public static void SendLuckyNumberRequest(int handle, IntPtr @serial1, IntPtr @serial2, IntPtr @serial3)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -6322,9 +6288,9 @@ public unsafe partial class ConnectionManager
             {
                 var length = LuckyNumberRequestRef.Length;
                 var packet = new LuckyNumberRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Serial1 = Marshal.PtrToStringAuto(@serial1, (int)serial1ByteLength);
-                packet.Serial2 = Marshal.PtrToStringAuto(@serial2, (int)serial2ByteLength);
-                packet.Serial3 = Marshal.PtrToStringAuto(@serial3, (int)serial3ByteLength);
+                packet.Serial1 = Marshal.PtrToStringAuto(@serial1);
+                packet.Serial2 = Marshal.PtrToStringAuto(@serial2);
+                packet.Serial3 = Marshal.PtrToStringAuto(@serial3);
 
                 return length;
             });
@@ -6483,13 +6449,12 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="playerId">The player id.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/>.</param>
     /// <remarks>
     /// Is sent by the client when: The player requests to start a duel with another player.
     /// Causes reaction on server side: The server sends a request to the other player.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendDuelStartRequest(int handle, ushort @playerId, IntPtr @playerName, uint playerNameByteLength)
+    public static void SendDuelStartRequest(int handle, ushort @playerId, IntPtr @playerName)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -6503,7 +6468,7 @@ public unsafe partial class ConnectionManager
                 var length = DuelStartRequestRef.Length;
                 var packet = new DuelStartRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
 
                 return length;
             });
@@ -6521,13 +6486,12 @@ public unsafe partial class ConnectionManager
     /// <param name="response">The response.</param>
     /// <param name="playerId">The player id.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/>.</param>
     /// <remarks>
     /// Is sent by the client when: A player requested to start a duel with the sending player.
     /// Causes reaction on server side: Depending on the response, the server starts the duel, or not.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendDuelStartResponse(int handle, byte @response, ushort @playerId, IntPtr @playerName, uint playerNameByteLength)
+    public static void SendDuelStartResponse(int handle, byte @response, ushort @playerId, IntPtr @playerName)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -6542,7 +6506,7 @@ public unsafe partial class ConnectionManager
                 var packet = new DuelStartResponseRef(pipeWriter.GetSpan(length)[..length]);
                 packet.Response = @response == 1;
                 packet.PlayerId = @playerId;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName, (int)playerNameByteLength);
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
 
                 return length;
             });

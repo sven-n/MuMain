@@ -204,7 +204,7 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
                 else
                 {
                     wchar_t szMsg[64];
-                    wsprintf(szMsg, GlobalText[380], m_nGameExit);
+                    swprintf(szMsg, GlobalText[380], m_nGameExit);
                     SetMsg(m_eType, szMsg);
                 }
             }
@@ -303,7 +303,7 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         break;
     case MESSAGE_GAME_END_COUNTDOWN:
         m_nGameExit = 5;
-        wsprintf(szTempMsg, GlobalText[380], m_nGameExit);
+        swprintf(szTempMsg, GlobalText[380], m_nGameExit);
         lpszMsg = szTempMsg;
         eType = MWT_NON;
         break;
@@ -386,11 +386,11 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         lpszMsg = GlobalText[1654];
         break;
     case MESSAGE_DELETE_CHARACTER_WARNING:
-        wsprintf(szTempMsg, GlobalText[1711], CHAR_DEL_LIMIT_LV);
+        swprintf(szTempMsg, GlobalText[1711], CHAR_DEL_LIMIT_LV);
         lpszMsg = szTempMsg;
         break;
     case MESSAGE_DELETE_CHARACTER_CONFIRM:
-        wsprintf(szTempMsg, GlobalText[1712], CharactersClient[SelectedHero].ID);
+        swprintf(szTempMsg, GlobalText[1712], CharactersClient[SelectedHero].ID);
         lpszMsg = szTempMsg;
         eType = MWT_BTN_BOTH;
         break;
@@ -525,5 +525,7 @@ void CMsgWin::RequestDeleteCharacter()
         g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
     }
     InputEnable = false;
-    SendRequestDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
+    CurrentProtocolState = REQUEST_DELETE_CHARACTER;
+    SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
+    // SendRequestDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
 }

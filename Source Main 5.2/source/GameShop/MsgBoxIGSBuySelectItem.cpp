@@ -154,20 +154,20 @@ void CMsgBoxIGSBuySelectItem::RenderTexts()
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        wsprintf(szText, L"Bad item index.");
+        swprintf(szText, L"Bad item index.");
     }
     else
     {
-        wsprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+        swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
     }
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 200, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"Package Seq : %d", m_iPackageSeq);
+    swprintf(szText, L"Package Seq : %d", m_iPackageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 200, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
+    swprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 200, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"Price Seq : %d", m_SelectBuyListBox.GetSelectedText()->m_iPriceSeq);
+    swprintf(szText, L"Price Seq : %d", m_SelectBuyListBox.GetSelectedText()->m_iPriceSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 200, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"Cash Type : %d", m_SelectBuyListBox.GetSelectedText()->m_iCashType);
+    swprintf(szText, L"Cash Type : %d", m_SelectBuyListBox.GetSelectedText()->m_iCashType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 50, szText, 200, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }
@@ -341,26 +341,26 @@ void CMsgBoxIGSBuySelectItem::AddData(int iPackageSeq, int iDisplaySeq, int iPri
     wcscpy(Item.m_szItemName, szText);
 
     g_InGameShopSystem->GetProductInfoFromPriceSeq(iProductSeq, iPriceSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_PRICE, iValue, szText);
-    wsprintf(Item.m_szItemPrice, L"%s %s", szText, pszPriceUnit);
+    swprintf(Item.m_szItemPrice, L"%s %s", szText, pszPriceUnit);
 
     g_InGameShopSystem->GetProductInfoFromPriceSeq(iProductSeq, iPriceSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_USE_LIMIT_PERIOD, iValue, szText);
     if (iValue > 0)
     {
-        wsprintf(Item.m_szItemPeriod, L"%d %s", iValue, szText);
+        swprintf(Item.m_szItemPeriod, L"%d %s", iValue, szText);
     }
     else
     {
-        wsprintf(Item.m_szItemPeriod, L"-");
+        swprintf(Item.m_szItemPeriod, L"-");
     }
 
     g_InGameShopSystem->GetProductInfoFromPriceSeq(iProductSeq, iPriceSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_NUM, iValue, szText);
     if (iValue > 0)
     {
-        wsprintf(Item.m_szAttribute, GlobalText[3045], iValue, Item.m_szItemPeriod);
+        swprintf(Item.m_szAttribute, GlobalText[3045], iValue, Item.m_szItemPeriod);
     }
     else
     {
-        wsprintf(Item.m_szAttribute, GlobalText[3039], Item.m_szItemPeriod);
+        swprintf(Item.m_szAttribute, GlobalText[3039], Item.m_szItemPeriod);
     }
 
     m_SelectBuyListBox.AddText(Item);

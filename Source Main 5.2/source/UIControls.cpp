@@ -52,7 +52,7 @@ int CutStr(const wchar_t* pszSrcText, wchar_t* pTextOut, const int iTargetPixelW
     SIZE iSize;
     while (iCharIndex < (int)wstrUTF16.length() && iLineIndex < iMaxOutLine)
     {
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), wstrUTF16.c_str(), iCharIndex, &iSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), wstrUTF16.c_str(), iCharIndex, &iSize);
 
         if (iLineIndex == 0)
             iSize.cx += iFirstLineTab;
@@ -435,7 +435,7 @@ void CUIButton::Render()
         {
             SIZE TextSize;
             const int TextLen = lstrlen(m_pszCaption);
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
             g_pRenderText->SetTextColor(230, 220, 200, 255);
             g_pRenderText->SetBgColor(0);
             g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, m_iPos_y + 1 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
@@ -466,7 +466,7 @@ void CUIButton::Render()
         SIZE TextSize;
         const int TextLen = lstrlen(m_pszCaption);
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
         g_pRenderText->SetTextColor(230, 220, 200, 255);
         g_pRenderText->SetBgColor(0, 0, 0, 0);
 
@@ -1201,14 +1201,14 @@ BOOL CUIGuildListBox::RenderDataLine(int iLineNumber)
     }
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    wsprintf(Text, L"%s", m_TextListIter->m_szID);
+    swprintf(Text, L"%s", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     if (m_TextListIter->m_Server != 255/* && m_TextListIter->m_Number != 0*/)
     {
         g_pRenderText->SetBgColor(255, 196, 0, 255);
         g_pRenderText->SetTextColor(0x00000000);
-        wsprintf(Text, L"(%d)", m_TextListIter->m_Server + 1);
+        swprintf(Text, L"(%d)", m_TextListIter->m_Server + 1);
         g_pRenderText->RenderText(m_iPos_x + m_iWidth - 60, iPos_y, Text);
     }
 
@@ -1436,7 +1436,7 @@ void CUISimpleChatListBox::AddTextToRenderList(const wchar_t* pszID, const wchar
     if (wcslen(pszID) + wcslen(pszText) >= 20)
     {
         SIZE nameSize;
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszID, lstrlen(pszID), &nameSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszID, lstrlen(pszID), &nameSize);
 
         wchar_t Text1[10][MAX_TEXT_LENGTH + 1] = { {0},{0},{0},{0},{0} };
         int iLine = CutText3(pszText, Text1[0], m_iWidth - 30, 10, MAX_TEXT_LENGTH + 1, (nameSize.cx + 5) / g_fScreenRate_x);
@@ -1505,7 +1505,7 @@ BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
         }
 
         EnableAlphaTest();
-        wsprintf(Text, L"%s: ", m_TextListIter->m_szID);
+        swprintf(Text, L"%s: ", m_TextListIter->m_szID);
         g_pRenderText->RenderText(m_iPos_x + 8, m_iPos_y - 16 - iLineNumber * 13, Text, 0, 0, RT3_SORT_LEFT, &TextSize);
         DisableAlphaBlend();
     }
@@ -1539,7 +1539,7 @@ BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
     }
 
     EnableAlphaTest();
-    wsprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%s", m_TextListIter->m_szText);
     g_pRenderText->RenderText(m_iPos_x + 8 + TextSize.cx, m_iPos_y - 16 - iLineNumber * 13, Text);
     DisableAlphaBlend();
 
@@ -1569,9 +1569,9 @@ CUIChatPalListBox::CUIChatPalListBox()
 
     m_iColumnWidth[0] = m_iColumnWidth[1] = m_iColumnWidth[2] = m_iColumnWidth[3] = 0;
     SIZE TextSize;
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"ZZZZZZZZZZ", lstrlen(L"ZZZZZZZZZZ"), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"ZZZZZZZZZZ", lstrlen(L"ZZZZZZZZZZ"), &TextSize);
     SetColumnWidth(0, TextSize.cx / g_fScreenRate_x + 8);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1022], GlobalText.GetStringSize(1022), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1022], GlobalText.GetStringSize(1022), &TextSize);
     SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
 
     m_bForceEditList = FALSE;
@@ -1739,34 +1739,34 @@ BOOL CUIChatPalListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    wsprintf(Text, L"%s", m_TextListIter->m_szID);
+    swprintf(Text, L"%s", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x + GetColumnPos_x(0), iPos_y, Text);
 
     if (m_iLayoutType == 1)
     {
         if (m_TextListIter->m_Server == 0xFF)
         {
-            wsprintf(Text, GlobalText[1039]);
+            swprintf(Text, GlobalText[1039]);
         }
         else if (m_TextListIter->m_Server == 0xFE)
         {
-            wsprintf(Text, GlobalText[1039]);
+            swprintf(Text, GlobalText[1039]);
         }
         else if (m_TextListIter->m_Server == 0xFD)
         {
-            wsprintf(Text, GlobalText[1041]);
+            swprintf(Text, GlobalText[1041]);
         }
         else if (m_TextListIter->m_Server == 0xFC)
         {
-            wsprintf(Text, GlobalText[1039]);
+            swprintf(Text, GlobalText[1039]);
         }
         //		else if (m_TextListIter->m_Server == 0xFB)
         //		{
-        //			wsprintf(Text,GlobalText[1040]);
+        //			swprintf(Text,GlobalText[1040]);
         //		}
         else
         {
-            wsprintf(Text, GlobalText[1042], m_TextListIter->m_Server + 1);
+            swprintf(Text, GlobalText[1042], m_TextListIter->m_Server + 1);
         }
         g_pRenderText->RenderText(iPos_x + 4 + GetColumnPos_x(1), iPos_y, Text);
     }
@@ -1916,7 +1916,7 @@ BOOL CUIWindowListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    wsprintf(Text, L"%s", m_TextListIter->m_szTitle);
+    swprintf(Text, L"%s", m_TextListIter->m_szTitle);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     DisableAlphaBlend();
@@ -1999,11 +1999,11 @@ CUILetterListBox::CUILetterListBox()
     SIZE TextSize;
 
     SetColumnWidth(0, 15 + 10);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1028], GlobalText.GetStringSize(1028), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1028], GlobalText.GetStringSize(1028), &TextSize);
     SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1029], GlobalText.GetStringSize(1029), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1029], GlobalText.GetStringSize(1029), &TextSize);
     SetColumnWidth(2, TextSize.cx / g_fScreenRate_x + 8);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1030], GlobalText.GetStringSize(1030), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1030], GlobalText.GetStringSize(1030), &TextSize);
     SetColumnWidth(3, TextSize.cx / g_fScreenRate_x + 8);
 
     m_bForceEditList = FALSE;
@@ -2351,7 +2351,7 @@ BOOL CUILetterTextListBox::RenderDataLine(int iLineNumber)
     g_pRenderText->SetTextColor(230, 220, 200, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    wsprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%s", m_TextListIter->m_szText);
     int iPos_x = m_iPos_x + 10;
     int iPos_y = GetRenderLinePos_y(iLineNumber);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
@@ -2465,7 +2465,7 @@ BOOL CUISocketListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    wsprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%s", m_TextListIter->m_szText);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     DisableAlphaBlend();
@@ -2757,9 +2757,9 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* ps
     SIZE RealTextSize;
 
     if (pszText[0] == '\0')
-        g_pMultiLanguage->_GetTextExtentPoint32(m_hFontDC, L"0", 1, &RealTextSize);
+        GetTextExtentPoint32(m_hFontDC, L"0", 1, &RealTextSize);
     else
-        g_pMultiLanguage->_GetTextExtentPoint32(m_hFontDC, pszText, lstrlen(pszText), &RealTextSize);
+        GetTextExtentPoint32(m_hFontDC, pszText, lstrlen(pszText), &RealTextSize);
 
     MU_POINTF RealBoxPos = { (float)iPos_x * g_fScreenRate_x, (float)iPos_y * g_fScreenRate_y };
     SIZEF RealBoxSize = { (float)iBoxWidth * g_fScreenRate_x, (float)iBoxHeight * g_fScreenRate_y };
@@ -2853,7 +2853,7 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* ps
     {
         ::SetBkColor(m_hFontDC, RGB(0, 0, 0));
         ::SetTextColor(m_hFontDC, RGB(255, 255, 255));
-        g_pMultiLanguage->_TextOut(m_hFontDC, 0, 0, pszText, lstrlen(pszText));
+        TextOut(m_hFontDC, 0, 0, pszText, lstrlen(pszText));
     }
 
     int iRealRenderWidth = RealRenderingSize.cx;
@@ -3193,7 +3193,12 @@ void CUITextInputBox::GetText(wchar_t* pszText, int iGetLength)
 
 void CUITextInputBox::SetText(const wchar_t* pszText)
 {
-    std::wstring wstrText = std::wstring(pszText);
+    std::wstring wstrText = L"";
+    if (pszText != nullptr)
+    {
+        wstrText = std::wstring(pszText);
+    }
+    
     //g_pMultiLanguage->ConvertCharToWideStr(wstrText, pszText);
 
     if (wstrText.length() > MAX_TEXT_LENGTH) return;
@@ -3458,7 +3463,7 @@ void CUITextInputBox::Render()
     if (m_fCaretHeight == 0)
     {
         SIZE TextSize;
-        g_pMultiLanguage->_GetTextExtentPoint32(m_hMemDC, L"Q", 1, &TextSize);
+        GetTextExtentPoint32(m_hMemDC, L"Q", 1, &TextSize);
         m_fCaretHeight = TextSize.cy;
     }
 
@@ -3486,7 +3491,7 @@ void CUITextInputBox::Render()
 
         if (IsPassword() == FALSE)
         {
-            g_pMultiLanguage->_GetTextExtentPoint32(m_hMemDC, TextCheckUTF16, wcslen(TextCheckUTF16), &TextSize);
+            GetTextExtentPoint32(m_hMemDC, TextCheckUTF16, wcslen(TextCheckUTF16), &TextSize);
         }
         else
         {
@@ -3495,7 +3500,7 @@ void CUITextInputBox::Render()
             szPasswd[MAX_TEXT_LENGTH] = '\0';
             g_pRenderText->SetFont(g_hFontBold);
 
-            g_pMultiLanguage->_GetTextExtentPoint32(m_hMemDC, szPasswd, wcslen(TextCheck), &TextSize);
+            GetTextExtentPoint32(m_hMemDC, szPasswd, wcslen(TextCheck), &TextSize);
             g_pRenderText->SetFont(g_hFont);
         }
         RealTextLine.cx = TextSize.cx + m_fCaretWidth;
@@ -4078,7 +4083,7 @@ void CUISlideHelp::Render(BOOL bForceFadeOut)
     if (m_iFontHeight == 0)
     {
         SIZE TextSize = { 0, 0 };
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Z", 1, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Z", 1, &TextSize);
         m_iFontHeight = TextSize.cy /= g_fScreenRate_y;
 
         if (GetPosition_y() >= m_iFontHeight)
@@ -4175,7 +4180,7 @@ int CUISlideHelp::CheckCutSize(const wchar_t* pszSource, int iNeedValue)
     m_iCutLength = iTextSize;
 
     SIZE TextSize = { 0, 0 };
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszSource, m_iCutLength, &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszSource, m_iCutLength, &TextSize);
     return TextSize.cx;
 }
 
@@ -4342,7 +4347,7 @@ void CSlideHelpMgr::OpenSlideTextFile(const wchar_t* szFileName)
     if (fp == nullptr)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", szFileName);
+        swprintf(Text, L"%s - File not exist.", szFileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -4363,10 +4368,10 @@ void CSlideHelpMgr::OpenSlideTextFile(const wchar_t* szFileName)
         m_iTextNumber[i] = SlideHelp.SlideHelp[i].iNumber;
         for (int j = 0; j < m_iTextNumber[i]; ++j)
         {
-            int iLength = wcslen(SlideHelp.SlideHelp[i].szSlideHelpText[j]);
-            wchar_t* pszText = new wchar_t[iLength + 1];
-            memset(pszText, 0, iLength + 1);
-            wcsncpy(pszText, SlideHelp.SlideHelp[i].szSlideHelpText[j], iLength);
+            auto charText = SlideHelp.SlideHelp[i].szSlideHelpText[j];
+            int iLength = MultiByteToWideChar(CP_UTF8, 0, charText, -1, 0, 0);
+            auto pszText = new wchar_t[iLength + 1];
+            MultiByteToWideChar(CP_UTF8, 0, charText, -1, pszText, iLength);
             m_SlideTextList[i].push_back(pszText);
         }
     }
@@ -4769,7 +4774,7 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    wsprintf(Text, L"%s", m_TextListIter->m_szID);
+    swprintf(Text, L"%s", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     if (iCharacterLevel == 0) g_pRenderText->RenderText(iPos_x + 45, iPos_y, GlobalText[1300], 70, 0, RT3_SORT_CENTER);
@@ -4781,7 +4786,7 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
         g_pRenderText->SetBgColor(0);
         g_pRenderText->SetTextColor(255, 196, 0, 255);
 
-        wsprintf(Text, L"%d", m_TextListIter->m_Server + 1);
+        swprintf(Text, L"%d", m_TextListIter->m_Server + 1);
         g_pRenderText->RenderText(m_iPos_x + m_iWidth - 30, iPos_y, Text);
     }
 
@@ -4967,10 +4972,10 @@ BOOL CUIUnionGuildListBox::RenderDataLine(int iLineNumber)
         memset(GuildMark[MARK_EDIT].Mark, 0, 64);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    wsprintf(Text, L"%s", m_TextListIter->szName);
+    swprintf(Text, L"%s", m_TextListIter->szName);
     g_pRenderText->RenderText(iPos_x + 12, iPos_y, Text);
 
-    wsprintf(Text, L"%d", m_TextListIter->nMemberCount);
+    swprintf(Text, L"%d", m_TextListIter->nMemberCount);
     g_pRenderText->RenderText(iPos_x + 138, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     DisableAlphaBlend();
@@ -5137,7 +5142,7 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
     if (pItem)
     {
         int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
-        wsprintf(oText, L"%s,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
+        swprintf(oText, L"%s,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
     }
 
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, oText);
@@ -5285,7 +5290,7 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
 {
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
 
-    wsprintf(Text, L"%s", m_TextListIter->szName);
+    swprintf(Text, L"%s", m_TextListIter->szName);
 
     if ((wcscmp(GuildMark[Hero->GuildMarkIndex].UnionName, Text) != NULL && wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, Text) != NULL))
     {
@@ -5313,16 +5318,16 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
 
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, Text);
 
-    wsprintf(Text, L"%d", m_TextListIter->nCount);
+    swprintf(Text, L"%d", m_TextListIter->nCount);
     g_pRenderText->RenderText(iPos_x + 70, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     if (m_TextListIter->byIsGiveUp)
-        wsprintf(Text, L"%s", GlobalText[1531]);
+        swprintf(Text, L"%s", GlobalText[1531]);
     else
-        wsprintf(Text, L"%s", GlobalText[1532]);
+        swprintf(Text, L"%s", GlobalText[1532]);
     g_pRenderText->RenderText(iPos_x + 120, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
-    wsprintf(Text, L"%u", m_TextListIter->bySeqNum);
+    swprintf(Text, L"%u", m_TextListIter->bySeqNum);
     g_pRenderText->RenderText(iPos_x + 140, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     DisableAlphaBlend();
@@ -5478,19 +5483,19 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    wsprintf(Text, L"%s", m_TextListIter->szName);
+    swprintf(Text, L"%s", m_TextListIter->szName);
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, Text);
 
     if (m_TextListIter->byJoinSide == 1)
-        wsprintf(Text, L"%s", GlobalText[1606]);
+        swprintf(Text, L"%s", GlobalText[1606]);
     else
-        wsprintf(Text, L"%s", GlobalText[1605]);
+        swprintf(Text, L"%s", GlobalText[1605]);
     g_pRenderText->RenderText(iPos_x + 100, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     if (m_TextListIter->byGuildInvolved == 1)
-        wsprintf(Text, L"%s", GlobalText[1607]);
+        swprintf(Text, L"%s", GlobalText[1607]);
     else
-        wsprintf(Text, L"%s", GlobalText[1608]);
+        swprintf(Text, L"%s", GlobalText[1608]);
 
     g_pRenderText->RenderText(iPos_x + 137, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
@@ -5498,9 +5503,9 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
     wchar_t Dummy[300];	if (Select_Guild == iLineNumber)
     {
         if (m_TextListIter->byJoinSide == 1)
-            wsprintf(Dummy, L"--");
+            swprintf(Dummy, L"--");
         else
-            wsprintf(Dummy, L"%s :     %d", m_TextListIter->szName, m_TextListIter->iGuildScore);
+            swprintf(Dummy, L"%s :     %d", m_TextListIter->szName, m_TextListIter->iGuildScore);
         g_pRenderText->RenderText(m_iPos_x + 60, m_iPos_y + 31 - 1, Dummy);
     }
 
@@ -5719,7 +5724,7 @@ BOOL CUICurQuestListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    wsprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%s", m_TextListIter->m_szText);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     return TRUE;
@@ -5877,7 +5882,7 @@ BOOL CUIQuestContentsListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    wsprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%s", m_TextListIter->m_szText);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text, GetWidth() - 18, 0, m_TextListIter->m_nSort);
 
     return TRUE;
@@ -6030,7 +6035,7 @@ BOOL CUIInGameShopListBox::RenderDataLine(int iLineNumber)
     wchar_t szItemName[MAX_TEXT_LENGTH];
     if (m_TextListIter->m_iNum > 1)
     {
-        wsprintf(szItemName, L"%s(%d)", m_TextListIter->m_szName, m_TextListIter->m_iNum);
+        swprintf(szItemName, L"%s(%d)", m_TextListIter->m_szName, m_TextListIter->m_iNum);
         g_pRenderText->RenderText(iPos_x, iPos_y, szItemName, 98, 0, RT3_SORT_LEFT);
     }
     else
@@ -6176,7 +6181,7 @@ BOOL CUIBuyingListBox::RenderDataLine(int iLineNumber)
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
     if (m_TextListIter->m_pszItemExplanation != nullptr)
     {
-        wsprintf(Text, L"%s", m_TextListIter->m_pszItemExplanation);
+        swprintf(Text, L"%s", m_TextListIter->m_pszItemExplanation);
         g_pRenderText->RenderText(iPos_x, iPos_y, Text);
     }
     DisableAlphaBlend();
@@ -6332,11 +6337,11 @@ BOOL CUIPackCheckBuyingListBox::RenderDataLine(int nLine)
         m_TextListIter->m_RadioBtn.RadiobuttonBoxRender();
 
         g_pRenderText->SetFont(g_hFontBold);
-        wsprintf(Text, L"%s", m_TextListIter->m_szItemName);
+        swprintf(Text, L"%s", m_TextListIter->m_szItemName);
         g_pRenderText->RenderText(iPos_x + 20, iPos_y + 5, Text);
 
         g_pRenderText->SetFont(g_hFont);
-        wsprintf(Text, L"%s", m_TextListIter->m_szAttribute);
+        swprintf(Text, L"%s", m_TextListIter->m_szAttribute);
         g_pRenderText->RenderText(iPos_x + 20, iPos_y + 17, Text);
     }
     DisableAlphaBlend();

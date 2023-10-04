@@ -3175,7 +3175,7 @@ void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
         }
 
         wchar_t szText[512];
-        wsprintf(szText, GlobalText[TextIndex]);
+        swprintf(szText, GlobalText[TextIndex]);
         CreateChat(c->ID, szText, c);
     }
 }
@@ -3764,8 +3764,8 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
     {
         wchar_t Text[100];
         wchar_t ID[100];
-        wsprintf(ID, L"%s .", c->ID);
-        wsprintf(Text, GlobalText[1176], c->Level);
+        swprintf(ID, L"%s .", c->ID);
+        swprintf(Text, GlobalText[1176], c->Level);
         wcscat(ID, Text);
         AddObjectDescription(ID, o->Position);
     }
@@ -12435,7 +12435,7 @@ void Setting_Monster(CHARACTER* c, int Type, int PositionX, int PositionY)
         else
             o->Kind = KIND_MONSTER;
         //c->Object.Kind = KIND_EDIT;
-        //wsprintf(c->ID,"%x",Key);
+        //swprintf(c->ID,"%x",Key);
         if (Type == 368 || Type == 369 || Type == 370)
             o->Kind = KIND_NPC;
         if (Type == 367
@@ -14409,7 +14409,7 @@ CHARACTER* CreateHellGate(BYTE* ID, int Key, int Index, int x, int y, int Create
     CHARACTER* portal = CreateMonster(Index, x, y, Key);
     portal->Level = Index - 152 + 1;
     wchar_t Text[100];
-    wsprintf(Text, portal->ID, ID);
+    swprintf(Text, portal->ID, ID);
 
     if (portal->Level == 7)
         portal->Object.SubType = 1;

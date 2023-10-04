@@ -972,7 +972,7 @@ struct SLIDEHELPTEXT
 {
     int iLevel;
     int iNumber;
-    wchar_t szSlideHelpText[32][256];
+    char szSlideHelpText[32][256];
 };
 
 struct SLIDEHELP

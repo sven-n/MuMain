@@ -125,7 +125,7 @@ bool CSQuest::OpenQuestScript(wchar_t* filename)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", filename);
+        swprintf(Text, L"%s - File not exist.", filename);
         return  FALSE;
     }
 
@@ -446,7 +446,11 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 {
     g_iCurrentDialogScript = iDialogIndex;
 
-    g_iNumLineMessageBoxCustom = SeparateTextIntoLines(g_DialogScript[g_iCurrentDialogScript].m_lpszText, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
+    wchar_t Text[300];
+    int wchars_num = MultiByteToWideChar(CP_UTF8, 0, g_DialogScript[g_iCurrentDialogScript].m_lpszText, -1, NULL, 0);
+    MultiByteToWideChar(CP_UTF8, 0, g_DialogScript[g_iCurrentDialogScript].m_lpszText, -1, Text, wchars_num);
+
+    g_iNumLineMessageBoxCustom = SeparateTextIntoLines(Text, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 
     wchar_t lpszAnswer[MAX_LENGTH_ANSWER + 8];
     g_iNumAnswer = 0;
@@ -456,7 +460,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     for (int i = 0; i < g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer; ++i)
     {
-        wsprintf(lpszAnswer, L"%d) %s", i + 1, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
+        swprintf(lpszAnswer, L"%d) %s", i + 1, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)
         {
@@ -468,7 +472,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     if (0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
     {
-        wsprintf(lpszAnswer, L"%d) %s", iTextSize + 1, GlobalText[609]);
+        swprintf(lpszAnswer, L"%d) %s", iTextSize + 1, GlobalText[609]);
         wcscpy(g_lpszDialogAnswer[0][0], lpszAnswer);
         g_iNumAnswer = 1;
     }
@@ -640,13 +644,13 @@ void CSQuest::RenderBloodCastle(void)
 
     g_pRenderText->SetTextColor(223, 191, 103, 255);
     g_pRenderText->SetBgColor(0);
-    wsprintf(Text, GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
+    swprintf(Text, GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 80, Text, 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->SetTextColor(255, 230, 210, 255);
     g_pRenderText->RenderText(m_iStartX + 85, m_iStartY + 100, GlobalText[877], 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->RenderText(m_iStartX + 105, m_iStartY + 120, GlobalText[878], 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetFont(g_hFontBig);
-    wsprintf(Text, GlobalText[868], m_byEventCount[m_byQuestType]);
+    swprintf(Text, GlobalText[868], m_byEventCount[m_byQuestType]);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 65 + 60 * 4, Text, 0, 0, RT3_WRITE_CENTER);
 }

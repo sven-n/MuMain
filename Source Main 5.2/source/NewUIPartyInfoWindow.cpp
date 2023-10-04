@@ -267,14 +267,14 @@ void CNewUIPartyInfoWindow::RenderMemberStatue(int iIndex, PARTY_t* pMember, boo
 
     g_pRenderText->RenderText(iPosX + 10, iPosY + 26, gMapManager.GetMapName(pMember->Map), 70, 0, RT3_SORT_LEFT);
 
-    wsprintf(szText, L"(%d,%d)", pMember->x, pMember->y);
+    swprintf(szText, L"(%d,%d)", pMember->x, pMember->y);
     g_pRenderText->RenderText(iPosX + 85, iPosY + 26, szText, 60, 0, RT3_SORT_LEFT);
 
     int iHP = (pMember->currHP * 147) / pMember->maxHP;
     RenderImage(IMAGE_PARTY_HPBAR_BACK, iPosX + 8, iPosY + 39, 151, 8);
     RenderImage(IMAGE_PARTY_HPBAR, iPosX + 10, iPosY + 41, iHP, 4);
 
-    wsprintf(szText, L"%d %s %d", pMember->currHP, GlobalText[2374], pMember->maxHP);
+    swprintf(szText, L"%d %s %d", pMember->currHP, GlobalText[2374], pMember->maxHP);
     g_pRenderText->RenderText(iPosX + 88, iPosY + 51, szText, 70, 0, RT3_SORT_RIGHT);
 
     if (bExitBtnRender)

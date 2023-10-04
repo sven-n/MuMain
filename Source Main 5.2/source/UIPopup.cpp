@@ -77,7 +77,7 @@ DWORD CUIPopup::SetPopup(const wchar_t* pszText, int nLineCount, int nBufferSize
         if (pszText[i * nBufferSize])
         {
             wcscpy(m_szPopupText[i], &pszText[i * nBufferSize]);
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], wcslen(m_szPopupText[i]), &sizeText);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], wcslen(m_szPopupText[i]), &sizeText);
             m_sizePopup.cy += sizeText.cy + 2;
         }
     }
@@ -488,7 +488,7 @@ void CUIPopup::Render()
         for (int i = 0; i < m_nPopupTextCount; ++i)
         {
             SIZE size;
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], wcslen(m_szPopupText[i]), &size);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], wcslen(m_szPopupText[i]), &size);
 
             size.cx /= g_fScreenRate_x;
             g_pRenderText->RenderText(320 - (size.cx / 2), fPosY, m_szPopupText[i], 0, 0, RT3_SORT_LEFT);

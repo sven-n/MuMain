@@ -91,7 +91,7 @@ public unsafe partial class ConnectionManager
       </xsl:when>
       <xsl:when test="not(pd:Length)">
         <xsl:apply-templates select="pd:Name" />
-        <xsl:text>Ref.GetRequiredSize((int)</xsl:text>
+        <xsl:text>Ref.GetRequiredSize(</xsl:text>
         <xsl:apply-templates select="pd:Fields/pd:Field[(pd:Type = 'Binary' or pd:Type = 'String') and not(pd:Length)]" mode="length"/>
         <xsl:text>)</xsl:text>
       </xsl:when>
@@ -118,10 +118,17 @@ public unsafe partial class ConnectionManager
     }</xsl:text>
   </xsl:template>
 
-  <xsl:template match="pd:Field" mode="length">
+  <xsl:template match="pd:Field[(pd:Type = 'Binary')]" mode="length">
+	  <xsl:text>(int)</xsl:text>
     <xsl:call-template name="LowerCaseName" />
     <xsl:text>ByteLength</xsl:text>
   </xsl:template>
+
+	<xsl:template match="pd:Field[(pd:Type = 'String')]" mode="length">
+		<xsl:text>Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@</xsl:text>
+		<xsl:call-template name="LowerCaseName" />
+		<xsl:text>)!)</xsl:text>
+	</xsl:template>
 
   <xsl:template match="pd:Field" mode="paramdoc">
     <xsl:value-of select="$newline"/>
@@ -143,7 +150,7 @@ public unsafe partial class ConnectionManager
 
     <xsl:text>&lt;/param&gt;</xsl:text>
     
-    <xsl:if test="(pd:Type = 'Binary') or (pd:Type = 'String')">
+    <xsl:if test="(pd:Type = 'Binary')">
         <xsl:value-of select="$newline"/>
     	<xsl:text>    /// &lt;param name="</xsl:text>
 		<xsl:call-template name="LowerCaseName" />
@@ -168,7 +175,7 @@ public unsafe partial class ConnectionManager
       <xsl:text> = </xsl:text>
       <xsl:value-of select="pd:DefaultValue"/>
     </xsl:if>
-    <xsl:if test="(pd:Type = 'Binary') or (pd:Type = 'String')">
+    <xsl:if test="(pd:Type = 'Binary')">
     	<xsl:text>, uint </xsl:text>
 		<xsl:call-template name="LowerCaseName" />
 		<xsl:text>ByteLength</xsl:text>
@@ -206,9 +213,7 @@ public unsafe partial class ConnectionManager
         <xsl:value-of select="pd:Name"/>
         <xsl:text> = Marshal.PtrToStringAuto(@</xsl:text>
         <xsl:call-template name="LowerCaseName" />
-        <xsl:text>, (int)</xsl:text>
-        <xsl:call-template name="LowerCaseName" />
-        <xsl:text>ByteLength);</xsl:text>
+        <xsl:text>);</xsl:text>
       </xsl:when>
       <xsl:when test="pd:Type='Binary'">
         <xsl:text>                packet.</xsl:text>

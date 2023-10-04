@@ -1189,6 +1189,9 @@
     <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Dotnet\PacketFunctions_Custom.cpp">
+      <Filter>MU\Dotnet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\BlackWin.h">
@@ -2273,6 +2276,9 @@
     </ClInclude>
     <ClInclude Include="source\ExternalObject\Leaf\xstreambuf.h">
       <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketFunctions_Custom.h">
+      <Filter>MU\Dotnet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

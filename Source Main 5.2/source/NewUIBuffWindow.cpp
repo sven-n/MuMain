@@ -289,7 +289,7 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
     {
         std::wstring& temp = *iter;
 
-        wsprintf(TextList[TextNum], temp.c_str());
+        swprintf(TextList[TextNum], temp.c_str());
 
         if (TextNum == 0)
         {
@@ -310,14 +310,14 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
 
     if (bufftime.size() != 0)
     {
-        wsprintf(TextList[TextNum], GlobalText[2533], bufftime.c_str());
+        swprintf(TextList[TextNum], GlobalText[2533], bufftime.c_str());
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum += 1;
     }
 
     SIZE TextSize = { 0, 0 };
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
     RenderTipTextList(x, y, TextNum, 0);
 }
 

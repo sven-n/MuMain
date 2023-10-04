@@ -25,11 +25,11 @@ void CLoadData::AccessModel(int Type, wchar_t* Dir, wchar_t* FileName, int i)
 {
     wchar_t Name[64];
     if (i == -1)
-        wsprintf(Name, L"%s.bmd", FileName);
+        swprintf(Name, L"%s.bmd", FileName);
     else if (i < 10)
-        wsprintf(Name, L"%s0%d.bmd", FileName, i);
+        swprintf(Name, L"%s0%d.bmd", FileName, i);
     else
-        wsprintf(Name, L"%s%d.bmd", FileName, i);
+        swprintf(Name, L"%s%d.bmd", FileName, i);
 
     bool Success = false;
 
@@ -40,7 +40,7 @@ void CLoadData::AccessModel(int Type, wchar_t* Dir, wchar_t* FileName, int i)
     if (Success == false && (wcscmp(FileName, L"Monster") == NULL || wcscmp(FileName, L"Player") == NULL || wcscmp(FileName, L"PlayerTest") == NULL || wcscmp(FileName, L"Angel") == NULL))
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s file does not exist.", Name);
+        swprintf(Text, L"%s file does not exist.", Name);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
@@ -58,7 +58,6 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
         auto* textureFileName = new wchar_t[wchars_num];
         MultiByteToWideChar(CP_UTF8, 0, pTexture->FileName, -1, textureFileName, wchars_num);
 
-        // todo convert texture filename
         wchar_t szFullPath[256] = { 0, };
         wcscpy(szFullPath, L"Data\\");
         wcscat(szFullPath, SubFolder);
@@ -102,7 +101,7 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
             else
             {
                 wchar_t szErrorMsg[256] = { 0, };
-                wsprintf(szErrorMsg, L"OpenTexture Failed: %s of %s", szFullPath, pModel->Name);
+                swprintf(szErrorMsg, L"OpenTexture Failed: %s of %s", szFullPath, pModel->Name);
 #ifdef FOR_WORK
                 PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK

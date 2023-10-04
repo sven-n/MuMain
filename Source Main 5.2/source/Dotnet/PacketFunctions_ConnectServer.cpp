@@ -18,45 +18,45 @@
 
 void PacketFunctions_ConnectServer::SendConnectionInfoRequest075(BYTE serverId)
 {
-    dotnet_SendConnectionInfoRequest075(this->_handle, serverId);
+    dotnet_SendConnectionInfoRequest075(this->GetHandle(), serverId);
 }
 
 void PacketFunctions_ConnectServer::SendConnectionInfoRequest(uint16_t serverId)
 {
-    dotnet_SendConnectionInfoRequest(this->_handle, serverId);
+    dotnet_SendConnectionInfoRequest(this->GetHandle(), serverId);
 }
 
-void PacketFunctions_ConnectServer::SendConnectionInfo(const wchar_t* ipAddress, uint32_t ipAddressByteLength, uint16_t port)
+void PacketFunctions_ConnectServer::SendConnectionInfo(const wchar_t* ipAddress, uint16_t port)
 {
-    dotnet_SendConnectionInfo(this->_handle, ipAddress, ipAddressByteLength, port);
+    dotnet_SendConnectionInfo(this->GetHandle(), ipAddress, port);
 }
 
 void PacketFunctions_ConnectServer::SendServerListRequest()
 {
-    dotnet_SendServerListRequest(this->_handle);
+    dotnet_SendServerListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ConnectServer::SendServerListRequestOld()
 {
-    dotnet_SendServerListRequestOld(this->_handle);
+    dotnet_SendServerListRequestOld(this->GetHandle());
 }
 
 void PacketFunctions_ConnectServer::SendHello()
 {
-    dotnet_SendHello(this->_handle);
+    dotnet_SendHello(this->GetHandle());
 }
 
 void PacketFunctions_ConnectServer::SendPatchCheckRequest(BYTE majorVersion, BYTE minorVersion, BYTE patchVersion)
 {
-    dotnet_SendPatchCheckRequest(this->_handle, majorVersion, minorVersion, patchVersion);
+    dotnet_SendPatchCheckRequest(this->GetHandle(), majorVersion, minorVersion, patchVersion);
 }
 
 void PacketFunctions_ConnectServer::SendPatchVersionOkay()
 {
-    dotnet_SendPatchVersionOkay(this->_handle);
+    dotnet_SendPatchVersionOkay(this->GetHandle());
 }
 
-void PacketFunctions_ConnectServer::SendClientNeedsPatch(BYTE patchVersion, const wchar_t* patchAddress, uint32_t patchAddressByteLength)
+void PacketFunctions_ConnectServer::SendClientNeedsPatch(BYTE patchVersion, const wchar_t* patchAddress)
 {
-    dotnet_SendClientNeedsPatch(this->_handle, patchVersion, patchAddress, patchAddressByteLength);
+    dotnet_SendClientNeedsPatch(this->GetHandle(), patchVersion, patchAddress);
 }

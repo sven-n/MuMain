@@ -69,7 +69,7 @@ void CMsgBoxIGSUseItemConfirm::Initialize(int iStorageSeq, int iStorageItemSeq, 
     wcscpy(m_szItemName, pszItemName);
 
     // Description
-    wsprintf(szText, GlobalText[2923], pszItemName);
+    swprintf(szText, GlobalText[2923], pszItemName);
     m_iDesciptionLine = ::DivideStringByPixel(&m_szDescription[0][0], UIMAX_TEXT_LINE, MAX_TEXT_LENGTH, szText, IGS_TEXT_DIVIDE_WIDTH, false, '#');
 }
 
@@ -249,13 +249,13 @@ void CMsgBoxIGSUseItemConfirm::RenderTexts()
 #ifdef FOR_WORK
     wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
-    wsprintf(szText, L"m_iStorageSeq : %d", m_iStorageSeq);
+    swprintf(szText, L"m_iStorageSeq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"m_iStorageItemSeq : %d", m_iStorageItemSeq);
+    swprintf(szText, L"m_iStorageItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"m_wItemCode : %d", m_wItemCode);
+    swprintf(szText, L"m_wItemCode : %d", m_wItemCode);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"m_szItemType : %c", m_szItemType);
+    swprintf(szText, L"m_szItemType : %c", m_szItemType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }

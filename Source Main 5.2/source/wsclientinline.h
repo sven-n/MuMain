@@ -184,7 +184,7 @@ __forceinline void SendRequestLogIn(wchar_t* p_lpszID, wchar_t* p_lpszPassword)
 	wcscpy(LogInID, ( p_lpszID));
 	CurrentProtocolState = REQUEST_LOG_IN;
 
-    //SocketClient->ToGameServer()->SendLoginLongPasswordStr(p_lpszID, p_lpszPassword, GetTickCount(), Version, Serial);
+    SocketClient->ToGameServer()->SendLogin(p_lpszID, p_lpszPassword, Version, Serial);
 	
 	g_pChatListBox->AddText(L"",GlobalText[472],SEASON3B::TYPE_SYSTEM_MESSAGE);\
 	g_pChatListBox->AddText(L"",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
@@ -207,50 +207,50 @@ extern wchar_t Password[MAX_ID_SIZE + 1];
 extern wchar_t QuestionID[MAX_ID_SIZE + 1];
 extern wchar_t Question[31];
 
-#define SendRequestCharactersList( byLanguage)\
-{\
-	CurrentProtocolState = REQUEST_CHARACTERS_LIST;\
-	CStreamPacketEngine spe;\
-	spe.Init(0xC1, 0xF3);\
-	spe << (BYTE)0x00;\
-	spe << (BYTE)byLanguage;\
-	spe.Send();\
-}
+//#define SendRequestCharactersList( byLanguage)\
+//{\
+//	CurrentProtocolState = REQUEST_CHARACTERS_LIST;\
+//	CStreamPacketEngine spe;\
+//	spe.Init(0xC1, 0xF3);\
+//	spe << (BYTE)0x00;\
+//	spe << (BYTE)byLanguage;\
+//	spe.Send();\
+//}
 
-#define SendRequestCreateCharacter( p_ID, p_Class, p_Skin)\
-{\
-	CurrentProtocolState = REQUEST_CREATE_CHARACTER;\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF3);\
-	spe << ( BYTE)0x01;\
-	spe.AddData( ( p_ID), wcslen( p_ID));\
-	spe.AddNullData( MAX_ID_SIZE - wcslen( p_ID));\
-	spe << ( BYTE)( (( p_Class)<<4)+( p_Skin));\
-	spe.Send();\
-}
+//#define SendRequestCreateCharacter( p_ID, p_Class, p_Skin)\
+//{\
+//	CurrentProtocolState = REQUEST_CREATE_CHARACTER;\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xF3);\
+//	spe << ( BYTE)0x01;\
+//	spe.AddData( ( p_ID), wcslen( p_ID));\
+//	spe.AddNullData( MAX_ID_SIZE - wcslen( p_ID));\
+//	spe << ( BYTE)( (( p_Class)<<4)+( p_Skin));\
+//	spe.Send();\
+//}
 
-#define SendRequestDeleteCharacter( p_ID, p_Resident)\
-{\
-	CurrentProtocolState = REQUEST_DELETE_CHARACTER;\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF3);\
-	spe << ( BYTE)0x02;\
-	spe.AddData( ( p_ID), wcslen( p_ID));\
-	spe.AddNullData( MAX_ID_SIZE - wcslen( p_ID));\
-	spe.AddData( ( p_Resident), 20);\
-	spe.Send();\
-}
+//#define SendRequestDeleteCharacter( p_ID, p_Resident)\
+//{\
+//	CurrentProtocolState = REQUEST_DELETE_CHARACTER;\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xF3);\
+//	spe << ( BYTE)0x02;\
+//	spe.AddData( ( p_ID), wcslen( p_ID));\
+//	spe.AddNullData( MAX_ID_SIZE - wcslen( p_ID));\
+//	spe.AddData( ( p_Resident), 20);\
+//	spe.Send();\
+//}
 
-#define SendRequestJoinMapServer( p_ID)\
-{\
-	CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF3);\
-	spe << ( BYTE)0x03;\
-	spe.AddData( ( p_ID), wcslen( ( p_ID)));\
-	spe.AddNullData( MAX_ID_SIZE - wcslen( ( p_ID)));\
-	spe.Send();\
-}
+//#define SendRequestJoinMapServer( p_ID)\
+//{\
+//	CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xF3);\
+//	spe << ( BYTE)0x03;\
+//	spe.AddData( ( p_ID), wcslen( ( p_ID)));\
+//	spe.AddNullData( MAX_ID_SIZE - wcslen( ( p_ID)));\
+//	spe.Send();\
+//}
 
 extern BOOL g_bWhileMovingZone;
 extern DWORD g_dwLatestZoneMoving;
@@ -274,7 +274,7 @@ inline bool IsWebzenCharacter()
 
 	return character_name.find(L"webzen") >= 0;
 }
-
+/*
 __forceinline void SendChat(const std::wstring& chat_text)
 {
 	chat_text.copy(ChatText, chat_text.length());
@@ -316,24 +316,24 @@ __forceinline void SendChat(const std::wstring& chat_text)
     //spe.AddData(Hero->ID, MAX_ID_SIZE);
     //spe.AddData((void*)Text, (WORD)min(wcslen(Text) + 1, MAX_CHAT_SIZE));
     //spe.Send();
-}
+}*/
 
-extern wchar_t ChatWhisperID[MAX_ID_SIZE + 1];
-
-#define SendChatWhisper( p_TargetID, p_Text)\
-{\
-    if(!IsWebzenCharacter())\
-	{\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC1, 0x02);\
-		spe.AddData( ( p_TargetID), MAX_ID_SIZE);\
-		spe.AddData( ( p_Text), min( wcslen( p_Text) + 1, MAX_CHAT_SIZE));\
-		spe.Send();\
-\
-		memcpy(ChatWhisperID, ( p_TargetID),MAX_ID_SIZE);\
-		ChatWhisperID[MAX_ID_SIZE] = NULL;\
-	}\
-}
+//extern wchar_t ChatWhisperID[MAX_ID_SIZE + 1];
+//
+//#define SendChatWhisper( p_TargetID, p_Text)\
+//{\
+//    if(!IsWebzenCharacter())\
+//	{\
+//		CStreamPacketEngine spe;\
+//		spe.Init( 0xC1, 0x02);\
+//		spe.AddData( ( p_TargetID), MAX_ID_SIZE);\
+//		spe.AddData( ( p_Text), min( wcslen( p_Text) + 1, MAX_CHAT_SIZE));\
+//		spe.Send();\
+//\
+//		memcpy(ChatWhisperID, ( p_TargetID),MAX_ID_SIZE);\
+//		ChatWhisperID[MAX_ID_SIZE] = NULL;\
+//	}\
+//}
 
 #define SendPosition( p_x, p_y)\
 {\
@@ -1073,7 +1073,7 @@ extern int SendDropItem;
 		spe.Send();\
 \
 		wchar_t Text[100];\
-		wsprintf(Text,GlobalText[475],CharactersClient[FindCharacterIndex(p_Key)].ID);\
+		swprintf(Text,GlobalText[475],CharactersClient[FindCharacterIndex(p_Key)].ID);\
 		g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);\
 	}\
 }
@@ -1168,7 +1168,7 @@ __forceinline bool SendRequestStorageExit()
 		spe.Send();\
 \
 		wchar_t Text[100];\
-		wsprintf(Text,GlobalText[476],CharactersClient[FindCharacterIndex(p_Key)].ID);\
+		swprintf(Text,GlobalText[476],CharactersClient[FindCharacterIndex(p_Key)].ID);\
 		g_pChatListBox->AddText(L"",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
 	}\
 }
@@ -1233,13 +1233,13 @@ __forceinline bool SendRequestStorageExit()
 	spe.Send();\
 	char szTmp[100];\
 	if( RelationType == 0x01 && RequestType == 0x01 )\
-		wsprintf(szTmp,GlobalText[1358],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
+		swprintf(szTmp,GlobalText[1358],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
 	else if( RelationType == 0x01 && RequestType == 0x02 )\
-		wsprintf(szTmp,GlobalText[1387]);\
+		swprintf(szTmp,GlobalText[1387]);\
 	else if( RelationType == 0x02 && RequestType == 0x01 )\
-		wsprintf(szTmp,GlobalText[1359],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
+		swprintf(szTmp,GlobalText[1359],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
 	else if( RelationType == 0x02 && RequestType == 0x02 )\
-		wsprintf(szTmp,GlobalText[1360],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
+		swprintf(szTmp,GlobalText[1360],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
 	g_pChatListBox->AddText(L"",szTmp,SEASON3B::TYPE_SYSTEM_MESSAGE);\
 }
 
@@ -1290,7 +1290,7 @@ __forceinline bool SendRequestStorageExit()
 		spe.Send();\
 \
 		wchar_t Text[100];\
-		wsprintf(Text,GlobalText[477],CharactersClient[FindCharacterIndex(p_Key)].ID);\
+		swprintf(Text,GlobalText[477],CharactersClient[FindCharacterIndex(p_Key)].ID);\
 		g_pChatListBox->AddText(L"",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
 	}\
 }

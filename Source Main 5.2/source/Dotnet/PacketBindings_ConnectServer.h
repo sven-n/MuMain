@@ -25,7 +25,7 @@ inline SendConnectionInfoRequest075 dotnet_SendConnectionInfoRequest075 = reinte
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendConnectionInfoRequest)(int32_t, uint16_t );
 inline SendConnectionInfoRequest dotnet_SendConnectionInfoRequest = reinterpret_cast<SendConnectionInfoRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendConnectionInfoRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendConnectionInfo)(int32_t, const wchar_t* , uint32_t, uint16_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendConnectionInfo)(int32_t, const wchar_t* , uint16_t );
 inline SendConnectionInfo dotnet_SendConnectionInfo = reinterpret_cast<SendConnectionInfo>(g_dotnet->get_method(type_name_connection_manager, L"SendConnectionInfo"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendServerListRequest)(int32_t);
@@ -43,5 +43,5 @@ inline SendPatchCheckRequest dotnet_SendPatchCheckRequest = reinterpret_cast<Sen
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPatchVersionOkay)(int32_t);
 inline SendPatchVersionOkay dotnet_SendPatchVersionOkay = reinterpret_cast<SendPatchVersionOkay>(g_dotnet->get_method(type_name_connection_manager, L"SendPatchVersionOkay"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendClientNeedsPatch)(int32_t, BYTE , const wchar_t* , uint32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendClientNeedsPatch)(int32_t, BYTE , const wchar_t* );
 inline SendClientNeedsPatch dotnet_SendClientNeedsPatch = reinterpret_cast<SendClientNeedsPatch>(g_dotnet->get_method(type_name_connection_manager, L"SendClientNeedsPatch"));

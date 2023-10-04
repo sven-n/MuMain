@@ -2638,8 +2638,8 @@ bool BMD::Open(wchar_t* DirName, wchar_t* ModelFileName)
 
     int Size;
     int DataPtr = 3;
-    Version = *((wchar_t*)(Data + DataPtr)); DataPtr += 1;
-    memcpy(Name, Data + DataPtr, 32); DataPtr += 32;
+    Version = *((char*)(Data + DataPtr)); DataPtr += 1;
+    memcpy(Name, Data + DataPtr, 32); DataPtr += 32 * sizeof(char);
     NumMeshs = *((short*)(Data + DataPtr)); DataPtr += 2;
     NumBones = *((short*)(Data + DataPtr)); DataPtr += 2;
     NumActions = *((short*)(Data + DataPtr)); DataPtr += 2;
@@ -2849,7 +2849,7 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
 
     int Size;
     int DataPtr = 3;
-    Version = *((wchar_t*)(Data + DataPtr)); DataPtr += 1;
+    Version = *((char*)(Data + DataPtr)); DataPtr += 1;
     if (Version == 12)
     {
         long lSize = *((long*)(Data + DataPtr)); DataPtr += sizeof(long);
@@ -2943,7 +2943,7 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     for (i = 0; i < NumBones; i++)
     {
         Bone_t* b = &Bones[i];
-        b->Dummy = *((wchar_t*)(Data + DataPtr)); DataPtr += 1;
+        b->Dummy = *((char*)(Data + DataPtr)); DataPtr += 1;
         if (!b->Dummy)
         {
             memcpy(b->Name, Data + DataPtr, 32); DataPtr += 32;

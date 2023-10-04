@@ -51,7 +51,7 @@ void CServerListManager::LoadServerListScript()
     if (fp == NULL)
     {
         wchar_t szMessage[256];
-        ::wsprintf(szMessage, L"Data\\Local\\ServerList.bmd file not found.\r\n");
+        ::swprintf(szMessage, L"Data\\Local\\ServerList.bmd file not found.\r\n");
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -62,7 +62,7 @@ void CServerListManager::LoadServerListScript()
     typedef struct _SERVER_GROUP_INFO
     {
         WORD	m_wIndex;
-        wchar_t	m_szName[SLM_MAX_SERVER_NAME_LENGTH];
+        char	m_szName[SLM_MAX_SERVER_NAME_LENGTH];
         BYTE	m_byPos;
         BYTE	m_bySequence;
         BYTE	m_abyNonPVP[SLM_MAX_SERVER_COUNT];
@@ -72,7 +72,7 @@ void CServerListManager::LoadServerListScript()
 
     int nSize = sizeof(SERVER_GROUP_INFO);
     SERVER_GROUP_INFO sServerGroupScript;
-    wchar_t szDescript[1024];
+    char szDescript[1024];
     SServerGroupInfo sServerGroupInfo;
     int i;
 
@@ -81,12 +81,22 @@ void CServerListManager::LoadServerListScript()
         BuxConvert((BYTE*)&sServerGroupScript, nSize);
         ::fread(szDescript, sServerGroupScript.m_nDescriptLen, 1, fp);
         BuxConvert((BYTE*)szDescript, sServerGroupScript.m_nDescriptLen);
-        ::wcsncpy(sServerGroupInfo.m_szName, sServerGroupScript.m_szName, SLM_MAX_SERVER_NAME_LENGTH);
+
+        // ::wcsncpy(sServerGroupInfo.m_szName, sServerGroupScript.m_szName, SLM_MAX_SERVER_NAME_LENGTH);
+        int wchars_num = MultiByteToWideChar(CP_UTF8, 0, sServerGroupScript.m_szName, -1, NULL, 0);
+        MultiByteToWideChar(CP_UTF8, 0, sServerGroupScript.m_szName, -1, sServerGroupInfo.m_szName, wchars_num);
+        //sServerGroupInfo.m_szName[wchars_num] = L'\0';
+
+
         sServerGroupInfo.m_byPos = sServerGroupScript.m_byPos;
         sServerGroupInfo.m_bySequence = sServerGroupScript.m_bySequence;
         for (i = 0; i < SLM_MAX_SERVER_COUNT; ++i)
             sServerGroupInfo.m_abyNonPVP[i] = sServerGroupScript.m_abyNonPVP[i];
-        sServerGroupInfo.m_strDescript = szDescript;
+
+        //wchars_num = MultiByteToWideChar(CP_UTF8, 0, sServerGroupScript., -1, NULL, 0);
+        //MultiByteToWideChar(CP_UTF8, 0, sServerGroupScript.m_szName, -1, sServerGroupInfo.m_szName, wchars_num);
+        
+        //sServerGroupInfo.m_strDescript = szDescript;
 
         m_mapServerListScript.insert(std::make_pair(sServerGroupScript.m_wIndex, sServerGroupInfo));
     }
@@ -191,22 +201,22 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     switch (pServerInfo->m_byNonPvP)
     {
     case 0:
-        wsprintf(pServerInfo->m_bName, L"%s-%d %s", pServerGroup->m_szName,
+        swprintf(pServerInfo->m_bName, L"%s-%d %s", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 1:
-        wsprintf(pServerInfo->m_bName, L"%s-%d(Non-PVP) %s", pServerGroup->m_szName,
+        swprintf(pServerInfo->m_bName, L"%s-%d(Non-PVP) %s", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 2:
-        wsprintf(pServerInfo->m_bName, L"%s-%d(Gold PVP) %s", pServerGroup->m_szName,
+        swprintf(pServerInfo->m_bName, L"%s-%d(Gold PVP) %s", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 3:
-        wsprintf(pServerInfo->m_bName, L"%s-%d(Gold) %s", pServerGroup->m_szName,
+        swprintf(pServerInfo->m_bName, L"%s-%d(Gold) %s", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
     }

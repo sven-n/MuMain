@@ -275,11 +275,11 @@ void CNewUITrade::RenderText()
     ConvertYourLevel(nLevel, dwColor);
     if (nLevel == 400)
     {
-        wsprintf(szTemp, L"%d", nLevel);
+        swprintf(szTemp, L"%d", nLevel);
     }
     else
     {
-        wsprintf(szTemp, GlobalText[369], nLevel);
+        swprintf(szTemp, GlobalText[369], nLevel);
     }
     g_pRenderText->SetTextColor(dwColor);
     g_pRenderText->RenderText(m_Pos.x + 134, m_Pos.y + 48, L"Lv.");
@@ -585,7 +585,7 @@ void CNewUITrade::GetYourID(wchar_t* pszYourID)
     ::wcscpy(pszYourID, m_szYourID);
 }
 
-void CNewUITrade::ProcessToReceiveTradeRequest(BYTE* pbyYourID)
+void CNewUITrade::ProcessToReceiveTradeRequest(char* pbyYourID)
 {
     if (g_pNewUISystem->IsImpossibleTradeInterface())
     {
@@ -593,8 +593,7 @@ void CNewUITrade::ProcessToReceiveTradeRequest(BYTE* pbyYourID)
         return;
     }
 
-    ::memcpy(m_szYourID, pbyYourID, MAX_ID_SIZE);
-    m_szYourID[MAX_ID_SIZE] = NULL;
+    CMultiLanguage::ConvertFromUtf8(m_szYourID, pbyYourID);
 
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CTradeMsgBoxLayout));
 

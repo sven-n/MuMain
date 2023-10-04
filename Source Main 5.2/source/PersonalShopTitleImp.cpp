@@ -458,7 +458,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxContent(const std::wstring&
     m_fulltitle = title;
 
     g_pRenderText->SetFont(g_hFontBold);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], GlobalText.GetStringSize(1104), &m_icon);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], GlobalText.GetStringSize(1104), &m_icon);
 
     SeparateShopTitle(title, m_topTitle, m_bottomTitle);
     CalculateBooleanSize(name, m_topTitle, m_bottomTitle, m_size);
@@ -594,10 +594,10 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::CalculateBooleanSize(IN const std
 {
     SIZE text_size[3];
     g_pRenderText->SetFont(g_hFontBold);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), name.c_str(), name.size(), &text_size[0]);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), name.c_str(), name.size(), &text_size[0]);
     g_pRenderText->SetFont(g_hFont);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), topTitle.c_str(), topTitle.size(), &text_size[1]);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), bottomTitle.c_str(), bottomTitle.size(), &text_size[2]);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), topTitle.c_str(), topTitle.size(), &text_size[1]);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), bottomTitle.c_str(), bottomTitle.size(), &text_size[2]);
 
     int maxWidth, maxHeight;
     if (!bottomTitle.empty())

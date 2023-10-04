@@ -115,7 +115,7 @@ void RenderAppoint()
     g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24 + 25 - 3, GlobalText[1312], 170, 0, RT3_SORT_CENTER);
 
     wchar_t Text[64];
-    wsprintf(Text, GlobalText[1314], s_szTargetID, (s_eAppointType == APPOINT_SUBGUILDMASTER ? GlobalText[1301] : GlobalText[1302]));
+    swprintf(Text, GlobalText[1314], s_szTargetID, (s_eAppointType == APPOINT_SUBGUILDMASTER ? GlobalText[1301] : GlobalText[1302]));
 
     g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24 + 25 * 2 + 1, Text, 170, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24 + 25 * 2 + 1 + 18, GlobalText[1315], 170, 0, RT3_SORT_CENTER);
@@ -292,10 +292,10 @@ void CUIGuildInfo::RenderGuildInfoTab()
     RenderGoldRect(ptOrigin.x, ptOrigin.y, 140, 62);
     ptOrigin.x += 5;
     ptOrigin.y += 8;
-    wsprintf(szTemp, L"%s :", GlobalText[1332]);
+    swprintf(szTemp, L"%s :", GlobalText[1332]);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
     ptOrigin.y += 13;
-    wsprintf(szTemp, GlobalText[1256], GuildTotalScore);
+    swprintf(szTemp, GlobalText[1256], GuildTotalScore);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
     ptOrigin.y += 13;
@@ -306,19 +306,19 @@ void CUIGuildInfo::RenderGuildInfoTab()
         {
             int nCount = CharacterAttribute->Level / 10 + CharacterAttribute->Charisma / 10;
             if (nCount > 80)	nCount = 80;
-            wsprintf(szTemp, GlobalText[1362], g_nGuildMemberCount, nCount);
+            swprintf(szTemp, GlobalText[1362], g_nGuildMemberCount, nCount);
         }
         else
-            wsprintf(szTemp, GlobalText[1362], g_nGuildMemberCount, CharacterAttribute->Level / 10);
+            swprintf(szTemp, GlobalText[1362], g_nGuildMemberCount, CharacterAttribute->Level / 10);
     }
     else
     {
-        wsprintf(szTemp, GlobalText[1310], g_nGuildMemberCount);
+        swprintf(szTemp, GlobalText[1310], g_nGuildMemberCount);
     }
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
     ptOrigin.y += 13;
-    wsprintf(szTemp, L"%s : %s", GlobalText[1321], m_szRivalGuildName[0] ? m_szRivalGuildName : GlobalText[1361]);
+    swprintf(szTemp, L"%s : %s", GlobalText[1321], m_szRivalGuildName[0] ? m_szRivalGuildName : GlobalText[1361]);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
     ptOrigin.x -= 5;
@@ -373,7 +373,7 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
                 {
                     wchar_t szText[2][64];
                     GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText();
-                    wsprintf(szText[0], GlobalText[1367], pText->m_szID);
+                    swprintf(szText[0], GlobalText[1367], pText->m_szID);
                     wcscpy(szText[1], GlobalText[1368]);
 
                     if (GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText())
@@ -398,7 +398,7 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
                     }
 
                     wchar_t szText[2][64];
-                    wsprintf(szText[0], GlobalText[1367], pText->m_szID);
+                    swprintf(szText[0], GlobalText[1367], pText->m_szID);
                     wcscpy(szText[1], GlobalText[1369]);
                     m_dwPopupID = g_pUIPopup->SetPopup(&szText[0][0], 2, 64, POPUP_YESNO, ::DoFireAction);
                 }
@@ -461,7 +461,7 @@ void CUIGuildInfo::DoGuildUnionMouseAction()
                     {
                         wchar_t szText[2][64];
 
-                        wsprintf(szText[0], GlobalText[1423], pText->szName);
+                        swprintf(szText[0], GlobalText[1423], pText->szName);
                         wcscpy(szText[1], GlobalText[1369]);
                         wcscpy(s_szTargetID, pText->szName);
 
@@ -668,7 +668,7 @@ void CUIGuildInfo::Render()
         ptOrigin.x = GetPosition_x() + 35;
         ptOrigin.y = GetPosition_y() + 53;
         g_pRenderText->SetTextColor(200, 255, 100, 255);
-        wsprintf(szTemp, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
+        swprintf(szTemp, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 120, 0, RT3_SORT_CENTER);
     }
 

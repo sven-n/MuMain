@@ -241,41 +241,41 @@ void CNewUIGoldBowmanWindow::RenderTexts()
     wchar_t Text[100];
 
     memset(&Text, 0, sizeof(char) * 100);
-    wsprintf(Text, getMonsterName(236)); // npc Name file
+    swprintf(Text, getMonsterName(236)); // npc Name file
     RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    wsprintf(Text, GlobalText[891]); //"100%%
+    swprintf(Text, GlobalText[891]); //"100%%
     RenderText(Text, m_Pos.x, m_Pos.y + 80, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    wsprintf(Text, GlobalText[892]);
+    swprintf(Text, GlobalText[892]);
     RenderText(Text, m_Pos.x, m_Pos.y + 95, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    wsprintf(Text, GlobalText[897]);
+    swprintf(Text, GlobalText[897]);
     RenderText(Text, m_Pos.x, m_Pos.y + 110, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    wsprintf(Text, GlobalText[898]);
+    swprintf(Text, GlobalText[898]);
     RenderText(Text, m_Pos.x, m_Pos.y + 125, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     /////////////////////////////// bottom text /////////////////////////////////////////////////////
 
     memset(&Text, 0, sizeof(char) * 100);
-    wsprintf(Text, GlobalText[893]);
+    swprintf(Text, GlobalText[893]);
     RenderText(Text, m_Pos.x, m_Pos.y + 180, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    wsprintf(Text, GlobalText[894]);
+    swprintf(Text, GlobalText[894]);
     RenderText(Text, m_Pos.x, m_Pos.y + 195, 190, 0, 0xFF18FF00, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    wsprintf(Text, GlobalText[916]);
+    swprintf(Text, GlobalText[916]);
     RenderText(Text, m_Pos.x, m_Pos.y + 210, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    wsprintf(Text, GlobalText[917]);
+    swprintf(Text, GlobalText[917]);
     RenderText(Text, m_Pos.x, m_Pos.y + 225, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     if (wcscmp(g_strGiftName, L""))

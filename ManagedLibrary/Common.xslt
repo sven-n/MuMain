@@ -158,7 +158,7 @@
       <xsl:text> = </xsl:text>
       <xsl:value-of select="pd:DefaultValue"/>
     </xsl:if>
-    <xsl:if test="(pd:Type = 'Binary') or (pd:Type = 'String')">
+    <xsl:if test="(pd:Type = 'Binary')">
     	<xsl:text>, uint32_t </xsl:text>
 		<xsl:call-template name="LowerCaseName" />
 		<xsl:text>ByteLength</xsl:text>
@@ -172,7 +172,7 @@
 	  <xsl:apply-templates select="pd:Type" mode="nativetype"/>
 	  <xsl:text> </xsl:text>
 	  <xsl:call-template name="LowerCaseName" />
-	  <xsl:if test="(pd:Type = 'Binary') or (pd:Type = 'String')">
+	  <xsl:if test="(pd:Type = 'Binary')">
 		  <xsl:text>, uint32_t </xsl:text>
 		  <xsl:call-template name="LowerCaseName" />
 		  <xsl:text>ByteLength</xsl:text>
@@ -184,7 +184,7 @@
     <xsl:text>, </xsl:text>
 	  <xsl:apply-templates select="pd:Type" mode="nativetype"/>
 	  <xsl:text> </xsl:text>
-	  <xsl:if test="(pd:Type = 'Binary') or (pd:Type = 'String')">
+	  <xsl:if test="(pd:Type = 'Binary')">
 		  <xsl:text>, uint32_t</xsl:text>
 	  </xsl:if>
   </xsl:template>

@@ -25,19 +25,15 @@
 #pragma once
 
 #include "stdafx.h"
-
+#include "PacketFunctions_Custom.h"
 #include &lt;coreclr_delegates.h&gt;
 
 /// &lt;summary&gt;
 /// Extension methods to start writing messages of this namespace on a &lt;see cref="Connection"/&gt;.
 /// &lt;/summary&gt;
-class PacketFunctions_</xsl:text><xsl:value-of select="$subNamespace"/><xsl:text>
+class PacketFunctions_</xsl:text><xsl:value-of select="$subNamespace"/><xsl:text> : public PacketFunctions_</xsl:text><xsl:value-of select="$subNamespace"/><xsl:text>_Custom
 {
-private:
-    int32_t _handle;
-public:
-    void SetHandle(int32_t handle) { _handle = handle; }
-</xsl:text>
+public:</xsl:text>
     <xsl:apply-templates select="pd:Packets/pd:Packet" mode="function_header" />
     <xsl:text>
 };</xsl:text>
@@ -83,7 +79,7 @@ public:
     </xsl:choose>
 
     <xsl:text>&lt;/param&gt;</xsl:text>
-    <xsl:if test="(pd:Type = 'Binary') or (pd:Type = 'String')">
+    <xsl:if test="(pd:Type = 'Binary')">
       <xsl:value-of select="$newline"/>
       <xsl:text>    /// &lt;param name="</xsl:text>
       <xsl:call-template name="LowerCaseName" />

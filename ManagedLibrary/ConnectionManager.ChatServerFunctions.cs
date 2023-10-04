@@ -39,13 +39,12 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="roomId">The room id.</param>
     /// <param name="token">A token (integer number), formatted as string. This value is also "encrypted" with the 3-byte XOR key (FC CF AB).</param>
-    /// <param name="tokenByteLength">The length of <paramref name="token"/>.</param>
     /// <remarks>
     /// Is sent by the client when: This packet is sent by the client after it connected to the server, to authenticate itself.
     /// Causes reaction on server side: The server will check the token. If it's correct, the client gets added to the requested chat room.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendAuthenticate(int handle, ushort @roomId, IntPtr @token, uint tokenByteLength)
+    public static void SendAuthenticate(int handle, ushort @roomId, IntPtr @token)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -59,7 +58,7 @@ public unsafe partial class ConnectionManager
                 var length = AuthenticateRef.Length;
                 var packet = new AuthenticateRef(pipeWriter.GetSpan(length)[..length]);
                 packet.RoomId = @roomId;
-                packet.Token = Marshal.PtrToStringAuto(@token, (int)tokenByteLength);
+                packet.Token = Marshal.PtrToStringAuto(@token);
 
                 return length;
             });
@@ -76,13 +75,12 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="clientIndex">The client index.</param>
     /// <param name="name">The name.</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/>.</param>
     /// <remarks>
     /// Is sent by the server when: This packet is sent by the server after another chat client joined the chat room.
     /// Causes reaction on client side: The client will add the client in its list (if over 2 clients are connected to the same room), or show its name in the title bar.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendChatRoomClientJoined(int handle, byte @clientIndex, IntPtr @name, uint nameByteLength)
+    public static void SendChatRoomClientJoined(int handle, byte @clientIndex, IntPtr @name)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -96,7 +94,7 @@ public unsafe partial class ConnectionManager
                 var length = ChatRoomClientJoinedRef.Length;
                 var packet = new ChatRoomClientJoinedRef(pipeWriter.GetSpan(length)[..length]);
                 packet.ClientIndex = @clientIndex;
-                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
+                packet.Name = Marshal.PtrToStringAuto(@name);
 
                 return length;
             });
@@ -113,13 +111,12 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="clientIndex">The client index.</param>
     /// <param name="name">The name.</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/>.</param>
     /// <remarks>
     /// Is sent by the server when: This packet is sent by the server after a chat client left the chat room.
     /// Causes reaction on client side: The client will remove the client from its list, or mark its name in the title bar as offline.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendChatRoomClientLeft(int handle, byte @clientIndex, IntPtr @name, uint nameByteLength)
+    public static void SendChatRoomClientLeft(int handle, byte @clientIndex, IntPtr @name)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -133,7 +130,7 @@ public unsafe partial class ConnectionManager
                 var length = ChatRoomClientLeftRef.Length;
                 var packet = new ChatRoomClientLeftRef(pipeWriter.GetSpan(length)[..length]);
                 packet.ClientIndex = @clientIndex;
-                packet.Name = Marshal.PtrToStringAuto(@name, (int)nameByteLength);
+                packet.Name = Marshal.PtrToStringAuto(@name);
 
                 return length;
             });
@@ -151,13 +148,12 @@ public unsafe partial class ConnectionManager
     /// <param name="senderIndex">The sender index.</param>
     /// <param name="messageLength">The message length.</param>
     /// <param name="message">The message. It's "encrypted" with the 3-byte XOR key (FC CF AB).</param>
-    /// <param name="messageByteLength">The length of <paramref name="message"/>.</param>
     /// <remarks>
     /// Is sent by the server when: This packet is sent by the server after another chat client sent a message to the current chat room.
     /// Causes reaction on client side: The client will show the message.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendChatMessage(int handle, byte @senderIndex, byte @messageLength, IntPtr @message, uint messageByteLength)
+    public static void SendChatMessage(int handle, byte @senderIndex, byte @messageLength, IntPtr @message)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -168,11 +164,11 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = ChatMessageRef.GetRequiredSize((int)messageByteLength);
+                var length = ChatMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@message)!));
                 var packet = new ChatMessageRef(pipeWriter.GetSpan(length)[..length]);
                 packet.SenderIndex = @senderIndex;
                 packet.MessageLength = @messageLength;
-                packet.Message = Marshal.PtrToStringAuto(@message, (int)messageByteLength);
+                packet.Message = Marshal.PtrToStringAuto(@message);
 
                 return length;
             });

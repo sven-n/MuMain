@@ -92,8 +92,8 @@ void SEASON3B::CNewUIDuelWindow::RenderContents()
 {
     wchar_t strMyScore[12];
     wchar_t strDuelScore[12];
-    wsprintf(strMyScore, L"%d", g_DuelMgr.GetScore(DUEL_HERO));
-    wsprintf(strDuelScore, L"%d", g_DuelMgr.GetScore(DUEL_ENEMY));
+    swprintf(strMyScore, L"%d", g_DuelMgr.GetScore(DUEL_HERO));
+    swprintf(strDuelScore, L"%d", g_DuelMgr.GetScore(DUEL_ENEMY));
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0, 0, 0, 255);

@@ -80,7 +80,7 @@ void CSBaseMatch::RenderTime(void)
             if (m_iMatchCountDownType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_CASTLE_END)
             {
                 int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CASTLE_ENTER_CLOSE;
-                wsprintf(lpszStr, GlobalText[textNum], GlobalText[1146], 30 - iTime);
+                swprintf(lpszStr, GlobalText[textNum], GlobalText[1146], 30 - iTime);
             }
             else if (m_iMatchCountDownType >= TYPE_MATCH_CHAOS_ENTER_START && m_iMatchCountDownType <= TYPE_MATCH_CHAOS_END)
             {
@@ -89,7 +89,7 @@ void CSBaseMatch::RenderTime(void)
                 {
                     textNum = 828;
                 }
-                wsprintf(lpszStr, GlobalText[textNum], GlobalText[1147], 30 - iTime);
+                swprintf(lpszStr, GlobalText[textNum], GlobalText[1147], 30 - iTime);
             }
             else if (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE
                 || m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START)
@@ -98,16 +98,16 @@ void CSBaseMatch::RenderTime(void)
 
                 if (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START) textNum = 2386;
 
-                wsprintf(lpszStr, GlobalText[textNum], 30 - iTime);
+                swprintf(lpszStr, GlobalText[textNum], 30 - iTime);
             }
             else if (m_iMatchCountDownType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
             {
                 int textNum = 2860 + m_iMatchCountDownType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE;
-                wsprintf(lpszStr, GlobalText[textNum], 30 - iTime);
+                swprintf(lpszStr, GlobalText[textNum], 30 - iTime);
             }
             else
             {
-                wsprintf(lpszStr, GlobalText[640 + m_iMatchCountDownType - TYPE_MATCH_DEVIL_ENTER_START], 30 - iTime);
+                swprintf(lpszStr, GlobalText[640 + m_iMatchCountDownType - TYPE_MATCH_DEVIL_ENTER_START], 30 - iTime);
             }
             g_pRenderText->RenderText(640 / 2, (int)y, lpszStr, 0, 0, RT3_WRITE_CENTER);
         }
@@ -120,12 +120,12 @@ void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
     wchar_t lpszStrS[10];
     int iMinute = MatchTime / 60;
 
-    wsprintf(lpszStr, L" %.2d :", iMinute);
+    swprintf(lpszStr, L" %.2d :", iMinute);
 
     int iSecondTime = MatchTime - (iMinute * 60);
     if (iSecondTime >= 0)
     {
-        wsprintf(lpszStrS, L" %.2d", iSecondTime);
+        swprintf(lpszStrS, L" %.2d", iSecondTime);
         wcscat(lpszStr, lpszStrS);
     }
 
@@ -135,7 +135,7 @@ void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
     }
     if (iMinute < 15)
     {
-        wsprintf(lpszStrS, L": %.2d", ((int)WorldTime % 60));
+        swprintf(lpszStrS, L": %.2d", ((int)WorldTime % 60));
         wcscat(lpszStr, lpszStrS);
     }
     g_pRenderText->SetFont(g_hFontBig);
@@ -191,7 +191,7 @@ void CSDevilSquareMatch::RenderMatchResult(void)
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->RenderText(xPos[2], yPos, GlobalText[647]);
     yPos += 16;
-    wsprintf(lpszStr, GlobalText[648], Hero->ID);
+    swprintf(lpszStr, GlobalText[648], Hero->ID);
     g_pRenderText->RenderText((xPos[2]), yPos, lpszStr);
     yPos += 24;
 
@@ -215,12 +215,12 @@ void CSDevilSquareMatch::RenderMatchResult(void)
             g_pRenderText->SetTextColor(200, 120, 0, 255);
             g_pRenderText->RenderText(xPos[0], yPos, GlobalText[685], 230, 0, RT3_SORT_CENTER);
             yPos += 20;
-            wsprintf(lpszStr, L"%2d", m_iMyResult);
+            swprintf(lpszStr, L"%2d", m_iMyResult);
         }
         else
         {
             g_pRenderText->SetTextColor(255, 255, 0, 255);
-            wsprintf(lpszStr, L"%2d", i + 1);
+            swprintf(lpszStr, L"%2d", i + 1);
         }
         g_pRenderText->RenderText(xPos[1], yPos, lpszStr);
 
@@ -228,13 +228,13 @@ void CSDevilSquareMatch::RenderMatchResult(void)
         memcpy(lpszStr, pResult->m_lpID, MAX_ID_SIZE);
         g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
 
-        wsprintf(lpszStr, L"%10d", pResult->m_iScore);
+        swprintf(lpszStr, L"%10d", pResult->m_iScore);
         g_pRenderText->RenderText(xPos[3], yPos, lpszStr);
 
-        wsprintf(lpszStr, L"%6d", pResult->m_dwExp);
+        swprintf(lpszStr, L"%6d", pResult->m_dwExp);
         g_pRenderText->RenderText(xPos[4], yPos, lpszStr);
 
-        wsprintf(lpszStr, L"%6d", pResult->m_iZen);
+        swprintf(lpszStr, L"%6d", pResult->m_iZen);
         g_pRenderText->RenderText(xPos[5], yPos, lpszStr); yPos += 16;
     }
 }

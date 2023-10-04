@@ -154,7 +154,7 @@ bool CNewUIDuelWatchWindow::Render()
     for (i = 0; i < 4; ++i)
     {
         g_pRenderText->SetTextColor(255, 255, 128, 255);
-        wsprintf(szText, GlobalText[2700], i + 1);
+        swprintf(szText, GlobalText[2700], i + 1);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 20, szText, 190, 0, RT3_SORT_CENTER);
 
         ptOrigin.y += 90;
@@ -243,7 +243,7 @@ void CNewUIDuelWatchWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    wsprintf(szText, L"%s", GlobalText[2698]);
+    swprintf(szText, L"%s", GlobalText[2698]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 

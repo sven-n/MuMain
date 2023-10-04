@@ -106,14 +106,13 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="ipAddress">The ip address.</param>
-    /// <param name="ipAddressByteLength">The length of <paramref name="ipAddress"/>.</param>
     /// <param name="port">The port.</param>
     /// <remarks>
     /// Is sent by the server when: This packet is sent by the server after the client requested the connection information of a server. This happens after the user clicked on a server.
     /// Causes reaction on client side: The client will try to connect to the server with the specified information.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendConnectionInfo(int handle, IntPtr @ipAddress, uint ipAddressByteLength, ushort @port)
+    public static void SendConnectionInfo(int handle, IntPtr @ipAddress, ushort @port)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -126,7 +125,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = ConnectionInfoRef.Length;
                 var packet = new ConnectionInfoRef(pipeWriter.GetSpan(length)[..length]);
-                packet.IpAddress = Marshal.PtrToStringAuto(@ipAddress, (int)ipAddressByteLength);
+                packet.IpAddress = Marshal.PtrToStringAuto(@ipAddress);
                 packet.Port = @port;
 
                 return length;
@@ -306,13 +305,12 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="patchVersion">The patch version.</param>
     /// <param name="patchAddress">The patch address, usually to a ftp server. The address is usually "encrypted" with the 3-byte XOR key (FC CF AB).</param>
-    /// <param name="patchAddressByteLength">The length of <paramref name="patchAddress"/>.</param>
     /// <remarks>
     /// Is sent by the server when: This packet is sent by the server after the client (launcher) requested to check the patch version and it requires an update.
     /// Causes reaction on client side: The launcher will download the required patches and then activate the start button.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendClientNeedsPatch(int handle, byte @patchVersion, IntPtr @patchAddress, uint patchAddressByteLength)
+    public static void SendClientNeedsPatch(int handle, byte @patchVersion, IntPtr @patchAddress)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -326,7 +324,7 @@ public unsafe partial class ConnectionManager
                 var length = ClientNeedsPatchRef.Length;
                 var packet = new ClientNeedsPatchRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PatchVersion = @patchVersion;
-                packet.PatchAddress = Marshal.PtrToStringAuto(@patchAddress, (int)patchAddressByteLength);
+                packet.PatchAddress = Marshal.PtrToStringAuto(@patchAddress);
 
                 return length;
             });

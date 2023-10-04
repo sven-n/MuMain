@@ -115,7 +115,7 @@ bool leaf::GetOSInfoString(OUT std::wstring& osinfo)
 
     if (!bGetVersion) {
         wchar_t szOSVersion[128] = { 0, };
-        wsprintf(szOSVersion, L"Unknown %d.%d", osi.dwMajorVersion, osi.dwMinorVersion);
+        swprintf(szOSVersion, L"Unknown %d.%d", osi.dwMajorVersion, osi.dwMinorVersion);
         osinfo = szOSVersion;
     }
 
@@ -124,12 +124,12 @@ bool leaf::GetOSInfoString(OUT std::wstring& osinfo)
     {
     case 0:
     {
-        wsprintf(szBuildNum, L" Build %d", osi.dwBuildNumber);
+        swprintf(szBuildNum, L" Build %d", osi.dwBuildNumber);
     }
     break;
     case 1:
     {
-        wsprintf(szBuildNum, L" Build %d.%d.%d ", HIBYTE(HIWORD(osi.dwBuildNumber)),
+        swprintf(szBuildNum, L" Build %d.%d.%d ", HIBYTE(HIWORD(osi.dwBuildNumber)),
             LOBYTE(HIWORD(osi.dwBuildNumber)), LOWORD(osi.dwBuildNumber));
     }
     break;
@@ -138,7 +138,7 @@ bool leaf::GetOSInfoString(OUT std::wstring& osinfo)
 
     if (osi.szCSDVersion[0]) {
         wchar_t szCSDVersion[128] = { 0, };
-        wsprintf(szCSDVersion, L"(%s)", osi.szCSDVersion);
+        swprintf(szCSDVersion, L"(%s)", osi.szCSDVersion);
         osinfo += szCSDVersion;
     }
     return true;
@@ -332,10 +332,10 @@ void leaf::GetCPUInfoString(OUT std::wstring& cpuinfo)
     wchar_t szFreq[24] = { 0, };
     if (llFreq > 1000) {
         double fFreq = double(llFreq) / 1000.f;
-        wsprintf(szFreq, L" CPU %.2fGHz", fFreq);
+        swprintf(szFreq, L" CPU %.2fGHz", fFreq);
     }
     else {
-        wsprintf(szFreq, L" CPU %dMHz", (int)llFreq);
+        swprintf(szFreq, L" CPU %dMHz", (int)llFreq);
     }
     cpuinfo += szFreq;
 }

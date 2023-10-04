@@ -51,7 +51,7 @@ void CNewUITextBox::SetPos(int iX, int iY, int iWidth, int iHeight)
 
     std::wstring strTemp = L"A";
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &Fontsize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &Fontsize);
 
     m_iTextHeight = Fontsize.cy;
     m_iTextLineHeight = m_iTextHeight + iLINE_INTERVAL;
@@ -123,7 +123,7 @@ void CNewUITextBox::AddText(wchar_t* strText)
 void CNewUITextBox::AddText(const wchar_t* strText)
 {
     wchar_t strTempText[iMAX_TEXT_LINE] = { 0, };
-    wsprintf(strTempText, strText);
+    swprintf(strTempText, strText);
 
     AddText(strTempText);
 }

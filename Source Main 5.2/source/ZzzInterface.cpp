@@ -335,11 +335,11 @@ void RenderIME_Status()
     wchar_t    Text[100];
     if ((g_dwOldConv & IME_CMODE_NATIVE) == IME_CMODE_NATIVE)
     {
-        wsprintf(Text, L"ENGLISH");
+        swprintf(Text, L"ENGLISH");
     }
     else
     {
-        wsprintf(Text, L"ENGLISH");
+        swprintf(Text, L"ENGLISH");
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -354,13 +354,13 @@ void RenderIME_Status()
     ::ImmGetConversionStatus(data, &dwConv, &dwSent);
     ::ImmReleaseContext(g_hWnd, data);
 
-    wsprintf(Text, L"Sentence Mode = %d", dwSent);
+    swprintf(Text, L"Sentence Mode = %d", dwSent);
     g_pRenderText->RenderText(100, 110, Text);
 
-    wsprintf(Text, L"Old Sentence Mode = %d", g_dwOldSent);
+    swprintf(Text, L"Old Sentence Mode = %d", g_dwOldSent);
     g_pRenderText->RenderText(100, 120, Text);
 
-    wsprintf(Text, L"LockInputStatus=%d", LockInputStatus);
+    swprintf(Text, L"LockInputStatus=%d", LockInputStatus);
     g_pRenderText->RenderText(100, 130, Text);
 }
 
@@ -435,7 +435,7 @@ void RenderTipText(int sx, int sy, const wchar_t* Text)
 {
     SIZE TextSize = { 0, 0 };
     g_pRenderText->SetFont(g_hFont);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &TextSize);
 
     int BackupAlphaBlendType = AlphaBlendType;
     EnableAlphaTest();
@@ -513,7 +513,7 @@ void CreateNotice(wchar_t* Text, int Color)
 {
     SIZE Size;
     g_pRenderText->SetFont(g_hFontBold);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
 
     ScrollNotice();
     Notice[NoticeCount].Color = Color;
@@ -743,18 +743,18 @@ void SetBooleanPosition(CHAT* c)
         (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))
     {
         g_pRenderText->SetFont(g_hFontBold);
-        bResult[0] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
+        bResult[0] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
         g_pRenderText->SetFont(g_hFont);
     }
     else
     {
-        bResult[0] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
+        bResult[0] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
     }
 
-    bResult[1] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[0], lstrlen(c->Text[0]), &Size[1]);
-    bResult[2] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[1], lstrlen(c->Text[1]), &Size[2]);
-    bResult[3] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Union, lstrlen(c->Union), &Size[3]);
-    bResult[4] = g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Guild, lstrlen(c->Guild), &Size[4]);
+    bResult[1] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[0], lstrlen(c->Text[0]), &Size[1]);
+    bResult[2] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[1], lstrlen(c->Text[1]), &Size[2]);
+    bResult[3] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Union, lstrlen(c->Union), &Size[3]);
+    bResult[4] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Guild, lstrlen(c->Guild), &Size[4]);
 
     Size[0].cx += 3;
 
@@ -772,7 +772,7 @@ void SetBooleanPosition(CHAT* c)
         SIZE sizeT[2];
         g_pRenderText->SetFont(g_hFontBold);
 
-        if (g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], GlobalText.GetStringSize(1104), &sizeT[1]))
+        if (GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], GlobalText.GetStringSize(1104), &sizeT[1]))
         {
             if (c->Width < sizeT[0].cx + sizeT[1].cx)
                 c->Width = sizeT[0].cx + sizeT[1].cx;
@@ -1057,25 +1057,25 @@ void AddGuildName(CHAT* c, CHARACTER* Owner)
     if (Owner->GuildMarkIndex >= 0 && GuildMark[Owner->GuildMarkIndex].UnionName[0])
     {
         if (Owner->GuildRelationShip == GR_UNION)
-            wsprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
+            swprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
         if (Owner->GuildRelationShip == GR_UNIONMASTER)
         {
             if (Owner->GuildStatus == G_MASTER)
-                wsprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1296]);
+                swprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1296]);
             else
-                wsprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
+                swprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
         }
         else if (Owner->GuildRelationShip == GR_RIVAL)
         {
             if (Owner->GuildStatus == G_MASTER)
-                wsprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1298]);
+                swprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1298]);
             else
-                wsprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1297]);
+                swprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1297]);
         }
         else if (Owner->GuildRelationShip == GR_RIVALUNION)
-            wsprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1299]);
+            swprintf(c->Union, L"<%s> %s", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1299]);
         else
-            wsprintf(c->Union, L"<%s>", GuildMark[Owner->GuildMarkIndex].UnionName);
+            swprintf(c->Union, L"<%s>", GuildMark[Owner->GuildMarkIndex].UnionName);
     }
     else
         c->Union[0] = NULL;
@@ -1085,15 +1085,15 @@ void AddGuildName(CHAT* c, CHARACTER* Owner)
         c->GuildColor = Owner->GuildTeam;
 
         if (Owner->GuildStatus == G_PERSON)
-            wsprintf(c->Guild, L"[%s] %s", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1330]);
+            swprintf(c->Guild, L"[%s] %s", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1330]);
         else if (Owner->GuildStatus == G_MASTER)
-            wsprintf(c->Guild, L"[%s] %s", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1300]);
+            swprintf(c->Guild, L"[%s] %s", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1300]);
         else if (Owner->GuildStatus == G_SUB_MASTER)
-            wsprintf(c->Guild, L"[%s] %s", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1301]);
+            swprintf(c->Guild, L"[%s] %s", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1301]);
         else if (Owner->GuildStatus == G_BATTLE_MASTER)
-            wsprintf(c->Guild, L"[%s] %s", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1302]);
+            swprintf(c->Guild, L"[%s] %s", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1302]);
         else
-            wsprintf(c->Guild, L"[%s]", GuildMark[Owner->GuildMarkIndex].GuildName);
+            swprintf(c->Guild, L"[%s]", GuildMark[Owner->GuildMarkIndex].GuildName);
     }
     else
     {
@@ -1303,12 +1303,12 @@ int RenderDebugText(int y)
             SIZE TextSize;
             if (Hex)
             {
-                wsprintf(Text, L"%0.2x", DebugText[i][j]);
+                swprintf(Text, L"%0.2x", DebugText[i][j]);
                 g_pRenderText->RenderText(x, y, Text, 0, 0, RT3_SORT_CENTER, &TextSize);
             }
             else
             {
-                wsprintf(Text, L"%c", DebugText[i][j]);
+                swprintf(Text, L"%c", DebugText[i][j]);
                 g_pRenderText->RenderText(x, y, Text, 0, 0, RT3_SORT_CENTER, &TextSize);
             }
             if (Hex)
@@ -3362,7 +3362,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         else if (g_pMyInventory->FindEmptySlot(&Items[ItemKey].Item) == -1)
         {
             wchar_t Text[256];
-            wsprintf(Text, GlobalText[375]);
+            swprintf(Text, GlobalText[375]);
 
             g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
@@ -3398,7 +3398,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 if (CharactersClient[TargetNpc].MonsterIndex == 238 && level < 10)
                 {
                     wchar_t Text[100];
-                    wsprintf(Text, GlobalText[663], CHAOS_MIX_LEVEL);
+                    swprintf(Text, GlobalText[663], CHAOS_MIX_LEVEL);
                     g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     break;
                 }
@@ -3479,12 +3479,12 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                     wchar_t _Temp[32] = { 0, };
                     if (CharactersClient[TargetNpc].MonsterIndex == 470)
                     {
-                        wsprintf(_Temp, GlobalText[2596], 100);
+                        swprintf(_Temp, GlobalText[2596], 100);
                         g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                     else if (CharactersClient[TargetNpc].MonsterIndex == 471)
                     {
-                        wsprintf(_Temp, GlobalText[2597], 100);
+                        swprintf(_Temp, GlobalText[2597], 100);
                         g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                 }
@@ -3929,7 +3929,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             else
             {
                 wchar_t szError[48] = L"";
-                wsprintf(szError, GlobalText[1123], 6);
+                swprintf(szError, GlobalText[1123], 6);
                 g_pChatListBox->AddText(L"", szError, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             return true;
@@ -4030,7 +4030,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 if (iLevel < 30)
                 {
                     wchar_t szError[48] = L"";
-                    wsprintf(szError, GlobalText[2704], 30);
+                    swprintf(szError, GlobalText[2704], 30);
                     g_pChatListBox->AddText(L"", szError, SEASON3B::TYPE_ERROR_MESSAGE);
                     return 3;
                 }
@@ -4252,9 +4252,9 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             wchar_t Name[256];
             if (i != 9)
-                wsprintf(Name, L"/%d", i + 1);
+                swprintf(Name, L"/%d", i + 1);
             else
-                wsprintf(Name, L"/%d", 0);
+                swprintf(Name, L"/%d", 0);
             if (Text[0] == Name[0] && Text[1] == Name[1])
             {
                 if (CheckMacroLimit(Text) == true)
@@ -4315,7 +4315,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         if (p->Width != 0)
         {
             wchar_t Name[256];
-            wsprintf(Name, L"/%s", p->Name);
+            swprintf(Name, L"/%s", p->Name);
 
             if (wcsicmp(Text, Name) == NULL)
             {
@@ -7009,7 +7009,7 @@ void CheckGate()
                             if (CharacterAttribute->Level < Level)
                             {
                                 wchar_t Text[100];
-                                wsprintf(Text, GlobalText[350], Level);
+                                swprintf(Text, GlobalText[350], Level);
                                 g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_ERROR_MESSAGE);
                             }
                         }
@@ -7022,7 +7022,7 @@ void CheckGate()
                         {
                             LoadingWorld = 50;
                             wchar_t Text[100];
-                            wsprintf(Text, GlobalText[350], Level);
+                            swprintf(Text, GlobalText[350], Level);
                             g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_ERROR_MESSAGE);
                             //							return;
                         }
@@ -7925,14 +7925,16 @@ void SendMacroChat(wchar_t* Text)
             CheckChatText(Text);
         }
 
-        if (CheckAbuseFilter(Text))
-        {
-            SendChat(GlobalText[570]);
-        }
-        else
-        {
-            SendChat(Text);
-        }
+        //if (CheckAbuseFilter(Text))
+        //{
+        //    SendChat(GlobalText[570]);
+        //}
+        //else
+        //{
+        //    SendChat(Text);
+        //}
+
+        SocketClient->ToGameServer()->SendPublicChatMessage(Hero->ID, Text);
 
         LastMacroTime = GetTickCount64();
     }
@@ -8079,17 +8081,17 @@ void GetTime(DWORD time, std::wstring& timeText, bool isSecond)
 
         if (day != 0)
         {
-            wsprintf(buff, L"%d %s %d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            swprintf(buff, L"%d %s %d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buff;
         }
         else if (day == 0 && oClock != 0)
         {
-            wsprintf(buff, L"%d %s %d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            swprintf(buff, L"%d %s %d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buff;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            wsprintf(buff, L"%d %s %d %s", minutes, GlobalText[2300], second, GlobalText[2301]);
+            swprintf(buff, L"%d %s %d %s", minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buff;
         }
         else if (day == 0 && oClock == 0 && minutes == 0)
@@ -8105,17 +8107,17 @@ void GetTime(DWORD time, std::wstring& timeText, bool isSecond)
 
         if (day != 0)
         {
-            wsprintf(buff, L"%d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            swprintf(buff, L"%d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
             timeText = buff;
         }
         else if (day == 0 && oClock != 0)
         {
-            wsprintf(buff, L"%d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            swprintf(buff, L"%d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300]);
             timeText = buff;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            wsprintf(buff, L"%d %s", minutes, GlobalText[2300]);
+            swprintf(buff, L"%d %s", minutes, GlobalText[2300]);
             timeText = buff;
         }
     }
@@ -8175,7 +8177,7 @@ void RenderSwichState()
     {
         if (Switch_Info[i].m_bySwitchState > 0)
         {
-            wsprintf(Buff, L"%s%d / %s / %s", GlobalText[1981], i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
+            swprintf(Buff, L"%s%d / %s / %s", GlobalText[1981], i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
             g_pRenderText->SetFont(g_hFont);
             g_pRenderText->SetTextColor(255, 255, 255, 255);
             g_pRenderText->SetBgColor(0);
@@ -8344,7 +8346,7 @@ void RenderTournamentInterface()
             if (g_wtMatchTimeLeft.m_Type == 3)
             {
                 g_pRenderText->SetTextColor(255, 255, 10, 255);
-                wsprintf(t_Str, GlobalText[1392], t_valueSec);
+                swprintf(t_Str, GlobalText[1392], t_valueSec);
             }
             else
             {
@@ -8354,11 +8356,11 @@ void RenderTournamentInterface()
                 }
                 if (t_valueSec < 10)
                 {
-                    wsprintf(t_Str, GlobalText[1390], t_valueMin, t_valueSec);
+                    swprintf(t_Str, GlobalText[1390], t_valueMin, t_valueSec);
                 }
                 else
                 {
-                    wsprintf(t_Str, GlobalText[1391], t_valueMin, t_valueSec);
+                    swprintf(t_Str, GlobalText[1391], t_valueMin, t_valueSec);
                 }
             }
             x += (float)GetScreenWidth() / 2; y += 350;
@@ -8394,33 +8396,33 @@ void RenderTournamentInterface()
     glColor4f(1.f, 1.f, 1.f, 1.f);
     g_pRenderText->SetFont(g_hFontBig);
     g_pRenderText->SetTextColor(200, 240, 255, 255);
-    wsprintf(t_Str, GlobalText[1393]);
+    swprintf(t_Str, GlobalText[1393]);
     g_pRenderText->RenderText(WindowX + Width / 2 - 50, WindowY + 20, t_Str);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    wsprintf(t_Str, GlobalText[1394]);
+    swprintf(t_Str, GlobalText[1394]);
     g_pRenderText->SetTextColor(255, 255, 10, 255);
     g_pRenderText->RenderText(WindowX + Width / 2 - 13, WindowY + 50, t_Str);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
     float t_temp = 0.0f;
-    wsprintf(t_Str, L"%s", g_wtMatchResult.m_MatchTeamName1);
+    swprintf(t_Str, L"%s", g_wtMatchResult.m_MatchTeamName1);
     t_temp = (MAX_ID_SIZE - wcslen(t_Str)) * 5;
     g_pRenderText->RenderText(WindowX + 10 + t_temp, WindowY + 50, t_Str);
-    wsprintf(t_Str, L"%s", g_wtMatchResult.m_MatchTeamName2);
+    swprintf(t_Str, L"%s", g_wtMatchResult.m_MatchTeamName2);
     t_temp = (MAX_ID_SIZE - wcslen(t_Str)) * 5;
     g_pRenderText->RenderText(WindowX + Width - 120 + t_temp, WindowY + 50, t_Str);
 
-    wsprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score1);
+    swprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score1);
     g_pRenderText->RenderText(WindowX + 45, WindowY + 75, t_Str);
-    wsprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score2);
+    swprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score2);
     g_pRenderText->RenderText(WindowX + Width - 85, WindowY + 75, t_Str);
 
     if (g_wtMatchResult.m_Score1 == g_wtMatchResult.m_Score2)
     {
         g_pRenderText->SetFont(g_hFontBig);
         g_pRenderText->SetTextColor(255, 255, 10, 255);
-        wsprintf(t_Str, GlobalText[1395]);
+        swprintf(t_Str, GlobalText[1395]);
         g_pRenderText->RenderText(WindowX + Width / 2 - 35, WindowY + 115, t_Str);
         g_pRenderText->SetFont(g_hFont);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -8429,10 +8431,10 @@ void RenderTournamentInterface()
     {
         g_pRenderText->SetFont(g_hFontBig);
         g_pRenderText->SetTextColor(255, 255, 10, 10);
-        wsprintf(t_Str, GlobalText[1396]);
+        swprintf(t_Str, GlobalText[1396]);
         g_pRenderText->RenderText(WindowX + 47, WindowY + 115, t_Str);
         g_pRenderText->SetTextColor(255, 10, 10, 255);
-        wsprintf(t_Str, GlobalText[1397]);
+        swprintf(t_Str, GlobalText[1397]);
         g_pRenderText->RenderText(WindowX + Width - 82, WindowY + 115, t_Str);
         g_pRenderText->SetFont(g_hFont);
     }
@@ -8440,10 +8442,10 @@ void RenderTournamentInterface()
     {
         g_pRenderText->SetFont(g_hFontBig);
         g_pRenderText->SetTextColor(255, 255, 10, 10);
-        wsprintf(t_Str, GlobalText[1397]);
+        swprintf(t_Str, GlobalText[1397]);
         g_pRenderText->RenderText(WindowX + 47, WindowY + 115, t_Str);
         g_pRenderText->SetTextColor(255, 10, 10, 255);
-        wsprintf(t_Str, GlobalText[1396]);
+        swprintf(t_Str, GlobalText[1396]);
         g_pRenderText->RenderText(WindowX + Width - 82, WindowY + 115, t_Str);
         g_pRenderText->SetFont(g_hFont);
     }
@@ -8487,7 +8489,7 @@ void RenderPartyHP()
 
         if ((MouseX >= ScreenX && MouseX < ScreenX + Width && MouseY >= ScreenY - 2 && MouseY < ScreenY + 6))
         {
-            wsprintf(Text, L"HP : %d0%%", p->stepHP);
+            swprintf(Text, L"HP : %d0%%", p->stepHP);
             g_pRenderText->SetTextColor(255, 230, 210, 255);
             g_pRenderText->RenderText(ScreenX, ScreenY - 6, Text);
         }
@@ -9055,14 +9057,14 @@ void RenderDebugWindow()
             g_pRenderText->RenderText(640 - 100, sy, L"Background");
         else
             g_pRenderText->RenderText(640 - 100, sy, L"Layer1");
-        wsprintf(Text, L"Brush Size: %d", BrushSize * 2 + 1);
+        swprintf(Text, L"Brush Size: %d", BrushSize * 2 + 1);
         g_pRenderText->RenderText(640 - 100, sy + 11, Text);
     }
     glColor3f(1.f, 1.f, 1.f);
     if (EditFlag == EDIT_OBJECT)
     {
         g_pRenderText->RenderText(640 - 100, 0, L"Garbage");
-        g_pRenderText->RenderText(0, 0, Models[SelectModel].Name);
+        // TODO g_pRenderText->RenderText(0, 0, Models[SelectModel].Name);
     }
     if (EditFlag == EDIT_MONSTER)
     {
@@ -9072,7 +9074,7 @@ void RenderDebugWindow()
                 glColor3f(1.f, 0.8f, 0.f);
             else
                 glColor3f(1.f, 1.f, 1.f);
-            wsprintf(Text, L"%2d: %s", MonsterScript[i].Type, MonsterScript[i].Name);
+            swprintf(Text, L"%2d: %s", MonsterScript[i].Type, MonsterScript[i].Name);
             g_pRenderText->RenderText(640 - 100, i * 10, Text);
         }
     }

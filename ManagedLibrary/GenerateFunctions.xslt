@@ -45,7 +45,7 @@
     <xsl:text>{
     dotnet_Send</xsl:text>
     <xsl:apply-templates select="pd:Name" />
-    <xsl:text>(this->_handle</xsl:text>
+    <xsl:text>(this->GetHandle()</xsl:text>
 	<xsl:apply-templates select="pd:Fields/pd:Field" mode="passparams">
       <xsl:sort select="pd:DefaultValue"/>
     </xsl:apply-templates>
@@ -57,7 +57,7 @@
   <xsl:template match="pd:Field" mode="passparams">
     <xsl:text>, </xsl:text>    
     <xsl:call-template name="LowerCaseName" />
-    <xsl:if test="(pd:Type = 'Binary') or (pd:Type = 'String')">
+    <xsl:if test="(pd:Type = 'Binary')">
     	<xsl:text>, </xsl:text>
 		<xsl:call-template name="LowerCaseName" />
 		<xsl:text>ByteLength</xsl:text>

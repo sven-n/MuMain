@@ -159,48 +159,48 @@ void CNewUIGensRanking::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    wsprintf(szText, GlobalText[3090]);
+    swprintf(szText, GlobalText[3090]);
     g_pRenderText->RenderText(_x, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_CENTER);
 
     _y += 75;
-    wsprintf(szText, GlobalText[3091]);
+    swprintf(szText, GlobalText[3091]);
     g_pRenderText->SetTextColor(246, 209, 73, 255);
     g_pRenderText->RenderText(_x + 102, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFont);
 
-    wsprintf(szText, L"%s", GetGensTeamName());
+    swprintf(szText, L"%s", GetGensTeamName());
     _y += 20;
     g_pRenderText->RenderText(_x + 102, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
-    wsprintf(szText, GlobalText[3095]);
+    swprintf(szText, GlobalText[3095]);
     _y += 24;
     g_pRenderText->RenderText(_x + 100, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
-    wsprintf(szText, L"%s", GetTitleName(Hero->GensRanking));
+    swprintf(szText, L"%s", GetTitleName(Hero->GensRanking));
     g_pRenderText->RenderText(_x + 66, _y, szText + 1, GENSRANKING_WIDTH - 16, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(230, 230, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    wsprintf(szText, GlobalText[3098]);
+    swprintf(szText, GlobalText[3098]);
     _y += 23;
     g_pRenderText->RenderText(_x + 13, _y, szText, 74, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    wsprintf(szText, GlobalText[3099], GetRanking());
+    swprintf(szText, GlobalText[3099], GetRanking());
     g_pRenderText->RenderText(_x, _y, szText, GENSRANKING_WIDTH - 20, 0, RT3_SORT_RIGHT);
 
     g_pRenderText->SetTextColor(230, 230, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    wsprintf(szText, GlobalText[3096]);
+    swprintf(szText, GlobalText[3096]);
     _y += 23;
     g_pRenderText->RenderText(_x + 13, _y, szText, 74, 0, RT3_SORT_CENTER);
     g_pRenderText->SetFont(g_hFont);
 
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    wsprintf(szText, L"%d", GetContribution());
+    swprintf(szText, L"%d", GetContribution());
     g_pRenderText->RenderText(_x, _y, szText, GENSRANKING_WIDTH - 20, 0, RT3_SORT_RIGHT);
 
     wchar_t _szTempText[TEMP_MAX_TEXT_LENGTH];
@@ -210,7 +210,7 @@ void CNewUIGensRanking::RenderTexts()
 
     if (GetNextContribution() > 0)
     {
-        wsprintf(_szTempText, GlobalText[3097], GetNextContribution());
+        swprintf(_szTempText, GlobalText[3097], GetNextContribution());
         _TextLineCnt = ::DivideStringByPixel(&_szText[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, _szTempText, 140, true, '#');
         for (int j = 0; j < _TextLineCnt; ++j)
             g_pRenderText->RenderText(_x + 20, _y + (j * _fHeight) + 20, _szText[j], _fWidth, 0, RT3_SORT_LEFT);
@@ -218,7 +218,7 @@ void CNewUIGensRanking::RenderTexts()
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(230, 230, 0, 255);
-    wsprintf(szText, GlobalText[3100]);
+    swprintf(szText, GlobalText[3100]);
 
     _y += 78;
     g_pRenderText->RenderText(_x + 13, _y, szText, 58, 0, RT3_SORT_CENTER);
@@ -383,7 +383,7 @@ bool CNewUIGensRanking::SetRanking(int _Ranking)
 {
     if (_Ranking <= 0)
     {
-        wsprintf(m_szRanking, L"-");
+        swprintf(m_szRanking, L"-");
         return false;
     }
 
@@ -451,7 +451,7 @@ wchar_t* CNewUIGensRanking::GetGensTeamName()
 void CNewUIGensRanking::SetTitleName()
 {
     wchar_t _szTempText[256] = { 0, };
-    wsprintf(_szTempText, GlobalText[3104]);
+    swprintf(_szTempText, GlobalText[3104]);
     ::DivideStringByPixel(&m_szTitleName[0][0], TITLENAME_END, MAX_TITLELENGTH, _szTempText, 240, true, '#');
 }
 

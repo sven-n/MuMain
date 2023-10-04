@@ -308,12 +308,12 @@ void SEASON3B::CNewUICursedTempleSystem::LoadImages()
     //score
     for (int i = 0; i < 10; ++i)
     {
-        wsprintf(buff, L"Interface\\newui_ctscorealliednum%d.tga", i);
+        swprintf(buff, L"Interface\\newui_ctscorealliednum%d.tga", i);
         LoadBitmap(buff, IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_NUMBER + i, GL_LINEAR);
     }
     for (int j = 0; j < 10; ++j)
     {
-        wsprintf(buff, L"Interface\\newui_ctscoreillusionnum%d.tga", j);
+        swprintf(buff, L"Interface\\newui_ctscoreillusionnum%d.tga", j);
         LoadBitmap(buff, IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_NUMBER + j, GL_LINEAR);
     }
     LoadBitmap(L"Interface\\newui_ctscorevs0.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS0, GL_LINEAR);
@@ -785,12 +785,12 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 
         SKILL_ATTRIBUTE* p = &SkillAttribute[CursedTempleCurSkillType];
         wcscpy(skillname, p->Name);
-        wsprintf(TextList[TextNum], L"%s", skillname);
+        swprintf(TextList[TextNum], L"%s", skillname);
         TextListColor[TextNum] = TEXT_COLOR_BLUE; TextNum++;
 
-        wsprintf(TextList[TextNum], L"\n"); TextNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++;
 
-        wsprintf(TextList[TextNum], L"%s", GlobalText[2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)]);
+        swprintf(TextList[TextNum], L"%s", GlobalText[2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)]);
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
 
         RenderTipTextList(x, y - 20, TextNum, 0);
@@ -806,7 +806,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = NULL;
         }
 
-        wsprintf(TextList[TextNum], L"%s", GlobalText[2378]);
+        swprintf(TextList[TextNum], L"%s", GlobalText[2378]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
@@ -823,7 +823,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = NULL;
         }
 
-        wsprintf(TextList[TextNum], L"%s", GlobalText[2377]);
+        swprintf(TextList[TextNum], L"%s", GlobalText[2377]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
@@ -1040,7 +1040,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
     {
         wcscpy(TextList[TextNum], GlobalText[2400]);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        wsprintf(TextList[TextNum], L"");
+        swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
         wcscpy(TextList[TextNum], GlobalText[2401]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
@@ -1053,7 +1053,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
     {
         wcscpy(TextList[TextNum], GlobalText[2404]);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        wsprintf(TextList[TextNum], L"");
+        swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
         wcscpy(TextList[TextNum], GlobalText[2405]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
@@ -1066,7 +1066,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
     {
         wcscpy(TextList[TextNum], GlobalText[2408]);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        wsprintf(TextList[TextNum], L"");
+        swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
         wcscpy(TextList[TextNum], GlobalText[2409]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
@@ -1423,7 +1423,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE*
     {
         wchar_t message[100];
         memset(&message, 0, sizeof(char));
-        wsprintf(message, GlobalText[2391], data->btSkillPoint - m_SkillPoint);
+        swprintf(message, GlobalText[2391], data->btSkillPoint - m_SkillPoint);
         g_pChatListBox->AddText(L"", message, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 

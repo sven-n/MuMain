@@ -180,22 +180,22 @@ void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isS
 
         if (day != 0)
         {
-            wsprintf(buffer, L"%d %s %d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            swprintf(buffer, L"%d %s %d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buffer;
         }
         else if (day == 0 && oClock != 0)
         {
-            wsprintf(buffer, L"%d %s %d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            swprintf(buffer, L"%d %s %d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buffer;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            wsprintf(buffer, L"%d %s %d %s", minutes, GlobalText[2300], second, GlobalText[2301]);
+            swprintf(buffer, L"%d %s %d %s", minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buffer;
         }
         else if (day == 0 && oClock == 0 && minutes == 0)
         {
-            wsprintf(buffer, L"%s", GlobalText[2308]);
+            swprintf(buffer, L"%s", GlobalText[2308]);
             timeText = buffer;
         }
     }
@@ -207,17 +207,17 @@ void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isS
 
         if (day != 0)
         {
-            wsprintf(buffer, L"%d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            swprintf(buffer, L"%d %s %d %s %d %s", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
             timeText = buffer;
         }
         else if (day == 0 && oClock != 0)
         {
-            wsprintf(buffer, L"%d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            swprintf(buffer, L"%d %s %d %s", oClock, GlobalText[2299], minutes, GlobalText[2300]);
             timeText = buffer;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            wsprintf(buffer, L"%d %s", minutes, GlobalText[2300]);
+            swprintf(buffer, L"%d %s", minutes, GlobalText[2300]);
             timeText = buffer;
         }
     }

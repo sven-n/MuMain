@@ -443,7 +443,7 @@ void CNewUINPCDialogue::SetCurSelTexts()
     int i;
     for (i = 0; i < QM_MAX_ND_ANSWER; ++i)
     {
-        ::wsprintf(szAnswer, L"%d. ", i + 1);
+        ::swprintf(szAnswer, L"%d. ", i + 1);
         pszAnswer = g_QuestMng.GetNPCDlgAnswer(m_dwCurDlgIndex, i);
         if (NULL == pszAnswer)
             break;
@@ -513,12 +513,12 @@ void CNewUINPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCoun
     {
         if (m_nSelTextCount - 1 == i)
         {
-            ::wsprintf(szSelText, L"%d. ", i + 1);
+            ::swprintf(szSelText, L"%d. ", i + 1);
             pszSelText = g_QuestMng.GetWords(1007);
         }
         else
         {
-            ::wsprintf(szSelText, L"%d. [Q]", i + 1);
+            ::swprintf(szSelText, L"%d. [Q]", i + 1);
             pszSelText = g_QuestMng.GetSubject(m_adwQuestIndex[i]);
         }
 

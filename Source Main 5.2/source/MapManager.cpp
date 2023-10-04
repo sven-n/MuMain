@@ -133,16 +133,16 @@ void CMapManager::Load() // OK
         {
             wchar_t FileName[100];
             if (i < 10)
-                wsprintf(FileName, L"Object8\\wt0%d.jpg", i);
+                swprintf(FileName, L"Object8\\wt0%d.jpg", i);
             else
-                wsprintf(FileName, L"Object8\\wt%d.jpg", i);
+                swprintf(FileName, L"Object8\\wt%d.jpg", i);
 
             LoadBitmap(FileName, BITMAP_WATER + i, GL_LINEAR, GL_REPEAT, false);
 
             if (i < 10)
-                wsprintf(FileName, L"wt0%d.jpg", i);
+                swprintf(FileName, L"wt0%d.jpg", i);
             else
-                wsprintf(FileName, L"wt%d.jpg", i);
+                swprintf(FileName, L"wt%d.jpg", i);
             wcscpy(Bitmaps[BITMAP_WATER + i].FileName, FileName);
         }
         break;
@@ -1044,9 +1044,9 @@ void CMapManager::Load() // OK
         {
             wchar_t FileName[100];
             if (i < 10)
-                wsprintf(FileName, L"Object8\\wt0%d.jpg", i);
+                swprintf(FileName, L"Object8\\wt0%d.jpg", i);
             else
-                wsprintf(FileName, L"Object8\\wt%d.jpg", i);
+                swprintf(FileName, L"Object8\\wt%d.jpg", i);
 
             LoadBitmap(FileName, BITMAP_WATER + i, GL_LINEAR, GL_REPEAT, false);
         }
@@ -1149,11 +1149,11 @@ void CMapManager::Load() // OK
             iMapWorld = WD_45CURSEDTEMPLE_LV1 + 2;
         }
 
-        wsprintf(DirName, L"Data\\Object%d\\", iMapWorld);
+        swprintf(DirName, L"Data\\Object%d\\", iMapWorld);
         for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
             gLoadData.AccessModel(i, DirName, L"Object", i + 1);
 
-        wsprintf(DirName, L"Object%d\\", iMapWorld);
+        swprintf(DirName, L"Object%d\\", iMapWorld);
         for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
         {
             gLoadData.OpenTexture(i, DirName);
@@ -1258,43 +1258,43 @@ void CMapManager::LoadWorld(int Map)
 
     battleCastle::Init();
 
-    wsprintf(WorldName, L"World%d", iMapWorld);
+    swprintf(WorldName, L"World%d", iMapWorld);
     {
 #if defined DEVIAS_XMAS_END_LOADFIX_FOR_TESTSERVER
         if (World == WD_2DEVIAS)
         {
-            wsprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
+            swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
         }
         else
 #endif	// defined DEVIAS_XMAS_END_LOADFIX_FOR_TESTSERVER
 #ifdef ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
             if (World == WD_33AIDA)
-                wsprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
+                swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
             else
 #endif	// ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
 #ifdef CHAOSCASTLE_MAP_FOR_TESTSERVER
                 if (InChaosCastle())
                 {
-                    wsprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
+                    swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
                 }
                 else
 #endif	// CHAOSCASTLE_MAP_FOR_TESTSERVER
 #ifdef KJH_EXTENSIONMAP_FOR_TESTSERVER
                     if ((World == WD_33AIDA) || (World == WD_37KANTURU_1ST) || (World == WD_56MAP_SWAMP_OF_QUIET) || (World == WD_57ICECITY))
                     {
-                        wsprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
+                        swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
                     }
                     else
 #endif // KJH_EXTENSIONMAP_FOR_TESTSERVER
 #ifdef KJH_FIX_ICARUS_MAP_ATTRIBUTE_FOR_TESTSERVER
                         if ((World == WD_10HEAVEN))
                         {
-                            wsprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
+                            swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
                         }
                         else
 #endif // KJH_FIX_ICARUS_MAP_ATTRIBUTE_FOR_TESTSERVER
                         {
-                            wsprintf(FileName, L"Data\\%s\\EncTerrain%d.map", WorldName, iMapWorld);
+                            swprintf(FileName, L"Data\\%s\\EncTerrain%d.map", WorldName, iMapWorld);
                         }
     }
 
@@ -1303,7 +1303,7 @@ void CMapManager::LoadWorld(int Map)
     if (iMapWorld != iResult && -1 != iResult)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s file corrupted.", FileName);
+        swprintf(Text, L"%s file corrupted.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -1317,7 +1317,7 @@ void CMapManager::LoadWorld(int Map)
     if (this->WorldActive == WD_77NEW_LOGIN_SCENE)
 #endif //PJH_NEW_SERVER_SELECT_MAP
     {
-        wsprintf(FileName, L"Data\\%s\\CWScript%d.cws", WorldName, iMapWorld);
+        swprintf(FileName, L"Data\\%s\\CWScript%d.cws", WorldName, iMapWorld);
         CCameraMove::GetInstancePtr()->LoadCameraWalkScript(FileName);
     }
 
@@ -1327,11 +1327,11 @@ void CMapManager::LoadWorld(int Map)
     {
         if (battleCastle::IsBattleCastleStart())
         {
-            wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld * 10 + 2);
+            swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld * 10 + 2);
         }
         else
         {
-            wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld);
+            swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld);
         }
     }
     else
@@ -1341,13 +1341,13 @@ void CMapManager::LoadWorld(int Map)
             switch (CryWolfState)
             {
             case CRYWOLF_OCCUPATION_STATE_PEACE:
-                wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld);
+                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld);
                 break;
             case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
-                wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld * 10 + 1);
+                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld * 10 + 1);
                 break;
             case CRYWOLF_OCCUPATION_STATE_WAR:
-                wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld * 10 + 2);
+                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld * 10 + 2);
                 break;
             }
         }
@@ -1355,22 +1355,22 @@ void CMapManager::LoadWorld(int Map)
         {
             if (M39Kanturu3rd::IsSuccessBattle())
             {
-                wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld * 10 + 1);
+                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld * 10 + 1);
             }
             else
             {
-                wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld);
+                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld);
             }
         }
         else
         {
-            wsprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld);
+            swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, iMapWorld);
         }
     iResult = OpenTerrainAttribute(FileName);
     if (iMapWorld != iResult && -1 != iResult)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s file corrupted.", FileName);
+        swprintf(Text, L"%s file corrupted.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -1378,13 +1378,13 @@ void CMapManager::LoadWorld(int Map)
         return;
     }
 
-    wsprintf(FileName, L"Data\\%s\\EncTerrain%d.obj", WorldName, iMapWorld);
+    swprintf(FileName, L"Data\\%s\\EncTerrain%d.obj", WorldName, iMapWorld);
 
     iResult = OpenObjectsEnc(FileName);
     if (iMapWorld != iResult && -1 != iResult)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s file corrupted.", FileName);
+        swprintf(Text, L"%s file corrupted.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -1392,7 +1392,7 @@ void CMapManager::LoadWorld(int Map)
         return;
     }
 
-    wsprintf(FileName, L"%s\\TerrainHeight.bmp", WorldName);
+    swprintf(FileName, L"%s\\TerrainHeight.bmp", WorldName);
     if (IsTerrainHeightExtMap(this->WorldActive) == true)
     {
         CreateTerrain(FileName, true);
@@ -1406,11 +1406,11 @@ void CMapManager::LoadWorld(int Map)
     {
         if (battleCastle::IsBattleCastleStart())
         {
-            wsprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
+            swprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
         }
         else
         {
-            wsprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
+            swprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
         }
     }
     else
@@ -1419,28 +1419,28 @@ void CMapManager::LoadWorld(int Map)
             switch (CryWolfState)
             {
             case CRYWOLF_OCCUPATION_STATE_PEACE:
-                wsprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
+                swprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
                 break;
             case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
-                wsprintf(FileName, L"%s\\TerrainLight1.jpg", WorldName);
+                swprintf(FileName, L"%s\\TerrainLight1.jpg", WorldName);
                 break;
             case CRYWOLF_OCCUPATION_STATE_WAR:
-                wsprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
+                swprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
                 break;
             }
         }
         else
         {
-            wsprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
+            swprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
         }
 
     OpenTerrainLight(FileName);
 
     if (CreateWaterTerrain(this->WorldActive) == false)
     {
-        wsprintf(FileName, L"%s\\TileGrass01.jpg", WorldName);
+        swprintf(FileName, L"%s\\TileGrass01.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE, GL_NEAREST, GL_REPEAT, false);
-        wsprintf(FileName, L"%s\\TileGrass02.jpg", WorldName);
+        swprintf(FileName, L"%s\\TileGrass02.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE + 1, GL_NEAREST, GL_REPEAT, false);
         if (this->WorldActive == WD_51HOME_6TH_CHAR
 #ifndef PJH_NEW_SERVER_SELECT_MAP
@@ -1449,56 +1449,56 @@ void CMapManager::LoadWorld(int Map)
 #endif //PJH_NEW_SERVER_SELECT_MAP
             )
         {
-            wsprintf(FileName, L"%s\\AlphaTileGround01.Tga", WorldName);
+            swprintf(FileName, L"%s\\AlphaTileGround01.Tga", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 2, GL_NEAREST, GL_REPEAT, false);
         }
         else
         {
-            wsprintf(FileName, L"%s\\TileGround01.jpg", WorldName);
+            swprintf(FileName, L"%s\\TileGround01.jpg", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 2, GL_NEAREST, GL_REPEAT, false);
         }
 
         if (this->WorldActive == WD_39KANTURU_3RD)
         {
-            wsprintf(FileName, L"%s\\AlphaTileGround02.Tga", WorldName);
+            swprintf(FileName, L"%s\\AlphaTileGround02.Tga", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 3, GL_NEAREST, GL_REPEAT, false);
         }
         else
         {
-            wsprintf(FileName, L"%s\\TileGround02.jpg", WorldName);
+            swprintf(FileName, L"%s\\TileGround02.jpg", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 3, GL_NEAREST, GL_REPEAT, false);
         }
         if (gMapManager.IsCursedTemple())
         {
-            wsprintf(FileName, L"%s\\AlphaTileGround03.Tga", WorldName);
+            swprintf(FileName, L"%s\\AlphaTileGround03.Tga", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 4, GL_NEAREST, GL_REPEAT, false);
         }
         else
         {
-            wsprintf(FileName, L"%s\\TileGround03.jpg", WorldName);
+            swprintf(FileName, L"%s\\TileGround03.jpg", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 4, GL_NEAREST, GL_REPEAT, false);
         }
 
-        wsprintf(FileName, L"%s\\TileWater01.jpg", WorldName);
+        swprintf(FileName, L"%s\\TileWater01.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE + 5, GL_NEAREST, GL_REPEAT, false);
-        wsprintf(FileName, L"%s\\TileWood01.jpg", WorldName);
+        swprintf(FileName, L"%s\\TileWood01.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE + 6, GL_NEAREST, GL_REPEAT, false);
-        wsprintf(FileName, L"%s\\TileRock01.jpg", WorldName);
+        swprintf(FileName, L"%s\\TileRock01.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE + 7, GL_NEAREST, GL_REPEAT, false);
-        wsprintf(FileName, L"%s\\TileRock02.jpg", WorldName);
+        swprintf(FileName, L"%s\\TileRock02.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE + 8, GL_NEAREST, GL_REPEAT, false);
-        wsprintf(FileName, L"%s\\TileRock03.jpg", WorldName);
+        swprintf(FileName, L"%s\\TileRock03.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE + 9, GL_NEAREST, GL_REPEAT, false);
 #ifdef PJH_NEW_SERVER_SELECT_MAP
         if (this->WorldActive == WD_73NEW_LOGIN_SCENE || this->WorldActive == WD_74NEW_CHARACTER_SCENE)
         {
-            wsprintf(FileName, L"%s\\AlphaTile01.Tga", WorldName);
+            swprintf(FileName, L"%s\\AlphaTile01.Tga", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 10, GL_NEAREST, GL_REPEAT, false);
         }
         else
         {
 #endif //PJH_NEW_SERVER_SELECT_MAP
-            wsprintf(FileName, L"%s\\TileRock04.jpg", WorldName);
+            swprintf(FileName, L"%s\\TileRock04.jpg", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 10, GL_NEAREST, GL_REPEAT, false);
 #ifdef PJH_NEW_SERVER_SELECT_MAP
         }
@@ -1509,75 +1509,75 @@ void CMapManager::LoadWorld(int Map)
         }
         else
         {
-            wsprintf(FileName, L"%s\\TileRock05.jpg", WorldName);
+            swprintf(FileName, L"%s\\TileRock05.jpg", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 11, GL_NEAREST, GL_REPEAT, false);
         }
 #ifdef ASG_ADD_MAP_KARUTAN
         if (IsKarutanMap())
         {
-            wsprintf(FileName, L"%s\\AlphaTile01.Tga", WorldName);
+            swprintf(FileName, L"%s\\AlphaTile01.Tga", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 12, GL_NEAREST, GL_REPEAT, false);
         }
         else
         {
 #endif	// ASG_ADD_MAP_KARUTAN
-            wsprintf(FileName, L"%s\\TileRock06.jpg", WorldName);
+            swprintf(FileName, L"%s\\TileRock06.jpg", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 12, GL_NEAREST, GL_REPEAT, false);
 #ifdef ASG_ADD_MAP_KARUTAN
         }
 #endif	// ASG_ADD_MAP_KARUTAN
-        wsprintf(FileName, L"%s\\TileRock07.jpg", WorldName);
+        swprintf(FileName, L"%s\\TileRock07.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE + 13, GL_NEAREST, GL_REPEAT, false);
 
         for (int i = 1; i <= 16; i++)
         {
             if (i >= 10)
-                wsprintf(FileName, L"%s\\ExtTile%d.jpg", WorldName, i);
+                swprintf(FileName, L"%s\\ExtTile%d.jpg", WorldName, i);
             else
-                wsprintf(FileName, L"%s\\ExtTile0%d.jpg", WorldName, i);
+                swprintf(FileName, L"%s\\ExtTile0%d.jpg", WorldName, i);
             LoadBitmap(FileName, BITMAP_MAPTILE + 13 + i, GL_NEAREST, GL_REPEAT, false);
         }
         if (IsPKField() || IsDoppelGanger2())
         {
-            wsprintf(FileName, L"%s\\TileGrass01_R.jpg", WorldName);
+            swprintf(FileName, L"%s\\TileGrass01_R.jpg", WorldName);
             LoadBitmap(FileName, BITMAP_MAPGRASS, GL_LINEAR, GL_REPEAT, false);
         }
         else
         {
-            wsprintf(FileName, L"%s\\TileGrass01.tga", WorldName);
+            swprintf(FileName, L"%s\\TileGrass01.tga", WorldName);
             LoadBitmap(FileName, BITMAP_MAPGRASS, GL_NEAREST, GL_REPEAT, false);
         }
 
-        wsprintf(FileName, L"%s\\TileGrass02.tga", WorldName);
+        swprintf(FileName, L"%s\\TileGrass02.tga", WorldName);
         LoadBitmap(FileName, BITMAP_MAPGRASS + 1, GL_NEAREST, GL_REPEAT, false);
-        wsprintf(FileName, L"%s\\TileGrass03.tga", WorldName);
+        swprintf(FileName, L"%s\\TileGrass03.tga", WorldName);
         LoadBitmap(FileName, BITMAP_MAPGRASS + 2, GL_NEAREST, GL_REPEAT, false);
 
-        wsprintf(FileName, L"%s\\leaf01.tga", WorldName);
+        swprintf(FileName, L"%s\\leaf01.tga", WorldName);
         LoadBitmap(FileName, BITMAP_LEAF1, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
-        wsprintf(FileName, L"%s\\leaf01.jpg", WorldName);
+        swprintf(FileName, L"%s\\leaf01.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_LEAF1, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
-        wsprintf(FileName, L"%s\\leaf02.jpg", WorldName);
+        swprintf(FileName, L"%s\\leaf02.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_LEAF2, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
 
         if (M34CryWolf1st::IsCyrWolf1st() == true)
         {
-            wsprintf(FileName, L"%s\\rain011.tga", L"World1");
+            swprintf(FileName, L"%s\\rain011.tga", L"World1");
             LoadBitmap(FileName, BITMAP_RAIN, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
         }
         else
         {
-            wsprintf(FileName, L"%s\\rain01.tga", L"World1");
+            swprintf(FileName, L"%s\\rain01.tga", L"World1");
             LoadBitmap(FileName, BITMAP_RAIN, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
         }
-        wsprintf(FileName, L"%s\\rain02.tga", L"World1");
+        swprintf(FileName, L"%s\\rain02.tga", L"World1");
         LoadBitmap(FileName, BITMAP_RAIN_CIRCLE, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
-        wsprintf(FileName, L"%s\\rain03.tga", L"World10");
+        swprintf(FileName, L"%s\\rain03.tga", L"World10");
         LoadBitmap(FileName, BITMAP_RAIN_CIRCLE + 1, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
 
         if (IsEmpireGuardian1() || IsEmpireGuardian2() || IsEmpireGuardian3() || IsEmpireGuardian4())
         {
-            wsprintf(FileName, L"%s\\AlphaTile01.Tga", WorldName);
+            swprintf(FileName, L"%s\\AlphaTile01.Tga", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 10, GL_NEAREST, GL_REPEAT, false);
         }
     }

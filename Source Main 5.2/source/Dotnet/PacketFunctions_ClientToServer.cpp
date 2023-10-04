@@ -18,940 +18,940 @@
 
 void PacketFunctions_ClientToServer::SendPing(uint32_t tickCount, uint16_t attackSpeed)
 {
-    dotnet_SendPing(this->_handle, tickCount, attackSpeed);
+    dotnet_SendPing(this->GetHandle(), tickCount, attackSpeed);
 }
 
 void PacketFunctions_ClientToServer::SendChecksumResponse(uint32_t checksum)
 {
-    dotnet_SendChecksumResponse(this->_handle, checksum);
+    dotnet_SendChecksumResponse(this->GetHandle(), checksum);
 }
 
-void PacketFunctions_ClientToServer::SendPublicChatMessage(const wchar_t* character, uint32_t characterByteLength, const wchar_t* message, uint32_t messageByteLength)
+void PacketFunctions_ClientToServer::SendPublicChatMessage(const wchar_t* character, const wchar_t* message)
 {
-    dotnet_SendPublicChatMessage(this->_handle, character, characterByteLength, message, messageByteLength);
+    dotnet_SendPublicChatMessage(this->GetHandle(), character, message);
 }
 
-void PacketFunctions_ClientToServer::SendWhisperMessage(const wchar_t* receiverName, uint32_t receiverNameByteLength, const wchar_t* message, uint32_t messageByteLength)
+void PacketFunctions_ClientToServer::SendWhisperMessage(const wchar_t* receiverName, const wchar_t* message)
 {
-    dotnet_SendWhisperMessage(this->_handle, receiverName, receiverNameByteLength, message, messageByteLength);
+    dotnet_SendWhisperMessage(this->GetHandle(), receiverName, message);
 }
 
 void PacketFunctions_ClientToServer::SendLoginLongPassword(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
-    dotnet_SendLoginLongPassword(this->_handle, username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
+    dotnet_SendLoginLongPassword(this->GetHandle(), username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendLoginShortPassword(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
-    dotnet_SendLoginShortPassword(this->_handle, username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
+    dotnet_SendLoginShortPassword(this->GetHandle(), username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendLogin075(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
-    dotnet_SendLogin075(this->_handle, username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
+    dotnet_SendLogin075(this->GetHandle(), username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendLogOut(uint32_t type)
 {
-    dotnet_SendLogOut(this->_handle, type);
+    dotnet_SendLogOut(this->GetHandle(), type);
 }
 
 void PacketFunctions_ClientToServer::SendLogOutByCheatDetection(BYTE param, BYTE type)
 {
-    dotnet_SendLogOutByCheatDetection(this->_handle, param, type);
+    dotnet_SendLogOutByCheatDetection(this->GetHandle(), param, type);
 }
 
 void PacketFunctions_ClientToServer::SendResetCharacterPointRequest()
 {
-    dotnet_SendResetCharacterPointRequest(this->_handle);
+    dotnet_SendResetCharacterPointRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendPlayerShopSetItemPrice(BYTE itemSlot, uint32_t price)
 {
-    dotnet_SendPlayerShopSetItemPrice(this->_handle, itemSlot, price);
+    dotnet_SendPlayerShopSetItemPrice(this->GetHandle(), itemSlot, price);
 }
 
-void PacketFunctions_ClientToServer::SendPlayerShopOpen(const wchar_t* storeName, uint32_t storeNameByteLength)
+void PacketFunctions_ClientToServer::SendPlayerShopOpen(const wchar_t* storeName)
 {
-    dotnet_SendPlayerShopOpen(this->_handle, storeName, storeNameByteLength);
+    dotnet_SendPlayerShopOpen(this->GetHandle(), storeName);
 }
 
 void PacketFunctions_ClientToServer::SendPlayerShopClose()
 {
-    dotnet_SendPlayerShopClose(this->_handle);
+    dotnet_SendPlayerShopClose(this->GetHandle());
 }
 
-void PacketFunctions_ClientToServer::SendPlayerShopItemListRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength)
+void PacketFunctions_ClientToServer::SendPlayerShopItemListRequest(uint16_t playerId, const wchar_t* playerName)
 {
-    dotnet_SendPlayerShopItemListRequest(this->_handle, playerId, playerName, playerNameByteLength);
+    dotnet_SendPlayerShopItemListRequest(this->GetHandle(), playerId, playerName);
 }
 
-void PacketFunctions_ClientToServer::SendPlayerShopItemBuyRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength, BYTE itemSlot)
+void PacketFunctions_ClientToServer::SendPlayerShopItemBuyRequest(uint16_t playerId, const wchar_t* playerName, BYTE itemSlot)
 {
-    dotnet_SendPlayerShopItemBuyRequest(this->_handle, playerId, playerName, playerNameByteLength, itemSlot);
+    dotnet_SendPlayerShopItemBuyRequest(this->GetHandle(), playerId, playerName, itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendPickupItemRequest(uint16_t itemId)
 {
-    dotnet_SendPickupItemRequest(this->_handle, itemId);
+    dotnet_SendPickupItemRequest(this->GetHandle(), itemId);
 }
 
 void PacketFunctions_ClientToServer::SendPickupItemRequest075(uint16_t itemId)
 {
-    dotnet_SendPickupItemRequest075(this->_handle, itemId);
+    dotnet_SendPickupItemRequest075(this->GetHandle(), itemId);
 }
 
 void PacketFunctions_ClientToServer::SendDropItemRequest(BYTE targetX, BYTE targetY, BYTE itemSlot)
 {
-    dotnet_SendDropItemRequest(this->_handle, targetX, targetY, itemSlot);
+    dotnet_SendDropItemRequest(this->GetHandle(), targetX, targetY, itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendItemMoveRequest(uint32_t fromStorage, BYTE fromSlot, const BYTE* itemData, uint32_t itemDataByteLength, uint32_t toStorage, BYTE toSlot)
 {
-    dotnet_SendItemMoveRequest(this->_handle, fromStorage, fromSlot, itemData, itemDataByteLength, toStorage, toSlot);
+    dotnet_SendItemMoveRequest(this->GetHandle(), fromStorage, fromSlot, itemData, itemDataByteLength, toStorage, toSlot);
 }
 
 void PacketFunctions_ClientToServer::SendConsumeItemRequest(BYTE itemSlot, BYTE targetSlot, uint32_t fruitConsumption)
 {
-    dotnet_SendConsumeItemRequest(this->_handle, itemSlot, targetSlot, fruitConsumption);
+    dotnet_SendConsumeItemRequest(this->GetHandle(), itemSlot, targetSlot, fruitConsumption);
 }
 
 void PacketFunctions_ClientToServer::SendConsumeItemRequest075(BYTE itemSlot, BYTE targetSlot)
 {
-    dotnet_SendConsumeItemRequest075(this->_handle, itemSlot, targetSlot);
+    dotnet_SendConsumeItemRequest075(this->GetHandle(), itemSlot, targetSlot);
 }
 
 void PacketFunctions_ClientToServer::SendTalkToNpcRequest(uint16_t npcId)
 {
-    dotnet_SendTalkToNpcRequest(this->_handle, npcId);
+    dotnet_SendTalkToNpcRequest(this->GetHandle(), npcId);
 }
 
 void PacketFunctions_ClientToServer::SendCloseNpcRequest()
 {
-    dotnet_SendCloseNpcRequest(this->_handle);
+    dotnet_SendCloseNpcRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendBuyItemFromNpcRequest(BYTE itemSlot)
 {
-    dotnet_SendBuyItemFromNpcRequest(this->_handle, itemSlot);
+    dotnet_SendBuyItemFromNpcRequest(this->GetHandle(), itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendSellItemToNpcRequest(BYTE itemSlot)
 {
-    dotnet_SendSellItemToNpcRequest(this->_handle, itemSlot);
+    dotnet_SendSellItemToNpcRequest(this->GetHandle(), itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendRepairItemRequest(BYTE itemSlot, BYTE isSelfRepair)
 {
-    dotnet_SendRepairItemRequest(this->_handle, itemSlot, isSelfRepair);
+    dotnet_SendRepairItemRequest(this->GetHandle(), itemSlot, isSelfRepair);
 }
 
 void PacketFunctions_ClientToServer::SendWarpCommandRequest(uint32_t commandKey, uint16_t warpInfoIndex)
 {
-    dotnet_SendWarpCommandRequest(this->_handle, commandKey, warpInfoIndex);
+    dotnet_SendWarpCommandRequest(this->GetHandle(), commandKey, warpInfoIndex);
 }
 
 void PacketFunctions_ClientToServer::SendEnterGateRequest(uint16_t gateNumber, BYTE teleportTargetX, BYTE teleportTargetY)
 {
-    dotnet_SendEnterGateRequest(this->_handle, gateNumber, teleportTargetX, teleportTargetY);
+    dotnet_SendEnterGateRequest(this->GetHandle(), gateNumber, teleportTargetX, teleportTargetY);
 }
 
 void PacketFunctions_ClientToServer::SendEnterGateRequest075(BYTE gateNumber, BYTE teleportTargetX, BYTE teleportTargetY)
 {
-    dotnet_SendEnterGateRequest075(this->_handle, gateNumber, teleportTargetX, teleportTargetY);
+    dotnet_SendEnterGateRequest075(this->GetHandle(), gateNumber, teleportTargetX, teleportTargetY);
 }
 
 void PacketFunctions_ClientToServer::SendTeleportTarget(uint16_t targetId, BYTE teleportTargetX, BYTE teleportTargetY)
 {
-    dotnet_SendTeleportTarget(this->_handle, targetId, teleportTargetX, teleportTargetY);
+    dotnet_SendTeleportTarget(this->GetHandle(), targetId, teleportTargetX, teleportTargetY);
 }
 
 void PacketFunctions_ClientToServer::SendServerChangeAuthentication(const BYTE* accountXor3, uint32_t accountXor3ByteLength, const BYTE* characterNameXor3, uint32_t characterNameXor3ByteLength, uint32_t authCode1, uint32_t authCode2, uint32_t authCode3, uint32_t authCode4, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
-    dotnet_SendServerChangeAuthentication(this->_handle, accountXor3, accountXor3ByteLength, characterNameXor3, characterNameXor3ByteLength, authCode1, authCode2, authCode3, authCode4, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
+    dotnet_SendServerChangeAuthentication(this->GetHandle(), accountXor3, accountXor3ByteLength, characterNameXor3, characterNameXor3ByteLength, authCode1, authCode2, authCode3, authCode4, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeStatusRequest()
 {
-    dotnet_SendCastleSiegeStatusRequest(this->_handle);
+    dotnet_SendCastleSiegeStatusRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeRegistrationRequest()
 {
-    dotnet_SendCastleSiegeRegistrationRequest(this->_handle);
+    dotnet_SendCastleSiegeRegistrationRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeUnregisterRequest()
 {
-    dotnet_SendCastleSiegeUnregisterRequest(this->_handle);
+    dotnet_SendCastleSiegeUnregisterRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeRegistrationStateRequest()
 {
-    dotnet_SendCastleSiegeRegistrationStateRequest(this->_handle);
+    dotnet_SendCastleSiegeRegistrationStateRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeMarkRegistration(BYTE itemIndex)
 {
-    dotnet_SendCastleSiegeMarkRegistration(this->_handle, itemIndex);
+    dotnet_SendCastleSiegeMarkRegistration(this->GetHandle(), itemIndex);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeDefenseBuyRequest(uint32_t npcNumber, uint32_t npcIndex)
 {
-    dotnet_SendCastleSiegeDefenseBuyRequest(this->_handle, npcNumber, npcIndex);
+    dotnet_SendCastleSiegeDefenseBuyRequest(this->GetHandle(), npcNumber, npcIndex);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeDefenseRepairRequest(uint32_t npcNumber, uint32_t npcIndex)
 {
-    dotnet_SendCastleSiegeDefenseRepairRequest(this->_handle, npcNumber, npcIndex);
+    dotnet_SendCastleSiegeDefenseRepairRequest(this->GetHandle(), npcNumber, npcIndex);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeDefenseUpgradeRequest(uint32_t npcNumber, uint32_t npcIndex, uint32_t npcUpgradeType, uint32_t npcUpgradeValue)
 {
-    dotnet_SendCastleSiegeDefenseUpgradeRequest(this->_handle, npcNumber, npcIndex, npcUpgradeType, npcUpgradeValue);
+    dotnet_SendCastleSiegeDefenseUpgradeRequest(this->GetHandle(), npcNumber, npcIndex, npcUpgradeType, npcUpgradeValue);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeTaxInfoRequest()
 {
-    dotnet_SendCastleSiegeTaxInfoRequest(this->_handle);
+    dotnet_SendCastleSiegeTaxInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeTaxChangeRequest(BYTE taxType, uint32_t taxRate)
 {
-    dotnet_SendCastleSiegeTaxChangeRequest(this->_handle, taxType, taxRate);
+    dotnet_SendCastleSiegeTaxChangeRequest(this->GetHandle(), taxType, taxRate);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeTaxMoneyWithdraw(uint32_t amount)
 {
-    dotnet_SendCastleSiegeTaxMoneyWithdraw(this->_handle, amount);
+    dotnet_SendCastleSiegeTaxMoneyWithdraw(this->GetHandle(), amount);
 }
 
 void PacketFunctions_ClientToServer::SendToggleCastleGateRequest(BYTE closeState, uint16_t gateId)
 {
-    dotnet_SendToggleCastleGateRequest(this->_handle, closeState, gateId);
+    dotnet_SendToggleCastleGateRequest(this->GetHandle(), closeState, gateId);
 }
 
 void PacketFunctions_ClientToServer::SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, BYTE command)
 {
-    dotnet_SendCastleGuildCommand(this->_handle, team, positionX, positionY, command);
+    dotnet_SendCastleGuildCommand(this->GetHandle(), team, positionX, positionY, command);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeHuntingZoneEntranceSetting(BYTE isPublic)
 {
-    dotnet_SendCastleSiegeHuntingZoneEntranceSetting(this->_handle, isPublic);
+    dotnet_SendCastleSiegeHuntingZoneEntranceSetting(this->GetHandle(), isPublic);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeGateListRequest()
 {
-    dotnet_SendCastleSiegeGateListRequest(this->_handle);
+    dotnet_SendCastleSiegeGateListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeStatueListRequest()
 {
-    dotnet_SendCastleSiegeStatueListRequest(this->_handle);
+    dotnet_SendCastleSiegeStatueListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeRegisteredGuildsListRequest()
 {
-    dotnet_SendCastleSiegeRegisteredGuildsListRequest(this->_handle);
+    dotnet_SendCastleSiegeRegisteredGuildsListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleOwnerListRequest()
 {
-    dotnet_SendCastleOwnerListRequest(this->_handle);
+    dotnet_SendCastleOwnerListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendFireCatapultRequest(uint16_t catapultId, BYTE targetAreaIndex)
 {
-    dotnet_SendFireCatapultRequest(this->_handle, catapultId, targetAreaIndex);
+    dotnet_SendFireCatapultRequest(this->GetHandle(), catapultId, targetAreaIndex);
 }
 
 void PacketFunctions_ClientToServer::SendWeaponExplosionRequest(uint16_t catapultId)
 {
-    dotnet_SendWeaponExplosionRequest(this->_handle, catapultId);
+    dotnet_SendWeaponExplosionRequest(this->GetHandle(), catapultId);
 }
 
 void PacketFunctions_ClientToServer::SendGuildLogoOfCastleOwnerRequest()
 {
-    dotnet_SendGuildLogoOfCastleOwnerRequest(this->_handle);
+    dotnet_SendGuildLogoOfCastleOwnerRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeHuntingZoneEnterRequest(uint32_t money)
 {
-    dotnet_SendCastleSiegeHuntingZoneEnterRequest(this->_handle, money);
+    dotnet_SendCastleSiegeHuntingZoneEnterRequest(this->GetHandle(), money);
 }
 
 void PacketFunctions_ClientToServer::SendCrywolfInfoRequest()
 {
-    dotnet_SendCrywolfInfoRequest(this->_handle);
+    dotnet_SendCrywolfInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCrywolfContractRequest(uint16_t statueId)
 {
-    dotnet_SendCrywolfContractRequest(this->_handle, statueId);
+    dotnet_SendCrywolfContractRequest(this->GetHandle(), statueId);
 }
 
 void PacketFunctions_ClientToServer::SendCrywolfChaosRateBenefitRequest()
 {
-    dotnet_SendCrywolfChaosRateBenefitRequest(this->_handle);
+    dotnet_SendCrywolfChaosRateBenefitRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendWhiteAngelItemRequest()
 {
-    dotnet_SendWhiteAngelItemRequest(this->_handle);
+    dotnet_SendWhiteAngelItemRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEnterOnWerewolfRequest()
 {
-    dotnet_SendEnterOnWerewolfRequest(this->_handle);
+    dotnet_SendEnterOnWerewolfRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEnterOnGatekeeperRequest()
 {
-    dotnet_SendEnterOnGatekeeperRequest(this->_handle);
+    dotnet_SendEnterOnGatekeeperRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLeoHelperItemRequest()
 {
-    dotnet_SendLeoHelperItemRequest(this->_handle);
+    dotnet_SendLeoHelperItemRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendMoveToDeviasBySnowmanRequest()
 {
-    dotnet_SendMoveToDeviasBySnowmanRequest(this->_handle);
+    dotnet_SendMoveToDeviasBySnowmanRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendSantaClausItemRequest()
 {
-    dotnet_SendSantaClausItemRequest(this->_handle);
+    dotnet_SendSantaClausItemRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendKanturuInfoRequest()
 {
-    dotnet_SendKanturuInfoRequest(this->_handle);
+    dotnet_SendKanturuInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendKanturuEnterRequest()
 {
-    dotnet_SendKanturuEnterRequest(this->_handle);
+    dotnet_SendKanturuEnterRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendRaklionStateInfoRequest()
 {
-    dotnet_SendRaklionStateInfoRequest(this->_handle);
+    dotnet_SendRaklionStateInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCashShopPointInfoRequest()
 {
-    dotnet_SendCashShopPointInfoRequest(this->_handle);
+    dotnet_SendCashShopPointInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCashShopOpenState(BYTE isClosed)
 {
-    dotnet_SendCashShopOpenState(this->_handle, isClosed);
+    dotnet_SendCashShopOpenState(this->GetHandle(), isClosed);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopItemBuyRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag)
 {
-    dotnet_SendCashShopItemBuyRequest(this->_handle, packageMainIndex, category, productMainIndex, itemIndex, coinIndex, mileageFlag);
+    dotnet_SendCashShopItemBuyRequest(this->GetHandle(), packageMainIndex, category, productMainIndex, itemIndex, coinIndex, mileageFlag);
 }
 
-void PacketFunctions_ClientToServer::SendCashShopItemGiftRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag, const wchar_t* giftReceiverName, uint32_t giftReceiverNameByteLength, const wchar_t* giftText, uint32_t giftTextByteLength)
+void PacketFunctions_ClientToServer::SendCashShopItemGiftRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag, const wchar_t* giftReceiverName, const wchar_t* giftText)
 {
-    dotnet_SendCashShopItemGiftRequest(this->_handle, packageMainIndex, category, productMainIndex, itemIndex, coinIndex, mileageFlag, giftReceiverName, giftReceiverNameByteLength, giftText, giftTextByteLength);
+    dotnet_SendCashShopItemGiftRequest(this->GetHandle(), packageMainIndex, category, productMainIndex, itemIndex, coinIndex, mileageFlag, giftReceiverName, giftText);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopStorageListRequest(uint32_t pageIndex, BYTE inventoryType)
 {
-    dotnet_SendCashShopStorageListRequest(this->_handle, pageIndex, inventoryType);
+    dotnet_SendCashShopStorageListRequest(this->GetHandle(), pageIndex, inventoryType);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopDeleteStorageItemRequest(uint32_t baseItemCode, uint32_t mainItemCode, BYTE productType)
 {
-    dotnet_SendCashShopDeleteStorageItemRequest(this->_handle, baseItemCode, mainItemCode, productType);
+    dotnet_SendCashShopDeleteStorageItemRequest(this->GetHandle(), baseItemCode, mainItemCode, productType);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopStorageItemConsumeRequest(uint32_t baseItemCode, uint32_t mainItemCode, uint16_t itemIndex, BYTE productType)
 {
-    dotnet_SendCashShopStorageItemConsumeRequest(this->_handle, baseItemCode, mainItemCode, itemIndex, productType);
+    dotnet_SendCashShopStorageItemConsumeRequest(this->GetHandle(), baseItemCode, mainItemCode, itemIndex, productType);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopEventItemListRequest(uint32_t categoryIndex)
 {
-    dotnet_SendCashShopEventItemListRequest(this->_handle, categoryIndex);
+    dotnet_SendCashShopEventItemListRequest(this->GetHandle(), categoryIndex);
 }
 
 void PacketFunctions_ClientToServer::SendUnlockVault(uint16_t pin)
 {
-    dotnet_SendUnlockVault(this->_handle, pin);
+    dotnet_SendUnlockVault(this->GetHandle(), pin);
 }
 
-void PacketFunctions_ClientToServer::SendSetVaultPin(uint16_t pin, const wchar_t* password, uint32_t passwordByteLength)
+void PacketFunctions_ClientToServer::SendSetVaultPin(uint16_t pin, const wchar_t* password)
 {
-    dotnet_SendSetVaultPin(this->_handle, pin, password, passwordByteLength);
+    dotnet_SendSetVaultPin(this->GetHandle(), pin, password);
 }
 
-void PacketFunctions_ClientToServer::SendRemoveVaultPin(const wchar_t* password, uint32_t passwordByteLength)
+void PacketFunctions_ClientToServer::SendRemoveVaultPin(const wchar_t* password)
 {
-    dotnet_SendRemoveVaultPin(this->_handle, password, passwordByteLength);
+    dotnet_SendRemoveVaultPin(this->GetHandle(), password);
 }
 
 void PacketFunctions_ClientToServer::SendVaultClosed()
 {
-    dotnet_SendVaultClosed(this->_handle);
+    dotnet_SendVaultClosed(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendVaultMoveMoneyRequest(uint32_t direction, uint32_t amount)
 {
-    dotnet_SendVaultMoveMoneyRequest(this->_handle, direction, amount);
+    dotnet_SendVaultMoveMoneyRequest(this->GetHandle(), direction, amount);
 }
 
 void PacketFunctions_ClientToServer::SendLahapJewelMixRequest(uint32_t operation, uint32_t item, uint32_t mixingStackSize, BYTE unmixingSourceSlot)
 {
-    dotnet_SendLahapJewelMixRequest(this->_handle, operation, item, mixingStackSize, unmixingSourceSlot);
+    dotnet_SendLahapJewelMixRequest(this->GetHandle(), operation, item, mixingStackSize, unmixingSourceSlot);
 }
 
 void PacketFunctions_ClientToServer::SendPartyListRequest()
 {
-    dotnet_SendPartyListRequest(this->_handle);
+    dotnet_SendPartyListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendPartyPlayerKickRequest(BYTE playerIndex)
 {
-    dotnet_SendPartyPlayerKickRequest(this->_handle, playerIndex);
+    dotnet_SendPartyPlayerKickRequest(this->GetHandle(), playerIndex);
 }
 
 void PacketFunctions_ClientToServer::SendPartyInviteRequest(uint16_t targetPlayerId)
 {
-    dotnet_SendPartyInviteRequest(this->_handle, targetPlayerId);
+    dotnet_SendPartyInviteRequest(this->GetHandle(), targetPlayerId);
 }
 
 void PacketFunctions_ClientToServer::SendPartyInviteResponse(BYTE accepted, uint16_t requesterId)
 {
-    dotnet_SendPartyInviteResponse(this->_handle, accepted, requesterId);
+    dotnet_SendPartyInviteResponse(this->GetHandle(), accepted, requesterId);
 }
 
 void PacketFunctions_ClientToServer::SendWalkRequest(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, const BYTE* directions, uint32_t directionsByteLength)
 {
-    dotnet_SendWalkRequest(this->_handle, sourceX, sourceY, stepCount, targetRotation, directions, directionsByteLength);
+    dotnet_SendWalkRequest(this->GetHandle(), sourceX, sourceY, stepCount, targetRotation, directions, directionsByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendWalkRequest075(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, const BYTE* directions, uint32_t directionsByteLength)
 {
-    dotnet_SendWalkRequest075(this->_handle, sourceX, sourceY, stepCount, targetRotation, directions, directionsByteLength);
+    dotnet_SendWalkRequest075(this->GetHandle(), sourceX, sourceY, stepCount, targetRotation, directions, directionsByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendInstantMoveRequest(BYTE targetX, BYTE targetY)
 {
-    dotnet_SendInstantMoveRequest(this->_handle, targetX, targetY);
+    dotnet_SendInstantMoveRequest(this->GetHandle(), targetX, targetY);
 }
 
 void PacketFunctions_ClientToServer::SendAnimationRequest(BYTE rotation, BYTE animationNumber)
 {
-    dotnet_SendAnimationRequest(this->_handle, rotation, animationNumber);
+    dotnet_SendAnimationRequest(this->GetHandle(), rotation, animationNumber);
 }
 
 void PacketFunctions_ClientToServer::SendRequestCharacterList(BYTE language)
 {
-    dotnet_SendRequestCharacterList(this->_handle, language);
+    dotnet_SendRequestCharacterList(this->GetHandle(), language);
 }
 
-void PacketFunctions_ClientToServer::SendCreateCharacter(const wchar_t* name, uint32_t nameByteLength, uint32_t class_)
+void PacketFunctions_ClientToServer::SendCreateCharacter(const wchar_t* name, uint32_t class_)
 {
-    dotnet_SendCreateCharacter(this->_handle, name, nameByteLength, class_);
+    dotnet_SendCreateCharacter(this->GetHandle(), name, class_);
 }
 
-void PacketFunctions_ClientToServer::SendDeleteCharacter(const wchar_t* name, uint32_t nameByteLength, const wchar_t* securityCode, uint32_t securityCodeByteLength)
+void PacketFunctions_ClientToServer::SendDeleteCharacter(const wchar_t* name, const wchar_t* securityCode)
 {
-    dotnet_SendDeleteCharacter(this->_handle, name, nameByteLength, securityCode, securityCodeByteLength);
+    dotnet_SendDeleteCharacter(this->GetHandle(), name, securityCode);
 }
 
-void PacketFunctions_ClientToServer::SendSelectCharacter(const wchar_t* name, uint32_t nameByteLength)
+void PacketFunctions_ClientToServer::SendSelectCharacter(const wchar_t* name)
 {
-    dotnet_SendSelectCharacter(this->_handle, name, nameByteLength);
+    dotnet_SendSelectCharacter(this->GetHandle(), name);
 }
 
-void PacketFunctions_ClientToServer::SendFocusCharacter(const wchar_t* name, uint32_t nameByteLength)
+void PacketFunctions_ClientToServer::SendFocusCharacter(const wchar_t* name)
 {
-    dotnet_SendFocusCharacter(this->_handle, name, nameByteLength);
+    dotnet_SendFocusCharacter(this->GetHandle(), name);
 }
 
 void PacketFunctions_ClientToServer::SendIncreaseCharacterStatPoint(uint32_t statType)
 {
-    dotnet_SendIncreaseCharacterStatPoint(this->_handle, statType);
+    dotnet_SendIncreaseCharacterStatPoint(this->GetHandle(), statType);
 }
 
 void PacketFunctions_ClientToServer::SendClientReadyAfterMapChange()
 {
-    dotnet_SendClientReadyAfterMapChange(this->_handle);
+    dotnet_SendClientReadyAfterMapChange(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendSaveKeyConfiguration(const BYTE* configuration, uint32_t configurationByteLength)
 {
-    dotnet_SendSaveKeyConfiguration(this->_handle, configuration, configurationByteLength);
+    dotnet_SendSaveKeyConfiguration(this->GetHandle(), configuration, configurationByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendAddMasterSkillPoint(uint16_t skillId)
 {
-    dotnet_SendAddMasterSkillPoint(this->_handle, skillId);
+    dotnet_SendAddMasterSkillPoint(this->GetHandle(), skillId);
 }
 
 void PacketFunctions_ClientToServer::SendHitRequest(uint16_t targetId, BYTE attackAnimation, BYTE lookingDirection)
 {
-    dotnet_SendHitRequest(this->_handle, targetId, attackAnimation, lookingDirection);
+    dotnet_SendHitRequest(this->GetHandle(), targetId, attackAnimation, lookingDirection);
 }
 
 void PacketFunctions_ClientToServer::SendTargetedSkill(uint16_t skillId, uint16_t targetId)
 {
-    dotnet_SendTargetedSkill(this->_handle, skillId, targetId);
+    dotnet_SendTargetedSkill(this->GetHandle(), skillId, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendTargetedSkill075(BYTE skillIndex, uint16_t targetId)
 {
-    dotnet_SendTargetedSkill075(this->_handle, skillIndex, targetId);
+    dotnet_SendTargetedSkill075(this->GetHandle(), skillIndex, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendTargetedSkill095(BYTE skillIndex, uint16_t targetId)
 {
-    dotnet_SendTargetedSkill095(this->_handle, skillIndex, targetId);
+    dotnet_SendTargetedSkill095(this->GetHandle(), skillIndex, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendMagicEffectCancelRequest(uint16_t skillId, uint16_t playerId)
 {
-    dotnet_SendMagicEffectCancelRequest(this->_handle, skillId, playerId);
+    dotnet_SendMagicEffectCancelRequest(this->GetHandle(), skillId, playerId);
 }
 
 void PacketFunctions_ClientToServer::SendAreaSkill(uint16_t skillId, BYTE targetX, BYTE targetY, BYTE rotation, uint16_t extraTargetId, BYTE animationCounter)
 {
-    dotnet_SendAreaSkill(this->_handle, skillId, targetX, targetY, rotation, extraTargetId, animationCounter);
+    dotnet_SendAreaSkill(this->GetHandle(), skillId, targetX, targetY, rotation, extraTargetId, animationCounter);
 }
 
 void PacketFunctions_ClientToServer::SendAreaSkill075(BYTE skillIndex, BYTE targetX, BYTE targetY, BYTE rotation)
 {
-    dotnet_SendAreaSkill075(this->_handle, skillIndex, targetX, targetY, rotation);
+    dotnet_SendAreaSkill075(this->GetHandle(), skillIndex, targetX, targetY, rotation);
 }
 
 void PacketFunctions_ClientToServer::SendAreaSkill095(BYTE skillIndex, BYTE targetX, BYTE targetY, BYTE rotation)
 {
-    dotnet_SendAreaSkill095(this->_handle, skillIndex, targetX, targetY, rotation);
+    dotnet_SendAreaSkill095(this->GetHandle(), skillIndex, targetX, targetY, rotation);
 }
 
 void PacketFunctions_ClientToServer::SendRageAttackRequest(uint16_t skillId, uint16_t targetId)
 {
-    dotnet_SendRageAttackRequest(this->_handle, skillId, targetId);
+    dotnet_SendRageAttackRequest(this->GetHandle(), skillId, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendRageAttackRangeRequest(uint16_t skillId, uint16_t targetId)
 {
-    dotnet_SendRageAttackRangeRequest(this->_handle, skillId, targetId);
+    dotnet_SendRageAttackRangeRequest(this->GetHandle(), skillId, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendTradeCancel()
 {
-    dotnet_SendTradeCancel(this->_handle);
+    dotnet_SendTradeCancel(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendTradeButtonStateChange(uint32_t newState)
 {
-    dotnet_SendTradeButtonStateChange(this->_handle, newState);
+    dotnet_SendTradeButtonStateChange(this->GetHandle(), newState);
 }
 
 void PacketFunctions_ClientToServer::SendTradeRequest(uint16_t playerId)
 {
-    dotnet_SendTradeRequest(this->_handle, playerId);
+    dotnet_SendTradeRequest(this->GetHandle(), playerId);
 }
 
 void PacketFunctions_ClientToServer::SendTradeRequestResponse(BYTE tradeAccepted)
 {
-    dotnet_SendTradeRequestResponse(this->_handle, tradeAccepted);
+    dotnet_SendTradeRequestResponse(this->GetHandle(), tradeAccepted);
 }
 
 void PacketFunctions_ClientToServer::SendSetTradeMoney(uint32_t amount)
 {
-    dotnet_SendSetTradeMoney(this->_handle, amount);
+    dotnet_SendSetTradeMoney(this->GetHandle(), amount);
 }
 
 void PacketFunctions_ClientToServer::SendLetterDeleteRequest(uint16_t letterIndex)
 {
-    dotnet_SendLetterDeleteRequest(this->_handle, letterIndex);
+    dotnet_SendLetterDeleteRequest(this->GetHandle(), letterIndex);
 }
 
 void PacketFunctions_ClientToServer::SendLetterListRequest()
 {
-    dotnet_SendLetterListRequest(this->_handle);
+    dotnet_SendLetterListRequest(this->GetHandle());
 }
 
-void PacketFunctions_ClientToServer::SendLetterSendRequest(uint32_t letterId, const wchar_t* receiver, uint32_t receiverByteLength, const wchar_t* title, uint32_t titleByteLength, BYTE rotation, BYTE animation, uint16_t messageLength, const wchar_t* message, uint32_t messageByteLength)
+void PacketFunctions_ClientToServer::SendLetterSendRequest(uint32_t letterId, const wchar_t* receiver, const wchar_t* title, BYTE rotation, BYTE animation, uint16_t messageLength, const wchar_t* message)
 {
-    dotnet_SendLetterSendRequest(this->_handle, letterId, receiver, receiverByteLength, title, titleByteLength, rotation, animation, messageLength, message, messageByteLength);
+    dotnet_SendLetterSendRequest(this->GetHandle(), letterId, receiver, title, rotation, animation, messageLength, message);
 }
 
 void PacketFunctions_ClientToServer::SendLetterReadRequest(uint16_t letterIndex)
 {
-    dotnet_SendLetterReadRequest(this->_handle, letterIndex);
+    dotnet_SendLetterReadRequest(this->GetHandle(), letterIndex);
 }
 
-void PacketFunctions_ClientToServer::SendGuildKickPlayerRequest(const wchar_t* playerName, uint32_t playerNameByteLength, const wchar_t* securityCode, uint32_t securityCodeByteLength)
+void PacketFunctions_ClientToServer::SendGuildKickPlayerRequest(const wchar_t* playerName, const wchar_t* securityCode)
 {
-    dotnet_SendGuildKickPlayerRequest(this->_handle, playerName, playerNameByteLength, securityCode, securityCodeByteLength);
+    dotnet_SendGuildKickPlayerRequest(this->GetHandle(), playerName, securityCode);
 }
 
 void PacketFunctions_ClientToServer::SendGuildJoinRequest(uint16_t guildMasterPlayerId)
 {
-    dotnet_SendGuildJoinRequest(this->_handle, guildMasterPlayerId);
+    dotnet_SendGuildJoinRequest(this->GetHandle(), guildMasterPlayerId);
 }
 
 void PacketFunctions_ClientToServer::SendGuildJoinResponse(BYTE accepted, uint16_t requesterId)
 {
-    dotnet_SendGuildJoinResponse(this->_handle, accepted, requesterId);
+    dotnet_SendGuildJoinResponse(this->GetHandle(), accepted, requesterId);
 }
 
 void PacketFunctions_ClientToServer::SendGuildListRequest()
 {
-    dotnet_SendGuildListRequest(this->_handle);
+    dotnet_SendGuildListRequest(this->GetHandle());
 }
 
-void PacketFunctions_ClientToServer::SendGuildCreateRequest(const wchar_t* guildName, uint32_t guildNameByteLength, const BYTE* guildEmblem, uint32_t guildEmblemByteLength)
+void PacketFunctions_ClientToServer::SendGuildCreateRequest(const wchar_t* guildName, const BYTE* guildEmblem, uint32_t guildEmblemByteLength)
 {
-    dotnet_SendGuildCreateRequest(this->_handle, guildName, guildNameByteLength, guildEmblem, guildEmblemByteLength);
+    dotnet_SendGuildCreateRequest(this->GetHandle(), guildName, guildEmblem, guildEmblemByteLength);
 }
 
-void PacketFunctions_ClientToServer::SendGuildCreateRequest075(const wchar_t* guildName, uint32_t guildNameByteLength, const BYTE* guildEmblem, uint32_t guildEmblemByteLength)
+void PacketFunctions_ClientToServer::SendGuildCreateRequest075(const wchar_t* guildName, const BYTE* guildEmblem, uint32_t guildEmblemByteLength)
 {
-    dotnet_SendGuildCreateRequest075(this->_handle, guildName, guildNameByteLength, guildEmblem, guildEmblemByteLength);
+    dotnet_SendGuildCreateRequest075(this->GetHandle(), guildName, guildEmblem, guildEmblemByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendGuildMasterAnswer(BYTE showCreationDialog)
 {
-    dotnet_SendGuildMasterAnswer(this->_handle, showCreationDialog);
+    dotnet_SendGuildMasterAnswer(this->GetHandle(), showCreationDialog);
 }
 
 void PacketFunctions_ClientToServer::SendCancelGuildCreation()
 {
-    dotnet_SendCancelGuildCreation(this->_handle);
+    dotnet_SendCancelGuildCreation(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendGuildWarResponse(BYTE accepted)
 {
-    dotnet_SendGuildWarResponse(this->_handle, accepted);
+    dotnet_SendGuildWarResponse(this->GetHandle(), accepted);
 }
 
 void PacketFunctions_ClientToServer::SendGuildInfoRequest(uint32_t guildId)
 {
-    dotnet_SendGuildInfoRequest(this->_handle, guildId);
+    dotnet_SendGuildInfoRequest(this->GetHandle(), guildId);
 }
 
-void PacketFunctions_ClientToServer::SendGuildRoleAssignRequest(uint32_t role, const wchar_t* playerName, uint32_t playerNameByteLength, BYTE type)
+void PacketFunctions_ClientToServer::SendGuildRoleAssignRequest(uint32_t role, const wchar_t* playerName, BYTE type)
 {
-    dotnet_SendGuildRoleAssignRequest(this->_handle, role, playerName, playerNameByteLength, type);
+    dotnet_SendGuildRoleAssignRequest(this->GetHandle(), role, playerName, type);
 }
 
 void PacketFunctions_ClientToServer::SendGuildTypeChangeRequest(BYTE guildType)
 {
-    dotnet_SendGuildTypeChangeRequest(this->_handle, guildType);
+    dotnet_SendGuildTypeChangeRequest(this->GetHandle(), guildType);
 }
 
 void PacketFunctions_ClientToServer::SendGuildRelationshipChangeRequest(uint32_t relationshipType, uint32_t requestType, uint16_t targetPlayerId)
 {
-    dotnet_SendGuildRelationshipChangeRequest(this->_handle, relationshipType, requestType, targetPlayerId);
+    dotnet_SendGuildRelationshipChangeRequest(this->GetHandle(), relationshipType, requestType, targetPlayerId);
 }
 
 void PacketFunctions_ClientToServer::SendGuildRelationshipChangeResponse(uint32_t relationshipType, uint32_t requestType, BYTE response, uint16_t targetPlayerId)
 {
-    dotnet_SendGuildRelationshipChangeResponse(this->_handle, relationshipType, requestType, response, targetPlayerId);
+    dotnet_SendGuildRelationshipChangeResponse(this->GetHandle(), relationshipType, requestType, response, targetPlayerId);
 }
 
 void PacketFunctions_ClientToServer::SendRequestAllianceList()
 {
-    dotnet_SendRequestAllianceList(this->_handle);
+    dotnet_SendRequestAllianceList(this->GetHandle());
 }
 
-void PacketFunctions_ClientToServer::SendRemoveAllianceGuildRequest(const wchar_t* guildName, uint32_t guildNameByteLength)
+void PacketFunctions_ClientToServer::SendRemoveAllianceGuildRequest(const wchar_t* guildName)
 {
-    dotnet_SendRemoveAllianceGuildRequest(this->_handle, guildName, guildNameByteLength);
+    dotnet_SendRemoveAllianceGuildRequest(this->GetHandle(), guildName);
 }
 
 void PacketFunctions_ClientToServer::SendPingResponse()
 {
-    dotnet_SendPingResponse(this->_handle);
+    dotnet_SendPingResponse(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendItemRepair(BYTE inventoryItemSlot)
 {
-    dotnet_SendItemRepair(this->_handle, inventoryItemSlot);
+    dotnet_SendItemRepair(this->GetHandle(), inventoryItemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendChaosMachineMixRequest(uint32_t mixType, BYTE socketSlot)
 {
-    dotnet_SendChaosMachineMixRequest(this->_handle, mixType, socketSlot);
+    dotnet_SendChaosMachineMixRequest(this->GetHandle(), mixType, socketSlot);
 }
 
 void PacketFunctions_ClientToServer::SendCraftingDialogCloseRequest()
 {
-    dotnet_SendCraftingDialogCloseRequest(this->_handle);
+    dotnet_SendCraftingDialogCloseRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendFriendListRequest()
 {
-    dotnet_SendFriendListRequest(this->_handle);
+    dotnet_SendFriendListRequest(this->GetHandle());
 }
 
-void PacketFunctions_ClientToServer::SendFriendAddRequest(const wchar_t* friendName, uint32_t friendNameByteLength)
+void PacketFunctions_ClientToServer::SendFriendAddRequest(const wchar_t* friendName)
 {
-    dotnet_SendFriendAddRequest(this->_handle, friendName, friendNameByteLength);
+    dotnet_SendFriendAddRequest(this->GetHandle(), friendName);
 }
 
-void PacketFunctions_ClientToServer::SendFriendDelete(const wchar_t* friendName, uint32_t friendNameByteLength)
+void PacketFunctions_ClientToServer::SendFriendDelete(const wchar_t* friendName)
 {
-    dotnet_SendFriendDelete(this->_handle, friendName, friendNameByteLength);
+    dotnet_SendFriendDelete(this->GetHandle(), friendName);
 }
 
-void PacketFunctions_ClientToServer::SendChatRoomCreateRequest(const wchar_t* friendName, uint32_t friendNameByteLength)
+void PacketFunctions_ClientToServer::SendChatRoomCreateRequest(const wchar_t* friendName)
 {
-    dotnet_SendChatRoomCreateRequest(this->_handle, friendName, friendNameByteLength);
+    dotnet_SendChatRoomCreateRequest(this->GetHandle(), friendName);
 }
 
-void PacketFunctions_ClientToServer::SendFriendAddResponse(BYTE accepted, const wchar_t* friendRequesterName, uint32_t friendRequesterNameByteLength)
+void PacketFunctions_ClientToServer::SendFriendAddResponse(BYTE accepted, const wchar_t* friendRequesterName)
 {
-    dotnet_SendFriendAddResponse(this->_handle, accepted, friendRequesterName, friendRequesterNameByteLength);
+    dotnet_SendFriendAddResponse(this->GetHandle(), accepted, friendRequesterName);
 }
 
 void PacketFunctions_ClientToServer::SendSetFriendOnlineState(BYTE onlineState)
 {
-    dotnet_SendSetFriendOnlineState(this->_handle, onlineState);
+    dotnet_SendSetFriendOnlineState(this->GetHandle(), onlineState);
 }
 
-void PacketFunctions_ClientToServer::SendChatRoomInvitationRequest(const wchar_t* friendName, uint32_t friendNameByteLength, uint16_t roomId, uint32_t requestId)
+void PacketFunctions_ClientToServer::SendChatRoomInvitationRequest(const wchar_t* friendName, uint16_t roomId, uint32_t requestId)
 {
-    dotnet_SendChatRoomInvitationRequest(this->_handle, friendName, friendNameByteLength, roomId, requestId);
+    dotnet_SendChatRoomInvitationRequest(this->GetHandle(), friendName, roomId, requestId);
 }
 
 void PacketFunctions_ClientToServer::SendLegacyQuestStateRequest()
 {
-    dotnet_SendLegacyQuestStateRequest(this->_handle);
+    dotnet_SendLegacyQuestStateRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLegacyQuestStateSetRequest(BYTE questNumber, uint32_t newState)
 {
-    dotnet_SendLegacyQuestStateSetRequest(this->_handle, questNumber, newState);
+    dotnet_SendLegacyQuestStateSetRequest(this->GetHandle(), questNumber, newState);
 }
 
 void PacketFunctions_ClientToServer::SendPetCommandRequest(uint32_t petType, uint32_t commandMode, uint16_t targetId)
 {
-    dotnet_SendPetCommandRequest(this->_handle, petType, commandMode, targetId);
+    dotnet_SendPetCommandRequest(this->GetHandle(), petType, commandMode, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendPetInfoRequest(uint32_t pet, uint32_t storage, BYTE itemSlot)
 {
-    dotnet_SendPetInfoRequest(this->_handle, pet, storage, itemSlot);
+    dotnet_SendPetInfoRequest(this->GetHandle(), pet, storage, itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendIllusionTempleEnterRequest(BYTE mapNumber, BYTE itemSlot)
 {
-    dotnet_SendIllusionTempleEnterRequest(this->_handle, mapNumber, itemSlot);
+    dotnet_SendIllusionTempleEnterRequest(this->GetHandle(), mapNumber, itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendIllusionTempleSkillRequest(uint16_t skillNumber, BYTE targetObjectIndex, BYTE distance)
 {
-    dotnet_SendIllusionTempleSkillRequest(this->_handle, skillNumber, targetObjectIndex, distance);
+    dotnet_SendIllusionTempleSkillRequest(this->GetHandle(), skillNumber, targetObjectIndex, distance);
 }
 
 void PacketFunctions_ClientToServer::SendIllusionTempleRewardRequest()
 {
-    dotnet_SendIllusionTempleRewardRequest(this->_handle);
+    dotnet_SendIllusionTempleRewardRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLuckyCoinCountRequest()
 {
-    dotnet_SendLuckyCoinCountRequest(this->_handle);
+    dotnet_SendLuckyCoinCountRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLuckyCoinRegistrationRequest()
 {
-    dotnet_SendLuckyCoinRegistrationRequest(this->_handle);
+    dotnet_SendLuckyCoinRegistrationRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLuckyCoinExchangeRequest(uint32_t coinCount)
 {
-    dotnet_SendLuckyCoinExchangeRequest(this->_handle, coinCount);
+    dotnet_SendLuckyCoinExchangeRequest(this->GetHandle(), coinCount);
 }
 
 void PacketFunctions_ClientToServer::SendDoppelgangerEnterRequest(BYTE ticketItemSlot)
 {
-    dotnet_SendDoppelgangerEnterRequest(this->_handle, ticketItemSlot);
+    dotnet_SendDoppelgangerEnterRequest(this->GetHandle(), ticketItemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendEnterMarketPlaceRequest()
 {
-    dotnet_SendEnterMarketPlaceRequest(this->_handle);
+    dotnet_SendEnterMarketPlaceRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendMuHelperStatusChangeRequest(BYTE pauseStatus)
 {
-    dotnet_SendMuHelperStatusChangeRequest(this->_handle, pauseStatus);
+    dotnet_SendMuHelperStatusChangeRequest(this->GetHandle(), pauseStatus);
 }
 
 void PacketFunctions_ClientToServer::SendMuHelperSaveDataRequest(const BYTE* helperData, uint32_t helperDataByteLength)
 {
-    dotnet_SendMuHelperSaveDataRequest(this->_handle, helperData, helperDataByteLength);
+    dotnet_SendMuHelperSaveDataRequest(this->GetHandle(), helperData, helperDataByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendQuestSelectRequest(uint16_t questNumber, uint16_t questGroup, BYTE selectedTextIndex)
 {
-    dotnet_SendQuestSelectRequest(this->_handle, questNumber, questGroup, selectedTextIndex);
+    dotnet_SendQuestSelectRequest(this->GetHandle(), questNumber, questGroup, selectedTextIndex);
 }
 
 void PacketFunctions_ClientToServer::SendQuestProceedRequest(uint16_t questNumber, uint16_t questGroup, uint32_t proceedAction)
 {
-    dotnet_SendQuestProceedRequest(this->_handle, questNumber, questGroup, proceedAction);
+    dotnet_SendQuestProceedRequest(this->GetHandle(), questNumber, questGroup, proceedAction);
 }
 
 void PacketFunctions_ClientToServer::SendQuestCompletionRequest(uint16_t questNumber, uint16_t questGroup)
 {
-    dotnet_SendQuestCompletionRequest(this->_handle, questNumber, questGroup);
+    dotnet_SendQuestCompletionRequest(this->GetHandle(), questNumber, questGroup);
 }
 
 void PacketFunctions_ClientToServer::SendQuestCancelRequest(uint16_t questNumber, uint16_t questGroup)
 {
-    dotnet_SendQuestCancelRequest(this->_handle, questNumber, questGroup);
+    dotnet_SendQuestCancelRequest(this->GetHandle(), questNumber, questGroup);
 }
 
 void PacketFunctions_ClientToServer::SendQuestClientActionRequest(uint16_t questNumber, uint16_t questGroup)
 {
-    dotnet_SendQuestClientActionRequest(this->_handle, questNumber, questGroup);
+    dotnet_SendQuestClientActionRequest(this->GetHandle(), questNumber, questGroup);
 }
 
 void PacketFunctions_ClientToServer::SendActiveQuestListRequest()
 {
-    dotnet_SendActiveQuestListRequest(this->_handle);
+    dotnet_SendActiveQuestListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendQuestStateRequest(uint16_t questNumber, uint16_t questGroup)
 {
-    dotnet_SendQuestStateRequest(this->_handle, questNumber, questGroup);
+    dotnet_SendQuestStateRequest(this->GetHandle(), questNumber, questGroup);
 }
 
 void PacketFunctions_ClientToServer::SendEventQuestStateListRequest()
 {
-    dotnet_SendEventQuestStateListRequest(this->_handle);
+    dotnet_SendEventQuestStateListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendAvailableQuestsRequest()
 {
-    dotnet_SendAvailableQuestsRequest(this->_handle);
+    dotnet_SendAvailableQuestsRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendNpcBuffRequest()
 {
-    dotnet_SendNpcBuffRequest(this->_handle);
+    dotnet_SendNpcBuffRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEnterEmpireGuardianEvent(BYTE itemSlot)
 {
-    dotnet_SendEnterEmpireGuardianEvent(this->_handle, itemSlot);
+    dotnet_SendEnterEmpireGuardianEvent(this->GetHandle(), itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendGensJoinRequest(uint32_t gensType)
 {
-    dotnet_SendGensJoinRequest(this->_handle, gensType);
+    dotnet_SendGensJoinRequest(this->GetHandle(), gensType);
 }
 
 void PacketFunctions_ClientToServer::SendGensLeaveRequest()
 {
-    dotnet_SendGensLeaveRequest(this->_handle);
+    dotnet_SendGensLeaveRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendGensRewardRequest(uint32_t gensType)
 {
-    dotnet_SendGensRewardRequest(this->_handle, gensType);
+    dotnet_SendGensRewardRequest(this->GetHandle(), gensType);
 }
 
 void PacketFunctions_ClientToServer::SendGensRankingRequest()
 {
-    dotnet_SendGensRankingRequest(this->_handle);
+    dotnet_SendGensRankingRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendDevilSquareEnterRequest(BYTE squareLevel, BYTE ticketItemInventoryIndex)
 {
-    dotnet_SendDevilSquareEnterRequest(this->_handle, squareLevel, ticketItemInventoryIndex);
+    dotnet_SendDevilSquareEnterRequest(this->GetHandle(), squareLevel, ticketItemInventoryIndex);
 }
 
 void PacketFunctions_ClientToServer::SendMiniGameOpeningStateRequest(uint32_t eventType, BYTE eventLevel)
 {
-    dotnet_SendMiniGameOpeningStateRequest(this->_handle, eventType, eventLevel);
+    dotnet_SendMiniGameOpeningStateRequest(this->GetHandle(), eventType, eventLevel);
 }
 
 void PacketFunctions_ClientToServer::SendEventChipRegistrationRequest(BYTE type, BYTE itemIndex)
 {
-    dotnet_SendEventChipRegistrationRequest(this->_handle, type, itemIndex);
+    dotnet_SendEventChipRegistrationRequest(this->GetHandle(), type, itemIndex);
 }
 
 void PacketFunctions_ClientToServer::SendMutoNumberRequest()
 {
-    dotnet_SendMutoNumberRequest(this->_handle);
+    dotnet_SendMutoNumberRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEventChipExitDialog()
 {
-    dotnet_SendEventChipExitDialog(this->_handle);
+    dotnet_SendEventChipExitDialog(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEventChipExchangeRequest(BYTE type)
 {
-    dotnet_SendEventChipExchangeRequest(this->_handle, type);
+    dotnet_SendEventChipExchangeRequest(this->GetHandle(), type);
 }
 
-void PacketFunctions_ClientToServer::SendServerImmigrationRequest(const wchar_t* securityCode, uint32_t securityCodeByteLength)
+void PacketFunctions_ClientToServer::SendServerImmigrationRequest(const wchar_t* securityCode)
 {
-    dotnet_SendServerImmigrationRequest(this->_handle, securityCode, securityCodeByteLength);
+    dotnet_SendServerImmigrationRequest(this->GetHandle(), securityCode);
 }
 
-void PacketFunctions_ClientToServer::SendLuckyNumberRequest(const wchar_t* serial1, uint32_t serial1ByteLength, const wchar_t* serial2, uint32_t serial2ByteLength, const wchar_t* serial3, uint32_t serial3ByteLength)
+void PacketFunctions_ClientToServer::SendLuckyNumberRequest(const wchar_t* serial1, const wchar_t* serial2, const wchar_t* serial3)
 {
-    dotnet_SendLuckyNumberRequest(this->_handle, serial1, serial1ByteLength, serial2, serial2ByteLength, serial3, serial3ByteLength);
+    dotnet_SendLuckyNumberRequest(this->GetHandle(), serial1, serial2, serial3);
 }
 
 void PacketFunctions_ClientToServer::SendBloodCastleEnterRequest(BYTE castleLevel, BYTE ticketItemInventoryIndex)
 {
-    dotnet_SendBloodCastleEnterRequest(this->_handle, castleLevel, ticketItemInventoryIndex);
+    dotnet_SendBloodCastleEnterRequest(this->GetHandle(), castleLevel, ticketItemInventoryIndex);
 }
 
 void PacketFunctions_ClientToServer::SendMiniGameEventCountRequest(uint32_t miniGame)
 {
-    dotnet_SendMiniGameEventCountRequest(this->_handle, miniGame);
+    dotnet_SendMiniGameEventCountRequest(this->GetHandle(), miniGame);
 }
 
 void PacketFunctions_ClientToServer::SendChaosCastleEnterRequest(BYTE castleLevel, BYTE ticketItemInventoryIndex)
 {
-    dotnet_SendChaosCastleEnterRequest(this->_handle, castleLevel, ticketItemInventoryIndex);
+    dotnet_SendChaosCastleEnterRequest(this->GetHandle(), castleLevel, ticketItemInventoryIndex);
 }
 
 void PacketFunctions_ClientToServer::SendChaosCastlePositionSet(BYTE positionX, BYTE positionY)
 {
-    dotnet_SendChaosCastlePositionSet(this->_handle, positionX, positionY);
+    dotnet_SendChaosCastlePositionSet(this->GetHandle(), positionX, positionY);
 }
 
-void PacketFunctions_ClientToServer::SendDuelStartRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength)
+void PacketFunctions_ClientToServer::SendDuelStartRequest(uint16_t playerId, const wchar_t* playerName)
 {
-    dotnet_SendDuelStartRequest(this->_handle, playerId, playerName, playerNameByteLength);
+    dotnet_SendDuelStartRequest(this->GetHandle(), playerId, playerName);
 }
 
-void PacketFunctions_ClientToServer::SendDuelStartResponse(BYTE response, uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength)
+void PacketFunctions_ClientToServer::SendDuelStartResponse(BYTE response, uint16_t playerId, const wchar_t* playerName)
 {
-    dotnet_SendDuelStartResponse(this->_handle, response, playerId, playerName, playerNameByteLength);
+    dotnet_SendDuelStartResponse(this->GetHandle(), response, playerId, playerName);
 }
 
 void PacketFunctions_ClientToServer::SendDuelStopRequest()
 {
-    dotnet_SendDuelStopRequest(this->_handle);
+    dotnet_SendDuelStopRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendDuelChannelJoinRequest(BYTE channelId)
 {
-    dotnet_SendDuelChannelJoinRequest(this->_handle, channelId);
+    dotnet_SendDuelChannelJoinRequest(this->GetHandle(), channelId);
 }
 
 void PacketFunctions_ClientToServer::SendDuelChannelQuitRequest(BYTE channelId)
 {
-    dotnet_SendDuelChannelQuitRequest(this->_handle, channelId);
+    dotnet_SendDuelChannelQuitRequest(this->GetHandle(), channelId);
 }

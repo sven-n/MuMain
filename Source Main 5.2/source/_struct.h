@@ -113,7 +113,7 @@ namespace info
         short   shQuestConditionNum;
         short   shQuestRequestNum;
         WORD    wNpcType;
-        wchar_t    strQuestName[32];
+        char    strQuestName[32];
 
         Script_Quest_Class_Act     QuestAct[MAX_QUEST_CONDITION];
         Script_Quest_Class_Request QuestRequest[MAX_QUEST_REQUEST];
@@ -137,16 +137,48 @@ typedef struct
 
 typedef struct
 {
-    wchar_t m_lpszText[MAX_LENGTH_DIALOG];
+    char m_lpszText[MAX_LENGTH_DIALOG];
     int m_iNumAnswer;
     int m_iLinkForAnswer[MAX_ANSWER_FOR_DIALOG];
     int m_iReturnForAnswer[MAX_ANSWER_FOR_DIALOG];
-    wchar_t m_lpszAnswer[MAX_ANSWER_FOR_DIALOG][MAX_LENGTH_ANSWER];
+    char m_lpszAnswer[MAX_ANSWER_FOR_DIALOG][MAX_LENGTH_ANSWER];
 } DIALOG_SCRIPT;//Script_Dialog
 
 typedef struct
 {
-    wchar_t Name[30];
+    char Name[MAX_ITEM_NAME];
+    bool TwoHand;
+    WORD Level;
+    BYTE m_byItemSlot;
+    WORD m_wSkillIndex;
+    BYTE Width;
+    BYTE Height;
+    BYTE DamageMin;
+    BYTE DamageMax;
+    BYTE SuccessfulBlocking;
+    BYTE Defense;
+    BYTE MagicDefense;
+    BYTE WeaponSpeed;
+    BYTE WalkSpeed;
+    BYTE Durability;
+    BYTE MagicDur;
+    BYTE MagicPower;
+    WORD RequireStrength;
+    WORD RequireDexterity;
+    WORD RequireEnergy;
+    WORD RequireVitality;
+    WORD RequireCharisma;
+    WORD RequireLevel;
+    BYTE Value;
+    int  iZen;
+    BYTE  AttType;
+    BYTE RequireClass[MAX_CLASS];
+    BYTE Resistance[MAX_RESISTANCE + 1];
+} ITEM_ATTRIBUTE_FILE;
+
+typedef struct
+{
+    wchar_t Name[MAX_ITEM_NAME];
     bool TwoHand;
     WORD Level;
     BYTE m_byItemSlot;
@@ -182,13 +214,21 @@ typedef struct _MASTER_LEVEL_DATA
     int Ability[8][4];
 }MASTER_LEVEL_DATA;
 
-typedef struct _MINI_MAP
+typedef struct
 {
     BYTE Kind;
     int	 Location[2];
     int  Rotation;
-    wchar_t Name[100];
-}MINI_MAP;
+    char Name[MAX_MINIMAP_NAME];
+}MINI_MAP_FILE;
+
+typedef struct
+{
+    BYTE Kind;
+    int	 Location[2];
+    int  Rotation;
+    wchar_t Name[MAX_MINIMAP_NAME];
+} MINI_MAP;
 
 #pragma pack(push, 1)
 typedef struct tagITEM
@@ -291,7 +331,7 @@ typedef struct
 
 typedef struct
 {
-    /*+00*/	wchar_t Name[32];
+    /*+00*/	char Name[MAX_SKILL_NAME];
     /*+32*/	WORD Level;
     /*+34*/	WORD Damage;
     /*+36*/	WORD Mana;
@@ -314,6 +354,33 @@ typedef struct
     /*+84*/	BYTE ItemSkill;
     /*+85*/	BYTE IsDamage;
     /*+86*/	WORD Effect;
+} SKILL_ATTRIBUTE_FILE;
+
+typedef struct
+{
+    wchar_t Name[MAX_SKILL_NAME];
+    WORD Level;
+    WORD Damage;
+    WORD Mana;
+    WORD AbilityGuage;
+    DWORD Distance;
+    int Delay;
+    int Energy;
+    WORD Charisma;
+    BYTE MasteryType;
+    BYTE SkillUseType;
+    DWORD SkillBrand;
+    BYTE KillCount;
+    BYTE RequireDutyClass[MAX_DUTY_CLASS];
+    BYTE RequireClass[MAX_CLASS];
+    BYTE SkillRank;
+    WORD Magic_Icon;
+    BYTE TypeSkill;
+    int Strength;
+    int Dexterity;
+    BYTE ItemSkill;
+    BYTE IsDamage;
+    WORD Effect;
 } SKILL_ATTRIBUTE;
 /*
 typedef struct
@@ -693,7 +760,20 @@ typedef	struct
 
 typedef struct
 {
-    wchar_t	strSetName[64];
+    char	strSetName[MAX_ITEM_SET_NAME];
+    BYTE	byStandardOption[6][2];
+    BYTE	byStandardOptionValue[6][2];
+    BYTE	byExtOption[2];
+    BYTE	byExtOptionValue[2];
+    BYTE	byOptionCount;
+    BYTE	byFullOption[5];
+    BYTE	byFullOptionValue[5];
+    BYTE	byRequireClass[MAX_CLASS];
+}ITEM_SET_OPTION_FILE;
+
+typedef struct
+{
+    wchar_t	strSetName[MAX_ITEM_SET_NAME];
     BYTE	byStandardOption[6][2];
     BYTE	byStandardOptionValue[6][2];
     BYTE	byExtOption[2];

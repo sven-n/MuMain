@@ -397,9 +397,8 @@ void DeleteCharacter()
         g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
     }
 
-    SocketClient->ToGameServer()->SendDeleteCharacter(
-        CharactersClient[SelectedHero].ID,  wcslen(CharactersClient[SelectedHero].ID),
-        InputText[0], wcslen(InputText[0]));
+    CurrentProtocolState = REQUEST_DELETE_CHARACTER;
+    SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
 
     MenuStateCurrent = MENU_DELETE_LEFT;
     MenuStateNext = MENU_NEW_DOWN;
@@ -612,14 +611,14 @@ BOOL ShowCheckBox(int num, int index, int message)
         }
 
         if (message == MESSAGE_USE_STATE2)
-            wsprintf(g_lpszMessageBoxCustom[0], L"( %s%s )", Name, GlobalText[1901]);
+            swprintf(g_lpszMessageBoxCustom[0], L"( %s%s )", Name, GlobalText[1901]);
         else
-            wsprintf(g_lpszMessageBoxCustom[0], L"( %s )", Name);
+            swprintf(g_lpszMessageBoxCustom[0], L"( %s )", Name);
 
         num++;
         for (int i = 1; i < num; ++i)
         {
-            wsprintf(g_lpszMessageBoxCustom[i], GlobalText[index]);
+            swprintf(g_lpszMessageBoxCustom[i], GlobalText[index]);
         }
         g_iNumLineMessageBoxCustom = num;
     }
@@ -627,11 +626,11 @@ BOOL ShowCheckBox(int num, int index, int message)
     {
         wchar_t szGold[256];
         ConvertGold(InputGold, szGold);
-        wsprintf(g_lpszMessageBoxCustom[0], GlobalText[index], szGold);
+        swprintf(g_lpszMessageBoxCustom[0], GlobalText[index], szGold);
 
         for (int i = 1; i < num; ++i)
         {
-            wsprintf(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
+            swprintf(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
         }
         g_iNumLineMessageBoxCustom = num;
     }
@@ -651,8 +650,8 @@ BOOL ShowCheckBox(int num, int index, int message)
         g_iNumLineMessageBoxCustom = 0;
         if (COMGEM::isComMode())
         {
-            if (COMGEM::m_cGemType == 0) wsprintf(tBuf, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
-            else wsprintf(tBuf, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+            if (COMGEM::m_cGemType == 0) swprintf(tBuf, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+            else swprintf(tBuf, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
 
             g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
                 tLines[g_iNumLineMessageBoxCustom], 2, 30);
@@ -660,14 +659,14 @@ BOOL ShowCheckBox(int num, int index, int message)
             for (int t = 0; t < 2; ++t)
                 wcscpy(g_lpszMessageBoxCustom[t], tLines[t]);
 
-            wsprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1810], COMGEM::m_iValue);
+            swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1810], COMGEM::m_iValue);
             ++g_iNumLineMessageBoxCustom;
         }
         else
         {
             int t_GemLevel = COMGEM::GetUnMixGemLevel() + 1;
-            if (COMGEM::m_cGemType == 0) wsprintf(tBuf, GlobalText[1813], GlobalText[1806], t_GemLevel);
-            else wsprintf(tBuf, GlobalText[1813], GlobalText[1807], t_GemLevel);
+            if (COMGEM::m_cGemType == 0) swprintf(tBuf, GlobalText[1813], GlobalText[1806], t_GemLevel);
+            else swprintf(tBuf, GlobalText[1813], GlobalText[1807], t_GemLevel);
 
             g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
                 tLines[g_iNumLineMessageBoxCustom], 2, 30);
@@ -675,14 +674,14 @@ BOOL ShowCheckBox(int num, int index, int message)
             for (int t = 0; t < 2; ++t)
                 wcscpy(g_lpszMessageBoxCustom[t], tLines[t]);
 
-            wsprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1814], COMGEM::m_iValue);
+            swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1814], COMGEM::m_iValue);
             ++g_iNumLineMessageBoxCustom;
         }
     }
     else if (message == MESSAGE_CANCEL_SKILL)
     {
         wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-        wsprintf(tBuf, L"%s%s", SkillAttribute[index].Name, GlobalText[2046]);
+        swprintf(tBuf, L"%s%s", SkillAttribute[index].Name, GlobalText[2046]);
         g_iNumLineMessageBoxCustom = SeparateTextIntoLines(tBuf, g_lpszMessageBoxCustom[0], 2, MAX_LENGTH_CMB);
         g_iCancelSkillTarget = index;
     }
@@ -1274,7 +1273,8 @@ void NewMoveLogInScene()
         CCameraMove::GetInstancePtr()->SetTourMode(FALSE);
 
         SceneFlag = CHARACTER_SCENE;
-        SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
+        CurrentProtocolState = REQUEST_CHARACTERS_LIST;
+        SocketClient->ToGameServer()->SendRequestCharacterList(g_pMultiLanguage->GetLanguage());
 
         ReleaseLogoSceneData();
 
@@ -1432,17 +1432,17 @@ bool NewRenderLogInScene(HDC hDC)
     g_pRenderText->SetBgColor(0, 0, 0, 128);
 
     wcscpy(Text, GlobalText[454]);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(335 - Size.cx * 640 / WindowWidth, 480 - Size.cy * 640 / WindowWidth - 1, Text);
 
     wcscpy(Text, GlobalText[455]);
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(335, 480 - Size.cy * 640 / WindowWidth - 1, Text);
 
-    wsprintf(Text, GlobalText[456], m_ExeVersion);
+    swprintf(Text, GlobalText[456], m_ExeVersion);
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(0, 480 - Size.cy * 640 / WindowWidth - 1, Text);
 
     RenderInfomation();
@@ -1876,7 +1876,9 @@ void MoveMainScene()
 
         g_ConsoleDebug->Write(MCD_SEND, L"SendRequestJoinMapServer");
 
-        SendRequestJoinMapServer(CharactersClient[SelectedHero].ID);
+        CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
+        SocketClient->ToGameServer()->SendSelectCharacter(CharactersClient[SelectedHero].ID);
+        // SendRequestJoinMapServer(CharactersClient[SelectedHero].ID);
 
         CUIMng::Instance().CreateMainScene();
 
@@ -2342,10 +2344,10 @@ void MainScene(HDC hDC)
     {
         SYSTEMTIME st;
         GetLocalTime(&st);
-        wsprintf(GrabFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
-        wsprintf(screenshotText, GlobalText[459], GrabFileName);
+        swprintf(GrabFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
+        swprintf(screenshotText, GlobalText[459], GrabFileName);
         wchar_t lpszTemp[64];
-        wsprintf(lpszTemp, L" [%s / %s]", g_ServerListManager->GetSelectServerName(), Hero->ID);
+        swprintf(lpszTemp, L" [%s / %s]", g_ServerListManager->GetSelectServerName(), Hero->ID);
         wcscat(screenshotText, lpszTemp);
         if (addTimeStampToCapture)
         {
@@ -2442,11 +2444,11 @@ void MainScene(HDC hDC)
 #ifndef  defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
         BeginBitmap();
         wchar_t szDebugText[128];
-        wsprintf(szDebugText, L"FPS : %.1f Connected: %d", FPS_AVG, g_bGameServerConnected);
+        swprintf(szDebugText, L"FPS : %.1f Connected: %d", FPS_AVG, g_bGameServerConnected);
         wchar_t szMousePos[128];
-        wsprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
+        swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
         wchar_t szCamera3D[128];
-        wsprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+        swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
         g_pRenderText->SetFont(g_hFontBold);
         g_pRenderText->SetBgColor(0, 0, 0, 100);
         g_pRenderText->SetTextColor(255, 255, 255, 200);

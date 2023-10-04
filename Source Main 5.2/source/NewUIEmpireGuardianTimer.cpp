@@ -87,7 +87,7 @@ bool CNewUIEmpireGuardianTimer::Render()
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0);
 
-    wsprintf(szText, GlobalText[2805], m_iDay, m_iZone);
+    swprintf(szText, GlobalText[2805], m_iDay, m_iZone);
     g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 13, szText, 110, 0, RT3_SORT_CENTER);
 
     switch (m_iType)
@@ -99,7 +99,7 @@ bool CNewUIEmpireGuardianTimer::Render()
         break;
     case 2:
         g_pRenderText->SetTextColor(255, 150, 0, 255);
-        wsprintf(szText, L"%s (%s)", GlobalText[865], GlobalText[2845]);
+        swprintf(szText, L"%s (%s)", GlobalText[865], GlobalText[2845]);
         g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 38, szText, 110, 0, RT3_SORT_CENTER);
         break;
     }
@@ -120,7 +120,7 @@ bool CNewUIEmpireGuardianTimer::Render()
         g_pRenderText->SetTextColor(255, 0, 0, 255);
     }
 
-    wsprintf(szText, L"%.2d:%.2d(%d)", iMinute, iSecond % 60, m_iMonsterCount);
+    swprintf(szText, L"%.2d:%.2d(%d)", iMinute, iSecond % 60, m_iMonsterCount);
     g_pRenderText->SetFont(g_hFontBig);
     g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 50, szText, 110, 0, RT3_SORT_CENTER);
 

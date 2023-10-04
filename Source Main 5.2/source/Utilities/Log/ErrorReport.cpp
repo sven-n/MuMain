@@ -187,22 +187,22 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
     DWORD dwWritten = 0;
     wchar_t szLine[256] = { 0, };
     int offset = 0;
-    offset += wsprintf(szLine, L"0x%00000008X : ", (DWORD*)pBuffer);
+    offset += swprintf(szLine, L"0x%00000008X : ", (DWORD*)pBuffer);
     for (int i = 0; i < iSize; i++) {
-        offset += wsprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
+        offset += swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
         if (i > 0 && i < iSize - 1) {
             if (i % 16 == 15) {	//. new line
-                offset += wsprintf(szLine + offset, L"\r\n");
+                offset += swprintf(szLine + offset, L"\r\n");
                 WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
                 offset = 0;
-                offset += wsprintf(szLine + offset, L"           : ");
+                offset += swprintf(szLine + offset, L"           : ");
             }
             else if (i % 4 == 3) { //. space
-                offset += wsprintf(szLine + offset, L" ");
+                offset += swprintf(szLine + offset, L" ");
             }
         }
     }
-    offset += wsprintf(szLine + offset, L"\r\n");
+    offset += swprintf(szLine + offset, L"\r\n");
     WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
 }
 
@@ -344,7 +344,7 @@ void GetOSVersion(ER_SystemInfo* si)
     GetVersionEx(&osiOne);
 
     int iBuildNumberType = 0;
-    wsprintf(si->m_lpszOS, L"%s %d.%d ", lpszUnknown, osiOne.dwMajorVersion, osiOne.dwMinorVersion);
+    swprintf(si->m_lpszOS, L"%s %d.%d ", lpszUnknown, osiOne.dwMajorVersion, osiOne.dwMinorVersion);
 
     switch (osiOne.dwMajorVersion)
     {
@@ -432,14 +432,14 @@ void GetOSVersion(ER_SystemInfo* si)
     switch (iBuildNumberType)
     {
     case 0:
-        wsprintf(lpszTemp, L"Build %d ", osiOne.dwBuildNumber);
+        swprintf(lpszTemp, L"Build %d ", osiOne.dwBuildNumber);
         break;
     case 1:
-        wsprintf(lpszTemp, L"Build %d.%d.%d ", HIBYTE(HIWORD(osiOne.dwBuildNumber)), LOBYTE(HIWORD(osiOne.dwBuildNumber)), LOWORD(osiOne.dwBuildNumber));
+        swprintf(lpszTemp, L"Build %d.%d.%d ", HIBYTE(HIWORD(osiOne.dwBuildNumber)), LOBYTE(HIWORD(osiOne.dwBuildNumber)), LOWORD(osiOne.dwBuildNumber));
         break;
     }
     wcscat(si->m_lpszOS, lpszTemp);
-    wsprintf(lpszTemp, L"(%s)", osiOne.szCSDVersion);
+    swprintf(lpszTemp, L"(%s)", osiOne.szCSDVersion);
     wcscat(si->m_lpszOS, lpszTemp);
 }
 
@@ -696,7 +696,7 @@ void GetCPUInfo(ER_SystemInfo* si)
     }
 
     __int64 llFreq = GetCPUFrequency(50) / 1000000;
-    wsprintf(lpszTemp, L" %dMhz", (int)llFreq);
+    swprintf(lpszTemp, L" %dMhz", (int)llFreq);
     wcscat(si->m_lpszCPU, lpszTemp);
 }
 
@@ -967,5 +967,5 @@ void GetSystemInfo(ER_SystemInfo* si)
 
     // DX
     DWORD dwDX = GetDXVersion();
-    wsprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
+    swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
 }

@@ -92,14 +92,14 @@ void CMsgBoxIGSGiftStorageItemInfo::Initialize(int iStorageSeq, int iStorageItem
     wcscpy(m_szName, pszName);
 
     // Num
-    wsprintf(m_szNum, GlobalText[3040], pszNum);		// "수량 : %s"
+    swprintf(m_szNum, GlobalText[3040], pszNum);		// "수량 : %s"
 
     // Period
-    wsprintf(m_szPeriod, GlobalText[3039], pszPeriod);	// "기간 : %s"
+    swprintf(m_szPeriod, GlobalText[3039], pszPeriod);	// "기간 : %s"
 
     // ID Info
     // "\'%s\' 님이 보낸 선물입니다."
-    wsprintf(m_szIDInfo, GlobalText[3041], pszID);
+    swprintf(m_szIDInfo, GlobalText[3041], pszID);
 
     m_MessageInputBox.SetText(pszMessage);
 }
@@ -273,16 +273,16 @@ void CMsgBoxIGSGiftStorageItemInfo::RenderTexts()
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        wsprintf(szText, L"아이템코드가 없습니다.");
+        swprintf(szText, L"아이템코드가 없습니다.");
     }
     else
     {
-        wsprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+        swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
     }
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"Storage Seq : %d", m_iStorageSeq);
+    swprintf(szText, L"Storage Seq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"Storage ItemSeq : %d", m_iStorageItemSeq);
+    swprintf(szText, L"Storage ItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }

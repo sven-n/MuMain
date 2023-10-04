@@ -9,7 +9,7 @@
 
 struct SServerGroupInfo
 {
-    wchar_t	m_szName[SLM_MAX_SERVER_NAME_LENGTH];
+    wchar_t	m_szName[SLM_MAX_SERVER_NAME_LENGTH + 1];
     BYTE	m_byPos;
     BYTE	m_bySequence;
     BYTE	m_abyNonPVP[SLM_MAX_SERVER_COUNT];

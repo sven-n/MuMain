@@ -201,7 +201,7 @@ void CButton::Render()
     g_pRenderText->SetFont(g_hFixFont);
 
     SIZE size;
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szText, ::wcslen(m_szText), &size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szText, ::wcslen(m_szText), &size);
 
     float fTextRelativeYPos = ((CSprite::GetHeight() - size.cy) / 2.0f);
 

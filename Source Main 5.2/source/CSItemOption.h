@@ -23,7 +23,7 @@ private:
     BYTE    m_byRenderOptionList;
     BYTE    m_bySelectedItemOption;
     BYTE    m_bySameSetItem;
-    wchar_t    m_strSetName[2][32];
+    wchar_t    m_strSetName[2][MAX_ITEM_SET_NAME];
 
     typedef std::map<int, std::wstring>	MAP_EQUIPPEDSETITEMNAME;
     typedef std::map<BYTE, int>		MAP_EQUIPPEDSETITEM_SEQUENCE;

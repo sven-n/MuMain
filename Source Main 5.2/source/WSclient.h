@@ -349,7 +349,7 @@ typedef struct
 typedef struct
 {
     BYTE         Index;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     WORD         Level;
     BYTE		 CtlCode;
     BYTE         Class;
@@ -372,7 +372,7 @@ typedef struct
     PBMSG_HEADER Header;
     BYTE         SubCode;
     BYTE         Result;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     BYTE         Index;
     WORD         Level;
     BYTE		 Class;
@@ -495,7 +495,7 @@ typedef struct {
 //request chat
 typedef struct {
     PBMSG_HEADER Header;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     char         ChatText[MAX_CHAT_SIZE];
 } PCHATING, * LPPCHATING;
 
@@ -534,7 +534,7 @@ typedef struct {
     BYTE         PositionY;
     BYTE         Class;
     BYTE         Equipment[EQUIPMENT_LENGTH];
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     BYTE         TargetX;
     BYTE         TargetY;
     BYTE         Path;
@@ -551,7 +551,7 @@ typedef struct
     BYTE         PositionY;
     BYTE         TypeH;
     BYTE         TypeL;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     BYTE         TargetX;
     BYTE         TargetY;
     BYTE         Path;

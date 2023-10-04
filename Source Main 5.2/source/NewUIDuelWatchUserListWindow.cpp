@@ -89,7 +89,7 @@ bool CNewUIDuelWatchUserListWindow::Render()
 
     SIZE TextSize;
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Q", 1, &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Q", 1, &TextSize);
     float fFontHeight = TextSize.cy / g_fScreenRate_y;
 
     POINT ptSize = { 57, 17 };

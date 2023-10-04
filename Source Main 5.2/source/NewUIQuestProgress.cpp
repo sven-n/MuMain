@@ -418,7 +418,7 @@ void CNewUIQuestProgress::SetCurPlayerWords()
     int i;
     for (i = 0; i < QM_MAX_ANSWER; ++i)
     {
-        wsprintf(szAnswer, L"%d.", i + 1);
+        swprintf(szAnswer, L"%d.", i + 1);
         const auto pszAnswer = g_QuestMng.GetAnswer(m_dwCurQuestIndex, i);
         if (NULL == pszAnswer)
             break;

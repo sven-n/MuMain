@@ -165,7 +165,7 @@ typedef struct _Mesh_t
 class BMD
 {
 public:
-    wchar_t          Name[32];
+    char          Name[32];
     char          Version;
     short         NumBones;
     short         NumMeshs;

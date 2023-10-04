@@ -73,25 +73,25 @@ namespace SEASON3B
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetFont(g_hFontBold);
-        wsprintf(szText, GlobalText[1891]);
+        swprintf(szText, GlobalText[1891]);
         g_pRenderText->RenderText(_x, _y, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetFont(g_hFont);
-        wsprintf(szText, GlobalText[2855]);
+        swprintf(szText, GlobalText[2855]);
         g_pRenderText->RenderText(_x, _y + 40, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        wsprintf(szText, GlobalText[2856]);
+        swprintf(szText, GlobalText[2856]);
         g_pRenderText->RenderText(_x, _y + 60, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        wsprintf(szText, GlobalText[2857]);
+        swprintf(szText, GlobalText[2857]);
         g_pRenderText->RenderText(_x, _y + 80, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        wsprintf(szText, GlobalText[2858]);
+        swprintf(szText, GlobalText[2858]);
         g_pRenderText->RenderText(_x, _y + 100, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetFont(g_hFontBold);
 
-        wsprintf(szText, GlobalText[1889]);
+        swprintf(szText, GlobalText[1889]);
         g_pRenderText->RenderText(_x, _y + 120, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 
-        wsprintf(szText, GlobalText[1893], GetRegistCount());
+        swprintf(szText, GlobalText[1893], GetRegistCount());
         g_pRenderText->RenderText(_x + 24, _y + 150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
     }
 

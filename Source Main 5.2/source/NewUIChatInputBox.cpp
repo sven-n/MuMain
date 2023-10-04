@@ -8,7 +8,7 @@
 #include "MapManager.h"
 using namespace SEASON3B;
 
-SEASON3B::CNewUIChatInputBox::CNewUIChatInputBox() : MAX_CHAT_SIZE_UTF16((int)(MAX_CHAT_SIZE / (g_pMultiLanguage->GetNumByteForOneCharUTF8())))
+SEASON3B::CNewUIChatInputBox::CNewUIChatInputBox()
 {
     Init();
 }
@@ -85,7 +85,7 @@ bool SEASON3B::CNewUIChatInputBox::Create(CNewUIManager* pNewUIMng, CNewUIChatLo
     SetWndPos(x, y);
 
     m_pChatInputBox = new CUITextInputBox;
-    m_pChatInputBox->Init(g_hWnd, 176, 14, MAX_CHAT_SIZE_UTF16 - 1);
+    m_pChatInputBox->Init(g_hWnd, 176, 14, MAX_CHAT_SIZE - 1);
     m_pChatInputBox->SetPosition(m_WndPos.x + 72, m_WndPos.y + 32);
     m_pChatInputBox->SetTextColor(255, 255, 230, 210);
     m_pChatInputBox->SetBackColor(0, 0, 0, 25);
@@ -483,17 +483,16 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
         m_lastChatTime = currentTickCount;
         wchar_t	szChatText[MAX_CHAT_SIZE + 1] = { '\0' };
         wchar_t	szWhisperID[MAX_ID_SIZE + 1] = { '\0' };
-        auto* szReceivedChat = new wchar_t[MAX_CHAT_SIZE_UTF16];
 
-        m_pChatInputBox->GetText(szReceivedChat, MAX_CHAT_SIZE_UTF16);
+        m_pChatInputBox->GetText(szChatText, MAX_CHAT_SIZE);
         m_pWhsprIDInputBox->GetText(szWhisperID, MAX_ID_SIZE + 1);
 
-        for (int i = 0; i < MAX_CHAT_SIZE_UTF16; i++)
-            szReceivedChat[i] = g_pMultiLanguage->ConvertFulltoHalfWidthChar(szReceivedChat[i]);
+        //for (int i = 0; i < MAX_CHAT_SIZE; i++)
+        //    szReceivedChat[i] = g_pMultiLanguage->ConvertFulltoHalfWidthChar(szReceivedChat[i]);
 
         std::wstring wstrText = L"";
 
-        if (szReceivedChat[0] != 0x002F)
+        if (szChatText[0] != 0x002F)
         {
             switch (m_iInputMsgType) {
             case INPUT_PARTY_MESSAGE:
@@ -509,9 +508,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                 break;
             }
         }
-        wstrText.append(szReceivedChat);
-
-        delete[] szReceivedChat;
+        wstrText.append(szChatText);
 
         if (wcslen(szChatText) != 0)
         {
@@ -525,7 +522,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 
                     if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && wcslen(szChatText) && wcslen(szWhisperID) > 0)
                     {
-                        SocketClient->ToGameServer()->SendWhisperMessage(szWhisperID, MAX_ID_SIZE, wstrText.c_str(), wstrText.length());
+                        SocketClient->ToGameServer()->SendWhisperMessage(szWhisperID, wstrText.c_str());
                         g_pChatListBox->AddText(Hero->ID, szChatText, SEASON3B::TYPE_WHISPER_MESSAGE);
                         AddWhsprIDHistory(szWhisperID);
                     }
@@ -548,7 +545,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                             CheckChatText(szChatText);
                         }
 
-                        SendChat(wstrText);
+                        SocketClient->ToGameServer()->SendPublicChatMessage(Hero->ID, wstrText.c_str());
                         AddChatHistory(wstrText);
                     }
                 }
@@ -741,11 +738,11 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
         1681, 1682, 1683, 3321,
         1684, 1685, 750, 1686, 751, 752 };
 
-    wsprintf(strTooltip, L"%s", GlobalText[iTextIndex[m_iTooltipType]]);
+    swprintf(strTooltip, L"%s", GlobalText[iTextIndex[m_iTooltipType]]);
 
     SIZE fontsize;
     g_pRenderText->SetFont(g_hFont);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, wcslen(strTooltip), &fontsize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, wcslen(strTooltip), &fontsize);
 
     const auto multiplier = ((float)WindowHeight / 480);
     fontsize.cx = fontsize.cx / multiplier;

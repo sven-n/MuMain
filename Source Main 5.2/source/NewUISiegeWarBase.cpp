@@ -53,7 +53,7 @@ bool SEASON3B::CNewUISiegeWarBase::Create(int x, int y)
         return false;
 
     wchar_t szText[256] = { NULL, };
-    wsprintf(szText, L"%d", (int)(m_fMiniMapAlpha * 100.5f));
+    swprintf(szText, L"%d", (int)(m_fMiniMapAlpha * 100.5f));
     m_BtnAlpha.ChangeText(szText);
     m_BtnAlpha.ChangeButtonImgState(true, IMAGE_BTN_ALPHA, true);
     m_BtnAlpha.ChangeButtonInfo(m_BtnAlphaPos.x, m_BtnAlphaPos.y, BTN_ALPHA_WIDTH, BTN_ALPHA_HEIGHT);
@@ -122,22 +122,22 @@ bool SEASON3B::CNewUISiegeWarBase::Render()
         {
             if (m_iMinute < 10)
             {
-                wsprintf(szText, L"%d:0%d", m_iHour, m_iMinute);
+                swprintf(szText, L"%d:0%d", m_iHour, m_iMinute);
             }
             else
             {
-                wsprintf(szText, L"%d:%d", m_iHour, m_iMinute);
+                swprintf(szText, L"%d:%d", m_iHour, m_iMinute);
             }
         }
         else
         {
             if (m_iMinute < 10)
             {
-                wsprintf(szText, L"%d 0%d", m_iHour, m_iMinute);
+                swprintf(szText, L"%d 0%d", m_iHour, m_iMinute);
             }
             else
             {
-                wsprintf(szText, L"%d %d", m_iHour, m_iMinute);
+                swprintf(szText, L"%d %d", m_iHour, m_iMinute);
             }
         }
         g_pRenderText->RenderText(m_TimeUIPos.x, m_TimeUIPos.y + 10, szText, 134, 0, RT3_SORT_CENTER);
@@ -310,7 +310,7 @@ bool SEASON3B::CNewUISiegeWarBase::BtnProcess()
         }
 
         wchar_t szText[256] = { NULL, };
-        wsprintf(szText, L"%d", (int)(m_fMiniMapAlpha * 100.5f));
+        swprintf(szText, L"%d", (int)(m_fMiniMapAlpha * 100.5f));
         m_BtnAlpha.ChangeText(szText);
         m_BtnAlpha.ChangeAlpha(m_fMiniMapAlpha);
 
@@ -430,7 +430,7 @@ void SEASON3B::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
             {
                 glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
             }
-            wsprintf(szText, L"%d", m_CmdBuffer[i].byTeam + 1);
+            swprintf(szText, L"%d", m_CmdBuffer[i].byTeam + 1);
             g_pRenderText->RenderText(Pos.x - 12, Pos.y - 5, szText);
             RenderBitmap(IMAGE_COMMAND_ATTACK + m_CmdBuffer[i].byCmd, Pos.x - 7, Pos.y - 7, 11.f, 11.f, 0.f, 0.f, ((float)iWidth - 1.f) / (float)iBWidth, ((float)iHeight - 1.f) / 16.f);
         }
@@ -464,9 +464,9 @@ void SEASON3B::CNewUISiegeWarBase::RenderSkillIcon()
     glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     g_pRenderText->SetFont(g_hFontBig);
-    wsprintf(szText, L"%d", iUseSkillDestKill);
+    swprintf(szText, L"%d", iUseSkillDestKill);
     g_pRenderText->RenderText(m_UseSkillDestKillPos.x, m_UseSkillDestKillPos.y, szText);
-    wsprintf(szText, L"%d", iCurKillCount);
+    swprintf(szText, L"%d", iCurKillCount);
     g_pRenderText->RenderText(m_CurKillCountPos.x, m_CurKillCountPos.y, szText);
 
     if (m_bRenderToolTip == true)

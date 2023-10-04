@@ -203,10 +203,10 @@ void CSocketItemMgr::CalcSocketOptionValueText(wchar_t* pszOptionValueText, int 
     switch (iOptionType)
     {
     case 2:
-        wsprintf(pszOptionValueText, L"+%d%%", CalcSocketOptionValue(iOptionType, fOptionValue));
+        swprintf(pszOptionValueText, L"+%d%%", CalcSocketOptionValue(iOptionType, fOptionValue));
         break;
     default:
-        wsprintf(pszOptionValueText, L"+%d", CalcSocketOptionValue(iOptionType, fOptionValue));
+        swprintf(pszOptionValueText, L"+%d", CalcSocketOptionValue(iOptionType, fOptionValue));
         break;
     }
 }
@@ -223,7 +223,7 @@ void CSocketItemMgr::CreateSocketOptionText(wchar_t* pszOptionText, int iSeedID,
 
     CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, fOptionValue);
 
-    wsprintf(pszOptionText, L"%s(%s %s)", GlobalText[2640 + pInfo->m_iOptionCategory - 1], pInfo->m_szOptionName, szOptionValueText);
+    swprintf(pszOptionText, L"%s(%s %s)", GlobalText[2640 + pInfo->m_iOptionCategory - 1], pInfo->m_szOptionName, szOptionValueText);
 }
 
 extern int SkipNum;
@@ -232,12 +232,12 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
 {
     if (pItem->SocketCount == 0) return iTextNum;
 
-    wsprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
-    wsprintf(TextList[iTextNum], L"%s %s", GlobalText[2650], GlobalText[159]);
+    swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+    swprintf(TextList[iTextNum], L"%s %s", GlobalText[2650], GlobalText[159]);
     TextListColor[iTextNum] = TEXT_COLOR_PURPLE;
     TextBold[iTextNum] = false;
     ++iTextNum;
-    wsprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+    swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
     wchar_t szOptionText[64] = { 0, };
     wchar_t szOptionValueText[16] = { 0, };
@@ -246,7 +246,7 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
     {
         if (pItem->SocketSeedID[i] == SOCKET_EMPTY)
         {
-            wsprintf(szOptionText, GlobalText[2652]);
+            swprintf(szOptionText, GlobalText[2652]);
             TextListColor[iTextNum] = TEXT_COLOR_GRAY;
         }
         else if (pItem->SocketSeedID[i] < MAX_SOCKET_OPTION)
@@ -259,24 +259,24 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
             assert(!"소켓 인덱스 에러");
         }
 
-        wsprintf(TextList[iTextNum], GlobalText[2655], i + 1, szOptionText);
+        swprintf(TextList[iTextNum], GlobalText[2655], i + 1, szOptionText);
         TextBold[iTextNum] = false;
         ++iTextNum;
     }
 
     if (pItem->SocketSeedSetOption < MAX_SOCKET_OPTION)
     {
-        wsprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+        swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
-        wsprintf(TextList[iTextNum], L"%s", GlobalText[2656]);
+        swprintf(TextList[iTextNum], L"%s", GlobalText[2656]);
         TextListColor[iTextNum] = TEXT_COLOR_PURPLE;
         TextBold[iTextNum] = false;
         ++iTextNum;
-        wsprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+        swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
         pInfo = &m_SocketOptionInfo[SOT_MIX_SET_BONUS_OPTIONS][pItem->SocketSeedSetOption];
         CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
-        wsprintf(TextList[iTextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
+        swprintf(TextList[iTextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -291,12 +291,12 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
     if (pItem->Type >= ITEM_WING + 60 && pItem->Type <= ITEM_WING + 65)
     {
         int iCategoryIndex = pItem->Type - (ITEM_WING + 60) + 1;
-        wsprintf(TextList[iTextNum], GlobalText[2653], GlobalText[2640 + iCategoryIndex - 1]);
+        swprintf(TextList[iTextNum], GlobalText[2653], GlobalText[2640 + iCategoryIndex - 1]);
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
 
-        wsprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+        swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
         int iSocketSeedID = 0;
         int iLevel = (pItem->Level >> 3) & 15;
@@ -322,7 +322,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
             break;
         }
         pInfo = &m_SocketOptionInfo[SOT_SOCKET_ITEM_OPTIONS][iSocketSeedID];
-        wsprintf(TextList[iTextNum], pInfo->m_szOptionName);
+        swprintf(TextList[iTextNum], pInfo->m_szOptionName);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -330,7 +330,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
     else if (pItem->Type >= ITEM_WING + 70 && pItem->Type <= ITEM_WING + 74)
     {
         int iSphereLevel = pItem->Type - (ITEM_WING + 70) + 1;
-        wsprintf(TextList[iTextNum], GlobalText[2654], iSphereLevel);
+        swprintf(TextList[iTextNum], GlobalText[2654], iSphereLevel);
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -338,12 +338,12 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
     else if (pItem->Type >= ITEM_WING + 100 && pItem->Type <= ITEM_WING + 129)
     {
         int iCategoryIndex = (pItem->Type - (ITEM_WING + 100)) % 6 + 1;
-        wsprintf(TextList[iTextNum], GlobalText[2653], GlobalText[2640 + iCategoryIndex - 1]);
+        swprintf(TextList[iTextNum], GlobalText[2653], GlobalText[2640 + iCategoryIndex - 1]);
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
 
-        wsprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+        swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
         int iSocketSeedID = 0;
         int iLevel = (pItem->Level >> 3) & 15;
@@ -376,7 +376,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
         auto fOptionValue = (float)pInfo->m_iOptionValue[(pItem->Type - (ITEM_WING + 100)) / 6];
         CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, fOptionValue);
 
-        wsprintf(TextList[iTextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
+        swprintf(TextList[iTextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -406,11 +406,11 @@ void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
         BYTE SkipNum = 0;
         BYTE setIndex = 0;
 
-        wsprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        wsprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        wsprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
 
-        wsprintf(TextList[TextNum], GlobalText[2657]);
+        swprintf(TextList[TextNum], GlobalText[2657]);
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = true;
         TextNum++;
@@ -422,7 +422,7 @@ void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
         {
             pInfo = &m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][*iter];
             CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
-            wsprintf(TextList[TextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
+            swprintf(TextList[TextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
@@ -585,7 +585,7 @@ void CSocketItemMgr::OpenSocketItemScript(const wchar_t* szFileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", szFileName);
+        swprintf(Text, L"%s - File not exist.", szFileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);

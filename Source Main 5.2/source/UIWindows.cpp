@@ -859,8 +859,6 @@ void RenderWindowHLine(float pos_x, float pos_y, float width)
 }
 
 CUIBaseWindow::CUIBaseWindow()
-    : MAX_LETTER_TITLE_LENGTH_UTF16((int)(MAX_LETTER_TITLE_LENGTH / g_pMultiLanguage->GetNumByteForOneCharUTF8())),
-    MAX_LETTER_TEXT_LENGTH_UTF16((int)(MAX_LETTERTEXT_LENGTH / g_pMultiLanguage->GetNumByteForOneCharUTF8()))
 {
     memset(&m_WorkMessage, 0, sizeof(UI_MESSAGE));
     m_iMouseClickPos_x = 0;
@@ -1288,9 +1286,6 @@ void CUIBaseWindow::Maximize()
 CUIChatWindow::CUIChatWindow()
     : m_iShowType(1),
     m_dwRoomNumber(0)
-    , MAX_CHATROOM_TEXT_LENGTH_UTF16((int)(MAX_CHATROOM_TEXT_LENGTH /
-        (g_pMultiLanguage->GetNumByteForOneCharUTF8())))
-
 {}
 
 CUIChatWindow::~CUIChatWindow()
@@ -1311,7 +1306,7 @@ void CUIChatWindow::InitControls()
     m_TextInputBox.SetParentUIID(GetUIID());
     m_TextInputBox.SetArrangeType(2, 2, 12);
     m_TextInputBox.SetState(UISTATE_NORMAL);
-    m_TextInputBox.SetTextLimit(MAX_CHATROOM_TEXT_LENGTH_UTF16 - 1);
+    m_TextInputBox.SetTextLimit(MAX_CHATROOM_TEXT_LENGTH - 1);
 
     m_InviteButton.Init(1, GlobalText[993]);
     m_InviteButton.SetParentUIID(GetUIID());
@@ -1606,9 +1601,9 @@ BOOL CUIChatWindow::HandleMessage()
     case UI_MESSAGE_TEXTINPUT:
     {
         wchar_t	pszText[MAX_CHATROOM_TEXT_LENGTH] = { '\0' };
-        auto* pwszTextUTF16 = new wchar_t[MAX_CHATROOM_TEXT_LENGTH_UTF16];
+        auto* pwszTextUTF16 = new wchar_t[MAX_CHATROOM_TEXT_LENGTH];
 
-        m_TextInputBox.GetText(pwszTextUTF16, MAX_CHATROOM_TEXT_LENGTH_UTF16);
+        m_TextInputBox.GetText(pwszTextUTF16, MAX_CHATROOM_TEXT_LENGTH);
 
         std::wstring strText = L"";
         std::wstring wstrUTF16 = pwszTextUTF16;
@@ -2376,7 +2371,7 @@ void CUIPhotoViewer::ChangeAnimation(int iMoveDir)
 void CUIPhotoViewer::SetID(const wchar_t* pszID)
 {
     if (pszID == NULL) return;
-    wsprintf(m_PhotoChar.ID, pszID);
+    swprintf(m_PhotoChar.ID, pszID);
 }
 
 extern bool EquipmentSuccess;
@@ -2531,11 +2526,11 @@ void CUIPhotoViewer::Render()
             glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
             TextNum = 0;
-            wsprintf(TextList[TextNum], GlobalText[997]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            wsprintf(TextList[TextNum], GlobalText[998]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            wsprintf(TextList[TextNum], GlobalText[999]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[997]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[998]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[999]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
             SIZE TextSize;
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Z", 1, &TextSize);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Z", 1, &TextSize);
             TextSize.cy /= g_fScreenRate_y;
             RenderTipTextList(m_iPos_x + m_iWidth / 2, m_iPos_y + m_iHeight - TextNum * (TextSize.cy + 2), TextNum, 0, RT3_SORT_LEFT);
         }
@@ -2545,7 +2540,7 @@ void CUIPhotoViewer::Render()
 void CUILetterWriteWindow::InitControls()
 {
     SIZE size;
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1000], GlobalText.GetStringSize(1000), &size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1000], GlobalText.GetStringSize(1000), &size);
 
     size.cx = (size.cx / g_fScreenRate_x) + 0.5f;
 
@@ -2564,14 +2559,14 @@ void CUILetterWriteWindow::InitControls()
     m_TitleInputBox.SetFont(g_hFont);
     m_TitleInputBox.SetOption(UIOPTION_NULL);
     m_TitleInputBox.SetBackColor(0, 0, 0, 0);
-    m_TitleInputBox.SetTextLimit(MAX_LETTER_TITLE_LENGTH_UTF16 - 1);
+    m_TitleInputBox.SetTextLimit(MAX_LETTER_TITLE_LENGTH - 1);
     m_TitleInputBox.SetParentUIID(GetUIID());
     m_TitleInputBox.SetArrangeType(0, size.cx, 18);
     m_TitleInputBox.SetState(UISTATE_NORMAL);
 
     m_TextInputBox.SetMultiline(TRUE);
     m_TextInputBox.Init(g_hWnd, 238, 135, 50);
-    m_TextInputBox.SetTextLimit(MAX_LETTER_TEXT_LENGTH_UTF16 - 1);
+    m_TextInputBox.SetTextLimit(MAX_LETTERTEXT_LENGTH - 1);
     m_TextInputBox.SetParentUIID(m_dwUIID);
     m_TextInputBox.SetFont(g_hFont);
     m_TextInputBox.SetOption(UIOPTION_NULL);
@@ -2707,7 +2702,7 @@ void CUILetterWriteWindow::RenderSub()
     SIZE size;
 
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1000], GlobalText.GetStringSize(1000), &size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1000], GlobalText.GetStringSize(1000), &size);
     g_pRenderText->RenderText(RPos_x(3), RPos_y(3), GlobalText[1000], size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
     g_pRenderText->RenderText(RPos_x(3), RPos_y(18), GlobalText[1005], size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
 
@@ -3066,7 +3061,7 @@ void CUILetterReadWindow::RenderSub()
     EndRenderColor();
 
     wchar_t szMailFrom[256] = { 0 };
-    wsprintf(szMailFrom, GlobalText[1014], m_LetterHead.m_szID, m_LetterHead.m_szDate, m_LetterHead.m_szTime);
+    swprintf(szMailFrom, GlobalText[1014], m_LetterHead.m_szID, m_LetterHead.m_szDate, m_LetterHead.m_szTime);
     g_pRenderText->RenderText(RPos_x(3), RPos_y(3), szMailFrom);
 
     m_ReplyButton.Render();
@@ -3101,13 +3096,13 @@ BOOL CUILetterReadWindow::HandleMessage()
         case 1:
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            wsprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            swprintf(temp, GlobalText[1071], g_cdwLetterCost);
 
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
             if (dwUIID == 0) break;
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText(m_LetterHead.m_szID);
             wchar_t szMailTitle[MAX_TEXT_LENGTH + 1] = { 0 };
-            wsprintf(szMailTitle, GlobalText[1016], m_LetterHead.m_szText);
+            swprintf(szMailTitle, GlobalText[1016], m_LetterHead.m_szText);
             wchar_t szMailTitleResult[32 + 1] = { 0 };
             CutText4(szMailTitle, szMailTitleResult, NULL, 32);
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMainTitleText(szMailTitleResult);
@@ -3534,7 +3529,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
         case 4:		// 편지쓰기
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            wsprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            swprintf(temp, GlobalText[1071], g_cdwLetterCost);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);	// "편지쓰기"
             if (dwUIID == 0) break;
             if (GetCurrentSelectedFriend() != NULL)
@@ -4440,7 +4435,7 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
         case 1:
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            wsprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            swprintf(temp, GlobalText[1071], g_cdwLetterCost);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
         }
         break;
@@ -4472,12 +4467,12 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
         {
             if (GetCurrentSelectedLetter() == NULL) break;
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            wsprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            swprintf(temp, GlobalText[1071], g_cdwLetterCost);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
             if (dwUIID == 0) break;
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText(GetCurrentSelectedLetter()->m_szID);
             wchar_t szMailTitle[MAX_TEXT_LENGTH + 1] = { 0 };
-            wsprintf(szMailTitle, GlobalText[1016], GetCurrentSelectedLetter()->m_szText);
+            swprintf(szMailTitle, GlobalText[1016], GetCurrentSelectedLetter()->m_szText);
             wchar_t szMailTitleResult[32 + 1] = { 0 };
             CutText4(szMailTitle, szMailTitleResult, NULL, 32);
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMainTitleText(szMailTitleResult);
@@ -4752,7 +4747,7 @@ void CUIFriendWindow::RenderSub()
 
         TextLen = lstrlen(m_FriendListWnd.GetTitle());
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_FriendListWnd.GetTitle(), TextLen, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_FriendListWnd.GetTitle(), TextLen, &TextSize);
         g_pRenderText->RenderText(RPos_x(0) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
             RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_FriendListWnd.GetTitle());
     }
@@ -4768,7 +4763,7 @@ void CUIFriendWindow::RenderSub()
         }
         TextLen = lstrlen(m_LetterBoxWnd.GetTitle());
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_LetterBoxWnd.GetTitle(), TextLen, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_LetterBoxWnd.GetTitle(), TextLen, &TextSize);
         g_pRenderText->RenderText(RPos_x(54) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_LetterBoxWnd.GetTitle());
     }
     if (m_ChatRoomListWnd.GetTitle() != NULL)
@@ -4783,12 +4778,12 @@ void CUIFriendWindow::RenderSub()
         }
         TextLen = lstrlen(m_ChatRoomListWnd.GetTitle());
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_ChatRoomListWnd.GetTitle(), TextLen, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_ChatRoomListWnd.GetTitle(), TextLen, &TextSize);
         g_pRenderText->RenderText(RPos_x(107) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_ChatRoomListWnd.GetTitle());
     }
 
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1035], GlobalText.GetStringSize(1035), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1035], GlobalText.GetStringSize(1035), &TextSize);
     g_pRenderText->RenderText(RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, GlobalText[1035]);
 
     float fCheckBoxPos_x = RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2 - 14;
@@ -4915,7 +4910,7 @@ void CUIFriendWindow::DoMouseActionSub()
         m_iTabMouseOverIndex = m_iTabIndex;
         SIZE TextSize;
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1035], GlobalText.GetStringSize(1035), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1035], GlobalText.GetStringSize(1035), &TextSize);
 
         if (CheckMouseIn(RPos_x(0) + RWidth() - TextSize.cx - 2 - 14,
             RPos_y(4), TextSize.cx + 2 + 14, 20) == TRUE)
@@ -5424,7 +5419,7 @@ void CUIFriendMenu::RenderSub()
     if (m_fLineHeight == 0)
     {
         SIZE TextSize;
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"0", 1, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"0", 1, &TextSize);
 
         m_fLineHeight = TextSize.cy / g_fScreenRate_y;
     }

@@ -97,7 +97,7 @@ void CPortalMgr::GetPortalPositionText(wchar_t* pszOut)
     }
     else
     {
-        wsprintf(pszOut, L"%s (%d, %d)", gMapManager.GetMapName(m_iPortalWorld), m_iPortalPosition_x, m_iPortalPosition_y);
+        swprintf(pszOut, L"%s (%d, %d)", gMapManager.GetMapName(m_iPortalWorld), m_iPortalPosition_x, m_iPortalPosition_y);
     }
 }
 
@@ -111,6 +111,6 @@ void CPortalMgr::GetRevivePositionText(wchar_t* pszOut)
     }
     else
     {
-        wsprintf(pszOut, L"%s (%d, %d)", gMapManager.GetMapName(m_iReviveWorld), m_iRevivePosition_x, m_iRevivePosition_y);
+        swprintf(pszOut, L"%s (%d, %d)", gMapManager.GetMapName(m_iReviveWorld), m_iRevivePosition_x, m_iRevivePosition_y);
     }
 }

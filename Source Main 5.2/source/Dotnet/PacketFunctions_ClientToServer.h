@@ -14,19 +14,15 @@
 #pragma once
 
 #include "stdafx.h"
-
+#include "PacketFunctions_Custom.h"
 #include <coreclr_delegates.h>
 
 /// <summary>
 /// Extension methods to start writing messages of this namespace on a <see cref="Connection"/>.
 /// </summary>
-class PacketFunctions_ClientToServer
+class PacketFunctions_ClientToServer : public PacketFunctions_ClientToServer_Custom
 {
-private:
-    int32_t _handle;
 public:
-    void SetHandle(int32_t handle) { _handle = handle; }
-
 
     /// <summary>
     /// Sends a Ping to this connection.
@@ -53,34 +49,30 @@ public:
     /// Sends a PublicChatMessage to this connection.
     /// </summary>
     /// <param name="character">The character.</param>
-    /// <param name="characterByteLength">The length of <paramref name="character"/> in bytes.
     /// <param name="message">The message.</param>
-    /// <param name="messageByteLength">The length of <paramref name="message"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A player sends a public chat message.
     /// Causes reaction on server side: The message is forwarded to all surrounding players, including the sender.
     /// </remarks>
-    void SendPublicChatMessage(const wchar_t* character, uint32_t characterByteLength, const wchar_t* message, uint32_t messageByteLength);
+    void SendPublicChatMessage(const wchar_t* character, const wchar_t* message);
 
     /// <summary>
     /// Sends a WhisperMessage to this connection.
     /// </summary>
     /// <param name="receiverName">The receiver name.</param>
-    /// <param name="receiverNameByteLength">The length of <paramref name="receiverName"/> in bytes.
     /// <param name="message">The message.</param>
-    /// <param name="messageByteLength">The length of <paramref name="message"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A player sends a private chat message to a specific target player.
     /// Causes reaction on server side: The message is forwarded to the target player.
     /// </remarks>
-    void SendWhisperMessage(const wchar_t* receiverName, uint32_t receiverNameByteLength, const wchar_t* message, uint32_t messageByteLength);
+    void SendWhisperMessage(const wchar_t* receiverName, const wchar_t* message);
 
     /// <summary>
     /// Sends a LoginLongPassword to this connection.
     /// </summary>
-    /// <param name="username">The user name, L"encrypted" with Xor3.</param>
+    /// <param name="username">The user name, "encrypted" with Xor3.</param>
     /// <param name="usernameByteLength">The length of <paramref name="username"/> in bytes.
-    /// <param name="password">The password, L"encrypted" with Xor3.</param>
+    /// <param name="password">The password, "encrypted" with Xor3.</param>
     /// <param name="passwordByteLength">The length of <paramref name="password"/> in bytes.
     /// <param name="tickCount">The tick count.</param>
     /// <param name="clientVersion">The client version.</param>
@@ -96,9 +88,9 @@ public:
     /// <summary>
     /// Sends a LoginShortPassword to this connection.
     /// </summary>
-    /// <param name="username">The user name, L"encrypted" with Xor3.</param>
+    /// <param name="username">The user name, "encrypted" with Xor3.</param>
     /// <param name="usernameByteLength">The length of <paramref name="username"/> in bytes.
-    /// <param name="password">The password, L"encrypted" with Xor3.</param>
+    /// <param name="password">The password, "encrypted" with Xor3.</param>
     /// <param name="passwordByteLength">The length of <paramref name="password"/> in bytes.
     /// <param name="tickCount">The tick count.</param>
     /// <param name="clientVersion">The client version.</param>
@@ -114,9 +106,9 @@ public:
     /// <summary>
     /// Sends a Login075 to this connection.
     /// </summary>
-    /// <param name="username">The user name, L"encrypted" with Xor3.</param>
+    /// <param name="username">The user name, "encrypted" with Xor3.</param>
     /// <param name="usernameByteLength">The length of <paramref name="username"/> in bytes.
-    /// <param name="password">The password, L"encrypted" with Xor3.</param>
+    /// <param name="password">The password, "encrypted" with Xor3.</param>
     /// <param name="passwordByteLength">The length of <paramref name="password"/> in bytes.
     /// <param name="tickCount">The tick count.</param>
     /// <param name="clientVersion">The client version.</param>
@@ -174,12 +166,11 @@ public:
     /// Sends a PlayerShopOpen to this connection.
     /// </summary>
     /// <param name="storeName">The store name.</param>
-    /// <param name="storeNameByteLength">The length of <paramref name="storeName"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: The player wants to open his personal item shop.
     /// Causes reaction on server side: The personal item shop is opened and the surrounding players are informed about it, including the own player.
     /// </remarks>
-    void SendPlayerShopOpen(const wchar_t* storeName, uint32_t storeNameByteLength);
+    void SendPlayerShopOpen(const wchar_t* storeName);
 
     /// <summary>
     /// Sends a PlayerShopClose to this connection.
@@ -195,25 +186,23 @@ public:
     /// </summary>
     /// <param name="playerId">The player id.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A player opens a shop of another player.
     /// Causes reaction on server side: The list of items is sent back, if the shop of the player is currently open.
     /// </remarks>
-    void SendPlayerShopItemListRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength);
+    void SendPlayerShopItemListRequest(uint16_t playerId, const wchar_t* playerName);
 
     /// <summary>
     /// Sends a PlayerShopItemBuyRequest to this connection.
     /// </summary>
     /// <param name="playerId">The player id.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/> in bytes.
     /// <param name="itemSlot">The item slot.</param>
     /// <remarks>
     /// Is sent by the client when: A player wants to buy the item of another players shop.
     /// Causes reaction on server side: If the buyer has enough money, the item is sold to the player. Both players will get notifications about that.
     /// </remarks>
-    void SendPlayerShopItemBuyRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength, BYTE itemSlot);
+    void SendPlayerShopItemBuyRequest(uint16_t playerId, const wchar_t* playerName, BYTE itemSlot);
 
     /// <summary>
     /// Sends a PickupItemRequest to this connection.
@@ -778,14 +767,12 @@ public:
     /// <param name="coinIndex">The coin index.</param>
     /// <param name="mileageFlag">The mileage flag.</param>
     /// <param name="giftReceiverName">The gift receiver name.</param>
-    /// <param name="giftReceiverNameByteLength">The length of <paramref name="giftReceiverName"/> in bytes.
     /// <param name="giftText">The gift text.</param>
-    /// <param name="giftTextByteLength">The length of <paramref name="giftText"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: The player wants to send a gift to another player.
     /// Causes reaction on server side: The server buys the item with the credits of the player and sends it as gift to the other player.
     /// </remarks>
-    void SendCashShopItemGiftRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag, const wchar_t* giftReceiverName, uint32_t giftReceiverNameByteLength, const wchar_t* giftText, uint32_t giftTextByteLength);
+    void SendCashShopItemGiftRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag, const wchar_t* giftReceiverName, const wchar_t* giftText);
 
     /// <summary>
     /// Sends a CashShopStorageListRequest to this connection.
@@ -848,23 +835,21 @@ public:
     /// </summary>
     /// <param name="pin">The pin.</param>
     /// <param name="password">The password of the account, which is required to set a new vault pin.</param>
-    /// <param name="passwordByteLength">The length of <paramref name="password"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: The player wants to set a new pin for the vault when it's in unlocked state.
     /// Causes reaction on server side: The vault pin is set. VaultProtectionInformation is sent as response.
     /// </remarks>
-    void SendSetVaultPin(uint16_t pin, const wchar_t* password, uint32_t passwordByteLength);
+    void SendSetVaultPin(uint16_t pin, const wchar_t* password);
 
     /// <summary>
     /// Sends a RemoveVaultPin to this connection.
     /// </summary>
     /// <param name="password">The password of the account, which is required to remove the vault pin.</param>
-    /// <param name="passwordByteLength">The length of <paramref name="password"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: The player wants to remove the pin for the vault when it's in unlocked state.
     /// Causes reaction on server side: The vault pin is removed. VaultProtectionInformation is sent as response.
     /// </remarks>
-    void SendRemoveVaultPin(const wchar_t* password, uint32_t passwordByteLength);
+    void SendRemoveVaultPin(const wchar_t* password);
 
     /// <summary>
     /// Sends a VaultClosed to this connection.
@@ -1005,48 +990,43 @@ public:
     /// Sends a CreateCharacter to this connection.
     /// </summary>
     /// <param name="name">The name of the character which should be created.</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/> in bytes.
     /// <param name="class_">The character class of the character which should be created.</param>
     /// <remarks>
     /// Is sent by the client when: The game client is at the character selection screen and the player requests to add a new character.
     /// Causes reaction on server side: The server checks if the player is allowed to create the character and sends a response back.
     /// </remarks>
-    void SendCreateCharacter(const wchar_t* name, uint32_t nameByteLength, uint32_t class_);
+    void SendCreateCharacter(const wchar_t* name, uint32_t class_);
 
     /// <summary>
     /// Sends a DeleteCharacter to this connection.
     /// </summary>
     /// <param name="name">The name of the character which should be deleted.</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/> in bytes.
     /// <param name="securityCode">A security code (7 bytes long). Some game clients/servers also expect to transmit the account password (up to 20 bytes long) here. In OpenMU, we work with the security here, but are not limiting to a length of 7 bytes.</param>
-    /// <param name="securityCodeByteLength">The length of <paramref name="securityCode"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: The game client is at the character selection screen and the player requests to delete an existing character.
     /// Causes reaction on server side: The server checks if the player transmitted the correct security code and if the character actually exists. If all is valid, it deletes the character from the account. It then sends a response with a result code back to the game client.
     /// </remarks>
-    void SendDeleteCharacter(const wchar_t* name, uint32_t nameByteLength, const wchar_t* securityCode, uint32_t securityCodeByteLength);
+    void SendDeleteCharacter(const wchar_t* name, const wchar_t* securityCode);
 
     /// <summary>
     /// Sends a SelectCharacter to this connection.
     /// </summary>
     /// <param name="name">The name of the character with which the player wants to join the game world</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: The player selects a character to enter the game world on the character selection screen.
     /// Causes reaction on server side: The player joins the game world with the specified character.
     /// </remarks>
-    void SendSelectCharacter(const wchar_t* name, uint32_t nameByteLength);
+    void SendSelectCharacter(const wchar_t* name);
 
     /// <summary>
     /// Sends a FocusCharacter to this connection.
     /// </summary>
     /// <param name="name">The name.</param>
-    /// <param name="nameByteLength">The length of <paramref name="name"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: The player focuses (clicks on it) a character with which he plans to enter the game world on the character selection screen.
     /// Causes reaction on server side: The server checks if this character exists and sends a response back. If successful, the game client highlights the focused character.
     /// </remarks>
-    void SendFocusCharacter(const wchar_t* name, uint32_t nameByteLength);
+    void SendFocusCharacter(const wchar_t* name);
 
     /// <summary>
     /// Sends a IncreaseCharacterStatPoint to this connection.
@@ -1280,19 +1260,16 @@ public:
     /// </summary>
     /// <param name="letterId">The letter id.</param>
     /// <param name="receiver">The receiver.</param>
-    /// <param name="receiverByteLength">The length of <paramref name="receiver"/> in bytes.
     /// <param name="title">The title.</param>
-    /// <param name="titleByteLength">The length of <paramref name="title"/> in bytes.
     /// <param name="rotation">The rotation.</param>
     /// <param name="animation">The animation.</param>
     /// <param name="messageLength">The message length.</param>
     /// <param name="message">The message.</param>
-    /// <param name="messageByteLength">The length of <paramref name="message"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A player wants to send a letter to another players character.
     /// Causes reaction on server side: The letter is sent to the other character, if it exists and the player has the required money.
     /// </remarks>
-    void SendLetterSendRequest(uint32_t letterId, const wchar_t* receiver, uint32_t receiverByteLength, const wchar_t* title, uint32_t titleByteLength, BYTE rotation, BYTE animation, uint16_t messageLength, const wchar_t* message, uint32_t messageByteLength);
+    void SendLetterSendRequest(uint32_t letterId, const wchar_t* receiver, const wchar_t* title, BYTE rotation, BYTE animation, uint16_t messageLength, const wchar_t* message);
 
     /// <summary>
     /// Sends a LetterReadRequest to this connection.
@@ -1308,14 +1285,12 @@ public:
     /// Sends a GuildKickPlayerRequest to this connection.
     /// </summary>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/> in bytes.
     /// <param name="securityCode">The security code.</param>
-    /// <param name="securityCodeByteLength">The length of <paramref name="securityCode"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A guild member wants to kick himself or a guild master wants to kick another player from its guild.
     /// Causes reaction on server side: If the player is allowed to kick the player, it's removed from the guild. If the guild master kicks himself, the guild is disbanded. Corresponding responses are sent to all involved players.
     /// </remarks>
-    void SendGuildKickPlayerRequest(const wchar_t* playerName, uint32_t playerNameByteLength, const wchar_t* securityCode, uint32_t securityCodeByteLength);
+    void SendGuildKickPlayerRequest(const wchar_t* playerName, const wchar_t* securityCode);
 
     /// <summary>
     /// Sends a GuildJoinRequest to this connection.
@@ -1351,27 +1326,25 @@ public:
     /// Sends a GuildCreateRequest to this connection.
     /// </summary>
     /// <param name="guildName">The guild name.</param>
-    /// <param name="guildNameByteLength">The length of <paramref name="guildName"/> in bytes.
     /// <param name="guildEmblem">The guild emblem in a custom bitmap format. It supports 16 colors (one transparent) per pixel and has a size of 8 * 8 pixel.</param>
     /// <param name="guildEmblemByteLength">The length of <paramref name="guildEmblem"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: When a player wants to create a guild.
     /// Causes reaction on server side: The guild is created and the player is set as the new guild master of the guild.
     /// </remarks>
-    void SendGuildCreateRequest(const wchar_t* guildName, uint32_t guildNameByteLength, const BYTE* guildEmblem, uint32_t guildEmblemByteLength);
+    void SendGuildCreateRequest(const wchar_t* guildName, const BYTE* guildEmblem, uint32_t guildEmblemByteLength);
 
     /// <summary>
     /// Sends a GuildCreateRequest075 to this connection.
     /// </summary>
     /// <param name="guildName">The guild name.</param>
-    /// <param name="guildNameByteLength">The length of <paramref name="guildName"/> in bytes.
     /// <param name="guildEmblem">The guild emblem in a custom bitmap format. It supports 16 colors (one transparent) per pixel and has a size of 8 * 8 pixel.</param>
     /// <param name="guildEmblemByteLength">The length of <paramref name="guildEmblem"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: When a player wants to create a guild.
     /// Causes reaction on server side: The guild is created and the player is set as the new guild master of the guild.
     /// </remarks>
-    void SendGuildCreateRequest075(const wchar_t* guildName, uint32_t guildNameByteLength, const BYTE* guildEmblem, uint32_t guildEmblemByteLength);
+    void SendGuildCreateRequest075(const wchar_t* guildName, const BYTE* guildEmblem, uint32_t guildEmblemByteLength);
 
     /// <summary>
     /// Sends a GuildMasterAnswer to this connection.
@@ -1417,13 +1390,12 @@ public:
     /// </summary>
     /// <param name="role">The role.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/> in bytes.
     /// <param name="type">Unknown value between 1 and 3.</param>
     /// <remarks>
     /// Is sent by the client when: A guild master wants to change the role of a guild member.
     /// Causes reaction on server side: The server changes the role of the guild member.
     /// </remarks>
-    void SendGuildRoleAssignRequest(uint32_t role, const wchar_t* playerName, uint32_t playerNameByteLength, BYTE type = 1);
+    void SendGuildRoleAssignRequest(uint32_t role, const wchar_t* playerName, BYTE type = 1);
 
     /// <summary>
     /// Sends a GuildTypeChangeRequest to this connection.
@@ -1473,12 +1445,11 @@ public:
     /// Sends a RemoveAllianceGuildRequest to this connection.
     /// </summary>
     /// <param name="guildName">The guild name.</param>
-    /// <param name="guildNameByteLength">The length of <paramref name="guildName"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: An alliance guild master wants to remove a guild from the alliance.
     /// Causes reaction on server side: The server removes the guild from the alliance.
     /// </remarks>
-    void SendRemoveAllianceGuildRequest(const wchar_t* guildName, uint32_t guildNameByteLength);
+    void SendRemoveAllianceGuildRequest(const wchar_t* guildName);
 
     /// <summary>
     /// Sends a PingResponse to this connection.
@@ -1532,46 +1503,42 @@ public:
     /// Sends a FriendAddRequest to this connection.
     /// </summary>
     /// <param name="friendName">The friend name.</param>
-    /// <param name="friendNameByteLength">The length of <paramref name="friendName"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A player wants to add another players character into his friend list of the messenger.
     /// Causes reaction on server side: A request is sent to the other player. If the player is currently offline, the request will be sent as soon as he is online again.
     /// </remarks>
-    void SendFriendAddRequest(const wchar_t* friendName, uint32_t friendNameByteLength);
+    void SendFriendAddRequest(const wchar_t* friendName);
 
     /// <summary>
     /// Sends a FriendDelete to this connection.
     /// </summary>
     /// <param name="friendName">The friend name.</param>
-    /// <param name="friendNameByteLength">The length of <paramref name="friendName"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A player wants to delete another players character from his friend list of the messenger.
     /// Causes reaction on server side: The entry in the friend list is removed. The player is shown as offline in the other players friends list.
     /// </remarks>
-    void SendFriendDelete(const wchar_t* friendName, uint32_t friendNameByteLength);
+    void SendFriendDelete(const wchar_t* friendName);
 
     /// <summary>
     /// Sends a ChatRoomCreateRequest to this connection.
     /// </summary>
     /// <param name="friendName">The friend name.</param>
-    /// <param name="friendNameByteLength">The length of <paramref name="friendName"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A player wants to open a chat with another player of his friend list.
     /// Causes reaction on server side: If both players are online, a chat room is created on the chat server. Authentication data is sent to both game clients, which will then try to connect to the chat server using this data.
     /// </remarks>
-    void SendChatRoomCreateRequest(const wchar_t* friendName, uint32_t friendNameByteLength);
+    void SendChatRoomCreateRequest(const wchar_t* friendName);
 
     /// <summary>
     /// Sends a FriendAddResponse to this connection.
     /// </summary>
     /// <param name="accepted">The accepted.</param>
     /// <param name="friendRequesterName">The friend requester name.</param>
-    /// <param name="friendRequesterNameByteLength">The length of <paramref name="friendRequesterName"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A player received a friend request from another player and responded to it.
     /// Causes reaction on server side: If the player accepted, the friend is added to the players friend list and both players get subscribed about each others online status.
     /// </remarks>
-    void SendFriendAddResponse(BYTE accepted, const wchar_t* friendRequesterName, uint32_t friendRequesterNameByteLength);
+    void SendFriendAddResponse(BYTE accepted, const wchar_t* friendRequesterName);
 
     /// <summary>
     /// Sends a SetFriendOnlineState to this connection.
@@ -1587,14 +1554,13 @@ public:
     /// Sends a ChatRoomInvitationRequest to this connection.
     /// </summary>
     /// <param name="friendName">The friend name.</param>
-    /// <param name="friendNameByteLength">The length of <paramref name="friendName"/> in bytes.
     /// <param name="roomId">The room id.</param>
     /// <param name="requestId">The request id.</param>
     /// <remarks>
     /// Is sent by the client when: A player wants to invite additional players from his friend list to an existing chat room.
     /// Causes reaction on server side: The player additional gets authentication data sent to his game client. It then connects to the chat server and joins the chat room.
     /// </remarks>
-    void SendChatRoomInvitationRequest(const wchar_t* friendName, uint32_t friendNameByteLength, uint16_t roomId, uint32_t requestId);
+    void SendChatRoomInvitationRequest(const wchar_t* friendName, uint16_t roomId, uint32_t requestId);
 
     /// <summary>
     /// Sends a LegacyQuestStateRequest to this connection.
@@ -1957,27 +1923,23 @@ public:
     /// Sends a ServerImmigrationRequest to this connection.
     /// </summary>
     /// <param name="securityCode">The security code.</param>
-    /// <param name="securityCodeByteLength">The length of <paramref name="securityCode"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: Unknown?
     /// Causes reaction on server side: Unknown?
     /// </remarks>
-    void SendServerImmigrationRequest(const wchar_t* securityCode, uint32_t securityCodeByteLength);
+    void SendServerImmigrationRequest(const wchar_t* securityCode);
 
     /// <summary>
     /// Sends a LuckyNumberRequest to this connection.
     /// </summary>
     /// <param name="serial1">The serial 1.</param>
-    /// <param name="serial1ByteLength">The length of <paramref name="serial1"/> in bytes.
     /// <param name="serial2">The serial 2.</param>
-    /// <param name="serial2ByteLength">The length of <paramref name="serial2"/> in bytes.
     /// <param name="serial3">The serial 3.</param>
-    /// <param name="serial3ByteLength">The length of <paramref name="serial3"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: The player requests to redeem a coupon code (lucky number) which is 12 alphanumeric digits long.
     /// Causes reaction on server side: A response is sent back to the client with the result. An item could be rewarded to the inventory.
     /// </remarks>
-    void SendLuckyNumberRequest(const wchar_t* serial1, uint32_t serial1ByteLength, const wchar_t* serial2, uint32_t serial2ByteLength, const wchar_t* serial3, uint32_t serial3ByteLength);
+    void SendLuckyNumberRequest(const wchar_t* serial1, const wchar_t* serial2, const wchar_t* serial3);
 
     /// <summary>
     /// Sends a BloodCastleEnterRequest to this connection.
@@ -2027,12 +1989,11 @@ public:
     /// </summary>
     /// <param name="playerId">The player id.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: The player requests to start a duel with another player.
     /// Causes reaction on server side: The server sends a request to the other player.
     /// </remarks>
-    void SendDuelStartRequest(uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength);
+    void SendDuelStartRequest(uint16_t playerId, const wchar_t* playerName);
 
     /// <summary>
     /// Sends a DuelStartResponse to this connection.
@@ -2040,12 +2001,11 @@ public:
     /// <param name="response">The response.</param>
     /// <param name="playerId">The player id.</param>
     /// <param name="playerName">The player name.</param>
-    /// <param name="playerNameByteLength">The length of <paramref name="playerName"/> in bytes.
     /// <remarks>
     /// Is sent by the client when: A player requested to start a duel with the sending player.
     /// Causes reaction on server side: Depending on the response, the server starts the duel, or not.
     /// </remarks>
-    void SendDuelStartResponse(BYTE response, uint16_t playerId, const wchar_t* playerName, uint32_t playerNameByteLength);
+    void SendDuelStartResponse(BYTE response, uint16_t playerId, const wchar_t* playerName);
 
     /// <summary>
     /// Sends a DuelStopRequest to this connection.

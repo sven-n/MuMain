@@ -4,6 +4,9 @@
 #include "stdafx.h"
 
 #include "muConsoleDebug.h"	// self
+
+#include <io.h>
+#include <fcntl.h>
 #include <iostream>
 #include "ZzzInterface.h"
 #include "ZzzOpenglUtil.h"
@@ -23,6 +26,7 @@ CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
     {
         leaf::ActivateCloseButton(false);
         leaf::ShowConsole(true);
+        // _setmode((int)leaf::GetConsoleWndHandle(), _O_WTEXT);
         m_bInit = true;
 
         g_ErrorReport.Write(L"Mu Debug Console Window Init - completed(Handle:0x%00000008X)\r\n", leaf::GetConsoleWndHandle());

@@ -172,11 +172,11 @@ bool CNewUIDoppelGangerWindow::Render()
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 210, GlobalText[2761], 190, 0, RT3_SORT_CENTER);
     if (m_iRemainTime == 0)
     {
-        wsprintf(szText, GlobalText[2164]);
+        swprintf(szText, GlobalText[2164]);
     }
     else
     {
-        wsprintf(szText, GlobalText[2762], m_iRemainTime);
+        swprintf(szText, GlobalText[2762], m_iRemainTime);
     }
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 230, szText, 190, 0, RT3_SORT_CENTER);
 
@@ -255,7 +255,7 @@ void CNewUIDoppelGangerWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    wsprintf(szText, L"%s", GlobalText[2756]);
+    swprintf(szText, L"%s", GlobalText[2756]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 

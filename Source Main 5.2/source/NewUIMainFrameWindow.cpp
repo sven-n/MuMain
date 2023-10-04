@@ -300,7 +300,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
     wchar_t strTipText[256];
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
-        wsprintf(strTipText, GlobalText[358], wLife, wLifeMax);
+        swprintf(strTipText, GlobalText[358], wLife, wLifeMax);
         RenderTipText((int)x, (int)418, strTipText);
     }
 
@@ -320,7 +320,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
     // mana
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
-        wsprintf(strTipText, GlobalText[359], wMana, wManaMax);
+        swprintf(strTipText, GlobalText[359], wMana, wManaMax);
         RenderTipText((int)x, (int)418, strTipText);
     }
 }
@@ -363,7 +363,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
     {
         wchar_t strTipText[256];
 
-        wsprintf(strTipText, GlobalText[214], dwSkillMana, dwMaxSkillMana);
+        swprintf(strTipText, GlobalText[214], dwSkillMana, dwMaxSkillMana);
         RenderTipText((int)x - 20, (int)418, strTipText);
     }
 }
@@ -408,7 +408,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
     {
         wchar_t strTipText[256];
 
-        wsprintf(strTipText, GlobalText[2037], wShield, wMaxShield);
+        swprintf(strTipText, GlobalText[2037], wShield, wMaxShield);
         RenderTipText((int)x - 20, (int)418, strTipText);
     }
 }
@@ -539,7 +539,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
         {
             wchar_t strTipText[256];
 
-            wsprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
+            swprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
             RenderTipText(280, 418, strTipText);
         }
     }
@@ -640,7 +640,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
         {
             wchar_t strTipText[256];
 
-            wsprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
+            swprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
             RenderTipText(280, 418, strTipText);
         }
     }

@@ -118,7 +118,7 @@ namespace SEASON3B
         void SendRequestItemToMyInven(ITEM* pItemObj,
             int nTradeIndex, int nInvenIndex);
 
-        void ProcessToReceiveTradeRequest(BYTE* pbyYourID);
+        void ProcessToReceiveTradeRequest(char* pbyYourID);
         void ProcessToReceiveTradeResult(LPPTRADE pTradeData);
         void ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex);
         void ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, BYTE* pbyItemPacket);

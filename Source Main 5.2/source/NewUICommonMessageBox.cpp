@@ -259,7 +259,7 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 
         g_pRenderText->SetBgColor(0);
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &Fontsize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &Fontsize);
 
         Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
         Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
@@ -280,7 +280,7 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
         SIZE TextSize;
         size_t TextExtentWidth;
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &TextSize);
         TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
         g_pRenderText->SetFont(g_hFont);
@@ -483,7 +483,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
     size_t TextExtentWidth;
     int iLine = 0;
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
     TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
     if (TextExtentWidth <= (DWORD)_TextSize)
@@ -512,7 +512,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
             cur_offset += offset;
 
             type_string strTemp(strRemainText, 0, cur_offset/* size */);
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
             TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
             if (TextExtentWidth > (DWORD)_TextSize && cur_offset != 0)
@@ -527,7 +527,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
                 m_MsgDataList.push_back(pMsg);
                 iLine++;
 
-                g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
+                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
                 TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
                 if (TextExtentWidth <= (DWORD)_TextSize)
@@ -626,7 +626,7 @@ void SEASON3B::CNewUICommonMessageBox::RenderTexts()
         SIZE TextSize;
         size_t TextExtentWidth, TextExtentHeight;
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
         TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
         TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -895,7 +895,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
     size_t TextExtentWidth;
     int iLine = 0;
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
     TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
     if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
@@ -926,7 +926,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
 
             type_string strTemp(strRemainText, 0, cur_offset/* size */);
 
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
             TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
             if (TextExtentWidth > MSGBOX_TEXT_MAXWIDTH_3DITEM && cur_offset != 0)
@@ -941,7 +941,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
                 m_MsgDataList.push_back(pMsg);
                 iLine++;
 
-                g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
+                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
                 TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
                 if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
@@ -1098,7 +1098,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderTexts()
         SIZE TextSize;
         size_t TextExtentWidth, TextExtentHeight;
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
         TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
         TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -1402,7 +1402,7 @@ bool SEASON3B::CGuildWarMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[128];
-    wsprintf(strText, GlobalText[430], GuildWarName);
+    swprintf(strText, GlobalText[430], GuildWarName);
     pMsgBox->AddMsg(strText);
     pMsgBox->AddMsg(GlobalText[431]);
 
@@ -1440,7 +1440,7 @@ bool SEASON3B::CBattleSoccerMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[128];
-    wsprintf(strText, GlobalText[430], GuildWarName);
+    swprintf(strText, GlobalText[430], GuildWarName);
     pMsgBox->AddMsg(strText);
     pMsgBox->AddMsg(GlobalText[432]);
 
@@ -1604,7 +1604,7 @@ bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[MAX_GLOBAL_TEXT_STRING];
-    wsprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_INFINITY_ARROW].Name, GlobalText[2046]);
+    swprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_INFINITY_ARROW].Name, GlobalText[2046]);
     g_iCancelSkillTarget = AT_SKILL_INFINITY_ARROW;
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -1646,7 +1646,7 @@ bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
         return false;
 
     wchar_t strText[MAX_GLOBAL_TEXT_STRING];
-    wsprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_SWELL_OF_MAGICPOWER].Name, GlobalText[2046]);
+    swprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_SWELL_OF_MAGICPOWER].Name, GlobalText[2046]);
     g_iCancelSkillTarget = AT_SKILL_SWELL_OF_MAGICPOWER;
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -1727,7 +1727,7 @@ bool SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[256] = { 0, };
-    wsprintf(strText, L"%s%s %s", GlobalText[1801], GlobalText[1816], GlobalText[858]);
+    swprintf(strText, L"%s%s %s", GlobalText[1801], GlobalText[1816], GlobalText[858]);
     pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationUnityResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
@@ -1791,7 +1791,7 @@ bool SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[256] = { 0, };
-    wsprintf(strText, L"%s%s %s", GlobalText[1800], GlobalText[1816], GlobalText[858]);
+    swprintf(strText, L"%s%s %s", GlobalText[1800], GlobalText[1816], GlobalText[858]);
     pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationDisjointResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     return true;
@@ -1988,16 +1988,16 @@ bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
     wchar_t strText[256];
     if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1] == 0)
     {
-        wsprintf(strText, L"%s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]]);
+        swprintf(strText, L"%s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]]);
     }
     else if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2] == 0)
     {
-        wsprintf(strText, L"%s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
+        swprintf(strText, L"%s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
             GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]]);
     }
     else
     {
-        wsprintf(strText, L"%s %s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
+        swprintf(strText, L"%s %s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
             GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]],
             GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]]);
     }
@@ -2581,19 +2581,19 @@ bool SEASON3B::CUseFruitMsgBoxLayout::SetLayout()
         switch ((pItem->Level >> 3) & 15)
         {
         case 0:
-            wsprintf(strName, L"%s", GlobalText[168]);
+            swprintf(strName, L"%s", GlobalText[168]);
             break;
         case 1:
-            wsprintf(strName, L"%s", GlobalText[169]);
+            swprintf(strName, L"%s", GlobalText[169]);
             break;
         case 2:
-            wsprintf(strName, L"%s", GlobalText[167]);
+            swprintf(strName, L"%s", GlobalText[167]);
             break;
         case 3:
-            wsprintf(strName, L"%s", GlobalText[166]);
+            swprintf(strName, L"%s", GlobalText[166]);
             break;
         case 4:
-            wsprintf(strName, L"%s", GlobalText[1900]);
+            swprintf(strName, L"%s", GlobalText[1900]);
             break;
         }
     }
@@ -2643,23 +2643,23 @@ bool SEASON3B::CUsePartChargeFruitMsgBoxLayout::SetLayout()
 
     if (pItem->Type == ITEM_HELPER + 54)
     {
-        wsprintf(strName, L"%s", GlobalText[166]);
+        swprintf(strName, L"%s", GlobalText[166]);
     }
     else if (pItem->Type == ITEM_HELPER + 55)
     {
-        wsprintf(strName, L"%s", GlobalText[167]);
+        swprintf(strName, L"%s", GlobalText[167]);
     }
     else if (pItem->Type == ITEM_HELPER + 56)
     {
-        wsprintf(strName, L"%s", GlobalText[169]);
+        swprintf(strName, L"%s", GlobalText[169]);
     }
     else if (pItem->Type == ITEM_HELPER + 57)
     {
-        wsprintf(strName, L"%s", GlobalText[168]);
+        swprintf(strName, L"%s", GlobalText[168]);
     }
     else if (pItem->Type == ITEM_HELPER + 58)
     {
-        wsprintf(strName, L"%s", GlobalText[1900]);
+        swprintf(strName, L"%s", GlobalText[1900]);
     }
 
     pMsgBox->AddMsg(strName, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -2936,7 +2936,7 @@ bool SEASON3B::CGuildPerson_Get_Out::SetLayout()
         return false;
 
     wchar_t Buff[300];
-    wsprintf(Buff, GlobalText[1367], GuildList[DeleteIndex].Name);
+    swprintf(Buff, GlobalText[1367], GuildList[DeleteIndex].Name);
     pMsgBox->AddMsg(Buff, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddMsg(GlobalText[1369], RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGuildPerson_Get_Out::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -3005,7 +3005,7 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
 
     wchar_t Text[300];
 
-    wsprintf(Text, L"%s    %s    %s    %s", GlobalText[680], GlobalText[681], GlobalText[1973], GlobalText[1977]);
+    swprintf(Text, L"%s    %s    %s    %s", GlobalText[680], GlobalText[681], GlobalText[1973], GlobalText[1977]);
 
     int TextColor = (255 << 24) + (21 << 16) + (148 << 8) + (255);
     pMsgBox->AddMsg(Text, TextColor);
@@ -3017,7 +3017,7 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
         if (HeroScore[i] == -1)
             continue;
 
-        wsprintf(Text, L"%d      %s      %s      %d", i + 1, HeroName[i], gCharacterManager.GetCharacterClassText(HeroClass[i]), HeroScore[i]);
+        swprintf(Text, L"%d      %s      %s      %d", i + 1, HeroName[i], gCharacterManager.GetCharacterClassText(HeroClass[i]), HeroScore[i]);
 
         pMsgBox->AddMsg(Text, TextColor);
     }
@@ -3030,9 +3030,9 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
 
     if (View_Suc_Or_Fail == 1)
     {
-        wsprintf(Text, GlobalText[2000]);
+        swprintf(Text, GlobalText[2000]);
         pMsgBox->AddMsg(Text, TextColor);
-        wsprintf(Text, GlobalText[2001]);
+        swprintf(Text, GlobalText[2001]);
         pMsgBox->AddMsg(Text, TextColor);
     }
     else
@@ -3227,7 +3227,7 @@ bool SEASON3B::CMaster_Level_Interface::SetLayout()
 
     wchar_t szText[256];
     pMsgBox->AddMsg(GlobalText[1771]);
-    wsprintf(szText, GlobalText[1772], Need_Point);
+    swprintf(szText, GlobalText[1772], Need_Point);
     pMsgBox->AddMsg(szText);
 
     pMsgBox->AddCallbackFunc(CMaster_Level_Interface::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -3271,7 +3271,7 @@ bool SEASON3B::CCry_Wolf_Get_Temple::SetLayout()
     wchar_t szText[256];
     int Num = CharactersClient[TargetNpc].Object.Type - MODEL_CRYWOLF_ALTAR1;
     BYTE State = (m_AltarState[Num] & 0x0f);
-    wsprintf(szText, GlobalText[2006], State);
+    swprintf(szText, GlobalText[2006], State);
     pMsgBox->AddMsg(szText);
     pMsgBox->AddMsg(GlobalText[2007]);
     BackUp_Key = CharactersClient[TargetNpc].Key;
@@ -3318,7 +3318,7 @@ bool SEASON3B::CUnionGuild_Break_MsgBoxLayout::SetLayout()
         return false;
 
     wchar_t szText[256];
-    wsprintf(szText, GlobalText[1423], DeleteID);
+    swprintf(szText, GlobalText[1423], DeleteID);
     pMsgBox->AddMsg(szText);
     pMsgBox->AddMsg(GlobalText[1369]);
     pMsgBox->AddCallbackFunc(CUnionGuild_Break_MsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -3481,7 +3481,7 @@ bool SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::SetLayout()
         return FALSE;
 
     wchar_t szText[100] = { 0, };
-    wsprintf(szText, GlobalText[580], GlobalText[1894]);
+    swprintf(szText, GlobalText[580], GlobalText[1894]);
     pMsgBox->AddMsg(szText);
     pMsgBox->AddCallbackFunc(CUseRegistLuckyCoinMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     return TRUE;
@@ -3526,7 +3526,7 @@ bool SEASON3B::CExchangeLuckyCoinMsgBoxLayout::SetLayout()
         return FALSE;
 
     wchar_t szText[100] = { 0, };
-    wsprintf(szText, GlobalText[580], GlobalText[1940]);
+    swprintf(szText, GlobalText[580], GlobalText[1940]);
     pMsgBox->AddMsg(szText);
 
     pMsgBox->AddCallbackFunc(CExchangeLuckyCoinMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);

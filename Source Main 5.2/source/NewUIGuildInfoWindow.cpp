@@ -309,7 +309,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
                         if (pMsgBox != NULL)
                         {
                             wchar_t strText[256];
-                            wsprintf(strText, GlobalText[1367], pText->m_szID);
+                            swprintf(strText, GlobalText[1367], pText->m_szID);
                             pMsgBox->AddMsg(strText);
                             pMsgBox->AddMsg(GlobalText[1368]);
                         }
@@ -491,7 +491,7 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderNoneGuild()
 
     wchar_t Text[128];
     memset(&Text, 0, sizeof(unicode::t_char) * 128);
-    wsprintf(Text, GlobalText[180]);
+    swprintf(Text, GlobalText[180]);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetFont(g_hFontBold);
@@ -518,13 +518,13 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 {
     wchar_t Text[300];
     POINT ptOrigin;
-    wsprintf(Text, GlobalText[180]);
+    swprintf(Text, GlobalText[180]);
     RenderText(Text, m_Pos.x, m_Pos.y + 12, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     ptOrigin.x = m_Pos.x + 35;
     ptOrigin.y = m_Pos.y + 48;
 
     g_pRenderText->SetTextColor(200, 255, 100, 255);
-    wsprintf(Text, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
+    swprintf(Text, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, Text, 120, 0, RT3_SORT_CENTER);
 
     glColor4f(0.6f, 0.6f, 0.6f, 1.f);
@@ -533,7 +533,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     {
         glColor4f(1.f, 1.f, 1.f, 1.f);
     }
-    wsprintf(Text, GlobalText[180]);
+    swprintf(Text, GlobalText[180]);
     RenderText(Text, m_Pos.x + 13 + (0 * 55), m_Pos.y + 76, 55, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     glColor4f(0.6f, 0.6f, 0.6f, 1.f);
 
@@ -541,7 +541,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     {
         glColor4f(1.f, 1.f, 1.f, 1.f);
     }
-    wsprintf(Text, GlobalText[1330]);
+    swprintf(Text, GlobalText[1330]);
     RenderText(Text, m_Pos.x + 13 + (1 * 55), m_Pos.y + 76, 55, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     glColor4f(0.6f, 0.6f, 0.6f, 1.f);
 
@@ -549,7 +549,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     {
         glColor4f(1.f, 1.f, 1.f, 1.f);
     }
-    wsprintf(Text, GlobalText[1352]);
+    swprintf(Text, GlobalText[1352]);
     RenderText(Text, m_Pos.x + 13 + (2 * 55), m_Pos.y + 76, 55, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     glColor4f(0.6f, 0.6f, 0.6f, 1.f);
 
@@ -565,7 +565,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
             m_Button[BUTTON_GUILD_OUT].ChangeText(GlobalText[189]);
         }
 
-        wsprintf(Text, GlobalText[1323]);
+        swprintf(Text, GlobalText[1323]);
         RenderText(Text, m_Pos.x + 22, m_Pos.y + 249, 40, 0, _ARGB(255, 255, 185, 1), 0x00000000, RT3_SORT_CENTER);
 
         m_GuildNotice.SetSize(160, 80);
@@ -573,11 +573,11 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
         m_GuildNotice.Render();
 
         int Nm_Loc = m_Pos.y + 169;
-        wsprintf(Text, L"%s :", GlobalText[1332]);
+        swprintf(Text, L"%s :", GlobalText[1332]);
         RenderText(Text, m_Pos.x + 22, Nm_Loc, 40, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT);
         Nm_Loc += 13;
 
-        wsprintf(Text, GlobalText[1256], GuildTotalScore);
+        swprintf(Text, GlobalText[1256], GuildTotalScore);
         RenderText(Text, m_Pos.x + 22, Nm_Loc, 80, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT);
 
         Nm_Loc += 13;
@@ -590,21 +590,21 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
                 if (nCount > 80)
                     nCount = 80;
 
-                wsprintf(Text, GlobalText[1362], g_nGuildMemberCount, nCount);
+                swprintf(Text, GlobalText[1362], g_nGuildMemberCount, nCount);
             }
             else
             {
-                wsprintf(Text, GlobalText[1362], g_nGuildMemberCount, CharacterAttribute->Level / 10);
+                swprintf(Text, GlobalText[1362], g_nGuildMemberCount, CharacterAttribute->Level / 10);
             }
         }
         else
         {
-            wsprintf(Text, GlobalText[1310], g_nGuildMemberCount);
+            swprintf(Text, GlobalText[1310], g_nGuildMemberCount);
         }
         RenderText(Text, m_Pos.x + 22, Nm_Loc, 80, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT);
 
         Nm_Loc += 13;
-        wsprintf(Text, L"%s : %s", GlobalText[1321], m_RivalGuildName[0] ? m_RivalGuildName : GlobalText[1361]);
+        swprintf(Text, L"%s : %s", GlobalText[1321], m_RivalGuildName[0] ? m_RivalGuildName : GlobalText[1361]);
         RenderText(Text, m_Pos.x + 22, Nm_Loc, 0, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT);
     }
     else if (m_nCurrentTab == 1)
@@ -1024,30 +1024,30 @@ void SEASON3B::CNewUIGuildInfoWindow::ReceiveGuildRelationShip(BYTE byRelationSh
         {
             if (m_MessageInfo.s_byRelationShipRequestType == 0x01)	// Join
             {
-                wsprintf(szText[0], GlobalText[1280], pPlayer->ID);
-                wsprintf(szText[1], GlobalText[1281]);
-                wsprintf(szText[2], GlobalText[1283]);
+                swprintf(szText[0], GlobalText[1280], pPlayer->ID);
+                swprintf(szText[1], GlobalText[1281]);
+                swprintf(szText[2], GlobalText[1283]);
             }
             else										// Break Off
             {
-                wsprintf(szText[0], GlobalText[1280], pPlayer->ID);
-                wsprintf(szText[1], GlobalText[1282]);
-                wsprintf(szText[2], GlobalText[1283]);
+                swprintf(szText[0], GlobalText[1280], pPlayer->ID);
+                swprintf(szText[1], GlobalText[1282]);
+                swprintf(szText[2], GlobalText[1283]);
             }
         }
         else if (m_MessageInfo.s_byRelationShipType == 0x02)		// Rival
         {
             if (m_MessageInfo.s_byRelationShipRequestType == 0x01)	// Join
             {
-                wsprintf(szText[0], GlobalText[1284], pPlayer->ID);
-                wsprintf(szText[1], GlobalText[1286]);
-                wsprintf(szText[2], GlobalText[1283]);
+                swprintf(szText[0], GlobalText[1284], pPlayer->ID);
+                swprintf(szText[1], GlobalText[1286]);
+                swprintf(szText[2], GlobalText[1283]);
             }
             else
             {
-                wsprintf(szText[0], GlobalText[1284], pPlayer->ID);
-                wsprintf(szText[1], GlobalText[1285]);
-                wsprintf(szText[2], GlobalText[1283]);
+                swprintf(szText[0], GlobalText[1284], pPlayer->ID);
+                swprintf(szText[1], GlobalText[1285]);
+                swprintf(szText[2], GlobalText[1283]);
             }
         }
 

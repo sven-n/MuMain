@@ -52,9 +52,9 @@ void CMsgBoxIGSBuyConfirm::Initialize(WORD wItemCode, int iPackageSeq, int iDisp
     m_iPriceSeq = iPriceSeq;
     m_iCashType = iCashType;
 
-    wsprintf(m_szItemName, GlobalText[3037], pszName);
-    wsprintf(m_szItemPrice, GlobalText[3038], pszPrice);
-    wsprintf(m_szItemPeriod, GlobalText[3039], pszPeriod);
+    swprintf(m_szItemName, GlobalText[3037], pszName);
+    swprintf(m_szItemPrice, GlobalText[3038], pszPrice);
+    swprintf(m_szItemPeriod, GlobalText[3039], pszPeriod);
 
     //int m_iNumNoticeLine = SeparateTextIntoLines( GlobalText[2898], txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
     m_iNumNoticeLine = ::DivideStringByPixel(&m_szNotice[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, GlobalText[2898], IGS_TEXT_NOTICE_WIDTH);
@@ -184,20 +184,20 @@ void CMsgBoxIGSBuyConfirm::RenderTexts()
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        wsprintf(szText, L"Bad Item index");
+        swprintf(szText, L"Bad Item index");
     }
     else
     {
-        wsprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+        swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
     }
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 200, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"Package Seq : %d", m_iPackageSeq);
+    swprintf(szText, L"Package Seq : %d", m_iPackageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 100, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
+    swprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 100, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"Price Seq : %d", m_iPriceSeq);
+    swprintf(szText, L"Price Seq : %d", m_iPriceSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 100, 0, RT3_SORT_LEFT);
-    wsprintf(szText, L"CashType : %d", m_iCashType);
+    swprintf(szText, L"CashType : %d", m_iCashType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 50, szText, 100, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }

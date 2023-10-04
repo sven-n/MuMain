@@ -141,7 +141,7 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     if ((infile = _wfopen(FileName, L"rb")) == NULL)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -220,7 +220,7 @@ bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilte
         if (false == Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode))
         {
             wchar_t szErrorMsg[256] = { 0, };
-            wsprintf(szErrorMsg, L"LoadBitmap Failed: %s", szFullPath);
+            swprintf(szErrorMsg, L"LoadBitmap Failed: %s", szFullPath);
 #ifdef FOR_WORK
             PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK

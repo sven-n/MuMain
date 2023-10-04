@@ -777,7 +777,7 @@ HRESULT InitDirectSound(HWND hDlg);
 void    SetEnableSound(bool b);
 void    FreeDirectSound();
 
-void    LoadWaveFile(int Buffer, const TCHAR* strFileName, int BufferChannel = MAX_CHANNEL, bool Enable3DSound = false);
+void    LoadWaveFile(int Buffer, wchar_t* strFileName, int BufferChannel = MAX_CHANNEL, bool Enable3DSound = false);
 HRESULT PlayBuffer(int Buffer, OBJECT* Object = NULL, BOOL bLooped = false);
 void    StopBuffer(int Buffer, BOOL bResetPosition);
 void    AllStopSound(void);

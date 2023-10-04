@@ -284,7 +284,8 @@ void CCharMakeWin::RequestCreateCharacter()
     else
     {
         BYTE classByte = (BYTE)(((CharacterView.Class) << 4) + (CharacterView.Skin));
-        SocketClient->ToGameServer()->SendCreateCharacter(InputText[0], character_name.length(), classByte);
+        CurrentProtocolState = REQUEST_CREATE_CHARACTER;
+        SocketClient->ToGameServer()->SendCreateCharacter(InputText[0], classByte);
         //SendRequestCreateCharacter(InputText[0], CharacterView.Class, CharacterView.Skin);
         rUIMng.HideWin(this);
         rUIMng.PopUpMsgWin(MESSAGE_WAIT);

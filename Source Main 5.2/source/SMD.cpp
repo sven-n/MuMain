@@ -181,7 +181,7 @@ bool OpenSMDFile(wchar_t* FileName, int Type, bool Flip)
 #ifdef _DEBUG
         extern HWND g_hWnd;
         wchar_t Text[1024];
-        wsprintf(Text, L"%s - File not exist..\r\n", FileName);
+        swprintf(Text, L"%s - File not exist..\r\n", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
 #endif
@@ -216,7 +216,7 @@ bool OpenSMDModel(int ID, wchar_t* FileName1, int Actions, bool Flip)
 
     if (OpenSMDFile(FileName1, REFERENCE_FRAME, Flip))
     {
-        wcscpy(Models[ID].Name, FileName1);
+        WideCharToMultiByte(CP_UTF8, 0, FileName1, wcslen(FileName1), Models[ID].Name, 32, 0, 0);
         Models[ID].Version = 10;
         FixupSMD();
         //Models[ID].Version = 11;

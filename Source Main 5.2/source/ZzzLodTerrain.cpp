@@ -124,7 +124,7 @@ int OpenTerrainAttribute(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s file not found.", FileName);
+        swprintf(Text, L"%s file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -734,7 +734,7 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
     if (!fp)
     {
         wchar_t Text[256];
-        wsprintf(Text, L"%s file not found.", FileName);
+        swprintf(Text, L"%s file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);

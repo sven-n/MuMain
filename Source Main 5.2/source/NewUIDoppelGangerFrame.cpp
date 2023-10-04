@@ -105,7 +105,7 @@ bool CNewUIDoppelGangerFrame::Render()
         g_pRenderText->SetTextColor(255, 0, 0, 255);
     }
 
-    wsprintf(szText, GlobalText[2772], m_iEnteredMonsters, m_iMaxMonsters);
+    swprintf(szText, GlobalText[2772], m_iEnteredMonsters, m_iMaxMonsters);
     g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 13, szText, 110, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(255, 150, 0, 255);
@@ -118,7 +118,7 @@ bool CNewUIDoppelGangerFrame::Render()
         iSecond = 0;
     }
 
-    wsprintf(szText, L"%.2d:%.2d:%.2d", iMinute, m_iTime % 60, iSecond);
+    swprintf(szText, L"%.2d:%.2d:%.2d", iMinute, m_iTime % 60, iSecond);
     g_pRenderText->SetFont(g_hFontBig);
     g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 50, szText, 110, 0, RT3_SORT_CENTER);
 
