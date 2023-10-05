@@ -751,40 +751,6 @@ typedef struct
 }GuildCommander;
 //csmapinterface end
 
-//csitemsetoption start
-typedef	struct
-{
-    BYTE	byOption[2];
-    BYTE	byMixItemLevel[2];
-}ITEM_SET_TYPE;
-
-typedef struct
-{
-    char	strSetName[MAX_ITEM_SET_NAME];
-    BYTE	byStandardOption[6][2];
-    BYTE	byStandardOptionValue[6][2];
-    BYTE	byExtOption[2];
-    BYTE	byExtOptionValue[2];
-    BYTE	byOptionCount;
-    BYTE	byFullOption[5];
-    BYTE	byFullOptionValue[5];
-    BYTE	byRequireClass[MAX_CLASS];
-}ITEM_SET_OPTION_FILE;
-
-typedef struct
-{
-    wchar_t	strSetName[MAX_ITEM_SET_NAME];
-    BYTE	byStandardOption[6][2];
-    BYTE	byStandardOptionValue[6][2];
-    BYTE	byExtOption[2];
-    BYTE	byExtOptionValue[2];
-    BYTE	byOptionCount;
-    BYTE	byFullOption[5];
-    BYTE	byFullOptionValue[5];
-    BYTE	byRequireClass[MAX_CLASS];
-}ITEM_SET_OPTION;
-//csitemsetoption end
-
 //cseventmatch start
 typedef struct
 {

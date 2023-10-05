@@ -278,13 +278,14 @@ void OpenSkillScript(wchar_t* FileName)
                 BuxConvert(pSeek, Size);
                 // memcpy(&SkillAttribute[i], pSeek, Size);
 
-                SKILL_ATTRIBUTE_FILE current{ };
-                memcpy(&current, pSeek, Size);
-                auto target = &SkillAttribute[i];
-                CMultiLanguage::ConvertFromUtf8(target->Name, current.Name);
-                memcpy(&target + MAX_SKILL_NAME * sizeof(wchar_t), pSeek + MAX_SKILL_NAME, Size);
+                char rawName[MAX_SKILL_NAME]{};
 
-                pSeek += Size;
+                memcpy(rawName, pSeek, MAX_SKILL_NAME);
+                CMultiLanguage::ConvertFromUtf8(SkillAttribute[i].Name, rawName);
+                pSeek += MAX_SKILL_NAME;
+                memcpy(&(SkillAttribute[i].Level), pSeek, Size - MAX_SKILL_NAME);
+
+                pSeek += Size - MAX_SKILL_NAME;
             }
         }
         delete[] Buffer;
@@ -393,7 +394,7 @@ void OpenItemScript(wchar_t* FileName)
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
     {
-        int Size = sizeof(ITEM_ATTRIBUTE_FILE);
+        const int Size = sizeof(ITEM_ATTRIBUTE_FILE);
         BYTE* Buffer = new BYTE[Size * MAX_ITEM];
         fread(Buffer, Size * MAX_ITEM, 1, fp);
         // crc
@@ -415,13 +416,14 @@ void OpenItemScript(wchar_t* FileName)
             {
                 BuxConvert(pSeek, Size);
 
-                ITEM_ATTRIBUTE_FILE current { };
-                memcpy(&current, pSeek, Size);
-                auto target = &ItemAttribute[i];
-                CMultiLanguage::ConvertFromUtf8(target->Name, current.Name);
-                memcpy(&target + MAX_ITEM_NAME * sizeof(wchar_t), pSeek + MAX_ITEM_NAME, Size);
+                char rawName[MAX_ITEM_NAME]{};
 
-                pSeek += Size;
+                memcpy(rawName, pSeek, MAX_ITEM_NAME);
+                CMultiLanguage::ConvertFromUtf8(ItemAttribute[i].Name, rawName);
+                pSeek += MAX_ITEM_NAME;
+                memcpy(&(ItemAttribute[i].TwoHand), pSeek, Size - MAX_ITEM_NAME);
+
+                pSeek += Size - MAX_ITEM_NAME;
             }
         }
         delete[] Buffer;
@@ -3809,27 +3811,27 @@ void CHARACTER_MACHINE::CalculateBasicState()
 {
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 78);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 78);
         Character.AddStrength += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 79);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 79);
         Character.AddDexterity += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 80);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 80);
         Character.AddVitality += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 81);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 81);
         Character.AddEnergy += (WORD)Item_data.m_byValue1;
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5))
     {
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 82);
+        auto Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEM_POTION + 82);
         Character.AddCharisma += (WORD)Item_data.m_byValue1;
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))

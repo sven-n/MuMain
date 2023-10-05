@@ -5,13 +5,11 @@
 #include "ZzzOpenglUtil.h"
 #include "zzzInfomation.h"
 #include "zzzBmd.h"
-#include "zzzObject.h"
 #include "zzztexture.h"
 #include "zzzCharacter.h"
 #include "zzzscene.h"
 #include "zzzInterface.h"
 #include "zzzinventory.h"
-#include "dsplaysound.h"
 #include "CSItemOption.h"
 #include "CharacterManager.h"
 #include "UIControls.h"
@@ -21,10 +19,23 @@
 extern	wchar_t TextList[50][100];
 extern	int  TextListColor[50];
 extern	int  TextBold[50];
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
 
-static  CSItemOption csItemOption;
+static  CSItemOption csItemOption; // do not delete, required for singleton initialization.
+
+constexpr int MAX_EQUIPPED_SETS = MAX_EQUIPMENT_INDEX - 2; // No Wings and Helper slots
+
+struct ITEM_SET_OPTION_FILE
+{
+    char	strSetName[MAX_ITEM_SET_NAME];
+    BYTE	byStandardOption[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SETS_PER_ITEM];
+    BYTE	byStandardOptionValue[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SETS_PER_ITEM];
+    BYTE	byExtOption[MAX_ITEM_SETS_PER_ITEM];
+    BYTE	byExtOptionValue[MAX_ITEM_SETS_PER_ITEM];
+    BYTE	byOptionCount;
+    BYTE	byFullOption[MAX_ITEM_SET_FULL_OPTION_COUNT];
+    BYTE	byFullOptionValue[MAX_ITEM_SET_FULL_OPTION_COUNT];
+    BYTE	byRequireClass[MAX_CLASS];
+};
 
 static BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
 
@@ -50,7 +61,7 @@ bool CSItemOption::OpenItemSetScript(bool bTestServer)
 bool CSItemOption::OpenItemSetType(const wchar_t* filename)
 {
     FILE* fp = _wfopen(filename, L"rb");
-    if (fp != NULL)
+    if (fp != nullptr)
     {
         int Size = sizeof(ITEM_SET_TYPE);
         BYTE* Buffer = new BYTE[Size * MAX_ITEM];
@@ -65,7 +76,7 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
             wchar_t Text[256];
             swprintf(Text, L"%s - File corrupted.", filename);
             g_ErrorReport.Write(Text);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
+            MessageBox(g_hWnd, Text, nullptr, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         }
         else
@@ -86,7 +97,7 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
         wchar_t Text[256];
         swprintf(Text, L"%s - File not exist.", filename);
         g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
+        MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
 
@@ -96,9 +107,9 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
 bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
 {
     FILE* fp = _wfopen(filename, L"rb");
-    if (fp != NULL)
+    if (fp != nullptr)
     {
-        int Size = sizeof(ITEM_SET_OPTION_FILE);
+        const int Size = sizeof(ITEM_SET_OPTION_FILE);
         BYTE* Buffer = new BYTE[Size * MAX_SET_OPTION];
         fread(Buffer, Size * MAX_SET_OPTION, 1, fp);
 
@@ -111,7 +122,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
             wchar_t Text[256];
             swprintf(Text, L"%s - File corrupted.", filename);
             g_ErrorReport.Write(Text);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
+            MessageBox(g_hWnd, Text, nullptr, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         }
         else
@@ -120,13 +131,34 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
             for (int i = 0; i < MAX_SET_OPTION; i++)
             {
                 BuxConvert(pSeek, Size);
-                // memcpy(&m_ItemSetOption[i], pSeek, Size);
 
                 ITEM_SET_OPTION_FILE current{ };
                 memcpy(&current, pSeek, Size);
-                auto target = &m_ItemSetOption[i];
+                const auto target = &m_ItemSetOption[i];
+
                 CMultiLanguage::ConvertFromUtf8(target->strSetName, current.strSetName);
-                memcpy(&target + MAX_ITEM_SET_NAME * sizeof(wchar_t), pSeek + MAX_ITEM_SET_NAME, Size);
+                target->byOptionCount = current.byOptionCount;
+                for (int setIndex = 0; setIndex < MAX_ITEM_SETS_PER_ITEM; ++setIndex)
+                {
+                    target->byExtOption[setIndex] = current.byExtOption[setIndex];
+                    target->byExtOptionValue[setIndex] = current.byExtOptionValue[setIndex];
+                    for (int optionIndex = 0; optionIndex < MAX_ITEM_SET_STANDARD_OPTION_COUNT; ++optionIndex)
+                    {
+                        target->byStandardOption[optionIndex][setIndex] = current.byStandardOption[optionIndex][setIndex];
+                        target->byStandardOptionValue[optionIndex][setIndex] = current.byStandardOptionValue[optionIndex][setIndex];
+                    }
+                }
+
+                for (int optionIndex = 0; optionIndex < MAX_ITEM_SET_FULL_OPTION_COUNT; ++optionIndex)
+                {
+                    target->byFullOption[optionIndex] = current.byFullOption[optionIndex];
+                    target->byFullOptionValue[optionIndex] = current.byFullOptionValue[optionIndex];
+                }
+
+                for (int i = 0; i < MAX_CLASS; i++)
+                {
+                    target->byRequireClass[i] = current.byRequireClass[i];
+                }
 
                 pSeek += Size;
             }
@@ -136,9 +168,9 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
     else
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", filename);
+        swprintf(Text, L"%s - File does not exist.", filename);
         g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
+        MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
 
@@ -256,28 +288,28 @@ WORD CSItemOption::GetMixItemLevel(const int Type)
     if (Type < 0) return 0;
 
     WORD MixLevel = 0;
-    ITEM_SET_TYPE& itemSType = m_ItemSetType[Type];
+    const ITEM_SET_TYPE& itemSType = m_ItemSetType[Type];
 
     MixLevel = MAKEWORD(itemSType.byMixItemLevel[0], itemSType.byMixItemLevel[1]);
 
     return MixLevel;
 }
 
-bool	CSItemOption::GetSetItemName(wchar_t* strName, const int iType, const int setType)
+bool CSItemOption::GetSetItemName(wchar_t* strName, const int iType, const int setType)
 {
     int setItemType = (setType % 0x04);
 
     if (setItemType > 0)
     {
-        ITEM_SET_TYPE& itemSType = m_ItemSetType[iType];
+        const ITEM_SET_TYPE& itemSType = m_ItemSetType[iType];
         if (itemSType.byOption[setItemType - 1] != 255 && itemSType.byOption[setItemType - 1] != 0)
         {
-            ITEM_SET_OPTION& itemOption = m_ItemSetOption[itemSType.byOption[setItemType - 1]];
+            const ITEM_SET_OPTION& itemOption = m_ItemSetOption[itemSType.byOption[setItemType - 1]];
 
-            // TODO
-            memcpy(strName, itemOption.strSetName, sizeof(wchar_t) * 32);
+            
+            memcpy(strName, itemOption.strSetName, sizeof itemOption.strSetName);
 
-            int length = wcslen(strName);
+            const int length = wcslen(strName);
             strName[length] = ' ';
             strName[length + 1] = 0;
             return true;
@@ -286,58 +318,72 @@ bool	CSItemOption::GetSetItemName(wchar_t* strName, const int iType, const int s
     return false;
 }
 
-void CSItemOption::checkItemType(BYTE* optionList, const int iType, const int setType)
+
+void CSItemOption::checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int setType)
 {
-    int setItemType = (setType % 0x04);
+    const int setItemType = (setType % 0x04);
 
-    if (setItemType > 0)
+    if (setItemType <= 0)
     {
-        ITEM_SET_TYPE& itemSType = m_ItemSetType[iType];
+        return;
+    }
 
-        if (itemSType.byOption[setItemType - 1] != 255 && itemSType.byOption[setItemType - 1] != 0)
+    const auto setTypeIndex = static_cast<BYTE>(setItemType - 1);
+
+    const ITEM_SET_TYPE& itemSetType = m_ItemSetType[iType];
+    const auto itemSetNumber = itemSetType.byOption[setTypeIndex];
+
+    if (itemSetNumber != 255 && itemSetNumber != 0)
+    {
+        // add set item to list
+        for (int i = 0; i < MAX_EQUIPPED_SETS; ++i)
         {
-            for (int i = 0; i < 30; i += 3)
+            const auto current = &optionList[i];
+            if (current->SetNumber == 0)
             {
-                if (optionList[i] == 0)
-                {
-                    optionList[i] = itemSType.byOption[setItemType - 1];
-                    optionList[i + 1]++;
-                    optionList[i + 2] = setItemType - 1;
-                    break;
-                }
-                else if (optionList[i] == itemSType.byOption[setItemType - 1])
-                {
-                    optionList[i + 1]++;
-                    optionList[i + 2] = setItemType - 1;
-                    break;
-                }
+                // The set wasn't found in another item yet, so add it
+                current->SetNumber = itemSetNumber;
+                current->ItemCount++;
+                current->SetTypeIndex = setTypeIndex;
+                break;
+            }
+
+            if (current->SetNumber == itemSetNumber)
+            {
+                // The set wasn't found in another item yet, so add it
+                current->ItemCount++;
+                current->SetTypeIndex = setTypeIndex;
+                break;
             }
         }
     }
 }
 
-void	CSItemOption::calcSetOptionList(BYTE* optionList)
+void CSItemOption::calcSetOptionList(SET_SEARCH_RESULT* optionList)
 {
-    return; //todo fix;
     int Class = gCharacterManager.GetBaseClass(Hero->Class);
     int ExClass = gCharacterManager.IsSecondClass(Hero->Class);
 
-    BYTE    bySetOptionListTmp[2][16];
-    BYTE    bySetOptionListTmp2[2][16];
-    int     iSetOptionListValue[2][16];
+    BYTE    bySetOptionListTmp[MAX_ITEM_SETS_PER_ITEM][MAX_OPTIONS_PER_ITEM_SET];
+    BYTE    bySetOptionListTmp2[MAX_ITEM_SETS_PER_ITEM][MAX_OPTIONS_PER_ITEM_SET];
+    int     iSetOptionListValue[MAX_ITEM_SETS_PER_ITEM][MAX_OPTIONS_PER_ITEM_SET];
 
-    unsigned int arruiSetItemTypeSequence[2][16];
-    memset(arruiSetItemTypeSequence, 0, sizeof(unsigned int) * 32);
+    unsigned int arruiSetItemTypeSequence[MAX_ITEM_SETS_PER_ITEM][MAX_OPTIONS_PER_ITEM_SET] = {};
 
     BYTE    optionCount[2] = { 0, 0 };  //
     BYTE    setType = 0;
 
     m_bySameSetItem = 0;
+    for (auto& i : m_strSetName)
+    {
+        i[0] = 0;
+    }
 
-    ZeroMemory(m_strSetName, sizeof(wchar_t) * 2 * 32);
+    for (auto& i : m_bySetOptionIndex)
+    {
+        i = 0;
+    }
 
-    m_bySetOptionIndex[0] = 0;
-    m_bySetOptionIndex[1] = 0;
     m_bySetOptionANum = 0;
     m_bySetOptionBNum = 0;
     Hero->ExtendState = 0;
@@ -347,13 +393,24 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
     m_mapEquippedSetItemName.clear();
     m_mapEquippedSetItemSequence.clear();
 
-    for (int i = 0; i < 30; i += 3)
+    for (int i = 0; i < MAX_EQUIPPED_SETS; i += 3)
     {
-        if (optionList[i + 1] >= 2)
+        const auto current = &optionList[i];
+        if (current->SetNumber == 0)
         {
-            int count = optionList[i + 1] - 1;
-            int standardCount = min(count, 6);
-            ITEM_SET_OPTION& itemOption = m_ItemSetOption[optionList[i]];
+            // we can already stop here
+            break;
+        }
+
+        assert(current->SetNumber < MAX_SET_OPTION);
+
+        if (current->ItemCount >= 2)
+        {
+            const int standardCount = min(current->ItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
+            setType = current->SetTypeIndex;
+            assert(setType < MAX_ITEM_SETS_PER_ITEM);
+
+            ITEM_SET_OPTION& itemOption = m_ItemSetOption[current->SetNumber];
 
             BYTE RequireClass = 0;
             if (itemOption.byRequireClass[0] == 1 && Class == CLASS_WIZARD) RequireClass = 1;
@@ -370,15 +427,17 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
             if (itemOption.byRequireClass[5] == 1 && Class == CLASS_SUMMONER && ExClass) RequireClass = 1;
             if (itemOption.byRequireClass[6] == 1 && Class == CLASS_RAGEFIGHTER) RequireClass = 1;
             if (itemOption.byRequireClass[6] == 1 && Class == CLASS_RAGEFIGHTER && ExClass) RequireClass = 1;
-            setType = optionList[i + 2];
-            m_bySetOptionIndex[setType] = optionList[i];
-            if (m_strSetName[setType][0] != 0 && wcscmp(m_strSetName[setType], itemOption.strSetName) != NULL)
+
+            m_bySetOptionIndex[setType] = optionList[i].SetNumber;
+
+            if (m_strSetName[setType][0] != 0
+                && wcscmp(m_strSetName[setType], itemOption.strSetName) != 0)
             {
                 if (m_strSetName[0][0] == 0)
                     wcscpy(m_strSetName[0], itemOption.strSetName);
                 else
                     wcscpy(m_strSetName[1], itemOption.strSetName);
-                m_bySameSetItem = count;
+                m_bySameSetItem = current->ItemCount;
             }
             else
             {
@@ -403,11 +462,13 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
                 m_mapEquippedSetItemName.insert(std::pair<int, std::wstring>(iCurrentSetItemTypeSequence, itemOption.strSetName));
             }
 
-            BYTE option[2];
-            int  value[2];
-            for (int j = 0; j < count; ++j)
+            constexpr BYTE EMPTY_OPTION = 0xFF;
+            BYTE option[MAX_ITEM_SETS_PER_ITEM];
+            int  value[MAX_ITEM_SETS_PER_ITEM];
+            for (int j = 0; j < current->ItemCount; ++j)
             {
-                option[0] = 255; option[1] = 255;
+                option[0] = EMPTY_OPTION;
+                option[1] = EMPTY_OPTION;
                 if (j < standardCount)
                 {
                     option[0] = itemOption.byStandardOption[j][0];
@@ -415,13 +476,13 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
                     option[1] = itemOption.byStandardOption[j][1];
                     value[1] = itemOption.byStandardOptionValue[j][1];
                 }
-                else if (j < (count - standardCount))
+                else if (j < (current->ItemCount - standardCount))
                 {
                     option[0] = itemOption.byExtOption[j];
                     value[0] = itemOption.byExtOptionValue[j];
                 }
 
-                if (option[0] != 255)
+                if (option[0] != EMPTY_OPTION)
                 {
                     if (option[0] < MASTERY_OPTION)
                     {
@@ -443,7 +504,7 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
                         }
                     }
                 }
-                if (option[1] != 255)
+                if (option[1] != EMPTY_OPTION)
                 {
                     if (option[1] < MASTERY_OPTION)
                     {
@@ -452,6 +513,7 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
                         bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
                         iSetOptionListValue[setType][optionCount[setType]] = value[1];
                         optionCount[setType]++;
+                        assert(optionCount[setType] < MAX_OPTIONS_PER_ITEM_SET);
                     }
                     else
                     {
@@ -462,18 +524,19 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
                             bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
                             iSetOptionListValue[setType][optionCount[setType]] = value[1];
                             optionCount[setType]++;
+                            assert(optionCount[setType] < MAX_OPTIONS_PER_ITEM_SET);
                         }
                     }
                 }
             }
 
-            if (count >= itemOption.byOptionCount - 2)
+            if (current->ItemCount >= itemOption.byOptionCount - 2)
             {
-                for (int j = 0; j < 5; ++j)
+                for (int j = 0; j < MAX_ITEM_SET_FULL_OPTION_COUNT; ++j)
                 {
                     option[0] = itemOption.byFullOption[j];
                     value[0] = itemOption.byFullOptionValue[j];
-                    if (option[0] != 255)
+                    if (option[0] != EMPTY_OPTION)
                     {
                         if (option[0] < MASTERY_OPTION)
                         {
@@ -482,6 +545,7 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
                             bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
                             iSetOptionListValue[setType][optionCount[setType]] = value[0];
                             optionCount[setType]++;
+                            assert(optionCount[setType] < MAX_OPTIONS_PER_ITEM_SET);
 
                             if (m_bySameSetItem != 0) m_bySameSetItem++;
                         }
@@ -494,6 +558,7 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
                                 bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
                                 iSetOptionListValue[setType][optionCount[setType]] = value[0];
                                 optionCount[setType]++;
+                                assert(optionCount[setType] < MAX_OPTIONS_PER_ITEM_SET);
 
                                 if (m_bySameSetItem != 0) m_bySameSetItem++;
                             }
@@ -506,7 +571,7 @@ void	CSItemOption::calcSetOptionList(BYTE* optionList)
         }
     }
 
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < MAX_ITEM_SETS_PER_ITEM; ++i)
     {
         for (int j = 0; j < optionCount[i]; ++j)
         {
@@ -745,6 +810,11 @@ void	CSItemOption::GetSpecialLevel(WORD* Value, const WORD SrcValue, int Special
 
 int CSItemOption::GetDefaultOptionValue(ITEM* ip, WORD* Value)
 {
+    if (ip->Type > MAX_ITEM)
+    {
+        return -1;
+    }
+
     *Value = ((ip->ExtOption >> 2) % 0x04);
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
@@ -754,6 +824,11 @@ int CSItemOption::GetDefaultOptionValue(ITEM* ip, WORD* Value)
 
 bool CSItemOption::GetDefaultOptionText(const ITEM* ip, wchar_t* Text)
 {
+    if (ip->Type > MAX_ITEM)
+    {
+        return false;
+    }
+
     if (((ip->ExtOption >> 2) % 0x04) <= 0) return false;
 
     switch (ItemAttribute[ip->Type].AttType)
@@ -785,9 +860,9 @@ bool CSItemOption::Special_Option_Check(int Kind)
     int i, j;
     for (i = 0; i < 2; i++)
     {
-        ITEM* item = NULL;
+        ITEM* item = nullptr;
         item = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT + i];
-        if (item == NULL || item->Type <= -1)
+        if (item == nullptr || item->Type <= -1)
             continue;
 
         if (Kind == 0)
@@ -872,7 +947,7 @@ void CSItemOption::getAllAddState(WORD* Strength, WORD* Dexterity, WORD* Energy,
 void CSItemOption::getAllAddStateOnlyAddValue(WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma)
 {
     *AddStrength = *AddDexterity = *AddEnergy = *AddVitality = *AddCharisma = 0;
-    memset(m_bySetOptionListOnOff, 0, sizeof(BYTE) * 16);
+    memset(m_bySetOptionListOnOff, 0, sizeof m_bySetOptionListOnOff);
 
     getAllAddState(AddStrength, AddDexterity, AddEnergy, AddVitality, AddCharisma);
 }
@@ -916,7 +991,7 @@ void CSItemOption::getAllAddOptionStatesbyCompare(WORD* Strength, WORD* Dexterit
         }
     }
 
-    memset(m_bySetOptionListOnOff, 0, sizeof(BYTE) * 16);
+    memset(m_bySetOptionListOnOff, 0, sizeof m_bySetOptionListOnOff);
 
     GetSpecial(Strength, AT_SET_OPTION_IMPROVE_STRENGTH);
     GetSpecial(Dexterity, AT_SET_OPTION_IMPROVE_DEXTERITY);
@@ -925,12 +1000,69 @@ void CSItemOption::getAllAddOptionStatesbyCompare(WORD* Strength, WORD* Dexterit
     GetSpecial(Charisma, AT_SET_OPTION_IMPROVE_CHARISMA);
 }
 
-void CSItemOption::CheckItemSetOptions(void)
+void CSItemOption::UpdateCount_SetOptionPerEquippedSetItem(const SET_SEARCH_RESULT* byOptionList, int* arLimitSetItemOptionCount, ITEM* ItemsEquipment)
 {
-    BYTE byOptionList[30] = { 0, };
-    ITEM* itemRight = NULL;
+    for (int iE = 0; iE < MAX_EQUIPMENT_INDEX; ++iE)
+    {
+        int& iCurCount = arLimitSetItemOptionCount[iE];
+        ITEM& CurItem = ItemsEquipment[iE];
 
-    ZeroMemory(m_bySetOptionList, sizeof(BYTE) * 16);
+        iCurCount = GetCurrentTypeSetitemCount(CurItem, byOptionList);
+    }
+}
+
+int CSItemOption::Search_From_EquippedSetItemNameMapTable(wchar_t* szSetItemname)
+{
+    int		iSizeFindName = wcslen(szSetItemname);
+
+    for (m_iterESIN = m_mapEquippedSetItemName.begin(); m_iterESIN != m_mapEquippedSetItemName.end(); ++m_iterESIN)
+    {
+        std::wstring	strCur;
+
+        strCur = m_iterESIN->second;
+        int iSizeCurName = strCur.size();
+
+        if (!wcsncmp(szSetItemname, strCur.c_str(), iSizeFindName)
+            && !wcsncmp(szSetItemname, strCur.c_str(), iSizeCurName))
+        {
+            return m_iterESIN->first;
+        }
+    }
+    return -1;
+}
+
+int CSItemOption::GetCurrentTypeSetitemCount(const ITEM& CurItem_, const SET_SEARCH_RESULT* byOptionList)
+{
+    const BYTE bySetType = CurItem_.ExtOption;
+
+    const int setItemType = (bySetType % 0x04);
+
+    const ITEM_SET_TYPE& itemSType = m_ItemSetType[CurItem_.Type];
+
+    for (int i = 0; i < MAX_EQUIPPED_SETS; ++i)
+    {
+        if (byOptionList[i].SetNumber == itemSType.byOption[(setItemType - 1)])
+        {
+            const int iEquippedCount = byOptionList[i + 1].ItemCount;
+            const ITEM_SET_OPTION& itemOption = m_ItemSetOption[byOptionList[i].SetNumber];
+            if (iEquippedCount >= itemOption.byOptionCount - 1)
+            {
+                return 255;
+            }
+
+            return iEquippedCount;
+        }
+    }
+
+    return 0;
+}
+
+void CSItemOption::CheckItemSetOptions()
+{
+    SET_SEARCH_RESULT byOptionList[MAX_EQUIPPED_SETS] = { };
+    const ITEM* itemRight = nullptr;
+
+    ZeroMemory(m_bySetOptionList, sizeof(BYTE) * MAX_OPTIONS_PER_ITEM_SET * MAX_ITEM_SETS_PER_ITEM);
 
     for (int i = 0; i < MAX_EQUIPMENT_INDEX; ++i)
     {
@@ -973,8 +1105,10 @@ void CSItemOption::CheckItemSetOptions(void)
     WORD AllCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
     WORD AllLevel = CharacterAttribute->Level;
 
-    ZeroMemory(byOptionList, sizeof(BYTE) * 30);
-    memset(m_bySetOptionList, 255, sizeof(BYTE) * 16);
+    
+    ZeroMemory(byOptionList, sizeof byOptionList);
+
+    memset(m_bySetOptionList, 0xFF, sizeof m_bySetOptionList);
 
     for (int i = 0; i < MAX_EQUIPMENT_INDEX; ++i)
     {
@@ -1151,7 +1285,7 @@ void CSItemOption::RenderOptionHelper(void)
 
     int TextNum = 0;
     int sx = 0, sy = 0;
-    ZeroMemory(TextListColor, 20 * sizeof(int));
+    ZeroMemory(TextListColor, sizeof TextListColor);
     for (int i = 0; i < 30; i++)
     {
         TextList[i][0] = NULL;
