@@ -628,6 +628,12 @@ void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, int Length)
         j += 1; // todo: 2 for 32 bit chars
     }
 
+    if (Cut == 0)
+    {
+        wcscpy(Text1, Text);
+        wcscpy(Text2, L"");
+    }
+
     int iTextSize = 0;
     for (int j = 0; j < Cut; j++)
     {

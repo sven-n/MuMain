@@ -4676,7 +4676,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
     {
         if (g_pMyShopInventory->IsEnablePersonalShop() == true)
         {
-            SendRequestDestoryPersonalShop();
+            SocketClient->ToGameServer()->SendPlayerShopClose();
         }
 
         CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();

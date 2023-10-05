@@ -2068,11 +2068,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             PetType = PET_TYPE_DARK_HORSE;
 
             if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER)
-                SendRequestPetInfo(PetType, Inventype, EQUIPMENT_HELPER);
+                SendRequestPetInfo(PetType, Inventype, EQUIPMENT_HELPER); // TODO: don't send it every frame
         }
         else
             if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
-                SendRequestPetInfo(PetType, Inventype, EQUIPMENT_WEAPON_LEFT);
+                SendRequestPetInfo(PetType, Inventype, EQUIPMENT_WEAPON_LEFT); // TODO: don't send it every frame
 
         giPetManager::RenderPetItemInfo(sx, sy, ip, Inventype);
         return;
@@ -11221,7 +11221,7 @@ void MovePersonalShop()
             {
                 if (g_bEnablePersonalShop)
                 {
-                    SendRequestCreatePersonalShop(g_szPersonalShopTitle);
+                    SocketClient->ToGameServer()->SendPlayerShopOpen(g_szPersonalShopTitle);
                     g_pUIManager->Close(INTERFACE_INVENTORY);
                 }
                 else
@@ -11241,7 +11241,7 @@ void MovePersonalShop()
             MouseLButtonPush = false;
             if (g_bEnablePersonalShop)
             {
-                SendRequestDestoryPersonalShop();
+                SocketClient->ToGameServer()->SendPlayerShopClose();
             }
         }
 
@@ -11262,7 +11262,7 @@ void ClosePersonalShop()
         memcpy(g_PersonalShopInven, g_PersonalShopBackup, sizeof(ITEM) * MAX_PERSONALSHOP_INVEN);
         if (IsShopInViewport(Hero))
         {
-            std::wstring title;
+            std::wstring title{};
             GetShopTitle(Hero, title);
             wcscpy(g_szPersonalShopTitle, title.c_str());
         }

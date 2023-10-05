@@ -1510,10 +1510,10 @@ bool SEASON3B::CPersonalshopCreateMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-   std::wstring Temp;
-
-    g_pMyShopInventory->GetTitle(Temp);
-    SendRequestCreatePersonalShop(const_cast<wchar_t*>(Temp.c_str()));
+    wchar_t shopTitle[MAX_SHOPTITLE]{};
+    g_pMyShopInventory->GetTitle(shopTitle);
+    wcscpy(g_szPersonalShopTitle, shopTitle);
+    SocketClient->ToGameServer()->SendPlayerShopOpen(shopTitle);
 
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -2730,7 +2730,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
 
     if (g_pMyShopInventory->IsEnablePersonalShop() == true)
     {
-        SendRequestDestoryPersonalShop();
+        SocketClient->ToGameServer()->SendPlayerShopClose();
     }
 
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();

@@ -154,9 +154,9 @@ void SEASON3B::CNewUIMyShopInventory::SetPos(int x, int y)
     }
 }
 
-void SEASON3B::CNewUIMyShopInventory::GetTitle(std::wstring& titletext)
+void SEASON3B::CNewUIMyShopInventory::GetTitle(wchar_t* titletext)
 {
-     m_EditBox->GetText((wchar_t*)&titletext, iMAX_SHOPTITLE_MULTI);
+     m_EditBox->GetText(titletext, iMAX_SHOPTITLE_MULTI);
 }
 
 bool SEASON3B::CNewUIMyShopInventory::InsertItem(int iIndex, BYTE* pbyItemPacket)
@@ -416,9 +416,9 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
             return false;
             case 1:
             {
-               std::wstring strTitle;
-                GetTitle(strTitle);
-                if (IsExistUndecidedPrice() == false && strTitle.size() > 0)
+                wchar_t shopTitle[MAX_SHOPTITLE]{};
+                g_pMyShopInventory->GetTitle(shopTitle);
+                if (IsExistUndecidedPrice() == false && wcslen(shopTitle) > 0)
                 {
                     if (m_EnablePersonalShop == false)
                     {
@@ -426,7 +426,8 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
                     }
                     else
                     {
-                        SendRequestCreatePersonalShop(const_cast<wchar_t*>(strTitle.c_str()));
+                        wcscpy(g_szPersonalShopTitle, shopTitle);
+                        SocketClient->ToGameServer()->SendPlayerShopOpen(shopTitle);
 
                         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
                         g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -441,7 +442,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
             return false;
             case 2:
             {
-                SendRequestDestoryPersonalShop();
+                SocketClient->ToGameServer()->SendPlayerShopClose();
 
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);

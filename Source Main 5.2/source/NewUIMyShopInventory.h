@@ -80,7 +80,7 @@ namespace SEASON3B
         ITEM* FindItem(int iLinealPos);
         void ChangeEditBox(const UISTATES type);
         void ChangeTitle(std::wstring& titletext);
-        void GetTitle(std::wstring& titletext);
+        void GetTitle(wchar_t* titletext);
         void ChangePersonal(bool state);
         const bool IsEnablePersonalShop() const;
         void OpenButtonLock();
