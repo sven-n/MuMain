@@ -261,7 +261,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
 
             if (i == 5)
             {
-                unicode::_strcpy(Text, GlobalText[737]);
+                wcscpy(Text, GlobalText[737]);
             }
             else
             {

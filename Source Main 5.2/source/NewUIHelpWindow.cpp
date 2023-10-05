@@ -106,7 +106,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        unicode::_strcpy(TextList[iTextNum], GlobalText[120]);
+        wcscpy(TextList[iTextNum], GlobalText[120]);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
@@ -116,7 +116,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
 
         for (int i = 0; i < 19; ++i)
         {
-            unicode::_strcpy(TextList[iTextNum], GlobalText[121 + i]);
+            wcscpy(TextList[iTextNum], GlobalText[121 + i]);
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -134,7 +134,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        unicode::_strcpy(TextList[iTextNum], GlobalText[140]);
+        wcscpy(TextList[iTextNum], GlobalText[140]);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
@@ -144,7 +144,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
 
         for (int i = 0; i < 16; ++i)
         {
-            unicode::_strcpy(TextList[iTextNum], GlobalText[141 + i]);
+            wcscpy(TextList[iTextNum], GlobalText[141 + i]);
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -162,14 +162,14 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        unicode::_strcpy(TextList[iTextNum], GlobalText[2421]);
+        wcscpy(TextList[iTextNum], GlobalText[2421]);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
 
         for (int i = 0; i < 24; ++i)
         {
-            unicode::_strcpy(TextList[iTextNum], GlobalText[2422 + i]);
+            wcscpy(TextList[iTextNum], GlobalText[2422 + i]);
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -187,14 +187,14 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        unicode::_strcpy(TextList[iTextNum], GlobalText[2446]);
+        wcscpy(TextList[iTextNum], GlobalText[2446]);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
 
         for (int i = 0; i < 18; ++i)
         {
-            unicode::_strcpy(TextList[iTextNum], GlobalText[2447 + i]);
+            wcscpy(TextList[iTextNum], GlobalText[2447 + i]);
             if (i == 0 || i == 8 || i == 9)
             {
                 TextListColor[iTextNum] = TEXT_COLOR_BLUE;

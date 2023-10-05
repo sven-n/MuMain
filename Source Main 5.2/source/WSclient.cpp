@@ -1532,39 +1532,42 @@ void ReceiveChatKey(const BYTE* ReceiveBuffer)
 void ReceiveNotice(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_NOTICE)ReceiveBuffer;
+    wchar_t Text[256]{};
+    CMultiLanguage::ConvertFromUtf8(Text, Data->Notice);
+
     if (Data->Result == 0)
     {
-        CreateNotice((wchar_t*)Data->Notice, 0);
+        CreateNotice(Text, 0);
     }
     else if (Data->Result == 1)
     {
         if (CHARACTER_SCENE != SceneFlag)
         {
-            g_pChatListBox->AddText(L"", (wchar_t*)Data->Notice, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
             EnableUse = 0;
         }
         else
         {
             CUIMng& rUIMng = CUIMng::Instance();
-            rUIMng.AddServerMsg((wchar_t*)Data->Notice);
+            rUIMng.AddServerMsg(Text);
         }
     }
     else if (Data->Result == 2)
     {
-        wchar_t Text[100];
-        swprintf(Text, GlobalText[483], (wchar_t*)Data->Notice);
-        CreateNotice(Text, 1);
-        g_pGuildInfoWindow->AddGuildNotice((wchar_t*)Data->Notice);
+        wchar_t FullText[300] {0};
+        swprintf(FullText, GlobalText[483], Text);
+        CreateNotice(FullText, 1);
+        g_pGuildInfoWindow->AddGuildNotice(Text);
     }
     else if (Data->Result >= 10 && Data->Result <= 15)
     {
         if (Data->Notice != NULL && Data->Notice[0] != '\0')
         {
-            g_pSlideHelpMgr->AddSlide(Data->Count, Data->Delay, (wchar_t*)Data->Notice, Data->Result - 10, Data->Speed / 10.0f, Data->Color);
+            g_pSlideHelpMgr->AddSlide(Data->Count, Data->Delay, Text, Data->Result - 10, Data->Speed / 10.0f, Data->Color);
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%s)]", Data->Notice);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%s)]", Text);
 }
 
 void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
@@ -8352,9 +8355,9 @@ void ReceiveCreateShopTitleViewport(const BYTE* ReceiveBuffer)
         int index = FindCharacterIndex(key);
         if (index >= 0 && index < MAX_CHARACTERS_CLIENT) {
             CHARACTER* pPlayer = &CharactersClient[index];
-            wchar_t szShopTitle[40];
-            memcpy(szShopTitle, pShopTitle->szTitle, MAX_SHOPTITLE);
-            szShopTitle[MAX_SHOPTITLE] = '\0';
+
+            wchar_t szShopTitle[40]{};
+            CMultiLanguage::ConvertFromUtf8(szShopTitle, pShopTitle->szTitle, MAX_SHOPTITLE);
 
             AddShopTitle(key, pPlayer, szShopTitle);
         }
@@ -8369,11 +8372,13 @@ void ReceiveShopTitleChange(const BYTE* ReceiveBuffer)
     int index = FindCharacterIndex(key);
     if (index >= 0 && index < MAX_CHARACTERS_CLIENT) {
         CHARACTER* pPlayer = &CharactersClient[index];
-        wchar_t szShopTitle[40];
-        memcpy(szShopTitle, Header->szTitle, MAX_SHOPTITLE);
-        szShopTitle[MAX_SHOPTITLE] = '\0';
+        wchar_t szShopTitle[40]{};
+        CMultiLanguage::ConvertFromUtf8(szShopTitle, Header->szTitle, MAX_SHOPTITLE);
 
-        if (wcsncmp(pPlayer->ID, (const wchar_t*)Header->szId, MAX_ID_SIZE) == 0)
+        wchar_t szID[MAX_ID_SIZE + 1]{};
+        CMultiLanguage::ConvertFromUtf8(szID, Header->szId, MAX_ID_SIZE);
+
+        if (wcsncmp(pPlayer->ID, szID, MAX_ID_SIZE) == 0)
             AddShopTitle(key, pPlayer, (const wchar_t*)szShopTitle);
     }
 }

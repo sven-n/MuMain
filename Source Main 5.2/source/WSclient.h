@@ -483,7 +483,7 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     WORD         Level;
     DWORD        GuildKey;
 } PTRADE, * LPPTRADE;
@@ -513,7 +513,7 @@ typedef struct {
     WORD		 Delay;
     DWORD		 Color;
     BYTE		 Speed;
-    BYTE         Notice[256];
+    char         Notice[256];
 } PRECEIVE_NOTICE, * LPPRECEIVE_NOTICE;
 
 //receive equipment
@@ -1656,15 +1656,15 @@ typedef struct tagPSHOPTITLE_HEADER {
 typedef struct tagPSHOPTITLE_DATA {
     BYTE	byIndexH;
     BYTE	byIndexL;
-    BYTE	szTitle[36];	//. MAX_SHOPTITLE
+    char	szTitle[MAX_SHOPTITLE];	//. MAX_SHOPTITLE
 } PSHOPTITLE_DATAINFO, * LPPSHOPTITLE_DATAINFO;
 typedef struct tagPSHOPTITLE_CHANGE {
     PBMSG_HEADER	Header;
     BYTE			bySubcode;
     BYTE			byIndexH;
     BYTE			byIndexL;
-    BYTE			szTitle[36];	//. MAX_SHOPTITLE
-    BYTE			szId[MAX_ID_SIZE];
+    char			szTitle[MAX_SHOPTITLE];	//. MAX_SHOPTITLE
+    char			szId[MAX_ID_SIZE];
 } PSHOPTITLE_CHANGEINFO, * LPPSHOPTITLE_CHANGEINFO;
 
 typedef struct tagPSHOPSETPRICE_RESULT {

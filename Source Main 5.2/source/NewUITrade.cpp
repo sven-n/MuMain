@@ -618,19 +618,17 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
         InitTradeInfo();
 
         int x = 260 * MouseX / 640;
-        ::SetCursorPos(x * WindowWidth / 640, MouseY * WindowHeight / 480);
+        SetCursorPos(x * WindowWidth / 640, MouseY * WindowHeight / 480);
 
-        wchar_t szTempID[MAX_ID_SIZE + 1];
-        ::memcpy(szTempID, pTradeData->ID, MAX_ID_SIZE);
-        szTempID[MAX_ID_SIZE] = NULL;
+        wchar_t szTempID[MAX_ID_SIZE + 1]{ };
+        CMultiLanguage::ConvertFromUtf8(szTempID, pTradeData->ID, MAX_ID_SIZE);
 
         if (!m_bTradeAlert && ::wcscmp(m_szYourID, szTempID))
             InitYourInvenBackUp();
 
         m_bTradeAlert = false;
         m_nYourGuildType = pTradeData->GuildKey;
-        ::memcpy(m_szYourID, pTradeData->ID, MAX_ID_SIZE);
-        m_szYourID[MAX_ID_SIZE] = NULL;
+        wcsncpy(m_szYourID, szTempID, MAX_ID_SIZE);
         m_nYourLevel = pTradeData->Level;   //  상대방 레벨.
         break;
     }
