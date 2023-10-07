@@ -103,6 +103,9 @@ extern char DebugTextCount;
 extern int  TotalPacketSize;
 extern int g_iKeyPadEnable;
 
+extern BOOL g_bWhileMovingZone;
+extern DWORD g_dwLatestZoneMoving;
+
 extern CUIMapName* g_pUIMapName; // rozy
 
 extern bool g_PetEnableDuel;
@@ -334,7 +337,7 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 void ReceiveServerConnectBusy(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SERVER_BUSY)ReceiveBuffer;
-    SendRequestServerList();
+    SocketClient->ToConnectServer()->SendServerListRequest();
 }
 
 void ReceiveJoinServer(const BYTE* ReceiveBuffer)
@@ -377,17 +380,17 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 
     g_GuildCache.Reset();
 
-#if defined _DEBUG || defined FOR_WORK
-    if (Data2->Result == 0x01)
-    {
-        wchar_t lpszTemp[256];
-        if (Util_CheckOption(GetCommandLineW(), L'i', lpszTemp))
-        {
-            g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", m_ID);
-            SendRequestLogIn(m_ID, lpszTemp);
-        }
-    }
-#endif
+//#if defined _DEBUG || defined FOR_WORK
+//    if (Data2->Result == 0x01)
+//    {
+//        wchar_t lpszTemp[256];
+//        if (Util_CheckOption(GetCommandLineW(), L'i', lpszTemp))
+//        {
+//            g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", m_ID);
+//            SendRequestLogIn(m_ID, lpszTemp);
+//        }
+//    }
+//#endif
 }
 
 void ReceiveConfirmPassword(const BYTE* ReceiveBuffer)
@@ -628,7 +631,7 @@ void InitGame()
 
     CheckInventory = NULL;
 
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     g_iFollowCharacter = -1;
 
@@ -1368,7 +1371,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
     if (SceneFlag == LOG_IN_SCENE)
     {
         g_ErrorReport.Write(L"Send Request Server List.\r\n");
-        SendRequestServerList();
+        SocketClient->ToConnectServer()->SendServerListRequest();
     }
     else
     {
@@ -1760,7 +1763,11 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
                 g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
-        SendRequestFinishLoading();
+
+        SocketClient->ToGameServer()->SendClientReadyAfterMapChange();
+
+        g_dwLatestZoneMoving = GetTickCount();
+        g_bWhileMovingZone = FALSE;
 
         LoadingWorld = 30;
 
@@ -4536,11 +4543,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         {
             if (so->CurrentAction == PLAYER_SKILL_ATT_UP_OURFORCES)
             {
-                SendRequestAction(AT_RAGEBUFF_1, ((BYTE)((so->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(sc->Object, AT_RAGEBUFF_1);
             }
             else
             {
-                SendRequestAction(AT_RAGEBUFF_2, ((BYTE)((so->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(sc->Object, AT_RAGEBUFF_2);
             }
         }
         OBJECT* _pObj = to;
@@ -6354,7 +6361,7 @@ void ReceiveTradeExit(const BYTE* ReceiveBuffer)
 
 void ReceivePing(const BYTE* ReceiveBuffer)
 {
-    SendPing();
+    SocketClient->ToGameServer()->SendPingResponse();
 }
 
 void ReceiveStorageGold(const BYTE* ReceiveBuffer)
@@ -6590,7 +6597,7 @@ void ReceiveGuildLeave(const BYTE* ReceiveBuffer)
     }
     else if (Data->Value == 5)
     {
-        SendRequestGuildList();
+        SocketClient->ToGameServer()->SendGuildListRequest();
     }
 }
 
@@ -6736,7 +6743,7 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
         }
     }
     SetActionClass(Hero, &Hero->Object, PLAYER_RUSH1, AT_RUSH1);
-    SendRequestAction(AT_RUSH1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+    SendRequestAction(Hero->Object, AT_RUSH1);
 
     g_pNewUISystem->Show(SEASON3B::INTERFACE_BATTLE_SOCCER_SCORE);
 
@@ -6780,11 +6787,11 @@ void ReceiveGuildEndWar(const BYTE* ReceiveBuffer)
     {
     case 2:
         SetActionClass(Hero, &Hero->Object, PLAYER_WIN1, AT_WIN1);
-        SendRequestAction(AT_WIN1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_WIN1);
         break;
     case 0:
         SetActionClass(Hero, &Hero->Object, PLAYER_CRY1, AT_CRY1);
-        SendRequestAction(AT_CRY1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_CRY1);
         break;
     }
 
@@ -6834,7 +6841,7 @@ void ReceiveGuildIDViewport(const BYTE* ReceiveBuffer)
             c->GuildMarkIndex = g_GuildCache.GetGuildMarkIndex(GuildKey);
         else
         {
-            SendRequestGuildInfo(GuildKey);
+            SocketClient->ToGameServer()->SendGuildInfoRequest(GuildKey);
             c->GuildMarkIndex = g_GuildCache.MakeGuildMarkIndex(GuildKey);
         }
 
@@ -7021,8 +7028,7 @@ void ReceiveBanUnionGuildResult(const BYTE* ReceiveBuffer)
     {
         if (g_pGuildInfoWindow->GetUnionCount() > 2)
         {
-            Sleep(500);
-            SendRequestUnionList();
+            SocketClient->ToGameServer()->SendRequestAllianceList();
         }
         g_pGuildInfoWindow->UnionGuildClear();
     }
@@ -9611,8 +9617,8 @@ void ReceiveProgressQuestRequestReward(const BYTE* ReceiveBuffer)
 void ReceiveProgressQuestListReady(const BYTE* ReceiveBuffer)
 {
     g_QuestMng.SetQuestIndexByEtcList(NULL, 0);
-    SendRequestProgressQuestList();
-    SendRequestQuestByEtcEPList();
+    SocketClient->ToGameServer()->SendActiveQuestListRequest();
+    SocketClient->ToGameServer()->SendEventQuestStateListRequest();
 }
 
 void ReceiveGensJoining(const BYTE* ReceiveBuffer)
@@ -11090,8 +11096,7 @@ void ReceiveCrywolfAltarContract(const BYTE* ReceiveBuffer)
         g_CharacterRegisterBuff((&Hero->Object), eBuff_CrywolfHeroContracted);
 
         SetAction(&Hero->Object, PLAYER_HEALING_FEMALE1);
-
-        SendRequestAction(AT_HEALING1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_HEALING1);
     }
 }
 
@@ -11345,7 +11350,7 @@ void ReceiveCheckSumRequest(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_WORD)ReceiveBuffer;
     DWORD dwCheckSum = GetCheckSum(Data->Value);
-    SendCheckSum(dwCheckSum);
+    SocketClient->ToGameServer()->SendChecksumResponse(dwCheckSum);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveCheckSumRequest]");
 }

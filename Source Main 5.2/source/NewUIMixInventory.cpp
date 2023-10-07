@@ -153,15 +153,15 @@ bool CNewUIMixInventory::ClosingProcess()
     case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
     case SEASON3A::MIXTYPE_EXTRACT_SEED:
     case SEASON3A::MIXTYPE_SEED_SPHERE:
-        SendRequestMixExit();
+        SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
         break;
     case SEASON3A::MIXTYPE_TRAINER:
-        SendExitInventory();
+        SocketClient->ToGameServer()->SendCloseNpcRequest();
         break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
         m_SocketListBox.Clear();
-        SendRequestMixExit();
+        SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
         break;
     default:
         break;

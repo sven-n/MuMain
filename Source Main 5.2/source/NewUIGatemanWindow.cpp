@@ -166,7 +166,7 @@ void CNewUIGatemanWindow::OpeningProcess()
 
 void CNewUIGatemanWindow::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float CNewUIGatemanWindow::GetLayerDepth()

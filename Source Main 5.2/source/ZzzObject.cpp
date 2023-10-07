@@ -8348,7 +8348,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
                 vPos[2] -= 40.f;
                 CreateParticle(BITMAP_SPARK + 2, vPos, o->Angle, vLight, 1);
                 SetAction(o, PLAYER_SHOCK);
-                SendRequestAction(PLAYER_SHOCK, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(*o, PLAYER_SHOCK);
                 o->m_iAnimation = 0;
             }
 
@@ -8398,7 +8398,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
                 vPos[2] -= 40.f;
                 CreateParticle(BITMAP_SPARK + 2, vPos, o->Angle, vLight, 1);
                 SetAction(o, PLAYER_SHOCK);
-                SendRequestAction(PLAYER_SHOCK, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(*o, PLAYER_SHOCK);
                 o->m_iAnimation = 0;
             }
 

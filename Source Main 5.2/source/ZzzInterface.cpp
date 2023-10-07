@@ -63,6 +63,9 @@ extern BOOL g_bUseChatListBox;
 extern DWORD g_dwMouseUseUIID;
 extern CUIMapName* g_pUIMapName;	// rozy
 extern bool bCheckNPC;
+extern BOOL g_bWhileMovingZone;
+extern DWORD g_dwLatestZoneMoving;
+
 #ifdef WINDOWMODE
 extern BOOL g_bUseWindowMode;
 #endif //WINDOWMODE
@@ -2241,6 +2244,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             }
         }
 
+#ifdef SEND_POSITION_TO_SERVER
         int TargetIndex = TERRAIN_INDEX(positionX, positionY);
 
         if ((TerrainWall[TargetIndex] & TW_NOMOVE) != TW_NOMOVE && (TerrainWall[TargetIndex] & TW_NOGROUND) != TW_NOGROUND)
@@ -2256,9 +2260,10 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 
                 )
             {
-                SendPosition(positionX, positionY);
+                SocketClient->ToGameServer()->SendInstantMoveRequest(positionX, positionY);
             }
         }
+#endif
     }
 }
 
@@ -2607,11 +2612,13 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         BYTE CharPosX = (BYTE)(vDis[0] / TERRAIN_SCALE);
         BYTE CharPosY = (BYTE)(vDis[1] / TERRAIN_SCALE);
 
-        //	if(!InChaosCastle())
+#ifdef SEND_POSITION_TO_SERVER
+        if ((TerrainWall[TargetIndex] & TW_NOMOVE) != TW_NOMOVE && (TerrainWall[TargetIndex] & TW_NOGROUND) != TW_NOGROUND)
         {
-            if ((TerrainWall[TargetIndex] & TW_NOMOVE) != TW_NOMOVE && (TerrainWall[TargetIndex] & TW_NOGROUND) != TW_NOGROUND)
-                SendPosition(CharPosX, CharPosY);
+            SocketClient->ToGameServer()->SendInstantMoveRequest(CharPosX, CharPosY);
         }
+#endif
+        
         pObj->m_sTargetIndex = g_MovementSkill.m_iTarget;
         g_CMonkSystem.RageCreateEffect(pObj, iSkill);
     }
@@ -3159,7 +3166,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         c->TargetCharacter = ActionTarget;
         int Dir = ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8);
         c->Skill = 0;
-        SendRequestAttack(CharactersClient[ActionTarget].Key, Dir);
+        SocketClient->ToGameServer()->SendHitRequest(CharactersClient[ActionTarget].Key, AT_ATTACK1, Dir);
     }
     break;
     case MOVEMENT_SKILL:
@@ -3431,7 +3438,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
                 if (g_csQuest.IsInit())
                 {
-                    SendRequestQuestHistory();
+                    SocketClient->ToGameServer()->SendLegacyQuestStateRequest();
                 }
 
                 if (M34CryWolf1st::Get_State_Only_Elf() == true && M34CryWolf1st::IsCyrWolf1st() == true)
@@ -3456,10 +3463,10 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                                 SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Ing_Set_Temple));
                             }
                             else
-                                SendRequestTalk(CharactersClient[TargetNpc].Key);
+                                SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                     }
                     else
-                        SendRequestTalk(CharactersClient[TargetNpc].Key);
+                        SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
                 else if (M34CryWolf1st::IsCyrWolf1st() == true)
                 {
@@ -3469,18 +3476,18 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                         {
                             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterWerwolfMsgBoxLayout));
                         }
-                        SendRequestTalk(CharactersClient[TargetNpc].Key);
+                        SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                     }
                 }
                 else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
                 {
-                    SendRequestTalk(CharactersClient[TargetNpc].Key);
+                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
 
                     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
                 }
                 else if (CharactersClient[TargetNpc].MonsterIndex >= 468 && CharactersClient[TargetNpc].MonsterIndex <= 475)
                 {
-                    SendRequestTalk(CharactersClient[TargetNpc].Key);
+                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
 
                     wchar_t _Temp[32] = { 0, };
                     if (CharactersClient[TargetNpc].MonsterIndex == 470)
@@ -3496,19 +3503,19 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 else if (CharactersClient[TargetNpc].MonsterIndex == 478)
                 {
-                    SendRequestTalk(CharactersClient[TargetNpc].Key);
+                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
                 else if (CharactersClient[TargetNpc].MonsterIndex == 540)
                 {
-                    SendRequestTalk(CharactersClient[TargetNpc].Key);
+                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
                 else if (CharactersClient[TargetNpc].MonsterIndex == 547)
                 {
-                    SendRequestTalk(CharactersClient[TargetNpc].Key);
+                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
                 else if (CharactersClient[TargetNpc].MonsterIndex == 579)
                 {
-                    SendRequestTalk(CharactersClient[TargetNpc].Key);
+                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
                 else
                 {
@@ -3516,7 +3523,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                     {
                         if (g_pKanturu2ndEnterNpc->IsNpcAnimation() == false)
                         {
-                            SendRequestTalk(CharactersClient[TargetNpc].Key);
+                            SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                         }
                     }
                     else if (gMapManager.IsCursedTemple())
@@ -3542,7 +3549,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                     }
                     else
                     {
-                        SendRequestTalk(CharactersClient[TargetNpc].Key);
+                        SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                     }
                 }
                 //#else
@@ -3684,7 +3691,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                     SetAction(o, PLAYER_HEALING1);
                 else
                     SetAction(o, PLAYER_HEALING_FEMALE1);
-                SendRequestAction(AT_HEALING1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(Hero->Object, AT_HEALING1);
             }
             else
             {
@@ -3702,7 +3709,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                         SetAction(o, PLAYER_POSE1);
                     else
                         SetAction(o, PLAYER_POSE_FEMALE1);
-                    SendRequestAction(AT_POSE1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                    SendRequestAction(Hero->Object, AT_POSE1);
                 }
                 if (Sit)
                 {
@@ -3713,7 +3720,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                         SetAction(o, PLAYER_SIT1);
                     else
                         SetAction(o, PLAYER_SIT_FEMALE1);
-                    SendRequestAction(AT_SIT1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                    SendRequestAction(Hero->Object, AT_SIT1);
                 }
                 PlayBuffer(SOUND_DROP_ITEM01, &Hero->Object);
             }
@@ -3766,7 +3773,7 @@ void SendMove(CHARACTER* c, OBJECT* o)
 
     if (g_bEventChipDialogEnable)
     {
-        SendRequestEventChipExit();
+        SocketClient->ToGameServer()->SendEventChipExitDialog();
 
         if (g_bEventChipDialogEnable == EVENT_SCRATCH_TICKET)
         {
@@ -3871,6 +3878,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     g_pChatListBox->AddText(L"", GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);
                     return true;
                 }
+
+                if (!IsCanTrade() || !EnableMainRender)
+                {
+                    return true;
+                }
+
                 if (SelectedCharacter != -1)
                 {
                     CHARACTER* c = &CharactersClient[SelectedCharacter];
@@ -3884,7 +3897,11 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             g_pChatListBox->AddText(L"", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
                             return true;
                         }
-                        SendRequestTrade(CharactersClient[SelectedCharacter].Key);
+
+                        SocketClient->ToGameServer()->SendTradeRequest(c->Key);
+                        wchar_t message[100]{};
+                        swprintf(message, GlobalText[475], c->ID);
+                        g_pChatListBox->AddText(L"", message, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                 }
                 else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -3905,7 +3922,10 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         BYTE Dir1 = (BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                         BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                         if (abs(Dir1 - Dir2) == 4) {
-                            SendRequestTrade(c->Key);
+                            SocketClient->ToGameServer()->SendTradeRequest(c->Key);
+                            wchar_t message[100]{};
+                            swprintf(message, GlobalText[475], c->ID);
+                            g_pChatListBox->AddText(L"", message, SEASON3B::TYPE_SYSTEM_MESSAGE);
                             break;
                         }
                     }
@@ -4109,7 +4129,13 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 if (o->Kind == KIND_PLAYER && c != Hero && (o->Type == MODEL_PLAYER || c->Change) &&
                     abs((c->PositionX) - (Hero->PositionX)) <= 1 &&
                     abs((c->PositionY) - (Hero->PositionY)) <= 1)
-                    SendRequestGuild(CharactersClient[SelectedCharacter].Key);
+                {
+                    GuildPlayerKey = c->Key;
+                    SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
+                    wchar_t Text[100];
+                    swprintf(Text, GlobalText[477], c->ID);
+                    g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                }
             }
             else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
             {
@@ -4124,7 +4150,11 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                     if (abs(Dir1 - Dir2) == 4)
                     {
-                        SendRequestGuild(c->Key);
+                        GuildPlayerKey = c->Key;
+                        SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
+                        wchar_t Text[100];
+                        swprintf(Text, GlobalText[477], c->ID);
+                        g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
                 }
@@ -4167,7 +4197,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     else
                     {
                         SetAction(&Hero->Object, PLAYER_RESPECT1);
-                        SendRequestAction(AT_RESPECT1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                        SendRequestAction(Hero->Object, AT_RESPECT1);
                         //SendRequestGuildRelationShip(0x02, 0x02, HIBYTE(CharactersClient[SelectedCharacter].Key), LOBYTE(CharactersClient[SelectedCharacter].Key));
                         SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x02, CharactersClient[SelectedCharacter].Key);
                     }
@@ -4198,7 +4228,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         else
                         {
                             SetAction(&Hero->Object, PLAYER_RESPECT1);
-                            SendRequestAction(AT_RESPECT1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                            SendRequestAction(Hero->Object, AT_RESPECT1);
                             //SendRequestGuildRelationShip(0x02, 0x02, HIBYTE(c->Key), LOBYTE(c->Key));
                             SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x02, c->Key);
                         }
@@ -4226,7 +4256,13 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 CHARACTER* c = &CharactersClient[SelectedCharacter];
                 OBJECT* o = &c->Object;
                 if (o->Kind == KIND_PLAYER && c != Hero && (o->Type == MODEL_PLAYER || c->Change) && abs((c->PositionX) - (Hero->PositionX)) <= 1 && abs((c->PositionY) - (Hero->PositionY)) <= 1)
-                    SendRequestParty(CharactersClient[SelectedCharacter].Key);
+                {
+                    PartyKey = c->Key;
+                    SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
+                    wchar_t Text[100];
+                    swprintf(Text, GlobalText[476], c->ID);
+                    g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                }
             }
             else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
             {
@@ -4238,7 +4274,11 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                     if (abs(Dir1 - Dir2) == 4)
                     {
-                        SendRequestParty(c->Key);
+                        PartyKey = c->Key;
+                        SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
+                        wchar_t Text[100];
+                        swprintf(Text, GlobalText[476], c->ID);
+                        g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
                 }
@@ -4414,7 +4454,7 @@ void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType)
             SetAction(o, Action);
         else
             SetAction(o, Action + 1);
-        SendRequestAction(ActionType, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, ActionType);
     }
 }
 
@@ -4425,112 +4465,112 @@ void CheckChatText(wchar_t* Text)
     if (FindText(Text, GlobalText[270]) || FindText(Text, GlobalText[271]) || FindText(Text, GlobalText[272]) || FindText(Text, GlobalText[273]) || FindText(Text, GlobalText[274]) || FindText(Text, GlobalText[275]) || FindText(Text, GlobalText[276]) || FindText(Text, GlobalText[277]))
     {
         SetActionClass(c, o, PLAYER_GREETING1, AT_GREETING1);
-        SendRequestAction(AT_GREETING1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_GREETING1);
     }
     else if (FindText(Text, GlobalText[278]) || FindText(Text, GlobalText[279]) || FindText(Text, GlobalText[280]))
     {
         SetActionClass(c, o, PLAYER_GOODBYE1, AT_GOODBYE1);
-        SendRequestAction(AT_GOODBYE1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_GOODBYE1);
     }
     else if (FindText(Text, GlobalText[281]) || FindText(Text, GlobalText[282]) || FindText(Text, GlobalText[283]) || FindText(Text, GlobalText[284]) || FindText(Text, GlobalText[285]) || FindText(Text, GlobalText[286]))
     {
         SetActionClass(c, o, PLAYER_CLAP1, AT_CLAP1);
-        SendRequestAction(AT_CLAP1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_CLAP1);
     }
     else if (FindText(Text, GlobalText[287]) || FindText(Text, GlobalText[288]) || FindText(Text, GlobalText[289]) || FindText(Text, GlobalText[290]))
     {
         SetActionClass(c, o, PLAYER_GESTURE1, AT_GESTURE1);
-        SendRequestAction(AT_GESTURE1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_GESTURE1);
     }
     else if (FindText(Text, GlobalText[292]) || FindText(Text, GlobalText[293]) || FindText(Text, GlobalText[294]) || FindText(Text, GlobalText[295]))
     {
         SetActionClass(c, o, PLAYER_DIRECTION1, AT_DIRECTION1);
-        SendRequestAction(AT_DIRECTION1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_DIRECTION1);
     }
     else if (FindText(Text, GlobalText[296]) || FindText(Text, GlobalText[297]) || FindText(Text, GlobalText[298]) || FindText(Text, GlobalText[299]) || FindText(Text, GlobalText[300]) || FindText(Text, GlobalText[301]) || FindText(Text, GlobalText[302]))
     {
         SetActionClass(c, o, PLAYER_UNKNOWN1, AT_UNKNOWN1);
-        SendRequestAction(AT_UNKNOWN1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_UNKNOWN1);
     }
     else if (FindText(Text, L";") || FindText(Text, GlobalText[303]) || FindText(Text, GlobalText[304]) || FindText(Text, GlobalText[305]))
     {
         SetActionClass(c, o, PLAYER_AWKWARD1, AT_AWKWARD1);
-        SendRequestAction(AT_AWKWARD1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_AWKWARD1);
     }
     else if (FindText(Text, L"壬.壬") || FindText(Text, L"厄.厄") || FindText(Text, L"T_T") || FindText(Text, GlobalText[306]) || FindText(Text, GlobalText[307]) || FindText(Text, GlobalText[308]) || FindText(Text, GlobalText[309]))
     {
         SetActionClass(c, o, PLAYER_CRY1, AT_CRY1);
-        SendRequestAction(AT_CRY1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_CRY1);
     }
     else if (FindText(Text, L"天.天") || FindText(Text, L"天.,天") || FindText(Text, L"天,.天") || FindText(Text, L"-.-") || FindText(Text, L"-_-") || FindText(Text, GlobalText[310]) || FindText(Text, GlobalText[311]))
     {
         SetActionClass(c, o, PLAYER_SEE1, AT_SEE1);
-        SendRequestAction(AT_SEE1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_SEE1);
     }
     else if (FindText(Text, L"^^") || FindText(Text, L"^.^") || FindText(Text, L"^_^") || FindText(Text, GlobalText[312]) || FindText(Text, GlobalText[313]) || FindText(Text, GlobalText[314]) || FindText(Text, GlobalText[315]) || FindText(Text, GlobalText[316]))
     {
         SetActionClass(c, o, PLAYER_SMILE1, AT_SMILE1);
-        SendRequestAction(AT_SMILE1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_SMILE1);
     }
     else if (FindText(Text, GlobalText[318]) || FindText(Text, GlobalText[319]) || FindText(Text, GlobalText[320]) || FindText(Text, GlobalText[321]))
     {
         SetActionClass(c, o, PLAYER_CHEER1, AT_CHEER1);
-        SendRequestAction(AT_CHEER1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_CHEER1);
     }
     else if (FindText(Text, GlobalText[322]) || FindText(Text, GlobalText[323]) || FindText(Text, GlobalText[324]) || FindText(Text, GlobalText[325]))
     {
         SetActionClass(c, o, PLAYER_WIN1, AT_WIN1);
-        SendRequestAction(AT_WIN1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_WIN1);
     }
     else if (FindText(Text, GlobalText[326]) || FindText(Text, GlobalText[327]) || FindText(Text, GlobalText[328]) || FindText(Text, GlobalText[329]))
     {
         SetActionClass(c, o, PLAYER_SLEEP1, AT_SLEEP1);
-        SendRequestAction(AT_SLEEP1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_SLEEP1);
     }
     else if (FindText(Text, GlobalText[330]) || FindText(Text, GlobalText[331]) || FindText(Text, GlobalText[332]) || FindText(Text, GlobalText[333]) || FindText(Text, GlobalText[334]))
     {
         SetActionClass(c, o, PLAYER_COLD1, AT_COLD1);
-        SendRequestAction(AT_COLD1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_COLD1);
     }
     else if (FindText(Text, GlobalText[335]) || FindText(Text, GlobalText[336]) || FindText(Text, GlobalText[337]) || FindText(Text, GlobalText[338]))
     {
         SetActionClass(c, o, PLAYER_AGAIN1, AT_AGAIN1);
-        SendRequestAction(AT_AGAIN1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_AGAIN1);
     }
     else if (FindText(Text, GlobalText[339]) || FindText(Text, GlobalText[340]) || FindText(Text, GlobalText[341]))
     {
         SetActionClass(c, o, PLAYER_RESPECT1, AT_RESPECT1);
-        SendRequestAction(AT_RESPECT1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_RESPECT1);
     }
     else if (FindText(Text, GlobalText[342]) || FindText(Text, GlobalText[343]) || FindText(Text, L"/天") || FindText(Text, L"天^"))
     {
         SetActionClass(c, o, PLAYER_SALUTE1, AT_SALUTE1);
-        SendRequestAction(AT_SALUTE1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_SALUTE1);
     }
     else if (FindText(Text, GlobalText[344]) || FindText(Text, GlobalText[345]) || FindText(Text, GlobalText[346]) || FindText(Text, GlobalText[347]))
     {
         SetActionClass(c, o, PLAYER_RUSH1, AT_RUSH1);
-        SendRequestAction(AT_RUSH1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_RUSH1);
     }
     else if (FindText(Text, GlobalText[783]) || FindText(Text, L"hustle"))
     {
         SetActionClass(c, o, PLAYER_HUSTLE, AT_HUSTLE);
-        SendRequestAction(AT_HUSTLE, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_HUSTLE);
     }
     else if (FindText(Text, GlobalText[291]))
     {
         SetActionClass(c, o, PLAYER_PROVOCATION, AT_PROVOCATION);
-        SendRequestAction(AT_PROVOCATION, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_PROVOCATION);
     }
     else if (FindText(Text, GlobalText[317]))
     {
         SetActionClass(c, o, PLAYER_CHEERS, AT_CHEERS);
-        SendRequestAction(AT_CHEERS, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_CHEERS);
     }
     else if (FindText(Text, GlobalText[348]))
     {
         SetActionClass(c, o, PLAYER_LOOK_AROUND, AT_LOOK_AROUND);
-        SendRequestAction(AT_LOOK_AROUND, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_LOOK_AROUND);
     }
     else if (FindText(Text, GlobalText[2228]))
     {
@@ -4542,12 +4582,12 @@ void CheckChatText(wchar_t* Text)
             if (rand_fps_check(2))
             {
                 SetAction(o, PLAYER_JACK_1);
-                SendRequestAction(AT_JACK1, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(Hero->Object, AT_JACK1);
             }
             else
             {
                 SetAction(o, PLAYER_JACK_2);
-                SendRequestAction(AT_JACK2, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(Hero->Object, AT_JACK2);
             }
 
             o->m_iAnimation = 0;
@@ -4566,13 +4606,13 @@ void CheckChatText(wchar_t* Text)
                 if (rand() % 2)
                 {
                     SetAction(o, PLAYER_SANTA_1);
-                    SendRequestAction(AT_SANTA1_1 + i, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                    SendRequestAction(Hero->Object, AT_SANTA1_1 + i);
                     PlayBuffer(SOUND_XMAS_JUMP_SANTA + i);
                 }
                 else
                 {
                     SetAction(o, PLAYER_SANTA_2);
-                    SendRequestAction(AT_SANTA2_1 + i, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                    SendRequestAction(Hero->Object, AT_SANTA2_1 + i);
                     PlayBuffer(SOUND_XMAS_TURN);
                 }
 
@@ -6018,10 +6058,15 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                         if (count > 10) return;
                     }
                     to->Angle[2] = CreateAngle2D(to->Position, tc->TargetPosition);
-                    bool bResult;
-                    SendRequestMagicTeleportB(&bResult, tc->Key, TargetX, TargetY);
-                    if (bResult)
+
+                    if (Teleport)
                     {
+                        Teleport = false;
+                    }
+                    else
+                    {
+                        Teleport = true;
+                        SocketClient->ToGameServer()->SendTeleportTarget(tc->Key, TargetX, TargetY);
                         SetPlayerTeleport(tc);
                     }
                 }
@@ -6070,7 +6115,18 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 {
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                     bool bResult;
-                    SendRequestMagicTeleport(&bResult, 0, TargetX, TargetY);
+                    //SendRequestMagicTeleport(&bResult, 0, TargetX, TargetY);
+                    if (Teleport || g_bWhileMovingZone || (GetTickCount() - g_dwLatestZoneMoving < 3000))\
+                    {
+                        bResult = false;
+                    }
+                    else
+                    {
+                        Teleport = true;
+                        SocketClient->ToGameServer()->SendEnterGateRequest(0, TargetX, TargetY);
+                        bResult = true;
+                    }
+
                     if (bResult)
                     {
                         if (g_isCharacterBuff(o, eDeBuff_Stun))
@@ -7034,10 +7090,18 @@ void CheckGate()
                         }
                         else
                         {
-                            bool bResult;
+                            bool bResult = false;
                             if ((LoadingWorld) <= 30)
                             {
-                                SendRequestMagicTeleport(&bResult, i, 0, 0);
+                                if (Teleport || g_bWhileMovingZone || (GetTickCount() - g_dwLatestZoneMoving < 3000))
+                                {
+                                    bResult = false;
+                                }
+                                else
+                                {
+                                    SocketClient->ToGameServer()->SendEnterGateRequest(i, 0, 0);
+                                    bResult = true;
+                                }
                             }
 
                             if (!bResult)
@@ -7252,7 +7316,7 @@ void MoveHero()
                 {
                     Hero->Object.Angle[2] = (float)HeroAngle;
                 }
-                SendRequestAction(AT_STAND1, ((BYTE)((HeroAngle + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(Hero->Object, AT_STAND1);
             }
         }
 
@@ -7357,7 +7421,7 @@ void MoveHero()
                     SrcInventory = Inventory;
                     SrcInventoryIndex = EQUIPMENT_WEAPON_LEFT;
                     DstInventoryIndex = EQUIPMENT_WEAPON_RIGHT;
-                    SendRequestEquipmentItem(0, SrcInventoryIndex, 0, DstInventoryIndex);
+                    SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, SrcInventoryIndex, &PickItem, STORAGE_TYPE::INVENTORY, DstInventoryIndex);
                 }
             }
             MouseUpdateTime = 0;
@@ -7370,13 +7434,15 @@ void MoveHero()
 
             if (Success)
             {
+#ifdef SEND_POSITION_TO_SERVER
                 if (c->Movement && c->MovementType == MOVEMENT_MOVE && gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
                 {
                     if (gCharacterManager.GetEquipedBowType(CharacterMachine->Equipment) != BOWTYPE_NONE)
                     {
-                        SendPosition((c->PositionX), (c->PositionY));
+                        SocketClient->ToGameServer()->SendInstantMoveRequest(c->PositionX, c->PositionY);
                     }
                 }
+#endif
 
                 if (SelectedCharacter >= -1)
                 {

@@ -87,7 +87,7 @@ void IdentityVector3D(T* vect) {
 
 typedef char* PCHAR;
 typedef char			CHAR;
-typedef std::wstring		STRING;
+typedef std::string		STRING;
 
 typedef wchar_t* PWCHAR;
 typedef wchar_t			WCHAR;

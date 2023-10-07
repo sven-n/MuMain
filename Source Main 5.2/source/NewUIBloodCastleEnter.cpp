@@ -273,7 +273,7 @@ float CNewUIEnterBloodCastle::GetLayerDepth()
 
 void CNewUIEnterBloodCastle::OpenningProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     for (int i = 0; i < MAX_ENTER_GRADE; i++)
     {
@@ -312,7 +312,7 @@ void CNewUIEnterBloodCastle::OpenningProcess()
 
 void CNewUIEnterBloodCastle::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 void CNewUIEnterBloodCastle::LoadImages()

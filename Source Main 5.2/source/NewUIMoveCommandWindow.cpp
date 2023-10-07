@@ -526,7 +526,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
                         {
                             SaveOptions();
                         }
-                        SendRequestMoveMap(g_pMoveCommandWindow->GetMoveCommandKey(), (*li)->_ReqInfo.index);
+
+                        SocketClient->ToGameServer()->SendWarpCommandRequest(g_pMoveCommandWindow->GetMoveCommandKey(), (*li)->_ReqInfo.index);
 
                         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MOVEMAP);
                         return true;

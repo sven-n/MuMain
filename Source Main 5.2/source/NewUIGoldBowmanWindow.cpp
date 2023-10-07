@@ -98,7 +98,7 @@ void CNewUIGoldBowmanWindow::ClosingProcess()
 {
     ZeroMemory(g_strGiftName, sizeof(char) * 64);
     ChangeEditBox(UISTATE_HIDE);
-    SendRequestEventChipExit();
+    SocketClient->ToGameServer()->SendEventChipExitDialog();
 }
 
 void CNewUIGoldBowmanWindow::ChangeEditBox(const UISTATES type)
@@ -159,7 +159,7 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
             wchar_t strSerial3[5] = L"0,";
             memcpy(strSerial3, strSerial + 8, sizeof(char) * 4); strSerial3[4] = 0;
 
-            SendRequestScratchSerial(strSerial1, strSerial2, strSerial3);
+            SocketClient->ToGameServer()->SendLuckyNumberRequest(strSerial1, strSerial2, strSerial3);
         }
     }
 

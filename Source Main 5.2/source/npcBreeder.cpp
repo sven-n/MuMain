@@ -103,11 +103,11 @@ namespace npcBreeder
             switch (type)
             {
             case REVIVAL_DARKHORSE:
-                SendRequestRepair(EQUIPMENT_HELPER, Gold);
+                SocketClient->ToGameServer()->SendRepairItemRequest(EQUIPMENT_HELPER, (BYTE)Gold);
                 break;
 
             case REVIVAL_DARKSPIRIT:
-                SendRequestRepair(EQUIPMENT_WEAPON_LEFT, Gold);
+                SocketClient->ToGameServer()->SendRepairItemRequest(EQUIPMENT_WEAPON_LEFT, (BYTE)Gold);
                 break;
             }
             giPetManager::InitItemBackup();

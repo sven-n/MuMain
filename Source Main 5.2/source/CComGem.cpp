@@ -34,12 +34,12 @@ namespace COMGEM
 void COMGEM::SendReqUnMix()
 {
     iUnMixIndex += 12;
-    SendRequestGemUnMix(m_cGemType / 2, iUnMixLevel, iUnMixIndex);
+    SocketClient->ToGameServer()->SendLahapJewelMixRequest(0x01, m_cGemType / 2, iUnMixLevel, iUnMixIndex);
 }
 
 void COMGEM::SendReqMix()
 {
-    SendRequestGemMix(m_cGemType / 2, (m_cComType / 10 - 1));
+    SocketClient->ToGameServer()->SendLahapJewelMixRequest(0x00, m_cGemType / 2, (m_cComType / 10 - 1), 0);
 }
 
 void COMGEM::ProcessCSAction()
@@ -298,7 +298,7 @@ void COMGEM::Exit()
 {
     Init();
 
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 int	COMGEM::GetJewelRequireCount(int i)

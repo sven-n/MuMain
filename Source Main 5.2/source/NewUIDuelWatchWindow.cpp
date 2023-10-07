@@ -197,7 +197,7 @@ void CNewUIDuelWatchWindow::OpeningProcess()
 
 void CNewUIDuelWatchWindow::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float CNewUIDuelWatchWindow::GetLayerDepth()

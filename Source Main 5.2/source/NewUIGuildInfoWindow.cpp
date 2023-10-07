@@ -111,7 +111,7 @@ void SEASON3B::CNewUIGuildInfoWindow::OpenningProcess()
 {
     m_nCurrentTab = 1;
 
-    SendRequestGuildList();
+    SocketClient->ToGameServer()->SendGuildListRequest();
 }
 
 void SEASON3B::CNewUIGuildInfoWindow::ClosingProcess()
@@ -374,7 +374,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Mouse(int mx, int my)
                     break;
                 case 1:
                 {
-                    SendRequestGuildList();
+                    SocketClient->ToGameServer()->SendGuildListRequest();
                 }
                 break;
                 case 2:
@@ -382,7 +382,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Mouse(int mx, int my)
                     if (m_bRequestUnionList == false
                         && GuildMark[Hero->GuildMarkIndex].UnionName[0] != NULL)
                     {
-                        SendRequestUnionList();
+                        SocketClient->ToGameServer()->SendRequestAllianceList();
                         m_bRequestUnionList = true;
                     }
                 }
@@ -1002,7 +1002,11 @@ void SEASON3B::CNewUIGuildInfoWindow::ReceiveGuildRelationShip(BYTE byRelationSh
 {
     if (!g_MessageBox->IsEmpty())
     {
-        SendRequestGuildRelationShipResult(byRelationShipType, byRequestType, 0x00, byTargetUserIndexH, byTargetUserIndexL);
+        SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
+            byRelationShipType,
+            byRequestType,
+            0x00,
+            MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
     }
     else
     {

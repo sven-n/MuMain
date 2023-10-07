@@ -171,23 +171,23 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::CreateMessageBox(BYTE btResult)
     wchar_t strMessage[256];
     if (btResult == POPUP_FAILED || btResult == POPUP_FAILED2)
     {
-        unicode::_strcpy(strMessage, GlobalText[2170]);
+        wcscpy(strMessage, GlobalText[2170]);
     }
     else if (btResult == POPUP_UNIRIA)
     {
-        unicode::_strcpy(strMessage, GlobalText[569]);
+        wcscpy(strMessage, GlobalText[569]);
     }
     else if (btResult == POPUP_CHANGERING)
     {
-        unicode::_strcpy(strMessage, GlobalText[2175]);
+        wcscpy(strMessage, GlobalText[2175]);
     }
     else if (btResult == POPUP_NOT_HELPER)
     {
-        unicode::_strcpy(strMessage, GlobalText[2176]);
+        wcscpy(strMessage, GlobalText[2176]);
     }
     else
     {
-        unicode::_strcpy(strMessage, GlobalText[2170 + btResult]);
+        wcscpy(strMessage, GlobalText[2170 + btResult]);
     }
 
     SEASON3B::CreateOkMessageBox(strMessage);
@@ -226,16 +226,16 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
     {
         if (btDetailState == KANTURU_TOWER_REVITALIXATION || btDetailState == KANTURU_TOWER_NOTIFY)
         {
-            unicode::_strcpy(m_strSubject, GlobalText[2149]);
-            unicode::_strcpy(m_strStateText[0], GlobalText[2150]);
+            wcscpy(m_strSubject, GlobalText[2149]);
+            wcscpy(m_strStateText[0], GlobalText[2150]);
             swprintf(m_strStateText[1], GlobalText[2151], iRemainTime / 3600);
             m_iStateTextNum = 2;
         }
         else
         {
-            unicode::_strcpy(m_strSubject, GlobalText[2174]);
-            unicode::_strcpy(m_strStateText[0], GlobalText[2160]);
-            unicode::_strcpy(m_strStateText[1], GlobalText[2161]);
+            wcscpy(m_strSubject, GlobalText[2174]);
+            wcscpy(m_strStateText[0], GlobalText[2160]);
+            wcscpy(m_strStateText[1], GlobalText[2161]);
             m_iStateTextNum = 2;
         }
     }
@@ -245,32 +245,32 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
             && btDetailState != KANTURU_MAYA_DIRECTION_STANBY2
             && btDetailState != KANTURU_MAYA_DIRECTION_STANBY3)
         {
-            unicode::_strcpy(m_strSubject, GlobalText[2152]);
+            wcscpy(m_strSubject, GlobalText[2152]);
             swprintf(m_strStateText[0], GlobalText[2153], btUserCount);
         }
         else
         {
-            unicode::_strcpy(m_strSubject, GlobalText[2163]);
+            wcscpy(m_strSubject, GlobalText[2163]);
 
             if (btDetailState == KANTURU_MAYA_DIRECTION_STANBY1)
             {
                 if (btUserCount < 15)
                 {
-                    unicode::_strcpy(m_strStateText[0], GlobalText[2164]);
+                    wcscpy(m_strStateText[0], GlobalText[2164]);
                 }
                 else if (btUserCount == 15)
                 {
-                    unicode::_strcpy(m_strStateText[0], GlobalText[2172]);
+                    wcscpy(m_strStateText[0], GlobalText[2172]);
                 }
                 else
                 {
                     if (m_BtnEnter.IsLock() == false)
                     {
-                        unicode::_strcpy(m_strStateText[0], GlobalText[2164]);
+                        wcscpy(m_strStateText[0], GlobalText[2164]);
                     }
                     else
                     {
-                        unicode::_strcpy(m_strStateText[0], GlobalText[2172]);
+                        wcscpy(m_strStateText[0], GlobalText[2172]);
                     }
                 }
                 m_iStateTextNum = 1;
@@ -285,7 +285,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
                 }
                 else if (btUserCount == 15)
                 {
-                    unicode::_strcpy(m_strStateText[0], GlobalText[2168]);
+                    wcscpy(m_strStateText[0], GlobalText[2168]);
                     m_iStateTextNum = 1;
                 }
             }
@@ -299,7 +299,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
                 }
                 else if (btUserCount == 15)
                 {
-                    unicode::_strcpy(m_strStateText[0], GlobalText[2168]);
+                    wcscpy(m_strStateText[0], GlobalText[2168]);
                     m_iStateTextNum = 1;
                 }
             }
@@ -307,7 +307,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
             {
                 if (m_BtnEnter.IsLock() == false)
                 {
-                    unicode::_strcpy(m_strStateText[0], GlobalText[2164]);
+                    wcscpy(m_strStateText[0], GlobalText[2164]);
 
                     m_iStateTextNum = 1;
                 }
@@ -340,14 +340,14 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
     }
     else if (btState == KANTURU_STATE_NIGHTMARE_BATTLE)
     {
-        unicode::_strcpy(m_strSubject, GlobalText[2152]);
+        wcscpy(m_strSubject, GlobalText[2152]);
         swprintf(m_strStateText[0], GlobalText[2153], btUserCount);
         swprintf(m_strStateText[1], GlobalText[2157], btUserCount);
         m_iStateTextNum = 2;
     }
     else if (btState == KANTURU_STATE_STANDBY)
     {
-        unicode::_strcpy(m_strSubject, GlobalText[2158]);
+        wcscpy(m_strSubject, GlobalText[2158]);
         if (btDetailState == 1)	// STANBY_START
         {
             swprintf(m_strStateText[0], GlobalText[2159], iRemainTime / 60);
@@ -362,7 +362,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
     }
     else
     {
-        unicode::_strcpy(m_strSubject, GlobalText[2170]);
+        wcscpy(m_strSubject, GlobalText[2170]);
     }
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC) == false)

@@ -139,8 +139,10 @@ bool CNewUIQuestProgress::ProcessBtns()
     {
         if (m_btnComplete.UpdateMouseEvent())
         {
-            SendRequestQuestComplete(m_dwCurQuestIndex);
-            ::PlayBuffer(SOUND_CLICK01);
+            const auto questNumber = static_cast<uint16_t>((m_dwCurQuestIndex & 0xFF00) >> 16);
+            const auto questGroup = static_cast<uint16_t>(m_dwCurQuestIndex & 0xFF);
+            SocketClient->ToGameServer()->SendQuestCompletionRequest(questNumber, questGroup);
+            PlayBuffer(SOUND_CLICK01);
             m_bCanClick = false;
             return true;
         }
@@ -171,8 +173,10 @@ bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
             m_nSelAnswer = i + 1;
             if (SEASON3B::IsRelease(VK_LBUTTON))
             {
-                SendQuestSelAnswer(m_dwCurQuestIndex, (BYTE)m_nSelAnswer);
-                ::PlayBuffer(SOUND_CLICK01);
+                const auto questNumber = static_cast<uint16_t>((m_dwCurQuestIndex & 0xFF00) >> 16);
+                const auto questGroup = static_cast<uint16_t>(m_dwCurQuestIndex & 0xFF);
+                SocketClient->ToGameServer()->SendQuestProceedRequest(questNumber, questGroup, (BYTE)m_nSelAnswer);
+                PlayBuffer(SOUND_CLICK01);
                 m_bCanClick = false;
                 return true;
             }
@@ -346,7 +350,7 @@ void CNewUIQuestProgress::ProcessOpening()
 bool CNewUIQuestProgress::ProcessClosing()
 {
     m_dwCurQuestIndex = 0;
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
     ::PlayBuffer(SOUND_CLICK01);
     return true;
 }
@@ -388,7 +392,7 @@ void CNewUIQuestProgress::SetCurNPCWords()
     if (0 == m_dwCurQuestIndex)
         return;
 
-    ::memset(m_aszNPCWords[0], 0, sizeof(char) * QP_NPC_LINE_MAX * QP_WORDS_ROW_MAX);
+    memset(m_aszNPCWords, 0, sizeof m_aszNPCWords);
 
     g_pRenderText->SetFont(g_hFont);
     int nLine = ::DivideStringByPixel(&m_aszNPCWords[0][0],
@@ -406,8 +410,8 @@ void CNewUIQuestProgress::SetCurPlayerWords()
     if (0 == m_dwCurQuestIndex)
         return;
 
-    ::memset(m_aszPlayerWords[0], 0, sizeof(char) * QP_PLAYER_LINE_MAX * QP_WORDS_ROW_MAX);
-    ::memset(m_anAnswerLine, 0, sizeof(int) * QM_MAX_ANSWER);
+    ::memset(m_aszPlayerWords, 0, sizeof m_aszPlayerWords);
+    ::memset(m_anAnswerLine, 0, sizeof m_anAnswerLine);
 
     g_pRenderText->SetFont(g_hFont);
 

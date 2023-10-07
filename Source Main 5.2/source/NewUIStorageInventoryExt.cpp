@@ -208,7 +208,7 @@ bool CNewUIStorageInventoryExt::ProcessClosing() const
 
     CNewUIInventoryCtrl::BackupPickedItem();
     DeleteAllItems();
-    SendRequestStorageExit();
+    SocketClient->ToGameServer()->SendVaultClosed();
     return true;
 }
 

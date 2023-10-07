@@ -572,7 +572,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
         return true;
     }
 
-    SendRequestTalk(npckey);
+    SocketClient->ToGameServer()->SendTalkToNpcRequest(npckey);
     return false;
 }
 

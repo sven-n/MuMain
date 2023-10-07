@@ -144,8 +144,10 @@ bool CNewUIQuestProgressByEtc::ProcessBtns()
     {
         if (m_btnComplete.UpdateMouseEvent())
         {
-            SendRequestQuestComplete(m_dwCurQuestIndex);
-            ::PlayBuffer(SOUND_CLICK01);
+            const auto questNumber = static_cast<uint16_t>((m_dwCurQuestIndex & 0xFF00) >> 16);
+            const auto questGroup = static_cast<uint16_t>(m_dwCurQuestIndex & 0xFF);
+            SocketClient->ToGameServer()->SendQuestCompletionRequest(questNumber, questGroup);
+            PlayBuffer(SOUND_CLICK01);
             m_bCanClick = false;
             return true;
         }
@@ -176,8 +178,10 @@ bool CNewUIQuestProgressByEtc::UpdateSelTextMouseEvent()
             m_nSelAnswer = i + 1;
             if (SEASON3B::IsRelease(VK_LBUTTON))
             {
-                SendQuestSelAnswer(m_dwCurQuestIndex, (BYTE)m_nSelAnswer);
-                ::PlayBuffer(SOUND_CLICK01);
+                const auto questNumber = static_cast<uint16_t>((m_dwCurQuestIndex & 0xFF00) >> 16);
+                const auto questGroup = static_cast<uint16_t>(m_dwCurQuestIndex & 0xFF);
+                SocketClient->ToGameServer()->SendQuestProceedRequest(questNumber, questGroup, (BYTE)m_nSelAnswer);
+                PlayBuffer(SOUND_CLICK01);
                 m_bCanClick = false;
                 return true;
             }
@@ -339,7 +343,7 @@ bool CNewUIQuestProgressByEtc::ProcessClosing()
 {
     g_QuestMng.DelQuestIndexByEtcList(m_dwCurQuestIndex);
     m_dwCurQuestIndex = 0;
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
     ::PlayBuffer(SOUND_CLICK01);
     return true;
 }

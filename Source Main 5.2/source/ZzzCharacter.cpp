@@ -241,7 +241,7 @@ void SetPlayerStop(CHARACTER* c)
                         if (c->Object.CurrentAction != PLAYER_HEALING_FEMALE1)
                         {
                             SetAction(&c->Object, PLAYER_HEALING_FEMALE1);
-                            SendRequestAction(AT_HEALING1, ((BYTE)((c->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                            SendRequestAction(c->Object, AT_HEALING1);
                         }
                     }
                     else
@@ -263,7 +263,7 @@ void SetPlayerStop(CHARACTER* c)
                         if (c->Object.CurrentAction != PLAYER_HEALING_FEMALE1)
                         {
                             SetAction(&c->Object, PLAYER_HEALING_FEMALE1);
-                            SendRequestAction(AT_HEALING1, ((BYTE)((c->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                            SendRequestAction(c->Object, AT_HEALING1);
                         }
                     }
                     else

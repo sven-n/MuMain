@@ -568,7 +568,7 @@ bool SEASON3B::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSelected
     }
 
     SetAction(&Hero->Object, PLAYER_RESPECT1);
-    SendRequestAction(AT_RESPECT1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+    SendRequestAction(Hero->Object, AT_RESPECT1);
     SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x02, pSelectedCha->Key);
     return true;
 }

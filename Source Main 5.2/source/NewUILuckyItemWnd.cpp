@@ -368,7 +368,7 @@ bool CNewUILuckyItemWnd::ClosingProcess(void)
         return false;
     }
 
-    SendRequestMixExit();
+    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
     m_eType = eLuckyItemType_None;
     return true;
 }

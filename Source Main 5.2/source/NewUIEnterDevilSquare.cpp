@@ -270,7 +270,7 @@ int CNewUIEnterDevilSquare::CheckLimitLV(int iIndex)
 
 void CNewUIEnterDevilSquare::OpenningProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     for (int i = 0; i < MAX_ENTER_GRADE; i++)
     {
@@ -308,7 +308,7 @@ void CNewUIEnterDevilSquare::OpenningProcess()
 
 void CNewUIEnterDevilSquare::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 void CNewUIEnterDevilSquare::LoadImages()

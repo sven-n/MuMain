@@ -769,7 +769,7 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
     }
     if (bPreName == FALSE)
     {
-        unicode::_strcpy(pszNameOut, szTempName);
+        wcscpy(pszNameOut, szTempName);
     }
 
     if (g_MixRecipeMgr.IsMixInit())

@@ -342,7 +342,7 @@ void CNewUIGensRanking::SetBtnInfo(float _PosX, float _PosY)
 
 void CNewUIGensRanking::OpenningProcess()
 {
-    SendRequestGensInfo_Open();
+    SocketClient->ToGameServer()->SendGensRankingRequest();
 }
 
 void CNewUIGensRanking::ClosingProcess()

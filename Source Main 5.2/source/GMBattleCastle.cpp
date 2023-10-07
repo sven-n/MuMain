@@ -128,12 +128,12 @@ namespace battleCastle
             if (Hero->Helper.Type == MODEL_HELPER + 37 && AniType == PLAYER_HIGH_SHOCK)
             {
                 SetAction_Fenrir_Damage(Hero, o);
-                SendRequestAction(AniType, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(Hero->Object, AniType);
             }
             else
             {
                 SetAction(o, AniType);
-                SendRequestAction(AniType, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(Hero->Object, AniType);
             }
         }
     }

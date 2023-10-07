@@ -382,7 +382,7 @@ bool CNewUINPCDialogue::ProcessClosing()
     m_dwCurDlgIndex = 0;
     m_dwContributePoint = 0;
     m_bQuestListMode = false;
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
     ::PlayBuffer(SOUND_CLICK01);
     return true;
 }
@@ -554,7 +554,11 @@ void CNewUINPCDialogue::ProcessSelTextResult()
             SetContents(0);
         }
         else
-            SendQuestSelection(m_adwQuestIndex[m_nSelSelText - 1], (BYTE)m_nSelSelText);
+        {
+            auto questNumber = (uint16_t)((m_adwQuestIndex[m_nSelSelText - 1] & 0xFF00) >> 16);
+            auto questGroup = (uint16_t)(m_adwQuestIndex[m_nSelSelText - 1] & 0xFF);
+            SocketClient->ToGameServer()->SendQuestSelectRequest(questNumber, questGroup, (BYTE)m_nSelSelText);
+        }
     }
     else
     {
@@ -568,29 +572,27 @@ void CNewUINPCDialogue::ProcessSelTextResult()
             switch (nAnswerResult)
             {
             case 901:
-                SendRequestQuestByNPCEPList();
+                SocketClient->ToGameServer()->SendAvailableQuestsRequest();
                 break;
 
             case 902:
-                SendRequestAPDPUp();
+                SocketClient->ToGameServer()->SendNpcBuffRequest();
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPC_DIALOGUE);
                 break;
             case 903:
-                SendRequestGensJoining(1);
+                SocketClient->ToGameServer()->SendGensJoinRequest(1);
                 break;
-
             case 904:
-                SendRequestGensJoining(2);
+                SocketClient->ToGameServer()->SendGensJoinRequest(2);
                 break;
-
             case 905:
-                SendRequestGensSecession();
+                SocketClient->ToGameServer()->SendGensLeaveRequest();
                 break;
             case 906:
-                SendRequestGensReward(1);
+                SocketClient->ToGameServer()->SendGensRewardRequest(1);
                 break;
             case 907:
-                SendRequestGensReward(2);
+                SocketClient->ToGameServer()->SendGensRewardRequest(2);
                 break;
 
             default:

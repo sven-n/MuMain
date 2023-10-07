@@ -73,7 +73,7 @@ void CNewUIPartyInfoWindow::InitButtons()
 
 void CNewUIPartyInfoWindow::OpenningProcess()
 {
-    SendRequestPartyList();
+    SocketClient->ToGameServer()->SendPartyListRequest();
 }
 
 void CNewUIPartyInfoWindow::ClosingProcess()
@@ -288,7 +288,7 @@ bool CNewUIPartyInfoWindow::LeaveParty(const int iIndex)
     if (!gMapManager.IsCursedTemple())
     {
         PlayBuffer(SOUND_CLICK01);
-        SendRequestPartyLeave(Party[iIndex].Number);
+        SocketClient->ToGameServer()->SendPartyPlayerKickRequest(Party[iIndex].Number);
     }
 
     SetParty(false);

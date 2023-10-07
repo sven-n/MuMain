@@ -75,7 +75,7 @@ bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 void SEASON3B::CNewUIMasterLevel::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float SEASON3B::CNewUIMasterLevel::GetLayerDepth()

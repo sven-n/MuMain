@@ -47,8 +47,8 @@ int DoDisbandAction(POPUP_RESULT Result)
 {
     if (Result == POPUP_RESULT_YES)
     {
-        SendRequestGuildAssign(0x03, G_PERSON, s_szTargetID);
-        SendRequestGuildList();
+        SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, s_szTargetID, 0x03);
+        SocketClient->ToGameServer()->SendGuildListRequest();
     }
     return 1;
 }
@@ -85,15 +85,9 @@ void DoAppointAction()
 
     if (s_PopupAppointOkButton.DoMouseAction())
     {
-        if (s_eAppointStatus == G_PERSON)
-        {
-            SendRequestGuildAssign(0x01, s_eAppointType, s_szTargetID);
-        }
-        else
-        {
-            SendRequestGuildAssign(0x02, s_eAppointType, s_szTargetID);
-        }
-        SendRequestGuildList();
+        SocketClient->ToGameServer()->SendGuildRoleAssignRequest(s_eAppointStatus, s_szTargetID, s_eAppointStatus == G_PERSON ? 0x01 : 0x02);
+
+        SocketClient->ToGameServer()->SendGuildListRequest();
 
         g_pUIPopup->CancelPopup();
     }
@@ -424,7 +418,7 @@ int DoBanUnionGuildAction(POPUP_RESULT Result)
 {
     if (Result == POPUP_RESULT_YES)
     {
-        SendRequestBanUnionGuild(s_szTargetID);
+        SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(s_szTargetID);
     }
     return 1;
 }
@@ -616,7 +610,7 @@ BOOL CUIGuildInfo::DoMouseAction()
         {
             if (!m_bRequestUnionList && GuildMark[Hero->GuildMarkIndex].UnionName[0])
             {
-                SendRequestUnionList();
+                SocketClient->ToGameServer()->SendRequestAllianceList();
                 m_bRequestUnionList = TRUE;
             }
             CloseMyPopup();

@@ -536,7 +536,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                             SaveOptions();
                         }
 
-                        SendRequestMoveMap(g_pMoveCommandWindow->GetMoveCommandKey(), iMapIndex);
+                        SocketClient->ToGameServer()->SendWarpCommandRequest(g_pMoveCommandWindow->GetMoveCommandKey(), iMapIndex);
                     }
                     else
                     {

@@ -248,7 +248,7 @@ void CNewUIGuildMakeWindow::ClosingProcess()
     ChangeWindowState(GUILDMAKE_INFO);
     ChangeEditBox(UISTATE_HIDE);
 
-    SendRequestGuildMaster(FALSE);
+    SocketClient->ToGameServer()->SendGuildMasterAnswer(false);
 }
 
 void CNewUIGuildMakeWindow::ChangeWindowState(const GUILDMAKE_STATE state)
@@ -275,7 +275,7 @@ bool CNewUIGuildMakeWindow::UpdateGMInfo()
 
     if (m_Button[GUILDMAKEBUTTON_INFO_MAKE].UpdateMouseEvent())
     {
-        SendRequestGuildMaster(TRUE);
+        SocketClient->ToGameServer()->SendGuildMasterAnswer(true);
         ChangeWindowState(GUILDMAKE_MARK);
         ChangeEditBox(UISTATE_NORMAL);
         return true;
@@ -368,7 +368,7 @@ bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
                 Mark[i / 2] += GuildMark[MARK_EDIT].Mark[i];
         }
 
-        SendRequestCreateGuild(0, (BYTE*)GuildMark[MARK_EDIT].GuildName, Mark);
+        SocketClient->ToGameServer()->SendGuildCreateRequest(GuildMark[MARK_EDIT].GuildName, Mark, sizeof Mark);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
         return true;
     }

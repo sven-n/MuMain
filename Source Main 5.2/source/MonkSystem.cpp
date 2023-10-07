@@ -454,8 +454,10 @@ bool CMonkSystem::SendAttackPacket(CHARACTER* _pCha, int _nMoveTarget, int _nSki
 
     if ((TerrainWall[TargetIndex] & TW_NOMOVE) != TW_NOMOVE && (TerrainWall[TargetIndex] & TW_NOGROUND) != TW_NOGROUND)
     {
-        //		if(!InChaosCastle())
-        SendPosition(CharPosX, CharPosY);
+#ifdef SEND_POSITION_TO_SERVER
+        // if(!InChaosCastle())
+        SocketClient->ToGameServer()->SendInstantMoveRequest(CharPosX, CharPosY);
+#endif
 
         VectorCopy(CharactersClient[_nMoveTarget].Object.Position, _pCha->TargetPosition);
         //몬스터의 넉백효과의 의해 이펙트가 혼란스러움 방지

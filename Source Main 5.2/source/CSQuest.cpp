@@ -119,6 +119,18 @@ int CSQuest::GetEventCount(BYTE byType)
     return m_byEventCount[byType];
 }
 
+typedef struct
+{
+    short   shQuestConditionNum;
+    short   shQuestRequestNum;
+    WORD	wNpcType;
+
+    char strQuestName[32];
+
+    QUEST_CLASS_ACT     QuestAct[MAX_QUEST_CONDITION];
+    QUEST_CLASS_REQUEST QuestRequest[MAX_QUEST_REQUEST];
+} QUEST_ATTRIBUTE_FILE;
+
 bool CSQuest::OpenQuestScript(wchar_t* filename)
 {
     FILE* fp = _wfopen(filename, L"rb");
@@ -129,15 +141,25 @@ bool CSQuest::OpenQuestScript(wchar_t* filename)
         return  FALSE;
     }
 
-    memset(m_Quest, 0, sizeof(QUEST_ATTRIBUTE) * MAX_QUESTS);
+    memset(m_Quest, 0, sizeof m_Quest);
 
-    int     Size = sizeof(QUEST_ATTRIBUTE);
+    int Size = sizeof(QUEST_ATTRIBUTE_FILE);
     BYTE* Buffer = new BYTE[Size];
     for (int i = 0; i < MAX_QUESTS; i++)
     {
         fread(Buffer, Size, 1, fp);
         BuxConvert(Buffer, Size);
-        memcpy(&m_Quest[i], Buffer, Size);
+
+        auto* current = (QUEST_ATTRIBUTE_FILE*)Buffer;
+        auto* target = &m_Quest[i];
+
+        target->shQuestConditionNum = current->shQuestConditionNum;
+        target->shQuestRequestNum = current->shQuestRequestNum;
+        target->wNpcType = current->wNpcType;
+        CMultiLanguage::ConvertFromUtf8(target->strQuestName, current->strQuestName);
+
+        memcpy(target->QuestAct, current->QuestAct, sizeof target->QuestAct);
+        memcpy(target->QuestRequest, current->QuestRequest, sizeof target->QuestRequest);
     }
     SAFE_DELETE_ARRAY(Buffer);
     fclose(fp);
@@ -611,7 +633,7 @@ bool CSQuest::ProcessNextProgress()
     }
     else
     {
-        SendRequestQuestState(m_byCurrQuestIndex, 1);
+        SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(m_byCurrQuestIndex, 1);
         return false;
     }
 }

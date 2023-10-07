@@ -46,6 +46,8 @@ extern char	View_Suc_Or_Fail;
 extern char Need_Point;
 extern int In_Skill;
 
+extern int BuyCost;
+
 SEASON3B::CNewUIMessageBoxButton::CNewUIMessageBoxButton()
 {
     m_bEnable = true;
@@ -1165,7 +1167,7 @@ bool SEASON3B::CGuildRequestMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildAnswer(true);
+    SocketClient->ToGameServer()->SendGuildJoinResponse(true, GuildPlayerKey);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1175,7 +1177,7 @@ CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::OkBtnDown(class CNewUIMessa
 
 CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildAnswer(false);
+    SocketClient->ToGameServer()->SendGuildJoinResponse(false, GuildPlayerKey);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1307,7 +1309,7 @@ bool SEASON3B::CPartyMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestPartyAnswer(true);
+    SocketClient->ToGameServer()->SendPartyInviteResponse(true, PartyKey);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1316,7 +1318,7 @@ CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBa
 
 CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestPartyAnswer(false);
+    SocketClient->ToGameServer()->SendPartyInviteResponse(false, PartyKey);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1342,7 +1344,7 @@ bool SEASON3B::CTradeMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestTradeAnswer(true);
+    SocketClient->ToGameServer()->SendTradeRequestResponse(true);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1351,7 +1353,7 @@ CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBa
 
 CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestTradeAnswer(false);
+    SocketClient->ToGameServer()->SendTradeRequestResponse(false);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1414,7 +1416,7 @@ bool SEASON3B::CGuildWarMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildWarAnswer(true);
+    SocketClient->ToGameServer()->SendGuildWarResponse(true);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1423,7 +1425,7 @@ CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::OkBtnDown(class CNewUIMessageBo
 
 CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildWarAnswer(false);
+    SocketClient->ToGameServer()->SendGuildWarResponse(false);
     InitGuildWar();
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1452,7 +1454,8 @@ bool SEASON3B::CBattleSoccerMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildWarAnswer(true);
+    SocketClient->ToGameServer()->SendGuildWarResponse(true);
+
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1461,7 +1464,7 @@ CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::OkBtnDown(class CNewUIMessa
 
 CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildWarAnswer(false);
+    SocketClient->ToGameServer()->SendGuildWarResponse(false);
     InitGuildWar();
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1616,7 +1619,7 @@ bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
 CALLBACK_RESULT SEASON3B::CInfinityArrowCancelMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     extern int g_iCancelSkillTarget;
-    SendRequestCancelMagic(g_iCancelSkillTarget, HeroKey);
+    SocketClient->ToGameServer()->SendMagicEffectCancelRequest(g_iCancelSkillTarget, HeroKey);
     g_iCancelSkillTarget = 0;
 
     PlayBuffer(SOUND_CLICK01);
@@ -1660,7 +1663,7 @@ bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
 CALLBACK_RESULT SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     extern int g_iCancelSkillTarget;
-    SendRequestCancelMagic(g_iCancelSkillTarget, HeroKey);
+    SocketClient->ToGameServer()->SendMagicEffectCancelRequest(g_iCancelSkillTarget, HeroKey);
     g_iCancelSkillTarget = 0;
 
     PlayBuffer(SOUND_CLICK01);
@@ -2013,7 +2016,7 @@ bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
 CALLBACK_RESULT SEASON3B::CMixCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_REQUESTED);
-    SendRequestMix(g_MixRecipeMgr.GetCurMixID(), g_MixRecipeMgr.GetMixSubType());
+    SocketClient->ToGameServer()->SendChaosMachineMixRequest(g_MixRecipeMgr.GetCurMixID(), g_MixRecipeMgr.GetMixSubType());
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2219,7 +2222,11 @@ CALLBACK_RESULT SEASON3B::CGuildRelationShipMsgBoxLayout::OkBtnDown(class CNewUI
 {
     const SEASON3B::ServerMessageInfo info = g_pGuildInfoWindow->GetServerMessage();
 
-    SendRequestGuildRelationShipResult(info.s_byRelationShipType, info.s_byRelationShipRequestType, 0x01, info.s_byTargetUserIndexH, info.s_byTargetUserIndexL);
+    SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
+        info.s_byRelationShipType,
+        info.s_byRelationShipRequestType,
+        0x01,
+        MAKEWORD(info.s_byTargetUserIndexH, info.s_byTargetUserIndexL));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2231,7 +2238,11 @@ CALLBACK_RESULT SEASON3B::CGuildRelationShipMsgBoxLayout::CancelBtnDown(class CN
 {
     const SEASON3B::ServerMessageInfo info = g_pGuildInfoWindow->GetServerMessage();
 
-    SendRequestGuildRelationShipResult(info.s_byRelationShipType, info.s_byRelationShipRequestType, 0x00, info.s_byTargetUserIndexH, info.s_byTargetUserIndexL);
+    SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
+        info.s_byRelationShipType,
+        info.s_byRelationShipRequestType,
+        0x00,
+        MAKEWORD(info.s_byTargetUserIndexH, info.s_byTargetUserIndexL));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2432,7 +2443,9 @@ bool SEASON3B::CQuestGiveUpMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CQuestGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestQuestGiveUp(g_pMyQuestInfoWindow->GetSelQuestIndex());
+    const auto questNumber = static_cast<uint16_t>((g_pMyQuestInfoWindow->GetSelQuestIndex() & 0xFF00) >> 16);
+    const auto questGroup = static_cast<uint16_t>(g_pMyQuestInfoWindow->GetSelQuestIndex() & 0xFF);
+    SocketClient->ToGameServer()->SendQuestCancelRequest(questNumber, questGroup);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2540,7 +2553,8 @@ CALLBACK_RESULT SEASON3B::CHighValueItemCheckMsgBoxLayout::OkBtnDown(class CNewU
 
     if (iSourceIndex != -1)
     {
-        SendRequestSell(iSourceIndex);
+        SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
+        g_pNPCShop->SetSellingItem(true);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2978,7 +2992,7 @@ bool SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildAssign(0x03, G_PERSON, GuildList[DeleteIndex].Name);
+    SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, GuildList[DeleteIndex].Name, 0x03);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3337,7 +3351,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::CancelBtnDown(class CN
 
 CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestBanUnionGuild(DeleteID);
+    SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(DeleteID);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3590,10 +3604,12 @@ CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageB
     GambleSystem& gambleSys = GambleSystem::Instance();
     LPBUYITEMINFO pItemInfo = NULL;
 
-    if (gambleSys.IsGambleShop())
+    if (gambleSys.IsGambleShop() && BuyCost != 0)
     {
         pItemInfo = gambleSys.GetBuyItemInfo();
-        SendRequestBuy(pItemInfo->ItemIndex, pItemInfo->ItemCost);
+        SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(pItemInfo->ItemIndex);
+        BuyCost = pItemInfo->ItemCost;
+        g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", pItemInfo->ItemIndex);
     }
 
     PlayBuffer(SOUND_CLICK01);

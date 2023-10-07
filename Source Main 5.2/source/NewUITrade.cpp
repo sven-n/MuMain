@@ -124,7 +124,7 @@ bool CNewUITrade::UpdateMouseEvent()
             && m_bMyConfirm)
         {
             m_bMyConfirm = false;
-            SendRequestTradeResult(m_bMyConfirm);
+            SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm);
         }
 
         return false;
@@ -160,7 +160,7 @@ bool CNewUITrade::UpdateKeyEvent()
     {
         if (SEASON3B::IsPress(VK_ESCAPE) == true)
         {
-            SendRequestTradeExit();
+            SocketClient->ToGameServer()->SendTradeCancel();
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_TRADE);
             PlayBuffer(SOUND_CLICK01);
 
@@ -475,7 +475,7 @@ void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
     else
     {
         m_bMyConfirm = false;
-        SendRequestTradeResult(m_bMyConfirm);
+        SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm);
 
         SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, nInvenIndex,
             pItemObj, STORAGE_TYPE::TRADE, nTradeIndex);
@@ -500,14 +500,14 @@ void CNewUITrade::SendRequestMyGoldInput(int nInputGold)
         if (m_bMyConfirm)
         {
             m_bMyConfirm = false;
-            SendRequestTradeResult(m_bMyConfirm);
+            SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm);
         }
 
         if (m_nMyTradeGold > 0)
             m_nMyTradeWait = 150;
 
         m_nTempMyTradeGold = nInputGold;
-        SendRequestTradeGold(nInputGold);
+        SocketClient->ToGameServer()->SendSetTradeMoney(nInputGold);
     }
     else
     {
@@ -520,7 +520,7 @@ void CNewUITrade::ProcessCloseBtn()
     if (CNewUIInventoryCtrl::GetPickedItem() == NULL)
     {
         m_bTradeAlert = false;
-        SendRequestTradeExit();
+        SocketClient->ToGameServer()->SendTradeCancel();
     }
 }
 
@@ -577,7 +577,7 @@ void CNewUITrade::AlertTrade()
     m_bMyConfirm = !m_bMyConfirm;
 
     m_bTradeAlert = true;
-    SendRequestTradeResult(m_bMyConfirm);
+    SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm);
 }
 
 void CNewUITrade::GetYourID(wchar_t* pszYourID)
@@ -589,7 +589,7 @@ void CNewUITrade::ProcessToReceiveTradeRequest(char* pbyYourID)
 {
     if (g_pNewUISystem->IsImpossibleTradeInterface())
     {
-        SendRequestTradeAnswer(false);
+        SocketClient->ToGameServer()->SendTradeRequestResponse(false);
         return;
     }
 

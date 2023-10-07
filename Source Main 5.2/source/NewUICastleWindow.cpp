@@ -213,7 +213,7 @@ void CNewUICastleWindow::OpeningProcess()
 
 void CNewUICastleWindow::ClosingProcess()
 {
-    SendRequestMixExit();
+    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 }
 
 float CNewUICastleWindow::GetLayerDepth()

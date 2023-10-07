@@ -808,7 +808,7 @@ void CNewUIMyInventory::OpenningProcess()
     {
         if (g_QuestMng.IsEPRequestRewardState(0x1000F))
         {
-            SendSatisfyQuestRequestFromClient(0x1000F);
+            SocketClient->ToGameServer()->SendQuestClientActionRequest(1, 0x0F);
             g_QuestMng.SetEPRequestRewardState(0x1000F, false);
         }
     }
@@ -1422,11 +1422,11 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
                 if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
                 {
-                    SendRequestRepair(m_iPointedSlot, 0);
+                    SocketClient->ToGameServer()->SendRepairItemRequest(m_iPointedSlot, 0);
                 }
                 else if (m_bRepairEnableLevel == true)
                 {
-                    SendRequestRepair(m_iPointedSlot, 1);
+                    SocketClient->ToGameServer()->SendRepairItemRequest(m_iPointedSlot, 1);
                 }
 
                 return true;
@@ -1527,11 +1527,11 @@ bool CNewUIMyInventory::RepairItemAtMousePoint(CNewUIInventoryCtrl* targetContro
 
     if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
     {
-        SendRequestRepair(iIndex, 0);
+        SocketClient->ToGameServer()->SendRepairItemRequest(iIndex, 0);
     }
     else
     {
-        SendRequestRepair(iIndex, 1);
+        SocketClient->ToGameServer()->SendRepairItemRequest(iIndex, 1);
     }
 
     return true;

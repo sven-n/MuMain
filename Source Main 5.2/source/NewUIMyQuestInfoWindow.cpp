@@ -360,7 +360,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::OpenningProcess()
 void SEASON3B::CNewUIMyQuestInfoWindow::ClosingProcess()
 {
     UnselectQuestList();
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
     ::PlayBuffer(SOUND_CLICK01);
 }
 
@@ -572,7 +572,7 @@ DWORD CNewUIMyQuestInfoWindow::GetSelQuestIndex()
 
 void CNewUIMyQuestInfoWindow::SetMessage(int nGlobalTextIndex)
 {
-    ::memset(&m_aszMsg[0][0], 0, sizeof(char) * 2 * 64);
+    memset(m_aszMsg, 0, sizeof m_aszMsg);
     g_pRenderText->SetFont(g_hFontBold);
     m_nMsgLine = ::DivideStringByPixel(&m_aszMsg[0][0], 2, 64, GlobalText[nGlobalTextIndex], 140);
 }

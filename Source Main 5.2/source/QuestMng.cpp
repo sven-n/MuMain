@@ -118,16 +118,18 @@ void CQuestMng::LoadQuestWordsScript()
 
     int nSize = sizeof(SQuestWordsHeader);
     SQuestWordsHeader sQuestWordsHeader;
-    wchar_t szWords[1024];
-    std::wstring	strWords;
+    char rawWords[1024] { };
+    wchar_t szWords[1024] { };
 
     while (0 != ::fread(&sQuestWordsHeader, nSize, 1, fp))
     {
         ::BuxConvert((BYTE*)&sQuestWordsHeader, nSize);
 
-        ::fread(szWords, sQuestWordsHeader.m_nWordsLen, 1, fp);
-        ::BuxConvert((BYTE*)szWords, sQuestWordsHeader.m_nWordsLen);
-        strWords = szWords;
+        ::fread(rawWords, sQuestWordsHeader.m_nWordsLen, 1, fp);
+        ::BuxConvert((BYTE*)rawWords, sQuestWordsHeader.m_nWordsLen);
+        CMultiLanguage::ConvertFromUtf8(szWords, rawWords, 1024);
+
+        std::wstring strWords = szWords;
         m_mapQuestWords.insert(std::make_pair(sQuestWordsHeader.m_nIndex, strWords));
     }
 
@@ -487,7 +489,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 ::swprintf(aDest[nLine].m_szText, L"Zen : %lu", pRequestInfo->m_dwValue);
                 break;
             case QUEST_REQUEST_PVP_POINT:
-                ::wprintf(aDest[nLine].m_szText, GlobalText[3278],
+                swprintf(aDest[nLine].m_szText, GlobalText[3278],
                     MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
                     pRequestInfo->m_dwValue);
                 break;
@@ -583,10 +585,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             switch (dwQuestIndex)
             {
             case 0x10009:
-                ::wprintf(aDest[nLine].m_szText, L"%s", GlobalText[2819]);
+                ::swprintf(aDest[nLine].m_szText, L"%s", GlobalText[2819]);
                 break;
             case 0x1000F:
-                ::wprintf(aDest[nLine].m_szText, L"%s", GlobalText[2820]);
+                ::swprintf(aDest[nLine].m_szText, L"%s", GlobalText[2820]);
                 break;
             }
             break;
@@ -643,7 +645,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 nTextIndex = 3079;
                 break;
             }
-            ::wprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex,
+            swprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex,
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
                 MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
 #else	// ASG_ADD_TIME_LIMIT_QUEST
@@ -686,7 +688,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 nTextIndex = 3081;
                 break;
             }
-            ::wprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex);
+            swprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex);
         }
         break;
         }
@@ -702,7 +704,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         if (0 == j && pRequestReward->m_byGeneralRewardCount)
             ::wcscpy(aDest[nLine].m_szText, GlobalText[2810]);
         else if (1 == j && pRequestReward->m_byRandRewardCount)
-            ::wprintf(aDest[nLine].m_szText, GlobalText[3082], pRequestReward->m_byRandGiveCount);
+            swprintf(aDest[nLine].m_szText, GlobalText[3082], pRequestReward->m_byRandGiveCount);
         else
             continue;
         aDest[nLine].m_hFont = g_hFontBold;
@@ -754,7 +756,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
 #ifdef ASG_ADD_GENS_SYSTEM
             case QUEST_REWARD_CONTRIBUTE:
-                ::wprintf(aDest[nLine].m_szText, GlobalText[2994], pRewardInfo->m_dwValue);
+                swprintf(aDest[nLine].m_szText, GlobalText[2994], pRewardInfo->m_dwValue);
                 break;
 #endif	// ASG_ADD_GENS_SYSTEM
             }
@@ -814,7 +816,9 @@ void CQuestMng::SendQuestIndexByEtcSelection()
         return;
 
     auto iter = m_listQuestIndexByEtc.begin();
-    SendQuestSelection(*iter, 0);
+    const auto questNumber = static_cast<uint16_t>((*iter & 0xFF00) >> 16);
+    const auto questGroup = static_cast<uint16_t>(*iter & 0xFF);
+    SocketClient->ToGameServer()->SendQuestSelectRequest(questNumber, questGroup, 0);
 }
 
 void CQuestMng::DelQuestIndexByEtcList(DWORD dwQuestIndex)

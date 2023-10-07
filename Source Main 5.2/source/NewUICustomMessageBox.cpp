@@ -2396,7 +2396,9 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessage
     }
     else
     {
-        SendRequestLogOut(0);
+        LogOut = true;
+        SocketClient->ToGameServer()->SendLogOut(0);
+        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 0");
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2424,7 +2426,9 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
     else
     {
         g_pNewUIMng->ResetActiveUIObj();
-        SendRequestLogOut(2);
+        LogOut = true;
+        SocketClient->ToGameServer()->SendLogOut(2);
+        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2453,7 +2457,9 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
     else
     {
         g_pNewUIMng->ResetActiveUIObj();
-        SendRequestLogOut(1);
+        LogOut = true;
+        SocketClient->ToGameServer()->SendLogOut(1);
+        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 1");
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -3737,7 +3743,7 @@ CALLBACK_RESULT SEASON3B::CCursedTempleProgressMsgBox::CompleteProcess(class CNe
         return CALLBACK_CONTINUE;
     }
 
-    SendRequestTalk(pMsgBox->GetNpcIndex());
+    SocketClient->ToGameServer()->SendTalkToNpcRequest(pMsgBox->GetNpcIndex());
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4300,7 +4306,7 @@ CALLBACK_RESULT CCherryBlossomMsgBox::GodCBBtnDown(class CNewUIMessageBoxBase* p
 
 CALLBACK_RESULT CCherryBlossomMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    //	SendRequestMixExit();
+    //	SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
     return CALLBACK_CONTINUE;
@@ -4497,7 +4503,7 @@ CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIMessage
 
     if (iInputZen <= (int)CharacterMachine->Gold)
     {
-        SendRequestStorageGold(0, iInputZen);
+        SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(0, iInputZen);
     }
     else
     {
@@ -4568,7 +4574,7 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessage
         if (!g_pStorageInventory->IsStorageLocked()
             || g_pStorageInventory->IsCorrectPassword())
         {
-            SendRequestStorageGold(1, iInputZen);
+            SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(1, iInputZen);
         }
         else
         {
@@ -4910,9 +4916,8 @@ CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMes
 
     if (pMsgBox->GetInputSize() == pMsgBox->GetInputLimit())
     {
-        BYTE byTemp[20] = { 0, };
         WORD wInputNumber = (WORD)_wtoi(pMsgBox->GetInputText());
-        SendStoragePassword(0, wInputNumber, byTemp);
+        SocketClient->ToGameServer()->SendUnlockVault(wInputNumber);
     }
     else
     {
@@ -5115,7 +5120,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::ProcessOk(class CNewUIMessag
 
     if (iInputTextSize > 0)
     {
-        SendStoragePassword(1, pMsgBox->GetPassword(), strText);
+        SocketClient->ToGameServer()->SendSetVaultPin(pMsgBox->GetPassword(), strText);
     }
     else
     {
@@ -5168,7 +5173,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class C
     {
         if (pMsgBox->GetStoragePassword() != 0)
         {
-            SendStoragePassword(1, pMsgBox->GetStoragePassword(), (void*)pMsgBox->GetInputText());
+            SocketClient->ToGameServer()->SendSetVaultPin(pMsgBox->GetStoragePassword(), pMsgBox->GetInputText());
         }
         g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -5224,7 +5229,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::OkBtnDown(class CNewUIMess
 
     if (iInputTextSize > 0)
     {
-        SendStoragePassword(2, 0, strText);
+        SocketClient->ToGameServer()->SendRemoveVaultPin(strText);
     }
     else
     {
@@ -5275,7 +5280,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(class CNew
 
     if (pMsgBox->GetInputSize() == pMsgBox->GetInputLimit())
     {
-        SendStoragePassword(2, 0, (void*)pMsgBox->GetInputText());
+        SocketClient->ToGameServer()->SendRemoveVaultPin(pMsgBox->GetInputText());
     }
     else
     {
@@ -5812,7 +5817,7 @@ CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown(class 
 
 CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMixExit();
+    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6003,7 +6008,7 @@ CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::ReviveBtnDown(class CNewUIMessageB
 
 CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6173,7 +6178,7 @@ CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::LButtonUp(class CNewUIMessageBo
 CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     npcBreeder::RecoverPet(REVIVAL_DARKSPIRIT);
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6184,7 +6189,7 @@ CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown(class
 CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     npcBreeder::RecoverPet(REVIVAL_DARKHORSE);
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6194,7 +6199,7 @@ CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown(class C
 
 CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6413,7 +6418,7 @@ CALLBACK_RESULT SEASON3B::CElpisMsgBox::RefineBtnDown(class CNewUIMessageBoxBase
 
 CALLBACK_RESULT SEASON3B::CElpisMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMixExit();
+    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6639,7 +6644,7 @@ CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::SeedSphereBtnDown(class CNewUIM
 
 CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMixExit();
+    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6830,7 +6835,7 @@ CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown(class
 
 CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMixExit();
+    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -7150,7 +7155,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewU
 
     if (iInputTextSize > 0)
     {
-        SendRequestGuildLeave(GuildList[DeleteIndex].Name, strText);
+        SocketClient->ToGameServer()->SendGuildKickPlayerRequest(GuildList[DeleteIndex].Name, strText);
     }
     else
     {
@@ -7436,17 +7441,12 @@ CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::SoulBtnDown(class CNewUIMess
 CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
+    SocketClient->ToGameServer()->SendGuildRoleAssignRequest(
+        AppointType,
+        GuildList[DeleteIndex].Name,
+        AppointType == G_PERSON ? 0x01 : 0x02);
 
-    if (AppointStatus == G_PERSON)
-    {
-        SendRequestGuildAssign(0x01, AppointType, GuildList[DeleteIndex].Name);
-    }
-    else
-    {
-        SendRequestGuildAssign(0x02, AppointType, GuildList[DeleteIndex].Name);
-    }
-
-    SendRequestGuildList();
+    SocketClient->ToGameServer()->SendGuildListRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -7573,7 +7573,7 @@ CALLBACK_RESULT SEASON3B::CDelgardoMainMenuMsgBox::ExchangeBtnDown(class CNewUIM
 
 CALLBACK_RESULT SEASON3B::CDelgardoMainMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMixExit();
+    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

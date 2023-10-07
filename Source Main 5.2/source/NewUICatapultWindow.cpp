@@ -351,7 +351,7 @@ void SEASON3B::CNewUICatapultWindow::OpenningProcess()
 
 void SEASON3B::CNewUICatapultWindow::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 void SEASON3B::CNewUICatapultWindow::Init(int iKey, int iType)

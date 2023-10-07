@@ -69,7 +69,7 @@ bool SEASON3B::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 void SEASON3B::CNewUIMiniMap::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float SEASON3B::CNewUIMiniMap::GetLayerDepth()

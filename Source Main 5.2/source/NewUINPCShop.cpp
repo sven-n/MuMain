@@ -11,6 +11,8 @@
 
 using namespace SEASON3B;
 
+extern int BuyCost;
+
 SEASON3B::CNewUINPCShop::CNewUINPCShop()
 {
     Init();
@@ -118,7 +120,9 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
                 }
                 if (BuyCost == 0)
                 {
-                    SendRequestBuy(iIndex, ItemValue(pItem, 0));
+                    SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(iIndex);
+                    BuyCost = ItemValue(pItem, 0);
+                    g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", iIndex);
                 }
 
                 return false;
@@ -168,7 +172,7 @@ bool SEASON3B::CNewUINPCShop::UpdateKeyEvent()
 
     if (SEASON3B::IsRepeat(VK_SHIFT) && SEASON3B::IsPress('L'))
     {
-        SendRequestRepair(255, 0);
+        SocketClient->ToGameServer()->SendRepairItemRequest(0xFF, 0);
         return false;
     }
     if (SEASON3B::IsPress('L'))
@@ -363,7 +367,8 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
         if (pPickedItem->GetSourceStorageType() == STORAGE_TYPE::INVENTORY)
         {
             int iSourceIndex = pPickedItem->GetSourceLinealPos();
-            SendRequestSell(iSourceIndex);
+            SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
+            g_pNPCShop->SetSellingItem(true);
 
             return true;
         }
@@ -393,7 +398,7 @@ bool SEASON3B::CNewUINPCShop::BtnProcess()
         }
         if (m_BtnRepairAll.UpdateMouseEvent() == true)
         {
-            SendRequestRepair(255, 0);
+            SocketClient->ToGameServer()->SendRepairItemRequest(0xFF, 0);
 
             return true;
         }
@@ -416,7 +421,7 @@ void SEASON3B::CNewUINPCShop::OpenningProcess()
 
 void SEASON3B::CNewUINPCShop::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     m_dwShopState = SHOP_STATE_BUYNSELL;
     m_iTaxRate = 0;

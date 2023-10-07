@@ -86,7 +86,7 @@ bool SEASON3B::CNewUICryWolf::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 void SEASON3B::CNewUICryWolf::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float SEASON3B::CNewUICryWolf::GetLayerDepth()

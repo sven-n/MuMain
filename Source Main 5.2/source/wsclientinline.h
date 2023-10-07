@@ -90,7 +90,7 @@ __forceinline void SendPacket(const BYTE* buf, int32_t len)
 
 #define END_OF_FUNCTION( pos)	;
 #define SendCrcOfFunction( p_Index, p_Next, p_Function, p_Key)	;
-
+/*
 #define SendRequestServerList()\
 {\
 	CStreamPacketEngine spe;\
@@ -111,7 +111,7 @@ __forceinline void SendPacket(const BYTE* buf, int32_t len)
 	spe.Send();\
 	g_pChatListBox->AddText(L"",GlobalText[470],SEASON3B::TYPE_SYSTEM_MESSAGE);\
 	g_pChatListBox->AddText(L"",GlobalText[471],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-}
+}*/
 
 extern int  LogIn;
 extern wchar_t LogInID[MAX_ID_SIZE + 1];
@@ -119,7 +119,7 @@ extern wchar_t LogInID[MAX_ID_SIZE + 1];
 extern bool First;
 extern int FirstTime;
 extern BOOL g_bGameServerConnected;
-
+/*
 __forceinline void SendCheck(void)
 {
     if (!g_bGameServerConnected)
@@ -173,25 +173,25 @@ __forceinline void SendCheck(void)
 	spe.Init( 0xC3, 0xF1);\
 	spe << ( BYTE)0x03 << ( BYTE)( byType) << ( BYTE)( byParam);\
 	spe.Send();\
-}
+}*/
 
-extern BYTE Version[SIZE_PROTOCOLVERSION];
-extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
+//extern BYTE Version[SIZE_PROTOCOLVERSION];
+//extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 
-__forceinline void SendRequestLogIn(wchar_t* p_lpszID, wchar_t* p_lpszPassword)
-{
-	LogIn = 1;
-	wcscpy(LogInID, ( p_lpszID));
-	CurrentProtocolState = REQUEST_LOG_IN;
-
-    SocketClient->ToGameServer()->SendLogin(p_lpszID, p_lpszPassword, Version, Serial);
-	
-	g_pChatListBox->AddText(L"",GlobalText[472],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	g_pChatListBox->AddText(L"",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
-}
+//__forceinline void SendRequestLogIn(wchar_t* p_lpszID, wchar_t* p_lpszPassword)
+//{
+//	LogIn = 1;
+//	wcscpy(LogInID, ( p_lpszID));
+//	CurrentProtocolState = REQUEST_LOG_IN;
+//
+//    SocketClient->ToGameServer()->SendLogin(p_lpszID, p_lpszPassword, Version, Serial);
+//	
+//	g_pChatListBox->AddText(L"",GlobalText[472],SEASON3B::TYPE_SYSTEM_MESSAGE);\
+//	g_pChatListBox->AddText(L"",GlobalText[473],SEASON3B::TYPE_SYSTEM_MESSAGE);\
+//}
 
 extern bool LogOut;
-
+/*
 __forceinline void SendRequestLogOut(int Flag)
 {
     LogOut = true;
@@ -201,7 +201,7 @@ __forceinline void SendRequestLogOut(int Flag)
     spe.Send();
 
     g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut]");
-}
+}*/
 
 extern wchar_t Password[MAX_ID_SIZE + 1];
 extern wchar_t QuestionID[MAX_ID_SIZE + 1];
@@ -252,19 +252,19 @@ extern wchar_t Question[31];
 //	spe.Send();\
 //}
 
-extern BOOL g_bWhileMovingZone;
-extern DWORD g_dwLatestZoneMoving;
-
-#define SendRequestFinishLoading()\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF3);\
-	spe << ( BYTE)0x12;\
-	spe.Send();\
-\
-	g_dwLatestZoneMoving = GetTickCount();\
-	g_bWhileMovingZone = FALSE;\
-}
+//extern BOOL g_bWhileMovingZone;
+//extern DWORD g_dwLatestZoneMoving;
+//
+//#define SendRequestFinishLoading()\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xF3);\
+//	spe << ( BYTE)0x12;\
+//	spe.Send();\
+//\
+//	g_dwLatestZoneMoving = GetTickCount();\
+//	g_bWhileMovingZone = FALSE;\
+//}
 
 inline wchar_t ChatText[256];
 
@@ -335,13 +335,13 @@ __forceinline void SendChat(const std::wstring& chat_text)
 //	}\
 //}
 
-#define SendPosition( p_x, p_y)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, PACKET_POSITION );\
-	spe << ( BYTE)( p_x) << ( BYTE)( p_y);\
-	spe.Send();\
-}
+//#define SendPosition( p_x, p_y)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, PACKET_POSITION );\
+//	spe << ( BYTE)( p_x) << ( BYTE)( p_y);\
+//	spe.Send();\
+//}
 
 extern int MoveCount;
 
@@ -403,43 +403,38 @@ __forceinline void SendCharacterMove(unsigned short Key, float Angle, unsigned c
     spe.Send();
 }
 
-#define SendRequestAction( p_Action, p_Angle)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x18);\
-	spe << ( BYTE)( p_Angle) << ( BYTE)( p_Action);\
-	spe.Send();\
+
+inline void SendRequestAction(OBJECT& obj, BYTE action)
+{
+	BYTE rotation = (BYTE)((obj.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
+	SocketClient->ToGameServer()->SendAnimationRequest(rotation, action);
 }
 
-#define SendRequestAttack( p_Key, p_Dir)\
-{\
-    if(!IsWebzenCharacter())\
-	{\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC1, PACKET_ATTACK);\
-		spe << ( BYTE)( ( p_Key) >> 8) << ( BYTE)( ( p_Key)&0xff) << ( BYTE)AT_ATTACK1 << ( BYTE)( p_Dir);\
-		spe.Send();\
-	}\
-}
+//#define SendRequestAttack( p_Key, p_Dir)\
+//{\
+//    if(!IsWebzenCharacter())\
+//	{\
+//		CStreamPacketEngine spe;\
+//		spe.Init( 0xC1, PACKET_ATTACK);\
+//		spe << ( BYTE)( ( p_Key) >> 8) << ( BYTE)( ( p_Key)&0xff) << ( BYTE)AT_ATTACK1 << ( BYTE)( p_Dir);\
+//		spe.Send();\
+//	}\
+//}
 
 extern DWORD g_dwLatestMagicTick;
 
 #ifndef _DEBUG
 
-#define SendRequestMagic( p_Type, p_Key)\
-{\
-	if(!IsWebzenCharacter() && ( p_Type==40 || p_Type==263 || p_Type==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))\
-	{\
-		g_dwLatestMagicTick = GetTickCount();\
-		CStreamPacketEngine spe;\
-		WORD Type = (WORD)p_Type;\
-		spe.Init( 0xC3, 0x19);\
-		spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type)) << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send();\
-	}\
+inline void SendRequestMagic(Type, Key)
+{
+	if(!IsWebzenCharacter() && (Type ==40 || Type ==263 || Type ==261 || abs( (int)(GetTickCount() - g_dwLatestMagicTick)) > 300 ))
+	{
+		g_dwLatestMagicTick = GetTickCount();
+		SocketClient->ToGameServer()->SendTargetedSkill(Type, Key);
+	}
 }
 #else // _DEBUG
-__forceinline void SendRequestMagic(int Type, int Key)
+inline void SendRequestMagic(int Type, int Key)
 {
     if (!IsCanBCSkill(Type))
         return;
@@ -447,26 +442,20 @@ __forceinline void SendRequestMagic(int Type, int Key)
     if (!IsWebzenCharacter() && (Type == 40 || Type == 263 || Type == 261 || abs((int)(GetTickCount() - g_dwLatestMagicTick)) > 300))
     {
         g_dwLatestMagicTick = GetTickCount();
-        CStreamPacketEngine spe;
-
-        WORD p_Type = (WORD)Type;
-        spe.Init(0xC3, 0x19);
-        spe << (BYTE)(HIBYTE(p_Type)) << (BYTE)(LOBYTE(p_Type)) << (BYTE)(Key >> 8) << (BYTE)(Key & 0xff);
-        spe.Send();
-
+        SocketClient->ToGameServer()->SendTargetedSkill(Type, Key);
         g_ConsoleDebug->Write(MCD_SEND, L"0x19 [SendRequestMagic(%d %d)]", Type, Key);
     }
 }
 #endif //_DEBUG
 
-#define SendRequestCancelMagic( p_Type, p_Key)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x1B);\
-	WORD Type = (WORD)p_Type;\
-	spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type))<< ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-	spe.Send();\
-}
+//#define SendRequestCancelMagic( p_Type, p_Key)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC3, 0x1B);\
+//	WORD Type = (WORD)p_Type;\
+//	spe << ( BYTE)(HIBYTE(Type))<<( BYTE)(LOBYTE(Type))<< ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
+//	spe.Send();\
+//}
 
 BYTE MakeSkillSerialNumber(BYTE* pSerialNumber);
 
@@ -540,19 +529,21 @@ inline BYTE GetDestValue(int xPos, int yPos, int xDst, int yDst)
 	}\
 }
 #else // ENABLE_EDIT
-__forceinline void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE Tpos, WORD TKey,
+inline void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE Tpos, WORD TKey,
     BYTE* pSkillSerial
 )
 {
     if (IsWebzenCharacter()) return;
     CurrentSkill = Type;
-    CStreamPacketEngine spe;
+
+    SocketClient->ToGameServer()->SendAreaSkill(Type, x, y, Angle, TKey, MakeSkillSerialNumber(pSkillSerial));
+    /*CStreamPacketEngine spe;
     WORD p_Type = (WORD)Type;
     spe.Init(0xC3, 0x1E);
     spe << (BYTE)(HIBYTE(p_Type)) << (BYTE)(LOBYTE(p_Type))
         << (BYTE)(x) << (BYTE)(y) << (BYTE)(Angle) << (BYTE)(Dest) << (BYTE)(Tpos) << (BYTE)((TKey) >> 8) << (BYTE)((TKey) & 0xff);
     spe << MakeSkillSerialNumber(pSkillSerial);
-    spe.Send();
+    spe.Send();*/
 
     g_ConsoleDebug->Write(MCD_SEND, L"0x1E [SendRequestMagicContinue]");
 }
@@ -560,309 +551,306 @@ __forceinline void SendRequestMagicContinue(int Type, int x, int y, int Angle, B
 
 extern bool Teleport;
 
-#define SendRequestMagicTeleport( p_pbResult, p_Type, p_x, p_y)\
-{	\
-	if ( Teleport || g_bWhileMovingZone || ( GetTickCount() - g_dwLatestZoneMoving < 3000))\
-	{\
-		*( p_pbResult) = false;\
-	}\
-	else\
-	{\
-		if(( p_Type)==0)\
-		{\
-			Teleport = true;\
-		}\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC3, 0x1C);\
-		spe.AddNullData( 1);\
-		spe << ( WORD)( p_Type) << ( BYTE)( p_x) << ( BYTE)( p_y);\
-		spe.Send();\
-\
-		*( p_pbResult) = true;\
-	}\
-}
+//#define SendRequestMagicTeleport( p_pbResult, p_Type, p_x, p_y)\
+//{	\
+//	if ( Teleport || g_bWhileMovingZone || ( GetTickCount() - g_dwLatestZoneMoving < 3000))\
+//	{\
+//		*( p_pbResult) = false;\
+//	}\
+//	else\
+//	{\
+//		if(( p_Type)==0)\
+//		{\
+//			Teleport = true;\
+//		}\
+//		CStreamPacketEngine spe;\
+//		spe.Init( 0xC3, 0x1C);\
+//		spe.AddNullData( 1);\
+//		spe << ( WORD)( p_Type) << ( BYTE)( p_x) << ( BYTE)( p_y);\
+//		spe.Send();\
+//\
+//		*( p_pbResult) = true;\
+//	}\
+//}
 
-#define SendRequestMagicTeleportB( p_pbResult, p_Index, p_x, p_y )\
-{	\
-	if ( Teleport )\
-	{\
-        Teleport = false;\
-		*( p_pbResult) = false;\
-	}\
-	else\
-	{\
-		Teleport = true;\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC3, 0xB0);\
-		spe << ( WORD)( p_Index) << ( BYTE)( p_x) << ( BYTE)( p_y);\
-		spe.Send();\
-\
-		*( p_pbResult) = true;\
-	}\
-}
+//#define SendRequestMagicTeleportB( p_pbResult, p_Index, p_x, p_y )\
+//{	\
+//	if ( Teleport )\
+//	{\
+//        Teleport = false;\
+//		*( p_pbResult) = false;\
+//	}\
+//	else\
+//	{\
+//		Teleport = true;\
+//		CStreamPacketEngine spe;\
+//		spe.Init( 0xC3, 0xB0);\
+//		spe << ( WORD)( p_Index) << ( BYTE)( p_x) << ( BYTE)( p_y);\
+//		spe.Send();\
+//\
+//		*( p_pbResult) = true;\
+//	}\
+//}
 
-#define SendRequestTalk( p_Key)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x30);\
-	spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-	spe.Send();\
-}
+//#define SendRequestTalk( p_Key)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC3, 0x30);\
+//	spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
+//	spe.Send();\
+//}
 
-#define SendExitInventory()\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x31);\
-	spe.Send();\
-}
+//#define SendExitInventory()\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x31);\
+//	spe.Send();\
+//}
 
-#define SendRequestSell( p_Index)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x33);\
-	spe << ( BYTE)( p_Index);\
-	spe.Send();\
-	g_pNPCShop->SetSellingItem(true);\
-}
+//#define SendRequestSell( p_Index)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC3, 0x33);\
+//	spe << ( BYTE)( p_Index);\
+//	spe.Send();\
+//	g_pNPCShop->SetSellingItem(true);\
+//}
 
-extern int BuyCost;
+//extern int BuyCost;
 
-__forceinline void SendRequestBuy(int Index, int Cost)
-{
-    if (BuyCost != 0) return;
-    CStreamPacketEngine spe;
-    spe.Init(0xC3, 0x32);
-    spe << (BYTE)Index;
-    spe.Send();
-    BuyCost = Cost;
-
-    g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", Index);
-}
-
-#define SendRequestRepair( p_Index, p_AddGold)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x34);\
-	spe << ( BYTE)( p_Index ) << ( BYTE )( p_AddGold );\
-	spe.Send();\
-}
-
-#define SendRequestEventChip( p_Type, p_Index )\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init( 0xC1, 0x95);\
-    spe << ( BYTE)( p_Type) << ( BYTE)( p_Index);\
-    spe.Send();\
-}
-
-#define SendRequestMutoNumber()\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init( 0xC1, 0x96);\
-    spe.Send();\
-}
-
+//__forceinline void SendRequestBuy(int Index, int Cost)
+//{
+//    if (BuyCost != 0) return;
+//    CStreamPacketEngine spe;
+//    spe.Init(0xC3, 0x32);
+//    spe << (BYTE)Index;
+//    spe.Send();
+//    BuyCost = Cost;
 //
-#define SendRequestEventChipExit()\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x97);\
-	spe.Send();\
-}
+//    g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", Index);
+//}
 
-#define SendRequestLenaExchange( p_byType )\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x98);\
-    spe << (BYTE)( p_byType );\
-	spe.Send();\
-}
+//#define SendRequestRepair( p_Index, p_AddGold)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC3, 0x34);\
+//	spe << ( BYTE)( p_Index ) << ( BYTE )( p_AddGold );\
+//	spe.Send();\
+//}
 
-#define SendRequestScratchSerial( p_strSerial1, p_strSerial2, p_strSerial3 )\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x9D );\
-	spe.AddData( p_strSerial1, 5 );\
-	spe.AddData( p_strSerial2, 5 );\
-	spe.AddData( p_strSerial3, 5 );\
-	spe.Send();\
-}
+//#define SendRequestEventChip( p_Type, p_Index )\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init( 0xC1, 0x95);\
+//    spe << ( BYTE)( p_Type) << ( BYTE)( p_Index);\
+//    spe.Send();\
+//}
+//
+//#define SendRequestMutoNumber()\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init( 0xC1, 0x96);\
+//    spe.Send();\
+//}
+//
+////
+//#define SendRequestEventChipExit()\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x97);\
+//	spe.Send();\
+//}
 
-#define SendRequestServerImmigration( p_ResidentNumber)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x99);\
-	spe.AddData( ( p_ResidentNumber), 10);\
-	spe.Send();\
-}
+//#define SendRequestLenaExchange( p_byType )\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x98);\
+//    spe << (BYTE)( p_byType );\
+//	spe.Send();\
+//}
 
-#define SendRequestQuestHistory()\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init ( 0xC3, 0xA0 );\
-    spe.Send();\
-}
+//#define SendRequestScratchSerial( p_strSerial1, p_strSerial2, p_strSerial3 )\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x9D );\
+//	spe.AddData( p_strSerial1, 5 );\
+//	spe.AddData( p_strSerial2, 5 );\
+//	spe.AddData( p_strSerial3, 5 );\
+//	spe.Send();\
+//}
+//
+//#define SendRequestServerImmigration( p_ResidentNumber)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC3, 0x99);\
+//	spe.AddData( ( p_ResidentNumber), 10);\
+//	spe.Send();\
+//}
 
-#define SendRequestQuestState( p_Index, p_State )\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init( 0xC3, 0xA2 );\
-    spe << (BYTE)( p_Index ) << (BYTE)( p_State );\
-    spe.Send();\
-}
+//#define SendRequestQuestHistory()\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init ( 0xC3, 0xA0 );\
+//    spe.Send();\
+//}
+//
+//#define SendRequestQuestState( p_Index, p_State )\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init( 0xC3, 0xA2 );\
+//    spe << (BYTE)( p_Index ) << (BYTE)( p_State );\
+//    spe.Send();\
+//}
 
-#define SendRequestAttribute( p_Att )\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init ( 0xC1, 0x9B );\
-    spe << (BYTE)( p_Att );\
-    spe.Send();\
-}
+//#define SendRequestAttribute( p_Att )\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init ( 0xC1, 0x9B );\
+//    spe << (BYTE)( p_Att );\
+//    spe.Send();\
+//}
 
 //----------------------------------------------------------------------------
 // CG [0xA4][0x00]
 //----------------------------------------------------------------------------
-#define SendRequestQuestMonKillInfo(byQuestIndex)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xA4);\
-	spe << (BYTE)0x00;\
-    spe << (BYTE)byQuestIndex;\
-    spe.Send();\
-}
+//#define SendRequestQuestMonKillInfo(byQuestIndex)\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xA4);\
+//	spe << (BYTE)0x00;\
+//    spe << (BYTE)byQuestIndex;\
+//    spe.Send();\
+//}
+//
+//#define SendQuestSelection(dwQuestIndex, byResult)\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x0A;\
+//	spe << (DWORD)(dwQuestIndex);\
+//    spe << (BYTE)(byResult);\
+//    spe.Send();\
+//}
 
-#define SendQuestSelection(dwQuestIndex, byResult)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x0A;\
-	spe << (DWORD)(dwQuestIndex);\
-    spe << (BYTE)(byResult);\
-    spe.Send();\
-}
+//#define SendQuestSelAnswer(dwQuestIndex, bySelAnswer)\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x0B;\
+//	spe << (DWORD)(dwQuestIndex);\
+//    spe << (BYTE)(bySelAnswer);\
+//    spe.Send();\
+//}
 
-#define SendQuestSelAnswer(dwQuestIndex, bySelAnswer)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x0B;\
-	spe << (DWORD)(dwQuestIndex);\
-    spe << (BYTE)(bySelAnswer);\
-    spe.Send();\
-}
+//#define SendRequestQuestComplete(dwQuestIndex)\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x0D;\
+//    spe << (DWORD)(dwQuestIndex);\
+//    spe.Send();\
+//}
 
-#define SendRequestQuestComplete(dwQuestIndex)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x0D;\
-    spe << (DWORD)(dwQuestIndex);\
-    spe.Send();\
-}
+//#define SendSatisfyQuestRequestFromClient(dwQuestIndex)\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x10;\
+//    spe << (DWORD)(dwQuestIndex);\
+//    spe.Send();\
+//}
 
-#define SendSatisfyQuestRequestFromClient(dwQuestIndex)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x10;\
-    spe << (DWORD)(dwQuestIndex);\
-    spe.Send();\
-}
+//#define SendRequestProgressQuestList()\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x1A;\
+//    spe.Send();\
+//}
 
-#define SendRequestProgressQuestList()\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x1A;\
-    spe.Send();\
-}
+//#define SendRequestProgressQuestRequestReward(dwQuestIndex)\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x1B;\
+//    spe << (DWORD)(dwQuestIndex);\
+//    spe.Send();\
+//}
 
-#define SendRequestProgressQuestRequestReward(dwQuestIndex)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x1B;\
-    spe << (DWORD)(dwQuestIndex);\
-    spe.Send();\
-}
+//#define SendRequestQuestGiveUp(dwQuestIndex)\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x0F;\
+//    spe << (DWORD)(dwQuestIndex);\
+//    spe.Send();\
+//}
 
-#define SendRequestQuestGiveUp(dwQuestIndex)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x0F;\
-    spe << (DWORD)(dwQuestIndex);\
-    spe.Send();\
-}
+//#define SendRequestQuestByEtcEPList()\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x21;\
+//    spe.Send();\
+//}
 
-#define SendRequestQuestByEtcEPList()\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x21;\
-    spe.Send();\
-}
+//#ifdef ASG_ADD_GENS_SYSTEM
+//#define SendRequestGensJoining(byInfluence)\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF8);\
+//	spe << (BYTE)0x01;\
+//    spe << (BYTE)(byInfluence);\
+//    spe.Send();\
+//}
 
-#ifdef ASG_ADD_GENS_SYSTEM
-#define SendRequestGensJoining(byInfluence)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF8);\
-	spe << (BYTE)0x01;\
-    spe << (BYTE)(byInfluence);\
-    spe.Send();\
-}
+//#define SendRequestGensSecession()\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF8);\
+//	spe << (BYTE)0x03;\
+//    spe.Send();\
+//}
+//
+//#define SendRequestGensReward(byInfluence)\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF8);\
+//	spe << (BYTE)0x09;\
+//	spe << (BYTE)(byInfluence);\
+//    spe.Send();\
+//}
+//#define SendRequestGensInfo_Open()\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF8);\
+//	spe << (BYTE)0x0B;\
+//    spe.Send();\
+//}
+//#endif //PBG_ADD_GENSRANKING
 
-#define SendRequestGensSecession()\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF8);\
-	spe << (BYTE)0x03;\
-    spe.Send();\
-}
+//// (0xF6 0x0A)
+//#define SendRequestQuestByNPCEPList()\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x30;\
+//    spe.Send();\
+//}
 
-#define SendRequestGensReward(byInfluence)\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF8);\
-	spe << (BYTE)0x09;\
-	spe << (BYTE)(byInfluence);\
-    spe.Send();\
-}
-#define SendRequestGensInfo_Open()\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF8);\
-	spe << (BYTE)0x0B;\
-    spe.Send();\
-}
-#endif //PBG_ADD_GENSRANKING
-
-// (0xF6 0x0A)
-#define SendRequestQuestByNPCEPList()\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x30;\
-    spe.Send();\
-}
-
-#define SendRequestAPDPUp()\
-{\
-    CStreamPacketEngine spe;\
-    spe.Init(0xC1, 0xF6);\
-	spe << (BYTE)0x31;\
-    spe.Send();\
-}
+//#define SendRequestAPDPUp()\
+//{\
+//    CStreamPacketEngine spe;\
+//    spe.Init(0xC1, 0xF6);\
+//	spe << (BYTE)0x31;\
+//    spe.Send();\
+//}
 
 __forceinline bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex)
 {
     if (EquipmentItem || NULL == pItem) return false;
 
     EquipmentItem = true;
-
-    CStreamPacketEngine spe;
-    spe.Init(0xC3, 0x24);
 
     BYTE splitType;
     if (pItem->option_380)
@@ -892,77 +880,74 @@ __forceinline bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex
         spareBits = (((BYTE)pItem->Jewel_Of_Harmony_Option) << 4) + ((BYTE)pItem->Jewel_Of_Harmony_OptionLevel);
     }
 
-    BYTE socketBits[5] = { pItem->bySocketOption[0], pItem->bySocketOption[1], pItem->bySocketOption[2], pItem->bySocketOption[3], pItem->bySocketOption[4] };
+	const BYTE ItemData[12]
+	{
+	    BYTECAST(char, pItem->Type),
+		BYTECAST(char, pItem->Level),
+		BYTECAST(char, pItem->Durability),
+		BYTECAST(char, pItem->Option1),
+		BYTECAST(char, pItem->ExtOption),
+		splitType,
+		spareBits,
+		pItem->bySocketOption[0], pItem->bySocketOption[1], pItem->bySocketOption[2], pItem->bySocketOption[3], pItem->bySocketOption[4]
+	};
 
-#ifdef KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
-    spe << (BYTE)(iSrcType & 0xff) << (BYTE)(iSrcIndex & 0xff) << (BYTE)(pItem->Type & 0xff) << (BYTE)(pItem->Level & 0xff)
-        << pItem->Durability << pItem->Option1 << pItem->ExtOption
-        << splitType << spareBits
-        << socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
-        << (BYTE)(iDstType & 0xff) << (BYTE)(iDstIndex & 0xff);
-#else // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
-    spe << static_cast<BYTE>(iSrcType) << BYTECAST(char, iSrcIndex) << BYTECAST(char, pItem->Type) << BYTECAST(char, pItem->Level)
-        << BYTECAST(char, pItem->Durability) << BYTECAST(char, pItem->Option1) << BYTECAST(char, pItem->ExtOption)
-        << splitType << spareBits
-        << socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
-        << static_cast<BYTE>(iDstType) << static_cast<BYTE>(iDstIndex);
-#endif // KJH_FIX_SEND_REQUEST_INVENTORY_ITEMINFO_CASTING
-    spe.Send();
+	SocketClient->ToGameServer()->SendItemMoveRequest((uint32_t)iSrcType, iSrcIndex, ItemData, sizeof ItemData, (uint32_t)iDstType, iDstIndex);
 
     g_ConsoleDebug->Write(MCD_SEND, L"0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", iSrcIndex, iDstIndex, iSrcType, iDstType, (pItem->Type & 0x1FFF), (BYTE)(pItem->Level), (BYTE)(pItem->Durability));
 
     return true;
 }
 
-__forceinline void SendRequestEquipmentItem(int SrcFlag, int SrcIndex, int DstFlag, int DstIndex)
-{
-    if (EquipmentItem) return;
-    EquipmentItem = true;
-
-    CStreamPacketEngine spe;
-    spe.Init(0xC3, 0x24);
-
-    BYTE splitType;
-
-    if (PickItem.option_380)
-    {
-        splitType = ((BYTE)(PickItem.Type >> 5) & 240) | 0x08;
-    }
-    else
-        splitType = ((BYTE)(PickItem.Type >> 5) & 240);
-
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-    if (PickItem.bPeriodItem == true)
-    {
-        splitType |= 0x02;
-    }
-
-    if (PickItem.bExpiredPeriod == true)
-    {
-        splitType |= 0x04;
-    }
-#endif // #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
-
-    BYTE spareBits;
-    if (g_SocketItemMgr.IsSocketItem(&PickItem))
-    {
-        spareBits = PickItem.SocketSeedSetOption;
-    }
-    else
-    {
-        spareBits = (((BYTE)PickItem.Jewel_Of_Harmony_Option) << 4) + ((BYTE)PickItem.Jewel_Of_Harmony_OptionLevel);
-    }
-
-    BYTE socketBits[5] = { PickItem.bySocketOption[0], PickItem.bySocketOption[1], PickItem.bySocketOption[2], PickItem.bySocketOption[3], PickItem.bySocketOption[4] };
-
-    spe << (BYTE)SrcFlag << (BYTE)SrcIndex << (BYTE)PickItem.Type << (BYTE)(PickItem.Level)
-        << (BYTE)(PickItem.Durability) << (BYTE)(PickItem.Option1) << (BYTE)(PickItem.ExtOption) << splitType << spareBits
-        << socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
-        << (BYTE)DstFlag << (BYTE)DstIndex;
-    spe.Send();
-
-    g_ConsoleDebug->Write(MCD_SEND, L"0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", SrcIndex, DstIndex, SrcFlag, DstFlag, (PickItem.Type & 0x1FFF), (BYTE)(PickItem.Level), (BYTE)(PickItem.Durability));
-}
+//__forceinline void SendRequestEquipmentItem(int SrcFlag, int SrcIndex, int DstFlag, int DstIndex)
+//{
+//    if (EquipmentItem) return;
+//    EquipmentItem = true;
+//
+//    CStreamPacketEngine spe;
+//    spe.Init(0xC3, 0x24);
+//
+//    BYTE splitType;
+//
+//    if (PickItem.option_380)
+//    {
+//        splitType = ((BYTE)(PickItem.Type >> 5) & 240) | 0x08;
+//    }
+//    else
+//        splitType = ((BYTE)(PickItem.Type >> 5) & 240);
+//
+//#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
+//    if (PickItem.bPeriodItem == true)
+//    {
+//        splitType |= 0x02;
+//    }
+//
+//    if (PickItem.bExpiredPeriod == true)
+//    {
+//        splitType |= 0x04;
+//    }
+//#endif // #ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
+//
+//    BYTE spareBits;
+//    if (g_SocketItemMgr.IsSocketItem(&PickItem))
+//    {
+//        spareBits = PickItem.SocketSeedSetOption;
+//    }
+//    else
+//    {
+//        spareBits = (((BYTE)PickItem.Jewel_Of_Harmony_Option) << 4) + ((BYTE)PickItem.Jewel_Of_Harmony_OptionLevel);
+//    }
+//
+//    BYTE socketBits[5] = { PickItem.bySocketOption[0], PickItem.bySocketOption[1], PickItem.bySocketOption[2], PickItem.bySocketOption[3], PickItem.bySocketOption[4] };
+//
+//    spe << (BYTE)SrcFlag << (BYTE)SrcIndex << (BYTE)PickItem.Type << (BYTE)(PickItem.Level)
+//        << (BYTE)(PickItem.Durability) << (BYTE)(PickItem.Option1) << (BYTE)(PickItem.ExtOption) << splitType << spareBits
+//        << socketBits[0] << socketBits[1] << socketBits[2] << socketBits[3] << socketBits[4]
+//        << (BYTE)DstFlag << (BYTE)DstIndex;
+//    spe.Send();
+//
+//    g_ConsoleDebug->Write(MCD_SEND, L"0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", SrcIndex, DstIndex, SrcFlag, DstFlag, (PickItem.Type & 0x1FFF), (BYTE)(PickItem.Level), (BYTE)(PickItem.Durability));
+//}
 
 extern int  EnableUse;
 
@@ -997,7 +982,7 @@ extern int  EnableUse;
 }
 
 #else	// ENABLE_EDIT
-__forceinline void SendRequestUse(int Index, int Target)
+inline void SendRequestUse(int Index, int Target)
 {
     if (!IsCanUseItem())
     {
@@ -1008,13 +993,9 @@ __forceinline void SendRequestUse(int Index, int Target)
     {
         return;
     }
-    EnableUse = 10;
-    CStreamPacketEngine spe;
-    spe.Init(0xC3, 0x26);
-    spe << (BYTE)(Index) << (BYTE)Target;
-    spe << (BYTE)g_byItemUseType;
-    spe.Send();
 
+    EnableUse = 10;
+    SocketClient->ToGameServer()->SendConsumeItemRequest(Index, Target, g_byItemUseType);
     g_ConsoleDebug->Write(MCD_SEND, L"0x26 [SendRequestUse(%d)]", Index);
 }
 #endif //ENABLE_EDIT
@@ -1022,26 +1003,19 @@ __forceinline void SendRequestUse(int Index, int Target)
 extern int SendGetItem;
 extern int SendDropItem;
 
-#define SendRequestGetItem( p_Key)\
-{\
-	if(SendGetItem == -1)\
-	{\
-		SendGetItem = p_Key;\
-\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC3, 0x22);\
-		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send();\
-	}\
+inline void SendRequestGetItem(int itemKey)
+{
+    if(SendGetItem == -1)
+    {
+        SendGetItem = itemKey;
+        SocketClient->ToGameServer()->SendPickupItemRequest(itemKey);
+    }
 }
 
-#define SendRequestDropItem( p_InventoryIndex, p_x, p_y)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x23);\
-	spe << ( BYTE)( p_x) << ( BYTE)( p_y) << ( BYTE)( p_InventoryIndex);\
-	spe.Send();\
-	SendDropItem = ( p_InventoryIndex);\
+inline void SendRequestDropItem(BYTE itemIndex, BYTE p_x, BYTE p_y)\
+{
+    SocketClient->ToGameServer()->SendDropItemRequest(p_x, p_y, itemIndex);
+    SendDropItem = itemIndex;
 }
 
 #ifdef _PVP_ADD_MOVE_SCROLL
@@ -1054,354 +1028,354 @@ extern int SendDropItem;
 }
 #endif	// _PVP_ADD_MOVE_SCROLL
 
-#define SendRequestAddPoint( p_Type)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xF3);\
-	spe << ( BYTE)0x06 << ( BYTE)( p_Type);\
-	spe.Send();\
-    PlayBuffer(SOUND_CLICK01);\
-}
+//#define SendRequestAddPoint( p_Type)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xF3);\
+//	spe << ( BYTE)0x06 << ( BYTE)( p_Type);\
+//	spe.Send();\
+//    PlayBuffer(SOUND_CLICK01);\
+//}
 
-#define SendRequestTrade( p_Key)\
-{\
-	if( IsCanTrade() && EnableMainRender )\
-	{\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC3, 0x36);\
-		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send();\
-\
-		wchar_t Text[100];\
-		swprintf(Text,GlobalText[475],CharactersClient[FindCharacterIndex(p_Key)].ID);\
-		g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	}\
-}
+//#define SendRequestTrade( p_Key)\
+//{\
+//	if( IsCanTrade() && EnableMainRender )\
+//	{\
+//		CStreamPacketEngine spe;\
+//		spe.Init( 0xC3, 0x36);\
+//		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
+//		spe.Send();\
+//\
+//		wchar_t Text[100];\
+//		swprintf(Text,GlobalText[475],CharactersClient[FindCharacterIndex(p_Key)].ID);\
+//		g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);\
+//	}\
+//}
 
-#define SendRequestTradeAnswer( p_Result)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x37);\
-	spe << ( BYTE)( p_Result);\
-	spe.Send();\
-}
+//#define SendRequestTradeAnswer( p_Result)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x37);\
+//	spe << ( BYTE)( p_Result);\
+//	spe.Send();\
+//}
 
-#define SendRequestTradeGold( p_Gold)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x3A);\
-	spe.AddNullData( 1);\
-	spe << ( DWORD)( p_Gold);\
-	spe.Send();\
-}
+//#define SendRequestTradeGold( p_Gold)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x3A);\
+//	spe.AddNullData( 1);\
+//	spe << ( DWORD)( p_Gold);\
+//	spe.Send();\
+//}
 
-#define SendRequestTradeResult( p_Result)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x3C);\
-	spe << ( BYTE)( p_Result);\
-	spe.Send();\
-}
-
-#define SendRequestTradeExit()\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x3D);\
-	spe.Send();\
-}
-
+//#define SendRequestTradeResult( p_Result)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC3, 0x3C);\
+//	spe << ( BYTE)( p_Result);\
+//	spe.Send();\
+//}
+//
+//#define SendRequestTradeExit()\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC3, 0x3D);\
+//	spe.Send();\
+//}
+/*
 #define SendPing()\
 {\
 	CStreamPacketEngine spe;\
 	spe.Init( 0xC1, 0x71);\
 	spe.Send();\
-}
+}*/
 
-__forceinline void SendRequestMoveMap(DWORD dwBlockKey, WORD wMapIndex)
-{
-    CStreamPacketEngine spe;
-    spe.Init(0xC1, 0x8E);
-    spe << (BYTE)0x02; \
-        spe << (DWORD)dwBlockKey << (WORD)wMapIndex;
-    spe.Send();
+//__forceinline void SendRequestMoveMap(DWORD dwBlockKey, WORD wMapIndex)
+//{
+//    CStreamPacketEngine spe;
+//    spe.Init(0xC1, 0x8E);
+//    spe << (BYTE)0x02; \
+//        spe << (DWORD)dwBlockKey << (WORD)wMapIndex;
+//    spe.Send();
+//
+//    g_ConsoleDebug->Write(MCD_SEND, L"0x8E [SendRequestMoveMap(%d %d)]", dwBlockKey, wMapIndex);
+//}
 
-    g_ConsoleDebug->Write(MCD_SEND, L"0x8E [SendRequestMoveMap(%d %d)]", dwBlockKey, wMapIndex);
-}
+//__forceinline void SendRequestStorageGold(int Flag, int Gold)
+//{
+//    CStreamPacketEngine spe;
+//    spe.Init(0xC1, 0x81);
+//    spe << (BYTE)Flag << (DWORD)Gold;
+//    spe.Send();
+//
+//    g_ConsoleDebug->Write(MCD_SEND, L"0x81 Send [SendRequestStorageGold(%d %d)]", Flag, Gold);
+//}
 
-__forceinline void SendRequestStorageGold(int Flag, int Gold)
-{
-    CStreamPacketEngine spe;
-    spe.Init(0xC1, 0x81);
-    spe << (BYTE)Flag << (DWORD)Gold;
-    spe.Send();
+//__forceinline bool SendRequestStorageExit()
+//{
+//    CStreamPacketEngine spe;
+//    spe.Init(0xC1, 0x82);
+//    spe.Send();
+//
+//    g_ConsoleDebug->Write(MCD_SEND, L"0x82 Send [SendRequestStorageExit]");
+//    return true;
+//}
 
-    g_ConsoleDebug->Write(MCD_SEND, L"0x81 Send [SendRequestStorageGold(%d %d)]", Flag, Gold);
-}
+//#define SendStoragePassword( p_byType, p_wPassword, p_ResidentNumber)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC3, 0x83);\
+//	spe << ( BYTE)( p_byType) << ( WORD)( p_wPassword);\
+//	spe.AddData( ( p_ResidentNumber), 20);\
+//	spe.Send();\
+//}
 
-__forceinline bool SendRequestStorageExit()
-{
-    CStreamPacketEngine spe;
-    spe.Init(0xC1, 0x82);
-    spe.Send();
+//#define SendRequestParty( p_Key)\
+//{\
+//	if(EnableMainRender)\
+//	{\
+//		PartyKey = p_Key;\
+//		CStreamPacketEngine spe;\
+//		spe.Init( 0xC3, 0x40);\
+//		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
+//		spe.Send();\
+//\
+//		wchar_t Text[100];\
+//		swprintf(Text,GlobalText[476],CharactersClient[FindCharacterIndex(p_Key)].ID);\
+//		g_pChatListBox->AddText(L"",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
+//	}\
+//}
 
-    g_ConsoleDebug->Write(MCD_SEND, L"0x82 Send [SendRequestStorageExit]");
-    return true;
-}
+//#define SendRequestPartyAnswer( p_Result)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC3, 0x41);\
+//	spe << ( BYTE)( p_Result) << ( BYTE)( PartyKey>>8) << ( BYTE)( PartyKey&0xff);\
+//	spe.Send();\
+//}
 
-#define SendStoragePassword( p_byType, p_wPassword, p_ResidentNumber)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x83);\
-	spe << ( BYTE)( p_byType) << ( WORD)( p_wPassword);\
-	spe.AddData( ( p_ResidentNumber), 20);\
-	spe.Send();\
-}
+//#define SendRequestPartyList()\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x42);\
+//	spe.Send();\
+//}
 
-#define SendRequestParty( p_Key)\
-{\
-	if(EnableMainRender)\
-	{\
-		PartyKey = p_Key;\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC3, 0x40);\
-		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send();\
-\
-		wchar_t Text[100];\
-		swprintf(Text,GlobalText[476],CharactersClient[FindCharacterIndex(p_Key)].ID);\
-		g_pChatListBox->AddText(L"",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	}\
-}
+//#define SendRequestPartyLeave( p_Index)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x43);\
+//	spe << ( BYTE)( p_Index);\
+//	spe.Send();\
+//}
 
-#define SendRequestPartyAnswer( p_Result)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC3, 0x41);\
-	spe << ( BYTE)( p_Result) << ( BYTE)( PartyKey>>8) << ( BYTE)( PartyKey&0xff);\
-	spe.Send();\
-}
+//#define SendRequestGuildMaster( p_Value)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x54);\
+//	spe << ( BYTE)( p_Value);\
+//	spe.Send();\
+//}
 
-#define SendRequestPartyList()\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x42);\
-	spe.Send();\
-}
+//#define SendRequestCreateGuild( GuildType, pGuildName, pGuildMark )\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x55);\
+//	spe << (BYTE)(GuildType);\
+//	spe.AddData( (pGuildName), 8);\
+//	spe.AddData( (pGuildMark), 32);\
+//	spe.Send();\
+//}
 
-#define SendRequestPartyLeave( p_Index)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x43);\
-	spe << ( BYTE)( p_Index);\
-	spe.Send();\
-}
+//#define SendRequestEditGuildType( GuildType )\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xE2);\
+//	spe << (BYTE)(GuildType);\
+//	spe.Send();\
+//}
 
-#define SendRequestGuildMaster( p_Value)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x54);\
-	spe << ( BYTE)( p_Value);\
-	spe.Send();\
-}
+//#define SendRequestGuildRelationShip( RelationType, RequestType, TargetUserIndexH, TargetUserIndexL )\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xE5);\
+//	spe << (BYTE)(RelationType);\
+//	spe << (BYTE)(RequestType);\
+//	spe << (BYTE)(TargetUserIndexH);\
+//	spe << (BYTE)(TargetUserIndexL);\
+//	spe.Send();\
+//	char szTmp[100];\
+//	if( RelationType == 0x01 && RequestType == 0x01 )\
+//		swprintf(szTmp,GlobalText[1358],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
+//	else if( RelationType == 0x01 && RequestType == 0x02 )\
+//		swprintf(szTmp,GlobalText[1387]);\
+//	else if( RelationType == 0x02 && RequestType == 0x01 )\
+//		swprintf(szTmp,GlobalText[1359],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
+//	else if( RelationType == 0x02 && RequestType == 0x02 )\
+//		swprintf(szTmp,GlobalText[1360],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
+//	g_pChatListBox->AddText(L"",szTmp,SEASON3B::TYPE_SYSTEM_MESSAGE);\
+//}
 
-#define SendRequestCreateGuild( GuildType, pGuildName, pGuildMark )\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x55);\
-	spe << (BYTE)(GuildType);\
-	spe.AddData( (pGuildName), 8);\
-	spe.AddData( (pGuildMark), 32);\
-	spe.Send();\
-}
+//#define SendRequestGuildRelationShipResult( Type, RequestType, Result, TargetUserIndexH, TargetUserIndexL )\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xE6);\
+//	spe << (BYTE)(Type);\
+//	spe << (BYTE)(RequestType);\
+//	spe << (BYTE)(Result);\
+//	spe << (BYTE)(TargetUserIndexH);\
+//	spe << (BYTE)(TargetUserIndexL);\
+//	spe.Send();\
+//}
+//#define SendRequestBanUnionGuild( GuildName )\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xEB);\
+//	spe << (BYTE)0x01;\
+//	spe.AddData( (GuildName), 8);\
+//    spe.Send();\
+//}
 
-#define SendRequestEditGuildType( GuildType )\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xE2);\
-	spe << (BYTE)(GuildType);\
-	spe.Send();\
-}
+//#define SendRequestUnionList()\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xE9);\
+//	spe.Send();\
+//}
 
-#define SendRequestGuildRelationShip( RelationType, RequestType, TargetUserIndexH, TargetUserIndexL )\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xE5);\
-	spe << (BYTE)(RelationType);\
-	spe << (BYTE)(RequestType);\
-	spe << (BYTE)(TargetUserIndexH);\
-	spe << (BYTE)(TargetUserIndexL);\
-	spe.Send();\
-	char szTmp[100];\
-	if( RelationType == 0x01 && RequestType == 0x01 )\
-		swprintf(szTmp,GlobalText[1358],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
-	else if( RelationType == 0x01 && RequestType == 0x02 )\
-		swprintf(szTmp,GlobalText[1387]);\
-	else if( RelationType == 0x02 && RequestType == 0x01 )\
-		swprintf(szTmp,GlobalText[1359],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
-	else if( RelationType == 0x02 && RequestType == 0x02 )\
-		swprintf(szTmp,GlobalText[1360],CharactersClient[FindCharacterIndex(MAKEWORD(TargetUserIndexL,TargetUserIndexH))].ID);\
-	g_pChatListBox->AddText(L"",szTmp,SEASON3B::TYPE_SYSTEM_MESSAGE);\
-}
-
-#define SendRequestGuildRelationShipResult( Type, RequestType, Result, TargetUserIndexH, TargetUserIndexL )\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xE6);\
-	spe << (BYTE)(Type);\
-	spe << (BYTE)(RequestType);\
-	spe << (BYTE)(Result);\
-	spe << (BYTE)(TargetUserIndexH);\
-	spe << (BYTE)(TargetUserIndexL);\
-	spe.Send();\
-}
-#define SendRequestBanUnionGuild( GuildName )\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xEB);\
-	spe << (BYTE)0x01;\
-	spe.AddData( (GuildName), 8);\
-    spe.Send();\
-}
-
-#define SendRequestUnionList()\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xE9);\
-	spe.Send();\
-}
-
-#define SendRequestEditGuildMark( p_Name, p_Mark )\
+/*#define SendRequestEditGuildMark( p_Name, p_Mark )\
 {\
 	CStreamPacketEngine spe;\
 	spe.Init( 0xC1, 0x55);\
 	spe.AddData( ( p_Name), 8);\
 	spe.AddData( ( p_Mark), 32);\
 	spe.Send();\
-}
+}*/
 
-#define SendRequestGuild( p_Key)\
-{\
-	if(EnableMainRender)\
-	{\
-		GuildPlayerKey = ( p_Key);\
-		CStreamPacketEngine spe;\
-		spe.Init( 0xC1, 0x50);\
-		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
-		spe.Send();\
-\
-		wchar_t Text[100];\
-		swprintf(Text,GlobalText[477],CharactersClient[FindCharacterIndex(p_Key)].ID);\
-		g_pChatListBox->AddText(L"",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
-	}\
-}
+//#define SendRequestGuild( p_Key)\
+//{\
+//	if(EnableMainRender)\
+//	{\
+//		GuildPlayerKey = ( p_Key);\
+//		CStreamPacketEngine spe;\
+//		spe.Init( 0xC1, 0x50);\
+//		spe << ( BYTE)( ( p_Key)>>8) << ( BYTE)( ( p_Key)&0xff);\
+//		spe.Send();\
+//\
+//		wchar_t Text[100];\
+//		swprintf(Text,GlobalText[477],CharactersClient[FindCharacterIndex(p_Key)].ID);\
+//		g_pChatListBox->AddText(L"",Text,SEASON3B::TYPE_SYSTEM_MESSAGE);\
+//	}\
+//}
 
-#define SendRequestGuildAnswer( p_Result)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x51);\
-	spe << ( BYTE)( p_Result) << ( BYTE)( GuildPlayerKey>>8) << ( BYTE)( GuildPlayerKey&0xff);\
-	spe.Send();\
-}
+//#define SendRequestGuildAnswer( p_Result)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x51);\
+//	spe << ( BYTE)( p_Result) << ( BYTE)( GuildPlayerKey>>8) << ( BYTE)( GuildPlayerKey&0xff);\
+//	spe.Send();\
+//}
 
-#define SendRequestCreateGuildCancel()\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x57);\
-	spe.Send();\
-}
+//#define SendRequestCreateGuildCancel()\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x57);\
+//	spe.Send();\
+//}
 
-#define SendRequestGuildList()\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x52);\
-	spe.Send();\
-}
+//#define SendRequestGuildList()\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x52);\
+//	spe.Send();\
+//}
 
-#define SendRequestGuildLeave( p_ID, p_ResidentNumber)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x53);\
-	spe.AddData( ( p_ID), MAX_ID_SIZE);\
-	spe.AddData( ( p_ResidentNumber), 20);\
-	spe.Send();\
-}
+//#define SendRequestGuildLeave( p_ID, p_ResidentNumber)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x53);\
+//	spe.AddData( ( p_ID), MAX_ID_SIZE);\
+//	spe.AddData( ( p_ResidentNumber), 20);\
+//	spe.Send();\
+//}
 
-#define SendRequestDeclareWar( p_Name)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x60);\
-	spe.AddData( ( p_Name), 8);\
-	spe.Send();\
-}
+//#define SendRequestDeclareWar( p_Name)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x60);\
+//	spe.AddData( ( p_Name), 8);\
+//	spe.Send();\
+//}
 
-void InitGuildWar();
+//void InitGuildWar();
+//
+//#define SendRequestGuildWarAnswer( p_Result)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x61);\
+//	spe << ( BYTE)( p_Result);\
+//	spe.Send();\
+//	if(!p_Result)\
+//	{\
+//		InitGuildWar();\
+//	}\
+//}
 
-#define SendRequestGuildWarAnswer( p_Result)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x61);\
-	spe << ( BYTE)( p_Result);\
-	spe.Send();\
-	if(!p_Result)\
-	{\
-		InitGuildWar();\
-	}\
-}
+//#define SendRequestGuildInfo( p_GuildKey)\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x66);\
+//	spe.AddNullData( 1);\
+//	spe << ( int)( p_GuildKey);\
+//	spe.Send();\
+//}
 
-#define SendRequestGuildInfo( p_GuildKey)\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x66);\
-	spe.AddNullData( 1);\
-	spe << ( int)( p_GuildKey);\
-	spe.Send();\
-}
+//#define SendRequestGuildAssign( Type, GuildStatus, Name )\
+//{\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xE1 );\
+//	spe << (BYTE)(Type);\
+//	spe << (BYTE)(GuildStatus);\
+//	spe.AddData( (Name), MAX_ID_SIZE );\
+//	spe.Send();\
+//}
 
-#define SendRequestGuildAssign( Type, GuildStatus, Name )\
-{\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xE1 );\
-	spe << (BYTE)(Type);\
-	spe << (BYTE)(GuildStatus);\
-	spe.AddData( (Name), MAX_ID_SIZE );\
-	spe.Send();\
-}
+//#define SendRequestMix( p_Type, p_SubType)\
+//{	\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0x86);\
+//    spe << ( BYTE)( p_Type);\
+//    spe << ( BYTE)( p_SubType);\
+//	spe.Send();\
+//}
 
-#define SendRequestMix( p_Type, p_SubType)\
-{	\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0x86);\
-    spe << ( BYTE)( p_Type);\
-    spe << ( BYTE)( p_SubType);\
-	spe.Send();\
-}
-
-__forceinline bool SendRequestMixExit()
-{
-    CStreamPacketEngine spe;
-    spe.Init(0xC1, 0x87);
-    spe.Send();
-
-    g_ConsoleDebug->Write(MCD_SEND, L"0x87 [SendRequestMixExit]");
-    return true;
-}
-#define SendRequestGemMix( iType, iLevel )\
-{	\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xBC);\
-	spe << (BYTE)0x00;\
-	spe << ( BYTE)( iType ) << ( BYTE)( iLevel );\
-	spe.Send();\
-}
-
-#define SendRequestGemUnMix( iType, iLevel, iPos )\
-{	\
-	CStreamPacketEngine spe;\
-	spe.Init( 0xC1, 0xBC);\
-	spe << (BYTE)0x01;\
-	spe << ( BYTE)( iType ) << ( BYTE)( iLevel ) << (BYTE)(iPos);\
-	spe.Send();\
-}
+//__forceinline bool SendRequestMixExit()
+//{
+//    CStreamPacketEngine spe;
+//    spe.Init(0xC1, 0x87);
+//    spe.Send();
+//
+//    g_ConsoleDebug->Write(MCD_SEND, L"0x87 [SendRequestMixExit]");
+//    return true;
+//}
+//#define SendRequestGemMix( iType, iLevel )\
+//{	\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xBC);\
+//	spe << (BYTE)0x00;\
+//	spe << ( BYTE)( iType ) << ( BYTE)( iLevel );\
+//	spe.Send();\
+//}
+//
+//#define SendRequestGemUnMix( iType, iLevel, iPos )\
+//{	\
+//	CStreamPacketEngine spe;\
+//	spe.Init( 0xC1, 0xBC);\
+//	spe << (BYTE)0x01;\
+//	spe << ( BYTE)( iType ) << ( BYTE)( iLevel ) << (BYTE)(iPos);\
+//	spe.Send();\
+//}
 
 #define SendRequestMoveToDevilSquare( bySquareNumber, iItemIndex)\
 {	\

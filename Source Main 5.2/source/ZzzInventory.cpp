@@ -11128,7 +11128,7 @@ void MoveServerDivisionInventory()
         MouseUpdateTime = 0;
         MouseUpdateTimeMax = 6;
 
-        SendExitInventory();
+        SocketClient->ToGameServer()->SendCloseNpcRequest();
         g_pUIManager->CloseAll();
     }
 
@@ -11143,7 +11143,7 @@ void MoveServerDivisionInventory()
 
             g_bEventChipDialogEnable = EVENT_NONE;
 
-            SendExitInventory();
+            SocketClient->ToGameServer()->SendCloseNpcRequest();
             g_pUIManager->CloseAll();
         }
     }

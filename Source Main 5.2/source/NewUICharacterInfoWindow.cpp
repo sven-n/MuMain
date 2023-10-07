@@ -144,7 +144,8 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
         {
             if (m_BtnStat[i].UpdateMouseEvent() == true)
             {
-                SendRequestAddPoint(i);
+                SocketClient->ToGameServer()->SendIncreaseCharacterStatPoint(i);
+                PlayBuffer(SOUND_CLICK01);
                 return true;
             }
         }
@@ -1662,7 +1663,7 @@ void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
         if (g_QuestMng.IsEPRequestRewardState(0x10009))
         {
             g_pMyQuestInfoWindow->UnselectQuestList();
-            SendSatisfyQuestRequestFromClient(0x10009);
+            SocketClient->ToGameServer()->SendQuestClientActionRequest(1, 9);
             g_QuestMng.SetEPRequestRewardState(0x10009, false);
         }
     }

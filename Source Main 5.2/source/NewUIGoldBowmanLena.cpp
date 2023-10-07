@@ -102,7 +102,7 @@ void CNewUIGoldBowmanLena::ClosingProcess()
 {
     g_bEventChipDialogEnable = 0;
     g_shEventChipCount = 0;
-    SendRequestEventChipExit();
+    SocketClient->ToGameServer()->SendEventChipExitDialog();
 }
 
 bool CNewUIGoldBowmanLena::UpdateMouseEvent()
@@ -118,7 +118,7 @@ bool CNewUIGoldBowmanLena::UpdateMouseEvent()
             int index = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_POTION + 21, 0);
 
             if (index != -1) {
-                SendRequestEventChip(0, index); //MAX_EQUIPMENT
+                SocketClient->ToGameServer()->SendEventChipRegistrationRequest(0, index);
             }
         }
     }

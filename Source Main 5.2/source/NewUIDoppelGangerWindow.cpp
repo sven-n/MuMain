@@ -209,7 +209,7 @@ void CNewUIDoppelGangerWindow::OpeningProcess()
 
 void CNewUIDoppelGangerWindow::ClosingProcess()
 {
-    // 	SendExitInventory();
+    // 	SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float CNewUIDoppelGangerWindow::GetLayerDepth()

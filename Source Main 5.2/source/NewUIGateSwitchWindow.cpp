@@ -154,7 +154,7 @@ void CNewUIGateSwitchWindow::OpeningProcess()
 
 void CNewUIGateSwitchWindow::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float CNewUIGateSwitchWindow::GetLayerDepth()

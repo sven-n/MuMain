@@ -215,7 +215,7 @@ void CNewUIGuardWindow::ClosingProcess()
     m_DeclareGuildListBox.Clear();
     m_GuildListBox.Clear();
 
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float CNewUIGuardWindow::GetLayerDepth()

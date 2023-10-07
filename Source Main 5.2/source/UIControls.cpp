@@ -5756,7 +5756,10 @@ BOOL CUICurQuestListBox::DoLineMouseAction(int iLineNumber)
 
             g_pMyQuestInfoWindow->QuestGiveUpBtnEnable(true);
             g_pMyQuestInfoWindow->SetSelQuestSummary();
-            SendRequestProgressQuestRequestReward(m_TextListIter->m_dwIndex);
+
+            const auto questNumber = static_cast<uint16_t>((m_TextListIter->m_dwIndex & 0xFF00) >> 16);
+            const auto questGroup = static_cast<uint16_t>(m_TextListIter->m_dwIndex & 0xFF);
+            SocketClient->ToGameServer()->SendQuestStateRequest(questNumber, questGroup);
         }
     }
 
@@ -5964,7 +5967,7 @@ void CUIInGameShopListBox::AddText(IGS_StorageItem& _StorageItem)
     wcsncpy(sItem.m_szName, _StorageItem.m_szName, MAX_TEXT_LENGTH);
     wcsncpy(sItem.m_szNum, _StorageItem.m_szNum, MAX_TEXT_LENGTH);
     wcsncpy(sItem.m_szPeriod, _StorageItem.m_szPeriod, MAX_TEXT_LENGTH);
-    wcsncpy(&(sItem.m_szType), &(_StorageItem.m_szType), sizeof(unicode::t_char));
+    wcsncpy(&(sItem.m_szType), &(_StorageItem.m_szType), sizeof(wchar_t));
     wcsncpy(sItem.m_szSendUserName, _StorageItem.m_szSendUserName, MAX_ID_SIZE + 1);
     wcsncpy(sItem.m_szMessage, _StorageItem.m_szMessage, MAX_GIFT_MESSAGE_SIZE);
 

@@ -106,7 +106,7 @@ int DoEditGuildMarkConfirmAction(POPUP_RESULT Result)
     {
         m_nCurrMode = MODE_EDIT_GUILDMARK;
         m_eCurrStep = STEP_EDIT_GUILD_MARK;
-        SendRequestGuildMaster(TRUE);
+        SocketClient->ToGameServer()->SendGuildMasterAnswer(true);
 
         if (Hero->GuildStatus != G_NONE)
             memcpy(&GuildMark[MARK_EDIT], &GuildMark[Hero->GuildMarkIndex], sizeof(MARK_t));
@@ -116,14 +116,12 @@ int DoEditGuildMarkConfirmAction(POPUP_RESULT Result)
 
 int DoGuildRelationReplyAction(POPUP_RESULT Result)
 {
-    if (Result == POPUP_RESULT_YES)
-    {
-        SendRequestGuildRelationShipResult(m_byRelationShipType, m_byRelationShipRequestType, 0x01, m_byTargetUserIndexH, m_byTargetUserIndexL);
-    }
-    else if ((Result & POPUP_RESULT_NO) == POPUP_RESULT_NO)
-    {
-        SendRequestGuildRelationShipResult(m_byRelationShipType, m_byRelationShipRequestType, 0x00, m_byTargetUserIndexH, m_byTargetUserIndexL);
-    }
+    SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
+        m_byRelationShipType,
+        m_byRelationShipRequestType,
+        Result == POPUP_RESULT_YES,
+        MAKEWORD(m_byTargetUserIndexL, m_byTargetUserIndexH));
+
     return 1;
 }
 
@@ -365,14 +363,14 @@ void CUIGuildMaster::DoCreateInfoAction()
 
         if (m_nCurrMode == MODE_CREATE_GUILD)
         {
-            SendRequestCreateGuild(0, (BYTE*)GuildMark[MARK_EDIT].GuildName, Mark);
+            SocketClient->ToGameServer()->SendGuildCreateRequest(GuildMark[MARK_EDIT].GuildName, Mark, sizeof Mark);
         }
         //		else if( m_nCurrMode == MODE_EDIT_GUILDMARK )
         //		{
         //			SendRequestEditGuildMark( (BYTE*)GuildMark[MARK_EDIT].GuildName, Mark );
         //		}
 
-        SendRequestGuildMaster(FALSE);
+        SocketClient->ToGameServer()->SendGuildMasterAnswer(false);
         Close();
 
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
@@ -458,7 +456,7 @@ void CUIGuildMaster::DoGuildMasterMainAction()
         m_nCurrMode = MODE_CREATE_GUILD;
         m_eCurrStep = STEP_CREATE_GUILDINFO;
         GuildInputEnable = TRUE;
-        SendRequestGuildMaster(TRUE);
+        SocketClient->ToGameServer()->SendGuildMasterAnswer(true);
     }
     if (m_EditGuildMarkButton.DoMouseAction())
     {
@@ -478,7 +476,7 @@ void CUIGuildMaster::DoGuildMasterMainAction()
         MouseLButtonPush = FALSE;
         MouseUpdateTime = 0;
         MouseUpdateTimeMax = 6;
-        SendRequestGuildMaster(FALSE);
+        SocketClient->ToGameServer()->SendGuildMasterAnswer(false);
         PlayBuffer(SOUND_CLICK01);
         Close();
         g_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_NPCGUILDMASTER, false);
@@ -533,7 +531,11 @@ void CUIGuildMaster::ReceiveGuildRelationShip(BYTE byRelationShipType, BYTE byRe
 {
     if (g_pUIPopup->GetPopupID() != 0)
     {
-        SendRequestGuildRelationShipResult(byRelationShipType, byRequestType, 0x00, byTargetUserIndexH, byTargetUserIndexL);
+        SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
+            byRelationShipType,
+            byRequestType,
+            0x00,
+            MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
         return;
     }
 
@@ -675,7 +677,7 @@ void CUIGuildMaster::Close()
     GuildInputEnable = FALSE;
     CloseMyPopup();
 
-    SendRequestGuildMaster(false);
+    SocketClient->ToGameServer()->SendGuildMasterAnswer(false);
 
     if (g_pSingleTextInputBox)
     {

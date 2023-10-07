@@ -166,7 +166,30 @@ extern wchar_t LogInID[];
 
 void CheckHack(void)
 {
-    SendCheck();
+    if (!g_bGameServerConnected)
+    {
+        return;
+    }
+
+    g_ConsoleDebug->Write(MCD_SEND, L"SendCheck");
+
+    auto attackSpeed = CharacterAttribute->AttackSpeed;
+    auto magicSpeed = CharacterAttribute->MagicSpeed;
+    if (CharacterAttribute->Ability & ABILITY_FAST_ATTACK_SPEED
+        || CharacterAttribute->Ability & ABILITY_FAST_ATTACK_SPEED2)
+    {
+        attackSpeed -= 20;
+        magicSpeed -= 20;
+    }
+
+    const int dwTick = GetTickCount();
+    SocketClient->ToGameServer()->SendPing(dwTick, attackSpeed);
+
+    if (!First)
+    {
+        First = true;
+        FirstTime = dwTick;
+    }
 }
 
 GLvoid KillGLWindow(GLvoid)
@@ -561,7 +584,7 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         KillGLWindow();
         break;
     case WM_NPROTECT_EXIT_TWO:
-        SendHackingChecked(0x04, 0);
+        SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
         SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, NULL);
         MessageBox(NULL, GlobalText[16], L"Error", MB_OK);
         break;

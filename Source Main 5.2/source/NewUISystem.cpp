@@ -1827,7 +1827,7 @@ void CNewUISystem::UpdateSendMoveInterface()
 {
     if (IsVisible(INTERFACE_TRADE))
     {
-        SendRequestTradeExit();
+        SocketClient->ToGameServer()->SendTradeCancel();
         Hide(INTERFACE_TRADE);
     }
     if (IsVisible(INTERFACE_STORAGE_EXT))

@@ -28,6 +28,8 @@
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 extern int g_iChatInputType;
+extern BYTE Version[SIZE_PROTOCOLVERSION];
+extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 
 CLoginWin::CLoginWin()
 {
@@ -220,7 +222,14 @@ void CLoginWin::RequestLogin()
             g_ErrorReport.Write(L"> Login Request.\r\n");
             g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", szID);
 
-            SendRequestLogIn(szID, szPass);
+            LogIn = 1;
+            wcscpy(LogInID, (szID));
+            CurrentProtocolState = REQUEST_LOG_IN;
+
+            SocketClient->ToGameServer()->SendLogin(szID, szPass, Version, Serial);
+
+            g_pChatListBox->AddText(L"", GlobalText[472], SEASON3B::TYPE_SYSTEM_MESSAGE); \
+            g_pChatListBox->AddText(L"", GlobalText[473], SEASON3B::TYPE_SYSTEM_MESSAGE); \
         }
     }
 }

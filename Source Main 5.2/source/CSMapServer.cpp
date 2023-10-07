@@ -14,6 +14,8 @@
 extern int  LogIn;
 extern wchar_t LogInID[MAX_ID_SIZE + 1];
 extern int HeroKey;
+extern BYTE Version[SIZE_PROTOCOLVERSION];
+extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 
 static  CSMServer csMapServer;
 

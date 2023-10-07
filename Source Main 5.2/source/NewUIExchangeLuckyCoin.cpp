@@ -235,7 +235,7 @@ void CNewUIExchangeLuckyCoin::ClosingProcess()
 {
     PlayBuffer(SOUND_CLICK01);
     g_pMyInventory->GetInventoryCtrl()->UnlockInventory();
-    SendRequestMixExit();
+    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 }
 
 void CNewUIExchangeLuckyCoin::LockExchangeBtn()

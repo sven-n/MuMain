@@ -297,7 +297,7 @@ bool CNewUIStorageInventory::ProcessClosing()
 
     CNewUIInventoryCtrl::BackupPickedItem();
     DeleteAllItems();
-    SendRequestStorageExit();
+    SocketClient->ToGameServer()->SendVaultClosed();
     return true;
 }
 
@@ -570,7 +570,7 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
         {
             if (m_bTakeZen)
             {
-                SendRequestStorageGold(1, GetBackupTakeZen());
+                SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(1, GetBackupTakeZen());
                 InitBackupItemInfo();
             }
             else

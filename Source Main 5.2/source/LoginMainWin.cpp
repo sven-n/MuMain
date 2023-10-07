@@ -104,7 +104,7 @@ void CLoginMainWin::UpdateWhileActive(double dDeltaTick)
     }
     else if (m_aBtn[LMW_BTN_CREDIT].IsClick())
     {
-        SendRequestServerList();
+        SocketClient->ToConnectServer()->SendServerListRequest();
 
         CUIMng& rUIMng = CUIMng::Instance();
         rUIMng.ShowWin(&rUIMng.m_CreditWin);
