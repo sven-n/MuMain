@@ -1242,7 +1242,7 @@ CALLBACK_RESULT SEASON3B::CMapEnterWerwolfMsgBoxLayout::OkBtnDown(class CNewUIMe
 
     if (dwGold >= 3000000)
     {
-        SendRequestEnterOnWerwolf();
+        SocketClient->ToGameServer()->SendEnterOnWerewolfRequest();
     }
     else
     {
@@ -1284,7 +1284,7 @@ bool CMapEnterGateKeeperMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT CMapEnterGateKeeperMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestEnterOnGateKeeper();
+    SocketClient->ToGameServer()->SendEnterOnGatekeeperRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1831,7 +1831,7 @@ CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::OkBtnDown(class CNe
     if (pItem)
     {
         int iSrcIndex = g_pMyInventory->GetStandbyItemIndex();
-        SendRequestMoveToEventMatch2(((pItem->Level >> 3) & 15), iSrcIndex);
+        SocketClient->ToGameServer()->SendChaosCastleEnterRequest((pItem->Level >> 3) & 15, iSrcIndex);
     }
     else
     {
@@ -1868,7 +1868,7 @@ bool SEASON3B::CHarvestEventLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CHarvestEventLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequest3ColorHarvestItem();
+    SocketClient->ToGameServer()->SendLeoHelperItemRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1902,7 +1902,7 @@ bool SEASON3B::CWhiteAngelEventLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CWhiteAngelEventLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestWhiteAngelItem();
+    SocketClient->ToGameServer()->SendWhiteAngelItemRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2361,7 +2361,7 @@ bool SEASON3B::CSiegeGiveUpMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CSiegeGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestBCGiveUp(0x01);
+    SocketClient->ToGameServer()->SendCastleSiegeUnregisterRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2760,14 +2760,14 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
         if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
         {
             int iItemPrice = pMsgBox->GetItemValue();
-            SendRequestSetSalePrice(iSourceIndex, iItemPrice);
+            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
             SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
         }
         else if (pPickedItem->GetOwnerInventory() == NULL)
         {
             int iItemPrice = pMsgBox->GetItemValue();
             BYTE byIndex = iSourceIndex;
-            SendRequestSetSalePrice(byIndex, iItemPrice);
+            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
 
             SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
         }
@@ -2775,7 +2775,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
         {
             int iItemPrice = pMsgBox->GetItemValue();
             BYTE byIndex = MAX_MY_INVENTORY_EX_INDEX + iSourceIndex;
-            SendRequestSetSalePrice(byIndex, iItemPrice);
+            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
 
             SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
         }
@@ -2786,7 +2786,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
     {
         iSourceIndex = g_pMyShopInventory->GetSourceIndex();
         int iItemPrice = pMsgBox->GetItemValue();
-        SendRequestSetSalePrice(iSourceIndex, iItemPrice);
+        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
         AddPersonalItemPrice(iSourceIndex, iItemPrice, g_IsPurchaseShop);
     }
 
@@ -2834,7 +2834,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
     if (pItem && pCha)
     {
         int sourceIndex = g_pPurchaseShopInventory->GetSourceIndex();
-        SendRequestPurchase(pCha->Key, pCha->ID, sourceIndex);
+        SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -3263,7 +3263,7 @@ CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::CancelBtnDown(class CNewUIMes
 
 CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMasterLevelSkill(In_Skill);
+    SocketClient->ToGameServer()->SendAddMasterSkillPoint(In_Skill);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -3313,7 +3313,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::OkBtnDown(class CNewUIMessageBox
     else
     {
         Button_Down = 2;
-        SendRequestCrywolfAltarContract(BackUp_Key);
+        SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -3439,7 +3439,7 @@ bool CSantaTownLeaveMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT CSantaTownLeaveMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMoveDevias();
+    SocketClient->ToGameServer()->SendMoveToDeviasBySnowmanRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3470,7 +3470,7 @@ bool CSantaTownSantaMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT CSantaTownSantaMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestSantaItem();
+    SocketClient->ToGameServer()->SendSantaClausItemRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

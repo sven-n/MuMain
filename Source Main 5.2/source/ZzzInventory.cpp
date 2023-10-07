@@ -2068,11 +2068,16 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             PetType = PET_TYPE_DARK_HORSE;
 
             if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER)
-                SendRequestPetInfo(PetType, Inventype, EQUIPMENT_HELPER); // TODO: don't send it every frame
+            {
+                // TODO: don't send it every frame
+                SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_HELPER);
+            }
         }
-        else
-            if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
-                SendRequestPetInfo(PetType, Inventype, EQUIPMENT_WEAPON_LEFT); // TODO: don't send it every frame
+        else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
+        {
+            // TODO: don't send it every frame
+            SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_WEAPON_LEFT);
+        }
 
         giPetManager::RenderPetItemInfo(sx, sy, ip, Inventype);
         return;
@@ -11273,6 +11278,7 @@ void ClosePersonalShop()
         if (g_PersonalShopSeller.Key)
         {
             SendRequestClosePersonalShop(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
+            //todo SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
         }
     }
 

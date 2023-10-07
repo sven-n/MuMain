@@ -256,11 +256,11 @@ bool CNewUIDuelWatchWindow::BtnProcess()
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUELWATCH);
     }
 
-    for (int i = 0; i < 4; ++i)
+    for (BYTE i = 0; i < 4; ++i)
     {
         if (m_BtnChannel[i].UpdateMouseEvent() == true)
         {
-            SendRequestJoinChannel(i);
+            SocketClient->ToGameServer()->SendDuelChannelJoinRequest(i);
             return true;
         }
     }

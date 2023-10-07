@@ -194,7 +194,7 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
 
         if (Result)
         {
-            SendRequestCursedEnter(static_cast<BYTE>(EnterLevel), static_cast<BYTE>(ItemPos + MAX_EQUIPMENT));
+            SocketClient->ToGameServer()->SendIllusionTempleEnterRequest(static_cast<BYTE>(EnterLevel), static_cast<BYTE>(ItemPos + MAX_EQUIPMENT));
         }
         else
         {

@@ -130,7 +130,7 @@ CALLBACK_RESULT CMsgBoxIGSDeleteItemConfirm::OKButtonDown(class CNewUIMessageBox
 {
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSDeleteItemConfirm*>(pOwner);
 
-    SendRequestIGS_DeleteStorageItem(pOwnMsgBox->m_iStorageSeq, pOwnMsgBox->m_iStorageItemSeq, &(pOwnMsgBox->m_szItemType));
+    SocketClient->ToGameServer()->SendCashShopDeleteStorageItemRequest(pOwnMsgBox->m_iStorageSeq, pOwnMsgBox->m_iStorageItemSeq, pOwnMsgBox->m_szItemType);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

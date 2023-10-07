@@ -170,7 +170,7 @@ bool CNewUIEmpireGuardianNPC::BtnProcess()
 
     if (m_btPositive.UpdateMouseEvent())
     {
-        SendRequestEnterEmpireGuardianEvent();
+        SocketClient->ToGameServer()->SendEnterEmpireGuardianEvent();
         ::PlayBuffer(SOUND_INTERFACE01);
         m_bCanClick = false;
         return true;

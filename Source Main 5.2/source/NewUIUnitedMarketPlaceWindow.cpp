@@ -289,7 +289,7 @@ bool CNewUIUnitedMarketPlaceWindow::BtnProcess()
     {
         LoadingWorld = 9999999;
 
-        SendRequestEnterUnitedMarketPlaceEvent();
+        SocketClient->ToGameServer()->SendEnterMarketPlaceRequest();
         m_bIsEnterButtonLocked = true;
 
         return true;

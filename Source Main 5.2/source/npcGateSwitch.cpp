@@ -106,7 +106,8 @@ namespace npcGateSwitch
         {
             State = 1;
         }
-        SendGateOparator(State, g_iNpcCharacterKey);
+
+        SocketClient->ToGameServer()->SendToggleCastleGateRequest(State, g_iNpcCharacterKey);
         g_iNpcCharacterKey = 0;
     }
 

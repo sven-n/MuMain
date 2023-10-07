@@ -37,6 +37,8 @@
 
 using namespace SEASON3B;
 
+extern bool Teleport;
+
 CNewUIMyInventory::CNewUIMyInventory()
 {
     m_pNewUIMng = nullptr;
@@ -129,12 +131,14 @@ bool CNewUIMyInventory::EquipItem(int iIndex, BYTE* pbyItemPacket)
         }
 
         if (pTempItem->Type == ITEM_HELPER + 4)
-            SendRequestPetInfo(PET_TYPE_DARK_HORSE, 0, iIndex);
+        {
+            SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, iIndex);
+        }
 
         if (pTempItem->Type == ITEM_HELPER + 5)
         {
             CreatePetDarkSpirit(Hero);
-            SendRequestPetInfo(PET_TYPE_DARK_SPIRIT, 0, iIndex);
+            SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, iIndex);
         }
 
         pTempItem->lineal_pos = iIndex;
@@ -1784,7 +1788,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
             return false;
         }
 
-        SendRequestEventZoneOpenTime(4, ((pItem->Level >> 3) & 15));
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(4, (pItem->Level >> 3) & 15);
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
         return true;
     }
@@ -1792,14 +1796,14 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     if (pItem->Type == ITEM_HELPER + 46)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_DEVILSQUARE);
-        SendRequestEventZoneOpenTime(1, byPossibleLevel);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(1, byPossibleLevel);
         return false;
     }
 
     if (pItem->Type == ITEM_HELPER + 47)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_BLOODCASTLE);
-        SendRequestEventZoneOpenTime(2, byPossibleLevel);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(2, byPossibleLevel);
         return false;
     }
 
@@ -1818,7 +1822,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     if (pItem->Type == ITEM_HELPER + 61)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_CURSEDTEMPLE);
-        SendRequestEventZoneOpenTime(5, byPossibleLevel);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(5, byPossibleLevel);
         return true;
     }
 
@@ -1830,20 +1834,20 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
             return false;
         }
 
-        SendRequestEventZoneOpenTime(4, ((pItem->Level >> 3) & 15));
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(4, (pItem->Level >> 3) & 15);
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
         return true;
     }
 
     if (pItem->Type == ITEM_HELPER + 51)
     {
-        SendRequestEventZoneOpenTime(5, ((pItem->Level >> 3) & 15));
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(5, (pItem->Level >> 3) & 15);
         return true;
     }
 
     if (pItem->Type == ITEM_POTION + 19)
     {
-        SendRequestEventZoneOpenTime(1, ((pItem->Level >> 3) & 15));
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(1, (pItem->Level >> 3) & 15);
         return true;
     }
 
@@ -1855,7 +1859,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         }
         else
         {
-            SendRequestEventZoneOpenTime(2, ((pItem->Level >> 3) & 15) - 1);
+            SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(2, ((pItem->Level >> 3) & 15) -1);
         }
 
         return true;

@@ -3054,7 +3054,7 @@ void CalcStopTime(void)
 
         if ((TerrainWall[index] & TW_NOGROUND) == TW_NOGROUND)
         {
-            SendRequestCheckPosition(g_iOldPositionX, g_iOldPositionY);
+            SocketClient->ToGameServer()->SendChaosCastlePositionSet(g_iOldPositionX, g_iOldPositionY);
         }
         g_fStopTime = WorldTime;
     }

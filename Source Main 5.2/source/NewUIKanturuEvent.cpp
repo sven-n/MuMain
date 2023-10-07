@@ -387,14 +387,14 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
 
 void SEASON3B::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdInfo()
 {
-    SendRequestKanturuInfo();
+    SocketClient->ToGameServer()->SendKanturuInfoRequest();
     m_dwRefreshTime = timeGetTime();
 }
 
 void SEASON3B::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdEnter()
 {
-    SendRequestKanturuEnter()
-        m_bEnterRequest = true;
+    SocketClient->ToGameServer()->SendKanturuEnterRequest();
+    m_bEnterRequest = true;
 }
 
 void SEASON3B::CNewUIKanturu2ndEnterNpc::LoadImages()

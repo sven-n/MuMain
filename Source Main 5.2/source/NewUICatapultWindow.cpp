@@ -527,7 +527,7 @@ bool SEASON3B::CNewUICatapultWindow::BtnProcess()
     iIndex = m_BtnChoiceArea.GetIndex();
     if (iIndex > -1 && m_BtnFire.UpdateMouseEvent() == true)
     {
-        SendCatapultFire(m_iNpcKey, iIndex + 1);
+        SocketClient->ToGameServer()->SendFireCatapultRequest(m_iNpcKey, iIndex + 1);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_CATAPULT);
     }
 

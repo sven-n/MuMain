@@ -65,6 +65,7 @@ extern CUIMapName* g_pUIMapName;	// rozy
 extern bool bCheckNPC;
 extern BOOL g_bWhileMovingZone;
 extern DWORD g_dwLatestZoneMoving;
+extern bool Teleport;
 
 #ifdef WINDOWMODE
 extern BOOL g_bUseWindowMode;
@@ -2631,7 +2632,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
 
-        SendRequestRageAtt(iSkill, wTargetKey);
+        SocketClient->ToGameServer()->SendRageAttackRequest(iSkill, wTargetKey);
 
         g_CMonkSystem.InitConsecutiveState(3.0f, 7.0f);
     }
@@ -2643,7 +2644,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
-        SendRequestRageAtt(iSkill, wTargetKey);
+        SocketClient->ToGameServer()->SendRageAttackRequest(iSkill, wTargetKey);
 
         g_CMonkSystem.InitConsecutiveState(3.0f, 12.0f);
 
@@ -2658,7 +2659,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
-        SendRequestRageAtt(iSkill, wTargetKey);
+        SocketClient->ToGameServer()->SendRageAttackRequest(iSkill, wTargetKey);
 
         g_CMonkSystem.InitConsecutiveState(3.0f);
 
@@ -2674,9 +2675,8 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
 
-        SendRequestDarkside((WORD)iSkill, wTargetKey);
-
-        SendRequestRageAtt(iSkill, wTargetKey);
+        SocketClient->ToGameServer()->SendRageAttackRangeRequest(iSkill, wTargetKey);
+        SocketClient->ToGameServer()->SendRageAttackRequest(iSkill, wTargetKey);
 
         pObj->m_sTargetIndex = g_MovementSkill.m_iTarget;
         g_CMonkSystem.RageCreateEffect(pObj, iSkill);
@@ -3567,12 +3567,16 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                     pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 
                     if (pItem->Type == ITEM_HELPER + 4)
-                        SendRequestPetInfo(PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER);
+                    {
+                        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER);
+                    }
 
                     pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
 
                     if (pItem->Type == ITEM_HELPER + 5)
-                        SendRequestPetInfo(PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT);
+                    {
+                        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT);
+                    }
                 }
             }
             TargetNpc = -1;
@@ -3996,7 +4000,9 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 CHARACTER* c = &CharactersClient[SelectedCharacter];
                 OBJECT* o = &c->Object;
                 if (o->Kind == KIND_PLAYER && c != Hero && (o->Type == MODEL_PLAYER || c->Change))
-                    SendRequestOpenPersonalShop(c->Key, c->ID);
+                {
+                    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, c->ID);
+                }
             }
             else
             {
@@ -4007,7 +4013,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (wcscmp(c->ID, szId) == 0)
                         {
-                            SendRequestOpenPersonalShop(c->Key, c->ID);
+                            SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, c->ID);
                         }
                     }
                     else
@@ -4019,7 +4025,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                             if (abs(Dir1 - Dir2) == 4)
                             {
-                                SendRequestOpenPersonalShop(c->Key, c->ID);
+                                SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, c->ID);
                                 break;
                             }
                         }
@@ -4068,7 +4074,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         if (o->Kind == KIND_PLAYER && c != Hero && (o->Type == MODEL_PLAYER || c->Change) &&
                             abs((c->PositionX) - (Hero->PositionX)) <= 1 &&
                             abs((c->PositionY) - (Hero->PositionY)) <= 1) {
-                            SendRequestDuelStart(c->Key, c->ID);
+                            SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, c->ID);
                         }
                     }
                     else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -4084,7 +4090,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                             if (abs(Dir1 - Dir2) == 4)
                             {
-                                SendRequestDuelStart(c->Key, c->ID);
+                                SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, c->ID);
                                 break;
                             }
                         }
@@ -4106,7 +4112,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 #endif// GUILD_WAR_EVENT
             if (g_DuelMgr.IsDuelEnabled())
             {
-                SendRequestDuelEnd();
+                SocketClient->ToGameServer()->SendDuelStopRequest();
             }
         }
         if (wcscmp(Text, GlobalText[254]) == NULL || wcsicmp(Text, L"/guild") == NULL)
@@ -4648,19 +4654,6 @@ bool CheckTarget(CHARACTER* c)
 }
 
 bool EnableFastInput = false;
-
-WORD g_byLastSkillSerialNumber = 0;
-
-BYTE MakeSkillSerialNumber(BYTE* pSerialNumber)
-{
-    if (pSerialNumber == NULL) return 0;
-
-    ++g_byLastSkillSerialNumber;
-    if (g_byLastSkillSerialNumber > 50) g_byLastSkillSerialNumber = 1;
-
-    *pSerialNumber = g_byLastSkillSerialNumber;
-    return g_byLastSkillSerialNumber;
-}
 
 void AttackElf(CHARACTER* c, int Skill, float Distance)
 {

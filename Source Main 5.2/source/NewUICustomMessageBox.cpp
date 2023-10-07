@@ -4698,19 +4698,19 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 
             if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
             {
-                SendRequestSetSalePrice(iSourceIndex, iInputZen);
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
 
                 SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
             }
-            else if (pPickedItem->GetOwnerInventory() == NULL)
+            else if (pPickedItem->GetOwnerInventory() == nullptr)
             {
-                SendRequestSetSalePrice(iSourceIndex, iInputZen);
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
 
                 SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
             }
             else if (pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
             {
-                SendRequestSetSalePrice(iSourceIndex, iInputZen);
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
 
                 SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
             }
@@ -4720,7 +4720,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
         else
         {
             iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-            SendRequestSetSalePrice(iSourceIndex, iInputZen);
+            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
             AddPersonalItemPrice(iSourceIndex, iInputZen, g_IsPurchaseShop);
         }
     }
@@ -7094,7 +7094,7 @@ CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown
         }
     }
 
-    SendRequestResetCharacterPoint();
+    SocketClient->ToGameServer()->SendResetCharacterPointRequest();
 
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
     return CALLBACK_BREAK;

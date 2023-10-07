@@ -166,13 +166,13 @@ namespace giPetManager
                             CHARACTER* tc = &CharactersClient[SelectedCharacter];
                             if (SelectedCharacter != -1 && (tc->Object.Kind == KIND_MONSTER || tc->Object.Kind == KIND_PLAYER))
                             {
-                                SendRequestPetCommand(pPet->GetPetType(), Index - AT_PET_COMMAND_DEFAULT, tc->Key);
+                                SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), Index - AT_PET_COMMAND_DEFAULT, tc->Key);
                             }
                         }
                     }
                     else
                     {
-                        SendRequestPetCommand(pPet->GetPetType(), Index - AT_PET_COMMAND_DEFAULT, 0xffff);
+                        SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), Index - AT_PET_COMMAND_DEFAULT, 0xFFFF);
                     }
                     MouseRButtonPop = false;
                     MouseRButtonPush = false;
@@ -315,7 +315,8 @@ namespace giPetManager
             {
                 iInvenType = 6;
             }
-            SendRequestPetInfo(PetType, iInvenType, iItemIndex);
+
+            SocketClient->ToGameServer()->SendPetInfoRequest(PetType, iInvenType, iItemIndex);
 
             return true;
         }

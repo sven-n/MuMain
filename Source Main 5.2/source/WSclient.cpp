@@ -850,7 +850,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
     {
-        SendRequestCrywolfInfo();
+        SocketClient->ToGameServer()->SendCrywolfInfoRequest();
     }
 
     matchEvent::CreateEventMatch(gMapManager.WorldActive);
@@ -1712,7 +1712,9 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             gMapManager.LoadWorld(gMapManager.WorldActive);
 
             if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
-                SendRequestCrywolfInfo();
+            {
+                SocketClient->ToGameServer()->SendCrywolfInfoRequest();
+            }
 
             if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) || gMapManager.InChaosCastle() == true)
             {
@@ -5784,7 +5786,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
 
     case 0x0D:
-        SendRequestBCStatus();
+        SocketClient->ToGameServer()->SendCastleSiegeStatusRequest();
         break;
     case 0x11:
     {
@@ -8404,6 +8406,7 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
         RemovePersonalItemPrice(g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
 
         SendRequestInventory();
+        // TODO SocketClient->ToGameServer()->SendInventoryRequest();
 
         g_ErrorReport.Write(L"@ [Fault] ReceiveSetPriceResult (result : %d)\n", Header->byResult);
     }
@@ -8712,7 +8715,10 @@ void ReceiveFriendList(const BYTE* ReceiveBuffer)
 
     // 채팅 서버 살아남
     g_pWindowMgr->SetServerEnable(TRUE);
-    if (g_iChatInputType == 0) SendRequestChangeState(2);
+    if (g_iChatInputType == 0)
+    {
+        SocketClient->ToGameServer()->SendSetFriendOnlineState(2);
+    }
 
     g_iMaxLetterCount = Header->MaxMemo;
 
@@ -10042,8 +10048,8 @@ void ReceiveBCGiveUp(const BYTE* ReceiveBuffer)
         g_pChatListBox->AddText(L"", GlobalText[1512], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
-        SendRequestBCRegInfo();
-        SendRequestBCDeclareGuildList();
+        SocketClient->ToGameServer()->SendCastleSiegeRegistrationStateRequest();
+        SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
         g_GuardsMan.SetRegStatus(0);
         g_pChatListBox->AddText(L"", GlobalText[1513], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
@@ -11774,9 +11780,9 @@ bool ReceiveIGS_ShopOpenResult(const BYTE* pReceiveBuffer)
         return false;
     }
 
-    SendRequestIGS_CashPointInfo();
-    wchar_t szCode = g_pInGameShop->GetCurrentStorageCode();
-    SendRequestIGS_ItemStorageList(1, &szCode);
+    SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
+    char szCode = g_pInGameShop->GetCurrentStorageCode();
+    SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, szCode);
 
     g_pNewUISystem->Show(SEASON3B::INTERFACE_INGAMESHOP);
 
@@ -11810,10 +11816,10 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2900], GlobalText[2901]);
 
-        SendRequestIGS_CashPointInfo();
+        SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
 
-        wchar_t szCode = g_pInGameShop->GetCurrentStorageCode();
-        SendRequestIGS_ItemStorageList(1, &szCode);
+        char szCode = g_pInGameShop->GetCurrentStorageCode();
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, szCode);
     }
     break;
     case 1:
@@ -11916,7 +11922,7 @@ bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2910], GlobalText[2911]);
 
-        SendRequestIGS_CashPointInfo();
+        SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
     }
     break;
     case 1:

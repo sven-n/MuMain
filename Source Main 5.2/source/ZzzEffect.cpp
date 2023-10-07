@@ -13927,7 +13927,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
                 if (o->LifeTime < 250 && o->Position[2] < Height + 300.f && o->SubType == 1 && o->Kind != 0 && o->Skill != 0)
                 {
-                    SendWeaponExplosion(o->Kind, o->Skill);
+                    SocketClient->ToGameServer()->SendWeaponExplosionRequest(MAKELONG(o->Skill, o->Kind));
                     o->Kind = 0;
                     o->Skill = 0;
                 }
@@ -14080,7 +14080,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
             if (o->Position[2] < Height + 300.f && o->SubType == 1 && o->Kind != 0 && o->Skill != 0)
             {
-                SendWeaponExplosion(o->Kind, o->Skill);
+                SocketClient->ToGameServer()->SendWeaponExplosionRequest(MAKELONG(o->Skill, o->Kind));
                 o->Kind = 0;
                 o->Skill = 0;
             }

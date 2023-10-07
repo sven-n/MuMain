@@ -254,7 +254,7 @@ bool CNewUIEnterBloodCastle::BtnProcess()
 
         if (iItemIndex > -1)
         {
-            SendRequestMoveToEventMatch(m_iNumActiveBtn + 1, iItemIndex);
+            SocketClient->ToGameServer()->SendBloodCastleEnterRequest(m_iNumActiveBtn + 1, iItemIndex);
         }
         else
         {

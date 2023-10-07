@@ -277,7 +277,7 @@ bool CNewUIDoppelGangerWindow::BtnProcess()
         }
         if (iPos != -1)
         {
-            SendRequestEnterDoppelGangerEvent((BYTE)iPos);
+            SocketClient->ToGameServer()->SendDoppelgangerEnterRequest((BYTE)iPos);
         }
         else
         {

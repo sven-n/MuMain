@@ -216,7 +216,7 @@ bool CNewUIEnterDevilSquare::BtnProcess()
 
         if (iItemIndex > -1)
         {
-            SendRequestMoveToDevilSquare(m_iNumActiveBtn, iItemIndex);
+            SocketClient->ToGameServer()->SendDevilSquareEnterRequest(m_iNumActiveBtn, iItemIndex);
         }
         else
         {

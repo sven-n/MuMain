@@ -158,8 +158,8 @@ CALLBACK_RESULT CMsgBoxIGSUseItemConfirm::OKButtonDown(class CNewUIMessageBoxBas
     }
     else
     {
-        SendRequestIGS_UseStorageItem(pOwnMsgBox->m_iStorageSeq, pOwnMsgBox->m_iStorageItemSeq, pOwnMsgBox->m_wItemCode, &(pOwnMsgBox->m_szItemType));
-        SendRequestIGS_CashPointInfo();			// 사용자의 캐시 포인트 정보 요청
+        SocketClient->ToGameServer()->SendCashShopStorageItemConsumeRequest(pOwnMsgBox->m_iStorageSeq, pOwnMsgBox->m_iStorageItemSeq, pOwnMsgBox->m_wItemCode, pOwnMsgBox->m_szItemType);
+        SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
     }
 
     PlayBuffer(SOUND_CLICK01);

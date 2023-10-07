@@ -4774,7 +4774,7 @@ void OpenMacro(const wchar_t* FileName)
 void SaveOptions()
 {
     // 0 ~ 19 skill hotkey
-    BYTE options[50] = { 0x00, };
+    BYTE options[30] = { 0x00, };
 
     int iSkillType = -1;
     for (int i = 0; i < 10; ++i)
@@ -4833,7 +4833,7 @@ void SaveOptions()
     options[28] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_E);
     options[29] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_R);
 
-    SendRequestHotKey(options);
+    SocketClient->ToGameServer()->SendSaveKeyConfiguration(options, sizeof options);
 }
 
 void OpenLogoSceneData()

@@ -836,7 +836,7 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
             {
                 if (g_InGameShopSystem->GetIsRequestShopOpenning() == false)
                 {
-                    SendRequestIGS_CashShopOpen(0);
+                    SocketClient->ToGameServer()->SendCashShopOpenState(0);
                     g_InGameShopSystem->SetIsRequestShopOpenning(true);
 
 #ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
@@ -846,7 +846,7 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
             }
             else
             {
-                SendRequestIGS_CashShopOpen(1);
+                SocketClient->ToGameServer()->SendCashShopOpenState(1);
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
             }
 

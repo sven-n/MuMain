@@ -143,7 +143,7 @@ void SEASON3B::CNewUICursedTempleResult::OpenningProcess()
 
 void SEASON3B::CNewUICursedTempleResult::ClosingProcess()
 {
-    SendRequestCursedTempleRequital();
+    SocketClient->ToGameServer()->SendIllusionTempleRewardRequest();
     ResetGameResultInfo();
 }
 

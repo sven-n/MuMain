@@ -108,7 +108,8 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::BtnProcess()
             SetMessage(2825);
         return true;
     }
-    else if (eTabBtnIndex == TAB_JOB_CHANGE)
+
+    if (eTabBtnIndex == TAB_JOB_CHANGE)
     {
         /*		BYTE byState = g_csQuest.getCurrQuestState();
                 if (byState == QUEST_NONE || byState == QUEST_NO || byState == QUEST_ERROR)
@@ -120,10 +121,11 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::BtnProcess()
                 */
         return true;
     }
-    else if (eTabBtnIndex == TAB_CASTLE_TEMPLE)
+
+    if (eTabBtnIndex == TAB_CASTLE_TEMPLE)
     {
-        SendRequestEventCount(2);
-        SendRequestEventCount(3);
+        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(2);
+        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(3);
         return true;
     }
 

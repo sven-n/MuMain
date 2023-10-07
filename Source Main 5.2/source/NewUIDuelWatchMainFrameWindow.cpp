@@ -305,7 +305,7 @@ bool CNewUIDuelWatchMainFrameWindow::BtnProcess()
     {
         if (g_DuelMgr.GetCurrentChannel() >= 0)
         {
-            SendRequestQuitChannel(g_DuelMgr.GetCurrentChannel());
+            SocketClient->ToGameServer()->SendDuelChannelQuitRequest(g_DuelMgr.GetCurrentChannel());
         }
         return true;
     }

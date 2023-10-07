@@ -101,7 +101,7 @@ private:
     int			m_iStorageItemSeq;		// 보관함 상품 순번
     WORD		m_wItemCode;			// 아이템 코드
     wchar_t m_szItemName[MAX_TEXT_LENGTH];		// 아이템이름
-    wchar_t m_szItemType;		// 상품구분 (C : 캐시, P : 상품)
+    char m_szItemType;		// 상품구분 (C : 캐시, P : 상품)
 };
 
 ////////////////////////////////////////////////////////////////////

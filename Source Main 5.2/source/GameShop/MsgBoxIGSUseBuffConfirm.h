@@ -92,7 +92,7 @@ private:
     int			m_iStorageSeq;
     int			m_iStorageItemSeq;
     WORD		m_wItemCode;
-    wchar_t m_szItemType;
+    char m_szItemType;
     wchar_t m_szCurrentBuffName[MAX_TEXT_LENGTH];
 };
 

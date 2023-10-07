@@ -149,11 +149,11 @@ bool CNewUIGuardWindow::Update()
         {
             if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
             {
-                SendRequestBCDeclareGuildList();
+                SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
             }
             else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
             {
-                SendRequestBCGuildList();
+                SocketClient->ToGameServer()->SendCastleOwnerListRequest();
             }
         }
     }
@@ -207,7 +207,7 @@ void CNewUIGuardWindow::OpeningProcess()
     m_iNumCurOpenTab = TAB_SIEGE_INFO;
     m_TabBtn.ChangeFrame(TAB_SIEGE_INFO);
 
-    SendRequestBCRegInfo();
+    SocketClient->ToGameServer()->SendCastleSiegeRegistrationStateRequest();
 }
 
 void CNewUIGuardWindow::ClosingProcess()
@@ -344,7 +344,7 @@ void CNewUIGuardWindow::UpdateRegisterTab()
         {
             if (g_GuardsMan.IsSufficentDeclareLevel())
             {
-                SendRequestBCReg();
+                SocketClient->ToGameServer()->SendCastleSiegeRegistrationRequest();
             }
             else
             {
@@ -357,7 +357,9 @@ void CNewUIGuardWindow::UpdateRegisterTab()
         {
             int nMarkSlot = g_GuardsMan.GetMyMarkSlotIndex();
             if (nMarkSlot != -1)
-                SendRequestBCRegMark(nMarkSlot);
+            {
+                SocketClient->ToGameServer()->SendCastleSiegeMarkRegistration(nMarkSlot);
+            }
         }
         break;
     }

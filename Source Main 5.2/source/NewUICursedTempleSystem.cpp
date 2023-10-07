@@ -1191,7 +1191,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJE
             return;
         }
 
-        SendRequestCursedTempleMagic(CursedTempleCurSkillType, static_cast<WORD>(tc->Key), Distance);
+        SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType, static_cast<BYTE>(tc->Key), Distance);
         Hero->m_CursedTempleCurSkillPacket = true;
         MouseRButtonPush = false;
 

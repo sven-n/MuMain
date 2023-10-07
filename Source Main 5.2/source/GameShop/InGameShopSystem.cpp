@@ -300,7 +300,7 @@ bool CInGameShopSystem::SelectCategory(int iIndex)
         {
             m_bSelectEventCategory = true;
             m_plistSelectPackage = &m_listEventPackage;
-            SendRequestIGS_EventItemList(m_SelectedCategory.ProductDisplaySeq);
+            SocketClient->ToGameServer()->SendCashShopEventItemListRequest(m_SelectedCategory.ProductDisplaySeq);
             m_bIsRequestEventPackage = true;
         }
         else

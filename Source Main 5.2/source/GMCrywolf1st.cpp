@@ -2235,7 +2235,7 @@ void M34CryWolf1st::MoveMvp_Interface()
                 else
                 {
                     Button_Down = 2;
-                    SendRequestCrywolfAltarContract(BackUp_Key);
+                    SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
                 }
             }
         }

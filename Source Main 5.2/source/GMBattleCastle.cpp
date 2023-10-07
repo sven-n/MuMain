@@ -345,7 +345,7 @@ namespace battleCastle
         Vector(0.f, 0.f, 0.f, Angle);
         Vector(0.f, 0.f, 270.f, Position);
 
-        SendGetCastleGuildMark();
+        SocketClient->ToGameServer()->SendGuildLogoOfCastleOwnerRequest();
 
         OpenMonsterModel(77);
 

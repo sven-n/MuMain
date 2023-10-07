@@ -206,9 +206,9 @@ void CNewUICastleWindow::OpeningProcess()
     g_SenatusInfo.SetCurrGate(0);
     g_SenatusInfo.SetCurrStatue(0);
 
-    SendRequestBCNPCList(1);
-    SendRequestBCNPCList(2);
-    SendRequestBCGetTaxInfo();
+    SocketClient->ToGameServer()->SendCastleSiegeGateListRequest();
+    SocketClient->ToGameServer()->SendCastleSiegeStatueListRequest();
+    SocketClient->ToGameServer()->SendCastleSiegeTaxInfoRequest();
 }
 
 void CNewUICastleWindow::ClosingProcess()

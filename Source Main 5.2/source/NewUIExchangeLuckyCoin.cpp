@@ -200,19 +200,19 @@ bool CNewUIExchangeLuckyCoin::BtnProcess()
     if (m_BtnExchange[0].UpdateMouseEvent() == true)
     {
         LockExchangeBtn();
-        SendRequestExChangeLuckyCoin(10);
+        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(10);
     }
 
     if (m_BtnExchange[1].UpdateMouseEvent() == true)
     {
         LockExchangeBtn();
-        SendRequestExChangeLuckyCoin(20);
+        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(20);
     }
 
     if (m_BtnExchange[2].UpdateMouseEvent() == true)
     {
         LockExchangeBtn();
-        SendRequestExChangeLuckyCoin(30);
+        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(30);
     }
 
     return false;

@@ -363,7 +363,7 @@ bool CNewUIInGameShop::BtnProcess()
         char szCode = GetCurrentStorageCode();
         m_iSelectedStorageItemIndex = 0;
         m_bRequestCurrentPage = true;
-        SendRequestIGS_ItemStorageList(1, &szCode);
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, szCode);
         return true;
     }
 
@@ -408,7 +408,7 @@ bool CNewUIInGameShop::BtnProcess()
 
     if (m_CashRefreshButton.UpdateMouseEvent() == true)
     {
-        SendRequestIGS_CashPointInfo();
+        SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
 
         return true;
     }
@@ -477,7 +477,7 @@ bool CNewUIInGameShop::BtnProcess()
     {
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == true)
         {
-            SendRequestIGS_CashShopOpen(1);		// ¼¥ Close¿äÃ»
+            SocketClient->ToGameServer()->SendCashShopOpenState(1);
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
 
             return true;
@@ -598,7 +598,7 @@ bool CNewUIInGameShop::UpdateKeyEvent()
     {
         if (SEASON3B::IsPress(VK_ESCAPE) == true)
         {
-            SendRequestIGS_CashShopOpen(1);
+            SocketClient->ToGameServer()->SendCashShopOpenState(1);
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
 
             return false;
@@ -945,7 +945,7 @@ void CNewUIInGameShop::StoragePrevPage()
         char szCode = GetCurrentStorageCode();
         m_iSelectedStorageItemIndex = 0;
         m_bRequestCurrentPage = true;
-        SendRequestIGS_ItemStorageList(m_iStorageCurrentPage - 1, &szCode);
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(m_iStorageCurrentPage - 1, szCode);
     }
 }
 
@@ -956,7 +956,7 @@ void CNewUIInGameShop::StorageNextPage()
         char szCode = GetCurrentStorageCode();
         m_iSelectedStorageItemIndex = 0;
         m_bRequestCurrentPage = true;
-        SendRequestIGS_ItemStorageList(m_iStorageCurrentPage + 1, &szCode);
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(m_iStorageCurrentPage + 1, szCode);
     }
 }
 
@@ -969,22 +969,22 @@ void CNewUIInGameShop::UpdateStorageItemList()
     if ((m_iStorageCurrentPageItemCnt == 1) && (m_iStorageTotalPage > 1))
     {
         m_iSelectedStorageItemIndex = 1;
-        SendRequestIGS_ItemStorageList(m_iStorageCurrentPage - 1, &szCode);
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(m_iStorageCurrentPage - 1, szCode);
     }
     else if (iSelectLineIndex == 1)
     {
         m_iSelectedStorageItemIndex = iSelectLineIndex;
-        SendRequestIGS_ItemStorageList(m_iStorageCurrentPage, &szCode);
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(m_iStorageCurrentPage, szCode);
     }
     else if (m_iStorageCurrentPageItemCnt < IGS_STORAGE_TOTAL_ITEM_PER_PAGE)
     {
         m_iSelectedStorageItemIndex = (iSelectLineIndex - 1);
-        SendRequestIGS_ItemStorageList(m_iStorageCurrentPage, &szCode);
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(m_iStorageCurrentPage, szCode);
     }
     else
     {
         m_iSelectedStorageItemIndex = iSelectLineIndex;
-        SendRequestIGS_ItemStorageList(m_iStorageCurrentPage, &szCode);
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(m_iStorageCurrentPage, szCode);
     }
 }
 

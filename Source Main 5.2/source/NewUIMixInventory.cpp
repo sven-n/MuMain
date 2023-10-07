@@ -122,7 +122,7 @@ void CNewUIMixInventory::DeleteAllItems()
 void CNewUIMixInventory::OpeningProcess()
 {
     g_MixRecipeMgr.SetPlusChaosRate(0);
-    SendRequestCrywolfBenefitPlusChaosRate();
+    SocketClient->ToGameServer()->SendCrywolfChaosRateBenefitRequest();
 
     SetMixState(SEASON3B::CNewUIMixInventory::MIX_READY);
 

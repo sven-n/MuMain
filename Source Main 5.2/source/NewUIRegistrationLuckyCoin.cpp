@@ -164,7 +164,7 @@ namespace SEASON3B
         if (m_RegistButton.UpdateMouseEvent() == true)
         {
             SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
-            SendRequestRegistLuckyCoin();
+            SocketClient->ToGameServer()->SendLuckyCoinRegistrationRequest();
             LockLuckyCoinRegBtn();
             return true;
         }
@@ -242,7 +242,7 @@ namespace SEASON3B
 
         UnLockLuckyCoinRegBtn();
 
-        SendRequestRegistedLuckyCoin();
+        SocketClient->ToGameServer()->SendLuckyCoinCountRequest();
 
         m_CoinItem = new ITEM;
         if (m_CoinItem == NULL)	return;
