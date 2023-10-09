@@ -4,29 +4,9 @@
 
 #include "stdafx.h"
 #include "turbojpeg.h"
-#include <Jpeglib.h>
-
 #include "GlobalBitmap.h"
-
 #include "./Utilities/Log/ErrorReport.h"
-#include "./Utilities/Log/muConsoleDebug.h"
 
-
-
-struct my_error_mgr
-{
-    struct jpeg_error_mgr pub;
-    jmp_buf setjmp_buffer;
-};
-typedef struct my_error_mgr* my_error_ptr;
-
-
-void my_error_exit(j_common_ptr cinfo)
-{
-    auto myerr = (my_error_ptr)cinfo->err;
-    (*cinfo->err->output_message) (cinfo);
-    longjmp(myerr->setjmp_buffer, 1);
-}
 
 CBitmapCache::CBitmapCache()
 {
@@ -588,103 +568,6 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
     return uiSeed + 1;
 }
 
-bool CGlobalBitmap::OpenJpeg(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
-{
-    std::wstring filename_ozj;
-    ExchangeExt(filename, L"OZJ", filename_ozj);
-
-    FILE* infile = _wfopen(filename_ozj.c_str(), L"rb");
-    if (infile == NULL)
-    {
-        return false;
-    }
-
-    fseek(infile, 24, SEEK_SET);	//. Skip Dump
-
-    struct jpeg_decompress_struct cinfo;
-    struct my_error_mgr jerr;
-    cinfo.err = jpeg_std_error(&jerr.pub);
-    jerr.pub.error_exit = my_error_exit;
-    if (setjmp(jerr.setjmp_buffer))
-    {
-        jpeg_destroy_decompress(&cinfo);
-        fclose(infile);
-        return false;
-    }
-
-    jpeg_create_decompress(&cinfo);
-    jpeg_stdio_src(&cinfo, infile);
-    (void)jpeg_read_header(&cinfo, TRUE);
-    (void)jpeg_start_decompress(&cinfo);
-
-    if (cinfo.output_width <= MAX_WIDTH && cinfo.output_height <= MAX_HEIGHT)
-    {
-        // rounds up to the next n^2 value
-        int Width, Height;
-        for (int i = 1; i <= MAX_WIDTH; i <<= 1)
-        {
-            Width = i;
-            if (i >= (int)cinfo.output_width) break;
-        }
-        for (int i = 1; i <= MAX_HEIGHT; i <<= 1)
-        {
-            Height = i;
-            if (i >= (int)cinfo.output_height) break;
-        }
-
-        auto* pNewBitmap = new BITMAP_t;
-        memset(pNewBitmap, 0, sizeof(BITMAP_t));
-
-        pNewBitmap->BitmapIndex = uiBitmapIndex;
-
-        filename._Copy_s(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME, MAX_BITMAP_FILE_NAME);
-
-        pNewBitmap->Width = (float)Width;
-        pNewBitmap->Height = (float)Height;
-        pNewBitmap->Components = 3;
-        pNewBitmap->Ref = 1;
-
-        size_t BufferSize = Width * Height * pNewBitmap->Components;
-        pNewBitmap->Buffer = new BYTE[BufferSize];
-        m_dwUsedTextureMemory += BufferSize;
-
-        int offset = 0;
-        int row_stride = cinfo.output_width * cinfo.output_components;
-        JSAMPARRAY buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
-        while (cinfo.output_scanline < cinfo.output_height)
-        {
-            if (offset + row_stride > (int)BufferSize)
-                break;
-
-            (void)jpeg_read_scanlines(&cinfo, buffer, 1);
-            memcpy(pNewBitmap->Buffer + (cinfo.output_scanline - 1) * Width * 3, buffer[0], row_stride);
-            offset += row_stride;
-        }
-
-        m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, pNewBitmap));
-
-        glGenTextures(1, &(pNewBitmap->TextureNumber));
-
-        glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
-    }
-
-    (void)jpeg_finish_decompress(&cinfo);
-    jpeg_destroy_decompress(&cinfo);
-    fclose(infile);
-
-    return true;
-}
-
 bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
     // create a reuseable buffer with the maximum size of the uncompressed image
@@ -728,8 +611,6 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     //assert(jpegColorspace == TJCS_RGB);
     assert(jpegWidth <= MAX_WIDTH);
     assert(jpegHeight <= MAX_HEIGHT);
-
-
 
     // decompress into the buffer
     result = tjDecompress2(tjhandle, jpegBuf, jpegSize, buffer, jpegWidth, 0, jpegHeight, TJPF_RGB, TJFLAG_FASTDCT);

@@ -4,9 +4,9 @@
 #include "GlobalBitmap.h"
 //extern CGlobalBitmap Bitmaps;
 
-extern bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat);
-extern bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality);
-extern void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer, int Size);
+bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat);
+bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality);
+void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer, int Size);
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool bCheck = true, bool bFullPath = false);

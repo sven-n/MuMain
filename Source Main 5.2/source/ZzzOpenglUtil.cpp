@@ -137,26 +137,13 @@ void SaveScreen()
 {
     GrabFirst = true;
 
-    auto Buffer = new unsigned char[WindowWidth * WindowHeight * 4];
+    auto Buffer = new unsigned char[WindowWidth * WindowHeight * 3];
 
-    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGBA, GL_UNSIGNED_BYTE, &Buffer[0]);
+    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, &Buffer[0]);
 
-    auto BufferNew = new unsigned char[WindowWidth * WindowHeight * 3];
-
-    int counter = 0;
-    for (uint32_t i = 0; i < WindowWidth * WindowHeight * 4; i += 4)
-    {
-        BufferNew[counter + 0] = Buffer[i + 0];
-        BufferNew[counter + 1] = Buffer[i + 1];
-        BufferNew[counter + 2] = Buffer[i + 2];
-
-        counter += 3;
-    }
-
-    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, &BufferNew[0], 100);
+    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, &Buffer[0], 100);
 
     SAFE_DELETE_ARRAY(Buffer);
-    SAFE_DELETE_ARRAY(BufferNew);
 
     GrabScreen++;
     GrabScreen %= 10000;
