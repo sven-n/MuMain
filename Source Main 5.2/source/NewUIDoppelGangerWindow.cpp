@@ -12,7 +12,7 @@
 #include "ZzzInterface.h"
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
 
 using namespace SEASON3B;

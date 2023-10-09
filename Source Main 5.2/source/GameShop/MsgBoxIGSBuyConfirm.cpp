@@ -6,7 +6,7 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSBuyConfirm.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include <strsafe.h>
 
 CMsgBoxIGSBuyConfirm::CMsgBoxIGSBuyConfirm()

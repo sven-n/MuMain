@@ -20,9 +20,10 @@
 #include "MapManager.h"
 #include "GM_Kanturu_2nd.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "ChangeRingManager.h"
 #include "LoadData.h"
+#include "NewUISystem.h"
 
 extern float g_fScreenRate_x;
 CTrapCanon g_TrapCanon;

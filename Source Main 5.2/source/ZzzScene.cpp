@@ -18,7 +18,7 @@
 #include "ZzzEffect.h"
 #include "ZzzAI.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "SMD.h"
 #include "Local.h"
 #include "MatchEvent.h"
@@ -81,6 +81,7 @@ extern DWORD g_dwKeyFocusUIID;
 extern CUIMapName* g_pUIMapName;
 extern bool HighLight;
 extern CTimer* g_pTimer;
+extern BOOL g_bGameServerConnected;
 
 #ifdef MOVIE_DIRECTSHOW
 extern CMovieScene* g_pMovieScene;

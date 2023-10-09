@@ -12,7 +12,7 @@
 #include "ZzzInterface.h"
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
 #include "UIGuildInfo.h"
 #include "UIGuardsMan.h"
@@ -629,8 +629,8 @@ void CNewUIGuardWindow::SetData(LPPMSG_ANS_CASTLESIEGESTATE Info)
     memset(m_szOwnerGuildMaster, 0, sizeof(char) * 11);
 
     m_eTimeType = (CASTLESIEGE_STATE)Info->cCastleSiegeState;
-    wcsncpy(m_szOwnerGuild, Info->cOwnerGuild, sizeof(char) * 8);
-    wcsncpy(m_szOwnerGuildMaster, Info->cOwnerGuildMaster, sizeof(char) * 10);
+    CMultiLanguage::ConvertFromUtf8(m_szOwnerGuild, Info->cOwnerGuild, MAX_GUILDNAME);
+    CMultiLanguage::ConvertFromUtf8(m_szOwnerGuildMaster, Info->cOwnerGuildMaster, MAX_ID_SIZE);
 
     m_wStartYear = MAKEWORD(Info->btStartYearL, Info->btStartYearH);
     m_byStartMonth = Info->btStartMonth;

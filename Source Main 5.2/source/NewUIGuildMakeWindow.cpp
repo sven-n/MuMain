@@ -6,10 +6,11 @@
 #include "NewUIManager.h"
 #include "NewUICommonMessageBox.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "Local.h"
+#include "NewUISystem.h"
 
 extern MARK_t		GuildMark[MAX_MARKS];
 extern int			SelectMarkColor;

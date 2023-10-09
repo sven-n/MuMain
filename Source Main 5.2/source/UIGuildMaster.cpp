@@ -10,9 +10,11 @@
 #include "UIManager.h"
 #include "UIGuildMaster.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "NewUICommonMessageBox.h"
 #include "Local.h"
+#include "NewUISystem.h"
+#include "ZzzInterface.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern int				g_iChatInputType;

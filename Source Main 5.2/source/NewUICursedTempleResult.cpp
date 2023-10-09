@@ -12,12 +12,13 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "UIControls.h"
 #include "SkillManager.h"
 #include "CharacterManager.h"
+#include "NewUISystem.h"
 
 using namespace SEASON3B;
 
@@ -363,9 +364,8 @@ void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYT
     {
         auto data2 = (LPPMSG_CURSED_TEMPLE_USER_ADD_EXP)(ReceiveBuffer + Offset);
 
-        CursedTempleGameResult TempData;
-        memset(&TempData.s_characterId, 0, sizeof(char) * (MAX_ID_SIZE + 1));
-        memcpy(&TempData.s_characterId, data2->GameId, MAX_ID_SIZE);
+        CursedTempleGameResult TempData{};
+        CMultiLanguage::ConvertFromUtf8(TempData.s_characterId, data2->GameId, MAX_ID_SIZE);
 
         TempData.s_mapnumber = (short)data2->byMapNumber;
 

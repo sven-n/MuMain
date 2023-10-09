@@ -2,15 +2,16 @@
 #include "CComGem.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
-#include "ZzzOpenData.h"
 #include "ZzzEffect.h"
 #include "ZzzAI.h"
 #include "ZzzCharacter.h"
-#include "ZzzLodTerrain.h"
-#include "ZzzInterface.h"
 #include "CDirection.h"
-#include "wsclientinline.h"
+
+#include "DSPlaySound.h"
+
 #include "MapManager.h"
+#include "NewUIInventoryCtrl.h"
+#include "NewUISystem.h"
 
 static CDirection Direction;
 

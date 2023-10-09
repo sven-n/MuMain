@@ -19,16 +19,19 @@
 #include <coreclr_delegates.h>
 
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticate)(int32_t, uint16_t , const wchar_t* );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticate)(int32_t, uint16_t , const BYTE* , uint32_t);
 inline SendAuthenticate dotnet_SendAuthenticate = reinterpret_cast<SendAuthenticate>(g_dotnet->get_method(type_name_connection_manager, L"SendAuthenticate"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomClientJoined)(int32_t, BYTE , const wchar_t* );
 inline SendChatRoomClientJoined dotnet_SendChatRoomClientJoined = reinterpret_cast<SendChatRoomClientJoined>(g_dotnet->get_method(type_name_connection_manager, L"SendChatRoomClientJoined"));
 
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLeaveChatRoom)(int32_t);
+inline SendLeaveChatRoom dotnet_SendLeaveChatRoom = reinterpret_cast<SendLeaveChatRoom>(g_dotnet->get_method(type_name_connection_manager, L"SendLeaveChatRoom"));
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomClientLeft)(int32_t, BYTE , const wchar_t* );
 inline SendChatRoomClientLeft dotnet_SendChatRoomClientLeft = reinterpret_cast<SendChatRoomClientLeft>(g_dotnet->get_method(type_name_connection_manager, L"SendChatRoomClientLeft"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatMessage)(int32_t, BYTE , BYTE , const wchar_t* );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatMessage)(int32_t, BYTE , BYTE , const BYTE* , uint32_t);
 inline SendChatMessage dotnet_SendChatMessage = reinterpret_cast<SendChatMessage>(g_dotnet->get_method(type_name_connection_manager, L"SendChatMessage"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendKeepAlive)(int32_t);

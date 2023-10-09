@@ -382,6 +382,8 @@ enum struct STORAGE_TYPE
 #define ITEM_POTION  	 (14*MAX_ITEM_INDEX)
 #define ITEM_ETC 		 (15*MAX_ITEM_INDEX)
 
+#define ITEM_ZEN  	 (ITEM_POTION + 15)
+
 #define MAX_RESISTANCE		7
 
 #define MAX_CLASS			7

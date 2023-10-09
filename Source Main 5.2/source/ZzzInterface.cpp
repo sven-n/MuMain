@@ -19,7 +19,7 @@
 #include "ZzzScene.h"
 #include "ZzzPath.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "./Utilities/Log/ErrorReport.h"
 #include "MatchEvent.h"
 #include "CSQuest.h"
@@ -55,6 +55,7 @@
 #include "ProtocolSend.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
+#include "StreamPacketEngine.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
@@ -66,6 +67,8 @@ extern bool bCheckNPC;
 extern BOOL g_bWhileMovingZone;
 extern DWORD g_dwLatestZoneMoving;
 extern bool Teleport;
+extern bool LogOut;
+extern int DirTable[16];
 
 #ifdef WINDOWMODE
 extern BOOL g_bUseWindowMode;
@@ -87,6 +90,8 @@ extern void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime = 0);
 extern void UnRegisterBuff(eBuffState buff, OBJECT* o);
 
 MovementSkill g_MovementSkill;
+
+DWORD g_dwLatestMagicTick;
 
 const   float   AutoMouseLimitTime = (1.f * 60.f * 60.f);
 int   LoadingWorld = 0;
@@ -1897,6 +1902,64 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
     return -1;
 }
 
+void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY)
+{
+    if (PathNum < 1)
+        return;
+
+    if (PathNum >= MAX_PATH_FIND)
+    {
+        PathNum = MAX_PATH_FIND - 1;
+    }
+
+    CStreamPacketEngine spe;
+    spe.Init(0xC1, PACKET_MOVE);
+    spe << PathX[0] << PathY[0];
+    BYTE Path[8];
+    ZeroMemory(Path, 8);
+    BYTE Dir = 0;
+    for (int i = 1; i < PathNum; i++)
+    {
+        Dir = 0;
+        for (int j = 0; j < 8; j++)
+        {
+            if (DirTable[j * 2] == (PathX[i] - PathX[i - 1]) && DirTable[j * 2 + 1] == (PathY[i] - PathY[i - 1]))
+            {
+                Dir = j;
+                break;
+            }
+        }
+
+        if (i % 2 == 1)
+        {
+            Path[(i + 1) / 2] = Dir << 4;
+        }
+        else
+        {
+            Path[(i + 1) / 2] += Dir;
+        }
+    }
+    if (PathNum == 1)
+    {
+        Path[0] = ((BYTE)((Angle + 22.5f) / 360.f * 8.f + 1.f) % 8) << 4;
+    }
+    else
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (DirTable[j * 2] == (TargetX - PathX[PathNum - 1]) && DirTable[j * 2 + 1] == (TargetY - PathY[PathNum - 1]))
+            {
+                Dir = j;
+                break;
+            }
+        }
+        Path[0] = Dir << 4;
+    }
+    Path[0] += (BYTE)(PathNum - 1);
+    spe.AddData(Path, 1 + (PathNum) / 2);
+    spe.Send();
+}
+
 void LetHeroStop(CHARACTER* c, BOOL bSetMovementFalse)
 {
     BYTE PathX[1];
@@ -1965,6 +2028,59 @@ bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, int iSkill)
     }
 
     return (Success);
+}
+
+void SendRequestMagic(int Type, int Key)
+{
+    if (!IsCanBCSkill(Type))
+        return;
+
+    if (Type == 40 || Type == 263 || Type == 261 || abs((int)(GetTickCount() - g_dwLatestMagicTick)) > 300)
+    {
+        g_dwLatestMagicTick = GetTickCount();
+        SocketClient->ToGameServer()->SendTargetedSkill(Type, Key);
+        g_ConsoleDebug->Write(MCD_SEND, L"0x19 [SendRequestMagic(%d %d)]", Type, Key);
+    }
+}
+
+extern int CurrentSkill;
+
+inline WORD g_byLastSkillSerialNumber = 0;
+inline BYTE MakeSkillSerialNumber(BYTE* pSerialNumber)
+{
+    if (pSerialNumber == NULL) return 0;
+
+    ++g_byLastSkillSerialNumber;
+    if (g_byLastSkillSerialNumber > 50) g_byLastSkillSerialNumber = 1;
+
+    *pSerialNumber = g_byLastSkillSerialNumber;
+    return g_byLastSkillSerialNumber;
+}
+
+void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE Tpos, WORD TKey, BYTE* pSkillSerial)
+{
+    CurrentSkill = Type;
+
+    SocketClient->ToGameServer()->SendAreaSkill(Type, x, y, Angle, TKey, MakeSkillSerialNumber(pSkillSerial));
+
+    g_ConsoleDebug->Write(MCD_SEND, L"0x1E [SendRequestMagicContinue]");
+}
+
+void SendRequestMagicAttack(int Type, int x, int y, BYTE Serial, int Count, int* Key, WORD SkillSerial)
+{
+    CStreamPacketEngine spe;
+    WORD p_Type = (WORD)Type;
+
+    spe.Init(0xC3, PACKET_MAGIC_ATTACK);
+    spe << (BYTE)(HIBYTE(p_Type)) << (BYTE)(LOBYTE(p_Type)) << (BYTE)x << (BYTE)y << (BYTE)MakeSkillSerialNumber(&Serial) << (BYTE)Count;
+    for (int i = 0; i < Count; i++)
+    {
+        spe << (BYTE)(Key[i] >> 8) << (BYTE)(Key[i] & 0xff);
+        spe << (BYTE)SkillSerial;
+    }
+    spe.Send();
+
+    g_ConsoleDebug->Write(MCD_SEND, L"0x1D [SendRequestMagicAttack(%d)]", Serial);
 }
 
 bool SkillWarrior(CHARACTER* c, ITEM* p)
@@ -2540,6 +2656,21 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
     }
 }
 
+BYTE GetDestValue(int xPos, int yPos, int xDst, int yDst)
+{
+    int DestX = xDst - xPos;
+    int DestY = yDst - yPos;
+    if (DestX < -8) DestX = -8;
+    if (DestX > 7) DestX = 7;
+    if (DestY < -8) DestY = -8;
+    if (DestY > 7) DestY = 7;
+    assert(-8 <= DestX && DestX <= 7);
+    assert(-8 <= DestY && DestY <= 7);
+    BYTE byValue1 = ((BYTE)(DestX + 8)) << 4;
+    BYTE byValue2 = ((BYTE)(DestY + 8)) & 0xf;
+    return (byValue1 | byValue2);
+}
+
 void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 {
     int iSkill = g_MovementSkill.m_bMagic ? CharacterAttribute->Skill[g_MovementSkill.m_iSkill] : g_MovementSkill.m_iSkill;
@@ -3089,6 +3220,13 @@ bool SkillElf(CHARACTER* c, ITEM* p)
     }
     return Success;
 }
+
+void SendRequestAction(OBJECT& obj, BYTE action)
+{
+    BYTE rotation = (BYTE)((obj.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
+    SocketClient->ToGameServer()->SendAnimationRequest(rotation, action);
+}
+
 int ItemKey = 0;
 int ActionTarget = -1;
 
@@ -3368,9 +3506,11 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             }
             MouseUpdateTimeMax = 6;
         }
-        if (Items[ItemKey].Item.Type == ITEM_POTION + 15)
+
+        if (Items[ItemKey].Item.Type == ITEM_ZEN && SendGetItem == -1)
         {
-            SendRequestGetItem(ItemKey);
+            SendGetItem = ItemKey;
+            SocketClient->ToGameServer()->SendPickupItemRequest(ItemKey);
         }
         else if (g_pMyInventory->FindEmptySlot(&Items[ItemKey].Item) == -1)
         {
@@ -3383,9 +3523,10 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             pItem->Position[2] = RequestTerrainHeight(pItem->Position[0], pItem->Position[1]) + 3.f;
             pItem->Gravity = 50.f;
         }
-        else
+        else if (SendGetItem == -1)
         {
-            SendRequestGetItem(ItemKey);
+            SendGetItem = ItemKey;
+            SocketClient->ToGameServer()->SendPickupItemRequest(ItemKey);
         }
         break;
     case MOVEMENT_TALK:
@@ -9105,7 +9246,7 @@ void RenderDebugWindow()
     }
 
 #ifdef ENABLE_EDIT
-    wchar_t Text[256];
+    wchar_t Text[256] {};
     if (EditFlag == EDIT_MAPPING)
     {
         int sx = 640 - 30;
@@ -9129,7 +9270,8 @@ void RenderDebugWindow()
     if (EditFlag == EDIT_OBJECT)
     {
         g_pRenderText->RenderText(640 - 100, 0, L"Garbage");
-        // TODO g_pRenderText->RenderText(0, 0, Models[SelectModel].Name);
+        CMultiLanguage::ConvertFromUtf8(Text, Models[SelectModel].Name, sizeof Models[SelectModel].Name);
+        g_pRenderText->RenderText(0, 0, Text);
     }
     if (EditFlag == EDIT_MONSTER)
     {
@@ -9139,7 +9281,10 @@ void RenderDebugWindow()
                 glColor3f(1.f, 0.8f, 0.f);
             else
                 glColor3f(1.f, 1.f, 1.f);
-            swprintf(Text, L"%2d: %s", MonsterScript[i].Type, MonsterScript[i].Name);
+
+            wchar_t monsterName[sizeof MonsterScript[i].Name]{};
+            CMultiLanguage::ConvertFromUtf8(monsterName, MonsterScript[i].Name, sizeof MonsterScript[i].Name);
+            swprintf(Text, L"%2d: %s", MonsterScript[i].Type, monsterName);
             g_pRenderText->RenderText(640 - 100, i * 10, Text);
         }
     }

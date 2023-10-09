@@ -17,7 +17,7 @@
 #include "zzzinventory.h"
 #include "zzzeffect.h"
 #include "dsplaysound.h"
-#include "wsclientinline.h"
+
 #include "UIManager.h"
 #include "DuelMgr.h"
 #include "MapManager.h"

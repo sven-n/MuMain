@@ -12,7 +12,7 @@
 #include "UIPopup.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #include "GMCrywolf1st.h"
 
 extern bool	View_Bal;

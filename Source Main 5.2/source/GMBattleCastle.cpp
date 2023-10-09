@@ -16,11 +16,14 @@
 #include "zzzOpenData.h"
 #include "PhysicsManager.h"
 #include "CSParts.h"
-#include "wsclientinline.h"
+
 #include "MapManager.h"
 #include "GIPetManager.h"
 #include "BoneManager.h"
 #include "GMBattleCastle.h"
+
+#include "GuildCache.h"
+#include "ZzzInterface.h"
 
 extern  int     g_iTotalObj;
 extern  int     WaterTextureNumber;

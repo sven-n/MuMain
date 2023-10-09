@@ -4,10 +4,12 @@
 
 #include "stdafx.h"
 #include "NewUIStorageInventory.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
 #include "GameShop\MsgBoxIGSCommon.h"
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM

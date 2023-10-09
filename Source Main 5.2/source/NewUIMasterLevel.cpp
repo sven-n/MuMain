@@ -7,7 +7,7 @@
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "NewUIGuildInfoWindow.h"
 #include "NewUIButton.h"
 #include "NewUIMyInventory.h"

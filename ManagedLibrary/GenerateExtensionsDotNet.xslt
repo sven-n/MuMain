@@ -164,6 +164,14 @@ public unsafe partial class ConnectionManager
 
   <xsl:template match="pd:Type[. = 'Binary']" mode="type">Memory&lt;byte&gt;</xsl:template>
 
+	<xsl:template match="pd:DefaultValue" mode="params">
+		<xsl:choose>
+		    <xsl:when test=". = 'true'">1</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="."/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
   <xsl:template match="pd:Field" mode="params">
     <xsl:if test="position() > 1">
       <xsl:text>, </xsl:text>
@@ -173,7 +181,7 @@ public unsafe partial class ConnectionManager
     <xsl:call-template name="LowerCaseName" />
     <xsl:if test="pd:DefaultValue">
       <xsl:text> = </xsl:text>
-      <xsl:value-of select="pd:DefaultValue"/>
+      <xsl:apply-templates select="pd:DefaultValue" mode="params"/>
     </xsl:if>
     <xsl:if test="(pd:Type = 'Binary')">
     	<xsl:text>, uint </xsl:text>

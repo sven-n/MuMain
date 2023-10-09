@@ -7,14 +7,7 @@
 
 #include "Input.h"
 #include "UIMng.h"
-
-#include "ZzzBMD.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
-#include "DSPlaySound.h"
-
-#include "ZzzCharacter.h"
-#include "wsclientinline.h"
+#include "WSclient.h"
 
 #ifdef MOVIE_DIRECTSHOW
 #include <dshow.h>

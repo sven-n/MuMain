@@ -15,7 +15,7 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "ZzzScene.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "CSQuest.h"
@@ -450,6 +450,76 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     DisableAlphaBlend();
+}
+
+void SendRequestUse(int Index, int Target)
+{
+    if (!IsCanUseItem())
+    {
+        g_pChatListBox->AddText(L"", GlobalText[474], SEASON3B::TYPE_ERROR_MESSAGE);
+        return;
+    }
+    if (EnableUse > 0)
+    {
+        return;
+    }
+
+    EnableUse = 10;
+    SocketClient->ToGameServer()->SendConsumeItemRequest(Index, Target, g_byItemUseType);
+    g_ConsoleDebug->Write(MCD_SEND, L"0x26 [SendRequestUse(%d)]", Index);
+}
+
+bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex)
+{
+    if (EquipmentItem || NULL == pItem) return false;
+
+    EquipmentItem = true;
+
+    BYTE splitType;
+    if (pItem->option_380)
+    {
+        splitType = ((BYTE)(pItem->Type >> 5) & 240) | 0x08;
+    }
+    else
+        splitType = ((BYTE)(pItem->Type >> 5) & 240);
+
+    if (pItem->bPeriodItem == true)
+    {
+        splitType |= 0x02;
+    }
+
+    if (pItem->bExpiredPeriod == true)
+    {
+        splitType |= 0x04;
+    }
+
+    BYTE spareBits;
+    if (g_SocketItemMgr.IsSocketItem(pItem))
+    {
+        spareBits = pItem->SocketSeedSetOption;
+    }
+    else
+    {
+        spareBits = (((BYTE)pItem->Jewel_Of_Harmony_Option) << 4) + ((BYTE)pItem->Jewel_Of_Harmony_OptionLevel);
+    }
+
+    const BYTE ItemData[12]
+    {
+        BYTECAST(char, pItem->Type),
+        BYTECAST(char, pItem->Level),
+        BYTECAST(char, pItem->Durability),
+        BYTECAST(char, pItem->Option1),
+        BYTECAST(char, pItem->ExtOption),
+        splitType,
+        spareBits,
+        pItem->bySocketOption[0], pItem->bySocketOption[1], pItem->bySocketOption[2], pItem->bySocketOption[3], pItem->bySocketOption[4]
+    };
+
+    SocketClient->ToGameServer()->SendItemMoveRequest((uint32_t)iSrcType, iSrcIndex, ItemData, sizeof ItemData, (uint32_t)iDstType, iDstIndex);
+
+    g_ConsoleDebug->Write(MCD_SEND, L"0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", iSrcIndex, iDstIndex, iSrcType, iDstType, (pItem->Type & 0x1FFF), (BYTE)(pItem->Level), (BYTE)(pItem->Durability));
+
+    return true;
 }
 
 bool IsCanUseItem()
@@ -6425,7 +6495,7 @@ void SetJewelColor()
 
 void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExtOption, bool Sort)
 {
-    wchar_t Name[80];
+    wchar_t Name[80]{};
 
     int Level = (ItemLevel >> 3) & 15;
 
@@ -11277,8 +11347,7 @@ void ClosePersonalShop()
         }
         if (g_PersonalShopSeller.Key)
         {
-            SendRequestClosePersonalShop(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
-            //todo SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
+            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
         }
     }
 

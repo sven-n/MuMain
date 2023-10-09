@@ -205,6 +205,17 @@ public:
     void SendPlayerShopItemBuyRequest(uint16_t playerId, const wchar_t* playerName, BYTE itemSlot);
 
     /// <summary>
+    /// Sends a PlayerShopCloseOther to this connection.
+    /// </summary>
+    /// <param name="playerId">The player id.</param>
+    /// <param name="playerName">The player name.</param>
+    /// <remarks>
+    /// Is sent by the client when: A player closes the dialog of another players shop.
+    /// Causes reaction on server side: The server handles that by unsubscribing the player from changes of the shop.
+    /// </remarks>
+    void SendPlayerShopCloseOther(uint16_t playerId, const wchar_t* playerName);
+
+    /// <summary>
     /// Sends a PickupItemRequest to this connection.
     /// </summary>
     /// <param name="itemId">The item id.</param>
@@ -414,11 +425,12 @@ public:
     /// <summary>
     /// Sends a CastleSiegeUnregisterRequest to this connection.
     /// </summary>
+    /// <param name="isGivingUp">The is giving up.</param>
     /// <remarks>
     /// Is sent by the client when: The player opened a castle siege npc to un-register his guild alliance.
     /// Causes reaction on server side: The server returns the result of the castle siege un-registration.
     /// </remarks>
-    void SendCastleSiegeUnregisterRequest();
+    void SendCastleSiegeUnregisterRequest(BYTE isGivingUp = true);
 
     /// <summary>
     /// Sends a CastleSiegeRegistrationStateRequest to this connection.
@@ -1037,6 +1049,15 @@ public:
     /// Causes reaction on server side: The server checks if a level-up-point is available. If yes, it adds the point to the specified stat type. It sends a response back to the client.
     /// </remarks>
     void SendIncreaseCharacterStatPoint(uint32_t statType);
+
+    /// <summary>
+    /// Sends a InventoryRequest to this connection.
+    /// </summary>
+    /// <remarks>
+    /// Is sent by the client when: The player bought or sold an item through his personal shop.
+    /// Causes reaction on server side: The server sends the inventory list back to the client.
+    /// </remarks>
+    void SendInventoryRequest();
 
     /// <summary>
     /// Sends a ClientReadyAfterMapChange to this connection.

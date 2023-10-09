@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "NewUIRegistrationLuckyCoin.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 
 namespace SEASON3B
 {

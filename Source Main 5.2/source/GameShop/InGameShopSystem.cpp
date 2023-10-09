@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "InGameShopSystem.h"
-#include "WSclientinline.h"
 #include "ZzzInventory.h"
 #include "MsgBoxIGSCommon.h"
 

@@ -13,7 +13,7 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "UIControls.h"
@@ -21,6 +21,8 @@
 #include "ZzzEffect.h"
 #include "w_CursedTemple.h"
 #include "MapManager.h"
+#include "NewUIInventoryCtrl.h"
+#include "NewUISystem.h"
 #include "SkillManager.h"
 
 extern int TextNum;

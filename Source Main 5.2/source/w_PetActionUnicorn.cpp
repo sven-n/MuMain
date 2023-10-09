@@ -7,8 +7,9 @@
 #include "ZzzEffect.h"
 #include "ZzzCharacter.h"
 #include "ZzzObject.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
+#include "WSclient.h"
 
 PetActionUnicornPtr PetActionUnicorn::Make()
 {
@@ -194,10 +195,12 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD 
         obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
         //------------------------------//
 
-        if (CompTimeControl(1000, m_dwSendDelayTime))
+        if (CompTimeControl(1000, m_dwSendDelayTime)
+            && &Hero->Object == obj->Owner
+            && SendGetItem == -1)
         {
-            if (&Hero->Object == obj->Owner)
-                SendRequestGetItem(m_RootItem.itemIndex);
+            SendGetItem = m_RootItem.itemIndex;
+            SocketClient->ToGameServer()->SendPickupItemRequest(m_RootItem.itemIndex);
         }
         obj->Velocity = m_speed;
     }
@@ -315,7 +318,7 @@ void PetActionUnicorn::FindZen(OBJECT* obj)
 
         if (SEARCH_LENGTH > dl)
         {
-            if (Items[i].Item.Type != ITEM_POTION + 15)
+            if (Items[i].Item.Type != ITEM_ZEN)
             {
                 continue;
             }

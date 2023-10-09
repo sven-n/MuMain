@@ -6,7 +6,8 @@
 using namespace SEASON3B;
 
 #include "NewUISiegeWarBase.h"
-#include "wsclientinline.h"
+#include "ZzzInterface.h"
+#include "ZzzInventory.h"
 #include "GMBattleCastle.h"
 #include "UIGuildInfo.h"
 #include "CharacterManager.h"

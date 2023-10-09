@@ -2,9 +2,11 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+
+#include "NewUISystem.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSStorageItemInfo.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
 #include "MsgBoxIGSUseItemConfirm.h"
 

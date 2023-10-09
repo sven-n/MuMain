@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "NewUIItemEnduranceInfo.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "CharacterManager.h"
 
 #ifdef PJH_FIX_SPRIT

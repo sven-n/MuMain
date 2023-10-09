@@ -8,12 +8,11 @@
 #include "ZzzTexture.h"
 #include "UIManager.h"
 #include "UIGuildInfo.h"
-#include "zzzLodTerrain.h"
-#include "GMBattleCastle.h"
 #include "CSParts.h"
-#include "wsclientinline.h"
 #include "NewUICommonMessageBox.h"
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
+#include "ZzzInventory.h"
 
 extern float		g_fScreenRate_x;
 extern float		g_fScreenRate_y;

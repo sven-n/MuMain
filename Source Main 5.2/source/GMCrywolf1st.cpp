@@ -16,15 +16,18 @@
 #include "CSChaosCastle.h"
 #include "MapManager.h"
 #include "CharacterManager.h"
+#include "NewUISystem.h"
 #include "SkillManager.h"
 
 extern void MonsterMoveSandSmoke(OBJECT* o);
 extern void MonsterDieSandSmoke(OBJECT* o);
 
+extern bool LogOut;
+
 BYTE m_AltarState[5] = { 2,2,2,2,2 };
 
 #include "UIControls.h"
-#include "wsclientinline.h"
+
 
 bool	View_Bal = false;
 char	Suc_Or_Fail = -1;

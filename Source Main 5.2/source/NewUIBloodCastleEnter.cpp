@@ -5,9 +5,9 @@
 
 #include "NewUIBloodCastleEnter.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
-#include "NewUICommonMessageBox.h"
+
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
 
 using namespace SEASON3B;
 

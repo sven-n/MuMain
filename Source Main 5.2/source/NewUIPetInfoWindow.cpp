@@ -5,7 +5,7 @@
 
 #include "NewUIPetInfoWindow.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "GIPetManager.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"

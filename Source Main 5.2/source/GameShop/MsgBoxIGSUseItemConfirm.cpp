@@ -4,11 +4,13 @@
 
 #include "stdafx.h"
 
+#include "ZzzCharacter.h"
+
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "MsgBoxIGSUseItemConfirm.h"
 
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
 #include "MsgBoxIGSUseBuffConfirm.h"
 

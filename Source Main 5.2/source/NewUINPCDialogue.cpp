@@ -4,8 +4,10 @@
 
 #include "stdafx.h"
 #include "NewUINPCDialogue.h"
-#include "wsclientinline.h"
+
 #include "CRTDBG.h"
+#include "DSPlaySound.h"
+#include "NewUISystem.h"
 
 using namespace SEASON3B;
 

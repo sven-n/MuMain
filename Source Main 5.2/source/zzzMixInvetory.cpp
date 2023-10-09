@@ -17,7 +17,7 @@
 #include "ZzzInventory.h"
 #include "zzzMixInventory.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "./Utilities/Log/ErrorReport.h"
 #include "Local.h"
 #include "CSItemOption.h"

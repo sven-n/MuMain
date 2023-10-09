@@ -4,12 +4,14 @@
 
 #include "stdafx.h"
 
+#include "NewUISystem.h"
+
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "MsgBoxIGSGiftStorageItemInfo.h"
 
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "MsgBoxIGSUseItemConfirm.h"
 
 //////////////////////////////////////////////////////////////////////

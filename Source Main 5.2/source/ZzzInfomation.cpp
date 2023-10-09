@@ -416,14 +416,46 @@ void OpenItemScript(wchar_t* FileName)
             {
                 BuxConvert(pSeek, Size);
 
-                char rawName[MAX_ITEM_NAME]{};
+                ITEM_ATTRIBUTE_FILE source;
+                memcpy(&source, pSeek, Size);
 
-                memcpy(rawName, pSeek, MAX_ITEM_NAME);
-                CMultiLanguage::ConvertFromUtf8(ItemAttribute[i].Name, rawName);
-                pSeek += MAX_ITEM_NAME;
-                memcpy(&(ItemAttribute[i].TwoHand), pSeek, Size - MAX_ITEM_NAME);
+                CMultiLanguage::ConvertFromUtf8(ItemAttribute[i].Name, source.Name, MAX_ITEM_NAME);
+                ItemAttribute[i].TwoHand = source.TwoHand;
+                ItemAttribute[i].Level = source.Level;
+                ItemAttribute[i].m_byItemSlot = source.m_byItemSlot;
+                ItemAttribute[i].m_wSkillIndex = source.m_wSkillIndex;
+                ItemAttribute[i].Width = source.Width;
+                ItemAttribute[i].Height = source.Height;
+                ItemAttribute[i].DamageMin = source.DamageMin;
+                ItemAttribute[i].DamageMax = source.DamageMax;
+                ItemAttribute[i].SuccessfulBlocking = source.SuccessfulBlocking;
+                ItemAttribute[i].Defense =source.Defense;
+                ItemAttribute[i].MagicDefense = source.MagicDefense;
+                ItemAttribute[i].WeaponSpeed = source.WeaponSpeed;
+                ItemAttribute[i].WalkSpeed = source.WalkSpeed;
+                ItemAttribute[i].Durability = source.Durability;
+                ItemAttribute[i].MagicDur = source.MagicDur;
+                ItemAttribute[i].MagicPower = source.MagicPower;
+                ItemAttribute[i].RequireStrength = source.RequireStrength;
+                ItemAttribute[i].RequireDexterity = source.RequireDexterity;
+                ItemAttribute[i].RequireEnergy = source.RequireEnergy;
+                ItemAttribute[i].RequireVitality = source.RequireVitality;
+                ItemAttribute[i].RequireCharisma = source.RequireCharisma;
+                ItemAttribute[i].RequireLevel = source.RequireLevel;
+                ItemAttribute[i].Value = source.Value;
+                ItemAttribute[i].iZen = source.iZen;
+                ItemAttribute[i].AttType = source.AttType;
+                for (int c = 0; c < MAX_CLASS; ++c)
+                {
+                    ItemAttribute[i].RequireClass[c] = source.RequireClass[c];
+                }
 
-                pSeek += Size - MAX_ITEM_NAME;
+                for (int r = 0; r < MAX_RESISTANCE; ++r)
+                {
+                    ItemAttribute[i].Resistance[r] = source.Resistance[r];
+                }
+
+                pSeek += Size;
             }
         }
         delete[] Buffer;

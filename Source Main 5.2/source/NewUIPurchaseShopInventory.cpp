@@ -5,7 +5,7 @@
 #include "NewUIPurchaseShopInventory.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
-#include "wsclientinline.h"
+
 #include "PersonalShopTitleImp.h"
 
 namespace

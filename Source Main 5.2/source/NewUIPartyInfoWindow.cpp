@@ -5,9 +5,10 @@
 
 #include "NewUIPartyInfoWindow.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "GMBattleCastle.h"
 #include "CSChaosCastle.h"
+#include "DSPlaySound.h"
 #include "GMHellas.h"
 #include "GM3rdChangeUp.h"
 #include "w_CursedTemple.h"

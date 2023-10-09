@@ -5,10 +5,9 @@
 
 #include "NewUIEnterDevilSquare.h"
 #include "NewUISystem.h"
-#include "NewUICommonMessageBox.h"
-#include "wsclientinline.h"
 #include "ZzzCharacter.h"
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
 
 using namespace SEASON3B;
 

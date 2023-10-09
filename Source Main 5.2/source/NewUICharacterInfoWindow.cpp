@@ -6,7 +6,7 @@
 #include "NewUISystem.h"
 #include "CharacterManager.h"
 #include "CSItemOption.h"
-#include "ZzzBMD.h"
+#include "DSPlaySound.h"
 #include "ZzzCharacter.h"
 #include "UIControls.h"
 #include "ZzzInterface.h"
@@ -15,7 +15,6 @@
 #include "SkillManager.h"
 #include "UIJewelHarmony.h"
 #include "UIManager.h"
-#include "wsclientinline.h"
 #include "ServerListManager.h"
 
 using namespace SEASON3B;

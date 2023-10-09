@@ -11,12 +11,13 @@
 #include "zzzscene.h"
 #include "zzzInterface.h"
 #include "zzzinventory.h"
-#include "wsclientinline.h"
+
 #include "CSQuest.h"
 #include "GIPetManager.h"
 #include "UsefulDef.h"
 #include "NewUIInventoryCtrl.h"
 #include "CharacterManager.h"
+#include "NewUISystem.h"
 
 bool bCheckNPC;
 extern  int  g_iMessageTextStart;

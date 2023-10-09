@@ -1,11 +1,14 @@
 #include "stdafx.h"
 #include "NewUIChatInputBox.h"
+
+#include "DSPlaySound.h"
 #include "NewUIChatLogWindow.h"
 #include "UIControls.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
 #include "ZzzOpenData.h"
 #include "MapManager.h"
+#include "ZzzInterface.h"
+
 using namespace SEASON3B;
 
 SEASON3B::CNewUIChatInputBox::CNewUIChatInputBox()
@@ -515,10 +518,10 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
             if (!CheckCommand(szChatText))
             {
                 {
-                    if (CheckAbuseFilter(szChatText))
-                    {
-                        wstrText = GlobalText[570];
-                    }
+                    //if (CheckAbuseFilter(szChatText))
+                    //{
+                    //    wstrText = GlobalText[570];
+                    //}
 
                     if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && wcslen(szChatText) && wcslen(szWhisperID) > 0)
                     {

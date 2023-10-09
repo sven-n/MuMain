@@ -58,4 +58,28 @@ class PacketFunctions_ConnectServer_Custom : public PacketFunctions_Base { };
 /// <summary>
 /// Extension methods to start writing messages of this namespace on a <see cref="Connection"/>.
 /// </summary>
-class PacketFunctions_ChatServer_Custom : public PacketFunctions_Base { };
+class PacketFunctions_ChatServer_Custom : public PacketFunctions_Base
+{
+public:
+    /// <summary>
+    /// Sends a Authenticate to this connection.
+    /// </summary>
+    /// <param name="roomId">The room id.</param>
+    /// <param name="token">The token to authenticate the client.</param>
+    /// <remarks>
+    /// Is sent by the client when: This packet is sent by the client after it connected to the server, to authenticate itself.
+    /// Causes reaction on server side: The server will check the token. If it's correct, the client gets added to the requested chat room.
+    /// </remarks>
+    void SendAuthenticateExt(uint16_t roomId, uint32_t token);
+
+    /// <summary>
+    /// Sends a ChatMessage to this connection.
+    /// </summary>
+    /// <param name="senderIndex">The sender index.</param>
+    /// <param name="message">The message.</param>
+    /// <remarks>
+    /// Is sent by the server when: This packet is sent by the server after another chat client sent a message to the current chat room.
+    /// Causes reaction on client side: The client will show the message.
+    /// </remarks>
+    void SendChatMessageExt(BYTE senderIndex, const wchar_t* message);
+};

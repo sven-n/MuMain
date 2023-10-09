@@ -8,7 +8,7 @@
 #include "UIManager.h"
 
 #include "ItemAddOptioninfo.h"
-#include "wsclientinline.h"
+
 
 #define ITEMADDOPTION_DATA_FILE L"Data\\Local\\ItemAddOption.bmd"
 

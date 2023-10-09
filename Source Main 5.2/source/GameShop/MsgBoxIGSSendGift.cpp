@@ -2,10 +2,12 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+
+#include "ZzzCharacter.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSSendGift.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "MsgBoxIGSCommon.h"
 #include "MsgBoxIGSSendGiftConfirm.h"
 

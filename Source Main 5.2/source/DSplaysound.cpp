@@ -12,16 +12,10 @@
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
 #include <objbase.h>
-//#include <initguid.h>
-#include <commdlg.h>
-#include <mmreg.h>
 #include <dsound.h>
 #include "DSwaveio.h"
-#include "ZzzBMD.h"
 #include "ZzzInfomation.h"
-#include "ZzzObject.h"
 #include "ZzzCharacter.h"
-//#include "DSWavRead.h"
 #include "DSPlaySound.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "./Utilities/Log/muConsoleDebug.h"

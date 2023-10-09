@@ -4,8 +4,10 @@
 
 #include "stdafx.h"
 #include "NewUIQuestProgressByEtc.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "UsefulDef.h"
 
 using namespace SEASON3B;

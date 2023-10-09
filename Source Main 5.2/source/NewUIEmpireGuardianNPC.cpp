@@ -5,7 +5,8 @@
 #include "NewUISystem.h"
 #include "NewUICommon.h"
 #include "NewUIEmpireGuardianNPC.h"
-#include "wsclientinline.h"
+
+#include "DSPlaySound.h"
 #include "UIControls.h"
 
 using namespace SEASON3B;

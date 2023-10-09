@@ -25,7 +25,7 @@ public:
     int GetGuildMarkIndex(int nGuildKey);
 
     int MakeGuildMarkIndex(int nGuildKey);
-    int SetGuildMark(int nGuildKey, BYTE* UnionName, BYTE* GuildName, BYTE* Mark);
+    int SetGuildMark(int nGuildKey, char* UnionName, char* GuildName, BYTE* Mark);
 };
 
 extern CGuildCache g_GuildCache;

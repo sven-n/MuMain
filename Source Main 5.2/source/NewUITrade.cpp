@@ -7,8 +7,9 @@
 #include "NewUITrade.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
-#include "wsclientinline.h"
+
 #include "CComGem.h"
+#include "DSPlaySound.h"
 
 using namespace SEASON3B;
 

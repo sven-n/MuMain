@@ -4,15 +4,11 @@
 
 #include "stdafx.h"
 #include "DuelMgr.h"
-#include "ZzzBMD.h"
-#include "ZzzEffect.h"
-#include "ZzzObject.h"
-#include "ZzzInventory.h"
-#include "ZzzInterface.h"
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
-#include "wsclientinline.h"
+
 #include "CharacterManager.h"
+#include "WSclient.h"
 
 CDuelMgr g_DuelMgr;
 

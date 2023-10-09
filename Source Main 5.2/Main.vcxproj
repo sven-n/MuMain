@@ -1091,7 +1091,6 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClInclude Include="source\WinEx.h" />
     <ClInclude Include="source\Winmain.h" />
     <ClInclude Include="source\WSclient.h" />
-    <ClInclude Include="source\wsclientinline.h" />
     <ClInclude Include="source\w_BaseMap.h" />
     <ClInclude Include="source\w_BasePet.h" />
     <ClInclude Include="source\w_Buff.h" />

@@ -15,7 +15,7 @@
 #include "ZzzScene.h"
 #include "ZzzOpenData.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "SideHair.h"
 #include "PhysicsManager.h"
 #include "GOBoid.h"
@@ -43,6 +43,7 @@
 #include "CharacterManager.h"
 #include "w_MapHeaders.h"
 #include "MonkSystem.h"
+#include "NewUISystem.h"
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
@@ -6101,7 +6102,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     int Type = ConvertItemType(Item);
     ITEM* n = &ip->Item;
     n->Type = Type;
-    if (Type == ITEM_POTION + 15)
+    if (Type == ITEM_ZEN)
     {
         n->Level = (Item[1] << 16) + (Item[2] << 8) + (Item[4]);
         n->Durability = 0;

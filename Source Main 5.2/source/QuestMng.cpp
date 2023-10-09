@@ -5,9 +5,12 @@
 #include "stdafx.h"
 #include "QuestMng.h"
 #include "./Utilities/Log/ErrorReport.h"
-#include "wsclientinline.h"
+
 
 #include <crtdbg.h>
+
+#include "NewUISystem.h"
+#include "UsefulDef.h"
 
 #define	QM_NPCDIALOGUE_FILE			L"Data\\Local\\NPCDialogue.bmd"
 #define	QM_QUESTPROGRESS_FILE		L"Data\\Local\\QuestProgress.bmd"

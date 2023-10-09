@@ -21,7 +21,7 @@
 #include "ZzzInventory.h"
 #include "zzzLodTerrain.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "Resource.h"
 #include <imm.h>
 #include "zzzpath.h"
@@ -60,6 +60,7 @@
 #include <ThemidaInclude.h>
 
 #include "MultiLanguage.h"
+#include "NewUISystem.h"
 
 CUIMercenaryInputBox* g_pMercenaryInputBox = NULL;
 CUITextInputBox* g_pSingleTextInputBox = NULL;
@@ -163,6 +164,9 @@ int GetMp3PlayPosition()
 
 extern int  LogIn;
 extern wchar_t LogInID[];
+extern bool First;
+extern int FirstTime;
+extern BOOL g_bGameServerConnected;
 
 void CheckHack(void)
 {
@@ -1507,15 +1511,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     //memorydump[0]
     RendomMemoryDump = new BYTE[rand() % 100 + 1];
 
-    GateAttribute = new GATE_ATTRIBUTE[MAX_GATES];
-    SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS];
+    GateAttribute = new GATE_ATTRIBUTE[MAX_GATES] { };
+    SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS] { };
 
     //memorydump[1]
-    ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024];
+    ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024] { };
     ItemAttribute = ((ITEM_ATTRIBUTE*)ItemAttRibuteMemoryDump) + rand() % 1024;
 
     //memorydump[2]
-    CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128];
+    CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128] { };
     CharactersClient = ((CHARACTER*)CharacterMemoryDump) + rand() % 128;
     CharacterMachine = new CHARACTER_MACHINE;
 
@@ -1595,10 +1599,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #endif
 #endif
 #endif	//WINDOWMODE(#else)
-
-#ifdef SAVE_PACKET
-    DeleteFile(PACKET_SAVE_FILE);
-#endif
 
 #if defined PROTECT_SYSTEMKEY && defined NDEBUG
 #ifndef FOR_WORK

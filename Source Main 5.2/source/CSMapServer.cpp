@@ -1,15 +1,12 @@
 #include "stdafx.h"
-#include "ZzzBMD.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzAI.h"
 #include "ZzzTexture.h"
-#include "ZzzOpenglUtil.h"
 #include "zzzOpenData.h"
-#include "zzzinfomation.h"
-#include "wsclientinline.h"
+
 #include "CSMapServer.h"
+
+#include "MultiLanguage.h"
+#include "WSclient.h"
 
 extern int  LogIn;
 extern wchar_t LogInID[MAX_ID_SIZE + 1];
@@ -66,6 +63,7 @@ void CSMServer::GetServerAddress(wchar_t* szAddress)
     }
 }
 
+extern BOOL g_bGameServerConnected;
 void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
 {
     SetServerInfo(sInfo);

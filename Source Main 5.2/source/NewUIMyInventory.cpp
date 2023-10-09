@@ -5,7 +5,6 @@
 #include "NewUIMyInventory.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
-#include "CSChaosCastle.h"
 #include "GOBoid.h"
 #include "ZzzEffect.h"
 #include "GIPetManager.h"
@@ -13,10 +12,7 @@
 #include "UIJewelHarmony.h"
 #include "CDirection.h"
 #include "GMCryWolf1st.h"
-#include "GMCryingWolf2nd.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
-#include "MixMgr.h"
 #include "ZzzLodTerrain.h"
 #include "CSQuest.h"
 #include "UIGuildInfo.h"
@@ -25,7 +21,6 @@
 #include "MapManager.h"
 #include "w_PetProcess.h"
 #include "SocketSystem.h"
-#include "w_CursedTemple.h"
 #include "PortalMgr.h"
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 #include "Event.h"
@@ -34,6 +29,8 @@
 #include "ChangeRingManager.h"
 #include "MonkSystem.h"
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
+#include "ZzzInterface.h"
 
 using namespace SEASON3B;
 
@@ -514,12 +511,14 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             {
                 if (Hero->Dead == false)
                 {
-                    SendRequestDropItem(iSourceIndex, tx, ty);
+                    SocketClient->ToGameServer()->SendDropItemRequest(tx, ty, iSourceIndex);
+                    SendDropItem = iSourceIndex;
                 }
             }
             else if (pItemObj && pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
             {
-                SendRequestDropItem(iSourceIndex, tx, ty);
+                SocketClient->ToGameServer()->SendDropItemRequest(tx, ty, iSourceIndex);
+                SendDropItem = iSourceIndex;
             }
             MouseUpdateTime = 0;
             MouseUpdateTimeMax = 6;

@@ -2,8 +2,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-#include "wsclientinline.h"
 #include "iexplorer.h"
 #include "NewUISystem.h"
 #include "NewUIInGameShop.h"
@@ -12,8 +12,8 @@
 #include "MsgBoxIGSCommon.h"
 #include "MsgBoxIGSStorageItemInfo.h"
 #include "MsgBoxIGSGiftStorageItemInfo.h"
-#include "MsgBoxIGSDeleteItemConfirm.h"
 #include "MapManager.h"
+#include "DSPlaySound.h"
 
 using namespace SEASON3B;
 

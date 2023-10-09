@@ -5,7 +5,7 @@
 #ifdef PBG_ADD_GENSRANKING
 #include "NewUIGensRanking.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 
 using namespace SEASON3B;
 

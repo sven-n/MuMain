@@ -7,8 +7,9 @@
 #include "ZzzEffect.h"
 #include "ZzzCharacter.h"
 #include "ZzzObject.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
+#include "WSclient.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -172,10 +173,12 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWOR
         float Angle = CreateAngle2D(obj->Position, targetPos);
         obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
 
-        if (CompTimeControl(1000, m_dwSendDelayTime))
+        if (CompTimeControl(1000, m_dwSendDelayTime)
+            && &Hero->Object == obj->Owner
+            && SendGetItem == -1)
         {
-            if (&Hero->Object == obj->Owner)
-                SendRequestGetItem(m_RootItem.itemIndex);
+            SendGetItem = m_RootItem.itemIndex;
+            SocketClient->ToGameServer()->SendPickupItemRequest(m_RootItem.itemIndex);
         }
     }
     break;
@@ -308,7 +311,7 @@ void PetActionCollecter::FindZen(OBJECT* obj)
         if (SEARCH_LENGTH > dl)
         {
             //if( -1 == g_pMyInventory->FindEmptySlot(&Items[i].Item) && Items[i].Item.Type != ITEM_POTION+15 )
-            if (Items[i].Item.Type != ITEM_POTION + 15)
+            if (Items[i].Item.Type != ITEM_ZEN)
             {
                 continue;
             }

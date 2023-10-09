@@ -11,9 +11,10 @@
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "wsclientinline.h"
+
 #include "UIControls.h"
 #include "GameCensorship.h"
+#include "NewUISystem.h"
 #include "ServerListManager.h"
 
 #define	SSW_GAP_WIDTH	28

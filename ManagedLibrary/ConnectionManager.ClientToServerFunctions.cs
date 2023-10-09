@@ -590,6 +590,42 @@ public unsafe partial class ConnectionManager
     }
 
     /// <summary>
+    /// Sends a <see cref="PlayerShopCloseOther" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="playerId">The player id.</param>
+    /// <param name="playerName">The player name.</param>
+    /// <remarks>
+    /// Is sent by the client when: A player closes the dialog of another players shop.
+    /// Causes reaction on server side: The server handles that by unsubscribing the player from changes of the shop.
+    /// </remarks>
+    [UnmanagedCallersOnly]
+    public static void SendPlayerShopCloseOther(int handle, ushort @playerId, IntPtr @playerName)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = PlayerShopCloseOtherRef.Length;
+                var packet = new PlayerShopCloseOtherRef(pipeWriter.GetSpan(length)[..length]);
+                packet.PlayerId = @playerId;
+                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
+
+                return length;
+            });
+        }
+        catch
+        {
+            // Log exception
+        }
+    }
+
+    /// <summary>
     /// Sends a <see cref="PickupItemRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
@@ -1251,12 +1287,13 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="CastleSiegeUnregisterRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
+    /// <param name="isGivingUp">The is giving up.</param>
     /// <remarks>
     /// Is sent by the client when: The player opened a castle siege npc to un-register his guild alliance.
     /// Causes reaction on server side: The server returns the result of the castle siege un-registration.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendCastleSiegeUnregisterRequest(int handle)
+    public static void SendCastleSiegeUnregisterRequest(int handle, byte @isGivingUp = 1)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -1269,6 +1306,8 @@ public unsafe partial class ConnectionManager
             {
                 var length = CastleSiegeUnregisterRequestRef.Length;
                 var packet = new CastleSiegeUnregisterRequestRef(pipeWriter.GetSpan(length)[..length]);
+                packet.IsGivingUp = @isGivingUp == 1;
+
                 return length;
             });
         }
@@ -3308,6 +3347,37 @@ public unsafe partial class ConnectionManager
                 var packet = new IncreaseCharacterStatPointRef(pipeWriter.GetSpan(length)[..length]);
                 packet.StatType = @statType;
 
+                return length;
+            });
+        }
+        catch
+        {
+            // Log exception
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="InventoryRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player bought or sold an item through his personal shop.
+    /// Causes reaction on server side: The server sends the inventory list back to the client.
+    /// </remarks>
+    [UnmanagedCallersOnly]
+    public static void SendInventoryRequest(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = InventoryRequestRef.Length;
+                var packet = new InventoryRequestRef(pipeWriter.GetSpan(length)[..length]);
                 return length;
             });
         }

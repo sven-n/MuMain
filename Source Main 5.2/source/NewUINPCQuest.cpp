@@ -6,8 +6,9 @@
 #include "NewUINPCQuest.h"
 #include "NewUISystem.h"
 #include "CSQuest.h"
-#include "wsclientinline.h"
+
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
 
 extern bool bCheckNPC;
 extern int g_iNumLineMessageBoxCustom;

@@ -91,6 +91,11 @@ void PacketFunctions_ClientToServer::SendPlayerShopItemBuyRequest(uint16_t playe
     dotnet_SendPlayerShopItemBuyRequest(this->GetHandle(), playerId, playerName, itemSlot);
 }
 
+void PacketFunctions_ClientToServer::SendPlayerShopCloseOther(uint16_t playerId, const wchar_t* playerName)
+{
+    dotnet_SendPlayerShopCloseOther(this->GetHandle(), playerId, playerName);
+}
+
 void PacketFunctions_ClientToServer::SendPickupItemRequest(uint16_t itemId)
 {
     dotnet_SendPickupItemRequest(this->GetHandle(), itemId);
@@ -181,9 +186,9 @@ void PacketFunctions_ClientToServer::SendCastleSiegeRegistrationRequest()
     dotnet_SendCastleSiegeRegistrationRequest(this->GetHandle());
 }
 
-void PacketFunctions_ClientToServer::SendCastleSiegeUnregisterRequest()
+void PacketFunctions_ClientToServer::SendCastleSiegeUnregisterRequest(BYTE isGivingUp)
 {
-    dotnet_SendCastleSiegeUnregisterRequest(this->GetHandle());
+    dotnet_SendCastleSiegeUnregisterRequest(this->GetHandle(), isGivingUp);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeRegistrationStateRequest()
@@ -479,6 +484,11 @@ void PacketFunctions_ClientToServer::SendFocusCharacter(const wchar_t* name)
 void PacketFunctions_ClientToServer::SendIncreaseCharacterStatPoint(uint32_t statType)
 {
     dotnet_SendIncreaseCharacterStatPoint(this->GetHandle(), statType);
+}
+
+void PacketFunctions_ClientToServer::SendInventoryRequest()
+{
+    dotnet_SendInventoryRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendClientReadyAfterMapChange()

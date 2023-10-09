@@ -6,11 +6,8 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzBMD.h"
-#include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzLodTerrain.h"
 #include "ZzzInterface.h"
-#include "wsclientinline.h"
 #include "ZzzAI.h"
 #include "GOBoid.h"
 #include "UIManager.h"
@@ -18,6 +15,8 @@
 #include "SummonSystem.h"
 #include "MapManager.h"
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
+#include "NewUISystem.h"
 
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
@@ -88,6 +87,8 @@ void CUIWindowMgr::Reset()
     }
     if (g_iChatInputType == 0)
     {
+        // for OpenMU the following line is not required.
+        // 2 probably means logging out.
         SocketClient->ToGameServer()->SendSetFriendOnlineState(2);
     }
 }
@@ -1416,22 +1417,14 @@ void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber
     }
 
     ConnectionHandleToWindowUuid[_connection->GetHandle()] = this->GetUIID();
-
-    // Convert the ticket into a string:
-    wchar_t szTicketStr[11] = { 0 };
-    _ultow_s(dwTicket, szTicketStr, 10);
-    szTicketStr[10] = '\0';
-    BuxConvert((BYTE*)szTicketStr, 10); // XOR3
-
-    _connection->ToChatServer()->SendAuthenticate(dwRoomNumber, szTicketStr);
+    _connection->ToChatServer()->SendAuthenticateExt(dwRoomNumber, dwTicket);
 }
 
 void CUIChatWindow::DisconnectToChatServer()
 {
     if (_connection != nullptr)
     {
-        // TODO connection->ToChatServer()->SendLeaveChatRoom();
-        SendRequestCRDisconnectRoom(_connection)
+        _connection->ToChatServer()->SendLeaveChatRoom();
         _connection->Close();
     }
 }
@@ -1604,30 +1597,24 @@ BOOL CUIChatWindow::HandleMessage()
         break;
     case UI_MESSAGE_TEXTINPUT:
     {
-        wchar_t	pszText[MAX_CHATROOM_TEXT_LENGTH] = { '\0' };
-        auto* pwszTextUTF16 = new wchar_t[MAX_CHATROOM_TEXT_LENGTH];
+        wchar_t	pszText[MAX_CHATROOM_TEXT_LENGTH] = { };
 
-        m_TextInputBox.GetText(pwszTextUTF16, MAX_CHATROOM_TEXT_LENGTH);
-
-        std::wstring strText = L"";
-        std::wstring wstrUTF16 = pwszTextUTF16;
-
-        if (CheckAbuseFilter(pszText, false))
-            strText = GlobalText[570];
-
-        
-        wcsncpy(pszText, strText.c_str(), sizeof pszText);
+        m_TextInputBox.GetText(pszText, MAX_CHATROOM_TEXT_LENGTH);
+        //if (CheckAbuseFilter(pszText, false))
+        //{
+        //    wcsncpy(pszText, GlobalText[570], sizeof pszText);
+        //}
 
         if (wcsncmp(m_szLastText, pszText, MAX_CHATROOM_TEXT_LENGTH) != 0)
         {
             wcsncpy(m_szLastText, pszText, MAX_CHATROOM_TEXT_LENGTH);
 
-            if (pszText[0] != '\0')
+            if (pszText[0] != L'\0')
             {
                 int iSize = wcslen(pszText);
                 if (_connection != nullptr)
                 {
-                    _connection->ToChatServer()->SendChatMessage(0, iSize, pszText);
+                    _connection->ToChatServer()->SendChatMessageExt(0, pszText);
                 }
             }
         }
@@ -3757,10 +3744,10 @@ void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, const BYTE* ReceiveBuffe
     auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
     if (pChatWindow == NULL) return;
     wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
-    wcsncpy(szName, (const wchar_t*)Data->Name, MAX_ID_SIZE);
+    CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_ID_SIZE);
     szName[MAX_ID_SIZE] = '\0';
     wchar_t szText[MAX_TEXT_LENGTH + 1] = { 0 };
-    wcsncpy(szText, (const wchar_t*)Data->Name, MAX_ID_SIZE);
+    CMultiLanguage::ConvertFromUtf8(szText, Data->Name, MAX_ID_SIZE);
     szText[MAX_ID_SIZE] = '\0';
     switch (Data->Type)
     {
@@ -3795,7 +3782,7 @@ void ReceiveChatRoomUserList(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
     for (int i = 0; i < Header->Count; ++i)
     {
         auto Data = (LPFS_CHAT_USERLIST_DATA)(ReceiveBuffer + iMoveOffset);
-        wcsncpy(szName, (const wchar_t*)Data->Name, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_ID_SIZE);
         szName[MAX_ID_SIZE] = '\0';
         ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID))->AddChatPal(szName, Data->Index, 0);
         iMoveOffset += sizeof(FS_CHAT_USERLIST_DATA);
@@ -3808,11 +3795,14 @@ void ReceiveChatRoomChatText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
     auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
     if (pChatWindow == NULL) return;
 
-    wchar_t ChatMsg[MAX_CHATROOM_TEXT_LENGTH] = { '\0' };
+    char temp[MAX_CHATROOM_TEXT_LENGTH] = { };
     if (Data->MsgSize >= MAX_CHATROOM_TEXT_LENGTH) return;
 
-    memcpy(ChatMsg, Data->Msg, Data->MsgSize);
-    BuxConvert((LPBYTE)ChatMsg, Data->MsgSize);
+    memcpy(temp, Data->Msg, Data->MsgSize);
+    BuxConvert((LPBYTE)temp, Data->MsgSize);
+
+    wchar_t chatMessage[MAX_CHATROOM_TEXT_LENGTH] = { };
+    CMultiLanguage::ConvertFromUtf8(chatMessage, temp, MAX_CHATROOM_TEXT_LENGTH);
 
     if (pChatWindow->GetState() == UISTATE_READY)
     {
@@ -3828,7 +3818,7 @@ void ReceiveChatRoomChatText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
     {
         g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
     }
-    pChatWindow->AddChatText(Data->Index, (wchar_t*)ChatMsg, 3, 0);
+    pChatWindow->AddChatText(Data->Index, chatMessage, 3, 0);
 }
 
 void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)

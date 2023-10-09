@@ -5,7 +5,8 @@
 #include "StdAfx.h"
 #include "NewUITextBox.h"
 #include "UIControls.h"
-#include "wsclientinline.h"
+#include "UsefulDef.h"
+
 
 using namespace SEASON3B;
 

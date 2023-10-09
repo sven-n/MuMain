@@ -22,3 +22,19 @@ void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, c
 {
     dotnet_SendLogin(this->GetHandle(), username, password, GetTickCount(), clientVersion, clientSerial);
 }
+
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExt)(int32_t, uint16_t, uint32_t);
+inline SendAuthenticateExt dotnet_SendAuthenticateExt = reinterpret_cast<SendAuthenticateExt>(g_dotnet->get_method(type_name_connection_manager, L"SendAuthenticateExt"));
+
+void PacketFunctions_ChatServer_Custom::SendAuthenticateExt(uint16_t roomId, uint32_t token)
+{
+    dotnet_SendAuthenticateExt(this->GetHandle(), roomId, token);
+}
+
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatMessageExt)(int32_t, BYTE, const wchar_t*);
+inline SendChatMessageExt dotnet_SendChatMessageExt = reinterpret_cast<SendChatMessageExt>(g_dotnet->get_method(type_name_connection_manager, L"SendChatMessageExt"));
+
+void PacketFunctions_ChatServer_Custom::SendChatMessageExt(BYTE senderIndex, const wchar_t* message)
+{
+    dotnet_SendChatMessageExt(this->GetHandle(), senderIndex, message);
+}

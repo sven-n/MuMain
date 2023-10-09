@@ -5,7 +5,7 @@
 #include "NewUIDuelWatchMainFrameWindow.h"
 #include "NewUISystem.h"
 #include "DuelMgr.h"
-#include "wsclientinline.h"
+
 
 using namespace SEASON3B;
 

@@ -61,7 +61,7 @@ namespace SEASON3B
 
     public:
         void ChangeShopCharacterIndex(int index);
-        void ChangeTitleText(std::wstring& text);
+        void ChangeTitleText(wchar_t* text);
         void ChangeSourceIndex(int sindex);
 
     public:
@@ -103,7 +103,7 @@ namespace SEASON3B
     }
 
     inline
-        void CNewUIPurchaseShopInventory::ChangeTitleText(std::wstring& text)
+        void CNewUIPurchaseShopInventory::ChangeTitleText(wchar_t* text)
     {
         m_TitleText = text;
     }

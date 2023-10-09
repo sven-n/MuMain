@@ -2,33 +2,19 @@
 //
 //  UIManager.cpp
 //
-//  내  용 : UI 들을 관리 해주는 클래스
-//
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
-#include "ZzzInfomation.h"
-#include "ZzzBMD.h"
-#include "ZzzObject.h"
-#include "ZzzCharacter.h"
 #include "ZzzInterface.h"
-#include "ZzzLodTerrain.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
-#include "CSQuest.h"
-#include "npcBreeder.h"
-#include "CSItemOption.h"
-#include "CSChaosCastle.h"
 #include "GIPetManager.h"
 #include "PersonalShopTitleImp.h"
-#include "npcGateSwitch.h"
 #include "CComGem.h"
-#include "GM_Kanturu_2nd.h"
+#include "DSPlaySound.h"
 #include "NewUICustomMessageBox.h"
 #include "NewUINPCShop.h"
-#include "MixMgr.h"
 
 extern int g_iKeyPadEnable;
 extern int g_iChatInputType;
@@ -46,6 +32,7 @@ extern int   ShopInventoryStartX;
 extern int   ShopInventoryStartY;
 
 extern bool g_bTradeEndByOppenent;
+extern bool LogOut;
 
 bool HeroInventoryEnable = false;
 bool GuildListEnable = false;
@@ -263,8 +250,7 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
 
             if (g_iPShopWndType != PSHOPWNDTYPE_NONE) {
                 g_ErrorReport.Write(L"@ OpenPersonalShop : SendRequestInventory\n");
-                SendRequestInventory();
-                // TODO SocketClient->ToGameServer()->SendInventoryRequest();
+                SocketClient->ToGameServer()->SendInventoryRequest();
             }
 
             CreatePersonalItemTable();
@@ -283,8 +269,7 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
 
             if (g_iPShopWndType != PSHOPWNDTYPE_NONE) {
                 g_ErrorReport.Write(L"@ OpenPersonalShop : SendRequestInventory\n");
-                SendRequestInventory();
-                // TODO SocketClient->ToGameServer()->SendInventoryRequest();
+                SocketClient->ToGameServer()->SendInventoryRequest();
             }
             CreatePersonalItemTable();
 

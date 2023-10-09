@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include "NewUIGoldBowmanWindow.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "MixMgr.h"
 
 #define MAXGOLDBOWMANSESERIAL 12

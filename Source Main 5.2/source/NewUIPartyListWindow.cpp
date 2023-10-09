@@ -5,10 +5,11 @@
 
 #include "NewUIPartyListWindow.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "ZzzInventory.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
+#include "ZzzInterface.h"
 
 using namespace SEASON3B;
 

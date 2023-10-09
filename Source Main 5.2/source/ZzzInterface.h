@@ -54,6 +54,7 @@ extern int ItemKey;
 extern bool g_bGMObservation;
 
 void Action(CHARACTER* c, OBJECT* o, bool Now);
+void SendRequestAction(OBJECT& obj, BYTE action);
 
 bool PressKey(int Key);
 void MoveHero();
@@ -140,8 +141,12 @@ bool CheckSkillUseCondition(OBJECT* o, int Type);
 bool CheckWall(int sx1, int sy1, int sx2, int sy2);
 bool CheckTile(CHARACTER* c, OBJECT* o, float Range);
 void LetHeroStop(CHARACTER* c = NULL, BOOL bSetMovementFalse = FALSE);
+void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
 void Attack(CHARACTER* c);
 bool SkillElf(CHARACTER* c, ITEM* p);
+void SendRequestMagic(int Type, int Key);
+void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE Tpos, WORD TKey, BYTE* pSkillSerial);
+void SendRequestMagicAttack(int Type, int x, int y, BYTE Serial, int Count, int* Key, WORD SkillSerial);
 bool SkillWarrior(CHARACTER* c, ITEM* p);
 void UseSkillWarrior(CHARACTER* c, OBJECT* o);
 void UseSkillWizard(CHARACTER* c, OBJECT* o);

@@ -1982,157 +1982,145 @@ void CreateFrustrum2D(vec3_t Position)
     float Width = 0.0f, CameraViewFar = 0.0f, CameraViewNear = 0.0f, CameraViewTarget = 0.0f;
     float WidthFar = 0.0f, WidthNear = 0.0f;
 
-    if (gMapManager.WorldActive == WD_6STADIUM && IsWebzenCharacter())
+    if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
     {
-        Width = (float)GetScreenWidth() / 500.f;
-        CameraViewFar = 8500.f;
-        CameraViewNear = CameraViewFar * 0.05f;
-        CameraViewTarget = CameraViewFar * 0.47f;
-        WidthFar = 3000.f * Width;
-        WidthNear = 540.f * Width;
-    }
-    else
-    {
-        if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
+        Width = (float)GetScreenWidth() / 480.f;// * 0.1f;
+        if (battleCastle::InBattleCastle2(Hero->Object.Position) && (Hero->Object.Position[0] < 17100.f || Hero->Object.Position[0]>18300.f))
         {
-            Width = (float)GetScreenWidth() / 480.f;// * 0.1f;
-            if (battleCastle::InBattleCastle2(Hero->Object.Position) && (Hero->Object.Position[0] < 17100.f || Hero->Object.Position[0]>18300.f))
-            {
-                CameraViewFar = 5100.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 2250.f * Width; // 1140.f
-                WidthNear = 540.f * Width; // 540.f
-            }
-            else
-            {
-                CameraViewFar = 3300.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1300.f * Width; // 1140.f
-                WidthNear = 580.f * Width; // 540.f
-            }
-        }
-        else if (gMapManager.WorldActive == WD_62SANTA_TOWN)
-        {
-            Width = (float)GetScreenWidth() / 450.f * 1.0f;
-            CameraViewFar = 2400.f;
-            CameraViewNear = CameraViewFar * 0.19f;
-            CameraViewTarget = CameraViewFar * 0.47f;
-            CameraViewFar = 2650.f;
-            WidthFar = 1250.f * Width;
-            WidthNear = 540.f * Width;
-        }
-        else if (gMapManager.IsPKField() || IsDoppelGanger2())
-        {
-            Width = (float)GetScreenWidth() / 500.f;
-            CameraViewFar = 1700.0f;
-            CameraViewNear = 55.0f;
-            CameraViewTarget = 830.0f;
-            CameraViewFar = 3300.f;
-            WidthFar = 1900.f * Width;
-            WidthNear = 600.f * Width;
+            CameraViewFar = 5100.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 2250.f * Width; // 1140.f
+            WidthNear = 540.f * Width; // 540.f
         }
         else
         {
-            static  int CameraLevel;
+            CameraViewFar = 3300.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1300.f * Width; // 1140.f
+            WidthNear = 580.f * Width; // 540.f
+        }
+    }
+    else if (gMapManager.WorldActive == WD_62SANTA_TOWN)
+    {
+        Width = (float)GetScreenWidth() / 450.f * 1.0f;
+        CameraViewFar = 2400.f;
+        CameraViewNear = CameraViewFar * 0.19f;
+        CameraViewTarget = CameraViewFar * 0.47f;
+        CameraViewFar = 2650.f;
+        WidthFar = 1250.f * Width;
+        WidthNear = 540.f * Width;
+    }
+    else if (gMapManager.IsPKField() || IsDoppelGanger2())
+    {
+        Width = (float)GetScreenWidth() / 500.f;
+        CameraViewFar = 1700.0f;
+        CameraViewNear = 55.0f;
+        CameraViewTarget = 830.0f;
+        CameraViewFar = 3300.f;
+        WidthFar = 1900.f * Width;
+        WidthNear = 600.f * Width;
+    }
+    else
+    {
+        static  int CameraLevel;
 
-            if ((int)CameraDistanceTarget >= (int)CameraDistance)
-                CameraLevel = g_shCameraLevel;
+        if ((int)CameraDistanceTarget >= (int)CameraDistance)
+            CameraLevel = g_shCameraLevel;
 
-            switch (CameraLevel)
+        switch (CameraLevel)
+        {
+        case 0:
+            if (SceneFlag == LOG_IN_SCENE)
             {
-            case 0:
-                if (SceneFlag == LOG_IN_SCENE)
-                {
-                }
-                else if (SceneFlag == CHARACTER_SCENE)
-                {
-                    Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
-                }
-                else if (g_Direction.m_CKanturu.IsMayaScene())
-                {
-                    Width = (float)GetScreenWidth() / 640.f * 10.0f * 0.115f;
-                }
-                else
-                {
-                    Width = (float)GetScreenWidth()/640.f * 1.1f;
-                }
-
-                if (SceneFlag == LOG_IN_SCENE)
-                {
-                }
-                else if (SceneFlag == CHARACTER_SCENE)
-                {
-                    CameraViewFar = 2000.f * 9.1f * 0.404998f;
-                }
-                else if (gMapManager.WorldActive == WD_39KANTURU_3RD)
-                {
-                    CameraViewFar = 2000.f * 10.0f * 0.115f;
-                }
-                else
-                {
-                    CameraViewFar = 2400.f;
-                }
-
-                if (SceneFlag == LOG_IN_SCENE)
-                {
-                    Width = (float)GetScreenWidth() / 640.f;
-                    CameraViewFar = 2400.f * 17.0f * 13.0f;
-                    CameraViewNear = 2400.f * 17.0f * 0.5f;
-                    CameraViewTarget = 2400.f * 17.0f * 0.5f;
-                    WidthFar = 5000.f * Width;
-                    WidthNear = 300.f * Width;
-                }
-                else
-                {
-                    CameraViewNear = CameraViewFar * 0.19f;//0.22
-                    CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                    WidthFar = 1190.f * Width * sqrtf(CameraFOV / 33.f); // 1140.f
-                    WidthNear = 540.f * Width * sqrtf(CameraFOV / 33.f); // 540.f
-                }
-                break;
-            case 1:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 2700.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1200.f * Width; // 1140.f
-                WidthNear = 540.f * Width; // 540.f
-                break;
-            case 2:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 3000.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1300.f * Width; // 1140.f
-                WidthNear = 540.f * Width; // 540.f
-                break;
-            case 3:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 3300.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1500.f * Width; // 1140.f
-                WidthNear = 580.f * Width; // 540.f
-                break;
-            case 4:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 5100.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 2250.f * Width; // 1140.f
-                WidthNear = 540.f * Width; // 540.f
-                break;
-            case 5:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 3400.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1600.f * Width; // 1140.f
-                WidthNear = 660.f * Width; // 540.f
-                break;
             }
+            else if (SceneFlag == CHARACTER_SCENE)
+            {
+                Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
+            }
+            else if (g_Direction.m_CKanturu.IsMayaScene())
+            {
+                Width = (float)GetScreenWidth() / 640.f * 10.0f * 0.115f;
+            }
+            else
+            {
+                Width = (float)GetScreenWidth()/640.f * 1.1f;
+            }
+
+            if (SceneFlag == LOG_IN_SCENE)
+            {
+            }
+            else if (SceneFlag == CHARACTER_SCENE)
+            {
+                CameraViewFar = 2000.f * 9.1f * 0.404998f;
+            }
+            else if (gMapManager.WorldActive == WD_39KANTURU_3RD)
+            {
+                CameraViewFar = 2000.f * 10.0f * 0.115f;
+            }
+            else
+            {
+                CameraViewFar = 2400.f;
+            }
+
+            if (SceneFlag == LOG_IN_SCENE)
+            {
+                Width = (float)GetScreenWidth() / 640.f;
+                CameraViewFar = 2400.f * 17.0f * 13.0f;
+                CameraViewNear = 2400.f * 17.0f * 0.5f;
+                CameraViewTarget = 2400.f * 17.0f * 0.5f;
+                WidthFar = 5000.f * Width;
+                WidthNear = 300.f * Width;
+            }
+            else
+            {
+                CameraViewNear = CameraViewFar * 0.19f;//0.22
+                CameraViewTarget = CameraViewFar * 0.47f;//0.47
+                WidthFar = 1190.f * Width * sqrtf(CameraFOV / 33.f); // 1140.f
+                WidthNear = 540.f * Width * sqrtf(CameraFOV / 33.f); // 540.f
+            }
+            break;
+        case 1:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 2700.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1200.f * Width; // 1140.f
+            WidthNear = 540.f * Width; // 540.f
+            break;
+        case 2:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 3000.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1300.f * Width; // 1140.f
+            WidthNear = 540.f * Width; // 540.f
+            break;
+        case 3:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 3300.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1500.f * Width; // 1140.f
+            WidthNear = 580.f * Width; // 540.f
+            break;
+        case 4:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 5100.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 2250.f * Width; // 1140.f
+            WidthNear = 540.f * Width; // 540.f
+            break;
+        case 5:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 3400.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1600.f * Width; // 1140.f
+            WidthNear = 660.f * Width; // 540.f
+            break;
         }
     }
 
@@ -2144,22 +2132,17 @@ void CreateFrustrum2D(vec3_t Position)
     vec3_t Angle;
     float Matrix[3][4];
 
-    if (gMapManager.WorldActive == WD_6STADIUM && IsWebzenCharacter())
+    if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
     {
-        Vector(0.f, 0.f, -CameraAngle[2], Angle);
+        VectorScale(CameraAngle, -1.0f, Angle);
+        CCameraMove::GetInstancePtr()->SetFrustumAngle(89.5f);
+        vec3_t _Temp = { CCameraMove::GetInstancePtr()->GetFrustumAngle(), 0.0f, 0.0f };
+        VectorAdd(Angle, _Temp, Angle);
     }
     else
-        if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
-        {
-            VectorScale(CameraAngle, -1.0f, Angle);
-            CCameraMove::GetInstancePtr()->SetFrustumAngle(89.5f);
-            vec3_t _Temp = { CCameraMove::GetInstancePtr()->GetFrustumAngle(), 0.0f, 0.0f };
-            VectorAdd(Angle, _Temp, Angle);
-        }
-        else
-        {
-            Vector(0.f, 0.f, 45.f, Angle);
-        }
+    {
+        Vector(0.f, 0.f, 45.f, Angle);
+    }
 
     AngleMatrix(Angle, Matrix);
     vec3_t Frustrum[4];

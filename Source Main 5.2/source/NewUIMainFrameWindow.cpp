@@ -15,7 +15,7 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "MapManager.h"

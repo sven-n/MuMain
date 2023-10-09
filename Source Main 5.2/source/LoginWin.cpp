@@ -13,8 +13,9 @@
 #include "ZzzInterface.h"
 #include "UIControls.h"
 #include "ZzzScene.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
+#include "NewUISystem.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 
 #include "ServerListManager.h"
@@ -28,6 +29,8 @@
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 extern int g_iChatInputType;
+extern int  LogIn;
+extern wchar_t LogInID[MAX_ID_SIZE + 1];
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 

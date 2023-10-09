@@ -24,7 +24,7 @@
 #include "ZzzOpenData.h"
 #include "ZzzScene.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "PhysicsManager.h"
 #include "GOBoid.h"
 #include "CSItemOption.h"
@@ -57,7 +57,7 @@
 #include "w_PetProcess.h"
 #include "DuelMgr.h"
 #include "MonkSystem.h"
-//#include "GMEmpireGuardian1.h"
+#include <NewUISystem.h>
 
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;
@@ -14401,17 +14401,21 @@ CHARACTER* CreateHero(int Index, int Class, int Skin, float x, float y, float Ro
     return c;
 }
 
-CHARACTER* CreateHellGate(BYTE* ID, int Key, int Index, int x, int y, int CreateFlag)
+CHARACTER* CreateHellGate(char* ID, int Key, int Index, int x, int y, int CreateFlag)
 {
     CHARACTER* portal = CreateMonster(Index, x, y, Key);
     portal->Level = Index - 152 + 1;
-    wchar_t Text[100];
-    swprintf(Text, portal->ID, ID);
+    wchar_t portalText[100];
+    wchar_t name[sizeof portal->ID];
+
+    CMultiLanguage::ConvertFromUtf8(name, ID);
+
+    swprintf(portalText, portal->ID, name);
 
     if (portal->Level == 7)
         portal->Object.SubType = 1;
 
-    memcpy(portal->ID, Text, sizeof(char) * 32);
+    memcpy(portal->ID, portalText, sizeof portalText);
 
     if (CreateFlag)
     {

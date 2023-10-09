@@ -8,7 +8,7 @@
 
 #include "MsgBoxIGSDeleteItemConfirm.h"
 
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
 
 //////////////////////////////////////////////////////////////////////

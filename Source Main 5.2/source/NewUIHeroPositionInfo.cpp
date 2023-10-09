@@ -3,8 +3,9 @@
 
 #include "stdafx.h"
 #include "NewUIHeroPositionInfo.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
 #include "MapManager.h"
 
 using namespace SEASON3B;

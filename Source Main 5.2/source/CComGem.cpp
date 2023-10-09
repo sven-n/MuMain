@@ -2,9 +2,10 @@
 #include "CComGem.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
-#include "wsclientinline.h"
+
 #include "ZzzInventory.h"
 #include "NewUIInventoryCtrl.h"
+#include "NewUISystem.h"
 
 extern DWORD  g_dwActiveUIID;
 extern int   InventoryStartX;

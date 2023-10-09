@@ -15,9 +15,10 @@
 #include "GOBoid.h"
 #include "ZzzScene.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "UIControls.h"
 #include "ZzzOpenglUtil.h"
+#include "Utilities/Log/ErrorReport.h"
 
 #define	MW_OK		0
 #define	MW_CANCEL	1
@@ -290,7 +291,8 @@ void CMsgWin::SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpsz
 void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
 {
     CUIMng& rUIMng = CUIMng::Instance();
-    std::wstring lpszMsg = NULL, lpszMsg2 = NULL;
+    std::wstring lpszMsg = L"";
+    std::wstring lpszMsg2 = L"";
     MSG_WIN_TYPE eType = MWT_BTN_OK;
     m_nMsgCode = nMsgCode;
     wchar_t szTempMsg[128];

@@ -14,7 +14,7 @@
 #include "ZzzInterface.h"
 #include "Local.h"
 #include "./Utilities/Log/ErrorReport.h"
-#include "wsclientinline.h"
+
 #include "UIControls.h"
 
 #define	CRW_ILLUST_FADE_TIME	2000.0

@@ -64,6 +64,9 @@ inline SendPlayerShopItemListRequest dotnet_SendPlayerShopItemListRequest = rein
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopItemBuyRequest)(int32_t, uint16_t , const wchar_t* , BYTE );
 inline SendPlayerShopItemBuyRequest dotnet_SendPlayerShopItemBuyRequest = reinterpret_cast<SendPlayerShopItemBuyRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendPlayerShopItemBuyRequest"));
 
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendPlayerShopCloseOther)(int32_t, uint16_t , const wchar_t* );
+inline SendPlayerShopCloseOther dotnet_SendPlayerShopCloseOther = reinterpret_cast<SendPlayerShopCloseOther>(g_dotnet->get_method(type_name_connection_manager, L"SendPlayerShopCloseOther"));
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPickupItemRequest)(int32_t, uint16_t );
 inline SendPickupItemRequest dotnet_SendPickupItemRequest = reinterpret_cast<SendPickupItemRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendPickupItemRequest"));
 
@@ -118,7 +121,7 @@ inline SendCastleSiegeStatusRequest dotnet_SendCastleSiegeStatusRequest = reinte
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendCastleSiegeRegistrationRequest)(int32_t);
 inline SendCastleSiegeRegistrationRequest dotnet_SendCastleSiegeRegistrationRequest = reinterpret_cast<SendCastleSiegeRegistrationRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendCastleSiegeRegistrationRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendCastleSiegeUnregisterRequest)(int32_t);
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendCastleSiegeUnregisterRequest)(int32_t, BYTE );
 inline SendCastleSiegeUnregisterRequest dotnet_SendCastleSiegeUnregisterRequest = reinterpret_cast<SendCastleSiegeUnregisterRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendCastleSiegeUnregisterRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendCastleSiegeRegistrationStateRequest)(int32_t);
@@ -297,6 +300,9 @@ inline SendFocusCharacter dotnet_SendFocusCharacter = reinterpret_cast<SendFocus
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendIncreaseCharacterStatPoint)(int32_t, uint32_t );
 inline SendIncreaseCharacterStatPoint dotnet_SendIncreaseCharacterStatPoint = reinterpret_cast<SendIncreaseCharacterStatPoint>(g_dotnet->get_method(type_name_connection_manager, L"SendIncreaseCharacterStatPoint"));
+
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendInventoryRequest)(int32_t);
+inline SendInventoryRequest dotnet_SendInventoryRequest = reinterpret_cast<SendInventoryRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendInventoryRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendClientReadyAfterMapChange)(int32_t);
 inline SendClientReadyAfterMapChange dotnet_SendClientReadyAfterMapChange = reinterpret_cast<SendClientReadyAfterMapChange>(g_dotnet->get_method(type_name_connection_manager, L"SendClientReadyAfterMapChange"));

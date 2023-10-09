@@ -4,7 +4,9 @@
 
 #include "stdafx.h"
 #include "UIGateKeeper.h"
-#include "wsclientinline.h"
+
+#include "WSclient.h"
+
 
 CUIGateKeeper::CUIGateKeeper()
 {

@@ -4,16 +4,17 @@
 #include "stdafx.h"
 
 #include "MonkSystem.h"
-#include "ZzzOpenData.h"
 #include "ZzzEffect.h"
 #include "ZzzAI.h"
 #include "ZzzLodTerrain.h"
-#include "wsclientinline.h"
-#include "CSChaosCastle.h"
+
 #include "LoadData.h"
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
 #include "SkillManager.h"
 #include "MapManager.h"
+#include "WSclient.h"
+#include "ZzzInterface.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

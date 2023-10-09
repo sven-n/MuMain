@@ -3,8 +3,11 @@
 
 #include "stdafx.h"
 #include "NewUIMyQuestInfoWindow.h"
-#include "wsclientinline.h"
+
 #include "csQuest.h"
+#include "DSPlaySound.h"
+#include "NewUISystem.h"
+#include "QuestMng.h"
 
 using namespace SEASON3B;
 

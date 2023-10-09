@@ -4,19 +4,15 @@
 #include "stdafx.h"
 #include <process.h>
 #include "UIManager.h"
-#include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "zzzinfomation.h"
-#include "zzzobject.h"
 #include "zzzcharacter.h"
-#include "zzzinterface.h"
 #include "zzzinventory.h"
-#include "ZzzObject.h"
-#include "ZzzCharacter.h"
 #include "ZzzTexture.h"
-#include "wsclientinline.h"
+
 #include "npcBreeder.h"
 #include "GIPetManager.h"
+#include "NewUISystem.h"
 
 extern  int SrcInventoryIndex;
 

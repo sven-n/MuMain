@@ -38,13 +38,14 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="roomId">The room id.</param>
-    /// <param name="token">A token (integer number), formatted as string. This value is also "encrypted" with the 3-byte XOR key (FC CF AB).</param>
+    /// <param name="token">A token (integer number), formatted as string and "encrypted" with the 3-byte XOR key (FC CF AB).</param>
+    /// <param name="tokenByteLength">The length of <paramref name="token"/>.</param>
     /// <remarks>
     /// Is sent by the client when: This packet is sent by the client after it connected to the server, to authenticate itself.
     /// Causes reaction on server side: The server will check the token. If it's correct, the client gets added to the requested chat room.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendAuthenticate(int handle, ushort @roomId, IntPtr @token)
+    public static void SendAuthenticate(int handle, ushort @roomId, byte* @token, uint tokenByteLength)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -58,7 +59,7 @@ public unsafe partial class ConnectionManager
                 var length = AuthenticateRef.Length;
                 var packet = new AuthenticateRef(pipeWriter.GetSpan(length)[..length]);
                 packet.RoomId = @roomId;
-                packet.Token = Marshal.PtrToStringAuto(@token);
+                new Span<byte>(@token, (int)tokenByteLength).CopyTo(packet.Token);
 
                 return length;
             });
@@ -96,6 +97,37 @@ public unsafe partial class ConnectionManager
                 packet.ClientIndex = @clientIndex;
                 packet.Name = Marshal.PtrToStringAuto(@name);
 
+                return length;
+            });
+        }
+        catch
+        {
+            // Log exception
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="LeaveChatRoom" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: This packet is sent by the client when it leaves the chat room, before the connection closes.
+    /// Causes reaction on server side: The server will remove the client from the chat room, notifying the remaining clients.
+    /// </remarks>
+    [UnmanagedCallersOnly]
+    public static void SendLeaveChatRoom(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = LeaveChatRoomRef.Length;
+                var packet = new LeaveChatRoomRef(pipeWriter.GetSpan(length)[..length]);
                 return length;
             });
         }
@@ -148,12 +180,13 @@ public unsafe partial class ConnectionManager
     /// <param name="senderIndex">The sender index.</param>
     /// <param name="messageLength">The message length.</param>
     /// <param name="message">The message. It's "encrypted" with the 3-byte XOR key (FC CF AB).</param>
+    /// <param name="messageByteLength">The length of <paramref name="message"/>.</param>
     /// <remarks>
     /// Is sent by the server when: This packet is sent by the server after another chat client sent a message to the current chat room.
     /// Causes reaction on client side: The client will show the message.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendChatMessage(int handle, byte @senderIndex, byte @messageLength, IntPtr @message)
+    public static void SendChatMessage(int handle, byte @senderIndex, byte @messageLength, byte* @message, uint messageByteLength)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -164,11 +197,11 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = ChatMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@message)!));
+                var length = ChatMessageRef.GetRequiredSize((int)messageByteLength);
                 var packet = new ChatMessageRef(pipeWriter.GetSpan(length)[..length]);
                 packet.SenderIndex = @senderIndex;
                 packet.MessageLength = @messageLength;
-                packet.Message = Marshal.PtrToStringAuto(@message);
+                new Span<byte>(@message, (int)messageByteLength).CopyTo(packet.Message);
 
                 return length;
             });

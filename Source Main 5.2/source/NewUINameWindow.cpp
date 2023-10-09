@@ -116,15 +116,9 @@ void SEASON3B::CNewUINameWindow::RenderName()
     }
 
 #ifndef GUILD_WAR_EVENT
-    if (gMapManager.InChaosCastle() == true)
+    if (gMapManager.InChaosCastle() == true && (SelectedNpc != -1 || SelectedCharacter != -1))
     {
-        if (!IsWebzenCharacter())
-        {
-            if (SelectedNpc != -1 || SelectedCharacter != -1)
-            {
-                return;
-            }
-        }
+        return;
     }
 #endif//GUILD_WAR_EVENT
 

@@ -5,7 +5,8 @@
 #include "NewUISiegeWarCommander.h"
 #include "UIControls.h"
 #include "zzzTexture.h"
-#include "wsclientinline.h"
+
+#include "ZzzCharacter.h"
 
 using namespace SEASON3B;
 

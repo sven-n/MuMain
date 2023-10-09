@@ -12,18 +12,16 @@
 #include "ZzzAi.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
-#include "GMCrywolf1st.h"
 #include "GMHellas.h"
 #include "GMBattleCastle.h"
 #include "UIManager.h"
-#include "GM_Kanturu_2nd.h"
 #include "CDirection.h"
 #include "MapManager.h"
-#include "BoneManager.h"
 #include "SkillEffectMgr.h"]
 #include "CharacterManager.h"
 #include "SkillManager.h"
+#include <NewUISystem.h>
+#include "ZzzInterface.h"
 
 PARTICLE  Particles[MAX_PARTICLES];
 #ifdef DEVIAS_XMAS_EVENT

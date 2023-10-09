@@ -3,15 +3,10 @@
 
 #include "stdafx.h"
 #include "NewUIGateSwitchWindow.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "ZzzBMD.h"
-#include "ZzzEffect.h"
-#include "ZzzObject.h"
-#include "ZzzInventory.h"
-#include "ZzzInterface.h"
 #include "ZzzInfomation.h"
-#include "ZzzCharacter.h"
-#include "wsclientinline.h"
 #include "npcGateSwitch.h"
 
 using namespace SEASON3B;

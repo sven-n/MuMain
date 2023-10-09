@@ -9,7 +9,7 @@
 #include "ZzzScene.h"
 #include "zzzAi.h"
 #include "CSEventMatch.h"
-#include "wsclientinline.h"
+
 #include "NewUICustomMessageBox.h"
 #include "NewUISystem.h"
 

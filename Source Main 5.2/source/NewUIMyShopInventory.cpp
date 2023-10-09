@@ -3,9 +3,9 @@
 
 #include "stdafx.h"
 #include "NewUIMyShopInventory.h"
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
-#include "wsclientinline.h"
 #include "PersonalShopTitleImp.h"
 
 const int iMAX_SHOPTITLE_MULTI = 26;

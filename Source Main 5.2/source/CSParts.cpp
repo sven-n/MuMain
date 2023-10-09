@@ -19,7 +19,7 @@
 
 void CreatePartsFactory(CHARACTER* c)
 {
-    if (IsWebzenCharacter() || g_isCharacterBuff((&c->Object), eBuff_GMEffect)
+    if (g_isCharacterBuff((&c->Object), eBuff_GMEffect)
         || ((c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR)))
     {
         if (c->m_pParts != NULL && c->EtcPart != PARTS_WEBZEN)

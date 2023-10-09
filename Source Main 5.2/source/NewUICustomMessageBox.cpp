@@ -5,7 +5,7 @@
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "wsclientinline.h"
+
 #include "PersonalShopTitleImp.h"
 #include "CComGem.h"
 #include "MatchEvent.h"
@@ -14,10 +14,12 @@
 #include "GMCrywolf1st.h"
 #include "ZzzOpenData.h"
 #include "DuelMgr.h"
+#include "NewUISystem.h"
 #include "w_CursedTemple.h"
 
 extern int DeleteIndex;
 extern int AppointStatus;
+extern bool LogOut;
 
 char AppointType;
 

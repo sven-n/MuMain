@@ -149,7 +149,7 @@ protected:
     CUIButton m_CloseInviteButton;
     DWORD m_dwRoomNumber;
     int m_iPrevWidth;
-    wchar_t m_szLastText[MAX_CHATROOM_TEXT_LENGTH];
+    wchar_t m_szLastText[MAX_CHATROOM_TEXT_LENGTH] {};
 };
 
 class CUIPhotoViewer : public CUIControl

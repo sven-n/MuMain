@@ -13,7 +13,7 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "./Utilities/Log/ErrorReport.h"
 #include "ReadScript.h"
 #include "GMCrywolf1st.h"

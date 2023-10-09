@@ -14,7 +14,7 @@
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "ZzzInfomation.h"
-#include "wsclientinline.h"
+
 #include "CharacterManager.h"
 #include "GuildManager.h"
 

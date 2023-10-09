@@ -4,10 +4,11 @@
 
 #include "stdafx.h"
 #include "NewUIExchangeLuckyCoin.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "NewUICommon.h"
 #include "NewUICommonMessageBox.h"
-#include "wsclientinline.h"
 
 using namespace SEASON3B;
 

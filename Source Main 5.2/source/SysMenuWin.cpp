@@ -10,17 +10,16 @@
 #include "ZzzInfomation.h"
 #include "ZzzScene.h"
 
-// SendRequestLogOut() 사용하기 위해.ㅜㅜ
-#include "ZzzBMD.h"
-#include "ZzzObject.h"
-#include "ZzzCharacter.h"
-#include "wsclientinline.h"
+#include "DSPlaySound.h"
 
-#include "GMCryWolf1st.h"
+#include "WSclient.h"
+#include "Utilities/Log/ErrorReport.h"
+#include "Utilities/Log/muConsoleDebug.h"
 
 #define	SMW_BTN_GAP		4
 
 extern int  SceneFlag;
+extern bool LogOut;
 
 CSysMenuWin::CSysMenuWin()
 {

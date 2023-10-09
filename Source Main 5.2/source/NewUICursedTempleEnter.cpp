@@ -13,10 +13,11 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #include "CharacterManager.h"
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
+#include "NewUISystem.h"
 #include "UIControls.h"
 
 //////////////////////////////////////////////////////////////////////

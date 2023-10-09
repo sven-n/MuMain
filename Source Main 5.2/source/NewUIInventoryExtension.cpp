@@ -2,7 +2,7 @@
 #include "NewUIInventoryExtension.h"
 
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 
 using namespace SEASON3B;
 

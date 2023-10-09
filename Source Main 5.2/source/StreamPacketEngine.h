@@ -104,6 +104,6 @@ public:
     __forceinline void Send()
     {
         End();
-        SendPacket(m_byBuffer, m_wSize);
+        SocketClient->Send(m_byBuffer, m_wSize);
     }
 };

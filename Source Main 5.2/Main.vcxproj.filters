@@ -1578,9 +1578,6 @@
     <ClInclude Include="source\WSclient.h">
       <Filter>MU\Network\proxy\receive</Filter>
     </ClInclude>
-    <ClInclude Include="source\wsclientinline.h">
-      <Filter>MU\Network\proxy\send</Filter>
-    </ClInclude>
     <ClInclude Include="source\DSPlaySound.h">
       <Filter>MU\Sound</Filter>
     </ClInclude>

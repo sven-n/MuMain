@@ -5,8 +5,9 @@
 #include "stdafx.h"
 
 #include "NewUICommandWindow.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
 #include "ZzzInterface.h"
 #include "PersonalShopTitleImp.h"
 #include "UIGuildInfo.h"

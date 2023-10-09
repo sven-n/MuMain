@@ -15,7 +15,7 @@
 #include "ZzzAI.h"
 #include "ZzzScene.h"
 #include "UIControls.h"
-#include "wsclientinline.h"
+
 #include "Local.h"
 #include "CharacterManager.h"
 

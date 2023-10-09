@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "NewUIGoldBowmanLena.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "MixMgr.h"
 
 namespace

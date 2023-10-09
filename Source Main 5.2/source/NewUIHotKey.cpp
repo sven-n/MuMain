@@ -10,7 +10,7 @@
 #include "w_CursedTemple.h"
 #include "ZzzInterface.h"
 #include "ZzzLodTerrain.h"
-#include "wsclientinline.h"
+
 #include "ZzzEffect.h"
 #include "UIMng.h"
 #include "MapManager.h"

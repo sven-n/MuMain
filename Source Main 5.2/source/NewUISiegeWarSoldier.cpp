@@ -4,7 +4,10 @@
 
 #include "stdafx.h"
 #include "NewUISiegeWarSoldier.h"
-#include "wsclientinline.h"
+
+#include "UIControls.h"
+
+#include "ZzzCharacter.h"
 
 using namespace SEASON3B;
 

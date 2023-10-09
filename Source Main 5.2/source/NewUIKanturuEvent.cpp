@@ -8,10 +8,11 @@
 #include "NewUISystem.h"
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
-#include "wsclientinline.h"
+
 #include "ChangeRingManager.h"
 #include "GM_Kanturu_3rd.h"
 #include "CDirection.h"
+#include "DSPlaySound.h"
 
 SEASON3B::CNewUIKanturu2ndEnterNpc::CNewUIKanturu2ndEnterNpc()
 {

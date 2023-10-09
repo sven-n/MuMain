@@ -60,14 +60,14 @@ int CGuildCache::MakeGuildMarkIndex(int nGuildKey)
     return m_dwCurrIndex++;
 }
 
-int CGuildCache::SetGuildMark(int nGuildKey, BYTE* UnionName, BYTE* GuildName, BYTE* Mark)
+int CGuildCache::SetGuildMark(int nGuildKey, char* UnionName, char* GuildName, BYTE* Mark)
 {
     int nIndex = GetGuildMarkIndex(nGuildKey);
     if (nIndex != -1)
     {
-        memcpy(GuildMark[nIndex].UnionName, UnionName, 8);
+        CMultiLanguage::ConvertFromUtf8(GuildMark[nIndex].UnionName, UnionName, 8);
+        CMultiLanguage::ConvertFromUtf8(GuildMark[nIndex].GuildName, GuildName, 8);
         GuildMark[nIndex].UnionName[8] = NULL;
-        memcpy(GuildMark[nIndex].GuildName, GuildName, 8);
         GuildMark[nIndex].GuildName[8] = NULL;
         for (int i = 0; i < 64; ++i)
         {

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "NewUISystem.h"
 #include "NewUIMessageBox.h"
-#include "wsclientinline.h"
+
 #include "PersonalShopTitleImp.h"
 #include "MapManager.h"
 #include "./Utilities/Log/muConsoleDebug.h"

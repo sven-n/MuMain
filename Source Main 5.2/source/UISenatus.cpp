@@ -7,7 +7,7 @@
 #include "ZzzTexture.h"
 #include "UIManager.h"
 #include "UIGuardsMan.h"
-#include "wsclientinline.h"
+
 
 #include "MixMgr.h"
 

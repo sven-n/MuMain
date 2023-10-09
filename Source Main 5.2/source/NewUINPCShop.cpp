@@ -3,10 +3,12 @@
 
 #include "stdafx.h"
 #include "NewUINPCShop.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #include "GambleSystem.h"
 
 using namespace SEASON3B;
