@@ -83,9 +83,9 @@ bool CConsoleWindow::Open(const std::wstring& title)
     if (FALSE == ::AllocConsole())
         return false;
 
-    _wfreopen(L"CONIN$", L"rb", stdin);
-    _wfreopen(L"CONOUT$", L"wb", stdout);
-    _wfreopen(L"CONOUT$", L"wb", stderr);
+    freopen("CONIN$", "r", stdin);
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
 
     ::SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE),
         ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);

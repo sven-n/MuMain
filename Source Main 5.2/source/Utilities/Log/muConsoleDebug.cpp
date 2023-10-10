@@ -26,7 +26,6 @@ CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
     {
         leaf::ActivateCloseButton(false);
         leaf::ShowConsole(true);
-        // _setmode((int)leaf::GetConsoleWndHandle(), _O_WTEXT);
         m_bInit = true;
 
         g_ErrorReport.Write(L"Mu Debug Console Window Init - completed(Handle:0x%00000008X)\r\n", leaf::GetConsoleWndHandle());
@@ -208,7 +207,7 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
         vswprintf(szBuffer, pStr, pArguments);
         va_end(pArguments);
 
-        std::cout << szBuffer << std::endl;
+        std::wcout << szBuffer << std::endl;
     }
 #endif
 }
