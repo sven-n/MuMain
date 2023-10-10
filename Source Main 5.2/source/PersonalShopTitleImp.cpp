@@ -585,7 +585,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::SeparateShopTitle(const std::wstr
 {
     wchar_t pszTopTitle[MAX_SHOPTITLE] = { '\0' };
     wchar_t pszBottonTitle[MAX_SHOPTITLE] = { '\0' };
-    CutText(title.c_str(), pszBottonTitle, pszTopTitle, title.length());
+    CutText(title.c_str(), pszBottonTitle, pszTopTitle);
 
     topTitle = pszTopTitle;
     bottomTitle = pszBottonTitle;

@@ -99,7 +99,7 @@ namespace SEASON3B
             SCROLL_MIDDLE_PART_HEIGHT = 15,
             SCROLL_BTN_WIDTH = 15,
             SCROLL_BTN_HEIGHT = 30,
-            CLIENT_WIDTH = WND_WIDTH - SCROLL_BAR_WIDTH - (WND_LEFT_RIGHT_EDGE * 2),
+            CLIENT_WIDTH = WND_WIDTH - SCROLL_BAR_WIDTH * 2 - (WND_LEFT_RIGHT_EDGE * 2),
         };
         enum EVENT_STATE
         {

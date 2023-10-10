@@ -534,7 +534,7 @@ void CreateNotice(wchar_t* Text, int Color)
     {
         wchar_t Temp1[256];
         wchar_t Temp2[256];
-        CutText(Text, Temp1, Temp2, wcslen(Text));
+        CutText(Text, Temp1, Temp2);
         wcscpy(Notice[NoticeCount++].Text, Temp2);
         ScrollNotice();
         Notice[NoticeCount].Color = Color;
@@ -601,61 +601,39 @@ void RenderNotices()
     NoticeInverse += FPS_ANIMATION_FACTOR;
 }
 
-void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, int Length)
+void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2)
 {
-    /*
-    if (g_pMultiLanguage->IsCharUTF8(Text))
+    auto sourceText = std::wstring(Text);
+    auto halfLength = sourceText.length() / 2;
+    auto offset = 0;
+    while (offset < sourceText.length())
     {
-        std::wstring wstrText = L"";
-        g_pMultiLanguage->ConvertCharToWideStr(wstrText, Text);
-        int iClosestBlankFromCenter = g_pMultiLanguage->GetClosestBlankFromCenter(wstrText);
-
-        std::wstring wstrText1, wstrText2;
-        wstrText1 = wstrText.substr(iClosestBlankFromCenter + 1, std::wstring::npos);
-        wstrText2 = wstrText.substr(0, iClosestBlankFromCenter + 1);
-
-        std::wstring strText1, strText2;
-        g_pMultiLanguage->ConvertWideCharToStr(strText1, wstrText1.c_str(), CP_UTF8);
-        g_pMultiLanguage->ConvertWideCharToStr(strText2, wstrText2.c_str(), CP_UTF8);
-
-        wcsncpy(Text1, strText1.c_str(), strText1.length() + 1);
-        wcsncpy(Text2, strText2.c_str(), strText2.length() + 1);
-
-        return;
-    }*/
-
-    int Cut = 0;
-
-    for (int j = 0; j < Length;)
-    {
-        if ((j >= Length / 2 - 2 && Text[j] == L' ') || j >= Length / 2 + 2)
+        const auto nextSpaceAt = sourceText.find(L' ', offset + 1);
+        if (nextSpaceAt >= halfLength)
         {
-            Cut = j;
-            break;
+            // now where above the halfway so we check if the next or previous space is closer
+
+            int splitOffset = offset;
+            if (nextSpaceAt - halfLength < halfLength - offset)
+            {
+                // next space is closer
+                splitOffset = nextSpaceAt;
+            }
+
+            wcsncpy(Text2, Text, splitOffset);
+            Text2[splitOffset] = '\0';
+
+            const auto restCount = sourceText.length() - splitOffset - 1;
+            wcsncpy(Text1, Text + splitOffset + 1, restCount);
+            Text1[restCount] = '\0';
+            return;
         }
 
-        j += 1; // todo: 2 for 32 bit chars
+        offset = nextSpaceAt;
     }
 
-    if (Cut == 0)
-    {
-        wcscpy(Text1, Text);
-        wcscpy(Text2, L"");
-    }
-
-    int iTextSize = 0;
-    for (int j = 0; j < Cut; j++)
-    {
-        Text2[j] = Text[j];
-        iTextSize = j;
-    }
-    Text2[iTextSize + 1] = NULL;
-    for (int j = Cut; j < Length; j++)
-    {
-        Text1[j - Cut] = Text[j];
-        iTextSize = j;
-    }
-    Text1[iTextSize - Cut + 1] = NULL;
+    wcsncpy(Text1, Text, wcslen(Text1));
+    Text2[0] = L'\0';
 }
 
 int     WhisperID_Num = 0;
@@ -734,9 +712,9 @@ typedef struct
     wchar_t      szShopTitle[16];
     char      Color;
     char      GuildColor;
-    int       IDLifeTime;
+    float       IDLifeTime;
     wchar_t   Text[2][256];
-    int       LifeTime[2];
+    float       LifeTime[2];
     CHARACTER* Owner;
     int       x, y;
     int       Width;
@@ -1030,7 +1008,7 @@ void RenderBoolean(int x, int y, CHAT* c)
 }
 void AddChat(CHAT* c, const wchar_t* chat_text, int flag)
 {
-    int Time = 0;
+    float Time = 0;
     int Length = (int)wcslen(chat_text);
     switch (flag)
     {
@@ -1045,7 +1023,7 @@ void AddChat(CHAT* c, const wchar_t* chat_text, int flag)
 
     if (Length >= 20)
     {
-        CutText(chat_text, c->Text[0], c->Text[1], Length);
+        CutText(chat_text, c->Text[0], c->Text[1]);
         c->LifeTime[0] = Time;
         c->LifeTime[1] = Time;
     }
@@ -1252,11 +1230,11 @@ void MoveChat()
     {
         CHAT* c = &Chat[i];
         if (c->IDLifeTime > 0)
-            c->IDLifeTime--;
+            c->IDLifeTime -= FPS_ANIMATION_FACTOR;
         if (c->LifeTime[0] > 0)
-            c->LifeTime[0]--;
+            c->LifeTime[0]-=FPS_ANIMATION_FACTOR;
         if (c->LifeTime[1] > 0)
-            c->LifeTime[1]--;
+            c->LifeTime[1]-=FPS_ANIMATION_FACTOR;
         if (c->Owner != NULL && (!c->Owner->Object.Live || !c->Owner->Object.Visible))
         {
             c->IDLifeTime = 0;
@@ -1266,7 +1244,7 @@ void MoveChat()
         if (c->LifeTime[0] > 0) {
             DisableShopTitleDraw(c->Owner);
         }
-        if (c->Owner != NULL && c->LifeTime[0] == 0) {
+        if (c->Owner != NULL && c->LifeTime[0] <= 0) {
             EnableShopTitleDraw(c->Owner);
         }
     }

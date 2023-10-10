@@ -327,7 +327,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
         if (!strText1.empty())
         {
             const auto pMsgText = new CMessageText;
-            if (!pMsgText->Create(strID, strText1, MsgType))
+            if (!pMsgText->Create(strID, strText, MsgType))
                 delete pMsgText;
             else
             {
@@ -915,26 +915,39 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
     extern float g_fScreenRate_x;
 
     SIZE TextSize;
-    type_string strIDPart = strID + L" : ";
     
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
-    size_t MaxFirstLineWidth = CLIENT_WIDTH - (size_t)(TextSize.cx / g_fScreenRate_x);
-
-    
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
-
-    BOOL bSpaceExist = (strIDPart.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
-    int iLocToken = strIDPart.length();
-
-    while (((size_t)(TextSize.cx / g_fScreenRate_x) > MaxFirstLineWidth) && (iLocToken > -1))
+    float max_first_line_size = CLIENT_WIDTH * g_fScreenRate_x;
+    if (!strID.empty())
     {
-        iLocToken = (bSpaceExist) ? strIDPart.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
+        const type_string strIDPart = strID + L" : ";
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (strIDPart.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
+        max_first_line_size -= (TextSize.cx);
     }
 
-    strText1 = strIDPart.substr(0, iLocToken);
-    strText2 = strIDPart.substr(iLocToken, strIDPart.length() - iLocToken) + strText;
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strText.c_str(), strText.length(), &TextSize);
+    auto required_size = TextSize.cx;
+
+    if (required_size <= max_first_line_size)
+    {
+        strText1 = strText;
+        strText2 = L"";
+        return;
+    }
+
+    BOOL bSpaceExist = (strText.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
+    int iLocToken = strText.length();
+
+    while ((required_size > max_first_line_size) && (iLocToken > -1))
+    {
+        iLocToken = (bSpaceExist) ? strText.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
+
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (strText.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
+        required_size = TextSize.cx;
+    }
+
+    strText1 = strText.substr(0, iLocToken);
+    strText2 = strText.substr(iLocToken, strText.length() - iLocToken);
 }
 
 bool SEASON3B::CNewUIChatLogWindow::CheckFilterText(const type_string& strTestText)
