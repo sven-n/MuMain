@@ -9244,9 +9244,7 @@ void RenderDebugWindow()
             else
                 glColor3f(1.f, 1.f, 1.f);
 
-            wchar_t monsterName[sizeof MonsterScript[i].Name]{};
-            CMultiLanguage::ConvertFromUtf8(monsterName, MonsterScript[i].Name, sizeof MonsterScript[i].Name);
-            swprintf(Text, L"%2d: %s", MonsterScript[i].Type, monsterName);
+            swprintf(Text, L"%2d: %s", MonsterScript[i].Type, MonsterScript[i].Name);
             g_pRenderText->RenderText(640 - 100, i * 10, Text);
         }
     }

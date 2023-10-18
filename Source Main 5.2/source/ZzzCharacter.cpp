@@ -12409,7 +12409,7 @@ void Setting_Monster(CHARACTER* c, int Type, int PositionX, int PositionY)
         {
             if (Type == MonsterScript[i].Type)
             {
-                CMultiLanguage::ConvertFromUtf8(c->ID, MonsterScript[i].Name);
+                wcscpy_s(c->ID, 32, MonsterScript[i].Name);
                 break;
             }
         }

@@ -2490,7 +2490,9 @@ void OpenMonsterScript(wchar_t* FileName)
         m->Type = static_cast<int>(TokenNumber);
         token = GetToken();
         token = GetToken();
-        strcpy(m->Name, TokenString);
+
+        CMultiLanguage::ConvertFromUtf8(m->Name, TokenString);
+        
         //Token = (*GetToken)();m->Level = (int)TokenNumber;
         //for(int i=0;i<23;i++) Token = (*GetToken)();
     }
@@ -2503,7 +2505,7 @@ const void getMonsterName(int type, wchar_t* name)
     {
         if (MonsterScript[i].Type == type)
         {
-            CMultiLanguage::ConvertFromUtf8(name, MonsterScript[i].Name);
+            name = MonsterScript[i].Name;
             return;
         }
     }
