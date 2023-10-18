@@ -2474,18 +2474,16 @@ void MainScene(HDC hDC)
             current_tick_count += rest_ms;
         }
 
-        if (EnableSocket && SceneFlag == MAIN_SCENE)
+        if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
         {
-            if (SocketClient == nullptr || !SocketClient->IsConnected())
+            static BOOL s_bClosed = FALSE;
+            if (!s_bClosed)
             {
-                static BOOL s_bClosed = FALSE;
-                if (!s_bClosed)
-                {
-                    s_bClosed = TRUE;
-                    g_ErrorReport.Write(L"> Connection closed. ");
-                    g_ErrorReport.WriteCurrentTime();
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CServerLostMsgBoxLayout));
-                }
+                s_bClosed = TRUE;
+                g_ErrorReport.Write(L"> Connection closed. ");
+                g_ErrorReport.WriteCurrentTime();
+                g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
+                CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
             }
         }
 

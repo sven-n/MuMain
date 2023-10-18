@@ -38,24 +38,24 @@ public unsafe partial class ConnectionManager
     /// </summary>
     /// <param name="hostPtr">The pointer to a string which contains the host (ip or hostname).</param>
     /// <param name="port">The port.</param>
-    /// <param name="onPacketReceived">
-    /// The pointer to an unmanaged method which is called when a new packet got received.
-    /// Parameters: handle, size, pointer to the data.
+    /// <param name="isEncrypted">
+    /// A flag, if the connection is supposed to be encrypted.
+    /// This is usually <c>1</c> for connections to the game server, but <c>0</c> for connections to the connect server.
     /// </param>
-    /// <param name="onDisconnected">
-    /// The pointer to an unmanaged method which is called when the connection got disconnected.
-    /// Parameter: handle.
-    /// </param>
+    /// <param name="onPacketReceived">The pointer to an unmanaged method which is called when a new packet got received.
+    /// Parameters: handle, size, pointer to the data.</param>
+    /// <param name="onDisconnected">The pointer to an unmanaged method which is called when the connection got disconnected.
+    /// Parameter: handle.</param>
     /// <returns>
     /// The handle of the created connection. If negative, the connection couldn't be established.
     /// </returns>
     [UnmanagedCallersOnly]
-    public static int Connect(IntPtr hostPtr, int port, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
+    public static int Connect(IntPtr hostPtr, int port, byte isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
     {
         try
         {
             var host = Marshal.PtrToStringAuto(hostPtr) ?? throw new ArgumentNullException(nameof(hostPtr));
-            return ConnectInner(host, port, onPacketReceived, onDisconnected);
+            return ConnectInner(host, port, isEncrypted == 1, onPacketReceived, onDisconnected);
         }
         catch (Exception ex)
         {
@@ -119,14 +119,14 @@ public unsafe partial class ConnectionManager
         }
     }
 
-    private static int ConnectInner(string host, int port, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
+    private static int ConnectInner(string host, int port, bool isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
     {
         var tcpClient = new TcpClient(host, port);
 
         var socketConnection = SocketConnection.Create(tcpClient.Client);
 
-        var encryptor = new PipelinedXor32Encryptor(new PipelinedSimpleModulusEncryptor(socketConnection.Output, PipelinedSimpleModulusEncryptor.DefaultClientKey).Writer);
-        var decryptor = new PipelinedSimpleModulusDecryptor(socketConnection.Input, PipelinedSimpleModulusDecryptor.DefaultClientKey);
+        var encryptor = isEncrypted ? new PipelinedXor32Encryptor(new PipelinedSimpleModulusEncryptor(socketConnection.Output, PipelinedSimpleModulusEncryptor.DefaultClientKey).Writer) : null;
+        var decryptor = isEncrypted ? new PipelinedSimpleModulusDecryptor(socketConnection.Input, PipelinedSimpleModulusDecryptor.DefaultClientKey) : null;
         var connection = new Connection(socketConnection, decryptor, encryptor, new NullLogger<Connection>());
 
         var handle = Interlocked.Increment(ref _maxHandle);

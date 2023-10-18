@@ -166,7 +166,10 @@ BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port)
     g_byPacketSerialSend = 0;
     g_byPacketSerialRecv = 0;
     g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
-    SocketClient = new Connection(IpAddr, Port, &HandleIncomingPacketLocked);
+
+    // todo: generally, it's a bad idea to assume a specific port number (range).
+    const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
+    SocketClient = new Connection(IpAddr, Port, isEncrypted, &HandleIncomingPacketLocked);
     if (!SocketClient->IsConnected())
     {
         bResult = FALSE;
