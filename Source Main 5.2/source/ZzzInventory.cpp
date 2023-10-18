@@ -7377,8 +7377,8 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
                 glColor3f(0.4f, 0.7f, 1.f);
             }
 
-            wchar_t TextName[64];
-            if (g_csItemOption.GetSetItemName(TextName, o->Type - MODEL_ITEM, ItemExtOption))
+            wchar_t SetName[64]{};
+            if (g_csItemOption.GetSetItemName(SetName, o->Type - MODEL_ITEM, ItemExtOption))
             {
                 // Excellent or Ancient item?
                 glColor3f(1.f, 1.f, 1.f);
@@ -7386,22 +7386,16 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
                 g_pRenderText->SetTextColor(0, 255, 0, 255);
                 g_pRenderText->SetBgColor(60, 60, 200, 255);
 
-                wcscat(TextName, ItemAttribute[o->Type - MODEL_ITEM].Name);
+                wcscat(SetName, Name);
+                wcscpy(Name, SetName);
             }
-            else
-            {
-                wcscat(TextName, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-
-            if (Level == 0)
-                swprintf(Name, L"%s", TextName);
-            else
-                swprintf(Name, L"%s +%d", TextName, Level);
 
             if ((ItemLevel >> 7) & 1)
             {
                 if (o->Type != MODEL_HELPER + 3)
+                {
                     wcscat(Name, GlobalText[176]);
+                }
                 else
                 {
                     wcscat(Name, L" +");
