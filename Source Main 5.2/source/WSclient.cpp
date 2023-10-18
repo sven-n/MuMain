@@ -686,7 +686,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     switch (Data->Value)
     {
     case 0:
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         break;
     case 1:
         StopMusic();
