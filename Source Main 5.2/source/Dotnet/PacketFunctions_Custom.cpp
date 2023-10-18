@@ -23,6 +23,14 @@ void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, c
     dotnet_SendLogin(this->GetHandle(), username, password, GetTickCount(), clientVersion, clientSerial);
 }
 
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendAreaSkillHits)(int32_t, uint16_t, BYTE, BYTE, BYTE, BYTE, const AreaSkillHitTarget*);
+inline SendAreaSkillHits dotnet_SendAreaSkillHits = reinterpret_cast<SendAreaSkillHits>(g_dotnet->get_method(type_name_connection_manager, L"SendAreaSkillHits"));
+
+void PacketFunctions_ClientToServer_Custom::SendAreaSkillHits(uint16_t skillId, BYTE targetX, BYTE targetY, BYTE serial, BYTE targetCount, const AreaSkillHitTarget* targets)
+{
+    dotnet_SendAreaSkillHits(this->GetHandle(), skillId, targetX, targetY, serial, targetCount, targets);
+}
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExt)(int32_t, uint16_t, uint32_t);
 inline SendAuthenticateExt dotnet_SendAuthenticateExt = reinterpret_cast<SendAuthenticateExt>(g_dotnet->get_method(type_name_connection_manager, L"SendAuthenticateExt"));
 

@@ -1572,9 +1572,6 @@
     <ClInclude Include="source\KeyGenerater.h">
       <Filter>MU\Network</Filter>
     </ClInclude>
-    <ClInclude Include="source\StreamPacketEngine.h">
-      <Filter>MU\Network</Filter>
-    </ClInclude>
     <ClInclude Include="source\WSclient.h">
       <Filter>MU\Network\proxy\receive</Filter>
     </ClInclude>

@@ -55,7 +55,6 @@
 #include "ProtocolSend.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
-#include "StreamPacketEngine.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
@@ -1890,16 +1889,12 @@ void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, u
         PathNum = MAX_PATH_FIND - 1;
     }
 
-    CStreamPacketEngine spe;
-    spe.Init(0xC1, PACKET_MOVE);
-    spe << PathX[0] << PathY[0];
-    BYTE Path[8];
-    ZeroMemory(Path, 8);
+    BYTE PathNew[8]{};
     BYTE Dir = 0;
     for (int i = 1; i < PathNum; i++)
     {
         Dir = 0;
-        for (int j = 0; j < 8; j++)
+        for (int j = 0; j < 8; j++) // loop to find the direction of this step
         {
             if (DirTable[j * 2] == (PathX[i] - PathX[i - 1]) && DirTable[j * 2 + 1] == (PathY[i] - PathY[i - 1]))
             {
@@ -1908,34 +1903,25 @@ void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, u
             }
         }
 
+        const auto path_index = ((i + 1) / 2) - 1;
         if (i % 2 == 1)
         {
-            Path[(i + 1) / 2] = Dir << 4;
+            PathNew[path_index] |= Dir << 4;
         }
         else
         {
-            Path[(i + 1) / 2] += Dir;
+            PathNew[path_index] |= Dir;
         }
     }
+
     if (PathNum == 1)
     {
-        Path[0] = ((BYTE)((Angle + 22.5f) / 360.f * 8.f + 1.f) % 8) << 4;
+        // For example, it's 1 when the character stops walking by starting a skill.
+        // Then we just send the direction of the character and no steps.
+        Dir = ((BYTE)((Angle + 22.5f) / 360.f * 8.f + 1.f) % 8);
     }
-    else
-    {
-        for (int j = 0; j < 8; j++)
-        {
-            if (DirTable[j * 2] == (TargetX - PathX[PathNum - 1]) && DirTable[j * 2 + 1] == (TargetY - PathY[PathNum - 1]))
-            {
-                Dir = j;
-                break;
-            }
-        }
-        Path[0] = Dir << 4;
-    }
-    Path[0] += (BYTE)(PathNum - 1);
-    spe.AddData(Path, 1 + (PathNum) / 2);
-    spe.Send();
+
+    SocketClient->ToGameServer()->SendWalkRequest(PathX[0], PathY[0], PathNum - 1, Dir, PathNew, PathNum / 2);
 }
 
 void LetHeroStop(CHARACTER* c, BOOL bSetMovementFalse)
@@ -2044,20 +2030,18 @@ void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE
     g_ConsoleDebug->Write(MCD_SEND, L"0x1E [SendRequestMagicContinue]");
 }
 
-void SendRequestMagicAttack(int Type, int x, int y, BYTE Serial, int Count, int* Key, WORD SkillSerial)
+void SendRequestMagicAttack(int Type, BYTE x, BYTE y, BYTE Serial, BYTE Count, int* Key, WORD SkillSerial)
 {
-    CStreamPacketEngine spe;
-    WORD p_Type = (WORD)Type;
-
-    spe.Init(0xC3, PACKET_MAGIC_ATTACK);
-    spe << (BYTE)(HIBYTE(p_Type)) << (BYTE)(LOBYTE(p_Type)) << (BYTE)x << (BYTE)y << (BYTE)MakeSkillSerialNumber(&Serial) << (BYTE)Count;
+    const auto targets = new AreaSkillHitTarget[Count]{};
     for (int i = 0; i < Count; i++)
     {
-        spe << (BYTE)(Key[i] >> 8) << (BYTE)(Key[i] & 0xff);
-        spe << (BYTE)SkillSerial;
+        targets[i].TargetId = Key[i];
+        targets[i].AnimationCounter = SkillSerial;
     }
-    spe.Send();
 
+    SocketClient->ToGameServer()->SendAreaSkillHits(Type, x, y, MakeSkillSerialNumber(&Serial), Count, targets);
+
+    delete[] targets;
     g_ConsoleDebug->Write(MCD_SEND, L"0x1D [SendRequestMagicAttack(%d)]", Serial);
 }
 
