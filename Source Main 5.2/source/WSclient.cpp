@@ -493,7 +493,7 @@ void ReceiveCharacterList(const BYTE* ReceiveBuffer)
         c->Level = Data2->Level;
         c->CtlCode = Data2->CtlCode;
 
-        CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID);
+        CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_ID_SIZE);
 
         ChangeCharacterExt(Data2->Index, Data2->Equipment);
 
@@ -558,8 +558,8 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
         int iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
 
         CharactersClient[Data->Index].Class = iClass;
-        CMultiLanguage::ConvertFromUtf8(CharactersClient[Data->Index].ID, Data->ID);
-        CharactersClient[Data->Index].ID[MAX_ID_SIZE] = NULL;
+        CMultiLanguage::ConvertFromUtf8(CharactersClient[Data->Index].ID, Data->ID, MAX_ID_SIZE);
+        CharactersClient[Data->Index].ID[MAX_ID_SIZE] = L'\0';
         CurrentProtocolState = RECEIVE_CREATE_CHARACTER_SUCCESS;
         CUIMng& rUIMng = CUIMng::Instance();
         rUIMng.CloseMsgWin();
@@ -867,6 +867,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     Hero = c;
 
+    memset(c->ID, 0, sizeof c->ID);
     wcscpy(c->ID, CharacterAttribute->Name);
 
     for (int i = 0; i < MAX_EQUIPMENT; ++i)
@@ -875,7 +876,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         CharacterMachine->Equipment[i].Level = 0;
         CharacterMachine->Equipment[i].Option1 = 0;
     }
-    c->ID[MAX_ID_SIZE] = NULL;
+    
     CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
     CurrentProtocolState = RECEIVE_JOIN_MAP_SERVER;
 
@@ -1373,12 +1374,14 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
     {
         auto Data = (LPPCHATING)ReceiveBuffer;
 
-        wchar_t ID[MAX_ID_SIZE + 1];
-        CMultiLanguage::ConvertFromUtf8(ID, Data->ID);
+        wchar_t ID[MAX_ID_SIZE + 1] {};
+        CMultiLanguage::ConvertFromUtf8(ID, Data->ID, MAX_ID_SIZE);
+        ID[MAX_ID_SIZE] = L'\0';
 
         const auto messageSize = Data->Header.Size - MAX_ID_SIZE - sizeof(PBMSG_HEADER);
-        wchar_t Text[MAX_CHAT_SIZE + 1];
+        wchar_t Text[MAX_CHAT_SIZE + 1] {};
         CMultiLanguage::ConvertFromUtf8(Text, Data->ChatText);
+        Text[MAX_CHAT_SIZE] = L'\0';
 
         if (Text[0] == L'~')
         {
@@ -1473,14 +1476,14 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
 
     auto Data = (LPPCHATING)ReceiveBuffer;
 
-    wchar_t ID[MAX_ID_SIZE + 1];
-    memset(ID, 0, MAX_ID_SIZE + 1);
-    memcpy(ID, (wchar_t*)Data->ID, MAX_ID_SIZE);
+    wchar_t ID[MAX_ID_SIZE + 1] {};
+    CMultiLanguage::ConvertFromUtf8(ID, Data->ID, MAX_ID_SIZE);
+    ID[MAX_ID_SIZE] = L'\0';
 
     const auto messageSize = Data->Header.Size - MAX_ID_SIZE - sizeof(PBMSG_HEADER);
-    wchar_t Text[MAX_CHAT_SIZE + 1];
-    memset(Text, 0, MAX_CHAT_SIZE + 1);
-    memcpy(Text, (wchar_t*)Data->ChatText, messageSize);
+    wchar_t Text[MAX_CHAT_SIZE + 1] {};
+    CMultiLanguage::ConvertFromUtf8(Text, Data->ChatText, messageSize);
+    Text[messageSize] = L'\0';
 
     RegistWhisperID(10, ID);
 
@@ -2228,7 +2231,7 @@ void ReceiveCreatePlayerViewport(const BYTE* ReceiveBuffer, int Size)
             }
 #endif
 
-            CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID);
+            CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_ID_SIZE);
 
             if ((Data2->Class & 0x07) == 1 && Index != MAX_CHARACTERS_CLIENT)
             {
@@ -9064,10 +9067,10 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
     auto Data = (LPFS_CHAT_CREATE_RESULT)ReceiveBuffer;
 
     wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
-    CMultiLanguage::ConvertFromUtf8(szName, Data->ID);
+    CMultiLanguage::ConvertFromUtf8(szName, Data->ID, MAX_ID_SIZE);
 
     wchar_t szIP[16];
-    CMultiLanguage::ConvertFromUtf8(szIP, Data->IP);
+    CMultiLanguage::ConvertFromUtf8(szIP, Data->IP, 15);
 
     switch (Data->Result)
     {

@@ -168,7 +168,7 @@ public:
     BYTE        m_byFriend;
     WORD        MonsterSkill;
 
-    wchar_t        ID[32];
+    wchar_t        ID[32]{};
     char 		Movement;
     char		MovementType;
     char		CollisionTime; // unused?
