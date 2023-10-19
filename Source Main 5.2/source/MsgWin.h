@@ -38,14 +38,14 @@ public:
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow);
     bool CursorInWin(int nArea);
-    void PopUp(int nMsgCode, wchar_t* pszMsg = NULL);
+    void PopUp(int nMsgCode, wchar_t* pszMsg = nullptr);
 
 protected:
     void PreRelease();
     void UpdateWhileActive(double dDeltaTick);
     void RenderControls();
     void SetCtrlPosition();
-    void SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2 = NULL);
+    void SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2 = L"");
     void ManageOKClick();
     void ManageCancelClick();
     void InitResidentNumInput();

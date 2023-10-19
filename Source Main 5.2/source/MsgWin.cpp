@@ -204,9 +204,9 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
                 }
                 else
                 {
-                    wchar_t szMsg[64];
+                    wchar_t szMsg[64]{};
                     swprintf(szMsg, GlobalText[380], m_nGameExit);
-                    SetMsg(m_eType, szMsg);
+                    SetMsg(m_eType, szMsg, L"");
                 }
             }
         }
