@@ -4763,7 +4763,7 @@ void OpenMacro(const wchar_t* FileName)
 void SaveOptions()
 {
     // 0 ~ 19 skill hotkey
-    BYTE options[30] = { 0x00, };
+    BYTE options[30]{};
 
     int iSkillType = -1;
     for (int i = 0; i < 10; ++i)
@@ -4814,7 +4814,7 @@ void SaveOptions()
     if (g_bUseChatListBox == FALSE)
         wChatListBoxSize = 0;
     BYTE wChatListBoxBackAlpha = g_pChatListBox->GetBackAlpha() * 10;
-    options[24] = wChatListBoxSize << 4 | wChatListBoxBackAlpha;
+    options[24] = (((wChatListBoxSize << 4) & 0xF0) | (wChatListBoxBackAlpha & 0x0F)) & 0xFF;
     options[25] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_R) - ITEM_POTION) & 0xFF);
 
     options[26] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_Q);
