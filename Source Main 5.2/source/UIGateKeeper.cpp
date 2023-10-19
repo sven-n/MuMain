@@ -4,7 +4,9 @@
 
 #include "stdafx.h"
 #include "UIGateKeeper.h"
-#include "wsclientinline.h"
+
+#include "WSclient.h"
+
 
 CUIGateKeeper::CUIGateKeeper()
 {
@@ -23,12 +25,12 @@ CUIGateKeeper::~CUIGateKeeper()
 
 void CUIGateKeeper::SendPublicSetting()
 {
-    SendRequestHuntZoneEnter((BYTE)(m_bPublic ^ true));
+    SocketClient->ToGameServer()->SendCastleSiegeHuntingZoneEntranceSetting(m_bPublic ^ true);
 }
 
 void CUIGateKeeper::SendEnteranceFee()
 {
-    SendRequestBCChangeTaxRate(3, (m_iViewEntranceFee >> 24), ((m_iViewEntranceFee >> 16) & 0xff), ((m_iViewEntranceFee >> 8) & 0xff), (m_iViewEntranceFee & 0xff));
+    SocketClient->ToGameServer()->SendCastleSiegeTaxChangeRequest(3, m_iViewEntranceFee);
 }
 
 void CUIGateKeeper::EnteranceFeeUp()
@@ -51,5 +53,5 @@ void CUIGateKeeper::EnteranceFeeDown()
 
 void CUIGateKeeper::SendEnter()
 {
-    SendCastleHuntZoneEnter(m_nEntranceFee);
+    SocketClient->ToGameServer()->SendCastleSiegeHuntingZoneEnterRequest(m_iViewEntranceFee);
 }

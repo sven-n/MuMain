@@ -988,9 +988,6 @@
     <ClCompile Include="source\Time\Timer.cpp">
       <Filter>External Object\time</Filter>
     </ClCompile>
-    <ClCompile Include="source\Utilities\Log\DebugAngel.cpp">
-      <Filter>Utilities\log</Filter>
-    </ClCompile>
     <ClCompile Include="source\Utilities\Log\ErrorReport.cpp">
       <Filter>Utilities\log</Filter>
     </ClCompile>
@@ -1156,22 +1153,10 @@
     <ClCompile Include="source\ExternalObject\Leaf\ExceptionHandler.cpp">
       <Filter>External Object\Leaf</Filter>
     </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\html_log.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\peimage.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
     <ClCompile Include="source\ExternalObject\Leaf\stdleaf.cpp">
       <Filter>External Object\Leaf</Filter>
     </ClCompile>
     <ClCompile Include="source\ExternalObject\Leaf\sysinfo.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\xortrans.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp">
       <Filter>External Object\Leaf</Filter>
     </ClCompile>
     <ClCompile Include="source\Dotnet\DotNetRuntime.cpp">
@@ -1188,6 +1173,24 @@
     </ClCompile>
     <ClCompile Include="source\NewUIStorageInventoryExt.cpp">
       <Filter>MU\Client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Dotnet\PacketFunctions_ChatServer.cpp">
+      <Filter>MU\Dotnet</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Dotnet\PacketFunctions_ClientToServer.cpp">
+      <Filter>MU\Dotnet</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Dotnet\PacketFunctions_ConnectServer.cpp">
+      <Filter>MU\Dotnet</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ExternalObject\Leaf\xortrans.cpp">
+      <Filter>MU\Client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp">
+      <Filter>MU\Client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Dotnet\PacketFunctions_Custom.cpp">
+      <Filter>MU\Dotnet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1569,14 +1572,8 @@
     <ClInclude Include="source\KeyGenerater.h">
       <Filter>MU\Network</Filter>
     </ClInclude>
-    <ClInclude Include="source\StreamPacketEngine.h">
-      <Filter>MU\Network</Filter>
-    </ClInclude>
     <ClInclude Include="source\WSclient.h">
       <Filter>MU\Network\proxy\receive</Filter>
-    </ClInclude>
-    <ClInclude Include="source\wsclientinline.h">
-      <Filter>MU\Network\proxy\send</Filter>
     </ClInclude>
     <ClInclude Include="source\DSPlaySound.h">
       <Filter>MU\Sound</Filter>
@@ -2010,9 +2007,6 @@
     <ClInclude Include="source\Time\Timer.h">
       <Filter>External Object\time</Filter>
     </ClInclude>
-    <ClInclude Include="source\Utilities\Log\DebugAngel.h">
-      <Filter>Utilities\log</Filter>
-    </ClInclude>
     <ClInclude Include="source\Utilities\Log\ErrorReport.h">
       <Filter>Utilities\log</Filter>
     </ClInclude>
@@ -2220,12 +2214,6 @@
     <ClInclude Include="source\ExternalObject\Leaf\ExceptionHandler.h">
       <Filter>External Object\Leaf</Filter>
     </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\html_log.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\peimage.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
     <ClInclude Include="source\ExternalObject\Leaf\rdtsc.h">
       <Filter>External Object\Leaf</Filter>
     </ClInclude>
@@ -2236,12 +2224,6 @@
       <Filter>External Object\Leaf</Filter>
     </ClInclude>
     <ClInclude Include="source\ExternalObject\Leaf\sysinfo.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\xortrans.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\xstreambuf.h">
       <Filter>External Object\Leaf</Filter>
     </ClInclude>
     <ClInclude Include="afxres.h">
@@ -2264,6 +2246,33 @@
     </ClInclude>
     <ClInclude Include="source\SpinLock.h">
       <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketFunctions_ChatServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketFunctions_ClientToServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketFunctions_ConnectServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketBindings_ChatServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketBindings_ClientToServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketBindings_ConnectServer.h">
+      <Filter>MU\Dotnet</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ExternalObject\Leaf\xortrans.h">
+      <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ExternalObject\Leaf\xstreambuf.h">
+      <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Dotnet\PacketFunctions_Custom.h">
+      <Filter>MU\Dotnet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

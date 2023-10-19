@@ -28,7 +28,7 @@ CShopList::~CShopList() // OK
     SAFE_DELETE(m_ProductListPtr);
 }
 
-WZResult CShopList::LoadCategroy(const char* szFilePath) // OK
+WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
 {
     WZResult result;
 
@@ -62,7 +62,7 @@ WZResult CShopList::LoadCategroy(const char* szFilePath) // OK
 
             CShopCategory cat;
 
-            const std::string data = this->GetDecodeingString(buff, enc);
+            const std::wstring data = this->GetDecodedString(buff, enc);
 
             if (cat.SetCategory(data))
             {
@@ -74,13 +74,13 @@ WZResult CShopList::LoadCategroy(const char* szFilePath) // OK
     }
     else
     {
-        result.SetResult(PT_LOADLIBRARY, LastError, "package file open fail");
+        result.SetResult(PT_LOADLIBRARY, LastError, L"package file open fail");
     }
 
     return result;
 }
 
-WZResult CShopList::LoadPackage(const char* szFilePath) // OK
+WZResult CShopList::LoadPackage(const wchar_t* szFilePath) // OK
 {
     WZResult result;
 
@@ -112,7 +112,7 @@ WZResult CShopList::LoadPackage(const char* szFilePath) // OK
 
             CShopPackage pack;
 
-            if (pack.SetPackage(this->GetDecodeingString(buff, enc)))
+            if (pack.SetPackage(this->GetDecodedString(buff, enc)))
             {
                 this->GetPackageListPtr()->Append(pack);
                 this->GetCategoryListPtr()->InsertPackage(pack.ProductDisplaySeq, pack.PackageProductSeq);
@@ -123,13 +123,13 @@ WZResult CShopList::LoadPackage(const char* szFilePath) // OK
     }
     else
     {
-        result.SetResult(4, LastError, "package file open fail");
+        result.SetResult(4, LastError, L"package file open fail");
     }
 
     return result;
 }
 
-WZResult CShopList::LoadProduct(const char* szFilePath) // OK
+WZResult CShopList::LoadProduct(const wchar_t* szFilePath) // OK
 {
     static WZResult result;
 
@@ -165,7 +165,7 @@ WZResult CShopList::LoadProduct(const char* szFilePath) // OK
 
             CShopProduct product;
 
-            std::string data = this->GetDecodeingString(buff, enc);
+            std::wstring data = this->GetDecodedString(buff, enc);
 
             if (product.SetProduct(data))
             {
@@ -177,7 +177,7 @@ WZResult CShopList::LoadProduct(const char* szFilePath) // OK
     }
     else
     {
-        result.SetResult(4, LastError, "package file open fail");
+        result.SetResult(4, LastError, L"package file open fail");
     }
 
     return result;
@@ -198,7 +198,7 @@ void CShopList::SetProductListPtr(CShopProductList* ProductListPtr) // OK
     m_ProductListPtr = ProductListPtr;
 }
 
-FILE_ENCODE CShopList::IsFileEncodingUtf8(const char* szFilePath) // OK
+FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
 {
     std::ifstream ifs;
 
@@ -233,21 +233,22 @@ FILE_ENCODE CShopList::IsFileEncodingUtf8(const char* szFilePath) // OK
     return FE_ANSI;
 }
 
-std::string CShopList::GetDecodeingString(const char* str, FILE_ENCODE encode) // OK
+std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode) // OK
 {
-    std::string result;
+    std::wstring result;
 
     if (encode == FE_UTF8)
     {
-        int cchWideChar = MultiByteToWideChar(CP_UTF8, 0, str, -1, 0, 0);
+        int cchWideChar = MultiByteToWideChar(CP_UTF8, 0, buffer, -1, 0, 0);
         auto lpWideCharStr = new WCHAR[cchWideChar + 1];
-        MultiByteToWideChar(CP_UTF8, 0, str, -1, lpWideCharStr, cchWideChar);
+        MultiByteToWideChar(CP_UTF8, 0, buffer, -1, lpWideCharStr, cchWideChar);
 
         cchWideChar = WideCharToMultiByte(0, 0, lpWideCharStr, -1, 0, 0, 0, 0);
         char* buff = new char[cchWideChar + 1];
         WideCharToMultiByte(0, 0, lpWideCharStr, -1, buff, cchWideChar, 0, 0);
 
-        result = (buff);
+        // todo: check if that's correct
+        result = (wchar_t*) buff;
 
         delete[] lpWideCharStr;
         delete[] buff;
@@ -256,11 +257,12 @@ std::string CShopList::GetDecodeingString(const char* str, FILE_ENCODE encode) /
     {
         if (encode == FE_UNICODE)
         {
-            result = "\0";
+            result = L"\0";
         }
         else
         {
-            result = (str);
+            // todo: check if that's correct
+            result = (wchar_t*)(buffer);
         }
     }
 

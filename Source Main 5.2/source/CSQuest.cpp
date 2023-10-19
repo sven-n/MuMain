@@ -11,22 +11,23 @@
 #include "zzzscene.h"
 #include "zzzInterface.h"
 #include "zzzinventory.h"
-#include "wsclientinline.h"
+
 #include "CSQuest.h"
 #include "GIPetManager.h"
 #include "UsefulDef.h"
 #include "NewUIInventoryCtrl.h"
 #include "CharacterManager.h"
+#include "NewUISystem.h"
 
 bool bCheckNPC;
 extern  int  g_iMessageTextStart;
 extern  char g_cMessageTextCurrNum;
 extern  char g_cMessageTextNum;
 extern  int g_iNumLineMessageBoxCustom;
-extern  char g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
+extern  wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
 extern  int g_iCurrentDialogScript;
 extern  int g_iNumAnswer;
-extern  char g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
+extern  wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 
 static  CSQuest csQuest;
 
@@ -79,22 +80,22 @@ BYTE CSQuest::getCurrQuestState(void)
     return CheckQuestState();
 }
 
-unicode::t_char* CSQuest::GetNPCName(BYTE byQuestIndex)
+const void CSQuest::GetNPCName(BYTE byQuestIndex, wchar_t* name)
 {
-    return ::getMonsterName(int(m_Quest[byQuestIndex].wNpcType));
+    return getMonsterName(int(m_Quest[byQuestIndex].wNpcType), name);
 }
 
-unicode::t_char* CSQuest::getQuestTitle()
+wchar_t* CSQuest::getQuestTitle()
 {
     return m_Quest[m_byCurrQuestIndex].strQuestName;
 }
 
-unicode::t_char* CSQuest::getQuestTitle(BYTE byQuestIndex)
+wchar_t* CSQuest::getQuestTitle(BYTE byQuestIndex)
 {
     return m_Quest[byQuestIndex].strQuestName;
 }
 
-unicode::t_char* CSQuest::getQuestTitleWindow()
+wchar_t* CSQuest::getQuestTitleWindow()
 {
     return m_Quest[m_byCurrQuestIndexWnd].strQuestName;
 }
@@ -119,25 +120,47 @@ int CSQuest::GetEventCount(BYTE byType)
     return m_byEventCount[byType];
 }
 
-bool CSQuest::OpenQuestScript(char* filename)
+typedef struct
 {
-    FILE* fp = fopen(filename, "rb");
+    short   shQuestConditionNum;
+    short   shQuestRequestNum;
+    WORD	wNpcType;
+
+    char strQuestName[32];
+
+    QUEST_CLASS_ACT     QuestAct[MAX_QUEST_CONDITION];
+    QUEST_CLASS_REQUEST QuestRequest[MAX_QUEST_REQUEST];
+} QUEST_ATTRIBUTE_FILE;
+
+bool CSQuest::OpenQuestScript(wchar_t* filename)
+{
+    FILE* fp = _wfopen(filename, L"rb");
     if (fp == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", filename);
+        wchar_t Text[256];
+        swprintf(Text, L"%s - File not exist.", filename);
         return  FALSE;
     }
 
-    memset(m_Quest, 0, sizeof(QUEST_ATTRIBUTE) * MAX_QUESTS);
+    memset(m_Quest, 0, sizeof m_Quest);
 
-    int     Size = sizeof(QUEST_ATTRIBUTE);
+    int Size = sizeof(QUEST_ATTRIBUTE_FILE);
     BYTE* Buffer = new BYTE[Size];
     for (int i = 0; i < MAX_QUESTS; i++)
     {
         fread(Buffer, Size, 1, fp);
         BuxConvert(Buffer, Size);
-        memcpy(&m_Quest[i], Buffer, Size);
+
+        auto* current = (QUEST_ATTRIBUTE_FILE*)Buffer;
+        auto* target = &m_Quest[i];
+
+        target->shQuestConditionNum = current->shQuestConditionNum;
+        target->shQuestRequestNum = current->shQuestRequestNum;
+        target->wNpcType = current->wNpcType;
+        CMultiLanguage::ConvertFromUtf8(target->strQuestName, current->strQuestName);
+
+        memcpy(target->QuestAct, current->QuestAct, sizeof target->QuestAct);
+        memcpy(target->QuestRequest, current->QuestRequest, sizeof target->QuestRequest);
     }
     SAFE_DELETE_ARRAY(Buffer);
     fclose(fp);
@@ -446,9 +469,12 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 {
     g_iCurrentDialogScript = iDialogIndex;
 
-    g_iNumLineMessageBoxCustom = SeparateTextIntoLines(g_DialogScript[g_iCurrentDialogScript].m_lpszText, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
+    wchar_t Text[300];
+    CMultiLanguage::ConvertFromUtf8(Text, g_DialogScript[g_iCurrentDialogScript].m_lpszText);
 
-    char lpszAnswer[MAX_LENGTH_ANSWER + 8];
+    g_iNumLineMessageBoxCustom = SeparateTextIntoLines(Text, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
+
+    wchar_t lpszAnswer[MAX_LENGTH_ANSWER + 8];
     g_iNumAnswer = 0;
     ZeroMemory(g_lpszDialogAnswer, MAX_ANSWER_FOR_DIALOG * NUM_LINE_DA * MAX_LENGTH_CMB);
 
@@ -456,20 +482,23 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     for (int i = 0; i < g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer; ++i)
     {
-        wsprintf(lpszAnswer, "%d) %s", i + 1, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
+        wchar_t answerText[64];
+        CMultiLanguage::ConvertFromUtf8(answerText, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
+        swprintf(lpszAnswer, L"%d) %s", i + 1, answerText);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)
         {
             g_lpszDialogAnswer[i][iNumLine][0] = '\0';
         }
+
         g_iNumAnswer++;
         iTextSize = i;
     }
 
     if (0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
     {
-        wsprintf(lpszAnswer, "%d) %s", iTextSize + 1, GlobalText[609]);
-        strcpy(g_lpszDialogAnswer[0][0], lpszAnswer);
+        swprintf(lpszAnswer, L"%d) %s", iTextSize + 1, GlobalText[609]);
+        wcscpy(g_lpszDialogAnswer[0][0], lpszAnswer);
         g_iNumAnswer = 1;
     }
 }
@@ -605,7 +634,7 @@ bool CSQuest::ProcessNextProgress()
     }
     else
     {
-        SendRequestQuestState(m_byCurrQuestIndex, 1);
+        SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(m_byCurrQuestIndex, 1);
         return false;
     }
 }
@@ -632,7 +661,7 @@ void CSQuest::RenderDevilSquare(void)
 
 void CSQuest::RenderBloodCastle(void)
 {
-    char Text[100];
+    wchar_t Text[100];
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(230, 230, 230, 255);
     g_pRenderText->SetBgColor(20, 20, 20, 255);
@@ -640,13 +669,13 @@ void CSQuest::RenderBloodCastle(void)
 
     g_pRenderText->SetTextColor(223, 191, 103, 255);
     g_pRenderText->SetBgColor(0);
-    sprintf(Text, GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
+    swprintf(Text, GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 80, Text, 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->SetTextColor(255, 230, 210, 255);
     g_pRenderText->RenderText(m_iStartX + 85, m_iStartY + 100, GlobalText[877], 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->RenderText(m_iStartX + 105, m_iStartY + 120, GlobalText[878], 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetFont(g_hFontBig);
-    sprintf(Text, GlobalText[868], m_byEventCount[m_byQuestType]);
+    swprintf(Text, GlobalText[868], m_byEventCount[m_byQuestType]);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 65 + 60 * 4, Text, 0, 0, RT3_WRITE_CENTER);
 }

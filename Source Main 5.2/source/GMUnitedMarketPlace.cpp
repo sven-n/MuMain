@@ -69,7 +69,7 @@ CHARACTER* GMUnitedMarketPlace::CreateMonster(int iType, int PosX, int PosY, int
     // 		{
     // 			OpenMonsterModel(185);
     // 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+185, PosX, PosY);
-    // 			strcpy(pCharacter->ID, "석상");
+    // 			wcscpy(pCharacter->ID, L"석상");
     // 			pCharacter->Object.m_bRenderShadow = false;
     // 			pCharacter->Object.Scale = 0.6f;
     // 			pCharacter->Object.LifeTime = 100;

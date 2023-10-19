@@ -7,7 +7,7 @@
 #include <time.h>
 
 //. Wrapping to C-style function
-bool leaf::AttachExceptionHandler(const std::string& dmpfile, bool bSecondChance) {
+bool leaf::AttachExceptionHandler(const std::wstring& dmpfile, bool bSecondChance) {
     return CExceptionHandler::GetObjPtr()->AttachExceptionHandler(dmpfile, bSecondChance);
 }
 bool leaf::AttachExceptionHandler(EXCEPTION_CALLBACK pfCallback, bool bSecondChance) {
@@ -19,7 +19,7 @@ bool leaf::DetachExceptionHandler() {
 bool leaf::IsContinueExceptionToSecondChance() {
     return CExceptionHandler::GetObjPtr()->IsEnableSecondChance();
 }
-bool leaf::SaveExceptionDumpFile(const std::string& filename, CONTEXT* pContext, _EXCEPTION_POINTERS* pExceptionInfo) {
+bool leaf::SaveExceptionDumpFile(const std::wstring& filename, CONTEXT* pContext, _EXCEPTION_POINTERS* pExceptionInfo) {
     return CExceptionHandler::GetObjPtr()->SaveDmpFile(filename, pContext, pExceptionInfo);
 }
 
@@ -32,7 +32,7 @@ CExceptionHandler::CExceptionHandler() : m_pfPrevExceptionFilter(NULL), m_pfExce
 CExceptionHandler::~CExceptionHandler()
 {}
 
-bool CExceptionHandler::AttachExceptionHandler(const std::string& filename, bool bSecondChance)
+bool CExceptionHandler::AttachExceptionHandler(const std::wstring& filename, bool bSecondChance)
 {
     if (!m_pfPrevExceptionFilter) {
         m_pfPrevExceptionFilter = ::SetUnhandledExceptionFilter(CExceptionHandler::OnException);
@@ -57,7 +57,7 @@ bool CExceptionHandler::DetachExceptionHandler()
     if (m_pfPrevExceptionFilter) {
         ::SetUnhandledExceptionFilter(m_pfPrevExceptionFilter);
         m_pfPrevExceptionFilter = NULL;
-        m_filename = "";
+        m_filename = L"";
         m_bSecondChance = false;
         return true;
     }
@@ -68,16 +68,16 @@ bool CExceptionHandler::IsEnableSecondChance() const
     return m_bSecondChance;
 }
 
-const std::string& CExceptionHandler::GetDmpFileName() const
+const std::wstring& CExceptionHandler::GetDmpFileName() const
 {
     return m_filename;
 }
-bool CExceptionHandler::SaveDmpFile(const std::string& filename, CONTEXT* pContext, _EXCEPTION_POINTERS* pExceptionInfo)
+bool CExceptionHandler::SaveDmpFile(const std::wstring& filename, CONTEXT* pContext, _EXCEPTION_POINTERS* pExceptionInfo)
 {
     if (pContext == NULL)
         return false;
 
-    FILE* fd = fopen(filename.c_str(), "wb");
+    FILE* fd = _wfopen(filename.c_str(), L"wb");
     if (fd == NULL) return false;
 
     DMPFILEHEADER DmpHeader;
@@ -96,11 +96,11 @@ bool CExceptionHandler::SaveDmpFile(const std::string& filename, CONTEXT* pConte
     DmpHeader.CreationTimeStamp = ltime;
 
     //. System infomation
-    std::string	strOSInfo;
+    std::wstring	strOSInfo;
     GetOSInfoString(strOSInfo);
     lstrcpyn(DmpHeader.OSInfoString, strOSInfo.c_str(), 128);
 
-    std::string	strCPUInfo;
+    std::wstring	strCPUInfo;
     GetCPUInfoString(strCPUInfo);
     lstrcpyn(DmpHeader.CPUInfoString, strCPUInfo.c_str(), 128);
 
@@ -199,7 +199,7 @@ void CExceptionHandler::SetProcessInfoHeader(DMPPROCESSINFOHEADER* pProcessInfoH
                     if (ProcessEntry.th32ProcessID == GetCurrentProcessId()) {
                         pProcessInfoHeader->ProcessId = ProcessEntry.th32ProcessID;
 
-                        char szModuleFileName[256];
+                        wchar_t szModuleFileName[256];
                         GetModuleFileName(NULL, szModuleFileName, 256);
                         lstrcpyn(pProcessInfoHeader->szImageName, szModuleFileName, 256);
 
@@ -220,7 +220,7 @@ void CExceptionHandler::SetProcessInfoHeader(DMPPROCESSINFOHEADER* pProcessInfoH
         {
             pProcessInfoHeader->ProcessId = GetCurrentProcessId();
 
-            char szModuleFileName[256];
+            wchar_t szModuleFileName[256];
             GetModuleFileName(NULL, szModuleFileName, 256);
             lstrcpyn(pProcessInfoHeader->szImageName, szModuleFileName, 256);
 
@@ -235,7 +235,7 @@ void CExceptionHandler::SetProcessInfoHeader(DMPPROCESSINFOHEADER* pProcessInfoH
             GetFileVersionInfo(pProcessInfoHeader->szImageName, 0, dwVersionInfoSize, pbyData);
 
             VS_FIXEDFILEINFO* pFileInfoPointer = NULL;
-            pProcessInfoHeader->IsExistFixedFileInfo = (BYTE)VerQueryValue(pbyData, "\\",
+            pProcessInfoHeader->IsExistFixedFileInfo = (BYTE)VerQueryValue(pbyData, L"\\",
                 (LPVOID*)&pFileInfoPointer, (UINT*)&dwVersionInfoSize);
             if (pProcessInfoHeader->IsExistFixedFileInfo)
                 ImageFileInfo = *pFileInfoPointer;
@@ -273,88 +273,88 @@ void CExceptionHandler::SetExceptionInfoHeader(DMPEXCEPTIONINFOHEADER* pExceptio
         pExceptionInfoHeader->ExceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
         pExceptionInfoHeader->ExceptionAddress = (DWORD)pExceptionInfo->ExceptionRecord->ExceptionAddress;
 
-        std::string strExceptionCode;
+        std::wstring strExceptionCode;
         GetExceptionCodeString(pExceptionInfo->ExceptionRecord, strExceptionCode);
         lstrcpyn(pExceptionInfoHeader->ExceptionCodeString, strExceptionCode.c_str(), 128);
     }
 }
-void CExceptionHandler::GetExceptionCodeString(IN PEXCEPTION_RECORD pExceptionRecord, OUT std::string& strType) {
+void CExceptionHandler::GetExceptionCodeString(IN PEXCEPTION_RECORD pExceptionRecord, OUT std::wstring& strType) {
     switch (pExceptionRecord->ExceptionCode)
     {
     case EXCEPTION_ACCESS_VIOLATION:
-        strType = "Access violation";
+        strType = L"Access violation";
         if (pExceptionRecord->ExceptionInformation[0] == 0)
         {
-            char szExceptionInfo[64];
-            sprintf(szExceptionInfo, " : reading inaccessible 0x%08X", pExceptionRecord->ExceptionInformation[1]);
+            wchar_t szExceptionInfo[64];
+            swprintf(szExceptionInfo, L" : reading inaccessible 0x%08X", pExceptionRecord->ExceptionInformation[1]);
             strType += szExceptionInfo;
         }
         else
         {
-            char szExceptionInfo[64];
-            sprintf(szExceptionInfo, " : writing inaccessible 0x%08X", pExceptionRecord->ExceptionInformation[1]);
+            wchar_t szExceptionInfo[64];
+            swprintf(szExceptionInfo, L" : writing inaccessible 0x%08X", pExceptionRecord->ExceptionInformation[1]);
             strType += szExceptionInfo;
         }
         break;
     case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-        strType = "Bounds exceeded";
+        strType = L"Bounds exceeded";
         break;
     case EXCEPTION_BREAKPOINT:
-        strType = "Break point";
+        strType = L"Break point";
         break;
     case EXCEPTION_DATATYPE_MISALIGNMENT:
-        strType = "Data type misalignment";
+        strType = L"Data type misalignment";
         break;
     case EXCEPTION_FLT_DENORMAL_OPERAND:
-        strType = "Float denormal operand";
+        strType = L"Float denormal operand";
         break;
     case EXCEPTION_FLT_DIVIDE_BY_ZERO:
-        strType = "Float divide by zero";
+        strType = L"Float divide by zero";
         break;
     case EXCEPTION_FLT_INEXACT_RESULT:
-        strType = "Float inexact result";
+        strType = L"Float inexact result";
         break;
     case EXCEPTION_FLT_INVALID_OPERATION:
-        strType = "Float invalid operation";
+        strType = L"Float invalid operation";
         break;
     case EXCEPTION_FLT_OVERFLOW:
-        strType = "Float overflow";
+        strType = L"Float overflow";
         break;
     case EXCEPTION_FLT_STACK_CHECK:
-        strType = "Float stack check";
+        strType = L"Float stack check";
         break;
     case EXCEPTION_FLT_UNDERFLOW:
-        strType = "Float underflow";
+        strType = L"Float underflow";
         break;
     case EXCEPTION_ILLEGAL_INSTRUCTION:
-        strType = "Illegal instruction";
+        strType = L"Illegal instruction";
         break;
     case EXCEPTION_IN_PAGE_ERROR:
-        strType = "In page error";
+        strType = L"In page error";
         break;
     case EXCEPTION_INT_DIVIDE_BY_ZERO:
-        strType = "Int divide by zero";
+        strType = L"Int divide by zero";
         break;
     case EXCEPTION_INT_OVERFLOW:
-        strType = "Int overflow";
+        strType = L"Int overflow";
         break;
     case EXCEPTION_INVALID_DISPOSITION:
-        strType = "Invalid disposition";
+        strType = L"Invalid disposition";
         break;
     case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-        strType = "Noncontinuable exception";
+        strType = L"Noncontinuable exception";
         break;
     case EXCEPTION_PRIV_INSTRUCTION:
-        strType = "Priv instruction";
+        strType = L"Priv instruction";
         break;
     case EXCEPTION_SINGLE_STEP:
-        strType = "Single step";
+        strType = L"Single step";
         break;
     case EXCEPTION_STACK_OVERFLOW:
-        strType = "Stack overflow";
+        strType = L"Stack overflow";
         break;
     default:
-        strType = "Unknown exception";
+        strType = L"Unknown exception";
         break;
     }
 }
@@ -376,11 +376,11 @@ CDmpFileLoader::~CDmpFileLoader()
     Release();
 }
 
-bool CDmpFileLoader::Create(const std::string& dmpfile)
+bool CDmpFileLoader::Create(const std::wstring& dmpfile)
 {
     if (!m_listModule.empty() || !m_listStackFrame.empty()) { Release(); }
 
-    FILE* fd = fopen(dmpfile.c_str(), "rb");
+    FILE* fd = _wfopen(dmpfile.c_str(), L"rb");
     if (fd == NULL) return false;
 
     fread(&m_DmpFileHeader, sizeof(DMPFILEHEADER), 1, fd);
@@ -452,7 +452,7 @@ DWORD CDmpFileLoader::GetThreadCount() const
 {
     return m_DmpFileHeader.ProcessInfo.ThreadCount;
 }
-const char* CDmpFileLoader::GetImageName() const
+const wchar_t* CDmpFileLoader::GetImageName() const
 {
     return m_DmpFileHeader.ProcessInfo.szImageName;
 }
@@ -474,11 +474,11 @@ const DMPMODULEINFO* CDmpFileLoader::GetModuleInfo(int index) const
 }
 
 //. Exception infomation
-const char* CDmpFileLoader::GetOSInfoString() const
+const wchar_t* CDmpFileLoader::GetOSInfoString() const
 {
     return m_DmpFileHeader.OSInfoString;
 }
-const char* CDmpFileLoader::GetCPUInfoString() const
+const wchar_t* CDmpFileLoader::GetCPUInfoString() const
 {
     return m_DmpFileHeader.CPUInfoString;
 }
@@ -499,7 +499,7 @@ DWORD CDmpFileLoader::GetExceptionAddress() const
 {
     return m_DmpFileHeader.ExceptionInfo.ExceptionAddress;
 }
-const char* CDmpFileLoader::GetExceptionCodeString() const
+const wchar_t* CDmpFileLoader::GetExceptionCodeString() const
 {
     return m_DmpFileHeader.ExceptionInfo.ExceptionCodeString;
 }

@@ -12,7 +12,7 @@ public:
     bool IsSecondClass(const BYTE byClass);
     bool IsThirdClass(const BYTE byClass);
     bool IsMasterLevel(const BYTE byClass);
-    const char* GetCharacterClassText(const BYTE byClass);
+    const wchar_t* GetCharacterClassText(const BYTE byClass);
     int GetBaseClass(int iClass) { return (0x7 & iClass); }
     int IsFemale(int iClass) { return (this->GetBaseClass(iClass) == CLASS_ELF || this->GetBaseClass(iClass) == CLASS_SUMMONER); }
     BYTE GetSkinModelIndex(const BYTE byClass);

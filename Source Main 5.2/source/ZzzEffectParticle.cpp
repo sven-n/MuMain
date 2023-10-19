@@ -6659,7 +6659,7 @@ void MoveParticles()
 
                     o->Scale += FPS_ANIMATION_FACTOR * 0.08f;
 
-                    VectorAdd(o->StartPosition, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
+                    VectorAddScaled(o->StartPosition, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
                     VectorCopy(o->Position, o->StartPosition);
 
                     vec3_t p;
@@ -8296,11 +8296,11 @@ void MoveParticles()
 
                 if (o->SubType >= 3 && o->SubType < 5 && o->Target != NULL)
                 {
-                    std::string name;
+                    std::wstring name;
                     switch (o->SubType)
                     {
-                    case 3: name = "Monster82_LHand"; break;
-                    case 4: name = "Monster82_RHand"; break;
+                    case 3: name = L"Monster82_LHand"; break;
+                    case 4: name = L"Monster82_RHand"; break;
                     }
                     if (BoneManager::GetBonePosition(o->Target, name, TargetPosition)) {
                         vec3_t Direction;

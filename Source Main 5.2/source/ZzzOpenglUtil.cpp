@@ -50,16 +50,16 @@ DWORD		 MouseRButtonPress = 0;
 
 //bool    showShoppingMall = false;
 
-void OpenExploper(char* Name, char* para)
+void OpenExploper(wchar_t* Name, wchar_t* para)
 {
-    ShellExecute(NULL, "open", Name, para, "", SW_SHOW);
+    ShellExecute(NULL, L"open", Name, para, L"", SW_SHOW);
 }
 
-bool CheckID_HistoryDay(char* Name, WORD day)
+bool CheckID_HistoryDay(wchar_t* Name, WORD day)
 {
     typedef struct  __day_history__
     {
-        char ID[MAX_ID_SIZE + 1];
+        wchar_t ID[MAX_ID_SIZE + 1];
         WORD date;
     }dayHistory;
 
@@ -70,7 +70,7 @@ bool CheckID_HistoryDay(char* Name, WORD day)
     bool  sameName = false;
     bool  update = true;
 
-    if ((fp = fopen("dconfig.ini", "rb")) != NULL)
+    if ((fp = _wfopen(L"dconfig.ini", L"rb")) != NULL)
     {
         fread(&num, sizeof(WORD), 1, fp);
 
@@ -85,7 +85,7 @@ bool CheckID_HistoryDay(char* Name, WORD day)
                 fread(days[i].ID, sizeof(char), MAX_ID_SIZE + 1, fp);
                 fread(&days[i].date, sizeof(WORD), 1, fp);
 
-                if (!strcmp(days[i].ID, Name))
+                if (!wcscmp(days[i].ID, Name))
                 {
                     sameName = true;
                     if (days[i].date == day)
@@ -111,7 +111,7 @@ bool CheckID_HistoryDay(char* Name, WORD day)
             num++;
         }
 
-        fp = fopen("dconfig.ini", "wb");
+        fp = _wfopen(L"dconfig.ini", L"wb");
 
         fwrite(&num, sizeof(WORD), 1, fp);
         for (int i = 0; i < num; ++i)
@@ -129,7 +129,7 @@ bool CheckID_HistoryDay(char* Name, WORD day)
 }
 
 bool GrabEnable = false;
-char GrabFileName[MAX_PATH];
+wchar_t GrabFileName[MAX_PATH];
 int  GrabScreen = 0;
 bool GrabFirst = false;
 
@@ -137,26 +137,13 @@ void SaveScreen()
 {
     GrabFirst = true;
 
-    auto Buffer = new unsigned char[WindowWidth * WindowHeight * 4];
+    auto Buffer = new unsigned char[WindowWidth * WindowHeight * 3];
 
-    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGBA, GL_UNSIGNED_BYTE, &Buffer[0]);
+    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, &Buffer[0]);
 
-    auto BufferNew = new unsigned char[WindowWidth * WindowHeight * 3];
-
-    int counter = 0;
-    for (uint32_t i = 0; i < WindowWidth * WindowHeight * 4; i += 4)
-    {
-        BufferNew[counter + 0] = Buffer[i + 0];
-        BufferNew[counter + 1] = Buffer[i + 1];
-        BufferNew[counter + 2] = Buffer[i + 2];
-
-        counter += 3;
-    }
-
-    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, &BufferNew[0], 100);
+    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, &Buffer[0], 100);
 
     SAFE_DELETE_ARRAY(Buffer);
-    SAFE_DELETE_ARRAY(BufferNew);
 
     GrabScreen++;
     GrabScreen %= 10000;
@@ -677,30 +664,30 @@ void UpdateMousePositionn()
 }
 
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-BOOL IsGLExtensionSupported(const char* extension)
+BOOL IsGLExtensionSupported(const wchar_t* extension)
 {
-    const size_t extlen = strlen(extension);
-    const char* supported = NULL;
+    const size_t extlen = wcslen(extension);
+    const wchar_t* supported = NULL;
 
     // Try To Use wglGetExtensionStringARB On Current DC, If Possible
-    PROC wglGetExtString = wglGetProcAddress("wglGetExtensionsStringARB");
+    PROC wglGetExtString = wglGetProcAddress(L"wglGetExtensionsStringARB");
 
     if (wglGetExtString)
-        supported = ((char* (__stdcall*)(HDC))wglGetExtString)(wglGetCurrentDC());
+        supported = ((wchar_t* (__stdcall*)(HDC))wglGetExtString)(wglGetCurrentDC());
 
     // If That Failed, Try Standard Opengl Extensions String
     if (supported == NULL)
-        supported = (char*)glGetString(GL_EXTENSIONS);
+        supported = (wchar_t*)glGetString(GL_EXTENSIONS);
 
     // If That Failed Too, Must Be No Extensions Supported
     if (supported == NULL)
         return FALSE;
 
     // Begin Examination At Start Of String, Increment By 1 On False Match
-    for (const char* p = supported; ; p++)
+    for (const wchar_t* p = supported; ; p++)
     {
         // Advance p Up To The Next Possible Match
-        p = strstr(p, extension);
+        p = wcsstr(p, extension);
 
         if (p == NULL)
             return FALSE;															// No Match
@@ -719,7 +706,7 @@ BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd
 #endif // defined(_DEBUG)
 
     // See If The String Exists In WGL!
-    if (!IsGLExtensionSupported("WGL_ARB_multisample"))
+    if (!IsGLExtensionSupported(L"WGL_ARB_multisample"))
     {
         bIsGLMultisampleSupported = FALSE;
         return FALSE;
@@ -729,7 +716,7 @@ BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd
     CheckGLError(__FILE__, __LINE__);
 #endif // defined(_DEBUG)
     // Get Our Pixel Format
-    PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
+    PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress(L"wglChoosePixelFormatARB");
     if (!wglChoosePixelFormatARB)
     {
         bIsGLMultisampleSupported = FALSE;
@@ -1055,10 +1042,10 @@ void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Sca
     }
     else
     {
-        char Text[32];
-        itoa(Num, Text, 10);
-        p[0] -= strlen(Text) * 5.f;
-        unsigned int Length = strlen(Text);
+        wchar_t Text[32];
+        _itow(Num, Text, 10);
+        p[0] -= wcslen(Text) * 5.f;
+        unsigned int Length = wcslen(Text);
         p[0] -= Length * Scale * 0.125f;
         p[1] -= Length * Scale * 0.125f;
         for (unsigned int i = 0; i < Length; i++)
@@ -1078,9 +1065,9 @@ void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Sca
 
 float RenderNumber2D(float x, float y, int Num, float Width, float Height)
 {
-    char Text[32];
-    itoa(Num, Text, 10);
-    int Length = (int)strlen(Text);
+    wchar_t Text[32];
+    _itow(Num, Text, 10);
+    int Length = (int)wcslen(Text);
     x -= Width * Length / 2;
     for (int i = 0; i < Length; i++)
     {

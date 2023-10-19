@@ -5,10 +5,11 @@
 
 #include "NewUIPartyListWindow.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "ZzzInventory.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
+#include "ZzzInterface.h"
 
 using namespace SEASON3B;
 
@@ -121,7 +122,7 @@ bool CNewUIPartyListWindow::BtnProcess()
     {
         int iVal = i * m_iVal;
 
-        if (!strcmp(Party[0].Name, Hero->ID) || !strcmp(Party[i].Name, Hero->ID))
+        if (!wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID))
         {
             if (m_BtnPartyExit[i].UpdateMouseEvent())
             {
@@ -137,7 +138,7 @@ bool CNewUIPartyListWindow::BtnProcess()
             if (SelectedCharacter == -1) {
                 CHARACTER* c = &CharactersClient[Party[i].index];
                 if (c && c != Hero) {
-                    CreateChat(c->ID, "", c);
+                    CreateChat(c->ID, L"", c);
                 }
             }
 
@@ -276,7 +277,7 @@ bool CNewUIPartyListWindow::Render()
         float fLife = ((float)iStepHP / (float)10) * (float)PARTY_LIST_HP_BAR_WIDTH;
         RenderImage(IMAGE_PARTY_LIST_HPBAR, m_Pos.x + 4, m_Pos.y + 16 + iVal, fLife, 3);
 
-        if (!strcmp(Party[0].Name, Hero->ID) || !strcmp(Party[i].Name, Hero->ID))
+        if (!wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID))
         {
             m_BtnPartyExit[i].Render();
         }
@@ -293,7 +294,7 @@ void SEASON3B::CNewUIPartyListWindow::RenderPartyHPOnHead()
         return;
 
     float   Width = 38.f;
-    char    Text[100];
+    wchar_t    Text[100];
 
     for (int j = 0; j < PartyNumber; ++j)
     {
@@ -316,7 +317,7 @@ void SEASON3B::CNewUIPartyListWindow::RenderPartyHPOnHead()
 
         if ((MouseX >= ScreenX && MouseX < ScreenX + Width && MouseY >= ScreenY - 2 && MouseY < ScreenY + 6))
         {
-            sprintf(Text, "HP : %d0%%", p->stepHP);
+            swprintf(Text, L"HP : %d0%%", p->stepHP);
             g_pRenderText->SetTextColor(255, 230, 210, 255);
             g_pRenderText->RenderText(ScreenX, ScreenY - 6, Text);
         }
@@ -392,10 +393,10 @@ bool CNewUIPartyListWindow::SelectCharacterInPartyList(PARTY_t* pMember)
 
 void CNewUIPartyListWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_party_flag.tga", IMAGE_PARTY_LIST_FLAG, GL_LINEAR);
-    LoadBitmap("Interface\\newui_party_x.tga", IMAGE_PARTY_LIST_EXIT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_party_back.tga", IMAGE_PARTY_LIST_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_party_hpbar.jpg", IMAGE_PARTY_LIST_HPBAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_flag.tga", IMAGE_PARTY_LIST_FLAG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_x.tga", IMAGE_PARTY_LIST_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_back.tga", IMAGE_PARTY_LIST_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_hpbar.jpg", IMAGE_PARTY_LIST_HPBAR, GL_LINEAR);
 }
 
 void CNewUIPartyListWindow::UnloadImages()

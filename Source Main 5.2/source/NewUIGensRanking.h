@@ -89,15 +89,15 @@ namespace SEASON3B
         FLOAT m_fBooleanSize;
 
         int m_nContribution;
-        unicode::t_char m_szRanking[TEAMNAME_LENTH];
-        unicode::t_char m_szGensTeam[TEAMNAME_LENTH];
+        wchar_t m_szRanking[TEAMNAME_LENTH];
+        wchar_t m_szGensTeam[TEAMNAME_LENTH];
 
         GENS_TYPE m_byGensInfluence;
         POINT m_ptRenderMarkPos;
 
         CNewUIButton m_BtnExit;
 
-        unicode::t_char m_szTitleName[TITLENAME_END][MAX_TITLELENGTH];
+        wchar_t m_szTitleName[TITLENAME_END][MAX_TITLELENGTH];
 
         int m_nNextContribution;
 
@@ -138,14 +138,14 @@ namespace SEASON3B
         int GetNextContribution();
 
         bool SetRanking(int _Ranking);
-        unicode::t_char* GetRanking();
+        wchar_t* GetRanking();
 
         bool SetGensInfo();
-        bool SetGensTeamName(const char* _pTeamName);
-        unicode::t_char* GetGensTeamName();
+        bool SetGensTeamName(const wchar_t* _pTeamName);
+        wchar_t* GetGensTeamName();
 
         void SetTitleName();
-        const unicode::t_char* GetTitleName(BYTE _index);
+        wchar_t* GetTitleName(BYTE _index);
 
         void RanderMark(float _x, float _y, GENS_TYPE _GensInfluence, BYTE _GensRankInfo, IMAGE_AREA _ImageArea = MARK_RANKINFOWIN, float _RenderY = 0);
         int GetImageIndex(BYTE _index);

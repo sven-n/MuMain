@@ -21,9 +21,9 @@ public:
     CShopList();
     virtual ~CShopList();
 
-    WZResult LoadCategroy(const char* szFilePath);
-    WZResult LoadPackage(const char* szFilePath);
-    WZResult LoadProduct(const char* szFilePath);
+    WZResult LoadCategroy(const wchar_t* szFilePath);
+    WZResult LoadPackage(const wchar_t* szFilePath);
+    WZResult LoadProduct(const wchar_t* szFilePath);
 
     CShopCategoryList* GetCategoryListPtr() { return m_CategoryListPtr; };	// 카테고리 목록 가져온다.
     CShopPackageList* GetPackageListPtr() { return m_PackageListPtr; };		// 패키지 목록 가져온다.
@@ -38,6 +38,6 @@ private:
     CShopPackageList* m_PackageListPtr;
     CShopProductList* m_ProductListPtr;
 
-    FILE_ENCODE IsFileEncodingUtf8(const char* szFilePath);
-    std::string GetDecodeingString(const char* str, FILE_ENCODE encode);
+    FILE_ENCODE IsFileEncodingUtf8(const wchar_t* szFilePath);
+    std::wstring GetDecodedString(const char* buffer, FILE_ENCODE encode);
 };

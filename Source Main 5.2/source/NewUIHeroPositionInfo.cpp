@@ -3,8 +3,9 @@
 
 #include "stdafx.h"
 #include "NewUIHeroPositionInfo.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
 #include "MapManager.h"
 
 using namespace SEASON3B;
@@ -40,8 +41,8 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
     SetPos(x, y);
     LoadImages();
 
-    unicode::t_string tooltiptext1 = GlobalText[3561];
-    unicode::t_string btname1 = "";
+   std::wstring tooltiptext1 = GlobalText[3561];
+   std::wstring btname1 = L"";
 
     SetButtonInfo(
         &m_BtnConfig,
@@ -58,8 +59,8 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
         tooltiptext1,
         0);
 
-    unicode::t_string tooltiptext2 = GlobalText[3562];
-    unicode::t_string btname2 = "";
+   std::wstring tooltiptext2 = GlobalText[3562];
+   std::wstring btname2 = L"";
 
     SetButtonInfo(
         &m_BtnStart,
@@ -76,8 +77,8 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
         tooltiptext2,
         0);
 
-    unicode::t_string tooltiptext3 = GlobalText[3563];
-    unicode::t_string btname3 = "";
+   std::wstring tooltiptext3 = GlobalText[3563];
+   std::wstring btname3 = L"";
 
     SetButtonInfo(
         &m_BtnStop,
@@ -174,7 +175,7 @@ bool CNewUIHeroPositionInfo::Update()
 
 bool CNewUIHeroPositionInfo::Render()
 {
-    unicode::t_char szText[255] = { NULL, };
+    wchar_t szText[255] = { NULL, };
 
     EnableAlphaTest();
     glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -193,7 +194,7 @@ bool CNewUIHeroPositionInfo::Render()
 
     m_BtnStart.Render();
     //--
-    unicode::_sprintf(szText, "%s (%d , %d)", gMapManager.GetMapName(gMapManager.WorldActive), m_CurHeroPosition.x, m_CurHeroPosition.y);
+    swprintf(szText, L"%s (%d , %d)", gMapManager.GetMapName(gMapManager.WorldActive), m_CurHeroPosition.x, m_CurHeroPosition.y);
 
     g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 5, szText, WidenX + 20, 13 - 4, RT3_SORT_CENTER);
 
@@ -222,12 +223,12 @@ void CNewUIHeroPositionInfo::SetCurHeroPosition(int x, int y)
 
 void CNewUIHeroPositionInfo::LoadImages()
 {
-    LoadBitmap("Interface\\Minimap_positionA.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW, GL_LINEAR);
-    LoadBitmap("Interface\\Minimap_positionB.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 1, GL_LINEAR);
-    LoadBitmap("Interface\\MacroUI\\Minimap_positionC.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 2, GL_LINEAR);
-    LoadBitmap("Interface\\MacroUI\\MacroUI_Setup.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 3, GL_LINEAR);
-    LoadBitmap("Interface\\MacroUI\\MacroUI_Start.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 4, GL_LINEAR);
-    LoadBitmap("Interface\\MacroUI\\MacroUI_Stop.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 5, GL_LINEAR);
+    LoadBitmap(L"Interface\\Minimap_positionA.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW, GL_LINEAR);
+    LoadBitmap(L"Interface\\Minimap_positionB.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 1, GL_LINEAR);
+    LoadBitmap(L"Interface\\MacroUI\\Minimap_positionC.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 2, GL_LINEAR);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_Setup.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 3, GL_LINEAR);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_Start.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 4, GL_LINEAR);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_Stop.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 5, GL_LINEAR);
 }
 
 void CNewUIHeroPositionInfo::UnloadImages()
@@ -237,7 +238,7 @@ void CNewUIHeroPositionInfo::UnloadImages()
     DeleteBitmap(IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 2);
 }
 
-void CNewUIHeroPositionInfo::SetButtonInfo(CNewUIButton* m_Btn, int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, unicode::t_string btname, unicode::t_string tooltiptext, bool istoppos)
+void CNewUIHeroPositionInfo::SetButtonInfo(CNewUIButton* m_Btn, int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, bool istoppos)
 {
     m_Btn->ChangeButtonImgState(1, imgindex, overflg, isimgwidth, bClickEffect);
     m_Btn->ChangeButtonInfo(x, y, sx, sy);

@@ -18,7 +18,7 @@ namespace info
     class SkillInfo : public InfoFile
     {
     public:
-        static SkillInfoPtr MakeInfo(const std::string& filename);
+        static SkillInfoPtr MakeInfo(const std::wstring& filename);
         virtual ~SkillInfo();
 
     protected:
@@ -29,8 +29,8 @@ namespace info
         const Script_Skill* GetData(int index) const;
 
     private:
-        bool OpenFile(const std::string& filename);
-        SkillInfo(const std::string& filename);
+        bool OpenFile(const std::wstring& filename);
+        SkillInfo(const std::wstring& filename);
 
     private:
         typedef std::vector<Script_Skill>	SkillVECTOR;

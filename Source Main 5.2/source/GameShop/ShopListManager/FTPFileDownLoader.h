@@ -10,22 +10,22 @@ public:
 
 public:
     WZResult DownLoadFiles(DownloaderType type,
-        std::string strServerIP,
+        std::wstring strServerIP,
         unsigned short PortNum,
-        std::string strUserName,
-        std::string strPWD,
-        std::string strRemotepath,
-        std::string strlocalpath,
+        std::wstring strUserName,
+        std::wstring strPWD,
+        std::wstring strRemotepath,
+        std::wstring strlocalpath,
         bool bPassiveMode,
         CListVersionInfo Version,
-        std::vector<std::string>	vScriptFiles);
+        std::vector<std::wstring>	vScriptFiles);
 
     void	Break();
 
     FileDownloader* GetFileDownloader() { return m_pFileDownloader; }
 
 private:
-    BOOL CreateFolder(std::string strFilePath);
+    BOOL CreateFolder(std::wstring strFilePath);
     BOOL m_Break;
     FileDownloader* m_pFileDownloader;
 };

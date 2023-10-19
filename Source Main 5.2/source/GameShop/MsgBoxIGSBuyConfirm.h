@@ -71,7 +71,7 @@ public:
     bool Update();
     bool Render();
 
-    void CMsgBoxIGSBuyConfirm::Initialize(WORD wItemCode, int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iCashType, unicode::t_char* pszName, unicode::t_char* pszPrice, unicode::t_char* pszPeriod);
+    void CMsgBoxIGSBuyConfirm::Initialize(WORD wItemCode, int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iCashType, wchar_t* pszName, wchar_t* pszPrice, wchar_t* pszPeriod);
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -96,11 +96,10 @@ private:
     int		m_iPriceSeq;
     int		m_iCashType;
 
-    unicode::t_char		m_szItemName[MAX_TEXT_LENGTH];
-    unicode::t_char		m_szItemPrice[MAX_TEXT_LENGTH];
-    unicode::t_char		m_szItemPeriod[MAX_TEXT_LENGTH];
-
-    unicode::t_char		m_szNotice[NUM_LINE_CMB][MAX_TEXT_LENGTH];
+    wchar_t m_szItemName[MAX_TEXT_LENGTH];
+    wchar_t m_szItemPrice[MAX_TEXT_LENGTH];
+    wchar_t m_szItemPeriod[MAX_TEXT_LENGTH];
+    wchar_t m_szNotice[NUM_LINE_CMB][MAX_TEXT_LENGTH];
 
     int		m_iNumNoticeLine;
 };

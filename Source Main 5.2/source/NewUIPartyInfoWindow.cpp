@@ -5,9 +5,10 @@
 
 #include "NewUIPartyInfoWindow.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "GMBattleCastle.h"
 #include "CSChaosCastle.h"
+#include "DSPlaySound.h"
 #include "GMHellas.h"
 #include "GM3rdChangeUp.h"
 #include "w_CursedTemple.h"
@@ -73,7 +74,7 @@ void CNewUIPartyInfoWindow::InitButtons()
 
 void CNewUIPartyInfoWindow::OpenningProcess()
 {
-    SendRequestPartyList();
+    SocketClient->ToGameServer()->SendPartyListRequest();
 }
 
 void CNewUIPartyInfoWindow::ClosingProcess()
@@ -100,7 +101,7 @@ bool CNewUIPartyInfoWindow::BtnProcess()
     {
         for (int i = 0; i < PartyNumber; i++)
         {
-            if (!strcmp(Party[0].Name, Hero->ID) || !strcmp(Party[i].Name, Hero->ID))
+            if (!wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID))
             {
                 if (m_BtnPartyExit[i].UpdateMouseEvent())
                 {
@@ -185,7 +186,7 @@ bool CNewUIPartyInfoWindow::Render()
 
             bool bExitBtnRender = false;
 
-            if (!strcmp(Party[0].Name, Hero->ID) || !strcmp(Party[i].Name, Hero->ID))
+            if (!wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID))
             {
                 bExitBtnRender = true;
             }
@@ -239,7 +240,7 @@ void CNewUIPartyInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int
 
 void CNewUIPartyInfoWindow::RenderMemberStatue(int iIndex, PARTY_t* pMember, bool bExitBtnRender /*= false*/)
 {
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
 
     int iVal = iIndex * 71;
     int iPosX = m_Pos.x + 10;
@@ -267,14 +268,14 @@ void CNewUIPartyInfoWindow::RenderMemberStatue(int iIndex, PARTY_t* pMember, boo
 
     g_pRenderText->RenderText(iPosX + 10, iPosY + 26, gMapManager.GetMapName(pMember->Map), 70, 0, RT3_SORT_LEFT);
 
-    unicode::_sprintf(szText, "(%d,%d)", pMember->x, pMember->y);
+    swprintf(szText, L"(%d,%d)", pMember->x, pMember->y);
     g_pRenderText->RenderText(iPosX + 85, iPosY + 26, szText, 60, 0, RT3_SORT_LEFT);
 
     int iHP = (pMember->currHP * 147) / pMember->maxHP;
     RenderImage(IMAGE_PARTY_HPBAR_BACK, iPosX + 8, iPosY + 39, 151, 8);
     RenderImage(IMAGE_PARTY_HPBAR, iPosX + 10, iPosY + 41, iHP, 4);
 
-    unicode::_sprintf(szText, "%d %s %d", pMember->currHP, GlobalText[2374], pMember->maxHP);
+    swprintf(szText, L"%d %s %d", pMember->currHP, GlobalText[2374], pMember->maxHP);
     g_pRenderText->RenderText(iPosX + 88, iPosY + 51, szText, 70, 0, RT3_SORT_RIGHT);
 
     if (bExitBtnRender)
@@ -288,7 +289,7 @@ bool CNewUIPartyInfoWindow::LeaveParty(const int iIndex)
     if (!gMapManager.IsCursedTemple())
     {
         PlayBuffer(SOUND_CLICK01);
-        SendRequestPartyLeave(Party[iIndex].Number);
+        SocketClient->ToGameServer()->SendPartyPlayerKickRequest(Party[iIndex].Number);
     }
 
     SetParty(false);
@@ -322,26 +323,26 @@ float CNewUIPartyInfoWindow::GetLayerDepth()
 
 void CNewUIPartyInfoWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_PARTY_BASE_WINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_PARTY_BASE_WINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_PARTY_BASE_WINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_PARTY_BASE_WINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_PARTY_BASE_WINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_PARTY_BASE_WINDOW_BTN_EXIT, GL_LINEAR);		// Exit Button
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_PARTY_BASE_WINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_PARTY_BASE_WINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_PARTY_BASE_WINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_PARTY_BASE_WINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_PARTY_BASE_WINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_PARTY_BASE_WINDOW_BTN_EXIT, GL_LINEAR);		// Exit Button
 
-    LoadBitmap("Interface\\newui_item_table01(L).tga", IMAGE_PARTY_TABLE_TOP_LEFT);
-    LoadBitmap("Interface\\newui_item_table01(R).tga", IMAGE_PARTY_TABLE_TOP_RIGHT);
-    LoadBitmap("Interface\\newui_item_table02(L).tga", IMAGE_PARTY_TABLE_BOTTOM_LEFT);
-    LoadBitmap("Interface\\newui_item_table02(R).tga", IMAGE_PARTY_TABLE_BOTTOM_RIGHT);
-    LoadBitmap("Interface\\newui_item_table03(Up).tga", IMAGE_PARTY_TABLE_TOP_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(Dw).tga", IMAGE_PARTY_TABLE_BOTTOM_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(L).tga", IMAGE_PARTY_TABLE_LEFT_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(R).tga", IMAGE_PARTY_TABLE_RIGHT_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_PARTY_TABLE_TOP_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_PARTY_TABLE_TOP_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_PARTY_TABLE_BOTTOM_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_PARTY_TABLE_BOTTOM_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_PARTY_TABLE_TOP_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_PARTY_TABLE_BOTTOM_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_PARTY_TABLE_LEFT_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_PARTY_TABLE_RIGHT_PIXEL);
 
-    LoadBitmap("Interface\\newui_party_lifebar01.jpg", IMAGE_PARTY_HPBAR_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_party_lifebar02.jpg", IMAGE_PARTY_HPBAR, GL_LINEAR);
-    LoadBitmap("Interface\\newui_party_flag.tga", IMAGE_PARTY_FLAG, GL_LINEAR);
-    LoadBitmap("Interface\\newui_party_x.tga", IMAGE_PARTY_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_lifebar01.jpg", IMAGE_PARTY_HPBAR_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_lifebar02.jpg", IMAGE_PARTY_HPBAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_flag.tga", IMAGE_PARTY_FLAG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_x.tga", IMAGE_PARTY_EXIT, GL_LINEAR);
 }
 
 void CNewUIPartyInfoWindow::UnloadImages()

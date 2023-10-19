@@ -5,7 +5,8 @@
 #include "NewUISiegeWarCommander.h"
 #include "UIControls.h"
 #include "zzzTexture.h"
-#include "wsclientinline.h"
+
+#include "ZzzCharacter.h"
 
 using namespace SEASON3B;
 
@@ -91,7 +92,7 @@ bool SEASON3B::CNewUISiegeWarCommander::OnUpdateMouseEvent()
             SelectCmd.byY = 256 - (MouseY + m_MiniMapScaleOffset.y - m_MiniMapPos.y) * m_iMiniMapScale;
             SelectCmd.byLifeTime = 100;
 
-            SendGuildCommand(SelectCmd.byTeam, SelectCmd.byX, SelectCmd.byY, SelectCmd.byCmd);
+            SocketClient->ToGameServer()->SendCastleGuildCommand(SelectCmd.byTeam, SelectCmd.byX, SelectCmd.byY, SelectCmd.byCmd);
 
             m_iCurSelectBtnCommand = -1;
 
@@ -165,14 +166,14 @@ void SEASON3B::CNewUISiegeWarCommander::OnSetPos(int x, int y)
 void SEASON3B::CNewUISiegeWarCommander::InitCmdGroupBtn()
 {
     int iVal = 0;
-    unicode::t_char sztext[255] = { 0, };
+    wchar_t sztext[255] = { 0, };
 
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
         iVal = i * MINIMAP_BTN_GROUP_HEIGHT;
         m_BtnCommandGroup[i].ChangeButtonImgState(true, IMAGE_MINIMAP_BTN_GROUP, true);
         m_BtnCommandGroup[i].ChangeButtonInfo(m_BtnCommandGroupPos.x, m_BtnCommandGroupPos.y + iVal, MINIMAP_BTN_GROUP_WIDTH, MINIMAP_BTN_GROUP_HEIGHT);
-        unicode::_sprintf(sztext, "%d", i + 1);
+        swprintf(sztext, L"%d", i + 1);
         m_BtnCommandGroup[i].ChangeText(sztext);
     }
 }
@@ -256,7 +257,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
 void SEASON3B::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
 {
     int iWidth, iHeight;
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
 
     switch (m_iCurSelectBtnCommand)
     {
@@ -265,7 +266,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
     case 2: iWidth = COMMAND_WAIT_WIDTH; iHeight = COMMAND_WAIT_HEIGHT; break;
     }
 
-    unicode::_sprintf(szText, "%d", m_iCurSelectBtnGroup + 1);
+    swprintf(szText, L"%d", m_iCurSelectBtnGroup + 1);
     g_pRenderText->RenderText(MouseX - 13, MouseY - 6, szText);
     RenderImage(IMAGE_COMMAND_ATTACK + m_iCurSelectBtnCommand, MouseX - 8, MouseY - 8, iWidth, iHeight);
 }
@@ -342,8 +343,8 @@ void SEASON3B::CNewUISiegeWarCommander::SetGuildMemberLocation(BYTE type, int x,
 
 void SEASON3B::CNewUISiegeWarCommander::OnLoadImages()
 {
-    LoadBitmap("Interface\\newui_SW_Minimap_Bt_group.tga", IMAGE_MINIMAP_BTN_GROUP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_SW_Minimap_Bt_Command.tga", IMAGE_MINIMAP_BTN_COMMAND, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_SW_Minimap_Bt_group.tga", IMAGE_MINIMAP_BTN_GROUP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_SW_Minimap_Bt_Command.tga", IMAGE_MINIMAP_BTN_COMMAND, GL_LINEAR);
 }
 
 void SEASON3B::CNewUISiegeWarCommander::OnUnloadImages()

@@ -3,14 +3,17 @@
 
 #include "stdafx.h"
 #include "NewUIMyQuestInfoWindow.h"
-#include "wsclientinline.h"
+
 #include "csQuest.h"
+#include "DSPlaySound.h"
+#include "NewUISystem.h"
+#include "QuestMng.h"
 
 using namespace SEASON3B;
 
 extern int g_iNumLineMessageBoxCustom;
 extern int g_iNumAnswer;
-extern char g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
+extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
 
 SEASON3B::CNewUIMyQuestInfoWindow::CNewUIMyQuestInfoWindow()
 {
@@ -108,7 +111,8 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::BtnProcess()
             SetMessage(2825);
         return true;
     }
-    else if (eTabBtnIndex == TAB_JOB_CHANGE)
+
+    if (eTabBtnIndex == TAB_JOB_CHANGE)
     {
         /*		BYTE byState = g_csQuest.getCurrQuestState();
                 if (byState == QUEST_NONE || byState == QUEST_NO || byState == QUEST_ERROR)
@@ -120,10 +124,11 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::BtnProcess()
                 */
         return true;
     }
-    else if (eTabBtnIndex == TAB_CASTLE_TEMPLE)
+
+    if (eTabBtnIndex == TAB_CASTLE_TEMPLE)
     {
-        SendRequestEventCount(2);
-        SendRequestEventCount(3);
+        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(2);
+        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(3);
         return true;
     }
 
@@ -204,19 +209,19 @@ float SEASON3B::CNewUIMyQuestInfoWindow::GetLayerDepth()
 
 void SEASON3B::CNewUIMyQuestInfoWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_MYQUEST_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_MYQUEST_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_MYQUEST_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_MYQUEST_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_MYQUEST_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_MYQUEST_BTN_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MYQUEST_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_MYQUEST_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_MYQUEST_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_MYQUEST_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_MYQUEST_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_MYQUEST_BTN_EXIT, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_MYQUEST_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\Quest_Bt_open.tga", IMAGE_MYQUEST_BTN_OPEN, GL_LINEAR);
-    LoadBitmap("Interface\\Quest_Bt_cast.tga", IMAGE_MYQUEST_BTN_GIVE_UP, GL_LINEAR);
-    LoadBitmap("Interface\\Quest_tab01.tga", IMAGE_MYQUEST_TAB_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\Quest_tab02.tga", IMAGE_MYQUEST_TAB_SMALL, GL_LINEAR);
-    LoadBitmap("Interface\\Quest_tab03.tga", IMAGE_MYQUEST_TAB_BIG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_MYQUEST_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\Quest_Bt_open.tga", IMAGE_MYQUEST_BTN_OPEN, GL_LINEAR);
+    LoadBitmap(L"Interface\\Quest_Bt_cast.tga", IMAGE_MYQUEST_BTN_GIVE_UP, GL_LINEAR);
+    LoadBitmap(L"Interface\\Quest_tab01.tga", IMAGE_MYQUEST_TAB_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\Quest_tab02.tga", IMAGE_MYQUEST_TAB_SMALL, GL_LINEAR);
+    LoadBitmap(L"Interface\\Quest_tab03.tga", IMAGE_MYQUEST_TAB_BIG, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIMyQuestInfoWindow::UnloadImages()
@@ -249,7 +254,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderSubjectTexts()
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(230, 230, 230, 255);
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, "Quest", 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, L"Quest", 190, 0, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CNewUIMyQuestInfoWindow::RenderQuestInfo()
@@ -324,11 +329,11 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderCastleInfo()
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    unicode::t_char strText[256];
-    unicode::_sprintf(strText, GlobalText[868], g_csQuest.GetEventCount(2));
+    wchar_t strText[256];
+    swprintf(strText, GlobalText[868], g_csQuest.GetEventCount(2));
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 125, strText, 190, 0, RT3_SORT_CENTER);
 
-    unicode::_sprintf(strText, GlobalText[829], 6);
+    swprintf(strText, GlobalText[829], 6);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 145, strText, 190, 0, RT3_SORT_CENTER);
 }
 
@@ -344,11 +349,11 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderTempleInfo()
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    unicode::t_char strText[256];
-    unicode::_sprintf(strText, GlobalText[868], g_csQuest.GetEventCount(3));
+    wchar_t strText[256];
+    swprintf(strText, GlobalText[868], g_csQuest.GetEventCount(3));
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 305, strText, 190, 0, RT3_SORT_CENTER);
 
-    unicode::_sprintf(strText, GlobalText[829], 6);
+    swprintf(strText, GlobalText[829], 6);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 325, strText, 190, 0, RT3_SORT_CENTER);
 }
 
@@ -360,7 +365,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::OpenningProcess()
 void SEASON3B::CNewUIMyQuestInfoWindow::ClosingProcess()
 {
     UnselectQuestList();
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
     ::PlayBuffer(SOUND_CLICK01);
 }
 
@@ -447,15 +452,15 @@ void CNewUIMyQuestInfoWindow::SetCurQuestList(DWordList* pDWordList)
 {
     m_CurQuestListBox.Clear();
 
-    char szInput[64];
-    char szOutput[64];
+    wchar_t szInput[64];
+    wchar_t szOutput[64];
     g_pRenderText->SetFont(g_hFont);
 
     int i;
     DWordList::iterator iter;
     for (iter = pDWordList->begin(), i = 1; iter != pDWordList->end(); advance(iter, 1), ++i)
     {
-        ::sprintf(szInput, "%d.%s", i, g_QuestMng.GetSubject(*iter));
+        ::swprintf(szInput, L"%d.%s", i, g_QuestMng.GetSubject(*iter));
         ::ReduceStringByPixel(szOutput, 64, szInput, 150);
         m_CurQuestListBox.AddText(*iter, szOutput);
     }
@@ -481,7 +486,7 @@ void CNewUIMyQuestInfoWindow::SetSelQuestSummary()
         g_hFontBold, 0xff0ab9ff, RT3_SORT_CENTER, g_QuestMng.GetSubject(dwSelQuestIndex));
 
     g_pRenderText->SetFont(g_hFont);
-    char aszSummary[8][64];
+    wchar_t aszSummary[8][64];
     int nLine = ::DivideStringByPixel(
         &aszSummary[0][0], 8, 64, g_QuestMng.GetSummary(dwSelQuestIndex), 150);
     int i;
@@ -512,17 +517,17 @@ void CNewUIMyQuestInfoWindow::SetSelQuestRequestReward()
     {
         if (0 == j)
         {
-            m_QuestContentsListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");
+            m_QuestContentsListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, L" ");
             nLoop = 1 + pQuestRequestReward->m_byRequestCount;
         }
         else if (1 == j && pQuestRequestReward->m_byGeneralRewardCount)
         {
-            m_QuestContentsListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");
+            m_QuestContentsListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, L" ");
             nLoop = 1 + pQuestRequestReward->m_byGeneralRewardCount + i;
         }
         else if (2 == j && pQuestRequestReward->m_byRandRewardCount)
         {
-            m_QuestContentsListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, " ");
+            m_QuestContentsListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, L" ");
             nLoop = 1 + pQuestRequestReward->m_byRandRewardCount + i;
         }
         else
@@ -572,7 +577,7 @@ DWORD CNewUIMyQuestInfoWindow::GetSelQuestIndex()
 
 void CNewUIMyQuestInfoWindow::SetMessage(int nGlobalTextIndex)
 {
-    ::memset(&m_aszMsg[0][0], 0, sizeof(char) * 2 * 64);
+    memset(m_aszMsg, 0, sizeof m_aszMsg);
     g_pRenderText->SetFont(g_hFontBold);
     m_nMsgLine = ::DivideStringByPixel(&m_aszMsg[0][0], 2, 64, GlobalText[nGlobalTextIndex], 140);
 }

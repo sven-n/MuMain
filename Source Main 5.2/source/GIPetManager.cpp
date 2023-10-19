@@ -5,29 +5,23 @@
 #include "PersonalShopTitleImp.h"
 #include "CSPetSystem.h"
 #include "UIManager.h"
-#include "zzzlodterrain.h"
-#include "zzzAi.h"
 #include "ZzzOpenglUtil.h"
 #include "zzzInfomation.h"
 #include "zzzBmd.h"
-#include "zzzObject.h"
 #include "zzztexture.h"
 #include "zzzCharacter.h"
-#include "zzzscene.h"
-#include "zzzinfomation.h"
 #include "zzzInterface.h"
 #include "zzzinventory.h"
-#include "wsclientinline.h"
-#include "CSChaosCastle.h"
-#include "CSQuest.h"
+
 #include "GIPetManager.h"
-#include "npcBreeder.h"
 #include "MapManager.h"
 #include "ZzzEffect.h"
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
+#include "NewUISystem.h"
 
 extern  bool    SkillEnable;
-extern	char    TextList[50][100];
+extern	wchar_t TextList[50][100];
 extern	int     TextListColor[50];
 extern	int     TextBold[50];
 extern  float   g_fScreenRate_x;
@@ -166,13 +160,13 @@ namespace giPetManager
                             CHARACTER* tc = &CharactersClient[SelectedCharacter];
                             if (SelectedCharacter != -1 && (tc->Object.Kind == KIND_MONSTER || tc->Object.Kind == KIND_PLAYER))
                             {
-                                SendRequestPetCommand(pPet->GetPetType(), Index - AT_PET_COMMAND_DEFAULT, tc->Key);
+                                SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), Index - AT_PET_COMMAND_DEFAULT, tc->Key);
                             }
                         }
                     }
                     else
                     {
-                        SendRequestPetCommand(pPet->GetPetType(), Index - AT_PET_COMMAND_DEFAULT, 0xffff);
+                        SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), Index - AT_PET_COMMAND_DEFAULT, 0xFFFF);
                     }
                     MouseRButtonPop = false;
                     MouseRButtonPush = false;
@@ -216,21 +210,21 @@ namespace giPetManager
             int cmdType = Type - AT_PET_COMMAND_DEFAULT;
 
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true;
-            sprintf(TextList[TextNum], GlobalText[1219 + cmdType]); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], GlobalText[1219 + cmdType]); TextNum++; SkipNum++;
 
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
             switch (cmdType)
             {
-            case PET_CMD_DEFAULT: sprintf(TextList[TextNum], GlobalText[1223]); TextNum++; SkipNum++; break;
-            case PET_CMD_RANDOM: sprintf(TextList[TextNum], GlobalText[1224]); TextNum++; SkipNum++; break;
-            case PET_CMD_OWNER: sprintf(TextList[TextNum], GlobalText[1225]); TextNum++; SkipNum++; break;
-            case PET_CMD_TARGET: sprintf(TextList[TextNum], GlobalText[1226]); TextNum++; SkipNum++; break;
+            case PET_CMD_DEFAULT: swprintf(TextList[TextNum], GlobalText[1223]); TextNum++; SkipNum++; break;
+            case PET_CMD_RANDOM: swprintf(TextList[TextNum], GlobalText[1224]); TextNum++; SkipNum++; break;
+            case PET_CMD_OWNER: swprintf(TextList[TextNum], GlobalText[1225]); TextNum++; SkipNum++; break;
+            case PET_CMD_TARGET: swprintf(TextList[TextNum], GlobalText[1226]); TextNum++; SkipNum++; break;
             }
 
             SIZE TextSize = { 0, 0 };
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
             int Height = (int)(((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) / g_fScreenRate_y);
             sy -= Height;
 
@@ -315,7 +309,8 @@ namespace giPetManager
             {
                 iInvenType = 6;
             }
-            SendRequestPetInfo(PetType, iInvenType, iItemIndex);
+
+            SocketClient->ToGameServer()->SendPetInfoRequest(PetType, iInvenType, iItemIndex);
 
             return true;
         }
@@ -470,28 +465,28 @@ namespace giPetManager
 
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
         {
-            char  Text[100];
+            wchar_t  Text[100];
             DWORD Gold = (GetPetItemValue(&giPetManager::gs_PetInfo) / 3);
             Gold = Gold / 100 * 100;
 
             ConvertGold(Gold, Text);
-            sprintf(TextList[TextNum], GlobalText[63], Text);
+            swprintf(TextList[TextNum], GlobalText[63], Text);
 
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = true;
             TextNum++;
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         }
         else if ((iInvenType == SEASON3B::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP))
         {
             int price = 0;
             int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(pItem);
-            char Text[100];
+            wchar_t Text[100];
 
             if (GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop))
             {
                 ConvertGold(price, Text);
-                sprintf(TextList[TextNum], GlobalText[63], Text);
+                swprintf(TextList[TextNum], GlobalText[63], Text);
 
                 if (price >= 10000000)
                     TextListColor[TextNum] = TEXT_COLOR_RED;
@@ -503,7 +498,7 @@ namespace giPetManager
                     TextListColor[TextNum] = TEXT_COLOR_WHITE;
                 TextBold[TextNum] = true;
                 TextNum++;
-                sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
                 DWORD gold = CharacterMachine->Gold;
 
@@ -511,18 +506,18 @@ namespace giPetManager
                 {
                     TextListColor[TextNum] = TEXT_COLOR_RED;
                     TextBold[TextNum] = true;
-                    sprintf(TextList[TextNum], GlobalText[423]);
+                    swprintf(TextList[TextNum], GlobalText[423]);
                     TextNum++;
-                    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
                 }
             }
             else if (g_IsPurchaseShop == PSHOPWNDTYPE_SALE)
             {
                 TextListColor[TextNum] = TEXT_COLOR_RED;
                 TextBold[TextNum] = true;
-                sprintf(TextList[TextNum], GlobalText[1101]);
+                swprintf(TextList[TextNum], GlobalText[1101]);
                 TextNum++;
-                sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
             }
         }
 
@@ -532,38 +527,38 @@ namespace giPetManager
             RequireLevel = (218 + (pPetInfo->m_wLevel * 2));
             RequireCharisma = 0;
 
-            sprintf(TextList[TextNum], GlobalText[1187]); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], GlobalText[1187]); TextNum++; SkipNum++;
         }
         else if (pItem->Type == ITEM_HELPER + 5)
         {
             RequireCharisma = (185 + (pPetInfo->m_wLevel * 15));
 
-            sprintf(TextList[TextNum], GlobalText[1214]); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], GlobalText[1214]); TextNum++; SkipNum++;
         }
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[201], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], "%s : %d", GlobalText[368], pPetInfo->m_wLevel); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[201], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"%s : %d", GlobalText[368], pPetInfo->m_wLevel); TextNum++; SkipNum++;
 
         if (pItem->Type == ITEM_HELPER + 5)
         {
-            sprintf(TextList[TextNum], GlobalText[203], pPetInfo->m_wDamageMin, pPetInfo->m_wDamageMax, pPetInfo->m_wAttackSuccess); TextNum++; SkipNum++;
-            sprintf(TextList[TextNum], GlobalText[64], pPetInfo->m_wAttackSpeed); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], GlobalText[203], pPetInfo->m_wDamageMin, pPetInfo->m_wDamageMax, pPetInfo->m_wAttackSuccess); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], GlobalText[64], pPetInfo->m_wAttackSpeed); TextNum++; SkipNum++;
         }
-        sprintf(TextList[TextNum], GlobalText[70], pPetInfo->m_wLife); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[70], pPetInfo->m_wLife); TextNum++; SkipNum++;
 
         if (pItem->Type == ITEM_HELPER + 4)
         {
-            sprintf(TextList[TextNum], GlobalText[76], RequireLevel);
+            swprintf(TextList[TextNum], GlobalText[76], RequireLevel);
 
             if (CharacterAttribute->Level < RequireLevel)
             {
                 TextListColor[TextNum] = TEXT_COLOR_RED;
                 TextBold[TextNum] = false;
                 TextNum++;
-                sprintf(TextList[TextNum], GlobalText[74], RequireLevel - CharacterAttribute->Level);
+                swprintf(TextList[TextNum], GlobalText[74], RequireLevel - CharacterAttribute->Level);
                 TextListColor[TextNum] = TEXT_COLOR_RED;
                 TextBold[TextNum] = false;
                 TextNum++;
@@ -577,7 +572,7 @@ namespace giPetManager
         }
         else if (pItem->Type == ITEM_HELPER + 5)
         {
-            sprintf(TextList[TextNum], GlobalText[698], RequireCharisma);
+            swprintf(TextList[TextNum], GlobalText[698], RequireCharisma);
 
             WORD Charisma;
             Charisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
@@ -587,7 +582,7 @@ namespace giPetManager
                 TextListColor[TextNum] = TEXT_COLOR_RED;
                 TextBold[TextNum] = false;
                 TextNum++;
-                sprintf(TextList[TextNum], GlobalText[74], RequireCharisma - Charisma);
+                swprintf(TextList[TextNum], GlobalText[74], RequireCharisma - Charisma);
                 TextListColor[TextNum] = TEXT_COLOR_RED;
                 TextBold[TextNum] = false;
                 TextNum++;
@@ -600,14 +595,14 @@ namespace giPetManager
             }
         }
 
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
         if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
         else
             TextListColor[TextNum] = TEXT_COLOR_DARKRED;
 
-        sprintf(TextList[TextNum], GlobalText[61], GlobalText[24]); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[61], GlobalText[24]); TextNum++; SkipNum++;
 
         for (int i = 0; i < pItem->SpecialNum; ++i)
         {
@@ -619,15 +614,15 @@ namespace giPetManager
 
         if (pItem->Type == ITEM_HELPER + 4)
         {
-            sprintf(TextList[TextNum], GlobalText[744], (30 + pPetInfo->m_wLevel) / 2);
+            swprintf(TextList[TextNum], GlobalText[744], (30 + pPetInfo->m_wLevel) / 2);
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextNum++; SkipNum++;
 
-            sprintf(TextList[TextNum], GlobalText[1188], 2);
+            swprintf(TextList[TextNum], GlobalText[1188], 2);
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
         }
 
         SIZE TextSize = { 0, 0 };
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
         int Height = (int)(((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) / g_fScreenRate_y);
         if (sy - Height >= 0)
             sy -= Height;

@@ -95,7 +95,7 @@ const BuffStateValueControl::BuffStateValueInfo BuffStateValueControl::GetValue(
     return tempvalueinfo;
 }
 
-void BuffStateValueControl::GetBuffInfoString(std::list<std::string>& outstr, eBuffState bufftype)
+void BuffStateValueControl::GetBuffInfoString(std::list<std::wstring>& outstr, eBuffState bufftype)
 {
     BuffStateValueInfo tempvalueinfo;
     tempvalueinfo = GetValue(bufftype);
@@ -103,7 +103,7 @@ void BuffStateValueControl::GetBuffInfoString(std::list<std::string>& outstr, eB
     const BuffInfo buffinfo = g_BuffInfo(bufftype);
 
     outstr = buffinfo.s_BuffDescriptlist;
-    outstr.push_front("\n");
+    outstr.push_front(L"\n");
     outstr.push_front(buffinfo.s_BuffName);
 
     /*
@@ -130,20 +130,20 @@ void BuffStateValueControl::GetBuffInfoString(std::list<std::string>& outstr, eB
     */
 }
 
-void BuffStateValueControl::GetBuffValueString(std::string& outstr, eBuffState bufftype)
+void BuffStateValueControl::GetBuffValueString(std::wstring& outstr, eBuffState bufftype)
 {
     BuffStateValueInfo tempvalueinfo;
     tempvalueinfo = GetValue(bufftype);
 
-    char buff[60];
+    wchar_t buff[60];
 
     if (tempvalueinfo.s_Value1 != 0)
     {
-        sprintf(buff, "%d", tempvalueinfo.s_Value1);
+        swprintf(buff, L"%d", tempvalueinfo.s_Value1);
         outstr = buff;
     }
     else
     {
-        outstr = "";
+        outstr = L"";
     }
 }

@@ -5,8 +5,9 @@
 #include "stdafx.h"
 
 #include "NewUICommandWindow.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
 #include "ZzzInterface.h"
 #include "PersonalShopTitleImp.h"
 #include "UIGuildInfo.h"
@@ -64,8 +65,8 @@ void SEASON3B::CNewUICommandWindow::Release()
 
 void SEASON3B::CNewUICommandWindow::InitButtons()
 {
-    unicode::t_char szText[256] = { NULL, };
-    unicode::_sprintf(szText, GlobalText[927], "D");
+    wchar_t szText[256] = { NULL, };
+    swprintf(szText, GlobalText[927], L"D");
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
@@ -416,14 +417,14 @@ int SEASON3B::CNewUICommandWindow::GetMouseCursor()
 
 void SEASON3B::CNewUICommandWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_COMMAND_BASE_WINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_COMMAND_BASE_WINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_COMMAND_BASE_WINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_COMMAND_BASE_WINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_COMMAND_BASE_WINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_COMMAND_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_cursorid_wnd.jpg", IMAGE_COMMAND_SELECTID_BG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_COMMAND_BASE_WINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_COMMAND_BASE_WINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_COMMAND_BASE_WINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_COMMAND_BASE_WINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_COMMAND_BASE_WINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_COMMAND_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_cursorid_wnd.jpg", IMAGE_COMMAND_SELECTID_BG, GL_LINEAR);
 }
 
 void SEASON3B::CNewUICommandWindow::UnloadImages()
@@ -447,39 +448,39 @@ bool SEASON3B::CNewUICommandWindow::CommandTrade(CHARACTER* pSelectedCha)
 
     if (level < TRADELIMITLEVEL)
     {
-        g_pChatListBox->AddText("", GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (IsShopInViewport(pSelectedCha))
     {
-        g_pChatListBox->AddText("", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
-    SendRequestTrade(pSelectedCha->Key);
+    SocketClient->ToGameServer()->SendTradeRequest(pSelectedCha->Key);
 
     return true;
 }
 
 bool SEASON3B::CNewUICommandWindow::CommandPurchase(CHARACTER* pSelectedCha)
 {
-    if (pSelectedCha == NULL)
+    if (pSelectedCha == nullptr)
         return false;
 
-    SendRequestOpenPersonalShop(pSelectedCha->Key, pSelectedCha->ID);
+    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(pSelectedCha->Key, pSelectedCha->ID);
 
     return true;
 }
 
 bool SEASON3B::CNewUICommandWindow::CommandParty(SHORT iChaKey)
 {
-    if (PartyNumber > 0 && strcmp(Party[0].Name, Hero->ID) != NULL)
+    if (PartyNumber > 0 && wcscmp(Party[0].Name, Hero->ID) != NULL)
     {
-        g_pChatListBox->AddText("", GlobalText[257], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[257], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
-    SendRequestParty(iChaKey);
+    SocketClient->ToGameServer()->SendPartyInviteRequest(iChaKey);
 
     return true;
 }
@@ -495,16 +496,16 @@ bool SEASON3B::CNewUICommandWindow::CommandGuild(CHARACTER* pSelectedChar)
 {
     if (Hero->GuildStatus != G_NONE)
     {
-        g_pChatListBox->AddText("", GlobalText[255], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[255], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if ((pSelectedChar->GuildMarkIndex < 0) || (pSelectedChar->GuildStatus != G_MASTER))
     {
-        g_pChatListBox->AddText("", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
-    SendRequestGuild(pSelectedChar->Key);
+    SocketClient->ToGameServer()->SendGuildJoinRequest(pSelectedChar->Key);
 
     return true;
 }
@@ -513,22 +514,22 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildUnion(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText("", GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus == G_NONE)
     {
-        g_pChatListBox->AddText("", GlobalText[1385], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1385], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText("", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus == G_MASTER)
     {
-        SendRequestGuildRelationShip(0x01, 0x01, HIBYTE(pSelectedCha->Key), LOBYTE(pSelectedCha->Key));
+        SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x01, 0x01, pSelectedCha->Key);
         return true;
     }
 
@@ -539,17 +540,17 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildRival(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText("", GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText("", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
-    SendRequestGuildRelationShip(0x02, 0x01, HIBYTE(pSelectedCha->Key), LOBYTE(pSelectedCha->Key));
+    SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x01, pSelectedCha->Key);
 
     return true;
 }
@@ -558,27 +559,26 @@ bool SEASON3B::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSelected
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText("", GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText("", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
     SetAction(&Hero->Object, PLAYER_RESPECT1);
-    SendRequestAction(AT_RESPECT1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
-    SendRequestGuildRelationShip(0x02, 0x02, HIBYTE(pSelectedCha->Key), LOBYTE(pSelectedCha->Key));
-
+    SendRequestAction(Hero->Object, AT_RESPECT1);
+    SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x02, pSelectedCha->Key);
     return true;
 }
 
 bool SEASON3B::CNewUICommandWindow::CommandAddFriend(CHARACTER* pSelectedCha)
 {
-    if (g_pWindowMgr->IsServerEnable() == TRUE)
+    if (g_pWindowMgr->IsServerEnable() == TRUE && pSelectedCha != nullptr)
     {
-        SendRequestAddFriend(pSelectedCha->ID);
+        SocketClient->ToGameServer()->SendFriendAddRequest(pSelectedCha->ID);
         return true;
     }
 
@@ -602,34 +602,34 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     int iLevel = CharacterAttribute->Level;
     if (iLevel < 30)
     {
-        char szError[48] = "";
-        sprintf(szError, GlobalText[2704], 30);
-        g_pChatListBox->AddText("", szError, SEASON3B::TYPE_ERROR_MESSAGE);
+        wchar_t szError[48] = L"";
+        swprintf(szError, GlobalText[2704], 30);
+        g_pChatListBox->AddText(L"", szError, SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
     {
-        g_pChatListBox->AddText("", GlobalText[2866], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2866], SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
     {
-        g_pChatListBox->AddText("", GlobalText[3063], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[3063], SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (!g_DuelMgr.IsDuelEnabled())
     {
-        SendRequestDuelStart(pSelectedCha->Key, pSelectedCha->ID);
+        SocketClient->ToGameServer()->SendDuelStartRequest(pSelectedCha->Key, pSelectedCha->ID);
         return 1;
     }
     else if (g_DuelMgr.IsDuelEnabled() && g_DuelMgr.IsDuelPlayer(pSelectedCha, DUEL_ENEMY))
     {
-        SendRequestDuelEnd();
+        SocketClient->ToGameServer()->SendDuelStopRequest();
         return 2;
     }
     else
     {
-        g_pChatListBox->AddText("", GlobalText[915], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[915], SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     return 0;

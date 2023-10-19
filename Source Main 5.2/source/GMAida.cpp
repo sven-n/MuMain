@@ -343,15 +343,15 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster100_Footstepst", 0);
-        BoneManager::RegisterBone(pCharacter, "Monster100_L_Hand", 76);
-        BoneManager::RegisterBone(pCharacter, "Monster100_R_Hand", 94);
-        BoneManager::RegisterBone(pCharacter, "Monster100_Pelvis", 2);
-        BoneManager::RegisterBone(pCharacter, "Monster100_Head", 57);
-        BoneManager::RegisterBone(pCharacter, "Monster100_z02", 107);
-        BoneManager::RegisterBone(pCharacter, "Monster100_z03", 108);
-        BoneManager::RegisterBone(pCharacter, "Monster100_z04", 109);
-        BoneManager::RegisterBone(pCharacter, "Monster100_z05", 110);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_Footstepst", 0);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_L_Hand", 76);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_R_Hand", 94);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_Pelvis", 2);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_Head", 57);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_z02", 107);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_z03", 108);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_z04", 109);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_z05", 110);
     }
     break;
     case 305:
@@ -362,9 +362,9 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster101_L_Arm", 12);
-        BoneManager::RegisterBone(pCharacter, "Monster101_R_Arm", 20);
-        BoneManager::RegisterBone(pCharacter, "Monster101_Head", 6);
+        BoneManager::RegisterBone(pCharacter, L"Monster101_L_Arm", 12);
+        BoneManager::RegisterBone(pCharacter, L"Monster101_R_Arm", 20);
+        BoneManager::RegisterBone(pCharacter, L"Monster101_Head", 6);
     }
     break;
     case 306:
@@ -375,8 +375,8 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster102_Footstepst", 0);
-        BoneManager::RegisterBone(pCharacter, "Monster102_Head", 6);
+        BoneManager::RegisterBone(pCharacter, L"Monster102_Footstepst", 0);
+        BoneManager::RegisterBone(pCharacter, L"Monster102_Head", 6);
     }
     break;
     case 307:
@@ -396,13 +396,13 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster104_Horn0", 37);
-        BoneManager::RegisterBone(pCharacter, "Monster104_Horn1", 38);
-        BoneManager::RegisterBone(pCharacter, "Monster104_Horn2", 39);
-        BoneManager::RegisterBone(pCharacter, "Monster104_Horn3", 40);
-        BoneManager::RegisterBone(pCharacter, "Monster104_Horn4", 44);
-        BoneManager::RegisterBone(pCharacter, "Monster104_Horn5", 45);
-        BoneManager::RegisterBone(pCharacter, "Monster104_Footsteps", 1);
+        BoneManager::RegisterBone(pCharacter, L"Monster104_Horn0", 37);
+        BoneManager::RegisterBone(pCharacter, L"Monster104_Horn1", 38);
+        BoneManager::RegisterBone(pCharacter, L"Monster104_Horn2", 39);
+        BoneManager::RegisterBone(pCharacter, L"Monster104_Horn3", 40);
+        BoneManager::RegisterBone(pCharacter, L"Monster104_Horn4", 44);
+        BoneManager::RegisterBone(pCharacter, L"Monster104_Horn5", 45);
+        BoneManager::RegisterBone(pCharacter, L"Monster104_Footsteps", 1);
     }
     break;
     case 309:
@@ -413,14 +413,14 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster105_R_Eye", 9);
-        BoneManager::RegisterBone(pCharacter, "Monster105_L_Eye", 10);
-        BoneManager::RegisterBone(pCharacter, "Monster105_L_Arm00", 33);
-        BoneManager::RegisterBone(pCharacter, "Monster105_L_Arm01", 34);
-        BoneManager::RegisterBone(pCharacter, "Monster105_L_Arm02", 35);
-        BoneManager::RegisterBone(pCharacter, "Monster105_L_Hand", 20);
-        BoneManager::RegisterBone(pCharacter, "Monster105_R_Hand", 39);
-        //			BoneManager::RegisterBone(pCharacter, "Monster105_Footsteps", 1);
+        BoneManager::RegisterBone(pCharacter, L"Monster105_R_Eye", 9);
+        BoneManager::RegisterBone(pCharacter, L"Monster105_L_Eye", 10);
+        BoneManager::RegisterBone(pCharacter, L"Monster105_L_Arm00", 33);
+        BoneManager::RegisterBone(pCharacter, L"Monster105_L_Arm01", 34);
+        BoneManager::RegisterBone(pCharacter, L"Monster105_L_Arm02", 35);
+        BoneManager::RegisterBone(pCharacter, L"Monster105_L_Hand", 20);
+        BoneManager::RegisterBone(pCharacter, L"Monster105_R_Hand", 39);
+        //			BoneManager::RegisterBone(pCharacter, L"Monster105_Footsteps", 1);
     }
     break;
     case 549:
@@ -442,8 +442,8 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster102_Footstepst", 0);
-        BoneManager::RegisterBone(pCharacter, "Monster102_Head", 6);
+        BoneManager::RegisterBone(pCharacter, L"Monster102_Footstepst", 0);
+        BoneManager::RegisterBone(pCharacter, L"Monster102_Head", 6);
     }
     break;
     case 551:
@@ -455,9 +455,9 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster101_L_Arm", 12);
-        BoneManager::RegisterBone(pCharacter, "Monster101_R_Arm", 20);
-        BoneManager::RegisterBone(pCharacter, "Monster101_Head", 6);
+        BoneManager::RegisterBone(pCharacter, L"Monster101_L_Arm", 12);
+        BoneManager::RegisterBone(pCharacter, L"Monster101_R_Arm", 20);
+        BoneManager::RegisterBone(pCharacter, L"Monster101_Head", 6);
     }
     break;
     case 552:
@@ -469,15 +469,15 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "Monster100_Footstepst", 0);
-        BoneManager::RegisterBone(pCharacter, "Monster100_L_Hand", 76);
-        BoneManager::RegisterBone(pCharacter, "Monster100_R_Hand", 94);
-        BoneManager::RegisterBone(pCharacter, "Monster100_Pelvis", 2);
-        BoneManager::RegisterBone(pCharacter, "Monster100_Head", 57);
-        BoneManager::RegisterBone(pCharacter, "Monster100_z02", 107);
-        BoneManager::RegisterBone(pCharacter, "Monster100_z03", 108);
-        BoneManager::RegisterBone(pCharacter, "Monster100_z04", 109);
-        BoneManager::RegisterBone(pCharacter, "Monster100_z05", 110);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_Footstepst", 0);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_L_Hand", 76);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_R_Hand", 94);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_Pelvis", 2);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_Head", 57);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_z02", 107);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_z03", 108);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_z04", 109);
+        BoneManager::RegisterBone(pCharacter, L"Monster100_z05", 110);
     }
     break;
     }
@@ -708,20 +708,20 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
         Vector(Random_Light + 0.5f, Random_Light - 0.05f, Random_Light + 0.5f, Light);
 
-        BoneManager::GetBonePosition(pObject, "Monster100_L_Hand", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_L_Hand", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.8f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster100_z02", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_z02", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.1f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster100_z03", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_z03", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.0f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster100_z04", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_z04", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.7f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster100_z05", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_z05", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.8f, Light, pObject);
 
         Vector(0.7f, 0.5f, 0.7f, Light);
         vec3_t Relative = { 0.0f, 0.0f, -65.0f };
-        BoneManager::GetBonePosition(pObject, "Monster100_Footstepst", Relative, Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
         CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 4, 4.0f);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
@@ -757,7 +757,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             if (pObject->AnimationFrame >= 4.0f)
             {
                 vec3_t Relative = { 70.0f, 0.0f, 0.0f };
-                BoneManager::GetBonePosition(pObject, "Monster100_Footstepst", Relative, Position);
+                BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
 
                 Vector(0.5f, 0.2f, 0.5f, Light);
                 CreateParticle(BITMAP_SMOKE, Position, Angle, Light, 27, 2.0f);
@@ -768,7 +768,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             {
                 vec3_t Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
                 vec3_t Relative = { 70.0f, 0.0f, 0.0f };
-                BoneManager::GetBonePosition(pObject, "Monster100_Footstepst", Relative, Position);
+                BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
                 Vector(1.0f, 1.0f, 1.0f, Light);
                 CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 3, 1.3f);
             }
@@ -801,11 +801,11 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         vec3_t Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
         Vector(1.0f, 1.0f, 1.0f, Light);
 
-        BoneManager::GetBonePosition(pObject, "Monster101_L_Arm", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Position);
         CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
-        BoneManager::GetBonePosition(pObject, "Monster101_R_Arm", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster101_R_Arm", Position);
         CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
-        BoneManager::GetBonePosition(pObject, "Monster101_Head", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster101_Head", Position);
         CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
@@ -843,13 +843,13 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             {
                 Vector(0.0f, 45.0f, 45.0f, Angle);
                 vec3_t Relative = { 30.0f, 0.0f, 0.0f };
-                BoneManager::GetBonePosition(pObject, "Monster101_L_Arm", Relative, Position);
+                BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Relative, Position);
                 CreateParticle(BITMAP_SMOKE, Position, Angle, Light, 25);
 
                 if (pObject->AnimationFrame >= 5.0f && pObject->AnimationFrame <= 5.5f)
                 {
                     Vector(5.0f, 5.0f, 5.0f, Light);
-                    BoneManager::GetBonePosition(pObject, "Monster101_L_Arm", Relative, Position);
+                    BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Relative, Position);
                     CreateParticle(BITMAP_SHOCK_WAVE, Position, Angle, Light, 3, 0.5f);
                 }
             }
@@ -879,7 +879,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         Vector(60.0f, -30.0f, 0.0f, Relative);
         Vector(0.0f, Random_Light, 0.0f, Light);
 
-        BoneManager::GetBonePosition(pObject, "Monster102_Head", Relative, Position);
+        BoneManager::GetBonePosition(pObject, L"Monster102_Head", Relative, Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 3.0f, Light, pObject);
         CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 7);
 
@@ -982,8 +982,8 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         for (int i = 0; i < 6; i++)
         {
-            char Bone_Name[256];
-            sprintf(Bone_Name, "Monster104_Horn%d", i);
+            wchar_t Bone_Name[256];
+            swprintf(Bone_Name, L"Monster104_Horn%d", i);
             Random_Light = (float)(rand() % 10) / 100.0f + 0.8f;
             Vector(0.4f, Random_Light, 0.5f, Light);
             BoneManager::GetBonePosition(pObject, Bone_Name, Position);
@@ -993,7 +993,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Position, Relative = { 0.0f, -100.0f, 20.0f }, Light = { 0.5f, 0.7f, 0.5f };
-            BoneManager::GetBonePosition(pObject, "Monster104_Footsteps", Relative, Position);
+            BoneManager::GetBonePosition(pObject, L"Monster104_Footsteps", Relative, Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 26);
         }
 
@@ -1009,19 +1009,19 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         Random_Light = (float)(rand() % 8) / 10.0f + 0.6f;
         Vector(Random_Light, 0.0f, 0.0f, Light);
 
-        BoneManager::GetBonePosition(pObject, "Monster105_R_Eye", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster105_R_Eye", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.3f, Light, pObject);
 
-        BoneManager::GetBonePosition(pObject, "Monster105_L_Eye", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster105_L_Eye", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.3f, Light, pObject);
 
-        BoneManager::GetBonePosition(pObject, "Monster105_L_Arm00", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster105_L_Arm00", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.0f, Light, pObject);
 
-        BoneManager::GetBonePosition(pObject, "Monster105_L_Arm01", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster105_L_Arm01", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.0f, Light, pObject);
 
-        BoneManager::GetBonePosition(pObject, "Monster105_L_Arm02", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster105_L_Arm02", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.0f, Light, pObject);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
@@ -1060,19 +1060,19 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         if (pObject->CurrentAction == MONSTER01_ATTACK2)
         {
-            BoneManager::GetBonePosition(pObject, "Monster105_L_Hand", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster105_L_Hand", Position);
             CreateParticle(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 5.0f);
 
-            BoneManager::GetBonePosition(pObject, "Monster105_R_Hand", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster105_R_Hand", Position);
             CreateParticle(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 5.0f);
         }
         else
         {
-            BoneManager::GetBonePosition(pObject, "Monster105_L_Hand", Position);
+            BoneManager::GetBonePosition(pObject, L"Monster105_L_Hand", Position);
             CreateParticle(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 2.5f);
 
             Vector(0.0f, 0.0f, -10.0f, Relative);
-            BoneManager::GetBonePosition(pObject, "Monster105_R_Hand", Relative, Position);
+            BoneManager::GetBonePosition(pObject, L"Monster105_R_Hand", Relative, Position);
             CreateParticle(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 2.1f);
         }
         if ((pObject->AnimationFrame >= 9.0f && pObject->AnimationFrame <= 10.0f) && pObject->CurrentAction == MONSTER01_ATTACK2)
@@ -1125,7 +1125,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         Vector(60.0f, -30.0f, 0.0f, Relative);
         Vector(0.0f, Random_Light, 0.0f, Light);
 
-        BoneManager::GetBonePosition(pObject, "Monster102_Head", Relative, Position);
+        BoneManager::GetBonePosition(pObject, L"Monster102_Head", Relative, Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 3.0f, Light, pObject);
         CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 7);
 
@@ -1166,11 +1166,11 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         vec3_t Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
         Vector(1.0f, 1.0f, 1.0f, Light);
 
-        BoneManager::GetBonePosition(pObject, "Monster101_L_Arm", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Position);
         CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
-        BoneManager::GetBonePosition(pObject, "Monster101_R_Arm", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster101_R_Arm", Position);
         CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
-        BoneManager::GetBonePosition(pObject, "Monster101_Head", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster101_Head", Position);
         CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
@@ -1208,13 +1208,13 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             {
                 Vector(0.0f, 45.0f, 45.0f, Angle);
                 vec3_t Relative = { 30.0f, 0.0f, 0.0f };
-                BoneManager::GetBonePosition(pObject, "Monster101_L_Arm", Relative, Position);
+                BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Relative, Position);
                 CreateParticle(BITMAP_SMOKE, Position, Angle, Light, 25);
 
                 if (pObject->AnimationFrame >= 5.0f && pObject->AnimationFrame <= 5.5f)
                 {
                     Vector(5.0f, 5.0f, 5.0f, Light);
-                    BoneManager::GetBonePosition(pObject, "Monster101_L_Arm", Relative, Position);
+                    BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Relative, Position);
                     CreateParticle(BITMAP_SHOCK_WAVE, Position, Angle, Light, 3, 0.5f);
                 }
             }
@@ -1242,20 +1242,20 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
         Vector(Random_Light + 0.5f, Random_Light - 0.05f, Random_Light + 0.5f, Light);
 
-        BoneManager::GetBonePosition(pObject, "Monster100_L_Hand", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_L_Hand", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.8f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster100_z02", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_z02", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.1f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster100_z03", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_z03", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.0f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster100_z04", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_z04", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.7f, Light, pObject);
-        BoneManager::GetBonePosition(pObject, "Monster100_z05", Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_z05", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.8f, Light, pObject);
 
         Vector(0.7f, 0.5f, 0.7f, Light);
         vec3_t Relative = { 0.0f, 0.0f, -65.0f };
-        BoneManager::GetBonePosition(pObject, "Monster100_Footstepst", Relative, Position);
+        BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
         CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 4, 4.0f);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
@@ -1291,7 +1291,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             if (pObject->AnimationFrame >= 4.0f)
             {
                 vec3_t Relative = { 70.0f, 0.0f, 0.0f };
-                BoneManager::GetBonePosition(pObject, "Monster100_Footstepst", Relative, Position);
+                BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
 
                 Vector(0.5f, 0.2f, 0.5f, Light);
                 CreateParticle(BITMAP_SMOKE, Position, Angle, Light, 27, 2.0f);
@@ -1302,7 +1302,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             {
                 vec3_t Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
                 vec3_t Relative = { 70.0f, 0.0f, 0.0f };
-                BoneManager::GetBonePosition(pObject, "Monster100_Footstepst", Relative, Position);
+                BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
                 Vector(1.0f, 1.0f, 1.0f, Light);
                 CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 3, 1.3f);
             }

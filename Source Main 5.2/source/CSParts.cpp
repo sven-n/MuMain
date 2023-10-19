@@ -19,7 +19,7 @@
 
 void CreatePartsFactory(CHARACTER* c)
 {
-    if (FindText(c->ID, "webzen") || g_isCharacterBuff((&c->Object), eBuff_GMEffect)
+    if (g_isCharacterBuff((&c->Object), eBuff_GMEffect)
         || ((c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR)))
     {
         if (c->m_pParts != NULL && c->EtcPart != PARTS_WEBZEN)
@@ -293,7 +293,7 @@ void CSParts2D::IRender(CHARACTER* c)
         )
         && c->GuildStatus == G_MASTER)
     {
-        if (strcmp(GuildMark[c->GuildMarkIndex].UnionName, GuildMark[c->GuildMarkIndex].GuildName) == NULL || strcmp(GuildMark[c->GuildMarkIndex].UnionName, "") == NULL)
+        if (wcscmp(GuildMark[c->GuildMarkIndex].UnionName, GuildMark[c->GuildMarkIndex].GuildName) == NULL || wcscmp(GuildMark[c->GuildMarkIndex].UnionName, L"") == NULL)
         {
             if (c->EtcPart == PARTS_DEFENSE_TEAM_MARK)
                 bSubType += 1;

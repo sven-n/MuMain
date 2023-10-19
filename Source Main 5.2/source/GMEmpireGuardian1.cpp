@@ -79,7 +79,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(166);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 166, PosX, PosY);
-        strcpy(pCharacter->ID, "레이몬드");
+        wcscpy(pCharacter->ID, L"레이몬드");
 
         pCharacter->Object.Scale = 1.45f;
 
@@ -90,7 +90,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(167);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 167, PosX, PosY);
-        strcpy(pCharacter->ID, "에르칸느");
+        wcscpy(pCharacter->ID, L"에르칸느");
 
         pCharacter->Object.Scale = 1.25f;
 
@@ -101,16 +101,16 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(168);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 168, PosX, PosY);
-        strcpy(pCharacter->ID, "데슬러");
+        wcscpy(pCharacter->ID, L"데슬러");
         pCharacter->Object.Scale = 1.55f;
 
-        BoneManager::RegisterBone(pCharacter, "node_eyes01", 14);
-        BoneManager::RegisterBone(pCharacter, "node_eyes02", 15);
-        BoneManager::RegisterBone(pCharacter, "node_blade01", 71);
-        BoneManager::RegisterBone(pCharacter, "node_blade05", 72);
-        BoneManager::RegisterBone(pCharacter, "node_blade04", 73);
-        BoneManager::RegisterBone(pCharacter, "node_blade02", 74);
-        //			BoneManager::RegisterBone(pCharacter, "node_blade03" ,75);
+        BoneManager::RegisterBone(pCharacter, L"node_eyes01", 14);
+        BoneManager::RegisterBone(pCharacter, L"node_eyes02", 15);
+        BoneManager::RegisterBone(pCharacter, L"node_blade01", 71);
+        BoneManager::RegisterBone(pCharacter, L"node_blade05", 72);
+        BoneManager::RegisterBone(pCharacter, L"node_blade04", 73);
+        BoneManager::RegisterBone(pCharacter, L"node_blade02", 74);
+        //			BoneManager::RegisterBone(pCharacter, L"node_blade03" ,75);
 
         OBJECT* o = &pCharacter->Object;
         BMD* b = &Models[o->Type];
@@ -133,7 +133,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(171);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 171, PosX, PosY);
-        strcpy(pCharacter->ID, "갈리아");
+        wcscpy(pCharacter->ID, L"갈리아");
         pCharacter->Object.Scale = 1.35f;
 
         m_bCurrentIsRage_Gallia = false;
@@ -143,7 +143,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(172);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 172, PosX, PosY);
-        strcpy(pCharacter->ID, "병참장교");
+        wcscpy(pCharacter->ID, L"병참장교");
         pCharacter->Object.Scale = 1.27f;
     }
     break;
@@ -151,7 +151,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(173);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 173, PosX, PosY);
-        strcpy(pCharacter->ID, "전투교관");
+        wcscpy(pCharacter->ID, L"전투교관");
         pCharacter->Object.Scale = 1.25f;
     }
     break;
@@ -159,7 +159,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(178);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 178, PosX, PosY);
-        strcpy(pCharacter->ID, "수호군방패병");
+        wcscpy(pCharacter->ID, L"수호군방패병");
         pCharacter->Object.Scale = 1.2f;
 
         Vector(0.0f, 0.0f, 0.0f, pCharacter->Object.EyeRight3);
@@ -170,7 +170,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(179);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 179, PosX, PosY);
-        strcpy(pCharacter->ID, "수호군치유병");
+        wcscpy(pCharacter->ID, L"수호군치유병");
         pCharacter->Object.Scale = 0.9f;
     }
     break;
@@ -178,7 +178,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(180);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 180, PosX, PosY);
-        strcpy(pCharacter->ID, "기사단");
+        wcscpy(pCharacter->ID, L"기사단");
         pCharacter->Object.Scale = 1.1f;
     }
     break;
@@ -186,7 +186,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(181);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 181, PosX, PosY);
-        strcpy(pCharacter->ID, "호위병");
+        wcscpy(pCharacter->ID, L"호위병");
         pCharacter->Object.Scale = 1.1f;
     }
     break;
@@ -194,7 +194,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(183);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 183, PosX, PosY);
-        strcpy(pCharacter->ID, "창살형 성문");
+        wcscpy(pCharacter->ID, L"창살형 성문");
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.Scale = 1.25f;
     }
@@ -203,7 +203,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(184);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 184, PosX, PosY);
-        strcpy(pCharacter->ID, "사자머리 성문");
+        wcscpy(pCharacter->ID, L"사자머리 성문");
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.LifeTime = 100;
         pCharacter->Object.Scale = 1.25f;
@@ -213,7 +213,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(185);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 185, PosX, PosY);
-        strcpy(pCharacter->ID, "석상");
+        wcscpy(pCharacter->ID, L"석상");
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.Scale = 0.6f;
         pCharacter->Object.LifeTime = 100;

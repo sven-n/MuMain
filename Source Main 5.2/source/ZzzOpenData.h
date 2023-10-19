@@ -5,7 +5,7 @@ void OpenNpc(int Type);
 void DeleteMonsters();
 void OpenMonsterModel(int Type);
 
-void OpenModel(int Type, char* Dir, char* ModelFileName, ...);
+void OpenModel(int Type, wchar_t* Dir, wchar_t* ModelFileName, ...);
 void OpenInterfaceData();
 void OpenBasicData(HDC hDC);
 void OpenMainData();
@@ -21,13 +21,13 @@ void ReleaseCharacterSceneData();
 void OpenPlayerTextures();
 void OpenItemTextures();
 
-void OpenSkillHotKey(char* File);
+void OpenSkillHotKey(const wchar_t* File);
 void SaveOptions();
-void SaveMacro(char* FileName);
-void OpenMacro(char* FileName);
+void SaveMacro(const wchar_t* FileName);
+void OpenMacro(const wchar_t* FileName);
 
-extern char AbuseFilter[][20];
-extern char AbuseNameFilter[][20];
+extern wchar_t AbuseFilter[][20];
+extern wchar_t AbuseNameFilter[][20];
 extern int  AbuseFilterNumber;
 extern int  AbuseNameFilterNumber;
-extern std::string g_strSelectedML;
+extern std::wstring g_strSelectedML;

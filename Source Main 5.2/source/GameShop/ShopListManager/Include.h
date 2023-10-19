@@ -4,10 +4,10 @@
 
 #define SHOPLIST_SCRIPT_COUNT				3
 
-#define SHOPLIST_SCRIPT_CATEGORY			"IBSCategory.txt"
-#define SHOPLIST_SCRIPT_PACKAGE				"IBSPackage.txt"
-#define SHOPLIST_SCRIPT_PRODUCT				"IBSProduct.txt"
-#define BANNER_SCRIPT_FILENAME				"IBSBanner.txt"
+#define SHOPLIST_SCRIPT_CATEGORY			L"IBSCategory.txt"
+#define SHOPLIST_SCRIPT_PACKAGE				L"IBSPackage.txt"
+#define SHOPLIST_SCRIPT_PRODUCT				L"IBSProduct.txt"
+#define BANNER_SCRIPT_FILENAME				L"IBSBanner.txt"
 
 #define SHOPLIST_LENGTH_CATEGORYNAME		128
 
@@ -50,9 +50,9 @@
 #endif
 
 //#ifdef _DEBUG
-//	#pragma  comment(lib, "FileDownloader.lib")
+//	#pragma  comment(lib, L"FileDownloader.lib")
 //#else
-//	#pragma  comment(lib, "FileDownloader.lib")
+//	#pragma  comment(lib, L"FileDownloader.lib")
 //#endif
 
 enum FTP_SERVICE_MODE { FTP_MODE_ACTIVE, FTP_MODE_PASSIVE };
@@ -75,13 +75,13 @@ class CListManagerInfo
 {
 public:
     DownloaderType		m_DownloaderType;
-    std::string			m_strServerIP;
+    std::wstring			m_strServerIP;
     unsigned short		m_nPortNum;
-    std::string			m_strUserID;
-    std::string			m_strPWD;
-    std::string			m_strRemotePath;
+    std::wstring			m_strUserID;
+    std::wstring			m_strPWD;
+    std::wstring			m_strRemotePath;
     FTP_SERVICE_MODE	m_ftpMode;
-    std::string			m_strLocalPath;
+    std::wstring			m_strLocalPath;
     DWORD				m_dwDownloadMaxTime;
 
     CListVersionInfo	m_Version;

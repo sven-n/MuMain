@@ -13,13 +13,13 @@
 
 using namespace info;
 
-DialogInfoPtr DialogInfo::MakeInfo(const std::string& filename)
+DialogInfoPtr DialogInfo::MakeInfo(const std::wstring& filename)
 {
     DialogInfoPtr info(new DialogInfo(filename));
     return info;
 }
 
-DialogInfo::DialogInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
+DialogInfo::DialogInfo(const std::wstring& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
     m_IsOpenFile = OpenFile(filename);
 
@@ -34,7 +34,7 @@ DialogInfo::~DialogInfo()
     clear();
 }
 
-bool DialogInfo::OpenFile(const std::string& filename)
+bool DialogInfo::OpenFile(const std::wstring& filename)
 {
     return true;
 }

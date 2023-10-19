@@ -17,7 +17,7 @@ namespace info
     class DialogInfo : public InfoFile
     {
     public:
-        static DialogInfoPtr MakeInfo(const std::string& filename);
+        static DialogInfoPtr MakeInfo(const std::wstring& filename);
         virtual ~DialogInfo();
 
     protected:
@@ -28,8 +28,8 @@ namespace info
         const Script_Dialog* GetData(int index) const;
 
     private:
-        bool OpenFile(const std::string& filename);
-        DialogInfo(const std::string& filename);
+        bool OpenFile(const std::wstring& filename);
+        DialogInfo(const std::wstring& filename);
 
     private:
         typedef std::vector<Script_Dialog>	DialogVECTOR;

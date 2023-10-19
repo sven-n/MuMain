@@ -106,7 +106,7 @@ void InitTerrainMappingLayer()
 
 void ExitProgram()
 {
-    MessageBox(g_hWnd, GlobalText[11], NULL, MB_OK);
+    MessageBoxW(g_hWnd, GlobalText[11], NULL, MB_OK);
     PostQuitMessage(0);
 }
 
@@ -118,15 +118,15 @@ static void BuxConvert(BYTE* Buffer, int Size)
         Buffer[i] ^= bBuxCode[i % 3];
 }
 
-int OpenTerrainAttribute(char* FileName)
+int OpenTerrainAttribute(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s file not found.", FileName);
+        wchar_t Text[256];
+        swprintf(Text, L"%s file not found.", FileName);
         g_ErrorReport.Write(Text);
-        g_ErrorReport.Write("\r\n");
+        g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);
@@ -225,15 +225,15 @@ int OpenTerrainAttribute(char* FileName)
     return iMap;
 }
 
-bool SaveTerrainAttribute(char* FileName, int iMap)
+bool SaveTerrainAttribute(wchar_t* FileName, int iMap)
 {
-    FILE* fp = fopen(FileName, "wb");
+    FILE* fp = _wfopen(FileName, L"wb");
     if (fp == NULL) {
-        char Text[256];
-        sprintf_s(Text, sizeof(Text), "%s file not found.", FileName);
+        wchar_t Text[256];
+        swprintf_s(Text, sizeof(Text), L"%s file not found.", FileName);
         g_ErrorReport.Write(Text);
-        g_ErrorReport.Write("\r\n");
-        MessageBoxA(g_hWnd, Text, NULL, MB_OK);
+        g_ErrorReport.Write(L"\r\n");
+        MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
     }
@@ -309,9 +309,9 @@ void SetTerrainWaterState(std::list<int>& terrainIndex, int state)
     }
 }
 
-int OpenTerrainMapping(char* FileName) {
+int OpenTerrainMapping(wchar_t* FileName) {
     InitTerrainMappingLayer();
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL) {
         return -1;
     }
@@ -358,9 +358,9 @@ int OpenTerrainMapping(char* FileName) {
     return iMapNumber;
 }
 
-bool SaveTerrainMapping(char* FileName, int iMapNumber)
+bool SaveTerrainMapping(wchar_t* FileName, int iMapNumber)
 {
-    FILE* fp = fopen(FileName, "wb");
+    FILE* fp = _wfopen(FileName, L"wb");
     BYTE Version = 0;
     fwrite(&Version, 1, 1, fp);
     fwrite(&iMapNumber, 1, 1, fp);
@@ -389,7 +389,7 @@ bool SaveTerrainMapping(char* FileName, int iMapNumber)
     fclose(fp);
 
     {
-        fp = fopen(FileName, "rb");
+        fp = _wfopen(FileName, L"rb");
         if (fp == NULL)
         {
             return (false);
@@ -406,7 +406,7 @@ bool SaveTerrainMapping(char* FileName, int iMapNumber)
         MapFileEncrypt(Data, EncData, EncBytes);
         delete[] EncData;
 
-        fp = fopen(FileName, "wb");
+        fp = _wfopen(FileName, L"wb");
         fwrite(Data, DataBytes, 1, fp);
         fclose(fp);
         delete[] Data;
@@ -557,7 +557,7 @@ void CreateTerrainLight_Part(int xi, int yi)
     }
 }
 
-void OpenTerrainLight(char* FileName)
+void OpenTerrainLight(wchar_t* FileName)
 {
     OpenJpegBuffer(FileName, &TerrainLight[0][0]);
     // Apply corrections to the loaded terrain light
@@ -589,7 +589,7 @@ void OpenTerrainLight(char* FileName)
     */
 }
 
-void SaveTerrainLight(char* FileName)
+void SaveTerrainLight(wchar_t* FileName)
 {
     auto* Buffer = new unsigned char[TERRAIN_SIZE * TERRAIN_SIZE * 3];
     for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; ++i)
@@ -605,7 +605,7 @@ void SaveTerrainLight(char* FileName)
     delete[] Buffer;
 }
 
-void CreateTerrain(char* FileName, bool bNew)
+void CreateTerrain(wchar_t* FileName, bool bNew)
 {
     ActiveTerrain = true;
     if (bNew)
@@ -627,15 +627,15 @@ bool IsTerrainHeightExtMap(int iWorld)
     return (iWorld == WD_42CHANGEUP3RD_2ND || gMapManager.IsPKField() || iWorld == WD_66DOPPLEGANGER2);
 }
 
-bool OpenTerrainHeight(char* filename)
+bool OpenTerrainHeight(wchar_t* filename)
 {
     const int Index = 1080;
     const int Size = 256 * 256 + Index;
-    char FileName[256];
+    wchar_t FileName[256];
 
-    char NewFileName[256];
+    wchar_t NewFileName[256];
 
-    for (int i = 0; i < (int)strlen(filename); i++)
+    for (int i = 0; i < (int)wcslen(filename); i++)
     {
         NewFileName[i] = filename[i];
         NewFileName[i + 1] = NULL;
@@ -643,18 +643,18 @@ bool OpenTerrainHeight(char* filename)
             break;
     }
 
-    strcpy_s(FileName, "Data\\");
-    strcat_s(FileName, NewFileName);
-    strcat_s(FileName, "OZB");
+    wcscpy_s(FileName, L"Data\\");
+    wcscat_s(FileName, NewFileName);
+    wcscat_s(FileName, L"OZB");
 
     FILE* fp;
-    errno_t err = fopen_s(&fp, FileName, "rb");
+    errno_t err = _wfopen_s(&fp, FileName, L"rb");
     if (err != 0 || fp == NULL)
     {
-        char Text[256];
-        sprintf_s(Text, "%s file not found.", FileName);
+        wchar_t Text[256];
+        swprintf_s(Text, L"%s file not found.", FileName);
         g_ErrorReport.Write(Text);
-        g_ErrorReport.Write("\r\n");
+        g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -685,7 +685,7 @@ bool OpenTerrainHeight(char* filename)
     return true;
 }
 
-void SaveTerrainHeight(char* name)
+void SaveTerrainHeight(wchar_t* name)
 {
     auto* Buffer = new unsigned char[256 * 256];
     for (int i = 0; i < 256; i++)
@@ -703,7 +703,7 @@ void SaveTerrainHeight(char* name)
             dst++;
         }
     }
-    FILE* fp = fopen(name, "wb");
+    FILE* fp = _wfopen(name, L"wb");
     fwrite(BMPHeader, 1080, 1, fp);
 
     for (int i = 0; i < 256; i++) fwrite(Buffer + (255 - i) * 256, 256, 1, fp);
@@ -712,12 +712,12 @@ void SaveTerrainHeight(char* name)
     fclose(fp);
 }
 
-bool OpenTerrainHeightNew(const char* strFilename)
+bool OpenTerrainHeightNew(const wchar_t* strFilename)
 {
-    char FileName[256];
-    char NewFileName[256];
+    wchar_t FileName[256];
+    wchar_t NewFileName[256];
 
-    for (int i = 0; i < (int)strlen(strFilename); ++i)
+    for (int i = 0; i < (int)wcslen(strFilename); ++i)
     {
         NewFileName[i] = strFilename[i];
         NewFileName[i + 1] = NULL;
@@ -726,17 +726,17 @@ bool OpenTerrainHeightNew(const char* strFilename)
             break;
     }
 
-    strcpy(FileName, "Data\\");
-    strcat(FileName, NewFileName);
-    strcat(FileName, "OZB");
+    wcscpy(FileName, L"Data\\");
+    wcscat(FileName, NewFileName);
+    wcscat(FileName, L"OZB");
 
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (!fp)
     {
-        char Text[256];
-        sprintf(Text, "%s file not found.", FileName);
+        wchar_t Text[256];
+        swprintf(Text, L"%s file not found.", FileName);
         g_ErrorReport.Write(Text);
-        g_ErrorReport.Write("\r\n");
+        g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -1982,157 +1982,145 @@ void CreateFrustrum2D(vec3_t Position)
     float Width = 0.0f, CameraViewFar = 0.0f, CameraViewNear = 0.0f, CameraViewTarget = 0.0f;
     float WidthFar = 0.0f, WidthNear = 0.0f;
 
-    if (gMapManager.WorldActive == WD_6STADIUM && (FindText(Hero->ID, "webzen") || FindText(Hero->ID, "webzen2")))
+    if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
     {
-        Width = (float)GetScreenWidth() / 500.f;
-        CameraViewFar = 8500.f;
-        CameraViewNear = CameraViewFar * 0.05f;
-        CameraViewTarget = CameraViewFar * 0.47f;
-        WidthFar = 3000.f * Width;
-        WidthNear = 540.f * Width;
-    }
-    else
-    {
-        if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
+        Width = (float)GetScreenWidth() / 480.f;// * 0.1f;
+        if (battleCastle::InBattleCastle2(Hero->Object.Position) && (Hero->Object.Position[0] < 17100.f || Hero->Object.Position[0]>18300.f))
         {
-            Width = (float)GetScreenWidth() / 480.f;// * 0.1f;
-            if (battleCastle::InBattleCastle2(Hero->Object.Position) && (Hero->Object.Position[0] < 17100.f || Hero->Object.Position[0]>18300.f))
-            {
-                CameraViewFar = 5100.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 2250.f * Width; // 1140.f
-                WidthNear = 540.f * Width; // 540.f
-            }
-            else
-            {
-                CameraViewFar = 3300.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1300.f * Width; // 1140.f
-                WidthNear = 580.f * Width; // 540.f
-            }
-        }
-        else if (gMapManager.WorldActive == WD_62SANTA_TOWN)
-        {
-            Width = (float)GetScreenWidth() / 450.f * 1.0f;
-            CameraViewFar = 2400.f;
-            CameraViewNear = CameraViewFar * 0.19f;
-            CameraViewTarget = CameraViewFar * 0.47f;
-            CameraViewFar = 2650.f;
-            WidthFar = 1250.f * Width;
-            WidthNear = 540.f * Width;
-        }
-        else if (gMapManager.IsPKField() || IsDoppelGanger2())
-        {
-            Width = (float)GetScreenWidth() / 500.f;
-            CameraViewFar = 1700.0f;
-            CameraViewNear = 55.0f;
-            CameraViewTarget = 830.0f;
-            CameraViewFar = 3300.f;
-            WidthFar = 1900.f * Width;
-            WidthNear = 600.f * Width;
+            CameraViewFar = 5100.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 2250.f * Width; // 1140.f
+            WidthNear = 540.f * Width; // 540.f
         }
         else
         {
-            static  int CameraLevel;
+            CameraViewFar = 3300.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1300.f * Width; // 1140.f
+            WidthNear = 580.f * Width; // 540.f
+        }
+    }
+    else if (gMapManager.WorldActive == WD_62SANTA_TOWN)
+    {
+        Width = (float)GetScreenWidth() / 450.f * 1.0f;
+        CameraViewFar = 2400.f;
+        CameraViewNear = CameraViewFar * 0.19f;
+        CameraViewTarget = CameraViewFar * 0.47f;
+        CameraViewFar = 2650.f;
+        WidthFar = 1250.f * Width;
+        WidthNear = 540.f * Width;
+    }
+    else if (gMapManager.IsPKField() || IsDoppelGanger2())
+    {
+        Width = (float)GetScreenWidth() / 500.f;
+        CameraViewFar = 1700.0f;
+        CameraViewNear = 55.0f;
+        CameraViewTarget = 830.0f;
+        CameraViewFar = 3300.f;
+        WidthFar = 1900.f * Width;
+        WidthNear = 600.f * Width;
+    }
+    else
+    {
+        static  int CameraLevel;
 
-            if ((int)CameraDistanceTarget >= (int)CameraDistance)
-                CameraLevel = g_shCameraLevel;
+        if ((int)CameraDistanceTarget >= (int)CameraDistance)
+            CameraLevel = g_shCameraLevel;
 
-            switch (CameraLevel)
+        switch (CameraLevel)
+        {
+        case 0:
+            if (SceneFlag == LOG_IN_SCENE)
             {
-            case 0:
-                if (SceneFlag == LOG_IN_SCENE)
-                {
-                }
-                else if (SceneFlag == CHARACTER_SCENE)
-                {
-                    Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
-                }
-                else if (g_Direction.m_CKanturu.IsMayaScene())
-                {
-                    Width = (float)GetScreenWidth() / 640.f * 10.0f * 0.115f;
-                }
-                else
-                {
-                    Width = (float)GetScreenWidth()/640.f * 1.1f;
-                }
-
-                if (SceneFlag == LOG_IN_SCENE)
-                {
-                }
-                else if (SceneFlag == CHARACTER_SCENE)
-                {
-                    CameraViewFar = 2000.f * 9.1f * 0.404998f;
-                }
-                else if (gMapManager.WorldActive == WD_39KANTURU_3RD)
-                {
-                    CameraViewFar = 2000.f * 10.0f * 0.115f;
-                }
-                else
-                {
-                    CameraViewFar = 2400.f;
-                }
-
-                if (SceneFlag == LOG_IN_SCENE)
-                {
-                    Width = (float)GetScreenWidth() / 640.f;
-                    CameraViewFar = 2400.f * 17.0f * 13.0f;
-                    CameraViewNear = 2400.f * 17.0f * 0.5f;
-                    CameraViewTarget = 2400.f * 17.0f * 0.5f;
-                    WidthFar = 5000.f * Width;
-                    WidthNear = 300.f * Width;
-                }
-                else
-                {
-                    CameraViewNear = CameraViewFar * 0.19f;//0.22
-                    CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                    WidthFar = 1190.f * Width * sqrtf(CameraFOV / 33.f); // 1140.f
-                    WidthNear = 540.f * Width * sqrtf(CameraFOV / 33.f); // 540.f
-                }
-                break;
-            case 1:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 2700.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1200.f * Width; // 1140.f
-                WidthNear = 540.f * Width; // 540.f
-                break;
-            case 2:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 3000.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1300.f * Width; // 1140.f
-                WidthNear = 540.f * Width; // 540.f
-                break;
-            case 3:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 3300.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1500.f * Width; // 1140.f
-                WidthNear = 580.f * Width; // 540.f
-                break;
-            case 4:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 5100.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 2250.f * Width; // 1140.f
-                WidthNear = 540.f * Width; // 540.f
-                break;
-            case 5:
-                Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-                CameraViewFar = 3400.f;// * 0.1f;
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1600.f * Width; // 1140.f
-                WidthNear = 660.f * Width; // 540.f
-                break;
             }
+            else if (SceneFlag == CHARACTER_SCENE)
+            {
+                Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
+            }
+            else if (g_Direction.m_CKanturu.IsMayaScene())
+            {
+                Width = (float)GetScreenWidth() / 640.f * 10.0f * 0.115f;
+            }
+            else
+            {
+                Width = (float)GetScreenWidth()/640.f * 1.1f;
+            }
+
+            if (SceneFlag == LOG_IN_SCENE)
+            {
+            }
+            else if (SceneFlag == CHARACTER_SCENE)
+            {
+                CameraViewFar = 2000.f * 9.1f * 0.404998f;
+            }
+            else if (gMapManager.WorldActive == WD_39KANTURU_3RD)
+            {
+                CameraViewFar = 2000.f * 10.0f * 0.115f;
+            }
+            else
+            {
+                CameraViewFar = 2400.f;
+            }
+
+            if (SceneFlag == LOG_IN_SCENE)
+            {
+                Width = (float)GetScreenWidth() / 640.f;
+                CameraViewFar = 2400.f * 17.0f * 13.0f;
+                CameraViewNear = 2400.f * 17.0f * 0.5f;
+                CameraViewTarget = 2400.f * 17.0f * 0.5f;
+                WidthFar = 5000.f * Width;
+                WidthNear = 300.f * Width;
+            }
+            else
+            {
+                CameraViewNear = CameraViewFar * 0.19f;//0.22
+                CameraViewTarget = CameraViewFar * 0.47f;//0.47
+                WidthFar = 1190.f * Width * sqrtf(CameraFOV / 33.f); // 1140.f
+                WidthNear = 540.f * Width * sqrtf(CameraFOV / 33.f); // 540.f
+            }
+            break;
+        case 1:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 2700.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1200.f * Width; // 1140.f
+            WidthNear = 540.f * Width; // 540.f
+            break;
+        case 2:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 3000.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1300.f * Width; // 1140.f
+            WidthNear = 540.f * Width; // 540.f
+            break;
+        case 3:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 3300.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1500.f * Width; // 1140.f
+            WidthNear = 580.f * Width; // 540.f
+            break;
+        case 4:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 5100.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 2250.f * Width; // 1140.f
+            WidthNear = 540.f * Width; // 540.f
+            break;
+        case 5:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
+            CameraViewFar = 3400.f;// * 0.1f;
+            CameraViewNear = CameraViewFar * 0.19f;//0.22
+            CameraViewTarget = CameraViewFar * 0.47f;//0.47
+            WidthFar = 1600.f * Width; // 1140.f
+            WidthNear = 660.f * Width; // 540.f
+            break;
         }
     }
 
@@ -2144,22 +2132,17 @@ void CreateFrustrum2D(vec3_t Position)
     vec3_t Angle;
     float Matrix[3][4];
 
-    if (gMapManager.WorldActive == WD_6STADIUM && (FindText(Hero->ID, "webzen") || FindText(Hero->ID, "webzen2")))
+    if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
     {
-        Vector(0.f, 0.f, -CameraAngle[2], Angle);
+        VectorScale(CameraAngle, -1.0f, Angle);
+        CCameraMove::GetInstancePtr()->SetFrustumAngle(89.5f);
+        vec3_t _Temp = { CCameraMove::GetInstancePtr()->GetFrustumAngle(), 0.0f, 0.0f };
+        VectorAdd(Angle, _Temp, Angle);
     }
     else
-        if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
-        {
-            VectorScale(CameraAngle, -1.0f, Angle);
-            CCameraMove::GetInstancePtr()->SetFrustumAngle(89.5f);
-            vec3_t _Temp = { CCameraMove::GetInstancePtr()->GetFrustumAngle(), 0.0f, 0.0f };
-            VectorAdd(Angle, _Temp, Angle);
-        }
-        else
-        {
-            Vector(0.f, 0.f, 45.f, Angle);
-        }
+    {
+        Vector(0.f, 0.f, 45.f, Angle);
+    }
 
     AngleMatrix(Angle, Matrix);
     vec3_t Frustrum[4];

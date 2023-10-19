@@ -8,20 +8,20 @@
 #include "NewUIMyInventory.h"
 #include "UIControls.h"
 #include "ZzzBMD.h"
-#include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "wsclientinline.h"
 #include "UIGuildInfo.h"
 #include "UIManager.h"
 #include "PersonalShopTitleImp.h"
 #include "CComGem.h"
 #include "MixMgr.h"
 #include "CSQuest.h"
-#include "NewUICryWolf.h"
 #include "PortalMgr.h"
 #include "GambleSystem.h"
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
+#include "NewUISystem.h"
 #include "SkillManager.h"
+#include "ZzzInterface.h"
 
 using namespace SEASON3B;
 
@@ -29,7 +29,7 @@ extern int DoBreakUpGuildAction_New(POPUP_RESULT Result);
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 extern int DeleteGuildIndex;
-extern char DeleteID[];
+extern wchar_t DeleteID[];
 extern int DeleteIndex, AppointStatus;
 extern int s_nTargetFireMemberIndex;
 extern int Button_Down;
@@ -41,10 +41,12 @@ extern int Exp;
 extern BYTE Ranking[5];
 extern BYTE HeroClass[5];
 extern int HeroScore[5];
-extern char HeroName[5][MAX_ID_SIZE + 1];
+extern wchar_t HeroName[5][MAX_ID_SIZE + 1];
 extern char	View_Suc_Or_Fail;
 extern char Need_Point;
 extern int In_Skill;
+
+extern int BuyCost;
 
 SEASON3B::CNewUIMessageBoxButton::CNewUIMessageBoxButton()
 {
@@ -121,9 +123,9 @@ void SEASON3B::CNewUIMessageBoxButton::SetInfo(DWORD dwTexType, float x, float y
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void SEASON3B::CNewUIMessageBoxButton::SetText(const unicode::t_char* strText)
+void SEASON3B::CNewUIMessageBoxButton::SetText(const wchar_t* strText)
 {
-    if (unicode::_strlen(strText) > 0)
+    if (wcslen(strText) > 0)
     {
         m_strText = strText;
     }
@@ -259,7 +261,7 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 
         g_pRenderText->SetBgColor(0);
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &Fontsize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &Fontsize);
 
         Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
         Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
@@ -280,7 +282,7 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
         SIZE TextSize;
         size_t TextExtentWidth;
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &TextSize);
         TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
         g_pRenderText->SetFont(g_hFont);
@@ -483,7 +485,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
     size_t TextExtentWidth;
     int iLine = 0;
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
     TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
     if (TextExtentWidth <= (DWORD)_TextSize)
@@ -512,7 +514,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
             cur_offset += offset;
 
             type_string strTemp(strRemainText, 0, cur_offset/* size */);
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
             TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
             if (TextExtentWidth > (DWORD)_TextSize && cur_offset != 0)
@@ -527,7 +529,7 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
                 m_MsgDataList.push_back(pMsg);
                 iLine++;
 
-                g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
+                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
                 TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
                 if (TextExtentWidth <= (DWORD)_TextSize)
@@ -626,7 +628,7 @@ void SEASON3B::CNewUICommonMessageBox::RenderTexts()
         SIZE TextSize;
         size_t TextExtentWidth, TextExtentHeight;
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
         TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
         TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -895,7 +897,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
     size_t TextExtentWidth;
     int iLine = 0;
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
     TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
     if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
@@ -926,7 +928,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
 
             type_string strTemp(strRemainText, 0, cur_offset/* size */);
 
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
             TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
             if (TextExtentWidth > MSGBOX_TEXT_MAXWIDTH_3DITEM && cur_offset != 0)
@@ -941,7 +943,7 @@ int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, 
                 m_MsgDataList.push_back(pMsg);
                 iLine++;
 
-                g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
+                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
                 TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
 
                 if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH_3DITEM)
@@ -1098,7 +1100,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderTexts()
         SIZE TextSize;
         size_t TextExtentWidth, TextExtentHeight;
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
         TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
         TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
 
@@ -1165,7 +1167,7 @@ bool SEASON3B::CGuildRequestMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildAnswer(true);
+    SocketClient->ToGameServer()->SendGuildJoinResponse(true, GuildPlayerKey);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1175,7 +1177,7 @@ CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::OkBtnDown(class CNewUIMessa
 
 CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildAnswer(false);
+    SocketClient->ToGameServer()->SendGuildJoinResponse(false, GuildPlayerKey);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1214,13 +1216,13 @@ bool SEASON3B::CMapEnterWerwolfMsgBoxLayout::SetLayout()
 
     pMsgBox->SetPos((SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2), 50);
     pMsgBox->AddMsg(GlobalText[1658], RGBA(254, 176, 72, 255), MSGBOX_FONT_BOLD);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[1659], RGBA(170, 218, 146, 255));
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[1660]);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[1676]);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[1661]);
 
     BYTE byQuestState = g_csQuest.getQuestState2(QUEST_3RD_CHANGE_UP_2);
@@ -1240,11 +1242,11 @@ CALLBACK_RESULT SEASON3B::CMapEnterWerwolfMsgBoxLayout::OkBtnDown(class CNewUIMe
 
     if (dwGold >= 3000000)
     {
-        SendRequestEnterOnWerwolf();
+        SocketClient->ToGameServer()->SendEnterOnWerewolfRequest();
     }
     else
     {
-        g_pChatListBox->AddText("", GlobalText[423], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[423], SEASON3B::TYPE_ERROR_MESSAGE);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -1263,11 +1265,11 @@ bool CMapEnterGateKeeperMsgBoxLayout::SetLayout()
 
     pMsgBox->SetPos((SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2), 50);
     pMsgBox->AddMsg(GlobalText[1662], 0xFF49B0FF, MSGBOX_FONT_BOLD);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[1663], 0xFF61F191);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[1664]);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[1677]);
 
     BYTE byQuestState = g_csQuest.getQuestState2(QUEST_3RD_CHANGE_UP_3);
@@ -1282,7 +1284,7 @@ bool CMapEnterGateKeeperMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT CMapEnterGateKeeperMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestEnterOnGateKeeper();
+    SocketClient->ToGameServer()->SendEnterOnGatekeeperRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1307,7 +1309,7 @@ bool SEASON3B::CPartyMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestPartyAnswer(true);
+    SocketClient->ToGameServer()->SendPartyInviteResponse(true, PartyKey);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1316,7 +1318,7 @@ CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBa
 
 CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestPartyAnswer(false);
+    SocketClient->ToGameServer()->SendPartyInviteResponse(false, PartyKey);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1331,7 +1333,7 @@ bool SEASON3B::CTradeMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    char szYourID[MAX_ID_SIZE + 1];
+    wchar_t szYourID[MAX_ID_SIZE + 1];
     g_pTrade->GetYourID(szYourID);
     pMsgBox->AddMsg(szYourID);
     pMsgBox->AddMsg(GlobalText[419]);
@@ -1342,7 +1344,7 @@ bool SEASON3B::CTradeMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestTradeAnswer(true);
+    SocketClient->ToGameServer()->SendTradeRequestResponse(true);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1351,7 +1353,7 @@ CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBa
 
 CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestTradeAnswer(false);
+    SocketClient->ToGameServer()->SendTradeRequestResponse(false);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1401,8 +1403,8 @@ bool SEASON3B::CGuildWarMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, 15.f))
         return false;
 
-    unicode::t_char strText[128];
-    unicode::_sprintf(strText, GlobalText[430], GuildWarName);
+    wchar_t strText[128];
+    swprintf(strText, GlobalText[430], GuildWarName);
     pMsgBox->AddMsg(strText);
     pMsgBox->AddMsg(GlobalText[431]);
 
@@ -1414,7 +1416,7 @@ bool SEASON3B::CGuildWarMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildWarAnswer(true);
+    SocketClient->ToGameServer()->SendGuildWarResponse(true);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1423,7 +1425,7 @@ CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::OkBtnDown(class CNewUIMessageBo
 
 CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildWarAnswer(false);
+    SocketClient->ToGameServer()->SendGuildWarResponse(false);
     InitGuildWar();
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1439,8 +1441,8 @@ bool SEASON3B::CBattleSoccerMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL, 15.f))
         return false;
 
-    unicode::t_char strText[128];
-    unicode::_sprintf(strText, GlobalText[430], GuildWarName);
+    wchar_t strText[128];
+    swprintf(strText, GlobalText[430], GuildWarName);
     pMsgBox->AddMsg(strText);
     pMsgBox->AddMsg(GlobalText[432]);
 
@@ -1452,7 +1454,8 @@ bool SEASON3B::CBattleSoccerMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildWarAnswer(true);
+    SocketClient->ToGameServer()->SendGuildWarResponse(true);
+
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1461,7 +1464,7 @@ CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::OkBtnDown(class CNewUIMessa
 
 CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildWarAnswer(false);
+    SocketClient->ToGameServer()->SendGuildWarResponse(false);
     InitGuildWar();
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1510,10 +1513,10 @@ bool SEASON3B::CPersonalshopCreateMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    unicode::t_string Temp;
-
-    g_pMyShopInventory->GetTitle(Temp);
-    SendRequestCreatePersonalShop(const_cast<char*>(Temp.c_str()));
+    wchar_t shopTitle[MAX_SHOPTITLE]{};
+    g_pMyShopInventory->GetTitle(shopTitle);
+    wcscpy(g_szPersonalShopTitle, shopTitle);
+    SocketClient->ToGameServer()->SendPlayerShopOpen(shopTitle);
 
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -1603,8 +1606,8 @@ bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    unicode::t_char strText[MAX_GLOBAL_TEXT_STRING];
-    unicode::_sprintf(strText, "%s%s", SkillAttribute[AT_SKILL_INFINITY_ARROW].Name, GlobalText[2046]);
+    wchar_t strText[MAX_GLOBAL_TEXT_STRING];
+    swprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_INFINITY_ARROW].Name, GlobalText[2046]);
     g_iCancelSkillTarget = AT_SKILL_INFINITY_ARROW;
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -1616,7 +1619,7 @@ bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
 CALLBACK_RESULT SEASON3B::CInfinityArrowCancelMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     extern int g_iCancelSkillTarget;
-    SendRequestCancelMagic(g_iCancelSkillTarget, HeroKey);
+    SocketClient->ToGameServer()->SendMagicEffectCancelRequest(g_iCancelSkillTarget, HeroKey);
     g_iCancelSkillTarget = 0;
 
     PlayBuffer(SOUND_CLICK01);
@@ -1645,8 +1648,8 @@ bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    unicode::t_char strText[MAX_GLOBAL_TEXT_STRING];
-    unicode::_sprintf(strText, "%s%s", SkillAttribute[AT_SKILL_SWELL_OF_MAGICPOWER].Name, GlobalText[2046]);
+    wchar_t strText[MAX_GLOBAL_TEXT_STRING];
+    swprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_SWELL_OF_MAGICPOWER].Name, GlobalText[2046]);
     g_iCancelSkillTarget = AT_SKILL_SWELL_OF_MAGICPOWER;
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -1660,7 +1663,7 @@ bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
 CALLBACK_RESULT SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     extern int g_iCancelSkillTarget;
-    SendRequestCancelMagic(g_iCancelSkillTarget, HeroKey);
+    SocketClient->ToGameServer()->SendMagicEffectCancelRequest(g_iCancelSkillTarget, HeroKey);
     g_iCancelSkillTarget = 0;
 
     PlayBuffer(SOUND_CLICK01);
@@ -1726,8 +1729,8 @@ bool SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
         return false;
 
-    unicode::t_char strText[256] = { 0, };
-    unicode::_sprintf(strText, "%s%s %s", GlobalText[1801], GlobalText[1816], GlobalText[858]);
+    wchar_t strText[256] = { 0, };
+    swprintf(strText, L"%s%s %s", GlobalText[1801], GlobalText[1816], GlobalText[858]);
     pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationUnityResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
@@ -1790,8 +1793,8 @@ bool SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
         return false;
 
-    unicode::t_char strText[256] = { 0, };
-    unicode::_sprintf(strText, "%s%s %s", GlobalText[1800], GlobalText[1816], GlobalText[858]);
+    wchar_t strText[256] = { 0, };
+    swprintf(strText, L"%s%s %s", GlobalText[1800], GlobalText[1816], GlobalText[858]);
     pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationDisjointResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     return true;
@@ -1828,7 +1831,7 @@ CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::OkBtnDown(class CNe
     if (pItem)
     {
         int iSrcIndex = g_pMyInventory->GetStandbyItemIndex();
-        SendRequestMoveToEventMatch2(((pItem->Level >> 3) & 15), iSrcIndex);
+        SocketClient->ToGameServer()->SendChaosCastleEnterRequest((pItem->Level >> 3) & 15, iSrcIndex);
     }
     else
     {
@@ -1865,7 +1868,7 @@ bool SEASON3B::CHarvestEventLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CHarvestEventLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequest3ColorHarvestItem();
+    SocketClient->ToGameServer()->SendLeoHelperItemRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1899,7 +1902,7 @@ bool SEASON3B::CWhiteAngelEventLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CWhiteAngelEventLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestWhiteAngelItem();
+    SocketClient->ToGameServer()->SendWhiteAngelItemRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1946,7 +1949,7 @@ bool  SEASON3B::CLuckyItemMsgBoxLayout::SetLayout()
     }
 
     pMsgBox->AddMsg(GlobalText[nTextIndex[0]], RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     for (int i = 1; i < 10; i++)
     {
         if (nTextIndex[i] <= 0)	break;
@@ -1985,25 +1988,25 @@ bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    unicode::t_char strText[256];
+    wchar_t strText[256];
     if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1] == 0)
     {
-        unicode::_sprintf(strText, "%s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]]);
+        swprintf(strText, L"%s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]]);
     }
     else if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2] == 0)
     {
-        unicode::_sprintf(strText, "%s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
+        swprintf(strText, L"%s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
             GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]]);
     }
     else
     {
-        unicode::_sprintf(strText, "%s %s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
+        swprintf(strText, L"%s %s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
             GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]],
             GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]]);
     }
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[539], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
     pMsgBox->AddCallbackFunc(CMixCheckMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CMixCheckMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -2013,7 +2016,7 @@ bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
 CALLBACK_RESULT SEASON3B::CMixCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_REQUESTED);
-    SendRequestMix(g_MixRecipeMgr.GetCurMixID(), g_MixRecipeMgr.GetMixSubType());
+    SocketClient->ToGameServer()->SendChaosMachineMixRequest(g_MixRecipeMgr.GetCurMixID(), g_MixRecipeMgr.GetMixSubType());
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2161,7 +2164,7 @@ bool SEASON3B::CDuelWatchErrorMsgBoxLayout::SetLayout()
         return false;
 
     pMsgBox->AddMsg(GlobalText[2706], RGBA(255, 255, 128, 255), MSGBOX_FONT_BOLD);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[2707], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
 
     pMsgBox->AddCallbackFunc(CDuelWatchErrorMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -2219,7 +2222,11 @@ CALLBACK_RESULT SEASON3B::CGuildRelationShipMsgBoxLayout::OkBtnDown(class CNewUI
 {
     const SEASON3B::ServerMessageInfo info = g_pGuildInfoWindow->GetServerMessage();
 
-    SendRequestGuildRelationShipResult(info.s_byRelationShipType, info.s_byRelationShipRequestType, 0x01, info.s_byTargetUserIndexH, info.s_byTargetUserIndexL);
+    SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
+        info.s_byRelationShipType,
+        info.s_byRelationShipRequestType,
+        0x01,
+        MAKEWORD(info.s_byTargetUserIndexH, info.s_byTargetUserIndexL));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2231,7 +2238,11 @@ CALLBACK_RESULT SEASON3B::CGuildRelationShipMsgBoxLayout::CancelBtnDown(class CN
 {
     const SEASON3B::ServerMessageInfo info = g_pGuildInfoWindow->GetServerMessage();
 
-    SendRequestGuildRelationShipResult(info.s_byRelationShipType, info.s_byRelationShipRequestType, 0x00, info.s_byTargetUserIndexH, info.s_byTargetUserIndexL);
+    SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
+        info.s_byRelationShipType,
+        info.s_byRelationShipRequestType,
+        0x00,
+        MAKEWORD(info.s_byTargetUserIndexH, info.s_byTargetUserIndexL));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2350,7 +2361,7 @@ bool SEASON3B::CSiegeGiveUpMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CSiegeGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestBCGiveUp(0x01);
+    SocketClient->ToGameServer()->SendCastleSiegeUnregisterRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2432,7 +2443,9 @@ bool SEASON3B::CQuestGiveUpMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CQuestGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestQuestGiveUp(g_pMyQuestInfoWindow->GetSelQuestIndex());
+    const auto questNumber = static_cast<uint16_t>((g_pMyQuestInfoWindow->GetSelQuestIndex() & 0xFF00) >> 16);
+    const auto questGroup = static_cast<uint16_t>(g_pMyQuestInfoWindow->GetSelQuestIndex() & 0xFF);
+    SocketClient->ToGameServer()->SendQuestCancelRequest(questNumber, questGroup);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2540,7 +2553,8 @@ CALLBACK_RESULT SEASON3B::CHighValueItemCheckMsgBoxLayout::OkBtnDown(class CNewU
 
     if (iSourceIndex != -1)
     {
-        SendRequestSell(iSourceIndex);
+        SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
+        g_pNPCShop->SetSellingItem(true);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2575,25 +2589,25 @@ bool SEASON3B::CUseFruitMsgBoxLayout::SetLayout()
 
     pMsgBox->Set3DItem(pItem);
 
-    unicode::t_char strName[50] = { 0, };
+    wchar_t strName[50] = { 0, };
     if (pItem->Type == ITEM_HELPER + 15)
     {
         switch ((pItem->Level >> 3) & 15)
         {
         case 0:
-            unicode::_sprintf(strName, "%s", GlobalText[168]);
+            swprintf(strName, L"%s", GlobalText[168]);
             break;
         case 1:
-            unicode::_sprintf(strName, "%s", GlobalText[169]);
+            swprintf(strName, L"%s", GlobalText[169]);
             break;
         case 2:
-            unicode::_sprintf(strName, "%s", GlobalText[167]);
+            swprintf(strName, L"%s", GlobalText[167]);
             break;
         case 3:
-            unicode::_sprintf(strName, "%s", GlobalText[166]);
+            swprintf(strName, L"%s", GlobalText[166]);
             break;
         case 4:
-            unicode::_sprintf(strName, "%s", GlobalText[1900]);
+            swprintf(strName, L"%s", GlobalText[1900]);
             break;
         }
     }
@@ -2639,27 +2653,27 @@ bool SEASON3B::CUsePartChargeFruitMsgBoxLayout::SetLayout()
 
     pMsgBox->Set3DItem(pItem);
 
-    unicode::t_char strName[50] = { 0, };
+    wchar_t strName[50] = { 0, };
 
     if (pItem->Type == ITEM_HELPER + 54)
     {
-        unicode::_sprintf(strName, "%s", GlobalText[166]);
+        swprintf(strName, L"%s", GlobalText[166]);
     }
     else if (pItem->Type == ITEM_HELPER + 55)
     {
-        unicode::_sprintf(strName, "%s", GlobalText[167]);
+        swprintf(strName, L"%s", GlobalText[167]);
     }
     else if (pItem->Type == ITEM_HELPER + 56)
     {
-        unicode::_sprintf(strName, "%s", GlobalText[169]);
+        swprintf(strName, L"%s", GlobalText[169]);
     }
     else if (pItem->Type == ITEM_HELPER + 57)
     {
-        unicode::_sprintf(strName, "%s", GlobalText[168]);
+        swprintf(strName, L"%s", GlobalText[168]);
     }
     else if (pItem->Type == ITEM_HELPER + 58)
     {
-        unicode::_sprintf(strName, "%s", GlobalText[1900]);
+        swprintf(strName, L"%s", GlobalText[1900]);
     }
 
     pMsgBox->AddMsg(strName, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -2730,7 +2744,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
 
     if (g_pMyShopInventory->IsEnablePersonalShop() == true)
     {
-        SendRequestDestoryPersonalShop();
+        SocketClient->ToGameServer()->SendPlayerShopClose();
     }
 
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
@@ -2746,14 +2760,14 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
         if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
         {
             int iItemPrice = pMsgBox->GetItemValue();
-            SendRequestSetSalePrice(iSourceIndex, iItemPrice);
+            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
             SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
         }
         else if (pPickedItem->GetOwnerInventory() == NULL)
         {
             int iItemPrice = pMsgBox->GetItemValue();
             BYTE byIndex = iSourceIndex;
-            SendRequestSetSalePrice(byIndex, iItemPrice);
+            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
 
             SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
         }
@@ -2761,7 +2775,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
         {
             int iItemPrice = pMsgBox->GetItemValue();
             BYTE byIndex = MAX_MY_INVENTORY_EX_INDEX + iSourceIndex;
-            SendRequestSetSalePrice(byIndex, iItemPrice);
+            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
 
             SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
         }
@@ -2772,7 +2786,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
     {
         iSourceIndex = g_pMyShopInventory->GetSourceIndex();
         int iItemPrice = pMsgBox->GetItemValue();
-        SendRequestSetSalePrice(iSourceIndex, iItemPrice);
+        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
         AddPersonalItemPrice(iSourceIndex, iItemPrice, g_IsPurchaseShop);
     }
 
@@ -2820,7 +2834,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
     if (pItem && pCha)
     {
         int sourceIndex = g_pPurchaseShopInventory->GetSourceIndex();
-        SendRequestPurchase(pCha->Key, pCha->ID, sourceIndex);
+        SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2846,7 +2860,7 @@ bool SEASON3B::COsbourneMsgBoxLayout::SetLayout()
         return false;
 
     pMsgBox->AddMsg(GlobalText[2223], RGBA(255, 0, 0, 255), MSGBOX_FONT_BOLD);
-    pMsgBox->AddMsg(" ");
+    pMsgBox->AddMsg(L" ");
     pMsgBox->AddMsg(GlobalText[2224], RGBA(223, 191, 103, 255), MSGBOX_FONT_BOLD);
 
     pMsgBox->AddCallbackFunc(COsbourneMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -2935,8 +2949,8 @@ bool SEASON3B::CGuildPerson_Get_Out::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    char Buff[300];
-    wsprintf(Buff, GlobalText[1367], GuildList[DeleteIndex].Name);
+    wchar_t Buff[300];
+    swprintf(Buff, GlobalText[1367], GuildList[DeleteIndex].Name);
     pMsgBox->AddMsg(Buff, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddMsg(GlobalText[1369], RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGuildPerson_Get_Out::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -2978,7 +2992,7 @@ bool SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestGuildAssign(0x03, G_PERSON, GuildList[DeleteIndex].Name);
+    SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, GuildList[DeleteIndex].Name, 0x03);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3003,9 +3017,9 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
         return false;
 
-    char Text[300];
+    wchar_t Text[300];
 
-    wsprintf(Text, "%s    %s    %s    %s", GlobalText[680], GlobalText[681], GlobalText[1973], GlobalText[1977]);
+    swprintf(Text, L"%s    %s    %s    %s", GlobalText[680], GlobalText[681], GlobalText[1973], GlobalText[1977]);
 
     int TextColor = (255 << 24) + (21 << 16) + (148 << 8) + (255);
     pMsgBox->AddMsg(Text, TextColor);
@@ -3017,22 +3031,22 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
         if (HeroScore[i] == -1)
             continue;
 
-        wsprintf(Text, "%d      %s      %s      %d", i + 1, HeroName[i], gCharacterManager.GetCharacterClassText(HeroClass[i]), HeroScore[i]);
+        swprintf(Text, L"%d      %s      %s      %d", i + 1, HeroName[i], gCharacterManager.GetCharacterClassText(HeroClass[i]), HeroScore[i]);
 
         pMsgBox->AddMsg(Text, TextColor);
     }
 
     TextColor = (255 << 24) + (255 << 16) + (0 << 8) + (255);
-    pMsgBox->AddMsg("    ", TextColor);
-    pMsgBox->AddMsg("    ", TextColor);
-    pMsgBox->AddMsg("    ", TextColor);
-    pMsgBox->AddMsg("    ", TextColor);
+    pMsgBox->AddMsg(L"    ", TextColor);
+    pMsgBox->AddMsg(L"    ", TextColor);
+    pMsgBox->AddMsg(L"    ", TextColor);
+    pMsgBox->AddMsg(L"    ", TextColor);
 
     if (View_Suc_Or_Fail == 1)
     {
-        wsprintf(Text, GlobalText[2000]);
+        swprintf(Text, GlobalText[2000]);
         pMsgBox->AddMsg(Text, TextColor);
-        wsprintf(Text, GlobalText[2001]);
+        swprintf(Text, GlobalText[2001]);
         pMsgBox->AddMsg(Text, TextColor);
     }
     else
@@ -3225,9 +3239,9 @@ bool SEASON3B::CMaster_Level_Interface::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    char szText[256];
+    wchar_t szText[256];
     pMsgBox->AddMsg(GlobalText[1771]);
-    unicode::_sprintf(szText, GlobalText[1772], Need_Point);
+    swprintf(szText, GlobalText[1772], Need_Point);
     pMsgBox->AddMsg(szText);
 
     pMsgBox->AddCallbackFunc(CMaster_Level_Interface::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -3249,7 +3263,7 @@ CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::CancelBtnDown(class CNewUIMes
 
 CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMasterLevelSkill(In_Skill);
+    SocketClient->ToGameServer()->SendAddMasterSkillPoint(In_Skill);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -3268,10 +3282,10 @@ bool SEASON3B::CCry_Wolf_Get_Temple::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    char szText[256];
+    wchar_t szText[256];
     int Num = CharactersClient[TargetNpc].Object.Type - MODEL_CRYWOLF_ALTAR1;
     BYTE State = (m_AltarState[Num] & 0x0f);
-    unicode::_sprintf(szText, GlobalText[2006], State);
+    swprintf(szText, GlobalText[2006], State);
     pMsgBox->AddMsg(szText);
     pMsgBox->AddMsg(GlobalText[2007]);
     BackUp_Key = CharactersClient[TargetNpc].Key;
@@ -3299,7 +3313,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::OkBtnDown(class CNewUIMessageBox
     else
     {
         Button_Down = 2;
-        SendRequestCrywolfAltarContract(BackUp_Key);
+        SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -3317,8 +3331,8 @@ bool SEASON3B::CUnionGuild_Break_MsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    char szText[256];
-    unicode::_sprintf(szText, GlobalText[1423], DeleteID);
+    wchar_t szText[256];
+    swprintf(szText, GlobalText[1423], DeleteID);
     pMsgBox->AddMsg(szText);
     pMsgBox->AddMsg(GlobalText[1369]);
     pMsgBox->AddCallbackFunc(CUnionGuild_Break_MsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -3337,7 +3351,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::CancelBtnDown(class CN
 
 CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestBanUnionGuild(DeleteID);
+    SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(DeleteID);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3425,7 +3439,7 @@ bool CSantaTownLeaveMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT CSantaTownLeaveMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMoveDevias();
+    SocketClient->ToGameServer()->SendMoveToDeviasBySnowmanRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3456,7 +3470,7 @@ bool CSantaTownSantaMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT CSantaTownSantaMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestSantaItem();
+    SocketClient->ToGameServer()->SendSantaClausItemRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3480,8 +3494,8 @@ bool SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
         return FALSE;
 
-    unicode::t_char szText[100] = { 0, };
-    unicode::_sprintf(szText, GlobalText[580], GlobalText[1894]);
+    wchar_t szText[100] = { 0, };
+    swprintf(szText, GlobalText[580], GlobalText[1894]);
     pMsgBox->AddMsg(szText);
     pMsgBox->AddCallbackFunc(CUseRegistLuckyCoinMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     return TRUE;
@@ -3525,8 +3539,8 @@ bool SEASON3B::CExchangeLuckyCoinMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OK))
         return FALSE;
 
-    unicode::t_char szText[100] = { 0, };
-    unicode::_sprintf(szText, GlobalText[580], GlobalText[1940]);
+    wchar_t szText[100] = { 0, };
+    swprintf(szText, GlobalText[580], GlobalText[1940]);
     pMsgBox->AddMsg(szText);
 
     pMsgBox->AddCallbackFunc(CExchangeLuckyCoinMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -3590,10 +3604,12 @@ CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageB
     GambleSystem& gambleSys = GambleSystem::Instance();
     LPBUYITEMINFO pItemInfo = NULL;
 
-    if (gambleSys.IsGambleShop())
+    if (gambleSys.IsGambleShop() && BuyCost != 0)
     {
         pItemInfo = gambleSys.GetBuyItemInfo();
-        SendRequestBuy(pItemInfo->ItemIndex, pItemInfo->ItemCost);
+        SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(pItemInfo->ItemIndex);
+        BuyCost = pItemInfo->ItemCost;
+        g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", pItemInfo->ItemIndex);
     }
 
     PlayBuffer(SOUND_CLICK01);

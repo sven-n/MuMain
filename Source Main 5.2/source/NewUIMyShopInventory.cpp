@@ -3,16 +3,16 @@
 
 #include "stdafx.h"
 #include "NewUIMyShopInventory.h"
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
-#include "wsclientinline.h"
 #include "PersonalShopTitleImp.h"
 
 const int iMAX_SHOPTITLE_MULTI = 26;
 
 namespace
 {
-    void RenderText(const char* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort, HFONT hFont = g_hFont)
+    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort, HFONT hFont = g_hFont)
     {
         g_pRenderText->SetFont(hFont);
 
@@ -30,7 +30,7 @@ namespace
 
 using namespace SEASON3B;
 
-SEASON3B::CNewUIMyShopInventory::CNewUIMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop(false), MAX_SHOPTITLE_UTF16(min(26, (int)(MAX_SHOPTITLE / g_pMultiLanguage->GetNumByteForOneCharUTF8())))
+SEASON3B::CNewUIMyShopInventory::CNewUIMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop(false)
 {
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
@@ -113,15 +113,15 @@ void SEASON3B::CNewUIMyShopInventory::Release()
 
 void SEASON3B::CNewUIMyShopInventory::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_MYSHOPINVENTORY_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_MYSHOPINVENTORY_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_MYSHOPINVENTORY_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_MYSHOPINVENTORY_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_MYSHOPINVENTORY_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_MYSHOPINVENTORY_EXIT_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Box_openTitle.tga", IMAGE_MYSHOPINVENTORY_EDIT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_openshop.tga", IMAGE_MYSHOPINVENTORY_OPEN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_closeshop.tga", IMAGE_MYSHOPINVENTORY_CLOSE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MYSHOPINVENTORY_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_MYSHOPINVENTORY_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_MYSHOPINVENTORY_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_MYSHOPINVENTORY_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_MYSHOPINVENTORY_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_MYSHOPINVENTORY_EXIT_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Box_openTitle.tga", IMAGE_MYSHOPINVENTORY_EDIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_openshop.tga", IMAGE_MYSHOPINVENTORY_OPEN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_closeshop.tga", IMAGE_MYSHOPINVENTORY_CLOSE, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIMyShopInventory::UnloadImages()
@@ -154,12 +154,9 @@ void SEASON3B::CNewUIMyShopInventory::SetPos(int x, int y)
     }
 }
 
-void SEASON3B::CNewUIMyShopInventory::GetTitle(unicode::t_string& titletext)
+void SEASON3B::CNewUIMyShopInventory::GetTitle(wchar_t* titletext)
 {
-    auto* pwszTitle = new wchar_t[iMAX_SHOPTITLE_MULTI];
-    m_EditBox->GetText(pwszTitle, iMAX_SHOPTITLE_MULTI);
-    g_pMultiLanguage->ConvertWideCharToStr(titletext, pwszTitle, CP_UTF8);
-    delete[] pwszTitle;
+     m_EditBox->GetText(titletext, iMAX_SHOPTITLE_MULTI);
 }
 
 bool SEASON3B::CNewUIMyShopInventory::InsertItem(int iIndex, BYTE* pbyItemPacket)
@@ -304,7 +301,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
         {
             if (IsPersonalShopBan(pItemObj) == true)
             {
-                g_pChatListBox->AddText("", GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
                 return true;
             }
 
@@ -324,7 +321,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
         {
             if (IsPersonalShopBan(pItemObj) == true)
             {
-                g_pChatListBox->AddText("", GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
                 return true;
             }
 
@@ -419,9 +416,9 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
             return false;
             case 1:
             {
-                unicode::t_string strTitle;
-                GetTitle(strTitle);
-                if (IsExistUndecidedPrice() == false && strTitle.size() > 0)
+                wchar_t shopTitle[MAX_SHOPTITLE]{};
+                g_pMyShopInventory->GetTitle(shopTitle);
+                if (IsExistUndecidedPrice() == false && wcslen(shopTitle) > 0)
                 {
                     if (m_EnablePersonalShop == false)
                     {
@@ -429,7 +426,8 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
                     }
                     else
                     {
-                        SendRequestCreatePersonalShop(const_cast<char*>(strTitle.c_str()));
+                        wcscpy(g_szPersonalShopTitle, shopTitle);
+                        SocketClient->ToGameServer()->SendPlayerShopOpen(shopTitle);
 
                         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
                         g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -438,13 +436,13 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
                 }
                 else
                 {
-                    g_pChatListBox->AddText("", GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pChatListBox->AddText(L"", GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
                 }
             }
             return false;
             case 2:
             {
-                SendRequestDestoryPersonalShop();
+                SocketClient->ToGameServer()->SendPlayerShopClose();
 
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -493,14 +491,14 @@ void SEASON3B::CNewUIMyShopInventory::RenderFrame()
     RenderImage(IMAGE_MYSHOPINVENTORY_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, INVENTORY_WIDTH, 45.f);
     RenderImage(IMAGE_MYSHOPINVENTORY_EDIT, m_Pos.x + 12, m_Pos.y + 49, 169.f, 26.f);
 
-    unicode::t_char Text[100] = {};
-    sprintf(Text, GlobalText[1102]);
+    wchar_t Text[100] = {};
+    swprintf(Text, GlobalText[1102]);
     RenderText(Text, m_Pos.x, m_Pos.y + 15, INVENTORY_WIDTH, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
 {
-    unicode::t_char Text[100];
+    wchar_t Text[100];
 
     if (m_EnablePersonalShop)
     {
@@ -508,35 +506,35 @@ void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
     }
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[370]);
+    swprintf(Text, GlobalText[370]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1109]);
+    swprintf(Text, GlobalText[1109]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 250, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1111]);
+    swprintf(Text, GlobalText[1111]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 262, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1112]);
+    swprintf(Text, GlobalText[1112]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 274, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1113]);
+    swprintf(Text, GlobalText[1113]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 286, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1115]);
+    swprintf(Text, GlobalText[1115]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 298, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1134]);
+    swprintf(Text, GlobalText[1134]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 320, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 100);
-    sprintf(Text, GlobalText[1135]);
+    swprintf(Text, GlobalText[1135]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 }
 

@@ -17,7 +17,7 @@
 #include "zzzinventory.h"
 #include "zzzeffect.h"
 #include "dsplaysound.h"
-#include "wsclientinline.h"
+
 #include "UIManager.h"
 #include "DuelMgr.h"
 #include "MapManager.h"
@@ -25,7 +25,7 @@
 extern bool g_PetEnableDuel;
 
 extern  double   WorldTime;
-extern	char    TextList[50][100];
+extern	wchar_t    TextList[50][100];
 extern	int     TextListColor[50];
 extern	int     TextBold[50];
 extern  float   g_fScreenRate_x;
@@ -298,7 +298,7 @@ void CSPetDarkSpirit::MovePet(void)
     {
         m_byCommand = 0;
         auto* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
-        SendRequestPetCommand(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xffff);
+        SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xFFFF);
         g_DuelMgr.EnablePetDuel(TRUE);
     }
 
@@ -316,7 +316,7 @@ void CSPetDarkSpirit::MovePet(void)
             float Distance = sqrtf(dx * dx + dy * dy);
 
             c->TargetCharacter = -1;
-            SendRequestPetCommand(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xffff);
+            SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xFFFF);
             SetAI(PET_STAND);
             if (Distance > 50 || (o->AI != PET_STAND_START && o->AI >= PET_FLYING && o->AI <= PET_STAND))
             {
@@ -334,7 +334,7 @@ void CSPetDarkSpirit::MovePet(void)
         float Distance = sqrtf(dx * dx + dy * dy);
 
         c->TargetCharacter = -1;
-        SendRequestPetCommand(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xffff);
+        SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xFFFF);
         SetAI(PET_STAND);
         if (Distance > 50 || (o->AI != PET_STAND_START && o->AI >= PET_FLYING && o->AI <= PET_STAND))
         {

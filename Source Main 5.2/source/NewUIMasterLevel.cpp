@@ -7,7 +7,7 @@
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "NewUIGuildInfoWindow.h"
 #include "NewUIButton.h"
 #include "NewUIMyInventory.h"
@@ -21,7 +21,7 @@ int						JobPoint[4] = { 0,0,0,0 };
 char Need_Point = 0;
 int	 In_Skill = 0;
 using namespace SEASON3B;
-extern char TextList[50][100];
+extern wchar_t TextList[50][100];
 extern int  TextListColor[50];
 extern int  TextBold[50];
 extern SIZE Size[50];
@@ -75,7 +75,7 @@ bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 void SEASON3B::CNewUIMasterLevel::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float SEASON3B::CNewUIMasterLevel::GetLayerDepth()
@@ -262,9 +262,9 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
 
                 Skill_Icon = 0;
 
-                char Name[300];
+                wchar_t Name[300];
                 Skill_Icon = SkillAttribute[Skill_Num].Magic_Icon;
-                strcpy(Name, SkillAttribute[Skill_Num].Name);
+                wcscpy(Name, SkillAttribute[Skill_Num].Name);
 
                 DWORD Color;
                 if (View_Kind == true || Skill_Num == 0
@@ -290,14 +290,14 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                             break;
                         }
                     }
-                    unicode::t_char lpszStr[256] = { NULL, };
+                    wchar_t lpszStr[256] = { NULL, };
 
                     if (View_Kind == true)
                         g_pRenderText->SetTextColor(120, 120, 0, 255);
                     else
                         g_pRenderText->SetTextColor(255, 255, 0, 255);
 
-                    unicode::_sprintf(lpszStr, "%d", Get_Magic);
+                    swprintf(lpszStr, L"%d", Get_Magic);
                     g_pRenderText->RenderText(Loc[Skill] + 31 + ((SKILL_ICON_WIDTH + 19) * sx), 95 + ((SKILL_ICON_HEIGHT + 14) * nsy), lpszStr, 0, 0, RT3_WRITE_CENTER);
 
                     Point_Tot += Get_Magic;
@@ -342,9 +342,9 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                         Dir = Skill_Num / 10000;
                         Skill_Num = Skill_Num % 10000;
                     }
-                char Name[300];
+                wchar_t Name[300];
                 Skill_Icon = SkillAttribute[Skill_Num].Magic_Icon;
-                strcpy(Name, SkillAttribute[Skill_Num].Name);
+                wcscpy(Name, SkillAttribute[Skill_Num].Name);
 
                 int Cur_Skill = Skill_Num;
                 int Get_Magic = 0;
@@ -399,8 +399,8 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                         for (int ib = 0; ib < 30; ib++)
                             TextList[ib][0] = NULL;
 
-                        sprintf(TextList[0], "%s", Name);
-                        sprintf(TextList[1], GlobalText[1773], Point);
+                        swprintf(TextList[0], L"%s", Name);
+                        swprintf(TextList[1], GlobalText[1773], Point);
 
                         int Dan = Get_Magic;
                         bool Kind = false;
@@ -421,8 +421,8 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
 
                         if (Get_Magic > 0)
                         {
-                            sprintf(TextList[StartText], "         ");
-                            sprintf(TextList[StartText + 1], GlobalText[1774], Dan);
+                            swprintf(TextList[StartText], L"         ");
+                            swprintf(TextList[StartText + 1], GlobalText[1774], Dan);
                             if (Set_Master <= 0)
                             {
                                 Num_Master = Get_Magic - 1;
@@ -437,14 +437,14 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                                     Num_Master = 0;
                             }
 
-                            sprintf(TextList[StartText + 2], GlobalText[1775], Master_Skill_Data[sy][Num_Master]);
+                            swprintf(TextList[StartText + 2], GlobalText[1775], Master_Skill_Data[sy][Num_Master]);
                             if (Kind == true)
                             {
                                 if (Check_View == true)
-                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1776], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1776], SkillAttribute[Skill_Num + Num_Master].Damage);
                                 else
                                 {
-                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1780 + ((Skill_Num - AT_SKILL_MANA_RECOVER) / 5)], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1780 + ((Skill_Num - AT_SKILL_MANA_RECOVER) / 5)], SkillAttribute[Skill_Num + Num_Master].Damage);
                                 }
                             }
                             else
@@ -458,41 +458,41 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                                 {
                                     if (SkillAttribute[Skill_Num + Num_Master].Distance > 0)
                                     {
-                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
+                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
                                         Add_Tex++;
                                     }
-                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                 }
                                 else
                                     if (AT_SKILL_HP_RECOVER == Skill_Num)
                                     {
-                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1781], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1781], SkillAttribute[Skill_Num + Num_Master].Damage);
                                     }
                                     else
                                         if (AT_SKILL_SD_RECOVER == Skill_Num)
                                         {
-                                            sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1782], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                            swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1782], SkillAttribute[Skill_Num + Num_Master].Damage);
                                         }
                                         else
                                             if (AT_SKILL_MANA_RECOVER == Skill_Num)
                                             {
-                                                sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1780], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                                swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1780], SkillAttribute[Skill_Num + Num_Master].Damage);
                                             }
                                             else
                                                 if (AT_SKILL_ALICE_CHAINLIGHTNING_UP == Skill_Num
                                                     || AT_SKILL_ALICE_DRAINLIFE_UP == Skill_Num)
                                                 {
-                                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                                 }
                                                 else
                                                     if (AT_SKILL_ASHAKE_UP == Skill_Num)
                                                     {
                                                         if (SkillAttribute[Skill_Num + Num_Master].Distance > 0)
                                                         {
-                                                            sprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
+                                                            swprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
                                                             Add_Tex++;
                                                         }
-                                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
+                                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
                                                     }
                                                     else
                                                         if (AT_SKILL_SOUL_UP == Skill_Num
@@ -507,34 +507,34 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                                                         {
                                                             if (SkillAttribute[Skill_Num + Num_Master].Distance > 0)
                                                             {
-                                                                sprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
+                                                                swprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
                                                                 Add_Tex++;
                                                             }
-                                                            sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                                            swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                                             Add_Tex++;
-                                                            sprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
+                                                            swprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
                                                         }
                                                         else
                                                             if (AT_SKILL_LIFE_UP == Skill_Num || AT_SKILL_ALICE_SLEEP_UP == Skill_Num || AT_SKILL_LIGHTNING_SHOCK_UP == Skill_Num)
                                                             {
-                                                                sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                                                swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                                                 Add_Tex++;
-                                                                sprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
+                                                                swprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
                                                             }
                                                             else
                                                                 if (AT_SKILL_HEAL_UP == Skill_Num)
                                                                 {
-                                                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1785], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1785], SkillAttribute[Skill_Num + Num_Master].Damage);
                                                                     Add_Tex++;
-                                                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                                                 }
                                                                 else
                                                                     if (AT_SKILL_MANA_MINUS_ADD == Skill_Num)
                                                                     {
-                                                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1788], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1788], SkillAttribute[Skill_Num + Num_Master].Damage);
                                                                     }
                                                                     else
-                                                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1777], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1777], SkillAttribute[Skill_Num + Num_Master].Damage);
                             }
                             StartText = 6 + Add_Tex;
 
@@ -554,8 +554,8 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
 
                             if (Get_Magic == 0)
                                 ib = 6 + Add_Tex;
-                            sprintf(TextList[StartText], "         ");
-                            sprintf(TextList[StartText + 1], GlobalText[1774], Dan);
+                            swprintf(TextList[StartText], L"         ");
+                            swprintf(TextList[StartText + 1], GlobalText[1774], Dan);
                             if (Set_Master <= 0)
                             {
                                 Num_Master = Get_Magic - 1;
@@ -569,14 +569,14 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                                 if (Num_Master < 0)
                                     Num_Master = 0;
                             }
-                            sprintf(TextList[StartText + Add_Tex + 2], GlobalText[1775], Master_Skill_Data[sy][Num_Master]);
+                            swprintf(TextList[StartText + Add_Tex + 2], GlobalText[1775], Master_Skill_Data[sy][Num_Master]);
                             if (Kind == true)
                             {
                                 if (Check_View == true)
-                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1776], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1776], SkillAttribute[Skill_Num + Num_Master].Damage);
                                 else
                                 {
-                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1780 + ((Skill_Num - AT_SKILL_MANA_RECOVER) / 5)], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1780 + ((Skill_Num - AT_SKILL_MANA_RECOVER) / 5)], SkillAttribute[Skill_Num + Num_Master].Damage);
                                 }
                             }
                             else
@@ -590,35 +590,35 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                                 {
                                     if (SkillAttribute[Skill_Num + Num_Master].Distance > 0)
                                     {
-                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
+                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
                                         Add_Tex++;
                                     }
-                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                 }
                                 else
                                     if (AT_SKILL_HP_RECOVER == Skill_Num)
                                     {
-                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1781], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1781], SkillAttribute[Skill_Num + Num_Master].Damage);
                                     }
                                     else
                                         if (AT_SKILL_SD_RECOVER == Skill_Num)
                                         {
-                                            sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1782], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                            swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1782], SkillAttribute[Skill_Num + Num_Master].Damage);
                                         }
                                         else
                                             if (AT_SKILL_MANA_RECOVER == Skill_Num)
                                             {
-                                                sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1780], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                                swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1780], SkillAttribute[Skill_Num + Num_Master].Damage);
                                             }
                                             else
                                                 if (AT_SKILL_ASHAKE_UP == Skill_Num)
                                                 {
                                                     if (SkillAttribute[Skill_Num + Num_Master].Distance > 0)
                                                     {
-                                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
+                                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
                                                         Add_Tex++;
                                                     }
-                                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
+                                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
                                                 }
                                                 else
                                                     if (AT_SKILL_SOUL_UP == Skill_Num
@@ -631,44 +631,44 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                                                         || AT_SKILL_FIRE_SCREAM_UP == Skill_Num
                                                         )
                                                     {
-                                                        //									sprintf(TextList[StartText+Add_Tex+3],GlobalText[1783],SkillAttribute[Skill_Num + Num_Master].Damage);
+                                                        //									swprintf(TextList[StartText+Add_Tex+3],GlobalText[1783],SkillAttribute[Skill_Num + Num_Master].Damage);
                                                         //									Add_Tex++;
                                                         if (SkillAttribute[Skill_Num + Num_Master].Distance > 0)
                                                         {
-                                                            sprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
+                                                            swprintf(TextList[StartText + Add_Tex + 3], GlobalText[174], SkillAttribute[Skill_Num + Num_Master].Distance);
                                                             Add_Tex++;
                                                         }
-                                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                                         Add_Tex++;
-                                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
+                                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
                                                     }
                                                     else
                                                         if (AT_SKILL_LIFE_UP == Skill_Num || AT_SKILL_ALICE_SLEEP_UP == Skill_Num || AT_SKILL_LIGHTNING_SHOCK_UP == Skill_Num)
                                                         {
-                                                            sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                                            swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                                             Add_Tex++;
-                                                            sprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
+                                                            swprintf(TextList[StartText + Add_Tex + 3], GlobalText[360], SkillAttribute[Skill_Num + Num_Master].AbilityGuage);
                                                         }
                                                         else
                                                             if (AT_SKILL_HEAL_UP == Skill_Num)
                                                             {
-                                                                sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1785], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                                                swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1785], SkillAttribute[Skill_Num + Num_Master].Damage);
                                                                 Add_Tex++;
-                                                                sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                                                swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                                             }
                                                             else
                                                                 if (AT_SKILL_ALICE_CHAINLIGHTNING_UP == Skill_Num
                                                                     || AT_SKILL_ALICE_DRAINLIFE_UP == Skill_Num)
                                                                 {
-                                                                    sprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
+                                                                    swprintf(TextList[StartText + Add_Tex + 3], GlobalText[175], SkillAttribute[Skill_Num + Num_Master].Mana);
                                                                 }
                                                                 else
                                                                     if (AT_SKILL_MANA_MINUS_ADD == Skill_Num)
                                                                     {
-                                                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1788], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1788], SkillAttribute[Skill_Num + Num_Master].Damage);
                                                                     }
                                                                     else
-                                                                        sprintf(TextList[StartText + Add_Tex + 3], GlobalText[1777], SkillAttribute[Skill_Num + Num_Master].Damage);
+                                                                        swprintf(TextList[StartText + Add_Tex + 3], GlobalText[1777], SkillAttribute[Skill_Num + Num_Master].Damage);
                             }
                             if (ib == 6 + Add_Tex)
                                 ib = 10 + Add_Tex;
@@ -698,15 +698,15 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                             || AT_SKILL_ALICE_DRAINLIFE_UP == Skill_Num
                             )
                         {
-                            sprintf(TextList[ib], "");
+                            swprintf(TextList[ib], L"");
                             ib++;
                             switch (Skill_Num)
                             {
                             case AT_SKILL_LIFE_UP:
-                                sprintf(TextList[ib], GlobalText[1786]);
+                                swprintf(TextList[ib], GlobalText[1786]);
                                 break;
                             case AT_SKILL_SOUL_UP:
-                                sprintf(TextList[ib], GlobalText[1783]);
+                                swprintf(TextList[ib], GlobalText[1783]);
                                 break;
                             case AT_SKILL_BLAST_UP:
                             case AT_SKILL_FIRE_BUST_UP:
@@ -726,13 +726,13 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
                             case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
                             case AT_SKILL_LIGHTNING_SHOCK_UP:
                             case AT_SKILL_ALICE_DRAINLIFE_UP:
-                                sprintf(TextList[ib], GlobalText[1784]);
+                                swprintf(TextList[ib], GlobalText[1784]);
                                 break;
                             case AT_SKILL_ALICE_SLEEP_UP:
                             case AT_SKILL_PET_DURABLE_SPD_DN:
                             case AT_SKILL_DEF_POWER_UP:
                             case AT_SKILL_ATT_POWER_UP:
-                                sprintf(TextList[ib], GlobalText[1787]);
+                                swprintf(TextList[ib], GlobalText[1787]);
                                 break;
                             };
                             ib++;
@@ -755,18 +755,18 @@ void SEASON3B::CNewUIMasterLevel::Render_Text()
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
-    unicode::t_char lpszStr[256] = { NULL, };
+    wchar_t lpszStr[256] = { NULL, };
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    unicode::_sprintf(lpszStr, GlobalText[1746], Master_Level_Data.nMLevel);
+    swprintf(lpszStr, GlobalText[1746], Master_Level_Data.nMLevel);
     g_pRenderText->RenderText(m_Pos.x + 170, m_Pos.y + 8, lpszStr, 0, 0, RT3_WRITE_CENTER);
 
-    unicode::_sprintf(lpszStr, GlobalText[1747], Master_Level_Data.nMLevelUpMPoint);
+    swprintf(lpszStr, GlobalText[1747], Master_Level_Data.nMLevelUpMPoint);
     g_pRenderText->RenderText(m_Pos.x + 265, m_Pos.y + 8, lpszStr, 0, 0, RT3_WRITE_CENTER);
 
-    unicode::_sprintf(lpszStr, GlobalText[1748], Master_Level_Data.lMasterLevel_Experince, Master_Level_Data.lNext_MasterLevel_Experince);
+    swprintf(lpszStr, GlobalText[1748], Master_Level_Data.lMasterLevel_Experince, Master_Level_Data.lNext_MasterLevel_Experince);
     g_pRenderText->RenderText(m_Pos.x + 410, m_Pos.y + 8, lpszStr, 0, 0, RT3_WRITE_CENTER);
 
-    //unicode::_sprintf( lpszStr, GlobalText[20]);
+    //wprintf( lpszStr, GlobalText[20]);
     int Job = 0;// = GetCharacterClass(Hero->Class);
 
     switch (gCharacterManager.GetCharacterClass(Hero->Class))
@@ -802,20 +802,20 @@ void SEASON3B::CNewUIMasterLevel::Render_Text()
     }
 
     g_pRenderText->SetTextColor(255, 155, 0, 255);
-    unicode::_sprintf(lpszStr, GlobalText[Job], JobPoint[0]);
+    swprintf(lpszStr, GlobalText[Job], JobPoint[0]);
     g_pRenderText->RenderText(m_Pos.x + 91, m_Pos.y + 37, lpszStr, 0, 0, RT3_SORT_LEFT);
-    unicode::_sprintf(lpszStr, GlobalText[Job + 1], JobPoint[1]);
+    swprintf(lpszStr, GlobalText[Job + 1], JobPoint[1]);
     g_pRenderText->RenderText(m_Pos.x + 251, m_Pos.y + 37, lpszStr, 0, 0, RT3_SORT_LEFT);
-    unicode::_sprintf(lpszStr, GlobalText[Job + 2], JobPoint[2]);
+    swprintf(lpszStr, GlobalText[Job + 2], JobPoint[2]);
     g_pRenderText->RenderText(m_Pos.x + 375, m_Pos.y + 37, lpszStr, 0, 0, RT3_SORT_LEFT);
-    unicode::_sprintf(lpszStr, GlobalText[Job + 3], JobPoint[3]);
+    swprintf(lpszStr, GlobalText[Job + 3], JobPoint[3]);
     g_pRenderText->RenderText(m_Pos.x + 518, m_Pos.y + 37, lpszStr, 0, 0, RT3_SORT_LEFT);
 }
 
-void SEASON3B::CNewUIMasterLevel::OpenMasterLevel(const char* filename)
+void SEASON3B::CNewUIMasterLevel::OpenMasterLevel(const wchar_t* filename)
 {
     //	MASTER_LEVEL_DATA		m_MasterLevel[MAX_MASTER];
-    FILE* fp = fopen(filename, "rb");
+    FILE* fp = _wfopen(filename, L"rb");
     if (fp != NULL)
     {
         int Size = sizeof(MASTER_LEVEL_DATA);
@@ -828,8 +828,8 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterLevel(const char* filename)
 
         if (dwCheckSum != GenerateCheckSum2(Buffer, (Size * MAX_MASTER) + 45, 0x2BC1))
         {
-            char Text[256];
-            sprintf(Text, "%s - File corrupted.", filename);
+            wchar_t Text[256];
+            swprintf(Text, L"%s - File corrupted.", filename);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -857,8 +857,8 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterLevel(const char* filename)
     }
     else
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", filename);
+        wchar_t Text[256];
+        swprintf(Text, L"%s - File not exist.", filename);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -868,11 +868,11 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterLevel(const char* filename)
 void SEASON3B::CNewUIMasterLevel::LoadImages()
 {
     //IMAGE_MASTER_INTERFACE
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_MASTER_EXIT, GL_LINEAR);				// Exit Button
-    LoadBitmap("Interface\\Master_back.jpg", IMAGE_MASTER_INTERFACE, GL_LINEAR);
-    LoadBitmap("Interface\\Master_skillbox.tga", IMAGE_MASTER_INTERFACE + 1, GL_LINEAR);
-    LoadBitmap("Interface\\Master_arrow(D).tga", IMAGE_MASTER_INTERFACE + 2, GL_LINEAR);
-    LoadBitmap("Interface\\Master_arrow(R).tga", IMAGE_MASTER_INTERFACE + 3, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_MASTER_EXIT, GL_LINEAR);				// Exit Button
+    LoadBitmap(L"Interface\\Master_back.jpg", IMAGE_MASTER_INTERFACE, GL_LINEAR);
+    LoadBitmap(L"Interface\\Master_skillbox.tga", IMAGE_MASTER_INTERFACE + 1, GL_LINEAR);
+    LoadBitmap(L"Interface\\Master_arrow(D).tga", IMAGE_MASTER_INTERFACE + 2, GL_LINEAR);
+    LoadBitmap(L"Interface\\Master_arrow(R).tga", IMAGE_MASTER_INTERFACE + 3, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIMasterLevel::UnloadImages()

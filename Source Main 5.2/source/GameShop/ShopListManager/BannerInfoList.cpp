@@ -23,15 +23,15 @@ CBannerInfoList::~CBannerInfoList() // OK
 {
 }
 
-WZResult CBannerInfoList::LoadBanner(std::string strDirPath, std::string strScriptFileName, bool bDonwLoad)
+WZResult CBannerInfoList::LoadBanner(std::wstring strDirPath, std::wstring strScriptFileName, bool bDonwLoad)
 {
     static WZResult result;
 
     result.BuildSuccessResult();
 
-    std::ifstream ifs;
+    std::wifstream ifs;
 
-    std::string path = strDirPath + strScriptFileName;
+    std::wstring path = strDirPath + strScriptFileName;
 
     ifs.open(path.c_str(), std::ifstream::in);
 
@@ -39,7 +39,7 @@ WZResult CBannerInfoList::LoadBanner(std::string strDirPath, std::string strScri
     {
         this->Clear();
 
-        char buff[1024] = { 0 };
+        wchar_t buff[1024] = { 0 };
 
         while (true)
         {
@@ -58,7 +58,7 @@ WZResult CBannerInfoList::LoadBanner(std::string strDirPath, std::string strScri
     }
     else
     {
-        result.SetResult(6, GetLastError(), "Banner file open fail");
+        result.SetResult(6, GetLastError(), L"Banner file open fail");
     }
 
     return result;

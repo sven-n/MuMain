@@ -88,15 +88,15 @@ inline bool leaf::GenerateCheckSum(IN const void* pBuffer, size_t size, OUT LPCH
 {
     return CCheckSumGenerator::GenerateCheckSumTable(pBuffer, size, lpCheckSumTable);
 }
-inline bool leaf::GenerateCheckSum(const std::string& in_filename, OUT LPCHECKSUMTABLE lpCheckSumTable)
+inline bool leaf::GenerateCheckSum(const std::wstring& in_filename, OUT LPCHECKSUMTABLE lpCheckSumTable)
 {
     return CCheckSumGenerator::GenerateCheckSumTable(in_filename, lpCheckSumTable);
 }
-inline bool leaf::GenerateCheckSum(IN const void* pBuffer, size_t size, const std::string& out_filename)
+inline bool leaf::GenerateCheckSum(IN const void* pBuffer, size_t size, const std::wstring& out_filename)
 {
     return CCheckSumGenerator::GenerateCheckSumFile(pBuffer, size, out_filename);
 }
-inline bool leaf::GenerateCheckSum(const std::string& in_filename, const std::string& out_filename)
+inline bool leaf::GenerateCheckSum(const std::wstring& in_filename, const std::wstring& out_filename)
 {
     return CCheckSumGenerator::GenerateCheckSumFile(in_filename, out_filename);
 }
@@ -108,7 +108,7 @@ CCheckSumGenerator::~CCheckSumGenerator()
     RemoveAllSegment();
 }
 
-bool CCheckSumGenerator::AddSegmentFromBuffer(const std::string& dataname, const void* pBuffer, size_t size)
+bool CCheckSumGenerator::AddSegmentFromBuffer(const std::wstring& dataname, const void* pBuffer, size_t size)
 {
     if (!GetSegmentInfo(dataname))
     {
@@ -123,7 +123,7 @@ bool CCheckSumGenerator::AddSegmentFromBuffer(const std::string& dataname, const
     }
     return false;
 }
-bool CCheckSumGenerator::AddSegmentFromFile(const std::string& filename)
+bool CCheckSumGenerator::AddSegmentFromFile(const std::wstring& filename)
 {
     if (!GetSegmentInfo(filename))
     {
@@ -138,7 +138,7 @@ bool CCheckSumGenerator::AddSegmentFromFile(const std::string& filename)
     }
     return false;
 }
-bool CCheckSumGenerator::RemoveSegment(const std::string& name)
+bool CCheckSumGenerator::RemoveSegment(const std::wstring& name)
 {
     auto vi = m_listSegment.begin();
     for (; vi != m_listSegment.end(); vi++)
@@ -176,7 +176,7 @@ int CCheckSumGenerator::GetSegmentCount() const
     return m_listSegment.size();
 }
 
-const CCheckSumGenerator::SEGMENTINFO* CCheckSumGenerator::GetSegmentInfo(const std::string& name)
+const CCheckSumGenerator::SEGMENTINFO* CCheckSumGenerator::GetSegmentInfo(const std::wstring& name)
 {
     std::vector<SEGMENTINFO*>::const_iterator vi = m_listSegment.begin();
     for (; vi != m_listSegment.end(); vi++)
@@ -201,7 +201,7 @@ bool CCheckSumGenerator::Generate(OUT LPCHECKSUMTABLE lpCheckSumTable)
         xBuffer.write((*vi)->cs_table.pdwTable, (*vi)->cs_table.TABLE_SIZE);
     return GenerateCheckSumTable(xBuffer.data(), xBuffer.size(), lpCheckSumTable);
 }
-bool CCheckSumGenerator::Generate(const std::string& out_filename)
+bool CCheckSumGenerator::Generate(const std::wstring& out_filename)
 {
     leaf::xstreambuf xBuffer;
     auto vi = m_listSegment.begin();
@@ -236,7 +236,7 @@ bool CCheckSumGenerator::GenerateCheckSumTable(IN const void* pBuffer, size_t si
 
     return true;
 }
-bool CCheckSumGenerator::GenerateCheckSumTable(const std::string& in_filename, OUT LPCHECKSUMTABLE lpCheckSumTable)
+bool CCheckSumGenerator::GenerateCheckSumTable(const std::wstring& in_filename, OUT LPCHECKSUMTABLE lpCheckSumTable)
 {
     HANDLE hFile = CreateFile(in_filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
     if (INVALID_HANDLE_VALUE == hFile) return false;
@@ -309,7 +309,7 @@ bool CCheckSumGenerator::GenerateCheckSumTable(const std::string& in_filename, O
 
     return true;
 }
-bool CCheckSumGenerator::GenerateCheckSumFile(IN const void* pBuffer, size_t size, const std::string& out_filename)
+bool CCheckSumGenerator::GenerateCheckSumFile(IN const void* pBuffer, size_t size, const std::wstring& out_filename)
 {
     HANDLE hFile = CreateFile(out_filename.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
     if (hFile == INVALID_HANDLE_VALUE) return false;
@@ -331,7 +331,7 @@ bool CCheckSumGenerator::GenerateCheckSumFile(IN const void* pBuffer, size_t siz
     CloseHandle(hFile);
     return true;
 }
-bool CCheckSumGenerator::GenerateCheckSumFile(const std::string& in_filename, const std::string& out_filename)
+bool CCheckSumGenerator::GenerateCheckSumFile(const std::wstring& in_filename, const std::wstring& out_filename)
 {
     HANDLE hFile = CreateFile(out_filename.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
     if (hFile == INVALID_HANDLE_VALUE) return false;
@@ -360,7 +360,7 @@ bool leaf::GenerateCrc32Code(const void* pBuffer, size_t size, DWORD& dwCrc32)
 {
     return CCyclicRedundancyCheck32::GetObjPtr()->GenerateCrc32Code(pBuffer, size, dwCrc32);
 }
-bool leaf::GenerateCrc32Code(const std::string& filename, DWORD& dwCrc32)
+bool leaf::GenerateCrc32Code(const std::wstring& filename, DWORD& dwCrc32)
 {
     return CCyclicRedundancyCheck32::GetObjPtr()->GenerateCrc32Code(filename, dwCrc32);
 }
@@ -386,7 +386,7 @@ bool CCyclicRedundancyCheck32::GenerateCrc32Code(const void* pBuffer, size_t siz
     }
     return false;
 }
-bool CCyclicRedundancyCheck32::GenerateCrc32Code(const std::string& filename, DWORD& dwCrc32)
+bool CCyclicRedundancyCheck32::GenerateCrc32Code(const std::wstring& filename, DWORD& dwCrc32)
 {
     HANDLE hFile = CreateFile(filename.c_str(),
         GENERIC_READ,

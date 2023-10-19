@@ -5,7 +5,6 @@
 #include "NewUIMyInventory.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
-#include "CSChaosCastle.h"
 #include "GOBoid.h"
 #include "ZzzEffect.h"
 #include "GIPetManager.h"
@@ -13,10 +12,7 @@
 #include "UIJewelHarmony.h"
 #include "CDirection.h"
 #include "GMCryWolf1st.h"
-#include "GMCryingWolf2nd.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
-#include "MixMgr.h"
 #include "ZzzLodTerrain.h"
 #include "CSQuest.h"
 #include "UIGuildInfo.h"
@@ -25,7 +21,6 @@
 #include "MapManager.h"
 #include "w_PetProcess.h"
 #include "SocketSystem.h"
-#include "w_CursedTemple.h"
 #include "PortalMgr.h"
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 #include "Event.h"
@@ -34,8 +29,12 @@
 #include "ChangeRingManager.h"
 #include "MonkSystem.h"
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
+#include "ZzzInterface.h"
 
 using namespace SEASON3B;
+
+extern bool Teleport;
 
 CNewUIMyInventory::CNewUIMyInventory()
 {
@@ -129,12 +128,14 @@ bool CNewUIMyInventory::EquipItem(int iIndex, BYTE* pbyItemPacket)
         }
 
         if (pTempItem->Type == ITEM_HELPER + 4)
-            SendRequestPetInfo(PET_TYPE_DARK_HORSE, 0, iIndex);
+        {
+            SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, iIndex);
+        }
 
         if (pTempItem->Type == ITEM_HELPER + 5)
         {
             CreatePetDarkSpirit(Hero);
-            SendRequestPetInfo(PET_TYPE_DARK_SPIRIT, 0, iIndex);
+            SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, iIndex);
         }
 
         pTempItem->lineal_pos = iIndex;
@@ -474,14 +475,14 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         ITEM* pItemObj = pPickedItem->GetItem();
         if (pItemObj && pItemObj->Jewel_Of_Harmony_Option != 0)
         {
-            g_pChatListBox->AddText("", GlobalText[2217], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2217], TYPE_ERROR_MESSAGE);
 
             ResetMouseLButton();
             return false;
         }
         if (pItemObj && IsHighValueItem(pItemObj) == true)
         {
-            g_pChatListBox->AddText("", GlobalText[269], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[269], TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
@@ -489,7 +490,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         }
         if (pItemObj && IsDropBan(pItemObj))
         {
-            g_pChatListBox->AddText("", GlobalText[1915], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[1915], TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
@@ -510,12 +511,14 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             {
                 if (Hero->Dead == false)
                 {
-                    SendRequestDropItem(iSourceIndex, tx, ty);
+                    SocketClient->ToGameServer()->SendDropItemRequest(tx, ty, iSourceIndex);
+                    SendDropItem = iSourceIndex;
                 }
             }
             else if (pItemObj && pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
             {
-                SendRequestDropItem(iSourceIndex, tx, ty);
+                SocketClient->ToGameServer()->SendDropItemRequest(tx, ty, iSourceIndex);
+                SendDropItem = iSourceIndex;
             }
             MouseUpdateTime = 0;
             MouseUpdateTimeMax = 6;
@@ -706,8 +709,8 @@ void CNewUIMyInventory::RenderSetOption()
         g_pRenderText->SetTextColor(100, 100, 100, 255);
     }
 
-    unicode::t_char strText[128];
-    unicode::_sprintf(strText, "[%s]", GlobalText[989]);
+    wchar_t strText[128];
+    swprintf(strText, L"[%s]", GlobalText[989]);
     g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.2f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
 
     if (g_csItemOption.IsViewOptionList() == true)
@@ -730,8 +733,8 @@ void CNewUIMyInventory::RenderSocketOption()
         g_pRenderText->SetTextColor(100, 100, 100, 255);
     }
 
-    unicode::t_char strText[128];
-    unicode::_sprintf(strText, "[%s]", GlobalText[2651]);
+    wchar_t strText[128];
+    swprintf(strText, L"[%s]", GlobalText[2651]);
     g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
 
     if (CheckMouseIn(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 20, INVENTORY_WIDTH * 0.5f, 15) == true)
@@ -808,7 +811,7 @@ void CNewUIMyInventory::OpenningProcess()
     {
         if (g_QuestMng.IsEPRequestRewardState(0x1000F))
         {
-            SendSatisfyQuestRequestFromClient(0x1000F);
+            SocketClient->ToGameServer()->SendQuestClientActionRequest(1, 0x0F);
             g_QuestMng.SetEPRequestRewardState(0x1000F, false);
         }
     }
@@ -1151,29 +1154,29 @@ void CNewUIMyInventory::SetButtonInfo()
 
 void CNewUIMyInventory::LoadImages() const
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_INVENTORY_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_INVENTORY_BACK_TOP2, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_INVENTORY_BACK_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_INVENTORY_BACK_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_INVENTORY_BACK_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_boots.tga", IMAGE_INVENTORY_ITEM_BOOT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_cap.tga", IMAGE_INVENTORY_ITEM_HELM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_fairy.tga", IMAGE_INVENTORY_ITEM_FAIRY, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_wing.tga", IMAGE_INVENTORY_ITEM_WING, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_weapon(L).tga", IMAGE_INVENTORY_ITEM_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_weapon(R).tga", IMAGE_INVENTORY_ITEM_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_upper.tga", IMAGE_INVENTORY_ITEM_ARMOR, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_gloves.tga", IMAGE_INVENTORY_ITEM_GLOVES, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_lower.tga", IMAGE_INVENTORY_ITEM_PANTS, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_ring.tga", IMAGE_INVENTORY_ITEM_RING, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_necklace.tga", IMAGE_INVENTORY_ITEM_NECKLACE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_money.tga", IMAGE_INVENTORY_MONEY, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_repair_00.tga", IMAGE_INVENTORY_REPAIR_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_expansion_btn.tga", IMAGE_INVENTORY_EXPAND_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_openshop.tga", IMAGE_INVENTORY_MYSHOP_OPEN_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_closeshop.tga", IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_INVENTORY_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_INVENTORY_BACK_TOP2, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_INVENTORY_BACK_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_INVENTORY_BACK_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_INVENTORY_BACK_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_boots.tga", IMAGE_INVENTORY_ITEM_BOOT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_cap.tga", IMAGE_INVENTORY_ITEM_HELM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_fairy.tga", IMAGE_INVENTORY_ITEM_FAIRY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_wing.tga", IMAGE_INVENTORY_ITEM_WING, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_weapon(L).tga", IMAGE_INVENTORY_ITEM_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_weapon(R).tga", IMAGE_INVENTORY_ITEM_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_upper.tga", IMAGE_INVENTORY_ITEM_ARMOR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_gloves.tga", IMAGE_INVENTORY_ITEM_GLOVES, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_lower.tga", IMAGE_INVENTORY_ITEM_PANTS, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_ring.tga", IMAGE_INVENTORY_ITEM_RING, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_necklace.tga", IMAGE_INVENTORY_ITEM_NECKLACE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_money.tga", IMAGE_INVENTORY_MONEY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_repair_00.tga", IMAGE_INVENTORY_REPAIR_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_expansion_btn.tga", IMAGE_INVENTORY_EXPAND_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_openshop.tga", IMAGE_INVENTORY_MYSHOP_OPEN_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_closeshop.tga", IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, GL_LINEAR);
 }
 
 void CNewUIMyInventory::UnloadImages()
@@ -1339,7 +1342,7 @@ void CNewUIMyInventory::RenderInventoryDetails() const
 
     const DWORD dwZen = CharacterMachine->Gold;
 
-    unicode::t_char Text[256] = { 0, };
+    wchar_t Text[256] = { 0, };
     ConvertGold(dwZen, Text);
 
     g_pRenderText->SetTextColor(getGoldColor(dwZen));
@@ -1361,7 +1364,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
             const int iTargetIndex = m_iPointedSlot;
             if (pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
             {
-                g_pChatListBox->AddText("", GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
                 CNewUIInventoryCtrl::BackupPickedItem();
 
                 ResetMouseLButton();
@@ -1381,7 +1384,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
                 if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
                 {
-                    g_pChatListBox->AddText("", GlobalText[2285], TYPE_ERROR_MESSAGE);
+                    g_pChatListBox->AddText(L"", GlobalText[2285], TYPE_ERROR_MESSAGE);
                     CNewUIInventoryCtrl::BackupPickedItem();
 
                     ResetMouseLButton();
@@ -1422,11 +1425,11 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
                 if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
                 {
-                    SendRequestRepair(m_iPointedSlot, 0);
+                    SocketClient->ToGameServer()->SendRepairItemRequest(m_iPointedSlot, 0);
                 }
                 else if (m_bRepairEnableLevel == true)
                 {
-                    SendRequestRepair(m_iPointedSlot, 1);
+                    SocketClient->ToGameServer()->SendRepairItemRequest(m_iPointedSlot, 1);
                 }
 
                 return true;
@@ -1527,11 +1530,11 @@ bool CNewUIMyInventory::RepairItemAtMousePoint(CNewUIInventoryCtrl* targetContro
 
     if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
     {
-        SendRequestRepair(iIndex, 0);
+        SocketClient->ToGameServer()->SendRepairItemRequest(iIndex, 0);
     }
     else
     {
-        SendRequestRepair(iIndex, 1);
+        SocketClient->ToGameServer()->SendRepairItemRequest(iIndex, 1);
     }
 
     return true;
@@ -1736,7 +1739,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         point[3] = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
         point[4] = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 
-        char nStat[MAX_CLASS][5] =
+        wchar_t nStat[MAX_CLASS][5] =
         {
             18, 18, 15, 30,	0,
             28, 20, 25, 10,	0,
@@ -1771,8 +1774,8 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     {
         if (IsUnitedMarketPlace())
         {
-            char	szOutputText[512];
-            sprintf(szOutputText, "%s %s", GlobalText[3014], GlobalText[3015]);
+            wchar_t	szOutputText[512];
+            swprintf(szOutputText, L"%s %s", GlobalText[3014], GlobalText[3015]);
 
             CreateOkMessageBox(szOutputText);
             return true;
@@ -1784,7 +1787,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
             return false;
         }
 
-        SendRequestEventZoneOpenTime(4, ((pItem->Level >> 3) & 15));
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(4, (pItem->Level >> 3) & 15);
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
         return true;
     }
@@ -1792,14 +1795,14 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     if (pItem->Type == ITEM_HELPER + 46)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_DEVILSQUARE);
-        SendRequestEventZoneOpenTime(1, byPossibleLevel);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(1, byPossibleLevel);
         return false;
     }
 
     if (pItem->Type == ITEM_HELPER + 47)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_BLOODCASTLE);
-        SendRequestEventZoneOpenTime(2, byPossibleLevel);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(2, byPossibleLevel);
         return false;
     }
 
@@ -1807,7 +1810,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     {
         if (Hero->SafeZone || gMapManager.InHellas())
         {
-            g_pChatListBox->AddText("", GlobalText[1238], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[1238], TYPE_ERROR_MESSAGE);
             return false;
         }
 
@@ -1818,7 +1821,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     if (pItem->Type == ITEM_HELPER + 61)
     {
         const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_CURSEDTEMPLE);
-        SendRequestEventZoneOpenTime(5, byPossibleLevel);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(5, byPossibleLevel);
         return true;
     }
 
@@ -1830,20 +1833,20 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
             return false;
         }
 
-        SendRequestEventZoneOpenTime(4, ((pItem->Level >> 3) & 15));
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(4, (pItem->Level >> 3) & 15);
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
         return true;
     }
 
     if (pItem->Type == ITEM_HELPER + 51)
     {
-        SendRequestEventZoneOpenTime(5, ((pItem->Level >> 3) & 15));
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(5, (pItem->Level >> 3) & 15);
         return true;
     }
 
     if (pItem->Type == ITEM_POTION + 19)
     {
-        SendRequestEventZoneOpenTime(1, ((pItem->Level >> 3) & 15));
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(1, (pItem->Level >> 3) & 15);
         return true;
     }
 
@@ -1851,11 +1854,11 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     {
         if (pItem->Level == 0)
         {
-            g_pChatListBox->AddText("", GlobalText[2089], TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2089], TYPE_ERROR_MESSAGE);
         }
         else
         {
-            SendRequestEventZoneOpenTime(2, ((pItem->Level >> 3) & 15) - 1);
+            SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(2, ((pItem->Level >> 3) & 15) -1);
         }
 
         return true;

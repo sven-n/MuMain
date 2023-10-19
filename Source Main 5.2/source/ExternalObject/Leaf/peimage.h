@@ -192,7 +192,7 @@ namespace leaf {
     class CPeImageDataInjector
     {
         struct INJECTION_DATA {
-            std::string	strDataName;
+            std::wstring	strDataName;
             void* pvBuffer;
             size_t		SizeOfBuffer;
         };
@@ -204,8 +204,8 @@ namespace leaf {
 
         bool PushBack(const std::string& strDataName, IN const std::string& strFilePath);
         bool PushBack(const std::string& strDataName, IN const void* pcvBuffer, size_t SizeOfBuffer);
-        bool Insert(int Index, const std::string& strDataName, IN const std::string& strFilePath);
-        bool Insert(int Index, const std::string& strDataName, IN const void* pcvBuffer, size_t SizeOfBuffer);
+        bool Insert(int Index, const std::wstring& strDataName, IN const std::wstring& strFilePath);
+        bool Insert(int Index, const std::wstring& strDataName, IN const void* pcvBuffer, size_t SizeOfBuffer);
         void Remove(int Index);
         void Remove(const std::string& strDataName);
         void RemoveAll();

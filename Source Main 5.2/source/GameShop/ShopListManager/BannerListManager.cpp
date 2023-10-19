@@ -26,7 +26,7 @@ CBannerListManager::~CBannerListManager() // OK
 
 WZResult			CBannerListManager::LoadScript(bool bDonwLoad) // OK
 {
-    std::string path = this->GetScriptPath();
+    std::wstring path = this->GetScriptPath();
 
     return this->m_BannerInfoList->LoadBanner(path, BANNER_SCRIPT_FILENAME, bDonwLoad);
 }

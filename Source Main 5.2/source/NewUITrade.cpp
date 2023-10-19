@@ -7,8 +7,9 @@
 #include "NewUITrade.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
-#include "wsclientinline.h"
+
 #include "CComGem.h"
+#include "DSPlaySound.h"
 
 using namespace SEASON3B;
 
@@ -124,7 +125,7 @@ bool CNewUITrade::UpdateMouseEvent()
             && m_bMyConfirm)
         {
             m_bMyConfirm = false;
-            SendRequestTradeResult(m_bMyConfirm);
+            SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm);
         }
 
         return false;
@@ -160,7 +161,7 @@ bool CNewUITrade::UpdateKeyEvent()
     {
         if (SEASON3B::IsPress(VK_ESCAPE) == true)
         {
-            SendRequestTradeExit();
+            SocketClient->ToGameServer()->SendTradeCancel();
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_TRADE);
             PlayBuffer(SOUND_CLICK01);
 
@@ -243,7 +244,7 @@ void CNewUITrade::RenderBackImage()
 
 void CNewUITrade::RenderText()
 {
-    unicode::t_char szTemp[128];
+    wchar_t szTemp[128];
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
@@ -275,14 +276,14 @@ void CNewUITrade::RenderText()
     ConvertYourLevel(nLevel, dwColor);
     if (nLevel == 400)
     {
-        unicode::_sprintf(szTemp, "%d", nLevel);
+        swprintf(szTemp, L"%d", nLevel);
     }
     else
     {
-        unicode::_sprintf(szTemp, GlobalText[369], nLevel);
+        swprintf(szTemp, GlobalText[369], nLevel);
     }
     g_pRenderText->SetTextColor(dwColor);
-    g_pRenderText->RenderText(m_Pos.x + 134, m_Pos.y + 48, "Lv.");
+    g_pRenderText->RenderText(m_Pos.x + 134, m_Pos.y + 48, L"Lv.");
     g_pRenderText->RenderText(m_Pos.x + 148, m_Pos.y + 48, szTemp);
 
     ::ConvertGold(m_nYourTradeGold, szTemp);
@@ -387,18 +388,18 @@ float CNewUITrade::GetLayerDepth()
 
 void CNewUITrade::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_TRADE_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_TRADE_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_TRADE_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_TRADE_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_TRADE_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_TRADE_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Account_title.tga", IMAGE_TRADE_NICK_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_money.tga", IMAGE_TRADE_MONEY, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_accept.tga", IMAGE_TRADE_CONFIRM, GL_LINEAR);
-    LoadBitmap("Interface\\CursorSitDown.tga", IMAGE_TRADE_WARNING_ARROW, GL_LINEAR, GL_CLAMP);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_TRADE_BTN_CLOSE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_money01.tga", IMAGE_TRADE_BTN_ZEN_INPUT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_TRADE_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_TRADE_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_TRADE_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_TRADE_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_TRADE_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_TRADE_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Account_title.tga", IMAGE_TRADE_NICK_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_money.tga", IMAGE_TRADE_MONEY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_accept.tga", IMAGE_TRADE_CONFIRM, GL_LINEAR);
+    LoadBitmap(L"Interface\\CursorSitDown.tga", IMAGE_TRADE_WARNING_ARROW, GL_LINEAR, GL_CLAMP);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_TRADE_BTN_CLOSE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_money01.tga", IMAGE_TRADE_BTN_ZEN_INPUT, GL_LINEAR);
 }
 
 void CNewUITrade::UnloadImages()
@@ -470,12 +471,12 @@ void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
     if (::IsTradeBan(pItemObj))
     {
         g_pChatListBox->AddText(
-            "", GlobalText[494], SEASON3B::TYPE_ERROR_MESSAGE);
+            L"", GlobalText[494], SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else
     {
         m_bMyConfirm = false;
-        SendRequestTradeResult(m_bMyConfirm);
+        SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm);
 
         SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, nInvenIndex,
             pItemObj, STORAGE_TYPE::TRADE, nTradeIndex);
@@ -500,14 +501,14 @@ void CNewUITrade::SendRequestMyGoldInput(int nInputGold)
         if (m_bMyConfirm)
         {
             m_bMyConfirm = false;
-            SendRequestTradeResult(m_bMyConfirm);
+            SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm);
         }
 
         if (m_nMyTradeGold > 0)
             m_nMyTradeWait = 150;
 
         m_nTempMyTradeGold = nInputGold;
-        SendRequestTradeGold(nInputGold);
+        SocketClient->ToGameServer()->SendSetTradeMoney(nInputGold);
     }
     else
     {
@@ -520,7 +521,7 @@ void CNewUITrade::ProcessCloseBtn()
     if (CNewUIInventoryCtrl::GetPickedItem() == NULL)
     {
         m_bTradeAlert = false;
-        SendRequestTradeExit();
+        SocketClient->ToGameServer()->SendTradeCancel();
     }
 }
 
@@ -577,24 +578,23 @@ void CNewUITrade::AlertTrade()
     m_bMyConfirm = !m_bMyConfirm;
 
     m_bTradeAlert = true;
-    SendRequestTradeResult(m_bMyConfirm);
+    SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm);
 }
 
-void CNewUITrade::GetYourID(char* pszYourID)
+void CNewUITrade::GetYourID(wchar_t* pszYourID)
 {
-    ::strcpy(pszYourID, m_szYourID);
+    ::wcscpy(pszYourID, m_szYourID);
 }
 
-void CNewUITrade::ProcessToReceiveTradeRequest(BYTE* pbyYourID)
+void CNewUITrade::ProcessToReceiveTradeRequest(char* pbyYourID)
 {
     if (g_pNewUISystem->IsImpossibleTradeInterface())
     {
-        SendRequestTradeAnswer(false);
+        SocketClient->ToGameServer()->SendTradeRequestResponse(false);
         return;
     }
 
-    ::memcpy(m_szYourID, pbyYourID, MAX_ID_SIZE);
-    m_szYourID[MAX_ID_SIZE] = NULL;
+    CMultiLanguage::ConvertFromUtf8(m_szYourID, pbyYourID);
 
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CTradeMsgBoxLayout));
 
@@ -606,11 +606,11 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
     switch (pTradeData->SubCode)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 2:
-        g_pChatListBox->AddText("", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 1:
@@ -619,19 +619,17 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
         InitTradeInfo();
 
         int x = 260 * MouseX / 640;
-        ::SetCursorPos(x * WindowWidth / 640, MouseY * WindowHeight / 480);
+        SetCursorPos(x * WindowWidth / 640, MouseY * WindowHeight / 480);
 
-        char szTempID[MAX_ID_SIZE + 1];
-        ::memcpy(szTempID, pTradeData->ID, MAX_ID_SIZE);
-        szTempID[MAX_ID_SIZE] = NULL;
+        wchar_t szTempID[MAX_ID_SIZE + 1]{ };
+        CMultiLanguage::ConvertFromUtf8(szTempID, pTradeData->ID, MAX_ID_SIZE);
 
-        if (!m_bTradeAlert && ::strcmp(m_szYourID, szTempID))
+        if (!m_bTradeAlert && ::wcscmp(m_szYourID, szTempID))
             InitYourInvenBackUp();
 
         m_bTradeAlert = false;
         m_nYourGuildType = pTradeData->GuildKey;
-        ::memcpy(m_szYourID, pTradeData->ID, MAX_ID_SIZE);
-        m_szYourID[MAX_ID_SIZE] = NULL;
+        wcsncpy(m_szYourID, szTempID, MAX_ID_SIZE);
         m_nYourLevel = pTradeData->Level;   //  상대방 레벨.
         break;
     }
@@ -796,7 +794,7 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     {
     case 0:
     {
-        g_pChatListBox->AddText("", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
 
         m_bTradeAlert = false;
 
@@ -807,15 +805,15 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     break;
 
     case 2:
-        g_pChatListBox->AddText("", GlobalText[495], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[495], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 3:
-        g_pChatListBox->AddText("", GlobalText[496], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[496], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 4:
-        g_pChatListBox->AddText("", GlobalText[2108], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2108], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
 

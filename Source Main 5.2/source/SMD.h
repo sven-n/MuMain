@@ -79,7 +79,7 @@ extern SkeletonGroup_t SkeletonGroup;
 extern TriangleGroup_t TriangleGroup;
 extern SMDMeshGroup_t  MeshGroup;
 
-bool OpenSMDModel(int ID, char* FileName, int Actions = 1, bool Flip = false);
-bool OpenSMDAnimation(int ID, char* FileName, bool LockPosition = false);
-void OpenBMD(int ID, char* FileName);
-void SaveBMD(int ID, char* FileName);
+bool OpenSMDModel(int ID, wchar_t* FileName, int Actions = 1, bool Flip = false);
+bool OpenSMDAnimation(int ID, wchar_t* FileName, bool LockPosition = false);
+void OpenBMD(int ID, wchar_t* FileName);
+void SaveBMD(int ID, wchar_t* FileName);

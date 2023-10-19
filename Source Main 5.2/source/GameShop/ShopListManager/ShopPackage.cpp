@@ -24,43 +24,43 @@ CShopPackage::~CShopPackage() // OK
 {
 }
 
-bool	CShopPackage::SetPackage(std::string strdata) // OK
+bool	CShopPackage::SetPackage(std::wstring strdata) // OK
 {
     if (strdata.empty())
         return 0;
 
-    CStringToken token(strdata, "@");
+    CStringToken token(strdata, L"@");
 
     if (token.hasMoreTokens() == 0)
         return 0;
 
-    this->ProductDisplaySeq = atoi(token.nextToken().c_str());
-    this->ViewOrder = atoi(token.nextToken().c_str());
-    this->PackageProductSeq = atoi(token.nextToken().c_str());
+    this->ProductDisplaySeq = _wtoi(token.nextToken().c_str());
+    this->ViewOrder = _wtoi(token.nextToken().c_str());
+    this->PackageProductSeq = _wtoi(token.nextToken().c_str());
     StringCchCopy(this->PackageProductName, sizeof(this->PackageProductName), token.nextToken().c_str());
-    this->PackageProductType = atoi(token.nextToken().c_str());
-    this->Price = atoi(token.nextToken().c_str());
+    this->PackageProductType = _wtoi(token.nextToken().c_str());
+    this->Price = _wtoi(token.nextToken().c_str());
     StringCchCopy(this->Description, sizeof(this->Description), token.nextToken().c_str());
     StringCchCopy(this->Caution, sizeof(this->Caution), token.nextToken().c_str());
-    this->SalesFlag = atoi(token.nextToken().c_str());
-    this->GiftFlag = atoi(token.nextToken().c_str());
+    this->SalesFlag = _wtoi(token.nextToken().c_str());
+    this->GiftFlag = _wtoi(token.nextToken().c_str());
     CStringMethod::ConvertStringToDateTime(this->StartDate, token.nextToken());
     CStringMethod::ConvertStringToDateTime(this->EndDate, token.nextToken());
-    this->CapsuleFlag = atoi(token.nextToken().c_str());
-    this->CapsuleCount = atoi(token.nextToken().c_str());
+    this->CapsuleFlag = _wtoi(token.nextToken().c_str());
+    this->CapsuleCount = _wtoi(token.nextToken().c_str());
     StringCchCopy(this->ProductCashName, sizeof(this->ProductCashName), token.nextToken().c_str());
     StringCchCopy(this->PricUnitName, sizeof(this->PricUnitName), token.nextToken().c_str());
-    this->DeleteFlag = atoi(token.nextToken().c_str());
-    this->EventFlag = atoi(token.nextToken().c_str());
-    this->ProductAmount = atoi(token.nextToken().c_str());
+    this->DeleteFlag = _wtoi(token.nextToken().c_str());
+    this->EventFlag = _wtoi(token.nextToken().c_str());
+    this->ProductAmount = _wtoi(token.nextToken().c_str());
     this->SetProductSeqList(token.nextToken());
     StringCchCopy(this->InGamePackageID, sizeof(this->InGamePackageID), token.nextToken().c_str());
-    this->ProductCashSeq = atoi(token.nextToken().c_str());
-    this->PriceCount = atoi(token.nextToken().c_str());
+    this->ProductCashSeq = _wtoi(token.nextToken().c_str());
+    this->PriceCount = _wtoi(token.nextToken().c_str());
     this->SetPriceSeqList(token.nextToken());
-    this->DeductMileageFlag = atoi(token.nextToken().c_str()) != 0;
-    this->CashType = atoi(token.nextToken().c_str());
-    this->CashTypeFlag = atoi(token.nextToken().c_str());
+    this->DeductMileageFlag = _wtoi(token.nextToken().c_str()) != 0;
+    this->CashType = _wtoi(token.nextToken().c_str());
+    this->CashTypeFlag = _wtoi(token.nextToken().c_str());
 
     return 1;
 }
@@ -130,31 +130,31 @@ bool	CShopPackage::GetPriceSeqNext(int& PriceSeq) // OK
     return 1;
 }
 
-void	CShopPackage::SetProductSeqList(std::string strdata) // OK
+void	CShopPackage::SetProductSeqList(std::wstring strdata) // OK
 {
-    CStringToken token(strdata, "|");
+    CStringToken token(strdata, L"|");
 
     while (true)
     {
-        std::string data = token.nextToken();
+        std::wstring data = token.nextToken();
 
         if (data.empty()) break;
 
-        this->ProductSeqList.push_back(atoi(data.c_str()));
+        this->ProductSeqList.push_back(_wtoi(data.c_str()));
     }
 }
 
-void	CShopPackage::SetPriceSeqList(std::string strdata) // OK
+void	CShopPackage::SetPriceSeqList(std::wstring strdata) // OK
 {
-    CStringToken token(strdata, "|");
+    CStringToken token(strdata, L"|");
 
     while (true)
     {
-        std::string data = token.nextToken();
+        std::wstring data = token.nextToken();
 
         if (data.empty()) break;
 
-        this->PriceSeqList.push_back(atoi(data.c_str()));
+        this->PriceSeqList.push_back(_wtoi(data.c_str()));
     }
 }
 #endif

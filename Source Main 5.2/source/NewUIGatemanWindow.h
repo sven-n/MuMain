@@ -75,7 +75,7 @@ namespace SEASON3B
         void RenderFrame();
         bool BtnProcess();
 
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption);
+        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
 
         void UpdateGuildMasterMode();
         void UpdateGuildMemeberMode();

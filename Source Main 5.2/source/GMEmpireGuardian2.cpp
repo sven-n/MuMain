@@ -80,7 +80,7 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(169);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 169, PosX, PosY);
-        strcpy(pCharacter->ID, "버몬트");
+        wcscpy(pCharacter->ID, L"버몬트");
 
         pCharacter->Object.Scale = 1.3f;
 
@@ -91,7 +91,7 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(174);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 174, PosX, PosY);
-        strcpy(pCharacter->ID, "기사단장");
+        wcscpy(pCharacter->ID, L"기사단장");
 
         pCharacter->Object.Scale = 1.35f;
     }
@@ -100,7 +100,7 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(175);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 175, PosX, PosY);
-        strcpy(pCharacter->ID, "대마법사");
+        wcscpy(pCharacter->ID, L"대마법사");
 
         OBJECT* pObject = &pCharacter->Object;
         pObject->Scale = 1.3f;

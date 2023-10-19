@@ -19,12 +19,12 @@ public:
     void EnableMsgWriting() { m_bMsgWriting = true; }
     void DisableMsgWriting() { m_bMsgWriting = false; }
 
-    void WriteMessage(const std::string& msg, DWORD dwMsgType = ResourceGuard::MSG_TYPE_NORMAL, long lParam = 0)
+    void WriteMessage(const std::wstring& msg, DWORD dwMsgType = ResourceGuard::MSG_TYPE_NORMAL, long lParam = 0)
     {
         if ((m_bErrorWriting && dwMsgType == ResourceGuard::MSG_TYPE_ERROR)
             || (m_bMsgWriting && dwMsgType == ResourceGuard::MSG_TYPE_NORMAL))
         {
-            std::string output;
+            std::wstring output;
 
             if ((lParam & ResourceGuard::MSG_PARAM_HEAD) == ResourceGuard::MSG_PARAM_HEAD)
                 output = "[ResourceGuard] ";
@@ -41,7 +41,7 @@ public:
             if ((lParam & ResourceGuard::MSG_PARAM_ENDL) == ResourceGuard::MSG_PARAM_ENDL)
                 output += "\r\n";
 
-            g_ErrorReport.Write(const_cast<char*>(output.c_str()));
+            g_ErrorReport.Write(const_cast<wchar_t*>(output.c_str()));
         }
     }
 };

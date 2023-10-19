@@ -15,7 +15,7 @@
 #include "ZzzScene.h"
 #include "ZzzOpenData.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "SideHair.h"
 #include "PhysicsManager.h"
 #include "GOBoid.h"
@@ -43,6 +43,7 @@
 #include "CharacterManager.h"
 #include "w_MapHeaders.h"
 #include "MonkSystem.h"
+#include "NewUISystem.h"
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
@@ -3185,7 +3186,7 @@ void RenderObjectVisual(OBJECT* o)
         {
         case 11:
         {
-            char indexLight[7] = { 1, 2, 4, 6, 9, 10, 11 };
+            wchar_t indexLight[7] = { 1, 2, 4, 6, 9, 10, 11 };
 
             Luminosity = sinf((o->Angle[2] * 20 + WorldTime) * 0.001f) * 0.5f + 0.5f;
             Vector(Luminosity * 1.f, Luminosity * 0.5f, 0.f, Light);
@@ -4993,13 +4994,13 @@ void DeleteObjectTile(int x, int y)
     }
 }
 
-int OpenObjects(char* FileName)
+int OpenObjects(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s file not found.", FileName);
+        wchar_t Text[256];
+        swprintf(Text, L"%s file not found.", FileName);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);
@@ -5036,13 +5037,13 @@ int OpenObjects(char* FileName)
     return iMapNumber;
 }
 
-int OpenObjectsEnc(char* FileName)
+int OpenObjectsEnc(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s file not found.", FileName);
+        wchar_t Text[256];
+        swprintf(Text, L"%s file not found.", FileName);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);
@@ -5080,9 +5081,9 @@ int OpenObjectsEnc(char* FileName)
     return iMapNumber;
 }
 
-bool SaveObjects(char* FileName, int iMapNumber)
+bool SaveObjects(wchar_t* FileName, int iMapNumber)
 {
-    FILE* fp = fopen(FileName, "wb");
+    FILE* fp = _wfopen(FileName, L"wb");
 
     short ObjectCount = 0;
     int CounterPoint = 3;
@@ -5123,7 +5124,7 @@ bool SaveObjects(char* FileName, int iMapNumber)
     fclose(fp);
 
     {
-        fp = fopen(FileName, "rb");
+        fp = _wfopen(FileName, L"rb");
         fseek(fp, 0, SEEK_END);
         int EncBytes = ftell(fp);
         fseek(fp, 0, SEEK_SET);
@@ -5136,7 +5137,7 @@ bool SaveObjects(char* FileName, int iMapNumber)
         MapFileEncrypt(Data, EncData, EncBytes);
         delete[] EncData;
 
-        fp = fopen(FileName, "wb");
+        fp = _wfopen(FileName, L"wb");
         fwrite(Data, DataBytes, 1, fp);
         fclose(fp);
         delete[] Data;
@@ -5144,10 +5145,10 @@ bool SaveObjects(char* FileName, int iMapNumber)
     return true;
 }
 
-void SaveTrapObjects(char* FileName)
+void SaveTrapObjects(wchar_t* FileName)
 {
-    FILE* fp = fopen(FileName, "wt");
-    fprintf(fp, "0\n");
+    FILE* fp = _wfopen(FileName, L"wt");
+    fwprintf(fp, L"0\n");
     for (int i = 0; i < 16; i++)
     {
         for (int j = 0; j < 16; j++)
@@ -5169,7 +5170,7 @@ void SaveTrapObjects(char* FileName)
                         case 51:Type = 102; break;
                         case 25:Type = 103; break;
                         }
-                        fprintf(fp, "%4d %4d 0 %4d %4d %4d\n", Type, gMapManager.WorldActive, (BYTE)(o->Position[0] / TERRAIN_SCALE), (BYTE)(o->Position[1] / TERRAIN_SCALE), (BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8);
+                        fwprintf(fp, L"%4d %4d 0 %4d %4d %4d\n", Type, gMapManager.WorldActive, (BYTE)(o->Position[0] / TERRAIN_SCALE), (BYTE)(o->Position[1] / TERRAIN_SCALE), (BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8);
                     }
                     if (o->Next == NULL) break;
                     o = o->Next;
@@ -5178,7 +5179,7 @@ void SaveTrapObjects(char* FileName)
             }
         }
     }
-    fprintf(fp, "end\n");
+    fwprintf(fp, L"end\n");
     fclose(fp);
 }
 
@@ -6101,7 +6102,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     int Type = ConvertItemType(Item);
     ITEM* n = &ip->Item;
     n->Type = Type;
-    if (Type == ITEM_POTION + 15)
+    if (Type == ITEM_ZEN)
     {
         n->Level = (Item[1] << 16) + (Item[2] << 8) + (Item[4]);
         n->Durability = 0;
@@ -8348,7 +8349,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
                 vPos[2] -= 40.f;
                 CreateParticle(BITMAP_SPARK + 2, vPos, o->Angle, vLight, 1);
                 SetAction(o, PLAYER_SHOCK);
-                SendRequestAction(PLAYER_SHOCK, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(*o, PLAYER_SHOCK);
                 o->m_iAnimation = 0;
             }
 
@@ -8398,7 +8399,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
                 vPos[2] -= 40.f;
                 CreateParticle(BITMAP_SPARK + 2, vPos, o->Angle, vLight, 1);
                 SetAction(o, PLAYER_SHOCK);
-                SendRequestAction(PLAYER_SHOCK, ((BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(*o, PLAYER_SHOCK);
                 o->m_iAnimation = 0;
             }
 

@@ -484,7 +484,7 @@ bool CPeImageDataInjector::PushBack(const std::string& strDataName, IN const voi
     return true;
 }
 
-bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN const std::string& strFilePath)
+bool CPeImageDataInjector::Insert(int Index, const std::wstring& strDataName, IN const std::wstring& strFilePath)
 {
     HANDLE hFile = CreateFile(strFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
     if (INVALID_HANDLE_VALUE == hFile)
@@ -521,7 +521,7 @@ bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN 
 
     return false;
 }
-bool CPeImageDataInjector::Insert(int Index, const std::string& strDataName, IN const void* pcvBuffer, size_t SizeOfBuffer)
+bool CPeImageDataInjector::Insert(int Index, const std::wstring& strDataName, IN const void* pcvBuffer, size_t SizeOfBuffer)
 {
     if (IsBadReadPtr(pcvBuffer, SizeOfBuffer))
         return false;

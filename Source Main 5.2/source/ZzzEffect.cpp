@@ -12,18 +12,16 @@
 #include "ZzzAi.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
-#include "GMCrywolf1st.h"
 #include "GMHellas.h"
 #include "GMBattleCastle.h"
 #include "UIManager.h"
-#include "GM_Kanturu_2nd.h"
 #include "CDirection.h"
 #include "MapManager.h"
-#include "BoneManager.h"
 #include "SkillEffectMgr.h"]
 #include "CharacterManager.h"
 #include "SkillManager.h"
+#include <NewUISystem.h>
+#include "ZzzInterface.h"
 
 PARTICLE  Particles[MAX_PARTICLES];
 #ifdef DEVIAS_XMAS_EVENT
@@ -13927,7 +13925,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
                 if (o->LifeTime < 250 && o->Position[2] < Height + 300.f && o->SubType == 1 && o->Kind != 0 && o->Skill != 0)
                 {
-                    SendWeaponExplosion(o->Kind, o->Skill);
+                    SocketClient->ToGameServer()->SendWeaponExplosionRequest(MAKELONG(o->Skill, o->Kind));
                     o->Kind = 0;
                     o->Skill = 0;
                 }
@@ -14080,7 +14078,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
             if (o->Position[2] < Height + 300.f && o->SubType == 1 && o->Kind != 0 && o->Skill != 0)
             {
-                SendWeaponExplosion(o->Kind, o->Skill);
+                SocketClient->ToGameServer()->SendWeaponExplosionRequest(MAKELONG(o->Skill, o->Kind));
                 o->Kind = 0;
                 o->Skill = 0;
             }

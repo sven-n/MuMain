@@ -1,19 +1,18 @@
 #include "stdafx.h"
-#include "ZzzBMD.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzAI.h"
 #include "ZzzTexture.h"
-#include "ZzzOpenglUtil.h"
 #include "zzzOpenData.h"
-#include "zzzinfomation.h"
-#include "wsclientinline.h"
+
 #include "CSMapServer.h"
 
+#include "MultiLanguage.h"
+#include "WSclient.h"
+
 extern int  LogIn;
-extern char LogInID[MAX_ID_SIZE + 1];
+extern wchar_t LogInID[MAX_ID_SIZE + 1];
 extern int HeroKey;
+extern BYTE Version[SIZE_PROTOCOLVERSION];
+extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 
 static  CSMServer csMapServer;
 
@@ -28,7 +27,7 @@ void CSMServer::Init(void)
     memset(&m_vServerInfo, 0, sizeof(MServerInfo));
 }
 
-void CSMServer::SetHeroID(char* ID)
+void CSMServer::SetHeroID(wchar_t* ID)
 {
     m_strHeroID = ID;
 }
@@ -52,7 +51,7 @@ void CSMServer::GetServerInfo(MServerInfo& sInfo)
     }
 }
 
-void CSMServer::GetServerAddress(char* szAddress)
+void CSMServer::GetServerAddress(wchar_t* szAddress)
 {
     if (m_bFillServerInfo)
     {
@@ -64,6 +63,7 @@ void CSMServer::GetServerAddress(char* szAddress)
     }
 }
 
+extern BOOL g_bGameServerConnected;
 void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
 {
     SetServerInfo(sInfo);
@@ -72,11 +72,14 @@ void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
     {
         DeleteSocket();
         SaveOptions();
-        SaveMacro("Data\\Macro.txt");
+        SaveMacro(L"Data\\Macro.txt");
 
         ::Sleep(20);
 
-        if (CreateSocket(m_vServerInfo.m_szMapSvrIpAddress, m_vServerInfo.m_wMapSvrPort))
+        wchar_t ip[16];
+        CMultiLanguage::ConvertFromUtf8(ip, m_vServerInfo.m_szMapSvrIpAddress);
+
+        if (CreateSocket(ip, m_vServerInfo.m_wMapSvrPort))
         {
             g_bGameServerConnected = TRUE;
         }
@@ -87,13 +90,33 @@ void CSMServer::SendChangeMapServer(void)
 {
     if (m_bFillServerInfo == false || LogIn == 0) return;
 
-    char  CharID[MAX_ID_SIZE + 1];
+    wchar_t  CharID[MAX_ID_SIZE + 1];
 
-    strcpy(CharID, m_strHeroID.c_str());
+    wcscpy(CharID, m_strHeroID.c_str());
     //	memcpy ( CharID, m_strHeroID.c_str(), MAX_ID_SIZE );
     CharID[MAX_ID_SIZE] = NULL;
 
     ClearCharacters(-1);
     InitGame();
-    SendChangeMServer(LogInID, CharID, m_vServerInfo.m_iJoinAuthCode1, m_vServerInfo.m_iJoinAuthCode2, m_vServerInfo.m_iJoinAuthCode3, m_vServerInfo.m_iJoinAuthCode4);
+    
+    wchar_t lpszID[MAX_ID_SIZE + 2];
+    wchar_t lpszCHR[MAX_ID_SIZE + 2];
+    ZeroMemory(lpszID, MAX_ID_SIZE + 2);
+    ZeroMemory(lpszCHR, MAX_ID_SIZE + 2);
+    // TODO wcscpy(lpszID, LogInID);
+    wcscpy(lpszCHR, CharID);
+    BuxConvert((BYTE*)lpszID, MAX_ID_SIZE + 2);
+    SocketClient->ToGameServer()->SendServerChangeAuthentication(
+        (BYTE*)lpszID, MAX_ID_SIZE,
+        (BYTE*)CharID, MAX_ID_SIZE,
+        m_vServerInfo.m_iJoinAuthCode1,
+        m_vServerInfo.m_iJoinAuthCode2,
+        m_vServerInfo.m_iJoinAuthCode3,
+        m_vServerInfo.m_iJoinAuthCode4,
+        GetTickCount(),
+        Version,
+        SIZE_PROTOCOLVERSION,
+        Serial,
+        SIZE_PROTOCOLSERIAL);
+    //SendChangeMServer(LogInID, CharID, m_vServerInfo.m_iJoinAuthCode1, m_vServerInfo.m_iJoinAuthCode2, m_vServerInfo.m_iJoinAuthCode3, m_vServerInfo.m_iJoinAuthCode4);
 }

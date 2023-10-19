@@ -109,22 +109,16 @@ void SEASON3B::CNewUINameWindow::RenderName()
             {
                 if (IsShopTitleVisible(c) == false)
                 {
-                    CreateChat(c->ID, "", c);
+                    CreateChat(c->ID, L"", c);
                 }
             }
         }
     }
 
 #ifndef GUILD_WAR_EVENT
-    if (gMapManager.InChaosCastle() == true)
+    if (gMapManager.InChaosCastle() == true && (SelectedNpc != -1 || SelectedCharacter != -1))
     {
-        if (FindText(Hero->ID, "webzen") == false)
-        {
-            if (SelectedNpc != -1 || SelectedCharacter != -1)
-            {
-                return;
-            }
-        }
+        return;
     }
 #endif//GUILD_WAR_EVENT
 
@@ -134,7 +128,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
         {
             CHARACTER* c = &CharactersClient[SelectedNpc];
             OBJECT* o = &c->Object;
-            CreateChat(c->ID, "", c);
+            CreateChat(c->ID, L"", c);
         }
         else if (SelectedCharacter != -1)
         {
@@ -156,7 +150,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
                 {
                     if (IsShopTitleVisible(c) == false)
                     {
-                        CreateChat(c->ID, "", c);
+                        CreateChat(c->ID, L"", c);
                     }
                 }
         }

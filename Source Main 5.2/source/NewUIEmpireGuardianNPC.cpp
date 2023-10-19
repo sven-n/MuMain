@@ -5,7 +5,8 @@
 #include "NewUISystem.h"
 #include "NewUICommon.h"
 #include "NewUIEmpireGuardianNPC.h"
-#include "wsclientinline.h"
+
+#include "DSPlaySound.h"
 #include "UIControls.h"
 
 using namespace SEASON3B;
@@ -45,7 +46,7 @@ bool CNewUIEmpireGuardianNPC::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng
     return true;
 }
 
-void CNewUIEmpireGuardianNPC::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption)
+void CNewUIEmpireGuardianNPC::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -122,7 +123,7 @@ bool CNewUIEmpireGuardianNPC::Render()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->RenderText(m_Pos.x, Position.y + 50, GlobalText[2795], 190, 0, RT3_SORT_CENTER);
-    char szTextOut[2][300];
+    wchar_t szTextOut[2][300];
     CutStr(GlobalText[2796], szTextOut[0], 150, 2, 300);
     g_pRenderText->RenderText(m_Pos.x, Position.y + 70, szTextOut[0], 190, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(m_Pos.x, Position.y + 90, szTextOut[1], 190, 0, RT3_SORT_CENTER);
@@ -170,7 +171,7 @@ bool CNewUIEmpireGuardianNPC::BtnProcess()
 
     if (m_btPositive.UpdateMouseEvent())
     {
-        SendRequestEnterEmpireGuardianEvent();
+        SocketClient->ToGameServer()->SendEnterEmpireGuardianEvent();
         ::PlayBuffer(SOUND_INTERFACE01);
         m_bCanClick = false;
         return true;
@@ -194,17 +195,17 @@ void CNewUIEmpireGuardianNPC::ClosingProcess()
 
 void CNewUIEmpireGuardianNPC::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_EMPIREGUARDIAN_NPC_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_EMPIREGUARDIAN_NPC_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_EMPIREGUARDIAN_NPC_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_EMPIREGUARDIAN_NPC_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_EMPIREGUARDIAN_NPC_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_EMPIREGUARDIAN_NPC_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_EMPIREGUARDIAN_NPC_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_EMPIREGUARDIAN_NPC_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_EMPIREGUARDIAN_NPC_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_EMPIREGUARDIAN_NPC_BOTTOM, GL_LINEAR);
 
     //btn
-    LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_EMPIREGUARDIAN_NPC_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_EMPIREGUARDIAN_NPC_BTN, GL_LINEAR);
 
     //line
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_EMPIREGUARDIAN_NPC_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_EMPIREGUARDIAN_NPC_LINE, GL_LINEAR);
 }
 
 void CNewUIEmpireGuardianNPC::UnloadImages()

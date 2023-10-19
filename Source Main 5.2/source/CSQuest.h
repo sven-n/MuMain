@@ -21,7 +21,7 @@ public:
     ~CSQuest(void);
 
     //  Quest Init Functions
-    bool OpenQuestScript(char* filename);
+    bool OpenQuestScript(wchar_t* filename);
     bool IsInit(void);
     void clearQuest(void);
 
@@ -33,10 +33,10 @@ public:
     void ShowQuestNpcWindow(int index = -1);
 
     BYTE getCurrQuestState(void);
-    unicode::t_char* GetNPCName(BYTE byQuestIndex);
-    unicode::t_char* getQuestTitle();
-    unicode::t_char* getQuestTitle(BYTE byQuestIndex);
-    unicode::t_char* getQuestTitleWindow();
+    const void GetNPCName(BYTE byQuestIndex, wchar_t* name);
+    wchar_t* getQuestTitle();
+    wchar_t* getQuestTitle(BYTE byQuestIndex);
+    wchar_t* getQuestTitleWindow();
     void SetEventCount(BYTE type, BYTE count);
     int GetEventCount(BYTE byType);
     DWORD GetNeedZen() { return m_dwNeedZen; }

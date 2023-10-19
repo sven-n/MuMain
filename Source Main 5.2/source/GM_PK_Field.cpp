@@ -55,7 +55,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(157);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 157, PosX, PosY);
-        strcpy(pCharacter->ID, "좀비 투사");
+        wcscpy(pCharacter->ID, L"좀비 투사");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -66,7 +66,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(157);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 157, PosX, PosY);
-        strcpy(pCharacter->ID, "좀비 투사");
+        wcscpy(pCharacter->ID, L"좀비 투사");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -77,7 +77,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(158);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 158, PosX, PosY);
-        strcpy(pCharacter->ID, "되살아난 검투사");
+        wcscpy(pCharacter->ID, L"되살아난 검투사");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -88,7 +88,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(158);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 158, PosX, PosY);
-        strcpy(pCharacter->ID, "되살아난 검투사");
+        wcscpy(pCharacter->ID, L"되살아난 검투사");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -99,7 +99,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(159);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 159, PosX, PosY);
-        strcpy(pCharacter->ID, "잿더미 도살자");
+        wcscpy(pCharacter->ID, L"잿더미 도살자");
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -110,7 +110,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(159);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 159, PosX, PosY);
-        strcpy(pCharacter->ID, "잿더미 도살자");
+        wcscpy(pCharacter->ID, L"잿더미 도살자");
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -121,7 +121,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(160);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 160, PosX, PosY);
-        strcpy(pCharacter->ID, "피의 암살자");
+        wcscpy(pCharacter->ID, L"피의 암살자");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -133,7 +133,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(161);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 161, PosX, PosY);
-        strcpy(pCharacter->ID, "잔혹한 피의 암살자");
+        wcscpy(pCharacter->ID, L"잔혹한 피의 암살자");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -145,7 +145,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(161);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 161, PosX, PosY);
-        strcpy(pCharacter->ID, "잔혹한 피의 암살자");
+        wcscpy(pCharacter->ID, L"잔혹한 피의 암살자");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -157,7 +157,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(163);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 163, PosX, PosY);
-        strcpy(pCharacter->ID, "불타는 용암 거인");
+        wcscpy(pCharacter->ID, L"불타는 용암 거인");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -168,7 +168,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(162);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 162, PosX, PosY);
-        strcpy(pCharacter->ID, "포악한 용암 거인");
+        wcscpy(pCharacter->ID, L"포악한 용암 거인");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -179,7 +179,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(162);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 162, PosX, PosY);
-        strcpy(pCharacter->ID, "포악한 용암 거인");
+        wcscpy(pCharacter->ID, L"포악한 용암 거인");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;

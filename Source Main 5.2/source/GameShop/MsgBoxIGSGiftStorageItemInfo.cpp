@@ -4,12 +4,14 @@
 
 #include "stdafx.h"
 
+#include "NewUISystem.h"
+
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "MsgBoxIGSGiftStorageItemInfo.h"
 
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "MsgBoxIGSUseItemConfirm.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -79,9 +81,9 @@ bool CMsgBoxIGSGiftStorageItemInfo::IsVisible() const
 
 //--------------------------------------------
 // Initialize
-void CMsgBoxIGSGiftStorageItemInfo::Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, unicode::t_char szItemType,
-    unicode::t_char* pszID, unicode::t_char* pszMessage, unicode::t_char* pszName,
-    unicode::t_char* pszNum, unicode::t_char* pszPeriod)
+void CMsgBoxIGSGiftStorageItemInfo::Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, wchar_t szItemType,
+    wchar_t* pszID, wchar_t* pszMessage, wchar_t* pszName,
+    wchar_t* pszNum, wchar_t* pszPeriod)
 {
     m_iStorageSeq = iStorageSeq;
     m_iStorageItemSeq = iStorageItemSeq;
@@ -89,17 +91,17 @@ void CMsgBoxIGSGiftStorageItemInfo::Initialize(int iStorageSeq, int iStorageItem
     m_szItemType = szItemType;
 
     // Name
-    strcpy(m_szName, pszName);
+    wcscpy(m_szName, pszName);
 
     // Num
-    sprintf(m_szNum, GlobalText[3040], pszNum);		// "수량 : %s"
+    swprintf(m_szNum, GlobalText[3040], pszNum);		// "수량 : %s"
 
     // Period
-    sprintf(m_szPeriod, GlobalText[3039], pszPeriod);	// "기간 : %s"
+    swprintf(m_szPeriod, GlobalText[3039], pszPeriod);	// "기간 : %s"
 
     // ID Info
     // "\'%s\' 님이 보낸 선물입니다."
-    sprintf(m_szIDInfo, GlobalText[3041], pszID);
+    swprintf(m_szIDInfo, GlobalText[3041], pszID);
 
     m_MessageInputBox.SetText(pszMessage);
 }
@@ -269,20 +271,20 @@ void CMsgBoxIGSGiftStorageItemInfo::RenderTexts()
 
 #ifdef FOR_WORK
     // debug
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        sprintf(szText, "아이템코드가 없습니다.");
+        swprintf(szText, L"아이템코드가 없습니다.");
     }
     else
     {
-        sprintf(szText, "ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+        swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
     }
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Storage Seq : %d", m_iStorageSeq);
+    swprintf(szText, L"Storage Seq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "Storage ItemSeq : %d", m_iStorageItemSeq);
+    swprintf(szText, L"Storage ItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }
@@ -299,8 +301,8 @@ void CMsgBoxIGSGiftStorageItemInfo::RenderButtons()
 // LoadImages
 void CMsgBoxIGSGiftStorageItemInfo::LoadImages()
 {
-    LoadBitmap("Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\InGameShop\\ingame_Box_List_B.tga", IMAGE_IGS_FRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\ingame_Box_List_B.tga", IMAGE_IGS_FRAME, GL_LINEAR);
 }
 
 //--------------------------------------------

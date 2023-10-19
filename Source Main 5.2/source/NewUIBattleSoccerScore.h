@@ -58,7 +58,7 @@ namespace SEASON3B
         void RenderBackImage();
         void RenderContents();
 
-        int FindGuildMark(char* pszGuildName);
+        int FindGuildMark(wchar_t* pszGuildName);
     };
 }
 

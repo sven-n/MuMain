@@ -186,12 +186,12 @@ namespace SEASON3A
         BOOL IsMixSource(ITEM* pItem);
         MIX_RECIPE* GetCurRecipe();
         int GetCurMixID();
-        BOOL GetCurRecipeName(unicode::t_char* pszNameOut, int iNameLine);
-        BOOL GetCurRecipeDesc(unicode::t_char* pszDescOut, int iDescLine);
+        BOOL GetCurRecipeName(wchar_t* pszNameOut, int iNameLine);
+        BOOL GetCurRecipeDesc(wchar_t* pszDescOut, int iDescLine);
         MIX_RECIPE* GetMostSimilarRecipe();
-        BOOL GetMostSimilarRecipeName(unicode::t_char* pszNameOut, int iNameLine);
-        BOOL GetRecipeAdvice(unicode::t_char* pszAdviceOut, int iAdivceLine);
-        int GetSourceName(int iItemNum, unicode::t_char* pszNameOut, int iNumMixItems, CMixItem* pMixItems);
+        BOOL GetMostSimilarRecipeName(wchar_t* pszNameOut, int iNameLine);
+        BOOL GetRecipeAdvice(wchar_t* pszAdviceOut, int iAdivceLine);
+        int GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixItems, CMixItem* pMixItems);
         BOOL IsReadyToMix() { return (m_iCurMixIndex > 0); }
         int GetSuccessRate() { return m_iSuccessRate; }
         DWORD GetReqiredZen() { return m_dwRequiredZen; }
@@ -214,7 +214,7 @@ namespace SEASON3A
         void EvaluateMixItems(int iNumMixItems, CMixItem* pMixItems);
         void CalcMixRate(int iNumMixItems, CMixItem* pMixItems);
         void CalcMixReqZen(int iNumMixItems, CMixItem* pMixItems);
-        BOOL GetRecipeName(MIX_RECIPE* pRecipe, unicode::t_char* pszNameOut, int iNameLine, BOOL bSimilarRecipe);	// 주어진 조합법의 이름 얻기
+        BOOL GetRecipeName(MIX_RECIPE* pRecipe, wchar_t* pszNameOut, int iNameLine, BOOL bSimilarRecipe);	// 주어진 조합법의 이름 얻기
         BOOL IsChaosItem(CMixItem& rSource);
         BOOL IsChaosJewel(CMixItem& rSource);
         BOOL Is380AddedItem(CMixItem& rSource);
@@ -263,7 +263,7 @@ namespace SEASON3A
         {
             m_iMixSubType = 0;
             m_btPlusChaosRate = 0;
-            OpenRecipeFile("Data\\Local\\Mix.bmd");
+            OpenRecipeFile(L"Data\\Local\\Mix.bmd");
         }
         virtual ~CMixRecipeMgr() {}
 
@@ -310,11 +310,11 @@ namespace SEASON3A
         {
             return m_MixRecipe[GetMixInventoryType()].GetCurMixID();
         }
-        BOOL GetCurRecipeName(unicode::t_char* pszNameOut, int iNameLine)
+        BOOL GetCurRecipeName(wchar_t* pszNameOut, int iNameLine)
         {
             return m_MixRecipe[GetMixInventoryType()].GetCurRecipeName(pszNameOut, iNameLine);
         }
-        BOOL GetCurRecipeDesc(unicode::t_char* pszDescOut, int iDescLine)
+        BOOL GetCurRecipeDesc(wchar_t* pszDescOut, int iDescLine)
         {
             return m_MixRecipe[GetMixInventoryType()].GetCurRecipeDesc(pszDescOut, iDescLine);
         }
@@ -322,15 +322,15 @@ namespace SEASON3A
         {
             return m_MixRecipe[GetMixInventoryType()].GetMostSimilarRecipe();
         }
-        BOOL GetMostSimilarRecipeName(unicode::t_char* pszNameOut, int iNameLine)
+        BOOL GetMostSimilarRecipeName(wchar_t* pszNameOut, int iNameLine)
         {
             return m_MixRecipe[GetMixInventoryType()].GetMostSimilarRecipeName(pszNameOut, iNameLine);
         }
-        BOOL GetRecipeAdvice(unicode::t_char* pszAdviceOut, int iAdivceLine)
+        BOOL GetRecipeAdvice(wchar_t* pszAdviceOut, int iAdivceLine)
         {
             return m_MixRecipe[GetMixInventoryType()].GetRecipeAdvice(pszAdviceOut, iAdivceLine);
         }
-        int GetSourceName(int iItemNum, unicode::t_char* pszNameOut)
+        int GetSourceName(int iItemNum, wchar_t* pszNameOut)
         {
             return m_MixRecipe[GetMixInventoryType()].GetSourceName(iItemNum, pszNameOut, m_MixItemInventory.GetNumMixItems(),
                 m_MixItemInventory.GetMixItems());
@@ -363,7 +363,7 @@ namespace SEASON3A
 #endif //LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
 
     protected:
-        void OpenRecipeFile(const unicode::t_char* szFileName);	// mix.bmd
+        void OpenRecipeFile(const wchar_t* szFileName);	// mix.bmd
 
     protected:
         CMixRecipes m_MixRecipe[MAX_MIX_TYPES];

@@ -201,7 +201,7 @@ void CButton::Render()
     g_pRenderText->SetFont(g_hFixFont);
 
     SIZE size;
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szText, ::strlen(m_szText), &size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szText, ::wcslen(m_szText), &size);
 
     float fTextRelativeYPos = ((CSprite::GetHeight() - size.cy) / 2.0f);
 
@@ -214,15 +214,15 @@ void CButton::ReleaseText()
     SAFE_DELETE_ARRAY(m_adwTextColorMap);
 }
 
-void CButton::SetText(const char* pszText, DWORD* adwColor)
+void CButton::SetText(const wchar_t* pszText, DWORD* adwColor)
 {
     ReleaseText();
 
-    m_szText = new char[::strlen(pszText) + 1];
-    ::strcpy(m_szText, pszText);
+    m_szText = new wchar_t[wcslen(pszText) + 1];
+    wcscpy(m_szText, pszText);
 
     int nTextColor = -1 < m_anImgMap[BTN_UP_CHECK] ? BTN_IMG_MAX : BTN_IMG_MAX / 2;
 
     m_adwTextColorMap = new DWORD[nTextColor];
-    ::memcpy(m_adwTextColorMap, adwColor, sizeof(DWORD) * nTextColor);
+    memcpy(m_adwTextColorMap, adwColor, sizeof(DWORD) * nTextColor);
 }

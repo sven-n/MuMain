@@ -15,7 +15,7 @@
 class CServerMsgWin : public CWinEx
 {
 protected:
-    char	m_aszMsg[SMW_MSG_LINE_MAX][SMW_MSG_ROW_MAX];
+    wchar_t	m_aszMsg[SMW_MSG_LINE_MAX][SMW_MSG_ROW_MAX];
     int		m_nMsgLine;
 
 public:
@@ -25,7 +25,7 @@ public:
     void Create();
     bool CursorInWin(int nArea);
 
-    void AddMsg(char* pszMsg);
+    void AddMsg(wchar_t* pszMsg);
 
 protected:
     void RenderControls();

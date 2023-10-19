@@ -39,7 +39,7 @@ namespace SEASON3B
         void SetServerEnable(BOOL bFlag) { m_pFriendWindowMgr->SetServerEnable(bFlag); }
         BOOL IsServerEnable() { return m_pFriendWindowMgr->IsServerEnable(); }
 
-        DWORD AddWindow(int iType, int x, int y, const char* strTitle, DWORD dwParentID = 0, int iOption = UIADDWND_NULL)
+        DWORD AddWindow(int iType, int x, int y, const wchar_t* strTitle, DWORD dwParentID = 0, int iOption = UIADDWND_NULL)
         {
             return m_pFriendWindowMgr->AddWindow(iType, x, y, strTitle, dwParentID, iOption);
         }

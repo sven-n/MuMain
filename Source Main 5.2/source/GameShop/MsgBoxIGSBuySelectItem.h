@@ -88,7 +88,7 @@ private:
     void RenderListBox();
     void ReleaseListBox();
     void ListBoxDoAction();
-    void CMsgBoxIGSBuySelectItem::AddData(int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iProductSeq, unicode::t_char* pszPriceUnit, int iCashType);
+    void CMsgBoxIGSBuySelectItem::AddData(int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iProductSeq, wchar_t* pszPriceUnit, int iCashType);
 
 private:
 
@@ -102,9 +102,9 @@ private:
     WORD	m_wItemCode;
     int		m_iDescriptionLine;
 
-    unicode::t_char		m_szPackageName[MAX_TEXT_LENGTH];
-    unicode::t_char		m_szPrice[MAX_TEXT_LENGTH];
-    unicode::t_char		m_szDescription[UIMAX_TEXT_LINE][MAX_TEXT_LENGTH];
+    wchar_t m_szPackageName[MAX_TEXT_LENGTH];
+    wchar_t m_szPrice[MAX_TEXT_LENGTH];
+    wchar_t m_szDescription[UIMAX_TEXT_LINE][MAX_TEXT_LENGTH];
 };
 
 class CMsgBoxIGSBuySelectItemLayout : public TMsgBoxLayout<CMsgBoxIGSBuySelectItem>

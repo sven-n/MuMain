@@ -445,25 +445,25 @@ void SEASON3B::CNewUIMessageBoxMng::PopAllEvents()
 
 void SEASON3B::CNewUIMessageBoxMng::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_top.tga", IMAGE_MSGBOX_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_middle.tga", IMAGE_MSGBOX_MIDDLE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_bottom.tga", IMAGE_MSGBOX_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_MSGBOX_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Message_Line.tga", IMAGE_MSGBOX_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Message_03.tga", IMAGE_MSGBOX_TOP_TITLEBAR, GL_LINEAR);
-    LoadBitmap("Interface\\newui_separate_line.jpg", IMAGE_MSGBOX_SEPARATE_LINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_button_ok.tga", IMAGE_MSGBOX_BTN_OK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_button_cancel.tga", IMAGE_MSGBOX_BTN_CANCEL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_button_close.tga", IMAGE_MSGBOX_BTN_CLOSE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_MSGBOX_BTN_EMPTY, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_small.tga", IMAGE_MSGBOX_BTN_EMPTY_SMALL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_big.tga", IMAGE_MSGBOX_BTN_EMPTY_BIG, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_top.tga", IMAGE_MSGBOX_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_middle.tga", IMAGE_MSGBOX_MIDDLE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_bottom.tga", IMAGE_MSGBOX_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MSGBOX_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Message_Line.tga", IMAGE_MSGBOX_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Message_03.tga", IMAGE_MSGBOX_TOP_TITLEBAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_separate_line.jpg", IMAGE_MSGBOX_SEPARATE_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_button_ok.tga", IMAGE_MSGBOX_BTN_OK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_button_cancel.tga", IMAGE_MSGBOX_BTN_CANCEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_button_close.tga", IMAGE_MSGBOX_BTN_CLOSE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_MSGBOX_BTN_EMPTY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_MSGBOX_BTN_EMPTY_SMALL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_big.tga", IMAGE_MSGBOX_BTN_EMPTY_BIG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_Bar_switch01.jpg", IMAGE_MSGBOX_PROGRESS_BG, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bar_switch02.jpg", IMAGE_MSGBOX_PROGRESS_BAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bar_switch01.jpg", IMAGE_MSGBOX_PROGRESS_BG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bar_switch02.jpg", IMAGE_MSGBOX_PROGRESS_BAR, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_DuelWindow.tga", IMAGE_MSGBOX_DUEL_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_DuelWindow.tga", IMAGE_MSGBOX_DUEL_BACK, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIMessageBoxMng::UnloadImages()

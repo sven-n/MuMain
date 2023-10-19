@@ -7,7 +7,7 @@
 #include "ZzzTexture.h"
 #include "UIManager.h"
 #include "UIGuardsMan.h"
-#include "wsclientinline.h"
+
 
 #include "MixMgr.h"
 
@@ -234,11 +234,11 @@ void CSenatusInfo::DoGateRepairAction()
 {
     if (GetCurrGateInfo().btNpcLive == 0)
     {
-        SendRequestBCNPCBuy(GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex);
+        SocketClient->ToGameServer()->SendCastleSiegeDefenseBuyRequest(GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex);
     }
     else
     {
-        SendRequestBCNPCRepair(GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex);
+        SocketClient->ToGameServer()->SendCastleSiegeDefenseRepairRequest(GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex);
     }
 }
 
@@ -246,24 +246,24 @@ void CSenatusInfo::DoGateUpgradeHPAction()
 {
     int nHPLevel = g_SenatusInfo.GetHPLevel(&GetCurrGateInfo());
     int nNextHP = g_SenatusInfo.GetHP(GetCurrGateInfo().iNpcNumber, nHPLevel + 1);
-    SendRequestBCNPCUpgrade(GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex, NPCUPGRADE_HP, nNextHP);
+    SocketClient->ToGameServer()->SendCastleSiegeDefenseUpgradeRequest(GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex, NPCUPGRADE_HP, nNextHP);
 }
 
 void CSenatusInfo::DoGateUpgradeDefenseAction()
 {
     int nLevel = g_SenatusInfo.GetDefenseLevel(&GetCurrGateInfo()) + 1;
-    SendRequestBCNPCUpgrade(GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex, NPCUPGRADE_DEFENSE, nLevel);
+    SocketClient->ToGameServer()->SendCastleSiegeDefenseUpgradeRequest(GetCurrGateInfo().iNpcNumber, GetCurrGateInfo().iNpcIndex, NPCUPGRADE_DEFENSE, nLevel);
 }
 
 void CSenatusInfo::DoStatueRepairAction()
 {
     if (GetCurrStatueInfo().btNpcLive == 0)
     {
-        SendRequestBCNPCBuy(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex);
+        SocketClient->ToGameServer()->SendCastleSiegeDefenseBuyRequest(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex);
     }
     else
     {
-        SendRequestBCNPCRepair(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex);
+        SocketClient->ToGameServer()->SendCastleSiegeDefenseRepairRequest(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex);
     }
 }
 
@@ -271,34 +271,30 @@ void CSenatusInfo::DoStatueUpgradeHPAction()
 {
     int nHPLevel = g_SenatusInfo.GetHPLevel(&GetCurrStatueInfo());
     int nNextHP = g_SenatusInfo.GetHP(GetCurrStatueInfo().iNpcNumber, nHPLevel + 1);
-    SendRequestBCNPCUpgrade(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex, NPCUPGRADE_HP, nNextHP);
+    SocketClient->ToGameServer()->SendCastleSiegeDefenseUpgradeRequest(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex, NPCUPGRADE_HP, nNextHP);
 }
 
 void CSenatusInfo::DoStatueUpgradeDefenseAction()
 {
     int nLevel = g_SenatusInfo.GetDefenseLevel(&GetCurrStatueInfo()) + 1;
-    SendRequestBCNPCUpgrade(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex, NPCUPGRADE_DEFENSE, nLevel);
+    SocketClient->ToGameServer()->SendCastleSiegeDefenseUpgradeRequest(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex, NPCUPGRADE_DEFENSE, nLevel);
 }
 
 void CSenatusInfo::DoStatueUpgradeRecoverAction()
 {
     int nLevel = g_SenatusInfo.GetRecoverLevel(&GetCurrStatueInfo()) + 1;
-    SendRequestBCNPCUpgrade(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex, NPCUPGRADE_RECOVER, nLevel);
+    SocketClient->ToGameServer()->SendCastleSiegeDefenseUpgradeRequest(GetCurrStatueInfo().iNpcNumber, GetCurrStatueInfo().iNpcIndex, NPCUPGRADE_RECOVER, nLevel);
 }
 
 void CSenatusInfo::DoApplyTaxAction()
 {
-    SendRequestBCChangeTaxRate(1, (m_iChaosTaxRate >> 24), ((m_iChaosTaxRate >> 16) & 0xff), ((m_iChaosTaxRate >> 8) & 0xff), (m_iChaosTaxRate & 0xff));
-    SendRequestBCChangeTaxRate(2, (m_iNormalTaxRate >> 24), ((m_iNormalTaxRate >> 16) & 0xff), ((m_iNormalTaxRate >> 8) & 0xff), (m_iNormalTaxRate & 0xff));
+    SocketClient->ToGameServer()->SendCastleSiegeTaxChangeRequest(1, m_iChaosTaxRate);
+    SocketClient->ToGameServer()->SendCastleSiegeTaxChangeRequest(2, m_iNormalTaxRate);
 }
 
 void CSenatusInfo::DoWithdrawAction(DWORD dwMoney)
 {
-    //char* szTmp = g_pUIPopup->GetInputText();
-    //DWORD dwMoney;
-    //sscanf( szTmp, "%u", &dwMoney );
-    BYTE* p = (BYTE*)&dwMoney;
-    SendRequestBCWithdraw((*p), (*(p + 1)), (*(p + 2)), (*(p + 3)));
+    SocketClient->ToGameServer()->SendCastleSiegeTaxMoneyWithdraw(dwMoney);
 }
 
 void CSenatusInfo::SetNPCInfo(LPPMSG_NPCDBLIST pInfo)

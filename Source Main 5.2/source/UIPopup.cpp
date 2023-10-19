@@ -54,7 +54,7 @@ void CUIPopup::Init()
     ZeroMemory(m_szInputText, sizeof(char) * 1024);
 }
 
-DWORD CUIPopup::SetPopup(const char* pszText, int nLineCount, int nBufferSize, int Type, int (*ResultFunc)(POPUP_RESULT Result), POPUP_ALIGN Align)
+DWORD CUIPopup::SetPopup(const wchar_t* pszText, int nLineCount, int nBufferSize, int Type, int (*ResultFunc)(POPUP_RESULT Result), POPUP_ALIGN Align)
 {
     if (nLineCount > MAX_POPUP_TEXTLINE)
     {
@@ -64,7 +64,7 @@ DWORD CUIPopup::SetPopup(const char* pszText, int nLineCount, int nBufferSize, i
     if (m_dwPopupID != 0)
     {
         __TraceF(TEXT("CUIPopup::SetPopup\n"));
-        g_pChatListBox->AddText("", "SetPopup", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", L"SetPopup", SEASON3B::TYPE_SYSTEM_MESSAGE);
         return 0;
     }
 
@@ -76,8 +76,8 @@ DWORD CUIPopup::SetPopup(const char* pszText, int nLineCount, int nBufferSize, i
     {
         if (pszText[i * nBufferSize])
         {
-            strcpy(m_szPopupText[i], &pszText[i * nBufferSize]);
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], strlen(m_szPopupText[i]), &sizeText);
+            wcscpy(m_szPopupText[i], &pszText[i * nBufferSize]);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], wcslen(m_szPopupText[i]), &sizeText);
             m_sizePopup.cy += sizeText.cy + 2;
         }
     }
@@ -127,14 +127,14 @@ void CUIPopup::SetPopupExtraFunc(void (*InputFunc)(), void (*RenderFunc)())
     PopupRenderFuncPointer = RenderFunc;
 }
 
-char* CUIPopup::GetInputText()
+wchar_t* CUIPopup::GetInputText()
 {
     if (g_iChatInputType == 1)
         g_pSingleTextInputBox->GetText(m_szInputText, 1024);
     else
     {
         if (InputText[0])
-            strcpy(m_szInputText, InputText[0]);
+            wcscpy(m_szInputText, InputText[0]);
         else
             m_szInputText[0] = NULL;
     }
@@ -488,7 +488,7 @@ void CUIPopup::Render()
         for (int i = 0; i < m_nPopupTextCount; ++i)
         {
             SIZE size;
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], strlen(m_szPopupText[i]), &size);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], wcslen(m_szPopupText[i]), &size);
 
             size.cx /= g_fScreenRate_x;
             g_pRenderText->RenderText(320 - (size.cx / 2), fPosY, m_szPopupText[i], 0, 0, RT3_SORT_LEFT);

@@ -4,11 +4,13 @@
 
 #include "stdafx.h"
 
+#include "ZzzCharacter.h"
+
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "MsgBoxIGSUseItemConfirm.h"
 
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
 #include "MsgBoxIGSUseBuffConfirm.h"
 
@@ -57,19 +59,19 @@ bool CMsgBoxIGSUseItemConfirm::Create(float fPriority)
 //--------------------------------------------
 // Initialize
 void CMsgBoxIGSUseItemConfirm::Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode,
-    unicode::t_char szItemType, unicode::t_char* pszItemName)
+    wchar_t szItemType, wchar_t* pszItemName)
 {
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
 
     m_iStorageSeq = iStorageSeq;
     m_iStorageItemSeq = iStorageItemSeq;
     m_wItemCode = wItemCode;
     m_szItemType = szItemType;
 
-    strcpy(m_szItemName, pszItemName);
+    wcscpy(m_szItemName, pszItemName);
 
     // Description
-    sprintf(szText, GlobalText[2923], pszItemName);
+    swprintf(szText, GlobalText[2923], pszItemName);
     m_iDesciptionLine = ::DivideStringByPixel(&m_szDescription[0][0], UIMAX_TEXT_LINE, MAX_TEXT_LENGTH, szText, IGS_TEXT_DIVIDE_WIDTH, false, '#');
 }
 
@@ -141,7 +143,7 @@ CALLBACK_RESULT CMsgBoxIGSUseItemConfirm::OKButtonDown(class CNewUIMessageBoxBas
     // 현재버프증 사용하려는 버프타입이 같으면 경고 메세지 처리
     BuffScriptLoader& pBuffInfo = TheBuffInfo();
     int iBuffType = pBuffInfo.GetBuffType(pOwnMsgBox->m_wItemCode);
-    unicode::t_char szBuffName[MAX_TEXT_LENGTH] = { '\0', };
+    wchar_t szBuffName[MAX_TEXT_LENGTH] = { '\0', };
     bool bEqualBuff = Hero->Object.m_BuffMap.IsEqualBuffType(iBuffType, szBuffName);
 
 #ifdef LEM_FIX_WARNINNGMSG_DELETE
@@ -158,8 +160,8 @@ CALLBACK_RESULT CMsgBoxIGSUseItemConfirm::OKButtonDown(class CNewUIMessageBoxBas
     }
     else
     {
-        SendRequestIGS_UseStorageItem(pOwnMsgBox->m_iStorageSeq, pOwnMsgBox->m_iStorageItemSeq, pOwnMsgBox->m_wItemCode, &(pOwnMsgBox->m_szItemType));
-        SendRequestIGS_CashPointInfo();			// 사용자의 캐시 포인트 정보 요청
+        SocketClient->ToGameServer()->SendCashShopStorageItemConsumeRequest(pOwnMsgBox->m_iStorageSeq, pOwnMsgBox->m_iStorageItemSeq, pOwnMsgBox->m_wItemCode, pOwnMsgBox->m_szItemType);
+        SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -247,15 +249,15 @@ void CMsgBoxIGSUseItemConfirm::RenderTexts()
     }
 
 #ifdef FOR_WORK
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
-    sprintf(szText, "m_iStorageSeq : %d", m_iStorageSeq);
+    swprintf(szText, L"m_iStorageSeq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "m_iStorageItemSeq : %d", m_iStorageItemSeq);
+    swprintf(szText, L"m_iStorageItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "m_wItemCode : %d", m_wItemCode);
+    swprintf(szText, L"m_wItemCode : %d", m_wItemCode);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "m_szItemType : %c", m_szItemType);
+    swprintf(szText, L"m_szItemType : %c", m_szItemType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }
@@ -272,12 +274,12 @@ void CMsgBoxIGSUseItemConfirm::RenderButtons()
 // LoadImages
 void CMsgBoxIGSUseItemConfirm::LoadImages()
 {
-    LoadBitmap("Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_IGS_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_IGS_DOWN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_top.tga", IMAGE_IGS_UP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_back06(L).tga", IMAGE_IGS_LEFTLINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_back06(R).tga", IMAGE_IGS_RIGHTLINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_IGS_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_IGS_DOWN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_top.tga", IMAGE_IGS_UP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_back06(L).tga", IMAGE_IGS_LEFTLINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_back06(R).tga", IMAGE_IGS_RIGHTLINE, GL_LINEAR);
 }
 
 //--------------------------------------------

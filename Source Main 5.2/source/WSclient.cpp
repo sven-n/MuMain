@@ -14,16 +14,12 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzOpenData.h"
 #include "ZzzScene.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
-#include "./Utilities/Log/DebugAngel.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "./Utilities/Memory/MemoryLock.h"
 #include "MatchEvent.h"
 #include "GOBoid.h"
-#ifdef SAVE_PACKET
-#include "./ExternalObject/leaf/stdleaf.h"
-#endif // SAVE_PACKET
 #include "CSQuest.h"
 #include "PersonalShopTitleImp.h"
 #include "GMHellas.h"
@@ -70,6 +66,8 @@
 #ifdef PBG_ADD_SECRETBUFF
 #include "FatigueTimeSystem.h"
 #endif //PBG_ADD_SECRETBUFF
+#include <codecvt>
+
 #include "ServerListManager.h"
 #include "MonkSystem.h"
 
@@ -102,6 +100,9 @@ extern char DebugTextCount;
 extern int  TotalPacketSize;
 extern int g_iKeyPadEnable;
 
+extern BOOL g_bWhileMovingZone;
+extern DWORD g_dwLatestZoneMoving;
+
 extern CUIMapName* g_pUIMapName; // rozy
 
 extern bool g_PetEnableDuel;
@@ -113,17 +114,14 @@ MASTER_LEVEL_VALUE	Master_Level_Data;
 BYTE Version[SIZE_PROTOCOLVERSION] = { '1' + 1, '0' + 2, '4' + 3, '0' + 4, '4' + 5 };
 BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 
-Connection* g_pSocketClient = nullptr;
-
 Connection* SocketClient = nullptr;
 
 BYTE    g_byPacketSerialSend = 0;
 BYTE    g_byPacketSerialRecv = 0;
 
 BOOL    g_bGameServerConnected = FALSE;
-DWORD   g_dwLatestMagicTick = 0;
 
-PMSG_MATCH_RESULT	g_wtMatchResult;
+MATCH_RESULT	g_wtMatchResult;
 PMSG_MATCH_TIMEVIEW	g_wtMatchTimeLeft;
 int g_iGoalEffect = 0;
 
@@ -134,9 +132,9 @@ int     CurrentProtocolState;
 
 int DirTable[16] = { -1,-1,  0,-1,  1,-1,  1,0,  1,1,  0,1,  -1,1,  -1,0 };
 
-char    Password[MAX_ID_SIZE + 1];
-char    QuestionID[MAX_ID_SIZE + 1];
-char    Question[31];
+wchar_t    Password[MAX_ID_SIZE + 1];
+wchar_t    QuestionID[MAX_ID_SIZE + 1];
+wchar_t    Question[31];
 
 #define FIRST_CROWN_SWITCH_NUMBER	322
 
@@ -162,18 +160,20 @@ void AddDebugText(const unsigned char* Buffer, int Size)
 // Forward declaration
 static void HandleIncomingPacketLocked(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
 
-BOOL CreateSocket(char* IpAddr, unsigned short Port)
+BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
     g_byPacketSerialSend = 0;
     g_byPacketSerialRecv = 0;
-    g_ConsoleDebug->Write(MCD_NORMAL, "[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
-    SocketClient = new Connection(IpAddr, Port, &HandleIncomingPacketLocked);
-    g_pSocketClient = SocketClient;
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
+
+    // todo: generally, it's a bad idea to assume a specific port number (range).
+    const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
+    SocketClient = new Connection(IpAddr, Port, isEncrypted, &HandleIncomingPacketLocked);
     if (!SocketClient->IsConnected())
     {
         bResult = FALSE;
-        g_ErrorReport.Write("Failed to connect. ");
+        g_ErrorReport.Write(L"Failed to connect. ");
         g_ErrorReport.WriteCurrentTime();
         free(SocketClient);
         SocketClient = nullptr;
@@ -201,14 +201,14 @@ void BuxConvert(BYTE* Buffer, int Size)
 }
 
 int  LogIn = 0;
-char LogInID[MAX_ID_SIZE + 1] = { 0, };
+wchar_t LogInID[MAX_ID_SIZE + 1] = { 0, };
 
 bool First = false;
 int FirstTime = 0;
 
 bool LogOut = false;
 
-char ChatWhisperID[MAX_ID_SIZE + 1];
+wchar_t ChatWhisperID[MAX_ID_SIZE + 1];
 
 int MoveCount = 0;
 
@@ -218,17 +218,17 @@ bool Teleport = false;
 
 int BuyCost = 0;
 
-int  EnableUse = 0;
+int  EnableUse = 0; // todo: get rid of this, it may cause the stuck client bug, so that players can't use items anymore.
 
-int SendGetItem = -1;
-int SendDropItem = -1;
+int SendGetItem = -1; // todo: get rid of this, it may cause the stuck client bug, so that players can't pick up anything anymore.
+int SendDropItem = -1; // todo: get rid of this, it may cause the stuck client bug, so that players can't drop anything anymore.
 
-int FindGuildName(char* Name)
+int FindGuildName(wchar_t* Name)
 {
     for (int i = 0; i < MARK_EDIT; i++)
     {
         MARK_t* p = &GuildMark[i];
-        if (strcmp(p->GuildName, Name) == NULL)
+        if (wcscmp(p->GuildName, Name) == NULL)
         {
             return i;
         }
@@ -272,7 +272,7 @@ void InitGuildWar()
     }
 }
 
-BOOL Util_CheckOption(char* lpszCommandLine, unsigned char cOption, char* lpszString);
+BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString);
 
 void ReceiveServerList(const BYTE* ReceiveBuffer)
 {
@@ -291,7 +291,7 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
 
         g_ServerListManager->InsertServerGroup(Data2->Index, Data2->Percent);
 
-        g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList(%d %d %d)]", i, Data2->Index, Data2->Percent);
+        g_ConsoleDebug->Write(MCD_RECEIVE, L"0xF4 [ReceiveServerList(%d %d %d)]", i, Data2->Index, Data2->Percent);
 
         Offset += sizeof(PRECEIVE_SERVER_LIST);
     }
@@ -304,17 +304,17 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
         rUIMng.ShowWin(&rUIMng.m_LoginMainWin);
     }
 
-    g_ErrorReport.Write("Success Receive Server List.\r\n");
+    g_ErrorReport.Write(L"Success Receive Server List.\r\n");
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0xF4 [ReceiveServerList]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0xF4 [ReceiveServerList]");
 }
-void ReceiveServerConnect(const BYTE* ReceiveBuffer) //Recebe informação do ConnectServer sobre a sala e envia a conexão para a sala escolhida
+void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SERVER_ADDRESS)ReceiveBuffer;
-    char IP[16];
-    memset(IP, 0, 16);
-    memcpy(IP, (char*)Data->IP, 15);
-    g_ErrorReport.Write("[ReceiveServerConnect]");
+    wchar_t IP[16];
+    CMultiLanguage::ConvertFromUtf8(IP, Data->IP);
+
+    g_ErrorReport.Write(L"[ReceiveServerConnect]");
     if (SocketClient != nullptr)
     {
         SocketClient->Close();
@@ -325,15 +325,15 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer) //Recebe informação do Conn
         g_bGameServerConnected = TRUE;
     }
 
-    char Text[100];
-    sprintf(Text, GlobalText[481], IP, Data->Port);
-    g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    wchar_t Text[100];
+    swprintf(Text, GlobalText[481], IP, Data->Port);
+    g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
 void ReceiveServerConnectBusy(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SERVER_BUSY)ReceiveBuffer;
-    SendRequestServerList();
+    SocketClient->ToConnectServer()->SendServerListRequest();
 }
 
 void ReceiveJoinServer(const BYTE* ReceiveBuffer)
@@ -358,7 +358,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             break;
 
         default:
-            g_ErrorReport.Write("Connectting error. ");
+            g_ErrorReport.Write(L"Connectting error. ");
             g_ErrorReport.WriteCurrentTime();
             rUIMng.PopUpMsgWin(MESSAGE_SERVER_LOST);
             break;
@@ -369,24 +369,24 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             {
                 rUIMng.HideWin(&rUIMng.m_LoginWin);
                 rUIMng.PopUpMsgWin(MESSAGE_VERSION);
-                g_ErrorReport.Write("Version dismatch - Join server.\r\n");
+                g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
             }
         }
     }
 
     g_GuildCache.Reset();
 
-#if defined _DEBUG || defined FOR_WORK
-    if (Data2->Result == 0x01)
-    {
-        char lpszTemp[256];
-        if (Util_CheckOption(GetCommandLine(), 'i', lpszTemp))
-        {
-            g_ErrorReport.Write("> Try to Login \"%s\"\r\n", m_ID);
-            SendRequestLogIn(m_ID, lpszTemp);
-        }
-    }
-#endif
+//#if defined _DEBUG || defined FOR_WORK
+//    if (Data2->Result == 0x01)
+//    {
+//        wchar_t lpszTemp[256];
+//        if (Util_CheckOption(GetCommandLineW(), L'i', lpszTemp))
+//        {
+//            g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", m_ID);
+//            SendRequestLogIn(m_ID, lpszTemp);
+//        }
+//    }
+//#endif
 }
 
 void ReceiveConfirmPassword(const BYTE* ReceiveBuffer)
@@ -398,8 +398,8 @@ void ReceiveConfirmPassword(const BYTE* ReceiveBuffer)
         CurrentProtocolState = RECEIVE_CONFIRM_PASSWORD_FAIL_ID;
         break;
     case 1:
-        BuxConvert(Data->Question, sizeof(Data->Question));
-        strcpy(Question, (char*)Data->Question);
+        BuxConvert((BYTE*)Data->Question, sizeof(Data->Question));
+        CMultiLanguage::ConvertFromUtf8(Question, Data->Question, sizeof Data->Question);
         CurrentProtocolState = RECEIVE_CONFIRM_PASSWORD_SUCCESS;
         break;
     }
@@ -411,8 +411,8 @@ void ReceiveConfirmPassword2(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 1:
-        BuxConvert(Data->Password, sizeof(Data->Password));
-        strcpy(Password, (char*)Data->Password);
+        BuxConvert((BYTE*)Data->Password, sizeof(Data->Password));
+        CMultiLanguage::ConvertFromUtf8(Password, Data->Password, sizeof Data->Password);
         CurrentProtocolState = RECEIVE_CONFIRM_PASSWORD2_SUCCESS;
         break;
     case 0:
@@ -456,9 +456,9 @@ void ReceiveCharacterList(const BYTE* ReceiveBuffer)
     int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
 
 #ifdef _DEBUG
-    g_ConsoleDebug->Write(MCD_RECEIVE, "[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
 #else
-    g_ErrorReport.Write("[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
+    g_ErrorReport.Write(L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
 #endif
 
     CharacterAttribute->IsVaultExtended = Data->IsVaultExtended;
@@ -493,8 +493,7 @@ void ReceiveCharacterList(const BYTE* ReceiveBuffer)
         c->Level = Data2->Level;
         c->CtlCode = Data2->CtlCode;
 
-        memcpy(c->ID, (char*)Data2->ID, MAX_ID_SIZE);
-        c->ID[MAX_ID_SIZE] = NULL;
+        CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID);
 
         ChangeCharacterExt(Data2->Index, Data2->Equipment);
 
@@ -522,7 +521,7 @@ void ReceiveCharacterCard_New(const BYTE* ReceiveBuffer)
     if ((Data->CharacterCard & CLASS_SUMMONER_CARD) == CLASS_SUMMONER_CARD)
         g_CharCardEnable.bCharacterEnable[2] = true;
 
-    g_ConsoleDebug->Write(MCD_NORMAL, "[BOTH MESSAGE] CharacterCard Recv %d = %d %d %d", Data->CharacterCard, g_CharCardEnable.bCharacterEnable[0], g_CharCardEnable.bCharacterEnable[1], g_CharCardEnable.bCharacterEnable[2]);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[BOTH MESSAGE] CharacterCard Recv %d = %d %d %d", Data->CharacterCard, g_CharCardEnable.bCharacterEnable[0], g_CharCardEnable.bCharacterEnable[1], g_CharCardEnable.bCharacterEnable[2]);
 }
 
 void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
@@ -559,7 +558,7 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
         int iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
 
         CharactersClient[Data->Index].Class = iClass;
-        memcpy(CharactersClient[Data->Index].ID, Data->ID, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(CharactersClient[Data->Index].ID, Data->ID);
         CharactersClient[Data->Index].ID[MAX_ID_SIZE] = NULL;
         CurrentProtocolState = RECEIVE_CREATE_CHARACTER_SUCCESS;
         CUIMng& rUIMng = CUIMng::Instance();
@@ -572,7 +571,7 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
     else if (Data->Result == 2)
         CUIMng::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL2);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x01 [ReceiveCreateCharacter]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x01 [ReceiveCreateCharacter]");
 }
 
 void ReceiveDeleteCharacter(const BYTE* ReceiveBuffer)
@@ -628,7 +627,7 @@ void InitGame()
 
     CheckInventory = NULL;
 
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     g_iFollowCharacter = -1;
 
@@ -690,7 +689,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     switch (Data->Value)
     {
     case 0:
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         break;
     case 1:
         StopMusic();
@@ -702,7 +701,8 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         CryWolfMVPInit();
 
         SceneFlag = CHARACTER_SCENE;
-        SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
+        CurrentProtocolState = REQUEST_CHARACTERS_LIST;
+        SocketClient->ToGameServer()->SendRequestCharacterList(g_pMultiLanguage->GetLanguage());
 
         InitCharacterScene = false;
         InitMainScene = false;
@@ -720,7 +720,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             ReleaseMainData();
         }
 
-        g_ErrorReport.Write("[ReceiveLogOut]");
+        g_ErrorReport.Write(L"[ReceiveLogOut]");
         if (SocketClient != nullptr)
         {
             SocketClient->Close();
@@ -745,7 +745,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     g_pFriendList->ClearFriendList();
     g_pLetterList->ClearLetterList();
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x02 [ReceiveServerList(%d)]", Data->Value);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x02 [ReceiveServerList(%d)]", Data->Value);
 
     return (TRUE);
 }
@@ -846,7 +846,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
     {
-        SendRequestCrywolfInfo();
+        SocketClient->ToGameServer()->SendCrywolfInfoRequest();
     }
 
     matchEvent::CreateEventMatch(gMapManager.WorldActive);
@@ -855,7 +855,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     CreateCharacterPointer(c, MODEL_PLAYER, Data->PositionX, Data->PositionY, ((float)Data->Angle - 1.f) * 45.f);
     c->Key = HeroKey;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d", c->Key, Data->Map, Data->PositionX, Data->PositionY);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d", c->Key, Data->Map, Data->PositionX, Data->PositionY);
 
     OBJECT* o = &c->Object;
     c->Class = CharacterAttribute->Class;
@@ -867,7 +867,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     Hero = c;
 
-    memcpy(c->ID, (char*)CharacterAttribute->Name, MAX_ID_SIZE);
+    wcscpy(c->ID, CharacterAttribute->Name);
 
     for (int i = 0; i < MAX_EQUIPMENT; ++i)
     {
@@ -932,10 +932,10 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4);
     else
     {
-        char Text[256];
-        sprintf(Text, "%s%s", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
+        wchar_t Text[256];
+        swprintf(Text, L"%s%s", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
 
-        g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
     if (gMapManager.WorldActive == WD_30BATTLECASTLE)
@@ -954,7 +954,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_EMPIREGUARDIAN_TIMER);
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveJoinMapServer]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
 
     return (TRUE);
 }
@@ -1112,7 +1112,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
 
     g_pNewUISystem->HideAll();
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x04 [ReceiveRevival]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x04 [ReceiveRevival]");
 }
 
 void ReceiveMagicList(const BYTE* ReceiveBuffer)
@@ -1209,7 +1209,7 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     if (Master_Skill_Bool > -1 && Skill_Bool > -1)
         CharacterAttribute->Skill[Skill_Bool] = 0;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x11 [ReceiveMagicList]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
 }
 
 BOOL ReceiveInventory(const BYTE* ReceiveBuffer, BOOL bEncrypted)
@@ -1259,7 +1259,7 @@ BOOL ReceiveInventory(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         Offset += sizeof(PRECEIVE_INVENTORY);
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x10 [ReceiveInventory]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x10 [ReceiveInventory]");
 
     return (TRUE);
 }
@@ -1293,7 +1293,7 @@ void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
         EnableUse = 0;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x28 [ReceiveDeleteInventory(%d %d)]", Data->SubCode, Data->Value);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x28 [ReceiveDeleteInventory(%d %d)]", Data->SubCode, Data->Value);
 }
 
 void ReceiveTradeInventory(const BYTE* ReceiveBuffer)
@@ -1310,7 +1310,7 @@ void ReceiveTradeInventory(const BYTE* ReceiveBuffer)
     }
     else if (Data->SubCode == 5)
     {
-        g_pChatListBox->AddText("", GlobalText[1208], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1208], SEASON3B::TYPE_ERROR_MESSAGE);
         PlayBuffer(SOUND_MIX01);
         PlayBuffer(SOUND_BREAK01);
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
@@ -1359,55 +1359,55 @@ void ReceiveTradeInventory(const BYTE* ReceiveBuffer)
         Offset += sizeof(PRECEIVE_INVENTORY);
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x31 [ReceiveTradeInventory]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x31 [ReceiveTradeInventory]");
 }
 
 void ReceiveChat(const BYTE* ReceiveBuffer)
 {
     if (SceneFlag == LOG_IN_SCENE)
     {
-        g_ErrorReport.Write("Send Request Server List.\r\n");
-        SendRequestServerList();
+        g_ErrorReport.Write(L"Send Request Server List.\r\n");
+        SocketClient->ToConnectServer()->SendServerListRequest();
     }
     else
     {
         auto Data = (LPPCHATING)ReceiveBuffer;
 
-        char ID[MAX_ID_SIZE + 1];
-        memset(ID, 0, MAX_ID_SIZE + 1);
-        memcpy(ID, (char*)Data->ID, MAX_ID_SIZE);
+        wchar_t ID[MAX_ID_SIZE + 1];
+        CMultiLanguage::ConvertFromUtf8(ID, Data->ID);
 
-        char Text[MAX_CHAT_SIZE + 1];
-        memset(Text, 0, MAX_CHAT_SIZE + 1);
+        const auto messageSize = Data->Header.Size - MAX_ID_SIZE - sizeof(PBMSG_HEADER);
+        wchar_t Text[MAX_CHAT_SIZE + 1];
+        CMultiLanguage::ConvertFromUtf8(Text, Data->ChatText);
 
-        if (Data->ChatText[0] == '~')
+        if (Text[0] == L'~')
         {
-            for (int i = 0; i < MAX_CHAT_SIZE - 1; i++)
-                Text[i] = Data->ChatText[i + 1];
+            for (int i = 0; i < messageSize - 1; i++)
+                Text[i] = Text[i + 1];
             g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_PARTY_MESSAGE);
         }
-        else if (Data->ChatText[0] == '@' && Data->ChatText[1] == '@')
+        else if (Text[0] == L'@' && Text[1] == L'@')
         {
-            for (int i = 0; i < MAX_CHAT_SIZE - 2; i++)
-                Text[i] = Data->ChatText[i + 2];
+            for (int i = 0; i < messageSize - 2; i++)
+                Text[i] = Text[i + 2];
             g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_UNION_MESSAGE);
         }
-        else if (Data->ChatText[0] == '@')
+        else if (Text[0] == L'@')
         {
-            for (int i = 0; i < MAX_CHAT_SIZE - 1; i++)
-                Text[i] = Data->ChatText[i + 1];
+            for (int i = 0; i < messageSize - 1; i++)
+                Text[i] = Text[i + 1];
             g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_GUILD_MESSAGE);
         }
-        else if (Data->ChatText[0] == '$')
+        else if (Text[0] == L'$')
         {
-            for (int i = 0; i < MAX_CHAT_SIZE - 1; i++)
-                Text[i] = Data->ChatText[i + 2];
+            for (int i = 0; i < messageSize - 1; i++)
+                Text[i] = Text[i + 2];
             g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_GENS_MESSAGE);
         }
-        else if (Data->ChatText[0] == '#')
+        else if (Text[0] == L'#')
         {
-            for (int i = 0; i < MAX_CHAT_SIZE - 1; i++)
-                Text[i] = Data->ChatText[i + 1];
+            for (int i = 0; i < messageSize - 1; i++)
+                Text[i] = Text[i + 1];
 
             CHARACTER* pFindGm = NULL;
 
@@ -1417,7 +1417,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
                 OBJECT* o = &c->Object;
                 if (o->Live && o->Kind == KIND_PLAYER && (g_isCharacterBuff((&c->Object), eBuff_GMEffect) || (c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR)))
                 {
-                    if (strcmp(c->ID, ID) == NULL)
+                    if (wcscmp(c->ID, ID) == NULL)
                     {
                         pFindGm = c;
                         break;
@@ -1436,7 +1436,6 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
         }
         else
         {
-            memcpy(Text, (char*)Data->ChatText, MAX_CHAT_SIZE);
             CHARACTER* pFindGm = NULL;
             for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
             {
@@ -1444,7 +1443,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
                 OBJECT* o = &c->Object;
                 if (o->Live && o->Kind == KIND_PLAYER && g_isCharacterBuff((&c->Object), eBuff_GMEffect) || (c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR))
                 {
-                    if (strcmp(c->ID, ID) == NULL)
+                    if (wcscmp(c->ID, ID) == NULL)
                     {
                         pFindGm = c;
                         break;
@@ -1474,13 +1473,14 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
 
     auto Data = (LPPCHATING)ReceiveBuffer;
 
-    char ID[MAX_ID_SIZE + 1];
+    wchar_t ID[MAX_ID_SIZE + 1];
     memset(ID, 0, MAX_ID_SIZE + 1);
-    memcpy(ID, (char*)Data->ID, MAX_ID_SIZE);
+    memcpy(ID, (wchar_t*)Data->ID, MAX_ID_SIZE);
 
-    char Text[MAX_CHAT_SIZE + 1];
+    const auto messageSize = Data->Header.Size - MAX_ID_SIZE - sizeof(PBMSG_HEADER);
+    wchar_t Text[MAX_CHAT_SIZE + 1];
     memset(Text, 0, MAX_CHAT_SIZE + 1);
-    memcpy(Text, (char*)Data->ChatText, MAX_CHAT_SIZE);
+    memcpy(Text, (wchar_t*)Data->ChatText, messageSize);
 
     RegistWhisperID(10, ID);
 
@@ -1510,7 +1510,7 @@ void ReceiveChatKey(const BYTE* ReceiveBuffer)
     int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
     int Index = FindCharacterIndex(Key);
 
-    if (Hero->GuildStatus == G_MASTER && !strcmp(CharactersClient[Index].ID, "±æµå ¸¶½ºÅÍ"))
+    if (Hero->GuildStatus == G_MASTER && !wcscmp(CharactersClient[Index].ID, L"±æµå ¸¶½ºÅÍ"))
     {
         g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCGUILDMASTER);
 
@@ -1525,45 +1525,50 @@ void ReceiveChatKey(const BYTE* ReceiveBuffer)
         return;
     }
 
-    CreateChat(CharactersClient[Index].ID, (char*)Data->ChatText, &CharactersClient[Index]);
+    wchar_t ChatText[sizeof Data->ChatText + 1] {};
+    CMultiLanguage::ConvertFromUtf8(ChatText, Data->ChatText, sizeof Data->ChatText);
+    CreateChat(CharactersClient[Index].ID, ChatText, &CharactersClient[Index]);
 }
 
 void ReceiveNotice(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_NOTICE)ReceiveBuffer;
+    wchar_t Text[256]{};
+    CMultiLanguage::ConvertFromUtf8(Text, Data->Notice);
+
     if (Data->Result == 0)
     {
-        CreateNotice((char*)Data->Notice, 0);
+        CreateNotice(Text, 0);
     }
     else if (Data->Result == 1)
     {
         if (CHARACTER_SCENE != SceneFlag)
         {
-            g_pChatListBox->AddText("", (char*)Data->Notice, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
             EnableUse = 0;
         }
         else
         {
             CUIMng& rUIMng = CUIMng::Instance();
-            rUIMng.AddServerMsg((char*)Data->Notice);
+            rUIMng.AddServerMsg(Text);
         }
     }
     else if (Data->Result == 2)
     {
-        char Text[100];
-        sprintf(Text, GlobalText[483], (char*)Data->Notice);
-        CreateNotice(Text, 1);
-        g_pGuildInfoWindow->AddGuildNotice((char*)Data->Notice);
+        wchar_t FullText[300] {0};
+        swprintf(FullText, GlobalText[483], Text);
+        CreateNotice(FullText, 1);
+        g_pGuildInfoWindow->AddGuildNotice(Text);
     }
     else if (Data->Result >= 10 && Data->Result <= 15)
     {
         if (Data->Notice != NULL && Data->Notice[0] != '\0')
         {
-            g_pSlideHelpMgr->AddSlide(Data->Count, Data->Delay, (char*)Data->Notice, Data->Result - 10, Data->Speed / 10.0f, Data->Color);
+            g_pSlideHelpMgr->AddSlide(Data->Count, Data->Delay, Text, Data->Result - 10, Data->Speed / 10.0f, Data->Color);
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x0D [ReceiveNotice(%s)]", Data->Notice);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%s)]", Text);
 }
 
 void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
@@ -1619,7 +1624,7 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
                 }
             }
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
         }
     }
 }
@@ -1705,7 +1710,9 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             gMapManager.LoadWorld(gMapManager.WorldActive);
 
             if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
-                SendRequestCrywolfInfo();
+            {
+                SocketClient->ToGameServer()->SendCrywolfInfoRequest();
+            }
 
             if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) || gMapManager.InChaosCastle() == true)
             {
@@ -1750,13 +1757,17 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4);
             else
             {
-                char Text[256];
-                sprintf(Text, "%s%s", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
+                wchar_t Text[256];
+                swprintf(Text, L"%s%s", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
 
-                g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
-        SendRequestFinishLoading();
+
+        SocketClient->ToGameServer()->SendClientReadyAfterMapChange();
+
+        g_dwLatestZoneMoving = GetTickCount();
+        g_bWhileMovingZone = FALSE;
 
         LoadingWorld = 30;
 
@@ -1801,7 +1812,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         Hero->EtcPart = iEtcPart;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x1C [ReceiveTeleport(%d)]", Data->Flag);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1C [ReceiveTeleport(%d)]", Data->Flag);
 
     return (TRUE);
 }
@@ -2044,10 +2055,9 @@ void ReceiveCreatePlayerViewport(const BYTE* ReceiveBuffer, int Size)
         int CreateFlag = (Key >> 15);
         Key &= 0x7FFF;
 
-        char Temp[MAX_ID_SIZE + 1];
-        ::memcpy(Temp, (char*)Data2->ID, MAX_ID_SIZE);
-        Temp[MAX_ID_SIZE] = NULL;
-        if (FindText(Temp, "webzen") == false)
+        wchar_t Temp[MAX_ID_SIZE + 1] {};
+        CMultiLanguage::ConvertFromUtf8(Temp, Data2->ID, MAX_ID_SIZE);
+        if (FindText(Temp, L"webzen") == false)
         {
             int Index;
             short BackUpGuildMarkIndex = -1;
@@ -2138,7 +2148,7 @@ void ReceiveCreatePlayerViewport(const BYTE* ReceiveBuffer, int Size)
 
             c->Object.Angle[2] = ((float)(Data2->Path >> 4) - 1.f) * 45.f;
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, "(RCPV)ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"(RCPV)ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
 
             if (CreateFlag)
             {
@@ -2218,8 +2228,7 @@ void ReceiveCreatePlayerViewport(const BYTE* ReceiveBuffer, int Size)
             }
 #endif
 
-            memcpy(c->ID, (char*)Data2->ID, MAX_ID_SIZE);
-            c->ID[MAX_ID_SIZE] = NULL;
+            CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID);
 
             if ((Data2->Class & 0x07) == 1 && Index != MAX_CHARACTERS_CLIENT)
             {
@@ -2232,7 +2241,7 @@ void ReceiveCreatePlayerViewport(const BYTE* ReceiveBuffer, int Size)
 
                 battleCastle::SettingBattleFormation(c, static_cast<eBuffState>(Data2->s_BuffEffectState[j]));
 
-                g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
+                g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
             }
 
             if (gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart())
@@ -2244,7 +2253,7 @@ void ReceiveCreatePlayerViewport(const BYTE* ReceiveBuffer, int Size)
         Offset += (sizeof(PCREATE_CHARACTER) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - Data2->s_BuffCount)));
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x12 [ReceiveCreatePlayerViewport(%d)]", Data->Value);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x12 [ReceiveCreatePlayerViewport(%d)]", Data->Value);
 }
 
 void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
@@ -2259,9 +2268,8 @@ void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
         int CreateFlag = (Key >> 15);
         Key &= 0x7FFF;
 
-        char Temp[MAX_ID_SIZE + 1];
-        memcpy(Temp, (char*)Data2->ID, MAX_ID_SIZE);
-        Temp[MAX_ID_SIZE] = NULL;
+        wchar_t characterName[MAX_ID_SIZE + 1]{};
+        CMultiLanguage::ConvertFromUtf8(characterName, Data2->ID, MAX_ID_SIZE);
 
         CHARACTER* pCha;
         int iIndex = FindCharacterIndex(Key);
@@ -2286,7 +2294,7 @@ void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
             byBackupCtlcode = pCha->CtlCode;
         }
 
-        if (FindText(Temp, "webzen") == false)
+        if (FindText(characterName, L"webzen") == false)
         {
             int Class = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
 
@@ -2329,7 +2337,7 @@ void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
                 RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
                 battleCastle::SettingBattleFormation(c, static_cast<eBuffState>(Data2->s_BuffEffectState[j]));
 
-                g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
+                g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
             }
 
             c->PositionX = Data2->PositionX;
@@ -2351,8 +2359,7 @@ void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
                 c->Movement = true;
             }
 
-            memcpy(c->ID, (char*)Data2->ID, MAX_ID_SIZE);
-            c->ID[MAX_ID_SIZE] = NULL;
+            CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_ID_SIZE);
 
             ChangeCharacterExt(FindCharacterIndex(Key), Data2->Equipment);
         }
@@ -2360,7 +2367,7 @@ void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
         Offset += (sizeof(PCREATE_TRANSFORM) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - Data2->s_BuffCount)));
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x45 [ReceiveCreateTransformViewport(%d)]", Data->Value);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x45 [ReceiveCreateTransformViewport(%d)]", Data->Value);
 }
 
 void AppearMonster(CHARACTER* c)
@@ -2472,7 +2479,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         Key &= 0x7FFF;
         CHARACTER* c = CreateMonster(Type, Data2->PositionX, Data2->PositionY, Key);
 
-        g_ConsoleDebug->Write(MCD_RECEIVE, "0x13 [ReceiveCreateMonsterViewport(Type : %d | Key : %d)]", Type, Key);
+        g_ConsoleDebug->Write(MCD_RECEIVE, L"0x13 [ReceiveCreateMonsterViewport(Type : %d | Key : %d)]", Type, Key);
 
         if (c == NULL) break;
 
@@ -2482,7 +2489,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         {
             RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
         }
 
         float fAngle = 45.0f;
@@ -2594,7 +2601,7 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
 
         if (Type >= 152 && Type <= 158)
         {
-            c = CreateHellGate(&Data2->ID[0], Key, Type, Data2->PositionX, Data2->PositionY, CreateFlag);
+            c = CreateHellGate(Data2->ID, Key, Type, Data2->PositionX, Data2->PositionY, CreateFlag);
         }
         else
         {
@@ -2608,8 +2615,6 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
         for (int j = 0; j < Data2->s_BuffCount; ++j)
         {
             RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
-
-            g_ConsoleDebug->Write(MCD_RECEIVE, "ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
         }
 
         c->Object.Angle[2] = ((float)(Data2->Path >> 4) - 1.f) * 45.f;
@@ -2625,12 +2630,12 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
 
         if (Type < 152 || Type>158)
         {
-            char Temp[100];
-            strcat(c->ID, GlobalText[485]);
-            memcpy(Temp, Data2->ID, MAX_ID_SIZE);
-            Temp[MAX_ID_SIZE] = NULL;
-            strcat(c->ID, Temp);
-            memcpy(c->OwnerID, Data2->ID, MAX_ID_SIZE);
+            wchar_t Temp[100] {};
+            wcscat(c->ID, GlobalText[485]);
+            CMultiLanguage::ConvertFromUtf8(Temp, Data2->ID, MAX_ID_SIZE);
+            wcscat(c->ID, Temp);
+
+            CMultiLanguage::ConvertFromUtf8(c->OwnerID, Data2->ID, MAX_ID_SIZE);
             c->OwnerID[MAX_ID_SIZE] = NULL;
         }
 
@@ -2654,7 +2659,7 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
         Offset += (sizeof(PCREATE_SUMMON) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - Data2->s_BuffCount)));
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x1F [ReceiveCreateSummonViewport(%d)]", Data->Value);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1F [ReceiveCreateSummonViewport(%d)]", Data->Value);
 }
 
 void ReceiveDeleteCharacterViewport(const BYTE* ReceiveBuffer)
@@ -3045,7 +3050,7 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
     }
     c->Hit = Damage;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, Damage);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, Damage);
 }
 
 void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
@@ -3062,7 +3067,12 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     iTargetKey = ((int)(Data->TargetKeyH) << 8) + Data->TargetKeyL;
     iTargetIndex = FindCharacterIndex(iTargetKey);
 
-    if (c->Helper.Type == MODEL_HELPER + 4) return;
+    if (!c->SafeZone && c->Helper.Type == MODEL_HELPER + 4)
+    {
+        // on a Dark Horse, don't show
+        
+        return;
+    }
     //if(c->Helper.Type == MODEL_HELPER+37) return;
 
     c->Object.Angle[2] = ((float)(Data->Angle) - 1.f) * 45.f;
@@ -3278,7 +3288,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         break;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x18 [ReceiveAction(%d)]", Data->Angle);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x18 [ReceiveAction(%d)]", Data->Angle);
 }
 
 void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
@@ -3328,7 +3338,7 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
                 c->EtcPart = PARTS_WEBZEN;
             }
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, "RegisterBuff ID : %s, Buff : %d", c->ID, static_cast<int>(bufftype));
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"RegisterBuff ID : %s, Buff : %d", c->ID, static_cast<int>(bufftype));
         }
     }
     else // clear
@@ -3343,7 +3353,7 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
         {
             battleCastle::DeleteBattleFormation(c, bufftype);
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, "UnRegisterBuff ID : %s, Buff : %d", c->ID, static_cast<int>(bufftype));
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"UnRegisterBuff ID : %s, Buff : %d", c->ID, static_cast<int>(bufftype));
         }
         else if (bufftype == eBuff_GMEffect)
         {
@@ -3594,7 +3604,7 @@ BOOL ReceiveMonsterSkill(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         sc->AttackTime = 1;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x69 [ReceiveMonsterSkill(Skill : %d | SKey : %d |TKey : %d)]", SkillNumber, SourceKey, TargetKey);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x69 [ReceiveMonsterSkill(Skill : %d | SKey : %d |TKey : %d)]", SkillNumber, SourceKey, TargetKey);
 
     return (TRUE);
 }
@@ -3612,7 +3622,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     {
         if (Success == false)
         {
-            g_pChatListBox->AddText("", GlobalText[2249], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2249], SEASON3B::TYPE_SYSTEM_MESSAGE);
             return FALSE;
         }
     }
@@ -4534,11 +4544,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         {
             if (so->CurrentAction == PLAYER_SKILL_ATT_UP_OURFORCES)
             {
-                SendRequestAction(AT_RAGEBUFF_1, ((BYTE)((so->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(sc->Object, AT_RAGEBUFF_1);
             }
             else
             {
-                SendRequestAction(AT_RAGEBUFF_2, ((BYTE)((so->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(sc->Object, AT_RAGEBUFF_2);
             }
         }
         OBJECT* _pObj = to;
@@ -4627,7 +4637,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     }
 
 #ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x19 [ReceiveMagic(%d)]", MagicNumber);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x19 [ReceiveMagic(%d)]", MagicNumber);
 #endif // CONSOLE_DEBUG
 
     return (TRUE);
@@ -5084,7 +5094,7 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     sc->SkillX = Data->PositionX;
     sc->SkillY = Data->PositionY;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x1E [ReceiveMagicContinue(%d)]", MagicNumber);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1E [ReceiveMagicContinue(%d)]", MagicNumber);
 
     return (TRUE);
 }
@@ -5248,18 +5258,18 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     if (Exp > 0)
     {
-        char Text[100];
+        wchar_t Text[100];
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
         {
-            sprintf(Text, GlobalText[1750], Exp);
+            swprintf(Text, GlobalText[1750], Exp);
         }
         else
-            sprintf(Text, GlobalText[486], Exp);
-        g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            swprintf(Text, GlobalText[486], Exp);
+        g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
 #ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x16 [ReceiveDieExp : %d]", Exp);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x16 [ReceiveDieExp : %d]", Exp);
 #endif // CONSOLE_DEBUG
 
     return (TRUE);
@@ -5309,15 +5319,15 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     if (Exp > 0)
     {
-        char Text[100];
+        wchar_t Text[100];
 
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
         {
-            sprintf(Text, GlobalText[1750], Exp);
+            swprintf(Text, GlobalText[1750], Exp);
         }
         else
-            sprintf(Text, GlobalText[486], Exp);
-        g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            swprintf(Text, GlobalText[486], Exp);
+        g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
     return (TRUE);
@@ -5433,7 +5443,7 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x17 [ReceiveDie(%d)]", Key);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x17 [ReceiveDie(%d)]", Key);
 }
 
 void ReceiveCreateItemViewport(const BYTE* ReceiveBuffer)
@@ -5453,7 +5463,7 @@ void ReceiveCreateItemViewport(const BYTE* ReceiveBuffer)
             Key = 0;
         CreateItem(&Items[Key], Data2->Item, Position, CreateFlag);
         int Type = ConvertItemType(Data2->Item);
-        if (Type == ITEM_POTION + 15)
+        if (Type == ITEM_ZEN)
         {
             Offset += sizeof(PCREATE_ITEM);
         }
@@ -5463,7 +5473,7 @@ void ReceiveCreateItemViewport(const BYTE* ReceiveBuffer)
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x20 [ReceiveCreateItemViewport]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateItemViewport]");
 }
 
 void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
@@ -5495,7 +5505,7 @@ void ReceiveGetItem(const BYTE* ReceiveBuffer)
     {
         if (Data->Result == GET_ITEM_ZEN)
         {
-            char szMessage[128];
+            wchar_t szMessage[128];
             int backupGold = CharacterMachine->Gold;
             CharacterMachine->Gold = (Data->Item[0] << 24) + (Data->Item[1] << 16) + (Data->Item[2] << 8) + (Data->Item[3]);
 
@@ -5503,8 +5513,8 @@ void ReceiveGetItem(const BYTE* ReceiveBuffer)
 
             if (getGold > 0)
             {
-                sprintf(szMessage, "%d %s %s", getGold, GlobalText[224], GlobalText[918]);
-                g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                swprintf(szMessage, L"%d %s %s", getGold, GlobalText[224], GlobalText[918]);
+                g_pChatListBox->AddText(L"", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
         else
@@ -5522,13 +5532,13 @@ void ReceiveGetItem(const BYTE* ReceiveBuffer)
                 }
             }
 
-            char szItem[64] = { 0, };
+            wchar_t szItem[64] = { 0, };
             int level = (Items[ItemKey].Item.Level >> 3) & 15;
             GetItemName(Items[ItemKey].Item.Type, level, szItem);
 
-            char szMessage[128];
-            sprintf(szMessage, "%s %s", szItem, GlobalText[918]);
-            g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            wchar_t szMessage[128];
+            swprintf(szMessage, L"%s %s", szItem, GlobalText[918]);
+            g_pChatListBox->AddText(L"", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
 #ifdef FOR_WORK
         Items[ItemKey].Object.Live = false;
@@ -5545,7 +5555,7 @@ void ReceiveGetItem(const BYTE* ReceiveBuffer)
     }
     SendGetItem = -1;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x22 [ReceiveGetItem(%d)]", Data->Result);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x22 [ReceiveGetItem(%d)]", Data->Result);
 }
 
 void ReceiveDropItem(const BYTE* ReceiveBuffer)
@@ -5682,7 +5692,7 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         g_bPacketAfter_EquipmentItem = FALSE;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x24 [ReceiveEquipmentItem(%d %d)]", Data->SubCode, Data->Index);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x24 [ReceiveEquipmentItem(%d %d)]", Data->SubCode, Data->Index);
 
     return (TRUE);
 }
@@ -5775,7 +5785,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
 
     case 0x0D:
-        SendRequestBCStatus();
+        SocketClient->ToGameServer()->SendCastleSiegeStatusRequest();
         break;
     case 0x11:
     {
@@ -5926,7 +5936,7 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
     }
     BuyCost = 0;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x32 [ReceiveBuy(%d)]", Data->Index);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x32 [ReceiveBuy(%d)]", Data->Index);
 }
 
 void ReceiveSell(const BYTE* ReceiveBuffer)
@@ -5974,7 +5984,7 @@ void ReceiveRepair(const BYTE* ReceiveBuffer)
         PlayBuffer(SOUND_REPAIR);
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x34 [ReceiveRepair(%d)]", Data->Gold);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x34 [ReceiveRepair(%d)]", Data->Gold);
 }
 
 void ReceiveLevelUp(const BYTE* ReceiveBuffer)
@@ -5993,10 +6003,10 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer)
     CharacterAttribute->wMinusPoint = Data->wMinusPoint;
     CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
 
-    unicode::t_char szText[256] = { NULL, };
+    wchar_t szText[256] = { NULL, };
     WORD iExp = CharacterAttribute->NextExperince - CharacterAttribute->Experience;
-    sprintf(szText, GlobalText[486], iExp);
-    g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    swprintf(szText, GlobalText[486], iExp);
+    g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
     CharacterMachine->CalculateNextExperince();
 
@@ -6020,7 +6030,7 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer)
     }
     PlayBuffer(SOUND_LEVEL_UP);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x05 [ReceiveLevelUp]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x05 [ReceiveLevelUp]");
 }
 
 void ReceiveAddPoint(const BYTE* ReceiveBuffer)
@@ -6185,18 +6195,18 @@ void ReceivePK(const BYTE* ReceiveBuffer)
     break;
     case 5:
     {
-        char szTemp[100];
+        wchar_t szTemp[100];
 
-        sprintf(szTemp, "%s %d%s", GlobalText[490], 1, GlobalText[491]);
+        swprintf(szTemp, L"%s %d%s", GlobalText[490], 1, GlobalText[491]);
 
         g_pChatListBox->AddText(CharactersClient[FindCharacterIndex(Key)].ID, szTemp, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     break;
     case 6:
     {
-        char szTemp[100];
+        wchar_t szTemp[100];
 
-        sprintf(szTemp, "%s %d%s", GlobalText[490], 2, GlobalText[491]);
+        swprintf(szTemp, L"%s %d%s", GlobalText[490], 2, GlobalText[491]);
 
         g_pChatListBox->AddText(CharactersClient[FindCharacterIndex(Key)].ID, szTemp, SEASON3B::TYPE_ERROR_MESSAGE);
     }
@@ -6227,7 +6237,7 @@ void ReceiveDurability(const BYTE* ReceiveBuffer)
         EnableUse = 0;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x2A [ReceiveDurability(%d %d)]", Data->Value, Data->KeyL);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x2A [ReceiveDurability(%d %d)]", Data->Value, Data->KeyL);
 }
 
 BOOL ReceiveHelperItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
@@ -6300,8 +6310,6 @@ void ReceiveTradeResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPTRADE)ReceiveBuffer;
     g_pTrade->ProcessToReceiveTradeResult(Data);
-
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x37 [ReceiveTradeResult(%d)]", Data->ID);
 }
 
 void ReceiveTradeYourInventoryDelete(const BYTE* ReceiveBuffer)
@@ -6352,7 +6360,7 @@ void ReceiveTradeExit(const BYTE* ReceiveBuffer)
 
 void ReceivePing(const BYTE* ReceiveBuffer)
 {
-    SendPing();
+    SocketClient->ToGameServer()->SendPingResponse();
 }
 
 void ReceiveStorageGold(const BYTE* ReceiveBuffer)
@@ -6364,12 +6372,12 @@ void ReceiveStorageGold(const BYTE* ReceiveBuffer)
         CharacterMachine->Gold = Data->Gold;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x81 [ReceiveStorageGold(%d %d %d)]", Data->Result, Data->StorageGold, Data->Gold);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x81 [ReceiveStorageGold(%d %d %d)]", Data->Result, Data->StorageGold, Data->Gold);
 }
 
 void ReceiveStorageExit(const BYTE* ReceiveBuffer)
 {
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x82 [ReceiveStorageExit]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x82 [ReceiveStorageExit]");
 }
 
 void ReceiveStorageStatus(const BYTE* ReceiveBuffer)
@@ -6392,15 +6400,15 @@ void ReceivePartyResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pChatListBox->AddText("", GlobalText[497], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 1:g_pChatListBox->AddText("", GlobalText[498], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pChatListBox->AddText("", GlobalText[499], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pChatListBox->AddText("", GlobalText[500], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pChatListBox->AddText("", GlobalText[501], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pChatListBox->AddText("", GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 6:g_pChatListBox->AddText("", GlobalText[2990], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 7:g_pChatListBox->AddText("", GlobalText[2997], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 8:g_pChatListBox->AddText("", GlobalText[2998], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pChatListBox->AddText(L"", GlobalText[497], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 1:g_pChatListBox->AddText(L"", GlobalText[498], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pChatListBox->AddText(L"", GlobalText[499], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pChatListBox->AddText(L"", GlobalText[500], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pChatListBox->AddText(L"", GlobalText[501], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pChatListBox->AddText(L"", GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 6:g_pChatListBox->AddText(L"", GlobalText[2990], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 7:g_pChatListBox->AddText(L"", GlobalText[2997], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 8:g_pChatListBox->AddText(L"", GlobalText[2998], SEASON3B::TYPE_ERROR_MESSAGE); break;
     }
 }
 
@@ -6413,7 +6421,7 @@ void ReceivePartyList(const BYTE* ReceiveBuffer)
     {
         auto Data2 = (LPPRECEIVE_PARTY_LIST)(ReceiveBuffer + Offset);
         PARTY_t* p = &Party[i];
-        memcpy(p->Name, Data2->ID, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(p->Name, Data2->ID, MAX_ID_SIZE);
         p->Name[MAX_ID_SIZE] = NULL;
         p->Number = Data2->Number;
         p->Map = Data2->Map;
@@ -6424,7 +6432,7 @@ void ReceivePartyList(const BYTE* ReceiveBuffer)
         Offset += sizeof(PRECEIVE_PARTY_LIST);
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
 }
 
 void ReceivePartyInfo(const BYTE* ReceiveBuffer)
@@ -6434,7 +6442,7 @@ void ReceivePartyInfo(const BYTE* ReceiveBuffer)
     for (int i = 0; i < Data->Count; i++)
     {
         auto Data2 = (LPPRECEIVE_PARTY_INFO)(ReceiveBuffer + Offset);
-        char stepHP = Data2->value & 0xf;
+        wchar_t stepHP = Data2->value & 0xf;
 
         PARTY_t* p = &Party[i];
 
@@ -6447,7 +6455,7 @@ void ReceivePartyInfo(const BYTE* ReceiveBuffer)
 void ReceivePartyLeave(const BYTE* ReceiveBuffer)
 {
     PartyNumber = 0;
-    g_pChatListBox->AddText("", GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE);
+    g_pChatListBox->AddText(L"", GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE);
 
     if (g_iFollowCharacter >= 0)
     {
@@ -6455,7 +6463,7 @@ void ReceivePartyLeave(const BYTE* ReceiveBuffer)
         CHARACTER* c = &CharactersClient[g_iFollowCharacter];
         for (int i = 0; i < PartyNumber; ++i)
         {
-            if (strcmp(Party[i].Name, c->ID) == NULL && strlen(Party[i].Name) == strlen(c->ID))
+            if (wcscmp(Party[i].Name, c->ID) == NULL && wcslen(Party[i].Name) == wcslen(c->ID))
             {
                 IsParty = true;
             }
@@ -6477,20 +6485,20 @@ void ReceivePartyGetItem(const BYTE* ReceiveBuffer)
     if (Hero == c) return;
 
     int itemType = Data->ItemInfo & 0x01fff;
-    char itemName[100] = { 0, };
-    char Text[100] = { 0, };
+    wchar_t itemName[100] = { 0, };
+    wchar_t Text[100] = { 0, };
 
-    if ((Data->ItemInfo & 0x10000))      sprintf(itemName, "%s ", GlobalText[620]);
-    else if ((Data->ItemInfo & 0x20000)) sprintf(itemName, "%s ", GlobalText[1089]);
+    if ((Data->ItemInfo & 0x10000))      swprintf(itemName, L"%s ", GlobalText[620]);
+    else if ((Data->ItemInfo & 0x20000)) swprintf(itemName, L"%s ", GlobalText[1089]);
 
     int itemLevel = Data->ItemLevel;
     GetItemName(itemType, itemLevel, Text);
-    strcat(itemName, Text);
-    if ((Data->ItemInfo & 0x02000)) strcat(itemName, GlobalText[176]);
-    if ((Data->ItemInfo & 0x08000)) strcat(itemName, GlobalText[177]);
-    if ((Data->ItemInfo & 0x04000)) strcat(itemName, GlobalText[178]);
+    wcscat(itemName, Text);
+    if ((Data->ItemInfo & 0x02000)) wcscat(itemName, GlobalText[176]);
+    if ((Data->ItemInfo & 0x08000)) wcscat(itemName, GlobalText[177]);
+    if ((Data->ItemInfo & 0x04000)) wcscat(itemName, GlobalText[178]);
 
-    sprintf(Text, "%s %s", itemName, GlobalText[918]);
+    swprintf(Text, L"%s %s", itemName, GlobalText[918]);
 
     g_pChatListBox->AddText(c->ID, Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
@@ -6513,17 +6521,17 @@ void ReceiveGuildResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pChatListBox->AddText("", GlobalText[503], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 1:g_pChatListBox->AddText("", GlobalText[504], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pChatListBox->AddText("", GlobalText[505], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pChatListBox->AddText("", GlobalText[506], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pChatListBox->AddText("", GlobalText[507], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pChatListBox->AddText("", GlobalText[508], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 6:g_pChatListBox->AddText("", GlobalText[509], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 7:g_pChatListBox->AddText("", GlobalText[510], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 0xA1:g_pChatListBox->AddText("", GlobalText[2992], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 0xA2:g_pChatListBox->AddText("", GlobalText[2995], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 0xA3:g_pChatListBox->AddText("", GlobalText[2996], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pChatListBox->AddText(L"", GlobalText[503], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 1:g_pChatListBox->AddText(L"", GlobalText[504], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pChatListBox->AddText(L"", GlobalText[505], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pChatListBox->AddText(L"", GlobalText[506], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pChatListBox->AddText(L"", GlobalText[507], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pChatListBox->AddText(L"", GlobalText[508], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 6:g_pChatListBox->AddText(L"", GlobalText[509], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 7:g_pChatListBox->AddText(L"", GlobalText[510], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0xA1:g_pChatListBox->AddText(L"", GlobalText[2992], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0xA2:g_pChatListBox->AddText(L"", GlobalText[2995], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0xA3:g_pChatListBox->AddText(L"", GlobalText[2996], SEASON3B::TYPE_ERROR_MESSAGE); break;
     }
 }
 
@@ -6536,15 +6544,16 @@ void ReceiveGuildList(const BYTE* ReceiveBuffer)
     GuildTotalScore = Data->TotalScore;
     GuildTotalScore = max(0, GuildTotalScore);
 
+    wchar_t rivalGuildName[sizeof Data->szRivalGuildName + 1] {};
+    CMultiLanguage::ConvertFromUtf8(rivalGuildName, Data->szRivalGuildName, sizeof Data->szRivalGuildName);
     g_pGuildInfoWindow->GuildClear();
     g_pGuildInfoWindow->UnionGuildClear();
-    g_pGuildInfoWindow->SetRivalGuildName(Data->szRivalGuildName);
+    g_pGuildInfoWindow->SetRivalGuildName(rivalGuildName);
     for (int i = 0; i < Data->Count; i++)
     {
         auto Data2 = (LPPRECEIVE_GUILD_LIST)(ReceiveBuffer + Offset);
         GUILD_LIST_t* p = &GuildList[i];
-        memcpy(p->Name, Data2->ID, MAX_ID_SIZE);
-        p->Name[MAX_ID_SIZE] = NULL;
+        CMultiLanguage::ConvertFromUtf8(p->Name, Data2->ID, MAX_ID_SIZE);
         p->Number = Data2->Number;
         p->Server = (0x80 & Data2->CurrentServer) ? (0x7F & Data2->CurrentServer) : -1;
         p->GuildStatus = Data2->GuildStatus;
@@ -6558,12 +6567,12 @@ void ReceiveGuildLeave(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pChatListBox->AddText("", GlobalText[511], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 1:g_pChatListBox->AddText("", GlobalText[512], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pChatListBox->AddText("", GlobalText[513], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pChatListBox->AddText("", GlobalText[514], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pChatListBox->AddText("", GlobalText[515], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pChatListBox->AddText("", GlobalText[568], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pChatListBox->AddText(L"", GlobalText[511], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 1:g_pChatListBox->AddText(L"", GlobalText[512], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pChatListBox->AddText(L"", GlobalText[513], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pChatListBox->AddText(L"", GlobalText[514], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pChatListBox->AddText(L"", GlobalText[515], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pChatListBox->AddText(L"", GlobalText[568], SEASON3B::TYPE_ERROR_MESSAGE); break;
     }
     if (Data->Value == 1 || Data->Value == 4)
     {
@@ -6588,7 +6597,7 @@ void ReceiveGuildLeave(const BYTE* ReceiveBuffer)
     }
     else if (Data->Value == 5)
     {
-        SendRequestGuildList();
+        SocketClient->ToGameServer()->SendGuildListRequest();
     }
 }
 
@@ -6624,12 +6633,12 @@ void ReceiveCreateGuildResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPMSG_GUILD_CREATE_RESULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pChatListBox->AddText("", GlobalText[516], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pChatListBox->AddText("", GlobalText[517], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pChatListBox->AddText("", GlobalText[518], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pChatListBox->AddText("", GlobalText[940], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pChatListBox->AddText("", GlobalText[941], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 6:g_pChatListBox->AddText("", GlobalText[942], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pChatListBox->AddText(L"", GlobalText[516], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pChatListBox->AddText(L"", GlobalText[517], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pChatListBox->AddText(L"", GlobalText[518], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pChatListBox->AddText(L"", GlobalText[940], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pChatListBox->AddText(L"", GlobalText[941], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 6:g_pChatListBox->AddText(L"", GlobalText[942], SEASON3B::TYPE_ERROR_MESSAGE); break;
     case 1:
         memset(InputText[0], 0, MAX_ID_SIZE);
         InputLength[0] = 0;
@@ -6645,21 +6654,20 @@ void ReceiveCreateGuildResult(const BYTE* ReceiveBuffer)
 
 bool EnableGuildWar = false;
 int  GuildWarIndex = -1;
-char GuildWarName[8 + 1];
+wchar_t GuildWarName[8 + 1];
 int  GuildWarScore[2];
 
 bool EnableSoccer = false;
 BYTE HeroSoccerTeam = 0;
 int  SoccerTime;
-char SoccerTeamName[2][8 + 1];
+wchar_t SoccerTeamName[2][8 + 1];
 bool SoccerObserver = false;
 
 void ReceiveDeclareWar(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_WAR)ReceiveBuffer;
-    memset(GuildWarName, 0, 8);
-    memcpy(GuildWarName, Data->Name, 8);
-    GuildWarName[8] = NULL;
+    memset(GuildWarName, 0, sizeof GuildWarName);
+    CMultiLanguage::ConvertFromUtf8(GuildWarName, Data->Name, 8);
 
     if (Data->Type == 1)
     {
@@ -6676,13 +6684,13 @@ void ReceiveDeclareWarResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pChatListBox->AddText("", GlobalText[519], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 1:g_pChatListBox->AddText("", GlobalText[520], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pChatListBox->AddText("", GlobalText[521], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pChatListBox->AddText("", GlobalText[522], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pChatListBox->AddText("", GlobalText[523], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pChatListBox->AddText("", GlobalText[524], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 6:g_pChatListBox->AddText("", GlobalText[525], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pChatListBox->AddText(L"", GlobalText[519], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 1:g_pChatListBox->AddText(L"", GlobalText[520], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pChatListBox->AddText(L"", GlobalText[521], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pChatListBox->AddText(L"", GlobalText[522], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pChatListBox->AddText(L"", GlobalText[523], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pChatListBox->AddText(L"", GlobalText[524], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 6:g_pChatListBox->AddText(L"", GlobalText[525], SEASON3B::TYPE_ERROR_MESSAGE); break;
     }
     if (Data->Value != 1 && !EnableGuildWar)
     {
@@ -6695,18 +6703,17 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
     auto Data = (LPPRECEIVE_WAR)ReceiveBuffer;
     EnableGuildWar = true;
 
-    char Text[100];
-    memset(GuildWarName, 0, 8);
-    memcpy(GuildWarName, Data->Name, 8);
-    GuildWarName[8] = NULL;
+    wchar_t Text[100];
+    memset(GuildWarName, 0, sizeof GuildWarName);
+    CMultiLanguage::ConvertFromUtf8(GuildWarName, Data->Name, 8);
 
     if (Data->Type == 0)
     {
-        sprintf(Text, GlobalText[526], GuildWarName);
+        swprintf(Text, GlobalText[526], GuildWarName);
     }
     else
     {
-        sprintf(Text, GlobalText[533], GuildWarName);
+        swprintf(Text, GlobalText[533], GuildWarName);
         EnableSoccer = true;
     }
 
@@ -6716,11 +6723,11 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
     for (int i = 0; i < MARK_EDIT; i++)
     {
         MARK_t* p = &GuildMark[i];
-        char Temp[8 + 1];
+        wchar_t Temp[8 + 1];
         memset(Temp, 0, 8);
-        memcpy(Temp, (char*)Data->Name, 8);
+        memcpy(Temp, (wchar_t*)Data->Name, 8);
         Temp[8] = NULL;
-        if (strcmp(p->GuildName, Temp) == NULL)
+        if (wcscmp(p->GuildName, Temp) == NULL)
         {
             GuildWarIndex = i;
             break;
@@ -6735,28 +6742,28 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
         }
     }
     SetActionClass(Hero, &Hero->Object, PLAYER_RUSH1, AT_RUSH1);
-    SendRequestAction(AT_RUSH1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+    SendRequestAction(Hero->Object, AT_RUSH1);
 
     g_pNewUISystem->Show(SEASON3B::INTERFACE_BATTLE_SOCCER_SCORE);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x62 [ReceiveGuildBeginWar(%d)]", Data->Team);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x62 [ReceiveGuildBeginWar(%d)]", Data->Team);
 }
 
 void ReceiveGuildEndWar(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
-    char Text[100];
+    wchar_t Text[100];
     int Win = 0;
     switch (Data->Value)
     {
-    case 0:sprintf(Text, GlobalText[527]); break;
-    case 1:sprintf(Text, GlobalText[528]); Win = 2; break;
-    case 2:sprintf(Text, GlobalText[529]); Win = 2; break;
-    case 3:sprintf(Text, GlobalText[530]); break;
-    case 4:sprintf(Text, GlobalText[531]); Win = 2; break;
-    case 5:sprintf(Text, GlobalText[532]); break;
-    case 6:sprintf(Text, GlobalText[480]); Win = 1; break;
-    default:sprintf(Text, ""); break;
+    case 0:wprintf(Text, GlobalText[527]); break;
+    case 1:wprintf(Text, GlobalText[528]); Win = 2; break;
+    case 2:wprintf(Text, GlobalText[529]); Win = 2; break;
+    case 3:wprintf(Text, GlobalText[530]); break;
+    case 4:wprintf(Text, GlobalText[531]); Win = 2; break;
+    case 5:wprintf(Text, GlobalText[532]); break;
+    case 6:wprintf(Text, GlobalText[480]); Win = 1; break;
+    default:swprintf(Text, L""); break;
     }
 
     g_wtMatchTimeLeft.m_Time = 0;
@@ -6779,11 +6786,11 @@ void ReceiveGuildEndWar(const BYTE* ReceiveBuffer)
     {
     case 2:
         SetActionClass(Hero, &Hero->Object, PLAYER_WIN1, AT_WIN1);
-        SendRequestAction(AT_WIN1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_WIN1);
         break;
     case 0:
         SetActionClass(Hero, &Hero->Object, PLAYER_CRY1, AT_CRY1);
-        SendRequestAction(AT_CRY1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_CRY1);
         break;
     }
 
@@ -6833,7 +6840,7 @@ void ReceiveGuildIDViewport(const BYTE* ReceiveBuffer)
             c->GuildMarkIndex = g_GuildCache.GetGuildMarkIndex(GuildKey);
         else
         {
-            SendRequestGuildInfo(GuildKey);
+            SocketClient->ToGameServer()->SendGuildInfoRequest(GuildKey);
             c->GuildMarkIndex = g_GuildCache.MakeGuildMarkIndex(GuildKey);
         }
 
@@ -6865,20 +6872,20 @@ void ReceiveGuildInfo(const BYTE* ReceiveBuffer)
 // ±æµåÁ÷Ã¥À» ÀÓ¸í/º¯°æ/ÇØÁ¦ °á°ú
 void ReceiveGuildAssign(const BYTE* ReceiveBuffer)
 {
-    char szTemp[MAX_GLOBAL_TEXT_STRING] = "Invalid GuildAssign";
+    wchar_t szTemp[MAX_GLOBAL_TEXT_STRING] = L"Invalid GuildAssign";
     auto pData = (LPPRECEIVE_GUILD_ASSIGN)ReceiveBuffer;
     if (pData->byResult == 0x01)
     {
         switch (pData->byType)
         {
         case 0x01:
-            strcpy(szTemp, GlobalText[1374]);
+            wcscpy(szTemp, GlobalText[1374]);
             break;
         case 0x02:
-            strcpy(szTemp, GlobalText[1375]);
+            wcscpy(szTemp, GlobalText[1375]);
             break;
         case 0x03:
-            strcpy(szTemp, GlobalText[1376]);
+            wcscpy(szTemp, GlobalText[1376]);
             break;
         default:
             assert(!"Packet(0xE1)");
@@ -6890,23 +6897,23 @@ void ReceiveGuildAssign(const BYTE* ReceiveBuffer)
         switch (pData->byResult)
         {
         case GUILD_ANS_NOTEXIST_GUILD:
-            strcpy(szTemp, GlobalText[522]);
+            wcscpy(szTemp, GlobalText[522]);
             break;
         case GUILD_ANS_NOTEXIST_PERMISSION:
-            strcpy(szTemp, GlobalText[1386]);
+            wcscpy(szTemp, GlobalText[1386]);
             break;
         case GUILD_ANS_NOTEXIST_EXTRA_STATUS:
-            strcpy(szTemp, GlobalText[1326]);
+            wcscpy(szTemp, GlobalText[1326]);
             break;
         case GUILD_ANS_NOTEXIST_EXTRA_TYPE:
-            strcpy(szTemp, GlobalText[1327]);
+            wcscpy(szTemp, GlobalText[1327]);
             break;
         default:
             assert(!"Packet(0xE1)");
             break;
         }
     }
-    g_pChatListBox->AddText("", szTemp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    g_pChatListBox->AddText(L"", szTemp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
 void ReceiveGuildRelationShip(const BYTE* ReceiveBuffer)
@@ -6918,7 +6925,7 @@ void ReceiveGuildRelationShip(const BYTE* ReceiveBuffer)
 
 void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
 {
-    char szTemp[MAX_GLOBAL_TEXT_STRING] = "Invalid GuildRelationShipResult";
+    wchar_t szTemp[MAX_GLOBAL_TEXT_STRING] = L"Invalid GuildRelationShipResult";
     auto pData = (LPPMSG_GUILD_RELATIONSHIP_RESULT)ReceiveBuffer;
     if (pData->byResult == 0x01)
     {
@@ -6926,79 +6933,79 @@ void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
         {
             if (pData->byRequestType == 0x01)
             {
-                strcpy(szTemp, GlobalText[1381]);
+                wcscpy(szTemp, GlobalText[1381]);
             }
             else if (pData->byRequestType == 0x02)
             {
-                strcpy(szTemp, GlobalText[1382]);
+                wcscpy(szTemp, GlobalText[1382]);
             }
             else if (pData->byRequestType == 0x10)
             {
-                strcpy(szTemp, GlobalText[1635]);
+                wcscpy(szTemp, GlobalText[1635]);
             }
         }
         else
         {
-            if (pData->byRequestType == 0x01)	strcpy(szTemp, GlobalText[1383]);
-            else								strcpy(szTemp, GlobalText[1384]);
+            if (pData->byRequestType == 0x01)	wcscpy(szTemp, GlobalText[1383]);
+            else								wcscpy(szTemp, GlobalText[1384]);
         }
     }
     else if (pData->byResult == 0)
     {
-        strcpy(szTemp, GlobalText[1328]);
+        wcscpy(szTemp, GlobalText[1328]);
     }
     else
     {
         switch (pData->byResult)
         {
         case GUILD_ANS_UNIONFAIL_BY_CASTLE:
-            strcpy(szTemp, GlobalText[1637]);
+            wcscpy(szTemp, GlobalText[1637]);
             break;
         case GUILD_ANS_NOTEXIST_PERMISSION:
-            strcpy(szTemp, GlobalText[1386]);
+            wcscpy(szTemp, GlobalText[1386]);
             break;
         case GUILD_ANS_EXIST_RELATIONSHIP_UNION:
-            strcpy(szTemp, GlobalText[1250]);
+            wcscpy(szTemp, GlobalText[1250]);
             break;
         case GUILD_ANS_EXIST_RELATIONSHIP_RIVAL:
-            strcpy(szTemp, GlobalText[1251]);
+            wcscpy(szTemp, GlobalText[1251]);
             break;
         case GUILD_ANS_EXIST_UNION:
-            strcpy(szTemp, GlobalText[1252]);
+            wcscpy(szTemp, GlobalText[1252]);
             break;
         case GUILD_ANS_EXIST_RIVAL:
-            strcpy(szTemp, GlobalText[1253]);
+            wcscpy(szTemp, GlobalText[1253]);
             break;
         case GUILD_ANS_NOTEXIST_UNION:
-            strcpy(szTemp, GlobalText[1254]);
+            wcscpy(szTemp, GlobalText[1254]);
             break;
         case GUILD_ANS_NOTEXIST_RIVAL:
-            strcpy(szTemp, GlobalText[1255]);
+            wcscpy(szTemp, GlobalText[1255]);
             break;
         case GUILD_ANS_NOT_UNION_MASTER:
-            strcpy(szTemp, GlobalText[1333]);
+            wcscpy(szTemp, GlobalText[1333]);
             break;
         case GUILD_ANS_NOT_GUILD_RIVAL:
-            strcpy(szTemp, GlobalText[1329]);
+            wcscpy(szTemp, GlobalText[1329]);
             break;
         case GUILD_ANS_CANNOT_BE_UNION_MASTER_GUILD:
-            strcpy(szTemp, GlobalText[1331]);
+            wcscpy(szTemp, GlobalText[1331]);
             break;
         case GUILD_ANS_EXCEED_MAX_UNION_MEMBER:
-            strcpy(szTemp, GlobalText[1287]);
+            wcscpy(szTemp, GlobalText[1287]);
             break;
         case GUILD_ANS_CANCEL_REQUEST:
-            strcpy(szTemp, GlobalText[1268]);
+            wcscpy(szTemp, GlobalText[1268]);
             break;
 #ifdef ASG_ADD_GENS_SYSTEM
         case GUILD_ANS_UNION_MASTER_NOT_GENS:
-            strcpy(szTemp, GlobalText[2991]);
+            wcscpy(szTemp, GlobalText[2991]);
             break;
         case GUILD_ANS_GUILD_MASTER_NOT_GENS:
-            strcpy(szTemp, GlobalText[2992]);
+            wcscpy(szTemp, GlobalText[2992]);
             break;
         case GUILD_ANS_UNION_MASTER_DISAGREE_GENS:
-            strcpy(szTemp, GlobalText[2993]);
+            wcscpy(szTemp, GlobalText[2993]);
             break;
 #endif	// ASG_ADD_GENS_SYSTEM
         default:
@@ -7006,7 +7013,7 @@ void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
             break;
         }
     }
-    g_pChatListBox->AddText("", szTemp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    g_pChatListBox->AddText(L"", szTemp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
     int nCharKey = MAKEWORD(pData->byTargetUserIndexL, pData->byTargetUserIndexH);
     if (nCharKey == HeroKey && pData->byResult == 0x01 && pData->byRelationShipType == 0x01 && pData->byRequestType == 0x02)
@@ -7020,14 +7027,13 @@ void ReceiveBanUnionGuildResult(const BYTE* ReceiveBuffer)
     {
         if (g_pGuildInfoWindow->GetUnionCount() > 2)
         {
-            Sleep(500);
-            SendRequestUnionList();
+            SocketClient->ToGameServer()->SendRequestAllianceList();
         }
         g_pGuildInfoWindow->UnionGuildClear();
     }
     else if (pData->byResult == 0)
     {
-        g_pChatListBox->AddText("", GlobalText[1328], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1328], SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -7038,10 +7044,8 @@ void ReceiveUnionViewportNotify(const BYTE* ReceiveBuffer)
     for (int i = 0; i < pData->byCount; ++i)
     {
         auto pData2 = (LPPMSG_UNION_VIEWPORT_NOTIFY)(ReceiveBuffer + Offset);
-
         int nGuildMarkIndex = g_GuildCache.GetGuildMarkIndex(pData2->nGuildKey);
-        memcpy(GuildMark[nGuildMarkIndex].UnionName, pData2->szUnionName, sizeof(char) * MAX_GUILDNAME);
-        GuildMark[nGuildMarkIndex].UnionName[MAX_GUILDNAME] = NULL;
+        CMultiLanguage::ConvertFromUtf8(GuildMark[nGuildMarkIndex].UnionName, pData2->szUnionName, MAX_GUILDNAME);
 
         int nCharKey = MAKEWORD(pData2->byKeyL, pData2->byKeyH);
 
@@ -7072,7 +7076,10 @@ void ReceiveUnionList(const BYTE* ReceiveBuffer)
                     tmp[j] = pData2->GuildMark[j / 2] & 0x0f;
             }
 
-            g_pGuildInfoWindow->AddUnionList(tmp, pData2->szGuildName, pData2->byMemberCount);
+            wchar_t guildName[MAX_GUILDNAME + 1];
+            CMultiLanguage::ConvertFromUtf8(guildName, pData2->szGuildName, MAX_GUILDNAME);
+
+            g_pGuildInfoWindow->AddUnionList(tmp, guildName, pData2->byMemberCount);
 
             Offset += sizeof(PMSG_UNIONLIST);
         }
@@ -7088,10 +7095,8 @@ void ReceiveSoccerTime(const BYTE* ReceiveBuffer)
 void ReceiveSoccerScore(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SOCCER_SCORE)ReceiveBuffer;
-    memcpy(SoccerTeamName[0], Data->Name1, 8);
-    memcpy(SoccerTeamName[1], Data->Name2, 8);
-    SoccerTeamName[0][8] = NULL;
-    SoccerTeamName[1][8] = NULL;
+    CMultiLanguage::ConvertFromUtf8(SoccerTeamName[0], Data->Name1, MAX_GUILDNAME);
+    CMultiLanguage::ConvertFromUtf8(SoccerTeamName[1], Data->Name2, MAX_GUILDNAME);
     GuildWarScore[0] = Data->Score1;
     GuildWarScore[1] = Data->Score2;
 
@@ -7118,12 +7123,12 @@ void ReceiveSoccerScore(const BYTE* ReceiveBuffer)
 void ReceiveSoccerGoal(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
-    char Text[100];
+    wchar_t Text[100];
     if (Data->Value == HeroSoccerTeam)
-        sprintf(Text, GlobalText[534], GuildMark[Hero->GuildMarkIndex].GuildName);
+        swprintf(Text, GlobalText[534], GuildMark[Hero->GuildMarkIndex].GuildName);
     else
-        sprintf(Text, GlobalText[534], GuildWarName);
-    g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        swprintf(Text, GlobalText[534], GuildWarName);
+    g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
 void Receive_Master_LevelUp(const BYTE* ReceiveBuffer)
@@ -7139,10 +7144,10 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer)
     Master_Level_Data.wMaxShield = Data->wMaxShield;
     Master_Level_Data.wMaxBP = Data->wMaxBP;
 
-    unicode::t_char szText[256] = { NULL, };
+    wchar_t szText[256] = { NULL, };
     WORD iExp = Master_Level_Data.lNext_MasterLevel_Experince - Master_Level_Data.lMasterLevel_Experince;
-    sprintf(szText, GlobalText[1750], iExp);
-    g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    swprintf(szText, GlobalText[1750], iExp);
+    g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
     CharacterMachine->CalulateMasterLevelNextExperience();
 
@@ -7157,7 +7162,7 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer)
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x51 [Receive_Master_LevelUp]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x51 [Receive_Master_LevelUp]");
 }
 
 void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer)
@@ -7203,7 +7208,7 @@ void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer)
     Master_Level_Data.wMaxShield = Data->wMaxShield;
     Master_Level_Data.wMaxBP = Data->wMaxSkillMana;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x50 [Receive_Master_Level_Exp]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x50 [Receive_Master_Level_Exp]");
 }
 
 void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
@@ -7339,7 +7344,7 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
     }
     Master_Level_Data.nMLevelUpMPoint = Data->nMLPoint;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x52 [Receive_Master_LevelGetSkill]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x52 [Receive_Master_LevelGetSkill]");
 }
 
 void ReceiveServerCommand(const BYTE* ReceiveBuffer)
@@ -7384,7 +7389,9 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDialogMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
-            pMsgBox->AddMsg(g_DialogScript[Data->Cmd2].m_lpszText);
+            wchar_t Text[300];
+            CMultiLanguage::ConvertFromUtf8(Text, g_DialogScript[Data->Cmd2].m_lpszText);
+            pMsgBox->AddMsg(Text);
         }
     }
     break;
@@ -7474,22 +7481,22 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         break;
     case 55:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[2043], GlobalText[39]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[2043], GlobalText[39]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
     case 56:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[2043], GlobalText[56]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[2043], GlobalText[56]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
     case 57:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[2043], GlobalText[57]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[2043], GlobalText[57]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -7543,7 +7550,7 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
         }
 #endif // LEM_ADD_LUCKYITEM
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        unicode::t_char szText[256] = { 0, };
+        wchar_t szText[256] = { 0, };
         switch (g_MixRecipeMgr.GetMixInventoryType())
         {
         case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
@@ -7551,32 +7558,32 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
         case SEASON3A::MIXTYPE_GOBLIN_ADD380:
         case SEASON3A::MIXTYPE_EXTRACT_SEED:
         case SEASON3A::MIXTYPE_SEED_SPHERE:
-            unicode::_sprintf(szText, GlobalText[594]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            swprintf(szText, GlobalText[594]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
             // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				unicode::_sprintf(szText, GlobalText[1208]);	// ºÎÈ° ½ÇÆÐ
-            // 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            // 				wprintf(szText, GlobalText[1208]);	// ºÎÈ° ½ÇÆÐ
+            // 				g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
             // 				break;
         case SEASON3A::MIXTYPE_OSBOURNE:
-            unicode::_sprintf(szText, GlobalText[2105], GlobalText[2061]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            swprintf(szText, GlobalText[2105], GlobalText[2061]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_JERRIDON:
-            unicode::_sprintf(szText, GlobalText[2105], GlobalText[2062]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            swprintf(szText, GlobalText[2105], GlobalText[2062]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_ELPIS:
-            unicode::_sprintf(szText, GlobalText[2112], GlobalText[2063]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            swprintf(szText, GlobalText[2112], GlobalText[2063]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHAOS_CARD:
-            unicode::_sprintf(szText, GlobalText[2112], GlobalText[2265]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            swprintf(szText, GlobalText[2112], GlobalText[2265]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            unicode::_sprintf(szText, GlobalText[2112], GlobalText[2560]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            swprintf(szText, GlobalText[2112], GlobalText[2560]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         }
     }
@@ -7591,7 +7598,7 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
         }
 #endif // LEM_ADD_LUCKYITEM
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        unicode::t_char szText[256] = { 0, };
+        wchar_t szText[256] = { 0, };
         switch (g_MixRecipeMgr.GetMixInventoryType())
         {
         case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
@@ -7599,32 +7606,32 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
         case SEASON3A::MIXTYPE_GOBLIN_ADD380:
         case SEASON3A::MIXTYPE_EXTRACT_SEED:
         case SEASON3A::MIXTYPE_SEED_SPHERE:
-            unicode::_sprintf(szText, GlobalText[595]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            swprintf(szText, GlobalText[595]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
             // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				unicode::_sprintf(szText, GlobalText[1209]);
-            // 				g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            // 				wprintf(szText, GlobalText[1209]);
+            // 				g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             // 				break;
         case SEASON3A::MIXTYPE_OSBOURNE:
-            unicode::_sprintf(szText, GlobalText[2106], GlobalText[2061]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            swprintf(szText, GlobalText[2106], GlobalText[2061]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_JERRIDON:
-            unicode::_sprintf(szText, GlobalText[2106], GlobalText[2062]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            swprintf(szText, GlobalText[2106], GlobalText[2062]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_ELPIS:
-            unicode::_sprintf(szText, GlobalText[2113], GlobalText[2063]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            swprintf(szText, GlobalText[2113], GlobalText[2063]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHAOS_CARD:
-            unicode::_sprintf(szText, GlobalText[2113], GlobalText[2265]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            swprintf(szText, GlobalText[2113], GlobalText[2265]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            unicode::_sprintf(szText, GlobalText[2113], GlobalText[2560]);
-            g_pChatListBox->AddText("", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            swprintf(szText, GlobalText[2113], GlobalText[2560]);
+            g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         }
 
@@ -7639,7 +7646,7 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
     case 0x0B:
     {
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_READY);
-        g_pChatListBox->AddText("", GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
     }
     break;
     case 4:
@@ -7676,18 +7683,18 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
         break;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x86 [ReceiveMix(%d)]", Data->Index);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x86 [ReceiveMix(%d)]", Data->Index);
 }
 
 void ReceiveMixExit(const BYTE* ReceiveBuffer)
 {
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x87 [ReceiveMixExit]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x87 [ReceiveMixExit]");
 }
 
 void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_ANS_JEWEL_MIX)ReceiveBuffer;
-    char sBuf[256];
+    wchar_t sBuf[256];
     memset(sBuf, 0, 256);
     switch (Data->m_iResult)
     {
@@ -7695,8 +7702,8 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     case 2:
     case 3:
     {
-        sprintf(sBuf, "%s%s %s", GlobalText[1801], GlobalText[1816], GlobalText[868]);
-        g_pChatListBox->AddText("", sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        swprintf(sBuf, L"%s%s %s", GlobalText[1801], GlobalText[1816], GlobalText[868]);
+        g_pChatListBox->AddText(L"", sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -7707,13 +7714,13 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     break;
     case 4:
     {
-        g_pChatListBox->AddText("", GlobalText[1817], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1817], SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 5:
     {
-        g_pChatListBox->AddText("", GlobalText[1811], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1811], SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -7723,7 +7730,7 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
 void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_ANS_JEWEL_UNMIX)ReceiveBuffer;
-    char sBuf[256];
+    wchar_t sBuf[256];
     memset(sBuf, 0, 256);
 
     switch (Data->m_iResult)
@@ -7731,8 +7738,8 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     case 0:
     case 5:
     {
-        sprintf(sBuf, "%s%s %s", GlobalText[1800], GlobalText[1816], GlobalText[868]);
-        g_pChatListBox->AddText("", sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        swprintf(sBuf, L"%s%s %s", GlobalText[1800], GlobalText[1816], GlobalText[868]);
+        g_pChatListBox->AddText(L"", sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -7746,19 +7753,19 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     case 4:
     case 6:
     {
-        g_pChatListBox->AddText("", GlobalText[1812], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1812], SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 7:
     {
-        g_pChatListBox->AddText("", GlobalText[1815], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1815], SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 8:
     {
-        g_pChatListBox->AddText("", GlobalText[1811], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1811], SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -7796,8 +7803,8 @@ void ReceiveMoveToDevilSquareResult(const BYTE* ReceiveBuffer)
 
     case 6:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[2043], GlobalText[39]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[2043], GlobalText[39]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -7813,8 +7820,8 @@ void ReceiveDevilSquareOpenTime(const BYTE* ReceiveBuffer)
     }
     else
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[644], (int)Data->Value);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[644], (int)Data->Value);
         SEASON3B::CreateOkMessageBox(strText);
     }
 }
@@ -7866,8 +7873,8 @@ void ReceiveMoveToEventMatchResult(const BYTE* ReceiveBuffer)
 
     case 2:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[852], GlobalText[1146]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[852], GlobalText[1146]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -7882,38 +7889,38 @@ void ReceiveMoveToEventMatchResult(const BYTE* ReceiveBuffer)
 
     case 5:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[853], GlobalText[1146], MAX_BLOOD_CASTLE_MEN);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[853], GlobalText[1146], MAX_BLOOD_CASTLE_MEN);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
 
     case 6:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[867], 6);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[867], 6);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
     case 7:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[2043], GlobalText[56]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[2043], GlobalText[56]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
     case 8:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[852], GlobalText[1147]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[852], GlobalText[1147]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
 
     case 9:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[853], GlobalText[1147], MAX_CHAOS_CASTLE_MEN);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[853], GlobalText[1147], MAX_CHAOS_CASTLE_MEN);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -7931,21 +7938,21 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
         }
         else
         {
-            unicode::t_char strText[128];
-            unicode::_sprintf(strText, GlobalText[644], (int)Data->KeyH);
+            wchar_t strText[128];
+            swprintf(strText, GlobalText[644], (int)Data->KeyH);
             SEASON3B::CreateOkMessageBox(strText);
         }
     }
     else if (Data->Value == 2)
     {
-        unicode::t_char strText[256];
+        wchar_t strText[256];
         if (0 == Data->KeyH)
         {
-            unicode::_sprintf(strText, GlobalText[850], GlobalText[1146]);
+            swprintf(strText, GlobalText[850], GlobalText[1146]);
         }
         else
         {
-            unicode::_sprintf(strText, GlobalText[851], (int)Data->KeyH, GlobalText[1146]);
+            swprintf(strText, GlobalText[851], (int)Data->KeyH, GlobalText[1146]);
         }
         SEASON3B::CreateOkMessageBox(strText);
     }
@@ -7955,11 +7962,11 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
 
         if (0 == time)
         {
-            char szOpenTime1[256] = { 0, };
-            char szOpenTime2[256] = { 0, };
+            wchar_t szOpenTime1[256] = { 0, };
+            wchar_t szOpenTime2[256] = { 0, };
 
-            sprintf(szOpenTime1, GlobalText[850], GlobalText[1147]);
-            sprintf(szOpenTime2, GlobalText[1156], GlobalText[1147], Data->KeyM, 100);
+            swprintf(szOpenTime1, GlobalText[850], GlobalText[1147]);
+            swprintf(szOpenTime2, GlobalText[1156], GlobalText[1147], Data->KeyM, 100);
 
             GlobalText.Remove(1154);
             GlobalText.Remove(1155);
@@ -7976,15 +7983,15 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
         }
         else
         {
-            char Text[256];
+            wchar_t Text[256];
             int Hour = (int)(time / 60);
             int Mini = (int)(time)-(Hour * 60);
 
-            char szOpenTime[256] = { 0, };
+            wchar_t szOpenTime[256] = { 0, };
 
-            wsprintf(szOpenTime, GlobalText[1164], Hour);
-            wsprintf(Text, GlobalText[851], Mini, GlobalText[1147]);
-            strcat(szOpenTime, Text);
+            swprintf(szOpenTime, GlobalText[1164], Hour);
+            swprintf(Text, GlobalText[851], Mini, GlobalText[1147]);
+            wcscat(szOpenTime, Text);
 
             GlobalText.Remove(1154);
             GlobalText.Add(1154, szOpenTime);
@@ -7999,14 +8006,14 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
     }
     else if (Data->Value == 5)
     {
-        unicode::t_char strText[256];
+        wchar_t strText[256];
         if (0 == Data->KeyH)
         {
-            unicode::_sprintf(strText, GlobalText[850], GlobalText[2369]);
+            swprintf(strText, GlobalText[850], GlobalText[2369]);
         }
         else
         {
-            unicode::_sprintf(strText, GlobalText[851], (int)Data->KeyH, GlobalText[2369]);
+            swprintf(strText, GlobalText[851], (int)Data->KeyH, GlobalText[2369]);
         }
         SEASON3B::CreateOkMessageBox(strText);
     }
@@ -8027,8 +8034,8 @@ void ReceiveMoveToEventMatchResult2(const BYTE* ReceiveBuffer)
 
     case 2:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[852], GlobalText[1147]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[852], GlobalText[1147]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8043,16 +8050,16 @@ void ReceiveMoveToEventMatchResult2(const BYTE* ReceiveBuffer)
 
     case 5:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[853], GlobalText[1147], MAX_CHAOS_CASTLE_MEN);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[853], GlobalText[1147], MAX_CHAOS_CASTLE_MEN);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
 
     case 6:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[867], 6);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[867], 6);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8063,8 +8070,8 @@ void ReceiveMoveToEventMatchResult2(const BYTE* ReceiveBuffer)
 
     case 8:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[2043], GlobalText[57]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[2043], GlobalText[57]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8075,7 +8082,7 @@ void ReceiveSetAttribute(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SET_MAPATTRIBUTE)ReceiveBuffer;
 
-    g_ErrorReport.Write("Type:%d \r\n", Data->m_byType);
+    g_ErrorReport.Write(L"Type:%d \r\n", Data->m_byType);
 
     switch (Data->m_byType)
     {
@@ -8091,7 +8098,7 @@ void ReceiveSetAttribute(const BYTE* ReceiveBuffer)
             int dx = Data->m_vAttribute[(k * 2) + 1].m_byX - Data->m_vAttribute[(k * 2)].m_byX + 1;
             int dy = Data->m_vAttribute[(k * 2) + 1].m_byY - Data->m_vAttribute[(k * 2)].m_byY + 1;
 
-            g_ErrorReport.Write("count:%d, x:%d, y:%d \r\n", Data->m_byCount, dx, dy);
+            g_ErrorReport.Write(L"count:%d, x:%d, y:%d \r\n", Data->m_byCount, dx, dy);
 
             AddTerrainAttributeRange(Data->m_vAttribute[(k * 2)].m_byX, Data->m_vAttribute[(k * 2)].m_byY, dx, dy, Data->m_byMapAttr, 1 - Data->m_byMapSetType);
         }
@@ -8103,12 +8110,12 @@ void ReceiveSetAttribute(const BYTE* ReceiveBuffer)
         {
             if (Data->m_byMapSetType)
             {
-                g_ErrorReport.Write("SubTerrainAttribute - count:%d, x:%d, y:%d \r\n", Data->m_byCount, Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
+                g_ErrorReport.Write(L"SubTerrainAttribute - count:%d, x:%d, y:%d \r\n", Data->m_byCount, Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
                 SubTerrainAttribute(Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY, Data->m_byMapAttr);
             }
             else
             {
-                g_ErrorReport.Write("AddTerrainAttribute - count:%d, x:%d, y:%d \r\n", Data->m_byCount, Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
+                g_ErrorReport.Write(L"AddTerrainAttribute - count:%d, x:%d, y:%d \r\n", Data->m_byCount, Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
                 AddTerrainAttribute(Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY, Data->m_byMapAttr);
             }
         }
@@ -8131,8 +8138,10 @@ void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
     }
 
     auto Data = (LPPMSG_REQ_DUEL_ANSWER)ReceiveBuffer;
+    wchar_t playerName[MAX_ID_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(playerName, Data->szID, MAX_ID_SIZE);
 
-    g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), Data->szID);
+    g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
 
     if (g_pNewUISystem->IsImpossibleDuelInterface() == true)
     {
@@ -8147,23 +8156,25 @@ void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
 void ReceiveDuelStart(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_ANS_DUEL_INVITE)ReceiveBuffer;
-    char szMessage[256];
+    wchar_t szMessage[256];
+    wchar_t playerName[MAX_ID_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(playerName, Data->szID, MAX_ID_SIZE);
     if (Data->nResult == 0)
     {
         g_DuelMgr.EnableDuel(TRUE);
         g_DuelMgr.SetHeroAsDuelPlayer(DUEL_HERO);
-        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), Data->szID);
-        sprintf(szMessage, GlobalText[912], g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
-        g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
+        swprintf(szMessage, GlobalText[912], g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
+        g_pChatListBox->AddText(L"", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
 
         g_pNewUISystem->Show(SEASON3B::INTERFACE_DUEL_WINDOW);
         PlayBuffer(SOUND_START_DUEL);
     }
     else if (Data->nResult == 15)
     {
-        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), Data->szID);
-        sprintf(szMessage, GlobalText[913], g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
-        g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
+        swprintf(szMessage, GlobalText[913], g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
+        g_pChatListBox->AddText(L"", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else if (Data->nResult == 16)
     {
@@ -8171,15 +8182,15 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
     }
     else if (Data->nResult == 28)
     {
-        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), Data->szID);
-        sprintf(szMessage, GlobalText[2704], 30);
-        g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
+        swprintf(szMessage, GlobalText[2704], 30);
+        g_pChatListBox->AddText(L"", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else if (Data->nResult == 30)
     {
-        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), Data->szID);
-        sprintf(szMessage, GlobalText[1811]);
-        g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
+        swprintf(szMessage, GlobalText[1811]);
+        g_pChatListBox->AddText(L"", szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
     }
 }
 
@@ -8189,11 +8200,13 @@ void ReceiveDuelEnd(const BYTE* ReceiveBuffer)
 
     if (Data->nResult == 0)
     {
+        wchar_t playerName[MAX_ID_SIZE + 1]{};
+        CMultiLanguage::ConvertFromUtf8(playerName, Data->szID, MAX_ID_SIZE);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUEL_WINDOW);
         g_DuelMgr.EnableDuel(FALSE);
-        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), Data->szID);
+        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
 
-        g_pChatListBox->AddText("", GlobalText[914], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[914], SEASON3B::TYPE_ERROR_MESSAGE);
 
         if (g_wtMatchTimeLeft.m_Type == 2)
             g_wtMatchTimeLeft.m_Time = 0;
@@ -8245,7 +8258,12 @@ void ReceiveDuelChannelList(const BYTE* ReceiveBuffer)
     auto Data = (LPPMSG_ANS_DUEL_CHANNELLIST)ReceiveBuffer;
     for (int i = 0; i < 4; ++i)
     {
-        g_DuelMgr.SetDuelChannel(i, Data->channel[i].bStart, Data->channel[i].bWatch, Data->channel[i].szID1, Data->channel[i].szID2);
+        wchar_t name1[MAX_ID_SIZE + 1]{};
+        wchar_t name2[MAX_ID_SIZE + 1]{};
+
+        CMultiLanguage::ConvertFromUtf8(name1, Data->channel[i].szID1, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(name2, Data->channel[i].szID2, MAX_ID_SIZE);
+        g_DuelMgr.SetDuelChannel(i, Data->channel[i].bStart, Data->channel[i].bWatch, name1, name2);
     }
 }
 
@@ -8254,11 +8272,17 @@ void ReceiveDuelWatchRequestReply(const BYTE* ReceiveBuffer)
     auto Data = (LPPMSG_ANS_DUEL_JOINCNANNEL)ReceiveBuffer;
     if (Data->nResult == 0)
     {
+        wchar_t name1[MAX_ID_SIZE + 1]{};
+        wchar_t name2[MAX_ID_SIZE + 1]{};
+
+        CMultiLanguage::ConvertFromUtf8(name1, Data->szID1, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(name2, Data->szID2, MAX_ID_SIZE);
+
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUELWATCH);
 
         g_DuelMgr.SetCurrentChannel(Data->nChannelId);
-        g_DuelMgr.SetDuelPlayer(DUEL_HERO, MAKEWORD(Data->bIndexL1, Data->bIndexH1), Data->szID1);
-        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL2, Data->bIndexH2), Data->szID2);
+        g_DuelMgr.SetDuelPlayer(DUEL_HERO, MAKEWORD(Data->bIndexL1, Data->bIndexH1), name1);
+        g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL2, Data->bIndexH2), name2);
     }
     else if (Data->nResult == 16)
     {
@@ -8276,7 +8300,10 @@ void ReceiveDuelWatchRequestReply(const BYTE* ReceiveBuffer)
 void ReceiveDuelWatcherJoin(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_DUEL_JOINCNANNEL_BROADCAST)ReceiveBuffer;
-    g_DuelMgr.AddDuelWatchUser(Data->szID);
+
+    wchar_t name[MAX_ID_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(name, Data->szID, MAX_ID_SIZE);
+    g_DuelMgr.AddDuelWatchUser(name);
 }
 
 void ReceiveDuelWatchEnd(const BYTE* ReceiveBuffer)
@@ -8294,7 +8321,9 @@ void ReceiveDuelWatchEnd(const BYTE* ReceiveBuffer)
 void ReceiveDuelWatcherQuit(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_DUEL_LEAVECNANNEL_BROADCAST)ReceiveBuffer;
-    g_DuelMgr.RemoveDuelWatchUser(Data->szID);
+    wchar_t name[MAX_ID_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(name, Data->szID, MAX_ID_SIZE);
+    g_DuelMgr.RemoveDuelWatchUser(name);
 }
 
 void ReceiveDuelWatcherList(const BYTE* ReceiveBuffer)
@@ -8304,7 +8333,9 @@ void ReceiveDuelWatcherList(const BYTE* ReceiveBuffer)
     auto Data = (LPPMSG_DUEL_OBSERVERLIST_BROADCAST)ReceiveBuffer;
     for (int i = 0; i < Data->nCount; ++i)
     {
-        g_DuelMgr.AddDuelWatchUser(Data->user[i].szID);
+        wchar_t name[MAX_ID_SIZE + 1]{};
+        CMultiLanguage::ConvertFromUtf8(name, Data->user[i].szID, MAX_ID_SIZE);
+        g_DuelMgr.AddDuelWatchUser(name);
     }
 }
 
@@ -8312,15 +8343,19 @@ void ReceiveDuelResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_DUEL_RESULT_BROADCAST)ReceiveBuffer;
 
-    char szMessage[256];
-    sprintf(szMessage, GlobalText[2689], 10);
-    g_pChatListBox->AddText("", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    wchar_t szMessage[256];
+    swprintf(szMessage, GlobalText[2689], 10);
+    g_pChatListBox->AddText(L"", szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
     SEASON3B::CDuelResultMsgBox* lpMsgBox = NULL;
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDuelResultMsgBoxLayout), &lpMsgBox);
     if (lpMsgBox)
     {
-        lpMsgBox->SetIDs(Data->szWinner, Data->szLoser);
+        wchar_t winnerName[MAX_ID_SIZE + 1]{};
+        wchar_t loserName[MAX_ID_SIZE + 1]{};
+        CMultiLanguage::ConvertFromUtf8(winnerName, Data->szWinner, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(loserName, Data->szLoser, MAX_ID_SIZE);
+        lpMsgBox->SetIDs(winnerName, loserName);
     }
     PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }
@@ -8352,11 +8387,11 @@ void ReceiveCreateShopTitleViewport(const BYTE* ReceiveBuffer)
         int index = FindCharacterIndex(key);
         if (index >= 0 && index < MAX_CHARACTERS_CLIENT) {
             CHARACTER* pPlayer = &CharactersClient[index];
-            char szShopTitle[40];
-            memcpy(szShopTitle, pShopTitle->szTitle, MAX_SHOPTITLE);
-            szShopTitle[MAX_SHOPTITLE] = '\0';
 
-            AddShopTitle(key, pPlayer, (const char*)szShopTitle);
+            wchar_t szShopTitle[40]{};
+            CMultiLanguage::ConvertFromUtf8(szShopTitle, pShopTitle->szTitle, MAX_SHOPTITLE);
+
+            AddShopTitle(key, pPlayer, szShopTitle);
         }
     }
 }
@@ -8369,12 +8404,14 @@ void ReceiveShopTitleChange(const BYTE* ReceiveBuffer)
     int index = FindCharacterIndex(key);
     if (index >= 0 && index < MAX_CHARACTERS_CLIENT) {
         CHARACTER* pPlayer = &CharactersClient[index];
-        char szShopTitle[40];
-        memcpy(szShopTitle, Header->szTitle, MAX_SHOPTITLE);
-        szShopTitle[MAX_SHOPTITLE] = '\0';
+        wchar_t szShopTitle[40]{};
+        CMultiLanguage::ConvertFromUtf8(szShopTitle, Header->szTitle, MAX_SHOPTITLE);
 
-        if (strncmp(pPlayer->ID, (const char*)Header->szId, MAX_ID_SIZE) == 0)
-            AddShopTitle(key, pPlayer, (const char*)szShopTitle);
+        wchar_t szID[MAX_ID_SIZE + 1]{};
+        CMultiLanguage::ConvertFromUtf8(szID, Header->szId, MAX_ID_SIZE);
+
+        if (wcsncmp(pPlayer->ID, szID, MAX_ID_SIZE) == 0)
+            AddShopTitle(key, pPlayer, (const wchar_t*)szShopTitle);
     }
 }
 
@@ -8392,9 +8429,9 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
 
         RemovePersonalItemPrice(g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
 
-        SendRequestInventory();
+        SocketClient->ToGameServer()->SendInventoryRequest();
 
-        g_ErrorReport.Write("@ [Fault] ReceiveSetPriceResult (result : %d)\n", Header->byResult);
+        g_ErrorReport.Write(L"@ [Fault] ReceiveSetPriceResult (result : %d)\n", Header->byResult);
     }
 }
 
@@ -8409,7 +8446,7 @@ void ReceiveCreatePersonalShop(const BYTE* ReceiveBuffer)
     else
     {
         // Header->btResult == 0x03
-        g_ErrorReport.Write("@ [Fault] ReceiveCreatePersonalShop (result : %d)\n", Header->byResult);
+        g_ErrorReport.Write(L"@ [Fault] ReceiveCreatePersonalShop (result : %d)\n", Header->byResult);
     }
 }
 void ReceiveDestroyPersonalShop(const BYTE* ReceiveBuffer)
@@ -8431,7 +8468,7 @@ void ReceiveDestroyPersonalShop(const BYTE* ReceiveBuffer)
     }
     else
     {
-        g_ErrorReport.Write("@ [Fault] ReceiveDestroyPersonalShop (result : %d)\n", Header->byResult);
+        g_ErrorReport.Write(L"@ [Fault] ReceiveDestroyPersonalShop (result : %d)\n", Header->byResult);
     }
 }
 
@@ -8453,8 +8490,9 @@ void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
 
         g_PersonalShopSeller.Initialize();
 
-        unicode::t_string temp = (char*)Header->szShopTitle;
-        g_pPurchaseShopInventory->ChangeTitleText(temp);
+        wchar_t shopName[MAX_SHOPTITLE + 1] {};
+        CMultiLanguage::ConvertFromUtf8(shopName, Header->szShopTitle, MAX_SHOPTITLE);
+        g_pPurchaseShopInventory->ChangeTitleText(shopName);
         g_pPurchaseShopInventory->GetInventoryCtrl()->RemoveAllItems();
 
         g_pNewUISystem->Show(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY);
@@ -8473,9 +8511,9 @@ void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
             }
             else
             {
-                g_ConsoleDebug->Write(MCD_ERROR, "[ReceivePersonalShopItemList]Item Cound : %d, Item Index : %d, Item Price : %d", Header->byCount, i, pShopItem->iItemPrice);
+                g_ConsoleDebug->Write(MCD_ERROR, L"[ReceivePersonalShopItemList]Item Cound : %d, Item Index : %d, Item Price : %d", Header->byCount, i, pShopItem->iItemPrice);
 
-                g_ErrorReport.Write("@ ReceivePersonalShopItemList - item price less than zero(%d)\n", pShopItem->iItemPrice);
+                g_ErrorReport.Write(L"@ ReceivePersonalShopItemList - item price less than zero(%d)\n", pShopItem->iItemPrice);
 
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
@@ -8496,16 +8534,16 @@ void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
         {
         case 0x03:
         {
-            g_pChatListBox->AddText("", GlobalText[1120], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[1120], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
         case 0x04:
         default:
-            g_ErrorReport.Write("@ [Fault] ReceivePersonalShopItemList (result : %d)\n", Header->byResult);
+            g_ErrorReport.Write(L"@ [Fault] ReceivePersonalShopItemList (result : %d)\n", Header->byResult);
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x05 [ReceivePersonalShopItemList]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x05 [ReceivePersonalShopItemList]");
 }
 
 void ReceiveRefreshItemList(const BYTE* ReceiveBuffer)
@@ -8530,11 +8568,11 @@ void ReceiveRefreshItemList(const BYTE* ReceiveBuffer)
             auto pCurrentInvenCtrl = g_pPurchaseShopInventory->GetInventoryCtrl();
 
             size_t uiCntInvenCtrl = pCurrentInvenCtrl->GetNumberOfItems();
-            g_ErrorReport.Write("@ [Notice] ReceiveRefreshItemList (InventoryCtrl Count Items(%d))\n", uiCntInvenCtrl);
+            g_ErrorReport.Write(L"@ [Notice] ReceiveRefreshItemList (InventoryCtrl Count Items(%d))\n", uiCntInvenCtrl);
         }
         else
         {
-            g_ErrorReport.Write("@ [Fault] ReceiveRefreshItemList (result : %d)\n", Header->byResult);
+            g_ErrorReport.Write(L"@ [Fault] ReceiveRefreshItemList (result : %d)\n", Header->byResult);
         }
     }
 }
@@ -8567,7 +8605,7 @@ void ReceivePurchaseItem(const BYTE* ReceiveBuffer)
     }
     else if (Header->byResult == 0x06)
     {
-        g_pChatListBox->AddText("", GlobalText[1166], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1166], SEASON3B::TYPE_ERROR_MESSAGE);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY);
     }
@@ -8577,17 +8615,17 @@ void ReceivePurchaseItem(const BYTE* ReceiveBuffer)
         {
         case 0x07:
         {
-            g_pChatListBox->AddText("", GlobalText[423], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[423], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
         case 0x08:
         {
-            g_pChatListBox->AddText("", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
         case 0x09:
         default:
-            g_ErrorReport.Write("@ [Fault] ReceivePurchaseItem (result : %d)\n", Header->byResult);
+            g_ErrorReport.Write(L"@ [Fault] ReceivePurchaseItem (result : %d)\n", Header->byResult);
         }
         SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
     }
@@ -8596,13 +8634,13 @@ void ReceivePurchaseItem(const BYTE* ReceiveBuffer)
 void NotifySoldItem(const BYTE* ReceiveBuffer)
 {
     auto Header = (LPSOLDITEM_RESULTINFO)ReceiveBuffer;
-    char szId[MAX_ID_SIZE + 2] = { 0, };
-    strncpy(szId, (char*)Header->szId, MAX_ID_SIZE);
+    wchar_t szId[MAX_ID_SIZE + 2] = { 0, };
+    wcsncpy(szId, (wchar_t*)Header->szId, MAX_ID_SIZE);
     szId[MAX_ID_SIZE] = '\0';
 
-    char Text[100];
-    sprintf(Text, GlobalText[1122], szId);
-    g_pChatListBox->AddText("", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    wchar_t Text[100];
+    swprintf(Text, GlobalText[1122], szId);
+    g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
 void NotifyClosePersonalShop(const BYTE* ReceiveBuffer)
@@ -8612,7 +8650,7 @@ void NotifyClosePersonalShop(const BYTE* ReceiveBuffer)
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY);
 
-        g_pChatListBox->AddText("", GlobalText[1126], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1126], SEASON3B::TYPE_ERROR_MESSAGE);
     }
 }
 
@@ -8686,11 +8724,11 @@ void ReceiveFriendList(const BYTE* ReceiveBuffer)
     g_pWindowMgr->Reset();
     auto Header = (LPFS_FRIEND_LIST_HEADER)ReceiveBuffer;
     int iMoveOffset = sizeof(FS_FRIEND_LIST_HEADER);
-    char szName[MAX_ID_SIZE + 1] = { 0 };
+    wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
     for (int i = 0; i < Header->Count; ++i)
     {
         auto Data = (LPFS_FRIEND_LIST_DATA)(ReceiveBuffer + iMoveOffset);
-        strncpy(szName, (const char*)Data->Name, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_ID_SIZE);
         szName[MAX_ID_SIZE] = '\0';
         g_pFriendList->AddFriend(szName, 0, Data->Server);
         iMoveOffset += sizeof(FS_FRIEND_LIST_DATA);
@@ -8701,36 +8739,42 @@ void ReceiveFriendList(const BYTE* ReceiveBuffer)
 
     // Ã¤ÆÃ ¼­¹ö »ì¾Æ³²
     g_pWindowMgr->SetServerEnable(TRUE);
-    if (g_iChatInputType == 0) SendRequestChangeState(2);
+    if (g_iChatInputType == 0)
+    {
+        SocketClient->ToGameServer()->SendSetFriendOnlineState(2);
+    }
 
     g_iMaxLetterCount = Header->MaxMemo;
 
     if (Header->MemoCount > 0)
     {
-        char temp[MAX_TEXT_LENGTH + 1];
-        sprintf(temp, GlobalText[1072], Header->MemoCount, Header->MaxMemo);
-        g_pChatListBox->AddText("", temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        wchar_t temp[MAX_TEXT_LENGTH + 1];
+        swprintf(temp, GlobalText[1072], Header->MemoCount, Header->MaxMemo);
+        g_pChatListBox->AddText(L"", temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
 void ReceiveAddFriendResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_FRIEND_RESULT)ReceiveBuffer;
-    char szName[MAX_ID_SIZE + 1] = { 0 };
-    strncpy(szName, (const char*)Data->Name, MAX_ID_SIZE);
+
+    wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_ID_SIZE);
     szName[MAX_ID_SIZE] = '\0';
-    char szText[MAX_TEXT_LENGTH + 1] = { 0 };
-    strncpy(szText, (const char*)Data->Name, MAX_ID_SIZE);
+
+    wchar_t szText[MAX_TEXT_LENGTH + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szText, Data->Name, MAX_ID_SIZE);
     szText[MAX_ID_SIZE] = '\0';
+
     switch (Data->Result)
     {
     case 0x00:
-        strcat(szText, GlobalText[1047]);
+        wcscat(szText, GlobalText[1047]);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     case 0x01:
     {
-        g_pChatListBox->AddText("", GlobalText[1075], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1075], SEASON3B::TYPE_SYSTEM_MESSAGE);
         g_pFriendList->AddFriend(szName, 0, Data->Server);
         g_pFriendList->Sort();
         g_pWindowMgr->RefreshMainWndPalList();
@@ -8738,36 +8782,39 @@ void ReceiveAddFriendResult(const BYTE* ReceiveBuffer)
     }
     break;
     case 0x03:
-        strcpy(szText, GlobalText[1048]);
+        wcscpy(szText, GlobalText[1048]);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     case 0x04:
-        strcat(szText, GlobalText[1049]);
+        wcscat(szText, GlobalText[1049]);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     case 0x05:
-        strcpy(szText, GlobalText[1050]);
+        wcscpy(szText, GlobalText[1050]);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     case 0x06:
-        strcpy(szText, GlobalText[1068]);
+        wcscpy(szText, GlobalText[1068]);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     default:
         break;
-    };
+    }
 }
 
 void ReceiveRequestAcceptAddFriend(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_ACCEPT_ADD_FRIEND_RESULT)ReceiveBuffer;
-    char szName[MAX_ID_SIZE + 1] = { 0 };
-    strncpy(szName, (const char*)Data->Name, MAX_ID_SIZE);
+
+    wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_ID_SIZE);
     szName[MAX_ID_SIZE] = '\0';
-    char szText[MAX_TEXT_LENGTH + 1] = { 0 };
-    strncpy(szText, (const char*)Data->Name, MAX_ID_SIZE);
+
+    wchar_t szText[MAX_TEXT_LENGTH + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szText, Data->Name, MAX_ID_SIZE);
     szText[MAX_ID_SIZE] = '\0';
-    strcat(szText, GlobalText[1051]);
+
+    wcscat(szText, GlobalText[1051]);
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == false)
     {
@@ -8785,9 +8832,11 @@ void ReceiveRequestAcceptAddFriend(const BYTE* ReceiveBuffer)
 void ReceiveDeleteFriendResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_FRIEND_RESULT)ReceiveBuffer;
-    char szName[MAX_ID_SIZE + 1] = { 0 };
-    strncpy(szName, (const char*)Data->Name, MAX_ID_SIZE);
+
+    wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_ID_SIZE);
     szName[MAX_ID_SIZE] = '\0';
+
     switch (Data->Result)
     {
     case 0x00:
@@ -8799,15 +8848,17 @@ void ReceiveDeleteFriendResult(const BYTE* ReceiveBuffer)
         break;
     default:
         break;
-    };
+    }
 }
 
 void ReceiveFriendStateChange(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_FRIEND_STATE_CHANGE)ReceiveBuffer;
-    char szName[MAX_ID_SIZE + 1] = { 0 };
-    strncpy(szName, (const char*)Data->Name, MAX_ID_SIZE);
+
+    wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_ID_SIZE);
     szName[MAX_ID_SIZE] = '\0';
+
     if (Data->Server == 0xFC)
     {
         g_pFriendList->UpdateAllFriendState(0, Data->Server);
@@ -8852,9 +8903,9 @@ void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
     {
         if (Data->WindowGuid != 0)
             g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, Data->WindowGuid, 0);
-        char temp[MAX_TEXT_LENGTH + 1];
-        sprintf(temp, GlobalText[1046], g_cdwLetterCost);
-        g_pChatListBox->AddText("", temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        wchar_t temp[MAX_TEXT_LENGTH + 1];
+        swprintf(temp, GlobalText[1046], g_cdwLetterCost);
+        g_pChatListBox->AddText(L"", temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
     break;
     case 0x02:
@@ -8889,29 +8940,30 @@ void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
 
 void ReceiveLetter(const BYTE* ReceiveBuffer)
 {
-    //g_pLetterList->ClearLetterList();
-
     auto Data = (LPFS_LETTER_ALERT)ReceiveBuffer;
-    char szDate[16] = { 0 };
-    strncpy(szDate, (char*)Data->Date, 10);
+
+    wchar_t szDate[16] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szDate, Data->Name + 11, 10);
     szDate[10] = '\0';
-    char szTime[16] = { 0 };
-    strncpy(szTime, (char*)Data->Date + 11, 8);
+
+    wchar_t szTime[16] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szTime, Data->Name + 11, 8);
     szTime[8] = '\0';
 
-    char szName[MAX_ID_SIZE + 1] = { 0 };
-    strncpy(szName, (const char*)Data->Name, MAX_ID_SIZE);
+    wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_ID_SIZE);
     szName[MAX_ID_SIZE] = '\0';
-    char szSubject[32 + 1] = { 0 };
-    strncpy(szSubject, (const char*)Data->Subject, 32);
-    szSubject[32] = '\0';
+
+    wchar_t szSubject[MAX_TEXT_LENGTH + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szSubject, Data->Subject, MAX_ID_SIZE);
+    szSubject[MAX_ID_SIZE] = '\0';
 
     switch (Data->Read)
     {
     case 0x02:
         PlayBuffer(SOUND_FRIEND_MAIL_ALERT);
         g_pFriendMenu->SetNewMailAlert(TRUE);
-        g_pChatListBox->AddText("", GlobalText[1062], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1062], SEASON3B::TYPE_SYSTEM_MESSAGE);
         g_pLetterList->AddLetter(Data->Index, szName, szSubject, szDate, szTime, 0x00);
         g_pLetterList->Sort();
         break;
@@ -8928,7 +8980,7 @@ void ReceiveLetter(const BYTE* ReceiveBuffer)
 
     if (g_pLetterList->GetLetterCount() >= g_iMaxLetterCount)
     {
-        g_pChatListBox->AddText("", GlobalText[1073], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1073], SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -8937,7 +8989,7 @@ extern int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 void ReceiveLetterText(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_LETTER_TEXT)ReceiveBuffer;
-    Data->Memo[Data->MemoSize] = '\0';
+    //Data->Memo[Data->MemoSize] = '\0';
 
     g_pLetterList->CacheLetterText(Data->Index, Data);
 
@@ -8946,8 +8998,8 @@ void ReceiveLetterText(const BYTE* ReceiveBuffer)
     pLetter->m_bIsRead = TRUE;
     g_pWindowMgr->RefreshMainWndLetterList();
 
-    char tempTxt[MAX_TEXT_LENGTH + 1];
-    sprintf(tempTxt, GlobalText[1054], pLetter->m_szText);
+    wchar_t tempTxt[MAX_TEXT_LENGTH + 1];
+    swprintf(tempTxt, GlobalText[1054], pLetter->m_szText);
     DWORD dwUIID = 0;
     if (g_iLetterReadNextPos_x == UIWND_DEFAULT)
     {
@@ -8960,13 +9012,13 @@ void ReceiveLetterText(const BYTE* ReceiveBuffer)
     }
 
     auto* pWindow = (CUILetterReadWindow*)g_pWindowMgr->GetWindow(dwUIID);
-    char szText[1000 + 1] = { 0 };
-    strncpy(szText, (const char*)Data->Memo, 1000);
+    wchar_t szText[1000 + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szText, Data->Memo, 1000);
     szText[1000] = '\0';
     pWindow->SetLetter(pLetter, szText);
     g_pWindowMgr->SetLetterReadWindow(pLetter->m_dwLetterID, dwUIID);
 
-    if (strnicmp(pLetter->m_szID, "webzen", MAX_ID_SIZE) == 0)
+    if (wcsnicmp(pLetter->m_szID, L"webzen", MAX_ID_SIZE) == 0)
     {
         pWindow->m_Photo.SetWebzenMail(TRUE);
     }
@@ -9005,12 +9057,13 @@ void ReceiveLetterDeleteResult(const BYTE* ReceiveBuffer)
 void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_CHAT_CREATE_RESULT)ReceiveBuffer;
-    char szName[MAX_ID_SIZE + 1] = { 0 };
-    strncpy(szName, (const char*)Data->ID, MAX_ID_SIZE);
-    szName[MAX_ID_SIZE] = '\0';
-    char szIP[16];
-    memset(szIP, 0, 16);
-    memcpy(szIP, Data->IP, 15);
+
+    wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szName, Data->ID);
+
+    wchar_t szIP[16];
+    CMultiLanguage::ConvertFromUtf8(szIP, Data->IP);
+
     switch (Data->Result)
     {
     case 0x00:
@@ -9022,7 +9075,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
         {
             g_pFriendMenu->RemoveRequestWindow(szName);
             DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, GlobalText[994]);
-            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char*)szIP, Data->RoomNumber, Data->Ticket);
+            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
         }
         else if (Data->Type == 1)
         {
@@ -9030,7 +9083,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
             if (dwUIID == 0)
             {
                 dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);
-                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char*)szIP, Data->RoomNumber, Data->Ticket);
+                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
                 g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
                 g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
                 if (g_pWindowMgr->GetFriendMainWindow() != NULL)
@@ -9040,7 +9093,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
             else
             {
                 ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->DisconnectToChatServer();
-                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char*)szIP, Data->RoomNumber, Data->Ticket);
+                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
 
                 //				SendRequestCRDisconnectRoom(((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->GetCurrentSocket());
                 //				DWORD dwOldRoomNumber = ((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->GetRoomNumber();
@@ -9051,7 +9104,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
         else if (Data->Type == 2)
         {
             DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);
-            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char*)szIP, Data->RoomNumber, Data->Ticket);
+            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
             g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
             g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
             if (g_pWindowMgr->GetFriendMainWindow() != NULL)
@@ -9081,10 +9134,10 @@ void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
     case 0x01:
         if (pChatWindow->GetCurrentInvitePal() != NULL)
         {
-            char szText[MAX_TEXT_LENGTH + 1] = { 0 };
-            strncpy(szText, pChatWindow->GetCurrentInvitePal()->m_szID, MAX_ID_SIZE);
+            wchar_t szText[MAX_TEXT_LENGTH + 1] = { 0 };
+            wcsncpy(szText, pChatWindow->GetCurrentInvitePal()->m_szID, MAX_ID_SIZE);
             szText[MAX_ID_SIZE] = '\0';
-            strcat(szText, GlobalText[1057]);
+            wcscat(szText, GlobalText[1057]);
             pChatWindow->AddChatText(255, szText, 1, 0);
         }
         else
@@ -9230,7 +9283,7 @@ void ReceiveBuffState(const BYTE* ReceiveBuffer)
 
         if (bufftype == eBuff_HelpNpc)
         {
-            g_pChatListBox->AddText("", GlobalText[1828], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[1828], SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
     }
     else
@@ -9259,7 +9312,7 @@ void ReceiveServerImmigration(const BYTE* ReceiveBuffer)
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CServerImmigrationErrorMsgBoxLayout));
         break;
     case 1:
-        SEASON3B::CreateOkMessageBox("ReceiveServerImmigration");
+        SEASON3B::CreateOkMessageBox(L"ReceiveServerImmigration");
         break;
     }
 }
@@ -9283,7 +9336,7 @@ void ReceiveScratchResult(const BYTE* ReceiveBuffer)
         break;
     }
 
-    memcpy(g_strGiftName, Data->m_strGiftName, sizeof(char) * 64);
+    CMultiLanguage::ConvertFromUtf8(g_strGiftName, Data->m_strGiftName, sizeof Data->m_strGiftName);
 }
 
 void ReceivePlaySoundEffect(const BYTE* ReceiveBuffer)
@@ -9568,7 +9621,7 @@ void ReceiveQuestCompleteResult(const BYTE* ReceiveBuffer)
             g_pQuestProgress->EnableCompleteBtn(false);
         else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
             g_pQuestProgressByEtc->EnableCompleteBtn(false);
-        g_pChatListBox->AddText("", GlobalText[2816], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2816], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 3:
@@ -9576,8 +9629,8 @@ void ReceiveQuestCompleteResult(const BYTE* ReceiveBuffer)
             g_pQuestProgress->EnableCompleteBtn(false);
         else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
             g_pQuestProgressByEtc->EnableCompleteBtn(false);
-        g_pChatListBox->AddText("", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
-        g_pChatListBox->AddText("", GlobalText[374], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[374], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
 }
@@ -9605,8 +9658,8 @@ void ReceiveProgressQuestRequestReward(const BYTE* ReceiveBuffer)
 void ReceiveProgressQuestListReady(const BYTE* ReceiveBuffer)
 {
     g_QuestMng.SetQuestIndexByEtcList(NULL, 0);
-    SendRequestProgressQuestList();
-    SendRequestQuestByEtcEPList();
+    SocketClient->ToGameServer()->SendActiveQuestListRequest();
+    SocketClient->ToGameServer()->SendEventQuestStateListRequest();
 }
 
 void ReceiveGensJoining(const BYTE* ReceiveBuffer)
@@ -9689,7 +9742,7 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
     BYTE fruit = Data->btFruitType;
     WORD point = Data->btStatValue;
 
-    unicode::t_char strText[MAX_GLOBAL_TEXT_STRING];
+    wchar_t strText[MAX_GLOBAL_TEXT_STRING];
 
     switch (result) {
     case 0x00:
@@ -9726,7 +9779,7 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
 
             CharacterAttribute->AddPoint += point;
 
-            unicode::_sprintf(strText, GlobalText[379], GlobalText[index], point, GlobalText[1412]);
+            swprintf(strText, GlobalText[379], GlobalText[index], point, GlobalText[1412]);
             SEASON3B::CreateOkMessageBox(strText);
         }
         break;
@@ -9737,8 +9790,8 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
 
     case 0x02:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[1904], GlobalText[1412]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[1904], GlobalText[1412]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -9777,8 +9830,8 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
             CharacterAttribute->LevelUpPoint += point;
             CharacterAttribute->wMinusPoint += point;
 
-            unicode::t_char strText[128];
-            unicode::_sprintf(strText, GlobalText[379], GlobalText[index], point, GlobalText[1903]);
+            wchar_t strText[128];
+            swprintf(strText, GlobalText[379], GlobalText[index], point, GlobalText[1903]);
             SEASON3B::CreateOkMessageBox(strText);
         }
         break;
@@ -9789,15 +9842,15 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
 
     case 0x05:
     {
-        unicode::t_char strText[128];
-        unicode::_sprintf(strText, GlobalText[1904], GlobalText[1903]);
+        wchar_t strText[128];
+        swprintf(strText, GlobalText[1904], GlobalText[1903]);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
     case 0x06:
         if (fruit >= 0 && fruit <= 4)
         {
-            char Text[MAX_GLOBAL_TEXT_STRING];
+            wchar_t Text[MAX_GLOBAL_TEXT_STRING];
             int  index;
 
             switch (fruit)
@@ -9829,7 +9882,7 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
 
             CharacterAttribute->LevelUpPoint += point;
 
-            sprintf(Text, GlobalText[379], GlobalText[index], point, GlobalText[1903]);
+            swprintf(Text, GlobalText[379], GlobalText[index], point, GlobalText[1903]);
             SEASON3B::CreateOkMessageBox(Text);
         }
         break;
@@ -9837,8 +9890,8 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
         SEASON3B::CreateOkMessageBox(GlobalText[1906]);
         break;
     case 0x08:
-        char Text[MAX_GLOBAL_TEXT_STRING];
-        sprintf(Text, GlobalText[1904], GlobalText[1903]);
+        wchar_t Text[MAX_GLOBAL_TEXT_STRING];
+        swprintf(Text, GlobalText[1904], GlobalText[1903]);
         SEASON3B::CreateOkMessageBox(Text);
         break;
     case 0x10:
@@ -9911,12 +9964,10 @@ void ReceiveWTMatchResult(const BYTE* ReceiveBuffer)
     if (Data->m_Type >= 0 && Data->m_Type < 3)
     {
         g_wtMatchResult.m_Type = Data->m_Type;
-        memset(g_wtMatchResult.m_MatchTeamName1, 0, MAX_ID_SIZE);
-        memcpy(g_wtMatchResult.m_MatchTeamName1, Data->m_MatchTeamName1, MAX_ID_SIZE);
         g_wtMatchResult.m_Score1 = Data->m_Score1;
-        memset(g_wtMatchResult.m_MatchTeamName2, 0, MAX_ID_SIZE);
-        memcpy(g_wtMatchResult.m_MatchTeamName2, Data->m_MatchTeamName2, MAX_ID_SIZE);
         g_wtMatchResult.m_Score2 = Data->m_Score2;
+        CMultiLanguage::ConvertFromUtf8(g_wtMatchResult.m_MatchTeamName1, Data->m_MatchTeamName1, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(g_wtMatchResult.m_MatchTeamName2, Data->m_MatchTeamName2, MAX_ID_SIZE);
     }
 }
 
@@ -9954,7 +10005,7 @@ void ReceiveChangeMapServerResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0xB1 [ReceiveChangeMapServerResult]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0xB1 [ReceiveChangeMapServerResult]");
 }
 
 void ReceiveBCStatus(const BYTE* ReceiveBuffer)
@@ -9964,7 +10015,7 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pChatListBox->AddText("", GlobalText[1500], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1500], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
     case 0x02:
@@ -9972,10 +10023,10 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
         g_pGuardWindow->SetData(Data);
         break;
     case 0x03:
-        g_pChatListBox->AddText("", GlobalText[1501], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1501], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x04:
-        g_pChatListBox->AddText("", GlobalText[1502], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1502], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -9987,32 +10038,32 @@ void ReceiveBCReg(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pChatListBox->AddText("", GlobalText[1503], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1503], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
         g_GuardsMan.SetRegStatus(1);
-        g_pChatListBox->AddText("", GlobalText[1504], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1504], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x02:
-        g_pChatListBox->AddText("", GlobalText[1505], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1505], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x03:
-        g_pChatListBox->AddText("", GlobalText[1506], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1506], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x04:
-        g_pChatListBox->AddText("", GlobalText[1507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1507], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x05:
-        g_pChatListBox->AddText("", GlobalText[1508], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1508], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x06:
-        g_pChatListBox->AddText("", GlobalText[1509], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1509], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x07:
-        g_pChatListBox->AddText("", GlobalText[1510], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1510], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x08:
-        g_pChatListBox->AddText("", GlobalText[1511], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1511], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     default:
         assert(!"ReceiveBCReg(0xB2, 0x01)");
@@ -10027,19 +10078,19 @@ void ReceiveBCGiveUp(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pChatListBox->AddText("", GlobalText[1512], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1512], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
-        SendRequestBCRegInfo();
-        SendRequestBCDeclareGuildList();
+        SocketClient->ToGameServer()->SendCastleSiegeRegistrationStateRequest();
+        SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
         g_GuardsMan.SetRegStatus(0);
-        g_pChatListBox->AddText("", GlobalText[1513], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1513], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x02:
-        g_pChatListBox->AddText("", GlobalText[1514], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1514], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x03:
-        g_pChatListBox->AddText("", GlobalText[1515], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1515], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     default:
         assert(!"ReceiveBCGiveUp(0xB2,0x02)");
@@ -10081,7 +10132,7 @@ void ReceiveBCRegMark(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pChatListBox->AddText("", GlobalText[1516], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1516], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
     {
@@ -10095,10 +10146,10 @@ void ReceiveBCRegMark(const BYTE* ReceiveBuffer)
     }
     break;
     case 0x02:
-        g_pChatListBox->AddText("", GlobalText[1517], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1517], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x03:
-        g_pChatListBox->AddText("", GlobalText[1518], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1518], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10109,19 +10160,19 @@ void ReceiveBCNPCBuy(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         g_SenatusInfo.BuyNewNPC(Data->iNpcNumber, Data->iNpcIndex);
         break;
     case 2:
-        g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pChatListBox->AddText("", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 4:
-        g_pChatListBox->AddText("", GlobalText[1616], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1616], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10133,7 +10184,7 @@ void ReceiveBCNPCRepair(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        g_pChatListBox->AddText("", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
     break;
@@ -10146,10 +10197,10 @@ void ReceiveBCNPCRepair(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pChatListBox->AddText("", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10160,7 +10211,7 @@ void ReceiveBCNPCUpgrade(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -10175,22 +10226,22 @@ void ReceiveBCNPCUpgrade(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pChatListBox->AddText("", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 4:
-        g_pChatListBox->AddText("", GlobalText[1521], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1521], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 5:
-        g_pChatListBox->AddText("", GlobalText[1522], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1522], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 6:
-        g_pChatListBox->AddText("", GlobalText[1523], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1523], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 7:
-        g_pChatListBox->AddText("", GlobalText[1524], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1524], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10201,13 +10252,13 @@ void ReceiveBCGetTaxInfo(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[1525], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1525], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         g_SenatusInfo.SetTaxInfo(Data);
         break;
     case 2:
-        g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10218,7 +10269,7 @@ void ReceiveBCChangeTaxRate(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[1526], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1526], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         if (Data->btTaxType == 3)
@@ -10231,7 +10282,7 @@ void ReceiveBCChangeTaxRate(const BYTE* ReceiveBuffer)
         }
         break;
     case 2:
-        g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10242,13 +10293,13 @@ void ReceiveBCWithdraw(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[1527], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1527], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         g_SenatusInfo.ChangeCastleMoney(Data);
         break;
     case 2:
-        g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10306,7 +10357,7 @@ void ReceiveBCNPCList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -10319,7 +10370,7 @@ void ReceiveBCNPCList(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pChatListBox->AddText("", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10332,7 +10383,7 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -10341,6 +10392,7 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
         {
             auto pData2 = (LPPMSG_CSREGGUILDLIST)(ReceiveBuffer + Offset);
 
+            // WTF - why not just use an int?
             DWORD dwMarkCount;
             BYTE* pMarkCount = (BYTE*)&dwMarkCount;
             *pMarkCount++ = pData2->btRegMarks4;
@@ -10348,7 +10400,9 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
             *pMarkCount++ = pData2->btRegMarks2;
             *pMarkCount++ = pData2->btRegMarks1;
 
-            g_pGuardWindow->AddDeclareGuildList(pData2->szGuildName, dwMarkCount, pData2->btIsGiveUp, pData2->btSeqNum);
+            wchar_t guildName[MAX_GUILDNAME + 1]{};
+            CMultiLanguage::ConvertFromUtf8(guildName, pData2->szGuildName, MAX_GUILDNAME);
+            g_pGuardWindow->AddDeclareGuildList(guildName, dwMarkCount, pData2->btIsGiveUp, pData2->btSeqNum);
 
             Offset += sizeof(PMSG_CSREGGUILDLIST);
         }
@@ -10366,7 +10420,7 @@ void ReceiveBCGuildList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pChatListBox->AddText("", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -10374,18 +10428,20 @@ void ReceiveBCGuildList(const BYTE* ReceiveBuffer)
         for (int i = 0; i < Data->iCount; ++i)
         {
             auto pData2 = (LPPMSG_CSATTKGUILDLIST)(ReceiveBuffer + Offset);
+            wchar_t guildName[MAX_GUILDNAME + 1]{};
+            CMultiLanguage::ConvertFromUtf8(guildName, pData2->szGuildName, MAX_GUILDNAME);
 
-            g_pGuardWindow->AddGuildList(pData2->szGuildName, pData2->btCsJoinSide, pData2->btGuildInvolved, pData2->iGuildScore);
+            g_pGuardWindow->AddGuildList(guildName, pData2->btCsJoinSide, pData2->btGuildInvolved, pData2->iGuildScore);
 
             Offset += sizeof(PMSG_CSATTKGUILDLIST);
         }
     }
     break;
     case 2:
-        g_pChatListBox->AddText("", GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pChatListBox->AddText("", GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10492,7 +10548,7 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
         int iKey = ((int)(pData->m_byKeyH) << 8) + pData->m_byKeyL;
         int iIndex = FindCharacterIndex(iKey);
         CHARACTER* pCha = &CharactersClient[iIndex];
-        unicode::t_char strText[256];
+        wchar_t strText[256];
 
         SEASON3B::CProgressMsgBox* pMsgBox = NULL;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCrownSwitchOtherPushLayout), &pMsgBox);
@@ -10500,15 +10556,15 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
         {
             if (pCha != NULL && pCha->ID != NULL)
             {
-                unicode::_sprintf(strText, GlobalText[1486], pCha->ID);
+                swprintf(strText, GlobalText[1486], pCha->ID);
             }
             else
             {
-                unicode::_sprintf(strText, GlobalText[1487]);
+                swprintf(strText, GlobalText[1487]);
             }
             pMsgBox->AddMsg(strText);
 
-            unicode::_sprintf(strText, GlobalText[1488], CrownSwitch->ID);
+            swprintf(strText, GlobalText[1488], CrownSwitch->ID);
             pMsgBox->AddMsg(strText);
         }
     }
@@ -10537,11 +10593,11 @@ void ReceiveCrownRegist(const BYTE* ReceiveBuffer)
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSealRegisterStartLayout), &pMsgBox);
         if (pMsgBox)
         {
-            unicode::t_char strText[256];
+            wchar_t strText[256];
             int iTime = (pData->m_dwCrownAccessTime / 1000);
             if (iTime >= 59)
                 iTime = 59;
-            unicode::_sprintf(strText, GlobalText[1980], GlobalText[1489], iTime);
+            swprintf(strText, GlobalText[1980], GlobalText[1489], iTime);
             pMsgBox->AddMsg(strText);
             pMsgBox->SetElapseTime(60000 - pData->m_dwCrownAccessTime);
         }
@@ -10558,11 +10614,11 @@ void ReceiveCrownRegist(const BYTE* ReceiveBuffer)
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSealRegisterFailLayout), &pMsgBox);
         if (pMsgBox)
         {
-            unicode::t_char strText[256];
+            wchar_t strText[256];
             int iTime = (pData->m_dwCrownAccessTime / 1000);
             if (iTime >= 59)
                 iTime = 59;
-            unicode::_sprintf(strText, GlobalText[1980], GlobalText[1491], iTime);
+            swprintf(strText, GlobalText[1980], GlobalText[1491], iTime);
             pMsgBox->AddMsg(strText);
         }
     }
@@ -10674,39 +10730,15 @@ bool Check_Switch(PRECEIVE_CROWN_SWITCH_INFO* Data)
         {
             Switch_Info[0].m_bySwitchState = Data->m_bySwitchState;
             Switch_Info[0].m_JoinSide = Data->m_JoinSide;
+            CMultiLanguage::ConvertFromUtf8(Switch_Info[0].m_szGuildName, Data->m_szGuildName, MAX_GUILDNAME);
+            CMultiLanguage::ConvertFromUtf8(Switch_Info[0].m_szUserName, Data->m_szUserName, MAX_ID_SIZE);
         }
         else
         {
             Switch_Info[1].m_bySwitchState = Data->m_bySwitchState;
             Switch_Info[1].m_JoinSide = Data->m_JoinSide;
-        }
-
-        char GName[8 + 1];
-        memset(GName, 0, 8 + 1);
-        memcpy(GName, (char*)Data->m_szGuildName, 8);
-
-        GName[8] = NULL;
-
-        if (Key == FIRST_CROWN_SWITCH_NUMBER)
-        {
-            memcpy(&Switch_Info[0].m_szGuildName, GName, 9);
-        }
-        else
-        {
-            memcpy(&Switch_Info[1].m_szGuildName, GName, 9);
-        }
-
-        char Name[MAX_ID_SIZE + 1];
-        memset(Name, 0, MAX_ID_SIZE + 1);
-        memcpy(Name, (char*)Data->m_szUserName, MAX_ID_SIZE);
-        Name[MAX_ID_SIZE] = NULL;
-        if (Key == FIRST_CROWN_SWITCH_NUMBER)
-        {
-            memcpy(&Switch_Info[0].m_szUserName, Name, MAX_ID_SIZE + 1);
-        }
-        else
-        {
-            memcpy(&Switch_Info[1].m_szUserName, Name, MAX_ID_SIZE + 1);
+            CMultiLanguage::ConvertFromUtf8(Switch_Info[1].m_szGuildName, Data->m_szGuildName, MAX_GUILDNAME);
+            CMultiLanguage::ConvertFromUtf8(Switch_Info[1].m_szUserName, Data->m_szUserName, MAX_ID_SIZE);
         }
     }
     return true;
@@ -10744,31 +10776,24 @@ void ReceiveBattleCastleProcess(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPRECEIVE_BC_PROCESS)ReceiveBuffer;
 
+    wchar_t guildName[MAX_GUILDNAME + 1];
+    CMultiLanguage::ConvertFromUtf8(guildName, pData->m_szGuildName, MAX_GUILDNAME);
+
     switch (pData->m_byBasttleCastleState)
     {
     case 0:
     {
-        char GuildName[8 + 1];
-        memset(GuildName, 0, 8 + 1);
-        memcpy(GuildName, (char*)pData->m_szGuildName, 8);
-        GuildName[8] = NULL;
-
-        char Text[100];
-        wsprintf(Text, GlobalText[1496], GuildName);
+        wchar_t Text[100];
+        swprintf(Text, GlobalText[1496], guildName);
         CreateNotice(Text, 1);
     }
     break;
 
     case 1:
     {
-        char Text[8 + 1];
-        memset(Text, 0, 8 + 1);
-        memcpy(Text, (char*)pData->m_szGuildName, 8);
-        Text[8] = NULL;
-        ChangeBattleFormation(Text, true);
-
-        char Text2[100];
-        wsprintf(Text2, GlobalText[1497], Text);
+        ChangeBattleFormation(guildName, true);
+        wchar_t Text2[100];
+        swprintf(Text2, GlobalText[1497], guildName);
         CreateNotice(Text2, 1);
     }
     break;
@@ -10858,7 +10883,7 @@ void ReceiveCatapultState(const BYTE* ReceiveBuffer)
     }
     else if (pData->m_byResult == 0)
     {
-        g_pChatListBox->AddText("", "ReceiveCatapultState", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", L"ReceiveCatapultState", SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -10874,7 +10899,7 @@ void ReceiveCatapultFire(const BYTE* ReceiveBuffer)
     }
     else if (pData->m_byResult == 0)
     {
-        g_pChatListBox->AddText("", "ReceiveCatapultFire", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", L"ReceiveCatapultFire", SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -10922,7 +10947,7 @@ void ReceivePreviewPort(const BYTE* ReceiveBuffer)
 
             ChangeCharacterExt(FindCharacterIndex(Key), pData2->m_byEquipment);
 
-            strcpy(c->ID, "   ");
+            wcscpy(c->ID, L"   ");
             c->ID[MAX_ID_SIZE] = NULL;
         }
         break;
@@ -11084,8 +11109,7 @@ void ReceiveCrywolfAltarContract(const BYTE* ReceiveBuffer)
         g_CharacterRegisterBuff((&Hero->Object), eBuff_CrywolfHeroContracted);
 
         SetAction(&Hero->Object, PLAYER_HEALING_FEMALE1);
-
-        SendRequestAction(AT_HEALING1, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+        SendRequestAction(Hero->Object, AT_HEALING1);
     }
 }
 
@@ -11133,7 +11157,10 @@ void ReceiveCrywolfHeroList(const BYTE* ReceiveBuffer)
     {
         auto pData2 = (LPPMSG_ANS_CRYWOLF_HERO_LIST_INFO)(ReceiveBuffer + Offset);
         Offset += sizeof(PMSG_ANS_CRYWOLF_HERO_LIST_INFO);
-        M34CryWolf1st::Set_WorldRank(pData2->iRank, pData2->btHeroClass, pData2->iHeroScore, pData2->szHeroName);
+
+        wchar_t playerName[MAX_ID_SIZE + 1];
+        CMultiLanguage::ConvertFromUtf8(playerName, pData2->szHeroName, MAX_ID_SIZE);
+        M34CryWolf1st::Set_WorldRank(pData2->iRank, pData2->btHeroClass, pData2->iHeroScore, playerName);
     }
 }
 
@@ -11339,9 +11366,9 @@ void ReceiveCheckSumRequest(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_WORD)ReceiveBuffer;
     DWORD dwCheckSum = GetCheckSum(Data->Value);
-    SendCheckSum(dwCheckSum);
+    SocketClient->ToGameServer()->SendChecksumResponse(dwCheckSum);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, "0x03 [ReceiveCheckSumRequest]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveCheckSumRequest]");
 }
 
 void Action(CHARACTER* c, OBJECT* o, bool Now);
@@ -11409,7 +11436,7 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
     case 1:
     {
         //g_pNewUISystem->Hide(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN);
-        g_pChatListBox->AddText("", GlobalText[1888], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[1888], SEASON3B::TYPE_SYSTEM_MESSAGE);
     }break;
     case 2:
     {
@@ -11426,7 +11453,7 @@ bool ReceiveEnterDoppelGangerEvent(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_RESULT_ENTER_DOPPELGANGER)ReceiveBuffer;
 
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
 
     switch (Data->btResult)
     {
@@ -11436,13 +11463,13 @@ bool ReceiveEnterDoppelGangerEvent(const BYTE* ReceiveBuffer)
         g_pDoppelGangerWindow->LockEnterButton(TRUE);
         break;
     case 2:
-        unicode::_sprintf(szText, GlobalText[2864]);
-        g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        swprintf(szText, GlobalText[2864]);
+        g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
         g_pDoppelGangerWindow->LockEnterButton(TRUE);
         break;
     case 3:
-        unicode::_sprintf(szText, GlobalText[2865]);
-        g_pChatListBox->AddText("", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        swprintf(szText, GlobalText[2865]);
+        g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
         g_pDoppelGangerWindow->LockEnterButton(TRUE);
         break;
     case 4:
@@ -11479,9 +11506,9 @@ bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(GlobalText[2763], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(" ");
+        pMsgBox->AddMsg(L" ");
         pMsgBox->AddMsg(GlobalText[2764], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(" ");
+        pMsgBox->AddMsg(L" ");
         pMsgBox->AddMsg(GlobalText[2765], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }
     break;
@@ -11542,12 +11569,12 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(GlobalText[2769], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(" ");
+        pMsgBox->AddMsg(L" ");
         pMsgBox->AddMsg(GlobalText[2770], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        // 			pMsgBox->AddMsg(" ");
-        // 			pMsgBox->AddMsg(" ");
+        // 			pMsgBox->AddMsg(L" ");
+        // 			pMsgBox->AddMsg(L" ");
         // 			char szText[256] = { 0, };
-        // 			sprintf(szText, GlobalText[2771], Data->dwRewardExp);
+        // 			wprintf(szText, GlobalText[2771], Data->dwRewardExp);
         // 			pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_BOLD);
     }
     break;
@@ -11563,7 +11590,7 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(GlobalText[2767], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(" ");
+        pMsgBox->AddMsg(L" ");
         pMsgBox->AddMsg(GlobalText[2768], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }
     break;
@@ -11637,9 +11664,9 @@ bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(GlobalText[2798], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(" ");
-        unicode::t_char szText[256] = { NULL, };
-        sprintf(szText, GlobalText[2799], (Data->RemainTick / 60000));
+        pMsgBox->AddMsg(L" ");
+        wchar_t szText[256] = { NULL, };
+        swprintf(szText, GlobalText[2799], (Data->RemainTick / 60000));
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     case 2:
@@ -11709,10 +11736,10 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
         int zone = g_pEmpireGuardianTimer->GetZone();
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        unicode::t_char szText[256] = { NULL, };
-        sprintf(szText, GlobalText[2801], day);
+        wchar_t szText[256] = { NULL, };
+        swprintf(szText, GlobalText[2801], day);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        sprintf(szText, "%d%s", zone, GlobalText[2840]);
+        swprintf(szText, L"%d%s", zone, GlobalText[2840]);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     case 2:
@@ -11720,11 +11747,11 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
         int day = g_pEmpireGuardianTimer->GetDay();
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        unicode::t_char szText[256] = { NULL, };
-        sprintf(szText, GlobalText[2801], day);
+        wchar_t szText[256] = { NULL, };
+        swprintf(szText, GlobalText[2801], day);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
         pMsgBox->AddMsg(GlobalText[2802], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        sprintf(szText, GlobalText[861], Data->Exp);
+        swprintf(szText, GlobalText[861], Data->Exp);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     }
@@ -11763,9 +11790,9 @@ bool ReceiveIGS_ShopOpenResult(const BYTE* pReceiveBuffer)
         return false;
     }
 
-    SendRequestIGS_CashPointInfo();
+    SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
     char szCode = g_pInGameShop->GetCurrentStorageCode();
-    SendRequestIGS_ItemStorageList(1, &szCode);
+    SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, szCode);
 
     g_pNewUISystem->Show(SEASON3B::INTERFACE_INGAMESHOP);
 
@@ -11799,10 +11826,10 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2900], GlobalText[2901]);
 
-        SendRequestIGS_CashPointInfo();
+        SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
 
         char szCode = g_pInGameShop->GetCurrentStorageCode();
-        SendRequestIGS_ItemStorageList(1, &szCode);
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, szCode);
     }
     break;
     case 1:
@@ -11905,7 +11932,7 @@ bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2910], GlobalText[2911]);
 
-        SendRequestIGS_CashPointInfo();
+        SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
     }
     break;
     case 1:
@@ -12028,13 +12055,10 @@ bool ReceiveIGS_StorageGiftItemList(const BYTE* pReceiveBuffer)
         return false;
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 
-    unicode::t_char szID[MAX_ID_SIZE + 1];
-    unicode::t_char szMessage[MAX_GIFT_MESSAGE_SIZE];
-
-    strncpy(szID, (unicode::t_char*)Data->chSendUserName, MAX_ID_SIZE + 1);
-    strncpy(szMessage, (unicode::t_char*)Data->chMessage, MAX_GIFT_MESSAGE_SIZE);
-    szID[MAX_ID_SIZE] = '\0';
-    szMessage[MAX_GIFT_MESSAGE_SIZE - 1] = '\0';
+    wchar_t szID[MAX_ID_SIZE + 1];
+    wchar_t szMessage[MAX_GIFT_MESSAGE_SIZE];
+    CMultiLanguage::ConvertFromUtf8(szID, Data->chSendUserName, MAX_ID_SIZE);
+    CMultiLanguage::ConvertFromUtf8(szMessage, Data->chMessage, MAX_GIFT_MESSAGE_SIZE);
 
     g_pInGameShop->AddStorageItem((int)Data->lStorageIndex, (int)Data->lItemSeq, (int)Data->lStorageGroupCode, (int)Data->lProductSeq, (int)Data->lPriceSeq, (int)Data->dCashPoint, (char)Data->chItemType, szID, szMessage);
     return true;
@@ -12273,7 +12297,7 @@ bool ReceiveEquippingInventoryItem(const BYTE* pReceiveBuffer)
     pItem->Durability = iResult;
 
 #ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_RECEIVE, "[0xBF][0x20]  [ReceiveEquippingInventoryItem]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"[0xBF][0x20]  [ReceiveEquippingInventoryItem]");
 #endif // CONSOLE_DEBUG
 
     return true;
@@ -12436,7 +12460,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
                 break;
             case 0x06:
                 CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_VERSION);
-                g_ErrorReport.Write("Version dismatch. - Login\r\n");
+                g_ErrorReport.Write(L"Version dismatch. - Login\r\n");
                 break;
             case 0x07:
             default:
@@ -12528,7 +12552,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             subcode = Data->SubCode;
         }
 
-        g_ConsoleDebug->Write(MCD_RECEIVE, "Recv [0xF3][0x%02x]", subcode);
+        g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF3][0x%02x]", subcode);
 
         switch (subcode)
         {
@@ -14112,49 +14136,49 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         {
             g_RegisterBuffTime(buff, bufftime);
 
-            char _Temp[64] = { 0, };
+            wchar_t _Temp[64] = { 0, };
 
             if (buff == eBuff_BlessingOfXmax)
             {
-                g_pChatListBox->AddText("", GlobalText[2591], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[2591], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 CharacterMachine->CalculateDamage();
                 CharacterMachine->CalculateDefense();
             }
             else if (buff == eBuff_StrengthOfSanta)
             {
-                sprintf(_Temp, GlobalText[2594], 30);
-                g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                swprintf(_Temp, GlobalText[2594], 30);
+                g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                 CharacterMachine->CalculateDamage();
             }
             else if (buff == eBuff_DefenseOfSanta)
             {
-                sprintf(_Temp, GlobalText[2595], 100);
-                g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                swprintf(_Temp, GlobalText[2595], 100);
+                g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                 CharacterMachine->CalculateDefense();
             }
             else if (buff == eBuff_QuickOfSanta)
             {
-                sprintf(_Temp, GlobalText[2598], 15);
-                g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                swprintf(_Temp, GlobalText[2598], 15);
+                g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                 CharacterMachine->CalculateAttackSpeed();
             }
             else if (buff == eBuff_LuckOfSanta)
             {
-                sprintf(_Temp, GlobalText[2599], 10);
-                g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                swprintf(_Temp, GlobalText[2599], 10);
+                g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             else if (buff == eBuff_CureOfSanta)
             {
-                sprintf(_Temp, GlobalText[2592], 500);
-                g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                swprintf(_Temp, GlobalText[2592], 500);
+                g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             else if (buff == eBuff_SafeGuardOfSanta)
             {
-                sprintf(_Temp, GlobalText[2593], 500);
-                g_pChatListBox->AddText("", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                swprintf(_Temp, GlobalText[2593], 500);
+                g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
         break;

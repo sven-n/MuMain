@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "NewUIItemEnduranceInfo.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "CharacterManager.h"
 
 #ifdef PJH_FIX_SPRIT
@@ -331,7 +331,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::InitImageIndex()
     m_iItemDurImageIndex[EQUIPMENT_RING_LEFT] = IMAGE_ITEM_DUR_RING;
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, unicode::t_char* pszName, int iLife, int iMaxLife/*=255*/, bool bWarning/*=false*/)
+void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszName, int iLife, int iMaxLife/*=255*/, bool bWarning/*=false*/)
 {
     EnableAlphaTest();
 
@@ -352,7 +352,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, unicode::t_ch
     EndRenderColor();
 
 #ifdef PJH_FIX_SPRIT
-    if (strcmp(pszName, GlobalText[1214]) == 0)
+    if (wcscmp(pszName, GlobalText[1214]) == 0)
     {
         int iCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
         PET_INFO PetInfo;
@@ -385,14 +385,14 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM
     int iLevel = (pItem->Level >> 3) & 15;
     int iMaxDurability = calcMaxDurability(pItem, pItemAtt, iLevel);
 
-    unicode::t_char szText[256] = { NULL, };
-    unicode::_sprintf(szText, "%s (%d/%d)", pItemAtt->Name, pItem->Durability, iMaxDurability);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), szText, 1, &TextSize);
+    wchar_t szText[256] = { NULL, };
+    swprintf(szText, L"%s (%d/%d)", pItemAtt->Name, pItem->Durability, iMaxDurability);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), szText, 1, &TextSize);
 
     g_pRenderText->SetBgColor(0, 0, 0, 128);
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(dwTextColor);
-    int iTextlen = unicode::_strlen(szText);
+    int iTextlen = wcslen(szText);
 
     int iTooltipWidth = (/*TextSize.cx*/7 * iTextlen) / g_fScreenRate_x;
 
@@ -415,69 +415,69 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
         || Hero->Helper.Type == MODEL_HELPER + 123
         || Hero->Helper.Type == MODEL_HELPER + 37)
     {
-        unicode::t_char szText[256] = { NULL, };
+        wchar_t szText[256] = { NULL, };
 
         switch (Hero->Helper.Type)
         {
         case MODEL_HELPER:
         {
-            unicode::_sprintf(szText, GlobalText[353]);
+            swprintf(szText, GlobalText[353]);
         }
         break;
         case MODEL_HELPER + 1:
         {
             ITEM_ATTRIBUTE* p = &ItemAttribute[Hero->Helper.Type - MODEL_SWORD];
-            unicode::_sprintf(szText, p->Name);
+            swprintf(szText, p->Name);
         }
         break;
         case MODEL_HELPER + 2:
         {
-            unicode::_sprintf(szText, GlobalText[355]);
+            swprintf(szText, GlobalText[355]);
         }
         break;
         case MODEL_HELPER + 3:
         {
-            unicode::_sprintf(szText, GlobalText[354]);
+            swprintf(szText, GlobalText[354]);
         }
         break;
         case MODEL_HELPER + 4:
         {
-            unicode::_sprintf(szText, GlobalText[1187]);
+            swprintf(szText, GlobalText[1187]);
         }
         break;
         case MODEL_HELPER + 37:
         {
-            unicode::_sprintf(szText, GlobalText[1916]);
+            swprintf(szText, GlobalText[1916]);
         }
         break;
         case MODEL_HELPER + 64:
         {
-            unicode::_sprintf(szText, ItemAttribute[ITEM_HELPER + 64].Name);
+            swprintf(szText, ItemAttribute[ITEM_HELPER + 64].Name);
         }
         break;
         case MODEL_HELPER + 65:
         {
-            unicode::_sprintf(szText, ItemAttribute[ITEM_HELPER + 65].Name);
+            swprintf(szText, ItemAttribute[ITEM_HELPER + 65].Name);
         }
         break;
         case MODEL_HELPER + 67:
         {
-            unicode::_sprintf(szText, ItemAttribute[ITEM_HELPER + 67].Name);
+            swprintf(szText, ItemAttribute[ITEM_HELPER + 67].Name);
         }
         break;
         case MODEL_HELPER + 80:
         {
-            unicode::_sprintf(szText, ItemAttribute[ITEM_HELPER + 80].Name);
+            swprintf(szText, ItemAttribute[ITEM_HELPER + 80].Name);
         }
         break;
         case MODEL_HELPER + 106:
         {
-            unicode::_sprintf(szText, ItemAttribute[ITEM_HELPER + 106].Name);
+            swprintf(szText, ItemAttribute[ITEM_HELPER + 106].Name);
         }
         break;
         case MODEL_HELPER + 123:
         {
-            unicode::_sprintf(szText, ItemAttribute[ITEM_HELPER + 123].Name);
+            swprintf(szText, ItemAttribute[ITEM_HELPER + 123].Name);
         }
         break;
         }
@@ -497,8 +497,8 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedPetLife(int iX, int iY)
     if (Hero->m_pPet == NULL)
         return false;
 
-    unicode::t_char szText[256] = { NULL, };
-    unicode::_sprintf(szText, GlobalText[1214]);
+    wchar_t szText[256] = { NULL, };
+    swprintf(szText, GlobalText[1214]);
 
     int iLife = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability;
 
@@ -511,8 +511,8 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderSummonMonsterLife(int iX, int iY)
     if (SummonLife <= 0)
         return false;
 
-    unicode::t_char szText[256] = { NULL, };
-    unicode::_sprintf(szText, GlobalText[356]);
+    wchar_t szText[256] = { NULL, };
+    swprintf(szText, GlobalText[356]);
 
     RenderHPUI(iX, iY, szText, SummonLife, 100);
 
@@ -524,7 +524,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
     if (m_iCurArrowType == ARROWTYPE_NONE)
         return false;
 
-    unicode::t_char szText[256] = { NULL, };
+    wchar_t szText[256] = { NULL, };
     int iNumEquipedArrowDurability = 0;
     int iNumArrowSetInInven = 0;
 
@@ -540,7 +540,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
         if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW + 15))
             return false;
 
-        unicode::_sprintf(szText, GlobalText[351], iNumEquipedArrowDurability, iNumArrowSetInInven);
+        swprintf(szText, GlobalText[351], iNumEquipedArrowDurability, iNumArrowSetInInven);
     }
     else if (m_iCurArrowType == ARROWTYPE_CROSSBOW)
     {
@@ -554,7 +554,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
         if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW + 7))
             return false;
 
-        unicode::_sprintf(szText, GlobalText[352], iNumEquipedArrowDurability, iNumArrowSetInInven);
+        swprintf(szText, GlobalText[352], iNumEquipedArrowDurability, iNumArrowSetInInven);
     }
 
     g_pRenderText->SetBgColor(0, 0, 0, 180);
@@ -733,18 +733,18 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
 
 void SEASON3B::CNewUIItemEnduranceInfo::LoadImages()
 {
-    LoadBitmap("Interface\\newui_Pet_Back.tga", IMAGE_PETHP_FRAME, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Pet_HpBar.jpg", IMAGE_PETHP_BAR, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_boots.tga", IMAGE_ITEM_DUR_BOOTS, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_cap.tga", IMAGE_ITEM_DUR_CAP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_gloves.tga", IMAGE_ITEM_DUR_GLOVES, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_lower.tga", IMAGE_ITEM_DUR_LOWER, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_necklace.tga", IMAGE_ITEM_DUR_NECKLACE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_ring.tga", IMAGE_ITEM_DUR_RING, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_shield.tga", IMAGE_ITEM_DUR_SHIELD, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_upper.tga", IMAGE_ITEM_DUR_UPPER, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_weapon.tga", IMAGE_ITEM_DUR_WEAPON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_durable_wing.tga", IMAGE_ITEM_DUR_WING, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Pet_Back.tga", IMAGE_PETHP_FRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Pet_HpBar.jpg", IMAGE_PETHP_BAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_boots.tga", IMAGE_ITEM_DUR_BOOTS, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_cap.tga", IMAGE_ITEM_DUR_CAP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_gloves.tga", IMAGE_ITEM_DUR_GLOVES, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_lower.tga", IMAGE_ITEM_DUR_LOWER, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_necklace.tga", IMAGE_ITEM_DUR_NECKLACE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_ring.tga", IMAGE_ITEM_DUR_RING, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_shield.tga", IMAGE_ITEM_DUR_SHIELD, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_upper.tga", IMAGE_ITEM_DUR_UPPER, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_weapon.tga", IMAGE_ITEM_DUR_WEAPON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_durable_wing.tga", IMAGE_ITEM_DUR_WING, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIItemEnduranceInfo::UnloadImages()

@@ -37,7 +37,7 @@ namespace SEASON3B
 
         struct CursedTempleGameResult
         {
-            char		s_characterId[MAX_ID_SIZE + 1];
+            wchar_t		s_characterId[MAX_ID_SIZE + 1];
             short		s_mapnumber;
             SEASON3A::eCursedTempleTeam		s_team;
             BYTE		s_point;
@@ -111,7 +111,7 @@ namespace SEASON3B
         CNewUIButton			m_Button[CURSEDTEMPLERESULT_MAXBUTTONCOUNT];
         POINT					m_Pos;
 
-        std::string				m_infoText;
+        std::wstring				m_infoText;
         float					m_ResultEffectAlph;
         int						m_WinState;
         SHORT					m_CharacterKey;

@@ -4,7 +4,22 @@
 #include "stdafx.h"
 #include "MoveCommandData.h"
 
+#include "MultiLanguage.h"
+
 using namespace SEASON3B;
+
+#pragma pack(push, 1)
+typedef struct
+{
+    int		index;
+    char	szMainMapName[32];
+    char	szSubMapName[32];
+    int		iReqLevel;
+    int		m_iReqMaxLevel;
+    int		iReqZen;
+    int		iGateNum;
+} MOVEREQINFO_FILE;
+#pragma pack(pop)
 
 CMoveCommandData::CMoveCommandData()
 {
@@ -21,9 +36,9 @@ CMoveCommandData* CMoveCommandData::GetInstance()
     return &s_Instance;
 }
 
-bool CMoveCommandData::Create(const std::string& filename)
+bool CMoveCommandData::Create(const std::wstring& filename)
 {
-    FILE* fp = fopen(filename.c_str(), "rb");
+    FILE* fp = _wfopen(filename.c_str(), L"rb");
     if (fp == NULL) return false;
 
     int count = 0;
@@ -32,8 +47,18 @@ bool CMoveCommandData::Create(const std::string& filename)
     for (int i = 0; i < count; i++)
     {
         auto* pMoveInfoData = new MOVEINFODATA;
-        fread(&(pMoveInfoData->_ReqInfo), sizeof(MOVEREQINFO), 1, fp);
-        BuxConvert((BYTE*)&(pMoveInfoData->_ReqInfo), sizeof(MOVEREQINFO));
+        MOVEREQINFO_FILE moveReqInfo{};
+        fread(&moveReqInfo, sizeof moveReqInfo, 1, fp);
+
+        BuxConvert((BYTE*)&moveReqInfo, sizeof moveReqInfo);
+        pMoveInfoData->_ReqInfo.index = moveReqInfo.index;
+        pMoveInfoData->_ReqInfo.iGateNum = moveReqInfo.iGateNum;
+        pMoveInfoData->_ReqInfo.iReqLevel = moveReqInfo.iReqLevel;
+        pMoveInfoData->_ReqInfo.iReqZen = moveReqInfo.iReqZen;
+        pMoveInfoData->_ReqInfo.m_iReqMaxLevel = moveReqInfo.m_iReqMaxLevel;
+        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szMainMapName, moveReqInfo.szMainMapName, sizeof moveReqInfo.szMainMapName);
+        CMultiLanguage::ConvertFromUtf8(pMoveInfoData->_ReqInfo.szSubMapName, moveReqInfo.szSubMapName, sizeof moveReqInfo.szSubMapName);
+
         m_listMoveInfoData.push_back(pMoveInfoData);
     }
     fclose(fp);
@@ -56,7 +81,7 @@ void CMoveCommandData::BuxConvert(BYTE* pBuffer, int size)
         pBuffer[i] ^= bBuxCode[i % 3];
 }
 
-bool CMoveCommandData::OpenMoveReqScript(const std::string& filename)
+bool CMoveCommandData::OpenMoveReqScript(const std::wstring& filename)
 {
     return CMoveCommandData::GetInstance()->Create(filename);
 }

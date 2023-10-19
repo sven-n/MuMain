@@ -13,13 +13,13 @@
 
 using namespace info;
 
-QuestInfoPtr QuestInfo::MakeInfo(const std::string& filename)
+QuestInfoPtr QuestInfo::MakeInfo(const std::wstring& filename)
 {
     QuestInfoPtr info(new QuestInfo(filename));
     return info;
 }
 
-QuestInfo::QuestInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
+QuestInfo::QuestInfo(const std::wstring& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
     m_IsOpenFile = OpenFile(filename);
 
@@ -34,7 +34,7 @@ QuestInfo::~QuestInfo()
     clear();
 }
 
-bool QuestInfo::OpenFile(const std::string& filename)
+bool QuestInfo::OpenFile(const std::wstring& filename)
 {
     return true;
 }

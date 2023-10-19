@@ -51,11 +51,11 @@ namespace SEASON3B
         CNewUIButton		m_btnSelTextR;
         CNewUIButton		m_btnClose;
 
-        char	m_aszNPCWords[ND_NPC_LINE_MAX][ND_WORDS_ROW_MAX];
+        wchar_t	m_aszNPCWords[ND_NPC_LINE_MAX][ND_WORDS_ROW_MAX];
         int		m_nSelNPCPage;
         int		m_nMaxNPCPage;
 
-        char	m_aszSelTexts[ND_SEL_TEXT_LINE_MAX][ND_WORDS_ROW_MAX];
+        wchar_t	m_aszSelTexts[ND_SEL_TEXT_LINE_MAX][ND_WORDS_ROW_MAX];
         int		m_nSelTextCount;
         int		m_anSelTextLine[ND_QUEST_INDEX_MAX_COUNT + 1];
         int		m_nSelSelText;

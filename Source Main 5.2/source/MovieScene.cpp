@@ -5,9 +5,9 @@
 #include "stdafx.h"
 
 #ifdef MOVIE_DIRECTSHOW
-#pragma comment(lib, "strmiids.lib")
-#pragma comment(lib, "strmbasd.lib")
-#pragma comment(lib, "WMVCORE.lib")
+#pragma comment(lib, L"strmiids.lib")
+#pragma comment(lib, L"strmbasd.lib")
+#pragma comment(lib, L"WMVCORE.lib")
 
 #include <atlbase.h>
 #include <dshow.h>
@@ -78,7 +78,7 @@ void CMovieScene::InitOpenGLClear(HDC hDC)
     ::SwapBuffers(hDC);
 }
 
-void CMovieScene::Initialize_DirectShow(HWND hWnd, char* strFileName)
+void CMovieScene::Initialize_DirectShow(HWND hWnd, wchar_t* strFileName)
 {
     if (m_bOneTimeInit == TRUE)
         return;
@@ -220,7 +220,7 @@ void CMovieScene::CreateFilter(REFCLSID clsid, IBaseFilter** ppFilter)
         IID_IBaseFilter, (void**)ppFilter);
 }
 
-BOOL CMovieScene::IsWindowsMediaFile(char* strFileName)
+BOOL CMovieScene::IsWindowsMediaFile(wchar_t* strFileName)
 {
     TCHAR t_strFileName[MAX_PATH];
 
@@ -228,17 +228,17 @@ BOOL CMovieScene::IsWindowsMediaFile(char* strFileName)
     t_strFileName[MAX_PATH - 1] = 0;
     _tcslwr(t_strFileName);
 
-    if (_tcsstr(t_strFileName, TEXT(".asf")) ||
-        _tcsstr(t_strFileName, TEXT(".wma")) ||
-        _tcsstr(t_strFileName, TEXT(".wmv")))
+    if (_tcsstr(t_strFileName, TEXT(L".asf")) ||
+        _tcsstr(t_strFileName, TEXT(L".wma")) ||
+        _tcsstr(t_strFileName, TEXT(L".wmv")))
         return TRUE;
     else
         return FALSE;
 }
 
-BOOL CMovieScene::IsFileInFolder(char* strFileName)
+BOOL CMovieScene::IsFileInFolder(wchar_t* strFileName)
 {
-    FILE* pFile = fopen(strFileName, "rb");
+    FILE* pFile = _wfopen(strFileName, L"rb");
 
     if (pFile == NULL)
     {
@@ -343,22 +343,22 @@ BOOL CMovieScene::IsEndMovie()
     return m_bEndMovie;
 }
 
-void CMovieScene::OpenMovieTxt(char* strFileName)
+void CMovieScene::OpenMovieTxt(wchar_t* strFileName)
 {
-    FILE* pFile = fopen(strFileName, "rt");
+    FILE* pFile = _wfopen(strFileName, L"rt");
 
     if (pFile == NULL) return;
 
-    fscanf(pFile, "%d", &m_iPlayNum);
+    fscanf(pFile, L"%d", &m_iPlayNum);
 
     fclose(pFile);
 }
 
-void CMovieScene::SaveMovieTxt(char* strFileName)
+void CMovieScene::SaveMovieTxt(wchar_t* strFileName)
 {
-    FILE* pFile = fopen(strFileName, "wt");
+    FILE* pFile = _wfopen(strFileName, L"wt");
 
-    fprintf(pFile, "%d", m_iPlayNum);
+    fprintf(pFile, L"%d", m_iPlayNum);
 
     fclose(pFile);
 }

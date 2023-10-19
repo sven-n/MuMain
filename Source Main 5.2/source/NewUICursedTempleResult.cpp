@@ -12,18 +12,19 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "UIControls.h"
 #include "SkillManager.h"
 #include "CharacterManager.h"
+#include "NewUISystem.h"
 
 using namespace SEASON3B;
 
 namespace
 {
-    void DrawText(char* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
+    void DrawText(wchar_t* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
     {
         if (isbold)
         {
@@ -90,8 +91,8 @@ void SEASON3B::CNewUICursedTempleResult::Destroy()
 
 void SEASON3B::CNewUICursedTempleResult::LoadImages()
 {
-    LoadBitmap("Interface\\illusion_success.tga", IMAGE_CURSEDTEMPLERESULT_SUCCESS, GL_LINEAR);
-    LoadBitmap("Interface\\illusion_failure.tga", IMAGE_CURSEDTEMPLERESULT_FAILURE, GL_LINEAR);
+    LoadBitmap(L"Interface\\illusion_success.tga", IMAGE_CURSEDTEMPLERESULT_SUCCESS, GL_LINEAR);
+    LoadBitmap(L"Interface\\illusion_failure.tga", IMAGE_CURSEDTEMPLERESULT_FAILURE, GL_LINEAR);
 }
 
 void SEASON3B::CNewUICursedTempleResult::UnloadImages()
@@ -143,7 +144,7 @@ void SEASON3B::CNewUICursedTempleResult::OpenningProcess()
 
 void SEASON3B::CNewUICursedTempleResult::ClosingProcess()
 {
-    SendRequestCursedTempleRequital();
+    SocketClient->ToGameServer()->SendIllusionTempleRewardRequest();
     ResetGameResultInfo();
 }
 
@@ -236,46 +237,46 @@ void SEASON3B::CNewUICursedTempleResult::RenderButtons()
 
 void SEASON3B::CNewUICursedTempleResult::RenderTextLine(const CursedTempleGameResult& resultinfo, int x, int y, DWORD color, DWORD backcolor)
 {
-    unicode::t_char Text[200];
+    wchar_t Text[200];
 
     memset(&Text, 0, sizeof(unicode::t_char) * 200);
     if (SEASON3A::eTeam_Allied == resultinfo.s_team)
     {
-        unicode::_sprintf(Text, GlobalText[2387]);
+        swprintf(Text, GlobalText[2387]);
     }
     else
     {
-        unicode::_sprintf(Text, GlobalText[2388]);
+        swprintf(Text, GlobalText[2388]);
     }
     DrawText(Text, x + 5, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 200);
-    unicode::_sprintf(Text, resultinfo.s_characterId);
+    swprintf(Text, resultinfo.s_characterId);
     DrawText(Text, x + 56, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 200);
-    sprintf(Text, gCharacterManager.GetCharacterClassText(resultinfo.s_class));
+    swprintf(Text, gCharacterManager.GetCharacterClassText(resultinfo.s_class));
     DrawText(Text, x + 106, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 200);
-    unicode::_sprintf(Text, "%d", resultinfo.s_addexp);
+    swprintf(Text, L"%d", resultinfo.s_addexp);
     DrawText(Text, x + 150, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 200);
-    unicode::_sprintf(Text, "%d", resultinfo.s_point);
+    swprintf(Text, L"%d", resultinfo.s_point);
     DrawText(Text, x + 190, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 }
 
 void SEASON3B::CNewUICursedTempleResult::RenderText()
 {
-    unicode::t_char Text[200];
+    wchar_t Text[200];
 
     memset(&Text, 0, sizeof(unicode::t_char) * 200);
-    unicode::_sprintf(Text, GlobalText[2414]);
+    swprintf(Text, GlobalText[2414]);
     DrawText(Text, m_Pos.x, m_Pos.y + 13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 
     memset(&Text, 0, sizeof(unicode::t_char) * 200);
-    unicode::_sprintf(Text, "  %s           %s        %s     %s    %s", GlobalText[2415], GlobalText[681], GlobalText[1973], GlobalText[683], GlobalText[682]);
+    swprintf(Text, L"  %s           %s        %s     %s    %s", GlobalText[2415], GlobalText[681], GlobalText[1973], GlobalText[683], GlobalText[682]);
     DrawText(Text, m_Pos.x, m_Pos.y + 38, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 
     int i = 0;
@@ -285,9 +286,9 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
         ++iter;
         CursedTempleGameResult& info = *curiter;
 
-        if (strcmp(info.s_characterId, Hero->ID) == 0)
+        if (wcscmp(info.s_characterId, Hero->ID) == 0)
         {
-            DrawText(" ", m_Pos.x + 2, m_Pos.y + 65 + (i * 15), 0xFFFBB264, 0xff0000ff, RT3_SORT_LEFT, 220.f, false);
+            DrawText(L" ", m_Pos.x + 2, m_Pos.y + 65 + (i * 15), 0xFFFBB264, 0xff0000ff, RT3_SORT_LEFT, 220.f, false);
         }
 
         RenderTextLine(info, m_Pos.x, m_Pos.y + 65 + (i * 15), 0xFFFBB264, 0x00000000);
@@ -301,9 +302,9 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
         ++emiter;
         CursedTempleGameResult& info = *curiter;
 
-        if (strcmp(info.s_characterId, Hero->ID) == 0)
+        if (wcscmp(info.s_characterId, Hero->ID) == 0)
         {
-            DrawText(" ", m_Pos.x + 2, m_Pos.y + 140 + (i * 15), 0xFF37d6fe, 0xff0000ff, RT3_SORT_LEFT, 220.f, false);
+            DrawText(L" ", m_Pos.x + 2, m_Pos.y + 140 + (i * 15), 0xFF37d6fe, 0xff0000ff, RT3_SORT_LEFT, 220.f, false);
         }
 
         RenderTextLine(info, m_Pos.x, m_Pos.y + 140 + (i * 15), 0xFF37d6fe, 0x00000000);
@@ -311,7 +312,7 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
     }
 
     memset(&Text, 0, sizeof(unicode::t_char) * 200);
-    sprintf(Text, GlobalText[2416]);
+    swprintf(Text, GlobalText[2416]);
     DrawText(Text, m_Pos.x, m_Pos.y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 55, 0xFF0000FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 }
 
@@ -363,9 +364,8 @@ void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYT
     {
         auto data2 = (LPPMSG_CURSED_TEMPLE_USER_ADD_EXP)(ReceiveBuffer + Offset);
 
-        CursedTempleGameResult TempData;
-        memset(&TempData.s_characterId, 0, sizeof(char) * (MAX_ID_SIZE + 1));
-        memcpy(&TempData.s_characterId, data2->GameId, MAX_ID_SIZE);
+        CursedTempleGameResult TempData{};
+        CMultiLanguage::ConvertFromUtf8(TempData.s_characterId, data2->GameId, MAX_ID_SIZE);
 
         TempData.s_mapnumber = (short)data2->byMapNumber;
 

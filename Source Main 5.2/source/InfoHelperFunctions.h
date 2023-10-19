@@ -30,7 +30,7 @@ info::Builder& TheBuilderInfo()
 ////////////////////////////////////////////////////text file///////////////////////////////////////////////////////////
 
 inline
-const char* TheGolbalText(int index)
+const wchar_t* TheGolbalText(int index)
 {
     return TheBuilderInfo().QueryInfo(info::eInfo_Text_File)->getinfodataTEXT(index);
 }
@@ -54,7 +54,7 @@ const info::Script_Skill* TheSkillText(int index)
 ////////////////////////////////////////////////////silde file/////////////////////////////////////////////////////////////
 
 inline
-const char* TheSildeText(int level, int index)
+const wchar_t* TheSildeText(int level, int index)
 {
     return TheBuilderInfo().QueryInfo(info::eInfo_Slide_File)->getinfodataSILDE(level, index);
 }

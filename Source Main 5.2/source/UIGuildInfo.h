@@ -48,7 +48,7 @@ protected:
 
     BOOL			m_bRequestUnionList;
 
-    char			m_szRivalGuildName[MAX_GUILDNAME + 1];
+    wchar_t			m_szRivalGuildName[MAX_GUILDNAME + 1];
 
     CUINewGuildMemberListBox	m_GuildMemberListBox;
     CUIGuildNoticeListBox		m_GuildNoticeListBox;
@@ -67,10 +67,10 @@ protected:
     BOOL IsSubGuildMaster() { return (Hero->GuildStatus == G_SUB_MASTER); }
     BOOL IsBattleMaster() { return (Hero->GuildStatus == G_BATTLE_MASTER); }
 
-    int GetGuildMemberIndex(char* szName);
-    const char* GetGuildMasterName();
-    const char* GetSubGuildMasterName();
-    const char* GetBattleMasterName();
+    int GetGuildMemberIndex(wchar_t* szName);
+    const wchar_t* GetGuildMasterName();
+    const wchar_t* GetSubGuildMasterName();
+    const wchar_t* GetBattleMasterName();
 
     void CloseMyPopup();
 
@@ -84,15 +84,15 @@ protected:
     void RenderGuildUnionTab();
 
 public:
-    void SetRivalGuildName(char* szName);
+    void SetRivalGuildName(wchar_t* szName);
 
-    void AddGuildNotice(char* szText);
+    void AddGuildNotice(wchar_t* szText);
     void ClearGuildLog();
 
     void AddMemberList(GUILD_LIST_t* pInfo);
     void ClearMemberList();
 
-    void AddUnionList(BYTE* pGuildMark, char* szGuildName, int nMemberCount);
+    void AddUnionList(BYTE* pGuildMark, wchar_t* szGuildName, int nMemberCount);
     int GetUnionCount();
     void ClearUnionList();
 

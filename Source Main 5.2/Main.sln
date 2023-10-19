@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Main", "Main.vcxproj", "{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}"
-	ProjectSection(ProjectDependencies) = postProject
-		{599D63E9-4BAB-44DC-AB6E-287C2A869CE4} = {599D63E9-4BAB-44DC-AB6E-287C2A869CE4}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MUnique.Client.ManagedLibrary", "..\ManagedLibrary\MUnique.Client.ManagedLibrary.csproj", "{599D63E9-4BAB-44DC-AB6E-287C2A869CE4}"
 EndProject

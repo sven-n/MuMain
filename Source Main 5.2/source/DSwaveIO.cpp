@@ -8,7 +8,7 @@
 waveIO::waveIO(bool IO)
 {
     m_IO = IO;
-    m_hmmio = NULL;
+    m_hmmio = nullptr;
     m_SilentSample = 0;  // Default assumes we are dealing with 16bit samples
 }
 
@@ -25,7 +25,7 @@ bool waveIO::CloseWaveFile()
     return true;
 }
 
-bool waveIO::LoadWaveHeader(char* szFilename)
+bool waveIO::LoadWaveHeader(wchar_t* szFilename)
 {
     MMCKINFO		ckOutRIFF;          // chunk info. for output RIFF chunk
     MMCKINFO		ckOut;              // info. for a chunk in output file
@@ -34,18 +34,18 @@ bool waveIO::LoadWaveHeader(char* szFilename)
         return false;
 
     // Open the wave file for reading using buffered I/O.
-    m_hmmio = mmioOpen(szFilename, NULL, MMIO_ALLOCBUF | MMIO_READ);
-    if (m_hmmio == NULL)
+    m_hmmio = mmioOpen(szFilename, nullptr, MMIO_ALLOCBUF | MMIO_READ);
+    if (m_hmmio == nullptr)
     {
-        printf("Cannot find file %s\n", szFilename);
+        wprintf(L"Cannot find file %s\n", szFilename);
         return false;
     }
 
     // Descend the file into the 'RIFF' chunk.
-    if (mmioDescend(m_hmmio, &ckOutRIFF, NULL, 0) != 0)
+    if (mmioDescend(m_hmmio, &ckOutRIFF, nullptr, 0) != 0)
     {
         mmioClose(m_hmmio, 0);
-        printf("Cannot read file!\n");
+        wprintf(L"Cannot read file!\n");
         return false;
     }
 
@@ -54,7 +54,7 @@ bool waveIO::LoadWaveHeader(char* szFilename)
         (ckOutRIFF.fccType != mmioFOURCC('W', 'A', 'V', 'E')))
     {
         mmioClose(m_hmmio, 0);
-        printf("Bad Wave Format!\n");
+        wprintf(L"Bad Wave Format!\n");
         return false;
     }
 
@@ -63,7 +63,7 @@ bool waveIO::LoadWaveHeader(char* szFilename)
     if (mmioDescend(m_hmmio, &ckOut, &ckOutRIFF, MMIO_FINDCHUNK) != 0)
     {
         mmioClose(m_hmmio, 0);
-        printf("Bad Riff Format!\n");
+        wprintf(L"Bad Riff Format!\n");
         return false;
     }
 
@@ -72,7 +72,7 @@ bool waveIO::LoadWaveHeader(char* szFilename)
     if (mmioRead(m_hmmio, (char*)&m_wfex, sizeof(PCMWAVEFORMAT)) == -1)
     {
         mmioClose(m_hmmio, 0);
-        printf("Bad Riff Format!\n");
+        wprintf(L"Bad Riff Format!\n");
         return false;
     }
 
@@ -85,7 +85,7 @@ bool waveIO::LoadWaveHeader(char* szFilename)
     if (m_wfex.wFormatTag != WAVE_FORMAT_PCM)
     {
         mmioClose(m_hmmio, 0);
-        printf("UnSupported Wave Format!\n");
+        wprintf(L"UnSupported Wave Format!\n");
         return false;
     }
 
@@ -93,7 +93,7 @@ bool waveIO::LoadWaveHeader(char* szFilename)
     if (mmioAscend(m_hmmio, &ckOut, 0) != 0)
     {
         mmioClose(m_hmmio, 0);
-        printf("Cannot read file!\n");
+        wprintf(L"Cannot read file!\n");
         return false;
     }
 
@@ -102,7 +102,7 @@ bool waveIO::LoadWaveHeader(char* szFilename)
     if (mmioDescend(m_hmmio, &ckOut, &ckOutRIFF, MMIO_FINDCHUNK) != 0)
     {
         mmioClose(m_hmmio, 0);
-        MessageBox(0, "Bad Format in Wave file!", "WaveLoad", MB_OK | MB_ICONSTOP);
+        MessageBox(nullptr, L"Bad Format in Wave file!", L"WaveLoad", MB_OK | MB_ICONSTOP);
         return FALSE;
     }
 
@@ -134,8 +134,8 @@ bool waveIO::ReadWaveData(char* buffer, int nSizeOfBuffer)
     hResult = mmioRead(m_hmmio, buffer, nBytesToRead);
     if (hResult < nBytesToRead)
     {
-        printf("hResult is %d", hResult);
-        printf("Failed to read audio data\n");
+        wprintf(L"hResult is %d", hResult);
+        wprintf(L"Failed to read audio data\n");
         mmioClose(m_hmmio, 0);
         return false;
     }
@@ -158,25 +158,25 @@ bool waveIO::WriteWaveData(char* buffer, int nSizeOfBuffer)
     result = mmioWrite(m_hmmio, buffer, nSizeOfBuffer);
     if (result != nSizeOfBuffer)
     {
-        printf("Failed to write audio data\n");
+        wprintf(L"Failed to write audio data\n");
         mmioClose(m_hmmio, 0);
         return false;
     }
     return true;
 }
 
-bool waveIO::WriteWaveHeader(char* szFilename, PCMWAVEFORMAT wf, int nWaveDataSize)
+bool waveIO::WriteWaveHeader(wchar_t* szFilename, PCMWAVEFORMAT wf, int nWaveDataSize)
 {
     int	nRIFFSize, nFormatSize, result;
 
     if (m_IO != OUTPUT)
         return false;
 
-    m_hmmio = mmioOpen(szFilename, NULL, MMIO_CREATE | MMIO_WRITE);
+    m_hmmio = mmioOpen(szFilename, nullptr, MMIO_CREATE | MMIO_WRITE);
 
-    if (m_hmmio == NULL)
+    if (m_hmmio == nullptr)
     {
-        printf("Failed to create output file\n");
+        wprintf(L"Failed to create output file\n");
         return false;
     }
 
@@ -185,56 +185,56 @@ bool waveIO::WriteWaveHeader(char* szFilename, PCMWAVEFORMAT wf, int nWaveDataSi
 
     if ((result = mmioWrite(m_hmmio, "RIFF", 4)) != 4)
     {
-        printf("Failed to write RIFF\n");
+        wprintf(L"Failed to write RIFF\n");
         mmioClose(m_hmmio, 0);
         return false;
     }
 
     if ((result = mmioWrite(m_hmmio, (char*)&nRIFFSize, 4)) != 4)
     {
-        printf("Failed to write RIFF size\n");
+        wprintf(L"Failed to write RIFF size\n");
         mmioClose(m_hmmio, 0);
         return false;
     }
 
     if ((result = mmioWrite(m_hmmio, "WAVE", 4)) != 4)
     {
-        printf("Failed to write WAVE\n");
+        wprintf(L"Failed to write WAVE\n");
         mmioClose(m_hmmio, 0);
         return false;
     }
 
     if ((result = mmioWrite(m_hmmio, "fmt ", 4)) != 4)
     {
-        printf("Failed to write fmt \n");
+        wprintf(L"Failed to write fmt \n");
         mmioClose(m_hmmio, 0);
         return false;
     }
 
     if ((result = mmioWrite(m_hmmio, (char*)&nFormatSize, 4)) != 4)
     {
-        printf("Failed to write fmt size\n");
+        wprintf(L"Failed to write fmt size\n");
         mmioClose(m_hmmio, 0);
         return false;
     }
 
     if ((result = mmioWrite(m_hmmio, (char*)&wf, sizeof(wf))) != sizeof(wf))
     {
-        printf("Failed to write Wave Format header\n");
+        wprintf(L"Failed to write Wave Format header\n");
         mmioClose(m_hmmio, 0);
         return false;
     }
 
     if ((result = mmioWrite(m_hmmio, "data", 4)) != 4)
     {
-        printf("Failed to write data\n");
+        wprintf(L"Failed to write data\n");
         mmioClose(m_hmmio, 0);
         return false;
     }
 
     if ((result = mmioWrite(m_hmmio, (char*)&nWaveDataSize, 4)) != 4)
     {
-        printf("Failed to write data size\n");
+        wprintf(L"Failed to write data size\n");
         mmioClose(m_hmmio, 0);
         return false;
     }

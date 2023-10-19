@@ -70,6 +70,12 @@
 #define EQUIPMENT_LENGTH    17
 #define MAX_SPE_BUFFERSIZE_	( 2048)
 
+// English Protocol:
+#define PACKET_MOVE         0xD4
+#define PACKET_POSITION     0x15
+#define PACKET_MAGIC_ATTACK 0xDB
+#define PACKET_ATTACK       0x11
+
 extern int CurrentProtocolState;
 
 typedef struct
@@ -272,84 +278,28 @@ typedef struct
     BYTE         Version[SIZE_PROTOCOLVERSION];
 } PRECEIVE_JOIN_SERVER, * LPPRECEIVE_JOIN_SERVER;
 
-//request create acoount
-typedef struct
-{
-    PBMSG_HEADER Header;
-    BYTE         SubCode;
-    BYTE         ID[MAX_ID_SIZE];
-    BYTE         Password[MAX_ID_SIZE];
-    BYTE         Name[10];
-    BYTE         ResidentNumber[13];
-    BYTE         Quiz[30];
-    BYTE         Answer[30];
-    BYTE         PhoneNumber[20];
-    BYTE         Email[50];
-} PREQUEST_CREATE_ACCOUNT, * LPPREQUEST_CREATE_ACCOUNT;
-
-//request log in
-typedef struct
-{
-    PBMSG_HEADER Header;
-    BYTE         SubCode;
-    BYTE         ID[MAX_ID_SIZE];
-    BYTE         Password[MAX_ID_SIZE];
-    DWORD        Time;
-    BYTE         Version[SIZE_PROTOCOLVERSION];
-    BYTE         Serial[SIZE_PROTOCOLSERIAL];
-} PREQUEST_LOG_IN, * LPPREQUEST_LOG_IN;
-
-//request confirm password
-typedef struct
-{
-    PBMSG_HEADER Header;
-    BYTE         SubCode;
-    BYTE         ID[MAX_ID_SIZE];
-} PREQUEST_CONFIRM_PASSWORD, * LPPREQUEST_CONFIRM_PASSWORD;
-
 //receive confirm password
 typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
     BYTE         Result;
-    BYTE         Question[30];
+    char         Question[30];
 } PRECEIVE_CONFIRM_PASSWORD, * LPPRECEIVE_CONFIRM_PASSWORD;
-
-//request confirm password
-typedef struct
-{
-    PBMSG_HEADER Header;
-    BYTE         SubCode;
-    BYTE         ID[MAX_ID_SIZE];
-    BYTE         ResidentNumber[13];
-    BYTE         Answer[30];
-} PREQUEST_CONFIRM_PASSWORD2, * LPPREQUEST_CONFIRM_PASSWORD2;
 
 //receive confirm password
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
     BYTE         Result;
-    BYTE         Password[MAX_ID_SIZE];
+    char         Password[MAX_ID_SIZE];
 } PRECEIVE_CONFIRM_PASSWORD2, * LPPRECEIVE_CONFIRM_PASSWORD2;
-
-//request change password
-typedef struct
-{
-    PBMSG_HEADER Header;
-    BYTE         SubCode;
-    BYTE         ID[MAX_ID_SIZE];
-    BYTE         OldPassword[MAX_ID_SIZE];
-    BYTE         NewPassword[MAX_ID_SIZE];
-    BYTE         ResidentNumber[13];
-} PREQUEST_CHANGE_PASSWORD, * LPPREQUEST_CHANGE_PASSWORD;
 
 //receive characters list
 typedef struct
 {
     BYTE         Index;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     WORD         Level;
     BYTE		 CtlCode;
     BYTE         Class;
@@ -357,44 +307,18 @@ typedef struct
     BYTE         byGuildStatus;
 } PRECEIVE_CHARACTER_LIST, * LPPRECEIVE_CHARACTER_LIST;
 
-//request create character
-typedef struct
-{
-    PBMSG_HEADER Header;
-    BYTE         SubCode;
-    BYTE         ID[MAX_ID_SIZE];
-    BYTE         Class;
-} PREQUEST_CREATE_CHARACTER, * LPREQUEST_CREATE_CHARACTER;
-
 //receive create character
 typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
     BYTE         Result;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     BYTE         Index;
     WORD         Level;
     BYTE		 Class;
     //BYTE         Equipment[24];
 } PRECEIVE_CREATE_CHARACTER, * LPPRECEIVE_CREATE_CHARACTER;
-
-//request delete character
-typedef struct
-{
-    PBMSG_HEADER Header;
-    BYTE         SubCode;
-    BYTE         ID[MAX_ID_SIZE];
-    BYTE         Resident[10];
-} PREQUEST_DELETE_CHARACTER, * LPREQUEST_DELETE_CHARACTER;
-
-//request join map server
-typedef struct
-{
-    PBMSG_HEADER Header;
-    BYTE		 SubCode;
-    BYTE         ID[MAX_ID_SIZE];
-} PREQUEST_JOIN_MAP_SERVER, * LPPREQUEST_JOIN_MAP_SERVER;
 
 //receive join map server
 typedef struct
@@ -483,7 +407,7 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     WORD         Level;
     DWORD        GuildKey;
 } PTRADE, * LPPTRADE;
@@ -495,15 +419,15 @@ typedef struct {
 //request chat
 typedef struct {
     PBMSG_HEADER Header;
-    BYTE         ID[MAX_ID_SIZE];
-    BYTE         ChatText[MAX_CHAT_SIZE];
+    char         ID[MAX_ID_SIZE];
+    char         ChatText[MAX_CHAT_SIZE];
 } PCHATING, * LPPCHATING;
 
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         KeyH;
     BYTE         KeyL;
-    BYTE         ChatText[MAX_CHAT_SIZE];
+    char         ChatText[MAX_CHAT_SIZE];
 } PCHATING_KEY, * LPPCHATING_KEY;
 
 typedef struct {
@@ -513,7 +437,7 @@ typedef struct {
     WORD		 Delay;
     DWORD		 Color;
     BYTE		 Speed;
-    BYTE         Notice[256];
+    char         Notice[256];
 } PRECEIVE_NOTICE, * LPPRECEIVE_NOTICE;
 
 //receive equipment
@@ -534,7 +458,7 @@ typedef struct {
     BYTE         PositionY;
     BYTE         Class;
     BYTE         Equipment[EQUIPMENT_LENGTH];
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     BYTE         TargetX;
     BYTE         TargetY;
     BYTE         Path;
@@ -551,7 +475,7 @@ typedef struct
     BYTE         PositionY;
     BYTE         TypeH;
     BYTE         TypeL;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     BYTE         TargetX;
     BYTE         TargetY;
     BYTE         Path;
@@ -572,7 +496,7 @@ typedef struct {
     BYTE         TargetX;
     BYTE         TargetY;
     BYTE         Path;
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     BYTE         s_BuffCount;
     BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
 } PCREATE_SUMMON, * LPPCREATE_SUMMON;
@@ -591,14 +515,6 @@ typedef struct {
     BYTE         s_BuffCount;
     BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
 } PCREATE_MONSTER, * LPPCREATE_MONSTER;
-
-//send move my character
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          PositionX;
-    BYTE          PositionY;
-    BYTE          Path[8];
-} PMOVE_MY_CHARACTER, * LPPMOVE_MY_CHARACTER;
 
 //receive move character
 typedef struct {
@@ -625,21 +541,6 @@ typedef struct {
     BYTE          Item[PACKET_ITEM_LENGTH];
 } PCREATE_ITEM, * LPPCREATE_ITEM;
 
-//request drop item
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          PositionX;
-    BYTE          PositionY;
-    BYTE          InventoryIndex;
-} PREQUEST_DROP_ITEM, * LPPREQUEST_DROP_ITEM;
-
-//request drop item
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          SrcIndex;
-    BYTE          DstIndex;
-} PREQUEST_EQUIPMENT_ITEM, * LPPREQUEST_EQUIPMENT_ITEM;
-
 //change character
 typedef struct {
     PBMSG_HEADER  Header;
@@ -647,14 +548,6 @@ typedef struct {
     BYTE          KeyL;
     BYTE          Item[PACKET_ITEM_LENGTH];
 } PCHANGE_CHARACTER, * LPPCHANGE_CHARACTER;
-
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          KeyH;
-    BYTE          KeyL;
-    BYTE          Action;
-    BYTE          Dir;
-} PREQUEST_ATTACK, * LPPREQUEST_ATTACK;
 
 //receive get item
 typedef struct {
@@ -685,6 +578,7 @@ typedef struct {
     BYTE          DamageH;
     BYTE          DamageL;
 } PRECEIVE_DIE, * LPPRECEIVE_DIE;
+
 typedef struct {
     PBMSG_HEADER  Header;
     BYTE          KeyH;
@@ -706,15 +600,6 @@ typedef struct {
     BYTE		 TKeyL;
 } PHEADER_DEFAULT_DIE, * LPPHEADER_DEFAULT_DIE;
 
-//request action
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          Angle;
-    BYTE          Action;
-    BYTE		  TargetKeyH;
-    BYTE		  TargetKeyL;
-} PREQUEST_ACTION, * LPPREQUEST_ACTION;
-
 //receive action
 typedef struct {
     PBMSG_HEADER  Header;
@@ -725,25 +610,6 @@ typedef struct {
     BYTE		  TargetKeyH;
     BYTE		  TargetKeyL;
 } PRECEIVE_ACTION, * LPPRECEIVE_ACTION;
-
-//send magic
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          MagicH;
-    BYTE          MagicL;
-    BYTE          KeyH;
-    BYTE          KeyL;
-} PSEND_MAGIC, * LPPSEND_MAGIC;
-
-//send magic continue
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          MagicH;
-    BYTE          MagicL;
-    BYTE          PositionX;
-    BYTE          PositionY;
-    BYTE          Angle;
-} PSEND_MAGIC_CONTINUE, * LPPSEND_MAGIC_CONTINUE;
 
 //receive magic continue
 typedef struct {
@@ -782,17 +648,6 @@ typedef struct {
     BYTE          KeyH;
     BYTE          KeyL;
 } PRECEIVE_MAGIC_POSITION, * LPPRECEIVE_MAGIC_POSITION;
-
-//send magic continue
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          MagicH;
-    BYTE          MagicL;
-    BYTE          PositionX;
-    BYTE          PositionY;
-    BYTE          Count;
-    BYTE          Key[10];
-} PSEND_MAGIC_CONTINUES, * LPPSEND_MAGIC_CONTINUES;
 
 //receive magic target
 typedef struct {
@@ -907,13 +762,6 @@ typedef struct {
     BYTE		 ShieldDamageL;
 } PRECEIVE_DAMAGE, * LPPRECEIVE_DAMAGE;
 
-//receive create guild master
-typedef struct {
-    PBMSG_HEADER Header;
-    BYTE         Name[8];
-    BYTE         Mark[32];
-} PSEND_CREATE_GUILD, * LPPSEND_CREATE_GUILD;
-
 //receive party info
 typedef struct {
     BYTE         value;
@@ -927,7 +775,7 @@ typedef struct {
 
 //receive party list
 typedef struct {
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     BYTE         Number;
     BYTE         Map;
     BYTE         x;
@@ -969,7 +817,7 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    BYTE         IP[15];
+    char         IP[15];
     WORD         Port;
 } PRECEIVE_SERVER_ADDRESS, * LPPRECEIVE_SERVER_ADDRESS;
 
@@ -979,20 +827,20 @@ typedef struct {
     BYTE		 Server;
 } PRECEIVE_SERVER_BUSY, * LPPRECEIVE_SERVER_BUSY;
 
-typedef struct {
-    BYTE         KeyH;
-    BYTE         KeyL;
-    BYTE         Name[8];
-    BYTE         Mark[32];
-} PRECEIVE_GUILD, * LPPRECEIVE_GUILD;
-
-typedef struct {
-    PBMSG_HEADER Header;
-    BYTE         KeyH;
-    BYTE         KeyL;
-    BYTE         Name[8];
-    BYTE         Mark[32];
-} PRECEIVE_GUILD_MARK, * LPPRECEIVE_GUILD_MARK;
+//typedef struct {
+//    BYTE         KeyH;
+//    BYTE         KeyL;
+//    char         Name[8];
+//    BYTE         Mark[32];
+//} PRECEIVE_GUILD, * LPPRECEIVE_GUILD;
+//
+//typedef struct {
+//    PBMSG_HEADER Header;
+//    BYTE         KeyH;
+//    BYTE         KeyL;
+//    char         Name[8];
+//    BYTE         Mark[32];
+//} PRECEIVE_GUILD_MARK, * LPPRECEIVE_GUILD_MARK;
 
 typedef struct {
     BYTE         KeyH;
@@ -1003,7 +851,7 @@ typedef struct {
 
 // 길드원 목록
 typedef struct {
-    BYTE         ID[MAX_ID_SIZE];
+    char         ID[MAX_ID_SIZE];
     BYTE         Number;
     BYTE		 CurrentServer;
     BYTE		 GuildStatus;
@@ -1019,22 +867,10 @@ typedef struct {
     char		szRivalGuildName[MAX_GUILDNAME];
 } PRECEIVE_GUILD_LISTS, * LPPRECEIVE_GUILD_LISTS;
 
-//send guild leave
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          ID[MAX_ID_SIZE];
-    BYTE          ResidentNumber[10];
-} PSEND_GUILD_LEAVE, * LPPSEND_GUILD_LEAVE;
-
-typedef struct {
-    PBMSG_HEADER Header;
-    BYTE         Name[8];
-} PSEND_GUILD_WAR, * LPPSEND_GUILD_WAR;
-
 //receive guild war
 typedef struct {
     PBMSG_HEADER Header;
-    BYTE         Name[8];
+    char         Name[8];
     BYTE         Type;
     BYTE         Team;
 } PRECEIVE_WAR, * LPPRECEIVE_WAR;
@@ -1061,8 +897,8 @@ typedef struct
     PBMSG_HEADER Header;
     int			GuildKey;
     BYTE		GuildType;
-    BYTE		UnionName[MAX_GUILDNAME];
-    BYTE		GuildName[MAX_GUILDNAME];
+    char		UnionName[MAX_GUILDNAME];
+    char		GuildName[MAX_GUILDNAME];
     BYTE		Mark[32];
 } PPRECEIVE_GUILDINFO, * LPPPRECEIVE_GUILDINFO;
 
@@ -1186,9 +1022,9 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    BYTE         Name1[8];
+    char         Name1[8];
     BYTE         Score1;
-    BYTE         Name2[8];
+    char         Name2[8];
     BYTE         Score2;
 } PRECEIVE_SOCCER_SCORE, * LPPRECEIVE_SOCCER_SCORE;
 
@@ -1528,7 +1364,7 @@ typedef struct
     BYTE		nResult;
     BYTE		bIndexH;
     BYTE		bIndexL;
-    CHAR		szID[MAX_ID_SIZE];
+    char		szID[MAX_ID_SIZE];
 } PMSG_ANS_DUEL_INVITE, * LPPMSG_ANS_DUEL_INVITE;
 
 typedef struct _tagPMSG_REQ_DUEL_ANSWER		// SC2
@@ -1537,7 +1373,7 @@ typedef struct _tagPMSG_REQ_DUEL_ANSWER		// SC2
     BYTE         SubCode;
     BYTE		bIndexH;
     BYTE		bIndexL;
-    CHAR		szID[MAX_ID_SIZE];
+    char		szID[MAX_ID_SIZE];
 } PMSG_REQ_DUEL_ANSWER, * LPPMSG_REQ_DUEL_ANSWER;
 
 typedef struct
@@ -1547,7 +1383,7 @@ typedef struct
     BYTE		nResult;
     BYTE		bIndexH;
     BYTE		bIndexL;
-    CHAR		szID[MAX_ID_SIZE];
+    char		szID[MAX_ID_SIZE];
 } PMSG_ANS_DUEL_EXIT, * LPPMSG_ANS_DUEL_EXIT;
 
 typedef struct
@@ -1581,8 +1417,8 @@ typedef struct
     PBMSG_HEADER Header;
     BYTE         SubCode;
     struct {
-        CHAR	szID1[MAX_ID_SIZE];
-        CHAR	szID2[MAX_ID_SIZE];
+        char	szID1[MAX_ID_SIZE];
+        char	szID2[MAX_ID_SIZE];
         BYTE	bStart;
         BYTE	bWatch;
     } channel[4];
@@ -1594,8 +1430,8 @@ typedef struct
     BYTE         SubCode;
     BYTE		nResult;
     BYTE		nChannelId;
-    CHAR		szID1[MAX_ID_SIZE];
-    CHAR		szID2[MAX_ID_SIZE];
+    char		szID1[MAX_ID_SIZE];
+    char		szID2[MAX_ID_SIZE];
     BYTE		bIndexH1;
     BYTE		bIndexL1;
     BYTE		bIndexH2;
@@ -1606,7 +1442,7 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    CHAR		szID[MAX_ID_SIZE];
+    char		szID[MAX_ID_SIZE];
 } PMSG_DUEL_JOINCNANNEL_BROADCAST, * LPPMSG_DUEL_JOINCNANNEL_BROADCAST;
 
 typedef struct
@@ -1620,7 +1456,7 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    CHAR		szID[MAX_ID_SIZE];
+    char		szID[MAX_ID_SIZE];
 } PMSG_DUEL_LEAVECNANNEL_BROADCAST, * LPPMSG_DUEL_LEAVECNANNEL_BROADCAST;
 
 typedef struct
@@ -1629,7 +1465,7 @@ typedef struct
     BYTE         SubCode;
     BYTE		nCount;
     struct {
-        CHAR	szID[MAX_ID_SIZE];
+        char	szID[MAX_ID_SIZE];
     } user[10];
 } PMSG_DUEL_OBSERVERLIST_BROADCAST, * LPPMSG_DUEL_OBSERVERLIST_BROADCAST;
 
@@ -1637,8 +1473,8 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    CHAR		szWinner[MAX_ID_SIZE];
-    CHAR		szLoser[MAX_ID_SIZE];
+    char		szWinner[MAX_ID_SIZE];
+    char		szLoser[MAX_ID_SIZE];
 } PMSG_DUEL_RESULT_BROADCAST, * LPPMSG_DUEL_RESULT_BROADCAST;
 
 typedef struct
@@ -1656,15 +1492,15 @@ typedef struct tagPSHOPTITLE_HEADER {
 typedef struct tagPSHOPTITLE_DATA {
     BYTE	byIndexH;
     BYTE	byIndexL;
-    BYTE	szTitle[36];	//. MAX_SHOPTITLE
+    char	szTitle[MAX_SHOPTITLE];	//. MAX_SHOPTITLE
 } PSHOPTITLE_DATAINFO, * LPPSHOPTITLE_DATAINFO;
 typedef struct tagPSHOPTITLE_CHANGE {
     PBMSG_HEADER	Header;
     BYTE			bySubcode;
     BYTE			byIndexH;
     BYTE			byIndexL;
-    BYTE			szTitle[36];	//. MAX_SHOPTITLE
-    BYTE			szId[MAX_ID_SIZE];
+    char			szTitle[MAX_SHOPTITLE];	//. MAX_SHOPTITLE
+    char			szId[MAX_ID_SIZE];
 } PSHOPTITLE_CHANGEINFO, * LPPSHOPTITLE_CHANGEINFO;
 
 typedef struct tagPSHOPSETPRICE_RESULT {
@@ -1693,8 +1529,8 @@ typedef struct tagGETPSHOPITEMLIST_HEADER {
     BYTE			byResult;
     BYTE			byIndexH;
     BYTE			byIndexL;
-    BYTE			szId[MAX_ID_SIZE];
-    BYTE			szShopTitle[36];	//. MAX_SHOPTITLE
+    char			szId[MAX_ID_SIZE];
+    char			szShopTitle[MAX_SHOPTITLE];	//. MAX_SHOPTITLE
     BYTE			byCount;
 } GETPSHOPITEMLIST_HEADERINFO, * LPGETPSHOPITEMLIST_HEADERINFO;
 typedef struct tagGETPSHOPITEM_DATA {
@@ -1740,25 +1576,25 @@ typedef struct {
 } FS_FRIEND_LIST_HEADER, * LPFS_FRIEND_LIST_HEADER;
 
 typedef struct {
-    BYTE			Name[MAX_ID_SIZE];
+    char			Name[MAX_ID_SIZE];
     BYTE			Server;
 } FS_FRIEND_LIST_DATA, * LPFS_FRIEND_LIST_DATA;
 
 typedef struct {
     PBMSG_HEADER    Header;
     BYTE			Result;
-    BYTE			Name[MAX_ID_SIZE];
+    char			Name[MAX_ID_SIZE];
     BYTE			Server;
 } FS_FRIEND_RESULT, * LPFS_FRIEND_RESULT;
 
 typedef struct {
     PBMSG_HEADER    Header;
-    BYTE			Name[MAX_ID_SIZE];
+    char			Name[MAX_ID_SIZE];
 } FS_ACCEPT_ADD_FRIEND_RESULT, * LPFS_ACCEPT_ADD_FRIEND_RESULT;
 
 typedef struct {
     PBMSG_HEADER    Header;
-    BYTE			Name[MAX_ID_SIZE];
+    char			Name[MAX_ID_SIZE];
     BYTE			Server;
 } FS_FRIEND_STATE_CHANGE, * LPFS_FRIEND_STATE_CHANGE;
 
@@ -1771,9 +1607,9 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER    Header;
     WORD			Index;
-    BYTE			Name[MAX_ID_SIZE];
-    BYTE			Date[30];
-    BYTE			Subject[MAX_LETTER_TITLE_LENGTH];
+    char			Name[MAX_ID_SIZE];
+    char			Date[30];
+    char			Subject[MAX_LETTER_TITLE_LENGTH];
     BYTE			Read;
 } FS_LETTER_ALERT, * LPFS_LETTER_ALERT;
 
@@ -1785,7 +1621,7 @@ typedef struct {
     BYTE			Equipment[EQUIPMENT_LENGTH];
     BYTE			PhotoDir;
     BYTE			PhotoAction;
-    BYTE			Memo[MAX_LETTERTEXT_LENGTH];
+    char			Memo[MAX_LETTERTEXT_LENGTH];
 } FS_LETTER_TEXT, * LPFS_LETTER_TEXT;
 
 typedef struct {
@@ -1796,11 +1632,11 @@ typedef struct {
 
 typedef struct {
     PBMSG_HEADER    Header;
-    BYTE			IP[15];
+    char			IP[15];
     WORD			RoomNumber;
     DWORD			Ticket;
     BYTE			Type;
-    BYTE			ID[10];
+    char			ID[10];
     BYTE			Result;
 } FS_CHAT_CREATE_RESULT, * LPFS_CHAT_CREATE_RESULT;
 
@@ -1813,7 +1649,7 @@ typedef struct {
     PBMSG_HEADER    Header;
     BYTE			Type;
     BYTE			Index;
-    BYTE			Name[MAX_ID_SIZE];
+    char			Name[MAX_ID_SIZE];
 } FS_CHAT_CHANGE_STATE, * LPFS_CHAT_CHANGE_STATE;
 
 typedef struct {
@@ -1824,7 +1660,7 @@ typedef struct {
 
 typedef struct {
     BYTE			Index;
-    BYTE			Name[MAX_ID_SIZE];
+    char			Name[MAX_ID_SIZE];
 } FS_CHAT_USERLIST_DATA, * LPFS_CHAT_USERLIST_DATA;
 
 typedef struct {
@@ -1837,7 +1673,7 @@ typedef struct {
     PBMSG_HEADER    Header;
     BYTE			Index;
     BYTE			MsgSize;
-    BYTE			Msg[100];
+    char			Msg[100];
 } FS_CHAT_TEXT, * LPFS_CHAT_TEXT;
 
 //----------------------------------------------------------------------------
@@ -1897,8 +1733,8 @@ typedef struct
 {
     void			Clear()
     {
-        memset(&m_MatchTeamName1, NULL, MAX_ID_SIZE);
-        memset(&m_MatchTeamName2, NULL, MAX_ID_SIZE);
+        memset(&m_MatchTeamName1, NULL, sizeof m_MatchTeamName1);
+        memset(&m_MatchTeamName2, NULL, sizeof m_MatchTeamName2);
         m_Score1 = 0;
         m_Score2 = 0;
         m_Type = 0;
@@ -1917,13 +1753,35 @@ typedef struct
 
 typedef struct
 {
+    void			Clear()
+    {
+        memset(&m_MatchTeamName1, NULL, sizeof m_MatchTeamName1);
+        memset(&m_MatchTeamName2, NULL, sizeof m_MatchTeamName2);
+        m_Score1 = 0;
+        m_Score2 = 0;
+        m_Type = 0;
+    }
+
+    PBMSG_HEADER	m_Header;
+    BYTE			m_subCode;
+    BYTE			m_Type;
+
+    wchar_t			m_MatchTeamName1[MAX_ID_SIZE];
+    WORD			m_Score1;
+
+    wchar_t			m_MatchTeamName2[MAX_ID_SIZE];
+    WORD			m_Score2;
+}MATCH_RESULT, * LPP_MATCH_RESULT;
+
+typedef struct
+{
     PBMSG_HEADER	m_Header;
     BYTE			m_subCode;
     BYTE			m_x;
     BYTE			m_y;
 }PMSG_SOCCER_GOALIN, * LPPMSG_SOCCER_GOALIN;
 
-extern PMSG_MATCH_RESULT		g_wtMatchResult;
+extern MATCH_RESULT		g_wtMatchResult;
 extern PMSG_MATCH_TIMEVIEW		g_wtMatchTimeLeft;
 extern int g_iGoalEffect;
 
@@ -1974,8 +1832,8 @@ typedef struct
     BYTE		btSiegeStartDay;
     BYTE		btSiegeStartHour;
     BYTE		btSiegeStartMinute;
-    CHAR		cOwnerGuild[8];
-    CHAR		cOwnerGuildMaster[10];
+    char		cOwnerGuild[MAX_GUILDNAME];
+    char		cOwnerGuildMaster[MAX_ID_SIZE];
 
     CHAR		btStateLeftSec1;
     CHAR		btStateLeftSec2;
@@ -1990,7 +1848,7 @@ typedef struct
 {
     PREQUEST_DEFAULT_SUBCODE	Header;
     BYTE		btResult;
-    CHAR		szGuildName[8];
+    char		szGuildName[MAX_GUILDNAME];
 } PMSG_ANS_REGCASTLESIEGE, * LPPMSG_ANS_REGCASTLESIEGE;
 
 //----------------------------------------------------------------------------
@@ -2001,7 +1859,7 @@ typedef struct
     PREQUEST_DEFAULT_SUBCODE	Header;
     BYTE		btResult;
     BYTE		btIsGiveUp;
-    CHAR		szGuildName[8];
+    char		szGuildName[MAX_GUILDNAME];
 } PMSG_ANS_GIVEUPCASTLESIEGE, * LPPMSG_ANS_GIVEUPCASTLESIEGE;
 
 //----------------------------------------------------------------------------
@@ -2011,7 +1869,7 @@ typedef struct
 {
     PREQUEST_DEFAULT_SUBCODE	Header;
     BYTE		btResult;
-    CHAR		szGuildName[8];
+    char		szGuildName[MAX_GUILDNAME];
     BYTE		btGuildMark1;
     BYTE		btGuildMark2;
     BYTE		btGuildMark3;
@@ -2027,7 +1885,7 @@ typedef struct
 {
     PREQUEST_DEFAULT_SUBCODE	Header;
     BYTE		btResult;
-    CHAR		szGuildName[8];
+    char		szGuildName[MAX_GUILDNAME];
     BYTE		btGuildMark1;
     BYTE		btGuildMark2;
     BYTE		btGuildMark3;
@@ -2164,7 +2022,7 @@ typedef struct
 } PMSG_ANS_CSREGGUILDLIST, * LPPMSG_ANS_CSREGGUILDLIST;
 typedef struct
 {
-    CHAR		szGuildName[8];
+    char		szGuildName[MAX_GUILDNAME];
     BYTE		btRegMarks1;
     BYTE		btRegMarks2;
     BYTE		btRegMarks3;
@@ -2186,7 +2044,7 @@ typedef struct
 {
     BYTE		btCsJoinSide;
     BYTE		btGuildInvolved;
-    CHAR		szGuildName[8];
+    char		szGuildName[8];
     INT			iGuildScore;
 } PMSG_CSATTKGUILDLIST, * LPPMSG_CSATTKGUILDLIST;
 
@@ -2287,15 +2145,15 @@ typedef struct
     BYTE				m_bySwitchState;
     BYTE				m_JoinSide;
 
-    BYTE				m_szGuildName[8];
-    BYTE				m_szUserName[MAX_ID_SIZE + 1];
+    char				m_szGuildName[8];
+    char				m_szUserName[MAX_ID_SIZE + 1];
 }PRECEIVE_CROWN_SWITCH_INFO, * LPRECEIVE_CROWN_SWITCH_INFO;
 
 typedef struct
 {
     PBMSG_HEADER2       m_Header;
     BYTE                m_byBasttleCastleState;
-    BYTE                m_szGuildName[8];
+    char                m_szGuildName[8];
 }PRECEIVE_BC_PROCESS, * LPPRECEIVE_BC_PROCESS;
 
 typedef struct
@@ -3173,20 +3031,6 @@ typedef struct
     long				lItemLeftCount;
 }PMSG_CASHSHOP_BUYITEM_ANS, * LPPMSG_CASHSHOP_BUYITEM_ANS;
 
-//----------------------------------------------------------------------------
-// (0xD2)(0x04)
-//----------------------------------------------------------------------------
-typedef struct
-{
-    PBMSG_HEADER2		h;
-
-    long				lGiftItemPackageSeq;
-    long				lDiftItemDisplaySeq;
-    long				lGiftItemPriceSeq;
-    long				lSaleZone;
-    char				chReceiveUserID[MAX_ID_SIZE + 1];
-    char				chMessage[MAX_GIFT_MESSAGE_SIZE];
-}PMSG_CASHSHOP_GIFTSEND_REQ, * LPPMSG_CASHSHOP_GIFTSEND_REQ;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x04)
@@ -3256,19 +3100,6 @@ typedef struct
     char				chSendUserName[MAX_ID_SIZE + 1];
     char				chMessage[MAX_GIFT_MESSAGE_SIZE];
 }PMSG_CASHSHOP_GIFTSTORAGELIST, * LPPMSG_CASHSHOP_GIFTSTORAGELIST;
-
-//----------------------------------------------------------------------------
-// (0xD2)(0x07)
-//----------------------------------------------------------------------------
-typedef struct
-{
-    PBMSG_HEADER2		h;
-
-    double				dCashValue;
-
-    char				chReceiveUserID[MAX_ID_SIZE + 1];
-    char				chMessage[MAX_GIFT_MESSAGE_SIZE];
-}PMSG_CASHSHOP_CASHSEND_REQ, * LPPMSG_CASHSHOP_CASHSEND_REQ;
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x07)
@@ -3476,13 +3307,13 @@ extern int SendDropItem;
 
 extern bool EnableGuildWar;
 extern int  GuildWarIndex;
-extern char GuildWarName[8 + 1];
+extern wchar_t GuildWarName[8 + 1];
 extern int  GuildWarScore[2];
 
 extern bool EnableSoccer;
 extern BYTE HeroSoccerTeam;
 extern int  SoccerTime;
-extern char SoccerTeamName[2][8 + 1];
+extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
 #ifdef ACC_PACKETSIZE
@@ -3491,7 +3322,9 @@ extern int g_iTotalPacketSend;
 extern DWORD g_dwPacketInitialTick;
 #endif //ACC_PACKETSIZE
 
-BOOL CreateSocket(char* IpAddr, unsigned short Port);
+void BuxConvert(BYTE* Buffer, int Size);
+
+BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port);
 void DeleteSocket();
 //void ProtocolCompiler( CWsctlc *pSocketClient = &SocketClient, int iTranslation = 0, int iParam = 0);
 void ReceiveCharacterList(const BYTE* ReceiveBuffer);
@@ -3510,8 +3343,8 @@ typedef struct _CROWN_SWITCH_INFO
 {
     BYTE				m_bySwitchState;
     BYTE				m_JoinSide;
-    BYTE				m_szGuildName[9];
-    BYTE				m_szUserName[MAX_ID_SIZE + 1];
+    wchar_t				m_szGuildName[9];
+    wchar_t				m_szUserName[MAX_ID_SIZE + 1];
 
     _CROWN_SWITCH_INFO()
     {

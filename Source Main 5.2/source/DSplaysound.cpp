@@ -12,16 +12,10 @@
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
 #include <objbase.h>
-//#include <initguid.h>
-#include <commdlg.h>
-#include <mmreg.h>
 #include <dsound.h>
 #include "DSwaveio.h"
-#include "ZzzBMD.h"
 #include "ZzzInfomation.h"
-#include "ZzzObject.h"
 #include "ZzzCharacter.h"
-//#include "DSWavRead.h"
 #include "DSPlaySound.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "./Utilities/Log/muConsoleDebug.h"
@@ -40,7 +34,7 @@ LPDIRECTSOUND3DBUFFER   g_lpDS3DBuffer[MAX_BUFFER][MAX_CHANNEL];
 DWORD                   g_dwBufferBytes;
 
 OBJECT* Object3DSound[MAX_BUFFER][MAX_CHANNEL];
-char                    BufferName[MAX_BUFFER][64];
+wchar_t                 BufferName[MAX_BUFFER][64];
 int                     BufferChannel[MAX_BUFFER];
 int                     MaxBufferChannel[MAX_BUFFER];
 bool                    Enable3DSound[MAX_BUFFER];
@@ -75,14 +69,14 @@ HRESULT InitDirectSound(HWND hDlg)
         // Create IDirectSound using the primary sound device
         if (FAILED(hr = DirectSoundCreate(NULL, &g_lpDS, NULL)))
         {
-            g_ErrorReport.Write("Init - DirectSoundCreate Error\r\n");
+            g_ErrorReport.Write(L"Init - DirectSoundCreate Error\r\n");
             return hr;
         }
 
         // Set coop level to DSSCL_PRIORITY
         if (FAILED(hr = g_lpDS->SetCooperativeLevel(hDlg, DSSCL_PRIORITY)))
         {
-            g_ErrorReport.Write("Init - DS SetCooperativeLevel Error\r\n");
+            g_ErrorReport.Write(L"Init - DS SetCooperativeLevel Error\r\n");
             return hr;
         }
         //if( FAILED( hr = g_lpDS->SetCooperativeLevel( hDlg, DSSCL_NORMAL ) ) )
@@ -94,14 +88,14 @@ HRESULT InitDirectSound(HWND hDlg)
         dsbdesc.dwFlags = DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
         if (FAILED(hr = g_lpDS->CreateSoundBuffer(&dsbdesc, &lpDSBPrimary, NULL)))
         {
-            g_ErrorReport.Write("Init - DS CreateSoundBuffer Error\r\n");
+            g_ErrorReport.Write(L"Init - DS CreateSoundBuffer Error\r\n");
             return hr;
         }
 
         if (FAILED(hr = lpDSBPrimary->QueryInterface(IID_IDirectSound3DListener,
             (VOID**)&g_lpDS3DListener)))
         {
-            g_ErrorReport.Write("Init DS QueryInterface Error\r\n");
+            g_ErrorReport.Write(L"Init DS QueryInterface Error\r\n");
             return hr;
         }
 
@@ -120,7 +114,7 @@ HRESULT InitDirectSound(HWND hDlg)
 
         if (FAILED(hr = lpDSBPrimary->SetFormat(&wfx)))
         {
-            g_ErrorReport.Write("Init DS SetFormat Error\r\n");
+            g_ErrorReport.Write(L"Init DS SetFormat Error\r\n");
             return hr;
         }
 
@@ -189,7 +183,7 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel, bool 
 
     if (FAILED(hr = g_lpDS->CreateSoundBuffer(&dsbdSecondary, &g_lpDSBuffer[Buffer][0], NULL)))
     {
-        g_ErrorReport.Write("Failed to create Direct Sound buffer [%s]\r\n", strFileName);
+        g_ErrorReport.Write(L"Failed to create Direct Sound buffer [%s]\r\n", strFileName);
         delete  wavefile;
         return 0;
     }
@@ -199,9 +193,9 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel, bool 
         // Query for a 3D Interface for the buffer
         if (FAILED(hr = g_lpDSBuffer[Buffer][0]->QueryInterface(IID_IDirectSound3DBuffer, (LPVOID*)&g_lpDS3DBuffer[Buffer][0])))
         {
-            g_ErrorReport.Write("Failed to query for 3D Interface on Direct Sound buffer [%s]\r\n", strFileName);
-            MessageBox(g_hWnd, "Failed to query for 3D Interface on Direct Sound buffer", NULL, MB_OK);
-            g_ErrorReport.Write("Failed to query for 3D Interface on Direct Sound buffer");
+            g_ErrorReport.Write(L"Failed to query for 3D Interface on Direct Sound buffer [%s]\r\n", strFileName);
+            MessageBox(g_hWnd, L"Failed to query for 3D Interface on Direct Sound buffer", NULL, MB_OK);
+            g_ErrorReport.Write(L"Failed to query for 3D Interface on Direct Sound buffer");
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
             delete  wavefile;
             return 0;
@@ -210,9 +204,9 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel, bool 
         // Set position to be to the front left of listener
         if (FAILED(hr = g_lpDS3DBuffer[Buffer][0]->SetPosition(-2, 0, 2, DS3D_IMMEDIATE)))
         {
-            g_ErrorReport.Write("Failed to set position of 3D buffer [%s]\r\n", strFileName);
-            MessageBox(g_hWnd, "Failed to set position of 3D buffer", NULL, MB_OK);
-            g_ErrorReport.Write("Failed to set position of 3D buffer");
+            g_ErrorReport.Write(L"Failed to set position of 3D buffer [%s]\r\n", strFileName);
+            MessageBox(g_hWnd, L"Failed to set position of 3D buffer", NULL, MB_OK);
+            g_ErrorReport.Write(L"Failed to set position of 3D buffer");
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
             delete  wavefile;
             return 0;
@@ -221,9 +215,9 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel, bool 
         // Query for a Property Set Interface for the buffer
         if (FAILED(hr = g_lpDS3DBuffer[Buffer][0]->QueryInterface(IID_IKsPropertySet, (void**)&g_lpPropertySet[Buffer])))
         {
-            g_ErrorReport.Write("Failed to get Property Set Interface [%s]\r\n", strFileName);
-            MessageBox(g_hWnd, "Failed to get Property Set Interface", NULL, MB_OK);
-            g_ErrorReport.Write("Failed to get Property Set Interface");
+            g_ErrorReport.Write(L"Failed to get Property Set Interface [%s]\r\n", strFileName);
+            MessageBox(g_hWnd, L"Failed to get Property Set Interface", NULL, MB_OK);
+            g_ErrorReport.Write(L"Failed to get Property Set Interface");
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
             delete  wavefile;
             return 0;
@@ -237,8 +231,8 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel, bool 
     // Next we need to load our audio data into our Secondary Buffer
     if (FAILED(hr = g_lpDSBuffer[Buffer][0]->Lock(0, g_dwBufferBytes, (void**)&lpPart1, &dwPart1Size, (void**)&lpPart2, &dwPart2Size, 0)))
     {
-        g_ErrorReport.Write("Failed to Lock Secondary buffer [%s]\r\n", strFileName);
-        printf("Failed to Lock Secondary buffer\n");
+        g_ErrorReport.Write(L"Failed to Lock Secondary buffer [%s]\r\n", strFileName);
+        wprintf(L"Failed to Lock Secondary buffer\n");
         SAFE_RELEASE(g_lpDSBuffer[Buffer][0]);
         delete  wavefile;
         return 0;
@@ -246,8 +240,8 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel, bool 
 
     if (dwPart1Size != g_dwBufferBytes)
     {
-        g_ErrorReport.Write("Couldn't Lock the whole buffer for some reason ... [%s]\r\n", strFileName);
-        printf("Couldn't Lock the whole buffer for some reason ...\n");
+        g_ErrorReport.Write(L"Couldn't Lock the whole buffer for some reason ... [%s]\r\n", strFileName);
+        wprintf(L"Couldn't Lock the whole buffer for some reason ...\n");
         SAFE_RELEASE(g_lpDSBuffer[Buffer][0]);
         delete  wavefile;
         return 0;
@@ -256,8 +250,8 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel, bool 
     // Use the waveIO Class ReadWaveData method to load in the data to where lpPart1 points
     if (FAILED(hr = wavefile->ReadWaveData((char*)lpPart1, g_dwBufferBytes)))
     {
-        g_ErrorReport.Write("Failed to read audio data [%s]\r\n", strFileName);
-        printf("Failed to read audio data\n");
+        g_ErrorReport.Write(L"Failed to read audio data [%s]\r\n", strFileName);
+        wprintf(L"Failed to read audio data\n");
         SAFE_RELEASE(g_lpDSBuffer[Buffer][0]);
         delete  wavefile;
         return 0;
@@ -266,8 +260,8 @@ HRESULT CreateStaticBuffer(int Buffer, TCHAR* strFileName, int MaxChannel, bool 
     // Unlock the buffer
     if (FAILED(hr = g_lpDSBuffer[Buffer][0]->Unlock(lpPart1, g_dwBufferBytes, lpPart2, 0)))
     {
-        g_ErrorReport.Write("Failed to UnLock Secondary buffer [%s]\r\n", strFileName);
-        printf("Failed to UnLock Secondary buffer\n");
+        g_ErrorReport.Write(L"Failed to UnLock Secondary buffer [%s]\r\n", strFileName);
+        wprintf(L"Failed to UnLock Secondary buffer\n");
         SAFE_RELEASE(g_lpDSBuffer[Buffer][0]);
         delete  wavefile;
         return 0;
@@ -290,7 +284,7 @@ HRESULT FillBuffer(int Buffer, int MaxChannel, bool Enable)
 // Name: LoadWaveFile()
 // Desc: Loads the wave file into a secondary static DirectSound buffer
 //-----------------------------------------------------------------------------
-VOID LoadWaveFile(int Buffer, TCHAR* strFileName, int MaxChannel, bool Enable)
+VOID LoadWaveFile(int Buffer, wchar_t* strFileName, int MaxChannel, bool Enable)
 {
     if (!g_EnableSound)
         return;
@@ -312,7 +306,8 @@ VOID LoadWaveFile(int Buffer, TCHAR* strFileName, int MaxChannel, bool Enable)
     {
         return;
     }
-    else if (FAILED(FillBuffer(Buffer, MaxChannel, Enable)))  // The sound buffer was successfully created
+
+    if (FAILED(FillBuffer(Buffer, MaxChannel, Enable)))  // The sound buffer was successfully created
     {
         return;
     }
@@ -320,7 +315,7 @@ VOID LoadWaveFile(int Buffer, TCHAR* strFileName, int MaxChannel, bool Enable)
     BufferChannel[Buffer] = 0;
     MaxBufferChannel[Buffer] = MaxChannel;
     Enable3DSound[Buffer] = Enable;
-    strcpy(BufferName[Buffer], strFileName);
+    wcscpy(BufferName[Buffer], strFileName);
 
     SoundLoadCount++;
 
@@ -434,7 +429,7 @@ HRESULT PlayBuffer(int Buffer, OBJECT* Object, BOOL bLooped)
 
     if (FAILED(hr = g_lpDSBuffer[Buffer][BufferChannel[Buffer]]->Play(0, 0, dwLooped)))
     {
-        g_ConsoleDebug->Write(MCD_ERROR, "Play Sound: %d, %d", Buffer, dwLooped);
+        g_ConsoleDebug->Write(MCD_ERROR, L"Play Sound: %d, %d", Buffer, dwLooped);
         return hr;
     }
 

@@ -16,7 +16,7 @@ CTimer::CTimer()
         {
 #ifdef __TIMER_DEBUG
             __TraceF(TEXT("timeBeginPeriod(...) Error\n"));
-            //CDebug::OutputDebugString("timeBeginPeriod(...) Error");
+            //CDebug::OutputDebugString(L"timeBeginPeriod(...) Error");
 #endif //__TIMER_DEBUG
         }
 

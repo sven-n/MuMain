@@ -13,13 +13,13 @@
 
 using namespace info;
 
-SkillInfoPtr SkillInfo::MakeInfo(const std::string& filename)
+SkillInfoPtr SkillInfo::MakeInfo(const std::wstring& filename)
 {
     SkillInfoPtr info(new SkillInfo(filename));
     return info;
 }
 
-SkillInfo::SkillInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
+SkillInfo::SkillInfo(const std::wstring& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
     m_IsOpenFile = OpenFile(filename);
 
@@ -34,7 +34,7 @@ SkillInfo::~SkillInfo()
     clear();
 }
 
-bool SkillInfo::OpenFile(const std::string& filename)
+bool SkillInfo::OpenFile(const std::wstring& filename)
 {
     return true;
 }

@@ -21,11 +21,11 @@ extern int  InputNumber;
 extern int  InputIndex;
 extern int  InputTextWidth;
 extern int  InputTextMax[12];
-extern char InputText[12][256];
-extern char InputTextIME[12][4];
+extern wchar_t InputText[12][256];
+extern wchar_t InputTextIME[12][4];
 extern int  InputLength[12];
 extern char InputTextHide[12];
-extern char MacroText[10][256];
+extern wchar_t MacroText[10][256];
 extern uint64_t  RemainingMacroCooldownTime;
 extern int  FontHeight;
 extern int  ItemHelp;
@@ -54,29 +54,30 @@ extern int ItemKey;
 extern bool g_bGMObservation;
 
 void Action(CHARACTER* c, OBJECT* o, bool Now);
+void SendRequestAction(OBJECT& obj, BYTE action);
 
 bool PressKey(int Key);
 void MoveHero();
 void EditObjects();
 
 void ClearInput(BOOL bClearWhisperTarget = TRUE);
-void CutText(const char* Text, char* Text1, char* Text2, int Length);
-void CreateChat(char* ID, const char* Text, CHARACTER* c, int Flag = 0, int SetColor = -1);
-int  CreateChat(char* ID, const char* Text, OBJECT* Owner, int Flag = 0, int SetColor = -1);
-void AssignChat(char* ID, const char* Text, int Flag = 0);
+void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2);
+void CreateChat(wchar_t* ID, const wchar_t* Text, CHARACTER* c, int Flag = 0, int SetColor = -1);
+int  CreateChat(wchar_t* character_name, const wchar_t* chat_text, OBJECT* Owner, int Flag = 0, int SetColor = -1);
+void AssignChat(wchar_t* ID, const wchar_t* Text, int Flag = 0);
 void MoveChat();
 void ClearNotice(void);
-void CreateNotice(char* Text, int Color);
+void CreateNotice(wchar_t* Text, int Color);
 void MoveNotices();
 void RenderNotices();
-void CreateWhisper(char* ID, const char* Text, int Type);
+void CreateWhisper(wchar_t* ID, const wchar_t* Text, int Type);
 void MoveWhispers();
 void RenderSwichState();
-void CheckChatText(char* Text);
+void CheckChatText(wchar_t* Text);
 
 //  Whisper
-bool CheckWhisperLevel(int lvl, char* text);
-void RegistWhisperID(int lvl, char* text);
+bool CheckWhisperLevel(int lvl, wchar_t* text);
+void RegistWhisperID(int lvl, wchar_t* text);
 void ClearWhisperID(void);
 
 void SaveIME_Status();
@@ -89,7 +90,7 @@ int  FindHotKey(int Skill);
 
 void RenderInputText(int x, int y, int Index, int Hide = 0);
 void RenderDebugWindow();
-void RenderTipText(int sx, int sy, const char* Text);
+void RenderTipText(int sx, int sy, const wchar_t* Text);
 
 extern int g_iWidthEx;
 
@@ -102,12 +103,13 @@ void ReloadArrow();
 int SearchArrowCount();
 
 int  SelectCharacter();
-bool FindText(const char* Text, const char* Token, bool First = false);
-bool FindTextABS(const char* Text, const char* Token, bool First = false);
-bool CheckAbuseFilter(char* Text, bool bCheckSlash = true);
-bool CheckAbuseNameFilter(char* Text);
+bool IsWebzenCharacter();
+bool FindText(const wchar_t* Text, const wchar_t* Token, bool First = false);
+bool FindTextABS(const wchar_t* Text, const wchar_t* Token, bool First = false);
+bool CheckAbuseFilter(wchar_t* Text, bool bCheckSlash = true);
+bool CheckAbuseNameFilter(wchar_t* Text);
 void SetPlayerColor(BYTE PK);
-bool CheckCommand(char* Text, bool bMacroText = false);
+bool CheckCommand(wchar_t* Text, bool bMacroText = false);
 void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType);
 void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disabled = false, bool clipping = true);
 void RenderOutSides();
@@ -129,7 +131,7 @@ void MoveTournamentInterface();
 void MoveBattleSoccerEffect(CHARACTER* c);
 void RenderTournamentInterface();
 
-void GetTime(DWORD time, std::string& timeText, bool isSecond = true);
+void GetTime(DWORD time, std::wstring& timeText, bool isSecond = true);
 
 extern int   TargetNpc;
 
@@ -139,8 +141,12 @@ bool CheckSkillUseCondition(OBJECT* o, int Type);
 bool CheckWall(int sx1, int sy1, int sx2, int sy2);
 bool CheckTile(CHARACTER* c, OBJECT* o, float Range);
 void LetHeroStop(CHARACTER* c = NULL, BOOL bSetMovementFalse = FALSE);
+void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
 void Attack(CHARACTER* c);
 bool SkillElf(CHARACTER* c, ITEM* p);
+void SendRequestMagic(int Type, int Key);
+void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE Tpos, WORD TKey, BYTE* pSkillSerial);
+void SendRequestMagicAttack(int Type, BYTE x, BYTE y, BYTE Serial, BYTE Count, int* Key, WORD SkillSerial);
 bool SkillWarrior(CHARACTER* c, ITEM* p);
 void UseSkillWarrior(CHARACTER* c, OBJECT* o);
 void UseSkillWizard(CHARACTER* c, OBJECT* o);
@@ -155,6 +161,6 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance);
 
 bool IsGMCharacter();
 bool IsNonAttackGM();
-bool IsIllegalMovementByUsingMsg(const char* szChatText);
+bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText);
 
 #endif //__ZZZINTERFACE_H__

@@ -19,9 +19,9 @@ class CCharInfoBalloon : public CSprite
 protected:
     CHARACTER* m_pCharInfo;
     DWORD		m_dwNameColor;
-    char		m_szName[64];
-    char		m_szGuild[64];
-    char		m_szClass[64];
+    wchar_t		m_szName[64];
+    wchar_t		m_szGuild[64];
+    wchar_t		m_szClass[64];
 
 public:
     CCharInfoBalloon();

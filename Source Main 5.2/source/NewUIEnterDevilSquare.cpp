@@ -5,10 +5,9 @@
 
 #include "NewUIEnterDevilSquare.h"
 #include "NewUISystem.h"
-#include "NewUICommonMessageBox.h"
-#include "wsclientinline.h"
 #include "ZzzCharacter.h"
 #include "CharacterManager.h"
+#include "DSPlaySound.h"
 
 using namespace SEASON3B;
 
@@ -216,7 +215,7 @@ bool CNewUIEnterDevilSquare::BtnProcess()
 
         if (iItemIndex > -1)
         {
-            SendRequestMoveToDevilSquare(m_iNumActiveBtn, iItemIndex);
+            SocketClient->ToGameServer()->SendDevilSquareEnterRequest(m_iNumActiveBtn, iItemIndex);
         }
         else
         {
@@ -270,7 +269,7 @@ int CNewUIEnterDevilSquare::CheckLimitLV(int iIndex)
 
 void CNewUIEnterDevilSquare::OpenningProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     for (int i = 0; i < MAX_ENTER_GRADE; i++)
     {
@@ -290,36 +289,36 @@ void CNewUIEnterDevilSquare::OpenningProcess()
     m_BtnEnter[m_iNumActiveBtn].UnLock();
     m_BtnEnter[m_iNumActiveBtn].ChangeTextColor(m_dwBtnTextColor[ENTERBTN_ENABLE]);
 
-    unicode::t_char sztext[255] = { 0, };
+    wchar_t sztext[255] = { 0, };
 
     for (int i = 0; i < MAX_ENTER_GRADE - 1; i++)
     {
-        unicode::_sprintf(sztext, GlobalText[645], i + 1
+        swprintf(sztext, GlobalText[645], i + 1
             , m_iDevilSquareLimitLevel[(iLimitLVIndex * (MAX_ENTER_GRADE)) + i][0]
             , m_iDevilSquareLimitLevel[(iLimitLVIndex * (MAX_ENTER_GRADE)) + i][1]);
         m_BtnEnter[i].SetFont(g_hFontBold);
         m_BtnEnter[i].ChangeText(sztext);
     }
 
-    unicode::_sprintf(sztext, GlobalText[1778], 7);
+    swprintf(sztext, GlobalText[1778], 7);
     m_BtnEnter[MAX_ENTER_GRADE - 1].SetFont(g_hFontBold);
     m_BtnEnter[MAX_ENTER_GRADE - 1].ChangeText(sztext);
 }
 
 void CNewUIEnterDevilSquare::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 void CNewUIEnterDevilSquare::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_ENTERDS_BASE_WINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_ENTERDS_BASE_WINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_ENTERDS_BASE_WINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_ENTERDS_BASE_WINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_ENTERDS_BASE_WINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_ENTERDS_BASE_WINDOW_BTN_EXIT, GL_LINEAR);				// Exit Button
-    LoadBitmap("Interface\\newui_btn_empty_big.tga", IMAGE_ENTERDS_BASE_WINDOW_BTN_ENTER, GL_LINEAR);		// Enter Button
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_ENTERDS_BASE_WINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_ENTERDS_BASE_WINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_ENTERDS_BASE_WINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_ENTERDS_BASE_WINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_ENTERDS_BASE_WINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_ENTERDS_BASE_WINDOW_BTN_EXIT, GL_LINEAR);				// Exit Button
+    LoadBitmap(L"Interface\\newui_btn_empty_big.tga", IMAGE_ENTERDS_BASE_WINDOW_BTN_ENTER, GL_LINEAR);		// Enter Button
 }
 
 //---------------------------------------------------------------------------------------------

@@ -25,7 +25,7 @@ bool SEASON3B::CNewUISlideWindow::Create(CNewUIManager* pNewUIMng)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_SLIDEWINDOW, this);
     m_pSlideMgr = new CSlideHelpMgr;
-    std::string strFileName = "Data\\Local\\" + g_strSelectedML + "\\Slide_" + g_strSelectedML + ".bmd";
+    std::wstring strFileName = L"Data\\Local\\" + g_strSelectedML + L"\\Slide_" + g_strSelectedML + L".bmd";
     m_pSlideMgr->OpenSlideTextFile(strFileName.c_str());
 
     return true;

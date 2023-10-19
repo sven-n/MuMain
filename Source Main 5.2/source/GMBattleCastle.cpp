@@ -16,18 +16,21 @@
 #include "zzzOpenData.h"
 #include "PhysicsManager.h"
 #include "CSParts.h"
-#include "wsclientinline.h"
+
 #include "MapManager.h"
 #include "GIPetManager.h"
 #include "BoneManager.h"
 #include "GMBattleCastle.h"
+
+#include "GuildCache.h"
+#include "ZzzInterface.h"
 
 extern  int     g_iTotalObj;
 extern  int     WaterTextureNumber;
 extern  char* g_lpszMp3[NUM_MUSIC];
 
 extern int TextNum;
-extern char TextList[50][100];
+extern wchar_t TextList[50][100];
 extern int  TextListColor[50];
 extern int  TextBold[50];
 extern SIZE Size[50];
@@ -84,24 +87,24 @@ namespace battleCastle
 
         if ( /*g_bBattleCastleStart!=g_bBattleCastleStartBackup && */ gMapManager.WorldActive != -1 && gMapManager.InBattleCastle())
         {
-            char FileName[64];
-            char WorldName[32];
+            wchar_t FileName[64];
+            wchar_t WorldName[32];
 
-            sprintf(WorldName, "World%d", gMapManager.WorldActive + 1);
+            swprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
             if (g_bBattleCastleStart)
             {
-                sprintf(FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
+                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
                 OpenTerrainAttribute(FileName);
 
-                sprintf(FileName, "%s\\TerrainLight2.jpg", WorldName);
+                swprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
                 OpenTerrainLight(FileName);
             }
             else
             {
-                sprintf(FileName, "Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
+                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
                 OpenTerrainAttribute(FileName);
 
-                sprintf(FileName, "%s\\TerrainLight.jpg", WorldName);
+                swprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
             }
 
             g_iMp3PlayTime = 0;
@@ -128,12 +131,12 @@ namespace battleCastle
             if (Hero->Helper.Type == MODEL_HELPER + 37 && AniType == PLAYER_HIGH_SHOCK)
             {
                 SetAction_Fenrir_Damage(Hero, o);
-                SendRequestAction(AniType, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(Hero->Object, AniType);
             }
             else
             {
                 SetAction(o, AniType);
-                SendRequestAction(AniType, ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8));
+                SendRequestAction(Hero->Object, AniType);
             }
         }
     }
@@ -345,7 +348,7 @@ namespace battleCastle
         Vector(0.f, 0.f, 0.f, Angle);
         Vector(0.f, 0.f, 270.f, Position);
 
-        SendGetCastleGuildMark();
+        SocketClient->ToGameServer()->SendGuildLogoOfCastleOwnerRequest();
 
         OpenMonsterModel(77);
 
@@ -418,9 +421,9 @@ namespace battleCastle
 
     bool    GetGuildMaster(CHARACTER* c)
     {
-        if (strcmp(GuildMark[c->GuildMarkIndex].GuildName, "") == NULL) return false;
-        if (strcmp(GuildMark[c->GuildMarkIndex].UnionName, "") == NULL && c->GuildStatus != G_MASTER) return false;
-        if (strcmp(GuildMark[c->GuildMarkIndex].UnionName, GuildMark[c->GuildMarkIndex].GuildName) == NULL && c->GuildStatus != G_MASTER) return false;
+        if (wcscmp(GuildMark[c->GuildMarkIndex].GuildName, L"") == NULL) return false;
+        if (wcscmp(GuildMark[c->GuildMarkIndex].UnionName, L"") == NULL && c->GuildStatus != G_MASTER) return false;
+        if (wcscmp(GuildMark[c->GuildMarkIndex].UnionName, GuildMark[c->GuildMarkIndex].GuildName) == NULL && c->GuildStatus != G_MASTER) return false;
 
         return true;
     }
@@ -476,7 +479,7 @@ namespace battleCastle
         }
     }
 
-    void ChangeBattleFormation(char* GuildName, bool bEffect)
+    void ChangeBattleFormation(wchar_t* GuildName, bool bEffect)
     {
         for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
         {
@@ -485,7 +488,7 @@ namespace battleCastle
             if (o->Live && o->Visible)
             {
                 DeleteParts(c);
-                if (strcmp(GuildMark[c->GuildMarkIndex].UnionName, GuildName) == NULL)
+                if (wcscmp(GuildMark[c->GuildMarkIndex].UnionName, GuildName) == NULL)
                 {
                     // _buffwani_
                     g_TokenCharacterBuff(o, eBuff_CastleRegimentDefense);
@@ -1280,7 +1283,7 @@ namespace battleCastle
             c->Object.LifeTime = 0;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            strcpy(c->ID, "¿Õ°ü");
+            wcscpy(c->ID, L"¿Õ°ü");
             break;
 
         case 216:
@@ -1290,7 +1293,7 @@ namespace battleCastle
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            strcpy(c->ID, "¿Õ°ü");
+            wcscpy(c->ID, L"¿Õ°ü");
             break;
 
         case 217:
@@ -1299,7 +1302,7 @@ namespace battleCastle
             c->m_bFixForm = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            strcpy(c->ID, "¿Õ°ü ¹ßÆÇ2");
+            wcscpy(c->ID, L"¿Õ°ü ¹ßÆÇ2");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
@@ -1311,7 +1314,7 @@ namespace battleCastle
             c->m_bFixForm = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            strcpy(c->ID, "¿Õ°ü ¹ßÆÇ1");
+            wcscpy(c->ID, L"¿Õ°ü ¹ßÆÇ1");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
@@ -1324,7 +1327,7 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            strcpy(c->ID, "¼º¹® ½ºÀ§Ä¡");
+            wcscpy(c->ID, L"¼º¹® ½ºÀ§Ä¡");
             break;
 
         case 220:
@@ -1334,7 +1337,7 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            strcpy(c->ID, "»ç³ÉÅÍ ¹®Áö±â");
+            wcscpy(c->ID, L"»ç³ÉÅÍ ¹®Áö±â");
             break;
 
         case 221:
@@ -1366,7 +1369,7 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            strcpy(c->ID, "¿ø·Î¿ø");
+            wcscpy(c->ID, L"¿ø·Î¿ø");
             break;
 
         case 224:
@@ -1377,7 +1380,7 @@ namespace battleCastle
             c->Object.SubType = rand() % 2 + 10;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            strcpy(c->ID, "±À§º´");
+            wcscpy(c->ID, L"±À§º´");
             break;
 
         case 277:

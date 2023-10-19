@@ -90,7 +90,7 @@ public:
     bool IsEmpireGuardian4();
     bool IsEmpireGuardian();
     bool InBattleCastle(int iMap = -1);
-    const char* GetMapName(int iMap);
+    const wchar_t* GetMapName(int iMap);
 public:
     int WorldActive;
 };

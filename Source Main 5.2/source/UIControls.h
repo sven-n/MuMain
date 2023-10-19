@@ -3,6 +3,7 @@
 
 #include "zzzinfomation.h"
 #include "MultiLanguage.h"
+#include "WSclient.h"
 #include "Time/Timer.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -11,9 +12,9 @@
 
 inline DWORD _ARGB(BYTE a, BYTE r, BYTE g, BYTE b) { return (a << 24) + (b << 16) + (g << 8) + (r); }
 
-int CutStr(const char* pszText, char* pTextOut, const int iTargetPixelWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab = 0);
-int CutText3(const char* pszText, char* pTextOut, const int TargetWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab = 0, const BOOL bReverseWrite = FALSE);
-void CutText4(const char* pszSource, char* pszResult1, char* pszResult2, int iCutCount);
+int CutStr(const wchar_t* pszText, wchar_t* pTextOut, const int iTargetPixelWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab = 0);
+int CutText3(const wchar_t* pszText, wchar_t* pTextOut, const int TargetWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab = 0, const BOOL bReverseWrite = FALSE);
+void CutText4(const wchar_t* pszSource, wchar_t* pszResult1, wchar_t* pszResult2, int iCutCount);
 
 void RenderCheckBox(int iPos_x, int iPos_y, BOOL bFlag);
 
@@ -44,8 +45,8 @@ enum UIOPTIONS
 typedef struct
 {
     BOOL	m_bIsSelected;
-    char	m_szID[MAX_ID_SIZE + 1];
-    char	m_szText[MAX_TEXT_LENGTH + 1];
+    wchar_t	m_szID[MAX_ID_SIZE + 1];
+    wchar_t	m_szText[MAX_TEXT_LENGTH + 1];
     int		m_iType;
     int		m_iColor;
     UINT	m_uiEmptyLines;
@@ -54,7 +55,7 @@ typedef struct
 typedef struct
 {
     BOOL	m_bIsSelected;
-    char	m_szID[MAX_ID_SIZE + 1];
+    wchar_t	m_szID[MAX_ID_SIZE + 1];
     BYTE	m_Number;
     BYTE	m_Server;
     BYTE	m_GuildStatus;
@@ -64,7 +65,7 @@ typedef struct
 {
     BOOL	m_bIsSelected;
     DWORD	m_dwUIID;
-    char	m_szTitle[64];
+    wchar_t	m_szTitle[64];
     int		m_iStatus;
 } WINDOWLIST_TEXT;
 
@@ -72,36 +73,36 @@ typedef struct
 {
     BOOL	m_bIsSelected;
     DWORD	m_dwLetterID;
-    char	m_szID[MAX_ID_SIZE + 1];
-    char	m_szText[MAX_TEXT_LENGTH + 1];
-    char	m_szDate[16];
-    char	m_szTime[16];
+    wchar_t	m_szID[MAX_ID_SIZE + 1];
+    wchar_t	m_szText[MAX_TEXT_LENGTH + 1];
+    wchar_t	m_szDate[16];
+    wchar_t	m_szTime[16];
     BOOL	m_bIsRead;
 } LETTERLIST_TEXT;
 
 typedef struct
 {
     BOOL	m_bIsSelected;
-    char	m_szText[MAX_LETTERTEXT_LENGTH + 1];
+    wchar_t	m_szText[MAX_LETTERTEXT_LENGTH + 1];
 } LETTER_TEXT;
 
 typedef struct
 {
     BOOL	m_bIsSelected;
-    char	m_szContent[60];
+    wchar_t	m_szContent[60];
 } GUILDLOG_TEXT;
 typedef struct
 {
     BOOL	m_bIsSelected;
     BYTE	GuildMark[64];
-    char	szName[8 + 1];
+    wchar_t	szName[MAX_GUILDNAME + 1];
     int		nMemberCount;
 } UNIONGUILD_TEXT;
 
 typedef struct
 {
     BOOL	m_bIsSelected;
-    char	szName[8 + 1];
+    wchar_t	szName[MAX_GUILDNAME + 1];
     int		nCount;
     BYTE	byIsGiveUp;
     BYTE	bySeqNum;
@@ -111,8 +112,8 @@ typedef struct tagMOVECOMMAND_TEXT
 {
     BOOL	m_bIsSelected;
     BOOL	m_bCanMove;
-    char	szMainMapName[32];		//. Main map name
-    char	szSubMapName[32];		//. Substitute map name
+    wchar_t	szMainMapName[32];		//. Main map name
+    wchar_t	szSubMapName[32];		//. Substitute map name
     int		iReqLevel;				//. required level
     int		iReqZen;				//. required zen
     int		iGateNum;				//. Gate number
@@ -121,7 +122,7 @@ typedef struct tagMOVECOMMAND_TEXT
 typedef struct
 {
     BOOL	m_bIsSelected;
-    char	szName[8 + 1];
+    wchar_t	szName[MAX_GUILDNAME + 1];
     BYTE	byJoinSide;
     BYTE	byGuildInvolved;
     int		iGuildScore;
@@ -140,7 +141,7 @@ typedef struct _SOCKETLIST_TEXT
 {
     BOOL	m_bIsSelected;
     int		m_iSocketIndex;
-    char	m_szText[64 + 1];
+    wchar_t	m_szText[64 + 1];
 } SOCKETLIST_TEXT;
 
 enum UI_MESSAGE_ENUM
@@ -237,14 +238,14 @@ public:
     CUIButton();
     virtual ~CUIButton();
 
-    virtual void Init(DWORD dwButtonID, const char* pszCaption);
-    virtual void SetCaption(const char* pszCaption);
+    virtual void Init(DWORD dwButtonID, const wchar_t* pszCaption);
+    virtual void SetCaption(const wchar_t* pszCaption);
     virtual BOOL DoMouseAction();
     virtual void Render();
 
 protected:
     DWORD m_dwButtonID;
-    char* m_pszCaption;
+    wchar_t* m_pszCaption;
     BOOL m_bMouseState;
 };
 
@@ -334,7 +335,7 @@ public:
     CUIGuildListBox();
     virtual ~CUIGuildListBox() {}
 
-    virtual void AddText(const char* pszID, BYTE Number, BYTE Server);
+    virtual void AddText(const wchar_t* pszID, BYTE Number, BYTE Server);
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
@@ -351,9 +352,9 @@ public:
     virtual ~CUISimpleChatListBox() {}
 
     virtual void Render();
-    virtual void AddText(const char* pszID, const char* pszText, int iType, int iColor);
+    virtual void AddText(const wchar_t* pszID, const wchar_t* pszText, int iType, int iColor);
 protected:
-    virtual void AddTextToRenderList(const char* pszID, const char* pszText, int iType, int iColor);
+    virtual void AddTextToRenderList(const wchar_t* pszID, const wchar_t* pszText, int iType, int iColor);
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
     virtual BOOL DoLineMouseAction(int iLineNumber) { return TRUE; }
@@ -367,9 +368,9 @@ public:
     virtual ~CUILetterTextListBox() {}
 
     virtual void Render();
-    virtual void AddText(const char* pszText);
+    virtual void AddText(const wchar_t* pszText);
 protected:
-    virtual void AddTextToRenderList(const char* pszText);
+    virtual void AddTextToRenderList(const wchar_t* pszText);
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);
     virtual BOOL DoLineMouseAction(int iLineNumber) { return TRUE; }
@@ -383,13 +384,13 @@ public:
     CUIChatPalListBox();
     virtual ~CUIChatPalListBox() {}
 
-    virtual void AddText(const char* pszID, BYTE Number, BYTE Server);
-    virtual void DeleteText(const char* pszID);
+    virtual void AddText(const wchar_t* pszID, BYTE Number, BYTE Server);
+    virtual void DeleteText(const wchar_t* pszID);
     virtual void SetNumRenderLine(int iLine);
     GUILDLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
     std::deque<GUILDLIST_TEXT>& GetFriendList() { m_bForceEditList = TRUE; return m_TextList; }
     void SetLayout(int iType) { m_iLayoutType = iType; }
-    const char* GetNameByNumber(BYTE byNumber);
+    const wchar_t* GetNameByNumber(BYTE byNumber);
     void SetColumnWidth(UINT uiColumnNum, int iWidth) { if (uiColumnNum < 4) m_iColumnWidth[uiColumnNum] = iWidth; }
     int GetColumnWidth(UINT uiColumnNum) { return (uiColumnNum < 4 ? m_iColumnWidth[uiColumnNum] : 0); }
     int GetColumnPos_x(UINT uiColumnNum)
@@ -402,7 +403,7 @@ public:
         }
         return iResult;
     }
-    void MakeTitleText(char* pszTitleText);
+    void MakeTitleText(wchar_t* pszTitleText);
 
 protected:
     virtual void RenderInterface();
@@ -422,7 +423,7 @@ public:
     CUIWindowListBox();
     virtual ~CUIWindowListBox() {}
 
-    virtual void AddText(DWORD dwUIID, const char* pszTitle, int iStatus = 0);
+    virtual void AddText(DWORD dwUIID, const wchar_t* pszTitle, int iStatus = 0);
     virtual void DeleteText(DWORD dwUIID);
     virtual void SetNumRenderLine(int iLine);
     WINDOWLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
@@ -439,7 +440,7 @@ public:
     CUILetterListBox();
     virtual ~CUILetterListBox() {}
 
-    virtual void AddText(const char* pszID, const char* pszText, const char* pszDate, const char* pszTime, BOOL bIsRead);
+    virtual void AddText(const wchar_t* pszID, const wchar_t* pszText, const wchar_t* pszDate, const wchar_t* pszTime, BOOL bIsRead);
     virtual void DeleteText(DWORD dwLetterID);
     virtual void SetNumRenderLine(int iLine);
     LETTERLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
@@ -473,7 +474,7 @@ public:
     CUISocketListBox();
     virtual ~CUISocketListBox() {}
 
-    virtual void AddText(int iSocketIndex, const char* pszText);
+    virtual void AddText(int iSocketIndex, const wchar_t* pszText);
     virtual void DeleteText(int iSocketIndex);
     virtual void SetNumRenderLine(int iLine);
     SOCKETLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
@@ -490,7 +491,7 @@ public:
     CUIGuildNoticeListBox();
     virtual ~CUIGuildNoticeListBox() {}
 
-    virtual void AddText(const char* szContent);
+    virtual void AddText(const wchar_t* szContent);
     virtual void DeleteText(DWORD dwIndex);
     virtual void SetNumRenderLine(int nLine);
     GUILDLOG_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
@@ -507,7 +508,7 @@ public:
     CUINewGuildMemberListBox();
     virtual ~CUINewGuildMemberListBox() {}
 
-    virtual void AddText(const char* pszID, BYTE Number, BYTE Server, BYTE GuildStatus);
+    virtual void AddText(const wchar_t* pszID, BYTE Number, BYTE Server, BYTE GuildStatus);
     virtual void DeleteText(DWORD dwUIID);
     virtual void SetNumRenderLine(int iLine);
     GUILDLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
@@ -527,7 +528,7 @@ public:
     CUIUnionGuildListBox();
     virtual ~CUIUnionGuildListBox() {}
 
-    virtual void AddText(BYTE* pGuildMark, const char* szGuildName, int nMemberCount);
+    virtual void AddText(BYTE* pGuildMark, const wchar_t* szGuildName, int nMemberCount);
     virtual void DeleteText(DWORD dwGuildIndex);
     virtual int GetTextCount();
     virtual void SetNumRenderLine(int iLine);
@@ -568,7 +569,7 @@ public:
     CUIBCDeclareGuildListBox();
     virtual ~CUIBCDeclareGuildListBox() {}
 
-    virtual void AddText(const char* szGuildName, int nMarkCount, BYTE byIsGiveUp, BYTE bySeqNum);
+    virtual void AddText(const wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUp, BYTE bySeqNum);
     virtual void DeleteText(DWORD dwGuildIndex);
     virtual void SetNumRenderLine(int iLine);
     BCDECLAREGUILD_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
@@ -589,7 +590,7 @@ public:
     CUIBCGuildListBox();
     virtual ~CUIBCGuildListBox() {}
 
-    virtual void AddText(const char* szGuildName, BYTE byJoinSide, BYTE byGuildInvolved, int iGuildScore);
+    virtual void AddText(const wchar_t* szGuildName, BYTE byJoinSide, BYTE byGuildInvolved, int iGuildScore);
     virtual void DeleteText(DWORD dwGuildIndex);
     virtual void SetNumRenderLine(int iLine);
     BCGUILD_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
@@ -606,7 +607,7 @@ public:
     CUIMoveCommandListBox();
     virtual ~CUIMoveCommandListBox() {}
 
-    virtual void AddText(int iIndex, const char* szMapName, const char* szSubMapName, int iReqLevel, int iReqZen, int iGateNum);
+    virtual void AddText(int iIndex, const wchar_t* szMapName, const wchar_t* szSubMapName, int iReqLevel, int iReqZen, int iGateNum);
     //virtual void DeleteText(DWORD dwGuildIndex);
     virtual void SetNumRenderLine(int iLine);
     MOVECOMMAND_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
@@ -623,7 +624,7 @@ struct SCurQuestItem
 {
     BOOL	m_bIsSelected;
     DWORD	m_dwIndex;
-    char	m_szText[64];
+    wchar_t	m_szText[64];
 };
 
 class CUICurQuestListBox : public CUITextListBox<SCurQuestItem>
@@ -632,7 +633,7 @@ public:
     CUICurQuestListBox();
     virtual ~CUICurQuestListBox() {}
 
-    virtual void AddText(DWORD dwQuestIndex, const char* pszText);
+    virtual void AddText(DWORD dwQuestIndex, const wchar_t* pszText);
     virtual void DeleteText(DWORD dwQuestIndex);
     virtual void SetNumRenderLine(int nLine);
     SCurQuestItem* GetSelectedText()
@@ -655,7 +656,7 @@ struct SQuestContents
     HFONT	m_hFont;
     DWORD	m_dwColor;
     int		m_nSort;
-    char	m_szText[64];
+    wchar_t	m_szText[64];
     REQUEST_REWARD_CLASSIFY	m_eRequestReward;
     DWORD	m_dwType;
     WORD	m_wIndex;
@@ -670,7 +671,7 @@ public:
     CUIQuestContentsListBox();
     virtual ~CUIQuestContentsListBox() {}
 
-    virtual void AddText(HFONT hFont, DWORD dwColor, int nSort, const char* pszText);
+    virtual void AddText(HFONT hFont, DWORD dwColor, int nSort, const wchar_t* pszText);
     virtual void AddText(SRequestRewardText* pRequestRewardText, int nSort);
     /*	virtual void DeleteText(DWORD dwQuestIndex);
         virtual void SetNumRenderLine(int nLine);
@@ -697,7 +698,7 @@ const int MAX_COLOR_PER_LINE = 10;
 
 struct RENDER_TEXT_DATA
 {
-    char m_szText[MAX_TEXT_LENGTH + 1];
+    wchar_t m_szText[MAX_TEXT_LENGTH + 1];
     int m_iWidth;
     int m_iHeight;
     int m_iTab;
@@ -728,7 +729,7 @@ public:
 
     virtual void SetFont(HFONT hFont) = 0;
 
-    virtual void RenderText(int iPos_x, int iPos_y, const char* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
+    virtual void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
         int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL) = 0;
 };
 
@@ -760,7 +761,7 @@ public:
 
     void SetFont(HFONT hFont);
 
-    void RenderText(int iPos_x, int iPos_y, const unicode::t_char* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
+    void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
         int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL);
 
 protected:
@@ -797,7 +798,7 @@ public:
 
     void SetFont(HFONT hFont);
 
-    void RenderText(int iPos_x, int iPos_y, const char* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
+    void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
         int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL);
 };
 
@@ -828,10 +829,9 @@ public:
     virtual void SetTextColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwTextColor = _ARGB(a, r, g, b); }
     virtual void SetBackColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwBackColor = _ARGB(a, r, g, b); }
     virtual void SetSelectBackColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwSelectBackColor = _ARGB(a, r, g, b); }
-    virtual void SetText(const char* pszText);
-    virtual void GetText(char* pszText, int iGetLenght = MAX_TEXT_LENGTH);
+    virtual void SetText(const wchar_t* pszText);
+    virtual void GetText(wchar_t* pszText, int iGetLength = MAX_TEXT_LENGTH);
 
-    virtual void GetText(wchar_t* pwszText, int iGetLenght = MAX_TEXT_LENGTH);
     HWND GetHandle() { return m_hEditWnd; }
     HWND GetParentHandle() { return m_hParentWnd; }
     BOOL HaveFocus() { return (GetHandle() == GetFocus()); }
@@ -911,9 +911,9 @@ public:
     void Reset();
     void Render();
     void TabMove(int iBoxNumber);
-    void GetTexts(char* pText, char* pBuddyText);
+    void GetTexts(wchar_t* pText, wchar_t* pBuddyText);
     void ClearTexts();
-    void SetText(BOOL bSetText, const char* pText, BOOL bSetBuddyText, const char* pBuddyText);
+    void SetText(BOOL bSetText, const wchar_t* pText, BOOL bSetBuddyText, const wchar_t* pBuddyText);
     void SetState(int iState);
     int GetState() { return m_TextInputBox.GetState(); }
     void SetFont(HFONT hFont);
@@ -934,15 +934,15 @@ protected:
 #endif
 
 public:
-    virtual void AddHistory(const char* pszText);
+    virtual void AddHistory(const wchar_t* pszText);
     virtual void MoveHistory(int iDegree);
 private:
     void RemoveHistory(BOOL bClear);
     BOOL m_bHistoryMode;
-    char m_szTempText[MAX_TEXT_LENGTH + 1];
-    std::deque<char*> m_HistoryList;
-    std::deque<char*>::iterator m_CurrentHistoryLine;
-    std::deque<char*>::iterator m_HistoryListIter;
+    wchar_t m_szTempText[MAX_TEXT_LENGTH + 1];
+    std::deque<wchar_t*> m_HistoryList;
+    std::deque<wchar_t*>::iterator m_CurrentHistoryLine;
+    std::deque<wchar_t*>::iterator m_HistoryListIter;
 };
 
 class CUILoginInputBox : public CUIChatInputBox
@@ -951,7 +951,7 @@ public:
     CUILoginInputBox() {}
     virtual ~CUILoginInputBox() {}
     virtual void Init(HWND hWnd);
-    virtual void AddHistory(const char* pszText) {}
+    virtual void AddHistory(const wchar_t* pszText) {}
     virtual void MoveHistory(int iDegree) {}
 };
 
@@ -961,7 +961,7 @@ public:
     CUIMercenaryInputBox() {}
     virtual ~CUIMercenaryInputBox() {}
     virtual void Init(HWND hWnd);
-    virtual void AddHistory(const char* pszText) {}
+    virtual void AddHistory(const wchar_t* pszText) {}
     virtual void MoveHistory(int iDegree) {}
 };
 
@@ -985,7 +985,7 @@ struct SLIDEHELP
 struct SLIDE_QUEUE_DATA
 {
     int m_iType;
-    char* m_pszText;
+    wchar_t* m_pszText;
     DWORD m_dwTextColor;
     float m_fSpeed;
     BOOL m_bLastData;
@@ -1003,12 +1003,12 @@ public:
     BOOL DoMouseAction();
     void Render(BOOL bForceFadeOut = FALSE);
     void SetScrollSpeed(float fSpeed);
-    BOOL AddSlideText(const char* pszNewText, DWORD dwTextColor = (255 << 24) + (200 << 16) + (220 << 8) + (230));
+    BOOL AddSlideText(const wchar_t* pszNewText, DWORD dwTextColor = (255 << 24) + (200 << 16) + (220 << 8) + (230));
 
     int GetAlphaRate() { return m_iAlphaRate; }
     BOOL HaveText();
 
-    void AddSlide(int iLoopCount, int iLoopDelay, const char* pszText, int iType, float fSpeed, DWORD dwTextColor);
+    void AddSlide(int iLoopCount, int iLoopDelay, const wchar_t* pszText, int iType, float fSpeed, DWORD dwTextColor);
     void CheckTime();
     void ManageSlide();
     DWORD m_dwTimer;
@@ -1022,13 +1022,13 @@ protected:
     void SlideMove();
     void ComputeSpeed();
 
-    int CheckCutSize(const char* pszSource, int iNeedValue);
+    int CheckCutSize(const wchar_t* pszSource, int iNeedValue);
 
 protected:
     HFONT m_hFont;
-    char* m_pszSlideText;
-    char m_szSlideTextA[SLIDE_TEXT_LENGTH];
-    char m_szSlideTextB[SLIDE_TEXT_LENGTH];
+    wchar_t* m_pszSlideText;
+    wchar_t m_szSlideTextA[SLIDE_TEXT_LENGTH];
+    wchar_t m_szSlideTextB[SLIDE_TEXT_LENGTH];
     float m_fMovePosition;
     float m_fMoveAccel;
     float m_fMoveSpeed;
@@ -1051,12 +1051,12 @@ public:
     void Render();
 
     void CreateSlideText();
-    void OpenSlideTextFile(const char* szFileName);
+    void OpenSlideTextFile(const wchar_t* szFileName);
     void ClearSlideText();
-    const char* GetSlideText(int iLevel);
+    const wchar_t* GetSlideText(int iLevel);
     void SetCreateDelay(int iDelay) { m_iCreateDelay = iDelay; }
 
-    void AddSlide(int iLoopCount, int iLoopDelay, const char* pszText,
+    void AddSlide(int iLoopCount, int iLoopDelay, const wchar_t* pszText,
         int iType, float fSpeed, DWORD dwTextColor = (255 << 24) + (200 << 16) + (220 << 8) + (230));
     void ManageSlide();
     BOOL IsIdle();
@@ -1067,8 +1067,8 @@ protected:
     int m_iCreateDelay;
     int m_iLevelCap[SLIDE_LEVEL_MAX];
     int m_iTextNumber[SLIDE_LEVEL_MAX];
-    std::list<char*> m_SlideTextList[SLIDE_LEVEL_MAX];
-    std::list<char*>::iterator m_SlideTextListIter;
+    std::list<wchar_t*> m_SlideTextList[SLIDE_LEVEL_MAX];
+    std::list<wchar_t*>::iterator m_SlideTextListIter;
     float m_fHelpSlideSpeed;
 };
 
@@ -1089,12 +1089,12 @@ typedef struct
     int		m_iNum;
     WORD	m_wItemCode;
 
-    unicode::t_char	m_szName[MAX_TEXT_LENGTH];
-    unicode::t_char m_szNum[MAX_TEXT_LENGTH];
-    unicode::t_char m_szPeriod[MAX_TEXT_LENGTH];
-    unicode::t_char	m_szSendUserName[MAX_ID_SIZE + 1];
-    unicode::t_char	m_szMessage[MAX_GIFT_MESSAGE_SIZE];
-    unicode::t_char m_szType;
+    wchar_t m_szName[MAX_TEXT_LENGTH];
+    wchar_t m_szNum[MAX_TEXT_LENGTH];
+    wchar_t m_szPeriod[MAX_TEXT_LENGTH];
+    wchar_t m_szSendUserName[MAX_ID_SIZE + 1];
+    wchar_t m_szMessage[MAX_GIFT_MESSAGE_SIZE];
+    wchar_t m_szType;
 }IGS_StorageItem;
 
 class CUIInGameShopListBox : public CUITextListBox<IGS_StorageItem>
@@ -1129,7 +1129,7 @@ protected:
 struct IGS_BuyList
 {
     BOOL	m_bIsSelected;
-    char	m_pszItemExplanation[LINE_TEXTMAX];
+    wchar_t	m_pszItemExplanation[LINE_TEXTMAX];
 };
 
 class CUIBuyingListBox : public CUITextListBox<IGS_BuyList>
@@ -1143,7 +1143,7 @@ public:
     CUIBuyingListBox();
     virtual ~CUIBuyingListBox() {}
 
-    virtual void AddText(const char* pszExplanationText);
+    virtual void AddText(const wchar_t* pszExplanationText);
     virtual void SetNumRenderLine(int nLine);
     IGS_BuyList* GetSelectedText()
     {
@@ -1203,8 +1203,8 @@ private:
 struct IGS_PackBuyList
 {
     BOOL	m_bIsSelected;
-    char	m_pszItemName[32];
-    char	m_nItemInfo[32];
+    wchar_t	m_pszItemName[32];
+    wchar_t	m_nItemInfo[32];
     CRadioButton m_CheckBtn;
 };
 
@@ -1217,10 +1217,10 @@ typedef struct
     WORD	m_wItemCode;
     int		m_iCashType;
 
-    unicode::t_char m_szItemName[MAX_TEXT_LENGTH];
-    unicode::t_char m_szItemPrice[MAX_TEXT_LENGTH];
-    unicode::t_char m_szItemPeriod[MAX_TEXT_LENGTH];
-    unicode::t_char m_szAttribute[MAX_TEXT_LENGTH];
+    wchar_t m_szItemName[MAX_TEXT_LENGTH];
+    wchar_t m_szItemPrice[MAX_TEXT_LENGTH];
+    wchar_t m_szItemPeriod[MAX_TEXT_LENGTH];
+    wchar_t m_szAttribute[MAX_TEXT_LENGTH];
 
     CRadioButton m_RadioBtn;
 }IGS_SelectBuyItem;

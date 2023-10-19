@@ -18,8 +18,8 @@ public:
     BOOL IsPortalPositionSaved();
     BOOL IsRevivePositionSaved();
 
-    void GetPortalPositionText(char* pszOut);
-    void GetRevivePositionText(char* pszOut);
+    void GetPortalPositionText(wchar_t* pszOut);
+    void GetRevivePositionText(wchar_t* pszOut);
 
     BOOL IsPortalUsable();
 

@@ -23,7 +23,7 @@ SEASON3B::CNewUIRenderNumber::~CNewUIRenderNumber()
 
 void SEASON3B::CNewUIRenderNumber::LoadImage()
 {
-    LoadBitmap("Interface\\newui_number1.tga", IMAGE_NUMBER1, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_number1.tga", IMAGE_NUMBER1, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIRenderNumber::ReleaseImage()
@@ -45,9 +45,9 @@ float SEASON3B::CNewUIRenderNumber::RenderNumber(float x, float y, int iNum, flo
     width = 12.f * (fScale - 0.3f);
     height = 16.f * (fScale - 0.3f);
 
-    char strText[32];
-    itoa(iNum, strText, 10);
-    int iLength = (int)strlen(strText);
+    wchar_t strText[32];
+    _itow(iNum, strText, 10);
+    int iLength = (int)wcslen(strText);
 
     x -= width * iLength / 2;
 

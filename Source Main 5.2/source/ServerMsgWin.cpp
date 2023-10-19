@@ -47,18 +47,18 @@ bool CServerMsgWin::CursorInWin(int nArea)
     return CWinEx::CursorInWin(nArea);
 }
 
-void CServerMsgWin::AddMsg(char* pszMsg)
+void CServerMsgWin::AddMsg(wchar_t* pszMsg)
 {
     if (++m_nMsgLine > SMW_MSG_LINE_MAX)
     {
         m_nMsgLine = SMW_MSG_LINE_MAX;
         for (int i = 0; i < SMW_MSG_LINE_MAX - 1; ++i)
-            ::strcpy(m_aszMsg[i], m_aszMsg[i + 1]);
+            ::wcscpy(m_aszMsg[i], m_aszMsg[i + 1]);
     }
     else
         CWinEx::SetLine(m_nMsgLine * 5);
 
-    ::strcpy(m_aszMsg[m_nMsgLine - 1], pszMsg);
+    wcscpy(m_aszMsg[m_nMsgLine - 1], pszMsg);
 
     CWinEx::Show(true);
 }

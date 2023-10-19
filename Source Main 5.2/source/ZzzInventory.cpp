@@ -15,7 +15,7 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "ZzzScene.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "CSQuest.h"
@@ -57,7 +57,7 @@ extern CUIGuildListBox* g_pGuildListBox;
 int			g_nTaxRate = 0;
 int			g_nChaosTaxRate = 0;
 
-char         g_GuildNotice[3][128];
+wchar_t      g_GuildNotice[3][128];
 GUILD_LIST_t GuildList[MAX_GUILDS];
 int			 g_nGuildMemberCount = 0;
 int			 GuildTotalScore = 0;
@@ -82,7 +82,7 @@ bool g_bEnablePersonalShop = false;
 int g_iPShopWndType = PSHOPWNDTYPE_NONE;
 POINT g_ptPersonalShop = { 0, 0 };
 int g_iPersonalShopMsgType = 0;
-char g_szPersonalShopTitle[64] = { 0, };
+wchar_t g_szPersonalShopTitle[64] = { 0, };
 
 CHARACTER g_PersonalShopSeller;
 bool g_bIsTooltipOn = false;
@@ -109,7 +109,7 @@ int  g_shEventChipCount = 0;
 short g_shMutoNumber[3] = { -1, -1, -1 };
 
 bool g_bServerDivisionAccept = false;
-char g_strGiftName[64];
+wchar_t g_strGiftName[64];
 
 bool RepairShop = false;
 int  RepairEnable = 0;
@@ -120,7 +120,7 @@ char OkYesOrNo = -1;
 int g_iKeyPadEnable = 0;
 WORD g_wStoragePassword = 0;
 short	g_nKeyPadMapping[10];
-char	g_lpszKeyPadInput[2][MAX_KEYPADINPUT + 1];
+wchar_t	g_lpszKeyPadInput[2][MAX_KEYPADINPUT + 1];
 
 BYTE g_byItemUseType = 0;
 
@@ -178,7 +178,7 @@ int getLevelGeneration(int level, unsigned int* color)
     return lvl;
 }
 
-char TextList[50][100];
+wchar_t TextList[50][100];
 int  TextListColor[50];
 int  TextBold[50];
 SIZE Size[50];
@@ -198,7 +198,7 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
             g_pRenderText->SetFont(g_hFont);
         }
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &Size[i]);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &Size[i]);
 
         if (TextWidth < Size[i].cx)
         {
@@ -304,7 +304,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
             g_pRenderText->SetFont(g_hFont);
         }
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
 
         if (fWidth < TextSize.cx)
             fWidth = TextSize.cx;
@@ -375,7 +375,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         float fHeight = 0;
         if (TextList[i][0] == 0x0a || (TextList[i][0] == ' ' && TextList[i][1] == 0x00))
         {
-            g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
+            GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
             fHeight = (float)TextSize.cy / g_fScreenRate_y / (TextList[i][0] == 0x0a ? 2.0f : 1.0f);
         }
         else
@@ -450,6 +450,76 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     DisableAlphaBlend();
+}
+
+void SendRequestUse(int Index, int Target)
+{
+    if (!IsCanUseItem())
+    {
+        g_pChatListBox->AddText(L"", GlobalText[474], SEASON3B::TYPE_ERROR_MESSAGE);
+        return;
+    }
+    if (EnableUse > 0)
+    {
+        return;
+    }
+
+    EnableUse = 10;
+    SocketClient->ToGameServer()->SendConsumeItemRequest(Index, Target, g_byItemUseType);
+    g_ConsoleDebug->Write(MCD_SEND, L"0x26 [SendRequestUse(%d)]", Index);
+}
+
+bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex)
+{
+    if (EquipmentItem || NULL == pItem) return false;
+
+    EquipmentItem = true;
+
+    BYTE splitType;
+    if (pItem->option_380)
+    {
+        splitType = ((BYTE)(pItem->Type >> 5) & 240) | 0x08;
+    }
+    else
+        splitType = ((BYTE)(pItem->Type >> 5) & 240);
+
+    if (pItem->bPeriodItem == true)
+    {
+        splitType |= 0x02;
+    }
+
+    if (pItem->bExpiredPeriod == true)
+    {
+        splitType |= 0x04;
+    }
+
+    BYTE spareBits;
+    if (g_SocketItemMgr.IsSocketItem(pItem))
+    {
+        spareBits = pItem->SocketSeedSetOption;
+    }
+    else
+    {
+        spareBits = (((BYTE)pItem->Jewel_Of_Harmony_Option) << 4) + ((BYTE)pItem->Jewel_Of_Harmony_OptionLevel);
+    }
+
+    const BYTE ItemData[12]
+    {
+        BYTECAST(char, pItem->Type),
+        BYTECAST(char, pItem->Level),
+        BYTECAST(char, pItem->Durability),
+        BYTECAST(char, pItem->Option1),
+        BYTECAST(char, pItem->ExtOption),
+        splitType,
+        spareBits,
+        pItem->bySocketOption[0], pItem->bySocketOption[1], pItem->bySocketOption[2], pItem->bySocketOption[3], pItem->bySocketOption[4]
+    };
+
+    SocketClient->ToGameServer()->SendItemMoveRequest((uint32_t)iSrcType, iSrcIndex, ItemData, sizeof ItemData, (uint32_t)iDstType, iDstIndex);
+
+    g_ConsoleDebug->Write(MCD_SEND, L"0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", iSrcIndex, iDstIndex, iSrcType, iDstType, (pItem->Type & 0x1FFF), (BYTE)(pItem->Level), (BYTE)(pItem->Durability));
+
+    return true;
 }
 
 bool IsCanUseItem()
@@ -557,7 +627,7 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
     int iTextColor = 0;
 
     TextListColor[TextNum + 2] = TextListColor[TextNum + 3] = TEXT_COLOR_WHITE;
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     int iCount = 0;
     for (int i = 0; i < MAX_CLASS; ++i)
@@ -592,17 +662,17 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
         {
             if (byRequireClass == 1)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[20]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[20]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 2)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[25]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[25]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 3)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[1669]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[1669]);
                 TextListColor[TextNum] = iTextColor;
             }
 
@@ -613,17 +683,17 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
         {
             if (byRequireClass == 1)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[21]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[21]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 2)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[26]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[26]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 3)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[1668]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[1668]);
                 TextListColor[TextNum] = iTextColor;
             }
 
@@ -634,17 +704,17 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
         {
             if (byRequireClass == 1)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[22]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[22]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 2)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[27]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[27]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 3)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[1670]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[1670]);
                 TextListColor[TextNum] = iTextColor;
             }
 
@@ -655,12 +725,12 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
         {
             if (byRequireClass == 1)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[23]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[23]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 3)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[1671]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[1671]);
                 TextListColor[TextNum] = iTextColor;
             }
 
@@ -671,12 +741,12 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
         {
             if (byRequireClass == 1)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[24]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[24]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 3)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[1672]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[1672]);
                 TextListColor[TextNum] = iTextColor;
             }
 
@@ -687,17 +757,17 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
         {
             if (byRequireClass == 1)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[1687]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[1687]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 2)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[1688]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[1688]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 3)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[1689]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[1689]);
                 TextListColor[TextNum] = iTextColor;
             }
 
@@ -708,12 +778,12 @@ void RequireClass(ITEM_ATTRIBUTE* pItem)
         {
             if (byRequireClass == 1)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[3150]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[3150]);
                 TextListColor[TextNum] = iTextColor;
             }
             else if (byRequireClass == 3)
             {
-                sprintf(TextList[TextNum], GlobalText[61], GlobalText[3151]);
+                swprintf(TextList[TextNum], GlobalText[61], GlobalText[3151]);
                 TextListColor[TextNum] = iTextColor;
             }
             TextBold[TextNum] = false;	TextNum++;
@@ -728,7 +798,7 @@ const int iMaxColumn = 17;
 int g_iCurrentItem = -1;
 int g_iItemInfo[iMaxLevel + 1][iMaxColumn];
 
-void RenderHelpLine(int iColumnType, const char* pPrintStyle, int& TabSpace, const char* pGapText, int Pos_y, int iType)
+void RenderHelpLine(int iColumnType, const wchar_t* pPrintStyle, int& TabSpace, const wchar_t* pGapText, int Pos_y, int iType)
 {
     int iCurrMaxLevel = iMaxLevel;
 
@@ -737,7 +807,7 @@ void RenderHelpLine(int iColumnType, const char* pPrintStyle, int& TabSpace, con
 
     for (int Level = 0; Level <= iCurrMaxLevel; ++Level)
     {
-        sprintf(TextList[TextNum], pPrintStyle, g_iItemInfo[Level][iColumnType]);
+        swprintf(TextList[TextNum], pPrintStyle, g_iItemInfo[Level][iColumnType]);
         if (g_iItemInfo[Level][_COLUMN_TYPE_CAN_EQUIP] == TRUE)
         {
             TextListColor[Level] = TEXT_COLOR_WHITE;
@@ -755,11 +825,11 @@ void RenderHelpLine(int iColumnType, const char* pPrintStyle, int& TabSpace, con
 
     if (pGapText == NULL)
     {
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[TextNum - 1], lstrlen(TextList[TextNum - 1]), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[TextNum - 1], lstrlen(TextList[TextNum - 1]), &TextSize);
     }
     else
     {
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), pGapText, lstrlen(pGapText), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), pGapText, wcslen(pGapText), &TextSize);
     }
     TabSpace += int(TextSize.cx / g_fScreenRate_x);
     if (iType == 6)
@@ -771,7 +841,7 @@ void RenderHelpLine(int iColumnType, const char* pPrintStyle, int& TabSpace, con
 
 void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y)
 {
-    const char* pText = NULL;
+    const wchar_t* pText = NULL;
 
     switch (iColumnType)
     {
@@ -817,7 +887,7 @@ void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y)
     default:
         break;
     }
-    sprintf(TextList[TextNum], pText);
+    swprintf(TextList[TextNum], pText);
     TextListColor[TextNum] = TEXT_COLOR_BLUE;
     TextNum++;
     RenderTipTextList(Pos_x, Pos_y, TextNum, 0, RT3_SORT_RIGHT, FALSE);
@@ -1054,9 +1124,9 @@ unsigned int getGoldColor(DWORD Gold)
     return  (255 << 24) + (150 << 16) + (220 << 8) + (255);
 }
 
-void ConvertGold(double dGold, unicode::t_char* szText, int iDecimals /*= 0*/)
+void ConvertGold(double dGold, wchar_t* szText, int iDecimals /*= 0*/)
 {
-    unicode::t_char szTemp[256];
+    wchar_t szTemp[256];
     int iCipherCnt = 0;
     auto dwValueTemp = (DWORD)dGold;
 
@@ -1066,26 +1136,26 @@ void ConvertGold(double dGold, unicode::t_char* szText, int iDecimals /*= 0*/)
         dwValueTemp = dwValueTemp / 1000;
     }
 
-    unicode::_sprintf(szText, "%d", dwValueTemp);
+    swprintf(szText, L"%d", dwValueTemp);
 
     while (iCipherCnt > 0)
     {
         dwValueTemp = (DWORD)dGold;
         dwValueTemp = (dwValueTemp % (int)pow(10.f, (float)iCipherCnt)) / (int)pow(10.f, (float)(iCipherCnt - 3));
-        unicode::_sprintf(szTemp, ",%03d", dwValueTemp);
-        strcat(szText, szTemp);
+        swprintf(szTemp, L",%03d", dwValueTemp);
+        wcscat(szText, szTemp);
         iCipherCnt = iCipherCnt - 3;
     }
 
     if (iDecimals > 0)
     {
         dwValueTemp = (int)(dGold * pow(10.f, (float)iDecimals)) % (int)pow(10.f, (float)iDecimals);
-        unicode::_sprintf(szTemp, ".%d", dwValueTemp);
-        strcat(szText, szTemp);
+        swprintf(szTemp, L".%d", dwValueTemp);
+        wcscat(szText, szTemp);
     }
 }
 
-void ConvertGold64(__int64 Gold, unicode::t_char* Text)
+void ConvertGold64(__int64 Gold, wchar_t* Text)
 {
     int Gold1 = Gold % 1000;
     int Gold2 = Gold % 1000000 / 1000;
@@ -1094,20 +1164,20 @@ void ConvertGold64(__int64 Gold, unicode::t_char* Text)
     int Gold5 = Gold % 1000000000000000 / 1000000000000;
     int Gold6 = Gold / 1000000000000000;
     if (Gold >= 1000000000000000)
-        unicode::_sprintf(Text, "%d,%03d,%03d,%03d,%03d,%03d", Gold6, Gold5, Gold4, Gold3, Gold2, Gold1);
+        swprintf(Text, L"%d,%03d,%03d,%03d,%03d,%03d", Gold6, Gold5, Gold4, Gold3, Gold2, Gold1);
     else if (Gold >= 1000000000000)
-        unicode::_sprintf(Text, "%d,%03d,%03d,%03d,%03d", Gold5, Gold4, Gold3, Gold2, Gold1);
+        swprintf(Text, L"%d,%03d,%03d,%03d,%03d", Gold5, Gold4, Gold3, Gold2, Gold1);
     else if (Gold >= 1000000000)
-        unicode::_sprintf(Text, "%d,%03d,%03d,%03d", Gold4, Gold3, Gold2, Gold1);
+        swprintf(Text, L"%d,%03d,%03d,%03d", Gold4, Gold3, Gold2, Gold1);
     else if (Gold >= 1000000)
-        unicode::_sprintf(Text, "%d,%03d,%03d", Gold3, Gold2, Gold1);
+        swprintf(Text, L"%d,%03d,%03d", Gold3, Gold2, Gold1);
     else if (Gold >= 1000)
-        unicode::_sprintf(Text, "%d,%03d", Gold2, Gold1);
+        swprintf(Text, L"%d,%03d", Gold2, Gold1);
     else
-        unicode::_sprintf(Text, "%d", Gold1);
+        swprintf(Text, L"%d", Gold1);
 }
 
-void ConvertTaxGold(DWORD Gold, char* Text)
+void ConvertTaxGold(DWORD Gold, wchar_t* Text)
 {
     Gold += ((LONGLONG)Gold * g_pNPCShop->GetTaxRate()) / 100;
 
@@ -1116,16 +1186,16 @@ void ConvertTaxGold(DWORD Gold, char* Text)
     int Gold3 = Gold % 1000000000 / 1000000;
     int Gold4 = Gold / 1000000000;
     if (Gold >= 1000000000)
-        sprintf(Text, "%d,%03d,%03d,%03d", Gold4, Gold3, Gold2, Gold1);
+        swprintf(Text, L"%d,%03d,%03d,%03d", Gold4, Gold3, Gold2, Gold1);
     else if (Gold >= 1000000)
-        sprintf(Text, "%d,%03d,%03d", Gold3, Gold2, Gold1);
+        swprintf(Text, L"%d,%03d,%03d", Gold3, Gold2, Gold1);
     else if (Gold >= 1000)
-        sprintf(Text, "%d,%03d", Gold2, Gold1);
+        swprintf(Text, L"%d,%03d", Gold2, Gold1);
     else
-        sprintf(Text, "%d", Gold1);
+        swprintf(Text, L"%d", Gold1);
 }
 
-void ConvertChaosTaxGold(DWORD Gold, char* Text)
+void ConvertChaosTaxGold(DWORD Gold, wchar_t* Text)
 {
     Gold += ((LONGLONG)Gold * g_nChaosTaxRate) / 100;
 
@@ -1134,16 +1204,16 @@ void ConvertChaosTaxGold(DWORD Gold, char* Text)
     int Gold3 = Gold % 1000000000 / 1000000;
     int Gold4 = Gold / 1000000000;
     if (Gold >= 1000000000)
-        sprintf(Text, "%d,%03d,%03d,%03d", Gold4, Gold3, Gold2, Gold1);
+        swprintf(Text, L"%d,%03d,%03d,%03d", Gold4, Gold3, Gold2, Gold1);
     else if (Gold >= 1000000)
-        sprintf(Text, "%d,%03d,%03d", Gold3, Gold2, Gold1);
+        swprintf(Text, L"%d,%03d,%03d", Gold3, Gold2, Gold1);
     else if (Gold >= 1000)
-        sprintf(Text, "%d,%03d", Gold2, Gold1);
+        swprintf(Text, L"%d,%03d", Gold2, Gold1);
     else
-        sprintf(Text, "%d", Gold1);
+        swprintf(Text, L"%d", Gold1);
 }
 
-int ConvertRepairGold(int Gold, int Durability, int MaxDurability, short Type, char* Text)
+int ConvertRepairGold(int Gold, int Durability, int MaxDurability, short Type, wchar_t* Text)
 {
     Gold = min(Gold, 400000000);
 
@@ -1211,7 +1281,7 @@ int ConvertRepairGold(int Gold, int Durability, int MaxDurability, short Type, c
 
 void RepairAllGold(void)
 {
-    char    text[100];
+    wchar_t text[100];
 
     AllRepairGold = 0;
 
@@ -1478,17 +1548,17 @@ int GuildListStartX;
 int GuildListStartY;
 int SommonTable[] = { 2,7,14,8,9,41 };
 
-char ChaosEventName[][100] = {
-    "히돼� 고향 여행권",
-    "펜티엄4 컴퓨터",
-    "디지탈카메라",
-    "로지텍 무선 마우스+키보드 세트",
-    "256M 램",
-    "6개� 잡지 구독권",
-    "문화상품권(만원)",
-    "뮤 머그컵",
-    "뮤 T셔츠",
-    "뮤 10시간 무료이용권"
+wchar_t ChaosEventName[][100] = {
+    L"히돼� 고향 여행권",
+    L"펜티엄4 컴퓨터",
+    L"디지탈카메라",
+    L"로지텍 무선 마우스+키보드 세트",
+    L"256M 램",
+    L"6개� 잡지 구독권",
+    L"문화상품권(만원)",
+    L"뮤 머그컵",
+    L"뮤 T셔츠",
+    L"뮤 10시간 무료이용권"
 };
 
 WORD calcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
@@ -1572,7 +1642,7 @@ WORD calcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     return  maxDurability;
 }
 
-void GetItemName(int iType, int iLevel, char* Text)
+void GetItemName(int iType, int iLevel, wchar_t* Text)
 {
     ITEM_ATTRIBUTE* p = &ItemAttribute[iType];
 
@@ -1582,59 +1652,59 @@ void GetItemName(int iType, int iLevel, char* Text)
         {
             switch (iLevel)
             {
-            case 0: sprintf(Text, "%s", p->Name); break;
-            case 1: sprintf(Text, "%s", GlobalText[906]); break;
+            case 0: swprintf(Text, L"%s", p->Name); break;
+            case 1: swprintf(Text, L"%s", GlobalText[906]); break;
             }
         }
         else if (iType == ITEM_POTION + 24)
         {
             switch (iLevel)
             {
-            case 0: sprintf(Text, "%s", p->Name); break;
-            case 1: sprintf(Text, "%s", GlobalText[907]); break;
+            case 0: swprintf(Text, L"%s", p->Name); break;
+            case 1: swprintf(Text, L"%s", GlobalText[907]); break;
             }
         }
         else
         {
-            sprintf(Text, "%s", p->Name);
+            swprintf(Text, L"%s", p->Name);
         }
     }
     else if (iType == ITEM_POTION + 12)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s", GlobalText[100]); break;
-        case 1:	sprintf(Text, "%s", GlobalText[101]); break;
-        case 2:	sprintf(Text, "%s", ChaosEventName[p->Durability]); break;
+        case 0: swprintf(Text, L"%s", GlobalText[100]); break;
+        case 1: swprintf(Text, L"%s", GlobalText[101]); break;
+        case 2: swprintf(Text, L"%s", ChaosEventName[p->Durability]); break;
         }
     }
     else if (iType == ITEM_POTION + 11)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s", p->Name); break;
-        case 1: sprintf(Text, "%s", GlobalText[105]); break;
-        case 2: sprintf(Text, "%s", GlobalText[106]); break;
-        case 3: sprintf(Text, "%s", GlobalText[107]); break;
-        case 5: sprintf(Text, "%s", GlobalText[109]); break;
-        case 6: sprintf(Text, "%s", GlobalText[110]); break;
-        case 7: sprintf(Text, "%s", GlobalText[111]); break;
+        case 0: swprintf(Text, L"%s", p->Name); break;
+        case 1: swprintf(Text, L"%s", GlobalText[105]); break;
+        case 2: swprintf(Text, L"%s", GlobalText[106]); break;
+        case 3: swprintf(Text, L"%s", GlobalText[107]); break;
+        case 5: swprintf(Text, L"%s", GlobalText[109]); break;
+        case 6: swprintf(Text, L"%s", GlobalText[110]); break;
+        case 7: swprintf(Text, L"%s", GlobalText[111]); break;
             break;
         case 8:
         case 9:
         case 10:
         case 11:
         case 12:
-            sprintf(Text, "%s +%d", GlobalText[115], iLevel - 7);
+            swprintf(Text, L"%s +%d", GlobalText[115], iLevel - 7);
             break;
         case 13:
-            sprintf(Text, GlobalText[117]); break;
+            swprintf(Text, GlobalText[117]); break;
         case 14:
-            sprintf(Text, GlobalText[1650]); break;
+            swprintf(Text, GlobalText[1650]); break;
             break;
 
         case 15:
-            sprintf(Text, GlobalText[1651]); break;
+            swprintf(Text, GlobalText[1651]); break;
             break;
         }
     }
@@ -1642,107 +1712,107 @@ void GetItemName(int iType, int iLevel, char* Text)
     {
         switch (iLevel)
         {
-        case 0:sprintf(Text, "%s %s", GlobalText[168], p->Name); break;
-        case 1:sprintf(Text, "%s %s", GlobalText[169], p->Name); break;
-        case 2:sprintf(Text, "%s %s", GlobalText[167], p->Name); break;
-        case 3:sprintf(Text, "%s %s", GlobalText[166], p->Name); break;
-        case 4:sprintf(Text, "%s %s", GlobalText[1900], p->Name); break;
+        case 0:swprintf(Text, L"%s %s", GlobalText[168], p->Name); break;
+        case 1:swprintf(Text, L"%s %s", GlobalText[169], p->Name); break;
+        case 2:swprintf(Text, L"%s %s", GlobalText[167], p->Name); break;
+        case 3:swprintf(Text, L"%s %s", GlobalText[166], p->Name); break;
+        case 4:swprintf(Text, L"%s %s", GlobalText[1900], p->Name); break;
         }
     }
     else if (iType == ITEM_HELPER + 14)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s", p->Name); break;
-        case 1: sprintf(Text, "%s", GlobalText[1235]); break;
+        case 0: swprintf(Text, L"%s", p->Name); break;
+        case 1: swprintf(Text, L"%s", GlobalText[1235]); break;
         }
     }
     else if (iType == ITEM_HELPER + 31)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s %s", GlobalText[1187], p->Name); break;
-        case 1: sprintf(Text, "%s %s", GlobalText[1214], p->Name); break;
+        case 0: swprintf(Text, L"%s %s", GlobalText[1187], p->Name); break;
+        case 1: swprintf(Text, L"%s %s", GlobalText[1214], p->Name); break;
         }
     }
     else if (iType == ITEM_POTION + 21)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s", p->Name); break;
-        case 1: sprintf(Text, "%s", GlobalText[810]); break;
-        case 2: sprintf(Text, "%s", GlobalText[1098]); break;
-        case 3: sprintf(Text, "%s", GlobalText[1290]); break;
+        case 0: swprintf(Text, L"%s", p->Name); break;
+        case 1: swprintf(Text, L"%s", GlobalText[810]); break;
+        case 2: swprintf(Text, L"%s", GlobalText[1098]); break;
+        case 3: swprintf(Text, L"%s", GlobalText[1290]); break;
         }
     }
     else if (iType == ITEM_HELPER + 19)
     {
-        sprintf(Text, "%s", GlobalText[809]);
+        swprintf(Text, L"%s", GlobalText[809]);
     }
     else if (iType == ITEM_HELPER + 20)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s", p->Name); break;
-        case 1: sprintf(Text, "%s", GlobalText[922]); break;
-        case 2: sprintf(Text, "%s", GlobalText[928]); break;
-        case 3: sprintf(Text, "%s", GlobalText[929]); break;
+        case 0: swprintf(Text, L"%s", p->Name); break;
+        case 1: swprintf(Text, L"%s", GlobalText[922]); break;
+        case 2: swprintf(Text, L"%s", GlobalText[928]); break;
+        case 3: swprintf(Text, L"%s", GlobalText[929]); break;
         }
     }
     else if (iType == ITEM_POTION + 9)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s", p->Name); break;
-        case 1:	sprintf(Text, "%s", GlobalText[108]); break;
+        case 0: swprintf(Text, L"%s", p->Name); break;
+        case 1:	swprintf(Text, L"%s", GlobalText[108]); break;
         }
     }
     else if (iType == ITEM_WING + 11)
     {
-        sprintf(Text, "%s %s", SkillAttribute[30 + iLevel].Name, GlobalText[102]);
+        swprintf(Text, L"%s %s", SkillAttribute[30 + iLevel].Name, GlobalText[102]);
     }
     else if (iType == ITEM_WING + 32)
     {
-        sprintf(Text, "%s", p->Name);
+        swprintf(Text, L"%s", p->Name);
     }
     else if (iType == ITEM_WING + 33)
     {
-        sprintf(Text, "%s", p->Name);
+        swprintf(Text, L"%s", p->Name);
     }
     else if (iType == ITEM_WING + 34)
     {
-        sprintf(Text, "%s", p->Name);
+        swprintf(Text, L"%s", p->Name);
     }
     else if (iType == ITEM_WING + 35)
     {
-        sprintf(Text, "%s", p->Name);
+        swprintf(Text, L"%s", p->Name);
     }
     else if (iType >= ITEM_POTION + 45 && iType <= ITEM_POTION + 50)
     {
-        sprintf(Text, "%s", p->Name);
+        swprintf(Text, L"%s", p->Name);
     }
     else if (iType == ITEM_POTION + 32)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s", p->Name); break;
-        case 1:	sprintf(Text, "%s", GlobalText[2012]); break;
+        case 0: swprintf(Text, L"%s", p->Name); break;
+        case 1:	swprintf(Text, L"%s", GlobalText[2012]); break;
         }
     }
     else if (iType == ITEM_POTION + 33)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s", p->Name); break;
-        case 1:	sprintf(Text, "%s", GlobalText[2013]); break;
+        case 0: swprintf(Text, L"%s", p->Name); break;
+        case 1:	swprintf(Text, L"%s", GlobalText[2013]); break;
         }
     }
     else if (iType == ITEM_POTION + 34)
     {
         switch (iLevel)
         {
-        case 0: sprintf(Text, "%s", p->Name); break;
-        case 1:	sprintf(Text, "%s", GlobalText[2014]); break;
+        case 0: swprintf(Text, L"%s", p->Name); break;
+        case 1:	swprintf(Text, L"%s", GlobalText[2014]); break;
         }
     }
     else if (iType == ITEM_HELPER + 10)
@@ -1751,92 +1821,92 @@ void GetItemName(int iType, int iLevel, char* Text)
         {
             if (SommonTable[iLevel] == MonsterScript[i].Type)
             {
-                sprintf(Text, "%s %s", MonsterScript[i].Name, GlobalText[103]);
+                swprintf(Text, L"%s %s", MonsterScript[i].Name, GlobalText[103]);
             }
         }
     }
     else if (iType >= ITEM_WING + 3 && iType <= ITEM_WING + 6)
     {
         if (iLevel == 0)
-            sprintf(Text, "%s", p->Name);
+            swprintf(Text, L"%s", p->Name);
         else
-            sprintf(Text, "%s +%d", p->Name, iLevel);
+            swprintf(Text, L"%s +%d", p->Name, iLevel);
     }
     else if ((iType >= ITEM_WING + 36 && iType <= ITEM_WING + 40) || (iType >= ITEM_WING + 42 && iType <= ITEM_WING + 43)
         || (iType == ITEM_WING + 50))
     {
         if (iLevel == 0)
-            sprintf(Text, "%s", p->Name);
+            swprintf(Text, L"%s", p->Name);
         else
-            sprintf(Text, "%s +%d", p->Name, iLevel);
+            swprintf(Text, L"%s +%d", p->Name, iLevel);
     }
     else if (iType == ITEM_SWORD + 19 || iType == ITEM_BOW + 18 || iType == ITEM_STAFF + 10 || iType == ITEM_MACE + 13)
     {
         if (iLevel == 0)
-            sprintf(Text, "%s", p->Name);
+            swprintf(Text, L"%s", p->Name);
         else
-            sprintf(Text, "%s +%d", p->Name, iLevel);
+            swprintf(Text, L"%s +%d", p->Name, iLevel);
     }
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(iType))
     {
-        sprintf(Text, "%s +%d", p->Name, iLevel + 1);
+        swprintf(Text, L"%s +%d", p->Name, iLevel + 1);
     }
     else if (iType == INDEX_COMPILED_CELE)
     {
-        sprintf(Text, "%s +%d", GlobalText[1806], iLevel + 1);
+        swprintf(Text, L"%s +%d", GlobalText[1806], iLevel + 1);
     }
     else if (iType == INDEX_COMPILED_SOUL)
     {
-        sprintf(Text, "%s +%d", GlobalText[1807], iLevel + 1);
+        swprintf(Text, L"%s +%d", GlobalText[1807], iLevel + 1);
     }
     else if ((iType >= ITEM_WING + 60 && iType <= ITEM_WING + 65)
         || (iType >= ITEM_WING + 70 && iType <= ITEM_WING + 74)
         || (iType >= ITEM_WING + 100 && iType <= ITEM_WING + 129))
     {
-        sprintf(Text, "%s", p->Name);
+        swprintf(Text, L"%s", p->Name);
     }
     else if (iType == ITEM_POTION + 7)
     {
         int iTextIndex = 0;
         iTextIndex = (iLevel == 0) ? 1413 : 1414;
-        sprintf(Text, "%s", GlobalText[iTextIndex]);
+        swprintf(Text, L"%s", GlobalText[iTextIndex]);
     }
     else
     {
         if (iLevel == 0)
-            sprintf(Text, "%s", p->Name);
+            swprintf(Text, L"%s", p->Name);
         else
-            sprintf(Text, "%s +%d", p->Name, iLevel);
+            swprintf(Text, L"%s +%d", p->Name, iLevel);
     }
 }
 
-void GetSpecialOptionText(int Type, char* Text, WORD Option, BYTE Value, int iMana)
+void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana)
 {
     switch (Option)
     {
     case AT_SKILL_BLOCKING:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[80], iMana);
+        swprintf(Text, GlobalText[80], iMana);
         break;
     case AT_SKILL_SWORD1:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[81], iMana);
+        swprintf(Text, GlobalText[81], iMana);
         break;
     case AT_SKILL_SWORD2:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[82], iMana);
+        swprintf(Text, GlobalText[82], iMana);
         break;
     case AT_SKILL_SWORD3:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[83], iMana);
+        swprintf(Text, GlobalText[83], iMana);
         break;
     case AT_SKILL_SWORD4:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[84], iMana);
+        swprintf(Text, GlobalText[84], iMana);
         break;
     case AT_SKILL_SWORD5:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[85], iMana);
+        swprintf(Text, GlobalText[85], iMana);
         break;
     case AT_SKILL_MANY_ARROW_UP:
     case AT_SKILL_MANY_ARROW_UP + 1:
@@ -1846,19 +1916,19 @@ void GetSpecialOptionText(int Type, char* Text, WORD Option, BYTE Value, int iMa
 
     case AT_SKILL_CROSSBOW:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[86], iMana);
+        swprintf(Text, GlobalText[86], iMana);
         break;
     case AT_SKILL_BLAST_CROSSBOW4:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[920], iMana);
+        swprintf(Text, GlobalText[920], iMana);
         break;
     case AT_SKILL_MULTI_SHOT:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[920], iMana);
+        swprintf(Text, GlobalText[920], iMana);
         break;
     case AT_SKILL_RECOVER:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[920], iMana);
+        swprintf(Text, GlobalText[920], iMana);
         break;
     case AT_SKILL_POWER_SLASH_UP:
     case AT_SKILL_POWER_SLASH_UP + 1:
@@ -1867,89 +1937,89 @@ void GetSpecialOptionText(int Type, char* Text, WORD Option, BYTE Value, int iMa
     case AT_SKILL_POWER_SLASH_UP + 4:
     case AT_SKILL_ICE_BLADE:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[98], iMana);
+        swprintf(Text, GlobalText[98], iMana);
         break;
     case AT_LUCK:
-        sprintf(Text, GlobalText[87]);
+        swprintf(Text, GlobalText[87]);
         break;
     case AT_IMPROVE_DAMAGE:
-        sprintf(Text, GlobalText[88], Value);
+        swprintf(Text, GlobalText[88], Value);
         break;
     case AT_IMPROVE_MAGIC:
-        sprintf(Text, GlobalText[89], Value);
+        swprintf(Text, GlobalText[89], Value);
         break;
     case AT_IMPROVE_CURSE:
-        sprintf(Text, GlobalText[1697], Value);
+        swprintf(Text, GlobalText[1697], Value);
         break;
     case AT_IMPROVE_BLOCKING:
-        sprintf(Text, GlobalText[90], Value);
+        swprintf(Text, GlobalText[90], Value);
         break;
     case AT_IMPROVE_DEFENSE:
-        sprintf(Text, GlobalText[91], Value);
+        swprintf(Text, GlobalText[91], Value);
         break;
     case AT_LIFE_REGENERATION:
         if (!(ITEM_HELPER + 14 <= Type && Type <= ITEM_HELPER + 18))
         {
-            sprintf(Text, GlobalText[92], Value);
+            swprintf(Text, GlobalText[92], Value);
         }
         break;
     case AT_IMPROVE_LIFE:
-        sprintf(Text, GlobalText[622]);
+        swprintf(Text, GlobalText[622]);
         break;
     case AT_IMPROVE_MANA:
-        sprintf(Text, GlobalText[623]);
+        swprintf(Text, GlobalText[623]);
         break;
     case AT_DECREASE_DAMAGE:
-        sprintf(Text, GlobalText[624]);
+        swprintf(Text, GlobalText[624]);
         break;
 
     case AT_REFLECTION_DAMAGE:
-        sprintf(Text, GlobalText[625]);
+        swprintf(Text, GlobalText[625]);
         break;
     case AT_IMPROVE_BLOCKING_PERCENT:
-        sprintf(Text, GlobalText[626]);
+        swprintf(Text, GlobalText[626]);
         break;
     case AT_IMPROVE_GAIN_GOLD:
-        sprintf(Text, GlobalText[627]);
+        swprintf(Text, GlobalText[627]);
         break;
     case AT_EXCELLENT_DAMAGE:
-        sprintf(Text, GlobalText[628]);
+        swprintf(Text, GlobalText[628]);
         break;
     case AT_IMPROVE_DAMAGE_LEVEL:
-        sprintf(Text, GlobalText[629]);
+        swprintf(Text, GlobalText[629]);
         break;
     case AT_IMPROVE_DAMAGE_PERCENT:
-        sprintf(Text, GlobalText[630], Value);
+        swprintf(Text, GlobalText[630], Value);
         break;
     case AT_IMPROVE_MAGIC_LEVEL:
-        sprintf(Text, GlobalText[631]);
+        swprintf(Text, GlobalText[631]);
         break;
     case AT_IMPROVE_MAGIC_PERCENT:
-        sprintf(Text, GlobalText[632], Value);
+        swprintf(Text, GlobalText[632], Value);
         break;
     case AT_IMPROVE_ATTACK_SPEED:
-        sprintf(Text, GlobalText[633], Value);
+        swprintf(Text, GlobalText[633], Value);
         break;
     case AT_IMPROVE_GAIN_LIFE:
-        sprintf(Text, GlobalText[634]);
+        swprintf(Text, GlobalText[634]);
         break;
     case AT_IMPROVE_GAIN_MANA:
-        sprintf(Text, GlobalText[635]);
+        swprintf(Text, GlobalText[635]);
         break;
     case AT_IMPROVE_EVADE:
-        sprintf(Text, GlobalText[746]);
+        swprintf(Text, GlobalText[746]);
         break;
     case AT_SKILL_RIDER:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[745], iMana);
+        swprintf(Text, GlobalText[745], iMana);
         break;
     case AT_SKILL_STRONG_PIER:  //
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[1210], iMana);
+        swprintf(Text, GlobalText[1210], iMana);
         break;
     case AT_SKILL_LONG_SPEAR:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[1186], iMana);
+        swprintf(Text, GlobalText[1186], iMana);
         break;
     case AT_SKILL_ASHAKE_UP:
     case AT_SKILL_ASHAKE_UP + 1:
@@ -1958,79 +2028,79 @@ void GetSpecialOptionText(int Type, char* Text, WORD Option, BYTE Value, int iMa
     case AT_SKILL_ASHAKE_UP + 4:
     case AT_SKILL_DARK_HORSE:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[1189], iMana);
+        swprintf(Text, GlobalText[1189], iMana);
         break;
     case AT_SKILL_PLASMA_STORM_FENRIR:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[1928], iMana);
+        swprintf(Text, GlobalText[1928], iMana);
         break;
     case AT_SET_OPTION_IMPROVE_DEFENCE:
-        sprintf(Text, GlobalText[959], Value);
+        swprintf(Text, GlobalText[959], Value);
         break;
     case AT_SET_OPTION_IMPROVE_CHARISMA:
-        sprintf(Text, GlobalText[954], Value);
+        swprintf(Text, GlobalText[954], Value);
         break;
     case AT_SET_OPTION_IMPROVE_DAMAGE:
-        sprintf(Text, GlobalText[577], Value);
+        swprintf(Text, GlobalText[577], Value);
         break;
     case AT_IMPROVE_HP_MAX:
-        sprintf(Text, GlobalText[740], Value);
+        swprintf(Text, GlobalText[740], Value);
         break;
     case AT_IMPROVE_MP_MAX:
-        sprintf(Text, GlobalText[741], Value);
+        swprintf(Text, GlobalText[741], Value);
         break;
     case AT_ONE_PERCENT_DAMAGE:
-        sprintf(Text, GlobalText[742], Value);
+        swprintf(Text, GlobalText[742], Value);
         break;
     case AT_IMPROVE_AG_MAX:
-        sprintf(Text, GlobalText[743], Value);
+        swprintf(Text, GlobalText[743], Value);
         break;
     case AT_DAMAGE_ABSORB:
-        sprintf(Text, GlobalText[744], Value);
+        swprintf(Text, GlobalText[744], Value);
         break;
     case AT_SET_OPTION_IMPROVE_STRENGTH:
-        sprintf(Text, GlobalText[985], Value);
+        swprintf(Text, GlobalText[985], Value);
         break;
     case AT_SET_OPTION_IMPROVE_DEXTERITY:
-        sprintf(Text, GlobalText[986], Value);
+        swprintf(Text, GlobalText[986], Value);
         break;
     case AT_SET_OPTION_IMPROVE_VITALITY:
-        sprintf(Text, GlobalText[987], Value);
+        swprintf(Text, GlobalText[987], Value);
         break;
     case AT_SET_OPTION_IMPROVE_ENERGY:
-        sprintf(Text, GlobalText[988], Value);
+        swprintf(Text, GlobalText[988], Value);
         break;
     case AT_IMPROVE_MAX_MANA:
-        sprintf(Text, GlobalText[1087], Value);
+        swprintf(Text, GlobalText[1087], Value);
         break;
     case AT_IMPROVE_MAX_AG:
-        sprintf(Text, GlobalText[1088], Value);
+        swprintf(Text, GlobalText[1088], Value);
         break;
     case AT_DAMAGE_REFLECTION:
-        sprintf(Text, GlobalText[1673], Value);
+        swprintf(Text, GlobalText[1673], Value);
         break;
     case AT_RECOVER_FULL_LIFE:
-        sprintf(Text, GlobalText[1674], Value);
+        swprintf(Text, GlobalText[1674], Value);
         break;
     case AT_RECOVER_FULL_MANA:
-        sprintf(Text, GlobalText[1675], Value);
+        swprintf(Text, GlobalText[1675], Value);
         break;
     case AT_SKILL_SUMMON_EXPLOSION:
-        sprintf(Text, GlobalText[1695], iMana);
+        swprintf(Text, GlobalText[1695], iMana);
         break;
     case AT_SKILL_SUMMON_REQUIEM:
-        sprintf(Text, GlobalText[1696], iMana);
+        swprintf(Text, GlobalText[1696], iMana);
         break;
     case AT_SKILL_SUMMON_POLLUTION:
-        sprintf(Text, GlobalText[1789], iMana);
+        swprintf(Text, GlobalText[1789], iMana);
         break;
     case AT_SKILL_THRUST:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[3153], iMana);
+        swprintf(Text, GlobalText[3153], iMana);
         break;
     case AT_SKILL_STAMP:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
-        sprintf(Text, GlobalText[3154], iMana);
+        swprintf(Text, GlobalText[3154], iMana);
         break;
     }
 }
@@ -2068,17 +2138,22 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             PetType = PET_TYPE_DARK_HORSE;
 
             if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER)
-                SendRequestPetInfo(PetType, Inventype, EQUIPMENT_HELPER);
+            {
+                // TODO: don't send it every frame
+                SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_HELPER);
+            }
         }
-        else
-            if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
-                SendRequestPetInfo(PetType, Inventype, EQUIPMENT_WEAPON_LEFT);
+        else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
+        {
+            // TODO: don't send it every frame
+            SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_WEAPON_LEFT);
+        }
 
         giPetManager::RenderPetItemInfo(sx, sy, ip, Inventype);
         return;
     }
 
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     int Level = (ip->Level >> 3) & 15;
     int Color;
@@ -2168,27 +2243,27 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && !IsSellingBan(ip))
     {
-        char Text[100];
+        wchar_t Text[100];
         {
             if (Sell)
             {
                 DWORD dwValue = ItemValue(ip, 0);
                 ConvertGold(dwValue, Text);
-                char Text2[100];
+                wchar_t Text2[100];
 
                 ConvertTaxGold(ItemValue(ip, 0), Text2);
-                sprintf(TextList[TextNum], GlobalText[1620], Text2, Text);
+                swprintf(TextList[TextNum], GlobalText[1620], Text2, Text);
             }
             else
             {
                 ConvertGold(ItemValue(ip, 1), Text);
-                sprintf(TextList[TextNum], GlobalText[63], Text);
+                swprintf(TextList[TextNum], GlobalText[63], Text);
             }
 
             TextListColor[TextNum] = Color;
             //			TextBold[TextNum] = true;
             TextNum++;
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         }
     }
     if ((Inventype == SEASON3B::TOOLTIP_TYPE_MY_SHOP || Inventype == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP)
@@ -2197,12 +2272,12 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             int price = 0;
             int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(ip);
-            char Text[100];
+            wchar_t Text[100];
 
             if (GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop))
             {
                 ConvertGold(price, Text);
-                sprintf(TextList[TextNum], GlobalText[63], Text);
+                swprintf(TextList[TextNum], GlobalText[63], Text);
 
                 if (price >= 10000000)
                     TextListColor[TextNum] = TEXT_COLOR_RED;
@@ -2214,7 +2289,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                     TextListColor[TextNum] = TEXT_COLOR_WHITE;
                 TextBold[TextNum] = true;
                 TextNum++;
-                sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
                 DWORD gold = CharacterMachine->Gold;
 
@@ -2222,18 +2297,18 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 {
                     TextListColor[TextNum] = TEXT_COLOR_RED;
                     TextBold[TextNum] = true;
-                    sprintf(TextList[TextNum], GlobalText[423]);
+                    swprintf(TextList[TextNum], GlobalText[423]);
                     TextNum++;
-                    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
                 }
             }
             else if (g_IsPurchaseShop == PSHOPWNDTYPE_SALE)
             {
                 TextListColor[TextNum] = TEXT_COLOR_RED;
                 TextBold[TextNum] = true;
-                sprintf(TextList[TextNum], GlobalText[1101]);
+                swprintf(TextList[TextNum], GlobalText[1101]);
                 TextNum++;
-                sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
             }
         }
     }
@@ -2245,8 +2320,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             Color = TEXT_COLOR_YELLOW;
             switch (Level)
             {
-            case 0: sprintf(TextList[TextNum], "%s", p->Name); break;
-            case 1: sprintf(TextList[TextNum], GlobalText[906]); break;
+            case 0: swprintf(TextList[TextNum], L"%s", p->Name); break;
+            case 1: swprintf(TextList[TextNum], GlobalText[906]); break;
             }
         }
         else if (ip->Type == ITEM_POTION + 24)
@@ -2254,12 +2329,12 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             Color = TEXT_COLOR_YELLOW;
             switch (Level)
             {
-            case 0: sprintf(TextList[TextNum], "%s", p->Name); break;
-            case 1: sprintf(TextList[TextNum], GlobalText[907]); break;
+            case 0: swprintf(TextList[TextNum], L"%s", p->Name); break;
+            case 1: swprintf(TextList[TextNum], GlobalText[907]); break;
             }
         }
         else {
-            sprintf(TextList[TextNum], "%s", p->Name);
+            swprintf(TextList[TextNum], L"%s", p->Name);
             Color = TEXT_COLOR_YELLOW;
         }
     }
@@ -2267,37 +2342,37 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         switch (Level)
         {
-        case 0:sprintf(TextList[TextNum], GlobalText[100]); break;
-        case 1:sprintf(TextList[TextNum], GlobalText[101]); break;
-        case 2:sprintf(TextList[TextNum], "%s", ChaosEventName[ip->Durability]); break;
+        case 0:swprintf(TextList[TextNum], GlobalText[100]); break;
+        case 1:swprintf(TextList[TextNum], GlobalText[101]); break;
+        case 2:swprintf(TextList[TextNum], L"%s", ChaosEventName[ip->Durability]); break;
         }
     }
     else if (ip->Type == ITEM_POTION + 11)
     {
         switch (Level)
         {
-        case 0:sprintf(TextList[TextNum], "%s", p->Name); break;
-        case 1:sprintf(TextList[TextNum], GlobalText[105]); break;
-        case 2:sprintf(TextList[TextNum], GlobalText[106]); break;
-        case 3:sprintf(TextList[TextNum], GlobalText[107]); break;
-        case 5:sprintf(TextList[TextNum], GlobalText[109]); break;
-        case 6:sprintf(TextList[TextNum], GlobalText[110]); break;
-        case 7:sprintf(TextList[TextNum], GlobalText[111]); break;
+        case 0:swprintf(TextList[TextNum], L"%s", p->Name); break;
+        case 1:swprintf(TextList[TextNum], GlobalText[105]); break;
+        case 2:swprintf(TextList[TextNum], GlobalText[106]); break;
+        case 3:swprintf(TextList[TextNum], GlobalText[107]); break;
+        case 5:swprintf(TextList[TextNum], GlobalText[109]); break;
+        case 6:swprintf(TextList[TextNum], GlobalText[110]); break;
+        case 7:swprintf(TextList[TextNum], GlobalText[111]); break;
         case 8:
         case 9:
         case 10:
         case 11:
         case 12:
-            sprintf(TextList[TextNum], "%s +%d", GlobalText[115], Level - 7);
+            swprintf(TextList[TextNum], L"%s +%d", GlobalText[115], Level - 7);
             break;
         case 13:
-            sprintf(TextList[TextNum], GlobalText[117]);
+            swprintf(TextList[TextNum], GlobalText[117]);
             break;
         case 14:
-            sprintf(TextList[TextNum], GlobalText[1650]);
+            swprintf(TextList[TextNum], GlobalText[1650]);
             break;
         case 15:
-            sprintf(TextList[TextNum], GlobalText[1651]);
+            swprintf(TextList[TextNum], GlobalText[1651]);
             break;
         }
     }
@@ -2305,9 +2380,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         switch (Level)
         {
-        case 0:sprintf(TextList[TextNum], GlobalText[100]); break;
-        case 1:sprintf(TextList[TextNum], GlobalText[101]); break;
-        case 2:sprintf(TextList[TextNum], "%s", ChaosEventName[ip->Durability]); break;
+        case 0:swprintf(TextList[TextNum], GlobalText[100]); break;
+        case 1:swprintf(TextList[TextNum], GlobalText[101]); break;
+        case 2:swprintf(TextList[TextNum], L"%s", ChaosEventName[ip->Durability]); break;
         }
     }
     else if (ip->Type == ITEM_HELPER + 15)
@@ -2315,11 +2390,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
         switch (Level)
         {
-        case 0:sprintf(TextList[TextNum], "%s %s", GlobalText[168], p->Name); break;
-        case 1:sprintf(TextList[TextNum], "%s %s", GlobalText[169], p->Name); break;
-        case 2:sprintf(TextList[TextNum], "%s %s", GlobalText[167], p->Name); break;
-        case 3:sprintf(TextList[TextNum], "%s %s", GlobalText[166], p->Name); break;
-        case 4:sprintf(TextList[TextNum], "%s %s", GlobalText[1900], p->Name); break;
+        case 0:swprintf(TextList[TextNum], L"%s %s", GlobalText[168], p->Name); break;
+        case 1:swprintf(TextList[TextNum], L"%s %s", GlobalText[169], p->Name); break;
+        case 2:swprintf(TextList[TextNum], L"%s %s", GlobalText[167], p->Name); break;
+        case 3:swprintf(TextList[TextNum], L"%s %s", GlobalText[166], p->Name); break;
+        case 4:swprintf(TextList[TextNum], L"%s %s", GlobalText[1900], p->Name); break;
         }
     }
     else if (ip->Type == ITEM_HELPER + 14)
@@ -2327,8 +2402,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], "%s", p->Name); break;
-        case 1: sprintf(TextList[TextNum], "%s", GlobalText[1235]); break;
+        case 0: swprintf(TextList[TextNum], L"%s", p->Name); break;
+        case 1: swprintf(TextList[TextNum], L"%s", GlobalText[1235]); break;
         }
     }
     else if (ip->Type == ITEM_POTION + 21)
@@ -2336,10 +2411,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], "%s", p->Name); break;
-        case 1: sprintf(TextList[TextNum], GlobalText[810]); break;
-        case 2: sprintf(TextList[TextNum], GlobalText[1098]); break;
-        case 3: sprintf(TextList[TextNum], GlobalText[1290]); break;
+        case 0: swprintf(TextList[TextNum], L"%s", p->Name); break;
+        case 1: swprintf(TextList[TextNum], GlobalText[810]); break;
+        case 2: swprintf(TextList[TextNum], GlobalText[1098]); break;
+        case 3: swprintf(TextList[TextNum], GlobalText[1290]); break;
         }
     }
     else if (ip->Type == ITEM_HELPER + 19)
@@ -2347,9 +2422,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], GlobalText[811]); break;
-        case 1: sprintf(TextList[TextNum], GlobalText[812]); break;
-        case 2: sprintf(TextList[TextNum], GlobalText[817]); break;
+        case 0: swprintf(TextList[TextNum], GlobalText[811]); break;
+        case 1: swprintf(TextList[TextNum], GlobalText[812]); break;
+        case 2: swprintf(TextList[TextNum], GlobalText[817]); break;
         }
     }
     else if (ip->Type == ITEM_HELPER + 20)
@@ -2357,52 +2432,52 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], p->Name); break;
-        case 1: sprintf(TextList[TextNum], GlobalText[922]); break;
-        case 2: sprintf(TextList[TextNum], GlobalText[928]); break;
-        case 3: sprintf(TextList[TextNum], GlobalText[929]); break;
+        case 0: swprintf(TextList[TextNum], p->Name); break;
+        case 1: swprintf(TextList[TextNum], GlobalText[922]); break;
+        case 2: swprintf(TextList[TextNum], GlobalText[928]); break;
+        case 3: swprintf(TextList[TextNum], GlobalText[929]); break;
         }
     }
     else if (ip->Type == ITEM_HELPER + 107)
     {
         Color = TEXT_COLOR_YELLOW;
-        sprintf(TextList[TextNum], p->Name);
+        swprintf(TextList[TextNum], p->Name);
     }
     else if (ip->Type == ITEM_POTION + 7)
     {
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], GlobalText[1413]); break;
-        case 1: sprintf(TextList[TextNum], GlobalText[1414]); break;
+        case 0: swprintf(TextList[TextNum], GlobalText[1413]); break;
+        case 1: swprintf(TextList[TextNum], GlobalText[1414]); break;
         }
     }
     else if (ip->Type == ITEM_HELPER + 7)
     {
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], GlobalText[1460]); break;
-        case 1: sprintf(TextList[TextNum], GlobalText[1461]); break;
+        case 0: swprintf(TextList[TextNum], GlobalText[1460]); break;
+        case 1: swprintf(TextList[TextNum], GlobalText[1461]); break;
         }
     }
     else if (ip->Type == ITEM_HELPER + 11)
     {
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], GlobalText[1416]); break;
-        case 1: sprintf(TextList[TextNum], GlobalText[1462]); break;
+        case 0: swprintf(TextList[TextNum], GlobalText[1416]); break;
+        case 1: swprintf(TextList[TextNum], GlobalText[1462]); break;
         }
     }
     else if (ip->Type == ITEM_POTION + 9)
     {
         switch (Level)
         {
-        case 0:sprintf(TextList[TextNum], "%s", p->Name); break;
-        case 1:sprintf(TextList[TextNum], GlobalText[108]); break;
+        case 0:swprintf(TextList[TextNum], L"%s", p->Name); break;
+        case 1:swprintf(TextList[TextNum], GlobalText[108]); break;
         }
     }
     else if (ip->Type == ITEM_WING + 11)
     {
-        sprintf(TextList[TextNum], "%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
+        swprintf(TextList[TextNum], L"%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
     }
     else if (ip->Type == ITEM_HELPER + 10)
     {
@@ -2410,7 +2485,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             if (SommonTable[Level] == MonsterScript[i].Type)
             {
-                sprintf(TextList[TextNum], "%s %s", MonsterScript[i].Name, GlobalText[103]);
+                swprintf(TextList[TextNum], L"%s %s", MonsterScript[i].Name, GlobalText[103]);
                 break;
             }
         }
@@ -2418,70 +2493,70 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ip->Type >= ITEM_WING + 3 && ip->Type <= ITEM_WING + 6)
     {
         if (Level == 0)
-            sprintf(TextList[TextNum], "%s", p->Name);
+            swprintf(TextList[TextNum], L"%s", p->Name);
         else
-            sprintf(TextList[TextNum], "%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
     }
     else if ((ip->Type >= ITEM_WING + 36 && ip->Type <= ITEM_WING + 40) || (ip->Type >= ITEM_WING + 42 && ip->Type <= ITEM_WING + 43)
         || (ip->Type >= ITEM_WING + 49 && ip->Type <= ITEM_WING + 50))
     {
         if (Level == 0)
-            sprintf(TextList[TextNum], "%s", p->Name);
+            swprintf(TextList[TextNum], L"%s", p->Name);
         else
-            sprintf(TextList[TextNum], "%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
     }
     else if (ip->Type == ITEM_HELPER + 31)
     {
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], "%s of %s", p->Name, GlobalText[1187]); break;
-        case 1: sprintf(TextList[TextNum], "%s of %s", p->Name, GlobalText[1214]); break;
+        case 0: swprintf(TextList[TextNum], L"%s of %s", p->Name, GlobalText[1187]); break;
+        case 1: swprintf(TextList[TextNum], L"%s of %s", p->Name, GlobalText[1214]); break;
         }
     }
     else if (ip->Type == ITEM_HELPER + 30)
     {
         if (Level == 0)
-            sprintf(TextList[TextNum], "%s", p->Name);
+            swprintf(TextList[TextNum], L"%s", p->Name);
         else
-            sprintf(TextList[TextNum], "%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
     }
     else if (ip->Type == ITEM_POTION + 29)
     {
-        sprintf(TextList[TextNum], GlobalText[1180], Level);
+        swprintf(TextList[TextNum], GlobalText[1180], Level);
     }
     else if (ip->Type == ITEM_POTION + 28)
     {
         Color = TEXT_COLOR_YELLOW;
-        sprintf(TextList[TextNum], "%s +%d", p->Name, Level);
+        swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
     }
     else if (ip->Type == ITEM_WING + 32)
     {
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
     }
     else if (ip->Type == ITEM_WING + 33)
     {
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
     }
     else if (ip->Type == ITEM_WING + 34)
     {
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
     }
     else if (ip->Type == ITEM_WING + 35)
     {
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
     }
     else if (ip->Type >= ITEM_POTION + 45 && ip->Type <= ITEM_POTION + 50)
     {
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
     }
     else if (ip->Type == ITEM_POTION + 32)
     {
         switch (Level)
         {
         case 0:
-            sprintf(TextList[TextNum], "%s", p->Name); break;
+            swprintf(TextList[TextNum], L"%s", p->Name); break;
         case 1:
-            sprintf(TextList[TextNum], "%s", GlobalText[2012]); break;
+            swprintf(TextList[TextNum], L"%s", GlobalText[2012]); break;
         }
     }
     else if (ip->Type == ITEM_POTION + 33)
@@ -2489,9 +2564,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         switch (Level)
         {
         case 0:
-            sprintf(TextList[TextNum], "%s", p->Name); break;
+            swprintf(TextList[TextNum], L"%s", p->Name); break;
         case 1:
-            sprintf(TextList[TextNum], "%s", GlobalText[2013]); break;
+            swprintf(TextList[TextNum], L"%s", GlobalText[2013]); break;
         }
     }
     else if (ip->Type == ITEM_POTION + 34)
@@ -2499,9 +2574,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         switch (Level)
         {
         case 0:
-            sprintf(TextList[TextNum], "%s", p->Name); break;
+            swprintf(TextList[TextNum], L"%s", p->Name); break;
         case 1:
-            sprintf(TextList[TextNum], "%s", GlobalText[2014]); break;
+            swprintf(TextList[TextNum], L"%s", GlobalText[2014]); break;
         }
     }
     else if (ip->Type >= ITEM_HELPER + 32 && ip->Type <= ITEM_HELPER + 37)
@@ -2510,87 +2585,87 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             Color = TEXT_COLOR_BLUE;
             if ((ip->Option1 & 63) == 0x01)
-                sprintf(TextList[TextNum], "%s %s", p->Name, GlobalText[1863]);
+                swprintf(TextList[TextNum], L"%s %s", p->Name, GlobalText[1863]);
             else if ((ip->Option1 & 63) == 0x02)
-                sprintf(TextList[TextNum], "%s %s", p->Name, GlobalText[1864]);
+                swprintf(TextList[TextNum], L"%s %s", p->Name, GlobalText[1864]);
             else if ((ip->Option1 & 63) == 0x04)
-                sprintf(TextList[TextNum], "%s %s", p->Name, GlobalText[1866]);
+                swprintf(TextList[TextNum], L"%s %s", p->Name, GlobalText[1866]);
             else
-                sprintf(TextList[TextNum], "%s", p->Name);
+                swprintf(TextList[TextNum], L"%s", p->Name);
         }
         else
         {
             Color = TEXT_COLOR_WHITE;
-            sprintf(TextList[TextNum], "%s", p->Name);
+            swprintf(TextList[TextNum], L"%s", p->Name);
         }
     }
     else if (ip->Type == ITEM_SWORD + 19 || ip->Type == ITEM_BOW + 18 || ip->Type == ITEM_STAFF + 10 || ip->Type == ITEM_MACE + 13)
     {
         if (Level == 0)
-            sprintf(TextList[TextNum], "%s", p->Name);
+            swprintf(TextList[TextNum], L"%s", p->Name);
         else
-            sprintf(TextList[TextNum], "%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
     }
     else if (nGemType != COMGEM::NOGEM && nGemType % 2 == 1)
     {
         int nGlobalIndex = COMGEM::GetJewelIndex(nGemType, COMGEM::eGEM_NAME);
-        sprintf(TextList[TextNum], "%s +%d", GlobalText[nGlobalIndex], Level + 1);
+        swprintf(TextList[TextNum], L"%s +%d", GlobalText[nGlobalIndex], Level + 1);
     }
     else if (ip->Type == ITEM_POTION + 41 || ip->Type == ITEM_POTION + 42 ||
         ip->Type == ITEM_POTION + 43 || ip->Type == ITEM_POTION + 44 ||
         ip->Type == ITEM_HELPER + 38
         )
     {
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
         Color = TEXT_COLOR_YELLOW;
     }
     else if ((ip->Type >= ITEM_WING + 60 && ip->Type <= ITEM_WING + 65)
         || (ip->Type >= ITEM_WING + 70 && ip->Type <= ITEM_WING + 74)
         || (ip->Type >= ITEM_WING + 100 && ip->Type <= ITEM_WING + 129))
     {
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
         Color = TEXT_COLOR_VIOLET;
     }
     else if (ip->Type == ITEM_POTION + 111)
     {
         Color = TEXT_COLOR_YELLOW;
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
     }
     else if (ITEM_POTION + 101 <= ip->Type && ip->Type <= ITEM_POTION + 109)
     {
         Color = TEXT_COLOR_YELLOW;
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
     }
     else
     {
-        char TextName[64];
+        wchar_t TextName[64];
         if (g_csItemOption.GetSetItemName(TextName, ip->Type, ip->ExtOption))
         {
-            strcat(TextName, p->Name);
+            wcscat(TextName, p->Name);
         }
         else
         {
-            strcpy(TextName, p->Name);
+            wcscpy(TextName, p->Name);
         }
 
         if ((ip->Option1 & 63) > 0)
         {
             if (Level == 0)
-                sprintf(TextList[TextNum], "%s %s", GlobalText[620], TextName);
+                swprintf(TextList[TextNum], L"%s %s", GlobalText[620], TextName);
             else
-                sprintf(TextList[TextNum], "%s %s +%d", GlobalText[620], TextName, Level);
+                swprintf(TextList[TextNum], L"%s %s +%d", GlobalText[620], TextName, Level);
         }
         else
         {
             if (Level == 0)
-                sprintf(TextList[TextNum], "%s", TextName);
+                swprintf(TextList[TextNum], L"%s", TextName);
             else
-                sprintf(TextList[TextNum], "%s +%d", TextName, Level);
+                swprintf(TextList[TextNum], L"%s +%d", TextName, Level);
         }
     }
 
     TextListColor[TextNum] = Color; TextBold[TextNum] = true; TextNum++;
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     if (ip->Type == ITEM_HELPER + 19)
     {
@@ -2600,84 +2675,84 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         int iNeedDex;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], GlobalText[730]); TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], GlobalText[730]); TextBold[TextNum] = false; TextNum++;
 
         TextListColor[TextNum] = TEXT_COLOR_DARKRED;
-        sprintf(TextList[TextNum], GlobalText[815]); TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], "\n"); TextBold[TextNum] = false; TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[815]); TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], L"\n"); TextBold[TextNum] = false; TextNum++; SkipNum++;
 
         switch (Level)
         {
         case 0:
-            sprintf(TextList[TextNum], "%s: %d ~ %d", GlobalText[42], 107, 110);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[42], 107, 110);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             iWeaponSpeed = 20;
             iNeedStrength = 132;
             iNeedDex = 32;
             break;
         case 1:
-            sprintf(TextList[TextNum], "%s: %d ~ %d", GlobalText[40], 110, 120);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[40], 110, 120);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             iWeaponSpeed = 35;
             iNeedStrength = 381;
             iNeedDex = 149;
             break;
         case 2:
-            sprintf(TextList[TextNum], "%s: %d ~ %d", GlobalText[41], 120, 140);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[41], 120, 140);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             iWeaponSpeed = 35;
             iNeedStrength = 140;
             iNeedDex = 350;
             break;
         }
 
-        sprintf(TextList[TextNum], GlobalText[64], iWeaponSpeed); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[73], iNeedStrength); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[75], iNeedDex);     TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], "\n"); TextBold[TextNum] = false; TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[87]);     TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[94], 20); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], GlobalText[64], iWeaponSpeed); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], GlobalText[73], iNeedStrength); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], GlobalText[75], iNeedDex);     TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], L"\n"); TextBold[TextNum] = false; TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[87]);     TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], GlobalText[94], 20); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
 
         switch (Level)
         {
         case 0:
         {
-            sprintf(TextList[TextNum], GlobalText[79], 53); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[631]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[632], 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[79], 53); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[631]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[632], 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
         }
         break;
         case 1:
         {
             gSkillManager.GetSkillInformation(AT_SKILL_SWORD4, 1, NULL, &iMana, NULL);
-            sprintf(TextList[TextNum], GlobalText[84], iMana); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[629]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[630], 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[84], iMana); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[629]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[630], 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
         }
         break;
         case 2:
         {
             gSkillManager.GetSkillInformation(AT_SKILL_CROSSBOW, 1, NULL, &iMana, NULL);
-            sprintf(TextList[TextNum], GlobalText[86], iMana); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[629]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[630], 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[86], iMana); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[629]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[630], 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
         }
         break;
         }
-        sprintf(TextList[TextNum], GlobalText[628]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[633], 7); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[634]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[635]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], GlobalText[628]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], GlobalText[633], 7); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], GlobalText[634]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], GlobalText[635]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
     }
 
     if (ip->Type >= ITEM_POTION + 23 && ip->Type <= ITEM_POTION + 26)
     {
-        sprintf(TextList[TextNum], GlobalText[730]);
+        swprintf(TextList[TextNum], GlobalText[730]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[731]);
+        swprintf(TextList[TextNum], GlobalText[731]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[732]);
+        swprintf(TextList[TextNum], GlobalText[732]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
@@ -2686,7 +2761,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         if (Level <= 1)
         {
-            sprintf(TextList[TextNum], GlobalText[119]);
+            swprintf(TextList[TextNum], GlobalText[119]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
@@ -2702,15 +2777,15 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         else if (ip->Type == ITEM_HELPER + 48)
             iMap = 58;
 
-        sprintf(TextList[TextNum], GlobalText[2259], GlobalText[iMap]);
+        swprintf(TextList[TextNum], GlobalText[2259], GlobalText[iMap]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2270]);
+        swprintf(TextList[TextNum], GlobalText[2270]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], "\n");
+        swprintf(TextList[TextNum], L"\n");
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -2726,113 +2801,113 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         else if (ip->Type == ITEM_HELPER + 127)
             iMap = 3107;
 
-        sprintf(TextList[TextNum], GlobalText[2259], GlobalText[iMap]);
+        swprintf(TextList[TextNum], GlobalText[2259], GlobalText[iMap]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], "\n");
+        swprintf(TextList[TextNum], L"\n");
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 54)
     {
-        sprintf(TextList[TextNum], GlobalText[2261]);
+        swprintf(TextList[TextNum], GlobalText[2261]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type >= ITEM_POTION + 58 && ip->Type <= ITEM_POTION + 62)
     {
-        sprintf(TextList[TextNum], GlobalText[2269]);
+        swprintf(TextList[TextNum], GlobalText[2269]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 83)
     {
-        sprintf(TextList[TextNum], GlobalText[2269]);
+        swprintf(TextList[TextNum], GlobalText[2269]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type >= ITEM_POTION + 145 && ip->Type <= ITEM_POTION + 150)
     {
-        sprintf(TextList[TextNum], GlobalText[2269]);
+        swprintf(TextList[TextNum], GlobalText[2269]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 53)
     {
-        sprintf(TextList[TextNum], GlobalText[2250]);
+        swprintf(TextList[TextNum], GlobalText[2250]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 43)
     {
-        sprintf(TextList[TextNum], GlobalText[2256]);
+        swprintf(TextList[TextNum], GlobalText[2256]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2297]);
+        swprintf(TextList[TextNum], GlobalText[2297]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2567]);
+        swprintf(TextList[TextNum], GlobalText[2567]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2568]);
+        swprintf(TextList[TextNum], GlobalText[2568]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 44)
     {
-        sprintf(TextList[TextNum], GlobalText[2257]);
+        swprintf(TextList[TextNum], GlobalText[2257]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2297]);
+        swprintf(TextList[TextNum], GlobalText[2297]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2567]);
+        swprintf(TextList[TextNum], GlobalText[2567]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2568]);
+        swprintf(TextList[TextNum], GlobalText[2568]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 45)
     {
-        sprintf(TextList[TextNum], GlobalText[2258]);
+        swprintf(TextList[TextNum], GlobalText[2258]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2297]);
+        swprintf(TextList[TextNum], GlobalText[2297]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2566]);
+        swprintf(TextList[TextNum], GlobalText[2566]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type >= ITEM_POTION + 70 && ip->Type <= ITEM_POTION + 71)
     {
-        sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
         int index = ip->Type - (ITEM_POTION + 70);
 
-        sprintf(TextList[TextNum], GlobalText[2500 + index]);
+        swprintf(TextList[TextNum], GlobalText[2500 + index]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -2841,19 +2916,19 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
-        sprintf(TextList[TextNum], GlobalText[2503 + (ip->Type - (ITEM_POTION + 72))], Item_data.m_byValue1);
+        swprintf(TextList[TextNum], GlobalText[2503 + (ip->Type - (ITEM_POTION + 72))], Item_data.m_byValue1);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[2502]);
+        swprintf(TextList[TextNum], GlobalText[2502]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 59)
     {
-        sprintf(TextList[TextNum], GlobalText[2509]);
+        swprintf(TextList[TextNum], GlobalText[2509]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -2863,20 +2938,20 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         DWORD statpoint = 0;
         statpoint = ip->Durability * 10;
 
-        sprintf(TextList[TextNum], GlobalText[2511], statpoint);
+        swprintf(TextList[TextNum], GlobalText[2511], statpoint);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[2510]);
+        swprintf(TextList[TextNum], GlobalText[2510]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
         TextListColor[TextNum] = TEXT_COLOR_DARKRED;
-        sprintf(TextList[TextNum], GlobalText[1908]);
+        swprintf(TextList[TextNum], GlobalText[1908]);
         TextNum++;
 
         if (ip->Type == ITEM_HELPER + 58)
@@ -2890,7 +2965,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 TextListColor[TextNum] = TEXT_COLOR_DARKRED;
             }
 
-            sprintf(TextList[TextNum], GlobalText[61], GlobalText[24]);
+            swprintf(TextList[TextNum], GlobalText[61], GlobalText[24]);
             TextNum++;
         }
     }
@@ -2899,7 +2974,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         int index = ip->Type - (ITEM_POTION + 78);
         DWORD value = 0;
 
-        sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -2907,42 +2982,42 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
         value = Item_data.m_byValue1;
 
-        sprintf(TextList[TextNum], GlobalText[2512 + index], value);
+        swprintf(TextList[TextNum], GlobalText[2512 + index], value);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2517]);
+        swprintf(TextList[TextNum], GlobalText[2517]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2518]);
+        swprintf(TextList[TextNum], GlobalText[2518]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
         if (ip->Type == ITEM_POTION + 82)
         {
-            sprintf(TextList[TextNum], GlobalText[3115]);
+            swprintf(TextList[TextNum], GlobalText[3115]);
             TextListColor[TextNum] = TEXT_COLOR_YELLOW;
             TextBold[TextNum] = false;
             TextNum++;
         }
 
-        std::string timetext;
+        std::wstring timetext;
         g_StringTime(Item_data.m_Time, timetext, true);
-        sprintf(TextList[TextNum], timetext.c_str());
+        swprintf(TextList[TextNum], timetext.c_str());
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[2302]);
+        swprintf(TextList[TextNum], GlobalText[2302]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 60)
     {
-        sprintf(TextList[TextNum], GlobalText[2519]);
+        swprintf(TextList[TextNum], GlobalText[2519]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -2951,19 +3026,19 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
-        sprintf(TextList[TextNum], GlobalText[2253], Item_data.m_byValue1);
+        swprintf(TextList[TextNum], GlobalText[2253], Item_data.m_byValue1);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2569], Item_data.m_byValue2);
+        swprintf(TextList[TextNum], GlobalText[2569], Item_data.m_byValue2);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2570]);
+        swprintf(TextList[TextNum], GlobalText[2570]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2566]);
+        swprintf(TextList[TextNum], GlobalText[2566]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
@@ -2972,15 +3047,15 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
-        sprintf(TextList[TextNum], GlobalText[2254], Item_data.m_byValue1);
+        swprintf(TextList[TextNum], GlobalText[2254], Item_data.m_byValue1);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2571], Item_data.m_byValue2);
+        swprintf(TextList[TextNum], GlobalText[2571], Item_data.m_byValue2);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2572]);
+        swprintf(TextList[TextNum], GlobalText[2572]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -2989,12 +3064,12 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
-        sprintf(TextList[TextNum], GlobalText[2580]);
+        swprintf(TextList[TextNum], GlobalText[2580]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[2502]);
+        swprintf(TextList[TextNum], GlobalText[2502]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -3003,159 +3078,159 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
-        sprintf(TextList[TextNum], GlobalText[2581]);
+        swprintf(TextList[TextNum], GlobalText[2581]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2502]);
+        swprintf(TextList[TextNum], GlobalText[2502]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 140)
     {
-        sprintf(TextList[TextNum], GlobalText[92], 3);
+        swprintf(TextList[TextNum], GlobalText[92], 3);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2188], 100);
+        swprintf(TextList[TextNum], GlobalText[2188], 100);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 96)
     {
-        sprintf(TextList[TextNum], GlobalText[2573]);
+        swprintf(TextList[TextNum], GlobalText[2573]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2574]);
+        swprintf(TextList[TextNum], GlobalText[2574]);
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2708]);
+        swprintf(TextList[TextNum], GlobalText[2708]);
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 64)
     {
-        sprintf(TextList[TextNum], GlobalText[2575]);
+        swprintf(TextList[TextNum], GlobalText[2575]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2576]);
+        swprintf(TextList[TextNum], GlobalText[2576]);
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 65)
     {
-        sprintf(TextList[TextNum], GlobalText[2577]);
+        swprintf(TextList[TextNum], GlobalText[2577]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2578]);
+        swprintf(TextList[TextNum], GlobalText[2578]);
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 67)
     {
-        sprintf(TextList[TextNum], GlobalText[2600]);
+        swprintf(TextList[TextNum], GlobalText[2600]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 123)
     {
-        sprintf(TextList[TextNum], GlobalText[2600]);
+        swprintf(TextList[TextNum], GlobalText[2600]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[3068]);
+        swprintf(TextList[TextNum], GlobalText[3068]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[3069]);
+        swprintf(TextList[TextNum], GlobalText[3069]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[3070]);
+        swprintf(TextList[TextNum], GlobalText[3070]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 80)
     {
-        sprintf(TextList[TextNum], GlobalText[2746]);
+        swprintf(TextList[TextNum], GlobalText[2746]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2747]);
+        swprintf(TextList[TextNum], GlobalText[2747]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2748]);
+        swprintf(TextList[TextNum], GlobalText[2748]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 106)
     {
-        sprintf(TextList[TextNum], GlobalText[2746]);
+        swprintf(TextList[TextNum], GlobalText[2746]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2744]);
+        swprintf(TextList[TextNum], GlobalText[2744]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2748]);
+        swprintf(TextList[TextNum], GlobalText[2748]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 107)
     {
-        sprintf(TextList[TextNum], GlobalText[926]);
+        swprintf(TextList[TextNum], GlobalText[926]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 104)
     {
-        sprintf(TextList[TextNum], GlobalText[2968]);
+        swprintf(TextList[TextNum], GlobalText[2968]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 105)
     {
-        sprintf(TextList[TextNum], GlobalText[2969]);
+        swprintf(TextList[TextNum], GlobalText[2969]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 103)
     {
-        sprintf(TextList[TextNum], GlobalText[2970], 170);
+        swprintf(TextList[TextNum], GlobalText[2970], 170);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 69)
     {
-        sprintf(TextList[TextNum], GlobalText[2602]);
+        swprintf(TextList[TextNum], GlobalText[2602]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
         if (g_PortalMgr.IsRevivePositionSaved())
         {
-            sprintf(TextList[TextNum], GlobalText[2603]);
+            swprintf(TextList[TextNum], GlobalText[2603]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
@@ -3167,269 +3242,269 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_HELPER + 70)
     {
-        sprintf(TextList[TextNum], GlobalText[2604]);
+        swprintf(TextList[TextNum], GlobalText[2604]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 81)
     {
-        sprintf(TextList[TextNum], GlobalText[2714]);
+        swprintf(TextList[TextNum], GlobalText[2714]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
-        sprintf(TextList[TextNum], GlobalText[2729]);
+        swprintf(TextList[TextNum], GlobalText[2729]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
-        sprintf(TextList[TextNum], GlobalText[3084]);
+        swprintf(TextList[TextNum], GlobalText[3084]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
     }
     else if (ip->Type == ITEM_HELPER + 82)
     {
-        sprintf(TextList[TextNum], GlobalText[2715]);
+        swprintf(TextList[TextNum], GlobalText[2715]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
-        sprintf(TextList[TextNum], GlobalText[2730]);
+        swprintf(TextList[TextNum], GlobalText[2730]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
-        sprintf(TextList[TextNum], GlobalText[2716]);
+        swprintf(TextList[TextNum], GlobalText[2716]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
     }
     else if (ip->Type == ITEM_HELPER + 93)
     {
-        sprintf(TextList[TextNum], GlobalText[2256]);
+        swprintf(TextList[TextNum], GlobalText[2256]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
-        sprintf(TextList[TextNum], GlobalText[2297]);
+        swprintf(TextList[TextNum], GlobalText[2297]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
     }
     else if (ip->Type == ITEM_HELPER + 94)
     {
-        sprintf(TextList[TextNum], GlobalText[2257]);
+        swprintf(TextList[TextNum], GlobalText[2257]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
-        sprintf(TextList[TextNum], GlobalText[2297]);
+        swprintf(TextList[TextNum], GlobalText[2297]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum++] = false;
     }
     else if (ip->Type == ITEM_HELPER + 61)
     {
-        sprintf(TextList[TextNum], GlobalText[2259], GlobalText[2369]);
+        swprintf(TextList[TextNum], GlobalText[2259], GlobalText[2369]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2270]);
+        swprintf(TextList[TextNum], GlobalText[2270]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], "\n");
+        swprintf(TextList[TextNum], L"\n");
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 91)
     {
-        sprintf(TextList[TextNum], GlobalText[2551]);
+        swprintf(TextList[TextNum], GlobalText[2551]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 92)
     {
-        sprintf(TextList[TextNum], GlobalText[2261]);
+        swprintf(TextList[TextNum], GlobalText[2261]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2553]);
+        swprintf(TextList[TextNum], GlobalText[2553]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 93)
     {
-        sprintf(TextList[TextNum], GlobalText[2261]);
+        swprintf(TextList[TextNum], GlobalText[2261]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2556]);
+        swprintf(TextList[TextNum], GlobalText[2556]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 95)
     {
-        sprintf(TextList[TextNum], GlobalText[2261]);
+        swprintf(TextList[TextNum], GlobalText[2261]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2552]);
+        swprintf(TextList[TextNum], GlobalText[2552]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 94)
     {
-        sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[2559]);
+        swprintf(TextList[TextNum], GlobalText[2559]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 84)
     {
-        sprintf(TextList[TextNum], GlobalText[2011]);
+        swprintf(TextList[TextNum], GlobalText[2011]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 85)
     {
-        sprintf(TextList[TextNum], GlobalText[2549]);
+        swprintf(TextList[TextNum], GlobalText[2549]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        std::string timetext;
+        std::wstring timetext;
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
         g_StringTime(Item_data.m_Time, timetext, true);
-        sprintf(TextList[TextNum], timetext.c_str());
+        swprintf(TextList[TextNum], timetext.c_str());
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 86)
     {
-        sprintf(TextList[TextNum], GlobalText[2550]);
+        swprintf(TextList[TextNum], GlobalText[2550]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        std::string timetext;
+        std::wstring timetext;
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
         g_StringTime(Item_data.m_Time, timetext, true);
-        sprintf(TextList[TextNum], timetext.c_str());
+        swprintf(TextList[TextNum], timetext.c_str());
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 87)
     {
-        sprintf(TextList[TextNum], GlobalText[2532]);
+        swprintf(TextList[TextNum], GlobalText[2532]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        std::string timetext;
+        std::wstring timetext;
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
         g_StringTime(Item_data.m_Time, timetext, true);
-        sprintf(TextList[TextNum], timetext.c_str());
+        swprintf(TextList[TextNum], timetext.c_str());
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 88)
     {
-        sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2534]);
+        swprintf(TextList[TextNum], GlobalText[2534]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2535]);
+        swprintf(TextList[TextNum], GlobalText[2535]);
         TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 89)
     {
-        sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2534]);
+        swprintf(TextList[TextNum], GlobalText[2534]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2536]);
+        swprintf(TextList[TextNum], GlobalText[2536]);
         TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 90)
     {
-        sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2534]);
+        swprintf(TextList[TextNum], GlobalText[2534]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2537]);
+        swprintf(TextList[TextNum], GlobalText[2537]);
         TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 49)
     {
-        sprintf(TextList[TextNum], GlobalText[2397]);
+        swprintf(TextList[TextNum], GlobalText[2397]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 50)
     {
-        sprintf(TextList[TextNum], GlobalText[2398]);
+        swprintf(TextList[TextNum], GlobalText[2398]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 51)
     {
-        sprintf(TextList[TextNum], GlobalText[2399]);
+        swprintf(TextList[TextNum], GlobalText[2399]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 64)
     {
-        sprintf(TextList[TextNum], GlobalText[2420]);
+        swprintf(TextList[TextNum], GlobalText[2420]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type >= ITEM_POTION + 65 && ip->Type <= ITEM_POTION + 68)
     {
-        sprintf(TextList[TextNum], GlobalText[730]);
+        swprintf(TextList[TextNum], GlobalText[730]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[731]);
+        swprintf(TextList[TextNum], GlobalText[731]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[732]);
+        swprintf(TextList[TextNum], GlobalText[732]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 52)
     {
-        sprintf(TextList[TextNum], GlobalText[1665]);
+        swprintf(TextList[TextNum], GlobalText[1665]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 53)
     {
-        sprintf(TextList[TextNum], GlobalText[1665]);
+        swprintf(TextList[TextNum], GlobalText[1665]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -3440,14 +3515,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_HELPER + 71 || ip->Type == ITEM_HELPER + 72 || ip->Type == ITEM_HELPER + 73 || ip->Type == ITEM_HELPER + 74 || ip->Type == ITEM_HELPER + 75)
     {
-        sprintf(TextList[TextNum], GlobalText[2709]);
+        swprintf(TextList[TextNum], GlobalText[2709]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 38)
     {
-        sprintf(TextList[TextNum], GlobalText[926]);
+        swprintf(TextList[TextNum], GlobalText[926]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
@@ -3458,7 +3533,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
         case 0:
         {
-            sprintf(TextList[TextNum], GlobalText[926]);
+            swprintf(TextList[TextNum], GlobalText[926]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -3467,19 +3542,19 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
         case 1:
         {
-            sprintf(TextList[TextNum], GlobalText[924], 40);
+            swprintf(TextList[TextNum], GlobalText[924], 40);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[731]);
+            swprintf(TextList[TextNum], GlobalText[731]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[732]);
+            swprintf(TextList[TextNum], GlobalText[732]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[733]);
+            swprintf(TextList[TextNum], GlobalText[733]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -3487,19 +3562,19 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         break;
         case 2:
         {
-            sprintf(TextList[TextNum], GlobalText[924], 80);
+            swprintf(TextList[TextNum], GlobalText[924], 80);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[731]);
+            swprintf(TextList[TextNum], GlobalText[731]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[732]);
+            swprintf(TextList[TextNum], GlobalText[732]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[733]);
+            swprintf(TextList[TextNum], GlobalText[733]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -3507,7 +3582,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         break;
         case 3:
         {
-            sprintf(TextList[TextNum], GlobalText[926]);
+            swprintf(TextList[TextNum], GlobalText[926]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -3518,7 +3593,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ip->Type >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN && ip->Type <= ITEM_TYPE_CHARM_MIXWING + EWS_END)
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
-        sprintf(TextList[TextNum], GlobalText[2717]);
+        swprintf(TextList[TextNum], GlobalText[2717]);
         TextBold[TextNum] = false;
         TextNum++;
 
@@ -3526,47 +3601,47 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
         case ITEM_TYPE_CHARM_MIXWING + EWS_KNIGHT_1_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2718], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2718], Item_data.m_byValue1);
         }break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_MAGICIAN_1_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2720], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2720], Item_data.m_byValue1);
         }break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_ELF_1_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2722], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2722], Item_data.m_byValue1);
         }break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_SUMMONER_1_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2724], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2724], Item_data.m_byValue1);
         }break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_DARKLORD_1_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2727], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2727], Item_data.m_byValue1);
         }break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_KNIGHT_2_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2719], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2719], Item_data.m_byValue1);
         }break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_MAGICIAN_2_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2721], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2721], Item_data.m_byValue1);
         }break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_ELF_2_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2723], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2723], Item_data.m_byValue1);
         }break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_SUMMONER_2_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2725], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2725], Item_data.m_byValue1);
         }break;
         case ITEM_TYPE_CHARM_MIXWING + EWS_DARKKNIGHT_2_CHARM:
         {
-            sprintf(TextList[TextNum], GlobalText[2726], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], GlobalText[2726], Item_data.m_byValue1);
         }break;
         }
 
-        sprintf(TextList[TextNum], GlobalText[2732 + (ip->Type - (ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN))],
+        swprintf(TextList[TextNum], GlobalText[2732 + (ip->Type - (ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN))],
             Item_data.m_byValue1);
 
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3575,35 +3650,35 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_POTION + 110)
     {
-        sprintf(TextList[TextNum], GlobalText[2773]);
+        swprintf(TextList[TextNum], GlobalText[2773]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2774]);
+        swprintf(TextList[TextNum], GlobalText[2774]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2775]);
+        swprintf(TextList[TextNum], GlobalText[2775]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5);
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2776], 5 - ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[2776], 5 - ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 111)
     {
-        sprintf(TextList[TextNum], GlobalText[2777]);
+        swprintf(TextList[TextNum], GlobalText[2777]);
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2778]);
+        swprintf(TextList[TextNum], GlobalText[2778]);
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -3614,27 +3689,27 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
         case ITEM_POTION + 101:
         {
-            sprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5);
+            swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
 
-            sprintf(TextList[TextNum], GlobalText[2788]);
+            swprintf(TextList[TextNum], GlobalText[2788]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
         }break;
         case ITEM_POTION + 102:
         {
-            sprintf(TextList[TextNum], GlobalText[2784]);
+            swprintf(TextList[TextNum], GlobalText[2784]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[2785]);
+            swprintf(TextList[TextNum], GlobalText[2785]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[2786]);
+            swprintf(TextList[TextNum], GlobalText[2786]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
@@ -3647,18 +3722,18 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         case ITEM_POTION + 107:
         case ITEM_POTION + 108:
         {
-            sprintf(TextList[TextNum], GlobalText[2790]);
+            swprintf(TextList[TextNum], GlobalText[2790]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
         }break;
         case ITEM_POTION + 109:
         {
-            sprintf(TextList[TextNum], GlobalText[2792]);
+            swprintf(TextList[TextNum], GlobalText[2792]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[2793]);
+            swprintf(TextList[TextNum], GlobalText[2793]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
@@ -3667,140 +3742,140 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ITEM_HELPER + 109 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[92], 3);
+        swprintf(TextList[TextNum], GlobalText[92], 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[3058], 4);
+        swprintf(TextList[TextNum], GlobalText[3058], 4);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_HELPER + 110 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[92], 3);
+        swprintf(TextList[TextNum], GlobalText[92], 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[622], 4);
+        swprintf(TextList[TextNum], GlobalText[622], 4);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_HELPER + 111 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[92], 3);
+        swprintf(TextList[TextNum], GlobalText[92], 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[627], 50);
+        swprintf(TextList[TextNum], GlobalText[627], 50);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_HELPER + 112 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[92], 3);
+        swprintf(TextList[TextNum], GlobalText[92], 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[624], 4);
+        swprintf(TextList[TextNum], GlobalText[624], 4);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_HELPER + 113 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[92], 3);
+        swprintf(TextList[TextNum], GlobalText[92], 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[628], 10);
+        swprintf(TextList[TextNum], GlobalText[628], 10);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_HELPER + 114 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[92], 3);
+        swprintf(TextList[TextNum], GlobalText[92], 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2229], 7);
+        swprintf(TextList[TextNum], GlobalText[2229], 7);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_HELPER + 115 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[92], 3);
+        swprintf(TextList[TextNum], GlobalText[92], 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[635]);
+        swprintf(TextList[TextNum], GlobalText[635]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_POTION + 112 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[2876]);
+        swprintf(TextList[TextNum], GlobalText[2876]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_POTION + 113 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[2875]);
+        swprintf(TextList[TextNum], GlobalText[2875]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 120)
     {
-        sprintf(TextList[TextNum], GlobalText[2971]);
+        swprintf(TextList[TextNum], GlobalText[2971]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_POTION + 121 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[2877]);
+        swprintf(TextList[TextNum], GlobalText[2877]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_POTION + 122 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[2878]);
+        swprintf(TextList[TextNum], GlobalText[2878]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_POTION + 123 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[2879]);
+        swprintf(TextList[TextNum], GlobalText[2879]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_POTION + 124 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[2880]);
+        swprintf(TextList[TextNum], GlobalText[2880]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_POTION + 134 <= ip->Type && ITEM_POTION + 139 >= ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[2972]);
+        swprintf(TextList[TextNum], GlobalText[2972]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ITEM_HELPER + 116 == ip->Type)
     {
-        sprintf(TextList[TextNum], GlobalText[3018]);
+        swprintf(TextList[TextNum], GlobalText[3018]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
 
         TextBold[TextNum] = false;
@@ -3809,60 +3884,60 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ITEM_HELPER + 121 == ip->Type)
     {
         int iMap = 57;
-        sprintf(TextList[TextNum], GlobalText[2259], GlobalText[iMap]);
+        swprintf(TextList[TextNum], GlobalText[2259], GlobalText[iMap]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2270]);
+        swprintf(TextList[TextNum], GlobalText[2270]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 124)
     {
-        sprintf(TextList[TextNum], GlobalText[3116]);
+        swprintf(TextList[TextNum], GlobalText[3116]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[3127]);
+        swprintf(TextList[TextNum], GlobalText[3127]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = true;
         TextNum++;
     }
     else if (ip->Type >= ITEM_POTION + 141 && ip->Type <= ITEM_POTION + 144)
     {
-        sprintf(TextList[TextNum], GlobalText[571]);
+        swprintf(TextList[TextNum], GlobalText[571]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 133)
     {
-        sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[3267]);
+        swprintf(TextList[TextNum], GlobalText[3267]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
     }
 
     Color = TEXT_COLOR_YELLOW;
-    sprintf(TextList[TextNum], "%s", p->Name);
+    swprintf(TextList[TextNum], L"%s", p->Name);
 
     if (ip->Type == ITEM_POTION + 19)
     {
-        sprintf(TextList[TextNum], GlobalText[638]);
+        swprintf(TextList[TextNum], GlobalText[638]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[639]);
+        swprintf(TextList[TextNum], GlobalText[639]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -3888,7 +3963,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         int DamageMax = ip->DamageMax;
         if (ip->Type >> 4 == 15)
         {
-            sprintf(TextList[TextNum], "%s: %d ~ %d", GlobalText[40 + 2], DamageMin, DamageMax);
+            swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[40 + 2], DamageMin, DamageMax);
         }
         else if (ip->Type != ITEM_ETC + 5 && ip->Type != ITEM_ETC + 14 && ip->Type != ITEM_ETC + 15)
         {
@@ -3901,14 +3976,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 DamageMin = skillAtt->Damage;
                 DamageMax = skillAtt->Damage + skillAtt->Damage / 2;
 
-                sprintf(TextList[TextNum], "%s: %d ~ %d", GlobalText[42], DamageMin, DamageMax);
+                swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[42], DamageMin, DamageMax);
             }
             else
             {
                 if (DamageMin + minindex >= DamageMax + maxindex)
-                    sprintf(TextList[TextNum], "%s: %d ~ %d", GlobalText[40 + p->TwoHand], DamageMax + maxindex, DamageMax + maxindex);
+                    swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[40 + p->TwoHand], DamageMax + maxindex, DamageMax + maxindex);
                 else
-                    sprintf(TextList[TextNum], "%s: %d ~ %d", GlobalText[40 + p->TwoHand], DamageMin + minindex, DamageMax + maxindex);
+                    swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[40 + p->TwoHand], DamageMin + minindex, DamageMax + maxindex);
             }
         }
         else
@@ -3953,7 +4028,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 maxdefense = SC.SI_SD.SI_defense;
             }
         }
-        sprintf(TextList[TextNum], GlobalText[65], ip->Defense + maxdefense);
+        swprintf(TextList[TextNum], GlobalText[65], ip->Defense + maxdefense);
 
         if (maxdefense != 0)
             TextListColor[TextNum] = TEXT_COLOR_YELLOW;
@@ -3970,14 +4045,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     if (ip->MagicDefense)
     {
-        sprintf(TextList[TextNum], GlobalText[66], ip->MagicDefense);
+        swprintf(TextList[TextNum], GlobalText[66], ip->MagicDefense);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     if (p->SuccessfulBlocking)
     {
-        sprintf(TextList[TextNum], GlobalText[67], ip->SuccessfulBlocking);
+        swprintf(TextList[TextNum], GlobalText[67], ip->SuccessfulBlocking);
         if ((ip->Option1 & 63) > 0)
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
         else
@@ -3987,21 +4062,21 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     if (p->WeaponSpeed)
     {
-        sprintf(TextList[TextNum], GlobalText[64], p->WeaponSpeed);
+        swprintf(TextList[TextNum], GlobalText[64], p->WeaponSpeed);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     if (p->WalkSpeed)
     {
-        sprintf(TextList[TextNum], GlobalText[68], p->WalkSpeed);
+        swprintf(TextList[TextNum], GlobalText[68], p->WalkSpeed);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
     }
     if (ip->Type >= ITEM_WING + 32 && ip->Type <= ITEM_WING + 34)
     {
-        sprintf(TextList[TextNum], GlobalText[571]);
+        swprintf(TextList[TextNum], GlobalText[571]);
         switch (ip->Type)
         {
         case ITEM_WING + 32:
@@ -4018,38 +4093,38 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     if (ip->Type >= ITEM_POTION + 45 && ip->Type <= ITEM_POTION + 50) //Halloween event
     {
-        char Text_data[300];
+        wchar_t Text_data[300];
         ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
 
         switch (ip->Type)
         {
         case ITEM_POTION + 45:
-            sprintf(TextList[TextNum], GlobalText[2011]);
+            swprintf(TextList[TextNum], GlobalText[2011]);
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             break;
         case ITEM_POTION + 46:
-            wsprintf(Text_data, GlobalText[2229], Item_data.m_byValue1);
-            sprintf(TextList[TextNum], Text_data);
+            swprintf(Text_data, GlobalText[2229], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], Text_data);
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             break;
         case ITEM_POTION + 47:
-            wsprintf(Text_data, GlobalText[2230], Item_data.m_byValue1);
-            sprintf(TextList[TextNum], Text_data);
+            swprintf(Text_data, GlobalText[2230], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], Text_data);
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             break;
         case ITEM_POTION + 48:
-            wsprintf(Text_data, GlobalText[2231], Item_data.m_byValue1);
-            sprintf(TextList[TextNum], Text_data);
+            swprintf(Text_data, GlobalText[2231], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], Text_data);
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             break;
         case ITEM_POTION + 49:
-            wsprintf(Text_data, GlobalText[960], Item_data.m_byValue1);
-            sprintf(TextList[TextNum], Text_data);
+            swprintf(Text_data, GlobalText[960], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], Text_data);
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             break;
         case ITEM_POTION + 50:
-            wsprintf(Text_data, GlobalText[961], Item_data.m_byValue1);
-            sprintf(TextList[TextNum], Text_data);
+            swprintf(Text_data, GlobalText[961], Item_data.m_byValue1);
+            swprintf(TextList[TextNum], Text_data);
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
             break;
         }
@@ -4057,7 +4132,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     if (ip->Type >= ITEM_POTION + 32 && ip->Type <= ITEM_POTION + 34)
     {
-        sprintf(TextList[TextNum], GlobalText[2011]);
+        swprintf(TextList[TextNum], GlobalText[2011]);
         switch (ip->Type)
         {
         case ITEM_POTION + 32:
@@ -4088,32 +4163,32 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         if (Level == 7)
         {
-            sprintf(TextList[TextNum], GlobalText[112]);
+            swprintf(TextList[TextNum], GlobalText[112]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[113]);
+            swprintf(TextList[TextNum], GlobalText[113]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[114]);
+            swprintf(TextList[TextNum], GlobalText[114]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         else if (Level == 14)
         {
-            sprintf(TextList[TextNum], GlobalText[1652]);
+            swprintf(TextList[TextNum], GlobalText[1652]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1653]);
+            swprintf(TextList[TextNum], GlobalText[1653]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         else
         {
-            sprintf(TextList[TextNum], GlobalText[571]);
+            swprintf(TextList[TextNum], GlobalText[571]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
-        sprintf(TextList[TextNum], GlobalText[733]);
+        swprintf(TextList[TextNum], GlobalText[733]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
         if (Level == 13)
         {
-            sprintf(TextList[TextNum], GlobalText[731]);
+            swprintf(TextList[TextNum], GlobalText[731]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -4125,136 +4200,136 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         int	nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
         if (nJewelIndex != COMGEM::NOGEM)
         {
-            sprintf(TextList[TextNum], GlobalText[1819], tCount, GlobalText[COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)]);
+            swprintf(TextList[TextNum], GlobalText[1819], tCount, GlobalText[COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1820]);
+            swprintf(TextList[TextNum], GlobalText[1820]);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
     }
     if (ip->Type == ITEM_POTION + 13)
     {
-        sprintf(TextList[TextNum], GlobalText[572]);
+        swprintf(TextList[TextNum], GlobalText[572]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_POTION + 14)
     {
-        sprintf(TextList[TextNum], GlobalText[573]);
+        swprintf(TextList[TextNum], GlobalText[573]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_POTION + 16)
     {
-        sprintf(TextList[TextNum], GlobalText[621]);
+        swprintf(TextList[TextNum], GlobalText[621]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_POTION + 17 || ip->Type == ITEM_POTION + 18)
     {
-        sprintf(TextList[TextNum], GlobalText[637]);
+        swprintf(TextList[TextNum], GlobalText[637]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_POTION + 10 && Level >= 1 && Level <= 8)
     {
-        sprintf(TextList[TextNum], GlobalText[157], 3);
+        swprintf(TextList[TextNum], GlobalText[157], 3);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_WING + 15)
     {
-        sprintf(TextList[TextNum], GlobalText[574]);
+        swprintf(TextList[TextNum], GlobalText[574]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_POTION + 22)
     {
-        sprintf(TextList[TextNum], GlobalText[619]);
+        swprintf(TextList[TextNum], GlobalText[619]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_POTION + 31)
     {
-        sprintf(TextList[TextNum], GlobalText[1289]);
+        swprintf(TextList[TextNum], GlobalText[1289]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_HELPER + 0) //
     {
-        sprintf(TextList[TextNum], GlobalText[578], 20);
+        swprintf(TextList[TextNum], GlobalText[578], 20);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[739], 50);
+        swprintf(TextList[TextNum], GlobalText[739], 50);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (ip->Type == ITEM_HELPER + 1)
     {
-        sprintf(TextList[TextNum], GlobalText[576]);
+        swprintf(TextList[TextNum], GlobalText[576]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if ((ip->Type >= ITEM_WING && ip->Type <= ITEM_WING + 2) || ip->Type == ITEM_WING + 41)
     {
-        sprintf(TextList[TextNum], GlobalText[577], 12 + Level * 2);
+        swprintf(TextList[TextNum], GlobalText[577], 12 + Level * 2);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[578], 12 + Level * 2);
+        swprintf(TextList[TextNum], GlobalText[578], 12 + Level * 2);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[579]);
+        swprintf(TextList[TextNum], GlobalText[579]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 38)
     {
-        sprintf(TextList[TextNum], GlobalText[2207]);
+        swprintf(TextList[TextNum], GlobalText[2207]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 41)
     {
-        sprintf(TextList[TextNum], GlobalText[2208]);
+        swprintf(TextList[TextNum], GlobalText[2208]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 42)
     {
-        sprintf(TextList[TextNum], GlobalText[2209]);
+        swprintf(TextList[TextNum], GlobalText[2209]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 43)
     {
-        sprintf(TextList[TextNum], GlobalText[2210]);
+        swprintf(TextList[TextNum], GlobalText[2210]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 44)
     {
-        sprintf(TextList[TextNum], GlobalText[2210]);
+        swprintf(TextList[TextNum], GlobalText[2210]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
 #ifdef LEM_ADD_LUCKYITEM
     else if (ip->Type == ITEM_POTION + 160)
     {
         // 연장의 보석
-        sprintf(TextList[TextNum], GlobalText[3305]);
+        swprintf(TextList[TextNum], GlobalText[3305]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 161)
     {
         // 상승의 보석
-        sprintf(TextList[TextNum], GlobalText[2209]);
+        swprintf(TextList[TextNum], GlobalText[2209]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
 #endif // LEM_ADD_LUCKYITEM
     else if ((ip->Type >= ITEM_WING + 3 && ip->Type <= ITEM_WING + 6) || ip->Type == ITEM_WING + 42) //날개
     {
-        sprintf(TextList[TextNum], GlobalText[577], 32 + Level);  //  데미지 몇%증가.
+        swprintf(TextList[TextNum], GlobalText[577], 32 + Level);  //  데미지 몇%증가.
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[578], 25 + Level * 2);  //  데미지 몇%흡수.
+        swprintf(TextList[TextNum], GlobalText[578], 25 + Level * 2);  //  데미지 몇%흡수.
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[579]);             //  이동 속도 향상.
+        swprintf(TextList[TextNum], GlobalText[579]);             //  이동 속도 향상.
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if ((ip->Type >= ITEM_WING + 36 && ip->Type <= ITEM_WING + 40) || ip->Type == ITEM_WING + 43
         || ip->Type == ITEM_WING + 50)
     {
-        sprintf(TextList[TextNum], GlobalText[577], 39 + Level * 2);
+        swprintf(TextList[TextNum], GlobalText[577], 39 + Level * 2);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         if (ip->Type == ITEM_WING + 40 || ip->Type == ITEM_WING + 50)
         {
-            sprintf(TextList[TextNum], GlobalText[578], 24 + Level * 2);
+            swprintf(TextList[TextNum], GlobalText[578], 24 + Level * 2);
         }
         else
         {
-            sprintf(TextList[TextNum], GlobalText[578], 39 + Level * 2);
+            swprintf(TextList[TextNum], GlobalText[578], 39 + Level * 2);
         }
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[579]);
+        swprintf(TextList[TextNum], GlobalText[579]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ITEM_WING + 130 <= ip->Type && ip->Type <= ITEM_WING + 135)
@@ -4264,9 +4339,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         case ITEM_WING + 130:
         case ITEM_WING + 135:
         {
-            sprintf(TextList[TextNum], GlobalText[577], 20 + Level * 2);
+            swprintf(TextList[TextNum], GlobalText[577], 20 + Level * 2);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[578], 20 + Level * 2);
+            swprintf(TextList[TextNum], GlobalText[578], 20 + Level * 2);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }break;
         case ITEM_WING + 131:
@@ -4274,20 +4349,20 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         case ITEM_WING + 133:
         case ITEM_WING + 134:
         {
-            sprintf(TextList[TextNum], GlobalText[577], 12 + Level * 2);
+            swprintf(TextList[TextNum], GlobalText[577], 12 + Level * 2);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[578], 12 + Level * 2);
+            swprintf(TextList[TextNum], GlobalText[578], 12 + Level * 2);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }break;
         }
-        sprintf(TextList[TextNum], GlobalText[579]);
+        swprintf(TextList[TextNum], GlobalText[579]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 3)
     {
-        sprintf(TextList[TextNum], GlobalText[577], 15);
+        swprintf(TextList[TextNum], GlobalText[577], 15);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[578], 10);
+        swprintf(TextList[TextNum], GlobalText[578], 10);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 31)
@@ -4295,8 +4370,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], GlobalText[1215]); TextNum++; break;
-        case 1: sprintf(TextList[TextNum], GlobalText[1216]); TextNum++; break;
+        case 0: swprintf(TextList[TextNum], GlobalText[1215]); TextNum++; break;
+        case 1: swprintf(TextList[TextNum], GlobalText[1216]); TextNum++; break;
         }
     }
     else if (ip->Type == ITEM_HELPER + 14)
@@ -4304,8 +4379,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], "%s", GlobalText[748]); TextNum++; break;
-        case 1: sprintf(TextList[TextNum], "%s", GlobalText[1236]); TextNum++; break;
+        case 0: swprintf(TextList[TextNum], L"%s", GlobalText[748]); TextNum++; break;
+        case 1: swprintf(TextList[TextNum], L"%s", GlobalText[1236]); TextNum++; break;
         }
     }
 
@@ -4314,58 +4389,58 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch (Level)
         {
-        case 0:sprintf(TextList[TextNum], "%s %s", GlobalText[168], GlobalText[636]); break;
-        case 1:sprintf(TextList[TextNum], "%s %s", GlobalText[169], GlobalText[636]); break;
-        case 2:sprintf(TextList[TextNum], "%s %s", GlobalText[167], GlobalText[636]); break;
-        case 3:sprintf(TextList[TextNum], "%s %s", GlobalText[166], GlobalText[636]); break;
-        case 4:sprintf(TextList[TextNum], "%s %s", GlobalText[1900], GlobalText[636]); break;
+        case 0:swprintf(TextList[TextNum], L"%s %s", GlobalText[168], GlobalText[636]); break;
+        case 1:swprintf(TextList[TextNum], L"%s %s", GlobalText[169], GlobalText[636]); break;
+        case 2:swprintf(TextList[TextNum], L"%s %s", GlobalText[167], GlobalText[636]); break;
+        case 3:swprintf(TextList[TextNum], L"%s %s", GlobalText[166], GlobalText[636]); break;
+        case 4:swprintf(TextList[TextNum], L"%s %s", GlobalText[1900], GlobalText[636]); break;
         }
         TextNum++;
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch (Level)
         {
-        case 0:sprintf(TextList[TextNum], "%s %s", GlobalText[168], GlobalText[1910]); break;
-        case 1:sprintf(TextList[TextNum], "%s %s", GlobalText[169], GlobalText[1910]); break;
-        case 2:sprintf(TextList[TextNum], "%s %s", GlobalText[167], GlobalText[1910]); break;
-        case 3:sprintf(TextList[TextNum], "%s %s", GlobalText[166], GlobalText[1910]); break;
-        case 4:sprintf(TextList[TextNum], "%s %s", GlobalText[1900], GlobalText[1910]); break;
+        case 0:swprintf(TextList[TextNum], L"%s %s", GlobalText[168], GlobalText[1910]); break;
+        case 1:swprintf(TextList[TextNum], L"%s %s", GlobalText[169], GlobalText[1910]); break;
+        case 2:swprintf(TextList[TextNum], L"%s %s", GlobalText[167], GlobalText[1910]); break;
+        case 3:swprintf(TextList[TextNum], L"%s %s", GlobalText[166], GlobalText[1910]); break;
+        case 4:swprintf(TextList[TextNum], L"%s %s", GlobalText[1900], GlobalText[1910]); break;
         }
         TextNum++;
         TextListColor[TextNum] = TEXT_COLOR_DARKRED;
-        sprintf(TextList[TextNum], GlobalText[1908]);
+        swprintf(TextList[TextNum], GlobalText[1908]);
 
         if (Level == 4)
         {
             TextNum++;
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            sprintf(TextList[TextNum], GlobalText[61], GlobalText[24]);
+            swprintf(TextList[TextNum], GlobalText[61], GlobalText[24]);
         }
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 16)
     {
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], GlobalText[816]);
+        swprintf(TextList[TextNum], GlobalText[816]);
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 17)
     {
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], GlobalText[816]);
+        swprintf(TextList[TextNum], GlobalText[816]);
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 18)
     {
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], GlobalText[814]);
+        swprintf(TextList[TextNum], GlobalText[814]);
         TextNum++;
-        sprintf(TextList[TextNum], "\n");
+        swprintf(TextList[TextNum], L"\n");
         TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[638]);
+        swprintf(TextList[TextNum], GlobalText[638]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[639]);
+        swprintf(TextList[TextNum], GlobalText[639]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -4376,16 +4451,16 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
         case 0:
         {
-            sprintf(TextList[TextNum], GlobalText[1417]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1418]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1419]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[1417]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[1418]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[1419]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
         break;
         case 1:
         {
-            sprintf(TextList[TextNum], GlobalText[1638]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1639]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1472]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[1638]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[1639]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], GlobalText[1472]); TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
         break;
         }
@@ -4394,8 +4469,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], GlobalText[1460]); break;
-        case 1: sprintf(TextList[TextNum], GlobalText[1461]); break;
+        case 0: swprintf(TextList[TextNum], GlobalText[1460]); break;
+        case 1: swprintf(TextList[TextNum], GlobalText[1461]); break;
         }
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
@@ -4405,8 +4480,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         switch (Level)
         {
-        case 0: sprintf(TextList[TextNum], GlobalText[1416]); break;
-        case 1: sprintf(TextList[TextNum], GlobalText[1462]); break;
+        case 0: swprintf(TextList[TextNum], GlobalText[1416]); break;
+        case 1: swprintf(TextList[TextNum], GlobalText[1462]); break;
         }
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextBold[TextNum] = false;
@@ -4425,13 +4500,13 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         int HeroLevel = CharacterAttribute->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], "%s %s    %s      %s    ", GlobalText[1147], GlobalText[368], GlobalText[935], GlobalText[936]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], L"%s %s    %s      %s    ", GlobalText[1147], GlobalText[368], GlobalText[935], GlobalText[936]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
 
         for (int i = 0; i < 6; i++)
         {
             int Zen = g_iChaosCastleZen[i];
 
-            sprintf(TextList[TextNum], "        %d             %3d~%3d     %3d,000", i + 1, g_iChaosCastleLevel[startIndex + i][0], min(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
+            swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1, g_iChaosCastleLevel[startIndex + i][0], min(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
             if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] && HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) && gCharacterManager.IsMasterLevel(Hero->Class) == false)
             {
                 TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
@@ -4442,7 +4517,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             }
             TextBold[TextNum] = false; TextNum++;
         }
-        sprintf(TextList[TextNum], "         %d          %s   %3d,000", 7, GlobalText[737], 1000);
+        swprintf(TextList[TextNum], L"         %d          %s   %3d,000", 7, GlobalText[737], 1000);
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
         {
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
@@ -4454,10 +4529,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], "\n");
+        swprintf(TextList[TextNum], L"\n");
         TextNum++;
         SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[1157]);
+        swprintf(TextList[TextNum], GlobalText[1157]);
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE;
         TextNum++;
     }
@@ -4466,9 +4541,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch (Level)
         {
-        case 1: sprintf(TextList[TextNum], GlobalText[813]); break;
-        case 2: sprintf(TextList[TextNum], GlobalText[1099]); break;
-        case 3: sprintf(TextList[TextNum], GlobalText[1291]); break;
+        case 1: swprintf(TextList[TextNum], GlobalText[813]); break;
+        case 2: swprintf(TextList[TextNum], GlobalText[1099]); break;
+        case 3: swprintf(TextList[TextNum], GlobalText[1291]); break;
         default: break;
         }
         TextNum++;
@@ -4480,10 +4555,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ip->Type == ITEM_WING + 49 || ip->Type == ITEM_HELPER + 30)
     {
         // 망토 관련 옵션변경
-        sprintf(TextList[TextNum], GlobalText[577], 20 + Level * 2);  //  데미지 몇%증가
+        swprintf(TextList[TextNum], GlobalText[577], 20 + Level * 2);  //  데미지 몇%증가
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         int _iDamage = (ip->Type == ITEM_WING + 49) ? 10 + Level * 2 : 10 + Level;
-        sprintf(TextList[TextNum], GlobalText[578], _iDamage);  //  데미지 몇%흡수
+        swprintf(TextList[TextNum], GlobalText[578], _iDamage);  //  데미지 몇%흡수
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
 
@@ -4519,55 +4594,55 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         int arrow = false;
         if (ip->Type >= ITEM_POTION && ip->Type <= ITEM_POTION + 8)
         {
-            sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
             Success = true;
         }
         else if (ip->Type == ITEM_POTION + 21 && Level == 3)
         {
-            sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
             Success = true;
         }
         else if (ip->Type == ITEM_BOW + 7 || ip->Type == ITEM_BOW + 15)
         {
-            sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
             Success = true;
             arrow = true;
         }
         else if (ip->Type >= ITEM_POTION + 35 && ip->Type <= ITEM_POTION + 40)
         {
-            sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
             Success = true;
         }
         else if (ip->Type == ITEM_POTION + 133)
         {
-            sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
             Success = true;
         }
         else if (ip->Type >= ITEM_POTION + 46 && ip->Type <= ITEM_POTION + 50)
         {
-            sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
             Success = true;
         }
         else if (ip->Type >= ITEM_POTION + 153 && ip->Type <= ITEM_POTION + 156)
         {
-            sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
             Success = true;
         }
         else if (ip->Type >= ITEM_HELPER + 32 && ip->Type <= ITEM_HELPER + 33)
         {
-            sprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 20);
+            swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 20);
             Success = true;
         }
         else if (ip->Type == ITEM_HELPER + 34)
         {
-            sprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 10);
+            swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 10);
             Success = true;
         }
         else if (ip->Type == ITEM_HELPER + 37)
         {
             if (ip->bPeriodItem == false)
             {
-                sprintf(TextList[TextNum], GlobalText[70], ip->Durability);
+                swprintf(TextList[TextNum], GlobalText[70], ip->Durability);
                 Success = true;
             }
         }
@@ -4575,20 +4650,20 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             if (ip->bPeriodItem == false)
             {
-                sprintf(TextList[TextNum], GlobalText[70], ip->Durability);
+                swprintf(TextList[TextNum], GlobalText[70], ip->Durability);
                 Success = true;
             }
         }
         else if (ip->Type == ITEM_HELPER + 10)
         {
-            sprintf(TextList[TextNum], GlobalText[95], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[95], ip->Durability);
             Success = true;
         }
         else if (ip->Type == ITEM_HELPER + 64 || ip->Type == ITEM_HELPER + 65)
         {
             if (ip->bPeriodItem == false)
             {
-                sprintf(TextList[TextNum], GlobalText[70], ip->Durability);
+                swprintf(TextList[TextNum], GlobalText[70], ip->Durability);
                 Success = true;
             }
         }
@@ -4597,58 +4672,58 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             if (ip->bPeriodItem == false)
             {
-                sprintf(TextList[TextNum], GlobalText[70], ip->Durability);
+                swprintf(TextList[TextNum], GlobalText[70], ip->Durability);
                 Success = true;
             }
         }
         else if (ip->Type >= ITEM_HELPER + 46 && ip->Type <= ITEM_HELPER + 48)
         {
-            sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
             Success = true;
         }
         else if (ip->Type >= ITEM_HELPER + 125 && ip->Type <= ITEM_HELPER + 127)
         {
-            sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
 
             if (ip->Type == ITEM_HELPER + 126)
             {
                 TextNum++;
-                sprintf(TextList[TextNum], GlobalText[3105]);
+                swprintf(TextList[TextNum], GlobalText[3105]);
             }
             else if (ip->Type == ITEM_HELPER + 127)
             {
                 TextNum++;
-                sprintf(TextList[TextNum], GlobalText[3106]);
+                swprintf(TextList[TextNum], GlobalText[3106]);
             }
             Success = true;
         }
         else if (ip->Type == ITEM_POTION + 53)
         {
-            sprintf(TextList[TextNum], GlobalText[2296], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[2296], ip->Durability);
             Success = true;
         }
         else if (ip->Type == ITEM_HELPER + 61)
         {
-            sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
             Success = true;
         }
         else if (ip->Type == ITEM_POTION + 100)
         {
-            sprintf(TextList[TextNum], GlobalText[69], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[69], ip->Durability);
             Success = true;
         }
         else if (ip->Type == ITEM_HELPER + 70)
         {
             if (ip->Durability == 2)
             {
-                sprintf(TextList[TextNum], GlobalText[2605]);
+                swprintf(TextList[TextNum], GlobalText[2605]);
                 TextListColor[TextNum] = TEXT_COLOR_BLUE;
                 TextBold[TextNum] = false;
                 TextNum++;
             }
             else if (ip->Durability == 1)
             {
-                sprintf(TextList[TextNum], GlobalText[2606]);
+                swprintf(TextList[TextNum], GlobalText[2606]);
                 TextListColor[TextNum] = TEXT_COLOR_BLUE;
                 TextBold[TextNum] = false;
                 TextNum++;
@@ -4662,11 +4737,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 #ifdef LEM_ADD_LUCKYITEM
         else if (ip->Type >= ITEM_HELPER + 135 && ip->Type <= ITEM_HELPER + 145)
         {
-            sprintf(TextList[TextNum], GlobalText[2261]);
+            swprintf(TextList[TextNum], GlobalText[2261]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
             Success = true;
         }
 #endif // LEM_ADD_LUCKYITEM
@@ -4675,18 +4750,18 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             int maxDurability = calcMaxDurability(ip, p, Level);
 
-            sprintf(TextList[TextNum], GlobalText[71], ip->Durability, maxDurability);
+            swprintf(TextList[TextNum], GlobalText[71], ip->Durability, maxDurability);
             Success = true;
         }
         else if (ip->Type >= ITEM_TYPE_CHARM_MIXWING + EWS_BEGIN && ip->Type <= ITEM_TYPE_CHARM_MIXWING + EWS_END)
         {
-            sprintf(TextList[TextNum], GlobalText[2732 + (ip->Type - (MODEL_TYPE_CHARM_MIXWING + EWS_BEGIN))]);
+            swprintf(TextList[TextNum], GlobalText[2732 + (ip->Type - (MODEL_TYPE_CHARM_MIXWING + EWS_BEGIN))]);
 
             Success = true;
         }
         else if (ip->Type == ITEM_HELPER + 121)
         {
-            sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
             Success = true;
         }
 
@@ -4701,7 +4776,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         if (ip->Type == ITEM_HELPER + 10)
         {
-            sprintf(TextList[TextNum], GlobalText[95], ip->Durability);
+            swprintf(TextList[TextNum], GlobalText[95], ip->Durability);
 
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
@@ -4715,11 +4790,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             int value = Level * 2 + 1;
 
-            sprintf(TextList[TextNum], GlobalText[577], value);
+            swprintf(TextList[TextNum], GlobalText[577], value);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[88], 1);
+            swprintf(TextList[TextNum], GlobalText[88], 1);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
@@ -4730,7 +4805,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         if (p->Resistance[i])
         {
-            sprintf(TextList[TextNum], GlobalText[72], GlobalText[48 + i], Level + 1);
+            swprintf(TextList[TextNum], GlobalText[72], GlobalText[48 + i], Level + 1);
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
             TextNum++;
@@ -4739,13 +4814,13 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (ip->RequireLevel && ip->Type != ITEM_HELPER + 14)
     {
-        sprintf(TextList[TextNum], GlobalText[76], ip->RequireLevel);
+        swprintf(TextList[TextNum], GlobalText[76], ip->RequireLevel);
         if (CharacterAttribute->Level < ip->RequireLevel)
         {
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[74], ip->RequireLevel - CharacterAttribute->Level);
+            swprintf(TextList[TextNum], GlobalText[74], ip->RequireLevel - CharacterAttribute->Level);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -4796,7 +4871,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (ip->RequireStrength && bRequireStat)
     {
-        sprintf(TextList[TextNum], GlobalText[73], ip->RequireStrength - si_iNeedStrength);
+        swprintf(TextList[TextNum], GlobalText[73], ip->RequireStrength - si_iNeedStrength);
 
         WORD Strength;
         Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
@@ -4805,7 +4880,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[74], (ip->RequireStrength - Strength) - si_iNeedStrength);
+            swprintf(TextList[TextNum], GlobalText[74], (ip->RequireStrength - Strength) - si_iNeedStrength);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -4827,7 +4902,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     if (ip->RequireDexterity && bRequireStat)
     {
-        sprintf(TextList[TextNum], GlobalText[75], ip->RequireDexterity - si_iNeedDex);
+        swprintf(TextList[TextNum], GlobalText[75], ip->RequireDexterity - si_iNeedDex);
         WORD Dexterity;
         Dexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
         if (Dexterity < (ip->RequireDexterity - si_iNeedDex))
@@ -4836,7 +4911,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextBold[TextNum] = false;
             TextNum++;
 
-            sprintf(TextList[TextNum], GlobalText[74], (ip->RequireDexterity - Dexterity) - si_iNeedDex);
+            swprintf(TextList[TextNum], GlobalText[74], (ip->RequireDexterity - Dexterity) - si_iNeedDex);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -4858,7 +4933,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (ip->RequireVitality && bRequireStat) //  요구체력.
     {
-        sprintf(TextList[TextNum], GlobalText[1930], ip->RequireVitality);
+        swprintf(TextList[TextNum], GlobalText[1930], ip->RequireVitality);
 
         WORD Vitality;
         Vitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
@@ -4867,7 +4942,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[74], ip->RequireVitality - Vitality);
+            swprintf(TextList[TextNum], GlobalText[74], ip->RequireVitality - Vitality);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -4882,7 +4957,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (ip->RequireEnergy && bRequireStat)
     {
-        sprintf(TextList[TextNum], GlobalText[77], ip->RequireEnergy);
+        swprintf(TextList[TextNum], GlobalText[77], ip->RequireEnergy);
 
         WORD Energy;
         Energy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
@@ -4892,7 +4967,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[74], ip->RequireEnergy - Energy);
+            swprintf(TextList[TextNum], GlobalText[74], ip->RequireEnergy - Energy);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -4907,7 +4982,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (ip->RequireCharisma && bRequireStat)
     {
-        sprintf(TextList[TextNum], GlobalText[698], ip->RequireCharisma);
+        swprintf(TextList[TextNum], GlobalText[698], ip->RequireCharisma);
 
         WORD Charisma;
         Charisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
@@ -4916,7 +4991,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[74], ip->RequireCharisma - Charisma);
+            swprintf(TextList[TextNum], GlobalText[74], ip->RequireCharisma - Charisma);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
@@ -4938,8 +5013,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         if (Level >= 5)
         {
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-            sprintf(TextList[TextNum], GlobalText[78]);
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], GlobalText[78]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
         }
     }
@@ -4948,9 +5023,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         if (Level >= 5)
         {
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-            sprintf(TextList[TextNum], GlobalText[93]);
+            swprintf(TextList[TextNum], GlobalText[93]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
         }
     }
@@ -4962,10 +5037,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         || (ip->Type == (MODEL_SWORD + 28 - MODEL_ITEM))
         )
     {
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
         int nText = ITEM_STAFF + 21 <= ip->Type && ip->Type <= ITEM_STAFF + 29 ? 1691 : 79;
-        ::sprintf(TextList[TextNum], GlobalText[nText], ip->MagicPower);
+        ::swprintf(TextList[TextNum], GlobalText[nText], ip->MagicPower);
 
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = true;
@@ -4974,8 +5049,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (IsCepterItem(ip->Type) == true)
     {
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[1234], ip->MagicPower);
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[1234], ip->MagicPower);
         TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
     }
 
@@ -4987,34 +5062,34 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
         if (!(ITEM_HELPER + 109 <= ip->Type && ITEM_HELPER + 115 >= ip->Type))
         {
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         }
     }
 
     if (ip->option_380 != 0)
     {
-        std::vector<std::string> Text380;
+        std::vector<std::wstring> Text380;
 
         if (g_pItemAddOptioninfo)
         {
             g_pItemAddOptioninfo->GetItemAddOtioninfoText(Text380, ip->Type);
 
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
             for (int i = 0; i < (int)Text380.size(); ++i)
             {
-                strncpy(TextList[TextNum], Text380[i].c_str(), 100);
+                wcsncpy(TextList[TextNum], Text380[i].c_str(), 100);
                 TextListColor[TextNum] = TEXT_COLOR_REDPURPLE; TextBold[TextNum] = true; TextNum++;
             }
 
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         }
     }
     //#ifndef PBG_MOD_NEWCHAR_MONK_WING_2
     //#ifdef PBG_MOD_NEWCHAR_MONK_WING
     //	if(ip->Type==ITEM_WING+49)
     //	{
-    //		sprintf(TextList[TextNum],GlobalText[578],15+Level);
+    //		swprintf(TextList[TextNum],GlobalText[578],15+Level);
     //		TextListColor[TextNum] = TEXT_COLOR_BLUE;
     //		TextNum++;
     //	}
@@ -5030,17 +5105,17 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             {
                 if (g_pUIJewelHarmonyinfo->IsHarmonyJewelOption(type, ip->Jewel_Of_Harmony_Option))
                 {
-                    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
                     HARMONYJEWELOPTION harmonyjewel = g_pUIJewelHarmonyinfo->GetHarmonyJewelOptionInfo(type, ip->Jewel_Of_Harmony_Option);
 
                     if (type == SI_Defense && ip->Jewel_Of_Harmony_Option == 7)
                     {
-                        sprintf(TextList[TextNum], "%s +%d%%", harmonyjewel.Name, harmonyjewel.HarmonyJewelLevel[ip->Jewel_Of_Harmony_OptionLevel]);
+                        swprintf(TextList[TextNum], L"%s +%d%%", harmonyjewel.Name, harmonyjewel.HarmonyJewelLevel[ip->Jewel_Of_Harmony_OptionLevel]);
                     }
                     else
                     {
-                        sprintf(TextList[TextNum], "%s +%d", harmonyjewel.Name, harmonyjewel.HarmonyJewelLevel[ip->Jewel_Of_Harmony_OptionLevel]);
+                        swprintf(TextList[TextNum], L"%s +%d", harmonyjewel.Name, harmonyjewel.HarmonyJewelLevel[ip->Jewel_Of_Harmony_OptionLevel]);
                     }
 
                     if (Level >= ip->Jewel_Of_Harmony_OptionLevel) TextListColor[TextNum] = TEXT_COLOR_YELLOW;
@@ -5048,13 +5123,13 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
                     TextBold[TextNum] = true; TextNum++;
 
-                    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
                 }
                 else
                 {
-                    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-                    sprintf(TextList[TextNum], "%s : %d %d %d"
+                    swprintf(TextList[TextNum], L"%s : %d %d %d"
                         , GlobalText[2204]
                         , (int)type
                         , (int)ip->Jewel_Of_Harmony_Option
@@ -5064,12 +5139,12 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                     TextListColor[TextNum] = TEXT_COLOR_DARKRED;
                     TextBold[TextNum] = true; TextNum++;
 
-                    sprintf(TextList[TextNum], GlobalText[2205]);
+                    swprintf(TextList[TextNum], GlobalText[2205]);
 
                     TextListColor[TextNum] = TEXT_COLOR_DARKRED;
                     TextBold[TextNum] = true; TextNum++;
 
-                    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+                    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
                 }
             }
         }
@@ -5092,17 +5167,17 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
         if (ip->Special[i] == AT_LUCK)
         {
-            sprintf(TextList[TextNum], GlobalText[94], ip->SpecialValue[i]);
+            swprintf(TextList[TextNum], GlobalText[94], ip->SpecialValue[i]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
         }
         else if (ip->Special[i] == AT_SKILL_RIDER)
         {
-            sprintf(TextList[TextNum], GlobalText[179]);
+            swprintf(TextList[TextNum], GlobalText[179]);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
         else if (ip->Special[i] == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= ip->Special[i] && ip->Special[i] <= AT_SKILL_ASHAKE_UP + 4))
         {
-            sprintf(TextList[TextNum], GlobalText[1201]);
+            swprintf(TextList[TextNum], GlobalText[1201]);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
         else if ((ip->Special[i] == AT_IMPROVE_DAMAGE) &&
@@ -5114,29 +5189,29 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 )
             )
         {
-            sprintf(TextList[TextNum], GlobalText[89], ip->SpecialValue[i]);
+            swprintf(TextList[TextNum], GlobalText[89], ip->SpecialValue[i]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false; TextNum++;
         }
     }
 
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     if (ip->Type == ITEM_HELPER + 32 || ip->Type == ITEM_HELPER + 33)
     {
-        sprintf(TextList[TextNum], GlobalText[1917]);
+        swprintf(TextList[TextNum], GlobalText[1917]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 34 || ip->Type == ITEM_HELPER + 35)
     {
-        sprintf(TextList[TextNum], GlobalText[1918]);
+        swprintf(TextList[TextNum], GlobalText[1918]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 36)
     {
-        sprintf(TextList[TextNum], GlobalText[1919]);
+        swprintf(TextList[TextNum], GlobalText[1919]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextNum++;
     }
@@ -5147,21 +5222,21 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false; TextNum++; SkipNum++;
         if (ip->Option1 == 0x01)
         {
-            sprintf(TextList[TextNum], GlobalText[1860], 10);
+            swprintf(TextList[TextNum], GlobalText[1860], 10);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextNum++;
 
-            sprintf(TextList[TextNum], GlobalText[579]);
+            swprintf(TextList[TextNum], GlobalText[579]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextNum++;
         }
         else if (ip->Option1 == 0x02)
         {
-            sprintf(TextList[TextNum], GlobalText[1861], 10);
+            swprintf(TextList[TextNum], GlobalText[1861], 10);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextNum++;
 
-            sprintf(TextList[TextNum], GlobalText[579]);
+            swprintf(TextList[TextNum], GlobalText[579]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextNum++;
         }
@@ -5169,64 +5244,64 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             WORD wLevel = CharacterAttribute->Level;
 
-            sprintf(TextList[TextNum], GlobalText[1867], (wLevel / 2));
+            swprintf(TextList[TextNum], GlobalText[1867], (wLevel / 2));
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1868], (wLevel / 2));
+            swprintf(TextList[TextNum], GlobalText[1868], (wLevel / 2));
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1869], (wLevel / 12));
+            swprintf(TextList[TextNum], GlobalText[1869], (wLevel / 12));
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1870], (wLevel / 25));
+            swprintf(TextList[TextNum], GlobalText[1870], (wLevel / 25));
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextNum++;
-            sprintf(TextList[TextNum], "\n");
+            swprintf(TextList[TextNum], L"\n");
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1871], (Hero->Level / 2));
+            swprintf(TextList[TextNum], GlobalText[1871], (Hero->Level / 2));
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[1872], (Hero->Level / 2));
+            swprintf(TextList[TextNum], GlobalText[1872], (Hero->Level / 2));
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
             TextNum++;
         }
 
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-        sprintf(TextList[TextNum], GlobalText[1920]);
+        swprintf(TextList[TextNum], GlobalText[1920]);
         TextListColor[TextNum] = TEXT_COLOR_YELLOW;
         TextNum++;
 
         if (ip->Option1 == 0x00)
         {
-            sprintf(TextList[TextNum], GlobalText[1929]);
+            swprintf(TextList[TextNum], GlobalText[1929]);
             TextListColor[TextNum] = TEXT_COLOR_YELLOW;
             TextNum++;
         }
     }
     else if (ip->Type == ITEM_HELPER + 10)
     {
-        sprintf(TextList[TextNum], GlobalText[3088]);
+        swprintf(TextList[TextNum], GlobalText[3088]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 39)
     {
-        char strText[100];
-        sprintf(strText, GlobalText[959], 10);
-        sprintf(TextList[TextNum], "%s%%", strText);
+        wchar_t strText[100];
+        swprintf(strText, GlobalText[959], 10);
+        swprintf(TextList[TextNum], L"%s%%", strText);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
 
         WORD wlevel = CharacterAttribute->Level;
-        sprintf(TextList[TextNum], GlobalText[2225], wlevel);
+        swprintf(TextList[TextNum], GlobalText[2225], wlevel);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
 
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-        sprintf(TextList[TextNum], GlobalText[3088]);
+        swprintf(TextList[TextNum], GlobalText[3088]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
@@ -5234,99 +5309,99 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ip->Type == ITEM_POTION + 63)
     {
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], GlobalText[2244]); TextNum++;
+        swprintf(TextList[TextNum], GlobalText[2244]); TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 52)
     {
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], GlobalText[2323]); TextNum++;
+        swprintf(TextList[TextNum], GlobalText[2323]); TextNum++;
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        sprintf(TextList[TextNum], GlobalText[2011]); TextNum++;
+        swprintf(TextList[TextNum], GlobalText[2011]); TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 40)
     {
-        sprintf(TextList[TextNum], "%s", GlobalText[2232]);
+        swprintf(TextList[TextNum], L"%s", GlobalText[2232]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
 
-        sprintf(TextList[TextNum], GlobalText[3088]);
+        swprintf(TextList[TextNum], GlobalText[3088]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
         TextNum++;
 
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-        sprintf(TextList[TextNum], GlobalText[3088]);
+        swprintf(TextList[TextNum], GlobalText[3088]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 41)
     {
-        sprintf(TextList[TextNum], GlobalText[88], 20);
+        swprintf(TextList[TextNum], GlobalText[88], 20);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[89], 20);
+        swprintf(TextList[TextNum], GlobalText[89], 20);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], "%s", GlobalText[2248]);
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"%s", GlobalText[2248]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextNum++;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[3088]);
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[3088]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 76)
     {
-        sprintf(TextList[TextNum], GlobalText[2743]);
+        swprintf(TextList[TextNum], GlobalText[2743]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2744]);
+        swprintf(TextList[TextNum], GlobalText[2744]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[2745]);
+        swprintf(TextList[TextNum], GlobalText[2745]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[3088]);
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[3088]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_HELPER + 122)
     {
-        sprintf(TextList[TextNum], GlobalText[3065]);
+        swprintf(TextList[TextNum], GlobalText[3065]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[3066]);
+        swprintf(TextList[TextNum], GlobalText[3066]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[3067]);
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[3067]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], GlobalText[3072]);
+        swprintf(TextList[TextNum], GlobalText[3072]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[3088]);
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[3088]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 51)
     {
-        sprintf(TextList[TextNum], "%s", GlobalText[2244]);
+        swprintf(TextList[TextNum], L"%s", GlobalText[2244]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
     }
@@ -5334,13 +5409,13 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         for (int i = 0; i < 7; ++i)
         {
-            sprintf(TextList[TextNum], GlobalText[976 + i], 255);
+            swprintf(TextList[TextNum], GlobalText[976 + i], 255);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextNum++;
         }
 
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], GlobalText[3088]);
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], GlobalText[3088]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
@@ -5348,16 +5423,16 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ip->Type == ITEM_HELPER + 66)
     {
         TextNum--;
-        sprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextNum++;
-        sprintf(TextList[TextNum], "%s", GlobalText[2589]);
+        swprintf(TextList[TextNum], L"%s", GlobalText[2589]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 100)
     {
-        sprintf(TextList[TextNum], GlobalText[1887], ip->Durability);
+        swprintf(TextList[TextNum], GlobalText[1887], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
     }
@@ -5365,12 +5440,12 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         TextNum--; SkipNum--;
 
-        sprintf(TextList[TextNum], GlobalText[3071]);
+        swprintf(TextList[TextNum], GlobalText[3071]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], GlobalText[3072]);
+        swprintf(TextList[TextNum], GlobalText[3072]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -5382,11 +5457,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
         if (ip->Durability == 254)
         {
-            sprintf(TextList[TextNum], GlobalText[3143]);
+            swprintf(TextList[TextNum], GlobalText[3143]);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         }
 
         switch (ip->Type)
@@ -5394,10 +5469,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
         case ITEM_HELPER + 128:
         case ITEM_HELPER + 129:
-            sprintf(TextList[TextNum], GlobalText[3121]);
+            swprintf(TextList[TextNum], GlobalText[3121]);
             break;
         case ITEM_HELPER + 134:
-            sprintf(TextList[TextNum], GlobalText[3123]);
+            swprintf(TextList[TextNum], GlobalText[3123]);
             break;
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
@@ -5405,7 +5480,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         case ITEM_HELPER + 131:
         case ITEM_HELPER + 132:
         case ITEM_HELPER + 133:
-            sprintf(TextList[TextNum], GlobalText[3122]);
+            swprintf(TextList[TextNum], GlobalText[3122]);
             break;
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 
@@ -5417,26 +5492,26 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextBold[TextNum] = false;
         TextNum++;
 
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
         switch (ip->Type)
         {
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
         case ITEM_HELPER + 128:
-            sprintf(TextList[TextNum], GlobalText[965], 10);
+            swprintf(TextList[TextNum], GlobalText[965], 10);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
             break;
         case ITEM_HELPER + 129:
-            sprintf(TextList[TextNum], GlobalText[967], 10);
+            swprintf(TextList[TextNum], GlobalText[967], 10);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
             break;
         case ITEM_HELPER + 134:
-            sprintf(TextList[TextNum], GlobalText[3126], 20);
+            swprintf(TextList[TextNum], GlobalText[3126], 20);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
@@ -5444,41 +5519,41 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
         case ITEM_HELPER + 130:
-            sprintf(TextList[TextNum], GlobalText[3132], 50);
+            swprintf(TextList[TextNum], GlobalText[3132], 50);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
             break;
         case ITEM_HELPER + 131:
-            sprintf(TextList[TextNum], GlobalText[3134], 50);
+            swprintf(TextList[TextNum], GlobalText[3134], 50);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
             break;
         case ITEM_HELPER + 132:
 #ifdef LJH_MOD_CHANGED_GOLDEN_OAK_CHARM_STAT
-            sprintf(TextList[TextNum], GlobalText[3132], 100);
+            swprintf(TextList[TextNum], GlobalText[3132], 100);
 #else //LJH_MOD_CHANGED_GOLDEN_OAK_CHARM_STAT
-            sprintf(TextList[TextNum], GlobalText[3132], 150);
+            swprintf(TextList[TextNum], GlobalText[3132], 150);
 #endif //LJH_MOD_CHANGED_GOLDEN_OAK_CHARM_STAT
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
 #ifdef LJH_MOD_CHANGED_GOLDEN_OAK_CHARM_STAT
-            sprintf(TextList[TextNum], GlobalText[3133], 500);
+            swprintf(TextList[TextNum], GlobalText[3133], 500);
 #else //LJH_MOD_CHANGED_GOLDEN_OAK_CHARM_STAT
-            sprintf(TextList[TextNum], GlobalText[3133], 50);
+            swprintf(TextList[TextNum], GlobalText[3133], 50);
 #endif //LJH_MOD_CHANGED_GOLDEN_OAK_CHARM_STAT
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
             break;
         case ITEM_HELPER + 133:	// 골든메이플참
-            sprintf(TextList[TextNum], GlobalText[3134], 150);
+            swprintf(TextList[TextNum], GlobalText[3134], 150);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
-            sprintf(TextList[TextNum], GlobalText[3135], 50);
+            swprintf(TextList[TextNum], GlobalText[3135], 50);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
             TextNum++;
@@ -5488,10 +5563,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             break;
         }
 
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-        sprintf(TextList[TextNum], GlobalText[3124]);
+        swprintf(TextList[TextNum], GlobalText[3124]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
@@ -5499,7 +5574,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
     else if (ip->Type == ITEM_HELPER + 68)
     {
-        sprintf(TextList[TextNum], GlobalText[3088]);
+        swprintf(TextList[TextNum], GlobalText[3088]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextBold[TextNum] = false;
         TextNum++;
@@ -5509,17 +5584,17 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         if (ip->bExpiredPeriod == true)
         {
-            sprintf(TextList[TextNum], GlobalText[3266]);
+            swprintf(TextList[TextNum], GlobalText[3266]);
             TextListColor[TextNum] = TEXT_COLOR_RED;
         }
         else
         {
-            sprintf(TextList[TextNum], GlobalText[3265]);
+            swprintf(TextList[TextNum], GlobalText[3265]);
             TextListColor[TextNum] = TEXT_COLOR_ORANGE;
             TextNum++;
             SkipNum++;
 
-            sprintf(TextList[TextNum], "%d-%02d-%02d  %02d:%02d", ExpireTime->tm_year + 1900, ExpireTime->tm_mon + 1,
+            swprintf(TextList[TextNum], L"%d-%02d-%02d  %02d:%02d", ExpireTime->tm_year + 1900, ExpireTime->tm_mon + 1,
                 ExpireTime->tm_mday, ExpireTime->tm_hour, ExpireTime->tm_min);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
         }
@@ -5554,7 +5629,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         fRateY = fRateY / 1.1f;
         g_pRenderText->SetFont(g_hFont);
 
-        g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
 
         Height = (TextLine * TextSize.cy + EmptyLine * TextSize.cy / 2.0f) / fRateY;
 
@@ -5770,9 +5845,9 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     {
         int maxDurability;
 
-        sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-        char Text[100];
+        wchar_t Text[100];
 
         maxDurability = calcMaxDurability(ip, p, Level);
         if (ip->Durability < maxDurability)
@@ -5783,14 +5858,14 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
             if (iGold == -1)
                 return;
             ConvertRepairGold(iGold, ip->Durability, maxDurability, ip->Type, Text);
-            sprintf(TextList[TextNum], GlobalText[238], Text);
+            swprintf(TextList[TextNum], GlobalText[238], Text);
 
             TextListColor[TextNum] = Color;
         }
         else
         {
             RepairEnable = 1;
-            sprintf(TextList[TextNum], GlobalText[238], "0");
+            swprintf(TextList[TextNum], GlobalText[238], L"0");
             TextListColor[TextNum] = Color;
         }
         TextBold[TextNum] = true;
@@ -5798,11 +5873,11 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
 
         //        RepairEnable = 1;
     }
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     if (ip->Type == ITEM_WING + 11)
     {
-        sprintf(TextList[TextNum], "%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
+        swprintf(TextList[TextNum], L"%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
     }
     else if (ip->Type == ITEM_HELPER + 10)
     {
@@ -5810,14 +5885,14 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         {
             if (SommonTable[Level] == MonsterScript[i].Type)
             {
-                sprintf(TextList[TextNum], "%s %s", MonsterScript[i].Name, GlobalText[103]);
+                swprintf(TextList[TextNum], L"%s %s", MonsterScript[i].Name, GlobalText[103]);
                 break;
             }
         }
     }
     else if ((ip->Type == ITEM_HELPER + 4) || (ip->Type == ITEM_HELPER + 5))
     {
-        sprintf(TextList[TextNum], "%s", p->Name);
+        swprintf(TextList[TextNum], L"%s", p->Name);
     }
     else if ((ip->Type >= ITEM_WING + 3 && ip->Type <= ITEM_WING + 6)
         || ip->Type >= ITEM_HELPER + 30
@@ -5826,29 +5901,29 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         || (ip->Type >= ITEM_WING + 49 && ip->Type <= ITEM_WING + 50))
     {
         if (Level == 0)
-            sprintf(TextList[TextNum], "%s", p->Name);
+            swprintf(TextList[TextNum], L"%s", p->Name);
         else
-            sprintf(TextList[TextNum], "%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
     }
     else
     {
         if ((ip->Option1 & 63) > 0)
         {
             if (Level == 0)
-                sprintf(TextList[TextNum], "%s %s", GlobalText[620], p->Name);
+                swprintf(TextList[TextNum], L"%s %s", GlobalText[620], p->Name);
             else
-                sprintf(TextList[TextNum], "%s %s +%d", GlobalText[620], p->Name, Level);
+                swprintf(TextList[TextNum], L"%s %s +%d", GlobalText[620], p->Name, Level);
         }
         else
         {
             if (Level == 0)
-                sprintf(TextList[TextNum], "%s", p->Name);
+                swprintf(TextList[TextNum], L"%s", p->Name);
             else
-                sprintf(TextList[TextNum], "%s +%d", p->Name, Level);
+                swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
         }
     }
     TextListColor[TextNum] = Color; TextBold[TextNum] = true; TextNum++;
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     if (ip->Type < ITEM_POTION)
     {
@@ -5856,7 +5931,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         {
             int maxDurability = calcMaxDurability(ip, p, Level);
 
-            sprintf(TextList[TextNum], GlobalText[71], ip->Durability, maxDurability);
+            swprintf(TextList[TextNum], GlobalText[71], ip->Durability, maxDurability);
 
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             TextBold[TextNum] = false;
@@ -5864,11 +5939,11 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         }
     }
 
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     SIZE TextSize = { 0, 0 };
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
 
     int Height = ((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) * 480 / WindowHeight;
     if (sy - Height >= 0)
@@ -5969,7 +6044,7 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
 
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*= STRP_NONE*/)
 {
-    char lpszName[256];
+    wchar_t lpszName[256];
     int  iMinDamage, iMaxDamage;
     int  HeroClass = gCharacterManager.GetBaseClass(Hero->Class);
     int  iMana, iDistance, iSkillMana;
@@ -5997,16 +6072,16 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         {
             if (CharacterMachine->Equipment[0].Special[i] == AT_SKILL_LONG_SPEAR)
             {
-                wsprintf(lpszName, "%s", GlobalText[1200]);
+                swprintf(lpszName, L"%s", GlobalText[1200]);
                 break;
             }
         }
     }
 
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
-    sprintf(TextList[TextNum], "%s", lpszName);
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"%s", lpszName);
     TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     WORD Dexterity;
     WORD Energy;
@@ -6068,13 +6143,13 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
             int iDeleteMana = (int)(CharacterAttribute->ManaMax * 0.02f);
             int iLimitTime = (int)(60 + (Energy / 40.f));
 
-            sprintf(TextList[TextNum], GlobalText[578], iDamageShield);
+            swprintf(TextList[TextNum], GlobalText[578], iDamageShield);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
 
-            sprintf(TextList[TextNum], GlobalText[880], iDeleteMana);
+            swprintf(TextList[TextNum], GlobalText[880], iDeleteMana);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
 
-            sprintf(TextList[TextNum], GlobalText[881], iLimitTime);
+            swprintf(TextList[TextNum], GlobalText[881], iLimitTime);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
         else if (SkillType != AT_SKILL_SWELL_OF_MAGICPOWER && SkillType != AT_SKILL_ALICE_SLEEP && !(AT_SKILL_ALICE_SLEEP_UP <= SkillType && SkillType <= AT_SKILL_ALICE_SLEEP_UP + 4))
@@ -6085,10 +6160,10 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
                 if (AT_SKILL_SUMMON_EXPLOSION <= bySkill && bySkill <= AT_SKILL_SUMMON_POLLUTION)
                 {
                     gCharacterManager.GetCurseSkillDamage(bySkill, &iMinDamage, &iMaxDamage);
-                    sprintf(TextList[TextNum], GlobalText[1692], iMinDamage, iMaxDamage);
+                    swprintf(TextList[TextNum], GlobalText[1692], iMinDamage, iMaxDamage);
                 }
                 else
-                    sprintf(TextList[TextNum], GlobalText[170], iMinDamage + skillattackpowerRate, iMaxDamage + skillattackpowerRate);
+                    swprintf(TextList[TextNum], GlobalText[170], iMinDamage + skillattackpowerRate, iMaxDamage + skillattackpowerRate);
                 TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             }
         }
@@ -6159,7 +6234,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         case AT_SKILL_ASHAKE_UP + 3:
         case AT_SKILL_ASHAKE_UP + 4:
         case AT_SKILL_DARK_HORSE:
-            sprintf(TextList[TextNum], GlobalText[1237]);
+            swprintf(TextList[TextNum], GlobalText[1237]);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
             break;
         case AT_SKILL_BRAND_OF_SKILL:
@@ -6171,7 +6246,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         case AT_SKILL_DEF_UP_OURFORCES:
             break;
         default:
-            sprintf(TextList[TextNum], GlobalText[879], iSkillMinDamage, iSkillMaxDamage + skillattackpowerRate);
+            swprintf(TextList[TextNum], GlobalText[879], iSkillMinDamage, iSkillMaxDamage + skillattackpowerRate);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             break;
         }
@@ -6205,7 +6280,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
 
         iSkillMaxDamage = iSkillMinDamage + 30;
 
-        sprintf(TextList[TextNum], GlobalText[879], iSkillMinDamage, iSkillMaxDamage + skillattackpowerRate);
+        swprintf(TextList[TextNum], GlobalText[879], iSkillMinDamage, iSkillMaxDamage + skillattackpowerRate);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
 
@@ -6221,11 +6296,11 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         case AT_SKILL_HEAL_UP + 4:
         {
             int Cal = (Energy / 5) + 5;
-            sprintf(TextList[TextNum], GlobalText[171], (Cal)+(int)((float)Cal * (float)(SkillAttribute[CharacterAttribute->Skill[Type]].Damage / (float)100)));
+            swprintf(TextList[TextNum], GlobalText[171], (Cal)+(int)((float)Cal * (float)(SkillAttribute[CharacterAttribute->Skill[Type]].Damage / (float)100)));
         }
         break;
         case AT_SKILL_HEALING:
-            sprintf(TextList[TextNum], GlobalText[171], Energy / 5 + 5);
+            swprintf(TextList[TextNum], GlobalText[171], Energy / 5 + 5);
             break;
         case AT_SKILL_DEF_POWER_UP:
         case AT_SKILL_DEF_POWER_UP + 1:
@@ -6234,10 +6309,10 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         case AT_SKILL_DEF_POWER_UP + 4:
         {
             int Cal = Energy / 8 + 2;
-            sprintf(TextList[TextNum], GlobalText[172], (Cal)+(int)((float)Cal / (float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage / (float)10)));
+            swprintf(TextList[TextNum], GlobalText[172], (Cal)+(int)((float)Cal / (float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage / (float)10)));
         }
         break;
-        case AT_SKILL_DEFENSE:sprintf(TextList[TextNum], GlobalText[172], Energy / 8 + 2); break;
+        case AT_SKILL_DEFENSE:swprintf(TextList[TextNum], GlobalText[172], Energy / 8 + 2); break;
         case AT_SKILL_ATT_POWER_UP:
         case AT_SKILL_ATT_POWER_UP + 1:
         case AT_SKILL_ATT_POWER_UP + 2:
@@ -6245,14 +6320,14 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         case AT_SKILL_ATT_POWER_UP + 4:
         {
             int Cal = Energy / 7 + 3;
-            sprintf(TextList[TextNum], GlobalText[173], (Cal)+(int)((float)Cal / (float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage / (float)10)));
+            swprintf(TextList[TextNum], GlobalText[173], (Cal)+(int)((float)Cal / (float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage / (float)10)));
         }
         break;
-        case AT_SKILL_ATTACK:sprintf(TextList[TextNum], GlobalText[173], Energy / 7 + 3); break;
+        case AT_SKILL_ATTACK:swprintf(TextList[TextNum], GlobalText[173], Energy / 7 + 3); break;
         case AT_SKILL_RECOVER:
         {
             int Cal = Energy / 4;
-            sprintf(TextList[TextNum], GlobalText[1782], (int)((float)Cal + (float)CharacterAttribute->Level));
+            swprintf(TextList[TextNum], GlobalText[1782], (int)((float)Cal + (float)CharacterAttribute->Level));
         }
         break;
         default:Success = false;
@@ -6267,23 +6342,23 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
     {
         if (iDistance)
         {
-            sprintf(TextList[TextNum], GlobalText[174], iDistance);
+            swprintf(TextList[TextNum], GlobalText[174], iDistance);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
     }
 
-    sprintf(TextList[TextNum], GlobalText[175], iMana);
+    swprintf(TextList[TextNum], GlobalText[175], iMana);
     TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     if (iSkillMana > 0)
     {
-        sprintf(TextList[TextNum], GlobalText[360], iSkillMana);
+        swprintf(TextList[TextNum], GlobalText[360], iSkillMana);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT)
     {
         if (CharacterAttribute->Skill[Type] == AT_SKILL_SPEAR)
         {
-            sprintf(TextList[TextNum], GlobalText[96]);
+            swprintf(TextList[TextNum], GlobalText[96]);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
 
@@ -6298,14 +6373,14 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
                 || (AT_SKILL_TORNADO_SWORDB_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_TORNADO_SWORDB_UP + 4)
                 )
             {
-                sprintf(TextList[TextNum], GlobalText[99]);
+                swprintf(TextList[TextNum], GlobalText[99]);
                 TextListColor[TextNum] = TEXT_COLOR_DARKRED;
                 TextBold[TextNum] = false;
                 TextNum++;
             }
             else if (CharacterAttribute->Skill[Type] == AT_SKILL_BLOW_OF_DESTRUCTION)
             {
-                sprintf(TextList[TextNum], GlobalText[2115]);
+                swprintf(TextList[TextNum], GlobalText[2115]);
                 TextListColor[TextNum] = TEXT_COLOR_DARKRED;
                 TextBold[TextNum] = false;
                 TextNum++;
@@ -6316,7 +6391,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
     BYTE MasteryType = gSkillManager.GetSkillMasteryType(CharacterAttribute->Skill[Type]);
     if (MasteryType != 255)
     {
-        sprintf(TextList[TextNum], GlobalText[1080 + MasteryType]);
+        swprintf(TextList[TextNum], GlobalText[1080 + MasteryType]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
     }
 
@@ -6325,17 +6400,17 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
     SkillUseType = SkillAttribute[SkillType].SkillUseType;
     if (SkillUseType == SKILL_USE_TYPE_BRAND)
     {
-        sprintf(TextList[TextNum], GlobalText[1480], SkillAttribute[BrandType].Name);
+        swprintf(TextList[TextNum], GlobalText[1480], SkillAttribute[BrandType].Name);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[1481], SkillAttribute[BrandType].Damage);
+        swprintf(TextList[TextNum], GlobalText[1481], SkillAttribute[BrandType].Damage);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
     }
     SkillUseType = SkillAttribute[SkillType].SkillUseType;
     if (SkillUseType == SKILL_USE_TYPE_MASTER)
     {
-        sprintf(TextList[TextNum], GlobalText[1482]);
+        swprintf(TextList[TextNum], GlobalText[1482]);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[1483], SkillAttribute[SkillType].KillCount);
+        swprintf(TextList[TextNum], GlobalText[1483], SkillAttribute[SkillType].KillCount);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
     }
 
@@ -6343,34 +6418,34 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
     {
         if (CharacterAttribute->Skill[Type] == AT_SKILL_PARTY_TELEPORT && PartyNumber <= 0)
         {
-            sprintf(TextList[TextNum], GlobalText[1185]);
+            swprintf(TextList[TextNum], GlobalText[1185]);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
     }
 
     if (CharacterAttribute->Skill[Type] == AT_SKILL_PLASMA_STORM_FENRIR)
     {
-        sprintf(TextList[TextNum], GlobalText[1926]);
+        swprintf(TextList[TextNum], GlobalText[1926]);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
-        sprintf(TextList[TextNum], GlobalText[1927]);
+        swprintf(TextList[TextNum], GlobalText[1927]);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
     }
 
     if (CharacterAttribute->Skill[Type] == AT_SKILL_INFINITY_ARROW)
     {
-        sprintf(TextList[1], lpszName);
+        swprintf(TextList[1], lpszName);
         TextListColor[1] = TEXT_COLOR_BLUE; TextBold[1] = true;
-        sprintf(TextList[2], "\n");
-        sprintf(TextList[3], GlobalText[2040]);
+        swprintf(TextList[2], L"\n");
+        swprintf(TextList[3], GlobalText[2040]);
         TextListColor[3] = TEXT_COLOR_DARKRED; TextBold[3] = false;
-        sprintf(TextList[4], GlobalText[175], iMana);
+        swprintf(TextList[4], GlobalText[175], iMana);
         TextListColor[4] = TEXT_COLOR_WHITE; TextBold[4] = false;
-        sprintf(TextList[5], GlobalText[360], iSkillMana);
+        swprintf(TextList[5], GlobalText[360], iSkillMana);
         TextListColor[5] = TEXT_COLOR_WHITE; TextBold[5] = false;
         TextNum = 6; SkipNum = 2;
     }
 
-    sprintf(TextList[TextNum], "\n"); TextNum++; SkipNum++;
+    swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
     if (CharacterAttribute->Skill[Type] == AT_SKILL_RUSH || CharacterAttribute->Skill[Type] == AT_SKILL_SPACE_SPLIT
         || CharacterAttribute->Skill[Type] == AT_SKILL_DEEPIMPACT || CharacterAttribute->Skill[Type] == AT_SKILL_JAVELIN
@@ -6378,30 +6453,30 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         || CharacterAttribute->Skill[Type] == AT_SKILL_OCCUPY
         )
     {
-        sprintf(TextList[TextNum], GlobalText[2047]);
+        swprintf(TextList[TextNum], GlobalText[2047]);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
     }
     if (CharacterAttribute->Skill[Type] == AT_SKILL_STUN || CharacterAttribute->Skill[Type] == AT_SKILL_REMOVAL_STUN
         || CharacterAttribute->Skill[Type] == AT_SKILL_INVISIBLE || CharacterAttribute->Skill[Type] == AT_SKILL_REMOVAL_INVISIBLE
         || CharacterAttribute->Skill[Type] == AT_SKILL_REMOVAL_BUFF)
     {
-        sprintf(TextList[TextNum], GlobalText[2048]);
+        swprintf(TextList[TextNum], GlobalText[2048]);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
     }
     if (CharacterAttribute->Skill[Type] == AT_SKILL_SPEAR)
     {
-        sprintf(TextList[TextNum], GlobalText[2049]);
+        swprintf(TextList[TextNum], GlobalText[2049]);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
     }
 
     if (SkillType == AT_SKILL_SWELL_OF_MAGICPOWER)
     {
-        sprintf(TextList[TextNum], GlobalText[2054]);
+        swprintf(TextList[TextNum], GlobalText[2054]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
     }
 
     SIZE TextSize = { 0, 0 };
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
 
     if (iRenderPoint == STRP_NONE)
     {
@@ -6420,7 +6495,7 @@ void SetJewelColor()
 
 void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExtOption, bool Sort)
 {
-    char Name[80];
+    wchar_t Name[80]{};
 
     int Level = (ItemLevel >> 3) & 15;
 
@@ -6445,17 +6520,17 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
     // Use the item name by default
     if (Level == 0)
     {
-        sprintf(Name, "%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, L"%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else
     {
-        sprintf(Name, "%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, Level);
+        swprintf(Name, L"%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, Level);
     }
 
     if (o->Type == MODEL_POTION + 15) // Zen
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, "%s %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        swprintf(Name, L"%s %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
     else if ((o->Type == MODEL_POTION + 13)
         || (o->Type == MODEL_POTION + 14)
@@ -6473,279 +6548,279 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         // Jewels ...
         g_pRenderText->SetFont(g_hFontBold);
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, "%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, L"%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_WING + 11)
     {
         glColor3f(0.7f, 0.7f, 0.7f);
-        sprintf(Name, "%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
+        swprintf(Name, L"%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
     }
     else if (o->Type == MODEL_HELPER + 46)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 46].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 46].Name);
     }
     else if (o->Type == MODEL_HELPER + 47)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 47].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 47].Name);
     }
     else if (o->Type == MODEL_HELPER + 48)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 48].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 48].Name);
     }
     else if (o->Type == MODEL_POTION + 54)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 54].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 54].Name);
     }
     else if (o->Type >= MODEL_POTION + 58 && o->Type <= MODEL_POTION + 62)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type >= MODEL_POTION + 145 && o->Type <= MODEL_POTION + 150)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_HELPER + 125)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 125].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 125].Name);
     }
     else if (o->Type == MODEL_HELPER + 126)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 126].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 126].Name);
     }
     else if (o->Type == MODEL_HELPER + 127)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 127].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 127].Name);
     }
     else if (o->Type == MODEL_POTION + 53)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 53].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 53].Name);
     }
     else if (o->Type == MODEL_HELPER + 43 || o->Type == MODEL_HELPER + 44 || o->Type == MODEL_HELPER + 45)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_HELPER].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_HELPER].Name);
     }
     else if (o->Type >= ITEM_POTION + 70 && o->Type <= ITEM_POTION + 71)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type >= ITEM_POTION + 72 && o->Type <= ITEM_POTION + 77)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == ITEM_HELPER + 59)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type >= ITEM_HELPER + 54 && o->Type <= ITEM_HELPER + 58)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type >= ITEM_POTION + 78 && o->Type <= ITEM_POTION + 82)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == ITEM_HELPER + 60)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == ITEM_HELPER + 61)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_POTION + 83)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_HELPER + 43 || o->Type == MODEL_HELPER + 44 || o->Type == MODEL_HELPER + 45)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[o->Type - MODEL_HELPER].Name);
+        swprintf(Name, ItemAttribute[o->Type - MODEL_HELPER].Name);
     }
     else if (o->Type == MODEL_POTION + 91)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 91].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 91].Name);
     }
     else if (o->Type == MODEL_POTION + 92)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 92].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 92].Name);
     }
     else if (o->Type == MODEL_POTION + 93)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 93].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 93].Name);
     }
     else if (o->Type == MODEL_POTION + 95)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 95].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 95].Name);
     }
     else if (o->Type == MODEL_POTION + 94)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 94].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 94].Name);
     }
     else if (o->Type == MODEL_POTION + 84)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 84].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 84].Name);
     }
     else if (o->Type == MODEL_POTION + 85)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 85].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 85].Name);
     }
     else if (o->Type == MODEL_POTION + 86)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 86].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 86].Name);
     }
     else if (o->Type == MODEL_POTION + 87)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 87].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 87].Name);
     }
     else if (o->Type == MODEL_POTION + 88)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 88].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 88].Name);
     }
     else if (o->Type == MODEL_POTION + 89)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 89].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 89].Name);
     }
     else if (o->Type == MODEL_POTION + 90)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 90].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 90].Name);
     }
     else if (o->Type == MODEL_HELPER + 62) {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 62].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 62].Name);
     }
     else if (o->Type == MODEL_HELPER + 63) {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 63].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 63].Name);
     }
     else if (o->Type == MODEL_POTION + 97)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 97].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 97].Name);
     }
     else if (o->Type == MODEL_POTION + 98)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 98].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 98].Name);
     }
     else if (o->Type == MODEL_POTION + 96)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 96].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 96].Name);
     }
     else if (o->Type == MODEL_HELPER + 64)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 64].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 64].Name);
     }
     else if (o->Type == MODEL_HELPER + 65)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 65].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 65].Name);
     }
     else if (o->Type == MODEL_HELPER + 67)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 67].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 67].Name);
     }
     else if (o->Type == MODEL_HELPER + 80)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 80].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 80].Name);
     }
     else if (o->Type == MODEL_HELPER + 106)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 106].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 106].Name);
     }
     else if (o->Type == MODEL_HELPER + 123)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 123].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 123].Name);
     }
     else if (o->Type == MODEL_HELPER + 68)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 68].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 68].Name);
     }
     else if (o->Type == MODEL_HELPER + 76)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 76].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 76].Name);
     }
     else if (o->Type == MODEL_HELPER + 122)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 122].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 122].Name);
     }
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 
     else if (o->Type == MODEL_HELPER + 128)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 128].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 128].Name);
     }
     else if (o->Type == MODEL_HELPER + 129)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 129].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 129].Name);
     }
     else if (o->Type == MODEL_HELPER + 134)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 134].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 134].Name);
     }
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
     else if (o->Type == MODEL_HELPER + 130)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 130].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 130].Name);
     }
     else if (o->Type == MODEL_HELPER + 131)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 131].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 131].Name);
     }
     else if (o->Type == MODEL_HELPER + 132)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 132].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 132].Name);
     }
     else if (o->Type == MODEL_HELPER + 133)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 133].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 133].Name);
     }
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true))
@@ -6753,19 +6828,19 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         int iJewelItemIndex = COMGEM::GetJewelIndex(COMGEM::Check_Jewel_Com(o->Type, true), COMGEM::eGEM_NAME);
         g_pRenderText->SetFont(g_hFontBold);
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, "%s", GlobalText[iJewelItemIndex]);
+        swprintf(Name, L"%s", GlobalText[iJewelItemIndex]);
     }
     else if (o->Type == MODEL_COMPILED_CELE)
     {
         g_pRenderText->SetFont(g_hFontBold);
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, "%s", ItemAttribute[MODEL_POTION + 13 - MODEL_ITEM].Name);
+        swprintf(Name, L"%s", ItemAttribute[MODEL_POTION + 13 - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_COMPILED_SOUL)
     {
         g_pRenderText->SetFont(g_hFontBold);
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, "%s", ItemAttribute[MODEL_POTION + 14 - MODEL_ITEM].Name);
+        swprintf(Name, L"%s", ItemAttribute[MODEL_POTION + 14 - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_POTION + 17 || o->Type == MODEL_POTION + 18 || o->Type == MODEL_POTION + 19)
     {
@@ -6773,25 +6848,25 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(1.f, 0.8f, 0.1f);
         if (((ItemLevel >> 3) & 15) == 0)
         {
-            sprintf(Name, "%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
+            swprintf(Name, L"%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
         }
         else
         {
-            sprintf(Name, "%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ((ItemLevel >> 3) & 15));
+            swprintf(Name, L"%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ((ItemLevel >> 3) & 15));
         }
     }
     else if (o->Type == MODEL_POTION + 11 && Level == 7)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, GlobalText[111]);
+        swprintf(Name, GlobalText[111]);
     }
     else if (o->Type == MODEL_POTION + 12)
     {
         switch (Level)
         {
-        case 0:sprintf(Name, GlobalText[100]); break;
-        case 1:sprintf(Name, GlobalText[101]); break;
-        case 2:sprintf(Name, GlobalText[104]); break;
+        case 0:swprintf(Name, GlobalText[100]); break;
+        case 1:swprintf(Name, GlobalText[101]); break;
+        case 2:swprintf(Name, GlobalText[104]); break;
         }
     }
     else if (o->Type == MODEL_HELPER + 15)
@@ -6799,11 +6874,11 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(1.f, 0.8f, 0.1f);
         switch (Level)
         {
-        case 0:sprintf(Name, "%s %s", GlobalText[168], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 1:sprintf(Name, "%s %s", GlobalText[169], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 2:sprintf(Name, "%s %s", GlobalText[167], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 3:sprintf(Name, "%s %s", GlobalText[166], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 4:sprintf(Name, "%s %s", GlobalText[1900], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 0:swprintf(Name, L"%s %s", GlobalText[168], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 1:swprintf(Name, L"%s %s", GlobalText[169], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 2:swprintf(Name, L"%s %s", GlobalText[167], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 3:swprintf(Name, L"%s %s", GlobalText[166], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 4:swprintf(Name, L"%s %s", GlobalText[1900], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
         }
     }
     else if (o->Type == MODEL_HELPER + 31)
@@ -6811,18 +6886,18 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(1.f, 0.8f, 0.1f);
         switch (Level)
         {
-        case 0:sprintf(Name, "%s of %s", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1187]); break;
-        case 1:sprintf(Name, "%s of %s", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1214]); break;
+        case 0:swprintf(Name, L"%s of %s", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1187]); break;
+        case 1:swprintf(Name, L"%s of %s", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1214]); break;
         }
     }
     else if (o->Type == MODEL_EVENT + 16)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, GlobalText[1235]);
+        swprintf(Name, GlobalText[1235]);
     }
     else if (o->Type == MODEL_EVENT + 4)
     {
-        sprintf(Name, GlobalText[105]);
+        swprintf(Name, GlobalText[105]);
     }
     else if (o->Type == MODEL_EVENT + 5)
     {
@@ -6830,15 +6905,15 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         switch (Level)
         {
         case 14:
-            sprintf(Name, GlobalText[1650]);
+            swprintf(Name, GlobalText[1650]);
             break;
 
         case 15:
-            sprintf(Name, GlobalText[1651]);
+            swprintf(Name, GlobalText[1651]);
             break;
 
         default:
-            sprintf(Name, GlobalText[106]);
+            swprintf(Name, GlobalText[106]);
             break;
         }
     }
@@ -6847,103 +6922,103 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         if (Level == 13)
         {
             glColor3f(1.f, 0.8f, 0.1f);
-            sprintf(Name, "%s", GlobalText[117]);
+            swprintf(Name, L"%s", GlobalText[117]);
         }
         else
         {
-            sprintf(Name, GlobalText[107]);
+            swprintf(Name, GlobalText[107]);
         }
     }
     else if (o->Type == MODEL_EVENT + 7)
     {
-        sprintf(Name, GlobalText[108]);
+        swprintf(Name, GlobalText[108]);
     }
     else if (o->Type == MODEL_EVENT + 8)
     {
-        sprintf(Name, GlobalText[109]);
+        swprintf(Name, GlobalText[109]);
     }
     else if (o->Type == MODEL_EVENT + 9)
     {
-        sprintf(Name, GlobalText[110]);
+        swprintf(Name, GlobalText[110]);
     }
     else if (o->Type == MODEL_EVENT + 10)
     {
-        sprintf(Name, "%s +%d", GlobalText[115], Level - 7);
+        swprintf(Name, L"%s +%d", GlobalText[115], Level - 7);
     }
     else if (o->Type == MODEL_WING + 32)
     {
         glColor3f(1.f, 0.3f, 0.3f);
-        sprintf(Name, ItemAttribute[ITEM_WING + 32].Name);
+        swprintf(Name, ItemAttribute[ITEM_WING + 32].Name);
     }
     else if (o->Type == MODEL_WING + 33)
     {
         glColor3f(0.3f, 1.0f, 0.3f);
-        sprintf(Name, ItemAttribute[ITEM_WING + 33].Name);
+        swprintf(Name, ItemAttribute[ITEM_WING + 33].Name);
     }
     else if (o->Type == MODEL_WING + 34)
     {
         glColor3f(0.3f, 0.3f, 1.f);
-        sprintf(Name, ItemAttribute[ITEM_WING + 34].Name);
+        swprintf(Name, ItemAttribute[ITEM_WING + 34].Name);
     }
     else if (o->Type == MODEL_HELPER + 49)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 49].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 49].Name);
     }
     else if (o->Type == MODEL_HELPER + 50)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 50].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 50].Name);
     }
     else if (o->Type == MODEL_HELPER + 51)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, ItemAttribute[ITEM_HELPER + 51].Name);
+        swprintf(Name, ItemAttribute[ITEM_HELPER + 51].Name);
     }
     else if (o->Type == MODEL_POTION + 64)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 64].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 64].Name);
     }
     else if (o->Type == MODEL_WING + 48)//
     {
         glColor3f(1.f, 1.f, 1.f);
-        sprintf(Name, ItemAttribute[ITEM_WING + 48].Name);
+        swprintf(Name, ItemAttribute[ITEM_WING + 48].Name);
     }
     else if (o->Type == MODEL_WING + 35)
     {
         glColor3f(1.f, 1.f, 1.f);
-        sprintf(Name, ItemAttribute[ITEM_WING + 35].Name);
+        swprintf(Name, ItemAttribute[ITEM_WING + 35].Name);
     }
     else if (o->Type == MODEL_POTION + 45)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 45].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 45].Name);
     }
     else if (o->Type == MODEL_POTION + 46)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 46].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 46].Name);
     }
     else if (o->Type == MODEL_POTION + 47)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 47].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 47].Name);
     }
     else if (o->Type == MODEL_POTION + 48)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 48].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 48].Name);
     }
     else if (o->Type == MODEL_POTION + 49)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 49].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 49].Name);
     }
     else if (o->Type == MODEL_POTION + 50)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
-        sprintf(Name, ItemAttribute[ITEM_POTION + 50].Name);
+        swprintf(Name, ItemAttribute[ITEM_POTION + 50].Name);
     }
     else if (o->Type == MODEL_POTION + 32)
     {
@@ -6952,13 +7027,13 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         if (Level == 0)
         {
             glColor3f(1.f, 0.3f, 1.f);
-            sprintf(Name, ItemAttribute[ITEM_POTION + 32].Name);
+            swprintf(Name, ItemAttribute[ITEM_POTION + 32].Name);
         }
         else
             if (Level == 1)
             {
                 glColor3f(1.f, 0.3f, 1.f);
-                sprintf(Name, GlobalText[2012]);
+                swprintf(Name, GlobalText[2012]);
             }
     }
     else if (o->Type == MODEL_POTION + 33)
@@ -6966,13 +7041,13 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         if (Level == 0)
         {
             glColor3f(1.0f, 0.3f, 0.3f);
-            sprintf(Name, ItemAttribute[ITEM_POTION + 33].Name);
+            swprintf(Name, ItemAttribute[ITEM_POTION + 33].Name);
         }
         else
             if (Level == 1)
             {
                 glColor3f(1.0f, 0.3f, 0.3f);
-                sprintf(Name, GlobalText[2013]);
+                swprintf(Name, GlobalText[2013]);
             }
     }
     else if (o->Type == MODEL_POTION + 34)
@@ -6980,46 +7055,46 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         if (Level == 0)
         {
             glColor3f(0.3f, 0.3f, 1.f);
-            sprintf(Name, ItemAttribute[ITEM_POTION + 34].Name);
+            swprintf(Name, ItemAttribute[ITEM_POTION + 34].Name);
         }
         else
             if (Level == 1)
             {
                 glColor3f(0.3f, 0.3f, 1.f);
-                sprintf(Name, GlobalText[2014]);
+                swprintf(Name, GlobalText[2014]);
             }
     }
     else if (o->Type == MODEL_EVENT + 21)
     {
         glColor3f(1.f, 0.3f, 1.f);
-        sprintf(Name, GlobalText[2012]);
+        swprintf(Name, GlobalText[2012]);
     }
     else if (o->Type == MODEL_EVENT + 22)
     {
         glColor3f(1.0f, 0.3f, 0.3f);
-        sprintf(Name, GlobalText[2013]);
+        swprintf(Name, GlobalText[2013]);
     }
     else if (o->Type == MODEL_EVENT + 23)
     {
         glColor3f(0.3f, 0.3f, 1.f);
-        sprintf(Name, GlobalText[2014]);
+        swprintf(Name, GlobalText[2014]);
     }
     else if (o->Type == MODEL_EVENT + 11)
     {
         glColor3f(1.f, 0.8f, 0.1f);
         {
-            sprintf(Name, GlobalText[810]);
+            swprintf(Name, GlobalText[810]);
         }
     }
     else if (o->Type == MODEL_EVENT + 12)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, GlobalText[906]);
+        swprintf(Name, GlobalText[906]);
     }
     else if (o->Type == MODEL_EVENT + 13)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, GlobalText[907]);
+        swprintf(Name, GlobalText[907]);
     }
     else if (o->Type == MODEL_EVENT + 14)
     {
@@ -7027,24 +7102,24 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         switch (Level)
         {
         case 2:
-            sprintf(Name, GlobalText[928]);
+            swprintf(Name, GlobalText[928]);
             break;
         case 3:
-            sprintf(Name, GlobalText[929]);
+            swprintf(Name, GlobalText[929]);
             break;
         default:
-            sprintf(Name, GlobalText[922]);
+            swprintf(Name, GlobalText[922]);
             break;
         }
     }
     else if (o->Type == MODEL_EVENT + 15)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, GlobalText[925]);
+        swprintf(Name, GlobalText[925]);
     }
     else if (o->Type == MODEL_WING + 11)
     {
-        sprintf(Name, "%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
+        swprintf(Name, L"%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
     }
     else if (o->Type == MODEL_HELPER + 10)
     {
@@ -7052,7 +7127,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         {
             if (SommonTable[Level] == MonsterScript[i].Type)
             {
-                sprintf(Name, "%s %s", MonsterScript[i].Name, GlobalText[103]);
+                swprintf(Name, L"%s %s", MonsterScript[i].Name, GlobalText[103]);
                 break;
             }
         }
@@ -7060,35 +7135,35 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
     else if (o->Type == MODEL_POTION + 21 && Level == 3)
     {
         glColor3f(1.f, 0.8f, 0.1f);
-        sprintf(Name, GlobalText[1290]);
+        swprintf(Name, GlobalText[1290]);
     }
     else if (o->Type == MODEL_POTION + 7)
     {
         switch (Level)
         {
-        case 0: sprintf(Name, GlobalText[1413]); break;
-        case 1: sprintf(Name, GlobalText[1414]); break;
+        case 0: swprintf(Name, GlobalText[1413]); break;
+        case 1: swprintf(Name, GlobalText[1414]); break;
         }
     }
     else if (o->Type == MODEL_HELPER + 7)
     {
         switch (Level)
         {
-        case 0: sprintf(Name, GlobalText[1460]); break;
-        case 1: sprintf(Name, GlobalText[1461]); break;
+        case 0: swprintf(Name, GlobalText[1460]); break;
+        case 1: swprintf(Name, GlobalText[1461]); break;
         }
     }
     else if (o->Type == MODEL_HELPER + 11)
     {
         switch (Level)
         {
-        case 0: sprintf(Name, GlobalText[1416]); break;
-        case 1: sprintf(Name, GlobalText[1462]); break;
+        case 0: swprintf(Name, GlobalText[1416]); break;
+        case 1: swprintf(Name, GlobalText[1462]); break;
         }
     }
     else if (o->Type == MODEL_EVENT + 18)
     {
-        sprintf(Name, GlobalText[1462]);
+        swprintf(Name, GlobalText[1462]);
     }
     else
     {
@@ -7102,78 +7177,78 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
             || (o->Type >= MODEL_WING + 100 && o->Type <= MODEL_WING + 129))
         {
             glColor3f(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
-            strcpy(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+            wcscpy(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
         }
         else if (o->Type == MODEL_HELPER + 66)
         {
             glColor3f(0.6f, 0.4f, 1.0f);
-            sprintf(Name, ItemAttribute[ITEM_HELPER + 66].Name);
+            swprintf(Name, ItemAttribute[ITEM_HELPER + 66].Name);
         }
         else if (o->Type == MODEL_POTION + 100)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[ITEM_POTION + 100].Name);
+            swprintf(Name, ItemAttribute[ITEM_POTION + 100].Name);
         }
         else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + EWS_BEGIN
             && o->Type <= MODEL_TYPE_CHARM_MIXWING + EWS_END)
         {
             glColor3f(0.9f, 0.53f, 0.13f);
-            sprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+            swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
         }
         else if (o->Type == MODEL_HELPER + 97 || o->Type == MODEL_HELPER + 98 || o->Type == MODEL_POTION + 91)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[o->Type].Name);
+            swprintf(Name, ItemAttribute[o->Type].Name);
         }
         else if (o->Type == MODEL_HELPER + 99)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[ITEM_HELPER + 99].Name);
+            swprintf(Name, ItemAttribute[ITEM_HELPER + 99].Name);
         }
         else if (o->Type == MODEL_HELPER + 109)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[MODEL_HELPER + 109].Name);
+            swprintf(Name, ItemAttribute[MODEL_HELPER + 109].Name);
         }
         else if (o->Type == MODEL_HELPER + 110)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[MODEL_HELPER + 110].Name);
+            swprintf(Name, ItemAttribute[MODEL_HELPER + 110].Name);
         }
         else if (o->Type == MODEL_HELPER + 111)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[MODEL_HELPER + 111].Name);
+            swprintf(Name, ItemAttribute[MODEL_HELPER + 111].Name);
         }
         else if (o->Type == MODEL_HELPER + 112)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[MODEL_HELPER + 112].Name);
+            swprintf(Name, ItemAttribute[MODEL_HELPER + 112].Name);
         }
         else if (o->Type == MODEL_HELPER + 113)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[MODEL_HELPER + 113].Name);
+            swprintf(Name, ItemAttribute[MODEL_HELPER + 113].Name);
         }
         else if (o->Type == MODEL_HELPER + 114)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[MODEL_HELPER + 114].Name);
+            swprintf(Name, ItemAttribute[MODEL_HELPER + 114].Name);
         }
         else if (o->Type == MODEL_HELPER + 115)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[MODEL_HELPER + 115].Name);
+            swprintf(Name, ItemAttribute[MODEL_HELPER + 115].Name);
         }
         else if (o->Type == MODEL_POTION + 112)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[MODEL_POTION + 112].Name);
+            swprintf(Name, ItemAttribute[MODEL_POTION + 112].Name);
         }
         else if (o->Type == MODEL_POTION + 113)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            sprintf(Name, ItemAttribute[MODEL_POTION + 113].Name);
+            swprintf(Name, ItemAttribute[MODEL_POTION + 113].Name);
         }
         else
         {
@@ -7195,79 +7270,79 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
             else if (MODEL_POTION + 101 <= o->Type && o->Type <= MODEL_POTION + 109)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (o->Type == MODEL_POTION + 111)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (o->Type == MODEL_POTION + 120)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (o->Type == MODEL_POTION + 121)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (o->Type == MODEL_POTION + 122)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (o->Type == MODEL_POTION + 123)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (o->Type == MODEL_POTION + 124)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (MODEL_POTION + 134 <= o->Type && o->Type <= MODEL_POTION + 139)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (o->Type == MODEL_HELPER + 116)
             {
                 glColor3f(0.9f, 0.53f, 0.13f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
 
             else if (ITEM_WING + 130 <= o->Type && o->Type <= ITEM_WING + 135)
             {
                 glColor3f(0.9f, 0.53f, 0.13f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
 
             else if (MODEL_POTION + 114 <= o->Type && o->Type <= MODEL_POTION + 119)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (MODEL_POTION + 126 <= o->Type && o->Type <= MODEL_POTION + 129)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (MODEL_POTION + 130 <= o->Type && o->Type <= MODEL_POTION + 132)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (MODEL_HELPER + 121 == o->Type)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (o->Type >= MODEL_POTION + 141 && o->Type <= MODEL_POTION + 144)
             {
                 glColor3f(0.9f, 0.53f, 0.13f);
-                sprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type].Name);
             }
             else if (o->Type == MODEL_WING + 25)
             {
@@ -7302,8 +7377,8 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
                 glColor3f(0.4f, 0.7f, 1.f);
             }
 
-            char TextName[64];
-            if (g_csItemOption.GetSetItemName(TextName, o->Type - MODEL_ITEM, ItemExtOption))
+            wchar_t SetName[64]{};
+            if (g_csItemOption.GetSetItemName(SetName, o->Type - MODEL_ITEM, ItemExtOption))
             {
                 // Excellent or Ancient item?
                 glColor3f(1.f, 1.f, 1.f);
@@ -7311,32 +7386,26 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
                 g_pRenderText->SetTextColor(0, 255, 0, 255);
                 g_pRenderText->SetBgColor(60, 60, 200, 255);
 
-                strcat(TextName, ItemAttribute[o->Type - MODEL_ITEM].Name);
+                wcscat(SetName, Name);
+                wcscpy(Name, SetName);
             }
-            else
-            {
-                strcpy(TextName, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-
-            if (Level == 0)
-                sprintf(Name, "%s", TextName);
-            else
-                sprintf(Name, "%s +%d", TextName, Level);
 
             if ((ItemLevel >> 7) & 1)
             {
                 if (o->Type != MODEL_HELPER + 3)
-                    strcat(Name, GlobalText[176]);
+                {
+                    wcscat(Name, GlobalText[176]);
+                }
                 else
                 {
-                    strcat(Name, " +");
-                    strcat(Name, GlobalText[179]);
+                    wcscat(Name, L" +");
+                    wcscat(Name, GlobalText[179]);
                 }
             }
             if ((ItemLevel & 3) || ((ItemOption >> 6) & 1))
-                strcat(Name, GlobalText[177]);
+                wcscat(Name, GlobalText[177]);
             if ((ItemLevel >> 2) & 1)
-                strcat(Name, GlobalText[178]);
+                wcscat(Name, GlobalText[178]);
         }
     }
 
@@ -11128,7 +11197,7 @@ void MoveServerDivisionInventory()
         MouseUpdateTime = 0;
         MouseUpdateTimeMax = 6;
 
-        SendExitInventory();
+        SocketClient->ToGameServer()->SendCloseNpcRequest();
         g_pUIManager->CloseAll();
     }
 
@@ -11143,7 +11212,7 @@ void MoveServerDivisionInventory()
 
             g_bEventChipDialogEnable = EVENT_NONE;
 
-            SendExitInventory();
+            SocketClient->ToGameServer()->SendCloseNpcRequest();
             g_pUIManager->CloseAll();
         }
     }
@@ -11217,11 +11286,11 @@ void MovePersonalShop()
         if (MouseX >= ButtonX && MouseX < ButtonX + Width && MouseY >= ButtonY && MouseY < ButtonY + Height && MouseLButtonPush)
         {
             MouseLButtonPush = false;
-            if (!IsExistUndecidedPrice() && strlen(g_szPersonalShopTitle) > 0)
+            if (!IsExistUndecidedPrice() && wcslen(g_szPersonalShopTitle) > 0)
             {
                 if (g_bEnablePersonalShop)
                 {
-                    SendRequestCreatePersonalShop(g_szPersonalShopTitle);
+                    SocketClient->ToGameServer()->SendPlayerShopOpen(g_szPersonalShopTitle);
                     g_pUIManager->Close(INTERFACE_INVENTORY);
                 }
                 else
@@ -11231,7 +11300,7 @@ void MovePersonalShop()
             }
             else
             {
-                g_pChatListBox->AddText("", GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
             }
         }
 
@@ -11241,7 +11310,7 @@ void MovePersonalShop()
             MouseLButtonPush = false;
             if (g_bEnablePersonalShop)
             {
-                SendRequestDestoryPersonalShop();
+                SocketClient->ToGameServer()->SendPlayerShopClose();
             }
         }
 
@@ -11262,9 +11331,9 @@ void ClosePersonalShop()
         memcpy(g_PersonalShopInven, g_PersonalShopBackup, sizeof(ITEM) * MAX_PERSONALSHOP_INVEN);
         if (IsShopInViewport(Hero))
         {
-            std::string title;
+            std::wstring title{};
             GetShopTitle(Hero, title);
-            strcpy(g_szPersonalShopTitle, title.c_str());
+            wcscpy(g_szPersonalShopTitle, title.c_str());
         }
         else
         {
@@ -11272,7 +11341,7 @@ void ClosePersonalShop()
         }
         if (g_PersonalShopSeller.Key)
         {
-            SendRequestClosePersonalShop(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
+            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
         }
     }
 
@@ -11334,11 +11403,11 @@ void OpenPersonalShopMsgWnd(int iMsgType)
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopItemValueMsgBoxLayout));
     }
 }
-bool IsCorrectShopTitle(const char* szShopTitle)
+bool IsCorrectShopTitle(const wchar_t* szShopTitle)
 {
     int j = 0;
-    char TmpText[2048];
-    for (int i = 0; i < (int)strlen(szShopTitle); ++i)
+    wchar_t TmpText[2048];
+    for (int i = 0; i < (int)wcslen(szShopTitle); ++i)
     {
         if (szShopTitle[i] != 32)
         {
@@ -11356,7 +11425,7 @@ bool IsCorrectShopTitle(const char* szShopTitle)
         }
     }
 
-    int len = strlen(szShopTitle);
+    int len = wcslen(szShopTitle);
     int count = 0;
 
     for (int i = 0; i < len; i++)
@@ -11624,11 +11693,11 @@ void RenderGuildList(int StartX, int StartY)
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetFont(g_hFontBold);
 
-    char Text[100];
+    wchar_t Text[100];
     if (Hero->GuildMarkIndex == -1)
-        sprintf(Text, GlobalText[180]);
+        swprintf(Text, GlobalText[180]);
     else
-        sprintf(Text, "%s (Score:%d)", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
+        swprintf(Text, L"%s (Score:%d)", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
 
     g_pRenderText->RenderText(StartX + 95 - 60, StartY + 12, Text, 120 * WindowWidth / 640, true, 3);
 

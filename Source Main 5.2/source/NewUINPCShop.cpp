@@ -3,13 +3,17 @@
 
 #include "stdafx.h"
 #include "NewUINPCShop.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #include "GambleSystem.h"
 
 using namespace SEASON3B;
+
+extern int BuyCost;
 
 SEASON3B::CNewUINPCShop::CNewUINPCShop()
 {
@@ -118,7 +122,9 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
                 }
                 if (BuyCost == 0)
                 {
-                    SendRequestBuy(iIndex, ItemValue(pItem, 0));
+                    SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(iIndex);
+                    BuyCost = ItemValue(pItem, 0);
+                    g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", iIndex);
                 }
 
                 return false;
@@ -168,7 +174,7 @@ bool SEASON3B::CNewUINPCShop::UpdateKeyEvent()
 
     if (SEASON3B::IsRepeat(VK_SHIFT) && SEASON3B::IsPress('L'))
     {
-        SendRequestRepair(255, 0);
+        SocketClient->ToGameServer()->SendRepairItemRequest(0xFF, 0);
         return false;
     }
     if (SEASON3B::IsPress('L'))
@@ -240,8 +246,8 @@ void SEASON3B::CNewUINPCShop::RenderTexts()
 
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, GlobalText[230], NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
 
-    unicode::t_char strText[256];
-    unicode::_sprintf(strText, GlobalText[1623], m_iTaxRate);
+    wchar_t strText[256];
+    swprintf(strText, GlobalText[1623], m_iTaxRate);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strText, NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
 }
 
@@ -261,7 +267,7 @@ void SEASON3B::CNewUINPCShop::RenderRepairMoney()
         RenderImage(IMAGE_NPCSHOP_REPAIR_MONEY, m_Pos.x + 10, m_Pos.y + 355, 170.f, 24.f);
         g_pRenderText->SetBgColor(255, 255, 255, 0);
         g_pRenderText->SetTextColor(255, 220, 150, 255);
-        unicode::t_char strText[256];
+        wchar_t strText[256];
         ConvertGold(AllRepairGold, strText);
         g_pRenderText->SetFont(g_hFontBold);
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 362, GlobalText[239]);
@@ -277,13 +283,13 @@ float SEASON3B::CNewUINPCShop::GetLayerDepth()
 
 void SEASON3B::CNewUINPCShop::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_NPCSHOP_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_NPCSHOP_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_NPCSHOP_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_NPCSHOP_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_NPCSHOP_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_repair_00.tga", IMAGE_NPCSHOP_BTN_REPAIR, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_money2.tga", IMAGE_NPCSHOP_REPAIR_MONEY, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_NPCSHOP_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_NPCSHOP_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_NPCSHOP_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_NPCSHOP_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_NPCSHOP_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_repair_00.tga", IMAGE_NPCSHOP_BTN_REPAIR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_money2.tga", IMAGE_NPCSHOP_REPAIR_MONEY, GL_LINEAR);
 }
 
 void SEASON3B::CNewUINPCShop::UnloadImages()
@@ -334,20 +340,20 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
     {
         if (CharacterMachine->Gold + ItemValue(pItem) > 2000000000)
         {
-            g_pChatListBox->AddText("", GlobalText[3148], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[3148], SEASON3B::TYPE_SYSTEM_MESSAGE);
 
             return true;
         }
 
         if (pItem && pItem->Jewel_Of_Harmony_Option != 0)
         {
-            g_pChatListBox->AddText("", GlobalText[2211], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2211], SEASON3B::TYPE_ERROR_MESSAGE);
 
             return true;
         }
         if (pItem && IsSellingBan(pItem) == true)
         {
-            g_pChatListBox->AddText("", GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
             m_pNewInventoryCtrl->BackupPickedItem();
 
             return true;
@@ -363,7 +369,8 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
         if (pPickedItem->GetSourceStorageType() == STORAGE_TYPE::INVENTORY)
         {
             int iSourceIndex = pPickedItem->GetSourceLinealPos();
-            SendRequestSell(iSourceIndex);
+            SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
+            g_pNPCShop->SetSellingItem(true);
 
             return true;
         }
@@ -393,7 +400,7 @@ bool SEASON3B::CNewUINPCShop::BtnProcess()
         }
         if (m_BtnRepairAll.UpdateMouseEvent() == true)
         {
-            SendRequestRepair(255, 0);
+            SocketClient->ToGameServer()->SendRepairItemRequest(0xFF, 0);
 
             return true;
         }
@@ -416,7 +423,7 @@ void SEASON3B::CNewUINPCShop::OpenningProcess()
 
 void SEASON3B::CNewUINPCShop::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 
     m_dwShopState = SHOP_STATE_BUYNSELL;
     m_iTaxRate = 0;

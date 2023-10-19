@@ -98,8 +98,8 @@ namespace SEASON3B
         DWORD m_dwRefreshTime;
         DWORD m_dwRefreshButtonGapTime;
 
-        unicode::t_char m_strSubject[MAX_GLOBAL_TEXT_STRING];
-        unicode::t_char m_strStateText[KANTURU2ND_STATETEXT_MAX][MAX_GLOBAL_TEXT_STRING];
+        wchar_t m_strSubject[MAX_GLOBAL_TEXT_STRING];
+        wchar_t m_strStateText[KANTURU2ND_STATETEXT_MAX][MAX_GLOBAL_TEXT_STRING];
         int	m_iStateTextNum;
 
         CNewUIButton m_BtnEnter;

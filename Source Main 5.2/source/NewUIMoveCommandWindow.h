@@ -101,13 +101,13 @@ namespace SEASON3B
         float GetLayerDepth();
 
         bool IsLuckySealBuff();
-        bool IsMapMove(const std::string& src);
+        bool IsMapMove(const std::wstring& src);
 
         void SetMoveCommandKey(DWORD dwKey);
         DWORD GetMoveCommandKey();
 
         BOOL IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const;
-        int GetMapIndexFromMovereq(const char* pszMapName);
+        int GetMapIndexFromMovereq(const wchar_t* pszMapName);
 
     private:
         void SetStrifeMap();

@@ -18,7 +18,7 @@
 #include "ZzzEffect.h"
 #include "ZzzAI.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "SMD.h"
 #include "Local.h"
 #include "MatchEvent.h"
@@ -81,6 +81,7 @@ extern DWORD g_dwKeyFocusUIID;
 extern CUIMapName* g_pUIMapName;
 extern bool HighLight;
 extern CTimer* g_pTimer;
+extern BOOL g_bGameServerConnected;
 
 #ifdef MOVIE_DIRECTSHOW
 extern CMovieScene* g_pMovieScene;
@@ -105,9 +106,9 @@ bool EnableEdit    = false;
 
 int g_iLengthAuthorityCode = 20;
 
-char* szServerIpAddress = "127.127.127.127";
+wchar_t* szServerIpAddress = L"127.127.127.127";
 //char *szServerIpAddress = "210.181.89.215";
-WORD g_ServerPort = 55901;
+WORD g_ServerPort = 55900;
 
 #ifdef MOVIE_DIRECTSHOW
 int  SceneFlag = MOVIE_SCENE;
@@ -172,7 +173,7 @@ char* g_lpszMp3[NUM_MUSIC] =
 #endif	// ASG_ADD_MAP_KARUTAN
 };
 
-extern char Mp3FileName[256];
+extern wchar_t Mp3FileName[256];
 
 #define MAX_LENGTH_CMB	( 38)
 
@@ -183,7 +184,7 @@ int     g_iMessageTextStart = 0;
 char    g_cMessageTextCurrNum = 0;
 char    g_cMessageTextNum = 0;
 int     g_iNumLineMessageBoxCustom;
-char    g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
+wchar_t    g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
 int     g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
 
 int     g_iCustomMessageBoxButton_Cancel[NUM_PAR_BUTTON_CMB];
@@ -193,7 +194,7 @@ int		g_iCancelSkillTarget = 0;
 #define NUM_LINE_DA		( 1)
 int g_iCurrentDialogScript = -1;
 int g_iNumAnswer = 0;
-char g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
+wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 
 DWORD GenerateCheckSum2(BYTE* pbyBuffer, DWORD dwSize, WORD wKey);
 
@@ -205,7 +206,7 @@ void StopMusic()
     }
 }
 
-bool CheckAbuseFilter(char* Text, bool bCheckSlash)
+bool CheckAbuseFilter(wchar_t* Text, bool bCheckSlash)
 {
     if (bCheckSlash == true)
     {
@@ -216,8 +217,8 @@ bool CheckAbuseFilter(char* Text, bool bCheckSlash)
     }
 
     int icntText = 0;
-    char TmpText[2048];
-    for (int i = 0; i < (int)strlen(Text); ++i)
+    wchar_t TmpText[2048];
+    for (int i = 0; i < wcslen(Text); ++i)
     {
         if (Text[i] != 32)
         {
@@ -237,11 +238,11 @@ bool CheckAbuseFilter(char* Text, bool bCheckSlash)
     return false;
 }
 
-bool CheckAbuseNameFilter(char* Text)
+bool CheckAbuseNameFilter(wchar_t* Text)
 {
     int icntText = 0;
-    char TmpText[256];
-    for (int i = 0; i < (int)strlen(Text); ++i)
+    wchar_t TmpText[256];
+    for (int i = 0; i < wcslen(Text); ++i)
     {
         if (Text[i] != 32)
         {
@@ -264,9 +265,9 @@ bool CheckAbuseNameFilter(char* Text)
 bool CheckName()
 {
     if (CheckAbuseNameFilter(InputText[0]) || CheckAbuseFilter(InputText[0]) ||
-        FindText(InputText[0], " ") || FindText(InputText[0], "¡¡") ||
-        FindText(InputText[0], ".") || FindText(InputText[0], "¡¤") || FindText(InputText[0], "¡­") ||
-        FindText(InputText[0], "Webzen") || FindText(InputText[0], "WebZen") || FindText(InputText[0], "webzen") || FindText(InputText[0], "WEBZEN") ||
+        FindText(InputText[0], L" ") || FindText(InputText[0], L"¡¡") ||
+        FindText(InputText[0], L".") || FindText(InputText[0], L"¡¤") || FindText(InputText[0], L"¡­") ||
+        FindText(InputText[0], L"Webzen") || FindText(InputText[0], L"WebZen") || FindText(InputText[0], L"webzen") || FindText(InputText[0], L"WEBZEN") ||
         FindText(InputText[0], GlobalText[457]) || FindText(InputText[0], GlobalText[458]))
         return true;
     return false;
@@ -329,31 +330,31 @@ void WebzenScene(HDC hDC)
     OpenFont();
     ClearInput();
 
-    LoadBitmap("Interface\\New_lo_back_01.jpg", BITMAP_TITLE, GL_LINEAR);
-    LoadBitmap("Interface\\New_lo_back_02.jpg", BITMAP_TITLE + 1, GL_LINEAR);
-    LoadBitmap("Interface\\MU_TITLE.tga", BITMAP_TITLE + 2, GL_LINEAR);
-    LoadBitmap("Interface\\lo_121518.tga", BITMAP_TITLE + 3, GL_LINEAR);
-    LoadBitmap("Interface\\New_lo_webzen_logo.tga", BITMAP_TITLE + 4, GL_LINEAR);
-    LoadBitmap("Interface\\lo_lo.jpg", BITMAP_TITLE + 5, GL_LINEAR, GL_REPEAT);
-    LoadBitmap("Interface\\lo_back_s5_03.jpg", BITMAP_TITLE + 6, GL_LINEAR);
-    LoadBitmap("Interface\\lo_back_s5_04.jpg", BITMAP_TITLE + 7, GL_LINEAR);
+    LoadBitmap(L"Interface\\New_lo_back_01.jpg", BITMAP_TITLE, GL_LINEAR);
+    LoadBitmap(L"Interface\\New_lo_back_02.jpg", BITMAP_TITLE + 1, GL_LINEAR);
+    LoadBitmap(L"Interface\\MU_TITLE.tga", BITMAP_TITLE + 2, GL_LINEAR);
+    LoadBitmap(L"Interface\\lo_121518.tga", BITMAP_TITLE + 3, GL_LINEAR);
+    LoadBitmap(L"Interface\\New_lo_webzen_logo.tga", BITMAP_TITLE + 4, GL_LINEAR);
+    LoadBitmap(L"Interface\\lo_lo.jpg", BITMAP_TITLE + 5, GL_LINEAR, GL_REPEAT);
+    LoadBitmap(L"Interface\\lo_back_s5_03.jpg", BITMAP_TITLE + 6, GL_LINEAR);
+    LoadBitmap(L"Interface\\lo_back_s5_04.jpg", BITMAP_TITLE + 7, GL_LINEAR);
     if (rand() % 100 <= 70)
     {
-        LoadBitmap("Interface\\lo_back_im01.jpg", BITMAP_TITLE + 8, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_im02.jpg", BITMAP_TITLE + 9, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_im03.jpg", BITMAP_TITLE + 10, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_im04.jpg", BITMAP_TITLE + 11, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_im05.jpg", BITMAP_TITLE + 12, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_im06.jpg", BITMAP_TITLE + 13, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_im01.jpg", BITMAP_TITLE + 8, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_im02.jpg", BITMAP_TITLE + 9, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_im03.jpg", BITMAP_TITLE + 10, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_im04.jpg", BITMAP_TITLE + 11, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_im05.jpg", BITMAP_TITLE + 12, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_im06.jpg", BITMAP_TITLE + 13, GL_LINEAR);
     }
     else
     {
-        LoadBitmap("Interface\\lo_back_s5_im01.jpg", BITMAP_TITLE + 8, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_s5_im02.jpg", BITMAP_TITLE + 9, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_s5_im03.jpg", BITMAP_TITLE + 10, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_s5_im04.jpg", BITMAP_TITLE + 11, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_s5_im05.jpg", BITMAP_TITLE + 12, GL_LINEAR);
-        LoadBitmap("Interface\\lo_back_s5_im06.jpg", BITMAP_TITLE + 13, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_s5_im01.jpg", BITMAP_TITLE + 8, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_s5_im02.jpg", BITMAP_TITLE + 9, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_s5_im03.jpg", BITMAP_TITLE + 10, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_s5_im04.jpg", BITMAP_TITLE + 11, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_s5_im05.jpg", BITMAP_TITLE + 12, GL_LINEAR);
+        LoadBitmap(L"Interface\\lo_back_s5_im06.jpg", BITMAP_TITLE + 13, GL_LINEAR);
     }
 
     rUIMng.CreateTitleSceneUI();
@@ -378,7 +379,7 @@ void WebzenScene(HDC hDC)
     for (int i = 6; i < 14; ++i)
         DeleteBitmap(BITMAP_TITLE + i);
 
-    g_ErrorReport.Write("> Loading ok.\r\n");
+    g_ErrorReport.Write(L"> Loading ok.\r\n");
 
     SceneFlag = LOG_IN_SCENE;	//
 }
@@ -396,7 +397,9 @@ void DeleteCharacter()
         g_pSinglePasswdInputBox->SetText(NULL);
         g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
     }
-    SendRequestDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
+
+    CurrentProtocolState = REQUEST_DELETE_CHARACTER;
+    SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
 
     MenuStateCurrent = MENU_DELETE_LEFT;
     MenuStateNext = MENU_NEW_DOWN;
@@ -430,14 +433,14 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound = TRUE)
     return FALSE;
 }
 
-int SeparateTextIntoLines(const char* lpszText, char* lpszSeparated, int iMaxLine, int iLineSize)
+int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int iMaxLine, int iLineSize)
 {
     int iLine = 0;
-    const char* lpLineStart = lpszText;
-    char* lpDst = lpszSeparated;
-    const char* lpSpace = NULL;
+    const wchar_t* lpLineStart = lpszText;
+    wchar_t* lpDst = lpszSeparated;
+    const wchar_t* lpSpace = NULL;
     int iMbclen = 0;
-    for (const char* lpSeek = lpszText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
+    for (const wchar_t* lpSeek = lpszText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
     {
         iMbclen = _mbclen((unsigned char*)lpSeek);
         if (iMbclen + (int)(lpSeek - lpLineStart) >= iLineSize)
@@ -595,40 +598,40 @@ BOOL ShowCheckBox(int num, int index, int message)
 {
     if (message == MESSAGE_USE_STATE || message == MESSAGE_USE_STATE2)
     {
-        char Name[50] = { 0, };
+        wchar_t Name[50] = { 0, };
         if (TargetItem.Type == ITEM_HELPER + 15)
         {
             switch ((TargetItem.Level >> 3) & 15)
             {
-            case 0:sprintf(Name, "%s", GlobalText[168]); break;
-            case 1:sprintf(Name, "%s", GlobalText[169]); break;
-            case 2:sprintf(Name, "%s", GlobalText[167]); break;
-            case 3:sprintf(Name, "%s", GlobalText[166]); break;
-            case 4:sprintf(Name, "%s", GlobalText[1900]); break;
+            case 0:wprintf(Name, L"%s", GlobalText[168]); break;
+            case 1:wprintf(Name, L"%s", GlobalText[169]); break;
+            case 2:wprintf(Name, L"%s", GlobalText[167]); break;
+            case 3:wprintf(Name, L"%s", GlobalText[166]); break;
+            case 4:wprintf(Name, L"%s", GlobalText[1900]); break;
             }
         }
 
         if (message == MESSAGE_USE_STATE2)
-            sprintf(g_lpszMessageBoxCustom[0], "( %s%s )", Name, GlobalText[1901]);
+            swprintf(g_lpszMessageBoxCustom[0], L"( %s%s )", Name, GlobalText[1901]);
         else
-            sprintf(g_lpszMessageBoxCustom[0], "( %s )", Name);
+            swprintf(g_lpszMessageBoxCustom[0], L"( %s )", Name);
 
         num++;
         for (int i = 1; i < num; ++i)
         {
-            sprintf(g_lpszMessageBoxCustom[i], GlobalText[index]);
+            swprintf(g_lpszMessageBoxCustom[i], GlobalText[index]);
         }
         g_iNumLineMessageBoxCustom = num;
     }
     else if (message == MESSAGE_PERSONALSHOP_WARNING)
     {
-        char szGold[256];
+        wchar_t szGold[256];
         ConvertGold(InputGold, szGold);
-        sprintf(g_lpszMessageBoxCustom[0], GlobalText[index], szGold);
+        swprintf(g_lpszMessageBoxCustom[0], GlobalText[index], szGold);
 
         for (int i = 1; i < num; ++i)
         {
-            sprintf(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
+            swprintf(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
         }
         g_iNumLineMessageBoxCustom = num;
     }
@@ -642,42 +645,44 @@ BOOL ShowCheckBox(int num, int index, int message)
     }
     else if (message == MESSAGE_GEM_INTEGRATION3)
     {
-        char tBuf[MAX_GLOBAL_TEXT_STRING];
-        char tLines[2][30];
+        wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
+        wchar_t tLines[2][30];
         for (int t = 0; t < 2; ++t) memset(tLines[t], 0, 20);
         g_iNumLineMessageBoxCustom = 0;
         if (COMGEM::isComMode())
         {
-            if (COMGEM::m_cGemType == 0) sprintf(tBuf, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
-            else sprintf(tBuf, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+            if (COMGEM::m_cGemType == 0) swprintf(tBuf, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+            else swprintf(tBuf, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
 
             g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
                 tLines[g_iNumLineMessageBoxCustom], 2, 30);
 
-            for (int t = 0; t < 2; ++t) strcpy(g_lpszMessageBoxCustom[t], tLines[t]);
+            for (int t = 0; t < 2; ++t)
+                wcscpy(g_lpszMessageBoxCustom[t], tLines[t]);
 
-            sprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1810], COMGEM::m_iValue);
+            swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1810], COMGEM::m_iValue);
             ++g_iNumLineMessageBoxCustom;
         }
         else
         {
             int t_GemLevel = COMGEM::GetUnMixGemLevel() + 1;
-            if (COMGEM::m_cGemType == 0) sprintf(tBuf, GlobalText[1813], GlobalText[1806], t_GemLevel);
-            else sprintf(tBuf, GlobalText[1813], GlobalText[1807], t_GemLevel);
+            if (COMGEM::m_cGemType == 0) swprintf(tBuf, GlobalText[1813], GlobalText[1806], t_GemLevel);
+            else swprintf(tBuf, GlobalText[1813], GlobalText[1807], t_GemLevel);
 
             g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
                 tLines[g_iNumLineMessageBoxCustom], 2, 30);
 
-            for (int t = 0; t < 2; ++t) strcpy(g_lpszMessageBoxCustom[t], tLines[t]);
+            for (int t = 0; t < 2; ++t)
+                wcscpy(g_lpszMessageBoxCustom[t], tLines[t]);
 
-            sprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1814], COMGEM::m_iValue);
+            swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1814], COMGEM::m_iValue);
             ++g_iNumLineMessageBoxCustom;
         }
     }
     else if (message == MESSAGE_CANCEL_SKILL)
     {
-        char tBuf[MAX_GLOBAL_TEXT_STRING];
-        sprintf(tBuf, "%s%s", SkillAttribute[index].Name, GlobalText[2046]);
+        wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
+        swprintf(tBuf, L"%s%s", SkillAttribute[index].Name, GlobalText[2046]);
         g_iNumLineMessageBoxCustom = SeparateTextIntoLines(tBuf, g_lpszMessageBoxCustom[0], 2, MAX_LENGTH_CMB);
         g_iCancelSkillTarget = index;
     }
@@ -685,8 +690,9 @@ BOOL ShowCheckBox(int num, int index, int message)
     {
         for (int i = 0; i < num; ++i)
         {
-            strcpy(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
+            wcscpy(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
         }
+
         g_iNumLineMessageBoxCustom = num;
     }
 
@@ -835,10 +841,10 @@ bool InitCharacterScene = false;
 bool InitMainScene = false;
 int  MenuY = 480;
 int  MenuX = -200;
-extern char LogInID[MAX_ID_SIZE + 1];
-extern char m_ExeVersion[11];
+extern wchar_t LogInID[MAX_ID_SIZE + 1];
+extern wchar_t m_ExeVersion[11];
 
-BOOL Util_CheckOption(char* lpszCommandLine, unsigned char cOption, char* lpszString);
+BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString);
 
 extern DWORD g_dwBKConv;
 extern DWORD g_dwBKSent;
@@ -857,7 +863,7 @@ void StartGame()
             CharacterAttribute->Level = CharactersClient[SelectedHero].Level;
             CharacterAttribute->Class = CharactersClient[SelectedHero].Class;
             CharacterAttribute->Skin = CharactersClient[SelectedHero].Skin;
-            ::strcpy(CharacterAttribute->Name, CharactersClient[SelectedHero].ID);
+            ::wcscpy(CharacterAttribute->Name, CharactersClient[SelectedHero].ID);
 
             ::ReleaseCharacterSceneData();
             InitLoading = false;
@@ -913,7 +919,7 @@ void CreateCharacterScene()
 
     for (int i = 0; i < MAX_WHISPER; i++)
     {
-        g_pChatListBox->AddText("", "", SEASON3B::TYPE_WHISPER_MESSAGE);
+        g_pChatListBox->AddText(L"", L"", SEASON3B::TYPE_WHISPER_MESSAGE);
     }
 
     HIMC hIMC = ImmGetContext(g_hWnd);
@@ -930,7 +936,7 @@ void CreateCharacterScene()
     ImmReleaseContext(g_hWnd, hIMC);
     g_bIMEBlock = TRUE;
 
-    g_ErrorReport.Write("> Character scene init success.\r\n");
+    g_ErrorReport.Write(L"> Character scene init success.\r\n");
 }
 
 void NewMoveCharacterScene()
@@ -961,10 +967,10 @@ void NewMoveCharacterScene()
     MoveCamera();
 
 #if defined _DEBUG || defined FOR_WORK
-    char lpszTemp[256];
-    if (::Util_CheckOption(::GetCommandLine(), 'c', lpszTemp))
+    wchar_t lpszTemp[256];
+    if (::Util_CheckOption(::GetCommandLine(), L'c', lpszTemp))
     {
-        SelectedHero = ::atoi(lpszTemp);
+        SelectedHero = ::_wtoi(lpszTemp);
         ::StartGame();
     }
 #endif
@@ -1145,7 +1151,7 @@ bool NewRenderCharacterScene(HDC hDC)
         CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 4);
         CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 5);
 
-        g_csMapServer.SetHeroID((char*)CharactersClient[SelectedHero].ID);
+        g_csMapServer.SetHeroID((wchar_t*)CharactersClient[SelectedHero].ID);
     }
 
     BeginSprite();
@@ -1193,8 +1199,8 @@ void CreateLogInScene()
 
     if (g_iChatInputType == 0)
     {
-        strcpy(InputText[0], m_ID);
-        InputLength[0] = strlen(InputText[0]);
+        wcscpy(InputText[0], m_ID);
+        InputLength[0] = wcslen(InputText[0]);
         InputTextMax[0] = MAX_ID_SIZE;
         if (InputLength[0] == 0)	InputIndex = 0;
         else InputIndex = 1;
@@ -1215,7 +1221,7 @@ void CreateLogInScene()
 
     ::PlayMp3(g_lpszMp3[MUSIC_LOGIN_THEME]);
 
-    g_ErrorReport.Write("> Login Scene init success.\r\n");
+    g_ErrorReport.Write(L"> Login Scene init success.\r\n");
 }
 
 void NewMoveLogInScene()
@@ -1263,12 +1269,13 @@ void NewMoveLogInScene()
     }
     if (RECEIVE_LOG_IN_SUCCESS == CurrentProtocolState)
     {
-        g_ErrorReport.Write("> Request Character list\r\n");
+        g_ErrorReport.Write(L"> Request Character list\r\n");
 
         CCameraMove::GetInstancePtr()->SetTourMode(FALSE);
 
         SceneFlag = CHARACTER_SCENE;
-        SendRequestCharactersList(g_pMultiLanguage->GetLanguage());
+        CurrentProtocolState = REQUEST_CHARACTERS_LIST;
+        SocketClient->ToGameServer()->SendRequestCharacterList(g_pMultiLanguage->GetLanguage());
 
         ReleaseLogoSceneData();
 
@@ -1416,7 +1423,7 @@ bool NewRenderLogInScene(HDC hDC)
     }
 
     SIZE Size;
-    char Text[100];
+    wchar_t Text[100];
 
     g_pRenderText->SetFont(g_hFont);
 
@@ -1425,18 +1432,18 @@ bool NewRenderLogInScene(HDC hDC)
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 128);
 
-    strcpy(Text, GlobalText[454]);
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
+    wcscpy(Text, GlobalText[454]);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(335 - Size.cx * 640 / WindowWidth, 480 - Size.cy * 640 / WindowWidth - 1, Text);
 
-    strcpy(Text, GlobalText[455]);
+    wcscpy(Text, GlobalText[455]);
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(335, 480 - Size.cy * 640 / WindowWidth - 1, Text);
 
-    sprintf(Text, GlobalText[456], m_ExeVersion);
+    swprintf(Text, GlobalText[456], m_ExeVersion);
 
-    g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(0, 480 - Size.cy * 640 / WindowWidth - 1, Text);
 
     RenderInfomation();
@@ -1477,7 +1484,7 @@ void RenderInterfaceEdge()
 
 void LoadingScene(HDC hDC)
 {
-    g_ConsoleDebug->Write(MCD_NORMAL, "LoadingScene_Start");
+    g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_Start");
 
     CUIMng& rUIMng = CUIMng::Instance();
     if (!InitLoading)
@@ -1486,10 +1493,10 @@ void LoadingScene(HDC hDC)
 
         InitLoading = true;
 
-        LoadBitmap("Interface\\LSBg01.JPG", BITMAP_TITLE, GL_LINEAR);
-        LoadBitmap("Interface\\LSBg02.JPG", BITMAP_TITLE + 1, GL_LINEAR);
-        LoadBitmap("Interface\\LSBg03.JPG", BITMAP_TITLE + 2, GL_LINEAR);
-        LoadBitmap("Interface\\LSBg04.JPG", BITMAP_TITLE + 3, GL_LINEAR);
+        LoadBitmap(L"Interface\\LSBg01.JPG", BITMAP_TITLE, GL_LINEAR);
+        LoadBitmap(L"Interface\\LSBg02.JPG", BITMAP_TITLE + 1, GL_LINEAR);
+        LoadBitmap(L"Interface\\LSBg03.JPG", BITMAP_TITLE + 2, GL_LINEAR);
+        LoadBitmap(L"Interface\\LSBg04.JPG", BITMAP_TITLE + 3, GL_LINEAR);
 
         ::StopMp3(g_lpszMp3[MUSIC_LOGIN_THEME]);
 
@@ -1517,7 +1524,7 @@ void LoadingScene(HDC hDC)
 
     ::ClearInput();
 
-    g_ConsoleDebug->Write(MCD_NORMAL, "LoadingScene_End");
+    g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_End");
 }
 
 float CameraDistanceTarget = 1000.f;
@@ -1862,15 +1869,17 @@ void MoveMainScene()
     {
         g_pMainFrame->ResetSkillHotKey();
 
-        g_ConsoleDebug->Write(MCD_NORMAL, "Join the game with the following character: %s", CharactersClient[SelectedHero].ID);
+        g_ConsoleDebug->Write(MCD_NORMAL, L"Join the game with the following character: %s", CharactersClient[SelectedHero].ID);
 
-        g_ErrorReport.Write("> Character selected <%d> \"%s\"\r\n", SelectedHero + 1, CharactersClient[SelectedHero].ID);
+        g_ErrorReport.Write(L"> Character selected <%d> \"%s\"\r\n", SelectedHero + 1, CharactersClient[SelectedHero].ID);
 
         InitMainScene = true;
 
-        g_ConsoleDebug->Write(MCD_SEND, "SendRequestJoinMapServer");
+        g_ConsoleDebug->Write(MCD_SEND, L"SendRequestJoinMapServer");
 
-        SendRequestJoinMapServer(CharactersClient[SelectedHero].ID);
+        CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
+        SocketClient->ToGameServer()->SendSelectCharacter(CharactersClient[SelectedHero].ID);
+        // SendRequestJoinMapServer(CharactersClient[SelectedHero].ID);
 
         CUIMng::Instance().CreateMainScene();
 
@@ -1885,7 +1894,7 @@ void MoveMainScene()
         InputNumber = 2;
         for (int i = 0; i < MAX_WHISPER; i++)
         {
-            g_pChatListBox->AddText("", "", SEASON3B::TYPE_WHISPER_MESSAGE);
+            g_pChatListBox->AddText(L"", L"", SEASON3B::TYPE_WHISPER_MESSAGE);
         }
 
         g_GuildNotice[0][0] = '\0';
@@ -1906,10 +1915,10 @@ void MoveMainScene()
 
         SetFocus(g_hWnd);
 
-        g_ErrorReport.Write("> Main Scene init success. ");
+        g_ErrorReport.Write(L"> Main Scene init success. ");
         g_ErrorReport.WriteCurrentTime();
 
-        g_ConsoleDebug->Write(MCD_NORMAL, "MainScene Init Success");
+        g_ConsoleDebug->Write(MCD_NORMAL, L"MainScene Init Success");
     }
 
     if (CurrentProtocolState == RECEIVE_JOIN_MAP_SERVER)
@@ -2331,19 +2340,19 @@ void MainScene(HDC hDC)
     Set3DSoundPosition();
 
     const bool addTimeStampToCapture = !HIBYTE(GetAsyncKeyState(VK_SHIFT));
-    char screenshotText[256];
+    wchar_t screenshotText[256];
     if (GrabEnable)
     {
         SYSTEMTIME st;
         GetLocalTime(&st);
-        sprintf(GrabFileName, "Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
-        sprintf(screenshotText, GlobalText[459], GrabFileName);
-        char lpszTemp[64];
-        wsprintf(lpszTemp, " [%s / %s]", g_ServerListManager->GetSelectServerName(), Hero->ID);
-        strcat(screenshotText, lpszTemp);
+        swprintf(GrabFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
+        swprintf(screenshotText, GlobalText[459], GrabFileName);
+        wchar_t lpszTemp[64];
+        swprintf(lpszTemp, L" [%s / %s]", g_ServerListManager->GetSelectServerName(), Hero->ID);
+        wcscat(screenshotText, lpszTemp);
         if (addTimeStampToCapture)
         {
-            g_pChatListBox->AddText("", screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pChatListBox->AddText(L"", screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
     }
 
@@ -2428,19 +2437,19 @@ void MainScene(HDC hDC)
 
         if (GrabEnable && !addTimeStampToCapture)
         {
-            g_pChatListBox->AddText("", screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pChatListBox->AddText(L"", screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
 
         GrabEnable = false;
 
 #ifndef  defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
         BeginBitmap();
-        unicode::t_char szDebugText[128];
-        unicode::_sprintf(szDebugText, "FPS : %.1f Connected: %d", FPS_AVG, g_bGameServerConnected);
-        unicode::t_char szMousePos[128];
-        unicode::_sprintf(szMousePos, "MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
-        unicode::t_char szCamera3D[128];
-        unicode::_sprintf(szCamera3D, "Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+        wchar_t szDebugText[128];
+        swprintf(szDebugText, L"FPS : %.1f Connected: %d", FPS_AVG, g_bGameServerConnected);
+        wchar_t szMousePos[128];
+        swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
+        wchar_t szCamera3D[128];
+        swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
         g_pRenderText->SetFont(g_hFontBold);
         g_pRenderText->SetBgColor(0, 0, 0, 100);
         g_pRenderText->SetTextColor(255, 255, 255, 200);
@@ -2465,18 +2474,16 @@ void MainScene(HDC hDC)
             current_tick_count += rest_ms;
         }
 
-        if (EnableSocket && SceneFlag == MAIN_SCENE)
+        if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
         {
-            if (SocketClient == nullptr || !SocketClient->IsConnected())
+            static BOOL s_bClosed = FALSE;
+            if (!s_bClosed)
             {
-                static BOOL s_bClosed = FALSE;
-                if (!s_bClosed)
-                {
-                    s_bClosed = TRUE;
-                    g_ErrorReport.Write("> Connection closed. ");
-                    g_ErrorReport.WriteCurrentTime();
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CServerLostMsgBoxLayout));
-                }
+                s_bClosed = TRUE;
+                g_ErrorReport.Write(L"> Connection closed. ");
+                g_ErrorReport.WriteCurrentTime();
+                g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
+                CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
             }
         }
 

@@ -117,12 +117,12 @@ extern bool g_bRenderBoundingBox;
 inline void __TraceF(const TCHAR* pFmt, ...)
 {
 #ifdef _DEBUG
-    TCHAR	szMsg[4096];
-    va_list	pArgList;
-    va_start(pArgList, pFmt);
-    _vsntprintf(szMsg, sizeof(szMsg) / sizeof(TCHAR), pFmt, pArgList);
-    va_end(pArgList);
-    OutputDebugString(szMsg);
+    //TCHAR	szMsg[4096];
+    //va_list	pArgList;
+    //va_start(pArgList, pFmt);
+    //_vsntprintf(szMsg, sizeof(szMsg) / sizeof(TCHAR), pFmt, pArgList);
+    //va_end(pArgList);
+    //OutputDebugString(szMsg);
 #endif // _DEBUG
 }
 

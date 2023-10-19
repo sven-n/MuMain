@@ -69,7 +69,7 @@ struct SRequestRewardText
 {
     HFONT	m_hFont;
     DWORD	m_dwColor;
-    char	m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN];
+    wchar_t	m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN];
     REQUEST_REWARD_CLASSIFY	m_eRequestReward;		//
     DWORD	m_dwType;
     WORD	m_wIndex;
@@ -78,7 +78,7 @@ struct SRequestRewardText
 
 typedef std::map<DWORD, SNPCDialogue> NPCDialogueMap;
 typedef std::map<DWORD, SQuestProgress> QuestProgressMap;
-typedef std::map<int, std::string> QuestWordsMap;
+typedef std::map<int, std::wstring> QuestWordsMap;
 typedef std::map<DWORD, SQuestRequestReward> QuestRequestRewardMap;
 typedef std::list<DWORD> DWordList;
 
@@ -93,7 +93,7 @@ protected:
     std::map<WORD, bool>			m_mapEPRequestRewardState;
 
     int		m_nNPCIndex;
-    char	m_szNPCName[32];
+    wchar_t	m_szNPCName[MAX_MONSTER_NAME];
 
     DWordList				m_listQuestIndexByEtc;
     DWordList				m_listCurQuestIndex;
@@ -108,19 +108,19 @@ public:
 
     void SetNPC(int nNPCIndex);
     int GetNPCIndex();
-    char* GetNPCName();
+    wchar_t* GetNPCName();
 
     void SetCurQuestProgress(DWORD dwQuestIndex);
 
-    const char* GetWords(int nWordsIndex);
-    const char* GetNPCDlgNPCWords(DWORD dwDlgState);
-    const char* GetNPCDlgAnswer(DWORD dwDlgState, int nAnswer);
+    const wchar_t* GetWords(int nWordsIndex);
+    const wchar_t* GetNPCDlgNPCWords(DWORD dwDlgState);
+    const wchar_t* GetNPCDlgAnswer(DWORD dwDlgState, int nAnswer);
     int GetNPCDlgAnswerResult(DWORD dwDlgState, int nAnswer);
-    const char* GetNPCWords(DWORD dwQuestIndex);
-    const char* GetPlayerWords(DWORD dwQuestIndex);
-    const char* GetAnswer(DWORD dwQuestIndex, int nAnswer);
-    const char* GetSubject(DWORD dwQuestIndex);
-    const char* GetSummary(DWORD dwQuestIndex);
+    const wchar_t* GetNPCWords(DWORD dwQuestIndex);
+    const wchar_t* GetPlayerWords(DWORD dwQuestIndex);
+    const wchar_t* GetAnswer(DWORD dwQuestIndex, int nAnswer);
+    const wchar_t* GetSubject(DWORD dwQuestIndex);
+    const wchar_t* GetSummary(DWORD dwQuestIndex);
     bool IsRequestRewardQS(DWORD dwQuestIndex);
     bool GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, DWORD dwQuestIndex);
     void SetEPRequestRewardState(DWORD dwQuestIndex, bool ProgressState);

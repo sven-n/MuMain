@@ -16,22 +16,25 @@
 #include "CSChaosCastle.h"
 #include "MapManager.h"
 #include "CharacterManager.h"
+#include "NewUISystem.h"
 #include "SkillManager.h"
 
 extern void MonsterMoveSandSmoke(OBJECT* o);
 extern void MonsterDieSandSmoke(OBJECT* o);
 
+extern bool LogOut;
+
 BYTE m_AltarState[5] = { 2,2,2,2,2 };
 
 #include "UIControls.h"
-#include "wsclientinline.h"
+
 
 bool	View_Bal = false;
 char	Suc_Or_Fail = -1;
 char	View_Suc_Or_Fail = -1;
 float Deco_Insert = 0.f;
 char Message_Box = 0;
-char   Box_String[2][200] = { NULL,NULL };
+wchar_t   Box_String[2][200] = { NULL,NULL };
 int  Dark_elf_Num = 0;
 int Button_Down = 0;
 int BackUp_Key = 0;
@@ -48,7 +51,7 @@ int Exp = 0;
 BYTE Ranking[5];
 BYTE HeroClass[5];
 int HeroScore[5] = { -1,-1,-1,-1,-1 };
-char HeroName[5][MAX_ID_SIZE + 1];
+wchar_t HeroName[5][MAX_ID_SIZE + 1];
 
 int BackUpMin = 0;
 bool TimeStart = false;
@@ -147,21 +150,21 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
 
     m_OccupationState = btOccupationState;
 
-    char FileName[64];
-    char WorldName[32];
+    wchar_t FileName[64];
+    wchar_t WorldName[32];
 
-    sprintf(WorldName, "World%d", gMapManager.WorldActive + 1);
+    swprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
 
     switch (m_OccupationState)
     {
     case CRYWOLF_OCCUPATION_STATE_PEACE:
-        sprintf(FileName, "%s\\TerrainLight.jpg", WorldName);
+        swprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
         break;
     case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
-        sprintf(FileName, "%s\\TerrainLight1.jpg", WorldName);
+        swprintf(FileName, L"%s\\TerrainLight1.jpg", WorldName);
         break;
     case CRYWOLF_OCCUPATION_STATE_WAR:
-        sprintf(FileName, "%s\\TerrainLight2.jpg", WorldName);
+        swprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
         break;
     }
     OpenTerrainLight(FileName);
@@ -169,13 +172,13 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
     switch (m_OccupationState)
     {
     case CRYWOLF_OCCUPATION_STATE_PEACE:
-        sprintf(FileName, "Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
+        swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
         break;
     case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
-        sprintf(FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
+        swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
         break;
     case CRYWOLF_OCCUPATION_STATE_WAR:
-        sprintf(FileName, "Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
+        swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
         break;
     }
     OpenTerrainAttribute(FileName);
@@ -239,7 +242,7 @@ void M34CryWolf1st::RenderNoticesCryWolf()
     }
     iTemp = 4 * iNextNotice;
 
-    char szText[256];
+    wchar_t szText[256];
     int nText = 0;
 
     for (int i = 0; i < 4; i++)
@@ -255,7 +258,7 @@ void M34CryWolf1st::RenderNoticesCryWolf()
         nText = 1957 + i + iTemp;
         if (1966 == nText || 1967 == nText)
         {
-            wsprintf(szText, GlobalText[nText]);
+            swprintf(szText, GlobalText[nText]);
             g_pRenderText->RenderText(190, 63 + i * 13, szText);
         }
         else
@@ -604,9 +607,9 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(c, "Monster96_Top", 27);
-        BoneManager::RegisterBone(c, "Monster96_Center", 28);
-        BoneManager::RegisterBone(c, "Monster96_Bottom", 29);
+        BoneManager::RegisterBone(c, L"Monster96_Top", 27);
+        BoneManager::RegisterBone(c, L"Monster96_Center", 28);
+        BoneManager::RegisterBone(c, L"Monster96_Bottom", 29);
     }
     break;
     case 313:
@@ -618,7 +621,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(c, "Monster95_Head", 6);
+        BoneManager::RegisterBone(c, L"Monster95_Head", 6);
     }
     break;
     case 314:
@@ -639,7 +642,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(c, "Monster95_Head", 6);
+        BoneManager::RegisterBone(c, L"Monster95_Head", 6);
     }
     break;
     case 316:
@@ -681,8 +684,8 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(c, "Monster94_zx", 27);
-        BoneManager::RegisterBone(c, "Monster94_zx01", 28);
+        BoneManager::RegisterBone(c, L"Monster94_zx", 27);
+        BoneManager::RegisterBone(c, L"Monster94_zx01", 28);
     }
     break;
     case 440:
@@ -693,7 +696,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
         c->Object.Scale = 1.5f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(c, "Left_Hand", 17);
+        BoneManager::RegisterBone(c, L"Left_Hand", 17);
     }
     break;
     case 348:
@@ -880,7 +883,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction != MONSTER01_DIE) {
             Vector(0.9f, 0.2f, 0.1f, Light);
-            BoneManager::GetBonePosition(o, "Monster95_Head", Position);
+            BoneManager::GetBonePosition(o, L"Monster95_Head", Position);
             CreateSprite(BITMAP_LIGHT, Position, 3.5f, Light, o);
         }
 
@@ -939,17 +942,17 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
             fScalePercent = .5f;
 
-        BoneManager::GetBonePosition(o, "Monster96_Center", Position);
+        BoneManager::GetBonePosition(o, L"Monster96_Center", Position);
         Vector(Luminosity * 0.f, Luminosity * 0.5f, Luminosity * 0.1f, Light);
         CreateSprite(BITMAP_LIGHT, Position, fScalePercent, Light, o);
 
         Vector(0.5f, 0.5f, 0.5f, Light);
 
-        BoneManager::GetBonePosition(o, "Monster96_Top", Position);
+        BoneManager::GetBonePosition(o, L"Monster96_Top", Position);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, o, Rotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, o, 360.f - Rotation);
 
-        BoneManager::GetBonePosition(o, "Monster96_Bottom", Position);
+        BoneManager::GetBonePosition(o, L"Monster96_Bottom", Position);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, o, Rotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, o, 360.f - Rotation);
     }
@@ -1272,7 +1275,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         else if (o->CurrentAction == MONSTER01_ATTACK3)
         {
             vec3_t Position, Light;
-            BoneManager::GetBonePosition(o, "Left_Hand", Position);
+            BoneManager::GetBonePosition(o, L"Left_Hand", Position);
 
             Vector(0.2f, 0.2f, 0.7f, Light);
             CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 27, 1.0f);
@@ -1756,7 +1759,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         auto Data = (float)((float)dummy / (float)100);
         auto Rot = (float)(rand() % 360);
         Vector(1.0f, 1.0f, 1.0f, Light);
-        BoneManager::GetBonePosition(o, "Monster94_zx", Position);
+        BoneManager::GetBonePosition(o, L"Monster94_zx", Position);
         CreateSprite(BITMAP_DS_EFFECT, Position, 1.5f, Light, o);
         Vector(0.3f, 0.3f, 0.7f, Light);
         CreateSprite(BITMAP_LIGHT, Position, 3.5f + (Data * 5), Light, o);
@@ -1764,7 +1767,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         CreateSprite(BITMAP_LIGHT, Position, 3.5f + (Data * 5), Light, o);
         CreateSprite(BITMAP_DS_SHOCK, Position, 0.8f + Data, Light, o, Rot);
 
-        BoneManager::GetBonePosition(o, "Monster94_zx01", Position);
+        BoneManager::GetBonePosition(o, L"Monster94_zx01", Position);
         Vector(0.1f, 0.0f, 0.6f, Light);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, Rot);
         if (rand_fps_check(2))
@@ -1846,7 +1849,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
         if (o->CurrentAction != MONSTER01_DIE) {
             Vector(0.9f, 0.2f, 0.1f, Light);
-            BoneManager::GetBonePosition(o, "Monster95_Head", Position);
+            BoneManager::GetBonePosition(o, L"Monster95_Head", Position);
             CreateSprite(BITMAP_LIGHT, Position, 3.5f, Light, o);
         }
 
@@ -1943,17 +1946,17 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
             fScalePercent = .5f;
 
-        BoneManager::GetBonePosition(o, "Monster96_Center", Position);
+        BoneManager::GetBonePosition(o, L"Monster96_Center", Position);
         Vector(Luminosity * 0.f, Luminosity * 0.5f, Luminosity * 0.1f, Light);
         CreateSprite(BITMAP_LIGHT, Position, fScalePercent, Light, o);
 
         Vector(0.5f, 0.5f, 0.5f, Light);
 
-        BoneManager::GetBonePosition(o, "Monster96_Top", Position);
+        BoneManager::GetBonePosition(o, L"Monster96_Top", Position);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, o, Rotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, o, 360.f - Rotation);
 
-        BoneManager::GetBonePosition(o, "Monster96_Bottom", Position);
+        BoneManager::GetBonePosition(o, L"Monster96_Bottom", Position);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, o, Rotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, o, 360.f - Rotation);
 
@@ -2160,10 +2163,10 @@ void M34CryWolf1st::Set_Message_Box(int Str, int Num, int Key, int ObjNum)
     if (Str == 56)
     {
         BYTE State = (m_AltarState[ObjNum] & 0x0f);
-        wsprintf(Box_String[Num], GlobalText[1950 + Str], State);
+        swprintf(Box_String[Num], GlobalText[1950 + Str], State);
     }
     else
-        strcpy(Box_String[Num], GlobalText[1950 + Str]);
+        wcscpy(Box_String[Num], GlobalText[1950 + Str]);
     if (Str == 56 || Str == 57)
         Message_Box = 1;
     else
@@ -2235,7 +2238,7 @@ void M34CryWolf1st::MoveMvp_Interface()
                 else
                 {
                     Button_Down = 2;
-                    SendRequestCrywolfAltarContract(BackUp_Key);
+                    SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
                 }
             }
         }
@@ -2382,7 +2385,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 
     EnableAlphaTest();
 
-    char Text[300];
+    wchar_t Text[300];
 
     float Main[] = { 518.f,278.f,122.f,119.f,120.f / 128.f,118.f / 128.f };
     float Number[5][6] = { {565.f,280.f,13.f,13.f,12.f / 16.f,12.f / 16.f},
@@ -2403,13 +2406,13 @@ bool M34CryWolf1st::Render_Mvp_Interface()
         g_pRenderText->SetTextColor(255, 148, 21, 255);
         g_pRenderText->SetBgColor(0x00000000);
 
-        wsprintf(Text, "%s", GlobalText[680]);
+        swprintf(Text, L"%s", GlobalText[680]);
         g_pRenderText->RenderText(240, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        wsprintf(Text, "%s", GlobalText[681]);
+        swprintf(Text, L"%s", GlobalText[681]);
         g_pRenderText->RenderText(285, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        wsprintf(Text, "%s", GlobalText[1973]);
+        swprintf(Text, L"%s", GlobalText[1973]);
         g_pRenderText->RenderText(333, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        wsprintf(Text, "%s", GlobalText[1977]);
+        swprintf(Text, L"%s", GlobalText[1977]);
         g_pRenderText->RenderText(387, 160, Text, 0, 0, RT3_WRITE_CENTER);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetBgColor(0x00000000);
@@ -2421,15 +2424,15 @@ bool M34CryWolf1st::Render_Mvp_Interface()
             if (HeroScore[i] == -1)
                 continue;
 
-            wsprintf(Text, "%d", i + 1);
+            swprintf(Text, L"%d", i + 1);
             g_pRenderText->RenderText(240, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
-            wsprintf(Text, "%s", HeroName[i]);
+            swprintf(Text, L"%s", HeroName[i]);
             g_pRenderText->RenderText(285, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
 
-            wsprintf(Text, "%s", gCharacterManager.GetCharacterClassText(HeroClass[i]));
+            swprintf(Text, L"%s", gCharacterManager.GetCharacterClassText(HeroClass[i]));
 
             g_pRenderText->RenderText(335, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
-            wsprintf(Text, "%d", HeroScore[i]);
+            swprintf(Text, L"%d", HeroScore[i]);
             g_pRenderText->RenderText(385, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
         }
 
@@ -2608,7 +2611,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 148, 21, 255);
     g_pRenderText->SetBgColor(0);
-    wsprintf(Text, GlobalText[1948], Dark_elf_Num);
+    swprintf(Text, GlobalText[1948], Dark_elf_Num);
     g_pRenderText->RenderText(582, 359, Text, 0, 0, RT3_WRITE_CENTER);
 
     if (View_Bal == true)
@@ -2619,7 +2622,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
         {
             g_pCryWolfInterface->Render(bar[0], bar[1], bar[2], bar[3], 0.f, 0.f, bar[4], bar[5], 0);
             g_pCryWolfInterface->Render(Val_Icon[0], Val_Icon[1], Val_Icon[2], Val_Icon[3], 0.f, 0.f, Val_Icon[4], Val_Icon[5], 4);
-            wsprintf(Text, GlobalText[1949]);
+            swprintf(Text, GlobalText[1949]);
             g_pRenderText->RenderText(38, 101, Text, 0, 0, RT3_WRITE_CENTER);
 
             float Hp = ((67.f / 100.f) * (float)Val_Hp);
@@ -2712,7 +2715,7 @@ void M34CryWolf1st::Set_MyRank(BYTE MyRank, int GettingExp)
     Exp = GettingExp;
 }
 
-void M34CryWolf1st::Set_WorldRank(BYTE Rank, BYTE Class, int Score, char* szHeroName)
+void M34CryWolf1st::Set_WorldRank(BYTE Rank, BYTE Class, int Score, wchar_t* szHeroName)
 {
     HeroScore[Rank] = Score;
     HeroClass[Rank] = Class;

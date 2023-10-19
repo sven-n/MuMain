@@ -36,7 +36,7 @@ namespace info
     private:
         InfoMAP			m_InfoMap;
         bool			m_isTestServer;
-        char			m_Language[32];
+        wchar_t			m_Language[32];
     };
 };
 

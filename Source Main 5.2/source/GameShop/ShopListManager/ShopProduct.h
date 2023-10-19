@@ -18,14 +18,14 @@ public:
     CShopProduct();
     virtual ~CShopProduct();
 
-    bool SetProduct(std::string strdata);
+    bool SetProduct(std::wstring strdata);
 
 public:
     int		ProductSeq;											//  1. 상품 번호
-    char	ProductName[SHOPLIST_LENGTH_PRODUCTNAME];			//  2. 상품 명
-    char	PropertyName[SHOPLIST_LENGTH_PRODUCTPROPERTYNAME];	//  3. 속성 명
-    char	Value[SHOPLIST_LENGTH_PRODUCTVALUE];				//  4. 속성 값
-    char	UnitName[SHOPLIST_LENGTH_PRODUCTUNITNAME];			//  5. 속성 단위 명
+    wchar_t	ProductName[SHOPLIST_LENGTH_PRODUCTNAME];			//  2. 상품 명
+    wchar_t	PropertyName[SHOPLIST_LENGTH_PRODUCTPROPERTYNAME];	//  3. 속성 명
+    wchar_t	Value[SHOPLIST_LENGTH_PRODUCTVALUE];				//  4. 속성 값
+    wchar_t	UnitName[SHOPLIST_LENGTH_PRODUCTUNITNAME];			//  5. 속성 단위 명
     int		Price;												//  6. 상품 가격
     int		PriceSeq;											//  7. 상품 가격 번호
     int		PropertyType;										//  8. 속성 유형 (141:아이템 속성, 142:가격 속성)
@@ -34,7 +34,7 @@ public:
     int		DeleteFlag;											// 11. 삭제 여부 (143: 삭제, 144: 활성)
     int		StorageGroup;										// 12. 보관함 그룹 유형
     int		ShareFlag;											// 13. ServerType(서버 유형) 별 보관함 노출 공유 항목 여부
-    char	InGamePackageID[SHOPLIST_LENGTH_INGAMEPACKAGEID];	// 14. 아이템 코드
+    wchar_t	InGamePackageID[SHOPLIST_LENGTH_INGAMEPACKAGEID];	// 14. 아이템 코드
     int		PropertySeq;										// 15. 속성 코드
     int		ProductType;										// 16. 상품 유형 코드
     int		UnitType;											// 17. 단위 코드

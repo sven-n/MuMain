@@ -13,13 +13,13 @@
 
 using namespace info;
 
-SlideInfoPtr SlideInfo::MakeInfo(const std::string& filename)
+SlideInfoPtr SlideInfo::MakeInfo(const std::wstring& filename)
 {
     SlideInfoPtr info(new SlideInfo(filename));
     return info;
 }
 
-SlideInfo::SlideInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
+SlideInfo::SlideInfo(const std::wstring& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
     m_IsOpenFile = OpenFile(filename);
 
@@ -34,7 +34,7 @@ SlideInfo::~SlideInfo()
     clear();
 }
 
-bool SlideInfo::OpenFile(const std::string& filename)
+bool SlideInfo::OpenFile(const std::wstring& filename)
 {
     return true;
 }

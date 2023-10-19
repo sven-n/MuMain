@@ -17,21 +17,21 @@ public:
 
     //				샵 리스트 다운로드 & 관리 를 위한 정보를 설정한다.
     void			SetListManagerInfo(DownloaderType type,
-        char* ServerIP,
-        char* UserID,
-        char* Pwd,
-        char* RemotePath,
-        char* LocalPath,
+        wchar_t* ServerIP,
+        wchar_t* UserID,
+        wchar_t* Pwd,
+        wchar_t* RemotePath,
+        wchar_t* LocalPath,
         CListVersionInfo Version,
         DWORD dwDownloadMaxTime = 0);
 
     void			SetListManagerInfo(DownloaderType type,
-        char* ServerIP,
+        wchar_t* ServerIP,
         unsigned short PortNum,
-        char* UserID,
-        char* Pwd,
-        char* RemotePath,
-        char* LocalPath,
+        wchar_t* UserID,
+        wchar_t* Pwd,
+        wchar_t* RemotePath,
+        wchar_t* LocalPath,
         FTP_SERVICE_MODE ftpMode,
         CListVersionInfo Version,
         DWORD dwDownloadMaxTime = 0);
@@ -40,7 +40,7 @@ public:
 
 protected:
     bool			IsScriptFileExist();
-    std::string		GetScriptPath();
+    std::wstring		GetScriptPath();
     void			DeleteScriptFiles();
 
     WZResult		FileDownLoad();
@@ -50,7 +50,7 @@ protected:
     virtual WZResult LoadScript(bool bDonwLoad) = 0;
 
     CListManagerInfo			m_ListManagerInfo;
-    std::vector<std::string>	m_vScriptFiles;
+    std::vector<std::wstring>	m_vScriptFiles;
     WZResult					m_Result;
     CFTPFileDownLoader* m_pFTPDownLoader;
 };

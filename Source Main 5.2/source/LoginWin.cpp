@@ -13,8 +13,9 @@
 #include "ZzzInterface.h"
 #include "UIControls.h"
 #include "ZzzScene.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
+#include "NewUISystem.h"
 #include "./Utilities/Log/muConsoleDebug.h"
 
 #include "ServerListManager.h"
@@ -28,6 +29,10 @@
 extern float g_fScreenRate_x;
 extern float g_fScreenRate_y;
 extern int g_iChatInputType;
+extern int  LogIn;
+extern wchar_t LogInID[MAX_ID_SIZE + 1];
+extern BYTE Version[SIZE_PROTOCOLVERSION];
+extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 
 CLoginWin::CLoginWin()
 {
@@ -161,7 +166,7 @@ void CLoginWin::RenderControls()
 {
     if (this->FirstLoad == 1)
     {
-        if (strlen(m_ID) > 0)
+        if (wcslen(m_ID) > 0)
             CUIMng::Instance().m_LoginWin.GetPassInputBox()->GiveFocus();
         else
             CUIMng::Instance().m_LoginWin.GetIDInputBox()->GiveFocus();
@@ -184,11 +189,11 @@ void CLoginWin::RenderControls()
     g_pRenderText->RenderText(int((CWin::GetXPos() + 30) / g_fScreenRate_x),
         int((CWin::GetYPos() + 139) / g_fScreenRate_y), GlobalText[451]);
 
-    unicode::t_char szServerName[MAX_TEXT_LENGTH];
+    wchar_t szServerName[MAX_TEXT_LENGTH];
 
-    const char* apszGlobalText[4]
+    const wchar_t* apszGlobalText[4]
         = { GlobalText[461], GlobalText[460], GlobalText[3130], GlobalText[3131] };
-    sprintf(szServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
+    swprintf(szServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
         g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
 
     g_pRenderText->RenderText(int((CWin::GetXPos() + 111) / g_fScreenRate_x),
@@ -202,25 +207,32 @@ void CLoginWin::RequestLogin()
 
     CUIMng::Instance().HideWin(this);
 
-    char szID[MAX_ID_SIZE + 1] = { 0, };
-    char szPass[MAX_PASSWORD_SIZE + 1] = { 0, };
+    wchar_t szID[MAX_ID_SIZE + 1] = { 0, };
+    wchar_t szPass[MAX_PASSWORD_SIZE + 1] = { 0, };
     m_pIDInputBox->GetText(szID, MAX_ID_SIZE + 1);
     m_pPassInputBox->GetText(szPass, MAX_PASSWORD_SIZE + 1);
 
-    if (unicode::_strlen(szID) <= 0)
+    if (wcslen(szID) <= 0)
         CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_ID);
-    else if (unicode::_strlen(szPass) <= 0)
+    else if (wcslen(szPass) <= 0)
         CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_PASSWORD);
     else
     {
         if (CurrentProtocolState == RECEIVE_JOIN_SERVER_SUCCESS)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, "Login with the following account: %s", szID);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %s", szID);
 
-            g_ErrorReport.Write("> Login Request.\r\n");
-            g_ErrorReport.Write("> Try to Login \"%s\"\r\n", szID);
+            g_ErrorReport.Write(L"> Login Request.\r\n");
+            g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", szID);
 
-            SendRequestLogIn(szID, szPass);
+            LogIn = 1;
+            wcscpy(LogInID, (szID));
+            CurrentProtocolState = REQUEST_LOG_IN;
+
+            SocketClient->ToGameServer()->SendLogin(szID, szPass, Version, Serial);
+
+            g_pChatListBox->AddText(L"", GlobalText[472], SEASON3B::TYPE_SYSTEM_MESSAGE); \
+            g_pChatListBox->AddText(L"", GlobalText[473], SEASON3B::TYPE_SYSTEM_MESSAGE); \
         }
     }
 }

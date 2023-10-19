@@ -45,9 +45,9 @@ namespace SEASON3B
 
         void OpenningProcess();
         void ClosingProcess();
-        void OpenQuickCommand(const char* strID, int iIndex, int x, int y);
+        void OpenQuickCommand(const wchar_t* strID, int iIndex, int x, int y);
         void CloseQuickCommand();
-        void SetID(const char* strID);
+        void SetID(const wchar_t* strID);
         void SetSelectedCharacterIndex(int iIndex);
 
     private:
@@ -63,7 +63,7 @@ namespace SEASON3B
         POINT			m_Pos;
 
         int m_iSelectedIndex;
-        char m_strID[32];
+        wchar_t m_strID[32];
         int m_iSelectedCharacterIndex;
     };
 }

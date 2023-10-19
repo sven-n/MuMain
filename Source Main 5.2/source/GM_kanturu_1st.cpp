@@ -416,7 +416,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "BERSERK_MOUTH", 9);
+        BoneManager::RegisterBone(pCharacter, L"BERSERK_MOUTH", 9);
     }
     break;
     case 434:
@@ -437,7 +437,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "GENO_WP", 47);
+        BoneManager::RegisterBone(pCharacter, L"GENO_WP", 47);
     }
     break;
     case 351:
@@ -447,9 +447,9 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Object.Scale = 0.8f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, "SPL_WOLF_EYE_26", 16);
-        BoneManager::RegisterBone(pCharacter, "SPL_WOLF_EYE_25", 17);
-        strcpy(pCharacter->ID, "스플린터 울프");
+        BoneManager::RegisterBone(pCharacter, L"SPL_WOLF_EYE_26", 16);
+        BoneManager::RegisterBone(pCharacter, L"SPL_WOLF_EYE_25", 17);
+        wcscpy(pCharacter->ID, L"스플린터 울프");
 
         OBJECT* o = &pCharacter->Object;
         BMD* b = &Models[o->Type];
@@ -468,11 +468,11 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, "IRON_RIDER_BIP01", 2);
-        BoneManager::RegisterBone(pCharacter, "IRON_RIDER_BOW_6", 42);
-        BoneManager::RegisterBone(pCharacter, "IRON_RIDER_BOW_15", 52);
-        BoneManager::RegisterBone(pCharacter, "IRON_RIDER_BOW_16", 47);
-        strcpy(pCharacter->ID, "아이언 라이더");
+        BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BIP01", 2);
+        BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BOW_6", 42);
+        BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BOW_15", 52);
+        BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BOW_16", 47);
+        wcscpy(pCharacter->ID, L"아이언 라이더");
     }
     break;
     case 354:
@@ -485,10 +485,10 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Object.Angle[0] = 0.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, "BLADE_L_HAND", 12);
-        BoneManager::RegisterBone(pCharacter, "BOX1", 54);
-        BoneManager::RegisterBone(pCharacter, "BOX2", 55);
-        strcpy(pCharacter->ID, "블레이드 헌터");
+        BoneManager::RegisterBone(pCharacter, L"BLADE_L_HAND", 12);
+        BoneManager::RegisterBone(pCharacter, L"BOX1", 54);
+        BoneManager::RegisterBone(pCharacter, L"BOX2", 55);
+        wcscpy(pCharacter->ID, L"블레이드 헌터");
     }
     break;
     case 353:
@@ -498,7 +498,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        strcpy(pCharacter->ID, "사티로스");
+        wcscpy(pCharacter->ID, L"사티로스");
     }
     break;
     case 355:
@@ -508,21 +508,21 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_23", 27);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_24", 28);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_25", 29);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_26", 30);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_18", 34);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_19", 35);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_20", 36);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_21", 37);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_TAIL", 81);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_TAIL_1", 82);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_TAIL_2", 83);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_SPAIN_1", 4);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_SPAIN_2", 5);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_SPAIN_3", 6);
-        strcpy(pCharacter->ID, "켄타우로스");
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_23", 27);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_24", 28);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_25", 29);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_26", 30);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_18", 34);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_19", 35);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_20", 36);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_21", 37);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_TAIL", 81);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_TAIL_1", 82);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_TAIL_2", 83);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_1", 4);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_2", 5);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_3", 6);
+        wcscpy(pCharacter->ID, L"켄타우로스");
     }
     break;
     case 553:
@@ -533,7 +533,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Object.Scale = 1.15f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, "BERSERK_MOUTH", 9);
+        BoneManager::RegisterBone(pCharacter, L"BERSERK_MOUTH", 9);
     }
     break;
     case 554:
@@ -544,21 +544,21 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_23", 27);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_24", 28);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_25", 29);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_26", 30);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_18", 34);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_19", 35);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_20", 36);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_21", 37);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_TAIL", 81);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_TAIL_1", 82);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_TAIL_2", 83);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_SPAIN_1", 4);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_SPAIN_2", 5);
-        BoneManager::RegisterBone(pCharacter, "KENTAUROS_BIP_SPAIN_3", 6);
-        strcpy(pCharacter->ID, "켄타우로스워리어");
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_23", 27);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_24", 28);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_25", 29);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_26", 30);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_18", 34);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_19", 35);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_20", 36);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_21", 37);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_TAIL", 81);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_TAIL_1", 82);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_TAIL_2", 83);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_1", 4);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_2", 5);
+        BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_3", 6);
+        wcscpy(pCharacter->ID, L"켄타우로스워리어");
     }
     break;
     case 555:
@@ -580,7 +580,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
-        BoneManager::RegisterBone(pCharacter, "GENO_WP", 47);
+        BoneManager::RegisterBone(pCharacter, L"GENO_WP", 47);
     }
     break;
     }
@@ -705,7 +705,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             vRelative[0] = (float)(4 - rand() % 5);
             vRelative[1] = (float)(4 - rand() % 5);
             vRelative[2] = (float)(4 - rand() % 5);
-            BoneManager::GetBonePosition(o, "IRON_RIDER_BOW_6", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_6", vRelative, vPos);
             CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
         }
 
@@ -713,7 +713,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
         {
             vec3_t vPos, vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
-            BoneManager::GetBonePosition(o, "IRON_RIDER_BOW_6", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_6", vRelative, vPos);
             CreateEffect(MODEL_IRON_RIDER_ARROW, vPos, o->Angle, o->Light, 0);
         }
 
@@ -730,7 +730,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                 vec3_t vPos, vRelative, Light;
                 Vector(140.f, 0.f, -30.f, vRelative);
                 Vector(0.2f, 0.2f, 1.f, Light);
-                BoneManager::GetBonePosition(o, "BLADE_L_HAND", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"BLADE_L_HAND", vRelative, vPos);
 
                 CreateEffect(MODEL_BLADE_SKILL, vPos, o->Angle, Light, 0);
 
@@ -755,21 +755,21 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             Vector(0.f, 0.f, 0.f, vRelative);
             int index = 31;
             float Width = 2.f;
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_23", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_23", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_24", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_24", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_25", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_25", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_26", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_26", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_18", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_18", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_19", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_19", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_20", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_20", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_21", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_21", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
         }
         if ((int)c->AttackTime == 14)
@@ -779,13 +779,13 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             if (o->CurrentAction == MONSTER01_ATTACK1)
             {
                 Vector(30.f, -30.f, 0.f, vRelative);
-                BoneManager::GetBonePosition(o, "KENTAUROS_BIP_25", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_25", vRelative, vPos);
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
             }
             else
             {
                 Vector(60.f, -30.f, 50.f, vRelative);
-                BoneManager::GetBonePosition(o, "KENTAUROS_BIP_23", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_23", vRelative, vPos);
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
                 o->Angle[2] += 15.f;
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
@@ -812,21 +812,21 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             Vector(0.f, 0.f, 0.f, vRelative);
             int index = 31;
             float Width = 2.f;
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_23", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_23", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_24", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_24", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_25", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_25", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_26", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_26", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_18", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_18", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_19", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_19", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_20", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_20", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_21", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_21", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
         }
         if ((int)c->AttackTime == 14)
@@ -836,13 +836,13 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             if (o->CurrentAction == MONSTER01_ATTACK1)
             {
                 Vector(30.f, -30.f, 0.f, vRelative);
-                BoneManager::GetBonePosition(o, "KENTAUROS_BIP_25", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_25", vRelative, vPos);
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
             }
             else
             {
                 Vector(60.f, -30.f, 50.f, vRelative);
-                BoneManager::GetBonePosition(o, "KENTAUROS_BIP_23", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_23", vRelative, vPos);
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
                 o->Angle[2] += 15.f;
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
@@ -1123,7 +1123,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
         vec3_t vPos, vRelative;
         Vector(0.f, 0.f, 0.f, vRelative);
-        BoneManager::GetBonePosition(o, "BERSERK_MOUTH", vRelative, vPos);
+        BoneManager::GetBonePosition(o, L"BERSERK_MOUTH", vRelative, vPos);
         CreateParticle(
             BITMAP_SMOKE, vPos, o->Angle, o->Light, 42, o->Scale);
 
@@ -1211,7 +1211,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         {
             vec3_t vPos, vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
-            BoneManager::GetBonePosition(o, "GENO_WP", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"GENO_WP", vRelative, vPos);
             CreateParticle(
                 BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, o->Scale);
 
@@ -1258,9 +1258,9 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             vRelative[0] = (float)(4 - rand() % 5);
             vRelative[1] = (float)(4 - rand() % 5);
             vRelative[2] = (float)(4 - rand() % 5);
-            BoneManager::GetBonePosition(o, "IRON_RIDER_BOW_15", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_15", vRelative, vPos);
             CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
-            BoneManager::GetBonePosition(o, "IRON_RIDER_BOW_16", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_16", vRelative, vPos);
             CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
 
             if (o->CurrentAction == MONSTER01_WALK)
@@ -1282,7 +1282,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             vec3_t vLight = { 1.0f, 1.0f, 1.0f };
             vec3_t vPos, vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
-            BoneManager::GetBonePosition(o, "IRON_RIDER_BIP01", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"IRON_RIDER_BIP01", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 3, 2.0f);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 4, 1.0f);
             if (o->SubType == FALSE)
@@ -1400,17 +1400,17 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_DIE)
         {
             float Scale = 0.3f;
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_TAIL", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_TAIL", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_TAIL_1", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_TAIL_1", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_TAIL_2", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_TAIL_2", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_SPAIN_1", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_SPAIN_1", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_SPAIN_2", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_SPAIN_2", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_SPAIN_3", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_SPAIN_3", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
         }
         else
@@ -1456,7 +1456,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 
         vec3_t vPos, vRelative;
         Vector(0.f, 0.f, 0.f, vRelative);
-        BoneManager::GetBonePosition(o, "BERSERK_MOUTH", vRelative, vPos);
+        BoneManager::GetBonePosition(o, L"BERSERK_MOUTH", vRelative, vPos);
         CreateParticle(
             BITMAP_SMOKE, vPos, o->Angle, o->Light, 42, o->Scale);
     }
@@ -1489,17 +1489,17 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_DIE)
         {
             float Scale = 0.3f;
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_TAIL", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_TAIL", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_TAIL_1", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_TAIL_1", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_TAIL_2", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_TAIL_2", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_SPAIN_1", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_SPAIN_1", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_SPAIN_2", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_SPAIN_2", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
-            BoneManager::GetBonePosition(o, "KENTAUROS_BIP_SPAIN_3", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_SPAIN_3", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
         }
         else
@@ -1590,7 +1590,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         {
             vec3_t vPos, vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
-            BoneManager::GetBonePosition(o, "GENO_WP", vRelative, vPos);
+            BoneManager::GetBonePosition(o, L"GENO_WP", vRelative, vPos);
             CreateParticle(
                 BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, o->Scale);
 

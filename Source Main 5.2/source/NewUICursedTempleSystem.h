@@ -135,7 +135,7 @@ namespace SEASON3B
         WORD				m_HolyItemPlayerIndex;		// 성물을 가지고 있는 사용자 인덱스
         WORD				m_HolyItemPlayerPosX;		// 성물 위치 X
         WORD				m_HolyItemPlayerPosY;		// 성물 위치 Y
-        char				m_HolyItemPlayerName[MAX_ID_SIZE];
+        wchar_t				m_HolyItemPlayerName[MAX_ID_SIZE];
 
         float				m_Scale;
         float				m_Alph;

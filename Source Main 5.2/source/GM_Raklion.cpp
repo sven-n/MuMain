@@ -94,7 +94,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 454:
         OpenMonsterModel(145);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 145, PosX, PosY);
-        strcpy(pCharacter->ID, "¾ÆÀÌ½º ¿öÄ¿");
+        wcscpy(pCharacter->ID, L"¾ÆÀÌ½º ¿öÄ¿");
         //pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -104,22 +104,22 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 455:
         OpenMonsterModel(146);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 146, PosX, PosY);
-        strcpy(pCharacter->ID, "ÀÚÀÌ¾ðÆ® ¸Å¸Óµå");
+        wcscpy(pCharacter->ID, L"ÀÚÀÌ¾ðÆ® ¸Å¸Óµå");
         pCharacter->Object.Scale = 1.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_TAIL", 45);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_TAIL_1", 6);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_TAIL_2", 7);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_SPAIN_1", 3);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_SPAIN_2", 4);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_SPAIN_3", 5);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL", 45);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL_1", 6);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL_2", 7);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_1", 3);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_2", 4);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_3", 5);
         break;
 
     case 456:
         OpenMonsterModel(147);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 147, PosX, PosY);
-        strcpy(pCharacter->ID, "¾ÆÀÌ½º ÀÚÀÌ¾ðÆ®");
+        wcscpy(pCharacter->ID, L"¾ÆÀÌ½º ÀÚÀÌ¾ðÆ®");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -129,7 +129,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 457:
         OpenMonsterModel(148);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 148, PosX, PosY);
-        strcpy(pCharacter->ID, "Äð·¯Æ¾");
+        wcscpy(pCharacter->ID, L"Äð·¯Æ¾");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -138,7 +138,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 458:
         OpenMonsterModel(149);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 149, PosX, PosY);
-        strcpy(pCharacter->ID, "¾ÆÀÌ¾ð ³ªÀÌÆ®");
+        wcscpy(pCharacter->ID, L"¾ÆÀÌ¾ð ³ªÀÌÆ®");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -148,7 +148,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(150);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 150, PosX, PosY);
-        strcpy(pCharacter->ID, "¼¼·çÆÇ");
+        wcscpy(pCharacter->ID, L"¼¼·çÆÇ");
         pCharacter->Object.Scale = 2.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -164,7 +164,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(151);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 151, PosX, PosY);
-        strcpy(pCharacter->ID, "°Å´ë °Å¹Ì¾Ë");
+        wcscpy(pCharacter->ID, L"°Å´ë °Å¹Ì¾Ë");
         pCharacter->Object.Scale = 0.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -176,7 +176,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(152);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 152, PosX, PosY);
-        strcpy(pCharacter->ID, "°Å´ë °Å¹Ì¾Ë");
+        wcscpy(pCharacter->ID, L"°Å´ë °Å¹Ì¾Ë");
         pCharacter->Object.Scale = 0.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -188,7 +188,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(153);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 153, PosX, PosY);
-        strcpy(pCharacter->ID, "°Å´ë °Å¹Ì¾Ë");
+        wcscpy(pCharacter->ID, L"°Å´ë °Å¹Ì¾Ë");
         pCharacter->Object.Scale = 0.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -201,24 +201,24 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(205);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 205, PosX, PosY);
-        strcpy(pCharacter->ID, "´Å© ÀÚÀÌ¾ðÆ® ¸Å¸Óµå");
+        wcscpy(pCharacter->ID, L"´Å© ÀÚÀÌ¾ðÆ® ¸Å¸Óµå");
         //pCharacter->Object.Scale = 1.7f;
         pCharacter->Object.Scale = 1.9f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_TAIL", 45);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_TAIL_1", 6);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_TAIL_2", 7);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_SPAIN_1", 3);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_SPAIN_2", 4);
-        BoneManager::RegisterBone(pCharacter, "GIANT_MAMUD_BIP_SPAIN_3", 5);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL", 45);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL_1", 6);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_TAIL_2", 7);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_1", 3);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_2", 4);
+        BoneManager::RegisterBone(pCharacter, L"GIANT_MAMUD_BIP_SPAIN_3", 5);
     }
     break;
     case 563:
     {
         OpenMonsterModel(206);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 206, PosX, PosY);
-        strcpy(pCharacter->ID, "´Å© ÀÚÀÌ¾ðÆ®");
+        wcscpy(pCharacter->ID, L"´Å© ÀÚÀÌ¾ðÆ®");
         //pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
@@ -231,7 +231,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(207);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 207, PosX, PosY);
-        strcpy(pCharacter->ID, "´Å© Äð·¯Æ¾");
+        wcscpy(pCharacter->ID, L"´Å© Äð·¯Æ¾");
         //pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
@@ -242,7 +242,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(208);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 208, PosX, PosY);
-        strcpy(pCharacter->ID, "´Å© ¾ÆÀÌ¾ð ³ªÀÌÆ®");
+        wcscpy(pCharacter->ID, L"´Å© ¾ÆÀÌ¾ð ³ªÀÌÆ®");
         //pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
@@ -385,17 +385,17 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
             {
                 float Scale = 3.5f;
                 Vector(1.f, 1.f, 1.f, o->Light);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_TAIL", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_TAIL", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 53, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_TAIL_1", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_TAIL_1", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 3, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_TAIL_2", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_TAIL_2", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 53, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_SPAIN_1", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_SPAIN_1", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 3, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_SPAIN_2", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_SPAIN_2", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 53, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_SPAIN_3", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_SPAIN_3", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 3, Scale);
             }
         }
@@ -836,17 +836,17 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
             {
                 float Scale = 3.5f;
                 Vector(1.f, 1.f, 1.f, o->Light);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_TAIL", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_TAIL", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 53, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_TAIL_1", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_TAIL_1", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 3, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_TAIL_2", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_TAIL_2", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 53, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_SPAIN_1", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_SPAIN_1", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 3, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_SPAIN_2", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_SPAIN_2", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 53, Scale);
-                BoneManager::GetBonePosition(o, "GIANT_MAMUD_BIP_SPAIN_3", vRelative, vPos);
+                BoneManager::GetBonePosition(o, L"GIANT_MAMUD_BIP_SPAIN_3", vRelative, vPos);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 3, Scale);
             }
         }

@@ -179,17 +179,17 @@ void PetProcess::UnRegister(CHARACTER* Owner, int itemType, bool isUnregistAll)
 
 bool PetProcess::LoadData()
 {
-    char FileName[100];
-    sprintf(FileName, "Data\\Local\\pet.bmd");
+    wchar_t FileName[100];
+    swprintf(FileName, L"Data\\Local\\pet.bmd");
 
     int _ver;
     int _array;
 
-    FILE* fp = fopen(FileName, "rb");
+    FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -220,8 +220,8 @@ bool PetProcess::LoadData()
 
     if (dwCheckSum != GenerateCheckSum2(Buffer, Size * _listSize, 0x7F1D))
     {
-        char Text[256];
-        sprintf(Text, "%s - File corrupted.", FileName);
+        wchar_t Text[256];
+        swprintf(Text, L"%s - File corrupted.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);

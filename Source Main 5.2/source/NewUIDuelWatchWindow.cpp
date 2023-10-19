@@ -12,7 +12,7 @@
 #include "ZzzInterface.h"
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
 #include "DuelMgr.h"
 
@@ -52,7 +52,7 @@ bool CNewUIDuelWatchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIDuelWatchWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption)
+void CNewUIDuelWatchWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -140,7 +140,7 @@ bool CNewUIDuelWatchWindow::Render()
     RenderFrame();
 
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
-    unicode::t_char szText[256];
+    wchar_t szText[256];
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[2699], 190, 0, RT3_SORT_CENTER);
@@ -154,7 +154,7 @@ bool CNewUIDuelWatchWindow::Render()
     for (i = 0; i < 4; ++i)
     {
         g_pRenderText->SetTextColor(255, 255, 128, 255);
-        unicode::_sprintf(szText, GlobalText[2700], i + 1);
+        swprintf(szText, GlobalText[2700], i + 1);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 20, szText, 190, 0, RT3_SORT_CENTER);
 
         ptOrigin.y += 90;
@@ -167,7 +167,7 @@ bool CNewUIDuelWatchWindow::Render()
         if (m_bChannelEnable[i] == TRUE)
         {
             g_pRenderText->SetTextColor(255, 50, 50, 255);
-            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 35, "VS", 190, 0, RT3_SORT_CENTER);
+            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 35, L"VS", 190, 0, RT3_SORT_CENTER);
             g_pRenderText->SetTextColor(255, 255, 255, 255);
             g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y + 35, g_DuelMgr.GetDuelChannelUserID1(i), 70, 0, RT3_SORT_CENTER);
             g_pRenderText->RenderText(ptOrigin.x + 100, ptOrigin.y + 35, g_DuelMgr.GetDuelChannelUserID2(i), 70, 0, RT3_SORT_CENTER);
@@ -197,7 +197,7 @@ void CNewUIDuelWatchWindow::OpeningProcess()
 
 void CNewUIDuelWatchWindow::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float CNewUIDuelWatchWindow::GetLayerDepth()
@@ -207,13 +207,13 @@ float CNewUIDuelWatchWindow::GetLayerDepth()
 
 void CNewUIDuelWatchWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_DUELWATCHWINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_DUELWATCHWINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_DUELWATCHWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_DUELWATCHWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_DUELWATCHWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_DUELWATCHWINDOW_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_myquest_Line.tga", IMAGE_DUELWATCHWINDOW_LINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_DUELWATCHWINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_DUELWATCHWINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_DUELWATCHWINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_DUELWATCHWINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_DUELWATCHWINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_DUELWATCHWINDOW_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_DUELWATCHWINDOW_LINE, GL_LINEAR);
 }
 
 void CNewUIDuelWatchWindow::UnloadImages()
@@ -235,7 +235,7 @@ void CNewUIDuelWatchWindow::RenderFrame()
     RenderImage(IMAGE_DUELWATCHWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
     RenderImage(IMAGE_DUELWATCHWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
     float fLine_y = 13.0f;
 
@@ -243,7 +243,7 @@ void CNewUIDuelWatchWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    unicode::_sprintf(szText, "%s", GlobalText[2698]);
+    swprintf(szText, L"%s", GlobalText[2698]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -256,11 +256,11 @@ bool CNewUIDuelWatchWindow::BtnProcess()
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUELWATCH);
     }
 
-    for (int i = 0; i < 4; ++i)
+    for (BYTE i = 0; i < 4; ++i)
     {
         if (m_BtnChannel[i].UpdateMouseEvent() == true)
         {
-            SendRequestJoinChannel(i);
+            SocketClient->ToGameServer()->SendDuelChannelJoinRequest(i);
             return true;
         }
     }

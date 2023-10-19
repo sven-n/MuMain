@@ -2,9 +2,10 @@
 #include "CComGem.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
-#include "wsclientinline.h"
+
 #include "ZzzInventory.h"
 #include "NewUIInventoryCtrl.h"
+#include "NewUISystem.h"
 
 extern DWORD  g_dwActiveUIID;
 extern int   InventoryStartX;
@@ -34,12 +35,12 @@ namespace COMGEM
 void COMGEM::SendReqUnMix()
 {
     iUnMixIndex += 12;
-    SendRequestGemUnMix(m_cGemType / 2, iUnMixLevel, iUnMixIndex);
+    SocketClient->ToGameServer()->SendLahapJewelMixRequest(0x01, m_cGemType / 2, iUnMixLevel, iUnMixIndex);
 }
 
 void COMGEM::SendReqMix()
 {
-    SendRequestGemMix(m_cGemType / 2, (m_cComType / 10 - 1));
+    SocketClient->ToGameServer()->SendLahapJewelMixRequest(0x00, m_cGemType / 2, (m_cComType / 10 - 1), 0);
 }
 
 void COMGEM::ProcessCSAction()
@@ -124,10 +125,10 @@ bool COMGEM::CheckInv()
         switch (GetError())
         {
         case COMERROR_NOTALLOWED:
-            g_pChatListBox->AddText("", GlobalText[1817], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[1817], SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case DEERROR_NOTALLOWED:
-            g_pChatListBox->AddText("", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         }
         GetBack();
@@ -298,7 +299,7 @@ void COMGEM::Exit()
 {
     Init();
 
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 int	COMGEM::GetJewelRequireCount(int i)

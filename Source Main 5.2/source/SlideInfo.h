@@ -17,7 +17,7 @@ namespace info
     class SlideInfo : public InfoFile
     {
     public:
-        static SlideInfoPtr MakeInfo(const std::string& filename);
+        static SlideInfoPtr MakeInfo(const std::wstring& filename);
         virtual ~SlideInfo();
 
     protected:
@@ -25,11 +25,11 @@ namespace info
         virtual void clear();
 
     public:
-        const char* GetData(int level, int index);
+        const wchar_t* GetData(int level, int index);
 
     private:
-        bool OpenFile(const std::string& filename);
-        SlideInfo(const std::string& filename);
+        bool OpenFile(const std::wstring& filename);
+        SlideInfo(const std::wstring& filename);
 
     private:
         typedef std::map<int, Script_Silde>		SildeMAP;
@@ -52,7 +52,7 @@ void info::SlideInfo::clear()
 }
 
 inline
-const char* info::SlideInfo::GetData(int level, int index)
+const wchar_t* info::SlideInfo::GetData(int level, int index)
 {
     info::SlideInfo::SildeMAP::iterator iter = m_info.find(level);
     if (iter != m_info.end()) {

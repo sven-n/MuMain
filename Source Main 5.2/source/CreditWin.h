@@ -39,7 +39,7 @@ class CCreditWin : public CWin
     struct SCreditItem
     {
         BYTE	byClass;
-        char	szName[CRW_NAME_MAX];
+        wchar_t	szName[CRW_NAME_MAX];
     };
 
 protected:
@@ -49,7 +49,7 @@ protected:
     SHOW_STATE	m_eIllustState;
     double		m_dIllustDeltaTickSum;
     BYTE		m_byIllust;
-    char* m_apszIllustPath[CRW_ILLUST_MAX][2];
+    wchar_t* m_apszIllustPath[CRW_ILLUST_MAX][2];
 
     HFONT		m_hFont;
     SCreditItem	m_aCredit[CRW_ITEM_MAX];

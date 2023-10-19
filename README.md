@@ -11,6 +11,9 @@ What I have done so far:
   * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
     a better frame rate when many players and objects are visible.
   * 🔥 Added inventory and vault extensions.
+  * 🔥 Unicode support: The client works with UTF-16LE instead of ANSI in memory.
+    All strings and char arrays have been changed to use wide characters.
+    Strings coming from files and the network are handled as UTF-8.
   * 🔥 Replaced the network stack with MUnique.OpenMU.Network to make it easier to
     apply changes. I included a .NET 7 runtime for this and had to change some
     code to allow async networking.

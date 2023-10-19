@@ -17,11 +17,11 @@ namespace info
     class MovereqInfo : public InfoFile
     {
     private:
-        bool OpenFile(const std::string& filename);
-        MovereqInfo(const std::string& filename);
+        bool OpenFile(const std::wstring& filename);
+        MovereqInfo(const std::wstring& filename);
 
     public:
-        static MovereqInfoPtr MakeInfo(const std::string& filename);
+        static MovereqInfoPtr MakeInfo(const std::wstring& filename);
         virtual ~MovereqInfo();
 
     protected:

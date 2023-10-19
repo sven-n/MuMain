@@ -4,12 +4,12 @@
 #include "stdafx.h"
 #include "NewUIGoldBowmanLena.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "MixMgr.h"
 
 namespace
 {
-    void RenderText(char* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
+    void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
     {
         g_pRenderText->SetFont(g_hFont);
 
@@ -72,14 +72,14 @@ void CNewUIGoldBowmanLena::Release()
 
 void CNewUIGoldBowmanLena::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_GBL_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_GBL_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_GBL_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_GBL_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_GBL_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_GBL_EXCHANGEBTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_GBL_BTN_SERIAL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_GBL_BTN_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GBL_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_GBL_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_GBL_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_GBL_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_GBL_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GBL_EXCHANGEBTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GBL_BTN_SERIAL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GBL_BTN_EXIT, GL_LINEAR);
 }
 
 void CNewUIGoldBowmanLena::UnloadImages()
@@ -102,7 +102,7 @@ void CNewUIGoldBowmanLena::ClosingProcess()
 {
     g_bEventChipDialogEnable = 0;
     g_shEventChipCount = 0;
-    SendRequestEventChipExit();
+    SocketClient->ToGameServer()->SendEventChipExitDialog();
 }
 
 bool CNewUIGoldBowmanLena::UpdateMouseEvent()
@@ -118,7 +118,7 @@ bool CNewUIGoldBowmanLena::UpdateMouseEvent()
             int index = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_POTION + 21, 0);
 
             if (index != -1) {
-                SendRequestEventChip(0, index); //MAX_EQUIPMENT
+                SocketClient->ToGameServer()->SendEventChipRegistrationRequest(0, index);
             }
         }
     }
@@ -208,39 +208,39 @@ void CNewUIGoldBowmanLena::RenderFrame()
 
 void CNewUIGoldBowmanLena::RenderTexts()
 {
-    char Text[100];
+    wchar_t Text[100];
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, getMonsterName(236));
+    getMonsterName(236, Text);
     RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     for (int i = 0; i < 3; ++i) {
         memset(&Text, 0, sizeof(char) * 100);
-        sprintf(Text, GlobalText[700 + i]);
+        swprintf(Text, GlobalText[700 + i]);
         RenderText(Text, m_Pos.x, m_Pos.y + 100 + (i * 15), 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     }
 
     int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, "%s", GlobalText[245]);
+    swprintf(Text, L"%s", GlobalText[245]);
     RenderText(Text, m_Pos.x + 20, m_Pos.y + 180, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, "    X    %d", registerItem);
+    swprintf(Text, L"    X    %d", registerItem);
     RenderText(Text, m_Pos.x + 5, m_Pos.y + 202, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, "%s", GlobalText[246]);
+    swprintf(Text, L"%s", GlobalText[246]);
     RenderText(Text, m_Pos.x + 20, m_Pos.y + 225, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(char) * 100);
-    sprintf(Text, "    X    %d", g_shEventChipCount);
+    swprintf(Text, L"    X    %d", g_shEventChipCount);
     RenderText(Text, m_Pos.x + 5, m_Pos.y + 245, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     for (int j = 0; j < 2; ++j) {
         memset(&Text, 0, sizeof(char) * 100);
-        sprintf(Text, GlobalText[703 + j]);
+        swprintf(Text, GlobalText[703 + j]);
         RenderText(Text, m_Pos.x, m_Pos.y + 350 + (j * 15), 190, 0, 0xFFFA47D6, 0x00000000, RT3_SORT_CENTER);
     }
 }

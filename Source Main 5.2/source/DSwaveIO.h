@@ -15,8 +15,8 @@ class waveIO
 public:
     waveIO(bool IO);
     virtual ~waveIO();
-    bool LoadWaveHeader(char* szFilename);
-    bool WriteWaveHeader(char* szFilename, PCMWAVEFORMAT wf, int nWaveDateSize);
+    bool LoadWaveHeader(wchar_t* szFilename);
+    bool WriteWaveHeader(wchar_t* szFilename, PCMWAVEFORMAT wf, int nWaveDateSize);
     bool CloseWaveFile();
     WAVEFORMATEX GetWaveFormatEx() { return m_wfex; }
     bool ReadWaveData(char* buffer, int nSizeOfBuffer);

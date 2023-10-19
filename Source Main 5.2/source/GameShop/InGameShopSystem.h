@@ -16,7 +16,7 @@
 
 typedef std::list<CShopPackage>			type_listPackage;
 typedef std::map<int, int>				type_mapZoneSeq;
-typedef std::list<unicode::t_string>	type_listName;
+typedef std::list<std::wstring>	type_listName;
 
 class CInGameShopSystem
 {
@@ -113,10 +113,10 @@ public:
     void SetIsRequestShopOpenning(bool bIsRequestShopOpenning);
     bool GetIsRequestShopOpenning();
 
-    bool GetPackageInfo(int iPackageSeq, int iPackageAttrType, OUT int& iValue, OUT unicode::t_char* pszText);
+    bool GetPackageInfo(int iPackageSeq, int iPackageAttrType, OUT int& iValue, OUT wchar_t* pszText);
 
-    bool GetProductInfoFromPriceSeq(int iProductSeq, int iPriceSeq, int iAttrType, OUT int& iValue, OUT unicode::t_char* pszUnitName);
-    bool GetProductInfoFromProductSeq(int iProductSeq, int iAttrType, OUT int& iValue, OUT unicode::t_char* pszUnitName);
+    bool GetProductInfoFromPriceSeq(int iProductSeq, int iPriceSeq, int iAttrType, OUT int& iValue, OUT wchar_t* pszUnitName);
+    bool GetProductInfoFromProductSeq(int iProductSeq, int iAttrType, OUT int& iValue, OUT wchar_t* pszUnitName);
 
     void SetNormalPackage();
     void InitEventPackage(int iTotalEventPackage);
@@ -127,8 +127,8 @@ public:
     void SetRequestEventPackge();
 
     bool IsBanner();
-    unicode::t_char* GetBannerFileName();
-    unicode::t_char* GetBannerURL();
+    wchar_t* GetBannerFileName();
+    wchar_t* GetBannerURL();
 
     CListVersionInfo GetScriptVer();
     CListVersionInfo GetBannerVer();
@@ -156,7 +156,7 @@ protected:
     void ShopOpenUnLock();
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 
-    bool GetProductInfo(CShopProduct* pProduct, int iAttrType, OUT int& iValue, OUT unicode::t_char* pszUnitName);
+    bool GetProductInfo(CShopProduct* pProduct, int iAttrType, OUT int& iValue, OUT wchar_t* pszUnitName);
 
 protected:
     CShopListManager		m_ShopManager;
@@ -170,12 +170,12 @@ protected:
     CListVersionInfo		m_CurrentBannerVerInfo;
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 
-    char					m_szScriptIPAddress[20];
-    char					m_szBannerIPAddress[20];
-    char					m_szScriptRemotePath[MAX_TEXT_LENGTH];
-    char					m_szScriptLocalPath[MAX_TEXT_LENGTH];
-    char					m_szBannerRemotePath[MAX_TEXT_LENGTH];
-    char					m_szBannerLocalPath[MAX_TEXT_LENGTH];
+    wchar_t					m_szScriptIPAddress[20];
+    wchar_t					m_szBannerIPAddress[20];
+    wchar_t					m_szScriptRemotePath[MAX_TEXT_LENGTH];
+    wchar_t					m_szScriptLocalPath[MAX_TEXT_LENGTH];
+    wchar_t					m_szBannerRemotePath[MAX_TEXT_LENGTH];
+    wchar_t					m_szBannerLocalPath[MAX_TEXT_LENGTH];
 
     CShopCategory			m_SelectedZone;
     CShopCategory			m_SelectedCategory;

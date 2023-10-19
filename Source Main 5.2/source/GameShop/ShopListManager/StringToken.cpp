@@ -24,7 +24,7 @@ CStringToken::~CStringToken() // OK
 {
 }
 
-CStringToken::CStringToken(const std::string& dataLine, const std::string& delim) // OK
+CStringToken::CStringToken(const std::wstring& dataLine, const std::wstring& delim) // OK
 {
     this->data = dataLine;
     this->delimiter = delim;
@@ -43,13 +43,13 @@ bool CStringToken::hasMoreTokens()
     return this->index != this->tokens.end();
 }
 
-std::string CStringToken::nextToken() // OK
+std::wstring CStringToken::nextToken() // OK
 {
-    std::string result;
+    std::wstring result;
 
     if (this->index == this->tokens.end())
     {
-        result.assign("\0");
+        result.assign(L"\0");
     }
     else
     {
@@ -66,9 +66,9 @@ void CStringToken::split() // OK
     std::size_t first_not = this->data.find_first_not_of(this->delimiter, 0);
     std::size_t first = this->data.find_first_of(this->delimiter, first_not);
 
-    while (first != std::string::npos || first_not != std::string::npos)
+    while (first != std::wstring::npos || first_not != std::wstring::npos)
     {
-        std::string subdata = this->data.substr(first_not, first - first_not);
+        std::wstring subdata = this->data.substr(first_not, first - first_not);
 
         this->tokens.push_back(subdata);
 
@@ -81,13 +81,13 @@ void CStringToken::split() // OK
     this->index = this->tokens.begin();
 }
 
-void CStringToken::IsNullString(std::string::size_type pos) // OK
+void CStringToken::IsNullString(std::wstring::size_type pos) // OK
 {
-    std::string search = this->data.substr(pos + 1, this->delimiter.length());
+    std::wstring search = this->data.substr(pos + 1, this->delimiter.length());
 
     if (search == this->delimiter)
     {
-        this->tokens.push_back("\0");
+        this->tokens.push_back(L"\0");
 
         this->IsNullString(pos + 1);
     }

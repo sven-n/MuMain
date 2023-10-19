@@ -13,7 +13,7 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "wsclientinline.h"
+
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "UIControls.h"
@@ -21,10 +21,12 @@
 #include "ZzzEffect.h"
 #include "w_CursedTemple.h"
 #include "MapManager.h"
+#include "NewUIInventoryCtrl.h"
+#include "NewUISystem.h"
 #include "SkillManager.h"
 
 extern int TextNum;
-extern char TextList[50][100];
+extern wchar_t TextList[50][100];
 extern int  TextListColor[50];
 
 using namespace SEASON3B;
@@ -211,7 +213,7 @@ namespace
         return false;
     }
 
-    void DrawText(char* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
+    void DrawText(wchar_t* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
     {
         if (isbold)
         {
@@ -281,57 +283,57 @@ void SEASON3B::CNewUICursedTempleSystem::Destroy()
 void SEASON3B::CNewUICursedTempleSystem::LoadImages()
 {
     //minimap
-    LoadBitmap("Interface\\newui_ctminmapframe.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPFRAME, GL_LINEAR);
-    LoadBitmap("Interface\\newui_ctminmap.jpg", IMAGE_CURSEDTEMPLESYSTEM_MINIMAP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_clearness_illusion.jpg", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPALPBTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctminmapframe.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPFRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctminmap.jpg", IMAGE_CURSEDTEMPLESYSTEM_MINIMAP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_clearness_illusion.jpg", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPALPBTN, GL_LINEAR);
 
     //minimapicon
-    LoadBitmap("Interface\\newui_ctminmap_Relic.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HOLYITEM_PC, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\newui_ctminmap_TeamA_box.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_HOLYITEM, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\newui_ctminmap_TeamA_member.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_PC, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\newui_ctminmap_TeamA_npc.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_NPC, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\newui_ctminmap_TeamB_box.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_HOLYITEM, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\newui_ctminmap_TeamB_member.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_PC, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\newui_ctminmap_TeamB_npc.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_NPC, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap("Interface\\newui_ctminmap_Hero.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HERO, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\newui_ctminmap_Relic.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HOLYITEM_PC, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\newui_ctminmap_TeamA_box.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_HOLYITEM, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\newui_ctminmap_TeamA_member.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_PC, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\newui_ctminmap_TeamA_npc.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ILLUSION_NPC, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\newui_ctminmap_TeamB_box.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_HOLYITEM, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\newui_ctminmap_TeamB_member.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_PC, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\newui_ctminmap_TeamB_npc.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_ALLIED_NPC, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Interface\\newui_ctminmap_Hero.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPICON_HERO, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
     //skill
-    LoadBitmap("Interface\\newui_ctskillframe.tga", IMAGE_CURSEDTEMPLESYSTEM_SKILLFRAME, GL_LINEAR);
-    LoadBitmap("Interface\\newui_ctskillup.jpg", IMAGE_CURSEDTEMPLESYSTEM_SKILLUPBT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_ctskilldown.jpg", IMAGE_CURSEDTEMPLESYSTEM_SKILLDOWNBT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctskillframe.tga", IMAGE_CURSEDTEMPLESYSTEM_SKILLFRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctskillup.jpg", IMAGE_CURSEDTEMPLESYSTEM_SKILLUPBT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctskilldown.jpg", IMAGE_CURSEDTEMPLESYSTEM_SKILLDOWNBT, GL_LINEAR);
 
     //gametime
-    LoadBitmap("Interface\\newui_ctgametimeframe.tga", IMAGE_CURSEDTEMPLESYSTEM_GAMETIME, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctgametimeframe.tga", IMAGE_CURSEDTEMPLESYSTEM_GAMETIME, GL_LINEAR);
 
-    char buff[100];
+    wchar_t buff[100];
 
     //score
     for (int i = 0; i < 10; ++i)
     {
-        std::sprintf(buff, "Interface\\newui_ctscorealliednum%d.tga", i);
+        swprintf(buff, L"Interface\\newui_ctscorealliednum%d.tga", i);
         LoadBitmap(buff, IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_NUMBER + i, GL_LINEAR);
     }
     for (int j = 0; j < 10; ++j)
     {
-        std::sprintf(buff, "Interface\\newui_ctscoreillusionnum%d.tga", j);
+        swprintf(buff, L"Interface\\newui_ctscoreillusionnum%d.tga", j);
         LoadBitmap(buff, IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_NUMBER + j, GL_LINEAR);
     }
-    LoadBitmap("Interface\\newui_ctscorevs0.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS0, GL_LINEAR);
-    LoadBitmap("Interface\\newui_ctscorevs1.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS1, GL_LINEAR);
-    LoadBitmap("Interface\\newui_ctscorealliedgaail.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_GAAIL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_ctscoreillsiongaail.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_GAAIL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_ctscoreleft.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_ctscoreright.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctscorevs0.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS0, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctscorevs1.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS1, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctscorealliedgaail.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_GAAIL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctscoreillsiongaail.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_GAAIL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctscoreleft.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_ctscoreright.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_RIGHT, GL_LINEAR);
 
     //prorogress, npctalk
-    LoadBitmap("Interface\\newui_msgbox_top.tga", IMAGE_CURSEDTEMPLESYSTEM_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_middle.tga", IMAGE_CURSEDTEMPLESYSTEM_MIDDLE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_bottom.tga", IMAGE_CURSEDTEMPLESYSTEM_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_CURSEDTEMPLESYSTEM_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_CURSEDTEMPLESYSTEM_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_top.tga", IMAGE_CURSEDTEMPLESYSTEM_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_middle.tga", IMAGE_CURSEDTEMPLESYSTEM_MIDDLE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_bottom.tga", IMAGE_CURSEDTEMPLESYSTEM_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CURSEDTEMPLESYSTEM_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_CURSEDTEMPLESYSTEM_BTN, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
-    LoadBitmap("Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
 }
 
 void SEASON3B::CNewUICursedTempleSystem::UnloadImages()
@@ -541,7 +543,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
                 }
                 else
                 {
-                    g_pChatListBox->AddText("", GlobalText[2092], SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pChatListBox->AddText(L"", GlobalText[2092], SEASON3B::TYPE_ERROR_MESSAGE);
                 }
             }
             else
@@ -572,7 +574,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
         return true;
     }
 
-    SendRequestTalk(npckey);
+    SocketClient->ToGameServer()->SendTalkToNpcRequest(npckey);
     return false;
 }
 
@@ -780,17 +782,17 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = NULL;
         }
 
-        char skillname[100];
+        wchar_t skillname[100];
         memset(&skillname, 0, sizeof(char));
 
         SKILL_ATTRIBUTE* p = &SkillAttribute[CursedTempleCurSkillType];
-        strcpy(skillname, p->Name);
-        sprintf(TextList[TextNum], "%s", skillname);
+        wcscpy(skillname, p->Name);
+        swprintf(TextList[TextNum], L"%s", skillname);
         TextListColor[TextNum] = TEXT_COLOR_BLUE; TextNum++;
 
-        sprintf(TextList[TextNum], "\n"); TextNum++;
+        swprintf(TextList[TextNum], L"\n"); TextNum++;
 
-        sprintf(TextList[TextNum], "%s", GlobalText[2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)]);
+        swprintf(TextList[TextNum], L"%s", GlobalText[2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)]);
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
 
         RenderTipTextList(x, y - 20, TextNum, 0);
@@ -806,7 +808,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = NULL;
         }
 
-        sprintf(TextList[TextNum], "%s", GlobalText[2378]);
+        swprintf(TextList[TextNum], L"%s", GlobalText[2378]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
@@ -823,7 +825,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = NULL;
         }
 
-        sprintf(TextList[TextNum], "%s", GlobalText[2377]);
+        swprintf(TextList[TextNum], L"%s", GlobalText[2377]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
@@ -1038,41 +1040,41 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
 
     if (m_TutorialStepState == 0)
     {
-        strcpy(TextList[TextNum], GlobalText[2400]);
+        wcscpy(TextList[TextNum], GlobalText[2400]);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        sprintf(TextList[TextNum], "");
+        swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
-        strcpy(TextList[TextNum], GlobalText[2401]);
+        wcscpy(TextList[TextNum], GlobalText[2401]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        strcpy(TextList[TextNum], GlobalText[2402]);
+        wcscpy(TextList[TextNum], GlobalText[2402]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        strcpy(TextList[TextNum], GlobalText[2403]);
+        wcscpy(TextList[TextNum], GlobalText[2403]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
     }
     else if (m_TutorialStepState == 1)
     {
-        strcpy(TextList[TextNum], GlobalText[2404]);
+        wcscpy(TextList[TextNum], GlobalText[2404]);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        sprintf(TextList[TextNum], "");
+        swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
-        strcpy(TextList[TextNum], GlobalText[2405]);
+        wcscpy(TextList[TextNum], GlobalText[2405]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        strcpy(TextList[TextNum], GlobalText[2406]);
+        wcscpy(TextList[TextNum], GlobalText[2406]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        strcpy(TextList[TextNum], GlobalText[2407]);
+        wcscpy(TextList[TextNum], GlobalText[2407]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
     }
     else if (m_TutorialStepState == 2)
     {
-        strcpy(TextList[TextNum], GlobalText[2408]);
+        wcscpy(TextList[TextNum], GlobalText[2408]);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        sprintf(TextList[TextNum], "");
+        swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
-        strcpy(TextList[TextNum], GlobalText[2409]);
+        wcscpy(TextList[TextNum], GlobalText[2409]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        strcpy(TextList[TextNum], GlobalText[2410]);
+        wcscpy(TextList[TextNum], GlobalText[2410]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        strcpy(TextList[TextNum], GlobalText[2411]);
+        wcscpy(TextList[TextNum], GlobalText[2411]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
     }
 
@@ -1127,7 +1129,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJE
 
     if (m_SkillPoint < MaxKillCount)
     {
-        g_pChatListBox->AddText("", GlobalText[2392], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", GlobalText[2392], SEASON3B::TYPE_ERROR_MESSAGE);
         MouseRButtonPush = false;
         return;
     }
@@ -1191,7 +1193,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJE
             return;
         }
 
-        SendRequestCursedTempleMagic(CursedTempleCurSkillType, static_cast<WORD>(tc->Key), Distance);
+        SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType, static_cast<BYTE>(tc->Key), Distance);
         Hero->m_CursedTempleCurSkillPacket = true;
         MouseRButtonPush = false;
 
@@ -1356,7 +1358,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
     m_HolyItemPlayerPosY = data->btY;
     m_MyTeam = static_cast<SEASON3A::eCursedTempleTeam>(data->btMyTeam);
 
-    char message[200];
+    wchar_t message[200];
     memset(&message, 0, sizeof(char));
 
     if (m_MyTeam == SEASON3A::eTeam_Allied)
@@ -1365,13 +1367,13 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pChatListBox->AddText("", GlobalText[2360], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2360], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         else if (m_IllusionPoint != data->btIllusionPoint)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pChatListBox->AddText("", GlobalText[2361], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2361], SEASON3B::TYPE_ERROR_MESSAGE);
         }
     }
     else
@@ -1380,13 +1382,13 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pChatListBox->AddText("", GlobalText[2363], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2363], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         else if (m_AlliedPoint != data->btAlliedPoint)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pChatListBox->AddText("", GlobalText[2364], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(L"", GlobalText[2364], SEASON3B::TYPE_ERROR_MESSAGE);
         }
     }
 
@@ -1421,10 +1423,10 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE*
 
     if (m_SkillPoint < data->btSkillPoint)
     {
-        char message[100];
+        wchar_t message[100];
         memset(&message, 0, sizeof(char));
-        sprintf(message, GlobalText[2391], data->btSkillPoint - m_SkillPoint);
-        g_pChatListBox->AddText("", message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        swprintf(message, GlobalText[2391], data->btSkillPoint - m_SkillPoint);
+        g_pChatListBox->AddText(L"", message, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
     m_SkillPoint = data->btSkillPoint;

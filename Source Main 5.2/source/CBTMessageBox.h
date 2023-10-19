@@ -9,7 +9,7 @@
 namespace leaf {
     //. Interface Declaration
 
-    int CBTMessageBox(HWND hWnd, const std::string& text, const std::string& caption, UINT uType, bool bAlwaysOnTop = false);
+    int CBTMessageBox(HWND hWnd, const std::wstring& text, const std::wstring& caption, UINT uType, bool bAlwaysOnTop = false);
 
     //. class CCBTMessageBox
 
@@ -23,7 +23,7 @@ namespace leaf {
         CCBTMessageBox();
         ~CCBTMessageBox();
 
-        int OpenMessageBox(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, bool bAlwaysOnTop);
+        int OpenMessageBox(HWND hWnd, const wchar_t* lpText, const wchar_t* lpCaption, UINT uType, bool bAlwaysOnTop);
 
         HWND GetParentWndHandle() const;
         bool IsAlwaysOnTop() const;

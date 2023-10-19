@@ -4,6 +4,9 @@
 #include "stdafx.h"
 
 #include "muConsoleDebug.h"	// self
+
+#include <io.h>
+#include <fcntl.h>
 #include <iostream>
 #include "ZzzInterface.h"
 #include "ZzzOpenglUtil.h"
@@ -19,13 +22,13 @@
 CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
 {
 #ifdef CSK_LH_DEBUG_CONSOLE
-    if (leaf::OpenConsoleWindow("Mu Debug Console Window"))
+    if (leaf::OpenConsoleWindow(L"Mu Debug Console Window"))
     {
         leaf::ActivateCloseButton(false);
         leaf::ShowConsole(true);
         m_bInit = true;
 
-        g_ErrorReport.Write("Mu Debug Console Window Init - completed(Handle:0x%00000008X)\r\n", leaf::GetConsoleWndHandle());
+        g_ErrorReport.Write(L"Mu Debug Console Window Init - completed(Handle:0x%00000008X)\r\n", leaf::GetConsoleWndHandle());
     }
 #endif
 }
@@ -64,9 +67,9 @@ void CmuConsoleDebug::UpdateMainScene()
 }
 
 
-bool CmuConsoleDebug::CheckCommand(const std::string& strCommand)
+bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
-    if (strCommand._Starts_with("$fps"))
+    if (strCommand._Starts_with(L"$fps"))
     {
         auto fps_str = strCommand.substr(5);
         auto target_fps = std::stof(fps_str);
@@ -78,69 +81,69 @@ bool CmuConsoleDebug::CheckCommand(const std::string& strCommand)
     if (!m_bInit)
         return false;
 
-    if (strCommand.compare("$open") == NULL)
+    if (strCommand.compare(L"$open") == NULL)
     {
         leaf::ShowConsole(true);
         return true;
     }
-    else if (strCommand.compare("$close") == NULL)
+    else if (strCommand.compare(L"$close") == NULL)
     {
         leaf::ShowConsole(false);
         return true;
     }
-    else if (strCommand.compare("$clear") == NULL)
+    else if (strCommand.compare(L"$clear") == NULL)
     {
         leaf::SetConsoleTextColor();
         leaf::ClearConsoleScreen();
         return true;
     }
 #ifdef CSK_DEBUG_MAP_ATTRIBUTE
-    else if (strCommand.compare("$mapatt on") == NULL)
+    else if (strCommand.compare(L"$mapatt on") == NULL)
     {
         EditFlag = EDIT_WALL;
         return true;
     }
-    else if (strCommand.compare("$mapatt off") == NULL)
+    else if (strCommand.compare(L"$mapatt off") == NULL)
     {
         EditFlag = EDIT_NONE;
         return true;
     }
 #endif // CSK_DEBUG_MAP_ATTRIBUTE
 #ifdef CSK_DEBUG_MAP_PATHFINDING
-    else if (strCommand.compare("$path on") == NULL)
+    else if (strCommand.compare(L"$path on") == NULL)
     {
         g_bShowPath = true;
     }
-    else if (strCommand.compare("$path off") == NULL)
+    else if (strCommand.compare(L"$path off") == NULL)
     {
         g_bShowPath = false;
     }
 #endif // CSK_DEBUG_MAP_PATHFINDING
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
-    else if (strCommand.compare("$bb on") == NULL)
+    else if (strCommand.compare(L"$bb on") == NULL)
     {
         g_bRenderBoundingBox = true;
     }
-    else if (strCommand.compare("$bb off") == NULL)
+    else if (strCommand.compare(L"$bb off") == NULL)
     {
         g_bRenderBoundingBox = false;
     }
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
-    else if (strCommand.compare("$type_test") == NULL)
+    else if (strCommand.compare(L"$type_test") == NULL)
     {
-        Write(MCD_SEND, "MCD_SEND");
-        Write(MCD_RECEIVE, "MCD_RECEIVE");
-        Write(MCD_ERROR, "MCD_ERROR");
-        Write(MCD_NORMAL, "MCD_NORMAL");
+        Write(MCD_SEND, L"MCD_SEND");
+        Write(MCD_RECEIVE, L"MCD_RECEIVE");
+        Write(MCD_ERROR, L"MCD_ERROR");
+        Write(MCD_NORMAL, L"MCD_NORMAL");
         return true;
     }
-    else if (strCommand.compare("$texture_info") == NULL)
+    else if (strCommand.compare(L"$texture_info") == NULL)
     {
-        Write(MCD_NORMAL, "Texture Number : %d", Bitmaps.GetNumberOfTexture());
-        Write(MCD_NORMAL, "Texture Memory : %dKB", Bitmaps.GetUsedTextureMemory() / 1024);
+        Write(MCD_NORMAL, L"Texture Number : %d", Bitmaps.GetNumberOfTexture());
+        Write(MCD_NORMAL, L"Texture Memory : %dKB", Bitmaps.GetUsedTextureMemory() / 1024);
         return true;
     }
-    else if (strCommand.compare("$color_test") == NULL)
+    else if (strCommand.compare(L"$color_test") == NULL)
     {
         leaf::SetConsoleTextColor(leaf::COLOR_DARKRED);
         std::cout << "color test: dark red" << std::endl;
@@ -176,7 +179,7 @@ bool CmuConsoleDebug::CheckCommand(const std::string& strCommand)
     return false;
 }
 
-void CmuConsoleDebug::Write(int iType, const char* pStr, ...)
+void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
 {
 #ifdef CONSOLE_DEBUG
     if (m_bInit)
@@ -197,14 +200,14 @@ void CmuConsoleDebug::Write(int iType, const char* pStr, ...)
             break;
         }
 
-        char szBuffer[256] = "";
+        wchar_t szBuffer[256] = L"";
         va_list	pArguments;
 
         va_start(pArguments, pStr);
-        vsprintf(szBuffer, pStr, pArguments);
+        vswprintf(szBuffer, pStr, pArguments);
         va_end(pArguments);
 
-        std::cout << szBuffer << std::endl;
+        std::wcout << szBuffer << std::endl;
     }
 #endif
 }
@@ -213,7 +216,7 @@ CmuSimpleLog::CmuSimpleLog(void)
 {
 #ifdef CSK_LH_DEBUG_CONSOLE
     m_bLogfirst = true;
-    m_strFilename = "SimpleLog.txt";
+    m_strFilename = L"SimpleLog.txt";
     m_pFile = NULL;
 #endif
 }
@@ -222,31 +225,31 @@ CmuSimpleLog::~CmuSimpleLog(void)
 {
 }
 
-void CmuSimpleLog::setFilename(const char* strFilename)
+void CmuSimpleLog::setFilename(const wchar_t* strFilename)
 {
 #ifdef CSK_LH_DEBUG_CONSOLE
     m_strFilename = strFilename;
 #endif
 }
 
-void CmuSimpleLog::log(char* str, ...)
+void CmuSimpleLog::log(wchar_t* str, ...)
 {
 #ifdef CSK_LH_DEBUG_CONSOLE
-    if (m_bLogfirst)
-    {
-        m_pFile = fopen(m_strFilename.c_str(), "a");
-        fclose(m_pFile);
-        m_bLogfirst = false;
-    }
+    //if (m_bLogfirst)
+    //{
+    //    m_pFile = _wfopen(m_strFilename.c_str(), L"a");
+    //    fclose(m_pFile);
+    //    m_bLogfirst = false;
+    //}
 
-    m_pFile = fopen(m_strFilename.c_str(), "a");
+    //m_pFile = _wfopen(m_strFilename.c_str(), L"a");
 
-    va_list ap;
+    //va_list ap;
 
-    va_start(ap, str);
-    vfprintf(m_pFile, str, ap);
-    va_end(ap);
+    //va_start(ap, str);
+    //vfprintf(m_pFile, str, ap);
+    //va_end(ap);
 
-    fclose(m_pFile);
+    //fclose(m_pFile);
 #endif
 }

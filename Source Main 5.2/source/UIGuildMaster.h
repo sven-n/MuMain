@@ -35,7 +35,7 @@ protected:
     DWORD			m_dwGuildRelationShipReplyPopup;
 
 protected:
-    BOOL IsValidGuildName(const char* szName);
+    BOOL IsValidGuildName(const wchar_t* szName);
     BOOL IsValidGuildMark();
 
     void StepPrev();

@@ -30,14 +30,14 @@ class CPersonalShopTitleImp
         CShopTitleDrawObj();
         ~CShopTitleDrawObj();
 
-        bool Create(int key, const std::string& name, const std::string& title, POINT& pos);
+        bool Create(int key, const std::wstring& name, const std::wstring& title, POINT& pos);
         void Release();
 
         int	GetKey() const;
 
-        void SetBoxContent(const std::string& name, const std::string& title);
+        void SetBoxContent(const std::wstring& name, const std::wstring& title);
         void SetBoxPos(POINT& pos);
-        void GetFullTitle(std::string& title);
+        void GetFullTitle(std::wstring& title);
 
         void GetBoxSize(SIZE& size);
         void GetBoxPos(POINT& pos);
@@ -54,14 +54,14 @@ class CPersonalShopTitleImp
 
     private:
         void Init();
-        void SeparateShopTitle(IN const std::string& title, OUT std::string& topTitle, OUT std::string& bottomTitle);
-        void CalculateBooleanSize(IN const std::string& name, IN const std::string& topTitle, IN const std::string& bottomTitle, OUT SIZE& size);
+        void SeparateShopTitle(IN const std::wstring& title, OUT std::wstring& topTitle, OUT std::wstring& bottomTitle);
+        void CalculateBooleanSize(IN const std::wstring& name, IN const std::wstring& topTitle, IN const std::wstring& bottomTitle, OUT SIZE& size);
 
     private:
-        std::string	m_fullname;
-        std::string	m_fulltitle;
-        std::string	m_topTitle;
-        std::string	m_bottomTitle;
+        std::wstring	m_fullname;
+        std::wstring	m_fulltitle;
+        std::wstring	m_topTitle;
+        std::wstring	m_bottomTitle;
 
         int		m_key;
         bool	m_bDraw;
@@ -73,7 +73,7 @@ class CPersonalShopTitleImp
 public:
     ~CPersonalShopTitleImp();
 
-    bool AddShopTitle(int key, CHARACTER* pPlayer, const std::string& title);
+    bool AddShopTitle(int key, CHARACTER* pPlayer, const std::wstring& title);
     void RemoveShopTitle(CHARACTER* pPlayer);
     void RemoveAllShopTitle();
     void RemoveAllShopTitleExceptHero();
@@ -91,8 +91,8 @@ public:
     bool IsShopTitleHighlight(CHARACTER* pPlayer) const;
 
     bool IsInViewport(CHARACTER* pPlayer);
-    void GetShopTitle(CHARACTER* pPlayer, std::string& title);
-    void GetShopTitleSummary(CHARACTER* pPlayer, std::string& summary);
+    void GetShopTitle(CHARACTER* pPlayer, std::wstring& title);
+    void GetShopTitleSummary(CHARACTER* pPlayer, std::wstring& summary);
 
     DWORD GetShopTextColor(CHARACTER* pPlayer);
     DWORD GetShopText2Color(CHARACTER* pPlayer);
@@ -121,7 +121,7 @@ private:
 };
 
 //. wrapping to C-style function
-inline bool AddShopTitle(int key, CHARACTER* pPlayer, const std::string& title) {
+inline bool AddShopTitle(int key, CHARACTER* pPlayer, const std::wstring& title) {
     return CPersonalShopTitleImp::GetObjPtr()->AddShopTitle(key, pPlayer, title);
 }
 inline void RemoveShopTitle(CHARACTER* pPlayer) {
@@ -168,10 +168,10 @@ inline bool IsShopTitleHighlight(CHARACTER* pPlayer) {
 inline bool IsShopInViewport(CHARACTER* pPlayer) {
     return CPersonalShopTitleImp::GetObjPtr()->IsInViewport(pPlayer);
 }
-inline void GetShopTitle(CHARACTER* pPlayer, std::string& title) {
+inline void GetShopTitle(CHARACTER* pPlayer, std::wstring& title) {
     CPersonalShopTitleImp::GetObjPtr()->GetShopTitle(pPlayer, title);
 }
-inline void GetShopTitleSummary(CHARACTER* pPlayer, std::string& summary) {
+inline void GetShopTitleSummary(CHARACTER* pPlayer, std::wstring& summary) {
     CPersonalShopTitleImp::GetObjPtr()->GetShopTitleSummary(pPlayer, summary);
 }
 
@@ -337,7 +337,7 @@ inline bool GetPersonalItemPrice(int index, int& price, int type)
     return pPersonalItemTable->GetItemPrice(index, price);
 }
 
-inline bool CheckPriceIntegrity(const char* szZen, int size)
+inline bool CheckPriceIntegrity(const wchar_t* szZen, int size)
 {
     if (size > 255) return false;
     for (int i = 0; i < size; i++)

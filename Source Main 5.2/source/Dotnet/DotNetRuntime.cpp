@@ -26,12 +26,12 @@ struct FooStruct
 {
     static void Foo1(int32_t bar)
     {
-        printf("Foo1, param: %d\r\n", bar);
+        wprintf(L"Foo1, param: %d\r\n", bar);
     }
 
     static void Foo2(int32_t bar)
     {
-        printf("Foo2, param: %d\r\n", bar);
+        wprintf(L"Foo2, param: %d\r\n", bar);
     }
 
     void (*f1)(int) = Foo1;
@@ -40,7 +40,7 @@ struct FooStruct
 
 void _cdecl foo(int32_t bar)
 {
-    printf("foo bar %d\r\n", bar);
+    wprintf(L"foo bar %d\r\n", bar);
 }
 
 DotNetRuntime::DotNetRuntime()

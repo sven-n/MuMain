@@ -23,23 +23,23 @@ CShopCategory::~CShopCategory() // OK
 {
 }
 
-bool CShopCategory::SetCategory(std::string strdata) // OK
+bool CShopCategory::SetCategory(std::wstring strdata) // OK
 {
     if (strdata.empty())
         return 0;
 
-    CStringToken token(strdata, "@");
+    CStringToken token(strdata, L"@");
 
     if (token.hasMoreTokens() == 0)
         return 0;
 
-    this->ProductDisplaySeq = atoi(token.nextToken().c_str());
+    this->ProductDisplaySeq = _wtoi(token.nextToken().c_str());
     StringCchCopy(this->CategroyName, sizeof(this->CategroyName), token.nextToken().c_str());
-    this->EventFlag = atoi(token.nextToken().c_str());
-    this->OpenFlag = atoi(token.nextToken().c_str());
-    this->ParentProductDisplaySeq = atoi(token.nextToken().c_str());
-    this->DisplayOrder = atoi(token.nextToken().c_str());
-    this->Root = atoi(token.nextToken().c_str());
+    this->EventFlag = _wtoi(token.nextToken().c_str());
+    this->OpenFlag = _wtoi(token.nextToken().c_str());
+    this->ParentProductDisplaySeq = _wtoi(token.nextToken().c_str());
+    this->DisplayOrder = _wtoi(token.nextToken().c_str());
+    this->Root = _wtoi(token.nextToken().c_str());
 
     return 1;
 }

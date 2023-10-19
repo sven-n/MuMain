@@ -4,25 +4,21 @@
 #include "stdafx.h"
 #include <process.h>
 #include "UIManager.h"
-#include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "zzzinfomation.h"
-#include "zzzobject.h"
 #include "zzzcharacter.h"
-#include "zzzinterface.h"
 #include "zzzinventory.h"
-#include "ZzzObject.h"
-#include "ZzzCharacter.h"
 #include "ZzzTexture.h"
-#include "wsclientinline.h"
+
 #include "npcBreeder.h"
 #include "GIPetManager.h"
+#include "NewUISystem.h"
 
 extern  int SrcInventoryIndex;
 
 namespace npcBreeder
 {
-    int CalcRecoveryZen(BYTE type, char* Text)
+    int CalcRecoveryZen(BYTE type, wchar_t* Text)
     {
         ITEM* ip;
 
@@ -34,7 +30,7 @@ namespace npcBreeder
             ip = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
             if (ip->Type != ITEM_HELPER + 4)
             {
-                sprintf(Text, GlobalText[1229]);
+                swprintf(Text, GlobalText[1229]);
                 return -1;
             }
             break;
@@ -43,7 +39,7 @@ namespace npcBreeder
             ip = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
             if (ip->Type != ITEM_HELPER + 5)
             {
-                sprintf(Text, GlobalText[1229]);
+                swprintf(Text, GlobalText[1229]);
                 return -1;
             }
             break;
@@ -65,25 +61,25 @@ namespace npcBreeder
         switch (Gold)
         {
         case 0:
-            sprintf(Text, GlobalText[1230]);
+            swprintf(Text, GlobalText[1230]);
             break;
 
         default:
         {
-            char  Text2[100];
+            wchar_t  Text2[100];
             memset(Text2, 0, sizeof(char) * 100);
 
             if ((int)CharacterMachine->Gold < Gold)
             {
                 ConvertGold((double)Gold - CharacterMachine->Gold, Text);
-                sprintf(Text2, GlobalText[1231], Text);
+                swprintf(Text2, GlobalText[1231], Text);
             }
             else
             {
-                sprintf(Text2, GlobalText[1232], Text);
+                swprintf(Text2, GlobalText[1232], Text);
             }
 
-            int Length = strlen(Text2);
+            int Length = wcslen(Text2);
             memcpy(Text, Text2, sizeof(char) * Length);
             Text[Length] = 0;
         }
@@ -95,7 +91,7 @@ namespace npcBreeder
 
     void RecoverPet(BYTE type)
     {
-        char Text[100];
+        wchar_t Text[100];
         int Gold = CalcRecoveryZen(type, Text);
 
         if ((int)CharacterMachine->Gold >= Gold && Gold != -1)
@@ -103,11 +99,11 @@ namespace npcBreeder
             switch (type)
             {
             case REVIVAL_DARKHORSE:
-                SendRequestRepair(EQUIPMENT_HELPER, Gold);
+                SocketClient->ToGameServer()->SendRepairItemRequest(EQUIPMENT_HELPER, (BYTE)Gold);
                 break;
 
             case REVIVAL_DARKSPIRIT:
-                SendRequestRepair(EQUIPMENT_WEAPON_LEFT, Gold);
+                SocketClient->ToGameServer()->SendRepairItemRequest(EQUIPMENT_WEAPON_LEFT, (BYTE)Gold);
                 break;
             }
             giPetManager::InitItemBackup();

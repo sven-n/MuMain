@@ -95,7 +95,7 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderBackImage()
 
 void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
 {
-    unicode::t_char szTemp[128];
+    wchar_t szTemp[128];
     int nX = m_Pos.x + 30;
     int nY = m_Pos.y + 33;
 
@@ -109,7 +109,7 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
         else
             g_pRenderText->SetTextColor(0, 150, 255, 255);
 
-        unicode::_sprintf(szTemp, "%d", GuildWarScore[0]);
+        swprintf(szTemp, L"%d", GuildWarScore[0]);
         g_pRenderText->RenderText(nX, nY, szTemp);				// 점수
         ::CreateGuildMark(Hero->GuildMarkIndex);
         ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY), 8, 8);// 길드 마크
@@ -120,7 +120,7 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
         else
             g_pRenderText->SetTextColor(255, 60, 0, 255);
 
-        unicode::_sprintf(szTemp, "%d", GuildWarScore[1]);
+        swprintf(szTemp, L"%d", GuildWarScore[1]);
         g_pRenderText->RenderText(nX, nY + 22, szTemp);			// 점수
         ::CreateGuildMark(FindGuildMark(GuildWarName));
         ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY + 22), 8, 8);// 길드 마크
@@ -129,14 +129,14 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
     else if (SoccerObserver)
     {
         g_pRenderText->SetTextColor(255, 60, 0, 255);
-        unicode::_sprintf(szTemp, "%d", GuildWarScore[0]);
+        swprintf(szTemp, L"%d", GuildWarScore[0]);
         g_pRenderText->RenderText(nX, nY, szTemp);
         ::CreateGuildMark(FindGuildMark(SoccerTeamName[0]));
         ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY), 8, 8);
         g_pRenderText->RenderText(nX + 33, nY, SoccerTeamName[0]);
 
         g_pRenderText->SetTextColor(0, 150, 255, 255);
-        unicode::_sprintf(szTemp, "%d", GuildWarScore[1]);
+        swprintf(szTemp, L"%d", GuildWarScore[1]);
         g_pRenderText->RenderText(nX, nY + 22, szTemp);
         ::CreateGuildMark(FindGuildMark(SoccerTeamName[1]));
         ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY + 22), 8, 8);
@@ -144,12 +144,12 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
     }
 }
 
-int SEASON3B::CNewUIBattleSoccerScore::FindGuildMark(char* pszGuildName)
+int SEASON3B::CNewUIBattleSoccerScore::FindGuildMark(wchar_t* pszGuildName)
 {
     for (int i = 0; i < MARK_EDIT; ++i)
     {
         MARK_t* p = &GuildMark[i];
-        if (strcmp(p->GuildName, pszGuildName) == NULL)
+        if (wcscmp(p->GuildName, pszGuildName) == NULL)
         {
             return i;
         }
@@ -164,7 +164,7 @@ float SEASON3B::CNewUIBattleSoccerScore::GetLayerDepth()
 
 void SEASON3B::CNewUIBattleSoccerScore::LoadImages()
 {
-    LoadBitmap("Interface\\newui_Figure_ground.tga", IMAGE_BSS_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Figure_ground.tga", IMAGE_BSS_BACK, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIBattleSoccerScore::UnloadImages()

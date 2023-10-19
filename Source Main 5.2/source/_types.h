@@ -2,41 +2,41 @@
 
 namespace unicode
 {
-    typedef char			t_char;
-    typedef std::string		t_string;
-    inline char* _strcpy(char* strDestination, const char* strSource)
+    typedef wchar_t			t_char;
+    typedef std::wstring		t_string;
+    inline wchar_t* _strcpy(wchar_t* strDestination, const wchar_t* strSource)
     {
-        return strcpy(strDestination, strSource);
+        return wcscpy(strDestination, strSource);
     }
-    inline char* _strncpy(char* strDest, const char* strSource, size_t count)
+    inline wchar_t* _strncpy(wchar_t* strDest, const wchar_t* strSource, size_t count)
     {
-        return strncpy(strDest, strSource, count);
+        return wcsncpy(strDest, strSource, count);
     }
-    inline char* _strtok(char* strToken, const char* strDelimit)
+    inline wchar_t* _strtok(wchar_t* strToken, const wchar_t* strDelimit)
     {
-        return strtok(strToken, strDelimit);
+        return _wcstok(strToken, strDelimit);
     }
-    inline size_t  __cdecl _strlen(const char* szText)
+    inline size_t  __cdecl _strlen(const wchar_t* szText)
     {
-        return strlen(szText);
+        return wcslen(szText);
     }
-    inline int _strcmp(const char* string1, const char* string2)
+    inline int _strcmp(const wchar_t* string1, const wchar_t* string2)
     {
-        return strcmp(string1, string2);
+        return wcscmp(string1, string2);
     }
-    inline char* _strstr(const char* string, const char* strCharSet)
+    inline wchar_t* _strstr(const wchar_t* string, const wchar_t* strCharSet)
     {
-        return const_cast<char*>(strstr(string, strCharSet));
+        return const_cast<wchar_t*>(wcsstr(string, strCharSet));
     }
 
-    inline int _sprintf(char* buffer, const char* format, ...)
+    inline int _sprintf(wchar_t* buffer, const wchar_t* format, ...)
     {
         va_list	pArguments;
         va_start(pArguments, format);
-        vsprintf(buffer, format, pArguments);
+        vswprintf(buffer, format, pArguments);
         va_end(pArguments);
 
-        return strlen(buffer);
+        return wcslen(buffer);
     }
 
     inline BOOL _GetTextExtentPoint(HDC hdc, LPCSTR lpString, int cbString, LPSIZE lpSize)

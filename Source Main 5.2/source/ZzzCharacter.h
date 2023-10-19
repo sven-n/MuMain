@@ -11,7 +11,7 @@ extern CHARACTER* Hero;
 DWORD GetGuildRelationShipTextColor(BYTE GuildRelationShip);
 DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip);
 
-CHARACTER* FindCharacterByID(char* szName);
+CHARACTER* FindCharacterByID(wchar_t* szName);
 
 void CreateMonsterServer(int Type, vec3_t Position, vec3_t Angle, int Level = 0);
 void CreateWeapon(int Type, int Level, CHARACTER* c, int Hand);
@@ -52,7 +52,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
 CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation = 0.f);
 CHARACTER* CreateHero(int Key, int Class = 0, int Skin = 0, float x = 0.f, float y = 0.f, float Ratate = 0.f);
 CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key = 0);
-CHARACTER* CreateHellGate(BYTE* ID, int Key, int Index, int x, int y, int CreateFlag);
+CHARACTER* CreateHellGate(char* ID, int Key, int Index, int x, int y, int CreateFlag);
 
 void SetAttackSpeed();
 void SetPlayerShock(CHARACTER* c, int Hit);

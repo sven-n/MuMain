@@ -21,10 +21,10 @@ public:
     bool IsBuffTime(eBuffTimeType bufftype);
 
 public:
-    void GetBuffStringTime(eBuffState bufftype, std::string& timeText);
-    void GetBuffStringTime(DWORD type, std::string& timeText, bool issecond = true);
+    void GetBuffStringTime(eBuffState bufftype, std::wstring& timeText);
+    void GetBuffStringTime(DWORD type, std::wstring& timeText, bool issecond = true);
     const DWORD GetBuffTime(DWORD type);
-    void GetStringTime(DWORD time, std::string& timeText, bool isSecond = true);
+    void GetStringTime(DWORD time, std::wstring& timeText, bool isSecond = true);
 
 public:
     bool HandleWindowMessage(UINT message, WPARAM wParam, LPARAM lParam, LRESULT& result);

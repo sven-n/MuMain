@@ -11,9 +11,10 @@
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "wsclientinline.h"
+
 #include "UIControls.h"
 #include "GameCensorship.h"
+#include "NewUISystem.h"
 #include "ServerListManager.h"
 
 #define	SSW_GAP_WIDTH	28
@@ -413,7 +414,7 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
             m_aServerGroupBtn[i].SetCheck(true);
             m_iSelectServerBtnIndex = i;
 
-            SendRequestServerList();
+            SocketClient->ToConnectServer()->SendServerListRequest();
         }
     }
 
@@ -434,7 +435,9 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
             {
                 CUIMng::Instance().HideWin(this);
 
-                SendRequestServerAddress(pServerInfo->m_iConnectIndex);
+                SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
+                g_pChatListBox->AddText(L"", GlobalText[470], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pChatListBox->AddText(L"", GlobalText[471], SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                 int iCensorshipIndex = CGameCensorship::STATE_12;
 

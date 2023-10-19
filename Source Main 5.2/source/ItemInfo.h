@@ -17,7 +17,7 @@ namespace info
     class ItemInfo : public InfoFile
     {
     public:
-        static ItemInfoPtr MakeInfo(const std::string& filename);
+        static ItemInfoPtr MakeInfo(const std::wstring& filename);
         virtual ~ItemInfo();
 
     protected:
@@ -28,8 +28,8 @@ namespace info
         const Script_Item* GetData(int index) const;
 
     private:
-        bool OpenFile(const std::string& filename);
-        ItemInfo(const std::string& filename);
+        bool OpenFile(const std::wstring& filename);
+        ItemInfo(const std::wstring& filename);
 
     private:
         bool					m_IsOpenFile;

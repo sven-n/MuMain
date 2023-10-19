@@ -13,7 +13,7 @@
 #include "ZzzInterface.h"
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
 #include "UIGateKeeper.h"
 
@@ -61,7 +61,7 @@ bool CNewUIGatemanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIGatemanWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const unicode::t_char* pCaption)
+void CNewUIGatemanWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -166,7 +166,7 @@ void CNewUIGatemanWindow::OpeningProcess()
 
 void CNewUIGatemanWindow::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float CNewUIGatemanWindow::GetLayerDepth()
@@ -176,15 +176,15 @@ float CNewUIGatemanWindow::GetLayerDepth()
 
 void CNewUIGatemanWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_GATEMANWINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_GATEMANWINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_GATEMANWINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_GATEMANWINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_GATEMANWINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_GATEMANWINDOW_EXIT_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_very_small.tga", IMAGE_GATEMANWINDOW_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_scroll_up.jpg", IMAGE_GATEMANWINDOW_SCROLL_UP_BTN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_scroll_dn.jpg", IMAGE_GATEMANWINDOW_SCROLL_DOWN_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GATEMANWINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GATEMANWINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_GATEMANWINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_GATEMANWINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_GATEMANWINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GATEMANWINDOW_EXIT_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_GATEMANWINDOW_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_scroll_up.jpg", IMAGE_GATEMANWINDOW_SCROLL_UP_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_scroll_dn.jpg", IMAGE_GATEMANWINDOW_SCROLL_DOWN_BTN, GL_LINEAR);
 }
 void CNewUIGatemanWindow::UnloadImages()
 {
@@ -207,7 +207,7 @@ void CNewUIGatemanWindow::RenderFrame()
     RenderImage(IMAGE_GATEMANWINDOW_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
     RenderImage(IMAGE_GATEMANWINDOW_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
     float fLine_y = 13.0f;
 
@@ -215,7 +215,7 @@ void CNewUIGatemanWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    unicode::_sprintf(szText, "%s", GlobalText[1596]);
+    swprintf(szText, L"%s", GlobalText[1596]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -305,11 +305,11 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
 
     RenderCheckBox(ptOrigin.x + 35, ptOrigin.y, g_pUIGateKeeper->IsPublic());
     g_pRenderText->RenderText(ptOrigin.x + 55, ptOrigin.y, GlobalText[1598]);
-    unicode::t_char szText[256];
-    unicode::t_char szGold[64];
+    wchar_t szText[256];
+    wchar_t szGold[64];
     ptOrigin.y += 18;
     ConvertGold(g_pUIGateKeeper->GetEnteranceFee(), szGold);
-    unicode::_sprintf(szText, GlobalText[1602], szGold);
+    swprintf(szText, GlobalText[1602], szGold);
     g_pRenderText->RenderText(ptOrigin.x + 35, ptOrigin.y, szText);
 
     glColor4f(0.f, 0.f, 0.f, 0.3f);
@@ -325,7 +325,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
     g_pRenderText->SetFont(g_hFont);
     ConvertGold(g_pUIGateKeeper->GetViewEnteranceFee(), szGold);
 
-    unicode::_sprintf(szText, "%s %s", szGold, GlobalText[224]);
+    swprintf(szText, L"%s %s", szGold, GlobalText[224]);
     g_pRenderText->RenderText(ptOrigin.x + 30 + 50, ptOrigin.y + 32, szText, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     ptOrigin.y += 20;
@@ -341,7 +341,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
     g_pRenderText->SetBgColor(0x00000000);
     g_pRenderText->SetTextColor(0xFFFFFFFF);
     ConvertGold(g_pUIGateKeeper->GetMaxEnteranceFee(), szGold);
-    unicode::_sprintf(szText, GlobalText[1600], szGold);
+    swprintf(szText, GlobalText[1600], szGold);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 13;
@@ -349,7 +349,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
 
     ptOrigin.y += 13;
     ConvertGold(g_pUIGateKeeper->GetAddEnteranceFee(), szGold);
-    unicode::_sprintf(szText, GlobalText[1618], szGold);
+    swprintf(szText, GlobalText[1618], szGold);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 50;
@@ -372,10 +372,10 @@ void CNewUIGatemanWindow::RenderGuestMode()
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
     if (g_pUIGateKeeper->IsPublic())
     {
-        unicode::t_char szText[256];
-        unicode::t_char szGold[64];
+        wchar_t szText[256];
+        wchar_t szGold[64];
         ConvertGold(g_pUIGateKeeper->GetEnteranceFee(), szGold);
-        unicode::_sprintf(szText, GlobalText[1632], szGold);
+        swprintf(szText, GlobalText[1632], szGold);
 
         if (g_pUIGateKeeper->GetEnteranceFee() > (int)CharacterMachine->Gold)
         {

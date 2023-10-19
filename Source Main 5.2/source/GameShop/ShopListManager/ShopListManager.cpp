@@ -32,23 +32,23 @@ WZResult		CShopListManager::LoadScript(bool bDonwLoad) // OK
 {
     if (this->m_ShopList)
     {
-        std::string path = this->GetScriptPath();
+        std::wstring path = this->GetScriptPath();
 
-        this->m_Result = this->m_ShopList->LoadCategroy(std::string(path + SHOPLIST_SCRIPT_CATEGORY).c_str());
+        this->m_Result = this->m_ShopList->LoadCategroy(std::wstring(path + SHOPLIST_SCRIPT_CATEGORY).c_str());
 
         if (this->m_Result.IsSuccess())
         {
-            this->m_Result = this->m_ShopList->LoadPackage(std::string(path + SHOPLIST_SCRIPT_PACKAGE).c_str());
+            this->m_Result = this->m_ShopList->LoadPackage(std::wstring(path + SHOPLIST_SCRIPT_PACKAGE).c_str());
 
             if (this->m_Result.IsSuccess())
             {
-                this->m_Result = this->m_ShopList->LoadProduct(std::string(path + SHOPLIST_SCRIPT_PRODUCT).c_str());
+                this->m_Result = this->m_ShopList->LoadProduct(std::wstring(path + SHOPLIST_SCRIPT_PRODUCT).c_str());
             }
         }
     }
     else
     {
-        this->m_Result.SetResult(PT_NO_INFO, 0, "[CShopListManager::LoadScript] Failed");
+        this->m_Result.SetResult(PT_NO_INFO, 0, L"[CShopListManager::LoadScript] Failed");
     }
 
     return this->m_Result;

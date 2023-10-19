@@ -110,7 +110,7 @@ namespace SEASON3B
 
         bool m_bRequestUnionList;
 
-        char m_RivalGuildName[MAX_GUILDNAME + 1];
+        wchar_t m_RivalGuildName[MAX_GUILDNAME + 1];
 
     public:
         CNewUIGuildInfoWindow();
@@ -133,13 +133,13 @@ namespace SEASON3B
         void OpenningProcess();
         void ClosingProcess();
 
-        void AddGuildNotice(char* szText);
-        void SetRivalGuildName(char* szName);
+        void AddGuildNotice(wchar_t* szText);
+        void SetRivalGuildName(wchar_t* szName);
         void AddGuildMember(GUILD_LIST_t* pInfo);
         void GuildClear();
         void NoticeClear();
         void UnionGuildClear();
-        void AddUnionList(BYTE* pGuildMark, char* szGuildName, int nMemberCount);
+        void AddUnionList(BYTE* pGuildMark, wchar_t* szGuildName, int nMemberCount);
 
         int GetUnionCount();
 
@@ -157,7 +157,7 @@ namespace SEASON3B
         bool Check_Mouse(int mx, int my);
         bool Check_Btn();
 
-        int GetGuildMemberIndex(char* szName);
+        int GetGuildMemberIndex(wchar_t* szName);
 
         void RenderFrame();
         void RenderNoneGuild();

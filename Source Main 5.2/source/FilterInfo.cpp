@@ -13,13 +13,13 @@
 
 using namespace info;
 
-FilterInfoPtr FilterInfo::MakeInfo(const std::string& filename)
+FilterInfoPtr FilterInfo::MakeInfo(const std::wstring& filename)
 {
     FilterInfoPtr info(new FilterInfo(filename));
     return info;
 }
 
-FilterInfo::FilterInfo(const std::string& filename) : InfoFile(filename), m_IsOpenFile(false)
+FilterInfo::FilterInfo(const std::wstring& filename) : InfoFile(filename), m_IsOpenFile(false)
 {
     m_IsOpenFile = OpenFile(filename);
 
@@ -34,7 +34,7 @@ FilterInfo::~FilterInfo()
     clear();
 }
 
-bool FilterInfo::OpenFile(const std::string& filename)
+bool FilterInfo::OpenFile(const std::wstring& filename)
 {
     return true;
 }

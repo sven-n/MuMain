@@ -90,11 +90,11 @@ namespace leaf {
     public:
         xfstreambuf();
         xfstreambuf(const xstreambuf& xbuf);
-        xfstreambuf(const std::string& filename);
+        xfstreambuf(const std::wstring& filename);
         virtual ~xfstreambuf();
 
-        bool load(const std::string& filename);
-        bool save(const std::string& filename);
+        bool load(const std::wstring& filename);
+        bool save(const std::wstring& filename);
     };
 }
 

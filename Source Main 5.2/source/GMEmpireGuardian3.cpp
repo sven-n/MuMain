@@ -82,7 +82,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(170);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 170, PosX, PosY);
-        strcpy(pCharacter->ID, "카토");
+        wcscpy(pCharacter->ID, L"카토");
         pCharacter->Object.Scale = 1.35f;
 
         m_bCurrentIsRage_Kato = false;
@@ -92,7 +92,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(176);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 176, PosX, PosY);
-        strcpy(pCharacter->ID, "암살단장");
+        wcscpy(pCharacter->ID, L"암살단장");
         pCharacter->Object.Scale = 1.55f;
     }
     break;
@@ -100,7 +100,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(177);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 177, PosX, PosY);
-        strcpy(pCharacter->ID, "기마단장");
+        wcscpy(pCharacter->ID, L"기마단장");
         pCharacter->Object.Scale = 1.25f;
     }
     break;

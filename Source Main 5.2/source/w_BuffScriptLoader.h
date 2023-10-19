@@ -35,12 +35,12 @@ public:
     BYTE	s_BuffEffectType;
     BYTE	s_ItemType;
     BYTE	s_ItemIndex;
-    char	s_BuffName[MAX_BUFF_NAME_LENGTH];
+    wchar_t	s_BuffName[MAX_BUFF_NAME_LENGTH];
     BYTE	s_BuffClassType;
     BYTE	s_NoticeType;
     BYTE	s_ClearType;
-    char	s_BuffDescript[MAX_DESCRIPT_LENGTH];
-    std::list<std::string> s_BuffDescriptlist;
+    wchar_t	s_BuffDescript[MAX_DESCRIPT_LENGTH];
+    std::list<std::wstring> s_BuffDescriptlist;
 };
 
 BoostSmartPointer(BuffScriptLoader);
@@ -51,7 +51,7 @@ public:
     virtual ~BuffScriptLoader();
 
 private:
-    bool Load(const std::string& pchFileName);
+    bool Load(const std::wstring& pchFileName);
 
 public:
     const BuffInfo GetBuffinfo(eBuffState type) const;

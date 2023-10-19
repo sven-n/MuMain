@@ -20,4 +20,4 @@
 #include "GameShop\ShopListManager\interface\DownloadInfo.h"
 #include "GameShop\ShopListManager\interface\IDownloaderStateEvent.h"
 
-#pragma comment(lib, "Wininet.lib")
+#pragma comment(lib, L"Wininet.lib")

@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "InGameShopSystem.h"
-#include "WSclientinline.h"
 #include "ZzzInventory.h"
 #include "MsgBoxIGSCommon.h"
 
@@ -100,15 +99,15 @@ bool CInGameShopSystem::ScriptDownload()
 
     ::GetCurrentDirectory(255, m_szScriptLocalPath);
 
-    char szScriptRemotePathforDMZ[MAX_TEXT_LENGTH];
-    sprintf(m_szScriptLocalPath, "%s%s", m_szScriptLocalPath, "\\data\\InGameShopScript");
-    strcpy(m_szScriptIPAddress, "image.webzen.com");
-    strcpy(m_szScriptRemotePath, "/Global/Payment/ProductTransfer");
-    strcpy(szScriptRemotePathforDMZ, "/Global/Payment/DevScriptGB/ProductTransfer");
+    wchar_t szScriptRemotePathforDMZ[MAX_TEXT_LENGTH];
+    swprintf(m_szScriptLocalPath, L"%s%s", m_szScriptLocalPath, L"\\data\\InGameShopScript");
+    wcscpy(m_szScriptIPAddress, L"image.webzen.com");
+    wcscpy(m_szScriptRemotePath, L"/Global/Payment/ProductTransfer");
+    wcscpy(szScriptRemotePathforDMZ, L"/Global/Payment/DevScriptGB/ProductTransfer");
 
 #ifdef FOR_WORK
     HANDLE hFile;
-    hFile = CreateFile("dmz.ini",     // file to create
+    hFile = CreateFile(L"dmz.ini",     // file to create
         GENERIC_READ,			// open for reading
         0,						// do not share
         NULL,                   // default security
@@ -118,13 +117,13 @@ bool CInGameShopSystem::ScriptDownload()
 
     if (hFile != INVALID_HANDLE_VALUE)
     {
-        strcpy(m_szScriptRemotePath, szScriptRemotePathforDMZ);
+        wcscpy(m_szScriptRemotePath, szScriptRemotePathforDMZ);
     }
     CloseHandle(hFile);
 #endif // FOR_WORK
     m_ShopManager.SetListManagerInfo(HTTP, m_szScriptIPAddress,
-        "",
-        "",
+        L"",
+        L"",
         m_szScriptRemotePath,
         m_szScriptLocalPath,
         m_ScriptVerInfo,
@@ -140,8 +139,8 @@ bool CInGameShopSystem::ScriptDownload()
 
         ShopOpenLock();
 
-        unicode::t_char szText[MAX_TEXT_LENGTH] = { '\0', };
-        sprintf(szText, GlobalText[3029], m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId, res.GetErrorMessage());
+        wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
+        swprintf(szText, GlobalText[3029], m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId, res.GetErrorMessage());
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[3028], szText);
@@ -150,8 +149,8 @@ bool CInGameShopSystem::ScriptDownload()
 
     m_CurrentScriptVerInfo = m_ScriptVerInfo;
 
-    g_ConsoleDebug->Write(MCD_NORMAL, "InGameShopStatue.Txt <IngameShop Script Download Success!!!>");
-    g_ConsoleDebug->Write(MCD_NORMAL, "InGameShopStatue.Txt - Ver %d.%d.%d", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt <IngameShop Script Download Success!!!>");
+    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt - Ver %d.%d.%d", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
 
     ShopOpenUnLock();
 
@@ -170,16 +169,16 @@ bool CInGameShopSystem::BannerDownload()
 
     ::GetCurrentDirectory(255, m_szBannerLocalPath);
 
-    char szBannerRemotePathforDMZ[MAX_TEXT_LENGTH];
-    sprintf(m_szBannerLocalPath, "%s%s", m_szBannerLocalPath, "\\data\\InGameShopBanner");
+    wchar_t szBannerRemotePathforDMZ[MAX_TEXT_LENGTH];
+    swprintf(m_szBannerLocalPath, L"%s%s", m_szBannerLocalPath, L"\\data\\InGameShopBanner");
 
-    strcpy(m_szBannerIPAddress, "image.webzen.com");
-    strcpy(m_szBannerRemotePath, "/Global/Payment/BannerTransfer");
-    strcpy(szBannerRemotePathforDMZ, "/Global/Payment/DevScriptGB/BannerTransfer");
+    wcscpy(m_szBannerIPAddress, L"image.webzen.com");
+    wcscpy(m_szBannerRemotePath, L"/Global/Payment/BannerTransfer");
+    wcscpy(szBannerRemotePathforDMZ, L"/Global/Payment/DevScriptGB/BannerTransfer");
 
 #ifdef FOR_WORK
     HANDLE hFile;
-    hFile = CreateFile("dmz.ini",     // file to create
+    hFile = CreateFile(L"dmz.ini",     // file to create
         GENERIC_READ,			// open for reading
         0,						// do not share
         NULL,                   // default security
@@ -189,15 +188,15 @@ bool CInGameShopSystem::BannerDownload()
 
     if (hFile != INVALID_HANDLE_VALUE)
     {
-        strcpy(m_szBannerRemotePath, szBannerRemotePathforDMZ);
+        wcscpy(m_szBannerRemotePath, szBannerRemotePathforDMZ);
     }
     CloseHandle(hFile);
 #endif // FOR_WORK
 
 #ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
     m_BannerManager.SetListManagerInfo(HTTP, m_szBannerIPAddress,
-        "",
-        "",
+        L"",
+        L"",
         m_szBannerRemotePath,
         m_szBannerLocalPath,
         m_BannerVerInfo,
@@ -221,8 +220,8 @@ bool CInGameShopSystem::BannerDownload()
         m_bIsBanner = false;
 
         // MessageBox
-        unicode::t_char szText[MAX_TEXT_LENGTH] = { '\0', };
-        sprintf(szText, GlobalText[3030], m_BannerVerInfo.Zone, m_BannerVerInfo.year, m_BannerVerInfo.yearId, res.GetErrorMessage());
+        wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
+        swprintf(szText, GlobalText[3030], m_BannerVerInfo.Zone, m_BannerVerInfo.year, m_BannerVerInfo.yearId, res.GetErrorMessage());
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[3028], szText);
@@ -244,15 +243,15 @@ bool CInGameShopSystem::BannerDownload()
 #ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 bool CInGameShopSystem::IsScriptDownload()
 {
-    g_ConsoleDebug->Write(MCD_NORMAL, "InGameShopStatue.Txt CallStack - CInGameShopSystem::IsScriptDownload()");
-    g_ConsoleDebug->Write(MCD_NORMAL, "InGameShopStatue.Txt - Script Ver %d.%d.%d", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
-    g_ConsoleDebug->Write(MCD_NORMAL, "InGameShopStatue.Txt - Current Ver %d.%d.%d", m_CurrentScriptVerInfo.Zone, m_CurrentScriptVerInfo.year, m_CurrentScriptVerInfo.yearId);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CInGameShopSystem::IsScriptDownload()");
+    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt - Script Ver %d.%d.%d", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt - Current Ver %d.%d.%d", m_CurrentScriptVerInfo.Zone, m_CurrentScriptVerInfo.year, m_CurrentScriptVerInfo.yearId);
     if (((m_ScriptVerInfo.year == m_CurrentScriptVerInfo.year) && (m_ScriptVerInfo.yearId == m_CurrentScriptVerInfo.yearId) && (m_ScriptVerInfo.Zone == m_CurrentScriptVerInfo.Zone)) && (m_bFirstScriptDownloaded == true))
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, "InGameShopStatue.Txt Return - false");
+        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false");
         return false;
     }
-    g_ConsoleDebug->Write(MCD_NORMAL, "InGameShopStatue.Txt Return - true");
+    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - true");
     return true;
 }
 
@@ -300,7 +299,7 @@ bool CInGameShopSystem::SelectCategory(int iIndex)
         {
             m_bSelectEventCategory = true;
             m_plistSelectPackage = &m_listEventPackage;
-            SendRequestIGS_EventItemList(m_SelectedCategory.ProductDisplaySeq);
+            SocketClient->ToGameServer()->SendCashShopEventItemListRequest(m_SelectedCategory.ProductDisplaySeq);
             m_bIsRequestEventPackage = true;
         }
         else
@@ -452,7 +451,7 @@ WORD CInGameShopSystem::GetPackageItemCode(int iIndex)
         iterPackage++;
     }
 
-    return atoi((*iterPackage).InGamePackageID);
+    return _wtoi((*iterPackage).InGamePackageID);
 }
 
 void CInGameShopSystem::SetTotalCash(double dTotalCash)
@@ -533,7 +532,7 @@ bool CInGameShopSystem::GetIsRequestShopOpenning()
     return m_bIsRequestShopOpenning;
 }
 
-bool CInGameShopSystem::GetPackageInfo(int iPackageSeq, int iPackageAttrType, OUT int& iValue, OUT unicode::t_char* pszText)
+bool CInGameShopSystem::GetPackageInfo(int iPackageSeq, int iPackageAttrType, OUT int& iValue, OUT wchar_t* pszText)
 {
     CShopPackage Package;
 
@@ -544,26 +543,26 @@ bool CInGameShopSystem::GetPackageInfo(int iPackageSeq, int iPackageAttrType, OU
         case IGS_PACKAGE_ATT_TYPE_NAME:
         {
             iValue = 0;
-            strcpy(pszText, Package.PackageProductName);
+            wcscpy(pszText, Package.PackageProductName);
             return true;
         }break;
         case IGS_PACKAGE_ATT_TYPE_DESCRIPTION:
         {
             iValue = 0;
-            strcpy(pszText, Package.Description);
+            wcscpy(pszText, Package.Description);
             return true;
         }break;
         case IGS_PACKAGE_ATT_TYPE_PRICE:
         {
-            unicode::t_char szText[MAX_TEXT_LENGTH] = { '\0', };
+            wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
             iValue = Package.Price;
             ConvertGold(iValue, szText);
-            sprintf(pszText, "%s %s", szText, Package.PricUnitName);
+            swprintf(pszText, L"%s %s", szText, Package.PricUnitName);
             return true;
         }break;
         case IGS_PACKAGE_ATT_TYPE_ITEMCODE:
         {
-            iValue = atoi(Package.InGamePackageID);
+            iValue = _wtoi(Package.InGamePackageID);
             pszText[0] = '\0';
             return true;
         }break;
@@ -578,7 +577,7 @@ bool CInGameShopSystem::GetPackageInfo(int iPackageSeq, int iPackageAttrType, OU
     return false;
 }
 
-bool CInGameShopSystem::GetProductInfoFromPriceSeq(int iProductSeq, int iPriceSeq, int iAttrType, OUT int& iValue, OUT unicode::t_char* pszUnitName)
+bool CInGameShopSystem::GetProductInfoFromPriceSeq(int iProductSeq, int iPriceSeq, int iAttrType, OUT int& iValue, OUT wchar_t* pszUnitName)
 {
     CShopProduct Product;
 
@@ -598,7 +597,7 @@ bool CInGameShopSystem::GetProductInfoFromPriceSeq(int iProductSeq, int iPriceSe
     return false;
 }
 
-bool CInGameShopSystem::GetProductInfoFromProductSeq(int iProductSeq, int iAttrType, OUT int& iValue, OUT unicode::t_char* pszUnitName)
+bool CInGameShopSystem::GetProductInfoFromProductSeq(int iProductSeq, int iAttrType, OUT int& iValue, OUT wchar_t* pszUnitName)
 {
     CShopProduct Product;
 
@@ -618,7 +617,7 @@ bool CInGameShopSystem::GetProductInfoFromProductSeq(int iProductSeq, int iAttrT
     return false;
 }
 
-bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OUT int& iValue, OUT unicode::t_char* pszUnitName)
+bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OUT int& iValue, OUT wchar_t* pszUnitName)
 {
     switch (iAttrType)
     {
@@ -627,7 +626,7 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
         if ((pProduct->PropertySeq == 2) || (pProduct->PropertySeq == 28) || (pProduct->PropertySeq == 12)
             || (pProduct->PropertySeq == 58) || (pProduct->PropertySeq == 10))
         {
-            iValue = atoi(pProduct->Value);
+            iValue = _wtoi(pProduct->Value);
             switch (pProduct->UnitType)
             {
             case 386:
@@ -635,21 +634,21 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
                 if (iValue >= 86400)
                 {
                     iValue /= 86400;
-                    strcpy(pszUnitName, GlobalText[2298]);
+                    wcscpy(pszUnitName, GlobalText[2298]);
                 }
                 else if (iValue >= 3600)
                 {
                     iValue /= 3600;
-                    strcpy(pszUnitName, GlobalText[2299]);
+                    wcscpy(pszUnitName, GlobalText[2299]);
                 }
                 else if (iValue >= 60)
                 {
                     iValue /= 60;
-                    strcpy(pszUnitName, GlobalText[2300]);
+                    wcscpy(pszUnitName, GlobalText[2300]);
                 }
                 else
                 {
-                    strcpy(pszUnitName, GlobalText[2301]);
+                    wcscpy(pszUnitName, GlobalText[2301]);
                 }
             }break;
             case 174:
@@ -657,16 +656,16 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
                 if (iValue >= 1440)
                 {
                     iValue /= 1440;
-                    strcpy(pszUnitName, GlobalText[2298]);
+                    wcscpy(pszUnitName, GlobalText[2298]);
                 }
                 else if (iValue >= 60)
                 {
                     iValue /= 60;
-                    strcpy(pszUnitName, GlobalText[2299]);
+                    wcscpy(pszUnitName, GlobalText[2299]);
                 }
                 else
                 {
-                    strcpy(pszUnitName, GlobalText[2300]);
+                    wcscpy(pszUnitName, GlobalText[2300]);
                 }
             }break;
             case 172:
@@ -674,16 +673,16 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
                 if (iValue >= 24)
                 {
                     iValue /= 24;
-                    strcpy(pszUnitName, GlobalText[2298]);
+                    wcscpy(pszUnitName, GlobalText[2298]);
                 }
                 else
                 {
-                    strcpy(pszUnitName, GlobalText[2299]);
+                    wcscpy(pszUnitName, GlobalText[2299]);
                 }
             }break;
             default:
             {
-                strcpy(pszUnitName, pProduct->UnitName);
+                wcscpy(pszUnitName, pProduct->UnitName);
             }break;
             }
             return true;
@@ -693,8 +692,8 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
     {
         if ((pProduct->PropertySeq == 46) || (pProduct->PropertySeq == 49) || (pProduct->PropertySeq == 48) || (pProduct->PropertySeq == 51) || (pProduct->PropertySeq == 52) || (pProduct->PropertySeq == 53) || (pProduct->PropertySeq == 50) || (pProduct->PropertySeq == 60))
         {
-            iValue = atoi(pProduct->Value);
-            strcpy(pszUnitName, pProduct->UnitName);
+            iValue = _wtoi(pProduct->Value);
+            wcscpy(pszUnitName, pProduct->UnitName);
             return true;
         }
     }break;
@@ -702,8 +701,8 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
     {
         if ((pProduct->PropertySeq == 30) || (pProduct->PropertySeq == 11) || (pProduct->PropertySeq == 7) || (pProduct->PropertySeq == 8) || (pProduct->PropertySeq == 9) || (pProduct->PropertySeq == 31))
         {
-            iValue = atoi(pProduct->Value);
-            strcpy(pszUnitName, pProduct->UnitName);
+            iValue = _wtoi(pProduct->Value);
+            wcscpy(pszUnitName, pProduct->UnitName);
             return true;
         }
     }break;
@@ -715,14 +714,14 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
     }break;
     case IGS_PRODUCT_ATT_TYPE_ITEMCODE:
     {
-        iValue = atoi(pProduct->InGamePackageID);
+        iValue = _wtoi(pProduct->InGamePackageID);
         pszUnitName[0] = '\0';
         return true;
     }break;
     case IGS_PRODUCT_ATT_TYPE_ITEMNAME:
     {
         iValue = -1;
-        strcpy(pszUnitName, pProduct->ProductName);
+        wcscpy(pszUnitName, pProduct->ProductName);
         return true;
     }break;
     case IGS_PRODUCT_ATT_TYPE_PRICE_SEQUENCE:
@@ -764,7 +763,7 @@ bool CInGameShopSystem::IsBanner()
     return m_bIsBanner;
 }
 
-unicode::t_char* CInGameShopSystem::GetBannerFileName()
+wchar_t* CInGameShopSystem::GetBannerFileName()
 {
     if (m_bIsBanner == false)
         return NULL;
@@ -772,7 +771,7 @@ unicode::t_char* CInGameShopSystem::GetBannerFileName()
     return m_BannerInfo.BannerImagePath;
 }
 
-unicode::t_char* CInGameShopSystem::GetBannerURL()
+wchar_t* CInGameShopSystem::GetBannerURL()
 {
     if (m_bIsBanner == false)
         return NULL;

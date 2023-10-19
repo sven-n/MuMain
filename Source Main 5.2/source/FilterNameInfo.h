@@ -17,11 +17,11 @@ namespace info
     class FilterNameInfo : public InfoFile
     {
     private:
-        bool OpenFile(const std::string& filename);
-        FilterNameInfo(const std::string& filename);
+        bool OpenFile(const std::wstring& filename);
+        FilterNameInfo(const std::wstring& filename);
 
     public:
-        static FilterNameInfoPtr MakeInfo(const std::string& filename);
+        static FilterNameInfoPtr MakeInfo(const std::wstring& filename);
         virtual ~FilterNameInfo();
 
     protected:
@@ -29,11 +29,11 @@ namespace info
         virtual void clear();
 
     public:
-        const char* GetData(int index) const;
+        const wchar_t* GetData(int index) const;
 
     private:
         bool		m_IsOpenFile;
-        char		m_Info[2048][20];
+        wchar_t		m_Info[2048][20];
     };
 };
 
@@ -49,7 +49,7 @@ void info::FilterNameInfo::clear()
 }
 
 inline
-const char* info::FilterNameInfo::GetData(int index) const
+const wchar_t* info::FilterNameInfo::GetData(int index) const
 {
     if (index >= 2048)
         assert(0);

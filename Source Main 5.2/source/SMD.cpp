@@ -173,15 +173,15 @@ void ParseTriangles(bool Flip)
     }
 }
 
-bool OpenSMDFile(char* FileName, int Type, bool Flip)
+bool OpenSMDFile(wchar_t* FileName, int Type, bool Flip)
 {
     if (FileName == NULL) return false;
-    if ((SMDFile = fopen(FileName, "rb")) == NULL)
+    if ((SMDFile = _wfopen(FileName, L"rb")) == NULL)
     {
 #ifdef _DEBUG
         extern HWND g_hWnd;
-        char Text[1024];
-        sprintf(Text, "%s - File not exist..\r\n", FileName);
+        wchar_t Text[1024];
+        swprintf(Text, L"%s - File not exist..\r\n", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
 #endif
@@ -210,13 +210,13 @@ void Triangle2Strip();
 void SMD2BMDModel(int ID, int Actions);
 void SMD2BMDAnimation(int ID, bool LockPosition);
 
-bool OpenSMDModel(int ID, char* FileName1, int Actions, bool Flip)
+bool OpenSMDModel(int ID, wchar_t* FileName1, int Actions, bool Flip)
 {
     if (Models[ID].NumMeshs > 0) return false;
 
     if (OpenSMDFile(FileName1, REFERENCE_FRAME, Flip))
     {
-        strcpy(Models[ID].Name, FileName1);
+        WideCharToMultiByte(CP_UTF8, 0, FileName1, wcslen(FileName1), Models[ID].Name, 32, 0, 0);
         Models[ID].Version = 10;
         FixupSMD();
         //Models[ID].Version = 11;
@@ -227,7 +227,7 @@ bool OpenSMDModel(int ID, char* FileName1, int Actions, bool Flip)
     return false;
 }
 
-bool OpenSMDAnimation(int ID, char* FileName2, bool LockPosition)
+bool OpenSMDAnimation(int ID, wchar_t* FileName2, bool LockPosition)
 {
     if (Models[ID].NumBones > 0)
     {

@@ -7,14 +7,7 @@
 
 #include "Input.h"
 #include "UIMng.h"
-
-#include "ZzzBMD.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
-#include "DSPlaySound.h"
-
-#include "ZzzCharacter.h"
-#include "wsclientinline.h"
+#include "WSclient.h"
 
 #ifdef MOVIE_DIRECTSHOW
 #include <dshow.h>
@@ -104,7 +97,7 @@ void CLoginMainWin::UpdateWhileActive(double dDeltaTick)
     }
     else if (m_aBtn[LMW_BTN_CREDIT].IsClick())
     {
-        SendRequestServerList();
+        SocketClient->ToConnectServer()->SendServerListRequest();
 
         CUIMng& rUIMng = CUIMng::Instance();
         rUIMng.ShowWin(&rUIMng.m_CreditWin);

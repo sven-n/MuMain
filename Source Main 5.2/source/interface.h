@@ -27,7 +27,7 @@ namespace info
         virtual void clear() = 0;
 
     public:
-        const char* GetinfoFileName() const { return m_FileName.c_str(); }
+        const wchar_t* GetinfoFileName() const { return m_FileName.c_str(); }
 
     private:
         string	m_FileName;

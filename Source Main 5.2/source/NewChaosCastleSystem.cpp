@@ -7,21 +7,15 @@
 using namespace SEASON3B;
 
 #include "NewChaosCastleSystem.h"
-
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "zzztexture.h"
-#include "ZzzBMD.h"
 #include "zzzlodterrain.h"
 #include "ZzzScene.h"
-#include "zzzEffect.h"
-#include "zzzAi.h"
-#include "UIWindows.h"
-#include "UIManager.h"
-#include "CSChaosCastle.h"
-#include "wsclientinline.h"
 #include "NewUICustomMessageBox.h"
 #include "MapManager.h"
+#include "DSPlaySound.h"
+#include "NewUISystem.h"
 
 extern int g_iChatInputType;
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
@@ -179,7 +173,7 @@ void CNewChaosCastleSystem::RenderMatchResult(void)
 {
     int x = 640 / 2;
     int yPos = m_PosResult.y + 40;
-    unicode::t_char lpszStr[256] = { NULL, };
+    wchar_t lpszStr[256] = { NULL, };
 
     EnableAlphaTest();
 
@@ -191,12 +185,12 @@ void CNewChaosCastleSystem::RenderMatchResult(void)
     {
         g_pRenderText->RenderText(x, yPos, GlobalText[1151], 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
-        unicode::_sprintf(lpszStr, "%s %s", GlobalText[1152], GlobalText[858]);
+        swprintf(lpszStr, L"%s %s", GlobalText[1152], GlobalText[858]);
         g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
     }
     else
     {
-        unicode::_sprintf(lpszStr, "%s %s", GlobalText[1152], GlobalText[860]);
+        swprintf(lpszStr, L"%s %s", GlobalText[1152], GlobalText[860]);
         g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
         g_pRenderText->RenderText(x, yPos, GlobalText[1153], 0, 0, RT3_WRITE_CENTER);
@@ -208,13 +202,13 @@ void CNewChaosCastleSystem::RenderMatchResult(void)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(210, 255, 210, 255);
 
-    unicode::_sprintf(lpszStr, GlobalText[861], pResult->m_dwExp);
+    swprintf(lpszStr, GlobalText[861], pResult->m_dwExp);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
 
-    unicode::_sprintf(lpszStr, GlobalText[1162], pResult->m_iScore);
+    swprintf(lpszStr, GlobalText[1162], pResult->m_iScore);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
 
-    unicode::_sprintf(lpszStr, GlobalText[1163], pResult->m_iZen);
+    swprintf(lpszStr, GlobalText[1163], pResult->m_iZen);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 24;
 
     DisableAlphaBlend();

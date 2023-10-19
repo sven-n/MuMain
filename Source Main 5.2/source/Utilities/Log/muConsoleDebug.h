@@ -20,8 +20,8 @@ public:
     static CmuConsoleDebug* GetInstance();
 
     void UpdateMainScene();
-    bool CheckCommand(const std::string& strCommand);
-    void Write(int iType, const char* pStr, ...);
+    bool CheckCommand(const std::wstring& strCommand);
+    void Write(int iType, const wchar_t* pStr, ...);
 
 protected:
     CmuConsoleDebug();	//. ban to create instance
@@ -36,13 +36,13 @@ public:
     ~CmuSimpleLog(void);
     static CmuSimpleLog* getInstance() { static CmuSimpleLog sInstance; return &sInstance; }
 
-    void setFilename(const char* strFilename);
-    void log(char* str, ...);
+    void setFilename(const wchar_t* strFilename);
+    void log(wchar_t* str, ...);
 
 private:
     bool m_bLogfirst;
 
-    std::string m_strFilename;
+    std::wstring m_strFilename;
 
     FILE* m_pFile;
 };

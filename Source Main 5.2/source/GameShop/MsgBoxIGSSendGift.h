@@ -77,7 +77,7 @@ public:
     bool Update();
     bool Render();
 
-    void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, unicode::t_char* pszName, unicode::t_char* pszPrice, unicode::t_char* pszPeriod);
+    void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, wchar_t* pszName, wchar_t* pszPrice, wchar_t* pszPeriod);
 
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -112,14 +112,14 @@ private:
     DWORD	m_wItemCode;
     int		m_iCashType;
 
-    unicode::t_char m_szID[MAX_ID_SIZE + 1];
-    unicode::t_char m_szMessage[MAX_GIFT_MESSAGE_SIZE];
+    wchar_t m_szID[MAX_ID_SIZE + 1];
+    wchar_t m_szMessage[MAX_GIFT_MESSAGE_SIZE];
 
-    unicode::t_char m_szName[MAX_TEXT_LENGTH];
-    unicode::t_char m_szPrice[MAX_TEXT_LENGTH];
-    unicode::t_char m_szPeriod[MAX_TEXT_LENGTH];
+    wchar_t m_szName[MAX_TEXT_LENGTH];
+    wchar_t m_szPrice[MAX_TEXT_LENGTH];
+    wchar_t m_szPeriod[MAX_TEXT_LENGTH];
 
-    unicode::t_char m_szNotice[NUM_LINE_CMB][MAX_TEXT_LENGTH];
+    wchar_t m_szNotice[NUM_LINE_CMB][MAX_TEXT_LENGTH];
 
     int		m_iNumNoticeLine;
 };

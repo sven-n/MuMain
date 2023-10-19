@@ -6,75 +6,42 @@
 #include "ZzzTexture.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "WSclient.h"
-#include "DSPlaySound.h"
-#include "Jpeglib.h"
+#include "turbojpeg.h"
 #include "ProtocolSend.h"
 
 CGlobalBitmap Bitmaps;
 
-struct my_error_mgr
+bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality)
 {
-    struct jpeg_error_mgr pub;
-    jmp_buf setjmp_buffer;
-};
-
-typedef struct my_error_mgr* my_error_ptr;
-
-METHODDEF(void) my_error_exit(j_common_ptr cinfo)
-{
-    auto myerr = (my_error_ptr)cinfo->err;
-    (*cinfo->err->output_message) (cinfo);
-    longjmp(myerr->setjmp_buffer, 1);
-}
-
-bool WriteJpeg(char* filename, int Width, int Height, unsigned char* Buffer, int quality)
-{
-    struct jpeg_compress_struct cinfo;
-    struct jpeg_error_mgr jerr;
     FILE* outfile;
-    JSAMPROW row_pointer[1];
-    int row_stride;
-
-    cinfo.err = jpeg_std_error(&jerr);
-    jpeg_create_compress(&cinfo);
-
-    if ((outfile = fopen(filename, "wb")) == NULL)
+    if ((outfile = _wfopen(filename, L"wb")) == NULL)
     {
-        //fprintf(stderr, "can't open %s\n", filename);
+        //fprintf(stderr, L"can't open %s\n", filename);
         //exit(1);
         return FALSE;
     }
-    jpeg_stdio_dest(&cinfo, outfile);
 
-    cinfo.image_width = Width;
-    cinfo.image_height = Height;
-    cinfo.input_components = 3;
-    cinfo.in_color_space = JCS_RGB;
-    jpeg_set_defaults(&cinfo);
-    jpeg_set_quality(&cinfo, quality, TRUE);
-    jpeg_start_compress(&cinfo, TRUE);
-    row_stride = cinfo.image_width * 3;
-
-    while (cinfo.next_scanline < cinfo.image_height)
-    {
-        row_pointer[0] = &Buffer[(Height - 1 - cinfo.next_scanline) * row_stride];
-        (void)jpeg_write_scanlines(&cinfo, row_pointer, 1);
-    }
-
-    jpeg_finish_compress(&cinfo);
+    const auto handle = tjInitCompress();
+    unsigned long jpegSize = 0;
+    auto maxSize = tjBufSize(Width, Height, TJSAMP_444);
+    auto outputBuffer = new unsigned char[maxSize];
+    
+    tjCompress2(handle, Buffer, Width, 0, Height, TJPF_RGB, &outputBuffer, &jpegSize, TJSAMP_444, quality, TJFLAG_BOTTOMUP);
+    fwrite(outputBuffer, 1, jpegSize, outfile);
     fclose(outfile);
-    jpeg_destroy_compress(&cinfo);
+    tjDestroy(handle);
+
     return TRUE;
 }
 
-void SaveImage(int HeaderSize, char* Ext, char* filename, BYTE* PakBuffer, int Size)
+void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer, int Size)
 {
     if (PakBuffer == NULL || Size == 0)
     {
-        char OpenFileName[256];
-        strcpy(OpenFileName, "Data2\\");
-        strcat(OpenFileName, filename);
-        FILE* fp = fopen(OpenFileName, "rb");
+        wchar_t OpenFileName[256];
+        wcscpy(OpenFileName, L"Data2\\");
+        wcscat(OpenFileName, filename);
+        FILE* fp = _wfopen(OpenFileName, L"rb");
         if (fp == NULL)
         {
             return;
@@ -87,23 +54,23 @@ void SaveImage(int HeaderSize, char* Ext, char* filename, BYTE* PakBuffer, int S
         fclose(fp);
     }
 
-    char Header[24];
+    wchar_t Header[24];
     memcpy(Header, PakBuffer, HeaderSize);
 
-    char NewFileName[256];
+    wchar_t NewFileName[256];
     int iTextcnt = 0;
-    for (int i = 0; i < (int)strlen(filename); i++)
+    for (int i = 0; i < (int)wcslen(filename); i++)
     {
         iTextcnt = i;
         NewFileName[i] = filename[i];
         if (filename[i] == '.') break;
     }
     NewFileName[iTextcnt + 1] = NULL;
-    strcat(NewFileName, Ext);
-    char SaveFileName[256];
-    strcpy(SaveFileName, "Data\\");
-    strcat(SaveFileName, NewFileName);
-    FILE* fp = fopen(SaveFileName, "wb");
+    wcscat(NewFileName, Ext);
+    wchar_t SaveFileName[256];
+    wcscpy(SaveFileName, L"Data\\");
+    wcscat(SaveFileName, NewFileName);
+    FILE* fp = _wfopen(SaveFileName, L"wb");
     if (fp == NULL) return;
     fwrite(Header, 1, HeaderSize, fp);
     fwrite(PakBuffer, 1, Size, fp);
@@ -115,112 +82,114 @@ void SaveImage(int HeaderSize, char* Ext, char* filename, BYTE* PakBuffer, int S
     }
 }
 
-bool OpenJpegBuffer(char* filename, float* BufferFloat)
+bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
 {
-    struct jpeg_decompress_struct cinfo;
-    struct my_error_mgr jerr;
-    FILE* infile;
-    JSAMPARRAY buffer;
-    int row_stride;
+    
+    wchar_t FileName[256];
 
-    char FileName[256];
-
-    char NewFileName[256];
+    wchar_t NewFileName[256];
     int iTextcnt = 0;
-    for (int i = 0; i < (int)strlen(filename); i++)
+    for (int i = 0; i < (int)wcslen(filename); i++)
     {
         iTextcnt = i;
         NewFileName[i] = filename[i];
         if (filename[i] == '.') break;
     }
     NewFileName[iTextcnt + 1] = NULL;
-    strcpy(FileName, "Data\\");
-    strcat(FileName, NewFileName);
-    strcat(FileName, "OZJ");
+    wcscpy(FileName, L"Data\\");
+    wcscat(FileName, NewFileName);
+    wcscat(FileName, L"OZJ");
 
-    if ((infile = fopen(FileName, "rb")) == NULL)
+    auto compressedFile = _wfopen(FileName, L"rb");
+    if (compressedFile == nullptr)
     {
-        char Text[256];
-        sprintf(Text, "%s - File not exist.", FileName);
+        wchar_t Text[256];
+        swprintf(Text, L"%s - File not exist.", FileName);
         g_ErrorReport.Write(Text);
-        g_ErrorReport.Write("\r\n");
+        g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
     }
 
-    fseek(infile, 24, SEEK_SET);
-
-    cinfo.err = jpeg_std_error(&jerr.pub);
-    jerr.pub.error_exit = my_error_exit;
-    if (setjmp(jerr.setjmp_buffer))
+    fseek(compressedFile, 0, SEEK_END);
+    const auto fileSize = ftell(compressedFile);
+    if (fileSize < 24)
     {
-        jpeg_destroy_decompress(&cinfo);
-        fclose(infile);
         return false;
     }
-    jpeg_create_decompress(&cinfo);
 
-    jpeg_stdio_src(&cinfo, infile);
+    // Skip first 24 bytes, because these are added by the OZJ format
+    fseek(compressedFile, 24, SEEK_SET);
 
-    (void)jpeg_read_header(&cinfo, TRUE);
+    const auto jpegSize = fileSize - 24;
+    int jpegWidth = 0, jpegHeight = 0;
+    int jpegSubsamp = TJSAMP_444;
+    int jpegColorspace = TJCS_RGB;
 
-    (void)jpeg_start_decompress(&cinfo);
-    row_stride = cinfo.output_width * cinfo.output_components;
-    buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
+    auto tjhandle = tjInitDecompress();
 
-    auto* Buffer = (unsigned char*) new BYTE[cinfo.output_width * cinfo.output_height * cinfo.output_components];
-    while (cinfo.output_scanline < cinfo.output_height)
+    auto jpegBuf = new BYTE[jpegSize];
+    fread(jpegBuf, 1, jpegSize, compressedFile);
+    fclose(compressedFile);
+
+    // First reading the header with the size information
+    auto result = tjDecompressHeader3(tjhandle, jpegBuf, jpegSize, &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
+    if (result != 0)
     {
-        (void)jpeg_read_scanlines(&cinfo, buffer, 1);
-        memcpy(Buffer + (cinfo.output_height - cinfo.output_scanline) * row_stride, buffer[0], row_stride);
+        delete[] jpegBuf;
+        return false;
     }
-    int Index = 0;
-    for (unsigned int y = 0; y < cinfo.output_height; y++)
-    {
-        for (unsigned int x = 0; x < cinfo.output_width; x++)
-        {
-            BufferFloat[Index] = (float)Buffer[Index] / 255.f;
-            BufferFloat[Index + 1] = (float)Buffer[Index + 1] / 255.f;
-            BufferFloat[Index + 2] = (float)Buffer[Index + 2] / 255.f;
-            Index += 3;
-        }
-    }
-    SAFE_DELETE_ARRAY(Buffer);
 
-    (void)jpeg_finish_decompress(&cinfo);
-    jpeg_destroy_decompress(&cinfo);
-    fclose(infile);
+    // decompress into the buffer
+    const auto bufferSize = jpegWidth * jpegHeight * 3;
+    const auto buffer = new BYTE[bufferSize];
+    result = tjDecompress2(tjhandle, jpegBuf, jpegSize, buffer, jpegWidth, 0, jpegHeight, TJPF_RGB, TJFLAG_BOTTOMUP);
+    delete[] jpegBuf;
+    jpegBuf = nullptr;
+    if (result != 0)
+    {
+        delete[] buffer;
+        return false;
+    }
+
+    for (int i = 0; i < bufferSize; ++i)
+    {
+        BufferFloat[i] = static_cast<float>(buffer[i]) / 255.f;
+    }
+
+    delete[] buffer;
+    
     return true;
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-bool LoadBitmap(const char* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck, bool bFullPath)
+bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck, bool bFullPath)
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-bool LoadBitmap(const char* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck)
+bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilter, GLuint uiWrapMode, bool bCheck)
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 {
-    char szFullPath[256] = { 0, };
+    wchar_t szFullPath[256] = { 0, };
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     if (bFullPath == true)
     {
-        strcpy(szFullPath, szFileName);
+        wcscpy(szFullPath, szFileName);
     }
     else
     {
-        strcpy(szFullPath, "Data\\");
-        strcat(szFullPath, szFileName);
+        wcscpy(szFullPath, L"Data\\");
+        wcscat(szFullPath, szFileName);
     }
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    strcpy(szFullPath, "Data\\");
-    strcat(szFullPath, szFileName);
+    wcscpy(szFullPath, L"Data\\");
+    wcscat(szFullPath, szFileName);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
     if (bCheck)
     {
         if (false == Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode))
         {
-            char szErrorMsg[256] = { 0, };
-            sprintf(szErrorMsg, "LoadBitmap Failed: %s", szFullPath);
+            wchar_t szErrorMsg[256] = { 0, };
+            swprintf(szErrorMsg, L"LoadBitmap Failed: %s", szFullPath);
 #ifdef FOR_WORK
             PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK
@@ -236,18 +205,18 @@ void DeleteBitmap(GLuint uiTextureIndex, bool bForce)
 {
     Bitmaps.UnloadImage(uiTextureIndex, bForce);
 }
-void PopUpErrorCheckMsgBox(const char* szErrorMsg, bool bForceDestroy)
+void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
 {
-    char szMsg[1024] = { 0, };
-    strcpy(szMsg, szErrorMsg);
+    wchar_t szMsg[1024] = { 0, };
+    wcscpy(szMsg, szErrorMsg);
 
     if (bForceDestroy)
     {
-        MessageBox(g_hWnd, szErrorMsg, "ErrorCheckBox", MB_OK | MB_ICONERROR);
+        MessageBox(g_hWnd, szErrorMsg, L"ErrorCheckBox", MB_OK | MB_ICONERROR);
     }
     else
     {
-        int iResult = MessageBox(g_hWnd, szMsg, "ErrorCheckBox", MB_YESNO | MB_ICONERROR);
+        int iResult = MessageBox(g_hWnd, szMsg, L"ErrorCheckBox", MB_YESNO | MB_ICONERROR);
         if (IDYES == iResult)
         {
             return;

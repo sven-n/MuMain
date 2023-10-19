@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "NewUISystem.h"
 #include "NewUIMessageBox.h"
-#include "wsclientinline.h"
+
 #include "PersonalShopTitleImp.h"
 #include "MapManager.h"
 #include "./Utilities/Log/muConsoleDebug.h"
@@ -1001,7 +1001,7 @@ void CNewUISystem::Show(DWORD dwKey)
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     else if (dwKey == INTERFACE_INGAMESHOP)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, "InGameShopStatue.Txt CallStack - CNewUISystem.Show()\r\n");
+        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUISystem.Show()\r\n");
         HideAll();
         g_pInGameShop->OpeningProcess();
 #ifndef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
@@ -1827,7 +1827,7 @@ void CNewUISystem::UpdateSendMoveInterface()
 {
     if (IsVisible(INTERFACE_TRADE))
     {
-        SendRequestTradeExit();
+        SocketClient->ToGameServer()->SendTradeCancel();
         Hide(INTERFACE_TRADE);
     }
     if (IsVisible(INTERFACE_STORAGE_EXT))

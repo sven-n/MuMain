@@ -64,7 +64,7 @@ extern const int iMaxLevel;
 // guild
 ///////////////////////////////////////////////////////////////////////////////
 
-extern char         g_GuildNotice[3][128];
+extern wchar_t         g_GuildNotice[3][128];
 extern GUILD_LIST_t GuildList[MAX_GUILDS];
 extern int          g_nGuildMemberCount;
 extern int          GuildListPage;
@@ -79,7 +79,7 @@ extern int AllRepairGold;
 //////////////////////////////////////////////////////////////////////////
 // text ฐüทร
 //////////////////////////////////////////////////////////////////////////
-extern char TextList[50][100];
+extern wchar_t TextList[50][100];
 extern int TextListColor[50];
 extern int TextBold[50];
 extern SIZE Size[50];
@@ -106,7 +106,7 @@ extern bool g_bEnablePersonalShop;
 extern int g_iPShopWndType;
 extern POINT g_ptPersonalShop;
 extern int g_iPersonalShopMsgType;
-extern char g_szPersonalShopTitle[64];
+extern wchar_t g_szPersonalShopTitle[64];
 extern CHARACTER g_PersonalShopSeller;
 
 extern bool EnableRenderInventory;
@@ -114,7 +114,7 @@ extern int  g_bEventChipDialogEnable;
 extern int  g_shEventChipCount;
 extern short g_shMutoNumber[3];
 extern bool g_bServerDivisionAccept;
-extern char g_strGiftName[64];
+extern wchar_t g_strGiftName[64];
 
 extern bool RepairShop;
 extern int  RepairEnable;
@@ -133,7 +133,7 @@ extern BYTE BuyItem[4];
 extern int  EnableUse;
 extern bool EquipmentItem;
 extern BYTE g_byItemUseType;
-extern char	g_lpszKeyPadInput[2][MAX_KEYPADINPUT + 1];
+extern wchar_t	g_lpszKeyPadInput[2][MAX_KEYPADINPUT + 1];
 
 #ifdef ASG_ADD_GENS_SYSTEM
 bool IsStrifeMap(int nMapIndex);
@@ -146,15 +146,17 @@ void AutoEquipmentChange(int sx, int sy, ITEM* Inv, int InvWidth, int InvHeight)
 #endif // AUTO_CHANGE_ITEM
 
 int CompareItem(ITEM item1, ITEM item2);
-void ConvertGold(double dGold, unicode::t_char* szText, int iDecimals = 0);
-void ConvertGold64(__int64 Gold, unicode::t_char* Text);
-void ConvertTaxGold(DWORD Gold, char* Text);
-void ConvertChaosTaxGold(DWORD Gold, char* Text);
-int  ConvertRepairGold(int Gold, int Durability, int MaxDurability, short Type, char* Text);
+void ConvertGold(double dGold, wchar_t* szText, int iDecimals = 0);
+void ConvertGold64(__int64 Gold, wchar_t* Text);
+void ConvertTaxGold(DWORD Gold, wchar_t* Text);
+void ConvertChaosTaxGold(DWORD Gold, wchar_t* Text);
+int  ConvertRepairGold(int Gold, int Durability, int MaxDurability, short Type, wchar_t* Text);
 void RepairAllGold(void);
 WORD calcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
 
+void SendRequestUse(int Index, int Target);
+bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex);
 bool IsCanUseItem();
 bool IsCanTrade();
 //  Party.
@@ -164,7 +166,7 @@ void ClosePersonalShop();
 void ClearPersonalShop();
 bool IsExistUndecidedPrice();
 void OpenPersonalShopMsgWnd(int iMsgType);
-bool IsCorrectShopTitle(const char* szShopTitle);
+bool IsCorrectShopTitle(const wchar_t* szShopTitle);
 
 void CreateGuildMark(int nMarkIndex, bool blend = true);
 void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index);
@@ -173,8 +175,8 @@ void CreateCastleMark(int Type, BYTE* buffer = NULL, bool blend = true);
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int Option1, int ExtOption, bool PickUp = false);
 void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
-void GetItemName(int iType, int iLevel, char* Text);
-void GetSpecialOptionText(int Type, char* Text, WORD Option, BYTE Value, int iMana);
+void GetItemName(int iType, int iLevel, wchar_t* Text);
+void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
 void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
 void RenderRepairInfo(int sz, int sy, ITEM* ip, bool Sell);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
@@ -194,7 +196,7 @@ bool IsWingItem(ITEM* pItem);
 
 void ComputeItemInfo(int iHelpItem);
 void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y);
-void RenderHelpLine(int iColumnType, const char* pPrintStyle, int& TabSpace, const char* pGapText = NULL, int Pos_y = 0, int iType = 0);
+void RenderHelpLine(int iColumnType, const wchar_t* pPrintStyle, int& TabSpace, const wchar_t* pGapText = NULL, int Pos_y = 0, int iType = 0);
 void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExtOption, bool Sort);
 
 BYTE CaculateFreeTicketLevel(int iType);

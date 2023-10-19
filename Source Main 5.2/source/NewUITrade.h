@@ -68,7 +68,7 @@ namespace SEASON3B
         CNewUIInventoryCtrl* m_pMyInvenCtrl;			// 내 물품 컨트롤.
         ITEM					m_aYourInvenBackUp[MAX_TRADE_INVEN];// 상대방 물품 백업.
 
-        char					m_szYourID[MAX_ID_SIZE + 1];// 거래 사용자의 아이디.
+        wchar_t					m_szYourID[MAX_ID_SIZE + 1];// 거래 사용자의 아이디.
         int						m_nYourLevel;			// 거래 사용자의 레벨.
         int						m_nYourGuildType;		// 상대방 길드 타입.
         int						m_nYourTradeGold;		// 상대방 거래할 돈.
@@ -111,14 +111,14 @@ namespace SEASON3B
         void ProcessCloseBtn();
         void ProcessClosing();
 
-        void GetYourID(char* pszYourID);
+        void GetYourID(wchar_t* pszYourID);
         void SetYourTradeGold(int nGold) { m_nYourTradeGold = nGold; }
 
         void SendRequestMyGoldInput(int nInputGold);
         void SendRequestItemToMyInven(ITEM* pItemObj,
             int nTradeIndex, int nInvenIndex);
 
-        void ProcessToReceiveTradeRequest(BYTE* pbyYourID);
+        void ProcessToReceiveTradeRequest(char* pbyYourID);
         void ProcessToReceiveTradeResult(LPPTRADE pTradeData);
         void ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex);
         void ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, BYTE* pbyItemPacket);

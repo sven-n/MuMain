@@ -37,7 +37,7 @@ namespace SEASON3B
         };
 
     private:
-        unicode::t_string		m_TooltipText;
+       std::wstring		m_TooltipText;
         HFONT					m_hToolTipFont;
         DWORD					m_TooltipTextColor;
 
@@ -71,9 +71,9 @@ namespace SEASON3B
 
         void OpenningProcess();
         void ClosingProcess();
-        void OpenMasterLevel(const char* filename);
+        void OpenMasterLevel(const wchar_t* filename);
         CNewUIButton m_BtnToolTip;
-        void LoadImages(const char* Filename);
+        void LoadImages(const wchar_t* Filename);
         void UnloadImages();
 
     private:

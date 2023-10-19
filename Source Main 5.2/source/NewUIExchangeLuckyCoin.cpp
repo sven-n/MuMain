@@ -4,10 +4,11 @@
 
 #include "stdafx.h"
 #include "NewUIExchangeLuckyCoin.h"
+
+#include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "NewUICommon.h"
 #include "NewUICommonMessageBox.h"
-#include "wsclientinline.h"
 
 using namespace SEASON3B;
 
@@ -200,19 +201,19 @@ bool CNewUIExchangeLuckyCoin::BtnProcess()
     if (m_BtnExchange[0].UpdateMouseEvent() == true)
     {
         LockExchangeBtn();
-        SendRequestExChangeLuckyCoin(10);
+        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(10);
     }
 
     if (m_BtnExchange[1].UpdateMouseEvent() == true)
     {
         LockExchangeBtn();
-        SendRequestExChangeLuckyCoin(20);
+        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(20);
     }
 
     if (m_BtnExchange[2].UpdateMouseEvent() == true)
     {
         LockExchangeBtn();
-        SendRequestExChangeLuckyCoin(30);
+        SocketClient->ToGameServer()->SendLuckyCoinExchangeRequest(30);
     }
 
     return false;
@@ -235,7 +236,7 @@ void CNewUIExchangeLuckyCoin::ClosingProcess()
 {
     PlayBuffer(SOUND_CLICK01);
     g_pMyInventory->GetInventoryCtrl()->UnlockInventory();
-    SendRequestMixExit();
+    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 }
 
 void CNewUIExchangeLuckyCoin::LockExchangeBtn()
@@ -258,13 +259,13 @@ void CNewUIExchangeLuckyCoin::UnLockExchangeBtn()
 
 void CNewUIExchangeLuckyCoin::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_btn_empty_small.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BTN_EXIT, GL_LINEAR);	// Exit Button
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, GL_LINEAR);				// Exchange Button
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BTN_EXIT, GL_LINEAR);	// Exit Button
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, GL_LINEAR);				// Exchange Button
 }
 
 void CNewUIExchangeLuckyCoin::UnloadImages()

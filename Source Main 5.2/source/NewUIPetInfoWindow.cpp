@@ -5,7 +5,7 @@
 
 #include "NewUIPetInfoWindow.h"
 #include "NewUISystem.h"
-#include "wsclientinline.h"
+
 #include "GIPetManager.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
@@ -58,7 +58,7 @@ void CNewUIPetInfoWindow::Release()
 
 void CNewUIPetInfoWindow::InitButtons()
 {
-    std::list<unicode::t_string> ltext;
+    std::list<std::wstring> ltext;
 
     ltext.push_back(GlobalText[1187]);
     ltext.push_back(GlobalText[1214]);
@@ -145,8 +145,8 @@ bool CNewUIPetInfoWindow::Render()
         {
             g_pRenderText->SetTextColor(0xFF0000FF);
             g_pRenderText->SetFont(g_hFontBold);
-            unicode::t_char szText[256] = { 0, };
-            unicode::_sprintf(szText, GlobalText[1233], GlobalText[1187]);
+            wchar_t szText[256] = { 0, };
+            swprintf(szText, GlobalText[1233], GlobalText[1187]);
             g_pRenderText->RenderText(m_Pos.x + 15, m_Pos.y + 100, szText, 160, 30, RT3_SORT_CENTER);
         }
         else
@@ -183,7 +183,7 @@ bool CNewUIPetInfoWindow::Render()
 
 bool CNewUIPetInfoWindow::RenderDarkHorseInfo(PET_INFO* pPetInfo)
 {
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -197,29 +197,29 @@ bool CNewUIPetInfoWindow::RenderDarkHorseInfo(PET_INFO* pPetInfo)
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
 
-    unicode::_sprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
+    swprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
     g_pRenderText->RenderText(iPosX + 2, iPosY + 8, szText, 70 - 14, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    unicode::_sprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
+    swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 28, szText, 0, 0, RT3_SORT_CENTER);
     RenderImage(IMAGE_PETINFO_LIFEBAR, iPosX + 7, iPosY + 40, 151, 12);
     int iHP = (min(pPetInfo->m_wLife, 255) * 147) / 255;
     RenderImage(IMAGE_PETINFO_LIFE, iPosX + 9, iPosY + 42, iHP, 8);
-    unicode::_sprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
+    swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 59, szText, 0, 0, RT3_SORT_CENTER);
-    unicode::_sprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1], pPetInfo->m_wAttackSuccess);
+    swprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1], pPetInfo->m_wAttackSuccess);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 72, szText, 0, 0, RT3_SORT_CENTER);
-    unicode::_sprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
+    swprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 85, szText, 0, 0, RT3_SORT_CENTER);
     return true;
 }
 
 bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
 {
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -236,26 +236,26 @@ bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
 
-    unicode::_sprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
+    swprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
     g_pRenderText->RenderText(iGBox1PosX + 2, iGBox1PosY + 8, szText, 70 - 14, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(iGBox2PosX + 2, iGBox2PosY + 8, GlobalText[1218], 70 - 14, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    unicode::_sprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
+    swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 28, szText, 0, 0, RT3_SORT_CENTER);
     RenderImage(IMAGE_PETINFO_LIFEBAR, iGBox1PosX + 7, iGBox1PosY + 40, 151, 12);
     int iHP = (min(pPetInfo->m_wLife, 255) * 147) / 255;
     RenderImage(IMAGE_PETINFO_LIFE, iGBox1PosX + 9, iGBox1PosY + 42, iHP, 8);
-    unicode::_sprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
+    swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 59, szText, 0, 0, RT3_SORT_CENTER);
-    unicode::_sprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1],
+    swprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1],
         pPetInfo->m_wAttackSuccess);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 72, szText, 0, 0, RT3_SORT_CENTER);
-    unicode::_sprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
+    swprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 85, szText, 0, 0, RT3_SORT_CENTER);
-    unicode::_sprintf(szText, GlobalText[698], (185 + (pPetInfo->m_wLevel * 15)));
+    swprintf(szText, GlobalText[698], (185 + (pPetInfo->m_wLevel * 15)));
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 98, szText, 0, 0, RT3_SORT_CENTER);
 
     // SkillBox
@@ -364,30 +364,30 @@ void CNewUIPetInfoWindow::CalcDamage(int iNumTapButton)
 
 void CNewUIPetInfoWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_PETINFO_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back04.tga", IMAGE_PETINFO_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_PETINFO_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_PETINFO_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_PETINFO_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_PETINFO_BTN_EXIT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_guild_tab04.tga", IMAGE_PETINFO_TAB_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_PETINFO_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_PETINFO_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_PETINFO_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_PETINFO_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_PETINFO_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_PETINFO_BTN_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_guild_tab04.tga", IMAGE_PETINFO_TAB_BUTTON, GL_LINEAR);
 
     // GroupBox
-    LoadBitmap("Interface\\newui_item_table01(L).tga", IMAGE_PETINFO_TABLE_TOP_LEFT);
-    LoadBitmap("Interface\\newui_item_table01(R).tga", IMAGE_PETINFO_TABLE_TOP_RIGHT);
-    LoadBitmap("Interface\\newui_item_table02(L).tga", IMAGE_PETINFO_TABLE_BOTTOM_LEFT);
-    LoadBitmap("Interface\\newui_item_table02(R).tga", IMAGE_PETINFO_TABLE_BOTTOM_RIGHT);
-    LoadBitmap("Interface\\newui_item_table03(Up).tga", IMAGE_PETINFO_TABLE_TOP_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(Dw).tga", IMAGE_PETINFO_TABLE_BOTTOM_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(L).tga", IMAGE_PETINFO_TABLE_LEFT_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(R).tga", IMAGE_PETINFO_TABLE_RIGHT_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_PETINFO_TABLE_TOP_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_PETINFO_TABLE_TOP_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_PETINFO_TABLE_BOTTOM_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_PETINFO_TABLE_BOTTOM_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_PETINFO_TABLE_TOP_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_PETINFO_TABLE_BOTTOM_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_PETINFO_TABLE_LEFT_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_PETINFO_TABLE_RIGHT_PIXEL);
 
     // Skill
-    LoadBitmap("Interface\\newui_command.jpg", IMAGE_PETINFO_SKILL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_skillbox.jpg", IMAGE_PETINFO_SKILLBOX, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_command.jpg", IMAGE_PETINFO_SKILL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skillbox.jpg", IMAGE_PETINFO_SKILLBOX, GL_LINEAR);
     // LifeBar
-    LoadBitmap("Interface\\newui_pet_lifebar01.jpg", IMAGE_PETINFO_LIFEBAR, GL_LINEAR);
-    LoadBitmap("Interface\\newui_pet_lifebar02.jpg", IMAGE_PETINFO_LIFE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_pet_lifebar01.jpg", IMAGE_PETINFO_LIFEBAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_pet_lifebar02.jpg", IMAGE_PETINFO_LIFE, GL_LINEAR);
 }
 
 void CNewUIPetInfoWindow::UnloadImages()

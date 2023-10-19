@@ -168,7 +168,7 @@ public:
     BYTE        m_byFriend;
     WORD        MonsterSkill;
 
-    char        ID[32];
+    wchar_t        ID[32];
     char 		Movement;
     char		MovementType;
     char		CollisionTime; // unused?
@@ -223,7 +223,7 @@ public:
     void* m_pPet;
     PET_INFO	m_PetInfo[PET_TYPE_END];
 
-    char        OwnerID[32];
+    wchar_t     OwnerID[32];
 
 private:
     ST_POSTMOVE_PROCESS*

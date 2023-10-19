@@ -64,7 +64,7 @@ public:
     bool Render();
     bool IsVisible() const;
     void Render3D();
-    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, unicode::t_char szItemType, unicode::t_char* pszID, unicode::t_char* pszMessage, unicode::t_char* pszName, unicode::t_char* pszNum, unicode::t_char* pszPeriod);
+    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, wchar_t szItemType, wchar_t* pszID, wchar_t* pszMessage, wchar_t* pszName, wchar_t* pszNum, wchar_t* pszPeriod);
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -86,12 +86,12 @@ private:
     int		m_iStorageItemSeq;
     WORD	m_wItemCode;
 
-    unicode::t_char	m_szName[MAX_TEXT_LENGTH];
-    unicode::t_char	m_szNum[MAX_TEXT_LENGTH];
-    unicode::t_char	m_szPeriod[MAX_TEXT_LENGTH];
-    unicode::t_char m_szItemType;
-    unicode::t_char	m_szIDInfo[MAX_TEXT_LENGTH];
-    unicode::t_char	m_szMessage[MAX_GIFT_MESSAGE_SIZE];
+    wchar_t	m_szName[MAX_TEXT_LENGTH];
+    wchar_t	m_szNum[MAX_TEXT_LENGTH];
+    wchar_t m_szPeriod[MAX_TEXT_LENGTH];
+    char m_szItemType;
+    wchar_t	m_szIDInfo[MAX_TEXT_LENGTH];
+    wchar_t	m_szMessage[MAX_GIFT_MESSAGE_SIZE];
 };
 
 class CMsgBoxIGSGiftStorageItemInfoLayout : public TMsgBoxLayout<CMsgBoxIGSGiftStorageItemInfo>

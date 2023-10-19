@@ -339,7 +339,14 @@ enum struct STORAGE_TYPE
 
 #define MAX_LENGTH_ANSWER		( 64)
 
+#define MAX_MINIMAP_NAME    100
+
+#define MAX_SKILL_NAME      32
+#define MAX_MONSTER_NAME    32
+
 #define MAX_ITEM_TYPE      16
+
+#define MAX_ITEM_NAME       30
 
 #define MAX_ITEM_INDEX     512
 
@@ -374,6 +381,8 @@ enum struct STORAGE_TYPE
 #define ITEM_HELPER		 (13*MAX_ITEM_INDEX)
 #define ITEM_POTION  	 (14*MAX_ITEM_INDEX)
 #define ITEM_ETC 		 (15*MAX_ITEM_INDEX)
+
+#define ITEM_ZEN  	 (ITEM_POTION + 15)
 
 #define MAX_RESISTANCE		7
 

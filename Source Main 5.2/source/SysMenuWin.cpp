@@ -10,17 +10,16 @@
 #include "ZzzInfomation.h"
 #include "ZzzScene.h"
 
-// SendRequestLogOut() 사용하기 위해.ㅜㅜ
-#include "ZzzBMD.h"
-#include "ZzzObject.h"
-#include "ZzzCharacter.h"
-#include "wsclientinline.h"
+#include "DSPlaySound.h"
 
-#include "GMCryWolf1st.h"
+#include "WSclient.h"
+#include "Utilities/Log/ErrorReport.h"
+#include "Utilities/Log/muConsoleDebug.h"
 
 #define	SMW_BTN_GAP		4
 
 extern int  SceneFlag;
+extern bool LogOut;
 
 CSysMenuWin::CSysMenuWin()
 {
@@ -45,7 +44,7 @@ void CSysMenuWin::Create()
     };
     m_winBack.Create(aiiBack, 1, 10);
 
-    const char* apszBtnText[SMW_BTN_MAX] =
+    const wchar_t* apszBtnText[SMW_BTN_MAX] =
     { GlobalText[381], GlobalText[382], GlobalText[385], GlobalText[388] };
     DWORD adwBtnClr[4] =
     { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 };
@@ -122,9 +121,11 @@ void CSysMenuWin::UpdateWhileActive(double dDeltaTick)
     }
     else if (m_aBtn[SMW_BTN_SERVER_SEL].IsClick())
     {
-        g_ErrorReport.Write("> Menu - Join another server.");
+        g_ErrorReport.Write(L"> Menu - Join another server.");
         g_ErrorReport.WriteCurrentTime();
-        SendRequestLogOut(2);
+        LogOut = true;
+        SocketClient->ToGameServer()->SendLogOut(2);
+        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
 
         CUIMng& rUIMng = CUIMng::Instance();
         rUIMng.HideWin(this);

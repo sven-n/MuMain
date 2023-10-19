@@ -8,7 +8,7 @@ namespace SEASON3B
 {
     class CNewUITextBox : public CNewUIObj
     {
-        typedef std::vector<unicode::t_string>		type_vector_textbase;
+        typedef std::vector<std::wstring>		type_vector_textbase;
         type_vector_textbase	m_vecText;
 
     protected:
@@ -40,11 +40,11 @@ namespace SEASON3B
         bool Render();
 
         void ClearText() { m_vecText.clear(); }
-        void AddText(unicode::t_char* strText);
-        void AddText(const unicode::t_char* strText);
+        void AddText(wchar_t* strText);
+        void AddText(const wchar_t* strText);
 
-        unicode::t_string GetFullText();
-        unicode::t_string GetLineText(int iLineIndex);
+       std::wstring GetFullText();
+       std::wstring GetLineText(int iLineIndex);
 
         int GetMoveableLine();
         int GetLimitLine() { return m_iLimitLine; }

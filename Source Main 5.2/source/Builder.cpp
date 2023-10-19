@@ -29,11 +29,11 @@ namespace
 {
     const int TEXTFILENAMECOUNT = eInfo_File_Count;
     const int TEXTFILENAMELENGTH = 64;
-    const char TEXTFILEPOSITION[TEXTFILENAMELENGTH] = "data\\local\\";
-    const char TEXTFILETESTSERVER[TEXTFILENAMELENGTH] = "test";
-    const char TEXTFILEBMD[TEXTFILENAMELENGTH] = ".bmd";
-    const char TEXTFILETXT[TEXTFILENAMELENGTH] = ".txt";
-    const char TEXTFILENAME[TEXTFILENAMECOUNT][TEXTFILENAMELENGTH] =
+    const wchar_t TEXTFILEPOSITION[TEXTFILENAMELENGTH] = "data\\local\\";
+    const wchar_t TEXTFILETESTSERVER[TEXTFILENAMELENGTH] = "test";
+    const wchar_t TEXTFILEBMD[TEXTFILENAMELENGTH] = ".bmd";
+    const wchar_t TEXTFILETXT[TEXTFILENAMELENGTH] = ".txt";
+    const wchar_t TEXTFILENAME[TEXTFILENAMECOUNT][TEXTFILENAMELENGTH] =
     {
         "text",
         "item",
@@ -61,7 +61,7 @@ Builder::Builder() : m_isTestServer(false)
         InitBuilder();
     }
     catch (...) {
-        MessageBox(NULL, "InitBuilder Error", "Builder", MB_OK);
+        MessageBox(NULL, L"InitBuilder Error", L"Builder", MB_OK);
         Clear();
         throw;
     }
@@ -95,30 +95,30 @@ void Builder::InitBuilder()
 
 #ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
 #ifdef _LANGUAGE_KOR
-    sprintf(m_Language, "(%s)", "Kor");
+    swprintf(m_Language, L"(%s)", L"Kor");
 #elif _LANGUAGE_ENG
-    sprintf(m_Language, "(%s)", "Eng");
+    swprintf(m_Language, L"(%s)", L"Eng");
 #elif _LANGUAGE_TAI
-    sprintf(m_Language, "(%s)", "Tai");
+    swprintf(m_Language, L"(%s)", L"Tai");
 #elif _LANGUAGE_CHS
-    sprintf(m_Language, "(%s)", "Chs");
+    swprintf(m_Language, L"(%s)", L"Chs");
 #elif _LANGUAGE_JPN
-    sprintf(m_Language, "(%s)", "Jpn");
+    swprintf(m_Language, L"(%s)", L"Jpn");
 #elif _LANGUAGE_PHI
-    sprintf(m_Language, "(%s)", "Phi");
+    swprintf(m_Language, L"(%s)", L"Phi");
 #elif _LANGUAGE_VIE
-    sprintf(m_Language, "(%s)", "Vie");
+    swprintf(m_Language, L"(%s)", L"Vie");
 #endif
 #else // KJH_MOD_NATION_LANGUAGE_REDEFINE
     switch (SELECTED_LANGUAGE)
     {
-    case LANGUAGE_KOREAN:		sprintf(m_Language, "(%s)", "Kor"); break;
-    case LANGUAGE_ENGLISH:		sprintf(m_Language, "(%s)", "Eng"); break;
-    case LANGUAGE_TAIWANESE:	sprintf(m_Language, "(%s)", "Tai"); break;
-    case LANGUAGE_CHINESE:		sprintf(m_Language, "(%s)", "Chs"); break;
-    case LANGUAGE_JAPANESE:		sprintf(m_Language, "(%s)", "Jpn"); break;
-    case LANGUAGE_PHILIPPINES:	sprintf(m_Language, "(%s)", "Phi"); break;
-    case LANGUAGE_VIETNAMESE:	sprintf(m_Language, "(%s)", "Vie"); break;
+    case LANGUAGE_KOREAN:		swprintf(m_Language, L"(%s)", L"Kor"); break;
+    case LANGUAGE_ENGLISH:		swprintf(m_Language, L"(%s)", L"Eng"); break;
+    case LANGUAGE_TAIWANESE:	swprintf(m_Language, L"(%s)", L"Tai"); break;
+    case LANGUAGE_CHINESE:		swprintf(m_Language, L"(%s)", L"Chs"); break;
+    case LANGUAGE_JAPANESE:		swprintf(m_Language, L"(%s)", L"Jpn"); break;
+    case LANGUAGE_PHILIPPINES:	swprintf(m_Language, L"(%s)", L"Phi"); break;
+    case LANGUAGE_VIETNAMESE:	swprintf(m_Language, L"(%s)", L"Vie"); break;
     }
 #endif // KJH_MOD_NATION_LANGUAGE_REDEFINE
 
@@ -148,9 +148,9 @@ BoostSmart_Ptr(InfoFile) Builder::MakeInfo(InfoTextType type)
 {
     BoostSmart_Ptr(InfoFile) info;
 
-    char TextFileName[512];
+    wchar_t TextFileName[512];
 
-    sprintf(TextFileName, "%s%s%s%s%s", //경로, 파일명, 테스트, 나라별, 확장명
+    swprintf(TextFileName, L"%s%s%s%s%s", //경로, 파일명, 테스트, 나라별, 확장명
         TEXTFILEPOSITION,
         TEXTFILENAME[type],
         m_isTestServer ? TEXTFILETESTSERVER : "",

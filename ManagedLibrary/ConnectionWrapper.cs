@@ -1,4 +1,6 @@
-﻿namespace MUnique.Client.ManagedLibrary;
+﻿using System.IO.Pipelines;
+
+namespace MUnique.Client.ManagedLibrary;
 
 using MUnique.OpenMU.Network;
 using Nito.AsyncEx.Synchronous;
@@ -53,6 +55,11 @@ public sealed class ConnectionWrapper : IDisposable
     }
 
     /// <summary>
+    /// Gets the output pipe writer.
+    /// </summary>
+    internal PipeWriter Output => this._connection.Output;
+
+    /// <summary>
     /// Begins receiving packets from the client.
     /// </summary>
     public void BeginReceive()
@@ -97,6 +104,18 @@ public sealed class ConnectionWrapper : IDisposable
 
         bytes.CopyTo(targetSpan);
         this._connection.Output.Advance(bytes.Length);
+        this._connection.Output.FlushAsync().AsTask().WaitAndUnwrapException();
+    }
+
+    /// <summary>
+    /// Sends the specified bytes.
+    /// </summary>
+    /// <param name="packetFactory">The factory which creates the packet and returns the length of it.</param>
+    public void CreateAndSend(Func<PipeWriter, int> packetFactory)
+    {
+        using var l = this._connection.OutputLock.Lock();
+        var length = packetFactory(this._connection.Output);
+        this._connection.Output.Advance(length);
         this._connection.Output.FlushAsync().AsTask().WaitAndUnwrapException();
     }
 

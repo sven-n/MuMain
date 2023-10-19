@@ -6,7 +6,8 @@
 using namespace SEASON3B;
 
 #include "NewUISiegeWarBase.h"
-#include "wsclientinline.h"
+#include "ZzzInterface.h"
+#include "ZzzInventory.h"
 #include "GMBattleCastle.h"
 #include "UIGuildInfo.h"
 #include "CharacterManager.h"
@@ -52,8 +53,8 @@ bool SEASON3B::CNewUISiegeWarBase::Create(int x, int y)
     if (!OnCreate(x, y))
         return false;
 
-    unicode::t_char szText[256] = { NULL, };
-    unicode::_sprintf(szText, "%d", (int)(m_fMiniMapAlpha * 100.5f));
+    wchar_t szText[256] = { NULL, };
+    swprintf(szText, L"%d", (int)(m_fMiniMapAlpha * 100.5f));
     m_BtnAlpha.ChangeText(szText);
     m_BtnAlpha.ChangeButtonImgState(true, IMAGE_BTN_ALPHA, true);
     m_BtnAlpha.ChangeButtonInfo(m_BtnAlphaPos.x, m_BtnAlphaPos.y, BTN_ALPHA_WIDTH, BTN_ALPHA_HEIGHT);
@@ -94,7 +95,7 @@ bool SEASON3B::CNewUISiegeWarBase::Update()
 
 bool SEASON3B::CNewUISiegeWarBase::Render()
 {
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
 
     EnableAlphaTest();
     glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
@@ -122,22 +123,22 @@ bool SEASON3B::CNewUISiegeWarBase::Render()
         {
             if (m_iMinute < 10)
             {
-                unicode::_sprintf(szText, "%d:0%d", m_iHour, m_iMinute);
+                swprintf(szText, L"%d:0%d", m_iHour, m_iMinute);
             }
             else
             {
-                unicode::_sprintf(szText, "%d:%d", m_iHour, m_iMinute);
+                swprintf(szText, L"%d:%d", m_iHour, m_iMinute);
             }
         }
         else
         {
             if (m_iMinute < 10)
             {
-                unicode::_sprintf(szText, "%d 0%d", m_iHour, m_iMinute);
+                swprintf(szText, L"%d 0%d", m_iHour, m_iMinute);
             }
             else
             {
-                unicode::_sprintf(szText, "%d %d", m_iHour, m_iMinute);
+                swprintf(szText, L"%d %d", m_iHour, m_iMinute);
             }
         }
         g_pRenderText->RenderText(m_TimeUIPos.x, m_TimeUIPos.y + 10, szText, 134, 0, RT3_SORT_CENTER);
@@ -309,8 +310,8 @@ bool SEASON3B::CNewUISiegeWarBase::BtnProcess()
             m_fMiniMapAlpha = m_fMiniMapAlpha - 0.1f;
         }
 
-        unicode::t_char szText[256] = { NULL, };
-        unicode::_sprintf(szText, "%d", (int)(m_fMiniMapAlpha * 100.5f));
+        wchar_t szText[256] = { NULL, };
+        swprintf(szText, L"%d", (int)(m_fMiniMapAlpha * 100.5f));
         m_BtnAlpha.ChangeText(szText);
         m_BtnAlpha.ChangeAlpha(m_fMiniMapAlpha);
 
@@ -399,7 +400,7 @@ void SEASON3B::CNewUISiegeWarBase::UpdateHeroPos()
 void SEASON3B::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
 {
     int iWidth, iHeight;
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     POINT Pos;
     memset(&Pos, 0, sizeof(POINT));
 
@@ -430,7 +431,7 @@ void SEASON3B::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
             {
                 glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
             }
-            unicode::_sprintf(szText, "%d", m_CmdBuffer[i].byTeam + 1);
+            swprintf(szText, L"%d", m_CmdBuffer[i].byTeam + 1);
             g_pRenderText->RenderText(Pos.x - 12, Pos.y - 5, szText);
             RenderBitmap(IMAGE_COMMAND_ATTACK + m_CmdBuffer[i].byCmd, Pos.x - 7, Pos.y - 7, 11.f, 11.f, 0.f, 0.f, ((float)iWidth - 1.f) / (float)iBWidth, ((float)iHeight - 1.f) / 16.f);
         }
@@ -443,7 +444,7 @@ void SEASON3B::CNewUISiegeWarBase::RenderSkillIcon()
     int iSelectSkill;
     int iCurKillCount;
 
-    unicode::t_char szText[256] = { NULL, };
+    wchar_t szText[256] = { NULL, };
 
     iUseSkillDestKill = SkillAttribute[Hero->GuildSkill].KillCount;
 
@@ -464,9 +465,9 @@ void SEASON3B::CNewUISiegeWarBase::RenderSkillIcon()
     glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     g_pRenderText->SetFont(g_hFontBig);
-    unicode::_sprintf(szText, "%d", iUseSkillDestKill);
+    swprintf(szText, L"%d", iUseSkillDestKill);
     g_pRenderText->RenderText(m_UseSkillDestKillPos.x, m_UseSkillDestKillPos.y, szText);
-    unicode::_sprintf(szText, "%d", iCurKillCount);
+    swprintf(szText, L"%d", iCurKillCount);
     g_pRenderText->RenderText(m_CurKillCountPos.x, m_CurKillCountPos.y, szText);
 
     if (m_bRenderToolTip == true)
@@ -528,17 +529,17 @@ void SEASON3B::CNewUISiegeWarBase::SetRenderSkillUI(bool bRenderSkillUI)
 
 void SEASON3B::CNewUISiegeWarBase::LoadImages()
 {
-    LoadBitmap("World31\\Map1.jpg", IMAGE_MINIMAP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_SW_Minimap_Frame.tga", IMAGE_MINIMAP_FRAME, GL_LINEAR);
-    LoadBitmap("Interface\\newui_SW_Time_Frame.tga", IMAGE_TIME_FRAME, GL_LINEAR);
-    LoadBitmap("Interface\\i_attack.tga", IMAGE_COMMAND_ATTACK);
-    LoadBitmap("Interface\\i_defense.tga", IMAGE_COMMAND_DEFENCE);
-    LoadBitmap("Interface\\i_wait.tga", IMAGE_COMMAND_WAIT);
-    LoadBitmap("Interface\\newui_SW_BattleSkill_Frame.tga", IMAGE_BATTLESKILL_FRAME, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_skill_scroll_up.jpg", IMAGE_SKILL_BTN_SCROLL_UP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Bt_skill_scroll_dn.jpg", IMAGE_SKILL_BTN_SCROLL_DN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_skill2.jpg", IMAGE_SKILL_ICON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_SW_MiniMap_Bt_clearness.jpg", IMAGE_BTN_ALPHA, GL_LINEAR);
+    LoadBitmap(L"World31\\Map1.jpg", IMAGE_MINIMAP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_SW_Minimap_Frame.tga", IMAGE_MINIMAP_FRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_SW_Time_Frame.tga", IMAGE_TIME_FRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\i_attack.tga", IMAGE_COMMAND_ATTACK);
+    LoadBitmap(L"Interface\\i_defense.tga", IMAGE_COMMAND_DEFENCE);
+    LoadBitmap(L"Interface\\i_wait.tga", IMAGE_COMMAND_WAIT);
+    LoadBitmap(L"Interface\\newui_SW_BattleSkill_Frame.tga", IMAGE_BATTLESKILL_FRAME, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_skill_scroll_up.jpg", IMAGE_SKILL_BTN_SCROLL_UP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Bt_skill_scroll_dn.jpg", IMAGE_SKILL_BTN_SCROLL_DN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL_ICON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_SW_MiniMap_Bt_clearness.jpg", IMAGE_BTN_ALPHA, GL_LINEAR);
 
     OnLoadImages();
 }

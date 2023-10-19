@@ -3,22 +3,13 @@
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UIManager.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzBMD.h"
-#include "zzzinfomation.h"
-#include "zzzobject.h"
 #include "zzzcharacter.h"
-#include "zzzinterface.h"
-#include "zzzinventory.h"
-#include "ZzzObject.h"
-#include "ZzzCharacter.h"
 #include "ZzzTexture.h"
 #include "zzzAi.h"
-#include "wsclientinline.h"
-#include "zzzlodterrain.h"
-#include "zzzeffect.h"
 #include "GMBattleCastle.h"
 #include "npcGateSwitch.h"
+
+#include "DSPlaySound.h"
 
 namespace npcGateSwitch
 {
@@ -106,7 +97,8 @@ namespace npcGateSwitch
         {
             State = 1;
         }
-        SendGateOparator(State, g_iNpcCharacterKey);
+
+        SocketClient->ToGameServer()->SendToggleCastleGateRequest(State, g_iNpcCharacterKey);
         g_iNpcCharacterKey = 0;
     }
 

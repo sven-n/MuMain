@@ -9,7 +9,7 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 
 using namespace SEASON3B;
 
@@ -351,7 +351,7 @@ void SEASON3B::CNewUICatapultWindow::OpenningProcess()
 
 void SEASON3B::CNewUICatapultWindow::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 void SEASON3B::CNewUICatapultWindow::Init(int iKey, int iType)
@@ -452,26 +452,26 @@ void SEASON3B::CNewUICatapultWindow::GetCameraPos(vec3_t& vPos)
 
 void SEASON3B::CNewUICatapultWindow::LoadImages()
 {
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_CATAPULT_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back01.tga", IMAGE_CATAPULT_TOP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-L.tga", IMAGE_CATAPULT_LEFT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back02-R.tga", IMAGE_CATAPULT_RIGHT, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_CATAPULT_BOTTOM, GL_LINEAR);
-    LoadBitmap("Interface\\newui_exit_00.tga", IMAGE_CATAPULT_BTN_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CATAPULT_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_CATAPULT_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_CATAPULT_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_CATAPULT_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_CATAPULT_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_CATAPULT_BTN_EXIT, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_btn_empty.tga", IMAGE_CATAPULT_BTN_FIRE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_CATAPULT_BTN_FIRE, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_Btn_gate.tga", IMAGE_CATAPULT_BTN_SMALL, GL_LINEAR);
-    LoadBitmap("Interface\\newui_Btn_round.tga", IMAGE_CATAPULT_BTN_BIG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Btn_gate.tga", IMAGE_CATAPULT_BTN_SMALL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_Btn_round.tga", IMAGE_CATAPULT_BTN_BIG, GL_LINEAR);
 
-    LoadBitmap("Interface\\newui_item_table01(L).tga", IMAGE_CATAPULT_TABLE_TOP_LEFT);
-    LoadBitmap("Interface\\newui_item_table01(R).tga", IMAGE_CATAPULT_TABLE_TOP_RIGHT);
-    LoadBitmap("Interface\\newui_item_table02(L).tga", IMAGE_CATAPULT_TABLE_BOTTOM_LEFT);
-    LoadBitmap("Interface\\newui_item_table02(R).tga", IMAGE_CATAPULT_TABLE_BOTTOM_RIGHT);
-    LoadBitmap("Interface\\newui_item_table03(Up).tga", IMAGE_CATAPULT_TABLE_TOP_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(Dw).tga", IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(L).tga", IMAGE_CATAPULT_TABLE_LEFT_PIXEL);
-    LoadBitmap("Interface\\newui_item_table03(R).tga", IMAGE_CATAPULT_TABLE_RIGHT_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_CATAPULT_TABLE_TOP_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_CATAPULT_TABLE_TOP_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_CATAPULT_TABLE_BOTTOM_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_CATAPULT_TABLE_BOTTOM_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_CATAPULT_TABLE_TOP_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_CATAPULT_TABLE_LEFT_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_CATAPULT_TABLE_RIGHT_PIXEL);
 }
 
 void SEASON3B::CNewUICatapultWindow::UnloadImages()
@@ -527,7 +527,7 @@ bool SEASON3B::CNewUICatapultWindow::BtnProcess()
     iIndex = m_BtnChoiceArea.GetIndex();
     if (iIndex > -1 && m_BtnFire.UpdateMouseEvent() == true)
     {
-        SendCatapultFire(m_iNpcKey, iIndex + 1);
+        SocketClient->ToGameServer()->SendFireCatapultRequest(m_iNpcKey, iIndex + 1);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_CATAPULT);
     }
 

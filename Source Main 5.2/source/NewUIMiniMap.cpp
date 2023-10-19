@@ -8,7 +8,7 @@
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
 #include "DSPlaySound.h"
-#include "wsclientinline.h"
+
 #include "NewUIGuildInfoWindow.h"
 #include "NewUIButton.h"
 #include "NewUIMyInventory.h"
@@ -37,12 +37,12 @@ bool SEASON3B::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MINI_MAP, this);
 
-    LoadBitmap("Interface\\mini_map_ui_corner.tga", IMAGE_MINIMAP_INTERFACE + 1, GL_LINEAR);
-    LoadBitmap("Interface\\mini_map_ui_line.jpg", IMAGE_MINIMAP_INTERFACE + 2, GL_LINEAR);
-    LoadBitmap("Interface\\mini_map_ui_cha.tga", IMAGE_MINIMAP_INTERFACE + 3, GL_LINEAR);
-    LoadBitmap("Interface\\mini_map_ui_portal.tga", IMAGE_MINIMAP_INTERFACE + 4, GL_LINEAR);
-    LoadBitmap("Interface\\mini_map_ui_npc.tga", IMAGE_MINIMAP_INTERFACE + 5, GL_LINEAR);
-    LoadBitmap("Interface\\mini_map_ui_cancel.tga", IMAGE_MINIMAP_INTERFACE + 6, GL_LINEAR);
+    LoadBitmap(L"Interface\\mini_map_ui_corner.tga", IMAGE_MINIMAP_INTERFACE + 1, GL_LINEAR);
+    LoadBitmap(L"Interface\\mini_map_ui_line.jpg", IMAGE_MINIMAP_INTERFACE + 2, GL_LINEAR);
+    LoadBitmap(L"Interface\\mini_map_ui_cha.tga", IMAGE_MINIMAP_INTERFACE + 3, GL_LINEAR);
+    LoadBitmap(L"Interface\\mini_map_ui_portal.tga", IMAGE_MINIMAP_INTERFACE + 4, GL_LINEAR);
+    LoadBitmap(L"Interface\\mini_map_ui_npc.tga", IMAGE_MINIMAP_INTERFACE + 5, GL_LINEAR);
+    LoadBitmap(L"Interface\\mini_map_ui_cancel.tga", IMAGE_MINIMAP_INTERFACE + 6, GL_LINEAR);
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_MINIMAP_INTERFACE + 6, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 610, 3, 85, 85);
@@ -69,7 +69,7 @@ bool SEASON3B::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 void SEASON3B::CNewUIMiniMap::ClosingProcess()
 {
-    SendExitInventory();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float SEASON3B::CNewUIMiniMap::GetLayerDepth()
@@ -205,12 +205,12 @@ bool SEASON3B::CNewUIMiniMap::Update()
     return true;
 }
 
-void SEASON3B::CNewUIMiniMap::LoadImages(const char* Filename)
+void SEASON3B::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
 {
-    char Fname[300];
+    wchar_t Fname[300];
     int i = 0;
-    sprintf(Fname, "Data\\%s\\mini_map.ozt", Filename);
-    FILE* pFile = fopen(Fname, "rb");
+    swprintf(Fname, L"Data\\%s\\mini_map.ozt", Filename);
+    FILE* pFile = _wfopen(Fname, L"rb");
 
     if (pFile == NULL)
     {
@@ -221,22 +221,22 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const char* Filename)
     {
         m_bSuccess = true;
         fclose(pFile);
-        sprintf(Fname, "%s\\mini_map.tga", Filename);
+        swprintf(Fname, L"%s\\mini_map.tga", Filename);
         LoadBitmap(Fname, IMAGE_MINIMAP_INTERFACE, GL_LINEAR);
     }
 
-    sprintf(Fname, "Data\\Local\\%s\\Minimap\\Minimap_%s_%s.bmd", g_strSelectedML.c_str(), Filename, g_strSelectedML.c_str());
+    swprintf(Fname, L"Data\\Local\\%s\\Minimap\\Minimap_%s_%s.bmd", g_strSelectedML.c_str(), Filename, g_strSelectedML.c_str());
 
     for (i = 0; i < MAX_MINI_MAP_DATA; i++)
     {
         m_Mini_Map_Data[i].Kind = 0;
     }
 
-    FILE* fp = fopen(Fname, "rb");
+    FILE* fp = _wfopen(Fname, L"rb");
 
     if (fp != NULL)
     {
-        int Size = sizeof(MINI_MAP);
+        int Size = sizeof(MINI_MAP_FILE);
         BYTE* Buffer = new BYTE[Size * MAX_MINI_MAP_DATA + 45];
         fread(Buffer, (Size * MAX_MINI_MAP_DATA) + 45, 1, fp);
 
@@ -246,8 +246,8 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const char* Filename)
 
         if (dwCheckSum != GenerateCheckSum2(Buffer, (Size * MAX_MINI_MAP_DATA) + 45, 0x2BC1))
         {
-            char Text[256];
-            sprintf(Text, "%s - File corrupted.", Fname);
+            wchar_t Text[256];
+            swprintf(Text, L"%s - File corrupted.", Fname);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -259,8 +259,17 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const char* Filename)
             for (i = 0; i < MAX_MINI_MAP_DATA; i++)
             {
                 BuxConvert(pSeek, Size);
-                memcpy(&(m_Mini_Map_Data[i]), pSeek, Size);
+                //memcpy(&(m_Mini_Map_Data[i]), pSeek, Size);
 
+                MINI_MAP_FILE current{ };
+                auto target = &(m_Mini_Map_Data[i]);
+                memcpy(&current, pSeek, Size);
+                memcpy(target, pSeek, Size);
+
+                CMultiLanguage::ConvertFromUtf8(target->Name, current.Name);
+                /*int wchars_num = MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, NULL, 0);
+                MultiByteToWideChar(CP_UTF8, 0, current.Name, -1, target->Name, wchars_num);
+                target->Name[wchars_num] = L'\0';*/
                 pSeek += Size;
             }
         }
@@ -316,9 +325,9 @@ bool SEASON3B::CNewUIMiniMap::Check_Btn(int mx, int my)
             if (mx > m_Btn_Loc[i][0] && mx < (m_Btn_Loc[i][0] + m_Btn_Loc[i][2]) && my > m_Btn_Loc[i][1] && my < (m_Btn_Loc[i][1] + m_Btn_Loc[i][3]))
             {
                 SIZE Fontsize;
-                m_TooltipText = (unicode::t_string)m_Mini_Map_Data[i].Name;
+                m_TooltipText = (std::wstring)m_Mini_Map_Data[i].Name;
                 g_pRenderText->SetFont(g_hFont);
-                g_pMultiLanguage->_GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
+                GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
 
                 Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
                 Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);

@@ -6,7 +6,7 @@
 
 namespace npcBreeder
 {
-    int     CalcRecoveryZen(BYTE type, char* Text);
+    int     CalcRecoveryZen(BYTE type, wchar_t* Text);
     void	RecoverPet(BYTE type);
 }
 

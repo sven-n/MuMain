@@ -13,11 +13,11 @@
 
 typedef struct
 {
-    char m_lpszCPU[MAX_LENGTH_CPUNAME];
-    char m_lpszOS[MAX_LENGTH_OSINFO];
+    wchar_t m_lpszCPU[MAX_LENGTH_CPUNAME];
+    wchar_t m_lpszOS[MAX_LENGTH_OSINFO];
     int m_iMemorySize;
 
-    char m_lpszDxVersion[MAX_DXVERSION];
+    wchar_t m_lpszDxVersion[MAX_DXVERSION];
 } ER_SystemInfo;
 
 class CErrorReport
@@ -30,24 +30,24 @@ public:
 
 protected:
     HANDLE m_hFile;
-    char m_lpszFileName[MAX_PATH];
+    wchar_t m_lpszFileName[MAX_PATH];
     int m_iKey;
 #ifdef ASG_ADD_MULTI_CLIENT
     int m_nFileCount;		// 로그 파일 개수.
 #endif	// ASG_ADD_MULTI_CLIENT
 
 public:
-    void Create(char* lpszFileName);
+    void Create(wchar_t* lpszFileName);
     void Destroy(void);
 protected:
     void CutHead(void);
-    char* CheckHeadToCut(char* lpszBuffer, DWORD dwNumber);
+    wchar_t* CheckHeadToCut(wchar_t* lpszBuffer, DWORD dwNumber);
 
 protected:
     BOOL WriteFile(HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped);
 public:
-    void WriteDebugInfoStr(char* lpszToWrite);
-    void Write(const char* lpszFormat, ...);
+    void WriteDebugInfoStr(wchar_t* lpszToWrite);
+    void Write(const wchar_t* lpszFormat, ...);
     void HexWrite(void* pBuffer, int iSize);
 
     void AddSeparator(void);

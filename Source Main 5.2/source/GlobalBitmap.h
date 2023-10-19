@@ -9,7 +9,6 @@
 #include <deque>
 #include <string>
 #include <setjmp.h>
-#include "Jpeglib.h"
 #include "./Time/Timer.h"
 
 #define MAX_BITMAP_FILE_NAME 256
@@ -18,7 +17,7 @@
 typedef struct
 {
     GLuint	BitmapIndex;
-    char	FileName[MAX_BITMAP_FILE_NAME];
+    wchar_t FileName[MAX_BITMAP_FILE_NAME];
     float	Width;
     float	Height;
     char	Components;
@@ -87,13 +86,6 @@ public:
 
 class CGlobalBitmap
 {
-    struct my_error_mgr
-    {
-        struct jpeg_error_mgr pub;
-        jmp_buf setjmp_buffer;
-    };
-    typedef struct my_error_mgr* my_error_ptr;
-
     enum
     {
         MAX_WIDTH = 1024,
@@ -120,20 +112,20 @@ public:
     CGlobalBitmap();
     virtual ~CGlobalBitmap();
 
-    GLuint LoadImage(const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
-    bool LoadImage(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+    GLuint LoadImage(const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+    bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     void UnloadImage(GLuint uiBitmapIndex, bool bForce = false);
     void UnloadAllImages();
 
     BITMAP_t* GetTexture(GLuint uiBitmapIndex);
     BITMAP_t* FindTexture(GLuint uiBitmapIndex);
-    BITMAP_t* FindTexture(const std::string& filename);
-    BITMAP_t* FindTextureByName(const std::string& name);
+    BITMAP_t* FindTexture(const std::wstring& filename);
+    BITMAP_t* FindTextureByName(const std::wstring& name);
 
     DWORD GetUsedTextureMemory() const;
     size_t GetNumberOfTexture() const;
 
-    bool Convert_Format(const unicode::t_string& filename);
+    bool Convert_Format(const std::wstring& filename);
 
     void Manage();
 
@@ -143,15 +135,13 @@ protected:
     GLuint GenerateTextureIndex();
     GLuint FindAvailableTextureIndex(GLuint uiSeed);
 
-    bool OpenJpeg(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
-    bool OpenTga(GLuint uiBitmapIndex, const std::string& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
-    void SplitFileName(IN const std::string& filepath, OUT std::string& filename, bool bIncludeExt);
-    void SplitExt(IN const std::string& filepath, OUT std::string& ext, bool bIncludeDot);
-    void ExchangeExt(IN const std::string& in_filepath, IN const std::string& ext, OUT std::string& out_filepath);
+    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+    void SplitFileName(IN const std::wstring& filepath, OUT std::wstring& filename, bool bIncludeExt);
+    void SplitExt(IN const std::wstring& filepath, OUT std::wstring& ext, bool bIncludeDot);
+    void ExchangeExt(IN const std::wstring& in_filepath, IN const std::wstring& ext, OUT std::wstring& out_filepath);
 
-    bool Save_Image(const unicode::t_string& src, const unicode::t_string& dest, int cDumpHeader);
-
-    static void my_error_exit(j_common_ptr cinfo);
+    bool Save_Image(const std::wstring& src, const std::wstring& dest, int cDumpHeader);
 };
 
 extern CGlobalBitmap Bitmaps;

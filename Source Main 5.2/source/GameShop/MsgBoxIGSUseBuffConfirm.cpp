@@ -4,7 +4,7 @@
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSUseBuffConfirm.h"
-#include "wsclientinline.h"
+
 #include "DSPlaySound.h"
 
 CMsgBoxIGSUseBuffConfirm::CMsgBoxIGSUseBuffConfirm()
@@ -42,17 +42,17 @@ bool CMsgBoxIGSUseBuffConfirm::Create(float fPriority)
     return true;
 }
 
-void CMsgBoxIGSUseBuffConfirm::Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, unicode::t_char szItemType, unicode::t_char* pszItemName, unicode::t_char* pszBuffName)
+void CMsgBoxIGSUseBuffConfirm::Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, wchar_t szItemType, wchar_t* pszItemName, wchar_t* pszBuffName)
 {
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
 
     m_iStorageSeq = iStorageSeq;
     m_iStorageItemSeq = iStorageItemSeq;
     m_wItemCode = wItemCode;
     m_szItemType = szItemType;
-    strcpy(m_szCurrentBuffName, pszBuffName);
+    wcscpy(m_szCurrentBuffName, pszBuffName);
 
-    sprintf(szText, GlobalText[3047], pszItemName, pszBuffName, pszItemName);
+    swprintf(szText, GlobalText[3047], pszItemName, pszBuffName, pszItemName);
     m_iDesciptionLine = ::DivideStringByPixel(&m_szDescription[0][0], UIMAX_TEXT_LINE, MAX_TEXT_LENGTH, szText, IGS_TEXT_DIVIDE_WIDTH, false, '#');
 }
 
@@ -109,8 +109,8 @@ CALLBACK_RESULT CMsgBoxIGSUseBuffConfirm::OKButtonDown(class CNewUIMessageBoxBas
 {
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSUseBuffConfirm*>(pOwner);
 
-    SendRequestIGS_UseStorageItem(pOwnMsgBox->m_iStorageSeq, pOwnMsgBox->m_iStorageItemSeq, pOwnMsgBox->m_wItemCode, &(pOwnMsgBox->m_szItemType));
-    SendRequestIGS_CashPointInfo();
+    SocketClient->ToGameServer()->SendCashShopStorageItemConsumeRequest(pOwnMsgBox->m_iStorageSeq, pOwnMsgBox->m_iStorageItemSeq, pOwnMsgBox->m_wItemCode, pOwnMsgBox->m_szItemType);
+    SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -180,15 +180,15 @@ void CMsgBoxIGSUseBuffConfirm::RenderTexts()
     }
 
 #ifdef FOR_WORK
-    unicode::t_char szText[256] = { 0, };
+    wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
-    sprintf(szText, "m_iStorageSeq : %d", m_iStorageSeq);
+    swprintf(szText, L"m_iStorageSeq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "m_iStorageItemSeq : %d", m_iStorageItemSeq);
+    swprintf(szText, L"m_iStorageItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "m_wItemCode : %d", m_wItemCode);
+    swprintf(szText, L"m_wItemCode : %d", m_wItemCode);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
-    sprintf(szText, "m_szItemType : %c", m_szItemType);
+    swprintf(szText, L"m_szItemType : %c", m_szItemType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }
@@ -201,12 +201,12 @@ void CMsgBoxIGSUseBuffConfirm::RenderButtons()
 
 void CMsgBoxIGSUseBuffConfirm::LoadImages()
 {
-    LoadBitmap("Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
-    LoadBitmap("Interface\\newui_msgbox_back.jpg", IMAGE_IGS_BACK, GL_LINEAR);
-    LoadBitmap("Interface\\newui_item_back03.tga", IMAGE_IGS_DOWN, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_top.tga", IMAGE_IGS_UP, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_back06(L).tga", IMAGE_IGS_LEFTLINE, GL_LINEAR);
-    LoadBitmap("Interface\\newui_option_back06(R).tga", IMAGE_IGS_RIGHTLINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_IGS_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_IGS_DOWN, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_top.tga", IMAGE_IGS_UP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_back06(L).tga", IMAGE_IGS_LEFTLINE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_option_back06(R).tga", IMAGE_IGS_RIGHTLINE, GL_LINEAR);
 }
 
 void CMsgBoxIGSUseBuffConfirm::UnloadImages()

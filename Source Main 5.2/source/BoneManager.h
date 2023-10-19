@@ -9,21 +9,21 @@
 #include "ZzzCharacter.h"
 
 namespace BoneManager {
-    void RegisterBone(CHARACTER* pCharacter, const std::string& name, int nBone);
-    void UnregisterBone(CHARACTER* pCharacter, const std::string& name);
+    void RegisterBone(CHARACTER* pCharacter, const std::wstring& name, int nBone);
+    void UnregisterBone(CHARACTER* pCharacter, const std::wstring& name);
     void UnregisterBone(CHARACTER* pCharacter);
     void UnregisterAll();
 
-    CHARACTER* GetOwnCharacter(OBJECT* pObject, const std::string& name);
-    int GetBoneNumber(OBJECT* pObject, const std::string& name);
-    bool GetBonePosition(OBJECT* pObject, const std::string& name, OUT vec3_t Position);
-    bool GetBonePosition(OBJECT* pObject, const std::string& name, IN vec3_t Relative, OUT vec3_t Position);
+    CHARACTER* GetOwnCharacter(OBJECT* pObject, const std::wstring& name);
+    int GetBoneNumber(OBJECT* pObject, const std::wstring& name);
+    bool GetBonePosition(OBJECT* pObject, const std::wstring& name, OUT vec3_t Position);
+    bool GetBonePosition(OBJECT* pObject, const std::wstring& name, IN vec3_t Relative, OUT vec3_t Position);
 }
 
 class CBoneManager {
     typedef struct __BONEINFO
     {
-        std::string	name;	// bone name
+        std::wstring	name;	// bone name
 
         CHARACTER* pCharacter;
         BMD* pModel;
@@ -36,22 +36,22 @@ class CBoneManager {
 public:
     ~CBoneManager();
 
-    void RegisterBone(CHARACTER* pCharacter, const std::string& name, int nBone);
-    void UnregisterBone(CHARACTER* pCharacter, const std::string& name);
+    void RegisterBone(CHARACTER* pCharacter, const std::wstring& name, int nBone);
+    void UnregisterBone(CHARACTER* pCharacter, const std::wstring& name);
     void UnregisterBone(CHARACTER* pCharacter);
     void UnregisterAll();
 
-    CHARACTER* GetOwnCharacter(OBJECT* pObject, const std::string& name);
-    int GetBoneNumber(OBJECT* pObject, const std::string& name);
-    bool GetBonePosition(OBJECT* pObject, const std::string& name, OUT vec3_t Position);
-    bool GetBonePosition(OBJECT* pObject, const std::string& name, IN vec3_t Relative, OUT vec3_t Position);
+    CHARACTER* GetOwnCharacter(OBJECT* pObject, const std::wstring& name);
+    int GetBoneNumber(OBJECT* pObject, const std::wstring& name);
+    bool GetBonePosition(OBJECT* pObject, const std::wstring& name, OUT vec3_t Position);
+    bool GetBonePosition(OBJECT* pObject, const std::wstring& name, IN vec3_t Relative, OUT vec3_t Position);
 
     static CBoneManager* GetInstance();
 
 protected:
     CBoneManager();		//. ban create instance
 
-    LPBONEINFO FindBone(OBJECT* pObject, const std::string& name);
+    LPBONEINFO FindBone(OBJECT* pObject, const std::wstring& name);
 };
 
 #endif // _BONEMANAGER_H_

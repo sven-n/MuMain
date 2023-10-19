@@ -16,7 +16,7 @@ size_t CCyclicXorTrans::GetKeyTableSize() const
     return m_xfKeyTable.size();
 }
 
-bool CCyclicXorTrans::LoadKeyTable(const std::string& filename)
+bool CCyclicXorTrans::LoadKeyTable(const std::wstring& filename)
 {
     return m_xfKeyTable.load(filename);
 }
@@ -30,7 +30,7 @@ void CCyclicXorTrans::UnloadKeyTable()
     m_xfKeyTable.resize(0);
 }
 
-bool CCyclicXorTrans::AppendKeyTable(const std::string& filename)
+bool CCyclicXorTrans::AppendKeyTable(const std::wstring& filename)
 {
     xfstreambuf xfAppendTable;
     if (xfAppendTable.load(filename)) {
@@ -70,7 +70,7 @@ void CCyclicXorTrans::JumbleKeyTable()
         m_xfKeyTable = xResult;
     }
 }
-bool CCyclicXorTrans::SaveKeyTable(const std::string& filename)
+bool CCyclicXorTrans::SaveKeyTable(const std::wstring& filename)
 {
     if (m_xfKeyTable.empty())
         return false;

@@ -14,5 +14,5 @@ public:
     int			m_iConnectIndex;
     int			m_iPercent;
     BYTE		m_byNonPvP;
-    unicode::t_char m_bName[MAX_TEXT_LENGTH];
+    wchar_t m_bName[MAX_TEXT_LENGTH];
 };
