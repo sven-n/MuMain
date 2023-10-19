@@ -13,6 +13,7 @@ CNewUISystem::CNewUISystem()
     m_pNewUIMng = nullptr;
     m_pNewUIHotKey = nullptr;
     m_pNewChatLogWindow = nullptr;
+    m_pNewSystemLogWindow = nullptr;
     m_pNewSlideWindow = nullptr;
     m_pNewGuildMakeWindow = nullptr;
     m_pNewFriendWindow = nullptr;
@@ -104,6 +105,10 @@ bool CNewUISystem::Create()
     if (false == m_pNewChatLogWindow->Create(m_pNewUIMng, 0, 480 - 50 - 47, 6))
         return false;
 
+    m_pNewSystemLogWindow = new CNewUISystemLogWindow;
+    if (false == m_pNewSystemLogWindow->Create(m_pNewUIMng, 0, 80))
+        return false;
+
     m_pNewOptionWindow = new CNewUIOptionWindow;
     if (m_pNewOptionWindow->Create(m_pNewUIMng, (640 / 2) - (190 / 2), 70) == false)
     {
@@ -129,6 +134,7 @@ void CNewUISystem::Release()
     SAFE_DELETE(m_pNewSlideWindow);
     SAFE_DELETE(m_pNewOptionWindow);
     SAFE_DELETE(m_pNewChatLogWindow);
+    SAFE_DELETE(m_pNewSystemLogWindow);
     SAFE_DELETE(m_pNewUI3DRenderMng);
 
     m_pNewUIMng->RemoveAllUIObjs();
@@ -140,16 +146,18 @@ bool CNewUISystem::LoadMainSceneInterface()
 {
     g_MessageBox->Show(true);
     m_pNewChatLogWindow->Show(true);
+    m_pNewSystemLogWindow->Show(true);
     m_pNewSlideWindow->Show(true);
 
     m_pNewItemMng = new CNewUIItemMng;
 
     m_pNewChatInputBox = new CNewUIChatInputBox;
 
-    if (false == m_pNewChatInputBox->Create(m_pNewUIMng, m_pNewChatLogWindow, 0, 480 - 51 - 47))
+    if (false == m_pNewChatInputBox->Create(m_pNewUIMng, m_pNewChatLogWindow, m_pNewSystemLogWindow, 0, 480 - 51 - 47))
     {
         return false;
     }
+
     SetFocus(g_hWnd);
 
     m_pNewUIHotKey = new CNewUIHotKey;
@@ -1791,6 +1799,7 @@ bool CNewUISystem::IsImpossibleHideInterface(DWORD dwKey)
         || dwKey == INTERFACE_SLIDEWINDOW
         || dwKey == INTERFACE_MESSAGEBOX
         || dwKey == INTERFACE_CHATLOGWINDOW
+        || dwKey == INTERFACE_SYSTEMLOGWINDOW
         || dwKey == INTERFACE_PARTY_INFO_WINDOW
         || dwKey == INTERFACE_KANTURU_INFO
         || dwKey == INTERFACE_BLOODCASTLE_TIME
@@ -1930,6 +1939,11 @@ CNewUISystem* CNewUISystem::GetInstance()
 CNewUIChatLogWindow* CNewUISystem::GetUI_NewChatLogWindow() const
 {
     return m_pNewChatLogWindow;
+}
+
+CNewUISystemLogWindow* CNewUISystem::GetUI_NewSystemLogWindow() const
+{
+    return m_pNewSystemLogWindow;
 }
 
 CNewUISlideWindow* CNewUISystem::GetUI_NewSlideWindow() const

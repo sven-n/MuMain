@@ -600,7 +600,7 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case FD_READ:
             break;
         case FD_CLOSE:
-            g_pChatListBox->AddText(L"", GlobalText[3], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[3], SEASON3B::TYPE_SYSTEM_MESSAGE);
 #ifdef CONSOLE_DEBUG
             switch (WSAGETSELECTERROR(lParam))
             {

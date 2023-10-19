@@ -654,7 +654,7 @@ bool CheckWhisperLevel(int lvl, wchar_t* text)
         }
     }
 
-    g_pChatListBox->AddText(L"", GlobalText[479], SEASON3B::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(GlobalText[479], SEASON3B::TYPE_SYSTEM_MESSAGE);
 
     return  false;
 }
@@ -3035,7 +3035,7 @@ void ReloadArrow()
                     SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_RIGHT);
                 }
                 g_pMyInventory->DeleteItem(Index);
-                g_pChatListBox->AddText(L"", GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             else
                 if ((gCharacterManager.GetEquipedBowType(rp) == BOWTYPE_CROSSBOW) && (lp->Type == -1))
@@ -3047,15 +3047,15 @@ void ReloadArrow()
                         SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_LEFT);
                     }
                     g_pMyInventory->DeleteItem(Index);
-                    g_pChatListBox->AddText(L"", GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
         }
     }
     else
     {
-        if (g_pChatListBox->CheckChatRedundancy(GlobalText[251]) == FALSE)
+        if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[251]) == FALSE)
         {
-            g_pChatListBox->AddText(L"", GlobalText[251], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[251], SEASON3B::TYPE_ERROR_MESSAGE);
         }
     }
 }
@@ -3479,7 +3479,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             wchar_t Text[256];
             swprintf(Text, GlobalText[375]);
 
-            g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
             OBJECT* pItem = &(Items[ItemKey].Object);
             pItem->Position[2] = RequestTerrainHeight(pItem->Position[0], pItem->Position[1]) + 3.f;
@@ -3515,7 +3515,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 {
                     wchar_t Text[100];
                     swprintf(Text, GlobalText[663], CHAOS_MIX_LEVEL);
-                    g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     break;
                 }
                 if (CharactersClient[TargetNpc].MonsterIndex == 243 ||
@@ -3596,12 +3596,12 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                     if (CharactersClient[TargetNpc].MonsterIndex == 470)
                     {
                         swprintf(_Temp, GlobalText[2596], 100);
-                        g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                     else if (CharactersClient[TargetNpc].MonsterIndex == 471)
                     {
                         swprintf(_Temp, GlobalText[2597], 100);
-                        g_pChatListBox->AddText(L"", _Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                 }
                 else if (CharactersClient[TargetNpc].MonsterIndex == 478)
@@ -3967,14 +3967,14 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             {
                 if (gMapManager.InChaosCastle() == true)
                 {
-                    g_pChatListBox->AddText(L"", GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                     return false;
                 }
 
                 if (::IsStrifeMap(gMapManager.WorldActive))
                 {
-                    g_pChatListBox->AddText(L"", GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
                     return false;
                 }
 
@@ -3982,7 +3982,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
                 if (level < TRADELIMITLEVEL)
                 {
-                    g_pChatListBox->AddText(L"", GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);
                     return true;
                 }
 
@@ -4001,14 +4001,14 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (IsShopInViewport(c))
                         {
-                            g_pChatListBox->AddText(L"", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
                             return true;
                         }
 
                         SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                         wchar_t message[100]{};
                         swprintf(message, GlobalText[475], c->ID);
-                        g_pChatListBox->AddText(L"", message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                 }
                 else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -4022,7 +4022,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (IsShopInViewport(c))
                         {
-                            g_pChatListBox->AddText(L"", GlobalText[493], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                            g_pSystemLogBox->AddText(GlobalText[493], SEASON3B::TYPE_SYSTEM_MESSAGE);
                             return true;
                         }
 
@@ -4032,7 +4032,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                             wchar_t message[100]{};
                             swprintf(message, GlobalText[475], c->ID);
-                            g_pChatListBox->AddText(L"", message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                            g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
                             break;
                         }
                     }
@@ -4050,7 +4050,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pChatListBox->AddText(L"", GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
@@ -4063,7 +4063,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             {
                 wchar_t szError[48] = L"";
                 swprintf(szError, GlobalText[1123], 6);
-                g_pChatListBox->AddText(L"", szError, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             return true;
         }
@@ -4071,13 +4071,13 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pChatListBox->AddText(L"", GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
             if (::IsStrifeMap(gMapManager.WorldActive))
             {
-                g_pChatListBox->AddText(L"", GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
@@ -4091,7 +4091,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 #endif // LEM_ADD_LUCKYITEM
                 )
             {
-                g_pChatListBox->AddText(L"", GlobalText[1121], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1121], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             wchar_t szCmd[24];
@@ -4142,20 +4142,20 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         if (wcscmp(Text, GlobalText[1136]) == 0)
         {
             ShowShopTitles();
-            g_pChatListBox->AddText(L"", GlobalText[1138], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[1138], SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
 
         if (wcscmp(Text, GlobalText[1137]) == 0)
         {
             HideShopTitles();
-            g_pChatListBox->AddText(L"", GlobalText[1139], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[1139], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         if (wcscmp(Text, GlobalText[908]) == 0 || wcsicmp(Text, L"/duelstart") == 0)
         {
 #ifndef GUILD_WAR_EVENT
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pChatListBox->AddText(L"", GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 #endif// UILD_WAR_EVENT
@@ -4166,7 +4166,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 {
                     wchar_t szError[48] = L"";
                     swprintf(szError, GlobalText[2704], 30);
-                    g_pChatListBox->AddText(L"", szError, SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_ERROR_MESSAGE);
                     return 3;
                 }
                 else
@@ -4201,7 +4201,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             }
             else
             {
-                g_pChatListBox->AddText(L"", GlobalText[915], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[915], SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
         if (wcscmp(Text, GlobalText[909]) == 0 || wcsicmp(Text, L"/duelend") == 0)
@@ -4209,7 +4209,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 #ifndef GUILD_WAR_EVENT
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pChatListBox->AddText(L"", GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 #endif// GUILD_WAR_EVENT
@@ -4222,12 +4222,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pChatListBox->AddText(L"", GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (Hero->GuildStatus != G_NONE)
             {
-                g_pChatListBox->AddText(L"", GlobalText[255], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[255], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -4243,7 +4243,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                     wchar_t Text[100];
                     swprintf(Text, GlobalText[477], c->ID);
-                    g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -4263,7 +4263,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                         wchar_t Text[100];
                         swprintf(Text, GlobalText[477], c->ID);
-                        g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
                 }
@@ -4276,12 +4276,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pChatListBox->AddText(L"", GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (Hero->GuildStatus == G_NONE)
             {
-                g_pChatListBox->AddText(L"", GlobalText[1355], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1355], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -4351,12 +4351,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pChatListBox->AddText(L"", GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (PartyNumber > 0 && wcscmp(Party[0].Name, Hero->ID) != NULL)
             {
-                g_pChatListBox->AddText(L"", GlobalText[257], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[257], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -4370,7 +4370,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                     wchar_t Text[100];
                     swprintf(Text, GlobalText[476], c->ID);
-                    g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -4387,7 +4387,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                         wchar_t Text[100];
                         swprintf(Text, GlobalText[476], c->ID);
-                        g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
                 }
@@ -7149,7 +7149,7 @@ void CheckGate()
                         if (((i >= 45 && i <= 49) || (i >= 55 && i <= 56)) &&
                             ((CharacterMachine->Equipment[EQUIPMENT_HELPER].Type >= ITEM_HELPER + 2 && CharacterMachine->Equipment[EQUIPMENT_HELPER].Type <= ITEM_HELPER + 3)))
                         {
-                            g_pChatListBox->AddText(L"", GlobalText[261], SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(GlobalText[261], SEASON3B::TYPE_ERROR_MESSAGE);
                         }
                         else if ((62 <= i && i <= 65) &&
                             !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 6
@@ -7162,26 +7162,26 @@ void CheckGate()
                                 || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING + 49 && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 50)
                                 || (CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_WING + 135)))
                         {
-                            g_pChatListBox->AddText(L"", GlobalText[263], SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(GlobalText[263], SEASON3B::TYPE_ERROR_MESSAGE);
 
                             if (CharacterAttribute->Level < Level)
                             {
                                 wchar_t Text[100];
                                 swprintf(Text, GlobalText[350], Level);
-                                g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_ERROR_MESSAGE);
+                                g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
                             }
                         }
 
                         else if ((62 <= i && i <= 65) && (CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HELPER + 2))
                         {
-                            g_pChatListBox->AddText(L"", GlobalText[569], SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(GlobalText[569], SEASON3B::TYPE_ERROR_MESSAGE);
                         }
                         else if (CharacterAttribute->Level < Level)
                         {
                             LoadingWorld = 50;
                             wchar_t Text[100];
                             swprintf(Text, GlobalText[350], Level);
-                            g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
                             //							return;
                         }
                         else
@@ -9362,13 +9362,13 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
 
     if (bCantSwim && bMoveAtlans)
     {
-        g_pChatListBox->AddText(L"", GlobalText[261], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[261], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return true;
     }
 
     if ((bCantFly || bEquipChangeRing) && bMoveIcarus)
     {
-        g_pChatListBox->AddText(L"", GlobalText[263], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[263], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return true;
     }
 

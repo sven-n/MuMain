@@ -16,6 +16,8 @@ namespace SEASON3B
 {
     class CNewUIManager;
     class CNewUIChatLogWindow;
+    class CNewUISystemLogWindow;
+
     class CNewUIChatInputBox : public CNewUIObj
     {
     public:
@@ -101,6 +103,7 @@ namespace SEASON3B
 
         CNewUIManager* m_pNewUIMng;
         CNewUIChatLogWindow* m_pNewUIChatLogWnd;
+        CNewUISystemLogWindow* m_pNewUISystemLogWnd;
         POINT	m_WndPos{};
         SIZE	m_WndSize{};
 
@@ -112,7 +115,7 @@ namespace SEASON3B
         int m_iTooltipType;
         int m_iInputMsgType;
         bool m_bBlockWhisper;
-        bool m_bOnlySystemMessage;
+        bool m_bShowSystemMessages;
         bool m_bShowChatLog;
         bool m_bWhisperSend;
         bool m_bShowMessageElseNormal;
@@ -137,7 +140,11 @@ namespace SEASON3B
         CNewUIChatInputBox();
         virtual ~CNewUIChatInputBox();
 
-        bool Create(CNewUIManager* pNewUIMng, CNewUIChatLogWindow* pNewUIChatLogWnd, int x, int y);
+        bool Create(CNewUIManager* pNewUIMng,
+            CNewUIChatLogWindow* pNewUIChatLogWnd,
+            CNewUISystemLogWindow* pNewUISystemLogWnd,
+            int x,
+            int y);
         void Release();
 
         void SetWndPos(int x, int y);

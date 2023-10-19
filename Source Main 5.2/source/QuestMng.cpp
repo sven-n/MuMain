@@ -273,7 +273,7 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
 
-        g_pChatListBox->AddText(L"", GlobalText[2814], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[2814], SEASON3B::TYPE_ERROR_MESSAGE);
 
         return;
     }

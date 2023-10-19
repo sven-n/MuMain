@@ -470,8 +470,7 @@ void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
 {
     if (::IsTradeBan(pItemObj))
     {
-        g_pChatListBox->AddText(
-            L"", GlobalText[494], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[494], SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else
     {
@@ -606,11 +605,11 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
     switch (pTradeData->SubCode)
     {
     case 0:
-        g_pChatListBox->AddText(L"", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 2:
-        g_pChatListBox->AddText(L"", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 1:
@@ -794,7 +793,7 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     {
     case 0:
     {
-        g_pChatListBox->AddText(L"", GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[492], SEASON3B::TYPE_ERROR_MESSAGE);
 
         m_bTradeAlert = false;
 
@@ -805,15 +804,15 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     break;
 
     case 2:
-        g_pChatListBox->AddText(L"", GlobalText[495], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[495], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 3:
-        g_pChatListBox->AddText(L"", GlobalText[496], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[496], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 4:
-        g_pChatListBox->AddText(L"", GlobalText[2108], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[2108], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
 

@@ -125,10 +125,10 @@ bool COMGEM::CheckInv()
         switch (GetError())
         {
         case COMERROR_NOTALLOWED:
-            g_pChatListBox->AddText(L"", GlobalText[1817], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[1817], SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case DEERROR_NOTALLOWED:
-            g_pChatListBox->AddText(L"", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         }
         GetBack();

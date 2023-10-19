@@ -301,7 +301,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
         {
             if (IsPersonalShopBan(pItemObj) == true)
             {
-                g_pChatListBox->AddText(L"", GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
                 return true;
             }
 
@@ -321,7 +321,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
         {
             if (IsPersonalShopBan(pItemObj) == true)
             {
-                g_pChatListBox->AddText(L"", GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
                 return true;
             }
 
@@ -436,7 +436,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
                 }
                 else
                 {
-                    g_pChatListBox->AddText(L"", GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
                 }
             }
             return false;

@@ -427,7 +427,7 @@ bool CNewUIGensRanking::SetGensInfo()
     }
     else
     {
-        g_pChatListBox->AddText(L"", GlobalText[3094], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[3094], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     return false;

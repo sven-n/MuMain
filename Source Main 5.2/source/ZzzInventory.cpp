@@ -456,7 +456,7 @@ void SendRequestUse(int Index, int Target)
 {
     if (!IsCanUseItem())
     {
-        g_pChatListBox->AddText(L"", GlobalText[474], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[474], SEASON3B::TYPE_ERROR_MESSAGE);
         return;
     }
     if (EnableUse > 0)
@@ -11300,7 +11300,7 @@ void MovePersonalShop()
             }
             else
             {
-                g_pChatListBox->AddText(L"", GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
             }
         }
 

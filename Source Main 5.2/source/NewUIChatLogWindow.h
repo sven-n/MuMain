@@ -150,13 +150,12 @@ namespace SEASON3B
         void UnloadImages();
 
         bool RenderBackground();
-        bool RenderMessage(const type_string& MsgText, const POINT& Pos, DWORD dwTextColor, DWORD dwTextBG, HFONT hFont = g_hFont);
         bool RenderMessages();
         bool RenderFrame();
 
     public:
         CNewUIChatLogWindow();
-        virtual ~CNewUIChatLogWindow();
+        ~CNewUIChatLogWindow() override;
 
         bool Create(CNewUIManager* pNewUIMng, int x, int y, int nShowingLines = 6);
         void Release();
@@ -192,15 +191,13 @@ namespace SEASON3B
         void HideFrame();
         bool IsShowFrame();
 
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
 
-        float GetLayerDepth();	//. 6.1f
-        float GetKeyEventOrder();	//. 8.0f
-
-        bool CheckChatRedundancy(const type_string& strText, int iSearchLine = 1);
+        float GetLayerDepth() override;	//. 6.1f
+        float GetKeyEventOrder() override;	//. 8.0f
 
         void UpdateWndSize();
         void UpdateScrollPos();
@@ -213,6 +210,72 @@ namespace SEASON3B
 
         bool CheckFilterText(const type_string& strTestText);
         void AddFilterWord(const type_string& strWord);
+    };
+
+    class CNewUISystemLogWindow : public CNewUIObj
+    {
+    private:
+        enum
+        {
+            MAX_MSG_BUFFER_SIZE = 6,
+            MAX_NUMBER_OF_LINES = 6,
+            WND_WIDTH = CNewUIChatInputBox::CHATBOX_WIDTH,
+            FONT_LEADING = 4,
+            WND_TOP_BOTTOM_EDGE = 2,
+            WND_LEFT_RIGHT_EDGE = 4,
+            CLIENT_WIDTH = WND_WIDTH - (WND_LEFT_RIGHT_EDGE * 2),
+        };
+
+
+        typedef std::wstring type_string;
+        typedef std::vector<CMessageText*>	type_vector_msgs;
+
+        CNewUIManager* m_pNewUIMng;
+
+        type_vector_msgs	m_vecAllMsgs;
+
+        POINT	m_WndPos;
+        SIZE	m_WndSize;
+        int		m_nShowingLines;
+
+        int		m_iCurrentRenderEndLine;
+        float	m_fBackAlpha;
+        bool    m_bShowMessages;
+
+        void Init();
+
+        bool RenderMessages();
+
+        void RemoveFrontLine();
+        int GetCurrentRenderEndLine() const;
+
+    protected:
+        void ProcessAddText(const type_string& strText, MESSAGE_TYPE MsgType);
+        void SeparateText(IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2);
+
+    public:
+        CNewUISystemLogWindow();
+        ~CNewUISystemLogWindow() override;
+
+        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        void Release();
+
+        void SetPosition(int x, int y);
+        void AddText(const type_string& strText, MESSAGE_TYPE MsgType);
+
+        void ClearAll();
+        void ShowMessages() { m_bShowMessages = true; }
+        void HideMessages() { m_bShowMessages = false; }
+
+        bool UpdateMouseEvent() override;
+        bool UpdateKeyEvent() override;
+        bool Update() override;
+        bool Render() override;
+
+        float GetLayerDepth() override;
+        float GetKeyEventOrder() override;
+
+        bool CheckChatRedundancy(const type_string& strText, int iSearchLine = 1);
     };
 }
 

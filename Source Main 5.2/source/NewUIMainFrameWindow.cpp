@@ -794,9 +794,9 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
 
             if (iLevel < 6)
             {
-                if (g_pChatListBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
+                if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
                 {
-                    g_pChatListBox->AddText(L"", GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else

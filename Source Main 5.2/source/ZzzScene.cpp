@@ -1903,6 +1903,7 @@ void MoveMainScene()
         g_pPartyManager->Create();
 
         g_pChatListBox->ClearAll();
+        g_pSystemLogBox->ClearAll();
 
         g_pSlideHelpMgr->Init();
         g_pUIMapName->Init();
@@ -2352,7 +2353,7 @@ void MainScene(HDC hDC)
         wcscat(screenshotText, lpszTemp);
         if (addTimeStampToCapture)
         {
-            g_pChatListBox->AddText(L"", screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
     }
 
@@ -2437,7 +2438,7 @@ void MainScene(HDC hDC)
 
         if (GrabEnable && !addTimeStampToCapture)
         {
-            g_pChatListBox->AddText(L"", screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
 
         GrabEnable = false;

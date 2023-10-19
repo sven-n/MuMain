@@ -25,6 +25,7 @@ void SEASON3B::CNewUIChatInputBox::Init()
 {
     m_pNewUIMng = nullptr;
     m_pNewUIChatLogWnd = nullptr;
+    m_pNewUISystemLogWnd = nullptr;
     m_pChatInputBox = nullptr;
     m_pWhsprIDInputBox = nullptr;
     m_WndPos = {};
@@ -37,7 +38,7 @@ void SEASON3B::CNewUIChatInputBox::Init()
     m_iTooltipType = INPUT_TOOLTIP_NOTHING;
     m_iInputMsgType = INPUT_CHAT_MESSAGE;
     m_bBlockWhisper = false;
-    m_bOnlySystemMessage = false;
+    m_bShowSystemMessages = true;
     m_bShowChatLog = true;
     m_bWhisperSend = true;
 
@@ -74,7 +75,12 @@ void SEASON3B::CNewUIChatInputBox::UnloadImages()
     DeleteBitmap(IMAGE_INPUTBOX_BACK);
 }
 
-bool SEASON3B::CNewUIChatInputBox::Create(CNewUIManager* pNewUIMng, CNewUIChatLogWindow* pNewUIChatLogWnd, int x, int y)
+bool SEASON3B::CNewUIChatInputBox::Create(
+    CNewUIManager* pNewUIMng,
+    CNewUIChatLogWindow* pNewUIChatLogWnd,
+    CNewUISystemLogWindow* pNewUISystemLogWnd,
+    int x,
+    int y)
 {
     Release();
 
@@ -85,6 +91,7 @@ bool SEASON3B::CNewUIChatInputBox::Create(CNewUIManager* pNewUIMng, CNewUIChatLo
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CHATINPUTBOX, this);
 
     m_pNewUIChatLogWnd = pNewUIChatLogWnd;
+    m_pNewUISystemLogWnd = pNewUISystemLogWnd;
     SetWndPos(x, y);
 
     m_pChatInputBox = new CUITextInputBox;
@@ -285,27 +292,25 @@ bool SEASON3B::CNewUIChatInputBox::UpdateMouseEvent()
         }
     }
 
-    if (m_bShowChatLog)
+
+    if (CheckMouseIn(m_WndPos.x + SYSTEM_ON_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
     {
-        if (CheckMouseIn(m_WndPos.x + SYSTEM_ON_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT))
+        m_iTooltipType = INPUT_TOOLTIP_SYSTEM;
+        if (releaseMouse)
         {
-            m_iTooltipType = INPUT_TOOLTIP_SYSTEM;
-            if (releaseMouse)
+            m_bShowSystemMessages = !m_bShowSystemMessages;
+
+            if (m_bShowSystemMessages)
             {
-                m_bOnlySystemMessage = !m_bOnlySystemMessage;
-
-                if (m_bOnlySystemMessage)
-                {
-                    m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_SYSTEM_MESSAGE);
-                }
-                else
-                {
-                    m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_ALL_MESSAGE);
-                }
-
-                PlayBuffer(SOUND_CLICK01);
-                return false;
+                m_pNewUISystemLogWnd->ShowMessages();
             }
+            else
+            {
+                m_pNewUISystemLogWnd->HideMessages();
+            }
+
+            PlayBuffer(SOUND_CLICK01);
+            return false;
         }
     }
 
@@ -710,13 +715,14 @@ void SEASON3B::CNewUIChatInputBox::RenderButtons()
         RenderImage(IMAGE_INPUTBOX_WHISPER_ON, windowX + BLOCK_WHISPER_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
     }
 
+    if (m_bShowSystemMessages)
+    {
+        RenderImage(IMAGE_INPUTBOX_SYSTEM_ON, windowX + SYSTEM_ON_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
+    }
+
     if (m_bShowChatLog)
     {
         RenderImage(IMAGE_INPUTBOX_CHATLOG_ON, windowX + CHATLOG_ON_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
-        if (m_bOnlySystemMessage)
-        {
-            RenderImage(IMAGE_INPUTBOX_SYSTEM_ON, windowX + SYSTEM_ON_START_X, windowY, BUTTON_WIDTH, BUTTON_HEIGHT);
-        }
     }
 
     if (m_pNewUIChatLogWnd->IsShowFrame())

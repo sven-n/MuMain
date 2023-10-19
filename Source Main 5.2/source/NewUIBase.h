@@ -4,7 +4,7 @@
 #pragma once
 
 #include <windows.h>
-
+ 
 namespace SEASON3B
 {
     class INewUIBase

@@ -2675,6 +2675,7 @@ void CUIRenderTextOriginal::SetBgColor(DWORD dwColor) { m_dwBackColor = dwColor;
 
 void CUIRenderTextOriginal::SetFont(HFONT hFont) { SelectObject(m_hFontDC, hFont); }
 
+/// \brief Reads the Picture created by GDI and copies it to the texture bitmap.
 void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
 {
     const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
@@ -2696,21 +2697,21 @@ void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
 #endif // _DEBUG
                 return;
             }
-
-            if (*(m_pFontBuffer + SrcIndex) == 255)	// 글자
+            if (*(m_pFontBuffer + SrcIndex) == 255)	// we hit a white pixel, so here is Text
             {
-                *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwTextColor;
+                *reinterpret_cast<unsigned int*>(pBitmapFont->Buffer + DstIndex) = m_dwTextColor;
             }
-            else									// 배경
+            else // it's a black pixel, so there is no text
             {
-                //*((unsigned int *)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
-                *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = 0;
+                *reinterpret_cast<unsigned int*>(pBitmapFont->Buffer + DstIndex) = 0; // Transparent
             }
-            SrcIndex += 3;
-            DstIndex += 4;
+            SrcIndex += 3; // RBG
+            DstIndex += 4; // RGBA
         }
     }
 }
+
+/// \brief Binds the previously created texture bitmap to the opengl texture.
 void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
 {
     BITMAP_t* b = &Bitmaps[BITMAP_FONT];
@@ -2747,9 +2748,10 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
     }
 }
 
+/// \brief Renders the text with GDI to the location of m_hFontDC/m_pFontBuffer as black/white picture. Text is white.
 void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* pszText,
-    int iBoxWidth /* = 0 */, int iBoxHeight /* = 0 */,
-    int iSort /* = RT3_SORT_LEFT */, OUT SIZE* lpTextSize /* = NULL */)
+                                       int iBoxWidth /* = 0 */, int iBoxHeight /* = 0 */,
+                                       int iSort /* = RT3_SORT_LEFT */, OUT SIZE* lpTextSize /* = NULL */)
 {
     if (pszText == nullptr || (pszText[0] == '\0' && iBoxWidth == 0)) return;
     if (wcslen(pszText) <= 0 && iBoxWidth == 0) return;

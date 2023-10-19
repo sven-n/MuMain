@@ -1286,7 +1286,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::DisjointBtnDown(class CNewUIMes
 
     if (!COMGEM::FindWantedList())
     {
-        g_pChatListBox->AddText(L"", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
         return CALLBACK_BREAK;
     }
 
@@ -2025,7 +2025,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class C
 
     if (COMGEM::m_UnmixTarList.IsEmpty() == true)
     {
-        g_pChatListBox->AddText(L"", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
         COMGEM::GetBack();
         pMsgBox->ChangeMiddleFrameSmall();
     }
@@ -2052,7 +2052,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CNewU
 
     if (COMGEM::m_UnmixTarList.IsEmpty() == true)
     {
-        g_pChatListBox->AddText(L"", GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
         COMGEM::GetBack();
         pMsgBox->ChangeMiddleFrameSmall();
     }
@@ -2394,7 +2394,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessage
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
     {
-        g_pChatListBox->AddText(L"", GlobalText[592], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[592], SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else
     {
@@ -2423,7 +2423,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
     {
-        g_pChatListBox->AddText(L"", GlobalText[592], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[592], SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else
     {
@@ -2454,7 +2454,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
     {
-        g_pChatListBox->AddText(L"", GlobalText[592], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[592], SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
     else
     {
@@ -4786,7 +4786,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::ProcessOk(class CNewUIM
     }
     else
     {
-        g_pChatListBox->AddText(L"", GlobalText[1130], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1130], SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -7090,7 +7090,7 @@ CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown
     for (int i = 0; i < MAX_EQUIPMENT; i++) {
         if (CharacterMachine->Equipment[i].Type != -1)
         {
-            g_pChatListBox->AddText(Hero->ID, GlobalText[1883], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[1883], SEASON3B::TYPE_ERROR_MESSAGE);
             g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
             return CALLBACK_BREAK;
         }
@@ -7161,7 +7161,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewU
     }
     else
     {
-        g_pChatListBox->AddText(L"", GlobalText[401], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[401], SEASON3B::TYPE_ERROR_MESSAGE);
     }
 
     PlayBuffer(SOUND_CLICK01);

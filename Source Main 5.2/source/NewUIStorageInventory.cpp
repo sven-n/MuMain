@@ -443,7 +443,7 @@ void CNewUIStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInven
         pMsgBox->Initialize(GlobalText[3028], GlobalText[667]);
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
-        g_pChatListBox->AddText(L"", GlobalText[667], TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[667], TYPE_ERROR_MESSAGE);
         CNewUIInventoryCtrl::BackupPickedItem();
 
         if (IsItemAutoMove())

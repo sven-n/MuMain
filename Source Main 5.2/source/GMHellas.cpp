@@ -181,7 +181,7 @@ bool GetUseLostMap(bool bDrawAlert)
 
     if (bDrawAlert && Hero->SafeZone)
     {
-        g_pChatListBox->AddText(L"", GlobalText[1238], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1238], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -194,7 +194,7 @@ bool GetUseLostMap(bool bDrawAlert)
     {
         wchar_t Text[100];
         swprintf(Text, GlobalText[1123], g_iKalimaLevel[startIndex][0]);
-        g_pChatListBox->AddText(L"", Text, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
     }
 
     return false;

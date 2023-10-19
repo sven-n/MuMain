@@ -136,7 +136,7 @@ bool CNewUIMixInventory::ClosingProcess()
 {
     if (g_pMixInventory->GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
     {
-        g_pChatListBox->AddText(L"", GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -806,7 +806,7 @@ bool CNewUIMixInventory::Mix()
 
     if (nMixZen > (int)dwGold)
     {
-        g_pChatListBox->AddText(L"", GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -814,7 +814,7 @@ bool CNewUIMixInventory::Mix()
     {
         wchar_t szText[100];
         swprintf(szText, GlobalText[580], GlobalText[591]);
-        g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -825,14 +825,14 @@ bool CNewUIMixInventory::Mix()
         wchar_t szText2[100];
         g_MixRecipeMgr.GetCurRecipeName(szText2, 1);
         swprintf(szText, GlobalText[2347], g_MixRecipeMgr.GetCurRecipe()->m_iRequiredLevel, szText2);
-        g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
     if (g_MixRecipeMgr.GetCurRecipe()->m_iWidth != -1 &&
         g_pMyInventory->FindEmptySlot(g_MixRecipeMgr.GetCurRecipe()->m_iWidth, g_MixRecipeMgr.GetCurRecipe()->m_iHeight) == -1)
     {
-        g_pChatListBox->AddText(L"", GlobalText[581], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[581], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -848,7 +848,7 @@ bool CNewUIMixInventory::Mix()
                 BYTE bySeedSphereID = g_MixRecipeMgr.GetSeedSphereID(0);
                 if (bySocketSeedID == bySeedSphereID)
                 {
-                    g_pChatListBox->AddText(L"", GlobalText[2683], SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(GlobalText[2683], SEASON3B::TYPE_ERROR_MESSAGE);
                     return false;
                 }
             }
@@ -856,13 +856,13 @@ bool CNewUIMixInventory::Mix()
 
         if (m_SocketListBox.SLGetSelectLineNum() == 0)
         {
-            g_pChatListBox->AddText(L"", GlobalText[2676], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2676], SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
         else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
             || g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) != SOCKET_EMPTY)
         {
-            g_pChatListBox->AddText(L"", GlobalText[2677], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2677], SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
 
@@ -873,13 +873,13 @@ bool CNewUIMixInventory::Mix()
         int iSelectedLine = m_SocketListBox.GetLineNum() - m_SocketListBox.SLGetSelectLineNum();
         if (m_SocketListBox.SLGetSelectLineNum() == 0)
         {
-            g_pChatListBox->AddText(L"", GlobalText[2678], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2678], SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
         else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
             || g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) == SOCKET_EMPTY)
         {
-            g_pChatListBox->AddText(L"", GlobalText[2679], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2679], SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
         g_MixRecipeMgr.SetMixSubType(iSelectedLine);
@@ -888,7 +888,7 @@ bool CNewUIMixInventory::Mix()
 #ifdef LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
     if (g_MixRecipeMgr.GetTotalChaosCharmCount() > 0 && g_MixRecipeMgr.GetTotalCharmCount() > 0)
     {
-        g_pChatListBox->AddText(L"", GlobalText[3286], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[3286], SEASON3B::TYPE_ERROR_MESSAGE);
         return FALSE;
     }
 #endif //LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
