@@ -436,8 +436,8 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
                 CUIMng::Instance().HideWin(this);
 
                 SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
-                g_pChatListBox->AddText(L"", GlobalText[470], SEASON3B::TYPE_SYSTEM_MESSAGE);
-                g_pChatListBox->AddText(L"", GlobalText[471], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[470], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[471], SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                 int iCensorshipIndex = CGameCensorship::STATE_12;
 

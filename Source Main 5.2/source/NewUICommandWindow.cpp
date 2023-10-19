@@ -448,12 +448,12 @@ bool SEASON3B::CNewUICommandWindow::CommandTrade(CHARACTER* pSelectedCha)
 
     if (level < TRADELIMITLEVEL)
     {
-        g_pChatListBox->AddText(L"", GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (IsShopInViewport(pSelectedCha))
     {
-        g_pChatListBox->AddText(L"", GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -476,7 +476,7 @@ bool SEASON3B::CNewUICommandWindow::CommandParty(SHORT iChaKey)
 {
     if (PartyNumber > 0 && wcscmp(Party[0].Name, Hero->ID) != NULL)
     {
-        g_pChatListBox->AddText(L"", GlobalText[257], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[257], SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -496,12 +496,12 @@ bool SEASON3B::CNewUICommandWindow::CommandGuild(CHARACTER* pSelectedChar)
 {
     if (Hero->GuildStatus != G_NONE)
     {
-        g_pChatListBox->AddText(L"", GlobalText[255], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[255], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if ((pSelectedChar->GuildMarkIndex < 0) || (pSelectedChar->GuildStatus != G_MASTER))
     {
-        g_pChatListBox->AddText(L"", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
@@ -514,17 +514,17 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildUnion(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText(L"", GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus == G_NONE)
     {
-        g_pChatListBox->AddText(L"", GlobalText[1385], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1385], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText(L"", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus == G_MASTER)
@@ -540,13 +540,13 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildRival(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText(L"", GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText(L"", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
@@ -559,12 +559,12 @@ bool SEASON3B::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSelected
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText(L"", GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pChatListBox->AddText(L"", GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
@@ -604,17 +604,17 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     {
         wchar_t szError[48] = L"";
         swprintf(szError, GlobalText[2704], 30);
-        g_pChatListBox->AddText(L"", szError, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
     {
-        g_pChatListBox->AddText(L"", GlobalText[2866], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[2866], SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
     {
-        g_pChatListBox->AddText(L"", GlobalText[3063], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[3063], SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (!g_DuelMgr.IsDuelEnabled())
@@ -629,7 +629,7 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     }
     else
     {
-        g_pChatListBox->AddText(L"", GlobalText[915], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[915], SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     return 0;

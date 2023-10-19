@@ -140,6 +140,7 @@ namespace SEASON3B
     private:
         CNewUIChatInputBox* m_pNewChatInputBox;
         CNewUIChatLogWindow* m_pNewChatLogWindow;
+        CNewUISystemLogWindow* m_pNewSystemLogWindow;
         CNewUISlideWindow* m_pNewSlideWindow;
         CNewUIFriendWindow* m_pNewFriendWindow;
         CNewUIMainFrameWindow* m_pNewMainFrameWindow;
@@ -220,6 +221,7 @@ namespace SEASON3B
     public:
         CNewUIChatInputBox* GetUI_NewChatInputBox() const;
         CNewUIChatLogWindow* GetUI_NewChatLogWindow() const;
+        CNewUISystemLogWindow* GetUI_NewSystemLogWindow() const;
         CNewUISlideWindow* GetUI_NewSlideWindow() const;
         CNewUIGuildMakeWindow* GetUI_NewGuildMakeWindow() const;
         CNewUIFriendWindow* GetUI_NewFriendWindow() const;
@@ -307,6 +309,7 @@ namespace SEASON3B
 #define g_pNewItemMng SEASON3B::CNewUISystem::GetInstance()->GetUI_NewItemMng()
 #define g_pChatInputBox SEASON3B::CNewUISystem::GetInstance()->GetUI_NewChatInputBox()
 #define g_pChatListBox SEASON3B::CNewUISystem::GetInstance()->GetUI_NewChatLogWindow()
+#define g_pSystemLogBox SEASON3B::CNewUISystem::GetInstance()->GetUI_NewSystemLogWindow()
 #define g_pSlideHelpMgr SEASON3B::CNewUISystem::GetInstance()->GetUI_NewSlideWindow()
 #define g_pWindowMgr SEASON3B::CNewUISystem::GetInstance()->GetUI_NewFriendWindow()
 #define g_pMainFrame SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMainFrameWindow()

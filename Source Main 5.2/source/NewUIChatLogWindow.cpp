@@ -9,6 +9,8 @@
 
 using namespace SEASON3B;
 
+extern float g_fScreenRate_y;
+
 SEASON3B::CNewUIChatLogWindow::CNewUIChatLogWindow()
 {
     Init();
@@ -171,8 +173,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
                     g_pRenderText->SetBgColor(30, 30, 30, 180);
                     g_pRenderText->SetTextColor(255, 128, 255, 255);
                 }
-                //std::wstring strIDUTF8 = "";
-                //g_pMultiLanguage->ConvertANSIToUTF8OrViceVersa(strIDUTF8, (pMsgText->GetID()).c_str());
+
                 type_string strLine = std::wstring( pMsgText->GetID()) + L" : " + pMsgText->GetText();
                 g_pRenderText->RenderText(ptRenderPos.x, ptRenderPos.y, strLine.c_str());
             }
@@ -895,21 +896,6 @@ float SEASON3B::CNewUIChatLogWindow::GetKeyEventOrder()
     return 8.0f;
 }
 
-bool SEASON3B::CNewUIChatLogWindow::CheckChatRedundancy(const type_string& strText, int iSearchLine/* = 1*/)
-{
-    type_vector_msgs* pvecMsgs = GetMsgs(TYPE_ALL_MESSAGE);
-    if (pvecMsgs == nullptr)
-    {
-        return 0;
-    }
-
-    if (pvecMsgs->empty()) return false;
-    auto vri_msgs = pvecMsgs->rbegin();
-    for (int i = 0; (i < iSearchLine) || (vri_msgs != pvecMsgs->rend()); vri_msgs++, i++)
-        if (0 == (*vri_msgs)->GetText().compare(strText)) return true;
-    return false;
-}
-
 void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2)
 {
     extern float g_fScreenRate_x;
@@ -1082,4 +1068,273 @@ void SEASON3B::CNewUIChatLogWindow::ShowChatLog()
 void SEASON3B::CNewUIChatLogWindow::HideChatLog()
 {
     m_bShowChatLog = false;
+}
+
+SEASON3B::CNewUISystemLogWindow::CNewUISystemLogWindow()
+{
+    Init();
+}
+
+SEASON3B::CNewUISystemLogWindow::~CNewUISystemLogWindow()
+{
+    Release();
+}
+
+void SEASON3B::CNewUISystemLogWindow::Init()
+{
+    m_pNewUIMng = nullptr;
+    m_WndPos.x = m_WndPos.y = 0;
+    m_WndSize.cx = WND_WIDTH; m_WndSize.cy = 0;
+    m_nShowingLines = 6;
+    m_iCurrentRenderEndLine = -1;
+    m_fBackAlpha = 0.6f;
+}
+
+
+bool SEASON3B::CNewUISystemLogWindow::RenderMessages()
+{
+    if (!m_bShowMessages)
+    {
+        return true;
+    }
+
+    int fRenderPosX = m_WndPos.x + FONT_LEADING;
+    int fRenderPosY = m_WndPos.y - m_WndSize.cy;
+
+    if (m_vecAllMsgs.empty())
+    {
+        return true;
+    }
+
+    int iRenderStartLine = 0;
+    if (GetCurrentRenderEndLine() >= m_nShowingLines)
+    {
+        iRenderStartLine = GetCurrentRenderEndLine() - m_nShowingLines + 1;
+    }
+    else
+    {
+        fRenderPosY += FONT_LEADING;
+    }
+
+    const auto rowHeight = static_cast<int>(FontHeight * 1.2 / g_fScreenRate_y);
+
+    EnableAlphaTest();
+    for (int i = iRenderStartLine; i <= GetCurrentRenderEndLine(); i++)
+    {
+        if (i < 0 && i >= static_cast<int>(m_vecAllMsgs.size())) break;
+
+        g_pRenderText->SetFont(g_hFont);
+
+        auto const message = m_vecAllMsgs[i];
+        if (message->GetType() == TYPE_SYSTEM_MESSAGE)
+        {
+            g_pRenderText->SetBgColor(0, 0, 0, 100);
+            g_pRenderText->SetTextColor(100, 150, 255, 255);
+        }
+        else
+        {
+            g_pRenderText->SetBgColor(0, 0, 0, 100);
+            g_pRenderText->SetTextColor(255, 30, 0, 255);
+        }
+
+        g_pRenderText->RenderText(fRenderPosX, fRenderPosY + rowHeight * i, message->GetText().c_str());
+    }
+
+    DisableAlphaBlend();
+
+    return true;
+}
+
+bool SEASON3B::CNewUISystemLogWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+{
+    Release();
+
+    if (nullptr == pNewUIMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_SYSTEMLOGWINDOW, this);
+    m_WndPos.x = x;
+    m_WndPos.y = y;
+    return true;
+}
+
+void SEASON3B::CNewUISystemLogWindow::Release()
+{
+    ClearAll();
+
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = nullptr;
+    }
+
+    Init();
+}
+
+void SEASON3B::CNewUISystemLogWindow::SetPosition(int x, int y)
+{
+    m_WndPos.x = x;
+    m_WndPos.y = y;
+}
+
+void SEASON3B::CNewUISystemLogWindow::AddText(const type_string& strText, MESSAGE_TYPE MsgType)
+{
+    if (strText.empty())
+    {
+        return;
+    }
+
+    if (m_vecAllMsgs.size() >= MAX_NUMBER_OF_LINES)
+    {
+        RemoveFrontLine();
+    }
+
+    ProcessAddText(strText, MsgType);
+}
+
+void SEASON3B::CNewUISystemLogWindow::ProcessAddText(const type_string& strText, MESSAGE_TYPE MsgType)
+{
+    type_vector_msgs* pvecMsgs = &m_vecAllMsgs;
+    if (pvecMsgs == nullptr)
+    {
+        assert(!"Empty Message");
+        return;
+    }
+
+    // todo: should we even separate the lines?
+    if (strText.size() >= 20)
+    {
+        type_string	strText1, strText2;
+        SeparateText(strText, strText1, strText2);
+        if (!strText1.empty())
+        {
+            const auto pMsgText = new CMessageText;
+            if (!pMsgText->Create(L"", strText, MsgType))
+                delete pMsgText;
+            else
+            {
+                pvecMsgs->push_back(pMsgText);
+            }
+        }
+
+        if (!strText2.empty())
+        {
+            const auto pMsgText = new CMessageText;
+            if (!pMsgText->Create(L"", strText2, MsgType))
+                delete pMsgText;
+            else
+            {
+                pvecMsgs->push_back(pMsgText);
+            }
+        }
+    }
+    else
+    {
+        const auto pMsgText = new CMessageText;
+        if (!pMsgText->Create(L"", strText, MsgType))
+            delete pMsgText;
+        else
+        {
+            pvecMsgs->push_back(pMsgText);
+        }
+    }
+
+    m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
+}
+
+void SEASON3B::CNewUISystemLogWindow::RemoveFrontLine()
+{
+    auto vi = m_vecAllMsgs.begin();
+    if (vi != m_vecAllMsgs.end())
+    {
+        delete (*vi);
+        vi = m_vecAllMsgs.erase(vi);
+    }
+}
+
+int SEASON3B::CNewUISystemLogWindow::GetCurrentRenderEndLine() const
+{
+    return m_iCurrentRenderEndLine;
+}
+
+bool SEASON3B::CNewUISystemLogWindow::UpdateMouseEvent()
+{
+    return true;
+}
+
+bool SEASON3B::CNewUISystemLogWindow::UpdateKeyEvent()
+{
+    return true;
+}
+
+bool SEASON3B::CNewUISystemLogWindow::Update()
+{
+    return true;
+}
+bool SEASON3B::CNewUISystemLogWindow::Render()
+{
+    return RenderMessages();
+}
+
+float SEASON3B::CNewUISystemLogWindow::GetLayerDepth()
+{
+    return 6.05f;
+}
+
+float SEASON3B::CNewUISystemLogWindow::GetKeyEventOrder()
+{
+    return 8.0f;
+}
+
+void SEASON3B::CNewUISystemLogWindow::SeparateText(IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2)
+{
+    extern float g_fScreenRate_x;
+
+    SIZE TextSize;
+
+    float max_first_line_size = CLIENT_WIDTH * g_fScreenRate_x;
+
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strText.c_str(), strText.length(), &TextSize);
+    auto required_size = TextSize.cx;
+
+    if (required_size <= max_first_line_size)
+    {
+        strText1 = strText;
+        strText2 = L"";
+        return;
+    }
+
+    BOOL bSpaceExist = (strText.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
+    int iLocToken = strText.length();
+
+    while ((required_size > max_first_line_size) && (iLocToken > -1))
+    {
+        iLocToken = (bSpaceExist) ? strText.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
+
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (strText.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
+        required_size = TextSize.cx;
+    }
+
+    strText1 = strText.substr(0, iLocToken);
+    strText2 = strText.substr(iLocToken, strText.length() - iLocToken);
+}
+
+void SEASON3B::CNewUISystemLogWindow::ClearAll()
+{
+    auto vi_msg = m_vecAllMsgs.begin();
+    for (; vi_msg != m_vecAllMsgs.end(); vi_msg++)
+        delete (*vi_msg);
+    m_vecAllMsgs.clear();
+
+    m_iCurrentRenderEndLine = -1;
+}
+
+bool SEASON3B::CNewUISystemLogWindow::CheckChatRedundancy(const type_string& strText, int iSearchLine/* = 1*/)
+{
+    if (m_vecAllMsgs.empty()) return false;
+    auto vri_msgs = m_vecAllMsgs.rbegin();
+    for (int i = 0; (i < iSearchLine) || (vri_msgs != m_vecAllMsgs.rend()); vri_msgs++, i++)
+        if (0 == (*vri_msgs)->GetText().compare(strText)) return true;
+    return false;
 }

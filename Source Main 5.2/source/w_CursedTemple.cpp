@@ -998,22 +998,22 @@ void CursedTemple::UpdateTempleSystemMsg(int _Value)
     case 2:
         break;
     case 3:
-        g_pChatListBox->AddText(L"", GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 4:
-        g_pChatListBox->AddText(L"", GlobalText[2368], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[2368], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 5:
         swprintf(szText, GlobalText[829], 6);
-        g_pChatListBox->AddText(L"", szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 6:
         break;
     case 7:
-        g_pChatListBox->AddText(L"", GlobalText[2865], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[2865], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 8:
-        g_pChatListBox->AddText(L"", GlobalText[2175], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[2175], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
 }

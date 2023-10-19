@@ -340,20 +340,20 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
     {
         if (CharacterMachine->Gold + ItemValue(pItem) > 2000000000)
         {
-            g_pChatListBox->AddText(L"", GlobalText[3148], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[3148], SEASON3B::TYPE_SYSTEM_MESSAGE);
 
             return true;
         }
 
         if (pItem && pItem->Jewel_Of_Harmony_Option != 0)
         {
-            g_pChatListBox->AddText(L"", GlobalText[2211], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2211], SEASON3B::TYPE_ERROR_MESSAGE);
 
             return true;
         }
         if (pItem && IsSellingBan(pItem) == true)
         {
-            g_pChatListBox->AddText(L"", GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
             m_pNewInventoryCtrl->BackupPickedItem();
 
             return true;

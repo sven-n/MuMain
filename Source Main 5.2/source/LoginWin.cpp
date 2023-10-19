@@ -231,8 +231,8 @@ void CLoginWin::RequestLogin()
 
             SocketClient->ToGameServer()->SendLogin(szID, szPass, Version, Serial);
 
-            g_pChatListBox->AddText(L"", GlobalText[472], SEASON3B::TYPE_SYSTEM_MESSAGE); \
-            g_pChatListBox->AddText(L"", GlobalText[473], SEASON3B::TYPE_SYSTEM_MESSAGE); \
+            g_pSystemLogBox->AddText(GlobalText[472], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[473], SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
     }
 }

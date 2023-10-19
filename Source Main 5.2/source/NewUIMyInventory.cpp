@@ -475,14 +475,14 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         ITEM* pItemObj = pPickedItem->GetItem();
         if (pItemObj && pItemObj->Jewel_Of_Harmony_Option != 0)
         {
-            g_pChatListBox->AddText(L"", GlobalText[2217], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2217], TYPE_ERROR_MESSAGE);
 
             ResetMouseLButton();
             return false;
         }
         if (pItemObj && IsHighValueItem(pItemObj) == true)
         {
-            g_pChatListBox->AddText(L"", GlobalText[269], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[269], TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
@@ -490,7 +490,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         }
         if (pItemObj && IsDropBan(pItemObj))
         {
-            g_pChatListBox->AddText(L"", GlobalText[1915], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[1915], TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
@@ -1364,7 +1364,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
             const int iTargetIndex = m_iPointedSlot;
             if (pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
             {
-                g_pChatListBox->AddText(L"", GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
                 CNewUIInventoryCtrl::BackupPickedItem();
 
                 ResetMouseLButton();
@@ -1384,7 +1384,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
                 if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
                 {
-                    g_pChatListBox->AddText(L"", GlobalText[2285], TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(GlobalText[2285], TYPE_ERROR_MESSAGE);
                     CNewUIInventoryCtrl::BackupPickedItem();
 
                     ResetMouseLButton();
@@ -1810,7 +1810,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     {
         if (Hero->SafeZone || gMapManager.InHellas())
         {
-            g_pChatListBox->AddText(L"", GlobalText[1238], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[1238], TYPE_ERROR_MESSAGE);
             return false;
         }
 
@@ -1854,7 +1854,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     {
         if (pItem->Level == 0)
         {
-            g_pChatListBox->AddText(L"", GlobalText[2089], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2089], TYPE_ERROR_MESSAGE);
         }
         else
         {

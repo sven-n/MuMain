@@ -637,16 +637,16 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
     g_pWindowMgr->HideAllWindowClear();
     if (g_iChatInputType == 0)
     {
-        if (g_pChatListBox->CheckChatRedundancy(GlobalText[992], 2) == FALSE)
-            g_pChatListBox->AddText(L"", GlobalText[992], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[992], 2) == FALSE)
+            g_pSystemLogBox->AddText(GlobalText[992], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return;
     }
     int iLevel = CharacterAttribute->Level;
 
     if (iLevel < 6)
     {
-        if (g_pChatListBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
-            g_pChatListBox->AddText(L"", GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
+            g_pSystemLogBox->AddText(GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
         return;
     }
 
@@ -3807,7 +3807,7 @@ void ReceiveChatRoomChatText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
     if (pChatWindow->GetState() == UISTATE_READY)
     {
         g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
-        g_pChatListBox->AddText(L"", GlobalText[1063], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[1063], SEASON3B::TYPE_SYSTEM_MESSAGE);
         pChatWindow->SetState(UISTATE_HIDE);
         if (g_pWindowMgr->GetFriendMainWindow() != NULL)
         {
@@ -3830,7 +3830,9 @@ void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
         return;
     }
 
-    g_pChatListBox->AddText(L"", (wchar_t*)Data->Msg, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    wchar_t message[sizeof Data->Msg]{};
+    CMultiLanguage::ConvertFromUtf8(message, Data->Msg, sizeof Data->Msg);
+    g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
 void TranslateChattingProtocol(DWORD dwWindowUIID, const BYTE* ReceiveBuffer, int Size)

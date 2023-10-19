@@ -199,7 +199,7 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
         }
         else
         {
-            g_pChatListBox->AddText(L"", GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
         }
 
         return false;

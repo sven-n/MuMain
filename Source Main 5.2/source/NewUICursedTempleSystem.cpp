@@ -543,7 +543,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
                 }
                 else
                 {
-                    g_pChatListBox->AddText(L"", GlobalText[2092], SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(GlobalText[2092], SEASON3B::TYPE_ERROR_MESSAGE);
                 }
             }
             else
@@ -1129,7 +1129,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJE
 
     if (m_SkillPoint < MaxKillCount)
     {
-        g_pChatListBox->AddText(L"", GlobalText[2392], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[2392], SEASON3B::TYPE_ERROR_MESSAGE);
         MouseRButtonPush = false;
         return;
     }
@@ -1367,13 +1367,13 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pChatListBox->AddText(L"", GlobalText[2360], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2360], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         else if (m_IllusionPoint != data->btIllusionPoint)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pChatListBox->AddText(L"", GlobalText[2361], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2361], SEASON3B::TYPE_ERROR_MESSAGE);
         }
     }
     else
@@ -1382,13 +1382,13 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pChatListBox->AddText(L"", GlobalText[2363], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2363], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         else if (m_AlliedPoint != data->btAlliedPoint)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pChatListBox->AddText(L"", GlobalText[2364], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(GlobalText[2364], SEASON3B::TYPE_ERROR_MESSAGE);
         }
     }
 
@@ -1426,7 +1426,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE*
         wchar_t message[100];
         memset(&message, 0, sizeof(char));
         swprintf(message, GlobalText[2391], data->btSkillPoint - m_SkillPoint);
-        g_pChatListBox->AddText(L"", message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
     m_SkillPoint = data->btSkillPoint;
