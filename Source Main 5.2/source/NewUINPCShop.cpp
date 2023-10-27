@@ -407,6 +407,12 @@ bool SEASON3B::CNewUINPCShop::BtnProcess()
     return false;
 }
 
+void SEASON3B::CNewUINPCShop::DeleteAllItems()
+{
+    if (m_pNewInventoryCtrl)
+        m_pNewInventoryCtrl->RemoveAllItems();
+}
+
 void SEASON3B::CNewUINPCShop::OpenningProcess()
 {
     if (SEASON3B::IsRepeat(VK_LBUTTON))

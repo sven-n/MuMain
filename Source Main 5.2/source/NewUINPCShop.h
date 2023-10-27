@@ -82,6 +82,7 @@ namespace SEASON3B
         bool InsertItem(int iIndex, BYTE* pbyItemPacket);
 
         void OpenningProcess();
+        void DeleteAllItems();
 
         void ClosingProcess();
         void SetRepairShop(bool bRepair);

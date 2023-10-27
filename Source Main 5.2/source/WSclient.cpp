@@ -1324,6 +1324,11 @@ void ReceiveTradeInventory(const BYTE* ReceiveBuffer)
             ShopInventory[i].Type = -1;
             ShopInventory[i].Number = 0;
         }
+
+        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+        {
+            g_pNPCShop->DeleteAllItems();
+        }
     }
 
     for (int i = 0; i < Data->Value; i++)
@@ -1340,7 +1345,7 @@ void ReceiveTradeInventory(const BYTE* ReceiveBuffer)
         }
         else
         {
-            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == true)
+            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
             {
                 g_pNPCShop->InsertItem(Data2->Index, Data2->Item);
             }
