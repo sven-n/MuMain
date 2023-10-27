@@ -1442,35 +1442,30 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     switch (WindowHeight)
     {
-        case 480:FontHeight = 12; break;
-        case 600:FontHeight = 13; break;
-        case 768:FontHeight = 14; break;
-        case 900:FontHeight = 14; break;
-        case 1024:FontHeight = 14; break;
-        case 1050:FontHeight = 15; break;
-        case 1080: FontHeight = 15; break;
-        case 1200: FontHeight = 16; break;
-        case 1280: FontHeight = 16; break;
-        case 1400: FontHeight = 17; break;
-        case 1440: FontHeight = 18; break;
+        case 480:FontHeight = 13; break;
+        case 600:FontHeight = 14; break;
+        case 768:FontHeight = 16; break;
+        case 900:FontHeight = 16; break;
+        case 1024:FontHeight = 16; break;
+        case 1050:FontHeight = 17; break;
+        case 1080: FontHeight = 17; break;
+        case 1200: FontHeight = 18; break;
+        case 1280: FontHeight = 18; break;
+        case 1400: FontHeight = 19; break;
+        case 1440: FontHeight = 20; break;
     }
 
-    int nFixFontHeight = 13;
+    int nFixFontHeight = WindowHeight <= 600 ? 14 : 15;
     int nFixFontSize;
     int iFontSize;
 
     iFontSize = FontHeight - 1;
     nFixFontSize = nFixFontHeight - 1;
 
-    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-
-    //g_hFont		= CreateFont(iFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
-    //g_hFontBold = CreateFont(iFontSize,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
-    //g_hFontBig	= CreateFont(iFontSize*2,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,GlobalText[0][0] ? GlobalText[0] : NULL);
-    //g_hFixFont	= CreateFont(nFixFontSize,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH | FF_DONTCARE,GlobalText[18][0] ? GlobalText[18] : NULL);
+    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
 
     setlocale(LC_ALL, "english");
 
