@@ -14284,34 +14284,32 @@ CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key)
         c->Object.Scale = 1.0f;
         c->Object.m_fEdgeScale = 1.1f;
         break;
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
+
     case 566:
-        OpenNpc(MODEL_TIME_LIMIT_QUEST_NPC_TERSIA);
-        c = CreateCharacter(Key, MODEL_TIME_LIMIT_QUEST_NPC_TERSIA, PositionX, PositionY);
+        OpenNpc(MODEL_TERSIA);
+        c = CreateCharacter(Key, MODEL_TERSIA, PositionX, PositionY);
         wcscpy(c->ID, L"길드관리인 테르시아");
         c->Object.Scale = 0.93f;
         break;
     case 567:
-        OpenNpc(MODEL_TIME_LIMIT_QUEST_NPC_BENA);
-        c = CreateCharacter(Key, MODEL_TIME_LIMIT_QUEST_NPC_BENA, PositionX, PositionY);
+        OpenNpc(MODEL_BENA);
+        c = CreateCharacter(Key, MODEL_BENA, PositionX, PositionY);
         wcscpy(c->ID, L"신녀 베이나");
         c->Object.Position[2] += 145.0f;
         break;
     case 568:
     {
-        OpenNpc(MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO);
-        c = CreateCharacter(Key, MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO, PositionX, PositionY);
+        OpenNpc(MODEL_ZAIRO);
+        c = CreateCharacter(Key, MODEL_ZAIRO, PositionX, PositionY);
         wcscpy(c->ID, L"떠돌이상인 자이로");
         c->Object.LifeTime = 100;
         c->Object.Scale = 0.8f;
         c->Object.m_fEdgeScale = 1.1f;
         int i;
         for (i = 0; i < 6; ++i)
-            Models[MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO].Actions[i].PlaySpeed = 0.33f;
+            Models[MODEL_ZAIRO].Actions[i].PlaySpeed = 0.33f;
     }
     break;
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_NPC
-#ifdef ASG_ADD_KARUTAN_NPC
     case 577:
         OpenNpc(MODEL_KARUTAN_NPC_REINA);
         c = CreateCharacter(Key, MODEL_KARUTAN_NPC_REINA, PositionX, PositionY);
@@ -14325,7 +14323,7 @@ CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key)
         wcscpy(c->ID, L"무기상인 볼로");
         c->Object.Scale = 0.9f;
         break;
-#endif	// ASG_ADD_KARUTAN_NPC
+
     }
 
     Setting_Monster(c, Type, PositionX, PositionY);

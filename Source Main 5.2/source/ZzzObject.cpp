@@ -2449,20 +2449,16 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
-                else if (o->Type == MODEL_TIME_LIMIT_QUEST_NPC_TERSIA)
+                else if (o->Type == MODEL_TERSIA)
                 {
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                     b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha * 0.4f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 }
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_NPC
-
                 else if (o->Type == MODEL_LUCKYITEM_NPC)
                 {
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                     b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha * 0.4f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 }
-#ifdef ASG_ADD_KARUTAN_NPC
                 else if (o->Type == MODEL_KARUTAN_NPC_VOLVO)
                 {
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
@@ -2471,8 +2467,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi,
                         o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_VOLO_SKIN_EFFECT);
                 }
-#endif	// ASG_ADD_KARUTAN_NPC
-
                 else if (o->Type == MODEL_WOLF_HEAD_EFFECT2)
                 {
                     float _BlendLight = o->BlendMeshLight;

@@ -2209,7 +2209,6 @@ void OpenNpc(int Type)
         gLoadData.AccessModel(MODEL_UNITEDMARKETPLACE_JULIA, L"Data\\Npc\\", L"UnitedMarkedPlace_julia");
         gLoadData.OpenTexture(MODEL_UNITEDMARKETPLACE_JULIA, L"Npc\\");
         break;
-#ifdef ASG_ADD_KARUTAN_NPC
     case MODEL_KARUTAN_NPC_REINA:	// 로랜시장 NPC 잡화상인 크리스틴과 동일.
         gLoadData.AccessModel(MODEL_KARUTAN_NPC_REINA, L"Data\\Npc\\", L"UnitedMarketPlace_christine");
         gLoadData.OpenTexture(MODEL_KARUTAN_NPC_REINA, L"Npc\\");
@@ -2218,12 +2217,10 @@ void OpenNpc(int Type)
         gLoadData.AccessModel(MODEL_KARUTAN_NPC_VOLVO, L"Data\\Npc\\", L"volvo");
         gLoadData.OpenTexture(MODEL_KARUTAN_NPC_VOLVO, L"Npc\\");
         break;
-#endif	// ASG_ADD_KARUTAN_NPC
     case MODEL_LUCKYITEM_NPC:
         gLoadData.AccessModel(MODEL_LUCKYITEM_NPC, L"Data\\Npc\\LuckyItem\\", L"npc_burial");
         gLoadData.OpenTexture(MODEL_LUCKYITEM_NPC, L"Npc\\LuckyItem\\");
         break;
-#endif // LEM_ADD_LUCKYITEM
     case MODEL_TERSIA:
         gLoadData.AccessModel(MODEL_TERSIA, L"Data\\Npc\\", L"tersia");
         gLoadData.OpenTexture(MODEL_TERSIA, L"Npc\\");
@@ -2278,25 +2275,19 @@ void OpenNpc(int Type)
         Models[Type].Actions[MONSTER01_WALK].PlaySpeed = 0.5f;
         break;
     case MODEL_UNITEDMARKETPLACE_CHRISTIN:
-#ifdef ASG_ADD_KARUTAN_NPC
     case MODEL_KARUTAN_NPC_REINA:
-#endif	// ASG_ADD_KARUTAN_NPC
         Models[Type].Actions[MONSTER01_STOP1].PlaySpeed = 0.5f;
         Models[Type].Actions[MONSTER01_STOP2].PlaySpeed = 0.6f;
         Models[Type].Actions[MONSTER01_WALK].PlaySpeed = 0.5f;
         break;
-#ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
-    case MODEL_TIME_LIMIT_QUEST_NPC_TERSIA:
+    case MODEL_TERSIA:
         Models[Type].Actions[MONSTER01_STOP1].PlaySpeed = 0.35f;
         Models[Type].Actions[MONSTER01_STOP2].PlaySpeed = 0.3f;
         break;
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_NPC
-#ifdef ASG_ADD_KARUTAN_NPC
     case MODEL_KARUTAN_NPC_VOLVO:
         Models[Type].Actions[MONSTER01_STOP1].PlaySpeed = 0.2f;
         Models[Type].Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         break;
-#endif	// ASG_ADD_KARUTAN_NPC
     }
 
     //#endif
@@ -5339,7 +5330,6 @@ void OpenBasicData(HDC hDC)
     //LoadBitmap(L"Item\\goldenmaple_cham_R.jpg",	BITMAP_GOLDEN_MAPLE_CHAM_LAYER_R,	GL_LINEAR, GL_CLAMP_TO_EDGE);
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 
-#ifdef ASG_ADD_KARUTAN_MONSTERS
     ::LoadBitmap(L"Monster\\BoneSE.jpg", BITMAP_BONE_SCORPION_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
     ::LoadBitmap(L"Monster\\KryptaBall2.jpg", BITMAP_KRYPTA_BALL_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
     ::LoadBitmap(L"Monster\\bora_golem_effect.jpg", BITMAP_CONDRA_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -5347,11 +5337,9 @@ void OpenBasicData(HDC hDC)
     ::LoadBitmap(L"Monster\\king_golem01_effect.jpg", BITMAP_NARCONDRA_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
     ::LoadBitmap(L"Monster\\king_golem02_effect.jpg", BITMAP_NARCONDRA_SKIN_EFFECT2, GL_LINEAR, GL_CLAMP_TO_EDGE);
     ::LoadBitmap(L"Monster\\king_golem03_effect.jpg", BITMAP_NARCONDRA_SKIN_EFFECT3, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif	// ASG_ADD_KARUTAN_MONSTERS
 
-#ifdef ASG_ADD_KARUTAN_NPC
     ::LoadBitmap(L"NPC\\voloE.jpg", BITMAP_VOLO_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
-#endif	// ASG_ADD_KARUTAN_NPC
+
 
     g_ErrorReport.Write(L"> First Load Files OK.\r\n");
 
