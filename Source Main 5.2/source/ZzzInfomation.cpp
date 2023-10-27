@@ -979,9 +979,7 @@ void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE Attribute3)
         || ITEM_PANTS + 43 == ip->Type
         || ITEM_GLOVES + 43 == ip->Type
         || ITEM_BOOTS + 43 == ip->Type
-#ifdef LEM_ADD_LUCKYITEM
         || Check_LuckyItem(ip->Type)
-#endif // LEM_ADD_LUCKYITEM
         )
     {
         excel = 0;
@@ -2315,9 +2313,7 @@ EXIT_CALCULATE:
     {
         Gold = (Gold / 10) * 10;
     }
-#ifdef LEM_ADD_LUCKYITEM
     if (Check_LuckyItem(ip->Type))	Gold = 0;
-#endif // LEM_ADD_LUCKYITEM
 
     return (int)Gold;
 }

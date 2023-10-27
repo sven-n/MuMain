@@ -366,10 +366,7 @@ bool SEASON3B::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY)
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY)
-#ifdef LEM_ADD_LUCKYITEM
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-#endif // LEM_ADD_LUCKYITEM
-
         )
     {
         return true;

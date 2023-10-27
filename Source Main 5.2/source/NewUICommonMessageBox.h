@@ -785,7 +785,6 @@ namespace SEASON3B
         static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-#ifdef LEM_ADD_LUCKYITEM
     class CLuckyItemMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
     {
     public:
@@ -793,7 +792,6 @@ namespace SEASON3B
         static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
-#endif // LEM_ADD_LUCKYITEM
 }
 
 #endif // !defined(AFX_NEWUICOMMONMESSAGEBOX_H__AA370602_D171_41DC_9A79_345D75F678D4__INCLUDED_)

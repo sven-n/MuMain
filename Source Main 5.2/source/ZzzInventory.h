@@ -201,13 +201,10 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
 
 BYTE CaculateFreeTicketLevel(int iType);
 
-#ifdef LEM_ADD_LUCKYITEM
 bool Check_ItemAction(ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType = false);
 bool Check_LuckyItem(int _nIndex, int _nType = 0);
 sItemAct Set_ItemActOption(int _nIndex, int _nOption);
-#endif // LEM_ADD_LUCKYITEM
-#ifdef KJH_FIX_SELL_LUCKYITEM
+
 bool IsLuckySetItem(int iType);
-#endif // KJH_FIX_SELL_LUCKYITEM
 
 #endif //__ZZZINVENTORY_H__

@@ -1305,9 +1305,7 @@ void RepairAllGold(void)
             {
                 int gold = ConvertRepairGold(ItemValue(ip, 2), ip->Durability, maxDurability, ip->Type, text);
 
-#ifdef LEM_ADD_LUCKYITEM
                 if (Check_LuckyItem(ip->Type))	gold = 0;
-#endif // LEM_ADD_LUCKYITEM
                 AllRepairGold += gold;
             }
         }
@@ -1517,17 +1515,13 @@ void RepairAllGold(void)
             if (pItem->Type == ITEM_HELPER + 107)
                 continue;
 
-#ifdef LEM_ADD_LUCKYITEM
             if (Check_ItemAction(pItem, eITEM_REPAIR))	continue;
-#endif // LEM_ADD_LUCKYITEM
 
             //. check durability
             if (pItem->Durability < maxDurability)
             {
                 int gold = ConvertRepairGold(ItemValue(pItem, 2), pItem->Durability, maxDurability, pItem->Type, text);
-#ifdef LEM_ADD_LUCKYITEM
                 if (Check_LuckyItem(pItem->Type))	gold = 0;
-#endif // LEM_ADD_LUCKYITEM
                 AllRepairGold += gold;
             }
         }
@@ -1632,12 +1626,11 @@ WORD calcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     {
         maxDurability += 15;
     }
-#ifdef LEM_ADD_LUCKYITEM
+
     if (Check_LuckyItem(ip->Type))
     {
         maxDurability = 255;
     }
-#endif // LEM_ADD_LUCKYITEM
 
     return  maxDurability;
 }
@@ -2165,10 +2158,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         ip->Type == ITEM_HELPER + 52 || ip->Type == ITEM_HELPER + 53 ||
         ip->Type == ITEM_POTION + 100 ||
         (ip->Type >= ITEM_POTION + 141 && ip->Type <= ITEM_POTION + 144) ||
-#ifdef LEM_ADD_LUCKYITEM
         (ip->Type >= ITEM_HELPER + 135 && ip->Type <= ITEM_HELPER + 145) ||
         (ip->Type == ITEM_POTION + 160 || ip->Type == ITEM_POTION + 161) ||
-#endif // LEM_ADD_LUCKYITEM
         ip->Type == ITEM_POTION + 16 || ip->Type == ITEM_POTION + 22)
     {
         Color = TEXT_COLOR_YELLOW;
@@ -4292,7 +4283,6 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         swprintf(TextList[TextNum], GlobalText[2210]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
-#ifdef LEM_ADD_LUCKYITEM
     else if (ip->Type == ITEM_POTION + 160)
     {
         // 연장의 보석
@@ -4305,7 +4295,6 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         swprintf(TextList[TextNum], GlobalText[2209]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
-#endif // LEM_ADD_LUCKYITEM
     else if ((ip->Type >= ITEM_WING + 3 && ip->Type <= ITEM_WING + 6) || ip->Type == ITEM_WING + 42) //날개
     {
         swprintf(TextList[TextNum], GlobalText[577], 32 + Level);  //  데미지 몇%증가.
@@ -4733,8 +4722,6 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 TextNum++;
             }
         }
-
-#ifdef LEM_ADD_LUCKYITEM
         else if (ip->Type >= ITEM_HELPER + 135 && ip->Type <= ITEM_HELPER + 145)
         {
             swprintf(TextList[TextNum], GlobalText[2261]);
@@ -4744,8 +4731,6 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
             Success = true;
         }
-#endif // LEM_ADD_LUCKYITEM
-
         else if ((bDurExist) && (ip->bPeriodItem == false))
         {
             int maxDurability = calcMaxDurability(ip, p, Level);
@@ -4836,9 +4821,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     int si_iNeedStrength = 0, si_iNeedDex = 0;
     bool bRequireStat = true;
 
-#ifdef LEM_ADD_LUCKYITEM
     if (Check_LuckyItem(ip->Type)) bRequireStat = false;
-#endif // LEM_ADD_LUCKYITEM
 
     if (Level >= ip->Jewel_Of_Harmony_OptionLevel)
     {
@@ -7450,9 +7433,7 @@ int GetScreenWidth()
             || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT)
             || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY)
             || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION)
-#ifdef LEM_ADD_LUCKYITEM
             || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-#endif // LEM_ADD_LUCKYITEM
             ))
     {
         iWidth = 640 - (190 * 2);
@@ -7920,9 +7901,7 @@ bool IsPersonalShopBan(ITEM* pItem)
     {
         return true;
     }
-#ifdef LEM_ADD_LUCKYITEM
     if (Check_ItemAction(pItem, eITEM_PERSONALSHOP))	return true;
-#endif // LEM_ADD_LUCKYITEM
 
     return false;
 }
@@ -7970,9 +7949,7 @@ bool IsTradeBan(ITEM* pItem)
         else
             return true;
     }
-#ifdef LEM_ADD_LUCKYITEM
     if (Check_ItemAction(pItem, eITEM_TRADE))	return true;
-#endif // LEM_ADD_LUCKYITEM
 
     return false;
 }
@@ -8005,14 +7982,12 @@ bool IsStoreBan(ITEM* pItem)
     {
         return true;
     }
-#ifdef LEM_ADD_LUCKYITEM
+
     if (Check_ItemAction(pItem, eITEM_STORE))	return true;
-#endif // LEM_ADD_LUCKYITEM
 
     return false;
 }
 
-#ifdef LEM_ADD_LUCKYITEM
 sItemAct Set_ItemActOption(int _nIndex, int _nOption)
 {
     sItemAct	sItem;
@@ -8069,9 +8044,7 @@ bool Check_LuckyItem(int _nIndex, int _nType)
 
     return false;
 }
-#endif // LEM_ADD_LUCKYITEM
 
-#ifdef KJH_FIX_SELL_LUCKYITEM
 bool IsLuckySetItem(int iType)
 {
     int iItemIndex = iType % MAX_ITEM_INDEX;
@@ -8088,7 +8061,6 @@ bool IsLuckySetItem(int iType)
 
     return false;
 }
-#endif // KJH_FIX_SELL_LUCKYITEM
 
 bool IsDropBan(ITEM* pItem)
 {
@@ -8134,9 +8106,8 @@ bool IsDropBan(ITEM* pItem)
     {
         return true;
     }
-#ifdef LEM_ADD_LUCKYITEM
+
     if (Check_ItemAction(pItem, eITEM_DROP))	return true;
-#endif // LEM_ADD_LUCKYITEM
 
     return false;
 }
@@ -8210,9 +8181,8 @@ bool IsSellingBan(ITEM* pItem)
     {
         return true;
     }
-#ifdef LEM_ADD_LUCKYITEM
+
     if (Check_ItemAction(pItem, eITEM_SELL))	return true;
-#endif // LEM_ADD_LUCKYITEM
 
     return false;
 }
@@ -8282,9 +8252,8 @@ bool IsRepairBan(ITEM* pItem)
     {
         return true;
     }
-#ifdef LEM_ADD_LUCKYITEM
+
     if (Check_ItemAction(pItem, eITEM_REPAIR))	return true;
-#endif // LEM_ADD_LUCKYITEM
 
     return false;
 }
@@ -9420,7 +9389,6 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] += 0.05f;
         Position[0] += 0.005f;
     }
-#ifdef LEM_ADD_LUCKYITEM
     else if (Type >= MODEL_HELPER + 135 && Type <= MODEL_HELPER + 145)
     {
         Position[1] += 0.02f;
@@ -9431,7 +9399,6 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] += 0.05f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-#endif // LEM_ADD_LUCKYITEM
     else if (COMGEM::Check_Jewel_Com(Type - MODEL_ITEM) != COMGEM::NOGEM)
     {
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
@@ -9565,18 +9532,14 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
     {
         b->BodyHeight = -160.f;
 
-#ifdef LEM_ADD_LUCKYITEM
         if (Check_LuckyItem(Type - MODEL_ITEM))				b->BodyHeight -= 10.0f;
         if (Type == MODEL_HELM + 65 || Type == MODEL_HELM + 70)	Position[0] += 0.04f;
-#endif // LEM_ADD_LUCKYITEM
     }
     else if (Type >= MODEL_ARMOR && Type < MODEL_ARMOR + MAX_ITEM_INDEX)
     {
         b->BodyHeight = -100.f;
 
-#ifdef LEM_ADD_LUCKYITEM
         if (Check_LuckyItem(Type - MODEL_ITEM))	b->BodyHeight -= 13.0f;
-#endif // LEM_ADD_LUCKYITEM
     }
     else if (Type >= MODEL_GLOVES && Type < MODEL_GLOVES + MAX_ITEM_INDEX)
         b->BodyHeight = -70.f;
@@ -9594,9 +9557,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
             if (Type == MODEL_HELM + 31)
                 Scale = 0.007f;
 
-#ifdef LEM_ADD_LUCKYITEM
             if (Type == MODEL_HELM + 65 || Type == MODEL_HELM + 70)	Scale = 0.007f;
-#endif // LEM_ADD_LUCKYITEM
         }
         else if (Type >= MODEL_ARMOR && Type < MODEL_ARMOR + MAX_ITEM_INDEX)
             Scale = 0.0039f;
@@ -10341,7 +10302,6 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
             b->BodyHeight = -100.f;
             Scale = 0.0039f;
         }
-#ifdef LEM_ADD_LUCKYITEM	// 럭키아이템 인벤토리 스케일 설정 [lem_2010.9.7]
         // LEM_TSET  상승의 보석, 연장의 보석 스케일[lem_2010.9.7]
         else if (Type >= MODEL_HELPER + 135 && Type <= MODEL_HELPER + 145)
         {
@@ -10355,7 +10315,6 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         {
             Scale = 0.001f;
         }
-#endif // LEM_ADD_LUCKYITEM
     }
 
     b->Animation(BoneTransform, ObjectSelect.AnimationFrame, ObjectSelect.PriorAnimationFrame, ObjectSelect.PriorAction, ObjectSelect.Angle, ObjectSelect.HeadAngle, false, false);

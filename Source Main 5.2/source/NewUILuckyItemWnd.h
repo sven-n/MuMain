@@ -85,7 +85,8 @@ namespace SEASON3B
     public:
         CNewUIInventoryCtrl* GetInventoryCtrl() const;
 
-        int		SetWndAction(eLUCKYITEM _eType);
+        int		SetActAction();
+        STORAGE_TYPE SetMoveAction();
         void	GetResult(BYTE _byResult, int _nIndex, BYTE* _pbyItemPacket = NULL);
         bool	Process_BTN_Action(void);
         bool	Process_InventoryCtrl_InsertItem(int iIndex, BYTE* pbyItemPacket);

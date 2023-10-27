@@ -80,9 +80,7 @@
 #include "NewUIGensRanking.h"
 #include "NewUIUnitedMarketPlaceWindow.h"
 #include "MultiLanguage.h"
-#ifdef LEM_ADD_LUCKYITEM
 #include "NewUILuckyItemWnd.h"
-#endif // LEM_ADD_LUCKYITEM
 #include "NewUIMuHelper.h"
 
 namespace SEASON3B
@@ -214,9 +212,7 @@ namespace SEASON3B
         CNewUIMiniMap* m_pNewMiniMap;
         CNewUIGensRanking* m_pNewGensRanking;
         CNewUIUnitedMarketPlaceWindow* m_pNewUnitedMarketPlaceWindow;
-#ifdef LEM_ADD_LUCKYITEM
         CNewUILuckyItemWnd* m_pNewUILuckyItemWnd;
-#endif // LEM_ADD_LUCKYITEM
         CNewUIMuHelper* m_pNewUIMuHelper;
     public:
         CNewUIChatInputBox* GetUI_NewChatInputBox() const;
@@ -295,9 +291,7 @@ namespace SEASON3B
         CNewUIGensRanking* GetUI_NewGensRanking() const;
         CNewUIUnitedMarketPlaceWindow* GetUI_pNewUnitedMarketPlaceWindow() const;
         //CNewUIUnitedMarketPlaceWindow*	GetUI_pNewUnitedMarketPlaceFrame() const;
-#ifdef LEM_ADD_LUCKYITEM
         CNewUILuckyItemWnd* Get_pNewUILuckyItemWnd() const;
-#endif // LEM_ADD_LUCKYITEM
         CNewUIMuHelper* Get_pNewUIMuHelper() const;
     };
 }
@@ -383,8 +377,6 @@ namespace SEASON3B
 #define g_pNewUIStamina SEASON3B::CNewUISystem::GetInstance()->GetUI_pNewUIStamina()
 #endif //PBG_MOD_STAMINA_UI
 #define g_pNewUIGensRanking SEASON3B::CNewUISystem::GetInstance()->GetUI_NewGensRanking()
-#ifdef LEM_ADD_LUCKYITEM
 #define g_pLuckyItemWnd	SEASON3B::CNewUISystem::GetInstance()->Get_pNewUILuckyItemWnd()
-#endif // LEM_ADD_LUCKYITEM
 #define g_pNewUIMuHelper SEASON3B::CNewUISystem::GetInstance()->Get_pNewUIMuHelper();
 #endif // _NEWUISYSTEM_H_

@@ -477,11 +477,9 @@ bool CNewUISystem::LoadMainSceneInterface()
     if (m_pNewUnitedMarketPlaceWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640 - 190, 0) == false)
         return false;
 
-#ifdef LEM_ADD_LUCKYITEM
     m_pNewUILuckyItemWnd = new CNewUILuckyItemWnd;
     if (m_pNewUILuckyItemWnd->Create(m_pNewUIMng, 260, 0) == false)
         return false;
-#endif // LEM_ADD_LUCKYITEM
 
     m_pNewUIMuHelper = new CNewUIMuHelper;
     if (m_pNewUIMuHelper->Create(m_pNewUIMng, 640 - 190, 0) == false)
@@ -1070,14 +1068,12 @@ void CNewUISystem::Show(DWORD dwKey)
     {
         m_pNewUnitedMarketPlaceWindow->OpeningProcess();
     }
-#ifdef LEM_ADD_LUCKYITEM
     else if (dwKey == SEASON3B::INTERFACE_LUCKYITEMWND)
     {
         HideAllGroupA();
         g_pLuckyItemWnd->OpeningProcess();
         m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
     }
-#endif // LEM_ADD_LUCKYITEM
 
     m_pNewUIMng->ShowInterface(dwKey);
 
@@ -1154,14 +1150,12 @@ void CNewUISystem::Hide(DWORD dwKey)
                 return;
             m_pNewUIMng->ShowInterface(INTERFACE_MIXINVENTORY, false);
         }
-#ifdef LEM_ADD_LUCKYITEM
         if (IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND))
         {
             if (g_pLuckyItemWnd->ClosingProcess() == false)
                 return;
             m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_LUCKYITEMWND, false);
         }
-#endif // LEM_ADD_LUCKYITEM
         if (IsVisible(INTERFACE_NPCSHOP))
         {
             g_pNPCShop->ClosingProcess();
@@ -1202,13 +1196,11 @@ void CNewUISystem::Hide(DWORD dwKey)
             m_pNewUIMng->ShowInterface(INTERFACE_EXCHANGE_LUCKYCOIN, false);
         }
 
-#ifdef LEM_ADD_LUCKYITEM
         if (IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND))
         {
             m_pNewUILuckyItemWnd->ClosingProcess();
             m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_LUCKYITEMWND, false);
         }
-#endif // LEM_ADD_LUCKYITEM
 
         g_pMyInventory->SetPos(640 - 190, 0);
         g_pMyInventory->ClosingProcess();
@@ -1472,7 +1464,6 @@ void CNewUISystem::Hide(DWORD dwKey)
     {
         m_pNewUnitedMarketPlaceWindow->ClosingProcess();
     }
-#ifdef LEM_ADD_LUCKYITEM
     else if (dwKey == SEASON3B::INTERFACE_LUCKYITEMWND)
     {
         if (g_pLuckyItemWnd->ClosingProcess() == false)
@@ -1483,7 +1474,6 @@ void CNewUISystem::Hide(DWORD dwKey)
             m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
         }
     }
-#endif // LEM_ADD_LUCKYITEM
 
     m_pNewUIMng->ShowInterface(dwKey, false);
 
@@ -1559,9 +1549,7 @@ void CNewUISystem::HideAllGroupA()
 #endif //PBG_ADD_GENSRANKING
         INTERFACE_UNITEDMARKETPLACE_NPC_JULIA,
 
-#ifdef LEM_ADD_LUCKYITEM
         SEASON3B::INTERFACE_LUCKYITEMWND,
-#endif // LEM_ADD_LUCKYITEM
 
         0,
     };
@@ -1621,9 +1609,7 @@ void CNewUISystem::HideAllGroupB()
         INTERFACE_GENSRANKING,
 #endif //PBG_ADD_GENSRANKING
         INTERFACE_UNITEDMARKETPLACE_NPC_JULIA,
-#ifdef LEM_ADD_LUCKYITEM
         SEASON3B::INTERFACE_LUCKYITEMWND,
-#endif // LEM_ADD_LUCKYITEM
 
         0,
     };
@@ -1741,9 +1727,7 @@ bool CNewUISystem::IsImpossibleSendMoveInterface()
 {
     if (IsVisible(INTERFACE_MIXINVENTORY)
         || IsVisible(INTERFACE_KANTURU2ND_ENTERNPC)
-#ifdef LEM_ADD_LUCKYITEM
         || IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-#endif // LEM_ADD_LUCKYITEM
         )
     {
         return true;
@@ -1761,9 +1745,7 @@ bool CNewUISystem::IsImpossibleTradeInterface()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
         || IsVisible(INTERFACE_INGAMESHOP)
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
-#ifdef LEM_ADD_LUCKYITEM
         || IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-#endif // LEM_ADD_LUCKYITEM
         )
     {
         return true;
@@ -1781,9 +1763,7 @@ bool CNewUISystem::IsImpossibleDuelInterface()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
         || IsVisible(INTERFACE_INGAMESHOP)
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
-#ifdef LEM_ADD_LUCKYITEM
         || IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-#endif // LEM_ADD_LUCKYITEM
         )
     {
         return true;
@@ -2312,12 +2292,10 @@ CNewUIUnitedMarketPlaceWindow* CNewUISystem::GetUI_pNewUnitedMarketPlaceWindow()
     return m_pNewUnitedMarketPlaceWindow;
 }
 
-#ifdef LEM_ADD_LUCKYITEM
 CNewUILuckyItemWnd* SEASON3B::CNewUISystem::Get_pNewUILuckyItemWnd() const
 {
     return m_pNewUILuckyItemWnd;
 }
-#endif // LEM_ADD_LUCKYITEM
 
 CNewUIMuHelper* CNewUISystem::Get_pNewUIMuHelper() const
 {

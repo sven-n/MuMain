@@ -331,10 +331,8 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
     if (!pPickedItem)			return false;
     ITEM* pItem = pPickedItem->GetItem();
 
-#ifdef LEM_ADD_LUCKYITEM
     if (IsSellingBan(pItem))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
     else	m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
-#endif // LEM_ADD_LUCKYITEM
 
     if (SEASON3B::IsRelease(VK_LBUTTON) == true && m_pNewInventoryCtrl->CheckPtInRect(MouseX, MouseY) == true && m_bSellingItem == false)
     {

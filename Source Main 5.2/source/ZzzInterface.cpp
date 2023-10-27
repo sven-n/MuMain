@@ -3522,9 +3522,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                     CharactersClient[TargetNpc].MonsterIndex == 246 ||
                     CharactersClient[TargetNpc].MonsterIndex == 251
                     || CharactersClient[TargetNpc].MonsterIndex == 416
-#ifdef ASG_ADD_KARUTAN_NPC
                     || CharactersClient[TargetNpc].MonsterIndex == 578
-#endif	// ASG_ADD_KARUTAN_NPC
                     )
                 {
                     g_pNPCShop->SetRepairShop(true);
@@ -4086,9 +4084,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
                 || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
                 || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
-#ifdef LEM_ADD_LUCKYITEM
                 || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-#endif // LEM_ADD_LUCKYITEM
                 )
             {
                 g_pSystemLogBox->AddText(GlobalText[1121], SEASON3B::TYPE_SYSTEM_MESSAGE);

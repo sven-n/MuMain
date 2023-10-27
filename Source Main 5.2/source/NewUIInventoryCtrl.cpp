@@ -1090,8 +1090,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                         {
                                             bSuccess = AreItemsStackable(pPickItem, pTargetItem);
                                         }
-
-#ifdef LEM_ADD_LUCKYITEM
                                         if (Check_LuckyItem(pTargetItem->Type))
                                         {
                                             bSuccess = false;
@@ -1104,7 +1102,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                                 if (pTargetItem->Durability > 0)				bSuccess = true;
                                             }
                                         }
-#endif // LEM_ADD_LUCKYITEM
                                     }
 
                                     if (bSuccess)

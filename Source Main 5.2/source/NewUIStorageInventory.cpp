@@ -342,10 +342,8 @@ void CNewUIStorageInventory::ProcessInventoryCtrl()
         }
         else
         {
-#ifdef LEM_ADD_LUCKYITEM
             if (::IsStoreBan(pItemObj))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
             else							m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
-#endif // LEM_ADD_LUCKYITEM
         }
     }
     else if (IsPress(VK_RBUTTON))

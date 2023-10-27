@@ -1220,7 +1220,6 @@ void OpenItems()
     for (int _nRollIndex = 0; _nRollIndex < 7; ++_nRollIndex)
         gLoadData.AccessModel(MODEL_ETC + 30 + _nRollIndex, L"Data\\Item\\", L"rollofpaper");
 
-#ifdef LEM_ADD_LUCKYITEM	// LuckyItem Data AccesModel
     gLoadData.AccessModel(MODEL_HELPER + 135, L"Data\\Item\\LuckyItem\\", L"LuckyCardgreen");
     gLoadData.AccessModel(MODEL_HELPER + 136, L"Data\\Item\\LuckyItem\\", L"LuckyCardgreen");
     gLoadData.AccessModel(MODEL_HELPER + 137, L"Data\\Item\\LuckyItem\\", L"LuckyCardgreen");
@@ -1235,9 +1234,9 @@ void OpenItems()
     gLoadData.AccessModel(MODEL_POTION + 160, L"Data\\Item\\LuckyItem\\", L"lucky_items01");
     gLoadData.AccessModel(MODEL_POTION + 161, L"Data\\Item\\LuckyItem\\", L"lucky_items02");
 
-    wchar_t	szLuckySetFileName[][50] = { "new_Helm", L"new_Armor", L"new_Pant", L"new_Glove", L"new_Boot" };
-    wchar_t* szLuckySetPath = { "Data\\Player\\LuckyItem\\" };
-    wchar_t	szLuckySetPathName[50] = { "" };
+    wchar_t	szLuckySetFileName[][50] = { L"new_Helm", L"new_Armor", L"new_Pant", L"new_Glove", L"new_Boot" };
+    wchar_t* szLuckySetPath = { L"Data\\Player\\LuckyItem\\" };
+    wchar_t	szLuckySetPathName[50] = { L"" };
     int		nIndex = 62;
 
     for (int i = 0; i < 11; i++)
@@ -1250,7 +1249,6 @@ void OpenItems()
         gLoadData.AccessModel(MODEL_BOOTS + nIndex, szLuckySetPathName, szLuckySetFileName[4], i + 1);
         nIndex++;
     }
-#endif // LEM_ADD_LUCKYITEM
 
     Models[MODEL_SPEAR].Meshs[1].NoneBlendMesh = true;
     Models[MODEL_SWORD + 10].Meshs[1].NoneBlendMesh = true;
@@ -1771,7 +1769,6 @@ void OpenItemTextures()
 
     LoadBitmap(L"Item\\PhoenixSoul_render.JPG", BITMAP_PHOENIXSOULWING, GL_LINEAR, GL_REPEAT);
 
-#ifdef LEM_ADD_LUCKYITEM
     gLoadData.OpenTexture(MODEL_HELPER + 135, L"Item\\LuckyItem\\");
     gLoadData.OpenTexture(MODEL_HELPER + 136, L"Item\\LuckyItem\\");
     gLoadData.OpenTexture(MODEL_HELPER + 137, L"Item\\LuckyItem\\");
@@ -1783,8 +1780,8 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_HELPER + 143, L"Item\\LuckyItem\\");
     gLoadData.OpenTexture(MODEL_HELPER + 144, L"Item\\LuckyItem\\");
 
-    wchar_t* szLuckySetPath = { "Player\\LuckyItem\\" };
-    wchar_t	szLuckySetPathName[50] = { "" };
+    wchar_t* szLuckySetPath = { L"Player\\LuckyItem\\" };
+    wchar_t	szLuckySetPathName[50] = { L"" };
     int		nIndex = 62;
 
     for (int i = 0; i < 11; i++)
@@ -1809,7 +1806,7 @@ void OpenItemTextures()
     LoadBitmap(szLuckySetPathName, BITMAP_INVEN_ARMOR + 7);
     swprintf(szLuckySetPathName, L"Player\\LuckyItem\\70\\InvenPantsMale41_luck.tga");
     LoadBitmap(szLuckySetPathName, BITMAP_INVEN_PANTS + 7);
-#endif // LEM_ADD_LUCKYITEM
+
 }
 
 void DeleteNpcs()
@@ -2222,13 +2219,22 @@ void OpenNpc(int Type)
         gLoadData.OpenTexture(MODEL_KARUTAN_NPC_VOLVO, L"Npc\\");
         break;
 #endif	// ASG_ADD_KARUTAN_NPC
-#ifdef LEM_ADD_LUCKYITEM
     case MODEL_LUCKYITEM_NPC:
-        //gLoadData.AccessModel(MODEL_LUCKYITEM_NPC, L"Data\\Npc\\", L"volvo");
         gLoadData.AccessModel(MODEL_LUCKYITEM_NPC, L"Data\\Npc\\LuckyItem\\", L"npc_burial");
         gLoadData.OpenTexture(MODEL_LUCKYITEM_NPC, L"Npc\\LuckyItem\\");
         break;
 #endif // LEM_ADD_LUCKYITEM
+    case MODEL_TERSIA:
+        gLoadData.AccessModel(MODEL_TERSIA, L"Data\\Npc\\", L"tersia");
+        gLoadData.OpenTexture(MODEL_TERSIA, L"Npc\\");
+    case MODEL_BENA:
+        gLoadData.AccessModel(MODEL_BENA, L"Data\\Npc\\", L"bena");
+        gLoadData.OpenTexture(MODEL_BENA, L"Npc\\");
+        break;
+    case MODEL_ZAIRO:
+        gLoadData.AccessModel(MODEL_ZAIRO, L"Data\\Npc\\", L"volvo"); // TODO: find the right BMD file
+        gLoadData.OpenTexture(MODEL_ZAIRO, L"Npc\\");
+        break;
     }
 
     for (int i = 0; i < b->NumActions; i++)

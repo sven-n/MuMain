@@ -3,8 +3,6 @@
 
 #include "stdafx.h"
 
-#ifdef LEM_ADD_LUCKYITEM
-
 #include "NewUILuckyItemWnd.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
@@ -17,6 +15,7 @@
 #include "ZzzCharacter.h"
 
 #include "DSPlaySound.h"
+#include "MixMgr.h"
 
 using namespace SEASON3B;
 CNewUILuckyItemWnd::CNewUILuckyItemWnd()
@@ -100,22 +99,32 @@ void CNewUILuckyItemWnd::Render_Frame(void)
     }
 }
 
-int CNewUILuckyItemWnd::SetWndAction(eLUCKYITEM _eType)
+STORAGE_TYPE CNewUILuckyItemWnd::SetMoveAction()
 {
-    m_eWndAction = _eType;
+    m_eWndAction = eLuckyItem_Move;
     switch (m_eType)
     {
     case eLuckyItemType_Trade:
-        if (m_eWndAction == eLuckyItem_Move)	return 15;
-        else if (m_eWndAction == eLuckyItem_Act)		return 51;
-        break;
+        return STORAGE_TYPE::LUCKYITEM_TRADE;
     case eLuckyItemType_Refinery:
-        if (m_eWndAction == eLuckyItem_Move)	return 16;
-        else if (m_eWndAction == eLuckyItem_Act)		return 52;
-        break;
+        return STORAGE_TYPE::LUCKYITEM_REFINERY;
     }
 
-    return -1;
+    return STORAGE_TYPE::UNDEFINED;
+}
+
+int CNewUILuckyItemWnd::SetActAction()
+{
+    m_eWndAction = eLuckyItem_Act;
+    switch (m_eType)
+    {
+        case eLuckyItemType_Trade:
+            return 51;
+        case eLuckyItemType_Refinery:
+            return 52;
+        default:
+            return -1;
+    }
 }
 
 void CNewUILuckyItemWnd::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
@@ -225,12 +234,12 @@ void CNewUILuckyItemWnd::LoadImg(void)
     float	fLineX = 21.0f;
     float	fLineY = fSizeY - fTop - fBottom;
 
-    wchar_t* szFileName[] = { "Interface\\newui_msgbox_back.jpg",
-                             "Interface\\newui_item_back04.tga",
-                             "Interface\\newui_item_back02-L.tga",
-                             "Interface\\newui_item_back02-R.tga",
-                             "Interface\\newui_item_back03.tga",
-                             "Interface\\newui_bt_mix.tga",
+    wchar_t* szFileName[] = { L"Interface\\newui_msgbox_back.jpg",
+                             L"Interface\\newui_item_back04.tga",
+                             L"Interface\\newui_item_back02-L.tga",
+                             L"Interface\\newui_item_back02-R.tga",
+                             L"Interface\\newui_item_back03.tga",
+                             L"Interface\\newui_bt_mix.tga",
     };
 
     m_sImgList[eFrame_BG].Set(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, fSizeX, fSizeY);
@@ -255,7 +264,7 @@ bool CNewUILuckyItemWnd::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_LUCKYITEMWND, this);
 
     m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(15/*todo?*/, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::LUCKYITEM_TRADE, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
@@ -457,8 +466,8 @@ bool CNewUILuckyItemWnd::Process_InventoryCtrl(void)
             int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
             if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
             {
-                int		nMoveIndex = SetWndAction(eLuckyItem_Move);
-                if (SendRequestEquipmentItem(REQUEST_EQUIPMENT_INVENTORY, iSourceIndex, pItemObj, nMoveIndex, iTargetIndex))
+                auto nMoveIndex = SetMoveAction();
+                if (SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, nMoveIndex, iTargetIndex))
                     return true;
             }
         }
@@ -471,7 +480,7 @@ bool CNewUILuckyItemWnd::Process_InventoryCtrl(void)
             int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
             if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
             {
-                int		nMoveIndex = SetWndAction(eLuckyItem_Move);
+                auto nMoveIndex = SetMoveAction();
                 if (SendRequestEquipmentItem(nMoveIndex, iSourceIndex, pItemObj, nMoveIndex, iTargetIndex))
                 {
                     return true;
@@ -591,5 +600,3 @@ float CNewUILuckyItemWnd::GetLayerDepth(void)
 {
     return 3.4f;
 }
-
-#endif // LEM_ADD_LUCKYITEM

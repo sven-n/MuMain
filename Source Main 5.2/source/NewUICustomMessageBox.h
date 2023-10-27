@@ -881,7 +881,6 @@ namespace SEASON3B
         int m_iMiddleCount;
     };
 
-#ifdef LEM_ADD_LUCKYITEM
     class CLuckyTradeMenuMsgBox : public CNewUIMessageBoxBase
     {
     public:
@@ -914,7 +913,6 @@ namespace SEASON3B
 
         int m_iMiddleCount;
     };
-#endif // LEM_ADD_LUCKYITEM
 
     class CSeedMasterMenuMsgBox : public CNewUIMessageBoxBase
     {
@@ -1386,13 +1384,11 @@ namespace SEASON3B
         bool SetLayout();
     };
 
-#ifdef LEM_ADD_LUCKYITEM
     class CLuckyTradeMenuMsgBoxLayout : public TMsgBoxLayout<CLuckyTradeMenuMsgBox>
     {
     public:
         bool SetLayout();
     };
-#endif // LEM_ADD_LUCKYITEM
 }
 
 #endif // _NEWUICUSOMMESSAGEBOX_H_

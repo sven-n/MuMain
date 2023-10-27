@@ -3378,23 +3378,18 @@ void EtcStopAnimationSetting(CHARACTER* c, OBJECT* o)
                         SetAction(o, rand() % 2 + 1);
                     break;
                 case MODEL_UNITEDMARKETPLACE_CHRISTIN:
-#ifdef ASG_ADD_KARUTAN_NPC
                 case MODEL_KARUTAN_NPC_REINA:
-#endif	// ASG_ADD_KARUTAN_NPC
                     if (rand() % 5 < 3)
                         SetAction(o, 0);
                     else
                         SetAction(o, rand() % 2 + 1);
                     break;
-#ifdef ASG_ADD_KARUTAN_NPC
                 case MODEL_KARUTAN_NPC_VOLVO:
                     if (rand() % 5 < 4)
                         SetAction(o, 0);
                     else
                         SetAction(o, 1);
                     break;
-#endif	// ASG_ADD_KARUTAN_NPC
-#ifdef LEM_ADD_LUCKYITEM
                 case MODEL_LUCKYITEM_NPC:
                     if (rand() % 5 < 4 || o->CurrentAction == 1)
                     {
@@ -3405,7 +3400,6 @@ void EtcStopAnimationSetting(CHARACTER* c, OBJECT* o)
                         SetAction(o, 1);
                     }
                     break;
-#endif // LEM_ADD_LUCKYITEM
                 default:
                     SetAction(o, rand() % 2);
                     break;
@@ -11689,12 +11683,10 @@ void SetCharacterScale(CHARACTER* c)
 
     if (c->BodyPart[BODYPART_HELM].Type == MODEL_HELM ||
         c->BodyPart[BODYPART_HELM].Type == MODEL_HELM + 2 ||
-#ifdef LEM_ADD_LUCKYITEM
         c->BodyPart[BODYPART_HELM].Type == MODEL_HELM + 63 ||
         c->BodyPart[BODYPART_HELM].Type == MODEL_HELM + 68 ||
         c->BodyPart[BODYPART_HELM].Type == MODEL_HELM + 65 ||
         c->BodyPart[BODYPART_HELM].Type == MODEL_HELM + 70 ||
-#endif // LEM_ADD_LUCKYITEM
         (c->BodyPart[BODYPART_HELM].Type >= MODEL_HELM + 10 && c->BodyPart[BODYPART_HELM].Type <= MODEL_HELM + 13))
     {
         c->BodyPart[BODYPART_HEAD].Type = MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(c->Class);
@@ -12466,12 +12458,8 @@ void Setting_Monster(CHARACTER* c, int Type, int PositionX, int PositionY)
             || Type == 545
             || Type == 546
             || Type == 547
-#ifdef ASG_ADD_KARUTAN_NPC
             || Type == 577 || Type == 578
-#endif	// ASG_ADD_KARUTAN_NPC
-#ifdef LEM_ADD_LUCKYITEM
             || Type == 579
-#endif // LEM_ADD_LUCKYITEM
             )
         {
             o->Kind = KIND_NPC;
@@ -14028,7 +14016,6 @@ CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key)
     }
     break;
 
-#ifdef LEM_ADD_LUCKYITEM
     case 579:
         OpenNpc(MODEL_LUCKYITEM_NPC);
         c = CreateCharacter(Key, MODEL_LUCKYITEM_NPC, PositionX, PositionY);
@@ -14041,7 +14028,6 @@ CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key)
         //	Models[MODEL_LUCKYITEM_NPC].Actions[0].PlaySpeed = 50.0f;
         //	Models[MODEL_LUCKYITEM_NPC].Actions[1].PlaySpeed = 50.0f;
         break;
-#endif // LEM_ADD_LUCKYITEM
     case 452:
         OpenNpc(MODEL_SEED_MASTER);
         c = CreateCharacter(Key, MODEL_SEED_MASTER, PositionX, PositionY);

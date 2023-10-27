@@ -463,9 +463,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             || g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == true
             || g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == true
             || g_pNewUISystem->IsVisible(INTERFACE_MYSHOP_INVENTORY) == true
-#ifdef LEM_ADD_LUCKYITEM
             || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == true
-#endif // LEM_ADD_LUCKYITEM
             || g_pNewUISystem->IsVisible(INTERFACE_PURCHASESHOP_INVENTORY) == true)
         {
             ResetMouseLButton();
@@ -573,9 +571,7 @@ bool CNewUIMyInventory::UpdateKeyEvent()
     {
         if (m_bRepairEnableLevel == true && g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == false
             && g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false
-#ifdef LEM_ADD_LUCKYITEM
             && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false
-#endif // LEM_ADD_LUCKYITEM
             )
         {
             ToggleRepairMode();
@@ -1309,9 +1305,7 @@ void CNewUIMyInventory::RenderButtons()
         && g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE) == false
         && g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE) == false
         && g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false
-#ifdef LEM_ADD_LUCKYITEM
         && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false
-#endif // LEM_ADD_LUCKYITEM
         && g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == false)
     {
         if (m_bRepairEnableLevel == true)
@@ -1621,7 +1615,6 @@ bool CNewUIMyInventory::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPi
         }
     }
 
-#ifdef LEM_ADD_LUCKYITEM
     if (Check_LuckyItem(pItem->Type))
     {
         bSuccess = false;
@@ -1634,7 +1627,6 @@ bool CNewUIMyInventory::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPi
             if (pItem->Durability > 0)					bSuccess = true;
         }
     }
-#endif // LEM_ADD_LUCKYITEM
 
     if (bSuccess)
     {
@@ -2105,9 +2097,7 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
             && !g_pNewUISystem->IsVisible(INTERFACE_TRADE)
             && !g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE)
             && !g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE)
-#ifdef LEM_ADD_LUCKYITEM
             && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-#endif // LEM_ADD_LUCKYITEM
             && !g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY))
         {
             ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
@@ -2258,9 +2248,7 @@ bool CNewUIMyInventory::BtnProcess()
         && g_pNewUISystem->IsVisible(INTERFACE_TRADE) == false
         && g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE) == false
         && g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE) == false
-#ifdef LEM_ADD_LUCKYITEM
         && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false
-#endif // LEM_ADD_LUCKYITEM
         && g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false
         && g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == false)
     {
@@ -2365,9 +2353,7 @@ bool CNewUIMyInventory::CanOpenMyShopInterface()
     if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
         || g_pNewUISystem->IsVisible(INTERFACE_STORAGE)
         || g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY)
-#ifdef LEM_ADD_LUCKYITEM
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-#endif // LEM_ADD_LUCKYITEM
         || g_pNewUISystem->IsVisible(INTERFACE_TRADE)
         || gMapManager.IsCursedTemple()
         )

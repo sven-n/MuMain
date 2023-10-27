@@ -2457,13 +2457,11 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 }
 #endif	// ASG_ADD_TIME_LIMIT_QUEST_NPC
 
-#ifdef LEM_ADD_LUCKYITEM
                 else if (o->Type == MODEL_LUCKYITEM_NPC)
                 {
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                     b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha * 0.4f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 }
-#endif // LEM_ADD_LUCKYITEM
 #ifdef ASG_ADD_KARUTAN_NPC
                 else if (o->Type == MODEL_KARUTAN_NPC_VOLVO)
                 {
@@ -6077,7 +6075,6 @@ void ItemAngle(OBJECT* o)
             o->Angle[2] = 90.f - 45.f;
         }
     }
-#ifdef LEM_ADD_LUCKYITEM
     else if (o->Type >= MODEL_HELPER + 135 && o->Type <= MODEL_HELPER + 145)
     {
         o->Scale = 0.2f;
@@ -6094,7 +6091,6 @@ void ItemAngle(OBJECT* o)
         o->Angle[1] = 180.0f;
         o->Angle[2] = 45.0f;
     }
-#endif // LEM_ADD_LUCKYITEM
 }
 
 void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
@@ -8915,7 +8911,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         }
     }
 
-#ifdef LEM_ADD_LUCKYITEM
     else if (Check_LuckyItem(Type, -MODEL_ITEM))
     {
         bool	bHide = false;
@@ -8948,7 +8943,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         }
     }
-#endif // LEM_ADD_LUCKYITEM
     else
     {
         b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);

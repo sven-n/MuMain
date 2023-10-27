@@ -284,12 +284,10 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
         int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 
 #ifndef KJH_FIX_CHANGE_ITEM_PRICE_IN_PERSONAL_SHOP				// #ifndef
-#ifdef LEM_ADD_LUCKYITEM
         if (IsPersonalShopBan(pItemObj))
             m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
         else
             m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
-#endif // LEM_ADD_LUCKYITEM
 #endif // KJH_FIX_CHANGE_ITEM_PRICE_IN_PERSONAL_SHOP
 
         if (iTargetIndex == -1)

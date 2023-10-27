@@ -5666,12 +5666,10 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             if (Data->Index >= 0 && Data->Index < MAX_MIX_INVENTORY)
                 g_pMixInventory->InsertItem(Data->Index, Data->Item);
         }
-#ifdef LEM_ADD_LUCKYITEM
-        else if (15 == storageType || 16 == storageType)
+        else if (storageType == STORAGE_TYPE::LUCKYITEM_TRADE || storageType == STORAGE_TYPE::LUCKYITEM_REFINERY)
         {
             g_pLuckyItemWnd->GetResult(1, Data->Index, Data->Item);
         }
-#endif // LEM_ADD_LUCKYITEM
 
         PlayBuffer(SOUND_GET_ITEM01);
     }
@@ -5878,13 +5876,11 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         g_pNewUISystem->Show(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
     }
     break;
-#ifdef LEM_ADD_LUCKYITEM
     case 0x26:
     {
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CLuckyTradeMenuMsgBoxLayout));
     }
     break;
-#endif // LEM_ADD_LUCKYITEM
     default:
     {
         // Data->Value
@@ -7550,13 +7546,11 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-#ifdef LEM_ADD_LUCKYITEM
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
         {
             g_pLuckyItemWnd->GetResult(0, Data->Index);
             break;
         }
-#endif // LEM_ADD_LUCKYITEM
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
         wchar_t szText[256] = { 0, };
         switch (g_MixRecipeMgr.GetMixInventoryType())
@@ -7598,13 +7592,11 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
     break;
     case 1:
     {
-#ifdef LEM_ADD_LUCKYITEM
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
         {
             g_pLuckyItemWnd->GetResult(1, 0, Data->Item);
             break;
         }
-#endif // LEM_ADD_LUCKYITEM
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
         wchar_t szText[256] = { 0, };
         switch (g_MixRecipeMgr.GetMixInventoryType())
@@ -7672,20 +7664,17 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
         g_pMixInventory->DeleteAllItems();
         g_pMixInventory->InsertItem(0, Data->Item);
         break;
-    case 3:
-    case 5:
-    case 7:
-    case 8:
-    case 0x0A:
-
-#ifdef LEM_ADD_LUCKYITEM
     case 0x20:
         if (g_pLuckyItemWnd->GetAct())
         {
             g_pLuckyItemWnd->GetResult(0, Data->Index, Data->Item);
         }
         break;
-#endif // LEM_ADD_LUCKYITEM
+    case 3:
+    case 5:
+    case 7:
+    case 8:
+    case 0x0A:
     default:
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
         break;

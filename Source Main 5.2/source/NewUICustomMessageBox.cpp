@@ -5705,7 +5705,6 @@ bool SEASON3B::CDelgardoMainMenuMsgBoxLayout::SetLayout()
     return true;
 }
 
-#ifdef LEM_ADD_LUCKYITEM
 bool SEASON3B::CLuckyTradeMenuMsgBoxLayout::SetLayout()
 {
     CLuckyTradeMenuMsgBox* pMsgBox = GetMsgBox();
@@ -5907,7 +5906,6 @@ void SEASON3B::CLuckyTradeMenuMsgBox::RenderButtons()
     m_BtnRefinery.Render();
     m_BtnExit.Render();
 }
-#endif // LEM_ADD_LUCKYITEM
 
 //////////////////////////////////////////////////////////////////////////
 

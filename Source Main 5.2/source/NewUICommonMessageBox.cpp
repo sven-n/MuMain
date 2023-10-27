@@ -19,6 +19,7 @@
 #include "GambleSystem.h"
 #include "CharacterManager.h"
 #include "DSPlaySound.h"
+#include "NewUILuckyItemWnd.h"
 #include "NewUISystem.h"
 #include "SkillManager.h"
 #include "ZzzInterface.h"
@@ -1918,7 +1919,6 @@ CALLBACK_RESULT SEASON3B::CWhiteAngelEventLayout::CancelBtnDown(class CNewUIMess
     return CALLBACK_BREAK;
 }
 
-#ifdef LEM_ADD_LUCKYITEM
 bool  SEASON3B::CLuckyItemMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -1964,7 +1964,7 @@ bool  SEASON3B::CLuckyItemMsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CLuckyItemMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SendRequestMix(g_pLuckyItemWnd->SetWndAction(eLuckyItem_Act), 0);
+    SocketClient->ToGameServer()->SendChaosMachineMixRequest(g_pLuckyItemWnd->SetActAction(), 0);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -1978,7 +1978,6 @@ CALLBACK_RESULT SEASON3B::CLuckyItemMsgBoxLayout::CancelBtnDown(class CNewUIMess
 
     return CALLBACK_BREAK;
 }
-#endif // LEM_ADD_LUCKYITEM
 
 bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
 {

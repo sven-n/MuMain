@@ -259,9 +259,7 @@ BOOL CMixRecipes::IsMixSource(ITEM* pItem)
     CMixItem mixitem;
     mixitem.SetItem(pItem, 0);
 
-#ifdef LEM_ADD_LUCKYITEM
     if (Check_LuckyItem(pItem->Type) && g_MixRecipeMgr.GetMixInventoryType() != MIXTYPE_JERRIDON)	return FALSE;
-#endif // LEM_ADD_LUCKYITEM
 
     if (IsCharmItem(mixitem))
     {
