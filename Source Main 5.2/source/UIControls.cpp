@@ -2701,10 +2701,22 @@ void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
             {
                 *reinterpret_cast<unsigned int*>(pBitmapFont->Buffer + DstIndex) = m_dwTextColor;
             }
+            else if (*(m_pFontBuffer + SrcIndex) != 0) // we hit a semi transparent pixel, so anti aliasing hit here
+            {
+                // The alpha channel is the highest 8 bits.
+                DWORD alpha = *(m_pFontBuffer + SrcIndex);
+                alpha += *(m_pFontBuffer + SrcIndex + 1);
+                alpha += *(m_pFontBuffer + SrcIndex + 2);
+                alpha /= 3;
+                alpha <<= 24;
+                alpha |= 0x00FFFFFF;
+                *reinterpret_cast<unsigned int*>(pBitmapFont->Buffer + DstIndex) = m_dwTextColor & alpha;
+            }
             else // it's a black pixel, so there is no text
             {
                 *reinterpret_cast<unsigned int*>(pBitmapFont->Buffer + DstIndex) = 0; // Transparent
             }
+
             SrcIndex += 3; // RBG
             DstIndex += 4; // RGBA
         }
