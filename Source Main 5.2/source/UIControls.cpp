@@ -1569,7 +1569,7 @@ CUIChatPalListBox::CUIChatPalListBox()
 
     m_iColumnWidth[0] = m_iColumnWidth[1] = m_iColumnWidth[2] = m_iColumnWidth[3] = 0;
     SIZE TextSize;
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"ZZZZZZZZZZ", lstrlen(L"ZZZZZZZZZZ"), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"ZZZZZZZZZZZZZ", lstrlen(L"ZZZZZZZZZZZZZ"), &TextSize);
     SetColumnWidth(0, TextSize.cx / g_fScreenRate_x + 8);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1022], GlobalText.GetStringSize(1022), &TextSize);
     SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
