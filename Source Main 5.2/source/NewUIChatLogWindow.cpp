@@ -1185,16 +1185,6 @@ void SEASON3B::CNewUISystemLogWindow::AddText(const type_string& strText, MESSAG
         return;
     }
 
-    if (m_vecAllMsgs.size() >= MAX_NUMBER_OF_LINES)
-    {
-        RemoveFrontLine();
-    }
-
-    ProcessAddText(strText, MsgType);
-}
-
-void SEASON3B::CNewUISystemLogWindow::ProcessAddText(const type_string& strText, MESSAGE_TYPE MsgType)
-{
     type_vector_msgs* pvecMsgs = &m_vecAllMsgs;
     if (pvecMsgs == nullptr)
     {
@@ -1202,43 +1192,19 @@ void SEASON3B::CNewUISystemLogWindow::ProcessAddText(const type_string& strText,
         return;
     }
 
-    // todo: should we even separate the lines?
-    if (strText.size() >= 20)
+    auto pMsgText = new CMessageText;
+    if (!pMsgText->Create(L"", strText, MsgType))
     {
-        type_string	strText1, strText2;
-        SeparateText(strText, strText1, strText2);
-        if (!strText1.empty())
-        {
-            const auto pMsgText = new CMessageText;
-            if (!pMsgText->Create(L"", strText, MsgType))
-                delete pMsgText;
-            else
-            {
-                pvecMsgs->push_back(pMsgText);
-            }
-        }
+        delete pMsgText;
+        return;
+    }
 
-        if (!strText2.empty())
-        {
-            const auto pMsgText = new CMessageText;
-            if (!pMsgText->Create(L"", strText2, MsgType))
-                delete pMsgText;
-            else
-            {
-                pvecMsgs->push_back(pMsgText);
-            }
-        }
-    }
-    else
+    if (pvecMsgs->size() >= MAX_NUMBER_OF_LINES)
     {
-        const auto pMsgText = new CMessageText;
-        if (!pMsgText->Create(L"", strText, MsgType))
-            delete pMsgText;
-        else
-        {
-            pvecMsgs->push_back(pMsgText);
-        }
+        RemoveFrontLine();
     }
+
+    pvecMsgs->push_back(pMsgText);
 
     m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
@@ -1285,39 +1251,6 @@ float SEASON3B::CNewUISystemLogWindow::GetLayerDepth()
 float SEASON3B::CNewUISystemLogWindow::GetKeyEventOrder()
 {
     return 8.0f;
-}
-
-void SEASON3B::CNewUISystemLogWindow::SeparateText(IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2)
-{
-    extern float g_fScreenRate_x;
-
-    SIZE TextSize;
-
-    float max_first_line_size = CLIENT_WIDTH * g_fScreenRate_x;
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strText.c_str(), strText.length(), &TextSize);
-    auto required_size = TextSize.cx;
-
-    if (required_size <= max_first_line_size)
-    {
-        strText1 = strText;
-        strText2 = L"";
-        return;
-    }
-
-    BOOL bSpaceExist = (strText.find_last_of(L" ") != std::wstring::npos) ? TRUE : FALSE;
-    int iLocToken = strText.length();
-
-    while ((required_size > max_first_line_size) && (iLocToken > -1))
-    {
-        iLocToken = (bSpaceExist) ? strText.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (strText.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
-        required_size = TextSize.cx;
-    }
-
-    strText1 = strText.substr(0, iLocToken);
-    strText2 = strText.substr(iLocToken, strText.length() - iLocToken);
 }
 
 void SEASON3B::CNewUISystemLogWindow::ClearAll()

@@ -249,10 +249,6 @@ namespace SEASON3B
         void RemoveFrontLine();
         int GetCurrentRenderEndLine() const;
 
-    protected:
-        void ProcessAddText(const type_string& strText, MESSAGE_TYPE MsgType);
-        void SeparateText(IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2);
-
     public:
         CNewUISystemLogWindow();
         ~CNewUISystemLogWindow() override;
