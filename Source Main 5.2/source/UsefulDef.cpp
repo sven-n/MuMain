@@ -31,9 +31,9 @@ bool ReduceStringByPixel(LPTSTR lpszDst, int nDstSize, LPCTSTR lpszSrc, int nPix
     return true;
 }
 
-int DivideStringByPixel(LPTSTR alpszDst, int nDstRow, int nDstColumn, LPCTSTR lpszSrc, int nPixelPerLine, bool bSpaceInsert, const wchar_t szNewlineChar)
+int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wchar_t* lpszSrc, int nPixelPerLine, bool bSpaceInsert, const wchar_t szNewlineChar)
 {
-    if (NULL == alpszDst || 0 >= nDstRow || 0 >= nDstColumn || NULL == lpszSrc || 16 > nPixelPerLine)
+    if (nullptr == alpszDst || 0 >= nDstRow || 0 >= nDstColumn || nullptr == lpszSrc || 16 > nPixelPerLine)
         return 0;
 
     wchar_t szWorkSrc[1024];
@@ -42,20 +42,21 @@ int DivideStringByPixel(LPTSTR alpszDst, int nDstRow, int nDstColumn, LPCTSTR lp
     wchar_t szWorkToken[1024];
     int nLine = 0;
 
-    wchar_t* pszToken = ::_wcstok(szWorkSrc, &szNewlineChar);
+    wchar_t* pszToken = _wcstok(szWorkSrc, &szNewlineChar);
 
-    while (pszToken != NULL)
+    while (pszToken != nullptr)
     {
         if (bSpaceInsert)
         {
-            ::swprintf(szWorkToken, L" %s", pszToken);
-            nLine += ::CutText3(szWorkToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
+            swprintf(szWorkToken, L" %s", pszToken);
+            nLine += CutText3(szWorkToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
         else
         {
-            nLine += ::CutText3(pszToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
+            nLine += CutText3(pszToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
-        pszToken = ::_wcstok(NULL, &szNewlineChar);
+
+        pszToken = _wcstok(nullptr, &szNewlineChar);
     }
 
     return nLine;

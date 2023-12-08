@@ -33,7 +33,7 @@ public:
     void ShowQuestNpcWindow(int index = -1);
 
     BYTE getCurrQuestState(void);
-    const void GetNPCName(BYTE byQuestIndex, wchar_t* name);
+    wchar_t* GetNPCName(BYTE byQuestIndex);
     wchar_t* getQuestTitle();
     wchar_t* getQuestTitle(BYTE byQuestIndex);
     wchar_t* getQuestTitleWindow();

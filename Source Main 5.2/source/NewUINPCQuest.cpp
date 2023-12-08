@@ -252,17 +252,17 @@ void CNewUINPCQuest::RenderText()
 
     g_pRenderText->SetTextColor(150, 255, 240, 255);
     //const auto name = new wchar_t[MAX_MONSTER_NAME];
-    wchar_t name[MAX_MONSTER_NAME] { 0 };
+    wchar_t* name = nullptr;
 
     if ((Hero->Class == CLASS_DARK_LORD || Hero->Class == CLASS_DARK
         || Hero->Class == CLASS_RAGEFIGHTER)
         && bCheckNPC)
     {
-        g_csQuest.GetNPCName(2, name);
+        name = g_csQuest.GetNPCName(2);
     }
     else
     {
-        g_csQuest.GetNPCName(byCurQuestIndex, name);
+        name = g_csQuest.GetNPCName(byCurQuestIndex);
     }
 
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 16, name, NPCQUEST_WIDTH, 0, RT3_SORT_CENTER);
@@ -365,9 +365,8 @@ bool CNewUINPCQuest::RenderItemMobText()
                 bCompletion = false;
             }
 
-            wchar_t text[MAX_MONSTER_NAME] { 0 };
-            getMonsterName(int(pQuest->QuestAct[i].wItemType), text);
-            swprintf(szTemp, L"%s x %d/%d", text, nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
+            auto name = getMonsterName(int(pQuest->QuestAct[i].wItemType));
+            swprintf(szTemp, L"%s x %d/%d", name, nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
 
             g_pRenderText->RenderText(m_Pos.x + 50, nPosY, szTemp);
         }

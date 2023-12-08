@@ -80,9 +80,9 @@ BYTE CSQuest::getCurrQuestState(void)
     return CheckQuestState();
 }
 
-const void CSQuest::GetNPCName(BYTE byQuestIndex, wchar_t* name)
+wchar_t* CSQuest::GetNPCName(BYTE byQuestIndex)
 {
-    return getMonsterName(int(m_Quest[byQuestIndex].wNpcType), name);
+    return getMonsterName(int(m_Quest[byQuestIndex].wNpcType));
 }
 
 wchar_t* CSQuest::getQuestTitle()

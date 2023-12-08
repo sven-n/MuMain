@@ -22,7 +22,7 @@ CQuestMng g_QuestMng;
 CQuestMng::CQuestMng()
 {
     m_nNPCIndex = 0;
-    ::memset(m_szNPCName, 0, sizeof(char) * 32);
+    m_szNPCName = nullptr;
 }
 
 CQuestMng::~CQuestMng()
@@ -249,7 +249,7 @@ const SQuestRequestReward* CQuestMng::GetRequestReward(DWORD dwQuestIndex)
 void CQuestMng::SetNPC(int nNPCIndex)
 {
     m_nNPCIndex = nNPCIndex;
-    getMonsterName(nNPCIndex, m_szNPCName);
+    m_szNPCName = getMonsterName(nNPCIndex);
 }
 
 int CQuestMng::GetNPCIndex()
@@ -513,8 +513,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             }
 
             {
-                wchar_t text[MAX_MONSTER_NAME]{ 0 };
-                getMonsterName(int(pRequestInfo->m_wIndex), text);
+                auto text = getMonsterName(int(pRequestInfo->m_wIndex));
                 swprintf(aDest[nLine].m_szText, L"Mon.: %s x %lu/%lu",
                     text,
                     MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),

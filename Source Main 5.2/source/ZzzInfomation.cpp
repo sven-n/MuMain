@@ -2495,18 +2495,17 @@ void OpenMonsterScript(wchar_t* FileName)
     fclose(SMDFile);
 }
 
-const void getMonsterName(int type, wchar_t* name)
+wchar_t* getMonsterName(int type)
 {
     for (int i = 0; i < MAX_MONSTER; ++i)
     {
         if (MonsterScript[i].Type == type)
         {
-            name = MonsterScript[i].Name;
-            return;
+            return MonsterScript[i].Name;
         }
     }
 
-    name = L"()";
+    return L"()";
 }
 
 void MonsterConvert(MONSTER* m, int Level)

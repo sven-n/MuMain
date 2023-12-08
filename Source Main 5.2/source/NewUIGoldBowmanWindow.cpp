@@ -240,9 +240,8 @@ void CNewUIGoldBowmanWindow::RenderTexts()
 {
     wchar_t Text[100];
 
-    memset(&Text, 0, sizeof(char) * 100);
-    getMonsterName(236, Text); // npc Name file
-    RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
+    auto name = getMonsterName(236); // npc Name file
+    RenderText(name, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
     swprintf(Text, GlobalText[891]); //"100%%

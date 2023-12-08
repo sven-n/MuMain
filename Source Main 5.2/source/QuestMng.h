@@ -93,7 +93,7 @@ protected:
     std::map<WORD, bool>			m_mapEPRequestRewardState;
 
     int		m_nNPCIndex;
-    wchar_t	m_szNPCName[MAX_MONSTER_NAME];
+    wchar_t* m_szNPCName; // [MAX_MONSTER_NAME] ;
 
     DWordList				m_listQuestIndexByEtc;
     DWordList				m_listCurQuestIndex;

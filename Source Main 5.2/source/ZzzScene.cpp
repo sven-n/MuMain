@@ -442,17 +442,17 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
     int iMbclen = 0;
     for (const wchar_t* lpSeek = lpszText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
     {
-        iMbclen = _mbclen((unsigned char*)lpSeek);
-        if (iMbclen + (int)(lpSeek - lpLineStart) >= iLineSize)
+        iMbclen = _tclen(lpSeek);
+        if (iMbclen + (lpSeek - lpLineStart) >= iLineSize)
         {
-            if (lpSpace && (int)(lpSeek - lpSpace) < min(10, iLineSize / 2))
+            if (lpSpace && (lpSeek - lpSpace) < min(10, iLineSize / 2))
             {
-                lpDst -= (lpSeek - lpSpace - 1);
+                lpDst -= lpSeek - lpSpace - 1;
                 lpSeek = lpSpace + 1;
             }
 
             lpLineStart = lpSeek;
-            *lpDst = '\0';
+            *lpDst = L'\0';
             if (iLine >= iMaxLine - 1)
             {
                 break;
@@ -463,12 +463,12 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
         }
 
         memcpy(lpDst, lpSeek, iMbclen);
-        if (*lpSeek == ' ')
+        if (*lpSeek == L' ')
         {
             lpSpace = lpSeek;
         }
     }
-    *lpDst = '\0';
+    *lpDst = L'\0';
 
     return (iLine + 1);
 }

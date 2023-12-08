@@ -37,7 +37,10 @@ extern BOOL g_bUseWindowMode;
 
 int CutStr(const wchar_t* pszSrcText, wchar_t* pTextOut, const int iTargetPixelWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab /* = 0 */)
 {
-    if (iFirstLineTab < 0)	return 0;
+    if (iFirstLineTab < 0)
+    {
+      return 0;
+    }
 
     if (pszSrcText == nullptr)
     {
@@ -45,42 +48,49 @@ int CutStr(const wchar_t* pszSrcText, wchar_t* pTextOut, const int iTargetPixelW
         return 0;
     }
 
-    std::wstring wstrUTF16 = std::wstring(pszSrcText);
+    auto tempString = std::wstring(pszSrcText);
     int iCharIndex = 0, iLineIndex = 0;
     const int iScreenRatePixelWidth = iTargetPixelWidth * g_fScreenRate_x - 5;
 
+    const int totalCharacters = tempString.length();
+    int processedSourceCharacters = 0;
     SIZE iSize;
-    while (iCharIndex < (int)wstrUTF16.length() && iLineIndex < iMaxOutLine)
+    while (!tempString.empty() && iLineIndex < iMaxOutLine)
     {
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), wstrUTF16.c_str(), iCharIndex, &iSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), tempString.c_str(), tempString.length(), &iSize);
 
         if (iLineIndex == 0)
             iSize.cx += iFirstLineTab;
 
-        if (iSize.cx >= iScreenRatePixelWidth || (int)wstrUTF16.length() >= iOutStrLength - 1)
+        const auto isTooWideInPixels = iSize.cx >= iScreenRatePixelWidth;
+        const auto isTooLongInCharacters = (int)tempString.length() >= iOutStrLength - 1;
+        if (isTooWideInPixels || isTooLongInCharacters)
         {
-            int iPosLastSpace = wstrUTF16.find_last_of(L" ", iCharIndex);
-            iCharIndex = (iPosLastSpace == std::wstring::npos) ? iCharIndex - 1 : iPosLastSpace;
-            wstrUTF16.copy(pTextOut, iCharIndex, 0);
-
-            iLineIndex++;
-            pTextOut += iOutStrLength;
-
-            wstrUTF16 = wstrUTF16.substr(iCharIndex + 1, wstrUTF16.length() - iCharIndex - 1);
-
-            iCharIndex = 0;
+          // then remove the last word/token from the string and try next loop iteration again ...
+          const auto iPosLastSpace = tempString.find_last_of(L' ');
+          iCharIndex = (iPosLastSpace == std::wstring::npos) ? tempString.length() - 1 : iPosLastSpace;
+          tempString = tempString.substr(0, iCharIndex);
         }
         else
         {
-            iCharIndex++;
+            // we can copy that to the destination
+            tempString.copy(pTextOut, tempString.length(), 0);
+            iLineIndex++;
+            processedSourceCharacters += tempString.length();
+
+            pTextOut += iOutStrLength; // move destination pointer to the next line
+            if (processedSourceCharacters < totalCharacters)
+            {
+              tempString = std::wstring(pszSrcText + processedSourceCharacters);
+            }
+            else
+            {
+              tempString = L"";
+              break;
+            }
         }
     }
 
-    if (iLineIndex < iMaxOutLine && wstrUTF16.substr(0, iCharIndex).length() > 0)
-    {
-        wstrUTF16.copy(pTextOut, iOutStrLength);
-        iLineIndex++;
-    }
 
     return iLineIndex;
 }

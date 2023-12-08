@@ -402,7 +402,7 @@ void CNewUINPCDialogue::SetContents(DWORD dwDlgIndex)
 
 void CNewUINPCDialogue::SetCurNPCWords(int nQuestListCount)
 {
-    ::memset(m_aszNPCWords[0], 0, sizeof(char) * ND_NPC_LINE_MAX * ND_WORDS_ROW_MAX);
+    memset(m_aszNPCWords[0], 0, sizeof(wchar_t) * ND_NPC_LINE_MAX * ND_WORDS_ROW_MAX);
 
     g_pRenderText->SetFont(g_hFont);
     const wchar_t* pszSrc;
@@ -434,7 +434,7 @@ void CNewUINPCDialogue::SetCurNPCWords(int nQuestListCount)
 
 void CNewUINPCDialogue::SetCurSelTexts()
 {
-    ::memset(m_aszSelTexts[0], 0, sizeof(char) * ND_SEL_TEXT_LINE_MAX * ND_WORDS_ROW_MAX);
+    ::memset(m_aszSelTexts[0], 0, sizeof(wchar_t) * ND_SEL_TEXT_LINE_MAX * ND_WORDS_ROW_MAX);
     ::memset(m_anSelTextLine, 0, sizeof(int) * (ND_QUEST_INDEX_MAX_COUNT + 1));
 
     g_pRenderText->SetFont(g_hFont);
@@ -503,7 +503,7 @@ void CNewUINPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCoun
 
     m_nSelTextCount = nIndexCount + 1;
 
-    ::memset(m_aszSelTexts[0], 0, sizeof(char) * ND_SEL_TEXT_LINE_MAX * ND_WORDS_ROW_MAX);
+    ::memset(m_aszSelTexts[0], 0, sizeof(wchar_t) * ND_SEL_TEXT_LINE_MAX * ND_WORDS_ROW_MAX);
     ::memset(m_anSelTextLine, 0, sizeof(int) * (ND_QUEST_INDEX_MAX_COUNT + 1));
 
     wchar_t szSelText[2 * ND_WORDS_ROW_MAX];
