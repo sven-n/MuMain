@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Platform>x86</Platform>
 		<Nullable>enable</Nullable>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.4.27">
+		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -25,8 +25,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MUnique.OpenMU.Network.Packets" Version="0.7.25" />
-		<PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.2" />
+		<PackageReference Include="MUnique.OpenMU.Network.Packets" Version="0.8.0" />
+		<PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
 	</ItemGroup>
 
 	<ItemGroup>

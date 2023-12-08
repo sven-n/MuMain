@@ -84,7 +84,6 @@ extern bool IsEndMp3();
 extern int GetMp3PlayPosition();
 extern unsigned int GenID();
 
-extern void CloseMainExe(void);
 extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();
 extern void DestroySound();

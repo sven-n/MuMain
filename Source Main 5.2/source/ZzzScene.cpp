@@ -108,7 +108,7 @@ int g_iLengthAuthorityCode = 20;
 
 wchar_t* szServerIpAddress = L"127.127.127.127";
 //char *szServerIpAddress = "210.181.89.215";
-WORD g_ServerPort = 55900;
+WORD g_ServerPort = 44405;
 
 #ifdef MOVIE_DIRECTSHOW
 int  SceneFlag = MOVIE_SCENE;

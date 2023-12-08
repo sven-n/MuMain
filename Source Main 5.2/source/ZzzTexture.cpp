@@ -231,6 +231,5 @@ void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
     KillGLWindow();
     DestroySound();
     DestroyWindow();
-    CloseMainExe();
     ExitProcess(0);
 }

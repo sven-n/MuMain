@@ -1,12 +1,13 @@
 {
   "runtimeOptions": {
-    "tfm": "net7.0",
+    "tfm": "net8.0",
     "framework": {
       "name": "Microsoft.NETCore.App",
-      "version": "7.0.5"
+      "version": "8.0.0"
     },
     "configProperties": {
-      "System.GC.Concurrent": false,
+      "System.GC.Concurrent": true,
+      "System.GC.Server": false,
       "System.Threading.ThreadPool.MinThreads": 4,
       "System.Threading.ThreadPool.MaxThreads": 25
     }

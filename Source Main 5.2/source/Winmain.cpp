@@ -275,27 +275,6 @@ BOOL GetFileNameOfFilePath(wchar_t* lpszFile, wchar_t* lpszPath)
     return (TRUE);
 }
 
-HANDLE g_hMainExe = INVALID_HANDLE_VALUE;
-
-BOOL OpenMainExe(void)
-{
-#ifdef _DEBUG
-    return (TRUE);
-#endif
-    //char lpszFile[MAX_PATH];
-    //wchar_t* lpszCommandLine = GetCommandLine();
-    //GetFileNameOfFilePath(lpszFile, lpszCommandLine);
-
-    //g_hMainExe = CreateFile((wchar_t*)lpszFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-
-    //return (INVALID_HANDLE_VALUE != g_hMainExe);
-}
-
-void CloseMainExe(void)
-{
-    CloseHandle(g_hMainExe);
-}
-
 WORD DecryptCheckSumKey(WORD wSource)
 {
     WORD wAcc = wSource ^ 0xB479;
@@ -653,7 +632,6 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         DestroySound();
         //DestroyWindow();
         KillGLWindow();
-        CloseMainExe();
         PostQuitMessage(0);
     }
     break;
@@ -1348,11 +1326,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         g_ServerPort = wPortNumber;
     }
     VM_END
-
-        if (!OpenMainExe())
-        {
-            return false;
-        }
 
     g_ErrorReport.Write(L"> To read config.ini.\r\n");
     if (OpenInitFile() == FALSE)

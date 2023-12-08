@@ -28,7 +28,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
@@ -36,7 +36,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
@@ -50,7 +50,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -149,7 +149,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/libpath:""NPGGuard"" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libhostfxr.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(SolutionDir)\dependencies\netcore\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -185,7 +185,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)source\;$(SolutionDir)dependencies\include;$(SolutionDir)dependencies\include\asio</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;UNICODE;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -213,7 +213,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/libpath:""NPGGuard"" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;nethost.lib;ijwhost.lib;libhostfxr.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;$(SolutionDir)\dependencies\netcore\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -249,7 +249,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)source\;$(SolutionDir)dependencies\include;$(SolutionDir)dependencies\netcore\includes</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_FOREIGN_NDEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;LDS_PATCH_GLOBAL_100520;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_FOREIGN_NDEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;UNICODE;LDS_PATCH_GLOBAL_100520;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>
       </RuntimeTypeInfo>
@@ -276,7 +276,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libhostfxr.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(SolutionDir)\dependencies\netcore\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories))</AdditionalLibraryDirectories>
@@ -312,7 +312,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)source\;$(SolutionDir)dependencies\include;$(SolutionDir)dependencies\include\asio</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;_FOREIGN_NDEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;LDS_PATCH_GLOBAL_100520;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;_FOREIGN_NDEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;UNICODE;LDS_PATCH_GLOBAL_100520;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>
       </RuntimeTypeInfo>
@@ -342,7 +342,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libhostfxr.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;$(SolutionDir)\dependencies\netcore\lib;%(AdditionalLibraryDirectories);C:\Libraries\boost_1_75_0\stage\lib</AdditionalLibraryDirectories>

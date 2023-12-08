@@ -149,9 +149,10 @@ bool CInGameShopSystem::ScriptDownload()
 
     m_CurrentScriptVerInfo = m_ScriptVerInfo;
 
+#ifdef CONSOLE_DEBUG
     g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt <IngameShop Script Download Success!!!>");
     g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt - Ver %d.%d.%d", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
-
+#endif
     ShopOpenUnLock();
 
     CShopList* pShopList = m_ShopManager.GetListPtr();
@@ -243,15 +244,21 @@ bool CInGameShopSystem::BannerDownload()
 #ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 bool CInGameShopSystem::IsScriptDownload()
 {
+#ifdef CONSOLE_DEBUG
     g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CInGameShopSystem::IsScriptDownload()");
     g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt - Script Ver %d.%d.%d", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
     g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt - Current Ver %d.%d.%d", m_CurrentScriptVerInfo.Zone, m_CurrentScriptVerInfo.year, m_CurrentScriptVerInfo.yearId);
+#endif
     if (((m_ScriptVerInfo.year == m_CurrentScriptVerInfo.year) && (m_ScriptVerInfo.yearId == m_CurrentScriptVerInfo.yearId) && (m_ScriptVerInfo.Zone == m_CurrentScriptVerInfo.Zone)) && (m_bFirstScriptDownloaded == true))
     {
+#ifdef CONSOLE_DEBUG
         g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false");
+#endif
         return false;
     }
+#ifdef CONSOLE_DEBUG
     g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - true");
+#endif
     return true;
 }
 
