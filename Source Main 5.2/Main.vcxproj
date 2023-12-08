@@ -149,7 +149,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/libpath:""NPGGuard"" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(SolutionDir)\dependencies\netcore\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
