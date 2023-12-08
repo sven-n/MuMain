@@ -149,7 +149,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/libpath:""NPGGuard"" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(SolutionDir)\dependencies\netcore\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -213,7 +213,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/libpath:""NPGGuard"" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;$(SolutionDir)\dependencies\netcore\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -276,7 +276,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(SolutionDir)\dependencies\netcore\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories))</AdditionalLibraryDirectories>
@@ -342,7 +342,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;version.lib;glprocs.lib;ShareMemory.lib;SimpleModulus.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;$(SolutionDir)\dependencies\netcore\lib;%(AdditionalLibraryDirectories);C:\Libraries\boost_1_75_0\stage\lib</AdditionalLibraryDirectories>
