@@ -15,8 +15,8 @@ What I have done so far:
     All strings and char arrays have been changed to use wide characters.
     Strings coming from files and the network are handled as UTF-8.
   * 🔥 Replaced the network stack with MUnique.OpenMU.Network to make it easier to
-    apply changes. I included a .NET 7 runtime for this and had to change some
-    code to allow async networking.
+    apply changes. The main.exe hosts a .NET 8 runtime for this and allow for async
+    networking.
   * 🔥 The network protocol has been adapted for Season 6 Episode 3 - there is probably
     still some work to do, but it connects to [OpenMU](https://github.com/MUnique/OpenMU)
     and is playable.
@@ -43,6 +43,8 @@ What needs to be done for Season 6:
   * MU Helper logic
 
 ## How to build & run
+
+It requires the [.NET 8 x86 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-windows-x86-installer) to be installed. 
 
 Because of the integrated .NET code, you need to publish the ManagedLibrary first
 to the debug output folder of the main.exe, so that all required managed DLLs are
