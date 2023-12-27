@@ -12401,7 +12401,7 @@ void Setting_Monster(CHARACTER* c, int Type, int PositionX, int PositionY)
         {
             if (Type == MonsterScript[i].Type)
             {
-                wcscpy_s(c->ID, 32, MonsterScript[i].Name);
+                wcscpy_s(c->ID, MAX_MONSTER_NAME + 1, MonsterScript[i].Name);
                 break;
             }
         }
