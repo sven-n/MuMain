@@ -603,6 +603,8 @@ BOOL CPhysicsCloth::Move(float fTime)
     if (m_oOwner == NULL)
         return (FALSE);
 
+    m_fWind *= FPS_ANIMATION_FACTOR;
+
     CPhysicsManager::s_vWind[0] = m_fWind * sinf((180.0f + m_oOwner->Angle[2]) * Q_PI / 180.0f);
     CPhysicsManager::s_vWind[1] = -m_fWind * cosf((180.0f + m_oOwner->Angle[2]) * Q_PI / 180.0f);
 
@@ -655,6 +657,7 @@ void CPhysicsCloth::MoveVertices(float fTime)
                 for (int i = 0; i < 3; ++i)
                 {
                     vForce[i] = (fDistance - pLink->m_fDistance[1]) * vDistance[i] / fDistance;
+                    vForce[i] *= FPS_ANIMATION_FACTOR;
                     if (PCT_OPT_CORRECTEDFORCE & m_dwType)
                     {
                         vForce[i] *= (pLink->m_fDistance[1] / 32.0f);
@@ -1200,7 +1203,7 @@ void CPhysicsManager::Clear(void)
 void CPhysicsManager::Move(float fTime)
 {
     float fPlus = ((rand() % 200) - 100) * 0.001f;
-    s_fWind += fPlus;
+    s_fWind += fPlus * FPS_ANIMATION_FACTOR;
     s_fWind = std::clamp(s_fWind, -0.2f, 1.0f);
 
     CNode<CPhysicsCloth*>* pNode = m_lstCloth.FindHead();
