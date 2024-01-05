@@ -44,7 +44,9 @@ What needs to be done for Season 6:
 
 ## How to build & run
 
-It requires the [.NET 8 x86 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-windows-x86-installer) to be installed. 
+It requires:
+  * [.NET 8 x86 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-windows-x86-installer) to be installed. 
+  * Visual Studio 2022 with the newest update, workloads for C++ and C#
 
 Because of the integrated .NET code, you need to publish the ManagedLibrary first
 to the debug output folder of the main.exe, so that all required managed DLLs are
