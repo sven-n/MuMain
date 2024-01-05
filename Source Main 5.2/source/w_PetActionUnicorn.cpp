@@ -43,14 +43,14 @@ bool PetActionUnicorn::Release(OBJECT* obj, CHARACTER* Owner)
     return TRUE;
 }
 
-bool PetActionUnicorn::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionUnicorn::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
     return false;
 }
 
-bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
@@ -70,9 +70,9 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD 
     vec3_t targetPos, Range, Direction;
     bool _isMove = false;
 
-    float fRadHeight = ((2 * 3.14f) / 15000.0f) * (float)(tick % 15000);
-    m_fRadWidthStand = ((2 * 3.14f) / 4000.0f) * (float)(tick % 4000);
-    m_fRadWidthGet = ((2 * 3.14f) / 2000.0f) * (float)(tick % 2000);
+    float fRadHeight = ((2 * Q_PI) / 15000.0f) * fmodf(tick, 15000);
+    m_fRadWidthStand = ((2 * Q_PI) / 4000.0f) * fmodf(tick, 4000);
+    m_fRadWidthGet = ((2 * Q_PI) / 2000.0f) * fmodf(tick, 2000);
 
     obj->Position[2] = obj->Owner->Position[2] + (200.0f * obj->Owner->Scale);
 
@@ -110,12 +110,12 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD 
         if (80.0f >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos); //test
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
         //	float Speed = ( FlyRange >= Distance ) ?  0 : (float)log(Distance) * 2.3f;
         float Speed = (FlyRange * FlyRange >= Distance) ? 0 : (float)log(Distance) * 2.3f;
@@ -154,12 +154,12 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD 
         if (Distance >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos); //test
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
         float Speed = (20.0f >= Distance) ? 0 : (float)log(Distance) * 2.5f;
 
@@ -192,7 +192,7 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD 
         VectorCopy(m_RootItem.position, targetPos);
 
         float Angle = CreateAngle2D(obj->Position, targetPos);
-        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
+        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f * FPS_ANIMATION_FACTOR);
         //------------------------------//
 
         if (CompTimeControl(1000, m_dwSendDelayTime)
@@ -218,12 +218,12 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD 
         if (Distance >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos);
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
         float Speed = (FlyRange >= Distance) ? 0 : (float)log(Distance) * 2.5f;
 
@@ -243,7 +243,7 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD 
     return TRUE;
 }
 
-bool PetActionUnicorn::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionUnicorn::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
@@ -282,7 +282,7 @@ bool PetActionUnicorn::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWOR
     return TRUE;
 }
 
-bool PetActionUnicorn::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionUnicorn::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 

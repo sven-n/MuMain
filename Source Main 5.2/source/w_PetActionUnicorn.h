@@ -16,10 +16,10 @@ public:
     virtual bool Release(OBJECT* obj, CHARACTER* Owner);
 
 public:
-    virtual bool Model(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender);
-    virtual bool Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender);
-    virtual bool Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender);
-    virtual bool Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender);
+    virtual bool Model(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender);
+    virtual bool Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender);
+    virtual bool Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender);
+    virtual bool Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender);
 
     //test
     void FindZen(OBJECT* obj);

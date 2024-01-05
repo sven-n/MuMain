@@ -28,9 +28,9 @@ bool PetActionDemon::Release(OBJECT* obj, CHARACTER* Owner)
     return TRUE;
 }
 
-bool PetActionDemon::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionDemon::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
-    float fRad = (3.14f / 10000.0f) * (float)(tick % 10000);
+    float fRad = (Q_PI / 10000.0f) * fmodf(tick, 10000);
     float temp = sinf(fRad);
 
     Vector(temp, temp, temp, obj->Light);
@@ -38,7 +38,7 @@ bool PetActionDemon::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD t
     return TRUE;
 }
 
-bool PetActionDemon::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionDemon::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     float FlyRange = 50.f;
     vec3_t Range, Direction;
@@ -56,12 +56,12 @@ bool PetActionDemon::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD ti
     else if (Distance >= FlyRange * FlyRange)
     {
         float Angle = CreateAngle2D(obj->Position, obj->Owner->Position);
-        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
+        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f * FPS_ANIMATION_FACTOR);
     }
 
     AngleMatrix(obj->Angle, obj->Matrix);
     VectorRotate(obj->Direction, obj->Matrix, Direction);
-    VectorAdd(obj->Position, Direction, obj->Position);
+    VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
     float Speed = (FlyRange * FlyRange >= Distance) ? 0 : (float)log(Distance) + 5.0f;
 
@@ -72,12 +72,12 @@ bool PetActionDemon::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD ti
     return TRUE;
 }
 
-bool PetActionDemon::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionDemon::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     BMD* b = &Models[obj->Type];
     vec3_t Position, vRelativePos;
     vec3_t Light, Light2;
-    float fRad = ((3.14f / 2500.0f) * (float)(tick % 25000));
+    float fRad = ((Q_PI / 2500.0f) * fmodf(tick, 25000));
     float temp = sinf(fRad) + 0.4f;
 
     Vector(0.f, 0.f, 0.f, vRelativePos);

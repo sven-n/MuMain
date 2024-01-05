@@ -42,14 +42,14 @@ bool PetActionCollecterAdd::Release(OBJECT* obj, CHARACTER* Owner)
     return TRUE;
 }
 
-bool PetActionCollecterAdd::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecterAdd::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
     return false;
 }
 
-bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
@@ -62,8 +62,8 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
 
     float FlyRange = 10.0f;
     vec3_t targetPos, Range, Direction;
-    m_fRadWidthStand = ((2 * 3.14f) / 4000.0f) * (float)(tick % 4000);
-    m_fRadWidthGet = ((2 * 3.14f) / 2000.0f) * (float)(tick % 2000);
+    m_fRadWidthStand = ((2 * Q_PI) / 4000.0f) * fmod(tick, 4000);
+    m_fRadWidthGet = ((2 * Q_PI) / 2000.0f) * fmod(tick, 2000);
 
     obj->Position[2] = obj->Owner->Position[2] + 20.0f;
     VectorSubtract(obj->Position, obj->Owner->Position, Range);
@@ -71,8 +71,8 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
     float Distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
     if (Distance > SEARCH_LENGTH * 3)
     {
-        obj->Position[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
-        obj->Position[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
+        obj->Position[0] = obj->Owner->Position[0] + (sin(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
+        obj->Position[1] = obj->Owner->Position[1] + (cos(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
 
         VectorCopy(obj->Owner->Angle, obj->Angle);
 
@@ -84,8 +84,8 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
     {
     case eAction_Stand:
     {
-        targetPos[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
-        targetPos[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
+        targetPos[0] = obj->Owner->Position[0] + (sin(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
+        targetPos[1] = obj->Owner->Position[1] + (cos(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
         targetPos[2] = obj->Owner->Position[2];
 
         VectorSubtract(targetPos, obj->Position, Range);
@@ -94,14 +94,14 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
         if (80.0f >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos);
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
-        float Speed = (FlyRange >= Distance) ? 0 : (float)log(Distance) * 2.3f;
+        float Speed = (FlyRange >= Distance) ? 0 : logf(Distance) * 2.3f;
 
         obj->Direction[0] = 0.0f;
         obj->Direction[1] = -Speed;
@@ -129,14 +129,14 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
         if (Distance >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos); //test
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
-        float Speed = (20.0f >= Distance) ? 0 : (float)log(Distance) * 2.5f;
+        float Speed = (20.0f >= Distance) ? 0 : logf(Distance) * 2.5f;
 
         obj->Direction[0] = 0.0f;
         obj->Direction[1] = -Speed;
@@ -166,7 +166,7 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
         VectorCopy(m_RootItem.position, targetPos);
 
         float Angle = CreateAngle2D(obj->Position, targetPos);
-        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
+        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f * FPS_ANIMATION_FACTOR);
         //------------------------------//
 
         if (CompTimeControl(1000, m_dwSendDelayTime)
@@ -192,14 +192,14 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
         if (Distance >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos); //test
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
-        float Speed = (FlyRange >= Distance) ? 0 : (float)log(Distance) * 2.5f;
+        float Speed = (FlyRange >= Distance) ? 0 : logf(Distance) * 2.5f;
 
         obj->Direction[0] = 0.0f;
         obj->Direction[1] = -Speed;
@@ -216,7 +216,7 @@ bool PetActionCollecterAdd::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, D
     return TRUE;
 }
 
-bool PetActionCollecterAdd::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecterAdd::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
@@ -230,7 +230,7 @@ bool PetActionCollecterAdd::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey,
 
     b->Animation(BoneTransform, obj->AnimationFrame, obj->PriorAnimationFrame, obj->PriorAction, obj->Angle, obj->HeadAngle);
 
-    float fRad1 = ((3.14f / 3000.0f) * (float)(tick % 3000));
+    float fRad1 = ((Q_PI / 3000.0f) * fmodf(tick, 3000));
     float fSize = sinf(fRad1) * 0.2f;
 
     Vector(1.f, 1.f, 1.f, Light);
@@ -256,7 +256,7 @@ bool PetActionCollecterAdd::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey,
     return TRUE;
 }
 
-bool PetActionCollecterAdd::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecterAdd::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
@@ -347,7 +347,7 @@ bool PetActionCollecterSkeleton::Release(OBJECT* obj, CHARACTER* Owner)
     return TRUE;
 }
 
-bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
@@ -361,9 +361,9 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
     float FlyRange = 12.0f;
     vec3_t targetPos, Range, Direction;
     bool _isMove = false;
-    float fRadHeight = ((2 * 3.14f) / 15000.0f) * (float)(tick % 15000);
-    m_fRadWidthStand = ((2 * 3.14f) / 4000.0f) * (float)(tick % 4000);
-    m_fRadWidthGet = ((2 * 3.14f) / 2000.0f) * (float)(tick % 2000);
+    float fRadHeight = ((2 * Q_PI) / 15000.0f) * fmodf(tick, 15000);
+    m_fRadWidthStand = ((2 * Q_PI) / 4000.0f) * fmodf(tick, 4000);
+    m_fRadWidthGet = ((2 * Q_PI) / 2000.0f) * fmodf(tick, 2000);
 
     obj->Position[2] = obj->Owner->Position[2] + (50.0f * obj->Owner->Scale);
 
@@ -396,15 +396,15 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         if (80.0f >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos); //test
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
         //	float Speed = ( FlyRange >= Distance ) ?  0 : (float)log(Distance) * 2.3f;
-        float Speed = (FlyRange * FlyRange >= Distance) ? 0 : (float)log(Distance) * 2.3f;
+        float Speed = (FlyRange * FlyRange >= Distance) ? 0 : logf(Distance) * 2.3f;
 
         obj->Direction[0] = 0.0f;
         obj->Direction[1] = -Speed;
@@ -431,14 +431,14 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         if (Distance >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos);
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
-        float Speed = (20.0f >= Distance) ? 0 : (float)log(Distance) * 2.5f;
+        float Speed = (20.0f >= Distance) ? 0 : logf(Distance) * 2.5f;
 
         obj->Direction[0] = 0.0f;
         obj->Direction[1] = -Speed;
@@ -467,7 +467,7 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         VectorCopy(m_RootItem.position, targetPos);
 
         float Angle = CreateAngle2D(obj->Position, targetPos);
-        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
+        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f * FPS_ANIMATION_FACTOR);
         //------------------------------//
 
         if (CompTimeControl(1000, m_dwSendDelayTime)
@@ -493,14 +493,14 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
         if (Distance >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos);
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
-        float Speed = (FlyRange >= Distance) ? 0 : (float)log(Distance) * 2.5f;
+        float Speed = (FlyRange >= Distance) ? 0 : logf(Distance) * 2.5f;
 
         obj->Direction[0] = 0.0f;
         obj->Direction[1] = -Speed;
@@ -517,7 +517,7 @@ bool PetActionCollecterSkeleton::Move(OBJECT* obj, CHARACTER* Owner, int targetK
     return TRUE;
 }
 
-bool PetActionCollecterSkeleton::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecterSkeleton::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 

@@ -20,7 +20,6 @@ PetObjectPtr PetObject::Make()
 PetObject::PetObject() :
     m_moveType(eAction_Stand),
     m_oldMoveType(eAction_End),
-    m_startTick(0),
     m_targetKey(-1),
     m_pOwner(NULL),
     m_itemType(-1)
@@ -56,7 +55,7 @@ bool PetObject::Create(int itemType, int modelType, vec3_t Position, CHARACTER* 
     assert(Owner);
     if (m_obj->Live) return FALSE;
 
-    m_startTick = GetTickCount();
+    m_timer = new CTimer();
 
     m_pOwner = Owner;
     m_itemType = itemType;
@@ -101,7 +100,7 @@ void PetObject::Release()
     {
         m_obj->Live = FALSE;
         delete m_obj;
-        m_obj = NULL;
+        m_obj = nullptr;
     }
 
     for (ActionMap::iterator iter = m_actionMap.begin(); iter != m_actionMap.end(); iter++)
@@ -116,6 +115,12 @@ void PetObject::Release()
     m_actionMap.clear();
 
     m_speedMap.clear();
+
+    if (m_timer)
+    {
+      delete m_timer;
+      m_timer = nullptr;
+    }
 }
 
 void PetObject::Update(bool bForceRender)
@@ -134,7 +139,7 @@ void PetObject::Update(bool bForceRender)
     Alpha(m_obj);
 
     //-----------------------------//
-    DWORD tick = GetNowTick();
+    auto tick = m_timer->GetTimeElapsed();
     UpdateModel(tick, bForceRender);
     UpdateMove(tick, bForceRender);
     UpdateSound(tick, bForceRender);
@@ -152,8 +157,7 @@ void PetObject::Render(bool bForceRender)
 
             RenderObject(m_obj, FALSE, 0, State);
 
-            DWORD tick = GetNowTick();
-            CreateEffect(tick, bForceRender);
+            CreateEffect(m_timer->GetTimeElapsed(), bForceRender);
         }
     }
 }
@@ -186,7 +190,7 @@ void PetObject::SetCommand(int targetKey, ActionType cmdType)
     m_moveType = cmdType;
 }
 
-bool PetObject::UpdateMove(DWORD tick, bool bForceRender)
+bool PetObject::UpdateMove(double tick, bool bForceRender)
 {
     if (m_oldMoveType != m_moveType)
     {
@@ -217,7 +221,7 @@ bool PetObject::UpdateMove(DWORD tick, bool bForceRender)
     return TRUE;
 }
 
-bool PetObject::UpdateModel(DWORD tick, bool bForceRender)
+bool PetObject::UpdateModel(double tick, bool bForceRender)
 {
     auto iter = m_actionMap.find(m_moveType);
     if (iter == m_actionMap.end()) return FALSE;
@@ -236,7 +240,7 @@ bool PetObject::UpdateModel(DWORD tick, bool bForceRender)
     return TRUE;
 }
 
-bool PetObject::UpdateSound(DWORD tick, bool bForceRender)
+bool PetObject::UpdateSound(double tick, bool bForceRender)
 {
     auto iter = m_actionMap.find(m_moveType);
     if (iter == m_actionMap.end()) return FALSE;
@@ -251,7 +255,7 @@ bool PetObject::UpdateSound(DWORD tick, bool bForceRender)
     return TRUE;
 }
 
-bool PetObject::CreateEffect(DWORD tick, bool bForceRender)
+bool PetObject::CreateEffect(double tick, bool bForceRender)
 {
     auto iter = m_actionMap.find(m_moveType);
     if (iter == m_actionMap.end()) return FALSE;

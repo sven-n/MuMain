@@ -27,12 +27,12 @@ bool PetActionStand::Release(OBJECT* obj, CHARACTER* Owner)
     return TRUE;
 }
 
-bool PetActionStand::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionStand::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     return false;
 }
 
-bool PetActionStand::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionStand::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     float FlyRange = 50.f;
     vec3_t Range, Direction;
@@ -51,14 +51,14 @@ bool PetActionStand::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD ti
     else if (Distance >= FlyRange * FlyRange)
     {
         float Angle = CreateAngle2D(obj->Position, obj->Owner->Position);
-        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
+        obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f * FPS_ANIMATION_FACTOR);
     }
 
     AngleMatrix(obj->Angle, obj->Matrix);
     VectorRotate(obj->Direction, obj->Matrix, Direction);
-    VectorAdd(obj->Position, Direction, obj->Position);
+    VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
-    float Speed = (FlyRange * FlyRange >= Distance) ? 0 : (float)log(Distance) * 1.8f;
+    float Speed = (FlyRange * FlyRange >= Distance) ? 0 : logf(Distance) * 1.8f;
 
     obj->Direction[0] = 0.0f;
     obj->Direction[1] = -Speed;
@@ -67,14 +67,14 @@ bool PetActionStand::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD ti
     return TRUE;
 }
 
-bool PetActionStand::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionStand::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     BMD* b = &Models[obj->Type];
     vec3_t Position, vRelativePos;
     vec3_t Light;
 
-    float fRad1 = ((3.14f / 3000.0f) * (float)(tick % 3000));
-    float fRad2 = ((3.14f / 3000.0f) * (float)((tick + 1500) % 3000));
+    float fRad1 = ((Q_PI / 3000.0f) * fmodf(tick, 3000));
+    float fRad2 = ((Q_PI / 3000.0f) * fmodf((tick + 1500), 3000));
     float tempLight;
 
     VectorCopy(obj->Position, b->BodyOrigin);

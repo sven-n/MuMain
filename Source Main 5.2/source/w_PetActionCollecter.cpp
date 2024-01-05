@@ -45,14 +45,14 @@ bool PetActionCollecter::Release(OBJECT* obj, CHARACTER* Owner)
     return TRUE;
 }
 
-bool PetActionCollecter::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecter::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
     return false;
 }
 
-bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
@@ -66,8 +66,8 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWOR
     //------------------------------------------//
     float FlyRange = 10.0f;
     vec3_t targetPos, Range, Direction;
-    m_fRadWidthStand = ((2 * 3.14f) / 4000.0f) * (float)(tick % 4000);
-    m_fRadWidthGet = ((2 * 3.14f) / 2000.0f) * (float)(tick % 2000);
+    m_fRadWidthStand = ((2 * Q_PI) / 4000.0f) * fmodf(tick, 4000);
+    m_fRadWidthGet = ((2 * Q_PI) / 2000.0f) * fmodf(tick, 2000);
 
     obj->Position[2] = obj->Owner->Position[2] + 20.0f;
     //------------------------------------------//
@@ -100,12 +100,12 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWOR
         if (80.0f >= FlyRange)
         {
             float Angle = CreateAngle2D(obj->Position, targetPos); //test
-            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f);
+            obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f * FPS_ANIMATION_FACTOR);
         }
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
         float Speed = (FlyRange >= Distance) ? 0 : (float)log(Distance) * 2.3f;
 
@@ -141,9 +141,9 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWOR
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
-        float Speed = (20.0f >= Distance) ? 0 : (float)log(Distance) * 2.5f;
+        float Speed = (20.0f >= Distance) ? 0 : logf(Distance) * 2.5f;
 
         obj->Direction[0] = 0.0f;
         obj->Direction[1] = -Speed;
@@ -200,9 +200,9 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWOR
 
         AngleMatrix(obj->Angle, obj->Matrix);
         VectorRotate(obj->Direction, obj->Matrix, Direction);
-        VectorAdd(obj->Position, Direction, obj->Position);
+        VectorAddScaled(obj->Position, Direction, obj->Position, FPS_ANIMATION_FACTOR);
 
-        float Speed = (FlyRange >= Distance) ? 0 : (float)log(Distance) * 2.5f;
+        float Speed = (FlyRange >= Distance) ? 0 : logf(Distance) * 2.5f;
 
         obj->Direction[0] = 0.0f;
         obj->Direction[1] = -Speed;
@@ -219,7 +219,7 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, DWOR
     return TRUE;
 }
 
-bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 
@@ -231,7 +231,7 @@ bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DW
 
     b->Animation(BoneTransform, obj->AnimationFrame, obj->PriorAnimationFrame, obj->PriorAction, obj->Angle, obj->HeadAngle);
 
-    float fRad1 = ((3.14f / 3000.0f) * (float)(tick % 3000));
+    float fRad1 = ((Q_PI / 3000.0f) * fmodf(tick, 3000));
     float fSize = sinf(fRad1) * 0.2f;
     float fSize2 = 1.0f;
 
@@ -275,7 +275,7 @@ bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, DW
     return TRUE;
 }
 
-bool PetActionCollecter::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, DWORD tick, bool bForceRender)
+bool PetActionCollecter::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
     if (NULL == obj || NULL == Owner) return FALSE;
 

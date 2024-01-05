@@ -5,6 +5,7 @@
 
 #include "w_PetAction.h"
 #include "ZzzBMD.h"
+#include "Time/Timer.h"
 
 BoostSmartPointer(PetObject);
 class PetObject
@@ -25,7 +26,6 @@ public:
     virtual ~PetObject();
 
 public:
-    DWORD GetNowTick() { return GetTickCount() - m_startTick; }
     OBJECT* GetObject() { return m_obj; }
     bool IsSameOwner(OBJECT* Owner);
     bool IsSameObject(OBJECT* Owner, int itemType);
@@ -42,11 +42,11 @@ public:
     void Render(bool bForceRender = false);
 
 private:
-    bool UpdateMove(DWORD tick, bool bForceRender = false);
-    bool UpdateModel(DWORD tick, bool bForceRender = false);
-    bool UpdateSound(DWORD tick, bool bForceRender = false);
+    bool UpdateMove(double tick, bool bForceRender = false);
+    bool UpdateModel(double tick, bool bForceRender = false);
+    bool UpdateSound(double tick, bool bForceRender = false);
 
-    bool CreateEffect(DWORD tick, bool bForceRender = false);
+    bool CreateEffect(double tick, bool bForceRender = false);
 
 private:
     void Init();
@@ -65,7 +65,7 @@ private:
     int m_targetKey;
     int m_itemType;
 
-    DWORD m_startTick;
+    CTimer* m_timer;
 
     ActionType m_moveType;
     ActionType m_oldMoveType;
