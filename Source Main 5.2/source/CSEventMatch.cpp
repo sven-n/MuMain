@@ -75,7 +75,7 @@ void CSBaseMatch::RenderTime(void)
             g_pRenderText->SetTextColor(128, 128, 255, 255);
             g_pRenderText->SetBgColor(0, 0, 0, 128);
 
-            wchar_t lpszStr[256];
+            wchar_t lpszStr[256] { 0 };
             int iTime = (dwCurrent - m_dwMatchCountDownStart) / 1000;
             if (m_iMatchCountDownType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_CASTLE_END)
             {
@@ -116,8 +116,8 @@ void CSBaseMatch::RenderTime(void)
 
 void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
 {
-    wchar_t lpszStr[256];
-    wchar_t lpszStrS[10];
+    wchar_t lpszStr[256] { 0 };
+    wchar_t lpszStrS[10] { 0 };
     int iMinute = MatchTime / 60;
 
     swprintf(lpszStr, L" %.2d :", iMinute);
@@ -186,7 +186,7 @@ void CSDevilSquareMatch::RenderMatchResult(void)
 
     g_pRenderText->SetBgColor(0);
 
-    wchar_t lpszStr[256];
+    wchar_t lpszStr[256] { 0 };
 
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->RenderText(xPos[2], yPos, GlobalText[647]);
