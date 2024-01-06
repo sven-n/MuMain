@@ -395,7 +395,7 @@ BOOL CPhysicsCloth::Create(OBJECT* o, int iBone, float fxPos, float fyPos, float
             vec3_t vPos;
             if (bCylinder)
             {
-                float fPosY = sinf((float)i / (float)(m_iNumHor - 1) * 3.14f) * 100.0f;
+                float fPosY = sinf((float)i / (float)(m_iNumHor - 1) * Q_PI) * 100.0f;
 
                 vPos[0] = (fUnitWidth * (float)i);
                 vPos[1] = fPosY - 30.0f;
@@ -519,7 +519,7 @@ void CPhysicsCloth::SetFixedVertices(float Matrix[3][4])
         vPos[0] += m_fxPos;
         if (bCylinder)
         {
-            float fPosY = sinf((float)iVertex / (float)(m_iNumHor - 1) * 3.14f) * 130.0f;
+            float fPosY = sinf((float)iVertex / (float)(m_iNumHor - 1) * Q_PI) * 130.0f;
             vPos[1] = fPosY - 110.0f;
         }
         else

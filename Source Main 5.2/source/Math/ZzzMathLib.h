@@ -12,7 +12,7 @@ extern "C" {
 #define	SIDE_BACK		1
 #define	SIDE_CROSS		-2
 
-#define	Q_PI         	3.14159265358979323846f
+#define	Q_PI         	3.1415926535897932384626433832795029f
 #define	ON_EPSILON		0.01
 #define	EQUAL_EPSILON	0.001f
 #define EPSILON_V       0.0001f

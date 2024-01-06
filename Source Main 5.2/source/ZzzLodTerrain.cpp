@@ -2176,7 +2176,7 @@ bool TestFrustrum2D(float x, float y, float Range)
 void CreateFrustrum(float Aspect, vec3_t position)
 {
     float Distance = CameraViewFar * 0.9f;
-    float Width = tanf(CameraFOV * 0.5f * 3.141592f / 180.f) * Distance * Aspect + 100.f;
+    float Width = tanf(CameraFOV * 0.5f * Q_PI / 180.f) * Distance * Aspect + 100.f;
     float Height = Width * 3.f / 4.f;
     vec3_t Temp[5];
     Vector(0.f, 0.f, 0.f, Temp[0]);
@@ -2242,7 +2242,7 @@ bool TestFrustrum(vec3_t Position, float Range)
 
 void CFrustrum::Make(vec3_t vEye, float fFov, float fAspect, float fDist)
 {
-    float Width = tanf(fFov * 0.5f * 3.141592f / 180.f) * fDist * fAspect + 100.f;
+    float Width = tanf(fFov * 0.5f * Q_PI / 180.f) * fDist * fAspect + 100.f;
     float Height = Width * 3.f / 4.f;
     vec3_t Temp[5];
     vec3_t FrustrumVertex[5];

@@ -10221,7 +10221,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             float   angle = (20 - count) * addAngle;
 
             o->Angle[0] += (80) * FPS_ANIMATION_FACTOR;
-            o->Direction[1] = sinf((float)((angle * 3.141592) / 180.f)) * 260;
+            o->Direction[1] = sinf((float)((angle * Q_PI) / 180.f)) * 260;
             VectorCopy(o->StartPosition, o->Position);
             if (count < 12.5 || count>12.5)
             {

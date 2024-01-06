@@ -1618,8 +1618,8 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Rotation = (float)(rand() % 360);
                     o->Gravity = (float)(rand() % 30 + 50) * 0.01f;
                     int iAngle = rand() % 360;
-                    o->TurningForce[0] = sinf(iAngle / 3.14f * 180);
-                    o->TurningForce[1] = cosf(iAngle / 3.14f * 180);
+                    o->TurningForce[0] = sinf(iAngle / Q_PI * 180);
+                    o->TurningForce[1] = cosf(iAngle / Q_PI * 180);
                 }
                 break;
                 case 67:

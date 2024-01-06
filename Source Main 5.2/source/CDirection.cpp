@@ -154,7 +154,7 @@ float CDirection::CalculateAngle(CHARACTER* c, int x, int y, float Angle)
 
     VectorNormalize(vResult);
 
-    float fAngle = acos(DotProduct(vResult, vTemp2)) / 3.14159 * 180;
+    float fAngle = acos(DotProduct(vResult, vTemp2)) / Q_PI * 180;
 
     if (vResult[0] > 0) fAngle = 360 - fAngle;
 

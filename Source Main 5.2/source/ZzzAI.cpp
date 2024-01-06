@@ -47,7 +47,7 @@ float CreateAngle(float x1, float y1, float x2, float y2)
     }
     else
     {
-        angle = (float)atan(ny2 / nx2) / 3.1415926536f * 180.f + 90.f;
+        angle = (float)atan(ny2 / nx2) / Q_PI * 180.f + 90.f;
         if (nx2 < 0.f && ny2 >= 0.f) r = angle + 180.f;
         else if (nx2 < 0.f && ny2 < 0.f) r = angle + 180.f;
         else if (nx2 >= 0.f && ny2 < 0.f) r = angle;

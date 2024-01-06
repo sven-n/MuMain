@@ -177,8 +177,8 @@ void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar)
     ScreenCenterYFlip = WindowWidth - ScreenCenterY;
 
     float AspectY = (float)(WindowHeight) / (float)(OpenglWindowHeight);
-    PerspectiveX = tanf(Fov * 0.5f * 3.141592f / 180.f) / (float)(OpenglWindowWidth / 2) * Aspect;
-    PerspectiveY = tanf(Fov * 0.5f * 3.141592f / 180.f) / (float)(OpenglWindowHeight / 2) * AspectY;
+    PerspectiveX = tanf(Fov * 0.5f * Q_PI / 180.f) / (float)(OpenglWindowWidth / 2) * Aspect;
+    PerspectiveY = tanf(Fov * 0.5f * Q_PI / 180.f) / (float)(OpenglWindowHeight / 2) * AspectY;
     //PerspectiveX = (float)ScreenCenterX/tanf(Fov*0.5f*3.141592f/180.f)*Aspect;
     //PerspectiveY = (float)ScreenCenterY/tanf(Fov*0.5f*3.141592f/180.f);
 }
