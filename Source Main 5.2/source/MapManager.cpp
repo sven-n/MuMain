@@ -1555,7 +1555,7 @@ void CMapManager::LoadWorld(int Map)
 
         swprintf(FileName, L"%s\\leaf01.tga", WorldName);
         LoadBitmap(FileName, BITMAP_LEAF1, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
-        sprintf(FileName,(Map==0||Map==3||Map==63)? L"%s\\leaf01.tga": L"%s\\leaf01.jpg",WorldName);
+        swprintf(FileName,(Map==0||Map==3||Map==63)? L"%s\\leaf01.tga": L"%s\\leaf01.jpg",WorldName);
         LoadBitmap(FileName, BITMAP_LEAF1, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
         swprintf(FileName, L"%s\\leaf02.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_LEAF2, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
