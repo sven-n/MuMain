@@ -99,9 +99,9 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
         fRenderPosY = fRenderPosY + FONT_LEADING + (SCROLL_MIDDLE_PART_HEIGHT * (m_nShowingLines - GetCurrentRenderEndLine() - 1));
     }
 
-    BYTE byAlpha = 150;
-    if (m_bShowFrame) byAlpha = 100;
-
+	fRenderPosY -= 260; //change postion of chat messager
+	BYTE byAlpha = 150;
+	if(m_bShowFrame) byAlpha = 100;
     EnableAlphaTest();
     for (int i = iRenderStartLine, s = 0; i <= GetCurrentRenderEndLine(); i++, s++)
     {
