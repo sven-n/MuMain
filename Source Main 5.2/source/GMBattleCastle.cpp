@@ -341,33 +341,46 @@ namespace battleCastle
         if (gMapManager.InBattleCastle() == false) return;
 
         g_byGuardAI = 0;
-        g_iMp3PlayTime = 0;
-        //        SetBattleCastleStart ( false );
+       g_iMp3PlayTime = 0;
+        //SetBattleCastleStart ( false );
 
         vec3_t Angle, Position;
-        Vector(0.f, 0.f, 0.f, Angle);
-        Vector(0.f, 0.f, 270.f, Position);
+      Vector ( 0.f, 0.f, 0.f, Angle );
 
-        SocketClient->ToGameServer()->SendGuildLogoOfCastleOwnerRequest();
+        SendGetCastleGuildMark ();
 
-        OpenMonsterModel(77);
+        OpenMonsterModel ( 77 );
+       
+        Vector(0.f, 0.f, 230.f, Position);
+        Position[0] = 65*TERRAIN_SCALE;
+        Position[1] = 113*TERRAIN_SCALE;
+        CreateObject ( MODEL_MONSTER01+77, Position, Angle );
+       
+        Vector(0.f, 0.f, 230.f, Position);
+        Position[0] = 71*TERRAIN_SCALE;
+        Position[1] = 113*TERRAIN_SCALE;
+        CreateObject ( MODEL_MONSTER01+77, Position, Angle );
+       
+        Vector(0.f, 0.f, 230.f, Position);
+        Position[0] = 91*TERRAIN_SCALE;
+        Position[1] = 113*TERRAIN_SCALE;
+        CreateObject ( MODEL_MONSTER01+77, Position, Angle );
 
-        Position[0] = 65 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
+        Vector(0.f, 0.f, 230.f, Position);
+        Position[0] = 97 * TERRAIN_SCALE;
+        Position[1] = 113 * TERRAIN_SCALE;
         CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
-
-        Position[0] = 71 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
-
-        Position[0] = 91 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
-
-        Position[0] = 118 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
-
-        Position[0] = 123 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+       
+        Vector(0.f, 0.f, 240.f, Position);
+        Position[0] = 117*TERRAIN_SCALE;
+        Position[1] = 113*TERRAIN_SCALE;
+        CreateObject ( MODEL_MONSTER01+77, Position, Angle );
+       
+        Vector(0.f, 0.f, 233.f, Position);
+        Position[0] = 123*TERRAIN_SCALE;
+        Position[1] = 113*TERRAIN_SCALE;
+        CreateObject ( MODEL_MONSTER01+77, Position, Angle );
     }
-
     bool    SettingBattleFormation(CHARACTER* c, eBuffState state)
     {
         if (gMapManager.InBattleCastle() == false)  return false;
@@ -1283,7 +1296,7 @@ namespace battleCastle
             c->Object.LifeTime = 0;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü");
+            wcscpy(c->ID, L"ì™•ê´€");
             break;
 
         case 216:
@@ -1293,7 +1306,7 @@ namespace battleCastle
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü");
+            wcscpy(c->ID, L"ì™•ê´€");
             break;
 
         case 217:
@@ -1302,7 +1315,7 @@ namespace battleCastle
             c->m_bFixForm = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü ¹ßÆÇ2");
+            wcscpy(c->ID, L"ì™•ê´€ ë°œíŒ2");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
@@ -1314,7 +1327,7 @@ namespace battleCastle
             c->m_bFixForm = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü ¹ßÆÇ1");
+            wcscpy(c->ID, L"ì™•ê´€ ë°œíŒ1");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
@@ -1327,7 +1340,7 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¼º¹® ½ºÀ§Ä¡");
+            wcscpy(c->ID, L"ì„±ë¬¸ ìŠ¤ìœ„ì¹˜");
             break;
 
         case 220:
@@ -1337,7 +1350,7 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"»ç³ÉÅÍ ¹®Áö±â");
+            wcscpy(c->ID, L"ì‚¬ëƒ¥í„° ë¬¸ì§€ê¸°");
             break;
 
         case 221:
@@ -1369,7 +1382,7 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿ø·Î¿ø");
+            wcscpy(c->ID, L"ì›ë¡œì›");
             break;
 
         case 224:
@@ -1380,7 +1393,7 @@ namespace battleCastle
             c->Object.SubType = rand() % 2 + 10;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"±À§º´");
+            wcscpy(c->ID, L"êµ¼ãŽˆ");
             break;
 
         case 277:
