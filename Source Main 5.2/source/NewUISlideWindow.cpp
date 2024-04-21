@@ -65,5 +65,6 @@ bool SEASON3B::CNewUISlideWindow::Render()
 
 float SEASON3B::CNewUISlideWindow::GetLayerDepth()
 {
-    return 1.91f;
+     //return 1.91f;
+   return 11.f;
 }
