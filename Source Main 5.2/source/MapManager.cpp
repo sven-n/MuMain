@@ -554,7 +554,7 @@ void CMapManager::Load() // OK
     case WD_41CHANGEUP3RD_1ST:
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"Effect\\firered.jpg", BITMAP_FIRE_RED, GL_LINEAR, GL_CLAMP_TO_EDGE);
-        LoadBitmap(L"Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);      //  ∫“ææ.
+        LoadBitmap(L"Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);      //  Î∂àÏî®.
 
         LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE1, L"Data\\Sound\\w42\\cage01.wav", 1);
         LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE2, L"Data\\Sound\\w42\\cage02.wav", 1);
@@ -598,7 +598,7 @@ void CMapManager::Load() // OK
             LoadBitmap(L"Logo\\MU-logo.tga", BITMAP_LOG_IN + 16, GL_LINEAR);
             LoadBitmap(L"Logo\\MU-logo_g.jpg", BITMAP_LOG_IN + 17, GL_LINEAR);
 
-            // ∏ÛΩ∫≈Õ πÃ∏Æ ¿–æÓ≥ı±‚
+            // Î™¨Ïä§ÌÑ∞ ÎØ∏Î¶¨ ÏùΩÏñ¥ÎÜìÍ∏∞
             OpenMonsterModel(129);
             OpenMonsterModel(130);
             OpenMonsterModel(131);
@@ -1553,9 +1553,10 @@ void CMapManager::LoadWorld(int Map)
         swprintf(FileName, L"%s\\TileGrass03.tga", WorldName);
         LoadBitmap(FileName, BITMAP_MAPGRASS + 2, GL_NEAREST, GL_REPEAT, false);
 
-        swprintf(FileName, L"%s\\leaf01.tga", WorldName);
+        
+        swprintf(FileName, L"%s\\leaf01.tga", WorldName); 
         LoadBitmap(FileName, BITMAP_LEAF1, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
-        swprintf(FileName, L"%s\\leaf01.jpg", WorldName);
+        swprintf(FileName,(Map==0||Map==3||Map==63)? L"%s\\leaf01.tga": L"%s\\leaf01.jpg",WorldName);
         LoadBitmap(FileName, BITMAP_LEAF1, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
         swprintf(FileName, L"%s\\leaf02.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_LEAF2, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
