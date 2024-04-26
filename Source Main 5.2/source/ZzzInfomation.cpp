@@ -2852,7 +2852,6 @@ void CHARACTER_MACHINE::CalculateDamage()
 
     WORD    Damage = 0;
 
-    memset(g_csItemOption.m_bySetOptionListOnOff, 0, sizeof(BYTE) * 16);
 
     g_csItemOption.PlusSpecial(&Damage, AT_SET_OPTION_IMPROVE_ATTACK_MIN);
     Character.AttackDamageMinLeft += Damage;

@@ -172,6 +172,7 @@ void CNewUIMyInventory::UnequipItem(int iIndex)
             pEquippedItem->Level = 0;
             pEquippedItem->Number = -1;
             pEquippedItem->Option1 = 0;
+            pEquippedItem->Durability = 0;
             pEquippedItem->ExtOption = 0;
             pEquippedItem->SocketCount = 0;
             for (int i = 0; i < MAX_SOCKETS; ++i)
@@ -696,7 +697,7 @@ void CNewUIMyInventory::RenderSetOption()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
-    if (g_csItemOption.GetSetOptionANum() > 0 || g_csItemOption.GetSetOptionBNum() > 0)
+    if (g_csItemOption.IsAncientSetEquipped())
     {
         g_pRenderText->SetTextColor(255, 204, 25, 255);
     }
