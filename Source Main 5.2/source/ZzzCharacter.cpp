@@ -268,12 +268,12 @@ void SetPlayerStop(CHARACTER* c)
                     }
                     else
                     {
-                        //  무기가 없거나. 블러俳낸습 아닌 안전지대 일때
+                        //  No weapons or. Blur when you are in a safe zone that is not a hunting ground.
                         if ((c->Weapon[0].Type == -1 && c->Weapon[1].Type == -1) || (c->SafeZone && (gMapManager.InBloodCastle() == false)))
                         {
                             if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
                                 SetAction(&c->Object, PLAYER_STOP_FEMALE);
-                            else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER && !gMapManager.InChaosCastle())	// 소환술사는 카오스캐슬에선 남자 애니메이션.
+                            else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER && !gMapManager.InChaosCastle())
                                 SetAction(&c->Object, PLAYER_STOP_SUMMONER);
                             else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
                                 SetAction(&c->Object, PLAYER_STOP_RAGEFIGHTER);
@@ -12602,7 +12602,7 @@ CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key)
         c->Object.SubType = rand() % 2 + 10;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
-        wcscpy(c->ID, L"a위병");
+        wcscpy(c->ID, L"Clerk");
         break;
 #ifdef ADD_ELF_SUMMON
     case 276:
@@ -14019,7 +14019,7 @@ CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key)
     case 579:
         OpenNpc(MODEL_LUCKYITEM_NPC);
         c = CreateCharacter(Key, MODEL_LUCKYITEM_NPC, PositionX, PositionY);
-        wcscpy(c->ID, L"a비드");
+        wcscpy(c->ID, L"Lucky Item NPC");
         c->Object.Scale = 0.95f;
         c->Object.m_fEdgeScale = 1.2f;
         Models[MODEL_LUCKYITEM_NPC].Actions[0].PlaySpeed = 0.45f;
