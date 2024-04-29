@@ -372,7 +372,6 @@ void CCharacterManager::GetMagicSkillDamage(int iType, int* piMinDamage, int* pi
     }
 
     Damage = 0;
-    g_csItemOption.ClearListOnOff();
     g_csItemOption.PlusMastery(&Damage, p->MasteryType);
     g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
     *piMinDamage += Damage;
@@ -407,7 +406,6 @@ void CCharacterManager::GetSkillDamage(int iType, int* piMinDamage, int* piMaxDa
     *piMaxDamage = Damage + Damage / 2;
 
     Damage = 0;
-    g_csItemOption.ClearListOnOff();
     g_csItemOption.PlusMastery(&Damage, p->MasteryType);
     g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
     *piMinDamage += Damage;

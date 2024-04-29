@@ -4,7 +4,6 @@
 #define __CSITEM_OPTION_H__
 
 #include "Singleton.h"
-#include "zzzinfomation.h"
 #include <map>
 
 constexpr BYTE MAX_SET_OPTION = 64; // Maximum number of possible ancient sets
@@ -22,10 +21,14 @@ constexpr BYTE MAX_EQUIPPED_SETS = MAX_EQUIPPED_SET_ITEMS / 2;
 constexpr auto MAX_ITEM_SET_NAME = 64;
 
 constexpr auto MAX_ITEM_SET_STANDARD_OPTION_COUNT = 6;
+constexpr auto MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT = 2;
+constexpr auto MAX_ITEM_SET_EXT_OPTION_COUNT = 2;
 constexpr auto MAX_ITEM_SETS_PER_ITEM = 2;
 constexpr auto MAX_ITEM_SET_FULL_OPTION_COUNT = 5;
 
-constexpr auto MAX_OPTIONS_PER_ITEM_SET = 16;
+constexpr auto MAX_OPTIONS_PER_ITEM_SET = MAX_ITEM_SET_STANDARD_OPTION_COUNT * MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT
+                                                + MAX_ITEM_SET_FULL_OPTION_COUNT
+                                                + MAX_ITEM_SET_EXT_OPTION_COUNT;
 
 struct ITEM_SET_TYPE
 {
@@ -35,32 +38,34 @@ struct ITEM_SET_TYPE
 
 struct ITEM_SET_OPTION
 {
-    wchar_t	strSetName[MAX_ITEM_SET_NAME];
-    BYTE	bySetItemCount; // The number of items in the set
+    wchar_t strSetName[MAX_ITEM_SET_NAME];
+    BYTE bySetItemCount; // The number of items in the set
+    BYTE byOptionCount; // The total number of options in the set
 
     // The following arrays are used to store the standard options of the ancient sets.
     // There is typically one option less than the number of items in the set.
     // These 2-element-arrays are somehow strange. Only the first element is actually used, I found no use case for the second one.
     // Theoretically Webzen planned to have 2 options per item, but never implemented it.
-    BYTE	byStandardOption[MAX_ITEM_SET_STANDARD_OPTION_COUNT][2];
-    BYTE	byStandardOptionValue[MAX_ITEM_SET_STANDARD_OPTION_COUNT][2];
+    BYTE byStandardOption[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT];
+    BYTE byStandardOptionValue[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT];
 
-    // todo: what are these? Found no set which uses that. If I understand the code correctly, it's an option which always applies.
-    BYTE	byExtOption[MAX_ITEM_SETS_PER_ITEM]; // ???
-    BYTE	byExtOptionValue[MAX_ITEM_SETS_PER_ITEM]; // ???
+    // There are up to 2 ext options which always apply when there are at least two items of a set equipped.
+    // Found no set which uses an ExtOption.
+    BYTE byExtOption[MAX_ITEM_SET_EXT_OPTION_COUNT];
+    BYTE byExtOptionValue[MAX_ITEM_SET_EXT_OPTION_COUNT];
 
-    BYTE	byOptionCount;
-    BYTE	byFullOption[MAX_ITEM_SET_FULL_OPTION_COUNT];
-    BYTE	byFullOptionValue[MAX_ITEM_SET_FULL_OPTION_COUNT];
-    BYTE	byRequireClass[MAX_CLASS];
+    BYTE byFullOption[MAX_ITEM_SET_FULL_OPTION_COUNT];
+    BYTE byFullOptionValue[MAX_ITEM_SET_FULL_OPTION_COUNT];
+    BYTE byRequireClass[MAX_CLASS];
 };
-
 
 struct SET_OPTION
 {
-    BYTE IsActive;
+    bool IsActive;
+    bool IsFullOption;
+    bool IsExtOption;
+    bool FulfillsClassRequirement; // If the option requires a specific class and the character fulfills that. //m_bySetOptionList[x][1]
     BYTE OptionNumber; // m_bySetOptionList[x][0]
-    BYTE RequireClass; //m_bySetOptionList[x][1]
     int Value; //m_iSetOptionListValue
 };
 
@@ -100,23 +105,22 @@ private:
     MAP_EQUIPPEDSETITEMNAME	            m_mapEquippedSetItemName;
     MAP_EQUIPPEDSETITEMNAME::iterator   m_iterESIN;
 
-    void  UpdateCount_SetOptionPerEquippedSetItem(const SET_SEARCH_RESULT* byOptionList, int* arLimitSetItemOptionCount, ITEM* ItemsEquipment);
-    int GetCurrentTypeSetitemCount(const ITEM& CurItem_, const SET_SEARCH_RESULT* byOptionList);
-    int Search_From_EquippedSetItemNameMapTable(wchar_t* szSetItemname);
+    static bool isClassRequirementFulfilled(const ITEM_SET_OPTION& setOptions, int firstClass, int secondClass);
+    static void TryAddSetOption(BYTE option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption, bool isExtOption, bool fulfillsClassRequirement, int firstClass, int secondClass);
+
+    static bool getExplainText(wchar_t* text, const BYTE option, const int value);
+    static BYTE RenderSetOptionList(const SET_SEARCH_RESULT_OPT& set, BYTE textIndex, bool bIsEquippedItem, bool bShowInactive);
 
     bool	OpenItemSetType(const wchar_t* filename);
     bool	OpenItemSetOption(const wchar_t* filename);
-    void	checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int setType);
-    void	calcSetOptionList(SET_SEARCH_RESULT* optionList);
-    BYTE    calcClassRequirement(const ITEM_SET_OPTION& setOptions, int firstClass, int secondClass);
-
-    void	getExplainText(wchar_t* text, const BYTE option, const BYTE value, const BYTE SetA);
-    void    getAllAddState(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma);
+    void	checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int setType) const;
+    void	calcSetOptionList(const SET_SEARCH_RESULT* optionList);
+    
+    void    getAllAddState(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma) const;
 
     void    AddStatsBySetOptions(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma) const; //Adds the stats of the active ancient set options to the given pointers, without bonus options
 
-    int     RenderSetOptionList(const SET_SEARCH_RESULT_OPT &set, BYTE textIndex, bool bIsEquippedItem, bool bShowInactive);
-
+    int AggregateOptionValue(int optionNumber) const;
 
 
 public:
@@ -130,27 +134,25 @@ public:
         m_bySelectedItemOption = 0;
         m_bySameSetItem = 0;
     }
-    void    ClearListOnOff(void)
-    {
-        //memset(m_bySetOptionListOnOff, 0, sizeof(BYTE) * MAX_OPTIONS_PER_ITEM_SET);
-    }
     bool    OpenItemSetScript(bool bTestServer);
 
-    bool    IsDisableSkill(int Type, int Energy, int Charisma = 0);
+    static bool    IsDisableSkill(int Type, int Energy, int Charisma = 0);
     BYTE    IsChangeSetItem(const int Type, const int SubType);
-    WORD    GetMixItemLevel(const int Type);
-    bool	GetSetItemName(wchar_t* strName, const int iType, const int setType);
+    WORD    GetMixItemLevel(const int Type) const;
+    bool	GetSetItemName(wchar_t* strName, const int iType, const int setType) const;
 
-    void	PlusSpecial(WORD* Value, const int Special);
-    void	PlusSpecialPercent(WORD* Value, const int Special);
-    void	PlusSpecialLevel(WORD* Value, const WORD SrcValue, const int Special);
-    void    PlusMastery(int* Value, const BYTE MasteryType);
+    void	PlusSpecial(WORD* Value, const int Special) const;
+    void	PlusSpecialPercent(WORD* Value, const int Special) const;
+    void	PlusSpecialLevel(WORD* Value, const WORD SrcValue, const int Special) const;
+    void    PlusMastery(int* Value, const BYTE MasteryType) const;
 
-    int     GetDefaultOptionValue(ITEM* ip, WORD* Value);
-    bool    GetDefaultOptionText(const ITEM* ip, wchar_t* Text);
-    int     RenderDefaultOptionText(const ITEM* ip, int TextNum);
+    
 
-    bool    Special_Option_Check(int Kind = 0);
+    static int     GetDefaultOptionValue(ITEM* ip, WORD* Value);
+    static bool    GetDefaultOptionText(const ITEM* ip, wchar_t* Text);
+    static int     RenderDefaultOptionText(const ITEM* ip, int TextNum);
+
+    static bool    Special_Option_Check(int Kind = 0);
     void	CheckItemSetOptions(void);
     void	MoveSetOptionList(const int StartX, const int StartY);
     void	RenderSetOptionButton(const int StartX, const int StartY);
@@ -169,7 +171,7 @@ public:
 
     void	getAllAddOptionStatesbyCompare(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma, WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality, WORD iC);
 
-    void	getAllAddStateOnlyAddValue(WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma); // Gets only the added stats of the active ancient set options plus bonus options
+    void	getAllAddStateOnlyAddValue(WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma) const; // Gets only the added stats of the active ancient set options plus bonus options
 };
 
 #define g_csItemOption CSItemOption::GetSingleton ()
