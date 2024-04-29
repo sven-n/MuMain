@@ -3914,7 +3914,6 @@ void CHARACTER_MACHINE::CalculateAll()
 {
     CalculateBasicState();
     g_csItemOption.CheckItemSetOptions();
-    g_csItemOption.ClearListOnOff();
     InitAddValue();
 
     g_SocketItemMgr.CheckSocketSetOption();

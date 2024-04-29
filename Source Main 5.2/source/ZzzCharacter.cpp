@@ -3080,7 +3080,6 @@ void HeroAttributeCalc(CHARACTER* c)
     if (CharacterAttribute->AbilityTime[1] == 0)
     {
         CharacterAttribute->Ability &= (~ABILITY_PLUS_DAMAGE);
-        g_csItemOption.ClearListOnOff();
         CharacterMachine->CalculateDamage();
         CharacterMachine->CalculateMagicDamage();
         CharacterMachine->CalculateCurseDamage();
