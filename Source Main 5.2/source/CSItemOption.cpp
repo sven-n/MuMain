@@ -470,7 +470,7 @@ void CSItemOption::calcSetOptionList(const SET_SEARCH_RESULT* optionList)
 
         for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
         {
-            TryAddSetOption(setOptions.byFullOption[o], setOptions.byFullOptionValue[o], 0, set, setOptions, isThisSetComplete, true, false, requireClass, firstClass, secondClass);
+            TryAddSetOption(setOptions.byFullOption[o], setOptions.byFullOptionValue[o], 255, set, setOptions, isThisSetComplete, true, false, requireClass, firstClass, secondClass);
         }
     }
 }
