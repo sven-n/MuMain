@@ -45,6 +45,7 @@ void CSWaterTerrain::Update(void)
         int waveX = ((Hero->PositionX) * 2) + (rand() % 30) - 15;
         int waveY = ((Hero->PositionY) * 2) + 25;
         addSineWave(waveX, waveY, 20, 2, 2000);
+        LastWaveStart = WorldTime;
     }
 
     m_iWaterPage ^= 1;
@@ -284,6 +285,7 @@ void CSWaterTerrain::calcWave(void)
                 + oldptr[count - 1]
                 ) >> 1)
                 - newptr[count];
+            newh *= FPS_ANIMATION_FACTOR;
             newptr[count] = newh - (newh >> 4);
         }
     }
