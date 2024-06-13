@@ -9641,7 +9641,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 if (o->Owner != NULL)
                 {
                     vec3_t Position;
-                    o->Angle[2] += (50.f) * FPS_ANIMATION_FACTOR;
+                    o->Angle[2] += 50.f;
                     VectorCopy(o->Owner->Position, Position);
 
                     o->Position[0] = o->Owner->Position[0] + sinf(o->Angle[2] * 0.1f) * 80.f;
@@ -9661,7 +9661,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 if (o->Owner != NULL)
                 {
                     vec3_t Position;
-                    o->Angle[2] += (180) * FPS_ANIMATION_FACTOR;
+                    o->Angle[2] += 180;
                     VectorCopy(o->Owner->Position, Position);
 
                     o->Position[0] = o->Owner->Position[0] + sinf(o->Angle[2] * 0.1f) * 50.f;

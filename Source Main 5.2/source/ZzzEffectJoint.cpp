@@ -3493,7 +3493,7 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else if (o->LifeTime > 80)
             {
-                VectorScale(o->Light, powf(1.f / 1.25f, FPS_ANIMATION_FACTOR), o->Light);
+                VectorScale(o->Light, powf(1.25f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 10)
@@ -3532,15 +3532,15 @@ void MoveJoint(JOINT* o, int iIndex)
             }
             else if (o->LifeTime > 68)
             {
-                VectorScale(o->Light, powf(1.f / 1.2f, FPS_ANIMATION_FACTOR), o->Light);
+                VectorScale(o->Light, powf(1.2f, FPS_ANIMATION_FACTOR), o->Light);
             }
         }
         else if (o->SubType == 14)
         {
             if (o->LifeTime < 5)
             {
-                float fLumi = o->LifeTime / 5.f; VectorScale(o->Light, powf(1.f / 1.1f, FPS_ANIMATION_FACTOR), o->Light);
-                VectorScale(o->Light, fLumi, o->Light);
+                float fLumi = o->LifeTime / 5.f;
+                VectorScale(o->Light, powf(fLumi, FPS_ANIMATION_FACTOR), o->Light);
             }
             o->Scale *= powf(1.05f, FPS_ANIMATION_FACTOR);
             VectorCopy(o->Target->Position, o->Position);
