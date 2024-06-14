@@ -218,6 +218,7 @@ void CSWaterTerrain::addSineWave(int x, int y, int radiusX, int radiusY, int hei
             {
                 float dist = sqrtf(square * length);
                 int   sine = (int)((cos(dist) + 0xffff) * height) >> 19;
+                sine *= FPS_ANIMATION_FACTOR;
                 p[WATER_TERRAIN_SIZE * (cy + y) + cx + x] += sine;
             }
         }
