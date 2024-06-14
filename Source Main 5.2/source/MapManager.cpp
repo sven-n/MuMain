@@ -1646,7 +1646,10 @@ void CMapManager::DeleteObjects()
 
 bool CMapManager::InChaosCastle(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
     if ((iMap >= WD_18CHAOS_CASTLE && iMap <= WD_18CHAOS_CASTLE_END) || iMap == WD_53CAOSCASTLE_MASTER_LEVEL)
     {
@@ -1658,7 +1661,10 @@ bool CMapManager::InChaosCastle(int iMap)
 
 bool CMapManager::InBloodCastle(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
     if ((iMap >= WD_11BLOODCASTLE1 && iMap <= WD_11BLOODCASTLE_END) || iMap == WD_52BLOODCASTLE_MASTER_LEVEL)
     {
@@ -1675,16 +1681,23 @@ bool CMapManager::InDevilSquare()
 
 bool CMapManager::InHellas(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
-    return ((this->WorldActive >= WD_24HELLAS && this->WorldActive <= WD_24HELLAS_END) || (this->WorldActive == WD_24HELLAS_7));
+    return ((iMap >= WD_24HELLAS && iMap <= WD_24HELLAS_END)
+        || (iMap == WD_24HELLAS_7));
 }
 
 bool CMapManager::InHiddenHellas(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
-    return (this->WorldActive == WD_24HELLAS_7) ? true : false;
+    return iMap == WD_24HELLAS_7;
 }
 
 bool CMapManager::IsPKField()
@@ -1736,9 +1749,12 @@ bool CMapManager::IsEmpireGuardian()
 
 bool CMapManager::InBattleCastle(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
-    return (this->WorldActive == WD_30BATTLECASTLE) ? true : false;
+    return (iMap == WD_30BATTLECASTLE) ? true : false;
 }
 
 const wchar_t* CMapManager::GetMapName(int iMap)
