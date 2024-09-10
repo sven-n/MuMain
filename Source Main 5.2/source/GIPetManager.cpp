@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -56,7 +56,7 @@ namespace giPetManager
 
     void CreatePetDarkSpirit_Now(CHARACTER* c)
     {
-        if (c->Weapon[1].Type == MODEL_HELPER + 5)
+        if (c->Weapon[1].Type == MODEL_DARK_RAVEN_ITEM)
         {
             DeletePet(c);
             CSPetSystem* pPet = new CSPetDarkSpirit(c);

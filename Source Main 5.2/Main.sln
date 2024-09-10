@@ -12,6 +12,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{BDAADE0E-F32A-4E29-B879-1958B43F4139}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstantsReplacer", "..\ConstantsReplacer\ConstantsReplacer.csproj", "{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,9 +60,28 @@ Global
 		{599D63E9-4BAB-44DC-AB6E-287C2A869CE4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{599D63E9-4BAB-44DC-AB6E-287C2A869CE4}.Release|x86.ActiveCfg = Release|Any CPU
 		{599D63E9-4BAB-44DC-AB6E-287C2A869CE4}.Release|x86.Build.0 = Release|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Debug|x86.Build.0 = Debug|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Global Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Global Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Global Debug|x86.ActiveCfg = Debug|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Global Debug|x86.Build.0 = Debug|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Global Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Global Release|Any CPU.Build.0 = Release|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Global Release|x86.ActiveCfg = Release|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Global Release|x86.Build.0 = Release|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Release|x86.ActiveCfg = Release|Any CPU
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BACA0C7F-CB97-4CB8-B620-9EF6EA9FCDE2} = {BDAADE0E-F32A-4E29-B879-1958B43F4139}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {46CBD986-0778-4FA7-8B9E-62CE67735BE4}

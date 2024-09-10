@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -627,7 +627,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     inter = (Light[0] - inter) / 15.0f;
                     Vector(0.f, inter, 0.f, o->Velocity);
 
-                    //  »ö.
+                    //  ìƒ‰.
                     Luminosity = (float)sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
                     Vector(Luminosity, Luminosity * 0.5f, Luminosity * 0.5f, o->Light);
                 }
@@ -1007,7 +1007,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Position[2] -= (20.f) * FPS_ANIMATION_FACTOR;
                     o->Gravity = (float)(rand() % 10 + 5) * 0.1f;
                 }
-                else if (o->SubType == 6)	// ¡İ
+                else if (o->SubType == 6)	// â—
                 {
                     o->LifeTime = 25;
                     o->Scale = (float)(rand() % 8 + 50) * 0.01f * Scale;
@@ -1052,7 +1052,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->Velocity[2] = -((1.2f) + ((float)(rand() % 20 - 10) * 0.025f));
                     o->Gravity = 2.f + ((float)(rand() % 20 - 10) * 0.05f);
                 }
-                else if (o->SubType == 10)	// BITMAP_FIRE_CURSEDLICH o->SubType == 1°ú ºñ½Á.
+                else if (o->SubType == 10)	// BITMAP_FIRE_CURSEDLICH o->SubType == 1ê³¼ ë¹„ìŠ·.
                 {
                     o->Position[0] += ((rand() % 10 - 5) * 0.2f) * FPS_ANIMATION_FACTOR;
                     o->Position[1] += ((rand() % 10 - 5) * 0.2f) * FPS_ANIMATION_FACTOR;
@@ -2654,7 +2654,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     VectorCopy(vSpeed, o->Velocity);
 
                     o->Alpha = 1.0f;
-                    //o->Scale = (float)(rand()%20)/20.0f+1.0f;	//(1~2 20´Ü°è)
+                    //o->Scale = (float)(rand()%20)/20.0f+1.0f;	//(1~2 20ë‹¨ê³„)
                     o->LifeTime = rand() % 30 + 20;
                     o->Angle[2] = (float)(rand() % 360);
                     o->Rotation = (float)(rand() % 360);
@@ -7048,18 +7048,18 @@ void MoveParticles()
                 {
                     o->Frame = (16 - o->LifeTime) / 4;
 
-                    // ÇÃ·¹ÀÌ¾î ¸ğµ¨
+                    // í”Œë ˆì´ì–´ ëª¨ë¸
                     BMD* pModel = &Models[o->Target->Type];
                     vec3_t vPos;
 
                     switch (o->SubType)
                     {
                     case 2:
-                        // ÇÃ·¹ÀÌ¾î ¿Ş¼Õ
+                        // í”Œë ˆì´ì–´ ì™¼ì†
                         pModel->TransformByObjectBone(vPos, o->Target, 37);
                         break;
                     case 3:
-                        // ÇÃ·¹ÀÌ¾î ¿À¸¥¼Õ
+                        // í”Œë ˆì´ì–´ ì˜¤ë¥¸ì†
                         pModel->TransformByObjectBone(vPos, o->Target, 28);
                         break;
                     }

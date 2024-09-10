@@ -1,4 +1,4 @@
-// GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
+﻿// GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "GMEmpireGuardian4.h"
@@ -86,7 +86,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     case 504:
     {
         OpenMonsterModel(164);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 164, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_3, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Gayion The Gladiator").copy(pCharacter->ID, 19);
 
@@ -111,7 +111,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     case 522:
     {
         OpenMonsterModel(165);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 165, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_4, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Jerry The Adviseru").copy(pCharacter->ID, 19);
         pCharacter->Object.Scale = 1.45f;
@@ -122,7 +122,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     case 527:
     {
         OpenMonsterModel(186);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 186, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_ROGUE_CENTURION_3, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Star Gate").copy(pCharacter->ID, 10);
         pCharacter->Object.m_bRenderShadow = false;
@@ -133,7 +133,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     case 528:
     {
         OpenMonsterModel(187);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 187, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_NECRON_3, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Rush Gate").copy(pCharacter->ID, 10);
         pCharacter->Object.m_bRenderShadow = false;
@@ -253,7 +253,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 187:
+    case MODEL_NECRON_3:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -286,7 +286,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
+    case MODEL_CHAOS_CASTLE_3:
     {
         switch (o->CurrentAction)
         {
@@ -452,8 +452,8 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 182:
-    case MODEL_MONSTER01 + 165:
+    case MODEL_DEATH_ANGEL_3:
+    case MODEL_CHAOS_CASTLE_4:
     {
         switch (o->CurrentAction)
         {
@@ -648,11 +648,11 @@ void GMEmpireGuardian4::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 166:
-    case MODEL_MONSTER01 + 178:
-    case MODEL_MONSTER01 + 179:
-    case MODEL_MONSTER01 + 180:
-    case MODEL_MONSTER01 + 181:
+    case MODEL_CHAOS_CASTLE_5:
+    case MODEL_ROGUE_CENTURION_2:
+    case MODEL_NECRON_2:
+    case MODEL_SCHRIKER_2:
+    case MODEL_ILLUSION_OF_KUNDUN_2:
     {
         g_EmpireGuardian1.MoveBlurEffect(c, o, b);
     }
@@ -672,9 +672,9 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
-    case MODEL_MONSTER01 + 165:
-    case MODEL_MONSTER01 + 167:
+    case MODEL_CHAOS_CASTLE_3:
+    case MODEL_CHAOS_CASTLE_4:
+    case MODEL_CHAOS_CASTLE_6:
     {
         RenderMonster(o, b, ExtraMon);
 
@@ -688,7 +688,7 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     return true;
-    case MODEL_MONSTER01 + 186:
+    case MODEL_ROGUE_CENTURION_3:
     {
         int tileX = int(o->Position[0] / 100);
         int tileY = int(o->Position[1] / 100);
@@ -713,7 +713,7 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     }
     return true;
 
-    case MODEL_MONSTER01 + 187:
+    case MODEL_NECRON_3:
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
@@ -1081,13 +1081,13 @@ bool GMEmpireGuardian4::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
+    case MODEL_CHAOS_CASTLE_3:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     break;
-    case MODEL_MONSTER01 + 165:
-    case MODEL_MONSTER01 + 182:
+    case MODEL_CHAOS_CASTLE_4:
+    case MODEL_DEATH_ANGEL_3:
     {
         vec3_t		v3LightBackup;
 
@@ -1122,7 +1122,7 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
+    case MODEL_CHAOS_CASTLE_3:
     {
         VectorCopy(o->Position, b->BodyOrigin);
         Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -1161,8 +1161,8 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 165:
-    case MODEL_MONSTER01 + 182:
+    case MODEL_CHAOS_CASTLE_4:
+    case MODEL_DEATH_ANGEL_3:
     {
         VectorCopy(o->Position, b->BodyOrigin);
         Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -1470,7 +1470,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
+    case MODEL_CHAOS_CASTLE_3:
     {
         switch (o->CurrentAction)
         {
@@ -1492,7 +1492,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 165:
+    case MODEL_CHAOS_CASTLE_4:
     {
         switch (o->CurrentAction)
         {

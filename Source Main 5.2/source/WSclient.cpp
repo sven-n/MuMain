@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "UIManager.h"
 #include "GuildCache.h"
 #include "ZzzBMD.h"
@@ -1081,7 +1081,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
             StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
         }
 
-        if (gMapManager.WorldActive == -1 || c->Helper.Type != MODEL_HELPER + 3 || c->SafeZone)
+        if (gMapManager.WorldActive == -1 || c->Helper.Type != MODEL_HORN_OF_DINORANT || c->SafeZone)
         {
             o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
         }
@@ -1518,7 +1518,7 @@ void ReceiveChatKey(const BYTE* ReceiveBuffer)
     int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
     int Index = FindCharacterIndex(Key);
 
-    if (Hero->GuildStatus == G_MASTER && !wcscmp(CharactersClient[Index].ID, L"±æµå ¸¶½ºÅÍ"))
+    if (Hero->GuildStatus == G_MASTER && !wcscmp(CharactersClient[Index].ID, L"ê¸¸ë“œ ë§ˆìŠ¤í„°"))
     {
         g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCGUILDMASTER);
 
@@ -1603,7 +1603,7 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
         {
             c->TargetX = Data->PositionX;
             c->TargetY = Data->PositionY;
-            if (o->Type == MODEL_MONSTER01 + 52)
+            if (o->Type == MODEL_SILVER_VALKYRIE)
             {
                 c->PositionX = Data->PositionX;
                 c->PositionY = Data->PositionY;
@@ -1676,7 +1676,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     o->Position[0] = ((float)(Hero->PositionX) + 0.5f) * TERRAIN_SCALE;
     o->Position[1] = ((float)(Hero->PositionY) + 0.5f) * TERRAIN_SCALE;
 
-    if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HELPER + 3 || Hero->SafeZone)
+    if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
     {
         o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
     }
@@ -1750,7 +1750,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
             matchEvent::CreateEventMatch(gMapManager.WorldActive);
 
-            if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HELPER + 3 || Hero->SafeZone)
+            if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
             {
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
             }
@@ -1960,13 +1960,13 @@ void ReceiveChangePlayer(const BYTE* ReceiveBuffer)
     case 7:
         if (Type == 0x1FFF)
         {
-            if (c->Wing.Type == MODEL_WING + 39 ||
-                c->Wing.Type == MODEL_HELPER + 30 ||
+            if (c->Wing.Type == MODEL_WING_OF_RUIN ||
+                c->Wing.Type == MODEL_CAPE_OF_LORD ||
                 c->Wing.Type == MODEL_WING + 130 ||
-                c->Wing.Type == MODEL_WING + 49 ||
-                c->Wing.Type == MODEL_WING + 50 ||
+                c->Wing.Type == MODEL_CAPE_OF_FIGHTER ||
+                c->Wing.Type == MODEL_CAPE_OF_OVERRULE ||
                 c->Wing.Type == MODEL_WING + 135 ||
-                c->Wing.Type == MODEL_WING + 40)
+                c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
             {
                 DeleteCloth(c, o);
             }
@@ -1976,13 +1976,13 @@ void ReceiveChangePlayer(const BYTE* ReceiveBuffer)
         {
             c->Wing.Type = MODEL_ITEM + Type;
             c->Wing.Level = 0;
-            if (c->Wing.Type == MODEL_WING + 39 ||
-                c->Wing.Type == MODEL_HELPER + 30 ||
+            if (c->Wing.Type == MODEL_WING_OF_RUIN ||
+                c->Wing.Type == MODEL_CAPE_OF_LORD ||
                 c->Wing.Type == MODEL_WING + 130 ||
-                c->Wing.Type == MODEL_WING + 49 ||
-                c->Wing.Type == MODEL_WING + 50 ||
+                c->Wing.Type == MODEL_CAPE_OF_FIGHTER ||
+                c->Wing.Type == MODEL_CAPE_OF_OVERRULE ||
                 c->Wing.Type == MODEL_WING + 135 ||
-                c->Wing.Type == MODEL_WING + 40)
+                c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
             {
                 DeleteCloth(c, o);
             }
@@ -2306,7 +2306,7 @@ void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
         {
             int Class = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
 
-            WORD Type = ((WORD)(Data2->TypeH) << 8) + Data2->TypeL;
+            auto Type = (EMonsterType)(((WORD)(Data2->TypeH) << 8) + Data2->TypeL);
 
             CHARACTER* c = CreateMonster(Type, Data2->PositionX, Data2->PositionY, Key);
             OBJECT* o = &c->Object;
@@ -2476,7 +2476,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
 
         BYTE bMyMob = (Data2->TypeH) & 0x80;
         BYTE byBuildTime = (Data2->TypeH & 0x70) >> 4;
-        WORD Type = ((WORD)(Data2->TypeH & 0x03) << 8) + Data2->TypeL;
+        auto Type = (EMonsterType)(((WORD)(Data2->TypeH & 0x03) << 8) + Data2->TypeL);
 
         if (Type != 106)
             int a = 0;
@@ -2501,7 +2501,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         }
 
         float fAngle = 45.0f;
-        if (o->Type == MODEL_MONSTER01 + 99)
+        if (o->Type == MODEL_GIANT_OGRE_3)
         {
             if (c->PositionY == 90)
                 fAngle = 0.0f;
@@ -2562,7 +2562,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         {
             AppearMonster(c);
         }
-        else if (gMapManager.WorldActive == WD_39KANTURU_3RD && o->Type == MODEL_MONSTER01 + 121 && TeleportFlag)
+        else if (gMapManager.WorldActive == WD_39KANTURU_3RD && o->Type == MODEL_DARK_SKULL_SOLDIER_5 && TeleportFlag)
         {
             vec3_t Light;
             Vector(1.0f, 1.0f, 1.0f, Light);
@@ -2601,7 +2601,7 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
     {
         auto Data2 = (LPPCREATE_SUMMON)(ReceiveBuffer + Offset);
         WORD Key = ((WORD)(Data2->KeyH) << 8) + Data2->KeyL;
-        WORD Type = ((WORD)(Data2->TypeH) << 8) + Data2->TypeL;
+        auto Type = (EMonsterType)(((WORD)(Data2->TypeH) << 8) + Data2->TypeL);
         int CreateFlag = (Key >> 15);
         Key &= 0x7FFF;
 
@@ -3075,7 +3075,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     iTargetKey = ((int)(Data->TargetKeyH) << 8) + Data->TargetKeyL;
     iTargetIndex = FindCharacterIndex(iTargetKey);
 
-    if (!c->SafeZone && c->Helper.Type == MODEL_HELPER + 4)
+    if (!c->SafeZone && c->Helper.Type == MODEL_DARK_HORSE_ITEM)
     {
         // on a Dark Horse, don't show
         
@@ -3460,7 +3460,7 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_BLAST_FREEZE:
         UnRegisterBuff(eDeBuff_Freeze, o);
         break;
-        //  ¸ó½ºÅÍ.
+        //  ëª¬ìŠ¤í„°.
     case AT_SKILL_MONSTER_MAGIC_DEF:
         SetActionDestroy_Def(o);
         UnRegisterBuff(eBuff_Defense, o);
@@ -3494,11 +3494,11 @@ void SetPlayerBow(CHARACTER* c)
     {
     case BOWTYPE_BOW:
     {
-        if (c->Helper.Type == MODEL_HELPER + 37)
+        if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
         {
             SetAction(&c->Object, PLAYER_FENRIR_ATTACK_BOW);
         }
-        else if ((c->Helper.Type == MODEL_HELPER + 2) || (c->Helper.Type == MODEL_HELPER + 3))
+        else if ((c->Helper.Type == MODEL_HORN_OF_UNIRIA) || (c->Helper.Type == MODEL_HORN_OF_DINORANT))
         {
             SetAction(&c->Object, PLAYER_ATTACK_RIDE_BOW);
         }
@@ -3513,11 +3513,11 @@ void SetPlayerBow(CHARACTER* c)
     }break;
     case BOWTYPE_CROSSBOW:
     {
-        if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+        if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
         {
             SetAction(&c->Object, PLAYER_FENRIR_ATTACK_CROSSBOW);
         }
-        else if ((c->Helper.Type == MODEL_HELPER + 2) || (c->Helper.Type == MODEL_HELPER + 3))
+        else if ((c->Helper.Type == MODEL_HORN_OF_UNIRIA) || (c->Helper.Type == MODEL_HORN_OF_DINORANT))
         {
             SetAction(&c->Object, PLAYER_ATTACK_RIDE_CROSSBOW);
         }
@@ -3539,11 +3539,11 @@ void SetPlayerHighBow(CHARACTER* c)
     {
     case BOWTYPE_BOW:
     {
-        if (c->Helper.Type == MODEL_HELPER + 37)
+        if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
         {
             SetAction(&c->Object, PLAYER_ATTACK_RIDE_BOW_UP);
         }
-        else if ((c->Helper.Type == MODEL_HELPER + 2) || (c->Helper.Type == MODEL_HELPER + 3))
+        else if ((c->Helper.Type == MODEL_HORN_OF_UNIRIA) || (c->Helper.Type == MODEL_HORN_OF_DINORANT))
         {
             SetAction(&c->Object, PLAYER_ATTACK_RIDE_BOW_UP);
         }
@@ -3558,11 +3558,11 @@ void SetPlayerHighBow(CHARACTER* c)
     }break;
     case BOWTYPE_CROSSBOW:
     {
-        if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+        if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
         {
             SetAction(&c->Object, PLAYER_ATTACK_RIDE_CROSSBOW_UP);
         }
-        else if ((c->Helper.Type == MODEL_HELPER + 2) || (c->Helper.Type == MODEL_HELPER + 3))
+        else if ((c->Helper.Type == MODEL_HORN_OF_UNIRIA) || (c->Helper.Type == MODEL_HORN_OF_DINORANT))
         {
             SetAction(&c->Object, PLAYER_ATTACK_RIDE_CROSSBOW_UP);
         }
@@ -3771,7 +3771,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         sc->AttackTime = 1;
         break;
     case AT_SKILL_THUNDER:
-        if (so->Type != MODEL_MONSTER01 + 83)
+        if (so->Type != MODEL_GOLDEN_WHEEL)
             PlayBuffer(SOUND_THUNDER01);
         if (to->CurrentAction == PLAYER_POSE1 || to->CurrentAction == PLAYER_POSE_FEMALE1 ||
             to->CurrentAction == PLAYER_SIT1 || to->CurrentAction == PLAYER_SIT_FEMALE1)
@@ -3810,7 +3810,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         break;
 
     case AT_SKILL_TELEPORT:
-        if (gMapManager.WorldActive == WD_39KANTURU_3RD && so->Type == MODEL_MONSTER01 + 121)
+        if (gMapManager.WorldActive == WD_39KANTURU_3RD && so->Type == MODEL_DARK_SKULL_SOLDIER_5)
         {
             vec3_t Light;
             Vector(1.0f, 1.0f, 1.0f, Light);
@@ -3824,11 +3824,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         break;
 
     case AT_SKILL_STRONG_PIER:
-        if ((sc->Helper.Type >= MODEL_HELPER + 2 && sc->Helper.Type <= MODEL_HELPER + 4) && !sc->SafeZone)
+        if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA && sc->Helper.Type <= MODEL_DARK_HORSE_ITEM) && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_STRIKE);
         }
-        else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+        else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
         {
             SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
         }
@@ -3845,11 +3845,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     case AT_SKILL_FIRE_BUST_UP + 3:
     case AT_SKILL_FIRE_BUST_UP + 4:
     case AT_SKILL_LONGPIER_ATTACK:
-        if ((sc->Helper.Type >= MODEL_HELPER + 2 && sc->Helper.Type <= MODEL_HELPER + 4) && !sc->SafeZone)
+        if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA && sc->Helper.Type <= MODEL_DARK_HORSE_ITEM) && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_STRIKE);
         }
-        else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+        else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
         {
             SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
         }
@@ -3885,7 +3885,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         PlayBuffer(SOUND_SKILL_SWORD4);
         break;
 
-    case AT_SKILL_SWORD5://º£±â
+    case AT_SKILL_SWORD5://ë² ê¸°
         if (sc->SwordCount % 2 == 0)
         {
             SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + MagicNumber - AT_SKILL_SWORD1);
@@ -3910,8 +3910,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         PlayBuffer(SOUND_SKILL_SWORD4);
         break;
 
-    case AT_SKILL_SPEAR:	// Ã¢Âî¸£±â
-        if (sc->Helper.Type == MODEL_HELPER + 37)
+    case AT_SKILL_SPEAR:	// ì°½ì°Œë¥´ê¸°
+        if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
             SetAction(so, PLAYER_FENRIR_ATTACK_SPEAR);
         else
             SetAction(so, PLAYER_ATTACK_SKILL_SPEAR);
@@ -4032,11 +4032,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         break;
 
     case AT_SKILL_SPACE_SPLIT:
-        if ((sc->Helper.Type >= MODEL_HELPER + 2 && sc->Helper.Type <= MODEL_HELPER + 4) && !sc->SafeZone)
+        if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA && sc->Helper.Type <= MODEL_DARK_HORSE_ITEM) && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_STRIKE);
         }
-        else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+        else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
         {
             SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
         }
@@ -4052,11 +4052,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
         g_CharacterRegisterBuff(to, eBuff_AddSkill);
 
-        if (sc->Helper.Type == MODEL_HELPER + 4 && !sc->SafeZone)
+        if (sc->Helper.Type == MODEL_DARK_HORSE_ITEM && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
         }
-        else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+        else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
         {
             SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
         }
@@ -4074,21 +4074,21 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         break;
 
     case AT_SKILL_STUN:
-        if (sc->Helper.Type == MODEL_HELPER + 4 && !sc->SafeZone)
+        if (sc->Helper.Type == MODEL_DARK_HORSE_ITEM && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
         }
         else
-            if (sc->Helper.Type == MODEL_HELPER + 2 && !sc->SafeZone)
+            if (sc->Helper.Type == MODEL_HORN_OF_UNIRIA && !sc->SafeZone)
             {
                 SetAction(so, PLAYER_SKILL_RIDER);
             }
             else
-                if (sc->Helper.Type == MODEL_HELPER + 3 && !sc->SafeZone)
+                if (sc->Helper.Type == MODEL_HORN_OF_DINORANT && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_SKILL_RIDER_FLY);
                 }
-                else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+                else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
                 }
@@ -4100,21 +4100,21 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         break;
 
     case AT_SKILL_REMOVAL_STUN:
-        if (sc->Helper.Type == MODEL_HELPER + 4 && !sc->SafeZone)
+        if (sc->Helper.Type == MODEL_DARK_HORSE_ITEM && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
         }
         else
-            if (sc->Helper.Type == MODEL_HELPER + 2 && !sc->SafeZone)
+            if (sc->Helper.Type == MODEL_HORN_OF_UNIRIA && !sc->SafeZone)
             {
                 SetAction(so, PLAYER_SKILL_RIDER);
             }
             else
-                if (sc->Helper.Type == MODEL_HELPER + 3 && !sc->SafeZone)
+                if (sc->Helper.Type == MODEL_HORN_OF_DINORANT && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_SKILL_RIDER_FLY);
                 }
-                else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+                else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
                 }
@@ -4131,21 +4131,21 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         break;
 
     case AT_SKILL_INVISIBLE:
-        if (sc->Helper.Type == MODEL_HELPER + 4 && !sc->SafeZone)
+        if (sc->Helper.Type == MODEL_DARK_HORSE_ITEM && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
         }
         else
-            if (sc->Helper.Type == MODEL_HELPER + 2 && !sc->SafeZone)
+            if (sc->Helper.Type == MODEL_HORN_OF_UNIRIA && !sc->SafeZone)
             {
                 SetAction(so, PLAYER_SKILL_RIDER);
             }
             else
-                if (sc->Helper.Type == MODEL_HELPER + 3 && !sc->SafeZone)
+                if (sc->Helper.Type == MODEL_HORN_OF_DINORANT && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_SKILL_RIDER_FLY);
                 }
-                else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+                else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
                 }
@@ -4165,21 +4165,21 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         break;
 
     case AT_SKILL_REMOVAL_INVISIBLE:
-        if (sc->Helper.Type == MODEL_HELPER + 4 && !sc->SafeZone)
+        if (sc->Helper.Type == MODEL_DARK_HORSE_ITEM && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
         }
         else
-            if (sc->Helper.Type == MODEL_HELPER + 2 && !sc->SafeZone)
+            if (sc->Helper.Type == MODEL_HORN_OF_UNIRIA && !sc->SafeZone)
             {
                 SetAction(so, PLAYER_SKILL_RIDER);
             }
             else
-                if (sc->Helper.Type == MODEL_HELPER + 3 && !sc->SafeZone)
+                if (sc->Helper.Type == MODEL_HORN_OF_DINORANT && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_SKILL_RIDER_FLY);
                 }
-                else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+                else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
                 }
@@ -4193,21 +4193,21 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         break;
 
     case AT_SKILL_MANA:
-        if (sc->Helper.Type == MODEL_HELPER + 4 && !sc->SafeZone)
+        if (sc->Helper.Type == MODEL_DARK_HORSE_ITEM && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
         }
         else
-            if (sc->Helper.Type == MODEL_HELPER + 2 && !sc->SafeZone)
+            if (sc->Helper.Type == MODEL_HORN_OF_UNIRIA && !sc->SafeZone)
             {
                 SetAction(so, PLAYER_SKILL_RIDER);
             }
             else
-                if (sc->Helper.Type == MODEL_HELPER + 3 && !sc->SafeZone)
+                if (sc->Helper.Type == MODEL_HORN_OF_DINORANT && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_SKILL_RIDER_FLY);
                 }
-                else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+                else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
                 }
@@ -4232,21 +4232,21 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             UnRegisterBuff(eBuff_AddCriticalDamage, to);
             UnRegisterBuff(eBuff_AddMana, to);
         }
-        if (sc->Helper.Type == MODEL_HELPER + 4 && !sc->SafeZone)
+        if (sc->Helper.Type == MODEL_DARK_HORSE_ITEM && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
         }
         else
-            if (sc->Helper.Type == MODEL_HELPER + 2 && !sc->SafeZone)
+            if (sc->Helper.Type == MODEL_HORN_OF_UNIRIA && !sc->SafeZone)
             {
                 SetAction(so, PLAYER_SKILL_RIDER);
             }
             else
-                if (sc->Helper.Type == MODEL_HELPER + 3 && !sc->SafeZone)
+                if (sc->Helper.Type == MODEL_HORN_OF_DINORANT && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_SKILL_RIDER_FLY);
                 }
-                else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+                else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
                 {
                     SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
                 }
@@ -4277,11 +4277,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
         g_CharacterRegisterBuff(to, eBuff_AddCriticalDamage);
 
-        if (sc->Helper.Type == MODEL_HELPER + 4 && !sc->SafeZone)
+        if (sc->Helper.Type == MODEL_DARK_HORSE_ITEM && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
         }
-        else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+        else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
         {
             SetAction(so, PLAYER_FENRIR_ATTACK_MAGIC);
         }
@@ -4292,11 +4292,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         sc->AttackTime = 1;
         break;
     case AT_SKILL_PARTY_TELEPORT:
-        if ((sc->Helper.Type >= MODEL_HELPER + 2 && sc->Helper.Type <= MODEL_HELPER + 4) && !sc->SafeZone)
+        if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA && sc->Helper.Type <= MODEL_DARK_HORSE_ITEM) && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_TELEPORT);
         }
-        else if (sc->Helper.Type == MODEL_HELPER + 37 && !sc->SafeZone)
+        else if (sc->Helper.Type == MODEL_HORN_OF_FENRIR && !sc->SafeZone)
         {
             SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT);
         }
@@ -4370,11 +4370,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     case AT_SKILL_FIRE_SCREAM_UP + 4:
     case AT_SKILL_DARK_SCREAM:
     {
-        if (sc->Helper.Type == MODEL_HELPER + 37)
+        if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
         {
             SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
         }
-        else if ((sc->Helper.Type >= MODEL_HELPER + 2) && (sc->Helper.Type <= MODEL_HELPER + 4))
+        else if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA) && (sc->Helper.Type <= MODEL_DARK_HORSE_ITEM))
         {
             SetAction(so, PLAYER_ATTACK_RIDE_STRIKE);
         }
@@ -4431,13 +4431,13 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
         switch (sc->Helper.Type)
         {
-        case MODEL_HELPER + 2:
+        case MODEL_HORN_OF_UNIRIA:
             SetAction(so, PLAYER_SKILL_SLEEP_UNI);
             break;
-        case MODEL_HELPER + 3:
+        case MODEL_HORN_OF_DINORANT:
             SetAction(so, PLAYER_SKILL_SLEEP_DINO);
             break;
-        case MODEL_HELPER + 37:
+        case MODEL_HORN_OF_FENRIR:
             SetAction(so, PLAYER_SKILL_SLEEP_FENRIR);
             break;
         default:
@@ -4480,11 +4480,11 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     {
         if (so->Type == MODEL_PLAYER)
         {
-            if (sc->Helper.Type == MODEL_HELPER + 37)
+            if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
             {
                 SetAction(&sc->Object, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
             }
-            else if ((sc->Helper.Type >= MODEL_HELPER + 2) && (sc->Helper.Type <= MODEL_HELPER + 4))
+            else if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA) && (sc->Helper.Type <= MODEL_DARK_HORSE_ITEM))
             {
                 SetAction(&sc->Object, PLAYER_ATTACK_RIDE_STRIKE);
             }
@@ -4729,13 +4729,13 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
                 switch (sc->Helper.Type)
                 {
-                case MODEL_HELPER + 2:
+                case MODEL_HORN_OF_UNIRIA:
                     SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_UNI);
                     break;
-                case MODEL_HELPER + 3:
+                case MODEL_HORN_OF_DINORANT:
                     SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_DINO);
                     break;
-                case MODEL_HELPER + 37:
+                case MODEL_HORN_OF_FENRIR:
                     SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_FENRIR);
                     break;
                 default:
@@ -4754,11 +4754,11 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             case AT_SKILL_FIRE_SCREAM_UP + 4:
             case AT_SKILL_DARK_SCREAM:
             {
-                if (sc->Helper.Type == MODEL_HELPER + 37)
+                if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
                 {
                     SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
                 }
-                else if ((sc->Helper.Type >= MODEL_HELPER + 2) && (sc->Helper.Type <= MODEL_HELPER + 4))
+                else if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA) && (sc->Helper.Type <= MODEL_DARK_HORSE_ITEM))
                 {
                     SetAction(so, PLAYER_ATTACK_RIDE_STRIKE);
                 }
@@ -4771,7 +4771,7 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             break;
 
             case AT_SKILL_THUNDER_STRIKE:
-                if (sc->Helper.Type == MODEL_HELPER + 37)
+                if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
                     SetAction(so, PLAYER_FENRIR_ATTACK_DARKLORD_FLASH);
                 else
                     SetAction(so, PLAYER_SKILL_FLASH);
@@ -4797,7 +4797,7 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
                 SetAction(so, PLAYER_SKILL_BLOW_OF_DESTRUCTION);
                 break;
             case AT_SKILL_SPEAR:
-                if (sc->Helper.Type == MODEL_HELPER + 37)
+                if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
                     SetAction(so, PLAYER_FENRIR_ATTACK_SPEAR);
                 else
                     SetAction(so, PLAYER_ATTACK_SKILL_SPEAR);
@@ -4811,13 +4811,13 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
                 switch (sc->Helper.Type)
                 {
-                case MODEL_HELPER + 2:
+                case MODEL_HORN_OF_UNIRIA:
                     SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_UNI);
                     break;
-                case MODEL_HELPER + 3:
+                case MODEL_HORN_OF_DINORANT:
                     SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_DINO);
                     break;
-                case MODEL_HELPER + 37:
+                case MODEL_HORN_OF_FENRIR:
                     SetAction(so, PLAYER_ATTACK_SKILL_WHEEL_FENRIR);
                     break;
                 default:
@@ -4858,11 +4858,11 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
                 break;
             case AT_SKILL_GAOTIC:
             {
-                if (sc->Helper.Type == MODEL_HELPER + 37)
+                if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
                 {
                     SetAction(&sc->Object, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
                 }
-                else if ((sc->Helper.Type >= MODEL_HELPER + 2) && (sc->Helper.Type <= MODEL_HELPER + 4))
+                else if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA) && (sc->Helper.Type <= MODEL_DARK_HORSE_ITEM))
                 {
                     SetAction(&sc->Object, PLAYER_ATTACK_RIDE_STRIKE);
                 }
@@ -4996,13 +4996,13 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             {
                 switch (sc->Helper.Type)
                 {
-                case MODEL_HELPER + 2:
+                case MODEL_HORN_OF_UNIRIA:
                     SetAction(so, PLAYER_SKILL_LIGHTNING_ORB_UNI);
                     break;
-                case MODEL_HELPER + 3:
+                case MODEL_HORN_OF_DINORANT:
                     SetAction(so, PLAYER_SKILL_LIGHTNING_ORB_DINO);
                     break;
-                case MODEL_HELPER + 37:
+                case MODEL_HORN_OF_FENRIR:
                     SetAction(so, PLAYER_SKILL_LIGHTNING_ORB_FENRIR);
                     break;
                 default:
@@ -5020,13 +5020,13 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             {
                 switch (sc->Helper.Type)
                 {
-                case MODEL_HELPER + 2:
+                case MODEL_HORN_OF_UNIRIA:
                     SetAction(so, PLAYER_SKILL_DRAIN_LIFE_UNI);
                     break;
-                case MODEL_HELPER + 3:
+                case MODEL_HORN_OF_DINORANT:
                     SetAction(so, PLAYER_SKILL_DRAIN_LIFE_DINO);
                     break;
-                case MODEL_HELPER + 37:
+                case MODEL_HORN_OF_FENRIR:
                     SetAction(so, PLAYER_SKILL_DRAIN_LIFE_FENRIR);
                     break;
                 default:
@@ -5039,13 +5039,13 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             case AT_SKILL_ALICE_ENERVATION:
                 switch (sc->Helper.Type)
                 {
-                case MODEL_HELPER + 2:
+                case MODEL_HORN_OF_UNIRIA:
                     SetAction(so, PLAYER_SKILL_SLEEP_UNI);
                     break;
-                case MODEL_HELPER + 3:
+                case MODEL_HORN_OF_DINORANT:
                     SetAction(so, PLAYER_SKILL_SLEEP_DINO);
                     break;
-                case MODEL_HELPER + 37:
+                case MODEL_HORN_OF_FENRIR:
                     SetAction(so, PLAYER_SKILL_SLEEP_FENRIR);
                     break;
                 default:
@@ -5120,13 +5120,13 @@ void ReceiveChainMagic(const BYTE* ReceiveBuffer)
 
     switch (pSourceChar->Helper.Type)
     {
-    case MODEL_HELPER + 2:
+    case MODEL_HORN_OF_UNIRIA:
         SetAction(pSourceObject, PLAYER_SKILL_CHAIN_LIGHTNING_UNI);
         break;
-    case MODEL_HELPER + 3:
+    case MODEL_HORN_OF_DINORANT:
         SetAction(pSourceObject, PLAYER_SKILL_CHAIN_LIGHTNING_DINO);
         break;
-    case MODEL_HELPER + 37:
+    case MODEL_HORN_OF_FENRIR:
         SetAction(pSourceObject, PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR);
         break;
     default:
@@ -5755,9 +5755,9 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_GOBLIN_NORMAL);
         g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
         //BYTE *pbyChaosRate = ( &Data->Value) + 1;
-        //int iDummyRate[6];	// ±¤ÀåÇ¥ È®·üÀ» ¼­¹ö¿¡¼­ ¹ŞÀ¸³ª »ç¿ëÇÏÁö ¾Ê°í ¹ö¸²
+        //int iDummyRate[6];	// ê´‘ì¥í‘œ í™•ë¥ ì„ ì„œë²„ì—ì„œ ë°›ìœ¼ë‚˜ ì‚¬ìš©í•˜ì§€ ì•Šê³  ë²„ë¦¼
         //for ( int i = 0; i < 6; ++i)
-        //	iDummyRate[i] = ( int)pbyChaosRate[i];	// ±¤ÀåÇ¥ È®·üÀ» ¼­¹ö¿¡¼­ ¹ŞÀ¸³ª »ç¿ëÇÏÁö ¾Ê°í ¹ö¸²(½ºÅ©¸³Æ®»ç¿ë)
+        //	iDummyRate[i] = ( int)pbyChaosRate[i];	// ê´‘ì¥í‘œ í™•ë¥ ì„ ì„œë²„ì—ì„œ ë°›ìœ¼ë‚˜ ì‚¬ìš©í•˜ì§€ ì•Šê³  ë²„ë¦¼(ìŠ¤í¬ë¦½íŠ¸ì‚¬ìš©)
         break;
 
     case 4:
@@ -6878,7 +6878,7 @@ void ReceiveGuildInfo(const BYTE* ReceiveBuffer)
     int Index = g_GuildCache.SetGuildMark(Data->GuildKey, Data->UnionName, Data->GuildName, Data->Mark);
 }
 
-// ±æµåÁ÷Ã¥À» ÀÓ¸í/º¯°æ/ÇØÁ¦ °á°ú
+// ê¸¸ë“œì§ì±…ì„ ì„ëª…/ë³€ê²½/í•´ì œ ê²°ê³¼
 void ReceiveGuildAssign(const BYTE* ReceiveBuffer)
 {
     wchar_t szTemp[MAX_GLOBAL_TEXT_STRING] = L"Invalid GuildAssign";
@@ -7569,7 +7569,7 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
             // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				wprintf(szText, GlobalText[1208]);	// ºÎÈ° ½ÇÆĞ
+            // 				wprintf(szText, GlobalText[1208]);	// ë¶€í™œ ì‹¤íŒ¨
             // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             // 				break;
         case SEASON3A::MIXTYPE_OSBOURNE:
@@ -8739,7 +8739,7 @@ void ReceiveFriendList(const BYTE* ReceiveBuffer)
     g_pFriendList->Sort(1);
     g_pWindowMgr->RefreshMainWndPalList();
 
-    // Ã¤ÆÃ ¼­¹ö »ì¾Æ³²
+    // ì±„íŒ… ì„œë²„ ì‚´ì•„ë‚¨
     g_pWindowMgr->SetServerEnable(TRUE);
     if (g_iChatInputType == 0)
     {
@@ -10957,7 +10957,7 @@ void ReceivePreviewPort(const BYTE* ReceiveBuffer)
         case 2:
         case 3:    //   NPC
         {
-            WORD Type = ((WORD)(pData2->m_byTypeH) << 8) + pData2->m_byTypeL;
+            auto Type = (EMonsterType)(((WORD)(pData2->m_byTypeH) << 8) + pData2->m_byTypeL);
             CHARACTER* c = CreateMonster(Type, pData2->m_byPosX, pData2->m_byPosY, Key);
             if (c == NULL) break;
             OBJECT* o = &c->Object;

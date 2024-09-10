@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -255,10 +255,10 @@ void OpenSkillScript(wchar_t* FileName)
     if (fp != NULL)
     {
         int Size = sizeof(SKILL_ATTRIBUTE_FILE);
-        // ÀĞ±â
+        // ì½ê¸°
         BYTE* Buffer = new BYTE[Size * MAX_SKILLS];
         fread(Buffer, Size * MAX_SKILLS, 1, fp);
-        // crc Ã¼Å©
+        // crc ì²´í¬
         DWORD dwCheckSum;
         fread(&dwCheckSum, sizeof(DWORD), 1, fp);
         fclose(fp);
@@ -473,8 +473,8 @@ void OpenItemScript(wchar_t* FileName)
 void PrintItem(wchar_t* FileName)
 {
     FILE* fp = _wfopen(FileName, L"wt");
-    fwprintf(fp, L"                ÀÌ¸§  ÃÖ¼Ò°ø°İ·Â ÃÖ´ë°ø°İ·Â ¹æ¾î·Â ¹æ¾îÀ² ÇÊ¿äÈû ÇÊ¿ä¹ÎÃ¸ ÇÊ¿ä¿¡³ÊÁö\n");
-    //fwprintf(fp,"                ÀÌ¸§    Ä«¿À½º¼º°øÈ®·ü\n");
+    fwprintf(fp, L"                ì´ë¦„  ìµœì†Œê³µê²©ë ¥ ìµœëŒ€ê³µê²©ë ¥ ë°©ì–´ë ¥ ë°©ì–´ìœ¨ í•„ìš”í˜ í•„ìš”ë¯¼ì²© í•„ìš”ì—ë„ˆì§€\n");
+    //fwprintf(fp,"                ì´ë¦„    ì¹´ì˜¤ìŠ¤ì„±ê³µí™•ë¥ \n");
     bool Excellent = true;
     for (int i = 0; i < 16 * MAX_ITEM_INDEX; i++)
     {
@@ -949,7 +949,7 @@ void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE Attribute3)
 
     if (p->RequireCharisma)
     {
-        if (ip->Type == MODEL_HELPER + 5)
+        if (ip->Type == MODEL_DARK_RAVEN_ITEM)
             ip->RequireCharisma = (185 + (p->RequireCharisma * 15));
         else
             ip->RequireCharisma = p->RequireCharisma;
@@ -2067,7 +2067,7 @@ int ItemValue(ITEM* ip, int goldType)
 
                     || (ip->Type >= ITEM_WING + 36 && ip->Type <= ITEM_WING + 43)
                     || (ip->Type >= ITEM_WING + 49 && ip->Type <= ITEM_WING + 50)
-                    )    //  ³¯°³.
+                    )    //  ë‚ ê°œ.
                 {
                     int iOption = ip->SpecialValue[i];
                     if (AT_LIFE_REGENERATION == ip->Special[i])
@@ -2545,7 +2545,7 @@ void CreateClassAttributes()
     CreateClassAttribute(3, 30, 30, 30, 30, 120, 80, 1, 1, 2, 2);
     CreateClassAttribute(4, 30, 30, 30, 30, 120, 80, 1, 1, 2, 2);
     CreateClassAttribute(5, 50, 50, 50, 30, 110, 30, 110, 30, 6, 3);
-    CreateClassAttribute(6, 32, 27, 25, 20, 100, 40,	 /*»ç¿ë¾ÈÇÔ => */1, 3, 1, 1);
+    CreateClassAttribute(6, 32, 27, 25, 20, 100, 40,	 /*ì‚¬ìš©ì•ˆí•¨ => */1, 3, 1, 1);
 }
 
 float CalcDurabilityPercent(BYTE dur, BYTE maxDur, int Level, int option, int ExtOption)
@@ -2921,7 +2921,7 @@ void CHARACTER_MACHINE::CalculateDamage()
     Character.AttackDamageMaxRight += g_SocketItemMgr.m_StatusBonus.m_iAttackDamageMaxBonus;
     Character.AttackDamageMinLeft += g_SocketItemMgr.m_StatusBonus.m_iAttackDamageMinBonus;
     Character.AttackDamageMaxLeft += g_SocketItemMgr.m_StatusBonus.m_iAttackDamageMaxBonus;
-    if (g_isCharacterBuff((&Hero->Object), eBuff_BlessingOfXmax))	//Å©¸®½º¸¶½ºÀÇ Ãàº¹
+    if (g_isCharacterBuff((&Hero->Object), eBuff_BlessingOfXmax))	//í¬ë¦¬ìŠ¤ë§ˆìŠ¤ì˜ ì¶•ë³µ
     {
         int _Temp = 0;
         _Temp = Character.Level / 3 + 45;
@@ -2932,7 +2932,7 @@ void CHARACTER_MACHINE::CalculateDamage()
         Character.AttackDamageMaxLeft += _Temp;
     }
 
-    if (g_isCharacterBuff((&Hero->Object), eBuff_StrengthOfSanta))	//»êÅ¸ÀÇ °­È­
+    if (g_isCharacterBuff((&Hero->Object), eBuff_StrengthOfSanta))	//ì‚°íƒ€ì˜ ê°•í™”
     {
         int _Temp = 30;
 
@@ -2972,7 +2972,7 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
     WORD    DamageMin = 0;
     WORD    DamageMax = 0;
 
-    // ³¯°³
+    // ë‚ ê°œ
     if (Equipment[EQUIPMENT_WING].Type != -1)
     {
         ITEM_ATTRIBUTE* p = &ItemAttribute[Equipment[EQUIPMENT_WING].Type];
@@ -3503,7 +3503,7 @@ void CHARACTER_MACHINE::CalculateAttackSpeed()
 
         Character.AttackSpeed += _Temp;
         Character.MagicSpeed += _Temp;
-        //Character.AttackSpeed += Amulet->WeaponSpeed;	// ¼­¹ö¿¡¼­ ³Ñ¾î¿À´Â °ª? ÃßÈÄ È®ÀÎ»çÇ×.
+        //Character.AttackSpeed += Amulet->WeaponSpeed;	// ì„œë²„ì—ì„œ ë„˜ì–´ì˜¤ëŠ” ê°’? ì¶”í›„ í™•ì¸ì‚¬í•­.
         //Character.MagicSpeed += Amulet->WeaponSpeed;
     }
 
@@ -3948,7 +3948,7 @@ void CHARACTER_MACHINE::CalculateAll()
     g_csItemOption.getAllAddOptionStatesbyCompare(&Character.AddStrength, &Character.AddDexterity, &Character.AddEnergy, &Character.AddVitality, &Character.AddCharisma, wStrengthResult, wDexterityResult, wEnergyResult, wVitalityResult, wCharismaResult);
     g_csItemOption.CheckItemSetOptions();
 
-    if ((CharacterMachine->Equipment[EQUIPMENT_WING].Type + MODEL_ITEM) == MODEL_HELPER + 30)
+    if ((CharacterMachine->Equipment[EQUIPMENT_WING].Type + MODEL_ITEM) == MODEL_CAPE_OF_LORD)
     {
         PlusSpecial(&Character.AddCharisma, AT_SET_OPTION_IMPROVE_CHARISMA, &CharacterMachine->Equipment[EQUIPMENT_WING]);
     }

@@ -1,4 +1,4 @@
-// CharacterManager.cpp: implementation of the CCharacterManager class.
+ï»¿// CharacterManager.cpp: implementation of the CCharacterManager class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -233,10 +233,10 @@ const wchar_t* CCharacterManager::GetCharacterClassText(const BYTE byClass)
     if (byCharacterClass == CLASS_DIMENSIONMASTER)
         return GlobalText[1689];
     if (byCharacterClass == CLASS_RAGEFIGHTER)
-        return GlobalText[3150];	// 3150 "·¹ÀÌÁöÆÄÀÌÅÍ"
+        return GlobalText[3150];	// 3150 "ë ˆì´ì§€íŒŒì´í„°"
     if (byCharacterClass == CLASS_TEMPLENIGHT)
         return GlobalText[3151];
-    // 3151 "ÅÛÇÃ³ªÀÌÆ®"
+    // 3151 "í…œí”Œë‚˜ì´íŠ¸"
     return GlobalText[2305];
 }
 
@@ -277,11 +277,11 @@ BYTE CCharacterManager::GetStepClass(const BYTE byClass)
 
 int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
 {
-    if ((pChar->Weapon[1].Type != MODEL_BOW + 7) && ((pChar->Weapon[1].Type >= MODEL_BOW) && (pChar->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)))
+    if ((pChar->Weapon[1].Type != MODEL_BOLT) && ((pChar->Weapon[1].Type >= MODEL_BOW) && (pChar->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)))
     {
         return BOWTYPE_BOW;
     }
-    else if ((pChar->Weapon[0].Type != MODEL_BOW + 15) && ((pChar->Weapon[0].Type >= MODEL_BOW + 8) && (pChar->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)))
+    else if ((pChar->Weapon[0].Type != MODEL_ARROWS) && ((pChar->Weapon[0].Type >= MODEL_CROSSBOW) && (pChar->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)))
     {
         return BOWTYPE_CROSSBOW;
     }

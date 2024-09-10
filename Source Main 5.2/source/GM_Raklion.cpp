@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////
 // GM_Raklion.cpp: implementation of the CGM_Raklion class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
@@ -93,8 +93,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
     case 454:
         OpenMonsterModel(145);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 145, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¾ÆÀÌ½º ¿öÄ¿");
+        pCharacter = CreateCharacter(Key, MODEL_DEATH_CENTURION_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì•„ì´ìŠ¤ ì›Œì»¤");
         //pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -103,8 +103,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 
     case 455:
         OpenMonsterModel(146);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 146, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÀÚÀÌ¾ðÆ® ¸Å¸Óµå");
+        pCharacter = CreateCharacter(Key, MODEL_BLOOD_SOLDIER_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ìžì´ì–¸íŠ¸ ë§¤ë¨¸ë“œ");
         pCharacter->Object.Scale = 1.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -118,8 +118,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 
     case 456:
         OpenMonsterModel(147);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 147, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¾ÆÀÌ½º ÀÚÀÌ¾ðÆ®");
+        pCharacter = CreateCharacter(Key, MODEL_AEGIS_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì•„ì´ìŠ¤ ìžì´ì–¸íŠ¸");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -128,8 +128,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 
     case 457:
         OpenMonsterModel(148);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 148, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Äð·¯Æ¾");
+        pCharacter = CreateCharacter(Key, MODEL_ROGUE_CENTURION_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì¿¨ëŸ¬í‹´");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -137,8 +137,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 
     case 458:
         OpenMonsterModel(149);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 149, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¾ÆÀÌ¾ð ³ªÀÌÆ®");
+        pCharacter = CreateCharacter(Key, MODEL_NECRON_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì•„ì´ì–¸ ë‚˜ì´íŠ¸");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -147,8 +147,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 459:
     {
         OpenMonsterModel(150);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 150, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¼¼·çÆÇ");
+        pCharacter = CreateCharacter(Key, MODEL_BALI, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì„¸ë£¨íŒ");
         pCharacter->Object.Scale = 2.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -163,8 +163,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 460:
     {
         OpenMonsterModel(151);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 151, PosX, PosY);
-        wcscpy(pCharacter->ID, L"°Å´ë °Å¹Ì¾Ë");
+        pCharacter = CreateCharacter(Key, MODEL_SOLDIER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ê±°ëŒ€ ê±°ë¯¸ì•Œ");
         pCharacter->Object.Scale = 0.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -175,8 +175,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 461:
     {
         OpenMonsterModel(152);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 152, PosX, PosY);
-        wcscpy(pCharacter->ID, L"°Å´ë °Å¹Ì¾Ë");
+        pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ê±°ëŒ€ ê±°ë¯¸ì•Œ");
         pCharacter->Object.Scale = 0.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -187,8 +187,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 462:
     {
         OpenMonsterModel(153);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 153, PosX, PosY);
-        wcscpy(pCharacter->ID, L"°Å´ë °Å¹Ì¾Ë");
+        pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_2, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ê±°ëŒ€ ê±°ë¯¸ì•Œ");
         pCharacter->Object.Scale = 0.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -200,8 +200,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 562:
     {
         OpenMonsterModel(205);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 205, PosX, PosY);
-        wcscpy(pCharacter->ID, L"´Å© ÀÚÀÌ¾ðÆ® ¸Å¸Óµå");
+        pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ëŠš?ìžì´ì–¸íŠ¸ ë§¤ë¨¸ë“œ");
         //pCharacter->Object.Scale = 1.7f;
         pCharacter->Object.Scale = 1.9f;
         pCharacter->Weapon[0].Type = -1;
@@ -217,8 +217,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 563:
     {
         OpenMonsterModel(206);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 206, PosX, PosY);
-        wcscpy(pCharacter->ID, L"´Å© ÀÚÀÌ¾ðÆ®");
+        pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR2, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ëŠš?ìžì´ì–¸íŠ¸");
         //pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
@@ -230,8 +230,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 564:
     {
         OpenMonsterModel(207);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 207, PosX, PosY);
-        wcscpy(pCharacter->ID, L"´Å© Äð·¯Æ¾");
+        pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR3, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ëŠš?ì¿¨ëŸ¬í‹´");
         //pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
@@ -241,8 +241,8 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 565:
     {
         OpenMonsterModel(208);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 208, PosX, PosY);
-        wcscpy(pCharacter->ID, L"´Å© ¾ÆÀÌ¾ð ³ªÀÌÆ®");
+        pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR4, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ëŠš?ì•„ì´ì–¸ ë‚˜ì´íŠ¸");
         //pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
@@ -288,7 +288,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 145:
+    case MODEL_DEATH_CENTURION_1:
     {
         switch (o->CurrentAction)
         {
@@ -319,7 +319,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                     v3Pos[0] = v3BasisPos[0] + ( v3Dir[0] * OFFSETLEN );
                     v3Pos[1] = v3BasisPos[1] + ( v3Dir[1] * OFFSETLEN );
                     v3Pos[2] = v3BasisPos[2] + ( v3Dir[2] * OFFSETLEN ); // POS_HEIGHT;
-                    v3Pos[2] = v3BasisPos[2] + POS_HEIGHT;				// Position º¸Á¤
+                    v3Pos[2] = v3BasisPos[2] + POS_HEIGHT;				// Position ë³´ì •
                 */
 
                 VectorCopy(o->Angle, v3Ang_);
@@ -349,7 +349,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         } // switch( o->CurrentAction )
     }
     break;
-    case MODEL_MONSTER01 + 146:
+    case MODEL_BLOOD_SOLDIER_1:
     {
         float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t Light;
@@ -410,11 +410,11 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         */
     }
     break;
-    case MODEL_MONSTER01 + 147:
+    case MODEL_AEGIS_1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 148:
+    case MODEL_ROGUE_CENTURION_1:
     {
         if (o->AnimationFrame >= 1.7f && o->AnimationFrame <= 2.0f)
         {
@@ -504,11 +504,11 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 149:
+    case MODEL_NECRON_1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 150:
+    case MODEL_BALI:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -760,9 +760,9 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 151:
-    case MODEL_MONSTER01 + 152:
-    case MODEL_MONSTER01 + 153:
+    case MODEL_SOLDIER:
+    case MODEL_GATE_TO_KALIMA_1:
+    case MODEL_GATE_TO_KALIMA_2:
     {
         if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame <= 12.f)
         {
@@ -800,7 +800,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 205:
+    case MODEL_WOLF_ALTAR1:
     {
         float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t Light;
@@ -861,11 +861,11 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         */
     }
     break;
-    case MODEL_MONSTER01 + 206:
+    case MODEL_WOLF_ALTAR2:
     {
     }
     break;
-    case MODEL_MONSTER01 + 207:
+    case MODEL_WOLF_ALTAR3:
     {
         if (o->AnimationFrame >= 1.7f && o->AnimationFrame <= 2.0f)
         {
@@ -955,7 +955,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 208:
+    case MODEL_WOLF_ALTAR4:
     {
     }
     break;
@@ -970,15 +970,15 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 145:
+    case MODEL_DEATH_CENTURION_1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 146:
+    case MODEL_BLOOD_SOLDIER_1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 147:
+    case MODEL_AEGIS_1:
     {
         float Start_Frame = 3.f;
         float End_Frame = 8.0f;
@@ -1010,33 +1010,33 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 148:
+    case MODEL_ROGUE_CENTURION_1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 149:
+    case MODEL_NECRON_1:
     {
         // RenderMonsterVisual()
     }
     break;
 
-    case MODEL_MONSTER01 + 150:
+    case MODEL_BALI:
     {
         // RenderMonsterVisual()
     }
     break;
-    case MODEL_MONSTER01 + 151:
-    case MODEL_MONSTER01 + 152:
-    case MODEL_MONSTER01 + 153:
+    case MODEL_SOLDIER:
+    case MODEL_GATE_TO_KALIMA_1:
+    case MODEL_GATE_TO_KALIMA_2:
     {
     }
     break;
 
-    case MODEL_MONSTER01 + 205:
+    case MODEL_WOLF_ALTAR1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 206:
+    case MODEL_WOLF_ALTAR2:
     {
         float Start_Frame = 3.f;
         float End_Frame = 8.0f;
@@ -1068,11 +1068,11 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     } // case MODEL_MONSTER01+456:
     break;
-    case MODEL_MONSTER01 + 208:
+    case MODEL_WOLF_ALTAR4:
     {
     }
     break;
-    case MODEL_MONSTER01 + 207:
+    case MODEL_WOLF_ALTAR3:
     {
     }
     break;
@@ -1223,13 +1223,13 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
             Vector(0, 0, 0, vRelativePos);
             Vector(1.f, 1.f, 1.f, vLight);
 
-            // ¸Ó¸®
+            // ë¨¸ë¦¬
             b->TransformPosition(BoneTransform[5], vRelativePos, vWorldPos, false);
             CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 2.f);
 
             if (o->AnimationFrame <= 8)
             {
-                // ¸Ó¸®
+                // ë¨¸ë¦¬
                 b->TransformPosition(BoneTransform[6], vRelativePos, vWorldPos, false);
                 CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 1.5f);
                 CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
@@ -1237,7 +1237,7 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
             if (o->AnimationFrame >= 12)
             {
-                // ÀÔ°¡
+                // ìž…ê°€
                 b->TransformPosition(BoneTransform[6], vRelativePos, vWorldPos, false);
                 CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 2.f);
                 CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
@@ -1245,7 +1245,7 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
             if (o->AnimationFrame <= 15)
             {
-                // ³¯°³
+                // ë‚ ê°œ
                 b->TransformPosition(BoneTransform[8], vRelativePos, vWorldPos, false);
                 CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 9, 2.f);
                 CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
@@ -1272,7 +1272,7 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     }
     else if (o->Type == 21)
     {
-        // ¾óÀ½ ±ú´Â ¿¡´Ï¸ÞÀÌ¼Ç µ¿ÀÛÀÌ°í
+        // ì–¼ìŒ ê¹¨ëŠ” ì—ë‹ˆë©”ì´ì…˜ ë™ìž‘ì´ê³ 
         if (o->CurrentAction == 0)
         {
             if (o->AnimationFrame >= 4 && o->AnimationFrame <= 8)
@@ -1280,14 +1280,14 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
                 vec3_t vRelativePos, vWorldPos, vLight;
                 Vector(0, 0, 0, vRelativePos);
                 Vector(1.f, 1.f, 1.f, vLight);
-                // ÀÔ¾Õ º»
+                // ìž…ì•ž ë³¸
                 b->TransformPosition(BoneTransform[7], vRelativePos, vWorldPos, false);
-                // ¹° ÀÌÆåÆ®
+                // ë¬¼ ì´íŽ™íŠ¸
                 CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 9, 0.5f);
                 CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
 
                 // 7, 16, 17, 21, 22
-                // ¿¬±â ÀÌÆåÆ®
+                // ì—°ê¸° ì´íŽ™íŠ¸
                 b->TransformPosition(BoneTransform[7], vRelativePos, vWorldPos, false);
                 CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 1.f);
                 b->TransformPosition(BoneTransform[16], vRelativePos, vWorldPos, false);
@@ -1410,11 +1410,11 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
         return true;
     }
-    else if ((o->Type >= MODEL_MONSTER01 + 145 && o->Type <= MODEL_MONSTER01 + 153)
-        || o->Type == MODEL_MONSTER01 + 205
-        || o->Type == MODEL_MONSTER01 + 206
-        || o->Type == MODEL_MONSTER01 + 208
-        || o->Type == MODEL_MONSTER01 + 207
+    else if ((o->Type >= MODEL_DEATH_CENTURION_1 && o->Type <= MODEL_GATE_TO_KALIMA_2)
+        || o->Type == MODEL_WOLF_ALTAR1
+        || o->Type == MODEL_WOLF_ALTAR2
+        || o->Type == MODEL_WOLF_ALTAR4
+        || o->Type == MODEL_WOLF_ALTAR3
         )
     {
         RenderMonster(o, b, ExtraMon);
@@ -1429,7 +1429,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 145:
+    case MODEL_DEATH_CENTURION_1:
     {
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1437,7 +1437,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 146:
+    case MODEL_BLOOD_SOLDIER_1:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
@@ -1451,7 +1451,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     }
     break;
 
-    case MODEL_MONSTER01 + 147:
+    case MODEL_AEGIS_1:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
@@ -1468,7 +1468,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         }
         break;
 
-    case MODEL_MONSTER01 + 148:
+    case MODEL_ROGUE_CENTURION_1:
     {
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1477,7 +1477,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     }
     break;
 
-    case MODEL_MONSTER01 + 149:
+    case MODEL_NECRON_1:
         if (o->CurrentAction == MONSTER01_DIE)
         {
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1494,7 +1494,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
         return true;
 
-    case MODEL_MONSTER01 + 150:
+    case MODEL_BALI:
     {
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
@@ -1527,9 +1527,9 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 151:
-    case MODEL_MONSTER01 + 152:
-    case MODEL_MONSTER01 + 153:
+    case MODEL_SOLDIER:
+    case MODEL_GATE_TO_KALIMA_1:
+    case MODEL_GATE_TO_KALIMA_2:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -1542,14 +1542,14 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
             {
                 if (i == 0)
                 {
-                    if (o->Type == MODEL_MONSTER01 + 151)
+                    if (o->Type == MODEL_SOLDIER)
                         o->Position[0] += 60;
                     else
                         o->Position[0] += 100;
                 }
                 else if (i == 1)
                 {
-                    if (o->Type == MODEL_MONSTER01 + 151)
+                    if (o->Type == MODEL_SOLDIER)
                         o->Position[1] += 60;
                     else
                         o->Position[1] += 100;
@@ -1579,14 +1579,14 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
             {
                 if (i == 0)
                 {
-                    if (o->Type == MODEL_MONSTER01 + 151)
+                    if (o->Type == MODEL_SOLDIER)
                         o->Position[0] += 60;
                     else
                         o->Position[0] += 100;
                 }
                 else if (i == 1)
                 {
-                    if (o->Type == MODEL_MONSTER01 + 151)
+                    if (o->Type == MODEL_SOLDIER)
                         o->Position[1] += 60;
                     else
                         o->Position[1] += 100;
@@ -1602,14 +1602,14 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
                 vec3_t vPos, vLight;
                 float fLumi = (sinf(WorldTime * 0.004f) + 1.2f) * 0.5f + 0.1f;
                 Vector(0.1f * fLumi, 0.6f * fLumi, 0.7f * fLumi, vLight);
-                if (o->Type == MODEL_MONSTER01 + 151)
+                if (o->Type == MODEL_SOLDIER)
                 {
                     b->TransformByObjectBone(vPos, o, 57);
                     CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
                     if (rand_fps_check(100))
                         CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
                 }
-                else if (o->Type == MODEL_MONSTER01 + 152)
+                else if (o->Type == MODEL_GATE_TO_KALIMA_1)
                 {
                     b->TransformByObjectBone(vPos, o, 95);
                     CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
@@ -1641,7 +1641,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 205:
+    case MODEL_WOLF_ALTAR1:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -1649,7 +1649,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 206:
+    case MODEL_WOLF_ALTAR2:
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
@@ -1667,13 +1667,13 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         }
     }
     break;
-    case MODEL_MONSTER01 + 207:
+    case MODEL_WOLF_ALTAR3:
     {
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     break;
-    case MODEL_MONSTER01 + 208:
+    case MODEL_WOLF_ALTAR4:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -1756,15 +1756,15 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 145:
+    case MODEL_DEATH_CENTURION_1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 146:
+    case MODEL_BLOOD_SOLDIER_1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 147:
+    case MODEL_AEGIS_1:
         if (o->CurrentAction == MONSTER01_ATTACK2 && o->AnimationFrame > 7.4f && o->AnimationFrame < 7.7f)
         {
             CreateInferno(o->Position, 5);
@@ -1801,11 +1801,11 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             CreateEffect(MODEL_ICE_GIANT_PART6, vPos, o->Angle, vLight, 0, o, 0, 0);
         }
         break;
-    case MODEL_MONSTER01 + 148:
+    case MODEL_ROGUE_CENTURION_1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 149:
+    case MODEL_NECRON_1:
     {
         vec3_t  Light;
         Vector(1.0f, 1.2f, 2.f, Light);
@@ -1932,7 +1932,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 150:
+    case MODEL_BALI:
     {
         vec3_t  Light;
         Vector(1.0f, 1.2f, 2.f, Light);
@@ -2009,18 +2009,18 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 151:
-    case MODEL_MONSTER01 + 152:
-    case MODEL_MONSTER01 + 153:
+    case MODEL_SOLDIER:
+    case MODEL_GATE_TO_KALIMA_1:
+    case MODEL_GATE_TO_KALIMA_2:
     {
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 205:
+    case MODEL_WOLF_ALTAR1:
     {
     }
     break;
-    case MODEL_MONSTER01 + 206:
+    case MODEL_WOLF_ALTAR2:
     {
         if (o->CurrentAction == MONSTER01_ATTACK2 && o->AnimationFrame > 7.4f && o->AnimationFrame < 7.7f)
         {
@@ -2059,7 +2059,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 208:
+    case MODEL_WOLF_ALTAR4:
     {
         vec3_t  Light;
         Vector(1.0f, 1.2f, 2.f, Light);
@@ -2186,7 +2186,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 207:
+    case MODEL_WOLF_ALTAR3:
     {
     }
     break;
@@ -2529,7 +2529,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 145:		// Ice Walker
+    case MODEL_DEATH_CENTURION_1:		// Ice Walker
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
             PlayBuffer(SOUND_RAKLION_ICEWALKER_ATTACK);
@@ -2548,7 +2548,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
             }
         }
         return true;
-    case MODEL_MONSTER01 + 146:
+    case MODEL_BLOOD_SOLDIER_1:
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
             PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_ATTACK);
@@ -2567,7 +2567,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
                     PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_DEATH);
                 }
         return true;
-    case MODEL_MONSTER01 + 147:
+    case MODEL_AEGIS_1:
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -2580,7 +2580,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
             PlayBuffer(SOUND_RAKLION_ICEGIANT_DEATH);
         }
         return true;
-    case MODEL_MONSTER01 + 148:
+    case MODEL_ROGUE_CENTURION_1:
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
             PlayBuffer(SOUND_RAKLION_COOLERTIN_ATTACK);
@@ -2600,7 +2600,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         }
 
         return true;
-    case MODEL_MONSTER01 + 149:
+    case MODEL_NECRON_1:
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_ATTACK);
@@ -2615,7 +2615,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         }
         return true;
 
-    case MODEL_MONSTER01 + 150:
+    case MODEL_BALI:
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             PlayBuffer(SOUND_RAKLION_SERUFAN_ATTACK1);
@@ -2630,7 +2630,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         }
         return true;
 
-    case MODEL_MONSTER01 + 205:
+    case MODEL_WOLF_ALTAR1:
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
             PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_ATTACK);
@@ -2647,7 +2647,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
             PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_DEATH);
         }
         return true;
-    case MODEL_MONSTER01 + 206:
+    case MODEL_WOLF_ALTAR2:
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -2660,7 +2660,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
             PlayBuffer(SOUND_RAKLION_ICEGIANT_DEATH);
         }
         return true;
-    case MODEL_MONSTER01 + 208:
+    case MODEL_WOLF_ALTAR4:
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_ATTACK);
@@ -2674,7 +2674,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
             PlayBuffer(SOUND_MONSTER + 154);
         }
         return true;
-    case MODEL_MONSTER01 + 207:
+    case MODEL_WOLF_ALTAR3:
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
             PlayBuffer(SOUND_RAKLION_COOLERTIN_ATTACK);

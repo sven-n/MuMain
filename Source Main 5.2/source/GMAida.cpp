@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "zzztexture.h"
@@ -104,7 +104,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 
     switch (pObject->Type)
     {
-    case 30:  // Ǯ
+    case 30:  // 풀
     {
         Vector(0.0f, -3.0f, 1.0f, p);
         pModel->TransformPosition(BoneTransform[6], p, Position, false);
@@ -338,7 +338,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     case 304:
     {
         OpenMonsterModel(100);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 100, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_LANCE_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -357,7 +357,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     case 305:
     {
         OpenMonsterModel(101);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 101, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_IRON_STICK_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.35f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -370,7 +370,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     case 306:
     {
         OpenMonsterModel(102);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 102, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_FIRE_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -382,7 +382,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     case 307:
     {
         OpenMonsterModel(103);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 103, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_METEORITE_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.15f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -408,7 +408,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     case 309:
     {
         OpenMonsterModel(105);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 105, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_CANON_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -426,7 +426,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     case 549:
     {
         OpenMonsterModel(193);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 193, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_AEGIS_4, PosX, PosY);
         //pCharacter->Object.Scale = 1.15f;
         pCharacter->Object.Scale = 1.35f;
         pCharacter->Weapon[0].Type = -1;
@@ -436,7 +436,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     case 550:
     {
         OpenMonsterModel(194);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 194, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_ROGUE_CENTURION_4, PosX, PosY);
         //pCharacter->Object.Scale = 1.1f;
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -449,7 +449,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     case 551:
     {
         OpenMonsterModel(195);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 195, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_NECRON_4, PosX, PosY);
         //pCharacter->Object.Scale = 1.35f;
         pCharacter->Object.Scale = 1.40f;
         pCharacter->Weapon[0].Type = -1;
@@ -463,7 +463,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     case 552:
     {
         OpenMonsterModel(196);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 196, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_SCHRIKER_4, PosX, PosY);
         //pCharacter->Object.Scale = 1.4f;
         pCharacter->Object.Scale = 1.75f;
         pCharacter->Weapon[0].Type = -1;
@@ -488,35 +488,35 @@ bool M33Aida::MoveAidaMonsterVisual(OBJECT* pObject, BMD* pModel)
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 100:
+    case MODEL_LANCE_TRAP:
     {
         vec3_t Light;
         Vector(0.7f, 0.1f, 0.1f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
     }
     break;
-    case MODEL_MONSTER01 + 101:
+    case MODEL_IRON_STICK_TRAP:
     {
         vec3_t Light;
         Vector(0.f, 0.0f, 0.7f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
     }
     break;
-    case MODEL_MONSTER01 + 105:
+    case MODEL_CANON_TRAP:
     {
         vec3_t Light;
         Vector(1.f, 0.0f, 0.0f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
     }
     break;
-    case MODEL_MONSTER01 + 195:
+    case MODEL_NECRON_4:
     {
         vec3_t Light;
         Vector(0.f, 0.0f, 0.7f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
     }
     break;
-    case MODEL_MONSTER01 + 196:
+    case MODEL_SCHRIKER_4:
     {
         vec3_t Light;
         Vector(0.7f, 0.1f, 0.1f, Light);
@@ -531,7 +531,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 102:
+    case MODEL_FIRE_TRAP:
     {
         if (pObject->AnimationFrame <= 5.06f && (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
         {
@@ -563,7 +563,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
         }
     }
     break;
-    case MODEL_MONSTER01 + 103:
+    case MODEL_METEORITE_TRAP:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -627,7 +627,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
         }
     }
     break;
-    case MODEL_MONSTER01 + 193:
+    case MODEL_AEGIS_4:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -663,7 +663,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
         }
     }
     break;
-    case MODEL_MONSTER01 + 194:
+    case MODEL_ROGUE_CENTURION_4:
     {
         if (pObject->AnimationFrame <= 5.06f && (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
         {
@@ -702,7 +702,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 100:
+    case MODEL_LANCE_TRAP:
     {
         vec3_t Position, Light, Angle;
         float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
@@ -796,7 +796,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 101:
+    case MODEL_IRON_STICK_TRAP:
     {
         vec3_t Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
         Vector(1.0f, 1.0f, 1.0f, Light);
@@ -871,7 +871,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 102:
+    case MODEL_FIRE_TRAP:
     {
         vec3_t Relative, Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
 
@@ -915,7 +915,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     }
     break;
 
-    case MODEL_MONSTER01 + 103:
+    case MODEL_METEORITE_TRAP:
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -1001,7 +1001,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 105:
+    case MODEL_CANON_TRAP:
     {
         vec3_t Relative, Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
         float Random_Light;
@@ -1084,7 +1084,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 193:
+    case MODEL_AEGIS_4:
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -1117,7 +1117,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 194:
+    case MODEL_ROGUE_CENTURION_4:
     {
         vec3_t Relative, Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
 
@@ -1161,7 +1161,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     }
     break;
 
-    case MODEL_MONSTER01 + 195:
+    case MODEL_NECRON_4:
     {
         vec3_t Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
         Vector(1.0f, 1.0f, 1.0f, Light);
@@ -1236,7 +1236,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 196:
+    case MODEL_SCHRIKER_4:
     {
         vec3_t Position, Light, Angle;
         float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
@@ -1338,7 +1338,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 101:
+    case MODEL_IRON_STICK_TRAP:
     {
         pModel->BeginRender(1.f);
 
@@ -1357,7 +1357,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 102:
+    case MODEL_FIRE_TRAP:
     {
         pModel->BeginRender(1.f);
 
@@ -1378,7 +1378,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 105:
+    case MODEL_CANON_TRAP:
     {
         pModel->BeginRender(1.f);
 
@@ -1412,7 +1412,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 194:
+    case MODEL_ROGUE_CENTURION_4:
     {
         pModel->BeginRender(1.f);
 
@@ -1433,7 +1433,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 195:
+    case MODEL_NECRON_4:
     {
         pModel->BeginRender(1.f);
 

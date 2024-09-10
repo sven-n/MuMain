@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////
 // NewUIMainFrameWindow.cpp: implementation of the CNewUIMainFrameWindow class.
 //////////////////////////////////////////////////////////////////////
 
@@ -2122,12 +2122,12 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         bCantSkill = true;
     }
 
-    if (bySkillType == AT_SKILL_SPEAR && (Hero->Helper.Type<MODEL_HELPER + 2 || Hero->Helper.Type>MODEL_HELPER + 3) && Hero->Helper.Type != MODEL_HELPER + 37)
+    if (bySkillType == AT_SKILL_SPEAR && (Hero->Helper.Type<MODEL_HORN_OF_UNIRIA || Hero->Helper.Type>MODEL_HORN_OF_DINORANT) && Hero->Helper.Type != MODEL_HORN_OF_FENRIR)
     {
         bCantSkill = true;
     }
 
-    if (bySkillType == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HELPER + 2 || Hero->Helper.Type == MODEL_HELPER + 3 || Hero->Helper.Type == MODEL_HELPER + 37))
+    if (bySkillType == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
     {
         int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
         int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
@@ -2137,12 +2137,12 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         }
     }
 
-    if (bySkillType >= AT_SKILL_BLOCKING && bySkillType <= AT_SKILL_SWORD5 && (Hero->Helper.Type == MODEL_HELPER + 2 || Hero->Helper.Type == MODEL_HELPER + 3 || Hero->Helper.Type == MODEL_HELPER + 37))
+    if (bySkillType >= AT_SKILL_BLOCKING && bySkillType <= AT_SKILL_SWORD5 && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
     {
         bCantSkill = true;
     }
 
-    if ((bySkillType == AT_SKILL_ICE_BLADE || (AT_SKILL_POWER_SLASH_UP <= bySkillType && AT_SKILL_POWER_SLASH_UP + 4 >= bySkillType)) && (Hero->Helper.Type == MODEL_HELPER + 2 || Hero->Helper.Type == MODEL_HELPER + 3 || Hero->Helper.Type == MODEL_HELPER + 37))
+    if ((bySkillType == AT_SKILL_ICE_BLADE || (AT_SKILL_POWER_SLASH_UP <= bySkillType && AT_SKILL_POWER_SLASH_UP + 4 >= bySkillType)) && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
     {
         bCantSkill = true;
     }
@@ -2168,13 +2168,13 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     {
         BYTE byDarkHorseLife = 0;
         byDarkHorseLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
-        if (byDarkHorseLife == 0 || Hero->Helper.Type != MODEL_HELPER + 4)
+        if (byDarkHorseLife == 0 || Hero->Helper.Type != MODEL_DARK_HORSE_ITEM)
         {
             bCantSkill = true;
         }
     }
 #ifdef PJH_FIX_SPRIT
-    /*¹ÚÁ¾ÈÆ*/
+    /*ë°•ì¢…í›ˆ*/
     if (bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType < AT_PET_COMMAND_END)
     {
         int iCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;

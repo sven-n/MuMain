@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "zzztexture.h"
@@ -131,7 +131,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     case 315:
     {
         OpenMonsterModel(95);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 95, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_MAGIC_SKELETON_2, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -142,7 +142,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     case 316:
     {
         OpenMonsterModel(96);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 96, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_WARRIOR_3, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -155,7 +155,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     case 317:
     {
         OpenMonsterModel(97);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 97, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_3, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -164,7 +164,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     case 318:
     {
         OpenMonsterModel(98);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 98, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_3, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -173,7 +173,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     case 310:
     {
         OpenMonsterModel(91);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 91, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_2, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -190,7 +190,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         return false;
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 95:
+    case MODEL_MAGIC_SKELETON_2:
     {
         vec3_t Position, Light;
 
@@ -210,7 +210,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         }
     }
     break;
-    case MODEL_MONSTER01 + 97:
+    case MODEL_CHIEF_SKELETON_ARCHER_3:
     {
         vec3_t Position, Position2, Light;
         Vector(0.f, 0.f, 0.f, Position);
@@ -227,7 +227,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         }
     }
     break;
-    case MODEL_MONSTER01 + 96:
+    case MODEL_CHIEF_SKELETON_WARRIOR_3:
     {
         vec3_t Position, Light;
 
@@ -270,7 +270,7 @@ void M34CryingWolf2nd::MoveCryingWolf2ndBlurEffect(CHARACTER* pCharacter, OBJECT
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 95:
+    case MODEL_MAGIC_SKELETON_2:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -305,7 +305,7 @@ void M34CryingWolf2nd::MoveCryingWolf2ndBlurEffect(CHARACTER* pCharacter, OBJECT
         }
     }
     break;
-    case MODEL_MONSTER01 + 97:
+    case MODEL_CHIEF_SKELETON_ARCHER_3:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -343,7 +343,7 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
 
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 96:
+    case MODEL_CHIEF_SKELETON_WARRIOR_3:
     {
         if ((int)pCharacter->AttackTime == 14)
         {
@@ -352,7 +352,7 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
         }
     }
     break;
-    case MODEL_MONSTER01 + 91:
+    case MODEL_CHIEF_SKELETON_ARCHER_2:
     {
         if ((int)pCharacter->AttackTime == 14)
         {

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -265,8 +265,8 @@ bool CheckAbuseNameFilter(wchar_t* Text)
 bool CheckName()
 {
     if (CheckAbuseNameFilter(InputText[0]) || CheckAbuseFilter(InputText[0]) ||
-        FindText(InputText[0], L" ") || FindText(InputText[0], L"¡¡") ||
-        FindText(InputText[0], L".") || FindText(InputText[0], L"¡¤") || FindText(InputText[0], L"¡­") ||
+        FindText(InputText[0], L" ") || FindText(InputText[0], L"ã€€") ||
+        FindText(InputText[0], L".") || FindText(InputText[0], L"Â·") || FindText(InputText[0], L"âˆ¼") ||
         FindText(InputText[0], L"Webzen") || FindText(InputText[0], L"WebZen") || FindText(InputText[0], L"webzen") || FindText(InputText[0], L"WEBZEN") ||
         FindText(InputText[0], GlobalText[457]) || FindText(InputText[0], GlobalText[458]))
         return true;
@@ -1093,7 +1093,7 @@ bool NewRenderCharacterScene(HDC hDC)
     {
         pCha = &CharactersClient[i];
         pObj = &pCha->Object;
-        if (pCha->Helper.Type == MODEL_HELPER + 3)
+        if (pCha->Helper.Type == MODEL_HORN_OF_DINORANT)
         {
 #ifdef PJH_NEW_SERVER_SELECT_MAP
             pObj->Position[2] = 194.5f;
@@ -1377,7 +1377,7 @@ bool NewRenderLogInScene(HDC hDC)
     if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
 #ifndef PJH_NEW_SERVER_SELECT_MAP
-        // È­¸é Èå¸®±â
+        // í™”ë©´ íë¦¬ê¸°
         EnableAlphaBlend4();
         glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
         float fScale = (sinf(WorldTime * 0.0005f) + 1.f) * 0.00011f;
@@ -1389,17 +1389,17 @@ bool NewRenderLogInScene(HDC hDC)
         fScale = (sinf(WorldTime * 0.0015f) + 1.f) * 0.00021f;
         RenderBitmapLocalRotate(BITMAP_CHROME + 4, 320.0f, 240.0f, 1150.0f, 1150.0f, fAngle, fScale * 512.f, fScale * 512.f, (512.f) / 512.f - fScale * 2 * 512.f, (512.f) / 512.f - fScale * 2 * 512.f);
 
-        // À§¾Æ·¡ ÀÚ¸£±â
+        // ìœ„ì•„ëž˜ ìžë¥´ê¸°
         EnableAlphaTest();
         glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
         RenderColor(0, 0, 640, 25);
         RenderColor(0, 480 - 25, 640, 25);
 
-        // È­¸éÄ¥
+        // í™”ë©´ì¹ 
         glColor4f(0.0f, 0.0f, 0.0f, 0.2f);
         RenderColor(0, 25, 640, 430);
 #endif //PJH_NEW_SERVER_SELECT_MAP
-        // ¹Â·Î°í
+        // ë®¤ë¡œê³ 
         g_fMULogoAlpha += 0.02f;
         if (g_fMULogoAlpha > 10.0f) g_fMULogoAlpha = 10.0f;
 
@@ -1602,7 +1602,7 @@ bool MoveMainCamera()
             {
             }
             else
-                if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HELPER + 3 || Hero->SafeZone)
+                if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
                 {
                     Hero->Object.Position[2] = RequestTerrainHeight(Hero->Object.Position[0], Hero->Object.Position[1]);
                 }

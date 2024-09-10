@@ -1,4 +1,4 @@
-// NewUIItemEnduranceInfo.cpp: implementation of the CNewUIItemEnduranceInfo class.
+﻿// NewUIItemEnduranceInfo.cpp: implementation of the CNewUIItemEnduranceInfo class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -79,14 +79,14 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 
     int iNextPosY = m_UIStartPos.y;
 
-    if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_HELPER + 4
-        || Hero->Helper.Type == MODEL_HELPER + 64
-        || Hero->Helper.Type == MODEL_HELPER + 65
-        || Hero->Helper.Type == MODEL_HELPER + 67
-        || Hero->Helper.Type == MODEL_HELPER + 80
-        || Hero->Helper.Type == MODEL_HELPER + 106
-        || Hero->Helper.Type == MODEL_HELPER + 123
-        || Hero->Helper.Type == MODEL_HELPER + 37)
+    if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM
+        || Hero->Helper.Type == MODEL_DEMON
+        || Hero->Helper.Type == MODEL_SPIRIT_OF_GUARDIAN
+        || Hero->Helper.Type == MODEL_PET_RUDOLF
+        || Hero->Helper.Type == MODEL_PET_PANDA
+        || Hero->Helper.Type == MODEL_PET_UNICORN
+        || Hero->Helper.Type == MODEL_PET_SKELETON
+        || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         if (CheckMouseIn(m_UIStartPos.x, iNextPosY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT))
             return false;
@@ -406,14 +406,14 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM
 
 bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
 {
-    if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_HELPER + 4
-        || Hero->Helper.Type == MODEL_HELPER + 64
-        || Hero->Helper.Type == MODEL_HELPER + 65
-        || Hero->Helper.Type == MODEL_HELPER + 67
-        || Hero->Helper.Type == MODEL_HELPER + 80
-        || Hero->Helper.Type == MODEL_HELPER + 106
-        || Hero->Helper.Type == MODEL_HELPER + 123
-        || Hero->Helper.Type == MODEL_HELPER + 37)
+    if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM
+        || Hero->Helper.Type == MODEL_DEMON
+        || Hero->Helper.Type == MODEL_SPIRIT_OF_GUARDIAN
+        || Hero->Helper.Type == MODEL_PET_RUDOLF
+        || Hero->Helper.Type == MODEL_PET_PANDA
+        || Hero->Helper.Type == MODEL_PET_UNICORN
+        || Hero->Helper.Type == MODEL_PET_SKELETON
+        || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         wchar_t szText[256] = { NULL, };
 
@@ -424,58 +424,58 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
             swprintf(szText, GlobalText[353]);
         }
         break;
-        case MODEL_HELPER + 1:
+        case MODEL_IMP:
         {
             ITEM_ATTRIBUTE* p = &ItemAttribute[Hero->Helper.Type - MODEL_SWORD];
             swprintf(szText, p->Name);
         }
         break;
-        case MODEL_HELPER + 2:
+        case MODEL_HORN_OF_UNIRIA:
         {
             swprintf(szText, GlobalText[355]);
         }
         break;
-        case MODEL_HELPER + 3:
+        case MODEL_HORN_OF_DINORANT:
         {
             swprintf(szText, GlobalText[354]);
         }
         break;
-        case MODEL_HELPER + 4:
+        case MODEL_DARK_HORSE_ITEM:
         {
             swprintf(szText, GlobalText[1187]);
         }
         break;
-        case MODEL_HELPER + 37:
+        case MODEL_HORN_OF_FENRIR:
         {
             swprintf(szText, GlobalText[1916]);
         }
         break;
-        case MODEL_HELPER + 64:
+        case MODEL_DEMON:
         {
             swprintf(szText, ItemAttribute[ITEM_HELPER + 64].Name);
         }
         break;
-        case MODEL_HELPER + 65:
+        case MODEL_SPIRIT_OF_GUARDIAN:
         {
             swprintf(szText, ItemAttribute[ITEM_HELPER + 65].Name);
         }
         break;
-        case MODEL_HELPER + 67:
+        case MODEL_PET_RUDOLF:
         {
             swprintf(szText, ItemAttribute[ITEM_HELPER + 67].Name);
         }
         break;
-        case MODEL_HELPER + 80:
+        case MODEL_PET_PANDA:
         {
             swprintf(szText, ItemAttribute[ITEM_HELPER + 80].Name);
         }
         break;
-        case MODEL_HELPER + 106:
+        case MODEL_PET_UNICORN:
         {
             swprintf(szText, ItemAttribute[ITEM_HELPER + 106].Name);
         }
         break;
-        case MODEL_HELPER + 123:
+        case MODEL_PET_SKELETON:
         {
             swprintf(szText, ItemAttribute[ITEM_HELPER + 123].Name);
         }

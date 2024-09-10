@@ -1,4 +1,4 @@
-// MapManager.cpp: implementation of the CMapManager class.
+﻿// MapManager.cpp: implementation of the CMapManager class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"

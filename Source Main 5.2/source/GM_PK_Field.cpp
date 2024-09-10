@@ -1,4 +1,4 @@
-//*****************************************************************************
+ï»¿//*****************************************************************************
 // file    : GM_PK_Field.cpp
 //*****************************************************************************
 #include "stdafx.h"
@@ -54,8 +54,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 480:
     {
         OpenMonsterModel(157);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 157, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Á»ºñ Åõ»ç");
+        pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_6, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì¢€ë¹„ íˆ¬ì‚¬");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -65,8 +65,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 481:
     {
         OpenMonsterModel(157);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 157, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Á»ºñ Åõ»ç");
+        pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_6, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì¢€ë¹„ íˆ¬ì‚¬");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -76,8 +76,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 482:
     {
         OpenMonsterModel(158);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 158, PosX, PosY);
-        wcscpy(pCharacter->ID, L"µÇ»ì¾Æ³­ °ËÅõ»ç");
+        pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_7, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë˜ì‚´ì•„ë‚œ ê²€íˆ¬ì‚¬");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -87,8 +87,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 483:
     {
         OpenMonsterModel(158);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 158, PosX, PosY);
-        wcscpy(pCharacter->ID, L"µÇ»ì¾Æ³­ °ËÅõ»ç");
+        pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_7, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë˜ì‚´ì•„ë‚œ ê²€íˆ¬ì‚¬");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -99,7 +99,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(159);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 159, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Àí´õ¹Ì µµ»ìÀÚ");
+        wcscpy(pCharacter->ID, L"ìž¿ë”ë¯¸ ë„ì‚´ìž");
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -110,7 +110,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(159);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 159, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Àí´õ¹Ì µµ»ìÀÚ");
+        wcscpy(pCharacter->ID, L"ìž¿ë”ë¯¸ ë„ì‚´ìž");
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -120,8 +120,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 486:
     {
         OpenMonsterModel(160);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 160, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÇÇÀÇ ¾Ï»ìÀÚ");
+        pCharacter = CreateCharacter(Key, MODEL_SCHRIKER_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"í”¼ì˜ ì•”ì‚´ìž");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -132,8 +132,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 487:
     {
         OpenMonsterModel(161);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 161, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÀÜÈ¤ÇÑ ÇÇÀÇ ¾Ï»ìÀÚ");
+        pCharacter = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ìž”í˜¹í•œ í”¼ì˜ ì•”ì‚´ìž");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -144,8 +144,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 488:
     {
         OpenMonsterModel(161);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 161, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÀÜÈ¤ÇÑ ÇÇÀÇ ¾Ï»ìÀÚ");
+        pCharacter = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ìž”í˜¹í•œ í”¼ì˜ ì•”ì‚´ìž");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -156,8 +156,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 489:
     {
         OpenMonsterModel(163);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 163, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ºÒÅ¸´Â ¿ë¾Ï °ÅÀÎ");
+        pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_2, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë¶ˆíƒ€ëŠ” ìš©ì•” ê±°ì¸");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -167,8 +167,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 490:
     {
         OpenMonsterModel(162);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 162, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Æ÷¾ÇÇÑ ¿ë¾Ï °ÅÀÎ");
+        pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"í¬ì•…í•œ ìš©ì•” ê±°ì¸");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -178,8 +178,8 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 491:
     {
         OpenMonsterModel(162);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 162, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Æ÷¾ÇÇÑ ¿ë¾Ï °ÅÀÎ");
+        pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"í¬ì•…í•œ ìš©ì•” ê±°ì¸");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -195,7 +195,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     if (!gMapManager.IsPKField())
         return;
 
-    if (o->Type >= MODEL_MONSTER01 + 158 && o->Type <= MODEL_MONSTER01 + 161)
+    if (o->Type >= MODEL_GATE_TO_KALIMA_7 && o->Type <= MODEL_ILLUSION_OF_KUNDUN_1)
     {
         float Start_Frame = 0.0f;
         float End_Frame = 0.0f;
@@ -208,14 +208,14 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             End_Frame = 10.0f;
         }
         break;
-        case MODEL_MONSTER01 + 158:
+        case MODEL_GATE_TO_KALIMA_7:
         {
             Start_Frame = 3.0f;
             End_Frame = 7.0f;
         }
         break;
-        case MODEL_MONSTER01 + 160:
-        case MODEL_MONSTER01 + 161:
+        case MODEL_SCHRIKER_1:
+        case MODEL_ILLUSION_OF_KUNDUN_1:
         {
             Start_Frame = 3.0f;
             End_Frame = 8.0f;
@@ -256,7 +256,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                     CreateBlur(c, StartPos, EndPos, Light, 0);
                 }
                 break;
-                case MODEL_MONSTER01 + 158:
+                case MODEL_GATE_TO_KALIMA_7:
                 {
                     Vector(0.0f, 0.3f, 0.2f, Light);
                     b->TransformPosition(BoneTransform[39], StartRelative, StartPos, false);
@@ -264,10 +264,10 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                     CreateBlur(c, StartPos, EndPos, Light, 0);
                 }
                 break;
-                case MODEL_MONSTER01 + 160:
-                case MODEL_MONSTER01 + 161:
+                case MODEL_SCHRIKER_1:
+                case MODEL_ILLUSION_OF_KUNDUN_1:
                 {
-                    if (o->Type == MODEL_MONSTER01 + 160)
+                    if (o->Type == MODEL_SCHRIKER_1)
                     {
                         Vector(0.9f, 0.2f, 0.1f, Light);
                     }
@@ -468,7 +468,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         return false;
     }
 
-    if (o->Type >= MODEL_MONSTER01 + 157 && o->Type <= MODEL_MONSTER01 + 163)
+    if (o->Type >= MODEL_GATE_TO_KALIMA_6 && o->Type <= MODEL_CHAOS_CASTLE_2)
     {
         RenderMonster(o, b, ExtraMon);
 
@@ -594,8 +594,8 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 160:
-    case MODEL_MONSTER01 + 161:
+    case MODEL_SCHRIKER_1:
+    case MODEL_ILLUSION_OF_KUNDUN_1:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -603,7 +603,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
             vec3_t vLight, vPos, vRelative;
             Vector(1.0f, 1.0f, 1.0f, vLight);
             vec3_t vLightFire;
-            if (o->Type == MODEL_MONSTER01 + 160)
+            if (o->Type == MODEL_SCHRIKER_1)
             {
                 Vector(1.0f, 0.2f, 0.0f, vLightFire);
             }
@@ -632,7 +632,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                     Vector((rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, vRelative);
                     b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
                 }
-                if (o->Type == MODEL_MONSTER01 + 160)
+                if (o->Type == MODEL_SCHRIKER_1)
                 {
                     for (int i = 0; i < 2; ++i)
                     {
@@ -690,11 +690,11 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 157:
+    case MODEL_GATE_TO_KALIMA_6:
     {
     }
     return true;
-    case MODEL_MONSTER01 + 158:
+    case MODEL_GATE_TO_KALIMA_7:
     {
     }
     return true;
@@ -711,17 +711,17 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 160:
-    case MODEL_MONSTER01 + 161:
+    case MODEL_SCHRIKER_1:
+    case MODEL_ILLUSION_OF_KUNDUN_1:
     {
         int iBones[] = { 37, 11, 70, 65, 6 };
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 160:
+        case MODEL_SCHRIKER_1:
             Vector(0.9f, 0.2f, 0.1f, vLight);	//red
             break;
-        case MODEL_MONSTER01 + 161:
+        case MODEL_ILLUSION_OF_KUNDUN_1:
             Vector(0.3f, 0.9f, 0.2f, vLight);	//green
             break;
         }
@@ -756,10 +756,10 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
                 switch (o->Type)
                 {
-                case MODEL_MONSTER01 + 160:
+                case MODEL_SCHRIKER_1:
                     Vector(0.9f, 0.4f, 0.1f, vLight);	//red
                     break;
-                case MODEL_MONSTER01 + 161:
+                case MODEL_ILLUSION_OF_KUNDUN_1:
                     Vector(0.6f, 0.9f, 0.2f, vLight);	//green
                     break;
                 }
@@ -781,11 +781,11 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[5], vRelativePos, vWorldPos, true);
                 switch (o->Type)
                 {
-                case MODEL_MONSTER01 + 160:
+                case MODEL_SCHRIKER_1:
                     CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD, vWorldPos, o->Angle, Light, 0, o, 0, 0);
                     break;
 
-                case MODEL_MONSTER01 + 161:
+                case MODEL_ILLUSION_OF_KUNDUN_1:
                     CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD, vWorldPos, o->Angle, Light, 0, o, 0, 0);
                     break;
                 }
@@ -793,20 +793,20 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 162:
-    case MODEL_MONSTER01 + 163:
+    case MODEL_CHAOS_CASTLE_1:
+    case MODEL_CHAOS_CASTLE_2:
     {
         auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
         float fAngle = (sinf(WorldTime * 0.003f) + 1.0f) * 0.4f + 1.5f;
         vec3_t vWorldPos, vLight;
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 162:
+        case MODEL_CHAOS_CASTLE_1:
         {
             Vector(0.5f, 0.1f, 0.9f, vLight);
         }
         break;
-        case MODEL_MONSTER01 + 163:
+        case MODEL_CHAOS_CASTLE_2:
         {
             Vector(0.9f, 0.4f, 0.1f, vLight);
         }
@@ -823,7 +823,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         vec3_t vRelative, vPos;
         Vector(1.0f, 1.0f, 1.0f, vLight);
-        int iModel = (o->Type == MODEL_MONSTER01 + 163) ? MODEL_LAVAGIANT_FOOTPRINT_R : MODEL_LAVAGIANT_FOOTPRINT_V;
+        int iModel = (o->Type == MODEL_CHAOS_CASTLE_2) ? MODEL_LAVAGIANT_FOOTPRINT_R : MODEL_LAVAGIANT_FOOTPRINT_V;
 
         if (o->CurrentAction == MONSTER01_WALK)
         {
@@ -860,10 +860,10 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             b->TransformPosition(o->BoneTransform[7], p, Position, true);
             switch (o->Type)
             {
-            case MODEL_MONSTER01 + 162:
+            case MODEL_CHAOS_CASTLE_1:
                 Vector(0.5f, 0.1f, 0.9f, o->Light);
                 break;
-            case MODEL_MONSTER01 + 163:
+            case MODEL_CHAOS_CASTLE_2:
                 Vector(0.9f, 0.4f, 0.1f, o->Light);
                 break;
             }
@@ -889,7 +889,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 157:
+    case MODEL_GATE_TO_KALIMA_6:
     {
         b->TransformByObjectBone(vWorldPos, o, 9);
         CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
@@ -901,7 +901,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         EnableDepthTest();
     }
     return true;
-    case MODEL_MONSTER01 + 158:
+    case MODEL_GATE_TO_KALIMA_7:
     {
         b->TransformByObjectBone(vWorldPos, o, 9);
         CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
@@ -925,8 +925,8 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
     }
     return true;
-    case MODEL_MONSTER01 + 160:
-    case MODEL_MONSTER01 + 161:
+    case MODEL_SCHRIKER_1:
+    case MODEL_ILLUSION_OF_KUNDUN_1:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -934,12 +934,12 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
             {
                 switch (o->Type)
                 {
-                case MODEL_MONSTER01 + 160:
+                case MODEL_SCHRIKER_1:
                 {
                     CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
                 }
                 break;
-                case MODEL_MONSTER01 + 161:
+                case MODEL_ILLUSION_OF_KUNDUN_1:
                 {
                     CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
                 }
@@ -956,7 +956,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
             switch (o->Type)
             {
-            case MODEL_MONSTER01 + 160:
+            case MODEL_SCHRIKER_1:
             {
                 b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON02);
@@ -965,7 +965,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
                 b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, 3, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON01);
             }
             break;
-            case MODEL_MONSTER01 + 161:
+            case MODEL_ILLUSION_OF_KUNDUN_1:
             {
                 b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON04);
@@ -983,8 +983,8 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 162:
-    case MODEL_MONSTER01 + 163:
+    case MODEL_CHAOS_CASTLE_1:
+    case MODEL_CHAOS_CASTLE_2:
     {
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -994,13 +994,13 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 162:
-        case MODEL_MONSTER01 + 163:
+        case MODEL_CHAOS_CASTLE_1:
+        case MODEL_CHAOS_CASTLE_2:
         {
             float fAlpha = 1.0f;
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
-            int iTexture = (o->Type == MODEL_MONSTER01 + 162) ? BITMAP_PKMON06 : BITMAP_PKMON05;
+            int iTexture = (o->Type == MODEL_CHAOS_CASTLE_1) ? BITMAP_PKMON06 : BITMAP_PKMON05;
 
             if (fBlendMeshLight < 0)
             {
@@ -1080,7 +1080,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 157:
+    case MODEL_GATE_TO_KALIMA_6:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -1106,7 +1106,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         //	SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE02,
     }
     return true;
-    case MODEL_MONSTER01 + 158:
+    case MODEL_GATE_TO_KALIMA_7:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -1158,8 +1158,8 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         //SOUND_PKFIELD_ASHESBUTCHER_MOVE02,
     }
     return true;
-    case MODEL_MONSTER01 + 160:
-    case MODEL_MONSTER01 + 161:
+    case MODEL_SCHRIKER_1:
+    case MODEL_ILLUSION_OF_KUNDUN_1:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -1185,8 +1185,8 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         //	SOUND_PKFIELD_BLOODASSASSIN_MOVE01,
     }
     return true;
-    case MODEL_MONSTER01 + 162:
-    case MODEL_MONSTER01 + 163:
+    case MODEL_CHAOS_CASTLE_1:
+    case MODEL_CHAOS_CASTLE_2:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction)
         {

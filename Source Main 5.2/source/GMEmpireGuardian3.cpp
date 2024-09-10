@@ -1,4 +1,4 @@
-// GMEmpireGuardian3.cpp: implementation of the GMEmpireGuardian3 class.
+ï»¿// GMEmpireGuardian3.cpp: implementation of the GMEmpireGuardian3 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
@@ -81,8 +81,8 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     case 510:
     {
         OpenMonsterModel(170);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 170, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Ä«Åä");
+        pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_9, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì¹´í† ");
         pCharacter->Object.Scale = 1.35f;
 
         m_bCurrentIsRage_Kato = false;
@@ -91,16 +91,16 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     case 516:
     {
         OpenMonsterModel(176);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 176, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¾Ï»ì´ÜÀå");
+        pCharacter = CreateCharacter(Key, MODEL_BLOOD_SOLDIER_2, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì•”ì‚´ë‹¨ìž¥");
         pCharacter->Object.Scale = 1.55f;
     }
     break;
     case 517:
     {
         OpenMonsterModel(177);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 177, PosX, PosY);
-        wcscpy(pCharacter->ID, L"±â¸¶´ÜÀå");
+        pCharacter = CreateCharacter(Key, MODEL_AEGIS_2, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ê¸°ë§ˆë‹¨ìž¥");
         pCharacter->Object.Scale = 1.25f;
     }
     break;
@@ -217,7 +217,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 170:
+    case MODEL_CHAOS_CASTLE_9:
     {
         switch (o->CurrentAction)
         {
@@ -245,7 +245,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 176:
+    case MODEL_BLOOD_SOLDIER_2:
     {
         switch (o->CurrentAction)
         {
@@ -390,7 +390,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 177:
+    case MODEL_AEGIS_2:
     {
         switch (o->CurrentAction)
         {
@@ -489,16 +489,16 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 166:
-    case MODEL_MONSTER01 + 178:
-    case MODEL_MONSTER01 + 179:
-    case MODEL_MONSTER01 + 180:
-    case MODEL_MONSTER01 + 181:
+    case MODEL_CHAOS_CASTLE_5:
+    case MODEL_ROGUE_CENTURION_2:
+    case MODEL_NECRON_2:
+    case MODEL_SCHRIKER_2:
+    case MODEL_ILLUSION_OF_KUNDUN_2:
     {
         g_EmpireGuardian1.MoveBlurEffect(c, o, b);
     }
     break;
-    case MODEL_MONSTER01 + 170:
+    case MODEL_CHAOS_CASTLE_9:
     {
         vec3_t  Light;
         vec3_t StartPos, StartRelative;
@@ -668,13 +668,13 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                             b->TransformPosition(BoneTransform[44], vRelative, vPosition, false);
                             CreateParticle(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
                         }
-                    } // °Ë±â
+                    } // ê²€ê¸°
                 }
             }
         }
     }
     break;
-    case MODEL_MONSTER01 + 177:
+    case MODEL_AEGIS_2:
     {
         switch (o->CurrentAction)
         {
@@ -1002,7 +1002,7 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 170:
+    case MODEL_CHAOS_CASTLE_9:
     {
         vec3_t Light, Position;
 
@@ -1094,7 +1094,7 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 176:
+    case MODEL_BLOOD_SOLDIER_2:
     {
     }
     return true;
@@ -1304,7 +1304,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 170:
+    case MODEL_CHAOS_CASTLE_9:
     {
         switch (o->CurrentAction)
         {
@@ -1338,7 +1338,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
     }
     return true;
 
-    case MODEL_MONSTER01 + 176:
+    case MODEL_BLOOD_SOLDIER_2:
     {
         switch (o->CurrentAction)
         {
@@ -1367,7 +1367,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
     }
     return true;
 
-    case MODEL_MONSTER01 + 177:
+    case MODEL_AEGIS_2:
     {
         switch (o->CurrentAction)
         {

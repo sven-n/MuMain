@@ -1,4 +1,4 @@
-#include "stdafx.h"
+Ôªø#include "stdafx.h"
 #include "UIControls.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
@@ -147,16 +147,16 @@ void OpenPlayers()
         gLoadData.AccessModel(MODEL_GLOVES + i + 10, L"Data\\Player\\", L"GloveElf", i + 1);
         gLoadData.AccessModel(MODEL_BOOTS + i + 10, L"Data\\Player\\", L"BootElf", i + 1);
     }
-    gLoadData.AccessModel(MODEL_ARMOR + 15, L"Data\\Player\\", L"ArmorMale", 16);
-    gLoadData.AccessModel(MODEL_PANTS + 15, L"Data\\Player\\", L"PantMale", 16);
-    gLoadData.AccessModel(MODEL_GLOVES + 15, L"Data\\Player\\", L"GloveMale", 16);
-    gLoadData.AccessModel(MODEL_BOOTS + 15, L"Data\\Player\\", L"BootMale", 16);
+    gLoadData.AccessModel(MODEL_STORM_CROW_ARMOR, L"Data\\Player\\", L"ArmorMale", 16);
+    gLoadData.AccessModel(MODEL_STORM_CROW_PANTS, L"Data\\Player\\", L"PantMale", 16);
+    gLoadData.AccessModel(MODEL_STORM_CROW_GLOVES, L"Data\\Player\\", L"GloveMale", 16);
+    gLoadData.AccessModel(MODEL_STORM_CROW_BOOTS, L"Data\\Player\\", L"BootMale", 16);
 
-    gLoadData.AccessModel(MODEL_HELM + 16, L"Data\\Player\\", L"HelmMale", 17);
-    gLoadData.AccessModel(MODEL_ARMOR + 16, L"Data\\Player\\", L"ArmorMale", 17);
-    gLoadData.AccessModel(MODEL_PANTS + 16, L"Data\\Player\\", L"PantMale", 17);
-    gLoadData.AccessModel(MODEL_GLOVES + 16, L"Data\\Player\\", L"GloveMale", 17);
-    gLoadData.AccessModel(MODEL_BOOTS + 16, L"Data\\Player\\", L"BootMale", 17);
+    gLoadData.AccessModel(MODEL_BLACK_DRAGON_HELM, L"Data\\Player\\", L"HelmMale", 17);
+    gLoadData.AccessModel(MODEL_BLACK_DRAGON_ARMOR, L"Data\\Player\\", L"ArmorMale", 17);
+    gLoadData.AccessModel(MODEL_BLACK_DRAGON_PANTS, L"Data\\Player\\", L"PantMale", 17);
+    gLoadData.AccessModel(MODEL_BLACK_DRAGON_GLOVES, L"Data\\Player\\", L"GloveMale", 17);
+    gLoadData.AccessModel(MODEL_BLACK_DRAGON_BOOTS, L"Data\\Player\\", L"BootMale", 17);
 
     gLoadData.AccessModel(MODEL_MASK_HELM + 0, L"Data\\Player\\", L"MaskHelmMale", 1);
     gLoadData.AccessModel(MODEL_MASK_HELM + 5, L"Data\\Player\\", L"MaskHelmMale", 6);
@@ -168,29 +168,29 @@ void OpenPlayers()
     {
         if (18 + i == 20)
         {
-            gLoadData.AccessModel(MODEL_HELM + 17 + i, L"Data\\Player\\", L"HelmMaleTest", 18 + i);
-            gLoadData.AccessModel(MODEL_ARMOR + 17 + i, L"Data\\Player\\", L"ArmorMaleTest", 18 + i);
-            gLoadData.AccessModel(MODEL_PANTS + 17 + i, L"Data\\Player\\", L"PantMaleTest", 18 + i);
-            gLoadData.AccessModel(MODEL_GLOVES + 17 + i, L"Data\\Player\\", L"GloveMaleTest", 18 + i);
-            gLoadData.AccessModel(MODEL_BOOTS + 17 + i, L"Data\\Player\\", L"BootMaleTest", 18 + i);
+            gLoadData.AccessModel(MODEL_DARK_PHOENIX_HELM + i, L"Data\\Player\\", L"HelmMaleTest", 18 + i);
+            gLoadData.AccessModel(MODEL_DARK_PHOENIX_ARMOR + i, L"Data\\Player\\", L"ArmorMaleTest", 18 + i);
+            gLoadData.AccessModel(MODEL_DARK_PHOENIX_PANTS + i, L"Data\\Player\\", L"PantMaleTest", 18 + i);
+            gLoadData.AccessModel(MODEL_DARK_PHOENIX_GLOVES + i, L"Data\\Player\\", L"GloveMaleTest", 18 + i);
+            gLoadData.AccessModel(MODEL_DARK_PHOENIX_BOOTS + i, L"Data\\Player\\", L"BootMaleTest", 18 + i);
         }
         else
         {
             if (i < 3)
             {
-                gLoadData.AccessModel(MODEL_HELM + 17 + i, L"Data\\Player\\", L"HelmMale", 18 + i);
+                gLoadData.AccessModel(MODEL_DARK_PHOENIX_HELM + i, L"Data\\Player\\", L"HelmMale", 18 + i);
             }
-            gLoadData.AccessModel(MODEL_ARMOR + 17 + i, L"Data\\Player\\", L"ArmorMale", 18 + i);
+            gLoadData.AccessModel(MODEL_DARK_PHOENIX_ARMOR + i, L"Data\\Player\\", L"ArmorMale", 18 + i);
             if (18 + i == 19)
             {
-                gLoadData.AccessModel(MODEL_PANTS + 17 + i, L"Data\\Player\\", L"t_PantMale", 18 + i);
+                gLoadData.AccessModel(MODEL_DARK_PHOENIX_PANTS + i, L"Data\\Player\\", L"t_PantMale", 18 + i);
             }
             else
             {
-                gLoadData.AccessModel(MODEL_PANTS + 17 + i, L"Data\\Player\\", L"PantMale", 18 + i);
+                gLoadData.AccessModel(MODEL_DARK_PHOENIX_PANTS + i, L"Data\\Player\\", L"PantMale", 18 + i);
             }
-            gLoadData.AccessModel(MODEL_GLOVES + 17 + i, L"Data\\Player\\", L"GloveMale", 18 + i);
-            gLoadData.AccessModel(MODEL_BOOTS + 17 + i, L"Data\\Player\\", L"BootMale", 18 + i);
+            gLoadData.AccessModel(MODEL_DARK_PHOENIX_GLOVES + i, L"Data\\Player\\", L"GloveMale", 18 + i);
+            gLoadData.AccessModel(MODEL_DARK_PHOENIX_BOOTS + i, L"Data\\Player\\", L"BootMale", 18 + i);
         }
     }
 
@@ -198,57 +198,57 @@ void OpenPlayers()
     {
         if (i != 2)
         {
-            gLoadData.AccessModel(MODEL_HELM + 21 + i, L"Data\\Player\\", L"HelmMale", 22 + i);
+            gLoadData.AccessModel(MODEL_GREAT_DRAGON_HELM + i, L"Data\\Player\\", L"HelmMale", 22 + i);
         }
-        gLoadData.AccessModel(MODEL_ARMOR + 21 + i, L"Data\\Player\\", L"ArmorMale", 22 + i);
-        gLoadData.AccessModel(MODEL_PANTS + 21 + i, L"Data\\Player\\", L"PantMale", 22 + i);
-        gLoadData.AccessModel(MODEL_GLOVES + 21 + i, L"Data\\Player\\", L"GloveMale", 22 + i);
-        gLoadData.AccessModel(MODEL_BOOTS + 21 + i, L"Data\\Player\\", L"BootMale", 22 + i);
+        gLoadData.AccessModel(MODEL_GREAT_DRAGON_ARMOR + i, L"Data\\Player\\", L"ArmorMale", 22 + i);
+        gLoadData.AccessModel(MODEL_GREAT_DRAGON_PANTS + i, L"Data\\Player\\", L"PantMale", 22 + i);
+        gLoadData.AccessModel(MODEL_GREAT_DRAGON_GLOVES + i, L"Data\\Player\\", L"GloveMale", 22 + i);
+        gLoadData.AccessModel(MODEL_GREAT_DRAGON_BOOTS + i, L"Data\\Player\\", L"BootMale", 22 + i);
     }
 
     for (int i = 0; i < 4; i++)
     {
-        gLoadData.AccessModel(MODEL_HELM + 25 + i, L"Data\\Player\\", L"HelmMale", 26 + i);
-        gLoadData.AccessModel(MODEL_ARMOR + 25 + i, L"Data\\Player\\", L"ArmorMale", 26 + i);
-        gLoadData.AccessModel(MODEL_PANTS + 25 + i, L"Data\\Player\\", L"PantMale", 26 + i);
-        gLoadData.AccessModel(MODEL_GLOVES + 25 + i, L"Data\\Player\\", L"GloveMale", 26 + i);
-        gLoadData.AccessModel(MODEL_BOOTS + 25 + i, L"Data\\Player\\", L"BootMale", 26 + i);
+        gLoadData.AccessModel(MODEL_LIGHT_PLATE_MASK + i, L"Data\\Player\\", L"HelmMale", 26 + i);
+        gLoadData.AccessModel(MODEL_LIGHT_PLATE_ARMOR + i, L"Data\\Player\\", L"ArmorMale", 26 + i);
+        gLoadData.AccessModel(MODEL_LIGHT_PLATE_PANTS + i, L"Data\\Player\\", L"PantMale", 26 + i);
+        gLoadData.AccessModel(MODEL_LIGHT_PLATE_GLOVES + i, L"Data\\Player\\", L"GloveMale", 26 + i);
+        gLoadData.AccessModel(MODEL_LIGHT_PLATE_BOOTS + i, L"Data\\Player\\", L"BootMale", 26 + i);
     }
 
     for (int i = 0; i < 5; ++i)
     {
-        gLoadData.AccessModel(MODEL_ARMOR + 29 + i, L"Data\\Player\\", L"HDK_ArmorMale", i + 1);
-        gLoadData.AccessModel(MODEL_PANTS + 29 + i, L"Data\\Player\\", L"HDK_PantMale", i + 1);
-        gLoadData.AccessModel(MODEL_GLOVES + 29 + i, L"Data\\Player\\", L"HDK_GloveMale", i + 1);
-        gLoadData.AccessModel(MODEL_BOOTS + 29 + i, L"Data\\Player\\", L"HDK_BootMale", i + 1);
+        gLoadData.AccessModel(MODEL_DRAGON_KNIGHT_ARMOR + i, L"Data\\Player\\", L"HDK_ArmorMale", i + 1);
+        gLoadData.AccessModel(MODEL_DRAGON_KNIGHT_PANTS + i, L"Data\\Player\\", L"HDK_PantMale", i + 1);
+        gLoadData.AccessModel(MODEL_DRAGON_KNIGHT_GLOVES + i, L"Data\\Player\\", L"HDK_GloveMale", i + 1);
+        gLoadData.AccessModel(MODEL_DRAGON_KNIGHT_BOOTS + i, L"Data\\Player\\", L"HDK_BootMale", i + 1);
     }
 
-    gLoadData.AccessModel(MODEL_HELM + 29, L"Data\\Player\\", L"HDK_HelmMale", 1);
-    gLoadData.AccessModel(MODEL_HELM + 30, L"Data\\Player\\", L"HDK_HelmMale", 2);
-    gLoadData.AccessModel(MODEL_HELM + 31, L"Data\\Player\\", L"HDK_HelmMale", 3);
-    gLoadData.AccessModel(MODEL_HELM + 33, L"Data\\Player\\", L"HDK_HelmMale", 5);
+    gLoadData.AccessModel(MODEL_DRAGON_KNIGHT_HELM, L"Data\\Player\\", L"HDK_HelmMale", 1);
+    gLoadData.AccessModel(MODEL_VENOM_MIST_HELM, L"Data\\Player\\", L"HDK_HelmMale", 2);
+    gLoadData.AccessModel(MODEL_SYLPHID_RAY_HELM, L"Data\\Player\\", L"HDK_HelmMale", 3);
+    gLoadData.AccessModel(MODEL_SUNLIGHT_MASK, L"Data\\Player\\", L"HDK_HelmMale", 5);
 
     for (int i = 0; i < 5; ++i)
     {
-        gLoadData.AccessModel(MODEL_ARMOR + 34 + i, L"Data\\Player\\", L"CW_ArmorMale", i + 1);
-        gLoadData.AccessModel(MODEL_PANTS + 34 + i, L"Data\\Player\\", L"CW_PantMale", i + 1);
-        gLoadData.AccessModel(MODEL_GLOVES + 34 + i, L"Data\\Player\\", L"CW_GloveMale", i + 1);
-        gLoadData.AccessModel(MODEL_BOOTS + 34 + i, L"Data\\Player\\", L"CW_BootMale", i + 1);
+        gLoadData.AccessModel(MODEL_ASHCROW_ARMOR + i, L"Data\\Player\\", L"CW_ArmorMale", i + 1);
+        gLoadData.AccessModel(MODEL_ASHCROW_PANTS + i, L"Data\\Player\\", L"CW_PantMale", i + 1);
+        gLoadData.AccessModel(MODEL_ASHCROW_GLOVES + i, L"Data\\Player\\", L"CW_GloveMale", i + 1);
+        gLoadData.AccessModel(MODEL_ASHCROW_BOOTS + i, L"Data\\Player\\", L"CW_BootMale", i + 1);
     }
 
-    //∏∂∞ÀªÁ¥¬ ¡¶ø‹«œ∞Ì ≈ı±∏µµ √ﬂ∞°
-    gLoadData.AccessModel(MODEL_HELM + 34, L"Data\\Player\\", L"CW_HelmMale", 1);
-    gLoadData.AccessModel(MODEL_HELM + 35, L"Data\\Player\\", L"CW_HelmMale", 2);
-    gLoadData.AccessModel(MODEL_HELM + 36, L"Data\\Player\\", L"CW_HelmMale", 3);
-    gLoadData.AccessModel(MODEL_HELM + 38, L"Data\\Player\\", L"CW_HelmMale", 5);
+    //ÎßàÍ≤ÄÏÇ¨Îäî Ï†úÏô∏ÌïòÍ≥† Ìà¨Íµ¨ÎèÑ Ï∂îÍ∞Ä
+    gLoadData.AccessModel(MODEL_ASHCROW_HELM, L"Data\\Player\\", L"CW_HelmMale", 1);
+    gLoadData.AccessModel(MODEL_ECLIPSE_HELM, L"Data\\Player\\", L"CW_HelmMale", 2);
+    gLoadData.AccessModel(MODEL_IRIS_HELM, L"Data\\Player\\", L"CW_HelmMale", 3);
+    gLoadData.AccessModel(MODEL_GLORIOUS_MASK, L"Data\\Player\\", L"CW_HelmMale", 5);
 
     for (int i = 0; i < 6; ++i)
     {
-        gLoadData.AccessModel(MODEL_HELM + 39 + i, L"Data\\Player\\", L"HelmMale", 40 + i);
-        gLoadData.AccessModel(MODEL_ARMOR + 39 + i, L"Data\\Player\\", L"ArmorMale", 40 + i);
-        gLoadData.AccessModel(MODEL_PANTS + 39 + i, L"Data\\Player\\", L"PantMale", 40 + i);
-        gLoadData.AccessModel(MODEL_GLOVES + 39 + i, L"Data\\Player\\", L"GloveMale", 40 + i);
-        gLoadData.AccessModel(MODEL_BOOTS + 39 + i, L"Data\\Player\\", L"BootMale", 40 + i);
+        gLoadData.AccessModel(MODEL_MISTERY_HELM + i, L"Data\\Player\\", L"HelmMale", 40 + i);
+        gLoadData.AccessModel(MODEL_MISTERY_ARMOR + i, L"Data\\Player\\", L"ArmorMale", 40 + i);
+        gLoadData.AccessModel(MODEL_MISTERY_PANTS + i, L"Data\\Player\\", L"PantMale", 40 + i);
+        gLoadData.AccessModel(MODEL_MISTERY_GLOVES + i, L"Data\\Player\\", L"GloveMale", 40 + i);
+        gLoadData.AccessModel(MODEL_MISTERY_BOOTS + i, L"Data\\Player\\", L"BootMale", 40 + i);
     }
 
     for (int i = 0; i < MODEL_ITEM_COMMON_NUM; ++i)
@@ -285,20 +285,20 @@ void OpenPlayers()
 
     for (int i = 0; i < 3; ++i)
     {
-        gLoadData.AccessModel(MODEL_HELM + 59 + i, L"Data\\Player\\", L"HelmMale", 60 + i);
-        gLoadData.AccessModel(MODEL_ARMOR + 59 + i, L"Data\\Player\\", L"ArmorMale", 60 + i);
-        gLoadData.AccessModel(MODEL_PANTS + 59 + i, L"Data\\Player\\", L"PantMale", 60 + i);
-        gLoadData.AccessModel(MODEL_BOOTS + 59 + i, L"Data\\Player\\", L"BootMale", 60 + i);
+        gLoadData.AccessModel(MODEL_SACRED_HELM + i, L"Data\\Player\\", L"HelmMale", 60 + i);
+        gLoadData.AccessModel(MODEL_SACRED_ARMOR + i, L"Data\\Player\\", L"ArmorMale", 60 + i);
+        gLoadData.AccessModel(MODEL_SACRED_PANTS + i, L"Data\\Player\\", L"PantMale", 60 + i);
+        gLoadData.AccessModel(MODEL_SACRED_BOOTS + i, L"Data\\Player\\", L"BootMale", 60 + i);
     }
 
-    gLoadData.AccessModel(MODEL_HELM + 73, L"Data\\Player\\", L"HelmMale74", -1);
-    gLoadData.AccessModel(MODEL_ARMOR + 73, L"Data\\Player\\", L"ArmorMale74", -1);
-    gLoadData.AccessModel(MODEL_PANTS + 73, L"Data\\Player\\", L"PantMale74", -1);
-    gLoadData.AccessModel(MODEL_BOOTS + 73, L"Data\\Player\\", L"BootMale74", -1);
+    gLoadData.AccessModel(MODEL_PHOENIX_SOUL_HELMET, L"Data\\Player\\", L"HelmMale74", -1);
+    gLoadData.AccessModel(MODEL_PHOENIX_SOUL_ARMOR, L"Data\\Player\\", L"ArmorMale74", -1);
+    gLoadData.AccessModel(MODEL_PHOENIX_SOUL_PANTS, L"Data\\Player\\", L"PantMale74", -1);
+    gLoadData.AccessModel(MODEL_PHOENIX_SOUL_BOOTS, L"Data\\Player\\", L"BootMale74", -1);
 
     {
         auto* pCloth = new CPhysicsClothMesh[1];
-        pCloth[0].Create(&Hero->Object, 2, 17, 0.0f, 0.0f, 0.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL, BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_PANTS + 18);
+        pCloth[0].Create(&Hero->Object, 2, 17, 0.0f, 0.0f, 0.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL, BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED, MODEL_GRAND_SOUL_PANTS);
         delete[] pCloth;
     }
 
@@ -478,30 +478,30 @@ void OpenPlayerTextures()
     {
         if (i != 2)
         {
-            gLoadData.OpenTexture(MODEL_HELM + 21 + i, L"Player\\");
+            gLoadData.OpenTexture(MODEL_GREAT_DRAGON_HELM + i, L"Player\\");
         }
-        gLoadData.OpenTexture(MODEL_ARMOR + 21 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_PANTS + 21 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_GLOVES + 21 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_BOOTS + 21 + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_GREAT_DRAGON_ARMOR + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_GREAT_DRAGON_PANTS + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_GREAT_DRAGON_GLOVES + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_GREAT_DRAGON_BOOTS + i, L"Player\\");
     }
 
     for (int i = 0; i < 4; i++)
     {
-        gLoadData.OpenTexture(MODEL_HELM + 25 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_ARMOR + 25 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_PANTS + 25 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_GLOVES + 25 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_BOOTS + 25 + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_LIGHT_PLATE_MASK + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_LIGHT_PLATE_ARMOR + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_LIGHT_PLATE_PANTS + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_LIGHT_PLATE_GLOVES + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_LIGHT_PLATE_BOOTS + i, L"Player\\");
     }
 
     for (int i = 0; i < 4; i++)
     {
-        gLoadData.OpenTexture(MODEL_HELM + 17 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_ARMOR + 17 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_PANTS + 17 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_GLOVES + 17 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_BOOTS + 17 + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_DARK_PHOENIX_HELM + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_DARK_PHOENIX_ARMOR + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_DARK_PHOENIX_PANTS + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_DARK_PHOENIX_GLOVES + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_DARK_PHOENIX_BOOTS + i, L"Player\\");
     }
 
     gLoadData.OpenTexture(MODEL_MASK_HELM + 0, L"Player\\");
@@ -523,37 +523,37 @@ void OpenPlayerTextures()
 
     for (int i = 0; i < 5; ++i)
     {
-        gLoadData.OpenTexture(MODEL_ARMOR + 29 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_PANTS + 29 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_GLOVES + 29 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_BOOTS + 29 + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_DRAGON_KNIGHT_ARMOR + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_DRAGON_KNIGHT_PANTS + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_DRAGON_KNIGHT_GLOVES + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_DRAGON_KNIGHT_BOOTS + i, L"Player\\");
     }
-    gLoadData.OpenTexture(MODEL_HELM + 29, L"Player\\");
-    gLoadData.OpenTexture(MODEL_HELM + 30, L"Player\\");
-    gLoadData.OpenTexture(MODEL_HELM + 31, L"Player\\");
-    gLoadData.OpenTexture(MODEL_HELM + 33, L"Player\\");
+    gLoadData.OpenTexture(MODEL_DRAGON_KNIGHT_HELM, L"Player\\");
+    gLoadData.OpenTexture(MODEL_VENOM_MIST_HELM, L"Player\\");
+    gLoadData.OpenTexture(MODEL_SYLPHID_RAY_HELM, L"Player\\");
+    gLoadData.OpenTexture(MODEL_SUNLIGHT_MASK, L"Player\\");
 
     for (int i = 0; i < 5; ++i)
     {
-        gLoadData.OpenTexture(MODEL_ARMOR + 34 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_PANTS + 34 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_GLOVES + 34 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_BOOTS + 34 + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_ASHCROW_ARMOR + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_ASHCROW_PANTS + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_ASHCROW_GLOVES + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_ASHCROW_BOOTS + i, L"Player\\");
     }
-    gLoadData.OpenTexture(MODEL_HELM + 34, L"Player\\");
-    gLoadData.OpenTexture(MODEL_HELM + 35, L"Player\\");
-    gLoadData.OpenTexture(MODEL_HELM + 36, L"Player\\");
-    gLoadData.OpenTexture(MODEL_HELM + 38, L"Player\\");
+    gLoadData.OpenTexture(MODEL_ASHCROW_HELM, L"Player\\");
+    gLoadData.OpenTexture(MODEL_ECLIPSE_HELM, L"Player\\");
+    gLoadData.OpenTexture(MODEL_IRIS_HELM, L"Player\\");
+    gLoadData.OpenTexture(MODEL_GLORIOUS_MASK, L"Player\\");
 
     wchar_t szFileName[64];
 
     for (int i = 0; i < 6; ++i)
     {
-        gLoadData.OpenTexture(MODEL_HELM + 39 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_ARMOR + 39 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_PANTS + 39 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_GLOVES + 39 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_BOOTS + 39 + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_MISTERY_HELM + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_MISTERY_ARMOR + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_MISTERY_PANTS + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_MISTERY_GLOVES + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_MISTERY_BOOTS + i, L"Player\\");
 
         ::swprintf(szFileName, L"Player\\InvenArmorMale%d.tga", 40 + i);
         ::LoadBitmap(szFileName, BITMAP_INVEN_ARMOR + i);
@@ -607,15 +607,15 @@ void OpenPlayerTextures()
 
     for (int i = 0; i < 3; ++i)
     {
-        gLoadData.OpenTexture(MODEL_HELM + 59 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_ARMOR + 59 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_PANTS + 59 + i, L"Player\\");
-        gLoadData.OpenTexture(MODEL_BOOTS + 59 + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_SACRED_HELM + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_SACRED_ARMOR + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_SACRED_PANTS + i, L"Player\\");
+        gLoadData.OpenTexture(MODEL_SACRED_BOOTS + i, L"Player\\");
     }
-    gLoadData.OpenTexture(MODEL_HELM + 73, L"Player\\");
-    gLoadData.OpenTexture(MODEL_ARMOR + 73, L"Player\\");
-    gLoadData.OpenTexture(MODEL_PANTS + 73, L"Player\\");
-    gLoadData.OpenTexture(MODEL_BOOTS + 73, L"Player\\");
+    gLoadData.OpenTexture(MODEL_PHOENIX_SOUL_HELMET, L"Player\\");
+    gLoadData.OpenTexture(MODEL_PHOENIX_SOUL_ARMOR, L"Player\\");
+    gLoadData.OpenTexture(MODEL_PHOENIX_SOUL_PANTS, L"Player\\");
+    gLoadData.OpenTexture(MODEL_PHOENIX_SOUL_BOOTS, L"Player\\");
 }
 
 void OpenItems()
@@ -627,13 +627,13 @@ void OpenItems()
     for (int i = 0; i < 17; i++)
         gLoadData.AccessModel(MODEL_SWORD + i, L"Data\\Item\\", L"Sword", i + 1);
 
-    gLoadData.AccessModel(MODEL_SWORD + 17, L"Data\\Item\\", L"Sword", 18);
-    gLoadData.AccessModel(MODEL_SWORD + 18, L"Data\\Item\\", L"Sword", 19);
-    gLoadData.AccessModel(MODEL_SWORD + 19, L"Data\\Item\\", L"Sword", 20);
+    gLoadData.AccessModel(MODEL_DARK_BREAKER, L"Data\\Item\\", L"Sword", 18);
+    gLoadData.AccessModel(MODEL_THUNDER_BLADE, L"Data\\Item\\", L"Sword", 19);
+    gLoadData.AccessModel(MODEL_DIVINE_SWORD_OF_ARCHANGEL, L"Data\\Item\\", L"Sword", 20);
 
-    gLoadData.AccessModel(MODEL_SWORD + 20, L"Data\\Item\\", L"Sword", 21);
-    gLoadData.AccessModel(MODEL_SWORD + 21, L"Data\\Item\\", L"Sword", 22);
-    gLoadData.AccessModel(MODEL_SWORD + 31, L"Data\\Item\\", L"Sword", 32);
+    gLoadData.AccessModel(MODEL_KNIGHT_BLADE, L"Data\\Item\\", L"Sword", 21);
+    gLoadData.AccessModel(MODEL_DARK_REIGN_BLADE, L"Data\\Item\\", L"Sword", 22);
+    gLoadData.AccessModel(MODEL_RUNE_BLADE, L"Data\\Item\\", L"Sword", 32);
 
     //////////////////////////////////////////////////////////////////////////
     //	MODEL_AXE
@@ -649,13 +649,13 @@ void OpenItems()
     for (int i = 0; i < 7; i++)
         gLoadData.AccessModel(MODEL_MACE + i, L"Data\\Item\\", L"Mace", i + 1);
 
-    gLoadData.AccessModel(MODEL_MACE + 7, L"Data\\Item\\", L"Mace", 8);
+    gLoadData.AccessModel(MODEL_ELEMENTAL_MACE, L"Data\\Item\\", L"Mace", 8);
 
     // MODEL_MACE+8,9,10,11,12
     for (int i = 0; i < 5; i++)
-        gLoadData.AccessModel(MODEL_MACE + 8 + i, L"Data\\Item\\", L"Mace", 9 + i);
+        gLoadData.AccessModel(MODEL_BATTLE_SCEPTER + i, L"Data\\Item\\", L"Mace", 9 + i);
 
-    gLoadData.AccessModel(MODEL_MACE + 13, L"Data\\Item\\", L"Saint");
+    gLoadData.AccessModel(MODEL_DIVINE_SCEPTER_OF_ARCHANGEL, L"Data\\Item\\", L"Saint");
 
     //////////////////////////////////////////////////////////////////////////
     //	MODEL_SPEAR
@@ -664,7 +664,7 @@ void OpenItems()
     for (int i = 0; i < 10; i++)
         gLoadData.AccessModel(MODEL_SPEAR + i, L"Data\\Item\\", L"Spear", i + 1);
 
-    gLoadData.AccessModel(MODEL_SPEAR + 10, L"Data\\Item\\", L"Spear", 11);
+    gLoadData.AccessModel(MODEL_DRAGON_SPEAR, L"Data\\Item\\", L"Spear", 11);
 
     //////////////////////////////////////////////////////////////////////////
     //	MODEL_SHIELD
@@ -673,8 +673,8 @@ void OpenItems()
     for (int i = 0; i < 15; i++)
         gLoadData.AccessModel(MODEL_SHIELD + i, L"Data\\Item\\", L"Shield", i + 1);
 
-    gLoadData.AccessModel(MODEL_SHIELD + 15, L"Data\\Item\\", L"Shield", 16);
-    gLoadData.AccessModel(MODEL_SHIELD + 16, L"Data\\Item\\", L"Shield", 17);
+    gLoadData.AccessModel(MODEL_GRAND_SOUL_SHIELD, L"Data\\Item\\", L"Shield", 16);
+    gLoadData.AccessModel(MODEL_ELEMENTAL_SHIELD, L"Data\\Item\\", L"Shield", 17);
 
     //////////////////////////////////////////////////////////////////////////
     //  MODEL_STAFF
@@ -683,9 +683,9 @@ void OpenItems()
     for (int i = 0; i < 9; i++)
         gLoadData.AccessModel(MODEL_STAFF + i, L"Data\\Item\\", L"Staff", i + 1);
 
-    gLoadData.AccessModel(MODEL_STAFF + 9, L"Data\\Item\\", L"Staff", 10);
-    gLoadData.AccessModel(MODEL_STAFF + 10, L"Data\\Item\\", L"Staff", 11);
-    gLoadData.AccessModel(MODEL_STAFF + 11, L"Data\\Item\\", L"Staff", 12);
+    gLoadData.AccessModel(MODEL_DRAGON_SOUL_STAFF, L"Data\\Item\\", L"Staff", 10);
+    gLoadData.AccessModel(MODEL_DIVINE_STAFF_OF_ARCHANGEL, L"Data\\Item\\", L"Staff", 11);
+    gLoadData.AccessModel(MODEL_STAFF_OF_KUNDUN, L"Data\\Item\\", L"Staff", 12);
 
     for (int i = 14; i <= 20; ++i)
         ::gLoadData.AccessModel(MODEL_STAFF + i, L"Data\\Item\\", L"Staff", i + 1);
@@ -700,13 +700,13 @@ void OpenItems()
     for (int i = 0; i < 7; i++)
         gLoadData.AccessModel(MODEL_BOW + i + 8, L"Data\\Item\\", L"CrossBow", i + 1);
 
-    gLoadData.AccessModel(MODEL_BOW + 7, L"Data\\Item\\", L"Arrows", 1);
-    gLoadData.AccessModel(MODEL_BOW + 15, L"Data\\Item\\", L"Arrows", 2);
-    gLoadData.AccessModel(MODEL_BOW + 16, L"Data\\Item\\", L"CrossBow", 17);
-    gLoadData.AccessModel(MODEL_BOW + 17, L"Data\\Item\\", L"Bow", 18);
-    gLoadData.AccessModel(MODEL_BOW + 18, L"Data\\Item\\", L"Bow", 19);
-    gLoadData.AccessModel(MODEL_BOW + 19, L"Data\\Item\\", L"CrossBow", 20);
-    gLoadData.AccessModel(MODEL_BOW + 20, L"Data\\Item\\", L"Bow", 20);
+    gLoadData.AccessModel(MODEL_BOLT, L"Data\\Item\\", L"Arrows", 1);
+    gLoadData.AccessModel(MODEL_ARROWS, L"Data\\Item\\", L"Arrows", 2);
+    gLoadData.AccessModel(MODEL_SAINT_CROSSBOW, L"Data\\Item\\", L"CrossBow", 17);
+    gLoadData.AccessModel(MODEL_CELESTIAL_BOW, L"Data\\Item\\", L"Bow", 18);
+    gLoadData.AccessModel(MODEL_DIVINE_CB_OF_ARCHANGEL, L"Data\\Item\\", L"Bow", 19);
+    gLoadData.AccessModel(MODEL_GREAT_REIGN_CROSSBOW, L"Data\\Item\\", L"CrossBow", 20);
+    gLoadData.AccessModel(MODEL_ARROW_VIPER_BOW, L"Data\\Item\\", L"Bow", 20);
 
     //////////////////////////////////////////////////////////////////////////
     //  MODEL_HELPER
@@ -723,30 +723,30 @@ void OpenItems()
     for (int i = 0; i < 2; i++)
         gLoadData.AccessModel(MODEL_HELPER + i + 12, L"Data\\Item\\", L"Necklace", i + 1);
 
-    gLoadData.AccessModel(MODEL_HELPER + 3, L"Data\\Player\\", L"Helper", 4);
-    gLoadData.AccessModel(MODEL_HELPER + 4, L"Data\\Item\\", L"DarkHorseHorn");
-    gLoadData.AccessModel(MODEL_HELPER + 31, L"Data\\Item\\", L"DarkHorseSoul");
-    gLoadData.AccessModel(MODEL_HELPER + 5, L"Data\\Item\\", L"SpiritBill");
+    gLoadData.AccessModel(MODEL_HORN_OF_DINORANT, L"Data\\Player\\", L"Helper", 4);
+    gLoadData.AccessModel(MODEL_DARK_HORSE_ITEM, L"Data\\Item\\", L"DarkHorseHorn");
+    gLoadData.AccessModel(MODEL_SPIRIT, L"Data\\Item\\", L"DarkHorseSoul");
+    gLoadData.AccessModel(MODEL_DARK_RAVEN_ITEM, L"Data\\Item\\", L"SpiritBill");
 
-    gLoadData.AccessModel(MODEL_HELPER + 21, L"Data\\Item\\", L"FireRing");
-    gLoadData.AccessModel(MODEL_HELPER + 22, L"Data\\Item\\", L"GroundRing");
-    gLoadData.AccessModel(MODEL_HELPER + 23, L"Data\\Item\\", L"WindRing");
-    gLoadData.AccessModel(MODEL_HELPER + 24, L"Data\\Item\\", L"ManaRing");
-    gLoadData.AccessModel(MODEL_HELPER + 25, L"Data\\Item\\", L"IceNecklace");
-    gLoadData.AccessModel(MODEL_HELPER + 26, L"Data\\Item\\", L"WindNecklace");
-    gLoadData.AccessModel(MODEL_HELPER + 27, L"Data\\Item\\", L"WaterNecklace");
-    gLoadData.AccessModel(MODEL_HELPER + 28, L"Data\\Item\\", L"AgNecklace");
-    gLoadData.AccessModel(MODEL_HELPER + 29, L"Data\\Item\\", L"EventChaosCastle");
+    gLoadData.AccessModel(MODEL_RING_OF_FIRE, L"Data\\Item\\", L"FireRing");
+    gLoadData.AccessModel(MODEL_RING_OF_EARTH, L"Data\\Item\\", L"GroundRing");
+    gLoadData.AccessModel(MODEL_RING_OF_WIND, L"Data\\Item\\", L"WindRing");
+    gLoadData.AccessModel(MODEL_RING_OF_MAGIC, L"Data\\Item\\", L"ManaRing");
+    gLoadData.AccessModel(MODEL_PENDANT_OF_ICE, L"Data\\Item\\", L"IceNecklace");
+    gLoadData.AccessModel(MODEL_PENDANT_OF_WIND, L"Data\\Item\\", L"WindNecklace");
+    gLoadData.AccessModel(MODEL_PENDANT_OF_WATER, L"Data\\Item\\", L"WaterNecklace");
+    gLoadData.AccessModel(MODEL_PENDANT_OF_ABILITY, L"Data\\Item\\", L"AgNecklace");
+    gLoadData.AccessModel(MODEL_ARMOR_OF_GUARDSMAN, L"Data\\Item\\", L"EventChaosCastle");
     gLoadData.AccessModel(MODEL_HELPER + 7, L"Data\\Item\\", L"Covenant");
-    gLoadData.AccessModel(MODEL_HELPER + 11, L"Data\\Item\\", L"SummonBook");
+    gLoadData.AccessModel(MODEL_LIFE_STONE, L"Data\\Item\\", L"SummonBook");
     gLoadData.AccessModel(MODEL_EVENT + 18, L"Data\\Item\\", L"LifeStoneItem");
 
-    gLoadData.AccessModel(MODEL_HELPER + 32, L"Data\\Item\\", L"FR_1");
-    gLoadData.AccessModel(MODEL_HELPER + 33, L"Data\\Item\\", L"FR_2");
-    gLoadData.AccessModel(MODEL_HELPER + 34, L"Data\\Item\\", L"FR_3");
-    gLoadData.AccessModel(MODEL_HELPER + 35, L"Data\\Item\\", L"FR_4");
-    gLoadData.AccessModel(MODEL_HELPER + 36, L"Data\\Item\\", L"FR_5");
-    gLoadData.AccessModel(MODEL_HELPER + 37, L"Data\\Item\\", L"FR_6");
+    gLoadData.AccessModel(MODEL_SPLINTER_OF_ARMOR, L"Data\\Item\\", L"FR_1");
+    gLoadData.AccessModel(MODEL_BLESS_OF_GUARDIAN, L"Data\\Item\\", L"FR_2");
+    gLoadData.AccessModel(MODEL_CLAW_OF_BEAST, L"Data\\Item\\", L"FR_3");
+    gLoadData.AccessModel(MODEL_FRAGMENT_OF_HORN, L"Data\\Item\\", L"FR_4");
+    gLoadData.AccessModel(MODEL_BROKEN_HORN, L"Data\\Item\\", L"FR_5");
+    gLoadData.AccessModel(MODEL_HORN_OF_FENRIR, L"Data\\Item\\", L"FR_6");
 
     gLoadData.AccessModel(MODEL_HELPER + 46, L"Data\\Item\\partCharge1\\", L"entrancegray");
     gLoadData.AccessModel(MODEL_HELPER + 47, L"Data\\Item\\partCharge1\\", L"entrancered");
@@ -827,13 +827,13 @@ void OpenItems()
     gLoadData.AccessModel(MODEL_POTION + 95, L"Data\\Item\\partCharge3\\", L"juju");
 
     gLoadData.AccessModel(MODEL_POTION + 94, L"Data\\Item\\partCharge2\\", L"EPotionR");
-    gLoadData.AccessModel(MODEL_POTION + 84, L"Data\\Item\\cherryblossom\\", L"cherrybox");
-    gLoadData.AccessModel(MODEL_POTION + 85, L"Data\\Item\\cherryblossom\\", L"chwine");
-    gLoadData.AccessModel(MODEL_POTION + 86, L"Data\\Item\\cherryblossom\\", L"chgateaux");
-    gLoadData.AccessModel(MODEL_POTION + 87, L"Data\\Item\\cherryblossom\\", L"chpetal");
+    gLoadData.AccessModel(MODEL_CHERRY_BLOSSOM_PLAYBOX, L"Data\\Item\\cherryblossom\\", L"cherrybox");
+    gLoadData.AccessModel(MODEL_CHERRY_BLOSSOM_WINE, L"Data\\Item\\cherryblossom\\", L"chwine");
+    gLoadData.AccessModel(MODEL_CHERRY_BLOSSOM_RICE_CAKE, L"Data\\Item\\cherryblossom\\", L"chgateaux");
+    gLoadData.AccessModel(MODEL_CHERRY_BLOSSOM_FLOWER_PETAL, L"Data\\Item\\cherryblossom\\", L"chpetal");
     gLoadData.AccessModel(MODEL_POTION + 88, L"Data\\Item\\cherryblossom\\", L"chbranche");
     gLoadData.AccessModel(MODEL_POTION + 89, L"Data\\Item\\cherryblossom\\", L"chbranche_red");
-    gLoadData.AccessModel(MODEL_POTION + 90, L"Data\\Item\\cherryblossom\\", L"chbranche_yellow");
+    gLoadData.AccessModel(MODEL_GOLDEN_CHERRY_BLOSSOM_BRANCH, L"Data\\Item\\cherryblossom\\", L"chbranche_yellow");
     gLoadData.AccessModel(MODEL_HELPER + 62, L"Data\\Item\\partCharge4\\", L"Curemark");
     gLoadData.AccessModel(MODEL_HELPER + 63, L"Data\\Item\\partCharge4\\", L"Holinessmark");
     gLoadData.AccessModel(MODEL_POTION + 97, L"Data\\Item\\partCharge4\\", L"battlescroll");
@@ -841,13 +841,13 @@ void OpenItems()
 
     gLoadData.AccessModel(MODEL_POTION + 96, L"Data\\Item\\partCharge4\\", L"strengamulet");
 
-    gLoadData.AccessModel(MODEL_HELPER + 64, L"Data\\Item\\partCharge4\\", L"demon");
-    gLoadData.AccessModel(MODEL_HELPER + 65, L"Data\\Item\\partCharge4\\", L"maria");
+    gLoadData.AccessModel(MODEL_DEMON, L"Data\\Item\\partCharge4\\", L"demon");
+    gLoadData.AccessModel(MODEL_SPIRIT_OF_GUARDIAN, L"Data\\Item\\partCharge4\\", L"maria");
 
-    gLoadData.AccessModel(MODEL_HELPER + 80, L"Data\\Item\\", L"PandaPet");
-    gLoadData.AccessModel(MODEL_HELPER + 67, L"Data\\Item\\xmas\\", L"xmas_deer");
-    gLoadData.AccessModel(MODEL_HELPER + 106, L"Data\\Item\\partcharge7\\", L"pet_unicorn");
-    gLoadData.AccessModel(MODEL_HELPER + 123, L"Data\\Item\\", L"skeletonpet");
+    gLoadData.AccessModel(MODEL_PET_PANDA, L"Data\\Item\\", L"PandaPet");
+    gLoadData.AccessModel(MODEL_PET_RUDOLF, L"Data\\Item\\xmas\\", L"xmas_deer");
+    gLoadData.AccessModel(MODEL_PET_UNICORN, L"Data\\Item\\partcharge7\\", L"pet_unicorn");
+    gLoadData.AccessModel(MODEL_PET_SKELETON, L"Data\\Item\\", L"skeletonpet");
 
     gLoadData.AccessModel(MODEL_HELPER + 69, L"Data\\Item\\partCharge5\\", L"ressurection");
     gLoadData.AccessModel(MODEL_HELPER + 70, L"Data\\Item\\partCharge5\\", L"potalcharm");
@@ -858,27 +858,27 @@ void OpenItems()
     gLoadData.AccessModel(MODEL_HELPER + 94, L"Data\\Item\\partCharge6\\", L"MasterSealB");
     gLoadData.AccessModel(MODEL_POTION + 140, L"Data\\Item\\", L"strengscroll");
 
-    gLoadData.AccessModel(MODEL_HELPER + 49, L"Data\\Item\\", L"scrollpaper");
-    gLoadData.AccessModel(MODEL_HELPER + 50, L"Data\\Item\\", L"oath");
-    gLoadData.AccessModel(MODEL_HELPER + 51, L"Data\\Item\\", L"songbl");
+    gLoadData.AccessModel(MODEL_OLD_SCROLL, L"Data\\Item\\", L"scrollpaper");
+    gLoadData.AccessModel(MODEL_ILLUSION_SORCERER_COVENANT, L"Data\\Item\\", L"oath");
+    gLoadData.AccessModel(MODEL_SCROLL_OF_BLOOD, L"Data\\Item\\", L"songbl");
 
-    gLoadData.AccessModel(MODEL_HELPER + 52, L"Data\\Item\\", L"condolstone");
-    gLoadData.AccessModel(MODEL_HELPER + 53, L"Data\\Item\\", L"condolwing");
+    gLoadData.AccessModel(MODEL_FLAME_OF_CONDOR, L"Data\\Item\\", L"condolstone");
+    gLoadData.AccessModel(MODEL_FEATHER_OF_CONDOR, L"Data\\Item\\", L"condolwing");
 
     gLoadData.AccessModel(MODEL_POTION + 64, L"Data\\Item\\", L"songss");
-    gLoadData.AccessModel(MODEL_POTION + 65, L"Data\\Item\\", L"deathbeamstone");
-    gLoadData.AccessModel(MODEL_POTION + 66, L"Data\\Item\\", L"hellhorn");
-    gLoadData.AccessModel(MODEL_POTION + 67, L"Data\\Item\\", L"phoenixfeather");
-    gLoadData.AccessModel(MODEL_POTION + 68, L"Data\\Item\\", L"Deye");
+    gLoadData.AccessModel(MODEL_FLAME_OF_DEATH_BEAM_KNIGHT, L"Data\\Item\\", L"deathbeamstone");
+    gLoadData.AccessModel(MODEL_HORN_OF_HELL_MAINE, L"Data\\Item\\", L"hellhorn");
+    gLoadData.AccessModel(MODEL_FEATHER_OF_DARK_PHOENIX, L"Data\\Item\\", L"phoenixfeather");
+    gLoadData.AccessModel(MODEL_EYE_OF_ABYSSAL, L"Data\\Item\\", L"Deye");
 
     for (int i = 0; i < 6; ++i)
-        gLoadData.AccessModel(MODEL_WING + 60 + i, L"Data\\Item\\", L"s30_seed");
+        gLoadData.AccessModel(MODEL_SEED_FIRE + i, L"Data\\Item\\", L"s30_seed");
     for (int i = 0; i < 5; ++i)
-        gLoadData.AccessModel(MODEL_WING + 70 + i, L"Data\\Item\\", L"s30_sphere_body", i + 1);
+        gLoadData.AccessModel(MODEL_SPHERE_MONO + i, L"Data\\Item\\", L"s30_sphere_body", i + 1);
     for (int i = 0; i < 5; ++i)
     {
         for (int j = 0; j < 6; ++j)
-            gLoadData.AccessModel(MODEL_WING + 100 + i * 6 + j, L"Data\\Item\\", L"s30_sphere", i + 1);
+            gLoadData.AccessModel(MODEL_SEED_SPHERE_FIRE_1 + i * 6 + j, L"Data\\Item\\", L"s30_sphere", i + 1);
     }
 
     gLoadData.AccessModel(MODEL_HELPER + 107, L"Data\\Item\\partcharge7\\", L"FatalRing");
@@ -908,48 +908,48 @@ void OpenItems()
     for (int i = 0; i < 7; i++)
         gLoadData.AccessModel(MODEL_POTION + i, L"Data\\Item\\", L"Potion", i + 1);
 
-    gLoadData.AccessModel(MODEL_POTION + 8, L"Data\\Item\\", L"Antidote", 1);
-    gLoadData.AccessModel(MODEL_POTION + 9, L"Data\\Item\\", L"Beer", 1);
-    gLoadData.AccessModel(MODEL_POTION + 10, L"Data\\Item\\", L"Scroll", 1);
-    gLoadData.AccessModel(MODEL_POTION + 11, L"Data\\Item\\", L"MagicBox", 1);
+    gLoadData.AccessModel(MODEL_ANTIDOTE, L"Data\\Item\\", L"Antidote", 1);
+    gLoadData.AccessModel(MODEL_ALE, L"Data\\Item\\", L"Beer", 1);
+    gLoadData.AccessModel(MODEL_TOWN_PORTAL_SCROLL, L"Data\\Item\\", L"Scroll", 1);
+    gLoadData.AccessModel(MODEL_BOX_OF_LUCK, L"Data\\Item\\", L"MagicBox", 1);
     gLoadData.AccessModel(MODEL_POTION + 12, L"Data\\Item\\", L"Event", 1);
 
     for (int i = 0; i < 2; i++)
         gLoadData.AccessModel(MODEL_POTION + i + 13, L"Data\\Item\\", L"Jewel", i + 1);
 
     gLoadData.AccessModel(MODEL_POTION + 15, L"Data\\Item\\", L"Gold", 1);
-    gLoadData.AccessModel(MODEL_POTION + 16, L"Data\\Item\\", L"Jewel", 3);
+    gLoadData.AccessModel(MODEL_JEWEL_OF_LIFE, L"Data\\Item\\", L"Jewel", 3);
 
     for (int i = 0; i < 3; i++)
-        gLoadData.AccessModel(MODEL_POTION + 17 + i, L"Data\\Item\\", L"Devil", i);
+        gLoadData.AccessModel(MODEL_DEVILS_EYE + i, L"Data\\Item\\", L"Devil", i);
 
     gLoadData.AccessModel(MODEL_POTION + 20, L"Data\\Item\\", L"Drink", 0);
     gLoadData.AccessModel(MODEL_POTION + 21, L"Data\\Item\\", L"ConChip", 0);
-    gLoadData.AccessModel(MODEL_POTION + 31, L"Data\\Item\\", L"suho", -1);
-    gLoadData.AccessModel(MODEL_HELPER + 38, L"Data\\Item\\", L"kanneck2");
-    gLoadData.AccessModel(MODEL_POTION + 41, L"Data\\Item\\", L"rs");
-    gLoadData.AccessModel(MODEL_POTION + 42, L"Data\\Item\\", L"jos");
-    gLoadData.AccessModel(MODEL_POTION + 43, L"Data\\Item\\", L"LowRefineStone");
-    gLoadData.AccessModel(MODEL_POTION + 44, L"Data\\Item\\", L"HighRefineStone");
+    gLoadData.AccessModel(MODEL_JEWEL_OF_GUARDIAN, L"Data\\Item\\", L"suho", -1);
+    gLoadData.AccessModel(MODEL_MOONSTONE_PENDANT, L"Data\\Item\\", L"kanneck2");
+    gLoadData.AccessModel(MODEL_GEMSTONE, L"Data\\Item\\", L"rs");
+    gLoadData.AccessModel(MODEL_JEWEL_OF_HARMONY, L"Data\\Item\\", L"jos");
+    gLoadData.AccessModel(MODEL_LOWER_REFINE_STONE, L"Data\\Item\\", L"LowRefineStone");
+    gLoadData.AccessModel(MODEL_HIGHER_REFINE_STONE, L"Data\\Item\\", L"HighRefineStone");
 
-    gLoadData.AccessModel(MODEL_POTION + 7, L"Data\\Item\\", L"SpecialPotion");
+    gLoadData.AccessModel(MODEL_SIEGE_POTION, L"Data\\Item\\", L"SpecialPotion");
 
     for (int i = 0; i < 4; ++i)
     {
-        gLoadData.AccessModel(MODEL_POTION + 23 + i, L"Data\\Item\\", L"Quest", i);
+        gLoadData.AccessModel(MODEL_SCROLL_OF_EMPEROR_RING_OF_HONOR + i, L"Data\\Item\\", L"Quest", i);
     }
     gLoadData.AccessModel(MODEL_POTION + 27, L"Data\\Item\\", L"godesteel");
 
     for (int i = 0; i < 2; i++)
     {
-        gLoadData.AccessModel(MODEL_POTION + 28 + i, L"Data\\Item\\", L"HELLASITEM", i);
+        gLoadData.AccessModel(MODEL_LOST_MAP + i, L"Data\\Item\\", L"HELLASITEM", i);
     }
 
     for (int i = 0; i < 3; ++i)
-        gLoadData.AccessModel(MODEL_POTION + 35 + i, L"Data\\Item\\", L"sdwater", i + 1);
+        gLoadData.AccessModel(MODEL_SMALL_SHIELD_POTION + i, L"Data\\Item\\", L"sdwater", i + 1);
 
     for (int i = 0; i < 3; ++i)
-        gLoadData.AccessModel(MODEL_POTION + 38 + i, L"Data\\Item\\", L"megawater", i + 1);
+        gLoadData.AccessModel(MODEL_SMALL_COMPLEX_POTION + i, L"Data\\Item\\", L"megawater", i + 1);
 
     gLoadData.AccessModel(MODEL_POTION + 120, L"Data\\Item\\InGameShop\\", L"gold_coin");
     gLoadData.AccessModel(MODEL_POTION + 121, L"Data\\Item\\InGameShop\\", L"itembox_gold");
@@ -963,14 +963,14 @@ void OpenItems()
 
     gLoadData.AccessModel(MODEL_COMPILED_CELE, L"Data\\Item\\", L"Jewel", 1);
     gLoadData.AccessModel(MODEL_COMPILED_SOUL, L"Data\\Item\\", L"Jewel", 2);
-    gLoadData.AccessModel(MODEL_WING + 136, L"Data\\Item\\", L"Jewel", 3);
-    gLoadData.AccessModel(MODEL_WING + 137, L"Data\\Item\\", L"jewel", 22);
-    gLoadData.AccessModel(MODEL_WING + 138, L"Data\\Item\\", L"suho", -1);
-    gLoadData.AccessModel(MODEL_WING + 139, L"Data\\Item\\", L"rs");
-    gLoadData.AccessModel(MODEL_WING + 140, L"Data\\Item\\", L"jos");
-    gLoadData.AccessModel(MODEL_WING + 141, L"Data\\Item\\", L"Jewel", 15);
-    gLoadData.AccessModel(MODEL_WING + 142, L"Data\\Item\\", L"LowRefineStone");
-    gLoadData.AccessModel(MODEL_WING + 143, L"Data\\Item\\", L"HighRefineStone");
+    gLoadData.AccessModel(MODEL_PACKED_JEWEL_OF_LIFE, L"Data\\Item\\", L"Jewel", 3);
+    gLoadData.AccessModel(MODEL_PACKED_JEWEL_OF_CREATION, L"Data\\Item\\", L"jewel", 22);
+    gLoadData.AccessModel(MODEL_PACKED_JEWEL_OF_GUARDIAN, L"Data\\Item\\", L"suho", -1);
+    gLoadData.AccessModel(MODEL_PACKED_GEMSTONE, L"Data\\Item\\", L"rs");
+    gLoadData.AccessModel(MODEL_PACKED_JEWEL_OF_HARMONY, L"Data\\Item\\", L"jos");
+    gLoadData.AccessModel(MODEL_PACKED_JEWEL_OF_CHAOS, L"Data\\Item\\", L"Jewel", 15);
+    gLoadData.AccessModel(MODEL_PACKED_LOWER_REFINE_STONE, L"Data\\Item\\", L"LowRefineStone");
+    gLoadData.AccessModel(MODEL_PACKED_HIGHER_REFINE_STONE, L"Data\\Item\\", L"HighRefineStone");
 
     gLoadData.AccessModel(MODEL_EVENT + 4, L"Data\\Item\\", L"MagicBox", 2);
     gLoadData.AccessModel(MODEL_EVENT + 6, L"Data\\Item\\", L"MagicBox", 5);
@@ -988,19 +988,19 @@ void OpenItems()
 
     gLoadData.AccessModel(MODEL_EVENT + 5, L"Data\\Item\\", L"MagicBox", 3);
 
-    gLoadData.AccessModel(MODEL_POTION + 63, L"Data\\Item\\", L"GM", 1);
-    gLoadData.AccessModel(MODEL_POTION + 52, L"Data\\Item\\", L"GM", 2);
+    gLoadData.AccessModel(MODEL_FIRECRACKER, L"Data\\Item\\", L"GM", 1);
+    gLoadData.AccessModel(MODEL_GM_GIFT, L"Data\\Item\\", L"GM", 2);
 
     gLoadData.AccessModel(MODEL_EVENT, L"Data\\Item\\", L"Event", 2);
     gLoadData.AccessModel(MODEL_EVENT + 1, L"Data\\Item\\", L"Event", 3);
 
-    gLoadData.AccessModel(MODEL_POTION + 99, L"Data\\Item\\XMas\\", L"xmasfire", -1);
+    gLoadData.AccessModel(MODEL_CHRISTMAS_FIRECRACKER, L"Data\\Item\\XMas\\", L"xmasfire", -1);
 
     for (int i = 0; i < 4; i++)
     {
         if (i < 3)
         {
-            gLoadData.AccessModel(MODEL_HELPER + 16 + i, L"Data\\Item\\", L"EventBloodCastle", i);
+            gLoadData.AccessModel(MODEL_SCROLL_OF_ARCHANGEL + i, L"Data\\Item\\", L"EventBloodCastle", i);
         }
         else
         {
@@ -1013,40 +1013,40 @@ void OpenItems()
     gLoadData.AccessModel(MODEL_EVENT + 14, L"Data\\Item\\", L"RingOfLordEvent", 0);
     gLoadData.AccessModel(MODEL_EVENT + 15, L"Data\\Item\\", L"MagicRing", 0);
 
-    gLoadData.AccessModel(MODEL_POTION + 22, L"Data\\Item\\", L"jewel", 22);
+    gLoadData.AccessModel(MODEL_JEWEL_OF_CREATION, L"Data\\Item\\", L"jewel", 22);
 
     for (int i = 0; i < 2; ++i)
     {
-        gLoadData.AccessModel(MODEL_HELPER + 14 + i, L"Data\\Item\\", L"Quest", 4 + i);
+        gLoadData.AccessModel(MODEL_LOCHS_FEATHER + i, L"Data\\Item\\", L"Quest", 4 + i);
     }
 
     gLoadData.AccessModel(MODEL_EVENT + 16, L"Data\\Item\\", L"DarkLordSleeve");
-    gLoadData.AccessModel(MODEL_HELPER + 30, L"Data\\Item\\", L"DarkLordRobe");
+    gLoadData.AccessModel(MODEL_CAPE_OF_LORD, L"Data\\Item\\", L"DarkLordRobe");
 
     for (int i = 0; i < 3; i++)
         gLoadData.AccessModel(MODEL_WING + i, L"Data\\Item\\", L"Wing", i + 1);
 
     for (int i = 0; i < 4; i++)
     {
-        gLoadData.AccessModel(MODEL_WING + 3 + i, L"Data\\Item\\", L"Wing", 4 + i);
+        gLoadData.AccessModel(MODEL_WINGS_OF_SPIRITS + i, L"Data\\Item\\", L"Wing", 4 + i);
     }
 
     for (int i = 0; i < 4; i++)
     {
-        gLoadData.AccessModel(MODEL_WING + 36 + i, L"Data\\Item\\", L"Wing", 8 + i);
+        gLoadData.AccessModel(MODEL_WING_OF_STORM + i, L"Data\\Item\\", L"Wing", 8 + i);
     }
-    gLoadData.AccessModel(MODEL_WING + 40, L"Data\\Item\\", L"DarkLordRobe02");
+    gLoadData.AccessModel(MODEL_CAPE_OF_EMPEROR, L"Data\\Item\\", L"DarkLordRobe02");
 
     for (int i = 41; i <= 43; ++i)
         ::gLoadData.AccessModel(MODEL_WING + i, L"Data\\Item\\", L"Wing", i + 1);
 
-    gLoadData.AccessModel(MODEL_STAFF + 21, L"Data\\Item\\", L"Book_of_Sahamutt");
-    gLoadData.AccessModel(MODEL_STAFF + 22, L"Data\\Item\\", L"Book_of_Neil");
-    gLoadData.AccessModel(MODEL_STAFF + 23, L"Data\\Item\\", L"Book_of_Rargle");
+    gLoadData.AccessModel(MODEL_BOOK_OF_SAHAMUTT, L"Data\\Item\\", L"Book_of_Sahamutt");
+    gLoadData.AccessModel(MODEL_BOOK_OF_NEIL, L"Data\\Item\\", L"Book_of_Neil");
+    gLoadData.AccessModel(MODEL_BOOK_OF_LAGLE, L"Data\\Item\\", L"Book_of_Rargle");
 
     for (int i = 0; i < 9; ++i)
     {
-        gLoadData.AccessModel(MODEL_ETC + 19 + i, L"Data\\Item\\", L"rollofpaper");
+        gLoadData.AccessModel(MODEL_CHAIN_LIGHTNING_PARCHMENT + i, L"Data\\Item\\", L"rollofpaper");
     }
 
     for (int i = 0; i < 13; i++)
@@ -1055,84 +1055,84 @@ void OpenItems()
             gLoadData.AccessModel(MODEL_WING + i + 7, L"Data\\Item\\", L"Gem", i + 1);
     }
 
-    gLoadData.AccessModel(MODEL_WING + 15, L"Data\\Item\\", L"Jewel", 15);
+    gLoadData.AccessModel(MODEL_JEWEL_OF_CHAOS, L"Data\\Item\\", L"Jewel", 15);
     gLoadData.AccessModel(MODEL_WING + 20, L"Data\\Item\\", L"Gem", 14);
 
-    gLoadData.AccessModel(MODEL_WING + 44, L"Data\\Item\\", L"Gem", 6);
+    gLoadData.AccessModel(MODEL_CRYSTAL_OF_DESTRUCTION, L"Data\\Item\\", L"Gem", 6);
 
-    gLoadData.AccessModel(MODEL_WING + 45, L"Data\\Item\\", L"Gem", 6);
+    gLoadData.AccessModel(MODEL_CRYSTAL_OF_MULTI_SHOT, L"Data\\Item\\", L"Gem", 6);
 
-    gLoadData.AccessModel(MODEL_WING + 46, L"Data\\Item\\", L"Gem", 6);
+    gLoadData.AccessModel(MODEL_CRYSTAL_OF_RECOVERY, L"Data\\Item\\", L"Gem", 6);
 
-    gLoadData.AccessModel(MODEL_WING + 47, L"Data\\Item\\", L"Gem", 6);
+    gLoadData.AccessModel(MODEL_CRYSTAL_OF_FLAME_STRIKE, L"Data\\Item\\", L"Gem", 6);
 
     for (int i = 0; i < 4; i++)
     {
-        gLoadData.AccessModel(MODEL_WING + 21 + i, L"Data\\Item\\", L"SkillScroll");
+        gLoadData.AccessModel(MODEL_SCROLL_OF_FIREBURST + i, L"Data\\Item\\", L"SkillScroll");
     }
-    gLoadData.AccessModel(MODEL_WING + 35, L"Data\\Item\\", L"SkillScroll");
+    gLoadData.AccessModel(MODEL_SCROLL_OF_FIRE_SCREAM, L"Data\\Item\\", L"SkillScroll");
 
-    gLoadData.AccessModel(MODEL_WING + 48, L"Data\\Item\\", L"SkillScroll");
+    gLoadData.AccessModel(MODEL_SCROLL_OF_CHAOTIC_DISEIER, L"Data\\Item\\", L"SkillScroll");
 
-    gLoadData.AccessModel(MODEL_POTION + 45, L"Data\\Item\\", L"hobakhead");
-    gLoadData.AccessModel(MODEL_POTION + 46, L"Data\\Item\\", L"hellowinscroll");
-    gLoadData.AccessModel(MODEL_POTION + 47, L"Data\\Item\\", L"hellowinscroll");
-    gLoadData.AccessModel(MODEL_POTION + 48, L"Data\\Item\\", L"hellowinscroll");
-    gLoadData.AccessModel(MODEL_POTION + 49, L"Data\\Item\\", L"Gogi");
-    gLoadData.AccessModel(MODEL_POTION + 50, L"Data\\Item\\", L"pumpkincup");
+    gLoadData.AccessModel(MODEL_PUMPKIN_OF_LUCK, L"Data\\Item\\", L"hobakhead");
+    gLoadData.AccessModel(MODEL_JACK_OLANTERN_BLESSINGS, L"Data\\Item\\", L"hellowinscroll");
+    gLoadData.AccessModel(MODEL_JACK_OLANTERN_WRATH, L"Data\\Item\\", L"hellowinscroll");
+    gLoadData.AccessModel(MODEL_JACK_OLANTERN_CRY, L"Data\\Item\\", L"hellowinscroll");
+    gLoadData.AccessModel(MODEL_JACK_OLANTERN_FOOD, L"Data\\Item\\", L"Gogi");
+    gLoadData.AccessModel(MODEL_JACK_OLANTERN_DRINK, L"Data\\Item\\", L"pumpkincup");
 
-    gLoadData.AccessModel(MODEL_POTION + 32, L"Data\\Item\\", L"giftbox_bp");
-    gLoadData.AccessModel(MODEL_POTION + 33, L"Data\\Item\\", L"giftbox_br");
-    gLoadData.AccessModel(MODEL_POTION + 34, L"Data\\Item\\", L"giftbox_bb");
+    gLoadData.AccessModel(MODEL_PINK_CHOCOLATE_BOX, L"Data\\Item\\", L"giftbox_bp");
+    gLoadData.AccessModel(MODEL_RED_CHOCOLATE_BOX, L"Data\\Item\\", L"giftbox_br");
+    gLoadData.AccessModel(MODEL_BLUE_CHOCOLATE_BOX, L"Data\\Item\\", L"giftbox_bb");
 
     gLoadData.AccessModel(MODEL_EVENT + 21, L"Data\\Item\\", L"p03box");
     gLoadData.AccessModel(MODEL_EVENT + 22, L"Data\\Item\\", L"obox02");
     gLoadData.AccessModel(MODEL_EVENT + 23, L"Data\\Item\\", L"blue01");
 
-    gLoadData.AccessModel(MODEL_WING + 32, L"Data\\Item\\", L"giftbox_r");
-    gLoadData.AccessModel(MODEL_WING + 33, L"Data\\Item\\", L"giftbox_g");
-    gLoadData.AccessModel(MODEL_WING + 34, L"Data\\Item\\", L"giftbox_b");
+    gLoadData.AccessModel(MODEL_RED_RIBBON_BOX, L"Data\\Item\\", L"giftbox_r");
+    gLoadData.AccessModel(MODEL_GREEN_RIBBON_BOX, L"Data\\Item\\", L"giftbox_g");
+    gLoadData.AccessModel(MODEL_BLUE_RIBBON_BOX, L"Data\\Item\\", L"giftbox_b");
 
     for (int i = 0; i < 19; i++)
         gLoadData.AccessModel(MODEL_ETC + i, L"Data\\Item\\", L"Book", i + 1);
 
-    gLoadData.AccessModel(MODEL_ETC + 29, L"Data\\Item\\", L"Book", 18);
+    gLoadData.AccessModel(MODEL_SCROLL_OF_GIGANTIC_STORM, L"Data\\Item\\", L"Book", 18);
 
-    gLoadData.AccessModel(MODEL_ETC + 28, L"Data\\Item\\", L"Book", 18);
+    gLoadData.AccessModel(MODEL_SCROLL_OF_WIZARDRY_ENHANCE, L"Data\\Item\\", L"Book", 18);
 
-    gLoadData.AccessModel(MODEL_SWORD + 22, L"Data\\Item\\", L"HDK_Sword");
-    gLoadData.AccessModel(MODEL_SWORD + 23, L"Data\\Item\\", L"HDK_Sword2");
-    gLoadData.AccessModel(MODEL_MACE + 14, L"Data\\Item\\", L"HDK_Mace");
-    gLoadData.AccessModel(MODEL_BOW + 21, L"Data\\Item\\", L"HDK_Bow");
-    gLoadData.AccessModel(MODEL_STAFF + 12, L"Data\\Item\\", L"HDK_Staff");
+    gLoadData.AccessModel(MODEL_BONE_BLADE, L"Data\\Item\\", L"HDK_Sword");
+    gLoadData.AccessModel(MODEL_EXPLOSION_BLADE, L"Data\\Item\\", L"HDK_Sword2");
+    gLoadData.AccessModel(MODEL_SOLEIL_SCEPTER, L"Data\\Item\\", L"HDK_Mace");
+    gLoadData.AccessModel(MODEL_SYLPH_WIND_BOW, L"Data\\Item\\", L"HDK_Bow");
+    gLoadData.AccessModel(MODEL_GRAND_VIPER_STAFF, L"Data\\Item\\", L"HDK_Staff");
 
-    gLoadData.AccessModel(MODEL_SWORD + 24, L"Data\\Item\\", L"CW_Sword");
-    gLoadData.AccessModel(MODEL_SWORD + 25, L"Data\\Item\\", L"CW_Sword2");
-    gLoadData.AccessModel(MODEL_MACE + 15, L"Data\\Item\\", L"CW_Mace");
-    gLoadData.AccessModel(MODEL_BOW + 22, L"Data\\Item\\", L"CW_Bow");
-    gLoadData.AccessModel(MODEL_STAFF + 13, L"Data\\Item\\", L"CW_Staff");
+    gLoadData.AccessModel(MODEL_DAYBREAK, L"Data\\Item\\", L"CW_Sword");
+    gLoadData.AccessModel(MODEL_SWORD_DANCER, L"Data\\Item\\", L"CW_Sword2");
+    gLoadData.AccessModel(MODEL_SHINING_SCEPTER, L"Data\\Item\\", L"CW_Mace");
+    gLoadData.AccessModel(MODEL_ALBATROSS_BOW, L"Data\\Item\\", L"CW_Bow");
+    gLoadData.AccessModel(MODEL_PLATINA_STAFF, L"Data\\Item\\", L"CW_Staff");
 
-    gLoadData.AccessModel(MODEL_SWORD + 26, L"Data\\Item\\", L"Sword_27");
-    gLoadData.AccessModel(MODEL_SWORD + 27, L"Data\\Item\\", L"Sword_28");
-    gLoadData.AccessModel(MODEL_SWORD + 28, L"Data\\Item\\", L"Sword_29");
-    gLoadData.AccessModel(MODEL_MACE + 16, L"Data\\Item\\", L"Mace_17");
-    gLoadData.AccessModel(MODEL_MACE + 17, L"Data\\Item\\", L"Mace_18");
-    gLoadData.AccessModel(MODEL_BOW + 23, L"Data\\Item\\", L"Bow_24");
-    gLoadData.AccessModel(MODEL_STAFF + 30, L"Data\\Item\\", L"Staff_31");
-    gLoadData.AccessModel(MODEL_STAFF + 31, L"Data\\Item\\", L"Staff_32");
+    gLoadData.AccessModel(MODEL_FLAMBERGE, L"Data\\Item\\", L"Sword_27");
+    gLoadData.AccessModel(MODEL_SWORD_BREAKER, L"Data\\Item\\", L"Sword_28");
+    gLoadData.AccessModel(MODEL_IMPERIAL_SWORD, L"Data\\Item\\", L"Sword_29");
+    gLoadData.AccessModel(MODEL_FROST_MACE, L"Data\\Item\\", L"Mace_17");
+    gLoadData.AccessModel(MODEL_ABSOLUTE_SCEPTER, L"Data\\Item\\", L"Mace_18");
+    gLoadData.AccessModel(MODEL_STINGER_BOW, L"Data\\Item\\", L"Bow_24");
+    gLoadData.AccessModel(MODEL_DEADLY_STAFF, L"Data\\Item\\", L"Staff_31");
+    gLoadData.AccessModel(MODEL_IMPERIAL_STAFF, L"Data\\Item\\", L"Staff_32");
     gLoadData.AccessModel(MODEL_STAFF + 32, L"Data\\Item\\", L"Staff_33");
-    gLoadData.AccessModel(MODEL_SHIELD + 17, L"Data\\Item\\", L"Shield_18");
-    gLoadData.AccessModel(MODEL_SHIELD + 18, L"Data\\Item\\", L"Shield_19");
-    gLoadData.AccessModel(MODEL_SHIELD + 19, L"Data\\Item\\", L"Shield_20");
-    gLoadData.AccessModel(MODEL_SHIELD + 20, L"Data\\Item\\", L"Shield_21");
+    gLoadData.AccessModel(MODEL_CRIMSONGLORY, L"Data\\Item\\", L"Shield_18");
+    gLoadData.AccessModel(MODEL_SALAMANDER_SHIELD, L"Data\\Item\\", L"Shield_19");
+    gLoadData.AccessModel(MODEL_FROST_BARRIER, L"Data\\Item\\", L"Shield_20");
+    gLoadData.AccessModel(MODEL_GUARDIAN_SHILED, L"Data\\Item\\", L"Shield_21");
 
-    gLoadData.AccessModel(MODEL_SHIELD + 21, L"Data\\Item\\", L"crosssheild");
+    gLoadData.AccessModel(MODEL_CROSS_SHIELD, L"Data\\Item\\", L"crosssheild");
 
-    gLoadData.AccessModel(MODEL_BOW + 24, L"Data\\Item\\", L"gamblebow");
-    gLoadData.AccessModel(MODEL_STAFF + 33, L"Data\\Item\\", L"gamble_wand");
-    gLoadData.AccessModel(MODEL_STAFF + 34, L"Data\\Item\\", L"gamble_stick");
-    gLoadData.AccessModel(MODEL_SPEAR + 11, L"Data\\Item\\", L"gamble_scyder01");
-    gLoadData.AccessModel(MODEL_MACE + 18, L"Data\\Item\\", L"gamble_safter01");
+    gLoadData.AccessModel(MODEL_AIR_LYN_BOW, L"Data\\Item\\", L"gamblebow");
+    gLoadData.AccessModel(MODEL_CHROMATIC_STAFF, L"Data\\Item\\", L"gamble_wand");
+    gLoadData.AccessModel(MODEL_RAVEN_STICK, L"Data\\Item\\", L"gamble_stick");
+    gLoadData.AccessModel(MODEL_BEUROBA, L"Data\\Item\\", L"gamble_scyder01");
+    gLoadData.AccessModel(MODEL_STRYKER_SCEPTER, L"Data\\Item\\", L"gamble_safter01");
 
     gLoadData.AccessModel(MODEL_HELPER + 71, L"Data\\Item\\", L"gamble_scyderx01");
     gLoadData.AccessModel(MODEL_HELPER + 72, L"Data\\Item\\", L"gamble_wand01");
@@ -1162,12 +1162,12 @@ void OpenItems()
     gLoadData.AccessModel(MODEL_POTION + 110, L"Data\\Item\\", L"indication");
     gLoadData.AccessModel(MODEL_POTION + 111, L"Data\\Item\\", L"speculum");
 
-    gLoadData.AccessModel(MODEL_POTION + 101, L"Data\\Item\\", L"doubt_paper");
-    gLoadData.AccessModel(MODEL_POTION + 102, L"Data\\Item\\", L"warrant");
-    gLoadData.AccessModel(MODEL_POTION + 109, L"Data\\Item\\", L"secromicon");
+    gLoadData.AccessModel(MODEL_SUSPICIOUS_SCRAP_OF_PAPER, L"Data\\Item\\", L"doubt_paper");
+    gLoadData.AccessModel(MODEL_GAIONS_ORDER, L"Data\\Item\\", L"warrant");
+    gLoadData.AccessModel(MODEL_COMPLETE_SECROMICON, L"Data\\Item\\", L"secromicon");
     for (int c = 0; c < 6; c++)
     {
-        gLoadData.AccessModel(MODEL_POTION + 103 + c, L"Data\\Item\\", L"secromicon_piece");
+        gLoadData.AccessModel(MODEL_FIRST_SECROMICON_FRAGMENT + c, L"Data\\Item\\", L"secromicon_piece");
     }
 
     gLoadData.AccessModel(MODEL_POTION + 112, L"Data\\Item\\Ingameshop\\", L"ItemBoxKey_silver");
@@ -1210,15 +1210,15 @@ void OpenItems()
     gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTLEFT, L"Data\\Item\\", L"class15_pantleft");
     gLoadData.AccessModel(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT, L"Data\\Item\\", L"class15_pantright");
 
-    gLoadData.AccessModel(MODEL_WING + 49, L"Data\\Item\\", L"Wing", 50);
-    gLoadData.AccessModel(MODEL_WING + 50, L"Data\\Item\\", L"Wing", 51);
+    gLoadData.AccessModel(MODEL_CAPE_OF_FIGHTER, L"Data\\Item\\", L"Wing", 50);
+    gLoadData.AccessModel(MODEL_CAPE_OF_OVERRULE, L"Data\\Item\\", L"Wing", 51);
     gLoadData.AccessModel(MODEL_WING + 135, L"Data\\Item\\", L"Wing", 50);
     LoadBitmap(L"Item\\NCcape.tga", BITMAP_NCCAPE, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\monk_manto01.TGA", BITMAP_MANTO01, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Item\\monke_manto.TGA", BITMAP_MANTOE, GL_LINEAR, GL_REPEAT);
     g_CMonkSystem.LoadModelItem();
     for (int _nRollIndex = 0; _nRollIndex < 7; ++_nRollIndex)
-        gLoadData.AccessModel(MODEL_ETC + 30 + _nRollIndex, L"Data\\Item\\", L"rollofpaper");
+        gLoadData.AccessModel(MODEL_CHAIN_DRIVE_PARCHMENT + _nRollIndex, L"Data\\Item\\", L"rollofpaper");
 
     gLoadData.AccessModel(MODEL_HELPER + 135, L"Data\\Item\\LuckyItem\\", L"LuckyCardgreen");
     gLoadData.AccessModel(MODEL_HELPER + 136, L"Data\\Item\\LuckyItem\\", L"LuckyCardgreen");
@@ -1251,9 +1251,9 @@ void OpenItems()
     }
 
     Models[MODEL_SPEAR].Meshs[1].NoneBlendMesh = true;
-    Models[MODEL_SWORD + 10].Meshs[1].NoneBlendMesh = true;
-    Models[MODEL_STAFF + 6].Meshs[2].NoneBlendMesh = true;
-    Models[MODEL_MACE + 6].Meshs[1].NoneBlendMesh = true;
+    Models[MODEL_LIGHT_SABER].Meshs[1].NoneBlendMesh = true;
+    Models[MODEL_STAFF_OF_RESURRECTION].Meshs[2].NoneBlendMesh = true;
+    Models[MODEL_CHAOS_DRAGON_AXE].Meshs[1].NoneBlendMesh = true;
     Models[MODEL_EVENT + 9].Meshs[1].NoneBlendMesh = true;
 }
 
@@ -1263,7 +1263,7 @@ void OpenItemTextures()
     {
         if (i < 3)
         {
-            gLoadData.OpenTexture(MODEL_HELPER + 16 + i, L"Item\\");
+            gLoadData.OpenTexture(MODEL_SCROLL_OF_ARCHANGEL + i, L"Item\\");
         }
         else
         {
@@ -1277,14 +1277,14 @@ void OpenItemTextures()
 
     for (int i = 0; i < 4; i++)
     {
-        gLoadData.OpenTexture(MODEL_WING + 3 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_WINGS_OF_SPIRITS + i, L"Item\\");
     }
 
     for (int i = 0; i < 4; i++)
     {
-        gLoadData.OpenTexture(MODEL_WING + 36 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_WING_OF_STORM + i, L"Item\\");
     }
-    gLoadData.OpenTexture(MODEL_WING + 40, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CAPE_OF_EMPEROR, L"Item\\");
 
     LoadBitmap(L"Item\\msword01_r.jpg", BITMAP_3RDWING_LAYER, GL_LINEAR, GL_REPEAT);
 
@@ -1296,56 +1296,56 @@ void OpenItemTextures()
 
     for (int i = 0; i < 9; ++i)
     {
-        gLoadData.OpenTexture(MODEL_ETC + 19 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_CHAIN_LIGHTNING_PARCHMENT + i, L"Item\\");
     }
 
     LoadBitmap(L"Item\\rollofpaper_R.jpg", BITMAP_ROOLOFPAPER_EFFECT_R, GL_LINEAR);
 
-    gLoadData.OpenTexture(MODEL_HELPER + 4, L"Skill\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 4, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 31, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 5, L"Skill\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 5, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DARK_HORSE_ITEM, L"Skill\\");
+    gLoadData.OpenTexture(MODEL_DARK_HORSE_ITEM, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SPIRIT, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DARK_RAVEN_ITEM, L"Skill\\");
+    gLoadData.OpenTexture(MODEL_DARK_RAVEN_ITEM, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_POTION + 22, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JEWEL_OF_CREATION, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_POTION + 31, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JEWEL_OF_GUARDIAN, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_POTION + 7, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SIEGE_POTION, L"Item\\");
     gLoadData.OpenTexture(MODEL_HELPER + 7, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 11, L"Item\\");
+    gLoadData.OpenTexture(MODEL_LIFE_STONE, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 18, L"Monster\\");
 
     for (int i = 0; i < 2; i++)
-        gLoadData.OpenTexture(MODEL_HELPER + 14 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_LOCHS_FEATHER + i, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 17, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD + 18, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DARK_BREAKER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_THUNDER_BLADE, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_STAFF + 9, L"Item\\");
-    gLoadData.OpenTexture(MODEL_BOW + 17, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DRAGON_SOUL_STAFF, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CELESTIAL_BOW, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_HELPER + 3, L"Skill\\");
+    gLoadData.OpenTexture(MODEL_HORN_OF_DINORANT, L"Skill\\");
 
     for (int i = 0; i < 4; i++)
-        gLoadData.OpenTexture(MODEL_POTION + 23 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_SCROLL_OF_EMPEROR_RING_OF_HONOR + i, L"Item\\");
 
     gLoadData.OpenTexture(MODEL_POTION + 27, L"Item\\");
 
     for (int i = 0; i < 2; i++)
-        gLoadData.OpenTexture(MODEL_POTION + 28 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_LOST_MAP + i, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_HELPER + 29, L"Npc\\");
-    gLoadData.OpenTexture(MODEL_SWORD + 19, L"Item\\");
-    gLoadData.OpenTexture(MODEL_STAFF + 10, L"Item\\");
-    gLoadData.OpenTexture(MODEL_BOW + 18, L"Item\\");
-    gLoadData.OpenTexture(MODEL_BOW + 19, L"Item\\");
+    gLoadData.OpenTexture(MODEL_ARMOR_OF_GUARDSMAN, L"Npc\\");
+    gLoadData.OpenTexture(MODEL_DIVINE_SWORD_OF_ARCHANGEL, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DIVINE_STAFF_OF_ARCHANGEL, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DIVINE_CB_OF_ARCHANGEL, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GREAT_REIGN_CROSSBOW, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 31, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SHIELD + 15, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SHIELD + 16, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SPEAR + 10, L"Item\\");
-    gLoadData.OpenTexture(MODEL_MACE + 7, L"Item\\");
+    gLoadData.OpenTexture(MODEL_RUNE_BLADE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GRAND_SOUL_SHIELD, L"Item\\");
+    gLoadData.OpenTexture(MODEL_ELEMENTAL_SHIELD, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DRAGON_SPEAR, L"Item\\");
+    gLoadData.OpenTexture(MODEL_ELEMENTAL_MACE, L"Item\\");
 
     for (int i = 0; i < 17; i++)
     {
@@ -1369,12 +1369,12 @@ void OpenItemTextures()
         gLoadData.OpenTexture(MODEL_HELPER + i, L"Item\\");
     //. MODEL_MACE+8,9,10,11
     for (int i = 0; i < 5; i++)
-        gLoadData.OpenTexture(MODEL_MACE + 8 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_BATTLE_SCEPTER + i, L"Item\\");
 
     for (int i = 0; i < 2; i++)
-        gLoadData.OpenTexture(MODEL_SWORD + 20 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_KNIGHT_BLADE + i, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_BOW + 20, L"Item\\");
+    gLoadData.OpenTexture(MODEL_ARROW_VIPER_BOW, L"Item\\");
 
     for (int i = 17; i < 21; i++)
     {
@@ -1382,17 +1382,17 @@ void OpenItemTextures()
     }
     for (int i = 0; i < 4; i++)
     {
-        gLoadData.OpenTexture(MODEL_WING + 21 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_SCROLL_OF_FIREBURST + i, L"Item\\");
     }
 
-    gLoadData.OpenTexture(MODEL_WING + 48, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 35, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 44, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 45, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 46, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 47, L"Item\\");
-    gLoadData.OpenTexture(MODEL_ETC + 29, L"Item\\");
-    gLoadData.OpenTexture(MODEL_ETC + 28, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SCROLL_OF_CHAOTIC_DISEIER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SCROLL_OF_FIRE_SCREAM, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CRYSTAL_OF_DESTRUCTION, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CRYSTAL_OF_MULTI_SHOT, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CRYSTAL_OF_RECOVERY, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CRYSTAL_OF_FLAME_STRIKE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SCROLL_OF_GIGANTIC_STORM, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SCROLL_OF_WIZARDRY_ENHANCE, L"Item\\");
 
     for (int i = 17; i < 19; ++i)
     {
@@ -1409,16 +1409,16 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_EVENT + 9, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 10, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 16, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 30, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CAPE_OF_LORD, L"Item\\");
 
     for (int i = 0; i < 3; i++)
-        gLoadData.OpenTexture(MODEL_POTION + 17 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_DEVILS_EYE + i, L"Item\\");
 
     for (int i = 0; i < 2; i++)
         gLoadData.OpenTexture(MODEL_POTION + 20 + i, L"Item\\");
 
     for (int i = 0; i < 6; ++i)
-        gLoadData.OpenTexture(MODEL_POTION + 35 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_SMALL_SHIELD_POTION + i, L"Item\\");
 
     for (int i = 0; i < 2; i++)
         gLoadData.OpenTexture(MODEL_EVENT + i, L"Item\\");
@@ -1429,55 +1429,55 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_COMPILED_CELE, L"Item\\");
     gLoadData.OpenTexture(MODEL_COMPILED_SOUL, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_WING + 136, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 137, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 138, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 139, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 140, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 141, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 142, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 143, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PACKED_JEWEL_OF_LIFE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PACKED_JEWEL_OF_CREATION, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PACKED_JEWEL_OF_GUARDIAN, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PACKED_GEMSTONE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PACKED_JEWEL_OF_HARMONY, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PACKED_JEWEL_OF_CHAOS, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PACKED_LOWER_REFINE_STONE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PACKED_HIGHER_REFINE_STONE, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 22, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD + 23, L"Item\\");
-    gLoadData.OpenTexture(MODEL_MACE + 14, L"Item\\");
-    gLoadData.OpenTexture(MODEL_BOW + 21, L"Item\\");
-    gLoadData.OpenTexture(MODEL_STAFF + 12, L"Item\\");
+    gLoadData.OpenTexture(MODEL_BONE_BLADE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_EXPLOSION_BLADE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SOLEIL_SCEPTER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SYLPH_WIND_BOW, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GRAND_VIPER_STAFF, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_POTION + 45, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 46, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 47, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 48, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 49, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 50, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 32, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 33, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 34, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PUMPKIN_OF_LUCK, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JACK_OLANTERN_BLESSINGS, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JACK_OLANTERN_WRATH, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JACK_OLANTERN_CRY, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JACK_OLANTERN_FOOD, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JACK_OLANTERN_DRINK, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PINK_CHOCOLATE_BOX, L"Item\\");
+    gLoadData.OpenTexture(MODEL_RED_CHOCOLATE_BOX, L"Item\\");
+    gLoadData.OpenTexture(MODEL_BLUE_CHOCOLATE_BOX, L"Item\\");
 
     gLoadData.OpenTexture(MODEL_EVENT + 21, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 22, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 23, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 38, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 41, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 42, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 43, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 44, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 32, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 33, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 34, L"Item\\");
+    gLoadData.OpenTexture(MODEL_MOONSTONE_PENDANT, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GEMSTONE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JEWEL_OF_HARMONY, L"Item\\");
+    gLoadData.OpenTexture(MODEL_LOWER_REFINE_STONE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_HIGHER_REFINE_STONE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_RED_RIBBON_BOX, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GREEN_RIBBON_BOX, L"Item\\");
+    gLoadData.OpenTexture(MODEL_BLUE_RIBBON_BOX, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 24, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD + 25, L"Item\\");
-    gLoadData.OpenTexture(MODEL_MACE + 15, L"Item\\");
-    gLoadData.OpenTexture(MODEL_BOW + 22, L"Item\\");
-    gLoadData.OpenTexture(MODEL_STAFF + 13, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DAYBREAK, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SWORD_DANCER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SHINING_SCEPTER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_ALBATROSS_BOW, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PLATINA_STAFF, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_HELPER + 32, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 33, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 34, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 35, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 36, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 37, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SPLINTER_OF_ARMOR, L"Item\\");
+    gLoadData.OpenTexture(MODEL_BLESS_OF_GUARDIAN, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CLAW_OF_BEAST, L"Item\\");
+    gLoadData.OpenTexture(MODEL_FRAGMENT_OF_HORN, L"Item\\");
+    gLoadData.OpenTexture(MODEL_BROKEN_HORN, L"Item\\");
+    gLoadData.OpenTexture(MODEL_HORN_OF_FENRIR, L"Item\\");
 
     gLoadData.OpenTexture(MODEL_HELPER + 46, L"Item\\partCharge1\\");
     gLoadData.OpenTexture(MODEL_HELPER + 47, L"Item\\partCharge1\\");
@@ -1547,14 +1547,14 @@ void OpenItemTextures()
 
     gLoadData.OpenTexture(MODEL_POTION + 96, L"Item\\partCharge4\\");
 
-    gLoadData.OpenTexture(MODEL_HELPER + 64, L"Item\\partCharge4\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 65, L"Item\\partCharge4\\");
+    gLoadData.OpenTexture(MODEL_DEMON, L"Item\\partCharge4\\");
+    gLoadData.OpenTexture(MODEL_SPIRIT_OF_GUARDIAN, L"Item\\partCharge4\\");
 
-    gLoadData.OpenTexture(MODEL_HELPER + 67, L"Item\\xmas\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 80, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PET_RUDOLF, L"Item\\xmas\\");
+    gLoadData.OpenTexture(MODEL_PET_PANDA, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_HELPER + 106, L"Item\\partcharge7\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 123, L"Item\\");
+    gLoadData.OpenTexture(MODEL_PET_UNICORN, L"Item\\partcharge7\\");
+    gLoadData.OpenTexture(MODEL_PET_SKELETON, L"Item\\");
     gLoadData.OpenTexture(MODEL_HELPER + 66, L"Item\\xmas\\");
     gLoadData.OpenTexture(MODEL_POTION + 100, L"Item\\");
     gLoadData.OpenTexture(MODEL_HELPER + 69, L"Item\\partCharge5\\");
@@ -1565,36 +1565,36 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_HELPER + 94, L"Item\\partCharge6\\");
     gLoadData.OpenTexture(MODEL_POTION + 140, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_POTION + 84, L"Item\\cherryblossom\\");
-    gLoadData.OpenTexture(MODEL_POTION + 85, L"Item\\cherryblossom\\");
-    gLoadData.OpenTexture(MODEL_POTION + 86, L"Item\\cherryblossom\\");
-    gLoadData.OpenTexture(MODEL_POTION + 87, L"Item\\cherryblossom\\");
+    gLoadData.OpenTexture(MODEL_CHERRY_BLOSSOM_PLAYBOX, L"Item\\cherryblossom\\");
+    gLoadData.OpenTexture(MODEL_CHERRY_BLOSSOM_WINE, L"Item\\cherryblossom\\");
+    gLoadData.OpenTexture(MODEL_CHERRY_BLOSSOM_RICE_CAKE, L"Item\\cherryblossom\\");
+    gLoadData.OpenTexture(MODEL_CHERRY_BLOSSOM_FLOWER_PETAL, L"Item\\cherryblossom\\");
     gLoadData.OpenTexture(MODEL_POTION + 88, L"Item\\cherryblossom\\");
     gLoadData.OpenTexture(MODEL_POTION + 89, L"Item\\cherryblossom\\");
-    gLoadData.OpenTexture(MODEL_POTION + 90, L"Item\\cherryblossom\\");
+    gLoadData.OpenTexture(MODEL_GOLDEN_CHERRY_BLOSSOM_BRANCH, L"Item\\cherryblossom\\");
 
-    gLoadData.OpenTexture(MODEL_HELPER + 49, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 50, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 51, L"Item\\");
+    gLoadData.OpenTexture(MODEL_OLD_SCROLL, L"Item\\");
+    gLoadData.OpenTexture(MODEL_ILLUSION_SORCERER_COVENANT, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SCROLL_OF_BLOOD, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_HELPER + 52, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 53, L"Item\\");
+    gLoadData.OpenTexture(MODEL_FLAME_OF_CONDOR, L"Item\\");
+    gLoadData.OpenTexture(MODEL_FEATHER_OF_CONDOR, L"Item\\");
 
     gLoadData.OpenTexture(MODEL_POTION + 55, L"Item\\");
     gLoadData.OpenTexture(MODEL_POTION + 56, L"Item\\");
     gLoadData.OpenTexture(MODEL_POTION + 57, L"Item\\");
 
     gLoadData.OpenTexture(MODEL_POTION + 64, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 65, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 66, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 67, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 68, L"Item\\");
+    gLoadData.OpenTexture(MODEL_FLAME_OF_DEATH_BEAM_KNIGHT, L"Item\\");
+    gLoadData.OpenTexture(MODEL_HORN_OF_HELL_MAINE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_FEATHER_OF_DARK_PHOENIX, L"Item\\");
+    gLoadData.OpenTexture(MODEL_EYE_OF_ABYSSAL, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_POTION + 63, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 52, L"Item\\");
+    gLoadData.OpenTexture(MODEL_FIRECRACKER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GM_GIFT, L"Item\\");
     g_ChangeRingMgr->LoadItemTexture();
 
-    gLoadData.OpenTexture(MODEL_POTION + 99, L"Item\\XMas\\");
+    gLoadData.OpenTexture(MODEL_CHRISTMAS_FIRECRACKER, L"Item\\XMas\\");
 
     gLoadData.OpenTexture(MODEL_POTION + 145, L"Item\\partCharge8\\");
     gLoadData.OpenTexture(MODEL_POTION + 146, L"Item\\partCharge8\\");
@@ -1620,39 +1620,39 @@ void OpenItemTextures()
 #endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
 //---------------------------------------------------------------------------------
 
-    gLoadData.OpenTexture(MODEL_SWORD + 26, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD + 27, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SWORD + 28, L"Item\\");
-    gLoadData.OpenTexture(MODEL_MACE + 16, L"Item\\");
-    gLoadData.OpenTexture(MODEL_MACE + 17, L"Item\\");
-    gLoadData.OpenTexture(MODEL_BOW + 23, L"Item\\");
-    gLoadData.OpenTexture(MODEL_STAFF + 30, L"Item\\");
-    gLoadData.OpenTexture(MODEL_STAFF + 31, L"Item\\");
+    gLoadData.OpenTexture(MODEL_FLAMBERGE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SWORD_BREAKER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_IMPERIAL_SWORD, L"Item\\");
+    gLoadData.OpenTexture(MODEL_FROST_MACE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_ABSOLUTE_SCEPTER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_STINGER_BOW, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DEADLY_STAFF, L"Item\\");
+    gLoadData.OpenTexture(MODEL_IMPERIAL_STAFF, L"Item\\");
     gLoadData.OpenTexture(MODEL_STAFF + 32, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SHIELD + 17, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SHIELD + 18, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SHIELD + 19, L"Item\\");
-    gLoadData.OpenTexture(MODEL_SHIELD + 20, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CRIMSONGLORY, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SALAMANDER_SHIELD, L"Item\\");
+    gLoadData.OpenTexture(MODEL_FROST_BARRIER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GUARDIAN_SHILED, L"Item\\");
 
     for (int i = 0; i < 6; ++i)
-        gLoadData.OpenTexture(MODEL_WING + 60 + i, L"Effect\\");
+        gLoadData.OpenTexture(MODEL_SEED_FIRE + i, L"Effect\\");
 
     for (int i = 0; i < 5; ++i)
-        gLoadData.OpenTexture(MODEL_WING + 70 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_SPHERE_MONO + i, L"Item\\");
 
     for (int i = 0; i < 30; ++i)
     {
-        gLoadData.OpenTexture(MODEL_WING + 100 + i, L"Effect\\");
-        gLoadData.OpenTexture(MODEL_WING + 100 + i, L"Item\\");
+        gLoadData.OpenTexture(MODEL_SEED_SPHERE_FIRE_1 + i, L"Effect\\");
+        gLoadData.OpenTexture(MODEL_SEED_SPHERE_FIRE_1 + i, L"Item\\");
     }
 
-    gLoadData.OpenTexture(MODEL_SHIELD + 21, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CROSS_SHIELD, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_BOW + 24, L"Item\\");
-    gLoadData.OpenTexture(MODEL_STAFF + 33, L"Item\\");
-    gLoadData.OpenTexture(MODEL_STAFF + 34, L"Item\\");
+    gLoadData.OpenTexture(MODEL_AIR_LYN_BOW, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CHROMATIC_STAFF, L"Item\\");
+    gLoadData.OpenTexture(MODEL_RAVEN_STICK, L"Item\\");
     gLoadData.OpenTexture(MODEL_SWORD + 29, L"Item\\");
-    gLoadData.OpenTexture(MODEL_MACE + 18, L"Item\\");
+    gLoadData.OpenTexture(MODEL_STRYKER_SCEPTER, L"Item\\");
 
     gLoadData.OpenTexture(MODEL_HELPER + 71, L"Item\\");
     gLoadData.OpenTexture(MODEL_HELPER + 72, L"Item\\");
@@ -1672,12 +1672,12 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_POTION + 110, L"Item\\");
     gLoadData.OpenTexture(MODEL_POTION + 111, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_POTION + 101, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 102, L"Item\\");
-    gLoadData.OpenTexture(MODEL_POTION + 109, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SUSPICIOUS_SCRAP_OF_PAPER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GAIONS_ORDER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_COMPLETE_SECROMICON, L"Item\\");
     for (int c = 0; c < 6; c++)
     {
-        gLoadData.OpenTexture(MODEL_POTION + 103 + c, L"Item\\");
+        gLoadData.OpenTexture(MODEL_FIRST_SECROMICON_FRAGMENT + c, L"Item\\");
     }
 
     gLoadData.OpenTexture(MODEL_HELPER + 107, L"Item\\partcharge7\\");
@@ -1760,12 +1760,12 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT, L"Item\\");	// 14, 15
     LoadBitmap(L"Item\\rgb_mix.jpg", BITMAP_RGB_MIX, GL_LINEAR, GL_REPEAT);
 
-    gLoadData.OpenTexture(MODEL_WING + 49, L"Item\\");
-    gLoadData.OpenTexture(MODEL_WING + 50, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CAPE_OF_FIGHTER, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CAPE_OF_OVERRULE, L"Item\\");
     gLoadData.OpenTexture(MODEL_WING + 135, L"Item\\");
     g_CMonkSystem.LoadModelItemTexture();
     for (int _nRollIndex = 0; _nRollIndex < 7; ++_nRollIndex)
-        gLoadData.OpenTexture(MODEL_ETC + 30 + _nRollIndex, L"Item\\");
+        gLoadData.OpenTexture(MODEL_CHAIN_DRIVE_PARCHMENT + _nRollIndex, L"Item\\");
 
     LoadBitmap(L"Item\\PhoenixSoul_render.JPG", BITMAP_PHOENIXSOULWING, GL_LINEAR, GL_REPEAT);
 
@@ -1929,7 +1929,7 @@ void OpenNpc(int Type)
         gLoadData.OpenTexture(Type, L"Npc\\");
         break;
 
-        //  µ•∫Òæ∆Ω∫, ∑Œ∑£Ω√æ∆ √ﬂ∞° ªÛ¡° NPC
+        //  Îç∞ÎπÑÏïÑÏä§, Î°úÎûúÏãúÏïÑ Ï∂îÍ∞Ä ÏÉÅÏ†ê NPC
     case MODEL_DEVIAS_TRADER:
         gLoadData.AccessModel(MODEL_DEVIAS_TRADER, L"Data\\Npc\\", L"DeviasTrader", 1);
         gLoadData.OpenTexture(Type, L"Npc\\");
@@ -1941,12 +1941,12 @@ void OpenNpc(int Type)
         gLoadData.OpenTexture(MODEL_ANGEL, L"Npc\\");
         break;
 #endif	// _PVP_ATTACK_GUARD
-    case MODEL_NPC_BREEDER:    //  ¡∂∑√ªÁ NPC.
+    case MODEL_NPC_BREEDER:    //  Ï°∞Î†®ÏÇ¨ NPC.
         gLoadData.AccessModel(MODEL_NPC_BREEDER, L"Data\\Npc\\", L"Breeder");
         gLoadData.OpenTexture(MODEL_NPC_BREEDER, L"Npc\\");
         break;
 #ifdef _PVP_MURDERER_HERO_ITEM
-    case MODEL_HERO_SHOP:	// øµøı ªÛ¡°
+    case MODEL_HERO_SHOP:	// ÏòÅÏõÖ ÏÉÅÏ†ê
         gLoadData.AccessModel(MODEL_HERO_SHOP, L"Data\\Npc\\", L"HeroNpc");
         gLoadData.OpenTexture(MODEL_HERO_SHOP, L"Npc\\");
         break;
@@ -2209,7 +2209,7 @@ void OpenNpc(int Type)
         gLoadData.AccessModel(MODEL_UNITEDMARKETPLACE_JULIA, L"Data\\Npc\\", L"UnitedMarkedPlace_julia");
         gLoadData.OpenTexture(MODEL_UNITEDMARKETPLACE_JULIA, L"Npc\\");
         break;
-    case MODEL_KARUTAN_NPC_REINA:	// ∑Œ∑£Ω√¿Â NPC ¿‚»≠ªÛ¿Œ ≈©∏ÆΩ∫∆æ∞˙ µø¿œ.
+    case MODEL_KARUTAN_NPC_REINA:	// Î°úÎûúÏãúÏû• NPC Ïû°ÌôîÏÉÅÏù∏ ÌÅ¨Î¶¨Ïä§Ìã¥Í≥º ÎèôÏùº.
         gLoadData.AccessModel(MODEL_KARUTAN_NPC_REINA, L"Data\\Npc\\", L"UnitedMarketPlace_christine");
         gLoadData.OpenTexture(MODEL_KARUTAN_NPC_REINA, L"Npc\\");
         break;
@@ -3292,10 +3292,10 @@ void OpenMonsterModel(int Type)
         LoadWaveFile(SOUND_MONSTER + 69, L"Data\\Sound\\mYeti2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 70, L"Data\\Sound\\mYetiAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 71, L"Data\\Sound\\mYetiDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + 12, 68, 68, 70, 70, 71);
-        SetMonsterSound(MODEL_MONSTER01 + 13, 68, 69, 70, 70, 71);
-        Models[MODEL_MONSTER01 + 12].BoneHead = 20;
-        Models[MODEL_MONSTER01 + 13].BoneHead = 20;
+        SetMonsterSound(MODEL_LARVA, 68, 68, 70, 70, 71);
+        SetMonsterSound(MODEL_HELL_SPIDER, 68, 69, 70, 70, 71);
+        Models[MODEL_LARVA].BoneHead = 20;
+        Models[MODEL_HELL_SPIDER].BoneHead = 20;
         break;
     case 19:
         LoadWaveFile(SOUND_MONSTER + 72, L"Data\\Sound\\mGoblin1.wav", Channel, Enable);
@@ -3418,7 +3418,7 @@ void OpenMonsterModel(int Type)
         SetMonsterSound(MODEL_MONSTER01 + Type, 132, 133, 104, 104, 133);
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.5f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.5f;
-        b->BoneHead = 20;//¿ŒæÓ
+        b->BoneHead = 20;//Ïù∏Ïñ¥
         break;
     case 35:
         LoadWaveFile(SOUND_MONSTER + 135, L"Data\\Sound\\mValkyrie1.wav", Channel, Enable);
@@ -3762,7 +3762,7 @@ void OpenMonsterModel(int Type)
         LoadWaveFile(SOUND_RAKLION_ICEGIANT_DEATH, L"Data\\Sound\\w58w59\\IceGiant_death.wav", 1);
         break;
     case 148:
-        LoadWaveFile(SOUND_MONSTER + 34, L"Data\\Sound\\m«ÔΩ∫∆ƒ¿Ã¥ı¡◊±‚.wav", 1);
+        LoadWaveFile(SOUND_MONSTER + 34, L"Data\\Sound\\mÌó¨Ïä§ÌååÏù¥ÎçîÏ£ΩÍ∏∞.wav", 1);
         LoadWaveFile(SOUND_RAKLION_COOLERTIN_ATTACK, L"Data\\Sound\\w58w59\\Coolertin_attack.wav", 1);
         LoadWaveFile(SOUND_RAKLION_COOLERTIN_MOVE, L"Data\\Sound\\w58w59\\Coolertin_move.wav", 1);
         break;
@@ -3954,8 +3954,8 @@ void OpenSkills()
     LoadBitmap(L"Skill\\jack04.jpg", BITMAP_JACK_1);
     LoadBitmap(L"Skill\\jack05.jpg", BITMAP_JACK_2);
     LoadBitmap(L"Monster\\iui02.tga", BITMAP_ROBE + 3);
-    gLoadData.AccessModel(MODEL_POTION + 45, L"Data\\Item\\", L"hobakhead");
-    gLoadData.OpenTexture(MODEL_POTION + 45, L"Item\\");
+    gLoadData.AccessModel(MODEL_PUMPKIN_OF_LUCK, L"Data\\Item\\", L"hobakhead");
+    gLoadData.OpenTexture(MODEL_PUMPKIN_OF_LUCK, L"Item\\");
 
     gLoadData.AccessModel(MODEL_CURSEDTEMPLE_ALLIED_PLAYER, L"Data\\Skill\\", L"unitedsoldier");
     gLoadData.AccessModel(MODEL_CURSEDTEMPLE_ILLUSION_PLAYER, L"Data\\Skill\\", L"illusionist");
@@ -4064,7 +4064,7 @@ void OpenSkills()
     gLoadData.AccessModel(MODEL_MAGIC_CIRCLE1, L"Data\\Skill\\", L"MagicCircle", 1);
     gLoadData.AccessModel(MODEL_ARROW_WING, L"Data\\Skill\\", L"ArrowWing", 1);
     gLoadData.AccessModel(MODEL_ARROW_BOMB, L"Data\\Skill\\", L"ArrowBomb", 1);
-    gLoadData.AccessModel(MODEL_BALL, L"Data\\Skill\\", L"Ball", 1);//∞¯
+    gLoadData.AccessModel(MODEL_BALL, L"Data\\Skill\\", L"Ball", 1);//Í≥µ
     Models[MODEL_BALL].Actions[0].PlaySpeed = 0.5f;
     gLoadData.AccessModel(MODEL_SKILL_BLAST, L"Data\\Skill\\", L"Blast", 1);
     gLoadData.AccessModel(MODEL_SKILL_INFERNO, L"Data\\Skill\\", L"Inferno", 1);
@@ -4430,7 +4430,7 @@ void OpenSkills()
     gLoadData.OpenTexture(MODEL_SWORD_35_WING, L"Item\\");
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
-    // ƒ‹µÂ∂Û µπ¡∂∞¢
+    // ÏΩòÎìúÎùº ÎèåÏ°∞Í∞Å
     gLoadData.AccessModel(MODEL_CONDRA_STONE, L"Data\\Monster\\", L"condra_7_stone");
     gLoadData.OpenTexture(MODEL_CONDRA_STONE, L"Monster\\");
     gLoadData.AccessModel(MODEL_CONDRA_STONE1, L"Data\\Monster\\", L"condra_7_stone_2");
@@ -4507,7 +4507,7 @@ void OpenSounds()
     LoadWaveFile(SOUND_TOWER01, L"Data\\Sound\\aTower.wav", 1);
     LoadWaveFile(SOUND_WATER01, L"Data\\Sound\\aWater.wav", 1);
     LoadWaveFile(SOUND_DESERT01, L"Data\\Sound\\desert.wav", 1);
-    //LoadWaveFile(SOUND_BOSS01		    ,"Data\\Sound\\aƒÔµ–.wav",1);
+    //LoadWaveFile(SOUND_BOSS01		    ,"Data\\Sound\\aÏø§Îëî.wav",1);
     LoadWaveFile(SOUND_HUMAN_WALK_GROUND, L"Data\\Sound\\pWalk(Soil).wav", 2);
     LoadWaveFile(SOUND_HUMAN_WALK_GRASS, L"Data\\Sound\\pWalk(Grass).wav", 2);
     LoadWaveFile(SOUND_HUMAN_WALK_SNOW, L"Data\\Sound\\pWalk(Snow).wav", 2);
@@ -4550,7 +4550,7 @@ void OpenSounds()
     LoadWaveFile(SOUND_DROP_GOLD01, L"Data\\Sound\\pDropMoney.wav", 1);
     LoadWaveFile(SOUND_JEWEL01, L"Data\\Sound\\eGem.wav", 1);
     LoadWaveFile(SOUND_GET_ITEM01, L"Data\\Sound\\pGetItem.wav", 1);
-    //LoadWaveFile(SOUND_SHOUT01    		,"Data\\Sound\\p±‚«’.wav",1);
+    //LoadWaveFile(SOUND_SHOUT01    		,"Data\\Sound\\pÍ∏∞Ìï©.wav",1);
 
     //skill
     LoadWaveFile(SOUND_SKILL_DEFENSE, L"Data\\Sound\\sKnightDefense.wav", 1);
@@ -4566,13 +4566,13 @@ void OpenSounds()
     LoadWaveFile(SOUND_HELLFIRE, L"Data\\Sound\\sHellFire.wav", 2, Enable3DSound);
     LoadWaveFile(SOUND_ICE, L"Data\\Sound\\sIce.wav", 2, Enable3DSound);
     LoadWaveFile(SOUND_FLAME, L"Data\\Sound\\sFlame.wav", 2, Enable3DSound);
-    //LoadWaveFile(SOUND_FLASH            ,"Data\\Sound\\m»˜µÂ∂Û∞¯∞›1.wav",2,Enable3DSound);
+    //LoadWaveFile(SOUND_FLASH            ,"Data\\Sound\\mÌûàÎìúÎùºÍ≥µÍ≤©1.wav",2,Enable3DSound);
     LoadWaveFile(SOUND_FLASH, L"Data\\Sound\\sAquaFlash.wav", 2, Enable3DSound);
 
     LoadWaveFile(SOUND_BREAK01, L"Data\\Sound\\eBreak.wav", 1, Enable3DSound);
     LoadWaveFile(SOUND_EXPLOTION01, L"Data\\Sound\\eExplosion.wav", 1, Enable3DSound);
     LoadWaveFile(SOUND_METEORITE01, L"Data\\Sound\\eMeteorite.wav", 2, Enable3DSound);
-    //LoadWaveFile(SOUND_METEORITE02	    ,"Data\\Sound\\e¿Øº∫.wav",2,Enable3DSound);
+    //LoadWaveFile(SOUND_METEORITE02	    ,"Data\\Sound\\eÏú†ÏÑ±.wav",2,Enable3DSound);
     LoadWaveFile(SOUND_THUNDER01, L"Data\\Sound\\eThunder.wav", 1, Enable3DSound);
 
     LoadWaveFile(SOUND_BONE1, L"Data\\Sound\\mBone1.wav", 2, Enable3DSound);
@@ -4843,7 +4843,7 @@ void OpenLogoSceneData()
     ::LoadBitmap(L"Interface\\server_ex02.jpg", BITMAP_LOG_IN + 13, GL_NEAREST, GL_REPEAT);
     ::LoadBitmap(L"Interface\\cr_mu_lo.tga", BITMAP_LOG_IN + 14, GL_LINEAR);
 #ifdef MOVIE_DIRECTSHOW
-    ::LoadBitmap(L"Interface\\movie_b_all.tga", BITMAP_LOG_IN + 15);// µøøµªÛ πˆ∆∞.
+    ::LoadBitmap(L"Interface\\movie_b_all.tga", BITMAP_LOG_IN + 15);// ÎèôÏòÅÏÉÅ Î≤ÑÌäº.
 #endif	// MOVIE_DIRECTSHOW
 }
 

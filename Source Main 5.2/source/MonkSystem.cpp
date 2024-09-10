@@ -1,4 +1,4 @@
-// MonkSystem.cpp: implementation of the CMonkSystem class.
+ï»¿// MonkSystem.cpp: implementation of the CMonkSystem class.
 //
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
@@ -75,34 +75,34 @@ void CMonkSystem::Destroy()
 
 void CMonkSystem::RegistItem()
 {
-    m_cItemEqualType.SetModelType(MODEL_SWORD + 32, MODEL_SWORD_32_LEFT, MODEL_SWORD_32_RIGHT);
+    m_cItemEqualType.SetModelType(MODEL_SACRED_GLOVE, MODEL_SWORD_32_LEFT, MODEL_SWORD_32_RIGHT);
     m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
 
-    m_cItemEqualType.SetModelType(MODEL_SWORD + 33, MODEL_SWORD_33_LEFT, MODEL_SWORD_33_RIGHT);
+    m_cItemEqualType.SetModelType(MODEL_STORM_HARD_GLOVE, MODEL_SWORD_33_LEFT, MODEL_SWORD_33_RIGHT);
     m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
 
-    m_cItemEqualType.SetModelType(MODEL_SWORD + 34, MODEL_SWORD_34_LEFT, MODEL_SWORD_34_RIGHT);
+    m_cItemEqualType.SetModelType(MODEL_PIERCING_BLADE_GLOVE, MODEL_SWORD_34_LEFT, MODEL_SWORD_34_RIGHT);
     m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
 
-    m_cItemEqualType.SetModelType(MODEL_SWORD + 35, MODEL_SWORD_35_LEFT, MODEL_SWORD_35_RIGHT);
+    m_cItemEqualType.SetModelType(MODEL_PHOENIX_SOUL_STAR, MODEL_SWORD_35_LEFT, MODEL_SWORD_35_RIGHT);
     m_mapItemEqualType.insert(tm_ItemEqualType::value_type(m_cItemEqualType.GetModelType(), m_cItemEqualType));
 }
 
 void CMonkSystem::LoadModelItem()
 {
-    gLoadData.AccessModel(MODEL_SWORD + 32, L"Data\\Item\\", L"Sword33");
+    gLoadData.AccessModel(MODEL_SACRED_GLOVE, L"Data\\Item\\", L"Sword33");
     gLoadData.AccessModel(MODEL_SWORD_32_LEFT, L"Data\\Item\\", L"SwordL33");
     gLoadData.AccessModel(MODEL_SWORD_32_RIGHT, L"Data\\Item\\", L"SwordR33");
 
-    gLoadData.AccessModel(MODEL_SWORD + 33, L"Data\\Item\\", L"Sword34");
+    gLoadData.AccessModel(MODEL_STORM_HARD_GLOVE, L"Data\\Item\\", L"Sword34");
     gLoadData.AccessModel(MODEL_SWORD_33_LEFT, L"Data\\Item\\", L"SwordL34");
     gLoadData.AccessModel(MODEL_SWORD_33_RIGHT, L"Data\\Item\\", L"SwordR34");
 
-    gLoadData.AccessModel(MODEL_SWORD + 34, L"Data\\Item\\", L"Sword35");
+    gLoadData.AccessModel(MODEL_PIERCING_BLADE_GLOVE, L"Data\\Item\\", L"Sword35");
     gLoadData.AccessModel(MODEL_SWORD_34_LEFT, L"Data\\Item\\", L"SwordL35");
     gLoadData.AccessModel(MODEL_SWORD_34_RIGHT, L"Data\\Item\\", L"SwordR35");
 
-    gLoadData.AccessModel(MODEL_SWORD + 35, L"Data\\Item\\", L"Sword36");
+    gLoadData.AccessModel(MODEL_PHOENIX_SOUL_STAR, L"Data\\Item\\", L"Sword36");
     gLoadData.AccessModel(MODEL_SWORD_35_LEFT, L"Data\\Item\\", L"Sword36L");
     gLoadData.AccessModel(MODEL_SWORD_35_RIGHT, L"Data\\Item\\", L"Sword36R");
 
@@ -114,19 +114,19 @@ void CMonkSystem::LoadModelItem()
 
 void CMonkSystem::LoadModelItemTexture()
 {
-    gLoadData.OpenTexture(MODEL_SWORD + 32, L"player\\");
+    gLoadData.OpenTexture(MODEL_SACRED_GLOVE, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_32_LEFT, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_32_RIGHT, L"player\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 33, L"Item\\");
+    gLoadData.OpenTexture(MODEL_STORM_HARD_GLOVE, L"Item\\");
     gLoadData.OpenTexture(MODEL_SWORD_33_LEFT, L"Item\\");
     gLoadData.OpenTexture(MODEL_SWORD_33_RIGHT, L"Item\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 34, L"player\\");
+    gLoadData.OpenTexture(MODEL_PIERCING_BLADE_GLOVE, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_34_LEFT, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_34_RIGHT, L"player\\");
 
-    gLoadData.OpenTexture(MODEL_SWORD + 35, L"player\\");
+    gLoadData.OpenTexture(MODEL_PHOENIX_SOUL_STAR, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_35_LEFT, L"player\\");
     gLoadData.OpenTexture(MODEL_SWORD_35_RIGHT, L"player\\");
 
@@ -209,10 +209,10 @@ int CMonkSystem::ModifyTypeCommonItemMonk(int _OrginalType)
 bool CMonkSystem::IsRagefighterCommonWeapon(BYTE _Class, int _Type)
 {
     if ((gCharacterManager.GetBaseClass(_Class) == CLASS_RAGEFIGHTER) &&
-        ((_Type == MODEL_SWORD + 0) || (_Type == MODEL_SWORD + 1)
-            || (_Type == MODEL_AXE + 0) || (_Type == MODEL_AXE + 1) || (_Type == MODEL_AXE + 3)
-            || (_Type == MODEL_MACE + 0) || (_Type == MODEL_MACE + 1) || (_Type == MODEL_MACE + 2)
-            || (_Type == MODEL_MACE + 3) || (_Type == MODEL_MACE + 4)))
+        ((_Type == MODEL_KRIS) || (_Type == MODEL_SHORT_SWORD)
+            || (_Type == MODEL_SMALL_AXE) || (_Type == MODEL_HAND_AXE) || (_Type == MODEL_TOMAHAWK)
+            || (_Type == MODEL_SMALLMACE) || (_Type == MODEL_MORNING_STAR) || (_Type == MODEL_FLAIL)
+            || (_Type == MODEL_GREAT_HAMMER) || (_Type == MODEL_CRYSTAL_MORNING_STAR)))
     {
         return true;
     }
@@ -325,7 +325,7 @@ bool CMonkSystem::RageEquipmentWeapon(int _Index, short _ItemType)
 {
     int _OtherEquip = (_Index == EQUIPMENT_WEAPON_LEFT) ? EQUIPMENT_WEAPON_RIGHT : EQUIPMENT_WEAPON_LEFT;
     ITEM* pOtherHand = &CharacterMachine->Equipment[_OtherEquip];
-    //±Û·¯ºêÇü ¹«±â´Â ±Û·¯ºêÇü¹«±âÇÏ°í¸¸ Âø¿ë°¡´É
+    //ê¸€ëŸ¬ë¸Œí˜• ë¬´ê¸°ëŠ” ê¸€ëŸ¬ë¸Œí˜•ë¬´ê¸°í•˜ê³ ë§Œ ì°©ìš©ê°€ëŠ¥
     if (g_CMonkSystem.IsSwordformGlovesItemType(_ItemType))
     {
         if (pOtherHand->Type == -1)
@@ -461,7 +461,7 @@ bool CMonkSystem::SendAttackPacket(CHARACTER* _pCha, int _nMoveTarget, int _nSki
 #endif
 
         VectorCopy(CharactersClient[_nMoveTarget].Object.Position, _pCha->TargetPosition);
-        //¸ó½ºÅÍÀÇ ³Ë¹éÈ¿°úÀÇ ÀÇÇØ ÀÌÆåÆ®°¡ È¥¶õ½º·¯¿ò ¹æÁö
+        //ëª¬ìŠ¤í„°ì˜ ë„‰ë°±íš¨ê³¼ì˜ ì˜í•´ ì´í™íŠ¸ê°€ í˜¼ë€ìŠ¤ëŸ¬ì›€ ë°©ì§€
         if (!(pObj->CurrentAction == PLAYER_SKILL_GIANTSWING && m_btAttState == FRAME_SECONDATT))
             pObj->Angle[2] = CreateAngle2D(pObj->Position, _pCha->TargetPosition);
 
@@ -925,7 +925,7 @@ void CMonkSystem::RenderRepeatedly(int _Key, OBJECT* pObj)
 
         switch (m_arrRepeatedly[_index].m_DamageType)
         {
-            //µ¥¹ÌÁöÅ¸ÀÔ¿¡ µû¸¥ÄÃ·¯
+            //ë°ë¯¸ì§€íƒ€ì…ì— ë”°ë¥¸ì»¬ëŸ¬
         case 0:
             if (_Key == HeroKey)
             {
@@ -974,7 +974,7 @@ void CMonkSystem::RenderRepeatedly(int _Key, OBJECT* pObj)
 
         if (m_arrRepeatedly[_index].m_Double)
         {
-            // ´õºíµ¥¹ÌÁö
+            // ë”ë¸”ë°ë¯¸ì§€
             Position[2] += 10.f;
             Vector(Light[0] - 0.2f, Light[1] - 0.2f, Light[2] - 0.2f, Light2);
             CreatePoint(Position, Damage, Light2, scale + 5.f, true);
@@ -988,10 +988,10 @@ void CMonkSystem::RenderRepeatedly(int _Key, OBJECT* pObj)
 
 bool CMonkSystem::IsRideNotUseSkill(int _nSkill, short _Type)
 {
-    if (_Type != MODEL_HELPER + 37 && _Type != MODEL_HELPER + 2 && _Type != MODEL_HELPER + 3)
+    if (_Type != MODEL_HORN_OF_FENRIR && _Type != MODEL_HORN_OF_UNIRIA && _Type != MODEL_HORN_OF_DINORANT)
         return false;
 
-    // Å»°ÍÅ¸°í ÀÖÀ» °æ¿ì »ç¿ë ºÒ°¡´ÉÇÑ ½ºÅ³
+    // íƒˆê²ƒíƒ€ê³  ìˆì„ ê²½ìš° ì‚¬ìš© ë¶ˆê°€ëŠ¥í•œ ìŠ¤í‚¬
     switch (_nSkill)
     {
     case AT_SKILL_THRUST:
@@ -1010,7 +1010,7 @@ bool CMonkSystem::IsSwordformGlovesUseSkill(int _nSkill)
 {
     switch (_nSkill)
     {
-    case AT_SKILL_GIANTSWING: //¿©±â ½ºÅ³µéÀº Àå°©Çü ¹«±â¸¦ Âø¿ë½Ã¿¡¸¸ »ç¿ë°¡´É
+    case AT_SKILL_GIANTSWING: //ì—¬ê¸° ìŠ¤í‚¬ë“¤ì€ ì¥ê°‘í˜• ë¬´ê¸°ë¥¼ ì°©ìš©ì‹œì—ë§Œ ì‚¬ìš©ê°€ëŠ¥
     case AT_SKILL_DRAGON_LOWER:
     case AT_SKILL_DRAGON_KICK:
     {

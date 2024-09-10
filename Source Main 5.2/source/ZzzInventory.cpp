@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -140,7 +140,7 @@ static  int iStateNum = 4;
 
 extern bool Teleport;
 
-extern float g_fScreenRate_x;	// ¡Ø
+extern float g_fScreenRate_x;	// â€»
 extern float g_fScreenRate_y;
 
 #ifdef _PVP_ADD_MOVE_SCROLL
@@ -1543,16 +1543,16 @@ int GuildListStartY;
 int SommonTable[] = { 2,7,14,8,9,41 };
 
 wchar_t ChaosEventName[][100] = {
-    L"È÷µÅ© °íÇâ ¿©Çà±Ç",
-    L"ÆæÆ¼¾ö4 ÄÄÇ»ÅÍ",
-    L"µðÁöÅ»Ä«¸Þ¶ó",
-    L"·ÎÁöÅØ ¹«¼± ¸¶¿ì½º+Å°º¸µå ¼¼Æ®",
-    L"256M ·¥",
-    L"6°³¿ ÀâÁö ±¸µ¶±Ç",
-    L"¹®È­»óÇ°±Ç(¸¸¿ø)",
-    L"¹Â ¸Ó±×ÄÅ",
-    L"¹Â T¼ÅÃ÷",
-    L"¹Â 10½Ã°£ ¹«·áÀÌ¿ë±Ç"
+    L"ížˆë¼?ê³ í–¥ ì—¬í–‰ê¶Œ",
+    L"íŽœí‹°ì—„4 ì»´í“¨í„°",
+    L"ë””ì§€íƒˆì¹´ë©”ë¼",
+    L"ë¡œì§€í… ë¬´ì„  ë§ˆìš°ìŠ¤+í‚¤ë³´ë“œ ì„¸íŠ¸",
+    L"256M ëž¨",
+    L"6ê°œ?ìž¡ì§€ êµ¬ë…ê¶Œ",
+    L"ë¬¸í™”ìƒí’ˆê¶Œ(ë§Œì›)",
+    L"ë®¤ ë¨¸ê·¸ì»µ",
+    L"ë®¤ Tì…”ì¸ ",
+    L"ë®¤ 10ì‹œê°„ ë¬´ë£Œì´ìš©ê¶Œ"
 };
 
 WORD calcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
@@ -4285,23 +4285,23 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_POTION + 160)
     {
-        // ¿¬ÀåÀÇ º¸¼®
+        // ì—°ìž¥ì˜ ë³´ì„
         swprintf(TextList[TextNum], GlobalText[3305]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 161)
     {
-        // »ó½ÂÀÇ º¸¼®
+        // ìƒìŠ¹ì˜ ë³´ì„
         swprintf(TextList[TextNum], GlobalText[2209]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
-    else if ((ip->Type >= ITEM_WING + 3 && ip->Type <= ITEM_WING + 6) || ip->Type == ITEM_WING + 42) //³¯°³
+    else if ((ip->Type >= ITEM_WING + 3 && ip->Type <= ITEM_WING + 6) || ip->Type == ITEM_WING + 42) //ë‚ ê°œ
     {
-        swprintf(TextList[TextNum], GlobalText[577], 32 + Level);  //  µ¥¹ÌÁö ¸î%Áõ°¡.
+        swprintf(TextList[TextNum], GlobalText[577], 32 + Level);  //  ë°ë¯¸ì§€ ëª‡%ì¦ê°€.
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        swprintf(TextList[TextNum], GlobalText[578], 25 + Level * 2);  //  µ¥¹ÌÁö ¸î%Èí¼ö.
+        swprintf(TextList[TextNum], GlobalText[578], 25 + Level * 2);  //  ë°ë¯¸ì§€ ëª‡%í¡ìˆ˜.
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        swprintf(TextList[TextNum], GlobalText[579]);             //  ÀÌµ¿ ¼Óµµ Çâ»ó.
+        swprintf(TextList[TextNum], GlobalText[579]);             //  ì´ë™ ì†ë„ í–¥ìƒ.
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if ((ip->Type >= ITEM_WING + 36 && ip->Type <= ITEM_WING + 40) || ip->Type == ITEM_WING + 43
@@ -4543,11 +4543,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_WING + 49 || ip->Type == ITEM_HELPER + 30)
     {
-        // ¸ÁÅä °ü·Ã ¿É¼Çº¯°æ
-        swprintf(TextList[TextNum], GlobalText[577], 20 + Level * 2);  //  µ¥¹ÌÁö ¸î%Áõ°¡
+        // ë§í†  ê´€ë ¨ ì˜µì…˜ë³€ê²½
+        swprintf(TextList[TextNum], GlobalText[577], 20 + Level * 2);  //  ë°ë¯¸ì§€ ëª‡%ì¦ê°€
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         int _iDamage = (ip->Type == ITEM_WING + 49) ? 10 + Level * 2 : 10 + Level;
-        swprintf(TextList[TextNum], GlobalText[578], _iDamage);  //  µ¥¹ÌÁö ¸î%Èí¼ö
+        swprintf(TextList[TextNum], GlobalText[578], _iDamage);  //  ë°ë¯¸ì§€ ëª‡%í¡ìˆ˜
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
 
@@ -4914,7 +4914,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
 
-    if (ip->RequireVitality && bRequireStat) //  ¿ä±¸Ã¼·Â.
+    if (ip->RequireVitality && bRequireStat) //  ìš”êµ¬ì²´ë ¥.
     {
         swprintf(TextList[TextNum], GlobalText[1930], ip->RequireVitality);
 
@@ -5013,11 +5013,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
     if ((ip->Type >= MODEL_STAFF - MODEL_ITEM && ip->Type < MODEL_STAFF + MAX_ITEM_INDEX - MODEL_ITEM)
-        || (ip->Type == (MODEL_SWORD + 31 - MODEL_ITEM))
-        || (ip->Type == (MODEL_SWORD + 23 - MODEL_ITEM))
-        || (ip->Type == (MODEL_SWORD + 25 - MODEL_ITEM))
-        || (ip->Type == (MODEL_SWORD + 21 - MODEL_ITEM))
-        || (ip->Type == (MODEL_SWORD + 28 - MODEL_ITEM))
+        || (ip->Type == (MODEL_RUNE_BLADE - MODEL_ITEM))
+        || (ip->Type == (MODEL_EXPLOSION_BLADE - MODEL_ITEM))
+        || (ip->Type == (MODEL_SWORD_DANCER - MODEL_ITEM))
+        || (ip->Type == (MODEL_DARK_REIGN_BLADE - MODEL_ITEM))
+        || (ip->Type == (MODEL_IMPERIAL_SWORD - MODEL_ITEM))
         )
     {
         swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
@@ -5531,7 +5531,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextBold[TextNum] = false;
             TextNum++;
             break;
-        case ITEM_HELPER + 133:	// °ñµç¸ÞÀÌÇÃÂü
+        case ITEM_HELPER + 133:	// ê³¨ë“ ë©”ì´í”Œì°¸
             swprintf(TextList[TextNum], GlobalText[3134], 150);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
@@ -6491,11 +6491,11 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
     // Color:
     switch (o->Type)
     {
-    case MODEL_POTION + 13:
+    case MODEL_JEWEL_OF_BLESS:
     case MODEL_POTION + 15:
         glColor3f(1.f, 0.8f, 0.1f);
         break;
-    case MODEL_WING + 11:
+    case MODEL_ORB_OF_SUMMONING:
         glColor3f(0.7f, 0.7f, 0.7f);
         break;
     }
@@ -6515,17 +6515,17 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, L"%s %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
-    else if ((o->Type == MODEL_POTION + 13)
-        || (o->Type == MODEL_POTION + 14)
-        || (o->Type == MODEL_POTION + 16)
-        || (o->Type == MODEL_WING + 15) // Chaos
-        || (o->Type == MODEL_POTION + 22)
-        || (o->Type == MODEL_POTION + 31)
-        || (o->Type == MODEL_HELPER + 14) // Feather
-        || (o->Type == MODEL_POTION + 41)
-        || (o->Type == MODEL_POTION + 42)
-        || (o->Type == MODEL_POTION + 43)
-        || (o->Type == MODEL_POTION + 44)
+    else if ((o->Type == MODEL_JEWEL_OF_BLESS)
+        || (o->Type == MODEL_JEWEL_OF_SOUL)
+        || (o->Type == MODEL_JEWEL_OF_LIFE)
+        || (o->Type == MODEL_JEWEL_OF_CHAOS) // Chaos
+        || (o->Type == MODEL_JEWEL_OF_CREATION)
+        || (o->Type == MODEL_JEWEL_OF_GUARDIAN)
+        || (o->Type == MODEL_LOCHS_FEATHER) // Feather
+        || (o->Type == MODEL_GEMSTONE)
+        || (o->Type == MODEL_JEWEL_OF_HARMONY)
+        || (o->Type == MODEL_LOWER_REFINE_STONE)
+        || (o->Type == MODEL_HIGHER_REFINE_STONE)
         )
     {
         // Jewels ...
@@ -6533,7 +6533,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, L"%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
-    else if (o->Type == MODEL_WING + 11)
+    else if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
         glColor3f(0.7f, 0.7f, 0.7f);
         swprintf(Name, L"%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
@@ -6663,22 +6663,22 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 94].Name);
     }
-    else if (o->Type == MODEL_POTION + 84)
+    else if (o->Type == MODEL_CHERRY_BLOSSOM_PLAYBOX)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 84].Name);
     }
-    else if (o->Type == MODEL_POTION + 85)
+    else if (o->Type == MODEL_CHERRY_BLOSSOM_WINE)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 85].Name);
     }
-    else if (o->Type == MODEL_POTION + 86)
+    else if (o->Type == MODEL_CHERRY_BLOSSOM_RICE_CAKE)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 86].Name);
     }
-    else if (o->Type == MODEL_POTION + 87)
+    else if (o->Type == MODEL_CHERRY_BLOSSOM_FLOWER_PETAL)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 87].Name);
@@ -6693,7 +6693,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 89].Name);
     }
-    else if (o->Type == MODEL_POTION + 90)
+    else if (o->Type == MODEL_GOLDEN_CHERRY_BLOSSOM_BRANCH)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 90].Name);
@@ -6721,47 +6721,47 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 96].Name);
     }
-    else if (o->Type == MODEL_HELPER + 64)
+    else if (o->Type == MODEL_DEMON)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 64].Name);
     }
-    else if (o->Type == MODEL_HELPER + 65)
+    else if (o->Type == MODEL_SPIRIT_OF_GUARDIAN)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 65].Name);
     }
-    else if (o->Type == MODEL_HELPER + 67)
+    else if (o->Type == MODEL_PET_RUDOLF)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 67].Name);
     }
-    else if (o->Type == MODEL_HELPER + 80)
+    else if (o->Type == MODEL_PET_PANDA)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 80].Name);
     }
-    else if (o->Type == MODEL_HELPER + 106)
+    else if (o->Type == MODEL_PET_UNICORN)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 106].Name);
     }
-    else if (o->Type == MODEL_HELPER + 123)
+    else if (o->Type == MODEL_PET_SKELETON)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 123].Name);
     }
-    else if (o->Type == MODEL_HELPER + 68)
+    else if (o->Type == MODEL_SNOWMAN_TRANSFORMATION_RING)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 68].Name);
     }
-    else if (o->Type == MODEL_HELPER + 76)
+    else if (o->Type == MODEL_PANDA_TRANSFORMATION_RING)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 76].Name);
     }
-    else if (o->Type == MODEL_HELPER + 122)
+    else if (o->Type == MODEL_SKELETON_TRANSFORMATION_RING)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 122].Name);
@@ -6817,15 +6817,15 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
     {
         g_pRenderText->SetFont(g_hFontBold);
         glColor3f(1.f, 0.8f, 0.1f);
-        swprintf(Name, L"%s", ItemAttribute[MODEL_POTION + 13 - MODEL_ITEM].Name);
+        swprintf(Name, L"%s", ItemAttribute[MODEL_JEWEL_OF_BLESS - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_COMPILED_SOUL)
     {
         g_pRenderText->SetFont(g_hFontBold);
         glColor3f(1.f, 0.8f, 0.1f);
-        swprintf(Name, L"%s", ItemAttribute[MODEL_POTION + 14 - MODEL_ITEM].Name);
+        swprintf(Name, L"%s", ItemAttribute[MODEL_JEWEL_OF_SOUL - MODEL_ITEM].Name);
     }
-    else if (o->Type == MODEL_POTION + 17 || o->Type == MODEL_POTION + 18 || o->Type == MODEL_POTION + 19)
+    else if (o->Type == MODEL_DEVILS_EYE || o->Type == MODEL_DEVILS_KEY || o->Type == MODEL_DEVILS_INVITATION)
     {
         g_pRenderText->SetFont(g_hFontBold);
         glColor3f(1.f, 0.8f, 0.1f);
@@ -6838,7 +6838,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
             swprintf(Name, L"%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ((ItemLevel >> 3) & 15));
         }
     }
-    else if (o->Type == MODEL_POTION + 11 && Level == 7)
+    else if (o->Type == MODEL_BOX_OF_LUCK && Level == 7)
     {
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, GlobalText[111]);
@@ -6852,7 +6852,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         case 2:swprintf(Name, GlobalText[104]); break;
         }
     }
-    else if (o->Type == MODEL_HELPER + 15)
+    else if (o->Type == MODEL_FRUITS)
     {
         glColor3f(1.f, 0.8f, 0.1f);
         switch (Level)
@@ -6864,7 +6864,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         case 4:swprintf(Name, L"%s %s", GlobalText[1900], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
         }
     }
-    else if (o->Type == MODEL_HELPER + 31)
+    else if (o->Type == MODEL_SPIRIT)
     {
         glColor3f(1.f, 0.8f, 0.1f);
         switch (Level)
@@ -6928,32 +6928,32 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
     {
         swprintf(Name, L"%s +%d", GlobalText[115], Level - 7);
     }
-    else if (o->Type == MODEL_WING + 32)
+    else if (o->Type == MODEL_RED_RIBBON_BOX)
     {
         glColor3f(1.f, 0.3f, 0.3f);
         swprintf(Name, ItemAttribute[ITEM_WING + 32].Name);
     }
-    else if (o->Type == MODEL_WING + 33)
+    else if (o->Type == MODEL_GREEN_RIBBON_BOX)
     {
         glColor3f(0.3f, 1.0f, 0.3f);
         swprintf(Name, ItemAttribute[ITEM_WING + 33].Name);
     }
-    else if (o->Type == MODEL_WING + 34)
+    else if (o->Type == MODEL_BLUE_RIBBON_BOX)
     {
         glColor3f(0.3f, 0.3f, 1.f);
         swprintf(Name, ItemAttribute[ITEM_WING + 34].Name);
     }
-    else if (o->Type == MODEL_HELPER + 49)
+    else if (o->Type == MODEL_OLD_SCROLL)
     {
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 49].Name);
     }
-    else if (o->Type == MODEL_HELPER + 50)
+    else if (o->Type == MODEL_ILLUSION_SORCERER_COVENANT)
     {
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 50].Name);
     }
-    else if (o->Type == MODEL_HELPER + 51)
+    else if (o->Type == MODEL_SCROLL_OF_BLOOD)
     {
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, ItemAttribute[ITEM_HELPER + 51].Name);
@@ -6963,49 +6963,49 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 64].Name);
     }
-    else if (o->Type == MODEL_WING + 48)//
+    else if (o->Type == MODEL_SCROLL_OF_CHAOTIC_DISEIER)//
     {
         glColor3f(1.f, 1.f, 1.f);
         swprintf(Name, ItemAttribute[ITEM_WING + 48].Name);
     }
-    else if (o->Type == MODEL_WING + 35)
+    else if (o->Type == MODEL_SCROLL_OF_FIRE_SCREAM)
     {
         glColor3f(1.f, 1.f, 1.f);
         swprintf(Name, ItemAttribute[ITEM_WING + 35].Name);
     }
-    else if (o->Type == MODEL_POTION + 45)
+    else if (o->Type == MODEL_PUMPKIN_OF_LUCK)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 45].Name);
     }
-    else if (o->Type == MODEL_POTION + 46)
+    else if (o->Type == MODEL_JACK_OLANTERN_BLESSINGS)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 46].Name);
     }
-    else if (o->Type == MODEL_POTION + 47)
+    else if (o->Type == MODEL_JACK_OLANTERN_WRATH)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 47].Name);
     }
-    else if (o->Type == MODEL_POTION + 48)
+    else if (o->Type == MODEL_JACK_OLANTERN_CRY)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 48].Name);
     }
-    else if (o->Type == MODEL_POTION + 49)
+    else if (o->Type == MODEL_JACK_OLANTERN_FOOD)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 49].Name);
     }
-    else if (o->Type == MODEL_POTION + 50)
+    else if (o->Type == MODEL_JACK_OLANTERN_DRINK)
     {
         glColor3f(0.9f, 0.53f, 0.13f);
         swprintf(Name, ItemAttribute[ITEM_POTION + 50].Name);
     }
-    else if (o->Type == MODEL_POTION + 32)
+    else if (o->Type == MODEL_PINK_CHOCOLATE_BOX)
     {
-        int i = MODEL_POTION + 32;
+        int i = MODEL_PINK_CHOCOLATE_BOX;
         int k = ITEM_POTION + 32;
         if (Level == 0)
         {
@@ -7019,7 +7019,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
                 swprintf(Name, GlobalText[2012]);
             }
     }
-    else if (o->Type == MODEL_POTION + 33)
+    else if (o->Type == MODEL_RED_CHOCOLATE_BOX)
     {
         if (Level == 0)
         {
@@ -7033,7 +7033,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
                 swprintf(Name, GlobalText[2013]);
             }
     }
-    else if (o->Type == MODEL_POTION + 34)
+    else if (o->Type == MODEL_BLUE_CHOCOLATE_BOX)
     {
         if (Level == 0)
         {
@@ -7100,11 +7100,11 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, GlobalText[925]);
     }
-    else if (o->Type == MODEL_WING + 11)
+    else if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
         swprintf(Name, L"%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
     }
-    else if (o->Type == MODEL_HELPER + 10)
+    else if (o->Type == MODEL_TRANSFORMATION_RING)
     {
         for (int i = 0; i < MAX_MONSTER; i++)
         {
@@ -7120,7 +7120,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, GlobalText[1290]);
     }
-    else if (o->Type == MODEL_POTION + 7)
+    else if (o->Type == MODEL_SIEGE_POTION)
     {
         switch (Level)
         {
@@ -7136,7 +7136,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         case 1: swprintf(Name, GlobalText[1461]); break;
         }
     }
-    else if (o->Type == MODEL_HELPER + 11)
+    else if (o->Type == MODEL_LIFE_STONE)
     {
         switch (Level)
         {
@@ -7155,9 +7155,9 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
 
     if (bFirstOK == false)
     {
-        if ((o->Type >= MODEL_WING + 60 && o->Type <= MODEL_WING + 65)
-            || (o->Type >= MODEL_WING + 70 && o->Type <= MODEL_WING + 74)
-            || (o->Type >= MODEL_WING + 100 && o->Type <= MODEL_WING + 129))
+        if ((o->Type >= MODEL_SEED_FIRE && o->Type <= MODEL_SEED_EARTH)
+            || (o->Type >= MODEL_SPHERE_MONO && o->Type <= MODEL_SPHERE_5)
+            || (o->Type >= MODEL_SEED_SPHERE_FIRE_1 && o->Type <= MODEL_SEED_SPHERE_EARTH_5))
         {
             glColor3f(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
             wcscpy(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
@@ -7235,7 +7235,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         }
         else
         {
-            if (o->Type == MODEL_STAFF + 10 || o->Type == MODEL_SWORD + 19 || o->Type == MODEL_BOW + 18 || o->Type == MODEL_MACE + 13)
+            if (o->Type == MODEL_DIVINE_STAFF_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL || o->Type == MODEL_DIVINE_CB_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL)
             {
                 glColor3f(1.f, 0.1f, 1.f);
             }
@@ -7243,14 +7243,14 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
             {
                 glColor3f(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
             }
-            else if ((ItemOption & 63) > 0 && (o->Type<MODEL_WING + 3 || o->Type>MODEL_WING + 6) && o->Type != MODEL_HELPER + 30
-                && (o->Type<MODEL_WING + 36 || o->Type>MODEL_WING + 40)
-                && (o->Type<MODEL_WING + 42 || o->Type>MODEL_WING + 43)
-                && !(o->Type >= MODEL_WING + 49 && o->Type <= MODEL_WING + 50))
+            else if ((ItemOption & 63) > 0 && (o->Type<MODEL_WINGS_OF_SPIRITS || o->Type>MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
+                && (o->Type<MODEL_WING_OF_STORM || o->Type>MODEL_CAPE_OF_EMPEROR)
+                && (o->Type<MODEL_WINGS_OF_DESPAIR || o->Type>MODEL_WING_OF_DIMENSION)
+                && !(o->Type >= MODEL_CAPE_OF_FIGHTER && o->Type <= MODEL_CAPE_OF_OVERRULE))
             {
                 glColor3f(0.1f, 1.f, 0.5f);
             }
-            else if (MODEL_POTION + 101 <= o->Type && o->Type <= MODEL_POTION + 109)
+            else if (MODEL_SUSPICIOUS_SCRAP_OF_PAPER <= o->Type && o->Type <= MODEL_COMPLETE_SECROMICON)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
                 swprintf(Name, ItemAttribute[o->Type].Name);
@@ -7331,7 +7331,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
             {
                 glColor3f(1.f, 0.8f, 0.1f);
             }
-            else if (o->Type == MODEL_POTION + 28 || o->Type == MODEL_POTION + 29)
+            else if (o->Type == MODEL_LOST_MAP || o->Type == MODEL_SYMBOL_OF_KUNDUN)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
             }
@@ -7375,7 +7375,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
 
             if ((ItemLevel >> 7) & 1)
             {
-                if (o->Type != MODEL_HELPER + 3)
+                if (o->Type != MODEL_HORN_OF_DINORANT)
                 {
                     wcscat(Name, GlobalText[176]);
                 }
@@ -7991,7 +7991,7 @@ bool IsStoreBan(ITEM* pItem)
 sItemAct Set_ItemActOption(int _nIndex, int _nOption)
 {
     sItemAct	sItem;
-    // eITEM_PERSONALSHOP = °³ÀÎ»óÁ¡, eITEM_STORE = Ã¢°í, eITEM_TRADE = °Å·¡, eITEM_DROP = ¹ö¸®±â, eITEM_SELL = ÆÇ¸Å, eITEM_REPAIR = ¼ö¸®
+    // eITEM_PERSONALSHOP = ê°œì¸ìƒì , eITEM_STORE = ì°½ê³ , eITEM_TRADE = ê±°ëž˜, eITEM_DROP = ë²„ë¦¬ê¸°, eITEM_SELL = íŒë§¤, eITEM_REPAIR = ìˆ˜ë¦¬
     int	nItemOption[][eITEM_END] = { 0, 1, 1, 0, 0, 0,
                                         0, 0, 0, 0, 1, 0,
         -1 };
@@ -8031,7 +8031,7 @@ bool Check_ItemAction(ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType)
         }
     }
 
-    // µî·ÏµÇÁö ¾ÊÀº ¾ÆÀÌÅÛÀº ¹«½Ã.
+    // ë“±ë¡ë˜ì§€ ì•Šì€ ì•„ì´í…œì€ ë¬´ì‹œ.
     return false;
 }
 
@@ -8305,136 +8305,136 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
     else
         VectorMA(MousePosition, 0.1f, Direction, Position);
 
-    if (Type == MODEL_SWORD + 0)
+    if (Type == MODEL_KRIS)
     {
         Position[0] -= 0.02f;
         Position[1] += 0.03f;
         Vector(180.f, 270.f, 15.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_BOW + 7 || Type == MODEL_BOW + 15)
+    else if (Type == MODEL_BOLT || Type == MODEL_ARROWS)
     {
         Vector(0.f, 270.f, 15.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_SPEAR + 0)
+    else if (Type == MODEL_LIGHT_SPEAR)
     {
         Position[1] += 0.05f;
         Vector(0.f, 90.f, 20.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_BOW + 17)
+    else if (Type == MODEL_CELESTIAL_BOW)
     {
         Vector(0.f, 90.f, 15.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELM + 31)
+    else if (Type == MODEL_SYLPHID_RAY_HELM)
     {
         Position[1] -= 0.06f;
         Position[0] += 0.03f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELM + 30)
+    else if (Type == MODEL_VENOM_MIST_HELM)
     {
         Position[1] += 0.07f;
         Position[0] -= 0.03f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_ARMOR + 30)
+    else if (Type == MODEL_VENOM_MIST_ARMOR)
     {
         Position[1] += 0.1f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_ARMOR + 29)
+    else if (Type == MODEL_DRAGON_KNIGHT_ARMOR)
     {
         Position[1] += 0.07f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_BOW + 21)
+    else if (Type == MODEL_SYLPH_WIND_BOW)
     {
         Position[1] += 0.12f;
         Vector(180.f, -90.f, 15.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_STAFF + 12)
+    else if (Type == MODEL_GRAND_VIPER_STAFF)
     {
         Position[1] -= 0.1f;
         Position[0] += 0.025f;
         Vector(180.f, 0.f, 8.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_STAFF + 21 && Type <= MODEL_STAFF + 29)
+    else if (Type >= MODEL_BOOK_OF_SAHAMUTT && Type <= MODEL_STAFF + 29)
     {
         Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_MACE + 14)
+    else if (Type == MODEL_SOLEIL_SCEPTER)
     {
         Position[1] += 0.1f;
         Position[0] -= 0.01;
         Vector(180.f, 90.f, 13.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_ARMOR + 34)
+    else if (Type == MODEL_ASHCROW_ARMOR)
     {
         Position[1] += 0.03f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELM + 35)
+    else if (Type == MODEL_ECLIPSE_HELM)
     {
         Position[0] -= 0.02f;
         Position[1] += 0.05f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_ARMOR + 35)
+    else if (Type == MODEL_ECLIPSE_ARMOR)
     {
         Position[1] += 0.05f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_ARMOR + 36)
+    else if (Type == MODEL_IRIS_ARMOR)
     {
         Position[1] -= 0.05f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_ARMOR + 37)
+    else if (Type == MODEL_VALIANT_ARMOR)
     {
         Position[1] -= 0.05f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (MODEL_HELM + 39 <= Type && MODEL_HELM + 44 >= Type)
+    else if (MODEL_MISTERY_HELM <= Type && MODEL_LILIUM_HELM >= Type)
     {
         Position[1] -= 0.05f;
         Vector(-90.f, 25.f, 0.f, ObjectSelect.Angle);
     }
-    else if (MODEL_ARMOR + 38 <= Type && MODEL_ARMOR + 44 >= Type)
+    else if (MODEL_GLORIOUS_ARMOR <= Type && MODEL_LILIUM_ARMOR >= Type)
     {
         Position[1] -= 0.08f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_SWORD + 24)
+    else if (Type == MODEL_DAYBREAK)
     {
         Position[0] -= 0.02f;
         Position[1] += 0.03f;
         Vector(180.f, 90.f, 15.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_MACE + 15)
+    else if (Type == MODEL_SHINING_SCEPTER)
     {
         Position[1] += 0.05f;
         Vector(180.f, 90.f, 13.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_BOW + 22 || Type == MODEL_BOW + 23)
+    else if (Type == MODEL_ALBATROSS_BOW || Type == MODEL_STINGER_BOW)
     {
         Position[0] -= 0.10f;
         Position[1] += 0.08f;
         Vector(180.f, -90.f, 15.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_STAFF + 13)
+    else if (Type == MODEL_PLATINA_STAFF)
     {
         Position[0] += 0.02f;
         Position[1] += 0.02f;
         Vector(180.f, 90.f, 8.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_BOW + 20)
+    else if (Type == MODEL_ARROW_VIPER_BOW)
     {
         Vector(180.f, -90.f, 15.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_BOW + 8 && Type < MODEL_BOW + MAX_ITEM_INDEX)
+    else if (Type >= MODEL_CROSSBOW && Type < MODEL_BOW + MAX_ITEM_INDEX)
     {
         Vector(90.f, 180.f, 20.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_SPEAR + 10)
+    else if (Type == MODEL_DRAGON_SPEAR)
     {
         Vector(180.f, 270.f, 20.f, ObjectSelect.Angle);
     }
@@ -8442,11 +8442,11 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
     {
         switch (Type)
         {
-        case MODEL_STAFF + 14:							Position[1] += 0.04f;	break;
-        case MODEL_STAFF + 17:	Position[0] += 0.02f;	Position[1] += 0.03f;	break;
-        case MODEL_STAFF + 18:	Position[0] += 0.02f;							break;
-        case MODEL_STAFF + 19:	Position[0] -= 0.02f;	Position[1] -= 0.02f;	break;
-        case MODEL_STAFF + 20:	Position[0] += 0.01f;	Position[1] -= 0.01f;	break;
+        case MODEL_MISTERY_STICK:							Position[1] += 0.04f;	break;
+        case MODEL_ANCIENT_STICK:	Position[0] += 0.02f;	Position[1] += 0.03f;	break;
+        case MODEL_DEMONIC_STICK:	Position[0] += 0.02f;							break;
+        case MODEL_STORM_BLITZ_STICK:	Position[0] -= 0.02f;	Position[1] -= 0.02f;	break;
+        case MODEL_ETERNAL_WING_STICK:	Position[0] += 0.01f;	Position[1] -= 0.01f;	break;
         }
 
         if (!ItemAttribute[Type - MODEL_ITEM].TwoHand)
@@ -8462,23 +8462,23 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
     {
         Vector(270.f, 270.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 3)
+    else if (Type == MODEL_HORN_OF_DINORANT)
     {
         Vector(-90.f, -90.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 4)
+    else if (Type == MODEL_DARK_HORSE_ITEM)
     {
         Vector(-90.f, -90.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 5)
+    else if (Type == MODEL_DARK_RAVEN_ITEM)
     {
         Vector(-90.f, -35.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 31)
+    else if (Type == MODEL_SPIRIT)
     {
         Vector(-90.f, -90.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 30)
+    else if (Type == MODEL_CAPE_OF_LORD)
     {
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
@@ -8486,11 +8486,11 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
     {
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 16 || Type == MODEL_HELPER + 17)
+    else if (Type == MODEL_SCROLL_OF_ARCHANGEL || Type == MODEL_BLOOD_BONE)
     {
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 18)
+    else if (Type == MODEL_INVISIBILITY_CLOAK)
     {
         Vector(290.f, 0.f, 0.f, ObjectSelect.Angle);
     }
@@ -8510,61 +8510,61 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_HELPER + 21 && Type <= MODEL_HELPER + 24)
+    else if (Type >= MODEL_RING_OF_FIRE && Type <= MODEL_RING_OF_MAGIC)
     {
         Vector(270.f, 160.f, 20.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 29)
+    else if (Type == MODEL_ARMOR_OF_GUARDSMAN)
     {
         Vector(290.f, 0.f, 0.f, ObjectSelect.Angle);
     }
 
-    else if (Type == MODEL_HELPER + 32)
+    else if (Type == MODEL_SPLINTER_OF_ARMOR)
     {
         Position[0] += 0.01f;
         Position[1] -= 0.03f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 33)
+    else if (Type == MODEL_BLESS_OF_GUARDIAN)
     {
         Position[1] += 0.02f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 34)
-    {
-        Position[0] += 0.01f;
-        Position[1] += 0.02f;
-        Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
-    }
-    else if (Type == MODEL_HELPER + 35)
+    else if (Type == MODEL_CLAW_OF_BEAST)
     {
         Position[0] += 0.01f;
         Position[1] += 0.02f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 36)
+    else if (Type == MODEL_FRAGMENT_OF_HORN)
+    {
+        Position[0] += 0.01f;
+        Position[1] += 0.02f;
+        Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
+    }
+    else if (Type == MODEL_BROKEN_HORN)
     {
         Position[0] += 0.01f;
         Position[1] += 0.05f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 37)
+    else if (Type == MODEL_HORN_OF_FENRIR)
     {
         Position[0] += 0.01f;
         Position[1] += 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 49)
+    else if (Type == MODEL_OLD_SCROLL)
     {
         Position[1] -= 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 50)
+    else if (Type == MODEL_ILLUSION_SORCERER_COVENANT)
     {
         Position[1] -= 0.03f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 51)
+    else if (Type == MODEL_SCROLL_OF_BLOOD)
     {
         Position[1] -= 0.02f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -8574,37 +8574,37 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] += 0.02f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 52)
+    else if (Type == MODEL_FLAME_OF_CONDOR)
     {
         Position[1] += 0.045f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 53)
+    else if (Type == MODEL_FEATHER_OF_CONDOR)
     {
         Position[1] += 0.04f;
         Vector(270.f, 120.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 37)
+    else if (Type == MODEL_WING_OF_ETERNAL)
     {
         Position[1] += 0.05f;
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 38)
+    else if (Type == MODEL_WING_OF_ILLUSION)
     {
         Position[1] += 0.05f;
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 39)
+    else if (Type == MODEL_WING_OF_RUIN)
     {
         Position[1] += 0.08f;
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 40)
+    else if (Type == MODEL_CAPE_OF_EMPEROR)
     {
         Position[1] += 0.05f;
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 42)
+    else if (Type == MODEL_WINGS_OF_DESPAIR)
     {
         Position[1] += 0.05f;
         Vector(270.f, 0.f, 2.f, ObjectSelect.Angle);
@@ -8728,24 +8728,24 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[0] += 0.01f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_POTION + 84 && Type <= MODEL_POTION + 90)
+    else if (Type >= MODEL_CHERRY_BLOSSOM_PLAYBOX && Type <= MODEL_GOLDEN_CHERRY_BLOSSOM_BRANCH)
     {
-        if (Type == MODEL_POTION + 84)
+        if (Type == MODEL_CHERRY_BLOSSOM_PLAYBOX)
         {
             Position[1] += 0.01f;
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
         }
-        else if (Type == MODEL_POTION + 85)
+        else if (Type == MODEL_CHERRY_BLOSSOM_WINE)
         {
             Position[1] -= 0.01f;
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
         }
-        else if (Type == MODEL_POTION + 86)
+        else if (Type == MODEL_CHERRY_BLOSSOM_RICE_CAKE)
         {
             Position[1] += 0.01f;
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
         }
-        else if (Type == MODEL_POTION + 87)
+        else if (Type == MODEL_CHERRY_BLOSSOM_FLOWER_PETAL)
         {
             Position[1] += 0.01f;
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -8760,7 +8760,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
             Position[1] += 0.015f;
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
         }
-        else if (Type == MODEL_POTION + 90)
+        else if (Type == MODEL_GOLDEN_CHERRY_BLOSSOM_BRANCH)
         {
             Position[1] += 0.015f;
             Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
@@ -8789,35 +8789,35 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[0] += 0.003f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (MODEL_HELPER + 64 <= Type && Type <= MODEL_HELPER + 65)
+    else if (MODEL_DEMON <= Type && Type <= MODEL_SPIRIT_OF_GUARDIAN)
     {
         switch (Type)
         {
-        case MODEL_HELPER + 64:
+        case MODEL_DEMON:
             Position[1] -= 0.05f;
             break;
-        case MODEL_HELPER + 65:
+        case MODEL_SPIRIT_OF_GUARDIAN:
             Position[1] -= 0.02f;
             break;
         }
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 65)
+    else if (Type == MODEL_FLAME_OF_DEATH_BEAM_KNIGHT)
     {
         Position[1] += 0.05f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 66)
+    else if (Type == MODEL_HORN_OF_HELL_MAINE)
     {
         Position[1] += 0.11f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 67)
+    else if (Type == MODEL_FEATHER_OF_DARK_PHOENIX)
     {
         Position[1] += 0.11f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 39)
+    else if (Type == MODEL_ELITE_TRANSFER_SKELETON_RING)
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
@@ -8837,46 +8837,46 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] += 0.07f;
         Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 40)
+    else if (Type == MODEL_JACK_OLANTERN_TRANSFORMATION_RING)
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 41)
+    else if (Type == MODEL_CHRISTMAS_TRANSFORMATION_RING)
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 51)
+    else if (Type == MODEL_SCROLL_OF_BLOOD)
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 42)
+    else if (Type == MODEL_GAME_MASTER_TRANSFORMATION_RING)
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 38)
+    else if (Type == MODEL_MOONSTONE_PENDANT)
     {
         Position[0] += 0.00f;
         Position[1] += 0.02f;
         Vector(-48 - 150.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 41)
+    else if (Type == MODEL_GEMSTONE)
     {
         Position[1] += 0.02f;
         Vector(270.f, 90.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 42)
+    else if (Type == MODEL_JEWEL_OF_HARMONY)
     {
         Position[1] += 0.02f;
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 43 || Type == MODEL_POTION + 44)
+    else if (Type == MODEL_LOWER_REFINE_STONE || Type == MODEL_HIGHER_REFINE_STONE)
     {
         Position[0] -= 0.04f;
         Position[1] += 0.02f;
         Position[2] += 0.02f;
         Vector(270.f, -10.f, -45.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_HELPER + 12 && Type < MODEL_HELPER + MAX_ITEM_INDEX && Type != MODEL_HELPER + 14 && Type != MODEL_HELPER + 15)
+    else if (Type >= MODEL_PENDANT_OF_LIGHTING && Type < MODEL_HELPER + MAX_ITEM_INDEX && Type != MODEL_LOCHS_FEATHER && Type != MODEL_FRUITS)
     {
         Vector(270.f + 90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
@@ -8909,55 +8909,55 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
     {
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 63)
+    else if (Type == MODEL_FIRECRACKER)
     {
         Position[1] += 0.08f;
         Vector(-50.f, -60.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 52)
+    else if (Type == MODEL_GM_GIFT)
     {
         //Position[1] += 0.08f;
         Vector(270.f, -25.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_ETC + 19 && Type <= MODEL_ETC + 27)
+    else if (Type >= MODEL_CHAIN_LIGHTNING_PARCHMENT && Type <= MODEL_INNOVATION_PARCHMENT)
     {
         Position[0] += 0.03f;
         Position[1] += 0.03f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 7)
+    else if (Type == MODEL_ORB_OF_TWISTING_SLASH)
     {
         Position[0] += 0.005f;
         Position[1] -= 0.015f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_ARMOR + 10)
+    else if (Type == MODEL_VINE_ARMOR)
     {
         Position[1] -= 0.1f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_PANTS + 10)
+    else if (Type == MODEL_VINE_PANTS)
     {
         Position[1] -= 0.08f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_ARMOR + 11)
+    else if (Type == MODEL_SILK_ARMOR)
     {
         Position[1] -= 0.1f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_PANTS + 11)
+    else if (Type == MODEL_SILK_PANTS)
     {
         Position[1] -= 0.08f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 44)
+    else if (Type == MODEL_CRYSTAL_OF_DESTRUCTION)
     {
         Position[0] += 0.005f;
         Position[1] -= 0.015f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 46 || Type == MODEL_WING + 45)
+    else if (Type == MODEL_CRYSTAL_OF_RECOVERY || Type == MODEL_CRYSTAL_OF_MULTI_SHOT)
     {
         Position[0] += 0.005f;
         Position[1] -= 0.015f;
@@ -8968,24 +8968,24 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
     }
 
-    if (Type >= MODEL_WING + 60 && Type <= MODEL_WING + 65)
+    if (Type >= MODEL_SEED_FIRE && Type <= MODEL_SEED_EARTH)
     {
         Vector(10.f, -10.f, 10.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_WING + 70 && Type <= MODEL_WING + 74)
+    else if (Type >= MODEL_SPHERE_MONO && Type <= MODEL_SPHERE_5)
     {
         Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_WING + 100 && Type <= MODEL_WING + 129)
+    else if (Type >= MODEL_SEED_SPHERE_FIRE_1 && Type <= MODEL_SEED_SPHERE_EARTH_5)
     {
         Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 67)
+    else if (Type == MODEL_PET_RUDOLF)
     {
         Position[1] -= 0.05f;
         Vector(270.f, 40.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 123)
+    else if (Type == MODEL_PET_SKELETON)
     {
         Position[1] -= 0.05f;
         Vector(270.f, 40.f, 0.f, ObjectSelect.Angle);
@@ -9012,30 +9012,30 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] -= 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 80)
+    else if (Type == MODEL_PET_PANDA)
     {
         Position[1] -= 0.05f;
         Vector(270.f, 40.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 106)
+    else if (Type == MODEL_PET_UNICORN)
     {
         Position[0] += 0.01f;
         Position[1] -= 0.05f;
         Vector(255.f, 45.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 68)
+    else if (Type == MODEL_SNOWMAN_TRANSFORMATION_RING)
     {
         Position[0] += 0.02f;
         Position[1] -= 0.02f;
         Vector(300.f, 10.f, 20.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 76)
+    else if (Type == MODEL_PANDA_TRANSFORMATION_RING)
     {
         //		Position[0] += 0.02f;
         Position[1] -= 0.02f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELPER + 122)
+    else if (Type == MODEL_SKELETON_TRANSFORMATION_RING)
     {
         Position[0] += 0.01f;
         Position[1] -= 0.035f;
@@ -9130,42 +9130,42 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] -= 0.05f;
         Vector(0.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_POTION + 99)
+    else if (Type == MODEL_CHRISTMAS_FIRECRACKER)
     {
         Position[0] += 0.02f;
         Position[1] -= 0.03f;
         //Vector(270.f,0.f,30.f,ObjectSelect.Angle);
         Vector(290.f, -40.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_STAFF + 33)
+    else if (Type == MODEL_CHROMATIC_STAFF)
     {
         Position[0] += 0.02f;
         Position[1] -= 0.06f;
         Vector(180.f, 90.f, 10.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_STAFF + 34)
+    else if (Type == MODEL_RAVEN_STICK)
     {
         Position[1] -= 0.05f;
         Vector(180.f, 90.f, 10.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_SPEAR + 11)
+    else if (Type == MODEL_BEUROBA)
     {
         Position[1] += 0.02f;
         Vector(180.f, 90.f, 15.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_MACE + 18)
+    else if (Type == MODEL_STRYKER_SCEPTER)
     {
         Position[0] -= 0.03f;
         Position[1] += 0.06f;
         Vector(180.f, 90.f, 2.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_BOW + 24)
+    else if (Type == MODEL_AIR_LYN_BOW)
     {
         Position[0] -= 0.07f;
         Position[1] += 0.07f;
         Vector(180.f, -90.f, 15.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 47)
+    else if (Type == MODEL_CRYSTAL_OF_FLAME_STRIKE)
     {
         Position[0] += 0.005f;
         Position[1] -= 0.015f;
@@ -9237,33 +9237,33 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] -= 0.0f;
         Vector(270.0f, 0.0f, 0.0f, ObjectSelect.Angle);
     }
-    else if (MODEL_POTION + 101 <= Type && Type <= MODEL_POTION + 109)
+    else if (MODEL_SUSPICIOUS_SCRAP_OF_PAPER <= Type && Type <= MODEL_COMPLETE_SECROMICON)
     {
         switch (Type)
         {
-        case MODEL_POTION + 101:
+        case MODEL_SUSPICIOUS_SCRAP_OF_PAPER:
         {
             Position[0] += 0.005f;
             //Position[1] -= 0.02f;
         }break;
-        case MODEL_POTION + 102:
+        case MODEL_GAIONS_ORDER:
         {
             Position[0] += 0.005f;
             Position[1] += 0.05f;
             Vector(0.0f, 0.0f, 30.0f, ObjectSelect.Angle);
         }break;
-        case MODEL_POTION + 103:
-        case MODEL_POTION + 104:
-        case MODEL_POTION + 105:
-        case MODEL_POTION + 106:
-        case MODEL_POTION + 107:
-        case MODEL_POTION + 108:
+        case MODEL_FIRST_SECROMICON_FRAGMENT:
+        case MODEL_SECOND_SECROMICON_FRAGMENT:
+        case MODEL_THIRD_SECROMICON_FRAGMENT:
+        case MODEL_FOURTH_SECROMICON_FRAGMENT:
+        case MODEL_FIFTH_SECROMICON_FRAGMENT:
+        case MODEL_SIXTH_SECROMICON_FRAGMENT:
         {
             Position[0] += 0.005f;
             Position[1] += 0.05f;
             Vector(0.0f, 0.0f, 30.0f, ObjectSelect.Angle);
         }break;
-        case MODEL_POTION + 109:
+        case MODEL_COMPLETE_SECROMICON:
         {
             Position[0] += 0.005f;
             Position[1] += 0.05f;
@@ -9330,7 +9330,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] -= 0.04f;
         Vector(270.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_HELM + 59)
+    else if (Type == MODEL_SACRED_HELM)
     {
         Position[1] += 0.04f;
         Vector(-90.f, 25.f, 0.f, ObjectSelect.Angle);
@@ -9349,36 +9349,36 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] += 0.05f;
         Vector(90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_SWORD + 32)
+    else if (Type == MODEL_SACRED_GLOVE)
     {
         Position[0] += 0.005f;
         Position[1] += 0.015f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_SWORD + 33 && Type <= MODEL_SWORD + 34)
+    else if (Type >= MODEL_STORM_HARD_GLOVE && Type <= MODEL_PIERCING_BLADE_GLOVE)
     {
         Position[0] += 0.002f;
         Position[1] += 0.02f;
         Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_SWORD + 35)
+    else if (Type == MODEL_PHOENIX_SOUL_STAR)
     {
         Position[0] -= 0.005f;
         Position[1] += 0.015f;
         Vector(0.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 49)
+    else if (Type == MODEL_CAPE_OF_FIGHTER)
     {
         Position[1] += 0.01f;
         Position[0] += 0.015f;
         Vector(-90.f, 0.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type == MODEL_WING + 50)
+    else if (Type == MODEL_CAPE_OF_OVERRULE)
     {
         Position[1] += 0.15f;
         Vector(270.f, -10.f, 0.f, ObjectSelect.Angle);
     }
-    else if (Type >= MODEL_ETC + 30 && Type <= MODEL_ETC + 36)
+    else if (Type >= MODEL_CHAIN_DRIVE_PARCHMENT && Type <= MODEL_INCREASE_BLOCK_PARCHMENT)
     {
         Position[0] += 0.03f;
         Position[1] += 0.03f;
@@ -9421,38 +9421,38 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
 
     switch (Type)
     {
-    case MODEL_SWORD + 26:
+    case MODEL_FLAMBERGE:
     {
         Position[0] -= 0.02f;
         Position[1] += 0.04f;
         Vector(180.f, 270.f, 10.f, ObjectSelect.Angle);
     }break;
-    case MODEL_SWORD + 27:
+    case MODEL_SWORD_BREAKER:
     {
         Vector(180.f, 270.f, 15.f, ObjectSelect.Angle);
     }break;
-    case MODEL_SWORD + 28:
+    case MODEL_IMPERIAL_SWORD:
     {
         Position[1] += 0.02f;
         Vector(180.f, 270.f, 10.f, ObjectSelect.Angle);
     }break;
-    case MODEL_MACE + 16:
+    case MODEL_FROST_MACE:
     {
         Position[0] -= 0.02f;
         Vector(180.f, 270.f, 15.f, ObjectSelect.Angle);
     }
     break;
-    case MODEL_MACE + 17:
+    case MODEL_ABSOLUTE_SCEPTER:
     {
         Position[0] -= 0.02f;
         Position[1] += 0.04f;
         Vector(180.f, 270.f, 15.f, ObjectSelect.Angle);
     }break;
-    case MODEL_STAFF + 30:
+    case MODEL_DEADLY_STAFF:
     {
         Vector(180.f, 90.f, 10.f, ObjectSelect.Angle);
     }break;
-    case MODEL_STAFF + 31:
+    case MODEL_IMPERIAL_STAFF:
     {
         Vector(180.f, 90.f, 10.f, ObjectSelect.Angle);
     }break;
@@ -9464,7 +9464,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
 
     switch (Type)
     {
-    case MODEL_STAFF + 7:
+    case MODEL_CHAOS_LIGHTNING_STAFF:
     {
         Vector(0.f, 0.f, 205.f, ObjectSelect.Angle);
     }break;
@@ -9472,10 +9472,10 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
 
     switch (Type)
     {
-    case MODEL_WING + 8:
-    case MODEL_WING + 9:
-    case MODEL_WING + 10:
-    case MODEL_WING + 11:
+    case MODEL_ORB_OF_HEALING:
+    case MODEL_ORB_OF_GREATER_DEFENSE:
+    case MODEL_ORB_OF_GREATER_DAMAGE:
+    case MODEL_ORB_OF_SUMMONING:
     {
         Position[0] += 0.005f;
         Position[1] -= 0.02f;
@@ -9487,9 +9487,9 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         Position[1] -= 0.005f;
     }
     break;
-    case MODEL_POTION + 13:
-    case MODEL_POTION + 14:
-    case MODEL_POTION + 22:
+    case MODEL_JEWEL_OF_BLESS:
+    case MODEL_JEWEL_OF_SOUL:
+    case MODEL_JEWEL_OF_CREATION:
     {
         Position[0] += 0.005f;
         Position[1] += 0.015f;
@@ -9553,8 +9553,8 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
     {
         if (Type >= MODEL_HELM && Type < MODEL_HELM + MAX_ITEM_INDEX)
         {
-            Scale = MODEL_HELM + 39 <= Type && MODEL_HELM + 44 >= Type ? 0.007f : 0.0039f;
-            if (Type == MODEL_HELM + 31)
+            Scale = MODEL_MISTERY_HELM <= Type && MODEL_LILIUM_HELM >= Type ? 0.007f : 0.0039f;
+            if (Type == MODEL_SYLPHID_RAY_HELM)
                 Scale = 0.007f;
 
             if (Type == MODEL_HELM + 65 || Type == MODEL_HELM + 70)	Scale = 0.007f;
@@ -9567,22 +9567,22 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
             Scale = 0.0033f;
         else if (Type >= MODEL_BOOTS && Type < MODEL_BOOTS + MAX_ITEM_INDEX)
             Scale = 0.0032f;
-        else if (Type == MODEL_ARMOR + 30)
+        else if (Type == MODEL_VENOM_MIST_ARMOR)
             Scale = 0.0035f;
-        else if (Type == MODEL_ARMOR + 32)
+        else if (Type == MODEL_VOLCANO_ARMOR)
             Scale = 0.0035f;
-        else if (Type == MODEL_ARMOR + 29)
+        else if (Type == MODEL_DRAGON_KNIGHT_ARMOR)
             Scale = 0.0033f;
-        if (Type == MODEL_ARMOR + 34)
+        if (Type == MODEL_ASHCROW_ARMOR)
             Scale = 0.0032f;
-        else if (Type == MODEL_ARMOR + 35)
+        else if (Type == MODEL_ECLIPSE_ARMOR)
             Scale = 0.0032f;
-        else if (Type == MODEL_GLOVES + 38)
+        else if (Type == MODEL_GLORIOUS_GLOVES)
             Scale = 0.0032f;
     }
     else
     {
-        if (Type == MODEL_WING + 6)
+        if (Type == MODEL_WINGS_OF_DARKNESS)
             Scale = 0.0015f;
         else if (COMGEM::Check_Jewel_Com(Type - MODEL_ITEM) != COMGEM::NOGEM)
         {
@@ -9622,38 +9622,38 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                 break;
             }
         }
-        else if (Type >= MODEL_WING + 32 && Type <= MODEL_WING + 34)
+        else if (Type >= MODEL_RED_RIBBON_BOX && Type <= MODEL_BLUE_RIBBON_BOX)
         {
             Scale = 0.001f;
             Position[1] -= 0.05f;
         }
-        else if (Type >= MODEL_WING + 60 && Type <= MODEL_WING + 65)
+        else if (Type >= MODEL_SEED_FIRE && Type <= MODEL_SEED_EARTH)
             Scale = 0.0022f;
-        else if (Type >= MODEL_WING + 70 && Type <= MODEL_WING + 74)
+        else if (Type >= MODEL_SPHERE_MONO && Type <= MODEL_SPHERE_5)
             Scale = 0.0017f;
-        else if (Type >= MODEL_WING + 100 && Type <= MODEL_WING + 129)
+        else if (Type >= MODEL_SEED_SPHERE_FIRE_1 && Type <= MODEL_SEED_SPHERE_EARTH_5)
             Scale = 0.0017f;
         else if (Type >= MODEL_WING && Type < MODEL_WING + MAX_ITEM_INDEX)
         {
             Scale = 0.002f;
         }
         else
-            if (Type == MODEL_POTION + 45 || Type == MODEL_POTION + 49)
+            if (Type == MODEL_PUMPKIN_OF_LUCK || Type == MODEL_JACK_OLANTERN_FOOD)
             {
                 Scale = 0.003f;
             }
             else
-                if (Type >= MODEL_POTION + 46 && Type <= MODEL_POTION + 48)
+                if (Type >= MODEL_JACK_OLANTERN_BLESSINGS && Type <= MODEL_JACK_OLANTERN_CRY)
                 {
                     Scale = 0.0025f;
                 }
                 else
-                    if (Type == MODEL_POTION + 50)
+                    if (Type == MODEL_JACK_OLANTERN_DRINK)
                     {
                         Scale = 0.001f;
                     }
                     else
-                        if (Type >= MODEL_POTION + 32 && Type <= MODEL_POTION + 34)
+                        if (Type >= MODEL_PINK_CHOCOLATE_BOX && Type <= MODEL_BLUE_CHOCOLATE_BOX)
                         {
                             Scale = 0.002f;
                             Position[1] += 0.05f;
@@ -9671,23 +9671,23 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                             }
                             else if (Type == MODEL_POTION + 21)
                                 Scale = 0.002f;
-                            else if (Type == MODEL_BOW + 19)
+                            else if (Type == MODEL_GREAT_REIGN_CROSSBOW)
                                 Scale = 0.002f;
                             else if (Type == MODEL_EVENT + 11)
                                 Scale = 0.0015f;
-                            else if (Type == MODEL_HELPER + 4)
+                            else if (Type == MODEL_DARK_HORSE_ITEM)
                                 Scale = 0.0015f;
-                            else if (Type == MODEL_HELPER + 5)
+                            else if (Type == MODEL_DARK_RAVEN_ITEM)
                                 Scale = 0.005f;
-                            else if (Type == MODEL_HELPER + 30)
+                            else if (Type == MODEL_CAPE_OF_LORD)
                                 Scale = 0.002f;
                             else if (Type == MODEL_EVENT + 16)
                                 Scale = 0.002f;
-                            else if (Type == MODEL_HELPER + 16)
+                            else if (Type == MODEL_SCROLL_OF_ARCHANGEL)
                                 Scale = 0.002f;
-                            else if (Type == MODEL_HELPER + 17)
+                            else if (Type == MODEL_BLOOD_BONE)
                                 Scale = 0.0018f;
-                            else if (Type == MODEL_HELPER + 18)
+                            else if (Type == MODEL_INVISIBILITY_CLOAK)
                                 Scale = 0.0018f;
                             else if (Type == MODEL_HELPER + 46)
                             {
@@ -9781,19 +9781,19 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                             {
                                 Scale = 0.0022f;
                             }
-                            else if (Type == MODEL_POTION + 84)
+                            else if (Type == MODEL_CHERRY_BLOSSOM_PLAYBOX)
                             {
                                 Scale = 0.0031f;
                             }
-                            else if (Type == MODEL_POTION + 85)
+                            else if (Type == MODEL_CHERRY_BLOSSOM_WINE)
                             {
                                 Scale = 0.0044f;
                             }
-                            else if (Type == MODEL_POTION + 86)
+                            else if (Type == MODEL_CHERRY_BLOSSOM_RICE_CAKE)
                             {
                                 Scale = 0.0031f;
                             }
-                            else if (Type == MODEL_POTION + 87)
+                            else if (Type == MODEL_CHERRY_BLOSSOM_FLOWER_PETAL)
                             {
                                 Scale = 0.0061f;
                             }
@@ -9805,7 +9805,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                             {
                                 Scale = 0.0035f;
                             }
-                            else if (Type == MODEL_POTION + 90)
+                            else if (Type == MODEL_GOLDEN_CHERRY_BLOSSOM_BRANCH)
                             {
                                 Scale = 0.0035f;
                             }
@@ -9821,27 +9821,27 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                             {
                                 Scale = 0.0028f;
                             }
-                            else if (MODEL_HELPER + 64 == Type || Type == MODEL_HELPER + 65)
+                            else if (MODEL_DEMON == Type || Type == MODEL_SPIRIT_OF_GUARDIAN)
                             {
                                 switch (Type)
                                 {
-                                case MODEL_HELPER + 64: Scale = 0.0005f; break;
-                                case MODEL_HELPER + 65: Scale = 0.0016f; break;
+                                case MODEL_DEMON: Scale = 0.0005f; break;
+                                case MODEL_SPIRIT_OF_GUARDIAN: Scale = 0.0016f; break;
                                 }
                             }
-                            else if (Type == MODEL_HELPER + 67)
+                            else if (Type == MODEL_PET_RUDOLF)
                             {
                                 Scale = 0.0015f;
                             }
-                            else if (Type == MODEL_HELPER + 80)
+                            else if (Type == MODEL_PET_PANDA)
                             {
                                 Scale = 0.0020f;
                             }
-                            else if (Type == MODEL_HELPER + 68)
+                            else if (Type == MODEL_SNOWMAN_TRANSFORMATION_RING)
                             {
                                 Scale = 0.0026f;
                             }
-                            else if (Type == MODEL_HELPER + 76)
+                            else if (Type == MODEL_PANDA_TRANSFORMATION_RING)
                             {
                                 Scale = 0.0026f;
                             }
@@ -9861,7 +9861,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                                 Scale = 0.0021f;
                             else if (Type == MODEL_HELPER + 94)
                                 Scale = 0.0021f;
-                            else if (Type == MODEL_SWORD + 19)
+                            else if (Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL)
                             {
                                 if (ItemLevel >= 0)
                                 {
@@ -9873,7 +9873,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                                     ItemLevel = 0;
                                 }
                             }
-                            else if (Type == MODEL_STAFF + 10)
+                            else if (Type == MODEL_DIVINE_STAFF_OF_ARCHANGEL)
                             {
                                 if (ItemLevel >= 0)
                                 {
@@ -9885,7 +9885,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                                     ItemLevel = 0;
                                 }
                             }
-                            else if (Type == MODEL_BOW + 18)
+                            else if (Type == MODEL_DIVINE_CB_OF_ARCHANGEL)
                             {
                                 if (ItemLevel >= 0)
                                 {
@@ -9897,15 +9897,15 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                                     ItemLevel = 0;
                                 }
                             }
-                            else if (Type >= MODEL_MACE + 8 && Type <= MODEL_MACE + 11)
+                            else if (Type >= MODEL_BATTLE_SCEPTER && Type <= MODEL_LORD_SCEPTER)
                             {
                                 Scale = 0.003f;
                             }
-                            else if (Type == MODEL_MACE + 12)
+                            else if (Type == MODEL_GREAT_LORD_SCEPTER)
                             {
                                 Scale = 0.0025f;
                             }
-                            else if (Type == MODEL_MACE + 18)
+                            else if (Type == MODEL_STRYKER_SCEPTER)
                             {
                                 Scale = 0.0024f;
                             }
@@ -9925,49 +9925,49 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                             {
                                 Scale = 0.0023f;
                             }
-                            else if (Type >= MODEL_POTION + 22 && Type < MODEL_POTION + 25)
+                            else if (Type >= MODEL_JEWEL_OF_CREATION && Type < MODEL_TEAR_OF_ELF)
                             {
                                 Scale = 0.0025f;
                             }
-                            else if (Type >= MODEL_POTION + 25 && Type < MODEL_POTION + 27)
+                            else if (Type >= MODEL_TEAR_OF_ELF && Type < MODEL_POTION + 27)
                             {
                                 Scale = 0.0028f;
                             }
-                            else if (Type == MODEL_POTION + 63)
+                            else if (Type == MODEL_FIRECRACKER)
                             {
                                 Scale = 0.007f;
                             }
-                            else if (Type == MODEL_POTION + 99)
+                            else if (Type == MODEL_CHRISTMAS_FIRECRACKER)
                             {
                                 Scale = 0.0025f;
                             }
-                            else if (Type == MODEL_POTION + 52)
+                            else if (Type == MODEL_GM_GIFT)
                             {
                                 Scale = 0.0014f;
                             }
-                            else if (Type == MODEL_HELPER + 38)
+                            else if (Type == MODEL_MOONSTONE_PENDANT)
                             {
                                 Scale = 0.0025f;
                             }
-                            else if (Type == MODEL_POTION + 41)
+                            else if (Type == MODEL_GEMSTONE)
                             {
                                 Scale = 0.0035f;
                             }
-                            else if (Type == MODEL_POTION + 42)
+                            else if (Type == MODEL_JEWEL_OF_HARMONY)
                             {
                                 Scale = 0.005f;
                             }
-                            else if (Type == MODEL_POTION + 43)
+                            else if (Type == MODEL_LOWER_REFINE_STONE)
                             {
                                 Position[1] += -0.005f;
                                 Scale = 0.0035f;
                             }
-                            else if (Type == MODEL_POTION + 44)
+                            else if (Type == MODEL_HIGHER_REFINE_STONE)
                             {
                                 Position[1] += -0.005f;
                                 Scale = 0.004f;
                             }
-                            else if (Type == MODEL_POTION + 7)
+                            else if (Type == MODEL_SIEGE_POTION)
                             {
                                 Scale = 0.0025f;
                             }
@@ -9979,47 +9979,47 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                             {
                                 Scale = 0.0025f;
                             }
-                            else if (Type == MODEL_HELPER + 11)
+                            else if (Type == MODEL_LIFE_STONE)
                             {
                                 Scale = 0.0025f;
                             }
-                            else if (Type == MODEL_HELPER + 32)
+                            else if (Type == MODEL_SPLINTER_OF_ARMOR)
                             {
                                 Scale = 0.0019f;
                             }
-                            else if (Type == MODEL_HELPER + 33)
+                            else if (Type == MODEL_BLESS_OF_GUARDIAN)
                             {
                                 Scale = 0.004f;
                             }
-                            else if (Type == MODEL_HELPER + 34)
+                            else if (Type == MODEL_CLAW_OF_BEAST)
                             {
                                 Scale = 0.004f;
                             }
-                            else if (Type == MODEL_HELPER + 35)
+                            else if (Type == MODEL_FRAGMENT_OF_HORN)
                             {
                                 Scale = 0.004f;
                             }
-                            else if (Type == MODEL_HELPER + 36)
+                            else if (Type == MODEL_BROKEN_HORN)
                             {
                                 Scale = 0.007f;
                             }
-                            else if (Type == MODEL_HELPER + 37)
+                            else if (Type == MODEL_HORN_OF_FENRIR)
                             {
                                 Scale = 0.005f;
                             }
-                            else if (Type == MODEL_BOW + 21)
+                            else if (Type == MODEL_SYLPH_WIND_BOW)
                             {
                                 Scale = 0.0022f;
                             }
-                            else if (Type == MODEL_HELPER + 49)
+                            else if (Type == MODEL_OLD_SCROLL)
                             {
                                 Scale = 0.0013f;
                             }
-                            else if (Type == MODEL_HELPER + 50)
+                            else if (Type == MODEL_ILLUSION_SORCERER_COVENANT)
                             {
                                 Scale = 0.003f;
                             }
-                            else if (Type == MODEL_HELPER + 51)
+                            else if (Type == MODEL_SCROLL_OF_BLOOD)
                             {
                                 Scale = 0.003f;
                             }
@@ -10027,31 +10027,31 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                             {
                                 Scale = 0.003f;
                             }
-                            else if (Type == MODEL_POTION + 65)
+                            else if (Type == MODEL_FLAME_OF_DEATH_BEAM_KNIGHT)
                                 Scale = 0.003f;
-                            else if (Type == MODEL_POTION + 66)
+                            else if (Type == MODEL_HORN_OF_HELL_MAINE)
                                 Scale = 0.0035f;
-                            else if (Type == MODEL_POTION + 67)
+                            else if (Type == MODEL_FEATHER_OF_DARK_PHOENIX)
                                 Scale = 0.0035f;
-                            else if (Type == MODEL_POTION + 68)
+                            else if (Type == MODEL_EYE_OF_ABYSSAL)
                                 Scale = 0.003f;
-                            else if (Type == MODEL_HELPER + 52)
+                            else if (Type == MODEL_FLAME_OF_CONDOR)
                                 Scale = 0.005f;
-                            else if (Type == MODEL_HELPER + 53)
+                            else if (Type == MODEL_FEATHER_OF_CONDOR)
                                 Scale = 0.005f;
-                            else if (Type == MODEL_SWORD + 24)
+                            else if (Type == MODEL_DAYBREAK)
                             {
                                 Scale = 0.0028f;
                             }
-                            else if (Type == MODEL_BOW + 22)
+                            else if (Type == MODEL_ALBATROSS_BOW)
                             {
                                 Scale = 0.0020f;
                             }
-                            else if (Type == MODEL_BOW + 23)
+                            else if (Type == MODEL_STINGER_BOW)
                             {
                                 Scale = 0.0032f;
                             }
-                            else if (Type == MODEL_HELPER + 14 || Type == MODEL_HELPER + 15)
+                            else if (Type == MODEL_LOCHS_FEATHER || Type == MODEL_FRUITS)
                             {
                                 Scale = 0.003f;
                             }
@@ -10065,29 +10065,29 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                             }
                             else if (Type >= MODEL_SPEAR && Type < MODEL_SPEAR + MAX_ITEM_INDEX)
                             {
-                                if (Type == MODEL_SPEAR + 10)
+                                if (Type == MODEL_DRAGON_SPEAR)
                                     Scale = 0.0018f;
-                                else if (Type == MODEL_SPEAR + 11)
+                                else if (Type == MODEL_BEUROBA)
                                     Scale = 0.0025f;
                                 else
                                     Scale = 0.0021f;
                             }
                             else if (Type >= MODEL_STAFF && Type < MODEL_STAFF + MAX_ITEM_INDEX)
                             {
-                                if (Type >= MODEL_STAFF + 14 && Type <= MODEL_STAFF + 20)
+                                if (Type >= MODEL_MISTERY_STICK && Type <= MODEL_ETERNAL_WING_STICK)
                                     Scale = 0.0028f;
-                                else if (Type >= MODEL_STAFF + 21 && Type <= MODEL_STAFF + 29)
+                                else if (Type >= MODEL_BOOK_OF_SAHAMUTT && Type <= MODEL_STAFF + 29)
                                     Scale = 0.004f;
-                                else if (Type == MODEL_STAFF + 33)
+                                else if (Type == MODEL_CHROMATIC_STAFF)
                                     Scale = 0.0028f;
-                                else if (Type == MODEL_STAFF + 34)
+                                else if (Type == MODEL_RAVEN_STICK)
                                     Scale = 0.0028f;
                                 else
                                     Scale = 0.0022f;
                             }
-                            else if (Type == MODEL_BOW + 15)
+                            else if (Type == MODEL_ARROWS)
                                 Scale = 0.0011f;
-                            else if (Type == MODEL_BOW + 7)
+                            else if (Type == MODEL_BOLT)
                                 Scale = 0.0012f;
                             else if (Type == MODEL_EVENT + 6)
                                 Scale = 0.0039f;
@@ -10110,7 +10110,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         {
             Scale = 0.001f;
         }
-        else if (Type >= MODEL_ETC + 19 && Type <= MODEL_ETC + 27)
+        else if (Type >= MODEL_CHAIN_LIGHTNING_PARCHMENT && Type <= MODEL_INNOVATION_PARCHMENT)
         {
             Scale = 0.0023f;
         }
@@ -10122,11 +10122,11 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         {
             Scale = 0.0026f;
         }
-        else if (Type == MODEL_HELPER + 122)
+        else if (Type == MODEL_SKELETON_TRANSFORMATION_RING)
         {
             Scale = 0.0033f;
         }
-        else if (Type == MODEL_HELPER + 123)
+        else if (Type == MODEL_PET_SKELETON)
         {
             Scale = 0.0009f;
         }
@@ -10139,33 +10139,33 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
             Scale = 0.0013f;
         }
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-        else if (Type == MODEL_HELPER + 128)		// ¸ÅÁ¶°¢»ó
+        else if (Type == MODEL_HELPER + 128)		// ë§¤ì¡°ê°ìƒ
         {
             Scale = 0.0035f;
         }
-        else if (Type == MODEL_HELPER + 129)		// ¾çÁ¶°¢»ó
+        else if (Type == MODEL_HELPER + 129)		// ì–‘ì¡°ê°ìƒ
         {
             Scale = 0.0035f;
         }
-        else if (Type == MODEL_HELPER + 134)		// ÆíÀÚ
+        else if (Type == MODEL_HELPER + 134)		// íŽ¸ìž
         {
             Scale = 0.0033f;
         }
 #endif	//LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
 #ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-        else if (Type == MODEL_HELPER + 130)		// ¿ÀÅ©Âü
+        else if (Type == MODEL_HELPER + 130)		// ì˜¤í¬ì°¸
         {
             Scale = 0.0032f;
         }
-        else if (Type == MODEL_HELPER + 131)		// ¸ÞÀÌÇÃÂü
+        else if (Type == MODEL_HELPER + 131)		// ë©”ì´í”Œì°¸
         {
             Scale = 0.0033f;
         }
-        else if (Type == MODEL_HELPER + 132)		// °ñµç¿ÀÅ©Âü
+        else if (Type == MODEL_HELPER + 132)		// ê³¨ë“ ì˜¤í¬ì°¸
         {
             Scale = 0.0025f;
         }
-        else if (Type == MODEL_HELPER + 133)		// °ñµç¸ÞÀÌÇÃÂü
+        else if (Type == MODEL_HELPER + 133)		// ê³¨ë“ ë©”ì´í”Œì°¸
         {
             Scale = 0.0033f;
         }
@@ -10174,7 +10174,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         {
             Scale = 0.0019f;
         }
-        else if (Type == MODEL_BOW + 24)
+        else if (Type == MODEL_AIR_LYN_BOW)
         {
             Scale = 0.0023f;
         }
@@ -10202,34 +10202,34 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         {
             Scale = 0.002f;
         }
-        else if (MODEL_POTION + 101 <= Type && Type <= MODEL_POTION + 109)
+        else if (MODEL_SUSPICIOUS_SCRAP_OF_PAPER <= Type && Type <= MODEL_COMPLETE_SECROMICON)
         {
             switch (Type)
             {
-            case MODEL_POTION + 101:
+            case MODEL_SUSPICIOUS_SCRAP_OF_PAPER:
             {
                 Scale = 0.004f;
             }break;
-            case MODEL_POTION + 102:
+            case MODEL_GAIONS_ORDER:
             {
                 Scale = 0.005f;
             }break;
-            case MODEL_POTION + 103:
-            case MODEL_POTION + 104:
-            case MODEL_POTION + 105:
-            case MODEL_POTION + 106:
-            case MODEL_POTION + 107:
-            case MODEL_POTION + 108:
+            case MODEL_FIRST_SECROMICON_FRAGMENT:
+            case MODEL_SECOND_SECROMICON_FRAGMENT:
+            case MODEL_THIRD_SECROMICON_FRAGMENT:
+            case MODEL_FOURTH_SECROMICON_FRAGMENT:
+            case MODEL_FIFTH_SECROMICON_FRAGMENT:
+            case MODEL_SIXTH_SECROMICON_FRAGMENT:
             {
                 Scale = 0.004f;
             }break;
-            case MODEL_POTION + 109:
+            case MODEL_COMPLETE_SECROMICON:
             {
                 Scale = 0.003f;
             }break;
             }
         }
-        else if (Type == MODEL_HELPER + 106)
+        else if (Type == MODEL_PET_UNICORN)
         {
             Scale = 0.0015f;
         }
@@ -10277,7 +10277,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         }
         else if (Type == MODEL_HELPER + 124)
             Scale = 0.0018f;
-        else if (Type >= MODEL_WING + 49 && Type <= MODEL_WING + 50)
+        else if (Type >= MODEL_CAPE_OF_FIGHTER && Type <= MODEL_CAPE_OF_OVERRULE)
         {
             Scale = 0.002f;
         }
@@ -10285,15 +10285,15 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
         {
             Scale = 0.0012f;
         }
-        else if (Type >= MODEL_SWORD + 32 && Type <= MODEL_SWORD + 34)
+        else if (Type >= MODEL_SACRED_GLOVE && Type <= MODEL_PIERCING_BLADE_GLOVE)
         {
             Scale = 0.0035f;
         }
-        else if (Type == MODEL_SWORD + 35)
+        else if (Type == MODEL_PHOENIX_SOUL_STAR)
         {
             Scale = 0.003f;
         }
-        else if (Type >= MODEL_ETC + 30 && Type <= MODEL_ETC + 36)
+        else if (Type >= MODEL_CHAIN_DRIVE_PARCHMENT && Type <= MODEL_INCREASE_BLOCK_PARCHMENT)
         {
             Scale = 0.0023f;
         }
@@ -10302,7 +10302,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
             b->BodyHeight = -100.f;
             Scale = 0.0039f;
         }
-        // LEM_TSET  »ó½ÂÀÇ º¸¼®, ¿¬ÀåÀÇ º¸¼® ½ºÄÉÀÏ[lem_2010.9.7]
+        // LEM_TSET  ìƒìŠ¹ì˜ ë³´ì„, ì—°ìž¥ì˜ ë³´ì„ ìŠ¤ì¼€ì¼[lem_2010.9.7]
         else if (Type >= MODEL_HELPER + 135 && Type <= MODEL_HELPER + 145)
         {
             Scale = 0.001f;
@@ -10542,27 +10542,27 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         sx += Width * 0.5f;
         sy += Height * 0.5f;
     }
-    else if (Type == MODEL_HELPER + 33)
+    else if (Type == MODEL_BLESS_OF_GUARDIAN)
     {
         sx += Width * 0.5f;
         sy += Height * 0.5f;
     }
-    else if (Type == MODEL_HELPER + 34)
+    else if (Type == MODEL_CLAW_OF_BEAST)
     {
         sx += Width * 0.5f;
         sy += Height * 0.5f;
     }
-    else if (Type == MODEL_HELPER + 35)
+    else if (Type == MODEL_FRAGMENT_OF_HORN)
     {
         sx += Width * 0.5f;
         sy += Height * 0.5f;
     }
-    else if (Type == MODEL_HELPER + 36)
+    else if (Type == MODEL_BROKEN_HORN)
     {
         sx += Width * 0.5f;
         sy += Height * 0.5f;
     }
-    else if (Type == MODEL_HELPER + 37)
+    else if (Type == MODEL_HORN_OF_FENRIR)
     {
         sx += Width * 0.5f;
         sy += Height * 0.5f;
@@ -10711,7 +10711,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
     vec3_t Position;
     CreateScreenVector((int)(sx), (int)(sy), Position, false);
     //RenderObjectScreen(Type+MODEL_ITEM,Level,Option1,Position,Success,PickUp);
-    if (Type == ITEM_POTION + 11 && (Level >> 3) == 1)	// ¼ºÅºÀÇº°
+    if (Type == ITEM_POTION + 11 && (Level >> 3) == 1)	// ì„±íƒ„ì˜ë³„
     {
         RenderObjectScreen(MODEL_EVENT + 4, Level, Option1, ExtOption, Position, Success, PickUp);
     }
@@ -10771,26 +10771,26 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
     }
     else if (Type == ITEM_POTION + 45)
     {
-        RenderObjectScreen(MODEL_POTION + 45, Level, Option1, ExtOption, Position, Success, PickUp);
+        RenderObjectScreen(MODEL_PUMPKIN_OF_LUCK, Level, Option1, ExtOption, Position, Success, PickUp);
     }
     else if (Type >= ITEM_POTION + 46 && Type <= ITEM_POTION + 48)
     {
-        RenderObjectScreen(MODEL_POTION + 46, Level, Option1, ExtOption, Position, Success, PickUp);
+        RenderObjectScreen(MODEL_JACK_OLANTERN_BLESSINGS, Level, Option1, ExtOption, Position, Success, PickUp);
     }
     else if (Type == ITEM_POTION + 49)
     {
-        RenderObjectScreen(MODEL_POTION + 49, Level, Option1, ExtOption, Position, Success, PickUp);
+        RenderObjectScreen(MODEL_JACK_OLANTERN_FOOD, Level, Option1, ExtOption, Position, Success, PickUp);
     }
     else if (Type == ITEM_POTION + 50)
     {
-        RenderObjectScreen(MODEL_POTION + 50, Level, Option1, ExtOption, Position, Success, PickUp);
+        RenderObjectScreen(MODEL_JACK_OLANTERN_DRINK, Level, Option1, ExtOption, Position, Success, PickUp);
     }
     else if (Type == ITEM_POTION + 32)
     {
         switch ((Level >> 3))
         {
         case 0:
-            RenderObjectScreen(MODEL_POTION + 32, Level, Option1, ExtOption, Position, Success, PickUp);
+            RenderObjectScreen(MODEL_PINK_CHOCOLATE_BOX, Level, Option1, ExtOption, Position, Success, PickUp);
             break;
         case 1:
             RenderObjectScreen(MODEL_EVENT + 21, Level, Option1, ExtOption, Position, Success, PickUp);
@@ -10802,7 +10802,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         switch ((Level >> 3))
         {
         case 0:
-            RenderObjectScreen(MODEL_POTION + 33, Level, Option1, ExtOption, Position, Success, PickUp);
+            RenderObjectScreen(MODEL_RED_CHOCOLATE_BOX, Level, Option1, ExtOption, Position, Success, PickUp);
             break;
         case 1:
             RenderObjectScreen(MODEL_EVENT + 22, Level, Option1, ExtOption, Position, Success, PickUp);
@@ -10814,7 +10814,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         switch ((Level >> 3))
         {
         case 0:
-            RenderObjectScreen(MODEL_POTION + 34, Level, Option1, ExtOption, Position, Success, PickUp);
+            RenderObjectScreen(MODEL_BLUE_CHOCOLATE_BOX, Level, Option1, ExtOption, Position, Success, PickUp);
             break;
         case 1:
             RenderObjectScreen(MODEL_EVENT + 23, Level, Option1, ExtOption, Position, Success, PickUp);
@@ -10826,13 +10826,13 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         switch ((Level >> 3))
         {
         case 0:
-            RenderObjectScreen(MODEL_STAFF + 10, -1, Option1, ExtOption, Position, Success, PickUp);
+            RenderObjectScreen(MODEL_DIVINE_STAFF_OF_ARCHANGEL, -1, Option1, ExtOption, Position, Success, PickUp);
             break;
         case 1:
-            RenderObjectScreen(MODEL_SWORD + 19, -1, Option1, ExtOption, Position, Success, PickUp);
+            RenderObjectScreen(MODEL_DIVINE_SWORD_OF_ARCHANGEL, -1, Option1, ExtOption, Position, Success, PickUp);
             break;
         case 2:
-            RenderObjectScreen(MODEL_BOW + 18, -1, Option1, ExtOption, Position, Success, PickUp);
+            RenderObjectScreen(MODEL_DIVINE_CB_OF_ARCHANGEL, -1, Option1, ExtOption, Position, Success, PickUp);
             break;
         }
     }
@@ -11522,17 +11522,17 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
         case 1:MarkColor[i] = (255 << 24) + (0 << 16) + (0 << 8) + (0); break;
         case 2:MarkColor[i] = (255 << 24) + (128 << 16) + (128 << 8) + (128); break;
         case 3:MarkColor[i] = (255 << 24) + (255 << 16) + (255 << 8) + (255); break;
-        case 4:MarkColor[i] = (255 << 24) + (0 << 16) + (0 << 8) + (255); break;//»¡
+        case 4:MarkColor[i] = (255 << 24) + (0 << 16) + (0 << 8) + (255); break;//ë¹¨
         case 5:MarkColor[i] = (255 << 24) + (0 << 16) + (128 << 8) + (255); break;//
-        case 6:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (255); break;//³ë
+        case 6:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (255); break;//ë…¸
         case 7:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (128); break;//
-        case 8:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (0); break;//ÃÊ
+        case 8:MarkColor[i] = (255 << 24) + (0 << 16) + (255 << 8) + (0); break;//ì´ˆ
         case 9:MarkColor[i] = (255 << 24) + (128 << 16) + (255 << 8) + (0); break;//
-        case 10:MarkColor[i] = (255 << 24) + (255 << 16) + (255 << 8) + (0); break;//Ã»
+        case 10:MarkColor[i] = (255 << 24) + (255 << 16) + (255 << 8) + (0); break;//ì²­
         case 11:MarkColor[i] = (255 << 24) + (255 << 16) + (128 << 8) + (0); break;//
-        case 12:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (0); break;//ÆÄ
+        case 12:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (0); break;//íŒŒ
         case 13:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (128); break;//
-        case 14:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (255); break;//º¸
+        case 14:MarkColor[i] = (255 << 24) + (255 << 16) + (0 << 8) + (255); break;//ë³´
         case 15:MarkColor[i] = (255 << 24) + (128 << 16) + (0 << 8) + (255); break;//
         }
     }

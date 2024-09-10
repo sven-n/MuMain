@@ -1,4 +1,4 @@
-// Event.cpp: implementation of the CEvent class.
+ï»¿// Event.cpp: implementation of the CEvent class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@
 #include "Event.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-// Å©¸®½º¸¶½º ÀÌº¥Æ®
+// í¬ë¦¬ìŠ¤ë§ˆìŠ¤ ì´ë²¤íŠ¸
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CXmasEvent::CXmasEvent(void)
@@ -76,8 +76,8 @@ void CXmasEvent::LoadXmasEventEffect()
 
 void CXmasEvent::LoadXmasEventItem()
 {
-    gLoadData.AccessModel(MODEL_POTION + 51, L"Data\\Item\\", L"MagicBox", 2);
-    gLoadData.OpenTexture(MODEL_POTION + 51, L"Item\\");
+    gLoadData.AccessModel(MODEL_CHRISTMAS_STAR, L"Data\\Item\\", L"MagicBox", 2);
+    gLoadData.OpenTexture(MODEL_CHRISTMAS_STAR, L"Item\\");
 }
 
 void CXmasEvent::LoadXmasEventSound()
@@ -250,7 +250,7 @@ CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int
     case 365:
     {
         OpenMonsterModel(122);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 122, iPosX, iPosY);
+        pCharacter = CreateCharacter(iKey, MODEL_GIANT_OGRE_5, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"Fortune Pouch");
         pCharacter->Object.Scale = 1.5f;
     }
@@ -267,7 +267,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     if (b == NULL)	return false;
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 122:
+    case MODEL_GIANT_OGRE_5:
     {
         vec3_t vRelativePos, vWorldPos;
         Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -364,7 +364,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-// Çà¿îÀÇ ÆÄ¶õ°¡¹æ ÀÌº¥Æ®
+// í–‰ìš´ì˜ íŒŒëž€ê°€ë°© ì´ë²¤íŠ¸
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
@@ -432,7 +432,7 @@ CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iK
     if (iType == 463)
     {
         OpenMonsterModel(154);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 154, iPosX, iPosY);
+        pCharacter = CreateCharacter(iKey, MODEL_GATE_TO_KALIMA_3, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"Initial Helper");
         pCharacter->Object.Scale = 0.8f;
         pCharacter->Object.HiddenMesh = 2;
@@ -446,7 +446,7 @@ CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iK
 
 bool C09SummerEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (o->Type != MODEL_MONSTER01 + 154)
+    if (o->Type != MODEL_GATE_TO_KALIMA_3)
         return false;
 
     vec3_t vRelativePos, vWorldPos;

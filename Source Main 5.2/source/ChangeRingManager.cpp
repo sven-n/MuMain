@@ -1,4 +1,4 @@
-// ChangeRingManager.cpp: implementation of the CChangeRingManager class.
+﻿// ChangeRingManager.cpp: implementation of the CChangeRingManager class.
 //////////////////////////////////////////////////////////////////////
 
 // common
@@ -21,25 +21,25 @@ CChangeRingManager::~CChangeRingManager()
 
 void CChangeRingManager::LoadItemModel()
 {
-    gLoadData.AccessModel(MODEL_HELPER + 10, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 39, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 40, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 41, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 42, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 68, L"Data\\Item\\xmas\\", L"xmasring");
-    gLoadData.AccessModel(MODEL_HELPER + 76, L"Data\\Item\\", L"PandaPetRing");
-    gLoadData.AccessModel(MODEL_HELPER + 122, L"Data\\Item\\", L"SkeletonRing");
+    gLoadData.AccessModel(MODEL_TRANSFORMATION_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_ELITE_TRANSFER_SKELETON_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_JACK_OLANTERN_TRANSFORMATION_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_CHRISTMAS_TRANSFORMATION_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_GAME_MASTER_TRANSFORMATION_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_SNOWMAN_TRANSFORMATION_RING, L"Data\\Item\\xmas\\", L"xmasring");
+    gLoadData.AccessModel(MODEL_PANDA_TRANSFORMATION_RING, L"Data\\Item\\", L"PandaPetRing");
+    gLoadData.AccessModel(MODEL_SKELETON_TRANSFORMATION_RING, L"Data\\Item\\", L"SkeletonRing");
 }
 
 void CChangeRingManager::LoadItemTexture()
 {
-    gLoadData.OpenTexture(MODEL_HELPER + 39, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 41, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 40, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 42, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 68, L"Item\\xmas\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 76, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 122, L"Item\\");
+    gLoadData.OpenTexture(MODEL_ELITE_TRANSFER_SKELETON_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CHRISTMAS_TRANSFORMATION_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JACK_OLANTERN_TRANSFORMATION_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GAME_MASTER_TRANSFORMATION_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SNOWMAN_TRANSFORMATION_RING, L"Item\\xmas\\");
+    gLoadData.OpenTexture(MODEL_PANDA_TRANSFORMATION_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SKELETON_TRANSFORMATION_RING, L"Item\\");
 }
 
 bool CChangeRingManager::CheckDarkLordHair(int iType)

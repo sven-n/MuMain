@@ -1,4 +1,4 @@
-// w_CursedTemple.cpp: implementation of the CursedTemple class.
+ï»¿// w_CursedTemple.cpp: implementation of the CursedTemple class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -155,7 +155,7 @@ bool CursedTemple::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     return false;
 }
 
-CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int iKey)
+CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPosY, int iKey)
 {
     CHARACTER* pCharacter = NULL;
 
@@ -165,7 +165,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenNpc(MODEL_CURSEDTEMPLE_STATUE);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_STATUE, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"¼®»ó");
+        wcscpy(pCharacter->ID, L"ì„ìƒ");
         pCharacter->Object.EnableShadow = false;
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.m_fEdgeScale = 1.03f;
@@ -192,7 +192,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_BASKET, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"¿¬ÇÕ±º ¼º¹°º¸°üÇÔ");
+        wcscpy(pCharacter->ID, L"ì—°í•©êµ° ì„±ë¬¼ë³´ê´€í•¨");
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowAlliedPointEffect = false;
@@ -202,7 +202,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION__BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION__BASKET, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´Ü ¼º¹°º¸°üÇÔ");
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ ì„±ë¬¼ë³´ê´€í•¨");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowIllusionPointEffect = false;
@@ -224,8 +224,8 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     case 401:
     {
         OpenMonsterModel(123);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 123, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´ÜÀÇ ¸Á·É(¹ø°³)");
+        pCharacter = CreateCharacter(iKey, MODEL_RED_SKELETON_KNIGHT_5, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ì˜ ë§ë ¹(ë²ˆê°œ)");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -239,8 +239,8 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     case 402:
     {
         OpenMonsterModel(124);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 124, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´ÜÀÇ ¸Á·É(¾óÀ½)");
+        pCharacter = CreateCharacter(iKey, MODEL_MAGIC_SKELETON_5, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ì˜ ë§ë ¹(ì–¼ìŒ)");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -254,8 +254,8 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     case 403:
     {
         OpenMonsterModel(125);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 125, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´ÜÀÇ ¸Á·É(µ¶)");
+        pCharacter = CreateCharacter(iKey, MODEL_CHIEF_SKELETON_WARRIOR_6, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ì˜ ë§ë ¹(ë…)");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -264,7 +264,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     case 404:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"¹Â¿¬ÇÕ");
+        wcscpy(pCharacter->ID, L"ë®¤ì—°í•©");
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ALLIED_PLAYER;
     }
@@ -272,7 +272,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
     case 405:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´Ü");
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨");
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ILLUSION_PLAYER;
     }
@@ -381,8 +381,8 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 123:
-    case MODEL_MONSTER01 + 124:
+    case MODEL_RED_SKELETON_KNIGHT_5:
+    case MODEL_MAGIC_SKELETON_5:
     {
         if (o->CurrentAction == MONSTER01_STOP1)
         {
@@ -415,7 +415,7 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 125:
+    case MODEL_CHIEF_SKELETON_WARRIOR_6:
     {
         /*
                     if(o->CurrentAction == MONSTER01_STOP1)
@@ -479,7 +479,7 @@ void CursedTemple::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 125:
+    case MODEL_CHIEF_SKELETON_WARRIOR_6:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -799,7 +799,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     }
     return true;
 
-    case MODEL_MONSTER01 + 125:
+    case MODEL_CHIEF_SKELETON_WARRIOR_6:
     {
         vec3_t vRelativePos, vWorldPos;
         Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -815,7 +815,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 124:
+    case MODEL_MAGIC_SKELETON_5:
     {
         vec3_t vRelativePos, vWorldPos;
         float fLuminosity = (float)sinf((WorldTime) * 0.002f) * 0.2f;
@@ -855,7 +855,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 123:
+    case MODEL_RED_SKELETON_KNIGHT_5:
     {
         vec3_t vRelativePos, vWorldPos;
 
@@ -1089,8 +1089,8 @@ bool CursedTemple::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 2000 * 0.001f);
     }
     return true;
-    case MODEL_MONSTER01 + 123:
-    case MODEL_MONSTER01 + 124:
+    case MODEL_RED_SKELETON_KNIGHT_5:
+    case MODEL_MAGIC_SKELETON_5:
     {
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.8f;

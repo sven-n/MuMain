@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////////
 //  GMBattleCastle.cpp
 //////////////////////////////////////////////////////////////////////////
 
@@ -128,7 +128,7 @@ namespace battleCastle
         if (InArea(Position[0], Position[1], o->Position, Range) && o->CurrentAction != AniType)
         {
             //            if ( Range<=350.f && rand()%(int)(100-(Range-350.f)/10) )
-            if (Hero->Helper.Type == MODEL_HELPER + 37 && AniType == PLAYER_HIGH_SHOCK)
+            if (Hero->Helper.Type == MODEL_HORN_OF_FENRIR && AniType == PLAYER_HIGH_SHOCK)
             {
                 SetAction_Fenrir_Damage(Hero, o);
                 SendRequestAction(Hero->Object, AniType);
@@ -305,7 +305,7 @@ namespace battleCastle
 
     void SetBuildTimeLocation(OBJECT* o)
     {
-        if (o->Type == MODEL_MONSTER01 + 86 && o->m_byBuildTime < 5)
+        if (o->Type == MODEL_DARK_SKULL_SOLDIER_1 && o->m_byBuildTime < 5)
         {
             BuildTime bt;
 
@@ -353,19 +353,19 @@ namespace battleCastle
         OpenMonsterModel(77);
 
         Position[0] = 65 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_DARK_PHOENIX, Position, Angle);
 
         Position[0] = 71 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_DARK_PHOENIX, Position, Angle);
 
         Position[0] = 91 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_DARK_PHOENIX, Position, Angle);
 
         Position[0] = 118 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_DARK_PHOENIX, Position, Angle);
 
         Position[0] = 123 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_DARK_PHOENIX, Position, Angle);
     }
 
     bool    SettingBattleFormation(CHARACTER* c, eBuffState state)
@@ -1005,7 +1005,7 @@ namespace battleCastle
             o->Scale = 1.f;
             break;
 
-        case    MODEL_MONSTER01 + 77:
+        case    MODEL_DARK_PHOENIX:
             o->Scale = 1.f;
             if (IsBattleCastleStart())
             {
@@ -1100,7 +1100,7 @@ namespace battleCastle
         case    BATTLE_CASTLE_WALL4:
             break;
 
-        case    MODEL_MONSTER01 + 77:
+        case    MODEL_DARK_PHOENIX:
             if (IsBattleCastleStart())
             {
                 o->HiddenMesh = -2;
@@ -1283,7 +1283,7 @@ namespace battleCastle
             c->Object.LifeTime = 0;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü");
+            wcscpy(c->ID, L"ì™•ê´€");
             break;
 
         case 216:
@@ -1293,7 +1293,7 @@ namespace battleCastle
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü");
+            wcscpy(c->ID, L"ì™•ê´€");
             break;
 
         case 217:
@@ -1302,7 +1302,7 @@ namespace battleCastle
             c->m_bFixForm = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü ¹ßÆÇ2");
+            wcscpy(c->ID, L"ì™•ê´€ ë°œíŒ2");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
@@ -1314,7 +1314,7 @@ namespace battleCastle
             c->m_bFixForm = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü ¹ßÆÇ1");
+            wcscpy(c->ID, L"ì™•ê´€ ë°œíŒ1");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
@@ -1327,17 +1327,17 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¼º¹® ½ºÀ§Ä¡");
+            wcscpy(c->ID, L"ì„±ë¬¸ ìŠ¤ìœ„ì¹˜");
             break;
 
         case 220:
             OpenNpc(77);      //  MODEL_MONSTER01+77
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 77, PositionX, PositionY);
+            c = CreateCharacter(Key, MODEL_DARK_PHOENIX, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"»ç³ÉÅÍ ¹®Áö±â");
+            wcscpy(c->ID, L"ì‚¬ëƒ¥í„° ë¬¸ì§€ê¸°");
             break;
 
         case 221:
@@ -1369,7 +1369,7 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿ø·Î¿ø");
+            wcscpy(c->ID, L"ì›ë¡œì›");
             break;
 
         case 224:
@@ -1380,12 +1380,12 @@ namespace battleCastle
             c->Object.SubType = rand() % 2 + 10;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"±À§º´");
+            wcscpy(c->ID, L"êµ¼ãŽˆ?");
             break;
 
         case 277:
             OpenMonsterModel(73);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 73, PositionX, PositionY);
+            c = CreateCharacter(Key, MODEL_DRAKAN, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.0f;
             c->Object.m_bRenderShadow = false;
@@ -1395,7 +1395,7 @@ namespace battleCastle
 
         case 278:
             OpenMonsterModel(86);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 86, PositionX, PositionY);
+            c = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_1, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.0f;
             c->Object.m_bRenderShadow = false;
@@ -1408,7 +1408,7 @@ namespace battleCastle
 
         case 283:
             OpenMonsterModel(74);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 74, PositionX, PositionY);
+            c = CreateCharacter(Key, MODEL_ALPHA_CRUST, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;
             c->Object.m_fEdgeScale = 1.03f;
@@ -1429,7 +1429,7 @@ namespace battleCastle
 
         case 285:
             OpenMonsterModel(74);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 74, PositionX, PositionY);
+            c = CreateCharacter(Key, MODEL_ALPHA_CRUST, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;
             c->Object.m_bRenderShadow = false;
@@ -1439,7 +1439,7 @@ namespace battleCastle
 
         case 286:
             OpenMonsterModel(76);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 76, PositionX, PositionY);
+            c = CreateCharacter(Key, MODEL_DARK_PHOENIX_SHIELD, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;
             c->Weapon[0].Type = -1;
@@ -1448,7 +1448,7 @@ namespace battleCastle
 
         case 287:
             OpenMonsterModel(77);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 77, PositionX, PositionY);
+            c = CreateCharacter(Key, MODEL_DARK_PHOENIX, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;
             c->Object.SubType = 30;
@@ -1458,7 +1458,7 @@ namespace battleCastle
 
         case 288:
             OpenMonsterModel(79);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 79, PositionX, PositionY);
+            c = CreateCharacter(Key, MODEL_GOLDEN_DRAGON, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;
             c->Object.m_fEdgeScale = 1.04f;
@@ -1490,7 +1490,7 @@ namespace battleCastle
             Vector(200.f, 50.f, 100.f, c->Object.BoundingBoxMax);
             break;
 
-        case MODEL_MONSTER01 + 73:
+        case MODEL_DRAKAN:
             Vector(-140.f, -140.f, 0.f, c->Object.BoundingBoxMin);
             Vector(140.f, 140.f, 300.f, c->Object.BoundingBoxMax);
             c->SwordCount = 0;
@@ -1681,8 +1681,8 @@ namespace battleCastle
         case 11:
             break;
 
-        case MODEL_MONSTER01 + 76:
-        case MODEL_MONSTER01 + 77:
+        case MODEL_DARK_PHOENIX_SHIELD:
+        case MODEL_DARK_PHOENIX:
             o->AI = GUARD_ATTACK;
             SetAction(o, 5);
             return true;
@@ -1714,7 +1714,7 @@ namespace battleCastle
             {
                 VectorCopy(o->Position, Position);
                 Position[2] += 500.f;
-                CreateEffect(MODEL_MONSTER01 + 77, Position, o->Angle, o->Light, 0);
+                CreateEffect(MODEL_DARK_PHOENIX, Position, o->Angle, o->Light, 0);
             }
             return true;
 
@@ -1783,11 +1783,11 @@ namespace battleCastle
             }
             break;
 
-        case MODEL_MONSTER01 + 73:
+        case MODEL_DRAKAN:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 74:
+        case MODEL_ALPHA_CRUST:
             o->Angle[2] = 0.f;
 
             Luminosity = sinf(WorldTime * 0.0005) * 0.58f + 0.42f;
@@ -1795,23 +1795,23 @@ namespace battleCastle
             AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
             return true;
 
-        case MODEL_MONSTER01 + 75:
+        case MODEL_GREAT_DRAKAN:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 76:
+        case MODEL_DARK_PHOENIX_SHIELD:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 77:
+        case MODEL_DARK_PHOENIX:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 78:
+        case MODEL_GOLDEN_GOBLIN:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 79:
+        case MODEL_GOLDEN_DRAGON:
             o->Angle[2] = 45.f;
             return true;
         }
@@ -1827,10 +1827,10 @@ namespace battleCastle
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 73:
+        case MODEL_DRAKAN:
             break;
 
-        case MODEL_MONSTER01 + 74:
+        case MODEL_ALPHA_CRUST:
             if (IsBattleCastleStart())
             {
                 Vector(0.3f, 0.2f, 0.f, Light);
@@ -1842,7 +1842,7 @@ namespace battleCastle
             }
             return true;
 
-        case MODEL_MONSTER01 + 86:
+        case MODEL_DARK_SKULL_SOLDIER_1:
             if (o->m_byBuildTime >= 5)
             {
                 o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.3 + 0.3f;
@@ -1860,7 +1860,7 @@ namespace battleCastle
             }
             return true;
 
-        case MODEL_MONSTER01 + 79:
+        case MODEL_GOLDEN_DRAGON:
             if (IsBattleCastleStart())
             {
                 c->m_bIsSelected = true;
@@ -1961,7 +1961,7 @@ namespace battleCastle
             success = true;
             break;
 
-        case MODEL_MONSTER01 + 73:
+        case MODEL_DRAKAN:
             if (o->CurrentAction == MONSTER01_DIE)
             {
                 if (o->CurrentAction == MONSTER01_DIE)
@@ -1977,7 +1977,7 @@ namespace battleCastle
             }
             break;
 
-        case MODEL_MONSTER01 + 74:
+        case MODEL_ALPHA_CRUST:
             if (IsBattleCastleStart())
             {
                 if (o->CurrentAction != MONSTER01_DIE)
@@ -2006,7 +2006,7 @@ namespace battleCastle
             success = true;
             break;
 
-        case MODEL_MONSTER01 + 86:
+        case MODEL_DARK_SKULL_SOLDIER_1:
             o->BlendMeshLight = o->m_byBuildTime / 10.f;
             Vector(o->BlendMeshLight, o->BlendMeshLight, o->BlendMeshLight, b->BodyLight);
             if (o->m_byBuildTime >= 2)
@@ -2043,7 +2043,7 @@ namespace battleCastle
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 73:
+        case MODEL_DRAKAN:
         {
             vec3_t Position;
             VectorCopy(o->Position, Position);
@@ -2071,7 +2071,7 @@ namespace battleCastle
         }
         break;
 
-        case MODEL_MONSTER01 + 74:
+        case MODEL_ALPHA_CRUST:
         {
             vec3_t Position;
             for (int i = 0; i < 5; i++)

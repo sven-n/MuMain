@@ -1,4 +1,4 @@
-// NewUIMyInventory.cpp: implementation of the CNewUIMyInventory class.
+Ôªø// NewUIMyInventory.cpp: implementation of the CNewUIMyInventory class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -978,22 +978,22 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
             }
             break;
         case ITEM_HELPER + 64:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 64, pHeroObject->Position, Hero);
+            ThePetProcess().CreatePet(pItem->Type, MODEL_DEMON, pHeroObject->Position, Hero);
             break;
         case ITEM_HELPER + 65:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 65, pHeroObject->Position, Hero);
+            ThePetProcess().CreatePet(pItem->Type, MODEL_SPIRIT_OF_GUARDIAN, pHeroObject->Position, Hero);
             break;
         case ITEM_HELPER + 67:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 67, pHeroObject->Position, Hero);
+            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_RUDOLF, pHeroObject->Position, Hero);
             break;
         case ITEM_HELPER + 80:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 80, pHeroObject->Position, Hero);
+            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_PANDA, pHeroObject->Position, Hero);
             break;
         case ITEM_HELPER + 106:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 106, pHeroObject->Position, Hero);
+            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_UNICORN, pHeroObject->Position, Hero);
             break;
         case ITEM_HELPER + 123:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 123, pHeroObject->Position, Hero);
+            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_SKELETON, pHeroObject->Position, Hero);
             break;
         }
     }
@@ -1242,7 +1242,7 @@ void CNewUIMyInventory::RenderEquippedItem()
             const int iLevel = (pEquipmentItemSlot->Level >> 3) & 15;
             const int iMaxDurability = calcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
 
-            // øÎªÁ/¿¸ªÁ¿«π›¡ˆ øπø‹√≥∏Æ
+            // Ïö©ÏÇ¨/Ï†ÑÏÇ¨ÏùòÎ∞òÏßÄ ÏòàÏô∏Ï≤òÎ¶¨
             if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
             {
                 if (pEquipmentItemSlot->Type == ITEM_HELPER + 20 && iLevel == 1
@@ -2399,7 +2399,7 @@ void CNewUIMyInventory::LockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(100, 100, 100, 255));
     m_BtnMyShop.Lock();
-    // 1125 "∞≥¿ŒªÛ¡°ø≠±‚(S)"
+    // 1125 "Í∞úÏù∏ÏÉÅÏ†êÏó¥Í∏∞(S)"
     m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
@@ -2408,13 +2408,13 @@ void CNewUIMyInventory::UnlockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(255, 255, 255, 255));
     m_BtnMyShop.UnLock();
-    // 1125 "∞≥¿ŒªÛ¡°ø≠±‚(S)"
+    // 1125 "Í∞úÏù∏ÏÉÅÏ†êÏó¥Í∏∞(S)"
     m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
 void CNewUIMyInventory::ToggleRepairMode()
 {
-    //. ≈‰±€ ºˆ∏Æ∏µÂ
+    //. ÌÜ†Í∏Ä ÏàòÎ¶¨Î™®Îìú
     if (m_RepairMode == REPAIR_MODE_OFF)
     {
         SetRepairMode(true);

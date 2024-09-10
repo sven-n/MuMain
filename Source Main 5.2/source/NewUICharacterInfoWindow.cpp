@@ -1,4 +1,4 @@
-// NewUICharacterInfoWindow.cpp: implementation of the CNewUICharacterInfoWindow class.
+ï»¿// NewUICharacterInfoWindow.cpp: implementation of the CNewUICharacterInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -978,10 +978,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         iChangeRingAddDefense = (t_adjdef + maxdefense) / 10;
     }
 
-    if (Hero->Helper.Type == MODEL_HELPER + 80)
+    if (Hero->Helper.Type == MODEL_PET_PANDA)
         iChangeRingAddDefense += 50;
 
-    if (Hero->Helper.Type == MODEL_HELPER + 106)
+    if (Hero->Helper.Type == MODEL_PET_UNICORN)
         iChangeRingAddDefense += 50;
 
     wchar_t strBlocking[256];
@@ -1181,7 +1181,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
         iY += 13;
-        //¹°¸®°ø°Ý·Â
+        //ë¬¼ë¦¬ê³µê²©ë ¥
         swprintf(strVitality, GlobalText[3155], 50 + (wVitality / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strVitality);
     }
@@ -1360,11 +1360,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         if ((pWeaponRight->Type >= MODEL_STAFF - MODEL_ITEM
             && pWeaponRight->Type < (MODEL_STAFF + MAX_ITEM_INDEX - MODEL_ITEM))
-            || pWeaponRight->Type == (MODEL_SWORD + 31 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 23 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 25 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 21 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 28 - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_RUNE_BLADE - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_EXPLOSION_BLADE - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_SWORD_DANCER - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_DARK_REIGN_BLADE - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_IMPERIAL_SWORD - MODEL_ITEM)
             )
         {
             float magicPercent = (float)(pWeaponRight->MagicPower) / 100;
@@ -1509,11 +1509,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
-        //¸¶¹ý°ø°Ý·Â
+        //ë§ˆë²•ê³µê²©ë ¥
         swprintf(strEnergy, GlobalText[3156], 50 + (wEnergy / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
         iY += 13;
-        //¹üÀ§°ø°Ý·Â
+        //ë²”ìœ„ê³µê²©ë ¥
         swprintf(strEnergy, GlobalText[3157], 100 + (wDexterity / 8 + wEnergy / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
     }

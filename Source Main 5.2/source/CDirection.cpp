@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "CComGem.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
@@ -161,7 +161,7 @@ float CDirection::CalculateAngle(CHARACTER* c, int x, int y, float Angle)
     return fAngle;
 }
 
-void CDirection::SummonCreateMonster(int Type, int x, int y, float Angle, bool NextCheck, bool SummonAni, float AniSpeed)
+void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angle, bool NextCheck, bool SummonAni, float AniSpeed)
 {
     CHARACTER* c = NULL;
     DirectionMonster DMonster = { 0, };
@@ -183,14 +183,14 @@ void CDirection::SummonCreateMonster(int Type, int x, int y, float Angle, bool N
 
     switch (Type)
     {
-    case 344: Index = MODEL_MONSTER01 + 91;	break;
-    case 341: Index = MODEL_MONSTER01 + 94;	break;
+    case 344: Index = MODEL_CHIEF_SKELETON_ARCHER_2;	break;
+    case 341: Index = MODEL_RED_SKELETON_KNIGHT_2;	break;
     case 440:
-    case 340: Index = MODEL_MONSTER01 + 92;	break;
-    case 345: Index = MODEL_MONSTER01 + 93;	break;
-    case 348: Index = MODEL_MONSTER01 + 99;	break;
-    case 349: Index = MODEL_MONSTER01 + 89;	break;
-    case 361: Index = MODEL_MONSTER01 + 121;	break;
+    case 340: Index = MODEL_DARK_SKULL_SOLDIER_2;	break;
+    case 345: Index = MODEL_GIANT_OGRE_2;	break;
+    case 348: Index = MODEL_GIANT_OGRE_3;	break;
+    case 349: Index = MODEL_MAGIC_SKELETON_1;	break;
+    case 361: Index = MODEL_DARK_SKULL_SOLDIER_5;	break;
     }
 
     BMD* b = &Models[Index];

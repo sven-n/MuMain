@@ -1,4 +1,4 @@
-//*****************************************************************************
+ï»¿//*****************************************************************************
 // File: GMKarutan1.cpp
 //*****************************************************************************
 
@@ -229,7 +229,7 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight,
             o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return true;
-    case MODEL_MONSTER01 + 215:
+    case MODEL_SHIELD_MONSTER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
@@ -250,7 +250,7 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
                 WorldTime * 0.0015f, o->BlendMeshTexCoordV);
         }
         return true;
-    case MODEL_MONSTER01 + 216:
+    case MODEL_CROWN:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
@@ -368,51 +368,51 @@ CHARACTER* CGMKarutan1::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
     case 569:
         OpenMonsterModel(209);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 209, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¸Íµ¶°í¸®Àü°¥");
+        pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR5, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë§¹ë…ê³ ë¦¬ì „ê°ˆ");
         pCharacter->Object.Scale = 1.0f;
         break;
     case 570:
         OpenMonsterModel(210);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 210, PosX, PosY);
-        wcscpy(pCharacter->ID, L"º»½ºÄÝÇÇ¿Â");
+        wcscpy(pCharacter->ID, L"ë³¸ìŠ¤ì½œí”¼ì˜¨");
         pCharacter->Object.Scale = 0.58f;
         break;
     case 571:
         OpenMonsterModel(211);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 211, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¿À¸£Ä¿½º");
+        wcscpy(pCharacter->ID, L"ì˜¤ë¥´ì»¤ìŠ¤");
         pCharacter->Object.Scale = 0.64f;
         break;
     case 572:
         OpenMonsterModel(212);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 212, PosX, PosY);
-        wcscpy(pCharacter->ID, L"°ñ·Ï");
+        wcscpy(pCharacter->ID, L"ê³¨ë¡");
         pCharacter->Object.Scale = 1.5f;
         break;
     case 573:
         OpenMonsterModel(213);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 213, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Å©¸³Å¸");
+        wcscpy(pCharacter->ID, L"í¬ë¦½íƒ€");
         pCharacter->Object.Scale = 1.5f;
         break;
     case 574:
         OpenMonsterModel(214);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 214, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Å©¸³Æ÷½º");
+        wcscpy(pCharacter->ID, L"í¬ë¦½í¬ìŠ¤");
         pCharacter->Object.Scale = 1.25f;
         break;
     case 575:
         OpenMonsterModel(215);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 215, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÄÜµå¶ó");
+        pCharacter = CreateCharacter(Key, MODEL_SHIELD_MONSTER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì½˜ë“œë¼");
         pCharacter->Object.Scale = 1.45f;
         pCharacter->Object.LifeTime = 100;
         break;
     case 576:
         OpenMonsterModel(216);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 216, PosX, PosY);
-        wcscpy(pCharacter->ID, L"³ª¸£ÄÜµå¶ó");
+        pCharacter = CreateCharacter(Key, MODEL_CROWN, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë‚˜ë¥´ì½˜ë“œë¼");
         pCharacter->Object.Scale = 1.55f;
         pCharacter->Object.LifeTime = 100;
 
@@ -437,7 +437,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 209:
+    case MODEL_WOLF_ALTAR5:
         Vector(0.f, 0.f, 0.f, p);
         b->TransformPosition(o->BoneTransform[15], p, Position, true);
         Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
@@ -457,7 +457,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
             CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
         }
         return true;
-    case MODEL_MONSTER01 + 215:
+    case MODEL_SHIELD_MONSTER:
         if (o->CurrentAction == MONSTER01_DIE)
         {
             if (o->AnimationFrame < 1.0f)
@@ -530,7 +530,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
             }
         }
         return true;
-    case MODEL_MONSTER01 + 216:
+    case MODEL_CROWN:
         if (o->CurrentAction == MONSTER01_DIE)
         {
             if (o->AnimationFrame < 1.0f)
@@ -764,7 +764,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 209:
+    case MODEL_WOLF_ALTAR5:
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
             PlayBuffer(SOUND_KARUTAN_TCSCORPION_ATTACK);
         else if (MONSTER01_DIE == o->CurrentAction)
@@ -842,7 +842,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
             PlayBuffer(SOUND_KARUTAN_CRYPTA_DEATH);
         return true;
 
-    case MODEL_MONSTER01 + 215:
+    case MODEL_SHIELD_MONSTER:
         if (MONSTER01_WALK == o->CurrentAction)
         {
             if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)
@@ -856,7 +856,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
             PlayBuffer(SOUND_KARUTAN_CONDRA_DEATH);
         return true;
 
-    case MODEL_MONSTER01 + 216:
+    case MODEL_CROWN:
         if (MONSTER01_WALK == o->CurrentAction)
         {
             if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)

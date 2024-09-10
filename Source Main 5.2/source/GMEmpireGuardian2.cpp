@@ -1,4 +1,4 @@
-// GMEmpireGuardian2.cpp: implementation of the GMEmpireGuardian2 class.
+ï»¿// GMEmpireGuardian2.cpp: implementation of the GMEmpireGuardian2 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "GMEmpireGuardian2.h"
@@ -79,8 +79,8 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     case 509:
     {
         OpenMonsterModel(169);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 169, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¹ö¸óÆ®");
+        pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_8, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë²„ëª¬íŠ¸");
 
         pCharacter->Object.Scale = 1.3f;
 
@@ -90,8 +90,8 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     case 514:
     {
         OpenMonsterModel(174);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 174, PosX, PosY);
-        wcscpy(pCharacter->ID, L"±â»ç´ÜÀå");
+        pCharacter = CreateCharacter(Key, MODEL_DEATH_ANGEL_2, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ê¸°ì‚¬ë‹¨ìž¥");
 
         pCharacter->Object.Scale = 1.35f;
     }
@@ -99,8 +99,8 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     case 515:
     {
         OpenMonsterModel(175);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 175, PosX, PosY);
-        wcscpy(pCharacter->ID, L"´ë¸¶¹ý»ç");
+        pCharacter = CreateCharacter(Key, MODEL_DEATH_CENTURION_2, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ëŒ€ë§ˆë²•ì‚¬");
 
         OBJECT* pObject = &pCharacter->Object;
         pObject->Scale = 1.3f;
@@ -224,7 +224,7 @@ bool GMEmpireGuardian2::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 169:
+    case MODEL_CHAOS_CASTLE_8:
     {
         vec3_t vPos;
         switch (o->CurrentAction)
@@ -380,7 +380,7 @@ bool GMEmpireGuardian2::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 174:
+    case MODEL_DEATH_ANGEL_2:
     {
         vec3_t vPos, vRelative, vLight, v3Temp;
 
@@ -509,11 +509,11 @@ void GMEmpireGuardian2::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 167:
-    case MODEL_MONSTER01 + 178:
-    case MODEL_MONSTER01 + 179:
-    case MODEL_MONSTER01 + 180:
-    case MODEL_MONSTER01 + 181:
+    case MODEL_CHAOS_CASTLE_6:
+    case MODEL_ROGUE_CENTURION_2:
+    case MODEL_NECRON_2:
+    case MODEL_SCHRIKER_2:
+    case MODEL_ILLUSION_OF_KUNDUN_2:
     {
         g_EmpireGuardian1.MoveBlurEffect(c, o, b);
     }
@@ -533,10 +533,10 @@ bool GMEmpireGuardian2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 167:
-    case MODEL_MONSTER01 + 169:
-    case MODEL_MONSTER01 + 174:
-    case MODEL_MONSTER01 + 175:
+    case MODEL_CHAOS_CASTLE_6:
+    case MODEL_CHAOS_CASTLE_8:
+    case MODEL_DEATH_ANGEL_2:
+    case MODEL_DEATH_CENTURION_2:
     {
         RenderMonster(o, b, ExtraMon);
 
@@ -819,12 +819,12 @@ bool GMEmpireGuardian2::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 169:
+    case MODEL_CHAOS_CASTLE_8:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     return true;
-    case MODEL_MONSTER01 + 174:
+    case MODEL_DEATH_ANGEL_2:
     {
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -832,7 +832,7 @@ bool GMEmpireGuardian2::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     return true;
-    case MODEL_MONSTER01 + 175:
+    case MODEL_DEATH_CENTURION_2:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -859,7 +859,7 @@ bool GMEmpireGuardian2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 169:
+    case MODEL_CHAOS_CASTLE_8:
     {
         vec3_t vPos, vRelative, vLight;
         float fLumi1 = (sinf(WorldTime * 0.004f) + 1.f) * 0.25f;
@@ -884,14 +884,14 @@ bool GMEmpireGuardian2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 if (i % 5 == 0)
                 {
                     b->TransformByObjectBone(vPosRage, o, i);
-                    CreateParticle(BITMAP_SMOKE, vPosRage, o->Angle, vLightRage, 50, 1.0f);	// ¿¬±â
-                    CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f);	// 3Á¾ ¿¬±â
+                    CreateParticle(BITMAP_SMOKE, vPosRage, o->Angle, vLightRage, 50, 1.0f);	// ì—°ê¸°
+                    CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f);	// 3ì¢… ì—°ê¸°
                 }
             }
         }
     }
     return true;
-    case MODEL_MONSTER01 + 175:
+    case MODEL_DEATH_CENTURION_2:
     {
         int i;
         float fLumi = (sinf(WorldTime * 0.08f) + 1.0f) * 0.5f * 0.3f + 0.7f;
@@ -1203,7 +1203,7 @@ bool GMEmpireGuardian2::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 169:
+    case MODEL_CHAOS_CASTLE_8:
     {
         switch (o->CurrentAction)
         {
@@ -1247,7 +1247,7 @@ bool GMEmpireGuardian2::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 174:
+    case MODEL_DEATH_ANGEL_2:
     {
         switch (o->CurrentAction)
         {
@@ -1286,7 +1286,7 @@ bool GMEmpireGuardian2::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 175:
+    case MODEL_DEATH_CENTURION_2:
     {
         switch (o->CurrentAction)
         {

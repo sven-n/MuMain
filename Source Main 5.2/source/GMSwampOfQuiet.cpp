@@ -1,4 +1,4 @@
-// GMSwampOfQuiet.cpp: implementation of the GMSwampOfQuiet class.
+ï»¿// GMSwampOfQuiet.cpp: implementation of the GMSwampOfQuiet class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -56,7 +56,7 @@ void GMSwampOfQuiet::CreateObject(OBJECT* pObject)
 
     // 	switch(pObject->Type)
     // 	{
-    // 	case 103:	// ÀÇÀÚ ¼³Á¤
+    // 	case 103:	// ì˜ìž ì„¤ì •
     // 		{
     // 			CreateOperate(pObject);
     // 		}
@@ -118,7 +118,7 @@ void GMSwampOfQuiet::PlayObjectSound(OBJECT* pObject)
 
     // 	switch(pObject->Type)
     // 	{
-    // 	case 2:		// ¸¶À»¾È ¼ö·Î
+    // 	case 2:		// ë§ˆì„ì•ˆ ìˆ˜ë¡œ
     // 		if (!bSafeZone)
     // 			PlayBuffer(SOUND_ELBELAND_WATERSMALL01, pObject, false);
     // 		break;
@@ -201,7 +201,7 @@ bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
 
 bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
 {
-    if (pObject->Type >= MODEL_MONSTER01 + 139 && pObject->Type <= MODEL_MONSTER01 + 141)
+    if (pObject->Type >= MODEL_CHIEF_SKELETON_ARCHER_7 && pObject->Type <= MODEL_GIANT_OGRE_7)
     {
         if (pObject->CurrentAction == MONSTER01_DIE)
         {
@@ -213,15 +213,15 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
 
             switch (pObject->Type)
             {
-            case MODEL_MONSTER01 + 139:
+            case MODEL_CHIEF_SKELETON_ARCHER_7:
                 Vector(1.0f, 0.2f, 0.2f, pModel->BodyLight);
                 pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 3, fLumi);
                 break;
-            case MODEL_MONSTER01 + 140:
+            case MODEL_DARK_SKULL_SOLDIER_7:
                 Vector(0.5f, 0.8f, 1.0f, pModel->BodyLight);
                 pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 3, fLumi);
                 break;
-            case MODEL_MONSTER01 + 141:
+            case MODEL_GIANT_OGRE_7:
                 Vector(0.5f, 1.0f, 0.5f, pModel->BodyLight);
                 pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi);
                 break;
@@ -232,7 +232,7 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
             float fLumi = (sinf(WorldTime * 0.002f) + 1.2f) * 0.5f * 1.0f;
             switch (pObject->Type)
             {
-            case MODEL_MONSTER01 + 139:
+            case MODEL_CHIEF_SKELETON_ARCHER_7:
                 pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
                 pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
                 pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
@@ -241,7 +241,7 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
                 pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_PAWN_RED);
                 pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_PAWN_RED);
                 break;
-            case MODEL_MONSTER01 + 140:
+            case MODEL_DARK_SKULL_SOLDIER_7:
                 pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
                 pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
                 pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
@@ -250,7 +250,7 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
                 pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_KINGHT_BLUE);
                 pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_KINGHT_BLUE);
                 break;
-            case MODEL_MONSTER01 + 141:
+            case MODEL_GIANT_OGRE_7:
                 pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
                 pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
                 pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
@@ -273,7 +273,7 @@ void GMSwampOfQuiet::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bo
     if (!IsCurrentMap())
         return;
 
-    // 	if(pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// ÆøÆ÷¹°1,2, ¼ö·Î, È¸¿À¸®, ºû
+    // 	if(pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// í­í¬ë¬¼1,2, ìˆ˜ë¡œ, íšŒì˜¤ë¦¬, ë¹›
     // 	{
     // 		pModel->RenderBody(RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,pObject->HiddenMesh);
     // 	}
@@ -288,7 +288,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 441:
         OpenMonsterModel(136);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 136, PosX, PosY);
-        wcscpy(pCharacter->ID, L"»çÇÇ-¿ì´©½º");
+        wcscpy(pCharacter->ID, L"ì‚¬í”¼-ìš°ëˆ„ìŠ¤");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -306,7 +306,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 442:
         OpenMonsterModel(137);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 137, PosX, PosY);
-        wcscpy(pCharacter->ID, L"»çÇÇ-µÎ¿À");
+        wcscpy(pCharacter->ID, L"ì‚¬í”¼-ë‘ì˜¤");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -323,8 +323,8 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         break;
     case 443:
         OpenMonsterModel(138);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 138, PosX, PosY);
-        wcscpy(pCharacter->ID, L"»çÇÇ-Æ®·¹½º");
+        pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_WARRIOR_7, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì‚¬í”¼-íŠ¸ë ˆìŠ¤");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -341,8 +341,8 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         break;
     case 444:
         OpenMonsterModel(139);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 139, PosX, PosY);
-        wcscpy(pCharacter->ID, L"½¦µµ¿ì Æ");
+        pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_7, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì‰ë„ìš°");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -350,8 +350,8 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         break;
     case 445:
         OpenMonsterModel(140);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 140, PosX, PosY);
-        wcscpy(pCharacter->ID, L"½¦µµ¿ì ³ªÀÌÆ®");
+        pCharacter = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_7, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì‰ë„ìš° ë‚˜ì´íŠ¸");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -359,8 +359,8 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         break;
     case 446:
         OpenMonsterModel(141);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 141, PosX, PosY);
-        wcscpy(pCharacter->ID, L"½¦µµ¿ì ·è");
+        pCharacter = CreateCharacter(Key, MODEL_GIANT_OGRE_7, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì‰ë„ìš° ë£©");
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -368,32 +368,32 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         break;
     case 447:
         OpenMonsterModel(142);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 142, PosX, PosY);
-        wcscpy(pCharacter->ID, L"½ã´õ ³×ÀÌÇÉ");
+        pCharacter = CreateCharacter(Key, MODEL_RED_SKELETON_KNIGHT_7, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì¬ë” ë„¤ì´í•€");
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case 448:
         OpenMonsterModel(143);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 143, PosX, PosY);
-        wcscpy(pCharacter->ID, L"°í½ºÆ® ³×ÀÌÇÉ");
+        pCharacter = CreateCharacter(Key, MODEL_MAGIC_SKELETON_7, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ê³ ìŠ¤íŠ¸ ë„¤ì´í•€");
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case 449:
         OpenMonsterModel(144);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 144, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ºí·¹ÀÌÁî ³×ÀÌÇÉ");
+        pCharacter = CreateCharacter(Key, MODEL_DEATH_ANGEL_1, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë¸”ë ˆì´ì¦ˆ ë„¤ì´í•€");
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case 561:
         OpenMonsterModel(192);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 192, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¸Þµà»ç");
+        pCharacter = CreateCharacter(Key, MODEL_BLOOD_SOLDIER_4, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë©”ë“€ì‚¬");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.LifeTime = 100;
         break;
@@ -401,7 +401,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 560:
         OpenMonsterModel(201);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 201, PosX, PosY);
-        wcscpy(pCharacter->ID, L"»çÇÇÄý");
+        wcscpy(pCharacter->ID, L"ì‚¬í”¼í€¸");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -409,7 +409,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 558:
         OpenMonsterModel(202);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 202, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¾ÆÀÌ½º ³×ÀÌÇÉ");
+        wcscpy(pCharacter->ID, L"ì•„ì´ìŠ¤ ë„¤ì´í•€");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -417,7 +417,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case 559:
         OpenMonsterModel(203);
         pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 203, PosX, PosY);
-        wcscpy(pCharacter->ID, L"½¦µµ¿ì ¸¶½ºÅÍ");
+        wcscpy(pCharacter->ID, L"ì‰ë„ìš° ë§ˆìŠ¤í„°");
         pCharacter->Object.Scale = 1.56f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -435,7 +435,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
 
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 142:
+    case MODEL_RED_SKELETON_KNIGHT_7:
         if (pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             BMD* pModel = &Models[pObject->Type];
@@ -472,7 +472,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
             }
         }
         break;
-    case MODEL_MONSTER01 + 143:
+    case MODEL_MAGIC_SKELETON_7:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             float Start_Frame = 7.0f;
@@ -509,7 +509,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
             }
         }
         break;
-    case MODEL_MONSTER01 + 144:
+    case MODEL_DEATH_ANGEL_1:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             BMD* pModel = &Models[pObject->Type];
@@ -540,7 +540,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
             }
         }
         break;
-    case MODEL_MONSTER01 + 192:
+    case MODEL_BLOOD_SOLDIER_4:
     {
         vec3_t vPos, vColor;
 
@@ -710,7 +710,7 @@ void GMSwampOfQuiet::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD*
         }
     }
     break;
-    case MODEL_MONSTER01 + 138:
+    case MODEL_CHIEF_SKELETON_WARRIOR_7:
     {
         float Start_Frame = 5.f;
         float End_Frame = 10.f;
@@ -732,7 +732,7 @@ void GMSwampOfQuiet::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD*
                 Vector(0.f, 0.f, 0.f, StartRelative);
                 Vector(0.f, 0.f, 0.f, EndRelative);
 
-                // ¿Þ¼Õ
+                // ì™¼ì†
                 pModel->TransformPosition(BoneTransform[42], StartRelative, StartPos, false);
 
                 pModel->TransformByBoneMatrix(EndPos, BoneTransform[34]);
@@ -765,10 +765,10 @@ void GMSwampOfQuiet::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD*
         }
     }
     break;
-    case MODEL_MONSTER01 + 142:
+    case MODEL_RED_SKELETON_KNIGHT_7:
         break;
     case MODEL_MONSTER01 + 201:
-    case MODEL_MONSTER01 + 204:
+    case MODEL_WOLF_STATUS:
     {
         float Start_Frame = 6.f;
         float End_Frame = 7.6f;
@@ -840,7 +840,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, pObject);
     }
     break;
-    case MODEL_MONSTER01 + 138:
+    case MODEL_CHIEF_SKELETON_WARRIOR_7:
     {
         Vector(0.2f, 0.7f, 1.0f, vLight);
         Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -850,7 +850,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, pObject);
     }
     break;
-    case MODEL_MONSTER01 + 139:
+    case MODEL_CHIEF_SKELETON_ARCHER_7:
     {
         int iBones[] = { 11, 15, 34, 21, 25, 39 };
         Vector(1.0f, 0.1f, 0.1f, vLight);
@@ -893,7 +893,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         }
     }
     break;
-    case MODEL_MONSTER01 + 140:
+    case MODEL_DARK_SKULL_SOLDIER_7:
     {
         int iBones[] = { 11, 15, 34, 21, 25, 39 };
         Vector(0.3f, 0.6f, 1.0f, vLight);
@@ -936,7 +936,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         }
     }
     break;
-    case MODEL_MONSTER01 + 141:
+    case MODEL_GIANT_OGRE_7:
     {
         int iBones[] = { 11, 15, 34, 21, 25, 39 };
         Vector(0.5f, 1.0f, 0.5f, vLight);
@@ -979,7 +979,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         }
     }
     break;
-    case MODEL_MONSTER01 + 142:
+    case MODEL_RED_SKELETON_KNIGHT_7:
     {
         int iBones[] = { 7, 4, 5, 10, 22, 11, 23, 12, 24, 34, 39 };
         vec3_t vLightFlare;
@@ -998,7 +998,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         }
     }
     break;
-    case MODEL_MONSTER01 + 143:
+    case MODEL_MAGIC_SKELETON_7:
     {
         int iBones[] = { 21, 37, 65, 66, 77, 78, 79 };
         Vector(0.4f, 1.0f, 0.4f, vLight);
@@ -1010,7 +1010,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         }
     }
     break;
-    case MODEL_MONSTER01 + 144:
+    case MODEL_DEATH_ANGEL_1:
     {
         int iBones[] = { 10, 61, 72, 21, 122, 116 };
         Vector(1.0f, 1.0f, 1.0f, vLight);
@@ -1052,7 +1052,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         }
     }
     break;
-    case MODEL_MONSTER01 + 192:
+    case MODEL_BLOOD_SOLDIER_4:
     {
         vec3_t vColor;
         Vector(1.0f, 1.0f, 1.0f, vColor);
@@ -1145,7 +1145,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
     }
     break;
     case MODEL_MONSTER01 + 201:
-    case MODEL_MONSTER01 + 204:
+    case MODEL_WOLF_STATUS:
     {
         Vector(1.0f, 0.6f, 0.1f, vLight);
         Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -1277,7 +1277,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
             }
         }
         return true;
-    case MODEL_MONSTER01 + 138:
+    case MODEL_CHIEF_SKELETON_WARRIOR_7:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             if (rand_fps_check(3))
@@ -1293,7 +1293,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
             }
         }
         return true;
-    case MODEL_MONSTER01 + 139:
+    case MODEL_CHIEF_SKELETON_ARCHER_7:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_PAWN_ATTACK01);
@@ -1303,7 +1303,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 140:
+    case MODEL_DARK_SKULL_SOLDIER_7:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_KNIGHT_ATTACK01);
@@ -1313,7 +1313,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 141:
+    case MODEL_GIANT_OGRE_7:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01);
@@ -1323,7 +1323,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_SWAMPOFQUIET_SHADOW_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 142:
+    case MODEL_RED_SKELETON_KNIGHT_7:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1340,7 +1340,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 143:
+    case MODEL_MAGIC_SKELETON_7:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1357,7 +1357,7 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 144:
+    case MODEL_DEATH_ANGEL_1:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1374,12 +1374,12 @@ bool GMSwampOfQuiet::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 192:
+    case MODEL_BLOOD_SOLDIER_4:
     {
     }
     return true;
     case MODEL_MONSTER01 + 201:
-    case MODEL_MONSTER01 + 204:
+    case MODEL_WOLF_STATUS:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             if (rand_fps_check(3))
@@ -1442,7 +1442,7 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
 
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 192:
+    case MODEL_BLOOD_SOLDIER_4:
     {
         switch (pCharacter->Skill)
         {
@@ -1475,7 +1475,7 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
     }
     return true;
     case MODEL_MONSTER01 + 201:
-    case MODEL_MONSTER01 + 204:
+    case MODEL_WOLF_STATUS:
     {
         if (pCharacter->MonsterSkill == ATMON_SKILL_EX_SAPIQUEEN_ATTACKSKILL)
         {

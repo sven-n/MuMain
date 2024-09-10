@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "zzztexture.h"
@@ -106,7 +106,7 @@ bool M31HuntingGround::MoveHuntingGroundObject(OBJECT* pObject)
     break;
     }
 
-    //. ¹è°æÀ½¾Ç ÄÁÆ®·Ñ
+    //. ë°°ê²½ìŒì•… ì»¨íŠ¸ë¡¤
     if (::timeGetTime() - g_MusicStartStamp > 300000) {
         g_MusicStartStamp = ::timeGetTime();
         PlayBuffer(SOUND_BC_HUNTINGGROUND_AMBIENT);
@@ -199,7 +199,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 290:
     {
         OpenMonsterModel(81);   //  81
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 81, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_GOLDEN_VEPAR, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -211,7 +211,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 291:
     {
         OpenMonsterModel(82);   //  82
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 82, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_GOLDEN_TANTALLOS, PosX, PosY);
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -225,7 +225,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 292:
     {
         OpenMonsterModel(83);	//	83
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 83, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_GOLDEN_WHEEL, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -237,7 +237,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 293:
     {
         OpenMonsterModel(84);	// 84
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 84, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_WARRIOR_1, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -253,7 +253,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 294:
     {
         OpenMonsterModel(85);	//85
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 85, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_1, PosX, PosY);
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -265,7 +265,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 295:
     {
         OpenMonsterModel(87);	//87
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 87, PosX, PosY);
+        pCharacter = CreateCharacter(Key, MODEL_GIANT_OGRE_1, PosX, PosY);
         pCharacter->Object.Scale = 2.f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -280,15 +280,15 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 297:
     {
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÀúÁÖ¹ÞÀº ±â»ç");
-        pCharacter->Skin = 1;	//. ±â»ç
-        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 1;
-        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 1;
-        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 1;
-        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 1;
-        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 1;
-        pCharacter->Weapon[0].Type = MODEL_SWORD + 16;
-        pCharacter->Weapon[1].Type = MODEL_SHIELD + 13;
+        wcscpy(pCharacter->ID, L"ì €ì£¼ë°›ì€ ê¸°ì‚¬");
+        pCharacter->Skin = 1;	//. ê¸°ì‚¬
+        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DRAGON_HELM;
+        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DRAGON_ARMOR;
+        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DRAGON_PANTS;
+        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_DRAGON_GLOVES;
+        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_DRAGON_BOOTS;
+        pCharacter->Weapon[0].Type = MODEL_SWORD_OF_DESTRUCTION;
+        pCharacter->Weapon[1].Type = MODEL_DRAGON_SHIELD;
         int Level = 9;
         pCharacter->BodyPart[BODYPART_HELM].Level = Level;
         pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
@@ -307,7 +307,7 @@ bool M31HuntingGround::MoveHuntingGroundMonsterVisual(OBJECT* pObject, BMD* pMod
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 82:
+    case MODEL_GOLDEN_TANTALLOS:
     {
         vec3_t Light;
         Vector(1.f, 0.2f, 0.1f, Light);
@@ -321,7 +321,7 @@ void M31HuntingGround::MoveHuntingGroundBlurEffect(CHARACTER* pCharacter, OBJECT
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 85:
+    case MODEL_CHIEF_SKELETON_ARCHER_1:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -362,7 +362,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 81:
+    case MODEL_GOLDEN_VEPAR:
     {
         vec3_t Position, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -393,7 +393,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 82:
+    case MODEL_GOLDEN_TANTALLOS:
     {
         vec3_t Light;
         Vector(1.f, 1.f, 1.f, Light);
@@ -483,7 +483,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 83:
+    case MODEL_GOLDEN_WHEEL:
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -522,7 +522,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
     }
     break;
 
-    case MODEL_MONSTER01 + 84:
+    case MODEL_CHIEF_SKELETON_WARRIOR_1:
     {
         vec3_t Light, Position;
 
@@ -594,7 +594,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
     }
     break;
 
-    case MODEL_MONSTER01 + 85:
+    case MODEL_CHIEF_SKELETON_ARCHER_1:
     {
         vec3_t Position, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -627,7 +627,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 87:
+    case MODEL_GIANT_OGRE_1:
     {
         vec3_t Position, Relative, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -674,7 +674,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 81:
+    case MODEL_GOLDEN_VEPAR:
     {
         pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, 1);
         pModel->BeginRender(1.f);
@@ -687,7 +687,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 82:
+    case MODEL_GOLDEN_TANTALLOS:
     {
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
@@ -712,7 +712,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 83:
+    case MODEL_GOLDEN_WHEEL:
     {
         pModel->BeginRender(1.f);
 
@@ -734,7 +734,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 84:
+    case MODEL_CHIEF_SKELETON_WARRIOR_1:
     {
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
@@ -782,7 +782,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 85:
+    case MODEL_CHIEF_SKELETON_ARCHER_1:
     {
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
@@ -810,7 +810,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 87:
+    case MODEL_GIANT_OGRE_1:
     {
         pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, 5);
 

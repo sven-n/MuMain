@@ -1,4 +1,4 @@
-// NewUISiegeWarCommander.cpp: implementation of the CNewUISiegeWarCommander class.
+﻿// NewUISiegeWarCommander.cpp: implementation of the CNewUISiegeWarCommander class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -203,7 +203,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
             }
             else
             {
-                if (o->Kind == KIND_NPC || o->Kind == KIND_MONSTER && o->Type == MODEL_MONSTER01 + 86)
+                if (o->Kind == KIND_NPC || o->Kind == KIND_MONSTER && o->Type == MODEL_DARK_SKULL_SOLDIER_1)
                 {
                     glColor4f(1.f, 0.f, 1.f, m_fMiniMapAlpha);
                 }

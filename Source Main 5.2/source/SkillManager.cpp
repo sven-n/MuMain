@@ -1,4 +1,4 @@
-// SkillManager.cpp: implementation of the CSkillManager class.
+﻿// SkillManager.cpp: implementation of the CSkillManager class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -110,7 +110,7 @@ float CSkillManager::GetSkillDistance(int Index, CHARACTER* c)
 
     if (c != NULL)
     {
-        if (c->Helper.Type == MODEL_HELPER + 4)
+        if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
         {
             Distance += 2;
         }

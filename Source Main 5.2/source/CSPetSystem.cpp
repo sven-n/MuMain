@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////
 //  CSPetSystem.
 //////////////////////////////////////////////////////////////////////////
 
@@ -668,7 +668,7 @@ void    CSPetDarkSpirit::RenderCmdType(void)
     {
         PartyWidth = 50.f;
     }
-    if ((Hero->Helper.Type >= MODEL_HELPER + 0 && Hero->Helper.Type <= MODEL_HELPER + 4) || Hero->Helper.Type == MODEL_HELPER + 37)
+    if ((Hero->Helper.Type >= MODEL_GUARDIAN_ANGEL && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM) || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         PartyWidth += 60.f;
     }
