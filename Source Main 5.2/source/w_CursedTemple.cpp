@@ -161,7 +161,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
 
     switch (iType)
     {
-    case 380:
+    case MONSTER_STONE_STATUE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_STATUE);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_STATUE, iPosX, iPosY);
@@ -172,7 +172,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         pCharacter->Object.PKKey = 0;
     }
     break;
-    case 381:
+    case MONSTER_MU_ALLIES_GENERAL:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_NPC, iPosX, iPosY);
@@ -180,7 +180,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         pCharacter->Object.Scale = 1.2f;
     }
     break;
-    case 382:
+    case MONSTER_ILLUSION_ELDER:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION_NPC, iPosX, iPosY);
@@ -188,7 +188,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         pCharacter->Object.Scale = 1.2f;
     }
     break;
-    case 383:
+    case MONSTER_ALLIANCE_ITEM_STORAGE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_BASKET, iPosX, iPosY);
@@ -198,7 +198,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         m_ShowAlliedPointEffect = false;
     }
     break;
-    case 384:
+    case MONSTER_ILLUSION_ITEM_STORAGE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION__BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION__BASKET, iPosX, iPosY);
@@ -208,7 +208,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         m_ShowIllusionPointEffect = false;
     }
     break;
-    case 385:
+    case MONSTER_MIRAGE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ENTER_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ENTER_NPC, iPosX, iPosY);
@@ -261,7 +261,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 404:
+    case MONSTER_MU_ALLIES:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"뮤연합");
@@ -269,7 +269,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ALLIED_PLAYER;
     }
     break;
-    case 405:
+    case MONSTER_ILLUSION_SORCERER:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"환영교단");
