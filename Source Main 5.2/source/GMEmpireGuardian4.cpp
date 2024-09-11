@@ -85,7 +85,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     {
     case 504:
     {
-        OpenMonsterModel(164);
+        OpenMonsterModel(MONSTER_CHAOS_CASTLE_3);
         pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_3, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Gayion The Gladiator").copy(pCharacter->ID, 19);
@@ -110,7 +110,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     case 505:
     case 522:
     {
-        OpenMonsterModel(165);
+        OpenMonsterModel(MONSTER_CHAOS_CASTLE_4);
         pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_4, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Jerry The Adviseru").copy(pCharacter->ID, 19);
@@ -121,7 +121,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case 527:
     {
-        OpenMonsterModel(186);
+        OpenMonsterModel(MONSTER_ROGUE_CENTURION_3);
         pCharacter = CreateCharacter(Key, MODEL_ROGUE_CENTURION_3, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Star Gate").copy(pCharacter->ID, 10);
@@ -132,7 +132,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
 
     case 528:
     {
-        OpenMonsterModel(187);
+        OpenMonsterModel(MONSTER_NECRON_3);
         pCharacter = CreateCharacter(Key, MODEL_NECRON_3, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Rush Gate").copy(pCharacter->ID, 10);

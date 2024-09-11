@@ -337,7 +337,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     {
     case 304:
     {
-        OpenMonsterModel(100);
+        OpenMonsterModel(MONSTER_LANCE_TRAP);
         pCharacter = CreateCharacter(Key, MODEL_LANCE_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
@@ -356,7 +356,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 305:
     {
-        OpenMonsterModel(101);
+        OpenMonsterModel(MONSTER_IRON_STICK_TRAP);
         pCharacter = CreateCharacter(Key, MODEL_IRON_STICK_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.35f;
         pCharacter->Weapon[0].Type = -1;
@@ -369,7 +369,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 306:
     {
-        OpenMonsterModel(102);
+        OpenMonsterModel(MONSTER_FIRE_TRAP);
         pCharacter = CreateCharacter(Key, MODEL_FIRE_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
@@ -381,7 +381,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 307:
     {
-        OpenMonsterModel(103);
+        OpenMonsterModel(MONSTER_METEORITE_TRAP);
         pCharacter = CreateCharacter(Key, MODEL_METEORITE_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.15f;
         pCharacter->Weapon[0].Type = -1;
@@ -407,7 +407,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 309:
     {
-        OpenMonsterModel(105);
+        OpenMonsterModel(MONSTER_CANON_TRAP);
         pCharacter = CreateCharacter(Key, MODEL_CANON_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
@@ -425,7 +425,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 549:
     {
-        OpenMonsterModel(193);
+        OpenMonsterModel(MONSTER_AEGIS_4);
         pCharacter = CreateCharacter(Key, MODEL_AEGIS_4, PosX, PosY);
         //pCharacter->Object.Scale = 1.15f;
         pCharacter->Object.Scale = 1.35f;
@@ -435,7 +435,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 550:
     {
-        OpenMonsterModel(194);
+        OpenMonsterModel(MONSTER_ROGUE_CENTURION_4);
         pCharacter = CreateCharacter(Key, MODEL_ROGUE_CENTURION_4, PosX, PosY);
         //pCharacter->Object.Scale = 1.1f;
         pCharacter->Object.Scale = 1.2f;
@@ -448,7 +448,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 551:
     {
-        OpenMonsterModel(195);
+        OpenMonsterModel(MONSTER_NECRON_4);
         pCharacter = CreateCharacter(Key, MODEL_NECRON_4, PosX, PosY);
         //pCharacter->Object.Scale = 1.35f;
         pCharacter->Object.Scale = 1.40f;
@@ -462,7 +462,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 552:
     {
-        OpenMonsterModel(196);
+        OpenMonsterModel(MONSTER_SCHRIKER_4);
         pCharacter = CreateCharacter(Key, MODEL_SCHRIKER_4, PosX, PosY);
         //pCharacter->Object.Scale = 1.4f;
         pCharacter->Object.Scale = 1.75f;

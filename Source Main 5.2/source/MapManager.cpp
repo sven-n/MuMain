@@ -599,10 +599,10 @@ void CMapManager::Load() // OK
             LoadBitmap(L"Logo\\MU-logo_g.jpg", BITMAP_LOG_IN + 17, GL_LINEAR);
 
             // 몬스터 미리 읽어놓기
-            OpenMonsterModel(129);
-            OpenMonsterModel(130);
-            OpenMonsterModel(131);
-            OpenMonsterModel(133);
+            OpenMonsterModel(MONSTER_RED_SKELETON_KNIGHT_6);
+            OpenMonsterModel(MONSTER_MAGIC_SKELETON_6);
+            OpenMonsterModel(MONSTER_CASTLE_GATE);
+            OpenMonsterModel(MONSTER_STATUE_OF_SAINT_2);
             OpenMonsterModel(135);
         }
         else

@@ -367,7 +367,7 @@ CHARACTER* CGMKarutan1::CreateMonster(int iType, int PosX, int PosY, int Key)
     switch (iType)
     {
     case 569:
-        OpenMonsterModel(209);
+        OpenMonsterModel(MONSTER_WOLF_ALTAR5);
         pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR5, PosX, PosY);
         wcscpy(pCharacter->ID, L"맹독고리전갈");
         pCharacter->Object.Scale = 1.0f;
@@ -403,14 +403,14 @@ CHARACTER* CGMKarutan1::CreateMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Object.Scale = 1.25f;
         break;
     case 575:
-        OpenMonsterModel(215);
+        OpenMonsterModel(MONSTER_SHIELD);
         pCharacter = CreateCharacter(Key, MODEL_SHIELD_MONSTER, PosX, PosY);
         wcscpy(pCharacter->ID, L"콘드라");
         pCharacter->Object.Scale = 1.45f;
         pCharacter->Object.LifeTime = 100;
         break;
     case 576:
-        OpenMonsterModel(216);
+        OpenMonsterModel(MONSTER_CROWN);
         pCharacter = CreateCharacter(Key, MODEL_CROWN, PosX, PosY);
         wcscpy(pCharacter->ID, L"나르콘드라");
         pCharacter->Object.Scale = 1.55f;

@@ -583,7 +583,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     {
     case 310:
     {
-        OpenMonsterModel(98);
+        OpenMonsterModel(MONSTER_DARK_SKULL_SOLDIER_3);
         c = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_3, PosX, PosY);
         c->Object.Scale = 1.2f;
         c->Weapon[0].Type = -1;
@@ -592,7 +592,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case 311:
     {
-        OpenMonsterModel(97);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_3);
         c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_3, PosX, PosY);
         c->Object.Scale = 1.2f;
         c->Weapon[0].Type = -1;
@@ -601,7 +601,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case 312:
     {
-        OpenMonsterModel(96);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_WARRIOR_3);
         c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_WARRIOR_3, PosX, PosY);
         c->Object.Scale = 1.2f;
         c->Weapon[0].Type = -1;
@@ -614,7 +614,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case 313:
     {
-        OpenMonsterModel(95);
+        OpenMonsterModel(MONSTER_MAGIC_SKELETON_2);
         c = CreateCharacter(Key, MODEL_MAGIC_SKELETON_2, PosX, PosY);
         c->Object.Scale = 1.25f;
         c->Object.SubType = 0;
@@ -626,7 +626,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case 314:
     {
-        OpenMonsterModel(98);
+        OpenMonsterModel(MONSTER_DARK_SKULL_SOLDIER_3);
         c = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_3, PosX, PosY);
         c->Object.Scale = 1.6f;
         c->Weapon[0].Type = -1;
@@ -635,7 +635,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case 315:
     {
-        OpenMonsterModel(95);
+        OpenMonsterModel(MONSTER_MAGIC_SKELETON_2);
         c = CreateCharacter(Key, MODEL_MAGIC_SKELETON_2, PosX, PosY);
         c->Object.Scale = 1.65f;
         c->Object.SubType = 1;
@@ -648,7 +648,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     case 316:
     case 344:
     {
-        OpenMonsterModel(91);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_2);
         c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_2, PosX, PosY);
         c->Object.Scale = 1.25f;
         c->Weapon[0].Type = -1;
@@ -658,7 +658,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     case 317:
     case 341:
     {
-        OpenMonsterModel(94);
+        OpenMonsterModel(MONSTER_RED_SKELETON_KNIGHT_2);
         c = CreateCharacter(Key, MODEL_RED_SKELETON_KNIGHT_2, PosX, PosY);
         c->Object.Scale = 1.3f;
         c->Weapon[0].Type = -1;
@@ -667,7 +667,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case 349:
     {
-        OpenMonsterModel(89);
+        OpenMonsterModel(MONSTER_MAGIC_SKELETON_1);
         c = CreateCharacter(Key, MODEL_MAGIC_SKELETON_1, PosX, PosY);
         c->Object.Scale = 2.f;
         c->Weapon[0].Type = -1;
@@ -678,7 +678,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case 345:
     {
-        OpenMonsterModel(93);
+        OpenMonsterModel(MONSTER_GIANT_OGRE_2);
         c = CreateCharacter(Key, MODEL_GIANT_OGRE_2, PosX, PosY);
         c->Object.Scale = 1.25f;
         c->Weapon[0].Type = -1;
@@ -691,7 +691,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     case 440:
     case 340:
     {
-        OpenMonsterModel(92);
+        OpenMonsterModel(MONSTER_DARK_SKULL_SOLDIER_2);
         c = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_2, PosX, PosY);
         c->Object.Scale = 1.5f;
         c->Weapon[0].Type = -1;
@@ -701,7 +701,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case 348:
     {
-        OpenMonsterModel(99);
+        OpenMonsterModel(MONSTER_GIANT_OGRE_3);
         c = CreateCharacter(Key, MODEL_GIANT_OGRE_3, PosX, PosY, 180);
         c->Object.Scale = 1.0f;
         c->Weapon[0].Type = -1;

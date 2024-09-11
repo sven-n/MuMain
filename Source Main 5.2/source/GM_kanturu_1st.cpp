@@ -410,7 +410,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     case 435:
     case 350:
     {
-        OpenMonsterModel(106);
+        OpenMonsterModel(MONSTER_LASER_TRAP);
         pCharacter = CreateCharacter(Key, MODEL_LASER_TRAP, PosX, PosY);
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
@@ -422,7 +422,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     case 434:
     case 356:
     {
-        OpenMonsterModel(112);
+        OpenMonsterModel(MONSTER_MAGIC_SKELETON_3);
         pCharacter = CreateCharacter(Key, MODEL_MAGIC_SKELETON_3, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -431,7 +431,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     break;
     case 357:
     {
-        OpenMonsterModel(113);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_WARRIOR_4);
         pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_WARRIOR_4, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -503,7 +503,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     break;
     case 355:
     {
-        OpenMonsterModel(111);
+        OpenMonsterModel(MONSTER_RED_SKELETON_KNIGHT_3);
         pCharacter = CreateCharacter(Key, MODEL_RED_SKELETON_KNIGHT_3, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
@@ -527,7 +527,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     break;
     case 553:
     {
-        OpenMonsterModel(197);
+        OpenMonsterModel(MONSTER_ILLUSION_OF_KUNDUN_4);
         pCharacter = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN_4, PosX, PosY);
         //pCharacter->Object.Scale = 0.95f;
         pCharacter->Object.Scale = 1.15f;
@@ -573,7 +573,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     break;
     case 556:
     {
-        OpenMonsterModel(200);
+        OpenMonsterModel(MONSTER_SOCCERBALL);
         pCharacter = CreateCharacter(Key, MODEL_SOCCERBALL, PosX, PosY);
         //pCharacter->Object.Scale = 1.2f;
         pCharacter->Object.Scale = 1.35f;

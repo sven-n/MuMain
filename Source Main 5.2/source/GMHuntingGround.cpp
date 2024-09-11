@@ -198,7 +198,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     {
     case 290:
     {
-        OpenMonsterModel(81);   //  81
+        OpenMonsterModel(MONSTER_GOLDEN_VEPAR);   //  81
         pCharacter = CreateCharacter(Key, MODEL_GOLDEN_VEPAR, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -210,7 +210,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     break;
     case 291:
     {
-        OpenMonsterModel(82);   //  82
+        OpenMonsterModel(MONSTER_GOLDEN_TANTALLOS);   //  82
         pCharacter = CreateCharacter(Key, MODEL_GOLDEN_TANTALLOS, PosX, PosY);
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
@@ -224,7 +224,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     break;
     case 292:
     {
-        OpenMonsterModel(83);	//	83
+        OpenMonsterModel(MONSTER_GOLDEN_WHEEL);	//	83
         pCharacter = CreateCharacter(Key, MODEL_GOLDEN_WHEEL, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
@@ -236,7 +236,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 303:
     case 293:
     {
-        OpenMonsterModel(84);	// 84
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_WARRIOR_1);	// 84
         pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_WARRIOR_1, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
@@ -252,7 +252,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case 302:
     case 294:
     {
-        OpenMonsterModel(85);	//85
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_1);	//85
         pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_1, PosX, PosY);
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
@@ -264,7 +264,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     break;
     case 295:
     {
-        OpenMonsterModel(87);	//87
+        OpenMonsterModel(MONSTER_GIANT_OGRE_1);	//87
         pCharacter = CreateCharacter(Key, MODEL_GIANT_OGRE_1, PosX, PosY);
         pCharacter->Object.Scale = 2.f;
         pCharacter->Weapon[0].Type = -1;

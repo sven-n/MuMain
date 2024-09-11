@@ -830,7 +830,7 @@ int CreateDragon(OBJECT* o, int index)
     if (index < 3)
     {
         o->Live = true;
-        OpenMonsterModel(31);
+        OpenMonsterModel(MONSTER_AGON);
         o->Type = MODEL_AGON;
         o->Scale = (float)(rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;
@@ -1298,7 +1298,7 @@ void MoveBoids()
                 if (rand_fps_check(300))
                 {
                     o->Live = true;
-                    OpenMonsterModel(31);
+                    OpenMonsterModel(MONSTER_AGON);
                     o->Type = MODEL_AGON;
                     o->Scale = (float)(rand() % 3 + 6) * 0.1f;
                     o->Alpha = 1.f;

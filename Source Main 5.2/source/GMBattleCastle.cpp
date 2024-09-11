@@ -350,7 +350,7 @@ namespace battleCastle
 
         SocketClient->ToGameServer()->SendGuildLogoOfCastleOwnerRequest();
 
-        OpenMonsterModel(77);
+        OpenMonsterModel(MONSTER_DARK_PHOENIX);
 
         Position[0] = 65 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
         CreateObject(MODEL_DARK_PHOENIX, Position, Angle);
@@ -1384,7 +1384,7 @@ namespace battleCastle
             break;
 
         case 277:
-            OpenMonsterModel(73);
+            OpenMonsterModel(MONSTER_DRAKAN);
             c = CreateCharacter(Key, MODEL_DRAKAN, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.0f;
@@ -1394,7 +1394,7 @@ namespace battleCastle
             break;
 
         case 278:
-            OpenMonsterModel(86);
+            OpenMonsterModel(MONSTER_DARK_SKULL_SOLDIER_1);
             c = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_1, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.0f;
@@ -1407,7 +1407,7 @@ namespace battleCastle
             break;
 
         case 283:
-            OpenMonsterModel(74);
+            OpenMonsterModel(MONSTER_ALPHA_CRUST);
             c = CreateCharacter(Key, MODEL_ALPHA_CRUST, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;
@@ -1428,7 +1428,7 @@ namespace battleCastle
             break;
 
         case 285:
-            OpenMonsterModel(74);
+            OpenMonsterModel(MONSTER_ALPHA_CRUST);
             c = CreateCharacter(Key, MODEL_ALPHA_CRUST, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;
@@ -1438,7 +1438,7 @@ namespace battleCastle
             break;
 
         case 286:
-            OpenMonsterModel(76);
+            OpenMonsterModel(MONSTER_DARK_PHOENIX_SHIELD);
             c = CreateCharacter(Key, MODEL_DARK_PHOENIX_SHIELD, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;
@@ -1447,7 +1447,7 @@ namespace battleCastle
             break;
 
         case 287:
-            OpenMonsterModel(77);
+            OpenMonsterModel(MONSTER_DARK_PHOENIX);
             c = CreateCharacter(Key, MODEL_DARK_PHOENIX, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;
@@ -1457,7 +1457,7 @@ namespace battleCastle
             break;
 
         case 288:
-            OpenMonsterModel(79);
+            OpenMonsterModel(MONSTER_GOLDEN_DRAGON);
             c = CreateCharacter(Key, MODEL_GOLDEN_DRAGON, PositionX, PositionY);
             c->m_bFixForm = true;
             c->Object.Scale = 1.f;

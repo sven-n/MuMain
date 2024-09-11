@@ -635,7 +635,7 @@ int CreateBigMon(OBJECT* o)
     {
         LastBigMonCreation = WorldTime;
         o->Live = true;
-        OpenMonsterModel(33);
+        OpenMonsterModel(MONSTER_ELITE_GOBLIN);
         o->Type = MODEL_ELITE_GOBLIN;
         o->Scale = 2.5f + (float)(rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;

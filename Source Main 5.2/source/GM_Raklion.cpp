@@ -92,7 +92,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     switch (iType)
     {
     case 454:
-        OpenMonsterModel(145);
+        OpenMonsterModel(MONSTER_DEATH_CENTURION_1);
         pCharacter = CreateCharacter(Key, MODEL_DEATH_CENTURION_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"아이스 워커");
         //pCharacter->Object.Scale = 1.0f;
@@ -102,7 +102,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
         break;
 
     case 455:
-        OpenMonsterModel(146);
+        OpenMonsterModel(MONSTER_BLOOD_SOLDIER_1);
         pCharacter = CreateCharacter(Key, MODEL_BLOOD_SOLDIER_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"자이언트 매머드");
         pCharacter->Object.Scale = 1.7f;
@@ -117,7 +117,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
         break;
 
     case 456:
-        OpenMonsterModel(147);
+        OpenMonsterModel(MONSTER_AEGIS_1);
         pCharacter = CreateCharacter(Key, MODEL_AEGIS_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"아이스 자이언트");
         pCharacter->Object.Scale = 1.0f;
@@ -127,7 +127,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
         break;
 
     case 457:
-        OpenMonsterModel(148);
+        OpenMonsterModel(MONSTER_ROGUE_CENTURION_1);
         pCharacter = CreateCharacter(Key, MODEL_ROGUE_CENTURION_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"쿨러틴");
         pCharacter->Object.Scale = 1.0f;
@@ -136,7 +136,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
         break;
 
     case 458:
-        OpenMonsterModel(149);
+        OpenMonsterModel(MONSTER_NECRON_1);
         pCharacter = CreateCharacter(Key, MODEL_NECRON_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"아이언 나이트");
         pCharacter->Object.Scale = 1.5f;
@@ -146,7 +146,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 
     case 459:
     {
-        OpenMonsterModel(150);
+        OpenMonsterModel(MONSTER_BALI);
         pCharacter = CreateCharacter(Key, MODEL_BALI, PosX, PosY);
         wcscpy(pCharacter->ID, L"세루판");
         pCharacter->Object.Scale = 2.0f;
@@ -162,7 +162,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 460:
     {
-        OpenMonsterModel(151);
+        OpenMonsterModel(MONSTER_SOLDIER);
         pCharacter = CreateCharacter(Key, MODEL_SOLDIER, PosX, PosY);
         wcscpy(pCharacter->ID, L"거대 거미알");
         pCharacter->Object.Scale = 0.3f;
@@ -174,7 +174,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 461:
     {
-        OpenMonsterModel(152);
+        OpenMonsterModel(MONSTER_GATE_TO_KALIMA_1);
         pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"거대 거미알");
         pCharacter->Object.Scale = 0.3f;
@@ -186,7 +186,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 462:
     {
-        OpenMonsterModel(153);
+        OpenMonsterModel(MONSTER_GATE_TO_KALIMA_2);
         pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_2, PosX, PosY);
         wcscpy(pCharacter->ID, L"거대 거미알");
         pCharacter->Object.Scale = 0.3f;
@@ -199,7 +199,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 
     case 562:
     {
-        OpenMonsterModel(205);
+        OpenMonsterModel(MONSTER_WOLF_ALTAR1);
         pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR1, PosX, PosY);
         wcscpy(pCharacter->ID, L"늚?자이언트 매머드");
         //pCharacter->Object.Scale = 1.7f;
@@ -216,7 +216,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 563:
     {
-        OpenMonsterModel(206);
+        OpenMonsterModel(MONSTER_WOLF_ALTAR2);
         pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR2, PosX, PosY);
         wcscpy(pCharacter->ID, L"늚?자이언트");
         //pCharacter->Object.Scale = 1.0f;
@@ -229,7 +229,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
 
     case 564:
     {
-        OpenMonsterModel(207);
+        OpenMonsterModel(MONSTER_WOLF_ALTAR3);
         pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR3, PosX, PosY);
         wcscpy(pCharacter->ID, L"늚?쿨러틴");
         //pCharacter->Object.Scale = 1.0f;
@@ -240,7 +240,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 565:
     {
-        OpenMonsterModel(208);
+        OpenMonsterModel(MONSTER_WOLF_ALTAR4);
         pCharacter = CreateCharacter(Key, MODEL_WOLF_ALTAR4, PosX, PosY);
         wcscpy(pCharacter->ID, L"늚?아이언 나이트");
         //pCharacter->Object.Scale = 1.5f;

@@ -249,7 +249,7 @@ CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int
     {
     case 365:
     {
-        OpenMonsterModel(122);
+        OpenMonsterModel(MONSTER_GIANT_OGRE_5);
         pCharacter = CreateCharacter(iKey, MODEL_GIANT_OGRE_5, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"Fortune Pouch");
         pCharacter->Object.Scale = 1.5f;
@@ -431,7 +431,7 @@ CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iK
 
     if (iType == 463)
     {
-        OpenMonsterModel(154);
+        OpenMonsterModel(MONSTER_GATE_TO_KALIMA_3);
         pCharacter = CreateCharacter(iKey, MODEL_GATE_TO_KALIMA_3, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"Initial Helper");
         pCharacter->Object.Scale = 0.8f;

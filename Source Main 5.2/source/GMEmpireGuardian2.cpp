@@ -78,7 +78,7 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     {
     case 509:
     {
-        OpenMonsterModel(169);
+        OpenMonsterModel(MONSTER_CHAOS_CASTLE_8);
         pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_8, PosX, PosY);
         wcscpy(pCharacter->ID, L"버몬트");
 
@@ -89,7 +89,7 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case 514:
     {
-        OpenMonsterModel(174);
+        OpenMonsterModel(MONSTER_DEATH_ANGEL_2);
         pCharacter = CreateCharacter(Key, MODEL_DEATH_ANGEL_2, PosX, PosY);
         wcscpy(pCharacter->ID, L"기사단장");
 
@@ -98,7 +98,7 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case 515:
     {
-        OpenMonsterModel(175);
+        OpenMonsterModel(MONSTER_DEATH_CENTURION_2);
         pCharacter = CreateCharacter(Key, MODEL_DEATH_CENTURION_2, PosX, PosY);
         wcscpy(pCharacter->ID, L"대마법사");
 

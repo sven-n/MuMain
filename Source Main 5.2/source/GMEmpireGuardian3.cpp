@@ -80,7 +80,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     {
     case 510:
     {
-        OpenMonsterModel(170);
+        OpenMonsterModel(MONSTER_CHAOS_CASTLE_9);
         pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_9, PosX, PosY);
         wcscpy(pCharacter->ID, L"카토");
         pCharacter->Object.Scale = 1.35f;
@@ -90,7 +90,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case 516:
     {
-        OpenMonsterModel(176);
+        OpenMonsterModel(MONSTER_BLOOD_SOLDIER_2);
         pCharacter = CreateCharacter(Key, MODEL_BLOOD_SOLDIER_2, PosX, PosY);
         wcscpy(pCharacter->ID, L"암살단장");
         pCharacter->Object.Scale = 1.55f;
@@ -98,7 +98,7 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case 517:
     {
-        OpenMonsterModel(177);
+        OpenMonsterModel(MONSTER_AEGIS_2);
         pCharacter = CreateCharacter(Key, MODEL_AEGIS_2, PosX, PosY);
         wcscpy(pCharacter->ID, L"기마단장");
         pCharacter->Object.Scale = 1.25f;

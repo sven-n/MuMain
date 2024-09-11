@@ -223,7 +223,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     case 398:
     case 401:
     {
-        OpenMonsterModel(123);
+        OpenMonsterModel(MONSTER_RED_SKELETON_KNIGHT_5);
         pCharacter = CreateCharacter(iKey, MODEL_RED_SKELETON_KNIGHT_5, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"환영교단의 망령(번개)");
         pCharacter->Object.Scale = 1.0f;
@@ -238,7 +238,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     case 399:
     case 402:
     {
-        OpenMonsterModel(124);
+        OpenMonsterModel(MONSTER_MAGIC_SKELETON_5);
         pCharacter = CreateCharacter(iKey, MODEL_MAGIC_SKELETON_5, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"환영교단의 망령(얼음)");
         pCharacter->Object.Scale = 1.0f;
@@ -253,7 +253,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     case 400:
     case 403:
     {
-        OpenMonsterModel(125);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_WARRIOR_6);
         pCharacter = CreateCharacter(iKey, MODEL_CHIEF_SKELETON_WARRIOR_6, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"환영교단의 망령(독)");
         pCharacter->Object.Scale = 1.0f;

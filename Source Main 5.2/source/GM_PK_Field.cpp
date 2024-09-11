@@ -53,7 +53,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
     case 480:
     {
-        OpenMonsterModel(157);
+        OpenMonsterModel(MONSTER_GATE_TO_KALIMA_6);
         pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_6, PosX, PosY);
         wcscpy(pCharacter->ID, L"좀비 투사");
         pCharacter->Object.Scale = 1.0f;
@@ -64,7 +64,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 481:
     {
-        OpenMonsterModel(157);
+        OpenMonsterModel(MONSTER_GATE_TO_KALIMA_6);
         pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_6, PosX, PosY);
         wcscpy(pCharacter->ID, L"좀비 투사");
         pCharacter->Object.Scale = 1.0f;
@@ -75,7 +75,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 482:
     {
-        OpenMonsterModel(158);
+        OpenMonsterModel(MONSTER_GATE_TO_KALIMA_7);
         pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_7, PosX, PosY);
         wcscpy(pCharacter->ID, L"되살아난 검투사");
         pCharacter->Object.Scale = 1.0f;
@@ -86,7 +86,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 483:
     {
-        OpenMonsterModel(158);
+        OpenMonsterModel(MONSTER_GATE_TO_KALIMA_7);
         pCharacter = CreateCharacter(Key, MODEL_GATE_TO_KALIMA_7, PosX, PosY);
         wcscpy(pCharacter->ID, L"되살아난 검투사");
         pCharacter->Object.Scale = 1.0f;
@@ -119,7 +119,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 486:
     {
-        OpenMonsterModel(160);
+        OpenMonsterModel(MONSTER_SCHRIKER_1);
         pCharacter = CreateCharacter(Key, MODEL_SCHRIKER_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"피의 암살자");
         pCharacter->Object.Scale = 1.0f;
@@ -131,7 +131,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 487:
     {
-        OpenMonsterModel(161);
+        OpenMonsterModel(MONSTER_ILLUSION_OF_KUNDUN_1);
         pCharacter = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"잔혹한 피의 암살자");
         pCharacter->Object.Scale = 1.0f;
@@ -143,7 +143,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 488:
     {
-        OpenMonsterModel(161);
+        OpenMonsterModel(MONSTER_ILLUSION_OF_KUNDUN_1);
         pCharacter = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"잔혹한 피의 암살자");
         pCharacter->Object.Scale = 1.0f;
@@ -155,7 +155,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 489:
     {
-        OpenMonsterModel(163);
+        OpenMonsterModel(MONSTER_CHAOS_CASTLE_2);
         pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_2, PosX, PosY);
         wcscpy(pCharacter->ID, L"불타는 용암 거인");
         pCharacter->Object.Scale = 1.0f;
@@ -166,7 +166,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 490:
     {
-        OpenMonsterModel(162);
+        OpenMonsterModel(MONSTER_CHAOS_CASTLE_1);
         pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"포악한 용암 거인");
         pCharacter->Object.Scale = 1.0f;
@@ -177,7 +177,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     break;
     case 491:
     {
-        OpenMonsterModel(162);
+        OpenMonsterModel(MONSTER_CHAOS_CASTLE_1);
         pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"포악한 용암 거인");
         pCharacter->Object.Scale = 1.0f;

@@ -404,7 +404,7 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
     case 436:
     case 409:
     {
-        OpenMonsterModel(91);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_2);
         c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_2, PosX, PosY);
         c->Object.Scale = 1.25f;
         c->Weapon[0].Type = -1;
@@ -413,7 +413,7 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
     break;
     case 410:
     {
-        OpenMonsterModel(93);
+        OpenMonsterModel(MONSTER_GIANT_OGRE_2);
         c = CreateCharacter(Key, MODEL_GIANT_OGRE_2, PosX, PosY);
         c->Object.Scale = 1.25f;
         c->Weapon[0].Type = -1;
@@ -426,7 +426,7 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
     case 437:
     case 411:
     {
-        OpenMonsterModel(94);
+        OpenMonsterModel(MONSTER_RED_SKELETON_KNIGHT_2);
         c = CreateCharacter(Key, MODEL_RED_SKELETON_KNIGHT_2, PosX, PosY);
         c->Object.Scale = 1.3f;
         c->Weapon[0].Type = -1;
@@ -437,7 +437,7 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
     {
         m_nDarkElfAppearance = true;
 
-        OpenMonsterModel(126);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_6);
         c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_6, PosX, PosY);
         //			c->Object.Scale = 1.5f;
         c->Object.Scale = 1.7f;

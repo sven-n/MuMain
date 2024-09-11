@@ -62,19 +62,19 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
     switch (iType)
     {
     case 529:
-        OpenMonsterModel(190);
+        OpenMonsterModel(MONSTER_DEATH_ANGEL_4);
         pCharacter = CreateCharacter(Key, MODEL_DEATH_ANGEL_4, PosX, PosY);
         wcscpy(pCharacter->ID, L"도살자");
         pCharacter->Object.Scale = 1.0f;
         break;
     case 530:
-        OpenMonsterModel(189);
+        OpenMonsterModel(MONSTER_ILLUSION_OF_KUNDUN_3);
         pCharacter = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN_3, PosX, PosY);
         wcscpy(pCharacter->ID, L"분노한 도살자");
         pCharacter->Object.Scale = 0.8f;
         break;
     case 531:
-        OpenMonsterModel(145);
+        OpenMonsterModel(MONSTER_DEATH_CENTURION_1);
         pCharacter = CreateCharacter(Key, MODEL_DEATH_CENTURION_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"아이스 워커");
         pCharacter->Object.Scale = 1.2f;
@@ -82,13 +82,13 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case 532:
-        OpenMonsterModel(6);
+        OpenMonsterModel(MONSTER_LICH);
         pCharacter = CreateCharacter(Key, MODEL_LICH, PosX, PosY);
         wcscpy(pCharacter->ID, L"유충");
         pCharacter->Object.Scale = 0.6f;
         break;
     case 533:
-        OpenMonsterModel(191);
+        OpenMonsterModel(MONSTER_DEATH_CENTURION_4);
         pCharacter = CreateCharacter(Key, MODEL_DEATH_CENTURION_4, PosX, PosY);
         wcscpy(pCharacter->ID, L"도플갱어");
         pCharacter->Object.Scale = 1.1f;

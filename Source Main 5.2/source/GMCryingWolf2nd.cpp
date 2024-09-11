@@ -130,7 +130,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     {
     case 315:
     {
-        OpenMonsterModel(95);
+        OpenMonsterModel(MONSTER_MAGIC_SKELETON_2);
         pCharacter = CreateCharacter(Key, MODEL_MAGIC_SKELETON_2, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         pCharacter->Weapon[0].Type = -1;
@@ -141,7 +141,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case 316:
     {
-        OpenMonsterModel(96);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_WARRIOR_3);
         pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_WARRIOR_3, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -154,7 +154,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case 317:
     {
-        OpenMonsterModel(97);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_3);
         pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_3, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -163,7 +163,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case 318:
     {
-        OpenMonsterModel(98);
+        OpenMonsterModel(MONSTER_DARK_SKULL_SOLDIER_3);
         pCharacter = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_3, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -172,7 +172,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case 310:
     {
-        OpenMonsterModel(91);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_2);
         pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_2, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         pCharacter->Weapon[0].Type = -1;

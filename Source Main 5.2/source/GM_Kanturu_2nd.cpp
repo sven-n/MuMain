@@ -58,7 +58,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
     case 438:
     case 358:
     {
-        OpenMonsterModel(114);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_4);
         pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_4, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
@@ -71,7 +71,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
     break;
     case 359:
     {
-        OpenMonsterModel(115);
+        OpenMonsterModel(MONSTER_DARK_SKULL_SOLDIER_4);
         pCharacter = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_4, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Angle[0] = 0.0f;
@@ -87,7 +87,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
     case 439:
     case 360:
     {
-        OpenMonsterModel(116);
+        OpenMonsterModel(MONSTER_GIANT_OGRE_4);
         pCharacter = CreateCharacter(Key, MODEL_GIANT_OGRE_4, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Angle[0] = 0.0f;

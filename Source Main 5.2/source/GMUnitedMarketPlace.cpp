@@ -67,7 +67,7 @@ CHARACTER* GMUnitedMarketPlace::CreateMonster(int iType, int PosX, int PosY, int
     // 	{
     // 	case 526:
     // 		{
-    // 			OpenMonsterModel(185);
+    // 			OpenMonsterModel(MONSTER_AEGIS_3);
     // 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+185, PosX, PosY);
     // 			wcscpy(pCharacter->ID, L"석상");
     // 			pCharacter->Object.m_bRenderShadow = false;

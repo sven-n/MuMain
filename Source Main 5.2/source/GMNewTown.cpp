@@ -1019,7 +1019,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_STRANGE_RABBIT:
-        OpenMonsterModel(128);
+        OpenMonsterModel(MONSTER_GIANT_OGRE_6);
         pCharacter = CreateCharacter(Key, MODEL_GIANT_OGRE_6, PosX, PosY);
         wcscpy(pCharacter->ID, L"기괴한 토끼");
         pCharacter->Object.Scale = 1.0f * 0.95f;
@@ -1027,7 +1027,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_POLLUTED_BUTTERFLY:
-        OpenMonsterModel(129);
+        OpenMonsterModel(MONSTER_RED_SKELETON_KNIGHT_6);
         pCharacter = CreateCharacter(Key, MODEL_RED_SKELETON_KNIGHT_6, PosX, PosY);
         wcscpy(pCharacter->ID, L"흉측한 토끼");
         pCharacter->Object.Scale = 0.8f * 0.95f;
@@ -1035,7 +1035,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_HIDEOUS_RABBIT:
-        OpenMonsterModel(130);
+        OpenMonsterModel(MONSTER_MAGIC_SKELETON_6);
         pCharacter = CreateCharacter(Key, MODEL_MAGIC_SKELETON_6, PosX, PosY);
         wcscpy(pCharacter->ID, L"늑대인간");
         pCharacter->Object.Scale = 1.0f * 0.95f;
@@ -1043,7 +1043,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_WEREWOLF2:
-        OpenMonsterModel(131);
+        OpenMonsterModel(MONSTER_CASTLE_GATE);
         pCharacter = CreateCharacter(Key, MODEL_CASTLE_GATE, PosX, PosY);
         wcscpy(pCharacter->ID, L"오염된 나비");
         pCharacter->Object.Scale = 0.8f * 1.1f;
@@ -1051,7 +1051,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_CURSED_LICH:
-        OpenMonsterModel(132);
+        OpenMonsterModel(MONSTER_STATUE_OF_SAINT_1);
         pCharacter = CreateCharacter(Key, MODEL_STATUE_OF_SAINT_1, PosX, PosY);
         wcscpy(pCharacter->ID, L"저주받은리치");
         pCharacter->Object.Scale = 1.0f * 0.95f;
@@ -1059,7 +1059,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_TOTEM_GOLEM:
-        OpenMonsterModel(133);
+        OpenMonsterModel(MONSTER_STATUE_OF_SAINT_2);
         pCharacter = CreateCharacter(Key, MODEL_STATUE_OF_SAINT_2, PosX, PosY);
         wcscpy(pCharacter->ID, L"토템골렘");
         pCharacter->Object.Scale = 0.17f * 0.95f;
@@ -1070,7 +1070,7 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_GRIZZLY:
-        OpenMonsterModel(134);
+        OpenMonsterModel(MONSTER_STATUE_OF_SAINT_3);
         pCharacter = CreateCharacter(Key, MODEL_STATUE_OF_SAINT_3, PosX, PosY);
         wcscpy(pCharacter->ID, L"괴수 우씨");
         pCharacter->Object.Scale = 1.2f * 0.95f;

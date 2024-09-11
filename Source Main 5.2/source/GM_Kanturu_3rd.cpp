@@ -667,7 +667,7 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
     {
     case 361:
     {
-        OpenMonsterModel(121);
+        OpenMonsterModel(MONSTER_DARK_SKULL_SOLDIER_5);
         c = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_5, PosX, PosY);
         c->Object.Scale = 1.6f;
         c->Weapon[0].Type = -1;
@@ -707,7 +707,7 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
     break;
     case 362:
     {
-        OpenMonsterModel(118);
+        OpenMonsterModel(MONSTER_MAGIC_SKELETON_4);
         c = CreateCharacter(Key, MODEL_MAGIC_SKELETON_4, PosX, PosY);
         c->Object.Scale = 2.28f;
         c->Weapon[0].Type = -1;
@@ -740,7 +740,7 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
     break;
     case 363:
     {
-        OpenMonsterModel(119);
+        OpenMonsterModel(MONSTER_CHIEF_SKELETON_WARRIOR_5);
         c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_WARRIOR_5, PosX, PosY);
         c->Object.Scale = 2.28f;
         c->Weapon[0].Type = -1;
@@ -773,7 +773,7 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
     break;
     case 364:
     {
-        OpenMonsterModel(0);
+        OpenMonsterModel(MONSTER_BULL_FIGHTER);
         c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_5, PosX, PosY);
         c->Object.Scale = 0.2f;
         c->Weapon[0].Type = -1;
