@@ -780,14 +780,14 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     OBJECT* o = &c->Object;
     switch (Type)
     {
-    case 144:
-    case 174:
-    case 182:
-    case 190:
-    case 260:
-    case 268:
-    case 334:
-        OpenMonsterModel(63);
+    case MONSTER_DEATH_ANGEL_1:
+    case MONSTER_DEATH_ANGEL_2:
+    case MONSTER_DEATH_ANGEL_3:
+    case MONSTER_DEATH_ANGEL_4:
+    case MONSTER_DEATH_ANGEL_5:
+    case MONSTER_DEATH_ANGEL_6:
+    case MONSTER_DEATH_ANGEL_7:
+        OpenMonsterModel(MONSTER_DEATH_BEAM_KNIGHT);
         c = CreateCharacter(Key, MODEL_DEATH_BEAM_KNIGHT, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
@@ -796,14 +796,14 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         o->BlendMesh = 1;
         wcscpy(c->ID, L"장수거북");
         break;
-    case 145:
-    case 175:
-    case 183:
-    case 191:
-    case 261:
-    case 269:
-    case 336:
-        OpenMonsterModel(67);
+    case MONSTER_DEATH_CENTURION_1:
+    case MONSTER_DEATH_CENTURION_2:
+    case MONSTER_DEATH_CENTURION_3:
+    case MONSTER_DEATH_CENTURION_4:
+    case MONSTER_DEATH_CENTURION_5:
+    case MONSTER_DEATH_CENTURION_6:
+    case MONSTER_DEATH_CENTURION_7:
+        OpenMonsterModel(MONSTER_METAL_BALROG);
         c = CreateCharacter(Key, MODEL_METAL_BALROG, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_DRAGON_SPEAR;
         c->Weapon[0].Level = 7;
@@ -813,14 +813,14 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         o->BlendMesh = 0;
         wcscpy(c->ID, L"대형 블루나이트");
         break;
-    case 146:
-    case 176:
-    case 184:
-    case 192:
-    case 262:
-    case 270:
-    case 333:
-        OpenMonsterModel(65);
+    case MONSTER_BLOOD_SOLDIER_1:
+    case MONSTER_BLOOD_SOLDIER_2:
+    case MONSTER_BLOOD_SOLDIER_3:
+    case MONSTER_BLOOD_SOLDIER_4:
+    case MONSTER_BLOOD_SOLDIER_5:
+    case MONSTER_BLOOD_SOLDIER_6:
+    case MONSTER_BLOOD_SOLDIER_7:
+        OpenMonsterModel(MONSTER_ELITE_ORC);
         c = CreateCharacter(Key, MODEL_ELITE_ORC, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
@@ -828,14 +828,14 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         o = &c->Object;
         wcscpy(c->ID, L"랍스터");
         break;
-    case 147:
-    case 177:
-    case 185:
-    case 193:
-    case 263:
-    case 271:
-    case 331:
-        OpenMonsterModel(66);
+    case MONSTER_AEGIS_1:
+    case MONSTER_AEGIS_2:
+    case MONSTER_AEGIS_3:
+    case MONSTER_AEGIS_4:
+    case MONSTER_AEGIS_5:
+    case MONSTER_AEGIS_6:
+    case MONSTER_AEGIS_7:
+        OpenMonsterModel(MONSTER_CURSED_KING);
         c = CreateCharacter(Key, MODEL_CURSED_KING, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
@@ -844,14 +844,14 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         o->BlendMesh = 1;
         wcscpy(c->ID, L"가오리");
         break;
-    case 148:
-    case 178:
-    case 186:
-    case 194:
-    case 264:
-    case 272:
-    case 332:
-        OpenMonsterModel(67);
+    case MONSTER_ROGUE_CENTURION_1:
+    case MONSTER_ROGUE_CENTURION_2:
+    case MONSTER_ROGUE_CENTURION_3:
+    case MONSTER_ROGUE_CENTURION_4:
+    case MONSTER_ROGUE_CENTURION_5:
+    case MONSTER_ROGUE_CENTURION_6:
+    case MONSTER_ROGUE_CENTURION_7:
+        OpenMonsterModel(MONSTER_METAL_BALROG);
         c = CreateCharacter(Key, MODEL_METAL_BALROG, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_DRAGON_SPEAR;
         c->Weapon[0].Level = 7;
@@ -860,15 +860,15 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         o->BlendMesh = 0;
         wcscpy(c->ID, L"블루나이트");
         break;
-    case 149:
-    case 179:
-    case 187:
-    case 195:
-    case 265:
-    case 273:
-    case 335:
-        OpenMonsterModel(68);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 68, PositionX, PositionY);
+    case MONSTER_NECRON_1:
+    case MONSTER_NECRON_2:
+    case MONSTER_NECRON_3:
+    case MONSTER_NECRON_4:
+    case MONSTER_NECRON_5:
+    case MONSTER_NECRON_6:
+    case MONSTER_NECRON_7:
+        OpenMonsterModel(MONSTER_MOLT);
+        c = CreateCharacter(Key, MODEL_MOLT, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.2f;
@@ -876,14 +876,14 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         o->BlendMesh = 3;
         wcscpy(c->ID, L"마린보이");
         break;
-    case 160:
-    case 180:
-    case 188:
-    case 196:
-    case 266:
-    case 274:
-    case 337:
-        OpenMonsterModel(69);
+    case MONSTER_SCHRIKER_1:
+    case MONSTER_SCHRIKER_2:
+    case MONSTER_SCHRIKER_3:
+    case MONSTER_SCHRIKER_4:
+    case MONSTER_SCHRIKER_5:
+    case MONSTER_SCHRIKER_6:
+    case MONSTER_SCHRIKER_7:
+        OpenMonsterModel(MONSTER_ALQUAMOS);
         c = CreateCharacter(Key, MODEL_ALQUAMOS, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[0].Level = 0;
@@ -893,13 +893,13 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         o = &c->Object;
         wcscpy(c->ID, L"쿤둔후보");
         break;
-    case 161:
-    case 181:
-    case 189:
-    case 197:
-    case 267:
-    case 338:
-        OpenMonsterModel(69);
+    case MONSTER_ILLUSION_OF_KUNDUN_1:
+    case MONSTER_ILLUSION_OF_KUNDUN_2:
+    case MONSTER_ILLUSION_OF_KUNDUN_3:
+    case MONSTER_ILLUSION_OF_KUNDUN_4:
+    case MONSTER_ILLUSION_OF_KUNDUN_5:
+    case MONSTER_ILLUSION_OF_KUNDUN_6:
+        OpenMonsterModel(MONSTER_ALQUAMOS);
         c = CreateCharacter(Key, MODEL_ALQUAMOS, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[0].Level = 0;
@@ -911,8 +911,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         wcscpy(c->ID, L"쿤둔후보");
         break;
 
-    case 275:
-        OpenMonsterModel(64);
+    case MONSTER_ILLUSION_OF_KUNDUN_7:
+        OpenMonsterModel(MONSTER_ORC_ARCHER);
         c = CreateCharacter(Key, MODEL_ORC_ARCHER, PositionX, PositionY);
         c->Weapon[1].Type = MODEL_STAFF_OF_KUNDUN;
         c->Weapon[1].Level = 0;
@@ -960,12 +960,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
 {
     switch (c->MonsterIndex)
     {
-    case 145:
-    case 175:
-    case 183:
-    case 191:
-    case 261:
-    case 269:
+    case MONSTER_DEATH_CENTURION_1:
+    case MONSTER_DEATH_CENTURION_2:
+    case MONSTER_DEATH_CENTURION_3:
+    case MONSTER_DEATH_CENTURION_4:
+    case MONSTER_DEATH_CENTURION_5:
+    case MONSTER_DEATH_CENTURION_6:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -988,12 +988,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 147:
-    case 177:
-    case 185:
-    case 193:
-    case 263:
-    case 271:
+    case MONSTER_AEGIS_1:
+    case MONSTER_AEGIS_2:
+    case MONSTER_AEGIS_3:
+    case MONSTER_AEGIS_4:
+    case MONSTER_AEGIS_5:
+    case MONSTER_AEGIS_6:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -1006,12 +1006,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 148:
-    case 178:
-    case 186:
-    case 194:
-    case 264:
-    case 272:
+    case MONSTER_ROGUE_CENTURION_1:
+    case MONSTER_ROGUE_CENTURION_2:
+    case MONSTER_ROGUE_CENTURION_3:
+    case MONSTER_ROGUE_CENTURION_4:
+    case MONSTER_ROGUE_CENTURION_5:
+    case MONSTER_ROGUE_CENTURION_6:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -1024,12 +1024,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 149:
-    case 179:
-    case 187:
-    case 195:
-    case 265:
-    case 273:
+    case MONSTER_NECRON_1:
+    case MONSTER_NECRON_2:
+    case MONSTER_NECRON_3:
+    case MONSTER_NECRON_4:
+    case MONSTER_NECRON_5:
+    case MONSTER_NECRON_6:
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
@@ -1042,21 +1042,21 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 160:
-    case 180:
-    case 188:
-    case 196:
-    case 266:
-    case 274:
-    case 161:
-    case 181:
-    case 189:
-    case 197:
-    case 267:
+    case MONSTER_SCHRIKER_1:
+    case MONSTER_SCHRIKER_2:
+    case MONSTER_SCHRIKER_3:
+    case MONSTER_SCHRIKER_4:
+    case MONSTER_SCHRIKER_5:
+    case MONSTER_SCHRIKER_6:
+    case MONSTER_ILLUSION_OF_KUNDUN_1:
+    case MONSTER_ILLUSION_OF_KUNDUN_2:
+    case MONSTER_ILLUSION_OF_KUNDUN_3:
+    case MONSTER_ILLUSION_OF_KUNDUN_4:
+    case MONSTER_ILLUSION_OF_KUNDUN_5:
         SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
         return true;
 
-    case 275:
+    case MONSTER_ILLUSION_OF_KUNDUN_7:
         SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
         return true;
     }
@@ -1071,13 +1071,13 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     Vector(1.f, 1.f, 1.f, Light);
     switch (c->MonsterIndex)
     {
-    case 144:
-    case 174:
-    case 182:
-    case 190:
-    case 260:
-    case 268:
-    case 276:
+    case MONSTER_DEATH_ANGEL_1:
+    case MONSTER_DEATH_ANGEL_2:
+    case MONSTER_DEATH_ANGEL_3:
+    case MONSTER_DEATH_ANGEL_4:
+    case MONSTER_DEATH_ANGEL_5:
+    case MONSTER_DEATH_ANGEL_6:
+    case MONSTER_DEATH_ANGEL_7:
         if ((int)c->AttackTime == 14)
         {
             Vector(1.f, 1.f, 1.f, Light);
@@ -1095,13 +1095,12 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 145:
-    case 175:
-    case 183:
-    case 191:
-    case 261:
-    case 269:
-    case 277:
+    case MONSTER_DEATH_CENTURION_1:
+    case MONSTER_DEATH_CENTURION_2:
+    case MONSTER_DEATH_CENTURION_3:
+    case MONSTER_DEATH_CENTURION_4:
+    case MONSTER_DEATH_CENTURION_5:
+    case MONSTER_DEATH_CENTURION_6:
         switch ((c->Skill))
         {
         case AT_SKILL_BLOOD_ATT_UP:
@@ -1150,13 +1149,13 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 146:
-    case 176:
-    case 184:
-    case 192:
-    case 262:
-    case 270:
-    case 278:
+    case MONSTER_BLOOD_SOLDIER_1:
+    case MONSTER_BLOOD_SOLDIER_2:
+    case MONSTER_BLOOD_SOLDIER_3:
+    case MONSTER_BLOOD_SOLDIER_4:
+    case MONSTER_BLOOD_SOLDIER_5:
+    case MONSTER_BLOOD_SOLDIER_6:
+    case MONSTER_BLOOD_SOLDIER_7:
         if ((int)c->AttackTime == 14)
         {
             Vector(1.f, 1.f, 1.f, Light);
@@ -1174,26 +1173,26 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 147:
-    case 177:
-    case 185:
-    case 193:
-    case 263:
-    case 271:
-    case 279:
+    case MONSTER_AEGIS_1:
+    case MONSTER_AEGIS_2:
+    case MONSTER_AEGIS_3:
+    case MONSTER_AEGIS_4:
+    case MONSTER_AEGIS_5:
+    case MONSTER_AEGIS_6:
+    case MONSTER_AEGIS_7:
         if (o->CurrentAction == MONSTER01_ATTACK2 && c->AttackTime == 14)
         {
             CreateEffect(MODEL_WATER_WAVE, o->Position, o->Angle, o->Light);
         }
         return true;
 
-    case 148:
-    case 178:
-    case 186:
-    case 194:
-    case 264:
-    case 272:
-    case 280:
+    case MONSTER_ROGUE_CENTURION_1:
+    case MONSTER_ROGUE_CENTURION_2:
+    case MONSTER_ROGUE_CENTURION_3:
+    case MONSTER_ROGUE_CENTURION_4:
+    case MONSTER_ROGUE_CENTURION_5:
+    case MONSTER_ROGUE_CENTURION_6:
+    case MONSTER_ROGUE_CENTURION_7:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -1208,13 +1207,13 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 149:
-    case 179:
-    case 187:
-    case 195:
-    case 265:
-    case 273:
-    case 281:
+    case MONSTER_NECRON_1:
+    case MONSTER_NECRON_2:
+    case MONSTER_NECRON_3:
+    case MONSTER_NECRON_4:
+    case MONSTER_NECRON_5:
+    case MONSTER_NECRON_6:
+    case MONSTER_NECRON_7:
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
@@ -1259,12 +1258,12 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 160:
-    case 180:
-    case 188:
-    case 196:
-    case 266:
-    case 274:
+    case MONSTER_SCHRIKER_1:
+    case MONSTER_SCHRIKER_2:
+    case MONSTER_SCHRIKER_3:
+    case MONSTER_SCHRIKER_4:
+    case MONSTER_SCHRIKER_5:
+    case MONSTER_SCHRIKER_6:
         if (o->CurrentAction == MONSTER01_ATTACK1 && c->AttackTime >= 13)
         {
             CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 5, o);
@@ -1273,11 +1272,11 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 161:
-    case 181:
-    case 189:
-    case 197:
-    case 267:
+    case MONSTER_ILLUSION_OF_KUNDUN_1:
+    case MONSTER_ILLUSION_OF_KUNDUN_2:
+    case MONSTER_ILLUSION_OF_KUNDUN_3:
+    case MONSTER_ILLUSION_OF_KUNDUN_4:
+    case MONSTER_ILLUSION_OF_KUNDUN_5:
         switch ((c->Skill))
         {
         case AT_SKILL_BLOOD_ATT_UP:
@@ -1333,7 +1332,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             }
         }
         return true;
-    case 275:
+    case MONSTER_ILLUSION_OF_KUNDUN_7:
         switch ((c->Skill))
         {
         case AT_SKILL_BLOOD_ATT_UP:

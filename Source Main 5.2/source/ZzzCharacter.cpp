@@ -12474,7 +12474,7 @@ void Setting_Monster(CHARACTER* c, int Type, int PositionX, int PositionY)
     }
 }
 
-CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key)
+CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Key)
 {
     CHARACTER* c = NULL;
     OBJECT* o;
@@ -14384,7 +14384,7 @@ CHARACTER* CreateHero(int Index, int Class, int Skin, float x, float y, float Ro
     return c;
 }
 
-CHARACTER* CreateHellGate(char* ID, int Key, int Index, int x, int y, int CreateFlag)
+CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, int CreateFlag)
 {
     CHARACTER* portal = CreateMonster(Index, x, y, Key);
     portal->Level = Index - 152 + 1;

@@ -2607,7 +2607,7 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
 
         CHARACTER* c;
 
-        if (Type >= 152 && Type <= 158)
+        if (Type >= MONSTER_GATE_TO_KALIMA_1 && Type <= MONSTER_GATE_TO_KALIMA_7)
         {
             c = CreateHellGate(Data2->ID, Key, Type, Data2->PositionX, Data2->PositionY, CreateFlag);
         }
