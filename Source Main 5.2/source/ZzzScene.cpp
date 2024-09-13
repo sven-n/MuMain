@@ -2614,9 +2614,9 @@ void MainScene(HDC hDC)
 #ifdef ASG_ADD_MAP_KARUTAN
             if (!IsKarutanMap())
                 StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
-            if (World != WD_80KARUTAN1)
+            if (gMapManager.WorldActive != WD_80KARUTAN1)
                 StopBuffer(SOUND_KARUTAN_INSECT_ENV, true);
-            if (World != WD_81KARUTAN2)
+            if (gMapManager.WorldActive != WD_81KARUTAN2)
                 StopBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, true);
 #endif	// ASG_ADD_MAP_KARUTAN
 

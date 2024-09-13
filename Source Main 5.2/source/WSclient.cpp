@@ -1603,7 +1603,7 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
         {
             c->TargetX = Data->PositionX;
             c->TargetY = Data->PositionY;
-            if (o->Type == MODEL_SILVER_VALKYRIE)
+            if (o->Type == MODEL_CRUST)
             {
                 c->PositionX = Data->PositionX;
                 c->PositionY = Data->PositionY;
@@ -2501,7 +2501,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         }
 
         float fAngle = 45.0f;
-        if (o->Type == MODEL_GIANT_OGRE_3)
+        if (o->Type == MODEL_BALLISTA_)
         {
             if (c->PositionY == 90)
                 fAngle = 0.0f;
@@ -3771,7 +3771,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         sc->AttackTime = 1;
         break;
     case AT_SKILL_THUNDER:
-        if (so->Type != MODEL_GOLDEN_WHEEL)
+        if (so->Type != MODEL_QUEEN_BEE_)
             PlayBuffer(SOUND_THUNDER01);
         if (to->CurrentAction == PLAYER_POSE1 || to->CurrentAction == PLAYER_POSE_FEMALE1 ||
             to->CurrentAction == PLAYER_SIT1 || to->CurrentAction == PLAYER_SIT_FEMALE1)

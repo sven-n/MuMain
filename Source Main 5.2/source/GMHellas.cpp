@@ -506,7 +506,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
 
 bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
 {
-    if (o->Type == MODEL_ELITE_GOBLIN && gMapManager.InHellas())
+    if (o->Type == MODEL_BAHAMUT && gMapManager.InHellas())
     {
         Vector(0.0f, 0.0f, 0.0f, b->BodyLight);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -635,8 +635,8 @@ int CreateBigMon(OBJECT* o)
     {
         LastBigMonCreation = WorldTime;
         o->Live = true;
-        OpenMonsterModel(MONSTER_ELITE_GOBLIN);
-        o->Type = MODEL_ELITE_GOBLIN;
+        OpenMonsterModel(MONSTER_MODEL_BAHAMUT);
+        o->Type = MODEL_BAHAMUT;
         o->Scale = 2.5f + (float)(rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;
         o->AlphaTarget = o->Alpha;
@@ -787,8 +787,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     case MONSTER_DEATH_ANGEL_5:
     case MONSTER_DEATH_ANGEL_6:
     case MONSTER_DEATH_ANGEL_7:
-        OpenMonsterModel(MONSTER_DEATH_BEAM_KNIGHT);
-        c = CreateCharacter(Key, MODEL_DEATH_BEAM_KNIGHT, PositionX, PositionY);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_ANGEL);
+        c = CreateCharacter(Key, MODEL_DEATH_ANGEL, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
         c->Object.Scale = 1.2f;
@@ -803,8 +803,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     case MONSTER_DEATH_CENTURION_5:
     case MONSTER_DEATH_CENTURION_6:
     case MONSTER_DEATH_CENTURION_7:
-        OpenMonsterModel(MONSTER_METAL_BALROG);
-        c = CreateCharacter(Key, MODEL_METAL_BALROG, PositionX, PositionY);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_CENTURION);
+        c = CreateCharacter(Key, MODEL_DEATH_CENTURION, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_DRAGON_SPEAR;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.5f;
@@ -820,8 +820,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     case MONSTER_BLOOD_SOLDIER_5:
     case MONSTER_BLOOD_SOLDIER_6:
     case MONSTER_BLOOD_SOLDIER_7:
-        OpenMonsterModel(MONSTER_ELITE_ORC);
-        c = CreateCharacter(Key, MODEL_ELITE_ORC, PositionX, PositionY);
+        OpenMonsterModel(MONSTER_MODEL_BLOOD_SOLDIER);
+        c = CreateCharacter(Key, MODEL_BLOOD_SOLDIER, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
         c->Object.Scale = 0.8f;
@@ -835,8 +835,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     case MONSTER_AEGIS_5:
     case MONSTER_AEGIS_6:
     case MONSTER_AEGIS_7:
-        OpenMonsterModel(MONSTER_CURSED_KING);
-        c = CreateCharacter(Key, MODEL_CURSED_KING, PositionX, PositionY);
+        OpenMonsterModel(MONSTER_MODEL_AEGIS);
+        c = CreateCharacter(Key, MODEL_AEGIS, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
         c->Object.Scale = 1.4f;
@@ -851,8 +851,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     case MONSTER_ROGUE_CENTURION_5:
     case MONSTER_ROGUE_CENTURION_6:
     case MONSTER_ROGUE_CENTURION_7:
-        OpenMonsterModel(MONSTER_METAL_BALROG);
-        c = CreateCharacter(Key, MODEL_METAL_BALROG, PositionX, PositionY);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_CENTURION);
+        c = CreateCharacter(Key, MODEL_DEATH_CENTURION, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_DRAGON_SPEAR;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.f;
@@ -867,8 +867,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     case MONSTER_NECRON_5:
     case MONSTER_NECRON_6:
     case MONSTER_NECRON_7:
-        OpenMonsterModel(MONSTER_MOLT);
-        c = CreateCharacter(Key, MODEL_MOLT, PositionX, PositionY);
+        OpenMonsterModel(MONSTER_MODEL_NECRON);
+        c = CreateCharacter(Key, MODEL_NECRON, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.2f;
@@ -883,8 +883,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     case MONSTER_SCHRIKER_5:
     case MONSTER_SCHRIKER_6:
     case MONSTER_SCHRIKER_7:
-        OpenMonsterModel(MONSTER_ALQUAMOS);
-        c = CreateCharacter(Key, MODEL_ALQUAMOS, PositionX, PositionY);
+        OpenMonsterModel(MONSTER_MODEL_SHRIKER);
+        c = CreateCharacter(Key, MODEL_SHRIKER, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[0].Level = 0;
         c->Weapon[1].Type = MODEL_DOUBLE_BLADE;
@@ -899,8 +899,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     case MONSTER_ILLUSION_OF_KUNDUN_4:
     case MONSTER_ILLUSION_OF_KUNDUN_5:
     case MONSTER_ILLUSION_OF_KUNDUN_6:
-        OpenMonsterModel(MONSTER_ALQUAMOS);
-        c = CreateCharacter(Key, MODEL_ALQUAMOS, PositionX, PositionY);
+        OpenMonsterModel(MONSTER_MODEL_SHRIKER);
+        c = CreateCharacter(Key, MODEL_SHRIKER, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[0].Level = 0;
         c->Weapon[1].Type = MODEL_DOUBLE_BLADE;
@@ -912,8 +912,8 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
         break;
 
     case MONSTER_ILLUSION_OF_KUNDUN_7:
-        OpenMonsterModel(MONSTER_ORC_ARCHER);
-        c = CreateCharacter(Key, MODEL_ORC_ARCHER, PositionX, PositionY);
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_OF_KUNDUN);
+        c = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN, PositionX, PositionY);
         c->Weapon[1].Type = MODEL_STAFF_OF_KUNDUN;
         c->Weapon[1].Level = 0;
         c->Object.Scale = 2.0f;
@@ -931,15 +931,15 @@ bool    SettingHellasMonsterLinkBone(CHARACTER* c, int Type)
 {
     switch (Type)
     {
-    case MODEL_ORC_ARCHER:
+    case MODEL_ILLUSION_OF_KUNDUN:
         c->Weapon[0].LinkBone = 29;
         c->Weapon[1].LinkBone = 49;
         return true;
-    case MODEL_CURSED_KING:
+    case MODEL_AEGIS:
         c->Weapon[0].LinkBone = 13;
         c->Weapon[1].LinkBone = 14;
         return true;
-    case MODEL_METAL_BALROG:
+    case MODEL_DEATH_CENTURION:
         c->Weapon[0].LinkBone = 56;
         c->Weapon[1].LinkBone = 42;
         return true;
@@ -947,7 +947,7 @@ bool    SettingHellasMonsterLinkBone(CHARACTER* c, int Type)
         c->Weapon[0].LinkBone = 60;
         c->Weapon[1].LinkBone = 60;
         return true;
-    case MODEL_ALQUAMOS:
+    case MODEL_SHRIKER:
         c->Weapon[0].LinkBone = 41;
         c->Weapon[1].LinkBone = 51;
         return true;
@@ -1428,11 +1428,11 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
         return true;
 
-    case MODEL_DEATH_BEAM_KNIGHT:
+    case MODEL_DEATH_ANGEL:
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.7f + 0.3f;
         return true;
 
-    case MODEL_ORC_ARCHER:
+    case MODEL_ILLUSION_OF_KUNDUN:
         if (rand_fps_check(2))
         {
             Vector(2.f, 30.f, 0.f, p);
@@ -1442,20 +1442,20 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_ELITE_ORC:
+    case MODEL_BLOOD_SOLDIER:
         return true;
 
-    case MODEL_CURSED_KING:
+    case MODEL_AEGIS:
         return true;
 
-    case MODEL_METAL_BALROG:
+    case MODEL_DEATH_CENTURION:
         return true;
 
     case MODEL_MONSTER01 + 68:
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.7f + 0.3f;
         return true;
 
-    case MODEL_ALQUAMOS:
+    case MODEL_SHRIKER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             if (rand_fps_check(2))
@@ -1509,7 +1509,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_DEATH_BEAM_KNIGHT:
+    case MODEL_DEATH_ANGEL:
         Vector(0.f, 0.f, 0.f, p);
 
         if (o->CurrentAction != MONSTER01_DIE)
@@ -1569,7 +1569,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_ORC_ARCHER:
+    case MODEL_ILLUSION_OF_KUNDUN:
 
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -1743,7 +1743,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_ELITE_ORC:
+    case MODEL_BLOOD_SOLDIER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
@@ -1791,7 +1791,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_CURSED_KING:
+    case MODEL_AEGIS:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Luminosity = (float)sin(WorldTime * 0.005f) * 0.15f + 0.85f;
@@ -1838,7 +1838,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_METAL_BALROG:
+    case MODEL_DEATH_CENTURION:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Vector(0.f, 0.f, 30.f, p);
@@ -1924,7 +1924,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_ALQUAMOS:
+    case MODEL_SHRIKER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             vec3_t Pos1, Pos2;
@@ -1996,7 +1996,7 @@ bool RenderHellasMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Selec
 bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
 {
     bool    success = false;
-    if (o->Type == MODEL_DEATH_BEAM_KNIGHT)
+    if (o->Type == MODEL_DEATH_ANGEL)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2009,7 +2009,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
         success = true;
     }
-    else if (o->Type == MODEL_ORC_ARCHER)
+    else if (o->Type == MODEL_ILLUSION_OF_KUNDUN)
     {
         if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && (int)o->LifeTime == 90)
         {
@@ -2111,7 +2111,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_ELITE_ORC)
+    else if (o->Type == MODEL_BLOOD_SOLDIER)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2125,7 +2125,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_CURSED_KING)
+    else if (o->Type == MODEL_AEGIS)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2140,7 +2140,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_METAL_BALROG)
+    else if (o->Type == MODEL_DEATH_CENTURION)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2197,7 +2197,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.8f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_ALQUAMOS)
+    else if (o->Type == MODEL_SHRIKER)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {

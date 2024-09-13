@@ -7136,7 +7136,7 @@ void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExt
         case 1: swprintf(Name, GlobalText[1461]); break;
         }
     }
-    else if (o->Type == MODEL_LIFE_STONE)
+    else if (o->Type == MODEL_LIFE_STONE_ITEM)
     {
         switch (Level)
         {
@@ -9979,7 +9979,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec
                             {
                                 Scale = 0.0025f;
                             }
-                            else if (Type == MODEL_LIFE_STONE)
+                            else if (Type == MODEL_LIFE_STONE_ITEM)
                             {
                                 Scale = 0.0025f;
                             }

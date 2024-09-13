@@ -183,13 +183,13 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
 
     switch (Type)
     {
-    case 344: Index = MODEL_CHIEF_SKELETON_ARCHER_2;	break;
-    case 341: Index = MODEL_RED_SKELETON_KNIGHT_2;	break;
+    case 344: Index = MODEL_BALRAM_;	break;
+    case 341: Index = MODEL_SORAM_;	break;
     case 440:
-    case 340: Index = MODEL_DARK_SKULL_SOLDIER_2;	break;
-    case 345: Index = MODEL_GIANT_OGRE_2;	break;
-    case 348: Index = MODEL_GIANT_OGRE_3;	break;
-    case 349: Index = MODEL_MAGIC_SKELETON_1;	break;
+    case 340: Index = MODEL_DARK_ELF_1;	break;
+    case 345: Index = MODEL_DEATH_SPIRIT;	break;
+    case 348: Index = MODEL_BALLISTA_;	break;
+    case 349: Index = MODEL_BALGASS_;	break;
     case 361: Index = MODEL_DARK_SKULL_SOLDIER_5;	break;
     }
 

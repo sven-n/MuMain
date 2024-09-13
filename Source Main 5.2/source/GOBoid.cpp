@@ -830,8 +830,8 @@ int CreateDragon(OBJECT* o, int index)
     if (index < 3)
     {
         o->Live = true;
-        OpenMonsterModel(MONSTER_AGON);
-        o->Type = MODEL_AGON;
+        OpenMonsterModel(MONSTER_MODEL_DRAGON);
+        o->Type = MODEL_DRAGON_;
         o->Scale = (float)(rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;
         o->AlphaTarget = o->Alpha;
@@ -1179,11 +1179,11 @@ void MoveBoidGroup(OBJECT* o, int index)
         float dy = o->Position[1] - Hero->Object.Position[1];
         float Range = sqrtf(dx * dx + dy * dy);
         float FlyDistance = 1500.f;
-        if (o->Type == MODEL_AGON)
+        if (o->Type == MODEL_DRAGON_)
         {
             FlyDistance = 4000.f;
         }
-        else if (o->Type == MODEL_ELITE_GOBLIN)
+        else if (o->Type == MODEL_BAHAMUT)
         {
             FlyDistance = 3000.f;
         }
@@ -1298,8 +1298,8 @@ void MoveBoids()
                 if (rand_fps_check(300))
                 {
                     o->Live = true;
-                    OpenMonsterModel(MONSTER_AGON);
-                    o->Type = MODEL_AGON;
+                    OpenMonsterModel(MONSTER_MODEL_DRAGON);
+                    o->Type = MODEL_DRAGON_;
                     o->Scale = (float)(rand() % 3 + 6) * 0.1f;
                     o->Alpha = 1.f;
                     o->AlphaTarget = 1.f;
@@ -1409,12 +1409,12 @@ void MoveBoids()
         {
             BMD* b = &Models[o->Type];
             float PlaySpeed = 1.f;
-            if (o->Type == MODEL_AGON || o->Type == MODEL_ELITE_GOBLIN)
+            if (o->Type == MODEL_DRAGON_ || o->Type == MODEL_BAHAMUT)
             {
                 PlaySpeed = 0.5f;
             }
 
-            if (EnableEvent != 0 && o->Type == MODEL_AGON)
+            if (EnableEvent != 0 && o->Type == MODEL_DRAGON_)
             {
                 SetAction(o, MONSTER01_DIE + 1);
                 b->CurrentAction = o->CurrentAction;
@@ -1467,7 +1467,7 @@ void MoveBoids()
                     MoveHeavenBug(o, i);
                     break;
 
-                case MODEL_ELITE_GOBLIN:
+                case MODEL_BAHAMUT:
                     MoveBigMon(o);
                     break;
 
@@ -1568,7 +1568,7 @@ void RenderBoids(bool bAfterCharacter)
                 vec3_t p, Position, Light;
                 switch (o->Type)
                 {
-                case MODEL_AGON:
+                case MODEL_DRAGON_:
                     if (o->SubType == 1)
                     {
                         float Bright = 1.0f;

@@ -738,7 +738,7 @@ void OpenItems()
     gLoadData.AccessModel(MODEL_PENDANT_OF_ABILITY, L"Data\\Item\\", L"AgNecklace");
     gLoadData.AccessModel(MODEL_ARMOR_OF_GUARDSMAN, L"Data\\Item\\", L"EventChaosCastle");
     gLoadData.AccessModel(MODEL_HELPER + 7, L"Data\\Item\\", L"Covenant");
-    gLoadData.AccessModel(MODEL_LIFE_STONE, L"Data\\Item\\", L"SummonBook");
+    gLoadData.AccessModel(MODEL_LIFE_STONE_ITEM, L"Data\\Item\\", L"SummonBook");
     gLoadData.AccessModel(MODEL_EVENT + 18, L"Data\\Item\\", L"LifeStoneItem");
 
     gLoadData.AccessModel(MODEL_SPLINTER_OF_ARMOR, L"Data\\Item\\", L"FR_1");
@@ -1313,7 +1313,7 @@ void OpenItemTextures()
 
     gLoadData.OpenTexture(MODEL_SIEGE_POTION, L"Item\\");
     gLoadData.OpenTexture(MODEL_HELPER + 7, L"Item\\");
-    gLoadData.OpenTexture(MODEL_LIFE_STONE, L"Item\\");
+    gLoadData.OpenTexture(MODEL_LIFE_STONE_ITEM, L"Item\\");
     gLoadData.OpenTexture(MODEL_EVENT + 18, L"Monster\\");
 
     for (int i = 0; i < 2; i++)
@@ -2319,7 +2319,7 @@ void DeleteMonsters()
         ReleaseBuffer(i);
 }
 
-void OpenMonsterModel(int Type)
+void OpenMonsterModel(EMonsterModelType Type)
 {
     g_ErrorReport.Write(L"OpenMonsterModel(%d)\r\n", Type);
 
@@ -3292,10 +3292,10 @@ void OpenMonsterModel(int Type)
         LoadWaveFile(SOUND_MONSTER + 69, L"Data\\Sound\\mYeti2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 70, L"Data\\Sound\\mYetiAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 71, L"Data\\Sound\\mYetiDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_LARVA, 68, 68, 70, 70, 71);
-        SetMonsterSound(MODEL_HELL_SPIDER, 68, 69, 70, 70, 71);
-        Models[MODEL_LARVA].BoneHead = 20;
-        Models[MODEL_HELL_SPIDER].BoneHead = 20;
+        SetMonsterSound(MODEL_YETI, 68, 68, 70, 70, 71);
+        SetMonsterSound(MODEL_ELITE_YETI_, 68, 69, 70, 70, 71);
+        Models[MODEL_YETI].BoneHead = 20;
+        Models[MODEL_ELITE_YETI_].BoneHead = 20;
         break;
     case 19:
         LoadWaveFile(SOUND_MONSTER + 72, L"Data\\Sound\\mGoblin1.wav", Channel, Enable);

@@ -253,7 +253,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
     b->CurrentAction = o->CurrentAction;
     VectorCopy(o->Position, b->BodyOrigin);
 
-    if (o->Type == MODEL_BEAM_KNIGHT)
+    if (o->Type == MODEL_CASTLE_GATE)
     {
         vec3_t Position;
         VectorCopy(o->Position, Position);
@@ -261,7 +261,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         Position[1] += 60.f;
         VectorCopy(Position, b->BodyOrigin);
     }
-    else if (o->Type == MODEL_BLOODY_WOLF)
+    else if (o->Type == MODEL_STATUE_OF_SAINT)
     {
         vec3_t Position;
         VectorCopy(o->Position, Position);
@@ -303,7 +303,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         if (gMapManager.InChaosCastle() == true || o->Kind != KIND_NPC)
         {
             Vector(0.1f, 0.01f, 0.f, b->BodyLight);
-            if (o->Type == MODEL_STONE_GOLEM)
+            if (o->Type == MODEL_BALI_)
             {
                 BoneScale = 1.2f;
             }
@@ -328,7 +328,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         if (gMapManager.InChaosCastle() == true || o->Kind != KIND_NPC)
         {
             Vector(0.7f, 0.07f, 0.f, b->BodyLight);
-            if (o->Type == MODEL_STONE_GOLEM)
+            if (o->Type == MODEL_BALI_)
             {
                 BoneScale = 1.08f;
             }
@@ -465,19 +465,19 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         }
         if (gMapManager.WorldActive == WD_10HEAVEN)
         {
-            if (o->Type == MODEL_AGON)
+            if (o->Type == MODEL_DRAGON_)
             {
                 Vector(0.02f, 0.05f, 0.15f, b->BodyLight);
             }
         }
         if (gMapManager.InDevilSquare())
         {
-            if (o->Type == MODEL_GORGON)
+            if (o->Type == MODEL_ICE_QUEEN)
             {
                 Vector(0.0f, 0.3f, 1.0f, b->BodyLight);
             }
         }
-        if (ExtraMon && o->Type == MODEL_CHAIN_SCORPION)
+        if (ExtraMon && o->Type == MODEL_BALROG_)
         {
             Vector(0.0f, 0.0f, 1.0f, b->BodyLight);
         }
@@ -527,7 +527,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
             Vector(0.3f, 0.4f, 1.0f, b->BodyLight);
             b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
-        else if (o->Type == MODEL_CHAOS_CASTLE_7)
+        else if (o->Type == MODEL_FRED_)
         {
             MoveEye(o, b, 14, 15, 71, 72, 73, 74);
 
@@ -563,7 +563,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
             }
         }
         else
-            if (o->Type == MODEL_BLOOD_SOLDIER_2)
+            if (o->Type == MODEL_BANSHEE_)
             {
                 float fLumi = (sinf(WorldTime * 0.0015f) + 1.f) * 0.35f;
 
@@ -713,7 +713,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 b->RenderBody(RENDER_COLOR, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
             }
 
-            else if (o->Type == MODEL_GOBLIN)
+            else if (o->Type == MODEL_DEVIL)
             {
                 Vector(0.4f, 0.6f, 1.f, b->BodyLight);
                 b->StreamMesh = 0;
@@ -1111,7 +1111,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     Vector(0.3f, 0.5f, 1.f, b->BodyLight);
                 }
 
-                if (o->Type == MODEL_DEATH_GORGON || o->Type == MODEL_SKELETON_ARCHER || o->Type == MODEL_SEA_WORM || o->Type == MODEL_GREAT_BAHAMUT)
+                if (o->Type == MODEL_VALKYRIE || o->Type == MODEL_ICE_MONSTER || o->Type == MODEL_ALQUAMOS_ || o->Type == MODEL_QUEEN_RAINER)
                 {
                     if (o->Alpha == 1.0f && o->BlendMeshLight == 0.05f)
                     {
@@ -1196,7 +1196,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                 b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, fLumi, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                                             }
                                             else
-                                                if (o->Type == MODEL_BAHAMUT)
+                                                if (o->Type == MODEL_MUTANT_)
                                                 {
                                                     if (ExtraMon)
                                                     {
@@ -1231,7 +1231,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, 2, 1.0f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                                                     }
-                                                    else if (o->Type == MODEL_HYDRA)
+                                                    else if (o->Type == MODEL_MOLT_)
                                                     {
                                                         b->BeginRender(o->Alpha);
                                                         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -1241,7 +1241,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                         pSideHair->Render(VertexTransform, LightTransform);
                                                         pSideHair->Destroy();
                                                     }
-                                                    else if (o->Type == MODEL_GOLDEN_SOLDIER)
+                                                    else if (o->Type == MODEL_DRAKAN_)
                                                     {
                                                         if (ExtraMon)
                                                         {
@@ -1255,7 +1255,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                         }
                                                     }
-                                                    else if (o->Type == MODEL_VEPAR)
+                                                    else if (o->Type == MODEL_ORC_ARCHER_)
                                                     {
                                                         if (ExtraMon)
                                                         {
@@ -1269,7 +1269,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                         }
                                                     }
-                                                    else if (o->Type == MODEL_VALKYRIE)
+                                                    else if (o->Type == MODEL_ORC)
                                                     {
                                                         if (ExtraMon)
                                                         {
@@ -1283,7 +1283,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                         }
                                                     }
-                                                    else if (o->Type == MODEL_LIZARD_KING)
+                                                    else if (o->Type == MODEL_CURSED_KING_)
                                                     {
                                                         if (ExtraMon)
                                                         {
@@ -1295,7 +1295,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                         }
                                                     }
-                                                    else if (o->Type == MODEL_SILVER_VALKYRIE)
+                                                    else if (o->Type == MODEL_CRUST)
                                                     {
                                                         if (ExtraMon == 0)
                                                         {
@@ -1332,7 +1332,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                                 //Vector( 0.1f, sinf(WorldTime*0.002f)*0.5f+0.5f, sinf(WorldTime*0.00173f)*0.5f+0.5f,b->BodyLight);
                                                             }
                                                     }
-                                                    else if (o->Type == MODEL_GOLDEN_TITAN)
+                                                    else if (o->Type == MODEL_PHANTOM_KNIGHT_)
                                                     {
                                                         float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
                                                         Vector(Luminosity + 0.5f, 0.3f - Luminosity * 0.5f, -Luminosity * 0.5f + 0.5f, b->BodyLight);
@@ -1343,14 +1343,14 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                         //Vector(.7f,.2f,.2f,b->BodyLight);
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                     }
-                                                    else if (o->Type == MODEL_GREAT_BAHAMUT)
+                                                    else if (o->Type == MODEL_QUEEN_RAINER)
                                                     {
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1, -1);
                                                         //b->RenderMesh(1,RENDER_TEXTURE|RENDER_PONG|RENDER_WAVE,1.0f,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
                                                         b->RenderMesh(1, RENDER_TEXTURE | RENDER_WAVE, 0.5f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                         b->RenderMesh(1, RENDER_TEXTURE | RENDER_WAVE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                     }
-                                                    else if (o->Type == MODEL_DARK_SKULL_SOLDIER_6)
+                                                    else if (o->Type == MODEL_LUNAR_RABBIT_)
                                                     {
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                     }
@@ -1389,7 +1389,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                         Vector(.6f, .6f, .6f, b->BodyLight);
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                     }
-                                                    else if (o->Type == MODEL_BLOODY_WOLF)
+                                                    else if (o->Type == MODEL_STATUE_OF_SAINT)
                                                     {
                                                         if (o->CurrentAction == MONSTER01_DIE ||
                                                             (WorldTime - o->InitialSceneTime) < 1000
@@ -1412,7 +1412,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                             b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
                                                         }
                                                     }
-                                                    else if (o->Type == MODEL_BEAM_KNIGHT && o->CurrentAction == MONSTER01_DIE)
+                                                    else if (o->Type == MODEL_CASTLE_GATE && o->CurrentAction == MONSTER01_DIE)
                                                     {
                                                         o->Live = false;
 
@@ -1497,7 +1497,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     {
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                     }
-                                                    else if (o->Type == MODEL_QUEEN_RAINER || o->Type == MODEL_MEGA_CRUST)
+                                                    else if (o->Type == MODEL_CHAOS_CASTLE_KNIGHT || o->Type == MODEL_CHAOSCASTLE_ELF)
                                                     {
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                     }
@@ -2031,7 +2031,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
-                else if (o->Type == MODEL_GATE_TO_KALIMA_4)
+                else if (o->Type == MODEL_CURSED_SANTA_)
                 {
                     if (o->CurrentAction == MONSTER01_DIE)
                     {
@@ -2367,7 +2367,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 {
                     b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
-                else if (o->Type == MODEL_GATE_TO_KALIMA_3)
+                else if (o->Type == MODEL_FIRE_FLAME_GHOST)
                 {
                     if (o->CurrentAction == MONSTER01_DIE)
                     {
@@ -2606,7 +2606,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, -2, 1.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
 
-                if (o->Type == MODEL_DEVIL)
+                if (o->Type == MODEL_HYDRA)
                 {
                     b->BeginRender(o->Alpha);
                     float Light = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
@@ -6461,15 +6461,15 @@ void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool Ext
 {
     int Color = 0;
 
-    if (ExtraMon && (Type == MODEL_CHAIN_SCORPION || Type == MODEL_BILL_OF_BALROG))
+    if (ExtraMon && (Type == MODEL_BALROG_ || Type == MODEL_BILL_OF_BALROG))
     {
         Color = 8;
     }
-    else if (Type == MODEL_CHAIN_SCORPION || Type == MODEL_BILL_OF_BALROG)
+    else if (Type == MODEL_BALROG_ || Type == MODEL_BILL_OF_BALROG)
     {
         Color = 1;
     }
-    else if (Type == MODEL_DEATH_GORGON || Type == MODEL_SILVER_BOW || Type == MODEL_BLUEWING_CROSSBOW)
+    else if (Type == MODEL_VALKYRIE || Type == MODEL_SILVER_BOW || Type == MODEL_BLUEWING_CROSSBOW)
     {
         Color = 5;
     }
@@ -8026,7 +8026,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         }
         b->EndRender();
     }
-    else if (Type == MODEL_LIFE_STONE)
+    else if (Type == MODEL_LIFE_STONE_ITEM)
     {
         b->BeginRender(1.f);
         glColor3f(1.f, 1.f, 1.f);
@@ -8951,7 +8951,7 @@ void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int Ren
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
     }
-    else if (Type == MODEL_GOLDEN_SOLDIER)
+    else if (Type == MODEL_DRAKAN_)
     {
         if (RenderType & RENDER_EXTRA)
         {
@@ -9430,11 +9430,11 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             {
                 int iHiddenMesh = o->HiddenMesh;
 
-                if (o->Type == MODEL_GIANT_OGRE_4)
+                if (o->Type == MODEL_DREADFEAR)
                 {
                     iHiddenMesh = 2;
                 }
-                else if (o->Type == MODEL_CHAOS_CASTLE_3)
+                else if (o->Type == MODEL_GAYION)
                 {
                     iHiddenMesh = 0;
                 }
@@ -9887,7 +9887,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         case 1: o->HiddenMesh = 0; break;
         }
     }
-    else if (Type == MODEL_LIFE_STONE)
+    else if (Type == MODEL_LIFE_STONE_ITEM)
     {
         o->HiddenMesh = 1;
     }
@@ -10496,13 +10496,13 @@ void RenderPartObjectEdge(BMD* b, OBJECT* o, int Flag, bool Translate, float Sca
         b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->EndRender();
     }
-    else if (o->Type == MODEL_CHIEF_SKELETON_ARCHER_4)
+    else if (o->Type == MODEL_PERSONA)
     {
         glColor3fv(b->BodyLight);
         b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
-    else if (o->Type == MODEL_GIANT_OGRE_4)
+    else if (o->Type == MODEL_DREADFEAR)
     {
         glColor3fv(b->BodyLight);
         b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);

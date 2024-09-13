@@ -67,7 +67,7 @@ CHARACTER* GMUnitedMarketPlace::CreateMonster(int iType, int PosX, int PosY, int
     // 	{
     // 	case 526:
     // 		{
-    // 			OpenMonsterModel(MONSTER_AEGIS_3);
+    // 			OpenMonsterModel(MONSTER_MODEL_AEGIS_3);
     // 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+185, PosX, PosY);
     // 			wcscpy(pCharacter->ID, L"석상");
     // 			pCharacter->Object.m_bRenderShadow = false;
@@ -336,7 +336,7 @@ bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
-    case MODEL_AEGIS_3:
+    case MODEL_STATUE:
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {

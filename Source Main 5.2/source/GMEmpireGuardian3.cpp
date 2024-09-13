@@ -78,28 +78,28 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
 
     switch (iType)
     {
-    case 510:
+    case MONSTER_DUAL_BERSERKER:
     {
-        OpenMonsterModel(MONSTER_CHAOS_CASTLE_9);
-        pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_9, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_DUAL_BERSERKER_);
+        pCharacter = CreateCharacter(Key, MODEL_DUAL_BERSERKER_, PosX, PosY);
         wcscpy(pCharacter->ID, L"카토");
         pCharacter->Object.Scale = 1.35f;
 
         m_bCurrentIsRage_Kato = false;
     }
     break;
-    case 516:
+    case MONSTER_BANSHEE:
     {
-        OpenMonsterModel(MONSTER_BLOOD_SOLDIER_2);
-        pCharacter = CreateCharacter(Key, MODEL_BLOOD_SOLDIER_2, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BANSHEE_);
+        pCharacter = CreateCharacter(Key, MODEL_BANSHEE_, PosX, PosY);
         wcscpy(pCharacter->ID, L"암살단장");
         pCharacter->Object.Scale = 1.55f;
     }
     break;
-    case 517:
+    case MONSTER_HEAD_MOUNTER:
     {
-        OpenMonsterModel(MONSTER_AEGIS_2);
-        pCharacter = CreateCharacter(Key, MODEL_AEGIS_2, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_HEAD_MOUNTER_);
+        pCharacter = CreateCharacter(Key, MODEL_HEAD_MOUNTER_, PosX, PosY);
         wcscpy(pCharacter->ID, L"기마단장");
         pCharacter->Object.Scale = 1.25f;
     }
@@ -217,7 +217,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_9:
+    case MODEL_DUAL_BERSERKER_:
     {
         switch (o->CurrentAction)
         {
@@ -245,7 +245,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_BLOOD_SOLDIER_2:
+    case MODEL_BANSHEE_:
     {
         switch (o->CurrentAction)
         {
@@ -390,7 +390,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_AEGIS_2:
+    case MODEL_HEAD_MOUNTER_:
     {
         switch (o->CurrentAction)
         {
@@ -489,16 +489,16 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_5:
-    case MODEL_ROGUE_CENTURION_2:
-    case MODEL_NECRON_2:
-    case MODEL_SCHRIKER_2:
-    case MODEL_ILLUSION_OF_KUNDUN_2:
+    case MODEL_RAYMOND_:
+    case MODEL_DEFENDER_:
+    case MODEL_FORSAKER_:
+    case MODEL_OCELOT:
+    case MODEL_ERIC:
     {
         g_EmpireGuardian1.MoveBlurEffect(c, o, b);
     }
     break;
-    case MODEL_CHAOS_CASTLE_9:
+    case MODEL_DUAL_BERSERKER_:
     {
         vec3_t  Light;
         vec3_t StartPos, StartRelative;
@@ -674,7 +674,7 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_AEGIS_2:
+    case MODEL_HEAD_MOUNTER_:
     {
         switch (o->CurrentAction)
         {
@@ -1002,7 +1002,7 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_9:
+    case MODEL_DUAL_BERSERKER_:
     {
         vec3_t Light, Position;
 
@@ -1094,7 +1094,7 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_BLOOD_SOLDIER_2:
+    case MODEL_BANSHEE_:
     {
     }
     return true;
@@ -1304,7 +1304,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_9:
+    case MODEL_DUAL_BERSERKER_:
     {
         switch (o->CurrentAction)
         {
@@ -1338,7 +1338,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
     }
     return true;
 
-    case MODEL_BLOOD_SOLDIER_2:
+    case MODEL_BANSHEE_:
     {
         switch (o->CurrentAction)
         {
@@ -1367,7 +1367,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
     }
     return true;
 
-    case MODEL_AEGIS_2:
+    case MODEL_HEAD_MOUNTER_:
     {
         switch (o->CurrentAction)
         {

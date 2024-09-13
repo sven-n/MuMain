@@ -653,7 +653,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
             }
             else
             {
-                assert(!"공격동작이 없?");
+                assert(!"���ݵ����� ��?");
             }
             pObject->Owner = pNewObject;
         }
@@ -786,7 +786,7 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
         return g_EmpireGuardian4.RenderObjectMesh(pObject, pModel, ExtraMon);
 #endif //PJH_NEW_SERVER_SELECT_MAP
 
-    // 배경
+    // ���
     if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
     {
         Mesh_t* m = NULL;
@@ -863,12 +863,12 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
         pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
         pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
     }
-    else if (pObject->Type == MODEL_MAGIC_SKELETON_6)
+    else if (pObject->Type == MODEL_HIDEOUS_RABBIT_)
     {
         pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
         pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
     }
-    else if (pObject->Type == MODEL_STATUE_OF_SAINT_2 && pObject->CurrentAction == MONSTER01_DIE)
+    else if (pObject->Type == MODEL_TOTEM_GOLEM_ && pObject->CurrentAction == MONSTER01_DIE)
     {
     }
 #ifndef PJH_NEW_SERVER_SELECT_MAP
@@ -950,7 +950,7 @@ void GMNewTown::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool Ex
     }
 #endif //PJH_NEW_SERVER_SELECT_MAP
 
-    if (pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// 폭포물1,2, 수로, 회오리, 빛
+    if (pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// ������1,2, ����, ȸ����, ��
     {
         pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
     }
@@ -998,14 +998,14 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_SILVIA:
         OpenNpc(MODEL_ELBELAND_SILVIA);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_SILVIA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"실비아");
+        wcscpy(pCharacter->ID, L"�Ǻ��");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_RHEA:
         OpenNpc(MODEL_ELBELAND_RHEA);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_RHEA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"레아");
+        wcscpy(pCharacter->ID, L"����");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.m_fEdgeScale = 1.1f;
         Models[MODEL_ELBELAND_RHEA].Actions[0].PlaySpeed = 0.2f;
@@ -1014,54 +1014,54 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_MARCE:
         OpenNpc(MODEL_ELBELAND_MARCE);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_MARCE, PosX, PosY);
-        wcscpy(pCharacter->ID, L"마르세");
+        wcscpy(pCharacter->ID, L"������");
         pCharacter->Object.Scale = 1.05f;
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_STRANGE_RABBIT:
-        OpenMonsterModel(MONSTER_GIANT_OGRE_6);
-        pCharacter = CreateCharacter(Key, MODEL_GIANT_OGRE_6, PosX, PosY);
-        wcscpy(pCharacter->ID, L"기괴한 토끼");
+        OpenMonsterModel(MONSTER_MODEL_RABBIT_);
+        pCharacter = CreateCharacter(Key, MODEL_RABBIT_, PosX, PosY);
+        wcscpy(pCharacter->ID, L"�Ⱬ�� �䳢");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_POLLUTED_BUTTERFLY:
-        OpenMonsterModel(MONSTER_RED_SKELETON_KNIGHT_6);
-        pCharacter = CreateCharacter(Key, MODEL_RED_SKELETON_KNIGHT_6, PosX, PosY);
-        wcscpy(pCharacter->ID, L"흉측한 토끼");
+        OpenMonsterModel(MONSTER_MODEL_BUTTERFLY_);
+        pCharacter = CreateCharacter(Key, MODEL_BUTTERFLY_, PosX, PosY);
+        wcscpy(pCharacter->ID, L"������ �䳢");
         pCharacter->Object.Scale = 0.8f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_HIDEOUS_RABBIT:
-        OpenMonsterModel(MONSTER_MAGIC_SKELETON_6);
-        pCharacter = CreateCharacter(Key, MODEL_MAGIC_SKELETON_6, PosX, PosY);
-        wcscpy(pCharacter->ID, L"늑대인간");
+        OpenMonsterModel(MONSTER_MODEL_HIDEOUS_RABBIT_);
+        pCharacter = CreateCharacter(Key, MODEL_HIDEOUS_RABBIT_, PosX, PosY);
+        wcscpy(pCharacter->ID, L"�����ΰ�");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_WEREWOLF2:
-        OpenMonsterModel(MONSTER_CASTLE_GATE);
-        pCharacter = CreateCharacter(Key, MODEL_CASTLE_GATE, PosX, PosY);
-        wcscpy(pCharacter->ID, L"오염된 나비");
+        OpenMonsterModel(MONSTER_MODEL_WEREWOLF2_);
+        pCharacter = CreateCharacter(Key, MODEL_WEREWOLF2_, PosX, PosY);
+        wcscpy(pCharacter->ID, L"������ ����");
         pCharacter->Object.Scale = 0.8f * 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_CURSED_LICH:
-        OpenMonsterModel(MONSTER_STATUE_OF_SAINT_1);
-        pCharacter = CreateCharacter(Key, MODEL_STATUE_OF_SAINT_1, PosX, PosY);
-        wcscpy(pCharacter->ID, L"저주받은리치");
+        OpenMonsterModel(MONSTER_MODEL_CURSED_LICH_);
+        pCharacter = CreateCharacter(Key, MODEL_CURSED_LICH_, PosX, PosY);
+        wcscpy(pCharacter->ID, L"���ֹ�����ġ");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_TOTEM_GOLEM:
-        OpenMonsterModel(MONSTER_STATUE_OF_SAINT_2);
-        pCharacter = CreateCharacter(Key, MODEL_STATUE_OF_SAINT_2, PosX, PosY);
-        wcscpy(pCharacter->ID, L"토템골렘");
+        OpenMonsterModel(MONSTER_MODEL_TOTEM_GOLEM_);
+        pCharacter = CreateCharacter(Key, MODEL_TOTEM_GOLEM_, PosX, PosY);
+        wcscpy(pCharacter->ID, L"���۰�");
         pCharacter->Object.Scale = 0.17f * 0.95f;
         pCharacter->Object.ShadowScale = 0.01f;
         pCharacter->Object.m_fEdgeScale = 1.05f;
@@ -1070,17 +1070,17 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_GRIZZLY:
-        OpenMonsterModel(MONSTER_STATUE_OF_SAINT_3);
-        pCharacter = CreateCharacter(Key, MODEL_STATUE_OF_SAINT_3, PosX, PosY);
-        wcscpy(pCharacter->ID, L"괴수 우씨");
+        OpenMonsterModel(MONSTER_MODEL_GRIZZLY_);
+        pCharacter = CreateCharacter(Key, MODEL_GRIZZLY_, PosX, PosY);
+        wcscpy(pCharacter->ID, L"���� �쾾");
         pCharacter->Object.Scale = 1.2f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_CAPTAIN_GRIZZLY:
-        OpenMonsterModel(135);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 135, PosX, PosY);
-        wcscpy(pCharacter->ID, L"괴수 우씨 대장");
+        OpenMonsterModel(MONSTER_MODEL_CAPTAIN_GRIZZLY_);
+        pCharacter = CreateCharacter(Key, MODEL_CAPTAIN_GRIZZLY, PosX, PosY);
+        wcscpy(pCharacter->ID, L"���� �쾾 ����");
         pCharacter->Object.Scale = 1.3f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -1102,7 +1102,7 @@ void GMNewTown::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pMod
 {
     switch (pObject->Type)
     {
-    case MODEL_MAGIC_SKELETON_6:
+    case MODEL_HIDEOUS_RABBIT_:
     {
         float Start_Frame = 0.f;
         float End_Frame = 6.0f;
@@ -1174,7 +1174,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
         CreateSprite(BITMAP_FLARE_BLUE, vPos, fScale * 0.8f, Light, pObject, -WorldTime * 0.1f);
     }
     break;
-    case MODEL_STATUE_OF_SAINT_1:
+    case MODEL_CURSED_LICH_:
         for (int i = 0; i < 4; ++i)
         {
             Vector(0, (rand() % 300 - 150) * 0.1f, (rand() % 200 - 100) * 0.1f, vRelative);
@@ -1182,7 +1182,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
             CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, pObject->Light, 0, 1, pObject);
         }
         break;
-    case MODEL_STATUE_OF_SAINT_2:
+    case MODEL_TOTEM_GOLEM_:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             vec3_t Position;
@@ -1261,7 +1261,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 
     switch (pObject->Type)
     {
-    case MODEL_GIANT_OGRE_6:
+    case MODEL_RABBIT_:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_ATTACK01);
@@ -1271,7 +1271,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_DEATH01);
         }
         return true;
-    case MODEL_RED_SKELETON_KNIGHT_6:
+    case MODEL_BUTTERFLY_:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1288,7 +1288,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_RABBITUGLY_DEATH01);
         }
         return true;
-    case MODEL_MAGIC_SKELETON_6:
+    case MODEL_HIDEOUS_RABBIT_:
         if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2
             || pObject->CurrentAction == MONSTER01_WALK)
         {
@@ -1306,7 +1306,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_WOLFHUMAN_DEATH01);
         }
         return true;
-    case MODEL_CASTLE_GATE:
+    case MODEL_WEREWOLF2_:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1319,7 +1319,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01);
         }
         return true;
-    case MODEL_STATUE_OF_SAINT_1:
+    case MODEL_CURSED_LICH_:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1336,7 +1336,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_CURSERICH_DEATH01);
         }
         return true;
-    case MODEL_STATUE_OF_SAINT_2:
+    case MODEL_TOTEM_GOLEM_:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(2))
@@ -1357,7 +1357,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_DEATH01);
         }
         return true;
-    case MODEL_STATUE_OF_SAINT_3:
+    case MODEL_GRIZZLY_:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))

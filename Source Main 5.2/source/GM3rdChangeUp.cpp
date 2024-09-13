@@ -401,20 +401,20 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
 
     switch (iType)
     {
-    case 436:
-    case 409:
+    case MONSTER_BALRAM_TRAINEE:
+    case MONSTER_BALRAM_TRAINEE_SOLDIER:
     {
-        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_2);
-        c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_2, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BALRAM_);
+        c = CreateCharacter(Key, MODEL_BALRAM_, PosX, PosY);
         c->Object.Scale = 1.25f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
     }
     break;
-    case 410:
+    case MONSTER_DEATH_SPIRIT_TRAINEE_SOLDIER:
     {
-        OpenMonsterModel(MONSTER_GIANT_OGRE_2);
-        c = CreateCharacter(Key, MODEL_GIANT_OGRE_2, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_SPIRIT_);
+        c = CreateCharacter(Key, MODEL_DEATH_SPIRIT, PosX, PosY);
         c->Object.Scale = 1.25f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -423,22 +423,22 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
         BoneManager::RegisterBone(c, L"Monster94_zx01", 28);
     }
     break;
-    case 437:
-    case 411:
+    case MONSTER_SORAM_TRAINEE:
+    case MONSTER_SORAM_TRAINEE_SOLDIER:
     {
-        OpenMonsterModel(MONSTER_RED_SKELETON_KNIGHT_2);
-        c = CreateCharacter(Key, MODEL_RED_SKELETON_KNIGHT_2, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SORAM_);
+        c = CreateCharacter(Key, MODEL_SORAM_, PosX, PosY);
         c->Object.Scale = 1.3f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
     }
     break;
-    case 412:
+    case MONSTER_DARK_ELF_TRAINEE_SOLDIER:
     {
         m_nDarkElfAppearance = true;
 
-        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_6);
-        c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_6, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_DARK_ELF_);
+        c = CreateCharacter(Key, MODEL_DARK_ELF_, PosX, PosY);
         //			c->Object.Scale = 1.5f;
         c->Object.Scale = 1.7f;
         c->Weapon[0].Type = -1;
@@ -457,10 +457,10 @@ bool SEASON3A::CGM3rdChangeUp::SetCurrentActionBalgasBarrackMonster(CHARACTER* c
 
     switch (c->MonsterIndex)
     {
-    case 409:
-    case 410:
-    case 411:
-    case 412:
+    case MONSTER_BALRAM_TRAINEE_SOLDIER:
+    case MONSTER_DEATH_SPIRIT_TRAINEE_SOLDIER:
+    case MONSTER_SORAM_TRAINEE_SOLDIER:
+    case MONSTER_DARK_ELF_TRAINEE_SOLDIER:
         return CheckMonsterSkill(c, o);
     }
     return false;
@@ -473,7 +473,7 @@ bool SEASON3A::CGM3rdChangeUp::AttackEffectBalgasBarrackMonster(CHARACTER* c, OB
 
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_2:
+    case MODEL_BALRAM_:
         if ((int)c->AttackTime == 14)
         {
             CreateEffect(MODEL_ARROW_HOLY, o->Position, o->Angle, o->Light, 1, o, o->PKKey);
@@ -489,7 +489,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJE
 {
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_2:
+    case MODEL_BALRAM_:
     {
         vec3_t Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -501,7 +501,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJE
         }
     }
     break;
-    case MODEL_GIANT_OGRE_2:
+    case MODEL_DEATH_SPIRIT:
     {
         vec3_t Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -514,7 +514,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJE
         }
     }
     break;
-    case MODEL_RED_SKELETON_KNIGHT_2:
+    case MODEL_SORAM_:
     {
         float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t Light;
@@ -553,7 +553,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJE
             }
     }
     break;
-    case MODEL_CHIEF_SKELETON_ARCHER_6:
+    case MODEL_DARK_ELF_:
         if (m_nDarkElfAppearance)
         {
             m_nDarkElfAppearance = false;
@@ -588,7 +588,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
 
     switch (o->Type)
     {
-    case MODEL_GIANT_OGRE_2:
+    case MODEL_DEATH_SPIRIT:
     {
         if ((o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2))
         {
@@ -636,7 +636,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
         }
     }
     break;
-    case MODEL_RED_SKELETON_KNIGHT_2:
+    case MODEL_SORAM_:
     {
         vec3_t  Light;
         Vector(1.0f, 1.0f, 1.0f, Light);
@@ -676,7 +676,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
         }
     }
     break;
-    case MODEL_CHIEF_SKELETON_ARCHER_6:
+    case MODEL_DARK_ELF_:
     {
         if ((o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2))
         {
@@ -727,13 +727,13 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b, int Ex
 {
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_2:
+    case MODEL_BALRAM_:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
         return true;
     }
     break;
-    case MODEL_GIANT_OGRE_2:
+    case MODEL_DEATH_SPIRIT:
     {
         b->BeginRender(o->Alpha);
         static float aaa = 0.f;
@@ -763,7 +763,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b, int Ex
         return true;
     }
     break;
-    case MODEL_RED_SKELETON_KNIGHT_2:
+    case MODEL_SORAM_:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->BeginRender(o->Alpha);
@@ -772,7 +772,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b, int Ex
         return true;
     }
     break;
-    case MODEL_CHIEF_SKELETON_ARCHER_6:
+    case MODEL_DARK_ELF_:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -791,7 +791,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
 
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_2:
+    case MODEL_BALRAM_:
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
@@ -822,7 +822,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
             o->SubType = FALSE;
 
         return true;
-    case MODEL_GIANT_OGRE_2:
+    case MODEL_DEATH_SPIRIT:
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
@@ -879,7 +879,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
         CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o);
     }
     return true;
-    case MODEL_RED_SKELETON_KNIGHT_2:
+    case MODEL_SORAM_:
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
@@ -909,7 +909,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OB
         if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
             o->SubType = FALSE;
         return true;
-    case MODEL_CHIEF_SKELETON_ARCHER_6:
+    case MODEL_DARK_ELF_:
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {

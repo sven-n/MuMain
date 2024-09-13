@@ -247,10 +247,10 @@ CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int
 
     switch (iType)
     {
-    case 365:
+    case MONSTER_POUCH_OF_BLESSING:
     {
-        OpenMonsterModel(MONSTER_GIANT_OGRE_5);
-        pCharacter = CreateCharacter(iKey, MODEL_GIANT_OGRE_5, iPosX, iPosY);
+        OpenMonsterModel(MONSTER_MODEL_POUCH_OF_BLESSING);
+        pCharacter = CreateCharacter(iKey, MODEL_POUCH_OF_BLESSING, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"Fortune Pouch");
         pCharacter->Object.Scale = 1.5f;
     }
@@ -267,7 +267,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     if (b == NULL)	return false;
     switch (o->Type)
     {
-    case MODEL_GIANT_OGRE_5:
+    case MODEL_POUCH_OF_BLESSING:
     {
         vec3_t vRelativePos, vWorldPos;
         Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -429,10 +429,10 @@ CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iK
 {
     CHARACTER* pCharacter = NULL;
 
-    if (iType == 463)
+    if (iType == MONSTER_FIRE_FLAME_GHOST)
     {
-        OpenMonsterModel(MONSTER_GATE_TO_KALIMA_3);
-        pCharacter = CreateCharacter(iKey, MODEL_GATE_TO_KALIMA_3, iPosX, iPosY);
+        OpenMonsterModel(MONSTER_MODEL_FIRE_FLAME_GHOST);
+        pCharacter = CreateCharacter(iKey, MODEL_FIRE_FLAME_GHOST, iPosX, iPosY);
         wcscpy(pCharacter->ID, L"Initial Helper");
         pCharacter->Object.Scale = 0.8f;
         pCharacter->Object.HiddenMesh = 2;
@@ -446,7 +446,7 @@ CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iK
 
 bool C09SummerEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (o->Type != MODEL_GATE_TO_KALIMA_3)
+    if (o->Type != MODEL_FIRE_FLAME_GHOST)
         return false;
 
     vec3_t vRelativePos, vWorldPos;

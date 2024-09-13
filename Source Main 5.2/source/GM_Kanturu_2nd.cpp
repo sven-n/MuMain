@@ -55,11 +55,11 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
 
     switch (iType)
     {
-    case 438:
-    case 358:
+    case MONSTER_PERSONA_DS7:
+    case MONSTER_PERSONA:
     {
-        OpenMonsterModel(MONSTER_CHIEF_SKELETON_ARCHER_4);
-        pCharacter = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_4, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_PERSONA);
+        pCharacter = CreateCharacter(Key, MODEL_PERSONA, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -69,10 +69,10 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         BoneManager::RegisterBone(pCharacter, L"PRSona_Tail1", 77);
     }
     break;
-    case 359:
+    case MONSTER_TWIN_TALE:
     {
-        OpenMonsterModel(MONSTER_DARK_SKULL_SOLDIER_4);
-        pCharacter = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_4, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_TWIN_TAIL);
+        pCharacter = CreateCharacter(Key, MODEL_TWIN_TAIL, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Angle[0] = 0.0f;
         pCharacter->Object.Gravity = 0.0f;
@@ -84,11 +84,11 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         BoneManager::RegisterBone(pCharacter, L"Twintail_Hair32", 24);
     }
     break;
-    case 439:
-    case 360:
+    case MONSTER_DREADFEAR2:
+    case MONSTER_DREADFEAR:
     {
-        OpenMonsterModel(MONSTER_GIANT_OGRE_4);
-        pCharacter = CreateCharacter(Key, MODEL_GIANT_OGRE_4, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_DREADFEAR);
+        pCharacter = CreateCharacter(Key, MODEL_DREADFEAR, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Angle[0] = 0.0f;
         pCharacter->Object.Gravity = 0.0f;
@@ -104,7 +104,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         BoneManager::RegisterBone(pCharacter, L"Dreadfear_Eye54", 10);
     }
     break;
-    case 367:
+    case MONSTER_GATEWAY_MACHINE:
     {
         OpenNpc(MODEL_KANTURU2ND_ENTER_NPC);
         pCharacter = CreateCharacter(Key, MODEL_KANTURU2ND_ENTER_NPC, PosX, PosY);
@@ -134,7 +134,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         BoneManager::RegisterBone(pCharacter, L"KANTURU2ND_ENTER_NPC_14", 10);
     }
     break;
-    case 105:
+    case MONSTER_CANON_TRAP:
     {
         pCharacter = g_TrapCanon.Create_TrapCanon(PosX, PosY, Key);
     }
@@ -151,9 +151,9 @@ bool M38Kanturu2nd::Set_CurrentAction_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o
 
     switch (c->MonsterIndex)
     {
-    case 358:
-    case 359:
-    case 360:
+    case MONSTER_PERSONA:
+    case MONSTER_TWIN_TALE:
+    case MONSTER_DREADFEAR:
     {
         return CheckMonsterSkill(c, o);
     }
@@ -167,17 +167,17 @@ bool M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o, BMD
 {
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_4:
+    case MODEL_PERSONA:
     {
         return true;
     }
     break;
-    case MODEL_DARK_SKULL_SOLDIER_4:
+    case MODEL_TWIN_TAIL:
     {
         return true;
     }
     break;
-    case MODEL_GIANT_OGRE_4:
+    case MODEL_DREADFEAR:
     {
         return true;
     }
@@ -277,11 +277,11 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 {
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_4:
+    case MODEL_PERSONA:
     {
     }
     break;
-    case MODEL_DARK_SKULL_SOLDIER_4:
+    case MODEL_TWIN_TAIL:
     {
         if (o->CurrentAction == MONSTER01_ATTACK2 &&
             (o->AnimationFrame >= 5.5f && o->AnimationFrame <= 6.5f))
@@ -317,7 +317,7 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     break;
-    case MODEL_GIANT_OGRE_4:
+    case MODEL_DREADFEAR:
     {
     }
     break;
@@ -681,7 +681,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int E
 {
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_4:
+    case MODEL_PERSONA:
     {
         float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -690,7 +690,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int E
         return true;
     }
     break;
-    case MODEL_DARK_SKULL_SOLDIER_4:
+    case MODEL_TWIN_TAIL:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f);
@@ -712,7 +712,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int E
         return true;
     }
     break;
-    case MODEL_GIANT_OGRE_4:
+    case MODEL_DREADFEAR:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -760,7 +760,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
 {
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_4:
+    case MODEL_PERSONA:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
@@ -866,7 +866,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         return true;
     }
     break;
-    case MODEL_DARK_SKULL_SOLDIER_4:
+    case MODEL_TWIN_TAIL:
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
         {
@@ -982,7 +982,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         return true;
     }
     break;
-    case MODEL_GIANT_OGRE_4:
+    case MODEL_DREADFEAR:
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
         {
@@ -1243,11 +1243,11 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_4:
+    case MODEL_PERSONA:
     {
     }
     break;
-    case MODEL_DARK_SKULL_SOLDIER_4:
+    case MODEL_TWIN_TAIL:
     {
         if ((o->AnimationFrame <= 4.12f && o->CurrentAction == MONSTER01_ATTACK1))
         {
@@ -1312,7 +1312,7 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_GIANT_OGRE_4:
+    case MODEL_DREADFEAR:
     {
         if ((o->AnimationFrame <= 5.0f && o->CurrentAction == MONSTER01_ATTACK1)
             || (o->AnimationFrame <= 9.0f && o->CurrentAction == MONSTER01_ATTACK2))

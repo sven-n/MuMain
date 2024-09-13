@@ -2501,7 +2501,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             case MODEL_CUNDUN_PART6:
             case MODEL_CUNDUN_PART7:
             case MODEL_CUNDUN_PART8:
-            case MODEL_ORC_ARCHER:
+            case MODEL_ILLUSION_OF_KUNDUN:
                 switch (o->SubType)
                 {
                 case 1:
@@ -4139,7 +4139,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 VectorRotate(p, Matrix, o->Direction);
             }
             break;
-            case MODEL_DARK_PHOENIX:
+            case MODEL_BATTLE_GUARD2_:
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 20;
@@ -10082,7 +10082,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (o->Owner != NULL)
             {
-                if (o->Owner->Type != MODEL_MAGIC_SKELETON_2)
+                if (o->Owner->Type != MODEL_WEREWOLF_HERO)
                 {
                     CreateEffect(MODEL_SKILL_FURY_STRIKE + 3, o->StartPosition, Angle, o->Light, 0, o, scale);
                     CreateEffect(MODEL_SKILL_FURY_STRIKE + 1, o->StartPosition, Angle, o->Light, 0, o, scale);
@@ -10289,7 +10289,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->BlendMeshTexCoordU = -(float)(int)o->LifeTime * 0.01f;
 
         if (o->Owner != NULL)
-            if (o->Owner->Type == MODEL_MAGIC_SKELETON_2)
+            if (o->Owner->Type == MODEL_WEREWOLF_HERO)
             {
                 Vector(Luminosity * 0.0f, Luminosity * 0.0f, Luminosity * 1.0f, Light);
             }
@@ -10342,7 +10342,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         if (o->Owner != NULL)
         {
-            if (o->Owner->Type == MODEL_MAGIC_SKELETON_2)
+            if (o->Owner->Type == MODEL_WEREWOLF_HERO)
             {
                 Vector(Luminosity * 0.0f, Luminosity * 0.0f, Luminosity * 1.0f, Light);
             }
@@ -10385,7 +10385,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         if (o->Owner != NULL)
         {
-            if (o->Owner->Type == MODEL_MAGIC_SKELETON_2)
+            if (o->Owner->Type == MODEL_WEREWOLF_HERO)
             {
                 Vector(Luminosity * 0.0f, Luminosity * 0.0f, Luminosity * 1.0f, Light);
             }
@@ -11372,7 +11372,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     case MODEL_CUNDUN_PART6:
     case MODEL_CUNDUN_PART7:
     case MODEL_CUNDUN_PART8:
-    case MODEL_ORC_ARCHER:
+    case MODEL_ILLUSION_OF_KUNDUN:
         switch (o->SubType)
         {
         case 1:
@@ -13740,7 +13740,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     case BATTLE_CASTLE_WALL4:
         break;
 
-    case MODEL_DARK_PHOENIX:
+    case MODEL_BATTLE_GUARD2_:
         if (o->SubType == 0)
         {
             if ((int)o->LifeTime % 5 == 0)
@@ -18561,7 +18561,7 @@ void RenderEffects(bool bRenderBlendMesh)
                 case MODEL_CUNDUN_PART6:
                 case MODEL_CUNDUN_PART7:
                 case MODEL_CUNDUN_PART8:
-                case MODEL_ORC_ARCHER:
+                case MODEL_ILLUSION_OF_KUNDUN:
                 case MODEL_CUNDUN_DRAGON_HEAD:
                 case MODEL_CUNDUN_PHOENIX:
                 case MODEL_CUNDUN_GHOST:

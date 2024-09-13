@@ -665,9 +665,9 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
 
     switch (iType)
     {
-    case 361:
+    case MONSTER_NIGHTMARE:
     {
-        OpenMonsterModel(MONSTER_DARK_SKULL_SOLDIER_5);
+        OpenMonsterModel(MONSTER_MODEL_DARK_SKULL_SOLDIER_5);
         c = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER_5, PosX, PosY);
         c->Object.Scale = 1.6f;
         c->Weapon[0].Type = -1;
@@ -705,10 +705,10 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(c, L"Windmill_Bone1", 47);
     }
     break;
-    case 362:
+    case MONSTER_MAYA_HAND_LEFT:
     {
-        OpenMonsterModel(MONSTER_MAGIC_SKELETON_4);
-        c = CreateCharacter(Key, MODEL_MAGIC_SKELETON_4, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_MAYA_HAND_LEFT);
+        c = CreateCharacter(Key, MODEL_MAYA_HAND_LEFT, PosX, PosY);
         c->Object.Scale = 2.28f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -738,10 +738,10 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 27, &c->Object, 15.f);
     }
     break;
-    case 363:
+    case MONSTER_MAYA_HAND_RIGHT:
     {
-        OpenMonsterModel(MONSTER_CHIEF_SKELETON_WARRIOR_5);
-        c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_WARRIOR_5, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_MAYA_HAND_RIGHT);
+        c = CreateCharacter(Key, MODEL_MAYA_HAND_RIGHT, PosX, PosY);
         c->Object.Scale = 2.28f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -771,10 +771,10 @@ CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY,
         CreateJoint(BITMAP_JOINT_ENERGY, c->Object.Position, c->Object.Position, c->Object.Angle, 33, &c->Object, 15.f);
     }
     break;
-    case 364:
+    case MONSTER_MAYA:
     {
-        OpenMonsterModel(MONSTER_BULL_FIGHTER);
-        c = CreateCharacter(Key, MODEL_CHIEF_SKELETON_ARCHER_5, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BULL_FIGHTER); // shouldn't that be MONSTER_MODEL_MAYA?
+        c = CreateCharacter(Key, MODEL_MAYA, PosX, PosY);
         c->Object.Scale = 0.2f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -879,7 +879,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
             o->SubType = FALSE;
     }
     break;
-    case MODEL_MAGIC_SKELETON_4:
+    case MODEL_MAYA_HAND_LEFT:
     {
         vec3_t Pos;
 
@@ -908,7 +908,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_CHIEF_SKELETON_WARRIOR_5:
+    case MODEL_MAYA_HAND_RIGHT:
     {
         vec3_t Pos;
 
@@ -937,7 +937,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_CHIEF_SKELETON_ARCHER_5:
+    case MODEL_MAYA:
     {
     }
     break;
@@ -988,15 +988,15 @@ void M39Kanturu3rd::MoveKanturu3rdBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MAGIC_SKELETON_4:
+    case MODEL_MAYA_HAND_LEFT:
     {
     }
     break;
-    case MODEL_CHIEF_SKELETON_WARRIOR_5:
+    case MODEL_MAYA_HAND_RIGHT:
     {
     }
     break;
-    case MODEL_CHIEF_SKELETON_ARCHER_5:
+    case MODEL_MAYA:
     {
     }
     break;
@@ -1087,7 +1087,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 16, 1.0f);
     }
     return true;
-    case MODEL_MAGIC_SKELETON_4:
+    case MODEL_MAYA_HAND_LEFT:
     {
         o->m_bRenderShadow = false;
 
@@ -1150,7 +1150,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         CreateSprite(BITMAP_FLARE_BLUE, Position, 1.0f, Light, o);
     }
     return true;
-    case MODEL_CHIEF_SKELETON_WARRIOR_5:
+    case MODEL_MAYA_HAND_RIGHT:
     {
         o->m_bRenderShadow = false;
 
@@ -1213,7 +1213,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         CreateSprite(BITMAP_FLARE_RED, Position, 1.0f, Light, o);
     }
     return true;
-    case MODEL_CHIEF_SKELETON_ARCHER_5:
+    case MODEL_MAYA:
     {
     }
     return true;
@@ -1240,7 +1240,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b, bool Ex
 {
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_ARCHER_4:
+    case MODEL_PERSONA:
     {
         float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1249,7 +1249,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b, bool Ex
         return true;
     }
     break;
-    case MODEL_DARK_SKULL_SOLDIER_4:
+    case MODEL_TWIN_TAIL:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f);
@@ -1269,7 +1269,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b, bool Ex
         return true;
     }
     break;
-    case MODEL_GIANT_OGRE_4:
+    case MODEL_DREADFEAR:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -1318,7 +1318,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b, bool Ex
         b->EndRender();
     }
     return true;
-    case MODEL_MAGIC_SKELETON_4:
+    case MODEL_MAYA_HAND_LEFT:
     {
         b->BeginRender(1.f);
 
@@ -1330,7 +1330,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b, bool Ex
         b->EndRender();
     }
     return true;
-    case MODEL_CHIEF_SKELETON_WARRIOR_5:
+    case MODEL_MAYA_HAND_RIGHT:
     {
         b->BeginRender(1.f);
 

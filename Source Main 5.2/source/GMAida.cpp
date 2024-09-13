@@ -335,10 +335,10 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     CHARACTER* pCharacter = NULL;
     switch (iType)
     {
-    case 304:
+    case MONSTER_WITCH_QUEEN:
     {
-        OpenMonsterModel(MONSTER_LANCE_TRAP);
-        pCharacter = CreateCharacter(Key, MODEL_LANCE_TRAP, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_WITCH_QUEEN_);
+        pCharacter = CreateCharacter(Key, MODEL_WITCH_QUEEN_, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -354,10 +354,10 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         BoneManager::RegisterBone(pCharacter, L"Monster100_z05", 110);
     }
     break;
-    case 305:
+    case MONSTER_BLUE_GOLEM:
     {
-        OpenMonsterModel(MONSTER_IRON_STICK_TRAP);
-        pCharacter = CreateCharacter(Key, MODEL_IRON_STICK_TRAP, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_GOLDEN_STONE_GOLEM_);
+        pCharacter = CreateCharacter(Key, MODEL_GOLDEN_STONE_GOLEM_, PosX, PosY);
         pCharacter->Object.Scale = 1.35f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -367,10 +367,10 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         BoneManager::RegisterBone(pCharacter, L"Monster101_Head", 6);
     }
     break;
-    case 306:
+    case MONSTER_DEATH_RIDER:
     {
-        OpenMonsterModel(MONSTER_FIRE_TRAP);
-        pCharacter = CreateCharacter(Key, MODEL_FIRE_TRAP, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_RIDER_);
+        pCharacter = CreateCharacter(Key, MODEL_DEATH_RIDER_, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -379,19 +379,19 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         BoneManager::RegisterBone(pCharacter, L"Monster102_Head", 6);
     }
     break;
-    case 307:
+    case MONSTER_FOREST_ORC:
     {
-        OpenMonsterModel(MONSTER_METEORITE_TRAP);
-        pCharacter = CreateCharacter(Key, MODEL_METEORITE_TRAP, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_FOREST_ORC_);
+        pCharacter = CreateCharacter(Key, MODEL_FOREST_ORC_, PosX, PosY);
         pCharacter->Object.Scale = 1.15f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 308:
+    case MONSTER_DEATH_TREE:
     {
-        OpenMonsterModel(104);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 104, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_TREE);
+        pCharacter = CreateCharacter(Key, MODEL_DEATH_TREE, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -405,10 +405,10 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         BoneManager::RegisterBone(pCharacter, L"Monster104_Footsteps", 1);
     }
     break;
-    case 309:
+    case MONSTER_HELL_MAINE:
     {
-        OpenMonsterModel(MONSTER_CANON_TRAP);
-        pCharacter = CreateCharacter(Key, MODEL_CANON_TRAP, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_HELL_MAINE_);
+        pCharacter = CreateCharacter(Key, MODEL_HELL_MAINE_, PosX, PosY);
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -423,20 +423,20 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         //			BoneManager::RegisterBone(pCharacter, L"Monster105_Footsteps", 1);
     }
     break;
-    case 549:
+    case MONSTER_BLOODY_ORC:
     {
-        OpenMonsterModel(MONSTER_AEGIS_4);
-        pCharacter = CreateCharacter(Key, MODEL_AEGIS_4, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BLOODY_ORC_);
+        pCharacter = CreateCharacter(Key, MODEL_BLOODY_ORC_, PosX, PosY);
         //pCharacter->Object.Scale = 1.15f;
         pCharacter->Object.Scale = 1.35f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 550:
+    case MONSTER_BLOODY_DEATH_RIDER:
     {
-        OpenMonsterModel(MONSTER_ROGUE_CENTURION_4);
-        pCharacter = CreateCharacter(Key, MODEL_ROGUE_CENTURION_4, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BLOODY_DEATH_RIDER_);
+        pCharacter = CreateCharacter(Key, MODEL_BLOODY_DEATH_RIDER_, PosX, PosY);
         //pCharacter->Object.Scale = 1.1f;
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -446,10 +446,10 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         BoneManager::RegisterBone(pCharacter, L"Monster102_Head", 6);
     }
     break;
-    case 551:
+    case MONSTER_BLOODY_GOLEM:
     {
-        OpenMonsterModel(MONSTER_NECRON_4);
-        pCharacter = CreateCharacter(Key, MODEL_NECRON_4, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BLOODY_GOLEM_);
+        pCharacter = CreateCharacter(Key, MODEL_BLOODY_GOLEM_, PosX, PosY);
         //pCharacter->Object.Scale = 1.35f;
         pCharacter->Object.Scale = 1.40f;
         pCharacter->Weapon[0].Type = -1;
@@ -460,10 +460,10 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
         BoneManager::RegisterBone(pCharacter, L"Monster101_Head", 6);
     }
     break;
-    case 552:
+    case MONSTER_BLOODY_WITCH_QUEEN:
     {
-        OpenMonsterModel(MONSTER_SCHRIKER_4);
-        pCharacter = CreateCharacter(Key, MODEL_SCHRIKER_4, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BLOODY_WITCH_QUEEN_);
+        pCharacter = CreateCharacter(Key, MODEL_BLOODY_WITCH_QUEEN_, PosX, PosY);
         //pCharacter->Object.Scale = 1.4f;
         pCharacter->Object.Scale = 1.75f;
         pCharacter->Weapon[0].Type = -1;
@@ -488,35 +488,35 @@ bool M33Aida::MoveAidaMonsterVisual(OBJECT* pObject, BMD* pModel)
 {
     switch (pObject->Type)
     {
-    case MODEL_LANCE_TRAP:
+    case MODEL_WITCH_QUEEN_:
     {
         vec3_t Light;
         Vector(0.7f, 0.1f, 0.1f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
     }
     break;
-    case MODEL_IRON_STICK_TRAP:
+    case MODEL_GOLDEN_STONE_GOLEM_:
     {
         vec3_t Light;
         Vector(0.f, 0.0f, 0.7f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
     }
     break;
-    case MODEL_CANON_TRAP:
+    case MODEL_HELL_MAINE_:
     {
         vec3_t Light;
         Vector(1.f, 0.0f, 0.0f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
     }
     break;
-    case MODEL_NECRON_4:
+    case MODEL_BLOODY_GOLEM_:
     {
         vec3_t Light;
         Vector(0.f, 0.0f, 0.7f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
     }
     break;
-    case MODEL_SCHRIKER_4:
+    case MODEL_BLOODY_WITCH_QUEEN_:
     {
         vec3_t Light;
         Vector(0.7f, 0.1f, 0.1f, Light);
@@ -531,7 +531,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
 {
     switch (pObject->Type)
     {
-    case MODEL_FIRE_TRAP:
+    case MODEL_DEATH_RIDER_:
     {
         if (pObject->AnimationFrame <= 5.06f && (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
         {
@@ -563,7 +563,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
         }
     }
     break;
-    case MODEL_METEORITE_TRAP:
+    case MODEL_FOREST_ORC_:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -599,7 +599,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
         }
     }
     break;
-    case MODEL_MONSTER01 + 104:
+    case MODEL_DEATH_TREE:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -627,7 +627,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
         }
     }
     break;
-    case MODEL_AEGIS_4:
+    case MODEL_BLOODY_ORC_:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -663,7 +663,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
         }
     }
     break;
-    case MODEL_ROGUE_CENTURION_4:
+    case MODEL_BLOODY_DEATH_RIDER_:
     {
         if (pObject->AnimationFrame <= 5.06f && (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
         {
@@ -702,7 +702,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 {
     switch (pObject->Type)
     {
-    case MODEL_LANCE_TRAP:
+    case MODEL_WITCH_QUEEN_:
     {
         vec3_t Position, Light, Angle;
         float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
@@ -796,7 +796,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_IRON_STICK_TRAP:
+    case MODEL_GOLDEN_STONE_GOLEM_:
     {
         vec3_t Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
         Vector(1.0f, 1.0f, 1.0f, Light);
@@ -871,7 +871,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_FIRE_TRAP:
+    case MODEL_DEATH_RIDER_:
     {
         vec3_t Relative, Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
 
@@ -915,7 +915,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     }
     break;
 
-    case MODEL_METEORITE_TRAP:
+    case MODEL_FOREST_ORC_:
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -948,7 +948,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 104:
+    case MODEL_DEATH_TREE:
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -1001,7 +1001,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_CANON_TRAP:
+    case MODEL_HELL_MAINE_:
     {
         vec3_t Relative, Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
         float Random_Light;
@@ -1084,7 +1084,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_AEGIS_4:
+    case MODEL_BLOODY_ORC_:
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -1117,7 +1117,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_ROGUE_CENTURION_4:
+    case MODEL_BLOODY_DEATH_RIDER_:
     {
         vec3_t Relative, Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
 
@@ -1161,7 +1161,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     }
     break;
 
-    case MODEL_NECRON_4:
+    case MODEL_BLOODY_GOLEM_:
     {
         vec3_t Position, Light, Angle = { 0.0f, 0.0f, 0.0f };
         Vector(1.0f, 1.0f, 1.0f, Light);
@@ -1236,7 +1236,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_SCHRIKER_4:
+    case MODEL_BLOODY_WITCH_QUEEN_:
     {
         vec3_t Position, Light, Angle;
         float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
@@ -1338,7 +1338,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
 {
     switch (pObject->Type)
     {
-    case MODEL_IRON_STICK_TRAP:
+    case MODEL_GOLDEN_STONE_GOLEM_:
     {
         pModel->BeginRender(1.f);
 
@@ -1357,7 +1357,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         return true;
     }
     break;
-    case MODEL_FIRE_TRAP:
+    case MODEL_DEATH_RIDER_:
     {
         pModel->BeginRender(1.f);
 
@@ -1378,7 +1378,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         return true;
     }
     break;
-    case MODEL_CANON_TRAP:
+    case MODEL_HELL_MAINE_:
     {
         pModel->BeginRender(1.f);
 
@@ -1412,7 +1412,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         return true;
     }
     break;
-    case MODEL_ROGUE_CENTURION_4:
+    case MODEL_BLOODY_DEATH_RIDER_:
     {
         pModel->BeginRender(1.f);
 
@@ -1433,7 +1433,7 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         return true;
     }
     break;
-    case MODEL_NECRON_4:
+    case MODEL_BLOODY_GOLEM_:
     {
         pModel->BeginRender(1.f);
 
@@ -1463,7 +1463,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
 
     switch (pCharacter->MonsterIndex)
     {
-    case 304:
+    case MONSTER_WITCH_QUEEN:
     {
         if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -1473,7 +1473,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
         }
     }
     return true;
-    case 308:
+    case MONSTER_DEATH_TREE:
     {
         if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -1483,7 +1483,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
         }
     }
     return true;
-    case 309:
+    case MONSTER_HELL_MAINE:
     {
         for (int i = 0; i < 5; i++)
         {
@@ -1496,7 +1496,7 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
         }
     }
     return true;
-    case 552:
+    case MONSTER_BLOODY_WITCH_QUEEN:
     {
         if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -1517,14 +1517,14 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
 
     switch (pCharacter->MonsterIndex)
     {
-    case 304:
-    case 305:
-    case 309:
+    case MONSTER_WITCH_QUEEN:
+    case MONSTER_BLUE_GOLEM:
+    case MONSTER_HELL_MAINE:
         return CheckMonsterSkill(pCharacter, pObject);
-    case 549:
-    case 550:
+    case MONSTER_BLOODY_ORC:
+    case MONSTER_BLOODY_DEATH_RIDER:
         return CheckMonsterSkill(pCharacter, pObject);
-    case 551:
+    case MONSTER_BLOODY_GOLEM:
     {
         if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYGOLUEM_ATTACKSKILL)
         {
@@ -1539,7 +1539,7 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
         return true;
     }
     return true;
-    case 552:
+    case MONSTER_BLOODY_WITCH_QUEEN:
     {
         if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYWITCHQUEEN_ATTACKSKILL)
         {

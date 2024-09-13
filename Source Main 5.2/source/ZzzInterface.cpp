@@ -1392,7 +1392,7 @@ bool CheckWall(int sx1, int sy1, int sx2, int sy2)
     int error = 0, count = 0;
     do {
         int _type = (SelectedCharacter >= 0 ? CharactersClient[SelectedCharacter].Object.Type : 0);
-        if ((_type != MODEL_DEATH_CENTURION_3 && _type != MODEL_BLOOD_SOLDIER_3 && _type != MODEL_ROGUE_CENTURION_3 && _type != MODEL_NECRON_3)
+        if ((_type != MODEL_EVIL_GATE_ && _type != MODEL_LION_GATE_ && _type != MODEL_STAR_GATE_ && _type != MODEL_RUSH_GATE_)
             && (TerrainWall[Index] >= TW_NOMOVE && (TerrainWall[Index] & TW_ACTION) != TW_ACTION && (TerrainWall[Index] & TW_HEIGHT) != TW_HEIGHT && (TerrainWall[Index] & TW_CAMERA_UP) != TW_CAMERA_UP))
         {
             return false;
@@ -7816,7 +7816,7 @@ int SelectCharacter(BYTE Kind)
                 {
                     o->OBB.StartPos[2] += 300.0f;
                 }
-                else if (o->Type == MODEL_MAGIC_SKELETON_4 || o->Type == MODEL_CHIEF_SKELETON_WARRIOR_5)
+                else if (o->Type == MODEL_MAYA_HAND_LEFT || o->Type == MODEL_MAYA_HAND_RIGHT)
                 {
                     o->OBB.StartPos[2] += 200.0f;
                 }

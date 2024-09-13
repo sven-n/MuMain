@@ -61,40 +61,40 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
 
     switch (iType)
     {
-    case 529:
-        OpenMonsterModel(MONSTER_DEATH_ANGEL_4);
-        pCharacter = CreateCharacter(Key, MODEL_DEATH_ANGEL_4, PosX, PosY);
+    case MONSTER_TERRIBLE_BUTCHER:
+        OpenMonsterModel(MONSTER_MODEL_TERRIBLE_BUTCHER);
+        pCharacter = CreateCharacter(Key, MODEL_TERRIBLE_BUTCHER, PosX, PosY);
         wcscpy(pCharacter->ID, L"도살자");
         pCharacter->Object.Scale = 1.0f;
         break;
-    case 530:
-        OpenMonsterModel(MONSTER_ILLUSION_OF_KUNDUN_3);
-        pCharacter = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN_3, PosX, PosY);
+    case MONSTER_MAD_BUTCHER:
+        OpenMonsterModel(MONSTER_MODEL_MAD_BUTCHER);
+        pCharacter = CreateCharacter(Key, MODEL_MAD_BUTCHER, PosX, PosY);
         wcscpy(pCharacter->ID, L"분노한 도살자");
         pCharacter->Object.Scale = 0.8f;
         break;
-    case 531:
-        OpenMonsterModel(MONSTER_DEATH_CENTURION_1);
-        pCharacter = CreateCharacter(Key, MODEL_DEATH_CENTURION_1, PosX, PosY);
+    case MONSTER_ICE_WALKER2:
+        OpenMonsterModel(MONSTER_MODEL_ICE_WALKER);
+        pCharacter = CreateCharacter(Key, MODEL_ICE_WALKER, PosX, PosY);
         wcscpy(pCharacter->ID, L"아이스 워커");
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 532:
-        OpenMonsterModel(MONSTER_LICH);
-        pCharacter = CreateCharacter(Key, MODEL_LICH, PosX, PosY);
+    case MONSTER_LARVA2:
+        OpenMonsterModel(MONSTER_MODEL_LARVA);
+        pCharacter = CreateCharacter(Key, MODEL_LARVA, PosX, PosY);
         wcscpy(pCharacter->ID, L"유충");
         pCharacter->Object.Scale = 0.6f;
         break;
-    case 533:
-        OpenMonsterModel(MONSTER_DEATH_CENTURION_4);
-        pCharacter = CreateCharacter(Key, MODEL_DEATH_CENTURION_4, PosX, PosY);
+    case MONSTER_DOPPELGANGER:
+        OpenMonsterModel(MONSTER_MODEL_DOPPELGANGER);
+        pCharacter = CreateCharacter(Key, MODEL_DOPPELGANGER, PosX, PosY);
         wcscpy(pCharacter->ID, L"도플갱어");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Object.m_bRenderShadow = false;
         break;
-    case 534:
+    case MONSTER_DOPPELGANGER_ELF:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_ELF;
@@ -107,7 +107,7 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[0].Type = MODEL_ARROWS;
         pCharacter->Weapon[1].Type = MODEL_CELESTIAL_BOW;
         break;
-    case 535:
+    case MONSTER_DOPPELGANGER_KNIGHT:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_KNIGHT;
@@ -120,7 +120,7 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 536:
+    case MONSTER_DOPPELGANGER_WIZARD:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_WIZARD;
@@ -133,7 +133,7 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[0].Type = MODEL_DRAGON_SOUL_STAFF;
         pCharacter->Weapon[1].Type = MODEL_GRAND_SOUL_SHIELD;
         break;
-    case 537:
+    case MONSTER_DOPPELGANGER_MG:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_DARK;
@@ -146,7 +146,7 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[0].Type = MODEL_RUNE_BLADE;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 538:
+    case MONSTER_DOPPELGANGER_DL:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_DARK_LORD;
@@ -161,7 +161,7 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Helper.Type = MODEL_DARK_HORSE_ITEM;
         CreateMount(MODEL_DARK_HORSE, pCharacter->Object.Position, &pCharacter->Object, 1);
         break;
-    case 539:
+    case MONSTER_DOPPELGANGER_SUM:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_SUMMONER;
@@ -211,7 +211,7 @@ bool CGMDoppelGanger1::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_DEATH_CENTURION_1:
+    case MODEL_ICE_WALKER:
     {
         switch (o->CurrentAction)
         {
@@ -247,14 +247,14 @@ bool CGMDoppelGanger1::MoveMonsterVisual(OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_ILLUSION_OF_KUNDUN_3:
-    case MODEL_DEATH_ANGEL_4:
+    case MODEL_MAD_BUTCHER:
+    case MODEL_TERRIBLE_BUTCHER:
     {
         if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
             o->CurrentAction = MONSTER01_WALK;
     }
     return true;
-    case MODEL_DEATH_CENTURION_4:
+    case MODEL_DOPPELGANGER:
         if (o->CurrentAction == MONSTER01_APEAR)
         {
             if (o->AnimationFrame > 18.0f)
@@ -319,8 +319,8 @@ void CGMDoppelGanger1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
 {
     switch (pObject->Type)
     {
-    case MODEL_ILLUSION_OF_KUNDUN_3:
-    case MODEL_DEATH_ANGEL_4:
+    case MODEL_MAD_BUTCHER:
+    case MODEL_TERRIBLE_BUTCHER:
     {
         if (!(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
             break;
@@ -379,15 +379,15 @@ bool CGMDoppelGanger1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 4000 * 0.00025f);
         b->StreamMesh = -1;
         return true;
-    case MODEL_DEATH_CENTURION_1:
+    case MODEL_ICE_WALKER:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER0);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER1);
         return true;
-    case MODEL_LICH:
+    case MODEL_LARVA:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_SNAKE01);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return true;
-    case MODEL_ILLUSION_OF_KUNDUN_3:
+    case MODEL_MAD_BUTCHER:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -395,14 +395,14 @@ bool CGMDoppelGanger1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
         //b->Actions[MONSTER01_WALK].PlaySpeed =		0.34f;
         return true;
-    case MODEL_DEATH_ANGEL_4:
+    case MODEL_TERRIBLE_BUTCHER:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
         return true;
-    case MODEL_DEATH_CENTURION_4:
+    case MODEL_DOPPELGANGER:
         return true;
     }
 
@@ -491,8 +491,8 @@ bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_ILLUSION_OF_KUNDUN_3:
-    case MODEL_DEATH_ANGEL_4:
+    case MODEL_MAD_BUTCHER:
+    case MODEL_TERRIBLE_BUTCHER:
         if (rand_fps_check(4))
         {
             b->TransformByObjectBone(vPos, o, 6);
@@ -509,7 +509,7 @@ bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, vLight, 0);
         }
 
-        if (o->Type == MODEL_DEATH_ANGEL_4)
+        if (o->Type == MODEL_TERRIBLE_BUTCHER)
         {
             Vector(1.0f, 0.2f, 0.1f, vLight);
             for (int j = 0; j < 50; ++j)
@@ -546,7 +546,7 @@ bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
         }
         return true;
-    case MODEL_DEATH_CENTURION_4:
+    case MODEL_DOPPELGANGER:
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.3f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return true;
@@ -614,7 +614,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_DEATH_CENTURION_1:		// Ice Walker
+    case MODEL_ICE_WALKER:		// Ice Walker
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
             PlayBuffer(SOUND_RAKLION_ICEWALKER_ATTACK);
@@ -633,7 +633,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
             }
         }
         return true;
-    case MODEL_DEATH_ANGEL_4:
+    case MODEL_TERRIBLE_BUTCHER:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -645,7 +645,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_ILLUSION_OF_KUNDUN_3:
+    case MODEL_MAD_BUTCHER:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -657,7 +657,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_DEATH_CENTURION_4:
+    case MODEL_DOPPELGANGER:
     {
         if (MONSTER01_APEAR == o->CurrentAction)
         {

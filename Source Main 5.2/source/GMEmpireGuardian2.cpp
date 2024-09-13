@@ -76,10 +76,10 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
 
     switch (iType)
     {
-    case 509:
+    case MONSTER_HAMMERIZE:
     {
-        OpenMonsterModel(MONSTER_CHAOS_CASTLE_8);
-        pCharacter = CreateCharacter(Key, MODEL_CHAOS_CASTLE_8, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_HAMMERIZE_);
+        pCharacter = CreateCharacter(Key, MODEL_HAMMERIZE_, PosX, PosY);
         wcscpy(pCharacter->ID, L"버몬트");
 
         pCharacter->Object.Scale = 1.3f;
@@ -87,19 +87,19 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
         m_bCurrentIsRage_Bermont = false;
     }
     break;
-    case 514:
+    case MONSTER_ATICLES_HEAD:
     {
-        OpenMonsterModel(MONSTER_DEATH_ANGEL_2);
-        pCharacter = CreateCharacter(Key, MODEL_DEATH_ANGEL_2, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_ATICLES_HEAD_);
+        pCharacter = CreateCharacter(Key, MODEL_ATICLES_HEAD_, PosX, PosY);
         wcscpy(pCharacter->ID, L"기사단장");
 
         pCharacter->Object.Scale = 1.35f;
     }
     break;
-    case 515:
+    case MONSTER_DARK_GHOST:
     {
-        OpenMonsterModel(MONSTER_DEATH_CENTURION_2);
-        pCharacter = CreateCharacter(Key, MODEL_DEATH_CENTURION_2, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_DARK_GHOST_);
+        pCharacter = CreateCharacter(Key, MODEL_DARK_GHOST_, PosX, PosY);
         wcscpy(pCharacter->ID, L"대마법사");
 
         OBJECT* pObject = &pCharacter->Object;
@@ -224,7 +224,7 @@ bool GMEmpireGuardian2::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_8:
+    case MODEL_HAMMERIZE_:
     {
         vec3_t vPos;
         switch (o->CurrentAction)
@@ -380,7 +380,7 @@ bool GMEmpireGuardian2::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_DEATH_ANGEL_2:
+    case MODEL_ATICLES_HEAD_:
     {
         vec3_t vPos, vRelative, vLight, v3Temp;
 
@@ -509,11 +509,11 @@ void GMEmpireGuardian2::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_6:
-    case MODEL_ROGUE_CENTURION_2:
-    case MODEL_NECRON_2:
-    case MODEL_SCHRIKER_2:
-    case MODEL_ILLUSION_OF_KUNDUN_2:
+    case MODEL_LUCAS_:
+    case MODEL_DEFENDER_:
+    case MODEL_FORSAKER_:
+    case MODEL_OCELOT:
+    case MODEL_ERIC:
     {
         g_EmpireGuardian1.MoveBlurEffect(c, o, b);
     }
@@ -533,10 +533,10 @@ bool GMEmpireGuardian2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_6:
-    case MODEL_CHAOS_CASTLE_8:
-    case MODEL_DEATH_ANGEL_2:
-    case MODEL_DEATH_CENTURION_2:
+    case MODEL_LUCAS_:
+    case MODEL_HAMMERIZE_:
+    case MODEL_ATICLES_HEAD_:
+    case MODEL_DARK_GHOST_:
     {
         RenderMonster(o, b, ExtraMon);
 
@@ -819,12 +819,12 @@ bool GMEmpireGuardian2::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_8:
+    case MODEL_HAMMERIZE_:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     return true;
-    case MODEL_DEATH_ANGEL_2:
+    case MODEL_ATICLES_HEAD_:
     {
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -832,7 +832,7 @@ bool GMEmpireGuardian2::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(2, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     return true;
-    case MODEL_DEATH_CENTURION_2:
+    case MODEL_DARK_GHOST_:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -859,7 +859,7 @@ bool GMEmpireGuardian2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_8:
+    case MODEL_HAMMERIZE_:
     {
         vec3_t vPos, vRelative, vLight;
         float fLumi1 = (sinf(WorldTime * 0.004f) + 1.f) * 0.25f;
@@ -891,7 +891,7 @@ bool GMEmpireGuardian2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_DEATH_CENTURION_2:
+    case MODEL_DARK_GHOST_:
     {
         int i;
         float fLumi = (sinf(WorldTime * 0.08f) + 1.0f) * 0.5f * 0.3f + 0.7f;
@@ -1203,7 +1203,7 @@ bool GMEmpireGuardian2::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_CHAOS_CASTLE_8:
+    case MODEL_HAMMERIZE_:
     {
         switch (o->CurrentAction)
         {
@@ -1247,7 +1247,7 @@ bool GMEmpireGuardian2::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_DEATH_ANGEL_2:
+    case MODEL_ATICLES_HEAD_:
     {
         switch (o->CurrentAction)
         {
@@ -1286,7 +1286,7 @@ bool GMEmpireGuardian2::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_DEATH_CENTURION_2:
+    case MODEL_DARK_GHOST_:
     {
         switch (o->CurrentAction)
         {

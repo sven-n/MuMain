@@ -216,46 +216,46 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         pCharacter->Object.Scale = 0.95f;
     }
     break;
-    case 386:
-    case 389:
-    case 392:
-    case 395:
-    case 398:
-    case 401:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_LIGHTNING:
     {
-        OpenMonsterModel(MONSTER_RED_SKELETON_KNIGHT_5);
-        pCharacter = CreateCharacter(iKey, MODEL_RED_SKELETON_KNIGHT_5, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"환영교단의 망령(번개)");
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING);
+        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"환영교단의 망령(번개)"); // Phantom of the Illusion Order (Lightning)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 387:
-    case 390:
-    case 393:
-    case 396:
-    case 399:
-    case 402:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_ICE:
     {
-        OpenMonsterModel(MONSTER_MAGIC_SKELETON_5);
-        pCharacter = CreateCharacter(iKey, MODEL_MAGIC_SKELETON_5, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"환영교단의 망령(얼음)");
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE);
+        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_ICE, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"환영교단의 망령(얼음)"); // Phantom of the Illusion Order (Ice)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 388:
-    case 391:
-    case 394:
-    case 397:
-    case 400:
-    case 403:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
     {
-        OpenMonsterModel(MONSTER_CHIEF_SKELETON_WARRIOR_6);
-        pCharacter = CreateCharacter(iKey, MODEL_CHIEF_SKELETON_WARRIOR_6, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"환영교단의 망령(독)");
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON);
+        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_POISON, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"환영교단의 망령(독)"); // Phantom of the Illusion Order (Poison)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -264,7 +264,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     case MONSTER_MU_ALLIES:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"뮤연합");
+        wcscpy(pCharacter->ID, L"뮤연합"); // Mu Alliance
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ALLIED_PLAYER;
     }
@@ -272,7 +272,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     case MONSTER_ILLUSION_SORCERER:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"환영교단");
+        wcscpy(pCharacter->ID, L"환영교단"); // Illusion Order
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ILLUSION_PLAYER;
     }
@@ -292,12 +292,12 @@ bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     Vector(1.f, 1.f, 1.f, Light);
     switch (c->MonsterIndex)
     {
-    case 388:
-    case 391:
-    case 394:
-    case 397:
-    case 400:
-    case 403:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -381,8 +381,8 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_RED_SKELETON_KNIGHT_5:
-    case MODEL_MAGIC_SKELETON_5:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
         if (o->CurrentAction == MONSTER01_STOP1)
         {
@@ -415,7 +415,7 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_CHIEF_SKELETON_WARRIOR_6:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_POISON:
     {
         /*
                     if(o->CurrentAction == MONSTER01_STOP1)
@@ -479,7 +479,7 @@ void CursedTemple::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_CHIEF_SKELETON_WARRIOR_6:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_POISON:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -799,7 +799,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     }
     return true;
 
-    case MODEL_CHIEF_SKELETON_WARRIOR_6:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_POISON:
     {
         vec3_t vRelativePos, vWorldPos;
         Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -815,7 +815,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MAGIC_SKELETON_5:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
         vec3_t vRelativePos, vWorldPos;
         float fLuminosity = (float)sinf((WorldTime) * 0.002f) * 0.2f;
@@ -855,7 +855,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_RED_SKELETON_KNIGHT_5:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
     {
         vec3_t vRelativePos, vWorldPos;
 
@@ -1089,8 +1089,8 @@ bool CursedTemple::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 2000 * 0.001f);
     }
     return true;
-    case MODEL_RED_SKELETON_KNIGHT_5:
-    case MODEL_MAGIC_SKELETON_5:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.8f;

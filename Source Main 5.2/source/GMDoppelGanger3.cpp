@@ -108,7 +108,7 @@ bool CGMDoppelGanger3::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_DEATH_CENTURION_1:
+    case MODEL_ICE_WALKER:
     {
         switch (o->CurrentAction)
         {
@@ -143,14 +143,14 @@ bool CGMDoppelGanger3::MoveMonsterVisual(OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_ILLUSION_OF_KUNDUN_3:
-    case MODEL_DEATH_ANGEL_4:
+    case MODEL_MAD_BUTCHER:
+    case MODEL_TERRIBLE_BUTCHER:
     {
         if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
             o->CurrentAction = MONSTER01_WALK;
     }
     return true;
-    case MODEL_DEATH_CENTURION_4:
+    case MODEL_DOPPELGANGER:
         if (o->CurrentAction == MONSTER01_APEAR)
         {
             if (o->AnimationFrame > 18.0f)
@@ -215,8 +215,8 @@ void CGMDoppelGanger3::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
 {
     switch (pObject->Type)
     {
-    case MODEL_ILLUSION_OF_KUNDUN_3:
-    case MODEL_DEATH_ANGEL_4:
+    case MODEL_MAD_BUTCHER:
+    case MODEL_TERRIBLE_BUTCHER:
     {
         if (!(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
             break;
@@ -273,30 +273,30 @@ bool CGMDoppelGanger3::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     return true;
-    case MODEL_DEATH_CENTURION_1:
+    case MODEL_ICE_WALKER:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER0);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER1);
         return true;
         break;
-    case MODEL_LICH:
+    case MODEL_LARVA:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_SNAKE01);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return true;
-    case MODEL_ILLUSION_OF_KUNDUN_3:
+    case MODEL_MAD_BUTCHER:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
         return true;
-    case MODEL_DEATH_ANGEL_4:
+    case MODEL_TERRIBLE_BUTCHER:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
         return true;
-    case MODEL_DEATH_CENTURION_4:
+    case MODEL_DOPPELGANGER:
         return true;
     }
 
@@ -349,8 +349,8 @@ bool CGMDoppelGanger3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_ILLUSION_OF_KUNDUN_3:
-    case MODEL_DEATH_ANGEL_4:
+    case MODEL_MAD_BUTCHER:
+    case MODEL_TERRIBLE_BUTCHER:
         if (rand_fps_check(4))
         {
             b->TransformByObjectBone(vPos, o, 6);
@@ -367,7 +367,7 @@ bool CGMDoppelGanger3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, vLight, 0);
         }
 
-        if (o->Type == MODEL_DEATH_ANGEL_4)
+        if (o->Type == MODEL_TERRIBLE_BUTCHER)
         {
             Vector(1.0f, 0.2f, 0.1f, vLight);
             for (int j = 0; j < 50; ++j)
@@ -404,7 +404,7 @@ bool CGMDoppelGanger3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
         }
         return true;
-    case MODEL_DEATH_CENTURION_4:
+    case MODEL_DOPPELGANGER:
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.3f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return true;
