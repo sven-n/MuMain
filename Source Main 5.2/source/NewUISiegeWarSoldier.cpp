@@ -103,7 +103,7 @@ void SEASON3B::CNewUISiegeWarSoldier::RenderCharPosInMiniMap()
             {
                 glColor4f(1.f, 0.f, 1.f, m_fMiniMapAlpha);
             }
-            else if (o->Kind == KIND_MONSTER && o->Type == MODEL_LIFE_STONE_)
+            else if (o->Kind == KIND_MONSTER && o->Type == MODEL_LIFE_STONE)
             {
                 glColor4f(1.f, 0.f, 1.f, m_fMiniMapAlpha);
             }

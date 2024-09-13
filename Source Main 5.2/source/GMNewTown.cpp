@@ -863,12 +863,12 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
         pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
         pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
     }
-    else if (pObject->Type == MODEL_HIDEOUS_RABBIT_)
+    else if (pObject->Type == MODEL_HIDEOUS_RABBIT)
     {
         pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
         pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
     }
-    else if (pObject->Type == MODEL_TOTEM_GOLEM_ && pObject->CurrentAction == MONSTER01_DIE)
+    else if (pObject->Type == MODEL_TOTEM_GOLEM && pObject->CurrentAction == MONSTER01_DIE)
     {
     }
 #ifndef PJH_NEW_SERVER_SELECT_MAP
@@ -1019,48 +1019,48 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_STRANGE_RABBIT:
-        OpenMonsterModel(MONSTER_MODEL_RABBIT_);
-        pCharacter = CreateCharacter(Key, MODEL_RABBIT_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_RABBIT);
+        pCharacter = CreateCharacter(Key, MODEL_RABBIT, PosX, PosY);
         wcscpy(pCharacter->ID, L"�Ⱬ�� �䳢");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_POLLUTED_BUTTERFLY:
-        OpenMonsterModel(MONSTER_MODEL_BUTTERFLY_);
-        pCharacter = CreateCharacter(Key, MODEL_BUTTERFLY_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BUTTERFLY);
+        pCharacter = CreateCharacter(Key, MODEL_BUTTERFLY, PosX, PosY);
         wcscpy(pCharacter->ID, L"������ �䳢");
         pCharacter->Object.Scale = 0.8f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_HIDEOUS_RABBIT:
-        OpenMonsterModel(MONSTER_MODEL_HIDEOUS_RABBIT_);
-        pCharacter = CreateCharacter(Key, MODEL_HIDEOUS_RABBIT_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_HIDEOUS_RABBIT);
+        pCharacter = CreateCharacter(Key, MODEL_HIDEOUS_RABBIT, PosX, PosY);
         wcscpy(pCharacter->ID, L"�����ΰ�");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_WEREWOLF2:
-        OpenMonsterModel(MONSTER_MODEL_WEREWOLF2_);
-        pCharacter = CreateCharacter(Key, MODEL_WEREWOLF2_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_WEREWOLF2);
+        pCharacter = CreateCharacter(Key, MODEL_WEREWOLF2, PosX, PosY);
         wcscpy(pCharacter->ID, L"������ ����");
         pCharacter->Object.Scale = 0.8f * 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_CURSED_LICH:
-        OpenMonsterModel(MONSTER_MODEL_CURSED_LICH_);
-        pCharacter = CreateCharacter(Key, MODEL_CURSED_LICH_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_CURSED_LICH);
+        pCharacter = CreateCharacter(Key, MODEL_CURSED_LICH, PosX, PosY);
         wcscpy(pCharacter->ID, L"���ֹ�����ġ");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_TOTEM_GOLEM:
-        OpenMonsterModel(MONSTER_MODEL_TOTEM_GOLEM_);
-        pCharacter = CreateCharacter(Key, MODEL_TOTEM_GOLEM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_TOTEM_GOLEM);
+        pCharacter = CreateCharacter(Key, MODEL_TOTEM_GOLEM, PosX, PosY);
         wcscpy(pCharacter->ID, L"���۰�");
         pCharacter->Object.Scale = 0.17f * 0.95f;
         pCharacter->Object.ShadowScale = 0.01f;
@@ -1070,15 +1070,15 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_GRIZZLY:
-        OpenMonsterModel(MONSTER_MODEL_GRIZZLY_);
-        pCharacter = CreateCharacter(Key, MODEL_GRIZZLY_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_GRIZZLY);
+        pCharacter = CreateCharacter(Key, MODEL_GRIZZLY, PosX, PosY);
         wcscpy(pCharacter->ID, L"���� �쾾");
         pCharacter->Object.Scale = 1.2f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_CAPTAIN_GRIZZLY:
-        OpenMonsterModel(MONSTER_MODEL_CAPTAIN_GRIZZLY_);
+        OpenMonsterModel(MONSTER_MODEL_CAPTAIN_GRIZZLY);
         pCharacter = CreateCharacter(Key, MODEL_CAPTAIN_GRIZZLY, PosX, PosY);
         wcscpy(pCharacter->ID, L"���� �쾾 ����");
         pCharacter->Object.Scale = 1.3f * 0.95f;
@@ -1102,7 +1102,7 @@ void GMNewTown::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pMod
 {
     switch (pObject->Type)
     {
-    case MODEL_HIDEOUS_RABBIT_:
+    case MODEL_HIDEOUS_RABBIT:
     {
         float Start_Frame = 0.f;
         float End_Frame = 6.0f;
@@ -1174,7 +1174,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
         CreateSprite(BITMAP_FLARE_BLUE, vPos, fScale * 0.8f, Light, pObject, -WorldTime * 0.1f);
     }
     break;
-    case MODEL_CURSED_LICH_:
+    case MODEL_CURSED_LICH:
         for (int i = 0; i < 4; ++i)
         {
             Vector(0, (rand() % 300 - 150) * 0.1f, (rand() % 200 - 100) * 0.1f, vRelative);
@@ -1182,7 +1182,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
             CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, pObject->Light, 0, 1, pObject);
         }
         break;
-    case MODEL_TOTEM_GOLEM_:
+    case MODEL_TOTEM_GOLEM:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             vec3_t Position;
@@ -1261,7 +1261,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 
     switch (pObject->Type)
     {
-    case MODEL_RABBIT_:
+    case MODEL_RABBIT:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_ATTACK01);
@@ -1271,7 +1271,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_DEATH01);
         }
         return true;
-    case MODEL_BUTTERFLY_:
+    case MODEL_BUTTERFLY:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1288,7 +1288,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_RABBITUGLY_DEATH01);
         }
         return true;
-    case MODEL_HIDEOUS_RABBIT_:
+    case MODEL_HIDEOUS_RABBIT:
         if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2
             || pObject->CurrentAction == MONSTER01_WALK)
         {
@@ -1306,7 +1306,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_WOLFHUMAN_DEATH01);
         }
         return true;
-    case MODEL_WEREWOLF2_:
+    case MODEL_WEREWOLF2:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1319,7 +1319,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01);
         }
         return true;
-    case MODEL_CURSED_LICH_:
+    case MODEL_CURSED_LICH:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1336,7 +1336,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_CURSERICH_DEATH01);
         }
         return true;
-    case MODEL_TOTEM_GOLEM_:
+    case MODEL_TOTEM_GOLEM:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(2))
@@ -1357,7 +1357,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_DEATH01);
         }
         return true;
-    case MODEL_GRIZZLY_:
+    case MODEL_GRIZZLY:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))

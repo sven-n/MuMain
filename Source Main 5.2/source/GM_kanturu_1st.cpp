@@ -422,8 +422,8 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     case MONSTER_GIGANTIS2:
     case MONSTER_GIGANTIS:
     {
-        OpenMonsterModel(MONSTER_MODEL_GIGANTIS_);
-        pCharacter = CreateCharacter(Key, MODEL_GIGANTIS_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_GIGANTIS);
+        pCharacter = CreateCharacter(Key, MODEL_GIGANTIS, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -431,8 +431,8 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     break;
     case MONSTER_GENOCIDER:
     {
-        OpenMonsterModel(MONSTER_MODEL_GENOCIDER_);
-        pCharacter = CreateCharacter(Key, MODEL_GENOCIDER_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_GENOCIDER);
+        pCharacter = CreateCharacter(Key, MODEL_GENOCIDER, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -442,8 +442,8 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     break;
     case MONSTER_SPLINTER_WOLF:
     {
-        OpenMonsterModel(MONSTER_MODEL_SPLINTER_WOLF_);
-        pCharacter = CreateCharacter(Key, MODEL_SPLINTER_WOLF_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SPLINTER_WOLF);
+        pCharacter = CreateCharacter(Key, MODEL_SPLINTER_WOLF, PosX, PosY);
         pCharacter->Object.Scale = 0.8f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -463,8 +463,8 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 
     case MONSTER_IRON_RIDER:
     {
-        OpenMonsterModel(MONSTER_MODEL_IRON_RIDER_);
-        pCharacter = CreateCharacter(Key, MODEL_IRON_RIDER_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_IRON_RIDER);
+        pCharacter = CreateCharacter(Key, MODEL_IRON_RIDER, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -493,8 +493,8 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     break;
     case MONSTER_SATYROS:
     {
-        OpenMonsterModel(MONSTER_MODEL_SATYROS_);
-        pCharacter = CreateCharacter(Key, MODEL_SATYROS_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SATYROS);
+        pCharacter = CreateCharacter(Key, MODEL_SATYROS, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -680,12 +680,12 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
         return true;
     }
     break;
-    case MODEL_GIGANTIS_:
+    case MODEL_GIGANTIS:
     {
         return true;
     }
     break;
-    case MODEL_GENOCIDER_:
+    case MODEL_GENOCIDER:
     {
         return true;
     }
@@ -876,9 +876,9 @@ bool M37Kanturu1st::MoveKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
     case MODEL_BERSERK:
         break;
-    case MODEL_GIGANTIS_:
+    case MODEL_GIGANTIS:
         break;
-    case MODEL_GENOCIDER_:
+    case MODEL_GENOCIDER:
         break;
     case MODEL_KENTAUROS:
         break;
@@ -927,7 +927,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_GIGANTIS_:
+    case MODEL_GIGANTIS:
     {
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -945,7 +945,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_GENOCIDER_:
+    case MODEL_GENOCIDER:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -1131,7 +1131,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     }
     break;
 
-    case MODEL_GIGANTIS_:
+    case MODEL_GIGANTIS:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
@@ -1180,7 +1180,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     }
     break;
 
-    case MODEL_GENOCIDER_:
+    case MODEL_GENOCIDER:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
@@ -1710,7 +1710,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_GIGANTIS_:
+    case MODEL_GIGANTIS:
     {
         if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 5.9f
             && o->CurrentAction == MONSTER01_ATTACK1)
@@ -1746,7 +1746,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_GENOCIDER_:
+    case MODEL_GENOCIDER:
     {
         if ((o->AnimationFrame >= 5.5f && o->AnimationFrame <= 6.9f
             && o->CurrentAction == MONSTER01_ATTACK1)

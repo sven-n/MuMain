@@ -592,8 +592,8 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case MONSTER_LANCE_SCOUT:
     {
-        OpenMonsterModel(MONSTER_MODEL_SOLAM_);
-        c = CreateCharacter(Key, MODEL_SOLAM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SOLAM);
+        c = CreateCharacter(Key, MODEL_SOLAM, PosX, PosY);
         c->Object.Scale = 1.2f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -601,8 +601,8 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case MONSTER_BOW_SCOUT:
     {
-        OpenMonsterModel(MONSTER_MODEL_VALAM_);
-        c = CreateCharacter(Key, MODEL_VALAM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_VALAM);
+        c = CreateCharacter(Key, MODEL_VALAM, PosX, PosY);
         c->Object.Scale = 1.2f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -648,8 +648,8 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     case MONSTER_VALAM:
     case MONSTER_BALRAM:
     {
-        OpenMonsterModel(MONSTER_MODEL_BALRAM_);
-        c = CreateCharacter(Key, MODEL_BALRAM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BALRAM);
+        c = CreateCharacter(Key, MODEL_BALRAM, PosX, PosY);
         c->Object.Scale = 1.25f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -658,8 +658,8 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     case MONSTER_SOLAM:
     case MONSTER_SORAM:
     {
-        OpenMonsterModel(MONSTER_MODEL_SORAM_);
-        c = CreateCharacter(Key, MODEL_SORAM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SORAM);
+        c = CreateCharacter(Key, MODEL_SORAM, PosX, PosY);
         c->Object.Scale = 1.3f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -667,8 +667,8 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case MONSTER_BALGASS:
     {
-        OpenMonsterModel(MONSTER_MODEL_BALGASS_);
-        c = CreateCharacter(Key, MODEL_BALGASS_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BALGASS);
+        c = CreateCharacter(Key, MODEL_BALGASS, PosX, PosY);
         c->Object.Scale = 2.f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -678,7 +678,7 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case MONSTER_DEATH_SPIRIT:
     {
-        OpenMonsterModel(MONSTER_MODEL_DEATH_SPIRIT_);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_SPIRIT);
         c = CreateCharacter(Key, MODEL_DEATH_SPIRIT, PosX, PosY);
         c->Object.Scale = 1.25f;
         c->Weapon[0].Type = -1;
@@ -701,8 +701,8 @@ CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY,
     break;
     case MONSTER_BALLISTA:
     {
-        OpenMonsterModel(MONSTER_MODEL_BALLISTA_);
-        c = CreateCharacter(Key, MODEL_BALLISTA_, PosX, PosY, 180);
+        OpenMonsterModel(MONSTER_MODEL_BALLISTA);
+        c = CreateCharacter(Key, MODEL_BALLISTA, PosX, PosY, 180);
         c->Object.Scale = 1.0f;
         c->Weapon[0].Type = -1;
         c->Weapon[1].Type = -1;
@@ -757,7 +757,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
     }
     break;
-    case MODEL_SORAM_:
+    case MODEL_SORAM:
     {
         float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
         vec3_t Light;
@@ -796,7 +796,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
     }
     break;
-    case MODEL_BALGASS_:
+    case MODEL_BALGASS:
     {
         MoveEye(o, b, 9, 10);
         float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
@@ -828,7 +828,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
     }
     break;
-    case MODEL_BALRAM_:
+    case MODEL_BALRAM:
     {
         vec3_t Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -916,7 +916,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
     }
     break;
-    case MODEL_SOLAM_:
+    case MODEL_SOLAM:
     {
         vec3_t Position, Light;
 
@@ -931,7 +931,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_VALAM_:
+    case MODEL_VALAM:
     {
         vec3_t Position, Light;
 
@@ -957,7 +957,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f * fScalePercent, Light, o, 360.f - Rotation);
     }
     break;
-    case MODEL_BALLISTA_:
+    case MODEL_BALLISTA:
     {
         if (m_CrywolfState == CRYWOLF_STATE_START)
         {
@@ -997,7 +997,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 
     switch (o->Type)
     {
-    case MODEL_VALAM_:
+    case MODEL_VALAM:
     {
         if ((int)c->AttackTime == 14)
         {
@@ -1006,7 +1006,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     break;
-    case MODEL_BALRAM_:
+    case MODEL_BALRAM:
     {
         if ((int)c->AttackTime == 14)
         {
@@ -1070,7 +1070,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     break;
-    case MODEL_BALLISTA_:
+    case MODEL_BALLISTA:
     {
         if ((int)c->AttackTime == 15)
         {
@@ -1092,7 +1092,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     vec3_t  TempAngle;
     switch (o->Type)
     {
-    case MODEL_SORAM_:
+    case MODEL_SORAM:
     {
         vec3_t  Light;
         Vector(1.0f, 1.0f, 1.0f, Light);
@@ -1190,7 +1190,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_BALGASS_:
+    case MODEL_BALGASS:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1368,7 +1368,7 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_SOLAM_:
+    case MODEL_SOLAM:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1403,7 +1403,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
 {
     switch (o->Type)
     {
-    case MODEL_SORAM_:
+    case MODEL_SORAM:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->BeginRender(o->Alpha);
@@ -1412,7 +1412,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_BALGASS_:
+    case MODEL_BALGASS:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->BeginRender(o->Alpha);
@@ -1425,7 +1425,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_BALRAM_:
+    case MODEL_BALRAM:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
         return true;
@@ -1607,7 +1607,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (fRotation2 >= 360.0f) fRotation2 = 0.0f;
     }
     break;
-    case MODEL_BALGASS_:
+    case MODEL_BALGASS:
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
@@ -1701,7 +1701,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             o->SubType = FALSE;
     }
     break;
-    case MODEL_BALLISTA_:
+    case MODEL_BALLISTA:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -1779,7 +1779,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o);
     }
     return true;
-    case MODEL_BALRAM_:
+    case MODEL_BALRAM:
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
@@ -1811,7 +1811,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             o->SubType = FALSE;
     }
     return true;
-    case MODEL_SORAM_:
+    case MODEL_SORAM:
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
@@ -1892,7 +1892,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             o->SubType = FALSE;
     }
     return true;
-    case MODEL_SOLAM_:
+    case MODEL_SOLAM:
     {
         vec3_t Position, Light;
 
@@ -1935,7 +1935,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             o->SubType = FALSE;
     }
     return true;
-    case MODEL_VALAM_:
+    case MODEL_VALAM:
     {
         vec3_t Position, Light;
 

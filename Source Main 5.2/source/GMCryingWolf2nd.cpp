@@ -141,8 +141,8 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case MONSTER_VALAM:
     {
-        OpenMonsterModel(MONSTER_MODEL_VALAM_);
-        pCharacter = CreateCharacter(Key, MODEL_VALAM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_VALAM);
+        pCharacter = CreateCharacter(Key, MODEL_VALAM, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -154,8 +154,8 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case MONSTER_SOLAM:
     {
-        OpenMonsterModel(MONSTER_MODEL_SOLAM_);
-        pCharacter = CreateCharacter(Key, MODEL_SOLAM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SOLAM);
+        pCharacter = CreateCharacter(Key, MODEL_SOLAM, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -172,8 +172,8 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case MONSTER_HAMMER_SCOUT:
     {
-        OpenMonsterModel(MONSTER_MODEL_BALRAM_);
-        pCharacter = CreateCharacter(Key, MODEL_BALRAM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BALRAM);
+        pCharacter = CreateCharacter(Key, MODEL_BALRAM, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -210,7 +210,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         }
     }
     break;
-    case MODEL_SOLAM_:
+    case MODEL_SOLAM:
     {
         vec3_t Position, Position2, Light;
         Vector(0.f, 0.f, 0.f, Position);
@@ -227,7 +227,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         }
     }
     break;
-    case MODEL_VALAM_:
+    case MODEL_VALAM:
     {
         vec3_t Position, Light;
 
@@ -305,7 +305,7 @@ void M34CryingWolf2nd::MoveCryingWolf2ndBlurEffect(CHARACTER* pCharacter, OBJECT
         }
     }
     break;
-    case MODEL_SOLAM_:
+    case MODEL_SOLAM:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -343,7 +343,7 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
 
     switch (pObject->Type)
     {
-    case MODEL_VALAM_:
+    case MODEL_VALAM:
     {
         if ((int)pCharacter->AttackTime == 14)
         {
@@ -352,7 +352,7 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
         }
     }
     break;
-    case MODEL_BALRAM_:
+    case MODEL_BALRAM:
     {
         if ((int)pCharacter->AttackTime == 14)
         {

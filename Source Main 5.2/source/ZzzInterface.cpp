@@ -1392,7 +1392,7 @@ bool CheckWall(int sx1, int sy1, int sx2, int sy2)
     int error = 0, count = 0;
     do {
         int _type = (SelectedCharacter >= 0 ? CharactersClient[SelectedCharacter].Object.Type : 0);
-        if ((_type != MODEL_EVIL_GATE_ && _type != MODEL_LION_GATE_ && _type != MODEL_STAR_GATE_ && _type != MODEL_RUSH_GATE_)
+        if ((_type != MODEL_EVIL_GATE && _type != MODEL_LION_GATE && _type != MODEL_STAR_GATE && _type != MODEL_RUSH_GATE)
             && (TerrainWall[Index] >= TW_NOMOVE && (TerrainWall[Index] & TW_ACTION) != TW_ACTION && (TerrainWall[Index] & TW_HEIGHT) != TW_HEIGHT && (TerrainWall[Index] & TW_CAMERA_UP) != TW_CAMERA_UP))
         {
             return false;

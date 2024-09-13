@@ -4139,7 +4139,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 VectorRotate(p, Matrix, o->Direction);
             }
             break;
-            case MODEL_BATTLE_GUARD2_:
+            case MODEL_BATTLE_GUARD2:
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 20;
@@ -13740,7 +13740,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     case BATTLE_CASTLE_WALL4:
         break;
 
-    case MODEL_BATTLE_GUARD2_:
+    case MODEL_BATTLE_GUARD2:
         if (o->SubType == 0)
         {
             if ((int)o->LifeTime % 5 == 0)

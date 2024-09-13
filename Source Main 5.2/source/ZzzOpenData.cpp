@@ -3293,9 +3293,9 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER + 70, L"Data\\Sound\\mYetiAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 71, L"Data\\Sound\\mYetiDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_YETI, 68, 68, 70, 70, 71);
-        SetMonsterSound(MODEL_ELITE_YETI_, 68, 69, 70, 70, 71);
+        SetMonsterSound(MODEL_ELITE_YETI, 68, 69, 70, 70, 71);
         Models[MODEL_YETI].BoneHead = 20;
-        Models[MODEL_ELITE_YETI_].BoneHead = 20;
+        Models[MODEL_ELITE_YETI].BoneHead = 20;
         break;
     case 19:
         LoadWaveFile(SOUND_MONSTER + 72, L"Data\\Sound\\mGoblin1.wav", Channel, Enable);

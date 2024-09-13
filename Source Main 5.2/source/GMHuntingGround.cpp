@@ -198,8 +198,8 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     {
     case MONSTER_LIZARD_WARRIOR:
     {
-        OpenMonsterModel(MONSTER_MODEL_LIZARD_WARRIOR_);   //  81
-        pCharacter = CreateCharacter(Key, MODEL_LIZARD_WARRIOR_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_LIZARD_WARRIOR);   //  81
+        pCharacter = CreateCharacter(Key, MODEL_LIZARD_WARRIOR, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -210,8 +210,8 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     break;
     case MONSTER_FIRE_GOLEM:
     {
-        OpenMonsterModel(MONSTER_MODEL_FIRE_GOLEM_);   //  82
-        pCharacter = CreateCharacter(Key, MODEL_FIRE_GOLEM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_FIRE_GOLEM);   //  82
+        pCharacter = CreateCharacter(Key, MODEL_FIRE_GOLEM, PosX, PosY);
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -224,8 +224,8 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     break;
     case MONSTER_QUEEN_BEE:
     {
-        OpenMonsterModel(MONSTER_MODEL_QUEEN_BEE_);	//	83
-        pCharacter = CreateCharacter(Key, MODEL_QUEEN_BEE_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_QUEEN_BEE);	//	83
+        pCharacter = CreateCharacter(Key, MODEL_QUEEN_BEE, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -236,8 +236,8 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case MONSTER_GIGAS_GOLEM:
     case MONSTER_POISON_GOLEM:
     {
-        OpenMonsterModel(MONSTER_MODEL_POISON_GOLEM_);	// 84
-        pCharacter = CreateCharacter(Key, MODEL_POISON_GOLEM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_POISON_GOLEM);	// 84
+        pCharacter = CreateCharacter(Key, MODEL_POISON_GOLEM, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -252,8 +252,8 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case MONSTER_AXE_HERO:
     case MONSTER_AXE_WARRIOR:
     {
-        OpenMonsterModel(MONSTER_MODEL_AXE_HERO_);	//85
-        pCharacter = CreateCharacter(Key, MODEL_AXE_HERO_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_AXE_HERO);	//85
+        pCharacter = CreateCharacter(Key, MODEL_AXE_HERO, PosX, PosY);
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -264,8 +264,8 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     break;
     case MONSTER_EROHIM:
     {
-        OpenMonsterModel(MONSTER_MODEL_EROHIM_);	//87
-        pCharacter = CreateCharacter(Key, MODEL_EROHIM_, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_EROHIM);	//87
+        pCharacter = CreateCharacter(Key, MODEL_EROHIM, PosX, PosY);
         pCharacter->Object.Scale = 2.f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -307,7 +307,7 @@ bool M31HuntingGround::MoveHuntingGroundMonsterVisual(OBJECT* pObject, BMD* pMod
 {
     switch (pObject->Type)
     {
-    case MODEL_FIRE_GOLEM_:
+    case MODEL_FIRE_GOLEM:
     {
         vec3_t Light;
         Vector(1.f, 0.2f, 0.1f, Light);
@@ -321,7 +321,7 @@ void M31HuntingGround::MoveHuntingGroundBlurEffect(CHARACTER* pCharacter, OBJECT
 {
     switch (pObject->Type)
     {
-    case MODEL_AXE_HERO_:
+    case MODEL_AXE_HERO:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -362,7 +362,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 {
     switch (pObject->Type)
     {
-    case MODEL_LIZARD_WARRIOR_:
+    case MODEL_LIZARD_WARRIOR:
     {
         vec3_t Position, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -393,7 +393,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_FIRE_GOLEM_:
+    case MODEL_FIRE_GOLEM:
     {
         vec3_t Light;
         Vector(1.f, 1.f, 1.f, Light);
@@ -483,7 +483,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_QUEEN_BEE_:
+    case MODEL_QUEEN_BEE:
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -522,7 +522,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
     }
     break;
 
-    case MODEL_POISON_GOLEM_:
+    case MODEL_POISON_GOLEM:
     {
         vec3_t Light, Position;
 
@@ -594,7 +594,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
     }
     break;
 
-    case MODEL_AXE_HERO_:
+    case MODEL_AXE_HERO:
     {
         vec3_t Position, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -627,7 +627,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_EROHIM_:
+    case MODEL_EROHIM:
     {
         vec3_t Position, Relative, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -674,7 +674,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
 {
     switch (pObject->Type)
     {
-    case MODEL_LIZARD_WARRIOR_:
+    case MODEL_LIZARD_WARRIOR:
     {
         pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, 1);
         pModel->BeginRender(1.f);
@@ -687,7 +687,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_FIRE_GOLEM_:
+    case MODEL_FIRE_GOLEM:
     {
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
@@ -712,7 +712,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_QUEEN_BEE_:
+    case MODEL_QUEEN_BEE:
     {
         pModel->BeginRender(1.f);
 
@@ -734,7 +734,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_POISON_GOLEM_:
+    case MODEL_POISON_GOLEM:
     {
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
@@ -782,7 +782,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_AXE_HERO_:
+    case MODEL_AXE_HERO:
     {
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
@@ -810,7 +810,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_EROHIM_:
+    case MODEL_EROHIM:
     {
         pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, 5);
 
