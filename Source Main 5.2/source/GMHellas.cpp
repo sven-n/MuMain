@@ -943,7 +943,7 @@ bool    SettingHellasMonsterLinkBone(CHARACTER* c, int Type)
         c->Weapon[0].LinkBone = 56;
         c->Weapon[1].LinkBone = 42;
         return true;
-    case MODEL_MONSTER01 + 68:
+    case MODEL_NECRON:
         c->Weapon[0].LinkBone = 60;
         c->Weapon[1].LinkBone = 60;
         return true;
@@ -1451,7 +1451,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
     case MODEL_DEATH_CENTURION:
         return true;
 
-    case MODEL_MONSTER01 + 68:
+    case MODEL_NECRON:
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.7f + 0.3f;
         return true;
 
@@ -1875,7 +1875,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 68:
+    case MODEL_NECRON:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             vec3_t pos;
@@ -2181,7 +2181,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         }
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 68)
+    else if (o->Type == MODEL_NECRON)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {

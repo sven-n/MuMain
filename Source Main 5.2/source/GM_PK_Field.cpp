@@ -202,7 +202,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 159:
+        case MODEL_SLAUGHTERER:
         {
             Start_Frame = 4.0f;
             End_Frame = 10.0f;
@@ -248,7 +248,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
                 switch (o->Type)
                 {
-                case MODEL_MONSTER01 + 159:
+                case MODEL_SLAUGHTERER:
                 {
                     Vector(0.3f, 0.3f, 0.3f, Light);
                     b->TransformPosition(BoneTransform[33], StartRelative, StartPos, false);
@@ -698,7 +698,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
     }
     return true;
-    case MODEL_MONSTER01 + 159:
+    case MODEL_SLAUGHTERER:
     {
         vec3_t p, Position;
         if (rand_fps_check(4))
@@ -913,7 +913,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         EnableDepthTest();
     }
     return true;
-    case MODEL_MONSTER01 + 159:
+    case MODEL_SLAUGHTERER:
     {
         float fBlendMeshLight = 0.0f;
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f;
@@ -1132,7 +1132,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         //	SOUND_PKFIELD_RAISEDGLADIATOR_MOVE02,
     }
     return true;
-    case MODEL_MONSTER01 + 159:
+    case MODEL_SLAUGHTERER:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {

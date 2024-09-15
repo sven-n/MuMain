@@ -591,7 +591,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
         }
     }
     break;
-    case MODEL_MONSTER01 + 202:
+    case MODEL_ICE_NAPIN:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             BMD* pModel = &Models[pObject->Type];

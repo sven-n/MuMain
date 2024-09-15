@@ -203,7 +203,7 @@ OBJECT* CollisionDetectObjects(OBJECT* PickObject)
 
 void BodyLight(OBJECT* o, BMD* b)
 {
-    if (o->Type == MODEL_MONSTER01 + 55)
+    if (o->Type == MODEL_DARK_PHEONIX_SHIELD)
     {
         Vector(.6f, .6f, .6f, b->BodyLight);
         return;
@@ -1216,7 +1216,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                 }
                                                 else
-                                                    if (o->Type == MODEL_MONSTER01 + 42 && o->SubType == 1)
+                                                    if (o->Type == MODEL_TANTALLOS && o->SubType == 1)
                                                     {
                                                         b->BeginRender(o->Alpha);
                                                         float Light = sinf(WorldTime * 0.002f) * 0.01f + 1.f;
@@ -1380,7 +1380,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     {
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                     }
-                                                    else if (o->Type == MODEL_MONSTER01 + 56)
+                                                    else if (o->Type == MODEL_DARK_PHEONIX)
                                                     {
                                                         b->StreamMesh = 0;
                                                         Vector(1.f, 1.0f, 1.0f, b->BodyLight);

@@ -178,7 +178,7 @@ public:
     short   	TargetCharacter;
 
     WORD        Level;
-    WORD        MonsterIndex;
+    EMonsterType        MonsterIndex;
     WORD        Damage;
     WORD        Hit;
     WORD        MoveSpeed;

@@ -1339,7 +1339,7 @@ void SetPlayerDie(CHARACTER* c)
             PlayBuffer(SOUND_BONE2, o);
         }
         break;
-        case MODEL_MONSTER01 + 110:
+        case MODEL_BLADE_HUNTER:
         case MODEL_TWIN_TAIL:
         {
             if (gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
@@ -4721,7 +4721,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             case AT_SKILL_SOUL_UP + 3:
             case AT_SKILL_SOUL_UP + 4:
             case AT_SKILL_WIZARDDEFENSE:
-                if (o->Type == MODEL_MONSTER01 + 55)
+                if (o->Type == MODEL_DARK_PHEONIX_SHIELD)
                 {
                     g_CharacterRegisterBuff(o, eBuff_PhysDefense);
                 }
@@ -5581,7 +5581,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         case MODEL_CRUST:
             o->BlendMeshTexCoordU = -(float)((int)(WorldTime) % 10000) * 0.0004f;
             break;
-        case MODEL_MONSTER01 + 55:
+        case MODEL_DARK_PHEONIX_SHIELD:
             o->BlendMeshTexCoordV = (float)((int)(WorldTime) % 10000) * 0.0001f;
             break;
         case MODEL_DRAKAN:
@@ -5699,7 +5699,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             MonsterMoveSandSmoke(o);
             //MonsterDieSandSmoke(o);
             break;
-        case MODEL_MONSTER01 + 42://
+        case MODEL_TANTALLOS://
             MoveEye(o, b, 24, 25);
             if (o->SubType == 1)
             {
@@ -5921,7 +5921,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
             }
             break;
-        case MODEL_MONSTER01:
+        case MODEL_BULL_FIGHTER:
             if (o->CurrentAction == MONSTER01_STOP1 &&
                 (o->AnimationFrame >= 15.f && o->AnimationFrame <= 20.f)) Smoke = true;
             if (o->CurrentAction == MONSTER01_STOP2 &&
@@ -8863,12 +8863,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
 
     VectorAdd(Light, o->Light, c->Light);
-    if (o->Type == MODEL_MONSTER01 + 55)
+    if (o->Type == MODEL_DARK_PHEONIX_SHIELD)
     {
         Vector(.6f, .6f, .6f, c->Light);
     }
 
-    else if (c->MonsterIndex >= 529 && c->MonsterIndex <= 539)
+    else if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
     {
         c->HideShadow = true;
 
@@ -10785,9 +10785,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
         }
         break;
-    case MODEL_MONSTER01:
+    case MODEL_BULL_FIGHTER:
     case MODEL_DEATH_COW:
-        if ((o->Type == MODEL_MONSTER01 && c->Level == 1) || (o->Type == MODEL_DEATH_COW))
+        if ((o->Type == MODEL_BULL_FIGHTER && c->Level == 1) || (o->Type == MODEL_DEATH_COW))
             RenderEye(o, 22, 23);
         break;
     case MODEL_CRUST:
@@ -11380,7 +11380,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     case MODEL_GORGON:
     case MODEL_DRAGON_:
     case MODEL_TITAN:
-    case MODEL_MONSTER01 + 42:
+    case MODEL_TANTALLOS:
     case MODEL_BEAM_KNIGHT:
         Vector(70.f, 70.f, 250.f, o->BoundingBoxMax);
         break;
@@ -11430,7 +11430,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         Vector(100.f, 100.f, 150.f, o->BoundingBoxMax);
     }
     break;
-    case MODEL_MONSTER01 + 159:
+    case MODEL_SLAUGHTERER:
     {
         Vector(-100.f, -100.f, 0.f, o->BoundingBoxMin);
         Vector(100.f, 100.f, 180.f, o->BoundingBoxMax);
@@ -11521,7 +11521,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         c->Weapon[0].LinkBone = 1;
         c->Weapon[1].LinkBone = 1;
         break;
-    case MODEL_MONSTER01 + 55:
+    case MODEL_DARK_PHEONIX_SHIELD:
         c->Weapon[0].LinkBone = 27;
         c->Weapon[1].LinkBone = 18;
         break;
@@ -11549,7 +11549,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         c->Weapon[0].LinkBone = 55;
         c->Weapon[1].LinkBone = 70;
         break;
-    case MODEL_MONSTER01 + 42:
+    case MODEL_TANTALLOS:
         c->Weapon[0].LinkBone = 43;
         break;
     case MODEL_GOLDEN_WHEEL:
@@ -11608,7 +11608,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         c->Weapon[0].LinkBone = 26;
         c->Weapon[1].LinkBone = 36;
         break;
-    case MODEL_MONSTER01:
+    case MODEL_BULL_FIGHTER:
     case MODEL_DEATH_COW:
         c->Weapon[0].LinkBone = 42;
         c->Weapon[1].LinkBone = 33;

@@ -1152,7 +1152,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 case 9://
                 case 23:
                     o->LifeTime = 16;
-                    if (o->Type == MODEL_MONSTER01 + 159)
+                    if (o->Type == MODEL_SLAUGHTERER)
                         o->Scale = (float)(rand() % 3 + 28) * 0.01f;
                     else
                         o->Scale = (float)(rand() % 32 + 48) * 0.01f;

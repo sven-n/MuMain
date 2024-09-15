@@ -1015,7 +1015,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     break;
-    case MODEL_MONSTER01 + 42:
+    case MODEL_TANTALLOS:
     {
         vec3_t Angle;
         if ((int)c->AttackTime == 1)
@@ -1497,7 +1497,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 42:
+    case MODEL_TANTALLOS:
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
         b->BeginRender(o->Alpha);

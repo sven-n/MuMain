@@ -1374,7 +1374,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_BEASTWOO_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 135:
+    case MODEL_CAPTAIN_GRIZZLY:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
