@@ -78,7 +78,7 @@ void CHARACTER::Initialize()
     TargetCharacter = 0;
 
     Level = 0;
-    MonsterIndex = 0;
+    MonsterIndex = MONSTER_BULL_FIGHTER;
     Damage = 0;
     Hit = 0;
     MoveSpeed = 0;

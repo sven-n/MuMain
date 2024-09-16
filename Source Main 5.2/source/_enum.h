@@ -2980,6 +2980,7 @@ enum E_WINGMIXCHAR_SEQUENCE
 
 enum EMonsterModelType : int
 {
+    MONSTER_MODEL_UNDEFINED = -1,
     MONSTER_MODEL_BULL_FIGHTER = 0,
     MONSTER_MODEL_HOUND = 1,
     MONSTER_MODEL_BUDGE_DRAGON = 2,
@@ -3201,6 +3202,7 @@ enum EMonsterModelType : int
 
 enum EMonsterType : int
 {
+    MONSTER_UNDEFINED = -1,
     MONSTER_BULL_FIGHTER = 0,
     MONSTER_HOUND = 1,
     MONSTER_BUDGE_DRAGON = 2,

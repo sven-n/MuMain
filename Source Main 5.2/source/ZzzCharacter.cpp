@@ -11324,7 +11324,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->Kind = KIND_PLAYER;
     c->Change = false;
     o->SubType = 0;
-    c->MonsterIndex = -1;
+    c->MonsterIndex = MONSTER_UNDEFINED;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;
     c->Skill = 0;

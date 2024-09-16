@@ -113,7 +113,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->Kind = KIND_PET;
     c->Change = false;
     o->SubType = 0;
-    c->MonsterIndex = -1;
+    c->MonsterIndex = MONSTER_UNDEFINED;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;
     o->Position[0] = (float)(PositionX * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
