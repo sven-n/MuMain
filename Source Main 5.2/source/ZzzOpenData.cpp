@@ -2347,7 +2347,7 @@ void OpenMonsterModel(EMonsterModelType Type)
 
     switch (Type)
     {
-    case 147:
+    case MONSTER_MODEL_ICE_GIANT:
     {
         gLoadData.AccessModel(MODEL_ICE_GIANT_PART1, L"Data\\Monster\\", L"icegiantpart_1");
         gLoadData.OpenTexture(MODEL_ICE_GIANT_PART1, L"Monster\\");
@@ -2386,81 +2386,81 @@ void OpenMonsterModel(EMonsterModelType Type)
 
     switch (Type)
     {
-    case 2:b->Actions[MONSTER01_WALK].PlaySpeed = 0.7f; break;
-    case 6:b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f; break;
-    case 8:b->Actions[MONSTER01_WALK].PlaySpeed = 0.7f; break;
-    case 9:b->Actions[MONSTER01_WALK].PlaySpeed = 1.2f; break;
-    case 10:b->Actions[MONSTER01_WALK].PlaySpeed = 0.28f; break;
-    case 12:b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f; break;
-    case 13:b->Actions[MONSTER01_WALK].PlaySpeed = 0.28f; break;
-    case 17:b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f; break;
-    case 19:b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f; break;
-    case 20:b->Actions[MONSTER01_WALK].PlaySpeed = 0.4f; break;
-    case 21:b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f; break;
-    case 28:b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f; break;
-    case 39:b->Actions[MONSTER01_WALK].PlaySpeed = 0.22f; break;
-    case 41:b->Actions[MONSTER01_WALK].PlaySpeed = 0.18f; break;
-    case 42:
+    case MONSTER_MODEL_BUDGE_DRAGON:b->Actions[MONSTER01_WALK].PlaySpeed = 0.7f; break;
+    case MONSTER_MODEL_LARVA:b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f; break;
+    case MONSTER_MODEL_HELL_SPIDER:b->Actions[MONSTER01_WALK].PlaySpeed = 0.7f; break;
+    case MONSTER_MODEL_SPIDER:b->Actions[MONSTER01_WALK].PlaySpeed = 1.2f; break;
+    case MONSTER_MODEL_CYCLOPS:b->Actions[MONSTER01_WALK].PlaySpeed = 0.28f; break;
+    case MONSTER_MODEL_YETI:b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f; break;
+    case MONSTER_MODEL_ELITE_YETI:b->Actions[MONSTER01_WALK].PlaySpeed = 0.28f; break;
+    case MONSTER_MODEL_WORM:b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f; break;
+    case MONSTER_MODEL_GOBLIN:b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f; break;
+    case MONSTER_MODEL_CHAIN_SCORPION:b->Actions[MONSTER01_WALK].PlaySpeed = 0.4f; break;
+    case MONSTER_MODEL_BEETLE_MONSTER:b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f; break;
+    case MONSTER_MODEL_SHADOW:b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f; break;
+    case MONSTER_MODEL_TITAN:b->Actions[MONSTER01_WALK].PlaySpeed = 0.22f; break;
+    case MONSTER_MODEL_GOLDEN_WHEEL:b->Actions[MONSTER01_WALK].PlaySpeed = 0.18f; break;
+    case MONSTER_MODEL_TANTALLOS:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.35f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.35f;
         break;
-    case 44:
+    case MONSTER_MODEL_BEAM_KNIGHT:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
         break;
-    case 63:
+    case MONSTER_MODEL_DEATH_ANGEL:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.1f;
         break;
-    case 64:
+    case MONSTER_MODEL_ILLUSION_OF_KUNDUN:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.3f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.15f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 66:
+    case MONSTER_MODEL_AEGIS:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.1f;
         break;
-    case 67:
+    case MONSTER_MODEL_DEATH_CENTURION:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.2f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.3f;
         break;
-    case 69:
+    case MONSTER_MODEL_SHRIKER:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.1f;
         break;
-    case 70:	//
-    case 71:	//
+    case MONSTER_MODEL_CHAOSCASTLE_KNIGHT:	//
+    case MONSTER_MODEL_CHAOSCASTLE_ELF:	//
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.5f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.5f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
         break;
-    case 72:
-        //    case 73:
+    case MONSTER_MODEL_CHAOSCASTLE_WIZARD:
+        //    case MONSTER_MODEL_CASTLE_GATE1:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.4f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.4f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
         break;
-    case 89:
+    case MONSTER_MODEL_BALGASS:
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.33f;
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.33f;
         b->Actions[MONSTER01_ATTACK4].PlaySpeed = 0.33f;
         break;
-    case 94:
+    case MONSTER_MODEL_SORAM:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.20f;
         break;
-    case 92:
+    case MONSTER_MODEL_DARK_ELF_1:
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.33f;
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.33f;
         break;
-    case 99:
+    case MONSTER_MODEL_BALLISTA:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.37f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.37f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.15f;
         break;
-    case 100:
+    case MONSTER_MODEL_WITCH_QUEEN:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
         break;
-    case 101:
+    case MONSTER_MODEL_GOLDEN_STONE_GOLEM:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
-    case 102:
+    case MONSTER_MODEL_DEATH_RIDER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.15f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.15f;
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.23f;
@@ -2468,13 +2468,13 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.15f;
         break;
-    case 104:
+    case MONSTER_MODEL_DEATH_TREE:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
         break;
-    case 105:
+    case MONSTER_MODEL_HELL_MAINE:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.15f;
         break;
-    case 106:
+    case MONSTER_MODEL_BERSERK:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.23f;
@@ -2482,7 +2482,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.28f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.19f;
         break;
-    case 107:
+    case MONSTER_MODEL_SPLINTER_WOLF:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.27f;
@@ -2490,7 +2490,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.30f;
         break;
-    case 108:
+    case MONSTER_MODEL_IRON_RIDER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.27f;
@@ -2498,7 +2498,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 109:
+    case MONSTER_MODEL_SATYROS:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.27f;
@@ -2506,12 +2506,12 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.3f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
         break;
-    case 110:
+    case MONSTER_MODEL_BLADE_HUNTER:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.23f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.23f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
         break;
-    case 111:
+    case MONSTER_MODEL_KENTAUROS:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.27f;
@@ -2519,12 +2519,12 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.27f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 112:
+    case MONSTER_MODEL_GIGANTIS:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.26f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.26f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.21f;
         break;
-    case 113:
+    case MONSTER_MODEL_GENOCIDER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
@@ -2533,7 +2533,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.5f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
         break;
-    case 114:
+    case MONSTER_MODEL_PERSONA:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.34f;
@@ -2541,7 +2541,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.33f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.23f;
         break;
-    case 115:
+    case MONSTER_MODEL_TWIN_TAIL:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.34f;
@@ -2549,7 +2549,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.23f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.23f;
         break;
-    case 116:
+    case MONSTER_MODEL_DREADFEAR:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.34f;
@@ -2557,7 +2557,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 121:
+    case MONSTER_MODEL_DARK_SKULL_SOLDIER_5:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.22f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.22f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
@@ -2568,33 +2568,33 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_ATTACK4].PlaySpeed = 0.25f;
         break;
-    case 118:
+    case MONSTER_MODEL_MAYA_HAND_LEFT:
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.12f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.12f;
-    case 119:
+    case MONSTER_MODEL_MAYA_HAND_RIGHT:
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.12f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.12f;
-    case 120:
+    case MONSTER_MODEL_MAYA:
         break;
-    case 122:
+    case MONSTER_MODEL_POUCH_OF_BLESSING:
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.3f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         break;
-    case 127:
+    case MONSTER_MODEL_LUNAR_RABBIT:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.50f;
         break;
-    case 154:
+    case MONSTER_MODEL_FIRE_FLAME_GHOST:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.60f;
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.50f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.50f;
         break;
-    case 157:
+    case MONSTER_MODEL_ZOMBIE_FIGHTER:
     {
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
@@ -2603,7 +2603,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
     }
     break;
-    case 158:
+    case MONSTER_MODEL_GLADIATOR:
     {
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
@@ -2612,7 +2612,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.18f;
     }
     break;
-    case 159:
+    case MONSTER_MODEL_SLAUGTHERER:
     {
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.2f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.4f;
@@ -2621,7 +2621,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
     }
     break;
-    case 160:
+    case MONSTER_MODEL_BLOOD_ASSASSIN:
     {
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f;
@@ -2630,7 +2630,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.4f;
     }
     break;
-    case 161:
+    case MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN:
     {
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.5f;
@@ -2639,7 +2639,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.4f;
     }
     break;
-    case 162:
+    case MONSTER_MODEL_LAVA_GIANT:
     {
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
@@ -2649,7 +2649,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
     }
     break;
-    case 163:
+    case MONSTER_MODEL_BURNING_LAVA_GIANT:
     {
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.28f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
@@ -2659,7 +2659,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
     }
     break;
-    case 128:
+    case MONSTER_MODEL_RABBIT:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.28f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
@@ -2668,7 +2668,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 129:
+    case MONSTER_MODEL_BUTTERFLY:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.20f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.20f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
@@ -2677,7 +2677,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.23f;
         break;
-    case 130:
+    case MONSTER_MODEL_HIDEOUS_RABBIT:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
@@ -2686,7 +2686,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.30f;
         break;
-    case 131:
+    case MONSTER_MODEL_WEREWOLF2:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.45f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.45f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.45f;
@@ -2695,7 +2695,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.45f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.45f;
         break;
-    case 132:
+    case MONSTER_MODEL_CURSED_LICH:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.20f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.20f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
@@ -2704,7 +2704,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.30f;
         break;
-    case 133:
+    case MONSTER_MODEL_TOTEM_GOLEM:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.20f;
@@ -2713,7 +2713,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.20f;
         break;
-    case 134:
+    case MONSTER_MODEL_GRIZZLY:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
@@ -2722,7 +2722,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         break;
-    case 135:
+    case MONSTER_MODEL_CAPTAIN_GRIZZLY:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
@@ -2731,59 +2731,59 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.28f;
         break;
-    case 136:
+    case MONSTER_MODEL_SAPIUNUS:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 137:
+    case MONSTER_MODEL_SAPIDUO:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 138:
+    case MONSTER_MODEL_SAPITRES:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 139:
+    case MONSTER_MODEL_SHADOW_PAWN:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.4f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.4f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 140:
+    case MONSTER_MODEL_SHADOW_KNIGHT:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.45f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.45f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 141:
+    case MONSTER_MODEL_SHADOW_LOOK:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 142:
+    case MONSTER_MODEL_NAPIN:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.20f;
         break;
-    case 143:
+    case MONSTER_MODEL_GHOST_NAPIN:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.20f;
         break;
-    case 144:
+    case MONSTER_MODEL_BLAZE_NAPIN:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.20f;
         break;
-    case 145:
+    case MONSTER_MODEL_ICE_WALKER:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f;
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.4f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.35f;
         break;
-    case 146:
+    case MONSTER_MODEL_GIANT_MAMMOTH:
         break;
-    case 147:
+    case MONSTER_MODEL_ICE_GIANT:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.13f;
         break;
-    case 148:
+    case MONSTER_MODEL_COOLUTIN:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.46f;
         break;
-    case 149:
+    case MONSTER_MODEL_IRON_KNIGHT:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.21f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.23f;
         break;
-    case 150:
+    case MONSTER_MODEL_SELUPAN:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.20f;
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.25f;
@@ -2793,16 +2793,16 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_ATTACK4].PlaySpeed = 0.25f;
         break;
-    case 151:
-    case 152:
-    case 153:
+    case MONSTER_MODEL_SPIDER_EGGS_1:
+    case MONSTER_MODEL_SPIDER_EGGS_2:
+    case MONSTER_MODEL_SPIDER_EGGS_3:
         break;
-    case 155:
+    case MONSTER_MODEL_CURSED_SANTA:
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.3f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.29f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.4f;
         break;
-    case 164:
+    case MONSTER_MODEL_GAYION:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.40f;
@@ -2814,7 +2814,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.38f;
         b->Actions[MONSTER01_ATTACK4].PlaySpeed = 0.38f;
         break;
-    case 165:
+    case MONSTER_MODEL_JERRY:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.50f;
@@ -2825,7 +2825,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.76f;
         break;
-    case 166:
+    case MONSTER_MODEL_RAYMOND:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.60f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.60f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.55f;
@@ -2836,7 +2836,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.50f;
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.80f;
         break;
-    case 167:
+    case MONSTER_MODEL_LUCAS:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.60f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.60f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.50f;
@@ -2847,7 +2847,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.80f;
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.40f;
         break;
-    case 168:
+    case MONSTER_MODEL_FRED:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.40f;
@@ -2858,7 +2858,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_ATTACK4].PlaySpeed = 0.45f;
         break;
-    case 169:
+    case MONSTER_MODEL_HAMMERIZE:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.35f;
@@ -2869,7 +2869,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.45f;
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.45f;
         break;
-    case 170:
+    case MONSTER_MODEL_DUAL_BERSERKER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.35f;
@@ -2879,7 +2879,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.35f;
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.40f;
         break;
-    case 171:
+    case MONSTER_MODEL_DEVIL_LORD:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.40f;
@@ -2889,7 +2889,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.45f;
         break;
-    case 172:
+    case MONSTER_MODEL_QUARTER_MASTER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.20f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.50f;
@@ -2898,7 +2898,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.50f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.55f;
         break;
-    case 173:
+    case MONSTER_MODEL_COMBAT_INSTRUCTOR:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.20f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.40f;
@@ -2908,7 +2908,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.40f;
         break;
-    case 174:
+    case MONSTER_MODEL_ATICLES_HEAD:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.65f;
@@ -2918,7 +2918,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.86f;
         break;
-    case 175:
+    case MONSTER_MODEL_DARK_GHOST:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.60f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.60f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.80f;
@@ -2927,7 +2927,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 1.00f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.30f;
         break;
-    case 176:
+    case MONSTER_MODEL_BANSHEE:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.20f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.20f;
@@ -2937,7 +2937,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.38f;
         break;
-    case 177:
+    case MONSTER_MODEL_HEAD_MOUNTER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.37f;
@@ -2946,7 +2946,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.50f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.30f;
         break;
-    case 178:
+    case MONSTER_MODEL_DEFENDER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.40f;
@@ -2957,7 +2957,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.40f;
         break;
 #ifdef LDS_ADD_EG_2_MONSTER_GUARDIANPRIEST
-    case 179:
+    case MONSTER_MODEL_FORSAKER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.80f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.80f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.80f;
@@ -2967,7 +2967,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.40f;
         break;
 #endif // LDS_ADD_EG_2_MONSTER_GUARDIANPRIEST
-    case 180:
+    case MONSTER_MODEL_OCELOT:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.20f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.55f;
@@ -2976,7 +2976,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.50f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.55f;
         break;
-    case 181:
+    case MONSTER_MODEL_ERIC:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.35f;
@@ -2985,12 +2985,12 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.50f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.30f;
         break;
-    case 189:
-    case 190:
+    case MONSTER_MODEL_MAD_BUTCHER:
+    case MONSTER_MODEL_TERRIBLE_BUTCHER:
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
         break;
-    case 191:
+    case MONSTER_MODEL_DOPPELGANGER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f * 2.0f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.2f * 2.0f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.34f * 2.0f;
@@ -3000,7 +3000,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.55f * 2.0f;
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.33f * 3.0f;
         break;
-    case 192:
+    case MONSTER_MODEL_MEDUSA:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.30f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.30;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.30;
@@ -3011,22 +3011,22 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.30;
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.30;
         break;
-    case 205:
+    case MONSTER_MODEL_DARK_MAMMOTH:
         break;
-    case 206:
+    case MONSTER_MODEL_DARK_GIANT:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.13f;
         break;
-    case 207:
+    case MONSTER_MODEL_DARK_COOLUTIN:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.46f;
         break;
-    case 208:
+    case MONSTER_MODEL_DARK_IRON_KNIGHT:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.21f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.23f;
         break;
-    case 193:
+    case MONSTER_MODEL_BLOODY_ORC:
         break;
-    case 194:
+    case MONSTER_MODEL_BLOODY_DEATH_RIDER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.15f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.15f;
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.23f;
@@ -3034,23 +3034,23 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.15f;
         break;
-    case 195:
+    case MONSTER_MODEL_BLOODY_GOLEM:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
         break;
-    case 196:
+    case MONSTER_MODEL_BLOODY_WITCH_QUEEN:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
         break;
-    case 201:
+    case MONSTER_MODEL_SAPI_QUEEN:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 202:
+    case MONSTER_MODEL_ICE_NAPIN:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.20f;
         break;
-    case 203:
+    case MONSTER_MODEL_SHADOW_MASTER:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 197:
+    case MONSTER_MODEL_BERSERKER_WARRIOR:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.23f;
@@ -3058,7 +3058,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.28f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.19f;
         break;
-    case 198:
+    case MONSTER_MODEL_KENTAUROS_WARRIOR:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.27f;
@@ -3066,12 +3066,12 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.27f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 199:
+    case MONSTER_MODEL_GIGANTIS_WARRIOR:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.26f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.26f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.21f;
         break;
-    case 200:
+    case MONSTER_MODEL_SOCCERBALL:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.25f;
@@ -3081,16 +3081,16 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
         break;
 #ifdef ASG_ADD_KARUTAN_MONSTERS
-    case 209:
+    case MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.95f;
         break;
-    case 210:
+    case MONSTER_MODEL_BONE_SCORPION:
         b->Actions[MONSTER01_WALK].PlaySpeed = 1.00f;
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.40f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.20f;
         break;
-    case 211:
+    case MONSTER_MODEL_ORCUS:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.7f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.7f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.6f;
@@ -3099,22 +3099,22 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_SHOCK].PlaySpeed = 0.25f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
         break;
-    case 212:
+    case MONSTER_MODEL_GOLLOCK:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.4f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.3f;
         break;
-    case 213:
-    case 214:
+    case MONSTER_MODEL_CRYPTA:
+    case MONSTER_MODEL_CRYPOS:
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.9f;
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.37f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.37f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.25f;
         break;
-    case 215:
+    case MONSTER_MODEL_CONDRA:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.80f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.80f;
         break;
-    case 216:
+    case MONSTER_MODEL_NACONDRA:
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.75f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.75f;
         break;
@@ -3122,10 +3122,10 @@ void OpenMonsterModel(EMonsterModelType Type)
     }
     switch (Type)
     {
-    case 14:
-    case 31:
-    case 39:
-    case 40:
+    case MONSTER_MODEL_ASSASSIN:
+    case MONSTER_MODEL_DRAGON:
+    case MONSTER_MODEL_TITAN:
+    case MONSTER_MODEL_SOLDIER:
         b->Actions[MONSTER01_STOP2].Loop = true;
         break;
     }
@@ -3314,14 +3314,14 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER + 81, L"Data\\Sound\\mScorpionDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 77, 78, 79, 80, 81);
         break;
-    case 21:
+    case MONSTER_MODEL_BEETLE_MONSTER:
         LoadWaveFile(SOUND_MONSTER + 82, L"Data\\Sound\\mBeetle1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 83, L"Data\\Sound\\mBeetleAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 84, L"Data\\Sound\\mBeetleDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 82, 82, 83, 83, 84);
         Models[MODEL_MONSTER01 + Type].BoneHead = 5;
         break;
-    case 22:
+    case MONSTER_MODEL_HUNTER:
         LoadWaveFile(SOUND_MONSTER + 85, L"Data\\Sound\\mHunter1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 86, L"Data\\Sound\\mHunter2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 87, L"Data\\Sound\\mHunterAttack1.wav", Channel, Enable);
@@ -3330,7 +3330,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         SetMonsterSound(MODEL_MONSTER01 + Type, 85, 86, 87, 88, 89);
         Models[MODEL_MONSTER01 + Type].BoneHead = 6;
         break;
-    case 23:
+    case MONSTER_MODEL_FOREST_MONSTER:
         LoadWaveFile(SOUND_MONSTER + 90, L"Data\\Sound\\mWoodMon1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 91, L"Data\\Sound\\mWoodMon2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 92, L"Data\\Sound\\mWoodMonAttack1.wav", Channel, Enable);
@@ -3339,7 +3339,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         SetMonsterSound(MODEL_MONSTER01 + Type, 90, 91, 92, 93, 94);
         Models[MODEL_MONSTER01 + Type].BoneHead = 6;
         break;
-    case 24:
+    case MONSTER_MODEL_AGON:
         LoadWaveFile(SOUND_MONSTER + 95, L"Data\\Sound\\mArgon1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 96, L"Data\\Sound\\mArgon2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 97, L"Data\\Sound\\mArgonAttack1.wav", Channel, Enable);
@@ -3348,7 +3348,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         SetMonsterSound(MODEL_MONSTER01 + Type, 95, 96, 97, 98, 99);
         Models[MODEL_MONSTER01 + Type].BoneHead = 16;
         break;
-    case 25:
+    case MONSTER_MODEL_STONE_GOLEM:
         LoadWaveFile(SOUND_MONSTER + 100, L"Data\\Sound\\mGolem1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 101, L"Data\\Sound\\mGolem2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 102, L"Data\\Sound\\mGolemAttack1.wav", Channel, Enable);
@@ -3357,14 +3357,14 @@ void OpenMonsterModel(EMonsterModelType Type)
         SetMonsterSound(MODEL_MONSTER01 + Type, 100, 101, 102, 103, 104);
         Models[MODEL_MONSTER01 + Type].BoneHead = 5;
         break;
-    case 26:
+    case MONSTER_MODEL_DEVIL:
         LoadWaveFile(SOUND_MONSTER + 105, L"Data\\Sound\\mYeti1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 106, L"Data\\Sound\\mSatanAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 107, L"Data\\Sound\\mYetiDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 105, 105, 106, 106, 107);
         Models[MODEL_MONSTER01 + Type].BoneHead = 6;
         break;
-    case 27:
+    case MONSTER_MODEL_BALROG:
         LoadWaveFile(SOUND_MONSTER + 108, L"Data\\Sound\\mBalrog1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 109, L"Data\\Sound\\mBalrog2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 110, L"Data\\Sound\\mWizardAttack2.wav", Channel, Enable);
@@ -3374,7 +3374,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         Models[MODEL_MONSTER01 + Type].BoneHead = 6;
         Models[MODEL_MONSTER01 + Type].StreamMesh = 1;
         break;
-    case 28:
+    case MONSTER_MODEL_SHADOW:
         LoadWaveFile(SOUND_MONSTER + 113, L"Data\\Sound\\mShadow1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 114, L"Data\\Sound\\mShadow2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 115, L"Data\\Sound\\mShadowAttack1.wav", Channel, Enable);
@@ -3383,7 +3383,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         SetMonsterSound(MODEL_MONSTER01 + Type, 113, 114, 115, 116, 117);
         Models[MODEL_MONSTER01 + Type].BoneHead = 5;
         break;
-    case 31:
+    case MONSTER_MODEL_DRAGON:
         LoadWaveFile(SOUND_MONSTER + 123, L"Data\\Sound\\mYeti1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 124, L"Data\\Sound\\mBullAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 125, L"Data\\Sound\\mYetiDie.wav", Channel, Enable);
@@ -3393,7 +3393,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.8f;
         b->Actions[MONSTER01_DIE + 1].PlaySpeed = 0.8f;
         break;
-    case 32:
+    case MONSTER_MODEL_BALI:
         LoadWaveFile(SOUND_MONSTER + 126, L"Data\\Sound\\mBali1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 127, L"Data\\Sound\\mBali2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 128, L"Data\\Sound\\mBaliAttack1.wav", Channel, Enable);
@@ -3406,12 +3406,12 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->BoneHead = 6;
         break;
 
-    case 33:
+    case MONSTER_MODEL_BAHAMUT:
         LoadWaveFile(SOUND_MONSTER + 130, L"Data\\Sound\\mBahamut1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 131, L"Data\\Sound\\mYeti1.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 130, 130, 131, 131, 130);
         break;
-    case 34:
+    case MONSTER_MODEL_VEPAR:
         LoadWaveFile(SOUND_MONSTER + 132, L"Data\\Sound\\mBepar1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 133, L"Data\\Sound\\mBepar2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 134, L"Data\\Sound\\mBalrog1.wav", Channel, Enable);
@@ -3420,15 +3420,15 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.5f;
         b->BoneHead = 20;//인어
         break;
-    case 35:
+    case MONSTER_MODEL_VALKYRIE:
         LoadWaveFile(SOUND_MONSTER + 135, L"Data\\Sound\\mValkyrie1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 136, L"Data\\Sound\\mBaliAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 137, L"Data\\Sound\\mValkyrieDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 135, 135, 136, 136, 137);
         Models[MODEL_MONSTER01 + Type].BoneHead = 19;
         break;
-    case 36:
-    case 40:
+    case MONSTER_MODEL_LIZARD:
+    case MONSTER_MODEL_SOLDIER:
         LoadWaveFile(SOUND_MONSTER + 138, L"Data\\Sound\\mLizardKing1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 139, L"Data\\Sound\\mLizardKing2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 140, L"Data\\Sound\\mGorgonDie.wav", Channel, Enable);
@@ -3438,7 +3438,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         else
             Models[MODEL_MONSTER01 + Type].BoneHead = 6;
         break;
-    case 37:
+    case MONSTER_MODEL_HYDRA:
         LoadWaveFile(SOUND_MONSTER + 141, L"Data\\Sound\\mHydra1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 142, L"Data\\Sound\\mHydraAttack1.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 141, 141, 142, 142, 141);
@@ -3446,13 +3446,13 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.15f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
         break;
-    case 41:
+    case MONSTER_MODEL_GOLDEN_WHEEL:
         LoadWaveFile(SOUND_MONSTER + 143, L"Data\\Sound\\iron1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 144, L"Data\\Sound\\iron_attack1.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 143, 143, 144, 144, 144);
         Models[MODEL_MONSTER01 + Type].BoneHead = 3;
         break;
-    case 42:
+    case MONSTER_MODEL_TANTALLOS:
         LoadWaveFile(SOUND_MONSTER + 145, L"Data\\Sound\\jaikan1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 146, L"Data\\Sound\\jaikan2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 147, L"Data\\Sound\\jaikan_attack1.wav", Channel, Enable);
@@ -3463,7 +3463,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadBitmap(L"Monster\\bv02_2.jpg", BITMAP_MONSTER_SKIN + 1, GL_LINEAR, GL_REPEAT);
         Models[MODEL_MONSTER01 + Type].BoneHead = 20;
         break;
-    case 43:
+    case MONSTER_MODEL_BLOODY_WOLF:
         LoadWaveFile(SOUND_MONSTER + 150, L"Data\\Sound\\blood1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 151, L"Data\\Sound\\blood_attack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 152, L"Data\\Sound\\blood_attack2.wav", Channel, Enable);
@@ -3471,41 +3471,41 @@ void OpenMonsterModel(EMonsterModelType Type)
         SetMonsterSound(MODEL_MONSTER01 + Type, 150, 150, 151, 152, 153);
         Models[MODEL_MONSTER01 + Type].BoneHead = 7;
         break;
-    case 44:
+    case MONSTER_MODEL_BEAM_KNIGHT:
         LoadWaveFile(SOUND_MONSTER + 154, L"Data\\Sound\\death1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 155, L"Data\\Sound\\death_attack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 156, L"Data\\Sound\\death_die.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 154, 154, 155, 155, 156);
         Models[MODEL_MONSTER01 + Type].BoneHead = 6;
         break;
-    case 45:
+    case MONSTER_MODEL_MUTANT:
         LoadWaveFile(SOUND_MONSTER + 157, L"Data\\Sound\\mutant1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 158, L"Data\\Sound\\mutant2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 159, L"Data\\Sound\\mutant_attack1.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 157, 158, 159, 159, 159);
         Models[MODEL_MONSTER01 + Type].BoneHead = 6;
         break;
-    case 46:
+    case MONSTER_MODEL_ORC_ARCHER:
         LoadWaveFile(SOUND_MONSTER + 162, L"Data\\Sound\\mOrcArcherAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 4, L"Data\\Sound\\mBullDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 162, 162, 4);
         Models[MODEL_MONSTER01 + Type].BoneHead = 7;
         break;
-    case 47:
+    case MONSTER_MODEL_ORC:
         LoadWaveFile(SOUND_MONSTER + 86, L"Data\\Sound\\mHunter2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 4, L"Data\\Sound\\mBullDie.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 161, L"Data\\Sound\\mOrcCapAttack1.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 86, 86, 161, 161, 4);
         Models[MODEL_MONSTER01 + Type].BoneHead = 20;
         break;
-    case 48:
+    case MONSTER_MODEL_CURSED_KING:
         LoadWaveFile(SOUND_MONSTER + 160, L"Data\\Sound\\mCursedKing1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 164, L"Data\\Sound\\mCursedKing2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 163, L"Data\\Sound\\mCursedKingDie1.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 160, 164, -1, -1, 163);
         Models[MODEL_MONSTER01 + Type].BoneHead = 20;
         break;
-    case 52:
+    case MONSTER_MODEL_CRUST:
         LoadBitmap(L"Monster\\iui02.tga", BITMAP_ROBE + 3);
         LoadBitmap(L"Monster\\iui03.tga", BITMAP_ROBE + 5);
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
@@ -3514,92 +3514,92 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER + 182, L"Data\\Sound\\mMegaCrustDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 180, 180, 181, 181, 182);
         break;
-    case 49:
+    case MONSTER_MODEL_MOLT:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         LoadWaveFile(SOUND_MONSTER + 177, L"Data\\Sound\\mMolt1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 178, L"Data\\Sound\\mMoltAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 179, L"Data\\Sound\\mMoltDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 177, 177, 178, 178, 179);
         break;
-    case 50:
+    case MONSTER_MODEL_ALQUAMOS:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         //LoadWaveFile(SOUND_MONSTER+174,"Data\\Sound\\mAlquamos1.wav"    ,Channel,Enable);
         LoadWaveFile(SOUND_MONSTER + 175, L"Data\\Sound\\mAlquamosAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 176, L"Data\\Sound\\mAlquamosDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 175, 175, 175, 175, 176);
         break;
-    case 51:
+    case MONSTER_MODEL_QUEEN_RAINER:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         LoadWaveFile(SOUND_MONSTER + 171, L"Data\\Sound\\mRainner1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 172, L"Data\\Sound\\mRainnerAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 173, L"Data\\Sound\\mRainnerDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 171, -1, 172, 172, 173);
         break;
-    case 53:
+    case MONSTER_MODEL_PHANTOM_KNIGHT:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         LoadWaveFile(SOUND_MONSTER + 168, L"Data\\Sound\\mPhantom1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 169, L"Data\\Sound\\mPhantomAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 170, L"Data\\Sound\\mPhantomDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 168, 168, 169, 169, 170);
         break;
-    case 54:
+    case MONSTER_MODEL_DRAKAN:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         LoadWaveFile(SOUND_MONSTER + 165, L"Data\\Sound\\mDrakan1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 166, L"Data\\Sound\\mDrakanAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 167, L"Data\\Sound\\mDrakanDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 165, 165, 166, 166, 167);
         break;
-    case 55:
+    case MONSTER_MODEL_DARK_PHOENIX_SHIELD:
         LoadWaveFile(SOUND_MONSTER + 183, L"Data\\Sound\\mPhoenix1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 184, L"Data\\Sound\\mPhoenix1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 185, L"Data\\Sound\\mPhoenixAttack1.wav", Channel, Enable);
         //LoadWaveFile(SOUND_MONSTER+186,"Data\\Sound\\mDarkPhoenixDie.wav"    ,Channel,Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 183, 184, 185, 185, -1);
-    case 56:
+    case MONSTER_MODEL_DARK_PHOENIX:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         //b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.01f;
         //b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.01f;
         break;
-    case 62:
+    case MONSTER_MODEL_MAGIC_SKELETON:
         LoadWaveFile(SOUND_MONSTER + 186, L"Data\\Sound\\mMagicSkull.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 187, L"Data\\Sound\\mMagicSkull.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 186, -1, -1, -1, 187);
         break;
-    case 61:
+    case MONSTER_MODEL_CASTLE_GATE:
         break;
-    case 60:
+    case MONSTER_MODEL_STATUE_OF_SAINT:
         break;
-    case 59:
+    case MONSTER_MODEL_DARK_SKULL_SOLDIER:
         LoadWaveFile(SOUND_MONSTER + 4, L"Data\\Sound\\mBullDie.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 188, L"Data\\Sound\\mHunter2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 189, L"Data\\Sound\\mBlackSkullDie.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 190, L"Data\\Sound\\mBlackSkullAttack.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 188, -1, 190, -1, 189);
         break;
-    case 58:
+    case MONSTER_MODEL_GIANT_OGRE:
         LoadWaveFile(SOUND_MONSTER + 188, L"Data\\Sound\\mHunter2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 191, L"Data\\Sound\\mGhaintOrgerDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 188, -1, 190, -1, 191);
         break;
-    case 57:
+    case MONSTER_MODEL_RED_SKELETON_KNIGHT:
         LoadWaveFile(SOUND_MONSTER + 192, L"Data\\Sound\\mRedSkull.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 193, L"Data\\Sound\\mRedSkullDie.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 194, L"Data\\Sound\\mRedSkullAttack.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 192, -1, 194, -1, 193);
         break;
-    case 63:
+    case MONSTER_MODEL_DEATH_ANGEL:
         LoadWaveFile(SOUND_MONSTER + 195, L"Data\\Sound\\mDAngelIdle.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 196, L"Data\\Sound\\mDAngelAttack.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 197, L"Data\\Sound\\mDAngelDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 195, 195, 196, 196, 197);
         break;
-    case 64:
+    case MONSTER_MODEL_ILLUSION_OF_KUNDUN:
         LoadWaveFile(SOUND_MONSTER + 232, L"Data\\Sound\\mKundunIdle.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 233, L"Data\\Sound\\mKundunAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 234, L"Data\\Sound\\mKundunAttack2.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 232, 232, 233, 234, -1);
         break;
-    case 65:
+    case MONSTER_MODEL_BLOOD_SOLDIER:
         LoadWaveFile(SOUND_MONSTER + 198, L"Data\\Sound\\mBSoldierIdle1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 199, L"Data\\Sound\\mBSoldierIdle2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 200, L"Data\\Sound\\mBSoldierAttack1.wav", Channel, Enable);
@@ -3607,14 +3607,14 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER + 202, L"Data\\Sound\\mBSoldierDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 198, 199, 200, 201, 202);
         break;
-    case 66:
+    case MONSTER_MODEL_AEGIS:
         LoadWaveFile(SOUND_MONSTER + 203, L"Data\\Sound\\mEsisIdle.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 204, L"Data\\Sound\\mEsisAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 205, L"Data\\Sound\\mEsisAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 206, L"Data\\Sound\\mEsisDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 203, 203, 204, 205, 206);
         break;
-    case 67:
+    case MONSTER_MODEL_DEATH_CENTURION:
         LoadWaveFile(SOUND_MONSTER + 207, L"Data\\Sound\\mDsIdle1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 208, L"Data\\Sound\\mDsIdle2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 209, L"Data\\Sound\\mDsAttack1.wav", Channel, Enable);
@@ -3627,7 +3627,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER + 216, L"Data\\Sound\\mLsDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216);
         break;
-    case 68:
+    case MONSTER_MODEL_NECRON:
         LoadWaveFile(SOUND_MONSTER + 217, L"Data\\Sound\\mNecronIdle1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 218, L"Data\\Sound\\mNecronIdle2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 219, L"Data\\Sound\\mNecronAttack1.wav", Channel, Enable);
@@ -3635,7 +3635,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER + 221, L"Data\\Sound\\mNecronDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 217, 218, 219, 220, 221);
         break;
-    case 69:
+    case MONSTER_MODEL_SHRIKER:
         LoadWaveFile(SOUND_MONSTER + 222, L"Data\\Sound\\mSvIdle1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 223, L"Data\\Sound\\mSvIdle2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 224, L"Data\\Sound\\mSvAttack1.wav", Channel, Enable);
@@ -3648,132 +3648,132 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER + 231, L"Data\\Sound\\mLvDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231);
         break;
-    case 73:
+    case MONSTER_MODEL_CASTLE_GATE1:
         LoadWaveFile(SOUND_MONSTER + 232, L"Data\\Sound\\BattleCastle\\oCDoorDis.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, -1, -1, 232);
         break;
-    case 86:
+    case MONSTER_MODEL_LIFE_STONE:
         SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, -1, -1, -1);
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.05f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.05f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.1f;
         break;
-    case 76:
+    case MONSTER_MODEL_BATTLE_GUARD1:
         LoadWaveFile(SOUND_MONSTER + 233, L"Data\\Sound\\BattleCastle\\mBowMercAttack.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 234, L"Data\\Sound\\BattleCastle\\mBowMercDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 233, 233, 234);
         break;
-    case 77:
+    case MONSTER_MODEL_BATTLE_GUARD2:
         LoadWaveFile(SOUND_MONSTER + 235, L"Data\\Sound\\BattleCastle\\mSpearMercAttack.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 236, L"Data\\Sound\\BattleCastle\\mSpearMercDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 235, 235, 236);
         break;
-    case 79:
+    case MONSTER_MODEL_CANON_TOWER:
         break;
-    case 128:
+    case MONSTER_MODEL_RABBIT:
         LoadWaveFile(SOUND_ELBELAND_RABBITSTRANGE_ATTACK01, L"Data\\Sound\\w52\\SE_Mon_rabbitstrange_attack01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_RABBITSTRANGE_DEATH01, L"Data\\Sound\\w52\\SE_Mon_rabbitstrange_death01.wav", 1);
         break;
-    case 129:
+    case MONSTER_MODEL_BUTTERFLY:
         LoadWaveFile(SOUND_ELBELAND_RABBITUGLY_BREATH01, L"Data\\Sound\\w52\\SE_Mon_rabbitugly_breath01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_RABBITUGLY_ATTACK01, L"Data\\Sound\\w52\\SE_Mon_rabbitugly_attack01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_RABBITUGLY_DEATH01, L"Data\\Sound\\w52\\SE_Mon_rabbitugly_death01.wav", 1);
         break;
-    case 130:
+    case MONSTER_MODEL_HIDEOUS_RABBIT:
         LoadWaveFile(SOUND_ELBELAND_WOLFHUMAN_MOVE02, L"Data\\Sound\\w52\\SE_Mon_wolfhuman_move02.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_WOLFHUMAN_ATTACK01, L"Data\\Sound\\w52\\SE_Mon_wolfhuman_attack01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_WOLFHUMAN_DEATH01, L"Data\\Sound\\w52\\SE_Mon_wolfhuman_death01.wav", 1);
         break;
-    case 131:
+    case MONSTER_MODEL_WEREWOLF2:
         LoadWaveFile(SOUND_ELBELAND_BUTTERFLYPOLLUTION_MOVE01, L"Data\\Sound\\w52\\SE_Mon_butterflypollution_move01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01, L"Data\\Sound\\w52\\SE_Mon_butterflypollution_death01.wav", 1);
         break;
-    case 132:
+    case MONSTER_MODEL_CURSED_LICH:
         LoadWaveFile(SOUND_ELBELAND_CURSERICH_MOVE01, L"Data\\Sound\\w52\\SE_Mon_curserich_move01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_CURSERICH_ATTACK01, L"Data\\Sound\\w52\\SE_Mon_curserich_attack01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_CURSERICH_DEATH01, L"Data\\Sound\\w52\\SE_Mon_curserich_death01.wav", 1);
         break;
-    case 133:
+    case MONSTER_MODEL_TOTEM_GOLEM:
         LoadWaveFile(SOUND_ELBELAND_TOTEMGOLEM_MOVE01, L"Data\\Sound\\w52\\SE_Mon_totemgolem_move01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_TOTEMGOLEM_MOVE02, L"Data\\Sound\\w52\\SE_Mon_totemgolem_move02.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_TOTEMGOLEM_ATTACK01, L"Data\\Sound\\w52\\SE_Mon_totemgolem_attack01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_TOTEMGOLEM_ATTACK02, L"Data\\Sound\\w52\\SE_Mon_totemgolem_attack02.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_TOTEMGOLEM_DEATH01, L"Data\\Sound\\w52\\SE_Mon_totemgolem_death01.wav", 1);
         break;
-    case 134:
+    case MONSTER_MODEL_GRIZZLY:
         LoadWaveFile(SOUND_ELBELAND_BEASTWOO_MOVE01, L"Data\\Sound\\w52\\SE_Mon_beastwoo_move01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_BEASTWOO_ATTACK01, L"Data\\Sound\\w52\\SE_Mon_beastwoo_attack01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_BEASTWOO_DEATH01, L"Data\\Sound\\w52\\SE_Mon_beastwoo_death01.wav", 1);
         break;
-    case 135:
+    case MONSTER_MODEL_CAPTAIN_GRIZZLY:
         LoadWaveFile(SOUND_ELBELAND_BEASTWOOLEADER_MOVE01, L"Data\\Sound\\w52\\SE_Mon_beastwooleader_move01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_BEASTWOOLEADER_ATTACK01, L"Data\\Sound\\w52\\SE_Mon_beastwooleader_attack01.wav", 1);
         LoadWaveFile(SOUND_ELBELAND_BEASTWOO_DEATH01, L"Data\\Sound\\w52\\SE_Mon_beastwoo_death01.wav", 1);
         break;
-    case 136:
+    case MONSTER_MODEL_SAPIUNUS:
         LoadWaveFile(SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01, L"Data\\Sound\\w57\\Sapi-Attack.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_SAPI_DEATH01, L"Data\\Sound\\w57\\Sapi-Death.wav", 1);
         break;
-    case 137:
+    case MONSTER_MODEL_SAPIDUO:
         LoadWaveFile(SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01, L"Data\\Sound\\w57\\Sapi-Attack.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_SAPI_DEATH01, L"Data\\Sound\\w57\\Sapi-Death.wav", 1);
         break;
-    case 138:
+    case MONSTER_MODEL_SAPITRES:
         LoadWaveFile(SOUND_SWAMPOFQUIET_SAPI_TRES_ATTACK01, L"Data\\Sound\\w57\\Sapi-Attack1.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_SAPI_DEATH01, L"Data\\Sound\\w57\\Sapi-Death.wav", 1);
         break;
-    case 139:
+    case MONSTER_MODEL_SHADOW_PAWN:
         LoadWaveFile(SOUND_SWAMPOFQUIET_SHADOW_PAWN_ATTACK01, L"Data\\Sound\\w57\\ShadowPawn-Attack.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_SHADOW_DEATH01, L"Data\\Sound\\w57\\Shadow-Death.wav", 1);
         break;
-    case 140:
+    case MONSTER_MODEL_SHADOW_KNIGHT:
         LoadWaveFile(SOUND_SWAMPOFQUIET_SHADOW_KNIGHT_ATTACK01, L"Data\\Sound\\w57\\ShadowKnight-Attack.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_SHADOW_DEATH01, L"Data\\Sound\\w57\\Shadow-Death.wav", 1);
         break;
-    case 141:
+    case MONSTER_MODEL_SHADOW_LOOK:
         LoadWaveFile(SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01, L"Data\\Sound\\w57\\ShadowRook-Attack.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_SHADOW_DEATH01, L"Data\\Sound\\w57\\Shadow-Death.wav", 1);
         break;
-    case 142:
+    case MONSTER_MODEL_NAPIN:
         LoadWaveFile(SOUND_SWAMPOFQUIET_THUNDER_NAIPIN_BREATH01, L"Data\\Sound\\w57\\Naipin-Thunder.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01, L"Data\\Sound\\w57\\Naipin-Attack.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01, L"Data\\Sound\\w57\\Naipin-Death.wav", 1);
         break;
-    case 143:
+    case MONSTER_MODEL_GHOST_NAPIN:
         LoadWaveFile(SOUND_SWAMPOFQUIET_GHOST_NAIPIN_BREATH01, L"Data\\Sound\\w57\\Naipin-Ghost.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01, L"Data\\Sound\\w57\\Naipin-Attack.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01, L"Data\\Sound\\w57\\Naipin-Death.wav", 1);
         break;
-    case 144:
+    case MONSTER_MODEL_BLAZE_NAPIN:
         LoadWaveFile(SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01, L"Data\\Sound\\w57\\Naipin-Blaze.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01, L"Data\\Sound\\w57\\Naipin-Attack.wav", 1);
         LoadWaveFile(SOUND_SWAMPOFQUIET_NAIPIN_DEATH01, L"Data\\Sound\\w57\\Naipin-Death.wav", 1);
         break;
-    case 145:
+    case MONSTER_MODEL_ICE_WALKER:
         LoadWaveFile(SOUND_ELBELAND_WOLFHUMAN_DEATH01, L"Data\\Sound\\w52\\SE_Mon_wolfhuman_death01.wav", 1);
         LoadWaveFile(SOUND_RAKLION_ICEWALKER_ATTACK, L"Data\\Sound\\w58w59\\IceWalker_attack.wav", 1);
         LoadWaveFile(SOUND_RAKLION_ICEWALKER_MOVE, L"Data\\Sound\\w58w59\\IceWalker_move.wav", 1);
         break;
-    case 146:
+    case MONSTER_MODEL_GIANT_MAMMOTH:
         LoadWaveFile(SOUND_RAKLION_GIANT_MAMUD_MOVE, L"Data\\Sound\\w58w59\\GiantMammoth_move.wav", 1);
         LoadWaveFile(SOUND_RAKLION_GIANT_MAMUD_ATTACK, L"Data\\Sound\\w58w59\\GiantMammoth_attack.wav", 1);
         LoadWaveFile(SOUND_RAKLION_GIANT_MAMUD_DEATH, L"Data\\Sound\\w58w59\\GiantMammoth_death.wav", 1);
         break;
-    case 147:
+    case MONSTER_MODEL_ICE_GIANT:
         LoadWaveFile(SOUND_RAKLION_ICEGIANT_MOVE, L"Data\\Sound\\w58w59\\IceGiant_move.wav", 1);
         LoadWaveFile(SOUND_RAKLION_ICEGIANT_DEATH, L"Data\\Sound\\w58w59\\IceGiant_death.wav", 1);
         break;
-    case 148:
+    case MONSTER_MODEL_COOLUTIN:
         // LoadWaveFile(SOUND_MONSTER + 34, L"Data\\Sound\\m헬스파이더죽기.wav", 1);
         LoadWaveFile(SOUND_RAKLION_COOLERTIN_ATTACK, L"Data\\Sound\\w58w59\\Coolertin_attack.wav", 1);
         LoadWaveFile(SOUND_RAKLION_COOLERTIN_MOVE, L"Data\\Sound\\w58w59\\Coolertin_move.wav", 1);
         break;
-    case 149:
+    case MONSTER_MODEL_IRON_KNIGHT:
         LoadWaveFile(SOUND_RAKLION_IRON_KNIGHT_MOVE, L"Data\\Sound\\w58w59\\IronKnight_move.wav", 1);
         LoadWaveFile(SOUND_RAKLION_IRON_KNIGHT_ATTACK, L"Data\\Sound\\w58w59\\IronKnight_attack.wav", 1);
         LoadWaveFile(SOUND_MONSTER + 154, L"Data\\Sound\\death1.wav", 1);
         break;
-    case 150:
+    case MONSTER_MODEL_SELUPAN:
         LoadWaveFile(SOUND_RAKLION_SERUFAN_ATTACK1, L"Data\\Sound\\w58w59\\Selupan_attack1.wav", 1);
         LoadWaveFile(SOUND_RAKLION_SERUFAN_ATTACK2, L"Data\\Sound\\w58w59\\Selupan_attack2.wav", 1);
         LoadWaveFile(SOUND_RAKLION_SERUFAN_CURE, L"Data\\Sound\\w58w59\\Selupan_cure.wav", 1);
@@ -3783,7 +3783,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_RAKLION_SERUFAN_WORD3, L"Data\\Sound\\w58w59\\Selupan_word3.wav", 1);
         LoadWaveFile(SOUND_RAKLION_SERUFAN_WORD4, L"Data\\Sound\\w58w59\\Selupan_word4.wav", 1);
         break;
-    case 155:
+    case MONSTER_MODEL_CURSED_SANTA:
         LoadWaveFile(SOUND_XMAS_SANTA_IDLE_1, L"Data\\Sound\\xmas\\DarkSanta_Idle01.wav");
         LoadWaveFile(SOUND_XMAS_SANTA_IDLE_2, L"Data\\Sound\\xmas\\DarkSanta_Idle02.wav");
         LoadWaveFile(SOUND_XMAS_SANTA_WALK_1, L"Data\\Sound\\xmas\\DarkSanta_Walk01.wav");
@@ -3793,7 +3793,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_XMAS_SANTA_DAMAGE_2, L"Data\\Sound\\xmas\\DarkSanta_Damage02.wav");
         LoadWaveFile(SOUND_XMAS_SANTA_DEATH_1, L"Data\\Sound\\xmas\\DarkSanta_Death01.wav");
         break;
-    case 156:
+    case MONSTER_MODEL_EVIL_GOBLIN:
         LoadWaveFile(SOUND_MONSTER + 72, L"Data\\Sound\\mGoblin1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 73, L"Data\\Sound\\mGoblin2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER + 74, L"Data\\Sound\\mGoblinAttack1.wav", Channel, Enable);
@@ -3801,7 +3801,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER + 76, L"Data\\Sound\\mGoblinDie.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, 72, 73, 74, 75, 76);
         break;
-    case 157:
+    case MONSTER_MODEL_ZOMBIE_FIGHTER:
     {
         LoadWaveFile(SOUND_PKFIELD_ZOMBIEWARRIOR_ATTACK, L"Data\\Sound\\w64\\ZombieWarrior_attack.wav");
         LoadWaveFile(SOUND_PKFIELD_ZOMBIEWARRIOR_DAMAGE01, L"Data\\Sound\\w64\\ZombieWarrior_damage01.wav");
@@ -3811,7 +3811,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE02, L"Data\\Sound\\w64\\ZombieWarrior_move02.wav");
     }
     break;
-    case 158:
+    case MONSTER_MODEL_GLADIATOR:
     {
         LoadWaveFile(SOUND_PKFIELD_RAISEDGLADIATOR_ATTACK, L"Data\\Sound\\w64\\RaisedGladiator_attack.wav");
         LoadWaveFile(SOUND_PKFIELD_RAISEDGLADIATOR_DAMAGE01, L"Data\\Sound\\w64\\RaisedGladiator_damage01.wav");
@@ -3821,7 +3821,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_PKFIELD_RAISEDGLADIATOR_MOVE02, L"Data\\Sound\\w64\\RaisedGladiator_move02.wav");
     }
     break;
-    case 159:
+    case MONSTER_MODEL_SLAUGTHERER:
     {
         LoadWaveFile(SOUND_PKFIELD_ASHESBUTCHER_ATTACK, L"Data\\Sound\\w64\\AshesButcher_attack.wav");
         LoadWaveFile(SOUND_PKFIELD_ASHESBUTCHER_DAMAGE01, L"Data\\Sound\\w64\\AshesButcher_damage01.wav");
@@ -3831,7 +3831,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_PKFIELD_ASHESBUTCHER_MOVE02, L"Data\\Sound\\w64\\AshesButcher_move02.wav");
     }
     break;
-    case 160:
+    case MONSTER_MODEL_BLOOD_ASSASSIN:
     {
         LoadWaveFile(SOUND_PKFIELD_BLOODASSASSIN_ATTACK, L"Data\\Sound\\w64\\BloodAssassin_attack.wav");
         LoadWaveFile(SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01, L"Data\\Sound\\w64\\BloodAssassin_damage01.wav");
@@ -3841,7 +3841,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_PKFIELD_BLOODASSASSIN_MOVE02, L"Data\\Sound\\w64\\BloodAssassin_move02.wav");
     }
     break;
-    case 162:
+    case MONSTER_MODEL_LAVA_GIANT:
     {
         LoadWaveFile(SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01, L"Data\\Sound\\w64\\BurningLavaGolem_attack01.wav");
         LoadWaveFile(SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02, L"Data\\Sound\\w64\\BurningLavaGolem_attack02.wav");
@@ -3852,67 +3852,67 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE02, L"Data\\Sound\\w64\\BurningLavaGolem_move02.wav");
     }
     break;
-    case 190:
+    case MONSTER_MODEL_TERRIBLE_BUTCHER:
     {
         LoadWaveFile(SOUND_DOPPELGANGER_RED_BUGBEAR_ATTACK, L"Data\\Sound\\Doppelganger\\Angerbutcher_attack.wav");
         LoadWaveFile(SOUND_DOPPELGANGER_RED_BUGBEAR_DEATH, L"Data\\Sound\\Doppelganger\\Angerbutcher_death.wav");
     }
     break;
-    case 189:
+    case MONSTER_MODEL_MAD_BUTCHER:
     {
         LoadWaveFile(SOUND_DOPPELGANGER_BUGBEAR_ATTACK, L"Data\\Sound\\Doppelganger\\Butcher_attack.wav");
         LoadWaveFile(SOUND_DOPPELGANGER_BUGBEAR_DEATH, L"Data\\Sound\\Doppelganger\\Butcher_death.wav");
     }
     break;
-    case 191:
+    case MONSTER_MODEL_DOPPELGANGER:
     {
         LoadWaveFile(SOUND_DOPPELGANGER_SLIME_ATTACK, L"Data\\Sound\\Doppelganger\\Doppelganger_attack.wav");
         LoadWaveFile(SOUND_DOPPELGANGER_SLIME_DEATH, L"Data\\Sound\\Doppelganger\\Doppelganger_death.wav");
     }
     break;
 #ifdef ASG_ADD_KARUTAN_MONSTERS
-    case 209:
+    case MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION:
         LoadWaveFile(SOUND_KARUTAN_TCSCORPION_ATTACK, L"Data\\Sound\\Karutan\\ToxyChainScorpion_attack.wav");
         LoadWaveFile(SOUND_KARUTAN_TCSCORPION_DEATH, L"Data\\Sound\\Karutan\\ToxyChainScorpion_death.wav");
         LoadWaveFile(SOUND_KARUTAN_TCSCORPION_HIT, L"Data\\Sound\\Karutan\\ToxyChainScorpion_hit.wav");
         break;
-    case 210:
+    case MONSTER_MODEL_BONE_SCORPION:
         LoadWaveFile(SOUND_KARUTAN_BONESCORPION_ATTACK, L"Data\\Sound\\Karutan\\BoneScorpion_attack.wav");
         LoadWaveFile(SOUND_KARUTAN_BONESCORPION_DEATH, L"Data\\Sound\\Karutan\\BoneScorpion_death.wav");
         LoadWaveFile(SOUND_KARUTAN_BONESCORPION_HIT, L"Data\\Sound\\Karutan\\BoneScorpion_hit.wav");
         break;
-    case 211:
+    case MONSTER_MODEL_ORCUS:
         LoadWaveFile(SOUND_KARUTAN_ORCUS_MOVE1, L"Data\\Sound\\Karutan\\Orcus_move1.wav");
         LoadWaveFile(SOUND_KARUTAN_ORCUS_MOVE2, L"Data\\Sound\\Karutan\\Orcus_move2.wav");
         LoadWaveFile(SOUND_KARUTAN_ORCUS_ATTACK1, L"Data\\Sound\\Karutan\\Orcus_attack_1.wav");
         LoadWaveFile(SOUND_KARUTAN_ORCUS_ATTACK2, L"Data\\Sound\\Karutan\\Orcus_attack_2.wav");
         LoadWaveFile(SOUND_KARUTAN_ORCUS_DEATH, L"Data\\Sound\\Karutan\\Orcus_death.wav");
         break;
-    case 212:
+    case MONSTER_MODEL_GOLLOCK:
         LoadWaveFile(SOUND_KARUTAN_GOLOCH_MOVE1, L"Data\\Sound\\Karutan\\Goloch_move1.wav");
         LoadWaveFile(SOUND_KARUTAN_GOLOCH_MOVE2, L"Data\\Sound\\Karutan\\Goloch_move2.wav");
         LoadWaveFile(SOUND_KARUTAN_GOLOCH_ATTACK, L"Data\\Sound\\Karutan\\Goloch_attack.wav");
         LoadWaveFile(SOUND_KARUTAN_GOLOCH_DEATH, L"Data\\Sound\\Karutan\\Goloch_death.wav");
         break;
-    case 213:
+    case MONSTER_MODEL_CRYPTA:
         LoadWaveFile(SOUND_KARUTAN_CRYPTA_MOVE1, L"Data\\Sound\\Karutan\\Crypta_move1.wav");
         LoadWaveFile(SOUND_KARUTAN_CRYPTA_MOVE2, L"Data\\Sound\\Karutan\\Crypta_move2.wav");
         LoadWaveFile(SOUND_KARUTAN_CRYPTA_ATTACK, L"Data\\Sound\\Karutan\\Crypta_attack.wav");
         LoadWaveFile(SOUND_KARUTAN_CRYPTA_DEATH, L"Data\\Sound\\Karutan\\Crypta_death.wav");
         break;
-    case 214:
+    case MONSTER_MODEL_CRYPOS:
         LoadWaveFile(SOUND_KARUTAN_CRYPOS_MOVE1, L"Data\\Sound\\Karutan\\Crypos_move1.wav");
         LoadWaveFile(SOUND_KARUTAN_CRYPOS_MOVE2, L"Data\\Sound\\Karutan\\Crypos_move2.wav");
         LoadWaveFile(SOUND_KARUTAN_CRYPOS_ATTACK1, L"Data\\Sound\\Karutan\\Crypos_attack_1.wav");
         LoadWaveFile(SOUND_KARUTAN_CRYPOS_ATTACK2, L"Data\\Sound\\Karutan\\Crypos_attack_2.wav");
         break;
-    case 215:
+    case MONSTER_MODEL_CONDRA:
         LoadWaveFile(SOUND_KARUTAN_CONDRA_MOVE1, L"Data\\Sound\\Karutan\\Condra_move1.wav");
         LoadWaveFile(SOUND_KARUTAN_CONDRA_MOVE2, L"Data\\Sound\\Karutan\\Condra_move2.wav");
         LoadWaveFile(SOUND_KARUTAN_CONDRA_ATTACK, L"Data\\Sound\\Karutan\\Condra_attack.wav");
         LoadWaveFile(SOUND_KARUTAN_CONDRA_DEATH, L"Data\\Sound\\Karutan\\Condra_death.wav");
         break;
-    case 216:
+    case MONSTER_MODEL_NACONDRA:
         LoadWaveFile(SOUND_KARUTAN_CONDRA_MOVE1, L"Data\\Sound\\Karutan\\Condra_move1.wav");
         LoadWaveFile(SOUND_KARUTAN_CONDRA_MOVE2, L"Data\\Sound\\Karutan\\Condra_move2.wav");
         LoadWaveFile(SOUND_KARUTAN_NARCONDRA_ATTACK, L"Data\\Sound\\Karutan\\NarCondra_attack.wav");
