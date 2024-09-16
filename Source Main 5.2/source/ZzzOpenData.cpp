@@ -3659,13 +3659,13 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.1f;
         break;
     case 76:
-        LoadWaveFile(SOUND_MONSTER + 233, L"Data\\Sound\\BattleCastle\\m_BowMercAttack.wav", Channel, Enable);
-        LoadWaveFile(SOUND_MONSTER + 234, L"Data\\Sound\\BattleCastle\\m_BowMercDeath.wav", Channel, Enable);
+        LoadWaveFile(SOUND_MONSTER + 233, L"Data\\Sound\\BattleCastle\\mBowMercAttack.wav", Channel, Enable);
+        LoadWaveFile(SOUND_MONSTER + 234, L"Data\\Sound\\BattleCastle\\mBowMercDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 233, 233, 234);
         break;
     case 77:
-        LoadWaveFile(SOUND_MONSTER + 235, L"Data\\Sound\\BattleCastle\\m_SpearMercAttack.wav", Channel, Enable);
-        LoadWaveFile(SOUND_MONSTER + 236, L"Data\\Sound\\BattleCastle\\m_SpearMercDeath.wav", Channel, Enable);
+        LoadWaveFile(SOUND_MONSTER + 235, L"Data\\Sound\\BattleCastle\\mSpearMercAttack.wav", Channel, Enable);
+        LoadWaveFile(SOUND_MONSTER + 236, L"Data\\Sound\\BattleCastle\\mSpearMercDeath.wav", Channel, Enable);
         SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 235, 235, 236);
         break;
     case 79:
@@ -3754,15 +3754,17 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_RAKLION_ICEWALKER_ATTACK, L"Data\\Sound\\w58w59\\IceWalker_attack.wav", 1);
         LoadWaveFile(SOUND_RAKLION_ICEWALKER_MOVE, L"Data\\Sound\\w58w59\\IceWalker_move.wav", 1);
         break;
-        LoadWaveFile(SOUND_RAKLION_GIANT_MAMUD_MOVE, L"Data\\Sound\\w57\\GiantMammoth_move.wav", 1);
-        LoadWaveFile(SOUND_RAKLION_GIANT_MAMUD_ATTACK, L"Data\\Sound\\w57\\GiantMammoth_attack.wav", 1);
-        LoadWaveFile(SOUND_RAKLION_GIANT_MAMUD_DEATH, L"Data\\Sound\\w57\\GiantMammoth_death.wav", 1);
+    case 146:
+        LoadWaveFile(SOUND_RAKLION_GIANT_MAMUD_MOVE, L"Data\\Sound\\w58w59\\GiantMammoth_move.wav", 1);
+        LoadWaveFile(SOUND_RAKLION_GIANT_MAMUD_ATTACK, L"Data\\Sound\\w58w59\\GiantMammoth_attack.wav", 1);
+        LoadWaveFile(SOUND_RAKLION_GIANT_MAMUD_DEATH, L"Data\\Sound\\w58w59\\GiantMammoth_death.wav", 1);
+        break;
     case 147:
         LoadWaveFile(SOUND_RAKLION_ICEGIANT_MOVE, L"Data\\Sound\\w58w59\\IceGiant_move.wav", 1);
         LoadWaveFile(SOUND_RAKLION_ICEGIANT_DEATH, L"Data\\Sound\\w58w59\\IceGiant_death.wav", 1);
         break;
     case 148:
-        LoadWaveFile(SOUND_MONSTER + 34, L"Data\\Sound\\m헬스파이더죽기.wav", 1);
+        // LoadWaveFile(SOUND_MONSTER + 34, L"Data\\Sound\\m헬스파이더죽기.wav", 1);
         LoadWaveFile(SOUND_RAKLION_COOLERTIN_ATTACK, L"Data\\Sound\\w58w59\\Coolertin_attack.wav", 1);
         LoadWaveFile(SOUND_RAKLION_COOLERTIN_MOVE, L"Data\\Sound\\w58w59\\Coolertin_move.wav", 1);
         break;
