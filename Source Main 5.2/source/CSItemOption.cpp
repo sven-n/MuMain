@@ -195,7 +195,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
     return true;
 }
 
-bool CSItemOption::IsDisableSkill(int Type, int Energy, int Charisma)
+bool CSItemOption::IsDisableSkill(ActionSkillType Type, int Energy, int Charisma)
 {
     int SkillEnergy = 20 + SkillAttribute[Type].Energy * (SkillAttribute[Type].Level) * 4 / 100;
 

@@ -136,7 +136,7 @@ public:
     }
     bool    OpenItemSetScript(bool bTestServer);
 
-    static bool    IsDisableSkill(int Type, int Energy, int Charisma = 0);
+    static bool    IsDisableSkill(ActionSkillType Type, int Energy, int Charisma = 0);
     BYTE    IsChangeSetItem(const int Type, const int SubType);
     WORD    GetMixItemLevel(const int Type) const;
     bool	GetSetItemName(wchar_t* strName, const int iType, const int setType) const;

@@ -2639,7 +2639,7 @@ void CHARACTER_MACHINE::SetCharacter(BYTE Class)
 
     for (int j = 0; j < MAX_SKILLS; j++)
     {
-        Character.Skill[j] = 0;
+        Character.Skill[j] = AT_SKILL_UNDEFINED;
     }
 }
 

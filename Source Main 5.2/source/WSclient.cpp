@@ -1126,19 +1126,19 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     if (Data->Value == 0xFF)
     {
         auto Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer + Offset);
-        CharacterAttribute->Skill[Data2->Index] = 0;
+        CharacterAttribute->Skill[Data2->Index] = AT_SKILL_UNDEFINED;
     }
     else if (Data->Value == 0xFE)
     {
         auto Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer + Offset);
-        CharacterAttribute->Skill[Data2->Index] = Data2->Type;
+        CharacterAttribute->Skill[Data2->Index] = (ActionSkillType)Data2->Type;
     }
     else if (Data->ListType == 0x02)
     {
         for (int i = 0; i < Data->Value; ++i)
         {
             auto Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer + Offset);
-            CharacterAttribute->Skill[Data2->Index] = 0;
+            CharacterAttribute->Skill[Data2->Index] = AT_SKILL_UNDEFINED;
         }
     }
     else
@@ -1150,14 +1150,14 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
         for (int i = 0; i < Data->Value; i++)
         {
             auto Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer + Offset);
-            CharacterAttribute->Skill[Data2->Index] = Data2->Type;
+            CharacterAttribute->Skill[Data2->Index] = (ActionSkillType)Data2->Type;
             Offset += sizeof(PRECEIVE_MAGIC_LIST);
         }
         if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
         {
             for (int i = 0; i < PET_CMD_END; ++i)
             {
-                CharacterAttribute->Skill[AT_PET_COMMAND_DEFAULT + i] = AT_PET_COMMAND_DEFAULT + i;
+                CharacterAttribute->Skill[AT_PET_COMMAND_DEFAULT + i] = (ActionSkillType)(AT_PET_COMMAND_DEFAULT + i);
             }
         }
     }
@@ -1208,7 +1208,7 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
         }
     }
     if (Master_Skill_Bool > -1 && Skill_Bool > -1)
-        CharacterAttribute->Skill[Skill_Bool] = 0;
+        CharacterAttribute->Skill[Skill_Bool] = AT_SKILL_UNDEFINED;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
 }
@@ -3376,7 +3376,7 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
     OBJECT* o = &CharactersClient[FindCharacterIndex(Key)].Object;
 
-    switch (Data->Value)
+    switch ((ActionSkillType)Data->Value) // todo: is this correct? Data->Value is a byte, but ActionSkillType is an int
     {
     case AT_SKILL_POISON:
         UnRegisterBuff(eDeBuff_Poison, o);
@@ -7234,93 +7234,93 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
                 {
                 case AT_SKILL_ASHAKE_UP:
                     if (AT_SKILL_DARK_HORSE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_BLAST_UP:
                     if (AT_SKILL_BLAST == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_MANY_ARROW_UP:
                     if (AT_SKILL_CROSSBOW == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_TORNADO_SWORDA_UP:
                 case AT_SKILL_TORNADO_SWORDB_UP:
                     if (AT_SKILL_WHEEL == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_HEAL_UP:
                     if (AT_SKILL_HEALING == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_LIFE_UP:
                     if (AT_SKILL_VITALITY == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_SOUL_UP:
                     if (AT_SKILL_WIZARDDEFENSE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_FIRE_BUST_UP:
                     if (AT_SKILL_LONGPIER_ATTACK == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_HELL_FIRE_UP:
                     if (AT_SKILL_HELL == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_EVIL_SPIRIT_UP:
                 case AT_SKILL_EVIL_SPIRIT_UP_M:
                     if (AT_SKILL_EVIL == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_BLOW_UP:
                     if (AT_SKILL_ONETOONE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_ANGER_SWORD_UP:
                     if (AT_SKILL_FURY_STRIKE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_BLOOD_ATT_UP:
                     if (AT_SKILL_REDUCEDEFENSE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_POWER_SLASH_UP:
                     if (AT_SKILL_ICE_BLADE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_FIRE_SCREAM_UP:
                     if (AT_SKILL_DARK_SCREAM == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_DEF_POWER_UP:
                     if (AT_SKILL_DEFENSE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_ATT_POWER_UP:
                     if (AT_SKILL_ATTACK == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_ICE_UP:
                     if (AT_SKILL_BLAST_FREEZE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_ALICE_SLEEP_UP:
                     if (AT_SKILL_ALICE_SLEEP == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
                     if (AT_SKILL_ALICE_CHAINLIGHTNING == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_LIGHTNING_SHOCK_UP:
                     if (AT_SKILL_LIGHTNING_SHOCK == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 case AT_SKILL_ALICE_DRAINLIFE_UP:
                     if (AT_SKILL_ALICE_DRAINLIFE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = 0;
+                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
                 }
             }
@@ -7332,7 +7332,7 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
                 {
                     if (CharacterAttribute->Skill[i] == (Data->nSkillNum - 1))
                     {
-                        CharacterAttribute->Skill[i] = Data->nSkillNum;
+                        CharacterAttribute->Skill[i] = (ActionSkillType)Data->nSkillNum;
                         Check_Add = true;
                         break;
                     }
@@ -7344,7 +7344,7 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
                 {
                     if (CharacterAttribute->Skill[i] == 0)
                     {
-                        CharacterAttribute->Skill[i] = Data->nSkillNum;
+                        CharacterAttribute->Skill[i] = (ActionSkillType)Data->nSkillNum;
                         break;
                     }
                 }

@@ -900,7 +900,7 @@ void CreateCharacterScene()
     CharacterAttribute->SkillNumber = 0;
 
     for (int i = 0; i < MAX_MAGIC; i++)
-        CharacterAttribute->Skill[i] = 0;
+        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
 
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < EQUIPMENT_HELPER; i++)
         CharacterMachine->Equipment[i].Level = 0;

@@ -2091,7 +2091,7 @@ void SEASON3B::CNewUISkillList::RenderPetSkill()
 
 void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, float width, float height)
 {
-    WORD bySkillType = CharacterAttribute->Skill[iIndex];
+    auto bySkillType = CharacterAttribute->Skill[iIndex];
 
     if (bySkillType == 0)
     {
@@ -2100,7 +2100,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 
     if (iIndex >= AT_PET_COMMAND_DEFAULT)
     {
-        bySkillType = iIndex;
+        bySkillType = (ActionSkillType)iIndex;
     }
 
     bool bCantSkill = false;

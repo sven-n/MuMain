@@ -1260,7 +1260,7 @@ namespace battleCastle
     {
     }
 
-    CHARACTER* CreateBattleCastleMonster(int Type, int PositionX, int PositionY, int Key)
+    CHARACTER* CreateBattleCastleMonster(EMonsterType Type, int PositionX, int PositionY, int Key)
     {
         if (gMapManager.InBattleCastle() == false) return NULL;
 
