@@ -2772,7 +2772,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
             int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 
-            if ((int)c->AttackTime >= 1 && LeftType == ITEM_BOW + 21 && o->Type == MODEL_PLAYER)
+            if ((int)c->AttackTime >= 1 && LeftType == ITEM_SYLPH_WIND_BOW && o->Type == MODEL_PLAYER)
             {
                 for (int i = 0; i < 20; i++)
                 {
@@ -5230,13 +5230,13 @@ bool CheckFullSet(CHARACTER* c)
 
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK && Success)
         {
-            if (CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_ARMOR + 15
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_ARMOR + 20
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_ARMOR + 23
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_ARMOR + 32
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_ARMOR + 37
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_ARMOR + 47
-                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_ARMOR + 48
+            if (CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_STORM_CROW_ARMOR
+                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_THUNDER_HAWK_ARMOR
+                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_HURRICANE_ARMOR
+                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_VOLCANO_ARMOR
+                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_VALIANT_ARMOR
+                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_DESTORY_ARMOR
+                && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_PHANTOM_ARMOR
                 )
             {
                 g_bAddDefense = false;
@@ -5287,13 +5287,13 @@ bool CheckFullSet(CHARACTER* c)
 
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK && Success)
         {
-            if (c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR + 15
-                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR + 20
-                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR + 23
-                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR + 32
-                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR + 37
-                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR + 47
-                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_ARMOR + 48
+            if (c->BodyPart[BODYPART_ARMOR].Type != ITEM_STORM_CROW_ARMOR
+                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_THUNDER_HAWK_ARMOR
+                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_HURRICANE_ARMOR
+                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_VOLCANO_ARMOR
+                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_VALIANT_ARMOR
+                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_DESTORY_ARMOR
+                && c->BodyPart[BODYPART_ARMOR].Type != ITEM_PHANTOM_ARMOR
                 )
             {
                 g_bAddDefense = false;

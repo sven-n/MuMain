@@ -599,7 +599,7 @@ BOOL ShowCheckBox(int num, int index, int message)
     if (message == MESSAGE_USE_STATE || message == MESSAGE_USE_STATE2)
     {
         wchar_t Name[50] = { 0, };
-        if (TargetItem.Type == ITEM_HELPER + 15)
+        if (TargetItem.Type == ITEM_FRUITS)
         {
             switch ((TargetItem.Level >> 3) & 15)
             {

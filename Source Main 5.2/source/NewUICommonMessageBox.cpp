@@ -2589,7 +2589,7 @@ bool SEASON3B::CUseFruitMsgBoxLayout::SetLayout()
     pMsgBox->Set3DItem(pItem);
 
     wchar_t strName[50] = { 0, };
-    if (pItem->Type == ITEM_HELPER + 15)
+    if (pItem->Type == ITEM_FRUITS)
     {
         switch ((pItem->Level >> 3) & 15)
         {

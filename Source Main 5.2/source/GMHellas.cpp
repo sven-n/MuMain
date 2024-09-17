@@ -205,7 +205,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
     int TextNum = textNum;
     switch (ip->Type)
     {
-    case ITEM_POTION + 28:
+    case ITEM_LOST_MAP:
     {
         int startIndex = 0;
         int baseClass = gCharacterManager.GetBaseClass(Hero->Class);
@@ -245,7 +245,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
     }
     break;
 
-    case ITEM_POTION + 29:
+    case ITEM_SYMBOL_OF_KUNDUN:
     {
         swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5); TextNum++;
         if (ip->Durability >= 5)

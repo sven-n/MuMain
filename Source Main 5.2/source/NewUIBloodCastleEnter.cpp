@@ -1,4 +1,4 @@
-// NewUIBloodCastleEnter.cpp: implementation of the CNewUIPartyInfo class.
+﻿// NewUIBloodCastleEnter.cpp: implementation of the CNewUIPartyInfo class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -245,7 +245,7 @@ bool CNewUIEnterBloodCastle::BtnProcess()
     {
         int iItemIndex = -1;
 
-        iItemIndex = g_pMyInventory->FindItemIndex(ITEM_HELPER + 18, m_iNumActiveBtn + 1);
+        iItemIndex = g_pMyInventory->FindItemIndex(ITEM_INVISIBILITY_CLOAK, m_iNumActiveBtn + 1);
 
         if (iItemIndex == -1)
         {

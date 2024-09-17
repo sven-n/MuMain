@@ -1,4 +1,4 @@
-/*+++++++++++++++++++++++++++++++++++++
+﻿/*+++++++++++++++++++++++++++++++++++++
     INCLUDE.
 +++++++++++++++++++++++++++++++++++++*/
 #include "stdafx.h"
@@ -730,7 +730,7 @@ int CSItemOption::RenderDefaultOptionText(const ITEM* ip, int TextNum)
         TextListColor[TNum] = TEXT_COLOR_BLUE;
         TNum++;
 
-        if ((ip->Type >= ITEM_HELPER + 8 && ip->Type <= ITEM_HELPER + 9) || (ip->Type >= ITEM_HELPER + 12 && ip->Type <= ITEM_HELPER + 13) || (ip->Type >= ITEM_HELPER + 21 && ip->Type <= ITEM_HELPER + 27))
+        if ((ip->Type >= ITEM_RING_OF_ICE && ip->Type <= ITEM_RING_OF_POISON) || (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type <= ITEM_PENDANT_OF_FIRE) || (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_PENDANT_OF_WATER))
         {
             swprintf(TextList[TNum], GlobalText[1165]); // "Increase Attribute Damage"
             TextListColor[TNum] = TEXT_COLOR_BLUE;

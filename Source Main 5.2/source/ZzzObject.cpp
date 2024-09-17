@@ -6112,9 +6112,9 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
 
         if (CreateFlag)
         {
-            if (Type == ITEM_POTION + 13 || Type == ITEM_POTION + 14 || Type == ITEM_POTION + 16 || Type == ITEM_WING + 15 || Type == ITEM_POTION + 22 || Type == ITEM_POTION + 31)
+            if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE || Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION || Type == ITEM_JEWEL_OF_GUARDIAN)
                 PlayBuffer(SOUND_JEWEL01, &ip->Object);
-            else if (Type == ITEM_POTION + 41)
+            else if (Type == ITEM_GEMSTONE)
                 PlayBuffer(SOUND_JEWEL02, &ip->Object);
             else
                 PlayBuffer(SOUND_DROP_ITEM01, &ip->Object);
@@ -6125,7 +6125,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     o->Live = true;
     o->Type = MODEL_SWORD + Type;
     o->SubType = 1;
-    if (Type == (int)(ITEM_POTION + 11))
+    if (Type == (int)(ITEM_BOX_OF_LUCK))
     {
         switch ((n->Level >> 3))
         {
@@ -6159,15 +6159,15 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
             o->Type = MODEL_EVENT + 5;
         }
     }
-    if (Type >= ITEM_POTION + 46 && Type <= ITEM_POTION + 48)
+    if (Type >= ITEM_JACK_OLANTERN_BLESSINGS && Type <= ITEM_JACK_OLANTERN_CRY)
     {
         o->Type = MODEL_ITEM + Type;
     }
-    if (Type >= ITEM_POTION + 32 && Type <= ITEM_POTION + 34)
+    if (Type >= ITEM_PINK_CHOCOLATE_BOX && Type <= ITEM_BLUE_CHOCOLATE_BOX)
     {
         if ((n->Level >> 3) == 1)
         {
-            int Num = Type - (ITEM_POTION + 32);
+            int Num = Type - (ITEM_PINK_CHOCOLATE_BOX);
             o->Type = MODEL_EVENT + 21 + Num;
         }
     }
@@ -6181,7 +6181,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
             break;
         }
     }
-    else if (Type == (int)(ITEM_HELPER + 19))
+    else if (Type == (int)(ITEM_WEAPON_OF_ARCHANGEL))
     {
         switch ((n->Level >> 3))
         {
@@ -6199,7 +6199,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
             break;
         }
     }
-    else if (Type == ITEM_POTION + 23)
+    else if (Type == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR)
     {
         switch ((n->Level >> 3))
         {
@@ -6209,7 +6209,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
             break;
         }
     }
-    else if (Type == ITEM_POTION + 24)
+    else if (Type == ITEM_BROKEN_SWORD_DARK_STONE)
     {
         switch ((n->Level >> 3))
         {
@@ -6218,7 +6218,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
             break;
         }
     }
-    else if (Type == ITEM_HELPER + 20)
+    else if (Type == ITEM_WIZARDS_RING)
     {
         switch ((n->Level >> 3))
         {
@@ -6232,7 +6232,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
             break;
         }
     }
-    else if (Type == (int)(ITEM_POTION + 9))
+    else if (Type == (int)(ITEM_ALE))
     {
         switch ((n->Level >> 3))
         {
@@ -6241,27 +6241,27 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
             break;
         }
     }
-    else if (Type == ITEM_HELPER + 14 && (n->Level >> 3) == 1)
+    else if (Type == ITEM_LOCHS_FEATHER && (n->Level >> 3) == 1)
     {
         o->Type = MODEL_EVENT + 16;
     }
-    else if (Type == ITEM_HELPER + 11 && (n->Level >> 3) == 1)
+    else if (Type == ITEM_LIFE_STONE_ITEM && (n->Level >> 3) == 1)
     {
         o->Type = MODEL_EVENT + 18;
     }
-    else if (Type == ITEM_POTION + 41)
+    else if (Type == ITEM_GEMSTONE)
     {
         o->Type = MODEL_GEMSTONE;
     }
-    else if (Type == ITEM_POTION + 42)
+    else if (Type == ITEM_JEWEL_OF_HARMONY)
     {
         o->Type = MODEL_JEWEL_OF_HARMONY;
     }
-    else if (Type == ITEM_POTION + 43)
+    else if (Type == ITEM_LOWER_REFINE_STONE)
     {
         o->Type = MODEL_LOWER_REFINE_STONE;
     }
-    else if (Type == ITEM_POTION + 44)
+    else if (Type == ITEM_HIGHER_REFINE_STONE)
     {
         o->Type = MODEL_HIGHER_REFINE_STONE;
     }

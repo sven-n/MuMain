@@ -1326,11 +1326,11 @@ int SearchArrow()
 
         if (gCharacterManager.GetEquipedBowType() == BOWTYPE_BOW)
         {
-            Arrow = ITEM_BOW + 15;
+            Arrow = ITEM_ARROWS;
         }
         else if (gCharacterManager.GetEquipedBowType() == BOWTYPE_CROSSBOW)
         {
-            Arrow = ITEM_BOW + 7;
+            Arrow = ITEM_BOLT;
         }
 
         int iIndex = g_pMyInventory->FindItemReverseIndex(Arrow);
@@ -1348,11 +1348,11 @@ int SearchArrowCount()
 
         if (gCharacterManager.GetEquipedBowType() == BOWTYPE_BOW)
         {
-            Arrow = ITEM_BOW + 15;
+            Arrow = ITEM_ARROWS;
         }
         else if (gCharacterManager.GetEquipedBowType() == BOWTYPE_CROSSBOW)
         {
-            Arrow = ITEM_BOW + 7;
+            Arrow = ITEM_BOLT;
         }
         Count = g_pMyInventory->GetNumItemByType(Arrow);
     }
@@ -3067,7 +3067,7 @@ bool CheckArrow()
 
     if (gCharacterManager.GetEquipedBowType() == BOWTYPE_CROSSBOW)
     {
-        if ((Left != ITEM_BOW + 7) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability <= 0))
+        if ((Left != ITEM_BOLT) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability <= 0))
         {
             ReloadArrow();
             return false;
@@ -3075,7 +3075,7 @@ bool CheckArrow()
     }
     else if (gCharacterManager.GetEquipedBowType() == BOWTYPE_BOW)
     {
-        if ((Right != ITEM_BOW + 15) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Durability <= 0))
+        if ((Right != ITEM_ARROWS) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Durability <= 0))
         {
             ReloadArrow();
             return false;
@@ -3667,14 +3667,14 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
                     pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 
-                    if (pItem->Type == ITEM_HELPER + 4)
+                    if (pItem->Type == ITEM_DARK_HORSE_ITEM)
                     {
                         SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER);
                     }
 
                     pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
 
-                    if (pItem->Type == ITEM_HELPER + 5)
+                    if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
                     {
                         SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT);
                     }
@@ -4682,7 +4682,7 @@ void CheckChatText(wchar_t* Text)
         ITEM* pItem_rr = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
         ITEM* pItem_rl = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
 
-        if (pItem_rr->Type == ITEM_HELPER + 40 || pItem_rl->Type == ITEM_HELPER + 40)
+        if (pItem_rr->Type == ITEM_JACK_OLANTERN_TRANSFORMATION_RING || pItem_rl->Type == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
         {
             if (rand_fps_check(2))
             {
@@ -4703,7 +4703,7 @@ void CheckChatText(wchar_t* Text)
         ITEM* pItem_rr = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
         ITEM* pItem_rl = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
 
-        if (pItem_rr->Type == ITEM_HELPER + 41 || pItem_rl->Type == ITEM_HELPER + 41)
+        if (pItem_rr->Type == ITEM_CHRISTMAS_TRANSFORMATION_RING || pItem_rl->Type == ITEM_CHRISTMAS_TRANSFORMATION_RING)
         {
             if (o->CurrentAction != PLAYER_SANTA_1 && o->CurrentAction != PLAYER_SANTA_2)
             {
@@ -7143,19 +7143,19 @@ void CheckGate()
                     if (Success)
                     {
                         if (((i >= 45 && i <= 49) || (i >= 55 && i <= 56)) &&
-                            ((CharacterMachine->Equipment[EQUIPMENT_HELPER].Type >= ITEM_HELPER + 2 && CharacterMachine->Equipment[EQUIPMENT_HELPER].Type <= ITEM_HELPER + 3)))
+                            ((CharacterMachine->Equipment[EQUIPMENT_HELPER].Type >= ITEM_HORN_OF_UNIRIA && CharacterMachine->Equipment[EQUIPMENT_HELPER].Type <= ITEM_HORN_OF_DINORANT)))
                         {
                             g_pSystemLogBox->AddText(GlobalText[261], SEASON3B::TYPE_ERROR_MESSAGE);
                         }
                         else if ((62 <= i && i <= 65) &&
-                            !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 6
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HELPER + 4
-                                || CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_HELPER + 30
-                                ) || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HELPER + 3
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HELPER + 37
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING + 36 && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 43)
+                            !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WINGS_OF_DARKNESS
+                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_DARK_HORSE_ITEM
+                                || CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_LORD
+                                ) || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_DINORANT
+                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_FENRIR
+                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING_OF_STORM && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING_OF_DIMENSION)
                                 || (ITEM_WING + 130 <= CharacterMachine->Equipment[EQUIPMENT_WING].Type && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 134)
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING + 49 && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 50)
+                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_CAPE_OF_FIGHTER && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_CAPE_OF_OVERRULE)
                                 || (CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_WING + 135)))
                         {
                             g_pSystemLogBox->AddText(GlobalText[263], SEASON3B::TYPE_ERROR_MESSAGE);
@@ -7168,7 +7168,7 @@ void CheckGate()
                             }
                         }
 
-                        else if ((62 <= i && i <= 65) && (CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HELPER + 2))
+                        else if ((62 <= i && i <= 65) && (CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_UNIRIA))
                         {
                             g_pSystemLogBox->AddText(GlobalText[569], SEASON3B::TYPE_ERROR_MESSAGE);
                         }
@@ -7501,7 +7501,7 @@ void MoveHero()
             if (!pPickedItem && RightType == -1 &&
                 ((LeftType >= ITEM_SWORD && LeftType < ITEM_MACE + MAX_ITEM_INDEX)
                     || (LeftType >= ITEM_STAFF && LeftType < ITEM_STAFF + MAX_ITEM_INDEX
-                        && !(LeftType >= ITEM_STAFF + 21 && LeftType <= ITEM_STAFF + 29)
+                        && !(LeftType >= ITEM_BOOK_OF_SAHAMUTT && LeftType <= ITEM_STAFF + 29)
                         )))
             {
                 if (g_pMyInventory->IsEquipable(EQUIPMENT_WEAPON_LEFT, &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT]))
@@ -9307,13 +9307,13 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
     short pEquipedHelperType = (&CharacterMachine->Equipment[EQUIPMENT_HELPER])->Type;
     short pEquipedWingType = (&CharacterMachine->Equipment[EQUIPMENT_WING])->Type;
 
-    if ((pEquipedWingType == -1 && pEquipedHelperType != ITEM_HELPER + 3 &&
-        pEquipedHelperType != ITEM_HELPER + 37 && pEquipedHelperType != ITEM_HELPER + 4) ||
-        pEquipedHelperType == ITEM_HELPER + 2)
+    if ((pEquipedWingType == -1 && pEquipedHelperType != ITEM_HORN_OF_DINORANT &&
+        pEquipedHelperType != ITEM_HORN_OF_FENRIR && pEquipedHelperType != ITEM_DARK_HORSE_ITEM) ||
+        pEquipedHelperType == ITEM_HORN_OF_UNIRIA)
     {
         bCantFly = true;
     }
-    if (pEquipedHelperType == ITEM_HELPER + 2 || pEquipedHelperType == ITEM_HELPER + 3)
+    if (pEquipedHelperType == ITEM_HORN_OF_UNIRIA || pEquipedHelperType == ITEM_HORN_OF_DINORANT)
     {
         bCantSwim = true;
     }

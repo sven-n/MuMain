@@ -1,4 +1,4 @@
-// NewUILuckyItemWnd.cpp: implementation of the CNewUILuckyItemWnd class.
+ï»¿// NewUILuckyItemWnd.cpp: implementation of the CNewUILuckyItemWnd class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -328,7 +328,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
         AddText(2223, 0xFF00FFFF);
         AddText(0);
         AddText(3295, 0xFF0000FF), AddText(3296, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(GlobalText[591], true); // Á¶ÇÕ
+        m_BtnMix.ChangeToolTipText(GlobalText[591], true); // ì¡°í•©
         break;
     case eLuckyItemType_Refinery:
         swprintf(m_szSubject, L"%s", GlobalText[3289]);
@@ -336,7 +336,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
         AddText(3300), AddText(3301);
         AddText(0), AddText(0), AddText(0);
         AddText(3302, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(GlobalText[2061], true); // Á¦·Ã
+        m_BtnMix.ChangeToolTipText(GlobalText[2061], true); // ì œë ¨
         break;
     }
 }

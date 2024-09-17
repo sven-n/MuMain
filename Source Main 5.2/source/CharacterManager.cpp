@@ -290,11 +290,11 @@ int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
 
 int CCharacterManager::GetEquipedBowType()
 {
-    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW + 7) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOLT) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
     {
         return BOWTYPE_BOW;
     }
-    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW + 15) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_BOW + 8) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_ARROWS) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_CROSSBOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -303,12 +303,12 @@ int CCharacterManager::GetEquipedBowType()
 
 int CCharacterManager::GetEquipedBowType(ITEM* pItem)
 {
-    if (((pItem->Type >= ITEM_BOW) && (pItem->Type <= ITEM_BOW + 6)) || (pItem->Type == ITEM_BOW + 17) || ((pItem->Type >= ITEM_BOW + 20) && (pItem->Type <= ITEM_BOW + 23)) || (pItem->Type == ITEM_BOW + 24))
+    if (((pItem->Type >= ITEM_BOW) && (pItem->Type <= ITEM_CHAOS_NATURE_BOW)) || (pItem->Type == ITEM_CELESTIAL_BOW) || ((pItem->Type >= ITEM_ARROW_VIPER_BOW) && (pItem->Type <= ITEM_STINGER_BOW)) || (pItem->Type == ITEM_AIR_LYN_BOW))
     {
         return BOWTYPE_BOW;
     }
 
-    else if (((pItem->Type >= ITEM_BOW + 8) && (pItem->Type <= ITEM_BOW + 14)) || (pItem->Type == ITEM_BOW + 16) || ((pItem->Type >= ITEM_BOW + 18) && (pItem->Type <= ITEM_BOW + 19)))
+    else if (((pItem->Type >= ITEM_CROSSBOW) && (pItem->Type <= ITEM_AQUAGOLD_CROSSBOW)) || (pItem->Type == ITEM_SAINT_CROSSBOW) || ((pItem->Type >= ITEM_DIVINE_CB_OF_ARCHANGEL) && (pItem->Type <= ITEM_GREAT_REIGN_CROSSBOW)))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -317,14 +317,14 @@ int CCharacterManager::GetEquipedBowType(ITEM* pItem)
 
 int CCharacterManager::GetEquipedBowType_Skill()
 {
-    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW + 7) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOLT) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
     {
-        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_BOW + 15)
+        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_ARROWS)
             return BOWTYPE_BOW;
     }
-    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW + 15) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_BOW + 8) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_ARROWS) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_CROSSBOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
     {
-        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOW + 7)
+        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOLT)
             return BOWTYPE_CROSSBOW;
     }
     return BOWTYPE_NONE;
@@ -334,11 +334,11 @@ bool CCharacterManager::IsEquipedWing()
 {
     ITEM* pEquippedItem = &CharacterMachine->Equipment[EQUIPMENT_WING];
 
-    if ((pEquippedItem->Type >= ITEM_WING && pEquippedItem->Type <= ITEM_WING + 6)
-        || (pEquippedItem->Type >= ITEM_WING + 36 && pEquippedItem->Type <= ITEM_WING + 43)
-        || (pEquippedItem->Type == ITEM_HELPER + 30)
+    if ((pEquippedItem->Type >= ITEM_WING && pEquippedItem->Type <= ITEM_WINGS_OF_DARKNESS)
+        || (pEquippedItem->Type >= ITEM_WING_OF_STORM && pEquippedItem->Type <= ITEM_WING_OF_DIMENSION)
+        || (pEquippedItem->Type == ITEM_CAPE_OF_LORD)
         || (ITEM_WING + 130 <= pEquippedItem->Type && pEquippedItem->Type <= ITEM_WING + 134)
-        || (pEquippedItem->Type >= ITEM_WING + 49 && pEquippedItem->Type <= ITEM_WING + 50) || (pEquippedItem->Type == ITEM_WING + 135))
+        || (pEquippedItem->Type >= ITEM_CAPE_OF_FIGHTER && pEquippedItem->Type <= ITEM_CAPE_OF_OVERRULE) || (pEquippedItem->Type == ITEM_WING + 135))
     {
         return true;
     }

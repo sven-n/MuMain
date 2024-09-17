@@ -2003,10 +2003,10 @@ void ReceiveChangePlayer(const BYTE* ReceiveBuffer)
             switch (Type)
             {
             case ITEM_HELPER:CreateMount(MODEL_HELPER, o->Position, o); break;
-            case ITEM_HELPER + 2:CreateMount(MODEL_UNICON, o->Position, o); break;
-            case ITEM_HELPER + 3:CreateMount(MODEL_PEGASUS, o->Position, o); break;
-            case ITEM_HELPER + 4:CreateMount(MODEL_DARK_HORSE, o->Position, o); break;
-            case ITEM_HELPER + 37:
+            case ITEM_HORN_OF_UNIRIA:CreateMount(MODEL_UNICON, o->Position, o); break;
+            case ITEM_HORN_OF_DINORANT:CreateMount(MODEL_PEGASUS, o->Position, o); break;
+            case ITEM_DARK_HORSE_ITEM:CreateMount(MODEL_DARK_HORSE, o->Position, o); break;
+            case ITEM_HORN_OF_FENRIR:
                 c->Helper.Option1 = Option;
                 if (Option == 0x01)
                 {
@@ -2025,18 +2025,18 @@ void ReceiveChangePlayer(const BYTE* ReceiveBuffer)
                     CreateMount(MODEL_FENRIR_RED, o->Position, o);
                 }
                 break;
-            case ITEM_HELPER + 64:
-            case ITEM_HELPER + 65:
+            case ITEM_DEMON:
+            case ITEM_SPIRIT_OF_GUARDIAN:
             {
                 {
                     ThePetProcess().CreatePet(Type, c->Helper.Type, o->Position, c);
                 }
             }
             break;
-            case ITEM_HELPER + 67:ThePetProcess().CreatePet(Type, c->Helper.Type, o->Position, c); break;
-            case ITEM_HELPER + 80:ThePetProcess().CreatePet(Type, c->Helper.Type, o->Position, c); break;
-            case ITEM_HELPER + 106:ThePetProcess().CreatePet(Type, c->Helper.Type, o->Position, c); break;
-            case ITEM_HELPER + 123:ThePetProcess().CreatePet(Type, c->Helper.Type, o->Position, c); break;
+            case ITEM_PET_RUDOLF:ThePetProcess().CreatePet(Type, c->Helper.Type, o->Position, c); break;
+            case ITEM_PET_PANDA:ThePetProcess().CreatePet(Type, c->Helper.Type, o->Position, c); break;
+            case ITEM_PET_UNICORN:ThePetProcess().CreatePet(Type, c->Helper.Type, o->Position, c); break;
+            case ITEM_PET_SKELETON:ThePetProcess().CreatePet(Type, c->Helper.Type, o->Position, c); break;
             }
         }
         break;
@@ -5553,10 +5553,10 @@ void ReceiveGetItem(const BYTE* ReceiveBuffer)
 #endif
 
         int Type = ConvertItemType(Data->Item);
-        if (Type == ITEM_POTION + 13 || Type == ITEM_POTION + 14 || Type == ITEM_POTION + 16 || Type == ITEM_WING + 15 || Type == ITEM_POTION + 22
-            || Type == INDEX_COMPILED_CELE || Type == INDEX_COMPILED_SOUL || Type == ITEM_POTION + 31)
+        if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE || Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION
+            || Type == INDEX_COMPILED_CELE || Type == INDEX_COMPILED_SOUL || Type == ITEM_JEWEL_OF_GUARDIAN)
             PlayBuffer(SOUND_JEWEL01, &Hero->Object);
-        else if (Type == ITEM_POTION + 41)
+        else if (Type == ITEM_GEMSTONE)
             PlayBuffer(SOUND_JEWEL02, &Hero->Object);
         else
             PlayBuffer(SOUND_GET_ITEM01, &Hero->Object);
@@ -5726,7 +5726,7 @@ void ReceiveModifyItem(const BYTE* ReceiveBuffer)
     }
 
     int iType = ConvertItemType(Data->Item);
-    if (iType == ITEM_POTION + 28 || iType == ITEM_POTION + 111)
+    if (iType == ITEM_LOST_MAP || iType == ITEM_POTION + 111)
     {
         PlayBuffer(SOUND_KUNDUN_ITEM_SOUND);
     }

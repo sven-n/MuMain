@@ -1037,14 +1037,14 @@ bool CMonkSystem::IsSwordformGlovesUseSkill(int _nSkill)
 
 bool CMonkSystem::IsChangeringNotUseSkill(short _LType, short _RType, int _LLevel, int _RLevel)
 {
-    if (_LType == ITEM_HELPER + 68 || _RType == ITEM_HELPER + 68)
+    if (_LType == ITEM_SNOWMAN_TRANSFORMATION_RING || _RType == ITEM_SNOWMAN_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (((_LType == ITEM_HELPER + 10)
+    if (((_LType == ITEM_TRANSFORMATION_RING)
         && (_LLevel == 0 || _LLevel == 8 || _LLevel == 24 || _LLevel == 32 || _LLevel == 40)) ||
-        ((_RType == ITEM_HELPER + 10)
+        ((_RType == ITEM_TRANSFORMATION_RING)
             && (_RLevel == 0 || _RLevel == 8 || _RLevel == 24 || _RLevel == 32 || _RLevel == 40))
         )
     {

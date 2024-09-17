@@ -266,7 +266,7 @@ namespace giPetManager
             g_RenderItemInfoBackup.Level = pItem->Level;
 
             BYTE PetType = PET_TYPE_DARK_SPIRIT;
-            if (pItem->Type == ITEM_HELPER + 4)
+            if (pItem->Type == ITEM_DARK_HORSE_ITEM)
             {
                 PetType = PET_TYPE_DARK_HORSE;
             }
@@ -405,7 +405,7 @@ namespace giPetManager
 
     void SetPetItemConvert(ITEM* ip, PET_INFO* pPetInfo)
     {
-        if (ip->Type == ITEM_HELPER + 4)
+        if (ip->Type == ITEM_DARK_HORSE_ITEM)
         {
             int Index = 0;
             for (int i = 0; i < ip->SpecialNum; ++i)
@@ -522,14 +522,14 @@ namespace giPetManager
         }
 
         TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true;
-        if (pItem->Type == ITEM_HELPER + 4)
+        if (pItem->Type == ITEM_DARK_HORSE_ITEM)
         {
             RequireLevel = (218 + (pPetInfo->m_wLevel * 2));
             RequireCharisma = 0;
 
             swprintf(TextList[TextNum], GlobalText[1187]); TextNum++; SkipNum++;
         }
-        else if (pItem->Type == ITEM_HELPER + 5)
+        else if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
         {
             RequireCharisma = (185 + (pPetInfo->m_wLevel * 15));
 
@@ -542,14 +542,14 @@ namespace giPetManager
         swprintf(TextList[TextNum], GlobalText[201], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2); TextNum++; SkipNum++;
         swprintf(TextList[TextNum], L"%s : %d", GlobalText[368], pPetInfo->m_wLevel); TextNum++; SkipNum++;
 
-        if (pItem->Type == ITEM_HELPER + 5)
+        if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
         {
             swprintf(TextList[TextNum], GlobalText[203], pPetInfo->m_wDamageMin, pPetInfo->m_wDamageMax, pPetInfo->m_wAttackSuccess); TextNum++; SkipNum++;
             swprintf(TextList[TextNum], GlobalText[64], pPetInfo->m_wAttackSpeed); TextNum++; SkipNum++;
         }
         swprintf(TextList[TextNum], GlobalText[70], pPetInfo->m_wLife); TextNum++; SkipNum++;
 
-        if (pItem->Type == ITEM_HELPER + 4)
+        if (pItem->Type == ITEM_DARK_HORSE_ITEM)
         {
             swprintf(TextList[TextNum], GlobalText[76], RequireLevel);
 
@@ -570,7 +570,7 @@ namespace giPetManager
                 TextNum++;
             }
         }
-        else if (pItem->Type == ITEM_HELPER + 5)
+        else if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
         {
             swprintf(TextList[TextNum], GlobalText[698], RequireCharisma);
 
@@ -612,7 +612,7 @@ namespace giPetManager
             TextBold[TextNum] = false; TextNum++; SkipNum++;
         }
 
-        if (pItem->Type == ITEM_HELPER + 4)
+        if (pItem->Type == ITEM_DARK_HORSE_ITEM)
         {
             swprintf(TextList[TextNum], GlobalText[744], (30 + pPetInfo->m_wLevel) / 2);
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextNum++; SkipNum++;

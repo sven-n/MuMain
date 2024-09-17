@@ -1,4 +1,4 @@
-//*****************************************************************************
+﻿//*****************************************************************************
 // File: NewUIStorageInventory.cpp
 //*****************************************************************************
 
@@ -394,7 +394,7 @@ bool CNewUIStorageInventory::ProcessMyInvenItemAutoMove()
     const auto pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
     if (const auto pItemObj = pMyInvenCtrl->FindItemAtPt(MouseX, MouseY))
     {
-        if (pItemObj->Type == ITEM_HELPER + 20)
+        if (pItemObj->Type == ITEM_WIZARDS_RING)
             return false;
 
         const int emptySlotIndex = FindEmptySlot(pItemObj);

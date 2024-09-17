@@ -119,38 +119,38 @@ bool CChangeRingManager::CheckDarkCloak(int iClass, int iType)
 
 bool CChangeRingManager::CheckChangeRing(short RingType)
 {
-    if (RingType == ITEM_HELPER + 10)
+    if (RingType == ITEM_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (RingType == ITEM_HELPER + 39)
+    if (RingType == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         return true;
     }
-    if (RingType == ITEM_HELPER + 40)
+    if (RingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (RingType == ITEM_HELPER + 41)
+    if (RingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (RingType == ITEM_HELPER + 42)
-    {
-        return true;
-    }
-
-    if (RingType == ITEM_HELPER + 68)
+    if (RingType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (RingType == ITEM_HELPER + 76)
+    if (RingType == ITEM_SNOWMAN_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (RingType == ITEM_HELPER + 122)
+    if (RingType == ITEM_PANDA_TRANSFORMATION_RING)
+    {
+        return true;
+    }
+
+    if (RingType == ITEM_SKELETON_TRANSFORMATION_RING)
     {
         return true;
     }
@@ -159,42 +159,42 @@ bool CChangeRingManager::CheckChangeRing(short RingType)
 
 bool CChangeRingManager::CheckRepair(int iType)
 {
-    if (iType == ITEM_HELPER + 10)
+    if (iType == ITEM_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 39)
+    if (iType == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 40)
+    if (iType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 41)
+    if (iType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 42)
+    if (iType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 68)
+    if (iType == ITEM_SNOWMAN_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 76)
+    if (iType == ITEM_PANDA_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 122)
+    if (iType == ITEM_SKELETON_TRANSFORMATION_RING)
     {
         return true;
     }
@@ -203,35 +203,35 @@ bool CChangeRingManager::CheckRepair(int iType)
 
 bool CChangeRingManager::CheckMoveMap(short sLeftRingType, short sRightRingType)
 {
-    if (sLeftRingType == ITEM_HELPER + 10 || sRightRingType == ITEM_HELPER + 10)
+    if (sLeftRingType == ITEM_TRANSFORMATION_RING || sRightRingType == ITEM_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 39 || sRightRingType == ITEM_HELPER + 39)
+    if (sLeftRingType == ITEM_ELITE_TRANSFER_SKELETON_RING || sRightRingType == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 40 || sRightRingType == ITEM_HELPER + 40)
+    if (sLeftRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING || sRightRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 41 || sRightRingType == ITEM_HELPER + 41)
+    if (sLeftRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || sRightRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 42 || sRightRingType == ITEM_HELPER + 42)
+    if (sLeftRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING || sRightRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 68 || sRightRingType == ITEM_HELPER + 68)
+    if (sLeftRingType == ITEM_SNOWMAN_TRANSFORMATION_RING || sRightRingType == ITEM_SNOWMAN_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 76 || sRightRingType == ITEM_HELPER + 76)
+    if (sLeftRingType == ITEM_PANDA_TRANSFORMATION_RING || sRightRingType == ITEM_PANDA_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 122 || sRightRingType == ITEM_HELPER + 122)
+    if (sLeftRingType == ITEM_SKELETON_TRANSFORMATION_RING || sRightRingType == ITEM_SKELETON_TRANSFORMATION_RING)
     {
         return true;
     }
@@ -240,27 +240,27 @@ bool CChangeRingManager::CheckMoveMap(short sLeftRingType, short sRightRingType)
 
 bool CChangeRingManager::CheckBanMoveIcarusMap(short sLeftRingType, short sRightRingType)
 {
-    if (sLeftRingType == ITEM_HELPER + 10 || sRightRingType == ITEM_HELPER + 10)
+    if (sLeftRingType == ITEM_TRANSFORMATION_RING || sRightRingType == ITEM_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 39 || sRightRingType == ITEM_HELPER + 39)
+    if (sLeftRingType == ITEM_ELITE_TRANSFER_SKELETON_RING || sRightRingType == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 40 || sRightRingType == ITEM_HELPER + 40)
+    if (sLeftRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING || sRightRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 41 || sRightRingType == ITEM_HELPER + 41)
+    if (sLeftRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || sRightRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 42 || sRightRingType == ITEM_HELPER + 42)
+    if (sLeftRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING || sRightRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 68 || sRightRingType == ITEM_HELPER + 68)
+    if (sLeftRingType == ITEM_SNOWMAN_TRANSFORMATION_RING || sRightRingType == ITEM_SNOWMAN_TRANSFORMATION_RING)
     {
         return true;
     }

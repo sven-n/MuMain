@@ -50,13 +50,13 @@ bool IsMount(ITEM* pItem)
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 0
-        || pItem->Type == ITEM_HELPER + 1
-        || pItem->Type == ITEM_HELPER + 2
-        || pItem->Type == ITEM_HELPER + 3
-        || pItem->Type == ITEM_HELPER + 4
-        || pItem->Type == ITEM_HELPER + 5
-        || pItem->Type == ITEM_HELPER + 37
+    if (pItem->Type == ITEM_GUARDIAN_ANGEL
+        || pItem->Type == ITEM_IMP
+        || pItem->Type == ITEM_HORN_OF_UNIRIA
+        || pItem->Type == ITEM_HORN_OF_DINORANT
+        || pItem->Type == ITEM_DARK_HORSE_ITEM
+        || pItem->Type == ITEM_DARK_RAVEN_ITEM
+        || pItem->Type == ITEM_HORN_OF_FENRIR
         )
     {
         return true;

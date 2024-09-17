@@ -1012,60 +1012,60 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
     case HOTKEY_Q:
         if (GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
         {
-            if (m_iHotKeyItemType[iType] >= ITEM_POTION + 4 && m_iHotKeyItemType[iType] <= ITEM_POTION + 6)
+            if (m_iHotKeyItemType[iType] >= ITEM_SMALL_MANA_POTION && m_iHotKeyItemType[iType] <= ITEM_LARGE_MANA_POTION)
             {
-                iStartItemType = ITEM_POTION + 6; iEndItemType = ITEM_POTION + 4;
+                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
             }
             else
             {
-                iStartItemType = ITEM_POTION + 3; iEndItemType = ITEM_POTION + 0;
+                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
             }
         }
         break;
     case HOTKEY_W:
         if (GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
         {
-            if (m_iHotKeyItemType[iType] >= ITEM_POTION + 0 && m_iHotKeyItemType[iType] <= ITEM_POTION + 3)
+            if (m_iHotKeyItemType[iType] >= ITEM_APPLE && m_iHotKeyItemType[iType] <= ITEM_LARGE_HEALING_POTION)
             {
-                iStartItemType = ITEM_POTION + 3; iEndItemType = ITEM_POTION + 0;
+                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
             }
             else
             {
-                iStartItemType = ITEM_POTION + 6; iEndItemType = ITEM_POTION + 4;
+                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
             }
         }
         break;
     case HOTKEY_E:
         if (GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
         {
-            if (m_iHotKeyItemType[iType] >= ITEM_POTION + 0 && m_iHotKeyItemType[iType] <= ITEM_POTION + 3)
+            if (m_iHotKeyItemType[iType] >= ITEM_APPLE && m_iHotKeyItemType[iType] <= ITEM_LARGE_HEALING_POTION)
             {
-                iStartItemType = ITEM_POTION + 3; iEndItemType = ITEM_POTION + 0;
+                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
             }
-            else if (m_iHotKeyItemType[iType] >= ITEM_POTION + 4 && m_iHotKeyItemType[iType] <= ITEM_POTION + 6)
+            else if (m_iHotKeyItemType[iType] >= ITEM_SMALL_MANA_POTION && m_iHotKeyItemType[iType] <= ITEM_LARGE_MANA_POTION)
             {
-                iStartItemType = ITEM_POTION + 6; iEndItemType = ITEM_POTION + 4;
+                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
             }
             else
             {
-                iStartItemType = ITEM_POTION + 8; iEndItemType = ITEM_POTION + 8;
+                iStartItemType = ITEM_ANTIDOTE; iEndItemType = ITEM_ANTIDOTE;
             }
         }
         break;
     case HOTKEY_R:
         if (GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
         {
-            if (m_iHotKeyItemType[iType] >= ITEM_POTION + 0 && m_iHotKeyItemType[iType] <= ITEM_POTION + 3)
+            if (m_iHotKeyItemType[iType] >= ITEM_APPLE && m_iHotKeyItemType[iType] <= ITEM_LARGE_HEALING_POTION)
             {
-                iStartItemType = ITEM_POTION + 3; iEndItemType = ITEM_POTION + 0;
+                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
             }
-            else if (m_iHotKeyItemType[iType] >= ITEM_POTION + 4 && m_iHotKeyItemType[iType] <= ITEM_POTION + 6)
+            else if (m_iHotKeyItemType[iType] >= ITEM_SMALL_MANA_POTION && m_iHotKeyItemType[iType] <= ITEM_LARGE_MANA_POTION)
             {
-                iStartItemType = ITEM_POTION + 6; iEndItemType = ITEM_POTION + 4;
+                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
             }
             else
             {
-                iStartItemType = ITEM_POTION + 37; iEndItemType = ITEM_POTION + 35;
+                iStartItemType = ITEM_LARGE_SHIELD_POTION; iEndItemType = ITEM_SMALL_SHIELD_POTION;
             }
         }
         break;
@@ -1089,11 +1089,11 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 
                 if (
                     (pItem->Type == i && ((pItem->Level >> 3) & 15) == m_iHotKeyItemLevel[iType])
-                    || (pItem->Type == i && (pItem->Type >= ITEM_POTION + 0 && pItem->Type <= ITEM_POTION + 3))
+                    || (pItem->Type == i && (pItem->Type >= ITEM_APPLE && pItem->Type <= ITEM_LARGE_HEALING_POTION))
                     )
                 {
-                    if (pItem->Type == ITEM_POTION + 9
-                        || pItem->Type == ITEM_POTION + 10
+                    if (pItem->Type == ITEM_ALE
+                        || pItem->Type == ITEM_TOWN_PORTAL_SCROLL
                         || pItem->Type == ITEM_POTION + 20
                         )
                     {
@@ -1109,7 +1109,7 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
         else
         {
             int iIndex = -1;
-            if (i >= ITEM_POTION + 0 && i <= ITEM_POTION + 3)
+            if (i >= ITEM_APPLE && i <= ITEM_LARGE_HEALING_POTION)
             {
                 iIndex = g_pMyInventory->FindItemReverseIndex(i);
             }
@@ -1121,8 +1121,8 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
             if (-1 != iIndex)
             {
                 pItem = g_pMyInventory->FindItem(iIndex);
-                if ((pItem->Type != ITEM_POTION + 7
-                    && pItem->Type != ITEM_POTION + 10
+                if ((pItem->Type != ITEM_SIEGE_POTION
+                    && pItem->Type != ITEM_TOWN_PORTAL_SCROLL
                     && pItem->Type != ITEM_POTION + 20)
                     || ((pItem->Level >> 3) & 15) == m_iHotKeyItemLevel[iType]
                     )
@@ -1145,16 +1145,16 @@ bool SEASON3B::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iS
 {
     switch (m_iHotKeyItemType[iHotKey])
     {
-    case ITEM_POTION + 7:
-    case ITEM_POTION + 8:
-    case ITEM_POTION + 9:
-    case ITEM_POTION + 10:
+    case ITEM_SIEGE_POTION:
+    case ITEM_ANTIDOTE:
+    case ITEM_ALE:
+    case ITEM_TOWN_PORTAL_SCROLL:
     case ITEM_POTION + 20:
-    case ITEM_POTION + 46:
-    case ITEM_POTION + 47:
-    case ITEM_POTION + 48:
-    case ITEM_POTION + 49:
-    case ITEM_POTION + 50:
+    case ITEM_JACK_OLANTERN_BLESSINGS:
+    case ITEM_JACK_OLANTERN_WRATH:
+    case ITEM_JACK_OLANTERN_CRY:
+    case ITEM_JACK_OLANTERN_FOOD:
+    case ITEM_JACK_OLANTERN_DRINK:
     case ITEM_POTION + 70:
     case ITEM_POTION + 71:
     case ITEM_POTION + 78:
@@ -1163,9 +1163,9 @@ bool SEASON3B::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iS
     case ITEM_POTION + 81:
     case ITEM_POTION + 82:
     case ITEM_POTION + 94:
-    case ITEM_POTION + 85:
-    case ITEM_POTION + 86:
-    case ITEM_POTION + 87:
+    case ITEM_CHERRY_BLOSSOM_WINE:
+    case ITEM_CHERRY_BLOSSOM_RICE_CAKE:
+    case ITEM_CHERRY_BLOSSOM_FLOWER_PETAL:
     case ITEM_POTION + 133:
         if (m_iHotKeyItemType[iHotKey] != ITEM_POTION + 20 || m_iHotKeyItemLevel[iHotKey] == 0)
         {
@@ -1174,14 +1174,14 @@ bool SEASON3B::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iS
         }
         break;
     default:
-        if (m_iHotKeyItemType[iHotKey] >= ITEM_POTION + 35 && m_iHotKeyItemType[iHotKey] <= ITEM_POTION + 37)
+        if (m_iHotKeyItemType[iHotKey] >= ITEM_SMALL_SHIELD_POTION && m_iHotKeyItemType[iHotKey] <= ITEM_LARGE_SHIELD_POTION)
         {
-            iStart = ITEM_POTION + 37; iEnd = ITEM_POTION + 35;
+            iStart = ITEM_LARGE_SHIELD_POTION; iEnd = ITEM_SMALL_SHIELD_POTION;
             return true;
         }
-        else if (m_iHotKeyItemType[iHotKey] >= ITEM_POTION + 38 && m_iHotKeyItemType[iHotKey] <= ITEM_POTION + 40)
+        else if (m_iHotKeyItemType[iHotKey] >= ITEM_SMALL_COMPLEX_POTION && m_iHotKeyItemType[iHotKey] <= ITEM_LARGE_COMPLEX_POTION)
         {
-            iStart = ITEM_POTION + 40; iEnd = ITEM_POTION + 38;
+            iStart = ITEM_LARGE_COMPLEX_POTION; iEnd = ITEM_SMALL_COMPLEX_POTION;
             return true;
         }
         break;
