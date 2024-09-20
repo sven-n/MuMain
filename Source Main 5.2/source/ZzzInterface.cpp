@@ -2282,7 +2282,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         && !(AT_SKILL_FIRE_BUST_UP <= Skill && AT_SKILL_FIRE_BUST_UP + 4 >= Skill))
     {
         CreateParticle(BITMAP_SHINY + 2, o->Position, o->Angle, Light, 0, 0.f, o);
-        PlayBuffer(SOUND_BRANDISH_SWORD01 + rand() % 2);
+        PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2));
     }
 
     VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
@@ -2303,10 +2303,10 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             || Skill == AT_SKILL_STRONG_PIER
             || Skill == AT_SKILL_ONEFLASH
             || Skill == AT_SKILL_RUSH
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 277
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 283
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 278
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 288
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_GUARDIAN_STATUE
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_LIFE_STONE
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CANON_TOWER
             )
         {
             int angle = abs((int)(o->Angle[2] / 45.f));
@@ -2676,10 +2676,10 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         BYTE TargetPosY = (BYTE)(pCha->TargetPosition[1] / TERRAIN_SCALE);
 
         if ((gMapManager.InBloodCastle()) || iSkill == AT_SKILL_OCCUPY
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 277
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 283
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 278
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 288)
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_GUARDIAN_STATUE
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_LIFE_STONE
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CANON_TOWER)
         {
             int angle = abs((int)(pObj->Angle[2] / 45.f));
             switch (angle)
@@ -3511,18 +3511,18 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             if (CharactersClient[TargetNpc].MonsterIndex >= npcIndex)
             {
                 int level = CharacterAttribute->Level;
-                if (CharactersClient[TargetNpc].MonsterIndex == 238 && level < 10)
+                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_CHAOS_GOBLIN && level < 10)
                 {
                     wchar_t Text[100];
                     swprintf(Text, GlobalText[663], CHAOS_MIX_LEVEL);
                     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     break;
                 }
-                if (CharactersClient[TargetNpc].MonsterIndex == 243 ||
-                    CharactersClient[TargetNpc].MonsterIndex == 246 ||
-                    CharactersClient[TargetNpc].MonsterIndex == 251
-                    || CharactersClient[TargetNpc].MonsterIndex == 416
-                    || CharactersClient[TargetNpc].MonsterIndex == 578
+                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_EO_THE_CRAFTSMAN ||
+                    CharactersClient[TargetNpc].MonsterIndex == MONSTER_ZIENNA_THE_WEAPONS_MERCHANT ||
+                    CharactersClient[TargetNpc].MonsterIndex == MONSTER_HANZO_THE_BLACKSMITH
+                    || CharactersClient[TargetNpc].MonsterIndex == MONSTER_RHEA
+                    || CharactersClient[TargetNpc].MonsterIndex == MONSTER_WEAPONS_MERCHANT_BOLO
                     )
                 {
                     g_pNPCShop->SetRepairShop(true);
@@ -3586,35 +3586,35 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
                     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex >= 468 && CharactersClient[TargetNpc].MonsterIndex <= 475)
+                else if (CharactersClient[TargetNpc].MonsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && CharactersClient[TargetNpc].MonsterIndex <= MONSTER_LITTLE_SANTA_PINK)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
 
                     wchar_t _Temp[32] = { 0, };
-                    if (CharactersClient[TargetNpc].MonsterIndex == 470)
+                    if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LITTLE_SANTA_RED)
                     {
                         swprintf(_Temp, GlobalText[2596], 100);
                         g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
-                    else if (CharactersClient[TargetNpc].MonsterIndex == 471)
+                    else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LITTLE_SANTA_BLUE)
                     {
                         swprintf(_Temp, GlobalText[2597], 100);
                         g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex == 478)
+                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_DELGADO)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex == 540)
+                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LUGARD)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex == 547)
+                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_MARKET_UNION_MEMBER_JULIA)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex == 579)
+                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_DAVID)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
@@ -3632,14 +3632,14 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                         if (!g_CursedTemple->IsGaugebarEnabled())
                         {
 #ifdef LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            if (CharactersClient[TargetNpc].MonsterIndex == 380
+                            if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE
                                 || (g_pCursedTempleWindow->CheckInventoryHolyItem(Hero)
-                                    && ((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied && CharactersClient[TargetNpc].MonsterIndex == 383)
-                                        || (g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && CharactersClient[TargetNpc].MonsterIndex == 384))
+                                    && ((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied && CharactersClient[TargetNpc].MonsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE)
+                                        || (g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && CharactersClient[TargetNpc].MonsterIndex == MONSTER_ILLUSION_ITEM_STORAGE))
                                     ))
 #else  //LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            if (CharactersClient[TargetNpc].MonsterIndex == 380 ||
-                                ((CharactersClient[TargetNpc].MonsterIndex == 383 || CharactersClient[TargetNpc].MonsterIndex == 384)
+                            if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE ||
+                                ((CharactersClient[TargetNpc].MonsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE || CharactersClient[TargetNpc].MonsterIndex == MONSTER_ILLUSION_ITEM_STORAGE)
                                     && g_pCursedTempleWindow->CheckInventoryHolyItem(Hero)))
 #endif //LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
                             {
@@ -3656,12 +3656,12 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 //#else
                 //				SendRequestTalk(CharactersClient[TargetNpc].Key);
                 //#endif
-                if (CharactersClient[TargetNpc].MonsterIndex == 229)
+                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_MARLON)
                     bCheckNPC = true;
                 else
                     bCheckNPC = false;
 
-                if (CharactersClient[TargetNpc].MonsterIndex == 226)
+                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_PET_TRAINER)
                 {
                     ITEM* pItem = NULL;
 
@@ -4712,7 +4712,7 @@ void CheckChatText(wchar_t* Text)
                 {
                     SetAction(o, PLAYER_SANTA_1);
                     SendRequestAction(Hero->Object, AT_SANTA1_1 + i);
-                    PlayBuffer(SOUND_XMAS_JUMP_SANTA + i);
+                    PlayBuffer(static_cast<ESound>(SOUND_XMAS_JUMP_SANTA + i));
                 }
                 else
                 {
@@ -7557,7 +7557,7 @@ void MoveHero()
                         }
                         else
                         {
-                            if ((gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE) || (c->MonsterIndex == 9))
+                            if ((gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE) || (c->MonsterIndex == MONSTER_THUNDER_LICH))
                             {
                                 if (CheckArrow() == false)
                                 {

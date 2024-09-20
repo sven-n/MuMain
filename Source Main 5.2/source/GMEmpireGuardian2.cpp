@@ -1024,7 +1024,7 @@ bool GMEmpireGuardian2::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 509:
+    case MONSTER_HAMMERIZE:
     {
         if (m_bCurrentIsRage_Bermont == true)
         {
@@ -1064,7 +1064,7 @@ bool GMEmpireGuardian2::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 514:
+    case MONSTER_ATICLES_HEAD:
     {
         switch (c->MonsterSkill)
         {
@@ -1089,7 +1089,7 @@ bool GMEmpireGuardian2::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 515:
+    case MONSTER_DARK_GHOST:
     {
         switch (c->MonsterSkill)
         {
@@ -1111,11 +1111,11 @@ bool GMEmpireGuardian2::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         break;
         }
     }
-    case 518:
+    case MONSTER_DEFENDER:
     {
     }
     return true;
-    case 519:
+    case MONSTER_FORSAKER:
     {
         switch (c->MonsterSkill)
         {
@@ -1145,7 +1145,7 @@ bool GMEmpireGuardian2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (c->MonsterIndex)
     {
-    case 515:
+    case MONSTER_DARK_GHOST:
     {
         vec3_t vPos;
 

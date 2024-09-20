@@ -113,7 +113,7 @@ WORD g_ServerPort = 44405;
 #ifdef MOVIE_DIRECTSHOW
 int  SceneFlag = MOVIE_SCENE;
 #else // MOVIE_DIRECTSHOW
-int  SceneFlag = WEBZEN_SCENE;
+EGameScene  SceneFlag = WEBZEN_SCENE;
 #endif // MOVIE_DIRECTSHOW
 
 extern int g_iKeyPadEnable;
@@ -384,8 +384,6 @@ void WebzenScene(HDC hDC)
     SceneFlag = LOG_IN_SCENE;	//
 }
 
-int MenuStateCurrent = MENU_SERVER_LIST;
-int MenuStateNext = MENU_SERVER_LIST;
 int DeleteGuildIndex = -1;
 
 void DeleteCharacter()
@@ -401,8 +399,6 @@ void DeleteCharacter()
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
     SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
 
-    MenuStateCurrent = MENU_DELETE_LEFT;
-    MenuStateNext = MENU_NEW_DOWN;
     PlayBuffer(SOUND_MENU01);
 
     ClearInput();

@@ -2,10 +2,8 @@
 #include "zzzinfomation.h"
 #include "SpinLock.h"
 
-extern int MenuStateCurrent;
-extern int MenuStateNext;
-extern int  SceneFlag;
-//extern bool EnableEdit;
+extern EGameScene SceneFlag;
+
 extern int  ErrorMessage;
 extern bool InitServerList;
 extern bool InitLogIn;

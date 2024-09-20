@@ -143,12 +143,12 @@ bool CursedTemple::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 388:
-    case 391:
-    case 394:
-    case 397:
-    case 400:
-    case 403:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
         return CheckMonsterSkill(c, o);
     }
 

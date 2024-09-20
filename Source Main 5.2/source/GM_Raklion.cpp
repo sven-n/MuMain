@@ -2270,7 +2270,7 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 454:
+    case MONSTER_ICE_WALKER:
     {
         if (c->MonsterSkill == 29)
         {
@@ -2284,7 +2284,7 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     break;
-    case 455:
+    case MONSTER_GIANT_MAMMOTH:
     {
         if (c->MonsterSkill == 30)
         {
@@ -2298,7 +2298,7 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     break;
-    case 456:
+    case MONSTER_ICE_GIANT:
     {
         if (c->MonsterSkill == 31)
         {
@@ -2312,7 +2312,7 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     break;
-    case 457:
+    case MONSTER_COOLUTIN:
     {
         if (c->MonsterSkill == 32)
         {
@@ -2325,7 +2325,7 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
     }
-    case 458:
+    case MONSTER_IRON_KNIGHT:
     {
         if (c->MonsterSkill == 33)
         {
@@ -2339,20 +2339,20 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     break;
-    case 459:
+    case MONSTER_SELUPAN:
     {
         SetBossMonsterAction(c, o);
         return true;
     }
     break;
-    case 460:
-    case 461:
-    case 462:
+    case MONSTER_SPIDER_EGGS_1:
+    case MONSTER_SPIDER_EGGS_2:
+    case MONSTER_SPIDER_EGGS_3:
     {
         return false;
     }
     break;
-    case 562:
+    case MONSTER_DARK_MAMMOTH:
     {
         if (c->MonsterSkill == ATMON_SKILL_EX_DARKMEMUD_ATTACKSKILL)
         {
@@ -2367,7 +2367,7 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     break;
-    case 563:
+    case MONSTER_DARK_GIANT:
     {
         if (c->MonsterSkill == ATMON_SKILL_EX_DARKGIANT_ATTACKSKILL)
         {
@@ -2382,7 +2382,7 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     break;
-    case 565:
+    case MONSTER_DARK_IRON_KNIGHT:
     {
         if (c->MonsterSkill == ATMON_SKILL_EX_DARKAIONNIGHT_ATTACKSKILL)
         {
@@ -2397,7 +2397,7 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     break;
-    case 564:
+    case MONSTER_DARK_COOLUTIN:
     {
         if (c->MonsterSkill == ATMON_SKILL_EX_DARKCOOLERTIN_ATTACKSKILL)
         {
@@ -2497,20 +2497,6 @@ bool CGM_Raklion::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     if (IsIceCity() == false)
         return false;
 
-    switch (c->MonsterIndex)
-    {
-    case 454:
-    case 455:
-    case 456:
-    case 457:
-    case 458:
-    case 459:
-    case 460:
-    case 461:
-    case 462:
-        break;
-    }
-
     return false;
 }
 
@@ -2595,7 +2581,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         else if (MONSTER01_DIE == o->CurrentAction)
         {
             {
-                PlayBuffer(SOUND_MONSTER + 34);
+                PlayBuffer(SOUND_MONSTER_HELLSPIDERDIE);
             }
         }
 
@@ -2611,7 +2597,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         }
         else if (o->CurrentAction == MONSTER01_DIE)
         {
-            PlayBuffer(SOUND_MONSTER + 154);
+            PlayBuffer(SOUND_MONSTER_DEATH1);
         }
         return true;
 
@@ -2671,7 +2657,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         }
         else if (o->CurrentAction == MONSTER01_DIE)
         {
-            PlayBuffer(SOUND_MONSTER + 154);
+            PlayBuffer(SOUND_MONSTER_DEATH1);
         }
         return true;
     case MODEL_DARK_COOLUTIN:
@@ -2689,7 +2675,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         else if (MONSTER01_DIE == o->CurrentAction)
         {
             {
-                PlayBuffer(SOUND_MONSTER + 34);
+                PlayBuffer(SOUND_MONSTER_HELLSPIDERDIE);
             }
         }
 

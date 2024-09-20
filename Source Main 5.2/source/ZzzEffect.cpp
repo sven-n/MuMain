@@ -141,16 +141,16 @@ bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, 
             if (Skill == AT_SKILL_STORM || Skill == AT_SKILL_EVIL || (AT_SKILL_EVIL_SPIRIT_UP <= Skill && AT_SKILL_EVIL_SPIRIT_UP + 4 >= Skill) || (AT_SKILL_EVIL_SPIRIT_UP_M <= Skill && AT_SKILL_EVIL_SPIRIT_UP_M + 4 >= Skill)
                 )
             {
-                if (c->m_bFixForm == false)
+                if (c->NotRotateOnMagicHit == false)
                 {
                     c->StormTime = 10;
                 }
 
-                if (c->MonsterIndex >= 459 && c->MonsterIndex <= 462)
+                if (c->MonsterIndex >= MONSTER_SELUPAN && c->MonsterIndex <= MONSTER_SPIDER_EGGS_3)
                 {
                     c->StormTime = 0;
                 }
-                else if (524 <= c->MonsterIndex && c->MonsterIndex <= 528)
+                else if (524 <= c->MonsterIndex && c->MonsterIndex <= MONSTER_RUSH_GATE)
                 {
                     c->StormTime = 0;
                 }
@@ -6844,7 +6844,7 @@ void CheckClientArrow(OBJECT* o)
 
                     default:
                         o->Live = false;
-                        PlayBuffer(SOUND_ATTACK01 + 5 + rand() % 4, o);
+                        PlayBuffer(static_cast<ESound>(SOUND_ATTACK_MELEE_HIT1 + 5 + rand() % 4), o);
                         if (o->Type == MODEL_ARROW_BOMB || o->Type == MODEL_ARROW_HOLY)
                             CreateBomb(o->Position, true);
                         break;
@@ -16407,7 +16407,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if ((int)o->LifeTime == o->ExtState - 1)
                 {
-                    PlayBuffer(SOUND_ATTACK01 + 4);
+                    PlayBuffer(SOUND_ATTACK_MELEE_HIT5);
                     //PlayBuffer( SOUND_ASSASSIN );
                 }
             }

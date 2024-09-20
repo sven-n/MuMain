@@ -444,7 +444,7 @@ bool GMUnitedMarketPlace::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 507:
+    case MONSTER_LUCAS:
     {
         // 			switch(c->MonsterSkill)
         // 			{

@@ -124,7 +124,7 @@ public:
     bool			Blood;
     bool			Ride;
     bool			SkillSuccess;
-    BOOL			m_bFixForm;
+    bool			NotRotateOnMagicHit;
     bool			Foot[2];
     bool			SafeZone;
     bool			Change;

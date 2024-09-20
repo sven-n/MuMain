@@ -374,13 +374,13 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15)) {
-                PlayBuffer(SOUND_BC_LIZARDWARRIOR_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_LIZARDWARRIOR_MOVE1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_LIZARDWARRIOR_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_LIZARDWARRIOR_ATTACK1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE) {
@@ -426,7 +426,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 0.8f);
 
             if (rand_fps_check(20)) {
-                PlayBuffer(SOUND_BC_FIREGOLEM_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_FIREGOLEM_MOVE1 + rand() % 2));
             }
         }
 
@@ -489,13 +489,13 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_QUEENBEE_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_QUEENBEE_MOVE1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_QUEENBEE_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_QUEENBEE_ATTACK1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE) {
@@ -532,7 +532,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_POISONGOLEM_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_POISONGOLEM_MOVE1 + rand() % 2));
             }
         }
 
@@ -565,7 +565,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         if (pObject->CurrentAction == MONSTER01_ATTACK2 && pObject->AnimationFrame >= 3.5f && pObject->AnimationFrame <= 4.2f) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_POISONGOLEM_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_POISONGOLEM_ATTACK1 + rand() % 2));
             }
 
             BoneManager::GetBonePosition(pObject, L"Monster84_RightHand", Position);
@@ -608,13 +608,13 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         {
             if (rand_fps_check(10)) {
                 CreateParticle(BITMAP_SMOKE + 1, pObject->Position, pObject->Angle, Light);
-                PlayBuffer(SOUND_BC_AXEWARRIOR_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_AXEWARRIOR_MOVE1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_AXEWARRIOR_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_AXEWARRIOR_ATTACK1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE) {
@@ -642,7 +642,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         if (pObject->CurrentAction == MONSTER01_ATTACK1) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_EROHIM_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_EROHIM_ATTACK1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE) {
@@ -879,16 +879,16 @@ bool M31HuntingGround::AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, O
 
     switch (pCharacter->MonsterIndex)
     {
-    case 290:
+    case MONSTER_LIZARD_WARRIOR:
         break;
-    case 292:
-    case 303:
-    case 293:
-    case 291:
-    case 295:
+    case MONSTER_QUEEN_BEE:
+    case MONSTER_GIGAS_GOLEM:
+    case MONSTER_POISON_GOLEM:
+    case MONSTER_FIRE_GOLEM:
+    case MONSTER_EROHIM:
         return true;
-    case 302:
-    case 294:
+    case MONSTER_AXE_HERO:
+    case MONSTER_AXE_WARRIOR:
         break;
     }
     return false;
@@ -900,7 +900,7 @@ bool M31HuntingGround::SetCurrentActionHuntingGroundMonster(CHARACTER* pCharacte
 
     switch (pCharacter->MonsterIndex)
     {
-    case 291:
+    case MONSTER_FIRE_GOLEM:
         if (pCharacter->Skill == AT_SKILL_BOSS) {
             SetAction(pObject, MONSTER01_ATTACK1);
         }

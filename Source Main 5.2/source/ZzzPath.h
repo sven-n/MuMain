@@ -36,7 +36,7 @@ public:
     static int s_iDir[8][2];
 
 private:
-    BYTE* m_pbyClosed;
+    EPathNodeState* m_pbyClosed;
     int m_iMinClosed, m_iMaxClosed;
     int* m_piCostToStart;
     int* m_pxPrev;
@@ -111,7 +111,7 @@ inline void PATH::SetMapDimensions(int iWidth, int iHeight, WORD* pbyMap)
     m_pbyMap = pbyMap;
     m_iSize = m_iWidth * m_iHeight;
 
-    m_pbyClosed = new BYTE[m_iSize];
+    m_pbyClosed = new EPathNodeState[m_iSize];
     m_piCostToStart = new int[m_iSize];
     m_pxPrev = new int[m_iSize];
     m_pyPrev = new int[m_iSize];

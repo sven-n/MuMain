@@ -218,7 +218,7 @@ void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, BYTE* _pbyItemPa
     }
 
     if (nMessage > nDefault)	g_pChatListBox->AddText(L"", GlobalText[nMessage], SEASON3B::TYPE_ERROR_MESSAGE);
-    if (nPlaySound > nDefault)	PlayBuffer(nPlaySound);
+    if (nPlaySound > nDefault)	PlayBuffer(static_cast<ESound>(nPlaySound));
     if (bInitInven)			g_pLuckyItemWnd->Process_InventoryCtrl_DeleteItem(-1);
     if (nAddInven > nDefault)	Process_InventoryCtrl_InsertItem(nAddInven, _pbyItemPacket);
 

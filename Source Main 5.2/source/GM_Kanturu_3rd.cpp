@@ -800,7 +800,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_3RD_NIGHTMARE_IDLE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_3RD_NIGHTMARE_IDLE1 + rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1365,7 +1365,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
 
     switch (c->MonsterIndex)
     {
-    case 354:
+    case MONSTER_DEATH_SPIRIT:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -1388,7 +1388,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     return true;
-    case 361:
+    case MONSTER_NIGHTMARE:
     {
         if (o->CurrentAction == MONSTER01_ATTACK3 && c->AttackTime >= 14)
         {
@@ -1406,7 +1406,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     return true;
-    case 362:
+    case MONSTER_MAYA_HAND_LEFT:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 && (int)c->AttackTime == 14)
         {
@@ -1432,7 +1432,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     return true;
-    case 363:
+    case MONSTER_MAYA_HAND_RIGHT:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 && (int)c->AttackTime == 14)
         {
@@ -1458,7 +1458,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     return true;
-    case 364:
+    case MONSTER_MAYA:
         return true;
     }
 
@@ -1472,10 +1472,10 @@ bool M39Kanturu3rd::SetCurrentActionKanturu3rdMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 361:
-    case 362:
-    case 363:
-    case 364:
+    case MONSTER_NIGHTMARE:
+    case MONSTER_MAYA_HAND_LEFT:
+    case MONSTER_MAYA_HAND_RIGHT:
+    case MONSTER_MAYA:
         return CheckMonsterSkill(c, o);
     }
 

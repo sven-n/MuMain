@@ -225,8 +225,8 @@ public:
     ~BMD();
     //utility
     void Init(bool Dummy);
-    bool Open(wchar_t* DirName, wchar_t* FileName);
-    bool Save(wchar_t* DirName, wchar_t* FileName);
+    //bool Open(wchar_t* DirName, wchar_t* FileName);
+    //bool Save(wchar_t* DirName, wchar_t* FileName);
     bool Open2(wchar_t* DirName, wchar_t* FileName, bool bReAlloc = true);
     bool Save2(wchar_t* DirName, wchar_t* FileName);
     void Release();

@@ -2276,7 +2276,7 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 506:
+    case MONSTER_RAYMOND:
     {
         if (m_bCurrentIsRage_Raymond == true)
         {
@@ -2316,7 +2316,7 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 507:
+    case MONSTER_LUCAS:
     {
         if (m_bCurrentIsRage_Ercanne == true)
         {
@@ -2356,7 +2356,7 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 508:
+    case MONSTER_FRED:
     {
         if (m_bCurrentIsRage_Daesuler == true)
         {
@@ -2396,7 +2396,7 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 511:
+    case MONSTER_DEVIL_LORD:
     {
         if (m_bCurrentIsRage_Gallia == true)
         {
@@ -2436,7 +2436,7 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 513:
+    case MONSTER_COMBAT_INSTRUCTOR:
     {
         switch (c->MonsterSkill)
         {
@@ -2461,7 +2461,7 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 518:
+    case MONSTER_DEFENDER:
     {
         switch (c->MonsterSkill)
         {
@@ -2486,7 +2486,7 @@ bool GMEmpireGuardian1::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 519:
+    case MONSTER_FORSAKER:
     {
         switch (c->MonsterSkill)
         {

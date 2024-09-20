@@ -452,7 +452,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
                 CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL, 60.f + rand() % 10);
 
                 int randValue = rand() % 2;
-                PlayBuffer(SOUND_CHAOS_THUNDER01 + randValue);
+                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + randValue));
             }
 
             if (o->LifeTime < 5)

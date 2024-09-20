@@ -312,7 +312,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
     if (LastAmbientSoundPlay < WorldTime - AmbientSoundInterval)
     {
         LastAmbientSoundPlay = WorldTime;
-        PlayBuffer(SOUND_KALIMA_AMBIENT2 + rand() % 2);
+        PlayBuffer(static_cast<ESound>(SOUND_KALIMA_AMBIENT2 + rand() % 2));
     }
 
     if (GetHellasLevel(Hero->Class, CharacterAttribute->Level) == KUNDUN_ZONE)
@@ -323,7 +323,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
         if ((CurrX >= 25 && CurrY >= 44) && (CurrX <= 51 && CurrY <= 119) && (LastKundunSoundPlay < WorldTime - KundunSoundInterval))
         {
             LastKundunSoundPlay = WorldTime;
-            PlayBuffer(SOUND_KUNDUN_AMBIENT1 + rand() % 2);
+            PlayBuffer(static_cast<ESound>(SOUND_KUNDUN_AMBIENT1 + rand() % 2));
         }
     }
 
@@ -1843,7 +1843,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             Vector(0.f, 0.f, 30.f, p);
 
-            if (c->MonsterIndex == 145)
+            if (c->MonsterIndex == MONSTER_DEATH_CENTURION_1)
             {
                 Vector(1.f, 0.f, 0.f, Light);
                 b->TransformPosition(o->BoneTransform[0], p, Position, true);

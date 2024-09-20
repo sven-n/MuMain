@@ -2311,17 +2311,17 @@ void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
             CHARACTER* c = CreateMonster(Type, Data2->PositionX, Data2->PositionY, Key);
             OBJECT* o = &c->Object;
 
-            if (c->MonsterIndex == 7)
+            if (c->MonsterIndex == MONSTER_GIANT)
             {
                 o->Scale = 0.8f;
             }
 
-            if (Type == 373)
+            if (Type == MONSTER_JACK_OLANTERN)
             {
                 DeleteCloth(c, o);
             }
 
-            if (Type == 404 || Type == 405)
+            if (Type == MONSTER_MU_ALLIES || Type == MONSTER_ILLUSION_SORCERER)
             {
                 DeleteCloth(c, o);
             }
@@ -2383,39 +2383,39 @@ void AppearMonster(CHARACTER* c)
     OBJECT* o = &c->Object;
     switch (c->MonsterIndex)
     {
-    case 44:
+    case MONSTER_GOLDEN_DRAGON:
         SetAction(o, MONSTER01_STOP2);
         o->PriorAction = MONSTER01_STOP2;
         c->Object.Alpha = 1.f;
-        PlayBuffer(SOUND_MONSTER + 124);
+        PlayBuffer(SOUND_MONSTER_BULLATTACK1);
         break;
-    case 21:
+    case MONSTER_ASSASSIN:
         SetAction(o, MONSTER01_STOP2);
         o->PriorAction = MONSTER01_STOP2;
         c->Object.Alpha = 1.f;
         PlayBuffer(SOUND_ASSASSIN);
         break;
-    case 53:
-    case 54:
+    case MONSTER_GOLDEN_TITAN:
+    case MONSTER_GOLDEN_SOLDIER:
         c->Appear = 60;
         SetAction(o, MONSTER01_STOP2);
         o->PriorAction = MONSTER01_STOP2;
         c->Object.Alpha = 1.f;
         //PlayBuffer(SOUND_ASSASSIN);
         break;
-    case 85:
-    case 91:
-    case 97:
-    case 114:
-    case 120:
-    case 126:
-        PlayBuffer(SOUND_MONSTER + 161);
+    case MONSTER_CHIEF_SKELETON_ARCHER_1:
+    case MONSTER_CHIEF_SKELETON_ARCHER_2:
+    case MONSTER_CHIEF_SKELETON_ARCHER_3:
+    case MONSTER_CHIEF_SKELETON_ARCHER_4:
+    case MONSTER_CHIEF_SKELETON_ARCHER_5:
+    case MONSTER_CHIEF_SKELETON_ARCHER_6:
+        PlayBuffer(SOUND_MONSTER_ORCCAPATTACK1);
         break;
-    case 440:
-    case 340:
-    case 341:
-    case 344:
-    case 345:
+    case MONSTER_DARK_ELF:
+    case MONSTER_DARKELF:
+    case MONSTER_SORAM:
+    case MONSTER_BALRAM:
+    case MONSTER_DEATH_SPIRIT:
     {
         if (g_Direction.m_CMVP.m_iCryWolfState == CRYWOLF_STATE_READY)
             c->Object.Alpha = 1.0f;
@@ -2443,8 +2443,8 @@ void AppearMonster(CHARACTER* c)
         }
     }
     break;
-    case 362:
-    case 363:
+    case MONSTER_MAYA_HAND_LEFT:
+    case MONSTER_MAYA_HAND_RIGHT:
     {
         SetAction(o, MONSTER01_APEAR);
         c->Object.Alpha = 0.f;
@@ -2545,7 +2545,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         c->m_byFriend = bMyMob;
         o->m_byBuildTime = byBuildTime;
 
-        if (gMapManager.InBattleCastle() && c->MonsterIndex == 277)
+        if (gMapManager.InBattleCastle() && c->MonsterIndex == MONSTER_CASTLE_GATE1)
         {
             if (g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen))
             {
@@ -2844,9 +2844,11 @@ void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
         }
         else
         {
-            if (c->MonsterIndex == 275);
-            else if (rand_fps_check(2))
+            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7
+                && rand_fps_check(2))
+            {
                 SetPlayerShock(c, Damage);
+            }
         }
 
         if (DamageType == 4)
@@ -2943,10 +2945,8 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
         }
         else
         {
-            if (c->MonsterIndex == 275)
-            {
-            }
-            else if (rand_fps_check(2))
+            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7
+                && rand_fps_check(2))
             {
                 SetPlayerShock(c, Damage);
             }
@@ -3265,7 +3265,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         int i = Data->Action % AT_SANTA1_1;
         g_XmasEvent->CreateXmasEventEffect(c, o, i);
         o->m_iAnimation = 0;
-        PlayBuffer(SOUND_XMAS_JUMP_SANTA + i);
+        PlayBuffer(static_cast<ESound>(SOUND_XMAS_JUMP_SANTA + i));
     }
     break;
     case AT_SANTA2_1:
@@ -3753,7 +3753,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 #ifdef ADD_ELF_SUMMON
     case AT_SKILL_SUMMON + 7:
 #endif // ADD_ELF_SUMMON
-        if (sc->MonsterIndex != 77)
+        if (sc->MonsterIndex != MONSTER_DARK_PHOENIX)
         {
             PlayBuffer(SOUND_SKILL_DEFENSE);
         }
@@ -10975,7 +10975,7 @@ void ReceivePreviewPort(const BYTE* ReceiveBuffer)
 
             c->m_iDeleteTime = 150;
 
-            if (gMapManager.InBattleCastle() && c->MonsterIndex == 277)
+            if (gMapManager.InBattleCastle() && c->MonsterIndex == MONSTER_CASTLE_GATE1)
             {
                 //  State
                 if (g_isCharacterBuff((&c->Object), eBuff_CastleGateIsOpen))

@@ -1431,7 +1431,7 @@ void MoveBoids()
                 if (o->LifeTime <= 0)
                     o->Live = false;
                 if (rand_fps_check(128))
-                    PlayBuffer(SOUND_MONSTER + 124);
+                    PlayBuffer(SOUND_MONSTER_BULLATTACK1);
             }
             else
             {

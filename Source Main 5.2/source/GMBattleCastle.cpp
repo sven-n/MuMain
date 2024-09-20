@@ -25,15 +25,9 @@
 #include "GuildCache.h"
 #include "ZzzInterface.h"
 
-extern  int     g_iTotalObj;
+
 extern  int     WaterTextureNumber;
 extern  char* g_lpszMp3[NUM_MUSIC];
-
-extern int TextNum;
-extern wchar_t TextList[50][100];
-extern int  TextListColor[50];
-extern int  TextBold[50];
-extern SIZE Size[50];
 
 namespace battleCastle
 {
@@ -1269,14 +1263,14 @@ namespace battleCastle
         {
         case MONSTER_TRAP:
             c = CreateCharacter(Key, 11, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.m_bRenderShadow = false;
             break;
 
         case MONSTER_SHIELD:
             OpenNpc(MODEL_NPC_BARRIER);      //  MODEL_NPC_BARRIER
             c = CreateCharacter(Key, MODEL_NPC_BARRIER, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->m_bIsSelected = false;
             c->Object.m_bRenderShadow = false;
             c->Object.Scale = 1.52f;
@@ -1289,7 +1283,7 @@ namespace battleCastle
         case MONSTER_CROWN:
             OpenNpc(MODEL_NPC_CROWN);      //  MODEL_NPC_CROWN
             c = CreateCharacter(Key, MODEL_NPC_CROWN, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
@@ -1299,7 +1293,7 @@ namespace battleCastle
         case MONSTER_CROWN_SWITCH1:
             OpenNpc(MODEL_NPC_CHECK_FLOOR);      //  MODEL_NPC_CHECK_FLOOR
             c = CreateCharacter(Key, MODEL_NPC_CHECK_FLOOR, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
             wcscpy(c->ID, L"왕관 발판2");
@@ -1311,7 +1305,7 @@ namespace battleCastle
         case MONSTER_CROWN_SWITCH2:
             OpenNpc(MODEL_NPC_CHECK_FLOOR);      //  MODEL_NPC_CHECK_FLOOR
             c = CreateCharacter(Key, MODEL_NPC_CHECK_FLOOR, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
             wcscpy(c->ID, L"왕관 발판1");
@@ -1323,7 +1317,7 @@ namespace battleCastle
         case MONSTER_CASTLE_GATE_SWITCH:
             OpenNpc(MODEL_NPC_GATE_SWITCH);      //  MODEL_NPC_GATE_SWITCH
             c = CreateCharacter(Key, MODEL_NPC_GATE_SWITCH, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
@@ -1333,7 +1327,7 @@ namespace battleCastle
         case MONSTER_GUARD:
             OpenNpc(77);      //  MODEL_MONSTER01+77
             c = CreateCharacter(Key, MODEL_BATTLE_GUARD2, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
@@ -1343,7 +1337,7 @@ namespace battleCastle
         case MONSTER_SLINGSHOT_ATTACK:
             OpenNpc(MODEL_NPC_CAPATULT_ATT);
             c = CreateCharacter(Key, MODEL_NPC_CAPATULT_ATT, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.m_bRenderShadow = false;
             c->Object.Scale = 0.8f;
             c->Object.m_fEdgeScale = 1.03f;
@@ -1354,7 +1348,7 @@ namespace battleCastle
         case MONSTER_SLINGSHOT_DEFENSE:
             OpenNpc(MODEL_NPC_CAPATULT_DEF);   //  MODEL_NPC_CATAPULT_DEF
             c = CreateCharacter(Key, MODEL_NPC_CAPATULT_DEF, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.m_bRenderShadow = false;
             c->Object.Scale = 0.8f;
             c->Object.m_fEdgeScale = 1.03f;
@@ -1365,7 +1359,7 @@ namespace battleCastle
         case MONSTER_SENIOR:
             OpenNpc(MODEL_NPC_SENATUS);      //  MODEL_NPC_SENATUS
             c = CreateCharacter(Key, MODEL_NPC_SENATUS, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
@@ -1375,7 +1369,7 @@ namespace battleCastle
         case MONSTER_GUARDSMAN:
             OpenNpc(MODEL_NPC_CLERK);        //
             c = CreateCharacter(Key, MODEL_NPC_CLERK, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.SubType = rand() % 2 + 10;
             c->Weapon[0].Type = -1;
@@ -1386,7 +1380,7 @@ namespace battleCastle
         case MONSTER_CASTLE_GATE1:
             OpenMonsterModel(MONSTER_MODEL_CASTLE_GATE1);
             c = CreateCharacter(Key, MODEL_CASTLE_GATE1, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.0f;
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
@@ -1396,7 +1390,7 @@ namespace battleCastle
         case MONSTER_LIFE_STONE:
             OpenMonsterModel(MONSTER_MODEL_LIFE_STONE);
             c = CreateCharacter(Key, MODEL_LIFE_STONE, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.0f;
             c->Object.m_bRenderShadow = false;
             c->Object.BlendMesh = 3;
@@ -1409,7 +1403,7 @@ namespace battleCastle
         case MONSTER_GUARDIAN_STATUE:
             OpenMonsterModel(MONSTER_MODEL_GUARDIAN_STATUE);
             c = CreateCharacter(Key, MODEL_GUARDIAN_STATUE, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.m_fEdgeScale = 1.03f;
             c->Object.m_bRenderShadow = false;
@@ -1430,7 +1424,7 @@ namespace battleCastle
         case MONSTER_GUARDIAN:
             OpenMonsterModel(MONSTER_MODEL_GUARDIAN_STATUE);
             c = CreateCharacter(Key, MODEL_GUARDIAN_STATUE, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
@@ -1440,7 +1434,7 @@ namespace battleCastle
         case MONSTER_BATTLE_GUARD1:
             OpenMonsterModel(MONSTER_MODEL_BATTLE_GUARD1);
             c = CreateCharacter(Key, MODEL_BATTLE_GUARD1, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
@@ -1449,7 +1443,7 @@ namespace battleCastle
         case MONSTER_BATTLE_GUARD2:
             OpenMonsterModel(MONSTER_MODEL_BATTLE_GUARD2);
             c = CreateCharacter(Key, MODEL_BATTLE_GUARD2, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.SubType = 30;
             c->Weapon[0].Type = -1;
@@ -1459,7 +1453,7 @@ namespace battleCastle
         case MONSTER_CANON_TOWER:
             OpenMonsterModel(MONSTER_MODEL_CANON_TOWER);
             c = CreateCharacter(Key, MODEL_CANON_TOWER, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.m_fEdgeScale = 1.04f;
             c->Object.m_bRenderShadow = false;

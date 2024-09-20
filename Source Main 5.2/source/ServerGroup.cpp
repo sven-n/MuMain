@@ -7,7 +7,7 @@ CServerGroup::CServerGroup()
     m_iServerIndex = 0;
     m_iNumServer = 0;
 
-    for (int i = 0; i < MAX_SERVER_LOW; i++)
+    for (int i = 0; i < MAX_SERVER_PER_GROUP; i++)
     {
         m_abyNonPvpServer[i] = 0;
     }

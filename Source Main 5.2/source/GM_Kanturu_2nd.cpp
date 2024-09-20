@@ -766,7 +766,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         {
             if (rand_fps_check(15))
             {
-                PlayBuffer(SOUND_KANTURU_2ND_PERSO_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_PERSO_MOVE1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -952,7 +952,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
                 }
                 o->m_dwTime = timeGetTime();
 
-                PlayBuffer(SOUND_KANTURU_2ND_TWIN_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_TWIN_MOVE1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1012,7 +1012,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         {
             if (rand_fps_check(15))
             {
-                PlayBuffer(SOUND_KANTURU_2ND_DRED_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_DRED_MOVE1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)

@@ -781,7 +781,7 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
     return true;
 }
 
-extern int SceneFlag;
+extern EGameScene SceneFlag;
 
 float RequestTerrainHeight(float xf, float yf) {
     if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)

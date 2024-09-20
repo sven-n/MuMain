@@ -1158,7 +1158,7 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 510:
+    case MONSTER_DUAL_BERSERKER:
     {
         if (m_bCurrentIsRage_Kato == true)
         {
@@ -1198,7 +1198,7 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 517:
+    case MONSTER_HEAD_MOUNTER:
     {
         switch (c->MonsterSkill)
         {
@@ -1229,7 +1229,7 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 519:
+    case MONSTER_FORSAKER:
     {
         switch (c->MonsterSkill)
         {
@@ -1248,7 +1248,7 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 516:
+    case MONSTER_BANSHEE:
     {
         switch (c->MonsterSkill)
         {

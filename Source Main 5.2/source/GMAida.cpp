@@ -727,7 +727,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -740,7 +740,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_CHAOS_THUNDER01 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + rand() % 2));
                 PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK1);
             }
         }
@@ -811,7 +811,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -886,7 +886,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -920,7 +920,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -953,7 +953,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_DEATHTREE_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHTREE_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1027,7 +1027,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_HELL_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_HELL_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1089,7 +1089,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1132,7 +1132,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1176,7 +1176,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1261,7 +1261,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1274,7 +1274,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_CHAOS_THUNDER01 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + rand() % 2));
                 PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK1);
             }
         }

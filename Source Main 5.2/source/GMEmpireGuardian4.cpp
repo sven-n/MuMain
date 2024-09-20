@@ -1345,7 +1345,7 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 504:
+    case MONSTER_GAYION_THE_GLADIATOR:
     {
         if (m_bCurrentIsRage_BossGaion == true)
         {
@@ -1398,7 +1398,7 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     return true;
-    case 505:
+    case MONSTER_JERRY:
     {
         if (m_bCurrentIsRage_Jerint == true)
         {

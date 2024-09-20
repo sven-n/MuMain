@@ -45,12 +45,12 @@ unsigned char ShadowBuffer[256 * 256];
 int           ShadowBufferWidth = 256;
 int           ShadowBufferHeight = 256;
 
-extern int  MouseX;
-extern int  MouseY;
-extern bool MouseLButton;
+//extern int  MouseX;
+//extern int  MouseY;
+//extern bool MouseLButton;
 
-extern double FPS;
-extern float FPS_ANIMATION_FACTOR;
+//extern double FPS;
+//extern float FPS_ANIMATION_FACTOR;
 
 bool  StopMotion = false;
 float ParentMatrix[3][4];
@@ -177,7 +177,7 @@ void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorF
     }
 }
 
-extern int  SceneFlag;
+extern EGameScene SceneFlag;
 extern int EditFlag;
 
 bool HighLight = true;
@@ -447,7 +447,7 @@ bool BMD::PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsig
 
         float fTemp;
 
-        if (SceneFlag == 4)
+        if (SceneFlag == CHARACTER_SCENE)
         {
             fTemp = *AnimationFrame + 2;
         }
@@ -2618,7 +2618,7 @@ void BMD::FindTriangleForEdge(int iMesh, int iTri1, int iIndex11)
     }
 }
 //#endif //USE_SHADOWVOLUME
-
+/*
 bool BMD::Open(wchar_t* DirName, wchar_t* ModelFileName)
 {
     wchar_t ModelName[64];
@@ -2698,11 +2698,11 @@ bool BMD::Open(wchar_t* DirName, wchar_t* ModelFileName)
         delete (TextureScript*)&TSParsing;
     }
     //#ifdef USE_SHADOWVOLUME
-        /*for(i=0;i<NumMeshs;i++)
-        {
-            Mesh_t *m = &Meshs[i];
-            EdgeTriangleIndex(m->Triangles,m->NumTriangles);
-        }*/
+        //for(i=0;i<NumMeshs;i++)
+        //{
+        //    Mesh_t *m = &Meshs[i];
+        //    EdgeTriangleIndex(m->Triangles,m->NumTriangles);
+        //}
     FindNearTriangle();
     //#endif
     for (i = 0; i < NumActions; i++)
@@ -2813,7 +2813,7 @@ bool BMD::Save(wchar_t* DirName, wchar_t* ModelFileName)
     }
     fclose(fp);
     return true;
-}
+}*/
 
 bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
 {
