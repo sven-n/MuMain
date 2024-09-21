@@ -890,7 +890,7 @@ void CGMKarutan1::PlayBGM(int World)
 
 bool IsKarutanMap()
 {
-    return gMapManager.IsEmpireGuardian4();
+    return gMapManager.IsKarutan();
 }
 
 #endif	// ASG_ADD_MAP_KARUTAN
