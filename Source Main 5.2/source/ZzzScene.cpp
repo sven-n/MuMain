@@ -2265,7 +2265,7 @@ extern int  GrabScreen;
 
 void MoveCharacter(CHARACTER* c, OBJECT* o);
 
-float target_fps = 60;
+float target_fps = 50;
 float ms_per_frame = 1000.f / target_fps;
 
 void SetTargetFps(float targetFps)
@@ -2447,16 +2447,16 @@ void MainScene(HDC hDC)
         BeginBitmap();
         wchar_t szDebugText[128];
         swprintf(szDebugText, L"FPS : %.1f Connected: %d", FPS_AVG, g_bGameServerConnected);
-        wchar_t szMousePos[128];
-        swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
-        wchar_t szCamera3D[128];
-        swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+        //wchar_t szMousePos[128];
+        //swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
+        //wchar_t szCamera3D[128];
+        //swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
         g_pRenderText->SetFont(g_hFontBold);
         g_pRenderText->SetBgColor(0, 0, 0, 100);
         g_pRenderText->SetTextColor(255, 255, 255, 200);
         g_pRenderText->RenderText(10, 26, szDebugText);
-        g_pRenderText->RenderText(10, 36, szMousePos);
-        g_pRenderText->RenderText(10, 46, szCamera3D);
+        //g_pRenderText->RenderText(10, 36, szMousePos);
+        //g_pRenderText->RenderText(10, 46, szCamera3D);
         g_pRenderText->SetFont(g_hFont);
         EndBitmap();
 #endif // defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
@@ -2612,12 +2612,12 @@ void MainScene(HDC hDC)
                 StopBuffer(SOUND_ELBELAND_ENTERATLANCE01, true);
             }
 #ifdef ASG_ADD_MAP_KARUTAN
-            if (!IsKarutanMap())
-                StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
-            if (World != WD_80KARUTAN1)
+            if (gMapManager.WorldActive != WD_80KARUTAN1)
                 StopBuffer(SOUND_KARUTAN_INSECT_ENV, true);
-            if (World != WD_81KARUTAN2)
+            else if (gMapManager.WorldActive != WD_81KARUTAN2)
                 StopBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, true);
+            else
+                StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
 #endif	// ASG_ADD_MAP_KARUTAN
 
             if (gMapManager.WorldActive == WD_0LORENCIA)
@@ -2756,7 +2756,7 @@ void MainScene(HDC hDC)
             g_EmpireGuardian4.PlayBGM();
             g_UnitedMarketPlace.PlayBGM();
 #ifdef ASG_ADD_MAP_KARUTAN
-            g_Karutan1.PlayBGM();
+            g_Karutan1.PlayBGM(gMapManager.WorldActive);
 #endif	// ASG_ADD_MAP_KARUTAN
         }
     }

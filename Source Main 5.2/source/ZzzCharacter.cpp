@@ -12422,30 +12422,42 @@ void Setting_Monster(CHARACTER* c, int Type, int PositionX, int PositionY)
             o->Kind = KIND_TRAP;
         else
             o->Kind = KIND_MONSTER;
-        //c->Object.Kind = KIND_EDIT;
-        //swprintf(c->ID,"%x",Key);
+
         if (Type == 368 || Type == 369 || Type == 370)
             o->Kind = KIND_NPC;
         if (Type == 367
             || Type == 371
             || Type == 375
-            || Type == 376 || Type == 377
+            || Type == 376
+            || Type == 377
             || Type == 379
-            || Type == 380 || Type == 381 || Type == 382
-            || Type == 383 || Type == 384 || Type == 385
+            || Type == 380
+            || Type == 381
+            || Type == 382
+            || Type == 383
+            || Type == 384
+            || Type == 385
             || Type == 406
             || Type == 407
             || Type == 408
             || Type == 414
-            || Type == 415 || Type == 416 || Type == 417
+            || Type == 415
+            || Type == 416
+            || Type == 417
             || Type == 450
-            || Type == 452 || Type == 453
+            || Type == 452
+            || Type == 453
             || Type == 464
             || Type == 465
             || Type == 467
-            || Type == 468 || Type == 469 || Type == 470	//NPC 1~8
-            || Type == 471 || Type == 472 || Type == 473
-            || Type == 474 || Type == 475
+            || Type == 468
+            || Type == 469
+            || Type == 470
+            || Type == 471
+            || Type == 472
+            || Type == 473
+            || Type == 474
+            || Type == 475
             || Type == 478
             || Type == 479
             || Type == 492
@@ -12453,21 +12465,20 @@ void Setting_Monster(CHARACTER* c, int Type, int PositionX, int PositionY)
             || Type == 541
             || Type == 542
             || Type == 522
-            || Type == 543 || Type == 544
+            || Type == 543
+            || Type == 544
             || Type == 545
             || Type == 546
             || Type == 547
-            || Type == 577 || Type == 578
-            || Type == 579
             )
         {
             o->Kind = KIND_NPC;
         }
-        if (Type >= 480 && Type <= 491)
+        else if (Type >= 480 && Type <= 491)
         {
             o->Kind = KIND_MONSTER;
         }
-        if (Type == 451)
+        else if (Type == 451)
         {
             o->Kind = KIND_TMP;
         }

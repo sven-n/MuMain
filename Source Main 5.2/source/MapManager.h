@@ -89,6 +89,7 @@ public:
     bool IsEmpireGuardian3();
     bool IsEmpireGuardian4();
     bool IsEmpireGuardian();
+    bool IsKarutan();
     bool InBattleCastle(int iMap = -1);
     const wchar_t* GetMapName(int iMap);
 public:

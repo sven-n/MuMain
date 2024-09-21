@@ -14,6 +14,11 @@
 #include "GM3rdChangeUp.h"
 #include "GMCryWolf1st.h"
 #include "GMDoppelGanger2.h"
+
+#ifdef ASG_ADD_MAP_KARUTAN
+#include "GMKarutan1.h"
+#endif
+
 #include "LoadData.h"
 #include "NewUISystem.h"
 #include "PersonalShopTitleImp.h"
@@ -1199,10 +1204,10 @@ void CMapManager::Load() // OK
 #ifdef ASG_ADD_MAP_KARUTAN
         else if (IsKarutanMap())
         {
-            Models[66].Actions[0].PlaySpeed = 0.15f;
-            Models[66].Actions[1].PlaySpeed = 0.15f;
+            //Models[66].Actions[0].PlaySpeed = 0.15f;
+            //Models[66].Actions[1].PlaySpeed = 0.15f;
 
-            Models[107].Actions[0].PlaySpeed = 5.f;
+        //    Models[107].Actions[0].PlaySpeed = 5.f;
         }
 #endif	// ASG_ADD_MAP_KARUTAN
     }
@@ -1746,6 +1751,13 @@ bool CMapManager::IsEmpireGuardian()
 
     return true;
 }
+
+#ifdef ASG_ADD_MAP_KARUTAN
+bool CMapManager::IsKarutan()
+{
+     return (this->WorldActive == WD_80KARUTAN1 || this->WorldActive == WD_81KARUTAN2) ? true : false;
+}
+#endif	// ASG_ADD_MAP_KARUTAN
 
 bool CMapManager::InBattleCastle(int iMap)
 {

@@ -875,7 +875,7 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 }
 #endif	// ASG_ADD_KARUTAN_MONSTERS
 
-void CGMKarutan1::PlayBGM()
+void CGMKarutan1::PlayBGM(int World)
 {
     if (World == WD_80KARUTAN1)
         PlayMp3(g_lpszMp3[MUSIC_KARUTAN1]);
@@ -890,7 +890,7 @@ void CGMKarutan1::PlayBGM()
 
 bool IsKarutanMap()
 {
-    return World == WD_80KARUTAN1 || World == WD_81KARUTAN2 ? true : false;
+    return gMapManager.IsEmpireGuardian4();
 }
 
 #endif	// ASG_ADD_MAP_KARUTAN
