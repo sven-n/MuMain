@@ -1,4 +1,4 @@
-// NewUIInGameShop.cpp: implementation of the NewUIInGameShop class.
+ï»¿// NewUIInGameShop.cpp: implementation of the NewUIInGameShop class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -67,7 +67,7 @@ bool CNewUIInGameShop::Create(CNewUIManager* pNewUIMng, int x, int y)
     SetPos(x, y);
     LoadImages();
     SetBtnInfo();
-    Show(false);	//visible()À» flase·Î
+    Show(false);	//visible()ì„ flaseë¡œ
 
     return true;
 }
@@ -262,7 +262,7 @@ void CNewUIInGameShop::SetConvertInvenCoord(WORD _ItemType, float _Width, float 
     float _TempHeight = pItemAttr->Height * 20.0f;
     float _fCoodX = 0, _fCoodY = 0;
 
-    if (_ItemType == ITEM_WING + 36)
+    if (_ItemType == ITEM_WING_OF_STORM)
     {
         _fCoodY = 5.0f;
     }
@@ -282,11 +282,11 @@ void CNewUIInGameShop::SetRateScale(int _ItemType)
     const float _fRate_Value = 0.703f;
     ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[_ItemType];
 
-    if (_ItemType == ITEM_WING + 36)
+    if (_ItemType == ITEM_WING_OF_STORM)
     {
         m_fRate_Scale = _fRate_Value * 0.7f;
     }
-    else if (_ItemType == ITEM_STAFF + 10)
+    else if (_ItemType == ITEM_DIVINE_STAFF_OF_ARCHANGEL)
     {
         m_fRate_Scale = _fRate_Value * 0.7f;
     }
@@ -427,14 +427,14 @@ bool CNewUIInGameShop::BtnProcess()
 
         IGS_StorageItem* pSelectItem = m_StorageItemListBox.GetSelectedText();
 
-        if (iStorageIndex == IGS_SAFEKEEPING_LISTBOX)					// º¸°üÇÔ
+        if (iStorageIndex == IGS_SAFEKEEPING_LISTBOX)					// ë³´ê´€í•¨
         {
             CMsgBoxIGSStorageItemInfo* pMsgBox = NULL;
             CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSStorageItemInfoLayout), &pMsgBox);
             pMsgBox->Initialize(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode, pSelectItem->m_szType,
                 pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
         }
-        else if (iStorageIndex == IGS_PRESENTBOX_LISTBOX)				// ¼±¹° º¸°üÇÔ
+        else if (iStorageIndex == IGS_PRESENTBOX_LISTBOX)				// ì„ ë¬¼ ë³´ê´€í•¨
         {
             CMsgBoxIGSGiftStorageItemInfo* pMsgBox = NULL;
             CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSGiftStorageItemInfoLayout), &pMsgBox);

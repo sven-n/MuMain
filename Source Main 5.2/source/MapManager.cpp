@@ -1,4 +1,4 @@
-// MapManager.cpp: implementation of the CMapManager class.
+﻿// MapManager.cpp: implementation of the CMapManager class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -14,6 +14,7 @@
 #include "GM3rdChangeUp.h"
 #include "GMCryWolf1st.h"
 #include "GMDoppelGanger2.h"
+#include "GMKarutan1.h"
 #include "LoadData.h"
 #include "NewUISystem.h"
 #include "PersonalShopTitleImp.h"
@@ -599,10 +600,10 @@ void CMapManager::Load() // OK
             LoadBitmap(L"Logo\\MU-logo_g.jpg", BITMAP_LOG_IN + 17, GL_LINEAR);
 
             // 몬스터 미리 읽어놓기
-            OpenMonsterModel(129);
-            OpenMonsterModel(130);
-            OpenMonsterModel(131);
-            OpenMonsterModel(133);
+            OpenMonsterModel(MONSTER_MODEL_RED_SKELETON_KNIGHT_6);
+            OpenMonsterModel(MONSTER_MODEL_MAGIC_SKELETON_6);
+            OpenMonsterModel(MONSTER_MODEL_CASTLE_GATE);
+            OpenMonsterModel(MONSTER_MODEL_STATUE_OF_SAINT_2);
             OpenMonsterModel(135);
         }
         else

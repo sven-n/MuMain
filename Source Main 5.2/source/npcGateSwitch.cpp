@@ -64,7 +64,7 @@ namespace npcGateSwitch
             CHARACTER* c = &CharactersClient[Index];
 
             if (c == NULL) return;
-            if (c->MonsterIndex != 277) return;
+            if (c->MonsterIndex != MONSTER_CASTLE_GATE1) return;
 
             OBJECT* o = &c->Object;
 

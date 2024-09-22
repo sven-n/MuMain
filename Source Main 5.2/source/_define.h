@@ -19,61 +19,34 @@
 #define BYTECAST(T,X) static_cast<T>(X & 0xFF)
 
 ///////////////////////////////////////////////_Scene start_//////////////////////////////////////////////
-#define MAX_SERVER_HI   30
-#define MAX_SERVER_LOW  20
+constexpr int MAX_SERVER_PER_GROUP = 20;
 
-#define MENU_SERVER_LIST           0
-#define MENU_WAITING_SERVERLIST	   1
-#define MENU_ACCOUNT_UP            2
-#define MENU_ACCOUNT_DOWN          3
-#define MENU_REGISTRATION_UP       4
-#define MENU_REGISTRATION_DOWN     5
-#define MENU_OPTION_UP             6
-#define MENU_OPTION_DOWN           7
-#define MENU_PASSWORD_CONFIRM_UP   8
-#define MENU_PASSWORD_CONFIRM_DOWN 9
-#define MENU_PASSWORD_CHANGE_UP    10
-#define MENU_PASSWORD_CHANGE_DOWN  11
-#define MENU_WAITING_LOGIN		   12
-#define MENU_CHARACTER             20
-#define MENU_NEW_DOWN              21
-#define MENU_NEW_UP                22
-#define MENU_DELETE_RIGHT          23
-#define MENU_DELETE_LEFT           24
-#define MENU_OK_RIGHT              25
-#define MENU_OK_LEFT               26
-#define MENU_NEW_CHARACTER_DOWN    27
-#define MENU_NEW_CHARACTER_UP      28
-#define MENU_EXIT                  29
+enum EGameScene {
+    SERVER_LIST_SCENE = 0,
+    WEBZEN_SCENE = 1,
+    LOG_IN_SCENE = 2,
+    LOADING_SCENE = 3,
+    CHARACTER_SCENE = 4,
+    MAIN_SCENE = 5,
+    MOVIE_SCENE = 6,
+};
 
-#define SERVER_LIST_SCENE   0
-#define	NON_SCENE			0
-#define WEBZEN_SCENE		1
-#define LOG_IN_SCENE		2
-#define LOADING_SCENE		3
-#define CHARACTER_SCENE		4
-#define MAIN_SCENE			5
+constexpr auto MAX_FENRIR_SKILL_MONSTER_NUM = 10;
+constexpr auto FENRIR_TYPE_BLACK = 0;
+constexpr auto FENRIR_TYPE_RED = 1;
+constexpr auto FENRIR_TYPE_BLUE = 2;
+constexpr auto FENRIR_TYPE_GOLD = 3;
 
-#define MOVIE_SCENE			6
+constexpr auto NUM_LINE_CMB = ( 7);
+constexpr auto NUM_BUTTON_CMB = ( 2);
+constexpr auto NUM_PAR_BUTTON_CMB = ( 5);
 
-#define MAX_FENRIR_SKILL_MONSTER_NUM	10
-#define FENRIR_TYPE_BLACK	0
-#define FENRIR_TYPE_RED		1
-#define FENRIR_TYPE_BLUE	2
-#define FENRIR_TYPE_GOLD	3
-
-#define MAX_WAITINGTIME	( 15)
-#define NUM_LINE_CMB	( 7)
-#define NUM_BUTTON_CMB		( 2)
-#define NUM_PAR_BUTTON_CMB	( 5)
-
-#define INGAMESHOP_DISPLAY_ITEMLIST_SIZE (9)
+constexpr auto INGAMESHOP_DISPLAY_ITEMLIST_SIZE = (9);
 
 ///////////////////////////////////////////////_Scene end_//////////////////////////////////////////////////////////
 //////////////////////////////////////////////_Path start_//////////////////////////////////////////////////////////
 
-#define MAX_PATH_FIND  15
-#define NEW_PATH_ALGORITHM
+constexpr auto MAX_PATH_FIND = 15;
 
 #define TW_SAFEZONE		( 0x0001)
 #define TW_CHARACTER	( 0x0002)
@@ -92,15 +65,24 @@
 #define TW_ATT6         ( 0x4000)
 #define TW_ATT7         ( 0x8000)
 
-#define FACTOR_PATH_DIST		( 5)
-#define FACTOR_PATH_DIST_DIAG	( ( int)( ( float)FACTOR_PATH_DIST * 1.414f))
+constexpr auto FACTOR_PATH_DIST = 5;
+constexpr auto FACTOR_PATH_DIST_DIAG = ((int)((float)FACTOR_PATH_DIST * 1.414f));
 
-#define MAX_COUNT_PATH		(500)
-#define MAX_INT_FORPATH		(65000 * 30000)
+constexpr auto MAX_COUNT_PATH = 500;
+constexpr auto MAX_INT_FORPATH = (65000 * 30000);
 
-#define PATH_INTESTLIST		( 0x01)
-#define PATH_TESTED			( 0x02)
-#define PATH_END			( 0x04)
+enum EPathNodeState : BYTE
+{
+    PATH_INTESTLIST = (0x01),
+    PATH_TESTED = (0x02),
+    PATH_END = (0x04),
+};
+
+DEFINE_ENUM_FLAG_OPERATORS(EPathNodeState)
+//inline EPathNodeState operator|(EPathNodeState a, EPathNodeState b)
+//{
+//    return static_cast<EPathNodeState>(static_cast<int>(a) | static_cast<int>(b));
+//}
 
 #define CUSTOM_CAMERA_DISTANCE1  200
 #define CUSTOM_CAMERA_DISTANCE2  -150
@@ -108,9 +90,6 @@
 #define RENDER_ITEMVIEW_NEAR  20.f
 
 #define MAX_MODEL_MONSTER	400
-
-#define MODEL_MONSTER01		MODEL_SKILL_END+1
-#define MODEL_MONSTER_END	MODEL_MONSTER01+MAX_MODEL_MONSTER
 
 #define MODEL_BODY_NUM               24
 #define MODEL_ITEM_COMMON_NUM		2
@@ -131,7 +110,7 @@
 #define MAX_BODYPART    6
 
 #define TELEPORT_NONE   0
-#define TELEPORT_BEGIN  1
+#define TELEPORT_BEGIN  1 
 #define TELEPORT        2
 #define TELEPORT_END    3
 #define KIND_PLAYER  1
@@ -342,13 +321,13 @@ enum struct STORAGE_TYPE
 #define MAX_SKILL_NAME      32
 #define MAX_MONSTER_NAME    32
 
-#define MAX_ITEM_TYPE      16
+constexpr int MAX_ITEM_TYPE = 16;
 
-#define MAX_ITEM_NAME       30
+constexpr int MAX_ITEM_NAME = 30;
 
-#define MAX_ITEM_INDEX     512
+constexpr int MAX_ITEM_INDEX = 512;
 
-#define MAX_ITEM           (MAX_ITEM_TYPE*MAX_ITEM_INDEX)
+constexpr int MAX_ITEM = MAX_ITEM_TYPE * MAX_ITEM_INDEX;
 
 #define MAX_MINI_MAP_DATA	100
 

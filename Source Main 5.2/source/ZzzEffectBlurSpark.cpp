@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+﻿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -388,13 +388,13 @@ void CreateBlood(OBJECT* o)
     int BoneHead = Models[o->Type].BoneHead;
     if (BoneHead != -1)
     {
-        if (o->Type == MODEL_MONSTER01 + 15)
+        if (o->Type == MODEL_ICE_MONSTER)
         {
             o->Live = false;
             for (int i = 0; i < 10; i++)
                 CreateEffect(MODEL_ICE_SMALL, o->Position, o->Angle, o->Light);
         }
-        else if (o->Type != MODEL_MONSTER01 + 7 && o->Type != MODEL_MONSTER01 + 14 && o->Type != MODEL_MONSTER01 + 18)
+        else if (o->Type != MODEL_GHOST && o->Type != MODEL_ASSASSIN && o->Type != MODEL_ICE_QUEEN)
         {
             vec3_t p, Position;
             for (int i = 0; i < 2; i++)

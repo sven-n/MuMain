@@ -1,4 +1,4 @@
-// ChangeRingManager.cpp: implementation of the CChangeRingManager class.
+﻿// ChangeRingManager.cpp: implementation of the CChangeRingManager class.
 //////////////////////////////////////////////////////////////////////
 
 // common
@@ -21,25 +21,25 @@ CChangeRingManager::~CChangeRingManager()
 
 void CChangeRingManager::LoadItemModel()
 {
-    gLoadData.AccessModel(MODEL_HELPER + 10, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 39, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 40, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 41, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 42, L"Data\\Item\\", L"Ring", 1);
-    gLoadData.AccessModel(MODEL_HELPER + 68, L"Data\\Item\\xmas\\", L"xmasring");
-    gLoadData.AccessModel(MODEL_HELPER + 76, L"Data\\Item\\", L"PandaPetRing");
-    gLoadData.AccessModel(MODEL_HELPER + 122, L"Data\\Item\\", L"SkeletonRing");
+    gLoadData.AccessModel(MODEL_TRANSFORMATION_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_ELITE_TRANSFER_SKELETON_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_JACK_OLANTERN_TRANSFORMATION_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_CHRISTMAS_TRANSFORMATION_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_GAME_MASTER_TRANSFORMATION_RING, L"Data\\Item\\", L"Ring", 1);
+    gLoadData.AccessModel(MODEL_SNOWMAN_TRANSFORMATION_RING, L"Data\\Item\\xmas\\", L"xmasring");
+    gLoadData.AccessModel(MODEL_PANDA_TRANSFORMATION_RING, L"Data\\Item\\", L"PandaPetRing");
+    gLoadData.AccessModel(MODEL_SKELETON_TRANSFORMATION_RING, L"Data\\Item\\", L"SkeletonRing");
 }
 
 void CChangeRingManager::LoadItemTexture()
 {
-    gLoadData.OpenTexture(MODEL_HELPER + 39, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 41, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 40, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 42, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 68, L"Item\\xmas\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 76, L"Item\\");
-    gLoadData.OpenTexture(MODEL_HELPER + 122, L"Item\\");
+    gLoadData.OpenTexture(MODEL_ELITE_TRANSFER_SKELETON_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_CHRISTMAS_TRANSFORMATION_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_JACK_OLANTERN_TRANSFORMATION_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_GAME_MASTER_TRANSFORMATION_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SNOWMAN_TRANSFORMATION_RING, L"Item\\xmas\\");
+    gLoadData.OpenTexture(MODEL_PANDA_TRANSFORMATION_RING, L"Item\\");
+    gLoadData.OpenTexture(MODEL_SKELETON_TRANSFORMATION_RING, L"Item\\");
 }
 
 bool CChangeRingManager::CheckDarkLordHair(int iType)
@@ -119,38 +119,38 @@ bool CChangeRingManager::CheckDarkCloak(int iClass, int iType)
 
 bool CChangeRingManager::CheckChangeRing(short RingType)
 {
-    if (RingType == ITEM_HELPER + 10)
+    if (RingType == ITEM_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (RingType == ITEM_HELPER + 39)
+    if (RingType == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         return true;
     }
-    if (RingType == ITEM_HELPER + 40)
+    if (RingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (RingType == ITEM_HELPER + 41)
+    if (RingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (RingType == ITEM_HELPER + 42)
-    {
-        return true;
-    }
-
-    if (RingType == ITEM_HELPER + 68)
+    if (RingType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (RingType == ITEM_HELPER + 76)
+    if (RingType == ITEM_SNOWMAN_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (RingType == ITEM_HELPER + 122)
+    if (RingType == ITEM_PANDA_TRANSFORMATION_RING)
+    {
+        return true;
+    }
+
+    if (RingType == ITEM_SKELETON_TRANSFORMATION_RING)
     {
         return true;
     }
@@ -159,42 +159,42 @@ bool CChangeRingManager::CheckChangeRing(short RingType)
 
 bool CChangeRingManager::CheckRepair(int iType)
 {
-    if (iType == ITEM_HELPER + 10)
+    if (iType == ITEM_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 39)
+    if (iType == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 40)
+    if (iType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 41)
+    if (iType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 42)
+    if (iType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 68)
+    if (iType == ITEM_SNOWMAN_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 76)
+    if (iType == ITEM_PANDA_TRANSFORMATION_RING)
     {
         return true;
     }
 
-    if (iType == ITEM_HELPER + 122)
+    if (iType == ITEM_SKELETON_TRANSFORMATION_RING)
     {
         return true;
     }
@@ -203,35 +203,35 @@ bool CChangeRingManager::CheckRepair(int iType)
 
 bool CChangeRingManager::CheckMoveMap(short sLeftRingType, short sRightRingType)
 {
-    if (sLeftRingType == ITEM_HELPER + 10 || sRightRingType == ITEM_HELPER + 10)
+    if (sLeftRingType == ITEM_TRANSFORMATION_RING || sRightRingType == ITEM_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 39 || sRightRingType == ITEM_HELPER + 39)
+    if (sLeftRingType == ITEM_ELITE_TRANSFER_SKELETON_RING || sRightRingType == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 40 || sRightRingType == ITEM_HELPER + 40)
+    if (sLeftRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING || sRightRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 41 || sRightRingType == ITEM_HELPER + 41)
+    if (sLeftRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || sRightRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 42 || sRightRingType == ITEM_HELPER + 42)
+    if (sLeftRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING || sRightRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 68 || sRightRingType == ITEM_HELPER + 68)
+    if (sLeftRingType == ITEM_SNOWMAN_TRANSFORMATION_RING || sRightRingType == ITEM_SNOWMAN_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 76 || sRightRingType == ITEM_HELPER + 76)
+    if (sLeftRingType == ITEM_PANDA_TRANSFORMATION_RING || sRightRingType == ITEM_PANDA_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 122 || sRightRingType == ITEM_HELPER + 122)
+    if (sLeftRingType == ITEM_SKELETON_TRANSFORMATION_RING || sRightRingType == ITEM_SKELETON_TRANSFORMATION_RING)
     {
         return true;
     }
@@ -240,27 +240,27 @@ bool CChangeRingManager::CheckMoveMap(short sLeftRingType, short sRightRingType)
 
 bool CChangeRingManager::CheckBanMoveIcarusMap(short sLeftRingType, short sRightRingType)
 {
-    if (sLeftRingType == ITEM_HELPER + 10 || sRightRingType == ITEM_HELPER + 10)
+    if (sLeftRingType == ITEM_TRANSFORMATION_RING || sRightRingType == ITEM_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 39 || sRightRingType == ITEM_HELPER + 39)
+    if (sLeftRingType == ITEM_ELITE_TRANSFER_SKELETON_RING || sRightRingType == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 40 || sRightRingType == ITEM_HELPER + 40)
+    if (sLeftRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING || sRightRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 41 || sRightRingType == ITEM_HELPER + 41)
+    if (sLeftRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || sRightRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 42 || sRightRingType == ITEM_HELPER + 42)
+    if (sLeftRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING || sRightRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
     {
         return true;
     }
-    if (sLeftRingType == ITEM_HELPER + 68 || sRightRingType == ITEM_HELPER + 68)
+    if (sLeftRingType == ITEM_SNOWMAN_TRANSFORMATION_RING || sRightRingType == ITEM_SNOWMAN_TRANSFORMATION_RING)
     {
         return true;
     }

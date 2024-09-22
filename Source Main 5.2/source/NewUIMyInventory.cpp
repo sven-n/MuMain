@@ -1,4 +1,4 @@
-// NewUIMyInventory.cpp: implementation of the CNewUIMyInventory class.
+ï»¿// NewUIMyInventory.cpp: implementation of the CNewUIMyInventory class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -127,12 +127,12 @@ bool CNewUIMyInventory::EquipItem(int iIndex, BYTE* pbyItemPacket)
             return false;
         }
 
-        if (pTempItem->Type == ITEM_HELPER + 4)
+        if (pTempItem->Type == ITEM_DARK_HORSE_ITEM)
         {
             SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, iIndex);
         }
 
-        if (pTempItem->Type == ITEM_HELPER + 5)
+        if (pTempItem->Type == ITEM_DARK_RAVEN_ITEM)
         {
             CreatePetDarkSpirit(Hero);
             SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, iIndex);
@@ -155,17 +155,17 @@ void CNewUIMyInventory::UnequipItem(int iIndex)
 
         if (pEquippedItem && pEquippedItem->Type != -1)
         {
-            if (pEquippedItem->Type == ITEM_HELPER + 4)
+            if (pEquippedItem->Type == ITEM_DARK_HORSE_ITEM)
             {
                 Hero->InitPetInfo(PET_TYPE_DARK_HORSE);
             }
-            else if (pEquippedItem->Type == ITEM_HELPER + 5)
+            else if (pEquippedItem->Type == ITEM_DARK_RAVEN_ITEM)
             {
                 DeletePet(Hero);
                 Hero->InitPetInfo(PET_TYPE_DARK_SPIRIT);
             }
 
-            if (pEquippedItem->Type != ITEM_HELPER + 5)
+            if (pEquippedItem->Type != ITEM_DARK_RAVEN_ITEM)
                 DeleteEquippingEffectBug(pEquippedItem);
 
             pEquippedItem->Type = -1;
@@ -250,10 +250,10 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
     {
         //ITEM *r = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
         const ITEM* l = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-        if (iIndex == EQUIPMENT_WEAPON_RIGHT && l->Type != ITEM_BOW + 7
+        if (iIndex == EQUIPMENT_WEAPON_RIGHT && l->Type != ITEM_BOLT
             && (l->Type >= ITEM_BOW && l->Type < ITEM_BOW + MAX_ITEM_INDEX))
         {
-            if (pItem->Type != ITEM_BOW + 15)
+            if (pItem->Type != ITEM_ARROWS)
                 bEquipable = false;
         }
     }
@@ -322,7 +322,7 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
     if (pItem->RequireLevel > wLevel)
         return false;
 
-    if (pItem->Type == ITEM_HELPER + 5)
+    if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
     {
         const PET_INFO* pPetInfo = GetPetInfo(pItem);
         const WORD wRequireCharisma = (185 + (pPetInfo->m_wLevel * 15));
@@ -330,25 +330,25 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
             return false;
     }
 
-    if (gMapManager.WorldActive == WD_7ATLANSE && (pItem->Type >= ITEM_HELPER + 2 && pItem->Type <= ITEM_HELPER + 3))
+    if (gMapManager.WorldActive == WD_7ATLANSE && (pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_HORN_OF_DINORANT))
     {
         return false;
     }
-    if (pItem->Type == ITEM_HELPER + 2 && gMapManager.WorldActive == WD_10HEAVEN)
+    if (pItem->Type == ITEM_HORN_OF_UNIRIA && gMapManager.WorldActive == WD_10HEAVEN)
     {
         return false;
     }
-    if (pItem->Type == ITEM_HELPER + 2 && g_Direction.m_CKanturu.IsMayaScene())
+    if (pItem->Type == ITEM_HORN_OF_UNIRIA && g_Direction.m_CKanturu.IsMayaScene())
     {
         return false;
     }
     if (gMapManager.InChaosCastle() || (Get_State_Only_Elf()
         && g_isCharacterBuff((&Hero->Object), eBuff_CrywolfHeroContracted)))
     {
-        if ((pItem->Type >= ITEM_HELPER + 2 && pItem->Type <= ITEM_HELPER + 5) || pItem->Type == ITEM_HELPER + 37)
+        if ((pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_DARK_RAVEN_ITEM) || pItem->Type == ITEM_HORN_OF_FENRIR)
             return false;
     }
-    else if ((pItem->Type >= ITEM_HELPER + 2 && pItem->Type <= ITEM_HELPER + 4 || pItem->Type == ITEM_HELPER + 37)
+    else if ((pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_DARK_HORSE_ITEM || pItem->Type == ITEM_HORN_OF_FENRIR)
         && Hero->Object.CurrentAction >= PLAYER_SIT1 && Hero->Object.CurrentAction <= PLAYER_SIT_FEMALE2)
     {
         return false;
@@ -495,7 +495,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             ResetMouseLButton();
             return false;
         }
-        if (pItemObj && pItemObj->Type == ITEM_POTION + 28 && gMapManager.IsCursedTemple() == true)
+        if (pItemObj && pItemObj->Type == ITEM_LOST_MAP && gMapManager.IsCursedTemple() == true)
         {
             ResetMouseLButton();
             return false;
@@ -938,22 +938,22 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
         case ITEM_HELPER:
             CreateMount(MODEL_HELPER, pHeroObject->Position, pHeroObject);
             break;
-        case ITEM_HELPER + 2:
+        case ITEM_HORN_OF_UNIRIA:
             CreateMount(MODEL_UNICON, pHeroObject->Position, pHeroObject);
             if (!Hero->SafeZone)
                 CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
             break;
-        case ITEM_HELPER + 3:
+        case ITEM_HORN_OF_DINORANT:
             CreateMount(MODEL_PEGASUS, pHeroObject->Position, pHeroObject);
             if (!Hero->SafeZone)
                 CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
             break;
-        case ITEM_HELPER + 4:
+        case ITEM_DARK_HORSE_ITEM:
             CreateMount(MODEL_DARK_HORSE, pHeroObject->Position, pHeroObject);
             if (!Hero->SafeZone)
                 CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
             break;
-        case ITEM_HELPER + 37:
+        case ITEM_HORN_OF_FENRIR:
             Hero->Helper.Option1 = pItem->Option1;
             if (pItem->Option1 == 0x01)
             {
@@ -977,39 +977,39 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
                 CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
             }
             break;
-        case ITEM_HELPER + 64:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 64, pHeroObject->Position, Hero);
+        case ITEM_DEMON:
+            ThePetProcess().CreatePet(pItem->Type, MODEL_DEMON, pHeroObject->Position, Hero);
             break;
-        case ITEM_HELPER + 65:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 65, pHeroObject->Position, Hero);
+        case ITEM_SPIRIT_OF_GUARDIAN:
+            ThePetProcess().CreatePet(pItem->Type, MODEL_SPIRIT_OF_GUARDIAN, pHeroObject->Position, Hero);
             break;
-        case ITEM_HELPER + 67:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 67, pHeroObject->Position, Hero);
+        case ITEM_PET_RUDOLF:
+            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_RUDOLF, pHeroObject->Position, Hero);
             break;
-        case ITEM_HELPER + 80:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 80, pHeroObject->Position, Hero);
+        case ITEM_PET_PANDA:
+            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_PANDA, pHeroObject->Position, Hero);
             break;
-        case ITEM_HELPER + 106:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 106, pHeroObject->Position, Hero);
+        case ITEM_PET_UNICORN:
+            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_UNICORN, pHeroObject->Position, Hero);
             break;
-        case ITEM_HELPER + 123:
-            ThePetProcess().CreatePet(pItem->Type, MODEL_HELPER + 123, pHeroObject->Position, Hero);
+        case ITEM_PET_SKELETON:
+            ThePetProcess().CreatePet(pItem->Type, MODEL_PET_SKELETON, pHeroObject->Position, Hero);
             break;
         }
     }
     if (Hero->EtcPart <= 0 || Hero->EtcPart > 3)
     {
-        if (pItem->Type == ITEM_HELPER + 20 && (pItem->Level >> 3) == 3)
+        if (pItem->Type == ITEM_WIZARDS_RING && (pItem->Level >> 3) == 3)
         {
             DeleteParts(Hero);
             Hero->EtcPart = PARTS_LION;
         }
     }
-    if (pItem->Type == ITEM_WING + 39 || pItem->Type == ITEM_HELPER + 30 ||
+    if (pItem->Type == ITEM_WING_OF_RUIN || pItem->Type == ITEM_CAPE_OF_LORD ||
         pItem->Type == ITEM_WING + 130 ||
-        (pItem->Type >= ITEM_WING + 49 && pItem->Type <= ITEM_WING + 50) ||
+        (pItem->Type >= ITEM_CAPE_OF_FIGHTER && pItem->Type <= ITEM_CAPE_OF_OVERRULE) ||
         (pItem->Type == ITEM_WING + 135) ||
-        pItem->Type == ITEM_WING + 40)
+        pItem->Type == ITEM_CAPE_OF_EMPEROR)
     {
         DeleteCloth(Hero, &Hero->Object);
     }
@@ -1024,12 +1024,12 @@ void CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
 
     switch (pItem->Type)
     {
-    case ITEM_HELPER + 30:
-    case ITEM_WING + 39:
-    case ITEM_WING + 40:
+    case ITEM_CAPE_OF_LORD:
+    case ITEM_WING_OF_RUIN:
+    case ITEM_CAPE_OF_EMPEROR:
     case ITEM_WING + 130:
-    case ITEM_WING + 49:
-    case ITEM_WING + 50:
+    case ITEM_CAPE_OF_FIGHTER:
+    case ITEM_CAPE_OF_OVERRULE:
     case ITEM_WING + 135:
         DeleteCloth(Hero, &Hero->Object);
         return;
@@ -1242,10 +1242,10 @@ void CNewUIMyInventory::RenderEquippedItem()
             const int iLevel = (pEquipmentItemSlot->Level >> 3) & 15;
             const int iMaxDurability = calcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
 
-            // ¿ë»ç/Àü»çÀÇ¹ÝÁö ¿¹¿ÜÃ³¸®
+            // ìš©ì‚¬/ì „ì‚¬ì˜ë°˜ì§€ ì˜ˆì™¸ì²˜ë¦¬
             if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
             {
-                if (pEquipmentItemSlot->Type == ITEM_HELPER + 20 && iLevel == 1
+                if (pEquipmentItemSlot->Type == ITEM_WIZARDS_RING && iLevel == 1
                     || iLevel == 2)
                 {
                     continue;
@@ -1444,7 +1444,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
                         {
                             bPicked = false;
                         }
-                        else if (((m_iPointedSlot == EQUIPMENT_WING) && !((pEquippedPetItem->Type == ITEM_HELPER + 3) || (pEquippedPetItem->Type == ITEM_HELPER + 4) || (pEquippedPetItem->Type == ITEM_HELPER + 37)))
+                        else if (((m_iPointedSlot == EQUIPMENT_WING) && !((pEquippedPetItem->Type == ITEM_HORN_OF_DINORANT) || (pEquippedPetItem->Type == ITEM_DARK_HORSE_ITEM) || (pEquippedPetItem->Type == ITEM_HORN_OF_FENRIR)))
                             )
                         {
                             bPicked = false;
@@ -1549,27 +1549,27 @@ bool CNewUIMyInventory::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPi
 
     bool bSuccess = true;
 
-    if (iType > ITEM_WING + 6
-        && iType != ITEM_HELPER + 30
-        && !(iType >= ITEM_WING + 36 && iType <= ITEM_WING + 43)
+    if (iType > ITEM_WINGS_OF_DARKNESS
+        && iType != ITEM_CAPE_OF_LORD
+        && !(iType >= ITEM_WING_OF_STORM && iType <= ITEM_WING_OF_DIMENSION)
         && !(ITEM_WING + 130 <= iType && iType <= ITEM_WING + 134)
-        && !(iType >= ITEM_WING + 49 && iType <= ITEM_WING + 50)
+        && !(iType >= ITEM_CAPE_OF_FIGHTER && iType <= ITEM_CAPE_OF_OVERRULE)
         && (iType != ITEM_WING + 135))
     {
         bSuccess = false;
     }
 
-    if (iType == ITEM_BOW + 7 || iType == ITEM_BOW + 15)
+    if (iType == ITEM_BOLT || iType == ITEM_ARROWS)
     {
         bSuccess = false;
     }
 
-    if ((pPickItem->Type == ITEM_POTION + 13 && iLevel >= 6) || (pPickItem->Type == ITEM_POTION + 14 && iLevel >= 9))
+    if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS && iLevel >= 6) || (pPickItem->Type == ITEM_JEWEL_OF_SOUL && iLevel >= 9))
     {
         bSuccess = false;
     }
 
-    if (pPickItem->Type == ITEM_POTION + 13 && iType == ITEM_HELPER + 37 && iDurability != 255)
+    if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR && iDurability != 255)
     {
         CFenrirRepairMsgBox* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CFenrirRepairMsgBoxLayout), &pMsgBox);
@@ -1582,7 +1582,7 @@ bool CNewUIMyInventory::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPi
         return true;
     }
 
-    if (pPickItem->Type == ITEM_POTION + 42)
+    if (pPickItem->Type == ITEM_JEWEL_OF_HARMONY)
     {
         if (g_SocketItemMgr.IsSocketItem(pItem))
         {
@@ -1604,7 +1604,7 @@ bool CNewUIMyInventory::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPi
             }
     }
 
-    if (pPickItem->Type == ITEM_POTION + 43 || pPickItem->Type == ITEM_POTION + 44)
+    if (pPickItem->Type == ITEM_LOWER_REFINE_STONE || pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
     {
         if (g_SocketItemMgr.IsSocketItem(pItem))
         {
@@ -1661,7 +1661,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         return false;
     }
 
-    if (pItem->Type == ITEM_POTION + 10)
+    if (pItem->Type == ITEM_TOWN_PORTAL_SCROLL)
     {
         if (!Teleport)
         {
@@ -1670,20 +1670,20 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         }
     }
 
-    const auto isApple = pItem->Type == ITEM_POTION + 0;
+    const auto isApple = pItem->Type == ITEM_APPLE;
     const auto isPotion =
-        (pItem->Type >= ITEM_POTION + 0 && pItem->Type <= ITEM_POTION + 9)
-        || (pItem->Type >= ITEM_POTION + 35 && pItem->Type <= ITEM_POTION + 40);
+        (pItem->Type >= ITEM_APPLE && pItem->Type <= ITEM_ALE)
+        || (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION);
 
     if (isApple || isPotion
         || (pItem->Type == ITEM_POTION + 20 && ((pItem->Level >> 3) & 15) == 0)
-        || (pItem->Type >= ITEM_POTION + 46 && pItem->Type <= ITEM_POTION + 50)
-        || (pItem->Type == ITEM_POTION + 11 && ((pItem->Level >> 3) & 15) == 14)
+        || (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK)
+        || (pItem->Type == ITEM_BOX_OF_LUCK && ((pItem->Level >> 3) & 15) == 14)
         || (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71)
         || (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77)
         || pItem->Type == ITEM_HELPER + 60
         || pItem->Type == ITEM_POTION + 94
-        || (pItem->Type >= ITEM_POTION + 85 && pItem->Type <= ITEM_POTION + 87)
+        || (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_CHERRY_BLOSSOM_FLOWER_PETAL)
         || (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98)
         || pItem->Type == ITEM_HELPER + 81
         || pItem->Type == ITEM_HELPER + 82
@@ -1763,7 +1763,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 29)
+    if (pItem->Type == ITEM_ARMOR_OF_GUARDSMAN)
     {
         if (IsUnitedMarketPlace())
         {
@@ -1831,19 +1831,19 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 51)
+    if (pItem->Type == ITEM_SCROLL_OF_BLOOD)
     {
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(5, (pItem->Level >> 3) & 15);
         return true;
     }
 
-    if (pItem->Type == ITEM_POTION + 19)
+    if (pItem->Type == ITEM_DEVILS_INVITATION)
     {
         SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(1, (pItem->Level >> 3) & 15);
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 18)
+    if (pItem->Type == ITEM_INVISIBILITY_CLOAK)
     {
         if (pItem->Level == 0)
         {
@@ -1857,35 +1857,35 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         return true;
     }
 
-    if ((pItem->Type >= ITEM_ETC + 0 && pItem->Type < ITEM_ETC + MAX_ITEM_INDEX)
-        || (pItem->Type >= ITEM_WING + 7 && pItem->Type <= ITEM_WING + 14)
-        || (pItem->Type >= ITEM_WING + 16 && pItem->Type <= ITEM_WING + 19)
+    if ((pItem->Type >= ITEM_SCROLL_OF_POISON && pItem->Type < ITEM_ETC + MAX_ITEM_INDEX)
+        || (pItem->Type >= ITEM_ORB_OF_TWISTING_SLASH && pItem->Type <= ITEM_ORB_OF_GREATER_FORTITUDE)
+        || (pItem->Type >= ITEM_ORB_OF_FIRE_SLASH && pItem->Type <= ITEM_ORB_OF_DEATH_STAB)
         || (pItem->Type == ITEM_WING + 20)
-        || (pItem->Type >= ITEM_WING + 21 && pItem->Type <= ITEM_WING + 24)
-        || (pItem->Type == ITEM_WING + 35)
-        || (pItem->Type == ITEM_WING + 44)
-        || (pItem->Type == ITEM_WING + 47)
-        || (pItem->Type == ITEM_WING + 46)
-        || (pItem->Type == ITEM_WING + 45)
-        || (pItem->Type == ITEM_WING + 48)
-        || (pItem->Type == ITEM_ETC + 29)
-        || (pItem->Type == ITEM_ETC + 28)
+        || (pItem->Type >= ITEM_SCROLL_OF_FIREBURST && pItem->Type <= ITEM_SCROLL_OF_ELECTRIC_SPARK)
+        || (pItem->Type == ITEM_SCROLL_OF_FIRE_SCREAM)
+        || (pItem->Type == ITEM_CRYSTAL_OF_DESTRUCTION)
+        || (pItem->Type == ITEM_CRYSTAL_OF_FLAME_STRIKE)
+        || (pItem->Type == ITEM_CRYSTAL_OF_RECOVERY)
+        || (pItem->Type == ITEM_CRYSTAL_OF_MULTI_SHOT)
+        || (pItem->Type == ITEM_SCROLL_OF_CHAOTIC_DISEIER)
+        || (pItem->Type == ITEM_SCROLL_OF_GIGANTIC_STORM)
+        || (pItem->Type == ITEM_SCROLL_OF_WIZARDRY_ENHANCE)
         )
     {
         bool bReadBookGem = true;
 
-        if ((pItem->Type == ITEM_ETC + 18)
-            || (pItem->Type == ITEM_ETC + 28)
-            || pItem->Type == ITEM_WING + 45
-            || (pItem->Type == ITEM_WING + 46)
-            || (pItem->Type == ITEM_WING + 44)
+        if ((pItem->Type == ITEM_SCROLL_OF_NOVA)
+            || (pItem->Type == ITEM_SCROLL_OF_WIZARDRY_ENHANCE)
+            || pItem->Type == ITEM_CRYSTAL_OF_MULTI_SHOT
+            || (pItem->Type == ITEM_CRYSTAL_OF_RECOVERY)
+            || (pItem->Type == ITEM_CRYSTAL_OF_DESTRUCTION)
             )
         {
             if (g_csQuest.getQuestState2(QUEST_CHANGE_UP_3) != QUEST_END)
 
                 bReadBookGem = false;
         }
-        if (pItem->Type == ITEM_WING + 48)
+        if (pItem->Type == ITEM_SCROLL_OF_CHAOTIC_DISEIER)
         {
             const int Level = CharacterAttribute->Level;
             if (Level < 220)
@@ -1910,7 +1910,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 15)
+    if (pItem->Type == ITEM_FRUITS)
     {
         const int Level = CharacterAttribute->Level;
 
@@ -1949,7 +1949,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 11)
+    if (pItem->Type == ITEM_LIFE_STONE_ITEM)
     {
         bool bUse = false;
         const int  Level = (pItem->Level >> 3) & 15;
@@ -2048,12 +2048,12 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
             || g_pMyInventoryExt->GetOwnerOf(pPickedItem)) // Movement between Inventory (and within extensions)
         {
             // Apply Jewels:
-            if ((pPickItem->Type == ITEM_POTION + 13
-                || pPickItem->Type == ITEM_POTION + 14
-                || pPickItem->Type == ITEM_POTION + 16
-                || pPickItem->Type == ITEM_POTION + 42
-                || pPickItem->Type == ITEM_POTION + 43
-                || pPickItem->Type == ITEM_POTION + 44
+            if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS
+                || pPickItem->Type == ITEM_JEWEL_OF_SOUL
+                || pPickItem->Type == ITEM_JEWEL_OF_LIFE
+                || pPickItem->Type == ITEM_JEWEL_OF_HARMONY
+                || pPickItem->Type == ITEM_LOWER_REFINE_STONE
+                || pPickItem->Type == ITEM_HIGHER_REFINE_STONE
                 || pPickItem->Type == ITEM_POTION + 160
                 || pPickItem->Type == ITEM_POTION + 161
                 ) && ApplyJewels(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex))
@@ -2308,29 +2308,29 @@ bool CNewUIMyInventory::CanRegisterItemHotKey(int iType)
 {
     switch (iType)
     {
-    case ITEM_POTION + 0:
-    case ITEM_POTION + 1:
-    case ITEM_POTION + 2:
-    case ITEM_POTION + 3:
-    case ITEM_POTION + 4:
-    case ITEM_POTION + 5:
-    case ITEM_POTION + 6:
-    case ITEM_POTION + 7:
-    case ITEM_POTION + 8:
-    case ITEM_POTION + 9:
-    case ITEM_POTION + 10:
+    case ITEM_APPLE:
+    case ITEM_SMALL_HEALING_POTION:
+    case ITEM_MEDIUM_HEALING_POTION:
+    case ITEM_LARGE_HEALING_POTION:
+    case ITEM_SMALL_MANA_POTION:
+    case ITEM_MEDIUM_MANA_POTION:
+    case ITEM_LARGE_MANA_POTION:
+    case ITEM_SIEGE_POTION:
+    case ITEM_ANTIDOTE:
+    case ITEM_ALE:
+    case ITEM_TOWN_PORTAL_SCROLL:
     case ITEM_POTION + 20:
-    case ITEM_POTION + 35:
-    case ITEM_POTION + 36:
-    case ITEM_POTION + 37:
-    case ITEM_POTION + 38:
-    case ITEM_POTION + 39:
-    case ITEM_POTION + 40:
-    case ITEM_POTION + 46:
-    case ITEM_POTION + 47:
-    case ITEM_POTION + 48:
-    case ITEM_POTION + 49:
-    case ITEM_POTION + 50:
+    case ITEM_SMALL_SHIELD_POTION:
+    case ITEM_MEDIUM_SHIELD_POTION:
+    case ITEM_LARGE_SHIELD_POTION:
+    case ITEM_SMALL_COMPLEX_POTION:
+    case ITEM_MEDIUM_COMPLEX_POTION:
+    case ITEM_LARGE_COMPLEX_POTION:
+    case ITEM_JACK_OLANTERN_BLESSINGS:
+    case ITEM_JACK_OLANTERN_WRATH:
+    case ITEM_JACK_OLANTERN_CRY:
+    case ITEM_JACK_OLANTERN_FOOD:
+    case ITEM_JACK_OLANTERN_DRINK:
     case ITEM_POTION + 70:
     case ITEM_POTION + 71:
     case ITEM_POTION + 78:
@@ -2339,9 +2339,9 @@ bool CNewUIMyInventory::CanRegisterItemHotKey(int iType)
     case ITEM_POTION + 81:
     case ITEM_POTION + 82:
     case ITEM_POTION + 94:
-    case ITEM_POTION + 85:
-    case ITEM_POTION + 86:
-    case ITEM_POTION + 87:
+    case ITEM_CHERRY_BLOSSOM_WINE:
+    case ITEM_CHERRY_BLOSSOM_RICE_CAKE:
+    case ITEM_CHERRY_BLOSSOM_FLOWER_PETAL:
     case ITEM_POTION + 133:
         return true;
     }
@@ -2399,7 +2399,7 @@ void CNewUIMyInventory::LockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(100, 100, 100, 255));
     m_BtnMyShop.Lock();
-    // 1125 "°³ÀÎ»óÁ¡¿­±â(S)"
+    // 1125 "ê°œì¸ìƒì ì—´ê¸°(S)"
     m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
@@ -2408,13 +2408,13 @@ void CNewUIMyInventory::UnlockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(255, 255, 255, 255));
     m_BtnMyShop.UnLock();
-    // 1125 "°³ÀÎ»óÁ¡¿­±â(S)"
+    // 1125 "ê°œì¸ìƒì ì—´ê¸°(S)"
     m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
 void CNewUIMyInventory::ToggleRepairMode()
 {
-    //. Åä±Û ¼ö¸®¸ðµå
+    //. í† ê¸€ ìˆ˜ë¦¬ëª¨ë“œ
     if (m_RepairMode == REPAIR_MODE_OFF)
     {
         SetRepairMode(true);
@@ -2490,7 +2490,7 @@ int CNewUIMyInventory::GetPointedItemIndex() const
 
 int CNewUIMyInventory::FindManaItemIndex() const
 {
-    for (int i = ITEM_POTION + 6; i >= ITEM_POTION + 4; i--)
+    for (int i = ITEM_LARGE_MANA_POTION; i >= ITEM_SMALL_MANA_POTION; i--)
     {
         const int iIndex = FindItemReverseIndex(i);
         if (iIndex != -1)

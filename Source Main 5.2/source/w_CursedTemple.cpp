@@ -1,4 +1,4 @@
-// w_CursedTemple.cpp: implementation of the CursedTemple class.
+ï»¿// w_CursedTemple.cpp: implementation of the CursedTemple class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -143,36 +143,36 @@ bool CursedTemple::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 388:
-    case 391:
-    case 394:
-    case 397:
-    case 400:
-    case 403:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
         return CheckMonsterSkill(c, o);
     }
 
     return false;
 }
 
-CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int iKey)
+CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPosY, int iKey)
 {
     CHARACTER* pCharacter = NULL;
 
     switch (iType)
     {
-    case 380:
+    case MONSTER_STONE_STATUE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_STATUE);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_STATUE, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"¼®»ó");
+        wcscpy(pCharacter->ID, L"ì„ìƒ");
         pCharacter->Object.EnableShadow = false;
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         pCharacter->Object.PKKey = 0;
     }
     break;
-    case 381:
+    case MONSTER_MU_ALLIES_GENERAL:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_NPC, iPosX, iPosY);
@@ -180,7 +180,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
         pCharacter->Object.Scale = 1.2f;
     }
     break;
-    case 382:
+    case MONSTER_ILLUSION_ELDER:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION_NPC, iPosX, iPosY);
@@ -188,27 +188,27 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
         pCharacter->Object.Scale = 1.2f;
     }
     break;
-    case 383:
+    case MONSTER_ALLIANCE_ITEM_STORAGE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_BASKET, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"¿¬ÇÕ±º ¼º¹°º¸°üÇÔ");
+        wcscpy(pCharacter->ID, L"ì—°í•©êµ° ì„±ë¬¼ë³´ê´€í•¨");
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowAlliedPointEffect = false;
     }
     break;
-    case 384:
+    case MONSTER_ILLUSION_ITEM_STORAGE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION__BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION__BASKET, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´Ü ¼º¹°º¸°üÇÔ");
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ ì„±ë¬¼ë³´ê´€í•¨");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowIllusionPointEffect = false;
     }
     break;
-    case 385:
+    case MONSTER_MIRAGE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ENTER_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ENTER_NPC, iPosX, iPosY);
@@ -216,63 +216,63 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
         pCharacter->Object.Scale = 0.95f;
     }
     break;
-    case 386:
-    case 389:
-    case 392:
-    case 395:
-    case 398:
-    case 401:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_LIGHTNING:
     {
-        OpenMonsterModel(123);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 123, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´ÜÀÇ ¸Á·É(¹ø°³)");
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING);
+        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ì˜ ë§ë ¹(ë²ˆê°œ)"); // Phantom of the Illusion Order (Lightning)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 387:
-    case 390:
-    case 393:
-    case 396:
-    case 399:
-    case 402:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_ICE:
     {
-        OpenMonsterModel(124);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 124, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´ÜÀÇ ¸Á·É(¾óÀ½)");
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE);
+        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_ICE, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ì˜ ë§ë ¹(ì–¼ìŒ)"); // Phantom of the Illusion Order (Ice)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 388:
-    case 391:
-    case 394:
-    case 397:
-    case 400:
-    case 403:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
     {
-        OpenMonsterModel(125);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 125, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´ÜÀÇ ¸Á·É(µ¶)");
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON);
+        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_POISON, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ì˜ ë§ë ¹(ë…)"); // Phantom of the Illusion Order (Poison)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 404:
+    case MONSTER_MU_ALLIES:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"¹Â¿¬ÇÕ");
+        wcscpy(pCharacter->ID, L"ë®¤ì—°í•©"); // Mu Alliance
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ALLIED_PLAYER;
     }
     break;
-    case 405:
+    case MONSTER_ILLUSION_SORCERER:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´Ü");
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨"); // Illusion Order
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ILLUSION_PLAYER;
     }
@@ -292,12 +292,12 @@ bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     Vector(1.f, 1.f, 1.f, Light);
     switch (c->MonsterIndex)
     {
-    case 388:
-    case 391:
-    case 394:
-    case 397:
-    case 400:
-    case 403:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -381,8 +381,8 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 123:
-    case MODEL_MONSTER01 + 124:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
         if (o->CurrentAction == MONSTER01_STOP1)
         {
@@ -415,7 +415,7 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 125:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_POISON:
     {
         /*
                     if(o->CurrentAction == MONSTER01_STOP1)
@@ -479,7 +479,7 @@ void CursedTemple::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 125:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_POISON:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -799,7 +799,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     }
     return true;
 
-    case MODEL_MONSTER01 + 125:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_POISON:
     {
         vec3_t vRelativePos, vWorldPos;
         Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -815,7 +815,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 124:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
         vec3_t vRelativePos, vWorldPos;
         float fLuminosity = (float)sinf((WorldTime) * 0.002f) * 0.2f;
@@ -855,7 +855,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 123:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
     {
         vec3_t vRelativePos, vWorldPos;
 
@@ -1089,8 +1089,8 @@ bool CursedTemple::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 2000 * 0.001f);
     }
     return true;
-    case MODEL_MONSTER01 + 123:
-    case MODEL_MONSTER01 + 124:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.8f;

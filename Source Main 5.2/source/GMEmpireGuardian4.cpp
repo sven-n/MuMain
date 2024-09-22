@@ -1,4 +1,4 @@
-// GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
+﻿// GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "GMEmpireGuardian4.h"
@@ -83,10 +83,10 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
 
     switch (iType)
     {
-    case 504:
+    case MONSTER_GAYION_THE_GLADIATOR:
     {
-        OpenMonsterModel(164);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 164, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_GAYION);
+        pCharacter = CreateCharacter(Key, MODEL_GAYION, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Gayion The Gladiator").copy(pCharacter->ID, 19);
 
@@ -107,11 +107,11 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
         m_bCurrentIsRage_BossGaion = false;
     }
     break;
-    case 505:
-    case 522:
+    case MONSTER_JERRY:
+    case MONSTER_ADVISER_JERINTEU:
     {
-        OpenMonsterModel(165);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 165, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_JERRY);
+        pCharacter = CreateCharacter(Key, MODEL_JERRY, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Jerry The Adviseru").copy(pCharacter->ID, 19);
         pCharacter->Object.Scale = 1.45f;
@@ -119,10 +119,10 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
         m_bCurrentIsRage_Jerint = false;
     }
     break;
-    case 527:
+    case MONSTER_STAR_GATE:
     {
-        OpenMonsterModel(186);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 186, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_STAR_GATE);
+        pCharacter = CreateCharacter(Key, MODEL_STAR_GATE, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Star Gate").copy(pCharacter->ID, 10);
         pCharacter->Object.m_bRenderShadow = false;
@@ -130,10 +130,10 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     }
     break;
 
-    case 528:
+    case MONSTER_RUSH_GATE:
     {
-        OpenMonsterModel(187);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 187, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_RUSH_GATE);
+        pCharacter = CreateCharacter(Key, MODEL_RUSH_GATE, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Rush Gate").copy(pCharacter->ID, 10);
         pCharacter->Object.m_bRenderShadow = false;
@@ -253,7 +253,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 187:
+    case MODEL_RUSH_GATE:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -286,7 +286,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
+    case MODEL_GAYION:
     {
         switch (o->CurrentAction)
         {
@@ -452,8 +452,8 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 182:
-    case MODEL_MONSTER01 + 165:
+    case MODEL_DEATH_ANGEL_3:
+    case MODEL_JERRY:
     {
         switch (o->CurrentAction)
         {
@@ -648,11 +648,11 @@ void GMEmpireGuardian4::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 166:
-    case MODEL_MONSTER01 + 178:
-    case MODEL_MONSTER01 + 179:
-    case MODEL_MONSTER01 + 180:
-    case MODEL_MONSTER01 + 181:
+    case MODEL_RAYMOND:
+    case MODEL_DEFENDER:
+    case MODEL_FORSAKER:
+    case MODEL_OCELOT:
+    case MODEL_ERIC:
     {
         g_EmpireGuardian1.MoveBlurEffect(c, o, b);
     }
@@ -672,9 +672,9 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
-    case MODEL_MONSTER01 + 165:
-    case MODEL_MONSTER01 + 167:
+    case MODEL_GAYION:
+    case MODEL_JERRY:
+    case MODEL_LUCAS:
     {
         RenderMonster(o, b, ExtraMon);
 
@@ -688,7 +688,7 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     return true;
-    case MODEL_MONSTER01 + 186:
+    case MODEL_STAR_GATE:
     {
         int tileX = int(o->Position[0] / 100);
         int tileY = int(o->Position[1] / 100);
@@ -713,7 +713,7 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     }
     return true;
 
-    case MODEL_MONSTER01 + 187:
+    case MODEL_RUSH_GATE:
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
@@ -1081,13 +1081,13 @@ bool GMEmpireGuardian4::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
+    case MODEL_GAYION:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     break;
-    case MODEL_MONSTER01 + 165:
-    case MODEL_MONSTER01 + 182:
+    case MODEL_JERRY:
+    case MODEL_DEATH_ANGEL_3:
     {
         vec3_t		v3LightBackup;
 
@@ -1122,7 +1122,7 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
+    case MODEL_GAYION:
     {
         VectorCopy(o->Position, b->BodyOrigin);
         Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -1161,8 +1161,8 @@ bool GMEmpireGuardian4::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 165:
-    case MODEL_MONSTER01 + 182:
+    case MODEL_JERRY:
+    case MODEL_DEATH_ANGEL_3:
     {
         VectorCopy(o->Position, b->BodyOrigin);
         Vector(0.0f, 0.0f, 0.0f, vRelative);
@@ -1345,7 +1345,7 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 504:
+    case MONSTER_GAYION_THE_GLADIATOR:
     {
         if (m_bCurrentIsRage_BossGaion == true)
         {
@@ -1398,7 +1398,7 @@ bool GMEmpireGuardian4::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     return true;
-    case 505:
+    case MONSTER_JERRY:
     {
         if (m_bCurrentIsRage_Jerint == true)
         {
@@ -1470,7 +1470,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 164:
+    case MODEL_GAYION:
     {
         switch (o->CurrentAction)
         {
@@ -1492,7 +1492,7 @@ bool GMEmpireGuardian4::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 165:
+    case MODEL_JERRY:
     {
         switch (o->CurrentAction)
         {

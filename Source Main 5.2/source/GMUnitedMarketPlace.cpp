@@ -1,4 +1,4 @@
-// GMUnitedMarketPlace.cpp: implementation of the GMUnitedMarketPlace class.
+ï»¿// GMUnitedMarketPlace.cpp: implementation of the GMUnitedMarketPlace class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -47,7 +47,7 @@ bool GMUnitedMarketPlace::CreateObject(OBJECT* o)
 {
     switch (o->Type)
     {
-    case 67:	// ±â´ë±â ¹Ú½º
+    case 67:	// ê¸°ëŒ€ê¸° ë°•ìŠ¤
     {
         CreateOperate(o);
         Vector(100.f, 100.f, 160.f, o->BoundingBoxMax);
@@ -67,9 +67,9 @@ CHARACTER* GMUnitedMarketPlace::CreateMonster(int iType, int PosX, int PosY, int
     // 	{
     // 	case 526:
     // 		{
-    // 			OpenMonsterModel(185);
+    // 			OpenMonsterModel(MONSTER_MODEL_AEGIS_3);
     // 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+185, PosX, PosY);
-    // 			wcscpy(pCharacter->ID, L"¼®»ó");
+    // 			wcscpy(pCharacter->ID, L"ì„ìƒ");
     // 			pCharacter->Object.m_bRenderShadow = false;
     // 			pCharacter->Object.Scale = 0.6f;
     // 			pCharacter->Object.LifeTime = 100;
@@ -91,12 +91,12 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
 
     switch (o->Type)
     {
-    case 8:	// chofountain01 ÆøÆ÷¹° Ç¥¸éÀÇ Animation ¼Óµµ Ã³¸® ¾à°£´õ ºü¸£°Ô.
+    case 8:	// chofountain01 í­í¬ë¬¼ í‘œë©´ì˜ Animation ì†ë„ ì²˜ë¦¬ ì•½ê°„ë” ë¹ ë¥´ê²Œ.
     {
         o->Velocity = 0.2f;
     }
     return true;
-    case 30:	// °¡·Îµî
+    case 30:	// ê°€ë¡œë“±
     {
         VectorCopy(o->Position, b->BodyOrigin);
         b->BodyScale = o->Scale;
@@ -113,7 +113,7 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
         AddTerrainLight(vLightPosition[0], vLightPosition[1], vLightFire, 3, PrimaryTerrainLight);
     }
     return true;
-    case 35:	// º®°¡·Îµî
+    case 35:	// ë²½ê°€ë¡œë“±
     {
         VectorCopy(o->Position, b->BodyOrigin);
         b->BodyScale = o->Scale;
@@ -174,7 +174,7 @@ bool GMUnitedMarketPlace::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     // 	switch(o->Type)
     // 	{
-    // 	case MODEL_MONSTER01+168:	// µ¥½½·¯
+    // 	case MODEL_MONSTER01+168:	// ë°ìŠ¬ëŸ¬
     // 		{
     // 			switch( o->CurrentAction )
     // 			{
@@ -336,7 +336,7 @@ bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 185:
+    case MODEL_STATUE:
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
@@ -444,7 +444,7 @@ bool GMUnitedMarketPlace::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 507:
+    case MONSTER_LUCAS:
     {
         // 			switch(c->MonsterSkill)
         // 			{

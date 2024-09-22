@@ -1,4 +1,4 @@
-// NewUICharacterInfoWindow.cpp: implementation of the CNewUICharacterInfoWindow class.
+ï»¿// NewUICharacterInfoWindow.cpp: implementation of the CNewUICharacterInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -710,17 +710,17 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         int maxIAttackDamageMin = 0;
         int maxIAttackDamageMax = 0;
-        if (iNonExpiredLRingType == ITEM_HELPER + 41 || iNonExpiredRRingType == ITEM_HELPER + 41)
+        if (iNonExpiredLRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
         {
             maxIAttackDamageMin = max(maxIAttackDamageMin, 20);
             maxIAttackDamageMax = max(maxIAttackDamageMax, 20);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 76 || iNonExpiredRRingType == ITEM_HELPER + 76)
+        if (iNonExpiredLRingType == ITEM_PANDA_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_PANDA_TRANSFORMATION_RING)
         {
             maxIAttackDamageMin = max(maxIAttackDamageMin, 30);
             maxIAttackDamageMax = max(maxIAttackDamageMax, 30);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 122 || iNonExpiredRRingType == ITEM_HELPER + 122)
+        if (iNonExpiredLRingType == ITEM_SKELETON_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_SKELETON_TRANSFORMATION_RING)
         {
             maxIAttackDamageMin = max(maxIAttackDamageMin, 40);
             maxIAttackDamageMax = max(maxIAttackDamageMax, 40);
@@ -733,13 +733,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     ITEM* pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
     if (pItemHelper)
     {
-        if (pItemHelper->Type == ITEM_HELPER + 37 && pItemHelper->Option1 == 0x04)
+        if (pItemHelper->Type == ITEM_HORN_OF_FENRIR && pItemHelper->Option1 == 0x04)
         {
             WORD wLevel = CharacterAttribute->Level;
             iAttackDamageMin += (wLevel / 12);
             iAttackDamageMax += (wLevel / 12);
         }
-        if (pItemHelper->Type == ITEM_HELPER + 64)
+        if (pItemHelper->Type == ITEM_DEMON)
         {
             if (false == pItemHelper->bExpiredPeriod)
             {
@@ -747,7 +747,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                 iAttackDamageMax += int(float(iAttackDamageMax) * 0.4f);
             }
         }
-        if (pItemHelper->Type == ITEM_HELPER + 123)
+        if (pItemHelper->Type == ITEM_PET_SKELETON)
         {
             if (false == pItemHelper->bExpiredPeriod)
             {
@@ -755,7 +755,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                 iAttackDamageMax += int(float(iAttackDamageMax) * 0.2f);
             }
         }
-        if (pItemHelper->Type == ITEM_HELPER + 1)
+        if (pItemHelper->Type == ITEM_IMP)
         {
             iAttackDamageMin += int(float(iAttackDamageMin) * 0.3f);
             iAttackDamageMax += int(float(iAttackDamageMax) * 0.3f);
@@ -895,13 +895,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             iType = CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type;
 
             if (
-                (iType != ITEM_ARMOR + 15)
-                && (iType != ITEM_ARMOR + 20)
-                && (iType != ITEM_ARMOR + 23)
-                && (iType != ITEM_ARMOR + 32)
-                && (iType != ITEM_ARMOR + 37)
-                && (iType != ITEM_ARMOR + 47)
-                && (iType != ITEM_ARMOR + 48)
+                (iType != ITEM_STORM_CROW_ARMOR)
+                && (iType != ITEM_THUNDER_HAWK_ARMOR)
+                && (iType != ITEM_HURRICANE_ARMOR)
+                && (iType != ITEM_VOLCANO_ARMOR)
+                && (iType != ITEM_VALIANT_ARMOR)
+                && (iType != ITEM_DESTORY_ARMOR)
+                && (iType != ITEM_PHANTOM_ARMOR)
                 )
             {
                 bDexSuccess = false;
@@ -973,15 +973,15 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
     pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-    if (pItemRingLeft->Type == ITEM_HELPER + 39 || pItemRingRight->Type == ITEM_HELPER + 39)
+    if (pItemRingLeft->Type == ITEM_ELITE_TRANSFER_SKELETON_RING || pItemRingRight->Type == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         iChangeRingAddDefense = (t_adjdef + maxdefense) / 10;
     }
 
-    if (Hero->Helper.Type == MODEL_HELPER + 80)
+    if (Hero->Helper.Type == MODEL_PET_PANDA)
         iChangeRingAddDefense += 50;
 
-    if (Hero->Helper.Type == MODEL_HELPER + 106)
+    if (Hero->Helper.Type == MODEL_PET_UNICORN)
         iChangeRingAddDefense += 50;
 
     wchar_t strBlocking[256];
@@ -1080,7 +1080,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     ITEM* phelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
     if (phelper->Durability != 0 &&
-        (phelper->Type == ITEM_HELPER + 64 || phelper->Type == ITEM_HELPER + 123))
+        (phelper->Type == ITEM_DEMON || phelper->Type == ITEM_PET_SKELETON))
     {
         if (IsRequireEquipItem(phelper))
         {
@@ -1164,7 +1164,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         g_pRenderText->SetTextColor(255, 0, 240, 255);
     }
 
-    if (phelper->Durability != 0 && phelper->Type == ITEM_HELPER + 65)
+    if (phelper->Durability != 0 && phelper->Type == ITEM_SPIRIT_OF_GUARDIAN)
     {
         if (IsRequireEquipItem(phelper))
         {
@@ -1181,7 +1181,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
         iY += 13;
-        //¹°¸®°ø°Ý·Â
+        //ë¬¼ë¦¬ê³µê²©ë ¥
         swprintf(strVitality, GlobalText[3155], 50 + (wVitality / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strVitality);
     }
@@ -1298,17 +1298,17 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         int maxIMagicDamageMin = 0;
         int maxIMagicDamageMax = 0;
 
-        if (iNonExpiredLRingType == ITEM_HELPER + 41 || iNonExpiredRRingType == ITEM_HELPER + 41)
+        if (iNonExpiredLRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
         {
             maxIMagicDamageMin = max(maxIMagicDamageMin, 20);
             maxIMagicDamageMax = max(maxIMagicDamageMax, 20);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 76 || iNonExpiredRRingType == ITEM_HELPER + 76)
+        if (iNonExpiredLRingType == ITEM_PANDA_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_PANDA_TRANSFORMATION_RING)
         {
             maxIMagicDamageMin = max(maxIMagicDamageMin, 30);
             maxIMagicDamageMax = max(maxIMagicDamageMax, 30);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 122 || iNonExpiredRRingType == ITEM_HELPER + 122)
+        if (iNonExpiredLRingType == ITEM_SKELETON_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_SKELETON_TRANSFORMATION_RING)
         {
             maxIMagicDamageMin = max(maxIMagicDamageMin, 40);
             maxIMagicDamageMax = max(maxIMagicDamageMax, 40);
@@ -1320,14 +1320,14 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
         if (pItemHelper)
         {
-            if (pItemHelper->Type == ITEM_HELPER + 37 && pItemHelper->Option1 == 0x04)
+            if (pItemHelper->Type == ITEM_HORN_OF_FENRIR && pItemHelper->Option1 == 0x04)
             {
                 WORD wLevel = CharacterAttribute->Level;
                 iMagicDamageMin += (wLevel / 25);
                 iMagicDamageMax += (wLevel / 25);
             }
 
-            if (pItemHelper->Type == ITEM_HELPER + 64)
+            if (pItemHelper->Type == ITEM_DEMON)
             {
                 if (false == pItemHelper->bExpiredPeriod)
                 {
@@ -1335,7 +1335,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                     iMagicDamageMax += int(float(iMagicDamageMax) * 0.4f);
                 }
             }
-            if (pItemHelper->Type == ITEM_HELPER + 123)
+            if (pItemHelper->Type == ITEM_PET_SKELETON)
             {
                 if (false == pItemHelper->bExpiredPeriod)
                 {
@@ -1343,7 +1343,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                     iMagicDamageMax += int(float(iMagicDamageMax) * 0.2f);
                 }
             }
-            if (pItemHelper->Type == ITEM_HELPER + 1)
+            if (pItemHelper->Type == ITEM_IMP)
             {
                 iMagicDamageMin += int(float(iMagicDamageMin) * 0.3f);
                 iMagicDamageMax += int(float(iMagicDamageMax) * 0.3f);
@@ -1360,11 +1360,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         if ((pWeaponRight->Type >= MODEL_STAFF - MODEL_ITEM
             && pWeaponRight->Type < (MODEL_STAFF + MAX_ITEM_INDEX - MODEL_ITEM))
-            || pWeaponRight->Type == (MODEL_SWORD + 31 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 23 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 25 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 21 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 28 - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_RUNE_BLADE - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_EXPLOSION_BLADE - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_SWORD_DANCER - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_DARK_REIGN_BLADE - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_IMPERIAL_SWORD - MODEL_ITEM)
             )
         {
             float magicPercent = (float)(pWeaponRight->MagicPower) / 100;
@@ -1431,12 +1431,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         int maxICurseDamageMin = 0;
         int maxICurseDamageMax = 0;
 
-        if (iNonExpiredLRingType == ITEM_HELPER + 76 || iNonExpiredRRingType == ITEM_HELPER + 76)
+        if (iNonExpiredLRingType == ITEM_PANDA_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_PANDA_TRANSFORMATION_RING)
         {
             maxICurseDamageMin = max(maxICurseDamageMin, 30);
             maxICurseDamageMax = max(maxICurseDamageMax, 30);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 122 || iNonExpiredRRingType == ITEM_HELPER + 122)
+        if (iNonExpiredLRingType == ITEM_SKELETON_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_SKELETON_TRANSFORMATION_RING)
         {
             maxICurseDamageMin = max(maxICurseDamageMin, 40);
             maxICurseDamageMax = max(maxICurseDamageMax, 40);
@@ -1448,7 +1448,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
         if (pItemHelper)
         {
-            if (pItemHelper->Type == ITEM_HELPER + 64)
+            if (pItemHelper->Type == ITEM_DEMON)
             {
                 if (false == pItemHelper->bExpiredPeriod)
                 {
@@ -1456,7 +1456,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                     iCurseDamageMax += int(float(iCurseDamageMax) * 0.4f);
                 }
             }
-            if (pItemHelper->Type == ITEM_HELPER + 123)
+            if (pItemHelper->Type == ITEM_PET_SKELETON)
             {
                 if (false == pItemHelper->bExpiredPeriod)
                 {
@@ -1466,7 +1466,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             }
         }
 
-        if (ITEM_STAFF + 21 <= pWeaponLeft->Type && pWeaponLeft->Type <= ITEM_STAFF + 29)
+        if (ITEM_BOOK_OF_SAHAMUTT <= pWeaponLeft->Type && pWeaponLeft->Type <= ITEM_STAFF + 29)
         {
             float fCursePercent = (float)(pWeaponLeft->MagicPower) / 100;
 
@@ -1509,11 +1509,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
-        //¸¶¹ý°ø°Ý·Â
+        //ë§ˆë²•ê³µê²©ë ¥
         swprintf(strEnergy, GlobalText[3156], 50 + (wEnergy / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
         iY += 13;
-        //¹üÀ§°ø°Ý·Â
+        //ë²”ìœ„ê³µê²©ë ¥
         swprintf(strEnergy, GlobalText[3157], 100 + (wDexterity / 8 + wEnergy / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
     }

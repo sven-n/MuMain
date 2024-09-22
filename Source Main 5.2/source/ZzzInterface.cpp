@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -287,7 +287,7 @@ void SetIME_Status(bool halfShape)
 
     data = ::ImmGetContext(g_hWnd);
 
-    //  ¹Ý°¢.
+    //  ë°˜ê°.
     dwConv = g_dwOldConv;
     dwSent = g_dwOldSent;
     if (halfShape)
@@ -448,8 +448,8 @@ void RenderTipText(int sx, int sy, const wchar_t* Text)
     int BackupAlphaBlendType = AlphaBlendType;
     EnableAlphaTest();
     glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-    RenderColor((float)sx - 2, (float)sy - 3, (float)TextSize.cx / g_fScreenRate_x + 4, (float)1);	// À§
-    RenderColor((float)sx - 2, (float)sy - 3, (float)1, (float)TextSize.cy / g_fScreenRate_y + 4);	// ÁÂ
+    RenderColor((float)sx - 2, (float)sy - 3, (float)TextSize.cx / g_fScreenRate_x + 4, (float)1);	// ìœ„
+    RenderColor((float)sx - 2, (float)sy - 3, (float)1, (float)TextSize.cy / g_fScreenRate_y + 4);	// ì¢Œ
     RenderColor((float)sx - 2 + TextSize.cx / g_fScreenRate_x + 3, (float)sy - 3, (float)1, (float)TextSize.cy / g_fScreenRate_y + 4);
     RenderColor((float)sx - 2, (float)sy - 3 + TextSize.cy / g_fScreenRate_y + 3, (float)TextSize.cx / g_fScreenRate_x + 4, (float)1);
 
@@ -731,7 +731,7 @@ void SetBooleanPosition(CHAT* c)
     SIZE Size[5];
     memset(&Size[0], 0, sizeof(SIZE) * 5);
 
-    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || // GM ÀÏ°æ¿ì
+    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || // GM ì¼ê²½ìš°
         (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))
     {
         g_pRenderText->SetFont(g_hFontBold);
@@ -790,7 +790,7 @@ void SetPlayerColor(BYTE PK)
     }
 }
 
-extern float g_fScreenRate_x;	// ¡Ø
+extern float g_fScreenRate_x;	// â€»
 extern float g_fScreenRate_y;
 const int ciSystemColor = 240;
 
@@ -1326,11 +1326,11 @@ int SearchArrow()
 
         if (gCharacterManager.GetEquipedBowType() == BOWTYPE_BOW)
         {
-            Arrow = ITEM_BOW + 15;
+            Arrow = ITEM_ARROWS;
         }
         else if (gCharacterManager.GetEquipedBowType() == BOWTYPE_CROSSBOW)
         {
-            Arrow = ITEM_BOW + 7;
+            Arrow = ITEM_BOLT;
         }
 
         int iIndex = g_pMyInventory->FindItemReverseIndex(Arrow);
@@ -1348,11 +1348,11 @@ int SearchArrowCount()
 
         if (gCharacterManager.GetEquipedBowType() == BOWTYPE_BOW)
         {
-            Arrow = ITEM_BOW + 15;
+            Arrow = ITEM_ARROWS;
         }
         else if (gCharacterManager.GetEquipedBowType() == BOWTYPE_CROSSBOW)
         {
-            Arrow = ITEM_BOW + 7;
+            Arrow = ITEM_BOLT;
         }
         Count = g_pMyInventory->GetNumItemByType(Arrow);
     }
@@ -1392,7 +1392,7 @@ bool CheckWall(int sx1, int sy1, int sx2, int sy2)
     int error = 0, count = 0;
     do {
         int _type = (SelectedCharacter >= 0 ? CharactersClient[SelectedCharacter].Object.Type : 0);
-        if ((_type != MODEL_MONSTER01 + 183 && _type != MODEL_MONSTER01 + 184 && _type != MODEL_MONSTER01 + 186 && _type != MODEL_MONSTER01 + 187)
+        if ((_type != MODEL_EVIL_GATE && _type != MODEL_LION_GATE && _type != MODEL_STAR_GATE && _type != MODEL_RUSH_GATE)
             && (TerrainWall[Index] >= TW_NOMOVE && (TerrainWall[Index] & TW_ACTION) != TW_ACTION && (TerrainWall[Index] & TW_HEIGHT) != TW_HEIGHT && (TerrainWall[Index] & TW_CAMERA_UP) != TW_CAMERA_UP))
         {
             return false;
@@ -1515,7 +1515,7 @@ bool CheckAttack_Fenrir(CHARACTER* c)
             }
         }
 
-        if (c->GuildRelationShip == GR_RIVAL || c->GuildRelationShip == GR_RIVALUNION)		//¹ÚÁ¾ÈÆ Ç¥½Ã
+        if (c->GuildRelationShip == GR_RIVAL || c->GuildRelationShip == GR_RIVALUNION)		//ë°•ì¢…í›ˆ í‘œì‹œ
         {
             return true;
         }
@@ -2061,7 +2061,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
     if (Skill == AT_SKILL_RIDER
         || Skill == AT_SKILL_ONETOONE
         || (AT_SKILL_BLOW_UP <= Skill && Skill <= AT_SKILL_BLOW_UP + 4)
-        || (Skill == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HELPER + 2 || Hero->Helper.Type == MODEL_HELPER + 3 || Hero->Helper.Type == MODEL_HELPER + 4 || Hero->Helper.Type == MODEL_HELPER + 37))
+        || (Skill == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_DARK_HORSE_ITEM || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
         || Skill == AT_SKILL_STRONG_PIER
         || Skill == AT_SKILL_LONGPIER_ATTACK
         || (AT_SKILL_FIRE_BUST_UP <= Skill && Skill <= AT_SKILL_FIRE_BUST_UP + 4)
@@ -2216,7 +2216,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         switch (Skill)
         {
         case AT_SKILL_SPEAR:
-            if (c->Helper.Type == MODEL_HELPER + 37)
+            if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
                 SetAction(o, PLAYER_FENRIR_ATTACK_SPEAR);
             else
                 SetAction(o, PLAYER_ATTACK_SKILL_SPEAR);
@@ -2258,7 +2258,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             SetAction(o, PLAYER_ATTACK_RUSH);
             break;
         default:
-            if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+            if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
                 SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
             else
                 SetAction(o, PLAYER_ATTACK_SKILL_SWORD1 + g_MovementSkill.m_iSkill - AT_SKILL_SWORD1);
@@ -2282,7 +2282,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         && !(AT_SKILL_FIRE_BUST_UP <= Skill && AT_SKILL_FIRE_BUST_UP + 4 >= Skill))
     {
         CreateParticle(BITMAP_SHINY + 2, o->Position, o->Angle, Light, 0, 0.f, o);
-        PlayBuffer(SOUND_BRANDISH_SWORD01 + rand() % 2);
+        PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2));
     }
 
     VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
@@ -2291,7 +2291,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
     if (Skill != AT_SKILL_GAOTIC)
         SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
 
-    if (((!g_isCharacterBuff(o, eDeBuff_Harden)) && c->Helper.Type != MODEL_HELPER + 4)
+    if (((!g_isCharacterBuff(o, eDeBuff_Harden)) && c->Helper.Type != MODEL_DARK_HORSE_ITEM)
         && Skill != AT_SKILL_DARK_SCREAM
         && !(AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP + 4)
         )
@@ -2303,10 +2303,10 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             || Skill == AT_SKILL_STRONG_PIER
             || Skill == AT_SKILL_ONEFLASH
             || Skill == AT_SKILL_RUSH
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 277
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 283
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 278
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 288
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_GUARDIAN_STATUE
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_LIFE_STONE
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CANON_TOWER
             )
         {
             int angle = abs((int)(o->Angle[2] / 45.f));
@@ -2487,13 +2487,13 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
         {
             switch (pCha->Helper.Type)
             {
-            case MODEL_HELPER + 2:
+            case MODEL_HORN_OF_UNIRIA:
                 SetAction(pObj, PLAYER_SKILL_DRAIN_LIFE_UNI);
                 break;
-            case MODEL_HELPER + 3:
+            case MODEL_HORN_OF_DINORANT:
                 SetAction(pObj, PLAYER_SKILL_DRAIN_LIFE_DINO);
                 break;
-            case MODEL_HELPER + 37:
+            case MODEL_HORN_OF_FENRIR:
                 SetAction(pObj, PLAYER_SKILL_DRAIN_LIFE_FENRIR);
                 break;
             default:
@@ -2505,13 +2505,13 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
         {
             switch (pCha->Helper.Type)
             {
-            case MODEL_HELPER + 2:
+            case MODEL_HORN_OF_UNIRIA:
                 SetAction(pObj, PLAYER_SKILL_LIGHTNING_ORB_UNI);
                 break;
-            case MODEL_HELPER + 3:
+            case MODEL_HORN_OF_DINORANT:
                 SetAction(pObj, PLAYER_SKILL_LIGHTNING_ORB_DINO);
                 break;
-            case MODEL_HELPER + 37:
+            case MODEL_HORN_OF_FENRIR:
                 SetAction(pObj, PLAYER_SKILL_LIGHTNING_ORB_FENRIR);
                 break;
             default:
@@ -2536,13 +2536,13 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 
         switch (pCha->Helper.Type)
         {
-        case MODEL_HELPER + 2:
+        case MODEL_HORN_OF_UNIRIA:
             SetAction(pObj, PLAYER_SKILL_CHAIN_LIGHTNING_UNI);
             break;
-        case MODEL_HELPER + 3:
+        case MODEL_HORN_OF_DINORANT:
             SetAction(pObj, PLAYER_SKILL_CHAIN_LIGHTNING_DINO);
             break;
-        case MODEL_HELPER + 37:
+        case MODEL_HORN_OF_FENRIR:
             SetAction(pObj, PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR);
             break;
         default:
@@ -2580,13 +2580,13 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
         LetHeroStop();
         switch (pCha->Helper.Type)
         {
-        case MODEL_HELPER + 2:
+        case MODEL_HORN_OF_UNIRIA:
             SetAction(pObj, PLAYER_SKILL_SLEEP_UNI);
             break;
-        case MODEL_HELPER + 3:
+        case MODEL_HORN_OF_DINORANT:
             SetAction(pObj, PLAYER_SKILL_SLEEP_DINO);
             break;
-        case MODEL_HELPER + 37:
+        case MODEL_HORN_OF_FENRIR:
             SetAction(pObj, PLAYER_SKILL_SLEEP_FENRIR);
             break;
         default:
@@ -2601,13 +2601,13 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
         SendRequestMagicContinue(iSkill, pCha->PositionX, pCha->PositionY, (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
         switch (pCha->Helper.Type)
         {
-        case MODEL_HELPER + 2:
+        case MODEL_HORN_OF_UNIRIA:
             SetAction(pObj, PLAYER_SKILL_SLEEP_UNI);
             break;
-        case MODEL_HELPER + 3:
+        case MODEL_HORN_OF_DINORANT:
             SetAction(pObj, PLAYER_SKILL_SLEEP_DINO);
             break;
-        case MODEL_HELPER + 37:
+        case MODEL_HORN_OF_FENRIR:
             SetAction(pObj, PLAYER_SKILL_SLEEP_FENRIR);
             break;
         default:
@@ -2676,10 +2676,10 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         BYTE TargetPosY = (BYTE)(pCha->TargetPosition[1] / TERRAIN_SCALE);
 
         if ((gMapManager.InBloodCastle()) || iSkill == AT_SKILL_OCCUPY
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 277
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 283
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 278
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == 288)
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_GUARDIAN_STATUE
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_LIFE_STONE
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CANON_TOWER)
         {
             int angle = abs((int)(pObj->Angle[2] / 45.f));
             switch (angle)
@@ -3067,7 +3067,7 @@ bool CheckArrow()
 
     if (gCharacterManager.GetEquipedBowType() == BOWTYPE_CROSSBOW)
     {
-        if ((Left != ITEM_BOW + 7) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability <= 0))
+        if ((Left != ITEM_BOLT) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability <= 0))
         {
             ReloadArrow();
             return false;
@@ -3075,7 +3075,7 @@ bool CheckArrow()
     }
     else if (gCharacterManager.GetEquipedBowType() == BOWTYPE_BOW)
     {
-        if ((Right != ITEM_BOW + 15) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Durability <= 0))
+        if ((Right != ITEM_ARROWS) || (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Durability <= 0))
         {
             ReloadArrow();
             return false;
@@ -3277,7 +3277,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         switch (iSkill)
         {
         case AT_SKILL_SPEAR:
-            if (Hero->Helper.Type != MODEL_HELPER + 2)
+            if (Hero->Helper.Type != MODEL_HORN_OF_UNIRIA)
             {
                 break;
             }
@@ -3511,18 +3511,18 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             if (CharactersClient[TargetNpc].MonsterIndex >= npcIndex)
             {
                 int level = CharacterAttribute->Level;
-                if (CharactersClient[TargetNpc].MonsterIndex == 238 && level < 10)
+                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_CHAOS_GOBLIN && level < 10)
                 {
                     wchar_t Text[100];
                     swprintf(Text, GlobalText[663], CHAOS_MIX_LEVEL);
                     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     break;
                 }
-                if (CharactersClient[TargetNpc].MonsterIndex == 243 ||
-                    CharactersClient[TargetNpc].MonsterIndex == 246 ||
-                    CharactersClient[TargetNpc].MonsterIndex == 251
-                    || CharactersClient[TargetNpc].MonsterIndex == 416
-                    || CharactersClient[TargetNpc].MonsterIndex == 578
+                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_EO_THE_CRAFTSMAN ||
+                    CharactersClient[TargetNpc].MonsterIndex == MONSTER_ZIENNA_THE_WEAPONS_MERCHANT ||
+                    CharactersClient[TargetNpc].MonsterIndex == MONSTER_HANZO_THE_BLACKSMITH
+                    || CharactersClient[TargetNpc].MonsterIndex == MONSTER_RHEA
+                    || CharactersClient[TargetNpc].MonsterIndex == MONSTER_WEAPONS_MERCHANT_BOLO
                     )
                 {
                     g_pNPCShop->SetRepairShop(true);
@@ -3586,35 +3586,35 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
                     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex >= 468 && CharactersClient[TargetNpc].MonsterIndex <= 475)
+                else if (CharactersClient[TargetNpc].MonsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && CharactersClient[TargetNpc].MonsterIndex <= MONSTER_LITTLE_SANTA_PINK)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
 
                     wchar_t _Temp[32] = { 0, };
-                    if (CharactersClient[TargetNpc].MonsterIndex == 470)
+                    if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LITTLE_SANTA_RED)
                     {
                         swprintf(_Temp, GlobalText[2596], 100);
                         g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
-                    else if (CharactersClient[TargetNpc].MonsterIndex == 471)
+                    else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LITTLE_SANTA_BLUE)
                     {
                         swprintf(_Temp, GlobalText[2597], 100);
                         g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex == 478)
+                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_DELGADO)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex == 540)
+                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LUGARD)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex == 547)
+                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_MARKET_UNION_MEMBER_JULIA)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
-                else if (CharactersClient[TargetNpc].MonsterIndex == 579)
+                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_DAVID)
                 {
                     SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
                 }
@@ -3632,14 +3632,14 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                         if (!g_CursedTemple->IsGaugebarEnabled())
                         {
 #ifdef LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            if (CharactersClient[TargetNpc].MonsterIndex == 380
+                            if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE
                                 || (g_pCursedTempleWindow->CheckInventoryHolyItem(Hero)
-                                    && ((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied && CharactersClient[TargetNpc].MonsterIndex == 383)
-                                        || (g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && CharactersClient[TargetNpc].MonsterIndex == 384))
+                                    && ((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied && CharactersClient[TargetNpc].MonsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE)
+                                        || (g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && CharactersClient[TargetNpc].MonsterIndex == MONSTER_ILLUSION_ITEM_STORAGE))
                                     ))
 #else  //LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            if (CharactersClient[TargetNpc].MonsterIndex == 380 ||
-                                ((CharactersClient[TargetNpc].MonsterIndex == 383 || CharactersClient[TargetNpc].MonsterIndex == 384)
+                            if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE ||
+                                ((CharactersClient[TargetNpc].MonsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE || CharactersClient[TargetNpc].MonsterIndex == MONSTER_ILLUSION_ITEM_STORAGE)
                                     && g_pCursedTempleWindow->CheckInventoryHolyItem(Hero)))
 #endif //LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
                             {
@@ -3656,25 +3656,25 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 //#else
                 //				SendRequestTalk(CharactersClient[TargetNpc].Key);
                 //#endif
-                if (CharactersClient[TargetNpc].MonsterIndex == 229)
+                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_MARLON)
                     bCheckNPC = true;
                 else
                     bCheckNPC = false;
 
-                if (CharactersClient[TargetNpc].MonsterIndex == 226)
+                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_PET_TRAINER)
                 {
                     ITEM* pItem = NULL;
 
                     pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 
-                    if (pItem->Type == ITEM_HELPER + 4)
+                    if (pItem->Type == ITEM_DARK_HORSE_ITEM)
                     {
                         SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER);
                     }
 
                     pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
 
-                    if (pItem->Type == ITEM_HELPER + 5)
+                    if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
                     {
                         SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT);
                     }
@@ -3818,7 +3818,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 if (Sit)
                 {
-                    if ((!c->SafeZone) && (c->Helper.Type == MODEL_HELPER + 37 || c->Helper.Type == MODEL_HELPER + 2 || c->Helper.Type == MODEL_HELPER + 3 || c->Helper.Type == MODEL_HELPER + 4))
+                    if ((!c->SafeZone) && (c->Helper.Type == MODEL_HORN_OF_FENRIR || c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT || c->Helper.Type == MODEL_DARK_HORSE_ITEM))
                         return;
 
                     if (!gCharacterManager.IsFemale(c->Class))
@@ -4602,12 +4602,12 @@ void CheckChatText(wchar_t* Text)
         SetActionClass(c, o, PLAYER_AWKWARD1, AT_AWKWARD1);
         SendRequestAction(Hero->Object, AT_AWKWARD1);
     }
-    else if (FindText(Text, L"¤Ð.¤Ð") || FindText(Text, L"¤Ì.¤Ì") || FindText(Text, L"T_T") || FindText(Text, GlobalText[306]) || FindText(Text, GlobalText[307]) || FindText(Text, GlobalText[308]) || FindText(Text, GlobalText[309]))
+    else if (FindText(Text, L"ã… .ã… ") || FindText(Text, L"ã…œ.ã…œ") || FindText(Text, L"T_T") || FindText(Text, GlobalText[306]) || FindText(Text, GlobalText[307]) || FindText(Text, GlobalText[308]) || FindText(Text, GlobalText[309]))
     {
         SetActionClass(c, o, PLAYER_CRY1, AT_CRY1);
         SendRequestAction(Hero->Object, AT_CRY1);
     }
-    else if (FindText(Text, L"¤Ñ.¤Ñ") || FindText(Text, L"¤Ñ.,¤Ñ") || FindText(Text, L"¤Ñ,.¤Ñ") || FindText(Text, L"-.-") || FindText(Text, L"-_-") || FindText(Text, GlobalText[310]) || FindText(Text, GlobalText[311]))
+    else if (FindText(Text, L"ã…¡.ã…¡") || FindText(Text, L"ã…¡.,ã…¡") || FindText(Text, L"ã…¡,.ã…¡") || FindText(Text, L"-.-") || FindText(Text, L"-_-") || FindText(Text, GlobalText[310]) || FindText(Text, GlobalText[311]))
     {
         SetActionClass(c, o, PLAYER_SEE1, AT_SEE1);
         SendRequestAction(Hero->Object, AT_SEE1);
@@ -4647,7 +4647,7 @@ void CheckChatText(wchar_t* Text)
         SetActionClass(c, o, PLAYER_RESPECT1, AT_RESPECT1);
         SendRequestAction(Hero->Object, AT_RESPECT1);
     }
-    else if (FindText(Text, GlobalText[342]) || FindText(Text, GlobalText[343]) || FindText(Text, L"/¤Ñ") || FindText(Text, L"¤Ñ^"))
+    else if (FindText(Text, GlobalText[342]) || FindText(Text, GlobalText[343]) || FindText(Text, L"/ã…¡") || FindText(Text, L"ã…¡^"))
     {
         SetActionClass(c, o, PLAYER_SALUTE1, AT_SALUTE1);
         SendRequestAction(Hero->Object, AT_SALUTE1);
@@ -4682,7 +4682,7 @@ void CheckChatText(wchar_t* Text)
         ITEM* pItem_rr = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
         ITEM* pItem_rl = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
 
-        if (pItem_rr->Type == ITEM_HELPER + 40 || pItem_rl->Type == ITEM_HELPER + 40)
+        if (pItem_rr->Type == ITEM_JACK_OLANTERN_TRANSFORMATION_RING || pItem_rl->Type == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
         {
             if (rand_fps_check(2))
             {
@@ -4703,7 +4703,7 @@ void CheckChatText(wchar_t* Text)
         ITEM* pItem_rr = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
         ITEM* pItem_rl = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
 
-        if (pItem_rr->Type == ITEM_HELPER + 41 || pItem_rl->Type == ITEM_HELPER + 41)
+        if (pItem_rr->Type == ITEM_CHRISTMAS_TRANSFORMATION_RING || pItem_rl->Type == ITEM_CHRISTMAS_TRANSFORMATION_RING)
         {
             if (o->CurrentAction != PLAYER_SANTA_1 && o->CurrentAction != PLAYER_SANTA_2)
             {
@@ -4712,7 +4712,7 @@ void CheckChatText(wchar_t* Text)
                 {
                     SetAction(o, PLAYER_SANTA_1);
                     SendRequestAction(Hero->Object, AT_SANTA1_1 + i);
-                    PlayBuffer(SOUND_XMAS_JUMP_SANTA + i);
+                    PlayBuffer(static_cast<ESound>(SOUND_XMAS_JUMP_SANTA + i));
                 }
                 else
                 {
@@ -4919,10 +4919,10 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         if (g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow) == false)
         {
             SendRequestMagic(Skill, HeroKey);
-            if ((c->Helper.Type == MODEL_HELPER + 37)
-                || (c->Helper.Type == MODEL_HELPER + 2)
-                || (c->Helper.Type == MODEL_HELPER + 3)
-                || (c->Helper.Type == MODEL_HELPER + 4))
+            if ((c->Helper.Type == MODEL_HORN_OF_FENRIR)
+                || (c->Helper.Type == MODEL_HORN_OF_UNIRIA)
+                || (c->Helper.Type == MODEL_HORN_OF_DINORANT)
+                || (c->Helper.Type == MODEL_DARK_HORSE_ITEM))
                 SetPlayerMagic(c);
             else
                 SetAction(o, PLAYER_RUSH1);
@@ -5326,7 +5326,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_POWER_SLASH_UP + 3:
             case AT_SKILL_POWER_SLASH_UP + 4:
             case AT_SKILL_ICE_BLADE:
-                if (c->Helper.Type<MODEL_HELPER + 2 || c->Helper.Type>MODEL_HELPER + 4 && c->Helper.Type != MODEL_HELPER + 37)
+                if (c->Helper.Type<MODEL_HORN_OF_UNIRIA || c->Helper.Type>MODEL_DARK_HORSE_ITEM && c->Helper.Type != MODEL_HORN_OF_FENRIR)
                 {
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
@@ -5350,7 +5350,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                         SendRequestMagicContinue(Skill, (c->PositionX),
                             (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                         SetAttackSpeed();
-                        if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+                        if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
                         {
                             SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
                         }
@@ -5396,11 +5396,11 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
 
                     //									SetPlayerMagic(c);
 
-                    if (c->Helper.Type == MODEL_HELPER + 37)
+                    if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
                     {
                         SetAction(o, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
                     }
-                    else if ((c->Helper.Type >= MODEL_HELPER + 2) && (c->Helper.Type <= MODEL_HELPER + 4))
+                    else if ((c->Helper.Type >= MODEL_HORN_OF_UNIRIA) && (c->Helper.Type <= MODEL_DARK_HORSE_ITEM))
                     {
                         SetAction(o, PLAYER_ATTACK_RIDE_STRIKE);
                     }
@@ -5552,11 +5552,11 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
 
                     SetAttackSpeed();
                     {
-                        if ((c->Helper.Type >= MODEL_HELPER + 2 && c->Helper.Type <= MODEL_HELPER + 4) && !c->SafeZone)
+                        if ((c->Helper.Type >= MODEL_HORN_OF_UNIRIA && c->Helper.Type <= MODEL_DARK_HORSE_ITEM) && !c->SafeZone)
                         {
                             SetAction(o, PLAYER_ATTACK_RIDE_STRIKE);
                         }
-                        else if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+                        else if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
                         {
                             SetAction(o, PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE);
                         }
@@ -5578,7 +5578,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_ASHAKE_UP + 3:
             case AT_SKILL_ASHAKE_UP + 4:
             case AT_SKILL_DARK_HORSE:
-                if (c->Helper.Type != MODEL_HELPER + 4 || c->SafeZone) break;
+                if (c->Helper.Type != MODEL_DARK_HORSE_ITEM || c->SafeZone) break;
 
             case AT_SKILL_THUNDER_STRIKE:
                 if (CheckTile(c, o, Distance))
@@ -5600,11 +5600,11 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
 
                     if (Skill == AT_SKILL_THUNDER_STRIKE)
                     {
-                        if (c->Helper.Type == MODEL_HELPER + 4 && !c->SafeZone)
+                        if (c->Helper.Type == MODEL_DARK_HORSE_ITEM && !c->SafeZone)
                         {
                             SetAction(o, PLAYER_ATTACK_RIDE_ATTACK_FLASH);
                         }
-                        else if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+                        else if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
                         {
                             SetAction(o, PLAYER_FENRIR_ATTACK_DARKLORD_FLASH);
                         }
@@ -6044,7 +6044,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                     (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
                 SetAttackSpeed();
 
-                if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+                if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
                     SetAction(o, PLAYER_SKILL_FLASH);
                 else
                     SetAction(o, PLAYER_SKILL_FLASH);
@@ -6267,13 +6267,13 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
                 switch (c->Helper.Type)
                 {
-                case MODEL_HELPER + 2:
+                case MODEL_HORN_OF_UNIRIA:
                     SetAction(o, PLAYER_SKILL_SLEEP_UNI);
                     break;
-                case MODEL_HELPER + 3:
+                case MODEL_HORN_OF_DINORANT:
                     SetAction(o, PLAYER_SKILL_SLEEP_DINO);
                     break;
-                case MODEL_HELPER + 37:
+                case MODEL_HORN_OF_FENRIR:
                     SetAction(o, PLAYER_SKILL_SLEEP_FENRIR);
                     break;
                 default:
@@ -6505,19 +6505,19 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
                 SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, pos, TKey, 0);
                 SetAttackSpeed();
 
-                if (c->Helper.Type == MODEL_HELPER + 4 && !c->SafeZone)
+                if (c->Helper.Type == MODEL_DARK_HORSE_ITEM && !c->SafeZone)
                 {
                     SetAction(o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
                 }
-                else if (c->Helper.Type == MODEL_HELPER + 2 && !c->SafeZone)
+                else if (c->Helper.Type == MODEL_HORN_OF_UNIRIA && !c->SafeZone)
                 {
                     SetAction(o, PLAYER_SKILL_RIDER);
                 }
-                else if (c->Helper.Type == MODEL_HELPER + 3 && !c->SafeZone)
+                else if (c->Helper.Type == MODEL_HORN_OF_DINORANT && !c->SafeZone)
                 {
                     SetAction(o, PLAYER_SKILL_RIDER_FLY);
                 }
-                else if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+                else if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
                 {
                     SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
                 }
@@ -6541,21 +6541,21 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
                 SendRequestMagic(Skill, CharactersClient[SelectedCharacter].Key);
             }
 
-            if (c->Helper.Type == MODEL_HELPER + 4 && !c->SafeZone)
+            if (c->Helper.Type == MODEL_DARK_HORSE_ITEM && !c->SafeZone)
             {
                 SetAction(o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
             }
             else
-                if (c->Helper.Type == MODEL_HELPER + 2 && !c->SafeZone)
+                if (c->Helper.Type == MODEL_HORN_OF_UNIRIA && !c->SafeZone)
                 {
                     SetAction(o, PLAYER_SKILL_RIDER);
                 }
                 else
-                    if (c->Helper.Type == MODEL_HELPER + 3 && !c->SafeZone)
+                    if (c->Helper.Type == MODEL_HORN_OF_DINORANT && !c->SafeZone)
                     {
                         SetAction(o, PLAYER_SKILL_RIDER_FLY);
                     }
-                    else if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+                    else if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
                     {
                         SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
                     }
@@ -6577,19 +6577,19 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
                 SendRequestMagic(Skill, CharactersClient[SelectedCharacter].Key);
             }
 
-            if (c->Helper.Type == MODEL_HELPER + 4 && !c->SafeZone)
+            if (c->Helper.Type == MODEL_DARK_HORSE_ITEM && !c->SafeZone)
             {
                 SetAction(o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 2 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_UNIRIA && !c->SafeZone)
             {
                 SetAction(o, PLAYER_SKILL_RIDER);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 3 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_DINORANT && !c->SafeZone)
             {
                 SetAction(o, PLAYER_SKILL_RIDER_FLY);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
             {
                 SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
             }
@@ -6610,19 +6610,19 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
                     SendRequestMagic(Skill, CharactersClient[SelectedCharacter].Key);
             }
 
-            if (c->Helper.Type == MODEL_HELPER + 4 && !c->SafeZone)
+            if (c->Helper.Type == MODEL_DARK_HORSE_ITEM && !c->SafeZone)
             {
                 SetAction(o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 2 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_UNIRIA && !c->SafeZone)
             {
                 SetAction(o, PLAYER_SKILL_RIDER);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 3 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_DINORANT && !c->SafeZone)
             {
                 SetAction(o, PLAYER_SKILL_RIDER_FLY);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
             {
                 SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
             }
@@ -6641,19 +6641,19 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
                 SendRequestMagic(Skill, CharactersClient[SelectedCharacter].Key);
             }
 
-            if (c->Helper.Type == MODEL_HELPER + 4 && !c->SafeZone)
+            if (c->Helper.Type == MODEL_DARK_HORSE_ITEM && !c->SafeZone)
             {
                 SetAction(o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 2 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_UNIRIA && !c->SafeZone)
             {
                 SetAction(o, PLAYER_SKILL_RIDER);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 3 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_DINORANT && !c->SafeZone)
             {
                 SetAction(o, PLAYER_SKILL_RIDER_FLY);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
             {
                 SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
             }
@@ -6673,19 +6673,19 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
                 SendRequestMagic(Skill, CharactersClient[SelectedCharacter].Key);
             }
 
-            if (c->Helper.Type == MODEL_HELPER + 4 && !c->SafeZone)
+            if (c->Helper.Type == MODEL_DARK_HORSE_ITEM && !c->SafeZone)
             {
                 SetAction(o, PLAYER_ATTACK_RIDE_ATTACK_MAGIC);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 2 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_UNIRIA && !c->SafeZone)
             {
                 SetAction(o, PLAYER_SKILL_RIDER);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 3 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_DINORANT && !c->SafeZone)
             {
                 SetAction(o, PLAYER_SKILL_RIDER_FLY);
             }
-            else if (c->Helper.Type == MODEL_HELPER + 37 && !c->SafeZone)
+            else if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
             {
                 SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
             }
@@ -6997,10 +6997,10 @@ void Attack(CHARACTER* c)
                             || ClassIndex == CLASS_RAGEFIGHTER)
                         {
                             bool bOk = false;
-                            if (c->Helper.Type != MODEL_HELPER + 2
-                                && c->Helper.Type != MODEL_HELPER + 3
-                                && c->Helper.Type != MODEL_HELPER + 4
-                                && c->Helper.Type != MODEL_HELPER + 37
+                            if (c->Helper.Type != MODEL_HORN_OF_UNIRIA
+                                && c->Helper.Type != MODEL_HORN_OF_DINORANT
+                                && c->Helper.Type != MODEL_DARK_HORSE_ITEM
+                                && c->Helper.Type != MODEL_HORN_OF_FENRIR
                                 )
                             {
                                 bOk = true;
@@ -7143,19 +7143,19 @@ void CheckGate()
                     if (Success)
                     {
                         if (((i >= 45 && i <= 49) || (i >= 55 && i <= 56)) &&
-                            ((CharacterMachine->Equipment[EQUIPMENT_HELPER].Type >= ITEM_HELPER + 2 && CharacterMachine->Equipment[EQUIPMENT_HELPER].Type <= ITEM_HELPER + 3)))
+                            ((CharacterMachine->Equipment[EQUIPMENT_HELPER].Type >= ITEM_HORN_OF_UNIRIA && CharacterMachine->Equipment[EQUIPMENT_HELPER].Type <= ITEM_HORN_OF_DINORANT)))
                         {
                             g_pSystemLogBox->AddText(GlobalText[261], SEASON3B::TYPE_ERROR_MESSAGE);
                         }
                         else if ((62 <= i && i <= 65) &&
-                            !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 6
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HELPER + 4
-                                || CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_HELPER + 30
-                                ) || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HELPER + 3
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HELPER + 37
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING + 36 && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 43)
+                            !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WINGS_OF_DARKNESS
+                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_DARK_HORSE_ITEM
+                                || CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_LORD
+                                ) || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_DINORANT
+                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_FENRIR
+                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING_OF_STORM && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING_OF_DIMENSION)
                                 || (ITEM_WING + 130 <= CharacterMachine->Equipment[EQUIPMENT_WING].Type && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 134)
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING + 49 && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 50)
+                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_CAPE_OF_FIGHTER && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_CAPE_OF_OVERRULE)
                                 || (CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_WING + 135)))
                         {
                             g_pSystemLogBox->AddText(GlobalText[263], SEASON3B::TYPE_ERROR_MESSAGE);
@@ -7168,7 +7168,7 @@ void CheckGate()
                             }
                         }
 
-                        else if ((62 <= i && i <= 65) && (CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HELPER + 2))
+                        else if ((62 <= i && i <= 65) && (CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_UNIRIA))
                         {
                             g_pSystemLogBox->AddText(GlobalText[569], SEASON3B::TYPE_ERROR_MESSAGE);
                         }
@@ -7501,7 +7501,7 @@ void MoveHero()
             if (!pPickedItem && RightType == -1 &&
                 ((LeftType >= ITEM_SWORD && LeftType < ITEM_MACE + MAX_ITEM_INDEX)
                     || (LeftType >= ITEM_STAFF && LeftType < ITEM_STAFF + MAX_ITEM_INDEX
-                        && !(LeftType >= ITEM_STAFF + 21 && LeftType <= ITEM_STAFF + 29)
+                        && !(LeftType >= ITEM_BOOK_OF_SAHAMUTT && LeftType <= ITEM_STAFF + 29)
                         )))
             {
                 if (g_pMyInventory->IsEquipable(EQUIPMENT_WEAPON_LEFT, &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT]))
@@ -7557,7 +7557,7 @@ void MoveHero()
                         }
                         else
                         {
-                            if ((gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE) || (c->MonsterIndex == 9))
+                            if ((gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE) || (c->MonsterIndex == MONSTER_THUNDER_LICH))
                             {
                                 if (CheckArrow() == false)
                                 {
@@ -7573,7 +7573,7 @@ void MoveHero()
                     }
                 }
             }
-            else if (SelectedOperate != -1 && (c->SafeZone || (c->Helper.Type<MODEL_HELPER + 2 || c->Helper.Type>MODEL_HELPER + 4 || c->Helper.Type != MODEL_HELPER + 37)))
+            else if (SelectedOperate != -1 && (c->SafeZone || (c->Helper.Type<MODEL_HORN_OF_UNIRIA || c->Helper.Type>MODEL_DARK_HORSE_ITEM || c->Helper.Type != MODEL_HORN_OF_FENRIR)))
             {
                 TargetX = (int)(Operates[SelectedOperate].Owner->Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(Operates[SelectedOperate].Owner->Position[1] / TERRAIN_SCALE);
@@ -7816,7 +7816,7 @@ int SelectCharacter(BYTE Kind)
                 {
                     o->OBB.StartPos[2] += 300.0f;
                 }
-                else if (o->Type == MODEL_MONSTER01 + 118 || o->Type == MODEL_MONSTER01 + 119)
+                else if (o->Type == MODEL_MAYA_HAND_LEFT || o->Type == MODEL_MAYA_HAND_RIGHT)
                 {
                     o->OBB.StartPos[2] += 200.0f;
                 }
@@ -8083,7 +8083,7 @@ void SendMacroChat(wchar_t* Text)
 {
     if (!CheckCommand(Text, true))
     {
-        if ((Hero->Helper.Type<MODEL_HELPER + 2 || Hero->Helper.Type>MODEL_HELPER + 4) || Hero->SafeZone)
+        if ((Hero->Helper.Type<MODEL_HORN_OF_UNIRIA || Hero->Helper.Type>MODEL_DARK_HORSE_ITEM) || Hero->SafeZone)
         {
             // Send animation for specific texts
             CheckChatText(Text);
@@ -8932,7 +8932,7 @@ void EditObjects()
             bool Success = RenderTerrainTile(SelectXF, SelectYF, (int)SelectXF, (int)SelectYF, 1.f, 1, true);
             if (Success)
             {
-                CHARACTER* c = CreateMonster(MonsterScript[SelectMonster].Type, (BYTE)(CollisionPosition[0] / TERRAIN_SCALE), (BYTE)(CollisionPosition[1] / TERRAIN_SCALE), MonsterKey++);
+                CHARACTER* c = CreateMonster((EMonsterType)MonsterScript[SelectMonster].Type, (BYTE)(CollisionPosition[0] / TERRAIN_SCALE), (BYTE)(CollisionPosition[1] / TERRAIN_SCALE), MonsterKey++);
                 c->Object.Kind = KIND_EDIT;
             }
         }
@@ -9307,13 +9307,13 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
     short pEquipedHelperType = (&CharacterMachine->Equipment[EQUIPMENT_HELPER])->Type;
     short pEquipedWingType = (&CharacterMachine->Equipment[EQUIPMENT_WING])->Type;
 
-    if ((pEquipedWingType == -1 && pEquipedHelperType != ITEM_HELPER + 3 &&
-        pEquipedHelperType != ITEM_HELPER + 37 && pEquipedHelperType != ITEM_HELPER + 4) ||
-        pEquipedHelperType == ITEM_HELPER + 2)
+    if ((pEquipedWingType == -1 && pEquipedHelperType != ITEM_HORN_OF_DINORANT &&
+        pEquipedHelperType != ITEM_HORN_OF_FENRIR && pEquipedHelperType != ITEM_DARK_HORSE_ITEM) ||
+        pEquipedHelperType == ITEM_HORN_OF_UNIRIA)
     {
         bCantFly = true;
     }
-    if (pEquipedHelperType == ITEM_HELPER + 2 || pEquipedHelperType == ITEM_HELPER + 3)
+    if (pEquipedHelperType == ITEM_HORN_OF_UNIRIA || pEquipedHelperType == ITEM_HORN_OF_DINORANT)
     {
         bCantSwim = true;
     }

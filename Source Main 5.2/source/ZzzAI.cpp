@@ -1,8 +1,8 @@
-///////////////////////////////////////////////////////////////////////////////
-// AI°ü·Ã ÇÔ¼ö
-// Å¸ÄÏ¹æÇâÀ¸·Î ¹æÇâ Æ²±â, ±æÃ£±â, fps±¸ÇÏ±â µîµî
+ï»¿///////////////////////////////////////////////////////////////////////////////
+// AIê´€ë ¨ í•¨ìˆ˜
+// íƒ€ì¼“ë°©í–¥ìœ¼ë¡œ ë°©í–¥ í‹€ê¸°, ê¸¸ì°¾ê¸°, fpsêµ¬í•˜ê¸° ë“±ë“±
 //
-// *** ÇÔ¼ö ·¹º§: 2
+// *** í•¨ìˆ˜ ë ˆë²¨: 2
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -303,20 +303,20 @@ void SetAction_Fenrir_Damage(CHARACTER* c, OBJECT* o)
             SetAction(o, PLAYER_FENRIR_DAMAGE_TWO_SWORD);
         else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_RIGHT);
-        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOW + 7)
+        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOLT)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_RIGHT);
         else if (c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
-        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_BOW + 15)
+        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_ARROWS)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
-        else	// ¸Ç¼Õ
+        else	// ë§¨ì†
             SetAction(o, PLAYER_FENRIR_DAMAGE);
     }
 }
 
 void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 {
-    if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_BOW + 15 && c->Weapon[1].Type != MODEL_BOW + 7)
+    if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS && c->Weapon[1].Type != MODEL_BOLT)
     {
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
             SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD_ELF);
@@ -338,7 +338,7 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
         else
             SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT);
     }
-    else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOW + 7)
+    else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOLT)
         SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT_ELF);
     else if (c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
     {
@@ -351,7 +351,7 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
         else
             SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT);
     }
-    else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_BOW + 15)
+    else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_ARROWS)
         SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT_ELF);
     else
     {
@@ -381,15 +381,15 @@ void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o)
     }
     else
     {
-        if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_BOW + 15 && c->Weapon[1].Type != MODEL_BOW + 7)
+        if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS && c->Weapon[1].Type != MODEL_BOLT)
             SetAction(o, PLAYER_FENRIR_WALK_TWO_SWORD);
         else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
-        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOW + 7)
+        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOLT)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
         else if (c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_LEFT);
-        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_BOW + 15)
+        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_ARROWS)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_LEFT);
         else
             SetAction(o, PLAYER_FENRIR_WALK);

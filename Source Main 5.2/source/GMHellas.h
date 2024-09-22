@@ -38,7 +38,7 @@ void    CreateMonsterSkill_Summon(OBJECT* o, int AttackTime, BYTE time);
 
 void    SetActionDestroy_Def(OBJECT* o);
 void    RenderDestroy_Def(OBJECT* o, BMD* b);
-CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key);
+CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, int Key);
 
 bool    SettingHellasMonsterLinkBone(CHARACTER* c, int Type);
 

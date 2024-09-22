@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////////
 //  GMHellas.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
@@ -205,7 +205,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
     int TextNum = textNum;
     switch (ip->Type)
     {
-    case ITEM_POTION + 28:
+    case ITEM_LOST_MAP:
     {
         int startIndex = 0;
         int baseClass = gCharacterManager.GetBaseClass(Hero->Class);
@@ -245,7 +245,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
     }
     break;
 
-    case ITEM_POTION + 29:
+    case ITEM_SYMBOL_OF_KUNDUN:
     {
         swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5); TextNum++;
         if (ip->Durability >= 5)
@@ -312,7 +312,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
     if (LastAmbientSoundPlay < WorldTime - AmbientSoundInterval)
     {
         LastAmbientSoundPlay = WorldTime;
-        PlayBuffer(SOUND_KALIMA_AMBIENT2 + rand() % 2);
+        PlayBuffer(static_cast<ESound>(SOUND_KALIMA_AMBIENT2 + rand() % 2));
     }
 
     if (GetHellasLevel(Hero->Class, CharacterAttribute->Level) == KUNDUN_ZONE)
@@ -323,7 +323,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
         if ((CurrX >= 25 && CurrY >= 44) && (CurrX <= 51 && CurrY <= 119) && (LastKundunSoundPlay < WorldTime - KundunSoundInterval))
         {
             LastKundunSoundPlay = WorldTime;
-            PlayBuffer(SOUND_KUNDUN_AMBIENT1 + rand() % 2);
+            PlayBuffer(static_cast<ESound>(SOUND_KUNDUN_AMBIENT1 + rand() % 2));
         }
     }
 
@@ -506,7 +506,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
 
 bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
 {
-    if (o->Type == MODEL_MONSTER01 + 33 && gMapManager.InHellas())
+    if (o->Type == MODEL_BAHAMUT && gMapManager.InHellas())
     {
         Vector(0.0f, 0.0f, 0.0f, b->BodyLight);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -635,8 +635,8 @@ int CreateBigMon(OBJECT* o)
     {
         LastBigMonCreation = WorldTime;
         o->Live = true;
-        OpenMonsterModel(33);
-        o->Type = MODEL_MONSTER01 + 33;
+        OpenMonsterModel(MONSTER_MODEL_BAHAMUT);
+        o->Type = MODEL_BAHAMUT;
         o->Scale = 2.5f + (float)(rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;
         o->AlphaTarget = o->Alpha;
@@ -774,152 +774,152 @@ void RenderDestroy_Def(OBJECT* o, BMD* b)
     }
 }
 
-CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
+CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, int Key)
 {
     CHARACTER* c = NULL;
     OBJECT* o = &c->Object;
     switch (Type)
     {
-    case 144:
-    case 174:
-    case 182:
-    case 190:
-    case 260:
-    case 268:
-    case 334:
-        OpenMonsterModel(63);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 63, PositionX, PositionY);
+    case MONSTER_DEATH_ANGEL_1:
+    case MONSTER_DEATH_ANGEL_2:
+    case MONSTER_DEATH_ANGEL_3:
+    case MONSTER_DEATH_ANGEL_4:
+    case MONSTER_DEATH_ANGEL_5:
+    case MONSTER_DEATH_ANGEL_6:
+    case MONSTER_DEATH_ANGEL_7:
+        OpenMonsterModel(MONSTER_MODEL_DEATH_ANGEL);
+        c = CreateCharacter(Key, MODEL_DEATH_ANGEL, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
         c->Object.Scale = 1.2f;
         o = &c->Object;
         o->BlendMesh = 1;
-        wcscpy(c->ID, L"Àå¼ö°ÅºÏ");
+        wcscpy(c->ID, L"ìž¥ìˆ˜ê±°ë¶");
         break;
-    case 145:
-    case 175:
-    case 183:
-    case 191:
-    case 261:
-    case 269:
-    case 336:
-        OpenMonsterModel(67);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 67, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_SPEAR + 10;
+    case MONSTER_DEATH_CENTURION_1:
+    case MONSTER_DEATH_CENTURION_2:
+    case MONSTER_DEATH_CENTURION_3:
+    case MONSTER_DEATH_CENTURION_4:
+    case MONSTER_DEATH_CENTURION_5:
+    case MONSTER_DEATH_CENTURION_6:
+    case MONSTER_DEATH_CENTURION_7:
+        OpenMonsterModel(MONSTER_MODEL_DEATH_CENTURION);
+        c = CreateCharacter(Key, MODEL_DEATH_CENTURION, PositionX, PositionY);
+        c->Weapon[0].Type = MODEL_DRAGON_SPEAR;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.5f;
         o = &c->Object;
         o->SubType = 9;
         o->BlendMesh = 0;
-        wcscpy(c->ID, L"´ëÇü ºí·ç³ªÀÌÆ®");
+        wcscpy(c->ID, L"ëŒ€í˜• ë¸”ë£¨ë‚˜ì´íŠ¸");
         break;
-    case 146:
-    case 176:
-    case 184:
-    case 192:
-    case 262:
-    case 270:
-    case 333:
-        OpenMonsterModel(65);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 65, PositionX, PositionY);
+    case MONSTER_BLOOD_SOLDIER_1:
+    case MONSTER_BLOOD_SOLDIER_2:
+    case MONSTER_BLOOD_SOLDIER_3:
+    case MONSTER_BLOOD_SOLDIER_4:
+    case MONSTER_BLOOD_SOLDIER_5:
+    case MONSTER_BLOOD_SOLDIER_6:
+    case MONSTER_BLOOD_SOLDIER_7:
+        OpenMonsterModel(MONSTER_MODEL_BLOOD_SOLDIER);
+        c = CreateCharacter(Key, MODEL_BLOOD_SOLDIER, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
         c->Object.Scale = 0.8f;
         o = &c->Object;
-        wcscpy(c->ID, L"¶ø½ºÅÍ");
+        wcscpy(c->ID, L"ëžìŠ¤í„°");
         break;
-    case 147:
-    case 177:
-    case 185:
-    case 193:
-    case 263:
-    case 271:
-    case 331:
-        OpenMonsterModel(66);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 66, PositionX, PositionY);
+    case MONSTER_AEGIS_1:
+    case MONSTER_AEGIS_2:
+    case MONSTER_AEGIS_3:
+    case MONSTER_AEGIS_4:
+    case MONSTER_AEGIS_5:
+    case MONSTER_AEGIS_6:
+    case MONSTER_AEGIS_7:
+        OpenMonsterModel(MONSTER_MODEL_AEGIS);
+        c = CreateCharacter(Key, MODEL_AEGIS, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
         c->Object.Scale = 1.4f;
         o = &c->Object;
         o->BlendMesh = 1;
-        wcscpy(c->ID, L"°¡¿À¸®");
+        wcscpy(c->ID, L"ê°€ì˜¤ë¦¬");
         break;
-    case 148:
-    case 178:
-    case 186:
-    case 194:
-    case 264:
-    case 272:
-    case 332:
-        OpenMonsterModel(67);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 67, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_SPEAR + 10;
+    case MONSTER_ROGUE_CENTURION_1:
+    case MONSTER_ROGUE_CENTURION_2:
+    case MONSTER_ROGUE_CENTURION_3:
+    case MONSTER_ROGUE_CENTURION_4:
+    case MONSTER_ROGUE_CENTURION_5:
+    case MONSTER_ROGUE_CENTURION_6:
+    case MONSTER_ROGUE_CENTURION_7:
+        OpenMonsterModel(MONSTER_MODEL_DEATH_CENTURION);
+        c = CreateCharacter(Key, MODEL_DEATH_CENTURION, PositionX, PositionY);
+        c->Weapon[0].Type = MODEL_DRAGON_SPEAR;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.f;
         o = &c->Object;
         o->BlendMesh = 0;
-        wcscpy(c->ID, L"ºí·ç³ªÀÌÆ®");
+        wcscpy(c->ID, L"ë¸”ë£¨ë‚˜ì´íŠ¸");
         break;
-    case 149:
-    case 179:
-    case 187:
-    case 195:
-    case 265:
-    case 273:
-    case 335:
-        OpenMonsterModel(68);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 68, PositionX, PositionY);
+    case MONSTER_NECRON_1:
+    case MONSTER_NECRON_2:
+    case MONSTER_NECRON_3:
+    case MONSTER_NECRON_4:
+    case MONSTER_NECRON_5:
+    case MONSTER_NECRON_6:
+    case MONSTER_NECRON_7:
+        OpenMonsterModel(MONSTER_MODEL_NECRON);
+        c = CreateCharacter(Key, MODEL_NECRON, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.2f;
         o = &c->Object;
         o->BlendMesh = 3;
-        wcscpy(c->ID, L"¸¶¸°º¸ÀÌ");
+        wcscpy(c->ID, L"ë§ˆë¦°ë³´ì´");
         break;
-    case 160:
-    case 180:
-    case 188:
-    case 196:
-    case 266:
-    case 274:
-    case 337:
-        OpenMonsterModel(69);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 69, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_SWORD + 13;
+    case MONSTER_SCHRIKER_1:
+    case MONSTER_SCHRIKER_2:
+    case MONSTER_SCHRIKER_3:
+    case MONSTER_SCHRIKER_4:
+    case MONSTER_SCHRIKER_5:
+    case MONSTER_SCHRIKER_6:
+    case MONSTER_SCHRIKER_7:
+        OpenMonsterModel(MONSTER_MODEL_SHRIKER);
+        c = CreateCharacter(Key, MODEL_SHRIKER, PositionX, PositionY);
+        c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[0].Level = 0;
-        c->Weapon[1].Type = MODEL_SWORD + 13;
+        c->Weapon[1].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[1].Level = 0;
         c->Object.Scale = 1.2f;
         o = &c->Object;
-        wcscpy(c->ID, L"ÄïµÐÈÄº¸");
+        wcscpy(c->ID, L"ì¿¤ë‘”í›„ë³´");
         break;
-    case 161:
-    case 181:
-    case 189:
-    case 197:
-    case 267:
-    case 338:
-        OpenMonsterModel(69);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 69, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_SWORD + 13;
+    case MONSTER_ILLUSION_OF_KUNDUN_1:
+    case MONSTER_ILLUSION_OF_KUNDUN_2:
+    case MONSTER_ILLUSION_OF_KUNDUN_3:
+    case MONSTER_ILLUSION_OF_KUNDUN_4:
+    case MONSTER_ILLUSION_OF_KUNDUN_5:
+    case MONSTER_ILLUSION_OF_KUNDUN_6:
+        OpenMonsterModel(MONSTER_MODEL_SHRIKER);
+        c = CreateCharacter(Key, MODEL_SHRIKER, PositionX, PositionY);
+        c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[0].Level = 0;
-        c->Weapon[1].Type = MODEL_SWORD + 13;
+        c->Weapon[1].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[1].Level = 0;
         o = &c->Object;
         o->SubType = 9;
         o->Scale = 1.5f;
-        wcscpy(c->ID, L"ÄïµÐÈÄº¸");
+        wcscpy(c->ID, L"ì¿¤ë‘”í›„ë³´");
         break;
 
-    case 275:
-        OpenMonsterModel(64);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 64, PositionX, PositionY);
-        c->Weapon[1].Type = MODEL_STAFF + 11;
+    case MONSTER_ILLUSION_OF_KUNDUN_7:
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_OF_KUNDUN);
+        c = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN, PositionX, PositionY);
+        c->Weapon[1].Type = MODEL_STAFF_OF_KUNDUN;
         c->Weapon[1].Level = 0;
         c->Object.Scale = 2.0f;
         //		c->Object.Scale = 1.9f;
         o = &c->Object;
-        wcscpy(c->ID, L"ÁøÂ¥ÄïµÐ");
+        wcscpy(c->ID, L"ì§„ì§œì¿¤ë‘”");
         o->LifeTime = 100;
         break;
     }
@@ -931,23 +931,23 @@ bool    SettingHellasMonsterLinkBone(CHARACTER* c, int Type)
 {
     switch (Type)
     {
-    case MODEL_MONSTER01 + 64:
+    case MODEL_ILLUSION_OF_KUNDUN:
         c->Weapon[0].LinkBone = 29;
         c->Weapon[1].LinkBone = 49;
         return true;
-    case MODEL_MONSTER01 + 66:
+    case MODEL_AEGIS:
         c->Weapon[0].LinkBone = 13;
         c->Weapon[1].LinkBone = 14;
         return true;
-    case MODEL_MONSTER01 + 67:
+    case MODEL_DEATH_CENTURION:
         c->Weapon[0].LinkBone = 56;
         c->Weapon[1].LinkBone = 42;
         return true;
-    case MODEL_MONSTER01 + 68:
+    case MODEL_NECRON:
         c->Weapon[0].LinkBone = 60;
         c->Weapon[1].LinkBone = 60;
         return true;
-    case MODEL_MONSTER01 + 69:
+    case MODEL_SHRIKER:
         c->Weapon[0].LinkBone = 41;
         c->Weapon[1].LinkBone = 51;
         return true;
@@ -960,12 +960,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
 {
     switch (c->MonsterIndex)
     {
-    case 145:
-    case 175:
-    case 183:
-    case 191:
-    case 261:
-    case 269:
+    case MONSTER_DEATH_CENTURION_1:
+    case MONSTER_DEATH_CENTURION_2:
+    case MONSTER_DEATH_CENTURION_3:
+    case MONSTER_DEATH_CENTURION_4:
+    case MONSTER_DEATH_CENTURION_5:
+    case MONSTER_DEATH_CENTURION_6:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -988,12 +988,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 147:
-    case 177:
-    case 185:
-    case 193:
-    case 263:
-    case 271:
+    case MONSTER_AEGIS_1:
+    case MONSTER_AEGIS_2:
+    case MONSTER_AEGIS_3:
+    case MONSTER_AEGIS_4:
+    case MONSTER_AEGIS_5:
+    case MONSTER_AEGIS_6:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -1006,12 +1006,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 148:
-    case 178:
-    case 186:
-    case 194:
-    case 264:
-    case 272:
+    case MONSTER_ROGUE_CENTURION_1:
+    case MONSTER_ROGUE_CENTURION_2:
+    case MONSTER_ROGUE_CENTURION_3:
+    case MONSTER_ROGUE_CENTURION_4:
+    case MONSTER_ROGUE_CENTURION_5:
+    case MONSTER_ROGUE_CENTURION_6:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -1024,12 +1024,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 149:
-    case 179:
-    case 187:
-    case 195:
-    case 265:
-    case 273:
+    case MONSTER_NECRON_1:
+    case MONSTER_NECRON_2:
+    case MONSTER_NECRON_3:
+    case MONSTER_NECRON_4:
+    case MONSTER_NECRON_5:
+    case MONSTER_NECRON_6:
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
@@ -1042,21 +1042,21 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 160:
-    case 180:
-    case 188:
-    case 196:
-    case 266:
-    case 274:
-    case 161:
-    case 181:
-    case 189:
-    case 197:
-    case 267:
+    case MONSTER_SCHRIKER_1:
+    case MONSTER_SCHRIKER_2:
+    case MONSTER_SCHRIKER_3:
+    case MONSTER_SCHRIKER_4:
+    case MONSTER_SCHRIKER_5:
+    case MONSTER_SCHRIKER_6:
+    case MONSTER_ILLUSION_OF_KUNDUN_1:
+    case MONSTER_ILLUSION_OF_KUNDUN_2:
+    case MONSTER_ILLUSION_OF_KUNDUN_3:
+    case MONSTER_ILLUSION_OF_KUNDUN_4:
+    case MONSTER_ILLUSION_OF_KUNDUN_5:
         SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
         return true;
 
-    case 275:
+    case MONSTER_ILLUSION_OF_KUNDUN_7:
         SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
         return true;
     }
@@ -1071,13 +1071,13 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     Vector(1.f, 1.f, 1.f, Light);
     switch (c->MonsterIndex)
     {
-    case 144:
-    case 174:
-    case 182:
-    case 190:
-    case 260:
-    case 268:
-    case 276:
+    case MONSTER_DEATH_ANGEL_1:
+    case MONSTER_DEATH_ANGEL_2:
+    case MONSTER_DEATH_ANGEL_3:
+    case MONSTER_DEATH_ANGEL_4:
+    case MONSTER_DEATH_ANGEL_5:
+    case MONSTER_DEATH_ANGEL_6:
+    case MONSTER_DEATH_ANGEL_7:
         if ((int)c->AttackTime == 14)
         {
             Vector(1.f, 1.f, 1.f, Light);
@@ -1095,13 +1095,12 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 145:
-    case 175:
-    case 183:
-    case 191:
-    case 261:
-    case 269:
-    case 277:
+    case MONSTER_DEATH_CENTURION_1:
+    case MONSTER_DEATH_CENTURION_2:
+    case MONSTER_DEATH_CENTURION_3:
+    case MONSTER_DEATH_CENTURION_4:
+    case MONSTER_DEATH_CENTURION_5:
+    case MONSTER_DEATH_CENTURION_6:
         switch ((c->Skill))
         {
         case AT_SKILL_BLOOD_ATT_UP:
@@ -1150,13 +1149,13 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 146:
-    case 176:
-    case 184:
-    case 192:
-    case 262:
-    case 270:
-    case 278:
+    case MONSTER_BLOOD_SOLDIER_1:
+    case MONSTER_BLOOD_SOLDIER_2:
+    case MONSTER_BLOOD_SOLDIER_3:
+    case MONSTER_BLOOD_SOLDIER_4:
+    case MONSTER_BLOOD_SOLDIER_5:
+    case MONSTER_BLOOD_SOLDIER_6:
+    case MONSTER_BLOOD_SOLDIER_7:
         if ((int)c->AttackTime == 14)
         {
             Vector(1.f, 1.f, 1.f, Light);
@@ -1174,26 +1173,26 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 147:
-    case 177:
-    case 185:
-    case 193:
-    case 263:
-    case 271:
-    case 279:
+    case MONSTER_AEGIS_1:
+    case MONSTER_AEGIS_2:
+    case MONSTER_AEGIS_3:
+    case MONSTER_AEGIS_4:
+    case MONSTER_AEGIS_5:
+    case MONSTER_AEGIS_6:
+    case MONSTER_AEGIS_7:
         if (o->CurrentAction == MONSTER01_ATTACK2 && c->AttackTime == 14)
         {
             CreateEffect(MODEL_WATER_WAVE, o->Position, o->Angle, o->Light);
         }
         return true;
 
-    case 148:
-    case 178:
-    case 186:
-    case 194:
-    case 264:
-    case 272:
-    case 280:
+    case MONSTER_ROGUE_CENTURION_1:
+    case MONSTER_ROGUE_CENTURION_2:
+    case MONSTER_ROGUE_CENTURION_3:
+    case MONSTER_ROGUE_CENTURION_4:
+    case MONSTER_ROGUE_CENTURION_5:
+    case MONSTER_ROGUE_CENTURION_6:
+    case MONSTER_ROGUE_CENTURION_7:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -1208,13 +1207,13 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 149:
-    case 179:
-    case 187:
-    case 195:
-    case 265:
-    case 273:
-    case 281:
+    case MONSTER_NECRON_1:
+    case MONSTER_NECRON_2:
+    case MONSTER_NECRON_3:
+    case MONSTER_NECRON_4:
+    case MONSTER_NECRON_5:
+    case MONSTER_NECRON_6:
+    case MONSTER_NECRON_7:
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
@@ -1259,12 +1258,12 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 160:
-    case 180:
-    case 188:
-    case 196:
-    case 266:
-    case 274:
+    case MONSTER_SCHRIKER_1:
+    case MONSTER_SCHRIKER_2:
+    case MONSTER_SCHRIKER_3:
+    case MONSTER_SCHRIKER_4:
+    case MONSTER_SCHRIKER_5:
+    case MONSTER_SCHRIKER_6:
         if (o->CurrentAction == MONSTER01_ATTACK1 && c->AttackTime >= 13)
         {
             CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 5, o);
@@ -1273,11 +1272,11 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 161:
-    case 181:
-    case 189:
-    case 197:
-    case 267:
+    case MONSTER_ILLUSION_OF_KUNDUN_1:
+    case MONSTER_ILLUSION_OF_KUNDUN_2:
+    case MONSTER_ILLUSION_OF_KUNDUN_3:
+    case MONSTER_ILLUSION_OF_KUNDUN_4:
+    case MONSTER_ILLUSION_OF_KUNDUN_5:
         switch ((c->Skill))
         {
         case AT_SKILL_BLOOD_ATT_UP:
@@ -1333,7 +1332,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             }
         }
         return true;
-    case 275:
+    case MONSTER_ILLUSION_OF_KUNDUN_7:
         switch ((c->Skill))
         {
         case AT_SKILL_BLOOD_ATT_UP:
@@ -1429,11 +1428,11 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
         return true;
 
-    case MODEL_MONSTER01 + 63:
+    case MODEL_DEATH_ANGEL:
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.7f + 0.3f;
         return true;
 
-    case MODEL_MONSTER01 + 64:
+    case MODEL_ILLUSION_OF_KUNDUN:
         if (rand_fps_check(2))
         {
             Vector(2.f, 30.f, 0.f, p);
@@ -1443,20 +1442,20 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 65:
+    case MODEL_BLOOD_SOLDIER:
         return true;
 
-    case MODEL_MONSTER01 + 66:
+    case MODEL_AEGIS:
         return true;
 
-    case MODEL_MONSTER01 + 67:
+    case MODEL_DEATH_CENTURION:
         return true;
 
-    case MODEL_MONSTER01 + 68:
+    case MODEL_NECRON:
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.7f + 0.3f;
         return true;
 
-    case MODEL_MONSTER01 + 69:
+    case MODEL_SHRIKER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             if (rand_fps_check(2))
@@ -1510,7 +1509,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 63:
+    case MODEL_DEATH_ANGEL:
         Vector(0.f, 0.f, 0.f, p);
 
         if (o->CurrentAction != MONSTER01_DIE)
@@ -1570,7 +1569,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 64:
+    case MODEL_ILLUSION_OF_KUNDUN:
 
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -1579,7 +1578,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else
         {
-            // ´«
+            // ëˆˆ
             Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
             Vector(0, 0, 0, p);
             Vector(Luminosity * 1.0f, Luminosity * 0.0f, Luminosity * 0.0f, Light);
@@ -1744,7 +1743,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 65:
+    case MODEL_BLOOD_SOLDIER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
@@ -1792,7 +1791,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 66:
+    case MODEL_AEGIS:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Luminosity = (float)sin(WorldTime * 0.005f) * 0.15f + 0.85f;
@@ -1839,12 +1838,12 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 67:
+    case MODEL_DEATH_CENTURION:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Vector(0.f, 0.f, 30.f, p);
 
-            if (c->MonsterIndex == 145)
+            if (c->MonsterIndex == MONSTER_DEATH_CENTURION_1)
             {
                 Vector(1.f, 0.f, 0.f, Light);
                 b->TransformPosition(o->BoneTransform[0], p, Position, true);
@@ -1876,7 +1875,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 68:
+    case MODEL_NECRON:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             vec3_t pos;
@@ -1925,7 +1924,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 69:
+    case MODEL_SHRIKER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             vec3_t Pos1, Pos2;
@@ -1997,7 +1996,7 @@ bool RenderHellasMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Selec
 bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
 {
     bool    success = false;
-    if (o->Type == MODEL_MONSTER01 + 63)
+    if (o->Type == MODEL_DEATH_ANGEL)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2010,7 +2009,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 64)
+    else if (o->Type == MODEL_ILLUSION_OF_KUNDUN)
     {
         if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && (int)o->LifeTime == 90)
         {
@@ -2112,7 +2111,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 65)
+    else if (o->Type == MODEL_BLOOD_SOLDIER)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2126,7 +2125,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 66)
+    else if (o->Type == MODEL_AEGIS)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2141,7 +2140,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 67)
+    else if (o->Type == MODEL_DEATH_CENTURION)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2182,7 +2181,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         }
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 68)
+    else if (o->Type == MODEL_NECRON)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2198,7 +2197,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.8f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 69)
+    else if (o->Type == MODEL_SHRIKER)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {

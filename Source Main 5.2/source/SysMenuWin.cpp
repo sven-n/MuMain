@@ -18,7 +18,7 @@
 
 #define	SMW_BTN_GAP		4
 
-extern int  SceneFlag;
+extern EGameScene  SceneFlag;
 extern bool LogOut;
 
 CSysMenuWin::CSysMenuWin()

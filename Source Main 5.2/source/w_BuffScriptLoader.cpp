@@ -122,13 +122,13 @@ bool BuffScriptLoader::Load(const std::wstring& pchFileName)
                 buffinfo.s_BuffEffectType = tempbuffinfo.s_BuffEffectType;
                 buffinfo.s_ItemType = tempbuffinfo.s_ItemType;
                 buffinfo.s_ItemIndex = tempbuffinfo.s_ItemIndex;
-                // TODO
-                memcpy(buffinfo.s_BuffName, tempbuffinfo.s_BuffName, sizeof(char) * MAX_BUFF_NAME_LENGTH);
+
+                CMultiLanguage::ConvertFromUtf8(buffinfo.s_BuffName, tempbuffinfo.s_BuffName, MAX_BUFF_NAME_LENGTH);
+                CMultiLanguage::ConvertFromUtf8(buffinfo.s_BuffDescript, tempbuffinfo.s_BuffDescript, MAX_DESCRIPT_LENGTH);
+
                 buffinfo.s_BuffClassType = tempbuffinfo.s_BuffClassType;
                 buffinfo.s_NoticeType = tempbuffinfo.s_NoticeType;
                 buffinfo.s_ClearType = tempbuffinfo.s_ClearType;
-                // TODO
-                memcpy(buffinfo.s_BuffDescript, tempbuffinfo.s_BuffDescript, sizeof(char) * MAX_DESCRIPT_LENGTH);
 
                 CutTokenString(buffinfo.s_BuffDescript, buffinfo.s_BuffDescriptlist);
                 m_Info.insert(std::make_pair(static_cast<eBuffState>(buffinfo.s_BuffIndex), buffinfo));

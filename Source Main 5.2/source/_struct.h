@@ -486,7 +486,7 @@ typedef struct
     WORD LevelUpPoint;
     BYTE SkillNumber;
     BYTE SkillMasterNumber;
-    WORD Skill[MAX_SKILLS];
+    ActionSkillType Skill[MAX_SKILLS];
     BYTE SkillLevel[MAX_SKILLS];
     int  SkillDelay[MAX_SKILLS];
 } CHARACTER_ATTRIBUTE;

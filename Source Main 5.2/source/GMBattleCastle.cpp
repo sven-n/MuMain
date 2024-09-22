@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////////
 //  GMBattleCastle.cpp
 //////////////////////////////////////////////////////////////////////////
 
@@ -25,15 +25,9 @@
 #include "GuildCache.h"
 #include "ZzzInterface.h"
 
-extern  int     g_iTotalObj;
+
 extern  int     WaterTextureNumber;
 extern  char* g_lpszMp3[NUM_MUSIC];
-
-extern int TextNum;
-extern wchar_t TextList[50][100];
-extern int  TextListColor[50];
-extern int  TextBold[50];
-extern SIZE Size[50];
 
 namespace battleCastle
 {
@@ -128,7 +122,7 @@ namespace battleCastle
         if (InArea(Position[0], Position[1], o->Position, Range) && o->CurrentAction != AniType)
         {
             //            if ( Range<=350.f && rand()%(int)(100-(Range-350.f)/10) )
-            if (Hero->Helper.Type == MODEL_HELPER + 37 && AniType == PLAYER_HIGH_SHOCK)
+            if (Hero->Helper.Type == MODEL_HORN_OF_FENRIR && AniType == PLAYER_HIGH_SHOCK)
             {
                 SetAction_Fenrir_Damage(Hero, o);
                 SendRequestAction(Hero->Object, AniType);
@@ -305,7 +299,7 @@ namespace battleCastle
 
     void SetBuildTimeLocation(OBJECT* o)
     {
-        if (o->Type == MODEL_MONSTER01 + 86 && o->m_byBuildTime < 5)
+        if (o->Type == MODEL_LIFE_STONE && o->m_byBuildTime < 5)
         {
             BuildTime bt;
 
@@ -350,22 +344,22 @@ namespace battleCastle
 
         SocketClient->ToGameServer()->SendGuildLogoOfCastleOwnerRequest();
 
-        OpenMonsterModel(77);
+        OpenMonsterModel(MONSTER_MODEL_BATTLE_GUARD2);
 
         Position[0] = 65 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
 
         Position[0] = 71 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
 
         Position[0] = 91 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
 
         Position[0] = 118 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
 
         Position[0] = 123 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
     }
 
     bool    SettingBattleFormation(CHARACTER* c, eBuffState state)
@@ -1005,7 +999,7 @@ namespace battleCastle
             o->Scale = 1.f;
             break;
 
-        case    MODEL_MONSTER01 + 77:
+        case    MODEL_BATTLE_GUARD2:
             o->Scale = 1.f;
             if (IsBattleCastleStart())
             {
@@ -1100,7 +1094,7 @@ namespace battleCastle
         case    BATTLE_CASTLE_WALL4:
             break;
 
-        case    MODEL_MONSTER01 + 77:
+        case    MODEL_BATTLE_GUARD2:
             if (IsBattleCastleStart())
             {
                 o->HiddenMesh = -2;
@@ -1260,90 +1254,90 @@ namespace battleCastle
     {
     }
 
-    CHARACTER* CreateBattleCastleMonster(int Type, int PositionX, int PositionY, int Key)
+    CHARACTER* CreateBattleCastleMonster(EMonsterType Type, int PositionX, int PositionY, int Key)
     {
         if (gMapManager.InBattleCastle() == false) return NULL;
 
         CHARACTER* c = NULL;
         switch (Type)
         {
-        case 104:
+        case MONSTER_TRAP:
             c = CreateCharacter(Key, 11, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.m_bRenderShadow = false;
             break;
 
-        case 215:
+        case MONSTER_SHIELD:
             OpenNpc(MODEL_NPC_BARRIER);      //  MODEL_NPC_BARRIER
             c = CreateCharacter(Key, MODEL_NPC_BARRIER, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->m_bIsSelected = false;
             c->Object.m_bRenderShadow = false;
             c->Object.Scale = 1.52f;
             c->Object.LifeTime = 0;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü");
+            wcscpy(c->ID, L"ì™•ê´€");
             break;
 
-        case 216:
+        case MONSTER_CROWN:
             OpenNpc(MODEL_NPC_CROWN);      //  MODEL_NPC_CROWN
             c = CreateCharacter(Key, MODEL_NPC_CROWN, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü");
+            wcscpy(c->ID, L"ì™•ê´€");
             break;
 
-        case 217:
+        case MONSTER_CROWN_SWITCH1:
             OpenNpc(MODEL_NPC_CHECK_FLOOR);      //  MODEL_NPC_CHECK_FLOOR
             c = CreateCharacter(Key, MODEL_NPC_CHECK_FLOOR, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü ¹ßÆÇ2");
+            wcscpy(c->ID, L"ì™•ê´€ ë°œíŒ2");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
             break;
 
-        case 218:
+        case MONSTER_CROWN_SWITCH2:
             OpenNpc(MODEL_NPC_CHECK_FLOOR);      //  MODEL_NPC_CHECK_FLOOR
             c = CreateCharacter(Key, MODEL_NPC_CHECK_FLOOR, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿Õ°ü ¹ßÆÇ1");
+            wcscpy(c->ID, L"ì™•ê´€ ë°œíŒ1");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
             break;
 
-        case 219:
+        case MONSTER_CASTLE_GATE_SWITCH:
             OpenNpc(MODEL_NPC_GATE_SWITCH);      //  MODEL_NPC_GATE_SWITCH
             c = CreateCharacter(Key, MODEL_NPC_GATE_SWITCH, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¼º¹® ½ºÀ§Ä¡");
+            wcscpy(c->ID, L"ì„±ë¬¸ ìŠ¤ìœ„ì¹˜");
             break;
 
-        case 220:
+        case MONSTER_GUARD:
             OpenNpc(77);      //  MODEL_MONSTER01+77
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 77, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c = CreateCharacter(Key, MODEL_BATTLE_GUARD2, PositionX, PositionY);
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"»ç³ÉÅÍ ¹®Áö±â");
+            wcscpy(c->ID, L"ì‚¬ëƒ¥í„° ë¬¸ì§€ê¸°");
             break;
 
-        case 221:
+        case MONSTER_SLINGSHOT_ATTACK:
             OpenNpc(MODEL_NPC_CAPATULT_ATT);
             c = CreateCharacter(Key, MODEL_NPC_CAPATULT_ATT, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.m_bRenderShadow = false;
             c->Object.Scale = 0.8f;
             c->Object.m_fEdgeScale = 1.03f;
@@ -1351,10 +1345,10 @@ namespace battleCastle
             c->Weapon[1].Type = -1;
             break;
 
-        case 222:
+        case MONSTER_SLINGSHOT_DEFENSE:
             OpenNpc(MODEL_NPC_CAPATULT_DEF);   //  MODEL_NPC_CATAPULT_DEF
             c = CreateCharacter(Key, MODEL_NPC_CAPATULT_DEF, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.m_bRenderShadow = false;
             c->Object.Scale = 0.8f;
             c->Object.m_fEdgeScale = 1.03f;
@@ -1362,41 +1356,41 @@ namespace battleCastle
             c->Weapon[1].Type = -1;
             break;
 
-        case 223:
+        case MONSTER_SENIOR:
             OpenNpc(MODEL_NPC_SENATUS);      //  MODEL_NPC_SENATUS
             c = CreateCharacter(Key, MODEL_NPC_SENATUS, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"¿ø·Î¿ø");
+            wcscpy(c->ID, L"ì›ë¡œì›");
             break;
 
-        case 224:
+        case MONSTER_GUARDSMAN:
             OpenNpc(MODEL_NPC_CLERK);        //
             c = CreateCharacter(Key, MODEL_NPC_CLERK, PositionX, PositionY);
-            c->m_bFixForm = true;
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.SubType = rand() % 2 + 10;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"±À§º´");
+            wcscpy(c->ID, L"êµ¼ãŽˆ?");
             break;
 
-        case 277:
-            OpenMonsterModel(73);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 73, PositionX, PositionY);
-            c->m_bFixForm = true;
+        case MONSTER_CASTLE_GATE1:
+            OpenMonsterModel(MONSTER_MODEL_CASTLE_GATE1);
+            c = CreateCharacter(Key, MODEL_CASTLE_GATE1, PositionX, PositionY);
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.0f;
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
             break;
 
-        case 278:
-            OpenMonsterModel(86);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 86, PositionX, PositionY);
-            c->m_bFixForm = true;
+        case MONSTER_LIFE_STONE:
+            OpenMonsterModel(MONSTER_MODEL_LIFE_STONE);
+            c = CreateCharacter(Key, MODEL_LIFE_STONE, PositionX, PositionY);
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.0f;
             c->Object.m_bRenderShadow = false;
             c->Object.BlendMesh = 3;
@@ -1406,10 +1400,10 @@ namespace battleCastle
             CreateEffect(MODEL_AURORA, c->Object.Position, c->Object.Angle, c->Object.Light, 0, &c->Object, 120);
             break;
 
-        case 283:
-            OpenMonsterModel(74);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 74, PositionX, PositionY);
-            c->m_bFixForm = true;
+        case MONSTER_GUARDIAN_STATUE:
+            OpenMonsterModel(MONSTER_MODEL_GUARDIAN_STATUE);
+            c = CreateCharacter(Key, MODEL_GUARDIAN_STATUE, PositionX, PositionY);
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.m_fEdgeScale = 1.03f;
             c->Object.m_bRenderShadow = false;
@@ -1427,39 +1421,39 @@ namespace battleCastle
             CreateEffect(MODEL_AURORA, c->Object.Position, c->Object.Angle, c->Object.Light, 0, &c->Object, 120);
             break;
 
-        case 285:
-            OpenMonsterModel(74);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 74, PositionX, PositionY);
-            c->m_bFixForm = true;
+        case MONSTER_GUARDIAN:
+            OpenMonsterModel(MONSTER_MODEL_GUARDIAN_STATUE);
+            c = CreateCharacter(Key, MODEL_GUARDIAN_STATUE, PositionX, PositionY);
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
             break;
 
-        case 286:
-            OpenMonsterModel(76);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 76, PositionX, PositionY);
-            c->m_bFixForm = true;
+        case MONSTER_BATTLE_GUARD1:
+            OpenMonsterModel(MONSTER_MODEL_BATTLE_GUARD1);
+            c = CreateCharacter(Key, MODEL_BATTLE_GUARD1, PositionX, PositionY);
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
             break;
 
-        case 287:
-            OpenMonsterModel(77);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 77, PositionX, PositionY);
-            c->m_bFixForm = true;
+        case MONSTER_BATTLE_GUARD2:
+            OpenMonsterModel(MONSTER_MODEL_BATTLE_GUARD2);
+            c = CreateCharacter(Key, MODEL_BATTLE_GUARD2, PositionX, PositionY);
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.SubType = 30;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
             break;
 
-        case 288:
-            OpenMonsterModel(79);
-            c = CreateCharacter(Key, MODEL_MONSTER01 + 79, PositionX, PositionY);
-            c->m_bFixForm = true;
+        case MONSTER_CANON_TOWER:
+            OpenMonsterModel(MONSTER_MODEL_CANON_TOWER);
+            c = CreateCharacter(Key, MODEL_CANON_TOWER, PositionX, PositionY);
+            c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
             c->Object.m_fEdgeScale = 1.04f;
             c->Object.m_bRenderShadow = false;
@@ -1490,7 +1484,7 @@ namespace battleCastle
             Vector(200.f, 50.f, 100.f, c->Object.BoundingBoxMax);
             break;
 
-        case MODEL_MONSTER01 + 73:
+        case MODEL_CASTLE_GATE1:
             Vector(-140.f, -140.f, 0.f, c->Object.BoundingBoxMin);
             Vector(140.f, 140.f, 300.f, c->Object.BoundingBoxMax);
             c->SwordCount = 0;
@@ -1506,8 +1500,8 @@ namespace battleCastle
 
         switch (c->MonsterIndex)
         {
-        case 286:
-        case 287:
+        case MONSTER_BATTLE_GUARD1:
+        case MONSTER_BATTLE_GUARD2:
             if (o->CurrentAction == 5)
             {
                 o->PriorAction = 4;
@@ -1546,12 +1540,12 @@ namespace battleCastle
             }
             return false;
 
-        case 221:
-        case 222:
+        case MONSTER_SLINGSHOT_ATTACK:
+        case MONSTER_SLINGSHOT_DEFENSE:
             SetAction(o, 0);
             return true;
 
-        case 277:
+        case MONSTER_CASTLE_GATE1:
         {
             if (g_isCharacterBuff(o, eBuff_CastleGateIsOpen))
             {
@@ -1592,17 +1586,17 @@ namespace battleCastle
 
         switch (c->MonsterIndex)
         {
-        case 216:
+        case MONSTER_CROWN:
             o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 200.f;
             g_isCrownState = g_isCharacterBuff(o, eBuff_CastleCrown);
             c->m_bIsSelected = (g_isCrownState ? true : false);
             break;
 
-        case 277:
+        case MONSTER_CASTLE_GATE1:
             g_bBeGate = true;
             break;
 
-        case 283:
+        case MONSTER_GUARDIAN_STATUE:
             o->HiddenMesh = -1;
             c->m_bIsSelected = true;
             if (IsBattleCastleStart() == false)
@@ -1612,8 +1606,8 @@ namespace battleCastle
             }
             break;
 
-        case 286:
-        case 287:
+        case MONSTER_BATTLE_GUARD1:
+        case MONSTER_BATTLE_GUARD2:
         {
             switch (o->AI)
             {
@@ -1663,7 +1657,7 @@ namespace battleCastle
         }
         break;
 
-        case 278:
+        case MONSTER_LIFE_STONE:
             if (c->m_byFriend == 128)
             {
                 g_fLifeStoneLocation[0] = o->Position[0];
@@ -1681,8 +1675,8 @@ namespace battleCastle
         case 11:
             break;
 
-        case MODEL_MONSTER01 + 76:
-        case MODEL_MONSTER01 + 77:
+        case MODEL_BATTLE_GUARD1:
+        case MODEL_BATTLE_GUARD2:
             o->AI = GUARD_ATTACK;
             SetAction(o, 5);
             return true;
@@ -1709,16 +1703,16 @@ namespace battleCastle
 
         switch (c->MonsterIndex)
         {
-        case 104:
+        case MONSTER_TRAP:
             if ((int)c->AttackTime == 5)
             {
                 VectorCopy(o->Position, Position);
                 Position[2] += 500.f;
-                CreateEffect(MODEL_MONSTER01 + 77, Position, o->Angle, o->Light, 0);
+                CreateEffect(MODEL_BATTLE_GUARD2, Position, o->Angle, o->Light, 0);
             }
             return true;
 
-        case 288:
+        case MONSTER_CANON_TOWER:
             CreateEffect(BITMAP_JOINT_FORCE, o->Position, o->Angle, o->Light);
             return true;
         }
@@ -1783,11 +1777,11 @@ namespace battleCastle
             }
             break;
 
-        case MODEL_MONSTER01 + 73:
+        case MODEL_CASTLE_GATE1:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 74:
+        case MODEL_GUARDIAN_STATUE:
             o->Angle[2] = 0.f;
 
             Luminosity = sinf(WorldTime * 0.0005) * 0.58f + 0.42f;
@@ -1795,23 +1789,23 @@ namespace battleCastle
             AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
             return true;
 
-        case MODEL_MONSTER01 + 75:
+        case MODEL_GREAT_DRAKAN:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 76:
+        case MODEL_BATTLE_GUARD1:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 77:
+        case MODEL_BATTLE_GUARD2:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 78:
+        case MODEL_GOLDEN_GOBLIN:
             o->Angle[2] = 0.f;
             return true;
 
-        case MODEL_MONSTER01 + 79:
+        case MODEL_CANON_TOWER:
             o->Angle[2] = 45.f;
             return true;
         }
@@ -1827,10 +1821,10 @@ namespace battleCastle
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 73:
+        case MODEL_CASTLE_GATE1:
             break;
 
-        case MODEL_MONSTER01 + 74:
+        case MODEL_GUARDIAN_STATUE:
             if (IsBattleCastleStart())
             {
                 Vector(0.3f, 0.2f, 0.f, Light);
@@ -1842,7 +1836,7 @@ namespace battleCastle
             }
             return true;
 
-        case MODEL_MONSTER01 + 86:
+        case MODEL_LIFE_STONE:
             if (o->m_byBuildTime >= 5)
             {
                 o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.3 + 0.3f;
@@ -1860,7 +1854,7 @@ namespace battleCastle
             }
             return true;
 
-        case MODEL_MONSTER01 + 79:
+        case MODEL_CANON_TOWER:
             if (IsBattleCastleStart())
             {
                 c->m_bIsSelected = true;
@@ -1961,7 +1955,7 @@ namespace battleCastle
             success = true;
             break;
 
-        case MODEL_MONSTER01 + 73:
+        case MODEL_CASTLE_GATE1:
             if (o->CurrentAction == MONSTER01_DIE)
             {
                 if (o->CurrentAction == MONSTER01_DIE)
@@ -1977,7 +1971,7 @@ namespace battleCastle
             }
             break;
 
-        case MODEL_MONSTER01 + 74:
+        case MODEL_GUARDIAN_STATUE:
             if (IsBattleCastleStart())
             {
                 if (o->CurrentAction != MONSTER01_DIE)
@@ -2006,7 +2000,7 @@ namespace battleCastle
             success = true;
             break;
 
-        case MODEL_MONSTER01 + 86:
+        case MODEL_LIFE_STONE:
             o->BlendMeshLight = o->m_byBuildTime / 10.f;
             Vector(o->BlendMeshLight, o->BlendMeshLight, o->BlendMeshLight, b->BodyLight);
             if (o->m_byBuildTime >= 2)
@@ -2043,7 +2037,7 @@ namespace battleCastle
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 73:
+        case MODEL_CASTLE_GATE1:
         {
             vec3_t Position;
             VectorCopy(o->Position, Position);
@@ -2071,7 +2065,7 @@ namespace battleCastle
         }
         break;
 
-        case MODEL_MONSTER01 + 74:
+        case MODEL_GUARDIAN_STATUE:
         {
             vec3_t Position;
             for (int i = 0; i < 5; i++)

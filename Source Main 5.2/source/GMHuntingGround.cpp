@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "zzztexture.h"
@@ -106,7 +106,7 @@ bool M31HuntingGround::MoveHuntingGroundObject(OBJECT* pObject)
     break;
     }
 
-    //. ¹è°æÀ½¾Ç ÄÁÆ®·Ñ
+    //. ë°°ê²½ìŒì•… ì»¨íŠ¸ë¡¤
     if (::timeGetTime() - g_MusicStartStamp > 300000) {
         g_MusicStartStamp = ::timeGetTime();
         PlayBuffer(SOUND_BC_HUNTINGGROUND_AMBIENT);
@@ -196,10 +196,10 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     CHARACTER* pCharacter = NULL;
     switch (iType)
     {
-    case 290:
+    case MONSTER_LIZARD_WARRIOR:
     {
-        OpenMonsterModel(81);   //  81
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 81, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_LIZARD_WARRIOR);   //  81
+        pCharacter = CreateCharacter(Key, MODEL_LIZARD_WARRIOR, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -208,10 +208,10 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         BoneManager::RegisterBone(pCharacter, L"Monster81_EyeLeft", 30);
     }
     break;
-    case 291:
+    case MONSTER_FIRE_GOLEM:
     {
-        OpenMonsterModel(82);   //  82
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 82, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_FIRE_GOLEM);   //  82
+        pCharacter = CreateCharacter(Key, MODEL_FIRE_GOLEM, PosX, PosY);
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -222,10 +222,10 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         BoneManager::RegisterBone(pCharacter, L"Monster82_Back", 46);
     }
     break;
-    case 292:
+    case MONSTER_QUEEN_BEE:
     {
-        OpenMonsterModel(83);	//	83
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 83, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_QUEEN_BEE);	//	83
+        pCharacter = CreateCharacter(Key, MODEL_QUEEN_BEE, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -233,11 +233,11 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         BoneManager::RegisterBone(pCharacter, L"Monster83_Tail", 62);
     }
     break;
-    case 303:
-    case 293:
+    case MONSTER_GIGAS_GOLEM:
+    case MONSTER_POISON_GOLEM:
     {
-        OpenMonsterModel(84);	// 84
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 84, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_POISON_GOLEM);	// 84
+        pCharacter = CreateCharacter(Key, MODEL_POISON_GOLEM, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -249,11 +249,11 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         BoneManager::RegisterBone(pCharacter, L"Monster84_RightHand", 50);
     }
     break;
-    case 302:
-    case 294:
+    case MONSTER_AXE_HERO:
+    case MONSTER_AXE_WARRIOR:
     {
-        OpenMonsterModel(85);	//85
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 85, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_AXE_HERO);	//85
+        pCharacter = CreateCharacter(Key, MODEL_AXE_HERO, PosX, PosY);
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -262,10 +262,10 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         BoneManager::RegisterBone(pCharacter, L"Monster85_RightEye", 19);
     }
     break;
-    case 295:
+    case MONSTER_EROHIM:
     {
-        OpenMonsterModel(87);	//87
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 87, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_EROHIM);	//87
+        pCharacter = CreateCharacter(Key, MODEL_EROHIM, PosX, PosY);
         pCharacter->Object.Scale = 2.f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -277,18 +277,18 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
         PlayBuffer(SOUND_BC_EROHIM_ENTER);
     }
     break;
-    case 297:
+    case MONSTER_PK_DARK_KNIGHT:
     {
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÀúÁÖ¹ÞÀº ±â»ç");
-        pCharacter->Skin = 1;	//. ±â»ç
-        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 1;
-        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 1;
-        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 1;
-        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 1;
-        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 1;
-        pCharacter->Weapon[0].Type = MODEL_SWORD + 16;
-        pCharacter->Weapon[1].Type = MODEL_SHIELD + 13;
+        wcscpy(pCharacter->ID, L"ì €ì£¼ë°›ì€ ê¸°ì‚¬");
+        pCharacter->Skin = 1;	//. ê¸°ì‚¬
+        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DRAGON_HELM;
+        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DRAGON_ARMOR;
+        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DRAGON_PANTS;
+        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_DRAGON_GLOVES;
+        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_DRAGON_BOOTS;
+        pCharacter->Weapon[0].Type = MODEL_SWORD_OF_DESTRUCTION;
+        pCharacter->Weapon[1].Type = MODEL_DRAGON_SHIELD;
         int Level = 9;
         pCharacter->BodyPart[BODYPART_HELM].Level = Level;
         pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
@@ -307,7 +307,7 @@ bool M31HuntingGround::MoveHuntingGroundMonsterVisual(OBJECT* pObject, BMD* pMod
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 82:
+    case MODEL_FIRE_GOLEM:
     {
         vec3_t Light;
         Vector(1.f, 0.2f, 0.1f, Light);
@@ -321,7 +321,7 @@ void M31HuntingGround::MoveHuntingGroundBlurEffect(CHARACTER* pCharacter, OBJECT
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 85:
+    case MODEL_AXE_HERO:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -362,7 +362,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 81:
+    case MODEL_LIZARD_WARRIOR:
     {
         vec3_t Position, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -374,13 +374,13 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15)) {
-                PlayBuffer(SOUND_BC_LIZARDWARRIOR_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_LIZARDWARRIOR_MOVE1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_LIZARDWARRIOR_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_LIZARDWARRIOR_ATTACK1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE) {
@@ -393,7 +393,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 82:
+    case MODEL_FIRE_GOLEM:
     {
         vec3_t Light;
         Vector(1.f, 1.f, 1.f, Light);
@@ -426,7 +426,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 0.8f);
 
             if (rand_fps_check(20)) {
-                PlayBuffer(SOUND_BC_FIREGOLEM_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_FIREGOLEM_MOVE1 + rand() % 2));
             }
         }
 
@@ -483,19 +483,19 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 83:
+    case MODEL_QUEEN_BEE:
     {
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_QUEENBEE_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_QUEENBEE_MOVE1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_QUEENBEE_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_QUEENBEE_ATTACK1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE) {
@@ -522,7 +522,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
     }
     break;
 
-    case MODEL_MONSTER01 + 84:
+    case MODEL_POISON_GOLEM:
     {
         vec3_t Light, Position;
 
@@ -532,7 +532,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_POISONGOLEM_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_POISONGOLEM_MOVE1 + rand() % 2));
             }
         }
 
@@ -565,7 +565,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         if (pObject->CurrentAction == MONSTER01_ATTACK2 && pObject->AnimationFrame >= 3.5f && pObject->AnimationFrame <= 4.2f) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_POISONGOLEM_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_POISONGOLEM_ATTACK1 + rand() % 2));
             }
 
             BoneManager::GetBonePosition(pObject, L"Monster84_RightHand", Position);
@@ -594,7 +594,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
     }
     break;
 
-    case MODEL_MONSTER01 + 85:
+    case MODEL_AXE_HERO:
     {
         vec3_t Position, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -608,13 +608,13 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         {
             if (rand_fps_check(10)) {
                 CreateParticle(BITMAP_SMOKE + 1, pObject->Position, pObject->Angle, Light);
-                PlayBuffer(SOUND_BC_AXEWARRIOR_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_AXEWARRIOR_MOVE1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_AXEWARRIOR_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_AXEWARRIOR_ATTACK1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE) {
@@ -627,7 +627,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->SubType = FALSE;
     }
     break;
-    case MODEL_MONSTER01 + 87:
+    case MODEL_EROHIM:
     {
         vec3_t Position, Relative, Light;
         Vector(0.9f, 0.2f, 0.1f, Light);
@@ -642,7 +642,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         if (pObject->CurrentAction == MONSTER01_ATTACK1) {
             if (pObject->SubType == FALSE) {
                 pObject->SubType = TRUE;
-                PlayBuffer(SOUND_BC_EROHIM_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_BC_EROHIM_ATTACK1 + rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE) {
@@ -674,7 +674,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 81:
+    case MODEL_LIZARD_WARRIOR:
     {
         pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, 1);
         pModel->BeginRender(1.f);
@@ -687,7 +687,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 82:
+    case MODEL_FIRE_GOLEM:
     {
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
@@ -712,7 +712,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 83:
+    case MODEL_QUEEN_BEE:
     {
         pModel->BeginRender(1.f);
 
@@ -734,7 +734,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 84:
+    case MODEL_POISON_GOLEM:
     {
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
@@ -782,7 +782,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 85:
+    case MODEL_AXE_HERO:
     {
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
@@ -810,7 +810,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 87:
+    case MODEL_EROHIM:
     {
         pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, 5);
 
@@ -879,16 +879,16 @@ bool M31HuntingGround::AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, O
 
     switch (pCharacter->MonsterIndex)
     {
-    case 290:
+    case MONSTER_LIZARD_WARRIOR:
         break;
-    case 292:
-    case 303:
-    case 293:
-    case 291:
-    case 295:
+    case MONSTER_QUEEN_BEE:
+    case MONSTER_GIGAS_GOLEM:
+    case MONSTER_POISON_GOLEM:
+    case MONSTER_FIRE_GOLEM:
+    case MONSTER_EROHIM:
         return true;
-    case 302:
-    case 294:
+    case MONSTER_AXE_HERO:
+    case MONSTER_AXE_WARRIOR:
         break;
     }
     return false;
@@ -900,7 +900,7 @@ bool M31HuntingGround::SetCurrentActionHuntingGroundMonster(CHARACTER* pCharacte
 
     switch (pCharacter->MonsterIndex)
     {
-    case 291:
+    case MONSTER_FIRE_GOLEM:
         if (pCharacter->Skill == AT_SKILL_BOSS) {
             SetAction(pObject, MONSTER01_ATTACK1);
         }

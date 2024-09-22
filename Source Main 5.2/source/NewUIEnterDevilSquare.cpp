@@ -1,4 +1,4 @@
-// NewUIEnterBloodCastle.cpp: implementation of the CNewUIPartyInfo class.
+﻿// NewUIEnterBloodCastle.cpp: implementation of the CNewUIPartyInfo class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -201,11 +201,11 @@ bool CNewUIEnterDevilSquare::BtnProcess()
     {
         int iItemIndex = -1;
 
-        iItemIndex = g_pMyInventory->FindItemIndex(ITEM_POTION + 19, 0);
+        iItemIndex = g_pMyInventory->FindItemIndex(ITEM_DEVILS_INVITATION, 0);
 
         if (iItemIndex == -1)
         {
-            iItemIndex = g_pMyInventory->FindItemIndex(ITEM_POTION + 19, m_iNumActiveBtn + 1);
+            iItemIndex = g_pMyInventory->FindItemIndex(ITEM_DEVILS_INVITATION, m_iNumActiveBtn + 1);
         }
 
         if (iItemIndex == -1)

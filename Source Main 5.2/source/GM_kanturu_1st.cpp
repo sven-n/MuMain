@@ -1,4 +1,4 @@
-//*****************************************************************************
+ï»¿//*****************************************************************************
 // File: GM_kanturu_1st.cpp
 //*****************************************************************************
 #include "stdafx.h"
@@ -407,11 +407,11 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
 
     switch (iType)
     {
-    case 435:
-    case 350:
+    case MONSTER_BERSERK:
+    case MONSTER_BERSERKER:
     {
-        OpenMonsterModel(106);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 106, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BERSERK);
+        pCharacter = CreateCharacter(Key, MODEL_BERSERK, PosX, PosY);
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -419,20 +419,20 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"BERSERK_MOUTH", 9);
     }
     break;
-    case 434:
-    case 356:
+    case MONSTER_GIGANTIS2:
+    case MONSTER_GIGANTIS:
     {
-        OpenMonsterModel(112);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 112, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_GIGANTIS);
+        pCharacter = CreateCharacter(Key, MODEL_GIGANTIS, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 357:
+    case MONSTER_GENOCIDER:
     {
-        OpenMonsterModel(113);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 113, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_GENOCIDER);
+        pCharacter = CreateCharacter(Key, MODEL_GENOCIDER, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -440,16 +440,16 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"GENO_WP", 47);
     }
     break;
-    case 351:
+    case MONSTER_SPLINTER_WOLF:
     {
-        OpenMonsterModel(107);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 107, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SPLINTER_WOLF);
+        pCharacter = CreateCharacter(Key, MODEL_SPLINTER_WOLF, PosX, PosY);
         pCharacter->Object.Scale = 0.8f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         BoneManager::RegisterBone(pCharacter, L"SPL_WOLF_EYE_26", 16);
         BoneManager::RegisterBone(pCharacter, L"SPL_WOLF_EYE_25", 17);
-        wcscpy(pCharacter->ID, L"½ºÇÃ¸°ÅÍ ¿ïÇÁ");
+        wcscpy(pCharacter->ID, L"ìŠ¤í”Œë¦°í„° ìš¸í”„");
 
         OBJECT* o = &pCharacter->Object;
         BMD* b = &Models[o->Type];
@@ -461,10 +461,10 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     }
     break;
 
-    case 352:
+    case MONSTER_IRON_RIDER:
     {
-        OpenMonsterModel(108);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 108, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_IRON_RIDER);
+        pCharacter = CreateCharacter(Key, MODEL_IRON_RIDER, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -472,13 +472,13 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BOW_6", 42);
         BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BOW_15", 52);
         BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BOW_16", 47);
-        wcscpy(pCharacter->ID, L"¾ÆÀÌ¾ð ¶óÀÌ´õ");
+        wcscpy(pCharacter->ID, L"ì•„ì´ì–¸ ë¼ì´ë”");
     }
     break;
-    case 354:
+    case MONSTER_BLADE_HUNTER:
     {
-        OpenMonsterModel(110);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 110, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BLADE_HUNTER);
+        pCharacter = CreateCharacter(Key, MODEL_BLADE_HUNTER, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Gravity = 0.0f;
         pCharacter->Object.Distance = (float)(rand() % 20) / 10.0f;
@@ -488,23 +488,23 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"BLADE_L_HAND", 12);
         BoneManager::RegisterBone(pCharacter, L"BOX1", 54);
         BoneManager::RegisterBone(pCharacter, L"BOX2", 55);
-        wcscpy(pCharacter->ID, L"ºí·¹ÀÌµå ÇåÅÍ");
+        wcscpy(pCharacter->ID, L"ë¸”ë ˆì´ë“œ í—Œí„°");
     }
     break;
-    case 353:
+    case MONSTER_SATYROS:
     {
-        OpenMonsterModel(109);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 109, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SATYROS);
+        pCharacter = CreateCharacter(Key, MODEL_SATYROS, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        wcscpy(pCharacter->ID, L"»çÆ¼·Î½º");
+        wcscpy(pCharacter->ID, L"ì‚¬í‹°ë¡œìŠ¤");
     }
     break;
-    case 355:
+    case MONSTER_KENTAUROS:
     {
-        OpenMonsterModel(111);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 111, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_KENTAUROS);
+        pCharacter = CreateCharacter(Key, MODEL_KENTAUROS, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -522,13 +522,13 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_1", 4);
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_2", 5);
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_3", 6);
-        wcscpy(pCharacter->ID, L"ÄËÅ¸¿ì·Î½º");
+        wcscpy(pCharacter->ID, L"ì¼„íƒ€ìš°ë¡œìŠ¤");
     }
     break;
-    case 553:
+    case MONSTER_BERSERKER_WARRIOR:
     {
-        OpenMonsterModel(197);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 197, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BERSERKER_WARRIOR);
+        pCharacter = CreateCharacter(Key, MODEL_BERSERKER_WARRIOR, PosX, PosY);
         //pCharacter->Object.Scale = 0.95f;
         pCharacter->Object.Scale = 1.15f;
         pCharacter->Weapon[0].Type = -1;
@@ -536,10 +536,10 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"BERSERK_MOUTH", 9);
     }
     break;
-    case 554:
+    case MONSTER_KENTAUROS_WARRIOR:
     {
-        OpenMonsterModel(198);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 198, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_KENTAUROS_WARRIOR);
+        pCharacter = CreateCharacter(Key, MODEL_KENTAUROS_WARRIOR, PosX, PosY);
         //pCharacter->Object.Scale = 1.1f;
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
@@ -558,23 +558,23 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_1", 4);
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_2", 5);
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_3", 6);
-        wcscpy(pCharacter->ID, L"ÄËÅ¸¿ì·Î½º¿ö¸®¾î");
+        wcscpy(pCharacter->ID, L"ì¼„íƒ€ìš°ë¡œìŠ¤ì›Œë¦¬ì–´");
     }
     break;
-    case 555:
+    case MONSTER_GIGANTIS_WARRIOR:
     {
-        OpenMonsterModel(199);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 199, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_GIGANTIS_WARRIOR);
+        pCharacter = CreateCharacter(Key, MODEL_GIGANTIS_WARRIOR, PosX, PosY);
         //pCharacter->Object.Scale = 1.2f;
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 556:
+    case MONSTER_GENOCIDER_WARRIOR:
     {
-        OpenMonsterModel(200);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 200, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SOCCERBALL);
+        pCharacter = CreateCharacter(Key, MODEL_SOCCERBALL, PosX, PosY);
         //pCharacter->Object.Scale = 1.2f;
         pCharacter->Object.Scale = 1.35f;
         pCharacter->Weapon[0].Type = -1;
@@ -595,11 +595,11 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 350:
-    case 356:
-    case 357:
-    case 351:
-    case 352:
+    case MONSTER_BERSERKER:
+    case MONSTER_GIGANTIS:
+    case MONSTER_GENOCIDER:
+    case MONSTER_SPLINTER_WOLF:
+    case MONSTER_IRON_RIDER:
     {
         if (rand_fps_check(2))
             SetAction(o, MONSTER01_ATTACK1);
@@ -609,7 +609,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     break;
-    case 355:
+    case MONSTER_KENTAUROS:
     {
         if (c->MonsterSkill == ATMON_SKILL_NUM9)
         {
@@ -620,7 +620,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
             SetAction(o, MONSTER01_ATTACK1);
     }
     break;
-    case 553:
+    case MONSTER_BERSERKER_WARRIOR:
     {
         if (c->MonsterSkill == ATMON_SKILL_EX_BERSERKERWARRIOR_ATTACKSKILL)
         {
@@ -631,7 +631,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
             SetAction(o, MONSTER01_ATTACK1);
     }
     break;
-    case 554:
+    case MONSTER_KENTAUROS_WARRIOR:
     {
         if (c->MonsterSkill == ATMON_SKILL_EX_KENTAURUSWARRIOR_ATTACKSKILL)
         {
@@ -642,7 +642,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
             SetAction(o, MONSTER01_ATTACK1);
     }
     break;
-    case 555:
+    case MONSTER_GIGANTIS_WARRIOR:
     {
         if (rand_fps_check(2))
             SetAction(o, MONSTER01_ATTACK1);
@@ -652,7 +652,7 @@ bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
         return true;
     }
     break;
-    case 556:
+    case MONSTER_GENOCIDER_WARRIOR:
     {
         if (c->MonsterSkill == ATMON_SKILL_EX_GENOSIDEWARRIOR_ATTACKSKILL)
         {
@@ -675,27 +675,27 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 106:
+    case MODEL_BERSERK:
     {
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 112:
+    case MODEL_GIGANTIS:
     {
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 113:
+    case MODEL_GENOCIDER:
     {
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 107:
+    case MODEL_SPLINTER_WOLF:
     {
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 108:
+    case MODEL_IRON_RIDER:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -720,7 +720,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 110:
+    case MODEL_BLADE_HUNTER:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -746,7 +746,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 111:
+    case MODEL_KENTAUROS:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -798,12 +798,12 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 197:
+    case MODEL_BERSERKER_WARRIOR:
     {
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 198:
+    case MODEL_KENTAUROS_WARRIOR:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -855,12 +855,12 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 199:
+    case MODEL_GIGANTIS_WARRIOR:
     {
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 200:
+    case MODEL_SOCCERBALL:
     {
         return true;
     }
@@ -874,27 +874,27 @@ bool M37Kanturu1st::MoveKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 106:
+    case MODEL_BERSERK:
         break;
-    case MODEL_MONSTER01 + 112:
+    case MODEL_GIGANTIS:
         break;
-    case MODEL_MONSTER01 + 113:
+    case MODEL_GENOCIDER:
         break;
-    case MODEL_MONSTER01 + 111:
+    case MODEL_KENTAUROS:
         break;
-    case MODEL_MONSTER01 + 197:
+    case MODEL_BERSERKER_WARRIOR:
     {
     }
     break;
-    case MODEL_MONSTER01 + 198:
+    case MODEL_KENTAUROS_WARRIOR:
     {
     }
     break;
-    case MODEL_MONSTER01 + 199:
+    case MODEL_GIGANTIS_WARRIOR:
     {
     }
     break;
-    case MODEL_MONSTER01 + 200:
+    case MODEL_SOCCERBALL:
     {
     }
     break;
@@ -907,7 +907,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 106:
+    case MODEL_BERSERK:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -927,7 +927,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 112:
+    case MODEL_GIGANTIS:
     {
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -945,7 +945,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 113:
+    case MODEL_GENOCIDER:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -953,7 +953,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 107:
+    case MODEL_SPLINTER_WOLF:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         Vector(1.f, 1.f, 1.f, b->BodyLight);
@@ -966,13 +966,13 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     }
     break;
 
-    case MODEL_MONSTER01 + 108:
+    case MODEL_IRON_RIDER:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 110:
+    case MODEL_BLADE_HUNTER:
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
@@ -997,7 +997,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 109:
+    case MODEL_SATYROS:
     {
         vec3_t Light;
         VectorCopy(b->BodyLight, Light);
@@ -1014,7 +1014,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 111:
+    case MODEL_KENTAUROS:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         Vector(1.f, 1.f, 1.f, b->BodyLight);
@@ -1024,7 +1024,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 197:
+    case MODEL_BERSERKER_WARRIOR:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -1044,7 +1044,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 198:
+    case MODEL_KENTAUROS_WARRIOR:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         Vector(1.f, 1.f, 1.f, b->BodyLight);
@@ -1054,7 +1054,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 199:
+    case MODEL_GIGANTIS_WARRIOR:
     {
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -1072,7 +1072,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 200:
+    case MODEL_SOCCERBALL:
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
@@ -1089,19 +1089,19 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 106:
+    case MODEL_BERSERK:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_BER_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_MOVE1 + rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_BER_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1131,7 +1131,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     }
     break;
 
-    case MODEL_MONSTER01 + 112:
+    case MODEL_GIGANTIS:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
@@ -1143,7 +1143,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1180,19 +1180,19 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     }
     break;
 
-    case MODEL_MONSTER01 + 113:
+    case MODEL_GENOCIDER:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_GENO_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_MOVE1 + rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_GENO_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1220,21 +1220,21 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 107:
+    case MODEL_SPLINTER_WOLF:
     {
         MoveEye(o, b, 16, 17);
 
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_SWOLF_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SWOLF_MOVE1 + rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_SWOLF_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SWOLF_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1248,7 +1248,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 108:
+    case MODEL_IRON_RIDER:
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
@@ -1266,14 +1266,14 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             if (o->CurrentAction == MONSTER01_WALK)
             {
                 if (rand_fps_check(15))
-                    PlayBuffer(SOUND_KANTURU_1ST_IR_MOVE1 + rand() % 2);
+                    PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_IR_MOVE1 + rand() % 2));
             }
             else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
             {
                 if (o->SubType == FALSE)
                 {
                     o->SubType = TRUE;
-                    PlayBuffer(SOUND_KANTURU_1ST_IR_ATTACK1 + rand() % 2);
+                    PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_IR_ATTACK1 + rand() % 2));
                 }
             }
         }
@@ -1294,19 +1294,19 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         return true;
     }
     break;
-    case MODEL_MONSTER01 + 109:
+    case MODEL_SATYROS:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_SATI_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SATI_MOVE1 + rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_SATI_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SATI_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1319,7 +1319,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     break;
-    case MODEL_MONSTER01 + 110:
+    case MODEL_BLADE_HUNTER:
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
         {
@@ -1351,7 +1351,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
                 if (gMapManager.WorldActive != WD_39KANTURU_3RD)
                     CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light);
 
-                PlayBuffer(SOUND_KANTURU_1ST_BLADE_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BLADE_MOVE1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1359,7 +1359,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_BLADE_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BLADE_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1372,19 +1372,19 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     break;
-    case MODEL_MONSTER01 + 111:
+    case MODEL_KENTAUROS:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_KENTA_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_MOVE1 + rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_KENTA_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1422,19 +1422,19 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             }
     }
     break;
-    case MODEL_MONSTER01 + 197:
+    case MODEL_BERSERKER_WARRIOR:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_BER_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_MOVE1 + rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_BER_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1461,19 +1461,19 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             BITMAP_SMOKE, vPos, o->Angle, o->Light, 42, o->Scale);
     }
     return true;
-    case MODEL_MONSTER01 + 198:
+    case MODEL_KENTAUROS_WARRIOR:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_KENTA_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_MOVE1 + rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_KENTA_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1513,7 +1513,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         }
     }
     return true;
-    case MODEL_MONSTER01 + 199:
+    case MODEL_GIGANTIS_WARRIOR:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
@@ -1525,7 +1525,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1559,19 +1559,19 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         CreateSprite(BITMAP_LIGHT, EndPos, 1.0f, o->Light, o);
     }
     return true;
-    case MODEL_MONSTER01 + 200:
+    case MODEL_SOCCERBALL:
     {
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(SOUND_KANTURU_1ST_GENO_MOVE1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_MOVE1 + rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(SOUND_KANTURU_1ST_GENO_ATTACK1 + rand() % 2);
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_ATTACK1 + rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1606,7 +1606,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 109:
+    case MODEL_SATYROS:
     {
         if ((o->AnimationFrame >= 3.6f && o->AnimationFrame <= 6.0f
             && o->CurrentAction == MONSTER01_ATTACK1)
@@ -1642,7 +1642,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 106:
+    case MODEL_BERSERK:
     {
         if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 6.7f
             && o->CurrentAction == MONSTER01_ATTACK1)
@@ -1678,7 +1678,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 110:
+    case MODEL_BLADE_HUNTER:
     {
         float Start_Frame = 5.9f;
         float End_Frame = 7.55f;
@@ -1710,7 +1710,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 112:
+    case MODEL_GIGANTIS:
     {
         if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 5.9f
             && o->CurrentAction == MONSTER01_ATTACK1)
@@ -1746,7 +1746,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 113:
+    case MODEL_GENOCIDER:
     {
         if ((o->AnimationFrame >= 5.5f && o->AnimationFrame <= 6.9f
             && o->CurrentAction == MONSTER01_ATTACK1)
@@ -1801,7 +1801,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 197:
+    case MODEL_BERSERKER_WARRIOR:
     {
         if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 6.7f
             && o->CurrentAction == MONSTER01_ATTACK1)
@@ -1837,7 +1837,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 198:
+    case MODEL_KENTAUROS_WARRIOR:
     {
         if ((o->AnimationFrame >= 3.5f && o->AnimationFrame <= 5.9f
             && o->CurrentAction == MONSTER01_ATTACK1)
@@ -1873,7 +1873,7 @@ void M37Kanturu1st::MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 199:
+    case MODEL_GIGANTIS_WARRIOR:
     {
         if ((o->AnimationFrame >= 5.5f && o->AnimationFrame <= 6.9f
             && o->CurrentAction == MONSTER01_ATTACK1)

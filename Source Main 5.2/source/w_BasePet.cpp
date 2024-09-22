@@ -1,4 +1,4 @@
-// w_BasePet.cpp: implementation of the BasePet class.
+﻿// w_BasePet.cpp: implementation of the BasePet class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -87,7 +87,7 @@ bool PetObject::Create(int itemType, int modelType, vec3_t Position, CHARACTER* 
 
     switch (m_obj->Type)
     {
-    case MODEL_HELPER + 123:
+    case MODEL_PET_SKELETON:
         m_obj->Position[1] += (60.0f * Owner->Object.Scale);
         break;
     }

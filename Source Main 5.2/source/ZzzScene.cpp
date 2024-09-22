@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -113,7 +113,7 @@ WORD g_ServerPort = 44405;
 #ifdef MOVIE_DIRECTSHOW
 int  SceneFlag = MOVIE_SCENE;
 #else // MOVIE_DIRECTSHOW
-int  SceneFlag = WEBZEN_SCENE;
+EGameScene  SceneFlag = WEBZEN_SCENE;
 #endif // MOVIE_DIRECTSHOW
 
 extern int g_iKeyPadEnable;
@@ -265,8 +265,8 @@ bool CheckAbuseNameFilter(wchar_t* Text)
 bool CheckName()
 {
     if (CheckAbuseNameFilter(InputText[0]) || CheckAbuseFilter(InputText[0]) ||
-        FindText(InputText[0], L" ") || FindText(InputText[0], L"¡¡") ||
-        FindText(InputText[0], L".") || FindText(InputText[0], L"¡¤") || FindText(InputText[0], L"¡­") ||
+        FindText(InputText[0], L" ") || FindText(InputText[0], L"ã€€") ||
+        FindText(InputText[0], L".") || FindText(InputText[0], L"Â·") || FindText(InputText[0], L"âˆ¼") ||
         FindText(InputText[0], L"Webzen") || FindText(InputText[0], L"WebZen") || FindText(InputText[0], L"webzen") || FindText(InputText[0], L"WEBZEN") ||
         FindText(InputText[0], GlobalText[457]) || FindText(InputText[0], GlobalText[458]))
         return true;
@@ -384,8 +384,6 @@ void WebzenScene(HDC hDC)
     SceneFlag = LOG_IN_SCENE;	//
 }
 
-int MenuStateCurrent = MENU_SERVER_LIST;
-int MenuStateNext = MENU_SERVER_LIST;
 int DeleteGuildIndex = -1;
 
 void DeleteCharacter()
@@ -401,8 +399,6 @@ void DeleteCharacter()
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
     SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
 
-    MenuStateCurrent = MENU_DELETE_LEFT;
-    MenuStateNext = MENU_NEW_DOWN;
     PlayBuffer(SOUND_MENU01);
 
     ClearInput();
@@ -599,7 +595,7 @@ BOOL ShowCheckBox(int num, int index, int message)
     if (message == MESSAGE_USE_STATE || message == MESSAGE_USE_STATE2)
     {
         wchar_t Name[50] = { 0, };
-        if (TargetItem.Type == ITEM_HELPER + 15)
+        if (TargetItem.Type == ITEM_FRUITS)
         {
             switch ((TargetItem.Level >> 3) & 15)
             {
@@ -900,7 +896,7 @@ void CreateCharacterScene()
     CharacterAttribute->SkillNumber = 0;
 
     for (int i = 0; i < MAX_MAGIC; i++)
-        CharacterAttribute->Skill[i] = 0;
+        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
 
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < EQUIPMENT_HELPER; i++)
         CharacterMachine->Equipment[i].Level = 0;
@@ -1093,7 +1089,7 @@ bool NewRenderCharacterScene(HDC hDC)
     {
         pCha = &CharactersClient[i];
         pObj = &pCha->Object;
-        if (pCha->Helper.Type == MODEL_HELPER + 3)
+        if (pCha->Helper.Type == MODEL_HORN_OF_DINORANT)
         {
 #ifdef PJH_NEW_SERVER_SELECT_MAP
             pObj->Position[2] = 194.5f;
@@ -1377,7 +1373,7 @@ bool NewRenderLogInScene(HDC hDC)
     if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
 #ifndef PJH_NEW_SERVER_SELECT_MAP
-        // È­¸é Èå¸®±â
+        // í™”ë©´ íë¦¬ê¸°
         EnableAlphaBlend4();
         glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
         float fScale = (sinf(WorldTime * 0.0005f) + 1.f) * 0.00011f;
@@ -1389,17 +1385,17 @@ bool NewRenderLogInScene(HDC hDC)
         fScale = (sinf(WorldTime * 0.0015f) + 1.f) * 0.00021f;
         RenderBitmapLocalRotate(BITMAP_CHROME + 4, 320.0f, 240.0f, 1150.0f, 1150.0f, fAngle, fScale * 512.f, fScale * 512.f, (512.f) / 512.f - fScale * 2 * 512.f, (512.f) / 512.f - fScale * 2 * 512.f);
 
-        // À§¾Æ·¡ ÀÚ¸£±â
+        // ìœ„ì•„ëž˜ ìžë¥´ê¸°
         EnableAlphaTest();
         glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
         RenderColor(0, 0, 640, 25);
         RenderColor(0, 480 - 25, 640, 25);
 
-        // È­¸éÄ¥
+        // í™”ë©´ì¹ 
         glColor4f(0.0f, 0.0f, 0.0f, 0.2f);
         RenderColor(0, 25, 640, 430);
 #endif //PJH_NEW_SERVER_SELECT_MAP
-        // ¹Â·Î°í
+        // ë®¤ë¡œê³ 
         g_fMULogoAlpha += 0.02f;
         if (g_fMULogoAlpha > 10.0f) g_fMULogoAlpha = 10.0f;
 
@@ -1602,7 +1598,7 @@ bool MoveMainCamera()
             {
             }
             else
-                if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HELPER + 3 || Hero->SafeZone)
+                if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
                 {
                     Hero->Object.Position[2] = RequestTerrainHeight(Hero->Object.Position[0], Hero->Object.Position[1]);
                 }
@@ -2614,9 +2610,9 @@ void MainScene(HDC hDC)
 #ifdef ASG_ADD_MAP_KARUTAN
             if (!IsKarutanMap())
                 StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
-            if (World != WD_80KARUTAN1)
+            if (gMapManager.WorldActive != WD_80KARUTAN1)
                 StopBuffer(SOUND_KARUTAN_INSECT_ENV, true);
-            if (World != WD_81KARUTAN2)
+            if (gMapManager.WorldActive != WD_81KARUTAN2)
                 StopBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, true);
 #endif	// ASG_ADD_MAP_KARUTAN
 

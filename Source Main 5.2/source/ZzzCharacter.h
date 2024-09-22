@@ -51,8 +51,8 @@ void ReleaseCharacters(void);
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation = 0.f);
 CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation = 0.f);
 CHARACTER* CreateHero(int Key, int Class = 0, int Skin = 0, float x = 0.f, float y = 0.f, float Ratate = 0.f);
-CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key = 0);
-CHARACTER* CreateHellGate(char* ID, int Key, int Index, int x, int y, int CreateFlag);
+CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Key = 0);
+CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, int CreateFlag);
 
 void SetAttackSpeed();
 void SetPlayerShock(CHARACTER* c, int Hit);

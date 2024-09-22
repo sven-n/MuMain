@@ -1,4 +1,4 @@
-// NewUIItemEnduranceInfo.cpp: implementation of the CNewUIItemEnduranceInfo class.
+﻿// NewUIItemEnduranceInfo.cpp: implementation of the CNewUIItemEnduranceInfo class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -79,14 +79,14 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 
     int iNextPosY = m_UIStartPos.y;
 
-    if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_HELPER + 4
-        || Hero->Helper.Type == MODEL_HELPER + 64
-        || Hero->Helper.Type == MODEL_HELPER + 65
-        || Hero->Helper.Type == MODEL_HELPER + 67
-        || Hero->Helper.Type == MODEL_HELPER + 80
-        || Hero->Helper.Type == MODEL_HELPER + 106
-        || Hero->Helper.Type == MODEL_HELPER + 123
-        || Hero->Helper.Type == MODEL_HELPER + 37)
+    if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM
+        || Hero->Helper.Type == MODEL_DEMON
+        || Hero->Helper.Type == MODEL_SPIRIT_OF_GUARDIAN
+        || Hero->Helper.Type == MODEL_PET_RUDOLF
+        || Hero->Helper.Type == MODEL_PET_PANDA
+        || Hero->Helper.Type == MODEL_PET_UNICORN
+        || Hero->Helper.Type == MODEL_PET_SKELETON
+        || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         if (CheckMouseIn(m_UIStartPos.x, iNextPosY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT))
             return false;
@@ -141,14 +141,14 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 
         if (i == EQUIPMENT_WEAPON_RIGHT)
         {
-            if (pItem->Type == ITEM_BOW + 15)
+            if (pItem->Type == ITEM_ARROWS)
             {
                 continue;
             }
         }
         else if (i == EQUIPMENT_WEAPON_LEFT)
         {
-            if (pItem->Type == ITEM_BOW + 7)
+            if (pItem->Type == ITEM_BOLT)
             {
                 continue;
             }
@@ -158,7 +158,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 
         if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
         {
-            if (pItem->Type == ITEM_HELPER + 20 && iLevel == 1
+            if (pItem->Type == ITEM_WIZARDS_RING && iLevel == 1
                 || iLevel == 2)
             {
                 continue;
@@ -406,14 +406,14 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM
 
 bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
 {
-    if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_HELPER + 4
-        || Hero->Helper.Type == MODEL_HELPER + 64
-        || Hero->Helper.Type == MODEL_HELPER + 65
-        || Hero->Helper.Type == MODEL_HELPER + 67
-        || Hero->Helper.Type == MODEL_HELPER + 80
-        || Hero->Helper.Type == MODEL_HELPER + 106
-        || Hero->Helper.Type == MODEL_HELPER + 123
-        || Hero->Helper.Type == MODEL_HELPER + 37)
+    if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM
+        || Hero->Helper.Type == MODEL_DEMON
+        || Hero->Helper.Type == MODEL_SPIRIT_OF_GUARDIAN
+        || Hero->Helper.Type == MODEL_PET_RUDOLF
+        || Hero->Helper.Type == MODEL_PET_PANDA
+        || Hero->Helper.Type == MODEL_PET_UNICORN
+        || Hero->Helper.Type == MODEL_PET_SKELETON
+        || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         wchar_t szText[256] = { NULL, };
 
@@ -424,60 +424,60 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
             swprintf(szText, GlobalText[353]);
         }
         break;
-        case MODEL_HELPER + 1:
+        case MODEL_IMP:
         {
             ITEM_ATTRIBUTE* p = &ItemAttribute[Hero->Helper.Type - MODEL_SWORD];
             swprintf(szText, p->Name);
         }
         break;
-        case MODEL_HELPER + 2:
+        case MODEL_HORN_OF_UNIRIA:
         {
             swprintf(szText, GlobalText[355]);
         }
         break;
-        case MODEL_HELPER + 3:
+        case MODEL_HORN_OF_DINORANT:
         {
             swprintf(szText, GlobalText[354]);
         }
         break;
-        case MODEL_HELPER + 4:
+        case MODEL_DARK_HORSE_ITEM:
         {
             swprintf(szText, GlobalText[1187]);
         }
         break;
-        case MODEL_HELPER + 37:
+        case MODEL_HORN_OF_FENRIR:
         {
             swprintf(szText, GlobalText[1916]);
         }
         break;
-        case MODEL_HELPER + 64:
+        case MODEL_DEMON:
         {
-            swprintf(szText, ItemAttribute[ITEM_HELPER + 64].Name);
+            swprintf(szText, ItemAttribute[ITEM_DEMON].Name);
         }
         break;
-        case MODEL_HELPER + 65:
+        case MODEL_SPIRIT_OF_GUARDIAN:
         {
-            swprintf(szText, ItemAttribute[ITEM_HELPER + 65].Name);
+            swprintf(szText, ItemAttribute[ITEM_SPIRIT_OF_GUARDIAN].Name);
         }
         break;
-        case MODEL_HELPER + 67:
+        case MODEL_PET_RUDOLF:
         {
-            swprintf(szText, ItemAttribute[ITEM_HELPER + 67].Name);
+            swprintf(szText, ItemAttribute[ITEM_PET_RUDOLF].Name);
         }
         break;
-        case MODEL_HELPER + 80:
+        case MODEL_PET_PANDA:
         {
-            swprintf(szText, ItemAttribute[ITEM_HELPER + 80].Name);
+            swprintf(szText, ItemAttribute[ITEM_PET_PANDA].Name);
         }
         break;
-        case MODEL_HELPER + 106:
+        case MODEL_PET_UNICORN:
         {
-            swprintf(szText, ItemAttribute[ITEM_HELPER + 106].Name);
+            swprintf(szText, ItemAttribute[ITEM_PET_UNICORN].Name);
         }
         break;
-        case MODEL_HELPER + 123:
+        case MODEL_PET_SKELETON:
         {
-            swprintf(szText, ItemAttribute[ITEM_HELPER + 123].Name);
+            swprintf(szText, ItemAttribute[ITEM_PET_SKELETON].Name);
         }
         break;
         }
@@ -532,12 +532,12 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
     {
         iNumArrowSetInInven = g_pMyInventory->GetNumItemByType(ARROWTYPE_BOW);
 
-        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_BOW + 15)
+        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_ARROWS)
         {
             iNumEquipedArrowDurability = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Durability;
         }
 
-        if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW + 15))
+        if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_ARROWS))
             return false;
 
         swprintf(szText, GlobalText[351], iNumEquipedArrowDurability, iNumArrowSetInInven);
@@ -546,12 +546,12 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
     {
         iNumArrowSetInInven = g_pMyInventory->GetNumItemByType(ARROWTYPE_CROSSBOW);
 
-        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOW + 7)
+        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOLT)
         {
             iNumEquipedArrowDurability = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability;
         }
 
-        if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW + 7))
+        if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOLT))
             return false;
 
         swprintf(szText, GlobalText[352], iNumEquipedArrowDurability, iNumArrowSetInInven);
@@ -599,7 +599,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
 
         if (i == EQUIPMENT_WEAPON_RIGHT)
         {
-            if (pItem->Type == ITEM_BOW + 15)
+            if (pItem->Type == ITEM_ARROWS)
             {
                 continue;
             }
@@ -611,7 +611,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
                 iTempImageIndex = m_iItemDurImageIndex[EQUIPMENT_WEAPON_RIGHT];
             }
 
-            if (pItem->Type == ITEM_BOW + 7)
+            if (pItem->Type == ITEM_BOLT)
             {
                 continue;
             }
@@ -621,7 +621,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
 
         if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
         {
-            if (pItem->Type == ITEM_HELPER + 20 && iLevel == 1
+            if (pItem->Type == ITEM_WIZARDS_RING && iLevel == 1
                 || iLevel == 2)
             {
                 continue;

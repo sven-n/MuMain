@@ -284,7 +284,7 @@ HRESULT FillBuffer(int Buffer, int MaxChannel, bool Enable)
 // Name: LoadWaveFile()
 // Desc: Loads the wave file into a secondary static DirectSound buffer
 //-----------------------------------------------------------------------------
-VOID LoadWaveFile(int Buffer, wchar_t* strFileName, int MaxChannel, bool Enable)
+VOID LoadWaveFile(ESound Buffer, wchar_t* strFileName, int MaxChannel, bool Enable)
 {
     if (!g_EnableSound)
         return;
@@ -412,7 +412,7 @@ DWORD Temp;
 // Name: PlayBuffer()
 // Desc: User hit the "Play" button, so play the DirectSound buffer
 //-----------------------------------------------------------------------------
-HRESULT PlayBuffer(int Buffer, OBJECT* Object, BOOL bLooped)
+HRESULT PlayBuffer(ESound Buffer, OBJECT* Object, BOOL bLooped)
 {
     if (!g_EnableSound) return false;
     if (Buffer < 0) return false;
@@ -473,7 +473,7 @@ BOOL IsSoundPlaying(int Buffer, int Channel)
 // Name: StopBuffer()
 // Desc: Stop the DirectSound buffer from playing
 //-----------------------------------------------------------------------------
-VOID StopBuffer(int Buffer, BOOL bResetPosition)
+VOID StopBuffer(ESound Buffer, BOOL bResetPosition)
 {
     //return;
     if (!g_EnableSound)
@@ -497,7 +497,7 @@ void AllStopSound(void)
 
     for (int i = 0; i < MAX_BUFFER; ++i)
     {
-        StopBuffer(i, true);
+        StopBuffer(static_cast<ESound>(i), true);
     }
 }
 

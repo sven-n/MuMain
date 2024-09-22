@@ -1,4 +1,4 @@
-// NewUICommonMessageBox.cpp: implementation of the NewUICommonMessageBox class.
+ï»¿// NewUICommonMessageBox.cpp: implementation of the NewUICommonMessageBox class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "NewUICommonMessageBox.h"
@@ -1927,7 +1927,7 @@ bool  SEASON3B::CLuckyItemMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    // ¾ÆÀÌÅÛ Á¦¸ñ
+    // ì•„ì´í…œ ì œëª©
     int				nTextIndex[10] = { 0, };
     eLUCKYITEMTYPE	eAct = g_pLuckyItemWnd->GetAct();
 
@@ -2589,7 +2589,7 @@ bool SEASON3B::CUseFruitMsgBoxLayout::SetLayout()
     pMsgBox->Set3DItem(pItem);
 
     wchar_t strName[50] = { 0, };
-    if (pItem->Type == ITEM_HELPER + 15)
+    if (pItem->Type == ITEM_FRUITS)
     {
         switch ((pItem->Level >> 3) & 15)
         {
@@ -3305,7 +3305,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::CancelBtnDown(class CNewUIMessag
 
 CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    if (Hero->Helper.Type == MODEL_HELPER + 2 || Hero->Helper.Type == MODEL_HELPER + 3 || Hero->Helper.Type == MODEL_HELPER + 37)
+    if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Dont_Set_Temple));
     }

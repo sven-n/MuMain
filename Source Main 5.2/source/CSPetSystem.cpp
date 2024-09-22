@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////
 //  CSPetSystem.
 //////////////////////////////////////////////////////////////////////////
 
@@ -113,7 +113,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->Kind = KIND_PET;
     c->Change = false;
     o->SubType = 0;
-    c->MonsterIndex = -1;
+    c->MonsterIndex = MONSTER_UNDEFINED;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;
     o->Position[0] = (float)(PositionX * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
@@ -428,7 +428,7 @@ void CSPetDarkSpirit::MovePet(void)
         int speedRandom = 28;
         int CharacterHeight = 250;
 
-        if (m_PetOwner->Helper.Type == ITEM_HELPER + 4 || gMapManager.WorldActive == WD_55LOGINSCENE)
+        if (m_PetOwner->Helper.Type == ITEM_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
         {
             CharacterHeight = 350;
         }
@@ -668,7 +668,7 @@ void    CSPetDarkSpirit::RenderCmdType(void)
     {
         PartyWidth = 50.f;
     }
-    if ((Hero->Helper.Type >= MODEL_HELPER + 0 && Hero->Helper.Type <= MODEL_HELPER + 4) || Hero->Helper.Type == MODEL_HELPER + 37)
+    if ((Hero->Helper.Type >= MODEL_GUARDIAN_ANGEL && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM) || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         PartyWidth += 60.f;
     }

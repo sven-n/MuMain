@@ -1,4 +1,4 @@
-// CNewUIEmpireGuardianNPC.cpp: implementation of the CNewUIEmpireGuardianNPC class.
+﻿// CNewUIEmpireGuardianNPC.cpp: implementation of the CNewUIEmpireGuardianNPC class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -242,7 +242,7 @@ void CNewUIEmpireGuardianNPC::RenderItem3D()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
 
-    int nItemType = ITEM_POTION + 102;
+    int nItemType = ITEM_GAIONS_ORDER;
     int nItemLevel = 0;
 
     ::RenderItem3D(ptOrigin.x + (190 - 20) / 2, ptOrigin.y + 70, 20.0f, 27.0f, nItemType, nItemLevel, 0, 0, false);

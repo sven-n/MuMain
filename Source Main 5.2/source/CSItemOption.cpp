@@ -1,4 +1,4 @@
-/*+++++++++++++++++++++++++++++++++++++
+﻿/*+++++++++++++++++++++++++++++++++++++
     INCLUDE.
 +++++++++++++++++++++++++++++++++++++*/
 #include "stdafx.h"
@@ -195,7 +195,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
     return true;
 }
 
-bool CSItemOption::IsDisableSkill(int Type, int Energy, int Charisma)
+bool CSItemOption::IsDisableSkill(ActionSkillType Type, int Energy, int Charisma)
 {
     int SkillEnergy = 20 + SkillAttribute[Type].Energy * (SkillAttribute[Type].Level) * 4 / 100;
 
@@ -730,7 +730,7 @@ int CSItemOption::RenderDefaultOptionText(const ITEM* ip, int TextNum)
         TextListColor[TNum] = TEXT_COLOR_BLUE;
         TNum++;
 
-        if ((ip->Type >= ITEM_HELPER + 8 && ip->Type <= ITEM_HELPER + 9) || (ip->Type >= ITEM_HELPER + 12 && ip->Type <= ITEM_HELPER + 13) || (ip->Type >= ITEM_HELPER + 21 && ip->Type <= ITEM_HELPER + 27))
+        if ((ip->Type >= ITEM_RING_OF_ICE && ip->Type <= ITEM_RING_OF_POISON) || (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type <= ITEM_PENDANT_OF_FIRE) || (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_PENDANT_OF_WATER))
         {
             swprintf(TextList[TNum], GlobalText[1165]); // "Increase Attribute Damage"
             TextListColor[TNum] = TEXT_COLOR_BLUE;

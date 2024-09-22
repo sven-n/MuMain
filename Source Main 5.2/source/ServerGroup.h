@@ -31,7 +31,7 @@ public:
     int		m_iServerIndex;
     int		m_iNumServer;
     bool	m_bPvPServer;
-    BYTE	m_abyNonPvpServer[MAX_SERVER_LOW];
+    BYTE	m_abyNonPvpServer[MAX_SERVER_PER_GROUP];
     unicode::t_char	m_szName[MAX_TEXT_LENGTH];
     unicode::t_char	m_szDescription[MAX_TEXT_LENGTH];
 
