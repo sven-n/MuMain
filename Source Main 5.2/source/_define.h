@@ -319,7 +319,7 @@ enum struct STORAGE_TYPE
 #define MAX_MINIMAP_NAME    100
 
 #define MAX_SKILL_NAME      32
-#define MAX_MONSTER_NAME    32
+#define MAX_MONSTER_NAME    40
 
 constexpr int MAX_ITEM_TYPE = 16;
 
