@@ -809,7 +809,6 @@ void CalcFPS()
     static int frame = 0;
     if (!timeinit)
     {
-        g_WorldTime->ResetTimer();
         start = g_WorldTime->GetTimeElapsed();
         timeinit = 1;
     }

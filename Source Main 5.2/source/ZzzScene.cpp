@@ -2270,8 +2270,8 @@ void SetTargetFps(float targetFps)
     ms_per_frame = 1000.0f / target_fps;
 }
 
-uint64_t current_tick_count = GetTickCount64();
-uint64_t last_water_change = GetTickCount64();
+auto current_tick_count = 0;
+auto last_water_change = 0;
 
 void MainScene(HDC hDC)
 {
@@ -2283,7 +2283,7 @@ void MainScene(HDC hDC)
     {
         double dDeltaTick = g_pTimer->GetTimeElapsed();
         dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
-        g_pTimer->ResetTimer();
+        // g_pTimer->ResetTimer();
 
         CInput::Instance().Update();
         CUIMng::Instance().Update(dDeltaTick);
@@ -2319,7 +2319,7 @@ void MainScene(HDC hDC)
 
     constexpr int NumberOfWaterTextures = 32;
     constexpr double timePerFrame = 1000 / REFERENCE_FPS;
-    int64_t time_since_last_render = current_tick_count - last_water_change;
+    auto time_since_last_render = current_tick_count - last_water_change;
     while (time_since_last_render > timePerFrame)
     {
         WaterTextureNumber++;
@@ -2404,8 +2404,8 @@ void MainScene(HDC hDC)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const uint64_t last_render_tick_count = current_tick_count;
-    current_tick_count = GetTickCount64();
+    const auto last_render_tick_count = current_tick_count;
+    current_tick_count = g_pTimer->GetTimeElapsed();
 
     bool Success = false;
 
@@ -2463,12 +2463,42 @@ void MainScene(HDC hDC)
             SwapBuffers(hDC);
         }
 
-        const uint64_t current_frame_time_ms = current_tick_count - last_render_tick_count;
-        if (current_frame_time_ms < ms_per_frame)
+        // Here comes the tricky part of limiting the frame rate:
+        // We need to make sure that the frame rate is limited to the target frame rate,
+        // but windows sleep functions are pretty inaccurate.
+        // First, we don't even try to sleep when we are already behind the target frame rate.
+        // Additionally, we only sleep when we have enough time to sleep and spin for the rest of the time.
+        // We use spinning to increase the accuracy of the frame limiting.
+        const float current_frame_time_ms = current_tick_count - last_render_tick_count;
+        if (current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
         {
-            const uint64_t rest_ms = ms_per_frame - current_frame_time_ms;
-            std::this_thread::sleep_for(std::chrono::milliseconds(rest_ms));
-            current_tick_count += rest_ms;
+            constexpr float min_spin_ms = 1;
+            constexpr float sleep_threshold_ms = 8;
+            const auto rest_ms = ms_per_frame - current_frame_time_ms;
+            auto sleep_ms = rest_ms - min_spin_ms;
+
+            const auto start_sleep = g_pTimer->GetTimeElapsed();
+            if (sleep_ms > sleep_threshold_ms)
+            {
+                // In my tests, it sleeps either for nearly 0 ms, or for about 10 ms ...
+                std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
+            }
+
+            const auto actual_sleep_ms = g_pTimer->GetTimeElapsed() - start_sleep;
+            const auto start_spin = g_pTimer->GetTimeElapsed();
+            const auto spin_ms = rest_ms - actual_sleep_ms;
+            
+            while (true)
+            {
+                const auto current = g_pTimer->GetTimeElapsed();
+                const auto spinned_ms = current - start_spin;
+                if (spinned_ms >= spin_ms)
+                {
+                    break;
+                }
+            }
+
+            current_tick_count += static_cast<int>(rest_ms);
         }
 
         if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))

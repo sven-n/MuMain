@@ -92,7 +92,7 @@ HFONT     g_hFontBold = NULL;
 HFONT     g_hFontBig = NULL;
 HFONT     g_hFixFont = NULL;
 
-CTimer* g_pTimer = NULL;	// performance counter.
+CTimer* g_pTimer = new CTimer();    // performance counter.
 bool      Destroy = false;
 bool      ActiveIME = false;
 
@@ -1509,7 +1509,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     g_pUIManager = new CUIManager;
     g_pUIMapName = new CUIMapName;	// rozy
-    g_pTimer = new CTimer();
 
 #ifdef MOVIE_DIRECTSHOW
     g_pMovieScene = new CMovieScene;
