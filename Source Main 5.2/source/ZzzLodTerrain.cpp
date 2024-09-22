@@ -2506,7 +2506,7 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || CameraTopViewEnable)
+            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, g_fFrustumRange) || CameraTopViewEnable)
             {
                 RenderTerrainTile(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
             }
@@ -2560,7 +2560,7 @@ void RenderTerrainBlock_After(float xf, float yf, int xi, int yi, bool EditFlag)
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || CameraTopViewEnable)
+            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, g_fFrustumRange) || CameraTopViewEnable)
             {
                 RenderTerrainTile_After(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
             }
@@ -2583,7 +2583,7 @@ void RenderTerrainFrustrum_After(bool EditFlag)
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            if (TestFrustrum2D(xf + 2.f, yf + 2.f, -80.f) || CameraTopViewEnable)
+            if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange * 2) || CameraTopViewEnable)
             {
                 RenderTerrainBlock_After(xf, yf, xi, yi, EditFlag);
             }
