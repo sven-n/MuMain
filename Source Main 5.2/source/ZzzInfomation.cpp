@@ -3273,6 +3273,11 @@ void CHARACTER_MACHINE::CalculateAttackRatingPK()
 
 void CHARACTER_MACHINE::CalculateAttackSpeed()
 {
+    if (Character.MaxAttackSpeed == 0xFFFF)
+    {
+        return;
+    }
+
     WORD Dexterity;
 
     Dexterity = Character.Dexterity + Character.AddDexterity;
@@ -3782,13 +3787,13 @@ void CHARACTER_MACHINE::CalculateWalkSpeed()
 
 void CHARACTER_MACHINE::CalculateNextExperince()
 {
-    Character.Experience = Character.NextExperince;
-    Character.NextExperince = (9 + Character.Level) * (Character.Level) * (Character.Level) * 10;
+    Character.Experience = Character.NextExperience;
+    Character.NextExperience = (9 + Character.Level) * (Character.Level) * (Character.Level) * 10;
 
     if (Character.Level > 255)
     {
         int LevelOver_N = Character.Level - 255;
-        Character.NextExperince += (9 + LevelOver_N) * LevelOver_N * LevelOver_N * 1000;
+        Character.NextExperience += (9 + LevelOver_N) * LevelOver_N * LevelOver_N * 1000;
     }
 }
 

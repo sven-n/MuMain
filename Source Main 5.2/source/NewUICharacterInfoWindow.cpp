@@ -300,7 +300,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
     else
     {
         swprintf(strLevel, GlobalText[200], CharacterAttribute->Level);
-        swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperince);
+        swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperience);
     }
     if (CharacterAttribute->Level > 9)
     {

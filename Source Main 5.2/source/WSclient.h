@@ -370,7 +370,7 @@ typedef struct
     BYTE		 InventoryExtensions;
 } PRECEIVE_JOIN_MAP_SERVER, * LPPRECEIVE_JOIN_MAP_SERVER;
 
-//receive revival
+//receive join map server
 typedef struct
 {
     PBMSG_HEADER Header;
@@ -379,21 +379,34 @@ typedef struct
     BYTE         PositionY;
     BYTE         Map;
     BYTE         Angle;
-    WORD         Life;
-    WORD         Mana;
-    WORD		 Shield;
-    WORD		 SkillMana;
-    BYTE		btMExp1;
-    BYTE		btMExp2;
-    BYTE		btMExp3;
-    BYTE		btMExp4;
-    BYTE		btMExp5;
-    BYTE		btMExp6;
-    BYTE		btMExp7;
-    BYTE		btMExp8;
-
+    uint64_t	CurrentExperience;
+    uint64_t	ExperienceForNextLevel;
+    WORD         LevelUpPoint;
+    WORD         Strength;
+    WORD         Dexterity;
+    WORD         Vitality;
+    WORD         Energy;
+    WORD         Charisma;
+    DWORD         Life;
+    DWORD         LifeMax;
+    DWORD         Mana;
+    DWORD         ManaMax;
+    DWORD		 Shield;
+    DWORD		 ShieldMax;
+    DWORD		 SkillMana;
+    DWORD		 SkillManaMax;
     DWORD        Gold;
-} PRECEIVE_REVIVAL, * LPPRECEIVE_REVIVAL;
+    BYTE         PK;
+    BYTE		 CtlCode;
+    short        AddPoint;
+    short        MaxAddPoint;
+    WORD		 wMinusPoint;
+    WORD		 wMaxMinusPoint;
+    WORD         AttackSpeed;
+    WORD         MagicSpeed;
+    WORD         MaxAttackSpeed;
+    BYTE		 InventoryExtensions;
+} PRECEIVE_JOIN_MAP_SERVER_EXTENDED, * LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED;
 
 //inventory
 typedef struct {
@@ -568,6 +581,14 @@ typedef struct {
     BYTE		  ShieldDamageL;
 } PRECEIVE_ATTACK, * LPPRECEIVE_ATTACK;
 
+typedef struct {
+    PBMSG_HEADER  Header;
+    BYTE		  DamageType;   // 3
+    WORD          TargetId;     // 4
+    DWORD         HealthDamage; // 8
+    DWORD         ShieldDamage; // 12
+} PRECEIVE_ATTACK_EXTENDED, * LPPRECEIVE_ATTACK_EXTENDED;
+
 //receive die
 typedef struct {
     PBMSG_HEADER  Header;
@@ -581,13 +602,12 @@ typedef struct {
 
 typedef struct {
     PBMSG_HEADER  Header;
-    BYTE          KeyH;
-    BYTE          KeyL;
-    WORD          ExpH;
-    WORD          ExpL;
-    BYTE          DamageH;
-    BYTE          DamageL;
-} PRECEIVE_DIE2, * LPPRECEIVE_DIE2;
+    BYTE          ExperienceType;       // 3
+    DWORD         AddedExperience;      // 4
+    DWORD         DamageOfLastHit;      // 8
+    WORD          KilledObjectId;       // 12
+    WORD          KillerObjectId;       // 14
+} PRECEIVE_EXP_EXTENDED, * LPPRECEIVE_EXP_EXTENDED;
 
 //receive default key
 typedef struct {
@@ -720,10 +740,32 @@ typedef struct {
 } PRECEIVE_LEVEL_UP, * LPPRECEIVE_LEVEL_UP;
 
 typedef struct {
+    PBMSG_HEADER Header;
+    BYTE         SubCode;
+    WORD         Level;
+    WORD         LevelUpPoint;
+    DWORD         MaxLife;
+    DWORD         MaxMana;
+    DWORD		 MaxShield;
+    DWORD		 SkillManaMax;
+    short        AddPoint;
+    short        MaxAddPoint;
+    WORD		 wMinusPoint;
+    WORD		 wMaxMinusPoint;
+} PRECEIVE_LEVEL_UP_EXTENDED, * LPPRECEIVE_LEVEL_UP_EXTENDED;
+
+typedef struct {
     PBMSG_HEADER  Header;
     BYTE          Index;
-    BYTE		  Life[5];
+    BYTE          Life[5];
 } PRECEIVE_LIFE, * LPPRECEIVE_LIFE;
+
+typedef struct {
+    PBMSG_HEADER  Header;
+    BYTE          Index;
+    DWORD          LifeOrMana;
+    DWORD          ShieldOrBP;
+} PRECEIVE_LIFE_EXTENDED, * LPPRECEIVE_LIFE_EXTENDED;
 
 //receive add point
 typedef struct {
@@ -731,9 +773,20 @@ typedef struct {
     BYTE         SubCode;
     BYTE         Result;
     WORD         Max;
-    WORD		 ShieldMax;
-    WORD		 SkillManaMax;
+    WORD         ShieldMax;
+    WORD         SkillManaMax;
 } PRECEIVE_ADD_POINT, * LPPRECEIVE_ADD_POINT;
+
+typedef struct {
+    PBMSG_HEADER Header;
+    BYTE         SubCode;       // 3
+    BYTE         StatType;      // 4
+    WORD         AddedAmount;   // 6
+    DWORD         MaxHealth;    // 8
+    DWORD         MaxMana;      // 12
+    DWORD		 ShieldMax;     // 16
+    DWORD		 SkillManaMax;  // 20
+} PRECEIVE_ADD_POINT_EXTENDED, * LPPRECEIVE_ADD_POINT_EXTENDED;
 
 typedef struct {
     PBMSG_HEADER Header;
@@ -2666,18 +2719,60 @@ typedef struct
 
 typedef struct
 {
+    PBMSG_HEADER  h;
+    BYTE		subcode;
+    short		nMLevel;
+    BYTE		btMExp1;
+    BYTE		btMExp2;
+    BYTE		btMExp3;
+    BYTE		btMExp4;
+    BYTE		btMExp5;
+    BYTE		btMExp6;
+    BYTE		btMExp7;
+    BYTE		btMExp8;
+
+    BYTE		btMNextExp1;
+    BYTE		btMNextExp2;
+    BYTE		btMNextExp3;
+    BYTE		btMNextExp4;
+    BYTE		btMNextExp5;
+    BYTE		btMNextExp6;
+    BYTE		btMNextExp7;
+    BYTE		btMNextExp8;
+    short		nMLPoint;
+    DWORD		wMaxLife;
+    DWORD		wMaxMana;
+    DWORD		wMaxShield;
+    DWORD		wMaxSkillMana;
+} PMSG_MASTERLEVEL_INFO_EXTENDED, * LPPMSG_MASTERLEVEL_INFO_EXTENDED;
+
+typedef struct
+{
     PBMSG_HEADER	h;
     BYTE		subcode;
     short		nMLevel;
     short		nAddMPoint;
     short       nMLevelUpMPoint;
-    //	short		nTotalMPoint;
     short		nMaxPoint;
     WORD		wMaxLife;
     WORD		wMaxMana;
     WORD		wMaxShield;
     WORD		wMaxBP;
 } PMSG_MASTERLEVEL_UP, * LPPMSG_MASTERLEVEL_UP;
+
+typedef struct
+{
+    PBMSG_HEADER	h;
+    BYTE		subcode;
+    short		nMLevel;
+    short		nAddMPoint;
+    short       nMLevelUpMPoint;
+    short		nMaxPoint;
+    DWORD		wMaxLife;
+    DWORD		wMaxMana;
+    DWORD		wMaxShield;
+    DWORD		wMaxBP;
+} PMSG_MASTERLEVEL_UP_EXTENDED, * LPPMSG_MASTERLEVEL_UP_EXTENDED;
 
 typedef struct
 {

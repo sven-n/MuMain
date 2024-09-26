@@ -236,7 +236,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFrame()
 
 void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 {
-    WORD wLifeMax, wLife, wManaMax, wMana;
+    DWORD wLifeMax, wLife, wManaMax, wMana;
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -330,7 +330,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
     float x, y, width, height;
     float fY, fH, fV;
 
-    WORD dwMaxSkillMana, dwSkillMana;
+    DWORD dwMaxSkillMana, dwSkillMana;
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -372,7 +372,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
 {
     float x, y, width, height;
     float fY, fH, fV;
-    WORD wMaxShield, wShield;
+    DWORD wMaxShield, wShield;
 
     //Master_Level_Data.wMaxShield
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
@@ -429,7 +429,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
     else
     {
         wLevel = CharacterAttribute->Level;
-        dwNexExperience = CharacterAttribute->NextExperince;
+        dwNexExperience = CharacterAttribute->NextExperience;
         dwExperience = CharacterAttribute->Experience;
     }
 

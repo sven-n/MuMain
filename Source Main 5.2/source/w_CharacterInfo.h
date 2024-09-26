@@ -179,8 +179,8 @@ public:
 
     WORD        Level;
     EMonsterType        MonsterIndex;
-    WORD        Damage;
-    WORD        Hit;
+    int        Damage;
+    int        Hit;
     WORD        MoveSpeed;
 
     int			Action;

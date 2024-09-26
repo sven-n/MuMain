@@ -111,9 +111,14 @@ MASTER_LEVEL_VALUE	Master_Level_Data;
 
 //BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '4'+3, '0'+4, '5'+5};
 //BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"TbYehR2hFUPBKgZj"};
-BYTE Version[SIZE_PROTOCOLVERSION] = { '1' + 1, '0' + 2, '4' + 3, '0' + 4, '4' + 5 };
-BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 
+#ifdef USE_EXTENDED_PROTOCOL
+BYTE Version[SIZE_PROTOCOLVERSION] = { '2' + 1, '0' + 2, '4' + 3, '0' + 4, '4' + 5 };
+#else
+BYTE Version[SIZE_PROTOCOLVERSION] = { '1' + 1, '0' + 2, '4' + 3, '0' + 4, '4' + 5 };
+#endif
+
+BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 Connection* SocketClient = nullptr;
 
 BYTE    g_byPacketSerialSend = 0;
@@ -363,14 +368,22 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             rUIMng.PopUpMsgWin(MESSAGE_SERVER_LOST);
             break;
         }
-        for (int i = 0; i < SIZE_PROTOCOLVERSION; i++)
+
+        u_int64 received = 0;
+        u_int64 actual = 0;
+        for (int i = 0; i < SIZE_PROTOCOLVERSION; ++i)
         {
-            if (Version[i] - (i + 1) != Data2->Version[i])
-            {
-                rUIMng.HideWin(&rUIMng.m_LoginWin);
-                rUIMng.PopUpMsgWin(MESSAGE_VERSION);
-                g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
-            }
+            received |= Data2->Version[i];
+            received <<= 8;
+            actual |= (Version[i] - (i + 1));
+            actual <<= 8;
+        }
+
+        if (actual < received)
+        {
+            rUIMng.HideWin(&rUIMng.m_LoginWin);
+            rUIMng.PopUpMsgWin(MESSAGE_VERSION);
+            g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
         }
     }
 
@@ -752,96 +765,143 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
 int HeroIndex;
 
-BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted, int Size)
 {
     MouseLButton = false;
+    HeroIndex = rand() % MAX_CHARACTERS_CLIENT;
+    CHARACTER* c = &CharactersClient[HeroIndex];
 
-    auto Data = (LPPRECEIVE_JOIN_MAP_SERVER)ReceiveBuffer;
-
-    __int64 Data_Exp = 0x0000000000000000;
-    Master_Level_Data.lMasterLevel_Experince = 0x0000000000000000;
-    Data_Exp |= Data->btMExp1;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp2;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp3;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp4;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp5;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp6;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp7;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp8;
-
-    if (gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
-    {
-        Master_Level_Data.lMasterLevel_Experince = Data_Exp;
-    }
-    else
-    {
-        CharacterAttribute->Experience = (int)Data_Exp;
-    }
-
-    Data_Exp = 0x0000000000000000;
-    Master_Level_Data.lNext_MasterLevel_Experince = 0x0000000000000000;
-
-    Data_Exp |= Data->btMNextExp1;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp2;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp3;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp4;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp5;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp6;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp7;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp8;
-
-    if (gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
-    {
-        Master_Level_Data.lNext_MasterLevel_Experince = Data_Exp;
-    }
-    else
-    {
-        CharacterAttribute->NextExperince = (int)Data_Exp;
-    }
-
-    CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
-    CharacterAttribute->Strength = Data->Strength;
-    CharacterAttribute->Dexterity = Data->Dexterity;
-    CharacterAttribute->Vitality = Data->Vitality;
-    CharacterAttribute->Energy = Data->Energy;
-    CharacterAttribute->Charisma = Data->Charisma;
-    CharacterAttribute->Life = Data->Life;
-    CharacterAttribute->LifeMax = Data->LifeMax;
-    CharacterAttribute->Mana = Data->Mana;
-    CharacterAttribute->ManaMax = Data->ManaMax;
-    CharacterAttribute->SkillMana = Data->SkillMana;
-    CharacterAttribute->SkillManaMax = Data->SkillManaMax;
+    BYTE pk, ctlCode, posX, posY, angle;
     CharacterAttribute->Ability = 0;
     CharacterAttribute->AbilityTime[0] = 0;
     CharacterAttribute->AbilityTime[1] = 0;
     CharacterAttribute->AbilityTime[2] = 0;
-    CharacterAttribute->Shield = Data->Shield;
-    CharacterAttribute->ShieldMax = Data->ShieldMax;
-    CharacterAttribute->AddPoint = Data->AddPoint;
-    CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
-    CharacterAttribute->wMinusPoint = Data->wMinusPoint;
-    CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
-    CharacterAttribute->InventoryExtensions = Data->InventoryExtensions;
 
-    CharacterMachine->Gold = Data->Gold;
-    //CharacterAttribute->SkillMana     = CharacterAttribute->Energy*10+CharacterAttribute->ManaMax*10/6;
+    if (Size < sizeof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED))
+    {
+        auto const Data = (LPPRECEIVE_JOIN_MAP_SERVER)ReceiveBuffer;
 
-    gMapManager.WorldActive = Data->Map;
+        __int64 Data_Exp = 0x0000000000000000;
+        Master_Level_Data.lMasterLevel_Experince = 0x0000000000000000;
+        Data_Exp |= Data->btMExp1;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMExp2;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMExp3;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMExp4;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMExp5;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMExp6;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMExp7;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMExp8;
 
+        if (gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
+        {
+            Master_Level_Data.lMasterLevel_Experince = Data_Exp;
+        }
+        else
+        {
+            CharacterAttribute->Experience = (int)Data_Exp;
+        }
+
+        Data_Exp = 0x0000000000000000;
+        Master_Level_Data.lNext_MasterLevel_Experince = 0x0000000000000000;
+
+        Data_Exp |= Data->btMNextExp1;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMNextExp2;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMNextExp3;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMNextExp4;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMNextExp5;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMNextExp6;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMNextExp7;
+        Data_Exp <<= 8;
+        Data_Exp |= Data->btMNextExp8;
+
+        if (gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
+        {
+            Master_Level_Data.lNext_MasterLevel_Experince = Data_Exp;
+        }
+        else
+        {
+            CharacterAttribute->NextExperience = (int)Data_Exp;
+        }
+
+        CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
+        CharacterAttribute->Strength = Data->Strength;
+        CharacterAttribute->Dexterity = Data->Dexterity;
+        CharacterAttribute->Vitality = Data->Vitality;
+        CharacterAttribute->Energy = Data->Energy;
+        CharacterAttribute->Charisma = Data->Charisma;
+        CharacterAttribute->Life = Data->Life;
+        CharacterAttribute->LifeMax = Data->LifeMax;
+        CharacterAttribute->Mana = Data->Mana;
+        CharacterAttribute->ManaMax = Data->ManaMax;
+        CharacterAttribute->SkillMana = Data->SkillMana;
+        CharacterAttribute->SkillManaMax = Data->SkillManaMax;
+        CharacterAttribute->Shield = Data->Shield;
+        CharacterAttribute->ShieldMax = Data->ShieldMax;
+        CharacterAttribute->AddPoint = Data->AddPoint;
+        CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
+        CharacterAttribute->wMinusPoint = Data->wMinusPoint;
+        CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
+        CharacterAttribute->InventoryExtensions = Data->InventoryExtensions;
+        CharacterAttribute->MaxAttackSpeed = 0xFFFF;
+        CharacterMachine->Gold = Data->Gold;
+        gMapManager.WorldActive = Data->Map;
+
+        pk = Data->PK;
+        ctlCode = Data->CtlCode;
+        posX = Data->PositionX;
+        posY = Data->PositionY;
+        angle = Data->Angle;
+    }
+    else
+    {
+        auto const Data = (LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED)ReceiveBuffer;
+        CharacterAttribute->Experience = Data->CurrentExperience;
+        CharacterAttribute->NextExperience = Data->ExperienceForNextLevel;
+        CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
+        CharacterAttribute->Strength = Data->Strength;
+        CharacterAttribute->Dexterity = Data->Dexterity;
+        CharacterAttribute->Vitality = Data->Vitality;
+        CharacterAttribute->Energy = Data->Energy;
+        CharacterAttribute->Charisma = Data->Charisma;
+        CharacterAttribute->Life = Data->Life;
+        CharacterAttribute->LifeMax = Data->LifeMax;
+        CharacterAttribute->Mana = Data->Mana;
+        CharacterAttribute->ManaMax = Data->ManaMax;
+        CharacterAttribute->SkillMana = Data->SkillMana;
+        CharacterAttribute->SkillManaMax = Data->SkillManaMax;
+        CharacterAttribute->Shield = Data->Shield;
+        CharacterAttribute->ShieldMax = Data->ShieldMax;
+        CharacterAttribute->AddPoint = Data->AddPoint;
+        CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
+        CharacterAttribute->wMinusPoint = Data->wMinusPoint;
+        CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
+        CharacterAttribute->InventoryExtensions = Data->InventoryExtensions;
+        CharacterAttribute->AttackSpeed = Data->AttackSpeed;
+        CharacterAttribute->MagicSpeed = Data->AttackSpeed;
+        CharacterAttribute->MaxAttackSpeed = Data->MaxAttackSpeed;
+        CharacterMachine->Gold = Data->Gold;
+
+        gMapManager.WorldActive = Data->Map;
+        pk = Data->PK;
+        ctlCode = Data->CtlCode;
+        posX = Data->PositionX;
+        posY = Data->PositionY;
+        angle = Data->Angle;
+
+    }
     gMapManager.LoadWorld(gMapManager.WorldActive);
 
     if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
@@ -850,18 +910,17 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
 
     matchEvent::CreateEventMatch(gMapManager.WorldActive);
-    HeroIndex = rand() % MAX_CHARACTERS_CLIENT;
-    CHARACTER* c = &CharactersClient[HeroIndex];
-    CreateCharacterPointer(c, MODEL_PLAYER, Data->PositionX, Data->PositionY, ((float)Data->Angle - 1.f) * 45.f);
+
+    CreateCharacterPointer(c, MODEL_PLAYER, posX, posY, ((float)angle - 1.f) * 45.f);
     c->Key = HeroKey;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d", c->Key, Data->Map, Data->PositionX, Data->PositionY);
-
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d", c->Key, gMapManager.WorldActive, posX, posY);
     OBJECT* o = &c->Object;
     c->Class = CharacterAttribute->Class;
     c->Skin = 0;
-    c->PK = Data->PK;
-    c->CtlCode = Data->CtlCode;
+    c->PK = pk;
+    c->CtlCode = ctlCode;
+
     o->Kind = KIND_PLAYER;
     SetCharacterClass(c);
 
@@ -959,7 +1018,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     return (TRUE);
 }
-
+/*
 void ReceiveRevival(const BYTE* ReceiveBuffer)
 {
     MouseLButton = false;
@@ -1114,7 +1173,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     g_pNewUISystem->HideAll();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x04 [ReceiveRevival]");
-}
+}*/
 
 void ReceiveMagicList(const BYTE* ReceiveBuffer)
 {
@@ -2744,23 +2803,10 @@ void ReceiveDamage(const BYTE* ReceiveBuffer)
         CharacterAttribute->Shield = 0;
 }
 
-void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
+void ReceiveAttackDamageCastle(CHARACTER* c, OBJECT* o, const bool success, const int key, const int damage, const int shieldDamage, const int damageType, const bool bRepeatedly, const bool bEndRepeatedly, const bool bDoubleEnable, const bool bComboEnable)
 {
-    int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
-    int Success = (Key >> 15);
-    Key &= 0x7FFF;
-
-    int Index = FindCharacterIndex(Key);
-    CHARACTER* c = &CharactersClient[Index];
-    OBJECT* o = &c->Object;
     vec3_t Light;
-    WORD Damage = (((WORD)(Data->DamageH) << 8) + Data->DamageL);
-    int	 DamageType = (Data->DamageType) & 0x3f;
-    bool bDoubleEnable = (Data->DamageType >> 6) & 0x01;
-    bool bComboEnable = (Data->DamageType >> 7) & 0x01;
-    WORD ShieldDamage = (((WORD)(Data->ShieldDamageH) << 8) + Data->ShieldDamageL);
-
-    int accumDamage = ShieldDamage + Damage;
+    int accumDamage = shieldDamage + damage;
     int	rstDamage = -1;
     float rstScale = 0.8f;
     Vector(0.5f, 0.5f, 0.5f, Light);
@@ -2783,7 +2829,7 @@ void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
     }
     else
     {
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
             Vector(1.f, 1.f, 1.f, Light);
         }
@@ -2793,38 +2839,38 @@ void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
         }
     }
 
-    if (Success)
+    if (success)
     {
-        SetPlayerShock(c, Damage);
+        SetPlayerShock(c, damage);
         Vector(1.f, 0.f, 0.f, Light);
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
-            if (Damage >= CharacterAttribute->Life)
+            if (damage >= CharacterAttribute->Life)
                 CharacterAttribute->Life = 0;
             else
-                CharacterAttribute->Life -= Damage;
+                CharacterAttribute->Life -= damage;
 
-            if (ShieldDamage >= CharacterAttribute->Shield)
+            if (shieldDamage >= CharacterAttribute->Shield)
                 CharacterAttribute->Shield = 0;
             else
-                CharacterAttribute->Shield -= ShieldDamage;
+                CharacterAttribute->Shield -= shieldDamage;
         }
 
         CreatePoint(o->Position, rstDamage, Light, rstScale);
     }
     else
     {
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
-            if (Damage >= CharacterAttribute->Life)
+            if (damage >= CharacterAttribute->Life)
                 CharacterAttribute->Life = 0;
             else
-                CharacterAttribute->Life -= Damage;
+                CharacterAttribute->Life -= damage;
 
-            if (ShieldDamage >= CharacterAttribute->Shield)
+            if (shieldDamage >= CharacterAttribute->Shield)
                 CharacterAttribute->Shield = 0;
             else
-                CharacterAttribute->Shield -= ShieldDamage;
+                CharacterAttribute->Shield -= shieldDamage;
 
             if (g_isCharacterBuff(o, eBuff_PhysDefense) && o->Type == MODEL_PLAYER)
             {
@@ -2847,89 +2893,66 @@ void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
             if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7
                 && rand_fps_check(2))
             {
-                SetPlayerShock(c, Damage);
+                SetPlayerShock(c, damage);
             }
         }
 
-        if (DamageType == 4)
+        if (damageType == 4)
         {
             Vector(1.f, 0.f, 1.f, Light);
         }
 
         CreatePoint(o->Position, rstDamage, Light, rstScale);
     }
-    c->Hit = Damage;
+
+    c->Hit = damage;
 }
 
-void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
+void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int key, const int damage, const int shieldDamage, const int damageType, const bool bRepeatedly, const bool bEndRepeatedly, const bool bDoubleEnable, const bool bComboEnable)
 {
-    auto Data = (LPPRECEIVE_ATTACK)ReceiveBuffer;
-
-    if (gMapManager.InChaosCastle())
-    {
-        ProcessDamageCastle(Data);
-        return;
-    }
-
-    int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
-    int Success = (Key >> 15);
-    Key &= 0x7FFF;
-
-    int Index = FindCharacterIndex(Key);
-    CHARACTER* c = &CharactersClient[Index];
-    OBJECT* o = &c->Object;
     vec3_t Light;
-    WORD Damage = (((WORD)(Data->DamageH) << 8) + Data->DamageL);
-    // DamageType
-    int	 DamageType = (Data->DamageType) & 0x0f;
-    bool bRepeatedly = (Data->DamageType >> 4) & 0x01;
-    bool bEndRepeatedly = (Data->DamageType >> 5) & 0x01;
-    bool bDoubleEnable = (Data->DamageType >> 6) & 0x01;
-    bool bComboEnable = (Data->DamageType >> 7) & 0x01;
-    WORD ShieldDamage = (((WORD)(Data->ShieldDamageH) << 8) + Data->ShieldDamageL);
-
-    if (Success)
+    if (success)
     {
-        SetPlayerShock(c, Damage);
+        SetPlayerShock(c, damage);
         Vector(1.f, 0.f, 0.f, Light);
 
-        CreatePoint(o->Position, Damage, Light);
+        CreatePoint(o->Position, damage, Light);
 
-        if (ShieldDamage > 0)
+        if (shieldDamage > 0)
         {
             vec3_t nPosShieldDamage;
             Vector(0.8f, 1.f, 0.f, Light);
             nPosShieldDamage[0] = o->Position[0]; nPosShieldDamage[1] = o->Position[1];
             nPosShieldDamage[2] = o->Position[2] + 25.f;
-            CreatePoint(nPosShieldDamage, ShieldDamage, Light);
+            CreatePoint(nPosShieldDamage, shieldDamage, Light);
         }
 
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
-            if (Damage >= CharacterAttribute->Life)
+            if (damage >= CharacterAttribute->Life)
                 CharacterAttribute->Life = 0;
             else
-                CharacterAttribute->Life -= Damage;
+                CharacterAttribute->Life -= damage;
 
-            if (ShieldDamage >= CharacterAttribute->Shield)
+            if (shieldDamage >= CharacterAttribute->Shield)
                 CharacterAttribute->Shield = 0;
             else
-                CharacterAttribute->Shield -= ShieldDamage;
+                CharacterAttribute->Shield -= shieldDamage;
         }
     }
     else
     {
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
-            if (Damage >= CharacterAttribute->Life)
+            if (damage >= CharacterAttribute->Life)
                 CharacterAttribute->Life = 0;
             else
-                CharacterAttribute->Life -= Damage;
+                CharacterAttribute->Life -= damage;
 
-            if (ShieldDamage >= CharacterAttribute->Shield)
+            if (shieldDamage >= CharacterAttribute->Shield)
                 CharacterAttribute->Shield = 0;
             else
-                CharacterAttribute->Shield -= ShieldDamage;
+                CharacterAttribute->Shield -= shieldDamage;
 
             if (g_isCharacterBuff(o, eBuff_PhysDefense) && o->Type == MODEL_PLAYER)
             {
@@ -2948,13 +2971,13 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
             if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7
                 && rand_fps_check(2))
             {
-                SetPlayerShock(c, Damage);
+                SetPlayerShock(c, damage);
             }
         }
         float scale = 15.f;
-        if (Damage == 0)
+        if (damage == 0)
         {
-            if (Key == HeroKey)
+            if (key == HeroKey)
             {
                 Vector(1.f, 1.f, 1.f, Light);
             }
@@ -2965,10 +2988,10 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
         }
         else
         {
-            switch (DamageType)
+            switch (damageType)
             {
             case 0:	//	DT_NONE
-                if (Key == HeroKey)
+                if (key == HeroKey)
                 {
                     Vector(1.f, 0.f, 0.f, Light);
                 }
@@ -3011,13 +3034,13 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
 
         if (bRepeatedly || bEndRepeatedly)
         {
-            g_CMonkSystem.SetRepeatedly(Damage, DamageType, bDoubleEnable, bEndRepeatedly);
+            g_CMonkSystem.SetRepeatedly(damage, damageType, bDoubleEnable, bEndRepeatedly);
             if (bEndRepeatedly)
             {
-                g_CMonkSystem.RenderRepeatedly(Key, o);
+                g_CMonkSystem.RenderRepeatedly(key, o);
             }
         }
-        else if (Damage == 0)
+        else if (damage == 0)
             CreatePoint(o->Position, -1, Light);
         else
         {
@@ -3026,39 +3049,103 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
                 vec3_t Position, Light2;
                 VectorCopy(o->Position, Position);
                 Vector(Light[0] - 0.4f, Light[1] - 0.4f, Light[2] - 0.4f, Light2);
-                CreatePoint(Position, Damage, Light2, scale);
+                CreatePoint(Position, damage, Light2, scale);
                 Position[2] += 10.f;
                 Vector(Light[0] - 0.2f, Light[1] - 0.2f, Light[2] - 0.2f, Light2);
-                CreatePoint(Position, Damage, Light2, scale + 5.f);
+                CreatePoint(Position, damage, Light2, scale + 5.f);
                 Position[2] += 10.f;
-                CreatePoint(Position, Damage, Light, scale + 10.f);
+                CreatePoint(Position, damage, Light, scale + 10.f);
             }
             else if (bDoubleEnable)    //  Double Damage
             {
                 vec3_t Position, Light2;
                 VectorCopy(o->Position, Position);
                 Vector(Light[0] - 0.4f, Light[1] - 0.4f, Light[2] - 0.4f, Light2);
-                CreatePoint(Position, Damage, Light2, scale);
+                CreatePoint(Position, damage, Light2, scale);
                 Position[2] += 10.f;
                 Vector(Light[0] - 0.2f, Light[1] - 0.2f, Light[2] - 0.2f, Light2);
-                CreatePoint(Position, Damage, Light2, scale + 5.f);
+                CreatePoint(Position, damage, Light2, scale + 5.f);
             }
 
-            CreatePoint(o->Position, Damage, Light, scale);
+            CreatePoint(o->Position, damage, Light, scale);
         }
 
-        if (ShieldDamage > 0)
+        if (shieldDamage > 0)
         {
             vec3_t nPosShieldDamage;
             Vector(0.8f, 1.f, 0.f, Light);
             nPosShieldDamage[0] = o->Position[0]; nPosShieldDamage[1] = o->Position[1];
             nPosShieldDamage[2] = o->Position[2] + 25.f;
-            CreatePoint(nPosShieldDamage, ShieldDamage, Light);
+            CreatePoint(nPosShieldDamage, shieldDamage, Light);
         }
     }
-    c->Hit = Damage;
+    c->Hit = damage;
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, damage);
+}
+
+void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_ATTACK)ReceiveBuffer;
+
+    int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
+    int Success = (Key >> 15);
+    Key &= 0x7FFF;
+
+    int Index = FindCharacterIndex(Key);
+    CHARACTER* c = &CharactersClient[Index];
+    OBJECT* o = &c->Object;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, Damage);
+    WORD Damage = (((WORD)(Data->DamageH) << 8) + Data->DamageL);
+    // DamageType
+    int	 DamageType = (Data->DamageType) & 0x0f;
+    bool bRepeatedly = (Data->DamageType >> 4) & 0x01;
+    bool bEndRepeatedly = (Data->DamageType >> 5) & 0x01;
+    bool bDoubleEnable = (Data->DamageType >> 6) & 0x01;
+    bool bComboEnable = (Data->DamageType >> 7) & 0x01;
+    WORD ShieldDamage = (((WORD)(Data->ShieldDamageH) << 8) + Data->ShieldDamageL);
+
+    if (gMapManager.InChaosCastle())
+    {
+        ReceiveAttackDamageCastle(c, o, Success, Key, Damage, ShieldDamage, DamageType, bRepeatedly, bEndRepeatedly, bDoubleEnable, bComboEnable);
+    }
+    else
+    {
+        ReceiveAttackDamage(c, o, Success, Key, Damage, ShieldDamage, DamageType, bRepeatedly, bEndRepeatedly, bDoubleEnable, bComboEnable);
+    }
+}
+
+void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_ATTACK_EXTENDED)ReceiveBuffer;
+
+    int Key = Data->TargetId;
+    int Success = (Key >> 15);
+    Key &= 0x7FFF;
+
+    int Index = FindCharacterIndex(Key);
+    CHARACTER* c = &CharactersClient[Index];
+    OBJECT* o = &c->Object;
+    
+    auto Damage = Data->HealthDamage;
+    // DamageType
+    int	 DamageType = (Data->DamageType) & 0x0f;
+    bool bRepeatedly = (Data->DamageType >> 4) & 0x01;
+    bool bEndRepeatedly = (Data->DamageType >> 5) & 0x01;
+    bool bDoubleEnable = (Data->DamageType >> 6) & 0x01;
+    bool bComboEnable = (Data->DamageType >> 7) & 0x01;
+    auto ShieldDamage = Data->ShieldDamage;
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamageExtended(%d %d)]", AttackPlayer, Damage);
+    if (gMapManager.InChaosCastle())
+    {
+        ReceiveAttackDamageCastle(c, o, Success, Key, Damage, ShieldDamage, DamageType, bRepeatedly, bEndRepeatedly, bDoubleEnable, bComboEnable);
+        
+    }
+    else
+    {
+        ReceiveAttackDamage(c, o, Success, Key, Damage, ShieldDamage, DamageType, bRepeatedly, bEndRepeatedly, bDoubleEnable, bComboEnable);
+    }
 }
 
 void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
@@ -5285,60 +5372,90 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
 BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
-    auto Data = (LPPRECEIVE_DIE2)ReceiveBuffer;
-    int     Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
-    DWORD   Exp = ((DWORD)(Data->ExpH) << 16) + Data->ExpL;
-    int     Damage = ((int)(Data->DamageH) << 8) + Data->DamageL;
-    int     Success = (Key >> 15);
-    Key &= 0x7FFF;
+    auto Data = (LPPRECEIVE_EXP_EXTENDED)ReceiveBuffer;
 
-    int Index = FindCharacterIndex(Key);
-    CHARACTER* c = &CharactersClient[Index];
-    OBJECT* o = &c->Object;
+    auto addedExperience = Data->AddedExperience;
+    auto damageOfLastHit = Data->DamageOfLastHit;
+    auto experienceType = Data->ExperienceType;
+    auto killedId = Data->KilledObjectId;
+    auto killerId = Data->KillerObjectId;
+
+    int Index = FindCharacterIndex(killedId);
+    CHARACTER* killedObject = &CharactersClient[Index];
+    OBJECT* o = &killedObject->Object;
     vec3_t Light;
     Vector(1.f, 0.6f, 0.f, Light);
-    if (Success)
+    if (Hero->Key == killerId)
     {
-        SetPlayerDie(c);
-        CreatePoint(o->Position, Damage, Light);
+        Hero->AttackFlag = ATTACK_DIE;
+        Hero->Damage = damageOfLastHit;
+        Hero->TargetCharacter = Index;
     }
     else
     {
-        Hero->AttackFlag = ATTACK_DIE;
-        Hero->Damage = Damage;
-        Hero->TargetCharacter = Index;
-        CreatePoint(o->Position, Damage, Light);
+        SetPlayerDie(killedObject);
+        
     }
-    c->Dead = true;
-    c->Movement = false;
 
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+    if (damageOfLastHit > 0)
+    {
+        CreatePoint(o->Position, damageOfLastHit, Light);
+    }
+
+    killedObject->Dead = true;
+    killedObject->Movement = false;
+
+    switch(experienceType)
+    {
+    case eExperienceType_MaxLevelReached:
+        // TODO: show message "You already reached maximum Level."
+        g_pSystemLogBox->AddText(L"You already reached maximum Level.", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        return TRUE;
+    case eExperienceType_MaxMasterLevelReached:
+        // TODO: show message "You already reached maximum master Level."
+        g_pSystemLogBox->AddText(L"You already reached maximum master Level.", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        return TRUE;
+    case eExperienceType_MonsterLevelTooLowForMasterExperience:
+        // TODO: You need to kill stronger monsters to gain master experience.
+        g_pSystemLogBox->AddText(L"You need to kill stronger monsters to gain master experience.", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        return TRUE;
+    }
+
+    if (addedExperience == 0)
+    {
+        return TRUE;
+    }
+
+    if (experienceType == eExperienceType_Master)
     {
         g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
-        g_pMainFrame->SetGetExp_Wide(Exp);
-        Master_Level_Data.lMasterLevel_Experince += Exp;
+        g_pMainFrame->SetGetExp_Wide(addedExperience);
+        Master_Level_Data.lMasterLevel_Experince += addedExperience;
     }
     else
     {
         g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
-        g_pMainFrame->SetGetExp(Exp);
-        CharacterAttribute->Experience += Exp;
+        g_pMainFrame->SetGetExp(addedExperience);
+        CharacterAttribute->Experience += addedExperience;
     }
 
-    if (Exp > 0)
+    if (addedExperience > 0)
     {
         wchar_t Text[100];
 
-        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+        if (experienceType == eExperienceType_Master)
         {
-            swprintf(Text, GlobalText[1750], Exp);
+            swprintf(Text, GlobalText[1750], addedExperience);
         }
         else
-            swprintf(Text, GlobalText[486], Exp);
+        {
+            swprintf(Text, GlobalText[486], addedExperience);
+        }
+
         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
-    return (TRUE);
+    return TRUE;
 }
 
 void FallingStartCharacter(CHARACTER* c, OBJECT* o)
@@ -5991,24 +6108,43 @@ void ReceiveRepair(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x34 [ReceiveRepair(%d)]", Data->Gold);
 }
 
-void ReceiveLevelUp(const BYTE* ReceiveBuffer)
+void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
 {
-    auto Data = (LPPRECEIVE_LEVEL_UP)ReceiveBuffer;
-    CharacterAttribute->Level = Data->Level;
-    CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
-    CharacterAttribute->LifeMax = Data->MaxLife;
-    CharacterAttribute->ManaMax = Data->MaxMana;
-    CharacterAttribute->Life = Data->MaxLife;
-    CharacterAttribute->Mana = Data->MaxMana;
-    CharacterAttribute->ShieldMax = Data->MaxShield;
-    CharacterAttribute->SkillManaMax = Data->SkillManaMax;
-    CharacterAttribute->AddPoint = Data->AddPoint;
-    CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
-    CharacterAttribute->wMinusPoint = Data->wMinusPoint;
-    CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
+    if (Size >= sizeof(PRECEIVE_LEVEL_UP_EXTENDED))
+    {
+        auto Data = (LPPRECEIVE_LEVEL_UP_EXTENDED)ReceiveBuffer;
+        CharacterAttribute->Level = Data->Level;
+        CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
+        CharacterAttribute->LifeMax = Data->MaxLife;
+        CharacterAttribute->ManaMax = Data->MaxMana;
+        CharacterAttribute->Life = Data->MaxLife;
+        CharacterAttribute->Mana = Data->MaxMana;
+        CharacterAttribute->ShieldMax = Data->MaxShield;
+        CharacterAttribute->SkillManaMax = Data->SkillManaMax;
+        CharacterAttribute->AddPoint = Data->AddPoint;
+        CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
+        CharacterAttribute->wMinusPoint = Data->wMinusPoint;
+        CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
+    }
+    else
+    {
+        auto Data = (LPPRECEIVE_LEVEL_UP)ReceiveBuffer;
+        CharacterAttribute->Level = Data->Level;
+        CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
+        CharacterAttribute->LifeMax = Data->MaxLife;
+        CharacterAttribute->ManaMax = Data->MaxMana;
+        CharacterAttribute->Life = Data->MaxLife;
+        CharacterAttribute->Mana = Data->MaxMana;
+        CharacterAttribute->ShieldMax = Data->MaxShield;
+        CharacterAttribute->SkillManaMax = Data->SkillManaMax;
+        CharacterAttribute->AddPoint = Data->AddPoint;
+        CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
+        CharacterAttribute->wMinusPoint = Data->wMinusPoint;
+        CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
+    }
 
     wchar_t szText[256] = { NULL, };
-    WORD iExp = CharacterAttribute->NextExperince - CharacterAttribute->Experience;
+    WORD iExp = CharacterAttribute->NextExperience - CharacterAttribute->Experience;
     swprintf(szText, GlobalText[486], iExp);
     g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
@@ -6069,6 +6205,42 @@ void ReceiveAddPoint(const BYTE* ReceiveBuffer)
     CharacterMachine->CalculateAll();
 }
 
+void ReceiveAddPointExtended(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_ADD_POINT_EXTENDED)ReceiveBuffer;
+    if (Data->AddedAmount == 0)
+    {
+        return;
+    }
+
+    CharacterAttribute->LevelUpPoint -= Data->AddedAmount;
+    switch (Data->StatType)
+    {
+    case 0:
+        CharacterAttribute->Strength += Data->AddedAmount;
+        break;
+    case 1:
+        CharacterAttribute->Dexterity += Data->AddedAmount;
+        break;
+    case 2:
+        CharacterAttribute->Vitality += Data->AddedAmount;
+        break;
+    case 3:
+        CharacterAttribute->Energy += Data->AddedAmount;
+        break;
+    case 4:
+        CharacterAttribute->Charisma += Data->AddedAmount;
+        break;
+    }
+
+    CharacterAttribute->LifeMax = Data->MaxHealth;
+    CharacterAttribute->ManaMax = Data->MaxMana;
+    CharacterAttribute->SkillManaMax = Data->SkillManaMax;
+    CharacterAttribute->ShieldMax = Data->ShieldMax;
+
+    CharacterMachine->CalculateAll();
+}
+
 void ReceiveLife(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_LIFE)ReceiveBuffer;
@@ -6091,6 +6263,46 @@ void ReceiveLife(const BYTE* ReceiveBuffer)
         {
             CharacterAttribute->LifeMax = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
             CharacterAttribute->ShieldMax = ((WORD)(Data->Life[3]) << 8) + Data->Life[4];
+        }
+        break;
+    case 0xfd:
+        EnableUse = 0;
+        break;
+    default:
+        if (ITEM* pItem = g_pMyInventory->FindItem(Data->Index))
+        {
+            if (pItem->Durability > 0)
+                pItem->Durability--;
+            if (pItem->Durability <= 0)
+                g_pMyInventory->DeleteItem(Data->Index);
+        }
+
+        break;
+    }
+}
+
+void ReceiveLifeExtended(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_LIFE_EXTENDED)ReceiveBuffer;
+    switch (Data->Index)
+    {
+    case 0xff:
+        CharacterAttribute->Life = Data->LifeOrMana;
+        CharacterAttribute->Shield = Data->ShieldOrBP;
+        break;
+    case 0xfe:
+        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+        {
+            //	Master_Level_Data.wMaxLife			= Data->LifeMax;
+            //	Master_Level_Data.wMaxMana			= Data->ManaMax;
+            //	Master_Level_Data.wMaxShield		= Data->ShieldMax;
+            Master_Level_Data.wMaxLife = Data->LifeOrMana;
+            Master_Level_Data.wMaxShield = Data->ShieldOrBP;
+        }
+        else
+        {
+            CharacterAttribute->LifeMax = Data->LifeOrMana;
+            CharacterAttribute->ShieldMax = Data->ShieldOrBP;
         }
         break;
     case 0xfd:
@@ -6135,6 +6347,62 @@ void ReceiveMana(const BYTE* ReceiveBuffer)
         break;
     default:
         CharacterAttribute->Mana = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
+
+        auto itemIndex = Data->Index - MAX_EQUIPMENT;
+        ITEM* item = nullptr;
+
+        if (itemIndex < MAX_INVENTORY)
+        {
+            item = &Inventory[itemIndex];
+        }
+        else
+        {
+            item = &InventoryExt[itemIndex - MAX_INVENTORY];
+        }
+
+        if (item)
+        {
+            if (item->Durability > 0)
+            {
+                item->Durability--;
+            }
+
+            if (item->Durability <= 0)
+            {
+                item->Type = -1;
+                item->Number = 0;
+            }
+        }
+        break;
+    }
+}
+
+void ReceiveManaExtended(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_LIFE_EXTENDED)ReceiveBuffer;
+    switch (Data->Index)
+    {
+    case 0xff:
+        CharacterAttribute->Mana = Data->LifeOrMana;
+        CharacterAttribute->SkillMana = Data->ShieldOrBP;
+        break;
+    case 0xfe:
+        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+        {
+            //	Master_Level_Data.wMaxLife			= Data->LifeMax;
+            //	Master_Level_Data.wMaxMana			= Data->ManaMax;
+            //	Master_Level_Data.wMaxShield		= Data->ShieldMax;
+            Master_Level_Data.wMaxMana = Data->LifeOrMana;
+            Master_Level_Data.wMaxBP = Data->ShieldOrBP;
+        }
+        else
+        {
+            CharacterAttribute->ManaMax = Data->LifeOrMana;
+            CharacterAttribute->SkillManaMax = Data->ShieldOrBP;
+        }
+        break;
+    default:
+        CharacterAttribute->Mana = Data->LifeOrMana;
 
         auto itemIndex = Data->Index - MAX_EQUIPMENT;
         ITEM* item = nullptr;
@@ -7140,7 +7408,7 @@ void ReceiveSoccerGoal(const BYTE* ReceiveBuffer)
     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
-void Receive_Master_LevelUp(const BYTE* ReceiveBuffer)
+void Receive_Master_LevelUp(const BYTE* ReceiveBuffer, int Size)
 {
     auto Data = (LPPMSG_MASTERLEVEL_UP)ReceiveBuffer;
     Master_Level_Data.nMLevel = Data->nMLevel;
@@ -7148,15 +7416,30 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer)
     Master_Level_Data.nMLevelUpMPoint = Data->nMLevelUpMPoint;
     //	Master_Level_Data.nTotalMPoint		= Data->nTotalMPoint;
     Master_Level_Data.nMaxPoint = Data->nMaxPoint;
-    Master_Level_Data.wMaxLife = Data->wMaxLife;
-    Master_Level_Data.wMaxMana = Data->wMaxMana;
-    Master_Level_Data.wMaxShield = Data->wMaxShield;
-    Master_Level_Data.wMaxBP = Data->wMaxBP;
+
+    if (Size >= sizeof(LPPMSG_MASTERLEVEL_UP_EXTENDED))
+    {
+        auto ExtData = (LPPMSG_MASTERLEVEL_UP_EXTENDED)ReceiveBuffer;
+        Master_Level_Data.wMaxLife = ExtData->wMaxLife;
+        Master_Level_Data.wMaxMana = ExtData->wMaxMana;
+        Master_Level_Data.wMaxShield = ExtData->wMaxShield;
+        Master_Level_Data.wMaxBP = ExtData->wMaxBP;
+    }
+    else
+    {
+        Master_Level_Data.wMaxLife = Data->wMaxLife;
+        Master_Level_Data.wMaxMana = Data->wMaxMana;
+        Master_Level_Data.wMaxShield = Data->wMaxShield;
+        Master_Level_Data.wMaxBP = Data->wMaxBP;
+    }
 
     wchar_t szText[256] = { NULL, };
-    WORD iExp = Master_Level_Data.lNext_MasterLevel_Experince - Master_Level_Data.lMasterLevel_Experince;
-    swprintf(szText, GlobalText[1750], iExp);
-    g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    DWORD iExp = Master_Level_Data.lNext_MasterLevel_Experince - Master_Level_Data.lMasterLevel_Experince;
+    if (iExp > 0)
+    {
+        swprintf(szText, GlobalText[1750], iExp);
+        g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
 
     CharacterMachine->CalulateMasterLevelNextExperience();
 
@@ -7174,7 +7457,7 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x51 [Receive_Master_LevelUp]");
 }
 
-void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer)
+void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer, int Size)
 {
     auto Data = (LPPMSG_MASTERLEVEL_INFO)ReceiveBuffer;
     Master_Level_Data.nMLevel = Data->nMLevel;
@@ -7212,10 +7495,21 @@ void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer)
     Master_Level_Data.lNext_MasterLevel_Experince |= Data->btMNextExp8;
     Master_Level_Data.nMLevelUpMPoint = Data->nMLPoint;
 
-    Master_Level_Data.wMaxLife = Data->wMaxLife;
-    Master_Level_Data.wMaxMana = Data->wMaxMana;
-    Master_Level_Data.wMaxShield = Data->wMaxShield;
-    Master_Level_Data.wMaxBP = Data->wMaxSkillMana;
+    if (Size >= sizeof(LPPMSG_MASTERLEVEL_INFO_EXTENDED))
+    {
+        auto ExtData = (LPPMSG_MASTERLEVEL_INFO_EXTENDED)ReceiveBuffer;
+        Master_Level_Data.wMaxLife = ExtData->wMaxLife;
+        Master_Level_Data.wMaxMana = ExtData->wMaxMana;
+        Master_Level_Data.wMaxShield = ExtData->wMaxShield;
+        Master_Level_Data.wMaxBP = ExtData->wMaxSkillMana;
+    }
+    else
+    {
+        Master_Level_Data.wMaxLife = Data->wMaxLife;
+        Master_Level_Data.wMaxMana = Data->wMaxMana;
+        Master_Level_Data.wMaxShield = Data->wMaxShield;
+        Master_Level_Data.wMaxBP = Data->wMaxSkillMana;
+    }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x50 [Receive_Master_Level_Exp]");
 }
@@ -12568,13 +12862,13 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             ReceiveDeleteCharacter(ReceiveBuffer);
             break;
         case 0x03: //receive join map server
-            if (!ReceiveJoinMapServer(ReceiveBuffer, bEncrypted))
+            if (!ReceiveJoinMapServer(ReceiveBuffer, bEncrypted, Size))
             {
                 //return ( FALSE);
             }
             break;
-        case 0x04: //receive revival
-            ReceiveRevival(ReceiveBuffer);
+        //case 0x04: //receive revival
+        //    ReceiveRevival(ReceiveBuffer);
             break;
         case 0x10: //receive inventory
             //AddDebugText(ReceiveBuffer,Size);
@@ -12584,10 +12878,18 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             }
             break;
         case 0x05: //receive level up
-            ReceiveLevelUp(ReceiveBuffer);
+            ReceiveLevelUp(ReceiveBuffer, Size);
             break;
         case 0x06: //receive Add Point
-            ReceiveAddPoint(ReceiveBuffer);
+            if (Size >= sizeof(PRECEIVE_ADD_POINT_EXTENDED))
+            {
+                ReceiveAddPointExtended(ReceiveBuffer);
+            }
+            else
+            {
+                ReceiveAddPoint(ReceiveBuffer);
+            }
+
             break;
         case 0x07: //receive damage
             ReceiveDamage(ReceiveBuffer);
@@ -12628,10 +12930,10 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             ReceiveServerCommand(ReceiveBuffer);
             break;
         case 0x50:
-            Receive_Master_Level_Exp(ReceiveBuffer);
+            Receive_Master_Level_Exp(ReceiveBuffer, Size);
             break;
         case 0x51:
-            Receive_Master_LevelUp(ReceiveBuffer);
+            Receive_Master_LevelUp(ReceiveBuffer, Size);
             break;
         case 0x52:
             Receive_Master_LevelGetSkill(ReceiveBuffer);
@@ -12742,7 +13044,14 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         ReceiveChangePlayer(ReceiveBuffer);
         break;
     case PACKET_ATTACK://attack character
-        ReceiveAttackDamage(ReceiveBuffer);
+        if (Size >= sizeof(PRECEIVE_ATTACK_EXTENDED))
+        {
+            ReceiveAttackDamageExtended(ReceiveBuffer);
+        }
+        else
+        {
+            ReceiveAttackDamage(ReceiveBuffer);
+        }
         break;
     case 0x18://action character
         ReceiveAction(ReceiveBuffer, Size);
@@ -12774,16 +13083,20 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
     case 0x07://setmagicstatus
         ReceiveSkillStatus(ReceiveBuffer);
         break;
+    //case 0x16://die character(exp)
+    //    if (!ReceiveDieExp(ReceiveBuffer, bEncrypted))
+    //    {
+    //        //return ( FALSE);
+    //    }
+    //    break;
     case 0x16://die character(exp)
-        if (!ReceiveDieExp(ReceiveBuffer, bEncrypted))
+        if (Size >= sizeof(PRECEIVE_EXP_EXTENDED))
         {
-            //return ( FALSE);
+            ReceiveDieExpLarge(ReceiveBuffer, bEncrypted);
         }
-        break;
-    case 0x9C://die character(exp)
-        if (!ReceiveDieExpLarge(ReceiveBuffer, bEncrypted))
+        else
         {
-            //return ( FALSE);
+            ReceiveDieExp(ReceiveBuffer, bEncrypted);
         }
         break;
     case 0x17://die character
@@ -12794,10 +13107,24 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         ReceiveDurability(ReceiveBuffer);
         break;
     case 0x26:
-        ReceiveLife(ReceiveBuffer);
+        if (Size >= sizeof(LPPRECEIVE_LIFE_EXTENDED))
+        {
+            ReceiveLifeExtended(ReceiveBuffer);
+        }
+        else
+        {
+            ReceiveLife(ReceiveBuffer);
+        }
         break;
     case 0x27:
-        ReceiveMana(ReceiveBuffer);
+        if (Size >= sizeof(LPPRECEIVE_LIFE_EXTENDED))
+        {
+            ReceiveManaExtended(ReceiveBuffer);
+        }
+        else
+        {
+            ReceiveMana(ReceiveBuffer);
+        }
         break;
     case 0x28:
         ReceiveDeleteInventory(ReceiveBuffer);

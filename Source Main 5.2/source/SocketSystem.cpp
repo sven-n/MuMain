@@ -174,7 +174,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
     }
     case 4:
     {
-        WORD wLifeMax;
+        DWORD wLifeMax;
 
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
             wLifeMax = Master_Level_Data.wMaxLife;
@@ -185,7 +185,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
     }
     case 5:
     {
-        WORD wManaMax;
+        DWORD wManaMax;
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
             wManaMax = Master_Level_Data.wMaxMana;
         else

@@ -138,6 +138,16 @@ namespace info
     };
 };
 
+enum ExperienceType
+{
+    eExperienceType_Undefined = 0,
+    eExperienceType_Normal = 1,
+    eExperienceType_Master = 2,
+    eExperienceType_MaxLevelReached = 0x10,
+    eExperienceType_MaxMasterLevelReached = 0x20,
+    eExperienceType_MonsterLevelTooLowForMasterExperience = 0x21,
+};
+
 //scene start
 enum ENUM_MUSIC
 {

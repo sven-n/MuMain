@@ -435,20 +435,20 @@ typedef struct
     BYTE InventoryExtensions;
     BYTE IsVaultExtended;
     WORD Level;
-    DWORD Experience;
-    DWORD NextExperince;
 
     WORD Strength;
     WORD Dexterity;
     WORD Vitality;
     WORD Energy;
     WORD Charisma;
-    WORD Life;
-    WORD Mana;
-    WORD LifeMax;
-    WORD ManaMax;
-    WORD Shield;
-    WORD ShieldMax;
+    DWORD Life;
+    DWORD Mana;
+    DWORD LifeMax;
+    DWORD ManaMax;
+    DWORD Shield;
+    DWORD ShieldMax;
+    DWORD SkillMana;
+    DWORD SkillManaMax;
     WORD AttackRatingPK;
     WORD SuccessfulBlockingPK;
     WORD AddStrength;
@@ -458,8 +458,6 @@ typedef struct
     WORD AddLifeMax;
     WORD AddManaMax;
     WORD AddCharisma;
-    WORD SkillMana;
-    WORD SkillManaMax;
     BYTE Ability;
     WORD AbilityTime[3];
 
@@ -468,6 +466,7 @@ typedef struct
     WORD wMinusPoint;
     WORD wMaxMinusPoint;
     WORD AttackSpeed;
+    WORD MaxAttackSpeed; // Maximum attack speed which can be reached on the server.
     WORD AttackRating;
     WORD AttackDamageMinRight;
     WORD AttackDamageMaxRight;
@@ -486,6 +485,10 @@ typedef struct
     WORD LevelUpPoint;
     BYTE SkillNumber;
     BYTE SkillMasterNumber;
+
+    uint64_t Experience;
+    uint64_t NextExperience;
+
     ActionSkillType Skill[MAX_SKILLS];
     BYTE SkillLevel[MAX_SKILLS];
     int  SkillDelay[MAX_SKILLS];
@@ -501,11 +504,10 @@ typedef struct _MASTER_LEVEL_VALUE
     short      	nMLevelUpMPoint;
     short		nTotalMPoint;
     short		nMaxPoint;
-
-    WORD		wMaxLife;
-    WORD		wMaxMana;
-    WORD		wMaxShield;
-    WORD		wMaxBP;
+    DWORD		wMaxLife;
+    DWORD		wMaxMana;
+    DWORD		wMaxShield;
+    DWORD		wMaxBP;
 } MASTER_LEVEL_VALUE;
 
 //infomation end
