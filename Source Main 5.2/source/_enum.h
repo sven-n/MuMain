@@ -1963,6 +1963,10 @@ enum
 
 enum
 {
+    ITEM_NUMBER_DARK_SPIRIT = 5,
+};
+enum
+{
     ITEM_KRIS = ITEM_SWORD + 0,
     ITEM_SHORT_SWORD = ITEM_SWORD + 1,
     ITEM_RAPIER = ITEM_SWORD + 2,
