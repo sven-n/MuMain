@@ -516,6 +516,62 @@ void ReceiveCharacterList(const BYTE* ReceiveBuffer)
     CurrentProtocolState = RECEIVE_CHARACTERS_LIST;
 }
 
+void ReceiveCharacterListExtended(const BYTE* ReceiveBuffer)
+{
+    InitGuildWar();
+
+    auto Data = (LPPHEADER_DEFAULT_CHARACTER_LIST)ReceiveBuffer;
+
+    int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
+
+#ifdef _DEBUG
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
+#else
+    g_ErrorReport.Write(L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
+#endif
+
+    CharacterAttribute->IsVaultExtended = Data->IsVaultExtended;
+    for (int i = 0; i < Data->CharacterCount; i++)
+    {
+        auto Data2 = (LPPRECEIVE_CHARACTER_LIST_EXTENDED)(ReceiveBuffer + Offset);
+
+        int iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
+        float fPos[2], fAngle = 0.0f;
+
+        switch (Data2->Index)
+        {
+#ifdef PJH_NEW_SERVER_SELECT_MAP
+        case 0:	fPos[0] = 8008.0f;	fPos[1] = 18885.0f;	fAngle = 115.0f; break;
+        case 1:	fPos[0] = 7986.0f;	fPos[1] = 19145.0f;	fAngle = 90.0f; break;
+        case 2:	fPos[0] = 8046.0f;	fPos[1] = 19400.0f;	fAngle = 75.0f; break;
+        case 3:	fPos[0] = 8133.0f;	fPos[1] = 19645.0f;	fAngle = 60.0f; break;
+        case 4:	fPos[0] = 8282.0f;	fPos[1] = 19845.0f;	fAngle = 35.0f; break;
+#else //PJH_NEW_SERVER_SELECT_MAP
+        case 0:	fPos[0] = 22628.0f;	fPos[1] = 15012.0f;	fAngle = 100.0f; break;
+        case 1:	fPos[0] = 22700.0f;	fPos[1] = 15201.0f;	fAngle = 75.0f; break;
+        case 2:	fPos[0] = 22840.0f;	fPos[1] = 15355.0f;	fAngle = 50.0f; break;
+        case 3:	fPos[0] = 23019.0f;	fPos[1] = 15443.0f;	fAngle = 25.0f; break;
+        case 4:	fPos[0] = 23211.6f;	fPos[1] = 15467.0f;	fAngle = 0.0f; break;
+#endif //PJH_NEW_SERVER_SELECT_MAP
+        default: return;
+        }
+
+        CHARACTER* c = CreateHero(Data2->Index, iClass, 0, fPos[0], fPos[1], fAngle);
+
+        c->Level = Data2->Level;
+        c->CtlCode = Data2->CtlCode;
+
+        CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_ID_SIZE);
+
+        ReadEquipmentExtended(Data2->Index, Data2->Flags, Data2->Equipment);
+
+        c->GuildStatus = Data2->byGuildStatus;
+        Offset += sizeof(PRECEIVE_CHARACTER_LIST_EXTENDED);
+    }
+
+    CurrentProtocolState = RECEIVE_CHARACTERS_LIST;
+}
+
 CHARACTER_ENABLE g_CharCardEnable;
 
 void ReceiveCharacterCard_New(const BYTE* ReceiveBuffer)
@@ -12853,7 +12909,12 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         switch (subcode)
         {
         case 0x00: //receive characters list
+#ifdef USE_EXTENDED_PROTOCOL
+            ReceiveCharacterListExtended(ReceiveBuffer);
+#else
             ReceiveCharacterList(ReceiveBuffer);
+#endif
+
             break;
         case 0x01: //receive create character
             ReceiveCreateCharacter(ReceiveBuffer);

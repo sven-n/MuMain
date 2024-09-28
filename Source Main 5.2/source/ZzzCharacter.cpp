@@ -12054,7 +12054,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     short ExtType = 0;
 
     Type = Equipment[0];
-    ExtType = Equipment[11] & 240;
+    ExtType = Equipment[11] & 0xF0;
     ExtType = (ExtType << 4) | Type;
 
     if (ExtType == 0x0FFF)
@@ -12373,6 +12373,210 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     c->Weapon[1].ExtOption = (Equipment[10] & 2) / 2;
 
     c->ExtendState = Equipment[10] & 0x01;
+
+    ChangeChaosCastleUnit(c);
+    SetCharacterScale(c);
+}
+
+void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter, OBJECT* pHelper)
+{
+    CHARACTER* c;
+    if (pCharacter == NULL)
+        c = &CharactersClient[Key];
+    else
+        c = pCharacter;
+
+    OBJECT* o = &c->Object;
+    if (o->Type != MODEL_PLAYER)
+        return;
+
+    c->ExtendState = (flags & 0x10) > 0;
+    int offset = 0;
+    for (int i = 0; i < 2; i++)
+    {
+        c->Weapon[i].Type = -1;
+        c->Weapon[i].Option1 = 0;
+        c->Weapon[i].ExtOption = 0;
+        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
+        {
+            short number = MAKEWORD(Equipment[offset + 1], Equipment[offset] & 0xF);
+            BYTE group = (Equipment[offset] & 0xF0) >> 4;
+            bool isAncient = Equipment[offset + 2] & 0x04;
+            bool isExcellent = Equipment[offset + 2] & 0x08;
+            BYTE glowLevel = (Equipment[offset + 2] & 0xF0) >> 4;
+            if (number > MAX_ITEM_INDEX)
+            {
+                // not supported yet!
+            }
+            else if (group == ITEM_GROUP_HELPER && number == ITEM_NUMBER_DARK_SPIRIT)
+            {
+                ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[i];
+                PET_INFO* pPetInfo = giPetManager::GetPetInfo(pEquipmentItemSlot);
+                giPetManager::CreatePetDarkSpirit(c);
+                if (!gMapManager.InChaosCastle())
+                    ((CSPetSystem*)c->m_pPet)->SetPetInfo(pPetInfo);
+            }
+            else
+            {
+                auto modelOffset = group * MAX_ITEM_INDEX + number;
+                c->Weapon[i].Type = MODEL_ITEM + modelOffset;
+                c->Weapon[i].Level = LevelConvert(glowLevel);
+                c->Weapon[i].Option1 = isExcellent;
+                c->Weapon[i].ExtOption = isAncient;
+            }
+        }
+
+        offset += 3;
+    }
+
+    DeleteParts(c);
+    if (c->Change)
+    {
+        // todo: is this the correct place to return?
+        return;
+    }
+
+    short bodyParts[] = { 0, MODEL_BODY_HELM, MODEL_BODY_ARMOR, MODEL_BODY_PANTS, MODEL_BODY_GLOVES, MODEL_BODY_BOOTS};
+    for (int i = 1; i < MAX_BODYPART; i++)
+    {
+        c->BodyPart[i].Type = bodyParts[i] + gCharacterManager.GetSkinModelIndex(c->Class);
+        c->BodyPart[i].Option1 = 0;
+        c->BodyPart[i].ExtOption = 0;
+        c->BodyPart[i].Level = 0;
+        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
+        {
+            short number = MAKEWORD(Equipment[offset + 1], Equipment[offset] & 0xF);
+            BYTE group = (Equipment[offset] & 0xF0) >> 4;
+            BYTE glowLevel = (Equipment[offset + 2] & 0xF0) >> 4;
+            bool isAncient = Equipment[offset + 2] & 0x04;
+            bool isExcellent = Equipment[offset + 2] & 0x08;
+
+            if (number > MAX_ITEM_INDEX)
+            {
+                // not supported
+            }
+            else
+            {
+                auto modelOffset = group * MAX_ITEM_INDEX + number;
+                c->BodyPart[i].Type = MODEL_ITEM + modelOffset;
+                c->BodyPart[i].Level = LevelConvert(glowLevel);
+                c->BodyPart[i].Option1 = isExcellent;
+                c->BodyPart[i].ExtOption = isAncient;
+            }
+        }
+
+        offset += 3;
+    }
+
+    // Wings:
+    {
+        c->Wing.Type = -1;
+        c->Wing.Level = 0;
+        
+        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
+        {
+            short number = Equipment[offset + 1] + ((Equipment[offset] & 0xF) << 4);
+            BYTE group = (Equipment[offset] & 0xF0) >> 4;
+            if (number > MAX_ITEM_INDEX)
+            {
+                // not supported
+            }
+            else
+            {
+                auto modelOffset = group * MAX_ITEM_INDEX + number;
+                c->Wing.Type = MODEL_ITEM + modelOffset;
+            }
+        }
+
+        offset += 2;
+    }
+
+    // Helper:
+    int HelperVariant = 0;
+    {
+        c->Helper.Type = -1;
+        c->Helper.Level = 0;
+
+        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
+        {
+            short number = Equipment[offset + 1] + ((Equipment[offset] & 0xF) << 4);
+            short itemNumber = number & (MAX_ITEM_INDEX-1);
+            HelperVariant = number - itemNumber;
+            BYTE group = (Equipment[offset] & 0xF0) >> 4;
+            auto modelOffset = group * MAX_ITEM_INDEX + itemNumber;
+            c->Helper.Type = MODEL_ITEM + modelOffset;
+        }
+
+        // offset += 2;
+    }
+
+    if (pHelper == nullptr)
+    {
+        DeleteMount(o);
+        ThePetProcess().DeletePet(c, c->Helper.Type, true);
+    }
+    else
+    {
+        pHelper->Live = false;
+    }
+
+    switch (c->Helper.Type)
+    {
+    case MODEL_GUARDIAN_ANGEL:
+    case MODEL_HORN_OF_UNIRIA:
+    case MODEL_HORN_OF_DINORANT:
+    {
+        int modelType = 0;
+        switch (c->Helper.Type)
+        {
+        case MODEL_GUARDIAN_ANGEL:
+            modelType = MODEL_HELPER; break;
+        case MODEL_HORN_OF_UNIRIA:
+            modelType = MODEL_UNICON; break;
+        case MODEL_HORN_OF_DINORANT:
+            modelType = MODEL_PEGASUS; break;
+        }
+
+        if (pHelper == NULL)
+            CreateMount(modelType, o->Position, o);
+        else
+            CreateMountSub(modelType, o->Position, o, pHelper);
+        break;
+    }
+    case MODEL_DEMON:
+    case MODEL_SPIRIT_OF_GUARDIAN:
+    case MODEL_PET_RUDOLF:
+    case MODEL_PET_PANDA:
+    case MODEL_PET_UNICORN:
+    case MODEL_PET_SKELETON:
+        ThePetProcess().CreatePet(c->Helper.Type - MODEL_ITEM, c->Helper.Type, o->Position, c);
+        break;
+    case MODEL_DARK_HORSE_ITEM:
+        if (pHelper == NULL)
+            CreateMount(MODEL_DARK_HORSE, o->Position, o);
+        else
+            CreateMountSub(MODEL_DARK_HORSE, o->Position, o, pHelper);
+        break;
+    case MODEL_HORN_OF_FENRIR:
+        int type = MODEL_FENRIR_RED;
+        switch(HelperVariant)
+        {
+        case 1: type = MODEL_FENRIR_BLACK; break;
+        case 2: type = MODEL_FENRIR_BLUE; break;
+        case 3: type = MODEL_FENRIR_GOLD; break;
+        }
+        if (pHelper == NULL)
+            CreateMount(type, o->Position, o);
+        else
+            CreateMountSub(type, o->Position, o, pHelper);
+        break;
+    }
+
+    c->EtcPart = 0;
+    if ((flags & 0x20) > 0)
+    {
+        c->EtcPart = PARTS_LION;
+    }
 
     ChangeChaosCastleUnit(c);
     SetCharacterScale(c);

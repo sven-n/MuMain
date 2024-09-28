@@ -36,6 +36,7 @@ void ClientSendMonsterHit(CHARACTER* cc, int AttackPoint);
 void ClientSendPositionPacket(CHARACTER* c);
 void ClientSendPathPacket(unsigned short ID, unsigned char* PathX, unsigned char* PathY, unsigned char PathNum);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
+void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr, OBJECT* pHelper = nullptr);
 void ClearCharacters(int Key = -1);
 void DeleteCharacter(int Key);
 void DeleteCharacter(CHARACTER* c, OBJECT* o);

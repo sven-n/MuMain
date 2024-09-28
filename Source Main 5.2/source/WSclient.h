@@ -68,6 +68,7 @@
 #define PACKET_ITEM_LENGTH  12
 
 #define EQUIPMENT_LENGTH    17
+#define EQUIPMENT_LENGTH_EXTENDED    25
 #define MAX_SPE_BUFFERSIZE_	( 2048)
 
 // English Protocol:
@@ -307,6 +308,18 @@ typedef struct
     BYTE         byGuildStatus;
 } PRECEIVE_CHARACTER_LIST, * LPPRECEIVE_CHARACTER_LIST;
 
+typedef struct
+{
+    BYTE         Index;
+    char         ID[MAX_ID_SIZE];
+    WORD         Level;
+    BYTE		 CtlCode;
+    BYTE         Class;
+    BYTE         Flags;
+    BYTE         Equipment[EQUIPMENT_LENGTH_EXTENDED];
+    BYTE         byGuildStatus;
+} PRECEIVE_CHARACTER_LIST_EXTENDED, * LPPRECEIVE_CHARACTER_LIST_EXTENDED;
+
 //receive create character
 typedef struct
 {
@@ -463,6 +476,15 @@ typedef struct {
     BYTE         Equipment[EQUIPMENT_LENGTH];
 } PRECEIVE_EQUIPMENT, * LPPRECEIVE_EQUIPMENT;
 
+typedef struct {
+    PBMSG_HEADER Header;
+    BYTE         SubCode;
+    BYTE         KeyH;
+    BYTE         KeyL;
+    BYTE         Class;
+    BYTE         Equipment[EQUIPMENT_LENGTH_EXTENDED];
+} PRECEIVE_EQUIPMENT_EXTENDED, * LPPRECEIVE_EQUIPMENT_EXTENDED;
+
 //receive other map character
 typedef struct {
     BYTE         KeyH;
@@ -478,6 +500,22 @@ typedef struct {
     BYTE         s_BuffCount;
     BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
 } PCREATE_CHARACTER, * LPPCREATE_CHARACTER;
+
+//receive other map character
+typedef struct {
+    BYTE         KeyH;
+    BYTE         KeyL;
+    BYTE         PositionX;
+    BYTE         PositionY;
+    BYTE         Class;
+    BYTE         Equipment[EQUIPMENT_LENGTH_EXTENDED];
+    char         ID[MAX_ID_SIZE];
+    BYTE         TargetX;
+    BYTE         TargetY;
+    BYTE         Path;
+    BYTE         s_BuffCount;
+    BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
+} PCREATE_CHARACTER_EXTENDED, * LPPCREATE_CHARACTER_EXTENDED;
 
 //receive other map character
 typedef struct
@@ -497,6 +535,24 @@ typedef struct
     BYTE         s_BuffCount;
     BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
 } PCREATE_TRANSFORM, * LPPCREATE_TRANSFORM;
+
+typedef struct
+{
+    BYTE         KeyH;
+    BYTE         KeyL;
+    BYTE         PositionX;
+    BYTE         PositionY;
+    BYTE         TypeH;
+    BYTE         TypeL;
+    char         ID[MAX_ID_SIZE];
+    BYTE         TargetX;
+    BYTE         TargetY;
+    BYTE         Path;
+    BYTE         Class;
+    BYTE         Equipment[EQUIPMENT_LENGTH_EXTENDED];
+    BYTE         s_BuffCount;
+    BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
+} PCREATE_TRANSFORM_EXTENDED, * LPPCREATE_TRANSFORM_EXTENDED;
 
 //receive other map character
 typedef struct {
@@ -1678,6 +1734,17 @@ typedef struct {
 } FS_LETTER_TEXT, * LPFS_LETTER_TEXT;
 
 typedef struct {
+    PWMSG_HEADER    Header;
+    WORD			Index;
+    WORD			MemoSize;
+    BYTE			Class;
+    BYTE			Equipment[EQUIPMENT_LENGTH_EXTENDED];
+    BYTE			PhotoDir;
+    BYTE			PhotoAction;
+    char			Memo[MAX_LETTERTEXT_LENGTH];
+} FS_LETTER_TEXT_EXTENDED, * LPFS_LETTER_TEXT_EXTENDED;
+
+typedef struct {
     PBMSG_HEADER    Header;
     BYTE			Result;
     WORD			Index;
@@ -2273,6 +2340,20 @@ typedef struct
     BYTE				s_BuffCount;
     BYTE				s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
 }PRECEIVE_PREVIEW_PORT, * LPPRECEIVE_PREVIEW_PORT;
+
+typedef struct
+{
+    BYTE                m_byObjType;
+    BYTE                m_byTypeH;
+    BYTE                m_byTypeL;
+    BYTE                m_byKeyH;
+    BYTE                m_byKeyL;
+    BYTE                m_byPosX;
+    BYTE                m_byPosY;
+    BYTE                m_byEquipment[EQUIPMENT_LENGTH_EXTENDED];
+    BYTE				s_BuffCount;
+    BYTE				s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
+}PRECEIVE_PREVIEW_PORT_EXTENDED, * LPPRECEIVE_PREVIEW_PORT_EXTENDED;
 
 typedef struct
 {
