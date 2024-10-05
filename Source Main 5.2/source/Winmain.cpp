@@ -5,6 +5,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
 
+#include <dpapi.h>
 #include <locale.h>
 #include <zmouse.h>
 #include "UIWindows.h"
@@ -109,7 +110,7 @@ CErrorReport g_ErrorReport;
 BOOL g_bMinimizedEnabled = FALSE;
 int g_iScreenSaverOldValue = 60 * 15;
 
-extern float g_fScreenRate_x;	// ¡Ø
+extern float g_fScreenRate_x;	// â€»
 extern float g_fScreenRate_y;
 
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
@@ -888,12 +889,15 @@ HWND StartWindow(HINSTANCE hInstance, int nCmdShow)
 }
 
 wchar_t m_ID[11];
+wchar_t m_Password[21];
+char m_EncryptedPassword[262];
 wchar_t m_Version[11];
 wchar_t m_ExeVersion[11];
 int  m_SoundOnOff;
 int  m_MusicOnOff;
 int  m_Resolution;
 int	m_nColorDepth;
+int m_RememberMe;
 int	g_iRenderTextType = 0;
 
 wchar_t g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = { '\0' };
@@ -951,20 +955,40 @@ BOOL OpenInitFile()
     //#ifdef _DEBUG
 
     m_ID[0] = '\0';
+    m_Password[0] = '\0';
     m_SoundOnOff = 1;
     m_MusicOnOff = 1;
     m_Resolution = 0;
     m_nColorDepth = 0;
+    m_RememberMe = 0;
 
     HKEY hKey;
     DWORD dwDisp;
     DWORD dwSize;
     if (ERROR_SUCCESS == RegCreateKeyEx(HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
     {
-        dwSize = 11;
+        dwSize = sizeof(m_ID);
         if (RegQueryValueEx(hKey, L"ID", 0, NULL, (LPBYTE)m_ID, &dwSize) != ERROR_SUCCESS)
         {
         }
+        dwSize = sizeof(m_EncryptedPassword);
+        if (RegQueryValueEx(hKey, L"Password", 0, NULL, (LPBYTE)m_EncryptedPassword, &dwSize) != ERROR_SUCCESS)
+        {
+        }
+        else
+        {
+            DATA_BLOB dataIn;
+            DATA_BLOB dataOut;
+            dataIn.pbData = (BYTE*)m_EncryptedPassword;
+            dataIn.cbData = dwSize;
+
+            if (CryptUnprotectData(&dataIn, NULL, NULL, NULL, NULL, 0, &dataOut))
+            {
+                wcscpy(m_Password, (wchar_t*)dataOut.pbData);
+                LocalFree(dataOut.pbData);
+            }
+        }
+
         dwSize = sizeof(int);
         if (RegQueryValueEx(hKey, L"SoundOnOff", 0, NULL, (LPBYTE)&m_SoundOnOff, &dwSize) != ERROR_SUCCESS)
         {
@@ -982,9 +1006,15 @@ BOOL OpenInitFile()
         if (0 == m_Resolution)
             m_Resolution = 1;
 
+        dwSize = sizeof(int);
         if (RegQueryValueEx(hKey, L"ColorDepth", 0, NULL, (LPBYTE)&m_nColorDepth, &dwSize) != ERROR_SUCCESS)
         {
             m_nColorDepth = 0;
+        }
+        dwSize = sizeof(int);
+        if (RegQueryValueEx(hKey, L"RememberMe", 0, NULL, (LPBYTE)&m_RememberMe, &dwSize) != ERROR_SUCCESS)
+        {
+            m_RememberMe = 0;
         }
         dwSize = sizeof(int);
         if (RegQueryValueEx(hKey, L"TextOut", 0, NULL, (LPBYTE)&g_iRenderTextType, &dwSize) != ERROR_SUCCESS)
@@ -1114,7 +1144,7 @@ BOOL UpdateFile(wchar_t* lpszOld, wchar_t* lpszNew)
     DWORD dwStartTickCount = ::GetTickCount();
     while (::GetTickCount() - dwStartTickCount < 5000) {
         if (CopyFile(lpszOld, lpszNew, FALSE))
-        {	// ¼º°ø
+        {	// ì„±ê³µ
             DeleteFile(lpszOld);
             return (TRUE);
         }
@@ -1556,10 +1586,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (g_bUseWindowMode == FALSE)
     {
 #endif	// ACTIVE_FOCUS_OUT
-        int nOldVal; // °ªÀÌ µé¾î°¥ ÇÊ¿ä°¡ ¾øÀ½
-        SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1, &nOldVal, 0);  // ´ÜÃàÅ°¸¦ ¸ø¾²°Ô ÇÔ
-        SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);  // ½ºÅ©¸°¼¼ÀÌ¹ö Â÷´Ü
-        SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300 * 60, NULL, 0);  // ½ºÅ©¸°¼¼ÀÌ¹ö Â÷´Ü
+        int nOldVal; // ê°’ì´ ë“¤ì–´ê°ˆ í•„ìš”ê°€ ì—†ìŒ
+        SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1, &nOldVal, 0);  // ë‹¨ì¶•í‚¤ë¥¼ ëª»ì“°ê²Œ í•¨
+        SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);  // ìŠ¤í¬ë¦°ì„¸ì´ë²„ ì°¨ë‹¨
+        SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300 * 60, NULL, 0);  // ìŠ¤í¬ë¦°ì„¸ì´ë²„ ì°¨ë‹¨
 #ifdef ACTIVE_FOCUS_OUT
     }
 #endif	// ACTIVE_FOCUS_OUT
