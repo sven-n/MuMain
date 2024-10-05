@@ -78,7 +78,6 @@ void CreateTeleportBegin(OBJECT* o);
 void CreateTeleportEnd(OBJECT* o);
 void CreateMagicShiny(CHARACTER* c, int Hand = 0);
 
-bool AddRangeAttack(vec3_t Position, float Range, short PKKey, int DamageKey[], int* piCount, int iMaxKey);
 bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, short PKKey = -1, WORD SkillSerialNum = 0);
 
 void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Skill, WORD SKKey);

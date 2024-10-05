@@ -41,10 +41,10 @@ void    ClearChaosCastleHelper(CHARACTER* c)
     c->Helper.Level = 0;
     c->Weapon[0].Type = -1;
     c->Weapon[0].Level = 0;
-    c->Weapon[0].Option1 = 0;
+    c->Weapon[0].ExcellentFlags = 0;
     c->Weapon[1].Type = -1;
     c->Weapon[1].Level = 0;
-    c->Weapon[1].Option1 = 0;
+    c->Weapon[1].ExcellentFlags = 0;
 #ifdef LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
     c->EtcPart = PARTS_NONE;
 #endif

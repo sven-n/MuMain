@@ -79,6 +79,9 @@ inline SendDropItemRequest dotnet_SendDropItemRequest = reinterpret_cast<SendDro
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendItemMoveRequest)(int32_t, uint32_t , BYTE , const BYTE* , uint32_t, uint32_t , BYTE );
 inline SendItemMoveRequest dotnet_SendItemMoveRequest = reinterpret_cast<SendItemMoveRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendItemMoveRequest"));
 
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendItemMoveRequestExtended)(int32_t, uint32_t , BYTE , uint32_t , BYTE );
+inline SendItemMoveRequestExtended dotnet_SendItemMoveRequestExtended = reinterpret_cast<SendItemMoveRequestExtended>(g_dotnet->get_method(type_name_connection_manager, L"SendItemMoveRequestExtended"));
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendConsumeItemRequest)(int32_t, BYTE , BYTE , uint32_t );
 inline SendConsumeItemRequest dotnet_SendConsumeItemRequest = reinterpret_cast<SendConsumeItemRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendConsumeItemRequest"));
 
@@ -586,5 +589,5 @@ inline SendDuelStopRequest dotnet_SendDuelStopRequest = reinterpret_cast<SendDue
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelChannelJoinRequest)(int32_t, BYTE );
 inline SendDuelChannelJoinRequest dotnet_SendDuelChannelJoinRequest = reinterpret_cast<SendDuelChannelJoinRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendDuelChannelJoinRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelChannelQuitRequest)(int32_t, BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelChannelQuitRequest)(int32_t);
 inline SendDuelChannelQuitRequest dotnet_SendDuelChannelQuitRequest = reinterpret_cast<SendDuelChannelQuitRequest>(g_dotnet->get_method(type_name_connection_manager, L"SendDuelChannelQuitRequest"));

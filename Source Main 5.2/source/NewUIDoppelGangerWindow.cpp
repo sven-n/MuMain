@@ -199,7 +199,7 @@ void CNewUIDoppelGangerWindow::RenderItem3D()
     int nItemType = (14 * MAX_ITEM_INDEX) + 111;
     int nItemLevel = 0;
 
-    ::RenderItem3D(ptOrigin.x + (190 - 20) / 2, ptOrigin.y + 75, 20.f, 27, nItemType, nItemLevel << 3, 0, 0, false);
+    ::RenderItem3D(ptOrigin.x + (190 - 20) / 2, ptOrigin.y + 75, 20.f, 27, nItemType, nItemLevel, 0, 0, false);
 }
 
 void CNewUIDoppelGangerWindow::OpeningProcess()

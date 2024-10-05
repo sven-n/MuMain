@@ -116,6 +116,11 @@ void PacketFunctions_ClientToServer::SendItemMoveRequest(uint32_t fromStorage, B
     dotnet_SendItemMoveRequest(this->GetHandle(), fromStorage, fromSlot, itemData, itemDataByteLength, toStorage, toSlot);
 }
 
+void PacketFunctions_ClientToServer::SendItemMoveRequestExtended(uint32_t fromStorage, BYTE fromSlot, uint32_t toStorage, BYTE toSlot)
+{
+    dotnet_SendItemMoveRequestExtended(this->GetHandle(), fromStorage, fromSlot, toStorage, toSlot);
+}
+
 void PacketFunctions_ClientToServer::SendConsumeItemRequest(BYTE itemSlot, BYTE targetSlot, uint32_t fruitConsumption)
 {
     dotnet_SendConsumeItemRequest(this->GetHandle(), itemSlot, targetSlot, fruitConsumption);
@@ -961,7 +966,7 @@ void PacketFunctions_ClientToServer::SendDuelChannelJoinRequest(BYTE channelId)
     dotnet_SendDuelChannelJoinRequest(this->GetHandle(), channelId);
 }
 
-void PacketFunctions_ClientToServer::SendDuelChannelQuitRequest(BYTE channelId)
+void PacketFunctions_ClientToServer::SendDuelChannelQuitRequest()
 {
-    dotnet_SendDuelChannelQuitRequest(this->GetHandle(), channelId);
+    dotnet_SendDuelChannelQuitRequest(this->GetHandle());
 }

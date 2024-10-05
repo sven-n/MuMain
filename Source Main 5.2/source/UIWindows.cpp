@@ -26,7 +26,7 @@ extern DWORD g_dwMouseUseUIID;
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern DWORD g_dwTopWindow;
 extern DWORD g_dwKeyFocusUIID;
-extern void ReceiveLetterText(const BYTE* ReceiveBuffer);
+extern void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer);
 
 int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
@@ -2090,7 +2090,7 @@ BOOL CompareItemEqual(const PART_t* item1, const PART_t* item2)
 {
     return (item1->Type == item2->Type &&
         item1->Level == item2->Level &&
-        item1->Option1 == item2->Option1);
+        item1->ExcellentFlags == item2->ExcellentFlags);
 }
 
 BOOL CompareItemEqual(const PART_t* item1, const ITEM* item2, int iDefaultValue)
@@ -2098,14 +2098,14 @@ BOOL CompareItemEqual(const PART_t* item1, const ITEM* item2, int iDefaultValue)
     if (item2->Type == -1)
     {
         return (item1->Type == iDefaultValue &&
-            item1->Level == ((item2->Level >> 3) & 15) &&
-            item1->Option1 == item2->Option1);
+            item1->Level == item2->Level &&
+            item1->ExcellentFlags == item2->ExcellentFlags);
     }
     else
     {
         return (item1->Type == item2->Type + MODEL_ITEM &&
-            item1->Level == ((item2->Level >> 3) & 15) &&
-            item1->Option1 == item2->Option1);
+            item1->Level == item2->Level &&
+            item1->ExcellentFlags == item2->ExcellentFlags);
     }
 }
 
@@ -2114,14 +2114,14 @@ void SetItemToPhoto(PART_t* itemDest, const ITEM* itemSrc, int iDefaultValue)
     if (itemSrc->Type == -1)
     {
         itemDest->Type = iDefaultValue;
-        itemDest->Level = ((itemSrc->Level >> 3) & 15);
-        itemDest->Option1 = itemSrc->Option1;
+        itemDest->Level = itemSrc->Level;
+        itemDest->ExcellentFlags = itemSrc->ExcellentFlags;
     }
     else
     {
         itemDest->Type = itemSrc->Type + MODEL_ITEM;
-        itemDest->Level = ((itemSrc->Level >> 3) & 15);
-        itemDest->Option1 = itemSrc->Option1;
+        itemDest->Level = itemSrc->Level;
+        itemDest->ExcellentFlags = itemSrc->ExcellentFlags;
     }
 }
 
@@ -2284,15 +2284,15 @@ void CUIPhotoViewer::CopyPlayer()
         case 3:CreateMountSub(MODEL_PEGASUS, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
         case 4:CreateMountSub(MODEL_DARK_HORSE, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
         case 37:	//^ 펜릴 편지 관련
-            if (m_PhotoChar.Helper.Option1 == 0x01)
+            if (m_PhotoChar.Helper.ExcellentFlags == 0x01)
             {
                 CreateMountSub(MODEL_FENRIR_BLACK, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
-            else if (m_PhotoChar.Helper.Option1 == 0x02)
+            else if (m_PhotoChar.Helper.ExcellentFlags == 0x02)
             {
                 CreateMountSub(MODEL_FENRIR_BLUE, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
-            else if (m_PhotoChar.Helper.Option1 == 0x04)
+            else if (m_PhotoChar.Helper.ExcellentFlags == 0x04)
             {
                 CreateMountSub(MODEL_FENRIR_GOLD, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
@@ -2307,7 +2307,7 @@ void CUIPhotoViewer::CopyPlayer()
     }
 }
 
-void CUIPhotoViewer::SetClass(BYTE byClass)
+void CUIPhotoViewer::SetClass(CLASS_TYPE byClass)
 {
     if (m_bIsInitialized == FALSE) return;
     CHARACTER* c = CharactersClient;
@@ -3135,7 +3135,8 @@ BOOL CUILetterReadWindow::HandleMessage()
                     }
                     else
                     {
-                        ReceiveLetterText((BYTE*)g_pLetterList->GetLetterText(dwPrevID));
+                        auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwPrevID));
+                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)));
                     }
                 }
                 else
@@ -3175,7 +3176,8 @@ BOOL CUILetterReadWindow::HandleMessage()
                     }
                     else
                     {
-                        ReceiveLetterText((BYTE*)g_pLetterList->GetLetterText(dwNextID));
+                        auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwNextID));
+                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)));
                     }
                 }
                 else
@@ -4449,7 +4451,8 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
                 }
                 else
                 {
-                    ReceiveLetterText((BYTE*)g_pLetterList->GetLetterText(dwLetterID));
+                    auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwLetterID));
+                    ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)));
                 }
             }
             else

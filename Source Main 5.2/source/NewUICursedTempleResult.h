@@ -41,10 +41,10 @@ namespace SEASON3B
             short		s_mapnumber;
             SEASON3A::eCursedTempleTeam		s_team;
             BYTE		s_point;
-            BYTE        s_class;
+            CLASS_TYPE        s_class;
             DWORD       s_addexp;
 
-            CursedTempleGameResult() : s_mapnumber(-1), s_team(SEASON3A::eTeam_Count), s_point(0xff), s_class(0xff), s_addexp(0xff)
+            CursedTempleGameResult() : s_mapnumber(-1), s_team(SEASON3A::eTeam_Count), s_point(0xff), s_class(CLASS_UNDEFINED), s_addexp(0xff)
             {
                 memset(&s_characterId, 0, sizeof(char) * (MAX_ID_SIZE + 1));
             }

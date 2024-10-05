@@ -154,7 +154,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
             }
         }
 
-        int iLevel = (pItem->Level >> 3) & 15;
+        int iLevel = pItem->Level;
 
         if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
         {
@@ -382,7 +382,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM
     ITEM_ATTRIBUTE* pItemAtt = &ItemAttribute[pItem->Type];
     SIZE TextSize = { 0, 0 };
 
-    int iLevel = (pItem->Level >> 3) & 15;
+    int iLevel = pItem->Level;
     int iMaxDurability = calcMaxDurability(pItem, pItemAtt, iLevel);
 
     wchar_t szText[256] = { NULL, };
@@ -617,7 +617,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
             }
         }
 
-        int iLevel = (pItem->Level >> 3) & 15;
+        int iLevel = pItem->Level;
 
         if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
         {
@@ -702,7 +702,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
         DWORD dwColor = 0xFFFFFFFF;
 
         ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-        int iLevel = (pItem->Level >> 3) & 15;
+        int iLevel = pItem->Level;
         int iMaxDurability = calcMaxDurability(pItem, pItemAttr, iLevel);
 
         if (pItem->Durability <= (iMaxDurability * 0.5f))

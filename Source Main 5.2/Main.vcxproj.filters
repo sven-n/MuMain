@@ -2274,6 +2274,9 @@
     <ClInclude Include="source\Dotnet\PacketFunctions_Custom.h">
       <Filter>MU\Dotnet</Filter>
     </ClInclude>
+    <ClInclude Include="dependencies\include\span.hpp">
+      <Filter>External Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="script\Mu_Chs.py">

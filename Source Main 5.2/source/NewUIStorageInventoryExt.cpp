@@ -214,7 +214,7 @@ bool CNewUIStorageInventoryExt::ProcessClosing() const
     return true;
 }
 
-bool CNewUIStorageInventoryExt::InsertItem(int iIndex, BYTE* pbyItemPacket) const
+bool CNewUIStorageInventoryExt::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(iIndex, pbyItemPacket);
@@ -329,7 +329,7 @@ int CNewUIStorageInventoryExt::FindEmptySlot(const ITEM* pItemObj) const
     return -1;
 }
 
-void CNewUIStorageInventoryExt::ProcessToReceiveStorageItems(int nIndex, BYTE* pbyItemPacket)
+void CNewUIStorageInventoryExt::ProcessToReceiveStorageItems(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
     CNewUIInventoryCtrl::DeletePickedItem();
 

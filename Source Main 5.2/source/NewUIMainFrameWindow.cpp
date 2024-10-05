@@ -1088,7 +1088,7 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
                 }
 
                 if (
-                    (pItem->Type == i && ((pItem->Level >> 3) & 15) == m_iHotKeyItemLevel[iType])
+                    (pItem->Type == i && pItem->Level == m_iHotKeyItemLevel[iType])
                     || (pItem->Type == i && (pItem->Type >= ITEM_APPLE && pItem->Type <= ITEM_LARGE_HEALING_POTION))
                     )
                 {
@@ -1124,7 +1124,7 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
                 if ((pItem->Type != ITEM_SIEGE_POTION
                     && pItem->Type != ITEM_TOWN_PORTAL_SCROLL
                     && pItem->Type != ITEM_POTION + 20)
-                    || ((pItem->Level >> 3) & 15) == m_iHotKeyItemLevel[iType]
+                    || pItem->Level == m_iHotKeyItemLevel[iType]
                     )
                 {
                     return iIndex;

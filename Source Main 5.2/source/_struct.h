@@ -235,6 +235,16 @@ typedef struct tagITEM
 {
     short Type;
     int   Level;
+    BYTE  Durability;
+    BYTE OptionLevel;
+    BYTE OptionType;
+    BYTE ExcellentFlags;
+    BYTE AncientDiscriminator; // 0 = no ancient;
+    BYTE AncientBonusOption;
+    WORD  Jewel_Of_Harmony_Option;
+    WORD  Jewel_Of_Harmony_OptionLevel;
+    bool HasSkill;
+    bool HasLuck;
     BYTE  Part;
     BYTE  Class;
     bool  TwoHand;
@@ -246,9 +256,7 @@ typedef struct tagITEM
     BYTE  MagicPower;
     BYTE  WeaponSpeed;
     WORD  WalkSpeed;
-    BYTE  Durability;
-    BYTE  Option1;
-    BYTE  ExtOption;
+
     WORD  RequireStrength;
     WORD  RequireDexterity;
     WORD  RequireEnergy;
@@ -272,11 +280,10 @@ typedef struct tagITEM
         BYTE  y;    //client olny
         BYTE  ex_src_type;
     };
-    WORD  Jewel_Of_Harmony_Option;
-    WORD  Jewel_Of_Harmony_OptionLevel;
     bool option_380;
-    BYTE bySocketOption[MAX_SOCKETS];
+
     BYTE SocketCount;
+    BYTE bySocketOption[MAX_SOCKETS];
     BYTE SocketSeedID[MAX_SOCKETS];
     BYTE SocketSphereLv[MAX_SOCKETS];
     BYTE SocketSeedSetOption;
@@ -286,13 +293,9 @@ typedef struct tagITEM
 
     BYTE byColorState;
 
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
     bool	bPeriodItem;
     bool	bExpiredPeriod;
-    //DWORD	dwLeftTime;
     long	lExpireTime;
-    //DWORD	dwPastSystemTime;
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
 private:
     friend class SEASON3B::CNewUIItemMng;
@@ -430,7 +433,7 @@ typedef struct
 typedef struct
 {
     wchar_t Name[MAX_ID_SIZE + 1];
-    BYTE Class;
+    CLASS_TYPE Class;
     BYTE Skin;
     BYTE InventoryExtensions;
     BYTE IsVaultExtended;

@@ -46,8 +46,8 @@ typedef struct _PART_t
 {
     short Type;
     BYTE  Level;
-    BYTE  Option1;
-    BYTE  ExtOption;
+    BYTE  ExcellentFlags; // Excellent
+    BYTE  AncientDiscriminator; // Ancient
     BYTE  LinkBone;
     BYTE  CurrentAction;
     unsigned short  PriorAction;
@@ -61,8 +61,8 @@ typedef struct _PART_t
     {
         Type = 0;
         Level = 0;
-        Option1 = 0;
-        ExtOption = 0;
+        ExcellentFlags = 0;
+        AncientDiscriminator = 0;
         LinkBone = 0;
         CurrentAction = 0;
         PriorAction = 0;
@@ -127,11 +127,11 @@ public:
     bool			NotRotateOnMagicHit;
     bool			Foot[2];
     bool			SafeZone;
-    bool			Change;
+    bool			Change; // True for transformed players
     bool			HideShadow;
     bool			m_bIsSelected;
     bool			Decoy;
-    BYTE			Class;
+    CLASS_TYPE			Class;
     BYTE			Skin;
     BYTE			CtlCode;
     BYTE			ExtendState;
@@ -182,6 +182,8 @@ public:
     int        Damage;
     int        Hit;
     WORD        MoveSpeed;
+    WORD        AttackSpeed;
+    WORD        MagicSpeed;
 
     int			Action;
     int			LongRangeAttack;
@@ -207,6 +209,8 @@ public:
     float       Duplication;
     float		Rot;
     float       Run;
+    float       HealthStatus;
+    float       ShieldStatus;
 
     vec3_t		TargetPosition;
     vec3_t      Light;

@@ -121,11 +121,11 @@ namespace SEASON3B
         void ProcessToReceiveTradeRequest(char* pbyYourID);
         void ProcessToReceiveTradeResult(LPPTRADE pTradeData);
         void ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex);
-        void ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, BYTE* pbyItemPacket);
+        void ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket);
         void ProcessToReceiveMyTradeGold(BYTE bySuccess);
         void ProcessToReceiveYourConfirm(BYTE byState);
         void ProcessToReceiveTradeExit(BYTE byState);
-        void ProcessToReceiveTradeItems(int nIndex, BYTE* pbyItemPacket);
+        void ProcessToReceiveTradeItems(int nIndex, std::span<const BYTE> pbyItemPacket);
 
         void AlertTrade();
 

@@ -113,7 +113,7 @@ private:
 
     bool	OpenItemSetType(const wchar_t* filename);
     bool	OpenItemSetOption(const wchar_t* filename);
-    void	checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int setType) const;
+    void	checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int ancientDiscriminator) const;
     void	calcSetOptionList(const SET_SEARCH_RESULT* optionList);
     
     void    getAllAddState(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma) const;

@@ -52,7 +52,7 @@ bool SEASON3B::CNewUIPurchaseShopInventory::Create(CNewUIManager* pNewUIMng, int
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY, this);
 
     m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x + 16, m_Pos.y + 90, 8, 4))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x + 16, m_Pos.y + 90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
@@ -85,7 +85,7 @@ void SEASON3B::CNewUIPurchaseShopInventory::Release()
     UnloadImages();
 }
 
-bool SEASON3B::CNewUIPurchaseShopInventory::InsertItem(int iIndex, BYTE* pbyItemPacket)
+bool SEASON3B::CNewUIPurchaseShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -196,7 +196,7 @@ bool SEASON3B::CNewUIPurchaseShopInventory::PurchaseShopInventoryProcess()
     if (m_pNewInventoryCtrl && IsPress(VK_LBUTTON))
     {
         int iCurSquareIndex = m_pNewInventoryCtrl->GetIndexAtPt(MouseX, MouseY);
-        if (iCurSquareIndex != -1)
+        if (iCurSquareIndex != -1 && m_pNewInventoryCtrl->FindItem(iCurSquareIndex) != nullptr)
         {
             ChangeSourceIndex(iCurSquareIndex);
             CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopItemBuyMsgBoxLayout));

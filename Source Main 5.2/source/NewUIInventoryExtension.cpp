@@ -281,7 +281,7 @@ CNewUIInventoryCtrl* CNewUIInventoryExtension::TryGetExtensionByInventoryIndex(i
     return nullptr;
 }
 
-bool CNewUIInventoryExtension::InsertItem(int iIndex, BYTE* pbyItemPacket) const
+bool CNewUIInventoryExtension::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
 {
     if (const auto& extension = TryGetExtensionByInventoryIndex(iIndex))
     {

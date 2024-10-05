@@ -172,8 +172,8 @@ void CreateGuildMark(int nMarkIndex, bool blend = true);
 void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index);
 void CreateCastleMark(int Type, BYTE* buffer = NULL, bool blend = true);
 
-void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int Option1, int ExtOption, bool PickUp = false);
-void RenderObjectScreen(int Type, int ItemLevel, int Option1, int ExtOption, vec3_t Target, int Select, bool PickUp);
+void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp = false);
+void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
 void GetItemName(int iType, int iLevel, wchar_t* Text);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
@@ -197,7 +197,7 @@ bool IsWingItem(ITEM* pItem);
 void ComputeItemInfo(int iHelpItem);
 void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y);
 void RenderHelpLine(int iColumnType, const wchar_t* pPrintStyle, int& TabSpace, const wchar_t* pGapText = NULL, int Pos_y = 0, int iType = 0);
-void RenderItemName(int i, OBJECT* o, int ItemLevel, int ItemOption, int ItemExtOption, bool Sort);
+void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort);
 
 BYTE CaculateFreeTicketLevel(int iType);
 

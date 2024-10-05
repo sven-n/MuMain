@@ -11,6 +11,42 @@
 #include <list>
 
 #include "./Time/Timer.h"
+#include <./span.hpp>
+
+struct ItemCreationParams
+{
+    int Group;
+    int Number;
+    BYTE Level;
+    BYTE Durability;
+    bool WithLuck;
+    bool WithSkill;
+
+    bool WithOption;
+    BYTE OptionLevel;
+    BYTE OptionType;
+
+    bool HasExcellentOption;
+    BYTE ExcellentFlags;
+
+    bool IsAncient;
+    BYTE AncientDiscriminator;
+    BYTE AncientBonusOption;
+
+    bool HasHarmonyOption;
+    BYTE HarmonyOptionType;
+    BYTE HarmonyOptionLevel;
+
+    bool HasGuardianOption;
+    BYTE SocketCount;
+    BYTE SocketOptions[MAX_SOCKETS];
+    BYTE SocketBonusOption;
+
+    bool WithExpiration;
+    bool IsExpired;
+};
+
+ItemCreationParams ParseItemData(std::span<const BYTE> itemData);
 
 namespace SEASON3B
 {
@@ -26,8 +62,11 @@ namespace SEASON3B
         CNewUIItemMng();
         virtual ~CNewUIItemMng();
 
-        ITEM* CreateItem(BYTE* pbyItemPacket);	//. create instance
-        ITEM* CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel = 0, BYTE byDurability = 255, BYTE byOption1 = 0, BYTE byOptionEx = 0, BYTE byOption380 = 0, BYTE byOptionHarmony = 0, BYTE* pbySocketOptions = NULL);	//. create instance
+        ITEM* CreateItem(std::span<const BYTE> itemData);
+        ITEM* CreateItemOld(std::span<const BYTE> pbyItemPacket);
+        ITEM* CreateItemExtended(std::span<const BYTE> itemData);
+        ITEM* CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel = 0, BYTE byDurability = 255, BYTE byOption1 = 0, BYTE ancientByte = 0, BYTE byOption380 = 0, BYTE byOptionHarmony = 0, BYTE* pbySocketOptions = NULL);	//. create instance
+        ITEM* CreateItemByParameters(const ItemCreationParams* parameters);
         ITEM* CreateItem(ITEM* pItem);		//. refer to the instance already existed
         ITEM* DuplicateItem(ITEM* pItem);	//. create instance
         void DeleteItem(ITEM* pItem);
@@ -42,8 +81,8 @@ namespace SEASON3B
         DWORD GenerateItemKey();
         DWORD FindAvailableKeyIndex(DWORD dwSeed);
 
-        WORD ExtractItemType(BYTE* pbyItemPacket);
-        void SetItemAttr(ITEM* pItem, BYTE byLevel, BYTE byOption1, BYTE byOptionEx);
+        WORD ExtractItemType(std::span<const BYTE> pbyItemPacket);
+        void SetItemAttr(ITEM* pItem, BYTE byLevel, BYTE byOption1, BYTE ancientDiscriminator);
     };
 }
 

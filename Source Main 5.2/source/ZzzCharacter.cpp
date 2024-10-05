@@ -109,11 +109,11 @@ void UnRegisterBuff(eBuffState buff, OBJECT* o);
 
 int GetFenrirType(CHARACTER* c)
 {
-    if (c->Helper.Option1 == 0x01)
+    if (c->Helper.ExcellentFlags == 0x01)
         return FENRIR_TYPE_BLACK;
-    else if (c->Helper.Option1 == 0x02)
+    else if (c->Helper.ExcellentFlags == 0x02)
         return FENRIR_TYPE_BLUE;
-    else if (c->Helper.Option1 == 0x04)
+    else if (c->Helper.ExcellentFlags == 0x04)
         return FENRIR_TYPE_GOLD;
 
     return FENRIR_TYPE_RED;
@@ -390,13 +390,9 @@ void SetPlayerWalk(CHARACTER* c)
 
     ITEM* pItemBoots = &CharacterMachine->Equipment[EQUIPMENT_BOOTS];
     ITEM* pItemGloves = &CharacterMachine->Equipment[EQUIPMENT_GLOVES];
-    int iItemBootsLevel = pItemBoots->Level;
-    int iItemGlovesLevel = pItemGloves->Level;
 
     if (c->MonsterIndex >= MONSTER_DOPPELGANGER_ELF && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
     {
-        iItemBootsLevel = 0;
-        iItemGlovesLevel = 0;
         c->Run = 0;
     }
     else
@@ -410,10 +406,10 @@ void SetPlayerWalk(CHARACTER* c)
                     ) && c->BodyPart[BODYPART_GLOVES].Type != -1 && c->BodyPart[BODYPART_GLOVES].Level >= 5)
                 || ((gMapManager.WorldActive != WD_7ATLANSE && !gMapManager.InHellas()
                     && gMapManager.WorldActive != WD_67DOPPLEGANGER3
-                    ) && iItemBootsLevel >= 40)
+                    ) && pItemBoots->Level >= 5)
                 || ((gMapManager.WorldActive == WD_7ATLANSE || gMapManager.InHellas()
                     || gMapManager.WorldActive == WD_67DOPPLEGANGER3
-                    ) && iItemGlovesLevel >= 40)
+                    ) && pItemGloves->Level >= 5)
                 || c->Helper.Type == MODEL_HORN_OF_FENRIR
                 || c->Object.SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER
                 || c->Object.SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
@@ -5201,12 +5197,12 @@ bool CheckFullSet(CHARACTER* c)
         if (Success)
         {
             int Type = CharacterMachine->Equipment[EQUIPMENT_BOOTS].Type % MAX_ITEM_INDEX;
-            tmpLevel = (CharacterMachine->Equipment[EQUIPMENT_BOOTS].Level >> 3) & 15;
+            tmpLevel = CharacterMachine->Equipment[EQUIPMENT_BOOTS].Level;
             for (int i = start; i >= end; i--)
             {
                 if ((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER) && (i == EQUIPMENT_GLOVES))
                     continue;
-                int Level = (CharacterMachine->Equipment[i].Level >> 3) & 15;
+                int Level = CharacterMachine->Equipment[i].Level;
                 if (Level < 9)
                 {
                     EquipmentLevelSet = 0;
@@ -6040,7 +6036,7 @@ float CharacterMoveSpeed(CHARACTER* c)
                 Speed = 16;
             else
             {
-                if (c->Helper.Option1 > 0)
+                if (c->Helper.ExcellentFlags > 0)
                     Speed = 19;
                 else
                     Speed = 17;
@@ -6676,7 +6672,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         && Type != MODEL_WING + 135 // Small Cape of Fighter
         )
     {
-        RenderPartObjectEffect(Object, Type, c->Light, o->Alpha, Level << 3, Option1, false, 0, RenderType | ((c->MonsterIndex == MONSTER_METAL_BALROG || c->MonsterIndex == MONSTER_ORC_ARCHER_OF_DOOM) ? (RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
+        RenderPartObjectEffect(Object, Type, c->Light, o->Alpha, Level, Option1, false, 0, RenderType | ((c->MonsterIndex == MONSTER_METAL_BALROG || c->MonsterIndex == MONSTER_ORC_ARCHER_OF_DOOM) ? (RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
     }
 
     float Luminosity;
@@ -8771,7 +8767,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     bool bCloak = false;
 
-    if ((gCharacterManager.GetCharacterClass(c->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD
+    if ((c->Class == CLASS_DARK || gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD
         || gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER) && o->Type == MODEL_PLAYER)
     {
         if (c->Change == false || (c->Change == true && c->Object.Type == MODEL_PLAYER))
@@ -8952,7 +8948,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER && (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, c->Level << 3, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, c->Level, 0, 0, false, false, Translate, Select);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
         && (o->SubType == MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN
@@ -9230,10 +9226,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
                     {
                         if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
-                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level << 3, p->Option1, p->ExtOption, false, false, Translate,
+                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags, p->AncientDiscriminator, false, false, Translate,
                                 Select, RENDER_DOPPELGANGER | RENDER_TEXTURE);
                         else
-                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level << 3, p->Option1, p->ExtOption, false, false, Translate,
+                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags, p->AncientDiscriminator, false, false, Translate,
                                 Select, RENDER_DOPPELGANGER | RENDER_BRIGHT | RENDER_TEXTURE);
                         // 						RenderPartObject(&c->Object,Type,p,c->Light,o->Alpha,p->Level<<3,p->Option1,p->ExtOption,false,false,Translate,
                         // 							Select,RENDER_DOPPELGANGER|RENDER_BRIGHT|RENDER_CHROME);
@@ -9249,7 +9245,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                             {
                                 if (o->m_sTargetIndex < 0 || c->JumpTime>0)
                                 {
-                                    RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level << 3, p->Option1, p->ExtOption, false, false, Translate, Select);
+                                    RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags, p->AncientDiscriminator, false, false, Translate, Select);
                                 }
                                 else
                                 {
@@ -9258,7 +9254,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                             }
                             else
                             {
-                                RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level << 3, p->Option1, p->ExtOption, false, false, Translate, Select);
+                                RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags, p->AncientDiscriminator, false, false, Translate, Select);
                             }
                     }
                 }
@@ -9777,7 +9773,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 if (g_CMonkSystem.IsSwordformGloves(w->Type))
                     g_CMonkSystem.RenderSwordformGloves(c, w->Type, i, o->Alpha, Translate, Select);
                 else
-                    RenderLinkObject(0.f, 0.f, 0.f, c, w, w->Type, w->Level, w->Option1, false, Translate);
+                    RenderLinkObject(0.f, 0.f, 0.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, Translate);
 
                 if (w->Level >= 7)
                 {
@@ -10100,7 +10096,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     case MODEL_PLAYER:
         Vector(0.f, 0.f, 0.f, p);
 
-        if (gCharacterManager.GetCharacterClass(c->Class) == CLASS_SOULMASTER)
+        if (c->Class == CLASS_SOULMASTER)
         {
             if( !g_isCharacterBuff(o, eBuff_Cloaking) )
    {
@@ -10985,7 +10981,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER)
     {
         PART_t* w = &c->Weapon[1];
-        g_SummonSystem.MoveEquipEffect(c, w->Type, w->Level, w->Option1);
+        g_SummonSystem.MoveEquipEffect(c, w->Type, w->Level, w->ExcellentFlags);
     }
 }
 
@@ -11298,10 +11294,12 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     c->CtlCode = 0;
     c->m_CursedTempleCurSkill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
     c->m_CursedTempleCurSkillPacket = false;
+    c->HealthStatus = -1;
+    c->ShieldStatus = -1;
 
     if (Type < MODEL_FACE || Type > MODEL_FACE + 6)
     {
-        c->Class = 0;
+        c->Class = CLASS_WIZARD;
     }
 
     if (Type == MODEL_PLAYER)
@@ -11478,15 +11476,15 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     {
         c->Weapon[i].Type = -1;
         c->Weapon[i].Level = 0;
-        c->Weapon[i].Option1 = 0;
+        c->Weapon[i].ExcellentFlags = 0;
     }
 
     for (int i = 0; i < MAX_BODYPART; i++)
     {
         c->BodyPart[i].Type = -1;
         c->BodyPart[i].Level = 0;
-        c->BodyPart[i].Option1 = 0;
-        c->BodyPart[i].ExtOption = 0;
+        c->BodyPart[i].ExcellentFlags = 0;
+        c->BodyPart[i].AncientDiscriminator = 0;
     }
     c->Wing.Type = -1;
     c->Helper.Type = -1;
@@ -11805,14 +11803,14 @@ void SetCharacterClass(CHARACTER* c)
         c->Helper.Type = p[EQUIPMENT_HELPER].Type + MODEL_ITEM;
     }
 
-    c->Weapon[0].Level = (p[EQUIPMENT_WEAPON_RIGHT].Level >> 3) & 15;
-    c->Weapon[1].Level = (p[EQUIPMENT_WEAPON_LEFT].Level >> 3) & 15;
-    c->Weapon[0].Option1 = p[EQUIPMENT_WEAPON_RIGHT].Option1;
-    c->Weapon[1].Option1 = p[EQUIPMENT_WEAPON_LEFT].Option1;
-    c->Weapon[0].ExtOption = p[EQUIPMENT_WEAPON_RIGHT].ExtOption;
-    c->Weapon[1].ExtOption = p[EQUIPMENT_WEAPON_LEFT].ExtOption;
-    c->Wing.Level = (p[EQUIPMENT_WING].Level >> 3) & 15;
-    c->Helper.Level = (p[EQUIPMENT_HELPER].Level >> 3) & 15;
+    c->Weapon[0].Level = p[EQUIPMENT_WEAPON_RIGHT].Level;
+    c->Weapon[1].Level = p[EQUIPMENT_WEAPON_LEFT].Level;
+    c->Weapon[0].ExcellentFlags = p[EQUIPMENT_WEAPON_RIGHT].ExcellentFlags;
+    c->Weapon[1].ExcellentFlags = p[EQUIPMENT_WEAPON_LEFT].ExcellentFlags;
+    c->Weapon[0].AncientDiscriminator = p[EQUIPMENT_WEAPON_RIGHT].AncientDiscriminator;
+    c->Weapon[1].AncientDiscriminator = p[EQUIPMENT_WEAPON_LEFT].AncientDiscriminator;
+    c->Wing.Level = p[EQUIPMENT_WING].Level;
+    c->Helper.Level = p[EQUIPMENT_HELPER].Level;
 
     bool Success = true;
 
@@ -11878,21 +11876,21 @@ void SetCharacterClass(CHARACTER* c)
         c->BodyPart[BODYPART_BOOTS].Type = p[EQUIPMENT_BOOTS].Type + MODEL_ITEM;
     }
 
-    c->BodyPart[BODYPART_HELM].Level = (p[EQUIPMENT_HELM].Level >> 3) & 15;
-    c->BodyPart[BODYPART_ARMOR].Level = (p[EQUIPMENT_ARMOR].Level >> 3) & 15;
-    c->BodyPart[BODYPART_PANTS].Level = (p[EQUIPMENT_PANTS].Level >> 3) & 15;
-    c->BodyPart[BODYPART_GLOVES].Level = (p[EQUIPMENT_GLOVES].Level >> 3) & 15;
-    c->BodyPart[BODYPART_BOOTS].Level = (p[EQUIPMENT_BOOTS].Level >> 3) & 15;
-    c->BodyPart[BODYPART_HELM].Option1 = p[EQUIPMENT_HELM].Option1;
-    c->BodyPart[BODYPART_ARMOR].Option1 = p[EQUIPMENT_ARMOR].Option1;
-    c->BodyPart[BODYPART_PANTS].Option1 = p[EQUIPMENT_PANTS].Option1;
-    c->BodyPart[BODYPART_GLOVES].Option1 = p[EQUIPMENT_GLOVES].Option1;
-    c->BodyPart[BODYPART_BOOTS].Option1 = p[EQUIPMENT_BOOTS].Option1;
-    c->BodyPart[BODYPART_HELM].ExtOption = p[EQUIPMENT_HELM].ExtOption;
-    c->BodyPart[BODYPART_ARMOR].ExtOption = p[EQUIPMENT_ARMOR].ExtOption;
-    c->BodyPart[BODYPART_PANTS].ExtOption = p[EQUIPMENT_PANTS].ExtOption;
-    c->BodyPart[BODYPART_GLOVES].ExtOption = p[EQUIPMENT_GLOVES].ExtOption;
-    c->BodyPart[BODYPART_BOOTS].ExtOption = p[EQUIPMENT_BOOTS].ExtOption;
+    c->BodyPart[BODYPART_HELM].Level = p[EQUIPMENT_HELM].Level;
+    c->BodyPart[BODYPART_ARMOR].Level = p[EQUIPMENT_ARMOR].Level;
+    c->BodyPart[BODYPART_PANTS].Level = p[EQUIPMENT_PANTS].Level;
+    c->BodyPart[BODYPART_GLOVES].Level = p[EQUIPMENT_GLOVES].Level;
+    c->BodyPart[BODYPART_BOOTS].Level = p[EQUIPMENT_BOOTS].Level;
+    c->BodyPart[BODYPART_HELM].ExcellentFlags = p[EQUIPMENT_HELM].ExcellentFlags;
+    c->BodyPart[BODYPART_ARMOR].ExcellentFlags = p[EQUIPMENT_ARMOR].ExcellentFlags;
+    c->BodyPart[BODYPART_PANTS].ExcellentFlags = p[EQUIPMENT_PANTS].ExcellentFlags;
+    c->BodyPart[BODYPART_GLOVES].ExcellentFlags = p[EQUIPMENT_GLOVES].ExcellentFlags;
+    c->BodyPart[BODYPART_BOOTS].ExcellentFlags = p[EQUIPMENT_BOOTS].ExcellentFlags;
+    c->BodyPart[BODYPART_HELM].AncientDiscriminator = p[EQUIPMENT_HELM].AncientDiscriminator;
+    c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = p[EQUIPMENT_ARMOR].AncientDiscriminator;
+    c->BodyPart[BODYPART_PANTS].AncientDiscriminator = p[EQUIPMENT_PANTS].AncientDiscriminator;
+    c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = p[EQUIPMENT_GLOVES].AncientDiscriminator;
+    c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = p[EQUIPMENT_BOOTS].AncientDiscriminator;
 
     ChangeChaosCastleUnit(c);
 
@@ -11925,36 +11923,36 @@ void SetChangeClass(CHARACTER* c)
     {
         c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM + iSkinModelIndex;
         c->BodyPart[BODYPART_HELM].Level = 0;
-        c->BodyPart[BODYPART_HELM].Option1 = 0;
-        c->BodyPart[BODYPART_HELM].ExtOption = 0;
+        c->BodyPart[BODYPART_HELM].ExcellentFlags = 0;
+        c->BodyPart[BODYPART_HELM].AncientDiscriminator = 0;
     }
     if (c->BodyPart[BODYPART_ARMOR].Type >= MODEL_BODY_ARMOR)
     {
         c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR + iSkinModelIndex;
         c->BodyPart[BODYPART_ARMOR].Level = 0;
-        c->BodyPart[BODYPART_ARMOR].Option1 = 0;
-        c->BodyPart[BODYPART_ARMOR].ExtOption = 0;
+        c->BodyPart[BODYPART_ARMOR].ExcellentFlags = 0;
+        c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = 0;
     }
     if (c->BodyPart[BODYPART_PANTS].Type >= MODEL_BODY_PANTS)
     {
         c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS + iSkinModelIndex;
         c->BodyPart[BODYPART_PANTS].Level = 0;
-        c->BodyPart[BODYPART_PANTS].Option1 = 0;
-        c->BodyPart[BODYPART_PANTS].ExtOption = 0;
+        c->BodyPart[BODYPART_PANTS].ExcellentFlags = 0;
+        c->BodyPart[BODYPART_PANTS].AncientDiscriminator = 0;
     }
     if (c->BodyPart[BODYPART_GLOVES].Type >= MODEL_BODY_GLOVES)
     {
         c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES + iSkinModelIndex;
         c->BodyPart[BODYPART_GLOVES].Level = 0;
-        c->BodyPart[BODYPART_GLOVES].Option1 = 0;
-        c->BodyPart[BODYPART_GLOVES].ExtOption = 0;
+        c->BodyPart[BODYPART_GLOVES].ExcellentFlags = 0;
+        c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = 0;
     }
     if (c->BodyPart[BODYPART_BOOTS].Type >= MODEL_BODY_BOOTS)
     {
         c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS + iSkinModelIndex;
         c->BodyPart[BODYPART_BOOTS].Level = 0;
-        c->BodyPart[BODYPART_BOOTS].Option1 = 0;
-        c->BodyPart[BODYPART_BOOTS].ExtOption = 0;
+        c->BodyPart[BODYPART_BOOTS].ExcellentFlags = 0;
+        c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = 0;
     }
 
     SetCharacterScale(c);
@@ -12060,8 +12058,8 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     if (ExtType == 0x0FFF)
     {
         c->Weapon[0].Type = -1;
-        c->Weapon[0].Option1 = 0;
-        c->Weapon[0].ExtOption = 0;
+        c->Weapon[0].ExcellentFlags = 0;
+        c->Weapon[0].AncientDiscriminator = 0;
     }
     else
     {
@@ -12075,8 +12073,8 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     if (ExtType == 0x0FFF)
     {
         c->Weapon[1].Type = -1;
-        c->Weapon[1].Option1 = 0;
-        c->Weapon[1].ExtOption = 0;
+        c->Weapon[1].ExcellentFlags = 0;
+        c->Weapon[1].AncientDiscriminator = 0;
     }
     else
     {
@@ -12144,8 +12142,8 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     else
     {
         c->Wing.Type = -1;
-        c->Wing.Option1 = 0;
-        c->Wing.ExtOption = 0;
+        c->Wing.ExcellentFlags = 0;
+        c->Wing.AncientDiscriminator = 0;
     }
 
     if (pHelper == NULL)
@@ -12172,8 +12170,8 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
         else
         {
             c->Helper.Type = -1;
-            c->Helper.Option1 = 0;
-            c->Helper.ExtOption = 0;
+            c->Helper.ExcellentFlags = 0;
+            c->Helper.AncientDiscriminator = 0;
         }
     }
     else
@@ -12242,7 +12240,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
             Type = 0x04;
         }
 
-        c->Helper.Option1 = Type;
+        c->Helper.ExcellentFlags = Type;
         if (Type == 0x01)
         {
             if (pHelper == NULL)
@@ -12355,22 +12353,22 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     c->BodyPart[BODYPART_GLOVES].Level = LevelConvert((Level >> 15) & 7);
     c->BodyPart[BODYPART_BOOTS].Level = LevelConvert((Level >> 18) & 7);
 
-    c->BodyPart[BODYPART_HELM].Option1 = (Equipment[9] & 128) / 128;
-    c->BodyPart[BODYPART_ARMOR].Option1 = (Equipment[9] & 64) / 64;
-    c->BodyPart[BODYPART_PANTS].Option1 = (Equipment[9] & 32) / 32;
-    c->BodyPart[BODYPART_GLOVES].Option1 = (Equipment[9] & 16) / 16;
-    c->BodyPart[BODYPART_BOOTS].Option1 = (Equipment[9] & 8) / 8;
+    c->BodyPart[BODYPART_HELM].ExcellentFlags = (Equipment[9] & 128) / 128;
+    c->BodyPart[BODYPART_ARMOR].ExcellentFlags = (Equipment[9] & 64) / 64;
+    c->BodyPart[BODYPART_PANTS].ExcellentFlags = (Equipment[9] & 32) / 32;
+    c->BodyPart[BODYPART_GLOVES].ExcellentFlags = (Equipment[9] & 16) / 16;
+    c->BodyPart[BODYPART_BOOTS].ExcellentFlags = (Equipment[9] & 8) / 8;
 
-    c->BodyPart[BODYPART_HELM].ExtOption = (Equipment[10] & 128) / 128;
-    c->BodyPart[BODYPART_ARMOR].ExtOption = (Equipment[10] & 64) / 64;
-    c->BodyPart[BODYPART_PANTS].ExtOption = (Equipment[10] & 32) / 32;
-    c->BodyPart[BODYPART_GLOVES].ExtOption = (Equipment[10] & 16) / 16;
-    c->BodyPart[BODYPART_BOOTS].ExtOption = (Equipment[10] & 8) / 8;
+    c->BodyPart[BODYPART_HELM].AncientDiscriminator = (Equipment[10] & 128) / 128;
+    c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = (Equipment[10] & 64) / 64;
+    c->BodyPart[BODYPART_PANTS].AncientDiscriminator = (Equipment[10] & 32) / 32;
+    c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = (Equipment[10] & 16) / 16;
+    c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = (Equipment[10] & 8) / 8;
 
-    c->Weapon[0].Option1 = (Equipment[9] & 4) / 4;
-    c->Weapon[1].Option1 = (Equipment[9] & 2) / 2;
-    c->Weapon[0].ExtOption = (Equipment[10] & 4) / 4;
-    c->Weapon[1].ExtOption = (Equipment[10] & 2) / 2;
+    c->Weapon[0].ExcellentFlags = (Equipment[9] & 4) / 4;
+    c->Weapon[1].ExcellentFlags = (Equipment[9] & 2) / 2;
+    c->Weapon[0].AncientDiscriminator = (Equipment[10] & 4) / 4;
+    c->Weapon[1].AncientDiscriminator = (Equipment[10] & 2) / 2;
 
     c->ExtendState = Equipment[10] & 0x01;
 
@@ -12395,8 +12393,8 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
     for (int i = 0; i < 2; i++)
     {
         c->Weapon[i].Type = -1;
-        c->Weapon[i].Option1 = 0;
-        c->Weapon[i].ExtOption = 0;
+        c->Weapon[i].ExcellentFlags = 0;
+        c->Weapon[i].AncientDiscriminator = 0;
         if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
         {
             short number = MAKEWORD(Equipment[offset + 1], Equipment[offset] & 0xF);
@@ -12421,8 +12419,8 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
                 auto modelOffset = group * MAX_ITEM_INDEX + number;
                 c->Weapon[i].Type = MODEL_ITEM + modelOffset;
                 c->Weapon[i].Level = LevelConvert(glowLevel);
-                c->Weapon[i].Option1 = isExcellent;
-                c->Weapon[i].ExtOption = isAncient;
+                c->Weapon[i].ExcellentFlags = isExcellent;
+                c->Weapon[i].AncientDiscriminator = isAncient;
             }
         }
 
@@ -12440,8 +12438,8 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
     for (int i = 1; i < MAX_BODYPART; i++)
     {
         c->BodyPart[i].Type = bodyParts[i] + gCharacterManager.GetSkinModelIndex(c->Class);
-        c->BodyPart[i].Option1 = 0;
-        c->BodyPart[i].ExtOption = 0;
+        c->BodyPart[i].ExcellentFlags = 0;
+        c->BodyPart[i].AncientDiscriminator = 0;
         c->BodyPart[i].Level = 0;
         if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
         {
@@ -12460,8 +12458,8 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
                 auto modelOffset = group * MAX_ITEM_INDEX + number;
                 c->BodyPart[i].Type = MODEL_ITEM + modelOffset;
                 c->BodyPart[i].Level = LevelConvert(glowLevel);
-                c->BodyPart[i].Option1 = isExcellent;
-                c->BodyPart[i].ExtOption = isAncient;
+                c->BodyPart[i].ExcellentFlags = isExcellent;
+                c->BodyPart[i].AncientDiscriminator = isAncient;
             }
         }
 
@@ -12499,9 +12497,9 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
 
         if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
         {
-            short number = Equipment[offset + 1] + ((Equipment[offset] & 0xF) << 4);
+            short number = Equipment[offset + 1] + ((Equipment[offset] & 0xF) << 8);
             short itemNumber = number & (MAX_ITEM_INDEX-1);
-            HelperVariant = number - itemNumber;
+            HelperVariant = (Equipment[offset] & 0xE) >> 1;
             BYTE group = (Equipment[offset] & 0xF0) >> 4;
             auto modelOffset = group * MAX_ITEM_INDEX + itemNumber;
             c->Helper.Type = MODEL_ITEM + modelOffset;
@@ -13034,7 +13032,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c = CreateCharacter(Key, MODEL_LIZARD, PositionX, PositionY);
         c->Object.Scale = 1.4f;
         c->Weapon[0].Type = MODEL_CHAOS_LIGHTNING_STAFF;
-        c->Weapon[0].Option1 = 63;
+        c->Weapon[0].ExcellentFlags = 63;
         break;
     case MONSTER_GOLDEN_VEPAR:
         OpenMonsterModel(MONSTER_MODEL_VEPAR);
@@ -13049,7 +13047,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         o = &c->Object;
         c->Object.Scale = 1.8f;
         c->Weapon[0].Type = MODEL_SWORD_OF_DESTRUCTION;
-        c->Weapon[0].Option1 = 63;
+        c->Weapon[0].ExcellentFlags = 63;
         CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
         CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
         break;
@@ -13058,7 +13056,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c = CreateCharacter(Key, MODEL_GOLDEN_WHEEL, PositionX, PositionY);
         c->Object.Scale = 1.4f;
         c->Weapon[0].Type = MODEL_AQUAGOLD_CROSSBOW;
-        c->Weapon[0].Option1 = 63;
+        c->Weapon[0].ExcellentFlags = 63;
         //c->Weapon[0].Type = MODEL_BOW+16;
         o = &c->Object;
         CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 2, o, 30.f);
@@ -14535,7 +14533,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     return c;
 }
 
-CHARACTER* CreateHero(int Index, int Class, int Skin, float x, float y, float Rotate)
+CHARACTER* CreateHero(int Index, CLASS_TYPE Class, int Skin, float x, float y, float Rotate)
 {
     CHARACTER* c = &CharactersClient[Index];
     OBJECT* o = &c->Object;
@@ -14774,7 +14772,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
         {
             int iType = c->Weapon[i].Type;
             int iLevel = c->Weapon[i].Level;
-            int iOption1 = c->Weapon[i].Option1;
+            int iOption1 = c->Weapon[i].ExcellentFlags;
 
             if (iType < 0)
                 continue;
@@ -14918,10 +14916,10 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                 case MODEL_CAPE_OF_EMPEROR:
                 case MODEL_CAPE_OF_OVERRULE:
                     w->LinkBone = 19;
-                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->Option1, true, bTranslate);
+                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, true, bTranslate);
                     break;
                 default:
-                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->Option1, false, bTranslate);
+                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, bTranslate);
                     break;
                 }
             }
@@ -14935,7 +14933,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                 PART_t* w = &c->Helper;
                 w->LinkBone = 34;
                 w->PlaySpeed = 0.5f;
-                iOption1 = w->Option1;
+                iOption1 = w->ExcellentFlags;
                 vec3_t vRelativePos;
                 if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
                     && (c->BodyPart[BODYPART_ARMOR].Type == MODEL_SACRED_ARMOR

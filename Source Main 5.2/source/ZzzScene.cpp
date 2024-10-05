@@ -108,7 +108,7 @@ int g_iLengthAuthorityCode = 20;
 
 wchar_t* szServerIpAddress = L"127.127.127.127";
 //char *szServerIpAddress = "210.181.89.215";
-WORD g_ServerPort = 44406;
+WORD g_ServerPort = 55902;
 
 #ifdef MOVIE_DIRECTSHOW
 int  SceneFlag = MOVIE_SCENE;
@@ -560,11 +560,11 @@ void RenderInfomation3D()
         case MESSAGE_USE_STATE:
         case MESSAGE_USE_STATE2:
         case MESSAGE_PERSONALSHOP_WARNING:
-            RenderItem3D(x, y, Width, Height, TargetItem.Type, TargetItem.Level, TargetItem.Option1, TargetItem.ExtOption, true);
+            RenderItem3D(x, y, Width, Height, TargetItem.Type, TargetItem.Level, TargetItem.ExcellentFlags, TargetItem.AncientDiscriminator, true);
             break;
 
         default:
-            RenderItem3D(x, y, Width, Height, PickItem.Type, PickItem.Level, PickItem.Option1, PickItem.ExtOption, true);
+            RenderItem3D(x, y, Width, Height, PickItem.Type, PickItem.Level, PickItem.ExcellentFlags, PickItem.AncientDiscriminator, true);
             break;
         }
 
@@ -597,7 +597,7 @@ BOOL ShowCheckBox(int num, int index, int message)
         wchar_t Name[50] = { 0, };
         if (TargetItem.Type == ITEM_FRUITS)
         {
-            switch ((TargetItem.Level >> 3) & 15)
+            switch (TargetItem.Level)
             {
             case 0:wprintf(Name, L"%s", GlobalText[168]); break;
             case 1:wprintf(Name, L"%s", GlobalText[169]); break;
@@ -886,7 +886,7 @@ void CreateCharacterScene()
     OpenCharacterSceneData();
 
     CreateCharacterPointer(&CharacterView, MODEL_FACE + 1, 0, 0);
-    CharacterView.Class = 1;
+    CharacterView.Class = CLASS_KNIGHT;
     CharacterView.Object.Kind = 0;
 
     SelectedHero = -1;

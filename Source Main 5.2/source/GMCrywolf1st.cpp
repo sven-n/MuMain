@@ -49,7 +49,7 @@ int iNextNotice = -1;
 BYTE Rank = 0;
 int Exp = 0;
 BYTE Ranking[5];
-BYTE HeroClass[5];
+CLASS_TYPE HeroClass[5];
 int HeroScore[5] = { -1,-1,-1,-1,-1 };
 wchar_t HeroName[5][MAX_ID_SIZE + 1];
 
@@ -2715,7 +2715,7 @@ void M34CryWolf1st::Set_MyRank(BYTE MyRank, int GettingExp)
     Exp = GettingExp;
 }
 
-void M34CryWolf1st::Set_WorldRank(BYTE Rank, BYTE Class, int Score, wchar_t* szHeroName)
+void M34CryWolf1st::Set_WorldRank(BYTE Rank, CLASS_TYPE Class, int Score, wchar_t* szHeroName)
 {
     HeroScore[Rank] = Score;
     HeroClass[Rank] = Class;

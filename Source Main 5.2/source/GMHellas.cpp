@@ -128,7 +128,7 @@ void SettingHellasColor()
     glClearColor(0.f, 0.f, 0.f, 1.f);
 }
 
-BYTE GetHellasLevel(int Class, int Level)
+BYTE GetHellasLevel(CLASS_TYPE Class, int Level)
 {
     int startIndex = 0;
     int baseClass = gCharacterManager.GetBaseClass(Class);
@@ -149,11 +149,11 @@ BYTE GetHellasLevel(int Class, int Level)
     return byLevel;
 }
 
-bool EnableKalima(int Class, int Level, int ItemLevel)
+bool EnableKalima(CLASS_TYPE Class, int Level, int ItemLevel)
 {
     int startIndex = 0;
 
-    int baseClass = gCharacterManager.GetBaseClass(Class);
+    auto baseClass = gCharacterManager.GetBaseClass(Class);
     if (baseClass == CLASS_DARK || baseClass == CLASS_DARK_LORD || baseClass == CLASS_RAGEFIGHTER)
     {
         startIndex = NUM_HELLAS;
@@ -215,7 +215,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
         }
 
         int HeroLevel = CharacterAttribute->Level;
-        int ItemLevel = (ip->Level >> 3) & 15;
+        int ItemLevel = ip->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         swprintf(TextList[TextNum], L"%s %s       %s    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;

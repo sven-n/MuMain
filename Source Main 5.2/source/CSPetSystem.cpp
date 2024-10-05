@@ -98,7 +98,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->m_bActionStart = false;
     o->m_bySkillCount = 0;
 
-    c->Class = 0;
+    c->Class = CLASS_WIZARD;
     o->PriorAction = 0;
     o->CurrentAction = 0;
     o->AnimationFrame = 0.f;
@@ -147,14 +147,14 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     {
         c->Weapon[i].Type = -1;
         c->Weapon[i].Level = 0;
-        c->Weapon[i].Option1 = 0;
+        c->Weapon[i].ExcellentFlags = 0;
     }
     for (i = 0; i < MAX_BODYPART; i++)
     {
         c->BodyPart[i].Type = -1;
         c->BodyPart[i].Level = 0;
-        c->BodyPart[i].Option1 = 0;
-        c->BodyPart[i].ExtOption = 0;
+        c->BodyPart[i].ExcellentFlags = 0;
+        c->BodyPart[i].AncientDiscriminator = 0;
     }
 
     c->Wing.Type = -1;

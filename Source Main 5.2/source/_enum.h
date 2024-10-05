@@ -148,6 +148,21 @@ enum ExperienceType
     eExperienceType_MonsterLevelTooLowForMasterExperience = 0x21,
 };
 
+enum ItemOptionFlags : BYTE
+{
+    None = 0x00,
+    HasOption = 0x01,
+    HasLuck = 0x02,
+    HasSkill = 0x04,
+    HasExcellent = 0x08,
+    HasAncient = 0x10,
+    HasHarmony = 0x20,
+    HasGuardian = 0x40,
+    HasSockets = 0x80,
+};
+
+DEFINE_ENUM_FLAG_OPERATORS(ItemOptionFlags);
+
 //scene start
 enum ENUM_MUSIC
 {
@@ -2996,8 +3011,9 @@ enum
 };
 //ai end
 
-enum CLASS_TYPE
+enum CLASS_TYPE : BYTE
 {
+    CLASS_UNDEFINED = -1,
     CLASS_WIZARD = 0,
     CLASS_KNIGHT,
     CLASS_ELF,
@@ -3005,10 +3021,12 @@ enum CLASS_TYPE
     CLASS_DARK_LORD,
     CLASS_SUMMONER,
     CLASS_RAGEFIGHTER,
+
     CLASS_SOULMASTER,
     CLASS_BLADEKNIGHT,
     CLASS_MUSEELF,
     CLASS_BLOODYSUMMONER,
+
     CLASS_GRANDMASTER,
     CLASS_BLADEMASTER,
     CLASS_HIGHELF,
@@ -3016,6 +3034,28 @@ enum CLASS_TYPE
     CLASS_LORDEMPEROR,
     CLASS_DIMENSIONMASTER,
     CLASS_TEMPLENIGHT,
+};
+
+enum SERVER_CLASS_TYPE : BYTE
+{
+    DarkWizard = 0,
+    SoulMaster = 2,
+    GrandMaster = 3,
+    DarkKnight = 4,
+    BladeKnight = 6,
+    BladeMaster = 7,
+    FairyElf = 8,
+    MuseElf = 10,
+    HighElf = 11,
+    MagicGladiator = 12,
+    DuelMaster = 13,
+    DarkLord = 16,
+    LordEmperor = 17,
+    Summoner = 20,
+    BloodySummoner = 22,
+    DimensionMaster = 23,
+    RageFighter = 24,
+    FistMaster = 25,
 };
 
 enum MonsterSkillType

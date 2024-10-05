@@ -173,7 +173,7 @@ void SEASON3B::CNewUIPickedItem::Render3D()
     {
         m_Pos.x = MouseX - m_Size.cx / 2;
         m_Pos.y = MouseY - m_Size.cy / 2;
-        RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level, m_pPickedItem->Option1, m_pPickedItem->ExtOption, true);
+        RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level, m_pPickedItem->ExcellentFlags, m_pPickedItem->AncientDiscriminator, true);
     }
 }
 
@@ -261,7 +261,7 @@ void SEASON3B::CNewUIInventoryCtrl::SetItemColorState(ITEM* pItem)
     }
 
     ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-    const int iLevel = (pItem->Level >> 3) & 15;
+    const int iLevel = pItem->Level;
     const int iMaxDurability = calcMaxDurability(pItem, pItemAttr, iLevel);
 
     if (pItem->Durability <= 0)
@@ -303,7 +303,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         return false;
     }
 
-    if (pItem->Type == ITEM_WIZARDS_RING && ((pItem->Level >> 3) & 15) == 1 || ((pItem->Level >> 3) & 15) == 2)
+    if (pItem->Type == ITEM_WIZARDS_RING && (pItem->Level == 1 || pItem->Level  == 2))
     {
         return false;
     }
@@ -400,7 +400,7 @@ void SEASON3B::CNewUIInventoryCtrl::Release()
     Init();
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iLinealPos, BYTE* pbyItemPacket)
+bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iLinealPos, std::span<const BYTE> itemData)
 {
     iLinealPos -= m_nIndexOffset;
     if (iLinealPos < 0 || iLinealPos >= m_nColumn * m_nRow)
@@ -409,10 +409,10 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iLinealPos, BYTE* pbyItemPacket)
     const int iColumnX = iLinealPos % m_nColumn;
     const int iRowY = iLinealPos / m_nColumn;
 
-    return AddItem(iColumnX, iRowY, pbyItemPacket);
+    return AddItem(iColumnX, iRowY, itemData);
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE* pbyItemPacket)
+bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, std::span<const BYTE> itemData)
 {
     if (iColumnX < 0 || iRowY < 0 ||
         iColumnX >= m_nColumn || iRowY >= m_nRow)
@@ -420,7 +420,7 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE* pbyIt
         return false;
     }
 
-    ITEM* pNewItem = m_pNewItemMng->CreateItem(pbyItemPacket);
+    ITEM* pNewItem = m_pNewItemMng->CreateItem(itemData);
     if (nullptr == pNewItem)
         return false;
 
@@ -629,7 +629,7 @@ int SEASON3B::CNewUIInventoryCtrl::GetItemCount(short int siType, int iLevel)
     auto li = m_vecItem.begin();
     for (; li != m_vecItem.end(); ++li) {
         if ((*li)->Type == siType) {
-            if (iLevel == -1 || (((*li)->Level >> 3) & 15) == iLevel)
+            if (iLevel == -1 || (*li)->Level == iLevel)
             {
                 count += ((*li)->Durability == 0) ? 1 : (*li)->Durability;
             }
@@ -645,7 +645,7 @@ int SEASON3B::CNewUIInventoryCtrl::FindItemIndex(short int siType, int iLevel)
     {
         if ((*li)->Type == siType)
         {
-            if (iLevel == -1 || (((*li)->Level >> 3) & 15) == iLevel)
+            if (iLevel == -1 || (*li)->Level == iLevel)
             {
                 return (*li)->y * GetNumberOfColumn() + (*li)->x + m_nIndexOffset;
             }
@@ -667,7 +667,7 @@ int SEASON3B::CNewUIInventoryCtrl::FindItemReverseIndex(short sType, int iLevel)
             {
                 if (pItem->Type == sType)
                 {
-                    if (iLevel == -1 || ((pItem->Level >> 3) & 15) == iLevel)
+                    if (iLevel == -1 || pItem->Level == iLevel)
                     {
                         return (pItem->y * GetNumberOfColumn()) + pItem->x + m_nIndexOffset;
                     }
@@ -1051,9 +1051,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                     if (pTargetItem)
                                     {
                                         const int	iType = pTargetItem->Type;
-
-                                        int	iLevel = (pTargetItem->Level >> 3) & 15;
-
                                         const int	iDurability = pTargetItem->Durability;
 
                                         if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS) || (pPickItem->Type == ITEM_JEWEL_OF_SOUL))
@@ -1067,7 +1064,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                                 const StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pTargetItem->Type));
 
                                                 if ((strengthitem != SI_None) && (!g_SocketItemMgr.IsSocketItem(pTargetItem))
-                                                    && ((pTargetItem->ExtOption % 0x04) != EXT_A_SET_OPTION && (pTargetItem->ExtOption % 0x04) != EXT_B_SET_OPTION))
+                                                    && (pTargetItem->AncientDiscriminator > 0))
                                                 {
                                                     bSuccess = true;
                                                 }
@@ -1416,7 +1413,7 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
         }
         else if (COMGEM::isCompiledGem(pItem))
         {
-            const int Level = (pItem->Level >> 3) & 15;
+            const int Level = pItem->Level;
             glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, (Level + 1) * COMGEM::FIRST);
         }
@@ -1551,7 +1548,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render3D()
         const float height = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
         glColor4f(1.f, 1.f, 1.f, 1.f);
 
-        RenderItem3D(x, y, width, height, pItem->Type, pItem->Level, pItem->Option1, pItem->ExtOption, false);
+        RenderItem3D(x, y, width, height, pItem->Type, pItem->Level, pItem->ExcellentFlags, pItem->AncientDiscriminator, false);
     }
 }
 
@@ -1714,7 +1711,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CanPushItem()
 
 bool SEASON3B::CNewUIInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem)
 {
-    const int	iTargetLevel = (pTargetItem->Level >> 3) & 15;
+    const int	iTargetLevel = pTargetItem->Level;
 
     if (((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING)
         && (pTargetItem->Type != ITEM_BOLT)

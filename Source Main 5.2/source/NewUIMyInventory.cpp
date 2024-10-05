@@ -109,43 +109,46 @@ void CNewUIMyInventory::Release()
     }
 }
 
-bool CNewUIMyInventory::EquipItem(int iIndex, BYTE* pbyItemPacket)
+bool CNewUIMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
-    if (iIndex >= 0 && iIndex < MAX_EQUIPMENT_INDEX && g_pNewItemMng && CharacterMachine)
+    if (iIndex < 0 || iIndex >= MAX_EQUIPMENT_INDEX || !g_pNewItemMng || !CharacterMachine)
     {
-        ITEM* pTargetItemSlot = &CharacterMachine->Equipment[iIndex];
-        if (pTargetItemSlot->Type > 0)
-        {
-            UnequipItem(iIndex);
-        }
-
-        ITEM* pTempItem = g_pNewItemMng->CreateItem(pbyItemPacket);
-
-        if (nullptr == pTempItem)
-            //if(NULL == pTempItem || false == IsEquipable(iIndex, pTempItem))
-        {
-            return false;
-        }
-
-        if (pTempItem->Type == ITEM_DARK_HORSE_ITEM)
-        {
-            SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, iIndex);
-        }
-
-        if (pTempItem->Type == ITEM_DARK_RAVEN_ITEM)
-        {
-            CreatePetDarkSpirit(Hero);
-            SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, iIndex);
-        }
-
-        pTempItem->lineal_pos = iIndex;
-        pTempItem->ex_src_type = ITEM_EX_SRC_EQUIPMENT;
-        memcpy(pTargetItemSlot, pTempItem, sizeof(ITEM));
-        g_pNewItemMng->DeleteItem(pTempItem);
-
-        CreateEquippingEffect(pTargetItemSlot);
+        return false;
     }
-    return false;
+
+    ITEM* pTargetItemSlot = &CharacterMachine->Equipment[iIndex];
+    if (pTargetItemSlot->Type > 0)
+    {
+        UnequipItem(iIndex);
+    }
+
+    ITEM* pTempItem = g_pNewItemMng->CreateItem(pbyItemPacket);
+
+    if (nullptr == pTempItem)
+    //if(NULL == pTempItem || false == IsEquipable(iIndex, pTempItem))
+    {
+        return false;
+    }
+
+    if (pTempItem->Type == ITEM_DARK_HORSE_ITEM)
+    {
+        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, iIndex);
+    }
+
+    if (pTempItem->Type == ITEM_DARK_RAVEN_ITEM)
+    {
+        CreatePetDarkSpirit(Hero);
+        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, iIndex);
+    }
+
+    pTempItem->lineal_pos = iIndex;
+    pTempItem->ex_src_type = ITEM_EX_SRC_EQUIPMENT;
+    memcpy(pTargetItemSlot, pTempItem, sizeof(ITEM));
+    g_pNewItemMng->DeleteItem(pTempItem);
+
+    CreateEquippingEffect(pTargetItemSlot);
+    
+    return true;
 }
 void CNewUIMyInventory::UnequipItem(int iIndex)
 {
@@ -171,9 +174,10 @@ void CNewUIMyInventory::UnequipItem(int iIndex)
             pEquippedItem->Type = -1;
             pEquippedItem->Level = 0;
             pEquippedItem->Number = -1;
-            pEquippedItem->Option1 = 0;
+            pEquippedItem->ExcellentFlags = 0;
             pEquippedItem->Durability = 0;
-            pEquippedItem->ExtOption = 0;
+            pEquippedItem->AncientDiscriminator = 0;
+            pEquippedItem->AncientBonusOption = 0;
             pEquippedItem->SocketCount = 0;
             for (int i = 0; i < MAX_SOCKETS; ++i)
             {
@@ -276,7 +280,7 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
     const WORD wCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
     const WORD wLevel = CharacterAttribute->Level;
 
-    const int iItemLevel = (pItem->Level >> 3) & 15;
+    const int iItemLevel = pItem->Level;
 
     int iDecNeedStrength = 0, iDecNeedDex = 0;
 
@@ -357,7 +361,7 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
     return bEquipable;
 }
 
-bool CNewUIMyInventory::InsertItem(int iIndex, BYTE* pbyItemPacket) const
+bool CNewUIMyInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
 {
     if (m_pNewInventoryCtrl)
     {
@@ -642,7 +646,7 @@ bool CNewUIMyInventory::UpdateKeyEvent()
 
             if (CanRegisterItemHotKey(pItem->Type) == true)
             {
-                const int iItemLevel = (pItem->Level >> 3) & 15;
+                const int iItemLevel = pItem->Level;
                 g_pMainFrame->SetItemHotKey(iHotKey, pItem->Type, iItemLevel);
                 return false;
             }
@@ -765,8 +769,8 @@ void CNewUIMyInventory::Render3D()
                 m_EquipmentSlots[i].height - 4,
                 pEquippedItem->Type,
                 pEquippedItem->Level,
-                pEquippedItem->Option1,
-                pEquippedItem->ExtOption,
+                pEquippedItem->ExcellentFlags,
+                pEquippedItem->AncientDiscriminator,
                 false);
         }
     }
@@ -954,16 +958,16 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
                 CreateEffect(BITMAP_MAGIC + 1, pHeroObject->Position, pHeroObject->Angle, pHeroObject->Light, 1, pHeroObject);
             break;
         case ITEM_HORN_OF_FENRIR:
-            Hero->Helper.Option1 = pItem->Option1;
-            if (pItem->Option1 == 0x01)
+            Hero->Helper.ExcellentFlags = pItem->ExcellentFlags;
+            if (pItem->ExcellentFlags == 0x01)
             {
                 CreateMount(MODEL_FENRIR_BLACK, pHeroObject->Position, pHeroObject);
             }
-            else if (pItem->Option1 == 0x02)
+            else if (pItem->ExcellentFlags == 0x02)
             {
                 CreateMount(MODEL_FENRIR_BLUE, pHeroObject->Position, pHeroObject);
             }
-            else if (pItem->Option1 == 0x04)
+            else if (pItem->ExcellentFlags == 0x04)
             {
                 CreateMount(MODEL_FENRIR_GOLD, pHeroObject->Position, pHeroObject);
             }
@@ -999,7 +1003,7 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
     }
     if (Hero->EtcPart <= 0 || Hero->EtcPart > 3)
     {
-        if (pItem->Type == ITEM_WIZARDS_RING && (pItem->Level >> 3) == 3)
+        if (pItem->Type == ITEM_WIZARDS_RING && pItem->Level == 3)
         {
             DeleteParts(Hero);
             Hero->EtcPart = PARTS_LION;
@@ -1239,7 +1243,7 @@ void CNewUIMyInventory::RenderEquippedItem()
         if (pEquipmentItemSlot->Type != -1)
         {
             ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pEquipmentItemSlot->Type];
-            const int iLevel = (pEquipmentItemSlot->Level >> 3) & 15;
+            const int iLevel = pEquipmentItemSlot->Level;
             const int iMaxDurability = calcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
 
             // 용사/전사의반지 예외처리
@@ -1544,7 +1548,7 @@ bool CNewUIMyInventory::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPi
     }
 
     const int	iType = pItem->Type;
-    const int	iLevel = (pItem->Level >> 3) & 15;
+    const int	iLevel = pItem->Level;
     const int	iDurability = pItem->Durability;
 
     bool bSuccess = true;
@@ -1676,9 +1680,9 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         || (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION);
 
     if (isApple || isPotion
-        || (pItem->Type == ITEM_POTION + 20 && ((pItem->Level >> 3) & 15) == 0)
+        || (pItem->Type == ITEM_POTION + 20 && pItem->Level == 0)
         || (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK)
-        || (pItem->Type == ITEM_BOX_OF_LUCK && ((pItem->Level >> 3) & 15) == 14)
+        || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 14)
         || (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71)
         || (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77)
         || pItem->Type == ITEM_HELPER + 60
@@ -1780,7 +1784,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
             return false;
         }
 
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(4, (pItem->Level >> 3) & 15);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(4, pItem->Level);
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
         return true;
     }
@@ -1826,20 +1830,20 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
             return false;
         }
 
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(4, (pItem->Level >> 3) & 15);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(4, pItem->Level);
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
         return true;
     }
 
     if (pItem->Type == ITEM_SCROLL_OF_BLOOD)
     {
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(5, (pItem->Level >> 3) & 15);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(5, pItem->Level);
         return true;
     }
 
     if (pItem->Type == ITEM_DEVILS_INVITATION)
     {
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(1, (pItem->Level >> 3) & 15);
+        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(1, pItem->Level);
         return true;
     }
 
@@ -1851,7 +1855,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         }
         else
         {
-            SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(2, ((pItem->Level >> 3) & 15) -1);
+            SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(2, pItem->Level - 1);
         }
 
         return true;
@@ -1924,11 +1928,11 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
                     bEquipmentEmpty = false;
                 }
             }
-            const int Class = CharacterAttribute->Class;
+            const auto Class = CharacterAttribute->Class;
 
             if (bEquipmentEmpty == true)
             {
-                if (pItem->Level == 32)
+                if (pItem->Level == 4) // Command Fruit
                 {
                     if (gCharacterManager.GetBaseClass(Class) != CLASS_DARK_LORD)
                     {
@@ -1952,8 +1956,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     if (pItem->Type == ITEM_LIFE_STONE_ITEM)
     {
         bool bUse = false;
-        const int  Level = (pItem->Level >> 3) & 15;
-        switch (Level)
+        switch (pItem->Level)
         {
         case 0:
             bUse = true;

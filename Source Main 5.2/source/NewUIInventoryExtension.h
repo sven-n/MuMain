@@ -60,7 +60,7 @@ namespace SEASON3B
 
         float GetLayerDepth();	//. 2.5f
 
-        bool InsertItem(int iIndex, BYTE* pbyItemPacket) const;
+        bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const;
         void DeleteItem(int iIndex) const;
         void DeleteAllItems() const;
         CNewUIInventoryCtrl* GetOwnerOf(const CNewUIPickedItem* pPickedItem) const;

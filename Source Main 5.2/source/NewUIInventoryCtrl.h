@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "NewUI3DRenderMng.h"
+#include "span.hpp"
 #include "ZzzTexture.h"
 
 namespace SEASON3B
@@ -167,8 +168,8 @@ namespace SEASON3B
         bool Create(STORAGE_TYPE storageType, CNewUI3DRenderMng* pNew3DRenderMng, CNewUIItemMng* pNewItemMng, CNewUIObj* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
         void Release();
 
-        bool AddItem(int iLinealPos, BYTE* pbyItemPacket);
-        bool AddItem(int iColumnX, int iRowY, BYTE* pbyItemPacket);
+        bool AddItem(int iLinealPos, std::span<const BYTE> pbyItemPacket);
+        bool AddItem(int iColumnX, int iRowY, std::span<const BYTE> pbyItemPacket);
         bool AddItem(int iColumnX, int iRowY, ITEM* pItem);
         bool AddItem(int iColumnX, int iRowY, BYTE byType, BYTE bySubType, BYTE byLevel = 0, BYTE byDurability = 255,
             BYTE byOption1 = 0, BYTE byOptionEx = 0, BYTE byOption380 = 0, BYTE byOptionHarmony = 0);

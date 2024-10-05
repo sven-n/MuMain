@@ -5,6 +5,7 @@
 
 #include "Dotnet/Connection.h"
 #include "CSMapServer.h"
+#include "span.hpp"
 
 #define WM_ASYNCSELECTMSG (WM_USER+0)
 
@@ -65,9 +66,9 @@
 #define RECEIVE_CHANGE_PASSWORD_FAIL_RESIDENT   70
 #define RECEIVE_CHANGE_PASSWORD_FAIL_PASSWORD   71
 
-#define PACKET_ITEM_LENGTH  12
+#define PACKET_ITEM_LENGTH_EXTENDED_MIN  5
+#define PACKET_ITEM_LENGTH_EXTENDED_MAX  15
 
-#define EQUIPMENT_LENGTH    17
 #define EQUIPMENT_LENGTH_EXTENDED    25
 #define MAX_SPE_BUFFERSIZE_	( 2048)
 
@@ -78,6 +79,17 @@
 #define PACKET_ATTACK       0x11
 
 extern int CurrentProtocolState;
+
+// Template to cast a span to a packet struct in a safe way.
+template <typename T> T* safe_cast(const std::span<const BYTE> span)
+{
+    if (span.size() < sizeof(T))
+    {
+        return nullptr;
+    }
+
+    return reinterpret_cast<T*>(const_cast<BYTE*>(span.data()));
+}
 
 typedef struct
 {
@@ -238,25 +250,16 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER  Header;
     BYTE          Index;
-    BYTE          Item[PACKET_ITEM_LENGTH];
-} PHEADER_DEFAULT_ITEM, * LPPHEADER_DEFAULT_ITEM;
+    BYTE          Item[PACKET_ITEM_LENGTH_EXTENDED_MIN];
+} PHEADER_DEFAULT_ITEM_EXTENDED, * LPPHEADER_DEFAULT_ITEM_EXTENDED;
 
 typedef struct {
     PBMSG_HEADER  Header;
     BYTE          SubCode;
     BYTE          Index;
-    BYTE          Item[PACKET_ITEM_LENGTH];
-} PHEADER_DEFAULT_SUBCODE_ITEM, * LPPHEADER_DEFAULT_SUBCODE_ITEM;
+    BYTE          Item[PACKET_ITEM_LENGTH_EXTENDED_MIN];
+} PHEADER_DEFAULT_SUBCODE_ITEM_EXTENDED, * LPPHEADER_DEFAULT_SUBCODE_ITEM_EXTENDED;
 
-//send trade
-typedef struct {
-    PBMSG_HEADER  Header;
-    BYTE          SrcFlag;
-    BYTE          SrcIndex;
-    BYTE          Item[PACKET_ITEM_LENGTH];
-    BYTE          DstFlag;
-    BYTE          DstIndex;
-} PSEND_TRADE, * LPSEND_TRADE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // log in
@@ -296,25 +299,13 @@ typedef struct {
     char         Password[MAX_ID_SIZE];
 } PRECEIVE_CONFIRM_PASSWORD2, * LPPRECEIVE_CONFIRM_PASSWORD2;
 
-//receive characters list
 typedef struct
 {
     BYTE         Index;
     char         ID[MAX_ID_SIZE];
     WORD         Level;
     BYTE		 CtlCode;
-    BYTE         Class;
-    BYTE         Equipment[EQUIPMENT_LENGTH];
-    BYTE         byGuildStatus;
-} PRECEIVE_CHARACTER_LIST, * LPPRECEIVE_CHARACTER_LIST;
-
-typedef struct
-{
-    BYTE         Index;
-    char         ID[MAX_ID_SIZE];
-    WORD         Level;
-    BYTE		 CtlCode;
-    BYTE         Class;
+    SERVER_CLASS_TYPE         Class;
     BYTE         Flags;
     BYTE         Equipment[EQUIPMENT_LENGTH_EXTENDED];
     BYTE         byGuildStatus;
@@ -329,59 +320,9 @@ typedef struct
     char         ID[MAX_ID_SIZE];
     BYTE         Index;
     WORD         Level;
-    BYTE		 Class;
+    SERVER_CLASS_TYPE		 Class;
     //BYTE         Equipment[24];
 } PRECEIVE_CREATE_CHARACTER, * LPPRECEIVE_CREATE_CHARACTER;
-
-//receive join map server
-typedef struct
-{
-    PBMSG_HEADER Header;
-    BYTE         SubCode;
-    BYTE         PositionX;
-    BYTE         PositionY;
-    BYTE         Map;
-    BYTE         Angle;
-    BYTE		btMExp1;
-    BYTE		btMExp2;
-    BYTE		btMExp3;
-    BYTE		btMExp4;
-    BYTE		btMExp5;
-    BYTE		btMExp6;
-    BYTE		btMExp7;
-    BYTE		btMExp8;
-    BYTE		btMNextExp1;
-    BYTE		btMNextExp2;
-    BYTE		btMNextExp3;
-    BYTE		btMNextExp4;
-    BYTE		btMNextExp5;
-    BYTE		btMNextExp6;
-    BYTE		btMNextExp7;
-    BYTE		btMNextExp8;
-    WORD         LevelUpPoint;
-    //BYTE         LevelUpPoint;
-    WORD         Strength;
-    WORD         Dexterity;
-    WORD         Vitality;
-    WORD         Energy;
-    WORD         Life;
-    WORD         LifeMax;
-    WORD         Mana;
-    WORD         ManaMax;
-    WORD		 Shield;
-    WORD		 ShieldMax;
-    WORD		 SkillMana;
-    WORD		 SkillManaMax;
-    DWORD        Gold;
-    BYTE         PK;
-    BYTE		 CtlCode;
-    short        AddPoint;
-    short        MaxAddPoint;
-    WORD         Charisma;
-    WORD		 wMinusPoint;
-    WORD		 wMaxMinusPoint;
-    BYTE		 InventoryExtensions;
-} PRECEIVE_JOIN_MAP_SERVER, * LPPRECEIVE_JOIN_MAP_SERVER;
 
 //receive join map server
 typedef struct
@@ -424,8 +365,45 @@ typedef struct
 //inventory
 typedef struct {
     BYTE          Index;
-    BYTE          Item[PACKET_ITEM_LENGTH];
-} PRECEIVE_INVENTORY, * LPPRECEIVE_INVENTORY;
+    BYTE          Item[PACKET_ITEM_LENGTH_EXTENDED_MIN];
+} PRECEIVE_INVENTORY_EXTENDED, * LPPRECEIVE_INVENTORY_EXTENDED;
+
+/// <summary>
+    /// Layout:
+    ///   Group:  4 bit
+    ///   Number: 12 bit
+    ///   Level:  8 bit
+    ///   Dura:   8 bit
+    ///   OptFlags: 8 bit
+    ///     HasOpt
+    ///     HasLuck
+    ///     HasSkill
+    ///     HasExc
+    ///     HasAnc
+    ///     HasGuardian
+    ///     HasHarmony
+    ///     HasSockets
+    ///   Optional, depending on Flags:
+    ///     Opt_Lvl 4 bit
+    ///     Opt_Typ 4 bit
+    ///     Exc:    8 bit
+    ///     Anc_Dis 4 bit
+    ///     Anc_Bon 4 bit
+    ///     Harmony 8 bit
+    ///     Soc_Bon 4 bit
+    ///     Soc_Cnt 4 bit
+    ///     Sockets n * 8 bit
+    ///   
+    ///  Total: 5 ~ 15 bytes.
+    /// </summary>
+#pragma pack(push, 1)
+typedef struct {
+    WORD            GroupAndNumber;
+    BYTE            Level;
+    BYTE            Durability;
+    ItemOptionFlags OptionFlags;
+} PITEM_EXTENDED_BASE, * LPPITEM_EXTENDED_BASE;
+#pragma pack(pop)
 
 ///////////////////////////////////////////////////////////////////////////////
 // trade
@@ -473,48 +451,29 @@ typedef struct {
     BYTE         KeyH;
     BYTE         KeyL;
     BYTE         Class;
-    BYTE         Equipment[EQUIPMENT_LENGTH];
-} PRECEIVE_EQUIPMENT, * LPPRECEIVE_EQUIPMENT;
-
-typedef struct {
-    PBMSG_HEADER Header;
-    BYTE         SubCode;
-    BYTE         KeyH;
-    BYTE         KeyL;
-    BYTE         Class;
+    BYTE         Flags;
     BYTE         Equipment[EQUIPMENT_LENGTH_EXTENDED];
 } PRECEIVE_EQUIPMENT_EXTENDED, * LPPRECEIVE_EQUIPMENT_EXTENDED;
 
 //receive other map character
 typedef struct {
-    BYTE         KeyH;
-    BYTE         KeyL;
+    PWMSG_HEADER Header;
+    WORD         Key;
     BYTE         PositionX;
     BYTE         PositionY;
-    BYTE         Class;
-    BYTE         Equipment[EQUIPMENT_LENGTH];
-    char         ID[MAX_ID_SIZE];
     BYTE         TargetX;
     BYTE         TargetY;
-    BYTE         Path;
-    BYTE         s_BuffCount;
-    BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
-} PCREATE_CHARACTER, * LPPCREATE_CHARACTER;
+    
+    BYTE         RotationAndHeroState;
+    WORD         AttackSpeed;
+    WORD         MagicSpeed;
+    char         ID[MAX_ID_SIZE];
 
-//receive other map character
-typedef struct {
-    BYTE         KeyH;
-    BYTE         KeyL;
-    BYTE         PositionX;
-    BYTE         PositionY;
-    BYTE         Class;
+    SERVER_CLASS_TYPE         Class;
+    BYTE         Flags;
     BYTE         Equipment[EQUIPMENT_LENGTH_EXTENDED];
-    char         ID[MAX_ID_SIZE];
-    BYTE         TargetX;
-    BYTE         TargetY;
-    BYTE         Path;
     BYTE         s_BuffCount;
-    BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
+    // BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
 } PCREATE_CHARACTER_EXTENDED, * LPPCREATE_CHARACTER_EXTENDED;
 
 //receive other map character
@@ -530,25 +489,8 @@ typedef struct
     BYTE         TargetX;
     BYTE         TargetY;
     BYTE         Path;
-    BYTE         Class;
-    BYTE         Equipment[EQUIPMENT_LENGTH];
-    BYTE         s_BuffCount;
-    BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
-} PCREATE_TRANSFORM, * LPPCREATE_TRANSFORM;
-
-typedef struct
-{
-    BYTE         KeyH;
-    BYTE         KeyL;
-    BYTE         PositionX;
-    BYTE         PositionY;
-    BYTE         TypeH;
-    BYTE         TypeL;
-    char         ID[MAX_ID_SIZE];
-    BYTE         TargetX;
-    BYTE         TargetY;
-    BYTE         Path;
-    BYTE         Class;
+    SERVER_CLASS_TYPE         Class;
+    BYTE         Flags;
     BYTE         Equipment[EQUIPMENT_LENGTH_EXTENDED];
     BYTE         s_BuffCount;
     BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
@@ -603,27 +545,47 @@ typedef struct {
 
 //create item
 typedef struct {
-    BYTE          KeyH;
-    BYTE          KeyL;
+    BYTE          IdL;
+    BYTE          IdH;
     BYTE          PositionX;
     BYTE          PositionY;
-    BYTE          Item[PACKET_ITEM_LENGTH];
-} PCREATE_ITEM, * LPPCREATE_ITEM;
+    BYTE          Item[PACKET_ITEM_LENGTH_EXTENDED_MIN];
+} PCREATE_ITEM_EXTENDED, * LPPCREATE_ITEM_EXTENDED;
+
+typedef struct {
+    PBMSG_HEADER  Header;
+    BYTE          IsFreshDrop;
+    WORD          Id;
+    BYTE          PositionX;
+    BYTE          PositionY;
+    DWORD         Amount;
+} PCREATE_MONEY, * LPPCREATE_MONEY;
 
 //change character
 typedef struct {
     PBMSG_HEADER  Header;
-    BYTE          KeyH;
-    BYTE          KeyL;
-    BYTE          Item[PACKET_ITEM_LENGTH];
-} PCHANGE_CHARACTER, * LPPCHANGE_CHARACTER;
+    WORD          Key;
+    BYTE          ItemSlot;
+    BYTE          ItemGroup;
+    WORD          ItemNumber;
+    BYTE          ItemLevel;
+    BYTE          ExcellentFlags;
+    BYTE          AncientDiscriminator;
+    BYTE          IsAncientSetComplete;
+} PCHANGE_CHARACTER_EXTENDED, * LPPCHANGE_CHARACTER_EXTENDED;
 
 //receive get item
 typedef struct {
     PBMSG_HEADER  Header;
     BYTE          Result;
-    BYTE          Item[PACKET_ITEM_LENGTH];
-} PRECEIVE_GET_ITEM, * LPPRECEIVE_GET_ITEM;
+    BYTE          Item[PACKET_ITEM_LENGTH_EXTENDED_MIN];
+} PRECEIVE_GET_ITEM_EXTENDED, * LPPRECEIVE_GET_ITEM_EXTENDED;
+
+typedef struct {
+    PBMSG_HEADER  Header;
+    BYTE          Result;
+    BYTE          Money[4];
+} PRECEIVE_INVENTORY_MONEY, * LPPRECEIVE_INVENTORY_MONEY;
 
 //receive attack
 typedef struct {
@@ -641,6 +603,8 @@ typedef struct {
     PBMSG_HEADER  Header;
     BYTE		  DamageType;   // 3
     WORD          TargetId;     // 4
+    BYTE          HealthStatus; // 6 status of the remaining health in fractions of 1/250
+    BYTE          ShieldStatus; // 7 status of the remaining shield in fractions of 1/250
     DWORD         HealthDamage; // 8
     DWORD         ShieldDamage; // 12
 } PRECEIVE_ATTACK_EXTENDED, * LPPRECEIVE_ATTACK_EXTENDED;
@@ -1237,7 +1201,7 @@ typedef struct {
     BYTE         m_byKeyH;
     BYTE         m_byKeyL;
     BYTE         m_byReparation;
-    BYTE         m_byNumber;
+    SERVER_CLASS_TYPE         m_byNumber;
 } PRECEIVE_QUEST_REPARATION, * LPPRECEIVE_QUEST_REPARATION;
 
 // GC[0xF6][0x0A]
@@ -1250,54 +1214,51 @@ typedef struct
     WORD			m_wQuestCount;
 } PMSG_NPCTALK_QUESTLIST, * LPPMSG_NPCTALK_QUESTLIST;
 
-#pragma pack(push, 1)
+
 typedef struct
 {
-    PBMSG_HEADER	Header;
+    PWMSG_HEADER	Header;
     BYTE			SubCode;
-    DWORD			m_dwQuestIndex;
     BYTE			m_byRequestCount;
     BYTE			m_byRewardCount;
     BYTE			m_byRandRewardCount;
+    DWORD			m_dwQuestIndex;
 } PMSG_NPC_QUESTEXP_INFO, * LPPMSG_NPC_QUESTEXP_INFO;
-#pragma pack(pop)
 
-enum QUEST_REQUEST_TYPE
+
+enum QUEST_REQUEST_TYPE : BYTE
 {
-    QUEST_REQUEST_NONE = 0x0000,
-    QUEST_REQUEST_MONSTER = 0x0001,
-    QUEST_REQUEST_SKILL = 0x0002,
-    QUEST_REQUEST_ITEM = 0x0004,
-    QUEST_REQUEST_LEVEL = 0x0008,
-    QUEST_REQUEST_TUTORIAL = 0x0010,
-    QUEST_REQUEST_BUFF = 0x0020,
-    QUEST_REQUEST_EVENT_MAP_USER_KILL = 0x0040,
-    QUEST_REQUEST_EVENT_MAP_MON_KILL = 0x0041,
-    QUEST_REQUEST_EVENT_MAP_BLOOD_GATE = 0x0042,
-    QUEST_REQUEST_EVENT_MAP_CLEAR_BLOOD = 0x0100,
-    QUEST_REQUEST_EVENT_MAP_CLEAR_CHAOS = 0x0101,
-    QUEST_REQUEST_EVENT_MAP_CLEAR_DEVIL = 0x0102,
-    QUEST_REQUEST_EVENT_MAP_CLEAR_ILLUSION = 0x0103,
-    QUEST_REQUEST_EVENT_MAP_DEVIL_POINT = 0x0104,
-    QUEST_REQUEST_ZEN = 0x0105,
-    QUEST_REQUEST_PVP_POINT = 0x0106,
-    QUEST_REQUEST_NPC_TALK = 0x0107,
-    QUEST_REQUEST_TYPE_MAX
+    QUEST_REQUEST_NONE = 0,
+    QUEST_REQUEST_MONSTER = 1,
+    QUEST_REQUEST_SKILL = 2,
+    QUEST_REQUEST_ITEM = 3,
+    QUEST_REQUEST_LEVEL = 4,
+    QUEST_REQUEST_TUTORIAL = 5,
+    QUEST_REQUEST_BUFF = 6,
+    QUEST_REQUEST_EVENT_MAP_USER_KILL = 7,
+    QUEST_REQUEST_EVENT_MAP_MON_KILL = 8,
+    QUEST_REQUEST_EVENT_MAP_BLOOD_GATE = 9,
+    QUEST_REQUEST_EVENT_MAP_CLEAR_BLOOD = 10,
+    QUEST_REQUEST_EVENT_MAP_CLEAR_CHAOS = 11,
+    QUEST_REQUEST_EVENT_MAP_CLEAR_DEVIL = 12,
+    QUEST_REQUEST_EVENT_MAP_CLEAR_ILLUSION = 13,
+    QUEST_REQUEST_EVENT_MAP_DEVIL_POINT = 14,
+    QUEST_REQUEST_ZEN = 15,
+    QUEST_REQUEST_PVP_POINT = 16,
+    QUEST_REQUEST_NPC_TALK = 17,
 };
 
-#pragma pack(push, 1)
 typedef struct
 {
-    DWORD	m_dwType;
+    QUEST_REQUEST_TYPE	m_dwType;
     WORD	m_wIndex;
     DWORD	m_dwValue;
-    WORD	m_wCurValue;
-    BYTE	m_byItemInfo[PACKET_ITEM_LENGTH];
+    DWORD	m_wCurValue;
+    BYTE	m_byItemInfo[PACKET_ITEM_LENGTH_EXTENDED_MAX];
 } NPC_QUESTEXP_REQUEST_INFO, * LPNPC_QUESTEXP_REQUEST_INFO;
-#pragma pack(pop)
 
 // º¸»ó
-enum QUEST_REWARD_TYPE
+enum QUEST_REWARD_TYPE : BYTE
 {
     QUEST_REWARD_NONE = 0x0000,
     QUEST_REWARD_EXP = 0x0001,
@@ -1306,18 +1267,15 @@ enum QUEST_REWARD_TYPE
     QUEST_REWARD_BUFF = 0x0008,
     QUEST_REWARD_CONTRIBUTE = 0x0010,
     QUEST_REWARD_RANDOM = 0x0020,
-    QUEST_REWARD_TYPE_MAX
 };
 
-#pragma pack(push, 1)
 typedef struct
 {
-    DWORD	m_dwType;
+    QUEST_REWARD_TYPE	m_dwType;
     WORD	m_wIndex;
     DWORD	m_dwValue;
-    BYTE	m_byItemInfo[PACKET_ITEM_LENGTH];
+    BYTE	m_byItemInfo[PACKET_ITEM_LENGTH_EXTENDED_MAX];
 } NPC_QUESTEXP_REWARD_INFO, * LPNPC_QUESTEXP_REWARD_INFO;
-#pragma pack(pop)
 
 typedef struct
 {
@@ -1632,21 +1590,35 @@ typedef struct tagDESTROYPSHOP_RESULT {
     BYTE			byIndexL;
 } DESTROYPSHOP_RESULTINFO, * LPDESTROYPSHOP_RESULTINFO;
 
+enum ShopItemListResult : BYTE
+{
+    Success = 0x01,
+
+    Fail1 = 0x03,
+    Fail2 = 0x04,
+};
+
 typedef struct tagGETPSHOPITEMLIST_HEADER {
     PWMSG_HEADER    Header;
     BYTE			bySubcode;
-    BYTE			byResult;
+    ShopItemListResult			byResult;
     BYTE			byIndexH;
     BYTE			byIndexL;
     char			szId[MAX_ID_SIZE];
     char			szShopTitle[MAX_SHOPTITLE];	//. MAX_SHOPTITLE
-    BYTE			byCount;
+    BYTE			ItemCount;
 } GETPSHOPITEMLIST_HEADERINFO, * LPGETPSHOPITEMLIST_HEADERINFO;
+
+#pragma pack(push, 1) // just to get the actual length by sizeof...
 typedef struct tagGETPSHOPITEM_DATA {
-    BYTE	byPos;
-    BYTE	byItemInfo[PACKET_ITEM_LENGTH];
-    INT		iItemPrice;
+    INT		MoneyPrice;
+    WORD    PriceItemType; // not yet used
+    WORD    RequiredItemAmount; // not yet used
+    BYTE	ItemSlot;
+    BYTE	Item[PACKET_ITEM_LENGTH_EXTENDED_MIN];
 } GETPSHOPITEM_DATAINFO, * LPGETPSHOPITEM_DATAINFO;
+#pragma pack(pop)
+
 typedef struct tagCLOSEPSHOP_RESULT {
     PWMSG_HEADER    Header;
     BYTE			bySubcode;
@@ -1655,19 +1627,32 @@ typedef struct tagCLOSEPSHOP_RESULT {
 } CLOSEPSHOP_RESULTINFO, * LPCLOSEPSHOP_RESULTINFO;
 
 typedef struct tagPURCHASEITEM_RESULT {
+    enum ItemBuyResult : BYTE
+    {
+        Undefined = 0,
+        BoughtSuccessfully = 1,
+        NotAvailable = 2,
+        ShopNotOpened = 3,
+        InTransaction = 4,
+        InvalidShopSlot = 5,
+        NameMismatchOrPriceMissing = 6,
+        LackOfMoney = 7,
+        MoneyOverflowOrNotEnoughSpace = 8,
+        ItemBlock = 9,
+    };
+
     PBMSG_HEADER	Header;
     BYTE			bySubcode;
-    BYTE			byResult;
-    BYTE			byIndexH;
-    BYTE			byIndexL;
-    BYTE			byItemInfo[PACKET_ITEM_LENGTH];
-    BYTE			byPos;
+    WORD			SellerId;
+    ItemBuyResult			Result;
+    BYTE			ItemSlot;
+    //BYTE			ItemData[PACKET_ITEM_LENGTH_EXTENDED_MIN];
 } PURCHASEITEM_RESULTINFO, * LPPURCHASEITEM_RESULTINFO;
 typedef struct tagSOLDITEM_RESULT {
     PBMSG_HEADER	Header;
     BYTE			bySubcode;
     BYTE			byPos;
-    BYTE			szId[MAX_ID_SIZE];
+    char			szId[MAX_ID_SIZE];
 } SOLDITEM_RESULTINFO, * LPSOLDITEM_RESULTINFO;
 
 typedef struct tagDISPLAYEFFECT_NOTIFY {
@@ -1726,23 +1711,13 @@ typedef struct {
     PWMSG_HEADER    Header;
     WORD			Index;
     WORD			MemoSize;
-    BYTE			Class;
-    BYTE			Equipment[EQUIPMENT_LENGTH];
-    BYTE			PhotoDir;
-    BYTE			PhotoAction;
-    char			Memo[MAX_LETTERTEXT_LENGTH];
-} FS_LETTER_TEXT, * LPFS_LETTER_TEXT;
-
-typedef struct {
-    PWMSG_HEADER    Header;
-    WORD			Index;
-    WORD			MemoSize;
-    BYTE			Class;
+    SERVER_CLASS_TYPE			Class;
+    BYTE            Flags;
     BYTE			Equipment[EQUIPMENT_LENGTH_EXTENDED];
     BYTE			PhotoDir;
     BYTE			PhotoAction;
     char			Memo[MAX_LETTERTEXT_LENGTH];
-} FS_LETTER_TEXT_EXTENDED, * LPFS_LETTER_TEXT_EXTENDED;
+} FS_LETTER_TEXT, * LPFS_LETTER_TEXT;
 
 typedef struct {
     PBMSG_HEADER    Header;
@@ -2336,20 +2311,8 @@ typedef struct
     BYTE                m_byKeyL;
     BYTE                m_byPosX;
     BYTE                m_byPosY;
-    BYTE                m_byEquipment[EQUIPMENT_LENGTH];
-    BYTE				s_BuffCount;
-    BYTE				s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
-}PRECEIVE_PREVIEW_PORT, * LPPRECEIVE_PREVIEW_PORT;
-
-typedef struct
-{
-    BYTE                m_byObjType;
-    BYTE                m_byTypeH;
-    BYTE                m_byTypeL;
-    BYTE                m_byKeyH;
-    BYTE                m_byKeyL;
-    BYTE                m_byPosX;
-    BYTE                m_byPosY;
+    BYTE                Class;
+    BYTE                Flags;
     BYTE                m_byEquipment[EQUIPMENT_LENGTH_EXTENDED];
     BYTE				s_BuffCount;
     BYTE				s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
@@ -2519,7 +2482,7 @@ typedef struct
     BYTE iRank;
     char szHeroName[MAX_ID_SIZE];
     int iHeroScore;
-    BYTE btHeroClass;
+    SERVER_CLASS_TYPE btHeroClass;
 } PMSG_ANS_CRYWOLF_HERO_LIST_INFO, * LPPMSG_ANS_CRYWOLF_HERO_LIST_INFO;
 
 //----------------------------------------------------------------------------
@@ -2705,7 +2668,7 @@ typedef struct
     char		GameId[MAX_ID_SIZE];
     BYTE		byMapNumber;
     BYTE		btTeam;
-    BYTE		btClass;
+    SERVER_CLASS_TYPE		btClass;
     int			nAddExp;
 } PMSG_CURSED_TEMPLE_USER_ADD_EXP, * LPPMSG_CURSED_TEMPLE_USER_ADD_EXP;
 

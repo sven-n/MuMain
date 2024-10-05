@@ -26,7 +26,7 @@ protected:
     CButton	m_abtnJob[MAX_CLASS];
     CButton	m_aBtn[2];
 
-    int		m_nSelJob;
+    CLASS_TYPE		m_nSelJob;
     wchar_t	m_aszJobDesc[CMW_DESC_LINE_MAX][CMW_DESC_ROW_MAX];
     int		m_nDescLine;
 
