@@ -110,7 +110,7 @@ CErrorReport g_ErrorReport;
 BOOL g_bMinimizedEnabled = FALSE;
 int g_iScreenSaverOldValue = 60 * 15;
 
-extern float g_fScreenRate_x;	// ��
+extern float g_fScreenRate_x;	// ※
 extern float g_fScreenRate_y;
 
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
@@ -1144,7 +1144,7 @@ BOOL UpdateFile(wchar_t* lpszOld, wchar_t* lpszNew)
     DWORD dwStartTickCount = ::GetTickCount();
     while (::GetTickCount() - dwStartTickCount < 5000) {
         if (CopyFile(lpszOld, lpszNew, FALSE))
-        {	// ����
+        {	// 성공
             DeleteFile(lpszOld);
             return (TRUE);
         }
@@ -1586,10 +1586,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (g_bUseWindowMode == FALSE)
     {
 #endif	// ACTIVE_FOCUS_OUT
-        int nOldVal; // ���� �� �ʿ䰡 ����
-        SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1, &nOldVal, 0);  // ����Ű�� ������ ��
-        SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);  // ��ũ�����̹� ����
-        SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300 * 60, NULL, 0);  // ��ũ�����̹� ����
+        int nOldVal; // 값이 들어갈 필요가 없음
+        SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1, &nOldVal, 0);  // 단축키를 못쓰게 함
+        SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);  // 스크린세이버 차단
+        SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300 * 60, NULL, 0);  // 스크린세이버 차단
 #ifdef ACTIVE_FOCUS_OUT
     }
 #endif	// ACTIVE_FOCUS_OUT
