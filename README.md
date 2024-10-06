@@ -37,6 +37,8 @@ What I have done so far:
   * Some minor bug fixes, e.g.:
     * Storm Crow item labels
     * Ancient set labels
+  * The code has been refactored. A lot of magic values have been replaced by
+    enums and constants.
 
 What needs to be done for Season 6:
   * The master skill tree system needs to be overhauled:
@@ -44,7 +46,6 @@ What needs to be done for Season 6:
     * The new system has one per normal skill, one per master skill, and additional
       levels that are sent to the client.
   * Lucky Items
-  * Karutan Map
   * MU Helper logic
 
 ## How to build & run
@@ -61,7 +62,8 @@ to be done once.
 
 It supports the common starting parameters `/u` and `/p`, example: `main.exe connect /u192.168.0.20 /p55902`.
 The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.17/MUnique.OpenMU.ClientLauncher_0.8.17.zip)
-will work as well. By default, it connects to localhost and port 44406.
+will work as well. By default, it connects to localhost and port `44406`.
+The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
 
 ## Credits
 
