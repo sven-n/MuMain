@@ -19,7 +19,12 @@ What I have done so far:
     networking.
   * 🔥 The network protocol has been adapted for Season 6 Episode 3 - there is probably
     still some work to do, but it connects to [OpenMU](https://github.com/MUnique/OpenMU)
-    and is playable.
+    and is playable. Additionally, the protocol has been extended so it's not standard
+    anymore.
+    * Damage, Exp etc. can exceed 16 bit now.
+    * Improved item serialization
+    * Improved appearance serialization
+    * Added monster health status bar after attack
   * 🔥 Significant changes from Qubit have been incorporated, such as
     * Rage Fighter class
     * Visual bug when Dark Lord walks with Raven
@@ -45,13 +50,18 @@ What needs to be done for Season 6:
 ## How to build & run
 
 It requires:
-  * [.NET 8 x86 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-windows-x86-installer) to be installed. 
+  * [.NET 8 x86 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-windows-x86-installer) to be installed.
   * Visual Studio 2022 with the newest update, workloads for C++ and C#
+  * A compatible server, e.g. [OpenMU](https://github.com/MUnique/OpenMU)
 
 Because of the integrated .NET code, you need to publish the ManagedLibrary first
 to the debug output folder of the main.exe, so that all required managed DLLs are
 copied. A simple build is not enough in this case, however the publish just needs
 to be done once.
+
+It supports the common starting parameters `/u` and `/p`, example: `main.exe connect /u192.168.0.20 /p55902`.
+The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.17/MUnique.OpenMU.ClientLauncher_0.8.17.zip)
+will work as well. By default, it connects to localhost and port 44406.
 
 ## Credits
 
