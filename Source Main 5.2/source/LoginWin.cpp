@@ -19,6 +19,7 @@
 #include "./Utilities/Log/muConsoleDebug.h"
 
 #include "ServerListManager.h"
+#include <dpapi.h>
 
 #define	LIW_ACCOUNT		0
 #define	LIW_PASSWORD	1
@@ -59,6 +60,9 @@ void CLoginWin::Create()
         CWin::RegisterButton(&m_aBtn[i]);
     }
 
+    m_aBtnRememberMe.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
+    CWin::RegisterButton(&m_aBtnRememberMe);
+
     SAFE_DELETE(m_pIDInputBox);
 
     m_pIDInputBox = new CUITextInputBox;
@@ -80,6 +84,11 @@ void CLoginWin::Create()
 
     m_pIDInputBox->SetTabTarget(m_pPassInputBox);
     m_pPassInputBox->SetTabTarget(m_pIDInputBox);
+
+    if (m_RememberMe) {
+        m_pPassInputBox->SetText(m_Password);
+        m_aBtnRememberMe.SetCheck(true);
+    }
 
     this->FirstLoad = 1;
 }
@@ -108,6 +117,7 @@ void CLoginWin::SetPosition(int nXCoord, int nYCoord)
 
     m_aBtn[LIW_OK].SetPosition(nXCoord + 150, nYCoord + 178);
     m_aBtn[LIW_CANCEL].SetPosition(nXCoord + 211, nYCoord + 178);
+    m_aBtnRememberMe.SetPosition(nXCoord + 109, nYCoord + 156);
 }
 
 void CLoginWin::Show(bool bShow)
@@ -119,6 +129,7 @@ void CLoginWin::Show(bool bShow)
         m_asprInputBox[i].Show(bShow);
         m_aBtn[i].Show(bShow);
     }
+    m_aBtnRememberMe.Show(bShow);
 }
 
 bool CLoginWin::CursorInWin(int nArea)
@@ -143,6 +154,8 @@ void CLoginWin::UpdateWhileActive(double dDeltaTick)
         RequestLogin();
     else if (m_aBtn[LIW_CANCEL].IsClick())
         CancelLogin();
+    else if (m_aBtnRememberMe.IsClick())
+        m_RememberMe = m_aBtnRememberMe.IsCheck();
     else if (CInput::Instance().IsKeyDown(VK_RETURN))
     {
         ::PlayBuffer(SOUND_CLICK01);
@@ -198,6 +211,9 @@ void CLoginWin::RenderControls()
 
     g_pRenderText->RenderText(int((CWin::GetXPos() + 111) / g_fScreenRate_x),
         int((CWin::GetYPos() + 80) / g_fScreenRate_y), szServerName);
+
+    g_pRenderText->RenderText(int((CWin::GetXPos() + 130) / g_fScreenRate_x),
+        int((CWin::GetYPos() + 159) / g_fScreenRate_y), L"Remember me?");
 }
 
 void CLoginWin::RequestLogin()
@@ -207,29 +223,46 @@ void CLoginWin::RequestLogin()
 
     CUIMng::Instance().HideWin(this);
 
-    wchar_t szID[MAX_ID_SIZE + 1] = { 0, };
-    wchar_t szPass[MAX_PASSWORD_SIZE + 1] = { 0, };
-    m_pIDInputBox->GetText(szID, MAX_ID_SIZE + 1);
-    m_pPassInputBox->GetText(szPass, MAX_PASSWORD_SIZE + 1);
+    m_pIDInputBox->GetText(m_ID, MAX_ID_SIZE + 1);
+    m_pPassInputBox->GetText(m_Password, MAX_PASSWORD_SIZE + 1);
 
-    if (wcslen(szID) <= 0)
+    // Start save account info to registry
+    HKEY hKey;
+    RegCreateKeyEx(HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL);
+    RegSetValueEx(hKey, L"ID", 0, REG_SZ, (BYTE*)m_ID, sizeof(m_ID));
+
+    DATA_BLOB dataIn;
+    DATA_BLOB dataOut;
+    dataIn.cbData = sizeof(m_Password);
+    dataIn.pbData = m_aBtnRememberMe.IsCheck() ? (BYTE*)m_Password : (BYTE*)"";
+
+    if (CryptProtectData(&dataIn, NULL, NULL, NULL, NULL, 0, &dataOut))
+    {
+        RegSetValueEx(hKey, L"Password", 0, REG_BINARY, dataOut.pbData, dataOut.cbData);
+        LocalFree(dataOut.pbData);
+    }
+
+    RegSetValueEx(hKey, L"RememberMe", 0, REG_DWORD, (BYTE*)&m_RememberMe, sizeof(m_RememberMe));
+    // End save account info to registry
+
+    if (wcslen(m_ID) <= 0)
         CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_ID);
-    else if (wcslen(szPass) <= 0)
+    else if (wcslen(m_Password) <= 0)
         CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_PASSWORD);
     else
     {
         if (CurrentProtocolState == RECEIVE_JOIN_SERVER_SUCCESS)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %s", szID);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %s", m_ID);
 
             g_ErrorReport.Write(L"> Login Request.\r\n");
-            g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", szID);
+            g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", m_ID);
 
             LogIn = 1;
-            wcscpy(LogInID, (szID));
+            wcscpy(LogInID, (m_ID));
             CurrentProtocolState = REQUEST_LOG_IN;
 
-            SocketClient->ToGameServer()->SendLogin(szID, szPass, Version, Serial);
+            SocketClient->ToGameServer()->SendLogin(m_ID, m_Password, Version, Serial);
 
             g_pSystemLogBox->AddText(GlobalText[472], SEASON3B::TYPE_SYSTEM_MESSAGE);
             g_pSystemLogBox->AddText(GlobalText[473], SEASON3B::TYPE_SYSTEM_MESSAGE);
