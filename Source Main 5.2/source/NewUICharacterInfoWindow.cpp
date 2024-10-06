@@ -170,8 +170,8 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 
     if (m_BtnMasterLevel.UpdateMouseEvent() == true)
     {
-        if (gCharacterManager.IsMasterLevel(Hero->Class) == true
-            && gCharacterManager.GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT)
+        if (gCharacterManager.IsMasterLevel(Hero->Class)
+            && Hero->Class != CLASS_TEMPLENIGHT)
             g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
         return true;
     }
@@ -300,7 +300,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
     else
     {
         swprintf(strLevel, GlobalText[200], CharacterAttribute->Level);
-        swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperince);
+        swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperience);
     }
     if (CharacterAttribute->Level > 9)
     {
@@ -581,7 +581,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     StrengthenCapability SC_r, SC_l;
 
-    int rlevel = (pWeaponRight->Level >> 3) & 15;
+    int rlevel = pWeaponRight->Level;
 
     if (rlevel >= pWeaponRight->Jewel_Of_Harmony_OptionLevel)
     {
@@ -595,7 +595,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         }
     }
 
-    int llevel = (pWeaponLeft->Level >> 3) & 15;
+    int llevel = pWeaponLeft->Level;
 
     if (llevel >= pWeaponLeft->Jewel_Of_Harmony_OptionLevel)
     {
@@ -613,14 +613,14 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     StrengthenCapability rightinfo, leftinfo;
 
-    int iRightLevel = (pWeaponRight->Level >> 3) & 15;
+    int iRightLevel = pWeaponRight->Level;
 
     if (iRightLevel >= pWeaponRight->Jewel_Of_Harmony_OptionLevel)
     {
         g_pUIJewelHarmonyinfo->GetStrengthenCapability(&rightinfo, pWeaponRight, 1);
     }
 
-    int iLeftLevel = (pWeaponLeft->Level >> 3) & 15;
+    int iLeftLevel = pWeaponLeft->Level;
 
     if (iLeftLevel >= pWeaponLeft->Jewel_Of_Harmony_OptionLevel)
     {
@@ -642,7 +642,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         ITEM* pItem = &CharacterMachine->Equipment[k];
 
-        int eqlevel = (pItem->Level >> 3) & 15;
+        int eqlevel = pItem->Level;
 
         if (eqlevel >= pItem->Jewel_Of_Harmony_OptionLevel)
         {
@@ -733,7 +733,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     ITEM* pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
     if (pItemHelper)
     {
-        if (pItemHelper->Type == ITEM_HORN_OF_FENRIR && pItemHelper->Option1 == 0x04)
+        if (pItemHelper->Type == ITEM_HORN_OF_FENRIR && pItemHelper->ExcellentFlags == 0x04)
         {
             WORD wLevel = CharacterAttribute->Level;
             iAttackDamageMin += (wLevel / 12);
@@ -955,7 +955,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     for (int j = 0; j < MAX_EQUIPMENT; ++j)
     {
-        int TempLevel = (CharacterMachine->Equipment[j].Level >> 3) & 15;
+        int TempLevel = CharacterMachine->Equipment[j].Level;
         if (TempLevel >= CharacterMachine->Equipment[j].Jewel_Of_Harmony_OptionLevel)
         {
             StrengthenCapability SC;
@@ -1244,7 +1244,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (iBaseClass == CLASS_WIZARD || iBaseClass == CLASS_DARK || iBaseClass == CLASS_SUMMONER)
     {
-        int Level = (pWeaponRight->Level >> 3) & 15;
         int iMagicDamageMin;
         int iMagicDamageMax;
 
@@ -1266,7 +1265,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         for (int j = 0; j < MAX_EQUIPMENT; ++j)
         {
-            int TempLevel = (CharacterMachine->Equipment[j].Level >> 3) & 15;
+            int TempLevel = CharacterMachine->Equipment[j].Level;
 
             if (TempLevel >= CharacterMachine->Equipment[j].Jewel_Of_Harmony_OptionLevel)
             {
@@ -1320,7 +1319,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
         if (pItemHelper)
         {
-            if (pItemHelper->Type == ITEM_HORN_OF_FENRIR && pItemHelper->Option1 == 0x04)
+            if (pItemHelper->Type == ITEM_HORN_OF_FENRIR && pItemHelper->ExcellentFlags == 0x04)
             {
                 WORD wLevel = CharacterAttribute->Level;
                 iMagicDamageMin += (wLevel / 25);
@@ -1370,7 +1369,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             float magicPercent = (float)(pWeaponRight->MagicPower) / 100;
 
             ITEM_ATTRIBUTE* p = &ItemAttribute[pWeaponRight->Type];
-            float   percent = CalcDurabilityPercent(pWeaponRight->Durability, p->MagicDur, pWeaponRight->Level, pWeaponRight->Option1, pWeaponRight->ExtOption);
+            float   percent = CalcDurabilityPercent(pWeaponRight->Durability, p->MagicDur, pWeaponRight->Level, pWeaponRight->ExcellentFlags, pWeaponRight->AncientDiscriminator);
 
             magicPercent = magicPercent - magicPercent * percent;
             swprintf(strEnergy, GlobalText[215], iMagicDamageMin + maxMg, iMagicDamageMax + maxMg, (int)((iMagicDamageMaxInitial + maxMg) * magicPercent));
@@ -1472,8 +1471,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
             ITEM_ATTRIBUTE* p = &ItemAttribute[pWeaponLeft->Type];
             float fPercent = ::CalcDurabilityPercent(pWeaponLeft->Durability,
-                p->MagicDur, pWeaponLeft->Level, pWeaponLeft->Option1,
-                pWeaponLeft->ExtOption);
+                p->MagicDur, pWeaponLeft->Level, pWeaponLeft->ExcellentFlags,
+                pWeaponLeft->AncientDiscriminator);
 
             fCursePercent -= fCursePercent * fPercent;
             swprintf(strEnergy, GlobalText[1693],
@@ -1637,7 +1636,7 @@ void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
 {
     ResetEquipmentLevel();
 
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true && gCharacterManager.GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT)
+    if (gCharacterManager.IsMasterLevel(Hero->Class) == true && Hero->Class != CLASS_TEMPLENIGHT)
     {
         m_BtnMasterLevel.UnLock();
         m_BtnMasterLevel.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
@@ -1671,13 +1670,13 @@ void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
 void SEASON3B::CNewUICharacterInfoWindow::ResetEquipmentLevel()
 {
     ITEM* pItem = CharacterMachine->Equipment;
-    Hero->Weapon[0].Level = (pItem[EQUIPMENT_WEAPON_RIGHT].Level >> 3) & 15;
-    Hero->Weapon[1].Level = (pItem[EQUIPMENT_WEAPON_LEFT].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_HELM].Level = (pItem[EQUIPMENT_HELM].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_ARMOR].Level = (pItem[EQUIPMENT_ARMOR].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_PANTS].Level = (pItem[EQUIPMENT_PANTS].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_GLOVES].Level = (pItem[EQUIPMENT_GLOVES].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_BOOTS].Level = (pItem[EQUIPMENT_BOOTS].Level >> 3) & 15;
+    Hero->Weapon[0].Level = pItem[EQUIPMENT_WEAPON_RIGHT].Level;
+    Hero->Weapon[1].Level = pItem[EQUIPMENT_WEAPON_LEFT].Level;
+    Hero->BodyPart[BODYPART_HELM].Level = pItem[EQUIPMENT_HELM].Level;
+    Hero->BodyPart[BODYPART_ARMOR].Level = pItem[EQUIPMENT_ARMOR].Level;
+    Hero->BodyPart[BODYPART_PANTS].Level = pItem[EQUIPMENT_PANTS].Level;
+    Hero->BodyPart[BODYPART_GLOVES].Level = pItem[EQUIPMENT_GLOVES].Level;
+    Hero->BodyPart[BODYPART_BOOTS].Level = pItem[EQUIPMENT_BOOTS].Level;
 
     CheckFullSet(Hero);
 }

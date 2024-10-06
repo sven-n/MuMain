@@ -777,6 +777,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="afxres.h" />
+    <ClInclude Include="dependencies\include\span.hpp" />
     <ClInclude Include="source\Dotnet\PacketBindings_ChatServer.h" />
     <ClInclude Include="source\Dotnet\PacketBindings_ClientToServer.h" />
     <ClInclude Include="source\Dotnet\PacketBindings_ConnectServer.h" />

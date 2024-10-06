@@ -176,7 +176,7 @@ void CNewUILuckyItemWnd::RenderMixEffect()
     DisableAlphaBlend();
 }
 
-void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, BYTE* _pbyItemPacket)
+void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE> pbyItemPacket)
 {
     int		nDefault = -1;
     int		nMessage = nDefault;
@@ -220,7 +220,7 @@ void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, BYTE* _pbyItemPa
     if (nMessage > nDefault)	g_pChatListBox->AddText(L"", GlobalText[nMessage], SEASON3B::TYPE_ERROR_MESSAGE);
     if (nPlaySound > nDefault)	PlayBuffer(static_cast<ESound>(nPlaySound));
     if (bInitInven)			g_pLuckyItemWnd->Process_InventoryCtrl_DeleteItem(-1);
-    if (nAddInven > nDefault)	Process_InventoryCtrl_InsertItem(nAddInven, _pbyItemPacket);
+    if (nAddInven > nDefault)	Process_InventoryCtrl_InsertItem(nAddInven, pbyItemPacket);
 
     m_eWndAction = eLuckyItem_None;
 }
@@ -382,7 +382,7 @@ bool CNewUILuckyItemWnd::ClosingProcess(void)
     return true;
 }
 
-bool CNewUILuckyItemWnd::Process_InventoryCtrl_InsertItem(int iIndex, BYTE* pbyItemPacket)
+bool CNewUILuckyItemWnd::Process_InventoryCtrl_InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(iIndex, pbyItemPacket);

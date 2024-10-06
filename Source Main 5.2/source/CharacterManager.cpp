@@ -6,29 +6,7 @@
 #include "CSItemOption.h"
 #include "GlobalText.h"
 #include "SkillManager.h"
-//#include "CameraMove.h"
-//#include "CDirection.h"
-//#include "GMBattleCastle.h"
-//#include "GMHellas.h"
-//#include "GM_Kanturu_3rd.h"
-//#include "DSPlaySound.h"
-//#include "GlobalBitmap.h"
-//#include "GM_Kanturu_2nd.h"
-//#include "GM3rdChangeUp.h"
-//#include "GMCryWolf1st.h"
-//#include "GMDoppelGanger2.h"
-//#include "LoadData.h"
-//#include "NewUISystem.h"
-//#include "PersonalShopTitleImp.h"
-//#include "ZzzBMD.h"
 #include "ZzzInfomation.h"
-//#include "ZzzEffect.h"
-//#include "ZzzLodTerrain.h"
-//#include "ZzzObject.h"
-//#include "ZzzOpenData.h"
-//#include "ZzzTexture.h"
-//#include "w_CursedTemple.h"
-//#include "WSclient.h"
 #include "./Utilities/Log/ErrorReport.h"
 
 CCharacterManager gCharacterManager;
@@ -41,139 +19,116 @@ CCharacterManager::~CCharacterManager() // OK
 {
 }
 
-BYTE CCharacterManager::ChangeServerClassTypeToClientClassType(const BYTE byServerClassType)
+CLASS_TYPE CCharacterManager::ChangeServerClassTypeToClientClassType(const SERVER_CLASS_TYPE byServerClassType)
 {
-    BYTE byClass = (((byServerClassType >> 4) & 0x01) << 3) | (byServerClassType >> 5) | (((byServerClassType >> 3) & 0x01) << 4);
-    return byClass;
+    switch (byServerClassType)
+    {
+    case DarkWizard:
+        return CLASS_WIZARD;
+    case SoulMaster:
+        return CLASS_SOULMASTER;
+    case GrandMaster:
+        return CLASS_GRANDMASTER;
+    case DarkKnight:
+        return CLASS_KNIGHT;
+    case BladeKnight:
+        return CLASS_BLADEKNIGHT;
+    case BladeMaster:
+        return CLASS_BLADEMASTER;
+    case FairyElf:
+        return CLASS_ELF;
+    case MuseElf:
+        return CLASS_MUSEELF;
+    case HighElf:
+        return CLASS_HIGHELF;
+    case MagicGladiator:
+        return CLASS_DARK;
+    case DuelMaster:
+        return CLASS_DUELMASTER;
+    case DarkLord:
+        return CLASS_DARK_LORD;
+    case LordEmperor:
+        return CLASS_LORDEMPEROR;
+    case Summoner:
+        return CLASS_SUMMONER;
+    case BloodySummoner:
+        return CLASS_BLOODYSUMMONER;
+    case DimensionMaster:
+        return CLASS_DIMENSIONMASTER;
+    case RageFighter:
+        return CLASS_RAGEFIGHTER;
+    case FistMaster:
+        return CLASS_TEMPLENIGHT;
+    }
+
+    return CLASS_WIZARD;
 }
 
-BYTE CCharacterManager::GetCharacterClass(const BYTE byClass)
+CLASS_TYPE CCharacterManager::GetBaseClass(CLASS_TYPE iClass)
 {
-    BYTE byCharacterClass = 0;
-    BYTE byFirstClass = byClass & 0x7;
-    BYTE bySecondClass = (byClass >> 3) & 0x01;
-    BYTE byThirdClass = (byClass >> 4) & 0x01;
-
-    switch (byFirstClass)
+    switch (iClass)
     {
-    case 0:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_GRANDMASTER;
-        }
-        else if (bySecondClass)
-        {
-            byCharacterClass = CLASS_SOULMASTER;
-        }
-        else
-        {
-            byCharacterClass = CLASS_WIZARD;
-        }
+    case CLASS_GRANDMASTER:
+    case CLASS_SOULMASTER:
+        return CLASS_WIZARD;
+    case CLASS_BLADEKNIGHT:
+    case CLASS_BLADEMASTER:
+        return CLASS_KNIGHT;
+    case CLASS_MUSEELF:
+    case CLASS_HIGHELF:
+        return CLASS_ELF;
+    case CLASS_BLOODYSUMMONER:
+    case CLASS_DIMENSIONMASTER:
+        return CLASS_SUMMONER;
+    case CLASS_DUELMASTER:
+        return CLASS_DARK;
+    case CLASS_LORDEMPEROR:
+        return CLASS_DARK_LORD;
+    case CLASS_TEMPLENIGHT:
+        return CLASS_RAGEFIGHTER;
     }
 
-    break;
-    case 1:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_BLADEMASTER;
-        }
-        else if (bySecondClass)
-        {
-            byCharacterClass = CLASS_BLADEKNIGHT;
-        }
-        else
-        {
-            byCharacterClass = CLASS_KNIGHT;
-        }
-    }
-    break;
-    case 2:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_HIGHELF;
-        }
-        else if (bySecondClass)
-        {
-            byCharacterClass = CLASS_MUSEELF;
-        }
-        else
-        {
-            byCharacterClass = CLASS_ELF;
-        }
-    }
-    break;
-    case 3:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_DUELMASTER;
-        }
-        else
-        {
-            byCharacterClass = CLASS_DARK;
-        }
-    }
-    break;
-    case 4:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_LORDEMPEROR;
-        }
-        else
-        {
-            byCharacterClass = CLASS_DARK_LORD;
-        }
-    }
-    break;
-    case 5:
-    {
-        if (byThirdClass)
-            byCharacterClass = CLASS_DIMENSIONMASTER;
-        else if (bySecondClass)
-            byCharacterClass = CLASS_BLOODYSUMMONER;
-        else
-            byCharacterClass = CLASS_SUMMONER;
-    }
-    break;
-    case 6:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_TEMPLENIGHT;
-        }
-        else
-        {
-            byCharacterClass = CLASS_RAGEFIGHTER;
-        }
-    }
-    }
-
-    return byCharacterClass;
+    return iClass;
 }
 
-bool CCharacterManager::IsSecondClass(const BYTE byClass)
+bool CCharacterManager::IsSecondClass(const CLASS_TYPE byClass)
 {
-    return (((signed int)byClass >> 3) & 1) != 0;;
+    switch (byClass)
+    {
+    case CLASS_SOULMASTER:
+    case CLASS_BLADEKNIGHT:
+    case CLASS_MUSEELF:
+    case CLASS_BLOODYSUMMONER:
+        return true;
+    }
+
+    return false;
 }
 
-bool CCharacterManager::IsThirdClass(const BYTE byClass)
+bool CCharacterManager::IsThirdClass(const CLASS_TYPE byClass)
 {
-    return (((signed int)byClass >> 4) & 1) != 0;;
+    switch (byClass)
+    {
+    case CLASS_GRANDMASTER:
+    case CLASS_BLADEMASTER:
+    case CLASS_HIGHELF:
+    case CLASS_DIMENSIONMASTER:
+    case CLASS_DUELMASTER:
+    case CLASS_LORDEMPEROR:
+    case CLASS_TEMPLENIGHT:
+        return true;
+    }
+
+    return false;
 }
 
-bool CCharacterManager::IsMasterLevel(const BYTE byClass)
+bool CCharacterManager::IsMasterLevel(const CLASS_TYPE byClass)
 {
     return this->IsThirdClass(byClass);
 }
 
-const wchar_t* CCharacterManager::GetCharacterClassText(const BYTE byClass)
+const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byCharacterClass)
 {
-    BYTE byCharacterClass = this->GetCharacterClass(byClass);
-
     if (byCharacterClass == CLASS_WIZARD)
     {
         return GlobalText[20];
@@ -240,7 +195,7 @@ const wchar_t* CCharacterManager::GetCharacterClassText(const BYTE byClass)
     return GlobalText[2305];
 }
 
-BYTE CCharacterManager::GetSkinModelIndex(const BYTE byClass)
+BYTE CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
 {
     BYTE bySkinIndex = 0;
     BYTE byFirstClass = byClass & 0x7;
@@ -259,7 +214,7 @@ BYTE CCharacterManager::GetSkinModelIndex(const BYTE byClass)
     return bySkinIndex;
 }
 
-BYTE CCharacterManager::GetStepClass(const BYTE byClass)
+BYTE CCharacterManager::GetStepClass(const CLASS_TYPE byClass)
 {
     if (IsThirdClass(byClass))
     {

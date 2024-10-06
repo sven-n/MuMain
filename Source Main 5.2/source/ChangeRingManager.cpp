@@ -79,9 +79,9 @@ bool CChangeRingManager::CheckDarkLordHair(int iType)
     return false;
 }
 
-bool CChangeRingManager::CheckDarkCloak(int iClass, int iType)
+bool CChangeRingManager::CheckDarkCloak(CLASS_TYPE iClass, int iType)
 {
-    if (gCharacterManager.GetCharacterClass(iClass) == CLASS_DARK)
+    if (iClass == CLASS_DARK)
     {
         if (iType == MODEL_HALLOWEEN)
         {

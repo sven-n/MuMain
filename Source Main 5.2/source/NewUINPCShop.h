@@ -79,7 +79,7 @@ namespace SEASON3B
         void SetTaxRate(int iTaxRate);
         int GetTaxRate();
 
-        bool InsertItem(int iIndex, BYTE* pbyItemPacket);
+        bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
 
         void OpenningProcess();
         void DeleteAllItems();

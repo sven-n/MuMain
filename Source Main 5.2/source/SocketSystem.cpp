@@ -89,7 +89,7 @@ int CSocketItemMgr::GetSeedShpereSeedID(const ITEM* pItem)
     if (pItem->Type >= ITEM_SEED_SPHERE_FIRE_1 && pItem->Type <= ITEM_SEED_SPHERE_EARTH_5)
     {
         int iCategoryIndex = (pItem->Type - (ITEM_SEED_SPHERE_FIRE_1)) % 6 + 1;
-        int iLevel = (pItem->Level >> 3) & 15;
+        int iLevel = pItem->Level;
         switch (iCategoryIndex)
         {
         case 1:	// 0~9
@@ -174,7 +174,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
     }
     case 4:
     {
-        WORD wLifeMax;
+        DWORD wLifeMax;
 
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
             wLifeMax = Master_Level_Data.wMaxLife;
@@ -185,7 +185,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
     }
     case 5:
     {
-        WORD wManaMax;
+        DWORD wManaMax;
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
             wManaMax = Master_Level_Data.wMaxMana;
         else
@@ -299,7 +299,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
         swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
         int iSocketSeedID = 0;
-        int iLevel = (pItem->Level >> 3) & 15;
+        int iLevel = pItem->Level;
         switch (iCategoryIndex)
         {
         case 1:	// 0~9
@@ -346,7 +346,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
         swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
         int iSocketSeedID = 0;
-        int iLevel = (pItem->Level >> 3) & 15;
+        int iLevel = pItem->Level;
         switch (iCategoryIndex)
         {
         case 1:	// 0~9

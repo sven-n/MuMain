@@ -206,7 +206,7 @@ int CMonkSystem::ModifyTypeCommonItemMonk(int _OrginalType)
     return _OrginalType;
 }
 
-bool CMonkSystem::IsRagefighterCommonWeapon(BYTE _Class, int _Type)
+bool CMonkSystem::IsRagefighterCommonWeapon(CLASS_TYPE _Class, int _Type)
 {
     if ((gCharacterManager.GetBaseClass(_Class) == CLASS_RAGEFIGHTER) &&
         ((_Type == MODEL_KRIS) || (_Type == MODEL_SHORT_SWORD)
@@ -248,7 +248,7 @@ void CMonkSystem::RenderPhoenixGloves(CHARACTER* _pCha, BYTE _Hand)
 void CMonkSystem::RenderSwordformGloves(CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate, int _Select)
 {
     PART_t* w = &_pCha->Weapon[_Hand];
-    RenderPartObject(&_pCha->Object, ModifyTypeSwordformGloves(_ModelType, _Hand), w, _pCha->Light, _Alpha, w->Level << 3, w->Option1, w->ExtOption, false, false, _Translate, _Select);
+    RenderPartObject(&_pCha->Object, ModifyTypeSwordformGloves(_ModelType, _Hand), w, _pCha->Light, _Alpha, w->Level, w->ExcellentFlags, w->AncientDiscriminator, false, false, _Translate, _Select);
 }
 
 int CMonkSystem::ModifyTypeSwordformGloves(int _ModelType, int _LeftHand)
@@ -746,7 +746,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
         pObj->AnimationFrame = m_fOtherAniFrame;
         pObj->CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
         Calc_ObjectAnimation(pObj, Translate, Select);
-        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level << 3, pPart->Option1, pPart->ExtOption, false, false, Translate, Select);
+        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
     }
 
     if (m_nDarksideCnt > 0)
@@ -815,7 +815,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
                 pObj->AnimationFrame = m_fDummyAniFrame;
                 pObj->CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
                 Calc_ObjectAnimation(pObj, Translate, Select);
-                RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level << 3, pPart->Option1, pPart->ExtOption, false, false, Translate, Select);
+                RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
             }
         }
     }
@@ -827,7 +827,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
     VectorCopy(vStartPos, pObj->StartPosition);
     VectorCopy(vOrgAngle, pObj->Angle);
     Calc_ObjectAnimation(pObj, Translate, Select);
-    RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level << 3, pPart->Option1, pPart->ExtOption, false, false, Translate, Select);
+    RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
 }
 
 void CMonkSystem::InitDummyCal()

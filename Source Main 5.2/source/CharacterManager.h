@@ -7,16 +7,16 @@ class CCharacterManager
 public:
     CCharacterManager();
     virtual ~CCharacterManager();
-    BYTE ChangeServerClassTypeToClientClassType(const BYTE byServerClassType);
-    BYTE GetCharacterClass(const BYTE byClass);
-    bool IsSecondClass(const BYTE byClass);
-    bool IsThirdClass(const BYTE byClass);
-    bool IsMasterLevel(const BYTE byClass);
-    const wchar_t* GetCharacterClassText(const BYTE byClass);
-    int GetBaseClass(int iClass) { return (0x7 & iClass); }
-    int IsFemale(int iClass) { return (this->GetBaseClass(iClass) == CLASS_ELF || this->GetBaseClass(iClass) == CLASS_SUMMONER); }
-    BYTE GetSkinModelIndex(const BYTE byClass);
-    BYTE GetStepClass(const BYTE byClass);
+    CLASS_TYPE ChangeServerClassTypeToClientClassType(const SERVER_CLASS_TYPE byServerClassType);
+    bool IsSecondClass(const CLASS_TYPE byClass);
+    bool IsThirdClass(const CLASS_TYPE byClass);
+    bool IsMasterLevel(const CLASS_TYPE byClass);
+    CLASS_TYPE GetBaseClass(CLASS_TYPE iClass);
+    const wchar_t* GetCharacterClassText(const CLASS_TYPE byClass);
+    
+    int IsFemale(CLASS_TYPE iClass) { return (this->GetBaseClass(iClass) == CLASS_ELF || this->GetBaseClass(iClass) == CLASS_SUMMONER); }
+    BYTE GetSkinModelIndex(const CLASS_TYPE byClass);
+    BYTE GetStepClass(const CLASS_TYPE byClass);
     int GetEquipedBowType(CHARACTER* pChar);
     int GetEquipedBowType();
     int GetEquipedBowType(ITEM* pItem);

@@ -234,7 +234,7 @@ void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
                 if (m_nSelJob == i)
                     break;
 
-                m_nSelJob = i;
+                m_nSelJob = (CLASS_TYPE)i;
                 UpdateDisplay();
                 break;
             }

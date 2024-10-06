@@ -36,6 +36,7 @@ void ClientSendMonsterHit(CHARACTER* cc, int AttackPoint);
 void ClientSendPositionPacket(CHARACTER* c);
 void ClientSendPathPacket(unsigned short ID, unsigned char* PathX, unsigned char* PathY, unsigned char PathNum);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
+void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr, OBJECT* pHelper = nullptr);
 void ClearCharacters(int Key = -1);
 void DeleteCharacter(int Key);
 void DeleteCharacter(CHARACTER* c, OBJECT* o);
@@ -50,7 +51,7 @@ void SetAllAction(int Action);
 void ReleaseCharacters(void);
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation = 0.f);
 CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation = 0.f);
-CHARACTER* CreateHero(int Key, int Class = 0, int Skin = 0, float x = 0.f, float y = 0.f, float Ratate = 0.f);
+CHARACTER* CreateHero(int Key, CLASS_TYPE Class, int Skin = 0, float x = 0.f, float y = 0.f, float Rotation = 0.f);
 CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Key = 0);
 CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, int CreateFlag);
 

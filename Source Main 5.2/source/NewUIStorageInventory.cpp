@@ -303,7 +303,7 @@ bool CNewUIStorageInventory::ProcessClosing()
     return true;
 }
 
-bool CNewUIStorageInventory::InsertItem(int nIndex, BYTE* pbyItemPacket)
+bool CNewUIStorageInventory::InsertItem(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(nIndex, pbyItemPacket);
@@ -609,7 +609,7 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
     }
 }
 
-void CNewUIStorageInventory::ProcessToReceiveStorageItems(int nIndex, BYTE* pbyItemPacket)
+void CNewUIStorageInventory::ProcessToReceiveStorageItems(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
     CNewUIInventoryCtrl::DeletePickedItem();
 

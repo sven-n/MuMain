@@ -91,7 +91,7 @@ namespace SEASON3B
         void SetInputValueTextBox(bool bIsEnable);
 
     public:
-        bool InsertItem(int iIndex, BYTE* pbyItemPacket);
+        bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
         void DeleteItem(int iIndex);
         void DeleteAllItems();
 

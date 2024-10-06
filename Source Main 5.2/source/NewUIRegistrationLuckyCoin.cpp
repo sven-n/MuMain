@@ -250,8 +250,8 @@ namespace SEASON3B
 
         m_CoinItem->Type = ITEM_POTION + 100;
         m_CoinItem->Level = 0;
-        m_CoinItem->Option1 = 0;
-        m_CoinItem->ExtOption = 0;
+        m_CoinItem->ExcellentFlags = 0;
+        m_CoinItem->AncientDiscriminator = 0;
     }
 
     void CNewUIRegistrationLuckyCoin::ClosingProcess()

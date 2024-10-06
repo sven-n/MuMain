@@ -4,6 +4,7 @@
 #define __CSQUEST_H__
 
 #include "Singleton.h"
+#include "_enum.h"
 
 class CSQuest : public Singleton<CSQuest>
 {
@@ -26,7 +27,7 @@ public:
     void clearQuest(void);
 
     //  Quest Setting.
-    void setQuestLists(BYTE* byList, int num, int Class = -1);
+    void setQuestLists(BYTE* byList, int num, CLASS_TYPE Class = CLASS_UNDEFINED);
     void setQuestList(int index, int result);
     BYTE getQuestState2(int questIndex);
     void ShowQuestPreviewWindow(int index = -1);

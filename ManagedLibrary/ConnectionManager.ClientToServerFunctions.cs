@@ -775,6 +775,46 @@ public unsafe partial class ConnectionManager
     }
 
     /// <summary>
+    /// Sends a <see cref="ItemMoveRequestExtended" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="fromStorage">The from storage.</param>
+    /// <param name="fromSlot">The from slot.</param>
+    /// <param name="toStorage">The to storage.</param>
+    /// <param name="toSlot">The to slot.</param>
+    /// <remarks>
+    /// Is sent by the client when: A player requests to move an item within or between his available item storage, such as inventory, vault, trade or chaos machine.
+    /// Causes reaction on server side: 
+    /// </remarks>
+    [UnmanagedCallersOnly]
+    public static void SendItemMoveRequestExtended(int handle, ItemStorageKind @fromStorage, byte @fromSlot, ItemStorageKind @toStorage, byte @toSlot)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = ItemMoveRequestExtendedRef.Length;
+                var packet = new ItemMoveRequestExtendedRef(pipeWriter.GetSpan(length)[..length]);
+                packet.FromStorage = @fromStorage;
+                packet.FromSlot = @fromSlot;
+                packet.ToStorage = @toStorage;
+                packet.ToSlot = @toSlot;
+
+                return length;
+            });
+        }
+        catch
+        {
+            // Log exception
+        }
+    }
+
+    /// <summary>
     /// Sends a <see cref="ConsumeItemRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
@@ -6656,13 +6696,12 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="DuelChannelQuitRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
-    /// <param name="channelId">The channel id.</param>
     /// <remarks>
     /// Is sent by the client when: A player requested to quit the duel as a spectator.
     /// Causes reaction on server side: The server will remove the player as spectator.
     /// </remarks>
     [UnmanagedCallersOnly]
-    public static void SendDuelChannelQuitRequest(int handle, byte @channelId)
+    public static void SendDuelChannelQuitRequest(int handle)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -6675,8 +6714,6 @@ public unsafe partial class ConnectionManager
             {
                 var length = DuelChannelQuitRequestRef.Length;
                 var packet = new DuelChannelQuitRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.ChannelId = @channelId;
-
                 return length;
             });
         }

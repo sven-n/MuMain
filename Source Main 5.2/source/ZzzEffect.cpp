@@ -59,49 +59,12 @@ bool CheckCharacterRange(OBJECT* so, float Range, short PKKey, BYTE Kind = 0)
     return false;
 }
 
-bool FindSameKey(int DamageKey[], int iCount, int Key)
-{
-    for (int i = 0; i < iCount; i++)
-    {
-        if (DamageKey[i] == Key)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool AddRangeAttack(vec3_t Position, float Range, short PKKey, int DamageKey[], int* piCount, int iMaxKey)
-{
-    if (*piCount >= iMaxKey)
-    {
-        return false;
-    }
-
-    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
-    {
-        CHARACTER* c = &CharactersClient[i];
-        OBJECT* o = &c->Object;
-        float dx = Position[0] - o->Position[0];
-        float dy = Position[1] - o->Position[1];
-        float Distance = sqrtf(dx * dx + dy * dy);
-        if (o->Live && o->Visible && c != Hero && !c->Dead && Distance <= Range &&
-            (o->Kind == KIND_MONSTER || (o->Kind == KIND_PLAYER && c->Key == PKKey)))
-        {
-            if (!FindSameKey(DamageKey, *piCount, c->Key))
-            {
-                DamageKey[(*piCount)++] = c->Key;
-                if (*piCount >= iMaxKey) break;
-            }
-        }
-    }
-
-    return true;
-}
-
 bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, short PKKey, WORD SkillSerialNum)
 {
+#ifdef USE_EXTENDED_PROTOCOL
+    return false; // we don't send this packet anymore
+#endif
+
     int Skill = CharacterAttribute->Skill[Index];
 
     int     Count = 0;
@@ -18125,7 +18088,7 @@ void RenderWheelWeapon(OBJECT* o)
     vec3_t Light;
     RequestTerrainLight(o->Position[0], o->Position[1], Light);
     VectorAdd(Light, o->Light, Light);
-    RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel << 3, 0, 0, true, true, true);
+    RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel, 0, 0, true, true, true);
     o->Type = (short)TempType;
 
     VectorCopy(TempPosition, o->Position);
@@ -18159,7 +18122,7 @@ void RenderFuryStrike(OBJECT* o)
         VectorCopy(o->Angle, Angle);
 
         b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, Angle, o->HeadAngle, false, false);
-        RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel << 3, 0, 0, true, true, true);
+        RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel, 0, 0, true, true, true);
 
         o->Type = (short)TempType;
     }

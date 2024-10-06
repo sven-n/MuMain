@@ -660,7 +660,7 @@ void CNewUITrade::BackUpYourInven(ITEM* pYourItemObj)
         || (pYourItemObj->Type >= ITEM_WING_OF_STORM && pYourItemObj->Type <= ITEM_WING_OF_DIMENSION)
         || (pYourItemObj->Type == ITEM_JEWEL_OF_CHAOS)
         || (pYourItemObj->Type >= ITEM_CAPE_OF_FIGHTER && pYourItemObj->Type <= ITEM_CAPE_OF_OVERRULE)
-        || ((((pYourItemObj->Level >> 3) & 15) > 4 && pYourItemObj->Type < ITEM_WING) || (pYourItemObj->Option1 & 63) > 0))
+        || ((pYourItemObj->Level > 4 && pYourItemObj->Type < ITEM_WING) || pYourItemObj->ExcellentFlags > 0))
     {
         int nCompareValue;
         bool bSameItem = false;
@@ -702,7 +702,7 @@ void CNewUITrade::BackUpYourInven(ITEM* pYourItemObj)
     }
 }
 
-void CNewUITrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, BYTE* pbyItemPacket)
+void CNewUITrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket)
 {
     m_pYourInvenCtrl->AddItem(byYourInvenIndex, pbyItemPacket);
     AlertYourTradeInven();
@@ -823,7 +823,7 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_TRADE);
 }
 
-void CNewUITrade::ProcessToReceiveTradeItems(int nIndex, BYTE* pbyItemPacket)
+void CNewUITrade::ProcessToReceiveTradeItems(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
     SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 

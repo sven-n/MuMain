@@ -904,7 +904,7 @@ bool SEASON3B::CUseFruitCheckMsgBox::Create(float fPriority)
     wchar_t strName[50] = { 0, };
     if (pItem->Type == ITEM_FRUITS)
     {
-        switch ((pItem->Level >> 3) & 15)
+        switch (pItem->Level)
         {
         case 0:
             swprintf(strName, L"%s", GlobalText[168]);
@@ -998,8 +998,8 @@ void SEASON3B::CUseFruitCheckMsgBox::Render3D()
     RenderItem3D(x, y, width, height,
         m_Item.Type,
         m_Item.Level,
-        m_Item.Option1,
-        m_Item.ExtOption,
+        m_Item.ExcellentFlags,
+        m_Item.AncientDiscriminator,
         true);		// PickUp
 }
 

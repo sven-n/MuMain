@@ -235,6 +235,16 @@ typedef struct tagITEM
 {
     short Type;
     int   Level;
+    BYTE  Durability;
+    BYTE OptionLevel;
+    BYTE OptionType;
+    BYTE ExcellentFlags;
+    BYTE AncientDiscriminator; // 0 = no ancient;
+    BYTE AncientBonusOption;
+    WORD  Jewel_Of_Harmony_Option;
+    WORD  Jewel_Of_Harmony_OptionLevel;
+    bool HasSkill;
+    bool HasLuck;
     BYTE  Part;
     BYTE  Class;
     bool  TwoHand;
@@ -246,9 +256,7 @@ typedef struct tagITEM
     BYTE  MagicPower;
     BYTE  WeaponSpeed;
     WORD  WalkSpeed;
-    BYTE  Durability;
-    BYTE  Option1;
-    BYTE  ExtOption;
+
     WORD  RequireStrength;
     WORD  RequireDexterity;
     WORD  RequireEnergy;
@@ -272,11 +280,10 @@ typedef struct tagITEM
         BYTE  y;    //client olny
         BYTE  ex_src_type;
     };
-    WORD  Jewel_Of_Harmony_Option;
-    WORD  Jewel_Of_Harmony_OptionLevel;
     bool option_380;
-    BYTE bySocketOption[MAX_SOCKETS];
+
     BYTE SocketCount;
+    BYTE bySocketOption[MAX_SOCKETS];
     BYTE SocketSeedID[MAX_SOCKETS];
     BYTE SocketSphereLv[MAX_SOCKETS];
     BYTE SocketSeedSetOption;
@@ -286,13 +293,9 @@ typedef struct tagITEM
 
     BYTE byColorState;
 
-#ifdef KJH_ADD_PERIOD_ITEM_SYSTEM
     bool	bPeriodItem;
     bool	bExpiredPeriod;
-    //DWORD	dwLeftTime;
     long	lExpireTime;
-    //DWORD	dwPastSystemTime;
-#endif // KJH_ADD_PERIOD_ITEM_SYSTEM
 
 private:
     friend class SEASON3B::CNewUIItemMng;
@@ -430,25 +433,25 @@ typedef struct
 typedef struct
 {
     wchar_t Name[MAX_ID_SIZE + 1];
-    BYTE Class;
+    CLASS_TYPE Class;
     BYTE Skin;
     BYTE InventoryExtensions;
     BYTE IsVaultExtended;
     WORD Level;
-    DWORD Experience;
-    DWORD NextExperince;
 
     WORD Strength;
     WORD Dexterity;
     WORD Vitality;
     WORD Energy;
     WORD Charisma;
-    WORD Life;
-    WORD Mana;
-    WORD LifeMax;
-    WORD ManaMax;
-    WORD Shield;
-    WORD ShieldMax;
+    DWORD Life;
+    DWORD Mana;
+    DWORD LifeMax;
+    DWORD ManaMax;
+    DWORD Shield;
+    DWORD ShieldMax;
+    DWORD SkillMana;
+    DWORD SkillManaMax;
     WORD AttackRatingPK;
     WORD SuccessfulBlockingPK;
     WORD AddStrength;
@@ -458,8 +461,6 @@ typedef struct
     WORD AddLifeMax;
     WORD AddManaMax;
     WORD AddCharisma;
-    WORD SkillMana;
-    WORD SkillManaMax;
     BYTE Ability;
     WORD AbilityTime[3];
 
@@ -468,6 +469,7 @@ typedef struct
     WORD wMinusPoint;
     WORD wMaxMinusPoint;
     WORD AttackSpeed;
+    WORD MaxAttackSpeed; // Maximum attack speed which can be reached on the server.
     WORD AttackRating;
     WORD AttackDamageMinRight;
     WORD AttackDamageMaxRight;
@@ -486,6 +488,10 @@ typedef struct
     WORD LevelUpPoint;
     BYTE SkillNumber;
     BYTE SkillMasterNumber;
+
+    uint64_t Experience;
+    uint64_t NextExperience;
+
     ActionSkillType Skill[MAX_SKILLS];
     BYTE SkillLevel[MAX_SKILLS];
     int  SkillDelay[MAX_SKILLS];
@@ -501,11 +507,10 @@ typedef struct _MASTER_LEVEL_VALUE
     short      	nMLevelUpMPoint;
     short		nTotalMPoint;
     short		nMaxPoint;
-
-    WORD		wMaxLife;
-    WORD		wMaxMana;
-    WORD		wMaxShield;
-    WORD		wMaxBP;
+    DWORD		wMaxLife;
+    DWORD		wMaxMana;
+    DWORD		wMaxShield;
+    DWORD		wMaxBP;
 } MASTER_LEVEL_VALUE;
 
 //infomation end

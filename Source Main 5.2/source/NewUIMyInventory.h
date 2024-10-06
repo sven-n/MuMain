@@ -11,6 +11,8 @@
 #include "NewUIMessageBox.h"
 #include "NewUI3DRenderMng.h"
 #include "NewUIButton.h"
+#include "span.hpp"
+#include "_enum.h"
 
 namespace SEASON3B
 {
@@ -102,13 +104,13 @@ namespace SEASON3B
         bool Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y);
         void Release();
 
-        bool EquipItem(int iIndex, BYTE* pbyItemPacket);
+        bool EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket);
         void UnequipItem(int iIndex);
         void UnequipAllItems();
 
         bool IsEquipable(int iIndex, ITEM* pItem);
 
-        bool InsertItem(int iIndex, BYTE* pbyItemPacket) const;
+        bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const;
         void DeleteItem(int iIndex) const;
         void DeleteAllItems() const;
 

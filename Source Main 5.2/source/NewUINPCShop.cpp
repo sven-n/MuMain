@@ -313,7 +313,7 @@ int SEASON3B::CNewUINPCShop::GetTaxRate()
     return m_iTaxRate;
 }
 
-bool SEASON3B::CNewUINPCShop::InsertItem(int iIndex, BYTE* pbyItemPacket)
+bool SEASON3B::CNewUINPCShop::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
     {

@@ -55,7 +55,8 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
     Reset();
 
     m_sType = pItem->Type;
-    m_iLevel = ((pItem->Level >> 3) & 15);
+    m_iLevel = pItem->Level;
+    
     m_iDurability = pItem->Durability;
     for (int i = 0; i < pItem->SpecialNum; i++)
     {
@@ -76,15 +77,15 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
             break;
         }
     }
-    if ((pItem->Option1 & 63) > 0) m_dwSpecialItem |= RCP_SP_EXCELLENT;
+    if (pItem->ExcellentFlags > 0) m_dwSpecialItem |= RCP_SP_EXCELLENT;
     if (pItem->RequireLevel >= 380) m_dwSpecialItem |= RCP_SP_ADD380ITEM;
-    if ((pItem->ExtOption % 0x04) == EXT_A_SET_OPTION || (pItem->ExtOption % 0x04) == EXT_B_SET_OPTION) m_dwSpecialItem |= RCP_SP_SETITEM;
+    if (pItem->AncientDiscriminator > 0) m_dwSpecialItem |= RCP_SP_SETITEM;
     m_b380AddedItem = pItem->option_380;
 
     if (pItem->Type >= ITEM_SWORD && pItem->Type <= ITEM_BOOTS + MAX_ITEM_INDEX - 1)
         m_bIsEquipment = TRUE;
 
-    if (pItem->Type == ITEM_HORN_OF_FENRIR && pItem->Option1 != 0)
+    if (pItem->Type == ITEM_HORN_OF_FENRIR && pItem->ExcellentFlags != 0)
         m_bFenrirAddedItem = TRUE;
 
     if (pItem->Type == ITEM_POTION + 53)

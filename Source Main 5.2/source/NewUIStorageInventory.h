@@ -86,7 +86,7 @@ namespace SEASON3B
         CNewUIInventoryCtrl* GetInventoryCtrl() const;
 
         bool ProcessClosing();
-        bool InsertItem(int iIndex, BYTE* pbyItemPacket);
+        bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
         int FindEmptySlot(ITEM* pItemObj);
 
         bool IsStorageLocked() { return m_bLock; }
@@ -100,7 +100,7 @@ namespace SEASON3B
         void SendRequestItemToMyInven(ITEM* pItemObj, int nStorageIndex, int nInvenIndex);
 
         void ProcessToReceiveStorageStatus(BYTE byStatus);
-        void ProcessToReceiveStorageItems(int nIndex, BYTE* pbyItemPacket);
+        void ProcessToReceiveStorageItems(int nIndex, std::span<const BYTE> pbyItemPacket);
         void ProcessStorageItemAutoMoveSuccess();
         void ProcessStorageItemAutoMoveFailure();
 

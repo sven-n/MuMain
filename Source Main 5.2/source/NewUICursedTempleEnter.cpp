@@ -146,7 +146,7 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckEnterItem(ITEM* p, int enterlevel)
         if (p->Type != ITEM_SCROLL_OF_BLOOD)
             return false;
 
-        int itemLevel = (p->Level >> 3) & 15;
+        int itemLevel = p->Level;
 
         if (itemLevel != enterlevel)
             return false;

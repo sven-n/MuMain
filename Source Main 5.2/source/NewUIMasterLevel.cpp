@@ -172,12 +172,9 @@ void SEASON3B::CNewUIMasterLevel::Render_Icon()
     int Skill_Num = -1;
     float nx = 43.f;
     float ny = 42.f;
-    BYTE Job = (Hero->Class >> 4) & 0x01;
     int GetJob = -1;
 
-    if (Job == 1)
-        Job = gCharacterManager.GetCharacterClass(Hero->Class);
-    switch (Job)
+    switch (Hero->Class)
     {
     case CLASS_WIZARD:
     case CLASS_SOULMASTER:
@@ -769,7 +766,7 @@ void SEASON3B::CNewUIMasterLevel::Render_Text()
     //wprintf( lpszStr, GlobalText[20]);
     int Job = 0;// = GetCharacterClass(Hero->Class);
 
-    switch (gCharacterManager.GetCharacterClass(Hero->Class))
+    switch (Hero->Class)
     {
     case CLASS_WIZARD:
     case CLASS_SOULMASTER:
@@ -985,13 +982,9 @@ bool SEASON3B::CNewUIMasterLevel::Check_Btn()
     }
 
     int Skill_Num = -1;
-
-    BYTE Job = (Hero->Class >> 4) & 0x01;
     int GetJob = -1;
 
-    if (Job == 1)
-        Job = gCharacterManager.GetCharacterClass(Hero->Class);
-    switch (Job)
+    switch (Hero->Class)
     {
     case CLASS_WIZARD:
     case CLASS_SOULMASTER:

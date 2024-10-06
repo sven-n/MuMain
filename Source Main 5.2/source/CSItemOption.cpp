@@ -331,16 +331,14 @@ bool CSItemOption::GetSetItemName(wchar_t* strName, const int iType, const int s
 }
 
 
-void CSItemOption::checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int setType) const
+void CSItemOption::checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int ancientDiscriminator) const
 {
-    const int setItemType = (setType % 0x04);
-
-    if (setItemType <= 0)
+    if (ancientDiscriminator <= 0)
     {
         return;
     }
 
-    const auto setTypeIndex = static_cast<BYTE>(setItemType - 1);
+    const auto setTypeIndex = static_cast<BYTE>(ancientDiscriminator - 1);
 
     const ITEM_SET_TYPE& itemSetType = m_ItemSetType[iType];
     const auto itemSetNumber = itemSetType.byOption[setTypeIndex];
@@ -651,7 +649,7 @@ int CSItemOption::GetDefaultOptionValue(ITEM* ip, WORD* Value)
         return -1;
     }
 
-    *Value = ((ip->ExtOption >> 2) % 0x04);
+    *Value = ip->AncientBonusOption;
 
     const ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
 
@@ -665,24 +663,27 @@ bool CSItemOption::GetDefaultOptionText(const ITEM* ip, wchar_t* Text)
         return false;
     }
 
-    if (((ip->ExtOption >> 2) % 0x04) <= 0) return false;
+    if (ip->AncientBonusOption <= 0)
+    {
+        return false;
+    }
 
     switch (ItemAttribute[ip->Type].AttType)
     {
     case SET_OPTION_STRENGTH:
-        swprintf(Text, GlobalText[950], ((ip->ExtOption >> 2) % 0x04) * 5);
+        swprintf(Text, GlobalText[950], ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_DEXTERITY:
-        swprintf(Text, GlobalText[951], ((ip->ExtOption >> 2) % 0x04) * 5);
+        swprintf(Text, GlobalText[951], ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_ENERGY:
-        swprintf(Text, GlobalText[952], ((ip->ExtOption >> 2) % 0x04) * 5);
+        swprintf(Text, GlobalText[952], ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_VITALITY:
-        swprintf(Text, GlobalText[953], ((ip->ExtOption >> 2) % 0x04) * 5);
+        swprintf(Text, GlobalText[953], ip->AncientBonusOption * 5);
         break;
 
     default:
@@ -889,7 +890,8 @@ void CSItemOption::CheckItemSetOptions()
         }
 
         if ((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT)
-            && itemRight != nullptr && itemRight->Type == item->Type && (itemRight->ExtOption % 0x04) == (item->ExtOption % 0x04))
+            && itemRight != nullptr && itemRight->Type == item->Type
+            && (itemRight->AncientDiscriminator == item->AncientDiscriminator))
         {
             // same item of a set should only count once
             continue;
@@ -897,7 +899,7 @@ void CSItemOption::CheckItemSetOptions()
 
         if (item->Type > -1)
         {
-            checkItemType(byOptionList, item->Type, item->ExtOption);
+            checkItemType(byOptionList, item->Type, item->AncientDiscriminator);
         }
 
         if (i == EQUIPMENT_WEAPON_RIGHT || i == EQUIPMENT_RING_RIGHT)
@@ -935,15 +937,16 @@ void CSItemOption::CheckItemSetOptions()
             continue;
         }
 
-        if (((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT)
-            && itemRight != nullptr && itemRight->Type == ip->Type && (itemRight->ExtOption % 0x04) == (ip->ExtOption % 0x04)))
+        if ((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT)
+            && itemRight != nullptr && itemRight->Type == ip->Type &&
+            itemRight->AncientDiscriminator == ip->AncientDiscriminator)
         {
             continue;
         }
 
         if (ip->Type > -1)
         {
-            checkItemType(byOptionList, ip->Type, ip->ExtOption);
+            checkItemType(byOptionList, ip->Type, ip->AncientDiscriminator);
         }
 
         if (i == EQUIPMENT_WEAPON_RIGHT || i == EQUIPMENT_RING_RIGHT)
@@ -1135,7 +1138,7 @@ int CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bI
 {
     const ITEM_SET_TYPE& itemSType = m_ItemSetType[ip->Type];
 
-    m_bySelectedItemOption = itemSType.byOption[(ip->ExtOption % 0x04) - 1];
+    m_bySelectedItemOption = itemSType.byOption[ip->AncientDiscriminator - 1];
 
     if (m_bySelectedItemOption <= 0 || m_bySelectedItemOption == 255) return TextNum;
 

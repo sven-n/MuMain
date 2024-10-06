@@ -96,7 +96,7 @@ void CNewUIMixInventory::SetMixState(int iMixState)
     }
 }
 
-bool CNewUIMixInventory::InsertItem(int iIndex, BYTE* pbyItemPacket)
+bool CNewUIMixInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(iIndex, pbyItemPacket);

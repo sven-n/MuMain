@@ -159,7 +159,7 @@ void SEASON3B::CNewUIMyShopInventory::GetTitle(wchar_t* titletext)
      m_EditBox->GetText(titletext, iMAX_SHOPTITLE_MULTI);
 }
 
-bool SEASON3B::CNewUIMyShopInventory::InsertItem(int iIndex, BYTE* pbyItemPacket)
+bool SEASON3B::CNewUIMyShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
     {

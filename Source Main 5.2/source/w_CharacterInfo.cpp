@@ -33,7 +33,7 @@ void CHARACTER::Initialize()
     m_bIsSelected = false;
     Decoy = false;
 
-    Class = 0;
+    Class = CLASS_WIZARD;
     Skin = 0;
     CtlCode = 0;
     ExtendState = 0;

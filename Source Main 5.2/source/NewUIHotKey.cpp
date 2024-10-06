@@ -228,7 +228,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
     else if (SEASON3B::IsPress('A'))
     {
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true
-            && gCharacterManager.GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT)
+            && Hero->Class != CLASS_TEMPLENIGHT)
         {
             g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
         }

@@ -76,9 +76,8 @@ bool COMGEM::FindWantedList()
         if (isCompiledGem(pItem))
         {
             INTBYTEPAIR p;
-            int Level = (pItem->Level >> 3) & 15;
             p.first = pItem->y * pNewInventoryCtrl->GetNumberOfColumn() + pItem->x;
-            p.second = Level;
+            p.second = pItem->Level;
             m_UnmixTarList.AddText(p.first, p.second);
             bReturn = true;
         }
@@ -217,15 +216,13 @@ void COMGEM::CalcGen()
 
 char COMGEM::CalcCompiledCount(const ITEM* p)
 {
-    int Level = (p->Level >> 3) & 15;
-
-    if (CheckOneItem(p) % 2)	return (Level + 1) * FIRST;
+    if (CheckOneItem(p) % 2)	return (p->Level + 1) * FIRST;
     else						return 0;
 }
 
 int	COMGEM::CalcItemValue(const ITEM* p)
 {
-    int Level = (p->Level >> 3) & 15;
+    int Level = p->Level;
     switch (CheckOneItem(p))
     {
     case NOGEM:

@@ -2722,7 +2722,7 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
         VectorAdd(vStartPos, vPos, vPos);
         VectorCopy(vPos, pObj->Position);
         Calc_ObjectAnimation(pObj, Translate, Select);
-        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level << 3, pPart->Option1, pPart->ExtOption, false, false, Translate, Select);
+        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
     }
 
     VectorCopy(vOrgPos, vPos);
@@ -2737,14 +2737,14 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
         VectorAdd(vStartPos, vPos, vPos);
         VectorCopy(vPos, pObj->Position);
         Calc_ObjectAnimation(pObj, Translate, Select);
-        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level << 3, pPart->Option1, pPart->ExtOption, false, false, Translate, Select);
+        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
     }
 
     VectorCopy(vOrgPos, pObj->Position);
     pObj->Alpha = 1.0f;
     pObj->AnimationFrame = fAnimationFrame;
     Calc_ObjectAnimation(pObj, Translate, Select);
-    RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level << 3, pPart->Option1, pPart->ExtOption, false, false, Translate, Select);
+    RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
 }
 
 void RenderObjectVisual(OBJECT* o)
@@ -6087,47 +6087,40 @@ void ItemAngle(OBJECT* o)
     }
 }
 
-void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
+void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool isFreshDrop)
 {
-    int Type = ConvertItemType(Item);
+    int Type = params.Group * MAX_ITEM_INDEX + params.Number;
     ITEM* n = &ip->Item;
     n->Type = Type;
-    if (Type == ITEM_ZEN)
-    {
-        n->Level = (Item[1] << 16) + (Item[2] << 8) + (Item[4]);
-        n->Durability = 0;
-        n->Option1 = 0;
-        if (CreateFlag)
-            PlayBuffer(SOUND_DROP_GOLD01);
-    }
-    else
-    {
-        n->Level = Item[1];
-        n->Durability = Item[2];
-        n->Option1 = Item[3];
-        n->ExtOption = Item[4];
-        n->option_380 = false;
-        BYTE b = (((Item[5] & 0x08) << 4) >> 7);
-        n->option_380 = b;
+    n->Level = params.Level;
+    n->HasSkill = params.WithSkill;
+    n->HasLuck = params.WithLuck;
+    n->OptionLevel = params.OptionLevel;
+    n->OptionType = params.OptionType;
+    n->Durability = params.Durability;
+    n->ExcellentFlags = params.ExcellentFlags;
+    n->AncientDiscriminator = params.AncientDiscriminator;
+    n->AncientBonusOption = params.AncientBonusOption;
+    n->option_380 = params.HasGuardianOption;
 
-        if (CreateFlag)
-        {
-            if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE || Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION || Type == ITEM_JEWEL_OF_GUARDIAN)
-                PlayBuffer(SOUND_JEWEL01, &ip->Object);
-            else if (Type == ITEM_GEMSTONE)
-                PlayBuffer(SOUND_JEWEL02, &ip->Object);
-            else
-                PlayBuffer(SOUND_DROP_ITEM01, &ip->Object);
-        }
+    if (isFreshDrop)
+    {
+        if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE || Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION || Type == ITEM_JEWEL_OF_GUARDIAN)
+            PlayBuffer(SOUND_JEWEL01, &ip->Object);
+        else if (Type == ITEM_GEMSTONE)
+            PlayBuffer(SOUND_JEWEL02, &ip->Object);
+        else
+            PlayBuffer(SOUND_DROP_ITEM01, &ip->Object);
     }
+    
 
     OBJECT* o = &ip->Object;
     o->Live = true;
-    o->Type = MODEL_SWORD + Type;
+    o->Type = MODEL_ITEM + Type;
     o->SubType = 1;
     if (Type == (int)(ITEM_BOX_OF_LUCK))
     {
-        switch ((n->Level >> 3))
+        switch (n->Level)
         {
         case 1:
             o->Type = MODEL_EVENT + 4;
@@ -6165,7 +6158,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     }
     if (Type >= ITEM_PINK_CHOCOLATE_BOX && Type <= ITEM_BLUE_CHOCOLATE_BOX)
     {
-        if ((n->Level >> 3) == 1)
+        if (n->Level == 1)
         {
             int Num = Type - (ITEM_PINK_CHOCOLATE_BOX);
             o->Type = MODEL_EVENT + 21 + Num;
@@ -6173,7 +6166,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     }
     else if (Type == (int)(ITEM_POTION + 21))
     {
-        switch ((n->Level >> 3))
+        switch (n->Level)
         {
         case 1:
         case 2:
@@ -6183,7 +6176,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     }
     else if (Type == (int)(ITEM_WEAPON_OF_ARCHANGEL))
     {
-        switch ((n->Level >> 3))
+        switch (n->Level)
         {
         case 0:
             o->Type = MODEL_DIVINE_STAFF_OF_ARCHANGEL;
@@ -6201,7 +6194,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     }
     else if (Type == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR)
     {
-        switch ((n->Level >> 3))
+        switch (n->Level)
         {
         case 1:
             o->Type = MODEL_EVENT + 12;
@@ -6211,7 +6204,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     }
     else if (Type == ITEM_BROKEN_SWORD_DARK_STONE)
     {
-        switch ((n->Level >> 3))
+        switch (n->Level)
         {
         case 1:
             o->Type = MODEL_EVENT + 13;
@@ -6220,7 +6213,7 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     }
     else if (Type == ITEM_WIZARDS_RING)
     {
-        switch ((n->Level >> 3))
+        switch (n->Level)
         {
         case 0:
             o->Type = MODEL_EVENT + 15;
@@ -6234,18 +6227,18 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     }
     else if (Type == (int)(ITEM_ALE))
     {
-        switch ((n->Level >> 3))
+        switch (n->Level)
         {
         case 1:
             o->Type = MODEL_EVENT + 7;
             break;
         }
     }
-    else if (Type == ITEM_LOCHS_FEATHER && (n->Level >> 3) == 1)
+    else if (Type == ITEM_LOCHS_FEATHER && n->Level == 1)
     {
         o->Type = MODEL_EVENT + 16;
     }
-    else if (Type == ITEM_LIFE_STONE_ITEM && (n->Level >> 3) == 1)
+    else if (Type == ITEM_LIFE_STONE_ITEM && n->Level == 1)
     {
         o->Type = MODEL_EVENT + 18;
     }
@@ -6268,8 +6261,8 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
     ItemObjectAttribute(o);
     Vector(-30.f, -30.f, -30.f, o->BoundingBoxMin);
     Vector(30.f, 30.f, 30.f, o->BoundingBoxMax);
-    VectorCopy(Position, o->Position);
-    if (CreateFlag)
+    VectorCopy(position, o->Position);
+    if (isFreshDrop)
     {
         if (o->Type == MODEL_EVENT + 8 || o->Type == MODEL_EVENT + 9)
         {
@@ -6279,8 +6272,8 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
             Vector(1.f, 1.f, 1.f, light);
             Vector(0.f, 0.f, 0.f, Angle);
             vec3_t NewPosition;
-            VectorCopy(Position, NewPosition);
-            NewPosition[2] = RequestTerrainHeight(Position[0], Position[1]) + 3;
+            VectorCopy(position, NewPosition);
+            NewPosition[2] = RequestTerrainHeight(position[0], position[1]) + 3;
             CreateEffect(MODEL_SKILL_FURY_STRIKE + 6, NewPosition, Angle, light, 0, o, scale);
             CreateEffect(MODEL_SKILL_FURY_STRIKE + 4, NewPosition, Angle, light, 0, o, scale);
             //CreateEffect(MODEL_SKILL_FURY_STRIKE+5,NewPosition,Angle,light,0,o,scale);
@@ -6293,6 +6286,42 @@ void CreateItem(ITEM_t* ip, BYTE* Item, vec3_t Position, int CreateFlag)
             o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 180.f;
             o->Gravity = 20.f;
         }
+    }
+    else
+    {
+        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+    }
+
+    ItemAngle(o);
+}
+
+void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop)
+{
+    int Type = ITEM_ZEN;
+    ITEM* n = &ip->Item;
+    n->Type = Type;
+    n->Level = amount;
+    n->Durability = 0;
+    n->ExcellentFlags = 0;
+    n->AncientDiscriminator = 0;
+    if (isFreshDrop)
+    {
+        PlayBuffer(SOUND_DROP_GOLD01);
+    }
+
+    OBJECT* o = &ip->Object;
+    o->Live = true;
+    o->Type = MODEL_ITEM + Type;
+    o->SubType = 1;
+    
+    ItemObjectAttribute(o);
+    Vector(-30.f, -30.f, -30.f, o->BoundingBoxMin);
+    Vector(30.f, 30.f, 30.f, o->BoundingBoxMax);
+    VectorCopy(position, o->Position);
+    if (isFreshDrop)
+    {
+        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 180.f;
+        o->Gravity = 20.f;
     }
     else
     {
@@ -6381,7 +6410,7 @@ void RenderItems()
                     Type = MODEL_PLAYER;
                 else if (o->Type == MODEL_POTION + 12)
                 {
-                    int Level = (Items[i].Item.Level >> 3) & 15;
+                    int Level = Items[i].Item.Level;
                     if (Level == 0)
                         Type = MODEL_EVENT;
                     else if (Level == 2)
@@ -6401,7 +6430,7 @@ void RenderItems()
                 vec3_t Light;
                 RequestTerrainLight(o->Position[0], o->Position[1], Light);
                 VectorAdd(Light, o->Light, Light);
-                if (o->Type == MODEL_POTION + 15)
+                if (o->Type == MODEL_POTION + 15) // Zen
                 {
                     vec3_t Temp;
                     VectorCopy(o->Position, Temp);
@@ -6418,7 +6447,7 @@ void RenderItems()
                         AngleMatrix(Angle, Matrix);
                         VectorRotate(p, Matrix, Position);
                         VectorAdd(Temp, Position, o->Position);
-                        RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.Option1, Items[i].Item.ExtOption, true, true, true);
+                        RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
                     }
                     VectorCopy(Temp, o->Position);
                 }
@@ -6442,7 +6471,7 @@ void RenderItems()
                     o->Position[2] = GetWaterTerrain(o->Position[0], o->Position[1]) + 180;
                 }
 
-                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.Option1, Items[i].Item.ExtOption, true, true, true);
+                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
                 VectorCopy(vBackup, o->Position);
 
                 vec3_t Position;
@@ -9386,9 +9415,9 @@ void NextGradeObjectRender(CHARACTER* c)
 
 extern float g_Luminosity;
 
-void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int ItemLevel, int Option1, int ExtOption, int Select, int RenderType)
+void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags, int ancientDiscriminator, int Select, int RenderType)
 {
-    int Level = (ItemLevel >> 3) & 15;
+    int Level = ItemLevel;
     if (RenderType & RENDER_WAVE)
     {
         Level = 0;
@@ -9721,7 +9750,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, 0.5f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1, BITMAP_CHROME + 1);
         return;
     }
-    else if (Type == MODEL_EVENT + 5 && ((ItemLevel >> 3) & 15) == 14)
+    else if (Type == MODEL_EVENT + 5 && ItemLevel == 14)
     {
         Vector(0.2f, 0.3f, 0.5f, b->BodyLight);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -9730,7 +9759,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         b->RenderBody(RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return;
     }
-    else if (Type == MODEL_EVENT + 5 && ((ItemLevel >> 3) & 15) == 15)
+    else if (Type == MODEL_EVENT + 5 && ItemLevel == 15)
     {
         Vector(0.5f, 0.3f, 0.2f, b->BodyLight);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -10352,7 +10381,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             && !g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint)
             )
         {
-            if ((Option1 & 63) > 0 && (o->Type<MODEL_WING || o->Type>MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
+            if ((ExcellentFlags & 63) > 0 && (o->Type<MODEL_WING || o->Type>MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
                 && (o->Type<MODEL_WING_OF_STORM || o->Type>MODEL_WING_OF_DIMENSION)
                 && (o->Type < MODEL_WING + 130 || MODEL_WING + 134 < o->Type)
                 && !(o->Type >= MODEL_CAPE_OF_FIGHTER && o->Type <= MODEL_CAPE_OF_OVERRULE)
@@ -10408,7 +10437,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                     b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 }
             }
-            else if (((ExtOption % 0x04) == EXT_A_SET_OPTION || (ExtOption % 0x04) == EXT_B_SET_OPTION))
+            else if (ancientDiscriminator > 0)
             {
                 Alpha = sinf(WorldTime * 0.001f) * 0.5f + 0.4f;
                 if (Alpha <= 0.01f)
@@ -10545,7 +10574,7 @@ void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, floa
 
 void BodyLight(OBJECT* o, BMD* b);
 
-void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, int ItemLevel, int Option1, int ExtOption, bool GlobalTransform, bool HideSkin, bool Translate, int Select, int RenderType)
+void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags, int ancientDiscriminator, bool GlobalTransform, bool HideSkin, bool Translate, int Select, int RenderType)
 {
     if (Alpha <= 0.01f)
     {
@@ -10556,7 +10585,7 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
 
     if (Type == MODEL_POTION + 12)
     {
-        int Level = (ItemLevel >> 3) & 15;
+        int Level = ItemLevel;
 
         if (Level == 0)
         {
@@ -10706,7 +10735,7 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
     }
 
     if (!g_CMonkSystem.RageFighterEffect(o, Type))
-        RenderPartObjectEffect(o, Type, Light, Alpha, ItemLevel, Option1, ExtOption, Select, RenderType);
+        RenderPartObjectEffect(o, Type, Light, Alpha, ItemLevel, ExcellentFlags, ancientDiscriminator, Select, RenderType);
 }
 
 float AmbientShadowAngle = 180.f;

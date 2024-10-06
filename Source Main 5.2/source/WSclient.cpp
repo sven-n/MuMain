@@ -111,9 +111,10 @@ MASTER_LEVEL_VALUE	Master_Level_Data;
 
 //BYTE Version[SIZE_PROTOCOLVERSION] = {'1'+1, '0'+2, '4'+3, '0'+4, '5'+5};
 //BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"TbYehR2hFUPBKgZj"};
-BYTE Version[SIZE_PROTOCOLVERSION] = { '1' + 1, '0' + 2, '4' + 3, '0' + 4, '4' + 5 };
-BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 
+BYTE Version[SIZE_PROTOCOLVERSION] = { '2', '0', '4', '0', '4' };
+
+BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 Connection* SocketClient = nullptr;
 
 BYTE    g_byPacketSerialSend = 0;
@@ -358,19 +359,27 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             break;
 
         default:
-            g_ErrorReport.Write(L"Connectting error. ");
+            g_ErrorReport.Write(L"Connecting error. ");
             g_ErrorReport.WriteCurrentTime();
             rUIMng.PopUpMsgWin(MESSAGE_SERVER_LOST);
             break;
         }
-        for (int i = 0; i < SIZE_PROTOCOLVERSION; i++)
+
+        u_int64 received = 0;
+        u_int64 actual = 0;
+        for (int i = 0; i < SIZE_PROTOCOLVERSION; ++i)
         {
-            if (Version[i] - (i + 1) != Data2->Version[i])
-            {
-                rUIMng.HideWin(&rUIMng.m_LoginWin);
-                rUIMng.PopUpMsgWin(MESSAGE_VERSION);
-                g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
-            }
+            received |= Data2->Version[i];
+            received <<= 8;
+            actual |= Version[i];
+            actual <<= 8;
+        }
+
+        if (actual < received)
+        {
+            rUIMng.HideWin(&rUIMng.m_LoginWin);
+            rUIMng.PopUpMsgWin(MESSAGE_VERSION);
+            g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
         }
     }
 
@@ -405,9 +414,15 @@ void ReceiveConfirmPassword(const BYTE* ReceiveBuffer)
     }
 }
 
-void ReceiveConfirmPassword2(const BYTE* ReceiveBuffer)
+void ReceiveConfirmPassword2(const std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPRECEIVE_CONFIRM_PASSWORD2)ReceiveBuffer;
+    auto Data = safe_cast<PRECEIVE_CONFIRM_PASSWORD2>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
     switch (Data->Result)
     {
     case 1:
@@ -447,11 +462,16 @@ void ReceiveChangePassword(const BYTE* ReceiveBuffer)
     }
 }
 
-void ReceiveCharacterList(const BYTE* ReceiveBuffer)
+void ReceiveCharacterList(std::span<const BYTE> ReceiveBuffer)
 {
     InitGuildWar();
 
-    auto Data = (LPPHEADER_DEFAULT_CHARACTER_LIST)ReceiveBuffer;
+    auto Data = safe_cast<PHEADER_DEFAULT_CHARACTER_LIST>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
 
     int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
 
@@ -464,9 +484,14 @@ void ReceiveCharacterList(const BYTE* ReceiveBuffer)
     CharacterAttribute->IsVaultExtended = Data->IsVaultExtended;
     for (int i = 0; i < Data->CharacterCount; i++)
     {
-        auto Data2 = (LPPRECEIVE_CHARACTER_LIST)(ReceiveBuffer + Offset);
+        auto Data2 = safe_cast<PRECEIVE_CHARACTER_LIST_EXTENDED>(ReceiveBuffer.subspan(Offset));
+        if (Data2 == nullptr)
+        {
+            assert(false);
+            return;
+        }
 
-        int iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
+        auto iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
 
         float fPos[2], fAngle = 0.0f;
 
@@ -498,8 +523,66 @@ void ReceiveCharacterList(const BYTE* ReceiveBuffer)
         ChangeCharacterExt(Data2->Index, Data2->Equipment);
 
         c->GuildStatus = Data2->byGuildStatus;
-        Offset += sizeof(PRECEIVE_CHARACTER_LIST);
+        Offset += sizeof(PRECEIVE_CHARACTER_LIST_EXTENDED);
     }
+    CurrentProtocolState = RECEIVE_CHARACTERS_LIST;
+}
+
+void ReceiveCharacterListExtended(const BYTE* ReceiveBuffer)
+{
+    InitGuildWar();
+
+    auto Data = (LPPHEADER_DEFAULT_CHARACTER_LIST)ReceiveBuffer;
+
+    int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
+
+#ifdef _DEBUG
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
+#else
+    g_ErrorReport.Write(L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
+#endif
+
+    CharacterAttribute->IsVaultExtended = Data->IsVaultExtended;
+    for (int i = 0; i < Data->CharacterCount; i++)
+    {
+        auto Data2 = (LPPRECEIVE_CHARACTER_LIST_EXTENDED)(ReceiveBuffer + Offset);
+
+        auto iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
+        float fPos[2], fAngle = 0.0f;
+
+        switch (Data2->Index)
+        {
+#ifdef PJH_NEW_SERVER_SELECT_MAP
+        case 0:	fPos[0] = 8008.0f;	fPos[1] = 18885.0f;	fAngle = 115.0f; break;
+        case 1:	fPos[0] = 7986.0f;	fPos[1] = 19145.0f;	fAngle = 90.0f; break;
+        case 2:	fPos[0] = 8046.0f;	fPos[1] = 19400.0f;	fAngle = 75.0f; break;
+        case 3:	fPos[0] = 8133.0f;	fPos[1] = 19645.0f;	fAngle = 60.0f; break;
+        case 4:	fPos[0] = 8282.0f;	fPos[1] = 19845.0f;	fAngle = 35.0f; break;
+#else //PJH_NEW_SERVER_SELECT_MAP
+        case 0:	fPos[0] = 22628.0f;	fPos[1] = 15012.0f;	fAngle = 100.0f; break;
+        case 1:	fPos[0] = 22700.0f;	fPos[1] = 15201.0f;	fAngle = 75.0f; break;
+        case 2:	fPos[0] = 22840.0f;	fPos[1] = 15355.0f;	fAngle = 50.0f; break;
+        case 3:	fPos[0] = 23019.0f;	fPos[1] = 15443.0f;	fAngle = 25.0f; break;
+        case 4:	fPos[0] = 23211.6f;	fPos[1] = 15467.0f;	fAngle = 0.0f; break;
+#endif //PJH_NEW_SERVER_SELECT_MAP
+        default: return;
+        }
+
+        CHARACTER* c = CreateHero(Data2->Index, iClass, 0, fPos[0], fPos[1], fAngle);
+
+        c->Level = Data2->Level;
+        c->CtlCode = Data2->CtlCode;
+
+        memset(c->ID, 0, sizeof(c->ID));
+
+        CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_ID_SIZE);
+
+        ReadEquipmentExtended(Data2->Index, Data2->Flags, Data2->Equipment);
+
+        c->GuildStatus = Data2->byGuildStatus;
+        Offset += sizeof(PRECEIVE_CHARACTER_LIST_EXTENDED);
+    }
+
     CurrentProtocolState = RECEIVE_CHARACTERS_LIST;
 }
 
@@ -555,7 +638,7 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
         CreateHero(Data->Index, CharacterView.Class, CharacterView.Skin, fPos[0], fPos[1], fAngle);
         CharactersClient[Data->Index].Level = Data->Level;
 
-        int iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
+        auto iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
 
         CharactersClient[Data->Index].Class = iClass;
         CMultiLanguage::ConvertFromUtf8(CharactersClient[Data->Index].ID, Data->ID, MAX_ID_SIZE);
@@ -752,67 +835,27 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
 int HeroIndex;
 
-BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 {
     MouseLButton = false;
+    HeroIndex = rand() % MAX_CHARACTERS_CLIENT;
+    CHARACTER* c = &CharactersClient[HeroIndex];
 
-    auto Data = (LPPRECEIVE_JOIN_MAP_SERVER)ReceiveBuffer;
+    BYTE pk, ctlCode, posX, posY, angle;
+    CharacterAttribute->Ability = 0;
+    CharacterAttribute->AbilityTime[0] = 0;
+    CharacterAttribute->AbilityTime[1] = 0;
+    CharacterAttribute->AbilityTime[2] = 0;
 
-    __int64 Data_Exp = 0x0000000000000000;
-    Master_Level_Data.lMasterLevel_Experince = 0x0000000000000000;
-    Data_Exp |= Data->btMExp1;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp2;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp3;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp4;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp5;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp6;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp7;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp8;
-
-    if (gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
+    auto const Data = safe_cast<PRECEIVE_JOIN_MAP_SERVER_EXTENDED>(ReceiveBuffer);
+    if (Data == nullptr)
     {
-        Master_Level_Data.lMasterLevel_Experince = Data_Exp;
-    }
-    else
-    {
-        CharacterAttribute->Experience = (int)Data_Exp;
+        assert(false);
+        return false;
     }
 
-    Data_Exp = 0x0000000000000000;
-    Master_Level_Data.lNext_MasterLevel_Experince = 0x0000000000000000;
-
-    Data_Exp |= Data->btMNextExp1;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp2;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp3;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp4;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp5;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp6;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp7;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMNextExp8;
-
-    if (gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
-    {
-        Master_Level_Data.lNext_MasterLevel_Experince = Data_Exp;
-    }
-    else
-    {
-        CharacterAttribute->NextExperince = (int)Data_Exp;
-    }
-
+    CharacterAttribute->Experience = Data->CurrentExperience;
+    CharacterAttribute->NextExperience = Data->ExperienceForNextLevel;
     CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
     CharacterAttribute->Strength = Data->Strength;
     CharacterAttribute->Dexterity = Data->Dexterity;
@@ -825,10 +868,6 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     CharacterAttribute->ManaMax = Data->ManaMax;
     CharacterAttribute->SkillMana = Data->SkillMana;
     CharacterAttribute->SkillManaMax = Data->SkillManaMax;
-    CharacterAttribute->Ability = 0;
-    CharacterAttribute->AbilityTime[0] = 0;
-    CharacterAttribute->AbilityTime[1] = 0;
-    CharacterAttribute->AbilityTime[2] = 0;
     CharacterAttribute->Shield = Data->Shield;
     CharacterAttribute->ShieldMax = Data->ShieldMax;
     CharacterAttribute->AddPoint = Data->AddPoint;
@@ -836,12 +875,12 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     CharacterAttribute->wMinusPoint = Data->wMinusPoint;
     CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
     CharacterAttribute->InventoryExtensions = Data->InventoryExtensions;
-
+    CharacterAttribute->AttackSpeed = Data->AttackSpeed;
+    CharacterAttribute->MagicSpeed = Data->AttackSpeed;
+    CharacterAttribute->MaxAttackSpeed = Data->MaxAttackSpeed;
     CharacterMachine->Gold = Data->Gold;
-    //CharacterAttribute->SkillMana     = CharacterAttribute->Energy*10+CharacterAttribute->ManaMax*10/6;
 
     gMapManager.WorldActive = Data->Map;
-
     gMapManager.LoadWorld(gMapManager.WorldActive);
 
     if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
@@ -850,18 +889,17 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
 
     matchEvent::CreateEventMatch(gMapManager.WorldActive);
-    HeroIndex = rand() % MAX_CHARACTERS_CLIENT;
-    CHARACTER* c = &CharactersClient[HeroIndex];
+
     CreateCharacterPointer(c, MODEL_PLAYER, Data->PositionX, Data->PositionY, ((float)Data->Angle - 1.f) * 45.f);
     c->Key = HeroKey;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d", c->Key, Data->Map, Data->PositionX, Data->PositionY);
-
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d", c->Key, gMapManager.WorldActive, Data->PositionX, Data->PositionY);
     OBJECT* o = &c->Object;
     c->Class = CharacterAttribute->Class;
     c->Skin = 0;
     c->PK = Data->PK;
     c->CtlCode = Data->CtlCode;
+
     o->Kind = KIND_PLAYER;
     SetCharacterClass(c);
 
@@ -874,7 +912,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     {
         CharacterMachine->Equipment[i].Type = -1;
         CharacterMachine->Equipment[i].Level = 0;
-        CharacterMachine->Equipment[i].Option1 = 0;
+        CharacterMachine->Equipment[i].ExcellentFlags = 0;
     }
     
     CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
@@ -959,7 +997,7 @@ BOOL ReceiveJoinMapServer(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     return (TRUE);
 }
-
+/*
 void ReceiveRevival(const BYTE* ReceiveBuffer)
 {
     MouseLButton = false;
@@ -1114,7 +1152,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     g_pNewUISystem->HideAll();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x04 [ReceiveRevival]");
-}
+}*/
 
 void ReceiveMagicList(const BYTE* ReceiveBuffer)
 {
@@ -1213,58 +1251,6 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
 }
 
-BOOL ReceiveInventory(const BYTE* ReceiveBuffer, BOOL bEncrypted)
-{
-    for (int i = 0; i < MAX_EQUIPMENT; i++)
-    {
-        CharacterMachine->Equipment[i].Type = -1;
-        CharacterMachine->Equipment[i].Number = 0;
-        CharacterMachine->Equipment[i].Option1 = 0;
-    }
-
-    g_pMyInventory->UnequipAllItems();
-    g_pMyInventory->DeleteAllItems();
-    g_pMyInventoryExt->DeleteAllItems();
-    g_pMyShopInventory->DeleteAllItems();
-
-    auto Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer; //LPPHEADER_DEFAULT_SUBCODE_WORD 6byte
-    int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
-    DeleteMount(&Hero->Object);
-    giPetManager::DeletePet(Hero);
-
-    ThePetProcess().DeletePet(Hero);
-
-    for (int i = 0; i < Data->Value; i++)
-    {
-        auto Data2 = (LPPRECEIVE_INVENTORY)(ReceiveBuffer + Offset); //LPPRECEIVE_INVENTORY 8byte
-
-        SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
-        int itemindex = Data2->Index;
-        if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
-        {
-            g_pMyInventory->EquipItem(itemindex, Data2->Item);
-        }
-        else if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
-        {
-            g_pMyInventory->InsertItem(itemindex, Data2->Item);
-        }
-        else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
-        {
-            g_pMyInventoryExt->InsertItem(itemindex, Data2->Item);
-        }
-        else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
-        {
-            g_pMyShopInventory->InsertItem(itemindex, Data2->Item);
-        }
-
-        Offset += sizeof(PRECEIVE_INVENTORY);
-    }
-
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x10 [ReceiveInventory]");
-
-    return (TRUE);
-}
-
 void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
@@ -1297,9 +1283,119 @@ void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x28 [ReceiveDeleteInventory(%d %d)]", Data->SubCode, Data->Value);
 }
 
-void ReceiveTradeInventory(const BYTE* ReceiveBuffer)
+int CalcItemLength(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPHEADER_DEFAULT_SUBCODE_WORD)ReceiveBuffer;
+    auto Data = safe_cast<PITEM_EXTENDED_BASE>(ReceiveBuffer);
+    int size = 5;
+    if (Data->OptionFlags & ItemOptionFlags::HasOption)
+    {
+        size++;
+    }
+
+    if (Data->OptionFlags & ItemOptionFlags::HasExcellent)
+    {
+        size++;
+    }
+
+    if (Data->OptionFlags & ItemOptionFlags::HasAncient)
+    {
+        size++;
+    }
+
+    if (Data->OptionFlags & ItemOptionFlags::HasHarmony)
+    {
+        size++;
+    }
+
+    if (Data->OptionFlags & ItemOptionFlags::HasSockets)
+    {
+        auto socketCount = ReceiveBuffer[size] & 0xF;
+        size++;
+        size += socketCount;
+    }
+
+    return size;
+}
+
+BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
+{
+    for (int i = 0; i < MAX_EQUIPMENT; i++)
+    {
+        CharacterMachine->Equipment[i].Type = -1;
+        CharacterMachine->Equipment[i].Number = 0;
+        CharacterMachine->Equipment[i].ExcellentFlags = 0;
+    }
+
+    g_pMyInventory->UnequipAllItems();
+    g_pMyInventory->DeleteAllItems();
+    g_pMyInventoryExt->DeleteAllItems();
+    g_pMyShopInventory->DeleteAllItems();
+
+    auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_WORD>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return false;
+    }
+
+    int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
+    DeleteMount(&Hero->Object);
+    giPetManager::DeletePet(Hero);
+
+    ThePetProcess().DeletePet(Hero);
+
+    for (int i = 0; i < Data->Value; i++)
+    {
+        auto itemStartData = safe_cast<PRECEIVE_INVENTORY_EXTENDED>(ReceiveBuffer.subspan(Offset));
+        if (itemStartData == nullptr)
+        {
+            assert(false);
+            return false;
+        }
+
+        SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+        int itemindex = itemStartData->Index;
+        Offset++;
+
+        int length = CalcItemLength(itemStartData->Item);
+        auto itemData = ReceiveBuffer.subspan(Offset, length);
+
+        if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
+        {
+            g_pMyInventory->EquipItem(itemindex, itemData);
+        }
+        else if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+        {
+            g_pMyInventory->InsertItem(itemindex, itemData);
+        }
+        else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        {
+            g_pMyInventoryExt->InsertItem(itemindex, itemData);
+        }
+        else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+        {
+            g_pMyShopInventory->InsertItem(itemindex, itemData);
+        }
+
+        Offset += length;
+    }
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x10 [ReceiveInventory]");
+
+    return (TRUE);
+}
+
+
+
+void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
+{
+    auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_WORD>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
     int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
 
     if (Data->SubCode == 3)
@@ -1333,39 +1429,47 @@ void ReceiveTradeInventory(const BYTE* ReceiveBuffer)
 
     for (int i = 0; i < Data->Value; i++)
     {
-        auto Data2 = (LPPRECEIVE_INVENTORY)(ReceiveBuffer + Offset);
-
-        if (Data->SubCode == 3)
+        auto itemStartData = safe_cast<PRECEIVE_INVENTORY_EXTENDED>(ReceiveBuffer.subspan(Offset));
+        if (itemStartData == nullptr)
         {
-            g_pMixInventory->InsertItem(Data2->Index, Data2->Item);
+            assert(false);
+            return;
         }
-        else if (Data->SubCode == 5)
+
+        int itemindex = itemStartData->Index;
+
+        int length = CalcItemLength(itemStartData->Item);
+
+        Offset++;
+        auto itemData = ReceiveBuffer.subspan(Offset, length);
+
+        if (Data->SubCode == 3 || Data->SubCode == 5)
         {
-            g_pMixInventory->InsertItem(Data2->Index, Data2->Item);
+            g_pMixInventory->InsertItem(itemindex, itemData);
         }
         else
         {
             if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
             {
-                g_pNPCShop->InsertItem(Data2->Index, Data2->Item);
+                g_pNPCShop->InsertItem(itemindex, itemData);
             }
             else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
             {
-                if (Data2->Index < MAX_SHOP_INVENTORY)
+                if (itemindex < MAX_SHOP_INVENTORY)
                 {
-                    g_pStorageInventory->InsertItem(Data2->Index, Data2->Item);
+                    g_pStorageInventory->InsertItem(itemindex, itemData);
                 }
                 else
                 {
-                    g_pStorageInventoryExt->InsertItem(Data2->Index, Data2->Item);
+                    g_pStorageInventoryExt->InsertItem(itemindex, itemData);
                 }
             }
         }
 
-        Offset += sizeof(PRECEIVE_INVENTORY);
+        Offset += length;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x31 [ReceiveTradeInventory]");
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x31 [ReceiveTradeInventoryExtended]");
 }
 
 void ReceiveChat(const BYTE* ReceiveBuffer)
@@ -1825,140 +1929,153 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     return (TRUE);
 }
 
-void ReceiveEquipment(const BYTE* ReceiveBuffer)
+void ReceiveEquipment(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPRECEIVE_EQUIPMENT)ReceiveBuffer;
+    auto Data = safe_cast<PRECEIVE_EQUIPMENT_EXTENDED>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
     int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
-    ChangeCharacterExt(FindCharacterIndex(Key), Data->Equipment);
+    ReadEquipmentExtended(FindCharacterIndex(Key), 0, Data->Equipment);
 }
 
-void ReceiveChangePlayer(const BYTE* ReceiveBuffer)
+void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPCHANGE_CHARACTER)ReceiveBuffer;
-    int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
+    auto Data = safe_cast<PCHANGE_CHARACTER_EXTENDED>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    int Key = Data->Key;
+
     CHARACTER* c = &CharactersClient[FindCharacterIndex(Key)];
     OBJECT* o = &c->Object;
 
-    int Type = ConvertItemType(Data->Item);
-    BYTE Level = Data->Item[1] & 0xf;
-    BYTE Option = Data->Item[3] & 63;
-    BYTE ExtOption = Data->Item[4];
+    int Type = ((Data->ItemGroup & 0xF) * MAX_ITEM_INDEX) | Data->ItemNumber;
+    //BYTE Level = Data->Item[1] & 0xf;
+    //BYTE Option = Data->Item[3] & 63;
+    //BYTE ExtOption = Data->Item[4];
 
     int maxClass = MAX_CLASS;
 
-    switch (Data->Item[1] >> 4)
+    switch (Data->ItemSlot)
     {
     case 0:
-        if (Type == 0x1FFF)
+        if (Data->ItemGroup == 0xFF)
         {
             c->Weapon[0].Type = -1;
-            c->Weapon[0].Option1 = 0;
+            c->Weapon[0].ExcellentFlags = 0;
         }
         else
         {
             c->Weapon[0].Type = MODEL_ITEM + Type;
-            c->Weapon[0].Level = LevelConvert(Level);
-            c->Weapon[0].Option1 = Option;
+            c->Weapon[0].Level = LevelConvert(Data->ItemLevel);
+            c->Weapon[0].ExcellentFlags = Data->ExcellentFlags;
         }
         break;
     case 1:
-        if (Type == 0x1FFF)
+        if (Data->ItemGroup == 0xFF)
         {
             c->Weapon[1].Type = -1;
-            c->Weapon[1].Option1 = 0;
+            c->Weapon[1].ExcellentFlags = 0;
             DeletePet(c);
         }
         else
         {
             c->Weapon[1].Type = MODEL_ITEM + Type;
-            c->Weapon[1].Level = LevelConvert(Level);
-            c->Weapon[1].Option1 = Option;
+            c->Weapon[1].Level = LevelConvert(Data->ItemLevel);
+            c->Weapon[1].ExcellentFlags = Data->ExcellentFlags;
             CreatePetDarkSpirit_Now(c);
             g_SummonSystem.RemoveEquipEffects(c);
         }
         break;
     case 2:
-        if (Type == 0x1FFF)
+        if (Data->ItemGroup == 0xFF)
         {
             c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(c->Class);
             c->BodyPart[BODYPART_HELM].Level = 0;
-            c->BodyPart[BODYPART_HELM].Option1 = 0;
-            c->BodyPart[BODYPART_HELM].ExtOption = 0;
+            c->BodyPart[BODYPART_HELM].ExcellentFlags = 0;
+            c->BodyPart[BODYPART_HELM].AncientDiscriminator = 0;
         }
         else
         {
             c->BodyPart[BODYPART_HELM].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_HELM].Level = LevelConvert(Level);
-            c->BodyPart[BODYPART_HELM].Option1 = Option;
-            c->BodyPart[BODYPART_HELM].ExtOption = ExtOption;
+            c->BodyPart[BODYPART_HELM].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_HELM].ExcellentFlags = Data->ExcellentFlags;
+            c->BodyPart[BODYPART_HELM].AncientDiscriminator = Data->AncientDiscriminator;
         }
         break;
     case 3:
-        if (Type == 0x1FFF)
+        if (Data->ItemGroup == 0xFF)
         {
             c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR + gCharacterManager.GetSkinModelIndex(c->Class);
             c->BodyPart[BODYPART_ARMOR].Level = 0;
-            c->BodyPart[BODYPART_ARMOR].Option1 = 0;
-            c->BodyPart[BODYPART_ARMOR].ExtOption = 0;
+            c->BodyPart[BODYPART_ARMOR].ExcellentFlags = 0;
+            c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = 0;
         }
         else
         {
             c->BodyPart[BODYPART_ARMOR].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_ARMOR].Level = LevelConvert(Level);
-            c->BodyPart[BODYPART_ARMOR].Option1 = Option;
-            c->BodyPart[BODYPART_ARMOR].ExtOption = ExtOption;
+            c->BodyPart[BODYPART_ARMOR].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_ARMOR].ExcellentFlags = Data->ExcellentFlags;
+            c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = Data->AncientDiscriminator;
         }
         break;
     case 4:
-        if (Type == 0x1FFF)
+        if (Data->ItemGroup == 0xFF)
         {
             c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS + gCharacterManager.GetSkinModelIndex(c->Class);
             c->BodyPart[BODYPART_PANTS].Level = 0;
-            c->BodyPart[BODYPART_PANTS].Option1 = 0;
-            c->BodyPart[BODYPART_PANTS].ExtOption = 0;
+            c->BodyPart[BODYPART_PANTS].ExcellentFlags = 0;
+            c->BodyPart[BODYPART_PANTS].AncientDiscriminator = 0;
         }
         else
         {
             c->BodyPart[BODYPART_PANTS].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_PANTS].Level = LevelConvert(Level);
-            c->BodyPart[BODYPART_PANTS].Option1 = Option;
-            c->BodyPart[BODYPART_PANTS].ExtOption = ExtOption;
+            c->BodyPart[BODYPART_PANTS].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_PANTS].ExcellentFlags = Data->ExcellentFlags;
+            c->BodyPart[BODYPART_PANTS].AncientDiscriminator = Data->AncientDiscriminator;
         }
         break;
     case 5:
-        if (Type == 0x1FFF)
+        if (Data->ItemGroup == 0xFF)
         {
             c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES + gCharacterManager.GetSkinModelIndex(c->Class);
             c->BodyPart[BODYPART_GLOVES].Level = 0;
-            c->BodyPart[BODYPART_GLOVES].Option1 = 0;
-            c->BodyPart[BODYPART_GLOVES].ExtOption = 0;
+            c->BodyPart[BODYPART_GLOVES].ExcellentFlags = 0;
+            c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = 0;
         }
         else
         {
             c->BodyPart[BODYPART_GLOVES].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_GLOVES].Level = LevelConvert(Level);
-            c->BodyPart[BODYPART_GLOVES].Option1 = Option;
-            c->BodyPart[BODYPART_GLOVES].ExtOption = ExtOption;
+            c->BodyPart[BODYPART_GLOVES].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_GLOVES].ExcellentFlags = Data->ExcellentFlags;
+            c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = Data->AncientDiscriminator;
         }
         break;
     case 6:
-        if (Type == 0x1FFF)
+        if (Data->ItemGroup == 0xFF)
         {
             c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS + gCharacterManager.GetSkinModelIndex(c->Class);
             c->BodyPart[BODYPART_BOOTS].Level = 0;
-            c->BodyPart[BODYPART_BOOTS].Option1 = 0;
-            c->BodyPart[BODYPART_BOOTS].ExtOption = 0;
+            c->BodyPart[BODYPART_BOOTS].ExcellentFlags = 0;
+            c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = 0;
         }
         else
         {
             c->BodyPart[BODYPART_BOOTS].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_BOOTS].Level = LevelConvert(Level);
-            c->BodyPart[BODYPART_BOOTS].Option1 = Option;
-            c->BodyPart[BODYPART_BOOTS].ExtOption = ExtOption;
+            c->BodyPart[BODYPART_BOOTS].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_BOOTS].ExcellentFlags = Data->ExcellentFlags;
+            c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = Data->AncientDiscriminator;
         }
         break;
     case 7:
-        if (Type == 0x1FFF)
+        if (Data->ItemGroup == 0xFF)
         {
             if (c->Wing.Type == MODEL_WING_OF_RUIN ||
                 c->Wing.Type == MODEL_CAPE_OF_LORD ||
@@ -1989,7 +2106,7 @@ void ReceiveChangePlayer(const BYTE* ReceiveBuffer)
         }
         break;
     case 8:
-        if (Type == 0x1FFF)
+        if (Data->ItemGroup == 0xFF)
         {
             c->Helper.Type = -1;
             DeleteMount(o);
@@ -2007,16 +2124,16 @@ void ReceiveChangePlayer(const BYTE* ReceiveBuffer)
             case ITEM_HORN_OF_DINORANT:CreateMount(MODEL_PEGASUS, o->Position, o); break;
             case ITEM_DARK_HORSE_ITEM:CreateMount(MODEL_DARK_HORSE, o->Position, o); break;
             case ITEM_HORN_OF_FENRIR:
-                c->Helper.Option1 = Option;
-                if (Option == 0x01)
+                c->Helper.ExcellentFlags = Data->ExcellentFlags;
+                if (Data->ExcellentFlags == 0x01)
                 {
                     CreateMount(MODEL_FENRIR_BLACK, o->Position, o);
                 }
-                else if (Option == 0x02)
+                else if (Data->ExcellentFlags == 0x02)
                 {
                     CreateMount(MODEL_FENRIR_BLUE, o->Position, o);
                 }
-                else if (Option == 0x04)
+                else if (Data->ExcellentFlags == 0x04)
                 {
                     CreateMount(MODEL_FENRIR_GOLD, o->Position, o);
                 }
@@ -2051,227 +2168,158 @@ void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime = 0);
 
 void UnRegisterBuff(eBuffState buff, OBJECT* o);
 
-void ReceiveCreatePlayerViewport(const BYTE* ReceiveBuffer, int Size)
+void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
-    int Offset = sizeof(PWHEADER_DEFAULT_WORD);
-
-    for (int i = 0; i < Data->Value; i++)
+    auto Data = safe_cast<PCREATE_CHARACTER_EXTENDED>(ReceiveBuffer);
+    if (Data == nullptr)
     {
-        auto Data2 = (LPPCREATE_CHARACTER)(ReceiveBuffer + Offset);
-        WORD Key = ((WORD)(Data2->KeyH) << 8) + Data2->KeyL;
-        int CreateFlag = (Key >> 15);
-        Key &= 0x7FFF;
-
-        wchar_t Temp[MAX_ID_SIZE + 1] {};
-        CMultiLanguage::ConvertFromUtf8(Temp, Data2->ID, MAX_ID_SIZE);
-        if (FindText(Temp, L"webzen") == false)
-        {
-            int Index;
-            short BackUpGuildMarkIndex = -1;
-            BYTE BackUpGuildStatus = 0;
-            BYTE BackUpGuildType = 0;
-            BYTE BackUpGuildRelationShip = 0;
-            BYTE BackUpGuildMasterKillCount = 0;
-            BYTE  EtcPart = 0;
-            // ctlcode
-            BYTE BackupCtlcode = 0;
-
-            if ((Data2->Class & 0x07) == 1)
-            {
-                Index = FindCharacterIndex(Key);
-                if (Index != MAX_CHARACTERS_CLIENT)
-                {
-                    BackUpGuildMarkIndex = CharactersClient[Index].GuildMarkIndex;
-                    BackUpGuildStatus = CharactersClient[Index].GuildStatus;
-                    BackUpGuildType = CharactersClient[Index].GuildType;
-                    BackUpGuildRelationShip = CharactersClient[Index].GuildRelationShip;
-                    EtcPart = CharactersClient[Index].EtcPart;
-                    BackUpGuildMasterKillCount = CharactersClient[Index].GuildMasterKillCount;
-                }
-
-                if (&CharactersClient[Index] == Hero)
-                {
-                    BackupCtlcode = CharactersClient[Index].CtlCode;
-                }
-            }
-            else
-            {
-                Index = FindCharacterIndex(Key);
-                if (Index != MAX_CHARACTERS_CLIENT)
-                {
-                    BackUpGuildMarkIndex = CharactersClient[Index].GuildMarkIndex;
-                    BackUpGuildStatus = CharactersClient[Index].GuildStatus;
-                    BackUpGuildType = CharactersClient[Index].GuildType;
-                    BackUpGuildRelationShip = CharactersClient[Index].GuildRelationShip;
-                    BackUpGuildMasterKillCount = CharactersClient[Index].GuildMasterKillCount;
-                    EtcPart = CharactersClient[Index].EtcPart;
-                }
-
-                if (&CharactersClient[Index] == Hero)
-                {
-                    BackupCtlcode = CharactersClient[Index].CtlCode;
-                }
-            }
-
-            CHARACTER* c = CreateCharacter(Key, MODEL_PLAYER, Data2->PositionX, Data2->PositionY, 0);
-            DeleteCloth(c, &c->Object);
-
-            OBJECT* o = &c->Object;
-            c->Class = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
-            c->Skin = 0;
-            c->PK = Data2->Path & 0xf;
-            o->Kind = KIND_PLAYER;
-
-            switch (Data2->Class & 0x07)
-            {
-            case 1:
-                CreateTeleportEnd(o);
-                AddDebugText(ReceiveBuffer, Size);
-                break;
-            case 2:
-                if (!gCharacterManager.IsFemale(c->Class))
-                    SetAction(o, PLAYER_SIT1);
-                else
-                    SetAction(o, PLAYER_SIT_FEMALE1);
-                break;
-            case 3:
-                if (!gCharacterManager.IsFemale(c->Class))
-                    SetAction(o, PLAYER_POSE1);
-                else
-                    SetAction(o, PLAYER_POSE_FEMALE1);
-                break;
-            case 4:
-                if (!gCharacterManager.IsFemale(c->Class))
-                    SetAction(o, PLAYER_HEALING1);
-                else
-                    SetAction(o, PLAYER_HEALING_FEMALE1);
-                break;
-            }
-
-            c->PositionX = Data2->PositionX;
-            c->PositionY = Data2->PositionY;
-            c->TargetX = Data2->TargetX;
-            c->TargetY = Data2->TargetY;
-
-            c->Object.Angle[2] = ((float)(Data2->Path >> 4) - 1.f) * 45.f;
-
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"(RCPV)ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
-
-            if (CreateFlag)
-            {
-                c->Object.Position[0] = ((c->PositionX) + 0.5f) * TERRAIN_SCALE;
-                c->Object.Position[1] = ((c->PositionY) + 0.5f) * TERRAIN_SCALE;
-                CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
-                c->Object.Alpha = 0.f;
-            }
-            else if (PathFinding2(c->PositionX, c->PositionY, Data2->TargetX, Data2->TargetY, &c->Path))
-            {
-                c->Movement = true;
-            }
-
-            if (gMapManager.InHellas())
-            {
-                CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 8, o, 20.f);
-            }
-#ifdef LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
-            if ((Data2->Class & 0x07) == 1 && Index != MAX_CHARACTERS_CLIENT)
-            {
-                c->GuildMarkIndex = BackUpGuildMarkIndex;
-                c->GuildStatus = BackUpGuildStatus;
-                c->GuildType = BackUpGuildType;
-                c->GuildRelationShip = BackUpGuildRelationShip;
-                c->EtcPart = EtcPart;
-                c->GuildMasterKillCount = BackUpGuildMasterKillCount;
-
-                if (&CharactersClient[Index] == Hero)
-                {
-                    c->CtlCode = BackupCtlcode;
-                }
-            }
-            else
-            {
-                c->GuildMarkIndex = BackUpGuildMarkIndex;
-                c->GuildStatus = BackUpGuildStatus;
-                c->GuildType = BackUpGuildType;
-                c->GuildRelationShip = BackUpGuildRelationShip;
-                c->GuildMasterKillCount = BackUpGuildMasterKillCount;
-                c->EtcPart = EtcPart;
-                if (&CharactersClient[Index] == Hero)
-                {
-                    c->CtlCode = BackupCtlcode;
-                }
-            }
-
-            ChangeCharacterExt(FindCharacterIndex(Key), Data2->Equipment);
-#else
-            ChangeCharacterExt(FindCharacterIndex(Key), Data2->Equipment);
-
-            if ((Data2->Class & 0x07) == 1 && Index != MAX_CHARACTERS_CLIENT)
-            {
-                c->GuildMarkIndex = BackUpGuildMarkIndex;
-                c->GuildStatus = BackUpGuildStatus;
-                c->GuildType = BackUpGuildType;
-                c->GuildRelationShip = BackUpGuildRelationShip;
-                c->EtcPart = EtcPart;
-                c->GuildMasterKillCount = BackUpGuildMasterKillCount;
-
-                if (&CharactersClient[Index] == Hero)
-                {
-                    c->CtlCode = BackupCtlcode;
-                }
-            }
-            else
-            {
-                c->GuildMarkIndex = BackUpGuildMarkIndex;
-                c->GuildStatus = BackUpGuildStatus;
-                c->GuildType = BackUpGuildType;
-                c->GuildRelationShip = BackUpGuildRelationShip;
-                c->GuildMasterKillCount = BackUpGuildMasterKillCount;
-                c->EtcPart = EtcPart;
-                if (&CharactersClient[Index] == Hero)
-                {
-                    c->CtlCode = BackupCtlcode;
-                }
-            }
-#endif
-
-            CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_ID_SIZE);
-
-            if ((Data2->Class & 0x07) == 1 && Index != MAX_CHARACTERS_CLIENT)
-            {
-                c->EtcPart = EtcPart;
-            }
-
-            for (int j = 0; j < Data2->s_BuffCount; ++j)
-            {
-                RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
-
-                battleCastle::SettingBattleFormation(c, static_cast<eBuffState>(Data2->s_BuffEffectState[j]));
-
-                g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
-            }
-
-            if (gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart())
-            {
-                //g_pSiegeWarfare->InitSkillUI();
-            }
-        }
-
-        Offset += (sizeof(PCREATE_CHARACTER) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - Data2->s_BuffCount)));
+        assert(false);
+        return;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x12 [ReceiveCreatePlayerViewport(%d)]", Data->Value);
+    WORD Key = Data->Key;
+    int CreateFlag = (Key >> 15);
+    Key &= 0x7FFF;
+
+    
+
+    //if (Index != MAX_CHARACTERS_CLIENT)
+    //{
+    //auto BackUpGuildMarkIndex = CharactersClient[Index].GuildMarkIndex;
+    //auto BackUpGuildStatus = CharactersClient[Index].GuildStatus;
+    //auto BackUpGuildType = CharactersClient[Index].GuildType;
+    //auto BackUpGuildRelationShip = CharactersClient[Index].GuildRelationShip;
+    //auto BackUpGuildMasterKillCount = CharactersClient[Index].GuildMasterKillCount;
+    //auto EtcPart = CharactersClient[Index].EtcPart;
+    //BYTE BackupCtlcode = 0;
+    //if (&CharactersClient[Index] == Hero)
+    //{
+    //    BackupCtlcode = CharactersClient[Index].CtlCode;
+    //}
+    //}
+
+    CHARACTER* c = CreateCharacter(Key, MODEL_PLAYER, Data->PositionX, Data->PositionY, 0);
+    memset(c->ID, 0, sizeof c->ID);
+    CMultiLanguage::ConvertFromUtf8(c->ID, Data->ID, MAX_ID_SIZE);
+    OBJECT* o = &c->Object;
+    //DeleteCloth(c, o);
+    c->Class = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
+    c->Skin = 0;
+    c->AttackSpeed = Data->AttackSpeed;
+    c->MagicSpeed = Data->MagicSpeed;
+    c->PK = Data->RotationAndHeroState & 0xf;
+    c->Object.Angle[2] = ((float)(Data->RotationAndHeroState >> 4) - 1.f) * 45.f;
+    o->Kind = KIND_PLAYER;
+    o->Type = MODEL_PLAYER;
+    c->PositionX = Data->PositionX;
+    c->PositionY = Data->PositionY;
+    c->TargetX = Data->TargetX;
+    c->TargetY = Data->TargetY;
+    switch (Data->Flags & 0x07)
+    {
+    case 1:
+        CreateTeleportEnd(o);
+        // AddDebugText(ReceiveBuffer, Size);
+        break;
+    case 2:
+        if (!gCharacterManager.IsFemale(c->Class))
+            SetAction(o, PLAYER_SIT1);
+        else
+            SetAction(o, PLAYER_SIT_FEMALE1);
+        break;
+    case 3:
+        if (!gCharacterManager.IsFemale(c->Class))
+            SetAction(o, PLAYER_POSE1);
+        else
+            SetAction(o, PLAYER_POSE_FEMALE1);
+        break;
+    case 4:
+        if (!gCharacterManager.IsFemale(c->Class))
+            SetAction(o, PLAYER_HEALING1);
+        else
+            SetAction(o, PLAYER_HEALING_FEMALE1);
+        break;
+    }
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"(RCPV)ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
+
+    if (CreateFlag)
+    {
+        c->Object.Position[0] = ((c->PositionX) + 0.5f) * TERRAIN_SCALE;
+        c->Object.Position[1] = ((c->PositionY) + 0.5f) * TERRAIN_SCALE;
+        CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
+        c->Object.Alpha = 0.f;
+    }
+    else if (PathFinding2(c->PositionX, c->PositionY, Data->TargetX, Data->TargetY, &c->Path))
+    {
+        c->Movement = true;
+    }
+
+    if (gMapManager.InHellas())
+    {
+        CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 8, o, 20.f);
+    }
+
+    int Index = FindCharacterIndex(Key);
+    ReadEquipmentExtended(Index, Data->Flags, Data->Equipment);
+
+    //if ((Data->Flags & 0x07) == 1)
+    //{
+    //    // after teleport between servers, restore some previous values.
+    //    c->GuildMarkIndex = BackUpGuildMarkIndex;
+    //    c->GuildStatus = BackUpGuildStatus;
+    //    c->GuildType = BackUpGuildType;
+    //    c->GuildRelationShip = BackUpGuildRelationShip;
+    //    c->EtcPart = EtcPart;
+    //    c->GuildMasterKillCount = BackUpGuildMasterKillCount;
+
+    //    if (&CharactersClient[Index] == Hero)
+    //    {
+    //        c->CtlCode = BackupCtlcode;
+    //    }
+    //}
+
+    if (Data->s_BuffCount > 0)
+    {
+        auto buffs = ReceiveBuffer.subspan(sizeof(PCREATE_CHARACTER_EXTENDED), Data->s_BuffCount);
+
+        for (int j = 0; j < Data->s_BuffCount; ++j)
+        {
+            auto buff = static_cast<eBuffState>(buffs[j]);
+            RegisterBuff(buff, o);
+            battleCastle::SettingBattleFormation(c, buff);
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s, Buff : %d", c->ID, static_cast<int>(buff));
+        }
+
+        if (gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart())
+        {
+            //g_pSiegeWarfare->InitSkillUI();
+        }
+    }
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x12 [ReceiveCreatePlayerViewportExtended]");
 }
 
-void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
+void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
+    auto Data = safe_cast<PWHEADER_DEFAULT_WORD>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
     int Offset = sizeof(PWHEADER_DEFAULT_WORD);
 
     for (int i = 0; i < Data->Value; i++)
     {
-        auto Data2 = (LPPCREATE_TRANSFORM)(ReceiveBuffer + Offset);
+        auto Data2 = safe_cast<PCREATE_TRANSFORM_EXTENDED>(ReceiveBuffer.subspan(Offset));
+        if (Data2 == nullptr)
+        {
+            assert(false);
+            return;
+        }
+
         WORD Key = ((WORD)(Data2->KeyH) << 8) + Data2->KeyL;
         int CreateFlag = (Key >> 15);
         Key &= 0x7FFF;
@@ -2304,7 +2352,7 @@ void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
 
         if (FindText(characterName, L"webzen") == false)
         {
-            int Class = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
+            auto Class = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
 
             auto Type = (EMonsterType)(((WORD)(Data2->TypeH) << 8) + Data2->TypeL);
 
@@ -2372,7 +2420,7 @@ void ReceiveCreateTransformViewport(const BYTE* ReceiveBuffer)
             ChangeCharacterExt(FindCharacterIndex(Key), Data2->Equipment);
         }
 
-        Offset += (sizeof(PCREATE_TRANSFORM) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - Data2->s_BuffCount)));
+        Offset += (sizeof(PCREATE_TRANSFORM_EXTENDED) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - Data2->s_BuffCount)));
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x45 [ReceiveCreateTransformViewport(%d)]", Data->Value);
@@ -2744,23 +2792,10 @@ void ReceiveDamage(const BYTE* ReceiveBuffer)
         CharacterAttribute->Shield = 0;
 }
 
-void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
+void ReceiveAttackDamageCastle(CHARACTER* c, OBJECT* o, const bool success, const int key, const int damage, const int shieldDamage, const int damageType, const bool bRepeatedly, const bool bEndRepeatedly, const bool bDoubleEnable, const bool bComboEnable)
 {
-    int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
-    int Success = (Key >> 15);
-    Key &= 0x7FFF;
-
-    int Index = FindCharacterIndex(Key);
-    CHARACTER* c = &CharactersClient[Index];
-    OBJECT* o = &c->Object;
     vec3_t Light;
-    WORD Damage = (((WORD)(Data->DamageH) << 8) + Data->DamageL);
-    int	 DamageType = (Data->DamageType) & 0x3f;
-    bool bDoubleEnable = (Data->DamageType >> 6) & 0x01;
-    bool bComboEnable = (Data->DamageType >> 7) & 0x01;
-    WORD ShieldDamage = (((WORD)(Data->ShieldDamageH) << 8) + Data->ShieldDamageL);
-
-    int accumDamage = ShieldDamage + Damage;
+    int accumDamage = shieldDamage + damage;
     int	rstDamage = -1;
     float rstScale = 0.8f;
     Vector(0.5f, 0.5f, 0.5f, Light);
@@ -2783,7 +2818,7 @@ void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
     }
     else
     {
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
             Vector(1.f, 1.f, 1.f, Light);
         }
@@ -2793,38 +2828,38 @@ void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
         }
     }
 
-    if (Success)
+    if (success)
     {
-        SetPlayerShock(c, Damage);
+        SetPlayerShock(c, damage);
         Vector(1.f, 0.f, 0.f, Light);
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
-            if (Damage >= CharacterAttribute->Life)
+            if (damage >= CharacterAttribute->Life)
                 CharacterAttribute->Life = 0;
             else
-                CharacterAttribute->Life -= Damage;
+                CharacterAttribute->Life -= damage;
 
-            if (ShieldDamage >= CharacterAttribute->Shield)
+            if (shieldDamage >= CharacterAttribute->Shield)
                 CharacterAttribute->Shield = 0;
             else
-                CharacterAttribute->Shield -= ShieldDamage;
+                CharacterAttribute->Shield -= shieldDamage;
         }
 
         CreatePoint(o->Position, rstDamage, Light, rstScale);
     }
     else
     {
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
-            if (Damage >= CharacterAttribute->Life)
+            if (damage >= CharacterAttribute->Life)
                 CharacterAttribute->Life = 0;
             else
-                CharacterAttribute->Life -= Damage;
+                CharacterAttribute->Life -= damage;
 
-            if (ShieldDamage >= CharacterAttribute->Shield)
+            if (shieldDamage >= CharacterAttribute->Shield)
                 CharacterAttribute->Shield = 0;
             else
-                CharacterAttribute->Shield -= ShieldDamage;
+                CharacterAttribute->Shield -= shieldDamage;
 
             if (g_isCharacterBuff(o, eBuff_PhysDefense) && o->Type == MODEL_PLAYER)
             {
@@ -2847,89 +2882,66 @@ void ProcessDamageCastle(LPPRECEIVE_ATTACK Data)
             if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7
                 && rand_fps_check(2))
             {
-                SetPlayerShock(c, Damage);
+                SetPlayerShock(c, damage);
             }
         }
 
-        if (DamageType == 4)
+        if (damageType == 4)
         {
             Vector(1.f, 0.f, 1.f, Light);
         }
 
         CreatePoint(o->Position, rstDamage, Light, rstScale);
     }
-    c->Hit = Damage;
+
+    c->Hit = damage;
 }
 
-void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
+void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int key, const int damage, const int shieldDamage, const int damageType, const bool bRepeatedly, const bool bEndRepeatedly, const bool bDoubleEnable, const bool bComboEnable)
 {
-    auto Data = (LPPRECEIVE_ATTACK)ReceiveBuffer;
-
-    if (gMapManager.InChaosCastle())
-    {
-        ProcessDamageCastle(Data);
-        return;
-    }
-
-    int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
-    int Success = (Key >> 15);
-    Key &= 0x7FFF;
-
-    int Index = FindCharacterIndex(Key);
-    CHARACTER* c = &CharactersClient[Index];
-    OBJECT* o = &c->Object;
     vec3_t Light;
-    WORD Damage = (((WORD)(Data->DamageH) << 8) + Data->DamageL);
-    // DamageType
-    int	 DamageType = (Data->DamageType) & 0x0f;
-    bool bRepeatedly = (Data->DamageType >> 4) & 0x01;
-    bool bEndRepeatedly = (Data->DamageType >> 5) & 0x01;
-    bool bDoubleEnable = (Data->DamageType >> 6) & 0x01;
-    bool bComboEnable = (Data->DamageType >> 7) & 0x01;
-    WORD ShieldDamage = (((WORD)(Data->ShieldDamageH) << 8) + Data->ShieldDamageL);
-
-    if (Success)
+    if (success)
     {
-        SetPlayerShock(c, Damage);
+        SetPlayerShock(c, damage);
         Vector(1.f, 0.f, 0.f, Light);
 
-        CreatePoint(o->Position, Damage, Light);
+        CreatePoint(o->Position, damage, Light);
 
-        if (ShieldDamage > 0)
+        if (shieldDamage > 0)
         {
             vec3_t nPosShieldDamage;
             Vector(0.8f, 1.f, 0.f, Light);
             nPosShieldDamage[0] = o->Position[0]; nPosShieldDamage[1] = o->Position[1];
             nPosShieldDamage[2] = o->Position[2] + 25.f;
-            CreatePoint(nPosShieldDamage, ShieldDamage, Light);
+            CreatePoint(nPosShieldDamage, shieldDamage, Light);
         }
 
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
-            if (Damage >= CharacterAttribute->Life)
+            if (damage >= CharacterAttribute->Life)
                 CharacterAttribute->Life = 0;
             else
-                CharacterAttribute->Life -= Damage;
+                CharacterAttribute->Life -= damage;
 
-            if (ShieldDamage >= CharacterAttribute->Shield)
+            if (shieldDamage >= CharacterAttribute->Shield)
                 CharacterAttribute->Shield = 0;
             else
-                CharacterAttribute->Shield -= ShieldDamage;
+                CharacterAttribute->Shield -= shieldDamage;
         }
     }
     else
     {
-        if (Key == HeroKey)
+        if (key == HeroKey)
         {
-            if (Damage >= CharacterAttribute->Life)
+            if (damage >= CharacterAttribute->Life)
                 CharacterAttribute->Life = 0;
             else
-                CharacterAttribute->Life -= Damage;
+                CharacterAttribute->Life -= damage;
 
-            if (ShieldDamage >= CharacterAttribute->Shield)
+            if (shieldDamage >= CharacterAttribute->Shield)
                 CharacterAttribute->Shield = 0;
             else
-                CharacterAttribute->Shield -= ShieldDamage;
+                CharacterAttribute->Shield -= shieldDamage;
 
             if (g_isCharacterBuff(o, eBuff_PhysDefense) && o->Type == MODEL_PLAYER)
             {
@@ -2948,13 +2960,13 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
             if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7
                 && rand_fps_check(2))
             {
-                SetPlayerShock(c, Damage);
+                SetPlayerShock(c, damage);
             }
         }
         float scale = 15.f;
-        if (Damage == 0)
+        if (damage == 0)
         {
-            if (Key == HeroKey)
+            if (key == HeroKey)
             {
                 Vector(1.f, 1.f, 1.f, Light);
             }
@@ -2965,10 +2977,10 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
         }
         else
         {
-            switch (DamageType)
+            switch (damageType)
             {
             case 0:	//	DT_NONE
-                if (Key == HeroKey)
+                if (key == HeroKey)
                 {
                     Vector(1.f, 0.f, 0.f, Light);
                 }
@@ -3011,13 +3023,13 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
 
         if (bRepeatedly || bEndRepeatedly)
         {
-            g_CMonkSystem.SetRepeatedly(Damage, DamageType, bDoubleEnable, bEndRepeatedly);
+            g_CMonkSystem.SetRepeatedly(damage, damageType, bDoubleEnable, bEndRepeatedly);
             if (bEndRepeatedly)
             {
-                g_CMonkSystem.RenderRepeatedly(Key, o);
+                g_CMonkSystem.RenderRepeatedly(key, o);
             }
         }
-        else if (Damage == 0)
+        else if (damage == 0)
             CreatePoint(o->Position, -1, Light);
         else
         {
@@ -3026,39 +3038,97 @@ void ReceiveAttackDamage(const BYTE* ReceiveBuffer)
                 vec3_t Position, Light2;
                 VectorCopy(o->Position, Position);
                 Vector(Light[0] - 0.4f, Light[1] - 0.4f, Light[2] - 0.4f, Light2);
-                CreatePoint(Position, Damage, Light2, scale);
+                CreatePoint(Position, damage, Light2, scale);
                 Position[2] += 10.f;
                 Vector(Light[0] - 0.2f, Light[1] - 0.2f, Light[2] - 0.2f, Light2);
-                CreatePoint(Position, Damage, Light2, scale + 5.f);
+                CreatePoint(Position, damage, Light2, scale + 5.f);
                 Position[2] += 10.f;
-                CreatePoint(Position, Damage, Light, scale + 10.f);
+                CreatePoint(Position, damage, Light, scale + 10.f);
             }
             else if (bDoubleEnable)    //  Double Damage
             {
                 vec3_t Position, Light2;
                 VectorCopy(o->Position, Position);
                 Vector(Light[0] - 0.4f, Light[1] - 0.4f, Light[2] - 0.4f, Light2);
-                CreatePoint(Position, Damage, Light2, scale);
+                CreatePoint(Position, damage, Light2, scale);
                 Position[2] += 10.f;
                 Vector(Light[0] - 0.2f, Light[1] - 0.2f, Light[2] - 0.2f, Light2);
-                CreatePoint(Position, Damage, Light2, scale + 5.f);
+                CreatePoint(Position, damage, Light2, scale + 5.f);
             }
 
-            CreatePoint(o->Position, Damage, Light, scale);
+            CreatePoint(o->Position, damage, Light, scale);
         }
 
-        if (ShieldDamage > 0)
+        if (shieldDamage > 0)
         {
             vec3_t nPosShieldDamage;
             Vector(0.8f, 1.f, 0.f, Light);
             nPosShieldDamage[0] = o->Position[0]; nPosShieldDamage[1] = o->Position[1];
             nPosShieldDamage[2] = o->Position[2] + 25.f;
-            CreatePoint(nPosShieldDamage, ShieldDamage, Light);
+            CreatePoint(nPosShieldDamage, shieldDamage, Light);
         }
     }
-    c->Hit = Damage;
+    c->Hit = damage;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, Damage);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, damage);
+}
+
+void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_ATTACK_EXTENDED)ReceiveBuffer;
+
+    int Key = Data->TargetId;
+    int Success = (Key >> 15);
+    Key &= 0x7FFF;
+
+    int Index = FindCharacterIndex(Key);
+    CHARACTER* c = &CharactersClient[Index];
+    OBJECT* o = &c->Object;
+    
+    auto Damage = Data->HealthDamage;
+    // DamageType
+    int	 DamageType = (Data->DamageType) & 0x0f;
+    bool bRepeatedly = (Data->DamageType >> 4) & 0x01;
+    bool bEndRepeatedly = (Data->DamageType >> 5) & 0x01;
+    bool bDoubleEnable = (Data->DamageType >> 6) & 0x01;
+    bool bComboEnable = (Data->DamageType >> 7) & 0x01;
+    auto ShieldDamage = Data->ShieldDamage;
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamageExtended(%d %d)]", AttackPlayer, Damage);
+    if (Data->HealthStatus == 0xFF)
+    {
+        c->HealthStatus = -1;
+    }
+    else if (Data->HealthStatus == 0)
+    {
+        c->HealthStatus = 0;
+    }
+    else
+    {
+        c->HealthStatus = static_cast<float>(Data->HealthStatus) / 250.f;
+    }
+
+    if (Data->ShieldStatus == 0xFF)
+    {
+        c->ShieldStatus = -1;
+    }
+    else if (Data->ShieldStatus == 0)
+    {
+        c->ShieldStatus = 0;
+    }
+    else
+    {
+        c->ShieldStatus = static_cast<float>(Data->HealthStatus) / 250.f;
+    }
+
+    if (gMapManager.InChaosCastle())
+    {
+        ReceiveAttackDamageCastle(c, o, Success, Key, Damage, ShieldDamage, DamageType, bRepeatedly, bEndRepeatedly, bDoubleEnable, bComboEnable);
+        
+    }
+    else
+    {
+        ReceiveAttackDamage(c, o, Success, Key, Damage, ShieldDamage, DamageType, bRepeatedly, bEndRepeatedly, bDoubleEnable, bComboEnable);
+    }
 }
 
 void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
@@ -5285,60 +5355,90 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
 BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
-    auto Data = (LPPRECEIVE_DIE2)ReceiveBuffer;
-    int     Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
-    DWORD   Exp = ((DWORD)(Data->ExpH) << 16) + Data->ExpL;
-    int     Damage = ((int)(Data->DamageH) << 8) + Data->DamageL;
-    int     Success = (Key >> 15);
-    Key &= 0x7FFF;
+    auto Data = (LPPRECEIVE_EXP_EXTENDED)ReceiveBuffer;
 
-    int Index = FindCharacterIndex(Key);
-    CHARACTER* c = &CharactersClient[Index];
-    OBJECT* o = &c->Object;
+    auto addedExperience = Data->AddedExperience;
+    auto damageOfLastHit = Data->DamageOfLastHit;
+    auto experienceType = Data->ExperienceType;
+    auto killedId = Data->KilledObjectId;
+    auto killerId = Data->KillerObjectId;
+
+    int Index = FindCharacterIndex(killedId);
+    CHARACTER* killedObject = &CharactersClient[Index];
+    OBJECT* o = &killedObject->Object;
     vec3_t Light;
     Vector(1.f, 0.6f, 0.f, Light);
-    if (Success)
+    if (Hero->Key == killerId)
     {
-        SetPlayerDie(c);
-        CreatePoint(o->Position, Damage, Light);
+        Hero->AttackFlag = ATTACK_DIE;
+        Hero->Damage = damageOfLastHit;
+        Hero->TargetCharacter = Index;
     }
     else
     {
-        Hero->AttackFlag = ATTACK_DIE;
-        Hero->Damage = Damage;
-        Hero->TargetCharacter = Index;
-        CreatePoint(o->Position, Damage, Light);
+        SetPlayerDie(killedObject);
+        
     }
-    c->Dead = true;
-    c->Movement = false;
 
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+    if (damageOfLastHit > 0)
+    {
+        CreatePoint(o->Position, damageOfLastHit, Light);
+    }
+
+    killedObject->Dead = true;
+    killedObject->Movement = false;
+
+    switch(experienceType)
+    {
+    case eExperienceType_MaxLevelReached:
+        // TODO: show message "You already reached maximum Level."
+        g_pSystemLogBox->AddText(L"You already reached maximum Level.", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        return TRUE;
+    case eExperienceType_MaxMasterLevelReached:
+        // TODO: show message "You already reached maximum master Level."
+        g_pSystemLogBox->AddText(L"You already reached maximum master Level.", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        return TRUE;
+    case eExperienceType_MonsterLevelTooLowForMasterExperience:
+        // TODO: You need to kill stronger monsters to gain master experience.
+        g_pSystemLogBox->AddText(L"You need to kill stronger monsters to gain master experience.", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        return TRUE;
+    }
+
+    if (addedExperience == 0)
+    {
+        return TRUE;
+    }
+
+    if (experienceType == eExperienceType_Master)
     {
         g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
-        g_pMainFrame->SetGetExp_Wide(Exp);
-        Master_Level_Data.lMasterLevel_Experince += Exp;
+        g_pMainFrame->SetGetExp_Wide(addedExperience);
+        Master_Level_Data.lMasterLevel_Experince += addedExperience;
     }
     else
     {
         g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
-        g_pMainFrame->SetGetExp(Exp);
-        CharacterAttribute->Experience += Exp;
+        g_pMainFrame->SetGetExp(addedExperience);
+        CharacterAttribute->Experience += addedExperience;
     }
 
-    if (Exp > 0)
+    if (addedExperience > 0)
     {
         wchar_t Text[100];
 
-        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+        if (experienceType == eExperienceType_Master)
         {
-            swprintf(Text, GlobalText[1750], Exp);
+            swprintf(Text, GlobalText[1750], addedExperience);
         }
         else
-            swprintf(Text, GlobalText[486], Exp);
+        {
+            swprintf(Text, GlobalText[486], addedExperience);
+        }
+
         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
-    return (TRUE);
+    return TRUE;
 }
 
 void FallingStartCharacter(CHARACTER* c, OBJECT* o)
@@ -5454,31 +5554,68 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x17 [ReceiveDie(%d)]", Key);
 }
 
-void ReceiveCreateItemViewport(const BYTE* ReceiveBuffer)
+void ReceiveCreateMoney(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
+    auto Data = safe_cast<PCREATE_MONEY>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+    
+    if (Data->Id < 0 || Data->Id >= MAX_ITEMS)
+    {
+        // we don't have a free place for it ...
+        return;
+    }
+
+    vec3_t Position;
+    Position[0] = (float)(Data->PositionX + 0.5f)* TERRAIN_SCALE;
+    Position[1] = (float)(Data->PositionY + 0.5f) * TERRAIN_SCALE;
+
+    CreateMoneyDrop(&Items[Data->Id], Data->Amount, Position, Data->IsFreshDrop);
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateMoney]");
+}
+
+void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
+{
+    auto Data = safe_cast<PWHEADER_DEFAULT_WORD>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
     int Offset = sizeof(PWHEADER_DEFAULT_WORD);
     for (int i = 0; i < Data->Value; i++)
     {
-        auto Data2 = (LPPCREATE_ITEM)(ReceiveBuffer + Offset);
+        auto itemStartData = safe_cast<PCREATE_ITEM_EXTENDED>(ReceiveBuffer.subspan(Offset));
+        if (itemStartData == nullptr)
+        {
+            assert(false);
+            return;
+        }
+
+        auto id = MAKEWORD(itemStartData->IdH, itemStartData->IdL) & 0x7FFF;
+        auto isFreshDrop = (itemStartData->IdL & 0x80) > 0;
+        if (id < 0 || id >= MAX_ITEMS)
+        {
+            // we don't have a free place for it ...
+            continue;
+        }
+
+        int length = CalcItemLength(itemStartData->Item);
+        Offset += 4;
+        auto itemData = ReceiveBuffer.subspan(Offset, length);
+        auto params = ParseItemData(itemData);
         vec3_t Position;
-        Position[0] = (float)(Data2->PositionX + 0.5f) * TERRAIN_SCALE;
-        Position[1] = (float)(Data2->PositionY + 0.5f) * TERRAIN_SCALE;
-        int Key = ((int)(Data2->KeyH) << 8) + Data2->KeyL;
-        int CreateFlag = (Key >> 15);
-        Key &= 0x7FFF;
-        if (Key < 0 || Key >= MAX_ITEMS)
-            Key = 0;
-        CreateItem(&Items[Key], Data2->Item, Position, CreateFlag);
-        int Type = ConvertItemType(Data2->Item);
-        if (Type == ITEM_ZEN)
-        {
-            Offset += sizeof(PCREATE_ITEM);
-        }
-        else
-        {
-            Offset += sizeof(PCREATE_ITEM);
-        }
+        Position[0] = (float)(itemStartData->PositionX + 0.5f) * TERRAIN_SCALE;
+        Position[1] = (float)(itemStartData->PositionY + 0.5f) * TERRAIN_SCALE;
+
+        CreateItemDrop(&Items[id], params, Position, isFreshDrop);
+
+        Offset += length;
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateItemViewport]");
@@ -5501,21 +5638,34 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
 
 static  const   BYTE    NOT_GET_ITEM = 0xff;
 static  const   BYTE    GET_ITEM_ZEN = 0xfe;
-static  const   BYTE    GET_ITEM_MULTI = 0xfd;
+static  const   BYTE    GET_ITEM_MULTI = 0xfd; // received when item was added in a stack
 extern int ItemKey;
-void ReceiveGetItem(const BYTE* ReceiveBuffer)
+void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPRECEIVE_GET_ITEM)ReceiveBuffer;
-    if (Data->Result == NOT_GET_ITEM)
+    auto Data = safe_cast<PHEADER_DEFAULT>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+    
+    if (Data->Value == NOT_GET_ITEM)
     {
     }
     else
     {
-        if (Data->Result == GET_ITEM_ZEN)
+        if (Data->Value == GET_ITEM_ZEN)
         {
+            auto Data2 = safe_cast<PRECEIVE_INVENTORY_MONEY>(ReceiveBuffer);
+            if (Data2 == nullptr)
+            {
+                assert(false);
+                return;
+            }
+
             wchar_t szMessage[128];
             int backupGold = CharacterMachine->Gold;
-            CharacterMachine->Gold = (Data->Item[0] << 24) + (Data->Item[1] << 16) + (Data->Item[2] << 8) + (Data->Item[3]);
+            CharacterMachine->Gold = (Data2->Money[0] << 24) + (Data2->Money[1] << 16) + (Data2->Money[2] << 8) + (Data2->Money[3]);
 
             int getGold = CharacterMachine->Gold - backupGold;
 
@@ -5527,43 +5677,54 @@ void ReceiveGetItem(const BYTE* ReceiveBuffer)
         }
         else
         {
-            auto itemIndex = Data->Result;
+            auto Data2 = safe_cast<PRECEIVE_GET_ITEM_EXTENDED>(ReceiveBuffer);
+            if (Data2 == nullptr)
+            {
+                assert(false);
+                return;
+            }
+
+            auto itemIndex = Data2->Result;
             if (itemIndex != GET_ITEM_MULTI)
             {
+                auto offset = sizeof(PBMSG_HEADER) + 1;
+                int length = CalcItemLength(Data2->Item);
+                auto itemData = ReceiveBuffer.subspan(offset, length);
+
                 if (itemIndex >= MAX_EQUIPMENT_INDEX && itemIndex < MAX_MY_INVENTORY_INDEX)
                 {
-                    g_pMyInventory->InsertItem(itemIndex, Data->Item);
+                    g_pMyInventory->InsertItem(itemIndex, itemData);
                 }
-                else if (itemIndex >= MAX_MY_INVENTORY_INDEX && Data->Result < MAX_MY_INVENTORY_EX_INDEX)
+                else if (itemIndex >= MAX_MY_INVENTORY_INDEX && Data2->Result < MAX_MY_INVENTORY_EX_INDEX)
                 {
-                    g_pMyInventoryExt->InsertItem(itemIndex, Data->Item);
+                    g_pMyInventoryExt->InsertItem(itemIndex, itemData);
                 }
             }
 
             wchar_t szItem[64] = { 0, };
-            int level = (Items[ItemKey].Item.Level >> 3) & 15;
+            int level = Items[ItemKey].Item.Level;
             GetItemName(Items[ItemKey].Item.Type, level, szItem);
 
             wchar_t szMessage[128];
             swprintf(szMessage, L"%s %s", szItem, GlobalText[918]);
             g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
+
+            int Type = Items[ItemKey].Item.Type;
+            if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE || Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION
+                || Type == INDEX_COMPILED_CELE || Type == INDEX_COMPILED_SOUL || Type == ITEM_JEWEL_OF_GUARDIAN)
+                PlayBuffer(SOUND_JEWEL01, &Hero->Object);
+            else if (Type == ITEM_GEMSTONE)
+                PlayBuffer(SOUND_JEWEL02, &Hero->Object);
+            else
+                PlayBuffer(SOUND_GET_ITEM01, &Hero->Object);
         }
 #ifdef FOR_WORK
         Items[ItemKey].Object.Live = false;
 #endif
-
-        int Type = ConvertItemType(Data->Item);
-        if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE || Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION
-            || Type == INDEX_COMPILED_CELE || Type == INDEX_COMPILED_SOUL || Type == ITEM_JEWEL_OF_GUARDIAN)
-            PlayBuffer(SOUND_JEWEL01, &Hero->Object);
-        else if (Type == ITEM_GEMSTONE)
-            PlayBuffer(SOUND_JEWEL02, &Hero->Object);
-        else
-            PlayBuffer(SOUND_GET_ITEM01, &Hero->Object);
     }
     SendGetItem = -1;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x22 [ReceiveGetItem(%d)]", Data->Result);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x22 [ReceiveGetItem(%d)]", Data->Value);
 }
 
 void ReceiveDropItem(const BYTE* ReceiveBuffer)
@@ -5595,10 +5756,20 @@ BYTE g_byPacketAfter_EquipmentItem[256];
 
 void ReceiveTradeExit(const BYTE* ReceiveBuffer);
 
-BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
+BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
 {
     EquipmentItem = false;
-    auto Data = (LPPHEADER_DEFAULT_SUBCODE_ITEM)ReceiveBuffer;
+    auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_ITEM_EXTENDED>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return false;
+    }
+
+    auto Offset = sizeof(PBMSG_HEADER) + 2;
+    int length = CalcItemLength(Data->Item);
+    auto itemData = ReceiveBuffer.subspan(Offset, length);
+
     if (Data->SubCode != 255)
     {
         const auto storageType = static_cast<STORAGE_TYPE>(Data->SubCode);
@@ -5630,38 +5801,38 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
             if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
             {
-                g_pMyInventory->EquipItem(itemindex, Data->Item);
+                g_pMyInventory->EquipItem(itemindex, itemData);
             }
             else if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                g_pMyInventory->InsertItem(itemindex, Data->Item);
+                g_pMyInventory->InsertItem(itemindex, itemData);
             }
             else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                g_pMyInventoryExt->InsertItem(itemindex, Data->Item);
+                g_pMyInventoryExt->InsertItem(itemindex, itemData);
             }
             else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
             {
-                g_pMyShopInventory->InsertItem(itemindex, Data->Item);
+                g_pMyShopInventory->InsertItem(itemindex, itemData);
             }
         }
         else if (storageType == STORAGE_TYPE::TRADE)
         {
-            g_pTrade->ProcessToReceiveTradeItems(Data->Index, Data->Item);
+            g_pTrade->ProcessToReceiveTradeItems(Data->Index, itemData);
         }
         else if (storageType == STORAGE_TYPE::VAULT)
         {
             if (Data->Index < MAX_SHOP_INVENTORY)
             {
-                g_pStorageInventory->ProcessToReceiveStorageItems(Data->Index, Data->Item);
+                g_pStorageInventory->ProcessToReceiveStorageItems(Data->Index, itemData);
             }
             else
             {
-                g_pStorageInventoryExt->ProcessToReceiveStorageItems(Data->Index, Data->Item);
+                g_pStorageInventoryExt->ProcessToReceiveStorageItems(Data->Index, itemData);
             }
         }
         if (storageType == STORAGE_TYPE::CHAOS_MIX
@@ -5669,11 +5840,11 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         {
             SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
             if (Data->Index >= 0 && Data->Index < MAX_MIX_INVENTORY)
-                g_pMixInventory->InsertItem(Data->Index, Data->Item);
+                g_pMixInventory->InsertItem(Data->Index, itemData);
         }
         else if (storageType == STORAGE_TYPE::LUCKYITEM_TRADE || storageType == STORAGE_TYPE::LUCKYITEM_REFINERY)
         {
-            g_pLuckyItemWnd->GetResult(1, Data->Index, Data->Item);
+            g_pLuckyItemWnd->GetResult(1, Data->Index, itemData);
         }
 
         PlayBuffer(SOUND_GET_ITEM01);
@@ -5703,12 +5874,24 @@ BOOL ReceiveEquipmentItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     return (TRUE);
 }
 
-void ReceiveModifyItem(const BYTE* ReceiveBuffer)
+
+void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPHEADER_DEFAULT_SUBCODE_ITEM)ReceiveBuffer;
+    auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_ITEM_EXTENDED>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    auto Offset = sizeof(PBMSG_HEADER) + 2;
+    int length = CalcItemLength(Data->Item);
+    auto itemData = ReceiveBuffer.subspan(Offset, length);
 
     if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+    {
         SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+    }
 
     int itemindex = Data->Index;
     if (g_pMyInventory->FindItem(itemindex))
@@ -5718,14 +5901,14 @@ void ReceiveModifyItem(const BYTE* ReceiveBuffer)
 
     if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
     {
-        g_pMyInventory->InsertItem(itemindex, Data->Item);
+        g_pMyInventory->InsertItem(itemindex, itemData);
     }
     else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
     {
-        g_pMyInventoryExt->InsertItem(itemindex, Data->Item);
+        g_pMyInventoryExt->InsertItem(itemindex, itemData);
     }
 
-    int iType = ConvertItemType(Data->Item);
+    int iType = Items[itemindex].Item.Type;
     if (iType == ITEM_LOST_MAP || iType == ITEM_POTION + 111)
     {
         PlayBuffer(SOUND_KUNDUN_ITEM_SOUND);
@@ -5909,7 +6092,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     return (TRUE);
 }
-
+/*
 void ReceiveBuy(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_ITEM)ReceiveBuffer;
@@ -5917,11 +6100,11 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
     {
         if (Data->Index >= MAX_EQUIPMENT_INDEX && Data->Index < MAX_MY_INVENTORY_INDEX)
         {
-            g_pMyInventory->InsertItem(Data->Index, Data->Item);
+            g_pMyInventory->InsertItem(Data->Index, Data->Item, Old);
         }
         else if (Data->Index >= MAX_MY_INVENTORY_INDEX && Data->Index < MAX_MY_INVENTORY_EX_INDEX)
         {
-            g_pMyInventoryExt->InsertItem(Data->Index, Data->Item);
+            g_pMyInventoryExt->InsertItem(Data->Index, Data->Item, Old);
         }
         else
         {
@@ -5941,6 +6124,212 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
     BuyCost = 0;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x32 [ReceiveBuy(%d)]", Data->Index);
+}*/
+
+void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
+{
+    auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    auto Offset = sizeof(PBMSG_HEADER) + 1;
+    int length = CalcItemLength(Data->Item);
+    auto itemData = ReceiveBuffer.subspan(Offset, length);
+    if (Data->Index != 255)
+    {
+        if (Data->Index >= MAX_EQUIPMENT_INDEX && Data->Index < MAX_MY_INVENTORY_INDEX)
+        {
+            g_pMyInventory->InsertItem(Data->Index, itemData);
+        }
+        else if (Data->Index >= MAX_MY_INVENTORY_INDEX && Data->Index < MAX_MY_INVENTORY_EX_INDEX)
+        {
+            g_pMyInventoryExt->InsertItem(Data->Index, itemData);
+        }
+
+        PlayBuffer(SOUND_GET_ITEM01);
+    }
+    if (Data->Index == 0xfe)
+    {
+        g_pNewUISystem->HideAll();
+
+        g_pChatListBox->AddText(Hero->ID, GlobalText[732], SEASON3B::TYPE_ERROR_MESSAGE);
+    }
+    BuyCost = 0;
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x32 [ReceiveBuy(%d)]", Data->Index);
+}
+
+void ReceiveTradeYourInventoryExtended(std::span<const BYTE> ReceiveBuffer)
+{
+    auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    auto Offset = sizeof(PBMSG_HEADER) + 1;
+    int length = CalcItemLength(Data->Item);
+    auto itemData = ReceiveBuffer.subspan(Offset, length);
+    g_pTrade->ProcessToReceiveYourItemAdd(Data->Index, itemData);
+}
+
+void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
+{
+    auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    auto Offset = sizeof(PBMSG_HEADER) + 1;
+    int length = CalcItemLength(Data->Item);
+    auto itemData = ReceiveBuffer.subspan(Offset, length);
+
+    switch (Data->Index)
+    {
+    case 0:
+    {
+        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
+        {
+            std::span<const BYTE> empty = {};
+            g_pLuckyItemWnd->GetResult(0, Data->Index, empty);
+            break;
+        }
+        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
+        wchar_t szText[256] = { 0, };
+        switch (g_MixRecipeMgr.GetMixInventoryType())
+        {
+        case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
+        case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
+        case SEASON3A::MIXTYPE_GOBLIN_ADD380:
+        case SEASON3A::MIXTYPE_EXTRACT_SEED:
+        case SEASON3A::MIXTYPE_SEED_SPHERE:
+            swprintf(szText, GlobalText[594]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            break;
+            // 			case SEASON3A::MIXTYPE_TRAINER:
+            // 				wprintf(szText, GlobalText[1208]);	// 부활 실패
+            // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            // 				break;
+        case SEASON3A::MIXTYPE_OSBOURNE:
+            swprintf(szText, GlobalText[2105], GlobalText[2061]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            break;
+        case SEASON3A::MIXTYPE_JERRIDON:
+            swprintf(szText, GlobalText[2105], GlobalText[2062]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            break;
+        case SEASON3A::MIXTYPE_ELPIS:
+            swprintf(szText, GlobalText[2112], GlobalText[2063]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            break;
+        case SEASON3A::MIXTYPE_CHAOS_CARD:
+            swprintf(szText, GlobalText[2112], GlobalText[2265]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            break;
+        case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
+            swprintf(szText, GlobalText[2112], GlobalText[2560]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+            break;
+        }
+    }
+    break;
+    case 1:
+    {
+        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
+        {
+            g_pLuckyItemWnd->GetResult(1, 0, itemData);
+            break;
+        }
+        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
+        wchar_t szText[256] = { 0, };
+        switch (g_MixRecipeMgr.GetMixInventoryType())
+        {
+        case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
+        case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
+        case SEASON3A::MIXTYPE_GOBLIN_ADD380:
+        case SEASON3A::MIXTYPE_EXTRACT_SEED:
+        case SEASON3A::MIXTYPE_SEED_SPHERE:
+            swprintf(szText, GlobalText[595]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            break;
+            // 			case SEASON3A::MIXTYPE_TRAINER:
+            // 				wprintf(szText, GlobalText[1209]);
+            // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            // 				break;
+        case SEASON3A::MIXTYPE_OSBOURNE:
+            swprintf(szText, GlobalText[2106], GlobalText[2061]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            break;
+        case SEASON3A::MIXTYPE_JERRIDON:
+            swprintf(szText, GlobalText[2106], GlobalText[2062]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            break;
+        case SEASON3A::MIXTYPE_ELPIS:
+            swprintf(szText, GlobalText[2113], GlobalText[2063]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            break;
+        case SEASON3A::MIXTYPE_CHAOS_CARD:
+            swprintf(szText, GlobalText[2113], GlobalText[2265]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            break;
+        case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
+            swprintf(szText, GlobalText[2113], GlobalText[2560]);
+            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            break;
+        }
+
+        g_pMixInventory->DeleteAllItems();
+        g_pMixInventory->InsertItem(0, itemData);
+
+        PlayBuffer(SOUND_MIX01);
+        PlayBuffer(SOUND_JEWEL01);
+    }
+    break;
+    case 2:
+    case 0x0B:
+    {
+        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_READY);
+        g_pSystemLogBox->AddText(GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
+    }
+    break;
+    case 4:
+        SEASON3B::CreateOkMessageBox(GlobalText[649]);
+        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
+        break;
+
+    case 9:
+        SEASON3B::CreateOkMessageBox(GlobalText[689]);
+        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
+        break;
+
+    case 100:
+        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
+        g_pMixInventory->DeleteAllItems();
+        g_pMixInventory->InsertItem(0, itemData);
+        break;
+    case 0x20:
+        if (g_pLuckyItemWnd->GetAct())
+        {
+            g_pLuckyItemWnd->GetResult(0, Data->Index, itemData);
+        }
+        break;
+    case 3:
+    case 5:
+    case 7:
+    case 8:
+    case 0x0A:
+    default:
+        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
+        break;
+    }
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x86 [ReceiveMix(%d)]", Data->Index);
 }
 
 void ReceiveSell(const BYTE* ReceiveBuffer)
@@ -5991,24 +6380,43 @@ void ReceiveRepair(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x34 [ReceiveRepair(%d)]", Data->Gold);
 }
 
-void ReceiveLevelUp(const BYTE* ReceiveBuffer)
+void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
 {
-    auto Data = (LPPRECEIVE_LEVEL_UP)ReceiveBuffer;
-    CharacterAttribute->Level = Data->Level;
-    CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
-    CharacterAttribute->LifeMax = Data->MaxLife;
-    CharacterAttribute->ManaMax = Data->MaxMana;
-    CharacterAttribute->Life = Data->MaxLife;
-    CharacterAttribute->Mana = Data->MaxMana;
-    CharacterAttribute->ShieldMax = Data->MaxShield;
-    CharacterAttribute->SkillManaMax = Data->SkillManaMax;
-    CharacterAttribute->AddPoint = Data->AddPoint;
-    CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
-    CharacterAttribute->wMinusPoint = Data->wMinusPoint;
-    CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
+    if (Size >= sizeof(PRECEIVE_LEVEL_UP_EXTENDED))
+    {
+        auto Data = (LPPRECEIVE_LEVEL_UP_EXTENDED)ReceiveBuffer;
+        CharacterAttribute->Level = Data->Level;
+        CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
+        CharacterAttribute->LifeMax = Data->MaxLife;
+        CharacterAttribute->ManaMax = Data->MaxMana;
+        CharacterAttribute->Life = Data->MaxLife;
+        CharacterAttribute->Mana = Data->MaxMana;
+        CharacterAttribute->ShieldMax = Data->MaxShield;
+        CharacterAttribute->SkillManaMax = Data->SkillManaMax;
+        CharacterAttribute->AddPoint = Data->AddPoint;
+        CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
+        CharacterAttribute->wMinusPoint = Data->wMinusPoint;
+        CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
+    }
+    else
+    {
+        auto Data = (LPPRECEIVE_LEVEL_UP)ReceiveBuffer;
+        CharacterAttribute->Level = Data->Level;
+        CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
+        CharacterAttribute->LifeMax = Data->MaxLife;
+        CharacterAttribute->ManaMax = Data->MaxMana;
+        CharacterAttribute->Life = Data->MaxLife;
+        CharacterAttribute->Mana = Data->MaxMana;
+        CharacterAttribute->ShieldMax = Data->MaxShield;
+        CharacterAttribute->SkillManaMax = Data->SkillManaMax;
+        CharacterAttribute->AddPoint = Data->AddPoint;
+        CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
+        CharacterAttribute->wMinusPoint = Data->wMinusPoint;
+        CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
+    }
 
     wchar_t szText[256] = { NULL, };
-    WORD iExp = CharacterAttribute->NextExperince - CharacterAttribute->Experience;
+    WORD iExp = CharacterAttribute->NextExperience - CharacterAttribute->Experience;
     swprintf(szText, GlobalText[486], iExp);
     g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
@@ -6069,6 +6477,42 @@ void ReceiveAddPoint(const BYTE* ReceiveBuffer)
     CharacterMachine->CalculateAll();
 }
 
+void ReceiveAddPointExtended(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_ADD_POINT_EXTENDED)ReceiveBuffer;
+    if (Data->AddedAmount == 0)
+    {
+        return;
+    }
+
+    CharacterAttribute->LevelUpPoint -= Data->AddedAmount;
+    switch (Data->StatType)
+    {
+    case 0:
+        CharacterAttribute->Strength += Data->AddedAmount;
+        break;
+    case 1:
+        CharacterAttribute->Dexterity += Data->AddedAmount;
+        break;
+    case 2:
+        CharacterAttribute->Vitality += Data->AddedAmount;
+        break;
+    case 3:
+        CharacterAttribute->Energy += Data->AddedAmount;
+        break;
+    case 4:
+        CharacterAttribute->Charisma += Data->AddedAmount;
+        break;
+    }
+
+    CharacterAttribute->LifeMax = Data->MaxHealth;
+    CharacterAttribute->ManaMax = Data->MaxMana;
+    CharacterAttribute->SkillManaMax = Data->SkillManaMax;
+    CharacterAttribute->ShieldMax = Data->ShieldMax;
+
+    CharacterMachine->CalculateAll();
+}
+
 void ReceiveLife(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_LIFE)ReceiveBuffer;
@@ -6091,6 +6535,46 @@ void ReceiveLife(const BYTE* ReceiveBuffer)
         {
             CharacterAttribute->LifeMax = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
             CharacterAttribute->ShieldMax = ((WORD)(Data->Life[3]) << 8) + Data->Life[4];
+        }
+        break;
+    case 0xfd:
+        EnableUse = 0;
+        break;
+    default:
+        if (ITEM* pItem = g_pMyInventory->FindItem(Data->Index))
+        {
+            if (pItem->Durability > 0)
+                pItem->Durability--;
+            if (pItem->Durability <= 0)
+                g_pMyInventory->DeleteItem(Data->Index);
+        }
+
+        break;
+    }
+}
+
+void ReceiveLifeExtended(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_LIFE_EXTENDED)ReceiveBuffer;
+    switch (Data->Index)
+    {
+    case 0xff:
+        CharacterAttribute->Life = Data->LifeOrMana;
+        CharacterAttribute->Shield = Data->ShieldOrBP;
+        break;
+    case 0xfe:
+        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+        {
+            //	Master_Level_Data.wMaxLife			= Data->LifeMax;
+            //	Master_Level_Data.wMaxMana			= Data->ManaMax;
+            //	Master_Level_Data.wMaxShield		= Data->ShieldMax;
+            Master_Level_Data.wMaxLife = Data->LifeOrMana;
+            Master_Level_Data.wMaxShield = Data->ShieldOrBP;
+        }
+        else
+        {
+            CharacterAttribute->LifeMax = Data->LifeOrMana;
+            CharacterAttribute->ShieldMax = Data->ShieldOrBP;
         }
         break;
     case 0xfd:
@@ -6135,6 +6619,62 @@ void ReceiveMana(const BYTE* ReceiveBuffer)
         break;
     default:
         CharacterAttribute->Mana = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
+
+        auto itemIndex = Data->Index - MAX_EQUIPMENT;
+        ITEM* item = nullptr;
+
+        if (itemIndex < MAX_INVENTORY)
+        {
+            item = &Inventory[itemIndex];
+        }
+        else
+        {
+            item = &InventoryExt[itemIndex - MAX_INVENTORY];
+        }
+
+        if (item)
+        {
+            if (item->Durability > 0)
+            {
+                item->Durability--;
+            }
+
+            if (item->Durability <= 0)
+            {
+                item->Type = -1;
+                item->Number = 0;
+            }
+        }
+        break;
+    }
+}
+
+void ReceiveManaExtended(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_LIFE_EXTENDED)ReceiveBuffer;
+    switch (Data->Index)
+    {
+    case 0xff:
+        CharacterAttribute->Mana = Data->LifeOrMana;
+        CharacterAttribute->SkillMana = Data->ShieldOrBP;
+        break;
+    case 0xfe:
+        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+        {
+            //	Master_Level_Data.wMaxLife			= Data->LifeMax;
+            //	Master_Level_Data.wMaxMana			= Data->ManaMax;
+            //	Master_Level_Data.wMaxShield		= Data->ShieldMax;
+            Master_Level_Data.wMaxMana = Data->LifeOrMana;
+            Master_Level_Data.wMaxBP = Data->ShieldOrBP;
+        }
+        else
+        {
+            CharacterAttribute->ManaMax = Data->LifeOrMana;
+            CharacterAttribute->SkillManaMax = Data->ShieldOrBP;
+        }
+        break;
+    default:
+        CharacterAttribute->Mana = Data->LifeOrMana;
 
         auto itemIndex = Data->Index - MAX_EQUIPMENT;
         ITEM* item = nullptr;
@@ -6327,11 +6867,12 @@ void ReceiveTradeYourInventoryDelete(const BYTE* ReceiveBuffer)
     g_pTrade->ProcessToReceiveYourItemDelete(Data->Value);
 }
 
+/*
 void ReceiveTradeYourInventory(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_ITEM)ReceiveBuffer;
-    g_pTrade->ProcessToReceiveYourItemAdd(Data->Index, Data->Item);
-}
+    g_pTrade->ProcessToReceiveYourItemAdd(Data->Index, Data->Item, Old);
+}*/
 
 void ReceiveTradeMyGold(const BYTE* ReceiveBuffer)
 {
@@ -7140,7 +7681,7 @@ void ReceiveSoccerGoal(const BYTE* ReceiveBuffer)
     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
-void Receive_Master_LevelUp(const BYTE* ReceiveBuffer)
+void Receive_Master_LevelUp(const BYTE* ReceiveBuffer, int Size)
 {
     auto Data = (LPPMSG_MASTERLEVEL_UP)ReceiveBuffer;
     Master_Level_Data.nMLevel = Data->nMLevel;
@@ -7148,15 +7689,30 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer)
     Master_Level_Data.nMLevelUpMPoint = Data->nMLevelUpMPoint;
     //	Master_Level_Data.nTotalMPoint		= Data->nTotalMPoint;
     Master_Level_Data.nMaxPoint = Data->nMaxPoint;
-    Master_Level_Data.wMaxLife = Data->wMaxLife;
-    Master_Level_Data.wMaxMana = Data->wMaxMana;
-    Master_Level_Data.wMaxShield = Data->wMaxShield;
-    Master_Level_Data.wMaxBP = Data->wMaxBP;
+
+    if (Size >= sizeof(LPPMSG_MASTERLEVEL_UP_EXTENDED))
+    {
+        auto ExtData = (LPPMSG_MASTERLEVEL_UP_EXTENDED)ReceiveBuffer;
+        Master_Level_Data.wMaxLife = ExtData->wMaxLife;
+        Master_Level_Data.wMaxMana = ExtData->wMaxMana;
+        Master_Level_Data.wMaxShield = ExtData->wMaxShield;
+        Master_Level_Data.wMaxBP = ExtData->wMaxBP;
+    }
+    else
+    {
+        Master_Level_Data.wMaxLife = Data->wMaxLife;
+        Master_Level_Data.wMaxMana = Data->wMaxMana;
+        Master_Level_Data.wMaxShield = Data->wMaxShield;
+        Master_Level_Data.wMaxBP = Data->wMaxBP;
+    }
 
     wchar_t szText[256] = { NULL, };
-    WORD iExp = Master_Level_Data.lNext_MasterLevel_Experince - Master_Level_Data.lMasterLevel_Experince;
-    swprintf(szText, GlobalText[1750], iExp);
-    g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    DWORD iExp = Master_Level_Data.lNext_MasterLevel_Experince - Master_Level_Data.lMasterLevel_Experince;
+    if (iExp > 0)
+    {
+        swprintf(szText, GlobalText[1750], iExp);
+        g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
 
     CharacterMachine->CalulateMasterLevelNextExperience();
 
@@ -7174,7 +7730,7 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x51 [Receive_Master_LevelUp]");
 }
 
-void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer)
+void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer, int Size)
 {
     auto Data = (LPPMSG_MASTERLEVEL_INFO)ReceiveBuffer;
     Master_Level_Data.nMLevel = Data->nMLevel;
@@ -7212,10 +7768,21 @@ void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer)
     Master_Level_Data.lNext_MasterLevel_Experince |= Data->btMNextExp8;
     Master_Level_Data.nMLevelUpMPoint = Data->nMLPoint;
 
-    Master_Level_Data.wMaxLife = Data->wMaxLife;
-    Master_Level_Data.wMaxMana = Data->wMaxMana;
-    Master_Level_Data.wMaxShield = Data->wMaxShield;
-    Master_Level_Data.wMaxBP = Data->wMaxSkillMana;
+    if (Size >= sizeof(LPPMSG_MASTERLEVEL_INFO_EXTENDED))
+    {
+        auto ExtData = (LPPMSG_MASTERLEVEL_INFO_EXTENDED)ReceiveBuffer;
+        Master_Level_Data.wMaxLife = ExtData->wMaxLife;
+        Master_Level_Data.wMaxMana = ExtData->wMaxMana;
+        Master_Level_Data.wMaxShield = ExtData->wMaxShield;
+        Master_Level_Data.wMaxBP = ExtData->wMaxSkillMana;
+    }
+    else
+    {
+        Master_Level_Data.wMaxLife = Data->wMaxLife;
+        Master_Level_Data.wMaxMana = Data->wMaxMana;
+        Master_Level_Data.wMaxShield = Data->wMaxShield;
+        Master_Level_Data.wMaxBP = Data->wMaxSkillMana;
+    }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x50 [Receive_Master_Level_Exp]");
 }
@@ -7542,7 +8109,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         break;
     }
 }
-
+/*
 void ReceiveMix(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_ITEM)ReceiveBuffer;
@@ -7553,7 +8120,8 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
     {
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
         {
-            g_pLuckyItemWnd->GetResult(0, Data->Index);
+            std::span<const BYTE> empty = {};
+            g_pLuckyItemWnd->GetResult(0, Data->Index, empty, Old);
             break;
         }
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
@@ -7599,7 +8167,7 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
     {
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
         {
-            g_pLuckyItemWnd->GetResult(1, 0, Data->Item);
+            g_pLuckyItemWnd->GetResult(1, 0, Data->Item, Old);
             break;
         }
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
@@ -7641,7 +8209,7 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
         }
 
         g_pMixInventory->DeleteAllItems();
-        g_pMixInventory->InsertItem(0, Data->Item);
+        g_pMixInventory->InsertItem(0, Data->Item, Old);
 
         PlayBuffer(SOUND_MIX01);
         PlayBuffer(SOUND_JEWEL01);
@@ -7667,12 +8235,12 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
     case 100:
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
         g_pMixInventory->DeleteAllItems();
-        g_pMixInventory->InsertItem(0, Data->Item);
+        g_pMixInventory->InsertItem(0, Data->Item, Old);
         break;
     case 0x20:
         if (g_pLuckyItemWnd->GetAct())
         {
-            g_pLuckyItemWnd->GetResult(0, Data->Index, Data->Item);
+            g_pLuckyItemWnd->GetResult(0, Data->Index, Data->Item, Old);
         }
         break;
     case 3:
@@ -7687,7 +8255,7 @@ void ReceiveMix(const BYTE* ReceiveBuffer)
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x86 [ReceiveMix(%d)]", Data->Index);
 }
-
+*/
 void ReceiveMixExit(const BYTE* ReceiveBuffer)
 {
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x87 [ReceiveMixExit]");
@@ -8474,10 +9042,16 @@ void ReceiveDestroyPersonalShop(const BYTE* ReceiveBuffer)
     }
 }
 
-void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
+void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Header = (LPGETPSHOPITEMLIST_HEADERINFO)ReceiveBuffer;
-    if (Header->byResult == 0x01)
+    auto Header = safe_cast<GETPSHOPITEMLIST_HEADERINFO>(ReceiveBuffer);
+    if (Header == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    if (Header->byResult == Success)
     {
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
         {
@@ -8502,20 +9076,30 @@ void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
         g_pMyInventory->ChangeMyShopButtonStateOpen();
 
         RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE);	//. clear item price table
-        auto pShopItem = (LPGETPSHOPITEM_DATAINFO)(ReceiveBuffer + sizeof(GETPSHOPITEMLIST_HEADERINFO));
-
-        for (int i = 0; i < Header->byCount; i++, pShopItem++)
+        int Offset = sizeof(GETPSHOPITEMLIST_HEADERINFO);
+        for (int i = 0; i < Header->ItemCount; i++)
         {
-            if (pShopItem->iItemPrice > 0)
+            auto pShopItem = safe_cast<GETPSHOPITEM_DATAINFO>(ReceiveBuffer.subspan(Offset));
+            if (pShopItem == nullptr)
             {
-                g_pPurchaseShopInventory->InsertItem(pShopItem->byPos, pShopItem->byItemInfo);
-                AddPersonalItemPrice(pShopItem->byPos, pShopItem->iItemPrice, PSHOPWNDTYPE_PURCHASE);
+                assert(false);
+                return;
+            }
+            int length = CalcItemLength(pShopItem->Item);
+            Offset+=9;
+            auto itemData = ReceiveBuffer.subspan(Offset, length);
+
+            // todo: use item prices as well when the UI is ready
+            if (pShopItem->MoneyPrice > 0)
+            {
+                g_pPurchaseShopInventory->InsertItem(pShopItem->ItemSlot, itemData);
+                AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_PURCHASE);
             }
             else
             {
-                g_ConsoleDebug->Write(MCD_ERROR, L"[ReceivePersonalShopItemList]Item Cound : %d, Item Index : %d, Item Price : %d", Header->byCount, i, pShopItem->iItemPrice);
+                g_ConsoleDebug->Write(MCD_ERROR, L"[ReceivePersonalShopItemList]Item Count : %d, Item Index : %d, Item Price : %d", Header->ItemCount, i, pShopItem->MoneyPrice);
 
-                g_ErrorReport.Write(L"@ ReceivePersonalShopItemList - item price less than zero(%d)\n", pShopItem->iItemPrice);
+                g_ErrorReport.Write(L"@ ReceivePersonalShopItemList - item price less than zero(%d)\n", pShopItem->MoneyPrice);
 
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
@@ -8523,6 +9107,8 @@ void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
 
                 return;
             }
+
+            Offset += length;
         }
 
         int key = MAKEWORD(Header->byIndexL, Header->byIndexH);
@@ -8534,12 +9120,12 @@ void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
     {
         switch (Header->byResult)
         {
-        case 0x03:
+        case Fail1:
         {
             g_pSystemLogBox->AddText(GlobalText[1120], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
-        case 0x04:
+        case Fail2:
         default:
             g_ErrorReport.Write(L"@ [Fault] ReceivePersonalShopItemList (result : %d)\n", Header->byResult);
         }
@@ -8548,19 +9134,37 @@ void ReceivePersonalShopItemList(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x05 [ReceivePersonalShopItemList]");
 }
 
-void ReceiveRefreshItemList(const BYTE* ReceiveBuffer)
+void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Header = (LPGETPSHOPITEMLIST_HEADERINFO)ReceiveBuffer;
+    auto Header = safe_cast<GETPSHOPITEMLIST_HEADERINFO>(ReceiveBuffer);
+    if (Header == nullptr)
+    {
+        assert(false);
+        return;
+    }
 
-    if (Header->byResult == 0x01 && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
+    int Offset = sizeof(GETPSHOPITEMLIST_HEADERINFO);
+    if (Header->byResult == Success && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
     {
         g_pPurchaseShopInventory->GetInventoryCtrl()->RemoveAllItems();
 
-        auto pShopItem = (LPGETPSHOPITEM_DATAINFO)(ReceiveBuffer + sizeof(GETPSHOPITEMLIST_HEADERINFO));
-        for (int i = 0; i < Header->byCount; i++, pShopItem++)
+        for (int i = 0; i < Header->ItemCount; i++)
         {
-            g_pPurchaseShopInventory->InsertItem(pShopItem->byPos, pShopItem->byItemInfo);
-            AddPersonalItemPrice(pShopItem->byPos, pShopItem->iItemPrice, PSHOPWNDTYPE_PURCHASE);
+            auto pShopItem = safe_cast<GETPSHOPITEM_DATAINFO>(ReceiveBuffer.subspan(Offset));
+            if (pShopItem == nullptr)
+            {
+                assert(false);
+                return;
+            }
+
+            int length = CalcItemLength(pShopItem->Item);
+            Offset += 9;
+            auto itemData = ReceiveBuffer.subspan(Offset, length);
+
+            g_pPurchaseShopInventory->InsertItem(pShopItem->ItemSlot, itemData);
+            AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_PURCHASE);
+
+            Offset += length;
         }
     }
     else
@@ -8579,11 +9183,16 @@ void ReceiveRefreshItemList(const BYTE* ReceiveBuffer)
     }
 }
 
-void ReceivePurchaseItem(const BYTE* ReceiveBuffer)
+void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Header = (LPPURCHASEITEM_RESULTINFO)ReceiveBuffer;
+    auto Header = safe_cast<PURCHASEITEM_RESULTINFO>(ReceiveBuffer);
+    if (Header == nullptr)
+    {
+        assert(false);
+        return;
+    }
 
-    if (Header->byResult == 0x01)
+    if (Header->Result == PURCHASEITEM_RESULTINFO::BoughtSuccessfully)
     {
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY))
         {
@@ -8595,17 +9204,25 @@ void ReceivePurchaseItem(const BYTE* ReceiveBuffer)
             RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE);
         }
 
-        auto itemindex = Header->byPos;
+        auto itemindex = Header->ItemSlot;
+        auto offset = sizeof(PURCHASEITEM_RESULTINFO);
+        auto itemData = ReceiveBuffer.subspan(offset);
+        if (CalcItemLength(itemData) < itemData.size())
+        {
+            assert(false);
+            return;
+        }
+
         if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
         {
-            g_pMyInventory->InsertItem(itemindex, Header->byItemInfo);
+            g_pMyInventory->InsertItem(itemindex, itemData);
         }
         else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
         {
-            g_pMyInventoryExt->InsertItem(itemindex, Header->byItemInfo);
+            g_pMyInventoryExt->InsertItem(itemindex, itemData);
         }
     }
-    else if (Header->byResult == 0x06)
+    else if (Header->Result == PURCHASEITEM_RESULTINFO::NameMismatchOrPriceMissing)
     {
         g_pSystemLogBox->AddText(GlobalText[1166], SEASON3B::TYPE_ERROR_MESSAGE);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
@@ -8613,21 +9230,21 @@ void ReceivePurchaseItem(const BYTE* ReceiveBuffer)
     }
     else
     {
-        switch (Header->byResult)
+        switch (Header->Result)
         {
-        case 0x07:
+        case PURCHASEITEM_RESULTINFO::LackOfMoney:
         {
             g_pSystemLogBox->AddText(GlobalText[423], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
-        case 0x08:
+        case PURCHASEITEM_RESULTINFO::MoneyOverflowOrNotEnoughSpace:
         {
             g_pSystemLogBox->AddText(GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
-        case 0x09:
+        case PURCHASEITEM_RESULTINFO::ItemBlock:
         default:
-            g_ErrorReport.Write(L"@ [Fault] ReceivePurchaseItem (result : %d)\n", Header->byResult);
+            g_ErrorReport.Write(L"@ [Fault] ReceivePurchaseItem (result : %d)\n", Header->Result);
         }
         SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
     }
@@ -8636,10 +9253,9 @@ void ReceivePurchaseItem(const BYTE* ReceiveBuffer)
 void NotifySoldItem(const BYTE* ReceiveBuffer)
 {
     auto Header = (LPSOLDITEM_RESULTINFO)ReceiveBuffer;
-    wchar_t szId[MAX_ID_SIZE + 2] = { 0, };
-    wcsncpy(szId, (wchar_t*)Header->szId, MAX_ID_SIZE);
-    szId[MAX_ID_SIZE] = '\0';
+    wchar_t szId[MAX_ID_SIZE + 2] = { 0 };
 
+    CMultiLanguage::ConvertFromUtf8(szId, Header->szId, MAX_ID_SIZE);
     wchar_t Text[100];
     swprintf(Text, GlobalText[1122], szId);
     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
@@ -8988,15 +9604,23 @@ void ReceiveLetter(const BYTE* ReceiveBuffer)
 
 extern int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
-void ReceiveLetterText(const BYTE* ReceiveBuffer)
+void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPFS_LETTER_TEXT)ReceiveBuffer;
-    //Data->Memo[Data->MemoSize] = '\0';
+    auto Data = safe_cast<FS_LETTER_TEXT>(ReceiveBuffer);
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
 
     g_pLetterList->CacheLetterText(Data->Index, Data);
 
-    LETTERLIST_TEXT* pLetter = g_pLetterList->GetLetter(Data->Index);
-    if (pLetter == NULL) return;
+    auto pLetter = g_pLetterList->GetLetter(Data->Index);
+    if (pLetter == nullptr)
+    {
+        return;
+    }
+
     pLetter->m_bIsRead = TRUE;
     g_pWindowMgr->RefreshMainWndLetterList();
 
@@ -9434,7 +10058,7 @@ void ReceiveQuestPrize(const BYTE* ReceiveBuffer)
         OBJECT* o = &c->Object;
         vec3_t      Position;
 
-        BYTE byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->m_byNumber);
+        auto byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->m_byNumber);
         if (2 != gCharacterManager.GetStepClass(byClass))
             break;
 
@@ -9513,7 +10137,7 @@ void ReceiveQuestPrize(const BYTE* ReceiveBuffer)
     {
         CHARACTER* c = &CharactersClient[Index];
 
-        BYTE byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->m_byNumber);
+        auto byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->m_byNumber);
         if (3 != gCharacterManager.GetStepClass(byClass))
             break;
 
@@ -10912,13 +11536,26 @@ void    ReceiveCatapultFireToMe(const BYTE* ReceiveBuffer)
     g_pCatapultWindow->DoFireFixStartPosition(pData->m_byWeaponType, pData->m_byTargetX, pData->m_byTargetY);
 }
 
-void ReceivePreviewPort(const BYTE* ReceiveBuffer)
+void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
 {
-    auto pData = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
+    auto pData = safe_cast<PWHEADER_DEFAULT_WORD>(ReceiveBuffer);
+    if (pData == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
     int Offset = sizeof(PWHEADER_DEFAULT_WORD);
+
     for (int i = 0; i < pData->Value; i++)
     {
-        auto pData2 = (LPPRECEIVE_PREVIEW_PORT)(ReceiveBuffer + Offset);
+        auto pData2 = safe_cast<PRECEIVE_PREVIEW_PORT_EXTENDED>(ReceiveBuffer.subspan(Offset));
+        if (pData2 == nullptr)
+        {
+            assert(false);
+            return;
+        }
+
         WORD Key = ((WORD)(pData2->m_byKeyH) << 8) + pData2->m_byKeyL;
         Key &= 0x7FFF;
 
@@ -10929,7 +11566,7 @@ void ReceivePreviewPort(const BYTE* ReceiveBuffer)
             CHARACTER* c = CreateCharacter(Key, MODEL_PLAYER, pData2->m_byPosX, pData2->m_byPosY, 0);
             OBJECT* o = &c->Object;
 
-            c->Class = gCharacterManager.ChangeServerClassTypeToClientClassType(pData2->m_byTypeH);
+            c->Class = gCharacterManager.ChangeServerClassTypeToClientClassType((SERVER_CLASS_TYPE)pData2->m_byTypeH);
             c->Skin = 0;
             c->PK = 0;
             o->Kind = KIND_TMP;
@@ -10993,7 +11630,7 @@ void ReceivePreviewPort(const BYTE* ReceiveBuffer)
         break;
         }
 
-        Offset += (sizeof(PRECEIVE_PREVIEW_PORT) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - pData2->s_BuffCount)));
+        Offset += (sizeof(PRECEIVE_PREVIEW_PORT_EXTENDED) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - pData2->s_BuffCount)));
     }
 }
 
@@ -11162,7 +11799,8 @@ void ReceiveCrywolfHeroList(const BYTE* ReceiveBuffer)
 
         wchar_t playerName[MAX_ID_SIZE + 1];
         CMultiLanguage::ConvertFromUtf8(playerName, pData2->szHeroName, MAX_ID_SIZE);
-        M34CryWolf1st::Set_WorldRank(pData2->iRank, pData2->btHeroClass, pData2->iHeroScore, playerName);
+        auto heroClass = gCharacterManager.ChangeServerClassTypeToClientClassType(pData2->btHeroClass);
+        M34CryWolf1st::Set_WorldRank(pData2->iRank, heroClass, pData2->iHeroScore, playerName);
     }
 }
 
@@ -12410,6 +13048,7 @@ void ReceiveDarkside(const BYTE* ReceiveBuffer)
 
 static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size)
 {
+    auto received_span = std::span<const BYTE>(ReceiveBuffer, Size);
     BYTE HeadCode = 0;
     BOOL bEncrypted = ReceiveBuffer[0] >= 0xC3;
     BOOL bIsC1C3 = ReceiveBuffer[0] % 2 == 1;
@@ -12532,7 +13171,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             break;
         case 0x04: //receive confirm password
             //AddDebugText(ReceiveBuffer,Size);
-            ReceiveConfirmPassword2(ReceiveBuffer);
+            ReceiveConfirmPassword2(received_span);
             break;
         case 0x05: //receive change password
             ReceiveChangePassword(ReceiveBuffer);
@@ -12559,7 +13198,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         switch (subcode)
         {
         case 0x00: //receive characters list
-            ReceiveCharacterList(ReceiveBuffer);
+            ReceiveCharacterListExtended(ReceiveBuffer);
             break;
         case 0x01: //receive create character
             ReceiveCreateCharacter(ReceiveBuffer);
@@ -12568,26 +13207,30 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             ReceiveDeleteCharacter(ReceiveBuffer);
             break;
         case 0x03: //receive join map server
-            if (!ReceiveJoinMapServer(ReceiveBuffer, bEncrypted))
+            if (!ReceiveJoinMapServer(received_span))
             {
                 //return ( FALSE);
             }
             break;
-        case 0x04: //receive revival
-            ReceiveRevival(ReceiveBuffer);
+        //case 0x04: //receive revival
+        //    ReceiveRevival(ReceiveBuffer);
             break;
         case 0x10: //receive inventory
-            //AddDebugText(ReceiveBuffer,Size);
-            if (!ReceiveInventory(ReceiveBuffer, bEncrypted))
-            {
-                //return ( FALSE);
-            }
+            ReceiveInventoryExtended(received_span);
             break;
         case 0x05: //receive level up
-            ReceiveLevelUp(ReceiveBuffer);
+            ReceiveLevelUp(ReceiveBuffer, Size);
             break;
         case 0x06: //receive Add Point
-            ReceiveAddPoint(ReceiveBuffer);
+            if (Size >= sizeof(PRECEIVE_ADD_POINT_EXTENDED))
+            {
+                ReceiveAddPointExtended(ReceiveBuffer);
+            }
+            else
+            {
+                ReceiveAddPoint(ReceiveBuffer);
+            }
+
             break;
         case 0x07: //receive damage
             ReceiveDamage(ReceiveBuffer);
@@ -12599,10 +13242,11 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             ReceiveMagicList(ReceiveBuffer);
             break;
         case 0x13:
-            ReceiveEquipment(ReceiveBuffer);
+            // not really in use in OpenMU
+            ReceiveEquipment(received_span);
             break;
         case 0x14:
-            ReceiveModifyItem(ReceiveBuffer);
+            ReceiveModifyItemExtended(received_span);
             break;
         case 0x20:
             ReceiveSummonLife(ReceiveBuffer);
@@ -12628,10 +13272,10 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             ReceiveServerCommand(ReceiveBuffer);
             break;
         case 0x50:
-            Receive_Master_Level_Exp(ReceiveBuffer);
+            Receive_Master_Level_Exp(ReceiveBuffer, Size);
             break;
         case 0x51:
-            Receive_Master_LevelUp(ReceiveBuffer);
+            Receive_Master_LevelUp(ReceiveBuffer, Size);
             break;
         case 0x52:
             Receive_Master_LevelGetSkill(ReceiveBuffer);
@@ -12700,7 +13344,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         break;
     case 0x12: //create characters
         AddDebugText(ReceiveBuffer, Size);
-        ReceiveCreatePlayerViewport(ReceiveBuffer, Size);
+        ReceiveCreatePlayerViewportExtended(received_span);
         break;
     case 0x13: //create monsters
         //AddDebugText(ReceiveBuffer,Size);
@@ -12712,37 +13356,36 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         break;
     case 0x45: //create monsters
         //AddDebugText(ReceiveBuffer,Size);
-        ReceiveCreateTransformViewport(ReceiveBuffer);
+        ReceiveCreateTransformViewport(received_span);
         break;
     case 0x14: //delete characters & monsters
         //AddDebugText(ReceiveBuffer,Size);
         ReceiveDeleteCharacterViewport(ReceiveBuffer);
         break;
     case 0x20: //create item
-        ReceiveCreateItemViewport(ReceiveBuffer);
+        ReceiveCreateItemViewportExtended(received_span);
+        break;
+    case 0x2F:
+        ReceiveCreateMoney(received_span);
         break;
     case 0x21://delete item
         ReceiveDeleteItemViewport(ReceiveBuffer);
         break;
     case 0x22://get item
-        //AddDebugText(ReceiveBuffer,Size);
-        ReceiveGetItem(ReceiveBuffer);
+        ReceiveGetItem(received_span);
         break;
     case 0x23://drop item
         ReceiveDropItem(ReceiveBuffer);
         break;
     case 0x24://equipment item
         AddDebugText(ReceiveBuffer, Size);
-        if (!ReceiveEquipmentItem(ReceiveBuffer, bEncrypted))
-        {
-            //return ( FALSE);
-        }
+        ReceiveEquipmentItemExtended(received_span);
         break;
     case 0x25://change character
-        ReceiveChangePlayer(ReceiveBuffer);
+        ReceiveChangePlayer(received_span);
         break;
     case PACKET_ATTACK://attack character
-        ReceiveAttackDamage(ReceiveBuffer);
+        ReceiveAttackDamageExtended(ReceiveBuffer);
         break;
     case 0x18://action character
         ReceiveAction(ReceiveBuffer, Size);
@@ -12774,16 +13417,20 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
     case 0x07://setmagicstatus
         ReceiveSkillStatus(ReceiveBuffer);
         break;
+    //case 0x16://die character(exp)
+    //    if (!ReceiveDieExp(ReceiveBuffer, bEncrypted))
+    //    {
+    //        //return ( FALSE);
+    //    }
+    //    break;
     case 0x16://die character(exp)
-        if (!ReceiveDieExp(ReceiveBuffer, bEncrypted))
+        if (Size >= sizeof(PRECEIVE_EXP_EXTENDED))
         {
-            //return ( FALSE);
+            ReceiveDieExpLarge(ReceiveBuffer, bEncrypted);
         }
-        break;
-    case 0x9C://die character(exp)
-        if (!ReceiveDieExpLarge(ReceiveBuffer, bEncrypted))
+        else
         {
-            //return ( FALSE);
+            ReceiveDieExp(ReceiveBuffer, bEncrypted);
         }
         break;
     case 0x17://die character
@@ -12794,10 +13441,24 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         ReceiveDurability(ReceiveBuffer);
         break;
     case 0x26:
-        ReceiveLife(ReceiveBuffer);
+        if (Size >= sizeof(LPPRECEIVE_LIFE_EXTENDED))
+        {
+            ReceiveLifeExtended(ReceiveBuffer);
+        }
+        else
+        {
+            ReceiveLife(ReceiveBuffer);
+        }
         break;
     case 0x27:
-        ReceiveMana(ReceiveBuffer);
+        if (Size >= sizeof(LPPRECEIVE_LIFE_EXTENDED))
+        {
+            ReceiveManaExtended(ReceiveBuffer);
+        }
+        else
+        {
+            ReceiveMana(ReceiveBuffer);
+        }
         break;
     case 0x28:
         ReceiveDeleteInventory(ReceiveBuffer);
@@ -12820,10 +13481,10 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         break;
     case 0x31:
         //AddDebugText(ReceiveBuffer,Size);
-        ReceiveTradeInventory(ReceiveBuffer);
+        ReceiveTradeInventoryExtended(received_span);
         break;
     case 0x32:
-        ReceiveBuy(ReceiveBuffer);
+        ReceiveBuyExtended(received_span);
         break;
     case 0x33:
         ReceiveSell(ReceiveBuffer);
@@ -12847,7 +13508,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         break;
     case 0x39:
         //AddDebugText(ReceiveBuffer,Size);
-        ReceiveTradeYourInventory(ReceiveBuffer);
+        ReceiveTradeYourInventoryExtended(received_span);
         break;
     case 0x3A:
         //AddDebugText(ReceiveBuffer,Size);
@@ -12982,7 +13643,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
     }
     break;
     case 0x68:
-        ReceivePreviewPort(ReceiveBuffer);
+        ReceivePreviewPort(received_span);
         break;
 
     case 0x71:
@@ -12998,7 +13659,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         ReceiveStorageStatus(ReceiveBuffer);
         break;
     case 0x86:
-        ReceiveMix(ReceiveBuffer);
+        ReceiveMixExtended(received_span);
         break;
     case 0x87:
         ReceiveMixExit(ReceiveBuffer);
@@ -13270,10 +13931,10 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             ReceiveDestroyPersonalShop(ReceiveBuffer);
             break;
         case 0x05:
-            ReceivePersonalShopItemList(ReceiveBuffer);
+            ReceivePersonalShopItemList(received_span);
             break;
         case 0x06:
-            ReceivePurchaseItem(ReceiveBuffer);
+            ReceivePurchaseItem(received_span);
             break;
         case 0x08:
             NotifySoldItem(ReceiveBuffer);
@@ -13285,7 +13946,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             NotifyClosePersonalShop(ReceiveBuffer);
             break;
         case 0x13:
-            ReceiveRefreshItemList(ReceiveBuffer);
+            ReceiveRefreshItemList(received_span);
             break;
         }
     }
@@ -13613,7 +14274,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         ReceiveLetter(ReceiveBuffer);
         break;
     case 0xC7:
-        ReceiveLetterText(ReceiveBuffer);
+        ReceiveLetterText(received_span);
         break;
     case 0xC8:
         ReceiveLetterDeleteResult(ReceiveBuffer);

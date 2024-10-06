@@ -236,7 +236,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFrame()
 
 void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
 {
-    WORD wLifeMax, wLife, wManaMax, wMana;
+    DWORD wLifeMax, wLife, wManaMax, wMana;
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -330,7 +330,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
     float x, y, width, height;
     float fY, fH, fV;
 
-    WORD dwMaxSkillMana, dwSkillMana;
+    DWORD dwMaxSkillMana, dwSkillMana;
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -372,7 +372,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
 {
     float x, y, width, height;
     float fY, fH, fV;
-    WORD wMaxShield, wShield;
+    DWORD wMaxShield, wShield;
 
     //Master_Level_Data.wMaxShield
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
@@ -429,7 +429,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
     else
     {
         wLevel = CharacterAttribute->Level;
-        dwNexExperience = CharacterAttribute->NextExperince;
+        dwNexExperience = CharacterAttribute->NextExperience;
         dwExperience = CharacterAttribute->Experience;
     }
 
@@ -1088,7 +1088,7 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
                 }
 
                 if (
-                    (pItem->Type == i && ((pItem->Level >> 3) & 15) == m_iHotKeyItemLevel[iType])
+                    (pItem->Type == i && pItem->Level == m_iHotKeyItemLevel[iType])
                     || (pItem->Type == i && (pItem->Type >= ITEM_APPLE && pItem->Type <= ITEM_LARGE_HEALING_POTION))
                     )
                 {
@@ -1124,7 +1124,7 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
                 if ((pItem->Type != ITEM_SIEGE_POTION
                     && pItem->Type != ITEM_TOWN_PORTAL_SCROLL
                     && pItem->Type != ITEM_POTION + 20)
-                    || ((pItem->Level >> 3) & 15) == m_iHotKeyItemLevel[iType]
+                    || pItem->Level == m_iHotKeyItemLevel[iType]
                     )
                 {
                     return iIndex;

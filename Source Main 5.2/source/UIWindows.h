@@ -161,7 +161,7 @@ public:
     virtual CHARACTER* GetPhotoChar() { return &m_PhotoChar; }
 
     virtual void Init(int iInitType);
-    virtual void SetClass(BYTE byClass);
+    virtual void SetClass(CLASS_TYPE byClass);
     virtual void SetEquipmentPacket(BYTE* pbyEquip);
     virtual void CopyPlayer();
     virtual void SetAngle(float fDegree);
