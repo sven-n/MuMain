@@ -10,6 +10,7 @@
 #include <coreclr_delegates.h>
 #include <hostfxr.h>
 #include <cassert>
+#include <filesystem>
 
 DotNetRuntime::~DotNetRuntime()
 {
@@ -48,8 +49,14 @@ DotNetRuntime::DotNetRuntime()
     // STEP 0: Load HostFxr and get exported hosting functions
     if (!load_hostfxr())
     {
-        assert(false && "Failure: load_hostfxr()");
-        return;
+        auto dialogResult = MessageBoxW(g_hWnd, L".NET 8 runtime (or higher) for x86 not found. Open download page?", L".NET 8 x86 runtime required", MB_YESNO | MB_ICONERROR);
+        if (dialogResult == IDYES)
+        {
+            auto downloadUrl = L"https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-windows-x86-installer";
+            ShellExecute(0, 0, downloadUrl, 0, 0, SW_SHOW);
+        }
+
+        std::terminate();
     }
 
     // STEP 1: Get the current executable directory
@@ -76,6 +83,12 @@ DotNetRuntime::DotNetRuntime()
     assert(load_func != nullptr && "Failure: get_dotnet_load_assembly()");
 	dotnetlib_path = runtimePath + L"\\MUnique.Client.ManagedLibrary.dll";
 
+    if (!std::filesystem::exists(dotnetlib_path))
+    {
+        MessageBoxW(g_hWnd, dotnetlib_path.data(), L"MUnique.Client.ManagedLibrary.dll not found", MB_OK | MB_ICONERROR);
+        std::terminate();
+    }
+
     is_initialized_ = true;
 }
 
@@ -87,7 +100,7 @@ bool DotNetRuntime::is_initialized() const
 void* DotNetRuntime::get_method(const char_t* type_name, const char_t* method_name) const
 {
     void* result = nullptr;
-    //const load_assembly_and_get_function_pointer_fn load_assembly_and_get_function_pointer = get_dotnet_load_assembly(config_path.c_str());
+
     const int resultCode = load_func(
         dotnetlib_path.c_str(),
         type_name,
@@ -95,7 +108,16 @@ void* DotNetRuntime::get_method(const char_t* type_name, const char_t* method_na
         UNMANAGEDCALLERSONLY_METHOD,
         nullptr,
         &result);
-    assert(resultCode == 0 && result != nullptr && "Failure: couldn't get method");
+
+    auto success = resultCode == 0 && result != nullptr;
+    if (!success)
+    {
+        auto message = L"Method not found: " + std::wstring(type_name) + L"." + std::wstring(method_name) + L"\r\n\r\n" 
+                            + L"The ManagedLibrary does probably not fit to the C++ code.";
+        MessageBoxW(g_hWnd, message.data(), L"Error", MB_OK | MB_ICONERROR);
+        std::terminate();
+    }
+
     return result;
 }
 
