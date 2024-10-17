@@ -2459,7 +2459,6 @@ void MainScene(HDC hDC)
 
         if (Success)
         {
-            glFlush();
             SwapBuffers(hDC);
         }
 
