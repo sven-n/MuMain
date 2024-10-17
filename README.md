@@ -6,8 +6,14 @@ The ultimate goal is to clean it up and make it compatible and feature complete
 to Season 6 Episode 3.
 
 What I have done so far:
-  * 🔥 The framerate has been increased to 60 fps and can be adjusted with the chat
-    command `$fps <value>`. The options menu includes a checkbox to reduce effects.
+  * 🔥 The framerate has been increased.
+    * By default, it uses V-Sync without fps limit. If V-Sync is not
+    available, it limits to 60 fps.
+    * The options menu includes a checkbox to reduce effects to achieve higher frame rates.
+    * Chat commands:
+      * Change FPS-Limit: `$fps <value>`
+      * Enable V-Sync: `$vsync on`
+      * Disable V-Sync: `$vsync off`
   * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
     a better frame rate when many players and objects are visible.
   * 🔥 Added inventory and vault extensions.

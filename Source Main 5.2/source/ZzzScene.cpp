@@ -2470,7 +2470,7 @@ void MainScene(HDC hDC)
         // Additionally, we only sleep when we have enough time to sleep and spin for the rest of the time.
         // We use spinning to increase the accuracy of the frame limiting.
         const float current_frame_time_ms = current_tick_count - last_render_tick_count;
-        if (current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
+        if (ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
         {
             constexpr float min_spin_ms = 1;
             constexpr float sleep_threshold_ms = 8;

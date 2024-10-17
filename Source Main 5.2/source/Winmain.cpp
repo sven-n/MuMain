@@ -1434,6 +1434,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     //g_ErrorReport.WriteImeInfo( g_hWnd);
     g_ErrorReport.AddSeparator();
 
+    InitVSync();
+    if (IsVSyncAvailable())
+    {
+        EnableVSync();
+        SetTargetFps(-1); // unlimited
+    }
+
     if (g_dotnet->is_initialized())
     {
         g_ErrorReport.Write(L".net runtime loaded :)");

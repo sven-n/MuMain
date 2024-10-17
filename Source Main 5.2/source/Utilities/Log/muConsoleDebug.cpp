@@ -77,6 +77,18 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         return true;
     }
 
+    if (strCommand.compare(L"$vsync on") == 0)
+    {
+        EnableVSync();
+        return true;
+    }
+
+    if (strCommand.compare(L"$vsync off") == 0)
+    {
+        DisableVSync();
+        return true;
+    }
+
 #ifdef CSK_LH_DEBUG_CONSOLE
     if (!m_bInit)
         return false;

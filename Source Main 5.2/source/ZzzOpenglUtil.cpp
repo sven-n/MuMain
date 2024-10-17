@@ -10,6 +10,7 @@
 #include "zzzcharacter.h"
 #include "Zzzinfomation.h"
 #include "NewUISystem.h"
+#include "wglext.h"
 
 int     OpenglWindowX;
 int     OpenglWindowY;
@@ -28,6 +29,12 @@ float   g_fCameraCustomDistance = 0.f;
 bool    FogEnable = false;
 GLfloat FogDensity = 0.0004f;
 GLfloat FogColor[4] = { 30 / 256.f,20 / 256.f,10 / 256.f, };
+
+bool _isVSyncAvailable = false;
+bool _isVSyncEnabled = false;
+PFNWGLSWAPINTERVALEXTPROC       wglSwapIntervalEXT = nullptr;
+//PFNWGLGETSWAPINTERVALEXTPROC    wglGetSwapIntervalEXT = nullptr;
+
 
 unsigned int WindowWidth = 1024;
 unsigned int WindowHeight = 768;
@@ -663,14 +670,13 @@ void UpdateMousePositionn()
     VectorIRotate(vPos, CameraMatrix, MousePosition);
 }
 
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL IsGLExtensionSupported(const wchar_t* extension)
 {
     const size_t extlen = wcslen(extension);
     const wchar_t* supported = NULL;
 
     // Try To Use wglGetExtensionStringARB On Current DC, If Possible
-    PROC wglGetExtString = wglGetProcAddress(L"wglGetExtensionsStringARB");
+    auto wglGetExtString = wglGetProcAddress("wglGetExtensionsStringARB");
 
     if (wglGetExtString)
         supported = ((wchar_t* (__stdcall*)(HDC))wglGetExtString)(wglGetCurrentDC());
@@ -697,6 +703,72 @@ BOOL IsGLExtensionSupported(const wchar_t* extension)
     }
 }
 
+bool WGLExtensionSupported(const char* extension_name)
+{
+    // this is pointer to function which returns pointer to string with list of all wgl extensions
+     PFNWGLGETEXTENSIONSSTRINGEXTPROC _wglGetExtensionsStringEXT = reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGEXTPROC>(wglGetProcAddress("wglGetExtensionsStringEXT"));
+
+    if (strstr(_wglGetExtensionsStringEXT(), extension_name) == nullptr)
+    {
+        // string was not found
+        return false;
+    }
+
+    // extension is supported
+    return true;
+}
+
+void InitVSync()
+{
+    _isVSyncAvailable = WGLExtensionSupported("WGL_EXT_swap_control");
+    if (_isVSyncAvailable)
+    {
+        // Extension is supported, init pointers.
+        wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+
+        // this is another function from WGL_EXT_swap_control extension
+        // wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)wglGetProcAddress("wglGetSwapIntervalEXT");
+    }
+
+    if (wglSwapIntervalEXT == nullptr)
+    {
+        _isVSyncAvailable = false;
+    }
+}
+
+bool IsVSyncAvailable()
+{
+    return _isVSyncAvailable;
+}
+
+bool IsVSyncEnabled()
+{
+    return _isVSyncEnabled;
+}
+
+void EnableVSync()
+{
+    if (!_isVSyncAvailable)
+    {
+        return;
+    }
+
+    wglSwapIntervalEXT(1);
+    _isVSyncEnabled = true;
+}
+
+void DisableVSync()
+{
+    if (!_isVSyncAvailable)
+    {
+        return;
+    }
+
+    wglSwapIntervalEXT(0);
+    _isVSyncEnabled = false;
+}
+
+#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd, int iRequestMSAAValue, int& OutiPixelFormat)
 {
     BOOL bIsGLMultisampleSupported = FALSE;
