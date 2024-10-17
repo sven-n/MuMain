@@ -637,8 +637,8 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
 
         CreateHero(Data->Index, CharacterView.Class, CharacterView.Skin, fPos[0], fPos[1], fAngle);
         CharactersClient[Data->Index].Level = Data->Level;
-
-        auto iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
+        SERVER_CLASS_TYPE serverClass = (SERVER_CLASS_TYPE)(Data->Class >> 3);
+        auto iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(serverClass);
 
         CharactersClient[Data->Index].Class = iClass;
         CMultiLanguage::ConvertFromUtf8(CharactersClient[Data->Index].ID, Data->ID, MAX_ID_SIZE);

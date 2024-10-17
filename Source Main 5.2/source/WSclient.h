@@ -320,7 +320,7 @@ typedef struct
     char         ID[MAX_ID_SIZE];
     BYTE         Index;
     WORD         Level;
-    SERVER_CLASS_TYPE		 Class;
+    BYTE         Class; // SERVER_CLASS_TYPE, shifted by 3 bits
     //BYTE         Equipment[24];
 } PRECEIVE_CREATE_CHARACTER, * LPPRECEIVE_CREATE_CHARACTER;
 
