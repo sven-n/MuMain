@@ -876,7 +876,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
     CharacterAttribute->InventoryExtensions = Data->InventoryExtensions;
     CharacterAttribute->AttackSpeed = Data->AttackSpeed;
-    CharacterAttribute->MagicSpeed = Data->AttackSpeed;
+    CharacterAttribute->MagicSpeed = Data->MagicSpeed;
     CharacterAttribute->MaxAttackSpeed = Data->MaxAttackSpeed;
     CharacterMachine->Gold = Data->Gold;
 
@@ -6513,34 +6513,38 @@ void ReceiveAddPointExtended(const BYTE* ReceiveBuffer)
     CharacterMachine->CalculateAll();
 }
 
-void ReceiveLife(const BYTE* ReceiveBuffer)
+void ReceiveStatsExtended(const BYTE* ReceiveBuffer)
 {
-    auto Data = (LPPRECEIVE_LIFE)ReceiveBuffer;
+    auto Data = (LPPRECEIVE_STATS_EXTENDED)ReceiveBuffer;
     switch (Data->Index)
     {
     case 0xff:
-        CharacterAttribute->Life = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
-        CharacterAttribute->Shield = ((WORD)(Data->Life[3]) << 8) + Data->Life[4];
+        CharacterAttribute->Life = Data->Life;
+        CharacterAttribute->Shield = Data->Shield;
+        CharacterAttribute->Mana = Data->Mana;
+        CharacterAttribute->SkillMana = Data->BP;
+        CharacterAttribute->AttackSpeed = Data->AttackSpeed;
+        CharacterAttribute->MagicSpeed = Data->MagicSpeed;
         break;
     case 0xfe:
+        CharacterAttribute->LifeMax = Data->Life;
+        CharacterAttribute->ShieldMax = Data->Shield;
+        CharacterAttribute->ManaMax = Data->Mana;
+        CharacterAttribute->SkillManaMax = Data->BP;
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
         {
-            //	Master_Level_Data.wMaxLife			= Data->LifeMax;
-            //	Master_Level_Data.wMaxMana			= Data->ManaMax;
-            //	Master_Level_Data.wMaxShield		= Data->ShieldMax;
-            Master_Level_Data.wMaxLife = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
-            Master_Level_Data.wMaxShield = ((WORD)(Data->Life[3]) << 8) + Data->Life[4];
+            Master_Level_Data.wMaxLife = Data->Life;
+            Master_Level_Data.wMaxShield = Data->Shield;
+            Master_Level_Data.wMaxMana = Data->Mana;
+            Master_Level_Data.wMaxBP = Data->BP;
         }
-        else
-        {
-            CharacterAttribute->LifeMax = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
-            CharacterAttribute->ShieldMax = ((WORD)(Data->Life[3]) << 8) + Data->Life[4];
-        }
+
         break;
     case 0xfd:
         EnableUse = 0;
         break;
     default:
+        // todo: is that ever used?
         if (ITEM* pItem = g_pMyInventory->FindItem(Data->Index))
         {
             if (pItem->Durability > 0)
@@ -6549,158 +6553,6 @@ void ReceiveLife(const BYTE* ReceiveBuffer)
                 g_pMyInventory->DeleteItem(Data->Index);
         }
 
-        break;
-    }
-}
-
-void ReceiveLifeExtended(const BYTE* ReceiveBuffer)
-{
-    auto Data = (LPPRECEIVE_LIFE_EXTENDED)ReceiveBuffer;
-    switch (Data->Index)
-    {
-    case 0xff:
-        CharacterAttribute->Life = Data->LifeOrMana;
-        CharacterAttribute->Shield = Data->ShieldOrBP;
-        break;
-    case 0xfe:
-        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
-        {
-            //	Master_Level_Data.wMaxLife			= Data->LifeMax;
-            //	Master_Level_Data.wMaxMana			= Data->ManaMax;
-            //	Master_Level_Data.wMaxShield		= Data->ShieldMax;
-            Master_Level_Data.wMaxLife = Data->LifeOrMana;
-            Master_Level_Data.wMaxShield = Data->ShieldOrBP;
-        }
-        else
-        {
-            CharacterAttribute->LifeMax = Data->LifeOrMana;
-            CharacterAttribute->ShieldMax = Data->ShieldOrBP;
-        }
-        break;
-    case 0xfd:
-        EnableUse = 0;
-        break;
-    default:
-        if (ITEM* pItem = g_pMyInventory->FindItem(Data->Index))
-        {
-            if (pItem->Durability > 0)
-                pItem->Durability--;
-            if (pItem->Durability <= 0)
-                g_pMyInventory->DeleteItem(Data->Index);
-        }
-
-        break;
-    }
-}
-
-void ReceiveMana(const BYTE* ReceiveBuffer)
-{
-    auto Data = (LPPRECEIVE_LIFE)ReceiveBuffer;
-    switch (Data->Index)
-    {
-    case 0xff:
-        CharacterAttribute->Mana = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
-        CharacterAttribute->SkillMana = ((WORD)(Data->Life[2]) << 8) + Data->Life[3];
-        break;
-    case 0xfe:
-        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
-        {
-            //	Master_Level_Data.wMaxLife			= Data->LifeMax;
-            //	Master_Level_Data.wMaxMana			= Data->ManaMax;
-            //	Master_Level_Data.wMaxShield		= Data->ShieldMax;
-            Master_Level_Data.wMaxMana = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
-            Master_Level_Data.wMaxBP = ((WORD)(Data->Life[2]) << 8) + Data->Life[3];
-        }
-        else
-        {
-            CharacterAttribute->ManaMax = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
-            CharacterAttribute->SkillManaMax = ((WORD)(Data->Life[2]) << 8) + Data->Life[3];
-        }
-        break;
-    default:
-        CharacterAttribute->Mana = ((WORD)(Data->Life[0]) << 8) + Data->Life[1];
-
-        auto itemIndex = Data->Index - MAX_EQUIPMENT;
-        ITEM* item = nullptr;
-
-        if (itemIndex < MAX_INVENTORY)
-        {
-            item = &Inventory[itemIndex];
-        }
-        else
-        {
-            item = &InventoryExt[itemIndex - MAX_INVENTORY];
-        }
-
-        if (item)
-        {
-            if (item->Durability > 0)
-            {
-                item->Durability--;
-            }
-
-            if (item->Durability <= 0)
-            {
-                item->Type = -1;
-                item->Number = 0;
-            }
-        }
-        break;
-    }
-}
-
-void ReceiveManaExtended(const BYTE* ReceiveBuffer)
-{
-    auto Data = (LPPRECEIVE_LIFE_EXTENDED)ReceiveBuffer;
-    switch (Data->Index)
-    {
-    case 0xff:
-        CharacterAttribute->Mana = Data->LifeOrMana;
-        CharacterAttribute->SkillMana = Data->ShieldOrBP;
-        break;
-    case 0xfe:
-        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
-        {
-            //	Master_Level_Data.wMaxLife			= Data->LifeMax;
-            //	Master_Level_Data.wMaxMana			= Data->ManaMax;
-            //	Master_Level_Data.wMaxShield		= Data->ShieldMax;
-            Master_Level_Data.wMaxMana = Data->LifeOrMana;
-            Master_Level_Data.wMaxBP = Data->ShieldOrBP;
-        }
-        else
-        {
-            CharacterAttribute->ManaMax = Data->LifeOrMana;
-            CharacterAttribute->SkillManaMax = Data->ShieldOrBP;
-        }
-        break;
-    default:
-        CharacterAttribute->Mana = Data->LifeOrMana;
-
-        auto itemIndex = Data->Index - MAX_EQUIPMENT;
-        ITEM* item = nullptr;
-
-        if (itemIndex < MAX_INVENTORY)
-        {
-            item = &Inventory[itemIndex];
-        }
-        else
-        {
-            item = &InventoryExt[itemIndex - MAX_INVENTORY];
-        }
-
-        if (item)
-        {
-            if (item->Durability > 0)
-            {
-                item->Durability--;
-            }
-
-            if (item->Durability <= 0)
-            {
-                item->Type = -1;
-                item->Number = 0;
-            }
-        }
         break;
     }
 }
@@ -13441,24 +13293,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         ReceiveDurability(ReceiveBuffer);
         break;
     case 0x26:
-        if (Size >= sizeof(LPPRECEIVE_LIFE_EXTENDED))
-        {
-            ReceiveLifeExtended(ReceiveBuffer);
-        }
-        else
-        {
-            ReceiveLife(ReceiveBuffer);
-        }
-        break;
-    case 0x27:
-        if (Size >= sizeof(LPPRECEIVE_LIFE_EXTENDED))
-        {
-            ReceiveManaExtended(ReceiveBuffer);
-        }
-        else
-        {
-            ReceiveMana(ReceiveBuffer);
-        }
+        ReceiveStatsExtended(ReceiveBuffer);
         break;
     case 0x28:
         ReceiveDeleteInventory(ReceiveBuffer);

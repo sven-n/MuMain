@@ -3296,7 +3296,7 @@ void CHARACTER_MACHINE::CalculateAttackRatingPK()
 
 void CHARACTER_MACHINE::CalculateAttackSpeed()
 {
-    if (Character.MaxAttackSpeed == 0xFFFF)
+    if (Character.MaxAttackSpeed != 0xFFFF)
     {
         return;
     }
