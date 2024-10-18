@@ -6644,7 +6644,7 @@ void ReceiveDurability(const BYTE* ReceiveBuffer)
 BOOL ReceiveHelperItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     auto Data = (LPPRECEIVE_HELPER_ITEM)ReceiveBuffer;
-    CharacterAttribute->AbilityTime[Data->Index] = Data->Time * 24;
+    CharacterAttribute->AbilityTime[Data->Index] = Data->Time * REFERENCE_FPS;
     switch (Data->Index)
     {
     case 0:
