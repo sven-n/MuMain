@@ -6416,7 +6416,7 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
     }
 
     wchar_t szText[256] = { NULL, };
-    WORD iExp = CharacterAttribute->NextExperience - CharacterAttribute->Experience;
+    uint64_t iExp = CharacterAttribute->NextExperience - CharacterAttribute->Experience;
     swprintf(szText, GlobalText[486], iExp);
     g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
