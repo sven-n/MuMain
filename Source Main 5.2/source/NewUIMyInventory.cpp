@@ -328,8 +328,8 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 
     if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
     {
-        const PET_INFO* pPetInfo = GetPetInfo(pItem);
-        const WORD wRequireCharisma = (185 + (pPetInfo->m_wLevel * 15));
+        auto pPetInfo = GetPetInfo(pItem);
+        auto wRequireCharisma = (185 + (pPetInfo->m_wLevel * 15));
         if (wRequireCharisma > wCharisma)
             return false;
     }
