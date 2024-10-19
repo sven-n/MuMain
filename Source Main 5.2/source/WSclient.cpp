@@ -5329,7 +5329,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
+        g_pMainFrame->SetPreExp(CharacterAttribute->Experience & 0xFFFFFFFF);
         g_pMainFrame->SetGetExp(Exp);
         CharacterAttribute->Experience += Exp;
     }
@@ -5417,7 +5417,7 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
+        g_pMainFrame->SetPreExp(CharacterAttribute->Experience & 0xFFFFFFFF);
         g_pMainFrame->SetGetExp(addedExperience);
         CharacterAttribute->Experience += addedExperience;
     }
