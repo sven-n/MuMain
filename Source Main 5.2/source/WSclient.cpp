@@ -5329,7 +5329,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
+        g_pMainFrame->SetPreExp(CharacterAttribute->Experience & 0xFFFFFFFF);
         g_pMainFrame->SetGetExp(Exp);
         CharacterAttribute->Experience += Exp;
     }
@@ -5417,7 +5417,7 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
+        g_pMainFrame->SetPreExp(CharacterAttribute->Experience & 0xFFFFFFFF);
         g_pMainFrame->SetGetExp(addedExperience);
         CharacterAttribute->Experience += addedExperience;
     }
@@ -6414,11 +6414,6 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
         CharacterAttribute->wMinusPoint = Data->wMinusPoint;
         CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
     }
-
-    wchar_t szText[256] = { NULL, };
-    WORD iExp = CharacterAttribute->NextExperience - CharacterAttribute->Experience;
-    swprintf(szText, GlobalText[486], iExp);
-    g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
     CharacterMachine->CalculateNextExperince();
 
