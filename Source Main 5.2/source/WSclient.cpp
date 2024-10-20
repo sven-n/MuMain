@@ -419,7 +419,6 @@ void ReceiveConfirmPassword2(const std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PRECEIVE_CONFIRM_PASSWORD2>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -469,7 +468,6 @@ void ReceiveCharacterList(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PHEADER_DEFAULT_CHARACTER_LIST>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -487,7 +485,6 @@ void ReceiveCharacterList(std::span<const BYTE> ReceiveBuffer)
         auto Data2 = safe_cast<PRECEIVE_CHARACTER_LIST_EXTENDED>(ReceiveBuffer.subspan(Offset));
         if (Data2 == nullptr)
         {
-            assert(false);
             return;
         }
 
@@ -850,7 +847,6 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     auto const Data = safe_cast<PRECEIVE_JOIN_MAP_SERVER_EXTENDED>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return false;
     }
 
@@ -1334,7 +1330,6 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_WORD>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return false;
     }
 
@@ -1349,7 +1344,6 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         auto itemStartData = safe_cast<PRECEIVE_INVENTORY_EXTENDED>(ReceiveBuffer.subspan(Offset));
         if (itemStartData == nullptr)
         {
-            assert(false);
             return false;
         }
 
@@ -1392,7 +1386,6 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_WORD>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -1432,7 +1425,6 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         auto itemStartData = safe_cast<PRECEIVE_INVENTORY_EXTENDED>(ReceiveBuffer.subspan(Offset));
         if (itemStartData == nullptr)
         {
-            assert(false);
             return;
         }
 
@@ -1934,7 +1926,6 @@ void ReceiveEquipment(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PRECEIVE_EQUIPMENT_EXTENDED>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -1947,7 +1938,6 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PCHANGE_CHARACTER_EXTENDED>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -2173,7 +2163,6 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PCREATE_CHARACTER_EXTENDED>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -2305,7 +2294,6 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PWHEADER_DEFAULT_WORD>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -2316,7 +2304,6 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
         auto Data2 = safe_cast<PCREATE_TRANSFORM_EXTENDED>(ReceiveBuffer.subspan(Offset));
         if (Data2 == nullptr)
         {
-            assert(false);
             return;
         }
 
@@ -5559,7 +5546,6 @@ void ReceiveCreateMoney(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PCREATE_MONEY>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
     
@@ -5583,7 +5569,6 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PWHEADER_DEFAULT_WORD>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -5593,7 +5578,6 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
         auto itemStartData = safe_cast<PCREATE_ITEM_EXTENDED>(ReceiveBuffer.subspan(Offset));
         if (itemStartData == nullptr)
         {
-            assert(false);
             return;
         }
 
@@ -5645,7 +5629,6 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PHEADER_DEFAULT>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
     
@@ -5659,7 +5642,6 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             auto Data2 = safe_cast<PRECEIVE_INVENTORY_MONEY>(ReceiveBuffer);
             if (Data2 == nullptr)
             {
-                assert(false);
                 return;
             }
 
@@ -5680,7 +5662,6 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             auto Data2 = safe_cast<PRECEIVE_GET_ITEM_EXTENDED>(ReceiveBuffer);
             if (Data2 == nullptr)
             {
-                assert(false);
                 return;
             }
 
@@ -5762,7 +5743,6 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_ITEM_EXTENDED>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return false;
     }
 
@@ -5880,7 +5860,6 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_ITEM_EXTENDED>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -6131,7 +6110,6 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -6167,7 +6145,6 @@ void ReceiveTradeYourInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -6182,7 +6159,6 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -7433,7 +7409,7 @@ void ReceiveGuildAssign(const BYTE* ReceiveBuffer)
             wcscpy(szTemp, GlobalText[1376]);
             break;
         default:
-            assert(!"Packet(0xE1)");
+            g_ConsoleDebug->Write(MCD_ERROR, L"Packet(0xE1)");
             break;
         }
     }
@@ -7454,7 +7430,7 @@ void ReceiveGuildAssign(const BYTE* ReceiveBuffer)
             wcscpy(szTemp, GlobalText[1327]);
             break;
         default:
-            assert(!"Packet(0xE1)");
+            g_ConsoleDebug->Write(MCD_ERROR, L"Packet(0xE1)");
             break;
         }
     }
@@ -7554,7 +7530,7 @@ void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
             break;
 #endif	// ASG_ADD_GENS_SYSTEM
         default:
-            assert(!"Packet (0xE6)");
+            g_ConsoleDebug->Write(MCD_ERROR, L"Packet (0xE6)");
             break;
         }
     }
@@ -9042,7 +9018,6 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
     auto Header = safe_cast<GETPSHOPITEMLIST_HEADERINFO>(ReceiveBuffer);
     if (Header == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -9077,7 +9052,6 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
             auto pShopItem = safe_cast<GETPSHOPITEM_DATAINFO>(ReceiveBuffer.subspan(Offset));
             if (pShopItem == nullptr)
             {
-                assert(false);
                 return;
             }
             int length = CalcItemLength(pShopItem->Item);
@@ -9134,7 +9108,6 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
     auto Header = safe_cast<GETPSHOPITEMLIST_HEADERINFO>(ReceiveBuffer);
     if (Header == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -9148,7 +9121,6 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
             auto pShopItem = safe_cast<GETPSHOPITEM_DATAINFO>(ReceiveBuffer.subspan(Offset));
             if (pShopItem == nullptr)
             {
-                assert(false);
                 return;
             }
 
@@ -9183,7 +9155,6 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
     auto Header = safe_cast<PURCHASEITEM_RESULTINFO>(ReceiveBuffer);
     if (Header == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -9204,7 +9175,6 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         auto itemData = ReceiveBuffer.subspan(offset);
         if (CalcItemLength(itemData) < itemData.size())
         {
-            assert(false);
             return;
         }
 
@@ -9604,7 +9574,6 @@ void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer)
     auto Data = safe_cast<FS_LETTER_TEXT>(ReceiveBuffer);
     if (Data == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -9763,7 +9732,7 @@ void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
         }
         else
         {
-            assert(!"ReceiveChatRoomInviteResult");
+            g_ConsoleDebug->Write(MCD_ERROR, L"ReceiveChatRoomInviteResult");
         }
         break;
     case 0x03:
@@ -10687,7 +10656,7 @@ void ReceiveBCReg(const BYTE* ReceiveBuffer)
         g_pSystemLogBox->AddText(GlobalText[1511], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     default:
-        assert(!"ReceiveBCReg(0xB2, 0x01)");
+        g_ConsoleDebug->Write(MCD_ERROR, L"ReceiveBCReg(0xB2, 0x01)");
         break;
     }
 }
@@ -10714,7 +10683,7 @@ void ReceiveBCGiveUp(const BYTE* ReceiveBuffer)
         g_pSystemLogBox->AddText(GlobalText[1515], SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     default:
-        assert(!"ReceiveBCGiveUp(0xB2,0x02)");
+        g_ConsoleDebug->Write(MCD_ERROR, L"ReceiveBCGiveUp(0xB2,0x02)");
         break;
     }
 }
@@ -10940,7 +10909,7 @@ void ReceiveTaxInfo(const BYTE* ReceiveBuffer)
     }
     else
     {
-        assert(!"Packet Recv(0xB2(0x1A))");
+        g_ConsoleDebug->Write(MCD_ERROR, L"Packet Recv(0xB2(0x1A))");
     }
 }
 
@@ -11536,7 +11505,6 @@ void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
     auto pData = safe_cast<PWHEADER_DEFAULT_WORD>(ReceiveBuffer);
     if (pData == nullptr)
     {
-        assert(false);
         return;
     }
 
@@ -11547,7 +11515,6 @@ void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
         auto pData2 = safe_cast<PRECEIVE_PREVIEW_PORT_EXTENDED>(ReceiveBuffer.subspan(Offset));
         if (pData2 == nullptr)
         {
-            assert(false);
             return;
         }
 
