@@ -3063,18 +3063,17 @@ void HeroAttributeCalc(CHARACTER* c)
 
     if (CharacterAttribute->AbilityTime[0] > 0)
     {
-        CharacterAttribute->AbilityTime[0]--;
+        CharacterAttribute->AbilityTime[0] -= FPS_ANIMATION_FACTOR;
     }
-    if (CharacterAttribute->AbilityTime[0] == 0)
+    if (CharacterAttribute->AbilityTime[0] <= 0)
     {
         CharacterAttribute->Ability &= (~ABILITY_FAST_ATTACK_SPEED);
-        CharacterMachine->CalculateAttackSpeed();
     }
     if (CharacterAttribute->AbilityTime[1] > 0)
     {
-        CharacterAttribute->AbilityTime[1]--;
+        CharacterAttribute->AbilityTime[1] -= FPS_ANIMATION_FACTOR;
     }
-    if (CharacterAttribute->AbilityTime[1] == 0)
+    if (CharacterAttribute->AbilityTime[1] <= 0)
     {
         CharacterAttribute->Ability &= (~ABILITY_PLUS_DAMAGE);
         CharacterMachine->CalculateDamage();
@@ -3083,12 +3082,11 @@ void HeroAttributeCalc(CHARACTER* c)
     }
     if (CharacterAttribute->AbilityTime[2] > 0)
     {
-        CharacterAttribute->AbilityTime[2]--;
+        CharacterAttribute->AbilityTime[2] -= FPS_ANIMATION_FACTOR;
     }
-    if (CharacterAttribute->AbilityTime[2] == 0)
+    if (CharacterAttribute->AbilityTime[2] <= 0)
     {
         CharacterAttribute->Ability &= (~ABILITY_FAST_ATTACK_SPEED2);
-        CharacterMachine->CalculateAttackSpeed();
     }
 }
 

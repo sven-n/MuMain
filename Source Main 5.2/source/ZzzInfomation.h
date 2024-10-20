@@ -90,7 +90,6 @@ public:
     void CalculateMagicDamage();
     void CalculateCurseDamage();
     void CalculateAttackRating();
-    void CalculateAttackSpeed();
     void CalculateSuccessfulBlocking();
     void CalculateAttackRatingPK();
     void CalculateSuccessfulBlockingPK();

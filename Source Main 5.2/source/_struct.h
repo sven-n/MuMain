@@ -462,7 +462,7 @@ typedef struct
     WORD AddManaMax;
     WORD AddCharisma;
     BYTE Ability;
-    WORD AbilityTime[3];
+    float AbilityTime[3]; // Number of reference frames
 
     short AddPoint;
     short MaxAddPoint;

@@ -783,9 +783,22 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER  Header;
     BYTE          Index;
-    DWORD          LifeOrMana;
-    DWORD          ShieldOrBP;
-} PRECEIVE_LIFE_EXTENDED, * LPPRECEIVE_LIFE_EXTENDED;
+    DWORD          Life;
+    DWORD          Shield;
+    DWORD          Mana;
+    DWORD          BP;
+    WORD          AttackSpeed;
+    WORD          MagicSpeed;
+} PRECEIVE_STATS_EXTENDED, * LPPRECEIVE_STATS_EXTENDED;
+
+typedef struct {
+    PBMSG_HEADER  Header;
+    BYTE          Index;
+    DWORD          Life;
+    DWORD          Shield;
+    DWORD          Mana;
+    DWORD          BP;
+} PRECEIVE_MAX_STATS_EXTENDED, * LPPRECEIVE_MAX_STATS_EXTENDED;
 
 //receive add point
 typedef struct {
