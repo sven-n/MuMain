@@ -265,7 +265,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
     wchar_t strID[256];
     swprintf(strID, L"%s", CharacterAttribute->Name);
     wchar_t strClassName[256];
-    swprintf(strClassName, L"(%s) %d", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class), CharacterAttribute->Class);
+    swprintf(strClassName, L"(%s)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(20, 20, 20, 20);
