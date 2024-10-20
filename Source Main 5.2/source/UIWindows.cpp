@@ -912,8 +912,10 @@ void CUIBaseWindow::SetTitle(const wchar_t* pszTitle)
         if (wcscmp(pszTitle, m_pszTitle) == 0) return;
         delete[] m_pszTitle;
     }
-    m_pszTitle = new wchar_t[wcslen(pszTitle) + 1 + 1];
-    wcsncpy(m_pszTitle, pszTitle, wcslen(pszTitle) + 1);
+
+    auto requiredLength = wcslen(pszTitle) + 2;
+    m_pszTitle = new wchar_t[requiredLength];
+    wcsncpy(m_pszTitle, pszTitle, wcslen(pszTitle));
 }
 
 void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)

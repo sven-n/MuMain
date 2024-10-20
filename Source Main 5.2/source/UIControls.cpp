@@ -1829,6 +1829,7 @@ void CUIWindowListBox::AddText(DWORD dwUIID, const wchar_t* pszTitle, int iStatu
     static WINDOWLIST_TEXT text;
     text.m_bIsSelected = FALSE;
     text.m_dwUIID = dwUIID;
+    memset(text.m_szTitle, 0, sizeof(text.m_szTitle));
     wcsncpy(text.m_szTitle, pszTitle, 64);
     text.m_iStatus = iStatus;
 
