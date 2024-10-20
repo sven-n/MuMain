@@ -6644,7 +6644,6 @@ BOOL ReceiveHelperItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     {
     case 0:
         CharacterAttribute->Ability |= ABILITY_FAST_ATTACK_SPEED;
-        CharacterMachine->CalculateAttackSpeed();
         break;
     case 1:
         CharacterAttribute->Ability |= ABILITY_PLUS_DAMAGE;
@@ -6653,7 +6652,6 @@ BOOL ReceiveHelperItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
     case 2:
         CharacterAttribute->Ability |= ABILITY_FAST_ATTACK_SPEED2;
-        CharacterMachine->CalculateAttackSpeed();
         break;
     }
     EnableUse = 0;
@@ -14518,10 +14516,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         {
             g_RegisterBuffTime(buff, bufftime);
 
-            if (buff == eBuff_Hellowin1)
-            {
-                CharacterMachine->CalculateAttackSpeed();
-            }
             if (buff == eBuff_Hellowin2)
             {
                 CharacterMachine->CalculateDamage();
@@ -14569,11 +14563,7 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         {
             g_RegisterBuffTime(buff, bufftime);
 
-            if (buff == eBuff_EliteScroll1)
-            {
-                CharacterMachine->CalculateAttackSpeed();
-            }
-            else if (buff == eBuff_EliteScroll2)
+            if (buff == eBuff_EliteScroll2)
             {
                 CharacterMachine->CalculateDefense();
             }
@@ -14655,8 +14645,6 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
             {
                 swprintf(_Temp, GlobalText[2598], 15);
                 g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
-
-                CharacterMachine->CalculateAttackSpeed();
             }
             else if (buff == eBuff_LuckOfSanta)
             {
@@ -14707,11 +14695,7 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
         {
             g_UnRegisterBuffTime(buff);
 
-            if (buff == eBuff_Hellowin1)
-            {
-                CharacterMachine->CalculateAttackSpeed();
-            }
-            else if (buff == eBuff_Hellowin2)
+            if (buff == eBuff_Hellowin2)
             {
                 int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
 
@@ -14767,11 +14751,7 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
         {
             g_UnRegisterBuffTime(buff);
 
-            if (buff == eBuff_EliteScroll1)
-            {
-                CharacterMachine->CalculateAttackSpeed();
-            }
-            else if (buff == eBuff_EliteScroll2)
+            if (buff == eBuff_EliteScroll2)
             {
                 CharacterMachine->CalculateDefense();
             }
@@ -14837,10 +14817,6 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
             else if (buff == eBuff_DefenseOfSanta)
             {
                 CharacterMachine->CalculateDefense();
-            }
-            else if (buff == eBuff_QuickOfSanta)
-            {
-                CharacterMachine->CalculateAttackSpeed();
             }
         }
         break;
