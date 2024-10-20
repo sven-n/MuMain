@@ -6415,11 +6415,6 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
         CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
     }
 
-    wchar_t szText[256] = { NULL, };
-    uint64_t iExp = CharacterAttribute->NextExperience - CharacterAttribute->Experience;
-    swprintf(szText, GlobalText[486], iExp);
-    g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-
     CharacterMachine->CalculateNextExperince();
 
     OBJECT* o = &Hero->Object;
