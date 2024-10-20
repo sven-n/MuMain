@@ -328,10 +328,17 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 
     if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
     {
-        auto pPetInfo = GetPetInfo(pItem);
-        auto wRequireCharisma = (185 + (pPetInfo->m_wLevel * 15));
-        if (wRequireCharisma > wCharisma)
+        const auto pPetInfo = GetPetInfo(pItem);
+        if (pPetInfo->m_dwPetType == PET_TYPE_NONE)
+        {
             return false;
+        }
+
+        const auto requiredCharisma = (185 + (pPetInfo->m_wLevel * 15));
+        if (requiredCharisma > wCharisma)
+        {
+            return false;
+        }
     }
 
     if (gMapManager.WorldActive == WD_7ATLANSE && (pItem->Type >= ITEM_HORN_OF_UNIRIA && pItem->Type <= ITEM_HORN_OF_DINORANT))
