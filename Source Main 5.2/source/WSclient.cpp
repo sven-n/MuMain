@@ -10049,11 +10049,12 @@ void ReceiveQuestPrize(const BYTE* ReceiveBuffer)
 
     case 201:
     {
+        // Evolution from 1st to 2nd class
         CHARACTER* c = &CharactersClient[Index];
         OBJECT* o = &c->Object;
         vec3_t      Position;
 
-        auto byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->m_byNumber);
+        auto byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(static_cast<SERVER_CLASS_TYPE>((Data->m_byNumber >> 3)));
         if (2 != gCharacterManager.GetStepClass(byClass))
             break;
 
@@ -10130,9 +10131,10 @@ void ReceiveQuestPrize(const BYTE* ReceiveBuffer)
 
     case 204:
     {
+        // Evolution from 2nd to 3rd class
         CHARACTER* c = &CharactersClient[Index];
 
-        auto byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->m_byNumber);
+        auto byClass = gCharacterManager.ChangeServerClassTypeToClientClassType(static_cast<SERVER_CLASS_TYPE>((Data->m_byNumber >> 3)));
         if (3 != gCharacterManager.GetStepClass(byClass))
             break;
 

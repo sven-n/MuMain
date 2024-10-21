@@ -1201,7 +1201,7 @@ typedef struct {
     BYTE         m_byKeyH;
     BYTE         m_byKeyL;
     BYTE         m_byReparation;
-    SERVER_CLASS_TYPE         m_byNumber;
+    BYTE         m_byNumber; // SERVER_CLASS_TYPE, shifted by 3
 } PRECEIVE_QUEST_REPARATION, * LPPRECEIVE_QUEST_REPARATION;
 
 // GC[0xF6][0x0A]
