@@ -2165,7 +2165,7 @@ bool TestFrustrum2D(float x, float y, float Range)
     {
         float d = (FrustrumX[i] - x) * (FrustrumY[j] - y) -
             (FrustrumX[j] - x) * (FrustrumY[i] - y);
-        if (d <= Range)
+        if (d <= Range - 70)
         {
             return false;
         }
