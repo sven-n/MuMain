@@ -1961,6 +1961,14 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     //BYTE Option = Data->Item[3] & 63;
     //BYTE ExtOption = Data->Item[4];
 
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x25 ReceiveChangePlayer Key(0x%04X) Item Slot(0x%02X) Group(0x%02X) Number(0x%04X) Level(0x%02X)", 
+        Data->Key,
+        Data->ItemSlot, 
+        Data->ItemGroup,
+        Data->ItemNumber,
+        Data->ItemLevel
+    );
+
     int maxClass = MAX_CLASS;
 
     switch (Data->ItemSlot)
@@ -1974,7 +1982,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         else
         {
             c->Weapon[0].Type = MODEL_ITEM + Type;
-            c->Weapon[0].Level = LevelConvert(Data->ItemLevel);
+            c->Weapon[0].Level = Data->ItemLevel;
             c->Weapon[0].ExcellentFlags = Data->ExcellentFlags;
         }
         break;
@@ -1988,7 +1996,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         else
         {
             c->Weapon[1].Type = MODEL_ITEM + Type;
-            c->Weapon[1].Level = LevelConvert(Data->ItemLevel);
+            c->Weapon[1].Level = Data->ItemLevel;
             c->Weapon[1].ExcellentFlags = Data->ExcellentFlags;
             CreatePetDarkSpirit_Now(c);
             g_SummonSystem.RemoveEquipEffects(c);
@@ -2005,7 +2013,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         else
         {
             c->BodyPart[BODYPART_HELM].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_HELM].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_HELM].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_HELM].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_HELM].AncientDiscriminator = Data->AncientDiscriminator;
         }
@@ -2021,7 +2029,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         else
         {
             c->BodyPart[BODYPART_ARMOR].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_ARMOR].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_ARMOR].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_ARMOR].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = Data->AncientDiscriminator;
         }
@@ -2037,7 +2045,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         else
         {
             c->BodyPart[BODYPART_PANTS].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_PANTS].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_PANTS].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_PANTS].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_PANTS].AncientDiscriminator = Data->AncientDiscriminator;
         }
@@ -2053,7 +2061,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         else
         {
             c->BodyPart[BODYPART_GLOVES].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_GLOVES].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_GLOVES].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_GLOVES].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = Data->AncientDiscriminator;
         }
@@ -2069,7 +2077,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         else
         {
             c->BodyPart[BODYPART_BOOTS].Type = MODEL_ITEM + Type;
-            c->BodyPart[BODYPART_BOOTS].Level = LevelConvert(Data->ItemLevel);
+            c->BodyPart[BODYPART_BOOTS].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_BOOTS].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = Data->AncientDiscriminator;
         }
@@ -2115,7 +2123,6 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         else
         {
             c->Helper.Type = MODEL_ITEM + Type;
-            //c->Helper.Level = LevelConvert(Level);
             c->Helper.Level = 0;
             switch (Type)
             {
