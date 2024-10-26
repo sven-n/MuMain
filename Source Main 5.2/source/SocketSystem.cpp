@@ -116,17 +116,9 @@ int CSocketItemMgr::GetSeedShpereSeedID(const ITEM* pItem)
     return bySocketSeedID;
 }
 
-#ifdef KJW_FIX_SOCKET_BONUS_BIT_OPERATION
 __int64 CSocketItemMgr::CalcSocketBonusItemValue(const ITEM* pItem, __int64 iOrgGold)
-#else // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
-int CSocketItemMgr::CalcSocketBonusItemValue(const ITEM* pItem, int iOrgGold)
-#endif // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
 {
-#ifdef KJW_FIX_SOCKET_BONUS_BIT_OPERATION
     __int64 iGoldResult = 0;
-#else // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
-    int iGoldResult = 0;
-#endif // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
 
     if (IsSocketItem(pItem))
     {
