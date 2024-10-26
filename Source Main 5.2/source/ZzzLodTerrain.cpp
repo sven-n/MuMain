@@ -72,6 +72,7 @@ extern  float CameraDistanceTarget;
 extern  float CameraDistance;
 
 static  float   g_fFrustumRange = -40.f;
+static  float   g_fFrustumRangeAllowance = -80.f;
 
 inline int TERRAIN_INDEX(int x, int y)
 {
@@ -2165,7 +2166,7 @@ bool TestFrustrum2D(float x, float y, float Range)
     {
         float d = (FrustrumX[i] - x) * (FrustrumY[j] - y) -
             (FrustrumX[j] - x) * (FrustrumY[i] - y);
-        if (d <= Range - 70)
+        if (d <= (Range + g_fFrustumRangeAllowance))
         {
             return false;
         }
