@@ -288,47 +288,41 @@ bool SEASON3B::CNewUIMuHelper::Update()
 
 bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
 {
-    /*switch (m_iNumCurOpenTab)
+    // Ignore events outside MU Helper window
+    if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
     {
-    case TAB_GATE_MANAGING:
-        UpdateGateManagingTab();
-        break;
-    case TAB_STATUE_MANAGING:
-        UpdateStatueManagingTab();
-        break;
-    case TAB_TAX_MANAGING:
-        UpdateTaxManagingTab();
-        break;
+        return true;
     }
 
-    if (true == BtnProcess())
-        return false;*/
-
-    POINT ptExitBtn1 = { m_Pos.x + 169, m_Pos.y + 7 };
-    POINT ptExitBtn2 = { m_Pos.x + 13, m_Pos.y + 391 };
-
-    if (SEASON3B::IsRelease(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
+    int buttonId = UpdateMouseBtnList();
+    if (buttonId != -1)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
-    }
+        g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked button [%d]", buttonId);
 
-    int Identificador = UpdateMouseBtnList();
+        // Exit Button
+        if (buttonId == 15)
+        {
+            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
+        }
 
-    //g_ConsoleDebug->Write(MCD_RECEIVE, L"MouseBtn Identificador: %d", Identificador);
-
-    if (Identificador == 15)
-    {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
         return false;
     }
-    else {
+
+    int checkboxId = UpdateMouseBoxList();
+    if (checkboxId != -1)
+    {
+        g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked checkbox [%d]", checkboxId);
+        return false;
     }
 
-    UpdateMouseBoxList();
-
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
+    int imgId = UpdateTextureList();
+    if (imgId != -1 && IsRelease(VK_LBUTTON))
+    {
+        g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked skill icon [%d]", imgId);
         return false;
-    return true;
+    }
+
+    return false;
 }
 
 bool SEASON3B::CNewUIMuHelper::UpdateKeyEvent()
@@ -470,14 +464,14 @@ void SEASON3B::CNewUIMuHelper::UnloadImages()
 //===============================================================================================================
 //===============================================================================================================
 
-void SEASON3B::CNewUIMuHelper::RegisterButton(int Identificador, CButtonTap button)
+void SEASON3B::CNewUIMuHelper::RegisterButton(int Identifier, CButtonTap button)
 {
-    m_ButtonList.insert(std::pair<int, CButtonTap>(Identificador, button));
+    m_ButtonList.insert(std::pair<int, CButtonTap>(Identifier, button));
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Identificador)
+void SEASON3B::CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Identifier)
 {
-    auto li = m_ButtonList.find(Identificador);
+    auto li = m_ButtonList.find(Identifier);
 
     if (li != m_ButtonList.end())
     {
@@ -493,7 +487,7 @@ void SEASON3B::CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Id
     }
 }
 
-void SEASON3B::CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identificador, int iNumTab)
+void SEASON3B::CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identifier, int iNumTab)
 {
     CButtonTap cBTN;
     auto* button = new CNewUIButton();
@@ -513,7 +507,7 @@ void SEASON3B::CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, 
     cBTN.iNumTab = iNumTab;
     memset(cBTN.class_character, 0, sizeof(cBTN.class_character));
 
-    RegisterButton(Identificador, cBTN);
+    RegisterButton(Identifier, cBTN);
 }
 
 void SEASON3B::CNewUIMuHelper::RenderBtnList()
@@ -533,7 +527,7 @@ void SEASON3B::CNewUIMuHelper::RenderBtnList()
 
 int SEASON3B::CNewUIMuHelper::UpdateMouseBtnList()
 {
-    int Identificador = -1;
+    int Identifier = -1;
 
     auto li = m_ButtonList.begin();
 
@@ -549,15 +543,15 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBtnList()
             }
         }
     }
-    return Identificador;
+    return Identifier;
 }
 
 //===============================================================================================================
 //===============================================================================================================
 
-void SEASON3B::CNewUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Identificador)
+void SEASON3B::CNewUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Identifier)
 {
-    auto li = m_CheckBoxList.find(Identificador);
+    auto li = m_CheckBoxList.find(Identifier);
 
     if (li != m_CheckBoxList.end())
     {
@@ -574,12 +568,12 @@ void SEASON3B::CNewUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Id
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterCheckBox(int Identificador, CheckBoxTap button)
+void SEASON3B::CNewUIMuHelper::RegisterCheckBox(int Identifier, CheckBoxTap button)
 {
-    m_CheckBoxList.insert(std::pair<int, CheckBoxTap>(Identificador, button));
+    m_CheckBoxList.insert(std::pair<int, CheckBoxTap>(Identifier, button));
 }
 
-void SEASON3B::CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg,std::wstring btname, int Identificador, int iNumTab)
+void SEASON3B::CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg,std::wstring btname, int Identifier, int iNumTab)
 {
     CheckBoxTap cBOX;
 
@@ -595,7 +589,7 @@ void SEASON3B::CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx
     cBOX.iNumTab = iNumTab;
     memset(cBOX.class_character, 0, sizeof(cBOX.class_character));
 
-    RegisterCheckBox(Identificador, cBOX);
+    RegisterCheckBox(Identifier, cBOX);
 }
 
 void SEASON3B::CNewUIMuHelper::RenderBoxList()
@@ -615,7 +609,7 @@ void SEASON3B::CNewUIMuHelper::RenderBoxList()
 
 int SEASON3B::CNewUIMuHelper::UpdateMouseBoxList()
 {
-    int Identificador = -1;
+    int Identifier = -1;
 
     auto li = m_CheckBoxList.begin();
 
@@ -631,7 +625,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBoxList()
             }
         }
     }
-    return Identificador;
+    return Identifier;
 }
 
 //===============================================================================================================
@@ -654,7 +648,7 @@ void SEASON3B::CNewUIMuHelper::RenderTextureList()
 
 int SEASON3B::CNewUIMuHelper::UpdateTextureList()
 {
-    int Identificador = -1;
+    int Identifier = -1;
 
     auto li = m_TextureList.begin();
 
@@ -671,12 +665,12 @@ int SEASON3B::CNewUIMuHelper::UpdateTextureList()
         }
     }
 
-    return Identificador;
+    return Identifier;
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterTextureCharacter(BYTE class_character, int Identificador)
+void SEASON3B::CNewUIMuHelper::RegisterTextureCharacter(BYTE class_character, int Identifier)
 {
-    auto li = m_TextureList.find(Identificador);
+    auto li = m_TextureList.find(Identifier);
 
     if (li != m_TextureList.end())
     {
@@ -693,12 +687,12 @@ void SEASON3B::CNewUIMuHelper::RegisterTextureCharacter(BYTE class_character, in
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterTexture(int Identificador, cTexture button)
+void SEASON3B::CNewUIMuHelper::RegisterTexture(int Identifier, cTexture button)
 {
-    m_TextureList.insert(std::pair<int, cTexture>(Identificador, button));
+    m_TextureList.insert(std::pair<int, cTexture>(Identifier, button));
 }
 
-void SEASON3B::CNewUIMuHelper::InsertTexture(int imgindex, int x, int y, int sx, int sy, int Identificador, int iNumTab)
+void SEASON3B::CNewUIMuHelper::InsertTexture(int imgindex, int x, int y, int sx, int sy, int Identifier, int iNumTab)
 {
     cTexture cImage;
 
@@ -711,7 +705,7 @@ void SEASON3B::CNewUIMuHelper::InsertTexture(int imgindex, int x, int y, int sx,
 
     memset(cImage.class_character, 0, sizeof(cImage.class_character));
 
-    RegisterTexture(Identificador, cImage);
+    RegisterTexture(Identifier, cImage);
 }
 
 //===============================================================================================================
@@ -732,9 +726,9 @@ void SEASON3B::CNewUIMuHelper::RenderTextList()
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int Identificador)
+void SEASON3B::CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int Identifier)
 {
-    auto li = m_TextNameList.find(Identificador);
+    auto li = m_TextNameList.find(Identifier);
 
     if (li != m_TextNameList.end())
     {
@@ -751,12 +745,12 @@ void SEASON3B::CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int I
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterTextur(int Identificador, cTextName button)
+void SEASON3B::CNewUIMuHelper::RegisterTextur(int Identifier, cTextName button)
 {
-    m_TextNameList.insert(std::pair<int, cTextName>(Identificador, button));
+    m_TextNameList.insert(std::pair<int, cTextName>(Identifier, button));
 }
 
-void SEASON3B::CNewUIMuHelper::InsertText(int x, int y,std::wstring Name, int Identificador, int iNumTab)
+void SEASON3B::CNewUIMuHelper::InsertText(int x, int y,std::wstring Name, int Identifier, int iNumTab)
 {
     cTextName cText;
 
@@ -766,5 +760,5 @@ void SEASON3B::CNewUIMuHelper::InsertText(int x, int y,std::wstring Name, int Id
     cText.iNumTab = iNumTab;
 
     memset(cText.class_character, 0, sizeof(cText.class_character));
-    RegisterTextur(Identificador, cText);
+    RegisterTextur(Identifier, cText);
 }

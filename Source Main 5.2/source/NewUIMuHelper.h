@@ -100,26 +100,26 @@ namespace SEASON3B
     public:
         void RenderBtnList();
         int UpdateMouseBtnList();
-        void RegisterBtnCharacter(BYTE class_character, int Identificador);
-        void RegisterButton(int Identificador, CButtonTap button);
-        void InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identificador, int iNumTab);
+        void RegisterBtnCharacter(BYTE class_character, int Identifier);
+        void RegisterButton(int Identifier, CButtonTap button);
+        void InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identifier, int iNumTab);
         //--
         void RenderBoxList();
         int UpdateMouseBoxList();
-        void RegisterBoxCharacter(BYTE class_character, int Identificador);
-        void RegisterCheckBox(int Identificador, CheckBoxTap button);
-        void InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg,std::wstring btname, int Identificador, int iNumTab);
+        void RegisterBoxCharacter(BYTE class_character, int Identifier);
+        void RegisterCheckBox(int Identifier, CheckBoxTap button);
+        void InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg,std::wstring btname, int Identifier, int iNumTab);
         //--
         void RenderTextureList();
         int UpdateTextureList();
-        void RegisterTextureCharacter(BYTE class_character, int Identificador);
-        void RegisterTexture(int Identificador, cTexture button);
-        void InsertTexture(int imgindex, int x, int y, int sx, int sy, int Identificador, int iNumTab);
+        void RegisterTextureCharacter(BYTE class_character, int Identifier);
+        void RegisterTexture(int Identifier, cTexture button);
+        void InsertTexture(int imgindex, int x, int y, int sx, int sy, int Identifier, int iNumTab);
         //--
         void RenderTextList();
-        void RegisterTextCharacter(BYTE class_character, int Identificador);
-        void RegisterTextur(int Identificador, cTextName button);
-        void InsertText(int x, int y,std::wstring Name, int Identificador, int iNumTab);
+        void RegisterTextCharacter(BYTE class_character, int Identifier);
+        void RegisterTextur(int Identifier, cTextName button);
+        void InsertText(int x, int y,std::wstring Name, int Identifier, int iNumTab);
     public:
         CNewUIMuHelper();
         virtual ~CNewUIMuHelper();
