@@ -145,11 +145,7 @@ namespace SEASON4A
 
         void CreateSocketOptionText(wchar_t* pszOptionText, int iSeedID, int iSphereLv);
 
-#ifdef KJW_FIX_SOCKET_BONUS_BIT_OPERATION
         __int64 CalcSocketBonusItemValue(const ITEM* pItem, __int64 iOrgGold);
-#else // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
-        int CalcSocketBonusItemValue(const ITEM* pItem, int iOrgGold);
-#endif // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
 
         int GetSocketOptionValue(const ITEM* pItem, int iSocketIndex);
 
