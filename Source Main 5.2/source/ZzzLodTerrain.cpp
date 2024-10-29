@@ -2173,11 +2173,13 @@ bool TestFrustrum2D(float x, float y, float Range)
     return true;
 }
 
-void CreateFrustrum(float Aspect, vec3_t position)
+void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
 {
+    const auto fovv = tanf(CameraFOV * Q_PI / 360.f);
     float Distance = CameraViewFar;
-    float Width = tanf(CameraFOV * 0.5f * Q_PI / 180.f) * Distance * Aspect + 100.f;
-    float Height = Width * Aspect + 100.f;
+    float Width = fovv * Distance * xAspect + 100.f;
+    float Height = fovv * Distance * yAspect + 100.f;
+
     vec3_t Temp[5];
     Vector(0.f, 0.f, 0.f, Temp[0]);
     Vector(-Width, Height, -Distance, Temp[1]);

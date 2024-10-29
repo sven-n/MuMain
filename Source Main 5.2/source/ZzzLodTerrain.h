@@ -56,7 +56,7 @@ void RequestTerrainLight(float xf, float yf, vec3_t Light);
 void OpenTerrainLight(wchar_t* FileName);
 void SaveTerrainLight(wchar_t* FileName);
 
-void CreateFrustrum(float Aspect, vec3_t position);
+void CreateFrustrum(float xAspect, float yAspect, vec3_t position);
 void CreateLodBuffer();
 
 float RequestTerrainHeight(float xf, float yf);

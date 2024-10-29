@@ -1061,7 +1061,7 @@ bool NewRenderCharacterScene(HDC hDC)
     glClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(0, 25, 640, 430);
 
-    CreateFrustrum((float)Width / (float)640, pos);
+    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
 
     OBJECT* o = &CharactersClient[SelectedHero].Object;
 
@@ -1342,7 +1342,7 @@ bool NewRenderLogInScene(HDC hDC)
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
     BeginOpengl(0, 25, 640, 430);
-    CreateFrustrum((float)Width / (float)640, pos);
+    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
@@ -2094,7 +2094,7 @@ bool RenderMainScene()
 
     BeginOpengl(0, 0, Width, Height);
 
-    CreateFrustrum((float)Width / (float)640, pos);
+    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
 
     if (gMapManager.InBattleCastle())
     {
