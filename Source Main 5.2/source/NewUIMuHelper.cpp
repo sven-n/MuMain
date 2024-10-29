@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "NewUISystem.h"
 #include "NewUIMuHelper.h"
 #include "CharacterManager.h"
@@ -198,39 +198,39 @@ void SEASON3B::CNewUIMuHelper::InitCheckBox()
 
 void SEASON3B::CNewUIMuHelper::InitImage()
 {
-    InsertTexture(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 17, m_Pos.y + 171, 32, 38, 0, 0);
-    InsertTexture(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 61, m_Pos.y + 171, 32, 38, 1, 0);
-    InsertTexture(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 61, m_Pos.y + 222, 32, 38, 2, 0);
-    InsertTexture(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 21, m_Pos.y + 293, 32, 38, 3, 0);
-    InsertTexture(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 55, m_Pos.y + 293, 32, 38, 4, 0);
-    InsertTexture(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 89, m_Pos.y + 293, 32, 38, 5, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 17, m_Pos.y + 171, 32, 38, 0, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 61, m_Pos.y + 171, 32, 38, 1, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 61, m_Pos.y + 222, 32, 38, 2, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 21, m_Pos.y + 293, 32, 38, 3, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 55, m_Pos.y + 293, 32, 38, 4, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 89, m_Pos.y + 293, 32, 38, 5, 0);
 
-    InsertTexture(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 135, m_Pos.y + 137, 28, 15, 6, 0);
-    InsertTexture(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 135, m_Pos.y + 174, 28, 15, 7, 0);
-    InsertTexture(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 135, m_Pos.y + 226, 28, 15, 8, 0);
-    InsertTexture(IMAGE_MACROUI_HELPER_INPUTSTRING, m_Pos.x + 34, m_Pos.y + 216, 93, 15, 9, 1);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 135, m_Pos.y + 137, 28, 15, 6, 0);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 135, m_Pos.y + 174, 28, 15, 7, 0);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 135, m_Pos.y + 226, 28, 15, 8, 0);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTSTRING, m_Pos.x + 34, m_Pos.y + 216, 93, 15, 9, 1);
 
-    RegisterTextureCharacter(0xFF, 0);
-    RegisterTextureCharacter(0xFF, 1);
-    RegisterTextureCharacter(0xFF, 3);
-    RegisterTextureCharacter(0xFF, 4);
-    RegisterTextureCharacter(0xFF, 5);
-    RegisterTextureCharacter(0xFF, 6);
-    RegisterTextureCharacter(0xFF, 7);
-    RegisterTextureCharacter(0xFF, 9);
+    RegisterIconCharacter(0xFF, 0);
+    RegisterIconCharacter(0xFF, 1);
+    RegisterIconCharacter(0xFF, 3);
+    RegisterIconCharacter(0xFF, 4);
+    RegisterIconCharacter(0xFF, 5);
+    RegisterIconCharacter(0xFF, 6);
+    RegisterIconCharacter(0xFF, 7);
+    RegisterIconCharacter(0xFF, 9);
 
-    RegisterTextureCharacter(Dark_Knight, 2);
-    RegisterTextureCharacter(Dark_Knight, 8);
-    RegisterTextureCharacter(Dark_Wizard, 2);
-    RegisterTextureCharacter(Dark_Wizard, 8);
-    RegisterTextureCharacter(Fairy_Elf, 2);
-    RegisterTextureCharacter(Fairy_Elf, 8);
-    RegisterTextureCharacter(Magic_Gladiator, 2);
-    RegisterTextureCharacter(Magic_Gladiator, 8);
-    RegisterTextureCharacter(Summoner, 2);
-    RegisterTextureCharacter(Summoner, 8);
-    RegisterTextureCharacter(Rage_Fighter, 2);
-    RegisterTextureCharacter(Rage_Fighter, 8);
+    RegisterIconCharacter(Dark_Knight, 2);
+    RegisterIconCharacter(Dark_Knight, 8);
+    RegisterIconCharacter(Dark_Wizard, 2);
+    RegisterIconCharacter(Dark_Wizard, 8);
+    RegisterIconCharacter(Fairy_Elf, 2);
+    RegisterIconCharacter(Fairy_Elf, 8);
+    RegisterIconCharacter(Magic_Gladiator, 2);
+    RegisterIconCharacter(Magic_Gladiator, 8);
+    RegisterIconCharacter(Summoner, 2);
+    RegisterIconCharacter(Summoner, 8);
+    RegisterIconCharacter(Rage_Fighter, 2);
+    RegisterIconCharacter(Rage_Fighter, 8);
 }
 
 void SEASON3B::CNewUIMuHelper::InitText()
@@ -315,11 +315,26 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
         return false;
     }
 
-    int imgId = UpdateTextureList();
-    if (imgId != -1 && IsRelease(VK_LBUTTON))
+    if (IsRelease(VK_LBUTTON))
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked skill icon [%d]", imgId);
-        return false;
+        int iconId = UpdateMouseIconList();
+        if (iconId != -1)
+        {
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked skill icon [%d]", iconId);
+            m_selectedIconIndex = iconId;
+            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+            return false;
+        }
+    }
+    if (IsRelease(VK_RBUTTON))
+    {
+        int iconId = UpdateMouseIconList();
+        if (iconId != -1)
+        {
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked skill icon [%d]", iconId);
+            m_aiSelectedSkills[iconId] = -1;
+            return false;
+        }
     }
 
     return false;
@@ -332,6 +347,7 @@ bool SEASON3B::CNewUIMuHelper::UpdateKeyEvent()
         if (SEASON3B::IsPress(VK_ESCAPE) == true)
         {
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
+            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
             //PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -359,7 +375,6 @@ bool SEASON3B::CNewUIMuHelper::Render()
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(0xFFFFFFFF);
-
     g_pRenderText->SetBgColor(0);
 
     RenderImage(IMAGE_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
@@ -416,7 +431,7 @@ bool SEASON3B::CNewUIMuHelper::Render()
     }
 
     RenderBoxList();
-    RenderTextureList();
+    RenderIconList();
     RenderTextList();
     RenderBtnList();
     DisableAlphaBlend();
@@ -527,8 +542,6 @@ void SEASON3B::CNewUIMuHelper::RenderBtnList()
 
 int SEASON3B::CNewUIMuHelper::UpdateMouseBtnList()
 {
-    int Identifier = -1;
-
     auto li = m_ButtonList.begin();
 
     for (; li != m_ButtonList.end(); li++)
@@ -543,7 +556,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBtnList()
             }
         }
     }
-    return Identifier;
+    return -1;
 }
 
 //===============================================================================================================
@@ -609,8 +622,6 @@ void SEASON3B::CNewUIMuHelper::RenderBoxList()
 
 int SEASON3B::CNewUIMuHelper::UpdateMouseBoxList()
 {
-    int Identifier = -1;
-
     auto li = m_CheckBoxList.begin();
 
     for (; li != m_CheckBoxList.end(); li++)
@@ -625,34 +636,40 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBoxList()
             }
         }
     }
-    return Identifier;
+    return -1;
 }
 
 //===============================================================================================================
 //===============================================================================================================
 
-void SEASON3B::CNewUIMuHelper::RenderTextureList()
+void SEASON3B::CNewUIMuHelper::RenderIconList()
 {
-    auto li = m_TextureList.begin();
+    auto li = m_IconList.begin();
 
-    for (; li != m_TextureList.end(); li++)
+    for (; li != m_IconList.end(); li++)
     {
         cTexture* cImage = &li->second;
 
         if ((cImage->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cImage->iNumTab == m_iNumCurOpenTab || cImage->iNumTab == -1))
         {
             RenderImage(cImage->s_ImgIndex, cImage->m_Pos.x, cImage->m_Pos.y, cImage->m_Size.x, cImage->m_Size.y);
+            
+            if (li->first >= 0 && li->first < MAX_SKILLS_SIZE)
+            {
+                if (m_aiSelectedSkills[li->first] != -1)
+                {
+                    RenderSkillIcon(m_aiSelectedSkills[li->first], cImage->m_Pos.x + 6, cImage->m_Pos.y + 6, 20, 28);
+                }
+            }
         }
     }
 }
 
-int SEASON3B::CNewUIMuHelper::UpdateTextureList()
+int SEASON3B::CNewUIMuHelper::UpdateMouseIconList()
 {
-    int Identifier = -1;
+    auto li = m_IconList.begin();
 
-    auto li = m_TextureList.begin();
-
-    for (; li != m_TextureList.end(); li++)
+    for (; li != m_IconList.end(); li++)
     {
         cTexture* cImage = &li->second;
 
@@ -665,14 +682,14 @@ int SEASON3B::CNewUIMuHelper::UpdateTextureList()
         }
     }
 
-    return Identifier;
+    return -1;
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterTextureCharacter(BYTE class_character, int Identifier)
+void SEASON3B::CNewUIMuHelper::RegisterIconCharacter(BYTE class_character, int Identifier)
 {
-    auto li = m_TextureList.find(Identifier);
+    auto li = m_IconList.find(Identifier);
 
-    if (li != m_TextureList.end())
+    if (li != m_IconList.end())
     {
         cTexture* cImage = &li->second;
 
@@ -687,12 +704,12 @@ void SEASON3B::CNewUIMuHelper::RegisterTextureCharacter(BYTE class_character, in
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterTexture(int Identifier, cTexture button)
+void SEASON3B::CNewUIMuHelper::RegisterIcon(int Identifier, cTexture button)
 {
-    m_TextureList.insert(std::pair<int, cTexture>(Identifier, button));
+    m_IconList.insert(std::pair<int, cTexture>(Identifier, button));
 }
 
-void SEASON3B::CNewUIMuHelper::InsertTexture(int imgindex, int x, int y, int sx, int sy, int Identifier, int iNumTab)
+void SEASON3B::CNewUIMuHelper::InsertIcon(int imgindex, int x, int y, int sx, int sy, int Identifier, int iNumTab)
 {
     cTexture cImage;
 
@@ -705,7 +722,7 @@ void SEASON3B::CNewUIMuHelper::InsertTexture(int imgindex, int x, int y, int sx,
 
     memset(cImage.class_character, 0, sizeof(cImage.class_character));
 
-    RegisterTexture(Identifier, cImage);
+    RegisterIcon(Identifier, cImage);
 }
 
 //===============================================================================================================
@@ -761,4 +778,615 @@ void SEASON3B::CNewUIMuHelper::InsertText(int x, int y,std::wstring Name, int Id
 
     memset(cText.class_character, 0, sizeof(cText.class_character));
     RegisterTextur(Identifier, cText);
+}
+
+void SEASON3B::CNewUIMuHelper::AssignSkill(int skillIndex)
+{
+    if (m_selectedIconIndex != -1 && m_selectedIconIndex < MAX_SKILLS_SIZE)
+    {
+        m_aiSelectedSkills[m_selectedIconIndex] = skillIndex;
+        g_ConsoleDebug->Write(MCD_NORMAL, L"Assign m_aiSelectedSkills[%d] = %d", m_selectedIconIndex, m_aiSelectedSkills[m_selectedIconIndex]);
+    }
+}
+
+void SEASON3B::CNewUIMuHelper::RenderSkillIcon(int iIndex, float x, float y, float width, float height)
+{
+    auto bySkillType = CharacterAttribute->Skill[iIndex];
+    if (bySkillType == 0)
+    {
+        return;
+    }
+
+    float fU, fV;
+    int iKindofSkill = 0;
+
+    BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
+    int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
+
+    if (bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_END)
+    {
+        fU = ((bySkillType - AT_PET_COMMAND_DEFAULT) % 8) * width / 256.f;
+        fV = ((bySkillType - AT_PET_COMMAND_DEFAULT) / 8) * height / 256.f;
+        iKindofSkill = KOS_COMMAND;
+    }
+    else if (bySkillType == AT_SKILL_PLASMA_STORM_FENRIR)
+    {
+        fU = 4 * width / 256.f;
+        fV = 0.f;
+        iKindofSkill = KOS_COMMAND;
+    }
+    else if ((bySkillType >= AT_SKILL_ALICE_DRAINLIFE && bySkillType <= AT_SKILL_ALICE_THORNS))
+    {
+        fU = ((bySkillType - AT_SKILL_ALICE_DRAINLIFE) % 8) * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType >= AT_SKILL_ALICE_SLEEP && bySkillType <= AT_SKILL_ALICE_BLIND)
+    {
+        fU = ((bySkillType - AT_SKILL_ALICE_SLEEP + 4) % 8) * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_ALICE_BERSERKER)
+    {
+        fU = 10 * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType >= AT_SKILL_ALICE_WEAKNESS && bySkillType <= AT_SKILL_ALICE_ENERVATION)
+    {
+        fU = (bySkillType - AT_SKILL_ALICE_WEAKNESS + 8) * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType >= AT_SKILL_SUMMON_EXPLOSION && bySkillType <= AT_SKILL_SUMMON_REQUIEM)
+    {
+        fU = ((bySkillType - AT_SKILL_SUMMON_EXPLOSION + 6) % 8) * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_SUMMON_POLLUTION)
+    {
+        fU = 11 * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_BLOW_OF_DESTRUCTION)
+    {
+        fU = 7 * width / 256.f;
+        fV = 2 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_GAOTIC)
+    {
+        fU = 3 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_RECOVER)
+    {
+        fU = 9 * width / 256.f;
+        fV = 2 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_MULTI_SHOT)
+    {
+        fU = 0 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_FLAME_STRIKE)
+    {
+        int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
+        int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
+
+        fU = 1 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_GIGANTIC_STORM)
+    {
+        fU = 2 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_LIGHTNING_SHOCK)
+    {
+        fU = 2 * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (AT_SKILL_LIGHTNING_SHOCK_UP <= bySkillType && bySkillType <= AT_SKILL_LIGHTNING_SHOCK_UP + 4)
+    {
+        fU = 6 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_SWELL_OF_MAGICPOWER)
+    {
+        fU = 8 * width / 256.f;
+        fV = 2 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillUseType == 4)
+    {
+        fU = (width / 256.f) * (Skill_Icon % 12);
+        fV = (height / 256.f) * ((Skill_Icon / 12) + 4);
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType >= AT_SKILL_THRUST)
+    {
+        fU = ((bySkillType - 260) % 12) * width / 256.f;
+        fV = ((bySkillType - 260) / 12) * height / 256.f;
+        iKindofSkill = KOS_SKILL3;
+    }
+    else if (bySkillType >= 57)
+    {
+        fU = ((bySkillType - 57) % 8) * width / 256.f;
+        fV = ((bySkillType - 57) / 8) * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else
+    {
+        fU = ((bySkillType - 1) % 8) * width / 256.f;
+        fV = ((bySkillType - 1) / 8) * height / 256.f;
+        iKindofSkill = KOS_SKILL1;
+    }
+    int iSkillIndex = 0;
+    switch (iKindofSkill)
+    {
+    case KOS_COMMAND:
+    {
+        iSkillIndex = IMAGE_COMMAND;
+    }break;
+    case KOS_SKILL1:
+    {
+        iSkillIndex = IMAGE_SKILL1;
+    }break;
+    case KOS_SKILL2:
+    {
+        iSkillIndex = IMAGE_SKILL2;
+    }break;
+    case KOS_SKILL3:
+    {
+        iSkillIndex = IMAGE_SKILL3;
+    }break;
+    }
+
+    if (iSkillIndex != 0)
+    {
+        RenderBitmap(iSkillIndex, x, y, width, height, fU, fV, width / 256.f, height / 256.f);
+    }
+}
+
+SEASON3B::CNewUIMuHelperSkillList::CNewUIMuHelperSkillList()
+{
+    m_pNewUIMng = NULL;
+    Reset();
+}
+
+SEASON3B::CNewUIMuHelperSkillList::~CNewUIMuHelperSkillList()
+{
+    Release();
+}
+
+
+bool SEASON3B::CNewUIMuHelperSkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
+{
+    if (NULL == pNewUIMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST, this);
+
+    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
+
+    m_bShowSkillList = true;
+
+    LoadImages();
+
+    Show(false);
+
+    return true;
+}
+
+void SEASON3B::CNewUIMuHelperSkillList::Release()
+{
+    if (m_pNewUI3DRenderMng)
+    {
+        m_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
+    }
+
+    UnloadImages();
+
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+}
+
+void SEASON3B::CNewUIMuHelperSkillList::Reset()
+{
+    m_bShowSkillList = false;
+
+    m_bRenderSkillInfo = false;
+    m_iRenderSkillInfoType = 0;
+    m_iRenderSkillInfoPosX = 0;
+    m_iRenderSkillInfoPosY = 0;
+
+    m_EventState = EVENT_NONE;
+}
+
+void SEASON3B::CNewUIMuHelperSkillList::LoadImages()
+{
+    LoadBitmap(L"Interface\\newui_skill.jpg", IMAGE_SKILL1, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_command.jpg", IMAGE_COMMAND, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skillbox.jpg", IMAGE_SKILLBOX, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skillbox2.jpg", IMAGE_SKILLBOX_USE, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_non_skill.jpg", IMAGE_NON_SKILL1, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_non_command.jpg", IMAGE_NON_COMMAND, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_skill3.jpg", IMAGE_SKILL3, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_non_skill3.jpg", IMAGE_NON_SKILL3, GL_LINEAR);
+}
+
+void SEASON3B::CNewUIMuHelperSkillList::UnloadImages()
+{
+    DeleteBitmap(IMAGE_SKILL1);
+    DeleteBitmap(IMAGE_SKILL2);
+    DeleteBitmap(IMAGE_COMMAND);
+    DeleteBitmap(IMAGE_SKILLBOX);
+    DeleteBitmap(IMAGE_SKILLBOX_USE);
+    DeleteBitmap(IMAGE_NON_SKILL1);
+    DeleteBitmap(IMAGE_NON_SKILL2);
+    DeleteBitmap(IMAGE_NON_COMMAND);
+    DeleteBitmap(IMAGE_SKILL3);
+    DeleteBitmap(IMAGE_NON_SKILL3);
+}
+
+bool SEASON3B::CNewUIMuHelperSkillList::UpdateMouseEvent()
+{
+    if (IsRelease(VK_LBUTTON))
+    {
+        int skillId = UpdateMouseSkillList();
+        if (skillId != -1)
+        {
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked skill [%d]", skillId);
+            g_pNewUIMuHelper->AssignSkill(skillId);
+            Show(false);
+            return false;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+bool SEASON3B::CNewUIMuHelperSkillList::UpdateKeyEvent()
+{
+    if (IsVisible())
+    {
+        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        {
+            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+            //PlayBuffer(SOUND_CLICK01);
+
+            return false;
+        }
+    }
+    return true;
+}
+
+int SEASON3B::CNewUIMuHelperSkillList::GetSkillIndex(int iSkillType)
+{
+    int iReturn = -1;
+    for (int i = 0; i < MAX_MAGIC; ++i)
+    {
+        if (CharacterAttribute->Skill[i] == iSkillType)
+        {
+            iReturn = i;
+            break;
+        }
+    }
+
+    return iReturn;
+}
+
+bool SEASON3B::CNewUIMuHelperSkillList::Update()
+{
+    return true;
+}
+
+bool SEASON3B::CNewUIMuHelperSkillList::Render()
+{
+    int i;
+    float x, y, width, height;
+
+    BYTE bySkillNumber = CharacterAttribute->SkillNumber;
+
+    if (bySkillNumber > 0)
+    {
+        if (m_bShowSkillList == true)
+        {
+            x = 300; y = 171; width = 32; height = 38;
+            float fOrigX = 300;
+            int iSkillType = 0;
+            int iSkillCount = 0;
+
+            for (i = 0; i < MAX_MAGIC; ++i)
+            {
+                iSkillType = CharacterAttribute->Skill[i];
+
+                if (iSkillType != 0 && (iSkillType < AT_SKILL_STUN || iSkillType > AT_SKILL_REMOVAL_BUFF))
+                {
+                    BYTE bySkillUseType = SkillAttribute[iSkillType].SkillUseType;
+
+                    if (bySkillUseType == SKILL_USE_TYPE_MASTER || bySkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
+                    {
+                        continue;
+                    }
+
+                    if (iSkillCount == 18)
+                    {
+                        y -= height;
+                    }
+
+                    if (iSkillCount < 14)
+                    {
+                        int iRemainder = iSkillCount % 2;
+                        int iQuotient = iSkillCount / 2;
+
+                        if (iRemainder == 0)
+                        {
+                            x = fOrigX + iQuotient * width;
+                        }
+                        else
+                        {
+                            x = fOrigX - (iQuotient + 1) * width;
+                        }
+                    }
+                    else if (iSkillCount >= 14 && iSkillCount < 18)
+                    {
+                        x = fOrigX - (8 * width) - ((iSkillCount - 14) * width);
+                    }
+                    else
+                    {
+                        x = fOrigX - (12 * width) + ((iSkillCount - 17) * width);
+                    }
+
+                    iSkillCount++;
+
+                    SEASON3B::RenderImage(IMAGE_SKILLBOX, x, y, width, height);
+                    RenderSkillIcon(i, x + 6, y + 6, 20, 28);
+
+                    m_skillIconMap.insert_or_assign(i, cSkillIcon{ i, POINT{ static_cast<LONG>(x), static_cast<LONG>(y) }, SIZE{ static_cast<LONG>(width), static_cast<LONG>(height) } });
+                }
+            }
+        }
+    }
+
+    if (m_bRenderSkillInfo == true && m_pNewUI3DRenderMng)
+    {
+        m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
+
+        m_bRenderSkillInfo = false;
+    }
+
+    return true;
+}
+
+void SEASON3B::CNewUIMuHelperSkillList::RenderSkillInfo()
+{
+    ::RenderSkillInfo(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
+}
+
+float SEASON3B::CNewUIMuHelperSkillList::GetLayerDepth()
+{
+    return 5.2f;
+}
+
+void SEASON3B::CNewUIMuHelperSkillList::RenderSkillIcon(int iIndex, float x, float y, float width, float height)
+{
+    auto bySkillType = CharacterAttribute->Skill[iIndex];
+    if (bySkillType == 0)
+    {
+        return;
+    }
+
+    float fU, fV;
+    int iKindofSkill = 0;
+
+    BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
+    int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
+
+    if (bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_END)
+    {
+        fU = ((bySkillType - AT_PET_COMMAND_DEFAULT) % 8) * width / 256.f;
+        fV = ((bySkillType - AT_PET_COMMAND_DEFAULT) / 8) * height / 256.f;
+        iKindofSkill = KOS_COMMAND;
+    }
+    else if (bySkillType == AT_SKILL_PLASMA_STORM_FENRIR)
+    {
+        fU = 4 * width / 256.f;
+        fV = 0.f;
+        iKindofSkill = KOS_COMMAND;
+    }
+    else if ((bySkillType >= AT_SKILL_ALICE_DRAINLIFE && bySkillType <= AT_SKILL_ALICE_THORNS))
+    {
+        fU = ((bySkillType - AT_SKILL_ALICE_DRAINLIFE) % 8) * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType >= AT_SKILL_ALICE_SLEEP && bySkillType <= AT_SKILL_ALICE_BLIND)
+    {
+        fU = ((bySkillType - AT_SKILL_ALICE_SLEEP + 4) % 8) * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_ALICE_BERSERKER)
+    {
+        fU = 10 * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType >= AT_SKILL_ALICE_WEAKNESS && bySkillType <= AT_SKILL_ALICE_ENERVATION)
+    {
+        fU = (bySkillType - AT_SKILL_ALICE_WEAKNESS + 8) * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType >= AT_SKILL_SUMMON_EXPLOSION && bySkillType <= AT_SKILL_SUMMON_REQUIEM)
+    {
+        fU = ((bySkillType - AT_SKILL_SUMMON_EXPLOSION + 6) % 8) * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_SUMMON_POLLUTION)
+    {
+        fU = 11 * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_BLOW_OF_DESTRUCTION)
+    {
+        fU = 7 * width / 256.f;
+        fV = 2 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_GAOTIC)
+    {
+        fU = 3 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_RECOVER)
+    {
+        fU = 9 * width / 256.f;
+        fV = 2 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_MULTI_SHOT)
+    {
+        fU = 0 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_FLAME_STRIKE)
+    {
+        int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
+        int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
+
+        fU = 1 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_GIGANTIC_STORM)
+    {
+        fU = 2 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_LIGHTNING_SHOCK)
+    {
+        fU = 2 * width / 256.f;
+        fV = 3 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (AT_SKILL_LIGHTNING_SHOCK_UP <= bySkillType && bySkillType <= AT_SKILL_LIGHTNING_SHOCK_UP + 4)
+    {
+        fU = 6 * width / 256.f;
+        fV = 8 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType == AT_SKILL_SWELL_OF_MAGICPOWER)
+    {
+        fU = 8 * width / 256.f;
+        fV = 2 * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillUseType == 4)
+    {
+        fU = (width / 256.f) * (Skill_Icon % 12);
+        fV = (height / 256.f) * ((Skill_Icon / 12) + 4);
+        iKindofSkill = KOS_SKILL2;
+    }
+    else if (bySkillType >= AT_SKILL_THRUST)
+    {
+        fU = ((bySkillType - 260) % 12) * width / 256.f;
+        fV = ((bySkillType - 260) / 12) * height / 256.f;
+        iKindofSkill = KOS_SKILL3;
+    }
+    else if (bySkillType >= 57)
+    {
+        fU = ((bySkillType - 57) % 8) * width / 256.f;
+        fV = ((bySkillType - 57) / 8) * height / 256.f;
+        iKindofSkill = KOS_SKILL2;
+    }
+    else
+    {
+        fU = ((bySkillType - 1) % 8) * width / 256.f;
+        fV = ((bySkillType - 1) / 8) * height / 256.f;
+        iKindofSkill = KOS_SKILL1;
+    }
+    int iSkillIndex = 0;
+    switch (iKindofSkill)
+    {
+    case KOS_COMMAND:
+    {
+        iSkillIndex = IMAGE_COMMAND;
+    }break;
+    case KOS_SKILL1:
+    {
+        iSkillIndex = IMAGE_SKILL1;
+    }break;
+    case KOS_SKILL2:
+    {
+        iSkillIndex = IMAGE_SKILL2;
+    }break;
+    case KOS_SKILL3:
+    {
+        iSkillIndex = IMAGE_SKILL3;
+    }break;
+    }
+
+    if (iSkillIndex != 0)
+    {
+        RenderBitmap(iSkillIndex, x, y, width, height, fU, fV, width / 256.f, height / 256.f);
+    }
+}
+
+void SEASON3B::CNewUIMuHelperSkillList::ResetMouseLButton()
+{
+    MouseLButton = false;
+    MouseLButtonPop = false;
+    MouseLButtonPush = false;
+}
+
+void SEASON3B::CNewUIMuHelperSkillList::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+{
+    if (pClass)
+    {
+        auto* pSkillList = (CNewUIMuHelperSkillList*)(pClass);
+        pSkillList->RenderSkillInfo();
+    }
+}
+
+int SEASON3B::CNewUIMuHelperSkillList::UpdateMouseSkillList()
+{
+    auto li = m_skillIconMap.begin();
+
+    for (; li != m_skillIconMap.end(); li++)
+    {
+        cSkillIcon* pIcon = &li->second;
+
+        if (CheckMouseIn(pIcon->location.x, pIcon->location.y, pIcon->area.cx, pIcon->area.cy))
+        {
+            return li->first;
+        }
+    }
+
+    return -1;
 }
