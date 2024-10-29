@@ -2141,7 +2141,7 @@ void CreateFrustrum2D(vec3_t Position)
     }
     else
     {
-        Vector(0.f, 0.f, 45.f, Angle);
+        Vector(0.f, 0.f, -CameraAngle[2], Angle);
     }
 
     AngleMatrix(Angle, Matrix);
@@ -2175,9 +2175,9 @@ bool TestFrustrum2D(float x, float y, float Range)
 
 void CreateFrustrum(float Aspect, vec3_t position)
 {
-    float Distance = CameraViewFar * 0.9f;
+    float Distance = CameraViewFar;
     float Width = tanf(CameraFOV * 0.5f * Q_PI / 180.f) * Distance * Aspect + 100.f;
-    float Height = Width * 3.f / 4.f;
+    float Height = Width * Aspect + 100.f;
     vec3_t Temp[5];
     Vector(0.f, 0.f, 0.f, Temp[0]);
     Vector(-Width, Height, -Distance, Temp[1]);
@@ -2223,7 +2223,7 @@ void CreateFrustrum(float Aspect, vec3_t position)
     FrustrumFaceD[2] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[2]);
     FrustrumFaceD[3] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
     FrustrumFaceD[4] = -DotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
-
+    
     CreateFrustrum2D(position);
 }
 
