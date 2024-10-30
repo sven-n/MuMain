@@ -2,6 +2,7 @@
 #include "NewUIBase.h"
 #include "NewUIManager.h"
 #include "NewUIButton.h"
+#include "MUHelper/MuHelper.h"
 
 namespace SEASON3B
 {
@@ -59,8 +60,9 @@ namespace SEASON3B
             Summoner,
             Rage_Fighter,
         };
+
     private:
-        static constexpr int MAX_SKILLS_SIZE = 6;
+        static constexpr int MAX_SKILLS_SLOT = 6;
         static constexpr int WINDOW_WIDTH = 190;
         static constexpr int WINDOW_HEIGHT = 429;
 
@@ -109,8 +111,9 @@ namespace SEASON3B
         cCheckBoxMap m_CheckBoxList;
         cTextNameMap m_TextNameList;
         cTextureMap m_IconList;
-        int m_selectedIconIndex;
-        int m_aiSelectedSkills[MAX_SKILLS_SIZE] = {-1, -1, -1, -1, -1, -1};
+        cMuHelperConfig m_TempConfig;
+        int m_iSelectedSkillSlot;
+        int m_aiSelectedSkills[MAX_SKILLS_SLOT];
     public:
         void RenderBtnList();
         int UpdateMouseBtnList();
@@ -119,6 +122,7 @@ namespace SEASON3B
         void InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identifier, int iNumTab);
         //--
         void RenderBoxList();
+        void ResetBoxList();
         int UpdateMouseBoxList();
         void RegisterBoxCharacter(BYTE class_character, int Identifier);
         void RegisterCheckBox(int Identifier, CheckBoxTap button);
@@ -157,8 +161,13 @@ namespace SEASON3B
         void RenderBack(int x, int y, int width, int height);
 
         void AssignSkill(int skillIndex);
+        void ResetSelectedSkills();
         void RenderSkillIcon(int iIndex, float x, float y, float width, float height);
 
+        void InitConfig();
+        void SaveConfig();
+        void ApplyConfigFromCheckbox(int iCheckboxId, bool bState);
+        void ApplyConfigFromSkillSlot(int iSlot, int iSkill);
     private:
         void LoadImages();
         void UnloadImages();
@@ -170,22 +179,11 @@ namespace SEASON3B
         {
             EVENT_NONE = 0,
 
-            // currentskill
-            EVENT_BTN_HOVER_CURRENTSKILL,
-            EVENT_BTN_DOWN_CURRENTSKILL,
-
-            // skillhotkey
-            EVENT_BTN_HOVER_SKILLHOTKEY,
-            EVENT_BTN_DOWN_SKILLHOTKEY,
-
-            // skilllist
             EVENT_BTN_HOVER_SKILLLIST,
             EVENT_BTN_DOWN_SKILLLIST,
         };
 
     public:
-        static constexpr int MAX_SKILLS_SIZE = 6;
-
         enum IMAGE_LIST
         {
             IMAGE_SKILL1 = BITMAP_INTERFACE_NEW_SKILLICON_BEGIN,
@@ -217,24 +215,28 @@ namespace SEASON3B
 
         int UpdateMouseSkillList();
         int GetSkillIndex(int iSkillType);
+        void FilterByAttackSkills();
+        void FilterByBuffSkills();
 
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
-
 
     private:
         void LoadImages();
         void UnloadImages();
 
         void RenderSkillIcon(int iIndex, float x, float y, float width, float height);
-
-        void ResetMouseLButton();
+        bool IsAttackSkill(int iSkillType);
+        bool IsBuffSkill(int iSkillType);
+        bool IsHealingSkill(int iSkillType);
+        bool IsDefenseSkill(int iSkillType);
 
     private:
         typedef struct
         {
-            int index;
+            int skillId;
             POINT location;
             SIZE area;
+            bool isVisible;
         } cSkillIcon;
 
         std::map<int, cSkillIcon> m_skillIconMap;
@@ -242,10 +244,8 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
         CNewUI3DRenderMng* m_pNewUI3DRenderMng;
 
-        int m_aiAssignedSkill[MAX_SKILLS_SIZE];
-
-        bool m_bShowSkillList;
-
+        bool m_bFilterByAttackSkills;
+        bool m_bFilterByBuffSkills;
         bool m_bRenderSkillInfo;
         int m_iRenderSkillInfoType;
         int m_iRenderSkillInfoPosX;

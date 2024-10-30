@@ -485,6 +485,10 @@ bool CNewUISystem::LoadMainSceneInterface()
     if (m_pNewUIMuHelper->Create(m_pNewUIMng, 640 - 190, 0) == false)
         return false;
 
+    m_pNewUIMuHelperSkillList = new CNewUIMuHelperSkillList;
+    if (m_pNewUIMuHelperSkillList->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
+        return false;
+
     return true;
 }
 
@@ -2300,4 +2304,9 @@ CNewUILuckyItemWnd* SEASON3B::CNewUISystem::Get_pNewUILuckyItemWnd() const
 CNewUIMuHelper* CNewUISystem::Get_pNewUIMuHelper() const
 {
     return m_pNewUIMuHelper;
+}
+
+CNewUIMuHelperSkillList* CNewUISystem::Get_pNewUIMuHelperSkillList() const
+{
+    return m_pNewUIMuHelperSkillList;
 }

@@ -214,6 +214,7 @@ namespace SEASON3B
         CNewUIUnitedMarketPlaceWindow* m_pNewUnitedMarketPlaceWindow;
         CNewUILuckyItemWnd* m_pNewUILuckyItemWnd;
         CNewUIMuHelper* m_pNewUIMuHelper;
+        CNewUIMuHelperSkillList* m_pNewUIMuHelperSkillList;
     public:
         CNewUIChatInputBox* GetUI_NewChatInputBox() const;
         CNewUIChatLogWindow* GetUI_NewChatLogWindow() const;
@@ -293,6 +294,7 @@ namespace SEASON3B
         //CNewUIUnitedMarketPlaceWindow*	GetUI_pNewUnitedMarketPlaceFrame() const;
         CNewUILuckyItemWnd* Get_pNewUILuckyItemWnd() const;
         CNewUIMuHelper* Get_pNewUIMuHelper() const;
+        CNewUIMuHelperSkillList* Get_pNewUIMuHelperSkillList() const;
     };
 }
 
@@ -378,5 +380,6 @@ namespace SEASON3B
 #endif //PBG_MOD_STAMINA_UI
 #define g_pNewUIGensRanking SEASON3B::CNewUISystem::GetInstance()->GetUI_NewGensRanking()
 #define g_pLuckyItemWnd	SEASON3B::CNewUISystem::GetInstance()->Get_pNewUILuckyItemWnd()
-#define g_pNewUIMuHelper SEASON3B::CNewUISystem::GetInstance()->Get_pNewUIMuHelper();
+#define g_pNewUIMuHelper SEASON3B::CNewUISystem::GetInstance()->Get_pNewUIMuHelper()
+#define g_pNewUIMuHelperSkillList SEASON3B::CNewUISystem::GetInstance()->Get_pNewUIMuHelperSkillList()
 #endif // _NEWUISYSTEM_H_

@@ -7,6 +7,7 @@
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "MapManager.h"
+#include "MUHelper/MuHelper.h"
 
 using namespace SEASON3B;
 
@@ -132,7 +133,15 @@ bool CNewUIHeroPositionInfo::BtnProcess()
 
     if (m_BtnStart.UpdateMouseEvent())
     {
-        // todo: start mu helper when it's implemented :)
+        if (g_MuHelper.IsActive())
+        {
+            g_MuHelper.Stop();
+        }
+        else
+        {
+            g_MuHelper.Start();
+        }
+
         PlayBuffer(SOUND_CLICK01);
         return true;
     }
