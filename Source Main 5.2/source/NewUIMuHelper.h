@@ -1,4 +1,8 @@
 #pragma once
+
+#include <array>
+#include <vector>
+
 #include "NewUIBase.h"
 #include "NewUIManager.h"
 #include "NewUIButton.h"
@@ -113,7 +117,7 @@ namespace SEASON3B
         cTextureMap m_IconList;
         cMuHelperConfig m_TempConfig;
         int m_iSelectedSkillSlot;
-        int m_aiSelectedSkills[MAX_SKILLS_SLOT];
+        std::array<int, MAX_SKILLS_SLOT> m_aiSelectedSkills;
     public:
         void RenderBtnList();
         int UpdateMouseBtnList();
@@ -160,9 +164,10 @@ namespace SEASON3B
         void SetPos(int x, int y);
         void RenderBack(int x, int y, int width, int height);
 
-        void AssignSkill(int skillIndex);
-        void ResetSelectedSkills();
-        void RenderSkillIcon(int iIndex, float x, float y, float width, float height);
+        void AssignSkill(int iSkill);
+        int GetSkillIndex(int iSkill);
+        bool IsSkillAssigned(int iSkill);
+        void RenderSkillIcon(int iSkill, float x, float y, float width, float height);
 
         void InitConfig();
         void SaveConfig();
@@ -217,7 +222,6 @@ namespace SEASON3B
         void Reset();
 
         int UpdateMouseSkillList();
-        int GetSkillIndex(int iSkillType);
         void FilterByAttackSkills();
         void FilterByBuffSkills();
 
@@ -227,7 +231,9 @@ namespace SEASON3B
         void LoadImages();
         void UnloadImages();
 
+        void PrepareSkillsToRender();
         void RenderSkillIcon(int iIndex, float x, float y, float width, float height);
+
         bool IsAttackSkill(int iSkillType);
         bool IsBuffSkill(int iSkillType);
         bool IsHealingSkill(int iSkillType);
@@ -253,6 +259,7 @@ namespace SEASON3B
         int m_iRenderSkillInfoType;
         int m_iRenderSkillInfoPosX;
         int m_iRenderSkillInfoPosY;
+        std::vector<int> m_aiSkillsToRender;
 
         EVENT_STATE m_EventState;
     };
