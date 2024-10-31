@@ -50,6 +50,8 @@
 #define SKILL_SLOT_BUFF2                4
 #define SKILL_SLOT_BUFF3                5
 
+#define BITMAP_DISTANCE_BEGIN           BITMAP_INTERFACE_CRYWOLF_BEGIN + 33
+
 SEASON3B::CNewUIMuHelper::CNewUIMuHelper()
 {
     m_pNewUIMng = NULL;
@@ -59,6 +61,7 @@ SEASON3B::CNewUIMuHelper::CNewUIMuHelper()
     m_iSelectedSkillSlot = 0;
     memset(m_aiSelectedSkills, -1, MAX_SKILLS_SLOT);
     memset(&m_TempConfig, 0, sizeof(m_TempConfig));
+    m_TempConfig.iObtainingRange = 1;
 }
 
 SEASON3B::CNewUIMuHelper::~CNewUIMuHelper()
@@ -188,7 +191,6 @@ void SEASON3B::CNewUIMuHelper::InitCheckBox()
     InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 15, m_Pos.y + 218, 15, 15, 0, GlobalText[3515], 10, 0);
     InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3516], 11, 0);
     InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3517], 12, 0);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Check box  %s", GlobalText[3517]);
 
     InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, GlobalText[3518], 13, 1);
     InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 17, m_Pos.y + 125, 15, 15, 0, GlobalText[3519], 14, 1);
@@ -351,7 +353,23 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
     {
         g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked button [%d]", iButtonId);
 
-        if (iButtonId == BUTTON_ID_EXIT_CONFIG)
+        if (iButtonId == BUTTON_ID_HUNT_RANGE_ADD)
+        {
+            ApplyHuntRangeUpdate(1);
+        }
+        else if (iButtonId == BUTTON_ID_HUNT_RANGE_MINUS)
+        {
+            ApplyHuntRangeUpdate(-1);
+        }
+        else if (iButtonId == BUTTON_ID_PICK_RANGE_ADD)
+        {
+            ApplyLootRangeUpdate(1);
+        }
+        else if (iButtonId == BUTTON_ID_PICK_RANGE_MINUS)
+        {
+            ApplyLootRangeUpdate(-1);
+        }
+        else if (iButtonId == BUTTON_ID_EXIT_CONFIG)
         {
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
         }
@@ -380,13 +398,13 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
 
     if (IsRelease(VK_LBUTTON))
     {
-        int iSlotIndex = UpdateMouseIconList();
-        if (iSlotIndex != -1 && iSlotIndex < MAX_SKILLS_SLOT)
+        int iIconIndex = UpdateMouseIconList();
+        if (iIconIndex != -1 && iIconIndex < MAX_SKILLS_SLOT)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked skill slot [%d]", iSlotIndex);
-            m_iSelectedSkillSlot = iSlotIndex;
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Clicked skill slot [%d]", iIconIndex);
+            m_iSelectedSkillSlot = iIconIndex;
 
-            if (iSlotIndex >= 0 && iSlotIndex < 3)
+            if (iIconIndex >= 0 && iIconIndex < 3)
             {
                 g_pNewUIMuHelperSkillList->FilterByAttackSkills();
             }
@@ -546,12 +564,39 @@ void SEASON3B::CNewUIMuHelper::ApplyConfigFromSkillSlot(int iSlot, int iSkill)
     }
 }
 
+void SEASON3B::CNewUIMuHelper::ApplyHuntRangeUpdate(int iDelta)
+{
+    m_TempConfig.iHuntingRange += iDelta;
+    if (m_TempConfig.iHuntingRange < 0)
+    {
+        m_TempConfig.iHuntingRange = 0;
+    }
+    if (m_TempConfig.iHuntingRange > 6)
+    {
+        m_TempConfig.iHuntingRange = 6;
+    }
+}
+
+void SEASON3B::CNewUIMuHelper::ApplyLootRangeUpdate(int iDelta)
+{
+    m_TempConfig.iObtainingRange += iDelta;
+    if (m_TempConfig.iObtainingRange < 1)
+    {
+        m_TempConfig.iObtainingRange = 1;
+    }
+    if (m_TempConfig.iObtainingRange > 8)
+    {
+        m_TempConfig.iObtainingRange = 8;
+    }
+}
+
 void SEASON3B::CNewUIMuHelper::InitConfig()
 {
     ResetBoxList();
     ResetSelectedSkills();
 
     memset(&m_TempConfig, 0, sizeof(m_TempConfig));
+    m_TempConfig.iObtainingRange = 1;
 }
 
 void SEASON3B::CNewUIMuHelper::SaveConfig()
@@ -614,7 +659,7 @@ bool SEASON3B::CNewUIMuHelper::Render()
             RenderBack(m_Pos.x + 12, m_Pos.y + 147, 165, 195);
             RenderBack(m_Pos.x + 16, m_Pos.y + 235, 158, 74);
 
-            RenderImage(BITMAP_INTERFACE_CRYWOLF_BEGIN + 34, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
+            RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iObtainingRange, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
         }
         else
         {
@@ -630,7 +675,7 @@ bool SEASON3B::CNewUIMuHelper::Render()
         RenderBack(m_Pos.x + 12, m_Pos.y + 156, 165, 120);
         RenderBack(m_Pos.x + 12, m_Pos.y + 273, 165, 69);
 
-        RenderImage(BITMAP_INTERFACE_CRYWOLF_BEGIN + 33, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
+        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iHuntingRange, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
     }
 
     RenderBoxList();
@@ -984,7 +1029,7 @@ void SEASON3B::CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int I
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterTextur(int Identifier, cTextName button)
+void SEASON3B::CNewUIMuHelper::RegisterText(int Identifier, cTextName button)
 {
     m_TextNameList.insert(std::pair<int, cTextName>(Identifier, button));
 }
@@ -999,7 +1044,7 @@ void SEASON3B::CNewUIMuHelper::InsertText(int x, int y,std::wstring Name, int Id
     cText.iNumTab = iNumTab;
 
     memset(cText.class_character, 0, sizeof(cText.class_character));
-    RegisterTextur(Identifier, cText);
+    RegisterText(Identifier, cText);
 }
 
 void SEASON3B::CNewUIMuHelper::AssignSkill(int iSkill)

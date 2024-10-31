@@ -136,7 +136,7 @@ namespace SEASON3B
         //--
         void RenderTextList();
         void RegisterTextCharacter(BYTE class_character, int Identifier);
-        void RegisterTextur(int Identifier, cTextName button);
+        void RegisterText(int Identifier, cTextName button);
         void InsertText(int x, int y,std::wstring Name, int Identifier, int iNumTab);
     public:
         CNewUIMuHelper();
@@ -168,6 +168,9 @@ namespace SEASON3B
         void SaveConfig();
         void ApplyConfigFromCheckbox(int iCheckboxId, bool bState);
         void ApplyConfigFromSkillSlot(int iSlot, int iSkill);
+        void ApplyHuntRangeUpdate(int iDelta);
+        void ApplyLootRangeUpdate(int iDelta);
+
     private:
         void LoadImages();
         void UnloadImages();
