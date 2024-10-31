@@ -1364,9 +1364,12 @@ bool SEASON3B::CNewUIMuHelperSkillList::Render()
     BYTE skillNumber = CharacterAttribute->SkillNumber;
     if (skillNumber > 0)
     {
-        float x = 300, y = 171, width = 32, height = 38;
-        float fOrigX = 300;
+        float x = 640 - 190 - 32;
+        float y = m_bFilterByAttackSkills ? 171 : 293;
+        float fOrigY = y;
+        float width = 32, height = 38;
         int iSkillCount = 0;
+        int iSkillPerRow = m_bFilterByAttackSkills ? 9 : 5;
 
         for (int i = 0; i < MAX_MAGIC; ++i)
         {
@@ -1384,32 +1387,21 @@ bool SEASON3B::CNewUIMuHelperSkillList::Render()
                 if ((m_bFilterByAttackSkills && IsAttackSkill(iSkillType)) ||
                     (m_bFilterByBuffSkills && IsBuffSkill(iSkillType)))
                 {
-                    if (iSkillCount == 18)
+                    if (iSkillCount == iSkillPerRow)
                     {
-                        y -= height;
+                        x -= width;
                     }
 
-                    if (iSkillCount < 14)
-                    {
-                        int iRemainder = iSkillCount % 2;
-                        int iQuotient = iSkillCount / 2;
+                    int iRemainder = iSkillCount % 2;
+                    int iQuotient = iSkillCount / 2;
 
-                        if (iRemainder == 0)
-                        {
-                            x = fOrigX + iQuotient * width;
-                        }
-                        else
-                        {
-                            x = fOrigX - (iQuotient + 1) * width;
-                        }
-                    }
-                    else if (iSkillCount >= 14 && iSkillCount < 18)
+                    if (iRemainder == 0)
                     {
-                        x = fOrigX - (8 * width) - ((iSkillCount - 14) * width);
+                        y = fOrigY + iQuotient * height;
                     }
                     else
                     {
-                        x = fOrigX - (12 * width) + ((iSkillCount - 17) * width);
+                        y = fOrigY - (iQuotient + 1) * height;
                     }
 
                     iSkillCount++;
@@ -1421,7 +1413,7 @@ bool SEASON3B::CNewUIMuHelperSkillList::Render()
                 }
                 else
                 {
-                    // Filtered out list will not be rendered
+                    // Filtered out skills will not be rendered
                     m_skillIconMap.insert_or_assign(iSkillType, cSkillIcon{ iSkillType, { 0, 0 }, { 0, 0 } });
                 }
             }
