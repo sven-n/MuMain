@@ -1959,7 +1959,7 @@ bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, int iSkill)
 {
     if (c == NULL)	return false;
     if (o == NULL)	return false;
-    if (p == NULL)	return false;
+    //if (p == NULL)	return false;
     bool Success = false;
 
     if (SelectedCharacter <= -1) return false;
@@ -6691,7 +6691,7 @@ bool SkillKeyPush(int Skill)
     return false;
 }
 
-void Attack(CHARACTER* c)
+void TriggerAttack(CHARACTER* c)
 {
     if ((MouseOnWindow || !SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429)) && MouseLButtonPush)
     {
@@ -6709,7 +6709,6 @@ void Attack(CHARACTER* c)
     }
 
     OBJECT* o = &c->Object;
-    int ClassIndex = gCharacterManager.GetBaseClass(c->Class);
 
     if (o->Teleport == TELEPORT_BEGIN)
     {
@@ -6721,10 +6720,8 @@ void Attack(CHARACTER* c)
     }
 
     bool Success = false;
-    bool CursedTempleSkillSuccess = false;
 
     int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
-
     float Distance = gSkillManager.GetSkillDistance(Skill, c);
 
     if (!EnableFastInput)
@@ -6798,78 +6795,38 @@ void Attack(CHARACTER* c)
         }
     }
 
-    if (Success)
+    if (!Success)
     {
-        g_iFollowCharacter = -1;
-
-        if (!g_isCharacterBuff((&Hero->Object), eBuff_Cloaking))
-        {
-            if (giPetManager::SendPetCommand(c, Hero->CurrentSkill) == true)
-            {
-                return;
-            }
-        }
-
-        if (gMapManager.IsCursedTemple())
-        {
-            if (g_pCursedTempleWindow->IsCursedTempleSkillKey(SelectedCharacter))
-            {
-                CursedTempleSkillSuccess = true;
-            }
-            else
-            {
-                if (g_CursedTemple->IsPartyMember(SelectedCharacter) == true)
-                {
-                    if (!IsCorrectSkillType_FrendlySkill(Skill) && !IsCorrectSkillType_Buff(Skill))
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    if (IsCorrectSkillType_FrendlySkill(Skill) || IsCorrectSkillType_Buff(Skill))
-                    {
-                        if (-1 != SelectedCharacter)
-                        {
-                            return;
-                        }
-                    }
-                }
-                if (CheckSkillUseCondition(o, Skill) == false) return;
-            }
-        }
-        else
-        {
-            if (CheckSkillUseCondition(o, Skill) == false)
-            {
-                return;
-            }
-        }
-
-        if (Skill == AT_SKILL_SUMMON_EXPLOSION || Skill == AT_SKILL_SUMMON_REQUIEM || Skill == AT_SKILL_SUMMON_POLLUTION)
-        {
-            CheckTarget(c);
-            if (!CheckTile(c, o, Distance))
-                return;
-        }
+        return;
     }
 
-    if (Success)
+    g_iFollowCharacter = -1;
+
+    if (!g_isCharacterBuff((&Hero->Object), eBuff_Cloaking))
     {
-        if (!gSkillManager.DemendConditionCheckSkill(Skill))
+        if (giPetManager::SendPetCommand(c, Hero->CurrentSkill) == true)
         {
             return;
         }
     }
-    if (Success && c->Dead == 0)
+
+    ExecuteAttack(c);
+}
+
+bool CanExecuteAttack(CHARACTER* c, int Skill, float Distance)
+{
+    OBJECT* o = &c->Object;
+
+    if (c->Dead)
     {
-        if (!c->SafeZone && CursedTempleSkillSuccess)
+        return false;
+    }
+
+    if (c->SafeZone)
+    {
+        if ((gMapManager.InBloodCastle() == true) || gMapManager.InChaosCastle() == true)
         {
-            g_pCursedTempleWindow->SetCursedTempleSkill(c, o, SelectedCharacter);
-        }
-        else if (!c->SafeZone || (gMapManager.InBloodCastle() == true) || gMapManager.InChaosCastle() == true)
-        {
-            if (c->SafeZone && Skill != AT_SKILL_HEALING && Skill != AT_SKILL_DEFENSE && Skill != AT_SKILL_ATTACK
+            if (Skill != AT_SKILL_HEALING && Skill != AT_SKILL_DEFENSE && Skill != AT_SKILL_ATTACK
                 && Skill != AT_SKILL_WIZARDDEFENSE && Skill != AT_SKILL_VITALITY
                 && Skill != AT_SKILL_INFINITY_ARROW
                 && Skill != AT_SKILL_SWELL_OF_MAGICPOWER
@@ -6885,207 +6842,281 @@ void Attack(CHARACTER* c)
                 && (Skill<AT_SKILL_STUN || Skill>AT_SKILL_REMOVAL_BUFF)
                 && Skill != AT_SKILL_BRAND_OF_SKILL
                 )
-                return;
-            if (
-                g_pOption->IsAutoAttack()
-                && gMapManager.WorldActive != WD_6STADIUM
-                && gMapManager.InChaosCastle() == false)
             {
-                if (ClassIndex == CLASS_ELF
-                    && (Skill != AT_SKILL_CROSSBOW
-                        && Skill != AT_SKILL_MULTI_SHOT
-                        && !(AT_SKILL_MANY_ARROW_UP <= Skill && Skill <= AT_SKILL_MANY_ARROW_UP + 4)
-                        && Skill != AT_SKILL_BOW
-                        && Skill != AT_SKILL_PIERCING
-                        && Skill != AT_SKILL_BLAST_CROSSBOW4
-                        && Skill != AT_SKILL_PLASMA_STORM_FENRIR
-                        ))
-                {
-                    Attacking = -1;
-                }
-                else if (ClassIndex == CLASS_KNIGHT && (Skill == AT_SKILL_VITALITY || (AT_SKILL_LIFE_UP <= Skill && Skill <= AT_SKILL_LIFE_UP + 4)))
-                {
-                    Attacking = -1;
-                }
-                else if (ClassIndex == CLASS_DARK_LORD
-                    && (Skill == AT_SKILL_ADD_CRITICAL || Skill == AT_SKILL_PARTY_TELEPORT))
-                {
-                    Attacking = -1;
-                }
-                else if (ClassIndex == CLASS_WIZARD
-                    && (Skill == AT_SKILL_BLAST_HELL_BEGIN || Skill == AT_SKILL_BLAST_HELL))
-                {
-                    Attacking = -1;
-                }
-                else if (Skill >= AT_SKILL_STUN && Skill <= AT_SKILL_REMOVAL_BUFF)
-                {
-                    Attacking = -1;
-                }
-                else if (Skill == AT_SKILL_BRAND_OF_SKILL)
-                {
-                    Attacking = -1;
-                }
-                else if (Skill == AT_SKILL_ALICE_THORNS
-                    || (AT_SKILL_ALICE_SLEEP_UP <= Skill && Skill <= AT_SKILL_ALICE_SLEEP_UP + 4)
-                    || Skill == AT_SKILL_ALICE_BERSERKER || Skill == AT_SKILL_ALICE_SLEEP
-                    || Skill == AT_SKILL_ALICE_BLIND || Skill == AT_SKILL_ALICE_WEAKNESS || Skill == AT_SKILL_ALICE_ENERVATION)
-                {
-                    Attacking = -1;
-                }
-                else if (AT_SKILL_ATT_UP_OURFORCES <= Skill && Skill <= AT_SKILL_DEF_UP_OURFORCES)
-                {
-                    Attacking = -1;
-                }
-                else
-                {
-                    Attacking = 2;
-                }
+                return false;
             }
+        }
+        return false;
+    }
 
-            if (o->Type == MODEL_PLAYER)
+    if (gMapManager.IsCursedTemple())
+    {
+        if (!g_pCursedTempleWindow->IsCursedTempleSkillKey(SelectedCharacter))
+        {
+            if (g_CursedTemple->IsPartyMember(SelectedCharacter) == true)
             {
-                if (o->CurrentAction < PLAYER_STOP_MALE
-                    || o->CurrentAction > PLAYER_STOP_RIDE_WEAPON
-                    && o->CurrentAction != PLAYER_STOP_TWO_HAND_SWORD_TWO
-                    && o->CurrentAction != PLAYER_SKILL_HELL_BEGIN
-                    && o->CurrentAction != PLAYER_DARKLORD_STAND
-                    && o->CurrentAction != PLAYER_STOP_RIDE_HORSE
-                    && o->CurrentAction != PLAYER_FENRIR_STAND
-                    && o->CurrentAction != PLAYER_FENRIR_STAND_TWO_SWORD
-                    && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_RIGHT
-                    && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_LEFT
-                    && !(o->CurrentAction >= PLAYER_RAGE_FENRIR_STAND && o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
-                    && o->CurrentAction != PLAYER_RAGE_UNI_STOP_ONE_RIGHT
-                    && o->CurrentAction != PLAYER_STOP_RAGEFIGHTER)
+                if (!IsCorrectSkillType_FrendlySkill(Skill) && !IsCorrectSkillType_Buff(Skill))
                 {
-                    MouseRButtonPress = 0;
-                    return;
+                    return false;
                 }
             }
             else
             {
-                if (o->CurrentAction < MONSTER01_STOP1 || o->CurrentAction > MONSTER01_STOP2)
+                if (IsCorrectSkillType_FrendlySkill(Skill) || IsCorrectSkillType_Buff(Skill))
                 {
-                    return;
-                }
-            }
-
-            if (ClassIndex != CLASS_WIZARD)
-            {
-                CheckTarget(c);
-
-                if (CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY))
-                {
-                    for (int i = EQUIPMENT_WEAPON_RIGHT; i <= EQUIPMENT_WEAPON_LEFT; i++)
+                    if (-1 != SelectedCharacter)
                     {
-                        if (ClassIndex == CLASS_KNIGHT || ClassIndex == CLASS_DARK || ClassIndex == CLASS_DARK_LORD
-                            || ClassIndex == CLASS_RAGEFIGHTER)
-                        {
-                            bool bOk = false;
-                            if (c->Helper.Type != MODEL_HORN_OF_UNIRIA
-                                && c->Helper.Type != MODEL_HORN_OF_DINORANT
-                                && c->Helper.Type != MODEL_DARK_HORSE_ITEM
-                                && c->Helper.Type != MODEL_HORN_OF_FENRIR
-                                )
-                            {
-                                bOk = true;
-                            }
-                            else
-                            {
-                                switch (Skill)
-                                {
-                                case AT_SKILL_GAOTIC:
-                                case AT_SKILL_SPEAR:
-                                case AT_SKILL_RIDER:
-                                case AT_SKILL_BLOW_UP:
-                                case AT_SKILL_BLOW_UP + 1:
-                                case AT_SKILL_BLOW_UP + 2:
-                                case AT_SKILL_BLOW_UP + 3:
-                                case AT_SKILL_BLOW_UP + 4:
-                                case AT_SKILL_ONETOONE:
-                                case AT_SKILL_STRONG_PIER:
-                                case AT_SKILL_FIRE_BUST_UP:
-                                case AT_SKILL_FIRE_BUST_UP + 1:
-                                case AT_SKILL_FIRE_BUST_UP + 2:
-                                case AT_SKILL_FIRE_BUST_UP + 3:
-                                case AT_SKILL_FIRE_BUST_UP + 4:
-                                case AT_SKILL_LONGPIER_ATTACK:
-                                case AT_SKILL_ASHAKE_UP:
-                                case AT_SKILL_ASHAKE_UP + 1:
-                                case AT_SKILL_ASHAKE_UP + 2:
-                                case AT_SKILL_ASHAKE_UP + 3:
-                                case AT_SKILL_ASHAKE_UP + 4:
-                                case AT_SKILL_DARK_HORSE:
-                                case AT_SKILL_THUNDER_STRIKE:
-                                case AT_SKILL_SPACE_SPLIT:
-                                case AT_SKILL_PLASMA_STORM_FENRIR:
-                                case AT_SKILL_FIRE_SCREAM_UP:
-                                case AT_SKILL_FIRE_SCREAM_UP + 1:
-                                case AT_SKILL_FIRE_SCREAM_UP + 2:
-                                case AT_SKILL_FIRE_SCREAM_UP + 3:
-                                case AT_SKILL_FIRE_SCREAM_UP + 4:
-                                case AT_SKILL_DARK_SCREAM:
-                                    bOk = true;
-                                    break;
-                                }
-                            }
-
-                            if (bOk)
-                            {
-                                g_MovementSkill.m_bMagic = TRUE;
-                                g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-
-                                if (CheckAttack())
-                                {
-                                    g_MovementSkill.m_iTarget = SelectedCharacter;
-                                }
-                                else
-                                {
-                                    g_MovementSkill.m_iTarget = -1;
-                                }
-                                if (SkillWarrior(c, &CharacterMachine->Equipment[i]))
-                                {
-                                    return;
-                                }
-                            }
-                        }
-                        if (ClassIndex == CLASS_ELF)
-                        {
-                            if (SkillElf(c, &CharacterMachine->Equipment[i]))
-                            {
-                                return;
-                            }
-                        }
+                        return false;
                     }
                 }
-                else
-                {
-                    ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
-                    g_MovementSkill.m_iTarget = -1;
-                }
-            }
-            if (ClassIndex == CLASS_ELF)
-            {
-                AttackElf(c, Skill, Distance);
-            }
-            if (ClassIndex == CLASS_KNIGHT || ClassIndex == CLASS_DARK || ClassIndex == CLASS_DARK_LORD)
-            {
-                AttackKnight(c, Skill, Distance);
-            }
-            if (ClassIndex == CLASS_RAGEFIGHTER)
-            {
-                AttackRagefighter(c, Skill, Distance);
-            }
-            if (ClassIndex == CLASS_WIZARD || ClassIndex == CLASS_DARK || ClassIndex == CLASS_SUMMONER)
-            {
-                AttackWizard(c, Skill, Distance);
-            }
-            if ((Skill >= AT_SKILL_STUN && Skill <= AT_SKILL_REMOVAL_BUFF))
-            {
-                AttackCommon(c, Skill, Distance);
             }
         }
     }
+
+    if (CheckSkillUseCondition(o, Skill) == false)
+    {
+        return false;
+    }
+
+    if (Skill == AT_SKILL_SUMMON_EXPLOSION || Skill == AT_SKILL_SUMMON_REQUIEM || Skill == AT_SKILL_SUMMON_POLLUTION)
+    {
+        CheckTarget(c);
+        if (!CheckTile(c, o, Distance))
+        {
+            return false;
+        }
+    }
+
+    if (!gSkillManager.DemendConditionCheckSkill(Skill))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void ExecuteAttack(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+
+    int ClassIndex = gCharacterManager.GetBaseClass(c->Class);
+    int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
+    float Distance = gSkillManager.GetSkillDistance(Skill, c);
+
+    if (!CanExecuteAttack(c, Skill, Distance))
+    {
+        return;
+    }
+
+    if (gMapManager.IsCursedTemple() && g_pCursedTempleWindow->IsCursedTempleSkillKey(SelectedCharacter))
+    {
+        g_pCursedTempleWindow->SetCursedTempleSkill(c, o, SelectedCharacter);
+        return;
+    }
+
+    if (
+        g_pOption->IsAutoAttack()
+        && gMapManager.WorldActive != WD_6STADIUM
+        && gMapManager.InChaosCastle() == false)
+    {
+        if (ClassIndex == CLASS_ELF
+            && (Skill != AT_SKILL_CROSSBOW
+                && Skill != AT_SKILL_MULTI_SHOT
+                && !(AT_SKILL_MANY_ARROW_UP <= Skill && Skill <= AT_SKILL_MANY_ARROW_UP + 4)
+                && Skill != AT_SKILL_BOW
+                && Skill != AT_SKILL_PIERCING
+                && Skill != AT_SKILL_BLAST_CROSSBOW4
+                && Skill != AT_SKILL_PLASMA_STORM_FENRIR
+                ))
+        {
+            Attacking = -1;
+        }
+        else if (ClassIndex == CLASS_KNIGHT && (Skill == AT_SKILL_VITALITY || (AT_SKILL_LIFE_UP <= Skill && Skill <= AT_SKILL_LIFE_UP + 4)))
+        {
+            Attacking = -1;
+        }
+        else if (ClassIndex == CLASS_DARK_LORD
+            && (Skill == AT_SKILL_ADD_CRITICAL || Skill == AT_SKILL_PARTY_TELEPORT))
+        {
+            Attacking = -1;
+        }
+        else if (ClassIndex == CLASS_WIZARD
+            && (Skill == AT_SKILL_BLAST_HELL_BEGIN || Skill == AT_SKILL_BLAST_HELL))
+        {
+            Attacking = -1;
+        }
+        else if (Skill >= AT_SKILL_STUN && Skill <= AT_SKILL_REMOVAL_BUFF)
+        {
+            Attacking = -1;
+        }
+        else if (Skill == AT_SKILL_BRAND_OF_SKILL)
+        {
+            Attacking = -1;
+        }
+        else if (Skill == AT_SKILL_ALICE_THORNS
+            || (AT_SKILL_ALICE_SLEEP_UP <= Skill && Skill <= AT_SKILL_ALICE_SLEEP_UP + 4)
+            || Skill == AT_SKILL_ALICE_BERSERKER || Skill == AT_SKILL_ALICE_SLEEP
+            || Skill == AT_SKILL_ALICE_BLIND || Skill == AT_SKILL_ALICE_WEAKNESS || Skill == AT_SKILL_ALICE_ENERVATION)
+        {
+            Attacking = -1;
+        }
+        else if (AT_SKILL_ATT_UP_OURFORCES <= Skill && Skill <= AT_SKILL_DEF_UP_OURFORCES)
+        {
+            Attacking = -1;
+        }
+        else
+        {
+            Attacking = 2;
+        }
+    }
+
+    if (o->Type == MODEL_PLAYER)
+    {
+        if (o->CurrentAction < PLAYER_STOP_MALE
+            || o->CurrentAction > PLAYER_STOP_RIDE_WEAPON
+            && o->CurrentAction != PLAYER_STOP_TWO_HAND_SWORD_TWO
+            && o->CurrentAction != PLAYER_SKILL_HELL_BEGIN
+            && o->CurrentAction != PLAYER_DARKLORD_STAND
+            && o->CurrentAction != PLAYER_STOP_RIDE_HORSE
+            && o->CurrentAction != PLAYER_FENRIR_STAND
+            && o->CurrentAction != PLAYER_FENRIR_STAND_TWO_SWORD
+            && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_RIGHT
+            && o->CurrentAction != PLAYER_FENRIR_STAND_ONE_LEFT
+            && !(o->CurrentAction >= PLAYER_RAGE_FENRIR_STAND && o->CurrentAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT)
+            && o->CurrentAction != PLAYER_RAGE_UNI_STOP_ONE_RIGHT
+            && o->CurrentAction != PLAYER_STOP_RAGEFIGHTER)
+        {
+            MouseRButtonPress = 0;
+            return;
+        }
+    }
+    else
+    {
+        if (o->CurrentAction < MONSTER01_STOP1 || o->CurrentAction > MONSTER01_STOP2)
+        {
+            return;
+        }
+    }
+
+    if (ClassIndex != CLASS_WIZARD)
+    {
+        CheckTarget(c);
+
+        if (CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY))
+        {
+            for (int i = EQUIPMENT_WEAPON_RIGHT; i <= EQUIPMENT_WEAPON_LEFT; i++)
+            {
+                if (ClassIndex == CLASS_KNIGHT || ClassIndex == CLASS_DARK || ClassIndex == CLASS_DARK_LORD
+                    || ClassIndex == CLASS_RAGEFIGHTER)
+                {
+                    bool bOk = false;
+                    if (c->Helper.Type != MODEL_HORN_OF_UNIRIA
+                        && c->Helper.Type != MODEL_HORN_OF_DINORANT
+                        && c->Helper.Type != MODEL_DARK_HORSE_ITEM
+                        && c->Helper.Type != MODEL_HORN_OF_FENRIR
+                        )
+                    {
+                        bOk = true;
+                    }
+                    else
+                    {
+                        switch (Skill)
+                        {
+                        case AT_SKILL_GAOTIC:
+                        case AT_SKILL_SPEAR:
+                        case AT_SKILL_RIDER:
+                        case AT_SKILL_BLOW_UP:
+                        case AT_SKILL_BLOW_UP + 1:
+                        case AT_SKILL_BLOW_UP + 2:
+                        case AT_SKILL_BLOW_UP + 3:
+                        case AT_SKILL_BLOW_UP + 4:
+                        case AT_SKILL_ONETOONE:
+                        case AT_SKILL_STRONG_PIER:
+                        case AT_SKILL_FIRE_BUST_UP:
+                        case AT_SKILL_FIRE_BUST_UP + 1:
+                        case AT_SKILL_FIRE_BUST_UP + 2:
+                        case AT_SKILL_FIRE_BUST_UP + 3:
+                        case AT_SKILL_FIRE_BUST_UP + 4:
+                        case AT_SKILL_LONGPIER_ATTACK:
+                        case AT_SKILL_ASHAKE_UP:
+                        case AT_SKILL_ASHAKE_UP + 1:
+                        case AT_SKILL_ASHAKE_UP + 2:
+                        case AT_SKILL_ASHAKE_UP + 3:
+                        case AT_SKILL_ASHAKE_UP + 4:
+                        case AT_SKILL_DARK_HORSE:
+                        case AT_SKILL_THUNDER_STRIKE:
+                        case AT_SKILL_SPACE_SPLIT:
+                        case AT_SKILL_PLASMA_STORM_FENRIR:
+                        case AT_SKILL_FIRE_SCREAM_UP:
+                        case AT_SKILL_FIRE_SCREAM_UP + 1:
+                        case AT_SKILL_FIRE_SCREAM_UP + 2:
+                        case AT_SKILL_FIRE_SCREAM_UP + 3:
+                        case AT_SKILL_FIRE_SCREAM_UP + 4:
+                        case AT_SKILL_DARK_SCREAM:
+                            bOk = true;
+                            break;
+                        }
+                    }
+
+                    if (bOk)
+                    {
+                        g_MovementSkill.m_bMagic = TRUE;
+                        g_MovementSkill.m_iSkill = Hero->CurrentSkill;
+
+                        if (CheckAttack())
+                        {
+                            g_MovementSkill.m_iTarget = SelectedCharacter;
+                        }
+                        else
+                        {
+                            g_MovementSkill.m_iTarget = -1;
+                        }
+                        if (SkillWarrior(c, &CharacterMachine->Equipment[i]))
+                        {
+                            return;
+                        }
+                    }
+                }
+                if (ClassIndex == CLASS_ELF)
+                {
+                    if (SkillElf(c, &CharacterMachine->Equipment[i]))
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+        else
+        {
+            ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
+            g_MovementSkill.m_iTarget = -1;
+        }
+    }
+    if (ClassIndex == CLASS_ELF)
+    {
+        AttackElf(c, Skill, Distance);
+    }
+    if (ClassIndex == CLASS_KNIGHT || ClassIndex == CLASS_DARK || ClassIndex == CLASS_DARK_LORD)
+    {
+        AttackKnight(c, Skill, Distance);
+    }
+    if (ClassIndex == CLASS_RAGEFIGHTER)
+    {
+        AttackRagefighter(c, Skill, Distance);
+    }
+    if (ClassIndex == CLASS_WIZARD || ClassIndex == CLASS_DARK || ClassIndex == CLASS_SUMMONER)
+    {
+        AttackWizard(c, Skill, Distance);
+    }
+    if ((Skill >= AT_SKILL_STUN && Skill <= AT_SKILL_REMOVAL_BUFF))
+    {
+        AttackCommon(c, Skill, Distance);
+    }
+}
+
+void SetActionTarget(int targetId)
+{
+    ActionTarget = targetId;
 }
 
 BOOL g_bWhileMovingZone = FALSE;
@@ -7689,7 +7720,7 @@ void MoveHero()
         MouseUpdateTime++;
     }
 
-    Attack(Hero);
+    TriggerAttack(Hero);
     int Index = ((int)Hero->Object.Position[1] / (int)TERRAIN_SCALE) * 256 + ((int)Hero->Object.Position[0] / (int)TERRAIN_SCALE);
     if (Index < 0) Index = 0;
     else if (Index > 65535) Index = 65535;

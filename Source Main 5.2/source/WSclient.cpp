@@ -1691,6 +1691,8 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
 
     OBJECT* o = &c->Object;
 
+    g_MuHelper.AddTarget(Key);
+
     if (c->Dead == 0)
     {
         OBJECT* o = &c->Object;
@@ -2543,6 +2545,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         CHARACTER* c = CreateMonster(Type, Data2->PositionX, Data2->PositionY, Key);
 
         g_ConsoleDebug->Write(MCD_RECEIVE, L"0x13 [ReceiveCreateMonsterViewport(Type : %d | Key : %d)]", Type, Key);
+        g_MuHelper.AddTarget(Key);
 
         if (c == NULL) break;
 
