@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <deque>
+#include <unordered_set>
 #include <string>
 #include <thread>
 #include <atomic>
@@ -75,6 +77,10 @@ public:
 	void Stop();
 	bool IsActive() { return m_bActive; }
 
+	void AddTarget(int iTargetId);
+	void DeleteTarget(int iTargetId);
+	void SimulateAttack(int iSkill);
+
 private:
 	void WorkLoop();
 	void Work();
@@ -83,6 +89,9 @@ private:
 	cMuHelperConfig m_config;
 	std::thread m_timerThread;
 	std::atomic<bool> m_bActive;
+	std::deque<int> m_queuedTargets;
+	std::unordered_set<int> m_setTargets;
+	int m_iCurrentTarget;
 };
 
 extern CMuHelper g_MuHelper;
