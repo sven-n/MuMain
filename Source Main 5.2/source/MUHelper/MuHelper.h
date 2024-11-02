@@ -67,7 +67,7 @@ typedef struct
 class CMuHelper
 {
 public:
-	CMuHelper() : m_bActive(false) {}
+	CMuHelper();
 	~CMuHelper() = default;
 
 public:
@@ -79,11 +79,13 @@ public:
 
 	void AddTarget(int iTargetId);
 	void DeleteTarget(int iTargetId);
-	void SimulateAttack(int iSkill);
 
 private:
 	void WorkLoop();
 	void Work();
+	int Attack();
+	int SimulateAttack(int iSkill);
+	int SimulateComboAttack();
 
 private:
 	cMuHelperConfig m_config;
@@ -92,6 +94,8 @@ private:
 	std::deque<int> m_queuedTargets;
 	std::unordered_set<int> m_setTargets;
 	int m_iCurrentTarget;
+	int m_iCurrentSkill;
+	int m_iComboState;
 };
 
 extern CMuHelper g_MuHelper;

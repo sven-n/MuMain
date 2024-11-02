@@ -6895,7 +6895,7 @@ bool CanExecuteAttack(CHARACTER* c, int Skill, float Distance)
     return true;
 }
 
-void ExecuteAttack(CHARACTER* c)
+int ExecuteAttack(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
 
@@ -6905,13 +6905,13 @@ void ExecuteAttack(CHARACTER* c)
 
     if (!CanExecuteAttack(c, Skill, Distance))
     {
-        return;
+        return 0;
     }
 
     if (gMapManager.IsCursedTemple() && g_pCursedTempleWindow->IsCursedTempleSkillKey(SelectedCharacter))
     {
         g_pCursedTempleWindow->SetCursedTempleSkill(c, o, SelectedCharacter);
-        return;
+        return 0;
     }
 
     if (
@@ -6987,14 +6987,14 @@ void ExecuteAttack(CHARACTER* c)
             && o->CurrentAction != PLAYER_STOP_RAGEFIGHTER)
         {
             MouseRButtonPress = 0;
-            return;
+            return 0;
         }
     }
     else
     {
         if (o->CurrentAction < MONSTER01_STOP1 || o->CurrentAction > MONSTER01_STOP2)
         {
-            return;
+            return 0;
         }
     }
 
@@ -7073,7 +7073,7 @@ void ExecuteAttack(CHARACTER* c)
                         }
                         if (SkillWarrior(c, &CharacterMachine->Equipment[i]))
                         {
-                            return;
+                            return 1;
                         }
                     }
                 }
@@ -7081,7 +7081,7 @@ void ExecuteAttack(CHARACTER* c)
                 {
                     if (SkillElf(c, &CharacterMachine->Equipment[i]))
                     {
-                        return;
+                        return 1;
                     }
                 }
             }
@@ -7112,6 +7112,8 @@ void ExecuteAttack(CHARACTER* c)
     {
         AttackCommon(c, Skill, Distance);
     }
+
+    return 1;
 }
 
 void SetActionTarget(int targetId)
