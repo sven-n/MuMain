@@ -6895,6 +6895,27 @@ bool CanExecuteAttack(CHARACTER* c, int Skill, float Distance)
     return true;
 }
 
+bool CheckMana(CHARACTER* c, int Skill)
+{
+    int iMana, iSkillMana;
+    gSkillManager.GetSkillInformation(Skill, 1, NULL, &iMana, NULL, &iSkillMana);
+    if (CharacterAttribute->Mana < iMana)
+    {
+        int Index = g_pMyInventory->FindManaItemIndex();
+
+        if (Index != -1)
+        {
+            SendRequestUse(Index, 0);
+        }
+        return false;
+    }
+    if (iSkillMana > CharacterAttribute->SkillMana)
+    {
+        return false;
+    }
+    return true;
+}
+
 int ExecuteAttack(CHARACTER* c)
 {
     OBJECT* o = &c->Object;

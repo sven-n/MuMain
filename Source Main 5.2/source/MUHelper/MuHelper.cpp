@@ -346,13 +346,12 @@ int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired)
     g_MovementSkill.m_iTarget = SelectedCharacter;
     g_MovementSkill.m_bMagic = FALSE;
 
-    if (ExecuteAttack(Hero))
+    if (CheckMana(Hero, iSkill))
     {
-        // Attack is considered completed only when no longer path finding
-        if (!Hero->Movement || Hero->MovementType == MOVEMENT_ATTACK)
+        if (ExecuteAttack(Hero))
         {
-            g_MovementSkill.m_iTarget = -1;
-            return 1;
+            // Attack is considered completed only when no longer path finding
+            return (int)(!Hero->Movement || Hero->MovementType == MOVEMENT_ATTACK);
         }
     }
 
