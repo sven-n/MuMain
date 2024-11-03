@@ -1,8 +1,7 @@
 #pragma once
 
 #include <array>
-#include <deque>
-#include <unordered_set>
+#include <set>
 #include <string>
 #include <thread>
 #include <atomic>
@@ -30,6 +29,8 @@ typedef struct
 	int iSkill3Interval;
 
 	bool bUseCombo;
+
+	bool bUseSelfDefense;
 
 	int iBuff1;
 	int iBuff2;
@@ -79,6 +80,7 @@ public:
 
 	void AddTarget(int iTargetId);
 	void DeleteTarget(int iTargetId);
+	void DeleteAllTargets();
 
 private:
 	void WorkLoop();
@@ -86,16 +88,20 @@ private:
 	int Attack();
 	int SimulateAttack(int iSkill);
 	int SimulateComboAttack();
+	int GetNearestTarget();
+	int GetFarthestTarget();
+	int ComputeDistanceFromTarget(CHARACTER* pTarget);
 
 private:
 	cMuHelperConfig m_config;
 	std::thread m_timerThread;
 	std::atomic<bool> m_bActive;
-	std::deque<int> m_queuedTargets;
-	std::unordered_set<int> m_setTargets;
+	std::set<int> m_setTargets;
 	int m_iCurrentTarget;
 	int m_iCurrentSkill;
 	int m_iComboState;
+
+	bool m_bSavedAutoAttack;
 };
 
 extern CMuHelper g_MuHelper;

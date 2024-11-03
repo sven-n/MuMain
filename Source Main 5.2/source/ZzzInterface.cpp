@@ -55,6 +55,7 @@
 #include "ProtocolSend.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
+#include "MUHelper/MuHelper.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
@@ -1967,7 +1968,6 @@ bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, int iSkill)
     TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
     TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
 
-    ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
     g_MovementSkill.m_bMagic = FALSE;
     g_MovementSkill.m_iSkill = iSkill;
     g_MovementSkill.m_iTarget = SelectedCharacter;
@@ -1987,7 +1987,6 @@ bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, int iSkill)
     {
         c->Movement = true;
         c->MovementType = MOVEMENT_SKILL;
-        Success = true;
         SendMove(c, o);
     }
 
@@ -2194,6 +2193,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 
     LetHeroStop();
     c->Movement = false;
+    c->MovementType = MOVEMENT_ATTACK;
     if (o->Type == MODEL_PLAYER)
     {
         SetAttackSpeed();
@@ -7116,11 +7116,6 @@ int ExecuteAttack(CHARACTER* c)
     return 1;
 }
 
-void SetActionTarget(int targetId)
-{
-    ActionTarget = targetId;
-}
-
 BOOL g_bWhileMovingZone = FALSE;
 DWORD g_dwLatestZoneMoving = 0;
 
@@ -7722,7 +7717,9 @@ void MoveHero()
         MouseUpdateTime++;
     }
 
-    TriggerAttack(Hero);
+    if (!g_MuHelper.IsActive())
+        TriggerAttack(Hero);
+
     int Index = ((int)Hero->Object.Position[1] / (int)TERRAIN_SCALE) * 256 + ((int)Hero->Object.Position[0] / (int)TERRAIN_SCALE);
     if (Index < 0) Index = 0;
     else if (Index > 65535) Index = 65535;

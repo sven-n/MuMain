@@ -11997,6 +11997,21 @@ CHARACTER* FindCharacterByID(wchar_t* szName)
     return NULL;
 }
 
+
+
+CHARACTER* FindCharacterByKey(int Key)
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+    {
+        CHARACTER* c = &CharactersClient[i];
+        if (c->Object.Live && c->Key == Key)
+        {
+            return c;
+        }
+    }
+    return NULL;
+}
+
 int LevelConvert(BYTE Level)
 {
     switch (Level)
@@ -14960,4 +14975,14 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
     }
 
     return bBindBack;
+}
+
+bool IsPlayer(CHARACTER* c)
+{
+    return c && c->Object.Kind == KIND_PLAYER;
+}
+
+bool IsMonster(CHARACTER* c)
+{
+    return c && c->Object.Kind == KIND_MONSTER;
 }

@@ -12,6 +12,7 @@ DWORD GetGuildRelationShipTextColor(BYTE GuildRelationShip);
 DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip);
 
 CHARACTER* FindCharacterByID(wchar_t* szName);
+CHARACTER* FindCharacterByKey(int Key);
 
 void CreateMonsterServer(int Type, vec3_t Position, vec3_t Angle, int Level = 0);
 void CreateWeapon(int Type, int Level, CHARACTER* c, int Hand);
@@ -89,5 +90,8 @@ extern bool      g_bAddDefense;
 void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle, int SubType = 0, OBJECT* Target = NULL, float Scale = 10.f, short PK = -1, WORD SkillIndex = 0, WORD SkillSerialNum = 0, int iChaIndex = -1, const float* vColor = NULL, short int sTargetIndex = -1);
 bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate);
 bool IsBackItem(CHARACTER* c, int iType);
+
+bool IsPlayer(CHARACTER* c);
+bool IsMonster(CHARACTER* c);
 
 #endif

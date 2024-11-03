@@ -144,7 +144,6 @@ bool CheckWall(int sx1, int sy1, int sx2, int sy2);
 bool CheckTile(CHARACTER* c, OBJECT* o, float Range);
 void LetHeroStop(CHARACTER* c = NULL, BOOL bSetMovementFalse = FALSE);
 void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
-void SetActionTarget(int targetId);
 void TriggerAttack(CHARACTER* c);
 int ExecuteAttack(CHARACTER* c);
 bool SkillElf(CHARACTER* c, ITEM* p);
