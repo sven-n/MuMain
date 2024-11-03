@@ -3511,7 +3511,7 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_LIFE_UP + 3:
     case AT_SKILL_LIFE_UP + 4:
     case AT_SKILL_VITALITY:
-        UnRegisterBuff(eBuff_HpRecovery, o); //eBuff_Life
+        UnRegisterBuff(eBuff_Life, o);
         break;
     case AT_SKILL_PARALYZE:
         UnRegisterBuff(eDeBuff_Harden, o);
@@ -4311,7 +4311,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         {
             UnRegisterBuff(eBuff_Attack, to);
             UnRegisterBuff(eBuff_Defense, to);
-            UnRegisterBuff(eBuff_HpRecovery, to);
+            UnRegisterBuff(eBuff_Life, to);
             UnRegisterBuff(eBuff_PhysDefense, to);
             UnRegisterBuff(eBuff_AddCriticalDamage, to);
             UnRegisterBuff(eBuff_AddMana, to);
@@ -4401,14 +4401,14 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     case AT_SKILL_LIFE_UP + 3:
     case AT_SKILL_LIFE_UP + 4:
     case AT_SKILL_VITALITY:
-        if (!g_isCharacterBuff(to, eBuff_HpRecovery)) //eBuff_Life
+        if (!g_isCharacterBuff(to, eBuff_Life))
         {
             DeleteEffect(BITMAP_LIGHT, to, 1);
 
             CreateEffect(BITMAP_LIGHT, to->Position, to->Angle, to->Light, 1, to);
         }
 
-        g_CharacterRegisterBuff(to, eBuff_HpRecovery); //eBuff_Life
+        g_CharacterRegisterBuff(to, eBuff_Life);
 
         SetAction(so, PLAYER_SKILL_VITALITY);
         sc->AttackTime = 1;
@@ -14430,8 +14430,7 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             bufflist.push_back(eDeBuff_BlowOfDestruction);
 
             //buff
-            bufflist.push_back(eBuff_HpRecovery); bufflist.push_back(eBuff_Attack);
-            //bufflist.push_back( eBuff_Life ); bufflist.push_back( eBuff_Attack );
+            bufflist.push_back(eBuff_Life); bufflist.push_back(eBuff_Attack);
             bufflist.push_back(eBuff_Defense); bufflist.push_back(eBuff_AddAG);
             bufflist.push_back(eBuff_Cloaking); bufflist.push_back(eBuff_AddSkill);
             bufflist.push_back(eBuff_PhysDefense); bufflist.push_back(eBuff_AddCriticalDamage);
@@ -14899,8 +14898,7 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_HpRecovery:
-        //case eBuff_Life:
+    case eBuff_Life:
     {
         DeleteEffect(BITMAP_LIGHT, o, 1);
         CreateEffect(BITMAP_LIGHT, o->Position, o->Angle, o->Light, 1, o);
@@ -15105,8 +15103,7 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_HpRecovery:
-        //case eBuff_Life:
+    case eBuff_Life:
     {
         DeleteEffect(BITMAP_LIGHT, o, 1);
     }

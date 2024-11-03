@@ -85,8 +85,10 @@ public:
 private:
 	void WorkLoop();
 	void Work();
+	int Buff();
 	int Attack();
 	int SimulateAttack(int iSkill);
+	int SimulateSkill(int iSkill, bool bTargetRequired);
 	int SimulateComboAttack();
 	int GetNearestTarget();
 	int GetFarthestTarget();

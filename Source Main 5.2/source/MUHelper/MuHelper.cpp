@@ -81,7 +81,7 @@ void CMuHelper::WorkLoop()
 {
     while (m_bActive) {
         Work();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
 
@@ -89,6 +89,14 @@ void CMuHelper::Work()
 {
     try
     {
+        if (m_config.iBuff1 || m_config.iBuff2 || m_config.iBuff3)
+        {
+            if (!Buff())
+            {
+                return;
+            }
+        }
+
         Attack();
     }
     catch (...)
@@ -235,6 +243,17 @@ int CMuHelper::GetFarthestTarget()
     return iFarthestMonsterId;
 }
 
+int CMuHelper::Buff()
+{
+    if (!g_isCharacterBuff((&Hero->Object), eBuff_Life))
+    {
+        m_iCurrentSkill = m_config.iBuff1;
+        return SimulateSkill(m_iCurrentSkill, false);
+    }
+
+    return 1;
+}
+
 int CMuHelper::Attack()
 {
     if (m_iCurrentTarget == -1 && !m_setTargets.empty())
@@ -287,27 +306,37 @@ int CMuHelper::SimulateComboAttack()
 
 int CMuHelper::SimulateAttack(int iSkill)
 {
+    return SimulateSkill(iSkill, true);
+}
+
+int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired)
+{
     extern MovementSkill g_MovementSkill;
     extern int SelectedCharacter;
     extern int TargetX, TargetY;
 
-    if (m_iCurrentTarget == -1)
+    if (bTargetRequired)
     {
-        return 0;
-    }
+        if (m_iCurrentTarget == -1)
+        {
+            return 0;
+        }
 
-    SelectedCharacter = FindCharacterIndex(m_iCurrentTarget);
-    if (SelectedCharacter == MAX_CHARACTERS_CLIENT)
-    {
-        DeleteTarget(m_iCurrentTarget);
-        return 0;
-    }
+        SelectedCharacter = FindCharacterIndex(m_iCurrentTarget);
+        if (SelectedCharacter == MAX_CHARACTERS_CLIENT)
+        {
+            DeleteTarget(m_iCurrentTarget);
+            return 0;
+        }
 
-    CHARACTER* pTarget = &CharactersClient[SelectedCharacter];
-    if (pTarget->Dead)
-    {
-        DeleteTarget(m_iCurrentTarget);
-        return 0;
+        CHARACTER* pTarget = &CharactersClient[SelectedCharacter];
+        if (pTarget->Dead)
+        {
+            DeleteTarget(m_iCurrentTarget);
+            return 0;
+        }
+        TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
+        TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
     }
 
     int iSkillIndex = g_pSkillList->GetSkillIndex(iSkill);
@@ -316,9 +345,6 @@ int CMuHelper::SimulateAttack(int iSkill)
     g_MovementSkill.m_iSkill = iSkill;
     g_MovementSkill.m_iTarget = SelectedCharacter;
     g_MovementSkill.m_bMagic = FALSE;
-
-    TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
-    TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
 
     if (ExecuteAttack(Hero))
     {

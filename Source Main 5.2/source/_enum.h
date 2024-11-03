@@ -3673,7 +3673,7 @@ enum eBuffState
     eBuff_AddCriticalDamage,
     eBuff_InfinityArrow,
     eBuff_AddAG,
-    eBuff_HpRecovery,
+    eBuff_Life,
     eBuff_AddMana,
     eBuff_BlessPotion,
     eBuff_SoulPotion,

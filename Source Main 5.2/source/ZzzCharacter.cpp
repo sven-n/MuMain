@@ -4024,8 +4024,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             bufflist.push_back(eDeBuff_BlowOfDestruction);
 
             //buff
-            bufflist.push_back(eBuff_HpRecovery); bufflist.push_back(eBuff_Attack);
-            //bufflist.push_back( eBuff_Life ); bufflist.push_back( eBuff_Attack );
+            bufflist.push_back(eBuff_Life); bufflist.push_back(eBuff_Attack);
             bufflist.push_back(eBuff_Defense); bufflist.push_back(eBuff_AddAG);
             bufflist.push_back(eBuff_Cloaking); bufflist.push_back(eBuff_AddSkill);
             bufflist.push_back(eBuff_PhysDefense); bufflist.push_back(eBuff_AddCriticalDamage);
