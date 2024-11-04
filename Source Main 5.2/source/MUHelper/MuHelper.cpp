@@ -251,6 +251,11 @@ int CMuHelper::Buff()
         return SimulateSkill(m_iCurrentSkill, false);
     }
 
+    if (m_config.bSupportParty)
+    {
+
+    }
+
     return 1;
 }
 
@@ -346,14 +351,5 @@ int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired)
     g_MovementSkill.m_iTarget = SelectedCharacter;
     g_MovementSkill.m_bMagic = FALSE;
 
-    if (CheckMana(Hero, iSkill))
-    {
-        if (ExecuteAttack(Hero))
-        {
-            // Attack is considered completed only when no longer path finding
-            return (int)(!Hero->Movement || Hero->MovementType == MOVEMENT_ATTACK);
-        }
-    }
-
-    return 0;
+    return ExecuteAttack(Hero);
 }

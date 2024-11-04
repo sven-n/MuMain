@@ -146,6 +146,7 @@ void LetHeroStop(CHARACTER* c = NULL, BOOL bSetMovementFalse = FALSE);
 void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
 void TriggerAttack(CHARACTER* c);
 int ExecuteAttack(CHARACTER* c);
+bool CompletedAttack(CHARACTER* c);
 bool CheckMana(CHARACTER* c, int Skill);
 bool SkillElf(CHARACTER* c, ITEM* p);
 void SendRequestMagic(int Type, int Key);
