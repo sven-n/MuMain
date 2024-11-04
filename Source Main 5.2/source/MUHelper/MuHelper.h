@@ -6,42 +6,42 @@
 #include <thread>
 #include <atomic>
 
+typedef enum
+{
+	eDefault = 0,
+	eDelayElapsed,
+	eTwoOrMoreWithinRange,
+	eThreeOrMoreWithinRange,
+	eFourOrMoreWithinRange,
+	eFiveOrMoreWithinRange,
+	eTwoOrMoreAttacking,
+	eThreeOrMoreAttacking,
+	eFourOrMoreAttacking,
+	eFiveOrMoreAttacking,
+} eSkillActivationType;
+
 typedef struct 
 {
 	int iHuntingRange;
 
+	bool bUseSelfDefense;
 	bool bLongDistanceCounterAttack;
 	bool bOriginalPosition;
 	int iAttackDistance;
 
-	int iBasicSkill;
-
-	int iSkill2;
-	bool bSkill2UseCondition;
-	int iSkill2ConditionType;
-	bool bSkill2UseDelay;
-	int iSkill2Interval;
-
-	int iSkill3;
-	bool bSkill3UseCondition;
-	int iSkill3ConditionType;
-	bool bSkill3UseDelay;
-	int iSkill3Interval;
+	std::array<int, 3> aiSkill;
+	std::array<int, 3> aiSkillCondition;
+	std::array<int, 3> aiSkillInterval;
 
 	bool bUseCombo;
 
-	bool bUseSelfDefense;
-
-	int iBuff1;
-	int iBuff2;
-	int iBuff3;
-
-	bool bSupportParty;
+	std::array<int, 3> aiBuff;
 
 	bool bBuffDuration;
 	bool bBuffDurationParty;
 	int iCastInterval;
 
+	bool bSupportParty;
 	bool bAutoHeal;
 	int iHealThreshold;
 
@@ -86,7 +86,13 @@ private:
 	void WorkLoop();
 	void Work();
 	int Buff();
+	int BuffTarget(CHARACTER* pTargetChar, int iBuffSkill);
+	int Heal();
+	int HealTarget(CHARACTER* pTargetChar);
+	int ConsumePotion();
 	int Attack();
+	int ObtainItem();
+	int RepairEquipments();
 	int SimulateAttack(int iSkill);
 	int SimulateSkill(int iSkill, bool bTargetRequired);
 	int SimulateComboAttack();
@@ -101,6 +107,8 @@ private:
 	std::set<int> m_setTargets;
 	int m_iCurrentTarget;
 	int m_iCurrentSkill;
+	int m_iCurrentBuffIndex;
+	int m_iCurrentPartyMemberIndex;
 	int m_iComboState;
 
 	bool m_bSavedAutoAttack;

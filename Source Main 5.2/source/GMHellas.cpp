@@ -740,10 +740,10 @@ void SetActionDestroy_Def(OBJECT* o)
 {
     if (o->Type != MODEL_PLAYER)
     {
-        if (g_isCharacterBuff(o, eBuff_PhysDefense))
+        if (g_isCharacterBuff(o, eBuff_WizDefense))
         {
             o->AI = ACTION_DESTROY_PHY_DEF;
-            g_CharacterUnRegisterBuff(o, eBuff_PhysDefense);
+            g_CharacterUnRegisterBuff(o, eBuff_WizDefense);
         }
         else if (g_isCharacterBuff(o, eBuff_Defense))
         {
@@ -1123,7 +1123,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         case AT_SKILL_MONSTER_MAGIC_DEF:
             if ((int)c->AttackTime >= 13)
             {
-                g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 c->AttackTime = 15;
                 PlayBuffer(SOUND_GREAT_SHIELD);
             }
@@ -1299,7 +1299,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         case AT_SKILL_MONSTER_MAGIC_DEF:
             if ((int)c->AttackTime >= 13)
             {
-                g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 c->AttackTime = 15;
                 PlayBuffer(SOUND_GREAT_SHIELD);
             }
@@ -1355,7 +1355,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         case AT_SKILL_MONSTER_MAGIC_DEF:
             if ((int)c->AttackTime >= 13)
             {
-                g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 c->AttackTime = 15;
 
                 PlayBuffer(SOUND_GREAT_SHIELD);
@@ -2250,11 +2250,11 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     if (success)
     {
-        if (g_isCharacterBuff(o, eBuff_PhysDefense) || g_isCharacterBuff(o, eBuff_Defense))
+        if (g_isCharacterBuff(o, eBuff_WizDefense) || g_isCharacterBuff(o, eBuff_Defense))
         {
             float Luminosity = sinf(WorldTime * 0.001f) * 0.2f + 0.5f;
 
-            if (g_isCharacterBuff(o, eBuff_PhysDefense))
+            if (g_isCharacterBuff(o, eBuff_WizDefense))
             {
                 Vector(Luminosity * 0.1f, Luminosity * 0.3f, Luminosity * 0.6f, b->BodyLight);
             }

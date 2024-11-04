@@ -27,7 +27,8 @@ CMuHelper::CMuHelper()
 {
     m_iCurrentTarget = -1;
     m_iComboState = 0;
-    m_iCurrentSkill = 1;
+    m_iCurrentSkill = MAX_MAGIC;
+    m_iCurrentBuffIndex = 0;
     m_bSavedAutoAttack = false;
 }
 
@@ -54,8 +55,11 @@ void CMuHelper::Start()
 
     m_bActive = true;
     m_iComboState = 0;
+    m_iCurrentBuffIndex = 0;
+    m_iCurrentPartyMemberIndex = 0;
     m_iCurrentTarget = -1;
-    m_iCurrentSkill = m_config.iBasicSkill;
+    m_iCurrentSkill = m_config.aiSkill[0];
+
     m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
 
     m_bSavedAutoAttack = g_pOption->IsAutoAttack();
@@ -89,15 +93,20 @@ void CMuHelper::Work()
 {
     try
     {
-        if (m_config.iBuff1 || m_config.iBuff2 || m_config.iBuff3)
+        if (!Buff())
         {
-            if (!Buff())
-            {
-                return;
-            }
+            return;
         }
 
+        if (!Heal())
+        {
+            return;
+        }
+
+        ConsumePotion();
         Attack();
+        ObtainItem();
+        RepairEquipments();
     }
     catch (...)
     {
@@ -245,62 +254,208 @@ int CMuHelper::GetFarthestTarget()
 
 int CMuHelper::Buff()
 {
-    if (!g_isCharacterBuff((&Hero->Object), eBuff_Life))
+    bool bNoBuff = true;
+
+    for (int i = 0; i < m_config.aiBuff.size(); i++)
     {
-        m_iCurrentSkill = m_config.iBuff1;
-        return SimulateSkill(m_iCurrentSkill, false);
+        if (m_config.aiBuff[i] != 0)
+        {
+            bNoBuff = false;
+            break;
+        }
+    }
+
+    if (bNoBuff)
+    {
+        return 1;
     }
 
     if (m_config.bSupportParty)
     {
+        bool bPartyActive = false;
 
+        for (int i = 0; i < ((sizeof(Party) / sizeof(Party[0])) - 1); i++)
+        {
+            PARTY_t* pMember = &Party[i];
+            CHARACTER* pTargetChar = FindCharacterByID(pMember->Name);
+            if (pTargetChar == Hero)
+            {
+                bPartyActive = true;
+                break;
+            }
+        }
+        
+        if (bPartyActive)
+        {
+            PARTY_t* pMember = &Party[m_iCurrentPartyMemberIndex];
+            CHARACTER* pTargetChar = FindCharacterByID(pMember->Name);
+            if (pTargetChar)
+            {
+                if (!BuffTarget(pTargetChar, m_config.aiBuff[m_iCurrentBuffIndex]))
+                {
+                    return 0;
+                }
+            }
+
+            m_iCurrentPartyMemberIndex = (m_iCurrentPartyMemberIndex + 1) % (sizeof(Party) / sizeof(Party[0]));
+        }
+        else
+        {
+            if (!BuffTarget(Hero, m_config.aiBuff[m_iCurrentBuffIndex]))
+            {
+                return 0;
+            }
+        }
+    }
+    else
+    {
+        if (!BuffTarget(Hero, m_config.aiBuff[m_iCurrentBuffIndex]))
+        {
+            return 0;
+        }
     }
 
+    if (m_iCurrentPartyMemberIndex == 0)
+    {
+        m_iCurrentBuffIndex = (m_iCurrentBuffIndex + 1) % m_config.aiBuff.size();
+    }
+
+    return 1;
+}
+
+int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
+{
+    // TODO: List other buffs here
+
+    if ((iBuffSkill == AT_SKILL_ATTACK
+        || iBuffSkill == AT_SKILL_ATT_POWER_UP
+        || iBuffSkill == AT_SKILL_ATT_POWER_UP + 1
+        || iBuffSkill == AT_SKILL_ATT_POWER_UP + 2
+        || iBuffSkill == AT_SKILL_ATT_POWER_UP + 3
+        || iBuffSkill == AT_SKILL_ATT_POWER_UP + 4)
+        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Attack))
+    {
+        m_iCurrentTarget = pTargetChar->Key;
+        return SimulateSkill(iBuffSkill, true);
+    }
+
+    if ((iBuffSkill == AT_SKILL_DEFENSE
+        || iBuffSkill == AT_SKILL_DEF_POWER_UP
+        || iBuffSkill == AT_SKILL_DEF_POWER_UP + 1
+        || iBuffSkill == AT_SKILL_DEF_POWER_UP + 2
+        || iBuffSkill == AT_SKILL_DEF_POWER_UP + 3
+        || iBuffSkill == AT_SKILL_DEF_POWER_UP + 4)
+        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Defense))
+    {
+        m_iCurrentTarget = pTargetChar->Key;
+        return SimulateSkill(iBuffSkill, true);
+    }
+
+    if ((iBuffSkill == AT_SKILL_WIZARDDEFENSE
+        || iBuffSkill == AT_SKILL_SOUL_UP
+        || iBuffSkill == AT_SKILL_SOUL_UP + 1
+        || iBuffSkill == AT_SKILL_SOUL_UP + 2
+        || iBuffSkill == AT_SKILL_SOUL_UP + 3
+        || iBuffSkill == AT_SKILL_SOUL_UP + 4)
+        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_WizDefense))
+    {
+        m_iCurrentTarget = pTargetChar->Key;
+        return SimulateSkill(iBuffSkill, true);
+    }
+
+    if ((iBuffSkill == AT_SKILL_VITALITY
+        || iBuffSkill == AT_SKILL_LIFE_UP
+        || iBuffSkill == AT_SKILL_LIFE_UP + 1
+        || iBuffSkill == AT_SKILL_LIFE_UP + 2
+        || iBuffSkill == AT_SKILL_LIFE_UP + 3
+        || iBuffSkill == AT_SKILL_LIFE_UP + 4)
+        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Life))
+    {
+        return SimulateSkill(iBuffSkill, false);
+    }
+
+    if ((iBuffSkill == AT_SKILL_SWELL_OF_MAGICPOWER)
+        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_SwellOfMagicPower))
+    {
+        return SimulateSkill(iBuffSkill, false);
+    }
+
+    if ((iBuffSkill == AT_SKILL_ADD_CRITICAL)
+        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_AddCriticalDamage))
+    {
+        return SimulateSkill(iBuffSkill, false);
+    }
+
+    return 1;
+}
+
+int CMuHelper::ConsumePotion()
+{
+    return 1;
+}
+
+int CMuHelper::Heal()
+{
+    return 1;
+}
+
+int CMuHelper::ObtainItem()
+{
+    return 1;
+}
+
+int CMuHelper::RepairEquipments()
+{
     return 1;
 }
 
 int CMuHelper::Attack()
 {
-    if (m_iCurrentTarget == -1 && !m_setTargets.empty())
+    if (m_iCurrentTarget == -1)
     {
-        m_iCurrentTarget = GetNearestTarget();
-
-        if (m_config.bUseCombo && m_iComboState < 2)
+        if (!m_setTargets.empty())
         {
-            m_iComboState = 0;
+            m_iCurrentTarget = GetNearestTarget();
+
+            if (m_config.bUseCombo && m_iComboState < 2)
+            {
+                m_iComboState = 0;
+            }
         }
+
+        m_iComboState = 0;
+        return 0;
     }
 
     if (m_config.bUseCombo)
     {
-        SimulateComboAttack();
-    }
-    else
-    {
-        SimulateAttack(m_iCurrentSkill);
+        return SimulateComboAttack();
     }
 
-    return 1;
+    return SimulateAttack(m_iCurrentSkill);
 }
 
 int CMuHelper::SimulateComboAttack()
 {
-    if (!m_config.iBasicSkill || !m_config.iSkill2 || !m_config.iSkill3)
+    for (int i = 0; i < m_config.aiSkill.size(); i++)
     {
-        return 0;
+        if (m_config.aiSkill[i] == 0)
+        {
+            return 0;
+        }
     }
 
-    if (m_iComboState == 0 && SimulateAttack(m_config.iBasicSkill))
+    if (m_iComboState == 0 && SimulateAttack(m_config.aiSkill[m_iComboState]))
     {
         g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] First Skill -> %d", m_iCurrentTarget);
         m_iComboState = 1;
     }
-    else if (m_iComboState == 1 && SimulateAttack(m_config.iSkill2))
+    else if (m_iComboState == 1 && SimulateAttack(m_config.aiSkill[m_iComboState]))
     {
         g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Second Skill -> %d", m_iCurrentTarget);
         m_iComboState = 2;
     }
-    else if (m_iComboState == 2 && SimulateAttack(m_config.iSkill3))
+    else if (m_iComboState == 2 && SimulateAttack(m_config.aiSkill[m_iComboState]))
     {
         g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Third Skill -> %d", m_iCurrentTarget);
         m_iComboState = 0;
@@ -345,6 +500,11 @@ int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired)
     }
 
     int iSkillIndex = g_pSkillList->GetSkillIndex(iSkill);
+    if (iSkillIndex == -1)
+    {
+        return 0;
+    }
+
     Hero->CurrentSkill = iSkillIndex;
 
     g_MovementSkill.m_iSkill = iSkill;

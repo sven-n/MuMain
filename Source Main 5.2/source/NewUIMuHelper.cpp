@@ -468,19 +468,19 @@ void SEASON3B::CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bSt
         break;
 
     case CHECKBOX_ID_SKILL2_DELAY:
-        m_TempConfig.bSkill2UseDelay = bState;
+        m_TempConfig.aiSkillCondition[1] = eDelayElapsed;
         break;
 
     case CHECKBOX_ID_SKILL2_CONDITION:
-        m_TempConfig.bSkill2UseCondition = bState;
+        m_TempConfig.aiSkillCondition[1] = eTwoOrMoreWithinRange;
         break;
 
     case CHECKBOX_ID_SKILL3_DELAY:
-        m_TempConfig.bSkill3UseDelay = bState;
+        m_TempConfig.aiSkillCondition[2] = eDelayElapsed;
         break;
 
     case CHECKBOX_ID_SKILL3_CONDITION:
-        m_TempConfig.bSkill3UseCondition = bState;
+        m_TempConfig.aiSkillCondition[2] = eTwoOrMoreWithinRange;
         break;
 
     case CHECKBOX_ID_COMBO:
@@ -546,26 +546,13 @@ void SEASON3B::CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bSt
 
 void SEASON3B::CNewUIMuHelper::ApplyConfigFromSkillSlot(int iSlot, int iSkill)
 {
-    switch (iSlot)
+    if (iSlot < 3)
     {
-    case SKILL_SLOT_SKILL1:
-        m_TempConfig.iBasicSkill = iSkill;
-        break;
-    case SKILL_SLOT_SKILL2:
-        m_TempConfig.iSkill2 = iSkill;
-        break;
-    case SKILL_SLOT_SKILL3:
-        m_TempConfig.iSkill3 = iSkill;
-        break;
-    case SKILL_SLOT_BUFF1:
-        m_TempConfig.iBuff1 = iSkill;
-        break;
-    case SKILL_SLOT_BUFF2:
-        m_TempConfig.iBuff2 = iSkill;
-        break;
-    case SKILL_SLOT_BUFF3:
-        m_TempConfig.iBuff3 = iSkill;
-        break;
+        m_TempConfig.aiSkill[iSlot] = iSkill;
+    }
+    else
+    {
+        m_TempConfig.aiBuff[iSlot - SKILL_SLOT_BUFF1] = iSkill;
     }
 }
 
@@ -1639,31 +1626,43 @@ bool SEASON3B::CNewUIMuHelperSkillList::IsAttackSkill(int iSkillType)
 
 bool SEASON3B::CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
 {
+    // To-do: Complete list of buffs
+
     switch (iSkillType)
     {
-    // Knight Buffs
-    // To-do: Add other buffs for knights
+    case AT_SKILL_LIFE_UP:
+    case AT_SKILL_LIFE_UP + 1:
+    case AT_SKILL_LIFE_UP + 2:
+    case AT_SKILL_LIFE_UP + 3:
+    case AT_SKILL_LIFE_UP + 4:
     case AT_SKILL_VITALITY:
-
         return true;
 
-    // Elf Buffs
-    // To-do: Add other buffs for elves (e.g. master skills)
+    case AT_SKILL_DEF_POWER_UP:
+    case AT_SKILL_DEF_POWER_UP + 1:
+    case AT_SKILL_DEF_POWER_UP + 2:
+    case AT_SKILL_DEF_POWER_UP + 3:
+    case AT_SKILL_DEF_POWER_UP + 4:
     case AT_SKILL_DEFENSE:
+    case AT_SKILL_ATT_POWER_UP:
+    case AT_SKILL_ATT_POWER_UP + 1:
+    case AT_SKILL_ATT_POWER_UP + 2:
+    case AT_SKILL_ATT_POWER_UP + 3:
+    case AT_SKILL_ATT_POWER_UP + 4:
     case AT_SKILL_ATTACK:
         return true;
 
-    // Wizard Buffs
-    // To-do: Add other buffs for wizards (e.g. master skills)
     case AT_SKILL_WIZARDDEFENSE:
+    case AT_SKILL_SOUL_UP:
+    case AT_SKILL_SOUL_UP + 1:
+    case AT_SKILL_SOUL_UP + 2:
+    case AT_SKILL_SOUL_UP + 3:
+    case AT_SKILL_SOUL_UP + 4:
+    case AT_SKILL_SWELL_OF_MAGICPOWER:
         return true;
 
-    // Dark Lord Buffs
-    // To-do: Add other buffs for dark lords (e.g. master skills)
     case AT_SKILL_ADD_CRITICAL:
         return true;
-
-        // To-do: Add other character buffs
     }
 
     return false;
@@ -1671,8 +1670,15 @@ bool SEASON3B::CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
 
 bool SEASON3B::CNewUIMuHelperSkillList::IsHealingSkill(int iSkillType)
 {
+    // To-do: Complete list of healing skills
+
     switch (iSkillType)
     {
+    case AT_SKILL_HEAL_UP:
+    case AT_SKILL_HEAL_UP + 1:
+    case AT_SKILL_HEAL_UP + 2:
+    case AT_SKILL_HEAL_UP + 3:
+    case AT_SKILL_HEAL_UP + 4:
     case AT_SKILL_HEALING:
         return true;
     }
@@ -1689,15 +1695,6 @@ bool SEASON3B::CNewUIMuHelperSkillList::IsDefenseSkill(int iSkillType)
     }
 
     return false;
-}
-
-bool is_empty_or_whitespace(const wchar_t* name) {
-    for (size_t i = 0; i < wcslen(name); ++i) {
-        if (!iswspace(name[i])) {
-            return false;
-        }
-    }
-    return true;
 }
 
 void SEASON3B::CNewUIMuHelperSkillList::FilterByAttackSkills()

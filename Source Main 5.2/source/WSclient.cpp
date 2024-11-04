@@ -2874,7 +2874,7 @@ void ReceiveAttackDamageCastle(CHARACTER* c, OBJECT* o, const bool success, cons
             else
                 CharacterAttribute->Shield -= shieldDamage;
 
-            if (g_isCharacterBuff(o, eBuff_PhysDefense) && o->Type == MODEL_PLAYER)
+            if (g_isCharacterBuff(o, eBuff_WizDefense) && o->Type == MODEL_PLAYER)
             {
                 CHARACTER* cm = &CharactersClient[AttackPlayer];
                 OBJECT* om = &cm->Object;
@@ -2956,7 +2956,7 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
             else
                 CharacterAttribute->Shield -= shieldDamage;
 
-            if (g_isCharacterBuff(o, eBuff_PhysDefense) && o->Type == MODEL_PLAYER)
+            if (g_isCharacterBuff(o, eBuff_WizDefense) && o->Type == MODEL_PLAYER)
             {
                 CHARACTER* cm = &CharactersClient[AttackPlayer];
                 OBJECT* om = &cm->Object;
@@ -3530,7 +3530,7 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_SOUL_UP + 3:
     case AT_SKILL_SOUL_UP + 4:
     case AT_SKILL_WIZARDDEFENSE:
-        UnRegisterBuff(eBuff_PhysDefense, o);
+        UnRegisterBuff(eBuff_WizDefense, o);
         break;
     case AT_SKILL_BLAST_POISON:
         UnRegisterBuff(eDeBuff_Poison, o);
@@ -3551,7 +3551,7 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
         break;
     case AT_SKILL_MONSTER_PHY_DEF:
         SetActionDestroy_Def(o);
-        UnRegisterBuff(eBuff_PhysDefense, o);
+        UnRegisterBuff(eBuff_WizDefense, o);
         break;
     case AT_SKILL_ATT_UP_OURFORCES:
         UnRegisterBuff(eBuff_Att_up_Ourforces, o);
@@ -3800,7 +3800,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     break;
     case AT_SKILL_MONSTER_MAGIC_DEF:
         sc->AttackTime = 1;
-        g_CharacterRegisterBuff(so, eBuff_PhysDefense);
+        g_CharacterRegisterBuff(so, eBuff_WizDefense);
         SetPlayerAttack(sc);
         break;
 
@@ -4312,7 +4312,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             UnRegisterBuff(eBuff_Attack, to);
             UnRegisterBuff(eBuff_Defense, to);
             UnRegisterBuff(eBuff_Life, to);
-            UnRegisterBuff(eBuff_PhysDefense, to);
+            UnRegisterBuff(eBuff_WizDefense, to);
             UnRegisterBuff(eBuff_AddCriticalDamage, to);
             UnRegisterBuff(eBuff_AddMana, to);
         }
@@ -14433,7 +14433,7 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             bufflist.push_back(eBuff_Life); bufflist.push_back(eBuff_Attack);
             bufflist.push_back(eBuff_Defense); bufflist.push_back(eBuff_AddAG);
             bufflist.push_back(eBuff_Cloaking); bufflist.push_back(eBuff_AddSkill);
-            bufflist.push_back(eBuff_PhysDefense); bufflist.push_back(eBuff_AddCriticalDamage);
+            bufflist.push_back(eBuff_WizDefense); bufflist.push_back(eBuff_AddCriticalDamage);
             bufflist.push_back(eBuff_CrywolfAltarOccufied);
 
             g_CharacterUnRegisterBuffList(o, bufflist);
@@ -14878,7 +14878,7 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
         }
     }
     break;
-    case eBuff_PhysDefense:
+    case eBuff_WizDefense:
     {
         if (o->Type == MODEL_PLAYER)
         {
@@ -15109,7 +15109,7 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_PhysDefense:
+    case eBuff_WizDefense:
     {
         if (o->Type == MODEL_PLAYER)
         {

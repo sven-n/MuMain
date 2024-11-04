@@ -3669,7 +3669,7 @@ enum eBuffState
     eBuff_Attack,
     eBuff_Defense,
     eBuff_HelpNpc,
-    eBuff_PhysDefense,
+    eBuff_WizDefense,
     eBuff_AddCriticalDamage,
     eBuff_InfinityArrow,
     eBuff_AddAG,
