@@ -1,8 +1,5 @@
 #include "stdafx.h"
 
-#undef max
-#include <limits>
-
 #include <thread>
 #include <mutex>
 #include <atomic>
@@ -29,14 +26,14 @@ CMuHelper::CMuHelper()
     m_iComboState = 0;
     m_iCurrentSkill = MAX_MAGIC;
     m_iCurrentBuffIndex = 0;
+    m_iCurrentPartyMemberIndex = 0;
     m_bSavedAutoAttack = false;
 }
 
 void CMuHelper::Save(const cMuHelperConfig& config)
 {
-    m_config = config;
-
     // Save config data by sending to server
+    m_config = config;
 }
 
 void CMuHelper::Load(const cMuHelperConfig& config)
@@ -59,6 +56,7 @@ void CMuHelper::Start()
     m_iCurrentPartyMemberIndex = 0;
     m_iCurrentTarget = -1;
     m_iCurrentSkill = m_config.aiSkill[0];
+    m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
     m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
 
@@ -114,32 +112,38 @@ void CMuHelper::Work()
     }
 }
 
-void CMuHelper::AddTarget(int iTargetId)
+void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
 {
     std::lock_guard<std::mutex> lock(_mtx_targetSet);
 
-    if (iTargetId == HeroKey || m_setTargets.find(iTargetId) != m_setTargets.end()) 
+    if (!m_bActive)
     {
         return;
     }
 
-    if (m_setTargets.size() >= 5)
+    if (m_setTargets.find(iTargetId) != m_setTargets.end()) 
     {
-        int iFarthestTarget = GetFarthestTarget();
-        m_setTargets.erase(iFarthestTarget);
+        return;
+    }
+
+    CHARACTER* pTarget = FindCharacterByKey(iTargetId);
+    if (!pTarget || pTarget == Hero)
+    {
+        return;
+    }
+
+    int iDistance = ComputeDistanceFromTarget(pTarget);
+    if ((iDistance <= m_config.iHuntingRange + 1)
+        || (bIsAttacking && m_config.bLongDistanceCounterAttack))
+    {
+        m_setTargets.insert(iTargetId);
     }
 
     if (m_config.bUseSelfDefense)
     {
-        CHARACTER* pTarget = FindCharacterByKey(iTargetId);
-        if (pTarget)
-        {
-            pTarget->Object.Kind = KIND_MONSTER;
-            m_iCurrentTarget = iTargetId;
-        }
+        pTarget->Object.Kind = KIND_MONSTER;
+        m_iCurrentTarget = iTargetId;
     }
-
-    m_setTargets.insert(iTargetId);
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Added target -> %d", iTargetId);
 }
@@ -165,21 +169,26 @@ void CMuHelper::DeleteAllTargets()
 
 int CMuHelper::ComputeDistanceFromTarget(CHARACTER* pTarget)
 {
-    int iPlayerX = (int)(Hero->Object.Position[0] / TERRAIN_SCALE);
-    int iPlayerY = (int)(Hero->Object.Position[1] / TERRAIN_SCALE);
+    int iDx, iDy;
 
-    int iTargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
-    int iTargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
+    if (m_config.bUseOriginalPosition)
+    {
+        iDx = m_posOriginal.x - pTarget->PositionX;
+        iDy = m_posOriginal.y - pTarget->PositionY;
+    }
+    else
+    {
+        iDx = Hero->PositionX - pTarget->PositionX;
+        iDy = Hero->PositionY - pTarget->PositionY;
+    }
 
-    int iDx = iTargetX - iPlayerX;
-    int iDy = iTargetY - iPlayerY;
     return iDx * iDx + iDy * iDy;
 }
 
 int CMuHelper::GetNearestTarget()
 {
     int iClosestMonsterId = -1;
-    int iMinDistance = std::numeric_limits<int>::max();
+    int iMinDistance = m_config.iHuntingRange + 1;
 
     std::set<int> setTargets;
     {
@@ -415,7 +424,14 @@ int CMuHelper::Attack()
     {
         if (!m_setTargets.empty())
         {
-            m_iCurrentTarget = GetNearestTarget();
+            if (m_config.bLongDistanceCounterAttack)
+            {
+                m_iCurrentTarget = GetFarthestTarget();
+            }
+            else
+            {
+                m_iCurrentTarget = GetNearestTarget();
+            }
 
             if (m_config.bUseCombo && m_iComboState < 2)
             {

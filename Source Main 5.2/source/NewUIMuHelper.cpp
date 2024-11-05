@@ -464,7 +464,7 @@ void SEASON3B::CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bSt
         break;
 
     case CHECKBOX_ID_ORIG_POSITION:
-        m_TempConfig.bOriginalPosition = bState;
+        m_TempConfig.bUseOriginalPosition = bState;
         break;
 
     case CHECKBOX_ID_SKILL2_DELAY:

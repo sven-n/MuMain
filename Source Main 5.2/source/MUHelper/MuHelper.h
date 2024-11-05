@@ -26,7 +26,7 @@ typedef struct
 
 	bool bUseSelfDefense;
 	bool bLongDistanceCounterAttack;
-	bool bOriginalPosition;
+	bool bUseOriginalPosition;
 	int iAttackDistance;
 
 	std::array<int, 3> aiSkill;
@@ -78,7 +78,7 @@ public:
 	void Stop();
 	bool IsActive() { return m_bActive; }
 
-	void AddTarget(int iTargetId);
+	void AddTarget(int iTargetId, bool bIsAttacking);
 	void DeleteTarget(int iTargetId);
 	void DeleteAllTargets();
 
@@ -88,7 +88,7 @@ private:
 	int Buff();
 	int BuffTarget(CHARACTER* pTargetChar, int iBuffSkill);
 	int Heal();
-	int HealTarget(CHARACTER* pTargetChar);
+	int HealTarget(CHARACTER* pTargetChar, int iHealSkill);
 	int ConsumePotion();
 	int Attack();
 	int ObtainItem();
@@ -102,6 +102,7 @@ private:
 
 private:
 	cMuHelperConfig m_config;
+	POINT m_posOriginal;
 	std::thread m_timerThread;
 	std::atomic<bool> m_bActive;
 	std::set<int> m_setTargets;

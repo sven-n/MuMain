@@ -1738,7 +1738,7 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
 
             if (IsMonster(c))
             {
-                g_MuHelper.AddTarget(Key);
+                g_MuHelper.AddTarget(Key, false);
             }
 
             g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
@@ -2552,7 +2552,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         if (c == NULL) break;
 
         OBJECT* o = &c->Object;
-        g_MuHelper.AddTarget(Key);
+        g_MuHelper.AddTarget(Key, false);
 
         for (int j = 0; j < Data2->s_BuffCount; ++j)
         {
@@ -3184,7 +3184,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         c->Object.AnimationFrame = 0;
 
         c->TargetCharacter = HeroIndex;
-        g_MuHelper.AddTarget(Key);
+        g_MuHelper.AddTarget(Key, true);
 
         AttackPlayer = Index;
         break;
