@@ -93,12 +93,14 @@ private:
 	int Attack();
 	int ObtainItem();
 	int RepairEquipments();
+	int CheckPosition();
 	int GoBack();
 	int SimulateAttack(int iSkill);
 	int SimulateSkill(int iSkill, bool bTargetRequired);
 	int SimulateComboAttack();
 	int GetNearestTarget();
 	int GetFarthestTarget();
+	int ComputeHuntingDistance();
 	int ComputeDistanceFromTarget(CHARACTER* pTarget);
 	int ComputeDistanceBetween(POINT posA, POINT posB);
 	int SimulateMove(POINT posMove);
@@ -114,7 +116,7 @@ private:
 	int m_iCurrentBuffIndex;
 	int m_iCurrentPartyMemberIndex;
 	int m_iComboState;
-
+	int m_iHuntingDistance;
 	int m_iSecondsElapsed;
 	int m_iSecondsAway;
 

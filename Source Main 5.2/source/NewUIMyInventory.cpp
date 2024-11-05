@@ -2512,6 +2512,20 @@ int CNewUIMyInventory::FindManaItemIndex() const
     return -1;
 }
 
+int CNewUIMyInventory::FindHealingItemIndex() const
+{
+    for (int i = ITEM_LARGE_HEALING_POTION; i >= ITEM_APPLE; i--)
+    {
+        const int iIndex = FindItemReverseIndex(i);
+        if (iIndex != -1)
+        {
+            return iIndex;
+        }
+    }
+
+    return -1;
+}
+
 void CNewUIMyInventory::ResetMouseLButton()
 {
     MouseLButton = false;

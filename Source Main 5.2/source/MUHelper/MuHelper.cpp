@@ -29,6 +29,7 @@ CMuHelper::CMuHelper()
     m_iCurrentPartyMemberIndex = 0;
 
     m_iSecondsElapsed = 0;
+    m_iSecondsAway = 0;
     m_bSavedAutoAttack = false;
 }
 
@@ -59,9 +60,13 @@ void CMuHelper::Start()
     m_iCurrentTarget = -1;
     m_iCurrentSkill = m_config.aiSkill[0];
     m_posOriginal = { Hero->PositionX, Hero->PositionY };
+    m_iHuntingDistance = ComputeHuntingDistance() + 1;
+    m_iSecondsElapsed = 0;
+    m_iSecondsAway = 0;
 
     // TO-DO: Use value from UI
-    m_config.iMaxSecondsAway = 4;
+    m_config.iMaxSecondsAway = 5;
+    m_config.iPotionThreshold = 50;
 
     m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
 
@@ -79,6 +84,7 @@ void CMuHelper::Stop()
         m_timerThread.join();
     }
 
+    m_setTargets.clear();
     g_pOption->SetAutoAttack(m_bSavedAutoAttack);
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper stopped");
@@ -126,23 +132,19 @@ void CMuHelper::Work()
             return;
         }
 
-        ConsumePotion();
+        if (!ConsumePotion())
+        {
+            return;
+        }
 
         if (!ObtainItem())
         {
             return;
         }
 
-        if (m_config.bReturnToOriginalPosition && m_iSecondsAway > m_config.iMaxSecondsAway)
+        if (!CheckPosition())
         {
-            if (!GoBack())
-            {
-                return;
-            }
-            
-            m_iSecondsAway = 0;
-            m_iComboState = 0;
-            m_iCurrentTarget = -1;
+            return;
         }
 
         Attack();
@@ -176,7 +178,7 @@ void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
     }
 
     int iDistance = ComputeDistanceFromTarget(pTarget);
-    if ((iDistance <= m_config.iHuntingRange + 1)
+    if ((iDistance <= m_iHuntingDistance)
         || (bIsAttacking && m_config.bLongDistanceCounterAttack))
     {
         m_setTargets.insert(iTargetId);
@@ -210,6 +212,22 @@ void CMuHelper::DeleteAllTargets()
     m_setTargets.clear();
 }
 
+int CMuHelper::ComputeHuntingDistance()
+{
+    if (m_config.bReturnToOriginalPosition)
+    {
+        POINT posA = { m_posOriginal.x, m_posOriginal.y };
+        POINT posB = { m_posOriginal.x + m_config.iHuntingRange, m_posOriginal.y - m_config.iHuntingRange };
+        return ComputeDistanceBetween(posA, posB);
+    }
+    else
+    {
+        POINT posA = { Hero->PositionX, Hero->PositionY };
+        POINT posB = { Hero->PositionX + m_config.iHuntingRange, Hero->PositionY - m_config.iHuntingRange };
+        return ComputeDistanceBetween(posA, posB);
+    }
+}
+
 int CMuHelper::ComputeDistanceFromTarget(CHARACTER* pTarget)
 {
     POINT posA, posB;
@@ -218,14 +236,26 @@ int CMuHelper::ComputeDistanceFromTarget(CHARACTER* pTarget)
     {
         posA = { m_posOriginal.x, m_posOriginal.y };
         posB = { pTarget->PositionX, pTarget->PositionY };
+        int iPrevDistance = ComputeDistanceBetween(posA, posB);
+
+        posA = { m_posOriginal.x, m_posOriginal.y };
+        posB = { pTarget->TargetX, pTarget->TargetX };
+        int iNextDistance = ComputeDistanceBetween(posA, posB);
+
+        return min(iPrevDistance, iNextDistance);
     }
     else
     {
         posA = { Hero->PositionX, Hero->PositionY };
         posB = { pTarget->PositionX, pTarget->PositionY };
-    }
+        int iPrevDistance = ComputeDistanceBetween(posA, posB);
 
-    return ComputeDistanceBetween(posA, posB);
+        posA = { Hero->PositionX, Hero->PositionY };
+        posB = { pTarget->TargetX, pTarget->TargetX };
+        int iNextDistance = ComputeDistanceBetween(posA, posB);
+
+        return min(iPrevDistance, iNextDistance);
+    }
 }
 
 int CMuHelper::ComputeDistanceBetween(POINT posA, POINT posB)
@@ -451,6 +481,22 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
 
 int CMuHelper::ConsumePotion()
 {
+    int64_t iLife = CharacterAttribute->Life;
+    int64_t iLifeMax = CharacterAttribute->LifeMax;
+
+    if (m_config.bUseHealPotion && iLifeMax > 0 && iLife > 0)
+    {
+        int64_t iRemaining = (iLife * 100 + iLifeMax - 1) / iLifeMax;
+        if (iRemaining <= m_config.iPotionThreshold)
+        {
+            int iPotionIndex = g_pMyInventory->FindHealingItemIndex();
+            if (iPotionIndex != -1)
+            {
+                SendRequestUse(iPotionIndex, 0);
+            }
+        }
+    }
+
     return 1;
 }
 
@@ -584,6 +630,23 @@ int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired)
     g_MovementSkill.m_bMagic = FALSE;
 
     return ExecuteAttack(Hero);
+}
+
+int CMuHelper::CheckPosition()
+{
+    if (m_config.bReturnToOriginalPosition && m_iSecondsAway > m_config.iMaxSecondsAway)
+    {
+        if (!GoBack())
+        {
+            return 0;
+        }
+
+        m_iSecondsAway = 0;
+        m_iComboState = 0;
+        m_iCurrentTarget = -1;
+    }
+
+    return 1;
 }
 
 int CMuHelper::GoBack()

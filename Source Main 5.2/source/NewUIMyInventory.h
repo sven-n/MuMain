@@ -151,6 +151,7 @@ namespace SEASON3B
         BYTE GetDurabilityPointedItem() const;
         int GetPointedItemIndex() const;
         int FindManaItemIndex() const;
+        int FindHealingItemIndex() const;
 
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
