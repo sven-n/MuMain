@@ -26,8 +26,8 @@ typedef struct
 
 	bool bUseSelfDefense;
 	bool bLongDistanceCounterAttack;
-	bool bUseOriginalPosition;
-	int iAttackDistance;
+	bool bReturnToOriginalPosition;
+	int iMaxSecondsAway;
 
 	std::array<int, 3> aiSkill;
 	std::array<int, 3> aiSkillCondition;
@@ -93,12 +93,15 @@ private:
 	int Attack();
 	int ObtainItem();
 	int RepairEquipments();
+	int GoBack();
 	int SimulateAttack(int iSkill);
 	int SimulateSkill(int iSkill, bool bTargetRequired);
 	int SimulateComboAttack();
 	int GetNearestTarget();
 	int GetFarthestTarget();
 	int ComputeDistanceFromTarget(CHARACTER* pTarget);
+	int ComputeDistanceBetween(POINT posA, POINT posB);
+	int SimulateMove(POINT posMove);
 
 private:
 	cMuHelperConfig m_config;
@@ -111,6 +114,9 @@ private:
 	int m_iCurrentBuffIndex;
 	int m_iCurrentPartyMemberIndex;
 	int m_iComboState;
+
+	int m_iSecondsElapsed;
+	int m_iSecondsAway;
 
 	bool m_bSavedAutoAttack;
 };

@@ -27,6 +27,8 @@ CMuHelper::CMuHelper()
     m_iCurrentSkill = MAX_MAGIC;
     m_iCurrentBuffIndex = 0;
     m_iCurrentPartyMemberIndex = 0;
+
+    m_iSecondsElapsed = 0;
     m_bSavedAutoAttack = false;
 }
 
@@ -58,6 +60,9 @@ void CMuHelper::Start()
     m_iCurrentSkill = m_config.aiSkill[0];
     m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
+    // TO-DO: Use value from UI
+    m_config.iMaxSecondsAway = 4;
+
     m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
 
     m_bSavedAutoAttack = g_pOption->IsAutoAttack();
@@ -81,9 +86,29 @@ void CMuHelper::Stop()
 
 void CMuHelper::WorkLoop()
 {
+    int iLoopCounter = 0;
+
+    m_iSecondsElapsed = 0;
+    m_iSecondsAway = 0;
+
     while (m_bActive) {
         Work();
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+        if (++iLoopCounter == 5) {
+            ++m_iSecondsElapsed;
+
+            if (ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, m_posOriginal) > 1)
+            {
+                ++m_iSecondsAway;
+            }
+            else
+            {
+                m_iSecondsAway = 0;
+            }
+
+            iLoopCounter = 0;
+        }
     }
 }
 
@@ -102,8 +127,26 @@ void CMuHelper::Work()
         }
 
         ConsumePotion();
+
+        if (!ObtainItem())
+        {
+            return;
+        }
+
+        if (m_config.bReturnToOriginalPosition && m_iSecondsAway > m_config.iMaxSecondsAway)
+        {
+            if (!GoBack())
+            {
+                return;
+            }
+            
+            m_iSecondsAway = 0;
+            m_iComboState = 0;
+            m_iCurrentTarget = -1;
+        }
+
         Attack();
-        ObtainItem();
+
         RepairEquipments();
     }
     catch (...)
@@ -169,18 +212,26 @@ void CMuHelper::DeleteAllTargets()
 
 int CMuHelper::ComputeDistanceFromTarget(CHARACTER* pTarget)
 {
-    int iDx, iDy;
+    POINT posA, posB;
 
-    if (m_config.bUseOriginalPosition)
+    if (m_config.bReturnToOriginalPosition)
     {
-        iDx = m_posOriginal.x - pTarget->PositionX;
-        iDy = m_posOriginal.y - pTarget->PositionY;
+        posA = { m_posOriginal.x, m_posOriginal.y };
+        posB = { pTarget->PositionX, pTarget->PositionY };
     }
     else
     {
-        iDx = Hero->PositionX - pTarget->PositionX;
-        iDy = Hero->PositionY - pTarget->PositionY;
+        posA = { Hero->PositionX, Hero->PositionY };
+        posB = { pTarget->PositionX, pTarget->PositionY };
     }
+
+    return ComputeDistanceBetween(posA, posB);
+}
+
+int CMuHelper::ComputeDistanceBetween(POINT posA, POINT posB)
+{
+    int iDx = posA.x - posB.x;
+    int iDy = posA.y - posB.y;
 
     return iDx * iDx + iDy * iDy;
 }
@@ -408,6 +459,11 @@ int CMuHelper::Heal()
     return 1;
 }
 
+int CMuHelper::HealTarget(CHARACTER* pTargetChar, int iHealSkill)
+{
+    return 1;
+}
+
 int CMuHelper::ObtainItem()
 {
     return 1;
@@ -528,4 +584,23 @@ int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired)
     g_MovementSkill.m_bMagic = FALSE;
 
     return ExecuteAttack(Hero);
+}
+
+int CMuHelper::GoBack()
+{
+    extern int TargetX, TargetY;
+
+    Hero->MovementType = MOVEMENT_MOVE;
+    TargetX = (int)m_posOriginal.x;
+    TargetY = (int)m_posOriginal.y;
+    if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
+        SendMove(Hero, &Hero->Object);
+        return !Hero->Movement;
+
+    return 0;
+}
+
+int CMuHelper::SimulateMove(POINT posMove)
+{
+    return 0;
 }

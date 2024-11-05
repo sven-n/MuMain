@@ -7772,8 +7772,7 @@ void MoveHero()
         MouseUpdateTime++;
     }
 
-    if (!g_MuHelper.IsActive())
-        TriggerAttack(Hero);
+    TriggerAttack(Hero);
 
     int Index = ((int)Hero->Object.Position[1] / (int)TERRAIN_SCALE) * 256 + ((int)Hero->Object.Position[0] / (int)TERRAIN_SCALE);
     if (Index < 0) Index = 0;
