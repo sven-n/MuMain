@@ -12,10 +12,12 @@
 #include "NewUISystem.h"
 #include "Utilities/Log/muConsoleDebug.h"
 #include "SkillManager.h"
+#include "PartyManager.h"
 #include "WSclient.h"
 
 #include "MuHelper.h"
 
+#define MAX_ACTIONABLE_DISTANCE 10
 
 CMuHelper g_MuHelper;
 std::mutex _mtx_targetSet;
@@ -24,10 +26,9 @@ CMuHelper::CMuHelper()
 {
     m_iCurrentTarget = -1;
     m_iComboState = 0;
-    m_iCurrentSkill = MAX_MAGIC;
     m_iCurrentBuffIndex = 0;
     m_iCurrentPartyMemberIndex = 0;
-
+    m_iHuntingDistance = MAX_ACTIONABLE_DISTANCE;
     m_iSecondsElapsed = 0;
     m_iSecondsAway = 0;
     m_bSavedAutoAttack = false;
@@ -58,11 +59,12 @@ void CMuHelper::Start()
     m_iCurrentBuffIndex = 0;
     m_iCurrentPartyMemberIndex = 0;
     m_iCurrentTarget = -1;
-    m_iCurrentSkill = m_config.aiSkill[0];
     m_posOriginal = { Hero->PositionX, Hero->PositionY };
-    m_iHuntingDistance = ComputeHuntingDistance() + 1;
+    m_iHuntingDistance = ComputeHuntingDistance();
+
     m_iSecondsElapsed = 0;
     m_iSecondsAway = 0;
+    m_setTargets.clear();
 
     // TO-DO: Use value from UI
     m_config.iMaxSecondsAway = 5;
@@ -84,7 +86,6 @@ void CMuHelper::Stop()
         m_timerThread.join();
     }
 
-    m_setTargets.clear();
     g_pOption->SetAutoAttack(m_bSavedAutoAttack);
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper stopped");
@@ -142,7 +143,7 @@ void CMuHelper::Work()
             return;
         }
 
-        if (!CheckPosition())
+        if (!Regroup())
         {
             return;
         }
@@ -166,11 +167,6 @@ void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
         return;
     }
 
-    if (m_setTargets.find(iTargetId) != m_setTargets.end()) 
-    {
-        return;
-    }
-
     CHARACTER* pTarget = FindCharacterByKey(iTargetId);
     if (!pTarget || pTarget == Hero)
     {
@@ -178,6 +174,7 @@ void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
     }
 
     int iDistance = ComputeDistanceFromTarget(pTarget);
+
     if ((iDistance <= m_iHuntingDistance)
         || (bIsAttacking && m_config.bLongDistanceCounterAttack))
     {
@@ -189,15 +186,12 @@ void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
         pTarget->Object.Kind = KIND_MONSTER;
         m_iCurrentTarget = iTargetId;
     }
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Added target -> %d", iTargetId);
 }
 
 void CMuHelper::DeleteTarget(int iTargetId)
 {
     std::lock_guard<std::mutex> lock(_mtx_targetSet);
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Deleted target -> %d", iTargetId);
     m_setTargets.erase(iTargetId);
 
     if (iTargetId == m_iCurrentTarget)
@@ -214,18 +208,9 @@ void CMuHelper::DeleteAllTargets()
 
 int CMuHelper::ComputeHuntingDistance()
 {
-    if (m_config.bReturnToOriginalPosition)
-    {
-        POINT posA = { m_posOriginal.x, m_posOriginal.y };
-        POINT posB = { m_posOriginal.x + m_config.iHuntingRange, m_posOriginal.y - m_config.iHuntingRange };
-        return ComputeDistanceBetween(posA, posB);
-    }
-    else
-    {
-        POINT posA = { Hero->PositionX, Hero->PositionY };
-        POINT posB = { Hero->PositionX + m_config.iHuntingRange, Hero->PositionY - m_config.iHuntingRange };
-        return ComputeDistanceBetween(posA, posB);
-    }
+    POINT posA = { 0, 0 };
+    POINT posB = { m_config.iHuntingRange, m_config.iHuntingRange * (-1) };
+    return ComputeDistanceBetween(posA, posB);
 }
 
 int CMuHelper::ComputeDistanceFromTarget(CHARACTER* pTarget)
@@ -263,7 +248,7 @@ int CMuHelper::ComputeDistanceBetween(POINT posA, POINT posB)
     int iDx = posA.x - posB.x;
     int iDy = posA.y - posB.y;
 
-    return iDx * iDx + iDy * iDy;
+    return static_cast<int>(std::ceil(std::sqrt(iDx * iDx + iDy * iDy)));
 }
 
 int CMuHelper::GetNearestTarget()
@@ -362,26 +347,36 @@ int CMuHelper::Buff()
 
     if (m_config.bSupportParty)
     {
-        bool bPartyActive = false;
+        int iMemberCount = 0;
+        int iHeroMap;
 
         for (int i = 0; i < ((sizeof(Party) / sizeof(Party[0])) - 1); i++)
         {
             PARTY_t* pMember = &Party[i];
-            CHARACTER* pTargetChar = FindCharacterByID(pMember->Name);
-            if (pTargetChar == Hero)
+            CHARACTER* pChar = FindCharacterByID(pMember->Name);
+            if (pChar != NULL)
             {
-                bPartyActive = true;
-                break;
+                if (pChar == Hero)
+                {
+                    iHeroMap = pMember->Map;
+                }
+                iMemberCount++;
             }
         }
+
+        bool bPartyActive = iMemberCount > 1;
         
         if (bPartyActive)
         {
             PARTY_t* pMember = &Party[m_iCurrentPartyMemberIndex];
-            CHARACTER* pTargetChar = FindCharacterByID(pMember->Name);
-            if (pTargetChar)
+            CHARACTER* pChar = FindCharacterByID(pMember->Name);
+
+            if (pChar != NULL
+                && pMember->Map == iHeroMap
+                && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE
+                )
             {
-                if (!BuffTarget(pTargetChar, m_config.aiBuff[m_iCurrentBuffIndex]))
+                if (!BuffTarget(pChar, m_config.aiBuff[m_iCurrentBuffIndex]))
                 {
                     return 0;
                 }
@@ -425,8 +420,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_ATT_POWER_UP + 4)
         && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Attack))
     {
-        m_iCurrentTarget = pTargetChar->Key;
-        return SimulateSkill(iBuffSkill, true);
+        return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
 
     if ((iBuffSkill == AT_SKILL_DEFENSE
@@ -437,8 +431,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_DEF_POWER_UP + 4)
         && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Defense))
     {
-        m_iCurrentTarget = pTargetChar->Key;
-        return SimulateSkill(iBuffSkill, true);
+        return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
 
     if ((iBuffSkill == AT_SKILL_WIZARDDEFENSE
@@ -449,8 +442,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_SOUL_UP + 4)
         && !g_isCharacterBuff((&pTargetChar->Object), eBuff_WizDefense))
     {
-        m_iCurrentTarget = pTargetChar->Key;
-        return SimulateSkill(iBuffSkill, true);
+        return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
 
     if ((iBuffSkill == AT_SKILL_VITALITY
@@ -461,19 +453,19 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_LIFE_UP + 4)
         && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Life))
     {
-        return SimulateSkill(iBuffSkill, false);
+        return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
     }
 
     if ((iBuffSkill == AT_SKILL_SWELL_OF_MAGICPOWER)
         && !g_isCharacterBuff((&pTargetChar->Object), eBuff_SwellOfMagicPower))
     {
-        return SimulateSkill(iBuffSkill, false);
+        return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
     }
 
     if ((iBuffSkill == AT_SKILL_ADD_CRITICAL)
         && !g_isCharacterBuff((&pTargetChar->Object), eBuff_AddCriticalDamage))
     {
-        return SimulateSkill(iBuffSkill, false);
+        return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
     }
 
     return 1;
@@ -550,7 +542,8 @@ int CMuHelper::Attack()
         return SimulateComboAttack();
     }
 
-    return SimulateAttack(m_iCurrentSkill);
+    // to-do select skill
+    return SimulateAttack(m_config.aiSkill[0]);
 }
 
 int CMuHelper::SimulateComboAttack()
@@ -584,10 +577,10 @@ int CMuHelper::SimulateComboAttack()
 
 int CMuHelper::SimulateAttack(int iSkill)
 {
-    return SimulateSkill(iSkill, true);
+    return SimulateSkill(iSkill, true, m_iCurrentTarget);
 }
 
-int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired)
+int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired, int iTarget)
 {
     extern MovementSkill g_MovementSkill;
     extern int SelectedCharacter;
@@ -595,22 +588,22 @@ int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired)
 
     if (bTargetRequired)
     {
-        if (m_iCurrentTarget == -1)
+        if (iTarget == -1)
         {
             return 0;
         }
 
-        SelectedCharacter = FindCharacterIndex(m_iCurrentTarget);
+        SelectedCharacter = FindCharacterIndex(iTarget);
         if (SelectedCharacter == MAX_CHARACTERS_CLIENT)
         {
-            DeleteTarget(m_iCurrentTarget);
+            DeleteTarget(iTarget);
             return 0;
         }
 
         CHARACTER* pTarget = &CharactersClient[SelectedCharacter];
         if (pTarget->Dead)
         {
-            DeleteTarget(m_iCurrentTarget);
+            DeleteTarget(iTarget);
             return 0;
         }
         TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
@@ -632,11 +625,11 @@ int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired)
     return ExecuteAttack(Hero);
 }
 
-int CMuHelper::CheckPosition()
+int CMuHelper::Regroup()
 {
     if (m_config.bReturnToOriginalPosition && m_iSecondsAway > m_config.iMaxSecondsAway)
     {
-        if (!GoBack())
+        if (!SimulateMove(m_posOriginal))
         {
             return 0;
         }
@@ -649,21 +642,19 @@ int CMuHelper::CheckPosition()
     return 1;
 }
 
-int CMuHelper::GoBack()
+int CMuHelper::SimulateMove(POINT posMove)
 {
     extern int TargetX, TargetY;
 
     Hero->MovementType = MOVEMENT_MOVE;
-    TargetX = (int)m_posOriginal.x;
-    TargetY = (int)m_posOriginal.y;
+    TargetX = (int)posMove.x;
+    TargetY = (int)posMove.y;
+
     if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
+    {
         SendMove(Hero, &Hero->Object);
-        return !Hero->Movement;
+        return 0;
+    }
 
-    return 0;
-}
-
-int CMuHelper::SimulateMove(POINT posMove)
-{
-    return 0;
+    return !Hero->Movement;
 }

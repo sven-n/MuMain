@@ -5837,7 +5837,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             }
             else
             {
-                if (!g_pPartyManager->IsPartyMember(SelectedCharacter))
+                if (c != Hero && !g_pPartyManager->IsPartyMember(SelectedCharacter))
                     return;
 
                 c->TargetCharacter = SelectedCharacter;

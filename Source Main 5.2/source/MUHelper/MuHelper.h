@@ -93,10 +93,9 @@ private:
 	int Attack();
 	int ObtainItem();
 	int RepairEquipments();
-	int CheckPosition();
-	int GoBack();
+	int Regroup();
 	int SimulateAttack(int iSkill);
-	int SimulateSkill(int iSkill, bool bTargetRequired);
+	int SimulateSkill(int iSkill, bool bTargetRequired, int iTarget);
 	int SimulateComboAttack();
 	int GetNearestTarget();
 	int GetFarthestTarget();
@@ -104,6 +103,7 @@ private:
 	int ComputeDistanceFromTarget(CHARACTER* pTarget);
 	int ComputeDistanceBetween(POINT posA, POINT posB);
 	int SimulateMove(POINT posMove);
+	int CheckTargetPosition(POINT posTarget);
 
 private:
 	cMuHelperConfig m_config;
@@ -112,7 +112,6 @@ private:
 	std::atomic<bool> m_bActive;
 	std::set<int> m_setTargets;
 	int m_iCurrentTarget;
-	int m_iCurrentSkill;
 	int m_iCurrentBuffIndex;
 	int m_iCurrentPartyMemberIndex;
 	int m_iComboState;
