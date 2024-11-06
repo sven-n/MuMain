@@ -88,7 +88,6 @@ private:
 	int Buff();
 	int BuffTarget(CHARACTER* pTargetChar, int iBuffSkill);
 	int Heal();
-	int HealTarget(CHARACTER* pTargetChar, int iHealSkill);
 	int ConsumePotion();
 	int Attack();
 	int ObtainItem();
@@ -103,7 +102,8 @@ private:
 	int ComputeDistanceFromTarget(CHARACTER* pTarget);
 	int ComputeDistanceBetween(POINT posA, POINT posB);
 	int SimulateMove(POINT posMove);
-	int CheckTargetPosition(POINT posTarget);
+	int GetHealingSkill();
+	bool HasAssignedBuffSkill();
 
 private:
 	cMuHelperConfig m_config;
@@ -113,7 +113,8 @@ private:
 	std::set<int> m_setTargets;
 	int m_iCurrentTarget;
 	int m_iCurrentBuffIndex;
-	int m_iCurrentPartyMemberIndex;
+	int m_iCurrentBuffPartyIndex;
+	int m_iCurrentHealPartyIndex;
 	int m_iComboState;
 	int m_iHuntingDistance;
 	int m_iSecondsElapsed;

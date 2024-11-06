@@ -13,6 +13,7 @@
 #include "Utilities/Log/muConsoleDebug.h"
 #include "SkillManager.h"
 #include "PartyManager.h"
+#include "MapManager.h"
 #include "WSclient.h"
 
 #include "MuHelper.h"
@@ -27,7 +28,7 @@ CMuHelper::CMuHelper()
     m_iCurrentTarget = -1;
     m_iComboState = 0;
     m_iCurrentBuffIndex = 0;
-    m_iCurrentPartyMemberIndex = 0;
+    m_iCurrentBuffPartyIndex = 0;
     m_iHuntingDistance = MAX_ACTIONABLE_DISTANCE;
     m_iSecondsElapsed = 0;
     m_iSecondsAway = 0;
@@ -57,7 +58,7 @@ void CMuHelper::Start()
     m_bActive = true;
     m_iComboState = 0;
     m_iCurrentBuffIndex = 0;
-    m_iCurrentPartyMemberIndex = 0;
+    m_iCurrentBuffPartyIndex = 0;
     m_iCurrentTarget = -1;
     m_posOriginal = { Hero->PositionX, Hero->PositionY };
     m_iHuntingDistance = ComputeHuntingDistance();
@@ -68,7 +69,8 @@ void CMuHelper::Start()
 
     // TO-DO: Use value from UI
     m_config.iMaxSecondsAway = 5;
-    m_config.iPotionThreshold = 50;
+    m_config.iPotionThreshold = 40;
+    m_config.iHealThreshold = 60;
 
     m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
 
@@ -217,30 +219,15 @@ int CMuHelper::ComputeDistanceFromTarget(CHARACTER* pTarget)
 {
     POINT posA, posB;
 
-    if (m_config.bReturnToOriginalPosition)
-    {
-        posA = { m_posOriginal.x, m_posOriginal.y };
-        posB = { pTarget->PositionX, pTarget->PositionY };
-        int iPrevDistance = ComputeDistanceBetween(posA, posB);
+    posA = { Hero->PositionX, Hero->PositionY };
+    posB = { pTarget->PositionX, pTarget->PositionY };
+    int iPrevDistance = ComputeDistanceBetween(posA, posB);
 
-        posA = { m_posOriginal.x, m_posOriginal.y };
-        posB = { pTarget->TargetX, pTarget->TargetX };
-        int iNextDistance = ComputeDistanceBetween(posA, posB);
+    posA = { Hero->PositionX, Hero->PositionY };
+    posB = { pTarget->TargetX, pTarget->TargetX };
+    int iNextDistance = ComputeDistanceBetween(posA, posB);
 
-        return min(iPrevDistance, iNextDistance);
-    }
-    else
-    {
-        posA = { Hero->PositionX, Hero->PositionY };
-        posB = { pTarget->PositionX, pTarget->PositionY };
-        int iPrevDistance = ComputeDistanceBetween(posA, posB);
-
-        posA = { Hero->PositionX, Hero->PositionY };
-        posB = { pTarget->TargetX, pTarget->TargetX };
-        int iNextDistance = ComputeDistanceBetween(posA, posB);
-
-        return min(iPrevDistance, iNextDistance);
-    }
+    return min(iPrevDistance, iNextDistance);
 }
 
 int CMuHelper::ComputeDistanceBetween(POINT posA, POINT posB)
@@ -329,68 +316,28 @@ int CMuHelper::GetFarthestTarget()
 
 int CMuHelper::Buff()
 {
-    bool bNoBuff = true;
-
-    for (int i = 0; i < m_config.aiBuff.size(); i++)
-    {
-        if (m_config.aiBuff[i] != 0)
-        {
-            bNoBuff = false;
-            break;
-        }
-    }
-
-    if (bNoBuff)
+    if (!HasAssignedBuffSkill())
     {
         return 1;
     }
 
-    if (m_config.bSupportParty)
+    if (m_config.bSupportParty && g_pPartyManager->IsPartyActive())
     {
-        int iMemberCount = 0;
-        int iHeroMap;
+        PARTY_t* pMember = &Party[m_iCurrentBuffPartyIndex];
+        CHARACTER* pChar = g_pPartyManager->GetPartyMemberChar(pMember);
 
-        for (int i = 0; i < ((sizeof(Party) / sizeof(Party[0])) - 1); i++)
+        if (pChar != NULL
+            && pMember->Map == gMapManager.WorldActive
+            && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE
+            )
         {
-            PARTY_t* pMember = &Party[i];
-            CHARACTER* pChar = FindCharacterByID(pMember->Name);
-            if (pChar != NULL)
-            {
-                if (pChar == Hero)
-                {
-                    iHeroMap = pMember->Map;
-                }
-                iMemberCount++;
-            }
-        }
-
-        bool bPartyActive = iMemberCount > 1;
-        
-        if (bPartyActive)
-        {
-            PARTY_t* pMember = &Party[m_iCurrentPartyMemberIndex];
-            CHARACTER* pChar = FindCharacterByID(pMember->Name);
-
-            if (pChar != NULL
-                && pMember->Map == iHeroMap
-                && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE
-                )
-            {
-                if (!BuffTarget(pChar, m_config.aiBuff[m_iCurrentBuffIndex]))
-                {
-                    return 0;
-                }
-            }
-
-            m_iCurrentPartyMemberIndex = (m_iCurrentPartyMemberIndex + 1) % (sizeof(Party) / sizeof(Party[0]));
-        }
-        else
-        {
-            if (!BuffTarget(Hero, m_config.aiBuff[m_iCurrentBuffIndex]))
+            if (!BuffTarget(pChar, m_config.aiBuff[m_iCurrentBuffIndex]))
             {
                 return 0;
             }
         }
+
+        m_iCurrentBuffPartyIndex = (m_iCurrentBuffPartyIndex + 1) % (sizeof(Party) / sizeof(Party[0]));
     }
     else
     {
@@ -400,7 +347,7 @@ int CMuHelper::Buff()
         }
     }
 
-    if (m_iCurrentPartyMemberIndex == 0)
+    if (m_iCurrentBuffPartyIndex == 0)
     {
         m_iCurrentBuffIndex = (m_iCurrentBuffIndex + 1) % m_config.aiBuff.size();
     }
@@ -494,11 +441,44 @@ int CMuHelper::ConsumePotion()
 
 int CMuHelper::Heal()
 {
-    return 1;
-}
+    if (!m_config.bAutoHeal)
+    {
+        return 1;
+    }
 
-int CMuHelper::HealTarget(CHARACTER* pTargetChar, int iHealSkill)
-{
+    int iHealingSkill = GetHealingSkill();
+    if (iHealingSkill == -1)
+    {
+        return 1;
+    }
+
+    if (m_config.bSupportParty && g_pPartyManager->IsPartyActive())
+    {
+        PARTY_t* pMember = &Party[m_iCurrentHealPartyIndex];
+        CHARACTER* pChar = g_pPartyManager->GetPartyMemberChar(pMember);
+
+        if (pChar != NULL 
+            && pMember->Map == gMapManager.WorldActive
+            && pMember->stepHP * 10 <= m_config.iHealThreshold
+            && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
+        {
+            return SimulateSkill(iHealingSkill, true, pChar->Key);
+        }
+
+        m_iCurrentHealPartyIndex = (m_iCurrentHealPartyIndex + 1) % (sizeof(Party) / sizeof(Party[0]));
+    }
+    else
+    {
+        int64_t iLife = CharacterAttribute->Life;
+        int64_t iLifeMax = CharacterAttribute->LifeMax;
+        int64_t iRemaining = (iLife * 100 + iLifeMax - 1) / iLifeMax;
+
+        if (iRemaining <= m_config.iHealThreshold)
+        {
+            return SimulateSkill(iHealingSkill, true, HeroKey);
+        }
+    }
+
     return 1;
 }
 
@@ -543,7 +523,12 @@ int CMuHelper::Attack()
     }
 
     // to-do select skill
-    return SimulateAttack(m_config.aiSkill[0]);
+    if (m_config.aiSkill[0] != 0)
+    {
+        return SimulateAttack(m_config.aiSkill[0]);
+    }
+
+    return 1;
 }
 
 int CMuHelper::SimulateComboAttack()
@@ -657,4 +642,41 @@ int CMuHelper::SimulateMove(POINT posMove)
     }
 
     return !Hero->Movement;
+}
+
+bool CMuHelper::HasAssignedBuffSkill()
+{
+    for (int i = 0; i < m_config.aiBuff.size(); i++)
+    {
+        if (m_config.aiBuff[i] != 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int CMuHelper::GetHealingSkill()
+{
+    int aiHealingSkills[] =
+    {
+        AT_SKILL_HEAL_UP,
+        AT_SKILL_HEAL_UP +1,
+        AT_SKILL_HEAL_UP +2,
+        AT_SKILL_HEAL_UP +3,
+        AT_SKILL_HEAL_UP +4,
+        AT_SKILL_HEALING
+    };
+
+    for (int i = 0; i < 6; i++)
+    {
+        int iSkillIndex = g_pSkillList->GetSkillIndex(aiHealingSkills[i]);
+        if (iSkillIndex != -1)
+        {
+            return aiHealingSkills[i];
+        }
+    }
+
+    return -1;
 }

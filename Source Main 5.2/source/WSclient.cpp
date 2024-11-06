@@ -3106,7 +3106,10 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     bool bDoubleEnable = (Data->DamageType >> 6) & 0x01;
     bool bComboEnable = (Data->DamageType >> 7) & 0x01;
     auto ShieldDamage = Data->ShieldDamage;
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamageExtended(%d %d)]", AttackPlayer, Damage);
+    g_MuHelper.AddTarget(Key, true);
+
     if (Data->HealthStatus == 0xFF)
     {
         c->HealthStatus = -1;

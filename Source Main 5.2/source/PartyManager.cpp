@@ -88,6 +88,28 @@ void CPartyManager::SearchPartyMember()
     }
 }
 
+bool CPartyManager::IsPartyActive()
+{
+    int iMemberCount = 0;
+
+    for (int i = 0; i < ((sizeof(Party) / sizeof(Party[0])) - 1); i++)
+    {
+        PARTY_t* pMember = &Party[i];
+        if (pMember->Name[0] == L'\0')
+        {
+            continue;
+        }
+
+        CHARACTER* pChar = FindCharacterByID(pMember->Name);
+        if (pChar != NULL)
+        {
+            iMemberCount++;
+        }
+    }
+
+    return iMemberCount > 1;
+}
+
 bool CPartyManager::IsPartyMember(int index)
 {
     CHARACTER* c = &CharactersClient[index];
@@ -105,4 +127,13 @@ bool CPartyManager::IsPartyMemberChar(CHARACTER* c)
     }
 
     return false;
+}
+
+CHARACTER* CPartyManager::GetPartyMemberChar(PARTY_t* pMember)
+{
+    if (pMember == nullptr || pMember->Name[0] == L'\0') {
+        return NULL;
+    }
+
+    return FindCharacterByID(pMember->Name);
 }
