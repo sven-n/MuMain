@@ -262,7 +262,7 @@ void SEASON3B::CNewUIInventoryCtrl::SetItemColorState(ITEM* pItem)
 
     ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
     const int iLevel = pItem->Level;
-    const int iMaxDurability = calcMaxDurability(pItem, pItemAttr, iLevel);
+    const int iMaxDurability = CalcMaxDurability(pItem, pItemAttr, iLevel);
 
     if (pItem->Durability <= 0)
     {

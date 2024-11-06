@@ -152,7 +152,7 @@ void ConvertTaxGold(DWORD Gold, wchar_t* Text);
 void ConvertChaosTaxGold(DWORD Gold, wchar_t* Text);
 int  ConvertRepairGold(int Gold, int Durability, int MaxDurability, short Type, wchar_t* Text);
 void RepairAllGold(void);
-WORD calcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
+WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
 
 void SendRequestUse(int Index, int Target);

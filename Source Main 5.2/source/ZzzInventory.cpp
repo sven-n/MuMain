@@ -1281,7 +1281,7 @@ void RepairAllGold(void)
             ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
 
             int Level = ip->Level;
-            int maxDurability = calcMaxDurability(ip, p, Level);
+            int maxDurability = CalcMaxDurability(ip, p, Level);
 
             if (IsRepairBan(ip) == true)
             {
@@ -1309,7 +1309,7 @@ void RepairAllGold(void)
             ITEM_ATTRIBUTE* p = &ItemAttribute[pItem->Type];
 
             int Level = pItem->Level;
-            int maxDurability = calcMaxDurability(pItem, p, Level);
+            int maxDurability = CalcMaxDurability(pItem, p, Level);
 
             if (pItem->Type >= ITEM_POTION + 55 && pItem->Type <= ITEM_POTION + 57)
             {
@@ -1543,7 +1543,7 @@ wchar_t ChaosEventName[][100] = {
     L"뮤 10시간 무료이용권"
 };
 
-WORD calcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
+WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
 {
     WORD maxDurability = p->Durability;
 
@@ -4721,7 +4721,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
         else if ((bDurExist) && (ip->bPeriodItem == false))
         {
-            int maxDurability = calcMaxDurability(ip, p, Level);
+            int maxDurability = CalcMaxDurability(ip, p, Level);
 
             swprintf(TextList[TextNum], GlobalText[71], ip->Durability, maxDurability);
             Success = true;
@@ -5820,7 +5820,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
 
         wchar_t Text[100];
 
-        maxDurability = calcMaxDurability(ip, p, Level);
+        maxDurability = CalcMaxDurability(ip, p, Level);
         if (ip->Durability < maxDurability)
         {
             RepairEnable = 2;
@@ -5900,7 +5900,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     {
         if (ip->bPeriodItem == false)
         {
-            int maxDurability = calcMaxDurability(ip, p, Level);
+            int maxDurability = CalcMaxDurability(ip, p, Level);
 
             swprintf(TextList[TextNum], GlobalText[71], ip->Durability, maxDurability);
 

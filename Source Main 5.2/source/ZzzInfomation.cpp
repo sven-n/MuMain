@@ -2317,7 +2317,7 @@ int ItemValue(ITEM* ip, int goldType)
     {
         //        wchar_t Text[100];
                 //int repairGold = ConvertRepairGold(Gold,ip->Durability, p->Durability, ip->Type, Text);
-        DWORD maxDurability = calcMaxDurability(ip, p, Level);
+        DWORD maxDurability = CalcMaxDurability(ip, p, Level);
         float persent = 1.f - ((float)ip->Durability / (float)maxDurability);
         auto repairGold = (DWORD)(Gold * 0.6f * persent);
 

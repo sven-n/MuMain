@@ -166,7 +166,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
         }
 
         ITEM_ATTRIBUTE* pItemAtt = &ItemAttribute[pItem->Type];
-        int iMaxDurability = calcMaxDurability(pItem, pItemAtt, iLevel);
+        int iMaxDurability = CalcMaxDurability(pItem, pItemAtt, iLevel);
 
         if (pItem->Durability <= iMaxDurability * 0.5f)
         {
@@ -383,7 +383,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM
     SIZE TextSize = { 0, 0 };
 
     int iLevel = pItem->Level;
-    int iMaxDurability = calcMaxDurability(pItem, pItemAtt, iLevel);
+    int iMaxDurability = CalcMaxDurability(pItem, pItemAtt, iLevel);
 
     wchar_t szText[256] = { NULL, };
     swprintf(szText, L"%s (%d/%d)", pItemAtt->Name, pItem->Durability, iMaxDurability);
@@ -629,7 +629,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
         }
 
         ITEM_ATTRIBUTE* pItemAtt = &ItemAttribute[pItem->Type];
-        int iMaxDurability = calcMaxDurability(pItem, pItemAtt, iLevel);
+        int iMaxDurability = CalcMaxDurability(pItem, pItemAtt, iLevel);
 
         if (pItem->Durability > iMaxDurability * 0.5f)
         {
@@ -703,7 +703,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
 
         ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
         int iLevel = pItem->Level;
-        int iMaxDurability = calcMaxDurability(pItem, pItemAttr, iLevel);
+        int iMaxDurability = CalcMaxDurability(pItem, pItemAttr, iLevel);
 
         if (pItem->Durability <= (iMaxDurability * 0.5f))
         {

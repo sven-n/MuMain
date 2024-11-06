@@ -18,7 +18,8 @@
 
 #include "MuHelper.h"
 
-#define MAX_ACTIONABLE_DISTANCE 10
+#define MAX_ACTIONABLE_DISTANCE      10
+#define DEFAULT_DURABILITY_THRESHOLD 50
 
 CMuHelper g_MuHelper;
 std::mutex _mtx_targetSet;
@@ -489,6 +490,35 @@ int CMuHelper::ObtainItem()
 
 int CMuHelper::RepairEquipments()
 {
+    if (m_config.bRepairItem)
+    {
+        for (int i = 0; i < MAX_EQUIPMENT; i++)
+        {
+            ITEM* pItem = &CharacterMachine->Equipment[i];
+            if (!pItem || pItem->Type == -1)
+            {
+                continue;
+            }
+
+            ITEM_ATTRIBUTE* pAttr = &ItemAttribute[pItem->Type];
+            if (!pAttr)
+            {
+                continue;
+            }
+
+            int iLevel = pItem->Level;
+            int iDurability = pItem->Durability;
+            int iMaxDurability = CalcMaxDurability(pItem, pAttr, iLevel);
+
+            int64_t iHealth = (iDurability * 100 + iMaxDurability - 1) / iMaxDurability;
+
+            if (iHealth <= DEFAULT_DURABILITY_THRESHOLD)
+            {
+                SocketClient->ToGameServer()->SendRepairItemRequest(i, 1);
+            }
+        }
+    }
+
     return 1;
 }
 
@@ -506,15 +536,12 @@ int CMuHelper::Attack()
             {
                 m_iCurrentTarget = GetNearestTarget();
             }
-
-            if (m_config.bUseCombo && m_iComboState < 2)
-            {
-                m_iComboState = 0;
-            }
         }
-
-        m_iComboState = 0;
-        return 0;
+        else 
+        {
+            m_iComboState = 0;
+            return 0;
+        }
     }
 
     if (m_config.bUseCombo)
@@ -541,20 +568,8 @@ int CMuHelper::SimulateComboAttack()
         }
     }
 
-    if (m_iComboState == 0 && SimulateAttack(m_config.aiSkill[m_iComboState]))
-    {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] First Skill -> %d", m_iCurrentTarget);
-        m_iComboState = 1;
-    }
-    else if (m_iComboState == 1 && SimulateAttack(m_config.aiSkill[m_iComboState]))
-    {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Second Skill -> %d", m_iCurrentTarget);
-        m_iComboState = 2;
-    }
-    else if (m_iComboState == 2 && SimulateAttack(m_config.aiSkill[m_iComboState]))
-    {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Third Skill -> %d", m_iCurrentTarget);
-        m_iComboState = 0;
+    if (SimulateAttack(m_config.aiSkill[m_iComboState])) {
+        m_iComboState = (m_iComboState + 1) % 3;
     }
 
     return 1;

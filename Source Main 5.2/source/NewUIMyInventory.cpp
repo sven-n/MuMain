@@ -1251,7 +1251,7 @@ void CNewUIMyInventory::RenderEquippedItem()
         {
             ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pEquipmentItemSlot->Type];
             const int iLevel = pEquipmentItemSlot->Level;
-            const int iMaxDurability = calcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
+            const int iMaxDurability = CalcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
 
             // 용사/전사의반지 예외처리
             if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
