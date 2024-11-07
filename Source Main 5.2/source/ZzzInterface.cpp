@@ -2191,7 +2191,6 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 
     LetHeroStop();
     c->Movement = false;
-    c->MovementType = MOVEMENT_ATTACK;
     if (o->Type == MODEL_PLAYER)
     {
         SetAttackSpeed();

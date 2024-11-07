@@ -53,8 +53,6 @@ extern int  LoadingWorld;
 extern int ItemKey;
 extern bool g_bGMObservation;
 
-extern MovementSkill g_MovementSkill;
-
 void Action(CHARACTER* c, OBJECT* o, bool Now);
 void SendRequestAction(OBJECT& obj, BYTE action);
 
