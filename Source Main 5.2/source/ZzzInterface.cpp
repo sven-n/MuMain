@@ -1362,18 +1362,16 @@ int SearchArrowCount()
 
 bool CheckTile(CHARACTER* c, OBJECT* o, float Range)
 {
-    if (c == NULL)	return false;
-    if (o == NULL)	return false;
+    if (!c || !o) return false;
 
     float dx = o->Position[0] - (TargetX * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f);
     float dy = o->Position[1] - (TargetY * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f);
 
-    float Distance = sqrtf(dx * dx + dy * dy);
-    if (Distance <= TERRAIN_SCALE * Range)
-    {
-        return true;
-    }
-    return false;
+    // Compare squared distance with squared range to avoid sqrt calculation
+    float squaredDistance = dx * dx + dy * dy;
+    float squaredRange = (TERRAIN_SCALE * Range) * (TERRAIN_SCALE * Range);
+
+    return squaredDistance <= squaredRange;
 }
 
 bool CheckWall(int sx1, int sy1, int sx2, int sy2)

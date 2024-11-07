@@ -8278,6 +8278,67 @@ bool IsWingItem(ITEM* pItem)
     return false;
 }
 
+bool IsJewelItem(ITEM* pItem)
+{
+    if (pItem->Type == ITEM_JEWEL_OF_BLESS
+        || pItem->Type == ITEM_JEWEL_OF_SOUL
+        || pItem->Type == ITEM_JEWEL_OF_LIFE
+        || pItem->Type == ITEM_JEWEL_OF_CHAOS
+        || pItem->Type == ITEM_JEWEL_OF_CREATION
+        || pItem->Type == ITEM_JEWEL_OF_GUARDIAN)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool IsExcellentItem(ITEM* pItem)
+{
+    return pItem->ExcellentFlags;
+}
+
+bool IsAncientItem(ITEM* pItem)
+{
+    return pItem->AncientDiscriminator;
+}
+
+bool IsMoneyItem(ITEM* pItem)
+{
+    return pItem->Type == ITEM_ZEN;
+}
+
+std::wstring GetItemDisplayName(ITEM* pItem)
+{
+    // NOTE: 
+    // There may be already another function for this (the one being used for displaying dropped items).
+    // This version currently only applies to ascii names of items
+
+    ITEM_ATTRIBUTE* pAttr = &ItemAttribute[pItem->Type];
+
+    auto nNameLen = wcsnlen(pAttr->Name, MAX_ITEM_NAME);
+    std::wstring strDisplayName(pAttr->Name, nNameLen);
+    std::wstring strOptions;
+
+    if (pItem->Level)
+    {
+        strOptions += L"+" + std::to_wstring(pItem->Level);
+    }
+    if (pItem->HasSkill)
+    {
+        strOptions += L"+Skill";
+    }
+    if (pItem->OptionLevel)
+    {
+        strOptions += L"+Option";
+    }
+    if (pItem->HasLuck) {
+        strOptions += L"+Luck";
+    }
+
+    return strDisplayName + (strOptions.empty() ? L"" : L" " + strOptions);
+}
+
 OBJECT ObjectSelect;
 
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp)

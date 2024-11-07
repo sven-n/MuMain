@@ -65,7 +65,6 @@ SEASON3B::CNewUIMuHelper::CNewUIMuHelper()
     m_iNumCurOpenTab = 0;
     m_iSelectedSkillSlot = 0;
     m_aiSelectedSkills.fill(-1);
-    memset(&m_TempConfig, 0, sizeof(m_TempConfig));
     m_TempConfig.iObtainingRange = 1;
 }
 
@@ -460,7 +459,7 @@ void SEASON3B::CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bSt
         break;
 
     case CHECKBOX_ID_LONG_DISTANCE:
-        m_TempConfig.bLongDistanceCounterAttack = bState;
+        m_TempConfig.bLongRangeCounterAttack = bState;
         break;
 
     case CHECKBOX_ID_ORIG_POSITION:

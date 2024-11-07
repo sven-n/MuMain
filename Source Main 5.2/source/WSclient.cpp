@@ -5591,6 +5591,7 @@ void ReceiveCreateMoney(std::span<const BYTE> ReceiveBuffer)
     Position[1] = (float)(Data->PositionY + 0.5f) * TERRAIN_SCALE;
 
     CreateMoneyDrop(&Items[Data->Id], Data->Amount, Position, Data->IsFreshDrop);
+    g_MuHelper.AddItem(Data->Id, { Data->PositionX, Data->PositionY });
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateMoney]");
 }
@@ -5631,6 +5632,7 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
         Position[1] = (float)(itemStartData->PositionY + 0.5f) * TERRAIN_SCALE;
 
         CreateItemDrop(&Items[id], params, Position, isFreshDrop);
+        g_MuHelper.AddItem(id, { itemStartData->PositionX, itemStartData->PositionY });
 
         Offset += length;
     }
@@ -5650,6 +5652,8 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
             Key = 0;
         Items[Key].Object.Live = false;
         Offset += sizeof(PDELETE_CHARACTER);
+
+        g_MuHelper.DeleteItem(Key);
     }
 }
 

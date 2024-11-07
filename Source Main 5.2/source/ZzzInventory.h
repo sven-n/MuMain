@@ -176,6 +176,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
 void GetItemName(int iType, int iLevel, wchar_t* Text);
+std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
 void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
 void RenderRepairInfo(int sz, int sy, ITEM* ip, bool Sell);
@@ -193,6 +194,10 @@ bool IsStoreBan(ITEM* pItem);
 bool IsSellingBan(ITEM* pItem);
 bool IsRepairBan(ITEM* pItem);
 bool IsWingItem(ITEM* pItem);
+bool IsJewelItem(ITEM* pItem);
+bool IsExcellentItem(ITEM* pItem);
+bool IsAncientItem(ITEM* pItem);
+bool IsMoneyItem(ITEM* pItem);
 
 void ComputeItemInfo(int iHelpItem);
 void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y);

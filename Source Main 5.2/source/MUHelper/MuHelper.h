@@ -20,49 +20,48 @@ typedef enum
 	eFiveOrMoreAttacking,
 } eSkillActivationType;
 
-typedef struct 
+typedef struct
 {
-	int iHuntingRange;
+	int iHuntingRange = 0;
 
-	bool bUseSelfDefense;
-	bool bLongDistanceCounterAttack;
-	bool bReturnToOriginalPosition;
-	int iMaxSecondsAway;
+	bool bUseSelfDefense = false;
+	bool bLongRangeCounterAttack = false;
+	bool bReturnToOriginalPosition = false;
+	int iMaxSecondsAway = 0;
 
-	std::array<int, 3> aiSkill;
-	std::array<int, 3> aiSkillCondition;
-	std::array<int, 3> aiSkillInterval;
+	std::array<int, 3> aiSkill = { 0, 0, 0 };
+	std::array<int, 3> aiSkillCondition = { 0, 0, 0 };
+	std::array<int, 3> aiSkillInterval = { 0, 0, 0 };
 
-	bool bUseCombo;
+	bool bUseCombo = false;
 
-	std::array<int, 3> aiBuff;
+	std::array<int, 3> aiBuff = { 0, 0, 0 };
 
-	bool bBuffDuration;
-	bool bBuffDurationParty;
-	int iCastInterval;
+	bool bBuffDuration = false;
+	bool bBuffDurationParty = false;
+	int iCastInterval = 0;
 
-	bool bSupportParty;
-	bool bAutoHeal;
-	int iHealThreshold;
+	bool bSupportParty = false;
+	bool bAutoHeal = false;
+	int iHealThreshold = 0;
 
-	bool bUseHealPotion;
-	int iPotionThreshold;
+	bool bUseHealPotion = false;
+	int iPotionThreshold = 0;
 
-	bool bUseDrainLife;
-	bool bUsePet;
+	bool bUseDrainLife = false;
+	bool bUsePet = false;
 
-	bool bRepairItem;
+	bool bRepairItem = false;
 
-	int iObtainingRange;
-	bool bPickAllItems;
-	bool bPickSelectItems;
-	bool bPickJewel;
-	bool bPickZen;
-	bool bPickAncient;
-	bool bPickExcellent;
-	bool bPickExtraItems;
-
-	std::array<std::string, 12> aExtraItems;
+	int iObtainingRange = 0;
+	bool bPickAllItems = false;
+	bool bPickSelectItems = false;
+	bool bPickJewel = false;
+	bool bPickZen = false;
+	bool bPickAncient = false;
+	bool bPickExcellent = false;
+	bool bPickExtraItems = false;
+	std::set<std::wstring> aExtraItems;
 } cMuHelperConfig;
 
 class CMuHelper
@@ -82,6 +81,9 @@ public:
 	void DeleteTarget(int iTargetId);
 	void DeleteAllTargets();
 
+	void AddItem(int iItemId, POINT posDropped);
+	void DeleteItem(int iItemId);
+
 private:
 	void WorkLoop();
 	void Work();
@@ -98,7 +100,8 @@ private:
 	int SimulateComboAttack();
 	int GetNearestTarget();
 	int GetFarthestTarget();
-	int ComputeHuntingDistance();
+	int GetNearestItem();
+	int ComputeDistanceByRange(int iRange);
 	int ComputeDistanceFromTarget(CHARACTER* pTarget);
 	int ComputeDistanceBetween(POINT posA, POINT posB);
 	int SimulateMove(POINT posMove);
@@ -111,16 +114,16 @@ private:
 	std::thread m_timerThread;
 	std::atomic<bool> m_bActive;
 	std::set<int> m_setTargets;
+	std::set<int> m_setItems;
 	int m_iCurrentTarget;
 	int m_iCurrentBuffIndex;
 	int m_iCurrentBuffPartyIndex;
 	int m_iCurrentHealPartyIndex;
 	int m_iComboState;
 	int m_iHuntingDistance;
+	int m_iObtainingDistance;
 	int m_iSecondsElapsed;
 	int m_iSecondsAway;
-
-	bool m_bSavedAutoAttack;
 };
 
 extern CMuHelper g_MuHelper;

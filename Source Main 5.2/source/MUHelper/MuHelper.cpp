@@ -18,11 +18,12 @@
 
 #include "MuHelper.h"
 
-#define MAX_ACTIONABLE_DISTANCE      10
-#define DEFAULT_DURABILITY_THRESHOLD 50
+#define MAX_ACTIONABLE_DISTANCE        10
+#define DEFAULT_DURABILITY_THRESHOLD   50
 
 CMuHelper g_MuHelper;
 std::mutex _mtx_targetSet;
+std::mutex _mtx_itemSet;
 
 CMuHelper::CMuHelper()
 {
@@ -30,10 +31,12 @@ CMuHelper::CMuHelper()
     m_iComboState = 0;
     m_iCurrentBuffIndex = 0;
     m_iCurrentBuffPartyIndex = 0;
-    m_iHuntingDistance = MAX_ACTIONABLE_DISTANCE;
+    m_iCurrentHealPartyIndex = 0;
     m_iSecondsElapsed = 0;
     m_iSecondsAway = 0;
-    m_bSavedAutoAttack = false;
+    m_posOriginal = { 0, 0 };
+    m_iHuntingDistance = 0;
+    m_iObtainingDistance = 1;
 }
 
 void CMuHelper::Save(const cMuHelperConfig& config)
@@ -62,7 +65,9 @@ void CMuHelper::Start()
     m_iCurrentBuffPartyIndex = 0;
     m_iCurrentTarget = -1;
     m_posOriginal = { Hero->PositionX, Hero->PositionY };
-    m_iHuntingDistance = ComputeHuntingDistance();
+
+    m_iHuntingDistance = ComputeDistanceByRange(m_config.iHuntingRange);
+    m_iObtainingDistance = ComputeDistanceByRange(m_config.iObtainingRange);
 
     m_iSecondsElapsed = 0;
     m_iSecondsAway = 0;
@@ -75,9 +80,6 @@ void CMuHelper::Start()
 
     m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
 
-    m_bSavedAutoAttack = g_pOption->IsAutoAttack();
-    g_pOption->SetAutoAttack(false);
-
     g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper started");
 }
 
@@ -88,8 +90,6 @@ void CMuHelper::Stop()
     {
         m_timerThread.join();
     }
-
-    g_pOption->SetAutoAttack(m_bSavedAutoAttack);
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper stopped");
 }
@@ -179,7 +179,7 @@ void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
     int iDistance = ComputeDistanceFromTarget(pTarget);
 
     if ((iDistance <= m_iHuntingDistance)
-        || (bIsAttacking && m_config.bLongDistanceCounterAttack))
+        || (bIsAttacking && m_config.bLongRangeCounterAttack))
     {
         m_setTargets.insert(iTargetId);
     }
@@ -209,11 +209,9 @@ void CMuHelper::DeleteAllTargets()
     m_setTargets.clear();
 }
 
-int CMuHelper::ComputeHuntingDistance()
+int CMuHelper::ComputeDistanceByRange(int iRange)
 {
-    POINT posA = { 0, 0 };
-    POINT posB = { m_config.iHuntingRange, m_config.iHuntingRange * (-1) };
-    return ComputeDistanceBetween(posA, posB);
+    return ComputeDistanceBetween({ 0, 0 }, { iRange, iRange });
 }
 
 int CMuHelper::ComputeDistanceFromTarget(CHARACTER* pTarget)
@@ -253,18 +251,7 @@ int CMuHelper::GetNearestTarget()
     for (const int& iMonsterId : setTargets)
     {
         int iIndex = FindCharacterIndex(iMonsterId);
-        if (iIndex == MAX_CHARACTERS_CLIENT)
-        {
-            DeleteTarget(iMonsterId);
-            continue;
-        }
-
         CHARACTER* pTarget = &CharactersClient[iIndex];
-        if (pTarget->Dead)
-        {
-            DeleteTarget(iMonsterId);
-            continue;
-        }
 
         int iDistance = ComputeDistanceFromTarget(pTarget);
         if (iDistance < iMinDistance)
@@ -291,18 +278,7 @@ int CMuHelper::GetFarthestTarget()
     for (const int& iMonsterId : setTargets)
     {
         int iIndex = FindCharacterIndex(iMonsterId);
-        if (iIndex == MAX_CHARACTERS_CLIENT)
-        {
-            DeleteTarget(iMonsterId);
-            continue;
-        }
-
         CHARACTER* pTarget = &CharactersClient[iIndex];
-        if (pTarget->Dead)
-        {
-            DeleteTarget(iMonsterId);
-            continue;
-        }
 
         int iDistance = ComputeDistanceFromTarget(pTarget);
         if (iDistance > iMaxDistance)
@@ -329,8 +305,7 @@ int CMuHelper::Buff()
 
         if (pChar != NULL
             && pMember->Map == gMapManager.WorldActive
-            && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE
-            )
+            && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
         {
             if (!BuffTarget(pChar, m_config.aiBuff[m_iCurrentBuffIndex]))
             {
@@ -401,6 +376,11 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_LIFE_UP + 4)
         && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Life))
     {
+        if (m_iComboState == 2)
+        {
+            return 1;
+        }
+        
         return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
     }
 
@@ -483,11 +463,6 @@ int CMuHelper::Heal()
     return 1;
 }
 
-int CMuHelper::ObtainItem()
-{
-    return 1;
-}
-
 int CMuHelper::RepairEquipments()
 {
     if (m_config.bRepairItem)
@@ -528,7 +503,7 @@ int CMuHelper::Attack()
     {
         if (!m_setTargets.empty())
         {
-            if (m_config.bLongDistanceCounterAttack)
+            if (m_config.bLongRangeCounterAttack)
             {
                 m_iCurrentTarget = GetFarthestTarget();
             }
@@ -694,4 +669,119 @@ int CMuHelper::GetHealingSkill()
     }
 
     return -1;
+}
+
+int CMuHelper::ObtainItem()
+{
+    int iTargetItem = GetNearestItem();
+    if (iTargetItem == MAX_ITEMS)
+    {
+        return 1;
+    }
+
+    ITEM_t* pDrop = &Items[iTargetItem];
+    ITEM* pItem = &pDrop->Item;
+
+    if (!pDrop->Object.Live)
+    {
+        DeleteItem(iTargetItem);
+        return 1;
+    }
+
+    extern int TargetX;
+    extern int TargetY;
+
+    TargetX = (int)(Items[iTargetItem].Object.Position[0] / TERRAIN_SCALE);
+    TargetY = (int)(Items[iTargetItem].Object.Position[1] / TERRAIN_SCALE);
+
+    int iDistance = ComputeDistanceBetween(m_posOriginal, { TargetX, TargetY });
+    if (iDistance <= m_iObtainingDistance)
+    {
+        if (!CheckTile(Hero, &Hero->Object, 1.5f))
+        {
+            if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
+            {
+                SendMove(Hero, &Hero->Object);
+            }
+
+            return 0;
+        }
+        else 
+        {
+            SocketClient->ToGameServer()->SendPickupItemRequest(iTargetItem);
+        }
+    }
+
+    return 1;
+}
+
+void CMuHelper::AddItem(int iItemId, POINT posWhere)
+{
+    std::lock_guard<std::mutex> lock(_mtx_itemSet);
+
+    ITEM_t* pDrop = &Items[iItemId];
+    ITEM* pItem = &pDrop->Item;
+
+    if (m_config.bPickZen && IsMoneyItem(pItem))
+    {
+        m_setItems.insert(iItemId);
+    }
+    else if (m_config.bPickJewel && IsJewelItem(pItem))
+    {
+        m_setItems.insert(iItemId);
+    }
+    else if (m_config.bPickAncient && IsAncientItem(pItem))
+    {
+        m_setItems.insert(iItemId);
+    }
+    else if (m_config.bPickExcellent && IsExcellentItem(pItem))
+    {
+        m_setItems.insert(iItemId);
+    }
+    else if (m_config.bPickExtraItems)
+    {
+        std::wstring strDisplayName = GetItemDisplayName(pItem);
+
+        for (const auto& str : m_config.aExtraItems) {
+            // Check if the search keyword is in the item's display name
+            if (str.find(strDisplayName) != std::wstring::npos) {
+                m_setItems.insert(iItemId);
+                break;
+            }
+        }
+    }
+}
+
+void CMuHelper::DeleteItem(int iItemId)
+{
+    std::lock_guard<std::mutex> lock(_mtx_itemSet);
+
+    m_setItems.erase(iItemId);
+}
+
+int CMuHelper::GetNearestItem()
+{
+    int iClosestItemId = MAX_ITEMS;
+    int iMinDistance = m_config.iObtainingRange + 1;
+
+    std::set<int> setItems;
+    {
+        std::lock_guard<std::mutex> lock(_mtx_targetSet);
+        setItems = m_setItems;
+    }
+
+    for (const int& iItemId : setItems)
+    {
+        int iItemX = (int)(Items[iItemId].Object.Position[0] / TERRAIN_SCALE);
+        int iItemY = (int)(Items[iItemId].Object.Position[1] / TERRAIN_SCALE);
+
+        int iDistance = ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, { iItemX, iItemY });
+        if (iDistance < iMinDistance)
+        {
+            iMinDistance = iDistance;
+            iClosestItemId = iItemId;
+        }
+    }
+
+    return iClosestItemId;
 }
