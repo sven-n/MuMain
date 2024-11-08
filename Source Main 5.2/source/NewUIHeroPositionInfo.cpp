@@ -194,7 +194,7 @@ bool CNewUIHeroPositionInfo::Render()
     //--
     m_BtnConfig.Render();
 
-    m_BtnStart.Render();
+    g_MuHelper.IsActive() ? m_BtnStop.Render() : m_BtnStart.Render();
     //--
     swprintf(szText, L"%s (%d , %d)", gMapManager.GetMapName(gMapManager.WorldActive), m_CurHeroPosition.x, m_CurHeroPosition.y);
 

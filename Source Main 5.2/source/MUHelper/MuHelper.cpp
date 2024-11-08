@@ -90,12 +90,12 @@ void CMuHelper::Toggle()
 
 void CMuHelper::WorkLoop()
 {
+    g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper work start");
+
     int iLoopCounter = 0;
 
     m_iSecondsElapsed = 0;
     m_iSecondsAway = 0;
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper work start");
 
     while (m_bActive && !Hero->SafeZone) 
     {
@@ -121,6 +121,7 @@ void CMuHelper::WorkLoop()
     }
 
     m_bActive = false;
+
     g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper work stopped");
 }
 
