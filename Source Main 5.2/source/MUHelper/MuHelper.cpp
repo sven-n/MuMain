@@ -53,13 +53,14 @@ void CMuHelper::Load(const cMuHelperConfig& config)
 
 void CMuHelper::Start()
 {
-    if (m_bActive)
-    {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper is already active!");
+    // Prevent starting if still active
+    if (m_timerThread.joinable()) {
+        g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper is still active!");
         return;
     }
 
     m_bActive = true;
+
     m_iComboState = 0;
     m_iCurrentBuffIndex = 0;
     m_iCurrentBuffPartyIndex = 0;
@@ -79,19 +80,15 @@ void CMuHelper::Start()
     m_config.iHealThreshold = 60;
 
     m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper started");
 }
 
 void CMuHelper::Stop()
 {
     m_bActive = false;
-    if (m_timerThread.joinable()) 
+    if (m_timerThread.joinable())
     {
         m_timerThread.join();
     }
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper stopped");
 }
 
 void CMuHelper::WorkLoop()
@@ -101,11 +98,16 @@ void CMuHelper::WorkLoop()
     m_iSecondsElapsed = 0;
     m_iSecondsAway = 0;
 
-    while (m_bActive) {
+    g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper work start");
+
+    while (m_bActive && !Hero->SafeZone) 
+    {
         Work();
+
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-        if (++iLoopCounter == 5) {
+        if (++iLoopCounter == 5) 
+        {
             ++m_iSecondsElapsed;
 
             if (ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, m_posOriginal) > 1)
@@ -120,6 +122,9 @@ void CMuHelper::WorkLoop()
             iLoopCounter = 0;
         }
     }
+
+    m_bActive = false;
+    g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper work stopped");
 }
 
 void CMuHelper::Work()
@@ -543,7 +548,8 @@ int CMuHelper::SimulateComboAttack()
         }
     }
 
-    if (SimulateAttack(m_config.aiSkill[m_iComboState])) {
+    if (SimulateAttack(m_config.aiSkill[m_iComboState])) 
+    {
         m_iComboState = (m_iComboState + 1) % 3;
     }
 
@@ -742,9 +748,11 @@ void CMuHelper::AddItem(int iItemId, POINT posWhere)
     {
         std::wstring strDisplayName = GetItemDisplayName(pItem);
 
-        for (const auto& str : m_config.aExtraItems) {
+        for (const auto& str : m_config.aExtraItems) 
+        {
             // Check if the search keyword is in the item's display name
-            if (str.find(strDisplayName) != std::wstring::npos) {
+            if (str.find(strDisplayName) != std::wstring::npos) 
+            {
                 m_setItems.insert(iItemId);
                 break;
             }
