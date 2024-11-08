@@ -73,8 +73,7 @@ public:
 public:
 	void Save(const cMuHelperConfig& config);
 	void Load(const cMuHelperConfig& config);
-	void Start();
-	void Stop();
+	void Toggle();
 	bool IsActive() { return m_bActive; }
 
 	void AddTarget(int iTargetId, bool bIsAttacking);

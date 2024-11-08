@@ -51,15 +51,16 @@ void CMuHelper::Load(const cMuHelperConfig& config)
     m_config = config;
 }
 
-void CMuHelper::Start()
+void CMuHelper::Toggle()
 {
-    // Prevent starting if still active
-    if (m_timerThread.joinable()) {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper is still active!");
-        return;
-    }
+    // Determine if the thread should be started
+    bool bStart = !m_bActive; 
 
-    m_bActive = true;
+    if (m_timerThread.joinable()) {
+        // Stop the current thread and wait for it to finish
+        m_bActive = false;
+        m_timerThread.join();
+    }
 
     m_iComboState = 0;
     m_iCurrentBuffIndex = 0;
@@ -79,15 +80,11 @@ void CMuHelper::Start()
     m_config.iPotionThreshold = 40;
     m_config.iHealThreshold = 60;
 
-    m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
-}
-
-void CMuHelper::Stop()
-{
-    m_bActive = false;
-    if (m_timerThread.joinable())
+    if (bStart)
     {
-        m_timerThread.join();
+        // Start the thread
+        m_bActive = true;
+        m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
     }
 }
 

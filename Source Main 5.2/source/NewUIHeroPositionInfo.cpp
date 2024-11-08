@@ -133,14 +133,7 @@ bool CNewUIHeroPositionInfo::BtnProcess()
 
     if (m_BtnStart.UpdateMouseEvent())
     {
-        if (g_MuHelper.IsActive())
-        {
-            g_MuHelper.Stop();
-        }
-        else
-        {
-            g_MuHelper.Start();
-        }
+        g_MuHelper.Toggle();
 
         PlayBuffer(SOUND_CLICK01);
         return true;
