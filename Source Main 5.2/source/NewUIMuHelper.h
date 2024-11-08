@@ -108,6 +108,10 @@ namespace SEASON3B
 
     private:
         CNewUIManager* m_pNewUIMng;
+        CUITextInputBox* m_pDistanceTimeInput;
+        CUITextInputBox* m_pSkill2DelayInput;
+        CUITextInputBox* m_pSkill3DelayInput;
+        CUITextInputBox* m_pItemInput;
         POINT m_Pos;
         CNewUIRadioGroupButton m_TabBtn;
         int m_iNumCurOpenTab;
@@ -115,7 +119,7 @@ namespace SEASON3B
         cCheckBoxMap m_CheckBoxList;
         cTextNameMap m_TextNameList;
         cTextureMap m_IconList;
-        cMuHelperConfig m_TempConfig;
+        cMuHelperConfig m_TempConfig; 
         int m_iSelectedSkillSlot;
         std::array<int, MAX_SKILLS_SLOT> m_aiSelectedSkills;
     public:
@@ -149,6 +153,7 @@ namespace SEASON3B
         bool Create(CNewUIManager* pNewUIMng, int x, int y);
         void Release();
 
+        void Show(bool bShow);
         bool Render();
         bool Update();
         bool UpdateMouseEvent();
@@ -161,6 +166,7 @@ namespace SEASON3B
         void InitImage();
         void InitButtons();
         void InitCheckBox();
+        void InitTextboxInput();
         void SetPos(int x, int y);
         void RenderBack(int x, int y, int width, int height);
 
@@ -171,14 +177,17 @@ namespace SEASON3B
 
         void InitConfig();
         void SaveConfig();
-        void ApplyConfigFromCheckbox(int iCheckboxId, bool bState);
-        void ApplyConfigFromSkillSlot(int iSlot, int iSkill);
-        void ApplyHuntRangeUpdate(int iDelta);
-        void ApplyLootRangeUpdate(int iDelta);
 
     private:
         void LoadImages();
         void UnloadImages();
+
+        void ApplyConfigFromCheckbox(int iCheckboxId, bool bState);
+        void ApplyConfigFromSkillSlot(int iSlot, int iSkill);
+        void ApplyHuntRangeUpdate(int iDelta);
+        void ApplyLootRangeUpdate(int iDelta);
+        void SaveExtraItem();
+        int GetIntFromTextInput(wchar_t* pstrInput);
     };
 
     class CNewUIMuHelperSkillList : public CNewUIObj

@@ -27,6 +27,7 @@ std::mutex _mtx_itemSet;
 
 CMuHelper::CMuHelper()
 {
+    m_iCurrentItem = -1;
     m_iCurrentTarget = -1;
     m_iComboState = 0;
     m_iCurrentBuffIndex = 0;
@@ -66,6 +67,7 @@ void CMuHelper::Toggle()
     m_iCurrentBuffIndex = 0;
     m_iCurrentBuffPartyIndex = 0;
     m_iCurrentTarget = -1;
+    m_iCurrentItem = MAX_ITEMS;
     m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
     m_iHuntingDistance = ComputeDistanceByRange(m_config.iHuntingRange);
@@ -76,7 +78,6 @@ void CMuHelper::Toggle()
     m_setTargets.clear();
 
     // TO-DO: Use value from UI
-    m_config.iMaxSecondsAway = 5;
     m_config.iPotionThreshold = 40;
     m_config.iHealThreshold = 60;
 
@@ -691,28 +692,31 @@ int CMuHelper::GetHealingSkill()
 
 int CMuHelper::ObtainItem()
 {
-    int iTargetItem = GetNearestItem();
-    if (iTargetItem == MAX_ITEMS)
+    if (m_iCurrentItem == MAX_ITEMS)
     {
-        return 1;
+        m_iCurrentItem = SelectItemToObtain();
+        if (m_iCurrentItem == MAX_ITEMS)
+        {
+            return 1;
+        }
     }
 
-    ITEM_t* pDrop = &Items[iTargetItem];
+    ITEM_t* pDrop = &Items[m_iCurrentItem];
     ITEM* pItem = &pDrop->Item;
 
     if (!pDrop->Object.Live)
     {
-        DeleteItem(iTargetItem);
+        DeleteItem(m_iCurrentItem);
         return 1;
     }
 
     extern int TargetX;
     extern int TargetY;
 
-    TargetX = (int)(Items[iTargetItem].Object.Position[0] / TERRAIN_SCALE);
-    TargetY = (int)(Items[iTargetItem].Object.Position[1] / TERRAIN_SCALE);
+    TargetX = (int)(Items[m_iCurrentItem].Object.Position[0] / TERRAIN_SCALE);
+    TargetY = (int)(Items[m_iCurrentItem].Object.Position[1] / TERRAIN_SCALE);
 
-    int iDistance = ComputeDistanceBetween(m_posOriginal, { TargetX, TargetY });
+    int iDistance = ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, {TargetX, TargetY});
     if (iDistance <= m_iObtainingDistance)
     {
         if (!CheckTile(Hero, &Hero->Object, 1.5f))
@@ -726,60 +730,62 @@ int CMuHelper::ObtainItem()
         }
         else 
         {
-            SocketClient->ToGameServer()->SendPickupItemRequest(iTargetItem);
+            SocketClient->ToGameServer()->SendPickupItemRequest(m_iCurrentItem);
+            m_iCurrentItem = -1;
         }
     }
 
     return 1;
 }
 
-void CMuHelper::AddItem(int iItemId, POINT posWhere)
+bool CMuHelper::ShouldObtainItem(int iItemId)
 {
-    std::lock_guard<std::mutex> lock(_mtx_itemSet);
-
     ITEM_t* pDrop = &Items[iItemId];
     ITEM* pItem = &pDrop->Item;
 
-    if (m_config.bPickZen && IsMoneyItem(pItem))
+    if ((m_config.bPickZen && IsMoneyItem(pItem))
+        || (m_config.bPickJewel && IsJewelItem(pItem))
+        || (m_config.bPickAncient && IsAncientItem(pItem))
+        || (m_config.bPickExcellent && IsExcellentItem(pItem)))
     {
-        m_setItems.insert(iItemId);
+        return true;
     }
-    else if (m_config.bPickJewel && IsJewelItem(pItem))
-    {
-        m_setItems.insert(iItemId);
-    }
-    else if (m_config.bPickAncient && IsAncientItem(pItem))
-    {
-        m_setItems.insert(iItemId);
-    }
-    else if (m_config.bPickExcellent && IsExcellentItem(pItem))
-    {
-        m_setItems.insert(iItemId);
-    }
-    else if (m_config.bPickExtraItems)
+
+    if (m_config.bPickExtraItems)
     {
         std::wstring strDisplayName = GetItemDisplayName(pItem);
 
-        for (const auto& str : m_config.aExtraItems) 
+        for (const auto& str : m_config.aExtraItems)
         {
             // Check if the search keyword is in the item's display name
-            if (str.find(strDisplayName) != std::wstring::npos) 
+            if (strDisplayName.find(str) != std::wstring::npos)
             {
-                m_setItems.insert(iItemId);
-                break;
+                return true;
             }
         }
     }
+
+    return false;
+}
+
+void CMuHelper::AddItem(int iItemId, POINT posWhere)
+{
+    std::lock_guard<std::mutex> lock(_mtx_itemSet);
+    m_setItems.insert(iItemId);
 }
 
 void CMuHelper::DeleteItem(int iItemId)
 {
     std::lock_guard<std::mutex> lock(_mtx_itemSet);
-
     m_setItems.erase(iItemId);
+
+    if (iItemId == m_iCurrentItem)
+    {
+        m_iCurrentItem = MAX_ITEMS;
+    }
 }
 
-int CMuHelper::GetNearestItem()
+int CMuHelper::SelectItemToObtain()
 {
     int iClosestItemId = MAX_ITEMS;
     int iMinDistance = m_config.iObtainingRange + 1;
@@ -792,6 +798,11 @@ int CMuHelper::GetNearestItem()
 
     for (const int& iItemId : setItems)
     {
+        if (!ShouldObtainItem(iItemId))
+        {
+            continue;
+        }
+
         int iItemX = (int)(Items[iItemId].Object.Position[0] / TERRAIN_SCALE);
         int iItemY = (int)(Items[iItemId].Object.Position[1] / TERRAIN_SCALE);
 

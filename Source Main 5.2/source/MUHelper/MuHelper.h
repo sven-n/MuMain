@@ -93,7 +93,6 @@ private:
 	int Heal();
 	int ConsumePotion();
 	int Attack();
-	int ObtainItem();
 	int RepairEquipments();
 	int Regroup();
 	int SimulateAttack(int iSkill);
@@ -101,11 +100,13 @@ private:
 	int SimulateComboAttack();
 	int GetNearestTarget();
 	int GetFarthestTarget();
-	int GetNearestItem();
 	int ComputeDistanceByRange(int iRange);
 	int ComputeDistanceFromTarget(CHARACTER* pTarget);
 	int ComputeDistanceBetween(POINT posA, POINT posB);
 	int SimulateMove(POINT posMove);
+	int ObtainItem();
+	int SelectItemToObtain();
+	bool ShouldObtainItem(int iItemId);
 	int GetHealingSkill();
 	bool HasAssignedBuffSkill();
 
@@ -116,6 +117,7 @@ private:
 	std::atomic<bool> m_bActive;
 	std::set<int> m_setTargets;
 	std::set<int> m_setItems;
+	int m_iCurrentItem;
 	int m_iCurrentTarget;
 	int m_iCurrentBuffIndex;
 	int m_iCurrentBuffPartyIndex;

@@ -55,11 +55,23 @@
 #define SKILL_SLOT_BUFF2                4
 #define SKILL_SLOT_BUFF3                5
 
+#define TEXTBOX_IMG_DISTANCE_TIME       6
+#define TEXTBOX_IMG_SKILL1_TIME         7
+#define TEXTBOX_IMG_SKILL2_TIME         8
+#define TEXTBOX_IMG_ADD_EXTRA_ITEM      9
+
 #define BITMAP_DISTANCE_BEGIN           BITMAP_INTERFACE_CRYWOLF_BEGIN + 33
+
+#define MAX_NUMBER_STRLEN               4
+#define MAX_ITEM_STRLEN                 20
 
 SEASON3B::CNewUIMuHelper::CNewUIMuHelper()
 {
     m_pNewUIMng = NULL;
+    m_pItemInput = NULL;
+    m_pDistanceTimeInput = NULL;
+    m_pSkill2DelayInput = NULL;
+    m_pSkill3DelayInput = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_ButtonList.clear();
     m_iNumCurOpenTab = 0;
@@ -93,6 +105,8 @@ bool SEASON3B::CNewUIMuHelper::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     InitText();
 
+    InitTextboxInput();
+
     Show(false);
 
     return true;
@@ -107,6 +121,11 @@ void SEASON3B::CNewUIMuHelper::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    SAFE_DELETE(m_pItemInput);
+    SAFE_DELETE(m_pDistanceTimeInput);
+    SAFE_DELETE(m_pSkill2DelayInput);
+    SAFE_DELETE(m_pSkill3DelayInput);
 }
 
 void SEASON3B::CNewUIMuHelper::SetPos(int x, int y)
@@ -330,6 +349,44 @@ void SEASON3B::CNewUIMuHelper::InitText()
     RegisterTextCharacter(Rage_Fighter, 10);
 }
 
+void SEASON3B::CNewUIMuHelper::InitTextboxInput()
+{
+    m_pDistanceTimeInput = new CUITextInputBox();
+    m_pDistanceTimeInput->Init(g_hWnd, 28, 15, 4, false);
+    m_pDistanceTimeInput->SetPosition(m_Pos.x + 136, m_Pos.y + 140);
+    m_pDistanceTimeInput->SetTextColor(255, 0, 0, 0);
+    m_pDistanceTimeInput->SetBackColor(255, 255, 255, 255);
+    m_pDistanceTimeInput->SetFont(g_hFont);
+    m_pDistanceTimeInput->SetState(UISTATE_NORMAL);
+    m_pDistanceTimeInput->SetOption(UIOPTION_NUMBERONLY);
+
+    m_pSkill2DelayInput = new CUITextInputBox();
+    m_pSkill2DelayInput->Init(g_hWnd, 28, 15, 4, false);
+    m_pSkill2DelayInput->SetPosition(m_Pos.x + 136, m_Pos.y + 177);
+    m_pSkill2DelayInput->SetTextColor(255, 0, 0, 0);
+    m_pSkill2DelayInput->SetBackColor(255, 255, 255, 255);
+    m_pSkill2DelayInput->SetFont(g_hFont);
+    m_pSkill2DelayInput->SetState(UISTATE_NORMAL);
+    m_pSkill2DelayInput->SetOption(UIOPTION_NUMBERONLY);
+
+    m_pSkill3DelayInput = new CUITextInputBox();
+    m_pSkill3DelayInput->Init(g_hWnd, 28, 15, 4, false);
+    m_pSkill3DelayInput->SetPosition(m_Pos.x + 136, m_Pos.y + 229);
+    m_pSkill3DelayInput->SetTextColor(255, 0, 0, 0);
+    m_pSkill3DelayInput->SetBackColor(255, 255, 255, 255);
+    m_pSkill3DelayInput->SetFont(g_hFont);
+    m_pSkill3DelayInput->SetState(UISTATE_NORMAL);
+    m_pSkill3DelayInput->SetOption(UIOPTION_NUMBERONLY);
+
+    m_pItemInput = new CUITextInputBox();
+    m_pItemInput->Init(g_hWnd, 93, 15, 20, false);
+    m_pItemInput->SetPosition(m_Pos.x + 35, m_Pos.y + 219);
+    m_pItemInput->SetTextColor(255, 0, 0, 0);
+    m_pItemInput->SetBackColor(255, 255, 255, 255);
+    m_pItemInput->SetFont(g_hFont);
+    m_pItemInput->SetState(UISTATE_HIDE);
+}
+
 bool SEASON3B::CNewUIMuHelper::Update()
 {
     if (IsVisible())
@@ -339,7 +396,27 @@ bool SEASON3B::CNewUIMuHelper::Update()
         if (iNumCurOpenTab == RADIOGROUPEVENT_NONE)
             return true;
 
+
         m_iNumCurOpenTab = iNumCurOpenTab;
+
+        if (m_iNumCurOpenTab == 0)
+        {
+            m_pDistanceTimeInput->SetState(UISTATE_NORMAL);
+            m_pSkill2DelayInput->SetState(UISTATE_NORMAL);
+            m_pSkill3DelayInput->SetState(UISTATE_NORMAL);
+            m_pItemInput->SetState(UISTATE_HIDE);
+
+            m_pDistanceTimeInput->GiveFocus();
+        }
+        else if (m_iNumCurOpenTab == 1)
+        {
+            m_pDistanceTimeInput->SetState(UISTATE_HIDE);
+            m_pSkill2DelayInput->SetState(UISTATE_HIDE);
+            m_pSkill3DelayInput->SetState(UISTATE_HIDE);
+            m_pItemInput->SetState(UISTATE_NORMAL);
+
+            m_pItemInput->GiveFocus();
+        }
     }
     return true;
 }
@@ -373,9 +450,14 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
         {
             ApplyLootRangeUpdate(-1);
         }
+        else if (iButtonId == BUTTON_ID_ADD_OTHER_ITEM)
+        {
+            SaveExtraItem();
+        }
         else if (iButtonId == BUTTON_ID_EXIT_CONFIG)
         {
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
+            SetFocus(g_hWnd);
         }
         else if (iButtonId == BUTTON_ID_INIT_CONFIG)
         {
@@ -412,7 +494,9 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
 
             bool bPrevVisible = g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
 
-            if (iIconIndex >= 0 && iIconIndex < 3)
+            if (iIconIndex == SKILL_SLOT_SKILL1 
+                || iIconIndex == SKILL_SLOT_SKILL2 
+                || iIconIndex == SKILL_SLOT_SKILL3)
             {
                 g_pNewUIMuHelperSkillList->FilterByAttackSkills();
             }
@@ -431,6 +515,22 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
             }
 
             return false;
+        }
+        else if (iIconIndex == TEXTBOX_IMG_DISTANCE_TIME)
+        {
+            m_pDistanceTimeInput->GiveFocus();
+        }
+        else if (iIconIndex == TEXTBOX_IMG_SKILL1_TIME)
+        {
+            m_pSkill2DelayInput->GiveFocus();
+        }
+        else if (iIconIndex == TEXTBOX_IMG_SKILL2_TIME)
+        {
+            m_pSkill3DelayInput->GiveFocus();
+        }
+        else if (iIconIndex == TEXTBOX_IMG_ADD_EXTRA_ITEM)
+        {
+            m_pItemInput->GiveFocus();
         }
     }
     if (IsRelease(VK_RBUTTON))
@@ -593,6 +693,34 @@ void SEASON3B::CNewUIMuHelper::ApplyLootRangeUpdate(int iDelta)
     }
 }
 
+void SEASON3B::CNewUIMuHelper::SaveExtraItem()
+{
+    wchar_t wsExtraItem[MAX_ITEM_STRLEN + 1] = { 0 };
+
+    m_pItemInput->GetText(wsExtraItem, sizeof(wsExtraItem));
+    
+    if (wsExtraItem != L"")
+    {
+        m_TempConfig.aExtraItems.insert(std::wstring(wsExtraItem));
+    }
+
+    m_pItemInput->SetText(L"");
+}
+
+int SEASON3B::CNewUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
+{
+    wchar_t* end;
+
+    int value = static_cast<int>(wcstol(pwsInput, &end, 10));  // Base 10
+
+    if (*end != L'\0') 
+    {
+        return 0;
+    }
+
+    return value;
+}
+
 void SEASON3B::CNewUIMuHelper::InitConfig()
 {
     ResetBoxList();
@@ -605,6 +733,17 @@ void SEASON3B::CNewUIMuHelper::InitConfig()
 
 void SEASON3B::CNewUIMuHelper::SaveConfig()
 {
+    wchar_t wsNumberInput[MAX_NUMBER_STRLEN + 1]{};
+
+    m_pDistanceTimeInput->GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_TempConfig.iMaxSecondsAway = GetIntFromTextInput(wsNumberInput);
+
+    m_pSkill2DelayInput->GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_TempConfig.aiSkillInterval[1] = GetIntFromTextInput(wsNumberInput);
+
+    m_pSkill3DelayInput->GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_TempConfig.aiSkillInterval[2] = GetIntFromTextInput(wsNumberInput);
+
     g_MuHelper.Save(m_TempConfig);
 }
 
@@ -616,6 +755,12 @@ float SEASON3B::CNewUIMuHelper::GetLayerDepth()
 float SEASON3B::CNewUIMuHelper::GetKeyEventOrder()
 {
     return 3.4;
+}
+
+void SEASON3B::CNewUIMuHelper::Show(bool bShow)
+{
+    CNewUIObj::Show(bShow);
+    SetFocus(g_hWnd);
 }
 
 bool SEASON3B::CNewUIMuHelper::Render()
@@ -649,27 +794,22 @@ bool SEASON3B::CNewUIMuHelper::Render()
 
     g_pRenderText->SetTextColor(TextColor);
 
-    int sTapIndex = m_iNumCurOpenTab;
-
     m_TabBtn.Render();
 
-    if (sTapIndex)
+    if (m_iNumCurOpenTab == 1)
     {
-        if (sTapIndex == 1)
-        {
-            RenderBack(m_Pos.x + 12, m_Pos.y + 73, 68, 50);
-            RenderBack(m_Pos.x + 75, m_Pos.y + 73, 102, 50);
-            RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 30);
-            RenderBack(m_Pos.x + 12, m_Pos.y + 147, 165, 195);
-            RenderBack(m_Pos.x + 16, m_Pos.y + 235, 158, 74);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 73, 68, 50);
+        RenderBack(m_Pos.x + 75, m_Pos.y + 73, 102, 50);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 30);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 147, 165, 195);
+        RenderBack(m_Pos.x + 16, m_Pos.y + 235, 158, 74);
 
-            RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iObtainingRange, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
-        }
-        else
-        {
-            RenderBack(m_Pos.x + 12, m_Pos.y + 73, 165, 50);
-            RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 222);
-        }
+        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iObtainingRange, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
+    }
+    else if (m_iNumCurOpenTab == 2)
+    {
+        RenderBack(m_Pos.x + 12, m_Pos.y + 73, 165, 50);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 222);
     }
     else
     {
@@ -686,6 +826,18 @@ bool SEASON3B::CNewUIMuHelper::Render()
     RenderIconList();
     RenderTextList();
     RenderBtnList();
+
+    if (m_iNumCurOpenTab == 0)
+    {
+        m_pDistanceTimeInput->Render();
+        m_pSkill2DelayInput->Render();
+        m_pSkill3DelayInput->Render();
+    }
+    else if (m_iNumCurOpenTab == 1)
+    {
+        m_pItemInput->Render();
+    }
+
     DisableAlphaBlend();
 
     return true;
@@ -1749,3 +1901,4 @@ int SEASON3B::CNewUIMuHelperSkillList::UpdateMouseSkillList()
 
     return -1;
 }
+
