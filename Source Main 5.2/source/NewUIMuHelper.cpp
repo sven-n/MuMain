@@ -402,11 +402,15 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
 
     if (IsRelease(VK_LBUTTON))
     {
+        int iPrevIndex = m_iSelectedSkillSlot;
         int iIconIndex = UpdateMouseIconList();
+
         if (iIconIndex != -1 && iIconIndex < MAX_SKILLS_SLOT)
         {
             g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Clicked skill slot [%d]", iIconIndex);
             m_iSelectedSkillSlot = iIconIndex;
+
+            bool bPrevVisible = g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
 
             if (iIconIndex >= 0 && iIconIndex < 3)
             {
@@ -417,7 +421,15 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
                 g_pNewUIMuHelperSkillList->FilterByBuffSkills();
             }
 
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+            if (iIconIndex == iPrevIndex && bPrevVisible)
+            {
+                g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+            }
+            else
+            {
+                g_pNewUISystem->Show(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+            }
+
             return false;
         }
     }

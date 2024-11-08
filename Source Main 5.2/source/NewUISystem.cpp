@@ -1078,6 +1078,10 @@ void CNewUISystem::Show(DWORD dwKey)
         g_pLuckyItemWnd->OpeningProcess();
         m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
     }
+    else if (dwKey == INTERFACE_MUHELPER)
+    {
+        HideAllGroupA();
+    }
 
     m_pNewUIMng->ShowInterface(dwKey);
 
@@ -1478,6 +1482,10 @@ void CNewUISystem::Hide(DWORD dwKey)
             m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
         }
     }
+    else if (dwKey == INTERFACE_MUHELPER)
+    {
+        m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST, false);
+    }
 
     m_pNewUIMng->ShowInterface(dwKey, false);
 
@@ -1636,6 +1644,8 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
         INTERFACE_GENSRANKING,
+        INTERFACE_MUHELPER,
+        INTERFACE_MUHELPER_SKILL_LIST,
         0,
     };
 
