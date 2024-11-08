@@ -2398,6 +2398,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessage
     }
     else
     {
+        g_MuHelper.Stop();
         LogOut = true;
         SocketClient->ToGameServer()->SendLogOut(0);
         g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 0");
@@ -2427,6 +2428,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
     }
     else
     {
+        g_MuHelper.Stop();
         g_pNewUIMng->ResetActiveUIObj();
         LogOut = true;
         SocketClient->ToGameServer()->SendLogOut(2);
@@ -2458,6 +2460,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
     }
     else
     {
+        g_MuHelper.Stop();
         g_pNewUIMng->ResetActiveUIObj();
         LogOut = true;
         SocketClient->ToGameServer()->SendLogOut(1);

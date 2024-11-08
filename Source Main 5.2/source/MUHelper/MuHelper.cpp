@@ -88,6 +88,20 @@ void CMuHelper::Toggle()
     }
 }
 
+void CMuHelper::Start()
+{
+    if (!m_bActive) {
+        Toggle();
+    }
+}
+
+void CMuHelper::Stop()
+{
+    if (m_bActive) {
+        Toggle();
+    }
+}
+
 void CMuHelper::WorkLoop()
 {
     g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper work start");
