@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 
+#include "UIControls.h"
 #include "NewUISystem.h"
 #include "NewUIMuHelper.h"
 #include "CharacterManager.h"
@@ -30,6 +31,9 @@
 #define CHECKBOX_ID_PICK_ZEN            18
 #define CHECKBOX_ID_PICK_EXCELLENT      19
 #define CHECKBOX_ID_ADD_OTHER_ITEM      20
+#define CHECKBOX_ID_AUTO_ACCEPT_FRIEND  21
+#define CHECKBOX_ID_USE_ELITE_MANA      22
+#define CHECKBOX_ID_AUTO_ACCEPT_GUILD   23
 
 #define BUTTON_ID_HUNT_RANGE_ADD        0
 #define BUTTON_ID_HUNT_RANGE_MINUS      1
@@ -62,17 +66,15 @@
 
 #define BITMAP_DISTANCE_BEGIN           BITMAP_INTERFACE_CRYWOLF_BEGIN + 33
 
-#define MAX_NUMBER_STRLEN               4
-#define MAX_ITEM_STRLEN                 20
+#define MAX_NUMBER_STRLEN               3
+#define MAX_ITEM_STRLEN                 30
+
+using namespace SEASON3B;
 
 SEASON3B::CNewUIMuHelper::CNewUIMuHelper()
 {
     m_pNewUIMng = NULL;
-    m_pItemInput = NULL;
-    m_pDistanceTimeInput = NULL;
-    m_pSkill2DelayInput = NULL;
-    m_pSkill3DelayInput = NULL;
-    m_Pos.x = m_Pos.y = 0;
+    m_MainPos.x = m_MainPos.y = 0;
     m_ButtonList.clear();
     m_iNumCurOpenTab = 0;
     m_iSelectedSkillSlot = 0;
@@ -121,17 +123,12 @@ void SEASON3B::CNewUIMuHelper::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-
-    SAFE_DELETE(m_pItemInput);
-    SAFE_DELETE(m_pDistanceTimeInput);
-    SAFE_DELETE(m_pSkill2DelayInput);
-    SAFE_DELETE(m_pSkill3DelayInput);
 }
 
 void SEASON3B::CNewUIMuHelper::SetPos(int x, int y)
 {
-    m_Pos.x = x;
-    m_Pos.y = y;
+    m_MainPos.x = x;
+    m_MainPos.y = y;
 }
 
 void SEASON3B::CNewUIMuHelper::InitButtons()
@@ -143,27 +140,27 @@ void SEASON3B::CNewUIMuHelper::InitButtons()
 
     m_TabBtn.CreateRadioGroup(3, IMAGE_WINDOW_TAB_BTN, TRUE);
     m_TabBtn.ChangeRadioText(ltext);
-    m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 10.f, m_Pos.y + 48.f, 56, 22);
+    m_TabBtn.ChangeRadioButtonInfo(true, m_MainPos.x + 10.f, m_MainPos.y + 48.f, 56, 22);
     m_TabBtn.ChangeFrame(m_iNumCurOpenTab);
 
-    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 0, 0);
-    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 1, 0);
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 191, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 2, 0); //-- skill 2
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 243, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 3, 0); //-- skill 3
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 4, 0); //-- Buff
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 79, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 5, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 6, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 7, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 8, 0); //-- potion
+    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_MainPos.x + 56, m_MainPos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 0, 0);
+    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_MainPos.x + 56, m_MainPos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 1, 0);
+    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 191, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 2, 0); //-- skill 2
+    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 243, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 3, 0); //-- skill 3
+    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 4, 0); //-- Buff
+    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 79, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 5, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 6, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 17, m_MainPos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 7, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 17, m_MainPos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 8, 0); //-- potion
     
-    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 9, 1);
-    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 10, 1);
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 208, 38, 24, 1, 0, 1, 1, GlobalText[3505], L"", 11, 1); //-- Buff
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 309, 38, 24, 1, 0, 1, 1, GlobalText[3506], L"", 12, 1); //-- Buff
+    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_MainPos.x + 56, m_MainPos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 9, 1);
+    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_MainPos.x + 56, m_MainPos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 10, 1);
+    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 208, 38, 24, 1, 0, 1, 1, GlobalText[3505], L"", 11, 1); //-- Buff
+    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 309, 38, 24, 1, 0, 1, 1, GlobalText[3506], L"", 12, 1); //-- Buff
     //--
-    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 120, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3503], L"", 13, -1);
-    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 65, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3504], L"", 14, -1);
-    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_Pos.x + 20, m_Pos.y + 388, 36, 29, 0, 0, 0, 0, L"", GlobalText[388], 15, -1);
+    InsertButton(IMAGE_IGS_BUTTON, m_MainPos.x + 120, m_MainPos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3503], L"", 13, -1);
+    InsertButton(IMAGE_IGS_BUTTON, m_MainPos.x + 65, m_MainPos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3504], L"", 14, -1);
+    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_MainPos.x + 20, m_MainPos.y + 388, 36, 29, 0, 0, 0, 0, L"", GlobalText[388], 15, -1);
 
     RegisterBtnCharacter(0xFF, 0);
     RegisterBtnCharacter(0xFF, 1);
@@ -200,34 +197,34 @@ void SEASON3B::CNewUIMuHelper::InitButtons()
 
 void SEASON3B::CNewUIMuHelper::InitCheckBox()
 {
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, GlobalText[3507], 0, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 122, 15, 15, 0, GlobalText[3508], 1, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 137, 15, 15, 0, GlobalText[3509], 2, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 94, m_Pos.y + 174, 15, 15, 0, GlobalText[3510], 3, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 94, m_Pos.y + 191, 15, 15, 0, GlobalText[3511], 4, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 94, m_Pos.y + 226, 15, 15, 0, GlobalText[3510], 5, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 94, m_Pos.y + 243, 15, 15, 0, GlobalText[3511], 6, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 226, 15, 15, 0, GlobalText[3512], 7, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 25, m_Pos.y + 276, 15, 15, 0, GlobalText[3513], 8, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 79, m_MainPos.y + 80, 15, 15, 0, GlobalText[3507], 0, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 122, 15, 15, 0, GlobalText[3508], 1, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 137, 15, 15, 0, GlobalText[3509], 2, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 94, m_MainPos.y + 174, 15, 15, 0, GlobalText[3510], 3, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 94, m_MainPos.y + 191, 15, 15, 0, GlobalText[3511], 4, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 94, m_MainPos.y + 226, 15, 15, 0, GlobalText[3510], 5, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 94, m_MainPos.y + 243, 15, 15, 0, GlobalText[3511], 6, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 226, 15, 15, 0, GlobalText[3512], 7, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 25, m_MainPos.y + 276, 15, 15, 0, GlobalText[3513], 8, 0);
 
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 60, m_Pos.y + 218, 15, 15, 0, GlobalText[3514], 9, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 15, m_Pos.y + 218, 15, 15, 0, GlobalText[3515], 10, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3516], 11, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3517], 12, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 60, m_MainPos.y + 218, 15, 15, 0, GlobalText[3514], 9, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 15, m_MainPos.y + 218, 15, 15, 0, GlobalText[3515], 10, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 79, m_MainPos.y + 97, 15, 15, 0, GlobalText[3516], 11, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 79, m_MainPos.y + 97, 15, 15, 0, GlobalText[3517], 12, 0);
 
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, GlobalText[3518], 13, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 17, m_Pos.y + 125, 15, 15, 0, GlobalText[3519], 14, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 17, m_Pos.y + 152, 15, 15, 0, GlobalText[3520], 15, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 79, m_MainPos.y + 80, 15, 15, 0, GlobalText[3518], 13, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 17, m_MainPos.y + 125, 15, 15, 0, GlobalText[3519], 14, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 17, m_MainPos.y + 152, 15, 15, 0, GlobalText[3520], 15, 1);
 
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 22, m_Pos.y + 170, 15, 15, 0, GlobalText[3521], 16, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 85, m_Pos.y + 170, 15, 15, 0, GlobalText[3522], 17, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 22, m_Pos.y + 185, 15, 15, 0, GlobalText[3523], 18, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 85, m_Pos.y + 185, 15, 15, 0, GlobalText[3524], 19, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 22, m_Pos.y + 200, 15, 15, 0, GlobalText[3525], 20, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 22, m_MainPos.y + 170, 15, 15, 0, GlobalText[3521], 16, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 85, m_MainPos.y + 170, 15, 15, 0, GlobalText[3522], 17, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 22, m_MainPos.y + 185, 15, 15, 0, GlobalText[3523], 18, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 85, m_MainPos.y + 185, 15, 15, 0, GlobalText[3524], 19, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 22, m_MainPos.y + 200, 15, 15, 0, GlobalText[3525], 20, 1);
     //--
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 80, 15, 15, 0, GlobalText[3591], 21, 2);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 97, 15, 15, 0, GlobalText[3592], 23, 2);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 125, 15, 15, 0, GlobalText[3594], 22, 2);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 80, 15, 15, 0, GlobalText[3591], 21, 2);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 97, 15, 15, 0, GlobalText[3592], 23, 2);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 125, 15, 15, 0, GlobalText[3594], 22, 2);
 
     RegisterBoxCharacter(0xFF, 0);
     RegisterBoxCharacter(0xFF, 1);
@@ -275,17 +272,17 @@ void SEASON3B::CNewUIMuHelper::InitCheckBox()
 
 void SEASON3B::CNewUIMuHelper::InitImage()
 {
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 17, m_Pos.y + 171, 32, 38, 0, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 61, m_Pos.y + 171, 32, 38, 1, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 61, m_Pos.y + 222, 32, 38, 2, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 21, m_Pos.y + 293, 32, 38, 3, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 55, m_Pos.y + 293, 32, 38, 4, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 89, m_Pos.y + 293, 32, 38, 5, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 17, m_MainPos.y + 171, 32, 38, 0, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 61, m_MainPos.y + 171, 32, 38, 1, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 61, m_MainPos.y + 222, 32, 38, 2, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 21, m_MainPos.y + 293, 32, 38, 3, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 55, m_MainPos.y + 293, 32, 38, 4, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 89, m_MainPos.y + 293, 32, 38, 5, 0);
 
-    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 135, m_Pos.y + 137, 28, 15, 6, 0);
-    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 135, m_Pos.y + 174, 28, 15, 7, 0);
-    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 135, m_Pos.y + 226, 28, 15, 8, 0);
-    InsertIcon(IMAGE_MACROUI_HELPER_INPUTSTRING, m_Pos.x + 34, m_Pos.y + 216, 93, 15, 9, 1);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_MainPos.x + 140, m_MainPos.y + 137, 20, 15, 6, 0);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_MainPos.x + 140, m_MainPos.y + 174, 20, 15, 7, 0);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_MainPos.x + 140, m_MainPos.y + 226, 20, 15, 8, 0);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTSTRING, m_MainPos.x + 34, m_MainPos.y + 216, 94, 15, 9, 1);
 
     RegisterIconCharacter(0xFF, 0);
     RegisterIconCharacter(0xFF, 1);
@@ -312,18 +309,22 @@ void SEASON3B::CNewUIMuHelper::InitImage()
 
 void SEASON3B::CNewUIMuHelper::InitText()
 {
-    InsertText(m_Pos.x + 18, m_Pos.y + 78, GlobalText[3526], 1, 0);
-    InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 2, 0);
-    InsertText(m_Pos.x + 113, m_Pos.y + 141, GlobalText[3527], 3, 0);
-    InsertText(m_Pos.x + 162, m_Pos.y + 141, GlobalText[3528], 4, 0);
-    InsertText(m_Pos.x + 18, m_Pos.y + 160, GlobalText[3529], 5, 0);
-    InsertText(m_Pos.x + 59, m_Pos.y + 160, GlobalText[3530], 7, 0);
-    InsertText(m_Pos.x + 162, m_Pos.y + 178, GlobalText[3528], 8, 0);
-    InsertText(m_Pos.x + 59, m_Pos.y + 212, GlobalText[3531], 9, 0);
+    InsertText(m_MainPos.x + 18, m_MainPos.y + 78, GlobalText[3526], 1, 0);
+    InsertText(m_MainPos.x + 18, m_MainPos.y + 83, L"________", 2, 0);
+    InsertText(m_MainPos.x + 110, m_MainPos.y + 141, GlobalText[3527], 3, 0);
+    //InsertText(m_Pos.x + 162, m_Pos.y + 141, GlobalText[3528], 4, 0);
+    InsertText(m_MainPos.x + 162, m_MainPos.y + 141, L"s", 4, 0);
 
-    InsertText(m_Pos.x + 162, m_Pos.y + 230, GlobalText[3528], 10, 0);
-    InsertText(m_Pos.x + 18, m_Pos.y + 78, GlobalText[3532], 11, 1);
-    InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 12, 1);
+    InsertText(m_MainPos.x + 18, m_MainPos.y + 160, GlobalText[3529], 5, 0);
+    InsertText(m_MainPos.x + 59, m_MainPos.y + 160, GlobalText[3530], 7, 0);
+    //InsertText(m_Pos.x + 162, m_Pos.y + 178, GlobalText[3528], 8, 0);
+    InsertText(m_MainPos.x + 162, m_MainPos.y + 178, L"s", 8, 0);
+    InsertText(m_MainPos.x + 59, m_MainPos.y + 212, GlobalText[3531], 9, 0);
+
+    //InsertText(m_Pos.x + 162, m_Pos.y + 230, GlobalText[3528], 10, 0);
+    InsertText(m_MainPos.x + 162, m_MainPos.y + 230, L"s", 10, 0);
+    InsertText(m_MainPos.x + 18, m_MainPos.y + 78, GlobalText[3532], 11, 1);
+    InsertText(m_MainPos.x + 18, m_MainPos.y + 83, L"________", 12, 1);
 
     RegisterTextCharacter(0xFF, 1);
     RegisterTextCharacter(0xFF, 2);
@@ -351,40 +352,39 @@ void SEASON3B::CNewUIMuHelper::InitText()
 
 void SEASON3B::CNewUIMuHelper::InitTextboxInput()
 {
-    m_pDistanceTimeInput = new CUITextInputBox();
-    m_pDistanceTimeInput->Init(g_hWnd, 28, 15, 4, false);
-    m_pDistanceTimeInput->SetPosition(m_Pos.x + 136, m_Pos.y + 140);
-    m_pDistanceTimeInput->SetTextColor(255, 0, 0, 0);
-    m_pDistanceTimeInput->SetBackColor(255, 255, 255, 255);
-    m_pDistanceTimeInput->SetFont(g_hFont);
-    m_pDistanceTimeInput->SetState(UISTATE_NORMAL);
-    m_pDistanceTimeInput->SetOption(UIOPTION_NUMBERONLY);
+    m_DistanceTimeInput.Init(g_hWnd, 17, 15, MAX_NUMBER_STRLEN, false);
+    m_DistanceTimeInput.SetPosition(m_MainPos.x + 142, m_MainPos.y + 140);
+    m_DistanceTimeInput.SetTextColor(255, 0, 0, 0);
+    m_DistanceTimeInput.SetBackColor(255, 255, 255, 255);
+    m_DistanceTimeInput.SetFont(g_hFont);
+    m_DistanceTimeInput.SetState(UISTATE_NORMAL);
+    m_DistanceTimeInput.SetOption(UIOPTION_NUMBERONLY);
 
-    m_pSkill2DelayInput = new CUITextInputBox();
-    m_pSkill2DelayInput->Init(g_hWnd, 28, 15, 4, false);
-    m_pSkill2DelayInput->SetPosition(m_Pos.x + 136, m_Pos.y + 177);
-    m_pSkill2DelayInput->SetTextColor(255, 0, 0, 0);
-    m_pSkill2DelayInput->SetBackColor(255, 255, 255, 255);
-    m_pSkill2DelayInput->SetFont(g_hFont);
-    m_pSkill2DelayInput->SetState(UISTATE_NORMAL);
-    m_pSkill2DelayInput->SetOption(UIOPTION_NUMBERONLY);
+    m_Skill2DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_STRLEN, false);
+    m_Skill2DelayInput.SetPosition(m_MainPos.x + 142, m_MainPos.y + 177);
+    m_Skill2DelayInput.SetTextColor(255, 0, 0, 0);
+    m_Skill2DelayInput.SetBackColor(255, 255, 255, 255);
+    m_Skill2DelayInput.SetFont(g_hFont);
+    m_Skill2DelayInput.SetState(UISTATE_NORMAL);
+    m_Skill2DelayInput.SetOption(UIOPTION_NUMBERONLY);
 
-    m_pSkill3DelayInput = new CUITextInputBox();
-    m_pSkill3DelayInput->Init(g_hWnd, 28, 15, 4, false);
-    m_pSkill3DelayInput->SetPosition(m_Pos.x + 136, m_Pos.y + 229);
-    m_pSkill3DelayInput->SetTextColor(255, 0, 0, 0);
-    m_pSkill3DelayInput->SetBackColor(255, 255, 255, 255);
-    m_pSkill3DelayInput->SetFont(g_hFont);
-    m_pSkill3DelayInput->SetState(UISTATE_NORMAL);
-    m_pSkill3DelayInput->SetOption(UIOPTION_NUMBERONLY);
+    m_Skill3DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_STRLEN, false);
+    m_Skill3DelayInput.SetPosition(m_MainPos.x + 142, m_MainPos.y + 229);
+    m_Skill3DelayInput.SetTextColor(255, 0, 0, 0);
+    m_Skill3DelayInput.SetBackColor(255, 255, 255, 255);
+    m_Skill3DelayInput.SetFont(g_hFont);
+    m_Skill3DelayInput.SetState(UISTATE_NORMAL);
+    m_Skill3DelayInput.SetOption(UIOPTION_NUMBERONLY);
 
-    m_pItemInput = new CUITextInputBox();
-    m_pItemInput->Init(g_hWnd, 93, 15, 20, false);
-    m_pItemInput->SetPosition(m_Pos.x + 35, m_Pos.y + 219);
-    m_pItemInput->SetTextColor(255, 0, 0, 0);
-    m_pItemInput->SetBackColor(255, 255, 255, 255);
-    m_pItemInput->SetFont(g_hFont);
-    m_pItemInput->SetState(UISTATE_HIDE);
+    m_ItemInput.Init(g_hWnd, 88, 15, MAX_ITEM_STRLEN, false);
+    m_ItemInput.SetPosition(m_MainPos.x + 36, m_MainPos.y + 219);
+    m_ItemInput.SetTextColor(255, 0, 0, 0);
+    m_ItemInput.SetBackColor(255, 255, 255, 255);
+    m_ItemInput.SetFont(g_hFont);
+    m_ItemInput.SetState(UISTATE_HIDE);
+
+    m_ItemFilter.SetSize(160, 70);
+    m_ItemFilter.SetPosition(m_MainPos.x + 20, m_MainPos.y + 238 + m_ItemFilter.GetHeight());
 }
 
 bool SEASON3B::CNewUIMuHelper::Update()
@@ -401,21 +401,21 @@ bool SEASON3B::CNewUIMuHelper::Update()
 
         if (m_iNumCurOpenTab == 0)
         {
-            m_pDistanceTimeInput->SetState(UISTATE_NORMAL);
-            m_pSkill2DelayInput->SetState(UISTATE_NORMAL);
-            m_pSkill3DelayInput->SetState(UISTATE_NORMAL);
-            m_pItemInput->SetState(UISTATE_HIDE);
+            m_DistanceTimeInput.SetState(UISTATE_NORMAL);
+            m_Skill2DelayInput.SetState(UISTATE_NORMAL);
+            m_Skill3DelayInput.SetState(UISTATE_NORMAL);
+            m_ItemInput.SetState(UISTATE_HIDE);
 
-            m_pDistanceTimeInput->GiveFocus();
+            m_DistanceTimeInput.GiveFocus();
         }
         else if (m_iNumCurOpenTab == 1)
         {
-            m_pDistanceTimeInput->SetState(UISTATE_HIDE);
-            m_pSkill2DelayInput->SetState(UISTATE_HIDE);
-            m_pSkill3DelayInput->SetState(UISTATE_HIDE);
-            m_pItemInput->SetState(UISTATE_NORMAL);
+            m_DistanceTimeInput.SetState(UISTATE_HIDE);
+            m_Skill2DelayInput.SetState(UISTATE_HIDE);
+            m_Skill3DelayInput.SetState(UISTATE_HIDE);
+            m_ItemInput.SetState(UISTATE_NORMAL);
 
-            m_pItemInput->GiveFocus();
+            m_ItemInput.GiveFocus();
         }
     }
     return true;
@@ -424,7 +424,7 @@ bool SEASON3B::CNewUIMuHelper::Update()
 bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
 {
     // Ignore events outside MU Helper window
-    if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
+    if (!CheckMouseIn(m_MainPos.x, m_MainPos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
     {
         return true;
     }
@@ -453,6 +453,10 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
         else if (iButtonId == BUTTON_ID_ADD_OTHER_ITEM)
         {
             SaveExtraItem();
+        }
+        else if (iButtonId == BUTTON_ID_DELETE_OTHER_ITEM)
+        {
+            RemoveExtraItem();
         }
         else if (iButtonId == BUTTON_ID_EXIT_CONFIG)
         {
@@ -518,19 +522,19 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
         }
         else if (iIconIndex == TEXTBOX_IMG_DISTANCE_TIME)
         {
-            m_pDistanceTimeInput->GiveFocus();
+            m_DistanceTimeInput.GiveFocus();
         }
         else if (iIconIndex == TEXTBOX_IMG_SKILL1_TIME)
         {
-            m_pSkill2DelayInput->GiveFocus();
+            m_Skill2DelayInput.GiveFocus();
         }
         else if (iIconIndex == TEXTBOX_IMG_SKILL2_TIME)
         {
-            m_pSkill3DelayInput->GiveFocus();
+            m_Skill3DelayInput.GiveFocus();
         }
         else if (iIconIndex == TEXTBOX_IMG_ADD_EXTRA_ITEM)
         {
-            m_pItemInput->GiveFocus();
+            m_ItemInput.GiveFocus();
         }
     }
     if (IsRelease(VK_RBUTTON))
@@ -542,6 +546,11 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
             m_aiSelectedSkills[iSlotIndex] = -1;
             return false;
         }
+    }
+
+    if (m_iNumCurOpenTab == 1)
+    {
+        m_ItemFilter.DoAction();
     }
 
     return false;
@@ -623,10 +632,20 @@ void SEASON3B::CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bSt
         break;
 
     case CHECKBOX_ID_PICK_ALL:
+        auto cboxPickSelected = m_CheckBoxList[CHECKBOX_ID_PICK_SELECTED];
+        if (cboxPickSelected.box->GetBoxState())
+        {
+            cboxPickSelected.box->RegisterBoxState(false);
+        }
         m_TempConfig.bPickAllItems = bState;
         break;
 
     case CHECKBOX_ID_PICK_SELECTED:
+        auto cboxPickAll = m_CheckBoxList[CHECKBOX_ID_PICK_ALL];
+        if (cboxPickAll.box->GetBoxState())
+        {
+            cboxPickAll.box->RegisterBoxState(false);
+        }
         m_TempConfig.bPickSelectItems = bState;
         break;
 
@@ -697,14 +716,27 @@ void SEASON3B::CNewUIMuHelper::SaveExtraItem()
 {
     wchar_t wsExtraItem[MAX_ITEM_STRLEN + 1] = { 0 };
 
-    m_pItemInput->GetText(wsExtraItem, sizeof(wsExtraItem));
+    m_ItemInput.GetText(wsExtraItem, sizeof(wsExtraItem));
     
     if (wsExtraItem != L"")
     {
+        m_ItemFilter.AddText(wsExtraItem);
+        m_ItemFilter.Scrolling(-m_ItemFilter.GetBoxSize());
+
         m_TempConfig.aExtraItems.insert(std::wstring(wsExtraItem));
     }
 
-    m_pItemInput->SetText(L"");
+    m_ItemInput.SetText(L"");
+}
+
+void SEASON3B::CNewUIMuHelper::RemoveExtraItem()
+{
+    FILTERLIST_TEXT* pText = m_ItemFilter.GetSelectedText();
+    if (pText)
+    {
+        m_TempConfig.aExtraItems.erase(std::wstring(pText->m_szPattern));
+        m_ItemFilter.DeleteText(pText->m_szPattern);
+    }
 }
 
 int SEASON3B::CNewUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
@@ -735,13 +767,13 @@ void SEASON3B::CNewUIMuHelper::SaveConfig()
 {
     wchar_t wsNumberInput[MAX_NUMBER_STRLEN + 1]{};
 
-    m_pDistanceTimeInput->GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_DistanceTimeInput.GetText(wsNumberInput, sizeof(wsNumberInput));
     m_TempConfig.iMaxSecondsAway = GetIntFromTextInput(wsNumberInput);
 
-    m_pSkill2DelayInput->GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_Skill2DelayInput.GetText(wsNumberInput, sizeof(wsNumberInput));
     m_TempConfig.aiSkillInterval[1] = GetIntFromTextInput(wsNumberInput);
 
-    m_pSkill3DelayInput->GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_Skill3DelayInput.GetText(wsNumberInput, sizeof(wsNumberInput));
     m_TempConfig.aiSkillInterval[2] = GetIntFromTextInput(wsNumberInput);
 
     g_MuHelper.Save(m_TempConfig);
@@ -774,23 +806,23 @@ bool SEASON3B::CNewUIMuHelper::Render()
     g_pRenderText->SetTextColor(0xFFFFFFFF);
     g_pRenderText->SetBgColor(0);
 
-    RenderImage(IMAGE_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
-    RenderImage(IMAGE_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(WINDOW_WIDTH), 64.f);
-    RenderImage(IMAGE_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_BASE_WINDOW_RIGHT, m_Pos.x + float(WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(WINDOW_HEIGHT) - 45.f, float(WINDOW_WIDTH), 45.f);
+    RenderImage(IMAGE_BASE_WINDOW_BACK, m_MainPos.x, m_MainPos.y, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
+    RenderImage(IMAGE_BASE_WINDOW_TOP, m_MainPos.x, m_MainPos.y, float(WINDOW_WIDTH), 64.f);
+    RenderImage(IMAGE_BASE_WINDOW_LEFT, m_MainPos.x, m_MainPos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
+    RenderImage(IMAGE_BASE_WINDOW_RIGHT, m_MainPos.x + float(WINDOW_WIDTH) - 21.f, m_MainPos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
+    RenderImage(IMAGE_BASE_WINDOW_BOTTOM, m_MainPos.x, m_MainPos.y + float(WINDOW_HEIGHT) - 45.f, float(WINDOW_WIDTH), 45.f);
 
     g_pRenderText->SetFont(g_hFontBold);
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3536], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_MainPos.x, m_MainPos.y + 13, GlobalText[3536], 190, 0, RT3_SORT_CENTER);
 
-    RenderBack(m_Pos.x + 12, m_Pos.y + 340, 165, 46);
+    RenderBack(m_MainPos.x + 12, m_MainPos.y + 340, 165, 46);
 
     g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 347, GlobalText[3537], 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_MainPos.x + 20, m_MainPos.y + 347, GlobalText[3537], 0, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(0xFF00B4FF);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 365, GlobalText[3538], 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_MainPos.x + 20, m_MainPos.y + 365, GlobalText[3538], 0, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(TextColor);
 
@@ -798,28 +830,30 @@ bool SEASON3B::CNewUIMuHelper::Render()
 
     if (m_iNumCurOpenTab == 1)
     {
-        RenderBack(m_Pos.x + 12, m_Pos.y + 73, 68, 50);
-        RenderBack(m_Pos.x + 75, m_Pos.y + 73, 102, 50);
-        RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 30);
-        RenderBack(m_Pos.x + 12, m_Pos.y + 147, 165, 195);
-        RenderBack(m_Pos.x + 16, m_Pos.y + 235, 158, 74);
+        RenderBack(m_MainPos.x + 12, m_MainPos.y + 73, 68, 50);
+        RenderBack(m_MainPos.x + 75, m_MainPos.y + 73, 102, 50);
+        RenderBack(m_MainPos.x + 12, m_MainPos.y + 120, 165, 30);
+        RenderBack(m_MainPos.x + 12, m_MainPos.y + 147, 165, 195);
+        RenderBack(m_MainPos.x + 16, m_MainPos.y + 235, 158, 75);
 
-        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iObtainingRange, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
+        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iObtainingRange, m_MainPos.x + 29, m_MainPos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
+
+        m_ItemFilter.Render();
     }
     else if (m_iNumCurOpenTab == 2)
     {
-        RenderBack(m_Pos.x + 12, m_Pos.y + 73, 165, 50);
-        RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 222);
+        RenderBack(m_MainPos.x + 12, m_MainPos.y + 73, 165, 50);
+        RenderBack(m_MainPos.x + 12, m_MainPos.y + 120, 165, 222);
     }
     else
     {
-        RenderBack(m_Pos.x + 12, m_Pos.y + 73, 68, 50);
-        RenderBack(m_Pos.x + 75, m_Pos.y + 73, 102, 50);
-        RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 39);
-        RenderBack(m_Pos.x + 12, m_Pos.y + 156, 165, 120);
-        RenderBack(m_Pos.x + 12, m_Pos.y + 273, 165, 69);
+        RenderBack(m_MainPos.x + 12, m_MainPos.y + 73, 68, 50);
+        RenderBack(m_MainPos.x + 75, m_MainPos.y + 73, 102, 50);
+        RenderBack(m_MainPos.x + 12, m_MainPos.y + 120, 165, 39);
+        RenderBack(m_MainPos.x + 12, m_MainPos.y + 156, 165, 120);
+        RenderBack(m_MainPos.x + 12, m_MainPos.y + 273, 165, 69);
 
-        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iHuntingRange, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
+        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iHuntingRange, m_MainPos.x + 29, m_MainPos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
     }
 
     RenderBoxList();
@@ -829,13 +863,13 @@ bool SEASON3B::CNewUIMuHelper::Render()
 
     if (m_iNumCurOpenTab == 0)
     {
-        m_pDistanceTimeInput->Render();
-        m_pSkill2DelayInput->Render();
-        m_pSkill3DelayInput->Render();
+        m_DistanceTimeInput.Render();
+        m_Skill2DelayInput.Render();
+        m_Skill3DelayInput.Render();
     }
     else if (m_iNumCurOpenTab == 1)
     {
-        m_pItemInput->Render();
+        m_ItemInput.Render();
     }
 
     DisableAlphaBlend();
@@ -1901,4 +1935,3 @@ int SEASON3B::CNewUIMuHelperSkillList::UpdateMouseSkillList()
 
     return -1;
 }
-

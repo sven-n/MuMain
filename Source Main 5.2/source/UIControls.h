@@ -63,6 +63,12 @@ typedef struct
 
 typedef struct
 {
+    BOOL    m_bIsSelected;
+    wchar_t	m_szPattern[MAX_ITEM_NAME + 1];
+} FILTERLIST_TEXT;
+
+typedef struct
+{
     BOOL	m_bIsSelected;
     DWORD	m_dwUIID;
     wchar_t	m_szTitle[64];
@@ -533,6 +539,23 @@ public:
     virtual int GetTextCount();
     virtual void SetNumRenderLine(int iLine);
     UNIONGUILD_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+protected:
+    virtual void RenderInterface();
+    virtual BOOL RenderDataLine(int iLineNumber);
+    virtual BOOL DoLineMouseAction(int iLineNumber);
+    virtual int GetRenderLinePos_y(int iLineNumber);
+};
+
+class CUIExtraItemListBox : public CUITextListBox<FILTERLIST_TEXT>
+{
+public:
+    CUIExtraItemListBox();
+    ~CUIExtraItemListBox() = default;
+
+    virtual void AddText(const wchar_t* pszPattern);
+    virtual void DeleteText(const wchar_t* pszPattern);
+    virtual void SetNumRenderLine(int iLine);
+    FILTERLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);

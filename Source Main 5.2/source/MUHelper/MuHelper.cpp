@@ -765,7 +765,7 @@ bool CMuHelper::ShouldObtainItem(int iItemId)
         }
     }
 
-    return false;
+    return m_config.bPickAllItems;
 }
 
 void CMuHelper::AddItem(int iItemId, POINT posWhere)

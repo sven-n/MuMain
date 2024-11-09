@@ -108,11 +108,14 @@ namespace SEASON3B
 
     private:
         CNewUIManager* m_pNewUIMng;
-        CUITextInputBox* m_pDistanceTimeInput;
-        CUITextInputBox* m_pSkill2DelayInput;
-        CUITextInputBox* m_pSkill3DelayInput;
-        CUITextInputBox* m_pItemInput;
-        POINT m_Pos;
+        CUITextInputBox m_DistanceTimeInput;
+        CUITextInputBox m_Skill2DelayInput;
+        CUITextInputBox m_Skill3DelayInput;
+        CUITextInputBox m_ItemInput;
+        CUIExtraItemListBox m_ItemFilter;
+
+        POINT m_MainPos;
+        POINT m_SubPos;
         CNewUIRadioGroupButton m_TabBtn;
         int m_iNumCurOpenTab;
         cButtonMap m_ButtonList;
@@ -187,6 +190,7 @@ namespace SEASON3B
         void ApplyHuntRangeUpdate(int iDelta);
         void ApplyLootRangeUpdate(int iDelta);
         void SaveExtraItem();
+        void RemoveExtraItem();
         int GetIntFromTextInput(wchar_t* pstrInput);
     };
 
@@ -272,5 +276,4 @@ namespace SEASON3B
 
         EVENT_STATE m_EventState;
     };
-
 }
