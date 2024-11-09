@@ -66,34 +66,41 @@
 
 #define BITMAP_DISTANCE_BEGIN           BITMAP_INTERFACE_CRYWOLF_BEGIN + 33
 
-#define MAX_NUMBER_STRLEN               3
-#define MAX_ITEM_STRLEN                 30
+#define MAX_NUMBER_DIGITS               3
+
+#define SUB_PAGE_SKILL2_CONFIG          2
+#define SUB_PAGE_SKILL3_CONFIG          3
+#define SUB_PAGE_POTION_CONFIG_ELF      4
+#define SUB_PAGE_POTION_CONFIG_SUMMY    5
+#define SUB_PAGE_POTION_CONFIG          6
+#define SUB_PAGE_PARTY_CONFIG           7
+#define SUB_PAGE_PARTY_CONFIG_ELF       8
 
 using namespace SEASON3B;
 
-SEASON3B::CNewUIMuHelper::CNewUIMuHelper()
+CNewUIMuHelper::CNewUIMuHelper()
 {
     m_pNewUIMng = NULL;
-    m_MainPos.x = m_MainPos.y = 0;
+    m_Pos.x = m_Pos.y = 0;
     m_ButtonList.clear();
-    m_iNumCurOpenTab = 0;
+    m_iCurrentOpenTab = 0;
     m_iSelectedSkillSlot = 0;
     m_aiSelectedSkills.fill(-1);
     m_TempConfig.iObtainingRange = 1;
 }
 
-SEASON3B::CNewUIMuHelper::~CNewUIMuHelper()
+CNewUIMuHelper::~CNewUIMuHelper()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIMuHelper::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CNewUIMuHelper::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MUHELPER, this);
+    m_pNewUIMng->AddUIObj(INTERFACE_MUHELPER, this);
 
     SetPos(x, y);
 
@@ -114,7 +121,7 @@ bool SEASON3B::CNewUIMuHelper::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void SEASON3B::CNewUIMuHelper::Release()
+void CNewUIMuHelper::Release()
 {
     UnloadImages();
 
@@ -125,13 +132,13 @@ void SEASON3B::CNewUIMuHelper::Release()
     }
 }
 
-void SEASON3B::CNewUIMuHelper::SetPos(int x, int y)
+void CNewUIMuHelper::SetPos(int x, int y)
 {
-    m_MainPos.x = x;
-    m_MainPos.y = y;
+    m_Pos.x = x;
+    m_Pos.y = y;
 }
 
-void SEASON3B::CNewUIMuHelper::InitButtons()
+void CNewUIMuHelper::InitButtons()
 {
     std::list<std::wstring> ltext;
     ltext.push_back(GlobalText[3500]);
@@ -140,27 +147,27 @@ void SEASON3B::CNewUIMuHelper::InitButtons()
 
     m_TabBtn.CreateRadioGroup(3, IMAGE_WINDOW_TAB_BTN, TRUE);
     m_TabBtn.ChangeRadioText(ltext);
-    m_TabBtn.ChangeRadioButtonInfo(true, m_MainPos.x + 10.f, m_MainPos.y + 48.f, 56, 22);
-    m_TabBtn.ChangeFrame(m_iNumCurOpenTab);
+    m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 10.f, m_Pos.y + 48.f, 56, 22);
+    m_TabBtn.ChangeFrame(m_iCurrentOpenTab);
 
-    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_MainPos.x + 56, m_MainPos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 0, 0);
-    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_MainPos.x + 56, m_MainPos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 1, 0);
-    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 191, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 2, 0); //-- skill 2
-    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 243, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 3, 0); //-- skill 3
-    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 4, 0); //-- Buff
-    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 79, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 5, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 6, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 17, m_MainPos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 7, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 17, m_MainPos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 8, 0); //-- potion
+    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 0, 0);
+    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 1, 0);
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 191, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 2, 0); //-- skill 2
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 243, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 3, 0); //-- skill 3
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 4, 0); //-- Buff
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 79, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 5, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 6, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 7, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", 8, 0); //-- potion
     
-    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_MainPos.x + 56, m_MainPos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 9, 1);
-    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_MainPos.x + 56, m_MainPos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 10, 1);
-    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 208, 38, 24, 1, 0, 1, 1, GlobalText[3505], L"", 11, 1); //-- Buff
-    InsertButton(IMAGE_CLEARNESS_BTN, m_MainPos.x + 132, m_MainPos.y + 309, 38, 24, 1, 0, 1, 1, GlobalText[3506], L"", 12, 1); //-- Buff
+    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", 9, 1);
+    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", 10, 1);
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 208, 38, 24, 1, 0, 1, 1, GlobalText[3505], L"", 11, 1); //-- Buff
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 309, 38, 24, 1, 0, 1, 1, GlobalText[3506], L"", 12, 1); //-- Buff
     //--
-    InsertButton(IMAGE_IGS_BUTTON, m_MainPos.x + 120, m_MainPos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3503], L"", 13, -1);
-    InsertButton(IMAGE_IGS_BUTTON, m_MainPos.x + 65, m_MainPos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3504], L"", 14, -1);
-    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_MainPos.x + 20, m_MainPos.y + 388, 36, 29, 0, 0, 0, 0, L"", GlobalText[388], 15, -1);
+    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 120, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3503], L"", 13, -1);
+    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 65, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3504], L"", 14, -1);
+    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_Pos.x + 20, m_Pos.y + 388, 36, 29, 0, 0, 0, 0, L"", GlobalText[388], 15, -1);
 
     RegisterBtnCharacter(0xFF, 0);
     RegisterBtnCharacter(0xFF, 1);
@@ -195,36 +202,36 @@ void SEASON3B::CNewUIMuHelper::InitButtons()
     RegisterBtnCharacter(Summoner, 5);
 }
 
-void SEASON3B::CNewUIMuHelper::InitCheckBox()
+void CNewUIMuHelper::InitCheckBox()
 {
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 79, m_MainPos.y + 80, 15, 15, 0, GlobalText[3507], 0, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 122, 15, 15, 0, GlobalText[3508], 1, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 137, 15, 15, 0, GlobalText[3509], 2, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 94, m_MainPos.y + 174, 15, 15, 0, GlobalText[3510], 3, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 94, m_MainPos.y + 191, 15, 15, 0, GlobalText[3511], 4, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 94, m_MainPos.y + 226, 15, 15, 0, GlobalText[3510], 5, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 94, m_MainPos.y + 243, 15, 15, 0, GlobalText[3511], 6, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 226, 15, 15, 0, GlobalText[3512], 7, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 25, m_MainPos.y + 276, 15, 15, 0, GlobalText[3513], 8, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, GlobalText[3507], 0, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 122, 15, 15, 0, GlobalText[3508], 1, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 137, 15, 15, 0, GlobalText[3509], 2, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 94, m_Pos.y + 174, 15, 15, 0, GlobalText[3510], 3, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 94, m_Pos.y + 191, 15, 15, 0, GlobalText[3511], 4, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 94, m_Pos.y + 226, 15, 15, 0, GlobalText[3510], 5, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 94, m_Pos.y + 243, 15, 15, 0, GlobalText[3511], 6, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 226, 15, 15, 0, GlobalText[3512], 7, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 25, m_Pos.y + 276, 15, 15, 0, GlobalText[3513], 8, 0);
 
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 60, m_MainPos.y + 218, 15, 15, 0, GlobalText[3514], 9, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 15, m_MainPos.y + 218, 15, 15, 0, GlobalText[3515], 10, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 79, m_MainPos.y + 97, 15, 15, 0, GlobalText[3516], 11, 0);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 79, m_MainPos.y + 97, 15, 15, 0, GlobalText[3517], 12, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 60, m_Pos.y + 218, 15, 15, 0, GlobalText[3514], 9, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 15, m_Pos.y + 218, 15, 15, 0, GlobalText[3515], 10, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3516], 11, 0);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3517], 12, 0);
 
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 79, m_MainPos.y + 80, 15, 15, 0, GlobalText[3518], 13, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 17, m_MainPos.y + 125, 15, 15, 0, GlobalText[3519], 14, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 17, m_MainPos.y + 152, 15, 15, 0, GlobalText[3520], 15, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, GlobalText[3518], 13, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 17, m_Pos.y + 125, 15, 15, 0, GlobalText[3519], 14, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 17, m_Pos.y + 152, 15, 15, 0, GlobalText[3520], 15, 1);
 
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 22, m_MainPos.y + 170, 15, 15, 0, GlobalText[3521], 16, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 85, m_MainPos.y + 170, 15, 15, 0, GlobalText[3522], 17, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 22, m_MainPos.y + 185, 15, 15, 0, GlobalText[3523], 18, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 85, m_MainPos.y + 185, 15, 15, 0, GlobalText[3524], 19, 1);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 22, m_MainPos.y + 200, 15, 15, 0, GlobalText[3525], 20, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 22, m_Pos.y + 170, 15, 15, 0, GlobalText[3521], 16, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 85, m_Pos.y + 170, 15, 15, 0, GlobalText[3522], 17, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 22, m_Pos.y + 185, 15, 15, 0, GlobalText[3523], 18, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 85, m_Pos.y + 185, 15, 15, 0, GlobalText[3524], 19, 1);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 22, m_Pos.y + 200, 15, 15, 0, GlobalText[3525], 20, 1);
     //--
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 80, 15, 15, 0, GlobalText[3591], 21, 2);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 97, 15, 15, 0, GlobalText[3592], 23, 2);
-    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_MainPos.x + 18, m_MainPos.y + 125, 15, 15, 0, GlobalText[3594], 22, 2);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 80, 15, 15, 0, GlobalText[3591], 21, 2);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 97, 15, 15, 0, GlobalText[3592], 23, 2);
+    InsertCheckBox(BITMAP_OPTION_BEGIN + 5, m_Pos.x + 18, m_Pos.y + 125, 15, 15, 0, GlobalText[3594], 22, 2);
 
     RegisterBoxCharacter(0xFF, 0);
     RegisterBoxCharacter(0xFF, 1);
@@ -270,19 +277,19 @@ void SEASON3B::CNewUIMuHelper::InitCheckBox()
     RegisterBoxCharacter(Rage_Fighter, 6);
 }
 
-void SEASON3B::CNewUIMuHelper::InitImage()
+void CNewUIMuHelper::InitImage()
 {
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 17, m_MainPos.y + 171, 32, 38, 0, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 61, m_MainPos.y + 171, 32, 38, 1, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 61, m_MainPos.y + 222, 32, 38, 2, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 21, m_MainPos.y + 293, 32, 38, 3, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 55, m_MainPos.y + 293, 32, 38, 4, 0);
-    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_MainPos.x + 89, m_MainPos.y + 293, 32, 38, 5, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 17, m_Pos.y + 171, 32, 38, 0, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 61, m_Pos.y + 171, 32, 38, 1, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 61, m_Pos.y + 222, 32, 38, 2, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 21, m_Pos.y + 293, 32, 38, 3, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 55, m_Pos.y + 293, 32, 38, 4, 0);
+    InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 89, m_Pos.y + 293, 32, 38, 5, 0);
 
-    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_MainPos.x + 140, m_MainPos.y + 137, 20, 15, 6, 0);
-    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_MainPos.x + 140, m_MainPos.y + 174, 20, 15, 7, 0);
-    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_MainPos.x + 140, m_MainPos.y + 226, 20, 15, 8, 0);
-    InsertIcon(IMAGE_MACROUI_HELPER_INPUTSTRING, m_MainPos.x + 34, m_MainPos.y + 216, 94, 15, 9, 1);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 140, m_Pos.y + 137, 20, 15, 6, 0);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 140, m_Pos.y + 174, 20, 15, 7, 0);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 140, m_Pos.y + 226, 20, 15, 8, 0);
+    InsertIcon(IMAGE_MACROUI_HELPER_INPUTSTRING, m_Pos.x + 34, m_Pos.y + 216, 94, 15, 9, 1);
 
     RegisterIconCharacter(0xFF, 0);
     RegisterIconCharacter(0xFF, 1);
@@ -307,24 +314,24 @@ void SEASON3B::CNewUIMuHelper::InitImage()
     RegisterIconCharacter(Rage_Fighter, 8);
 }
 
-void SEASON3B::CNewUIMuHelper::InitText()
+void CNewUIMuHelper::InitText()
 {
-    InsertText(m_MainPos.x + 18, m_MainPos.y + 78, GlobalText[3526], 1, 0);
-    InsertText(m_MainPos.x + 18, m_MainPos.y + 83, L"________", 2, 0);
-    InsertText(m_MainPos.x + 110, m_MainPos.y + 141, GlobalText[3527], 3, 0);
+    InsertText(m_Pos.x + 18, m_Pos.y + 78, GlobalText[3526], 1, 0);
+    InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 2, 0);
+    InsertText(m_Pos.x + 110, m_Pos.y + 141, GlobalText[3527], 3, 0);
     //InsertText(m_Pos.x + 162, m_Pos.y + 141, GlobalText[3528], 4, 0);
-    InsertText(m_MainPos.x + 162, m_MainPos.y + 141, L"s", 4, 0);
+    InsertText(m_Pos.x + 162, m_Pos.y + 141, L"s", 4, 0);
 
-    InsertText(m_MainPos.x + 18, m_MainPos.y + 160, GlobalText[3529], 5, 0);
-    InsertText(m_MainPos.x + 59, m_MainPos.y + 160, GlobalText[3530], 7, 0);
+    InsertText(m_Pos.x + 18, m_Pos.y + 160, GlobalText[3529], 5, 0);
+    InsertText(m_Pos.x + 59, m_Pos.y + 160, GlobalText[3530], 7, 0);
     //InsertText(m_Pos.x + 162, m_Pos.y + 178, GlobalText[3528], 8, 0);
-    InsertText(m_MainPos.x + 162, m_MainPos.y + 178, L"s", 8, 0);
-    InsertText(m_MainPos.x + 59, m_MainPos.y + 212, GlobalText[3531], 9, 0);
+    InsertText(m_Pos.x + 162, m_Pos.y + 178, L"s", 8, 0);
+    InsertText(m_Pos.x + 59, m_Pos.y + 212, GlobalText[3531], 9, 0);
 
     //InsertText(m_Pos.x + 162, m_Pos.y + 230, GlobalText[3528], 10, 0);
-    InsertText(m_MainPos.x + 162, m_MainPos.y + 230, L"s", 10, 0);
-    InsertText(m_MainPos.x + 18, m_MainPos.y + 78, GlobalText[3532], 11, 1);
-    InsertText(m_MainPos.x + 18, m_MainPos.y + 83, L"________", 12, 1);
+    InsertText(m_Pos.x + 162, m_Pos.y + 230, L"s", 10, 0);
+    InsertText(m_Pos.x + 18, m_Pos.y + 78, GlobalText[3532], 11, 1);
+    InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 12, 1);
 
     RegisterTextCharacter(0xFF, 1);
     RegisterTextCharacter(0xFF, 2);
@@ -350,44 +357,44 @@ void SEASON3B::CNewUIMuHelper::InitText()
     RegisterTextCharacter(Rage_Fighter, 10);
 }
 
-void SEASON3B::CNewUIMuHelper::InitTextboxInput()
+void CNewUIMuHelper::InitTextboxInput()
 {
-    m_DistanceTimeInput.Init(g_hWnd, 17, 15, MAX_NUMBER_STRLEN, false);
-    m_DistanceTimeInput.SetPosition(m_MainPos.x + 142, m_MainPos.y + 140);
+    m_DistanceTimeInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
+    m_DistanceTimeInput.SetPosition(m_Pos.x + 142, m_Pos.y + 140);
     m_DistanceTimeInput.SetTextColor(255, 0, 0, 0);
     m_DistanceTimeInput.SetBackColor(255, 255, 255, 255);
     m_DistanceTimeInput.SetFont(g_hFont);
     m_DistanceTimeInput.SetState(UISTATE_NORMAL);
     m_DistanceTimeInput.SetOption(UIOPTION_NUMBERONLY);
 
-    m_Skill2DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_STRLEN, false);
-    m_Skill2DelayInput.SetPosition(m_MainPos.x + 142, m_MainPos.y + 177);
+    m_Skill2DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
+    m_Skill2DelayInput.SetPosition(m_Pos.x + 142, m_Pos.y + 177);
     m_Skill2DelayInput.SetTextColor(255, 0, 0, 0);
     m_Skill2DelayInput.SetBackColor(255, 255, 255, 255);
     m_Skill2DelayInput.SetFont(g_hFont);
     m_Skill2DelayInput.SetState(UISTATE_NORMAL);
     m_Skill2DelayInput.SetOption(UIOPTION_NUMBERONLY);
 
-    m_Skill3DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_STRLEN, false);
-    m_Skill3DelayInput.SetPosition(m_MainPos.x + 142, m_MainPos.y + 229);
+    m_Skill3DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
+    m_Skill3DelayInput.SetPosition(m_Pos.x + 142, m_Pos.y + 229);
     m_Skill3DelayInput.SetTextColor(255, 0, 0, 0);
     m_Skill3DelayInput.SetBackColor(255, 255, 255, 255);
     m_Skill3DelayInput.SetFont(g_hFont);
     m_Skill3DelayInput.SetState(UISTATE_NORMAL);
     m_Skill3DelayInput.SetOption(UIOPTION_NUMBERONLY);
 
-    m_ItemInput.Init(g_hWnd, 88, 15, MAX_ITEM_STRLEN, false);
-    m_ItemInput.SetPosition(m_MainPos.x + 36, m_MainPos.y + 219);
+    m_ItemInput.Init(g_hWnd, 88, 15, MAX_ITEM_NAME, false);
+    m_ItemInput.SetPosition(m_Pos.x + 36, m_Pos.y + 219);
     m_ItemInput.SetTextColor(255, 0, 0, 0);
     m_ItemInput.SetBackColor(255, 255, 255, 255);
     m_ItemInput.SetFont(g_hFont);
     m_ItemInput.SetState(UISTATE_HIDE);
 
     m_ItemFilter.SetSize(160, 70);
-    m_ItemFilter.SetPosition(m_MainPos.x + 20, m_MainPos.y + 238 + m_ItemFilter.GetHeight());
+    m_ItemFilter.SetPosition(m_Pos.x + 20, m_Pos.y + 238 + m_ItemFilter.GetHeight());
 }
 
-bool SEASON3B::CNewUIMuHelper::Update()
+bool CNewUIMuHelper::Update()
 {
     if (IsVisible())
     {
@@ -397,9 +404,9 @@ bool SEASON3B::CNewUIMuHelper::Update()
             return true;
 
 
-        m_iNumCurOpenTab = iNumCurOpenTab;
+        m_iCurrentOpenTab = iNumCurOpenTab;
 
-        if (m_iNumCurOpenTab == 0)
+        if (m_iCurrentOpenTab == 0)
         {
             m_DistanceTimeInput.SetState(UISTATE_NORMAL);
             m_Skill2DelayInput.SetState(UISTATE_NORMAL);
@@ -408,7 +415,7 @@ bool SEASON3B::CNewUIMuHelper::Update()
 
             m_DistanceTimeInput.GiveFocus();
         }
-        else if (m_iNumCurOpenTab == 1)
+        else if (m_iCurrentOpenTab == 1)
         {
             m_DistanceTimeInput.SetState(UISTATE_HIDE);
             m_Skill2DelayInput.SetState(UISTATE_HIDE);
@@ -421,10 +428,10 @@ bool SEASON3B::CNewUIMuHelper::Update()
     return true;
 }
 
-bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
+bool CNewUIMuHelper::UpdateMouseEvent()
 {
     // Ignore events outside MU Helper window
-    if (!CheckMouseIn(m_MainPos.x, m_MainPos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
+    if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
     {
         return true;
     }
@@ -458,10 +465,37 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
         {
             RemoveExtraItem();
         }
+        else if (iButtonId == BUTTON_ID_SKILL2_CONFIG)
+        {
+            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_SKILL2_CONFIG);
+        }
+        else if (iButtonId == BUTTON_ID_SKILL3_CONFIG)
+        {
+            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_SKILL3_CONFIG);
+        }
+        else if (iButtonId == BUTTON_ID_POTION_CONFIG_ELF)
+        {
+            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_POTION_CONFIG_ELF);
+        }
+        else if (iButtonId == BUTTON_ID_POTION_CONFIG_SUMMY)
+        {
+            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_POTION_CONFIG_SUMMY);
+        }
+        else if (iButtonId == BUTTON_ID_POTION_CONFIG)
+        {
+            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_POTION_CONFIG);
+        }
+        else if (iButtonId == BUTTON_ID_PARTY_CONFIG)
+        {
+            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_PARTY_CONFIG);
+        }
+        else if (iButtonId == BUTTON_ID_PARTY_CONFIG_ELF)
+        {
+            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_PARTY_CONFIG_ELF);
+        }
         else if (iButtonId == BUTTON_ID_EXIT_CONFIG)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
-            SetFocus(g_hWnd);
+            this->Show(false);
         }
         else if (iButtonId == BUTTON_ID_INIT_CONFIG)
         {
@@ -496,7 +530,7 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
             g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Clicked skill slot [%d]", iIconIndex);
             m_iSelectedSkillSlot = iIconIndex;
 
-            bool bPrevVisible = g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+            bool bPrevVisible = g_pNewUISystem->IsVisible(INTERFACE_MUHELPER_SKILL_LIST);
 
             if (iIconIndex == SKILL_SLOT_SKILL1 
                 || iIconIndex == SKILL_SLOT_SKILL2 
@@ -511,11 +545,11 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
 
             if (iIconIndex == iPrevIndex && bPrevVisible)
             {
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+                g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
             }
             else
             {
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+                g_pNewUISystem->Show(INTERFACE_MUHELPER_SKILL_LIST);
             }
 
             return false;
@@ -548,7 +582,7 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
         }
     }
 
-    if (m_iNumCurOpenTab == 1)
+    if (m_iCurrentOpenTab == 1)
     {
         m_ItemFilter.DoAction();
     }
@@ -556,14 +590,14 @@ bool SEASON3B::CNewUIMuHelper::UpdateMouseEvent()
     return false;
 }
 
-bool SEASON3B::CNewUIMuHelper::UpdateKeyEvent()
+bool CNewUIMuHelper::UpdateKeyEvent()
 {
     if (IsVisible())
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+            g_pNewUISystem->Hide(INTERFACE_MUHELPER);
+            g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
             //PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -572,7 +606,7 @@ bool SEASON3B::CNewUIMuHelper::UpdateKeyEvent()
     return true;
 }
 
-void SEASON3B::CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
+void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
 {
     switch (iCheckboxId) {
     case CHECKBOX_ID_POTION:
@@ -674,7 +708,7 @@ void SEASON3B::CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bSt
     }
 }
 
-void SEASON3B::CNewUIMuHelper::ApplyConfigFromSkillSlot(int iSlot, int iSkill)
+void CNewUIMuHelper::ApplyConfigFromSkillSlot(int iSlot, int iSkill)
 {
     if (iSlot < 3)
     {
@@ -686,7 +720,7 @@ void SEASON3B::CNewUIMuHelper::ApplyConfigFromSkillSlot(int iSlot, int iSkill)
     }
 }
 
-void SEASON3B::CNewUIMuHelper::ApplyHuntRangeUpdate(int iDelta)
+void CNewUIMuHelper::ApplyHuntRangeUpdate(int iDelta)
 {
     m_TempConfig.iHuntingRange += iDelta;
     if (m_TempConfig.iHuntingRange < 0)
@@ -699,7 +733,7 @@ void SEASON3B::CNewUIMuHelper::ApplyHuntRangeUpdate(int iDelta)
     }
 }
 
-void SEASON3B::CNewUIMuHelper::ApplyLootRangeUpdate(int iDelta)
+void CNewUIMuHelper::ApplyLootRangeUpdate(int iDelta)
 {
     m_TempConfig.iObtainingRange += iDelta;
     if (m_TempConfig.iObtainingRange < 1)
@@ -712,9 +746,9 @@ void SEASON3B::CNewUIMuHelper::ApplyLootRangeUpdate(int iDelta)
     }
 }
 
-void SEASON3B::CNewUIMuHelper::SaveExtraItem()
+void CNewUIMuHelper::SaveExtraItem()
 {
-    wchar_t wsExtraItem[MAX_ITEM_STRLEN + 1] = { 0 };
+    wchar_t wsExtraItem[MAX_ITEM_NAME + 1] = { 0 };
 
     m_ItemInput.GetText(wsExtraItem, sizeof(wsExtraItem));
     
@@ -729,7 +763,7 @@ void SEASON3B::CNewUIMuHelper::SaveExtraItem()
     m_ItemInput.SetText(L"");
 }
 
-void SEASON3B::CNewUIMuHelper::RemoveExtraItem()
+void CNewUIMuHelper::RemoveExtraItem()
 {
     FILTERLIST_TEXT* pText = m_ItemFilter.GetSelectedText();
     if (pText)
@@ -739,7 +773,7 @@ void SEASON3B::CNewUIMuHelper::RemoveExtraItem()
     }
 }
 
-int SEASON3B::CNewUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
+int CNewUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
 {
     wchar_t* end;
 
@@ -753,7 +787,7 @@ int SEASON3B::CNewUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
     return value;
 }
 
-void SEASON3B::CNewUIMuHelper::InitConfig()
+void CNewUIMuHelper::InitConfig()
 {
     ResetBoxList();
 
@@ -763,9 +797,9 @@ void SEASON3B::CNewUIMuHelper::InitConfig()
     m_TempConfig.iObtainingRange = 1;
 }
 
-void SEASON3B::CNewUIMuHelper::SaveConfig()
+void CNewUIMuHelper::SaveConfig()
 {
-    wchar_t wsNumberInput[MAX_NUMBER_STRLEN + 1]{};
+    wchar_t wsNumberInput[MAX_NUMBER_DIGITS + 1]{};
 
     m_DistanceTimeInput.GetText(wsNumberInput, sizeof(wsNumberInput));
     m_TempConfig.iMaxSecondsAway = GetIntFromTextInput(wsNumberInput);
@@ -779,23 +813,33 @@ void SEASON3B::CNewUIMuHelper::SaveConfig()
     g_MuHelper.Save(m_TempConfig);
 }
 
-float SEASON3B::CNewUIMuHelper::GetLayerDepth()
+float CNewUIMuHelper::GetLayerDepth()
 {
     return 3.4;
 }
 
-float SEASON3B::CNewUIMuHelper::GetKeyEventOrder()
+float CNewUIMuHelper::GetKeyEventOrder()
 {
     return 3.4;
 }
 
-void SEASON3B::CNewUIMuHelper::Show(bool bShow)
+void CNewUIMuHelper::Show(bool bShow)
 {
     CNewUIObj::Show(bShow);
+
+    if (bShow == false)
+    {
+        if (g_pNewUIMuHelperExt)
+            g_pNewUIMuHelperExt->Show(false);
+
+        if (g_pNewUIMuHelperSkillList)
+            g_pNewUIMuHelperSkillList->Show(false);
+    }
+
     SetFocus(g_hWnd);
 }
 
-bool SEASON3B::CNewUIMuHelper::Render()
+bool CNewUIMuHelper::Render()
 {
     EnableAlphaTest();
     glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -806,54 +850,54 @@ bool SEASON3B::CNewUIMuHelper::Render()
     g_pRenderText->SetTextColor(0xFFFFFFFF);
     g_pRenderText->SetBgColor(0);
 
-    RenderImage(IMAGE_BASE_WINDOW_BACK, m_MainPos.x, m_MainPos.y, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
-    RenderImage(IMAGE_BASE_WINDOW_TOP, m_MainPos.x, m_MainPos.y, float(WINDOW_WIDTH), 64.f);
-    RenderImage(IMAGE_BASE_WINDOW_LEFT, m_MainPos.x, m_MainPos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_BASE_WINDOW_RIGHT, m_MainPos.x + float(WINDOW_WIDTH) - 21.f, m_MainPos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_BASE_WINDOW_BOTTOM, m_MainPos.x, m_MainPos.y + float(WINDOW_HEIGHT) - 45.f, float(WINDOW_WIDTH), 45.f);
+    RenderImage(IMAGE_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
+    RenderImage(IMAGE_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(WINDOW_WIDTH), 64.f);
+    RenderImage(IMAGE_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
+    RenderImage(IMAGE_BASE_WINDOW_RIGHT, m_Pos.x + float(WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
+    RenderImage(IMAGE_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(WINDOW_HEIGHT) - 45.f, float(WINDOW_WIDTH), 45.f);
 
     g_pRenderText->SetFont(g_hFontBold);
 
-    g_pRenderText->RenderText(m_MainPos.x, m_MainPos.y + 13, GlobalText[3536], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3536], 190, 0, RT3_SORT_CENTER);
 
-    RenderBack(m_MainPos.x + 12, m_MainPos.y + 340, 165, 46);
+    RenderBack(m_Pos.x + 12, m_Pos.y + 340, 165, 46);
 
     g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->RenderText(m_MainPos.x + 20, m_MainPos.y + 347, GlobalText[3537], 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 347, GlobalText[3537], 0, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(0xFF00B4FF);
-    g_pRenderText->RenderText(m_MainPos.x + 20, m_MainPos.y + 365, GlobalText[3538], 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 365, GlobalText[3538], 0, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(TextColor);
 
     m_TabBtn.Render();
 
-    if (m_iNumCurOpenTab == 1)
+    if (m_iCurrentOpenTab == 1)
     {
-        RenderBack(m_MainPos.x + 12, m_MainPos.y + 73, 68, 50);
-        RenderBack(m_MainPos.x + 75, m_MainPos.y + 73, 102, 50);
-        RenderBack(m_MainPos.x + 12, m_MainPos.y + 120, 165, 30);
-        RenderBack(m_MainPos.x + 12, m_MainPos.y + 147, 165, 195);
-        RenderBack(m_MainPos.x + 16, m_MainPos.y + 235, 158, 75);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 73, 68, 50);
+        RenderBack(m_Pos.x + 75, m_Pos.y + 73, 102, 50);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 30);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 147, 165, 195);
+        RenderBack(m_Pos.x + 16, m_Pos.y + 235, 158, 75);
 
-        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iObtainingRange, m_MainPos.x + 29, m_MainPos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
+        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iObtainingRange, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
 
         m_ItemFilter.Render();
     }
-    else if (m_iNumCurOpenTab == 2)
+    else if (m_iCurrentOpenTab == 2)
     {
-        RenderBack(m_MainPos.x + 12, m_MainPos.y + 73, 165, 50);
-        RenderBack(m_MainPos.x + 12, m_MainPos.y + 120, 165, 222);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 73, 165, 50);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 222);
     }
     else
     {
-        RenderBack(m_MainPos.x + 12, m_MainPos.y + 73, 68, 50);
-        RenderBack(m_MainPos.x + 75, m_MainPos.y + 73, 102, 50);
-        RenderBack(m_MainPos.x + 12, m_MainPos.y + 120, 165, 39);
-        RenderBack(m_MainPos.x + 12, m_MainPos.y + 156, 165, 120);
-        RenderBack(m_MainPos.x + 12, m_MainPos.y + 273, 165, 69);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 73, 68, 50);
+        RenderBack(m_Pos.x + 75, m_Pos.y + 73, 102, 50);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 120, 165, 39);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 156, 165, 120);
+        RenderBack(m_Pos.x + 12, m_Pos.y + 273, 165, 69);
 
-        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iHuntingRange, m_MainPos.x + 29, m_MainPos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
+        RenderImage(BITMAP_DISTANCE_BEGIN + m_TempConfig.iHuntingRange, m_Pos.x + 29, m_Pos.y + 92, 15, 19, 0.f, 0.f, 15.f / 16.f, 19.f / 32.f);
     }
 
     RenderBoxList();
@@ -861,13 +905,13 @@ bool SEASON3B::CNewUIMuHelper::Render()
     RenderTextList();
     RenderBtnList();
 
-    if (m_iNumCurOpenTab == 0)
+    if (m_iCurrentOpenTab == 0)
     {
         m_DistanceTimeInput.Render();
         m_Skill2DelayInput.Render();
         m_Skill3DelayInput.Render();
     }
-    else if (m_iNumCurOpenTab == 1)
+    else if (m_iCurrentOpenTab == 1)
     {
         m_ItemInput.Render();
     }
@@ -877,7 +921,7 @@ bool SEASON3B::CNewUIMuHelper::Render()
     return true;
 }
 
-void SEASON3B::CNewUIMuHelper::RenderBack(int x, int y, int width, int height)
+void CNewUIMuHelper::RenderBack(int x, int y, int width, int height)
 {
     EnableAlphaTest();
     glColor4f(0.0, 0.0, 0.0, 0.4f);
@@ -894,7 +938,7 @@ void SEASON3B::CNewUIMuHelper::RenderBack(int x, int y, int width, int height)
     RenderImage(IMAGE_TABLE_LEFT_PIXEL, x, (y + 6.f), 14.0, (height - 14.f));
 }
 
-void SEASON3B::CNewUIMuHelper::LoadImages()
+void CNewUIMuHelper::LoadImages()
 {
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_RangeMinus.tga", IMAGE_MACROUI_HELPER_RAGEMINUS, GL_LINEAR, GL_CLAMP, 1, 0);
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_OptionButton.tga", IMAGE_MACROUI_HELPER_OPTIONBUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
@@ -904,7 +948,7 @@ void SEASON3B::CNewUIMuHelper::LoadImages()
     LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
 }
 
-void SEASON3B::CNewUIMuHelper::UnloadImages()
+void CNewUIMuHelper::UnloadImages()
 {
     DeleteBitmap(IMAGE_MACROUI_HELPER_RAGEMINUS);
     DeleteBitmap(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
@@ -917,12 +961,12 @@ void SEASON3B::CNewUIMuHelper::UnloadImages()
 //===============================================================================================================
 //===============================================================================================================
 
-void SEASON3B::CNewUIMuHelper::RegisterButton(int Identifier, CButtonTap button)
+void CNewUIMuHelper::RegisterButton(int Identifier, CButtonTap button)
 {
     m_ButtonList.insert(std::pair<int, CButtonTap>(Identifier, button));
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Identifier)
+void CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Identifier)
 {
     auto li = m_ButtonList.find(Identifier);
 
@@ -940,7 +984,7 @@ void SEASON3B::CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Id
     }
 }
 
-void SEASON3B::CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identifier, int iNumTab)
+void CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identifier, int iNumTab)
 {
     CButtonTap cBTN;
     auto* button = new CNewUIButton();
@@ -963,7 +1007,7 @@ void SEASON3B::CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, 
     RegisterButton(Identifier, cBTN);
 }
 
-void SEASON3B::CNewUIMuHelper::RenderBtnList()
+void CNewUIMuHelper::RenderBtnList()
 {
     auto li = m_ButtonList.begin();
 
@@ -971,14 +1015,14 @@ void SEASON3B::CNewUIMuHelper::RenderBtnList()
     {
         CButtonTap* cBTN = &li->second;
 
-        if ((cBTN->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cBTN->iNumTab == m_iNumCurOpenTab || cBTN->iNumTab == -1))
+        if ((cBTN->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cBTN->iNumTab == m_iCurrentOpenTab || cBTN->iNumTab == -1))
         {
             cBTN->btn->Render();
         }
     }
 }
 
-int SEASON3B::CNewUIMuHelper::UpdateMouseBtnList()
+int CNewUIMuHelper::UpdateMouseBtnList()
 {
     auto li = m_ButtonList.begin();
 
@@ -986,7 +1030,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBtnList()
     {
         CButtonTap* cBTN = &li->second;
 
-        if ((cBTN->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cBTN->iNumTab == m_iNumCurOpenTab || cBTN->iNumTab == -1))
+        if ((cBTN->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cBTN->iNumTab == m_iCurrentOpenTab || cBTN->iNumTab == -1))
         {
             if (cBTN->btn->UpdateMouseEvent())
             {
@@ -1000,7 +1044,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBtnList()
 //===============================================================================================================
 //===============================================================================================================
 
-void SEASON3B::CNewUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Identifier)
+void CNewUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Identifier)
 {
     auto li = m_CheckBoxList.find(Identifier);
 
@@ -1019,12 +1063,12 @@ void SEASON3B::CNewUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Id
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterCheckBox(int Identifier, CheckBoxTap button)
+void CNewUIMuHelper::RegisterCheckBox(int Identifier, CheckBoxTap button)
 {
     m_CheckBoxList.insert(std::pair<int, CheckBoxTap>(Identifier, button));
 }
 
-void SEASON3B::CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg,std::wstring btname, int Identifier, int iNumTab)
+void CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg,std::wstring btname, int Identifier, int iNumTab)
 {
     CheckBoxTap cBOX;
 
@@ -1043,7 +1087,7 @@ void SEASON3B::CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx
     RegisterCheckBox(Identifier, cBOX);
 }
 
-void SEASON3B::CNewUIMuHelper::RenderBoxList()
+void CNewUIMuHelper::RenderBoxList()
 {
     auto li = m_CheckBoxList.begin();
 
@@ -1051,14 +1095,14 @@ void SEASON3B::CNewUIMuHelper::RenderBoxList()
     {
         CheckBoxTap* cBOX = &li->second;
 
-        if ((cBOX->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cBOX->iNumTab == m_iNumCurOpenTab || cBOX->iNumTab == -1))
+        if ((cBOX->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cBOX->iNumTab == m_iCurrentOpenTab || cBOX->iNumTab == -1))
         {
             cBOX->box->Render();
         }
     }
 }
 
-void SEASON3B::CNewUIMuHelper::ResetBoxList()
+void CNewUIMuHelper::ResetBoxList()
 {
     auto li = m_CheckBoxList.begin();
 
@@ -1069,7 +1113,7 @@ void SEASON3B::CNewUIMuHelper::ResetBoxList()
     }
 }
 
-int SEASON3B::CNewUIMuHelper::UpdateMouseBoxList()
+int CNewUIMuHelper::UpdateMouseBoxList()
 {
     auto li = m_CheckBoxList.begin();
 
@@ -1077,7 +1121,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBoxList()
     {
         CheckBoxTap* cBOX = &li->second;
 
-        if ((cBOX->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cBOX->iNumTab == m_iNumCurOpenTab || cBOX->iNumTab == -1))
+        if ((cBOX->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cBOX->iNumTab == m_iCurrentOpenTab || cBOX->iNumTab == -1))
         {
             if (cBOX->box->UpdateMouseEvent())
             {
@@ -1091,7 +1135,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseBoxList()
 //===============================================================================================================
 //===============================================================================================================
 
-void SEASON3B::CNewUIMuHelper::RenderIconList()
+void CNewUIMuHelper::RenderIconList()
 {
     auto li = m_IconList.begin();
 
@@ -1099,7 +1143,7 @@ void SEASON3B::CNewUIMuHelper::RenderIconList()
     {
         cTexture* cImage = &li->second;
 
-        if ((cImage->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cImage->iNumTab == m_iNumCurOpenTab || cImage->iNumTab == -1))
+        if ((cImage->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cImage->iNumTab == m_iCurrentOpenTab || cImage->iNumTab == -1))
         {
             RenderImage(cImage->s_ImgIndex, cImage->m_Pos.x, cImage->m_Pos.y, cImage->m_Size.x, cImage->m_Size.y);
             
@@ -1114,7 +1158,7 @@ void SEASON3B::CNewUIMuHelper::RenderIconList()
     }
 }
 
-int SEASON3B::CNewUIMuHelper::UpdateMouseIconList()
+int CNewUIMuHelper::UpdateMouseIconList()
 {
     auto li = m_IconList.begin();
 
@@ -1122,7 +1166,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseIconList()
     {
         cTexture* cImage = &li->second;
 
-        if ((cImage->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cImage->iNumTab == m_iNumCurOpenTab || cImage->iNumTab == -1))
+        if ((cImage->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cImage->iNumTab == m_iCurrentOpenTab || cImage->iNumTab == -1))
         {
             if (CheckMouseIn(cImage->m_Pos.x, cImage->m_Pos.y, cImage->m_Size.x, cImage->m_Size.y))
             {
@@ -1134,7 +1178,7 @@ int SEASON3B::CNewUIMuHelper::UpdateMouseIconList()
     return -1;
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterIconCharacter(BYTE class_character, int Identifier)
+void CNewUIMuHelper::RegisterIconCharacter(BYTE class_character, int Identifier)
 {
     auto li = m_IconList.find(Identifier);
 
@@ -1153,12 +1197,12 @@ void SEASON3B::CNewUIMuHelper::RegisterIconCharacter(BYTE class_character, int I
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterIcon(int Identifier, cTexture button)
+void CNewUIMuHelper::RegisterIcon(int Identifier, cTexture button)
 {
     m_IconList.insert(std::pair<int, cTexture>(Identifier, button));
 }
 
-void SEASON3B::CNewUIMuHelper::InsertIcon(int imgindex, int x, int y, int sx, int sy, int Identifier, int iNumTab)
+void CNewUIMuHelper::InsertIcon(int imgindex, int x, int y, int sx, int sy, int Identifier, int iNumTab)
 {
     cTexture cImage;
 
@@ -1177,7 +1221,7 @@ void SEASON3B::CNewUIMuHelper::InsertIcon(int imgindex, int x, int y, int sx, in
 //===============================================================================================================
 //===============================================================================================================
 
-void SEASON3B::CNewUIMuHelper::RenderTextList()
+void CNewUIMuHelper::RenderTextList()
 {
     auto li = m_TextNameList.begin();
 
@@ -1185,14 +1229,14 @@ void SEASON3B::CNewUIMuHelper::RenderTextList()
     {
         cTextName* cImage = &li->second;
 
-        if ((cImage->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cImage->iNumTab == m_iNumCurOpenTab || cImage->iNumTab == -1))
+        if ((cImage->class_character[gCharacterManager.GetBaseClass(Hero->Class)]) && (cImage->iNumTab == m_iCurrentOpenTab || cImage->iNumTab == -1))
         {
             g_pRenderText->RenderText(cImage->m_Pos.x, cImage->m_Pos.y, cImage->m_Name.c_str());
         }
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int Identifier)
+void CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int Identifier)
 {
     auto li = m_TextNameList.find(Identifier);
 
@@ -1211,12 +1255,12 @@ void SEASON3B::CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int I
     }
 }
 
-void SEASON3B::CNewUIMuHelper::RegisterText(int Identifier, cTextName button)
+void CNewUIMuHelper::RegisterText(int Identifier, cTextName button)
 {
     m_TextNameList.insert(std::pair<int, cTextName>(Identifier, button));
 }
 
-void SEASON3B::CNewUIMuHelper::InsertText(int x, int y,std::wstring Name, int Identifier, int iNumTab)
+void CNewUIMuHelper::InsertText(int x, int y,std::wstring Name, int Identifier, int iNumTab)
 {
     cTextName cText;
 
@@ -1229,7 +1273,7 @@ void SEASON3B::CNewUIMuHelper::InsertText(int x, int y,std::wstring Name, int Id
     RegisterText(Identifier, cText);
 }
 
-void SEASON3B::CNewUIMuHelper::AssignSkill(int iSkill)
+void CNewUIMuHelper::AssignSkill(int iSkill)
 {
     if (m_iSelectedSkillSlot != -1 && m_iSelectedSkillSlot < MAX_SKILLS_SLOT)
     {
@@ -1249,12 +1293,12 @@ void SEASON3B::CNewUIMuHelper::AssignSkill(int iSkill)
     }
 }
 
-bool SEASON3B::CNewUIMuHelper::IsSkillAssigned(int iSkill)
+bool CNewUIMuHelper::IsSkillAssigned(int iSkill)
 {
     return std::find(m_aiSelectedSkills.begin(), m_aiSelectedSkills.end(), iSkill) != m_aiSelectedSkills.end();
 }
 
-int SEASON3B::CNewUIMuHelper::GetSkillIndex(int iSkill)
+int CNewUIMuHelper::GetSkillIndex(int iSkill)
 {
     auto it = std::find(m_aiSelectedSkills.begin(), m_aiSelectedSkills.end(), iSkill);
 
@@ -1265,7 +1309,7 @@ int SEASON3B::CNewUIMuHelper::GetSkillIndex(int iSkill)
     return -1;
 }
 
-void SEASON3B::CNewUIMuHelper::RenderSkillIcon(int skill, float x, float y, float width, float height)
+void CNewUIMuHelper::RenderSkillIcon(int skill, float x, float y, float width, float height)
 {
     float fU, fV;
     int iKindofSkill = 0;
@@ -1429,25 +1473,25 @@ void SEASON3B::CNewUIMuHelper::RenderSkillIcon(int skill, float x, float y, floa
     }
 }
 
-SEASON3B::CNewUIMuHelperSkillList::CNewUIMuHelperSkillList()
+CNewUIMuHelperSkillList::CNewUIMuHelperSkillList()
 {
     m_pNewUIMng = NULL;
     Reset();
 }
 
-SEASON3B::CNewUIMuHelperSkillList::~CNewUIMuHelperSkillList()
+CNewUIMuHelperSkillList::~CNewUIMuHelperSkillList()
 {
     Release();
 }
 
 
-bool SEASON3B::CNewUIMuHelperSkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
+bool CNewUIMuHelperSkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST, this);
+    m_pNewUIMng->AddUIObj(INTERFACE_MUHELPER_SKILL_LIST, this);
 
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
 
@@ -1458,7 +1502,7 @@ bool SEASON3B::CNewUIMuHelperSkillList::Create(CNewUIManager* pNewUIMng, CNewUI3
     return true;
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::Release()
+void CNewUIMuHelperSkillList::Release()
 {
     if (m_pNewUI3DRenderMng)
     {
@@ -1474,7 +1518,7 @@ void SEASON3B::CNewUIMuHelperSkillList::Release()
     }
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::Reset()
+void CNewUIMuHelperSkillList::Reset()
 {
     m_bRenderSkillInfo = false;
     m_iRenderSkillInfoType = 0;
@@ -1484,7 +1528,7 @@ void SEASON3B::CNewUIMuHelperSkillList::Reset()
     m_EventState = EVENT_NONE;
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::LoadImages()
+void CNewUIMuHelperSkillList::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_skill.jpg", IMAGE_SKILL1, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
@@ -1498,7 +1542,7 @@ void SEASON3B::CNewUIMuHelperSkillList::LoadImages()
     LoadBitmap(L"Interface\\newui_non_skill3.jpg", IMAGE_NON_SKILL3, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::UnloadImages()
+void CNewUIMuHelperSkillList::UnloadImages()
 {
     DeleteBitmap(IMAGE_SKILL1);
     DeleteBitmap(IMAGE_SKILL2);
@@ -1512,7 +1556,7 @@ void SEASON3B::CNewUIMuHelperSkillList::UnloadImages()
     DeleteBitmap(IMAGE_NON_SKILL3);
 }
 
-bool SEASON3B::CNewUIMuHelperSkillList::UpdateMouseEvent()
+bool CNewUIMuHelperSkillList::UpdateMouseEvent()
 {
     if (IsRelease(VK_LBUTTON))
     {
@@ -1531,13 +1575,13 @@ bool SEASON3B::CNewUIMuHelperSkillList::UpdateMouseEvent()
     return false;
 }
 
-bool SEASON3B::CNewUIMuHelperSkillList::UpdateKeyEvent()
+bool CNewUIMuHelperSkillList::UpdateKeyEvent()
 {
     if (IsVisible())
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST);
+            g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
             //PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -1546,7 +1590,7 @@ bool SEASON3B::CNewUIMuHelperSkillList::UpdateKeyEvent()
     return true;
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::PrepareSkillsToRender()
+void CNewUIMuHelperSkillList::PrepareSkillsToRender()
 {
     m_aiSkillsToRender.clear();
     m_skillIconMap.clear();
@@ -1577,12 +1621,12 @@ void SEASON3B::CNewUIMuHelperSkillList::PrepareSkillsToRender()
     }
 }
 
-bool SEASON3B::CNewUIMuHelperSkillList::Update()
+bool CNewUIMuHelperSkillList::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIMuHelperSkillList::Render()
+bool CNewUIMuHelperSkillList::Render()
 {
     float x = 640 - 190 - 32;
     float y = m_bFilterByAttackSkills ? 171 : 293;
@@ -1610,7 +1654,7 @@ bool SEASON3B::CNewUIMuHelperSkillList::Render()
             y = fOrigY - (iQuotient + 1) * height;
         }
 
-        SEASON3B::RenderImage(IMAGE_SKILLBOX, x, y, width, height);
+        RenderImage(IMAGE_SKILLBOX, x, y, width, height);
         RenderSkillIcon(iSkillType, x + 6, y + 6, 20, 28);
 
         m_skillIconMap.insert_or_assign(iSkillType, cSkillIcon{ iSkillType, { static_cast<LONG>(x), static_cast<LONG>(y) }, { static_cast<LONG>(width), static_cast<LONG>(height) } });
@@ -1627,17 +1671,17 @@ bool SEASON3B::CNewUIMuHelperSkillList::Render()
     return true;
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::RenderSkillInfo()
+void CNewUIMuHelperSkillList::RenderSkillInfo()
 {
     ::RenderSkillInfo(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
 }
 
-float SEASON3B::CNewUIMuHelperSkillList::GetLayerDepth()
+float CNewUIMuHelperSkillList::GetLayerDepth()
 {
     return 5.2f;
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::RenderSkillIcon(int iSkillType, float x, float y, float width, float height)
+void CNewUIMuHelperSkillList::RenderSkillIcon(int iSkillType, float x, float y, float width, float height)
 {
     float fU, fV;
     int iKindofSkill = 0;
@@ -1801,7 +1845,7 @@ void SEASON3B::CNewUIMuHelperSkillList::RenderSkillIcon(int iSkillType, float x,
     }
 }
 
-bool SEASON3B::CNewUIMuHelperSkillList::IsAttackSkill(int iSkillType)
+bool CNewUIMuHelperSkillList::IsAttackSkill(int iSkillType)
 {
     if (IsBuffSkill(iSkillType))
     {
@@ -1821,7 +1865,7 @@ bool SEASON3B::CNewUIMuHelperSkillList::IsAttackSkill(int iSkillType)
     return true;
 }
 
-bool SEASON3B::CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
+bool CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
 {
     // To-do: Complete list of buffs
 
@@ -1865,7 +1909,7 @@ bool SEASON3B::CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
     return false;
 }
 
-bool SEASON3B::CNewUIMuHelperSkillList::IsHealingSkill(int iSkillType)
+bool CNewUIMuHelperSkillList::IsHealingSkill(int iSkillType)
 {
     // To-do: Complete list of healing skills
 
@@ -1883,7 +1927,7 @@ bool SEASON3B::CNewUIMuHelperSkillList::IsHealingSkill(int iSkillType)
     return false;
 }
 
-bool SEASON3B::CNewUIMuHelperSkillList::IsDefenseSkill(int iSkillType)
+bool CNewUIMuHelperSkillList::IsDefenseSkill(int iSkillType)
 {
     switch (iSkillType)
     {
@@ -1894,7 +1938,7 @@ bool SEASON3B::CNewUIMuHelperSkillList::IsDefenseSkill(int iSkillType)
     return false;
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::FilterByAttackSkills()
+void CNewUIMuHelperSkillList::FilterByAttackSkills()
 {
     m_bFilterByAttackSkills = true;
     m_bFilterByBuffSkills = false;
@@ -1902,7 +1946,7 @@ void SEASON3B::CNewUIMuHelperSkillList::FilterByAttackSkills()
     PrepareSkillsToRender();
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::FilterByBuffSkills()
+void CNewUIMuHelperSkillList::FilterByBuffSkills()
 {
     m_bFilterByBuffSkills = true;
     m_bFilterByAttackSkills = false;
@@ -1910,7 +1954,7 @@ void SEASON3B::CNewUIMuHelperSkillList::FilterByBuffSkills()
     PrepareSkillsToRender();
 }
 
-void SEASON3B::CNewUIMuHelperSkillList::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void CNewUIMuHelperSkillList::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     if (pClass)
     {
@@ -1919,7 +1963,7 @@ void SEASON3B::CNewUIMuHelperSkillList::UI2DEffectCallback(LPVOID pClass, DWORD 
     }
 }
 
-int SEASON3B::CNewUIMuHelperSkillList::UpdateMouseSkillList()
+int CNewUIMuHelperSkillList::UpdateMouseSkillList()
 {
     auto li = m_skillIconMap.begin();
 
@@ -1934,4 +1978,226 @@ int SEASON3B::CNewUIMuHelperSkillList::UpdateMouseSkillList()
     }
 
     return -1;
+}
+
+CNewUIMuHelperExt::CNewUIMuHelperExt()
+{
+    m_pNewUIMng = NULL;
+    m_Pos.x = m_Pos.y = 0;
+}
+
+CNewUIMuHelperExt::~CNewUIMuHelperExt()
+{
+    Release();
+}
+
+bool CNewUIMuHelperExt::Create(CNewUIManager* pNewUIMng, int x, int y)
+{
+    if (NULL == pNewUIMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(INTERFACE_MUHELPER_EXT, this);
+
+    SetPos(x, y);
+
+    LoadImages();
+
+    InitButtons();
+
+    InitCheckBox();
+
+    InitImage();
+
+    InitText();
+
+    Show(false);
+
+    return true;
+}
+
+void CNewUIMuHelperExt::Release()
+{
+    UnloadImages();
+
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+}
+
+void CNewUIMuHelperExt::SetPos(int x, int y)
+{
+    m_Pos.x = x;
+    m_Pos.y = y;
+}
+
+void CNewUIMuHelperExt::InitText()
+{
+
+}
+
+void CNewUIMuHelperExt::InitImage()
+{
+
+}
+
+void CNewUIMuHelperExt::InitButtons()
+{
+
+}
+
+void CNewUIMuHelperExt::InitCheckBox()
+{
+
+}
+
+bool CNewUIMuHelperExt::Render()
+{
+    EnableAlphaTest();
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+
+    DWORD TextColor = g_pRenderText->GetTextColor();
+
+    g_pRenderText->SetFont(g_hFont);
+    g_pRenderText->SetTextColor(0xFFFFFFFF);
+    g_pRenderText->SetBgColor(0);
+
+    RenderImage(IMAGE_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
+    RenderImage(IMAGE_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(WINDOW_WIDTH), 64.f);
+    RenderImage(IMAGE_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
+    RenderImage(IMAGE_BASE_WINDOW_RIGHT, m_Pos.x + float(WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f, 21.f, float(WINDOW_HEIGHT) - 64.f - 45.f);
+    RenderImage(IMAGE_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(WINDOW_HEIGHT) - 45.f, float(WINDOW_WIDTH), 45.f);
+
+    g_pRenderText->SetFont(g_hFontBold);
+
+    if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF)
+    {
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, GlobalText[3546]); // "Auto Heal"
+    }
+    if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
+    {
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
+    }
+    if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG)
+    {
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
+    }
+
+    else if (m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG
+        || m_iCurrentPage == SUB_PAGE_SKILL3_CONFIG)
+    {
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3552], 190, 0, RT3_SORT_CENTER); // "Activation Skill"
+        g_pRenderText->SetTextColor(TextColor);
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3543]);
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, GlobalText[3544]);
+    }
+
+    else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG)
+    {
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3554], 190, 0, RT3_SORT_CENTER); // "Party"
+        g_pRenderText->SetTextColor(TextColor);
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3549]);
+    }
+    else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
+    {
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3554], 190, 0, RT3_SORT_CENTER); // "Party"
+        g_pRenderText->SetTextColor(TextColor);
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 70, GlobalText[3548]);
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 145, 165, 45, GlobalText[3549]);
+    }
+
+    DisableAlphaBlend();
+
+    return true;
+}
+
+void CNewUIMuHelperExt::RenderBackPane(int x, int y, int width, int height, const wchar_t* pszHeader)
+{
+    DWORD TextColor = g_pRenderText->GetTextColor();
+    int headerWidth = 65;
+
+    EnableAlphaTest();
+    glColor4f(0.0, 0.0, 0.0, 0.4f);
+    RenderColor(x + 3.f, y + 2.f, headerWidth - 7.f, 18.f, 0.0, 0);  // shade for top box
+    RenderColor(x + 3.f, y + 2.f + 18.f, width - 7.f, height - 7.f, 0.0, 0);  // shade for bottom box
+    EndRenderColor();
+
+    // Top box (tab) without bottom line
+    RenderImage(IMAGE_TABLE_TOP_LEFT, x, y, 14.0, 14.0);                                // Top-left corner of the tab
+    RenderImage(IMAGE_TABLE_TOP_RIGHT, (x + headerWidth) - 14.f, y, 14.0, 14.0);        // Top-right corner of the tab
+    RenderImage(IMAGE_TABLE_TOP_PIXEL, x + 6.f, y, (headerWidth - 12.f), 14.0);         // Top edge of the tab
+    RenderImage(IMAGE_TABLE_RIGHT_PIXEL, (x + headerWidth) - 14.f, y + 6.f, 14.0, 14.0); // Right edge of the tab
+
+    // Bottom box without top line
+    RenderImage(IMAGE_TABLE_TOP_RIGHT, (x + width) - 14.f, y + 18.f, 14.0, 14.0);       // Main box top-right corner
+    RenderImage(IMAGE_TABLE_BOTTOM_LEFT, x, (y + height + 18.f) - 14.f, 14.0, 14.0);    // Main box bottom-left corner
+    RenderImage(IMAGE_TABLE_BOTTOM_RIGHT, (x + width) - 14.f, (y + height + 18.f) - 14.f, 14.0, 14.0); // Main box bottom-right corner
+    RenderImage(IMAGE_TABLE_TOP_PIXEL, x + 2.f, y + 18.f, (width - 12.f), 14.0);        // Top edge of main box
+    RenderImage(IMAGE_TABLE_RIGHT_PIXEL, (x + width) - 14.f, y + 24.f, 14.0, (height - 14.f)); // Right edge of main box
+    RenderImage(IMAGE_TABLE_BOTTOM_PIXEL, x + 6.f, (y + height + 18.f) - 14.f, (width - 12.f), 14.0); // Bottom edge of main box
+
+    // Left line to connect top box and bottom box
+    RenderImage(IMAGE_TABLE_LEFT_PIXEL, x, y + 6.f, 14.0, (height));             // Connecting left edge
+
+    // Header inside top box
+    g_pRenderText->SetTextColor(TextColor);
+    g_pRenderText->SetFont(g_hFont);
+    g_pRenderText->RenderText(x + 10.f, y + 6.f, pszHeader, headerWidth, 0, RT3_SORT_LEFT); // Adjusted text position
+}
+
+void CNewUIMuHelperExt::LoadImages()
+{
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_RangeMinus.tga", IMAGE_MACROUI_HELPER_RAGEMINUS, GL_LINEAR, GL_CLAMP, 1, 0);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_OptionButton.tga", IMAGE_MACROUI_HELPER_OPTIONBUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_InputNumber.tga", IMAGE_MACROUI_HELPER_INPUTNUMBER, GL_LINEAR, GL_CLAMP, 1, 0);
+    LoadBitmap(L"Interface\\MacroUI\\MacroUI_InputString.tga", IMAGE_MACROUI_HELPER_INPUTSTRING, GL_LINEAR, GL_CLAMP, 1, 0);
+    //--
+    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
+}
+
+void CNewUIMuHelperExt::UnloadImages()
+{
+    DeleteBitmap(IMAGE_MACROUI_HELPER_RAGEMINUS);
+    DeleteBitmap(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
+    DeleteBitmap(IMAGE_MACROUI_HELPER_INPUTNUMBER);
+    DeleteBitmap(IMAGE_MACROUI_HELPER_INPUTSTRING);
+    //--
+    DeleteBitmap(IMAGE_IGS_BUTTON);
+}
+
+bool CNewUIMuHelperExt::Update()
+{
+    return true;
+}
+
+bool CNewUIMuHelperExt::UpdateMouseEvent()
+{
+    return true;
+}
+
+bool CNewUIMuHelperExt::UpdateKeyEvent()
+{
+    return true;
+}
+
+float CNewUIMuHelperExt::GetLayerDepth()
+{
+    return 3.4;
+}
+
+float CNewUIMuHelperExt::GetKeyEventOrder()
+{
+    return 3.4;
+}
+
+void CNewUIMuHelperExt::ShowPage(int iPageId)
+{
+    m_iCurrentPage = iPageId;
+    this->Show(true);
 }
