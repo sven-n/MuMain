@@ -14,11 +14,6 @@
 #define WM_CHATROOMMSG_BEGIN (WM_USER+0x100)
 #define WM_CHATROOMMSG_END (WM_USER+0x200)
 
-#define CHATCONNECT_TIMER 1002
-#ifdef TEENAGER_REGULATION
-#define WARNING_TIMER	1004
-#endif
-
 const int g_ciWindowFrameThickness = 5;
 const int g_ciWindowTitleHeight = 21;
 const int UIWND_DEFAULT = -1;

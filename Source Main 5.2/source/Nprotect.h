@@ -10,10 +10,6 @@
 #endif // _MSC_VER > 1000
 
 
-#define HACK_TIMER	1000
-#define WINDOWMINIMIZED_TIMER	1001
-
-
 typedef BOOL(NPROTECTCHECKCRC)(char *);
 extern NPROTECTCHECKCRC *g_pNprotectCheckCRC;
 

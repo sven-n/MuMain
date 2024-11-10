@@ -8,6 +8,7 @@
 #include <dpapi.h>
 #include <locale.h>
 #include <zmouse.h>
+#include <cmath>
 #include "UIWindows.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
@@ -36,6 +37,7 @@
 #include "./Utilities/Log/muConsoleDebug.h"
 #include "ProtocolSend.h"
 #include "ProtectSysKey.h"
+#include "MUHelper/MuHelper.h"
 
 #include "CBTMessageBox.h"
 #include "./ExternalObject/leaf/regkey.h"
@@ -1498,6 +1500,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     }
 
     SetTimer(g_hWnd, HACK_TIMER, 20 * 1000, NULL);
+    SetTimer(g_hWnd, MUHELPER_TIMER, 200 /* ms */, CMuHelper::TimerProc);
 
     srand((unsigned)time(NULL));
     for (int i = 0; i < 100; i++)

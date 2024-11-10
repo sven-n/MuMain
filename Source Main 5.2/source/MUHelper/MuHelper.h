@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <array>
 #include <set>
 #include <string>
@@ -71,6 +72,8 @@ public:
 	~CMuHelper() = default;
 
 public:
+	static void CALLBACK TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+
 	void Save(const cMuHelperConfig& config);
 	void Load(const cMuHelperConfig& config);
 	void Start();
@@ -86,7 +89,7 @@ public:
 	void DeleteItem(int iItemId);
 
 private:
-	void WorkLoop();
+	void WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
 	void Work();
 	int Buff();
 	int BuffTarget(CHARACTER* pTargetChar, int iBuffSkill);
@@ -125,6 +128,7 @@ private:
 	int m_iComboState;
 	int m_iHuntingDistance;
 	int m_iObtainingDistance;
+	int m_iLoopCounter;
 	int m_iSecondsElapsed;
 	int m_iSecondsAway;
 };

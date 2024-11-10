@@ -24,7 +24,6 @@ const int COORDINATE_TYPE_LEFT_DOWN = 2;
 BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight, int CoordType = COORDINATE_TYPE_LEFT_TOP);
 
 #define ID_UICEDIT 0x0001
-#define SLIDEHELP_TIMER 1003
 
 enum UISTATES
 {

@@ -40,6 +40,11 @@ CMuHelper::CMuHelper()
     m_iObtainingDistance = 1;
 }
 
+void CALLBACK CMuHelper::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime) 
+{
+    g_MuHelper.WorkLoop(hwnd, uMsg, idEvent, dwTime);
+}
+
 void CMuHelper::Save(const cMuHelperConfig& config)
 {
     // Save config data by sending to server
@@ -57,10 +62,10 @@ void CMuHelper::Toggle()
     // Determine if the thread should be started
     bool bStart = !m_bActive; 
 
-    if (m_timerThread.joinable()) {
-        // Stop the current thread and wait for it to finish
+    if (m_bActive) {
         m_bActive = false;
-        m_timerThread.join();
+        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Stopped");
+        return;
     }
 
     m_iComboState = 0;
@@ -81,11 +86,14 @@ void CMuHelper::Toggle()
     m_config.iPotionThreshold = 40;
     m_config.iHealThreshold = 60;
 
-    if (bStart)
+    if (bStart && !Hero->SafeZone)
     {
         // Start the thread
+        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Starting");
         m_bActive = true;
-        m_timerThread = std::thread(&CMuHelper::WorkLoop, this);
+        m_iLoopCounter = 0;
+        m_iSecondsElapsed = 0;
+        m_iSecondsAway = 0;
     }
 }
 
@@ -103,41 +111,37 @@ void CMuHelper::Stop()
     }
 }
 
-void CMuHelper::WorkLoop()
+void CMuHelper::WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-    g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper work start");
-
-    int iLoopCounter = 0;
-
-    m_iSecondsElapsed = 0;
-    m_iSecondsAway = 0;
-
-    while (m_bActive && !Hero->SafeZone) 
+    if (!m_bActive)
     {
-        Work();
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-        if (++iLoopCounter == 5) 
-        {
-            ++m_iSecondsElapsed;
-
-            if (ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, m_posOriginal) > 1)
-            {
-                ++m_iSecondsAway;
-            }
-            else
-            {
-                m_iSecondsAway = 0;
-            }
-
-            iLoopCounter = 0;
-        }
+        return;
     }
 
-    m_bActive = false;
+    if (Hero->SafeZone)
+    {
+        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Entered safezone. Stopping.");
+        m_bActive = false;
+        return;
+    }
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"MU Helper work stopped");
+    Work();
+
+    if (m_iLoopCounter++ == 5)
+    {
+        m_iSecondsElapsed++;
+
+        if (ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, m_posOriginal) > 1)
+        {
+            m_iSecondsAway++;
+        }
+        else
+        {
+            m_iSecondsAway = 0;
+        }
+
+        m_iLoopCounter = 0;
+    }
 }
 
 void CMuHelper::Work()
