@@ -42,6 +42,7 @@ namespace SEASON3B
             IMAGE_CHAINFO_BTN_STAT = BITMAP_INTERFACE_NEW_CHAINFO_WINDOW_BEGIN + 1,
             IMAGE_CLEARNESS_BTN = BITMAP_CURSEDTEMPLE_BEGIN + 4,
             IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,
+            IMAGE_CHECKBOX_BTN = BITMAP_OPTION_BEGIN + 5,
 
             //-- Skills
             IMAGE_SKILL1 = BITMAP_INTERFACE_NEW_SKILLICON_BEGIN,
@@ -125,7 +126,6 @@ namespace SEASON3B
         cCheckBoxMap m_CheckBoxList;
         cTextNameMap m_TextNameList;
         cTextureMap m_IconList;
-        cMuHelperConfig m_TempConfig; 
         int m_iSelectedSkillSlot;
         std::array<int, MAX_SKILLS_SLOT> m_aiSelectedSkills;
     public:
@@ -312,6 +312,8 @@ namespace SEASON3B
             IMAGE_CHAINFO_BTN_STAT = BITMAP_INTERFACE_NEW_CHAINFO_WINDOW_BEGIN + 1,
             IMAGE_CLEARNESS_BTN = BITMAP_CURSEDTEMPLE_BEGIN + 4,
             IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,
+
+            IMAGE_CHECKBOX_BTN = BITMAP_OPTION_BEGIN + 5
         };
 
     private:
@@ -322,7 +324,13 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
 
         POINT m_Pos;
-        CNewUIRadioGroupButton m_TabBtn;
+        CNewUICheckBox m_BtnPreConHuntRange;
+        CNewUICheckBox m_BtnPreConAttacking;
+
+        CNewUICheckBox m_BtnSubConMoreThanTwo;
+        CNewUICheckBox m_BtnSubConMoreThanThree;
+        CNewUICheckBox m_BtnSubConMoreThanFour;
+        CNewUICheckBox m_BtnSubConMoreThanFive;
     public:
         CNewUIMuHelperExt();
         ~CNewUIMuHelperExt();
