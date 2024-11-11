@@ -38,6 +38,13 @@ typedef enum
 	eFiveOrMoreAttacking    = MUHELPER_ATTACK_ON_MOBS_ATTACKING | MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS,
 } eSkillActivationType;
 
+typedef enum
+{
+	eCeaseAttack,
+	eAutomaticAttack,
+	eSameTargetAttack,
+} eDarkRavenMode;
+
 typedef struct
 {
 	int iHuntingRange = 0;
@@ -69,7 +76,8 @@ typedef struct
 	int iPotionThreshold = 0;
 
 	bool bUseDrainLife = false;
-	bool bUsePet = false;
+	bool bUseDarkRaven = false;
+	int iDarkRavenMode = 0;
 
 	bool bRepairItem = false;
 

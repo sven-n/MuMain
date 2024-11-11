@@ -32,8 +32,11 @@
 #define CHECKBOX_ID_PICK_EXCELLENT      19
 #define CHECKBOX_ID_ADD_OTHER_ITEM      20
 #define CHECKBOX_ID_AUTO_ACCEPT_FRIEND  21
-#define CHECKBOX_ID_USE_ELITE_MANA      22
+#define CHECKBOX_ID_AUTO_DEFEND         22
 #define CHECKBOX_ID_AUTO_ACCEPT_GUILD   23
+#define CHECKBOX_ID_DR_ATTACK_CEASE     24
+#define CHECKBOX_ID_DR_ATTACK_AUTO      25
+#define CHECKBOX_ID_DR_ATTACK_TOGETHER  26
 
 #define BUTTON_ID_HUNT_RANGE_ADD        0
 #define BUTTON_ID_HUNT_RANGE_MINUS      1
@@ -223,10 +226,10 @@ void CNewUIMuHelper::InitCheckBox()
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 226, 15, 15, 0, GlobalText[3510], 5, 0);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 243, 15, 15, 0, GlobalText[3511], 6, 0);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 226, 15, 15, 0, GlobalText[3512], 7, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 25, m_Pos.y + 276, 15, 15, 0, GlobalText[3513], 8, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 276, 15, 15, 0, GlobalText[3513], 8, 0);
 
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 60, m_Pos.y + 218, 15, 15, 0, GlobalText[3514], 9, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 15, m_Pos.y + 218, 15, 15, 0, GlobalText[3515], 10, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 218, 15, 15, 0, GlobalText[3514], 9, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 218, 15, 15, 0, GlobalText[3515], 10, 0);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3516], 11, 0);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3517], 12, 0);
 
@@ -240,9 +243,15 @@ void CNewUIMuHelper::InitCheckBox()
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 85, m_Pos.y + 185, 15, 15, 0, GlobalText[3524], 19, 1);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 22, m_Pos.y + 200, 15, 15, 0, GlobalText[3525], 20, 1);
     //--
+
+    InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 94, m_Pos.y + 235, 15, 15, 0, GlobalText[3533], 24, 0);
+    InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 30, m_Pos.y + 235, 15, 15, 0, GlobalText[3534], 25, 0);
+    InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 30, m_Pos.y + 250, 15, 15, 0, GlobalText[3535], 26, 0);
+
+    //--
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 80, 15, 15, 0, GlobalText[3591], 21, 2);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 97, 15, 15, 0, GlobalText[3592], 23, 2);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 125, 15, 15, 0, GlobalText[3594], 22, 2);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 125, 15, 15, 0, GlobalText[3593], 22, 2);
 
     RegisterBoxCharacter(0xFF, 0);
     RegisterBoxCharacter(0xFF, 1);
@@ -274,6 +283,9 @@ void CNewUIMuHelper::InitCheckBox()
     RegisterBoxCharacter(Magic_Gladiator, 6);
 
     RegisterBoxCharacter(Dark_Lord, 9);
+    RegisterBoxCharacter(Dark_Lord, 24);
+    RegisterBoxCharacter(Dark_Lord, 25);
+    RegisterBoxCharacter(Dark_Lord, 26);
 
     RegisterBoxCharacter(Fairy_Elf, 11);
     RegisterBoxCharacter(Fairy_Elf, 5);
@@ -528,6 +540,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         else if (iButtonId == BUTTON_ID_SAVE_CONFIG)
         {
             SaveConfig();
+            g_pNewUISystem->Hide(INTERFACE_MUHELPER);
         }
 
         return false;
@@ -561,6 +574,24 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         {
             m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(true);
             m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->RegisterBoxState(false);
+        }
+        else if (iCheckboxId == CHECKBOX_ID_DR_ATTACK_CEASE)
+        {
+            m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_CEASE].box->RegisterBoxState(true);
+            m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_AUTO].box->RegisterBoxState(false);
+            m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_TOGETHER].box->RegisterBoxState(false);
+        }
+        else if (iCheckboxId == CHECKBOX_ID_DR_ATTACK_AUTO)
+        {
+            m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_AUTO].box->RegisterBoxState(true);
+            m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_CEASE].box->RegisterBoxState(false);
+            m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_TOGETHER].box->RegisterBoxState(false);
+        }
+        else if (iCheckboxId == CHECKBOX_ID_DR_ATTACK_TOGETHER)
+        {
+            m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_TOGETHER].box->RegisterBoxState(true);
+            m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_CEASE].box->RegisterBoxState(false);
+            m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_AUTO].box->RegisterBoxState(false);
         }
 
         ApplyConfigFromCheckbox(iCheckboxId, state);
@@ -700,7 +731,19 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
         break;
 
     case CHECKBOX_ID_USE_PET:
-        _TempConfig.bUsePet = bState;
+        _TempConfig.bUseDarkRaven = bState;
+        break;
+
+    case CHECKBOX_ID_DR_ATTACK_CEASE:
+        _TempConfig.iDarkRavenMode = eCeaseAttack;
+        break;
+
+    case CHECKBOX_ID_DR_ATTACK_AUTO:
+        _TempConfig.iDarkRavenMode = eAutomaticAttack;
+        break;
+
+    case CHECKBOX_ID_DR_ATTACK_TOGETHER:
+        _TempConfig.iDarkRavenMode = eSameTargetAttack;
         break;
 
     case CHECKBOX_ID_PARTY:
@@ -756,6 +799,9 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
     case CHECKBOX_ID_ADD_OTHER_ITEM:
         _TempConfig.bPickExtraItems = bState;
         break;
+
+    case CHECKBOX_ID_AUTO_DEFEND:
+        _TempConfig.bUseSelfDefense = bState;
 
     default:
         break;
@@ -2574,6 +2620,16 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
 
 bool CNewUIMuHelperExt::UpdateKeyEvent()
 {
+    if (IsVisible())
+    {
+        if (IsPress(VK_ESCAPE) == true)
+        {
+            g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
+            //PlayBuffer(SOUND_CLICK01);
+
+            return false;
+        }
+    }
     return true;
 }
 
