@@ -82,10 +82,6 @@ void CMuHelper::Toggle()
     m_iSecondsAway = 0;
     m_setTargets.clear();
 
-    // TO-DO: Use value from UI
-    m_config.iPotionThreshold = 40;
-    m_config.iHealThreshold = 60;
-
     if (bStart && !Hero->SafeZone)
     {
         // Start the thread

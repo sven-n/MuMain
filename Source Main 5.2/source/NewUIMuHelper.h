@@ -313,7 +313,10 @@ namespace SEASON3B
             IMAGE_CLEARNESS_BTN = BITMAP_CURSEDTEMPLE_BEGIN + 4,
             IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,
 
-            IMAGE_CHECKBOX_BTN = BITMAP_OPTION_BEGIN + 5
+            IMAGE_OPTION_BTN_CHECK = BITMAP_OPTION_BEGIN + 5,
+            IMAGE_OPTION_VOLUME_BACK = BITMAP_OPTION_BEGIN + 8,
+            IMAGE_OPTION_VOLUME_COLOR = BITMAP_OPTION_BEGIN + 9,
+
         };
 
     private:
@@ -331,6 +334,10 @@ namespace SEASON3B
         CNewUICheckBox m_BtnSubConMoreThanThree;
         CNewUICheckBox m_BtnSubConMoreThanFour;
         CNewUICheckBox m_BtnSubConMoreThanFive;
+
+        CNewUIButton m_BtnSave;
+        CNewUIButton m_BtnReset;
+        CNewUIButton m_BtnClose;
     public:
         CNewUIMuHelperExt();
         ~CNewUIMuHelperExt();
@@ -348,6 +355,8 @@ namespace SEASON3B
 
     public:
         void ShowPage(int iPage);
+        void Save();
+        void Reset();
 
     private:
         void InitText();
@@ -356,11 +365,14 @@ namespace SEASON3B
         void InitCheckBox();
         void SetPos(int x, int y);
         void RenderBackPane(int x, int y, int width, int height, const wchar_t* pszHeader);
+        void RenderHpLevel(int x, int y, int width, int height, int level, const wchar_t* pszLabel);
         void LoadImages();
         void UnloadImages();
 
     private:
         int m_iCurrentPage;
+        int m_iCurrentHealThreshold;
+        int m_iCurrentPotionThreshold;
     };
 
 }
