@@ -184,6 +184,7 @@ namespace SEASON3B
         void InitConfig();
         void SaveConfig();
 
+        static int GetIntFromTextInput(wchar_t* pstrInput);
     private:
         void LoadImages();
         void UnloadImages();
@@ -194,7 +195,6 @@ namespace SEASON3B
         void ApplyLootRangeUpdate(int iDelta);
         void SaveExtraItem();
         void RemoveExtraItem();
-        int GetIntFromTextInput(wchar_t* pstrInput);
     };
 
     class CNewUIMuHelperSkillList : public CNewUIObj
@@ -335,6 +335,10 @@ namespace SEASON3B
         CNewUICheckBox m_BtnSubConMoreThanFour;
         CNewUICheckBox m_BtnSubConMoreThanFive;
 
+        CNewUICheckBox m_BtnPartyHeal;
+        CNewUICheckBox m_BtnPartyDuration;
+        CUITextInputBox m_BuffTimeInput;
+
         CNewUIButton m_BtnSave;
         CNewUIButton m_BtnReset;
         CNewUIButton m_BtnClose;
@@ -372,6 +376,7 @@ namespace SEASON3B
     private:
         int m_iCurrentPage;
         int m_iCurrentHealThreshold;
+        int m_iCurrentPartyHealThreshold;
         int m_iCurrentPotionThreshold;
     };
 

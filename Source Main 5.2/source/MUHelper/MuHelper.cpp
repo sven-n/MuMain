@@ -731,7 +731,7 @@ int CMuHelper::ObtainItem()
         else 
         {
             SocketClient->ToGameServer()->SendPickupItemRequest(m_iCurrentItem);
-            m_iCurrentItem = -1;
+            DeleteItem(m_iCurrentItem);
         }
     }
 

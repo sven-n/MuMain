@@ -97,6 +97,7 @@ CNewUIMuHelper::CNewUIMuHelper()
 
     _TempConfig.iPotionThreshold = 40;
     _TempConfig.iHealThreshold = 60;
+    _TempConfig.iHealPartyThreshold = 60;
 }
 
 CNewUIMuHelper::~CNewUIMuHelper()
@@ -369,6 +370,8 @@ void CNewUIMuHelper::InitText()
 
 void CNewUIMuHelper::InitTextboxInput()
 {
+    wchar_t wsInitText[MAX_NUMBER_DIGITS + 1];
+
     m_DistanceTimeInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
     m_DistanceTimeInput.SetPosition(m_Pos.x + 142, m_Pos.y + 140);
     m_DistanceTimeInput.SetTextColor(255, 0, 0, 0);
@@ -376,6 +379,8 @@ void CNewUIMuHelper::InitTextboxInput()
     m_DistanceTimeInput.SetFont(g_hFont);
     m_DistanceTimeInput.SetState(UISTATE_NORMAL);
     m_DistanceTimeInput.SetOption(UIOPTION_NUMBERONLY);
+    swprintf(wsInitText, L"%d", _TempConfig.iMaxSecondsAway);
+    m_DistanceTimeInput.SetText(wsInitText);
 
     m_Skill2DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
     m_Skill2DelayInput.SetPosition(m_Pos.x + 142, m_Pos.y + 177);
@@ -384,6 +389,8 @@ void CNewUIMuHelper::InitTextboxInput()
     m_Skill2DelayInput.SetFont(g_hFont);
     m_Skill2DelayInput.SetState(UISTATE_NORMAL);
     m_Skill2DelayInput.SetOption(UIOPTION_NUMBERONLY);
+    swprintf(wsInitText, L"%d", _TempConfig.aiSkillInterval[1]);
+    m_Skill2DelayInput.SetText(wsInitText);
 
     m_Skill3DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
     m_Skill3DelayInput.SetPosition(m_Pos.x + 142, m_Pos.y + 229);
@@ -392,6 +399,8 @@ void CNewUIMuHelper::InitTextboxInput()
     m_Skill3DelayInput.SetFont(g_hFont);
     m_Skill3DelayInput.SetState(UISTATE_NORMAL);
     m_Skill3DelayInput.SetOption(UIOPTION_NUMBERONLY);
+    swprintf(wsInitText, L"%d", _TempConfig.aiSkillInterval[2]);
+    m_Skill3DelayInput.SetText(wsInitText);
 
     m_ItemInput.Init(g_hWnd, 88, 15, MAX_ITEM_NAME, false);
     m_ItemInput.SetPosition(m_Pos.x + 36, m_Pos.y + 219);
@@ -412,7 +421,6 @@ bool CNewUIMuHelper::Update()
 
         if (iNumCurOpenTab == RADIOGROUPEVENT_NONE)
             return true;
-
 
         m_iCurrentOpenTab = iNumCurOpenTab;
 
@@ -955,7 +963,11 @@ bool CNewUIMuHelper::Render()
     {
         m_DistanceTimeInput.Render();
         m_Skill2DelayInput.Render();
-        m_Skill3DelayInput.Render();
+
+        if (gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
+        {
+            m_Skill3DelayInput.Render();
+        }
     }
     else if (m_iCurrentOpenTab == 1)
     {
@@ -2081,7 +2093,12 @@ void CNewUIMuHelperExt::SetPos(int x, int y)
 
 void CNewUIMuHelperExt::InitText()
 {
-
+    m_BuffTimeInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
+    m_BuffTimeInput.SetTextColor(255, 0, 0, 0);
+    m_BuffTimeInput.SetBackColor(255, 255, 255, 255);
+    m_BuffTimeInput.SetFont(g_hFont);
+    m_BuffTimeInput.SetState(UISTATE_NORMAL);
+    m_BuffTimeInput.SetOption(UIOPTION_NUMBERONLY);
 }
 
 void CNewUIMuHelperExt::InitImage()
@@ -2114,6 +2131,14 @@ void CNewUIMuHelperExt::InitButtons()
     m_BtnSubConMoreThanFive.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
     m_BtnSubConMoreThanFive.CheckBoxInfo(m_Pos.x + 17 + 78, m_Pos.y + 158, 15, 15);
     m_BtnSubConMoreThanFive.ChangeText(GlobalText[3560]); // "More Than 5 Mobs"
+
+    m_BtnPartyHeal.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
+    m_BtnPartyHeal.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 78, 15, 15);
+    m_BtnPartyHeal.ChangeText(GlobalText[3539]); // "Preference of Party Heal"
+
+    m_BtnPartyDuration.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
+    m_BtnPartyDuration.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 168, 15, 15);
+    m_BtnPartyDuration.ChangeText(GlobalText[3540]); // "Buff Duration for All Party Members"
 
     m_BtnSave.ChangeButtonImgState(1, IMAGE_IGS_BUTTON, 1, 0, 1);
     m_BtnSave.ChangeButtonInfo(m_Pos.x + 120, m_Pos.y + 388, 52, 26);
@@ -2161,10 +2186,10 @@ bool CNewUIMuHelperExt::Render()
     {
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
-        RenderHpLevel(m_Pos.x + 33, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]);
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]);
 
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, GlobalText[3546]); // "Auto Heal"
-        RenderHpLevel(m_Pos.x + 33, m_Pos.y + 145, 124.f, 16.f, m_iCurrentHealThreshold, GlobalText[3547]);
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 145, 124.f, 16.f, m_iCurrentHealThreshold, GlobalText[3547]);
     }
     else if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
     {
@@ -2176,7 +2201,7 @@ bool CNewUIMuHelperExt::Render()
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
 
-        RenderHpLevel(m_Pos.x + 33, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]);
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]);
     }
     else if (m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG
         || m_iCurrentPage == SUB_PAGE_SKILL3_CONFIG)
@@ -2198,13 +2223,26 @@ bool CNewUIMuHelperExt::Render()
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3554], 190, 0, RT3_SORT_CENTER); // "Party"
         g_pRenderText->SetTextColor(TextColor);
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3549]); // Buff Support
+        m_BtnPartyDuration.Render();
+        g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 97, GlobalText[3551], 124, 0, RT3_SORT_LEFT); // "Time Space of Casting Buff"
+        RenderImage(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 125, m_Pos.y + 93, 20, 15);
+        m_BuffTimeInput.Render();
+        g_pRenderText->RenderText(m_Pos.x + 146, m_Pos.y + 97, L"s", 124, 0, RT3_SORT_LEFT); // "s"
     }
     else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
     {
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3554], 190, 0, RT3_SORT_CENTER); // "Party"
         g_pRenderText->SetTextColor(TextColor);
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 70, GlobalText[3548]); // Heal Support
+        m_BtnPartyHeal.Render();
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 100, 124.f, 16.f, m_iCurrentPartyHealThreshold, GlobalText[3550]); // "HP Status of Party Members"
+
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 145, 165, 45, GlobalText[3549]); // Buff Support
+        m_BtnPartyDuration.Render();
+        g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 187, GlobalText[3551], 124, 0, RT3_SORT_LEFT); // "Time Space of Casting Buff"
+        RenderImage(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 125, m_Pos.y + 183, 20, 15);
+        m_BuffTimeInput.Render();
+        g_pRenderText->RenderText(m_Pos.x + 146, m_Pos.y + 187, L"s", 124, 0, RT3_SORT_LEFT); // "s"
     }
 
     m_BtnSave.Render();
@@ -2358,6 +2396,22 @@ bool CNewUIMuHelperExt::Update()
             }
         }
 
+        if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
+        {
+            if (m_BtnPartyHeal.UpdateMouseEvent())
+            {
+                _TempConfig.bAutoHealParty = m_BtnPartyHeal.GetBoxState();
+            }
+        }
+
+        if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG || m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
+        {
+            if (m_BtnPartyDuration.UpdateMouseEvent())
+            {
+                _TempConfig.bBuffDurationParty = m_BtnPartyDuration.GetBoxState();
+            }
+        }
+
         if (m_BtnClose.UpdateMouseEvent())
         {
             g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
@@ -2404,7 +2458,7 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
                 m_iCurrentPotionThreshold = 0;
             }
         }
-        if (SEASON3B::IsRepeat(VK_LBUTTON))
+        if (IsRepeat(VK_LBUTTON))
         {
             int x = MouseX - (m_Pos.x + 33);
             if (x < 0)
@@ -2417,14 +2471,9 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
                 m_iCurrentPotionThreshold = (int)fValue + 1;
             }
         }
-
-        if (iOldValue != m_iCurrentPotionThreshold)
-        {
-            SetEffectVolumeLevel(m_iCurrentPotionThreshold);
-        }
     }
 
-    if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF)
+    if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
     {
         if (CheckMouseIn(m_Pos.x + 33 - 8, m_Pos.y + 145, 124 + 8, 16))
         {
@@ -2447,7 +2496,7 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
                     m_iCurrentHealThreshold = 0;
                 }
             }
-            if (SEASON3B::IsRepeat(VK_LBUTTON))
+            if (IsRepeat(VK_LBUTTON))
             {
                 int x = MouseX - (m_Pos.x + 33);
                 if (x < 0)
@@ -2460,11 +2509,63 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
                     m_iCurrentHealThreshold = (int)fValue + 1;
                 }
             }
-
-            if (iOldValue != m_iCurrentHealThreshold)
+        }
+    }
+    else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
+    {
+        if (CheckMouseIn(m_Pos.x + 32 - 8, m_Pos.y + 100, 124 + 8, 16))
+        {
+            int iOldValue = m_iCurrentPartyHealThreshold;
+            if (MouseWheel > 0)
             {
-                SetEffectVolumeLevel(m_iCurrentHealThreshold);
+                MouseWheel = 0;
+                m_iCurrentPartyHealThreshold++;
+                if (m_iCurrentPartyHealThreshold > 10)
+                {
+                    m_iCurrentPartyHealThreshold = 10;
+                }
             }
+            else if (MouseWheel < 0)
+            {
+                MouseWheel = 0;
+                m_iCurrentPartyHealThreshold--;
+                if (m_iCurrentPartyHealThreshold < 0)
+                {
+                    m_iCurrentPartyHealThreshold = 0;
+                }
+            }
+            if (IsRepeat(VK_LBUTTON))
+            {
+                int x = MouseX - (m_Pos.x + 33);
+                if (x < 0)
+                {
+                    m_iCurrentPartyHealThreshold = 0;
+                }
+                else
+                {
+                    float fValue = (10.f * x) / 124.f;
+                    m_iCurrentPartyHealThreshold = (int)fValue + 1;
+                }
+            }
+        }
+        else if (CheckMouseIn(m_BuffTimeInput.GetPosition_x(), m_BuffTimeInput.GetPosition_y(), 20, 15))
+        {
+            m_BuffTimeInput.GiveFocus();
+        }
+        else
+        {
+            SetFocus(g_hWnd);
+        }
+    }
+    else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG)
+    {
+        if (CheckMouseIn(m_BuffTimeInput.GetPosition_x(), m_BuffTimeInput.GetPosition_y(), 20, 15))
+        {
+            m_BuffTimeInput.GiveFocus();
+        }
+        else
+        {
+            SetFocus(g_hWnd);
         }
     }
 
@@ -2506,12 +2607,42 @@ void CNewUIMuHelperExt::ShowPage(int iPageId)
         m_iCurrentPotionThreshold = _TempConfig.iPotionThreshold / 10;
         m_iCurrentHealThreshold = _TempConfig.iHealThreshold / 10;
     }
+    else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG)
+    {
+        m_BtnPartyDuration.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 78, 15, 15);
+        m_BtnPartyDuration.RegisterBoxState(_TempConfig.bBuffDurationParty);
+        m_iCurrentPartyHealThreshold = _TempConfig.iHealPartyThreshold / 10;
+
+        wchar_t wsBuffTime[MAX_NUMBER_DIGITS + 1] = { 0 };
+        swprintf(wsBuffTime, L"%d", m_iCurrentPartyHealThreshold);
+        m_BuffTimeInput.SetText(wsBuffTime);
+        m_BuffTimeInput.SetPosition(m_Pos.x + 127, m_Pos.y + 97);
+    }
+    else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
+    {
+        m_BtnPartyHeal.RegisterBoxState(_TempConfig.bAutoHealParty);
+
+        m_BtnPartyDuration.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 168, 15, 15);
+        m_BtnPartyDuration.RegisterBoxState(_TempConfig.bBuffDurationParty);
+        m_iCurrentPartyHealThreshold = _TempConfig.iHealPartyThreshold / 10;
+
+        wchar_t wsBuffTime[MAX_NUMBER_DIGITS + 1] = { 0 };
+        swprintf(wsBuffTime, L"%d", m_iCurrentPartyHealThreshold);
+        m_BuffTimeInput.SetText(wsBuffTime);
+        m_BuffTimeInput.SetPosition(m_Pos.x + 127, m_Pos.y + 187);
+    }
 }
 
 void CNewUIMuHelperExt::Save()
 {
+    wchar_t wsNumberInput[MAX_NUMBER_DIGITS + 1]{};
+
+    m_BuffTimeInput.GetText(wsNumberInput, sizeof(wsNumberInput));
+    _TempConfig.iCastInterval = CNewUIMuHelper::GetIntFromTextInput(wsNumberInput);
+
     _TempConfig.iPotionThreshold = m_iCurrentPotionThreshold * 10;
     _TempConfig.iHealThreshold = m_iCurrentHealThreshold * 10;
+    _TempConfig.iHealPartyThreshold = m_iCurrentPartyHealThreshold * 10;
 }
 
 void CNewUIMuHelperExt::Reset()

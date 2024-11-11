@@ -59,9 +59,11 @@ typedef struct
 	bool bBuffDurationParty = false;
 	int iCastInterval = 0;
 
-	bool bSupportParty = false;
 	bool bAutoHeal = false;
 	int iHealThreshold = 0;
+	bool bSupportParty = false;
+	bool bAutoHealParty = false;
+	int iHealPartyThreshold = 0;
 
 	bool bUseHealPotion = false;
 	int iPotionThreshold = 0;
