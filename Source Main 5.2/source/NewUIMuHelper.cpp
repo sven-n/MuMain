@@ -2108,27 +2108,27 @@ void CNewUIMuHelperExt::InitImage()
 
 void CNewUIMuHelperExt::InitButtons()
 {
-    m_BtnPreConHuntRange.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
+    m_BtnPreConHuntRange.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnPreConHuntRange.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 78, 15, 15);
     m_BtnPreConHuntRange.ChangeText(GlobalText[3555]); // "Monster Within Hunting range"
 
-    m_BtnPreConAttacking.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
+    m_BtnPreConAttacking.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnPreConAttacking.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 93, 15, 15);
     m_BtnPreConAttacking.ChangeText(GlobalText[3556]); // "Monster Attacking Me"
 
-    m_BtnSubConMoreThanTwo.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
+    m_BtnSubConMoreThanTwo.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnSubConMoreThanTwo.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 143, 15, 15);
     m_BtnSubConMoreThanTwo.ChangeText(GlobalText[3557]); // "More Than 2 Mobs"
 
-    m_BtnSubConMoreThanThree.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
+    m_BtnSubConMoreThanThree.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnSubConMoreThanThree.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 158, 15, 15);
     m_BtnSubConMoreThanThree.ChangeText(GlobalText[3558]); // "More Than 3 Mobs"
 
-    m_BtnSubConMoreThanFour.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
+    m_BtnSubConMoreThanFour.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnSubConMoreThanFour.CheckBoxInfo(m_Pos.x + 17 + 78, m_Pos.y + 143, 15, 15);
     m_BtnSubConMoreThanFour.ChangeText(GlobalText[3559]); // "More Than 4 Mobs"
 
-    m_BtnSubConMoreThanFive.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
+    m_BtnSubConMoreThanFive.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnSubConMoreThanFive.CheckBoxInfo(m_Pos.x + 17 + 78, m_Pos.y + 158, 15, 15);
     m_BtnSubConMoreThanFive.ChangeText(GlobalText[3560]); // "More Than 5 Mobs"
 
