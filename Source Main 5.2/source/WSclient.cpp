@@ -1916,6 +1916,8 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         RepairEnable = 0;
     }
 
+    g_MuHelper.Stop();
+
     Hero->Movement = false;
     SetPlayerStop(Hero);
 
@@ -5566,6 +5568,11 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
 
             VectorCopy(o->Angle, o->HeadAngle);
         }
+    }
+
+    if (c == Hero)
+    {
+        g_MuHelper.Stop();
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x17 [ReceiveDie(%d)]", Key);
@@ -14292,6 +14299,10 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             ReceiveEquippingInventoryItem(ReceiveBuffer);
             break;
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
+        case 0x51:
+            // MU Helper Status Update
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"Received mu helper status update server");
+            break;
         }
     }
     break;
@@ -14384,6 +14395,10 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         break;
     case 0x4B:
         ReceiveDarkside(ReceiveBuffer);
+        break;
+    case 0xAE:
+        // Received mu helper config from server
+        g_ConsoleDebug->Write(MCD_RECEIVE, L"Received mu helper config from server");
         break;
     default:
         break;
