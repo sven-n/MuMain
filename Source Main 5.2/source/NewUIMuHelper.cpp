@@ -88,19 +88,11 @@ CNewUIMuHelper::CNewUIMuHelper()
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_ButtonList.clear();
+
     m_iCurrentOpenTab = 0;
+
     m_iSelectedSkillSlot = 0;
     m_aiSelectedSkills.fill(-1);
-
-    // TODO: Acquire values from server
-    _TempConfig.iObtainingRange = 1;
-    _TempConfig.aiSkillCondition[0] = MUHELPER_ATTACK_ALWAYS;
-    _TempConfig.aiSkillCondition[1] = MUHELPER_ATTACK_ON_TIMER;
-    _TempConfig.aiSkillCondition[2] = MUHELPER_ATTACK_ON_TIMER;
-
-    _TempConfig.iPotionThreshold = 40;
-    _TempConfig.iHealThreshold = 60;
-    _TempConfig.iHealPartyThreshold = 60;
 }
 
 CNewUIMuHelper::~CNewUIMuHelper()
@@ -500,34 +492,34 @@ bool CNewUIMuHelper::UpdateMouseEvent()
             m_CheckBoxList[CHECKBOX_ID_SKILL2_DELAY].box->RegisterBoxState(false);
             m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->RegisterBoxState(true);
             ApplyConfigFromCheckbox(CHECKBOX_ID_SKILL2_CONDITION, true);
-            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_SKILL2_CONFIG);
+            g_pNewUIMuHelperExt->Toggle(SUB_PAGE_SKILL2_CONFIG);
         }
         else if (iButtonId == BUTTON_ID_SKILL3_CONFIG)
         {
             m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->RegisterBoxState(false);
             m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(true);
-            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_SKILL3_CONFIG);
             ApplyConfigFromCheckbox(CHECKBOX_ID_SKILL3_CONDITION, true);
+            g_pNewUIMuHelperExt->Toggle(SUB_PAGE_SKILL3_CONFIG);
         }
         else if (iButtonId == BUTTON_ID_POTION_CONFIG_ELF)
         {
-            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_POTION_CONFIG_ELF);
+            g_pNewUIMuHelperExt->Toggle(SUB_PAGE_POTION_CONFIG_ELF);
         }
         else if (iButtonId == BUTTON_ID_POTION_CONFIG_SUMMY)
         {
-            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_POTION_CONFIG_SUMMY);
+            g_pNewUIMuHelperExt->Toggle(SUB_PAGE_POTION_CONFIG_SUMMY);
         }
         else if (iButtonId == BUTTON_ID_POTION_CONFIG)
         {
-            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_POTION_CONFIG);
+            g_pNewUIMuHelperExt->Toggle(SUB_PAGE_POTION_CONFIG);
         }
         else if (iButtonId == BUTTON_ID_PARTY_CONFIG)
         {
-            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_PARTY_CONFIG);
+            g_pNewUIMuHelperExt->Toggle(SUB_PAGE_PARTY_CONFIG);
         }
         else if (iButtonId == BUTTON_ID_PARTY_CONFIG_ELF)
         {
-            g_pNewUIMuHelperExt->ShowPage(SUB_PAGE_PARTY_CONFIG_ELF);
+            g_pNewUIMuHelperExt->Toggle(SUB_PAGE_PARTY_CONFIG_ELF);
         }
         else if (iButtonId == BUTTON_ID_EXIT_CONFIG)
         {
@@ -701,25 +693,25 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
         break;
 
     case CHECKBOX_ID_SKILL2_DELAY:
-        _TempConfig.aiSkillCondition[1] = (_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_PRECONDITION_MASK);
-        _TempConfig.aiSkillCondition[1] = (_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_MASK);
-        _TempConfig.aiSkillCondition[1] = _TempConfig.aiSkillCondition[1] | MUHELPER_ATTACK_ON_TIMER;
+        _TempConfig.aiSkillCondition[1] &= MUHELPER_ATTACK_PRECONDITION_MASK;
+        //_TempConfig.aiSkillCondition[1] &= MUHELPER_ATTACK_ON_MOBS_MASK);
+        //_TempConfig.aiSkillCondition[1] |= MUHELPER_ATTACK_ON_TIMER;
         break;
 
     case CHECKBOX_ID_SKILL2_CONDITION:
-        _TempConfig.aiSkillCondition[1] = (_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER);
-        _TempConfig.aiSkillCondition[1] = MUHELPER_ATTACK_ON_MOBS_NEARBY | MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
+        _TempConfig.aiSkillCondition[1] &= ~MUHELPER_ATTACK_ON_TIMER;
+        //_TempConfig.aiSkillCondition[1] = MUHELPER_ATTACK_ON_MOBS_NEARBY | MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
         break;
 
     case CHECKBOX_ID_SKILL3_DELAY:
-        _TempConfig.aiSkillCondition[2] = (_TempConfig.aiSkillCondition[2] & MUHELPER_ATTACK_PRECONDITION_MASK);
-        _TempConfig.aiSkillCondition[1] = (_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_MASK);
-        _TempConfig.aiSkillCondition[2] = _TempConfig.aiSkillCondition[2] | MUHELPER_ATTACK_ON_TIMER;
+        _TempConfig.aiSkillCondition[2] &= MUHELPER_ATTACK_PRECONDITION_MASK;
+        //_TempConfig.aiSkillCondition[2] &= MUHELPER_ATTACK_ON_MOBS_MASK);
+        //_TempConfig.aiSkillCondition[2] = _TempConfig.aiSkillCondition[2] | MUHELPER_ATTACK_ON_TIMER;
         break;
 
     case CHECKBOX_ID_SKILL3_CONDITION:
-        _TempConfig.aiSkillCondition[2] = (_TempConfig.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER);
-        _TempConfig.aiSkillCondition[2] = MUHELPER_ATTACK_ON_MOBS_NEARBY | MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
+        _TempConfig.aiSkillCondition[2] &= ~MUHELPER_ATTACK_ON_TIMER;
+        //_TempConfig.aiSkillCondition[2] = MUHELPER_ATTACK_ON_MOBS_NEARBY | MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
         break;
 
     case CHECKBOX_ID_COMBO:
@@ -802,6 +794,7 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
 
     case CHECKBOX_ID_AUTO_DEFEND:
         _TempConfig.bUseSelfDefense = bState;
+        break;
 
     default:
         break;
@@ -887,14 +880,77 @@ int CNewUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
     return value;
 }
 
+void CNewUIMuHelper::ApplySavedConfig(const cMuHelperConfig& config)
+{
+    _TempConfig = config;
+    g_MuHelper.Load(_TempConfig);
+
+    m_aiSelectedSkills[0] = _TempConfig.aiSkill[0] ? _TempConfig.aiSkill[0] : -1;
+    m_aiSelectedSkills[1] = _TempConfig.aiSkill[1] ? _TempConfig.aiSkill[1] : -1;
+    m_aiSelectedSkills[2] = _TempConfig.aiSkill[2] ? _TempConfig.aiSkill[2] : -1;
+    m_aiSelectedSkills[3] = _TempConfig.aiBuff[0] ? _TempConfig.aiBuff[0] : -1;
+    m_aiSelectedSkills[4] = _TempConfig.aiBuff[1] ? _TempConfig.aiBuff[1] : -1;
+    m_aiSelectedSkills[5] = _TempConfig.aiBuff[2] ? _TempConfig.aiBuff[2] : -1;
+
+    m_CheckBoxList[CHECKBOX_ID_POTION].box->RegisterBoxState(_TempConfig.bUseHealPotion);
+    m_CheckBoxList[CHECKBOX_ID_AUTO_HEAL].box->RegisterBoxState(_TempConfig.bAutoHeal);
+    m_CheckBoxList[CHECKBOX_ID_DRAIN_LIFE].box->RegisterBoxState(_TempConfig.bUseDrainLife);
+    m_CheckBoxList[CHECKBOX_ID_LONG_DISTANCE].box->RegisterBoxState(_TempConfig.bLongRangeCounterAttack);
+    m_CheckBoxList[CHECKBOX_ID_ORIG_POSITION].box->RegisterBoxState(_TempConfig.bReturnToOriginalPosition);
+
+    m_CheckBoxList[CHECKBOX_ID_SKILL2_DELAY].box->RegisterBoxState(_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER);
+    m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_CONDITIONS_MASK);
+    m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->RegisterBoxState(_TempConfig.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER);
+    m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[2] & MUHELPER_ATTACK_CONDITIONS_MASK);
+    m_CheckBoxList[CHECKBOX_ID_COMBO].box->RegisterBoxState(_TempConfig.bUseCombo);
+
+    wchar_t wsTempNum[MAX_NUMBER_DIGITS + 1] = { 0 };
+    swprintf(wsTempNum, L"%d", _TempConfig.iMaxSecondsAway);
+    m_DistanceTimeInput.SetText(wsTempNum);
+    swprintf(wsTempNum, L"%d", _TempConfig.aiSkillInterval[1]);
+    m_Skill2DelayInput.SetText(wsTempNum);
+    swprintf(wsTempNum, L"%d", _TempConfig.aiSkillInterval[2]);
+    m_Skill3DelayInput.SetText(wsTempNum);
+
+    m_CheckBoxList[CHECKBOX_ID_BUFF_DURATION].box->RegisterBoxState(_TempConfig.bBuffDuration);
+    m_CheckBoxList[CHECKBOX_ID_PARTY].box->RegisterBoxState(_TempConfig.bSupportParty);
+
+    m_CheckBoxList[CHECKBOX_ID_USE_PET].box->RegisterBoxState(_TempConfig.bUseDarkRaven);
+    m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_CEASE].box->RegisterBoxState(_TempConfig.iDarkRavenMode == eCeaseAttack);
+    m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_AUTO].box->RegisterBoxState(_TempConfig.iDarkRavenMode == eAutomaticAttack);
+    m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_TOGETHER].box->RegisterBoxState(_TempConfig.iDarkRavenMode == eSameTargetAttack);
+
+    m_CheckBoxList[CHECKBOX_ID_REPAIR_ITEM].box->RegisterBoxState(_TempConfig.bRepairItem);
+    m_CheckBoxList[CHECKBOX_ID_PICK_ALL].box->RegisterBoxState(_TempConfig.bPickAllItems);
+    m_CheckBoxList[CHECKBOX_ID_PICK_SELECTED].box->RegisterBoxState(_TempConfig.bPickSelectItems);
+    m_CheckBoxList[CHECKBOX_ID_PICK_JEWEL].box->RegisterBoxState(_TempConfig.bPickJewel);
+    m_CheckBoxList[CHECKBOX_ID_PICK_ZEN].box->RegisterBoxState(_TempConfig.bPickZen);
+    m_CheckBoxList[CHECKBOX_ID_PICK_EXCELLENT].box->RegisterBoxState(_TempConfig.bPickExcellent);
+    m_CheckBoxList[CHECKBOX_ID_PICK_ANCIENT].box->RegisterBoxState(_TempConfig.bPickAncient);
+    m_CheckBoxList[CHECKBOX_ID_ADD_OTHER_ITEM].box->RegisterBoxState(_TempConfig.bPickExtraItems);
+    
+    m_CheckBoxList[CHECKBOX_ID_AUTO_ACCEPT_FRIEND].box->RegisterBoxState(_TempConfig.bAutoAcceptFriend);
+    m_CheckBoxList[CHECKBOX_ID_AUTO_ACCEPT_GUILD].box->RegisterBoxState(_TempConfig.bAutoAcceptGuild);
+    m_CheckBoxList[CHECKBOX_ID_AUTO_DEFEND].box->RegisterBoxState(_TempConfig.bUseSelfDefense);
+
+    for (const auto& item : _TempConfig.aExtraItems) 
+    {
+        m_ItemFilter.AddText(item.c_str());
+    }
+}
+
 void CNewUIMuHelper::InitConfig()
 {
+    _TempConfig.iHuntingRange = 0;
+    _TempConfig.iObtainingRange = 1;
+    _TempConfig.aiSkillCondition[0] = MUHELPER_ATTACK_ALWAYS;
+    _TempConfig.aiSkillCondition[1] = MUHELPER_ATTACK_ON_TIMER;
+    _TempConfig.aiSkillCondition[2] = MUHELPER_ATTACK_ON_TIMER;
+    _TempConfig.bBuffDuration = false;
+
     ResetBoxList();
 
-    m_aiSelectedSkills.fill(-1);
-
-    memset(&_TempConfig, 0, sizeof(_TempConfig));
-    _TempConfig.iObtainingRange = 1;
+    g_pNewUIMuHelperExt->InitConfig();
 }
 
 void CNewUIMuHelper::SaveConfig()
@@ -2087,7 +2143,9 @@ int CNewUIMuHelperSkillList::UpdateMouseSkillList()
 CNewUIMuHelperExt::CNewUIMuHelperExt()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
+    m_Pos.x = 0;
+    m_Pos.y = 0;
+    m_iCurrentPage = -1;
 }
 
 CNewUIMuHelperExt::~CNewUIMuHelperExt()
@@ -2643,10 +2701,17 @@ float CNewUIMuHelperExt::GetKeyEventOrder()
     return 3.4;
 }
 
-void CNewUIMuHelperExt::ShowPage(int iPageId)
+void CNewUIMuHelperExt::Toggle(int iPageId)
 {
+    int iPrevPage = m_iCurrentPage;
     m_iCurrentPage = iPageId;
-    this->Show(true);
+
+    if (IsVisible() && m_iCurrentPage == iPrevPage)
+    {
+        m_iCurrentPage = -1;
+        this->Show(false);
+        return;
+    }
 
     if (m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG || m_iCurrentPage == SUB_PAGE_SKILL3_CONFIG)
     {
@@ -2670,7 +2735,7 @@ void CNewUIMuHelperExt::ShowPage(int iPageId)
         m_iCurrentPartyHealThreshold = _TempConfig.iHealPartyThreshold / 10;
 
         wchar_t wsBuffTime[MAX_NUMBER_DIGITS + 1] = { 0 };
-        swprintf(wsBuffTime, L"%d", m_iCurrentPartyHealThreshold);
+        swprintf(wsBuffTime, L"%d", _TempConfig.iBuffCastInterval);
         m_BuffTimeInput.SetText(wsBuffTime);
         m_BuffTimeInput.SetPosition(m_Pos.x + 127, m_Pos.y + 97);
     }
@@ -2683,10 +2748,12 @@ void CNewUIMuHelperExt::ShowPage(int iPageId)
         m_iCurrentPartyHealThreshold = _TempConfig.iHealPartyThreshold / 10;
 
         wchar_t wsBuffTime[MAX_NUMBER_DIGITS + 1] = { 0 };
-        swprintf(wsBuffTime, L"%d", m_iCurrentPartyHealThreshold);
+        swprintf(wsBuffTime, L"%d", _TempConfig.iBuffCastInterval);
         m_BuffTimeInput.SetText(wsBuffTime);
         m_BuffTimeInput.SetPosition(m_Pos.x + 127, m_Pos.y + 187);
     }
+
+    this->Show(true);
 }
 
 void CNewUIMuHelperExt::Save()
@@ -2694,16 +2761,36 @@ void CNewUIMuHelperExt::Save()
     wchar_t wsNumberInput[MAX_NUMBER_DIGITS + 1]{};
 
     m_BuffTimeInput.GetText(wsNumberInput, sizeof(wsNumberInput));
-    _TempConfig.iCastInterval = CNewUIMuHelper::GetIntFromTextInput(wsNumberInput);
+    _TempConfig.iBuffCastInterval = CNewUIMuHelper::GetIntFromTextInput(wsNumberInput);
 
     _TempConfig.iPotionThreshold = m_iCurrentPotionThreshold * 10;
     _TempConfig.iHealThreshold = m_iCurrentHealThreshold * 10;
     _TempConfig.iHealPartyThreshold = m_iCurrentPartyHealThreshold * 10;
 }
 
+void CNewUIMuHelperExt::ApplySavedConfig()
+{
+    m_iCurrentPotionThreshold = _TempConfig.iPotionThreshold / 10;
+    m_iCurrentHealThreshold = _TempConfig.iHealThreshold / 10;
+    m_iCurrentPartyHealThreshold = _TempConfig.iHealPartyThreshold / 10;
+}
+
+// Called by the "Initialization" button from the main page
+void CNewUIMuHelperExt::InitConfig()
+{
+    _TempConfig.iPotionThreshold = 0;
+    _TempConfig.iHealThreshold = 0;
+    _TempConfig.iBuffCastInterval = 0;
+    _TempConfig.iHealPartyThreshold = 0;
+    _TempConfig.bAutoHealParty = false;
+    _TempConfig.bBuffDurationParty = false;
+}
+
+// Called by the "Initialization" button from the sub page
 void CNewUIMuHelperExt::Reset()
 {
-    if (m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG || m_iCurrentPage == SUB_PAGE_SKILL3_CONFIG)
+    if (m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG 
+        || m_iCurrentPage == SUB_PAGE_SKILL3_CONFIG)
     {
         int iSkillIndex = m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG ? 1 : 2;
 
@@ -2716,9 +2803,13 @@ void CNewUIMuHelperExt::Reset()
         m_BtnSubConMoreThanThree.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS);
         m_BtnSubConMoreThanFour.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS);
         m_BtnSubConMoreThanFive.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS);
-
-        _TempConfig.iPotionThreshold = 50;
-        _TempConfig.iHealThreshold = 50;
+    }
+    else if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG 
+        || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF 
+        || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
+    {
+        _TempConfig.iPotionThreshold = 0;
+        _TempConfig.iHealThreshold = 0;
 
         m_iCurrentPotionThreshold = _TempConfig.iPotionThreshold / 10;
         m_iCurrentHealThreshold = _TempConfig.iHealThreshold / 10;

@@ -8326,14 +8326,14 @@ std::wstring GetItemDisplayName(ITEM* pItem)
     }
     if (pItem->HasSkill)
     {
-        strOptions += L"+Skill";
+        strOptions += L"+Skill"; // TODO: Use GlobalText[176]
     }
     if (pItem->OptionLevel)
     {
-        strOptions += L"+Option";
+        strOptions += L"+Option"; // TODO: Use GlobalText[177]
     }
     if (pItem->HasLuck) {
-        strOptions += L"+Luck";
+        strOptions += L"+Luck"; // TODO: Use GlobalText[178]
     }
 
     return strDisplayName + (strOptions.empty() ? L"" : L" " + strOptions);

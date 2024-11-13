@@ -181,6 +181,7 @@ namespace SEASON3B
         bool IsSkillAssigned(int iSkill);
         void RenderSkillIcon(int iSkill, float x, float y, float width, float height);
 
+        void ApplySavedConfig(const cMuHelperConfig& config);
         void InitConfig();
         void SaveConfig();
 
@@ -358,9 +359,11 @@ namespace SEASON3B
         float GetKeyEventOrder();
 
     public:
-        void ShowPage(int iPage);
+        void Toggle(int iPage);
         void Save();
         void Reset();
+        void ApplySavedConfig();
+        void InitConfig();
 
     private:
         void InitText();

@@ -55,6 +55,49 @@ void CMuHelper::Load(const cMuHelperConfig& config)
 {
     // Load config data received from the server
     m_config = config;
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Hunting Range: %d", m_config.iHuntingRange);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Original Position: %d", m_config.bReturnToOriginalPosition);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"DistanceMin: %d", m_config.iMaxSecondsAway);
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Basic Skill: %d", m_config.aiSkill[0]);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1: %d", m_config.aiSkill[1]);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2: %d", m_config.aiSkill[2]);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Combo? %d", m_config.bUseCombo);
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Delay? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Condition? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_CONDITIONS_MASK));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Pre Condition Hunting Range? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_NEARBY));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Pre Condition Attacking Me? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_ATTACKING));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 2 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 3 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 4 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 5 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS));
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Delay? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Condition? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_CONDITIONS_MASK));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Pre Condition Hunting Range? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_NEARBY));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Pre Condition Attacking Me? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_ATTACKING));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Sub Condition 2 or more? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Sub Condition 3 or more? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Sub Condition 4 or more? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Sub Condition 5 or more? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS));
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Buff 0: %d", m_config.aiBuff[0]);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"buff 1: %d", m_config.aiBuff[1]);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Buff 2: %d", m_config.aiBuff[2]);
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Obtain Range: %d", m_config.iObtainingRange);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick All: %d", m_config.bPickAllItems);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Zen: %d", m_config.bPickZen);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Jewel: %d", m_config.bPickJewel);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Excellent: %d", m_config.bPickExcellent);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Ancient: %d", m_config.bPickAncient);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Extra Items: %d", m_config.bPickExtraItems);
+}
+
+cMuHelperConfig CMuHelper::GetConfig() const {
+    return m_config;
 }
 
 void CMuHelper::Toggle()
@@ -125,6 +168,7 @@ void CMuHelper::WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 
     if (m_iLoopCounter++ == 5)
     {
+        m_iSecondsSinceLastBuff++;
         m_iSecondsElapsed++;
 
         if (ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, m_posOriginal) > 1)
@@ -346,20 +390,28 @@ int CMuHelper::Buff()
         m_iCurrentBuffIndex = (m_iCurrentBuffIndex + 1) % m_config.aiBuff.size();
     }
 
+    m_iSecondsSinceLastBuff = 0;
+
     return 1;
 }
 
 int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
 {
-    // TODO: List other buffs here
+    bool bForceBuff = false;
 
+    if (m_config.bBuffDurationParty && m_iSecondsSinceLastBuff >= m_config.iBuffCastInterval)
+    {
+        bForceBuff = true;
+    }
+
+    // TODO: List other buffs here
     if ((iBuffSkill == AT_SKILL_ATTACK
         || iBuffSkill == AT_SKILL_ATT_POWER_UP
         || iBuffSkill == AT_SKILL_ATT_POWER_UP + 1
         || iBuffSkill == AT_SKILL_ATT_POWER_UP + 2
         || iBuffSkill == AT_SKILL_ATT_POWER_UP + 3
         || iBuffSkill == AT_SKILL_ATT_POWER_UP + 4)
-        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Attack))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Attack) || bForceBuff))
     {
         return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
@@ -370,7 +422,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_DEF_POWER_UP + 2
         || iBuffSkill == AT_SKILL_DEF_POWER_UP + 3
         || iBuffSkill == AT_SKILL_DEF_POWER_UP + 4)
-        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Defense))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Defense) || bForceBuff))
     {
         return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
@@ -381,7 +433,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_SOUL_UP + 2
         || iBuffSkill == AT_SKILL_SOUL_UP + 3
         || iBuffSkill == AT_SKILL_SOUL_UP + 4)
-        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_WizDefense))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_WizDefense) || bForceBuff))
     {
         return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
@@ -392,7 +444,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_LIFE_UP + 2
         || iBuffSkill == AT_SKILL_LIFE_UP + 3
         || iBuffSkill == AT_SKILL_LIFE_UP + 4)
-        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_Life))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Life) || bForceBuff))
     {
         if (m_iComboState == 2)
         {
@@ -403,13 +455,13 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
     }
 
     if ((iBuffSkill == AT_SKILL_SWELL_OF_MAGICPOWER)
-        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_SwellOfMagicPower))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_SwellOfMagicPower) || bForceBuff))
     {
         return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
     }
 
     if ((iBuffSkill == AT_SKILL_ADD_CRITICAL)
-        && !g_isCharacterBuff((&pTargetChar->Object), eBuff_AddCriticalDamage))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_AddCriticalDamage) || bForceBuff))
     {
         return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
     }
@@ -451,31 +503,43 @@ int CMuHelper::Heal()
         return 1;
     }
 
-    if (m_config.bSupportParty && g_pPartyManager->IsPartyActive())
+    if (m_config.bAutoHealParty && g_pPartyManager->IsPartyActive())
     {
         PARTY_t* pMember = &Party[m_iCurrentHealPartyIndex];
         CHARACTER* pChar = g_pPartyManager->GetPartyMemberChar(pMember);
 
-        if (pChar != NULL 
-            && pMember->Map == gMapManager.WorldActive
-            && pMember->stepHP * 10 <= m_config.iHealThreshold
-            && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
+        if (pChar != NULL)
         {
-            return SimulateSkill(iHealingSkill, true, pChar->Key);
+            if (pChar == Hero)
+            {
+                return HealSelf(iHealingSkill);
+            }
+            else if (pMember->Map == gMapManager.WorldActive 
+                && pMember->stepHP * 10 <= m_config.iHealPartyThreshold
+                && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
+            {
+                return SimulateSkill(iHealingSkill, true, pChar->Key);
+            }
         }
-
         m_iCurrentHealPartyIndex = (m_iCurrentHealPartyIndex + 1) % (sizeof(Party) / sizeof(Party[0]));
     }
     else
     {
-        int64_t iLife = CharacterAttribute->Life;
-        int64_t iLifeMax = CharacterAttribute->LifeMax;
-        int64_t iRemaining = (iLife * 100 + iLifeMax - 1) / iLifeMax;
+        return HealSelf(iHealingSkill);
+    }
 
-        if (iRemaining <= m_config.iHealThreshold)
-        {
-            return SimulateSkill(iHealingSkill, true, HeroKey);
-        }
+    return 1;
+}
+
+int CMuHelper::HealSelf(int iHealingSkill)
+{
+    int64_t iLife = CharacterAttribute->Life;
+    int64_t iLifeMax = CharacterAttribute->LifeMax;
+    int64_t iRemaining = (iLife * 100 + iLifeMax - 1) / iLifeMax;
+
+    if (iRemaining <= m_config.iHealThreshold)
+    {
+        return SimulateSkill(iHealingSkill, true, HeroKey);
     }
 
     return 1;

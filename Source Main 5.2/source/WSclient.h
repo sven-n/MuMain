@@ -3514,3 +3514,57 @@ typedef struct _CROWN_SWITCH_INFO
 extern CROWN_SWITCH_INFO* Switch_Info;
 
 extern MASTER_LEVEL_VALUE	Master_Level_Data;
+
+// MU Helper Data
+#pragma pack(push, 1)
+typedef struct {
+    BYTE DataStartMarker;                    // Index: 4
+    BYTE : 3; // Unused
+    BYTE JewelOrGem : 1;                     // Index: 5
+    BYTE SetItem : 1;
+    BYTE ExcellentItem : 1;
+    BYTE Zen : 1;
+    BYTE AddExtraItem : 1;
+    BYTE HuntingRange : 4;                   // Index: 6
+    BYTE ObtainRange : 4;
+    WORD DistanceMin;                        // Index: 7
+    WORD BasicSkill1;                        // Index: 9
+    WORD ActivationSkill1;                   // Index: 11
+    WORD DelayMinSkill1;                     // Index: 13
+    WORD ActivationSkill2;                   // Index: 15
+    WORD DelayMinSkill2;                     // Index: 17
+    WORD CastingBuffMin;                     // Index: 19
+    WORD BuffSkill0NumberID;                 // Index: 21
+    WORD BuffSkill1NumberID;                 // Index: 23
+    WORD BuffSkill2NumberID;                 // Index: 25
+    BYTE HPStatusAutoPotion : 4;             // Index: 27
+    BYTE HPStatusAutoHeal : 4;
+    BYTE HPStatusOfPartyMembers : 4;         // Index: 28
+    BYTE HPStatusDrainLife : 4;
+    BYTE AutoPotion : 1;                     // Index: 29
+    BYTE AutoHeal : 1;
+    BYTE DrainLife : 1;
+    BYTE LongDistanceAttack : 1;
+    BYTE OriginalPosition : 1;
+    BYTE Combo : 1;
+    BYTE Party : 1;
+    BYTE PreferenceOfPartyHeal : 1;
+    BYTE BuffDurationforAllPartyMembers : 1; // Index: 30
+    BYTE UseDarkSpirits : 1;
+    BYTE BuffDuration : 1;
+    BYTE Skill1Delay : 1;
+    BYTE Skill1Con : 1;
+    BYTE Skill1PreCon : 1;
+    BYTE Skill1SubCon : 2;
+    BYTE Skill2Delay : 1;                    // Index: 31
+    BYTE Skill2Con : 1;
+    BYTE Skill2PreCon : 1;
+    BYTE Skill2SubCon : 2;
+    BYTE RepairItem : 1;
+    BYTE PickAllNearItems : 1;
+    BYTE PickSelectedItems : 1;
+    BYTE PetAttack;                          // Index: 32
+    BYTE _UnusedPadding[36];
+    char ExtraItems[12][15];                 // Index: 69
+} PRECEIVE_MUHELPER_DATA, * LPRECEIVE_MUHELPER_DATA;
+#pragma pack(pop)

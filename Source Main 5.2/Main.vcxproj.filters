@@ -1195,6 +1195,9 @@
     <ClCompile Include="source\MUHelper\MuHelper.cpp">
       <Filter>MU\MUHelper</Filter>
     </ClCompile>
+    <ClCompile Include="source\MUHelper\MuHelperData.cpp">
+      <Filter>MU\Client\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\BlackWin.h">
@@ -2279,6 +2282,9 @@
     </ClInclude>
     <ClInclude Include="source\MUHelper\MuHelper.h">
       <Filter>MU\MUHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MUHelper\MuHelperData.h">
+      <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

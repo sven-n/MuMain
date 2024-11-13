@@ -73,6 +73,8 @@
 
 #include "Dotnet/Connection.h"
 
+#include "MUHelper/MuHelper.h"
+
 #define MAX_DEBUG_MAX 10
 
 extern BYTE m_AltarState[];
@@ -138,6 +140,40 @@ wchar_t    QuestionID[MAX_ID_SIZE + 1];
 wchar_t    Question[31];
 
 #define FIRST_CROWN_SWITCH_NUMBER	322
+
+void hexdump(std::span<const BYTE> ReceiveBuffer) {
+    const size_t bytesPerLine = 16;
+
+    for (size_t i = 0; i < ReceiveBuffer.size(); i += bytesPerLine) {
+        // Print offset
+        printf("%08X  ", static_cast<unsigned int>(i));
+
+        // Print hex bytes
+        for (size_t j = 0; j < bytesPerLine; ++j) {
+            if (i + j < ReceiveBuffer.size()) {
+                printf("%02X ", ReceiveBuffer[i + j]);
+            }
+            else {
+                printf("   "); // Fill gaps for alignment
+            }
+        }
+
+        printf(" |");
+
+        // Print ASCII characters
+        for (size_t j = 0; j < bytesPerLine; ++j) {
+            if (i + j < ReceiveBuffer.size()) {
+                BYTE byte = ReceiveBuffer[i + j];
+                printf("%c", std::isprint(byte) ? byte : '.');
+            }
+            else {
+                printf(" ");
+            }
+        }
+
+        printf("|\n");
+    }
+}
 
 void AddDebugText(const unsigned char* Buffer, int Size)
 {
@@ -1249,6 +1285,23 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
         CharacterAttribute->Skill[Skill_Bool] = AT_SKILL_UNDEFINED;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
+}
+
+void ReceiveMuHelperConfigurationData(std::span<const BYTE> ReceiveBuffer)
+{
+    //hexdump(ReceiveBuffer);
+    auto pMuHelperData = safe_cast<PRECEIVE_MUHELPER_DATA>(ReceiveBuffer.subspan(4));
+    if (pMuHelperData == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    cMuHelperConfig config;
+    MuHelperConfigSerDe::Deserialize(*pMuHelperData, config);
+    g_pNewUIMuHelper->ApplySavedConfig(config);
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0xAE [ReceiveMuHelperConfigurationData]");
 }
 
 void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
@@ -14398,7 +14451,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         break;
     case 0xAE:
         // Received mu helper config from server
-        g_ConsoleDebug->Write(MCD_RECEIVE, L"Received mu helper config from server");
+        ReceiveMuHelperConfigurationData(received_span);
         break;
     default:
         break;
