@@ -49,6 +49,11 @@ void CMuHelper::Save(const cMuHelperConfig& config)
 {
     // Save config data by sending to server
     m_config = config;
+
+    PRECEIVE_MUHELPER_DATA netData;
+    MuHelperConfigSerDe::Serialize(m_config, netData);
+
+    SocketClient->ToGameServer()->SendMuHelperSaveDataRequest(reinterpret_cast<BYTE*>(&netData), sizeof(netData));
 }
 
 void CMuHelper::Load(const cMuHelperConfig& config)
@@ -66,7 +71,7 @@ void CMuHelper::Load(const cMuHelperConfig& config)
     g_ConsoleDebug->Write(MCD_NORMAL, L"Combo? %d", m_config.bUseCombo);
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Delay? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Condition? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_CONDITIONS_MASK));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Condition? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_CONDITION));
     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Pre Condition Hunting Range? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_NEARBY));
     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Pre Condition Attacking Me? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_ATTACKING));
     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 2 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS));
@@ -75,7 +80,7 @@ void CMuHelper::Load(const cMuHelperConfig& config)
     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 5 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS));
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Delay? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Condition? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_CONDITIONS_MASK));
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Condition? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION));
     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Pre Condition Hunting Range? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_NEARBY));
     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Pre Condition Attacking Me? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_ATTACKING));
     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Sub Condition 2 or more? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS));
@@ -86,6 +91,10 @@ void CMuHelper::Load(const cMuHelperConfig& config)
     g_ConsoleDebug->Write(MCD_NORMAL, L"Buff 0: %d", m_config.aiBuff[0]);
     g_ConsoleDebug->Write(MCD_NORMAL, L"buff 1: %d", m_config.aiBuff[1]);
     g_ConsoleDebug->Write(MCD_NORMAL, L"Buff 2: %d", m_config.aiBuff[2]);
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Potion: %d Threshold: %d", m_config.bUseHealPotion, m_config.iPotionThreshold);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Heal: %d Threshold: %d", m_config.bAutoHeal, m_config.iHealThreshold);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Party Heal: %d Threshold: %d", m_config.bAutoHealParty, m_config.iHealPartyThreshold);
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"Obtain Range: %d", m_config.iObtainingRange);
     g_ConsoleDebug->Write(MCD_NORMAL, L"Pick All: %d", m_config.bPickAllItems);

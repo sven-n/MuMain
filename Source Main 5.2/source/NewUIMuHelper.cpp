@@ -383,7 +383,7 @@ void CNewUIMuHelper::InitTextboxInput()
     m_DistanceTimeInput.SetFont(g_hFont);
     m_DistanceTimeInput.SetState(UISTATE_NORMAL);
     m_DistanceTimeInput.SetOption(UIOPTION_NUMBERONLY);
-    swprintf(wsInitText, L"%d", _TempConfig.iMaxSecondsAway);
+    swprintf(wsInitText, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iMaxSecondsAway);
     m_DistanceTimeInput.SetText(wsInitText);
 
     m_Skill2DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
@@ -393,7 +393,7 @@ void CNewUIMuHelper::InitTextboxInput()
     m_Skill2DelayInput.SetFont(g_hFont);
     m_Skill2DelayInput.SetState(UISTATE_NORMAL);
     m_Skill2DelayInput.SetOption(UIOPTION_NUMBERONLY);
-    swprintf(wsInitText, L"%d", _TempConfig.aiSkillInterval[1]);
+    swprintf(wsInitText, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[1]);
     m_Skill2DelayInput.SetText(wsInitText);
 
     m_Skill3DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
@@ -403,7 +403,7 @@ void CNewUIMuHelper::InitTextboxInput()
     m_Skill3DelayInput.SetFont(g_hFont);
     m_Skill3DelayInput.SetState(UISTATE_NORMAL);
     m_Skill3DelayInput.SetOption(UIOPTION_NUMBERONLY);
-    swprintf(wsInitText, L"%d", _TempConfig.aiSkillInterval[2]);
+    swprintf(wsInitText, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[2]);
     m_Skill3DelayInput.SetText(wsInitText);
 
     m_ItemInput.Init(g_hWnd, 88, 15, MAX_ITEM_NAME, false);
@@ -547,25 +547,45 @@ bool CNewUIMuHelper::UpdateMouseEvent()
 
         if (iCheckboxId == CHECKBOX_ID_SKILL2_DELAY)
         {
-            m_CheckBoxList[CHECKBOX_ID_SKILL2_DELAY].box->RegisterBoxState(true);
-            m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->RegisterBoxState(false);
-            g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
+            bool bState = m_CheckBoxList[CHECKBOX_ID_SKILL2_DELAY].box->GetBoxState();
+            if (bState == true)
+            {
+                m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->RegisterBoxState(false);
+                g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
+            }
         }
         else if (iCheckboxId == CHECKBOX_ID_SKILL2_CONDITION)
         {
-            m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->RegisterBoxState(true);
-            m_CheckBoxList[CHECKBOX_ID_SKILL2_DELAY].box->RegisterBoxState(false);
+            bool bState = m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->GetBoxState();
+            if (bState == true)
+            {
+                m_CheckBoxList[CHECKBOX_ID_SKILL2_DELAY].box->RegisterBoxState(false);
+            }
+            else
+            {
+                g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
+            }
         }
         else if (iCheckboxId == CHECKBOX_ID_SKILL3_DELAY)
         {
-            m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->RegisterBoxState(true);
-            m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(false);
-            g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
+            bool bState = m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->GetBoxState();
+            if (bState == true)
+            {
+                m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(false);
+                g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
+            }
         }
         else if (iCheckboxId == CHECKBOX_ID_SKILL3_CONDITION)
         {
-            m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(true);
-            m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->RegisterBoxState(false);
+            bool bState = m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->GetBoxState();
+            if (bState == true)
+            {
+                m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->RegisterBoxState(false);
+            }
+            else
+            {
+                g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
+            }
         }
         else if (iCheckboxId == CHECKBOX_ID_DR_ATTACK_CEASE)
         {
@@ -693,25 +713,23 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
         break;
 
     case CHECKBOX_ID_SKILL2_DELAY:
-        _TempConfig.aiSkillCondition[1] &= MUHELPER_ATTACK_PRECONDITION_MASK;
-        //_TempConfig.aiSkillCondition[1] &= MUHELPER_ATTACK_ON_MOBS_MASK);
-        //_TempConfig.aiSkillCondition[1] |= MUHELPER_ATTACK_ON_TIMER;
+        _TempConfig.aiSkillCondition[1] &= ~MUHELPER_ATTACK_ON_CONDITION;
+        _TempConfig.aiSkillCondition[1] |= MUHELPER_ATTACK_ON_TIMER;
         break;
 
     case CHECKBOX_ID_SKILL2_CONDITION:
         _TempConfig.aiSkillCondition[1] &= ~MUHELPER_ATTACK_ON_TIMER;
-        //_TempConfig.aiSkillCondition[1] = MUHELPER_ATTACK_ON_MOBS_NEARBY | MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
+        _TempConfig.aiSkillCondition[1] |= MUHELPER_ATTACK_ON_CONDITION;
         break;
 
     case CHECKBOX_ID_SKILL3_DELAY:
-        _TempConfig.aiSkillCondition[2] &= MUHELPER_ATTACK_PRECONDITION_MASK;
-        //_TempConfig.aiSkillCondition[2] &= MUHELPER_ATTACK_ON_MOBS_MASK);
-        //_TempConfig.aiSkillCondition[2] = _TempConfig.aiSkillCondition[2] | MUHELPER_ATTACK_ON_TIMER;
+        _TempConfig.aiSkillCondition[2] &= ~MUHELPER_ATTACK_ON_CONDITION;
+        _TempConfig.aiSkillCondition[2] |= MUHELPER_ATTACK_ON_TIMER;
         break;
 
     case CHECKBOX_ID_SKILL3_CONDITION:
         _TempConfig.aiSkillCondition[2] &= ~MUHELPER_ATTACK_ON_TIMER;
-        //_TempConfig.aiSkillCondition[2] = MUHELPER_ATTACK_ON_MOBS_NEARBY | MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
+        _TempConfig.aiSkillCondition[2] |= MUHELPER_ATTACK_ON_CONDITION;
         break;
 
     case CHECKBOX_ID_COMBO:
@@ -727,15 +745,15 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
         break;
 
     case CHECKBOX_ID_DR_ATTACK_CEASE:
-        _TempConfig.iDarkRavenMode = eCeaseAttack;
+        _TempConfig.iDarkRavenMode = PET_ATTACK_CEASE;
         break;
 
     case CHECKBOX_ID_DR_ATTACK_AUTO:
-        _TempConfig.iDarkRavenMode = eAutomaticAttack;
+        _TempConfig.iDarkRavenMode = PET_ATTACK_AUTO;
         break;
 
     case CHECKBOX_ID_DR_ATTACK_TOGETHER:
-        _TempConfig.iDarkRavenMode = eSameTargetAttack;
+        _TempConfig.iDarkRavenMode = PET_ATTACK_TOGETHER;
         break;
 
     case CHECKBOX_ID_PARTY:
@@ -853,6 +871,12 @@ void CNewUIMuHelper::SaveExtraItem()
         _TempConfig.aExtraItems.insert(std::wstring(wsExtraItem));
     }
 
+    int iItemIndex = 0;
+    for (const auto& item : _TempConfig.aExtraItems)
+    {
+        g_ConsoleDebug->Write(MCD_NORMAL, L"%s", item.c_str());
+    }
+
     m_ItemInput.SetText(L"");
 }
 
@@ -899,26 +923,31 @@ void CNewUIMuHelper::ApplySavedConfig(const cMuHelperConfig& config)
     m_CheckBoxList[CHECKBOX_ID_ORIG_POSITION].box->RegisterBoxState(_TempConfig.bReturnToOriginalPosition);
 
     m_CheckBoxList[CHECKBOX_ID_SKILL2_DELAY].box->RegisterBoxState(_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER);
-    m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_CONDITIONS_MASK);
+    m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_ON_CONDITION);
     m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->RegisterBoxState(_TempConfig.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER);
-    m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[2] & MUHELPER_ATTACK_CONDITIONS_MASK);
+    m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION);
     m_CheckBoxList[CHECKBOX_ID_COMBO].box->RegisterBoxState(_TempConfig.bUseCombo);
 
-    wchar_t wsTempNum[MAX_NUMBER_DIGITS + 1] = { 0 };
-    swprintf(wsTempNum, L"%d", _TempConfig.iMaxSecondsAway);
+    wchar_t wsTempNum[MAX_NUMBER_DIGITS + 1];
+    memset(wsTempNum, 0, sizeof(wsTempNum));
+    swprintf(wsTempNum, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iMaxSecondsAway);
     m_DistanceTimeInput.SetText(wsTempNum);
-    swprintf(wsTempNum, L"%d", _TempConfig.aiSkillInterval[1]);
+
+    memset(wsTempNum, 0, sizeof(wsTempNum));
+    swprintf(wsTempNum, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[1]);
     m_Skill2DelayInput.SetText(wsTempNum);
-    swprintf(wsTempNum, L"%d", _TempConfig.aiSkillInterval[2]);
+
+    memset(wsTempNum, 0, sizeof(wsTempNum));
+    swprintf(wsTempNum, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[2]);
     m_Skill3DelayInput.SetText(wsTempNum);
 
     m_CheckBoxList[CHECKBOX_ID_BUFF_DURATION].box->RegisterBoxState(_TempConfig.bBuffDuration);
     m_CheckBoxList[CHECKBOX_ID_PARTY].box->RegisterBoxState(_TempConfig.bSupportParty);
 
     m_CheckBoxList[CHECKBOX_ID_USE_PET].box->RegisterBoxState(_TempConfig.bUseDarkRaven);
-    m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_CEASE].box->RegisterBoxState(_TempConfig.iDarkRavenMode == eCeaseAttack);
-    m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_AUTO].box->RegisterBoxState(_TempConfig.iDarkRavenMode == eAutomaticAttack);
-    m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_TOGETHER].box->RegisterBoxState(_TempConfig.iDarkRavenMode == eSameTargetAttack);
+    m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_CEASE].box->RegisterBoxState(_TempConfig.iDarkRavenMode == PET_ATTACK_CEASE);
+    m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_AUTO].box->RegisterBoxState(_TempConfig.iDarkRavenMode == PET_ATTACK_AUTO);
+    m_CheckBoxList[CHECKBOX_ID_DR_ATTACK_TOGETHER].box->RegisterBoxState(_TempConfig.iDarkRavenMode == PET_ATTACK_TOGETHER);
 
     m_CheckBoxList[CHECKBOX_ID_REPAIR_ITEM].box->RegisterBoxState(_TempConfig.bRepairItem);
     m_CheckBoxList[CHECKBOX_ID_PICK_ALL].box->RegisterBoxState(_TempConfig.bPickAllItems);
@@ -933,6 +962,7 @@ void CNewUIMuHelper::ApplySavedConfig(const cMuHelperConfig& config)
     m_CheckBoxList[CHECKBOX_ID_AUTO_ACCEPT_GUILD].box->RegisterBoxState(_TempConfig.bAutoAcceptGuild);
     m_CheckBoxList[CHECKBOX_ID_AUTO_DEFEND].box->RegisterBoxState(_TempConfig.bUseSelfDefense);
 
+    m_ItemFilter.Clear();
     for (const auto& item : _TempConfig.aExtraItems) 
     {
         m_ItemFilter.AddText(item.c_str());
@@ -943,9 +973,11 @@ void CNewUIMuHelper::InitConfig()
 {
     _TempConfig.iHuntingRange = 0;
     _TempConfig.iObtainingRange = 1;
-    _TempConfig.aiSkillCondition[0] = MUHELPER_ATTACK_ALWAYS;
-    _TempConfig.aiSkillCondition[1] = MUHELPER_ATTACK_ON_TIMER;
-    _TempConfig.aiSkillCondition[2] = MUHELPER_ATTACK_ON_TIMER;
+    _TempConfig.aiSkill.fill(0);
+    _TempConfig.aiBuff.fill(0);
+    _TempConfig.aiSkillCondition.fill(0);
+    _TempConfig.aiSkillInterval.fill(0);
+    _TempConfig.aExtraItems.clear();
     _TempConfig.bBuffDuration = false;
 
     ResetBoxList();
@@ -1742,6 +1774,7 @@ bool CNewUIMuHelperSkillList::UpdateKeyEvent()
         if (IsPress(VK_ESCAPE) == true)
         {
             g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
+            SetFocus(g_hWnd);
             //PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -2437,7 +2470,7 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other precondition bits and set the bit for "Hunt Range"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_PRECONDITION_MASK) |
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_PRECONDITION_CLEAR_MASK) |
                     MUHELPER_ATTACK_ON_MOBS_NEARBY;
             }
             else if (m_BtnPreConAttacking.UpdateMouseEvent())
@@ -2447,7 +2480,7 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other precondition bits and set the bit for "Attacking"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_PRECONDITION_MASK) |
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_PRECONDITION_CLEAR_MASK) |
                     MUHELPER_ATTACK_ON_MOBS_ATTACKING;
             }
             else if (m_BtnSubConMoreThanTwo.UpdateMouseEvent())
@@ -2459,7 +2492,7 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other bits and set the bit for "More Than Two Mobs"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_MASK) |
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_CLEAR_MASK) |
                     MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
             }
             else if (m_BtnSubConMoreThanThree.UpdateMouseEvent())
@@ -2471,7 +2504,7 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other bits and set the bit for "More Than Three Mobs"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_MASK) |
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_CLEAR_MASK) |
                     MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS;
             }
             else if (m_BtnSubConMoreThanFour.UpdateMouseEvent())
@@ -2483,7 +2516,7 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other bits and set the bit for "More Than Four Mobs"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_MASK) |
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_CLEAR_MASK) |
                     MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS;
             }
             else if (m_BtnSubConMoreThanFive.UpdateMouseEvent())
@@ -2495,7 +2528,7 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other bits and set the bit for "More Than Five Mobs"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_MASK) |
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_CLEAR_MASK) |
                     MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS;
             }
         }
@@ -2735,7 +2768,7 @@ void CNewUIMuHelperExt::Toggle(int iPageId)
         m_iCurrentPartyHealThreshold = _TempConfig.iHealPartyThreshold / 10;
 
         wchar_t wsBuffTime[MAX_NUMBER_DIGITS + 1] = { 0 };
-        swprintf(wsBuffTime, L"%d", _TempConfig.iBuffCastInterval);
+        swprintf(wsBuffTime, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iBuffCastInterval);
         m_BuffTimeInput.SetText(wsBuffTime);
         m_BuffTimeInput.SetPosition(m_Pos.x + 127, m_Pos.y + 97);
     }
@@ -2748,7 +2781,7 @@ void CNewUIMuHelperExt::Toggle(int iPageId)
         m_iCurrentPartyHealThreshold = _TempConfig.iHealPartyThreshold / 10;
 
         wchar_t wsBuffTime[MAX_NUMBER_DIGITS + 1] = { 0 };
-        swprintf(wsBuffTime, L"%d", _TempConfig.iBuffCastInterval);
+        swprintf(wsBuffTime, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iBuffCastInterval);
         m_BuffTimeInput.SetText(wsBuffTime);
         m_BuffTimeInput.SetPosition(m_Pos.x + 127, m_Pos.y + 187);
     }

@@ -3517,7 +3517,8 @@ extern MASTER_LEVEL_VALUE	Master_Level_Data;
 
 // MU Helper Data
 #pragma pack(push, 1)
-typedef struct {
+typedef struct 
+{
     BYTE DataStartMarker;                    // Index: 4
     BYTE : 3; // Unused
     BYTE JewelOrGem : 1;                     // Index: 5
