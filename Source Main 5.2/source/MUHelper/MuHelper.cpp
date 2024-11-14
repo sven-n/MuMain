@@ -29,6 +29,7 @@ CMuHelper::CMuHelper()
 {
     m_iCurrentItem = -1;
     m_iCurrentTarget = -1;
+    m_iCurrentSkill = -1;
     m_iComboState = 0;
     m_iCurrentBuffIndex = 0;
     m_iCurrentBuffPartyIndex = 0;
@@ -124,6 +125,7 @@ void CMuHelper::Toggle()
     m_iCurrentBuffIndex = 0;
     m_iCurrentBuffPartyIndex = 0;
     m_iCurrentTarget = -1;
+    m_iCurrentSkill = -1;
     m_iCurrentItem = MAX_ITEMS;
     m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
@@ -411,7 +413,8 @@ int CMuHelper::Buff()
     {
         m_iCurrentBuffIndex = (m_iCurrentBuffIndex + 1) % m_config.aiBuff.size();
 
-        // Everyone's been buffed, reset the timer activated buff flag
+        // Reaching this branch means everyone's been buffed, 
+        // so we're resetting the timer activated buff flag
         if (m_iCurrentBuffIndex == 0)
         {
             m_bTimerActivatedBuffOngoing = false;
@@ -642,13 +645,49 @@ int CMuHelper::Attack()
         return SimulateComboAttack();
     }
 
-    // to-do select skill
-    if (m_config.aiSkill[0] != 0)
+    // no selected skill yet, try skill 2 activation conditions
+    if (m_iCurrentSkill == -1 && m_config.aiSkill[1] > 0)
     {
-        return SimulateAttack(m_config.aiSkill[0]);
+        // if skill 2 activation is timer and interval elapsed
+        if ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER)
+            && m_config.aiSkillInterval[1] != 0
+            && m_iSecondsElapsed % m_config.aiSkillInterval[1] == 0)
+        {
+            m_iCurrentSkill = m_config.aiSkill[1];
+        }
     }
 
-    return 1;
+    // no selected skill yet, try skill 3 activation conditions
+    if (m_iCurrentSkill == -1 && m_config.aiSkill[2] > 0)
+    {
+        // if skill 3 activation is timer and interval elapsed
+        if ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER)
+            && m_config.aiSkillInterval[2] != 0
+            && m_iSecondsElapsed % m_config.aiSkillInterval[2] == 0)
+        {
+            m_iCurrentSkill = m_config.aiSkill[2];
+        }
+    }
+
+    // no selected skill yet, default to basic skill
+    if (m_iCurrentSkill == -1 && m_config.aiSkill[0] > 0)
+    {
+        m_iCurrentSkill = m_config.aiSkill[0];
+    }
+
+    if (m_iCurrentSkill == -1)
+    {
+        m_iCurrentSkill = m_config.aiSkill[0];
+    }
+
+    if (SimulateAttack(m_iCurrentSkill))
+    {
+        // after a successful attack, reset skill and select again later
+        m_iCurrentSkill = -1;
+        return 1;
+    }
+
+    return 0;
 }
 
 int CMuHelper::SimulateComboAttack()

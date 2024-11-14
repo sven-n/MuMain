@@ -72,6 +72,7 @@ private:
 	int m_iCurrentBuffPartyIndex;
 	int m_iCurrentHealPartyIndex;
 	int m_iComboState;
+	int m_iCurrentSkill;
 	int m_iHuntingDistance;
 	int m_iObtainingDistance;
 	int m_iLoopCounter;

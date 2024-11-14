@@ -61,36 +61,36 @@ void MuHelperConfigSerDe::Serialize(const cMuHelperConfig& gameData, PRECEIVE_MU
 
 	if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER) 
 	{
-		netData.Skill1Delay = 1;
+		netData.Skill2Delay = 1;
 	}
 	if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION)
 	{
-		netData.Skill1Con = 1;
+		netData.Skill2Con = 1;
 	}
 	if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_NEARBY) 
 	{
-		netData.Skill1PreCon = 0;
+		netData.Skill2PreCon = 0;
 	}
 	else if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_ATTACKING) 
 	{
-		netData.Skill1PreCon = 1;
+		netData.Skill2PreCon = 1;
 	}
 
 	if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) 
 	{
-		netData.Skill1SubCon = 0;
+		netData.Skill2SubCon = 0;
 	}
 	else if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) 
 	{
-		netData.Skill1SubCon = 1;
+		netData.Skill2SubCon = 1;
 	}
 	else if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) 
 	{
-		netData.Skill1SubCon = 2;
+		netData.Skill2SubCon = 2;
 	}
 	else if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) 
 	{
-		netData.Skill1SubCon = 3;
+		netData.Skill2SubCon = 3;
 	}
 
 	netData.Combo = gameData.bUseCombo ? 1 : 0;
