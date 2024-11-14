@@ -44,11 +44,12 @@ private:
 	int Attack();
 	int RepairEquipments();
 	int Regroup();
+	int SelectAttackSkill();
 	int SimulateAttack(int iSkill);
 	int SimulateSkill(int iSkill, bool bTargetRequired, int iTarget);
 	int SimulateComboAttack();
 	int GetNearestTarget();
-	int GetFarthestTarget();
+	int GetFarthestAttackingTarget();
 	int ComputeDistanceByRange(int iRange);
 	int ComputeDistanceFromTarget(CHARACTER* pTarget);
 	int ComputeDistanceBetween(POINT posA, POINT posB);
@@ -65,6 +66,7 @@ private:
 	std::thread m_timerThread;
 	std::atomic<bool> m_bActive;
 	std::set<int> m_setTargets;
+	std::set<int> m_setTargetsAttacking;
 	std::set<int> m_setItems;
 	int m_iCurrentItem;
 	int m_iCurrentTarget;

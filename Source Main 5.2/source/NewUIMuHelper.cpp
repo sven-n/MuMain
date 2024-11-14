@@ -714,22 +714,30 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
 
     case CHECKBOX_ID_SKILL2_DELAY:
         _TempConfig.aiSkillCondition[1] &= ~MUHELPER_ATTACK_ON_CONDITION;
-        _TempConfig.aiSkillCondition[1] |= MUHELPER_ATTACK_ON_TIMER;
+        _TempConfig.aiSkillCondition[1] = bState
+            ? (_TempConfig.aiSkillCondition[1] | MUHELPER_ATTACK_ON_TIMER)
+            : (_TempConfig.aiSkillCondition[1] & ~MUHELPER_ATTACK_ON_TIMER);
         break;
 
     case CHECKBOX_ID_SKILL2_CONDITION:
         _TempConfig.aiSkillCondition[1] &= ~MUHELPER_ATTACK_ON_TIMER;
-        _TempConfig.aiSkillCondition[1] |= MUHELPER_ATTACK_ON_CONDITION;
+        _TempConfig.aiSkillCondition[1] = bState
+            ? (_TempConfig.aiSkillCondition[1] | MUHELPER_ATTACK_ON_CONDITION)
+            : (_TempConfig.aiSkillCondition[1] & ~MUHELPER_ATTACK_ON_CONDITION);
         break;
 
     case CHECKBOX_ID_SKILL3_DELAY:
         _TempConfig.aiSkillCondition[2] &= ~MUHELPER_ATTACK_ON_CONDITION;
-        _TempConfig.aiSkillCondition[2] |= MUHELPER_ATTACK_ON_TIMER;
+        _TempConfig.aiSkillCondition[2] = bState
+            ? (_TempConfig.aiSkillCondition[2] | MUHELPER_ATTACK_ON_TIMER)
+            : (_TempConfig.aiSkillCondition[2] & ~MUHELPER_ATTACK_ON_TIMER);
         break;
 
     case CHECKBOX_ID_SKILL3_CONDITION:
         _TempConfig.aiSkillCondition[2] &= ~MUHELPER_ATTACK_ON_TIMER;
-        _TempConfig.aiSkillCondition[2] |= MUHELPER_ATTACK_ON_CONDITION;
+        _TempConfig.aiSkillCondition[2] = bState
+            ? (_TempConfig.aiSkillCondition[2] | MUHELPER_ATTACK_ON_CONDITION)
+            : (_TempConfig.aiSkillCondition[2] & ~MUHELPER_ATTACK_ON_CONDITION);
         break;
 
     case CHECKBOX_ID_COMBO:

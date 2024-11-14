@@ -125,7 +125,7 @@ void CMuHelper::Toggle()
     m_iCurrentBuffIndex = 0;
     m_iCurrentBuffPartyIndex = 0;
     m_iCurrentTarget = -1;
-    m_iCurrentSkill = -1;
+    m_iCurrentSkill = m_config.aiSkill[0];
     m_iCurrentItem = MAX_ITEMS;
     m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
@@ -135,6 +135,7 @@ void CMuHelper::Toggle()
     m_iSecondsElapsed = 0;
     m_iSecondsAway = 0;
     m_setTargets.clear();
+    m_setTargetsAttacking.clear();
 
     if (bStart && !Hero->SafeZone)
     {
@@ -254,6 +255,11 @@ void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
         || (bIsAttacking && m_config.bLongRangeCounterAttack))
     {
         m_setTargets.insert(iTargetId);
+
+        if (bIsAttacking)
+        {
+            m_setTargetsAttacking.insert(iTargetId);
+        }
     }
 
     if (m_config.bUseSelfDefense)
@@ -268,6 +274,7 @@ void CMuHelper::DeleteTarget(int iTargetId)
     std::lock_guard<std::mutex> lock(_mtx_targetSet);
 
     m_setTargets.erase(iTargetId);
+    m_setTargetsAttacking.erase(iTargetId);
 
     if (iTargetId == m_iCurrentTarget)
     {
@@ -279,6 +286,7 @@ void CMuHelper::DeleteAllTargets()
 {
     std::lock_guard<std::mutex> lock(_mtx_targetSet);
     m_setTargets.clear();
+    m_setTargetsAttacking.clear();
 }
 
 int CMuHelper::ComputeDistanceByRange(int iRange)
@@ -336,7 +344,7 @@ int CMuHelper::GetNearestTarget()
     return iClosestMonsterId;
 }
 
-int CMuHelper::GetFarthestTarget()
+int CMuHelper::GetFarthestAttackingTarget()
 {
     int iFarthestMonsterId = -1;
     int iMaxDistance = -1;
@@ -344,7 +352,7 @@ int CMuHelper::GetFarthestTarget()
     std::set<int> setTargets;
     {
         std::lock_guard<std::mutex> lock(_mtx_targetSet);
-        setTargets = m_setTargets;
+        setTargets = m_setTargetsAttacking;
     }
 
     for (const int& iMonsterId : setTargets)
@@ -626,7 +634,7 @@ int CMuHelper::Attack()
         {
             if (m_config.bLongRangeCounterAttack)
             {
-                m_iCurrentTarget = GetFarthestTarget();
+                m_iCurrentTarget = GetFarthestAttackingTarget();
             }
             else
             {
@@ -645,49 +653,110 @@ int CMuHelper::Attack()
         return SimulateComboAttack();
     }
 
-    // no selected skill yet, try skill 2 activation conditions
-    if (m_iCurrentSkill == -1 && m_config.aiSkill[1] > 0)
+    m_iCurrentSkill = SelectAttackSkill();
+    if (m_iCurrentSkill > 0)
     {
-        // if skill 2 activation is timer and interval elapsed
+        SimulateAttack(m_iCurrentSkill);
+    }
+
+    return 1;
+}
+
+int CMuHelper::SelectAttackSkill()
+{
+    // try skill 2 activation conditions
+    if (m_config.aiSkill[1] > 0)
+    {
         if ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER)
             && m_config.aiSkillInterval[1] != 0
             && m_iSecondsElapsed % m_config.aiSkillInterval[1] == 0)
         {
-            m_iCurrentSkill = m_config.aiSkill[1];
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Timer");
+            return m_config.aiSkill[1];
+        }
+
+        if (m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_CONDITION)
+        {
+            if (m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_NEARBY)
+            {
+                int iCount = m_setTargets.size();
+
+                if (((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
+                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
+                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
+                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
+                {
+                    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Hunting Range Condition");
+                    return m_config.aiSkill[1];
+                }
+            }
+            else if (m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_ATTACKING)
+            {
+                int iCount = m_setTargetsAttacking.size();
+
+                if (((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
+                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
+                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
+                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
+                {
+                    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Attacking Me Condition");
+                    return m_config.aiSkill[1];
+                }
+            }
         }
     }
 
-    // no selected skill yet, try skill 3 activation conditions
-    if (m_iCurrentSkill == -1 && m_config.aiSkill[2] > 0)
+    // try skill 3 activation conditions
+    if (m_config.aiSkill[2] > 0
+        && (m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER
+            || m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION))
     {
-        // if skill 3 activation is timer and interval elapsed
         if ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER)
             && m_config.aiSkillInterval[2] != 0
             && m_iSecondsElapsed % m_config.aiSkillInterval[2] == 0)
         {
-            m_iCurrentSkill = m_config.aiSkill[2];
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 3 Timer");
+            return m_config.aiSkill[2];
+        }
+
+        if (m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION)
+        {
+            if (m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_NEARBY)
+            {
+                int iCount = m_setTargets.size();
+
+                if (((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
+                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
+                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
+                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
+                {
+                    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 3 Hunting Range Condition");
+                    return m_config.aiSkill[2];
+                }
+            }
+            else if (m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_ATTACKING)
+            {
+                int iCount = m_setTargetsAttacking.size();
+
+                if (((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
+                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
+                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
+                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
+                {
+                    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 3 Attacking Me Condition");
+                    return m_config.aiSkill[2];
+                }
+            }
         }
     }
 
-    // no selected skill yet, default to basic skill
-    if (m_iCurrentSkill == -1 && m_config.aiSkill[0] > 0)
+    // no skill for activation yet, default to basic skill
+    if (m_config.aiSkill[0] > 0)
     {
-        m_iCurrentSkill = m_config.aiSkill[0];
+        return m_config.aiSkill[0];
     }
 
-    if (m_iCurrentSkill == -1)
-    {
-        m_iCurrentSkill = m_config.aiSkill[0];
-    }
-
-    if (SimulateAttack(m_iCurrentSkill))
-    {
-        // after a successful attack, reset skill and select again later
-        m_iCurrentSkill = -1;
-        return 1;
-    }
-
-    return 0;
+    return -1;
 }
 
 int CMuHelper::SimulateComboAttack()

@@ -17,10 +17,6 @@ void MuHelperConfigSerDe::Serialize(const cMuHelperConfig& gameData, PRECEIVE_MU
 	netData.DelayMinSkill1 = static_cast<WORD>(gameData.aiSkillInterval[1] & 0xFFFF);
 	netData.DelayMinSkill2 = static_cast<WORD>(gameData.aiSkillInterval[2] & 0xFFFF);
 
-	netData.Skill1Delay = 0;
-	netData.Skill1PreCon = 0;
-	netData.Skill1SubCon = 0;
-
 	if (gameData.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER) 
 	{
 		netData.Skill1Delay = 1;
@@ -54,10 +50,6 @@ void MuHelperConfigSerDe::Serialize(const cMuHelperConfig& gameData, PRECEIVE_MU
 	{
 		netData.Skill1SubCon = 3;
 	}
-
-	netData.Skill2Delay = 0;
-	netData.Skill2PreCon = 0;
-	netData.Skill2SubCon = 0;
 
 	if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER) 
 	{
