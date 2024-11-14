@@ -96,7 +96,7 @@ void CMuHelper::Load(const cMuHelperConfig& config)
     g_ConsoleDebug->Write(MCD_NORMAL, L"Heal: %d Threshold: %d", m_config.bAutoHeal, m_config.iHealThreshold);
     g_ConsoleDebug->Write(MCD_NORMAL, L"Party Heal: %d Threshold: %d", m_config.bAutoHealParty, m_config.iHealPartyThreshold);
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Obtain Range: %d", m_config.iObtainingRange);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Obtaining Range: %d", m_config.iObtainingRange);
     g_ConsoleDebug->Write(MCD_NORMAL, L"Pick All: %d", m_config.bPickAllItems);
     g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Zen: %d", m_config.bPickZen);
     g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Jewel: %d", m_config.bPickJewel);
@@ -177,7 +177,6 @@ void CMuHelper::WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 
     if (m_iLoopCounter++ == 5)
     {
-        m_iSecondsSinceLastBuff++;
         m_iSecondsElapsed++;
 
         if (ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, m_posOriginal) > 1)
@@ -378,6 +377,13 @@ int CMuHelper::Buff()
             && pMember->Map == gMapManager.WorldActive
             && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
         {
+            if (!m_config.bBuffDurationParty
+                && m_config.iBuffCastInterval != 0
+                && m_iSecondsElapsed % m_config.iBuffCastInterval == 0)
+            {
+                m_bTimerActivatedBuffOngoing = true;
+            }
+
             if (!BuffTarget(pChar, m_config.aiBuff[m_iCurrentBuffIndex]))
             {
                 return 0;
@@ -388,6 +394,13 @@ int CMuHelper::Buff()
     }
     else
     {
+        if (!m_config.bBuffDuration
+            && m_config.iBuffCastInterval != 0
+            && m_iSecondsElapsed % m_config.iBuffCastInterval == 0)
+        {
+            m_bTimerActivatedBuffOngoing = true;
+        }
+
         if (!BuffTarget(Hero, m_config.aiBuff[m_iCurrentBuffIndex]))
         {
             return 0;
@@ -397,22 +410,19 @@ int CMuHelper::Buff()
     if (m_iCurrentBuffPartyIndex == 0)
     {
         m_iCurrentBuffIndex = (m_iCurrentBuffIndex + 1) % m_config.aiBuff.size();
-    }
 
-    m_iSecondsSinceLastBuff = 0;
+        // Everyone's been buffed, reset the timer activated buff flag
+        if (m_iCurrentBuffIndex == 0)
+        {
+            m_bTimerActivatedBuffOngoing = false;
+        }
+    }
 
     return 1;
 }
 
 int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
 {
-    bool bForceBuff = false;
-
-    if (m_config.bBuffDurationParty && m_iSecondsSinceLastBuff >= m_config.iBuffCastInterval)
-    {
-        bForceBuff = true;
-    }
-
     // TODO: List other buffs here
     if ((iBuffSkill == AT_SKILL_ATTACK
         || iBuffSkill == AT_SKILL_ATT_POWER_UP
@@ -420,7 +430,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_ATT_POWER_UP + 2
         || iBuffSkill == AT_SKILL_ATT_POWER_UP + 3
         || iBuffSkill == AT_SKILL_ATT_POWER_UP + 4)
-        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Attack) || bForceBuff))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Attack) || m_bTimerActivatedBuffOngoing))
     {
         return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
@@ -431,7 +441,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_DEF_POWER_UP + 2
         || iBuffSkill == AT_SKILL_DEF_POWER_UP + 3
         || iBuffSkill == AT_SKILL_DEF_POWER_UP + 4)
-        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Defense) || bForceBuff))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Defense) || m_bTimerActivatedBuffOngoing))
     {
         return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
@@ -448,7 +458,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_SOUL_UP + 2
         || iBuffSkill == AT_SKILL_SOUL_UP + 3
         || iBuffSkill == AT_SKILL_SOUL_UP + 4)
-        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_WizDefense) || bForceBuff))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_WizDefense) || m_bTimerActivatedBuffOngoing))
     {
         return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
@@ -459,7 +469,7 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         || iBuffSkill == AT_SKILL_LIFE_UP + 2
         || iBuffSkill == AT_SKILL_LIFE_UP + 3
         || iBuffSkill == AT_SKILL_LIFE_UP + 4)
-        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Life) || bForceBuff))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Life) || m_bTimerActivatedBuffOngoing))
     {
         if (m_iComboState == 2)
         {

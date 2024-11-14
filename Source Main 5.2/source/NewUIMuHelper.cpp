@@ -971,8 +971,8 @@ void CNewUIMuHelper::ApplySavedConfig(const cMuHelperConfig& config)
 
 void CNewUIMuHelper::InitConfig()
 {
-    _TempConfig.iHuntingRange = 0;
-    _TempConfig.iObtainingRange = 1;
+    _TempConfig.iHuntingRange = 6;
+    _TempConfig.iObtainingRange = 8;
     _TempConfig.aiSkill.fill(0);
     _TempConfig.aiBuff.fill(0);
     _TempConfig.aiSkillCondition.fill(0);
@@ -2824,10 +2824,10 @@ void CNewUIMuHelperExt::ApplySavedConfig()
 // Called by the "Initialization" button from the main page
 void CNewUIMuHelperExt::InitConfig()
 {
-    _TempConfig.iPotionThreshold = 0;
-    _TempConfig.iHealThreshold = 0;
+    _TempConfig.iPotionThreshold = 40;
+    _TempConfig.iHealThreshold = 60;
     _TempConfig.iBuffCastInterval = 0;
-    _TempConfig.iHealPartyThreshold = 0;
+    _TempConfig.iHealPartyThreshold = 60;
     _TempConfig.bAutoHealParty = false;
     _TempConfig.bBuffDurationParty = false;
 }

@@ -18,9 +18,9 @@ public:
 public:
 	static void CALLBACK TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
 
+	cMuHelperConfig GetConfig() const;
 	void Save(const cMuHelperConfig& config);
 	void Load(const cMuHelperConfig& config);
-	cMuHelperConfig GetConfig() const;
 	void Start();
 	void Stop();
 	void Toggle();
@@ -77,7 +77,7 @@ private:
 	int m_iLoopCounter;
 	int m_iSecondsElapsed;
 	int m_iSecondsAway;
-	int m_iSecondsSinceLastBuff;
+	bool m_bTimerActivatedBuffOngoing;
 };
 
 extern CMuHelper g_MuHelper;
