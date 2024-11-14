@@ -436,6 +436,12 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
         return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
     }
 
+    if ((iBuffSkill == AT_SKILL_INFINITY_ARROW) &&
+        (!g_isCharacterBuff((&pTargetChar->Object), eBuff_InfinityArrow)))
+    {
+        return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
+    }
+
     if ((iBuffSkill == AT_SKILL_WIZARDDEFENSE
         || iBuffSkill == AT_SKILL_SOUL_UP
         || iBuffSkill == AT_SKILL_SOUL_UP + 1
@@ -464,13 +470,24 @@ int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
     }
 
     if ((iBuffSkill == AT_SKILL_SWELL_OF_MAGICPOWER)
-        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_SwellOfMagicPower) || bForceBuff))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_SwellOfMagicPower)))
     {
         return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
     }
 
     if ((iBuffSkill == AT_SKILL_ADD_CRITICAL)
-        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_AddCriticalDamage) || bForceBuff))
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_AddCriticalDamage)))
+    {
+        return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
+    }
+
+    if ((iBuffSkill == AT_SKILL_ALICE_BERSERKER)
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Berserker)))
+    {
+        return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
+    }
+    if ((iBuffSkill == AT_SKILL_ALICE_THORNS)
+        && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Thorns)))
     {
         return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
     }
@@ -748,7 +765,13 @@ int CMuHelper::GetHealingSkill()
         AT_SKILL_HEAL_UP +2,
         AT_SKILL_HEAL_UP +3,
         AT_SKILL_HEAL_UP +4,
-        AT_SKILL_HEALING
+        AT_SKILL_HEALING,
+        AT_SKILL_ALICE_DRAINLIFE_UP,
+        AT_SKILL_ALICE_DRAINLIFE_UP + 1,
+        AT_SKILL_ALICE_DRAINLIFE_UP + 2,
+        AT_SKILL_ALICE_DRAINLIFE_UP + 3,
+        AT_SKILL_ALICE_DRAINLIFE_UP + 4,
+        AT_SKILL_ALICE_DRAINLIFE,
     };
 
     for (int i = 0; i < 6; i++)

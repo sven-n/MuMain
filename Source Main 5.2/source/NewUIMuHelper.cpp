@@ -2064,6 +2064,7 @@ bool CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
 
     switch (iSkillType)
     {
+    // BK buffs
     case AT_SKILL_LIFE_UP:
     case AT_SKILL_LIFE_UP + 1:
     case AT_SKILL_LIFE_UP + 2:
@@ -2071,7 +2072,8 @@ bool CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
     case AT_SKILL_LIFE_UP + 4:
     case AT_SKILL_VITALITY:
         return true;
-
+    // Elf buffs
+    case AT_SKILL_INFINITY_ARROW:
     case AT_SKILL_DEF_POWER_UP:
     case AT_SKILL_DEF_POWER_UP + 1:
     case AT_SKILL_DEF_POWER_UP + 2:
@@ -2085,7 +2087,7 @@ bool CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
     case AT_SKILL_ATT_POWER_UP + 4:
     case AT_SKILL_ATTACK:
         return true;
-
+    // Wiz buffs
     case AT_SKILL_WIZARDDEFENSE:
     case AT_SKILL_SOUL_UP:
     case AT_SKILL_SOUL_UP + 1:
@@ -2094,8 +2096,12 @@ bool CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
     case AT_SKILL_SOUL_UP + 4:
     case AT_SKILL_SWELL_OF_MAGICPOWER:
         return true;
-
+    // DL buffs
     case AT_SKILL_ADD_CRITICAL:
+        return true;
+    // Summoner buffs
+    case AT_SKILL_ALICE_BERSERKER:
+    case AT_SKILL_ALICE_THORNS:
         return true;
     }
 
@@ -2114,6 +2120,13 @@ bool CNewUIMuHelperSkillList::IsHealingSkill(int iSkillType)
     case AT_SKILL_HEAL_UP + 3:
     case AT_SKILL_HEAL_UP + 4:
     case AT_SKILL_HEALING:
+        return true;
+    case AT_SKILL_ALICE_DRAINLIFE_UP:
+    case AT_SKILL_ALICE_DRAINLIFE_UP + 1:
+    case AT_SKILL_ALICE_DRAINLIFE_UP + 2:
+    case AT_SKILL_ALICE_DRAINLIFE_UP + 3:
+    case AT_SKILL_ALICE_DRAINLIFE_UP + 4:
+    case AT_SKILL_ALICE_DRAINLIFE:
         return true;
     }
 
