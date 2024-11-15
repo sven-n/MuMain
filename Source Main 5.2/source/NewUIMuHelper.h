@@ -137,7 +137,6 @@ namespace SEASON3B
         void InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identifier, int iNumTab);
         //--
         void RenderBoxList();
-        void ResetBoxList();
         int UpdateMouseBoxList();
         void RegisterBoxCharacter(BYTE class_character, int Identifier);
         void RegisterCheckBox(int Identifier, CheckBoxTap button);

@@ -921,6 +921,7 @@ void CNewUIMuHelper::Reset()
     _TempConfig.bReturnToOriginalPosition = true;
 
     _TempConfig.aiSkill.fill(0);
+    _TempConfig.bUseCombo = false;
 
     _TempConfig.aiSkillInterval.fill(0);
 
@@ -932,16 +933,16 @@ void CNewUIMuHelper::Reset()
     _TempConfig.bBuffDurationParty = true;
     _TempConfig.iBuffCastInterval = 0;
 
-    _TempConfig.bAutoHeal = true;
+    _TempConfig.bAutoHeal = false;
     _TempConfig.iHealThreshold = 60;
-    _TempConfig.bUseDrainLife = true;
-    _TempConfig.bUseHealPotion = true;
+    _TempConfig.bUseDrainLife = false;
+    _TempConfig.bUseHealPotion = false;
     _TempConfig.iPotionThreshold = 40;
-    _TempConfig.bSupportParty = true;
-    _TempConfig.bAutoHealParty = true;
+    _TempConfig.bSupportParty = false;
+    _TempConfig.bAutoHealParty = false;
     _TempConfig.iHealPartyThreshold = 60;
 
-    _TempConfig.bUseDarkRaven = true;
+    _TempConfig.bUseDarkRaven = false;
     _TempConfig.iDarkRavenMode = PET_ATTACK_CEASE;
     _TempConfig.bRepairItem = false;
 
@@ -1030,16 +1031,7 @@ void CNewUIMuHelper::ApplyConfig()
 
 void CNewUIMuHelper::InitConfig()
 {
-    _TempConfig.iHuntingRange = 6;
-    _TempConfig.iObtainingRange = 8;
-    _TempConfig.aiSkill.fill(0);
-    _TempConfig.aiBuff.fill(0);
-    _TempConfig.aiSkillCondition.fill(0);
-    _TempConfig.aiSkillInterval.fill(0);
-    _TempConfig.aExtraItems.clear();
-    _TempConfig.bBuffDuration = false;
-
-    ResetBoxList();
+    Reset();
 
     g_pNewUIMuHelperExt->InitConfig();
 }
@@ -1056,6 +1048,10 @@ void CNewUIMuHelper::SaveConfig()
 
     m_Skill3DelayInput.GetText(wsNumberInput, sizeof(wsNumberInput));
     _TempConfig.aiSkillInterval[2] = GetIntFromTextInput(wsNumberInput);
+
+    _TempConfig.aiSkill[0] = m_aiSelectedSkills[0];
+    _TempConfig.aiSkill[1] = m_aiSelectedSkills[1];
+    _TempConfig.aiSkill[2] = m_aiSelectedSkills[2];
 
     g_MuHelper.Save(_TempConfig);
 }
@@ -1350,17 +1346,6 @@ void CNewUIMuHelper::RenderBoxList()
         {
             cBOX->box->Render();
         }
-    }
-}
-
-void CNewUIMuHelper::ResetBoxList()
-{
-    auto li = m_CheckBoxList.begin();
-
-    for (; li != m_CheckBoxList.end(); li++)
-    {
-        CheckBoxTap* cBOX = &li->second;
-        cBOX->box->RegisterBoxState(false);
     }
 }
 
