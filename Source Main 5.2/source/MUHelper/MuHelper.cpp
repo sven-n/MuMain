@@ -178,7 +178,7 @@ void CMuHelper::WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 
     Work();
 
-    if (m_iLoopCounter++ == 5)
+    if (m_iLoopCounter++ == 4)
     {
         m_iSecondsElapsed++;
 

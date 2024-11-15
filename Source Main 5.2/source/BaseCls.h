@@ -700,11 +700,11 @@ T CBTree<T, S>::RemoveNode(CBNode<T, S>*& pNode)
             }
             else
             {
-                if (pNode == pNode->GetParent()->m_pRight)
+                if (pNode->GetParent() && pNode == pNode->GetParent()->m_pRight)
                 {
                     pNode->GetParent()->SetRight(pSeek);
                 }
-                else
+                else if (pNode->GetParent())
                 {
                     pNode->GetParent()->SetLeft(pSeek);
                 }
@@ -743,11 +743,11 @@ T CBTree<T, S>::RemoveNode(CBNode<T, S>*& pNode)
             }
             else
             {
-                if (pNode == pNode->GetParent()->m_pRight)
+                if (pNode->GetParent() && pNode == pNode->GetParent()->m_pRight)
                 {
                     pNode->GetParent()->SetRight(pSeek);
                 }
-                else
+                else if (pNode->GetParent())
                 {
                     pNode->GetParent()->SetLeft(pSeek);
                 }
