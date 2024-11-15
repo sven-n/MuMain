@@ -1709,7 +1709,7 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
 
     OBJECT* o = &c->Object;
 
-    if (c->Dead == 0)
+    if (c->Dead == 0 && o->Live)
     {
         OBJECT* o = &c->Object;
         c->TargetAngle = Data->Path[0] >> 4;

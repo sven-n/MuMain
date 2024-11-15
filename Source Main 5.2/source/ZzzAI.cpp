@@ -715,7 +715,10 @@ void DebugUtil_Write(wchar_t* lpszFileName, ...)
 
 #endif
 
-PATH* path = new PATH;
+
+PATH _path;
+PATH* path = &_path;
+SpinLock path_find_lock;
 
 void InitPath()
 {
@@ -724,6 +727,9 @@ void InitPath()
 
 bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, int iDefaultWall)
 {
+    path_find_lock.lock();
+
+    bool Success = false;
     bool Value = false;
 
     if (M34CryWolf1st::Get_State_Only_Elf() == true && M34CryWolf1st::IsCyrWolf1st() == true)
@@ -736,18 +742,18 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
 
     int Wall = iDefaultWall;
 
-    bool Success = path->FindPath(sx, sy, tx, ty, true, Wall, Value, fDistance);
-    if (!Success)
+    bool PathFound = path->FindPath(sx, sy, tx, ty, true, Wall, Value, fDistance);
+    if (!PathFound)
     {
         if (((TerrainWall[TERRAIN_INDEX_REPEAT(sx, sy)] & TW_SAFEZONE) == TW_SAFEZONE || (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_SAFEZONE) == TW_SAFEZONE) && (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_CHARACTER) != TW_CHARACTER)
         {
             Wall = TW_NOMOVE;
         }
 
-        Success = path->FindPath(sx, sy, tx, ty, false, Wall, Value, fDistance);
+        PathFound = path->FindPath(sx, sy, tx, ty, false, Wall, Value, fDistance);
     }
 
-    if (Success)
+    if (PathFound)
     {
         int PathNum = path->GetPath();
         if (PathNum > 1)
@@ -765,10 +771,13 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
             a->CurrentPath = 0;
             a->CurrentPathFloat = 0;
 
-            return true;
+            Success = true;
         }
     }
-    return false;
+
+    path_find_lock.unlock();
+
+    return Success;
 }
 
 CTimer* g_WorldTime = new CTimer();

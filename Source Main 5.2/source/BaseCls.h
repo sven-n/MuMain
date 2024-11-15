@@ -1,4 +1,4 @@
-# ifndef __BASE_CLASSES_H__
+Ôªø# ifndef __BASE_CLASSES_H__
 # define __BASE_CLASSES_H__
 
 template <class T> class CList;
@@ -368,7 +368,7 @@ T& CList<T>::GetData(CNode<T>* pNode)
 {
     if (m_pHead == pNode || m_pTail == pNode)
     {
-        T NullData;	// NULL ∏Æ≈œø° « ø‰«— ∞™
+        T NullData;	// NULL Î¶¨ÌÑ¥Ïóê ÌïÑÏöîÌïú Í∞í
         memset(&NullData, 0, sizeof(T));
 
         return (NullData);
@@ -409,7 +409,7 @@ template <class T>
 BOOL CQueue<T>::Insert(T NewElement)
 {
     if (NULL == AddTail(NewElement))
-    {	// Ω«∆–«œ∏È
+    {	// Ïã§Ìå®ÌïòÎ©¥
         return (FALSE);
     }
 
@@ -432,7 +432,7 @@ template <class T>
 BOOL CQueue<T>::Find(T Element)
 {
     if (NULL == FindNode(Element))
-    {	// √£¡ˆ ∏¯«œ∏È
+    {	// Ï∞æÏßÄ Î™ªÌïòÎ©¥
         return (FALSE);
     }
 
@@ -447,9 +447,9 @@ class CBNode
 protected:
     T m_Data;
     S m_CompValue;
-    CBNode<T, S>* m_pLeft;
-    CBNode<T, S>* m_pRight;
-    CBNode<T, S>* m_pParent;
+    CBNode<T, S>* m_pLeft = NULL;
+    CBNode<T, S>* m_pRight = NULL;
+    CBNode<T, S>* m_pParent = NULL;
 
     void SetLeft(CBNode<T, S>* pLeft) { m_pLeft = pLeft; pLeft->m_pParent = this; }
     void SetRight(CBNode<T, S>* pRight) { m_pRight = pRight; pRight->m_pParent = this; }
@@ -466,7 +466,7 @@ public:
     CBNode(T Data, S CompValue);
     ~CBNode();
 
-    // µ•¿Ã≈Õ √≥∏Æ
+    // Îç∞Ïù¥ÌÑ∞ Ï≤òÎ¶¨
     void SetData(T Data) { m_Data = Data; }
     void SetValue(S CompValue) { m_CompValue = CompValue; }
     T& GetData(void) { return (m_Data); }
@@ -496,8 +496,8 @@ template <class T, class S>
 class CBTree
 {
 protected:
-    long m_lCount;
-    CBNode<T, S>* m_pHead;
+    long m_lCount = 0;
+    CBNode<T, S>* m_pHead = NULL;
 
     void RemoveFrom(CBNode<T, S>* pNode);
     void CycleFrom(CBNode<T, S>* pNode, DWORD dwParam);
@@ -512,7 +512,7 @@ public:
     friend CBTree<T, S>& operator + (const CBTree<T, S>& Value1, const CBTree<T, S>& Value2);
 
     CBNode<T, S>* Add(T NewElement, S CompValue);
-    T RemoveNode(CBNode<T, S>*& pNode);
+    void RemoveNode(CBNode<T, S>*& pNode);
     void RemoveAll(void);
 
     BOOL IsEmpty(void) { return (m_lCount == 0); }
@@ -639,6 +639,9 @@ CBNode<T, S>* CBTree<T, S>::Add(T NewElement, S CompValue)
     {
         m_lCount++;
         m_pHead = new CBNode<T, S>(NewElement, CompValue);
+        m_pHead->m_pParent = NULL;
+        m_pHead->m_pLeft = NULL;
+        m_pHead->m_pRight = NULL;
 
         return (m_pHead);
     }
@@ -682,9 +685,12 @@ CBNode<T, S>* CBTree<T, S>::Add(T NewElement, S CompValue)
 }
 
 template <class T, class S>
-T CBTree<T, S>::RemoveNode(CBNode<T, S>*& pNode)
+void CBTree<T, S>::RemoveNode(CBNode<T, S>*& pNode)
 {
-    T ResultData = pNode->GetData();
+    if (!pNode)
+    {
+        return;
+    }
 
     CBNode<T, S>* pOld = NULL;
 
@@ -700,18 +706,18 @@ T CBTree<T, S>::RemoveNode(CBNode<T, S>*& pNode)
             }
             else
             {
-                if (pNode->GetParent() && pNode == pNode->GetParent()->m_pRight)
+                if (pNode == pNode->GetParent()->m_pRight)
                 {
                     pNode->GetParent()->SetRight(pSeek);
                 }
-                else if (pNode->GetParent())
+                else
                 {
                     pNode->GetParent()->SetLeft(pSeek);
                 }
             }
             delete pNode;
             m_lCount--;
-            return (ResultData);
+            return;
         }
 
         pOld = pSeek;
@@ -729,7 +735,7 @@ T CBTree<T, S>::RemoveNode(CBNode<T, S>*& pNode)
         pNode->m_Data = Data;
         pNode->m_CompValue = CompValue;
 
-        return (ResultData);
+        return;
     }
     else
     {
@@ -743,22 +749,21 @@ T CBTree<T, S>::RemoveNode(CBNode<T, S>*& pNode)
             }
             else
             {
-                if (pNode->GetParent() && pNode == pNode->GetParent()->m_pRight)
+                if (pNode == pNode->GetParent()->m_pRight)
                 {
                     pNode->GetParent()->SetRight(pSeek);
                 }
-                else if (pNode->GetParent())
+                else
                 {
                     pNode->GetParent()->SetLeft(pSeek);
                 }
             }
             delete pNode;
             m_lCount--;
-            return (ResultData);
+            return;
         }
     }
     UnlinkOneBottomNode(pNode);
-    return (ResultData);
 }
 
 template <class T, class S>

@@ -847,13 +847,16 @@ int CMuHelper::SimulateMove(POINT posMove)
     TargetX = (int)posMove.x;
     TargetY = (int)posMove.y;
 
-    if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
+    if (!CheckTile(Hero, &Hero->Object, 1.5f))
     {
-        SendMove(Hero, &Hero->Object);
+        if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
+        {
+            SendMove(Hero, &Hero->Object);
+        }
         return 0;
     }
 
-    return !Hero->Movement;
+    return 1;
 }
 
 bool CMuHelper::HasAssignedBuffSkill()

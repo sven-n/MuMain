@@ -407,8 +407,6 @@ void DestroyWindow()
 
     ReleaseCharacters();
 
-    delete path;
-
     SAFE_DELETE(GateAttribute);
 
     SAFE_DELETE(SkillAttribute);
