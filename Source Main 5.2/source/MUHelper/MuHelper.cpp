@@ -27,6 +27,9 @@ std::mutex _mtx_itemSet;
 
 CMuHelper::CMuHelper()
 {
+    m_iLoopCounter = 0;
+    m_iSecondsElapsed = 0;
+    m_iSecondsAway = 0;
     m_iCurrentItem = -1;
     m_iCurrentTarget = -1;
     m_iCurrentSkill = -1;
@@ -34,11 +37,10 @@ CMuHelper::CMuHelper()
     m_iCurrentBuffIndex = 0;
     m_iCurrentBuffPartyIndex = 0;
     m_iCurrentHealPartyIndex = 0;
-    m_iSecondsElapsed = 0;
-    m_iSecondsAway = 0;
     m_posOriginal = { 0, 0 };
     m_iHuntingDistance = 0;
     m_iObtainingDistance = 1;
+    m_bTimerActivatedBuffOngoing = false;
 }
 
 void CALLBACK CMuHelper::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime) 
@@ -48,7 +50,6 @@ void CALLBACK CMuHelper::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD
 
 void CMuHelper::Save(const cMuHelperConfig& config)
 {
-    // Save config data by sending to server
     m_config = config;
 
     PRECEIVE_MUHELPER_DATA netData;
@@ -59,7 +60,6 @@ void CMuHelper::Save(const cMuHelperConfig& config)
 
 void CMuHelper::Load(const cMuHelperConfig& config)
 {
-    // Load config data received from the server
     m_config = config;
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"Hunting Range: %d", m_config.iHuntingRange);
@@ -112,7 +112,7 @@ cMuHelperConfig CMuHelper::GetConfig() const {
 
 void CMuHelper::Toggle()
 {
-    // Determine if the thread should be started
+    // Determine if the timer proc should be started
     bool bStart = !m_bActive; 
 
     if (m_bActive) {
@@ -139,7 +139,7 @@ void CMuHelper::Toggle()
 
     if (bStart && !Hero->SafeZone)
     {
-        // Start the thread
+        // Activate the timer proc
         g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Starting");
         m_bActive = true;
         m_iLoopCounter = 0;

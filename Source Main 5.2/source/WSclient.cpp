@@ -1264,7 +1264,7 @@ void ReceiveMuHelperConfigurationData(std::span<const BYTE> ReceiveBuffer)
 
     cMuHelperConfig config;
     MuHelperConfigSerDe::Deserialize(*pMuHelperData, config);
-    g_pNewUIMuHelper->ApplySavedConfig(config);
+    g_pNewUIMuHelper->LoadSavedConfig(config);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0xAE [ReceiveMuHelperConfigurationData]");
 }

@@ -912,9 +912,60 @@ int CNewUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
     return value;
 }
 
-void CNewUIMuHelper::ApplySavedConfig(const cMuHelperConfig& config)
+void CNewUIMuHelper::Reset()
+{
+    _TempConfig.iHuntingRange = 6;
+
+    _TempConfig.iMaxSecondsAway = 10;
+    _TempConfig.bLongRangeCounterAttack = false;
+    _TempConfig.bReturnToOriginalPosition = true;
+
+    _TempConfig.aiSkill.fill(0);
+
+    _TempConfig.aiSkillInterval.fill(0);
+
+    _TempConfig.aiSkillCondition.fill(0);
+
+    _TempConfig.aiBuff.fill(0);
+
+    _TempConfig.bBuffDuration = true;
+    _TempConfig.bBuffDurationParty = true;
+    _TempConfig.iBuffCastInterval = 0;
+
+    _TempConfig.bAutoHeal = true;
+    _TempConfig.iHealThreshold = 60;
+    _TempConfig.bUseDrainLife = true;
+    _TempConfig.bUseHealPotion = true;
+    _TempConfig.iPotionThreshold = 40;
+    _TempConfig.bSupportParty = true;
+    _TempConfig.bAutoHealParty = true;
+    _TempConfig.iHealPartyThreshold = 60;
+
+    _TempConfig.bUseDarkRaven = true;
+    _TempConfig.iDarkRavenMode = PET_ATTACK_CEASE;
+    _TempConfig.bRepairItem = false;
+
+    _TempConfig.iObtainingRange = 8;
+    _TempConfig.bPickAllItems = false;
+    _TempConfig.bPickSelectItems = false;
+    _TempConfig.bPickZen = false;
+    _TempConfig.bPickJewel = false;
+    _TempConfig.bPickExcellent = false;
+    _TempConfig.bPickAncient = false;
+    _TempConfig.bPickExtraItems = false;
+    _TempConfig.aExtraItems.clear();
+
+    ApplyConfig();
+}
+
+void CNewUIMuHelper::LoadSavedConfig(const cMuHelperConfig& config)
 {
     _TempConfig = config;
+    ApplyConfig();
+}
+
+void CNewUIMuHelper::ApplyConfig()
+{
     g_MuHelper.Load(_TempConfig);
 
     m_aiSelectedSkills[0] = _TempConfig.aiSkill[0] ? _TempConfig.aiSkill[0] : -1;
@@ -965,13 +1016,13 @@ void CNewUIMuHelper::ApplySavedConfig(const cMuHelperConfig& config)
     m_CheckBoxList[CHECKBOX_ID_PICK_EXCELLENT].box->RegisterBoxState(_TempConfig.bPickExcellent);
     m_CheckBoxList[CHECKBOX_ID_PICK_ANCIENT].box->RegisterBoxState(_TempConfig.bPickAncient);
     m_CheckBoxList[CHECKBOX_ID_ADD_OTHER_ITEM].box->RegisterBoxState(_TempConfig.bPickExtraItems);
-    
+
     m_CheckBoxList[CHECKBOX_ID_AUTO_ACCEPT_FRIEND].box->RegisterBoxState(_TempConfig.bAutoAcceptFriend);
     m_CheckBoxList[CHECKBOX_ID_AUTO_ACCEPT_GUILD].box->RegisterBoxState(_TempConfig.bAutoAcceptGuild);
     m_CheckBoxList[CHECKBOX_ID_AUTO_DEFEND].box->RegisterBoxState(_TempConfig.bUseSelfDefense);
 
     m_ItemFilter.Clear();
-    for (const auto& item : _TempConfig.aExtraItems) 
+    for (const auto& item : _TempConfig.aExtraItems)
     {
         m_ItemFilter.AddText(item.c_str());
     }

@@ -1903,6 +1903,7 @@ void MoveMainScene()
 
         g_pSlideHelpMgr->Init();
         g_pUIMapName->Init();
+        g_pNewUIMuHelper->Reset();
 
         g_GuildCache.Reset();
 

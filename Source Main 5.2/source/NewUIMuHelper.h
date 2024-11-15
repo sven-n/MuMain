@@ -13,6 +13,28 @@ namespace SEASON3B
     class CNewUIMuHelper : public CNewUIObj
     {
     public:
+        CNewUIMuHelper();
+        ~CNewUIMuHelper();
+
+        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        void Release();
+
+        void Show(bool bShow);
+        bool Render();
+        bool Update();
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+
+        float GetLayerDepth();
+        float GetKeyEventOrder();
+
+    public:
+        void Reset();
+        void LoadSavedConfig(const cMuHelperConfig& config);
+        void AssignSkill(int iSkill);
+        static int GetIntFromTextInput(wchar_t* pstrInput);
+
+    private:
         enum IMAGE_LIST
         {
             IMAGE_BASE_WINDOW_BACK = BITMAP_INTERFACE_NEW_MESSAGEBOX_BEGIN + 3,				//. newui_msgbox_back.jpg
@@ -67,7 +89,6 @@ namespace SEASON3B
             Rage_Fighter,
         };
 
-    private:
         static constexpr int MAX_SKILLS_SLOT = 6;
         static constexpr int WINDOW_WIDTH = 190;
         static constexpr int WINDOW_HEIGHT = 429;
@@ -109,26 +130,6 @@ namespace SEASON3B
         typedef std::map<int, cTextName> cTextNameMap;
 
     private:
-        CNewUIManager* m_pNewUIMng;
-        CUITextInputBox m_DistanceTimeInput;
-        CUITextInputBox m_Skill2DelayInput;
-        CUITextInputBox m_Skill3DelayInput;
-        CUITextInputBox m_ItemInput;
-        CUIExtraItemListBox m_ItemFilter;
-
-        POINT m_Pos;
-        POINT m_SubPos;
-        CNewUIRadioGroupButton m_TabBtn;
-        int m_iCurrentOpenTab;
-        int m_iCurrentOpenSubWin;
-        bool m_bSubWinOpen;
-        cButtonMap m_ButtonList;
-        cCheckBoxMap m_CheckBoxList;
-        cTextNameMap m_TextNameList;
-        cTextureMap m_IconList;
-        int m_iSelectedSkillSlot;
-        std::array<int, MAX_SKILLS_SLOT> m_aiSelectedSkills;
-    public:
         void RenderBtnList();
         int UpdateMouseBtnList();
         void RegisterBtnCharacter(BYTE class_character, int Identifier);
@@ -152,21 +153,6 @@ namespace SEASON3B
         void RegisterTextCharacter(BYTE class_character, int Identifier);
         void RegisterText(int Identifier, cTextName button);
         void InsertText(int x, int y,std::wstring Name, int Identifier, int iNumTab);
-    public:
-        CNewUIMuHelper();
-        ~CNewUIMuHelper();
-
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
-        void Release();
-
-        void Show(bool bShow);
-        bool Render();
-        bool Update();
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-
-        float GetLayerDepth();
-        float GetKeyEventOrder();
 
         void InitText();
         void InitImage();
@@ -176,17 +162,14 @@ namespace SEASON3B
         void SetPos(int x, int y);
         void RenderBack(int x, int y, int width, int height);
 
-        void AssignSkill(int iSkill);
         int GetSkillIndex(int iSkill);
         bool IsSkillAssigned(int iSkill);
         void RenderSkillIcon(int iSkill, float x, float y, float width, float height);
-
-        void ApplySavedConfig(const cMuHelperConfig& config);
+        
         void InitConfig();
         void SaveConfig();
+        void ApplyConfig();
 
-        static int GetIntFromTextInput(wchar_t* pstrInput);
-    private:
         void LoadImages();
         void UnloadImages();
 
@@ -196,33 +179,33 @@ namespace SEASON3B
         void ApplyLootRangeUpdate(int iDelta);
         void SaveExtraItem();
         void RemoveExtraItem();
+
+    private:
+        CNewUIManager* m_pNewUIMng;
+        CUITextInputBox m_DistanceTimeInput;
+        CUITextInputBox m_Skill2DelayInput;
+        CUITextInputBox m_Skill3DelayInput;
+        CUITextInputBox m_ItemInput;
+        CUIExtraItemListBox m_ItemFilter;
+
+        POINT m_Pos;
+        POINT m_SubPos;
+        CNewUIRadioGroupButton m_TabBtn;
+        int m_iCurrentOpenTab;
+        int m_iCurrentOpenSubWin;
+        bool m_bSubWinOpen;
+        cButtonMap m_ButtonList;
+        cCheckBoxMap m_CheckBoxList;
+        cTextNameMap m_TextNameList;
+        cTextureMap m_IconList;
+        int m_iSelectedSkillSlot;
+        std::array<int, MAX_SKILLS_SLOT> m_aiSelectedSkills;
     };
 
     class CNewUIMuHelperSkillList : public CNewUIObj
     {
-        enum EVENT_STATE
-        {
-            EVENT_NONE = 0,
-
-            EVENT_BTN_HOVER_SKILLLIST,
-            EVENT_BTN_DOWN_SKILLLIST,
-        };
 
     public:
-        enum IMAGE_LIST
-        {
-            IMAGE_SKILL1 = BITMAP_INTERFACE_NEW_SKILLICON_BEGIN,
-            IMAGE_SKILL2,
-            IMAGE_COMMAND,
-            IMAGE_SKILL3,
-            IMAGE_SKILLBOX,
-            IMAGE_SKILLBOX_USE,
-            IMAGE_NON_SKILL1,
-            IMAGE_NON_SKILL2,
-            IMAGE_NON_COMMAND,
-            IMAGE_NON_SKILL3,
-        };
-
         CNewUIMuHelperSkillList();
         ~CNewUIMuHelperSkillList();
 
@@ -245,6 +228,37 @@ namespace SEASON3B
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
     private:
+        enum IMAGE_LIST
+        {
+            IMAGE_SKILL1 = BITMAP_INTERFACE_NEW_SKILLICON_BEGIN,
+            IMAGE_SKILL2,
+            IMAGE_COMMAND,
+            IMAGE_SKILL3,
+            IMAGE_SKILLBOX,
+            IMAGE_SKILLBOX_USE,
+            IMAGE_NON_SKILL1,
+            IMAGE_NON_SKILL2,
+            IMAGE_NON_COMMAND,
+            IMAGE_NON_SKILL3,
+        };
+
+        enum EVENT_STATE
+        {
+            EVENT_NONE = 0,
+
+            EVENT_BTN_HOVER_SKILLLIST,
+            EVENT_BTN_DOWN_SKILLLIST,
+        };
+
+        typedef struct
+        {
+            int skillId;
+            POINT location;
+            SIZE area;
+            bool isVisible;
+        } cSkillIcon;
+
+    private:
         void LoadImages();
         void UnloadImages();
 
@@ -257,14 +271,6 @@ namespace SEASON3B
         bool IsDefenseSkill(int iSkillType);
 
     private:
-        typedef struct
-        {
-            int skillId;
-            POINT location;
-            SIZE area;
-            bool isVisible;
-        } cSkillIcon;
-
         std::map<int, cSkillIcon> m_skillIconMap;
 
         CNewUIManager* m_pNewUIMng;
@@ -284,6 +290,28 @@ namespace SEASON3B
     class CNewUIMuHelperExt : public CNewUIObj
     {
     public:
+        CNewUIMuHelperExt();
+        ~CNewUIMuHelperExt();
+
+        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        void Release();
+
+        bool Render();
+        bool Update();
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+
+        float GetLayerDepth();
+        float GetKeyEventOrder();
+
+    public:
+        void Toggle(int iPage);
+        void Save();
+        void Reset();
+        void ApplySavedConfig();
+        void InitConfig();
+
+    private:
         enum IMAGE_LIST
         {
             IMAGE_BASE_WINDOW_BACK = BITMAP_INTERFACE_NEW_MESSAGEBOX_BEGIN + 3,				//. newui_msgbox_back.jpg
@@ -320,9 +348,19 @@ namespace SEASON3B
 
         };
 
-    private:
         static constexpr int WINDOW_WIDTH = 190;
         static constexpr int WINDOW_HEIGHT = 429;
+
+    private:
+        void InitText();
+        void InitImage();
+        void InitButtons();
+        void InitCheckBox();
+        void SetPos(int x, int y);
+        void RenderBackPane(int x, int y, int width, int height, const wchar_t* pszHeader);
+        void RenderHpLevel(int x, int y, int width, int height, int level, const wchar_t* pszLabel);
+        void LoadImages();
+        void UnloadImages();
 
     private:
         CNewUIManager* m_pNewUIMng;
@@ -343,38 +381,6 @@ namespace SEASON3B
         CNewUIButton m_BtnSave;
         CNewUIButton m_BtnReset;
         CNewUIButton m_BtnClose;
-    public:
-        CNewUIMuHelperExt();
-        ~CNewUIMuHelperExt();
-
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
-        void Release();
-
-        bool Render();
-        bool Update();
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-
-        float GetLayerDepth();
-        float GetKeyEventOrder();
-
-    public:
-        void Toggle(int iPage);
-        void Save();
-        void Reset();
-        void ApplySavedConfig();
-        void InitConfig();
-
-    private:
-        void InitText();
-        void InitImage();
-        void InitButtons();
-        void InitCheckBox();
-        void SetPos(int x, int y);
-        void RenderBackPane(int x, int y, int width, int height, const wchar_t* pszHeader);
-        void RenderHpLevel(int x, int y, int width, int height, int level, const wchar_t* pszLabel);
-        void LoadImages();
-        void UnloadImages();
 
     private:
         int m_iCurrentPage;
