@@ -6826,7 +6826,7 @@ void TriggerAttack(CHARACTER* c)
         }
     }
 
-    ExecuteAttack(c);
+    ExecuteSkill(c, Skill, Distance);
 }
 
 bool CanExecuteAttack(CHARACTER* c, int Skill, float Distance)
@@ -6937,18 +6937,24 @@ bool CheckMana(CHARACTER* c, int Skill)
     return true;
 }
 
-int ExecuteAttack(CHARACTER* c)
+int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
 {
     OBJECT* o = &c->Object;
 
     int ClassIndex = gCharacterManager.GetBaseClass(c->Class);
-    int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
-    float Distance = gSkillManager.GetSkillDistance(Skill, c);
 
     if (!CanExecuteAttack(c, Skill, Distance))
     {
         return 0;
     }
+
+    int iSkillIndex = g_pSkillList->GetSkillIndex(Skill);
+    if (iSkillIndex == -1)
+    {
+        return 0;
+    }
+
+    Hero->CurrentSkill = iSkillIndex;
 
     if (gMapManager.IsCursedTemple() && g_pCursedTempleWindow->IsCursedTempleSkillKey(SelectedCharacter))
     {
@@ -7120,7 +7126,7 @@ int ExecuteAttack(CHARACTER* c)
                         }
                         if (SkillWarrior(c, &CharacterMachine->Equipment[i]))
                         {
-                            return (int) CompletedAttack(c);
+                            return (int) ExecuteSkillComplete(c);
                         }
                     }
                 }
@@ -7128,15 +7134,17 @@ int ExecuteAttack(CHARACTER* c)
                 {
                     if (SkillElf(c, &CharacterMachine->Equipment[i]))
                     {
-                        return (int) CompletedAttack(c);
+                        return (int) ExecuteSkillComplete(c);
                     }
                 }
             }
         }
         else
         {
-            ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
-            g_MovementSkill.m_iTarget = -1;
+            if (PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
+            {
+                SendMove(c, o);
+            }
         }
     }
     if (ClassIndex == CLASS_ELF)
@@ -7160,10 +7168,10 @@ int ExecuteAttack(CHARACTER* c)
         AttackCommon(c, Skill, Distance);
     }
 
-    return (int) CompletedAttack(c);
+    return (int) ExecuteSkillComplete(c);
 }
 
-bool CompletedAttack(CHARACTER* c)
+bool ExecuteSkillComplete(CHARACTER* c)
 {
     return c->SkillSuccess && !c->Movement;
 }

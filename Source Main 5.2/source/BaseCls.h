@@ -799,6 +799,11 @@ void CBTree<T, S>::RemoveAll(void)
 template <class T, class S>
 void CBTree<T, S>::RemoveFrom(CBNode<T, S>* pNode)
 {
+    if (!pNode)
+    {
+        return;
+    }
+
     if (pNode->GetLeft() != NULL)
     {
         RemoveFrom(pNode->GetLeft());

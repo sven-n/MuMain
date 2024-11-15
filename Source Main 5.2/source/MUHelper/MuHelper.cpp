@@ -808,23 +808,18 @@ int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired, int iTarget)
             DeleteTarget(iTarget);
             return 0;
         }
+
         TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
         TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
+
+        g_MovementSkill.m_iSkill = iSkill;
+        g_MovementSkill.m_iTarget = SelectedCharacter;
+        g_MovementSkill.m_bMagic = FALSE;
     }
 
-    int iSkillIndex = g_pSkillList->GetSkillIndex(iSkill);
-    if (iSkillIndex == -1)
-    {
-        return 0;
-    }
+    float fDistance = gSkillManager.GetSkillDistance(iSkill, Hero);
 
-    Hero->CurrentSkill = iSkillIndex;
-
-    g_MovementSkill.m_iSkill = iSkill;
-    g_MovementSkill.m_iTarget = SelectedCharacter;
-    g_MovementSkill.m_bMagic = FALSE;
-
-    return ExecuteAttack(Hero);
+    return ExecuteSkill(Hero, iSkill, fDistance);
 }
 
 int CMuHelper::Regroup()
