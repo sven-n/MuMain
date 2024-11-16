@@ -24,7 +24,11 @@ public:
 	void Start();
 	void Stop();
 	void Toggle();
+	void TriggerStart();
+	void TriggerStop();
 	bool IsActive() { return m_bActive; }
+	void AddCost(int iCost) { m_iTotalCost += iCost; }
+	int GetTotalCost() { return m_iTotalCost; }
 
 	void AddTarget(int iTargetId, bool bIsAttacking);
 	void DeleteTarget(int iTargetId);
@@ -81,6 +85,7 @@ private:
 	int m_iSecondsElapsed;
 	int m_iSecondsAway;
 	bool m_bTimerActivatedBuffOngoing;
+	int m_iTotalCost;
 };
 
 extern CMuHelper g_MuHelper;

@@ -3515,7 +3515,7 @@ extern CROWN_SWITCH_INFO* Switch_Info;
 
 extern MASTER_LEVEL_VALUE	Master_Level_Data;
 
-// MU Helper Data
+// MU Helper
 #pragma pack(push, 1)
 typedef struct 
 {
@@ -3568,4 +3568,13 @@ typedef struct
     BYTE _UnusedPadding[36];
     char ExtraItems[12][15];                 // Index: 69
 } PRECEIVE_MUHELPER_DATA, * LPRECEIVE_MUHELPER_DATA;
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+typedef struct
+{
+    DWORD ConsumeMoney;
+    DWORD Money;
+    DWORD Pause;
+} PRECEIVE_MUHELPER_STATUS, * LPRECEIVE_MUHELPER_STATUS;
 #pragma pack(pop)

@@ -1269,6 +1269,37 @@ void ReceiveMuHelperConfigurationData(std::span<const BYTE> ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0xAE [ReceiveMuHelperConfigurationData]");
 }
 
+void ReceiveMuHelperStatusUpdate(std::span<const BYTE> ReceiveBuffer)
+{
+    auto pMuHelperStatus = safe_cast<PRECEIVE_MUHELPER_STATUS>(ReceiveBuffer.subspan(4));
+    if (pMuHelperStatus == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    if (pMuHelperStatus->Pause)
+    {
+        g_MuHelper.Stop();
+    }
+    else
+    {
+        g_MuHelper.Start();
+
+        if (pMuHelperStatus->Money > 0 && pMuHelperStatus->ConsumeMoney)
+        {
+            g_MuHelper.AddCost(pMuHelperStatus->Money);
+            int iTotalCost = g_MuHelper.GetTotalCost();
+
+            wchar_t Text[100];
+            swprintf(Text, GlobalText[3586], iTotalCost);
+            g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        }
+    }
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x51 [ReceiveMuHelperStatusUpdate]");
+}
+
 void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
@@ -1934,7 +1965,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         RepairEnable = 0;
     }
 
-    g_MuHelper.Stop();
+    g_MuHelper.TriggerStop();
 
     Hero->Movement = false;
     SetPlayerStop(Hero);
@@ -5590,7 +5621,7 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
 
     if (c == Hero)
     {
-        g_MuHelper.Stop();
+        g_MuHelper.TriggerStop();
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x17 [ReceiveDie(%d)]", Key);
@@ -14318,8 +14349,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             break;
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
         case 0x51:
-            // MU Helper Status Update
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"Received mu helper status update server");
+            ReceiveMuHelperStatusUpdate(received_span);
             break;
         }
     }

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 
 #include <thread>
-#include <mutex>
 #include <atomic>
 #include <chrono>
 #include <cmath>
@@ -22,8 +21,8 @@
 #define DEFAULT_DURABILITY_THRESHOLD   50
 
 CMuHelper g_MuHelper;
-std::mutex _mtx_targetSet;
-std::mutex _mtx_itemSet;
+SpinLock _targetsLock;
+SpinLock _itemsLock;
 
 CMuHelper::CMuHelper()
 {
@@ -61,49 +60,6 @@ void CMuHelper::Save(const cMuHelperConfig& config)
 void CMuHelper::Load(const cMuHelperConfig& config)
 {
     m_config = config;
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Hunting Range: %d", m_config.iHuntingRange);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Original Position: %d", m_config.bReturnToOriginalPosition);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"DistanceMin: %d", m_config.iMaxSecondsAway);
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Basic Skill: %d", m_config.aiSkill[0]);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1: %d", m_config.aiSkill[1]);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2: %d", m_config.aiSkill[2]);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Combo? %d", m_config.bUseCombo);
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Delay? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Condition? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_CONDITION));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Pre Condition Hunting Range? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_NEARBY));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Pre Condition Attacking Me? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_ATTACKING));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 2 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 3 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 4 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 1 Sub Condition 5 or more? %d", !!(m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS));
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Delay? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Condition? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Pre Condition Hunting Range? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_NEARBY));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Pre Condition Attacking Me? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_ATTACKING));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Sub Condition 2 or more? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Sub Condition 3 or more? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Sub Condition 4 or more? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS));
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Sub Condition 5 or more? %d", !!(m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS));
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Buff 0: %d", m_config.aiBuff[0]);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"buff 1: %d", m_config.aiBuff[1]);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Buff 2: %d", m_config.aiBuff[2]);
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Potion: %d Threshold: %d", m_config.bUseHealPotion, m_config.iPotionThreshold);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Heal: %d Threshold: %d", m_config.bAutoHeal, m_config.iHealThreshold);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Party Heal: %d Threshold: %d", m_config.bAutoHealParty, m_config.iHealPartyThreshold);
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Obtaining Range: %d", m_config.iObtainingRange);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick All: %d", m_config.bPickAllItems);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Zen: %d", m_config.bPickZen);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Jewel: %d", m_config.bPickJewel);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Excellent: %d", m_config.bPickExcellent);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Ancient: %d", m_config.bPickAncient);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Pick Extra Items: %d", m_config.bPickExtraItems);
 }
 
 cMuHelperConfig CMuHelper::GetConfig() const {
@@ -112,15 +68,34 @@ cMuHelperConfig CMuHelper::GetConfig() const {
 
 void CMuHelper::Toggle()
 {
-    // Determine if the timer proc should be started
-    bool bStart = !m_bActive; 
+    if (m_bActive) 
+    {
+        TriggerStop();
+    }
+    else
+    {
+        TriggerStart();
+    }
+}
 
-    if (m_bActive) {
-        m_bActive = false;
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Stopped");
+void CMuHelper::TriggerStart()
+{
+    SocketClient->ToGameServer()->SendMuHelperStatusChangeRequest(0);
+}
+
+void CMuHelper::TriggerStop()
+{
+    SocketClient->ToGameServer()->SendMuHelperStatusChangeRequest(1);
+}
+
+void CMuHelper::Start()
+{
+    if (m_bActive)
+    {
         return;
     }
 
+    m_iTotalCost = 0;
     m_iComboState = 0;
     m_iCurrentBuffIndex = 0;
     m_iCurrentBuffPartyIndex = 0;
@@ -137,29 +112,16 @@ void CMuHelper::Toggle()
     m_setTargets.clear();
     m_setTargetsAttacking.clear();
 
-    if (bStart && !Hero->SafeZone)
-    {
-        // Activate the timer proc
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Starting");
-        m_bActive = true;
-        m_iLoopCounter = 0;
-        m_iSecondsElapsed = 0;
-        m_iSecondsAway = 0;
-    }
-}
+    m_iLoopCounter = 0;
 
-void CMuHelper::Start()
-{
-    if (!m_bActive) {
-        Toggle();
-    }
+    m_bActive = true;
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Started");
 }
 
 void CMuHelper::Stop()
 {
-    if (m_bActive) {
-        Toggle();
-    }
+    m_bActive = false;
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Stopped");
 }
 
 void CMuHelper::WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -172,7 +134,7 @@ void CMuHelper::WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
     if (Hero->SafeZone)
     {
         g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Entered safezone. Stopping.");
-        m_bActive = false;
+        TriggerStop();
         return;
     }
 
@@ -236,8 +198,6 @@ void CMuHelper::Work()
 
 void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
 {
-    std::lock_guard<std::mutex> lock(_mtx_targetSet);
-
     if (!m_bActive)
     {
         return;
@@ -254,12 +214,16 @@ void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
     if ((iDistance <= m_iHuntingDistance)
         || (bIsAttacking && m_config.bLongRangeCounterAttack))
     {
+        _targetsLock.lock();
+
         m_setTargets.insert(iTargetId);
 
         if (bIsAttacking)
         {
             m_setTargetsAttacking.insert(iTargetId);
         }
+
+        _targetsLock.unlock();
     }
 
     if (m_config.bUseSelfDefense)
@@ -271,10 +235,12 @@ void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
 
 void CMuHelper::DeleteTarget(int iTargetId)
 {
-    std::lock_guard<std::mutex> lock(_mtx_targetSet);
+    _targetsLock.lock();
 
     m_setTargets.erase(iTargetId);
     m_setTargetsAttacking.erase(iTargetId);
+
+    _targetsLock.unlock();
 
     if (iTargetId == m_iCurrentTarget)
     {
@@ -284,9 +250,12 @@ void CMuHelper::DeleteTarget(int iTargetId)
 
 void CMuHelper::DeleteAllTargets()
 {
-    std::lock_guard<std::mutex> lock(_mtx_targetSet);
+    _targetsLock.lock();
+
     m_setTargets.clear();
     m_setTargetsAttacking.clear();
+
+    _targetsLock.unlock();
 }
 
 int CMuHelper::ComputeDistanceByRange(int iRange)
@@ -324,8 +293,9 @@ int CMuHelper::GetNearestTarget()
 
     std::set<int> setTargets;
     {
-        std::lock_guard<std::mutex> lock(_mtx_targetSet);
+        _targetsLock.lock();
         setTargets = m_setTargets;
+        _targetsLock.unlock();
     }
 
     for (const int& iMonsterId : setTargets)
@@ -351,8 +321,9 @@ int CMuHelper::GetFarthestAttackingTarget()
 
     std::set<int> setTargets;
     {
-        std::lock_guard<std::mutex> lock(_mtx_targetSet);
+        _targetsLock.lock();
         setTargets = m_setTargetsAttacking;
+        _targetsLock.unlock();
     }
 
     for (const int& iMonsterId : setTargets)
@@ -982,14 +953,16 @@ bool CMuHelper::ShouldObtainItem(int iItemId)
 
 void CMuHelper::AddItem(int iItemId, POINT posWhere)
 {
-    std::lock_guard<std::mutex> lock(_mtx_itemSet);
+    _itemsLock.lock();
     m_setItems.insert(iItemId);
+    _itemsLock.unlock();
 }
 
 void CMuHelper::DeleteItem(int iItemId)
 {
-    std::lock_guard<std::mutex> lock(_mtx_itemSet);
+    _itemsLock.lock();
     m_setItems.erase(iItemId);
+    _itemsLock.unlock();
 
     if (iItemId == m_iCurrentItem)
     {
@@ -1004,8 +977,9 @@ int CMuHelper::SelectItemToObtain()
 
     std::set<int> setItems;
     {
-        std::lock_guard<std::mutex> lock(_mtx_targetSet);
+        _itemsLock.lock();
         setItems = m_setItems;
+        _itemsLock.unlock();
     }
 
     for (const int& iItemId : setItems)
