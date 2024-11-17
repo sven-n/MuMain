@@ -17,70 +17,70 @@ void MuHelperConfigSerDe::Serialize(const cMuHelperConfig& gameData, PRECEIVE_MU
 	netData.DelayMinSkill1 = static_cast<WORD>(gameData.aiSkillInterval[1] & 0xFFFF);
 	netData.DelayMinSkill2 = static_cast<WORD>(gameData.aiSkillInterval[2] & 0xFFFF);
 
-	if (gameData.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER) 
+	if (gameData.aiSkillCondition[1] & ON_TIMER) 
 	{
 		netData.Skill1Delay = 1;
 	}
-	if (gameData.aiSkillCondition[1] & MUHELPER_ATTACK_ON_CONDITION)
+	if (gameData.aiSkillCondition[1] & ON_CONDITION)
 	{
 		netData.Skill1Con = 1;
 	}
-	if (gameData.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_NEARBY) 
+	if (gameData.aiSkillCondition[1] & ON_MOBS_NEARBY) 
 	{
 		netData.Skill1PreCon = 0;
 	}
-	else if (gameData.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_ATTACKING) 
+	else if (gameData.aiSkillCondition[1] & ON_MOBS_ATTACKING) 
 	{
 		netData.Skill1PreCon = 1;
 	}
 
-	if (gameData.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) 
+	if (gameData.aiSkillCondition[1] & ON_MORE_THAN_TWO_MOBS) 
 	{
 		netData.Skill1SubCon = 0;
 	}
-	else if (gameData.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) 
+	else if (gameData.aiSkillCondition[1] & ON_MORE_THAN_THREE_MOBS) 
 	{
 		netData.Skill1SubCon = 1;
 	}
-	else if (gameData.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) 
+	else if (gameData.aiSkillCondition[1] & ON_MORE_THAN_FOUR_MOBS) 
 	{
 		netData.Skill1SubCon = 2;
 	}
-	else if (gameData.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) 
+	else if (gameData.aiSkillCondition[1] & ON_MORE_THAN_FIVE_MOBS) 
 	{
 		netData.Skill1SubCon = 3;
 	}
 
-	if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER) 
+	if (gameData.aiSkillCondition[2] & ON_TIMER) 
 	{
 		netData.Skill2Delay = 1;
 	}
-	if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION)
+	if (gameData.aiSkillCondition[2] & ON_CONDITION)
 	{
 		netData.Skill2Con = 1;
 	}
-	if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_NEARBY) 
+	if (gameData.aiSkillCondition[2] & ON_MOBS_NEARBY) 
 	{
 		netData.Skill2PreCon = 0;
 	}
-	else if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_ATTACKING) 
+	else if (gameData.aiSkillCondition[2] & ON_MOBS_ATTACKING) 
 	{
 		netData.Skill2PreCon = 1;
 	}
 
-	if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) 
+	if (gameData.aiSkillCondition[2] & ON_MORE_THAN_TWO_MOBS) 
 	{
 		netData.Skill2SubCon = 0;
 	}
-	else if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) 
+	else if (gameData.aiSkillCondition[2] & ON_MORE_THAN_THREE_MOBS) 
 	{
 		netData.Skill2SubCon = 1;
 	}
-	else if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) 
+	else if (gameData.aiSkillCondition[2] & ON_MORE_THAN_FOUR_MOBS) 
 	{
 		netData.Skill2SubCon = 2;
 	}
-	else if (gameData.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) 
+	else if (gameData.aiSkillCondition[2] & ON_MORE_THAN_FIVE_MOBS) 
 	{
 		netData.Skill2SubCon = 3;
 	}
@@ -155,22 +155,22 @@ void MuHelperConfigSerDe::Deserialize(const PRECEIVE_MUHELPER_DATA& netData, cMu
 	gameData.aiSkillInterval[2] = static_cast<int>(netData.DelayMinSkill2);
 
 	gameData.aiSkillCondition.fill(0);
-	gameData.aiSkillCondition[1] |= netData.Skill1Delay ? MUHELPER_ATTACK_ON_TIMER : 0;
-	gameData.aiSkillCondition[1] |= netData.Skill1Con ? MUHELPER_ATTACK_ON_CONDITION : 0;
-	gameData.aiSkillCondition[1] |= netData.Skill1PreCon == 0 ? MUHELPER_ATTACK_ON_MOBS_NEARBY : MUHELPER_ATTACK_ON_MOBS_ATTACKING;
-	gameData.aiSkillCondition[1] |= netData.Skill1SubCon == 0 ? MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS : 
-		netData.Skill1SubCon == 1 ? MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS : 
-		netData.Skill1SubCon == 2 ? MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS :
-		netData.Skill1SubCon == 3 ? MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS : 
+	gameData.aiSkillCondition[1] |= netData.Skill1Delay ? ON_TIMER : 0;
+	gameData.aiSkillCondition[1] |= netData.Skill1Con ? ON_CONDITION : 0;
+	gameData.aiSkillCondition[1] |= netData.Skill1PreCon == 0 ? ON_MOBS_NEARBY : ON_MOBS_ATTACKING;
+	gameData.aiSkillCondition[1] |= netData.Skill1SubCon == 0 ? ON_MORE_THAN_TWO_MOBS : 
+		netData.Skill1SubCon == 1 ? ON_MORE_THAN_THREE_MOBS : 
+		netData.Skill1SubCon == 2 ? ON_MORE_THAN_FOUR_MOBS :
+		netData.Skill1SubCon == 3 ? ON_MORE_THAN_FIVE_MOBS : 
 		0;
 
-	gameData.aiSkillCondition[2] |= netData.Skill2Delay ? MUHELPER_ATTACK_ON_TIMER : 0;
-	gameData.aiSkillCondition[2] |= netData.Skill2Con ? MUHELPER_ATTACK_ON_CONDITION : 0;
-	gameData.aiSkillCondition[2] |= netData.Skill2PreCon == 0 ? MUHELPER_ATTACK_ON_MOBS_NEARBY : MUHELPER_ATTACK_ON_MOBS_ATTACKING;
-	gameData.aiSkillCondition[2] |= netData.Skill2SubCon == 0 ? MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS :
-		netData.Skill2SubCon == 1 ? MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS :
-		netData.Skill2SubCon == 2 ? MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS :
-		netData.Skill2SubCon == 3 ? MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS :
+	gameData.aiSkillCondition[2] |= netData.Skill2Delay ? ON_TIMER : 0;
+	gameData.aiSkillCondition[2] |= netData.Skill2Con ? ON_CONDITION : 0;
+	gameData.aiSkillCondition[2] |= netData.Skill2PreCon == 0 ? ON_MOBS_NEARBY : ON_MOBS_ATTACKING;
+	gameData.aiSkillCondition[2] |= netData.Skill2SubCon == 0 ? ON_MORE_THAN_TWO_MOBS :
+		netData.Skill2SubCon == 1 ? ON_MORE_THAN_THREE_MOBS :
+		netData.Skill2SubCon == 2 ? ON_MORE_THAN_FOUR_MOBS :
+		netData.Skill2SubCon == 3 ? ON_MORE_THAN_FIVE_MOBS :
 		0;
 	gameData.bUseCombo = (bool)netData.Combo;
 

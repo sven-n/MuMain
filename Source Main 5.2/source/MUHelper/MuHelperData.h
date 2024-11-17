@@ -1,31 +1,45 @@
 #pragma once
 
+#include <cstdint>
 #include <set>
 #include <array>
 #include <string>
 #include "WSclient.h"
 
-#define MUHELPER_ATTACK_ALWAYS                   0x00000000
-#define MUHELPER_ATTACK_ON_TIMER                 0x00000001
-#define MUHELPER_ATTACK_ON_CONDITION             0x00000002
-#define MUHELPER_ATTACK_ON_MOBS_NEARBY           0x00000004
-#define MUHELPER_ATTACK_ON_MOBS_ATTACKING        0x00000008
+enum ESkillActivationBase : uint32_t
+{
+	ALWAYS = 0x00000000,
+	ON_TIMER = 0x00000001,
+	ON_CONDITION = 0x00000002,
+};
 
-#define MUHELPER_ATTACK_PRECONDITION_CLEAR_MASK  \
-    ~(MUHELPER_ATTACK_ON_MOBS_NEARBY | MUHELPER_ATTACK_ON_MOBS_ATTACKING)
+enum ESkillActivationPreCon : uint32_t
+{
+	ON_MOBS_NEARBY = 0x00000004,
+	ON_MOBS_ATTACKING = 0x00000008
+};
 
-#define MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS    0x00000010
-#define MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS  0x00000020
-#define MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS   0x00000040
-#define MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS   0x00000080
+enum ESkillActivationSubCon : uint32_t
+{
+	ON_MORE_THAN_TWO_MOBS = 0x00000010,
+	ON_MORE_THAN_THREE_MOBS = 0x00000020,
+	ON_MORE_THAN_FOUR_MOBS = 0x00000040,
+	ON_MORE_THAN_FIVE_MOBS = 0x00000080
+};
 
-#define MUHELPER_ATTACK_ON_MOBS_CLEAR_MASK  \
-    ~(MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS | MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS | \
-      MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS | MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS)
+constexpr uint32_t MUHELPER_SKILL_PRECON_CLEAR =
+~(ON_MOBS_NEARBY | ON_MOBS_ATTACKING);
 
-#define PET_ATTACK_CEASE    0x00
-#define PET_ATTACK_AUTO     0x01
-#define PET_ATTACK_TOGETHER 0x02
+constexpr uint32_t MUHELPER_SKILL_SUBCON_CLEAR =
+~(ON_MORE_THAN_TWO_MOBS | ON_MORE_THAN_THREE_MOBS |
+	ON_MORE_THAN_FOUR_MOBS | ON_MORE_THAN_FIVE_MOBS);
+
+enum EPetAttackMode : BYTE
+{
+    PET_ATTACK_CEASE = 0x00,
+    PET_ATTACK_AUTO = 0x01,
+    PET_ATTACK_TOGETHER = 0x02
+};
 
 typedef struct
 {
@@ -35,13 +49,13 @@ typedef struct
 	bool bReturnToOriginalPosition = false;
 	int iMaxSecondsAway = 0;
 
-	std::array<int, 3> aiSkill = { 0, 0, 0 };
-	std::array<int, 3> aiSkillCondition = { 0, 0, 0 };
-	std::array<int, 3> aiSkillInterval = { 0, 0, 0 };
+	std::array<uint32_t, 3> aiSkill = { 0, 0, 0 };
+	std::array<uint32_t, 3> aiSkillCondition = { 0, 0, 0 };
+	std::array<uint32_t, 3> aiSkillInterval = { 0, 0, 0 };
 
 	bool bUseCombo = false;
 
-	std::array<int, 3> aiBuff = { 0, 0, 0 };
+	std::array<uint32_t, 3> aiBuff = { 0, 0, 0 };
 
 	bool bBuffDuration = false;
 	bool bBuffDurationParty = false;

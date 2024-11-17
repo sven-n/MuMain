@@ -713,31 +713,31 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
         break;
 
     case CHECKBOX_ID_SKILL2_DELAY:
-        _TempConfig.aiSkillCondition[1] &= ~MUHELPER_ATTACK_ON_CONDITION;
+        _TempConfig.aiSkillCondition[1] &= ~ON_CONDITION;
         _TempConfig.aiSkillCondition[1] = bState
-            ? (_TempConfig.aiSkillCondition[1] | MUHELPER_ATTACK_ON_TIMER)
-            : (_TempConfig.aiSkillCondition[1] & ~MUHELPER_ATTACK_ON_TIMER);
+            ? (_TempConfig.aiSkillCondition[1] | ON_TIMER)
+            : (_TempConfig.aiSkillCondition[1] & ~ON_TIMER);
         break;
 
     case CHECKBOX_ID_SKILL2_CONDITION:
-        _TempConfig.aiSkillCondition[1] &= ~MUHELPER_ATTACK_ON_TIMER;
+        _TempConfig.aiSkillCondition[1] &= ~ON_TIMER;
         _TempConfig.aiSkillCondition[1] = bState
-            ? (_TempConfig.aiSkillCondition[1] | MUHELPER_ATTACK_ON_CONDITION)
-            : (_TempConfig.aiSkillCondition[1] & ~MUHELPER_ATTACK_ON_CONDITION);
+            ? (_TempConfig.aiSkillCondition[1] | ON_CONDITION)
+            : (_TempConfig.aiSkillCondition[1] & ~ON_CONDITION);
         break;
 
     case CHECKBOX_ID_SKILL3_DELAY:
-        _TempConfig.aiSkillCondition[2] &= ~MUHELPER_ATTACK_ON_CONDITION;
+        _TempConfig.aiSkillCondition[2] &= ~ON_CONDITION;
         _TempConfig.aiSkillCondition[2] = bState
-            ? (_TempConfig.aiSkillCondition[2] | MUHELPER_ATTACK_ON_TIMER)
-            : (_TempConfig.aiSkillCondition[2] & ~MUHELPER_ATTACK_ON_TIMER);
+            ? (_TempConfig.aiSkillCondition[2] | ON_TIMER)
+            : (_TempConfig.aiSkillCondition[2] & ~ON_TIMER);
         break;
 
     case CHECKBOX_ID_SKILL3_CONDITION:
-        _TempConfig.aiSkillCondition[2] &= ~MUHELPER_ATTACK_ON_TIMER;
+        _TempConfig.aiSkillCondition[2] &= ~ON_TIMER;
         _TempConfig.aiSkillCondition[2] = bState
-            ? (_TempConfig.aiSkillCondition[2] | MUHELPER_ATTACK_ON_CONDITION)
-            : (_TempConfig.aiSkillCondition[2] & ~MUHELPER_ATTACK_ON_CONDITION);
+            ? (_TempConfig.aiSkillCondition[2] | ON_CONDITION)
+            : (_TempConfig.aiSkillCondition[2] & ~ON_CONDITION);
         break;
 
     case CHECKBOX_ID_COMBO:
@@ -982,10 +982,10 @@ void CNewUIMuHelper::ApplyConfig()
     m_CheckBoxList[CHECKBOX_ID_LONG_DISTANCE].box->RegisterBoxState(_TempConfig.bLongRangeCounterAttack);
     m_CheckBoxList[CHECKBOX_ID_ORIG_POSITION].box->RegisterBoxState(_TempConfig.bReturnToOriginalPosition);
 
-    m_CheckBoxList[CHECKBOX_ID_SKILL2_DELAY].box->RegisterBoxState(_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER);
-    m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[1] & MUHELPER_ATTACK_ON_CONDITION);
-    m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->RegisterBoxState(_TempConfig.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER);
-    m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION);
+    m_CheckBoxList[CHECKBOX_ID_SKILL2_DELAY].box->RegisterBoxState(_TempConfig.aiSkillCondition[1] & ON_TIMER);
+    m_CheckBoxList[CHECKBOX_ID_SKILL2_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[1] & ON_CONDITION);
+    m_CheckBoxList[CHECKBOX_ID_SKILL3_DELAY].box->RegisterBoxState(_TempConfig.aiSkillCondition[2] & ON_TIMER);
+    m_CheckBoxList[CHECKBOX_ID_SKILL3_CONDITION].box->RegisterBoxState(_TempConfig.aiSkillCondition[2] & ON_CONDITION);
     m_CheckBoxList[CHECKBOX_ID_COMBO].box->RegisterBoxState(_TempConfig.bUseCombo);
 
     wchar_t wsTempNum[MAX_NUMBER_DIGITS + 1];
@@ -1052,6 +1052,9 @@ void CNewUIMuHelper::SaveConfig()
     _TempConfig.aiSkill[0] = m_aiSelectedSkills[0];
     _TempConfig.aiSkill[1] = m_aiSelectedSkills[1];
     _TempConfig.aiSkill[2] = m_aiSelectedSkills[2];
+    _TempConfig.aiBuff[0] = m_aiSelectedSkills[3];
+    _TempConfig.aiBuff[1] = m_aiSelectedSkills[4];
+    _TempConfig.aiBuff[2] = m_aiSelectedSkills[5];
 
     g_MuHelper.Save(_TempConfig);
 }
@@ -2527,8 +2530,8 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other precondition bits and set the bit for "Hunt Range"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_PRECONDITION_CLEAR_MASK) |
-                    MUHELPER_ATTACK_ON_MOBS_NEARBY;
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_SKILL_PRECON_CLEAR) |
+                    ON_MOBS_NEARBY;
             }
             else if (m_BtnPreConAttacking.UpdateMouseEvent())
             {
@@ -2537,8 +2540,8 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other precondition bits and set the bit for "Attacking"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_PRECONDITION_CLEAR_MASK) |
-                    MUHELPER_ATTACK_ON_MOBS_ATTACKING;
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_SKILL_PRECON_CLEAR) |
+                    ON_MOBS_ATTACKING;
             }
             else if (m_BtnSubConMoreThanTwo.UpdateMouseEvent())
             {
@@ -2549,8 +2552,8 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other bits and set the bit for "More Than Two Mobs"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_CLEAR_MASK) |
-                    MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_SKILL_SUBCON_CLEAR) |
+                    ON_MORE_THAN_TWO_MOBS;
             }
             else if (m_BtnSubConMoreThanThree.UpdateMouseEvent())
             {
@@ -2561,8 +2564,8 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other bits and set the bit for "More Than Three Mobs"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_CLEAR_MASK) |
-                    MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS;
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_SKILL_SUBCON_CLEAR) |
+                    ON_MORE_THAN_THREE_MOBS;
             }
             else if (m_BtnSubConMoreThanFour.UpdateMouseEvent())
             {
@@ -2573,8 +2576,8 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other bits and set the bit for "More Than Four Mobs"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_CLEAR_MASK) |
-                    MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS;
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_SKILL_SUBCON_CLEAR) |
+                    ON_MORE_THAN_FOUR_MOBS;
             }
             else if (m_BtnSubConMoreThanFive.UpdateMouseEvent())
             {
@@ -2585,8 +2588,8 @@ bool CNewUIMuHelperExt::Update()
 
                 // Clear other bits and set the bit for "More Than Five Mobs"
                 _TempConfig.aiSkillCondition[iSkillIndex] =
-                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_CLEAR_MASK) |
-                    MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS;
+                    (_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_SKILL_SUBCON_CLEAR) |
+                    ON_MORE_THAN_FIVE_MOBS;
             }
         }
 
@@ -2806,12 +2809,12 @@ void CNewUIMuHelperExt::Toggle(int iPageId)
     if (m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG || m_iCurrentPage == SUB_PAGE_SKILL3_CONFIG)
     {
         int iSkillIndex = m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG ? 1 : 2;
-        m_BtnPreConHuntRange.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_NEARBY);
-        m_BtnPreConAttacking.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_ATTACKING);
-        m_BtnSubConMoreThanTwo.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS);
-        m_BtnSubConMoreThanThree.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS);
-        m_BtnSubConMoreThanFour.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS);
-        m_BtnSubConMoreThanFive.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS);
+        m_BtnPreConHuntRange.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MOBS_NEARBY);
+        m_BtnPreConAttacking.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MOBS_ATTACKING);
+        m_BtnSubConMoreThanTwo.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MORE_THAN_TWO_MOBS);
+        m_BtnSubConMoreThanThree.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MORE_THAN_THREE_MOBS);
+        m_BtnSubConMoreThanFour.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MORE_THAN_FOUR_MOBS);
+        m_BtnSubConMoreThanFive.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MORE_THAN_FIVE_MOBS);
     }
     else if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
     {
@@ -2884,15 +2887,15 @@ void CNewUIMuHelperExt::Reset()
     {
         int iSkillIndex = m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG ? 1 : 2;
 
-        _TempConfig.aiSkillCondition[iSkillIndex] = MUHELPER_ATTACK_ON_MOBS_NEARBY | MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
-        _TempConfig.aiSkillCondition[iSkillIndex] = MUHELPER_ATTACK_ON_MOBS_NEARBY | MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS;
+        _TempConfig.aiSkillCondition[iSkillIndex] = ON_MOBS_NEARBY | ON_MORE_THAN_TWO_MOBS;
+        _TempConfig.aiSkillCondition[iSkillIndex] = ON_MOBS_NEARBY | ON_MORE_THAN_TWO_MOBS;
 
-        m_BtnPreConHuntRange.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_NEARBY);
-        m_BtnPreConAttacking.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MOBS_ATTACKING);
-        m_BtnSubConMoreThanTwo.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS);
-        m_BtnSubConMoreThanThree.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS);
-        m_BtnSubConMoreThanFour.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS);
-        m_BtnSubConMoreThanFive.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS);
+        m_BtnPreConHuntRange.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MOBS_NEARBY);
+        m_BtnPreConAttacking.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MOBS_ATTACKING);
+        m_BtnSubConMoreThanTwo.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MORE_THAN_TWO_MOBS);
+        m_BtnSubConMoreThanThree.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MORE_THAN_THREE_MOBS);
+        m_BtnSubConMoreThanFour.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MORE_THAN_FOUR_MOBS);
+        m_BtnSubConMoreThanFive.RegisterBoxState(_TempConfig.aiSkillCondition[iSkillIndex] & ON_MORE_THAN_FIVE_MOBS);
     }
     else if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG 
         || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF 

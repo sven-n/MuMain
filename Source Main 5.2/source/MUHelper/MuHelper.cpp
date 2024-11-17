@@ -17,8 +17,8 @@
 
 #include "MuHelper.h"
 
-#define MAX_ACTIONABLE_DISTANCE        10
-#define DEFAULT_DURABILITY_THRESHOLD   50
+constexpr int MAX_ACTIONABLE_DISTANCE = 10;
+constexpr int DEFAULT_DURABILITY_THRESHOLD = 50;
 
 CMuHelper g_MuHelper;
 SpinLock _targetsLock;
@@ -40,6 +40,7 @@ CMuHelper::CMuHelper()
     m_iHuntingDistance = 0;
     m_iObtainingDistance = 1;
     m_bTimerActivatedBuffOngoing = false;
+    m_iTotalCost = 0;
 }
 
 void CALLBACK CMuHelper::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime) 
@@ -638,7 +639,7 @@ int CMuHelper::SelectAttackSkill()
     // try skill 2 activation conditions
     if (m_config.aiSkill[1] > 0)
     {
-        if ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_TIMER)
+        if ((m_config.aiSkillCondition[1] & ON_TIMER)
             && m_config.aiSkillInterval[1] != 0
             && m_iSecondsElapsed % m_config.aiSkillInterval[1] == 0)
         {
@@ -646,29 +647,29 @@ int CMuHelper::SelectAttackSkill()
             return m_config.aiSkill[1];
         }
 
-        if (m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_CONDITION)
+        if (m_config.aiSkillCondition[1] & ON_CONDITION)
         {
-            if (m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_NEARBY)
+            if (m_config.aiSkillCondition[1] & ON_MOBS_NEARBY)
             {
                 int iCount = m_setTargets.size();
 
-                if (((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
-                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
-                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
+                if (((m_config.aiSkillCondition[1] & ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
+                    || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
+                    || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
+                    || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                 {
                     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Hunting Range Condition");
                     return m_config.aiSkill[1];
                 }
             }
-            else if (m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MOBS_ATTACKING)
+            else if (m_config.aiSkillCondition[1] & ON_MOBS_ATTACKING)
             {
                 int iCount = m_setTargetsAttacking.size();
 
-                if (((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
-                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
-                    || ((m_config.aiSkillCondition[1] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
+                if (((m_config.aiSkillCondition[1] & ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
+                    || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
+                    || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
+                    || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                 {
                     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Attacking Me Condition");
                     return m_config.aiSkill[1];
@@ -679,10 +680,10 @@ int CMuHelper::SelectAttackSkill()
 
     // try skill 3 activation conditions
     if (m_config.aiSkill[2] > 0
-        && (m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER
-            || m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION))
+        && (m_config.aiSkillCondition[2] & ON_TIMER
+            || m_config.aiSkillCondition[2] & ON_CONDITION))
     {
-        if ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_TIMER)
+        if ((m_config.aiSkillCondition[2] & ON_TIMER)
             && m_config.aiSkillInterval[2] != 0
             && m_iSecondsElapsed % m_config.aiSkillInterval[2] == 0)
         {
@@ -690,29 +691,29 @@ int CMuHelper::SelectAttackSkill()
             return m_config.aiSkill[2];
         }
 
-        if (m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_CONDITION)
+        if (m_config.aiSkillCondition[2] & ON_CONDITION)
         {
-            if (m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_NEARBY)
+            if (m_config.aiSkillCondition[2] & ON_MOBS_NEARBY)
             {
                 int iCount = m_setTargets.size();
 
-                if (((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
-                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
-                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
+                if (((m_config.aiSkillCondition[2] & ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
+                    || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
+                    || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
+                    || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                 {
                     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 3 Hunting Range Condition");
                     return m_config.aiSkill[2];
                 }
             }
-            else if (m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MOBS_ATTACKING)
+            else if (m_config.aiSkillCondition[2] & ON_MOBS_ATTACKING)
             {
                 int iCount = m_setTargetsAttacking.size();
 
-                if (((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
-                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
-                    || ((m_config.aiSkillCondition[2] & MUHELPER_ATTACK_ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
+                if (((m_config.aiSkillCondition[2] & ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
+                    || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
+                    || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
+                    || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                 {
                     g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 3 Attacking Me Condition");
                     return m_config.aiSkill[2];
