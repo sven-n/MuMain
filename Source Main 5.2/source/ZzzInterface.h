@@ -142,7 +142,7 @@ bool CheckWall(int sx1, int sy1, int sx2, int sy2);
 bool CheckTile(CHARACTER* c, OBJECT* o, float Range);
 void LetHeroStop(CHARACTER* c = NULL, BOOL bSetMovementFalse = FALSE);
 void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
-void TriggerAttack(CHARACTER* c);
+void Attack(CHARACTER* c);
 int ExecuteSkill(CHARACTER* c, int Skill, float Distance);
 bool ExecuteSkillComplete(CHARACTER* c);
 bool CheckMana(CHARACTER* c, int Skill);
