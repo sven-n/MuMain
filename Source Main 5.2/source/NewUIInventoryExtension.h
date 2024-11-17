@@ -59,7 +59,7 @@ namespace SEASON3B
         bool Render();
 
         float GetLayerDepth();	//. 2.5f
-
+        ITEM* FindItem(int iIndex) const;
         bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const;
         void DeleteItem(int iIndex) const;
         void DeleteAllItems() const;

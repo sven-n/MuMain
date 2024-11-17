@@ -5684,39 +5684,46 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            auto Data2 = safe_cast<PRECEIVE_GET_ITEM_EXTENDED>(ReceiveBuffer);
-            if (Data2 == nullptr)
-            {
-                assert(false);
-                return;
-            }
-
-            auto itemIndex = Data2->Result;
+            auto pickedItem = &Items[ItemKey].Item;
+            auto itemIndex = Data->Value;
             if (itemIndex != GET_ITEM_MULTI)
             {
+                auto Data2 = safe_cast<PRECEIVE_GET_ITEM_EXTENDED>(ReceiveBuffer);
+                if (Data2 == nullptr)
+                {
+                    assert(false);
+                    return;
+                }
+
                 auto offset = sizeof(PBMSG_HEADER) + 1;
                 int length = CalcItemLength(Data2->Item);
                 auto itemData = ReceiveBuffer.subspan(offset, length);
 
                 if (itemIndex >= MAX_EQUIPMENT_INDEX && itemIndex < MAX_MY_INVENTORY_INDEX)
                 {
-                    g_pMyInventory->InsertItem(itemIndex, itemData);
+                    if (g_pMyInventory->InsertItem(itemIndex, itemData))
+                    {
+                        pickedItem = g_pMyInventory->FindItem(itemIndex);
+                    }
                 }
                 else if (itemIndex >= MAX_MY_INVENTORY_INDEX && Data2->Result < MAX_MY_INVENTORY_EX_INDEX)
                 {
-                    g_pMyInventoryExt->InsertItem(itemIndex, itemData);
+                    if (g_pMyInventoryExt->InsertItem(itemIndex, itemData))
+                    {
+                        pickedItem = g_pMyInventoryExt->FindItem(itemIndex);
+                    }
                 }
             }
 
             wchar_t szItem[64] = { 0, };
-            int level = Items[ItemKey].Item.Level;
-            GetItemName(Items[ItemKey].Item.Type, level, szItem);
+            int level = pickedItem->Level;
+            GetItemName(pickedItem->Type, level, szItem);
 
             wchar_t szMessage[128];
             swprintf(szMessage, L"%s %s", szItem, GlobalText[918]);
             g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
-            int Type = Items[ItemKey].Item.Type;
+            int Type = pickedItem->Type;
             if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE || Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION
                 || Type == INDEX_COMPILED_CELE || Type == INDEX_COMPILED_SOUL || Type == ITEM_JEWEL_OF_GUARDIAN)
                 PlayBuffer(SOUND_JEWEL01, &Hero->Object);
