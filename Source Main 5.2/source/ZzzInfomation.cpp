@@ -1591,7 +1591,7 @@ void SetItemAttributes(ITEM* ip)
     CalcPartType(ip);
 }
 
-int ItemValue(ITEM* ip, int goldType)
+__int64 ItemValue(ITEM* ip, int goldType)
 {
     if (ip->Type == -1) return 0;
 
@@ -1979,7 +1979,7 @@ int ItemValue(ITEM* ip, int goldType)
                 Gold = Gold / 3;
                 Gold = Gold / 10 * 10;
             }
-            return (int)Gold;
+            return (__int64)Gold;
         }
     }
     else if (ip->Type == ITEM_WIZARDS_RING)
@@ -2338,7 +2338,7 @@ EXIT_CALCULATE:
     }
     if (Check_LuckyItem(ip->Type))	Gold = 0;
 
-    return (int)Gold;
+    return (__int64)Gold;
 }
 
 bool IsRequireEquipItem(ITEM* pItem)

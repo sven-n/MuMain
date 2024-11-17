@@ -1201,28 +1201,21 @@ void ConvertChaosTaxGold(DWORD Gold, wchar_t* Text)
         swprintf(Text, L"%d", Gold1);
 }
 
-int ConvertRepairGold(int Gold, int Durability, int MaxDurability, short Type, wchar_t* Text)
+int64_t CalcRepairCost(int64_t ItemValue, int Durability, int MaxDurability, short Type, bool SelfRepair)
 {
-    Gold = min(Gold, 400000000);
+    // Cap ItemValue at 400M
+    int64_t repairGold = min(ItemValue, int64_t(400000000));
 
-    auto repairGold = (float)Gold;
-    float   persent = 1.f - (float)(Durability / (float)MaxDurability);
-    bool    doubleP = false;
-
-    if (persent > 0)
+    // Calculate percentage of durability lost
+    float percent = 1.f - static_cast<float>(Durability) / MaxDurability;
+    if (percent > 0.f)
     {
-        auto fRoot = (float)sqrt((double)repairGold);
-        auto fRootRoot = (float)sqrt(sqrt((double)repairGold));
-        repairGold = 3.f * fRoot * fRootRoot;
+        // Repair cost calculation
+        double fRoot = sqrt(static_cast<double>(repairGold));
+        double fRootRoot = sqrt(fRoot);
+        repairGold = static_cast<int64_t>(3.5 * fRoot * fRootRoot * percent) + 1;
 
-        if (doubleP)
-        {
-            repairGold *= 2;
-        }
-
-        repairGold *= persent;
-        repairGold++;
-
+        // Adjust for 0 durability
         if (Durability <= 0)
         {
             if (Type == ITEM_DARK_HORSE_ITEM || Type == ITEM_DARK_RAVEN_ITEM)
@@ -1231,40 +1224,53 @@ int ConvertRepairGold(int Gold, int Durability, int MaxDurability, short Type, w
             }
             else
             {
-                repairGold += repairGold * 0.4f;
+                repairGold = static_cast<int64_t>(repairGold * 1.4);
             }
         }
     }
     else
     {
-        repairGold = 0;
+        repairGold = 0; // No cost if no durability loss
     }
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == true && g_pNPCShop->IsRepairShop())
+    if (SelfRepair)
     {
-        Gold = (int)(repairGold);
-    }
-    else if ((g_pMyInventory->IsVisible()) && (!g_pNPCShop->IsVisible()))
-    {
-        Gold = (int)(repairGold + (repairGold * 1.5f));
-    }
-    else
-    {
-        Gold = (int)(repairGold);
+        // +150% adjustment for self-repair (vs doing it in shop)
+        repairGold = static_cast<int64_t>(repairGold * 2.5);
     }
 
-    if (Gold >= 1000)
+    // Round cost to the nearest 100 or 10
+    if (repairGold >= 1000)
     {
-        Gold = (Gold / 100) * 100;
+        repairGold = (repairGold / 100) * 100;
     }
-    else if (Gold >= 100)
+    else if (repairGold >= 100)
     {
-        Gold = (Gold / 10) * 10;
+        repairGold = (repairGold / 10) * 10;
     }
 
-    ConvertGold(Gold, Text);
+    return repairGold;
+}
 
-    return  Gold;
+int64_t CalcSelfRepairCost(int64_t ItemValue, int Durability, int MaxDurability, short Type) 
+{
+    return CalcRepairCost(ItemValue, Durability, MaxDurability, Type, true);
+}
+
+int64_t ConvertRepairGold(int64_t Gold, int Durability, int MaxDurability, short Type, wchar_t* Text)
+{
+    int64_t repairGold = 0;
+
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop()) {
+        repairGold = CalcRepairCost(Gold, Durability, MaxDurability, Type, false);
+    }
+    else if (g_pMyInventory->IsVisible() && !g_pNPCShop->IsVisible()) {
+        repairGold = CalcRepairCost(Gold, Durability, MaxDurability, Type, true);
+    }
+
+    ConvertGold(repairGold, Text);
+
+    return repairGold;
 }
 
 void RepairAllGold(void)
