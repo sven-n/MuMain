@@ -29,7 +29,7 @@ extern	int  TextBold[50];
 static  CSWaterTerrain* g_pCSWaterTerrain = NULL;
 static  std::queue<ObjectDescript> g_qObjDes;
 
-static  const BYTE  ACTION_DESTROY_PHY_DEF = 33;
+static  const BYTE  ACTION_DESTROY_WIZ_DEF = 33;
 static  const BYTE  ACTION_DESTROY_DEF = 34;
 
 #define NUM_HELLAS	7
@@ -742,7 +742,7 @@ void SetActionDestroy_Def(OBJECT* o)
     {
         if (g_isCharacterBuff(o, eBuff_WizDefense))
         {
-            o->AI = ACTION_DESTROY_PHY_DEF;
+            o->AI = ACTION_DESTROY_WIZ_DEF;
             g_CharacterUnRegisterBuff(o, eBuff_WizDefense);
         }
         else if (g_isCharacterBuff(o, eBuff_Defense))
@@ -757,7 +757,7 @@ void RenderDestroy_Def(OBJECT* o, BMD* b)
 {
     if (o->Type != MODEL_PLAYER)
     {
-        if (o->AI == ACTION_DESTROY_PHY_DEF)
+        if (o->AI == ACTION_DESTROY_WIZ_DEF)
         {
             b->RenderMeshEffect(6, MODEL_STONE_COFFIN, 1);
             o->AI = 0;
