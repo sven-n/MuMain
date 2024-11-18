@@ -9,83 +9,86 @@
 
 #include "MuHelperData.h"
 
-class CMuHelper
+namespace MUHelper
 {
-public:
-	CMuHelper();
-	~CMuHelper() = default;
+	class CMuHelper
+	{
+	public:
+		CMuHelper();
+		~CMuHelper() = default;
 
-public:
-	static void CALLBACK TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+	public:
+		static void CALLBACK TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
 
-	cMuHelperConfig GetConfig() const;
-	void Save(const cMuHelperConfig& config);
-	void Load(const cMuHelperConfig& config);
-	void Start();
-	void Stop();
-	void Toggle();
-	void TriggerStart();
-	void TriggerStop();
-	bool IsActive() { return m_bActive; }
-	void AddCost(int iCost) { m_iTotalCost += iCost; }
-	int GetTotalCost() { return m_iTotalCost; }
+		ConfigData GetConfig() const;
+		void Save(const ConfigData& config);
+		void Load(const ConfigData& config);
+		void Start();
+		void Stop();
+		void Toggle();
+		void TriggerStart();
+		void TriggerStop();
+		bool IsActive() { return m_bActive; }
+		void AddCost(int iCost) { m_iTotalCost += iCost; }
+		int GetTotalCost() { return m_iTotalCost; }
 
-	void AddTarget(int iTargetId, bool bIsAttacking);
-	void DeleteTarget(int iTargetId);
-	void DeleteAllTargets();
+		void AddTarget(int iTargetId, bool bIsAttacking);
+		void DeleteTarget(int iTargetId);
+		void DeleteAllTargets();
 
-	void AddItem(int iItemId, POINT posDropped);
-	void DeleteItem(int iItemId);
+		void AddItem(int iItemId, POINT posDropped);
+		void DeleteItem(int iItemId);
 
-private:
-	void WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
-	void Work();
-	int Buff();
-	int BuffTarget(CHARACTER* pTargetChar, int iBuffSkill);
-	int Heal();
-	int HealSelf(int iHealingSkill);
-	int ConsumePotion();
-	int Attack();
-	int RepairEquipments();
-	int Regroup();
-	int SelectAttackSkill();
-	int SimulateAttack(int iSkill);
-	int SimulateSkill(int iSkill, bool bTargetRequired, int iTarget);
-	int SimulateComboAttack();
-	int GetNearestTarget();
-	int GetFarthestAttackingTarget();
-	int ComputeDistanceByRange(int iRange);
-	int ComputeDistanceFromTarget(CHARACTER* pTarget);
-	int ComputeDistanceBetween(POINT posA, POINT posB);
-	int SimulateMove(POINT posMove);
-	int ObtainItem();
-	int SelectItemToObtain();
-	bool ShouldObtainItem(int iItemId);
-	int GetHealingSkill();
-	bool HasAssignedBuffSkill();
+	private:
+		void WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+		void Work();
+		int Buff();
+		int BuffTarget(CHARACTER* pTargetChar, int iBuffSkill);
+		int Heal();
+		int HealSelf(int iHealingSkill);
+		int ConsumePotion();
+		int Attack();
+		int RepairEquipments();
+		int Regroup();
+		int SelectAttackSkill();
+		int SimulateAttack(int iSkill);
+		int SimulateSkill(int iSkill, bool bTargetRequired, int iTarget);
+		int SimulateComboAttack();
+		int GetNearestTarget();
+		int GetFarthestAttackingTarget();
+		int ComputeDistanceByRange(int iRange);
+		int ComputeDistanceFromTarget(CHARACTER* pTarget);
+		int ComputeDistanceBetween(POINT posA, POINT posB);
+		int SimulateMove(POINT posMove);
+		int ObtainItem();
+		int SelectItemToObtain();
+		bool ShouldObtainItem(int iItemId);
+		int GetHealingSkill();
+		bool HasAssignedBuffSkill();
 
-private:
-	cMuHelperConfig m_config;
-	POINT m_posOriginal;
-	std::thread m_timerThread;
-	std::atomic<bool> m_bActive;
-	std::set<int> m_setTargets;
-	std::set<int> m_setTargetsAttacking;
-	std::set<int> m_setItems;
-	int m_iCurrentItem;
-	int m_iCurrentTarget;
-	int m_iCurrentBuffIndex;
-	int m_iCurrentBuffPartyIndex;
-	int m_iCurrentHealPartyIndex;
-	int m_iComboState;
-	int m_iCurrentSkill;
-	int m_iHuntingDistance;
-	int m_iObtainingDistance;
-	int m_iLoopCounter;
-	int m_iSecondsElapsed;
-	int m_iSecondsAway;
-	bool m_bTimerActivatedBuffOngoing;
-	int m_iTotalCost;
-};
+	private:
+		ConfigData m_config;
+		POINT m_posOriginal;
+		std::thread m_timerThread;
+		std::atomic<bool> m_bActive;
+		std::set<int> m_setTargets;
+		std::set<int> m_setTargetsAttacking;
+		std::set<int> m_setItems;
+		int m_iCurrentItem;
+		int m_iCurrentTarget;
+		int m_iCurrentBuffIndex;
+		int m_iCurrentBuffPartyIndex;
+		int m_iCurrentHealPartyIndex;
+		int m_iComboState;
+		int m_iCurrentSkill;
+		int m_iHuntingDistance;
+		int m_iObtainingDistance;
+		int m_iLoopCounter;
+		int m_iSecondsElapsed;
+		int m_iSecondsAway;
+		bool m_bTimerActivatedBuffOngoing;
+		int m_iTotalCost;
+	};
 
-extern CMuHelper g_MuHelper;
+	extern CMuHelper g_MuHelper;
+}

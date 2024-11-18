@@ -10,6 +10,8 @@
 #include "CharacterManager.h"
 #include "MUHelper/MuHelper.h"
 
+using namespace MUHelper;
+
 #define CHECKBOX_ID_POTION              0
 #define CHECKBOX_ID_LONG_DISTANCE       1
 #define CHECKBOX_ID_ORIG_POSITION       2
@@ -81,7 +83,7 @@
 
 using namespace SEASON3B;
 
-cMuHelperConfig _TempConfig;
+ConfigData _TempConfig;
 
 CNewUIMuHelper::CNewUIMuHelper()
 {
@@ -524,6 +526,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         else if (iButtonId == BUTTON_ID_EXIT_CONFIG)
         {
             g_pNewUISystem->Hide(INTERFACE_MUHELPER);
+            SetFocus(g_hWnd);
         }
         else if (iButtonId == BUTTON_ID_INIT_CONFIG)
         {
@@ -533,6 +536,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         {
             SaveConfig();
             g_pNewUISystem->Hide(INTERFACE_MUHELPER);
+            SetFocus(g_hWnd);
         }
 
         return false;
@@ -690,6 +694,7 @@ bool CNewUIMuHelper::UpdateKeyEvent()
             g_pNewUISystem->Hide(INTERFACE_MUHELPER);
             g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
             //PlayBuffer(SOUND_CLICK01);
+            SetFocus(g_hWnd);
 
             return false;
         }
@@ -959,7 +964,7 @@ void CNewUIMuHelper::Reset()
     ApplyConfig();
 }
 
-void CNewUIMuHelper::LoadSavedConfig(const cMuHelperConfig& config)
+void CNewUIMuHelper::LoadSavedConfig(const ConfigData& config)
 {
     _TempConfig = config;
     ApplyConfig();

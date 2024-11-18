@@ -1262,8 +1262,8 @@ void ReceiveMuHelperConfigurationData(std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
-    cMuHelperConfig config;
-    MuHelperConfigSerDe::Deserialize(*pMuHelperData, config);
+    MUHelper::ConfigData config;
+    MUHelper::ConfigDataSerDe::Deserialize(*pMuHelperData, config);
     g_pNewUIMuHelper->LoadSavedConfig(config);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0xAE [ReceiveMuHelperConfigurationData]");
@@ -1280,16 +1280,16 @@ void ReceiveMuHelperStatusUpdate(std::span<const BYTE> ReceiveBuffer)
 
     if (pMuHelperStatus->Pause)
     {
-        g_MuHelper.Stop();
+        MUHelper::g_MuHelper.Stop();
     }
     else
     {
-        g_MuHelper.Start();
+        MUHelper::g_MuHelper.Start();
 
         if (pMuHelperStatus->Money > 0 && pMuHelperStatus->ConsumeMoney)
         {
-            g_MuHelper.AddCost(pMuHelperStatus->Money);
-            int iTotalCost = g_MuHelper.GetTotalCost();
+            MUHelper:: g_MuHelper.AddCost(pMuHelperStatus->Money);
+            int iTotalCost = MUHelper::g_MuHelper.GetTotalCost();
 
             wchar_t Text[100];
             swprintf(Text, GlobalText[3586], iTotalCost);
@@ -1787,7 +1787,7 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
 
             if (IsMonster(c))
             {
-                g_MuHelper.AddTarget(Key, false);
+                MUHelper::g_MuHelper.AddTarget(Key, false);
             }
 
             g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
@@ -1965,7 +1965,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         RepairEnable = 0;
     }
 
-    g_MuHelper.TriggerStop();
+    MUHelper::g_MuHelper.TriggerStop();
 
     Hero->Movement = false;
     SetPlayerStop(Hero);
@@ -2603,7 +2603,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         if (c == NULL) break;
 
         OBJECT* o = &c->Object;
-        g_MuHelper.AddTarget(Key, false);
+        MUHelper::g_MuHelper.AddTarget(Key, false);
 
         for (int j = 0; j < Data2->s_BuffCount; ++j)
         {
@@ -3159,7 +3159,7 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     auto ShieldDamage = Data->ShieldDamage;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamageExtended(%d %d)]", AttackPlayer, Damage);
-    g_MuHelper.AddTarget(Key, true);
+    MUHelper::g_MuHelper.AddTarget(Key, true);
 
     if (Data->HealthStatus == 0xFF)
     {
@@ -3238,7 +3238,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         c->Object.AnimationFrame = 0;
 
         c->TargetCharacter = HeroIndex;
-        g_MuHelper.AddTarget(Key, true);
+        MUHelper::g_MuHelper.AddTarget(Key, true);
 
         AttackPlayer = Index;
         break;
@@ -5621,7 +5621,7 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
 
     if (c == Hero)
     {
-        g_MuHelper.TriggerStop();
+        MUHelper::g_MuHelper.TriggerStop();
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x17 [ReceiveDie(%d)]", Key);
@@ -5647,7 +5647,7 @@ void ReceiveCreateMoney(std::span<const BYTE> ReceiveBuffer)
     Position[1] = (float)(Data->PositionY + 0.5f) * TERRAIN_SCALE;
 
     CreateMoneyDrop(&Items[Data->Id], Data->Amount, Position, Data->IsFreshDrop);
-    g_MuHelper.AddItem(Data->Id, { Data->PositionX, Data->PositionY });
+    MUHelper::g_MuHelper.AddItem(Data->Id, { Data->PositionX, Data->PositionY });
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateMoney]");
 }
@@ -5688,7 +5688,7 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
         Position[1] = (float)(itemStartData->PositionY + 0.5f) * TERRAIN_SCALE;
 
         CreateItemDrop(&Items[id], params, Position, isFreshDrop);
-        g_MuHelper.AddItem(id, { itemStartData->PositionX, itemStartData->PositionY });
+        MUHelper::g_MuHelper.AddItem(id, { itemStartData->PositionX, itemStartData->PositionY });
 
         Offset += length;
     }
@@ -5709,7 +5709,7 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
         Items[Key].Object.Live = false;
         Offset += sizeof(PDELETE_CHARACTER);
 
-        g_MuHelper.DeleteItem(Key);
+        MUHelper::g_MuHelper.DeleteItem(Key);
     }
 }
 

@@ -133,7 +133,7 @@ bool CNewUIHeroPositionInfo::BtnProcess()
 
     if (m_BtnStart.UpdateMouseEvent())
     {
-        g_MuHelper.Toggle();
+        MUHelper::g_MuHelper.Toggle();
 
         PlayBuffer(SOUND_CLICK01);
         return true;
@@ -194,7 +194,7 @@ bool CNewUIHeroPositionInfo::Render()
     //--
     m_BtnConfig.Render();
 
-    g_MuHelper.IsActive() ? m_BtnStop.Render() : m_BtnStart.Render();
+    MUHelper::g_MuHelper.IsActive() ? m_BtnStop.Render() : m_BtnStart.Render();
     //--
     swprintf(szText, L"%s (%d , %d)", gMapManager.GetMapName(gMapManager.WorldActive), m_CurHeroPosition.x, m_CurHeroPosition.y);
 

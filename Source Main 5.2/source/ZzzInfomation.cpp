@@ -1591,13 +1591,13 @@ void SetItemAttributes(ITEM* ip)
     CalcPartType(ip);
 }
 
-__int64 ItemValue(ITEM* ip, int goldType)
+int64_t ItemValue(ITEM* ip, int goldType)
 {
     if (ip->Type == -1) return 0;
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
 
-    __int64 Gold = 0;
+    int64_t Gold = 0;
 
     if (p->iZen != 0)
     {
@@ -1969,17 +1969,17 @@ __int64 ItemValue(ITEM* ip, int goldType)
         if (ip->Type >= ITEM_POTION && ip->Type <= ITEM_ANTIDOTE)
         {
             if (Level > 0)
-                Gold *= (__int64)pow((double)2, (double)Level);
+                Gold *= (int64_t)pow((double)2, (double)Level);
 
             Gold = Gold / 10 * 10;
-            Gold *= (__int64)ip->Durability;
+            Gold *= (int64_t)ip->Durability;
 
             if (goldType)
             {
                 Gold = Gold / 3;
                 Gold = Gold / 10 * 10;
             }
-            return (__int64)Gold;
+            return (int64_t)Gold;
         }
     }
     else if (ip->Type == ITEM_WIZARDS_RING)
@@ -2099,34 +2099,34 @@ __int64 ItemValue(ITEM* ip, int goldType)
                     }
                     switch (iOption)
                     {
-                    case 4:Gold += (__int64)((double)Gold * 6 / 10); break;
-                    case 8:Gold += (__int64)((double)Gold * 14 / 10); break;
-                    case 12:Gold += (__int64)((double)Gold * 28 / 10); break;
-                    case 16:Gold += (__int64)((double)Gold * 56 / 10); break;
+                    case 4:Gold += (int64_t)((double)Gold * 6 / 10); break;
+                    case 8:Gold += (int64_t)((double)Gold * 14 / 10); break;
+                    case 12:Gold += (int64_t)((double)Gold * 28 / 10); break;
+                    case 16:Gold += (int64_t)((double)Gold * 56 / 10); break;
                     }
                 }
                 else
                 {
                     switch (ip->SpecialValue[i])
                     {
-                    case 4:Gold += (__int64)((double)Gold * 6 / 10); break;
-                    case 8:Gold += (__int64)((double)Gold * 14 / 10); break;
-                    case 12:Gold += (__int64)((double)Gold * 28 / 10); break;
-                    case 16:Gold += (__int64)((double)Gold * 56 / 10); break;
+                    case 4:Gold += (int64_t)((double)Gold * 6 / 10); break;
+                    case 8:Gold += (int64_t)((double)Gold * 14 / 10); break;
+                    case 12:Gold += (int64_t)((double)Gold * 28 / 10); break;
+                    case 16:Gold += (int64_t)((double)Gold * 56 / 10); break;
                     }
                 }
                 break;
             case AT_IMPROVE_BLOCKING:
                 switch (ip->SpecialValue[i])
                 {
-                case 5:Gold += (__int64)((double)Gold * 6 / 10); break;
-                case 10:Gold += (__int64)((double)Gold * 14 / 10); break;
-                case 15:Gold += (__int64)((double)Gold * 28 / 10); break;
-                case 20:Gold += (__int64)((double)Gold * 56 / 10); break;
+                case 5:Gold += (int64_t)((double)Gold * 6 / 10); break;
+                case 10:Gold += (int64_t)((double)Gold * 14 / 10); break;
+                case 15:Gold += (int64_t)((double)Gold * 28 / 10); break;
+                case 20:Gold += (int64_t)((double)Gold * 56 / 10); break;
                 }
                 break;
             case AT_LUCK:
-                Gold += (__int64)((double)Gold * 25 / 100);
+                Gold += (int64_t)((double)Gold * 25 / 100);
                 break;
             case AT_IMPROVE_LIFE:
             case AT_IMPROVE_MANA:
@@ -2155,7 +2155,7 @@ __int64 ItemValue(ITEM* ip, int goldType)
             case AT_DAMAGE_REFLECTION:
             case AT_RECOVER_FULL_LIFE:
             case AT_RECOVER_FULL_MANA:
-                Gold += (__int64)((double)Gold * 25 / 100);
+                Gold += (int64_t)((double)Gold * 25 / 100);
                 break;
             }
         }
@@ -2338,7 +2338,7 @@ EXIT_CALCULATE:
     }
     if (Check_LuckyItem(ip->Type))	Gold = 0;
 
-    return (__int64)Gold;
+    return (int64_t)Gold;
 }
 
 bool IsRequireEquipItem(ITEM* pItem)
@@ -3553,30 +3553,30 @@ void CHARACTER_MACHINE::CalulateMasterLevelNextExperience()
 {
     Master_Level_Data.lMasterLevel_Experince = Master_Level_Data.lNext_MasterLevel_Experince;
 
-    __int64 iTotalLevel = (__int64)CharacterAttribute->Level + (__int64)Master_Level_Data.nMLevel + 1;
-    __int64 iTOverLevel = iTotalLevel - 255;
-    __int64 iBaseExperience = 0;
+    int64_t iTotalLevel = (int64_t)CharacterAttribute->Level + (int64_t)Master_Level_Data.nMLevel + 1;
+    int64_t iTOverLevel = iTotalLevel - 255;
+    int64_t iBaseExperience = 0;
 
-    __int64 iData_Master =
+    int64_t iData_Master =
         (
             (
-                (__int64)9 + (__int64)iTotalLevel
+                (int64_t)9 + (int64_t)iTotalLevel
                 )
-            * (__int64)iTotalLevel
-            * (__int64)iTotalLevel
-            * (__int64)10
+            * (int64_t)iTotalLevel
+            * (int64_t)iTotalLevel
+            * (int64_t)10
             )
         +
         (
             (
-                (__int64)9 + (__int64)iTOverLevel
+                (int64_t)9 + (int64_t)iTOverLevel
                 )
-            * (__int64)iTOverLevel
-            * (__int64)iTOverLevel
-            * (__int64)1000
+            * (int64_t)iTOverLevel
+            * (int64_t)iTOverLevel
+            * (int64_t)1000
             );
 
-    Master_Level_Data.lNext_MasterLevel_Experince = (iData_Master - (__int64)3892250000) / (__int64)2;
+    Master_Level_Data.lNext_MasterLevel_Experince = (iData_Master - (int64_t)3892250000) / (int64_t)2;
 }
 
 bool CHARACTER_MACHINE::IsZeroDurability()
