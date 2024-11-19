@@ -7144,8 +7144,14 @@ int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
             if (PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
             {
                 SendMove(c, o);
+                return 0;
             }
-            return 0;
+            else
+            {
+                ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
+                g_MovementSkill.m_iTarget = -1;
+                return -1;
+            }
         }
     }
     if (ClassIndex == CLASS_ELF)

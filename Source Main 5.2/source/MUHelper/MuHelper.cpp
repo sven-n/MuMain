@@ -650,7 +650,6 @@ namespace MUHelper
                 && m_config.aiSkillInterval[1] != 0
                 && m_iSecondsElapsed % m_config.aiSkillInterval[1] == 0)
             {
-                g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Timer");
                 return m_config.aiSkill[1];
             }
 
@@ -665,7 +664,6 @@ namespace MUHelper
                         || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
                         || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                     {
-                        g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Hunting Range Condition");
                         return m_config.aiSkill[1];
                     }
                 }
@@ -678,7 +676,6 @@ namespace MUHelper
                         || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
                         || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                     {
-                        g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 2 Attacking Me Condition");
                         return m_config.aiSkill[1];
                     }
                 }
@@ -694,7 +691,6 @@ namespace MUHelper
                 && m_config.aiSkillInterval[2] != 0
                 && m_iSecondsElapsed % m_config.aiSkillInterval[2] == 0)
             {
-                g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 3 Timer");
                 return m_config.aiSkill[2];
             }
 
@@ -709,7 +705,6 @@ namespace MUHelper
                         || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
                         || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                     {
-                        g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 3 Hunting Range Condition");
                         return m_config.aiSkill[2];
                     }
                 }
@@ -722,7 +717,6 @@ namespace MUHelper
                         || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
                         || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                     {
-                        g_ConsoleDebug->Write(MCD_NORMAL, L"Skill 3 Attacking Me Condition");
                         return m_config.aiSkill[2];
                     }
                 }
@@ -767,6 +761,9 @@ namespace MUHelper
         extern int SelectedCharacter;
         extern int TargetX, TargetY;
 
+        g_MovementSkill.m_iSkill = iSkill;
+        g_MovementSkill.m_bMagic = FALSE;
+
         if (bTargetRequired)
         {
             if (iTarget == -1)
@@ -788,17 +785,26 @@ namespace MUHelper
                 return 0;
             }
 
+            g_MovementSkill.m_iTarget = SelectedCharacter;
+
             TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
             TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
-
-            g_MovementSkill.m_iSkill = iSkill;
-            g_MovementSkill.m_iTarget = SelectedCharacter;
-            g_MovementSkill.m_bMagic = FALSE;
+        }
+        else
+        {
+            TargetX = Hero->PositionX;
+            TargetY = Hero->PositionY;
         }
 
         float fDistance = gSkillManager.GetSkillDistance(iSkill, Hero);
 
-        return ExecuteSkill(Hero, iSkill, fDistance);
+        int iSkillResult = ExecuteSkill(Hero, iSkill, fDistance);
+        if (iSkillResult == -1)
+        {
+            DeleteTarget(iTarget);
+        }
+
+        return (int)(iSkillResult == 1);
     }
 
     int CMuHelper::Regroup()
