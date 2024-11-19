@@ -42,6 +42,7 @@ namespace MUHelper
 	private:
 		void WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
 		void Work();
+		int ActivatePet();
 		int Buff();
 		int BuffTarget(CHARACTER* pTargetChar, int iBuffSkill);
 		int Heal();
@@ -87,6 +88,7 @@ namespace MUHelper
 		int m_iSecondsElapsed;
 		int m_iSecondsAway;
 		bool m_bTimerActivatedBuffOngoing;
+		bool m_bPetActivated;
 		int m_iTotalCost;
 	};
 

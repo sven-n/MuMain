@@ -116,6 +116,9 @@ namespace MUHelper
         m_setTargets.clear();
         m_setTargetsAttacking.clear();
 
+        m_bTimerActivatedBuffOngoing = false;
+        m_bPetActivated = false;
+
         m_iLoopCounter = 0;
 
         m_bActive = true;
@@ -165,6 +168,11 @@ namespace MUHelper
     {
         try
         {
+            if (!ActivatePet())
+            {
+                return;
+            }
+
             if (!Buff())
             {
                 return;
@@ -344,6 +352,35 @@ namespace MUHelper
         }
 
         return iFarthestMonsterId;
+    }
+
+    int CMuHelper::ActivatePet()
+    {
+        if (!m_config.bUseDarkRaven)
+        {
+            return 1;
+        }
+
+        if (m_bPetActivated)
+        {
+            return 1;
+        }
+
+        if (m_config.iDarkRavenMode == PET_ATTACK_CEASE)
+        {
+            SocketClient->ToGameServer()->SendPetCommandRequest(PET_TYPE_DARK_SPIRIT, AT_PET_COMMAND_DEFAULT, 0xFFFF);
+        }
+        else if (m_config.iDarkRavenMode == PET_ATTACK_AUTO)
+        {
+            SocketClient->ToGameServer()->SendPetCommandRequest(PET_TYPE_DARK_SPIRIT, AT_PET_COMMAND_RANDOM, 0xFFFF);
+        }
+        else if (m_config.iDarkRavenMode == PET_ATTACK_TOGETHER)
+        {
+            SocketClient->ToGameServer()->SendPetCommandRequest(PET_TYPE_DARK_SPIRIT, AT_PET_COMMAND_OWNER, 0xFFFF);
+        }
+
+        m_bPetActivated = true;
+        return 1;
     }
 
     int CMuHelper::Buff()
