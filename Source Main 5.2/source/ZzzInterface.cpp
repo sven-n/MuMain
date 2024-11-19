@@ -2030,21 +2030,6 @@ void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE
     g_ConsoleDebug->Write(MCD_SEND, L"0x1E [SendRequestMagicContinue]");
 }
 
-void SendRequestMagicAttack(int Type, BYTE x, BYTE y, BYTE Serial, BYTE Count, int* Key, WORD SkillSerial)
-{
-    const auto targets = new AreaSkillHitTarget[Count]{};
-    for (int i = 0; i < Count; i++)
-    {
-        targets[i].TargetId = Key[i];
-        targets[i].AnimationCounter = SkillSerial;
-    }
-
-    SocketClient->ToGameServer()->SendAreaSkillHits(Type, x, y, MakeSkillSerialNumber(&Serial), Count, targets);
-
-    delete[] targets;
-    g_ConsoleDebug->Write(MCD_SEND, L"0x1D [SendRequestMagicAttack(%d)]", Serial);
-}
-
 bool SkillWarrior(CHARACTER* c, ITEM* p)
 {
     OBJECT* o = &c->Object;

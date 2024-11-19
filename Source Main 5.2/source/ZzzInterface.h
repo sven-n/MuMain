@@ -146,7 +146,6 @@ void Attack(CHARACTER* c);
 bool SkillElf(CHARACTER* c, ITEM* p);
 void SendRequestMagic(int Type, int Key);
 void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE Tpos, WORD TKey, BYTE* pSkillSerial);
-void SendRequestMagicAttack(int Type, BYTE x, BYTE y, BYTE Serial, BYTE Count, int* Key, WORD SkillSerial);
 bool SkillWarrior(CHARACTER* c, ITEM* p);
 void UseSkillWarrior(CHARACTER* c, OBJECT* o);
 void UseSkillWizard(CHARACTER* c, OBJECT* o);

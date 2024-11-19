@@ -55,17 +55,6 @@ public:
     /// Causes reaction on server side: The server is authenticating the sent login name and password. If it's correct, the state of the player is proceeding to be logged in.
     /// </remarks>
     void SendLogin(const wchar_t* username, const wchar_t* password, const BYTE* clientVersion, const BYTE* clientSerial);
-
-    /// <summary>
-    /// Sends a <see cref="AreaSkillHit" /> to this connection.
-    /// </summary>
-    /// <param name="skillId">The skill id.</param>
-    /// <param name="targetX">The target x.</param>
-    /// <param name="targetY">The target y.</param>
-    /// <param name="serial">The serial.</param>
-    /// <param name="targetCount">The target count.</param>
-    /// <param name="targets">The target data.</param>
-    void SendAreaSkillHits(uint16_t skillId, BYTE targetX, BYTE targetY, BYTE serial, BYTE targetCount, const AreaSkillHitTarget* targets);
 };
 
 /// <summary>

@@ -2,12 +2,11 @@
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MUnique.Client.ManagedLibrary;
+namespace MUnique.Client.Library;
 
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-
 using MUnique.OpenMU.Network;
 using MUnique.OpenMU.Network.Packets.ChatServer;
 using MUnique.OpenMU.Network.Xor;
@@ -33,7 +32,7 @@ public partial class ConnectionManager
     /// Is sent by the client when: This packet is sent by the client after it connected to the server, to authenticate itself.
     /// Causes reaction on server side: The server will check the token. If it's correct, the client gets added to the requested chat room.
     /// </remarks>
-    [UnmanagedCallersOnly]
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_SendAuthenticateExt")]
     public static void SendAuthenticateExt(int handle, ushort @roomId, uint token)
     {
         if (!Connections.TryGetValue(handle, out var connection))
@@ -72,7 +71,7 @@ public partial class ConnectionManager
     /// Is sent by the server when: This packet is sent by the server after another chat client sent a message to the current chat room.
     /// Causes reaction on client side: The client will show the message.
     /// </remarks>
-    [UnmanagedCallersOnly]
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_SendChatMessageExt")]
     public static void SendChatMessageExt(int handle, byte @senderIndex, IntPtr @message)
     {
         if (!Connections.TryGetValue(handle, out var connection))

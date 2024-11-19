@@ -2,13 +2,8 @@
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MUnique.Client.ManagedLibrary;
+namespace MUnique.Client.Library;
 
-using Microsoft.Extensions.Logging.Abstractions;
-using MUnique.OpenMU.Network;
-using MUnique.OpenMU.Network.SimpleModulus;
-using MUnique.OpenMU.Network.Xor;
-using Pipelines.Sockets.Unofficial;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,6 +11,11 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
+using MUnique.OpenMU.Network;
+using MUnique.OpenMU.Network.SimpleModulus;
+using MUnique.OpenMU.Network.Xor;
+using Pipelines.Sockets.Unofficial;
 
 /// <summary>
 /// Class which manages the connections which are created through the game client.
@@ -49,7 +49,7 @@ public unsafe partial class ConnectionManager
     /// <returns>
     /// The handle of the created connection. If negative, the connection couldn't be established.
     /// </returns>
-    [UnmanagedCallersOnly]
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_Connect")]
     public static int Connect(IntPtr hostPtr, int port, byte isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
     {
         try
@@ -70,7 +70,7 @@ public unsafe partial class ConnectionManager
     /// <param name="handle">The handle of the connection.</param>
     /// <param name="data">The pointer to the packet data.</param>
     /// <param name="count">The count of bytes which should be sent.</param>
-    [UnmanagedCallersOnly]
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_Send")]
     public static void Send(int handle, byte* data, int count)
     {
         if (Connections.TryGetValue(handle, out var connection))
@@ -97,7 +97,7 @@ public unsafe partial class ConnectionManager
     /// Begins receiving data for the connection of the specified handle.
     /// </summary>
     /// <param name="connectionHandle">The handle of the connection.</param>
-    [UnmanagedCallersOnly]
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_BeginReceive")]
     public static void BeginReceive(int connectionHandle)
     {
         if (Connections.TryGetValue(connectionHandle, out var connection))
@@ -110,7 +110,7 @@ public unsafe partial class ConnectionManager
     /// Disconnects the connection of the specified handle.
     /// </summary>
     /// <param name="connectionHandle">The handle of the connection.</param>
-    [UnmanagedCallersOnly]
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_Disconnect")]
     public static void Disconnect(int connectionHandle)
     {
         if (Connections.TryGetValue(connectionHandle, out var connection))

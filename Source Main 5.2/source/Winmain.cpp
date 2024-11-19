@@ -46,7 +46,6 @@
 #include "Input.h"
 #include "./Time/Timer.h"
 #include "UIMng.h"
-#include "./Dotnet/DotNetRuntime.h"
 
 #ifdef MOVIE_DIRECTSHOW
 #include <dshow.h>
@@ -1439,15 +1438,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         EnableVSync();
         SetTargetFps(-1); // unlimited
-    }
-
-    if (g_dotnet->is_initialized())
-    {
-        g_ErrorReport.Write(L".net runtime loaded :)");
-    }
-    else
-    {
-        g_ErrorReport.Write(L".net runtime failed to load :(L");
     }
 
     switch (WindowHeight)

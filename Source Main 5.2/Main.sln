@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Main", "Main.vcxproj", "{83C6A8DE-5418-41B5-BD9C-471F99FEAAA0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MUnique.Client.ManagedLibrary", "..\ManagedLibrary\MUnique.Client.ManagedLibrary.csproj", "{599D63E9-4BAB-44DC-AB6E-287C2A869CE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MUnique.Client.Library", "..\ClientLibrary\MUnique.Client.Library.csproj", "{599D63E9-4BAB-44DC-AB6E-287C2A869CE4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{75D681EF-0E4D-4D9C-B262-C6B94119CEB7}"
 	ProjectSection(SolutionItems) = preProject

@@ -25,9 +25,9 @@
 #pragma once
 
 #include "stdafx.h"
-#include "DotNetRuntime.h"
 #include "Connection.h"
 #include &lt;coreclr_delegates.h&gt;
+
 
 </xsl:text>
     <xsl:apply-templates select="pd:Packets/pd:Packet" mode="function_binding" />
@@ -50,7 +50,7 @@
     <xsl:apply-templates select="pd:Name" />
     <xsl:text> = reinterpret_cast&lt;Send</xsl:text>
     <xsl:apply-templates select="pd:Name" />
-    <xsl:text>&gt;(g_dotnet->get_method(type_name_connection_manager, L"Send</xsl:text>
+    <xsl:text>&gt;(symLoad(munique_client_library_handle, "Send</xsl:text>
     <xsl:apply-templates select="pd:Name" />
     <xsl:text>"));</xsl:text>
     <xsl:value-of select="$newline" />

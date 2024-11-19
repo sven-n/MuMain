@@ -2,7 +2,6 @@
 #include <map>
 
 #include "Connection.h"
-#include "DotNetRuntime.h"
 
 #include "PacketBindings_ChatServer.h"
 #include "PacketBindings_ConnectServer.h"
@@ -19,24 +18,16 @@ typedef void(CORECLR_DELEGATE_CALLTYPE* BeginReceive)(int32_t);
 typedef void(CORECLR_DELEGATE_CALLTYPE* Send)(int32_t, const BYTE*, int32_t);
 
 Connect dotnet_connect = reinterpret_cast<Connect>(
-    g_dotnet->get_method(
-        type_name_connection_manager,
-        L"Connect"));
+    symLoad(munique_client_library_handle,"ConnectionManager_Connect"));
 
 Disconnect dotnet_disconnect = reinterpret_cast<Disconnect>(
-    g_dotnet->get_method(
-        type_name_connection_manager,
-        L"Disconnect"));
+    symLoad(munique_client_library_handle, "ConnectionManager_Disconnect"));
 
 BeginReceive dotnet_beginreceive = reinterpret_cast<BeginReceive>(
-    g_dotnet->get_method(
-        type_name_connection_manager,
-        L"BeginReceive"));
+    symLoad(munique_client_library_handle, "ConnectionManager_BeginReceive"));
 
 Send dotnet_send = reinterpret_cast<Send>(
-    g_dotnet->get_method(
-        type_name_connection_manager,
-        L"Send"));
+    symLoad(munique_client_library_handle, "ConnectionManager_Send"));
 
 void Connection::OnPacketReceivedS(const int32_t handle, const int32_t size, BYTE* data)
 {

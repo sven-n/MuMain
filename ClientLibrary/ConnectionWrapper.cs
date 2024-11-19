@@ -1,13 +1,16 @@
-﻿using System.IO.Pipelines;
+﻿// <copyright file="ConnectionWrapper.cs" company="MUnique">
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+// </copyright>
 
-namespace MUnique.Client.ManagedLibrary;
+namespace MUnique.Client.Library;
 
-using MUnique.OpenMU.Network;
-using Nito.AsyncEx.Synchronous;
 using System;
 using System.Buffers;
 using System.Diagnostics;
+using System.IO.Pipelines;
 using System.Threading.Tasks;
+using MUnique.OpenMU.Network;
+using Nito.AsyncEx.Synchronous;
 
 /// <summary>
 /// A wrapper for a <see cref="Connection"/>.
