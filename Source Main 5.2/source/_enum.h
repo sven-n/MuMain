@@ -107,6 +107,8 @@ namespace SEASON3B
         INTERFACE_3DRENDERING_CAMERA_END = INTERFACE_3DRENDERING_CAMERA_BEGIN + 24,
         INTERFACE_ITEM_TOOLTIP,
         INTERFACE_MUHELPER,
+        INTERFACE_MUHELPER_EXT,
+        INTERFACE_MUHELPER_SKILL_LIST,
         INTERFACE_SYSTEMLOGWINDOW,
         INTERFACE_END,
         INTERFACE_COUNT = INTERFACE_END - 2,
@@ -3014,6 +3016,8 @@ enum
 enum CLASS_TYPE : BYTE
 {
     CLASS_UNDEFINED = -1,
+    CLASS_START = 0,
+
     CLASS_WIZARD = 0,
     CLASS_KNIGHT,
     CLASS_ELF,
@@ -3034,6 +3038,8 @@ enum CLASS_TYPE : BYTE
     CLASS_LORDEMPEROR,
     CLASS_DIMENSIONMASTER,
     CLASS_TEMPLENIGHT,
+
+    CLASS_END = CLASS_TEMPLENIGHT
 };
 
 enum SERVER_CLASS_TYPE : BYTE
@@ -3664,11 +3670,11 @@ enum eBuffState
     eBuff_Attack,
     eBuff_Defense,
     eBuff_HelpNpc,
-    eBuff_PhysDefense,
+    eBuff_WizDefense,
     eBuff_AddCriticalDamage,
     eBuff_InfinityArrow,
     eBuff_AddAG,
-    eBuff_HpRecovery,
+    eBuff_Life,
     eBuff_AddMana,
     eBuff_BlessPotion,
     eBuff_SoulPotion,
@@ -4143,6 +4149,8 @@ enum EMonsterModelType : int
 enum EMonsterType : int
 {
     MONSTER_UNDEFINED = -1,
+    MONSTER_START = 0,
+
     MONSTER_BULL_FIGHTER = 0,
     MONSTER_HOUND = 1,
     MONSTER_BUDGE_DRAGON = 2,
@@ -4687,6 +4695,8 @@ enum EMonsterType : int
     MONSTER_CAPTURED_STONE_STATUE_8 = 666,
     MONSTER_CAPTURED_STONE_STATUE_9 = 667,
     MONSTER_CAPTURED_STONE_STATUE_10 = 668,
+
+    MONSTER_END = 668
 };
 
 enum

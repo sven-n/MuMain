@@ -4024,11 +4024,10 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             bufflist.push_back(eDeBuff_BlowOfDestruction);
 
             //buff
-            bufflist.push_back(eBuff_HpRecovery); bufflist.push_back(eBuff_Attack);
-            //bufflist.push_back( eBuff_Life ); bufflist.push_back( eBuff_Attack );
+            bufflist.push_back(eBuff_Life); bufflist.push_back(eBuff_Attack);
             bufflist.push_back(eBuff_Defense); bufflist.push_back(eBuff_AddAG);
             bufflist.push_back(eBuff_Cloaking); bufflist.push_back(eBuff_AddSkill);
-            bufflist.push_back(eBuff_PhysDefense); bufflist.push_back(eBuff_AddCriticalDamage);
+            bufflist.push_back(eBuff_WizDefense); bufflist.push_back(eBuff_AddCriticalDamage);
             bufflist.push_back(eBuff_CrywolfAltarOccufied);
 
             g_CharacterUnRegisterBuffList(o, bufflist);
@@ -4719,12 +4718,12 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             case AT_SKILL_WIZARDDEFENSE:
                 if (o->Type == MODEL_DARK_PHEONIX_SHIELD)
                 {
-                    g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                    g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 }
                 else
                 {
                     if (g_isCharacterBuff(to, eBuff_Cloaking)) break;
-                    g_CharacterRegisterBuff(to, eBuff_PhysDefense);
+                    g_CharacterRegisterBuff(to, eBuff_WizDefense);
 
                     PlayBuffer(SOUND_SOULBARRIER);
                     DeleteJoint(MODEL_SPEARSKILL, to, 0);
@@ -11997,6 +11996,21 @@ CHARACTER* FindCharacterByID(wchar_t* szName)
     return NULL;
 }
 
+
+
+CHARACTER* FindCharacterByKey(int Key)
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+    {
+        CHARACTER* c = &CharactersClient[i];
+        if (c->Object.Live && c->Key == Key)
+        {
+            return c;
+        }
+    }
+    return NULL;
+}
+
 int LevelConvert(BYTE Level)
 {
     switch (Level)
@@ -14960,4 +14974,14 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
     }
 
     return bBindBack;
+}
+
+bool IsPlayer(CHARACTER* c)
+{
+    return c && c->Object.Kind == KIND_PLAYER;
+}
+
+bool IsMonster(CHARACTER* c)
+{
+    return c && c->Object.Kind == KIND_MONSTER;
 }

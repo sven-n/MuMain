@@ -9484,7 +9484,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         else if (o->SubType == 1)
         {
-            if (o->Owner != NULL && o->Owner->Live == true && g_isCharacterBuff(o->Owner, eBuff_HpRecovery))
+            if (o->Owner != NULL && o->Owner->Live == true && g_isCharacterBuff(o->Owner, eBuff_Life))
                 o->LifeTime = 10;
             else
                 o->LifeTime = 0;

@@ -24,7 +24,6 @@ const int COORDINATE_TYPE_LEFT_DOWN = 2;
 BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight, int CoordType = COORDINATE_TYPE_LEFT_TOP);
 
 #define ID_UICEDIT 0x0001
-#define SLIDEHELP_TIMER 1003
 
 enum UISTATES
 {
@@ -60,6 +59,12 @@ typedef struct
     BYTE	m_Server;
     BYTE	m_GuildStatus;
 } GUILDLIST_TEXT;
+
+typedef struct
+{
+    BOOL    m_bIsSelected;
+    wchar_t	m_szPattern[MAX_ITEM_NAME + 1];
+} FILTERLIST_TEXT;
 
 typedef struct
 {
@@ -533,6 +538,23 @@ public:
     virtual int GetTextCount();
     virtual void SetNumRenderLine(int iLine);
     UNIONGUILD_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
+protected:
+    virtual void RenderInterface();
+    virtual BOOL RenderDataLine(int iLineNumber);
+    virtual BOOL DoLineMouseAction(int iLineNumber);
+    virtual int GetRenderLinePos_y(int iLineNumber);
+};
+
+class CUIExtraItemListBox : public CUITextListBox<FILTERLIST_TEXT>
+{
+public:
+    CUIExtraItemListBox();
+    ~CUIExtraItemListBox() = default;
+
+    virtual void AddText(const wchar_t* pszPattern);
+    virtual void DeleteText(const wchar_t* pszPattern);
+    virtual void SetNumRenderLine(int iLine);
+    FILTERLIST_TEXT* GetSelectedText() { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
 protected:
     virtual void RenderInterface();
     virtual BOOL RenderDataLine(int iLineNumber);

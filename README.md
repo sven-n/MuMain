@@ -37,7 +37,7 @@ What I have done so far:
     * Item equipping with right mouse click
     * Glow for red, blue and black fenrir
     * Additional screen resolutions
-    * MU helper dialog (not fully functional yet)
+  * 🔥 Incorporated MU Helper UI and logic - there's some work to do but core functionality is usable
   * Removed if-defs for Rage Fighter class as we are targeting Season 6, so Rage
     Fighter should always be included.
   * Some minor bug fixes, e.g.:
@@ -52,7 +52,6 @@ What needs to be done for Season 6:
     * The new system has one per normal skill, one per master skill, and additional
       levels that are sent to the client.
   * Lucky Items
-  * MU Helper logic
 
 ## How to build & run
 
@@ -75,3 +74,4 @@ The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
   * Louis
   * Qubit (tuservermu.com.ve)
   * Community members of RaGEZONE and tuservermu.com.ve for posting fixes
+  * [Nitoy](https://github.com/nitoygo) for the MU Helper

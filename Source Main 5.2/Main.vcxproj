@@ -380,6 +380,8 @@
     <ClCompile Include="source\Dotnet\PacketFunctions_ClientToServer.cpp" />
     <ClCompile Include="source\Dotnet\PacketFunctions_ConnectServer.cpp" />
     <ClCompile Include="source\Dotnet\PacketFunctions_Custom.cpp" />
+    <ClCompile Include="source\MUHelper\MuHelper.cpp" />
+    <ClCompile Include="source\MUHelper\MuHelperData.cpp" />
     <ClCompile Include="source\NewUIInventoryExtension.cpp" />
     <ClCompile Include="source\BlackWin.cpp" />
     <ClCompile Include="source\BoneManager.cpp" />
@@ -768,6 +770,8 @@
     <ClInclude Include="source\Dotnet\PacketFunctions_ClientToServer.h" />
     <ClInclude Include="source\Dotnet\PacketFunctions_ConnectServer.h" />
     <ClInclude Include="source\Dotnet\PacketFunctions_Custom.h" />
+    <ClInclude Include="source\MUHelper\MuHelper.h" />
+    <ClInclude Include="source\MUHelper\MuHelperData.h" />
     <ClInclude Include="source\NewUIInventoryExtension.h" />
     <ClInclude Include="source\BaseCls.h" />
     <ClInclude Include="source\BlackWin.h" />

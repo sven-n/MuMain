@@ -485,6 +485,14 @@ bool CNewUISystem::LoadMainSceneInterface()
     if (m_pNewUIMuHelper->Create(m_pNewUIMng, 640 - 190, 0) == false)
         return false;
 
+    m_pNewUIMuHelperExt = new CNewUIMuHelperExt;
+    if (m_pNewUIMuHelperExt->Create(m_pNewUIMng, 640 - 380, 0) == false)
+        return false;
+
+    m_pNewUIMuHelperSkillList = new CNewUIMuHelperSkillList;
+    if (m_pNewUIMuHelperSkillList->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
+        return false;
+
     return true;
 }
 
@@ -1074,6 +1082,10 @@ void CNewUISystem::Show(DWORD dwKey)
         g_pLuckyItemWnd->OpeningProcess();
         m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
     }
+    else if (dwKey == INTERFACE_MUHELPER)
+    {
+        HideAllGroupA();
+    }
 
     m_pNewUIMng->ShowInterface(dwKey);
 
@@ -1474,6 +1486,11 @@ void CNewUISystem::Hide(DWORD dwKey)
             m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
         }
     }
+    else if (dwKey == INTERFACE_MUHELPER)
+    {
+        m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST, false);
+        m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_MUHELPER_EXT, false);
+    }
 
     m_pNewUIMng->ShowInterface(dwKey, false);
 
@@ -1515,7 +1532,9 @@ void CNewUISystem::HideAllGroupA()
         //SEASON3B::INTERFACE_INVENTORY,
         //SEASON3B::INTERFACE_CHARACTER,
         //SEASON3B::INTERFACE_WINDOW_MENU,
-
+        INTERFACE_MUHELPER,
+        INTERFACE_MUHELPER_EXT,
+        INTERFACE_MUHELPER_SKILL_LIST,
         INTERFACE_MIXINVENTORY,
         INTERFACE_STORAGE,
         INTERFACE_NPCSHOP,
@@ -1632,6 +1651,9 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
         INTERFACE_GENSRANKING,
+        INTERFACE_MUHELPER,
+        INTERFACE_MUHELPER_EXT,
+        INTERFACE_MUHELPER_SKILL_LIST,
         0,
     };
 
@@ -2300,4 +2322,14 @@ CNewUILuckyItemWnd* SEASON3B::CNewUISystem::Get_pNewUILuckyItemWnd() const
 CNewUIMuHelper* CNewUISystem::Get_pNewUIMuHelper() const
 {
     return m_pNewUIMuHelper;
+}
+
+CNewUIMuHelperExt* CNewUISystem::Get_pNewUIMuHelperExt() const
+{
+    return m_pNewUIMuHelperExt;
+}
+
+CNewUIMuHelperSkillList* CNewUISystem::Get_pNewUIMuHelperSkillList() const
+{
+    return m_pNewUIMuHelperSkillList;
 }

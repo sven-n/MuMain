@@ -193,6 +193,9 @@
     <Filter Include="MU\Dotnet">
       <UniqueIdentifier>{b3403733-92ae-4eab-9619-948b4a78f0a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MU\MUHelper">
+      <UniqueIdentifier>{a994719d-9ab7-43b4-8931-23acf72f699c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="source\icon1.ico">
@@ -1188,6 +1191,12 @@
     </ClCompile>
     <ClCompile Include="source\Dotnet\PacketFunctions_Custom.cpp">
       <Filter>MU\Dotnet</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MUHelper\MuHelper.cpp">
+      <Filter>MU\MUHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MUHelper\MuHelperData.cpp">
+      <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2270,6 +2279,12 @@
     </ClInclude>
     <ClInclude Include="dependencies\include\span.hpp">
       <Filter>External Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MUHelper\MuHelper.h">
+      <Filter>MU\MUHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MUHelper\MuHelperData.h">
+      <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

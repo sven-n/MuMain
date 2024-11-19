@@ -29,7 +29,7 @@ extern	int  TextBold[50];
 static  CSWaterTerrain* g_pCSWaterTerrain = NULL;
 static  std::queue<ObjectDescript> g_qObjDes;
 
-static  const BYTE  ACTION_DESTROY_PHY_DEF = 33;
+static  const BYTE  ACTION_DESTROY_WIZ_DEF = 33;
 static  const BYTE  ACTION_DESTROY_DEF = 34;
 
 #define NUM_HELLAS	7
@@ -740,10 +740,10 @@ void SetActionDestroy_Def(OBJECT* o)
 {
     if (o->Type != MODEL_PLAYER)
     {
-        if (g_isCharacterBuff(o, eBuff_PhysDefense))
+        if (g_isCharacterBuff(o, eBuff_WizDefense))
         {
-            o->AI = ACTION_DESTROY_PHY_DEF;
-            g_CharacterUnRegisterBuff(o, eBuff_PhysDefense);
+            o->AI = ACTION_DESTROY_WIZ_DEF;
+            g_CharacterUnRegisterBuff(o, eBuff_WizDefense);
         }
         else if (g_isCharacterBuff(o, eBuff_Defense))
         {
@@ -757,7 +757,7 @@ void RenderDestroy_Def(OBJECT* o, BMD* b)
 {
     if (o->Type != MODEL_PLAYER)
     {
-        if (o->AI == ACTION_DESTROY_PHY_DEF)
+        if (o->AI == ACTION_DESTROY_WIZ_DEF)
         {
             b->RenderMeshEffect(6, MODEL_STONE_COFFIN, 1);
             o->AI = 0;
@@ -1123,7 +1123,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         case AT_SKILL_MONSTER_MAGIC_DEF:
             if ((int)c->AttackTime >= 13)
             {
-                g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 c->AttackTime = 15;
                 PlayBuffer(SOUND_GREAT_SHIELD);
             }
@@ -1299,7 +1299,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         case AT_SKILL_MONSTER_MAGIC_DEF:
             if ((int)c->AttackTime >= 13)
             {
-                g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 c->AttackTime = 15;
                 PlayBuffer(SOUND_GREAT_SHIELD);
             }
@@ -1355,7 +1355,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         case AT_SKILL_MONSTER_MAGIC_DEF:
             if ((int)c->AttackTime >= 13)
             {
-                g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 c->AttackTime = 15;
 
                 PlayBuffer(SOUND_GREAT_SHIELD);
@@ -2250,11 +2250,11 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     if (success)
     {
-        if (g_isCharacterBuff(o, eBuff_PhysDefense) || g_isCharacterBuff(o, eBuff_Defense))
+        if (g_isCharacterBuff(o, eBuff_WizDefense) || g_isCharacterBuff(o, eBuff_Defense))
         {
             float Luminosity = sinf(WorldTime * 0.001f) * 0.2f + 0.5f;
 
-            if (g_isCharacterBuff(o, eBuff_PhysDefense))
+            if (g_isCharacterBuff(o, eBuff_WizDefense))
             {
                 Vector(Luminosity * 0.1f, Luminosity * 0.3f, Luminosity * 0.6f, b->BodyLight);
             }

@@ -153,7 +153,13 @@ inline int PATH::GetNewNodeToTest(void)
         pNode = m_btOpenNodes.GetLeft(pNode);
     }
 
-    return (m_btOpenNodes.RemoveNode(pResult));
+    int iIndex = -1;
+    if (pResult)
+    {
+        iIndex = pResult->GetData();
+        m_btOpenNodes.RemoveNode(pResult);
+    }
+    return iIndex;
 }
 
 inline bool PATH::FindPath(int xStart, int yStart, int xEnd, int yEnd, bool bErrorCheck, int iWall, bool Value, float fDistance)
@@ -216,6 +222,11 @@ inline bool PATH::FindPath(int xStart, int yStart, int xEnd, int yEnd, bool bErr
     {
         int xTest, yTest;
         int iIndex = GetNewNodeToTest();
+        if (iIndex == -1)
+        {
+            return false;
+        }
+
         GetXYPos(iIndex, &xTest, &yTest);
 
         m_piCostToStart[iIndex] = (iCheckCount == iMaxCount) ? 0 : MAX_INT_FORPATH;

@@ -73,6 +73,8 @@
 
 #include "Dotnet/Connection.h"
 
+#include "MUHelper/MuHelper.h"
+
 #define MAX_DEBUG_MAX 10
 
 extern BYTE m_AltarState[];
@@ -1251,6 +1253,53 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
 }
 
+void ReceiveMuHelperConfigurationData(std::span<const BYTE> ReceiveBuffer)
+{
+    auto pMuHelperData = safe_cast<PRECEIVE_MUHELPER_DATA>(ReceiveBuffer.subspan(4));
+    if (pMuHelperData == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    MUHelper::ConfigData config;
+    MUHelper::ConfigDataSerDe::Deserialize(*pMuHelperData, config);
+    g_pNewUIMuHelper->LoadSavedConfig(config);
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0xAE [ReceiveMuHelperConfigurationData]");
+}
+
+void ReceiveMuHelperStatusUpdate(std::span<const BYTE> ReceiveBuffer)
+{
+    auto pMuHelperStatus = safe_cast<PRECEIVE_MUHELPER_STATUS>(ReceiveBuffer.subspan(4));
+    if (pMuHelperStatus == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    if (pMuHelperStatus->Pause)
+    {
+        MUHelper::g_MuHelper.Stop();
+    }
+    else
+    {
+        MUHelper::g_MuHelper.Start();
+
+        if (pMuHelperStatus->Money > 0 && pMuHelperStatus->ConsumeMoney)
+        {
+            MUHelper:: g_MuHelper.AddCost(pMuHelperStatus->Money);
+            int iTotalCost = MUHelper::g_MuHelper.GetTotalCost();
+
+            wchar_t Text[100];
+            swprintf(Text, GlobalText[3586], iTotalCost);
+            g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        }
+    }
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x51 [ReceiveMuHelperStatusUpdate]");
+}
+
 void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
@@ -1691,7 +1740,7 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
 
     OBJECT* o = &c->Object;
 
-    if (c->Dead == 0)
+    if (c->Dead == 0 && o->Live)
     {
         OBJECT* o = &c->Object;
         c->TargetAngle = Data->Path[0] >> 4;
@@ -1734,6 +1783,11 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
                     c->Movement = false;
                     SetPlayerStop(c);
                 }
+            }
+
+            if (IsMonster(c))
+            {
+                MUHelper::g_MuHelper.AddTarget(Key, false);
             }
 
             g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
@@ -1910,6 +1964,8 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         Attacking = -1;
         RepairEnable = 0;
     }
+
+    MUHelper::g_MuHelper.TriggerStop();
 
     Hero->Movement = false;
     SetPlayerStop(Hero);
@@ -2547,6 +2603,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         if (c == NULL) break;
 
         OBJECT* o = &c->Object;
+        MUHelper::g_MuHelper.AddTarget(Key, false);
 
         for (int j = 0; j < Data2->s_BuffCount; ++j)
         {
@@ -2868,7 +2925,7 @@ void ReceiveAttackDamageCastle(CHARACTER* c, OBJECT* o, const bool success, cons
             else
                 CharacterAttribute->Shield -= shieldDamage;
 
-            if (g_isCharacterBuff(o, eBuff_PhysDefense) && o->Type == MODEL_PLAYER)
+            if (g_isCharacterBuff(o, eBuff_WizDefense) && o->Type == MODEL_PLAYER)
             {
                 CHARACTER* cm = &CharactersClient[AttackPlayer];
                 OBJECT* om = &cm->Object;
@@ -2950,7 +3007,7 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
             else
                 CharacterAttribute->Shield -= shieldDamage;
 
-            if (g_isCharacterBuff(o, eBuff_PhysDefense) && o->Type == MODEL_PLAYER)
+            if (g_isCharacterBuff(o, eBuff_WizDefense) && o->Type == MODEL_PLAYER)
             {
                 CHARACTER* cm = &CharactersClient[AttackPlayer];
                 OBJECT* om = &cm->Object;
@@ -3100,7 +3157,10 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     bool bDoubleEnable = (Data->DamageType >> 6) & 0x01;
     bool bComboEnable = (Data->DamageType >> 7) & 0x01;
     auto ShieldDamage = Data->ShieldDamage;
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamageExtended(%d %d)]", AttackPlayer, Damage);
+    MUHelper::g_MuHelper.AddTarget(Key, true);
+
     if (Data->HealthStatus == 0xFF)
     {
         c->HealthStatus = -1;
@@ -3178,6 +3238,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         c->Object.AnimationFrame = 0;
 
         c->TargetCharacter = HeroIndex;
+        MUHelper::g_MuHelper.AddTarget(Key, true);
 
         AttackPlayer = Index;
         break;
@@ -3504,7 +3565,7 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_LIFE_UP + 3:
     case AT_SKILL_LIFE_UP + 4:
     case AT_SKILL_VITALITY:
-        UnRegisterBuff(eBuff_HpRecovery, o); //eBuff_Life
+        UnRegisterBuff(eBuff_Life, o);
         break;
     case AT_SKILL_PARALYZE:
         UnRegisterBuff(eDeBuff_Harden, o);
@@ -3523,7 +3584,7 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_SOUL_UP + 3:
     case AT_SKILL_SOUL_UP + 4:
     case AT_SKILL_WIZARDDEFENSE:
-        UnRegisterBuff(eBuff_PhysDefense, o);
+        UnRegisterBuff(eBuff_WizDefense, o);
         break;
     case AT_SKILL_BLAST_POISON:
         UnRegisterBuff(eDeBuff_Poison, o);
@@ -3544,7 +3605,7 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
         break;
     case AT_SKILL_MONSTER_PHY_DEF:
         SetActionDestroy_Def(o);
-        UnRegisterBuff(eBuff_PhysDefense, o);
+        UnRegisterBuff(eBuff_WizDefense, o);
         break;
     case AT_SKILL_ATT_UP_OURFORCES:
         UnRegisterBuff(eBuff_Att_up_Ourforces, o);
@@ -3793,7 +3854,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     break;
     case AT_SKILL_MONSTER_MAGIC_DEF:
         sc->AttackTime = 1;
-        g_CharacterRegisterBuff(so, eBuff_PhysDefense);
+        g_CharacterRegisterBuff(so, eBuff_WizDefense);
         SetPlayerAttack(sc);
         break;
 
@@ -4304,8 +4365,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         {
             UnRegisterBuff(eBuff_Attack, to);
             UnRegisterBuff(eBuff_Defense, to);
-            UnRegisterBuff(eBuff_HpRecovery, to);
-            UnRegisterBuff(eBuff_PhysDefense, to);
+            UnRegisterBuff(eBuff_Life, to);
+            UnRegisterBuff(eBuff_WizDefense, to);
             UnRegisterBuff(eBuff_AddCriticalDamage, to);
             UnRegisterBuff(eBuff_AddMana, to);
         }
@@ -4394,14 +4455,14 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     case AT_SKILL_LIFE_UP + 3:
     case AT_SKILL_LIFE_UP + 4:
     case AT_SKILL_VITALITY:
-        if (!g_isCharacterBuff(to, eBuff_HpRecovery)) //eBuff_Life
+        if (!g_isCharacterBuff(to, eBuff_Life))
         {
             DeleteEffect(BITMAP_LIGHT, to, 1);
 
             CreateEffect(BITMAP_LIGHT, to->Position, to->Angle, to->Light, 1, to);
         }
 
-        g_CharacterRegisterBuff(to, eBuff_HpRecovery); //eBuff_Life
+        g_CharacterRegisterBuff(to, eBuff_Life);
 
         SetAction(so, PLAYER_SKILL_VITALITY);
         sc->AttackTime = 1;
@@ -5558,6 +5619,11 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
         }
     }
 
+    if (c == Hero)
+    {
+        MUHelper::g_MuHelper.TriggerStop();
+    }
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x17 [ReceiveDie(%d)]", Key);
 }
 
@@ -5581,6 +5647,7 @@ void ReceiveCreateMoney(std::span<const BYTE> ReceiveBuffer)
     Position[1] = (float)(Data->PositionY + 0.5f) * TERRAIN_SCALE;
 
     CreateMoneyDrop(&Items[Data->Id], Data->Amount, Position, Data->IsFreshDrop);
+    MUHelper::g_MuHelper.AddItem(Data->Id, { Data->PositionX, Data->PositionY });
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateMoney]");
 }
@@ -5621,6 +5688,7 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
         Position[1] = (float)(itemStartData->PositionY + 0.5f) * TERRAIN_SCALE;
 
         CreateItemDrop(&Items[id], params, Position, isFreshDrop);
+        MUHelper::g_MuHelper.AddItem(id, { itemStartData->PositionX, itemStartData->PositionY });
 
         Offset += length;
     }
@@ -5640,6 +5708,8 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
             Key = 0;
         Items[Key].Object.Live = false;
         Offset += sizeof(PDELETE_CHARACTER);
+
+        MUHelper::g_MuHelper.DeleteItem(Key);
     }
 }
 
@@ -14278,6 +14348,9 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
             ReceiveEquippingInventoryItem(ReceiveBuffer);
             break;
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
+        case 0x51:
+            ReceiveMuHelperStatusUpdate(received_span);
+            break;
         }
     }
     break;
@@ -14371,6 +14444,10 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
     case 0x4B:
         ReceiveDarkside(ReceiveBuffer);
         break;
+    case 0xAE:
+        // Received mu helper config from server
+        ReceiveMuHelperConfigurationData(received_span);
+        break;
     default:
         break;
     }
@@ -14423,11 +14500,10 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             bufflist.push_back(eDeBuff_BlowOfDestruction);
 
             //buff
-            bufflist.push_back(eBuff_HpRecovery); bufflist.push_back(eBuff_Attack);
-            //bufflist.push_back( eBuff_Life ); bufflist.push_back( eBuff_Attack );
+            bufflist.push_back(eBuff_Life); bufflist.push_back(eBuff_Attack);
             bufflist.push_back(eBuff_Defense); bufflist.push_back(eBuff_AddAG);
             bufflist.push_back(eBuff_Cloaking); bufflist.push_back(eBuff_AddSkill);
-            bufflist.push_back(eBuff_PhysDefense); bufflist.push_back(eBuff_AddCriticalDamage);
+            bufflist.push_back(eBuff_WizDefense); bufflist.push_back(eBuff_AddCriticalDamage);
             bufflist.push_back(eBuff_CrywolfAltarOccufied);
 
             g_CharacterUnRegisterBuffList(o, bufflist);
@@ -14872,7 +14948,7 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
         }
     }
     break;
-    case eBuff_PhysDefense:
+    case eBuff_WizDefense:
     {
         if (o->Type == MODEL_PLAYER)
         {
@@ -14892,8 +14968,7 @@ void InsertBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_HpRecovery:
-        //case eBuff_Life:
+    case eBuff_Life:
     {
         DeleteEffect(BITMAP_LIGHT, o, 1);
         CreateEffect(BITMAP_LIGHT, o->Position, o->Angle, o->Light, 1, o);
@@ -15098,14 +15173,13 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
     }
     break;
 
-    case eBuff_HpRecovery:
-        //case eBuff_Life:
+    case eBuff_Life:
     {
         DeleteEffect(BITMAP_LIGHT, o, 1);
     }
     break;
 
-    case eBuff_PhysDefense:
+    case eBuff_WizDefense:
     {
         if (o->Type == MODEL_PLAYER)
         {

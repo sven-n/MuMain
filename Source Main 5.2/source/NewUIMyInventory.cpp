@@ -1251,7 +1251,7 @@ void CNewUIMyInventory::RenderEquippedItem()
         {
             ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pEquipmentItemSlot->Type];
             const int iLevel = pEquipmentItemSlot->Level;
-            const int iMaxDurability = calcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
+            const int iMaxDurability = CalcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
 
             // 용사/전사의반지 예외처리
             if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
@@ -2501,6 +2501,20 @@ int CNewUIMyInventory::GetPointedItemIndex() const
 int CNewUIMyInventory::FindManaItemIndex() const
 {
     for (int i = ITEM_LARGE_MANA_POTION; i >= ITEM_SMALL_MANA_POTION; i--)
+    {
+        const int iIndex = FindItemReverseIndex(i);
+        if (iIndex != -1)
+        {
+            return iIndex;
+        }
+    }
+
+    return -1;
+}
+
+int CNewUIMyInventory::FindHealingItemIndex() const
+{
+    for (int i = ITEM_LARGE_HEALING_POTION; i >= ITEM_APPLE; i--)
     {
         const int iIndex = FindItemReverseIndex(i);
         if (iIndex != -1)

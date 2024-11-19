@@ -6524,3 +6524,131 @@ void CRadioButton::RenderImage(GLuint uiImageType, float x, float y, float width
 }
 int CRadioButton::m_nIterIndex = 0;
 #endif //PBG_ADD_INGAMESHOP_UI_ITEMSHOP
+
+
+CUIExtraItemListBox::CUIExtraItemListBox()
+{
+    m_iMaxLineCount = 12;
+    m_iCurrentRenderEndLine = 0;
+    m_iNumRenderLine = 5;
+
+    m_fScrollBarRange_top = 0;
+    m_fScrollBarRange_bottom = 0;
+
+    m_fScrollBarPos_y = 0;
+    m_fScrollBarWidth = 13;
+    m_fScrollBarHeight = 0;
+
+    m_fScrollBarClickPos_y = 0;
+    m_bScrollBtnClick = FALSE;
+    m_bScrollBarClick = FALSE;
+
+    m_bUseSelectLine = TRUE;
+}
+
+void CUIExtraItemListBox::AddText(const wchar_t* pszPattern)
+{
+    if (pszPattern == nullptr || pszPattern[0] == '\0') return;
+
+    static FILTERLIST_TEXT text;
+    wcsncpy(text.m_szPattern, pszPattern, MAX_ITEM_NAME + 1);
+    text.m_bIsSelected = FALSE;
+    m_TextList.push_front(text);
+
+    RemoveText();
+    SLSetSelectLine(0);
+    if (GetLineNum() > m_iNumRenderLine) ++m_iCurrentRenderEndLine;
+
+    if (GetLineNum() < m_iNumRenderLine);
+    else if (GetLineNum() - m_iCurrentRenderEndLine < m_iNumRenderLine)
+        m_iCurrentRenderEndLine = GetLineNum() - m_iNumRenderLine;
+
+    if (m_TextList.size() == 1)
+        SLSetSelectLine(1);
+
+    if (m_TextList.empty() == FALSE)
+    {
+        SLSetSelectLine(GetLineNum());
+        Scrolling(-10000);
+    }
+}
+
+void CUIExtraItemListBox::SetNumRenderLine(int iLine)
+{
+    if (iLine < m_iNumRenderLine && iLine < GetLineNum()) ++m_iCurrentRenderEndLine;
+    else if (iLine > GetLineNum()) m_iCurrentRenderEndLine = 0;
+    m_iNumRenderLine = iLine;
+}
+
+
+void CUIExtraItemListBox::RenderInterface()
+{
+    return;
+}
+
+int CUIExtraItemListBox::GetRenderLinePos_y(int iLineNumber)
+{
+    if (GetLineNum() > m_iNumRenderLine)
+        return (m_iPos_y - m_iHeight + (m_iNumRenderLine - 1) * 13 - iLineNumber * 13 + 3);
+    else
+        return (m_iPos_y - m_iHeight + (GetLineNum() - 1) * 13 - iLineNumber * 13 + 3);
+}
+
+BOOL CUIExtraItemListBox::RenderDataLine(int iLineNumber)
+{
+    EnableAlphaTest();
+
+    if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
+    {
+        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+        RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        g_pRenderText->SetTextColor(0, 0, 0, 255);
+    }
+    else
+    {
+        g_pRenderText->SetTextColor(230, 220, 200, 255);
+    }
+
+    glEnable(GL_TEXTURE_2D);
+    g_pRenderText->SetBgColor(0);
+
+    int iPos_x = m_iPos_x + 8;
+    int iPos_y = GetRenderLinePos_y(iLineNumber);
+
+    wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
+    swprintf(Text, L"%s", m_TextListIter->m_szPattern);
+    g_pRenderText->RenderText(iPos_x, iPos_y, Text);
+
+    DisableAlphaBlend();
+
+    return TRUE;
+}
+
+BOOL CUIExtraItemListBox::DoLineMouseAction(int iLineNumber)
+{
+    if (::CheckMouseIn(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13))
+    {
+        if (MouseLButtonPush)
+        {
+            SLSetSelectLine(m_iCurrentRenderEndLine + iLineNumber + 1);
+            m_TextListIter->m_bIsSelected = (m_TextListIter->m_bIsSelected + 1) % 2;
+            MouseLButtonPush = false;
+        }
+    }
+    return TRUE;
+}
+
+void CUIExtraItemListBox::DeleteText(const wchar_t* pszPattern)
+{
+    if (pszPattern == nullptr || wcslen(pszPattern) == 0) return;
+    for (m_TextListIter = m_TextList.begin(); m_TextListIter != m_TextList.end(); ++m_TextListIter)
+    {
+        if (wcsncmp(m_TextListIter->m_szPattern, pszPattern, MAX_ITEM_NAME) == 0)
+            break;
+    }
+    if (m_TextListIter == m_TextList.end()) return;
+
+    if (SLGetSelectLineNum() != 1) SLSelectNextLine();
+    m_TextList.erase(m_TextListIter);
+}

@@ -46,7 +46,7 @@ namespace npcBreeder
         }
         ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
 
-        int maxDurability = calcMaxDurability(ip, p, ip->Level);
+        int maxDurability = CalcMaxDurability(ip, p, ip->Level);
 
         int Gold = 0;
         if (ip->Durability < maxDurability)
