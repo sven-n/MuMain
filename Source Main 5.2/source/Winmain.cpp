@@ -1440,20 +1440,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         SetTargetFps(-1); // unlimited
     }
 
-    switch (WindowHeight)
-    {
-        case 480:FontHeight = 13; break;
-        case 600:FontHeight = 14; break;
-        case 768:FontHeight = 16; break;
-        case 900:FontHeight = 16; break;
-        case 1024:FontHeight = 16; break;
-        case 1050:FontHeight = 17; break;
-        case 1080: FontHeight = 17; break;
-        case 1200: FontHeight = 18; break;
-        case 1280: FontHeight = 18; break;
-        case 1400: FontHeight = 19; break;
-        case 1440: FontHeight = 20; break;
-    }
+    FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));
 
     int nFixFontHeight = WindowHeight <= 600 ? 14 : 15;
     int nFixFontSize;
