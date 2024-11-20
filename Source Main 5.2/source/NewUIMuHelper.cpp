@@ -1071,12 +1071,12 @@ void CNewUIMuHelper::SaveConfig()
     m_Skill3DelayInput.GetText(wsNumberInput, sizeof(wsNumberInput));
     _TempConfig.aiSkillInterval[2] = GetIntFromTextInput(wsNumberInput);
 
-    _TempConfig.aiSkill[0] = m_aiSelectedSkills[0];
-    _TempConfig.aiSkill[1] = m_aiSelectedSkills[1];
-    _TempConfig.aiSkill[2] = m_aiSelectedSkills[2];
-    _TempConfig.aiBuff[0] = m_aiSelectedSkills[3];
-    _TempConfig.aiBuff[1] = m_aiSelectedSkills[4];
-    _TempConfig.aiBuff[2] = m_aiSelectedSkills[5];
+    _TempConfig.aiSkill[0] = m_aiSelectedSkills[0] > 0 ? m_aiSelectedSkills[0] : 0;
+    _TempConfig.aiSkill[1] = m_aiSelectedSkills[1] > 0 ? m_aiSelectedSkills[1] : 0;
+    _TempConfig.aiSkill[2] = m_aiSelectedSkills[2] > 0 ? m_aiSelectedSkills[2] : 0;
+    _TempConfig.aiBuff[0] = m_aiSelectedSkills[3] > 0 ? m_aiSelectedSkills[3] : 0;
+    _TempConfig.aiBuff[1] = m_aiSelectedSkills[4] > 0 ? m_aiSelectedSkills[4] : 0;
+    _TempConfig.aiBuff[2] = m_aiSelectedSkills[5] > 0 ? m_aiSelectedSkills[5] : 0;
 
     g_MuHelper.Save(_TempConfig);
 }

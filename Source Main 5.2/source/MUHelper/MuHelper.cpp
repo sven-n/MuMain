@@ -723,7 +723,7 @@ namespace MUHelper
     int CMuHelper::SelectAttackSkill()
     {
         // try skill 2 activation conditions
-        if (m_config.aiSkill[1] > 0)
+        if (m_config.aiSkill[1] > 0 && m_config.aiSkill[1] < MAX_SKILLS)
         {
             if ((m_config.aiSkillCondition[1] & ON_TIMER)
                 && m_config.aiSkillInterval[1] != 0
@@ -762,9 +762,7 @@ namespace MUHelper
         }
 
         // try skill 3 activation conditions
-        if (m_config.aiSkill[2] > 0
-            && (m_config.aiSkillCondition[2] & ON_TIMER
-                || m_config.aiSkillCondition[2] & ON_CONDITION))
+        if (m_config.aiSkill[2] > 0 && m_config.aiSkill[2] < MAX_SKILLS)
         {
             if ((m_config.aiSkillCondition[2] & ON_TIMER)
                 && m_config.aiSkillInterval[2] != 0
