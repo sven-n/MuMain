@@ -116,6 +116,9 @@ namespace MUHelper
         m_setTargets.clear();
         m_setTargetsAttacking.clear();
 
+        m_bTimerActivatedBuffOngoing = false;
+        m_bPetActivated = false;
+
         m_iLoopCounter = 0;
 
         m_bActive = true;
@@ -165,17 +168,17 @@ namespace MUHelper
     {
         try
         {
+            if (!ActivatePet())
+            {
+                return;
+            }
+
             if (!Buff())
             {
                 return;
             }
 
-            if (!Heal())
-            {
-                return;
-            }
-
-            if (!ConsumePotion())
+            if (!RecoverHealth())
             {
                 return;
             }
@@ -346,6 +349,35 @@ namespace MUHelper
         return iFarthestMonsterId;
     }
 
+    int CMuHelper::ActivatePet()
+    {
+        if (!m_config.bUseDarkRaven)
+        {
+            return 1;
+        }
+
+        if (m_bPetActivated)
+        {
+            return 1;
+        }
+
+        if (m_config.iDarkRavenMode == PET_ATTACK_CEASE)
+        {
+            SocketClient->ToGameServer()->SendPetCommandRequest(PET_TYPE_DARK_SPIRIT, AT_PET_COMMAND_DEFAULT, 0xFFFF);
+        }
+        else if (m_config.iDarkRavenMode == PET_ATTACK_AUTO)
+        {
+            SocketClient->ToGameServer()->SendPetCommandRequest(PET_TYPE_DARK_SPIRIT, AT_PET_COMMAND_RANDOM, 0xFFFF);
+        }
+        else if (m_config.iDarkRavenMode == PET_ATTACK_TOGETHER)
+        {
+            SocketClient->ToGameServer()->SendPetCommandRequest(PET_TYPE_DARK_SPIRIT, AT_PET_COMMAND_OWNER, 0xFFFF);
+        }
+
+        m_bPetActivated = true;
+        return 1;
+    }
+
     int CMuHelper::Buff()
     {
         if (!HasAssignedBuffSkill())
@@ -512,6 +544,26 @@ namespace MUHelper
         return 1;
     }
 
+    int CMuHelper::RecoverHealth()
+    {
+        if (!Heal())
+        {
+            return 0;
+        }
+        
+        if (!DrainLife())
+        {
+            return 0;
+        }
+
+        if (!ConsumePotion())
+        {
+            return 0;
+        }
+
+        return 1;
+    }
+
     int CMuHelper::Heal()
     {
         if (!m_config.bAutoHeal)
@@ -549,8 +601,6 @@ namespace MUHelper
         {
             return HealSelf(iHealingSkill);
         }
-
-        return 1;
     }
 
     int CMuHelper::HealSelf(int iHealingSkill)
@@ -562,6 +612,35 @@ namespace MUHelper
         if (iRemaining <= m_config.iHealThreshold)
         {
             return SimulateSkill(iHealingSkill, true, HeroKey);
+        }
+
+        return 1;
+    }
+
+    int CMuHelper::DrainLife()
+    {
+        if (!m_config.bUseDrainLife)
+        {
+            return 1;
+        }
+
+        int iDrainLife = GetDrainLifeSkill();
+        if (iDrainLife == -1)
+        {
+            return 1;
+        }
+
+        int64_t iLife = CharacterAttribute->Life;
+        int64_t iLifeMax = CharacterAttribute->LifeMax;
+        int64_t iRemaining = (iLife * 100 + iLifeMax - 1) / iLifeMax;
+
+        if (iRemaining <= m_config.iHealThreshold)
+        {
+            m_iCurrentTarget = GetNearestTarget();
+            if (m_iCurrentTarget != -1)
+            {
+                return SimulateSkill(iDrainLife, true, m_iCurrentTarget);
+            }
         }
 
         return 1;
@@ -644,7 +723,7 @@ namespace MUHelper
     int CMuHelper::SelectAttackSkill()
     {
         // try skill 2 activation conditions
-        if (m_config.aiSkill[1] > 0)
+        if (m_config.aiSkill[1] > 0 && m_config.aiSkill[1] < MAX_SKILLS)
         {
             if ((m_config.aiSkillCondition[1] & ON_TIMER)
                 && m_config.aiSkillInterval[1] != 0
@@ -683,9 +762,7 @@ namespace MUHelper
         }
 
         // try skill 3 activation conditions
-        if (m_config.aiSkill[2] > 0
-            && (m_config.aiSkillCondition[2] & ON_TIMER
-                || m_config.aiSkillCondition[2] & ON_CONDITION))
+        if (m_config.aiSkill[2] > 0 && m_config.aiSkill[2] < MAX_SKILLS)
         {
             if ((m_config.aiSkillCondition[2] & ON_TIMER)
                 && m_config.aiSkillInterval[2] != 0
@@ -859,14 +936,32 @@ namespace MUHelper
 
     int CMuHelper::GetHealingSkill()
     {
-        int aiHealingSkills[] =
+        std::vector<int> aiHealingSkills =
         {
             AT_SKILL_HEAL_UP,
             AT_SKILL_HEAL_UP + 1,
             AT_SKILL_HEAL_UP + 2,
             AT_SKILL_HEAL_UP + 3,
             AT_SKILL_HEAL_UP + 4,
-            AT_SKILL_HEALING,
+            AT_SKILL_HEALING
+        };
+
+        for (int i = 0; i < aiHealingSkills.size(); i++)
+        {
+            int iSkillIndex = g_pSkillList->GetSkillIndex(aiHealingSkills[i]);
+            if (iSkillIndex != -1)
+            {
+                return aiHealingSkills[i];
+            }
+        }
+
+        return -1;
+    }
+
+    int CMuHelper::GetDrainLifeSkill()
+    {
+        std::vector<int> aiDrainLifeSkills =
+        {
             AT_SKILL_ALICE_DRAINLIFE_UP,
             AT_SKILL_ALICE_DRAINLIFE_UP + 1,
             AT_SKILL_ALICE_DRAINLIFE_UP + 2,
@@ -875,12 +970,12 @@ namespace MUHelper
             AT_SKILL_ALICE_DRAINLIFE,
         };
 
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < aiDrainLifeSkills.size(); i++)
         {
-            int iSkillIndex = g_pSkillList->GetSkillIndex(aiHealingSkills[i]);
+            int iSkillIndex = g_pSkillList->GetSkillIndex(aiDrainLifeSkills[i]);
             if (iSkillIndex != -1)
             {
-                return aiHealingSkills[i];
+                return aiDrainLifeSkills[i];
             }
         }
 

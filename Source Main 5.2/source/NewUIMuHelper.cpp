@@ -1071,12 +1071,12 @@ void CNewUIMuHelper::SaveConfig()
     m_Skill3DelayInput.GetText(wsNumberInput, sizeof(wsNumberInput));
     _TempConfig.aiSkillInterval[2] = GetIntFromTextInput(wsNumberInput);
 
-    _TempConfig.aiSkill[0] = m_aiSelectedSkills[0];
-    _TempConfig.aiSkill[1] = m_aiSelectedSkills[1];
-    _TempConfig.aiSkill[2] = m_aiSelectedSkills[2];
-    _TempConfig.aiBuff[0] = m_aiSelectedSkills[3];
-    _TempConfig.aiBuff[1] = m_aiSelectedSkills[4];
-    _TempConfig.aiBuff[2] = m_aiSelectedSkills[5];
+    _TempConfig.aiSkill[0] = m_aiSelectedSkills[0] > 0 ? m_aiSelectedSkills[0] : 0;
+    _TempConfig.aiSkill[1] = m_aiSelectedSkills[1] > 0 ? m_aiSelectedSkills[1] : 0;
+    _TempConfig.aiSkill[2] = m_aiSelectedSkills[2] > 0 ? m_aiSelectedSkills[2] : 0;
+    _TempConfig.aiBuff[0] = m_aiSelectedSkills[3] > 0 ? m_aiSelectedSkills[3] : 0;
+    _TempConfig.aiBuff[1] = m_aiSelectedSkills[4] > 0 ? m_aiSelectedSkills[4] : 0;
+    _TempConfig.aiBuff[2] = m_aiSelectedSkills[5] > 0 ? m_aiSelectedSkills[5] : 0;
 
     g_MuHelper.Save(_TempConfig);
 }
@@ -2405,15 +2405,19 @@ bool CNewUIMuHelperExt::Render()
     {
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
-        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]);
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]); // "HP Status"
 
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, GlobalText[3546]); // "Auto Heal"
-        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 145, 124.f, 16.f, m_iCurrentHealThreshold, GlobalText[3547]);
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 145, 124.f, 16.f, m_iCurrentHealThreshold, GlobalText[3547]); // "HP Status"
     }
     else if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
     {
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]); // "HP Status"
+
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, GlobalText[3517]); // "Drain Life"
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 145, 124.f, 16.f, m_iCurrentHealThreshold, GlobalText[3547]); // "HP Status"
     }
     else if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG)
     {
