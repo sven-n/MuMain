@@ -3616,6 +3616,12 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_DEF_UP_OURFORCES:
         UnRegisterBuff(eBuff_Def_up_Ourforces, o);
         break;
+    case AT_SKILL_ALICE_THORNS:
+        UnRegisterBuff(eBuff_Thorns, o);
+        break;
+    case AT_SKILL_ALICE_BERSERKER:
+        UnRegisterBuff(eBuff_Berserker, o);
+        break;
     }
 }
 
@@ -4561,9 +4567,6 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     case AT_SKILL_ALICE_SLEEP_UP + 3:
     case AT_SKILL_ALICE_SLEEP_UP + 4:
     case AT_SKILL_ALICE_SLEEP:
-    case AT_SKILL_ALICE_BLIND:
-    case AT_SKILL_ALICE_THORNS:
-    case AT_SKILL_ALICE_BERSERKER:
     {
         sc->AttackTime = 1;
 
@@ -4583,21 +4586,37 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             break;
         }
 
-        if (MagicNumber == AT_SKILL_ALICE_SLEEP || (AT_SKILL_ALICE_SLEEP_UP <= MagicNumber && MagicNumber <= AT_SKILL_ALICE_SLEEP_UP + 4))
-        {
-            PlayBuffer(SOUND_SUMMON_SKILL_SLEEP);
-        }
-        else
-            if (MagicNumber == AT_SKILL_ALICE_BLIND)
-            {
-                PlayBuffer(SOUND_SUMMON_SKILL_BLIND);
-            }
-            else
-            {
-                PlayBuffer(SOUND_SUMMON_SKILL_THORNS);
-            }
+        PlayBuffer(SOUND_SUMMON_SKILL_SLEEP);
     }
     break;
+    case AT_SKILL_ALICE_BLIND:
+        sc->AttackTime = 1; // todo: what is this?
+
+        SetAttackSpeed();
+        SetAction(so, PLAYER_SKILL_SLEEP); // todo: check if same action for this skill
+
+        PlayBuffer(SOUND_SUMMON_SKILL_BLIND);
+        break;
+    case AT_SKILL_ALICE_THORNS:
+        sc->AttackTime = 1; // todo: what is this?
+
+        SetAttackSpeed();
+        SetAction(so, PLAYER_SKILL_SLEEP); // todo: check if same action for this skill
+
+        g_CharacterRegisterBuff(to, eBuff_Thorns);
+
+        PlayBuffer(SOUND_SUMMON_SKILL_THORNS);
+        break;
+    case AT_SKILL_ALICE_BERSERKER:
+        sc->AttackTime = 1; // todo: what is this?
+
+        SetAttackSpeed();
+        SetAction(so, PLAYER_SKILL_SLEEP); // todo: check if same action for this skill
+
+        g_CharacterRegisterBuff(to, eBuff_Berserker);
+
+        PlayBuffer(SOUND_SKILL_BERSERKER);
+        break;
     case AT_SKILL_SWELL_OF_MAGICPOWER:
     {
         SetAttackSpeed();
