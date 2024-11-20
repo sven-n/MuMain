@@ -45,8 +45,10 @@ namespace MUHelper
 		int ActivatePet();
 		int Buff();
 		int BuffTarget(CHARACTER* pTargetChar, int iBuffSkill);
+		int RecoverHealth();
 		int Heal();
 		int HealSelf(int iHealingSkill);
+		int DrainLife();
 		int ConsumePotion();
 		int Attack();
 		int RepairEquipments();
@@ -65,6 +67,7 @@ namespace MUHelper
 		int SelectItemToObtain();
 		bool ShouldObtainItem(int iItemId);
 		int GetHealingSkill();
+		int GetDrainLifeSkill();
 		bool HasAssignedBuffSkill();
 
 	private:
