@@ -856,8 +856,8 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
         return false;
     }
 
-    CharacterAttribute->Experience = Data->CurrentExperience;
-    CharacterAttribute->NextExperience = Data->ExperienceForNextLevel;
+    CharacterAttribute->Experience = ntoh64(Data->CurrentExperience);
+    CharacterAttribute->NextExperience = ntoh64(Data->ExperienceForNextLevel);
     CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
     CharacterAttribute->Strength = Data->Strength;
     CharacterAttribute->Dexterity = Data->Dexterity;
