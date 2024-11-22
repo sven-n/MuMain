@@ -36,13 +36,12 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
     if (nullptr == alpszDst || 0 >= nDstRow || 0 >= nDstColumn || nullptr == lpszSrc || 16 > nPixelPerLine)
         return 0;
 
-    wchar_t szWorkSrc[1024];
-    ::wcscpy(szWorkSrc, lpszSrc);
+    std::wstring szWorkSrc(lpszSrc);  // Convert lpszSrc to std::wstring
 
     wchar_t szWorkToken[1024];
     int nLine = 0;
 
-    wchar_t* pszToken = _wcstok(szWorkSrc, &szNewlineChar);
+    wchar_t* pszToken = wcstok(&szWorkSrc[0], &szNewlineChar);
 
     while (pszToken != nullptr)
     {
@@ -56,7 +55,7 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
             nLine += CutText3(pszToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
 
-        pszToken = _wcstok(nullptr, &szNewlineChar);
+        pszToken = wcstok(nullptr, &szNewlineChar);
     }
 
     return nLine;
