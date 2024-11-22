@@ -15,7 +15,7 @@ public:
     const wchar_t* GetCharacterClassText(const CLASS_TYPE byClass);
     
     int IsFemale(CLASS_TYPE iClass) { return (this->GetBaseClass(iClass) == CLASS_ELF || this->GetBaseClass(iClass) == CLASS_SUMMONER); }
-    BYTE GetSkinModelIndex(const CLASS_TYPE byClass);
+    CLASS_SKIN_INDEX GetSkinModelIndex(const CLASS_TYPE byClass);
     BYTE GetStepClass(const CLASS_TYPE byClass);
     int GetEquipedBowType(CHARACTER* pChar);
     int GetEquipedBowType();
