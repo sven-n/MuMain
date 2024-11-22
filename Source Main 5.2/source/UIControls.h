@@ -1055,7 +1055,7 @@ protected:
     float m_fMoveAccel;
     float m_fMoveSpeed;
     float m_fMaxMoveSpeed;
-    int m_iAlphaRate;
+    float m_iAlphaRate;
     int m_iCutLength;
     int m_iCutSize;
     int m_iFontHeight;

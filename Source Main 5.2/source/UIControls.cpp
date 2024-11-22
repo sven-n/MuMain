@@ -4072,13 +4072,13 @@ void CUISlideHelp::Render(BOOL bForceFadeOut)
 
     if (bFadeOut == FALSE)
     {
-        if (m_iAlphaRate < 205) m_iAlphaRate += 30;
-        if (m_iAlphaRate > 205) m_iAlphaRate = 205;
+        m_iAlphaRate += 30.f * FPS_ANIMATION_FACTOR;
+        m_iAlphaRate = std::min<float>(m_iAlphaRate, 205.f);
     }
     else
     {
-        if (m_iAlphaRate > 0) m_iAlphaRate -= 30;
-        if (m_iAlphaRate < 0) m_iAlphaRate = 0;
+        m_iAlphaRate -= 30 * FPS_ANIMATION_FACTOR;
+        m_iAlphaRate = std::max<float>(m_iAlphaRate, 0.f);
     }
 
     if (m_iAlphaRate <= 0)
@@ -4120,12 +4120,16 @@ void CUISlideHelp::Render(BOOL bForceFadeOut)
     g_pRenderText->SetTextColor(m_dwSlideTextColor & 0x00FFFFFF);
 
     BYTE byAlpha = m_dwSlideTextColor >> 24;
-    byAlpha = (float)byAlpha * ((m_iAlphaRate > 180 ? m_iAlphaRate : (m_iAlphaRate - 25 < 0 ? 0 : m_iAlphaRate - 25)) + 50) / 255.0f;
-    if (m_bBlink == TRUE && g_iNoticeInverse % 10 < 5) byAlpha /= 2;
+    byAlpha = static_cast<float>(byAlpha) * ((m_iAlphaRate > 180 ? m_iAlphaRate : (m_iAlphaRate - 25 < 0 ? 0 : m_iAlphaRate - 25)) + 50) / 255.0f;
+    if (const auto frac = WorldTime - static_cast<long>(WorldTime);
+        m_bBlink == TRUE && frac < 0.5)
+    {
+        byAlpha /= 2;
+    }
 
     g_pRenderText->SetTextColor(g_pRenderText->GetTextColor() + (byAlpha << 24));
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_fMovePosition, m_iPos_y, m_pszSlideText);
+    g_pRenderText->RenderText(static_cast<int>(m_fMovePosition), m_iPos_y, m_pszSlideText);
     DisableAlphaBlend();
 
     ComputeSpeed();
@@ -4161,7 +4165,7 @@ void CUISlideHelp::ComputeSpeed()
         m_fMoveAccel = -1.0f;
     }
 
-    m_fMoveSpeed += m_fMoveAccel;
+    m_fMoveSpeed += m_fMoveAccel * FPS_ANIMATION_FACTOR;
     if (m_fMoveSpeed >= m_fMaxMoveSpeed)
     {
         m_fMoveSpeed = m_fMaxMoveSpeed;
@@ -4170,7 +4174,8 @@ void CUISlideHelp::ComputeSpeed()
     {
         m_fMoveSpeed = 0;
     }
-    m_fMovePosition -= m_fMoveSpeed;
+
+    m_fMovePosition -= m_fMoveSpeed * FPS_ANIMATION_FACTOR;
 }
 
 BOOL CUISlideHelp::AddSlideText(const wchar_t* pszNewText, DWORD dwTextColor)
