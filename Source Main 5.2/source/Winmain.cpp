@@ -599,6 +599,7 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (SocketClient != nullptr)
             {
                 SocketClient->Close();
+                g_bGameServerConnected = false;
             }
 
             CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
@@ -627,6 +628,7 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         if (SocketClient != nullptr)
         {
             SocketClient->Close();
+            g_bGameServerConnected = false;
         }
 
         DestroySound();

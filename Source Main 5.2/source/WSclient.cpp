@@ -809,6 +809,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         if (SocketClient != nullptr)
         {
             SocketClient->Close();
+            g_bGameServerConnected = false;
         }
 
         ReleaseCharacterSceneData();
