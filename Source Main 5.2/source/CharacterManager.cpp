@@ -195,23 +195,21 @@ const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byChara
     return GlobalText[2305];
 }
 
-BYTE CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
+CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
 {
-    BYTE bySkinIndex = 0;
-    BYTE byFirstClass = byClass & 0x7;
-    BYTE bySecondClass = (byClass >> 3) & 0x01;
-    BYTE byThirdClass = (byClass >> 4) & 0x01;
-
-    if (byFirstClass == CLASS_WIZARD || byFirstClass == CLASS_KNIGHT || byFirstClass == CLASS_ELF || byFirstClass == CLASS_SUMMONER)
+    switch (byClass)
     {
-        bySkinIndex = byFirstClass + (bySecondClass + byThirdClass) * MAX_CLASS;
-    }
-    else
-    {
-        bySkinIndex = byFirstClass + (byThirdClass * 2) * MAX_CLASS;
+    case CLASS_BLOODYSUMMONER: return SKIN_CLASS_BLOODYSUMMONER;
+    case CLASS_GRANDMASTER: return SKIN_CLASS_GRANDMASTER;
+    case CLASS_BLADEMASTER: return SKIN_CLASS_BLADEMASTER;
+    case CLASS_HIGHELF: return SKIN_CLASS_HIGHELF;
+    case CLASS_DUELMASTER:return SKIN_CLASS_DUELMASTER;
+    case CLASS_LORDEMPEROR: return SKIN_CLASS_LORDEMPEROR;
+    case CLASS_DIMENSIONMASTER: return SKIN_CLASS_DIMENSIONMASTER;
+    case CLASS_TEMPLENIGHT: return SKIN_CLASS_TEMPLENIGHT;
     }
 
-    return bySkinIndex;
+    return static_cast<CLASS_SKIN_INDEX>(byClass);
 }
 
 BYTE CCharacterManager::GetStepClass(const CLASS_TYPE byClass)

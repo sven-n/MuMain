@@ -132,7 +132,8 @@ public:
     bool			m_bIsSelected;
     bool			Decoy;
     CLASS_TYPE			Class;
-    BYTE			Skin;
+    CLASS_SKIN_INDEX            SkinIndex;
+    BYTE			Skin; // What is this good for?
     BYTE			CtlCode;
     BYTE			ExtendState;
     BYTE			EtcPart;

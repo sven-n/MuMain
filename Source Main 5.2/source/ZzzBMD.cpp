@@ -928,16 +928,13 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     if (textureIndex == BITMAP_HIDE)
         return;
 
-    if (textureIndex == BITMAP_SKIN)
-    {
-        if (HideSkin)
+    bool isSkin = textureIndex >= BITMAP_SKIN_BEGIN && textureIndex <= BITMAP_SKIN_END;
+    if (isSkin && HideSkin)
         {
             return;
         }
 
-        textureIndex = BITMAP_SKIN + Skin;
-    }
-    else if (textureIndex == BITMAP_WATER)
+    if (textureIndex == BITMAP_WATER)
     {
         textureIndex = BITMAP_WATER + WaterTextureNumber;
     }
@@ -2530,13 +2527,11 @@ void BMD::Release()
                 delete m->m_csTScript;
                 m->m_csTScript = NULL;
             }
-            switch (IndexTexture[m->Texture])
+            auto textureIndex = IndexTexture[m->Texture];
+            auto isSkinTexture = (textureIndex >= BITMAP_SKIN_BEGIN && textureIndex <= BITMAP_SKIN_END);
+            if (!isSkinTexture)
             {
-            case BITMAP_SKIN:
-                break;
-            default:
-                DeleteBitmap(IndexTexture[m->Texture]);
-                break;
+                DeleteBitmap(textureIndex);
             }
         }
     }

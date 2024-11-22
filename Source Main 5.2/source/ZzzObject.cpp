@@ -6418,7 +6418,7 @@ void RenderItems()
                 }
                 BMD* b = &Models[Type];
                 b->CurrentAction = 0;
-                b->Skin = gCharacterManager.GetBaseClass(Hero->Class);
+                b->Skin = gCharacterManager.GetBaseClass(Hero->Class); // ???
                 b->CurrentAction = o->CurrentAction;
                 VectorCopy(o->Position, b->BodyOrigin);
                 ItemHeight(o->Type, b);
@@ -8921,6 +8921,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         float fLumi = (sinf(WorldTime * 0.0015f) + 1.0f) * 0.5f;
         b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_ROOLOFPAPER_EFFECT_R);
     }
+    /*
     else if (Type == MODEL_BODY_ARMOR + (MAX_CLASS * 2) + CLASS_RAGEFIGHTER || Type == MODEL_BODY_PANTS + (MAX_CLASS * 2) + CLASS_RAGEFIGHTER
         || Type == MODEL_BODY_GLOVES + (MAX_CLASS * 2) + CLASS_RAGEFIGHTER || Type == MODEL_BODY_BOOTS + (MAX_CLASS * 2) + CLASS_RAGEFIGHTER)
     {
@@ -8930,9 +8931,12 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         {
             Texture_t* pTexture = &b->Textures[i];
             int SkinTexture = (!strnicmp(pTexture->FileName, pSkinTextureName, nLen)) ? BITMAP_SKIN + 14 : -1;
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, SkinTexture);
+            if (SkinTexture != -1)
+            {
+                b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, SkinTexture);
+            }
         }
-    }
+    }*/
 
     else if (Check_LuckyItem(Type, -MODEL_ITEM))
     {
