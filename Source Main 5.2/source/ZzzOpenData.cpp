@@ -434,18 +434,14 @@ void OpenPlayers()
 
 void OpenPlayerTextures()
 {
-    LoadBitmap(L"Player\\skin_barbarian_01.jpg", BITMAP_SKIN);
-    LoadBitmap(L"Player\\level_man022.jpg", BITMAP_SKIN + 1);
-    LoadBitmap(L"Player\\skin_wizard_01.jpg", BITMAP_SKIN + 2);
-    LoadBitmap(L"Player\\level_man01.jpg", BITMAP_SKIN + 3);
-    LoadBitmap(L"Player\\skin_archer_01.jpg", BITMAP_SKIN + 4);
-    LoadBitmap(L"Player\\level_man033.jpg", BITMAP_SKIN + 5);
-    LoadBitmap(L"Player\\skin_special_01.jpg", BITMAP_SKIN + 6);
-    LoadBitmap(L"Player\\level_man02.jpg", BITMAP_SKIN + 8);
     LoadBitmap(L"Player\\hair_r.jpg", BITMAP_HAIR);
-    LoadBitmap(L"Player\\LevelClass107.jpg", BITMAP_SKIN + 12);
-    LoadBitmap(L"Player\\LevelClass207.jpg", BITMAP_SKIN + 13);
-    LoadBitmap(L"Player\\LevelClass207_1.jpg", BITMAP_SKIN + 14);
+    LoadBitmap(L"Player\\Robe01.jpg", BITMAP_ROBE);
+    LoadBitmap(L"Player\\Robe02.jpg", BITMAP_ROBE + 1);
+    LoadBitmap(L"Player\\Robe03.tga", BITMAP_ROBE + 2);
+    LoadBitmap(L"Player\\DarklordRobe.tga", BITMAP_ROBE + 7);
+    LoadBitmap(L"Item\\msword03.tga", BITMAP_ROBE + 8);
+    LoadBitmap(L"Item\\dl_redwings02.tga", BITMAP_ROBE + 9);
+    LoadBitmap(L"Item\\dl_redwings03.tga", BITMAP_ROBE + 10);
 
     int nIndex;
 
@@ -511,15 +507,7 @@ void OpenPlayerTextures()
     gLoadData.OpenTexture(MODEL_MASK_HELM + 9, L"Player\\");
 
     gLoadData.OpenTexture(MODEL_SHADOW_BODY, L"Player\\");
-    {
-        LoadBitmap(L"Player\\Robe01.jpg", BITMAP_ROBE);
-        LoadBitmap(L"Player\\Robe02.jpg", BITMAP_ROBE + 1);
-        LoadBitmap(L"Player\\Robe03.tga", BITMAP_ROBE + 2);
-        LoadBitmap(L"Player\\DarklordRobe.tga", BITMAP_ROBE + 7);
-        LoadBitmap(L"Item\\msword03.tga", BITMAP_ROBE + 8);
-        LoadBitmap(L"Item\\dl_redwings02.tga", BITMAP_ROBE + 9);
-        LoadBitmap(L"Item\\dl_redwings03.tga", BITMAP_ROBE + 10);
-    }
+
 
     for (int i = 0; i < 5; ++i)
     {

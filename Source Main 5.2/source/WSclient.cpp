@@ -643,6 +643,7 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
         auto iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(serverClass);
 
         CharactersClient[Data->Index].Class = iClass;
+        CharactersClient[Data->Index].SkinIndex = gCharacterManager.GetSkinModelIndex(iClass);
         CMultiLanguage::ConvertFromUtf8(CharactersClient[Data->Index].ID, Data->ID, MAX_ID_SIZE);
         CharactersClient[Data->Index].ID[MAX_ID_SIZE] = L'\0';
         CurrentProtocolState = RECEIVE_CREATE_CHARACTER_SUCCESS;
@@ -898,6 +899,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d", c->Key, gMapManager.WorldActive, Data->PositionX, Data->PositionY);
     OBJECT* o = &c->Object;
     c->Class = CharacterAttribute->Class;
+    c->SkinIndex = gCharacterManager.GetSkinModelIndex(c->Class);
     c->Skin = 0;
     c->PK = Data->PK;
     c->CtlCode = Data->CtlCode;
@@ -2061,7 +2063,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     case 2:
         if (Data->ItemGroup == 0xFF)
         {
-            c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(c->Class);
+            c->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM + c->SkinIndex;
             c->BodyPart[BODYPART_HELM].Level = 0;
             c->BodyPart[BODYPART_HELM].ExcellentFlags = 0;
             c->BodyPart[BODYPART_HELM].AncientDiscriminator = 0;
@@ -2077,7 +2079,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     case 3:
         if (Data->ItemGroup == 0xFF)
         {
-            c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR + gCharacterManager.GetSkinModelIndex(c->Class);
+            c->BodyPart[BODYPART_ARMOR].Type = MODEL_BODY_ARMOR + c->SkinIndex;
             c->BodyPart[BODYPART_ARMOR].Level = 0;
             c->BodyPart[BODYPART_ARMOR].ExcellentFlags = 0;
             c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = 0;
@@ -2093,7 +2095,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     case 4:
         if (Data->ItemGroup == 0xFF)
         {
-            c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS + gCharacterManager.GetSkinModelIndex(c->Class);
+            c->BodyPart[BODYPART_PANTS].Type = MODEL_BODY_PANTS + c->SkinIndex;
             c->BodyPart[BODYPART_PANTS].Level = 0;
             c->BodyPart[BODYPART_PANTS].ExcellentFlags = 0;
             c->BodyPart[BODYPART_PANTS].AncientDiscriminator = 0;
@@ -2109,7 +2111,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     case 5:
         if (Data->ItemGroup == 0xFF)
         {
-            c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES + gCharacterManager.GetSkinModelIndex(c->Class);
+            c->BodyPart[BODYPART_GLOVES].Type = MODEL_BODY_GLOVES + c->SkinIndex;
             c->BodyPart[BODYPART_GLOVES].Level = 0;
             c->BodyPart[BODYPART_GLOVES].ExcellentFlags = 0;
             c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = 0;
@@ -2125,7 +2127,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     case 6:
         if (Data->ItemGroup == 0xFF)
         {
-            c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS + gCharacterManager.GetSkinModelIndex(c->Class);
+            c->BodyPart[BODYPART_BOOTS].Type = MODEL_BODY_BOOTS + c->SkinIndex;
             c->BodyPart[BODYPART_BOOTS].Level = 0;
             c->BodyPart[BODYPART_BOOTS].ExcellentFlags = 0;
             c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = 0;
@@ -2267,6 +2269,7 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
     OBJECT* o = &c->Object;
     //DeleteCloth(c, o);
     c->Class = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
+    c->SkinIndex = gCharacterManager.GetSkinModelIndex(c->Class);
     c->Skin = 0;
     c->AttackSpeed = Data->AttackSpeed;
     c->MagicSpeed = Data->MagicSpeed;
@@ -2447,6 +2450,7 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
             c->EtcPart = byEtcPart;
             c->CtlCode = byBackupCtlcode;
             c->Class = Class;
+            c->SkinIndex = gCharacterManager.GetSkinModelIndex(c->Class);
             c->PK = Data2->Path & 0xf;
             o->Kind = KIND_PLAYER;
             c->Change = true;
@@ -10012,6 +10016,7 @@ void ReceiveQuestPrize(const BYTE* ReceiveBuffer)
             break;
 
         c->Class = byClass;
+        c->SkinIndex = gCharacterManager.GetSkinModelIndex(c->Class);
 
         if (Hero == c)
         {
@@ -10092,6 +10097,7 @@ void ReceiveQuestPrize(const BYTE* ReceiveBuffer)
             break;
 
         c->Class = byClass;
+        c->SkinIndex = gCharacterManager.GetSkinModelIndex(c->Class);
 
         if (Hero == c)
         {
@@ -11517,6 +11523,7 @@ void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
             OBJECT* o = &c->Object;
 
             c->Class = gCharacterManager.ChangeServerClassTypeToClientClassType((SERVER_CLASS_TYPE)pData2->m_byTypeH);
+            c->SkinIndex = gCharacterManager.GetSkinModelIndex(c->Class);
             c->Skin = 0;
             c->PK = 0;
             o->Kind = KIND_TMP;

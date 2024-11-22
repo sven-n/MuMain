@@ -68,6 +68,7 @@
 #include <chrono>
 #include <thread>
 
+#include "CharacterManager.h"
 #include "SpinLock.h"
 
 class SpinLock;
@@ -887,6 +888,7 @@ void CreateCharacterScene()
 
     CreateCharacterPointer(&CharacterView, MODEL_FACE + 1, 0, 0);
     CharacterView.Class = CLASS_KNIGHT;
+    CharacterView.SkinIndex = gCharacterManager.GetSkinModelIndex(CLASS_KNIGHT);
     CharacterView.Object.Kind = 0;
 
     SelectedHero = -1;
