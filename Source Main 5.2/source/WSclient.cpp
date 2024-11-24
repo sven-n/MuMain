@@ -9,6 +9,7 @@
 #include "ZzzInventory.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzAI.h"
+#include "ZzzPath.h"
 #include "ZzzTexture.h"
 #include "ZzzEffect.h"
 #include "ZzzOpenglUtil.h"
@@ -1735,34 +1736,67 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%s)]", Text);
 }
 
-void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
+void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPMOVE_CHARACTER)ReceiveBuffer;
+    auto fixedSize = sizeof(PMOVE_CHARACTER);
+    auto Data = safe_cast<PMOVE_CHARACTER>(ReceiveBuffer.subspan(0, fixedSize));
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    auto pathNum = Data->PathMetadata & 0x0F;
+    if (pathNum >= MAX_PATH_FIND)
+    {
+        assert(false);
+        return;
+    }
+
+    auto requiredSize = fixedSize + (pathNum + 1) / 2;
+    if (ReceiveBuffer.size() < requiredSize)
+    {
+        assert(false);
+        return;
+    }
+
+    auto pathData = const_cast<BYTE*>(ReceiveBuffer.subspan(fixedSize).data());
+
     int  Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
     CHARACTER* c = &CharactersClient[FindCharacterIndex(Key)];
-
     OBJECT* o = &c->Object;
+    PATH_t* pCharPath = &c->Path;
+
+    c->PositionX = Data->SourceX;
+    c->PositionY = Data->SourceY;
+    c->TargetX = Data->TargetX;
+    c->TargetY = Data->TargetY;
 
     if (c->Dead == 0 && o->Live)
     {
-        OBJECT* o = &c->Object;
-        c->TargetAngle = Data->Path[0] >> 4;
+        c->TargetAngle = Data->PathMetadata >> 4;
         if (Key == HeroKey)
         {
             if (!c->Movement)
             {
-                c->PositionX = Data->PositionX;
-                c->PositionY = Data->PositionY;
+                c->PositionX = Data->TargetX;
+                c->PositionY = Data->TargetY;
             }
         }
         else
         {
-            c->TargetX = Data->PositionX;
-            c->TargetY = Data->PositionY;
+            pCharPath->Lock.lock();
+
+            if (c->Movement)
+            {
+                c->Movement = false;
+                SetPlayerStop(c);
+            }
+
             if (o->Type == MODEL_CRUST)
             {
-                c->PositionX = Data->PositionX;
-                c->PositionY = Data->PositionY;
+                c->PositionX = Data->TargetX;
+                c->PositionY = Data->TargetY;
                 o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->PositionX * 100.f, c->PositionY * 100.f);
                 SetPlayerWalk(c);
                 c->JumpTime = 1;
@@ -1777,16 +1811,33 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
                     iDefaultWall = TW_NOMOVE;
                 }
 
-                if (PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path, 0.0f, iDefaultWall))
+                BYTE direction = c->TargetAngle;
+                POINT nextPos = MovePoint(static_cast<EPathDirection>(direction), { Data->SourceX, Data->SourceY });
+
+                pCharPath->PathX[0] = nextPos.x;
+                pCharPath->PathY[0] = nextPos.y;
+
+                for (int i = 0; i < pathNum; ++i)
                 {
-                    c->Movement = true;
+                    int byteIndex = i / 2;
+
+                    direction = (i % 2 == 0) ?
+                        (pathData[byteIndex] >> 4) & 0x0F :
+                        (pathData[byteIndex] & 0x0F);
+
+                    nextPos = MovePoint(static_cast<EPathDirection>(direction), nextPos);
+
+                    pCharPath->PathX[i + 1] = nextPos.x;
+                    pCharPath->PathY[i + 1] = nextPos.y;
                 }
-                else
-                {
-                    c->Movement = false;
-                    SetPlayerStop(c);
-                }
+
+                pCharPath->PathNum = pathNum + 1;
+                pCharPath->Direction = direction;
+                pCharPath->CurrentPath = 0;
+                pCharPath->CurrentPathFloat = 0;
             }
+
+            pCharPath->Lock.unlock();
 
             if (IsMonster(c))
             {
@@ -1796,6 +1847,7 @@ void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
             g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
         }
     }
+    
 }
 
 void ReceiveMovePosition(const BYTE* ReceiveBuffer)
@@ -13295,7 +13347,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         ReceiveWeather(ReceiveBuffer);
         break;
     case PACKET_MOVE: //move character
-        ReceiveMoveCharacter(ReceiveBuffer);
+        ReceiveMoveCharacter(received_span);
         break;
     case PACKET_POSITION: //move position
         ReceiveMovePosition(ReceiveBuffer);

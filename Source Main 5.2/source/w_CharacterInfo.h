@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "SpinLock.h"
+
 typedef struct _PATH_t
 {
     unsigned char CurrentPath;
@@ -20,6 +22,7 @@ typedef struct _PATH_t
     unsigned char Direction;
     unsigned char Run;
     int           Count;
+    SpinLock      Lock;
 
     _PATH_t()
     {
