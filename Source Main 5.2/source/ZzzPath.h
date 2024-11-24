@@ -7,6 +7,35 @@ extern bool g_bShowPath;
 #include "BaseCls.h"
 #include "./Utilities/Log/ErrorReport.h"
 
+enum EPathDirection
+{
+    UNDEFINED = 0x00,
+    WEST = 0x1,
+    SOUTHWEST = 0x2,
+    SOUTH = 0x3,
+    SOUTHEAST = 0x4,
+    EAST = 0x5,
+    NORTHEAST = 0x6,
+    NORTH = 0x7,
+    NORTHWEST = 0x8,
+};
+
+inline POINT MovePoint(EPathDirection direction, POINT position)
+{
+    switch (direction)
+    {
+    case EPathDirection::WEST:       position.x--; position.y--; break;
+    case EPathDirection::SOUTHWEST:  position.y--; break;
+    case EPathDirection::SOUTH:      position.x++; position.y--; break;
+    case EPathDirection::SOUTHEAST:  position.x++; break;
+    case EPathDirection::EAST:       position.x++; position.y++; break;
+    case EPathDirection::NORTHEAST:  position.y++; break;
+    case EPathDirection::NORTH:      position.x--; position.y++; break;
+    case EPathDirection::NORTHWEST:  position.x--; break;
+    }
+    return position;
+}
+
 class PATH
 {
 public:
