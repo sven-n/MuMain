@@ -79,10 +79,19 @@ enum EPathNodeState : BYTE
 };
 
 DEFINE_ENUM_FLAG_OPERATORS(EPathNodeState)
-//inline EPathNodeState operator|(EPathNodeState a, EPathNodeState b)
-//{
-//    return static_cast<EPathNodeState>(static_cast<int>(a) | static_cast<int>(b));
-//}
+
+enum EPathDirection
+{
+    UNDEFINED = 0x00,
+    WEST = 0x1,
+    SOUTHWEST = 0x2,
+    SOUTH = 0x3,
+    SOUTHEAST = 0x4,
+    EAST = 0x5,
+    NORTHEAST = 0x6,
+    NORTH = 0x7,
+    NORTHWEST = 0x8,
+};
 
 #define CUSTOM_CAMERA_DISTANCE1  200
 #define CUSTOM_CAMERA_DISTANCE2  -150
