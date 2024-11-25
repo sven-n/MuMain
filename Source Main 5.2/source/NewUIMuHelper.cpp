@@ -690,6 +690,13 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         {
             g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Clicked slot slot [%d]", iSlotIndex);
             m_aiSelectedSkills[iSlotIndex] = -1;
+
+            auto cboxCombo = m_CheckBoxList[CHECKBOX_ID_COMBO];
+            if (cboxCombo.box->GetBoxState() == true)
+            {
+                cboxCombo.box->RegisterBoxState(false);
+            }
+
             return false;
         }
     }
@@ -763,7 +770,18 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
         break;
 
     case CHECKBOX_ID_COMBO:
-        _TempConfig.bUseCombo = bState;
+        auto cboxCombo = m_CheckBoxList[CHECKBOX_ID_COMBO];
+
+        if (bState == true)
+        {
+            if (m_aiSelectedSkills[0] <= 0 || m_aiSelectedSkills[1] <= 0 || m_aiSelectedSkills[2] <= 0)
+            {
+                g_pSystemLogBox->AddText(GlobalText[3565], SEASON3B::TYPE_ERROR_MESSAGE);
+                cboxCombo.box->RegisterBoxState(false);
+            }
+        }
+        
+        _TempConfig.bUseCombo = cboxCombo.box->GetBoxState();
         break;
 
     case CHECKBOX_ID_BUFF_DURATION:
@@ -1550,6 +1568,12 @@ void CNewUIMuHelper::AssignSkill(int iSkill)
             int iPrevIndex = GetSkillIndex(iSkill);
             m_aiSelectedSkills[iPrevIndex] = -1;
             m_aiSelectedSkills[m_iSelectedSkillSlot] = iSkill;
+
+            auto cboxCombo = m_CheckBoxList[CHECKBOX_ID_COMBO];
+            if (cboxCombo.box->GetBoxState() == true)
+            {
+                cboxCombo.box->RegisterBoxState(false);
+            }
         }
     }
 }
