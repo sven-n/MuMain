@@ -841,6 +841,8 @@ namespace MUHelper
         g_MovementSkill.m_iSkill = iSkill;
         g_MovementSkill.m_bMagic = FALSE;
 
+        float fDistance = gSkillManager.GetSkillDistance(iSkill, Hero);
+
         if (bTargetRequired)
         {
             if (iTarget == -1)
@@ -866,14 +868,22 @@ namespace MUHelper
 
             TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
             TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
+
+            if (!CheckTile(Hero, &Hero->Object, fDistance))
+            {
+                if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
+                {
+                    SendMove(Hero, &Hero->Object);
+                }
+
+                return 0;
+            }
         }
         else
         {
             TargetX = Hero->PositionX;
             TargetY = Hero->PositionY;
         }
-
-        float fDistance = gSkillManager.GetSkillDistance(iSkill, Hero);
 
         int iSkillResult = ExecuteSkill(Hero, iSkill, fDistance);
         if (iSkillResult == -1)
