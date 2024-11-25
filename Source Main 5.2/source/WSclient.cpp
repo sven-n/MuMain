@@ -1746,10 +1746,9 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
     }
 
     auto pathNum = Data->PathMetadata & 0x0F;
-    if (pathNum >= MAX_PATH_FIND)
+    if (pathNum > MAX_PATH_FIND)
     {
-        assert(false);
-        return;
+        pathNum = MAX_PATH_FIND;
     }
 
     auto requiredSize = fixedSize + (pathNum + 1) / 2;
