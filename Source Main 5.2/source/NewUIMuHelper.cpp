@@ -86,6 +86,8 @@ enum ETextBoxImg : uint16_t
 constexpr int BITMAP_DISTANCE_BEGIN = BITMAP_INTERFACE_CRYWOLF_BEGIN + 33;
 
 constexpr int MAX_NUMBER_DIGITS = 3;
+constexpr int MAX_HUNTING_RANGE = 6;
+constexpr int MAX_OBTAINING_RANGE = 8;
 
 enum ESkillSlot
 {
@@ -886,9 +888,9 @@ void CNewUIMuHelper::ApplyHuntRangeUpdate(int iDelta)
     {
         _TempConfig.iHuntingRange = 0;
     }
-    if (_TempConfig.iHuntingRange > 6)
+    if (_TempConfig.iHuntingRange > MAX_HUNTING_RANGE)
     {
-        _TempConfig.iHuntingRange = 6;
+        _TempConfig.iHuntingRange = MAX_HUNTING_RANGE;
     }
 }
 
@@ -899,9 +901,9 @@ void CNewUIMuHelper::ApplyLootRangeUpdate(int iDelta)
     {
         _TempConfig.iObtainingRange = 1;
     }
-    if (_TempConfig.iObtainingRange > 8)
+    if (_TempConfig.iObtainingRange > MAX_OBTAINING_RANGE)
     {
-        _TempConfig.iObtainingRange = 8;
+        _TempConfig.iObtainingRange = MAX_OBTAINING_RANGE;
     }
 }
 
