@@ -14,7 +14,7 @@ namespace MUHelper
 	class CMuHelper
 	{
 	public:
-		CMuHelper();
+		CMuHelper() = default;
 		~CMuHelper() = default;
 
 	public:
