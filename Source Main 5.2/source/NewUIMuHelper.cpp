@@ -697,6 +697,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
             if (cboxCombo.box->GetBoxState() == true)
             {
                 cboxCombo.box->RegisterBoxState(false);
+                _TempConfig.bUseCombo = false;
             }
 
             return false;
@@ -1575,6 +1576,7 @@ void CNewUIMuHelper::AssignSkill(int iSkill)
             if (cboxCombo.box->GetBoxState() == true)
             {
                 cboxCombo.box->RegisterBoxState(false);
+                _TempConfig.bUseCombo = false;
             }
         }
     }

@@ -601,6 +601,8 @@ namespace MUHelper
         {
             return HealSelf(iHealingSkill);
         }
+
+        return 1;
     }
 
     int CMuHelper::HealSelf(int iHealingSkill)
@@ -839,7 +841,7 @@ namespace MUHelper
         extern int TargetX, TargetY;
 
         g_MovementSkill.m_iSkill = iSkill;
-        g_MovementSkill.m_bMagic = FALSE;
+        g_MovementSkill.m_bMagic = true;
 
         float fSkillDistance = gSkillManager.GetSkillDistance(iSkill, Hero);
 
@@ -869,14 +871,37 @@ namespace MUHelper
             TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
             TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
 
-            if (!CheckTile(Hero, &Hero->Object, fSkillDistance))
-            {
-                if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
-                {
-                    Hero->Path.PathNum = min(Hero->Path.PathNum, 2); // limit to 2 steps
-                    SendMove(Hero, &Hero->Object);
-                }
+            PATH_t tempPath;
+            bool bHasPath = PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &tempPath, m_iHuntingDistance + fSkillDistance);
+            bool bTargetNear = CheckTile(Hero, &Hero->Object, fSkillDistance);
+            bool bNoWall = CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY);
 
+            // target not reachable, ignore it
+            if (!bHasPath)
+            {
+                DeleteTarget(iTarget);
+                return 0;
+            }
+
+            // target is not near or the path is obstructed by a wall, move closer
+            if (!bTargetNear || !bNoWall)
+            {
+                Hero->Path.Lock.lock();
+
+                // Limit movement to 2 steps at a time
+                int pathNum = min(tempPath.PathNum, 2);
+                for (int i = 0; i < pathNum; i++)
+                {
+                    Hero->Path.PathX[i] = tempPath.PathX[i];
+                    Hero->Path.PathY[i] = tempPath.PathY[i];
+                }
+                Hero->Path.PathNum = pathNum;
+                Hero->Path.CurrentPath = 0;
+                Hero->Path.CurrentPathFloat = 0;
+
+                Hero->Path.Lock.unlock();
+
+                SendMove(Hero, &Hero->Object);
                 return 0;
             }
         }
