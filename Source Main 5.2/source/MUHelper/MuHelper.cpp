@@ -27,25 +27,6 @@ namespace MUHelper
 {
     CMuHelper g_MuHelper;
 
-    CMuHelper::CMuHelper()
-    {
-        m_iLoopCounter = 0;
-        m_iSecondsElapsed = 0;
-        m_iSecondsAway = 0;
-        m_iCurrentItem = -1;
-        m_iCurrentTarget = -1;
-        m_iCurrentSkill = -1;
-        m_iComboState = 0;
-        m_iCurrentBuffIndex = 0;
-        m_iCurrentBuffPartyIndex = 0;
-        m_iCurrentHealPartyIndex = 0;
-        m_posOriginal = { 0, 0 };
-        m_iHuntingDistance = 0;
-        m_iObtainingDistance = 1;
-        m_bTimerActivatedBuffOngoing = false;
-        m_iTotalCost = 0;
-    }
-
     void CALLBACK CMuHelper::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
     {
         g_MuHelper.WorkLoop(hwnd, uMsg, idEvent, dwTime);
