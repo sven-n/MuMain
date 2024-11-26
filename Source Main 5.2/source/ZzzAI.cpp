@@ -605,10 +605,16 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
     }*/
 }
 
+PATH _path;
+PATH* path = &_path;
+
 bool MovePath(CHARACTER* c, bool Turn)
 {
     bool Success = false;
     PATH_t* p = &c->Path;
+
+    p->Lock.lock();
+
     if (p->CurrentPath < p->PathNum)
     {
         if (p->CurrentPathFloat == 0)
@@ -687,6 +693,8 @@ bool MovePath(CHARACTER* c, bool Turn)
         }
     }
 
+    p->Lock.unlock();
+
     return Success;
 }
 
@@ -715,11 +723,6 @@ void DebugUtil_Write(wchar_t* lpszFileName, ...)
 
 #endif
 
-
-PATH _path;
-PATH* path = &_path;
-SpinLock path_find_lock;
-
 void InitPath()
 {
     path->SetMapDimensions(256, 256, TerrainWall);
@@ -727,7 +730,7 @@ void InitPath()
 
 bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, int iDefaultWall)
 {
-    path_find_lock.lock();
+    a->Lock.lock();
 
     bool Success = false;
     bool Value = false;
@@ -775,7 +778,7 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
         }
     }
 
-    path_find_lock.unlock();
+    a->Lock.unlock();
 
     return Success;
 }

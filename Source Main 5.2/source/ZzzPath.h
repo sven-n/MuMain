@@ -418,3 +418,19 @@ inline bool PATH::GeneratePath(int xStart, int yStart, int xEnd, int yEnd)
 
     return (false);
 }
+
+inline POINT MovePoint(EPathDirection direction, POINT position)
+{
+    switch (direction)
+    {
+    case EPathDirection::WEST:       position.x--; position.y--; break;
+    case EPathDirection::SOUTHWEST:  position.y--; break;
+    case EPathDirection::SOUTH:      position.x++; position.y--; break;
+    case EPathDirection::SOUTHEAST:  position.x++; break;
+    case EPathDirection::EAST:       position.x++; position.y++; break;
+    case EPathDirection::NORTHEAST:  position.y++; break;
+    case EPathDirection::NORTH:      position.x--; position.y++; break;
+    case EPathDirection::NORTHWEST:  position.x--; break;
+    }
+    return position;
+}

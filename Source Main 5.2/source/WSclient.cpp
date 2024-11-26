@@ -8,6 +8,7 @@
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "ZzzLodTerrain.h"
+#include "ZzzPath.h"
 #include "ZzzAI.h"
 #include "ZzzTexture.h"
 #include "ZzzEffect.h"
@@ -1735,67 +1736,118 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%s)]", Text);
 }
 
-void ReceiveMoveCharacter(const BYTE* ReceiveBuffer)
+void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = (LPPMOVE_CHARACTER)ReceiveBuffer;
-    int  Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
-    CHARACTER* c = &CharactersClient[FindCharacterIndex(Key)];
+    auto fixedSize = sizeof(PMOVE_CHARACTER);
+    auto Data = safe_cast<PMOVE_CHARACTER>(ReceiveBuffer.subspan(0, fixedSize));
+    if (Data == nullptr)
+    {
+        assert(false);
+        return;
+    }
 
+    auto pathNum = Data->PathMetadata & 0x0F;
+    if (pathNum > MAX_PATH_FIND)
+    {
+        pathNum = MAX_PATH_FIND;
+    }
+
+    auto requiredSize = fixedSize + (pathNum + 1) / 2;
+    if (ReceiveBuffer.size() < requiredSize)
+    {
+        assert(false);
+        return;
+    }
+
+    int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
+    CHARACTER* c = &CharactersClient[FindCharacterIndex(Key)];
     OBJECT* o = &c->Object;
 
-    if (c->Dead == 0 && o->Live)
+    if (c->Dead || !o->Live)
     {
-        OBJECT* o = &c->Object;
-        c->TargetAngle = Data->Path[0] >> 4;
-        if (Key == HeroKey)
-        {
-            if (!c->Movement)
-            {
-                c->PositionX = Data->PositionX;
-                c->PositionY = Data->PositionY;
-            }
-        }
-        else
-        {
-            c->TargetX = Data->PositionX;
-            c->TargetY = Data->PositionY;
-            if (o->Type == MODEL_CRUST)
-            {
-                c->PositionX = Data->PositionX;
-                c->PositionY = Data->PositionY;
-                o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->PositionX * 100.f, c->PositionY * 100.f);
-                SetPlayerWalk(c);
-                c->JumpTime = 1;
-            }
-            else if (c->Appear == 0)
-            {
-                int iDefaultWall = TW_CHARACTER;
-
-                if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4
-                    && Key != HeroKey)
-                {
-                    iDefaultWall = TW_NOMOVE;
-                }
-
-                if (PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path, 0.0f, iDefaultWall))
-                {
-                    c->Movement = true;
-                }
-                else
-                {
-                    c->Movement = false;
-                    SetPlayerStop(c);
-                }
-            }
-
-            if (IsMonster(c))
-            {
-                MUHelper::g_MuHelper.AddTarget(Key, false);
-            }
-
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
-        }
+        return;
     }
+
+    if (IsMonster(c))
+    {
+        MUHelper::g_MuHelper.AddTarget(Key, false);
+    }
+
+    c->PositionX = Data->SourceX;
+    c->PositionY = Data->SourceY;
+    c->TargetX = Data->TargetX;
+    c->TargetY = Data->TargetY;
+    c->TargetAngle = Data->PathMetadata >> 4;
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
+
+    if (Key == HeroKey)
+    {
+        if (!c->Movement)
+        {
+            c->PositionX = Data->TargetX;
+            c->PositionY = Data->TargetY;
+        }
+        return;
+    }
+
+    if (o->Type == MODEL_CRUST)
+    {
+        c->PositionX = Data->TargetX;
+        c->PositionY = Data->TargetY;
+        o->Angle[2] = CreateAngle(o->Position[0], o->Position[1], c->PositionX * 100.f, c->PositionY * 100.f);
+        SetPlayerWalk(c);
+        c->JumpTime = 1;
+
+        return;
+    }
+
+    if (c->Movement)
+    {
+        c->Movement = false;
+        SetPlayerStop(c);
+    }
+
+    auto pathData = const_cast<BYTE*>(ReceiveBuffer.subspan(fixedSize).data());
+
+    PATH_t* pCharPath = &c->Path;
+    pCharPath->Lock.lock();
+
+    if (c->Appear == 0)
+    {
+        int iDefaultWall = TW_CHARACTER;
+
+        if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4
+            && Key != HeroKey)
+        {
+            iDefaultWall = TW_NOMOVE;
+        }
+
+        BYTE direction = c->TargetAngle;
+        POINT nextPos = MovePoint(static_cast<EPathDirection>(direction), { Data->SourceX, Data->SourceY });
+
+        pCharPath->PathX[0] = nextPos.x;
+        pCharPath->PathY[0] = nextPos.y;
+
+        for (int i = 0; i < pathNum; ++i)
+        {
+            int byteIndex = i / 2;
+
+            direction = (i % 2 == 0) ? (pathData[byteIndex] >> 4) & 0x0F : (pathData[byteIndex] & 0x0F);
+
+            nextPos = MovePoint(static_cast<EPathDirection>(direction), nextPos);
+
+            pCharPath->PathX[i + 1] = nextPos.x;
+            pCharPath->PathY[i + 1] = nextPos.y;
+        }
+
+        pCharPath->PathNum = pathNum + 1;
+        pCharPath->Direction = direction;
+        pCharPath->CurrentPath = 0;
+        pCharPath->CurrentPathFloat = 0;
+    }
+
+    pCharPath->Lock.unlock();
 }
 
 void ReceiveMovePosition(const BYTE* ReceiveBuffer)
@@ -13295,7 +13347,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
         ReceiveWeather(ReceiveBuffer);
         break;
     case PACKET_MOVE: //move character
-        ReceiveMoveCharacter(ReceiveBuffer);
+        ReceiveMoveCharacter(received_span);
         break;
     case PACKET_POSITION: //move position
         ReceiveMovePosition(ReceiveBuffer);

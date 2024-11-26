@@ -544,9 +544,11 @@ typedef struct {
     PBMSG_HEADER  Header;
     BYTE          KeyH;
     BYTE          KeyL;
-    BYTE          PositionX;
-    BYTE          PositionY;
-    BYTE          Path[1];
+    BYTE          SourceX;
+    BYTE          SourceY;
+    BYTE          TargetX;
+    BYTE          TargetY;
+    BYTE          PathMetadata;
 } PMOVE_CHARACTER, * LPPMOVE_CHARACTER;
 
 //delete character and item
