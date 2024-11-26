@@ -8,6 +8,7 @@
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "ZzzLodTerrain.h"
+#include "ZzzPath.h"
 #include "ZzzAI.h"
 #include "ZzzTexture.h"
 #include "ZzzEffect.h"
@@ -1801,18 +1802,13 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
-    c->Movement = false;
-    SetPlayerStop(c);
+    if (c->Movement)
+    {
+        c->Movement = false;
+        SetPlayerStop(c);
+    }
 
     auto pathData = const_cast<BYTE*>(ReceiveBuffer.subspan(fixedSize).data());
-
-    if (pathData == nullptr || pathNum == 0)
-    {
-        c->PositionX = Data->TargetX;
-        c->PositionY = Data->TargetY;
-
-        return;
-    }
 
     PATH_t* pCharPath = &c->Path;
     pCharPath->Lock.lock();
@@ -1827,34 +1823,26 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
             iDefaultWall = TW_NOMOVE;
         }
 
-        POINT nextPos = { Data->SourceX, Data->SourceY };
+        BYTE direction = c->TargetAngle;
+        POINT nextPos = MovePoint(static_cast<EPathDirection>(direction), { Data->SourceX, Data->SourceY });
+
+        pCharPath->PathX[0] = nextPos.x;
+        pCharPath->PathY[0] = nextPos.y;
 
         for (int i = 0; i < pathNum; ++i)
         {
             int byteIndex = i / 2;
 
-            BYTE direction = (i % 2 == 0) ?
-                (pathData[byteIndex] >> 4) & 0x0F :
-                (pathData[byteIndex] & 0x0F);
+            direction = (i % 2 == 0) ? (pathData[byteIndex] >> 4) & 0x0F : (pathData[byteIndex] & 0x0F);
 
-            switch (static_cast<EPathDirection>(direction))
-            {
-            case EPathDirection::WEST:       nextPos.x--; nextPos.y--; break;
-            case EPathDirection::SOUTHWEST:  nextPos.y--; break;
-            case EPathDirection::SOUTH:      nextPos.x++; nextPos.y--; break;
-            case EPathDirection::SOUTHEAST:  nextPos.x++; break;
-            case EPathDirection::EAST:       nextPos.x++; nextPos.y++; break;
-            case EPathDirection::NORTHEAST:  nextPos.y++; break;
-            case EPathDirection::NORTH:      nextPos.x--; nextPos.y++; break;
-            case EPathDirection::NORTHWEST:  nextPos.x--; break;
-            }
+            nextPos = MovePoint(static_cast<EPathDirection>(direction), nextPos);
 
-            pCharPath->PathX[i] = nextPos.x;
-            pCharPath->PathY[i] = nextPos.y;
+            pCharPath->PathX[i + 1] = nextPos.x;
+            pCharPath->PathY[i + 1] = nextPos.y;
         }
 
-        pCharPath->PathNum = pathNum;
-        pCharPath->Direction = c->TargetAngle;
+        pCharPath->PathNum = pathNum + 1;
+        pCharPath->Direction = direction;
         pCharPath->CurrentPath = 0;
         pCharPath->CurrentPathFloat = 0;
     }
