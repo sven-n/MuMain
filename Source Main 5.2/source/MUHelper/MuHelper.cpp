@@ -677,7 +677,8 @@ namespace MUHelper
                 {
                     m_iCurrentTarget = GetFarthestAttackingTarget();
                 }
-                else
+                
+                if (m_iCurrentTarget == -1)
                 {
                     m_iCurrentTarget = GetNearestTarget();
                 }
