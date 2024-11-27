@@ -94,8 +94,6 @@ namespace MUHelper
 
         m_iSecondsElapsed = 0;
         m_iSecondsAway = 0;
-        m_setTargets.clear();
-        m_setTargetsAttacking.clear();
 
         m_bTimerActivatedBuffOngoing = false;
         m_bPetActivated = false;
