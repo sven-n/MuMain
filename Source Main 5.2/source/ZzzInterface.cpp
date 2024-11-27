@@ -1855,7 +1855,7 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
                 return -1;
         }
     }
-    else if (sc->PK >= PVP_MURDERER2 || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
+    else if ((sc->PK >= PVP_MURDERER2 && sc->Object.Type == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
     {
         return sc->Key;
     }
