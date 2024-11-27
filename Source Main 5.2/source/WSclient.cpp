@@ -2660,7 +2660,10 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         if (c == NULL) break;
 
         OBJECT* o = &c->Object;
-        MUHelper::g_MuHelper.AddTarget(Key, false);
+        if (IsMonster(c))
+        {
+            MUHelper::g_MuHelper.AddTarget(Key, false);
+        }
 
         for (int j = 0; j < Data2->s_BuffCount; ++j)
         {
