@@ -94,8 +94,6 @@ namespace MUHelper
 
         m_iSecondsElapsed = 0;
         m_iSecondsAway = 0;
-        m_setTargets.clear();
-        m_setTargetsAttacking.clear();
 
         m_bTimerActivatedBuffOngoing = false;
         m_bPetActivated = false;
@@ -328,6 +326,31 @@ namespace MUHelper
         }
 
         return iFarthestMonsterId;
+    }
+
+    void CMuHelper::CleanupTargets()
+    {
+        std::set<int> setTargets;
+        {
+            _targetsLock.lock();
+            setTargets = m_setTargets;
+            _targetsLock.unlock();
+        }
+
+        for (const int& iMonsterId : setTargets)
+        {
+            int iIndex = FindCharacterIndex(iMonsterId);
+            if (iIndex == MAX_CHARACTERS_CLIENT)
+            {
+                DeleteTarget(iMonsterId);
+            }
+
+            CHARACTER* pTarget = &CharactersClient[iIndex];
+            if (!pTarget || (pTarget && (pTarget->Dead || !pTarget->Object.Live)))
+            {
+                DeleteTarget(iMonsterId);
+            }
+        }
     }
 
     int CMuHelper::ActivatePet()
@@ -673,11 +696,14 @@ namespace MUHelper
         {
             if (!m_setTargets.empty())
             {
+                CleanupTargets();
+
                 if (m_config.bLongRangeCounterAttack)
                 {
                     m_iCurrentTarget = GetFarthestAttackingTarget();
                 }
-                else
+                
+                if (m_iCurrentTarget == -1)
                 {
                     m_iCurrentTarget = GetNearestTarget();
                 }
