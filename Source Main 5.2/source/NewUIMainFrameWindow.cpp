@@ -1832,6 +1832,12 @@ int SEASON3B::CNewUISkillList::GetHotKey(int iHotKey)
 
 int SEASON3B::CNewUISkillList::GetSkillIndex(int iSkillType)
 {
+    // special handling for skills with different skill id for the trigger
+    if (iSkillType == AT_SKILL_BLAST_HELL_BEGIN)
+    {
+        iSkillType = AT_SKILL_BLAST_HELL;
+    }
+
     int iReturn = -1;
     for (int i = 0; i < MAX_MAGIC; ++i)
     {

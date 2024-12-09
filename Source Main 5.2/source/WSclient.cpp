@@ -218,8 +218,6 @@ int MoveCount = 0;
 
 int CurrentSkill = 0;
 
-bool Teleport = false;
-
 int BuyCost = 0;
 
 int  EnableUse = 0; // todo: get rid of this, it may cause the stuck client bug, so that players can't use items anymore.
@@ -1916,7 +1914,6 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     if (Data->Flag == 0)
     {
         CreateTeleportEnd(o);
-        Teleport = false;
     }
     else
     {
@@ -4005,10 +4002,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
     case AT_SKILL_TELEPORT_B:
         CreateTeleportBegin(to);
-
         CreateTeleportEnd(so);
-        if (sc == Hero)
-            Teleport = false;
 
         PlayBuffer(SOUND_TELEKINESIS, so);
         break;
@@ -10629,8 +10623,6 @@ void ReceiveChangeMapServerInfo(const BYTE* ReceiveBuffer)
     if (0 == Data->m_vSvrInfo.m_wMapSvrPort)
     {
         LoadingWorld = 0;
-
-        Teleport = false;
         return;
     }
 

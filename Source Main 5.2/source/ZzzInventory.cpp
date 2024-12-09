@@ -138,8 +138,6 @@ BYTE BuyItem[4];
 
 static  int iStateNum = 4;
 
-extern bool Teleport;
-
 extern float g_fScreenRate_x;	// ※
 extern float g_fScreenRate_y;
 
