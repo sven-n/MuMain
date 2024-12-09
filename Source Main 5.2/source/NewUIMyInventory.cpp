@@ -34,8 +34,6 @@
 
 using namespace SEASON3B;
 
-extern bool Teleport;
-
 CNewUIMyInventory::CNewUIMyInventory()
 {
     m_pNewUIMng = nullptr;
@@ -1674,11 +1672,8 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
 
     if (pItem->Type == ITEM_TOWN_PORTAL_SCROLL)
     {
-        if (!Teleport)
-        {
-            SendRequestUse(iIndex, 0);
-            return true;
-        }
+        SendRequestUse(iIndex, 0);
+        return true;
     }
 
     const auto isApple = pItem->Type == ITEM_APPLE;

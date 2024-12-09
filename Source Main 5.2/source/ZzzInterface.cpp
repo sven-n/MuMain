@@ -66,7 +66,6 @@ extern CUIMapName* g_pUIMapName;	// rozy
 extern bool bCheckNPC;
 extern BOOL g_bWhileMovingZone;
 extern DWORD g_dwLatestZoneMoving;
-extern bool Teleport;
 extern bool LogOut;
 extern int DirTable[16];
 
@@ -6149,16 +6148,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                     }
                     to->Angle[2] = CreateAngle2D(to->Position, tc->TargetPosition);
 
-                    if (Teleport)
-                    {
-                        Teleport = false;
-                    }
-                    else
-                    {
-                        Teleport = true;
-                        SocketClient->ToGameServer()->SendTeleportTarget(tc->Key, TargetX, TargetY);
-                        SetPlayerTeleport(tc);
-                    }
+                    SocketClient->ToGameServer()->SendTeleportTarget(tc->Key, TargetX, TargetY);
+                    SetPlayerTeleport(tc);
                 }
             }
             return;
@@ -6206,13 +6197,12 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                     bool bResult;
                     //SendRequestMagicTeleport(&bResult, 0, TargetX, TargetY);
-                    if (Teleport || g_bWhileMovingZone || (GetTickCount() - g_dwLatestZoneMoving < 3000))\
+                    if (g_bWhileMovingZone || (GetTickCount() - g_dwLatestZoneMoving < 3000))\
                     {
                         bResult = false;
                     }
                     else
                     {
-                        Teleport = true;
                         SocketClient->ToGameServer()->SendEnterGateRequest(0, TargetX, TargetY);
                         bResult = true;
                     }
@@ -7265,7 +7255,7 @@ void CheckGate()
                             bool bResult = false;
                             if ((LoadingWorld) <= 30)
                             {
-                                if (Teleport || g_bWhileMovingZone || (GetTickCount() - g_dwLatestZoneMoving < 3000))
+                                if (g_bWhileMovingZone || (GetTickCount() - g_dwLatestZoneMoving < 3000))
                                 {
                                     bResult = false;
                                 }
