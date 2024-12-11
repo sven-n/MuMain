@@ -2474,8 +2474,9 @@ void MainScene(HDC hDC)
         const float current_frame_time_ms = current_tick_count - last_render_tick_count;
         if (ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
         {
-            constexpr float min_spin_ms = 1;
-            constexpr float sleep_threshold_ms = 8;
+            constexpr float min_spin_ms = 1.0f;
+            constexpr float spin_yield_threshold_ms = 0.25f;
+            constexpr float sleep_threshold_ms = 8.0f;
             const auto rest_ms = ms_per_frame - current_frame_time_ms;
             auto sleep_ms = rest_ms - min_spin_ms;
 
@@ -2497,6 +2498,11 @@ void MainScene(HDC hDC)
                 if (spinned_ms >= spin_ms)
                 {
                     break;
+                }
+                // reduce CPU usage by yielding during spin phase
+                if (spin_ms - spinned_ms > spin_yield_threshold_ms)
+                {
+                    std::this_thread::yield();
                 }
             }
 
