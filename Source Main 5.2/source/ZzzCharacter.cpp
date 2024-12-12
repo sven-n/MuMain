@@ -2373,7 +2373,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             o->m_vPosSword[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
             o->m_vPosSword[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
         }
-        if (6 <= c->AttackTime && c->AttackTime <= 12)
+        if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
         {	// 꼬깔 만들기
             vec3_t Position;
 
