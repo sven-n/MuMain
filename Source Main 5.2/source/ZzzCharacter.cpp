@@ -757,7 +757,7 @@ void SetAttackSpeed()
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD4].PlaySpeed = 0.30f + AttackSpeed1;
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SWORD5].PlaySpeed = 0.24f + AttackSpeed1;
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_WHEEL].PlaySpeed = 0.24f + AttackSpeed1;
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_ONETOONE].PlaySpeed = 0.25f + AttackSpeed1;
+    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_DEATHSTAB].PlaySpeed = 0.25f + AttackSpeed1;
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SKILL_SPEAR].PlaySpeed = 0.30f + AttackSpeed1;
     Models[MODEL_PLAYER].Actions[PLAYER_SKILL_RIDER].PlaySpeed = 0.3f + AttackSpeed1;
     Models[MODEL_PLAYER].Actions[PLAYER_SKILL_RIDER_FLY].PlaySpeed = 0.3f + AttackSpeed1;
@@ -2334,7 +2334,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
     case AT_SKILL_BLOW_UP + 2:
     case AT_SKILL_BLOW_UP + 3:
     case AT_SKILL_BLOW_UP + 4:
-    case AT_SKILL_ONETOONE:
+    case AT_SKILL_DEATHSTAB:
     {
         BMD* b = &Models[o->Type];
 
@@ -2399,7 +2399,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
                     if (10 <= c->AttackTime && to->Live)
                     {
                         //PlayBuffer( SOUND_THUNDER01);
-                        to->m_byHurtByOneToOne = 35;
+                        to->m_byHurtByDeathstab = 35;
                     }
                 }
             }
@@ -3796,7 +3796,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
     Vector(0.f, 0.f, 0.f, p);
     Vector(1.f, 1.f, 1.f, Light);
 
-    if (gMapManager.InBattleCastle() == false && o->m_byHurtByOneToOne > 0 && rand_fps_check(2))
+    if (gMapManager.InBattleCastle() == false && o->m_byHurtByDeathstab > 0 && rand_fps_check(2))
     {
         vec3_t pos1, pos2;
 
@@ -3817,7 +3817,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                 }
             }
         }
-        o->m_byHurtByOneToOne--;
+        o->m_byHurtByDeathstab--;
     }
 
     if ((o->CurrentAction == PLAYER_ATTACK_TELEPORT || o->CurrentAction == PLAYER_ATTACK_RIDE_TELEPORT
@@ -5041,7 +5041,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             case AT_SKILL_BLOW_UP + 2:
             case AT_SKILL_BLOW_UP + 3:
             case AT_SKILL_BLOW_UP + 4:
-            case AT_SKILL_ONETOONE:
+            case AT_SKILL_DEATHSTAB:
             case AT_SKILL_SPEAR:
             case AT_SKILL_LIFE_UP:
             case AT_SKILL_LIFE_UP + 1:
@@ -11267,7 +11267,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->AlphaTarget = 1.f;
     o->Velocity = 0.f;
     o->ShadowScale = 0.f;
-    o->m_byHurtByOneToOne = 0;
+    o->m_byHurtByDeathstab = 0;
     o->AI = 0;
     o->m_byBuildTime = 10;
     c->m_iDeleteTime = -128;

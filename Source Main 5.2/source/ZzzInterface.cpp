@@ -2040,7 +2040,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
     }
     int Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
     if (Skill == AT_SKILL_RIDER
-        || Skill == AT_SKILL_ONETOONE
+        || Skill == AT_SKILL_DEATHSTAB
         || (AT_SKILL_BLOW_UP <= Skill && Skill <= AT_SKILL_BLOW_UP + 4)
         || (Skill == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_DARK_HORSE_ITEM || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
         || Skill == AT_SKILL_STRONG_PIER
@@ -2065,7 +2065,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         case AT_SKILL_BLOW_UP + 2:
         case AT_SKILL_BLOW_UP + 3:
         case AT_SKILL_BLOW_UP + 4:
-        case AT_SKILL_ONETOONE:
+        case AT_SKILL_DEATHSTAB:
             if (!(Hero->Weapon[0].Type != -1 && (Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF + MAX_ITEM_INDEX)))
             {
                 return false;
@@ -2207,8 +2207,8 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         case AT_SKILL_BLOW_UP + 2:
         case AT_SKILL_BLOW_UP + 3:
         case AT_SKILL_BLOW_UP + 4:
-        case AT_SKILL_ONETOONE:
-            SetAction(o, PLAYER_ATTACK_ONETOONE);
+        case AT_SKILL_DEATHSTAB:
+            SetAction(o, PLAYER_ATTACK_DEATHSTAB);
             break;
         case AT_SKILL_RIDER:
             //		    SendRequestMagic(Skill,CharactersClient[g_MovementSkill.m_iTarget].Key);
@@ -2310,7 +2310,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         if ((TerrainWall[TargetIndex] & TW_NOMOVE) != TW_NOMOVE && (TerrainWall[TargetIndex] & TW_NOGROUND) != TW_NOGROUND)
         {
             if (Skill != AT_SKILL_SPEAR
-                && Skill != AT_SKILL_ONETOONE
+                && Skill != AT_SKILL_DEATHSTAB
                 && Skill != AT_SKILL_RIDER
                 && Skill != AT_SKILL_STRONG_PIER
                 && Skill != AT_SKILL_LONGPIER_ATTACK
@@ -2341,7 +2341,7 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     case AT_SKILL_BLOW_UP + 2:
     case AT_SKILL_BLOW_UP + 3:
     case AT_SKILL_BLOW_UP + 4:
-    case AT_SKILL_ONETOONE:
+    case AT_SKILL_DEATHSTAB:
         return;
     }
 
@@ -3279,7 +3279,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_BLOW_UP + 2:
         case AT_SKILL_BLOW_UP + 3:
         case AT_SKILL_BLOW_UP + 4:
-        case AT_SKILL_ONETOONE:
+        case AT_SKILL_DEATHSTAB:
         case AT_SKILL_RIDER:
         case AT_SKILL_SWORD1:
         case AT_SKILL_SWORD2:
@@ -7073,7 +7073,7 @@ int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
                         case AT_SKILL_BLOW_UP + 2:
                         case AT_SKILL_BLOW_UP + 3:
                         case AT_SKILL_BLOW_UP + 4:
-                        case AT_SKILL_ONETOONE:
+                        case AT_SKILL_DEATHSTAB:
                         case AT_SKILL_STRONG_PIER:
                         case AT_SKILL_FIRE_BUST_UP:
                         case AT_SKILL_FIRE_BUST_UP + 1:

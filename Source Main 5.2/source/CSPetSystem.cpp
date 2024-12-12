@@ -83,7 +83,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->AlphaTarget = 1.f;
     o->Velocity = 0.f;
     o->ShadowScale = 0.f;
-    o->m_byHurtByOneToOne = 0;
+    o->m_byHurtByDeathstab = 0;
     o->AI = 0;
     o->Velocity = 1.f;
     o->Gravity = 13;

@@ -1883,7 +1883,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 o->m_vPosSword[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
                 o->m_vPosSword[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
             }
-            if (6 <= c->AttackTime && c->AttackTime <= 12)
+            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
             {
                 vec3_t Position;
                 vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
@@ -1905,7 +1905,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                         OBJECT* to = &tc->Object;
                         if (10 <= c->AttackTime && to->Live)
                         {
-                            to->m_byHurtByOneToOne = 35;
+                            to->m_byHurtByDeathstab = 35;
                         }
                     }
                 }
@@ -2137,7 +2137,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 o->m_vPosSword[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
                 o->m_vPosSword[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
             }
-            if (6 <= c->AttackTime && c->AttackTime <= 12)
+            if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
             {
                 vec3_t Position;
                 vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
@@ -2159,7 +2159,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                         OBJECT* to = &tc->Object;
                         if (10 <= c->AttackTime && to->Live)
                         {
-                            to->m_byHurtByOneToOne = 35;
+                            to->m_byHurtByDeathstab = 35;
                         }
                     }
                 }
