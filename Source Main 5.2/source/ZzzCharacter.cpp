@@ -3796,7 +3796,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
     Vector(0.f, 0.f, 0.f, p);
     Vector(1.f, 1.f, 1.f, Light);
 
-    if (gMapManager.InBattleCastle() == false && o->m_byHurtByOneToOne > 0)
+    if (gMapManager.InBattleCastle() == false && o->m_byHurtByOneToOne > 0 && rand_fps_check(2))
     {
         vec3_t pos1, pos2;
 
