@@ -2,85 +2,81 @@
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Timer.h"
+#include <chrono>
 
 CTimer::CTimer()
 {
-    if (::QueryPerformanceFrequency((LARGE_INTEGER*)&m_frequency) == FALSE)
-    {
-        m_bUsePerformanceCounter = FALSE;
-
-        TIMECAPS Caps;
-        ::timeGetDevCaps(&Caps, sizeof(Caps));
-
-        if (::timeBeginPeriod(Caps.wPeriodMin) == TIMERR_NOCANDO)
-        {
-#ifdef __TIMER_DEBUG
-            __TraceF(TEXT("timeBeginPeriod(...) Error\n"));
-            //CDebug::OutputDebugString(L"timeBeginPeriod(...) Error");
-#endif //__TIMER_DEBUG
-        }
-
-        m_mmAbsTimerStart = m_mmTimerStart = ::timeGetTime();
-    }
-    else
-    {
-        m_bUsePerformanceCounter = TRUE;
-
-        ::QueryPerformanceCounter((LARGE_INTEGER*)&m_pcTimerStart);
-
-        m_pcAbsTimerStart = m_pcTimerStart;
-        m_resolution = (float)(1.0 / (double)m_frequency) * 1000.0f;
-    }
-}
-
-CTimer::~CTimer()
-{
-    if (!m_bUsePerformanceCounter)
-    {
-        TIMECAPS Caps;
-        ::timeGetDevCaps(&Caps, sizeof(Caps));
-        ::timeEndPeriod(Caps.wPeriodMin);
-    }
+    m_startTime = Clock::now();
+    m_absStartTime = m_startTime;
 }
 
 double CTimer::GetTimeElapsed()
 {
-    __int64 timeElapsed;
-
-    if (m_bUsePerformanceCounter)	// if using Performance Counter
-    {
-        ::QueryPerformanceCounter((LARGE_INTEGER*)&timeElapsed);
-        timeElapsed -= m_pcTimerStart;
-        return (double)timeElapsed * (double)m_resolution;
-    }
-    else	// if not
-    {
-        timeElapsed = ::timeGetTime() - m_mmTimerStart;
-        return (double)timeElapsed;
-    }
+    auto now = Clock::now();
+    auto elapsed = std::chrono::duration<double, std::milli>(now - m_startTime);
+    return elapsed.count(); // Return elapsed time in milliseconds
 }
 
 double CTimer::GetAbsTime()
 {
-    __int64 absTime;
-
-    if (m_bUsePerformanceCounter)	// if using Performance Counter
-    {
-        ::QueryPerformanceCounter((LARGE_INTEGER*)&absTime);
-        return (double)absTime * (double)m_resolution;
-    }
-    else	// if not
-    {
-        absTime = ::timeGetTime();
-        return (double)absTime;
-    }
+    auto now = Clock::now();
+    auto elapsed = std::chrono::duration<double, std::milli>(now - m_absStartTime);
+    return elapsed.count(); // Return absolute time in milliseconds
 }
 
 void CTimer::ResetTimer()
 {
-    // start time
-    if (m_bUsePerformanceCounter)	// if using Performance Counter
-        ::QueryPerformanceCounter((LARGE_INTEGER*)&m_pcTimerStart);
-    else	// if not
-        m_mmTimerStart = ::timeGetTime();
+    m_startTime = Clock::now(); // Reset start time to now
+}
+
+void CTimer2::SetTimer(unsigned int delay)
+{
+    m_delay = delay;
+    m_startTickCount = 0;
+}
+
+unsigned int CTimer2::GetDelay() const
+{
+    return m_delay;
+}
+
+void CTimer2::ResetTimer()
+{
+    m_startTickCount = 0;
+}
+
+void CTimer2::UpdateTime()
+{
+    using SteadyClock = std::chrono::steady_clock;
+    using TimePoint = std::chrono::time_point<SteadyClock>;
+
+    static TimePoint startTickTime;
+
+    if (m_delay == 0)
+    {
+        m_timeReached = true;
+    }
+    else
+    {
+        m_timeReached = false;
+        auto now = SteadyClock::now();
+
+        if (m_startTickCount == 0)
+        {
+            startTickTime = now;
+            m_startTickCount = 1; // Mark initialization
+            return;
+        }
+
+        if (now - startTickTime > std::chrono::milliseconds(m_delay))
+        {
+            startTickTime = now;
+            m_timeReached = true;
+        }
+    }
+}
+
+bool CTimer2::IsTime() const
+{
+    return m_timeReached;
 }
