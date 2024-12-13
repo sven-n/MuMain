@@ -2349,7 +2349,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
                 PlayBuffer(SOUND_SKILL_SWORD2);
         }
 
-        if (2 <= c->AttackTime && c->AttackTime <= 8)
+        if (2 <= c->AttackTime && c->AttackTime <= 8 && rand_fps_check(1))
         {	// 기 모으기
             for (int j = 0; j < 3; ++j)
             {
@@ -2373,22 +2373,25 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             o->m_vPosSword[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
             o->m_vPosSword[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
         }
-        if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
+        if (6 <= c->AttackTime && c->AttackTime <= 12)
         {	// 꼬깔 만들기
-            vec3_t Position;
+            if (rand_fps_check(2))
+            {
+                vec3_t Position;
 
-            //memcpy( Position, o->Position, sizeof ( vec3_t));
-            vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
+                //memcpy( Position, o->Position, sizeof ( vec3_t));
+                vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
 
-            b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], Position2, Position, true);
+                b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], Position2, Position, true);
 
-            float fDistance = 100.0f + (float)(c->AttackTime - 8) * 10.0f;
-            Position[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
-            Position[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
-            //Position[2] += 110.0f;
-            vec3_t Light = { 1.0f, 1.0f, 1.0f };
-            CreateEffect(MODEL_SPEAR, Position, o->Angle, Light, 1, o);
-            CreateEffect(MODEL_SPEAR, Position, o->Angle, Light, 1, o);
+                float fDistance = 100.0f + (float)(c->AttackTime - 8) * 10.0f;
+                Position[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
+                Position[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
+                //Position[2] += 110.0f;
+                vec3_t Light = { 1.0f, 1.0f, 1.0f };
+                CreateEffect(MODEL_SPEAR, Position, o->Angle, Light, 1, o);
+                CreateEffect(MODEL_SPEAR, Position, o->Angle, Light, 1, o);
+            }
 
             if (c->TargetCharacter != -1)
             {
@@ -3796,28 +3799,31 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
     Vector(0.f, 0.f, 0.f, p);
     Vector(1.f, 1.f, 1.f, Light);
 
-    if (gMapManager.InBattleCastle() == false && o->m_byHurtByDeathstab > 0 && rand_fps_check(2))
+    if (gMapManager.InBattleCastle() == false && o->m_byHurtByDeathstab > 0)
     {
-        vec3_t pos1, pos2;
-
-        Vector(0.f, 0.f, 0.f, p);
-        for (int i = 0; i < b->NumBones; ++i)
+        if (rand_fps_check(2))
         {
-            if (!b->Bones[i].Dummy)
-            {
-                int iParent = b->Bones[i].Parent;
-                if (iParent > -1 && iParent < b->NumBones)
-                {
-                    b->TransformPosition(o->BoneTransform[i], p, pos1, true);
-                    b->TransformPosition(o->BoneTransform[iParent], p, pos2, true);
+            vec3_t pos1, pos2;
 
-                    GetNearRandomPos(pos1, 20, pos1);
-                    GetNearRandomPos(pos2, 20, pos2);
-                    CreateJoint(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 20.f);
+            Vector(0.f, 0.f, 0.f, p);
+            for (int i = 0; i < b->NumBones; ++i)
+            {
+                if (!b->Bones[i].Dummy)
+                {
+                    int iParent = b->Bones[i].Parent;
+                    if (iParent > -1 && iParent < b->NumBones)
+                    {
+                        b->TransformPosition(o->BoneTransform[i], p, pos1, true);
+                        b->TransformPosition(o->BoneTransform[iParent], p, pos2, true);
+
+                        GetNearRandomPos(pos1, 20, pos1);
+                        GetNearRandomPos(pos2, 20, pos2);
+                        CreateJoint(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 20.f);
+                    }
                 }
             }
         }
-        o->m_byHurtByDeathstab--;
+        o->m_byHurtByDeathstab -= FPS_ANIMATION_FACTOR;
     }
 
     if ((o->CurrentAction == PLAYER_ATTACK_TELEPORT || o->CurrentAction == PLAYER_ATTACK_RIDE_TELEPORT
