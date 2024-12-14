@@ -171,6 +171,13 @@ extern int CurrentSkill;
 void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to,
     WORD SkillIndex, WORD Skill, WORD SKKey)
 {
+    vec3_t ArrowPos;
+    VectorCopy(o->Position, ArrowPos);
+    if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
+    {
+        ArrowPos[2] += 30.0f; // slightly elevate when riding a fenrir
+    }
+
     int SubType = 0;
     int Right = c->Weapon[0].Type;
     int Left = c->Weapon[1].Type;
@@ -202,40 +209,40 @@ void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to,
 
     if (SKKey == AT_SKILL_DEEPIMPACT)
     {
-        CreateEffect(MODEL_ARROW_IMPACT, o->Position, o->Angle, o->Light, 0, to, o->PKKey, SkillIndex, Skill);
+        CreateEffect(MODEL_ARROW_IMPACT, ArrowPos, o->Angle, o->Light, 0, to, o->PKKey, SkillIndex, Skill);
     }
     else
     {
         switch (Right)
         {
-        case MODEL_CROSSBOW:CreateEffect(MODEL_ARROW_STEEL, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_GOLDEN_CROSSBOW:CreateEffect(MODEL_ARROW_STEEL, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_ARQUEBUS:CreateEffect(MODEL_ARROW_SAW, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_LIGHT_CROSSBOW:CreateEffect(MODEL_ARROW_LASER, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SERPENT_CROSSBOW:CreateEffect(MODEL_ARROW_THUNDER, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_BLUEWING_CROSSBOW:CreateEffect(MODEL_ARROW_WING, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_AQUAGOLD_CROSSBOW:CreateEffect(MODEL_ARROW_BOMB, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SAINT_CROSSBOW:CreateEffect(MODEL_ARROW_DOUBLE, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_CROSSBOW:CreateEffect(MODEL_ARROW_STEEL, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_GOLDEN_CROSSBOW:CreateEffect(MODEL_ARROW_STEEL, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_ARQUEBUS:CreateEffect(MODEL_ARROW_SAW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_LIGHT_CROSSBOW:CreateEffect(MODEL_ARROW_LASER, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_SERPENT_CROSSBOW:CreateEffect(MODEL_ARROW_THUNDER, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_BLUEWING_CROSSBOW:CreateEffect(MODEL_ARROW_WING, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_AQUAGOLD_CROSSBOW:CreateEffect(MODEL_ARROW_BOMB, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_SAINT_CROSSBOW:CreateEffect(MODEL_ARROW_DOUBLE, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
         case MODEL_DIVINE_CB_OF_ARCHANGEL:
-            CreateEffect(MODEL_ARROW_BEST_CROSSBOW, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            CreateEffect(MODEL_ARROW_BEST_CROSSBOW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
             break;
-        case MODEL_GREAT_REIGN_CROSSBOW:CreateEffect(MODEL_ARROW_DRILL, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_GREAT_REIGN_CROSSBOW:CreateEffect(MODEL_ARROW_DRILL, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
         }
         switch (Left)
         {
-        case MODEL_BOW:CreateEffect(MODEL_ARROW, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SMALL_BOW:CreateEffect(MODEL_ARROW, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_ELVEN_BOW:CreateEffect(MODEL_ARROW_V, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_BATTLE_BOW:CreateEffect(MODEL_ARROW, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_TIGER_BOW:CreateEffect(MODEL_ARROW, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SILVER_BOW:CreateEffect(MODEL_ARROW, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_CHAOS_NATURE_BOW:CreateEffect(MODEL_ARROW_NATURE, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_CELESTIAL_BOW:CreateEffect(MODEL_ARROW_HOLY, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_ARROW_VIPER_BOW:CreateEffect(MODEL_LACEARROW, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SYLPH_WIND_BOW:CreateEffect(MODEL_ARROW_SPARK, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_ALBATROSS_BOW:CreateEffect(MODEL_ARROW_RING, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_STINGER_BOW:CreateEffect(MODEL_ARROW_DARKSTINGER, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_AIR_LYN_BOW:CreateEffect(MODEL_ARROW_GAMBLE, o->Position, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_SMALL_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_ELVEN_BOW:CreateEffect(MODEL_ARROW_V, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_BATTLE_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_TIGER_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_SILVER_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_CHAOS_NATURE_BOW:CreateEffect(MODEL_ARROW_NATURE, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_CELESTIAL_BOW:CreateEffect(MODEL_ARROW_HOLY, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_ARROW_VIPER_BOW:CreateEffect(MODEL_LACEARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_SYLPH_WIND_BOW:CreateEffect(MODEL_ARROW_SPARK, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_ALBATROSS_BOW:CreateEffect(MODEL_ARROW_RING, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_STINGER_BOW:CreateEffect(MODEL_ARROW_DARKSTINGER, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_AIR_LYN_BOW:CreateEffect(MODEL_ARROW_GAMBLE, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
         }
     }
 }

@@ -1701,7 +1701,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 AngleMatrix(o->Angle, Matrix);
                 Vector(-10.f, -60.f, 135.f, p1);
                 VectorRotate(p1, Matrix, p2);
-                VectorAddScaled(o->Position, p2, o->Position, FPS_ANIMATION_FACTOR);
+                VectorAdd(o->Position, p2, o->Position);
                 if (Type == MODEL_ARROW_WING)
                 {
                     o->Scale = 1.8f;
