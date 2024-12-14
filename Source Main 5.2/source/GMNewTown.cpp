@@ -700,8 +700,8 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                     }
                     else
                     {
-                        SetAction(pObject->Owner, PLAYER_ATTACK_ONETOONE);
-                        pCharacter->Skill = AT_SKILL_ONETOONE;
+                        SetAction(pObject->Owner, PLAYER_ATTACK_DEATHSTAB);
+                        pCharacter->Skill = AT_SKILL_DEATHSTAB;
                         pCharacter->AttackTime = 1;
                         pCharacter->TargetCharacter = -1;
                         pCharacter->AttackFlag = ATTACK_FAIL;

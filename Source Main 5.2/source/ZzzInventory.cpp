@@ -6341,7 +6341,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         {
             if ((CharacterAttribute->Skill[Type] >= AT_SKILL_SWORD1 && CharacterAttribute->Skill[Type] <= AT_SKILL_SWORD5)
                 || CharacterAttribute->Skill[Type] == AT_SKILL_WHEEL || CharacterAttribute->Skill[Type] == AT_SKILL_FURY_STRIKE
-                || CharacterAttribute->Skill[Type] == AT_SKILL_ONETOONE
+                || CharacterAttribute->Skill[Type] == AT_SKILL_DEATHSTAB
                 || (AT_SKILL_ANGER_SWORD_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_ANGER_SWORD_UP + 4)
                 || (AT_SKILL_BLOW_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_BLOW_UP + 4)
                 || (AT_SKILL_TORNADO_SWORDA_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_TORNADO_SWORDA_UP + 4)

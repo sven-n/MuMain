@@ -358,7 +358,7 @@ void OpenPlayers()
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_TWO_HAND_SWORD_TWO].PlaySpeed = 0.24f;
 
     //Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_ONETOONE    ].PlaySpeed = 0.30f;
-    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_ONETOONE].PlaySpeed = 0.45f;
+    Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_DEATHSTAB].PlaySpeed = 0.45f;
 
     Models[MODEL_PLAYER].Actions[PLAYER_DIE1].Loop = true;
     Models[MODEL_PLAYER].Actions[PLAYER_DIE2].Loop = true;
