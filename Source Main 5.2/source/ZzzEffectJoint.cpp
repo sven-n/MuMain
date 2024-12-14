@@ -4235,7 +4235,7 @@ void MoveJoint(JOINT* o, int iIndex)
 
             vec3_t MagicPos;
             GetMagicScrew(iIndex * 17721, MagicPos, 1.4f);
-            VectorScale(MagicPos, 300.0f, MagicPos);
+            //VectorScale(MagicPos, 300.0f, MagicPos);
             VectorAdd(MagicPos, o->TargetPosition, MagicPos);
             vec3_t TargetPos;
             VectorCopy(o->Target->m_vPosSword, TargetPos);
