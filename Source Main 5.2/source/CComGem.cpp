@@ -34,7 +34,6 @@ namespace COMGEM
 
 void COMGEM::SendReqUnMix()
 {
-    iUnMixIndex += 12;
     SocketClient->ToGameServer()->SendLahapJewelMixRequest(0x01, m_cGemType / 2, iUnMixLevel, iUnMixIndex);
 }
 
@@ -76,7 +75,7 @@ bool COMGEM::FindWantedList()
         if (isCompiledGem(pItem))
         {
             INTBYTEPAIR p;
-            p.first = pItem->y * pNewInventoryCtrl->GetNumberOfColumn() + pItem->x;
+            p.first = pItem->y * pNewInventoryCtrl->GetNumberOfColumn() + pItem->x + MAX_EQUIPMENT_INDEX;
             p.second = pItem->Level;
             m_UnmixTarList.AddText(p.first, p.second);
             bReturn = true;
@@ -171,7 +170,7 @@ bool COMGEM::CheckMyInvValid()
     }
     else if (m_bType == DETACH)
     {
-        if (iUnMixIndex == -1 || iUnMixIndex >= MAX_INVENTORY)
+        if (iUnMixIndex == -1 || iUnMixIndex >= MAX_MY_INVENTORY_EX_INDEX)
         {
             m_cErr = DEERROR_NOTALLOWED;
             m_cPercent = 0;
