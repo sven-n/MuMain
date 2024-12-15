@@ -34,7 +34,7 @@ namespace COMGEM
 
 void COMGEM::SendReqUnMix()
 {
-    iUnMixIndex += 12;
+    iUnMixIndex += MAX_EQUIPMENT;
     SocketClient->ToGameServer()->SendLahapJewelMixRequest(0x01, m_cGemType / 2, iUnMixLevel, iUnMixIndex);
 }
 
@@ -171,7 +171,7 @@ bool COMGEM::CheckMyInvValid()
     }
     else if (m_bType == DETACH)
     {
-        if (iUnMixIndex == -1 || iUnMixIndex >= MAX_INVENTORY)
+        if (iUnMixIndex == -1 || iUnMixIndex >= MAX_INVENTORY_EXT)
         {
             m_cErr = DEERROR_NOTALLOWED;
             m_cPercent = 0;
@@ -180,7 +180,7 @@ bool COMGEM::CheckMyInvValid()
 
         //SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
         //ITEM * pItem = pNewInventoryCtrl->GetItem(iUnMixIndex);
-        ITEM* pItem = g_pMyInventory->FindItem(iUnMixIndex);
+        ITEM* pItem = g_pMyInventory->FindItem(iUnMixIndex + MAX_EQUIPMENT);
 
         if (isCompiledGem(pItem))
 
