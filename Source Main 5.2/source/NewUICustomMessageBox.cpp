@@ -2078,7 +2078,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
         {
             wchar_t strText[256] = { 0, };
             int	iGemLevel = COMGEM::GetUnMixGemLevel() + 1;
-            ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(pUT->m_iInvenIdx + MAX_EQUIPMENT);
+            ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(pUT->m_iInvenIdx);
             int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
             COMGEM::SetGem(nIdx);
             swprintf(strText, GlobalText[1813], GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], iGemLevel);

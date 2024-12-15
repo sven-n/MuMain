@@ -5168,7 +5168,7 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
 
     wchar_t oText[MAX_GLOBAL_TEXT_STRING] = { 0, };
 
-    ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(m_TextListIter->m_iInvenIdx + MAX_EQUIPMENT);
+    ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(m_TextListIter->m_iInvenIdx);
     if (pItem)
     {
         int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
