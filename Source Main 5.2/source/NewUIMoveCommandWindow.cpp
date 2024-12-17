@@ -392,7 +392,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
                     (*li)->_bCanMove = false;
                 }
             }
-            else if (wcsncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], 8) == 0)
+            else if (wcsncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], wcslen(GlobalText[37])) == 0)
             {
                 if (pEquipedHelper->Type == ITEM_HORN_OF_UNIRIA || pEquipedHelper->Type == ITEM_HORN_OF_DINORANT)
                 {
