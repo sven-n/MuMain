@@ -86,23 +86,25 @@ JewelHarmonyInfo::~JewelHarmonyInfo()
 
 const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filename)
 {
+    constexpr size_t NAME_SIZE = 60;
+    constexpr size_t LEVEL_COUNT = 14;
+    constexpr size_t ENTRY_SIZE =
+        sizeof(int) +                  // OptionType
+        NAME_SIZE +                    // Name
+        sizeof(int) +                  // Minlevel
+        LEVEL_COUNT * sizeof(int) +    // HarmonyJewelLevel
+        LEVEL_COUNT * sizeof(int);     // Zen
+
     FILE* fp = ::_wfopen(filename.c_str(), L"rb");
     if (fp != NULL)
     {
-        // This is the old HarmonyJewelOption that uses char[] for the Name
-        struct HarmonyJewelOption_Char {
-            int OptionType;
-            char Name[60];
-            int Minlevel;
-            int HarmonyJewelLevel[14];
-            int Zen[14];
-        } tempOptions[MAXHARMONYJEWELOPTIONTYPE * MAXHARMONYJEWELOPTIONINDEX] = { 0 };
-
         int nEntries = MAXHARMONYJEWELOPTIONTYPE * MAXHARMONYJEWELOPTIONINDEX;
-        int nSize = sizeof(HarmonyJewelOption_Char) * nEntries;
+        size_t nSize = ENTRY_SIZE * nEntries;
 
-        ::fread(tempOptions, nSize, 1, fp);
-        ::BuxConvert((BYTE*)tempOptions, nSize);
+        std::vector<BYTE> tempBuffer(nSize);
+
+        ::fread(tempBuffer.data(), nSize, 1, fp);
+        ::BuxConvert((BYTE*)tempBuffer.data(), nSize);
         ::fclose(fp);
 
         // Copy to the new HarmonyJewelOption array that uses wchar_t[] for the Name
@@ -111,13 +113,28 @@ const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filena
             int type = i / MAXHARMONYJEWELOPTIONINDEX;
             int option = i % MAXHARMONYJEWELOPTIONINDEX;
 
-            m_OptionData[type][option].OptionType = tempOptions[i].OptionType;
-            m_OptionData[type][option].Minlevel = tempOptions[i].Minlevel;
-            std::memcpy(m_OptionData[type][option].HarmonyJewelLevel, tempOptions[i].HarmonyJewelLevel, sizeof(tempOptions[i].HarmonyJewelLevel));
-            std::memcpy(m_OptionData[type][option].Zen, tempOptions[i].Zen, sizeof(tempOptions[i].Zen));
+            // Calculate base offset for the current entry
+            BYTE* entry = tempBuffer.data() + i * ENTRY_SIZE;
 
-            // Convert char Name[60] to wchar_t Name[60]
-            std::mbstowcs(m_OptionData[type][option].Name, tempOptions[i].Name, sizeof(m_OptionData[type][option].Name) / sizeof(wchar_t));
+            // Read OptionType
+            m_OptionData[type][option].OptionType = *reinterpret_cast<int*>(entry);
+
+            // Read Name and convert to wchar_t
+            char* name = reinterpret_cast<char*>(entry + sizeof(int));
+            CMultiLanguage::GetSingletonPtr()->ConvertFromUtf8(m_OptionData[type][option].Name, name, NAME_SIZE);
+
+            // Read Minlevel
+            m_OptionData[type][option].Minlevel = *reinterpret_cast<int*>(entry + sizeof(int) + NAME_SIZE);
+
+            // Read HarmonyJewelLevel[14]
+            std::memcpy(m_OptionData[type][option].HarmonyJewelLevel,
+                entry + sizeof(int) + NAME_SIZE + sizeof(int),
+                LEVEL_COUNT * sizeof(int));
+
+            // Read Zen[14]
+            std::memcpy(m_OptionData[type][option].Zen,
+                entry + sizeof(int) + NAME_SIZE + sizeof(int) + LEVEL_COUNT * sizeof(int),
+                LEVEL_COUNT * sizeof(int));
         }
 
         return true;
