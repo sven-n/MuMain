@@ -433,12 +433,12 @@ int CInGameShopSystem::GetSizePackageAsDisplayPackage()
     return m_listDisplayPackage.size();
 }
 
-type_listName CInGameShopSystem::GetZoneName()
+type_listName& CInGameShopSystem::GetZoneName()
 {
     return m_listZoneName;
 }
 
-type_listName CInGameShopSystem::GetCategoryName()
+type_listName& CInGameShopSystem::GetCategoryName()
 {
     return m_listCategoryName;
 }

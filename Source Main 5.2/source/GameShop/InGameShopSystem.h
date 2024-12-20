@@ -94,8 +94,8 @@ public:
 
     WORD GetPackageItemCode(int iIndex);
 
-    type_listName GetZoneName();
-    type_listName GetCategoryName();
+    type_listName& GetZoneName();
+    type_listName& GetCategoryName();
 
     void SetTotalCash(double dTotalCash);
     void SetTotalPoint(double dTotalPoint);

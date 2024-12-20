@@ -525,7 +525,7 @@ void CNewUIMixInventory::RenderFrame()
         g_pRenderText->SetTextColor(220, 220, 220, 255);
         g_pRenderText->SetBgColor(40, 40, 40, 128);
 
-        wchar_t szTempText[2][100];
+        wchar_t szTempText[2][100] = { 0 };
         int iTextLines = 0;
         if (!g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetMostSimilarRecipeName(szTempText[0], 1) == TRUE)
         {

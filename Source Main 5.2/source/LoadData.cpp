@@ -94,7 +94,7 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
         if (pModel->IndexTexture[i] == BITMAP_UNKNOWN)
         {
             wchar_t szErrorMsg[256] = { 0, };
-            swprintf(szErrorMsg, L"OpenTexture Failed: %s of %s", szFullPath, pModel->Name);
+            swprintf(szErrorMsg, L"OpenTexture Failed: %s of %hs", szFullPath, pModel->Name);
 #ifdef FOR_WORK
             PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK

@@ -1589,7 +1589,8 @@ CUIChatPalListBox::CUIChatPalListBox()
 
 void CUIChatPalListBox::AddText(const wchar_t* pszID, BYTE Number, BYTE Server)
 {
-    if (pszID == L"")	return;
+    if (wcscmp(pszID, L"") == 0)
+        return;
 
     static GUILDLIST_TEXT text;
     text.m_bIsSelected = FALSE;
