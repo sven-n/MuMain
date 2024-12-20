@@ -914,7 +914,7 @@ void CNewUIMuHelper::SaveExtraItem()
 
     m_ItemInput.GetText(wsExtraItem, sizeof(wsExtraItem));
 
-    if (wsExtraItem != L"")
+    if (wcscmp(wsExtraItem, L"") != 0)
     {
         m_ItemFilter.AddText(wsExtraItem);
         m_ItemFilter.Scrolling(-m_ItemFilter.GetBoxSize());

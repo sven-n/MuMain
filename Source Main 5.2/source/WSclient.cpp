@@ -10422,7 +10422,6 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
 
     case 0x02:
     {
-        wchar_t strText[128];
         swprintf(strText, GlobalText[1904], GlobalText[1412]);
         SEASON3B::CreateOkMessageBox(strText);
     }

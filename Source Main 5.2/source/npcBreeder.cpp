@@ -43,7 +43,11 @@ namespace npcBreeder
                 return -1;
             }
             break;
+        default:
+            swprintf(Text, GlobalText[1229]);
+            return -1;
         }
+
         ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
 
         int maxDurability = CalcMaxDurability(ip, p, ip->Level);
