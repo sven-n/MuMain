@@ -6394,6 +6394,41 @@ void ItemHeight(int Type, BMD* b)
         b->BodyHeight = 0.f;
 }
 
+void RenderZen(ITEM_t* item, vec3_t light)
+{
+    auto o = &item->Object;
+    auto k = item->Key;
+    vec3_t tempPosition;
+    VectorCopy(o->Position, tempPosition);
+
+    int coinCount = static_cast<int>(sqrtf(static_cast<float>(Items[k].Item.Level))) / 2;
+
+    coinCount = max(min(coinCount, 80), 3);
+
+    vec3_t randomRadius;
+    vec3_t randomAngle;
+    vec3_t randomPosition;
+    float angleMatrix[3][4];
+
+    for (int i = 1; i < coinCount; i++)
+    {
+        // Get a random angle
+        Vector(0.f, 0.f, (float)(RandomTable[(k * 20 + i) % 100] % 360), randomAngle);
+
+        // And a random radius
+        Vector((float)(RandomTable[(k + i) % 100] % (coinCount + 20)), 0.f, 0.f, randomRadius);
+
+        // Calculate the position based on the random angle and radius
+        AngleMatrix(randomAngle, angleMatrix);
+        VectorRotate(randomRadius, angleMatrix, randomPosition);
+
+        VectorAdd(tempPosition, randomPosition, o->Position);
+        RenderPartObject(o, MODEL_ZEN, NULL, light, o->Alpha, Items[k].Item.Level, Items[k].Item.ExcellentFlags, Items[k].Item.AncientDiscriminator, true, true, true);
+    }
+
+    VectorCopy(tempPosition, o->Position);
+}
+
 void RenderItems()
 {
     for (int i = 0; i < MAX_ITEMS; i++)
@@ -6430,26 +6465,9 @@ void RenderItems()
                 vec3_t Light;
                 RequestTerrainLight(o->Position[0], o->Position[1], Light);
                 VectorAdd(Light, o->Light, Light);
-                if (o->Type == MODEL_POTION + 15) // Zen
+                if (o->Type == MODEL_ZEN) // Zen
                 {
-                    vec3_t Temp;
-                    VectorCopy(o->Position, Temp);
-                    int Count = (int)sqrtf((float)Items[i].Item.Level) / 2;
-                    if (Count < 3) Count = 3;
-                    if (Count > 80) Count = 80;
-                    for (int j = 1; j < Count; j++)
-                    {
-                        vec3_t Angle;
-                        float Matrix[3][4];
-                        vec3_t p, Position;
-                        Vector(0.f, 0.f, (float)(RandomTable[(i * 20 + j) % 100] % 360), Angle);
-                        Vector((float)(RandomTable[(i + j) % 100] % (Count + 20)), 0.f, 0.f, p);
-                        AngleMatrix(Angle, Matrix);
-                        VectorRotate(p, Matrix, Position);
-                        VectorAdd(Temp, Position, o->Position);
-                        RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
-                    }
-                    VectorCopy(Temp, o->Position);
+                    RenderZen(&Items[i], Light);
                 }
                 else if (o->Type == MODEL_CAPE_OF_OVERRULE)
                 {
@@ -10231,7 +10249,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             Vector(Luminosity * 0.3f, Luminosity * 0.5f, Luminosity * 1.f, b->BodyLight);
             RenderPartObjectBody(b, o, Type, Alpha, RenderType);
         }
-        else if (Level < 3 || o->Type == MODEL_POTION + 15)
+        else if (Level < 3 || o->Type == MODEL_ZEN)
         {
             if (o->Type == MODEL_POTION + 64)
             {
