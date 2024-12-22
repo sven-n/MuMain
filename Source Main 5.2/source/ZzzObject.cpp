@@ -6430,7 +6430,7 @@ void RenderZen(ITEM_t* item, vec3_t light)
         Vector(0.f, 0.f, static_cast<float>(RandomTable[(k * 20 + i) % 100] % 360), randomAngle);
 
         // And a random radius
-        constexpr auto maxRadius = coinCount + 20;
+        const auto maxRadius = coinCount + 20;
         Vector(static_cast<float>(RandomTable[(k + i) % 100] % maxRadius), 0.f, 0.f, randomRadius);
 
         // Calculate the position based on the random angle and radius
