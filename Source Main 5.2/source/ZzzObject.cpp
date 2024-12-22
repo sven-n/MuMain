@@ -6422,7 +6422,6 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 
     BoneScale = 1.f;
     BodyLight(o, b);
-    VectorCopy(light, b->BodyLight);
 
     constexpr auto alpha = 1.0f;
     b->BeginRender(alpha);
