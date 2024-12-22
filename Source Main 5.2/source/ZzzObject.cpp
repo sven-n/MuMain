@@ -6410,21 +6410,42 @@ void RenderZen(ITEM_t* item, vec3_t light)
     vec3_t randomPosition;
     float angleMatrix[3][4];
 
-    for (int i = 1; i < coinCount; i++)
+    BMD* b = &Models[MODEL_ZEN];
+    b->HideSkin = false;
+    b->BodyScale = o->Scale;
+    b->ContrastEnable = o->ContrastEnable;
+    b->LightEnable = o->LightEnable;
+
+    BoneScale = 1.f;
+    BodyLight(o, b);
+    VectorCopy(light, b->BodyLight);
+
+    constexpr auto alpha = 1.0f;
+    b->BeginRender(alpha);
+    b->BeginRenderCoinHeap();
+    int target_vertex_index = -1;
+    for (int i = 0; i < coinCount; ++i)
     {
         // Get a random angle
-        Vector(0.f, 0.f, (float)(RandomTable[(k * 20 + i) % 100] % 360), randomAngle);
+        Vector(0.f, 0.f, static_cast<float>(RandomTable[(k * 20 + i) % 100] % 360), randomAngle);
 
         // And a random radius
-        Vector((float)(RandomTable[(k + i) % 100] % (coinCount + 20)), 0.f, 0.f, randomRadius);
+        constexpr auto maxRadius = coinCount + 20;
+        Vector(static_cast<float>(RandomTable[(k + i) % 100] % maxRadius), 0.f, 0.f, randomRadius);
 
         // Calculate the position based on the random angle and radius
         AngleMatrix(randomAngle, angleMatrix);
         VectorRotate(randomRadius, angleMatrix, randomPosition);
 
         VectorAdd(tempPosition, randomPosition, o->Position);
-        RenderPartObject(o, MODEL_ZEN, NULL, light, o->Alpha, Items[k].Item.Level, Items[k].Item.ExcellentFlags, Items[k].Item.AncientDiscriminator, true, true, true);
+        VectorCopy(o->Position, b->BodyOrigin);
+        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, true);
+
+        target_vertex_index = b->AddToCoinHeap(i, target_vertex_index);
     }
+
+    b->EndRenderCoinHeap(coinCount);
+    b->EndRender();
 
     VectorCopy(tempPosition, o->Position);
 }
