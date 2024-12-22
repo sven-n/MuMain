@@ -6394,10 +6394,10 @@ void ItemHeight(int Type, BMD* b)
         b->BodyHeight = 0.f;
 }
 
-void RenderZen(ITEM_t* item, vec3_t light)
+void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 {
     auto o = &item->Object;
-    auto k = item->Key;
+    auto k = itemIndex;
     vec3_t tempPosition;
     VectorCopy(o->Position, tempPosition);
 
@@ -6488,7 +6488,7 @@ void RenderItems()
                 VectorAdd(Light, o->Light, Light);
                 if (o->Type == MODEL_ZEN) // Zen
                 {
-                    RenderZen(&Items[i], Light);
+                    RenderZen(i, &Items[i], Light);
                 }
                 else if (o->Type == MODEL_CAPE_OF_OVERRULE)
                 {
