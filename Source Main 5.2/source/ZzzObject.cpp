@@ -6373,7 +6373,11 @@ void MoveItems()
                 else
                     o->Angle[0] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
             }
-            CreateShiny(o);
+
+            if (rand_fps_check(1))
+            {
+                CreateShiny(o);
+            }
         }
     }
 }
