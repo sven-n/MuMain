@@ -921,11 +921,6 @@ void BMD::BeginRenderCoinHeap()
     Mesh_t* m = &Meshs[meshIndex];
     const auto textureIndex = IndexTexture[m->Texture];
 
-    for (int j = 0; j < m->NumNormals; ++j)
-    {
-        VectorScale(BodyLight, IntensityTransform[meshIndex][j], LightTransform[meshIndex][j]);
-    }
-
     BindTexture(textureIndex);
     DisableAlphaBlend();
 
@@ -960,11 +955,6 @@ int BMD::AddToCoinHeap(int coinIndex, int target_vertex_index)
             auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
             texCoords[target_vertex_index][0] = texco.TexCoordU;
             texCoords[target_vertex_index][1] = texco.TexCoordV;
-
-            int normalIndex = triangle->NormalIndex[k];
-
-            auto light = LightTransform[meshIndex][normalIndex];
-            Vector4(light[0], light[1], light[2], alpha, colors[target_vertex_index]);
         }
     }
 

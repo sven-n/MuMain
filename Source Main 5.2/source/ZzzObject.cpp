@@ -6415,10 +6415,7 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
     float angleMatrix[3][4];
 
     BMD* b = &Models[MODEL_ZEN];
-    b->HideSkin = false;
     b->BodyScale = o->Scale;
-    b->ContrastEnable = o->ContrastEnable;
-    b->LightEnable = o->LightEnable;
 
     BoneScale = 1.f;
     BodyLight(o, b);
