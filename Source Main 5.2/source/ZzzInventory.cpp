@@ -6483,7 +6483,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     switch (o->Type)
     {
     case MODEL_JEWEL_OF_BLESS:
-    case MODEL_POTION + 15:
+    case MODEL_ZEN:
         glColor3f(1.f, 0.8f, 0.1f);
         break;
     case MODEL_ORB_OF_SUMMONING:
@@ -6501,7 +6501,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         swprintf(Name, L"%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
 
-    if (o->Type == MODEL_POTION + 15) // Zen
+    if (o->Type == MODEL_ZEN) // Zen
     {
         glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, L"%s %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);

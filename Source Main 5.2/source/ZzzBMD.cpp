@@ -915,6 +915,71 @@ void BMD::EndRender()
 extern double WorldTime;
 extern int WaterTextureNumber;
 
+void BMD::BeginRenderCoinHeap()
+{
+    constexpr int meshIndex = 0;
+    Mesh_t* m = &Meshs[meshIndex];
+    const auto textureIndex = IndexTexture[m->Texture];
+
+    BindTexture(textureIndex);
+    DisableAlphaBlend();
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
+int BMD::AddToCoinHeap(int coinIndex, int target_vertex_index)
+{
+    const auto vertices = RenderArrayVertices;
+    const auto colors = RenderArrayColors;
+    const auto texCoords = RenderArrayTexCoords;
+
+    constexpr auto alpha = 1.0f;
+    constexpr int meshIndex = 0;
+
+    Mesh_t* m = &Meshs[meshIndex];
+
+    for (int j = 0; j < m->NumTriangles; j++)
+    {
+        const auto triangle = &m->Triangles[j];
+        for (int k = 0; k < triangle->Polygon; k++)
+        {
+            const int source_vertex_index = triangle->VertexIndex[k];
+            target_vertex_index++;
+
+            VectorCopy(VertexTransform[meshIndex][source_vertex_index], vertices[target_vertex_index]);
+
+            Vector4(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
+
+            auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
+            texCoords[target_vertex_index][0] = texco.TexCoordU;
+            texCoords[target_vertex_index][1] = texco.TexCoordV;
+        }
+    }
+
+    return target_vertex_index;
+}
+
+void BMD::EndRenderCoinHeap(int coinCount)
+{
+    const auto vertices = RenderArrayVertices;
+    const auto colors = RenderArrayColors;
+    const auto texCoords = RenderArrayTexCoords;
+
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glColorPointer(4, GL_FLOAT, 0, colors);
+    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+
+    constexpr int meshIndex = 0;
+    Mesh_t* m = &Meshs[meshIndex];
+    glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3 * coinCount);
+
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshIndex, float blendMeshAlpha, float blendMeshTextureCoordU, float blendMeshTextureCoordV, int explicitTextureIndex)
 {
     if (meshIndex >= NumMeshs || meshIndex < 0) return;
