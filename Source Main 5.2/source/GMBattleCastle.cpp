@@ -1704,16 +1704,20 @@ namespace battleCastle
         switch (c->MonsterIndex)
         {
         case MONSTER_TRAP:
-            if ((int)c->AttackTime == 5)
+            if (c->CheckAttackTime(5))
             {
                 VectorCopy(o->Position, Position);
                 Position[2] += 500.f;
                 CreateEffect(MODEL_BATTLE_GUARD2, Position, o->Angle, o->Light, 0);
+                c->SetLastAttackEffectTime();
             }
             return true;
 
         case MONSTER_CANON_TOWER:
-            CreateEffect(BITMAP_JOINT_FORCE, o->Position, o->Angle, o->Light);
+            if (rand_fps_check(1))
+            {
+                CreateEffect(BITMAP_JOINT_FORCE, o->Position, o->Angle, o->Light);
+            }
             return true;
         }
         return false;

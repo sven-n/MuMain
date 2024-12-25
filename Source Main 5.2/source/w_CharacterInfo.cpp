@@ -49,6 +49,7 @@ void CHARACTER::Initialize()
     PK = 0;
     AttackFlag = 0;
     AttackTime = 0;
+    LastAttackEffectTime = -1;
     TargetAngle = 0;
     Dead = 0;
     Run = 0;

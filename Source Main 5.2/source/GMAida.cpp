@@ -1465,21 +1465,23 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
     case MONSTER_WITCH_QUEEN:
     {
-        if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
+        if (pCharacter->CheckAttackTime(10) && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(BITMAP_JOINT_FORCE, pObject->Position, pObject->Angle, Light, 1);
+            pCharacter->SetLastAttackEffectTime();
         }
     }
     return true;
     case MONSTER_DEATH_TREE:
     {
-        if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
+        if (pCharacter->CheckAttackTime(10) && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(MODEL_TREE_ATTACK, pObject->Position, pObject->Angle, Light);
+            pCharacter->SetLastAttackEffectTime();
         }
     }
     return true;
@@ -1487,22 +1489,24 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
         for (int i = 0; i < 5; i++)
         {
-            if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK1)
+            if (pCharacter->CheckAttackTime(10) && pObject->CurrentAction == MONSTER01_ATTACK1)
             {
                 vec3_t Light;
                 Vector(1.f, 1.f, 1.f, Light);
                 CreateEffect(MODEL_STORM, pObject->Position, pObject->Angle, Light, 3 + i);
+                pCharacter->SetLastAttackEffectTime();
             }
         }
     }
     return true;
     case MONSTER_BLOODY_WITCH_QUEEN:
     {
-        if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
+        if (pCharacter->CheckAttackTime(10) && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(BITMAP_JOINT_FORCE, pObject->Position, pObject->Angle, Light, 1);
+            pCharacter->SetLastAttackEffectTime();
         }
     }
     return true;

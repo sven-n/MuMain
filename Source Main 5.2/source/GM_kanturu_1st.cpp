@@ -709,12 +709,13 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
         }
 
-        if ((int)c->AttackTime == 10)
+        if (c->CheckAttackTime(10))
         {
             vec3_t vPos, vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_6", vRelative, vPos);
             CreateEffect(MODEL_IRON_RIDER_ARROW, vPos, o->Angle, o->Light, 0);
+            c->SetLastAttackEffectTime();
         }
 
         return true;
@@ -724,7 +725,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
                 //				if(o->AnimationFrame >= StartAction && o->AnimationFrame < (StartAction + fActionSpeed))
             {
                 vec3_t vPos, vRelative, Light;
@@ -740,6 +741,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                 CreateParticle(BITMAP_EXPLOTION + 1, vPos, o->Angle, o->Light, 0, 1.3f);
                 CreateParticle(BITMAP_EXPLOTION + 1, vPos, o->Angle, o->Light, 0, 2.3f);
                 CreateParticle(BITMAP_EXPLOTION + 1, vPos, o->Angle, o->Light, 0, 1.8f);
+                c->SetLastAttackEffectTime();
             }
         }
 
@@ -772,7 +774,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_21", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
         }
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             vec3_t vPos, vRelative;
 
@@ -793,6 +795,8 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
                 o->Angle[2] += 15.f;
             }
+
+            c->SetLastAttackEffectTime();
         }
 
         return true;
@@ -829,7 +833,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_21", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
         }
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             vec3_t vPos, vRelative;
 
@@ -850,6 +854,8 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
                 o->Angle[2] += 15.f;
             }
+
+            c->SetLastAttackEffectTime();
         }
 
         return true;

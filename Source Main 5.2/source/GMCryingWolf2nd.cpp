@@ -345,18 +345,20 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
     {
     case MODEL_VALAM:
     {
-        if ((int)pCharacter->AttackTime == 14)
+        if (pCharacter->CheckAttackTime(14))
         {
             CreateEffect(MODEL_ARROW_NATURE, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, pObject->PKKey);
+            pCharacter->SetLastAttackEffectTime();
             return true;
         }
     }
     break;
     case MODEL_BALRAM:
     {
-        if ((int)pCharacter->AttackTime == 14)
+        if (pCharacter->CheckAttackTime(14))
         {
             CreateEffect(MODEL_ARROW_HOLY, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, pObject->PKKey);
+            pCharacter->SetLastAttackEffectTime();
             return true;
         }
     }

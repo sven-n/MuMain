@@ -474,9 +474,10 @@ bool SEASON3A::CGM3rdChangeUp::AttackEffectBalgasBarrackMonster(CHARACTER* c, OB
     switch (o->Type)
     {
     case MODEL_BALRAM:
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             CreateEffect(MODEL_ARROW_HOLY, o->Position, o->Angle, o->Light, 1, o, o->PKKey);
+            c->SetLastAttackEffectTime();
             return true;
         }
         break;

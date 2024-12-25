@@ -999,18 +999,20 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     {
     case MODEL_VALAM:
     {
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             CreateEffect(MODEL_ARROW_NATURE, o->Position, o->Angle, o->Light, 1, o, o->PKKey);
+            c->SetLastAttackEffectTime();
             return true;
         }
     }
     break;
     case MODEL_BALRAM:
     {
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             CreateEffect(MODEL_ARROW_HOLY, o->Position, o->Angle, o->Light, 1, o, o->PKKey);
+            c->SetLastAttackEffectTime();
             return true;
         }
     }
@@ -1018,11 +1020,12 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     case MODEL_TANTALLOS:
     {
         vec3_t Angle;
-        if ((int)c->AttackTime == 1)
+        if (c->CheckAttackTime(1))
         {
             CreateInferno(o->Position);
+            c->SetLastAttackEffectTime();
         }
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             if (c->MonsterIndex == MONSTER_ZAIKAN)
             {
@@ -1036,6 +1039,8 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                     }
                 }
             }
+
+            c->SetLastAttackEffectTime();
         }
     }
     break;
@@ -1055,8 +1060,11 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                 CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 10.f);
             }
         }
-        if ((int)c->AttackTime == 1)
+        if (c->CheckAttackTime(1))
+        {
             PlayBuffer(SOUND_EVIL);
+            c->SetLastAttackEffectTime();
+        }
 
         for (int i = 0; i < 4; i++)
         {
@@ -1072,9 +1080,10 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     break;
     case MODEL_BALLISTA:
     {
-        if ((int)c->AttackTime == 15)
+        if (c->CheckAttackTime(15))
         {
             CreateEffect(MODEL_ARROW_TANKER, o->Position, o->Angle, o->Light, 1, o, o->PKKey);
+            c->SetLastAttackEffectTime();
             return true;
         }
     }

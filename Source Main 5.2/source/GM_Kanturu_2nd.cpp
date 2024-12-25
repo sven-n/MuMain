@@ -1389,6 +1389,7 @@ CHARACTER* CTrapCanon::Create_TrapCanon(int iPosX, int iPosY, int iKey)
     pCha = CreateCharacter(iKey, MODEL_TRAP_CANON, iPosX, iPosY);
     pCha->Object.Scale = 1.0f;
     pCha->AttackTime = 0;
+    pCha->LastAttackEffectTime = -1;
 
     return pCha;
 }
@@ -1402,7 +1403,7 @@ void CTrapCanon::Render_Object(OBJECT* o, BMD* b)
 
 void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if ((int)c->AttackTime == 0)
+    if (c->CheckAttackTime(0))
     {
         float fLumi;
         vec3_t vPos, vLight;
@@ -1417,12 +1418,14 @@ void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
         Vector(2.0f + (rand() % 10) * 0.03f, 0.4f + (rand() % 10) * 0.03f, 0.4f + (rand() % 10) * 0.03f, vLight);
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o, -(WorldTime * 0.1f));
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o, (WorldTime * 0.12f));
+
+        c->SetLastAttackEffectTime();
     }
 }
 
 void CTrapCanon::Render_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if ((int)c->AttackTime == 1)
+    if (c->CheckAttackTime(1))
     {
         CHARACTER* tc = &CharactersClient[c->TargetCharacter];
         OBJECT* to = &tc->Object;
@@ -1431,5 +1434,6 @@ void CTrapCanon::Render_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)
         VectorCopy(to->Position, vPos2);
         vPos[2] += 85.f;
         CreateJoint(BITMAP_JOINT_ENERGY, vPos, vPos2, to->Angle, 43, to, 30.0f);
+        c->SetLastAttackEffectTime();
     }
 }

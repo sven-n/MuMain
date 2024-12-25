@@ -242,6 +242,7 @@ void CSPetSystem::SetAttack(int Key, int attackType)
 
     m_PetCharacter.TargetCharacter = Index;
     m_PetCharacter.AttackTime = 0;
+    m_PetCharacter.LastAttackEffectTime = -1;
     SetAI(PET_ATTACK + attackType);
 
     if (m_PetCharacter.Object.AI == PET_ATTACK)
@@ -710,16 +711,18 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
             {
                 CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL, (float)(rand() % 40 + 20));
             }
-            if ((int)c->AttackTime == 1)
+
+            if (c->CheckAttackTime(1))
             {
                 vec3_t Angle, Light;
 
                 Vector(45.f, (float)(rand() % 180) - 90, 0.f, Angle);
                 Vector(1.f, 0.8f, 0.6f, Light);
                 CreateEffect(MODEL_DARKLORD_SKILL, o->Position, Angle, Light, 3);
+                c->SetLastAttackEffectTime();
             }
         }
-        if (c->AttackTime > 3 && (int)c->AttackTime % 2)
+        if (c->AttackTime > 3 && (int)c->AttackTime % 2 && rand_fps_check(1))
         {
             if (o->Position[2] > (m_PetOwner->Object.Position[2] + 100.f))
             {
@@ -763,6 +766,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
                 SetAI(PET_FLYING);
             }
             c->AttackTime = 0;
+            c->LastAttackEffectTime = -1;
         }
         break;
 

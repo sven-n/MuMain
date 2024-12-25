@@ -1498,9 +1498,10 @@ void AttackEffect(CHARACTER* c)
         {
             if (rand_fps_check(2))
             {
-                if ((int)c->AttackTime == 1)
+                if (c->CheckAttackTime(1))
                 {
                     CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 1);
+                    c->SetLastAttackEffectTime();
                 }
             }
             else
@@ -1517,7 +1518,7 @@ void AttackEffect(CHARACTER* c)
     case MONSTER_ALQUAMOS:
         break;
     case MONSTER_QUEEN_RAINER:
-        if ((int)c->AttackTime == 5)
+        if (c->CheckAttackTime(5))
         {
             if (c->TargetCharacter != -1)
             {
@@ -1528,6 +1529,8 @@ void AttackEffect(CHARACTER* c)
                     CreateEffect(BITMAP_BLIZZARD, to->Position, to->Angle, Light);
                 }
             }
+
+            c->SetLastAttackEffectTime();
         }
         break;
     case MONSTER_OMEGA_WING:
@@ -1535,17 +1538,18 @@ void AttackEffect(CHARACTER* c)
     case MONSTER_ALPHA_CRUST:
         if (c->Object.CurrentAction == MONSTER01_ATTACK1 || c->Object.CurrentAction == MONSTER01_ATTACK2)
         {
-            if ((int)c->AttackTime == 5)
+            if (c->CheckAttackTime(5))
             {
                 CreateInferno(o->Position);
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light);
+                c->SetLastAttackEffectTime();
             }
         }
         break;
     case MONSTER_PHANTOM_KNIGHT:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 vec3_t Angle = { 0.0f, 0.0f, 0.0f };
                 int iCount = 36;
@@ -1561,6 +1565,8 @@ void AttackEffect(CHARACTER* c)
                     Position[2] += 100.f;
                     CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 1, NULL, 60.f, 0, 0);
                 }
+
+                c->SetLastAttackEffectTime();
             }
         }
         break;
@@ -1568,7 +1574,7 @@ void AttackEffect(CHARACTER* c)
     case MONSTER_GREAT_DRAKAN:
         if (c->Object.CurrentAction == MONSTER01_ATTACK1)
         {
-            if ((int)c->AttackTime == 11)
+            if (c->CheckAttackTime(11))
             {
                 CreateInferno(o->Position);
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light);
@@ -1585,11 +1591,13 @@ void AttackEffect(CHARACTER* c)
                     VectorCopy(Position, o->StartPosition);
                     CreateEffect(MODEL_PIERCING + 1, Position, Angle, Light, 1, o);
                 }
+
+                c->SetLastAttackEffectTime();
             }
         }
         else
         {
-            if ((int)c->AttackTime == 13)
+            if (c->CheckAttackTime(13))
             {
                 Vector(1.f, 0.5f, 0.f, Light);
                 Vector(-50.f, 100.f, 0.f, p);
@@ -1599,14 +1607,16 @@ void AttackEffect(CHARACTER* c)
                 VectorCopy(Position, o->StartPosition);
                 CreateEffect(MODEL_PIERCING + 1, Position, Angle, Light, 1, o);
                 PlayBuffer(SOUND_METEORITE01);
+                c->SetLastAttackEffectTime();
             }
-            else if ((int)c->AttackTime == 9)
+            else if (c->CheckAttackTime(9))
             {
                 Vector(1.f, 0.5f, 0.f, Light);
                 Vector(0.f, 0.f, 0.f, p);
                 VectorCopy(o->Angle, Angle);
                 Angle[0] += 45.f;
                 b->TransformPosition(o->BoneTransform[11], p, Position, true);
+                c->SetLastAttackEffectTime();
             }
         }
 
@@ -1614,7 +1624,7 @@ void AttackEffect(CHARACTER* c)
     case MONSTER_DARK_PHOENIX:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if ((int)c->AttackTime == 2 || c->AttackTime == 6)
+            if (c->CheckAttackTime(2) || c->CheckAttackTime(6))
             {
                 vec3_t Angle = { 0.0f, 0.0f, 0.0f };
                 int iCount = 40;
@@ -1629,6 +1639,8 @@ void AttackEffect(CHARACTER* c)
                     Position[2] += 100.f;
                     CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
                 }
+
+                c->SetLastAttackEffectTime();
             }
         }
         break;
@@ -1636,19 +1648,21 @@ void AttackEffect(CHARACTER* c)
     case MONSTER_BEAM_KNIGHT:
         if (c->MonsterIndex == MONSTER_DEATH_BEAM_KNIGHT)
         {
-            if ((int)c->AttackTime == 1)
+            if (c->CheckAttackTime(1))
             {
                 CreateInferno(o->Position);
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light);
+                c->SetLastAttackEffectTime();
             }
             if ((c->Skill) == AT_SKILL_BOSS)
             {
-                if (c->MonsterIndex == MONSTER_DEATH_BEAM_KNIGHT)
+                if (c->MonsterIndex == MONSTER_DEATH_BEAM_KNIGHT && rand_fps_check(1))
                 {
                     Vector(o->Position[0] + rand() % 800 - 400, o->Position[1] + rand() % 800 - 400, o->Position[2], Position);
                     CreateEffect(MODEL_SKILL_BLAST, Position, o->Angle, o->Light);
                 }
-                if ((int)c->AttackTime == 14)
+
+                if (c->CheckAttackTime(14))
                 {
                     for (int i = 0; i < 18; i++)
                     {
@@ -1656,31 +1670,34 @@ void AttackEffect(CHARACTER* c)
                         Angle[2] += i * 20.f;
                         CreateEffect(MODEL_STAFF_OF_DESTRUCTION, o->Position, Angle, o->Light);
                     }
+                    c->SetLastAttackEffectTime();
                 }
             }
         }
         else
         {
-            if ((int)c->AttackTime == 1)
+            if (c->CheckAttackTime(1))
             {
                 //CreateInferno(o->Position);
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light);
+                c->SetLastAttackEffectTime();
             }
         }
         break;
     case MONSTER_CURSED_KING:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if ((int)c->AttackTime == 1)
+            if (c->CheckAttackTime(1))
             {
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 1);
+                c->SetLastAttackEffectTime();
             }
         }
         break;
     case MONSTER_GOLDEN_SOLDIER:
     case MONSTER_IRON_WHEEL:
     case MONSTER_SOLDIER:
-        if ((int)c->AttackTime == 1)
+        if (c->CheckAttackTime(1))
         {
             Vector(60.f, -110.f, 0.f, p);
             b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
@@ -1694,16 +1711,19 @@ void AttackEffect(CHARACTER* c)
                 Angle[2] -= 40.f;
                 CreateEffect(MODEL_ARROW_BOMB, o->Position, Angle, o->Light, 0, o);
             }
+
+            c->SetLastAttackEffectTime();
         }
         break;
     case MONSTER_GOLDEN_TITAN:
     case MONSTER_TANTALLOS:
     case MONSTER_ZAIKAN:
-        if ((int)c->AttackTime == 1)
+        if (c->CheckAttackTime(1))
         {
             CreateInferno(o->Position);
+            c->SetLastAttackEffectTime();
         }
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             if (c->MonsterIndex == MONSTER_ZAIKAN)
             {
@@ -1717,6 +1737,8 @@ void AttackEffect(CHARACTER* c)
                     }
                 }
             }
+
+            c->SetLastAttackEffectTime();
         }
         break;
     case MONSTER_HYDRA:
@@ -1727,7 +1749,7 @@ void AttackEffect(CHARACTER* c)
         }
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if ((int)c->AttackTime == 1)
+            if (c->CheckAttackTime(1))
             {
                 VectorCopy(o->Angle, Angle); Angle[2] += 20.f;
                 VectorCopy(o->Position, p); p[2] += 50.f;
@@ -1739,13 +1761,15 @@ void AttackEffect(CHARACTER* c)
                     Angle[2] += 40.f;
                     CreateEffect(BITMAP_BOSS_LASER, p, Angle, Light);
                 }
+
+                c->SetLastAttackEffectTime();
             }
         }
         break;
     case MONSTER_RED_DRAGON:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if ((int)c->AttackTime == 1)
+            if (c->CheckAttackTime(1))
             {
                 Vector(0.f, 0.f, 0.f, p);
                 b->TransformPosition(o->BoneTransform[11], p, Position, true);
@@ -1756,16 +1780,20 @@ void AttackEffect(CHARACTER* c)
                 Vector(o->Angle[0] - 20.f, o->Angle[1], o->Angle[2] + 30.f, Angle);
                 CreateEffect(MODEL_FIRE, Position, Angle, o->Light, 2);
                 PlayBuffer(SOUND_METEORITE01);
+                c->SetLastAttackEffectTime();
             }
-            Vector(o->Position[0] + rand() % 1024 - 512, o->Position[1] + rand() % 1024 - 512, o->Position[2], Position);
-            CreateEffect(MODEL_FIRE, Position, o->Angle, o->Light);
-            PlayBuffer(SOUND_METEORITE01);
+            if (rand_fps_check(1))
+            {
+                Vector(o->Position[0] + rand() % 1024 - 512, o->Position[1] + rand() % 1024 - 512, o->Position[2], Position);
+                CreateEffect(MODEL_FIRE, Position, o->Angle, o->Light);
+                PlayBuffer(SOUND_METEORITE01);
+            }
         }
         break;
     case MONSTER_DEATH_GORGON:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if ((int)c->AttackTime == 1)
+            if (c->CheckAttackTime(1))
             {
                 for (int i = 0; i < 18; i++)
                 {
@@ -1773,6 +1801,7 @@ void AttackEffect(CHARACTER* c)
                     CreateEffect(MODEL_FIRE, o->Position, Angle, o->Light, 1, o);
                 }
                 PlayBuffer(SOUND_METEORITE01);
+                c->SetLastAttackEffectTime();
             }
         }
         break;
@@ -1780,19 +1809,24 @@ void AttackEffect(CHARACTER* c)
     case MONSTER_METAL_BALROG:
         if ((c->Skill) == AT_SKILL_BOSS)
         {
-            if ((int)c->AttackTime == 1)
+            if (c->CheckAttackTime(1))
             {
                 CreateEffect(MODEL_CIRCLE, o->Position, o->Angle, o->Light);
                 CreateEffect(MODEL_CIRCLE_LIGHT, o->Position, o->Angle, o->Light);
                 PlayBuffer(SOUND_HELLFIRE);
+                c->SetLastAttackEffectTime();
             }
-            Vector(o->Position[0] + rand() % 1024 - 512, o->Position[1] + rand() % 1024 - 512, o->Position[2], Position);
-            CreateEffect(MODEL_FIRE, Position, o->Angle, o->Light);
-            PlayBuffer(SOUND_METEORITE01);
+
+            if (rand_fps_check(1))
+            {
+                Vector(o->Position[0] + rand() % 1024 - 512, o->Position[1] + rand() % 1024 - 512, o->Position[2], Position);
+                CreateEffect(MODEL_FIRE, Position, o->Angle, o->Light);
+                PlayBuffer(SOUND_METEORITE01);
+            }
         }
         break;
     case MONSTER_METEORITE_TRAP://함정
-        if ((c->Skill) == AT_SKILL_BOSS)
+        if ((c->Skill) == AT_SKILL_BOSS && rand_fps_check(1))
         {
             Vector(o->Position[0] + rand() % 1024 - 512, o->Position[1] + rand() % 1024 - 512, o->Position[2], Position);
             CreateEffect(MODEL_FIRE, Position, o->Angle, o->Light);
@@ -1800,12 +1834,15 @@ void AttackEffect(CHARACTER* c)
         }
         break;
     case MONSTER_BAHAMUT://물고기
-        for (int i = 0; i < 4; i++)
+        if (rand_fps_check(1))
         {
-            Vector((float)(rand() % 32 - 16), (float)(rand() % 32 - 16), (float)(rand() % 32 - 16), p);
-            b->TransformPosition(o->BoneTransform[2], p, Position, true);
-            CreateParticle(BITMAP_BUBBLE, Position, o->Angle, Light);
-            CreateParticle(BITMAP_BLOOD + 1, Position, o->Angle, Light);
+            for (int i = 0; i < 4; i++)
+            {
+                Vector((float)(rand() % 32 - 16), (float)(rand() % 32 - 16), (float)(rand() % 32 - 16), p);
+                b->TransformPosition(o->BoneTransform[2], p, Position, true);
+                CreateParticle(BITMAP_BUBBLE, Position, o->Angle, Light);
+                CreateParticle(BITMAP_BLOOD + 1, Position, o->Angle, Light);
+            }
         }
         break;
     default:
@@ -1830,22 +1867,24 @@ void AttackEffect(CHARACTER* c)
             case MONSTER_CHAOS_CASTLE_14:
                 if (c->Weapon[0].Type == MODEL_GREAT_REIGN_CROSSBOW)
                 {
-                    if ((int)c->AttackTime == 8)
+                    if (c->CheckAttackTime(8))
                     {
                         CreateArrows(c, o, o, 0, 0, 0);
+                        c->SetLastAttackEffectTime();
                     }
                 }
                 else if (c->Object.CurrentAction == MONSTER01_ATTACK1)
                 {
-                    if ((int)c->AttackTime == 15)
+                    if (c->CheckAttackTime(15))
                     {
                         CalcAddPosition(o, -20.f, -90.f, 100.f, Position);
                         CreateEffect(BITMAP_BOSS_LASER, Position, o->Angle, Light, 0, o);
+                        c->SetLastAttackEffectTime();
                     }
                 }
                 else if (c->Object.CurrentAction == MONSTER01_ATTACK2)
                 {
-                    if ((int)c->AttackTime == 8)
+                    if (c->CheckAttackTime(8))
                     {
                         if (rand_fps_check(2))
                         {
@@ -1858,6 +1897,7 @@ void AttackEffect(CHARACTER* c)
                             CreateEffect(MODEL_FIRE, to->Position, o->Angle, Light, 6);
                             CreateEffect(MODEL_FIRE, to->Position, o->Angle, Light, 6);
                         }
+                        c->SetLastAttackEffectTime();
                     }
                 }
                 break;
@@ -1869,13 +1909,14 @@ void AttackEffect(CHARACTER* c)
             case MONSTER_MAGIC_SKELETON_5:
             case MONSTER_MAGIC_SKELETON_6:
             case MONSTER_MAGIC_SKELETON_7:
-                if (14 == c->AttackTime)
+                if (c->CheckAttackTime(14))
                 {
                     Vector(0.f, 0.f, 0.f, p);
                     b->TransformPosition(o->BoneTransform[33], p, Position, true);
                     VectorCopy(o->Angle, Angle);
                     CreateEffect(MODEL_PIERCING + 1, Position, Angle, Light, 1);
                     CreateJoint(BITMAP_JOINT_THUNDER, Position, Position, Angle, 2, to, 50.f);
+                    c->SetLastAttackEffectTime();
                 }
                 break;
 
@@ -1886,7 +1927,7 @@ void AttackEffect(CHARACTER* c)
             case MONSTER_GIANT_OGRE_5:	//. 자이언트오거5
             case MONSTER_GIANT_OGRE_6:	//. 자이언트오거6
             case MONSTER_GIANT_OGRE_7:
-                if ((int)c->AttackTime == 13)
+                if (c->CheckAttackTime(13))
                 {
                     Vector(1.0f, 1.0f, 1.0f, Light);
                     Vector(60.f, 30.f, 0.f, p);
@@ -1894,11 +1935,12 @@ void AttackEffect(CHARACTER* c)
 
                     Vector(o->Angle[0], o->Angle[1], o->Angle[2], Angle);
                     CreateEffect(MODEL_FIRE, Position, Angle, o->Light, 5);
+                    c->SetLastAttackEffectTime();
                 }
                 break;
 
             case MONSTER_DARK_PHOENIX://불사조공격
-                if (14 == c->AttackTime)
+                if (c->CheckAttackTime(14))
                 {
                     Vector(0.f, 0.f, 0.f, p);
                     b->TransformPosition(g_fBoneSave[2], p, Position, true);
@@ -1909,13 +1951,14 @@ void AttackEffect(CHARACTER* c)
                     VectorCopy(o->Angle, Angle);
                     CreateEffect(MODEL_PIERCING + 1, Position, Angle, Light, 1);
                     CreateJoint(BITMAP_JOINT_THUNDER, Position, Position, Angle, 2, to, 50.f);
+                    c->SetLastAttackEffectTime();
                 }
                 break;
             case MONSTER_DRAKAN:
             case MONSTER_GREAT_DRAKAN:
                 if (c->Object.CurrentAction == MONSTER01_ATTACK2)
                 {
-                    if ((int)c->AttackTime == 13)
+                    if (c->CheckAttackTime(13))
                     {
                         Vector(1.f, 0.5f, 0.f, Light);
                         Vector(-50.f, 100.f, 0.f, p);
@@ -1924,85 +1967,113 @@ void AttackEffect(CHARACTER* c)
                         b->TransformPosition(o->BoneTransform[11], p, Position, true);
                         CreateEffect(MODEL_PIERCING + 1, Position, Angle, Light, 1);
                         CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 50.f);
+                        c->SetLastAttackEffectTime();
                     }
                 }
                 break;
             case MONSTER_ALQUAMOS:
-                if ((int)c->AttackTime == 1)
+                if (c->CheckAttackTime(1))
                 {
                     for (int i = 0; i < 4; ++i)
                     {
                         CreateJoint(BITMAP_FLARE, o->Position, o->Position, Angle, 7, to, 50.f);
                         // CreateJoint(BITMAP_FLARE, Position, Position, Angle, 7, to, 50.f);
                     }
-                    c->AttackTime = 2;
+
+                    c->SetLastAttackEffectTime();
                 }
                 break;
             case MONSTER_BEAM_KNIGHT:
-                for (int i = 0; i < 6; i++)
+                if (rand_fps_check(1))
                 {
-                    int Hand = 0;
-                    if (i >= 3) Hand = 1;
-                    b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);//에러
-                    Vector(0.f, 0.f, (float)(rand() % 360), Angle);
-                    CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 50.f);
-                    CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 10.f);
+                    for (int i = 0; i < 6; i++)
+                    {
+                        int Hand = 0;
+                        if (i >= 3) Hand = 1;
+                        b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);//에러
+                        Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+                        CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 50.f);
+                        CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 10.f);
+                    }
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int Hand = 0;
+                        if (i >= 2) Hand = 1;
+                        b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
+                        Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+                        CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
+                        CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
+                    }
                 }
 
-                if ((int)c->AttackTime == 1)
+                if (c->CheckAttackTime(1))
+                {
                     PlayBuffer(SOUND_EVIL);
-
-                for (int i = 0; i < 4; i++)
-                {
-                    int Hand = 0;
-                    if (i >= 2) Hand = 1;
-                    b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
-                    Vector(0.f, 0.f, (float)(rand() % 360), Angle);
-                    CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
-                    CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
+                    c->SetLastAttackEffectTime();
                 }
+
                 break;
             case MONSTER_VEPAR:
-                if ((int)c->AttackTime == 1)
-                    PlayBuffer(SOUND_EVIL);
-
-                for (int i = 0; i < 4; i++)
+                if (c->CheckAttackTime(1))
                 {
-                    int Hand = 0;
-                    if (i >= 2) Hand = 1;
-                    Vector(0.f, 0.f, 0.f, Angle);
-                    b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
-                    CreateJoint(BITMAP_BLUR + 1, Position, to->Position, Angle, 1, to, 50.f);
-                    CreateJoint(BITMAP_BLUR + 1, Position, to->Position, Angle, 1, to, 10.f);
+                    PlayBuffer(SOUND_EVIL);
+                    c->SetLastAttackEffectTime();
+                }
+
+                if (rand_fps_check(1))
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int Hand = 0;
+                        if (i >= 2) Hand = 1;
+                        Vector(0.f, 0.f, 0.f, Angle);
+                        b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
+                        CreateJoint(BITMAP_BLUR + 1, Position, to->Position, Angle, 1, to, 50.f);
+                        CreateJoint(BITMAP_BLUR + 1, Position, to->Position, Angle, 1, to, 10.f);
+                    }
                 }
                 break;
             case MONSTER_DEVIL:
-                if ((int)c->AttackTime == 1)
-                    PlayBuffer(SOUND_EVIL);
-
-                for (int i = 0; i < 4; i++)
+                if (c->CheckAttackTime(1))
                 {
-                    int Hand = 0;
-                    if (i >= 2) Hand = 1;
-                    b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
-                    Vector(0.f, 0.f, (float)(rand() % 360), Angle);
-                    CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
-                    CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
+                    PlayBuffer(SOUND_EVIL);
+                    c->SetLastAttackEffectTime();
+                }
+
+                if (rand_fps_check(1))
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int Hand = 0;
+                        if (i >= 2) Hand = 1;
+                        b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
+                        Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+                        CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
+                        CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
+                    }
                 }
                 break;
             case MONSTER_CURSED_KING:
             {
-                if ((int)c->AttackTime == 1)
-                    PlayBuffer(SOUND_THUNDER01);
-                float fAngle = (float)((int)(45.f - (c->AttackTime * 3 + (int)WorldTime / 10)) % 90) + 180.f;
-
-                for (int i = 0; i < 4; i++)
+                if (c->CheckAttackTime(1))
                 {
-                    b->TransformPosition(o->BoneTransform[c->Weapon[i % 2].LinkBone], p, Position, true);
-                    Vector(0.f, 0.f, fAngle, Angle);
-                    CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 1, to, 50.f);
-                    CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
-                    fAngle += 270.f;
+                    PlayBuffer(SOUND_THUNDER01);
+                    c->SetLastAttackEffectTime();
+                }
+
+                if (rand_fps_check(1))
+                {
+                    float fAngle = (float)((int)(45.f - (c->AttackTime * 3 + (int)WorldTime / 10)) % 90) + 180.f;
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        b->TransformPosition(o->BoneTransform[c->Weapon[i % 2].LinkBone], p, Position, true);
+                        Vector(0.f, 0.f, fAngle, Angle);
+                        CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 1, to, 50.f);
+                        CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
+                        fAngle += 270.f;
+                    }
                 }
             }
             break;
@@ -2023,22 +2094,28 @@ void AttackEffect(CHARACTER* c)
             case MONSTER_MAGIC_SKELETON_6:
             case MONSTER_MAGIC_SKELETON_7:
             {
-                if ((int)c->AttackTime == 1)
-                    PlayBuffer(SOUND_THUNDER01);
-                float fAngle = (float)(45.f - (int)(c->AttackTime * 3 + (int)WorldTime / 10) % 90) + 180.f;
-                for (int i = 0; i < 4; i++)
+                if (c->CheckAttackTime(1))
                 {
-                    b->TransformPosition(o->BoneTransform[c->Weapon[i % 2].LinkBone], p, Position, true);
-                    Vector(0.f, 0.f, fAngle, Angle);
-                    CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 1, to, 50.f);
-                    CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
-                    fAngle += 270.f;
+                    PlayBuffer(SOUND_THUNDER01);
+                    c->SetLastAttackEffectTime();
+                }
+                if (rand_fps_check(1))
+                {
+                    float fAngle = (float)(45.f - (int)(c->AttackTime * 3 + (int)WorldTime / 10) % 90) + 180.f;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        b->TransformPosition(o->BoneTransform[c->Weapon[i % 2].LinkBone], p, Position, true);
+                        Vector(0.f, 0.f, fAngle, Angle);
+                        CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 1, to, 50.f);
+                        CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
+                        fAngle += 270.f;
+                    }
                 }
             }
             break;
 
             case MONSTER_DARK_PHOENIX://불사조공격
-                if (8 <= c->AttackTime)
+                if (8 <= c->AttackTime && rand_fps_check(1))
                 {
                     Vector(0.f, 0.f, 0.f, p);
                     b->TransformPosition(g_fBoneSave[0], p, Position, true);
@@ -2050,17 +2127,23 @@ void AttackEffect(CHARACTER* c)
                 }
                 break;
             case MONSTER_DEVIL://데빌
-                if ((int)c->AttackTime == 1)
-                    PlayBuffer(SOUND_EVIL);
-
-                for (int i = 0; i < 4; i++)
+                if (c->CheckAttackTime(1))
                 {
-                    int Hand = 0;
-                    if (i >= 2) Hand = 1;
-                    b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
-                    Vector(0.f, 0.f, (float)(rand() % 360), Angle);
-                    CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
-                    CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
+                    PlayBuffer(SOUND_EVIL);
+                    c->SetLastAttackEffectTime();
+                }
+
+                if (rand_fps_check(1))
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int Hand = 0;
+                        if (i >= 2) Hand = 1;
+                        b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
+                        Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+                        CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
+                        CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
+                    }
                 }
                 break;
             case MONSTER_CURSED_WIZARD:
@@ -2418,19 +2501,21 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         BMD* b = &Models[o->Type];
 
         vec3_t p;
-        if ((int)c->AttackTime == 10)
+        if (c->CheckAttackTime(10))
         {
             PlayBuffer(SOUND_RIDINGSPEAR);
+            c->SetLastAttackEffectTime();
         }
-        else if ((int)c->AttackTime == 4)
+        else if (c->CheckAttackTime(4))
         {	// 준비동작
             vec3_t Light = { 1.0f, 1.0f, .5f };
             vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
             b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], Position2, p, true);
             CreateEffect(MODEL__SPEAR, p, o->Angle, Light, c->Weapon[Hand].Type, o);
             //CreateEffect(BITMAP_MAGIC+1,o->Position,o->Angle,Light,4,o);
+            c->SetLastAttackEffectTime();
         }
-        else if (8 == c->AttackTime)
+        else if (c->CheckAttackTime(8))
         {	// 꼬깔 만들기
             vec3_t Position;
             memcpy(Position, o->Position, sizeof(vec3_t));
@@ -2440,8 +2525,9 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             vec3_t Light = { 1.0f, 1.0f, 1.0f };
             CreateEffect(MODEL_SPEAR, Position, o->Angle, Light, 0, o);
             CreateEffect(MODEL_SPEAR, Position, o->Angle, Light, 0, o);
+            c->SetLastAttackEffectTime();
         }
-        if (13 <= c->AttackTime && c->AttackTime <= 14)
+        if (13 <= c->AttackTime && c->AttackTime <= 14 && rand_fps_check(1))
         {	// 현란한 창술
             for (int i = 0; i < 3; ++i)
             {
@@ -2452,7 +2538,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
                 Position[2] += 110.0f;
                 //vec3_t Light = { .6f, .6f, .2f};
                 vec3_t Light = { .3f, .3f, .3f };
-                if ((int)c->AttackTime == 11)
+                if (c->CheckAttackTime(11))
                 {
                     /*Light[0] = 1.0f;
                     Light[1] = 0.5f;
@@ -2480,10 +2566,11 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             }
         }
 
-        if ((int)c->AttackTime == 3)  //  氣 모으기.
+        if (c->CheckAttackTime(3))  //  氣 모으기.
         {
             CreateEffect(BITMAP_GATHERING, o->Position, o->Angle, o->Light, 0, o);
             PlayBuffer(SOUND_PIERCING, o);
+            c->SetLastAttackEffectTime();
         }
         g_iLimitAttackTime = 5;
         break;
@@ -3846,6 +3933,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
     if ((int)c->AttackTime >= g_iLimitAttackTime)
     {
         c->AttackTime = 0;
+        c->LastAttackEffectTime = -1;
         o->PKKey = getTargetCharacterKey(c, SelectedCharacter);
 
         switch ((c->Skill))
@@ -11332,6 +11420,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->BlendMeshTexCoordV = 0.f;
     c->Skill = 0;
     c->AttackTime = 0;
+    c->LastAttackEffectTime = -1;
     c->TargetCharacter = -1;
     c->AttackFlag = ATTACK_FAIL;
     c->Weapon[0].Type = -1;

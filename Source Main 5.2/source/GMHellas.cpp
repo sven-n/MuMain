@@ -1078,7 +1078,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case MONSTER_DEATH_ANGEL_5:
     case MONSTER_DEATH_ANGEL_6:
     case MONSTER_DEATH_ANGEL_7:
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1092,6 +1092,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             }
             Position[2] += 150.f;
             CreateParticle(BITMAP_SHINY + 4, Position, o->Angle, Light, 1, 1.f);
+            c->SetLastAttackEffectTime();
         }
         return true;
 
@@ -1156,7 +1157,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case MONSTER_BLOOD_SOLDIER_5:
     case MONSTER_BLOOD_SOLDIER_6:
     case MONSTER_BLOOD_SOLDIER_7:
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1170,6 +1171,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             }
             Position[2] += 150.f;
             CreateParticle(BITMAP_SHINY + 4, Position, o->Angle, Light, 1, 1.f);
+            c->SetLastAttackEffectTime();
         }
         return true;
 
@@ -1196,9 +1198,10 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 1, o, -1, 0, 1);
+                c->SetLastAttackEffectTime();
             }
             break;
 
@@ -1217,7 +1220,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 vec3_t Light, Position;
 
@@ -1231,11 +1234,12 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
                     CreateEffect(MODEL_FIRE, Position, o->Angle, Light, 7, NULL, 0);
                 }
+                c->SetLastAttackEffectTime();
             }
             break;
 
         case AT_SKILL_ENERGYBALL:
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 if (c->TargetCharacter >= 0 && c->TargetCharacter < MAX_CHARACTERS_CLIENT)
                 {
@@ -1253,6 +1257,8 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
                     Angle[2] += 15.f;
                     CreateJoint(BITMAP_FLARE + 1, Position, to->Position, Angle, 6, to, 30.f, 50);
                 }
+
+                c->SetLastAttackEffectTime();
             }
             break;
         }
@@ -1320,15 +1326,16 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if ((int)c->AttackTime == 7)
+            if (c->CheckAttackTime(7))
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 0);
+                c->SetLastAttackEffectTime();
             }
-            else if ((int)c->AttackTime >= 13)
+            else if (c->CheckAttackTime(13))
             {
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 0, o);
                 CreateEffect(BITMAP_FLAME, o->Position, o->Angle, o->Light, 1, o);
-                c->AttackTime = 15;
+                c->SetLastAttackEffectTime();
             }
         }
         return true;

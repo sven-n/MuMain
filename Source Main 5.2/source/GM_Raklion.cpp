@@ -1859,7 +1859,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             // 				PlayBuffer(SOUND_SKILL_SWORD2);
             // 			}
 
-            if (2 <= c->AttackTime && c->AttackTime <= 8)
+            if (2 <= c->AttackTime && c->AttackTime <= 8 && rand_fps_check(1))
             {
                 for (int j = 0; j < 3; ++j)
                 {
@@ -1874,7 +1874,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     CreateJoint(MODEL_SPEARSKILL, TempPos, TempPos, o->Angle, 2, o, 40.0f);
                 }
             }
-            if (c->AttackTime <= 8)
+            if (c->AttackTime <= 8 && rand_fps_check(1))
             {
                 vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
                 b->TransformPosition(o->BoneTransform[26], Position2, o->m_vPosSword, true);
@@ -1918,7 +1918,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 //				PlayBuffer(SOUND_COMBO);
             }
         }
-        else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame < 1.0f)
+        else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame < 1.0f && rand_fps_check(1))
         {
             int iBones[] = { 20, 37, 45, 51 };
             for (int i = 0; i < 4; ++i)
