@@ -2934,15 +2934,15 @@ void DeadCharacter(CHARACTER* c, OBJECT* o, BMD* b)
 
     if (o->Type == MODEL_BALI && gMapManager.WorldActive == WD_7ATLANSE)
     {
-        c->Rot += 0.05f;
+        c->Rot += 0.05f * FPS_ANIMATION_FACTOR;
     }
     else if (o->Type == MODEL_ILLUSION_OF_KUNDUN)
     {
-        if (o->LifeTime >= 100) c->Rot += 0.01f;
-        else c->Rot += 0.02f;
+        if (o->LifeTime >= 100) c->Rot += 0.01f * FPS_ANIMATION_FACTOR;
+        else c->Rot += 0.02f * FPS_ANIMATION_FACTOR;
     }
     else
-        c->Rot += 0.02f;
+        c->Rot += 0.02f * FPS_ANIMATION_FACTOR;
     float RotTime = 1.f;
     if (c->Rot >= RotTime)
     {
