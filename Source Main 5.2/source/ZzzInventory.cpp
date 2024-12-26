@@ -46,6 +46,8 @@
 #include "NewUISystem.h"
 #include "ServerListManager.h"
 #include <time.h>
+#include <unordered_set>
+
 #include "MapManager.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
@@ -6468,6 +6470,229 @@ void SetJewelColor()
     glColor3f(1.f, 0.8f, 0.1f);
 }
 
+void SetYellowColor()
+{
+    glColor3f(1.f, 0.8f, 0.1f);
+}
+
+void SetGrayColor()
+{
+    glColor3f(0.7f, 0.7f, 0.7f);
+}
+
+void SetOrangeColor()
+{
+    glColor3f(0.9f, 0.53f, 0.13f);
+}
+
+std::unordered_set<int> boldTextItems = {
+    MODEL_JEWEL_OF_BLESS,
+    MODEL_JEWEL_OF_SOUL,
+    MODEL_JEWEL_OF_LIFE,
+    MODEL_JEWEL_OF_CHAOS,
+    MODEL_JEWEL_OF_CREATION,
+    MODEL_JEWEL_OF_GUARDIAN,
+    MODEL_LOCHS_FEATHER,
+    MODEL_GEMSTONE,
+    MODEL_JEWEL_OF_HARMONY,
+    MODEL_LOWER_REFINE_STONE,
+    MODEL_HIGHER_REFINE_STONE,
+    MODEL_COMPILED_CELE,
+    MODEL_COMPILED_SOUL,
+    MODEL_DEVILS_EYE,
+    MODEL_DEVILS_KEY,
+    MODEL_DEVILS_INVITATION,
+};
+
+std::unordered_set<int> whiteTextItems = {
+    MODEL_SCROLL_OF_CHAOTIC_DISEIER,
+    MODEL_SCROLL_OF_FIRE_SCREAM,
+};
+
+std::unordered_set<int> yellowTextItems = {
+    
+    MODEL_ZEN,
+    MODEL_JEWEL_OF_BLESS,
+    MODEL_JEWEL_OF_SOUL,
+    MODEL_JEWEL_OF_LIFE,
+    MODEL_JEWEL_OF_CHAOS,
+    MODEL_JEWEL_OF_CREATION,
+    MODEL_JEWEL_OF_GUARDIAN,
+    MODEL_LOCHS_FEATHER,
+    MODEL_GEMSTONE,
+    MODEL_JEWEL_OF_HARMONY,
+    MODEL_LOWER_REFINE_STONE,
+    MODEL_HIGHER_REFINE_STONE,
+    MODEL_COMPILED_CELE,
+    MODEL_COMPILED_SOUL,
+    MODEL_DEVILS_EYE,
+    MODEL_DEVILS_KEY,
+    MODEL_DEVILS_INVITATION,
+    MODEL_BOX_OF_LUCK,
+    MODEL_FRUITS,
+    MODEL_SPIRIT,
+    MODEL_EVENT + 16,
+    MODEL_EVENT + 5,
+    MODEL_OLD_SCROLL,
+    MODEL_ILLUSION_SORCERER_COVENANT,
+    MODEL_SCROLL_OF_BLOOD,
+    MODEL_POTION + 64,
+    MODEL_EVENT + 11,
+    MODEL_EVENT + 12,
+    MODEL_EVENT + 13,
+    MODEL_EVENT + 14,
+    MODEL_EVENT + 15,
+    MODEL_SUSPICIOUS_SCRAP_OF_PAPER,
+    MODEL_GAIONS_ORDER,
+    MODEL_FIRST_SECROMICON_FRAGMENT,
+    MODEL_SECOND_SECROMICON_FRAGMENT,
+    MODEL_THIRD_SECROMICON_FRAGMENT,
+    MODEL_FOURTH_SECROMICON_FRAGMENT,
+    MODEL_FIFTH_SECROMICON_FRAGMENT,
+    MODEL_SIXTH_SECROMICON_FRAGMENT,
+    MODEL_COMPLETE_SECROMICON,
+    MODEL_POTION + 100,
+    MODEL_POTION + 111,
+    MODEL_POTION + 112,
+    MODEL_POTION + 113,
+    MODEL_POTION + 120,
+    MODEL_POTION + 121,
+    MODEL_POTION + 122,
+    MODEL_POTION + 123,
+    MODEL_POTION + 124,
+    MODEL_POTION + 134,
+    MODEL_POTION + 135,
+    MODEL_POTION + 136,
+    MODEL_POTION + 137,
+    MODEL_POTION + 138,
+    MODEL_POTION + 139,
+    MODEL_POTION + 114,
+    MODEL_POTION + 115,
+    MODEL_POTION + 116,
+    MODEL_POTION + 117,
+    MODEL_POTION + 118,
+    MODEL_POTION + 119,
+    MODEL_POTION + 126,
+    MODEL_POTION + 127,
+    MODEL_POTION + 128,
+    MODEL_POTION + 129,
+    MODEL_POTION + 130,
+    MODEL_POTION + 131,
+    MODEL_POTION + 132,
+    MODEL_HELPER + 91,
+    MODEL_HELPER + 97,
+    MODEL_HELPER + 98,
+    MODEL_HELPER + 99,
+    MODEL_HELPER + 109,
+    MODEL_HELPER + 110,
+    MODEL_HELPER + 111,
+    MODEL_HELPER + 112,
+    MODEL_HELPER + 113,
+    MODEL_HELPER + 114,
+    MODEL_HELPER + 115,
+    MODEL_HELPER + 121,
+    MODEL_WING + 25,
+    MODEL_LOST_MAP,
+    MODEL_SYMBOL_OF_KUNDUN,
+};
+
+std::unordered_set<int> orangeTextItems = {
+    MODEL_CHERRY_BLOSSOM_PLAYBOX,
+    MODEL_CHERRY_BLOSSOM_WINE,
+    MODEL_CHERRY_BLOSSOM_RICE_CAKE,
+    MODEL_CHERRY_BLOSSOM_FLOWER_PETAL,
+    MODEL_GOLDEN_CHERRY_BLOSSOM_BRANCH,
+    MODEL_DEMON,
+    MODEL_SPIRIT_OF_GUARDIAN,
+    MODEL_PET_RUDOLF,
+    MODEL_PET_PANDA,
+    MODEL_PET_UNICORN,
+    MODEL_PET_SKELETON,
+    MODEL_SNOWMAN_TRANSFORMATION_RING,
+    MODEL_PANDA_TRANSFORMATION_RING,
+    MODEL_SKELETON_TRANSFORMATION_RING,
+    MODEL_PUMPKIN_OF_LUCK,
+    MODEL_JACK_OLANTERN_BLESSINGS,
+    MODEL_JACK_OLANTERN_WRATH,
+    MODEL_JACK_OLANTERN_CRY,
+    MODEL_JACK_OLANTERN_FOOD,
+    MODEL_JACK_OLANTERN_DRINK,
+    MODEL_HELPER + 43,
+    MODEL_HELPER + 44,
+    MODEL_HELPER + 45,
+    MODEL_HELPER + 46,
+    MODEL_HELPER + 47,
+    MODEL_HELPER + 48,
+    MODEL_HELPER + 54,
+    MODEL_HELPER + 55,
+    MODEL_HELPER + 56,
+    MODEL_HELPER + 57,
+    MODEL_HELPER + 58,
+    MODEL_HELPER + 59,
+    MODEL_HELPER + 60,
+    MODEL_HELPER + 61,
+    MODEL_HELPER + 62,
+    MODEL_HELPER + 63,
+    MODEL_HELPER + 116,
+    MODEL_HELPER + 125,
+    MODEL_HELPER + 126,
+    MODEL_HELPER + 127,
+    MODEL_HELPER + 128,
+    MODEL_HELPER + 129,
+    MODEL_HELPER + 130,
+    MODEL_HELPER + 131,
+    MODEL_HELPER + 132,
+    MODEL_HELPER + 133,
+    MODEL_HELPER + 134,
+    MODEL_POTION + 53,
+    MODEL_POTION + 54,
+    MODEL_POTION + 58,
+    MODEL_POTION + 59,
+    MODEL_POTION + 60,
+    MODEL_POTION + 61,
+    MODEL_POTION + 62,
+    MODEL_POTION + 70,
+    MODEL_POTION + 71,
+    MODEL_POTION + 72,
+    MODEL_POTION + 73,
+    MODEL_POTION + 74,
+    MODEL_POTION + 75,
+    MODEL_POTION + 76,
+    MODEL_POTION + 77,
+    MODEL_POTION + 78,
+    MODEL_POTION + 79,
+    MODEL_POTION + 80,
+    MODEL_POTION + 81,
+    MODEL_POTION + 82,
+    MODEL_POTION + 83,
+    MODEL_POTION + 88,
+    MODEL_POTION + 89,
+    MODEL_POTION + 91,
+    MODEL_POTION + 92,
+    MODEL_POTION + 93,
+    MODEL_POTION + 94,
+    MODEL_POTION + 95,
+    MODEL_POTION + 96,
+    MODEL_POTION + 97,
+    MODEL_POTION + 98,
+    MODEL_POTION + 141,
+    MODEL_POTION + 142,
+    MODEL_POTION + 143,
+    MODEL_POTION + 144,
+    MODEL_POTION + 145,
+    MODEL_POTION + 146,
+    MODEL_POTION + 147,
+    MODEL_POTION + 148,
+    MODEL_POTION + 149,
+    MODEL_POTION + 150,
+    MODEL_WING + 130,
+    MODEL_WING + 131,
+    MODEL_WING + 132,
+    MODEL_WING + 133,
+    MODEL_WING + 134,
+    MODEL_WING + 135,
+};
+
 void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
 {
     wchar_t Name[80]{};
@@ -6477,22 +6702,12 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 255);
 
-    bool bFirstOK = true;
-
-    // Color:
-    switch (o->Type)
-    {
-    case MODEL_JEWEL_OF_BLESS:
-    case MODEL_ZEN:
-        glColor3f(1.f, 0.8f, 0.1f);
-        break;
-    case MODEL_ORB_OF_SUMMONING:
-        glColor3f(0.7f, 0.7f, 0.7f);
-        break;
-    }
-
     // Use the item name by default
-    if (ItemLevel == 0)
+    if (o->Type == MODEL_ZEN) // Zen
+    {
+        swprintf(Name, L"%s %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+    }
+    else if (ItemLevel == 0)
     {
         swprintf(Name, L"%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
@@ -6501,337 +6716,45 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         swprintf(Name, L"%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
 
-    if (o->Type == MODEL_ZEN) // Zen
+    if (boldTextItems.count(o->Type) > 0)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
-        swprintf(Name, L"%s %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
-    }
-    else if ((o->Type == MODEL_JEWEL_OF_BLESS)
-        || (o->Type == MODEL_JEWEL_OF_SOUL)
-        || (o->Type == MODEL_JEWEL_OF_LIFE)
-        || (o->Type == MODEL_JEWEL_OF_CHAOS) // Chaos
-        || (o->Type == MODEL_JEWEL_OF_CREATION)
-        || (o->Type == MODEL_JEWEL_OF_GUARDIAN)
-        || (o->Type == MODEL_LOCHS_FEATHER) // Feather
-        || (o->Type == MODEL_GEMSTONE)
-        || (o->Type == MODEL_JEWEL_OF_HARMONY)
-        || (o->Type == MODEL_LOWER_REFINE_STONE)
-        || (o->Type == MODEL_HIGHER_REFINE_STONE)
-        )
-    {
-        // Jewels ...
         g_pRenderText->SetFont(g_hFontBold);
-        glColor3f(1.f, 0.8f, 0.1f);
-        swprintf(Name, L"%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
+    }
+
+    if (whiteTextItems.count(o->Type) > 0)
+    {
+        glColor3f(1.f, 1.f, 1.f);
+    }
+    else if (yellowTextItems.count(o->Type) > 0)
+    {
+        SetYellowColor();
+    }
+    else if (orangeTextItems.count(o->Type) > 0)
+    {
+        SetOrangeColor();
     }
     else if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
-        glColor3f(0.7f, 0.7f, 0.7f);
+        SetGrayColor();
         swprintf(Name, L"%s %s", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
     }
-    else if (o->Type == MODEL_HELPER + 46)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 46].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 47)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 47].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 48)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 48].Name);
-    }
-    else if (o->Type == MODEL_POTION + 54)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 54].Name);
-    }
-    else if (o->Type >= MODEL_POTION + 58 && o->Type <= MODEL_POTION + 62)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type >= MODEL_POTION + 145 && o->Type <= MODEL_POTION + 150)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 125)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 125].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 126)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 126].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 127)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 127].Name);
-    }
-    else if (o->Type == MODEL_POTION + 53)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 53].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 43 || o->Type == MODEL_HELPER + 44 || o->Type == MODEL_HELPER + 45)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_HELPER].Name);
-    }
-    else if (o->Type >= ITEM_POTION + 70 && o->Type <= ITEM_POTION + 71)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type >= ITEM_POTION + 72 && o->Type <= ITEM_POTION + 77)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type == ITEM_HELPER + 59)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type >= ITEM_HELPER + 54 && o->Type <= ITEM_HELPER + 58)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type >= ITEM_POTION + 78 && o->Type <= ITEM_POTION + 82)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type == ITEM_HELPER + 60)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type == ITEM_HELPER + 61)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type == MODEL_POTION + 83)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 43 || o->Type == MODEL_HELPER + 44 || o->Type == MODEL_HELPER + 45)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[o->Type - MODEL_HELPER].Name);
-    }
-    else if (o->Type == MODEL_POTION + 91)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 91].Name);
-    }
-    else if (o->Type == MODEL_POTION + 92)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 92].Name);
-    }
-    else if (o->Type == MODEL_POTION + 93)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 93].Name);
-    }
-    else if (o->Type == MODEL_POTION + 95)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 95].Name);
-    }
-    else if (o->Type == MODEL_POTION + 94)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 94].Name);
-    }
-    else if (o->Type == MODEL_CHERRY_BLOSSOM_PLAYBOX)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_CHERRY_BLOSSOM_PLAYBOX].Name);
-    }
-    else if (o->Type == MODEL_CHERRY_BLOSSOM_WINE)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_CHERRY_BLOSSOM_WINE].Name);
-    }
-    else if (o->Type == MODEL_CHERRY_BLOSSOM_RICE_CAKE)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_CHERRY_BLOSSOM_RICE_CAKE].Name);
-    }
-    else if (o->Type == MODEL_CHERRY_BLOSSOM_FLOWER_PETAL)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_CHERRY_BLOSSOM_FLOWER_PETAL].Name);
-    }
-    else if (o->Type == MODEL_POTION + 88)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 88].Name);
-    }
-    else if (o->Type == MODEL_POTION + 89)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 89].Name);
-    }
-    else if (o->Type == MODEL_GOLDEN_CHERRY_BLOSSOM_BRANCH)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 62) {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 62].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 63) {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 63].Name);
-    }
-    else if (o->Type == MODEL_POTION + 97)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 97].Name);
-    }
-    else if (o->Type == MODEL_POTION + 98)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 98].Name);
-    }
-    else if (o->Type == MODEL_POTION + 96)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 96].Name);
-    }
-    else if (o->Type == MODEL_DEMON)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_DEMON].Name);
-    }
-    else if (o->Type == MODEL_SPIRIT_OF_GUARDIAN)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_SPIRIT_OF_GUARDIAN].Name);
-    }
-    else if (o->Type == MODEL_PET_RUDOLF)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_PET_RUDOLF].Name);
-    }
-    else if (o->Type == MODEL_PET_PANDA)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_PET_PANDA].Name);
-    }
-    else if (o->Type == MODEL_PET_UNICORN)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_PET_UNICORN].Name);
-    }
-    else if (o->Type == MODEL_PET_SKELETON)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_PET_SKELETON].Name);
-    }
-    else if (o->Type == MODEL_SNOWMAN_TRANSFORMATION_RING)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_SNOWMAN_TRANSFORMATION_RING].Name);
-    }
-    else if (o->Type == MODEL_PANDA_TRANSFORMATION_RING)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_PANDA_TRANSFORMATION_RING].Name);
-    }
-    else if (o->Type == MODEL_SKELETON_TRANSFORMATION_RING)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_SKELETON_TRANSFORMATION_RING].Name);
-    }
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-
-    else if (o->Type == MODEL_HELPER + 128)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 128].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 129)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 129].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 134)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 134].Name);
-    }
-#endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM
-#ifdef LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
-    else if (o->Type == MODEL_HELPER + 130)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 130].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 131)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 131].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 132)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 132].Name);
-    }
-    else if (o->Type == MODEL_HELPER + 133)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_HELPER + 133].Name);
-    }
-#endif //LJH_ADD_ITEMS_EQUIPPED_FROM_INVENTORY_SYSTEM_PART_2
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true))
     {
         int iJewelItemIndex = COMGEM::GetJewelIndex(COMGEM::Check_Jewel_Com(o->Type, true), COMGEM::eGEM_NAME);
         g_pRenderText->SetFont(g_hFontBold);
-        glColor3f(1.f, 0.8f, 0.1f);
+        SetYellowColor();
         swprintf(Name, L"%s", GlobalText[iJewelItemIndex]);
     }
     else if (o->Type == MODEL_COMPILED_CELE)
     {
-        g_pRenderText->SetFont(g_hFontBold);
-        glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, L"%s", ItemAttribute[MODEL_JEWEL_OF_BLESS - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_COMPILED_SOUL)
     {
-        g_pRenderText->SetFont(g_hFontBold);
-        glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, L"%s", ItemAttribute[MODEL_JEWEL_OF_SOUL - MODEL_ITEM].Name);
-    }
-    else if (o->Type == MODEL_DEVILS_EYE || o->Type == MODEL_DEVILS_KEY || o->Type == MODEL_DEVILS_INVITATION)
-    {
-        g_pRenderText->SetFont(g_hFontBold);
-        glColor3f(1.f, 0.8f, 0.1f);
-        if (ItemLevel == 0)
-        {
-            swprintf(Name, L"%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
-        }
-        else
-        {
-            swprintf(Name, L"%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
-        }
     }
     else if (o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, GlobalText[111]);
     }
     else if (o->Type == MODEL_POTION + 12)
@@ -6845,7 +6768,6 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_FRUITS)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
         switch (ItemLevel)
         {
         case 0:swprintf(Name, L"%s %s", GlobalText[168], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
@@ -6857,7 +6779,6 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_SPIRIT)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
         switch (ItemLevel)
         {
         case 0:swprintf(Name, L"%s of %s", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1187]); break;
@@ -6866,7 +6787,6 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_EVENT + 16)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, GlobalText[1235]);
     }
     else if (o->Type == MODEL_EVENT + 4)
@@ -6875,7 +6795,6 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_EVENT + 5)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
         switch (ItemLevel)
         {
         case 14:
@@ -6895,7 +6814,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     {
         if (ItemLevel == 13)
         {
-            glColor3f(1.f, 0.8f, 0.1f);
+            SetYellowColor();
             swprintf(Name, L"%s", GlobalText[117]);
         }
         else
@@ -6921,78 +6840,16 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_RED_RIBBON_BOX)
     {
-        glColor3f(1.f, 0.3f, 0.3f);
-        swprintf(Name, ItemAttribute[ITEM_RED_RIBBON_BOX].Name);
+        glColor3f(1.f, 0.3f, 0.3f); // Color: Red
+
     }
     else if (o->Type == MODEL_GREEN_RIBBON_BOX)
     {
-        glColor3f(0.3f, 1.0f, 0.3f);
-        swprintf(Name, ItemAttribute[ITEM_GREEN_RIBBON_BOX].Name);
+        glColor3f(0.3f, 1.0f, 0.3f); // Color: Green
     }
     else if (o->Type == MODEL_BLUE_RIBBON_BOX)
     {
-        glColor3f(0.3f, 0.3f, 1.f);
-        swprintf(Name, ItemAttribute[ITEM_BLUE_RIBBON_BOX].Name);
-    }
-    else if (o->Type == MODEL_OLD_SCROLL)
-    {
-        glColor3f(1.f, 0.8f, 0.1f);
-        swprintf(Name, ItemAttribute[ITEM_OLD_SCROLL].Name);
-    }
-    else if (o->Type == MODEL_ILLUSION_SORCERER_COVENANT)
-    {
-        glColor3f(1.f, 0.8f, 0.1f);
-        swprintf(Name, ItemAttribute[ITEM_ILLUSION_SORCERER_COVENANT].Name);
-    }
-    else if (o->Type == MODEL_SCROLL_OF_BLOOD)
-    {
-        glColor3f(1.f, 0.8f, 0.1f);
-        swprintf(Name, ItemAttribute[ITEM_SCROLL_OF_BLOOD].Name);
-    }
-    else if (o->Type == MODEL_POTION + 64)
-    {
-        glColor3f(1.f, 0.8f, 0.1f);
-        swprintf(Name, ItemAttribute[ITEM_POTION + 64].Name);
-    }
-    else if (o->Type == MODEL_SCROLL_OF_CHAOTIC_DISEIER)//
-    {
-        glColor3f(1.f, 1.f, 1.f);
-        swprintf(Name, ItemAttribute[ITEM_SCROLL_OF_CHAOTIC_DISEIER].Name);
-    }
-    else if (o->Type == MODEL_SCROLL_OF_FIRE_SCREAM)
-    {
-        glColor3f(1.f, 1.f, 1.f);
-        swprintf(Name, ItemAttribute[ITEM_SCROLL_OF_FIRE_SCREAM].Name);
-    }
-    else if (o->Type == MODEL_PUMPKIN_OF_LUCK)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_PUMPKIN_OF_LUCK].Name);
-    }
-    else if (o->Type == MODEL_JACK_OLANTERN_BLESSINGS)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_JACK_OLANTERN_BLESSINGS].Name);
-    }
-    else if (o->Type == MODEL_JACK_OLANTERN_WRATH)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_JACK_OLANTERN_WRATH].Name);
-    }
-    else if (o->Type == MODEL_JACK_OLANTERN_CRY)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_JACK_OLANTERN_CRY].Name);
-    }
-    else if (o->Type == MODEL_JACK_OLANTERN_FOOD)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_JACK_OLANTERN_FOOD].Name);
-    }
-    else if (o->Type == MODEL_JACK_OLANTERN_DRINK)
-    {
-        glColor3f(0.9f, 0.53f, 0.13f);
-        swprintf(Name, ItemAttribute[ITEM_JACK_OLANTERN_DRINK].Name);
+        glColor3f(0.3f, 0.3f, 1.f); // Color: Blue
     }
     else if (o->Type == MODEL_PINK_CHOCOLATE_BOX)
     {
@@ -7001,7 +6858,6 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         if (ItemLevel == 0)
         {
             glColor3f(1.f, 0.3f, 1.f);
-            swprintf(Name, ItemAttribute[ITEM_PINK_CHOCOLATE_BOX].Name);
         }
         else
             if (ItemLevel == 1)
@@ -7015,7 +6871,6 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         if (ItemLevel == 0)
         {
             glColor3f(1.0f, 0.3f, 0.3f);
-            swprintf(Name, ItemAttribute[ITEM_RED_CHOCOLATE_BOX].Name);
         }
         else
             if (ItemLevel == 1)
@@ -7029,7 +6884,6 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         if (ItemLevel == 0)
         {
             glColor3f(0.3f, 0.3f, 1.f);
-            swprintf(Name, ItemAttribute[ITEM_BLUE_CHOCOLATE_BOX].Name);
         }
         else
             if (ItemLevel == 1)
@@ -7040,39 +6894,33 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_EVENT + 21)
     {
-        glColor3f(1.f, 0.3f, 1.f);
+        glColor3f(1.f, 0.3f, 1.f); // Color: Pink
         swprintf(Name, GlobalText[2012]);
     }
     else if (o->Type == MODEL_EVENT + 22)
     {
-        glColor3f(1.0f, 0.3f, 0.3f);
+        glColor3f(1.0f, 0.3f, 0.3f); // Color: Red
         swprintf(Name, GlobalText[2013]);
     }
     else if (o->Type == MODEL_EVENT + 23)
     {
-        glColor3f(0.3f, 0.3f, 1.f);
+        glColor3f(0.3f, 0.3f, 1.f); // Color: Blue
         swprintf(Name, GlobalText[2014]);
     }
     else if (o->Type == MODEL_EVENT + 11)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
-        {
-            swprintf(Name, GlobalText[810]);
-        }
+        swprintf(Name, GlobalText[810]);
     }
     else if (o->Type == MODEL_EVENT + 12)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, GlobalText[906]);
     }
     else if (o->Type == MODEL_EVENT + 13)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, GlobalText[907]);
     }
     else if (o->Type == MODEL_EVENT + 14)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
         switch (ItemLevel)
         {
         case 2:
@@ -7088,7 +6936,6 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_EVENT + 15)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
         swprintf(Name, GlobalText[925]);
     }
     else if (o->Type == MODEL_ORB_OF_SUMMONING)
@@ -7108,7 +6955,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_POTION + 21 && ItemLevel == 3)
     {
-        glColor3f(1.f, 0.8f, 0.1f);
+        SetYellowColor();
         swprintf(Name, GlobalText[1290]);
     }
     else if (o->Type == MODEL_SIEGE_POTION)
@@ -7139,247 +6986,92 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     {
         swprintf(Name, GlobalText[1462]);
     }
-    else
-    {
-        bFirstOK = false;
-    }
-
-    if (bFirstOK == false)
-    {
-        if ((o->Type >= MODEL_SEED_FIRE && o->Type <= MODEL_SEED_EARTH)
+    else if ((o->Type >= MODEL_SEED_FIRE && o->Type <= MODEL_SEED_EARTH)
             || (o->Type >= MODEL_SPHERE_MONO && o->Type <= MODEL_SPHERE_5)
             || (o->Type >= MODEL_SEED_SPHERE_FIRE_1 && o->Type <= MODEL_SEED_SPHERE_EARTH_5))
+    {
+        glColor3f(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
+        wcscpy(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+    }
+    else if (o->Type == MODEL_HELPER + 66)
+    {
+        glColor3f(0.6f, 0.4f, 1.0f);
+    }
+    else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + EWS_BEGIN
+        && o->Type <= MODEL_TYPE_CHARM_MIXWING + EWS_END)
+    {
+        SetOrangeColor();
+    }
+    else
+    {
+        if (o->Type == MODEL_DIVINE_STAFF_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL || o->Type == MODEL_DIVINE_CB_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL)
+        {
+            glColor3f(1.f, 0.1f, 1.f);
+        }
+        else if (g_SocketItemMgr.IsSocketItem(o))
         {
             glColor3f(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
-            wcscpy(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
         }
-        else if (o->Type == MODEL_HELPER + 66)
+        else if ((ItemOption & 63) > 0 && (o->Type<MODEL_WINGS_OF_SPIRITS || o->Type>MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
+            && (o->Type<MODEL_WING_OF_STORM || o->Type>MODEL_CAPE_OF_EMPEROR)
+            && (o->Type<MODEL_WINGS_OF_DESPAIR || o->Type>MODEL_WING_OF_DIMENSION)
+            && !(o->Type >= MODEL_CAPE_OF_FIGHTER && o->Type <= MODEL_CAPE_OF_OVERRULE))
         {
-            glColor3f(0.6f, 0.4f, 1.0f);
-            swprintf(Name, ItemAttribute[ITEM_HELPER + 66].Name);
+            glColor3f(0.1f, 1.f, 0.5f);
         }
-        else if (o->Type == MODEL_POTION + 100)
+        else if (ItemLevel >= 7)
         {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_POTION + 100].Name);
+            SetYellowColor();
         }
-        else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + EWS_BEGIN
-            && o->Type <= MODEL_TYPE_CHARM_MIXWING + EWS_END)
+        else if (ip->HasSkill || ip->HasLuck || ip->OptionLevel > 0)
         {
-            glColor3f(0.9f, 0.53f, 0.13f);
-            swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+            glColor3f(0.4f, 0.7f, 1.f);
         }
-        else if (o->Type == MODEL_HELPER + 97 || o->Type == MODEL_HELPER + 98 || o->Type == MODEL_POTION + 91)
+        else if (ItemLevel == 0)
         {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+            SetGrayColor();
         }
-        else if (o->Type == MODEL_HELPER + 99)
+        else if (ItemLevel < 3)
         {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_HELPER + 99].Name);
+            glColor3f(0.9f, 0.9f, 0.9f);
         }
-        else if (o->Type == MODEL_HELPER + 109)
+        else if (ItemLevel < 5)
         {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_HELPER + 109].Name);
+            glColor3f(1.f, 0.5f, 0.2f);
         }
-        else if (o->Type == MODEL_HELPER + 110)
+        else if (ItemLevel < 7)
         {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_HELPER + 110].Name);
+            glColor3f(0.4f, 0.7f, 1.f);
         }
-        else if (o->Type == MODEL_HELPER + 111)
-        {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_HELPER + 111].Name);
-        }
-        else if (o->Type == MODEL_HELPER + 112)
-        {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_HELPER + 112].Name);
-        }
-        else if (o->Type == MODEL_HELPER + 113)
-        {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_HELPER + 113].Name);
-        }
-        else if (o->Type == MODEL_HELPER + 114)
-        {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_HELPER + 114].Name);
-        }
-        else if (o->Type == MODEL_HELPER + 115)
-        {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_HELPER + 115].Name);
-        }
-        else if (o->Type == MODEL_POTION + 112)
-        {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_POTION + 112].Name);
-        }
-        else if (o->Type == MODEL_POTION + 113)
-        {
-            glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[ITEM_POTION + 113].Name);
-        }
-        else
-        {
-            if (o->Type == MODEL_DIVINE_STAFF_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL || o->Type == MODEL_DIVINE_CB_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL)
-            {
-                glColor3f(1.f, 0.1f, 1.f);
-            }
-            else if (g_SocketItemMgr.IsSocketItem(o))
-            {
-                glColor3f(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
-            }
-            else if ((ItemOption & 63) > 0 && (o->Type<MODEL_WINGS_OF_SPIRITS || o->Type>MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
-                && (o->Type<MODEL_WING_OF_STORM || o->Type>MODEL_CAPE_OF_EMPEROR)
-                && (o->Type<MODEL_WINGS_OF_DESPAIR || o->Type>MODEL_WING_OF_DIMENSION)
-                && !(o->Type >= MODEL_CAPE_OF_FIGHTER && o->Type <= MODEL_CAPE_OF_OVERRULE))
-            {
-                glColor3f(0.1f, 1.f, 0.5f);
-            }
-            else if (MODEL_SUSPICIOUS_SCRAP_OF_PAPER <= o->Type && o->Type <= MODEL_COMPLETE_SECROMICON)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (o->Type == MODEL_POTION + 111)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (o->Type == MODEL_POTION + 120)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (o->Type == MODEL_POTION + 121)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (o->Type == MODEL_POTION + 122)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (o->Type == MODEL_POTION + 123)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (o->Type == MODEL_POTION + 124)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (MODEL_POTION + 134 <= o->Type && o->Type <= MODEL_POTION + 139)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (o->Type == MODEL_HELPER + 116)
-            {
-                glColor3f(0.9f, 0.53f, 0.13f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
 
-            else if (ITEM_WING + 130 <= o->Type && o->Type <= ITEM_WING + 135)
-            {
-                glColor3f(0.9f, 0.53f, 0.13f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
+        wchar_t SetName[64]{};
+        if (g_csItemOption.GetSetItemName(SetName, o->Type - MODEL_ITEM, ip->AncientDiscriminator))
+        {
+            glColor3f(1.f, 1.f, 1.f);
+            g_pRenderText->SetFont(g_hFontBold);
+            g_pRenderText->SetTextColor(0, 255, 0, 255);
+            g_pRenderText->SetBgColor(60, 60, 200, 255);
 
-            else if (MODEL_POTION + 114 <= o->Type && o->Type <= MODEL_POTION + 119)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (MODEL_POTION + 126 <= o->Type && o->Type <= MODEL_POTION + 129)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (MODEL_POTION + 130 <= o->Type && o->Type <= MODEL_POTION + 132)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (MODEL_HELPER + 121 == o->Type)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (o->Type >= MODEL_POTION + 141 && o->Type <= MODEL_POTION + 144)
-            {
-                glColor3f(0.9f, 0.53f, 0.13f);
-                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-            }
-            else if (o->Type == MODEL_WING + 25)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-            }
-            else if (o->Type == MODEL_LOST_MAP || o->Type == MODEL_SYMBOL_OF_KUNDUN)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-            }
-            else if (ItemLevel >= 7)
-            {
-                glColor3f(1.f, 0.8f, 0.1f);
-            }
-            else if (ip->HasSkill || ip ->HasLuck || ip->OptionLevel > 0)
-            {
-                glColor3f(0.4f, 0.7f, 1.f);
-            }
-            else if (ItemLevel == 0)
-            {
-                glColor3f(0.7f, 0.7f, 0.7f);
-            }
-            else if (ItemLevel < 3)
-            {
-                glColor3f(0.9f, 0.9f, 0.9f);
-            }
-            else if (ItemLevel < 5)
-            {
-                glColor3f(1.f, 0.5f, 0.2f);
-            }
-            else if (ItemLevel < 7)
-            {
-                glColor3f(0.4f, 0.7f, 1.f);
-            }
-
-            wchar_t SetName[64]{};
-            if (g_csItemOption.GetSetItemName(SetName, o->Type - MODEL_ITEM, ip->AncientDiscriminator))
-            {
-                glColor3f(1.f, 1.f, 1.f);
-                g_pRenderText->SetFont(g_hFontBold);
-                g_pRenderText->SetTextColor(0, 255, 0, 255);
-                g_pRenderText->SetBgColor(60, 60, 200, 255);
-
-                wcscat(SetName, Name);
-                wcscpy(Name, SetName);
-            }
-
-            if (ip->HasSkill)
-            {
-                if (o->Type != MODEL_HORN_OF_DINORANT)
-                {
-                    wcscat(Name, GlobalText[176]);
-                }
-                else
-                {
-                    wcscat(Name, L" +");
-                    wcscat(Name, GlobalText[179]);
-                }
-            }
-            if (ip->OptionLevel > 0)
-                wcscat(Name, GlobalText[177]);
-            if (ip->HasLuck)
-                wcscat(Name, GlobalText[178]);
+            wcscat(SetName, Name);
+            wcscpy(Name, SetName);
         }
+
+        if (ip->HasSkill)
+        {
+            if (o->Type != MODEL_HORN_OF_DINORANT)
+            {
+                wcscat(Name, GlobalText[176]);
+            }
+            else
+            {
+                wcscat(Name, L" +");
+                wcscat(Name, GlobalText[179]);
+            }
+        }
+        if (ip->OptionLevel > 0)
+            wcscat(Name, GlobalText[177]);
+        if (ip->HasLuck)
+            wcscat(Name, GlobalText[178]);
     }
 
     GLfloat fCurColor[4] = { 1.f, 1.f, 1.f, 0.0f };
