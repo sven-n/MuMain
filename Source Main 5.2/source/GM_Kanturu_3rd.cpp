@@ -1396,7 +1396,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
             Vector(0.3f, 0.2f, 0.1f, Light);
             CreateEffect(MODEL_SUMMON, o->Position, o->Angle, Light, 3);
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK4 && c->AttackTime >= 10 %% rand_fps_check(1))
+        else if (o->CurrentAction == MONSTER01_ATTACK4 && c->AttackTime >= 10 && rand_fps_check(1))
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             CreateInferno(o->Position);
