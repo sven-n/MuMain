@@ -7172,7 +7172,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         else if (o->Type == MODEL_HELPER + 97 || o->Type == MODEL_HELPER + 98 || o->Type == MODEL_POTION + 91)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[o->Type].Name);
+            swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
         }
         else if (o->Type == MODEL_HELPER + 99)
         {
@@ -7182,47 +7182,47 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         else if (o->Type == MODEL_HELPER + 109)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[MODEL_HELPER + 109].Name);
+            swprintf(Name, ItemAttribute[ITEM_HELPER + 109].Name);
         }
         else if (o->Type == MODEL_HELPER + 110)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[MODEL_HELPER + 110].Name);
+            swprintf(Name, ItemAttribute[ITEM_HELPER + 110].Name);
         }
         else if (o->Type == MODEL_HELPER + 111)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[MODEL_HELPER + 111].Name);
+            swprintf(Name, ItemAttribute[ITEM_HELPER + 111].Name);
         }
         else if (o->Type == MODEL_HELPER + 112)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[MODEL_HELPER + 112].Name);
+            swprintf(Name, ItemAttribute[ITEM_HELPER + 112].Name);
         }
         else if (o->Type == MODEL_HELPER + 113)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[MODEL_HELPER + 113].Name);
+            swprintf(Name, ItemAttribute[ITEM_HELPER + 113].Name);
         }
         else if (o->Type == MODEL_HELPER + 114)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[MODEL_HELPER + 114].Name);
+            swprintf(Name, ItemAttribute[ITEM_HELPER + 114].Name);
         }
         else if (o->Type == MODEL_HELPER + 115)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[MODEL_HELPER + 115].Name);
+            swprintf(Name, ItemAttribute[ITEM_HELPER + 115].Name);
         }
         else if (o->Type == MODEL_POTION + 112)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[MODEL_POTION + 112].Name);
+            swprintf(Name, ItemAttribute[ITEM_POTION + 112].Name);
         }
         else if (o->Type == MODEL_POTION + 113)
         {
             glColor3f(1.0f, 0.8f, 0.1f);
-            swprintf(Name, ItemAttribute[MODEL_POTION + 113].Name);
+            swprintf(Name, ItemAttribute[ITEM_POTION + 113].Name);
         }
         else
         {
@@ -7244,79 +7244,79 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
             else if (MODEL_SUSPICIOUS_SCRAP_OF_PAPER <= o->Type && o->Type <= MODEL_COMPLETE_SECROMICON)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (o->Type == MODEL_POTION + 111)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (o->Type == MODEL_POTION + 120)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (o->Type == MODEL_POTION + 121)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (o->Type == MODEL_POTION + 122)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (o->Type == MODEL_POTION + 123)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (o->Type == MODEL_POTION + 124)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (MODEL_POTION + 134 <= o->Type && o->Type <= MODEL_POTION + 139)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (o->Type == MODEL_HELPER + 116)
             {
                 glColor3f(0.9f, 0.53f, 0.13f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
 
             else if (ITEM_WING + 130 <= o->Type && o->Type <= ITEM_WING + 135)
             {
                 glColor3f(0.9f, 0.53f, 0.13f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
 
             else if (MODEL_POTION + 114 <= o->Type && o->Type <= MODEL_POTION + 119)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (MODEL_POTION + 126 <= o->Type && o->Type <= MODEL_POTION + 129)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (MODEL_POTION + 130 <= o->Type && o->Type <= MODEL_POTION + 132)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (MODEL_HELPER + 121 == o->Type)
             {
                 glColor3f(1.f, 0.8f, 0.1f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (o->Type >= MODEL_POTION + 141 && o->Type <= MODEL_POTION + 144)
             {
                 glColor3f(0.9f, 0.53f, 0.13f);
-                swprintf(Name, ItemAttribute[o->Type].Name);
+                swprintf(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
             }
             else if (o->Type == MODEL_WING + 25)
             {
