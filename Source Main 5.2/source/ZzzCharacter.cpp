@@ -8066,6 +8066,12 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         case MODEL_WING + 135:        // Little Warrior's Cloak
             b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
             break;
+        default:
+            if (o->m_pCloth)
+            {
+                b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
+            }
+            break;
         }
     }
 }
