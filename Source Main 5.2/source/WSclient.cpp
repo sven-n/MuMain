@@ -3216,7 +3216,10 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     auto ShieldDamage = Data->ShieldDamage;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamageExtended(%d %d)]", AttackPlayer, Damage);
-    MUHelper::g_MuHelper.AddTarget(Key, true);
+    if (IsMonster(c) || IsPlayer(c))
+    {
+        MUHelper::g_MuHelper.AddTarget(Key, true);
+    }
 
     if (Data->HealthStatus == 0xFF)
     {
@@ -3295,7 +3298,10 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         c->Object.AnimationFrame = 0;
 
         c->TargetCharacter = HeroIndex;
-        MUHelper::g_MuHelper.AddTarget(Key, true);
+        if (IsMonster(c) || IsPlayer(c))
+        {
+            MUHelper::g_MuHelper.AddTarget(Key, true);
+        }
 
         AttackPlayer = Index;
         break;
