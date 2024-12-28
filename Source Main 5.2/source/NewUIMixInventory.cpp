@@ -175,6 +175,8 @@ void CNewUIMixInventory::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
+
+    m_pNewInventoryCtrl->SetPos(x + 15, y + 110);
 }
 
 bool CNewUIMixInventory::UpdateMouseEvent()

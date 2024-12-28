@@ -677,20 +677,25 @@ void CNewUISystem::Show(DWORD dwKey)
                 Hide(INTERFACE_CHARACTER);
             }
         }
-        else if (IsVisible(INTERFACE_MYQUEST))
+        if (IsVisible(INTERFACE_MYQUEST))
         {
             Hide(INTERFACE_MYQUEST);
         }
-        else if (IsVisible(INTERFACE_CHARACTER))
+        if (IsVisible(INTERFACE_CHARACTER))
         {
             Hide(INTERFACE_CHARACTER);
         }
-        else if (IsVisible(INTERFACE_MIXINVENTORY))
+        if (IsVisible(INTERFACE_NPCSHOP))
+        {
+            g_pNPCShop->SetPos(640 - 190 * 3, 0);
+            Hide(INTERFACE_HERO_POSITION_INFO);
+        }
+        if (IsVisible(INTERFACE_MIXINVENTORY))
         {
             g_pMixInventory->SetPos(640 - 190 * 3, 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
         }
-        else if (IsVisible(INTERFACE_TRADE))
+        if (IsVisible(INTERFACE_TRADE))
         {
             g_pTrade->SetPos(640 - 190 * 3, 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
@@ -1143,6 +1148,16 @@ void CNewUISystem::Hide(DWORD dwKey)
         if (IsVisible(INTERFACE_STORAGE))
         {
             g_pStorageInventory->SetPos(secondColumnX, 0);
+        }
+
+        if (IsVisible(INTERFACE_NPCSHOP))
+        {
+            g_pNPCShop->SetPos(secondColumnX, 0);
+        }
+
+        if (IsVisible(INTERFACE_MIXINVENTORY))
+        {
+            g_pMixInventory->SetPos(secondColumnX, 0);
         }
 
         Show(INTERFACE_HERO_POSITION_INFO);
