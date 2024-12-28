@@ -3021,15 +3021,15 @@ void DeadCharacter(CHARACTER* c, OBJECT* o, BMD* b)
 
     if (o->Type == MODEL_BALI && gMapManager.WorldActive == WD_7ATLANSE)
     {
-        c->Rot += 0.05f;
+        c->Rot += 0.05f * FPS_ANIMATION_FACTOR;
     }
     else if (o->Type == MODEL_ILLUSION_OF_KUNDUN)
     {
-        if (o->LifeTime >= 100) c->Rot += 0.01f;
-        else c->Rot += 0.02f;
+        if (o->LifeTime >= 100) c->Rot += 0.01f * FPS_ANIMATION_FACTOR;
+        else c->Rot += 0.02f * FPS_ANIMATION_FACTOR;
     }
     else
-        c->Rot += 0.02f;
+        c->Rot += 0.02f * FPS_ANIMATION_FACTOR;
     float RotTime = 1.f;
     if (c->Rot >= RotTime)
     {
@@ -8153,6 +8153,12 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         case MODEL_WING + 130:        // Small Cape of Lord
         case MODEL_WING + 135:        // Little Warrior's Cloak
             b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
+            break;
+        default:
+            if (o->m_pCloth)
+            {
+                b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
+            }
             break;
         }
     }
