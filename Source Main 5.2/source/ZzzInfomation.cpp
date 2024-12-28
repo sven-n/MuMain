@@ -784,8 +784,6 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
         }
     }
 
-    ip->Defense = 0;
-
     if (ip->Type == ITEM_CAPE_OF_LORD)
     {
         p->Defense = 15;
@@ -812,14 +810,14 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
         return;
     }
 
-    if (isExcellent > 0 && p->Level > 0)
+    if (isExcellent && p->Level > 0)
     {
         ip->Defense += p->Defense * 12 / p->Level + 4 + p->Level / 5;
     }
 
     if (isAncientItem)
     {
-        ip->Defense = ip->Defense + (ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30);
+        ip->Defense += p->Defense + (ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30);
     }
 
     if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_WINGS_OF_DESPAIR)
