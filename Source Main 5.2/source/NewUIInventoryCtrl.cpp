@@ -593,7 +593,7 @@ ITEM* SEASON3B::CNewUIInventoryCtrl::FindItem(int iLinealPos)
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItem(int iColumnX, int iRowY)
 {
-    return FindItem(iRowY * m_nColumn + iColumnX);
+    return FindItem(iRowY * m_nColumn + iColumnX + m_nIndexOffset);
 }
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItemByKey(DWORD dwKey)
