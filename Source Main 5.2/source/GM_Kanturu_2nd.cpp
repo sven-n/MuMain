@@ -1403,7 +1403,7 @@ void CTrapCanon::Render_Object(OBJECT* o, BMD* b)
 
 void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (c->CheckAttackTime(0))
+    if (c->AttackTime < 1)
     {
         float fLumi;
         vec3_t vPos, vLight;
