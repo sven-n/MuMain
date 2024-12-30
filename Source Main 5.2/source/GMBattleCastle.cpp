@@ -366,7 +366,7 @@ namespace battleCastle
         Position[0] = 97 * TERRAIN_SCALE;
         Position[1] = 113 * TERRAIN_SCALE;
         Position[2] = RequestTerrainHeight(Position[0], Position[1]) + zOffset;
-        CreateObject(MODEL_MONSTER01 + 77, Position, Angle);
+        CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
 
         Position[0] = 117 * TERRAIN_SCALE;
         Position[1] = 113 * TERRAIN_SCALE;
