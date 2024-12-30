@@ -340,25 +340,42 @@ namespace battleCastle
 
         vec3_t Angle, Position;
         Vector(0.f, 0.f, 0.f, Angle);
-        Vector(0.f, 0.f, 270.f, Position);
+        Vector(0.f, 0.f, 0.f, Position);
 
         SocketClient->ToGameServer()->SendGuildLogoOfCastleOwnerRequest();
 
         OpenMonsterModel(MONSTER_MODEL_BATTLE_GUARD2);
 
-        Position[0] = 65 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
+        constexpr float zOffset = 80.f;
+
+        Position[0] = 65 * TERRAIN_SCALE;
+        Position[1] = 113 * TERRAIN_SCALE;
+        Position[2] = RequestTerrainHeight(Position[0], Position[1]) + zOffset;
         CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
 
-        Position[0] = 71 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
+        Position[0] = 71 * TERRAIN_SCALE;
+        Position[1] = 113 * TERRAIN_SCALE;
+        Position[2] = RequestTerrainHeight(Position[0], Position[1]) + zOffset;
         CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
 
-        Position[0] = 91 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
+        Position[0] = 91 * TERRAIN_SCALE;
+        Position[1] = 113 * TERRAIN_SCALE;
+        Position[2] = RequestTerrainHeight(Position[0], Position[1]) + zOffset;
         CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
 
-        Position[0] = 118 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
+        Position[0] = 97 * TERRAIN_SCALE;
+        Position[1] = 113 * TERRAIN_SCALE;
+        Position[2] = RequestTerrainHeight(Position[0], Position[1]) + zOffset;
         CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
 
-        Position[0] = 123 * TERRAIN_SCALE; Position[1] = 113 * TERRAIN_SCALE;
+        Position[0] = 117 * TERRAIN_SCALE;
+        Position[1] = 113 * TERRAIN_SCALE;
+        Position[2] = RequestTerrainHeight(Position[0], Position[1]) + zOffset;
+        CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
+
+        Position[0] = 123 * TERRAIN_SCALE;
+        Position[1] = 113 * TERRAIN_SCALE;
+        Position[2] = RequestTerrainHeight(Position[0], Position[1]) + zOffset;
         CreateObject(MODEL_BATTLE_GUARD2, Position, Angle);
     }
 
