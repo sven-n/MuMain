@@ -569,18 +569,18 @@ void RenderBackLight(OBJECT* o, vec3_t Position, vec3_t Light1, vec3_t Light2)
         position[1] = Position[1] + rand() % 80 - 40;
         position[2] = Position[2] + 10;
 
-        if (rand() % 2)
+        if (rand_fps_check(2))
         {
             CreateParticle(BITMAP_ENERGY, position, o->Angle, Light1, 1, 0.05f);
         }
-        else
+        else if (rand_fps_check(2))
         {
             CreateParticle(BITMAP_ENERGY, position, o->Angle, Light2, 1, 0.05f);
         }
 
         Vector(Light1[0] * light + Light2[0] * (1.f - light), Light1[1] * light + Light2[1] * (1.f - light), Light1[2] * light + Light2[2] * (1.f - light), Light);
 
-        CreateParticle(BITMAP_FLARE, position, o->Angle, Light1, 1, 0.2f);
+        CreateParticleFpsChecked(BITMAP_FLARE, position, o->Angle, Light1, 1, 0.2f);
     }
     g_aniBackLight = true;
 }

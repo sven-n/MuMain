@@ -1156,7 +1156,7 @@ namespace battleCastle
             if (IsBattleCastleStart() == false)
             {
                 Vector(1.f, 1.f, 1.f, Light);
-                CreateParticle(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 6, o->Scale);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 6, o->Scale);
             }
             break;
         case 53:
@@ -1170,7 +1170,7 @@ namespace battleCastle
             if (IsBattleCastleStart() == false)
             {
                 Vector(1.f, 1.f, 1.f, Light);
-                CreateParticle(BITMAP_WATERFALL_3 + (rand() % 2), o->Position, o->Angle, Light, 0);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (rand() % 2), o->Position, o->Angle, Light, 0);
             }
             break;
         }

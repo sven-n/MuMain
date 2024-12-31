@@ -234,7 +234,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
             Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
             b->TransformPosition(BoneTransform[34], p, Pos, false);
             if (o->AnimationFrame >= 5.0f && o->AnimationFrame < 12.5f)
-                CreateParticle(BITMAP_SMOKE, Pos, o->Angle, Light, 43, 1.5f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 43, 1.5f);
         }
 
         if (g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_ENDCYCLE || g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_STANDBY)
@@ -863,7 +863,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
             CreateEffect(MODEL_STORM2, Position, o->Angle, Light, 0);
             CreateEffect(BITMAP_BOSS_LASER, Position, o->Angle, Light, 2);
         }
-        else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 3.0f)
+        else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 3.0f && rand_fps_check(1))
         {
             vec3_t Position;
             BoneManager::GetBonePosition(o, L"Body_Bone13", Position);
@@ -883,7 +883,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
     {
         vec3_t Pos;
 
-        if (o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3)
+        if (o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3 && rand_fps_check(1))
         {
             o->BlendMesh = -2;
             Vector(0.0f, 0.0f, 0.0f, Position);
@@ -898,7 +898,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
         else
             o->BlendMesh = -1;
 
-        if (o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3)
+        if (o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3 && rand_fps_check(1))
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             Vector(0.0f, -50.0f, 0.0f, Position);
@@ -912,7 +912,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
     {
         vec3_t Pos;
 
-        if (o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3)
+        if (o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3 && rand_fps_check(1))
         {
             o->BlendMesh = -2;
             Vector(0.0f, 0.0f, 0.0f, Position);
@@ -927,7 +927,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
         else
             o->BlendMesh = -1;
 
-        if (o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3)
+        if (o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3 && rand_fps_check(1))
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             Vector(50.0f, 0.0f, 0.0f, Position);
@@ -1064,7 +1064,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
 
         BoneManager::GetBonePosition(o, L"Body_Bone13", Position);
-        CreateParticle(BITMAP_FIRE + 1, Position, o->Angle, Light, 3, 1.7f);
+        CreateParticleFpsChecked(BITMAP_FIRE + 1, Position, o->Angle, Light, 3, 1.7f);
 
         Vector(3.0f, 0.0f, 0.0f, Position);
         BoneManager::GetBonePosition(o, L"Sword_Bone1", Position, Position);

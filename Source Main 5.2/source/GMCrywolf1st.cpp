@@ -743,8 +743,8 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
                 for (int iu = 0; iu < 6; iu++)
                 {
-                    CreateEffect(MODEL_STONE2, EndPos, o->Angle, o->Light);
-                    CreateEffect(MODEL_STONE2, EndPos1, o->Angle, o->Light);
+                    CreateEffectFpsChecked(MODEL_STONE2, EndPos, o->Angle, o->Light);
+                    CreateEffectFpsChecked(MODEL_STONE2, EndPos1, o->Angle, o->Light);
                 }
             }
         }
@@ -766,7 +766,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (o->AnimationFrame >= 6.5f && o->AnimationFrame < (6.5f + fActionSpeed))
+            if (o->AnimationFrame >= 6.5f && o->AnimationFrame < (6.5f + fActionSpeed) && rand_fps_check(1))
             {
                 Vector(0.0f, 0.0f, 0.0f, EndRelative);
                 b->TransformPosition(o->BoneTransform[27], EndRelative, EndPos, true);
@@ -807,7 +807,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         if (o->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t EndPos, EndRelative;
-            if (o->AnimationFrame >= 7.5f && o->AnimationFrame < (7.5f + fActionSpeed))
+            if (o->AnimationFrame >= 7.5f && o->AnimationFrame < (7.5f + fActionSpeed) && rand_fps_check(1))
             {
                 Vector(0.f, 0.f, 0.f, EndRelative);
                 b->TransformPosition(BoneTransform[33], EndRelative, EndPos, false);
@@ -894,7 +894,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         //			CreateParticle(BITMAP_FIRE,EndPos,o->Angle,Light);
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (o->AnimationFrame >= 2.5f && o->AnimationFrame < (2.5f + fActionSpeed))
+            if (o->AnimationFrame >= 2.5f && o->AnimationFrame < (2.5f + fActionSpeed) && rand_fps_check(1))
             {
                 Vector(0.0f, 0.0f, 100.0f, EndRelative);
                 b->TransformPosition(o->BoneTransform[20], EndRelative, EndPos, true);
@@ -927,7 +927,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             VectorRotate(o->Direction, Matrix, Position);
 
             Vector(1.f, 0.0f, 0.5f, Light);
-            CreateEffect(MODEL_PIERCING2, o->Position, o->Angle, Light, 1);
+            CreateEffectFpsChecked(MODEL_PIERCING2, o->Position, o->Angle, Light, 1);
         }
     }
     break;
@@ -1056,8 +1056,8 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
 
             if (to != NULL)
             {
-                CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 50.f);
-                CreateJoint(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 10.f);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 50.f);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, to->Position, Angle, 2, to, 10.f);
             }
         }
         if (c->CheckAttackTime(1))
@@ -1073,8 +1073,8 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
             Vector(0.f, 0.f, (float)(rand() % 360), Angle);
             if (to != NULL)
-                CreateJoint(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
-            CreateParticle(BITMAP_FIRE, Position, o->Angle, o->Light);
+                CreateJointFpsChecked(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
+            CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, o->Light);
         }
     }
     break;
@@ -1589,8 +1589,8 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             fRotation2 = -WorldTime * 0.01f;
             Vector(0.09f, 0.09f, 0.04f, o->Light);
 
-            CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light);
-            CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 1);
+            CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light);
+            CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 1);
         }
         if (g_isCharacterBuff(o, eBuff_CrywolfAltarOccufied))
         {

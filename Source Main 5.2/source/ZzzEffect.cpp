@@ -323,6 +323,14 @@ void CheckTargetRange(OBJECT* o)
     }
 }
 
+void CreateEffectFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, OBJECT* Owner, short PKKey, WORD SkillIndex, WORD Skill, WORD SkillSerialNum, float Scale, short int sTargetIndex)
+{
+    if (rand_fps_check(1))
+    {
+        CreateEffect(Type, Position, Angle, Light, SubType, Owner, PKKey, SkillIndex, Skill, SkillSerialNum, Scale, sTargetIndex);
+    }
+}
+
 void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, OBJECT* Owner, short PKKey, WORD SkillIndex, WORD Skill, WORD SkillSerialNum, float Scale, short int sTargetIndex)
 {
     for (int icntEffect = 0; icntEffect < MAX_EFFECTS; icntEffect++)
@@ -6836,7 +6844,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             OBJECT* pOwn = o->Owner;
             if ((int)o->LifeTime % 10 == 0)
             {
-                CreateEffect(MODEL_ARROW_AUTOLOAD, pOwn->Position, pOwn->Angle, pOwn->Light, 1, pOwn);
+                CreateEffectFpsChecked(MODEL_ARROW_AUTOLOAD, pOwn->Position, pOwn->Angle, pOwn->Light, 1, pOwn);
             }
         }
         else if (o->SubType == 1)
@@ -6893,10 +6901,10 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Light[1] *= pow(0.98f, FPS_ANIMATION_FACTOR);
             o->Light[2] *= pow(0.98f, FPS_ANIMATION_FACTOR);
             if ((int)o->LifeTime == 40)
-                CreateEffect(MODEL_INFINITY_ARROW3, o->Position, o->Angle, o->Light, 2, o);
+                CreateEffectFpsChecked(MODEL_INFINITY_ARROW3, o->Position, o->Angle, o->Light, 2, o);
             else
                 if ((int)o->LifeTime == 20)
-                    CreateEffect(MODEL_INFINITY_ARROW3, o->Position, o->Angle, o->Light, 3, o);
+                    CreateEffectFpsChecked(MODEL_INFINITY_ARROW3, o->Position, o->Angle, o->Light, 3, o);
             VectorCopy(o->Owner->Position, o->Position);
         }
         else if (o->SubType == 2)
@@ -6953,19 +6961,19 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->SubType == 1)
             {
                 Vector(0.3f, 0.3f, 0.8f, nLight);
-                CreateEffect(BITMAP_SHOCK_WAVE, o->Owner->Position, o->Owner->Angle,
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, o->Owner->Position, o->Owner->Angle,
                     nLight, 9, o->Owner, -1, 0, 0, 0);
             }
             else if (o->SubType == 2)
             {
                 vec3_t vShockColor = { 0.8f, 0.3f, 0.3f };
-                CreateEffect(BITMAP_SHOCK_WAVE, o->Owner->Position, o->Owner->Angle,
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, o->Owner->Position, o->Owner->Angle,
                     vShockColor, 9, o->Owner, -1, 0, 0, 0);
             }
             else
             {
                 vec3_t vShockColor = { 1.f, 1.f, 1.f };
-                CreateEffect(BITMAP_SHOCK_WAVE, o->Owner->Position, o->Owner->Angle,
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, o->Owner->Position, o->Owner->Angle,
                     vShockColor, 9, o->Owner, -1, 0, 0, 0);
             }
         }
@@ -6976,21 +6984,21 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->SubType == 1)
         {
             Vector(0.f, 1.f, 5.f, nLight);
-            CreateEffect(MODEL_SKILL_INFERNO, nPos, o->Angle, nLight, 10, o, 30, 0);
+            CreateEffectFpsChecked(MODEL_SKILL_INFERNO, nPos, o->Angle, nLight, 10, o, 30, 0);
             nPos[2] += 120.f;
-            CreateParticle(BITMAP_SMOKE, nPos, o->Angle, o->Light, 11, 2.f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, nPos, o->Angle, o->Light, 11, 2.f);
         }
         else if (o->SubType == 2)
         {
             Vector(0.8f, 0.3f, 0.3f, nLight);
-            CreateEffect(MODEL_SKILL_INFERNO, nPos, o->Angle, nLight, 10, o, 30, 0);
+            CreateEffectFpsChecked(MODEL_SKILL_INFERNO, nPos, o->Angle, nLight, 10, o, 30, 0);
         }
         else if (o->SubType == 0)
         {
             Vector(0.0f, 0.8f, 1.5f, nLight);
-            CreateEffect(MODEL_SKILL_INFERNO, nPos, o->Angle, nLight, 2, o, 30, 0);
+            CreateEffectFpsChecked(MODEL_SKILL_INFERNO, nPos, o->Angle, nLight, 2, o, 30, 0);
             nPos[2] += 120.f;
-            CreateParticle(BITMAP_SMOKE, nPos, o->Angle, o->Light, 11, 2.f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, nPos, o->Angle, o->Light, 11, 2.f);
         }
     }
     break;
@@ -7028,10 +7036,10 @@ void MoveEffect(OBJECT* o, int iIndex)
         VectorAdd(o->Position, vPos, o->Position);
         CreateSprite(BITMAP_LIGHT + 3, o->Position, 4.0f, o->Light, o);
         CreateSprite(BITMAP_DS_EFFECT, o->Position, 2.5f, o->Light, o);
-        CreateParticle(BITMAP_SPARK + 1, o->Position, o->Angle, o->Light, 10, 3.0f);
+        CreateParticleFpsChecked(BITMAP_SPARK + 1, o->Position, o->Angle, o->Light, 10, 3.0f);
 
         VectorCopy(o->Position, o->EyeLeft);
-        CreateEffect(MODEL_WAVES, o->Position, o->Angle, o->Light, 3, NULL, 0);
+        CreateEffectFpsChecked(MODEL_WAVES, o->Position, o->Angle, o->Light, 3, NULL, 0);
     }
     break;
     case MODEL_MULTI_SHOT3:
@@ -7124,7 +7132,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         CreateSprite(BITMAP_SHINY + 1, p, (float)(rand() % 8 + 8) * 0.07f, Light, o->Owner, (float)(rand() % 360));
                         VectorCopy(o->Owner->Position, p);
                         p[2] += ((rand() % 80 - 40) + 200);
-                        CreateJoint(BITMAP_SPARK + 1, p, p, o->Owner->Angle, 1, o->Owner, 18.7f);
+                        CreateJointFpsChecked(BITMAP_SPARK + 1, p, p, o->Owner->Angle, 1, o->Owner, 18.7f);
                     }
                     CreateArrow(c, o->Owner, to, FindHotKey((o->Skill)), 1, 0);
                     o->Owner->Angle[2] = Angle[2];
@@ -7141,7 +7149,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector(0.f, -1.f, 0.f, vDir);
             AngleMatrix(o->Angle, vMat);
             VectorRotate(vDir, vMat, o->Direction);
-            CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 17, o, 15.f, 40);
+            CreateJointFpsChecked(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 17, o, 15.f, 40);
         }
         if (o->LifeTime <= 24)
         {
@@ -7151,8 +7159,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorScale(o->Direction, o->Velocity, vPos);
             VectorAdd(o->Position, vPos, o->Position);
             //			CreateParticle(BITMAP_FLAME, o->Position, o->Angle, vLight, 8, 3.5f);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 26, 0.2f);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 26, 0.2f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 26, 0.2f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 26, 0.2f);
             //			CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 9, o, 10.f, 40 );
         }
         //			else
@@ -7209,7 +7217,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->Angle[0] += (sinf((int)WorldTime % 10000 * 0.0001f) * o->Distance / 3.0f) * FPS_ANIMATION_FACTOR;
 
         Vector(o->BlendMeshLight / 10.f, o->BlendMeshLight / 10.f, o->BlendMeshLight / 4.f, o->Light);
-        CreateParticle(BITMAP_LIGHT, o->Position, o->Angle, o->Light, 9, o->Scale);
+        CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, o->Angle, o->Light, 9, o->Scale);
     }
     break;
 
@@ -7267,7 +7275,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 vec3_t Position;
                 Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
                 VectorAdd(Position, o->Position, Position);
-                CreateParticle(BITMAP_SPARK, Position, o->Angle, o->Light, 7);
+                CreateParticleFpsChecked(BITMAP_SPARK, Position, o->Angle, o->Light, 7);
             }
         }
         CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
@@ -7346,7 +7354,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         Position[1] = o->Owner->Position[1] + 50.0f * (float)cosf(fParam + WorldTime * 0.003f);
                         Position[2] = o->Owner->Position[2] + (i + 1) * 50.0f * o->Owner->Scale;
                         vec3_t LightFlame = { 0.6f, 0.6f, 1.0f };
-                        CreateParticle(BITMAP_LIGHT, Position, o->Angle, LightFlame, 5, 0.7f);
+                        CreateParticleFpsChecked(BITMAP_LIGHT, Position, o->Angle, LightFlame, 5, 0.7f);
                     }
                 }
                 break;
@@ -7379,11 +7387,11 @@ void MoveEffect(OBJECT* o, int iIndex)
     case MODEL_SPEAR:
         if (1 == o->SubType)
         {
-            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 12, o, 100.0f);
+            CreateJointFpsChecked(BITMAP_FLARE, o->Position, o->Position, o->Angle, 12, o, 100.0f);
         }
         else if (0 == o->SubType)
         {
-            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 4, o, 50.0f);
+            CreateJointFpsChecked(BITMAP_FLARE, o->Position, o->Position, o->Angle, 4, o, 50.0f);
         }
         break;
     case MODEL__SPEAR:
@@ -7400,7 +7408,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorRotate(p, Matrix, Position);
             VectorSubtract(o->Position, Position, Position);
             //Position[2] += 30.f;
-            CreateJoint(BITMAP_JOINT_HEALING, Position, o->Position, Angle, 6, NULL, 5.f);
+            CreateJointFpsChecked(BITMAP_JOINT_HEALING, Position, o->Position, Angle, 6, NULL, 5.f);
         }
     }
     break;
@@ -7431,7 +7439,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if (rand_fps_check(3))
                 {
-                    CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 5, 0.4f + rand() % 10 * 0.01f);
+                    CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, o->Light, 5, 0.4f + rand() % 10 * 0.01f);
                 }
             }
         }
@@ -7507,13 +7515,13 @@ void MoveEffect(OBJECT* o, int iIndex)
         else if (o->SubType == 1)
         {
             VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
-            CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, o->Position, o->Angle, o->Light, 0, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, o->Position, o->Angle, o->Light, 0, 1.0f);
             //CreateParticle(BITMAP_SMOKE, o->Position, o->Angle,o->Light, 23, 1.0f);
             //CreateParticle(BITMAP_SMOKE, o->Position, o->Angle,o->Light, 8, 1.0f);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 11, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 11, 1.0f);
             if (rand_fps_check(2))
             {
-                CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, o->Light, 3, 3.f);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_3, o->Position, o->Angle, o->Light, 3, 3.f);
             }
         }
         else if (o->SubType == 2)
@@ -7558,7 +7566,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             vec3_t vLight;
             Vector(o->Alpha * 0.3f, o->Alpha * 0.3f, o->Alpha * 0.3f, vLight);
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 3, 1, pObject);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 3, 1, pObject);
         }
         else if (o->SubType == 1)
         {
@@ -7571,13 +7579,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 switch (rand() % 3)
                 {
                 case 0:
-                    CreateParticle(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, o->Light, 1, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, o->Light, 1, fScale);
                     break;
                 case 1:
-                    CreateParticle(BITMAP_FIRE_CURSEDLICH, vFirePosition, o->Angle, o->Light, 5, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vFirePosition, o->Angle, o->Light, 5, fScale);
                     break;
                 case 2:
-                    CreateParticle(BITMAP_FIRE_HIK3, vFirePosition, o->Angle, o->Light, 1, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vFirePosition, o->Angle, o->Light, 1, fScale);
                     break;
                 }
             }
@@ -7594,13 +7602,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 switch (rand() % 3)
                 {
                 case 0:
-                    CreateParticle(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, o->Light, 1, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, o->Light, 1, fScale);
                     break;
                 case 1:
-                    CreateParticle(BITMAP_FIRE_CURSEDLICH, vFirePosition, o->Angle, o->Light, 5, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vFirePosition, o->Angle, o->Light, 5, fScale);
                     break;
                 case 2:
-                    CreateParticle(BITMAP_FIRE_HIK3, vFirePosition, o->Angle, o->Light, 1, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vFirePosition, o->Angle, o->Light, 1, fScale);
                     break;
                 }
             }
@@ -7629,13 +7637,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 switch (rand() % 3)
                 {
                 case 0:
-                    CreateParticle(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, vLight, 0, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, vLight, 0, fScale);
                     break;
                 case 1:
-                    CreateParticle(BITMAP_FIRE_CURSEDLICH, vFirePosition, o->Angle, vLight, 4, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vFirePosition, o->Angle, vLight, 4, fScale);
                     break;
                 case 2:
-                    CreateParticle(BITMAP_FIRE_HIK3, vFirePosition, o->Angle, vLight, 0, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vFirePosition, o->Angle, vLight, 0, fScale);
                     break;
                 }
             }
@@ -7649,13 +7657,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 switch (rand() % 3)
                 {
                 case 0:
-                    CreateParticle(BITMAP_FIRE_HIK1, o->Position, o->Angle, o->Light, 0, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, o->Light, 0, fScale);
                     break;
                 case 1:
-                    CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, o->Light, 4, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, o->Light, 4, fScale);
                     break;
                 case 2:
-                    CreateParticle(BITMAP_FIRE_HIK3, o->Position, o->Angle, o->Light, 0, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, o->Light, 0, fScale);
                     break;
                 }
             }
@@ -7669,13 +7677,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 switch (rand() % 3)
                 {
                 case 0:
-                    CreateParticle(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, o->Light, 0, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, o->Light, 0, fScale);
                     break;
                 case 1:
-                    CreateParticle(BITMAP_FIRE_HIK2_MONO, o->Position, o->Angle, o->Light, 4, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK2_MONO, o->Position, o->Angle, o->Light, 4, fScale);
                     break;
                 case 2:
-                    CreateParticle(BITMAP_FIRE_HIK3_MONO, o->Position, o->Angle, o->Light, 0, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, o->Position, o->Angle, o->Light, 0, fScale);
                     break;
                 }
             }
@@ -7734,7 +7742,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 vec3_t vLight;
                 Vector(o->Alpha * 0.3f, o->Alpha * 0.3f, o->Alpha * 0.3f, vLight);
-                CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 1, 1, pObject);
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 1, 1, pObject);
             }
         }
         else if (o->SubType == 1)
@@ -7749,7 +7757,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 }
                 BMD* pModel = &Models[pObject->Type];
                 int iNumBones = pModel->NumBones;
-                CreateEffect(BITMAP_FIRE_CURSEDLICH, pObject->Position, pObject->Angle, pObject->Light, 0, pObject, -1, rand() % iNumBones);
+                CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, pObject->Position, pObject->Angle, pObject->Light, 0, pObject, -1, rand() % iNumBones);
             }
         }
         break;
@@ -7788,12 +7796,12 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector(o->Alpha, o->Alpha, o->Alpha, vLight);
             if (rand_fps_check(1))
             {
-                CreateParticle(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
             }
 
             if (rand_fps_check(2))
             {
-                CreateParticle(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 2, o->Position, o->Angle, o->Light, 3, 0.30f, pObject);
             }
             //DeleteJoint(MODEL_SPEARSKILL, o, 15);
         }
@@ -7807,7 +7815,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
             vec3_t vColor;
             Vector(1.0f, 1.0f, 1.0f, vColor);
-            CreateParticle(BITMAP_LIGHT + 2, pObject->Position, pObject->Angle, vColor, 5, 0.1f, pObject);
+            CreateParticleFpsChecked(BITMAP_LIGHT + 2, pObject->Position, pObject->Angle, vColor, 5, 0.1f, pObject);
         }
         break;
     case MODEL_SUMMONER_EQUIP_HEAD_LAGUL:
@@ -7844,7 +7852,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             vec3_t vLight;
             Vector(o->Alpha * 0.7f, o->Alpha * 0.3f, o->Alpha * 1.f, vLight);
-            CreateParticle(BITMAP_CLUD64, o->Position, o->Angle, vLight, 10, 1.f, pObject);
+            CreateParticleFpsChecked(BITMAP_CLUD64, o->Position, o->Angle, vLight, 10, 1.f, pObject);
         }
     }
     case MODEL_SUMMONER_CASTING_EFFECT1:
@@ -7975,9 +7983,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             pModel->TransformPosition(BoneTransform[iPositions[i]], vRelative, vPos, false);
             VectorAdd(vPos, vTempPosition, vPos);
             Vector(o->Alpha * 0.3f, o->Alpha * 0.3f, o->Alpha * 0.3f, vLight);
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 2, 5, o);
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 2, 4, o);
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 2, 3, o);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 2, 5, o);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 2, 4, o);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 2, 3, o);
         }
     }
     break;
@@ -7989,11 +7997,11 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->AnimationFrame > 8 && o->Skill == 0)
         {
             o->Skill = 1;
-            CreateEffect(MODEL_SUMMONER_SUMMON_NEIL_NIFE1, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
+            CreateEffectFpsChecked(MODEL_SUMMONER_SUMMON_NEIL_NIFE1, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
             if (o->SubType >= 1)
-                CreateEffect(MODEL_SUMMONER_SUMMON_NEIL_NIFE2, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
+                CreateEffectFpsChecked(MODEL_SUMMONER_SUMMON_NEIL_NIFE2, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
             if (o->SubType >= 2)
-                CreateEffect(MODEL_SUMMONER_SUMMON_NEIL_NIFE3, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
+                CreateEffectFpsChecked(MODEL_SUMMONER_SUMMON_NEIL_NIFE3, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
         }
         if (o->AnimationFrame > 10 && o->Skill == 1)
         {
@@ -8004,13 +8012,13 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector(0, -60.0f, 0, vMoveDir);
             VectorRotate(vMoveDir, Matrix, vPosition);
             VectorAdd(o->Position, vPosition, vPosition);
-            CreateEffect(MODEL_SUMMONER_SUMMON_NEIL_GROUND1, vPosition, o->Angle, o->Light, o->SubType, o);
+            CreateEffectFpsChecked(MODEL_SUMMONER_SUMMON_NEIL_GROUND1, vPosition, o->Angle, o->Light, o->SubType, o);
 
-            CreateEffect(MODEL_SUMMONER_SUMMON_NEIL_GROUND1, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
+            CreateEffectFpsChecked(MODEL_SUMMONER_SUMMON_NEIL_GROUND1, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
             if (o->SubType >= 1)
-                CreateEffect(MODEL_SUMMONER_SUMMON_NEIL_GROUND2, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
+                CreateEffectFpsChecked(MODEL_SUMMONER_SUMMON_NEIL_GROUND2, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
             if (o->SubType >= 2)
-                CreateEffect(MODEL_SUMMONER_SUMMON_NEIL_GROUND3, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
+                CreateEffectFpsChecked(MODEL_SUMMONER_SUMMON_NEIL_GROUND3, o->HeadTargetAngle, o->Angle, o->Light, o->SubType);
 
             PlayBuffer(SOUND_SUMMON_REQUIEM);
         }
@@ -8047,16 +8055,16 @@ void MoveEffect(OBJECT* o, int iIndex)
                 vPos[0] += (float)(rand() % 500 - 250);
                 vPos[1] += (float)(rand() % 500 - 250);
                 Vector(1.0f, 1.0f, 1.0f, vLight);
-                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 57, 3.5f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 57, 3.5f);
 
                 VectorCopy(o->HeadTargetAngle, vPos);
                 vPos[0] += (float)(rand() % 400 - 200);
                 vPos[1] += (float)(rand() % 400 - 200);
                 Vector(0.6f, 0.1f, 1.f, vLight);
-                CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
+                CreateEffectFpsChecked(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
 
                 Vector(0.6f, 0.1f, 1.f, vLight);
-                CreateParticle(BITMAP_TWINTAIL_WATER, vPos, o->Angle, vLight, 1);
+                CreateParticleFpsChecked(BITMAP_TWINTAIL_WATER, vPos, o->Angle, vLight, 1);
             }
         }
         else if (o->SubType == 1)
@@ -8071,22 +8079,22 @@ void MoveEffect(OBJECT* o, int iIndex)
     }
     break;
     case BITMAP_FIRE:
-        CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light, 9, 1.f, o->Owner);
+        CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 9, 1.f, o->Owner);
         break;
 
     case BITMAP_FIRE + 1:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_FIRE + 1, o->Position, o->Angle, Light, 1);
+        CreateParticleFpsChecked(BITMAP_FIRE + 1, o->Position, o->Angle, Light, 1);
         Vector(Luminosity * 1.f, Luminosity * 0.6f, Luminosity * 0.3f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
         break;
     case BITMAP_MAGIC:
         if (o->SubType == 0)
         {
-            CreateEffect(BITMAP_MAGIC, o->Position, o->Angle, o->Light, 1);
+            CreateEffectFpsChecked(BITMAP_MAGIC, o->Position, o->Angle, o->Light, 1);
             if (o->LifeTime > 5 && o->LifeTime < 10)
             {
-                CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
+                CreateParticleFpsChecked(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
             }
         }
         else if (o->SubType == 2 || o->SubType == 3 || o->SubType == 7)
@@ -8094,14 +8102,14 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->LifeTime > 5 && o->LifeTime < 10)
             {
                 if (o->SubType == 3)
-                    CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 10, 0.19f, o);
+                    CreateParticleFpsChecked(BITMAP_FLARE, o->Position, o->Angle, o->Light, 10, 0.19f, o);
                 else
-                    CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
+                    CreateParticleFpsChecked(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
             }
         }
         else if (o->SubType == 4)
         {
-            CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 12, 0.19f, o);
+            CreateParticleFpsChecked(BITMAP_FLARE, o->Position, o->Angle, o->Light, 12, 0.19f, o);
         }
         else if (o->SubType == 8)
         {
@@ -8217,7 +8225,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     continue;
                 Vector(-50 + rand() % 100, -10 + rand() % 20, -10 + rand() % 20, p);
                 b->TransformPosition(o->Owner->BoneTransform[iIndex], p, Position, true);
-                CreateParticle(BITMAP_LIGHT, Position, o->Owner->Angle, Light, 8);
+                CreateParticleFpsChecked(BITMAP_LIGHT, Position, o->Owner->Angle, Light, 8);
             }
             o->Owner->Alpha = o->LifeTime / 80.0f;
         }
@@ -8290,7 +8298,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[0] = o->Position[0] + (float)(rand() % 500 - 250);
             Position[1] = o->Position[1] + (float)(rand() % 500 - 250);
             Position[2] = o->Position[2] - (float)(rand() % 100) + 150.0f;
-            CreateParticle(o->Type, Position, o->Angle, o->Light, 0, o->Scale);
+            CreateParticleFpsChecked(o->Type, Position, o->Angle, o->Light, 0, o->Scale);
             break;
         case 1:
         case 2:
@@ -8311,7 +8319,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     if (rand_fps_check(2))
                     {
                         vWorldPos[2] -= 20.f;
-                        CreateParticle(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
+                        CreateParticleFpsChecked(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
                     }
                 }
             }
@@ -8343,8 +8351,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             if ((int)o->LifeTime % 10 == 0)
             {
                 //						Vector(0.1f,0.1f,0.1f,Light);
-                CreateEffect(MODEL_FEATHER, o->Position, o->Angle, o->Light, 2, NULL, -1, 0, 0, 0, 1.4f);
-                CreateEffect(MODEL_FEATHER, o->Position, o->Angle, o->Light, 3, NULL, -1, 0, 0, 0, 1.4f);
+                CreateEffectFpsChecked(MODEL_FEATHER, o->Position, o->Angle, o->Light, 2, NULL, -1, 0, 0, 0, 1.4f);
+                CreateEffectFpsChecked(MODEL_FEATHER, o->Position, o->Angle, o->Light, 3, NULL, -1, 0, 0, 0, 1.4f);
             }
         }
     }
@@ -8360,9 +8368,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (rand_fps_check(2))
             {
                 if (o->SubType == 3)
-                    CreateParticle(o->Type, Position, o->Angle, o->Light, 1, o->Scale);
+                    CreateParticleFpsChecked(o->Type, Position, o->Angle, o->Light, 1, o->Scale);
                 else
-                    CreateParticle(o->Type, Position, o->Angle, o->Light, 0, o->Scale);
+                    CreateParticleFpsChecked(o->Type, Position, o->Angle, o->Light, 0, o->Scale);
             }
             break;
         case 1:
@@ -8384,7 +8392,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     if (rand_fps_check(2))
                     {
                         vWorldPos[2] -= 20.f;
-                        CreateParticle(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
+                        CreateParticleFpsChecked(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
                     }
                 }
             }
@@ -8425,7 +8433,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->LifeTime <= 5)
             {
                 o->Live = false;
-                CreateEffect(o->Type, o->Position, o->Angle, o->Light, o->SubType, o->Owner);
+                CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, o->SubType, o->Owner);
             }
         }
         break;
@@ -8438,7 +8446,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->LifeTime = 100;
 
             if (rand_fps_check(60))
-                CreateParticle(o->Type, o->Position, o->Angle, o->Light, o->SubType, 0.5f, o->Owner);
+                CreateParticleFpsChecked(o->Type, o->Position, o->Angle, o->Light, o->SubType, 0.5f, o->Owner);
         }
         break;
 
@@ -8483,11 +8491,11 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if (((int)o->LifeTime % 2) == 0)
                 {
-                    CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
                 }
                 else
                 {
-                    CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
+                    CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
                 }
                 CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, o->Light, o, (float)(rand() % 360));
             }
@@ -8495,18 +8503,18 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if (((int)o->LifeTime % 2) == 0)
                 {
-                    CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
                 }
                 CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, o->Light, o, (float)(rand() % 360));
             }
             else if (o->SubType == 3)
             {
-                CreateParticle(BITMAP_SPARK + 1, Position, Angle, o->Light, 26, (rand() % 10 + 5) / 25.f, o);
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, o->Light, 26, (rand() % 10 + 5) / 25.f, o);
             }
             else
             {
                 CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.3f, o->Light, o, (float)(rand() % 360));
-                CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
             }
         }
         break;
@@ -8525,11 +8533,11 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             if (o->SubType == 1)
             {
-                CreateJoint(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 33, NULL, fScale);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 33, NULL, fScale);
             }
             else
             {
-                CreateJoint(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 16, NULL, fScale);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vStartPosition, vPosition, o->Angle, 16, NULL, fScale);
             }
         }
 
@@ -8538,22 +8546,22 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->LifeTime > 10)
         {
             if (rand_fps_check(2))
-                CreateEffect(BITMAP_MAGIC + 1, vPosition, o->Angle, vLight, 11, o);
+                CreateEffectFpsChecked(BITMAP_MAGIC + 1, vPosition, o->Angle, vLight, 11, o);
         }
 
         if (rand_fps_check(4))
-            CreateParticle(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
 
         if (rand_fps_check(4))
         {
-            CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, vLight, 13);
+            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, vLight, 13);
         }
 
         if (o->LifeTime > 5)
         {
             Vector(0.15f, 0.15f, 0.4f, vLight);
             if (rand_fps_check(5))
-                CreateEffect(BITMAP_CHROME_ENERGY2, vPosition, o->Angle, vLight, 0);
+                CreateEffectFpsChecked(BITMAP_CHROME_ENERGY2, vPosition, o->Angle, vLight, 0);
         }
 
         if (o->Owner != NULL && rand_fps_check(5) && o->Owner->BoneTransform != NULL)
@@ -8573,7 +8581,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 Vector(0.2f, 0.2f, 0.8f, vLight);
                 fRandom = 3.0f + ((float)(rand() % 20 - 10) * 0.1f);
-                CreateParticle(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
+                CreateParticleFpsChecked(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
             }
         }
     }
@@ -8627,11 +8635,11 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 Vector((float)(rand() % 50 - 25), (float)(rand() % 50 - 25), 0.f, Position);
                 VectorAdd(Position, o->Position, Position);
-                CreateParticle(BITMAP_FLAME, Position, o->Angle, Light);
+                CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, Light);
             }
             if (rand_fps_check(8))
             {
-                CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
             }
 
             Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
@@ -8656,9 +8664,9 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Position[0] += rand() % 64 - 32;
                     Position[1] += rand() % 64 - 32;
                     if (o->SubType == 1)
-                        CreateParticle(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
+                        CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
                     else if (o->SubType == 2)
-                        CreateParticle(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
+                        CreateParticleFpsChecked(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
                 }
             }
         }
@@ -8668,17 +8676,17 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if (rand_fps_check(1))
                 {
-                    CreateParticle(BITMAP_FLAME, o->Position, o->Angle, Light, 6);
+                    CreateParticleFpsChecked(BITMAP_FLAME, o->Position, o->Angle, Light, 6);
                     Vector((float)(rand() % 10 - 5), (float)(rand() % 10 - 5), 40.f, Position);
                     VectorAdd(Position, o->Position, Position);
-                    CreateParticle(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 0, 2.8f);
+                    CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 0, 2.8f);
                 }
             }
             Vector((float)(rand() % 10 - 5), (float)(rand() % 10 - 5), -40.f, Position);
             VectorAdd(Position, o->Position, Position);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 21, 0.8f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 21, 0.8f);
 
-            CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 12);
+            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 12);
 
             Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -8697,22 +8705,22 @@ void MoveEffect(OBJECT* o, int iIndex)
                     VectorAdd(Position, o->Position, Position);
                     Position[0] += rand() % 64 - 32;
                     Position[1] += rand() % 64 - 32;
-                    CreateParticle(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
+                    CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, Light, 0, 1.2f);
                 }
             }
-            CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 12);
+            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 12);
         }
         else if (o->SubType == 5)
         {
             Vector((float)(rand() % 32 - 16), (float)(rand() % 32 - 16), 0.f, Position);
             VectorAdd(Position, o->Position, Position);
-            CreateParticle(BITMAP_FLAME, Position, o->Angle, Light, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, Light, 0, o->Scale);
         }
         else if (o->SubType == 6)
         {
             Vector((float)(rand() % 32 - 16), (float)(rand() % 32 - 16), 0.f, Position);
             VectorAdd(Position, o->Position, Position);
-            CreateParticle(BITMAP_FLAME, Position, o->Angle, o->Light, 12, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, o->Light, 12, o->Scale);
         }
         break;
     case MODEL_RAKLION_BOSS_CRACKEFFECT:
@@ -8736,12 +8744,12 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorAdd(p, o->Position, Position);
                 if (rand() % 3 != 0)
                 {
-                    CreateParticle(BITMAP_FLAME, Position, o->Angle, o->Light, 11, 1.4f);
+                    CreateParticleFpsChecked(BITMAP_FLAME, Position, o->Angle, o->Light, 11, 1.4f);
                 }
 
                 if (rand_fps_check(8))
                 {
-                    CreateEffect(MODEL_ICE_SMALL, Position, o->Angle, o->Light, 0);
+                    CreateEffectFpsChecked(MODEL_ICE_SMALL, Position, o->Angle, o->Light, 0);
                 }
             }
         }
@@ -8758,7 +8766,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     VectorAdd(Position, o->Position, Position);
                     Position[0] += rand() % 64 - 32;
                     Position[1] += rand() % 64 - 32;
-                    CreateParticle(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
+                    CreateParticleFpsChecked(BITMAP_FIRE + 3, Position, o->Angle, Light, 13, 2.5f);
                 }
             }
         }
@@ -8776,7 +8784,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         Vector((float)(rand() % 32 - 16), (float)(rand() % 32 - 16), 0.f, Position);
         VectorAdd(Position, o->Position, Position);
         Vector(1.0f, 0.4f, 0.4f, Light);
-        CreateParticle(BITMAP_FIRE_RED, Position, o->Angle, Light, 0, o->Scale);
+        CreateParticleFpsChecked(BITMAP_FIRE_RED, Position, o->Angle, Light, 0, o->Scale);
         break;
     case BITMAP_SPARK + 1:
     {
@@ -8791,9 +8799,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 Position[2] += Scale * 4.f;
                 if (j == 0)
-                    CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale * 2.f);
+                    CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale * 2.f);
                 else
-                    CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale);
+                    CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, o->Angle, Light, 1, Scale);
             }
         }
         break;
@@ -8803,8 +8811,8 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             Luminosity = o->LifeTime * 0.2f;
             Vector(Luminosity, Luminosity, Luminosity, Light);
-            CreateParticle(BITMAP_ENERGY, o->Position, o->Angle, Light);
-            CreateParticle(BITMAP_SPARK + 1, o->Position, o->Angle, Light, 0, 4.f);
+            CreateParticleFpsChecked(BITMAP_ENERGY, o->Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, o->Position, o->Angle, Light, 0, 4.f);
             Vector(Luminosity * 0.2f, Luminosity * 0.4f, Luminosity * 1.f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
             CheckTargetRange(o);
@@ -8831,10 +8839,10 @@ void MoveEffect(OBJECT* o, int iIndex)
             CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f, vLight, o, (float)(rand() % 360));
 
             Vector(0.4f, 0.4f, 1.5f, vLight);
-            CreateParticle(BITMAP_MAGIC, o->Position, o->Angle, vLight, 0, 1.f);
+            CreateParticleFpsChecked(BITMAP_MAGIC, o->Position, o->Angle, vLight, 0, 1.f);
             for (int i = 0; i < 3; ++i)
             {
-                CreateParticle(BITMAP_SPARK + 1, o->Position, o->Angle, o->Light, 13, 1.0f);
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, o->Position, o->Angle, o->Light, 13, 1.0f);
             }
 
             CheckTargetRange(o);
@@ -8860,7 +8868,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 for (int i = 0; i < 5; ++i)
                 {
-                    CreateParticle(BITMAP_SPARK + 1, o->Position, o->Angle, o->Light, 20, 1.0f);
+                    CreateParticleFpsChecked(BITMAP_SPARK + 1, o->Position, o->Angle, o->Light, 20, 1.0f);
                 }
             }
 
@@ -8868,21 +8876,21 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->LifeTime >= 14)
             {
                 Vector(0.4f, 0.3f, 1.0f, vLight);
-                CreateParticle(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 0, 0.3f);
-                CreateParticle(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 0, 0.3f);
+                CreateParticleFpsChecked(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 0, 0.3f);
+                CreateParticleFpsChecked(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 0, 0.3f);
             }
 
             Vector(0.2f, 0.2f, 1.0f, vLight);
             for (int i = 0; i < 2; ++i)
             {
-                CreateEffect(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 3, o);
+                CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 3, o);
             }
 
             if (o->LifeTime <= 5)
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 40);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 40);
                 }
             }
 
@@ -8932,19 +8940,19 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Vector(0.4f, 0.4f, 1.0f, vLight);
                 pSourceModel->TransformPosition(pSourceObj->BoneTransform[37], vRelativePos, vPos, true);
                 Vector(-60.f, 0.f, pSourceObj->Angle[2], vAngle);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
                 Vector(0.f, 0.f, (pSourceObj->Angle[2]) + 60.f, vAngle);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
 
                 pSourceModel->TransformPosition(pSourceObj->BoneTransform[28], vRelativePos, vPos, true);
                 Vector(-60.f, 0.f, pSourceObj->Angle[2], vAngle);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
                 Vector(0.f, 0.f, (pSourceObj->Angle[2]) - 60.f, vAngle);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
             }
             else if (o->SubType == 1 || o->SubType == 2)
             {
@@ -8955,8 +8963,8 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorCopy(pTargetObj->Position, vTargetPos);
                 vTargetPos[2] += 80.0f;
                 //Vector(0.f, 0.f, 0.f, vAngle);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, pTargetObj->Angle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
-                CreateJoint(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, pTargetObj->Angle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, pTargetObj->Angle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, pTargetObj->Angle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
             }
 
             if ((int)o->LifeTime == 15)
@@ -8970,7 +8978,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     Vector(0.2f, 0.2f, 0.8f, vLight);
                     fRandom = 3.0f + ((float)(rand() % 20 - 10) * 0.1f);
-                    CreateParticle(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
+                    CreateParticleFpsChecked(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
                 }
             }
         }
@@ -9026,7 +9034,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             vSourcePos[1] += ((float)((rand() % 60 - 30)));
             vSourcePos[2] += (80.0f + ((float)((rand() % 180 - 100))));
             Vector(1.0f, 0.2f, 0.2f, vLight);
-            CreateParticle(BITMAP_LIGHT + 2, vSourcePos, pSourceObj->Angle, vLight, 7, 1.8f);
+            CreateParticleFpsChecked(BITMAP_LIGHT + 2, vSourcePos, pSourceObj->Angle, vLight, 7, 1.8f);
         }
 
         if (o->LifeTime <= 60)
@@ -9038,7 +9046,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 vTargetPos[1] += ((float)((rand() % 60 - 30)));
                 vTargetPos[2] += (80.0f + ((float)((rand() % 180 - 100))));
                 Vector(1.0f, 0.2f, 0.2f, vLight);
-                CreateParticle(BITMAP_LIGHT + 2, vTargetPos, pTargetObj->Angle, vLight, 7, 1.8f);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 2, vTargetPos, pTargetObj->Angle, vLight, 7, 1.8f);
             }
         }
 
@@ -9091,7 +9099,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 vTargetPos[2] += 100.f + (float)(((rand() % 10 - 5)) * 4);		// 80~120
 
                 Vector(0.8f, 0.1f, 0.2f, vLight);
-                CreateJoint(BITMAP_DRAIN_LIFE_GHOST, vSourcePos, vTargetPos, o->Angle, 0, pSourceObj, 40.f, 0, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_DRAIN_LIFE_GHOST, vSourcePos, vTargetPos, o->Angle, 0, pSourceObj, 40.f, 0, 0, 0, -1, vLight);
             }
         }
 
@@ -9115,7 +9123,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     VectorCopy(pSourceObj->Position, vSourcePos);
                     vSourcePos[2] += 80.0f;
                     Vector(1.0f, 0.0f, 0.1f, vLight);
-                    CreateJoint(BITMAP_JOINT_ENERGY, vTargetPos, vSourcePos, pTargetObj->Angle, 45, pSourceObj, 10.0f, -1, 0, 0, -1, vLight);
+                    CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vTargetPos, vSourcePos, pTargetObj->Angle, 45, pSourceObj, 10.0f, -1, 0, 0, -1, vLight);
                 }
             }
         }
@@ -9238,11 +9246,11 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 if (o->SubType == 0 || o->SubType == 2)
                 {
-                    CreateJoint(BITMAP_JOINT_HEALING, vWorldPos, o->Position, vAngle, 15, o, 5.f, 0, 0, 0, 0, vLight);
+                    CreateJointFpsChecked(BITMAP_JOINT_HEALING, vWorldPos, o->Position, vAngle, 15, o, 5.f, 0, 0, 0, 0, vLight);
                 }
                 else if (o->SubType == 1)
                 {
-                    CreateJoint(BITMAP_JOINT_HEALING, vWorldPos, o->Position, vAngle, 16, o, 5.f, 0, 0, 0, 0, vLight);
+                    CreateJointFpsChecked(BITMAP_JOINT_HEALING, vWorldPos, o->Position, vAngle, 16, o, 5.f, 0, 0, 0, 0, vLight);
                 }
             }
         }
@@ -9270,19 +9278,19 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     if (o->SubType == 3)
                     {
-                        CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, o->Light, 6, o->Scale);
+                        CreateParticleFpsChecked(BITMAP_LIGHT + 2, vWorldPos, o->Angle, o->Light, 6, o->Scale);
                         iBone = rand() % pModel->NumBones;
                         pModel->TransformPosition(o->Owner->BoneTransform[iBone], vRelativePos, vWorldPos, false);
                         VectorScale(vWorldPos, pModel->BodyScale, vWorldPos);
                         VectorAdd(vWorldPos, o->Owner->Position, vWorldPos);
-                        CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, o->Light, 6, o->Scale);
+                        CreateParticleFpsChecked(BITMAP_LIGHT + 2, vWorldPos, o->Angle, o->Light, 6, o->Scale);
                     }
                     else if (o->SubType == 4)
                     {
                         if (rand_fps_check(2))
                         {
                             vWorldPos[2] -= 20.f;
-                            CreateParticle(BITMAP_TWINTAIL_WATER, vWorldPos, o->Angle, o->Light, 2);
+                            CreateParticleFpsChecked(BITMAP_TWINTAIL_WATER, vWorldPos, o->Angle, o->Light, 2);
                         }
                     }
                 }
@@ -9325,7 +9333,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             CreateSprite(BITMAP_PIN_LIGHT, o->Position, 2.0f * fScale, vLight, o, (float)(rand() % 360));
 
             Vector(1.0f, 0.3f, 0.3f, vLight);
-            CreateParticle(BITMAP_MAGIC, o->Position, o->Angle, vLight, 0, 1.f * fScale);
+            CreateParticleFpsChecked(BITMAP_MAGIC, o->Position, o->Angle, vLight, 0, 1.f * fScale);
 
             vec3_t vPos, vLightFlare, vRelative;
             Vector(1.0f, 0.7f, 0.4f, vLight);
@@ -9337,7 +9345,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     o->Position[2] + (rand() % 70 - 35) * 1.0f, vPos);
                 CreateSprite(BITMAP_LIGHT, vPos, 2.2f, vLightFlare, pObject);
                 if (rand() % 3 > 0) continue;
-                CreateParticle(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
             }
 
             Vector(1.0f, 0.5f, 0.4f, vLight);
@@ -9348,13 +9356,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 int iBone = rand() % 41;
                 Vector((rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, vRelative);
                 pOwnerModel->TransformByObjectBone(vPos, pOwner, iBone, vRelative);
-                CreateParticle(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
             }
 
             float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
             if (o->Position[2] < Height)
             {
-                CreateEffect(MODEL_LIGHTNING_SHOCK, o->Position, o->Angle, o->Light, 1, o);
+                CreateEffectFpsChecked(MODEL_LIGHTNING_SHOCK, o->Position, o->Angle, o->Light, 1, o);
                 EffectDestructor(o);
             }
         }
@@ -9371,7 +9379,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 fScale = (float)(rand() % 80 + 32) * 0.01f * 1.0f;
                 Vector(o->Position[0] + (rand() % 70 - 35) * 1.0f, o->Position[1] + (rand() % 70 - 35) * 1.0f,
                     o->Position[2] + (rand() % 70 - 35) * 1.0f, vPos);
-                CreateParticle(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);	// 전기
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);	// 전기
             }
 
             vec34_t Matrix;
@@ -9390,7 +9398,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorAdd(vPosition, o->Position, vPosition);
                 vPosition[2] = RequestTerrainHeight(vPosition[0], vPosition[1]) + 20;
 
-                CreateParticle(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPosition, pObject->Angle, vLight, 0, fScale);	// 전기
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPosition, pObject->Angle, vLight, 0, fScale);	// 전기
             }
 
             VectorCopy(o->Position, vPosition);
@@ -9399,15 +9407,15 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector(1.0f, 0.0f, 0.0f, vLight);
 
             for (int i = 0; i < 2; i++)
-                CreateParticle(BITMAP_SMOKE, vPosition, o->Angle, vLight, 58);
+                CreateParticleFpsChecked(BITMAP_SMOKE, vPosition, o->Angle, vLight, 58);
 
             if (rand_fps_check(2))
             {
                 Vector(1.0f, 0.0f, 0.0f, vLight);
-                CreateParticle(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, vPosition, o->Angle, vLight, 54, 2.8f);
             }
 
-            CreateEffect(MODEL_STONE1 + rand() % 2, vPosition, o->Angle, vLight, 13, o);
+            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, vPosition, o->Angle, vLight, 13, o);
         }
         else if (o->SubType == 2)
         {
@@ -9427,24 +9435,24 @@ void MoveEffect(OBJECT* o, int iIndex)
                     if (rand_fps_check(60))
                     {
                         fRandom = 5.0f + ((float)(rand() % 20 - 10) * 0.1f);
-                        CreateParticle(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
+                        CreateParticleFpsChecked(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
                     }
                     Vector(1.0f, 0.8f, 0.4f, vLight);
                     if (rand_fps_check(5))
                     {
                         fRandom = (float)(rand() % 70 + 22) * 0.01f * 1.0f;
-                        CreateParticle(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, vAngle, vLight, 0, fRandom);
+                        CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, vAngle, vLight, 0, fRandom);
                     }
                 }
 
                 Vector(1.0f, 0.0f, 0.0f, vLight);
                 //for(i=0; i<2; i++)
-                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 58);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 58);
 
                 if (rand_fps_check(4))
                 {
                     Vector(1.0f, 0.0f, 0.0f, vLight);
-                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 54, 2.8f);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 54, 2.8f);
                 }
             }
         }
@@ -9474,12 +9482,12 @@ void MoveEffect(OBJECT* o, int iIndex)
             //o->Direction[2] -= .35f;
             o->Direction[2] -= .01f * FPS_ANIMATION_FACTOR;
             //VectorScale( o->Light, 0.9f, o->Light);
-            CreateParticle(BITMAP_LIGHT, o->Position, o->Angle, o->Light, 1, o->Scale);
+            CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, o->Angle, o->Light, 1, o->Scale);
             if (o->Direction[2] < -2.f)
             {
                 o->LifeTime = 0;
                 /*vec3_t Light = { 1.f, 1.f, 1.f};
-                CreateParticle(BITMAP_EXPLOTION,o->Position,o->Angle,o->Light);*/
+                CreateParticleFpsChecked(BITMAP_EXPLOTION,o->Position,o->Angle,o->Light);*/
             }
         }
         else if (o->SubType == 1)
@@ -9501,10 +9509,10 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             Index = rand() % 7;
             Luminosity = g_byUpperBoneLocation[Index];
-            CreateParticle(BITMAP_LIGHT, o->Position, Angle, Light, 4, Luminosity, o->Owner);
+            CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, Angle, Light, 4, Luminosity, o->Owner);
 
             Luminosity = g_byUpperBoneLocation[6 - Index];
-            CreateParticle(BITMAP_LIGHT, o->Position, Angle, Light, 4, Luminosity, o->Owner);
+            CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, Angle, Light, 4, Luminosity, o->Owner);
         }
         else if (o->SubType == 2)
         {
@@ -9529,7 +9537,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     o->Position[1] = o->Owner->Position[1] + cosf(o->Angle[2] * 0.1f) * 80.f;
                     o->Position[2] = o->Owner->Position[2] + 50;
 
-                    CreateJoint(BITMAP_JOINT_HEALING, o->Position, o->Position, o->Angle, 9, o->Owner, 15.f);
+                    CreateJointFpsChecked(BITMAP_JOINT_HEALING, o->Position, o->Position, o->Angle, 9, o->Owner, 15.f);
                 }
             }
         }
@@ -9549,7 +9557,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     o->Position[1] = o->Owner->Position[1] + cosf(o->Angle[2] * 0.1f) * 50.f;
                     o->Position[2] = o->Owner->Position[2] + 20;
 
-                    CreateJoint(BITMAP_JOINT_HEALING, o->Position, o->Position, o->Angle, 9, o->Owner, 10.f);
+                    CreateJointFpsChecked(BITMAP_JOINT_HEALING, o->Position, o->Position, o->Angle, 9, o->Owner, 10.f);
                 }
             }
         }
@@ -9566,11 +9574,11 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if (rand_fps_check(1))
                 {
-                    CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                    CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
                 }
             }
-            CreateParticle(BITMAP_SHINY + 4, Position, o->Angle, Light);
-            CreateParticle(BITMAP_EXPLOTION, Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_SHINY + 4, Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_EXPLOTION, Position, o->Angle, Light);
             if (o->Owner == &Hero->Object)
                 AttackCharacterRange(o->Skill, o->Position, 150.f, o->Weapon, o->PKKey);
             o->Live = false;
@@ -9715,14 +9723,14 @@ void MoveEffect(OBJECT* o, int iIndex)
                 {
                     if (rand_fps_check(1))
                     {
-                        CreateEffect(MODEL_METEO1 + rand() % 2, o->Position, o->Angle, o->Light, 0);
+                        CreateEffectFpsChecked(MODEL_METEO1 + rand() % 2, o->Position, o->Angle, o->Light, 0);
                     }
                 }
             }
         }
         VectorAddScaled(o->Position, o->Direction, o->Position, FPS_ANIMATION_FACTOR);
         o->Angle[0] += (10.f / o->Scale) * FPS_ANIMATION_FACTOR;
-        CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
+        CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
         //CreateParticle(BITMAP_ENERGY,o->Position,o->Angle,Light);
         //CreateParticle(BITMAP_SPARK+1,o->Position,o->Angle,Light,0,4.f);
         return;
@@ -9757,7 +9765,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->BlendMeshLight = o->LifeTime * 0.1f;
         break;
     case MODEL_SKILL_WHEEL1:
-        CreateEffect(MODEL_SKILL_WHEEL2, o->Position, o->Angle, o->Light, 4 - o->LifeTime, o->Owner, o->PKKey, o->Skill, o->Kind);
+        CreateEffectFpsChecked(MODEL_SKILL_WHEEL2, o->Position, o->Angle, o->Light, 4 - o->LifeTime, o->Owner, o->PKKey, o->Skill, o->Kind);
         break;
     case MODEL_SKILL_WHEEL2:
         switch (o->SubType)
@@ -9782,7 +9790,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->Angle[2] -= 18 * FPS_ANIMATION_FACTOR;
 
         if (rand_fps_check(1)) {
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
             Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
         }
@@ -9799,7 +9807,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[1] += rand() % 20 - 10;
             Position[2] += 120.f;
             Vector(0.5f, 0.5f, 0.5f, Light);
-            CreateParticle(BITMAP_WATERFALL_5, Position, Angle, Light, 3);
+            CreateParticleFpsChecked(BITMAP_WATERFALL_5, Position, Angle, Light, 3);
         }
         else
         {
@@ -9812,8 +9820,8 @@ void MoveEffect(OBJECT* o, int iIndex)
                     VectorCopy(o->Position, Position);
                     Position[0] += rand() % 20 - 10;
                     Position[1] += rand() % 20 - 10;
-                    CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
-                    if (rand_fps_check(4)) CreateParticle(BITMAP_SPARK, Position, Angle, Light);
+                    CreateJointFpsChecked(BITMAP_JOINT_SPARK, Position, Position, Angle);
+                    if (rand_fps_check(4)) CreateParticleFpsChecked(BITMAP_SPARK, Position, Angle, Light);
                 }
             }
         }
@@ -9847,14 +9855,14 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 Position[0] += rand() % 600 - 200;
                 Position[1] += rand() % 600 - 400;
-                CreateJoint(BITMAP_FLARE, Position, Position, Angle, 24, NULL, 90);
+                CreateJointFpsChecked(BITMAP_FLARE, Position, Position, Angle, 24, NULL, 90);
             }
         }
         else if ((int)o->LifeTime == 2)
         {
             Vector(0.f, 0.f, rand() % 360, Angle);
-            CreateEffect(MODEL_FISSURE, o->Position, Angle, o->Light, 0, o);
-            CreateEffect(MODEL_FISSURE_LIGHT, o->Position, Angle, o->Light, 0, o);
+            CreateEffectFpsChecked(MODEL_FISSURE, o->Position, Angle, o->Light, 0, o);
+            CreateEffectFpsChecked(MODEL_FISSURE_LIGHT, o->Position, Angle, o->Light, 0, o);
             o->Live = false;
         }
     }
@@ -9875,7 +9883,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorRotate(p, Matrix, Position);
             VectorAdd(Position, o->Position, Position);
 
-            CreateEffect(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
+            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
         }
 
         BMD* pModel = &Models[o->Type];
@@ -9886,8 +9894,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 Vector(0.f, 0.f, 0.f, p);
                 pModel->TransformPosition(BoneTransform[i], p, Position, true);
-                CreateParticle(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 3, 4.f, o);
-                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 21, 1.f);
+                CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, o->Angle, Light, 3, 4.f, o);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 21, 1.f);
             }
         }
     }
@@ -9936,7 +9944,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->StartPosition[2] = RequestTerrainHeight(o->StartPosition[0], o->StartPosition[1]) + AddHeight;
             AddHeight = 3.f;
 
-            CreateParticle(BITMAP_EXPLOTION, o->StartPosition, Angle, light, 0, 0.5f);
+            CreateParticleFpsChecked(BITMAP_EXPLOTION, o->StartPosition, Angle, light, 0, 0.5f);
 
             if (o->Kind == 0)
             {
@@ -9949,15 +9957,15 @@ void MoveEffect(OBJECT* o, int iIndex)
                         VectorCopy(o->StartPosition, Position);
                         Position[0] += rand() % 20 - 10;
                         Position[1] += rand() % 20 - 10;
-                        CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
-                        if (rand_fps_check(8)) CreateParticle(BITMAP_SPARK, Position, Angle, Light);
+                        CreateJointFpsChecked(BITMAP_JOINT_SPARK, Position, Position, Angle);
+                        if (rand_fps_check(8)) CreateParticleFpsChecked(BITMAP_SPARK, Position, Angle, Light);
                     }
                 }
             }
             Vector(0.f, 0.f, 0.f, Angle);
 
             if (o->Kind == 0)
-                CreateEffect(MODEL_WAVE, o->StartPosition, Angle, o->Light);
+                CreateEffectFpsChecked(MODEL_WAVE, o->StartPosition, Angle, o->Light);
 
             o->StartPosition[2] -= 27; //* FPS_ANIMATION_FACTOR;
 
@@ -9965,9 +9973,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if (o->Owner->Type != MODEL_WEREWOLF_HERO)
                 {
-                    CreateEffect(MODEL_SKILL_FURY_STRIKE + 3, o->StartPosition, Angle, o->Light, 0, o, scale);
-                    CreateEffect(MODEL_SKILL_FURY_STRIKE + 1, o->StartPosition, Angle, o->Light, 0, o, scale);
-                    CreateEffect(MODEL_SKILL_FURY_STRIKE + 2, o->StartPosition, Angle, o->Light, 0, o, scale);
+                    CreateEffectFpsChecked(MODEL_SKILL_FURY_STRIKE + 3, o->StartPosition, Angle, o->Light, 0, o, scale);
+                    CreateEffectFpsChecked(MODEL_SKILL_FURY_STRIKE + 1, o->StartPosition, Angle, o->Light, 0, o, scale);
+                    CreateEffectFpsChecked(MODEL_SKILL_FURY_STRIKE + 2, o->StartPosition, Angle, o->Light, 0, o, scale);
                 }
             }
 
@@ -9997,8 +10005,8 @@ void MoveEffect(OBJECT* o, int iIndex)
                     }
                     Position[2] = RequestTerrainHeight(Position[0], Position[1]) + AddHeight;
 
-                    CreateEffect(MODEL_SKILL_FURY_STRIKE + 4, Position, Angle, o->Light, 0, o->Owner, scale);
-                    CreateEffect(MODEL_SKILL_FURY_STRIKE + 5, Position, Angle, o->Light, 0, o->Owner, scale);
+                    CreateEffectFpsChecked(MODEL_SKILL_FURY_STRIKE + 4, Position, Angle, o->Light, 0, o->Owner, scale);
+                    CreateEffectFpsChecked(MODEL_SKILL_FURY_STRIKE + 5, Position, Angle, o->Light, 0, o->Owner, scale);
                 }
             }
         }
@@ -10044,8 +10052,8 @@ void MoveEffect(OBJECT* o, int iIndex)
                             Pos[i][2] = RequestTerrainHeight(Pos[i][0], Pos[i][1]) + 3;
                         Angle[2] += 270.f;
 
-                        CreateEffect(MODEL_SKILL_FURY_STRIKE + 7, Pos[i], Angle, o->Light, 0, o->Owner, 100);
-                        CreateEffect(MODEL_SKILL_FURY_STRIKE + 8, Pos[i], Angle, o->Light, 0, o->Owner, 100);
+                        CreateEffectFpsChecked(MODEL_SKILL_FURY_STRIKE + 7, Pos[i], Angle, o->Light, 0, o->Owner, 100);
+                        CreateEffectFpsChecked(MODEL_SKILL_FURY_STRIKE + 8, Pos[i], Angle, o->Light, 0, o->Owner, 100);
                     }
                 }
 
@@ -10084,7 +10092,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     {
                         position[0] = pos[0]; position[1] = pos[1];
                         position[2] = pos[2] - (i * 50);
-                        CreateEffect(MODEL_TAIL, position, Angle, o->Light);
+                        CreateEffectFpsChecked(MODEL_TAIL, position, Angle, o->Light);
                     }
                     pos[0] += rand() % 30 + 20;
                     pos[2] += rand() % 500 - 250;
@@ -10093,7 +10101,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     {
                         position[0] = pos[0]; position[1] = pos[1];
                         position[2] = pos[2] - (i * 30);
-                        CreateEffect(MODEL_TAIL, position, Angle, o->Light);
+                        CreateEffectFpsChecked(MODEL_TAIL, position, Angle, o->Light);
                     }
                     PlayBuffer(SOUND_FURY_STRIKE2);
                 }
@@ -10163,7 +10171,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
 
-                CreateEffect(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
             }
         }
 
@@ -10215,7 +10223,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
 
-                CreateEffect(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
             }
         }
 
@@ -10310,7 +10318,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Loc[2] = o->Position[2] - 200;
             if (o->SubType == 0 || o->SubType == 2)
             {
-                CreateJoint(BITMAP_FLARE, Loc, Loc, o->Angle, 50, NULL, 40);
+                CreateJointFpsChecked(BITMAP_FLARE, Loc, Loc, o->Angle, 50, NULL, 40);
             }
             //				else
             //				if(o->SubType == 1)
@@ -10318,7 +10326,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                                 //CreateJoint(BITMAP_FLARE,Loc,Loc,o->Angle,51,NULL,30);
 
             if (o->LifeTime > 40)
-                CreateEffect(BITMAP_MAGIC, o->Position, o->Angle, Light, 4, o, 4.0f);
+                CreateEffectFpsChecked(BITMAP_MAGIC, o->Position, o->Angle, Light, 4, o, 4.0f);
         }
         if (o->LifeTime <= 1 && o->SubType == 0)
             SetPlayerStop(Hero);
@@ -10341,16 +10349,16 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             if ((int)o->LifeTime == 100)
             {
-                CreateEffect(MODEL_CHANGE_UP_NASA, o->Position, o->Angle, o->Light, 1, o);
+                CreateEffectFpsChecked(MODEL_CHANGE_UP_NASA, o->Position, o->Angle, o->Light, 1, o);
             }
             else
                 if ((int)o->LifeTime == 70)
                 {
-                    CreateEffect(MODEL_CHANGE_UP_NASA, o->Position, o->Angle, o->Light, 2, o);
+                    CreateEffectFpsChecked(MODEL_CHANGE_UP_NASA, o->Position, o->Angle, o->Light, 2, o);
                 }
             if ((int)o->LifeTime == 40)
             {
-                CreateEffect(MODEL_CHANGE_UP_NASA, o->Position, o->Angle, o->Light, 3, o);
+                CreateEffectFpsChecked(MODEL_CHANGE_UP_NASA, o->Position, o->Angle, o->Light, 3, o);
             }
         }
         if (o->SubType >= 1 && o->SubType <= 3)
@@ -10406,7 +10414,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         for (int j = 0; j < 6; j++)
         {
             if (rand_fps_check(1))
-                CreateParticle(BITMAP_SMOKE, Position, Angle, o->Light, 25);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, Angle, o->Light, 25);
         }
         Vector(Luminosity * 0.3f, Luminosity * 0.6f, Luminosity, Light);
         AddTerrainLight(Position[0], Position[1], Light, 3, PrimaryTerrainLight);
@@ -10420,7 +10428,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         for (int j = 0; j < 4; j++)
             if (rand_fps_check(1))
-                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
 
         Vector(Luminosity * 0.3f, Luminosity * 0.6f, Luminosity, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -10433,7 +10441,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorCopy(o->Position, Position);
             Angle[2] += rand() % 10 - 5;
             if (rand_fps_check(1))
-                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.015f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.015f);
 
             Vector(1.f, 1.f, 1.f, Light2);
             Position[2] += 50.f;
@@ -10450,21 +10458,21 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->BlendMeshLight = o->LifeTime * 0.1f;
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.1f;
             //VectorAdd(o->Position,o->Direction,o->Position);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
             Vector(90.f, 0.f, o->Angle[2], Angle);
             if (rand_fps_check(2))
             {
                 Vector(o->Position[0] - 200.f, o->Position[1], o->Position[2] + 700.f, Position);
-                CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 10.f);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 10.f);
             }
             if (rand_fps_check(2))
             {
                 Vector(o->Position[0] + 200.f, o->Position[1], o->Position[2] + 700.f, Position);
-                CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 10.f);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 10.f);
             }
             o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
             if (rand_fps_check(4))
-                CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
             Vector(-Luminosity * 0.4f, -Luminosity * 0.3f, -Luminosity * 0.2f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 5, PrimaryTerrainLight);
 
@@ -10491,8 +10499,8 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             VectorCopy(o->Position, Position);
             Position[2] += 100.f;
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light, 3);
-            CreateParticle(BITMAP_BUBBLE, Position, o->Angle, o->Light, 3, 0.1f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 3);
+            CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 3, 0.1f);
 
             Vector(-Luminosity * 0.1f, -Luminosity * 0.3f, -Luminosity * 1.f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], o->Light, 5, PrimaryTerrainLight);
@@ -10506,8 +10514,8 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             VectorCopy(o->Position, Position);
             Position[2] += 100.f;
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light, 3);
-            CreateParticle(BITMAP_BUBBLE, Position, o->Angle, o->Light, 3, 0.1f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 3);
+            CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 3, 0.1f);
 
             Vector(-Luminosity * 0.1f, -Luminosity * 0.3f, -Luminosity * 1.f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], o->Light, 5, PrimaryTerrainLight);
@@ -10518,11 +10526,11 @@ void MoveEffect(OBJECT* o, int iIndex)
         case 6:
         case 7:
             EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 28);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 29);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 30);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 28);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 29);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 30);
             if (rand_fps_check(2))
-                CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
             break;
         case 8:
         {
@@ -10583,7 +10591,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorAdd(Position, o->Position, Position);
 
                 Vector(0.3f, 0.5f, 0.6f, Light);
-                CreateParticle(BITMAP_CLUD64, Position, o->Angle, Light, 1, 1.0f);
+                CreateParticleFpsChecked(BITMAP_CLUD64, Position, o->Angle, Light, 1, 1.0f);
             }
 
             Vector(90.f, 0.f, 0.0f, Angle);
@@ -10596,12 +10604,12 @@ void MoveEffect(OBJECT* o, int iIndex)
             Pos2[1] = Pos1[1] + rand() % 100 - 50.0f;
             Pos2[2] = Pos1[2];
 
-            CreateJoint(BITMAP_JOINT_THUNDER, Pos1, Pos2, Angle, 20, o, 20.f);
+            CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Pos1, Pos2, Angle, 20, o, 20.f);
 
             Pos2[0] = Pos1[0] + rand() % 100 - 50.0f;
             Pos2[1] = Pos1[1] + rand() % 100 - 50.0f;
             Pos2[2] = Pos1[2];
-            CreateEffect(MODEL_STONE1 + rand() % 2, Pos2, o->Angle, Light, 2);
+            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Pos2, o->Angle, Light, 2);
 
             o->Angle[2] += (o->Gravity) * FPS_ANIMATION_FACTOR;
             o->Light[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
@@ -10624,7 +10632,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 o->Light[2] *= pow(1.0f / (1.01f), FPS_ANIMATION_FACTOR);
             }
 
-            CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
+            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
         }
     }
     break;
@@ -10653,7 +10661,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Pos2[0] = Pos1[1] + rand() % 200 - 100.0f;
                 Pos2[1] = Pos1[1] + rand() % 200 - 100.0f;
 
-                CreateJoint(BITMAP_JOINT_THUNDER, Pos1, Pos2, Angle, 20, o, 20.f);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Pos1, Pos2, Angle, 20, o, 20.f);
             }
         }
     }
@@ -10694,7 +10702,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             Vector(0.0f, 0.6f, 1.f, Light);
             Vector(0.f, 0.f, 0.f, Angle);
-            CreateEffect(MODEL_SKILL_INFERNO, o->Position, Angle, Light, 2, o, 30, 0);
+            CreateEffectFpsChecked(MODEL_SKILL_INFERNO, o->Position, Angle, Light, 2, o, 30, 0);
 
             for (int i = 0; i < smokeNum; ++i)
             {
@@ -10703,13 +10711,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Position[2] = o->Position[2] + 50;
 
                 Vector(0.3f, 0.5f, 1.0f, Light);
-                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
             }
 
             for (int j = 0; j < 6; j++)
-                CreateEffect(MODEL_MAYASTONE4 + rand() % 2, o->Position, o->Angle, Light);
+                CreateEffectFpsChecked(MODEL_MAYASTONE4 + rand() % 2, o->Position, o->Angle, Light);
 
-            CreateParticle(BITMAP_EXPLOTION, Position, o->Angle, Light, 0, 4.0f);
+            CreateParticleFpsChecked(BITMAP_EXPLOTION, Position, o->Angle, Light, 0, 4.0f);
 
             o->Live = false;
         }
@@ -10734,7 +10742,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Angle[0] -= (o->Scale * 32.f) * FPS_ANIMATION_FACTOR;
 
         if (rand_fps_check(10))
-            CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 15);
+            CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, o->Light, 15);
     }
     break;
     case MODEL_MAYASTONEFIRE:
@@ -10757,14 +10765,14 @@ void MoveEffect(OBJECT* o, int iIndex)
             vec3_t vPos;
             VectorCopy(o->Position, vPos);
             vPos[2] += 100.f;
-            CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->StartPosition, 17, 10.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, o->StartPosition, 17, 10.0f);
 
             vec3_t Direction;
             Vector(0.0f, (-80.0f - rand() % 30) * o->Scale, 0.0f, Direction);
             AngleMatrix(o->Angle, Matrix);
             VectorRotate(Direction, Matrix, Position);
             VectorAdd(Position, o->Position, o->Position);
-            CreateEffect(MODEL_MAYAHANDSKILL, o->Position, o->Angle, o->StartPosition, 1, NULL, -1, 0, 0, 0, o->Scale + 0.2f);
+            CreateEffectFpsChecked(MODEL_MAYAHANDSKILL, o->Position, o->Angle, o->StartPosition, 1, NULL, -1, 0, 0, 0, o->Scale + 0.2f);
 
             if (o->Light[0] <= 0.05f)
                 o->Live = false;
@@ -10778,7 +10786,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             vec3_t vPos;
             VectorCopy(o->Position, vPos);
             vPos[2] += 100.f;
-            CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->StartPosition, 17, 10.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, o->StartPosition, 17, 10.0f);
         }
     }
     break;
@@ -10798,12 +10806,12 @@ void MoveEffect(OBJECT* o, int iIndex)
                     vec3_t Position;
                     VectorCopy(o->Position, Position);
                     Position[2] += 100.f;
-                    CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 6, o, 60.f, 0, 0);
+                    CreateJointFpsChecked(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 6, o, 60.f, 0, 0);
 
                     if ((int)o->LifeTime == (44 - o->Owner->m_bySkillCount + 1))
                     {
                         Angle[2] = i * 10.f;
-                        CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 7, o, 60.f, 0, 0);
+                        CreateJointFpsChecked(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 7, o, 60.f, 0, 0);
                     }
                 }
             }
@@ -10843,8 +10851,8 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     VectorCopy(o->Position, Position);
                     Position[2] += 100.f;
-                    CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 22, o, 2.0f, 0, 0);
-                    CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 23, o, 1.75f, 0, 0);
+                    CreateJointFpsChecked(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 22, o, 2.0f, 0, 0);
+                    CreateJointFpsChecked(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 23, o, 1.75f, 0, 0);
                 }
             }
         }
@@ -10871,7 +10879,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 AngleMatrix(Angle, Matrix);
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
-                CreateEffect(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 1);
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 1);
             }
             Vector(Luminosity * 1.f, Luminosity * 0.8f, Luminosity * 0.2f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 4, PrimaryTerrainLight);
@@ -10898,12 +10906,12 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
 
-                CreateParticle(BITMAP_FLARE_BLUE, Position, o->Angle, o->Light, 0);
+                CreateParticleFpsChecked(BITMAP_FLARE_BLUE, Position, o->Angle, o->Light, 0);
                 if (o->LifeTime > 40)
                 {
                     Position[2] += 600.f;
                     Angle[2] = 45.f;
-                    CreateJoint(BITMAP_FLARE_BLUE, Position, Position, Angle, 19, NULL, 40);
+                    CreateJointFpsChecked(BITMAP_FLARE_BLUE, Position, Position, Angle, 19, NULL, 40);
                 }
             }
             Vector(o->BlendMeshLight, o->BlendMeshLight, o->BlendMeshLight, Light);
@@ -10931,10 +10939,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
 
-                CreateParticle(BITMAP_FLARE_BLUE, Position, o->Angle, o->Light, 0);
+                CreateParticleFpsChecked(BITMAP_FLARE_BLUE, Position, o->Angle, o->Light, 0);
                 Position[2] += 600.f;
                 Angle[2] = 45.f;
-                CreateJoint(BITMAP_FLARE_BLUE, Position, Position, Angle, 19, NULL, 40);
+                CreateJointFpsChecked(BITMAP_FLARE_BLUE, Position, Position, Angle, 19, NULL, 40);
             }
             Vector(o->BlendMeshLight, o->BlendMeshLight, o->BlendMeshLight, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 4, PrimaryTerrainLight);
@@ -11042,10 +11050,10 @@ void MoveEffect(OBJECT* o, int iIndex)
             if ((o->SubType == 0 || o->SubType == 12 || o->SubType == 13) && rand_fps_check(10))
             {
                 if (o->Type == MODEL_ICE_SMALL || o->Type == MODEL_METEO1 || o->Type == MODEL_METEO2)
-                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
                 else if (o->Type == MODEL_STONE1 || o->Type == MODEL_STONE2)
                 {
-                    CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 1 + rand() % 3);
+                    CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, o->Light, 1 + rand() % 3);
                 }
             }
         }
@@ -11097,7 +11105,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             }
 
             if (rand_fps_check(30))
-                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
         }
         else if (o->SubType == 1)
         {
@@ -11121,7 +11129,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Vector(0.0f, 0.6f, 1.f, Light);
                 Vector(0.f, 0.f, 0.f, Angle);
 
-                CreateEffect(MODEL_SKILL_INFERNO, o->Position, Angle, Light, 2, o);
+                CreateEffectFpsChecked(MODEL_SKILL_INFERNO, o->Position, Angle, Light, 2, o);
 
                 Vector(0.2f, 0.4f, 0.8f, Light);
                 for (int i = 0; i < 8; ++i)
@@ -11130,19 +11138,19 @@ void MoveEffect(OBJECT* o, int iIndex)
                     vPos[1] = o->Position[1] + (rand() % 80 - 40);
                     vPos[2] = o->Position[2] + 50;
 
-                    CreateParticle(BITMAP_SMOKE, vPos, o->Angle, Light, 11, (float)(rand() % 40 + 60) * 0.025f);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, Light, 11, (float)(rand() % 40 + 60) * 0.025f);
                 }
 
                 for (int j = 0; j < 6; j++)
                 {
-                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + rand() % 3, vPos, o->Angle, Light, 0);
+                    CreateEffectFpsChecked(MODEL_EFFECT_BROKEN_ICE0 + rand() % 3, vPos, o->Angle, Light, 0);
                 }
 
                 Vector(0.6f, 0.6f, 1.f, Light);
                 vPos[0] = o->Position[0];
                 vPos[1] = o->Position[1];
                 vPos[2] = o->Position[2] + 100;
-                CreateParticle(BITMAP_EXPLOTION_MONO, vPos, o->Angle, Light, 1, 1.5f);
+                CreateParticleFpsChecked(BITMAP_EXPLOTION_MONO, vPos, o->Angle, Light, 1, 1.5f);
 
                 o->Live = false;
             }
@@ -11154,7 +11162,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             float fHeight = RequestTerrainHeight(o->Position[0], o->Position[1]);
             if (o->Position[2] < fHeight)
             {
-                CreateEffect(o->Type, o->Position, o->Angle, o->Light, 0);
+                CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, 0);
 
                 o->Live = false;
             }
@@ -11239,7 +11247,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 }
             }
 
-            CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light, 5, 1.2f);
+            CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 5, 1.2f);
 
             Vector(Luminosity, Luminosity * 0.3f, Luminosity * 0.1f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 4, PrimaryTerrainLight);
@@ -11297,14 +11305,14 @@ void MoveEffect(OBJECT* o, int iIndex)
                             Position[2] -= 30.f;
                             VectorCopy(o->Angle, Angle);
                             Angle[2] += rand() % 180;
-                            CreateParticle(BITMAP_WATERFALL_5, Position, Angle, Light, 2);
+                            CreateParticleFpsChecked(BITMAP_WATERFALL_5, Position, Angle, Light, 2);
                         }
                     }
                     VectorCopy(o->Position, Position);
                     Position[0] += rand() % 40 - 20;
                     Position[1] += rand() % 40 - 20;
                     Position[2] -= 50.f;
-                    CreateParticle(BITMAP_BUBBLE, Position, o->Angle, o->Light, 4);
+                    CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 4);
 
                     o->Direction[0] = 0;
                     o->Direction[1] = 0;
@@ -11353,14 +11361,14 @@ void MoveEffect(OBJECT* o, int iIndex)
                         VectorCopy(o->Position, Position);
                         //Position[2] += 100.f;
                         if (rand_fps_check(2))
-                            CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 8, NULL, 50.f, 0, 0);
+                            CreateJointFpsChecked(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 8, NULL, 50.f, 0, 0);
                     }
 
                     if (rand_fps_check(3))
                     {
                         vec3_t Light;
                         Vector(0.5f, 0.5f, 0.5f, Light);
-                        CreateParticle(BITMAP_SMOKE + 3, o->Position, o->Angle, Light, 2, (float)(rand() % 32 + 48) * 0.02f);
+                        CreateParticleFpsChecked(BITMAP_SMOKE + 3, o->Position, o->Angle, Light, 2, (float)(rand() % 32 + 48) * 0.02f);
                     }
                 }
             }
@@ -11627,7 +11635,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         for (int j = 0; j < 4; j++)
         {
-            CreateParticle(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 1);
+            CreateParticleFpsChecked(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 1);
         }
 
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -11639,11 +11647,11 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             VectorCopy(o->Position, Position);
             Position[2] += 80;
-            CreateParticle(BITMAP_EXPLOTION, Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_EXPLOTION, Position, o->Angle, Light);
 
             for (int j = 0; j < 6; j++)
             {
-                CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
             }
             o->Live = false;
         }
@@ -11670,7 +11678,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             Vector(1.f, 1.f, 1.f, Light);
 
-            CreateJoint(BITMAP_JOINT_THUNDER, o->Position, o->Position, o->Angle, 3, NULL, 20.f, 7); //  전기
+            CreateJointFpsChecked(BITMAP_JOINT_THUNDER, o->Position, o->Position, o->Angle, 3, NULL, 20.f, 7); //  전기
             CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, Light, o, (float)(rand() % 360));
         }
 
@@ -11690,10 +11698,10 @@ void MoveEffect(OBJECT* o, int iIndex)
     case MODEL_PIERCING + 1:
         if (rand_fps_check(2))
         {
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 0);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 0);
         }
-        CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
-        CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
+        CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
+        CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
 
         Vector(Luminosity * 0.6f, Luminosity * 0.8f, Luminosity * 0.8f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
@@ -11734,7 +11742,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Angle[1] += (60.f) * FPS_ANIMATION_FACTOR;
 
             if ((int)o->LifeTime == 13)
-                CreateEffect(MODEL_PIERCING, o->Position, o->Angle, o->Light, 3, o);
+                CreateEffectFpsChecked(MODEL_PIERCING, o->Position, o->Angle, o->Light, 3, o);
             CheckClientArrow(o);
 
             Vector(Luminosity * 0.9f, Luminosity * 0.4f, Luminosity * 0.6f, Light);
@@ -11751,7 +11759,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if ((int)o->LifeTime == 13)
                 {
-                    CreateEffect(MODEL_PIERCING, o->Position, o->Angle, o->Light, 0, o);
+                    CreateEffectFpsChecked(MODEL_PIERCING, o->Position, o->Angle, o->Light, 0, o);
                 }
                 else if ((int)o->LifeTime == 30)
                 {
@@ -11790,17 +11798,17 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Vector(0.f, 0.f, 0.f, o->Direction);
                 }
             }
-            CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
+            CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
         }
         else if (o->SubType == 5)
         {
             Vector(Luminosity * 0.1f, Luminosity * 0.6f, Luminosity * 0.3f, Light);
-            CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light);
             CheckClientArrow(o);
         }
         else
         {
-            CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light);
             CheckClientArrow(o);
         }
         break;
@@ -11832,7 +11840,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         VectorAdd(Position, o->Position, Position);
 
                         Vector(0.4f, 1.f, 0.2f, Light);
-                        CreateParticle(BITMAP_FLARE, Position, o->Angle, Light, 5, 0.2f);
+                        CreateParticleFpsChecked(BITMAP_FLARE, Position, o->Angle, Light, 5, 0.2f);
                     }
                 }
             }
@@ -11844,7 +11852,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 {
                     Vector((float)(rand() % 32 - 16), (float)(rand() % 64 - 32), (float)(rand() % 32 - 16), Position);
                     VectorAdd(Position, o->Position, Position);
-                    CreateParticle(BITMAP_FLOWER01 + rand() % 3, Position, o->Angle, o->Light);
+                    CreateParticleFpsChecked(BITMAP_FLOWER01 + rand() % 3, Position, o->Angle, o->Light);
                     //CreateParticle(BITMAP_BUBBLE,Position,o->Angle,o->Light);
                 }
                 o->Angle[1] += (30.f) * FPS_ANIMATION_FACTOR;
@@ -11865,11 +11873,11 @@ void MoveEffect(OBJECT* o, int iIndex)
                     VectorAdd(Position, o->Position, Position);
 
                     Vector(0.4f, 0.2f, 1.f, Light);
-                    CreateParticle(BITMAP_FLARE, Position, o->Angle, Light, 5, 0.2f);
+                    CreateParticleFpsChecked(BITMAP_FLARE, Position, o->Angle, Light, 5, 0.2f);
                 }
             }
             VectorCopy(o->Position, o->EyeLeft);
-            CreateEffect(MODEL_WAVES, o->Position, o->Angle, o->Light, 3, NULL, 0);
+            CreateEffectFpsChecked(MODEL_WAVES, o->Position, o->Angle, o->Light, 3, NULL, 0);
 
             Vector(Luminosity * 0.6f, Luminosity * 0.2f, Luminosity * 0.8f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
@@ -11882,9 +11890,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
                 VectorAdd(Position, o->Position, Position);
-                CreateParticle(BITMAP_BUBBLE, Position, o->Angle, o->Light, 1);
+                CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 1);
             }
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 0);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 0);
 
             Vector(Luminosity * 0.6f, Luminosity * 0.8f, Luminosity * 0.8f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
@@ -11909,7 +11917,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 3.f;
 
-        CreateParticle(BITMAP_FLAME, o->Position, o->Angle, o->Light, 8, (o->Scale - 0.4f) * 3.5f);
+        CreateParticleFpsChecked(BITMAP_FLAME, o->Position, o->Angle, o->Light, 8, (o->Scale - 0.4f) * 3.5f);
         if (o->Type == MODEL_DARK_SCREAM)
         {
             CheckClientArrow(o);
@@ -11970,7 +11978,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         effbmd->SetBodyLight(o->Light);
         effbmd->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity / 3.f, o->Position, o->Angle);
 
-        CreateEffect(BITMAP_SHOCK_WAVE, o->Owner->Position, o->Angle, o->Light, 10, o->Owner);
+        CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, o->Owner->Position, o->Angle, o->Light, 10, o->Owner);
     }
     break;
     case MODEL_CURSEDTEMPLE_RESTRAINT_SKILL:
@@ -12007,7 +12015,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     {
         VectorCopy(o->Position, o->EyeLeft);
         Vector(0.0f, 1.0f, 0.1f, o->Light);
-        CreateEffect(MODEL_WAVES, o->Position, o->Angle, o->Light, 4, NULL, 0);
+        CreateEffectFpsChecked(MODEL_WAVES, o->Position, o->Angle, o->Light, 4, NULL, 0);
 
         Vector(Luminosity * 0.6f, Luminosity * 0.2f, Luminosity * 0.8f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
@@ -12031,7 +12039,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
             VectorAdd(Position, o->Position, Position);
-            CreateParticle(BITMAP_BUBBLE, Position, o->Angle, o->Light, 1);
+            CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 1);
         }
         MoveJump(o);
         if ((int)o->LifeTime == 1)
@@ -12079,8 +12087,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             pModel->TransformByObjectBone(vPos, o, 1);
             for (int i = 0; i < iNumCreateFeather; i++)
             {
-                CreateEffect(MODEL_FEATHER, vPos, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 0.6f);
-                CreateEffect(MODEL_FEATHER, vPos, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 0.6f);
+                CreateEffectFpsChecked(MODEL_FEATHER, vPos, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 0.6f);
+                CreateEffectFpsChecked(MODEL_FEATHER, vPos, o->Angle, Light, 1, NULL, -1, 0, 0, 0, 0.6f);
             }
         }
 
@@ -12088,7 +12096,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             pModel->TransformByObjectBone(vPos, o, 1);
             Vector(0.4f, 0.4f, 0.9f, Light);
-            CreateJoint(BITMAP_FLARE + 1, vPos, vPos, o->Angle, 18, o, 90.f, 40, 0, 0, -1, Light);
+            CreateJointFpsChecked(BITMAP_FLARE + 1, vPos, vPos, o->Angle, 18, o, 90.f, 40, 0, 0, -1, Light);
         }
     }
     break;
@@ -12104,11 +12112,11 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector((float)(rand() % 32 - 16), (float)(rand() % 64 - 32), (float)(rand() % 32 - 16), Position);
             VectorAdd(Position, o->Position, Position);
 
-            CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, vLight, 30, 1.f);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, o->Angle, vLight, 30, 1.f);
         }
 
         VectorCopy(o->Position, o->EyeLeft);
-        CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 24, 1.0f);
+        CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 24, 1.0f);
 
         Vector(Luminosity * 0.2f, Luminosity * 0.8f, Luminosity * 0.5f, vLight);
         AddTerrainLight(o->Position[0], o->Position[1], vLight, 2, PrimaryTerrainLight);
@@ -12159,7 +12167,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Vector(o->Position[0] + (float)(rand() % 64 - 32),
                         o->Position[1] + (float)(rand() % 64 - 32),
                         o->Position[2] + (float)(rand() % 128 + 32), Position);
-                    CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light);
                 }
                 //AttackRange(o->Position,200.f,10);
                 o->Alpha -= (0.05f) * FPS_ANIMATION_FACTOR;
@@ -12229,7 +12237,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     Position[2] += o->Gravity;
                     Vector(1.f, 1.f, 1.f, Light);
-                    CreateParticle(BITMAP_FIRE + 2, Position, o->Angle, Light, 10, 2.f);
+                    CreateParticleFpsChecked(BITMAP_FIRE + 2, Position, o->Angle, Light, 10, 2.f);
                 }
             }
             else
@@ -12328,7 +12336,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     Vector(0.f, 0.5f, 0.f, Light);
                     Vector(0.f, 0.f, 0.f, Angle);
-                    CreateEffect(MODEL_SKILL_INFERNO, o->Position, Angle, Light, 2, o, 30, 0);
+                    CreateEffectFpsChecked(MODEL_SKILL_INFERNO, o->Position, Angle, Light, 2, o, 30, 0);
 
                     if (o->SubType == 7)
                     {
@@ -12346,14 +12354,14 @@ void MoveEffect(OBJECT* o, int iIndex)
                         Position[2] = o->Position[2] + 50;
 
                         Vector(0.1f, 0.5f, 0.1f, Light);
-                        CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
+                        CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
                     }
 
                     if (o->SubType != 7 && o->SubType != 8)
                     {
                         for (int j = 0; j < 6; j++)
                         {
-                            CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, Light);
+                            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, Light);
                         }
                     }
                     PlayBuffer(SOUND_DEATH_POISON2);
@@ -12362,10 +12370,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                 {
                     for (int j = 0; j < 6; j++)
                     {
-                        CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                        CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
                     }
                 }
-                CreateParticle(BITMAP_EXPLOTION, Position, o->Angle, Light);
+                CreateParticleFpsChecked(BITMAP_EXPLOTION, Position, o->Angle, Light);
 
                 o->Live = false;
             }
@@ -12396,18 +12404,18 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Vector(0.f, 0.f, 0.f, o->Direction);
                 vec3_t Position;
                 Vector(o->Position[0], o->Position[1], o->Position[2] + 80.f, Position);
-                CreateParticle(BITMAP_EXPLOTION, Position, o->Angle, Light);
+                CreateParticleFpsChecked(BITMAP_EXPLOTION, Position, o->Angle, Light);
                 for (int j = 0; j < 6; j++)
                 {
-                    CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                    CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
                 }
                 o->Live = false;
             }
         }
         else if (o->SubType == 9)
         {
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Direction, 36, 1.0f + o->Scale, o);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Direction, 37, 2.0f + o->Scale, o);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Direction, 36, 1.0f + o->Scale, o);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Direction, 37, 2.0f + o->Scale, o);
             Vector(1.0f, 0.2f, 0.2f, o->Light);
             AddTerrainLight(o->Position[0], o->Position[1], o->Light, 4, PrimaryTerrainLight);
 
@@ -12428,7 +12436,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
             if ((rand() % 5) != 0)
             {
-                CreateParticle(BITMAP_POUNDING_BALL, o->Position, o->Angle, Light);
+                CreateParticleFpsChecked(BITMAP_POUNDING_BALL, o->Position, o->Angle, Light);
             }
         }
         else
@@ -12461,12 +12469,12 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Position[0] = o->Position[0] + rand() % 50 - 25;
                     Position[1] = o->Position[1];
                     Position[2] = o->Position[2];
-                    CreateParticle(BITMAP_FIRE, Position, o->Angle, Light, 5);
+                    CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, Light, 5);
                 }
             }
             else if (o->SubType != 3)
             {
-                CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
+                CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 5);
             }
             else
             {
@@ -12479,10 +12487,10 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 Vector(0.0f, 0.0f, 0.0f, Angle);
                 Vector(1.0f, 1.0f, 1.0f, Light);
-                CreateParticle(BITMAP_FIRE, Pos, Angle, Light, 8, o->Scale * 2.5f);
+                CreateParticleFpsChecked(BITMAP_FIRE, Pos, Angle, Light, 8, o->Scale * 2.5f);
                 CreateSprite(BITMAP_SHINY + 1, Pos, o->Scale * 3.0f, Light, NULL, (float)(rand() % 360));
             }
-            //                CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,Light, 5);
+            //                CreateParticleFpsChecked(BITMAP_SMOKE,o->Position,o->Angle,Light, 5);
             if (o->SubType == 1)
             {
                 CheckTargetRange(o);
@@ -12495,7 +12503,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     case BITMAP_FIRECRACKERRISE:
         if (0 == ((int)o->LifeTime % 5) && (0 == (rand() % 3)))
         {
-            CreateEffect(BITMAP_FIRECRACKER, o->Position, o->Angle, o->Light);
+            CreateEffectFpsChecked(BITMAP_FIRECRACKER, o->Position, o->Angle, o->Light);
         }
         break;
     case BITMAP_FIRECRACKER:
@@ -12507,11 +12515,11 @@ void MoveEffect(OBJECT* o, int iIndex)
             //for ( int j = 0; j < 200; ++j)
             for (int j = 0; j < 80 * FPS_ANIMATION_FACTOR; ++j)
             {
-                CreateParticle(BITMAP_FIRECRACKER, o->Position, o->Angle, Light, iSubType);
+                CreateParticleFpsChecked(BITMAP_FIRECRACKER, o->Position, o->Angle, Light, iSubType);
             }
             PlayBuffer(SOUND_FIRECRACKER2, o);
         }
-        CreateParticle(BITMAP_FIRECRACKER, o->Position, o->Angle, o->Light, -1);
+        CreateParticleFpsChecked(BITMAP_FIRECRACKER, o->Position, o->Angle, o->Light, -1);
         Vector(Luminosity * .4f, Luminosity * 0.3f, Luminosity * 0.2f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
         break;
@@ -12522,7 +12530,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             Vector(o->Position[0] + (rand() % 200 - 100), o->Position[1] + (rand() % 200 - 100),
                 o->Position[2], Position);
-            CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, o->Angle, 25, o, 1.f, -1, o->SubType);
+            CreateJointFpsChecked(BITMAP_JOINT_SPIRIT, Position, Position, o->Angle, 25, o, 1.f, -1, o->SubType);
         }
     }
     break;
@@ -12535,7 +12543,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector(o->Position[0] + (rand() % 300 - 150), o->Position[1] + (rand() % 300 - 150),
                 o->Position[2], Position);
             float fScale = 0.5f + (rand() % 5) * 0.1f;
-            CreateEffect(BITMAP_FIRECRACKER0003, Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, fScale);
+            CreateEffectFpsChecked(BITMAP_FIRECRACKER0003, Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, fScale);
         }
     }
     break;
@@ -12573,13 +12581,13 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 vec3_t Light;
                 Vector(1.f, 1.f, 1.f, Light);
-                CreateJoint(BITMAP_JOINT_FORCE, Position, Position, o->HeadAngle, 10, o->Owner, 150.f, o->PKKey, o->Skill, 0, -1, Light);
+                CreateJointFpsChecked(BITMAP_JOINT_FORCE, Position, Position, o->HeadAngle, 10, o->Owner, 150.f, o->PKKey, o->Skill, 0, -1, Light);
             }
             else
                 if (o->SubType == 0)
-                    CreateJoint(BITMAP_JOINT_FORCE, Position, Position, o->HeadAngle, 0, o->Owner, 150.f, o->PKKey, o->Skill);
+                    CreateJointFpsChecked(BITMAP_JOINT_FORCE, Position, Position, o->HeadAngle, 0, o->Owner, 150.f, o->PKKey, o->Skill);
                 else
-                    CreateJoint(BITMAP_JOINT_FORCE, Position, Position, o->HeadAngle, 8, o->Owner, 150.f, o->PKKey, o->Skill);
+                    CreateJointFpsChecked(BITMAP_JOINT_FORCE, Position, Position, o->HeadAngle, 8, o->Owner, 150.f, o->PKKey, o->Skill);
         }
         break;
 
@@ -12595,7 +12603,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 o->StartPosition[0] -= (10.f) * FPS_ANIMATION_FACTOR;
 
-                CreateParticle(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 7, o->Scale);
+                CreateParticleFpsChecked(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 7, o->Scale);
 
                 o->Light[0] += (0.1f) * FPS_ANIMATION_FACTOR;
                 o->Light[1] = o->Light[0];
@@ -12612,7 +12620,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 o->StartPosition[0] -= (10.f) * FPS_ANIMATION_FACTOR;
 
-                CreateParticle(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 11, o->Scale);
+                CreateParticleFpsChecked(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 11, o->Scale);
 
                 o->Light[0] += (0.1f) * FPS_ANIMATION_FACTOR;
                 o->Light[1] = o->Light[0];
@@ -12626,10 +12634,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Vector(0.24f, 0.28f, 0.8f, Light);
                     VectorCopy(o->Position, Position);
                     Position[2] += 50.f;
-                    CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
 
                     if (rand_fps_check(5))
-                        CreateEffect(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
+                        CreateEffectFpsChecked(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
                 }
             }
         }
@@ -12649,12 +12657,12 @@ void MoveEffect(OBJECT* o, int iIndex)
         Vector(0.f, 20.f, 0.f, p);
         VectorRotate(p, Matrix, Position);
         VectorAdd(o->Position, Position, o->StartPosition);
-        CreateParticle(BITMAP_FIRE + 2, o->StartPosition, o->Angle, Light, 10, o->Scale);
+        CreateParticleFpsChecked(BITMAP_FIRE + 2, o->StartPosition, o->Angle, Light, 10, o->Scale);
 
         Vector(0.f, -20.f, 0.f, p);
         VectorRotate(p, Matrix, Position);
         VectorAdd(o->Position, Position, o->StartPosition);
-        CreateParticle(BITMAP_FIRE + 2, o->StartPosition, o->Angle, Light, 10, o->Scale);
+        CreateParticleFpsChecked(BITMAP_FIRE + 2, o->StartPosition, o->Angle, Light, 10, o->Scale);
 
         if ((int)o->LifeTime == 1)
         {
@@ -12688,7 +12696,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         if (rand_fps_check(10))
         {
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, Light);
         }
         break;
 
@@ -12718,7 +12726,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->Alpha = o->LifeTime / 10.f;
         if (rand_fps_check(10))
         {
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, Light);
         }
         break;
     case MODEL_SHINE:
@@ -12731,7 +12739,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[2] += 360.f;
 
             float Scale = (rand() % 30 + 50) / 100.f;
-            CreateParticle(BITMAP_SHINY, Position, o->Angle, o->Light, 2, Scale);
+            CreateParticleFpsChecked(BITMAP_SHINY, Position, o->Angle, o->Light, 2, Scale);
         }
         break;
     case MODEL_BLIZZARD:
@@ -12744,14 +12752,14 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             o->StartPosition[0] -= (10.f) * FPS_ANIMATION_FACTOR;
 
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 0, 1.5f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 0, 1.5f);
             if (rand_fps_check(2))
             {
-                CreateParticle(BITMAP_ENERGY, o->Position, o->Angle, Light, 1, 0.5f);
+                CreateParticleFpsChecked(BITMAP_ENERGY, o->Position, o->Angle, Light, 1, 0.5f);
             }
             else
             {
-                CreateParticle(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 7, o->Scale);
+                CreateParticleFpsChecked(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 7, o->Scale);
             }
 
             o->Light[0] += (0.1f) * FPS_ANIMATION_FACTOR;
@@ -12766,14 +12774,14 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Vector(0.24f, 0.28f, 0.8f, Light);
                 VectorCopy(o->Position, Position);
                 Position[2] += 50.f;
-                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11, (float)(rand() % 32 + 80) * 0.025f);
 
                 if (rand_fps_check(5))
                 {
-                    CreateEffect(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
+                    CreateEffectFpsChecked(MODEL_ICE_SMALL, Position, o->Angle, o->Light);
                 }
 
-                CreateEffect(MODEL_BLIZZARD, Position, o->Angle, o->Light, 1, NULL, o->PKKey);
+                CreateEffectFpsChecked(MODEL_BLIZZARD, Position, o->Angle, o->Light, 1, NULL, o->PKKey);
 
                 o->Live = false;
             }
@@ -12799,7 +12807,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if (rand_fps_check(2))
                 {
-                    CreateParticle(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 7, o->Scale);
+                    CreateParticleFpsChecked(BITMAP_FIRE + 2, o->Position, o->Angle, Light, 7, o->Scale);
                 }
 
                 o->Light[0] += (0.1f) * FPS_ANIMATION_FACTOR;
@@ -12816,9 +12824,9 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             o->Angle[1] += (30.f) * FPS_ANIMATION_FACTOR;
 
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 13);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 13);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 13);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 13);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 13);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 13);
 
             if ((int)o->LifeTime == 1)
             {
@@ -12941,7 +12949,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->SubType == 1) {
             if (o->LifeTime > 1) {
                 o->BlendMeshLight *= pow(1.0f / (1.6f), FPS_ANIMATION_FACTOR);
-                CreateEffect(MODEL_WAVES, o->Position, o->Angle, o->Light, 2, NULL, o->LifeTime);
+                CreateEffectFpsChecked(MODEL_WAVES, o->Position, o->Angle, o->Light, 2, NULL, o->LifeTime);
             }
         }
         else
@@ -12951,13 +12959,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 if (o->LifeTime > 1)
                 {
                     o->BlendMeshLight *= pow(1.0f / (1.6f), FPS_ANIMATION_FACTOR);
-                    CreateEffect(MODEL_WAVES, o->Position, o->Angle, o->Light, 2, NULL, o->LifeTime);
+                    CreateEffectFpsChecked(MODEL_WAVES, o->Position, o->Angle, o->Light, 2, NULL, o->LifeTime);
                 }
             }
             else {
                 if (o->LifeTime > 5) {
                     o->BlendMeshLight *= pow(1.0f / (1.6f), FPS_ANIMATION_FACTOR);
-                    CreateEffect(MODEL_WAVES, o->Position, o->Angle, o->Light, 2, NULL, o->LifeTime);
+                    CreateEffectFpsChecked(MODEL_WAVES, o->Position, o->Angle, o->Light, 2, NULL, o->LifeTime);
                 }
             }
         break;
@@ -13079,13 +13087,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                                 float	fRandDistance = (float)(rand() % 100) + 100;
                                 Vector(0.0f, fRandDistance, 0.0f, vRandomDir);
 
-                                CreateParticle(BITMAP_FIRE + 2, vPosition, o->Angle, o->Light, 17, 1.35f);
+                                CreateParticleFpsChecked(BITMAP_FIRE + 2, vPosition, o->Angle, o->Light, 17, 1.35f);
 
                                 Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), vAngle);
                                 AngleMatrix(vAngle, matRandomRotation);
                                 VectorRotate(vRandomDir, matRandomRotation, vRandomDirPosition);
                                 VectorAdd(vPosition, vRandomDirPosition, vResultRandomPosition);
-                                CreateJoint(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
+                                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
                             }
                         }
                         delete[] arrEachBonePos;
@@ -13120,14 +13128,14 @@ void MoveEffect(OBJECT* o, int iIndex)
                     if (o->LifeTime < 10)
                     {
                         o->Velocity += (0.1f) * FPS_ANIMATION_FACTOR;
-                        CreateEffect(BITMAP_MAGIC + 1, Position, o->Angle, o->Light, 1, o);
+                        CreateEffectFpsChecked(BITMAP_MAGIC + 1, Position, o->Angle, o->Light, 1, o);
                     }
 
                     AngleMatrix(o->Angle, Matrix);
                     VectorRotate(o->Direction, Matrix, Position);
                     VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
-                    CreateEffect(MODEL_TAIL, o->Position, o->Angle, o->Light, 0, o);
+                    CreateEffectFpsChecked(MODEL_TAIL, o->Position, o->Angle, o->Light, 0, o);
                 }
                 if (Distance < 40 && (int)o->LifeTime == 5)
                 {
@@ -13178,7 +13186,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     VectorRotate(o->Direction, Matrix, Position);
                     VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
-                    CreateEffect(MODEL_PIER_PART, o->Position, o->Angle, o->Light, 1, o);
+                    CreateEffectFpsChecked(MODEL_PIER_PART, o->Position, o->Angle, o->Light, 1, o);
                 }
                 if (Distance < 40 && (int)o->LifeTime == 5)
                 {
@@ -13206,7 +13214,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 if ((int)o->LifeTime % 3 == 0)
                 {
                     Vector(-90.f, 0.f, o->Angle[2], Angle);
-                    CreateJoint(BITMAP_JOINT_FORCE, o->Position, o->Position, Angle, 2, NULL, 150.f);
+                    CreateJointFpsChecked(BITMAP_JOINT_FORCE, o->Position, o->Position, Angle, 2, NULL, 150.f);
                 }
             }
         }
@@ -13261,8 +13269,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[2] = o->Position[2] + 50.f;
 
             Vector(1.f, 0.8f, 0.6f, Light);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 11, 2.f, o);
-            CreateEffect(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 10);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 11, 2.f, o);
+            CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 10);
         }
         //        o->BlendMeshTexCoordU = -(int)WorldTime%2000 * 0.0005f;
 
@@ -13353,7 +13361,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             if (((int)o->LifeTime % 8) == 0)
             {
-                CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, o->Light, 5);
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, o->Position, o->Angle, o->Light, 5);
             }
             break;
         }
@@ -13461,31 +13469,31 @@ void MoveEffect(OBJECT* o, int iIndex)
     case BITMAP_FLARE:
         if (o->SubType == 1)
         {
-            CreateParticle(BITMAP_FLARE, o->Position, o->Angle, Light, 11, 1.0f);
+            CreateParticleFpsChecked(BITMAP_FLARE, o->Position, o->Angle, Light, 11, 1.0f);
         }
         else if (o->SubType == 2)
         {
-            CreateParticle(BITMAP_FLARE_BLUE, o->Position, o->Angle, Light, 1, 1.0f);
+            CreateParticleFpsChecked(BITMAP_FLARE_BLUE, o->Position, o->Angle, Light, 1, 1.0f);
         }
         else
             if (o->SubType == 3)
             {
                 Vector(0.9f, 0.4f, 0.1f, Light);
                 float fRandom = 3.5f + ((float)(rand() % 20 - 10) * 0.1f);
-                CreateParticle(BITMAP_LIGHT, o->Position, o->Angle, Light, 5, fRandom);
+                CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, o->Angle, Light, 5, fRandom);
             }
             else
                 if ((int)o->LifeTime % 2 == 0)
                 {
                     VectorCopy(o->Position, Position);
                     Position[2] += 100.f;
-                    CreateJoint(BITMAP_FLARE_BLUE, Position, Position, o->Angle, 14, o, 40.f);
-                    CreateJoint(BITMAP_FLARE_BLUE, Position, Position, o->Angle, 15, o, 40.f);
+                    CreateJointFpsChecked(BITMAP_FLARE_BLUE, Position, Position, o->Angle, 14, o, 40.f);
+                    CreateJointFpsChecked(BITMAP_FLARE_BLUE, Position, Position, o->Angle, 15, o, 40.f);
 
                     if (rand_fps_check(2) && o->LifeTime > 5 && o->LifeTime < 15)
                     {
                         Vector(o->Position[0] - 200.f, o->Position[1], o->Position[2] + 700.f, Position);
-                        CreateJoint(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 20.f);
+                        CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 20.f);
                     }
                 }
         break;
@@ -13497,7 +13505,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[0] += rand() % 64 - 32.f;
             Position[1] += rand() % 64 - 32.f;
 
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 5, NULL, 50.f + rand() % 10);
+            CreateJointFpsChecked(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 5, NULL, 50.f + rand() % 10);
         }
         break;
 
@@ -13514,7 +13522,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (rand_fps_check(2))
             {
                 Angle[2] = (float)(rand() % 24 * 30);
-                CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 14, NULL, 100.f, 0, 0);
+                CreateJointFpsChecked(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 14, NULL, 100.f, 0, 0);
             }
         }
         break;
@@ -13547,7 +13555,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[2] += rand() % 60;
             Vector(1, 1, 1, Light);
             for (int i = 0; i < 3; ++i)
-                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 20, 10.f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 20, 10.f);
         }
         else
         {
@@ -13566,7 +13574,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[1] += rand() % 1200 - 600;
             vec3_t Angle;
             Vector(0.f, 0.f, rand() % 10 * 20.f, Angle);
-            CreateEffect(MODEL_FIRE, Position, Angle, Light, 0, NULL, 0);
+            CreateEffectFpsChecked(MODEL_FIRE, Position, Angle, Light, 0, NULL, 0);
 
             o->Scale += (0.02f) * FPS_ANIMATION_FACTOR;
             //				o->Position[2] -= 0.5f;
@@ -13582,7 +13590,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 {
                     vec3_t Angle;
                     Vector(0, 0, o->Angle[2] + 320 + i * 8, Angle);
-                    CreateEffect(MODEL_CUNDUN_PHOENIX, o->Position, Angle, o->Light, 0);
+                    CreateEffectFpsChecked(MODEL_CUNDUN_PHOENIX, o->Position, Angle, o->Light, 0);
                 }
             }
         }
@@ -13596,13 +13604,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 for (int i = 0; i < 20; ++i)
                 {
                     Angle[2] = (float)(o->PKKey * 30);
-                    CreateEffect(MODEL_CUNDUN_DRAGON_HEAD, o->Position, Angle, o->Light);
+                    CreateEffectFpsChecked(MODEL_CUNDUN_DRAGON_HEAD, o->Position, Angle, o->Light);
                 }
             }
             if (o->PKKey > 5 && o->PKKey < 10)
             {
                 Angle[2] = (float)(o->PKKey * 30);
-                CreateEffect(MODEL_CUNDUN_DRAGON_HEAD, o->Position, Angle, o->Light);
+                CreateEffectFpsChecked(MODEL_CUNDUN_DRAGON_HEAD, o->Position, Angle, o->Light);
             }
             ++o->PKKey;
         }
@@ -13630,7 +13638,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 Position[0] += rand() % 100 - 50.f;
                 Position[1] -= rand() % 30 + 15.f;
-                CreateEffect(MODEL_FLY_BIG_STONE1, Position, o->Angle, o->Light, 2);
+                CreateEffectFpsChecked(MODEL_FLY_BIG_STONE1, Position, o->Angle, o->Light, 2);
             }
         }
         if (o->LifeTime < 5)
@@ -13649,13 +13657,13 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             Vector(0.0f, 0.0f, -30.0f, o->Direction);
             Vector(1.f, 0.6f, 0.2f, Light);
-            CreateParticle(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light);
 
             if (o->HiddenMesh != 99)
             {
                 CreateInferno(o->Position, 1);
                 VectorCopy(o->Position, o->StartPosition);
-                CreateEffect(BITMAP_CRATER, o->Position, o->Angle, o->Light);
+                CreateEffectFpsChecked(BITMAP_CRATER, o->Position, o->Angle, o->Light);
             }
 
             EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
@@ -13680,10 +13688,10 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector(1.0f, 1.0f, 1.0f, o->Light);
             Vector(0.0f, 1.5f, 0.0f, p1);
             b->TransformPosition(BoneTransform[2], p1, p2);
-            CreateParticle(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 8, o->Scale - 0.4f, o);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 38, o->Scale, o);
+            CreateParticleFpsChecked(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 8, o->Scale - 0.4f, o);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 38, o->Scale, o);
             Vector(1.0f, 0.4f, 0.0f, o->Light);
-            CreateParticle(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 9, o->Scale - 0.4f, o);
+            CreateParticleFpsChecked(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 9, o->Scale - 0.4f, o);
         }
 
         if (o->HiddenMesh == 99)
@@ -13731,7 +13739,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             if ((int)o->LifeTime % 3 == 0)
             {
                 Vector(1.f, 0.6f, 0.2f, Light);
-                CreateParticle(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light, 1, 0.2f);
+                CreateParticleFpsChecked(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light, 1, 0.2f);
             }
         }
         else
@@ -13751,7 +13759,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 {
                     o->HiddenMesh = -1;
                     Vector(Luminosity * 1.f, Luminosity * 0.5f, Luminosity * 0.1f, Light);
-                    CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light, 5, 2.f);
+                    CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 5, 2.f);
                 }
 
                 o->Velocity -= (0.45f) * FPS_ANIMATION_FACTOR;
@@ -13788,8 +13796,8 @@ void MoveEffect(OBJECT* o, int iIndex)
                 if (o->LifeTime > o->DamageTime)
                 {
                     Vector(1.f, 0.6f, 0.2f, Light);
-                    CreateParticle(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light);
-                    CreateParticle(BITMAP_FIRE, o->Position, o->Angle, Light, 2, 2.f);
+                    CreateParticleFpsChecked(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light);
+                    CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 2, 2.f);
 
                     if (o->SubType == 88 && o->Owner != NULL)
                     {
@@ -13828,7 +13836,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     }
                     if (o->HiddenMesh != 99 && o->Visible)
                     {
-                        CreateEffect(BITMAP_CRATER, o->Position, o->Angle, o->Light);
+                        CreateEffectFpsChecked(BITMAP_CRATER, o->Position, o->Angle, o->Light);
                         PlayBuffer(SOUND_BC_CATAPULT_HIT, o);
 
                         battleCastle::CollisionEffectToObject(o, 350.f, 250.f, true);
@@ -13840,7 +13848,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         else if (o->SubType == 99 || (o->SubType == 88 && o->Owner != NULL))
                         {
                             Vector(1.f, 0.3f, 0.1f, Light);
-                            CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, Light, 7);
+                            CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, o->Position, o->Angle, Light, 7);
                         }
                     }
                     o->HiddenMesh = 99;
@@ -13904,7 +13912,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 if (rand_fps_check(2))
                 {
-                    CreateParticle(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light, 1, 2.f);
+                    CreateParticleFpsChecked(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, Light, 1, 2.f);
                 }
             }
 
@@ -13942,7 +13950,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if (o->LifeTime > o->DamageTime)
             {
-                CreateParticle(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, o->Light);
+                CreateParticleFpsChecked(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, o->Light);
 
                 if (o->SubType == 88 && o->Owner != NULL)
                 {
@@ -13981,7 +13989,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 }
                 if (o->HiddenMesh != 99 && o->Visible)
                 {
-                    CreateEffect(BITMAP_CRATER, o->Position, o->Angle, o->Light);
+                    CreateEffectFpsChecked(BITMAP_CRATER, o->Position, o->Angle, o->Light);
                     PlayBuffer(SOUND_BC_CATAPULT_HIT, o);
 
                     if (o->SubType == 88 && o->Owner == NULL)
@@ -13991,7 +13999,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     else if (o->SubType == 99 || (o->SubType == 88 && o->Owner != NULL))
                     {
                         Vector(1.f, 0.3f, 0.1f, Light);
-                        CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, Light, 7);
+                        CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, o->Position, o->Angle, Light, 7);
                     }
                 }
                 o->HiddenMesh = 99;
@@ -14036,12 +14044,12 @@ void MoveEffect(OBJECT* o, int iIndex)
                 o->HiddenMesh = 0;
 
                 if (rand_fps_check(10))
-                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 1.25f * o->Scale);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 1.25f * o->Scale);
             }
             else
             {
                 if (rand_fps_check(2))
-                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 0.2f);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 24, 0.2f);
             }
             break;
         }
@@ -14075,11 +14083,11 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->Type == MODEL_GOLEM_STONE)
         {
             if (rand_fps_check(4)) {
-                CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, 2.8f);
-                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, 1.8f);
+                CreateParticleFpsChecked(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, 2.8f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, 1.8f);
             }
             if (rand_fps_check(10)) {
-                CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
+                CreateParticleFpsChecked(BITMAP_SMOKE + 1, o->Position, o->Angle, Light);
             }
         }
         else if (o->Type == MODEL_BIG_STONE_PART1 && o->SubType == 2)
@@ -14087,7 +14095,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (rand_fps_check(10)) {
                 Vector(0.2f, 0.5f, 0.35f, Light);
                 o->Position[2] = Height;
-                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, 2.f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 11, 2.f);
             }
         }
         break;
@@ -14118,7 +14126,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         if (rand_fps_check(10))
         {
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, Light);
         }
         break;
 
@@ -14228,13 +14236,13 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 vec3_t vLight;
                 Vector(0.5f, 0.5f, 0.5f, vLight);
-                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 11, (float)(rand() % 20 + 30) * 0.020f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 11, (float)(rand() % 20 + 30) * 0.020f);
 
                 int iRand = rand() % 2 + 2;
                 for (int i = 0; i < iRand; ++i)
                 {
                     float fScale = 0.03f + (rand() % 10) / 40.0f + o->Scale * 0.3f;
-                    CreateEffect(MODEL_FALL_STONE_EFFECT, o->Position, o->Angle, o->Light, 3, NULL, -1, 0, 0, 0, fScale);
+                    CreateEffectFpsChecked(MODEL_FALL_STONE_EFFECT, o->Position, o->Angle, o->Light, 3, NULL, -1, 0, 0, 0, fScale);
                 }
 
                 o->Live = false;
@@ -14413,7 +14421,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 o->Position[2] = Height;
                 if (o->ExtState == 0)
                 {
-                    CreateEffect(BITMAP_CRATER, o->Position, o->Angle, o->Light, 1);
+                    CreateEffectFpsChecked(BITMAP_CRATER, o->Position, o->Angle, o->Light, 1);
                     o->ExtState = 1;
                 }
             }
@@ -14426,7 +14434,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 if ((int)o->LifeTime % 3 == 0)
                 {
-                    CreateParticle(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, o->Light, 1, 1.f);
+                    CreateParticleFpsChecked(BITMAP_ADV_SMOKE + 1, o->Position, o->Angle, o->Light, 1, 1.f);
                 }
             }
             o->Light[0] = o->LifeTime / 10.f;
@@ -14438,7 +14446,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             if ((int)o->LifeTime % 3 == 0)
             {
-                CreateEffect(MODEL_STUN_STONE, o->Position, o->Angle, o->Light);
+                CreateEffectFpsChecked(MODEL_STUN_STONE, o->Position, o->Angle, o->Light);
             }
             AddTerrainLight(o->Position[0], o->Position[1], o->Light, 1, PrimaryTerrainLight);
         }
@@ -14486,7 +14494,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     o->Scale = 1.f;
                     o->Gravity = 0.01f;
 
-                    CreateEffect(MODEL_MANA_RUNE, o->Position, o->Angle, o->Light, 1);
+                    CreateEffectFpsChecked(MODEL_MANA_RUNE, o->Position, o->Angle, o->Light, 1);
                 }
             }
             else if (o->LifeTime < 15)
@@ -14533,12 +14541,12 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     if ((int)o->LifeTime % 3 == 0)
                     {
-                        CreateParticle(BITMAP_POUNDING_BALL, o->Position, o->Angle, o->Light, 1);
+                        CreateParticleFpsChecked(BITMAP_POUNDING_BALL, o->Position, o->Angle, o->Light, 1);
                     }
                 }
                 else
                 {
-                    CreateParticle(BITMAP_POUNDING_BALL, o->Position, o->Angle, o->Light, 1);
+                    CreateParticleFpsChecked(BITMAP_POUNDING_BALL, o->Position, o->Angle, o->Light, 1);
                 }
             }
             o->Velocity += (1.5f) * FPS_ANIMATION_FACTOR;
@@ -14592,8 +14600,8 @@ void MoveEffect(OBJECT* o, int iIndex)
             Position[0] += rand() % 100 - 50.f;
             Position[1] += rand() % 100 - 50.f;
             Position[2] += 1200.f;
-            CreateJoint(BITMAP_FLASH, Position, Position, o->Angle, 2, o, 50.f);
-            CreateJoint(BITMAP_FLASH, Position, Position, o->Angle, 3, o, 50.f);
+            CreateJointFpsChecked(BITMAP_FLASH, Position, Position, o->Angle, 2, o, 50.f);
+            CreateJointFpsChecked(BITMAP_FLASH, Position, Position, o->Angle, 3, o, 50.f);
         }
         else if (o->SubType == 1)
         {
@@ -14613,7 +14621,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorAdd(o->StartPosition, Position, Position);
 
                 Position[2] += rand() % 400 + 700.f;
-                CreateJoint(BITMAP_FLASH, Position, Position, o->Angle, 5, o, 110.f);
+                CreateJointFpsChecked(BITMAP_FLASH, Position, Position, o->Angle, 5, o, 110.f);
             }
         }
         else if (o->SubType == 1)
@@ -14627,8 +14635,8 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorAdd(o->StartPosition, Position, Position);
 
                 Position[2] += 100.f;
-                CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
-                CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
             }
         }
 
@@ -14642,10 +14650,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                 o->Direction[1] -= (2.f) * FPS_ANIMATION_FACTOR;
                 if (o->SubType == 2)
                 {
-                    CreateEffect(MODEL_SWORD_FORCE, o->Position, o->Angle, o->Light, 3, o);
+                    CreateEffectFpsChecked(MODEL_SWORD_FORCE, o->Position, o->Angle, o->Light, 3, o);
                 }
                 else
-                    CreateEffect(MODEL_SWORD_FORCE, o->Position, o->Angle, o->Light, 1, o);
+                    CreateEffectFpsChecked(MODEL_SWORD_FORCE, o->Position, o->Angle, o->Light, 1, o);
             }
             else
             {
@@ -14665,13 +14673,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                 for (int i = 0; i < 4; i++)
                 {
                     Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2], Angle);
-                    CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
+                    CreateJointFpsChecked(BITMAP_JOINT_SPARK, Position, Position, Angle);
                     if (o->SubType == 2)
                     {
-                        CreateParticle(BITMAP_FIRE, Position, Angle, o->Light, 18, 1.5f);
+                        CreateParticleFpsChecked(BITMAP_FIRE, Position, Angle, o->Light, 18, 1.5f);
                     }
                     else
-                        CreateParticle(BITMAP_FIRE, Position, Angle, o->Light, 2, 1.5f);
+                        CreateParticleFpsChecked(BITMAP_FIRE, Position, Angle, o->Light, 2, 1.5f);
                 }
             }
             Vector(1.f, 0.8f, 0.6f, Light);
@@ -14701,7 +14709,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->LifeTime < 125 && o->LifeTime > 120)
             {
                 for (int i = 0; i < 5; ++i)
-                    CreateParticle(BITMAP_SPARK, o->Position, o->Angle, o->Light, 6, 1.5f, o);
+                    CreateParticleFpsChecked(BITMAP_SPARK, o->Position, o->Angle, o->Light, 6, 1.5f, o);
             }
         }
         else if (o->LifeTime > 95)
@@ -14738,7 +14746,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     o->Position[1] + (rand() % 26 - 13) * cosf(fAngle),
                     //o->Position[2] + 45+(10-o->LifeTime)*1.5f+rand()%5, p);
                     o->Position[2] + 48 - o->LifeTime + (rand() % 5), p);
-                CreateParticle(BITMAP_SPARK, p, o->Angle, o->Light, 5, 2.0f, o);
+                CreateParticleFpsChecked(BITMAP_SPARK, p, o->Angle, o->Light, 5, 2.0f, o);
             }
         }
     }
@@ -14756,12 +14764,12 @@ void MoveEffect(OBJECT* o, int iIndex)
             vPos[2] += 110.f;
 
             {
-                CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 24, 1.0f, o);
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 24, 1.0f, o);
             }
 
             if ((int)o->LifeTime % 15 == 0)
             {
-                CreateEffect(BITMAP_TARGET_POSITION_EFFECT1, o->Position, vAngle, vLight, 0);//, NULL, -1, 0, 0, 0, fScale );
+                CreateEffectFpsChecked(BITMAP_TARGET_POSITION_EFFECT1, o->Position, vAngle, vLight, 0);//, NULL, -1, 0, 0, 0, fScale );
             }
 
             if (o->LifeTime <= 10)
@@ -14832,7 +14840,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Position[0] += ((float)((rand() % 120) - 60)) * FPS_ANIMATION_FACTOR;
             o->Position[1] += ((float)((rand() % 120) - 60)) * FPS_ANIMATION_FACTOR;
 
-            CreateEffect(MODEL_EFFECT_SAPITRES_ATTACK_1, o->Position, o->Angle, o->Light, 0, o->Owner);
+            CreateEffectFpsChecked(MODEL_EFFECT_SAPITRES_ATTACK_1, o->Position, o->Angle, o->Light, 0, o->Owner);
         }
     }
     break;
@@ -14854,7 +14862,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    CreateEffect(MODEL_EFFECT_SAPITRES_ATTACK_2, o->Position, o->Angle, vLight, 0);
+                    CreateEffectFpsChecked(MODEL_EFFECT_SAPITRES_ATTACK_2, o->Position, o->Angle, vLight, 0);
                 }
             }
         }
@@ -14874,7 +14882,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 vPos[0] += (3.0f * ((float)(rand() % 40) - 20));
                 vPos[1] += (3.0f * ((float)(rand() % 40) - 20));
                 vPos[2] += (3.0f * ((float)(rand() % 40) - 20));
-                CreateParticle(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, o->Angle, vLight, 0, o->Scale);
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, o->Angle, vLight, 0, o->Scale);
             }
             CreateSprite(BITMAP_LIGHT, o->Position, 8.0f, vLightFlare, o);
             CreateSprite(BITMAP_LIGHT, o->Position, 8.0f, vLightFlare, o);
@@ -14897,7 +14905,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 vPos[0] += (3.0f * ((float)(rand() % 40) - 20));
                 vPos[1] += (3.0f * ((float)(rand() % 40) - 20));
                 vPos[2] += (3.0f * ((float)(rand() % 40) - 20));
-                CreateParticle(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, o->Angle, vLight, 0, o->Scale);
+                CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, o->Angle, vLight, 0, o->Scale);
             }
 
             VectorCopy(o->Position, vPos);
@@ -14932,8 +14940,8 @@ void MoveEffect(OBJECT* o, int iIndex)
                 CreateSprite(BITMAP_SHINY + 1, vtaWorldPos, 1.8f, o->Light, o, +WorldTime * 0.08f);
                 for (int i = 0; i < 7; ++i)
                 {
-                    CreateParticle(BITMAP_SHINY + 1, vtaWorldPos, o->Angle, o->Light, 5, 0.8f, o);
-                    CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.5f);
+                    CreateParticleFpsChecked(BITMAP_SHINY + 1, vtaWorldPos, o->Angle, o->Light, 5, 0.8f, o);
+                    CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.5f);
                 }
 
                 b->TransformPosition(BoneTransform[2], vRelativePos, vtaWorldPos, false);
@@ -14941,8 +14949,8 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 for (int i = 0; i < 7; ++i)
                 {
-                    CreateParticle(BITMAP_SHINY + 1, vtaWorldPos, o->Angle, o->Light, 5, 0.8f, o);
-                    CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.5f);
+                    CreateParticleFpsChecked(BITMAP_SHINY + 1, vtaWorldPos, o->Angle, o->Light, 5, 0.8f, o);
+                    CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.5f);
                 }
 
                 if ((int)o->LifeTime == 30 || (int)o->LifeTime == 15 || (int)o->LifeTime == 4)
@@ -14971,14 +14979,14 @@ void MoveEffect(OBJECT* o, int iIndex)
                     for (int k = 0; k < 70; ++k)
                     {
                         if (rand_fps_check(3)) {
-                            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.4f);
+                            CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle, rand() % 7 == 3 ? vLight2 : vLight1, 0, 0.4f);
                         }
-                        CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_FLOWER, vtaWorldPos, o->Angle, rand() % 4 == 3 ? vLight2 : vLight1, 0, 0.4f);
+                        CreateParticleFpsChecked(BITMAP_CHERRYBLOSSOM_EVENT_FLOWER, vtaWorldPos, o->Angle, rand() % 4 == 3 ? vLight2 : vLight1, 0, 0.4f);
                     }
 
                     Vector(0.f, 1.f, 0.f, vAngle);
                     Vector(1.f, 0.6f, 0.8f, vLight2);
-                    CreateParticle(BITMAP_SHOCK_WAVE, vtaWorldPos, vAngle, vLight2, 4, 0.005f);
+                    CreateParticleFpsChecked(BITMAP_SHOCK_WAVE, vtaWorldPos, vAngle, vLight2, 4, 0.005f);
 
                     characterBMD->Animation(o->Owner->BoneTransform, o->Owner->AnimationFrame,
                         o->Owner->PriorAnimationFrame, o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
@@ -15016,9 +15024,9 @@ void MoveEffect(OBJECT* o, int iIndex)
                 if ((int)o->LifeTime == 23)
                 {
                     Vector(0.3f, 0.3f, 1.0f, vLight);
-                    CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
-                    CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
-                    CreateEffect(MODEL_KNIGHT_PLANCRACK_A, o->Position, o->Angle, vLight, 0, o, 0, 0, 0, 0, 1.2f);
+                    CreateEffectFpsChecked(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
+                    CreateEffectFpsChecked(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
+                    CreateEffectFpsChecked(MODEL_KNIGHT_PLANCRACK_A, o->Position, o->Angle, vLight, 0, o, 0, 0, 0, 0, 1.2f);
 
                     vec3_t vDir, vPos, vAngle;
                     VectorSubtract(o->StartPosition, o->Position, vDir);
@@ -15038,7 +15046,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         {
                             vAngle[2] -= (rand() % 20 + 10);
                         }
-                        CreateEffect(MODEL_KNIGHT_PLANCRACK_B, vPos, vAngle, vLight, 0, o, 0, 0, 0, 0, 1.0f);
+                        CreateEffectFpsChecked(MODEL_KNIGHT_PLANCRACK_B, vPos, vAngle, vLight, 0, o, 0, 0, 0, 0, 1.0f);
                     }
                 }
 
@@ -15063,11 +15071,11 @@ void MoveEffect(OBJECT* o, int iIndex)
                         float fScale = 1.6f + rand() % 10 * 0.1f;
                         Vector(0.5f, 0.5f, 1.0f, vLight);
                         int index = (rand_fps_check(2)) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
-                        CreateParticle(index, vPos, o->Angle, vLight, 8, fScale);
+                        CreateParticleFpsChecked(index, vPos, o->Angle, vLight, 8, fScale);
                         Vector(1.0f, 1.0f, 1.0f, vLight);
                         if (rand_fps_check(2))
                         {
-                            CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, 1.f);
+                            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, 1.f);
                         }
                     }
                 }
@@ -15078,9 +15086,9 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Vector(0.5f, 0.5f, 1.f, vLight);
 
                     Vector(0.3f, 0.3f, 1.0f, vLight);
-                    CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 2.f);
-                    CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 1.f);
-                    CreateEffect(MODEL_RAKLION_BOSS_CRACKEFFECT, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 0.2f);
+                    CreateEffectFpsChecked(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 2.f);
+                    CreateEffectFpsChecked(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 1.f);
+                    CreateEffectFpsChecked(MODEL_RAKLION_BOSS_CRACKEFFECT, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 0.2f);
 
                     vec3_t vPos, vResult;
                     vec3_t vAngle;
@@ -15093,7 +15101,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         VectorRotate(vPos, Matrix, vResult);
                         VectorAdd(vResult, o->Position, vResult);
 
-                        CreateEffect(MODEL_STONE1 + rand() % 2, vResult, o->Angle, o->Light, 13);
+                        CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, vResult, o->Angle, o->Light, 13);
                     }
                 }
 
@@ -15125,10 +15133,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorAdd(o->Position, vPos, vPos);
                 VectorCopy(o->Owner->Angle, vAngle);
                 vAngle[2] += (rand() % 40 + 140);
-                CreateEffect(MODEL_DRAGON_LOWER_DUMMY, vPos, vAngle, vLight, 0, o, 0, 0, 0, 0, 0.8f);
+                CreateEffectFpsChecked(MODEL_DRAGON_LOWER_DUMMY, vPos, vAngle, vLight, 0, o, 0, 0, 0, 0, 0.8f);
 
                 Vector(1.0f, 1.0f, 1.0f, vLight);
-                CreateEffect(BITMAP_LIGHT_RED, vPos, vAngle, vLight, 4, o, -1, 0, 0, 0, 3.0f);
+                CreateEffectFpsChecked(BITMAP_LIGHT_RED, vPos, vAngle, vLight, 4, o, -1, 0, 0, 0, 3.0f);
             }
         }
     }
@@ -15258,9 +15266,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector(0.4f, 0.3f, 0.9f, vLight);
             if ((int)o->LifeTime == 45 || (int)o->LifeTime == 35 || (int)o->LifeTime == 25)
             {
-                CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 14, o, -1, 0, 0, 0, 5.0f);
-                CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 14, o, -1, 0, 0, 0, 5.0f);
-                CreateEffect(BITMAP_TWLIGHT, o->Position, o->Angle, vLight, 3, o, -1, 0, 0, 0, 6.0f);
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 14, o, -1, 0, 0, 0, 5.0f);
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, o->Position, o->Angle, vLight, 14, o, -1, 0, 0, 0, 5.0f);
+                CreateEffectFpsChecked(BITMAP_TWLIGHT, o->Position, o->Angle, vLight, 3, o, -1, 0, 0, 0, 6.0f);
             }
 
             Vector(0.7f, 0.3f, 0.9f, vLight);
@@ -15281,9 +15289,9 @@ void MoveEffect(OBJECT* o, int iIndex)
             if ((int)o->LifeTime == 45)
             {
                 pModel->TransformByObjectBone(vPos, o->Owner, 28);
-                CreateEffect(MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 28);
+                CreateEffectFpsChecked(MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 28);
                 pModel->TransformByObjectBone(vPos, o->Owner, 37);
-                CreateEffect(MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 37);
+                CreateEffectFpsChecked(MODEL_ARROWSRE06, vPos, o->Angle, vLight, 1, o->Owner, 37);
             }
 
             if (o->LifeTime >= 30)
@@ -15291,7 +15299,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Vector(0.3f, 0.2f, 0.9f, vLight);
                 for (int i = 0; i < 2; i++)
                 {
-                    CreateJoint(BITMAP_2LINE_GHOST, o->Position, o->Position, o->Angle, 1, o, 20.0f + rand() % 10, -1, 0, 0, -1, vLight);
+                    CreateJointFpsChecked(BITMAP_2LINE_GHOST, o->Position, o->Position, o->Angle, 1, o, 20.0f + rand() % 10, -1, 0, 0, -1, vLight);
                 }
             }
         }
@@ -15399,10 +15407,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                 Vector(0.2f, 0.2f, 0.9f, vLight);
 
                 // Bip01 R Hand
-                CreateEffect(MODEL_ARROWSRE06, o->Position, o->Angle, vLight, 1, o->Owner, 28);
+                CreateEffectFpsChecked(MODEL_ARROWSRE06, o->Position, o->Angle, vLight, 1, o->Owner, 28);
 
                 // Bip01 L Hand
-                CreateEffect(MODEL_ARROWSRE06, o->Position, o->Angle, vLight, 1, o->Owner, 37);
+                CreateEffectFpsChecked(MODEL_ARROWSRE06, o->Position, o->Angle, vLight, 1, o->Owner, 37);
 
                 o->Timer = WorldTime;
             }
@@ -15523,7 +15531,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                     v3Light_[0] = 0.5f; v3Light_[1] = 0.6f; v3Light_[2] = 0.94f;
 
-                    CreateParticle(BITMAP_RAKLION_CLOUDS, v3ResultPos, v3ResultAngle, v3Light_, 1, fResultScale);
+                    CreateParticleFpsChecked(BITMAP_RAKLION_CLOUDS, v3ResultPos, v3ResultAngle, v3Light_, 1, fResultScale);
                 }
             }
         }
@@ -15533,9 +15541,9 @@ void MoveEffect(OBJECT* o, int iIndex)
         vec3_t	v3Pos;
         VectorCopy(o->Position, v3Pos);
 
-        CreateParticle(BITMAP_WATERFALL_3, v3Pos, o->Angle, o->Light, 11, 0.6f);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3, v3Pos, o->Angle, o->Light, 11, 0.6f);
         // 연기
-        CreateParticle(BITMAP_SMOKE, v3Pos, o->Angle, o->Light, 52, 0.6f);
+        CreateParticleFpsChecked(BITMAP_SMOKE, v3Pos, o->Angle, o->Light, 52, 0.6f);
 
         if (15 == o->LifeTime)
         {
@@ -15553,7 +15561,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorCopy(o->Position, vPos);
             //vPos[2] += 100.f;
 
-            CreateEffect(MODEL_MOONHARVEST_MOON, vPos, vDir_, o->Light,
+            CreateEffectFpsChecked(MODEL_MOONHARVEST_MOON, vPos, vDir_, o->Light,
                 1,
                 NULL, -1, 0, 0, 0, 0.3f);
         }
@@ -15605,11 +15613,11 @@ void MoveEffect(OBJECT* o, int iIndex)
         VectorAdd(o->Position, vLook, vPosition);
         if (o->Type == MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD)
         {
-            CreateEffect(BITMAP_FIRE_CURSEDLICH, vPosition, o->Angle, vLight, 4, o);
+            CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, vPosition, o->Angle, vLight, 4, o);
         }
         else
         {
-            CreateEffect(BITMAP_FIRE_CURSEDLICH, vPosition, o->Angle, vLight, 3, o);
+            CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, vPosition, o->Angle, vLight, 3, o);
         }
     }
     break;
@@ -15716,7 +15724,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, Position);
 
-                CreateEffect(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, Position, o->Angle, o->Light, 0);
             }
         }
         else
@@ -15735,7 +15743,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
         if (rand_fps_check(3))
         {
-            CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light, 6);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light, 6);
         }
     }
     break;
@@ -15999,13 +16007,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                                     float	fRandDistance = (float)(rand() % 100) + 100;
                                     Vector(0.0f, fRandDistance, 0.0f, vRandomDir);
 
-                                    CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 5, 1.35f);
+                                    CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 5, 1.35f);
 
                                     Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), vAngle);
                                     AngleMatrix(vAngle, matRandomRotation);
                                     VectorRotate(vRandomDir, matRandomRotation, vRandomDirPosition);
                                     VectorAdd(vPosition, vRandomDirPosition, vResultRandomPosition);
-                                    CreateJoint(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
+                                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
                                 }
                             }
                         }
@@ -16049,13 +16057,13 @@ void MoveEffect(OBJECT* o, int iIndex)
                                     float	fRandDistance = (float)(rand() % 100) + 100;
                                     Vector(0.0f, fRandDistance, 0.0f, vRandomDir);
 
-                                    CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+                                    CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
                                     Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), vAngle);
                                     AngleMatrix(vAngle, matRandomRotation);
                                     VectorRotate(vRandomDir, matRandomRotation, vRandomDirPosition);
                                     VectorAdd(vPosition, vRandomDirPosition, vResultRandomPosition);
-                                    CreateJoint(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
+                                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
                                 }
                             }
                         }
@@ -16093,7 +16101,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if (fCurrentRate > fRateShadowStart && fCurrentRate < fRateShadowEnd)
                 {
-                    CreateEffect(o->Type, o->Position, o->Angle, o->Light, 20, o, -1, 0, 0, 0, o->Scale);
+                    CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, 20, o, -1, 0, 0, 0, o->Scale);
                 }
             }
 
@@ -16101,7 +16109,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if (fCurrentRate > fRateJointStart && fCurrentRate < fRateJointEnd)
                 {
-                    CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 20, o, 160.f, 40);
+                    CreateJointFpsChecked(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 20, o, 160.f, 40);
                 }
             }
 
@@ -16184,7 +16192,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         {
                             if (rand_fps_check(20))
                             {
-                                CreateEffect(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
+                                CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
                             }
                         }
                     }
@@ -16217,7 +16225,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         v3PosModify[2] = arrEachBonePos[i][2] + (float)((rand() % 80) - 40);
                         if (rand_fps_check(10))
                         {
-                            CreateEffect(BITMAP_FIRE_CURSEDLICH, v3PosModify, vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale * 1.5f);
+                            CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, v3PosModify, vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale * 1.5f);
                         }
                     }
 
@@ -16238,7 +16246,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if ((int)o->LifeTime == 5)
                 {
-                    CreateEffect(o->Type, o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
+                    CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
                 }
             }
             break;
@@ -16247,7 +16255,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if ((int)o->LifeTime == 3)
                 {
-                    CreateEffect(o->Type, o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
+                    CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
                 }
             }
             break;
@@ -16255,7 +16263,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if ((int)o->LifeTime == 10)
                 {
-                    CreateEffect(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_,
+                    CreateEffectFpsChecked(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_,
                         o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
                 }
             }
@@ -16264,7 +16272,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 if ((int)o->LifeTime == 1)
                 {
-                    CreateEffect(MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE,
+                    CreateEffectFpsChecked(MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE,
                         o->Position, o->Angle, o->Light, 1,
                         o->Owner, -1, 0, 0, 0, o->Scale);
                 }
@@ -16355,7 +16363,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Vector(0.0f, 0.0f, 0.0f, v3RelativePos);
                     Vector(0.0f, 0.0f, 0.0f, v3OwnerBonePos);
 
-                    CreateEffect(o->Type, oHighHier->Position, oHighHier->Angle, oHighHier->Light,
+                    CreateEffectFpsChecked(o->Type, oHighHier->Position, oHighHier->Angle, oHighHier->Light,
                         11, o->Owner, -1, 0, 0, 0, o->Scale);
                 }
 
@@ -16383,16 +16391,16 @@ void MoveEffect(OBJECT* o, int iIndex)
                         VectorRotate(vDirection, Matrix, vPosition);
                         VectorAdd(vPosition, o->Light, vPosition);
 
-                        CreateEffect(BITMAP_JOINT_THUNDER, vPosition, o->Angle, vLight, 1);
+                        CreateEffectFpsChecked(BITMAP_JOINT_THUNDER, vPosition, o->Angle, vLight, 1);
                     }
 
                     Vector(1.f, 1.f, 1.f, vLight);
                     VectorCopy(o->Light, vPosition);
 
-                    CreateEffect(BITMAP_CRATER, vPosition, o->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f);
+                    CreateEffectFpsChecked(BITMAP_CRATER, vPosition, o->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f);
                     for (int iu = 0; iu < 20; iu++)
                     {
-                        CreateEffect(MODEL_STONE2, vPosition, o->Angle, vLight);
+                        CreateEffectFpsChecked(MODEL_STONE2, vPosition, o->Angle, vLight);
                     }
 
                     vec3_t	v3Pos;
@@ -16403,40 +16411,40 @@ void MoveEffect(OBJECT* o, int iIndex)
                     v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    CreateParticle(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
                     v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    CreateParticle(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
                     v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    CreateParticle(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
                     v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    CreateParticle(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
                     v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    CreateParticle(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
                     v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
                     v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
-                    CreateParticle(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
 
                     Vector(0.3f, 0.2f, 1.f, vLight);
-                    CreateEffect(BITMAP_SHOCK_WAVE, vPosition, o->Angle, vLight, 11);
-                    CreateEffect(BITMAP_SHOCK_WAVE, vPosition, o->Angle, vLight, 11);
+                    CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, vPosition, o->Angle, vLight, 11);
+                    CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, vPosition, o->Angle, vLight, 11);
 
                     vPosition[2] += 100.0f;
                     Vector(0.0f, 0.2f, 1.0f, vLight);
-                    CreateEffect(MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1, vPosition, o->Angle, vLight, 1, NULL, -1, 0, 0, 0, 1.0f);
+                    CreateEffectFpsChecked(MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1, vPosition, o->Angle, vLight, 1, NULL, -1, 0, 0, 0, 1.0f);
                 }
             }
             break;
@@ -16444,7 +16452,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if ((int)o->LifeTime == 15)
             {
-                CreateEffect(o->Type, o->Position, o->Angle, o->Light, 12, o->Owner, -1, 0, 0, 0, o->Scale);
+                CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, 12, o->Owner, -1, 0, 0, 0, o->Scale);
             }
 
             int	iSwordOnTheLand = (o->ExtState / 2) + 5;
@@ -16519,7 +16527,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         Vector(1.0f, 1.0f, 1.0f, v3LightModify);
                         if (rand_fps_check(2))
                         {
-                            CreateParticle(BITMAP_POUNDING_BALL, arrEachBonePos[j], o->Angle, v3LightModify, 3, 1.3f);
+                            CreateParticleFpsChecked(BITMAP_POUNDING_BALL, arrEachBonePos[j], o->Angle, v3LightModify, 3, 1.3f);
                         }
                     }
                 }
@@ -16533,7 +16541,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     {
                         if (rand_fps_check(2))
                         {
-                            CreateParticle(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
                         }
                     }
                 }
@@ -16546,7 +16554,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     {
                         if (rand_fps_check(20))
                         {
-                            CreateEffect(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
+                            CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
                         }
                     }
                 }
@@ -16618,7 +16626,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     {
                         if (rand_fps_check(2))
                         {
-                            CreateParticle(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
                         }
                     }
                 }
@@ -16690,10 +16698,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                     //CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
                     //CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o);
 
-                    CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, o->PKKey, o->Kind, o->Skill, o->m_bySkillSerialNum, o->Scale * 1.0f);
-                    CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, o->PKKey, o->Kind, o->Skill, o->m_bySkillSerialNum, o->Scale * 1.0f);
+                    CreateEffectFpsChecked(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, o->PKKey, o->Kind, o->Skill, o->m_bySkillSerialNum, o->Scale * 1.0f);
+                    CreateEffectFpsChecked(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, o->PKKey, o->Kind, o->Skill, o->m_bySkillSerialNum, o->Scale * 1.0f);
 
-                    CreateEffect(MODEL_KNIGHT_PLANCRACK_A, o->Position, o->Angle, vLight, 0, o, 0, 0, 0, 0, o->Scale * 0.2f);
+                    CreateEffectFpsChecked(MODEL_KNIGHT_PLANCRACK_A, o->Position, o->Angle, vLight, 0, o, 0, 0, 0, 0, o->Scale * 0.2f);
 
                     vec3_t vDir, vPos, vAngle;
                     VectorSubtract(o->StartPosition, o->Position, vDir);
@@ -16713,7 +16721,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         {
                             vAngle[2] -= (rand() % 20 + 10);
                         }
-                        CreateEffect(MODEL_KNIGHT_PLANCRACK_B,
+                        CreateEffectFpsChecked(MODEL_KNIGHT_PLANCRACK_B,
                             vPos, vAngle, vLight, 0, o, 0, 0, 0, 0, o->Scale);
                     }
                 }
@@ -16739,11 +16747,11 @@ void MoveEffect(OBJECT* o, int iIndex)
                         float fScale = (o->Scale * 1.6f) + rand() % 10 * 0.1f;
                         Vector(0.3f, 0.3f, 1.0f, vLight);
                         int index = (rand_fps_check(2)) ? BITMAP_WATERFALL_5 : BITMAP_WATERFALL_3;
-                        CreateParticle(index, vPos, o->Angle, vLight, 8, fScale);
+                        CreateParticleFpsChecked(index, vPos, o->Angle, vLight, 8, fScale);
                         Vector(1.0f, 1.0f, 1.0f, vLight);
                         if (rand_fps_check(2))
                         {
-                            CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, o->Scale * 0.9f);
+                            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 55, o->Scale * 0.9f);
                         }
                     }
                 }
@@ -16754,9 +16762,9 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Vector(0.5f, 0.5f, 1.f, vLight);
 
                     Vector(0.3f, 0.3f, 1.0f, vLight);
-                    CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, o->Scale * 1.1f);
-                    CreateEffect(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, o->Scale * 1.2f);
-                    CreateEffect(MODEL_RAKLION_BOSS_CRACKEFFECT, o->Position, o->Angle, vLight,
+                    CreateEffectFpsChecked(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, o->Scale * 1.1f);
+                    CreateEffectFpsChecked(MODEL_NIGHTWATER_01, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, o->Scale * 1.2f);
+                    CreateEffectFpsChecked(MODEL_RAKLION_BOSS_CRACKEFFECT, o->Position, o->Angle, vLight,
                         0, o, -1, 0, 0, 0, o->Scale * 0.4f);
 
                     vec3_t vPos, vResult;
@@ -16770,7 +16778,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         VectorRotate(vPos, Matrix, vResult);
                         VectorAdd(vResult, o->Position, vResult);
 
-                        CreateEffect(MODEL_STONE1 + rand() % 2, vResult, o->Angle, o->Light, 13);
+                        CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, vResult, o->Angle, o->Light, 13);
                     }
                 }
 
@@ -16805,7 +16813,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 vec3_t vLight;
                 Vector(1.0f, 0.2f, 0.5f, vLight);
-                CreateEffect(BITMAP_RING_OF_GRADATION, o->Owner->Position, o->Angle, vLight, 0, o->Owner, 0, 0, 0, 0, 1.2f);
+                CreateEffectFpsChecked(BITMAP_RING_OF_GRADATION, o->Owner->Position, o->Angle, vLight, 0, o->Owner, 0, 0, 0, 0, 1.2f);
             }
         }
     }break;
@@ -16835,7 +16843,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Scale *= pow(1.1f, FPS_ANIMATION_FACTOR);
         }
         CreateSprite(BITMAP_SHOCK_WAVE, o->Position, o->Scale, o->Light, o->Owner);
-        CreateParticle(BITMAP_FIRE + 2, o->Position, o->Angle, o->Light, 16, 2.5f);
+        CreateParticleFpsChecked(BITMAP_FIRE + 2, o->Position, o->Angle, o->Light, 16, 2.5f);
     }break;
     case MODEL_EFFECT_SD_AURA:
     {
@@ -16920,10 +16928,10 @@ void MoveEffect(OBJECT* o, int iIndex)
                     Vector(0.2f, 0.3f, 1.0f, Light);
                     p[1] += rand() % 20 - 10;
                     p[2] += rand() % 28 + 6;
-                    CreateJoint(BITMAP_PIN_LIGHT, p, p, o->Owner->Angle, 0, o->Owner, 5.0f);
+                    CreateJointFpsChecked(BITMAP_PIN_LIGHT, p, p, o->Owner->Angle, 0, o->Owner, 5.0f);
                 }
-                CreateEffect(MODEL_WOLF_HEAD_EFFECT, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 1, o->Owner);
-                CreateEffect(MODEL_WOLF_HEAD_EFFECT, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 2, o->Owner);
+                CreateEffectFpsChecked(MODEL_WOLF_HEAD_EFFECT, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 1, o->Owner);
+                CreateEffectFpsChecked(MODEL_WOLF_HEAD_EFFECT, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 2, o->Owner);
                 o->Owner->Angle[2] = Angle[2];
                 o->Owner->Angle[0] = Angle[0];
             }
@@ -16950,7 +16958,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
             Vector(vPosition[0] + rand() % 80 - 40, vPosition[1] + rand() % 80 - 40, vPosition[2] + rand() % 120 + 30, vPosition);
             float Scale = 1.5f + (rand() % 10 * 0.02f);
-            CreateParticle(BITMAP_SBUMB, vPosition, o->Angle, vLight, 0, Scale * o->Scale, o->Owner);
+            CreateParticleFpsChecked(BITMAP_SBUMB, vPosition, o->Angle, vLight, 0, Scale * o->Scale, o->Owner);
         }
         if ((int)o->LifeTime == 15 || (int)o->LifeTime == 9 || (int)o->LifeTime == 6)
         {
@@ -16981,7 +16989,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             vec3_t _StartPos, _EndPos;
             pModel->TransformByObjectBone(_StartPos, o, 0);
-            CreateJoint(BITMAP_FORCEPILLAR, _StartPos, _StartPos, o->Angle, 0, o, 50.0f);
+            CreateJointFpsChecked(BITMAP_FORCEPILLAR, _StartPos, _StartPos, o->Angle, 0, o, 50.0f);
 
             VectorCopy(o->Owner->Angle, o->Angle);
             VectorCopy(o->Owner->Position, o->Position);
@@ -17007,7 +17015,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             if (o->AnimationFrame >= 6.0f || !o->Owner->Live)
             {
                 o->Live = false;
-                CreateEffect(MODEL_DOWN_ATTACK_DUMMY_L, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 0, o->Owner);
+                CreateEffectFpsChecked(MODEL_DOWN_ATTACK_DUMMY_L, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 0, o->Owner);
             }
 
             if (o->AnimationFrame >= 3.0f && o->LifeTime > 50)
@@ -17022,7 +17030,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             vec3_t _StartPos, _EndPos;
             pModel->TransformByObjectBone(_StartPos, o, 0);
-            CreateJoint(BITMAP_FORCEPILLAR, _StartPos, _StartPos, o->Angle, 1, o, 50.0f);
+            CreateJointFpsChecked(BITMAP_FORCEPILLAR, _StartPos, _StartPos, o->Angle, 1, o, 50.0f);
 
             VectorCopy(o->Owner->Angle, o->Angle);
             VectorCopy(o->Owner->Position, o->Position);
@@ -17047,7 +17055,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         vec3_t _StartPos, _EndPos;
         b->TransformByObjectBone(_StartPos, o->Owner, 5);
         b->TransformByObjectBone(_EndPos, o->Owner, 4);
-        CreateJoint(BITMAP_SWORDEFF, _StartPos, _EndPos, o->Owner->Angle, 0, o->Owner, 100.0f);
+        CreateJointFpsChecked(BITMAP_SWORDEFF, _StartPos, _EndPos, o->Owner->Angle, 0, o->Owner, 100.0f);
 
         if (o->Owner->AnimationFrame > 6 && o->LifeTime > 50)
         {
@@ -17060,13 +17068,13 @@ void MoveEffect(OBJECT* o, int iIndex)
             b->TransformByObjectBone(position, o->Owner, 0, Relative);
 
             Vector(60.0f, 0.0f, Angle[2] - 180, Angle);
-            CreateEffect(MODEL_SHOCKWAVE01, position, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 1.0f);
-            CreateEffect(MODEL_WOLF_HEAD_EFFECT2, o->Position, o->Angle, o->Light, 3, o->Owner);
+            CreateEffectFpsChecked(MODEL_SHOCKWAVE01, position, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 1.0f);
+            CreateEffectFpsChecked(MODEL_WOLF_HEAD_EFFECT2, o->Position, o->Angle, o->Light, 3, o->Owner);
 
             if (o->Owner->m_sTargetIndex < 0)
                 break;
 
-            CreateEffect(BITMAP_DAMAGE1, CharactersClient[o->Owner->m_sTargetIndex].Object.Position, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 1.4f);
+            CreateEffectFpsChecked(BITMAP_DAMAGE1, CharactersClient[o->Owner->m_sTargetIndex].Object.Position, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 1.4f);
             StopBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK, true);
             PlayBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK);
             o->LifeTime = 45;
@@ -17081,21 +17089,21 @@ void MoveEffect(OBJECT* o, int iIndex)
             Vector(-80.0f, 120.0f, 0.0f, Relative);
             b->TransformByObjectBone(position, o->Owner, 4, Relative);
             Vector(90.f, 0.0f, Angle[2] - 180, Angle);
-            CreateEffect(MODEL_SHOCKWAVE02, position, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 0.5f);
-            CreateEffect(MODEL_WOLF_HEAD_EFFECT2, o->Position, o->Angle, o->Light, 5, o->Owner);
+            CreateEffectFpsChecked(MODEL_SHOCKWAVE02, position, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 0.5f);
+            CreateEffectFpsChecked(MODEL_WOLF_HEAD_EFFECT2, o->Position, o->Angle, o->Light, 5, o->Owner);
 
             Vector(1.0f, 1.0f, 1.0f, Light);
             Vector(-80.0f, 20.0f, 0.0f, vPosition);
             b->TransformByObjectBone(vPosition, o->Owner, 4, vPosition);
             Vector(90.0f, Angle[1], Angle[2], Angle);
-            CreateEffect(MODEL_SHOCKWAVE_SPIN01, vPosition, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 0.5f);
-            CreateEffect(MODEL_SHOCKWAVE_SPIN01, vPosition, Angle, Light, 1, o->Owner, -1, 0, 0, 0, 0.9f);
+            CreateEffectFpsChecked(MODEL_SHOCKWAVE_SPIN01, vPosition, Angle, Light, 0, o->Owner, -1, 0, 0, 0, 0.5f);
+            CreateEffectFpsChecked(MODEL_SHOCKWAVE_SPIN01, vPosition, Angle, Light, 1, o->Owner, -1, 0, 0, 0, 0.9f);
 
             if (o->Owner->m_sTargetIndex < 0)
                 break;
 
             VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
-            CreateEffect(BITMAP_SHINY + 4, vPosition, o->Angle, Light, 0, o->Owner, -1, 0, 0, 0, 1.9f);
+            CreateEffectFpsChecked(BITMAP_SHINY + 4, vPosition, o->Angle, Light, 0, o->Owner, -1, 0, 0, 0, 1.9f);
             StopBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK, true);
             PlayBuffer(SOUND_RAGESKILL_GIANTSWING_ATTACK);
             o->LifeTime = 20;
@@ -17183,7 +17191,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
             Vector(vPosition[0] + rand() % 90 - 40, vPosition[1] + rand() % 90 - 40, vPosition[2] + rand() % 100 + 50, vPosition);
             float Scale = 1.5f + (rand() % 5 * 0.01f);
-            CreateParticle(BITMAP_DAMAGE1, vPosition, o->Angle, vLight, 0, Scale * o->Scale, o->Owner);
+            CreateParticleFpsChecked(BITMAP_DAMAGE1, vPosition, o->Angle, vLight, 0, Scale * o->Scale, o->Owner);
         }
     }
     break;
@@ -17251,7 +17259,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                 {
                     Vector(1.0f, 0.2f, 0.0f, vLight);
                 }
-                CreateEffect(MODEL_WINDFOCE, o->Position, o->Angle, vLight, 3, o, -1, 0, 0, 0, 1.0f);
+                CreateEffectFpsChecked(MODEL_WINDFOCE, o->Position, o->Angle, vLight, 3, o, -1, 0, 0, 0, 1.0f);
             }
         }
         else if (o->SubType == 1)		//지속적인거
@@ -17292,7 +17300,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 vec3_t vLight;
                 Vector(1.0f, 0.5f, 0.0f, vLight);
-                CreateEffect(MODEL_WINDFOCE, o->Position, o->Angle, vLight, 3, o, -1, 0, 0, 0, 1.0f);
+                CreateEffectFpsChecked(MODEL_WINDFOCE, o->Position, o->Angle, vLight, 3, o, -1, 0, 0, 0, 1.0f);
             }
         }
         else if (o->SubType == 3)
@@ -17314,7 +17322,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         VectorCopy(o->Position, vPosition);
         VectorCopy(o->Light, Light);
         Vector(vPosition[0] + rand() % 100 - 40, vPosition[1] + rand() % 100 - 40, vPosition[2] + rand() % 100 + 50, vPosition);
-        CreateParticle(BITMAP_SHINY + 4, vPosition, o->Angle, Light, 2, o->Scale);
+        CreateParticleFpsChecked(BITMAP_SHINY + 4, vPosition, o->Angle, Light, 2, o->Scale);
     }
     break;
     case BITMAP_LIGHT_RED:
@@ -17334,7 +17342,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     {
                         vec3_t vLight;
                         Vector(0.6f, 0.6f, 1.0f, vLight);
-                        CreateEffect(MODEL_WINDFOCE_MIRROR, o->Owner->Position, o->Angle, vLight, 0, o->Owner, -1, 0, 0, 0, 1.0f);
+                        CreateEffectFpsChecked(MODEL_WINDFOCE_MIRROR, o->Owner->Position, o->Angle, vLight, 0, o->Owner, -1, 0, 0, 0, 1.0f);
                     }
                 }
             }
@@ -17373,7 +17381,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     VectorCopy(o->Position, Position);
                     Vector(1.0f, 0.12f, 0.0f, Light);
                     b->TransformByObjectBone(Position, o->Owner, (rand_fps_check(2)) ? 26 : 35);
-                    CreateParticle(BITMAP_SMOKELINE1, Position, o->Angle, Light, 5, 0.005f, o->Owner);
+                    CreateParticleFpsChecked(BITMAP_SMOKELINE1, Position, o->Angle, Light, 5, 0.005f, o->Owner);
                 }
             }
         }
@@ -17404,7 +17412,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         VectorCopy(o->Light, vLight);
         VectorScale(vLight, 0.1f, vLight);
         if ((int)o->LifeTime % 3 != 0)
-            CreateParticle(BITMAP_SWORD_EFFECT_MONO, o->Position, o->Angle, o->Light, 0, o->Scale, o);
+            CreateParticleFpsChecked(BITMAP_SWORD_EFFECT_MONO, o->Position, o->Angle, o->Light, 0, o->Scale, o);
 
         if ((int)o->LifeTime == 14)
         {
@@ -17421,7 +17429,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 Vector(1.0f, 0.12f, 0.0f, vLight);
             }
-            CreateEffect(MODEL_SHOCKWAVE01, o->Position, o->Angle, vLight, 2, o->Owner, -1, 0, 0, 0, 1.0f);
+            CreateEffectFpsChecked(MODEL_SHOCKWAVE01, o->Position, o->Angle, vLight, 2, o->Owner, -1, 0, 0, 0, 1.0f);
         }
     }
     break;
@@ -17465,8 +17473,8 @@ void MoveEffect(OBJECT* o, int iIndex)
 
                 VectorCopy(pos, o->Position);
 
-                CreateEffect(MODEL_WOLF_HEAD_EFFECT2, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 4, o->Owner);
-                CreateEffect(MODEL_WOLF_HEAD_EFFECT2, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 6, o->Owner);
+                CreateEffectFpsChecked(MODEL_WOLF_HEAD_EFFECT2, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 4, o->Owner);
+                CreateEffectFpsChecked(MODEL_WOLF_HEAD_EFFECT2, o->Owner->Position, o->Owner->Angle, o->Owner->Light, 6, o->Owner);
                 o->Owner->Angle[2] = Angle[2];
                 o->Owner->Angle[0] = Angle[0];
             }
@@ -17536,7 +17544,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     pModel->TransformByObjectBone(_StartPos, o, 1);
                     pModel->TransformByObjectBone(_EndPos, o, 2);
 
-                    CreateJoint(BITMAP_GROUND_WIND, _StartPos, _EndPos, o->Angle, i, o, 150.0f);
+                    CreateJointFpsChecked(BITMAP_GROUND_WIND, _StartPos, _EndPos, o->Angle, i, o, 150.0f);
                     fAnimationFrame += fSpeedPerFrame;
                 }
             }
@@ -17556,15 +17564,15 @@ void MoveEffect(OBJECT* o, int iIndex)
                     float fScale = ((float)(rand() % 40 + 50) * 0.01f * 1.5f) * o->Scale * 1.8f;
                     for (int i = 0; i < 4; ++i)
                     {
-                        CreateParticle(BITMAP_ENERGY, vPos, o->Angle, o->Light, 7, fScale);
-                        CreateParticle(BITMAP_LIGHTNING_MEGA1, vPos, o->Angle, o->Light, 0, fScale * 0.9f);
+                        CreateParticleFpsChecked(BITMAP_ENERGY, vPos, o->Angle, o->Light, 7, fScale);
+                        CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1, vPos, o->Angle, o->Light, 0, fScale * 0.9f);
 
-                        CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, o->Light, 3, 1.0f + (fLuminosity * 0.05f));
-                        CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, o->Light, 8, 1.0f + (fLuminosity * 0.05f));
+                        CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, o->Light, 3, 1.0f + (fLuminosity * 0.05f));
+                        CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, o->Light, 8, 1.0f + (fLuminosity * 0.05f));
 
                         if (i % 2)
                         {
-                            CreateParticle(BITMAP_SPARK, vPos, o->Angle, o->Light, 13);
+                            CreateParticleFpsChecked(BITMAP_SPARK, vPos, o->Angle, o->Light, 13);
                         }
 
                         if (i % 2)
@@ -17623,8 +17631,8 @@ void MoveEffect(OBJECT* o, int iIndex)
                 pModel->TransformByObjectBone(_StartPos, o->Owner, 36);
                 pModel->TransformByObjectBone(_EndPos, o->Owner, 28);
 
-                CreateJoint(BITMAP_LAVA, _StartPos, _StartPos, o->Owner->Angle, i, o->Owner, 20.0f);
-                CreateJoint(BITMAP_LAVA, _EndPos, _EndPos, o->Owner->Angle, 7 + i, o->Owner, 20.0f);
+                CreateJointFpsChecked(BITMAP_LAVA, _StartPos, _StartPos, o->Owner->Angle, i, o->Owner, 20.0f);
+                CreateJointFpsChecked(BITMAP_LAVA, _EndPos, _EndPos, o->Owner->Angle, 7 + i, o->Owner, 20.0f);
                 fAnimationFrame += fSpeedPerFrame;
             }
         }
@@ -17635,14 +17643,14 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->Owner->AnimationFrame > 5 && o->LifeTime > 100)
         {
             Vector(1.0f, 0.12f, 0.0f, vLight);
-            CreateEffect(MODEL_SHOCKWAVE01, o->Owner->Position, vAngle, vLight, 1, o->Owner, -1, 0, 0, 0, 1.0f);
+            CreateEffectFpsChecked(MODEL_SHOCKWAVE01, o->Owner->Position, vAngle, vLight, 1, o->Owner, -1, 0, 0, 0, 1.0f);
             o->LifeTime = 95;
         }
 
         if (o->Owner->AnimationFrame > 5 && o->LifeTime > 80)
         {
             Vector(1.0f, 0.1f, 0.0f, vLight);
-            CreateEffect(MODEL_SHOCKWAVE_GROUND01, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.0f);
+            CreateEffectFpsChecked(MODEL_SHOCKWAVE_GROUND01, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.0f);
             o->LifeTime = 80;
         }
 
@@ -17656,13 +17664,13 @@ void MoveEffect(OBJECT* o, int iIndex)
             switch (rand() % 3)
             {
             case 0:
-                CreateParticle(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
                 break;
             case 1:
-                CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 4, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 4, fScale);
                 break;
             case 2:
-                CreateParticle(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 0, fScale);
                 break;
             }
 
@@ -17681,12 +17689,12 @@ void MoveEffect(OBJECT* o, int iIndex)
                 VectorRotate(PosL, Matrix, outPos);
                 VectorAdd(vPos, outPos, vPos);
                 vPos[2] = tempPos[2];
-                CreateParticle(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 5, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 5, fScale);
 
                 vec3_t TempPos;
                 VectorCopy(vPos, TempPos);
                 TempPos[2] = 250.0f;
-                CreateParticle(BITMAP_SPARK, TempPos, o->Angle, o->Light, 12, 1.5f);
+                CreateParticleFpsChecked(BITMAP_SPARK, TempPos, o->Angle, o->Light, 12, 1.5f);
             }
         }
     }
@@ -17702,14 +17710,14 @@ void MoveEffect(OBJECT* o, int iIndex)
             vec3_t temp;
             VectorCopy(o->Position, temp);
             temp[2] = 250.0f;
-            CreateParticle(BITMAP_SPARK, temp, o->Angle, o->Light, 12, 1.5f);
+            CreateParticleFpsChecked(BITMAP_SPARK, temp, o->Angle, o->Light, 12, 1.5f);
         }
 
         if (o->AnimationFrame > 1 && o->LifeTime > 80)
         {
             vec3_t vLight;
             Vector(1.0f, 1.0f, 1.0f, vLight);
-            CreateEffect(BITMAP_LIGHT_RED, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 15.0f);
+            CreateEffectFpsChecked(BITMAP_LIGHT_RED, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 15.0f);
             o->LifeTime = 80;
         }
         o->Alpha *= pow(0.96f, FPS_ANIMATION_FACTOR);
@@ -17742,13 +17750,13 @@ void MoveEffect(OBJECT* o, int iIndex)
             switch (rand() % 3)
             {
             case 0:
-                CreateParticle(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, fScale);
                 break;
             case 1:
-                CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, fScale);
                 break;
             case 2:
-                CreateParticle(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, fScale);
                 break;
             }
         }
@@ -17771,13 +17779,13 @@ void MoveEffect(OBJECT* o, int iIndex)
             switch (rand() % 3)
             {
             case 0:
-                CreateParticle(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 6, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 6, fScale);
                 break;
             case 1:
-                CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 9, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 9, fScale);
                 break;
             case 2:
-                CreateParticle(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 6, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 6, fScale);
                 break;
             }
 
@@ -17785,12 +17793,12 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    CreateEffect(MODEL_VOLCANO_STONE, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 1.0f);
+                    CreateEffectFpsChecked(MODEL_VOLCANO_STONE, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 1.0f);
                 }
 
                 VectorCopy(o->Position, vPos);
                 Vector(1.0f, 0.1f, 0.0f, vLight);
-                CreateEffect(MODEL_SHOCKWAVE_GROUND01, vPos, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.0f);
+                CreateEffectFpsChecked(MODEL_SHOCKWAVE_GROUND01, vPos, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.0f);
                 Vector(1.0f, 1.0f, 1.0f, vLight);
             }
             if (o->LifeTime < 20)
@@ -17818,7 +17826,7 @@ void MoveEffect(OBJECT* o, int iIndex)
 
             if ((int)o->LifeTime == 2)
             {
-                CreateEffect(MODEL_VOLCANO_OF_MONK, o->Position, o->Angle, o->Light, 1, o, -1, 0, 0, 0, 1.0f);
+                CreateEffectFpsChecked(MODEL_VOLCANO_OF_MONK, o->Position, o->Angle, o->Light, 1, o, -1, 0, 0, 0, 1.0f);
                 o->LifeTime = 0;
                 o->Live = false;
             }
@@ -17858,13 +17866,13 @@ void MoveEffect(OBJECT* o, int iIndex)
         switch (rand() % 3)
         {
         case 0:
-            CreateParticle(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, fScale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, fScale);
             break;
         case 1:
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, fScale);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, fScale);
             break;
         case 2:
-            CreateParticle(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, fScale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, fScale);
             break;
         }
     }

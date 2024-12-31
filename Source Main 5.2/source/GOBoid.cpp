@@ -291,7 +291,7 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                         bWave = true;
                     }
 
-                    if (bWave)
+                    if (bWave && rand_fps_check(1))
                     {
                         Vector(Position[0], Position[1], Position[2], p);
                         CreateEffect(BITMAP_SHOCK_WAVE, p, o->Angle, Light, 1);
@@ -609,11 +609,14 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 FlyRange = 150.f;
                 vec3_t Position, Light;
                 Vector(0.4f, 0.4f, 0.4f, Light);
-                for (j = 0; j < 4; j++)
+                if (rand_fps_check(1))
                 {
-                    Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
-                    VectorAdd(Position, o->Position, Position);
-                    CreateParticle(BITMAP_SPARK, Position, o->Angle, Light, 1);
+                    for (j = 0; j < 4; j++)
+                    {
+                        Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
+                        VectorAdd(Position, o->Position, Position);
+                        CreateParticle(BITMAP_SPARK, Position, o->Angle, Light, 1);
+                    }
                 }
             }
         case MODEL_IMP:
@@ -1582,7 +1585,7 @@ void RenderBoids(bool bAfterCharacter)
                         Vector(1.f, 0.f, 0.f, Light);
                         CreateSprite(BITMAP_LIGHTNING + 1, Position, 1.f, Light, o);
                         Vector(1.f, 1.f, 1.f, Light);
-                        CreateParticle(BITMAP_FIRE, Position, o->Angle, Light);
+                        CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, Light);
                     }
                     break;
 
@@ -1597,7 +1600,7 @@ void RenderBoids(bool bAfterCharacter)
 
                 case MODEL_MAP_TORNADO:
                 {
-                    CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, o->Light, 18, o->Scale, o);
+                    CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, o->Light, 18, o->Scale, o);
                 }
                 break;
 
@@ -1762,7 +1765,7 @@ void MoveFishs()
                     o->Gravity = 9;
                     o->LifeTime = 100;
                     VectorCopy(o->Position, o->EyeLeft);
-                    CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 4, o, 30.f);
+                    CreateJointFpsChecked(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 4, o, 30.f);
                     break;
                 case WD_34CRYWOLF_1ST:
                     if (Hero->SafeZone != true)
@@ -1773,7 +1776,7 @@ void MoveFishs()
                         VectorCopy(o->Position, o->EyeLeft);
                         o->Gravity = 1;
                         o->LifeTime = 100;
-                        CreateJoint(BITMAP_SCOLPION_TAIL, o->Position, o->Position, o->Angle, 0, o, 30.f);
+                        CreateJointFpsChecked(BITMAP_SCOLPION_TAIL, o->Position, o->Position, o->Angle, 0, o, 30.f);
                     }
                     else
                         o->Live = false;
@@ -1816,7 +1819,7 @@ void MoveFishs()
                     o->Velocity = 2.5f / o->Scale;
                     o->Gravity = 9;
                     o->LifeTime = 70;
-                    CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 8, o, 50.f);
+                    CreateJointFpsChecked(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 8, o, 50.f);
                 }
             }
         }

@@ -1146,8 +1146,8 @@ bool NewRenderCharacterScene(HDC hDC)
 
         float Rotation = (int)WorldTime % 3600 / (float)10.f;
         Vector(0.15f, 0.15f, 0.15f, o->Light);
-        CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 4);
-        CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 5);
+        CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 4);
+        CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 5);
 
         g_csMapServer.SetHeroID((wchar_t*)CharactersClient[SelectedHero].ID);
     }

@@ -117,13 +117,13 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
         switch (rand() % 3)
         {
         case 0:
-            CreateParticle(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         case 1:
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
             break;
         case 2:
-            CreateParticle(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         }
     }
@@ -142,7 +142,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
             vec3_t vLight;
             Vector(0.04f, 0.04f, 0.04f, vLight);
             for (int i = 0; i < 20; ++i)
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, vLight, 0, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, vLight, 0, o->Scale, o);
         }
         return true;
     case 116:
@@ -160,7 +160,7 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
             vec3_t vLight;
             Vector(0.27f, 0.2f, 0.1f, vLight);
             for (int i = 0; i < 4; ++i)
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, vLight, 0, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, vLight, 0, o->Scale, o);
         }
         return true;
     }
@@ -454,7 +454,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
         {
             vec3_t Position;
             Vector(o->Position[0] + rand() % 200 - 100, o->Position[1] + rand() % 200 - 100, o->Position[2], Position);
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
         }
         return true;
     case MODEL_CONDRA:
@@ -513,7 +513,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (o->AnimationFrame >= 12.5f && o->AnimationFrame < 13.0f)
+            if (o->AnimationFrame >= 12.5f && o->AnimationFrame < 13.0f && rand_fps_check(1))
             {
                 vec3_t Light;
                 vec3_t EndPos, EndRelative;
@@ -728,8 +728,9 @@ bool CGMKarutan1::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     switch (o->Type)
     {
     case MODEL_CRYPOS:
-        if (o->CurrentAction == MONSTER01_ATTACK2 &&
-            (o->AnimationFrame >= 3.5f && o->AnimationFrame <= 4.5f))
+        if (o->CurrentAction == MONSTER01_ATTACK2
+            && (o->AnimationFrame >= 3.5f && o->AnimationFrame <= 4.5f)
+            && rand_fps_check(1))
         {
             CHARACTER* tc = &CharactersClient[c->TargetCharacter];
             OBJECT* to = &tc->Object;
