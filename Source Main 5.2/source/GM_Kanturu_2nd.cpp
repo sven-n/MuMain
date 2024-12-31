@@ -283,8 +283,10 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     break;
     case MODEL_TWIN_TAIL:
     {
-        if (o->CurrentAction == MONSTER01_ATTACK2 &&
-            (o->AnimationFrame >= 5.5f && o->AnimationFrame <= 6.5f))
+        if (o->CurrentAction == MONSTER01_ATTACK2
+            && o->AnimationFrame >= 5.5f
+            && o->AnimationFrame <= 6.5f
+            && rand_fps_check(1))
         {
             CHARACTER* tc = &CharactersClient[c->TargetCharacter];
             OBJECT* to = &tc->Object;
@@ -354,7 +356,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
         Vector(0.0f, 0.0f, 0.0f, vPos);
         Vector(fLumi, fLumi, fLumi, Light);
         b->TransformPosition(BoneTransform[4], vPos, Position, false);
-        CreateParticle(BITMAP_ENERGY, Position, o->Angle, Light, 0, 1.5f);
+        CreateParticleFpsChecked(BITMAP_ENERGY, Position, o->Angle, Light, 0, 1.5f);
         CreateSprite(BITMAP_SPARK + 1, Position, 10.0f, Light, o);
         vec3_t StartPos, EndPos;
         VectorCopy(Position, StartPos);
@@ -392,7 +394,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
             Vector(0.06f, 0.06f, 0.06f, Light);
             for (int i = 0; i < 20; ++i)
             {
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 1, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 1, o->Scale, o);
             }
         }
     }
@@ -405,14 +407,14 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
             Vector(0.06f, 0.06f, 0.06f, Light);
             for (int i = 0; i < 20; ++i)
             {
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 2, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 2, o->Scale, o);
             }
         }
     }
     break;
     case 47:
     {
-        if (o->HiddenMesh != -2)
+        if (o->HiddenMesh != -2 && rand_fps_check(1))
         {
             vec3_t  Light;
             Vector(0.2f, 0.2f, 0.2f, Light);
@@ -435,7 +437,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
     break;
     case 49:
     {
-        if (o->HiddenMesh != -2)
+        if (o->HiddenMesh != -2 && rand_fps_check(1))
         {
             vec3_t  Light;
             Vector(0.0f, 0.01f, 0.03f, Light);
@@ -820,12 +822,12 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
             CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 5, 0.8f, o);
         }
 
-        if (o->CurrentAction == MONSTER01_ATTACK1 && (o->AnimationFrame >= 3.f && o->AnimationFrame <= 4.f))
+        if (o->CurrentAction == MONSTER01_ATTACK1 && (o->AnimationFrame >= 3.f && o->AnimationFrame <= 4.f) && rand_fps_check(1))
         {
             Vector(0.6f, 0.6f, 1.0f, vLight);
             CreateEffect(MODEL_STORM, o->Position, o->Angle, vLight, 0);
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK2 && (o->AnimationFrame >= 3.f && o->AnimationFrame <= 4.f))
+        else if (o->CurrentAction == MONSTER01_ATTACK2 && (o->AnimationFrame >= 3.f && o->AnimationFrame <= 4.f) && rand_fps_check(1))
         {
             vec3_t vPos;
             VectorCopy(o->Position, vPos);
@@ -848,9 +850,9 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
             o->BlendMesh = -2;
             Vector(0.5f, 0.5f, 0.5f, vLight);
             BoneManager::GetBonePosition(o, L"PRSona_Tail", vPos);
-            CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 6, 0.8f, o);
+            CreateParticleFpsChecked(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 6, 0.8f, o);
             BoneManager::GetBonePosition(o, L"PRSona_Tail1", vPos);
-            CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 6, 0.8f, o);
+            CreateParticleFpsChecked(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 6, 0.8f, o);
 
             for (int i = 0; i < 5; i++)
             {
@@ -859,7 +861,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
                 Vector(0.f, 0.f, 0.f, p);
                 Vector(0.5f, 0.5f, 0.5f, vLight);
                 b->TransformPosition(o->BoneTransform[j], p, vPos, true);
-                CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 6, 0.8f, o);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_3, vPos, o->Angle, vLight, 6, 0.8f, o);
             }
         }
 
@@ -959,7 +961,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         {
             o->BlendMesh = -2;
             o->m_bRenderShadow = false;
-            if (o->AnimationFrame <= 3.0f)
+            if (o->AnimationFrame <= 3.0f && rand_fps_check(1))
             {
                 Vector(0.1f, 1.0f, 0.2f, vLight);
                 for (int i = 0; i < 5; i++)
@@ -1062,7 +1064,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
                 CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 0);
             }
         }
-        else if (o->CurrentAction == MONSTER01_DIE)
+        else if (o->CurrentAction == MONSTER01_DIE && rand_fps_check(1))
         {
             vec3_t vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
@@ -1389,6 +1391,7 @@ CHARACTER* CTrapCanon::Create_TrapCanon(int iPosX, int iPosY, int iKey)
     pCha = CreateCharacter(iKey, MODEL_TRAP_CANON, iPosX, iPosY);
     pCha->Object.Scale = 1.0f;
     pCha->AttackTime = 0;
+    pCha->LastAttackEffectTime = -1;
 
     return pCha;
 }
@@ -1402,7 +1405,7 @@ void CTrapCanon::Render_Object(OBJECT* o, BMD* b)
 
 void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if ((int)c->AttackTime == 0)
+    if (c->AttackTime < 1)
     {
         float fLumi;
         vec3_t vPos, vLight;
@@ -1417,12 +1420,14 @@ void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
         Vector(2.0f + (rand() % 10) * 0.03f, 0.4f + (rand() % 10) * 0.03f, 0.4f + (rand() % 10) * 0.03f, vLight);
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o, -(WorldTime * 0.1f));
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o, (WorldTime * 0.12f));
+
+        c->SetLastAttackEffectTime();
     }
 }
 
 void CTrapCanon::Render_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if ((int)c->AttackTime == 1)
+    if (c->CheckAttackTime(1))
     {
         CHARACTER* tc = &CharactersClient[c->TargetCharacter];
         OBJECT* to = &tc->Object;
@@ -1431,5 +1436,6 @@ void CTrapCanon::Render_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)
         VectorCopy(to->Position, vPos2);
         vPos[2] += 85.f;
         CreateJoint(BITMAP_JOINT_ENERGY, vPos, vPos2, to->Angle, 43, to, 30.0f);
+        c->SetLastAttackEffectTime();
     }
 }

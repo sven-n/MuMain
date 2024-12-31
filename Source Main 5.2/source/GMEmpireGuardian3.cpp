@@ -402,8 +402,8 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 Vector(0.8f, 0.4f, 0.1f, o->Light);
 
                 b->TransformByObjectBone(vPos, o, 15);
-                CreateParticle(BITMAP_CLUD64, vPos, o->Angle, o->Light, 3, 0.2f);
-                CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, o->Light, 13, 1.0f);
+                CreateParticleFpsChecked(BITMAP_CLUD64, vPos, o->Angle, o->Light, 3, 0.2f);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_3, vPos, o->Angle, o->Light, 13, 1.0f);
             }
         }
         break;
@@ -415,13 +415,13 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             {
                 b->TransformByObjectBone(vPos, o, 32);
                 vPos[2] += 25.0f;
-                CreateParticle(BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f);
+                CreateParticleFpsChecked(BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f);
             }
             if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)
             {
                 b->TransformByObjectBone(vPos, o, 19);
                 vPos[2] += 25.0f;
-                CreateParticle(BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f);
+                CreateParticleFpsChecked(BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f);
             }
         }
         break;
@@ -453,28 +453,28 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             float Scale = 0.3f;
             b->TransformByObjectBone(vPos, o, 30);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 17);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 2);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 6);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 98);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 91);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 2);
-            CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
 
             b->TransformByObjectBone(vPos, o, 3);
-            CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
         }
         break;
         } //switch end
@@ -621,25 +621,25 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[24], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+                            CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[25], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+                            CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[43], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+                            CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[44], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+                            CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
                             vec3_t	vLight__;
                             Vector(0.9f, 0.9f, 0.9f, vLight__);
@@ -648,25 +648,25 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[24], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
+                            CreateParticleFpsChecked(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[25], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
+                            CreateParticleFpsChecked(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[43], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
+                            CreateParticleFpsChecked(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[44], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
+                            CreateParticleFpsChecked(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
                         }
                     } // 검기
                 }
@@ -773,9 +773,9 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             for (int i = 0; i < 4; ++i)
             {
                 Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
-                CreateJoint(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
+                CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
-            CreateParticle(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
+            CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
         }
         else if (o->AnimationFrame > 15.4f && o->AnimationFrame < 16.5f)
         {
@@ -783,9 +783,9 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             for (int i = 0; i < 4; ++i)
             {
                 Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2], Angle);
-                CreateJoint(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
+                CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
-            CreateParticle(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
+            CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
         }
     }
     return true;
@@ -815,8 +815,8 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
         for (int i = 2; i <= 7; i++)
         {
             b->TransformPosition(BoneTransform[i], vRelativePos, vPos);
-            CreateParticle(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight1, 4, o->Scale * 0.6f);
-            CreateParticle(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight2, 4, o->Scale * 0.3f);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight1, 4, o->Scale * 0.6f);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight2, 4, o->Scale * 0.3f);
         }
     }
     return true;
@@ -829,9 +829,9 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             for (int i = 0; i < 4; ++i)
             {
                 Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
-                CreateJoint(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
+                CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
-            CreateParticle(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
+            CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
         }
     }
     return true;
@@ -852,7 +852,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             Vector(0.04f, 0.03f, 0.02f, Light);
             for (int i = 0; i < 3; ++i)
             {
-                CreateParticle(BITMAP_CLOUD, Position, o->Angle, Light, 22, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, Position, o->Angle, Light, 22, o->Scale, o);
             }
         }
     }
@@ -870,13 +870,13 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
         switch (rand() % 3)
         {
         case 0:
-            CreateParticle(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         case 1:
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
             break;
         case 2:
-            CreateParticle(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         }
     }
@@ -892,14 +892,14 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 82:
     {
-        CreateParticle(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 9, o->Scale);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 9, o->Scale);
     }
     return true;
 
     case 83:
     {
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 14, o->Scale);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 14, o->Scale);
     }
     return true;
 
@@ -925,7 +925,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             int iRand = rand() % 4 + 4;
             for (int i = 0; i < iRand; ++i)
             {
-                CreateEffect(BITMAP_FLAME, o->Position, o->Angle, vLight, 6, NULL, -1, 0, o->Scale);
+                CreateEffectFpsChecked(BITMAP_FLAME, o->Position, o->Angle, vLight, 6, NULL, -1, 0, o->Scale);
             }
         }
     }
@@ -1087,8 +1087,8 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 if (i % 5 == 0)
                 {
                     b->TransformByObjectBone(vPosRage, o, i);
-                    CreateParticle(BITMAP_SMOKE, vPosRage, o->Angle, vLightRage, 50, 1.0f);
-                    CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, vPosRage, o->Angle, vLightRage, 50, 1.0f);
+                    CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f);
                 }
             }
         }

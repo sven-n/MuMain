@@ -310,11 +310,11 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         }
         break;
     case 58:
-        CreateParticle(BITMAP_WATERFALL_5, pObject->Position, pObject->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_5, pObject->Position, pObject->Angle, Light, 0);
         break;
     case 59:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 8, pObject->Scale);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 8, pObject->Scale);
         break;
     case 60:
         if (pObject->HiddenMesh != -2)
@@ -1179,7 +1179,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
         {
             Vector(0, (rand() % 300 - 150) * 0.1f, (rand() % 200 - 100) * 0.1f, vRelative);
             pModel->TransformPosition(pObject->BoneTransform[30], vRelative, vPos, true);
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, pObject->Light, 0, 1, pObject);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, pObject->Light, 0, 1, pObject);
         }
         break;
     case MODEL_TOTEM_GOLEM:
@@ -1187,7 +1187,7 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
         {
             vec3_t Position;
             Vector(pObject->Position[0] + rand() % 200 - 100, pObject->Position[1] + rand() % 200 - 100, pObject->Position[2], Position);
-            CreateParticle(BITMAP_SMOKE + 1, Position, pObject->Angle, pObject->Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, pObject->Angle, pObject->Light);
         }
         if (pObject->CurrentAction == MONSTER01_DIE)
         {

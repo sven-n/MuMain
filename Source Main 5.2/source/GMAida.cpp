@@ -173,7 +173,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
         break;
     case 57:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 4, pObject->Scale);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 4, pObject->Scale);
         break;
     case 58:
         Vector(1.f, 1.f, 1.f, Light);
@@ -189,14 +189,13 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
             Vector(0.01f, 0.03f, 0.05f, Light);
             for (int i = 0; i < 20; ++i)
             {
-                CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
+                CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
             }
         }
         break;
     case 60:
     {
-        int time = timeGetTime() % 1024;
-        if (time >= 0 && time < 10) {
+        if (rand_fps_check(25)) {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(MODEL_BUTTERFLY01, pObject->Position, pObject->Angle, Light, 3, pObject);
@@ -211,7 +210,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
             Vector(0.05f, 0.05f, 0.05f, Light);
             for (int i = 0; i < 20; ++i)
             {
-                CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
+                CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
             }
         }
         break;
@@ -222,7 +221,7 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
             Vector(0.05f, 0.02f, 0.02f, Light);
             for (int i = 0; i < 20; ++i)
             {
-                CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
+                CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
             }
         }
         break;
@@ -240,12 +239,12 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     break;
     case	67:
         Vector(0.3f, 0.3f, 0.3f, pObject->Light);
-        CreateParticle(BITMAP_FLAME, pObject->Position, pObject->Angle, pObject->Light, 7, pObject->Scale);
+        CreateParticleFpsChecked(BITMAP_FLAME, pObject->Position, pObject->Angle, pObject->Light, 7, pObject->Scale);
         break;
     case	70:
     {
         int time = timeGetTime() % 1024;
-        if (rand() % 5 == 1 && (time >= 0 && time < 30))
+        if (rand_fps_check(5) && (time >= 0 && time < 30))
         {
             Vector(0.1f, 0.1f, 0.1f, Light);
             CreateEffect(MODEL_GHOST, pObject->Position, pObject->Angle, Light, 0, pObject, -1, 0, pObject->Scale);
@@ -722,7 +721,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         Vector(0.7f, 0.5f, 0.7f, Light);
         vec3_t Relative = { 0.0f, 0.0f, -65.0f };
         BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
-        CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 4, 4.0f);
+        CreateParticleFpsChecked(BITMAP_LIGHT + 1, Position, Angle, Light, 4, 4.0f);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -760,9 +759,9 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
                 BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
 
                 Vector(0.5f, 0.2f, 0.5f, Light);
-                CreateParticle(BITMAP_SMOKE, Position, Angle, Light, 27, 2.0f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, Angle, Light, 27, 2.0f);
                 Vector(1.0f, 1.0f, 1.0f, Light);
-                CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 2, 1.0f);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 1, Position, Angle, Light, 2, 1.0f);
             }
             if (pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK1)
             {
@@ -770,7 +769,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
                 vec3_t Relative = { 70.0f, 0.0f, 0.0f };
                 BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
                 Vector(1.0f, 1.0f, 1.0f, Light);
-                CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 3, 1.3f);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 1, Position, Angle, Light, 3, 1.3f);
             }
             if (pCharacter->TargetCharacter >= 0 && pCharacter->TargetCharacter < MAX_CHARACTERS_CLIENT)
             {
@@ -783,11 +782,11 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
                 if (pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK1)
                 {
-                    CreateParticle(BITMAP_LIGHT + 1, vTemp, Angle, Light, 3, 1.3f);
+                    CreateParticleFpsChecked(BITMAP_LIGHT + 1, vTemp, Angle, Light, 3, 1.3f);
                 }
                 if (pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK2)
                 {
-                    CreateJoint(BITMAP_JOINT_THUNDER, to->Position, vTemp, pObject->Angle, 16);
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, to->Position, vTemp, pObject->Angle, 16);
                 }
             }
         }
@@ -802,11 +801,11 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         Vector(1.0f, 1.0f, 1.0f, Light);
 
         BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Position);
-        CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
         BoneManager::GetBonePosition(pObject, L"Monster101_R_Arm", Position);
-        CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
         BoneManager::GetBonePosition(pObject, L"Monster101_Head", Position);
-        CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -844,13 +843,13 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
                 Vector(0.0f, 45.0f, 45.0f, Angle);
                 vec3_t Relative = { 30.0f, 0.0f, 0.0f };
                 BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Relative, Position);
-                CreateParticle(BITMAP_SMOKE, Position, Angle, Light, 25);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, Angle, Light, 25);
 
                 if (pObject->AnimationFrame >= 5.0f && pObject->AnimationFrame <= 5.5f)
                 {
                     Vector(5.0f, 5.0f, 5.0f, Light);
                     BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Relative, Position);
-                    CreateParticle(BITMAP_SHOCK_WAVE, Position, Angle, Light, 3, 0.5f);
+                    CreateParticleFpsChecked(BITMAP_SHOCK_WAVE, Position, Angle, Light, 3, 0.5f);
                 }
             }
 
@@ -863,7 +862,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
                 VectorCopy(to->Position, vTemp);
                 vTemp[2] += 100.0f;
 
-                CreateJoint(BITMAP_JOINT_ENERGY, vTemp, pObject->Position, to->Angle, 16, pObject, 20.0f);
+                CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vTemp, pObject->Position, to->Angle, 16, pObject, 20.0f);
             }
         }
 
@@ -881,7 +880,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         BoneManager::GetBonePosition(pObject, L"Monster102_Head", Relative, Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 3.0f, Light, pObject);
-        CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 7);
+        CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 7);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -988,13 +987,13 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             Vector(0.4f, Random_Light, 0.5f, Light);
             BoneManager::GetBonePosition(pObject, Bone_Name, Position);
             CreateSprite(BITMAP_LIGHT + 1, Position, 0.4f, Light, pObject);
-            CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 6);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 6);
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Position, Relative = { 0.0f, -100.0f, 20.0f }, Light = { 0.5f, 0.7f, 0.5f };
             BoneManager::GetBonePosition(pObject, L"Monster104_Footsteps", Relative, Position);
-            CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 26);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, pObject->Angle, Light, 26);
         }
 
         if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
@@ -1061,23 +1060,23 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             BoneManager::GetBonePosition(pObject, L"Monster105_L_Hand", Position);
-            CreateParticle(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 5.0f);
+            CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 5.0f);
 
             BoneManager::GetBonePosition(pObject, L"Monster105_R_Hand", Position);
-            CreateParticle(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 5.0f);
+            CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 5.0f);
         }
         else
         {
             BoneManager::GetBonePosition(pObject, L"Monster105_L_Hand", Position);
-            CreateParticle(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 2.5f);
+            CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 2.5f);
 
             Vector(0.0f, 0.0f, -10.0f, Relative);
             BoneManager::GetBonePosition(pObject, L"Monster105_R_Hand", Relative, Position);
-            CreateParticle(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 2.1f);
+            CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, Angle, Light, 6, 2.1f);
         }
         if ((pObject->AnimationFrame >= 9.0f && pObject->AnimationFrame <= 10.0f) && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
-            CreateEffect(BITMAP_BOSS_LASER, Position, pObject->Angle, Light, 1);
+            CreateEffectFpsChecked(BITMAP_BOSS_LASER, Position, pObject->Angle, Light, 1);
         }
 
         if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
@@ -1127,7 +1126,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
         BoneManager::GetBonePosition(pObject, L"Monster102_Head", Relative, Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 3.0f, Light, pObject);
-        CreateParticle(BITMAP_SPARK + 1, Position, Angle, Light, 7);
+        CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 7);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -1167,11 +1166,11 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         Vector(1.0f, 1.0f, 1.0f, Light);
 
         BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Position);
-        CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
         BoneManager::GetBonePosition(pObject, L"Monster101_R_Arm", Position);
-        CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
         BoneManager::GetBonePosition(pObject, L"Monster101_Head", Position);
-        CreateParticle(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -1209,13 +1208,13 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
                 Vector(0.0f, 45.0f, 45.0f, Angle);
                 vec3_t Relative = { 30.0f, 0.0f, 0.0f };
                 BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Relative, Position);
-                CreateParticle(BITMAP_SMOKE, Position, Angle, Light, 25);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, Angle, Light, 25);
 
                 if (pObject->AnimationFrame >= 5.0f && pObject->AnimationFrame <= 5.5f)
                 {
                     Vector(5.0f, 5.0f, 5.0f, Light);
                     BoneManager::GetBonePosition(pObject, L"Monster101_L_Arm", Relative, Position);
-                    CreateParticle(BITMAP_SHOCK_WAVE, Position, Angle, Light, 3, 0.5f);
+                    CreateParticleFpsChecked(BITMAP_SHOCK_WAVE, Position, Angle, Light, 3, 0.5f);
                 }
             }
 
@@ -1228,7 +1227,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
                 VectorCopy(to->Position, vTemp);
                 vTemp[2] += 100.0f;
 
-                CreateJoint(BITMAP_JOINT_ENERGY, vTemp, pObject->Position, to->Angle, 16, pObject, 20.0f);
+                CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vTemp, pObject->Position, to->Angle, 16, pObject, 20.0f);
             }
         }
 
@@ -1256,7 +1255,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         Vector(0.7f, 0.5f, 0.7f, Light);
         vec3_t Relative = { 0.0f, 0.0f, -65.0f };
         BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
-        CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 4, 4.0f);
+        CreateParticleFpsChecked(BITMAP_LIGHT + 1, Position, Angle, Light, 4, 4.0f);
 
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
@@ -1294,9 +1293,9 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
                 BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
 
                 Vector(0.5f, 0.2f, 0.5f, Light);
-                CreateParticle(BITMAP_SMOKE, Position, Angle, Light, 27, 2.0f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, Angle, Light, 27, 2.0f);
                 Vector(1.0f, 1.0f, 1.0f, Light);
-                CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 2, 1.0f);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 1, Position, Angle, Light, 2, 1.0f);
             }
             if (pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK1)
             {
@@ -1304,7 +1303,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
                 vec3_t Relative = { 70.0f, 0.0f, 0.0f };
                 BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
                 Vector(1.0f, 1.0f, 1.0f, Light);
-                CreateParticle(BITMAP_LIGHT + 1, Position, Angle, Light, 3, 1.3f);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 1, Position, Angle, Light, 3, 1.3f);
             }
             if (pCharacter->TargetCharacter >= 0 && pCharacter->TargetCharacter < MAX_CHARACTERS_CLIENT)
             {
@@ -1317,11 +1316,11 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
 
                 if (pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK1)
                 {
-                    CreateParticle(BITMAP_LIGHT + 1, vTemp, Angle, Light, 3, 1.3f);
+                    CreateParticleFpsChecked(BITMAP_LIGHT + 1, vTemp, Angle, Light, 3, 1.3f);
                 }
                 if (pObject->AnimationFrame >= 6.0f && pObject->CurrentAction == MONSTER01_ATTACK2)
                 {
-                    CreateJoint(BITMAP_JOINT_THUNDER, to->Position, vTemp, pObject->Angle, 16);
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, to->Position, vTemp, pObject->Angle, 16);
                 }
             }
         }
@@ -1465,21 +1464,23 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
     case MONSTER_WITCH_QUEEN:
     {
-        if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
+        if (pCharacter->CheckAttackTime(10) && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(BITMAP_JOINT_FORCE, pObject->Position, pObject->Angle, Light, 1);
+            pCharacter->SetLastAttackEffectTime();
         }
     }
     return true;
     case MONSTER_DEATH_TREE:
     {
-        if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
+        if (pCharacter->CheckAttackTime(10) && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(MODEL_TREE_ATTACK, pObject->Position, pObject->Angle, Light);
+            pCharacter->SetLastAttackEffectTime();
         }
     }
     return true;
@@ -1487,22 +1488,24 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
         for (int i = 0; i < 5; i++)
         {
-            if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK1)
+            if (pCharacter->CheckAttackTime(10) && pObject->CurrentAction == MONSTER01_ATTACK1)
             {
                 vec3_t Light;
                 Vector(1.f, 1.f, 1.f, Light);
                 CreateEffect(MODEL_STORM, pObject->Position, pObject->Angle, Light, 3 + i);
+                pCharacter->SetLastAttackEffectTime();
             }
         }
     }
     return true;
     case MONSTER_BLOODY_WITCH_QUEEN:
     {
-        if ((int)pCharacter->AttackTime == 10 && pObject->CurrentAction == MONSTER01_ATTACK2)
+        if (pCharacter->CheckAttackTime(10) && pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Light;
             Vector(1.f, 1.f, 1.f, Light);
             CreateEffect(BITMAP_JOINT_FORCE, pObject->Position, pObject->Angle, Light, 1);
+            pCharacter->SetLastAttackEffectTime();
         }
     }
     return true;

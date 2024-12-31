@@ -453,6 +453,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
 
                 int randValue = rand() % 2;
                 PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + randValue));
+                o->LifeTime = 9.9f;
             }
 
             if (o->LifeTime < 5)
@@ -524,7 +525,7 @@ void RenderTerrainVisual(int xi, int yi)
         Position[0] = (xi * TERRAIN_SCALE) + (rand() % 30 - 15.f);
         Position[1] = (yi * TERRAIN_SCALE) + (rand() % 30 - 15.f);
         Position[2] = Hero->Object.Position[2];
-        CreateParticle(BITMAP_SMOKE + 4, Position, Angle, Light, 0, 1.5f);
+        CreateParticleFpsChecked(BITMAP_SMOKE + 4, Position, Angle, Light, 0, 1.5f);
 
         if (rand_fps_check(5))
         {

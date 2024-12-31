@@ -279,7 +279,7 @@ void CSummonSystem::CreateEquipEffect_WristRing(CHARACTER* pCharacter, int iItem
     {
         if (rand() % 4)
         {
-            CreateParticle(BITMAP_SPARK + 1, vPos, pObject->Angle, vLight, 23, 0.5f, pObject);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, pObject->Angle, vLight, 23, 0.5f, pObject);
         }
     }
 }

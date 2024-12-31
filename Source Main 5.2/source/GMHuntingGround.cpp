@@ -407,7 +407,8 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             pObject->Live = false;
             PlayBuffer(SOUND_BC_FIREGOLEM_DIE);
         }
-        else {
+        else if (rand_fps_check(1))
+        {
             Vector(5.f, 10.f, 5.f, Relative);
             BoneManager::GetBonePosition(pObject, L"Monster82_LHand", Relative, Position);
             CreateParticle(BITMAP_TRUE_FIRE, Position, pObject->Angle, Light, 3, 3.4f, pObject);
@@ -514,8 +515,8 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 
             CreateSprite(BITMAP_SHINY + 1, Position, 2.5f, pObject->Light, pObject, 0.f, 1);
             CreateSprite(BITMAP_MAGIC + 1, Position, 0.8f, pObject->Light, pObject, 0.f);
-            CreateParticle(BITMAP_ENERGY, Position, pObject->Angle, Light);
-            CreateParticle(BITMAP_ENERGY, Position, pObject->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_ENERGY, Position, pObject->Angle, Light);
+            CreateParticleFpsChecked(BITMAP_ENERGY, Position, pObject->Angle, Light);
         }
         if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
             pObject->SubType = FALSE;
@@ -560,7 +561,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
                     BoneManager::GetBonePosition(pObject, L"Monster84_PoisonLeft", Position);
                 CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.025f);
             }
-            CreateEffect(MODEL_BIG_STONE_PART2, Position, Angle, Light, 3);
+            CreateEffectFpsChecked(MODEL_BIG_STONE_PART2, Position, Angle, Light, 3);
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK2 && pObject->AnimationFrame >= 3.5f && pObject->AnimationFrame <= 4.2f) {
             if (pObject->SubType == FALSE) {
@@ -570,11 +571,11 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
 
             BoneManager::GetBonePosition(pObject, L"Monster84_RightHand", Position);
             Position[2] = pObject->Position[2];
-            CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.05f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.05f);
 
             BoneManager::GetBonePosition(pObject, L"Monster84_LeftHand", Position);
             Position[2] = pObject->Position[2];
-            CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.05f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.05f);
         }
 
         if (rand_fps_check(10)) {
@@ -660,8 +661,8 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             }
             Vector(0.f, 0.f, -10.f, Relative);
             BoneManager::GetBonePosition(pObject, L"Monster87_LeftHand", Relative, Position);
-            CreateParticle(BITMAP_TRUE_FIRE, Position, pObject->Angle, Light, 3, 3.f, pObject);
-            CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 2.f);
+            CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, pObject->Angle, Light, 3, 3.f, pObject);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 2.f);
         }
         if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
             pObject->SubType = FALSE;

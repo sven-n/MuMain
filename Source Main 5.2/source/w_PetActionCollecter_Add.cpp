@@ -573,13 +573,13 @@ bool PetActionCollecterSkeleton::Effect(OBJECT* obj, CHARACTER* Owner, int targe
             switch (rand() % 3)
             {
             case 0:
-                CreateParticle(BITMAP_FIRE_HIK1_MONO, vPosition, vAngle, vLight, 4, obj->Scale, obj);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPosition, vAngle, vLight, 4, obj->Scale, obj);
                 break;
             case 1:
-                CreateParticle(BITMAP_FIRE_HIK2_MONO, vPosition, vAngle, vLight, 8, obj->Scale, obj);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK2_MONO, vPosition, vAngle, vLight, 8, obj->Scale, obj);
                 break;
             case 2:
-                CreateParticle(BITMAP_FIRE_HIK3_MONO, vPosition, vAngle, vLight, 5, obj->Scale, obj);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPosition, vAngle, vLight, 5, obj->Scale, obj);
                 break;
             }
         }

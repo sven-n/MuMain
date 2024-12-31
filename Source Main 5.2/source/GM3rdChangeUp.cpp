@@ -163,10 +163,10 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(0.2f, 0.2f, 0.2f, Light);
 
         if (pObject->HiddenMesh != -2) {
-            CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
-            CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 2, pObject->Scale, pObject);
-            CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 3, pObject->Scale, pObject);
-            CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 4, pObject->Scale, pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 2, pObject->Scale, pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 3, pObject->Scale, pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 4, pObject->Scale, pObject);
         }
         pObject->HiddenMesh = -2;
     }
@@ -183,7 +183,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         break;
     case 60:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 3, pObject->Scale);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 3, pObject->Scale);
         break;
     case 85:
         if (rand_fps_check(2))
@@ -245,7 +245,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         {
             for (int i = 0; i < 2; ++i)
             {
-                CreateEffect(BITMAP_FIRE_RED, pObject->Position, pObject->Angle, Light, 0, NULL, -1, 0, pObject->Scale);
+                CreateEffectFpsChecked(BITMAP_FIRE_RED, pObject->Position, pObject->Angle, Light, 0, NULL, -1, 0, pObject->Scale);
             }
         }
     }
@@ -474,9 +474,10 @@ bool SEASON3A::CGM3rdChangeUp::AttackEffectBalgasBarrackMonster(CHARACTER* c, OB
     switch (o->Type)
     {
     case MODEL_BALRAM:
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             CreateEffect(MODEL_ARROW_HOLY, o->Position, o->Angle, o->Light, 1, o, o->PKKey);
+            c->SetLastAttackEffectTime();
             return true;
         }
         break;
@@ -523,7 +524,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJE
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if (o->AnimationFrame >= 6.5f && o->AnimationFrame < (6.5f + fActionSpeed))
+            if (o->AnimationFrame >= 6.5f && o->AnimationFrame < (6.5f + fActionSpeed) && rand_fps_check(1))
             {
                 Vector(0.0f, 0.0f, 0.0f, EndRelative);
                 b->TransformPosition(o->BoneTransform[27], EndRelative, EndPos, true);
@@ -656,7 +657,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
                 Vector(0.f, 100.f, -150.f, EndRelative);
                 b->TransformPosition(BoneTransform[16], EndRelative, EndPos, false);
 
-                if (o->AnimationFrame > 5.0f && o->AnimationFrame < 7.0f)
+                if (o->AnimationFrame > 5.0f && o->AnimationFrame < 7.0f && rand_fps_check(1))
                 {
                     CreateParticle(BITMAP_FIRE, EndPos, o->Angle, Light);
                 }
@@ -691,7 +692,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 
             if (o->CurrentAction == MONSTER01_ATTACK2 && (o->AnimationFrame > 4.5f && o->AnimationFrame < 5.0f))
-                CreateEffect(MODEL_DARK_ELF_SKILL, o->Position, o->Angle, o->Light, 2, o);
+                CreateEffectFpsChecked(MODEL_DARK_ELF_SKILL, o->Position, o->Angle, o->Light, 2, o);
 
             VectorCopy(o->Angle, TempAngle);
             for (int i = 0; i < 10; i++) {
@@ -707,7 +708,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
             }
             VectorCopy(TempAngle, o->Angle);
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK3)
+        else if (o->CurrentAction == MONSTER01_ATTACK3 && rand_fps_check(1))
         {
             vec3_t Position, Light;
             BoneManager::GetBonePosition(o, L"Left_Hand", Position);

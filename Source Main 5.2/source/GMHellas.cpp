@@ -460,12 +460,12 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
         break;
     case 35:
         Vector(0.3f, 0.6f, 1.f, Light);
-        CreateParticle(BITMAP_LIGHT, o->Position, o->Angle, Light, 6, 1.f, o);
+        CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, o->Angle, Light, 6, 1.f, o);
         o->HiddenMesh = -2;
         break;
     case 36:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_TRUE_BLUE, o->Position, o->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_TRUE_BLUE, o->Position, o->Angle, Light, 0);
 
         o->Scale = 0.5f;
         o->HiddenMesh = -2;
@@ -473,7 +473,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
 
     case 37:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 0);
         o->Scale = 0.5f;
         PlayBuffer(SOUND_KALIMA_WATER_FALL);
         break;
@@ -488,7 +488,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
         break;
     case 39:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3 + (rand() % 2), o->Position, o->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (rand() % 2), o->Position, o->Angle, Light, 0);
         o->Scale = 0.5f;
         break;
     case 40:
@@ -578,7 +578,7 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
             Vector(2.f, 10.f, 0.f, p);
             b->TransformPosition(BoneTransform[6], p, Position, false);
             Vector(1.0f, 0.2f, 0.0f, Light);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17, 3.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17, 3.0f);
         }
         return true;
     }
@@ -696,7 +696,7 @@ void CreateMonsterSkill_ReduceDef(OBJECT* o, int AttackTime, BYTE time, float He
         for (int i = 0; i < 3; i++)
         {
             Vector(0.f, 0.f, i * 120.f, Angle);
-            CreateEffect(MODEL_SKULL, Position, Angle, Light, 1, o);
+            CreateEffectFpsChecked(MODEL_SKULL, Position, Angle, Light, 1, o);
         }
 
         PlayBuffer(SOUND_SKILL_SKULL);
@@ -720,7 +720,7 @@ void CreateMonsterSkill_Poison(OBJECT* o, int AttackTime, BYTE time)
             VectorRotate(p, Matrix, Position);
             VectorAdd(o->Position, Position, Position);
 
-            CreateEffect(MODEL_FIRE, Position, o->Angle, Light, 8, NULL, 0);
+            CreateEffectFpsChecked(MODEL_FIRE, Position, o->Angle, Light, 8, NULL, 0);
         }
 
         PlayBuffer(SOUND_GREAT_POISON);
@@ -1078,7 +1078,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case MONSTER_DEATH_ANGEL_5:
     case MONSTER_DEATH_ANGEL_6:
     case MONSTER_DEATH_ANGEL_7:
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1092,6 +1092,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             }
             Position[2] += 150.f;
             CreateParticle(BITMAP_SHINY + 4, Position, o->Angle, Light, 1, 1.f);
+            c->SetLastAttackEffectTime();
         }
         return true;
 
@@ -1156,7 +1157,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case MONSTER_BLOOD_SOLDIER_5:
     case MONSTER_BLOOD_SOLDIER_6:
     case MONSTER_BLOOD_SOLDIER_7:
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1170,6 +1171,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             }
             Position[2] += 150.f;
             CreateParticle(BITMAP_SHINY + 4, Position, o->Angle, Light, 1, 1.f);
+            c->SetLastAttackEffectTime();
         }
         return true;
 
@@ -1196,9 +1198,10 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 1, o, -1, 0, 1);
+                c->SetLastAttackEffectTime();
             }
             break;
 
@@ -1217,7 +1220,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 vec3_t Light, Position;
 
@@ -1231,11 +1234,12 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
                     CreateEffect(MODEL_FIRE, Position, o->Angle, Light, 7, NULL, 0);
                 }
+                c->SetLastAttackEffectTime();
             }
             break;
 
         case AT_SKILL_ENERGYBALL:
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 if (c->TargetCharacter >= 0 && c->TargetCharacter < MAX_CHARACTERS_CLIENT)
                 {
@@ -1253,6 +1257,8 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
                     Angle[2] += 15.f;
                     CreateJoint(BITMAP_FLARE + 1, Position, to->Position, Angle, 6, to, 30.f, 50);
                 }
+
+                c->SetLastAttackEffectTime();
             }
             break;
         }
@@ -1320,15 +1326,16 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if ((int)c->AttackTime == 7)
+            if (c->CheckAttackTime(7))
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 0);
+                c->SetLastAttackEffectTime();
             }
-            else if ((int)c->AttackTime >= 13)
+            else if (c->CheckAttackTime(13))
             {
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 0, o);
                 CreateEffect(BITMAP_FLAME, o->Position, o->Angle, o->Light, 1, o);
-                c->AttackTime = 15;
+                c->SetLastAttackEffectTime();
             }
         }
         return true;
@@ -1386,7 +1393,7 @@ void MonsterMoveWaterSmoke(OBJECT* o)
     {
         vec3_t Position;
         Vector(o->Position[0] + rand() % 200 - 100, o->Position[1] + rand() % 200 - 100, o->Position[2], Position);
-        CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
+        CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
     }
 }
 void MonsterDieWaterSmoke(OBJECT* o)
@@ -1400,7 +1407,7 @@ void MonsterDieWaterSmoke(OBJECT* o)
             Vector(o->Position[0] + (float)(rand() % 64 - 32),
                 o->Position[1] + (float)(rand() % 64 - 32),
                 o->Position[2] + (float)(rand() % 32 - 16), Position);
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light, 1);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light, 1);
         }
     }
 }
@@ -1419,10 +1426,10 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
             Position[1] = o->Position[1] + rand() % 100 - 50;
             Position[2] = o->Position[2];
 
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
-            CreateEffect(MODEL_STONE1, o->Position, o->Angle, o->Light);
-            CreateEffect(MODEL_STONE2, o->Position, o->Angle, o->Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
+            CreateEffectFpsChecked(MODEL_STONE1, o->Position, o->Angle, o->Light);
+            CreateEffectFpsChecked(MODEL_STONE2, o->Position, o->Angle, o->Light);
         }
         o->BlendMesh = 1;
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
@@ -1438,7 +1445,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
             Vector(2.f, 30.f, 0.f, p);
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
             Vector(1.0f, 0.2f, 0.0f, Light);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
         }
         return true;
 
@@ -1470,7 +1477,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
                 {
                     Vector(0.0f, 0.3f, 1.0f, Light);
                 }
-                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
             }
         }
         return true;
@@ -1670,7 +1677,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                         Position[0] = o->Position[0] + sinf(fAngle) * fDistance;
                         Position[1] = o->Position[1] + cosf(fAngle) * fDistance;
                         Position[2] = o->Position[2] + 800.f;
-                        CreateEffect(9, Position, Angle, Light);
+                        CreateEffectFpsChecked(9, Position, Angle, Light);
                     }
                 }
             }
@@ -1687,7 +1694,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     b->TransformPosition(o->BoneTransform[49], p, Position, true);
                     float fHeight = Position[2];
                     Vector(o->Position[0], o->Position[1], fHeight, Position);
-                    CreateEffect(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 0);
+                    CreateEffectFpsChecked(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 0);
                 }
             }
             if (o->CurrentAction == MONSTER01_ATTACK2)
@@ -1704,7 +1711,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     Vector(0.f, 0.f, 0.f, p);
                     b->TransformPosition(o->BoneTransform[49], p, Position, true);
                     Position[2] = 400;
-                    CreateEffect(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 1);
+                    CreateEffectFpsChecked(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 1);
                 }
                 if ((int)o->LifeTime == 101 && o->AnimationFrame > 6.0f)
                 {
@@ -1720,7 +1727,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     for (i = 0; i < 24; ++i)
                     {
                         Angle[2] = (float)(i * 30);
-                        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 14, NULL, 100.f, 0, 0);
+                        CreateJointFpsChecked(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 14, NULL, 100.f, 0, 0);
                     }
                     if (gMapManager.InHellas())
                     {
@@ -1826,13 +1833,13 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 {
                     b->TransformPosition(o->BoneTransform[i], p, pos1, true);
                     b->TransformPosition(o->BoneTransform[i + 1], p, pos2, true);
-                    CreateJoint(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 30.f);
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 30.f);
                 }
                 for (i = 31; i < 37; ++i)
                 {
                     b->TransformPosition(o->BoneTransform[i], p, pos1, true);
                     b->TransformPosition(o->BoneTransform[i + 1], p, pos2, true);
-                    CreateJoint(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 30.f);
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 30.f);
                 }
             }
         }
@@ -1903,7 +1910,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             b->TransformPosition(o->BoneTransform[60], p, pos, true);
             CreateSprite(BITMAP_ENERGY, pos, 0.5f + (Luminosity * 0.2f), Light, o, WorldTime * 0.1f);
             CreateSprite(BITMAP_ENERGY, pos, 0.5f + (Luminosity * 0.2f), Light, o, -WorldTime * 0.1f);
-            CreateParticle(BITMAP_LIGHT, pos, o->Angle, Light, 0, 1.1f);
+            CreateParticleFpsChecked(BITMAP_LIGHT, pos, o->Angle, Light, 0, 1.1f);
 
             Vector(0.1f, 0.4f, 1.f, Light);
             CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o, 0.f);
@@ -1968,13 +1975,13 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[51], p, Pos2, true);
                 if (o->SubType == 9)
                 {
-                    CreateParticle(BITMAP_FIRE + 1, Pos1, o->Angle, Light, 1, 7.2f / (i / 2 + 6));
-                    CreateParticle(BITMAP_FIRE + 1, Pos2, o->Angle, Light, 1, 7.2f / (i / 2 + 6));
+                    CreateParticleFpsChecked(BITMAP_FIRE + 1, Pos1, o->Angle, Light, 1, 7.2f / (i / 2 + 6));
+                    CreateParticleFpsChecked(BITMAP_FIRE + 1, Pos2, o->Angle, Light, 1, 7.2f / (i / 2 + 6));
                 }
                 else
                 {
-                    CreateParticle(BITMAP_FIRE + 3, Pos1, o->Angle, Light, 12, 7.2f / (i / 2 + 6) * 0.5f);
-                    CreateParticle(BITMAP_FIRE + 3, Pos2, o->Angle, Light, 12, 7.2f / (i / 2 + 6) * 0.5f);
+                    CreateParticleFpsChecked(BITMAP_FIRE + 3, Pos1, o->Angle, Light, 12, 7.2f / (i / 2 + 6) * 0.5f);
+                    CreateParticleFpsChecked(BITMAP_FIRE + 3, Pos2, o->Angle, Light, 12, 7.2f / (i / 2 + 6) * 0.5f);
                 }
             }
         }
@@ -2021,33 +2028,36 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
             EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
 
-            vec3_t p, Position;
-            Vector(39.0f, -7.5f, -0.5, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART8, Position, o->Angle, o->Light, 3, o, -130, 3);
-            Vector(24.0f, -7.5f, 32.5f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART1, Position, o->Angle, o->Light, 3, o, -130, 4);
-            Vector(24.0f, -8.5f, -32.5f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART2, Position, o->Angle, o->Light, 3, o, -130, 5);
-            Vector(-0.5f, 4.0f, 0.5f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART3, Position, o->Angle, o->Light, 2, o, -130, 6);
-            Vector(-2.5f, -22.0f, 54.0f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART4, Position, o->Angle, o->Light, 3, o, -130, 1);
-            Vector(-4.5f, -24.5f, -53, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART5, Position, o->Angle, o->Light, 3, o, -130, 2);
-            Vector(-136.0f, -153.5f, 0, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART6, Position, o->Angle, o->Light, 4, o, -10, 2);
-            Vector(-135.0f, -153.0f, 0.0f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART7, Position, o->Angle, o->Light, 5, o, -130, 2);
+            if (rand_fps_check(1))
+            {
+                vec3_t p, Position;
+                Vector(39.0f, -7.5f, -0.5, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART8, Position, o->Angle, o->Light, 3, o, -130, 3);
+                Vector(24.0f, -7.5f, 32.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART1, Position, o->Angle, o->Light, 3, o, -130, 4);
+                Vector(24.0f, -8.5f, -32.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART2, Position, o->Angle, o->Light, 3, o, -130, 5);
+                Vector(-0.5f, 4.0f, 0.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART3, Position, o->Angle, o->Light, 2, o, -130, 6);
+                Vector(-2.5f, -22.0f, 54.0f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART4, Position, o->Angle, o->Light, 3, o, -130, 1);
+                Vector(-4.5f, -24.5f, -53, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART5, Position, o->Angle, o->Light, 3, o, -130, 2);
+                Vector(-136.0f, -153.5f, 0, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART6, Position, o->Angle, o->Light, 4, o, -10, 2);
+                Vector(-135.0f, -153.0f, 0.0f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART7, Position, o->Angle, o->Light, 5, o, -130, 2);
 
-            CreateEffect(MODEL_CUNDUN_SKILL, o->Position, o->Angle, o->Light, 2);
+                CreateEffect(MODEL_CUNDUN_SKILL, o->Position, o->Angle, o->Light, 2);
+            }
         }
         else
         {
@@ -2058,21 +2068,24 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
                     PlayBuffer(SOUND_KUNDUN_DESTROY);
                 }
                 o->LifeTime = 90;
-
-                vec3_t Angle = { 0.0f, 0.0f, 0.0f };
-                int iCount = 86;
-                for (int i = 0; i < iCount; ++i)
+                if (rand_fps_check(1))
                 {
-                    Angle[0] = -10.f;
-                    Angle[1] = 0.f;
-                    Angle[2] = i * (10.f + rand() % 10);
+                    vec3_t Angle = { 0.0f, 0.0f, 0.0f };
+                    int iCount = 86;
+                    for (int i = 0; i < iCount; ++i)
+                    {
+                        Angle[0] = -10.f;
+                        Angle[1] = 0.f;
+                        Angle[2] = i * (10.f + rand() % 10);
 
-                    vec3_t Position;
-                    VectorCopy(o->Position, Position);
-                    Position[2] += 200.f;
-                    CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
-                    CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                        vec3_t Position;
+                        VectorCopy(o->Position, Position);
+                        Position[2] += 200.f;
+                        CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                    }
                 }
+
                 EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
             }
 

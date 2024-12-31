@@ -40,6 +40,18 @@ void HandPosition(PARTICLE* o)
     b->TransformPosition(Owner->BoneTransform[Hero->Weapon[o->SubType % 2].LinkBone], p, o->Position, true);
 }
 
+int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, float Scale, OBJECT* Owner)
+{
+    if (rand_fps_check(1))
+    {
+        return CreateParticle(Type, Position, Angle, Light, SubType, Scale, Owner);
+    }
+    else
+    {
+        return false;
+    }
+}
+
 int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, float Scale, OBJECT* Owner)
 {
     if (!g_pOption->GetRenderAllEffects())
@@ -8747,7 +8759,7 @@ void MoveParticles()
                 {
                     vec3_t Light;
                     Vector(0.8f, 0.3f, 0.3f, Light);
-                    if (rand() % 2 == 1)
+                    if (rand_fps_check(2))
                         CreateParticle(BITMAP_CURSEDTEMPLE_EFFECT_MASKER, o->StartPosition, o->Angle, Light, 1, 1.3f);
                 }
             }
@@ -8855,11 +8867,11 @@ void MoveParticles()
                 {
                     float _Scale = (rand() % 20 + 20.0f) / 50.0f;
                     if (o->SubType == 0)
-                        CreateParticle(BITMAP_AG_ADDITION_EFFECT, Temp_Pos, o->Angle, o->Light, 0, 1.0f, o->Target);
+                        CreateParticleFpsChecked(BITMAP_AG_ADDITION_EFFECT, Temp_Pos, o->Angle, o->Light, 0, 1.0f, o->Target);
                     else if (o->SubType == 1)
-                        CreateParticle(BITMAP_AG_ADDITION_EFFECT, Temp_Pos, o->Angle, o->Light, 1, 1.0f, o->Target);
+                        CreateParticleFpsChecked(BITMAP_AG_ADDITION_EFFECT, Temp_Pos, o->Angle, o->Light, 1, 1.0f, o->Target);
                     else if (o->SubType == 2)
-                        CreateParticle(BITMAP_AG_ADDITION_EFFECT, Temp_Pos, o->Angle, o->Light, 2, 1.0f, o->Target);
+                        CreateParticleFpsChecked(BITMAP_AG_ADDITION_EFFECT, Temp_Pos, o->Angle, o->Light, 2, 1.0f, o->Target);
                 }
             }
             break;

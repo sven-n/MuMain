@@ -452,23 +452,23 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                 VectorRotate(vPosition, matRotate, vLook);
                 VectorAdd(pObject->Position, vLook, vPosition);
 
-                CreateEffect(BITMAP_CRATER, vPosition, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f);
+                CreateEffectFpsChecked(BITMAP_CRATER, vPosition, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f);
                 for (int iu = 0; iu < 20; iu++)
                 {
                     //CreateEffect ( MODEL_BIG_STONE1, vPosition,pObject->Angle,pObject->Light,10);
-                    CreateEffect(MODEL_STONE2, vPosition, pObject->Angle, pObject->Light);
+                    CreateEffectFpsChecked(MODEL_STONE2, vPosition, pObject->Angle, pObject->Light);
                 }
                 Vector(0.7f, 0.7f, 1.f, vLight);
-                CreateParticle(BITMAP_CLUD64, vPosition, pObject->Angle, vLight, 7, 2.0f);
-                CreateParticle(BITMAP_CLUD64, vPosition, pObject->Angle, vLight, 7, 2.0f);
+                CreateParticleFpsChecked(BITMAP_CLUD64, vPosition, pObject->Angle, vLight, 7, 2.0f);
+                CreateParticleFpsChecked(BITMAP_CLUD64, vPosition, pObject->Angle, vLight, 7, 2.0f);
 
                 Vector(0.3f, 0.2f, 1.f, vLight);
-                CreateEffect(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 11);
-                CreateEffect(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 11);
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 11);
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 11);
 
                 vPosition[2] += 100.0f;
                 Vector(0.0f, 0.2f, 1.0f, vLight);
-                CreateEffect(MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1, vPosition, pObject->Angle, vLight, 0);
+                CreateEffectFpsChecked(MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1, vPosition, pObject->Angle, vLight, 0);
             }
         }
         break;
@@ -492,20 +492,20 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                 {
                     Vector(vPosition[0] + (rand() % 20 - 10) * 1.0f,
                         vPosition[1] + (rand() % 20 - 10) * 1.0f, vPosition[2] + (rand() % 20 - 10) * 1.0f, vSmokePosition);
-                    CreateParticle(BITMAP_SMOKE, vSmokePosition, pObject->Angle, vLight, 51);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, vSmokePosition, pObject->Angle, vLight, 51);
                 }
                 if (pObject->AnimationFrame < End_Frame)
                 {
                     Vector(4.0f, 10.0f, 4.0f, vLight);
-                    CreateParticle(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 3, 0.5f);
-                    CreateParticle(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 3, 0.8f);
+                    CreateParticleFpsChecked(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 3, 0.5f);
+                    CreateParticleFpsChecked(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 3, 0.8f);
                 }
 
                 Vector(0.0f, -100.0f, 100.0f, vPosition);
                 AngleMatrix(pObject->Angle, matRotate);
                 VectorRotate(vPosition, matRotate, vLook);
                 VectorAdd(pObject->Position, vLook, vPosition);
-                CreateJoint(BITMAP_JOINT_ENERGY, vPosition, pObject->Position, pObject->Angle, 46, pObject, 20.0f);
+                CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vPosition, pObject->Position, pObject->Angle, 46, pObject, 20.0f);
             }
         }
         break;
@@ -527,16 +527,16 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                 VectorRotate(vPosition, matRotate, vLook);
                 VectorAdd(pObject->Position, vLook, vPosition);
 
-                CreateEffect(BITMAP_FIRE_CURSEDLICH, vPosition, pObject->Angle, vLight, 1, pObject);
+                CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, vPosition, pObject->Angle, vLight, 1, pObject);
 
-                CreateEffect(BITMAP_CRATER, vPosition, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f);
+                CreateEffectFpsChecked(BITMAP_CRATER, vPosition, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f);
                 for (int iu = 0; iu < 20; iu++)
                 {
-                    CreateEffect(MODEL_STONE2, vPosition, pObject->Angle, pObject->Light);
+                    CreateEffectFpsChecked(MODEL_STONE2, vPosition, pObject->Angle, pObject->Light);
                 }
 
                 Vector(0.5f, 0.1f, 0.0f, vLight);
-                CreateEffect(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 12, NULL, -1, 0, 0, 0, 0.1f);
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 12, NULL, -1, 0, 0, 0, 0.1f);
             }
         }
         break;
@@ -548,7 +548,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
         {
         case MONSTER01_WALK:
             Vector(pObject->Position[0] + rand() % 200 - 100, pObject->Position[1] + rand() % 200 - 100, pObject->Position[2], vPos);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, pObject->Angle, pObject->Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, pObject->Angle, pObject->Light);
             break;
 
         case MONSTER01_ATTACK1:
@@ -572,13 +572,13 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                         switch (rand() % 3)
                         {
                         case 0:
-                            CreateParticle(BITMAP_FIRE_HIK1_MONO, vPos, vAngle, vColor, 4, pObject->Scale, pObject);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPos, vAngle, vColor, 4, pObject->Scale, pObject);
                             break;
                         case 1:
-                            CreateParticle(BITMAP_FIRE_HIK2_MONO, vPos, vAngle, vColor, 8, pObject->Scale, pObject);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK2_MONO, vPos, vAngle, vColor, 8, pObject->Scale, pObject);
                             break;
                         case 2:
-                            CreateParticle(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vColor, 5, pObject->Scale, pObject);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vColor, 5, pObject->Scale, pObject);
                             break;
                         }
                     }
@@ -609,16 +609,16 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                 VectorRotate(vPosition, matRotate, vLook);
                 VectorAdd(pObject->Position, vLook, vPosition);
 
-                CreateEffect(BITMAP_FIRE_CURSEDLICH, vPosition, pObject->Angle, vLight, 1, pObject);
+                CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, vPosition, pObject->Angle, vLight, 1, pObject);
 
-                CreateEffect(BITMAP_CRATER, vPosition, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f);
+                CreateEffectFpsChecked(BITMAP_CRATER, vPosition, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f);
                 for (int iu = 0; iu < 20; iu++)
                 {
-                    CreateEffect(MODEL_STONE2, vPosition, pObject->Angle, pObject->Light);
+                    CreateEffectFpsChecked(MODEL_STONE2, vPosition, pObject->Angle, pObject->Light);
                 }
 
                 Vector(0.5f, 0.1f, 0.0f, vLight);
-                CreateEffect(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 12, NULL, -1, 0, 0, 0, 0.1f);
+                CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, vPosition, pObject->Angle, vLight, 12, NULL, -1, 0, 0, 0, 0.1f);
             }
         }
         break;
@@ -858,8 +858,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         {
             if (rand() % 6 > 0) continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-            CreateParticle(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.0f);
-            CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -901,8 +901,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         {
             if (rand() % 6 > 0) continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-            CreateParticle(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.0f);
-            CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -944,8 +944,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         {
             if (rand() % 6 > 0) continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-            CreateParticle(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.5f);
-            CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.5f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -994,7 +994,7 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
             Vector((rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, vRelative);
             pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
             fScale = (float)(rand() % 80 + 32) * 0.01f * 1.0f;
-            CreateParticle(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
+            CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
         }
     }
     break;
@@ -1005,8 +1005,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         for (int i = 0; i < 7; ++i)
         {
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-            CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 1, 1.0f, pObject);
-            CreateParticle(BITMAP_CLUD64, vPos, pObject->Angle, vLight, 6, 1.0f, pObject);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 1, 1.0f, pObject);
+            CreateParticleFpsChecked(BITMAP_CLUD64, vPos, pObject->Angle, vLight, 6, 1.0f, pObject);
         }
     }
     break;
@@ -1040,13 +1040,13 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
             switch (rand() % 3)
             {
             case 0:
-                CreateParticle(BITMAP_FIRE_HIK1, vPos, pObject->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, pObject->Angle, vLight, 0, fScale);
                 break;
             case 1:
-                CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, vLight, 4, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, vLight, 4, fScale);
                 break;
             case 2:
-                CreateParticle(BITMAP_FIRE_HIK3, vPos, pObject->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, pObject->Angle, vLight, 0, fScale);
                 break;
             }
         }
@@ -1071,8 +1071,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
 
         MoveEye(pObject, pModel, 34, 35);
         Vector(1.0f, 0.0f, 0.0f, vColor);
-        CreateJoint(BITMAP_JOINT_ENERGY, vPos, pObject->Position, pObject->Angle, 55, pObject, 6.0f, -1, 0, 0, -1, vColor);
-        CreateJoint(BITMAP_JOINT_ENERGY, vPos, pObject->Position, pObject->Angle, 56, pObject, 6.0f, -1, 0, 0, -1, vColor);
+        CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vPos, pObject->Position, pObject->Angle, 55, pObject, 6.0f, -1, 0, 0, -1, vColor);
+        CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vPos, pObject->Position, pObject->Angle, 56, pObject, 6.0f, -1, 0, 0, -1, vColor);
         Vector(1.0f, 1.0f, 1.0f, vColor);
         pModel->TransformByObjectBone(vPos, pObject, 34);
         vPos[1] -= 0.8f;
@@ -1096,8 +1096,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         }
 
         Vector(0.1f, 0.6f, 0.3f, vColor);
-        CreateJoint(BITMAP_JOINT_ENERGY, vPos, pObject->Position, pObject->Angle, 57, pObject, 10.0f, 67, 0, 0, 15, vColor); //57 - pk:node , ichaindex:maxtail
-        CreateJoint(BITMAP_JOINT_ENERGY, vPos, pObject->Position, pObject->Angle, 57, pObject, 10.0f, 70, 0, 0, 15, vColor); //57 - pk:node , ichaindex:maxtail
+        CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vPos, pObject->Position, pObject->Angle, 57, pObject, 10.0f, 67, 0, 0, 15, vColor); //57 - pk:node , ichaindex:maxtail
+        CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vPos, pObject->Position, pObject->Angle, 57, pObject, 10.0f, 70, 0, 0, 15, vColor); //57 - pk:node , ichaindex:maxtail
 
         Vector(1.0f, 1.0f, 1.0f, vColor);
         pModel->TransformByObjectBone(vPos, pObject, 66);
@@ -1117,8 +1117,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
             if (i % 5 == 0)
             {
                 pModel->TransformByObjectBone(vPos, pObject, temp[i]);
-                CreateParticle(BITMAP_SMOKE, vPos, pObject->Angle, vColor, 50, 1.0f);
-                CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vColor, 0, 1.0f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vColor, 50, 1.0f);
+                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vColor, 0, 1.0f);
             }
         }
 
@@ -1186,13 +1186,13 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
             switch (rand() % 3)
             {
             case 0:
-                CreateParticle(BITMAP_FIRE_HIK1, vPos, pObject->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, pObject->Angle, vLight, 0, fScale);
                 break;
             case 1:
-                CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, vLight, 4, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, vLight, 4, fScale);
                 break;
             case 2:
-                CreateParticle(BITMAP_FIRE_HIK3, vPos, pObject->Angle, vLight, 0, fScale);
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, pObject->Angle, vLight, 0, fScale);
                 break;
             }
         }
@@ -1206,8 +1206,8 @@ bool GMSwampOfQuiet::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject,
         {
             if (rand() % 6 > 0) continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-            CreateParticle(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.5f);
-            CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.5f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)

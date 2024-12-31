@@ -234,7 +234,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
             Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
             b->TransformPosition(BoneTransform[34], p, Pos, false);
             if (o->AnimationFrame >= 5.0f && o->AnimationFrame < 12.5f)
-                CreateParticle(BITMAP_SMOKE, Pos, o->Angle, Light, 43, 1.5f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 43, 1.5f);
         }
 
         if (g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_ENDCYCLE || g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_STANDBY)
@@ -863,7 +863,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
             CreateEffect(MODEL_STORM2, Position, o->Angle, Light, 0);
             CreateEffect(BITMAP_BOSS_LASER, Position, o->Angle, Light, 2);
         }
-        else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 3.0f)
+        else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 3.0f && rand_fps_check(1))
         {
             vec3_t Position;
             BoneManager::GetBonePosition(o, L"Body_Bone13", Position);
@@ -883,7 +883,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
     {
         vec3_t Pos;
 
-        if (o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3)
+        if (o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3 && rand_fps_check(1))
         {
             o->BlendMesh = -2;
             Vector(0.0f, 0.0f, 0.0f, Position);
@@ -898,7 +898,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
         else
             o->BlendMesh = -1;
 
-        if (o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3)
+        if (o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3 && rand_fps_check(1))
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             Vector(0.0f, -50.0f, 0.0f, Position);
@@ -912,7 +912,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
     {
         vec3_t Pos;
 
-        if (o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3)
+        if (o->CurrentAction == MONSTER01_DIE && g_Direction.m_CKanturu.m_iMayaState < KANTURU_MAYA_DIRECTION_MAYA3 && rand_fps_check(1))
         {
             o->BlendMesh = -2;
             Vector(0.0f, 0.0f, 0.0f, Position);
@@ -927,7 +927,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
         else
             o->BlendMesh = -1;
 
-        if (o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3)
+        if (o->CurrentAction == MONSTER01_STOP2 && g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MAYA3 && rand_fps_check(1))
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             Vector(50.0f, 0.0f, 0.0f, Position);
@@ -1064,7 +1064,7 @@ bool M39Kanturu3rd::RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, o);
 
         BoneManager::GetBonePosition(o, L"Body_Bone13", Position);
-        CreateParticle(BITMAP_FIRE + 1, Position, o->Angle, Light, 3, 1.7f);
+        CreateParticleFpsChecked(BITMAP_FIRE + 1, Position, o->Angle, Light, 3, 1.7f);
 
         Vector(3.0f, 0.0f, 0.0f, Position);
         BoneManager::GetBonePosition(o, L"Sword_Bone1", Position, Position);
@@ -1369,7 +1369,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 vec3_t vPos, vRelative, Light;
                 Vector(140.f, 0.f, -30.f, vRelative);
@@ -1384,39 +1384,47 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
                 CreateParticle(BITMAP_EXPLOTION + 1, vPos, o->Angle, o->Light, 0, 1.3f);
                 CreateParticle(BITMAP_EXPLOTION + 1, vPos, o->Angle, o->Light, 0, 2.3f);
                 CreateParticle(BITMAP_EXPLOTION + 1, vPos, o->Angle, o->Light, 0, 1.8f);
+                c->SetLastAttackEffectTime();
             }
         }
     }
     return true;
     case MONSTER_NIGHTMARE:
     {
-        if (o->CurrentAction == MONSTER01_ATTACK3 && c->AttackTime >= 14)
+        if (o->CurrentAction == MONSTER01_ATTACK3 && c->AttackTime >= 14 && rand_fps_check(1))
         {
             Vector(0.3f, 0.2f, 0.1f, Light);
             CreateEffect(MODEL_SUMMON, o->Position, o->Angle, Light, 3);
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK4 && c->AttackTime >= 10)
+        else if (o->CurrentAction == MONSTER01_ATTACK4 && c->AttackTime >= 10 && rand_fps_check(1))
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
             CreateInferno(o->Position);
-            if ((int)c->AttackTime == 10)
+            if (c->CheckAttackTime(10))
+            {
                 CreateEffect(MODEL_CIRCLE, o->Position, o->Angle, Light, 4, o);
-            else if ((int)c->AttackTime == 14)
+                c->SetLastAttackEffectTime();
+            }
+            else if (c->CheckAttackTime(14))
+            {
                 CreateEffect(MODEL_CIRCLE, o->Position, o->Angle, Light, 4, o);
+                c->SetLastAttackEffectTime();
+            }
         }
     }
     return true;
     case MONSTER_MAYA_HAND_LEFT:
     {
-        if (o->CurrentAction == MONSTER01_ATTACK1 && (int)c->AttackTime == 14)
+        if (o->CurrentAction == MONSTER01_ATTACK1 && c->CheckAttackTime(14))
         {
             CreateInferno(o->Position, 2);
             Vector(0.0f, 0.5f, 1.0f, Light);
             CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, Light, 7);
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYAHAND_ATTACK1);
+            c->SetLastAttackEffectTime();
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK2 && (int)c->AttackTime == 14)
+        else if (o->CurrentAction == MONSTER01_ATTACK2 && c->CheckAttackTime(14))
         {
             float Matrix[3][4];
             Vector(0.0f, 0.0f, 0.0f, Angle);
@@ -1429,20 +1437,22 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
             CreateEffect(MODEL_MAYAHANDSKILL, Position, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 1.0f);
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYAHAND_ATTACK2);
+            c->SetLastAttackEffectTime();
         }
     }
     return true;
     case MONSTER_MAYA_HAND_RIGHT:
     {
-        if (o->CurrentAction == MONSTER01_ATTACK1 && (int)c->AttackTime == 14)
+        if (o->CurrentAction == MONSTER01_ATTACK1 && c->CheckAttackTime(14))
         {
             CreateInferno(o->Position, 3);
             Vector(1.0f, 0.5f, 0.0f, Light);
             CreateEffect(BITMAP_SHOCK_WAVE, o->Position, o->Angle, Light, 7);
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYAHAND_ATTACK1);
+            c->SetLastAttackEffectTime();
         }
-        else if (o->CurrentAction == MONSTER01_ATTACK2 && (int)c->AttackTime == 14)
+        else if (o->CurrentAction == MONSTER01_ATTACK2 && c->CheckAttackTime(14))
         {
             float Matrix[3][4];
             Vector(0.0f, 0.0f, 0.0f, Angle);
@@ -1455,6 +1465,7 @@ bool M39Kanturu3rd::AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* 
             CreateEffect(MODEL_MAYAHANDSKILL, Position, o->Angle, Light, 0, NULL, -1, 0, 0, 0, 1.0f);
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYAHAND_ATTACK2);
+            c->SetLastAttackEffectTime();
         }
     }
     return true;

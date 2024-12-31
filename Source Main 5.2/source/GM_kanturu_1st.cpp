@@ -111,8 +111,7 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
         if (pObject->Timer > 10.f)
             pObject->Timer = 0.f;
         if (pObject->Timer > 5.f)
-            CreateParticle(BITMAP_BUBBLE, pObject->Position, pObject->Angle,
-                pObject->Light, 5);
+            CreateParticleFpsChecked(BITMAP_BUBBLE, pObject->Position, pObject->Angle, pObject->Light, 5);
         break;
     case 98:
         ::PlayBuffer(SOUND_KANTURU_1ST_BG_PLANT);
@@ -169,7 +168,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
         {
             Vector(0.04f, 0.04f, 0.04f, Light);
             for (int i = 0; i < 20; ++i)
-                CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle,
+                CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle,
                     Light, 20, pObject->Scale, pObject);
         }
         break;
@@ -193,7 +192,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
         break;
     case 82:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3, pObject->Position,
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3, pObject->Position,
             pObject->Angle, Light, 4, pObject->Scale);
         break;
     case 83:
@@ -254,7 +253,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(0.0f, 0.0f, 0.0f, vPos);
         Vector(fLumi, fLumi, fLumi, Light);
         pModel->TransformPosition(BoneTransform[4], vPos, Position, false);
-        CreateParticle(
+        CreateParticleFpsChecked(
             BITMAP_ENERGY, Position, pObject->Angle, Light, 0, 1.5f);
         CreateSprite(BITMAP_SPARK + 1, Position, 10.0f, Light, pObject);
         vec3_t StartPos, EndPos;
@@ -278,7 +277,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
             vec3_t Light;
             Vector(0.06f, 0.06f, 0.06f, Light);
             for (int i = 0; i < 20; ++i)
-                CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle,
+                CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle,
                     Light, 2, pObject->Scale, pObject);
         }
         break;
@@ -288,7 +287,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
             vec3_t Light;
             Vector(0.2f, 0.2f, 0.2f, Light);
             for (int i = 0; i < 20; ++i)
-                CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle,
+                CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle,
                     Light, 7, pObject->Scale, pObject);
         }
         break;
@@ -706,15 +705,16 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             vRelative[1] = (float)(4 - rand() % 5);
             vRelative[2] = (float)(4 - rand() % 5);
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_6", vRelative, vPos);
-            CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
         }
 
-        if ((int)c->AttackTime == 10)
+        if (c->CheckAttackTime(10))
         {
             vec3_t vPos, vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_6", vRelative, vPos);
             CreateEffect(MODEL_IRON_RIDER_ARROW, vPos, o->Angle, o->Light, 0);
+            c->SetLastAttackEffectTime();
         }
 
         return true;
@@ -724,7 +724,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
                 //				if(o->AnimationFrame >= StartAction && o->AnimationFrame < (StartAction + fActionSpeed))
             {
                 vec3_t vPos, vRelative, Light;
@@ -740,6 +740,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                 CreateParticle(BITMAP_EXPLOTION + 1, vPos, o->Angle, o->Light, 0, 1.3f);
                 CreateParticle(BITMAP_EXPLOTION + 1, vPos, o->Angle, o->Light, 0, 2.3f);
                 CreateParticle(BITMAP_EXPLOTION + 1, vPos, o->Angle, o->Light, 0, 1.8f);
+                c->SetLastAttackEffectTime();
             }
         }
 
@@ -772,7 +773,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_21", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
         }
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             vec3_t vPos, vRelative;
 
@@ -793,6 +794,8 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
                 o->Angle[2] += 15.f;
             }
+
+            c->SetLastAttackEffectTime();
         }
 
         return true;
@@ -829,7 +832,7 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_21", vRelative, vPos);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, index, Width);
         }
-        if ((int)c->AttackTime == 14)
+        if (c->CheckAttackTime(14))
         {
             vec3_t vPos, vRelative;
 
@@ -850,6 +853,8 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
                 CreateEffect(MODEL_KENTAUROS_ARROW, vPos, o->Angle, o->Light, 0);
                 o->Angle[2] += 15.f;
             }
+
+            c->SetLastAttackEffectTime();
         }
 
         return true;
@@ -1207,7 +1212,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
             o->SubType = FALSE;
 
-        if (o->CurrentAction == MONSTER01_WALK)
+        if (o->CurrentAction == MONSTER01_WALK && rand_fps_check(1))
         {
             vec3_t vPos, vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
@@ -1259,9 +1264,9 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             vRelative[1] = (float)(4 - rand() % 5);
             vRelative[2] = (float)(4 - rand() % 5);
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_15", vRelative, vPos);
-            CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_16", vRelative, vPos);
-            CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
 
             if (o->CurrentAction == MONSTER01_WALK)
             {
@@ -1283,8 +1288,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             vec3_t vPos, vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BIP01", vRelative, vPos);
-            CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 3, 2.0f);
-            CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 4, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 3, 2.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 3, vPos, o->Angle, vLight, 4, 1.0f);
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
@@ -1397,7 +1402,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         }
         vec3_t vPos, vRelative;
         Vector(0.f, 0.f, 0.f, vRelative);
-        if (o->CurrentAction == MONSTER01_DIE)
+        if (o->CurrentAction == MONSTER01_DIE && rand_fps_check(1))
         {
             float Scale = 0.3f;
             BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_TAIL", vRelative, vPos);
@@ -1457,7 +1462,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         vec3_t vPos, vRelative;
         Vector(0.f, 0.f, 0.f, vRelative);
         BoneManager::GetBonePosition(o, L"BERSERK_MOUTH", vRelative, vPos);
-        CreateParticle(
+        CreateParticleFpsChecked(
             BITMAP_SMOKE, vPos, o->Angle, o->Light, 42, o->Scale);
     }
     return true;
@@ -1486,7 +1491,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         }
         vec3_t vPos, vRelative;
         Vector(0.f, 0.f, 0.f, vRelative);
-        if (o->CurrentAction == MONSTER01_DIE)
+        if (o->CurrentAction == MONSTER01_DIE && rand_fps_check(1))
         {
             float Scale = 0.3f;
             BoneManager::GetBonePosition(o, L"KENTAUROS_BIP_TAIL", vRelative, vPos);
@@ -1586,7 +1591,7 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
             o->SubType = FALSE;
 
-        if (o->CurrentAction == MONSTER01_WALK)
+        if (o->CurrentAction == MONSTER01_WALK && rand_fps_check(1))
         {
             vec3_t vPos, vRelative;
             Vector(0.f, 0.f, 0.f, vRelative);

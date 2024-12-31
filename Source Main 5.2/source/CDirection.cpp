@@ -384,14 +384,14 @@ void CDirection::FaillingEffect()
     Pos[1] = Hero->Object.Position[1] + (float)(rand() % 20 - 10) * 70.0f;
     Pos[2] = Hero->Object.Position[2] - rand() % 200 - 500.0f;
 
-    CreateParticle(BITMAP_CLOUD, Pos, Hero->Object.Angle, Light, 13, Scale);
+    CreateParticleFpsChecked(BITMAP_CLOUD, Pos, Hero->Object.Angle, Light, 13, Scale);
 
     Pos[0] = Hero->Object.Position[0] + (float)(rand() % 20 - 10) * 70.0f;
     Pos[1] = Hero->Object.Position[1] + (float)(rand() % 20 - 10) * 70.0f;
     Pos[2] = Hero->Object.Position[2] - rand() % 200 - 500.0f;
 
     Vector(0.05f, 0.05f, 0.05f, Light);
-    CreateParticle(BITMAP_CLOUD, Pos, Hero->Object.Angle, Light, 13, Scale);
+    CreateParticleFpsChecked(BITMAP_CLOUD, Pos, Hero->Object.Angle, Light, 13, Scale);
 }
 
 void CDirection::HeroFallingDownInit()

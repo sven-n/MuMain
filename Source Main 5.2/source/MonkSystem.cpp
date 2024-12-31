@@ -729,7 +729,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
         }
         if (m_bDarkSideEffOnce)
         {
-            CreateParticle(BITMAP_DAMAGE2, vPos, pObj->Angle, vLight, 0, 1.0f);
+            CreateParticleFpsChecked(BITMAP_DAMAGE2, vPos, pObj->Angle, vLight, 0, 1.0f);
             m_bDarkSideEffOnce = false;
         }
 
@@ -809,7 +809,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
                 if (DamageEff == 10 && (GetDarksideEffectTotal() > m_nDarksideEffectAttCnt))
                 {
                     Vector(1.0f, 1.0f, 1.0f, vLight);
-                    CreateParticle(BITMAP_DAMAGE2, vPos, pObj->Angle, vLight, 0, 1.0f);
+                    CreateParticleFpsChecked(BITMAP_DAMAGE2, vPos, pObj->Angle, vLight, 0, 1.0f);
                 }
 
                 pObj->AnimationFrame = m_fDummyAniFrame;

@@ -199,6 +199,7 @@ public:
     int         PositionX;
     int         PositionY;
     int			m_iFenrirSkillTarget;
+    int         LastAttackEffectTime;
 
     float       m_iDeleteTime;
     float       LastCritDamageEffect;
@@ -249,6 +250,14 @@ public:
 #ifdef PBG_MOD_STRIFE_GENSMARKRENDER
     BYTE		GensContributionPoints;
 #endif //PBG_MOD_STRIFE_GENSMARKRENDER
+    bool CheckAttackTime(int timeNumber) const
+    {
+        return static_cast<int>(AttackTime) == timeNumber && LastAttackEffectTime != timeNumber;
+    }
+    void SetLastAttackEffectTime()
+    {
+        LastAttackEffectTime = static_cast<int>(AttackTime);
+    }
 };
 
 #endif // !defined(AFX_W_CHARACTERINFO_H__95647591_5047_48A4_81AE_E88B5F17EE94__INCLUDED_)
