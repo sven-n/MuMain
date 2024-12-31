@@ -102,7 +102,7 @@ bool PetActionDemon::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double
         case 3:
         case 4:
         case 5:
-            CreateParticle(BITMAP_CLUD64, Position, obj->Angle, Light, 11, 0.5f);
+            CreateParticleFpsChecked(BITMAP_CLUD64, Position, obj->Angle, Light, 11, 0.5f);
             break;
 
         case 6:
@@ -111,7 +111,7 @@ bool PetActionDemon::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double
             break;
 
         case 8:
-            CreateParticle(BITMAP_FIRE_HIK3, Position, obj->Angle, Light, 1, 0.4f);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, Position, obj->Angle, Light, 1, 0.4f);
             CreateSprite(BITMAP_FLARE, Position, 1.5f, Light, obj);
             CreateSprite(BITMAP_FLARE, Position, 0.5f, Light2, obj);
             break;

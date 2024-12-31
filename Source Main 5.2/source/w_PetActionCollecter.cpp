@@ -238,7 +238,7 @@ bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, do
     Vector(1.0f, 0.8f, 0.2f, Light);
     VectorCopy(obj->Position, Position);
     Position[2] += 30.0f;
-    CreateParticle(BITMAP_SHINY, Position, obj->Angle, Light, 7);
+    CreateParticleFpsChecked(BITMAP_SHINY, Position, obj->Angle, Light, 7);
 
     switch (m_state)
     {

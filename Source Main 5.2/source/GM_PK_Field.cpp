@@ -372,7 +372,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
             Vector(1.0f, 1.0f, 1.0f, Light);
             for (int i = 0; i < 20; ++i)
             {
-                CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 6, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 6, o->Scale, o);
             }
         }
     }
@@ -446,13 +446,13 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
         switch (rand() % 3)
         {
         case 0:
-            CreateParticle(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         case 1:
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
             break;
         case 2:
-            CreateParticle(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         }
     }
@@ -529,7 +529,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         Vector(-150.0f, 0.0f, 0.0f, p);
         b->TransformPosition(BoneTransform[4], p, Pos, false);
         if (o->AnimationFrame >= 35.0f && o->AnimationFrame < 50.0f)
-            CreateParticle(BITMAP_SMOKE, Pos, o->Angle, Light, 63, o->Scale * 1.5f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 63, o->Scale * 1.5f);
 
         return true;
     }
@@ -562,7 +562,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
         b->TransformPosition(BoneTransform[4], p, Pos, false);
         if (o->AnimationFrame >= 7.0f && o->AnimationFrame < 13.0f)
-            CreateParticle(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
 
         return true;
     }
@@ -640,13 +640,13 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                         switch (rand() % 3)
                         {
                         case 0:
-                            CreateParticle(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
                             break;
                         case 1:
-                            CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 4, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 4, fScale);
                             break;
                         case 2:
-                            CreateParticle(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 0, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 0, fScale);
                             break;
                         }
                     }
@@ -660,13 +660,13 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                         switch (rand() % 3)
                         {
                         case 0:
-                            CreateParticle(BITMAP_FIRE_HIK1_MONO, vPos, o->Angle, o->Light, 0, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPos, o->Angle, o->Light, 0, fScale);
                             break;
                         case 1:
-                            CreateParticle(BITMAP_FIRE_HIK2_MONO, vPos, o->Angle, o->Light, 4, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK2_MONO, vPos, o->Angle, o->Light, 4, fScale);
                             break;
                         case 2:
-                            CreateParticle(BITMAP_FIRE_HIK3_MONO, vPos, o->Angle, o->Light, 0, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPos, o->Angle, o->Light, 0, fScale);
                             break;
                         }
                     }
@@ -707,7 +707,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
 
             Vector(1.0f, 1.0f, 1.0f, o->Light);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light, 61);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 61);
         }
     }
     return true;
@@ -732,8 +732,8 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 if (rand() % 4 > 0) continue;
 
                 b->TransformByObjectBone(vPos, o, iBones[i]);
-                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 50, 1.0f);
-                CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, o->Angle, vLight, 0, 0.01f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 50, 1.0f);
+                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, o->Angle, vLight, 0, 0.01f);
             }
 
             if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -752,7 +752,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
                 VectorAdd(vPos, TempPos, vPos);
 
-                CreateParticle(BITMAP_LIGHT + 2, vPos, o->Angle, vLight, 7, 0.5f);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 2, vPos, o->Angle, vLight, 7, 0.5f);
 
                 switch (o->Type)
                 {
@@ -763,7 +763,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     Vector(0.6f, 0.9f, 0.2f, vLight);	//green
                     break;
                 }
-                CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 29, 1.0f);
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 29, 1.0f);
             }
         }
         else					//o->CurrentAction == MONSTER01_DIE
@@ -827,14 +827,14 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (o->AnimationFrame >= 2.0f && o->AnimationFrame <= 2.4f)
+            if (o->AnimationFrame >= 2.0f && o->AnimationFrame <= 2.4f && rand_fps_check(1))
             {
                 Vector(0.0f, 0.0f, 0.0f, vPos);
                 b->TransformPosition(o->BoneTransform[36], vPos, vRelative, true);
                 CreateEffect(iModel, vRelative, o->Angle, vLight, 0, o, -1, 0, 0, 0, 1.3f);
                 CreateParticle(BITMAP_SMOKE, vRelative, o->Angle, vLight, 62, 1.0f);
             }
-            else if (o->AnimationFrame >= 7.0f && o->AnimationFrame <= 7.4f)
+            else if (o->AnimationFrame >= 7.0f && o->AnimationFrame <= 7.4f && rand_fps_check(1))
             {
                 Vector(0.0f, 0.0f, 0.0f, vPos);
                 b->TransformPosition(o->BoneTransform[42], vPos, vRelative, true);
@@ -844,7 +844,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (o->AnimationFrame >= 6.0f && o->AnimationFrame <= 6.4f)
+            if (o->AnimationFrame >= 6.0f && o->AnimationFrame <= 6.4f && rand_fps_check(1))
             {
                 Vector(0.0f, 0.0f, 0.0f, vPos);
                 b->TransformPosition(o->BoneTransform[42], vPos, vRelative, true);

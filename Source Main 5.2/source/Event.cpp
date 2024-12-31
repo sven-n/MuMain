@@ -342,19 +342,19 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             if (o->AnimationFrame <= 0.3f)
             {
                 o->m_iAnimation = rand() % 6 + MODEL_NEWYEARSDAY_EVENT_BEKSULKI;
-                CreateParticle(BITMAP_EXPLOTION, vWorldPos, o->Angle, vLight, 0, 0.5f);
+                CreateParticleFpsChecked(BITMAP_EXPLOTION, vWorldPos, o->Angle, vLight, 0, 0.5f);
                 if (rand_fps_check(4)) o->m_iAnimation = MODEL_NEWYEARSDAY_EVENT_PIG;
 
                 PlayBuffer(SOUND_NEWYEARSDAY_DIE);
             }
 
             if (o->AnimationFrame >= 4.5f)
-                CreateEffect(MODEL_NEWYEARSDAY_EVENT_MONEY, vWorldPos, o->Angle, vLight);
+                CreateEffectFpsChecked(MODEL_NEWYEARSDAY_EVENT_MONEY, vWorldPos, o->Angle, vLight);
 
             if (o->m_iAnimation != 0 && rand_fps_check(3))
             {
                 if (o->AnimationFrame >= 4.5f)
-                    CreateEffect(o->m_iAnimation, vWorldPos, o->Angle, vLight);
+                    CreateEffectFpsChecked(o->m_iAnimation, vWorldPos, o->Angle, vLight);
             }
         }
     }
@@ -487,7 +487,7 @@ bool C09SummerEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     }break;
     case MONSTER01_DIE:
     {
-        if (o->AnimationFrame > 0.0f && o->AnimationFrame <= 0.3f)
+        if (o->AnimationFrame > 0.0f && o->AnimationFrame <= 0.3f && rand_fps_check(1))
         {
             CreateEffect(MODEL_EFFECT_SKURA_ITEM, o->Position, o->Angle, o->Light, 1, o);
             vec3_t Position, Angle, Light;

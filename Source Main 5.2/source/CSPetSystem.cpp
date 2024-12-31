@@ -410,7 +410,7 @@ void CSPetDarkSpirit::MovePet(void)
             {
                 b->TransformPosition(o->BoneTransform[rand() % 66], p, Pos);
 
-                CreateParticle(BITMAP_SPARK + 1, Pos, o->Angle, Light, 5, 0.8f);
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, Pos, o->Angle, Light, 5, 0.8f);
             }
         }
 
@@ -746,7 +746,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
                     if (!b->Bones[i].Dummy && i < b->NumBones)
                     {
                         b->TransformPosition(o->BoneTransform[i], p, Pos);
-                        CreateParticle(BITMAP_LIGHT, Pos, o->Angle, Light, 6, 1.3f);
+                        CreateParticleFpsChecked(BITMAP_LIGHT, Pos, o->Angle, Light, 6, 1.3f);
                     }
                 }
             }
