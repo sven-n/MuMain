@@ -1408,8 +1408,9 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         int itemindex = itemStartData->Index;
         Offset++;
 
+        auto itemData = ReceiveBuffer.subspan(Offset);
         int length = CalcItemLength(itemStartData->Item);
-        auto itemData = ReceiveBuffer.subspan(Offset, length);
+        itemData = itemData.subspan(0, length);
 
         if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
         {
@@ -1489,10 +1490,9 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
 
         int itemindex = itemStartData->Index;
 
+        auto itemData = ReceiveBuffer.subspan(Offset);
         int length = CalcItemLength(itemStartData->Item);
-
-        Offset++;
-        auto itemData = ReceiveBuffer.subspan(Offset, length);
+        itemData = itemData.subspan(0, length);
 
         if (Data->SubCode == 3 || Data->SubCode == 5)
         {
@@ -5758,9 +5758,11 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
             continue;
         }
 
-        int length = CalcItemLength(itemStartData->Item);
         Offset += 4;
-        auto itemData = ReceiveBuffer.subspan(Offset, length);
+        auto itemData = ReceiveBuffer.subspan(Offset);
+        int length = CalcItemLength(itemStartData->Item);
+        itemData = itemData.subspan(0, length);
+
         auto params = ParseItemData(itemData);
         vec3_t Position;
         Position[0] = (float)(itemStartData->PositionX + 0.5f) * TERRAIN_SCALE;
@@ -5845,8 +5847,9 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
                 }
 
                 auto offset = sizeof(PBMSG_HEADER) + 1;
-                int length = CalcItemLength(Data2->Item);
-                auto itemData = ReceiveBuffer.subspan(offset, length);
+                auto itemData = ReceiveBuffer.subspan(offset);
+                int length = CalcItemLength(itemData);
+                itemData = itemData.subspan(0, length);
 
                 if (itemIndex >= MAX_EQUIPMENT_INDEX && itemIndex < MAX_MY_INVENTORY_INDEX)
                 {
@@ -5930,8 +5933,9 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
     }
 
     auto Offset = sizeof(PBMSG_HEADER) + 2;
-    int length = CalcItemLength(Data->Item);
-    auto itemData = ReceiveBuffer.subspan(Offset, length);
+    auto itemData = ReceiveBuffer.subspan(Offset);
+    int length = CalcItemLength(itemData);
+    itemData = itemData.subspan(0, length);
 
     if (Data->SubCode != 255)
     {
@@ -6048,8 +6052,9 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     }
 
     auto Offset = sizeof(PBMSG_HEADER) + 2;
-    int length = CalcItemLength(Data->Item);
-    auto itemData = ReceiveBuffer.subspan(Offset, length);
+    auto itemData = ReceiveBuffer.subspan(Offset);
+    int length = CalcItemLength(itemData);
+    itemData = itemData.subspan(0, length);
 
     if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
     {
@@ -6299,8 +6304,10 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
     }
 
     auto Offset = sizeof(PBMSG_HEADER) + 1;
-    int length = CalcItemLength(Data->Item);
-    auto itemData = ReceiveBuffer.subspan(Offset, length);
+    auto itemData = ReceiveBuffer.subspan(Offset);
+    int length = CalcItemLength(itemData);
+    itemData = itemData.subspan(0, length);
+
     if (Data->Index != 255)
     {
         if (Data->Index >= MAX_EQUIPMENT_INDEX && Data->Index < MAX_MY_INVENTORY_INDEX)
@@ -6335,8 +6342,10 @@ void ReceiveTradeYourInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     }
 
     auto Offset = sizeof(PBMSG_HEADER) + 1;
-    int length = CalcItemLength(Data->Item);
-    auto itemData = ReceiveBuffer.subspan(Offset, length);
+    auto itemData = ReceiveBuffer.subspan(Offset);
+    int length = CalcItemLength(itemData);
+    itemData = itemData.subspan(0, length);
+
     g_pTrade->ProcessToReceiveYourItemAdd(Data->Index, itemData);
 }
 
@@ -6350,8 +6359,9 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     }
 
     auto Offset = sizeof(PBMSG_HEADER) + 1;
-    int length = CalcItemLength(Data->Item);
-    auto itemData = ReceiveBuffer.subspan(Offset, length);
+    auto itemData = ReceiveBuffer.subspan(Offset);
+    int length = CalcItemLength(itemData);
+    itemData = itemData.subspan(0, length);
 
     switch (Data->Index)
     {
@@ -9093,9 +9103,11 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
                 assert(false);
                 return;
             }
-            int length = CalcItemLength(pShopItem->Item);
+
             Offset+=9;
-            auto itemData = ReceiveBuffer.subspan(Offset, length);
+            auto itemData = ReceiveBuffer.subspan(Offset);
+            int length = CalcItemLength(itemData);
+            itemData = itemData.subspan(0, length);
 
             // todo: use item prices as well when the UI is ready
             if (pShopItem->MoneyPrice > 0)
@@ -9165,9 +9177,10 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
                 return;
             }
 
-            int length = CalcItemLength(pShopItem->Item);
             Offset += 9;
-            auto itemData = ReceiveBuffer.subspan(Offset, length);
+            auto itemData = ReceiveBuffer.subspan(Offset);
+            int length = CalcItemLength(itemData);
+            itemData = itemData.subspan(0, length);
 
             g_pPurchaseShopInventory->InsertItem(pShopItem->ItemSlot, itemData);
             AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_PURCHASE);
