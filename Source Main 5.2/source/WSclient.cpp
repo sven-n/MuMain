@@ -1409,7 +1409,7 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         Offset++;
 
         auto itemData = ReceiveBuffer.subspan(Offset);
-        int length = CalcItemLength(itemStartData->Item);
+        int length = CalcItemLength(itemData);
         itemData = itemData.subspan(0, length);
 
         if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
@@ -1491,7 +1491,7 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         int itemindex = itemStartData->Index;
 
         auto itemData = ReceiveBuffer.subspan(Offset);
-        int length = CalcItemLength(itemStartData->Item);
+        int length = CalcItemLength(itemData);
         itemData = itemData.subspan(0, length);
 
         if (Data->SubCode == 3 || Data->SubCode == 5)
@@ -5760,7 +5760,7 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
 
         Offset += 4;
         auto itemData = ReceiveBuffer.subspan(Offset);
-        int length = CalcItemLength(itemStartData->Item);
+        int length = CalcItemLength(itemData);
         itemData = itemData.subspan(0, length);
 
         auto params = ParseItemData(itemData);
