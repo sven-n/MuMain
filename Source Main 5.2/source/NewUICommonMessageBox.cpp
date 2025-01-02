@@ -2783,7 +2783,8 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
     }
     else
     {
-        iSourceIndex = g_pMyShopInventory->GetSourceIndex();
+        ITEM* pItem = g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex());
+        iSourceIndex = g_pMyShopInventory->GetItemInventoryIndex(pItem);
         int iItemPrice = pMsgBox->GetItemValue();
         SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
         AddPersonalItemPrice(iSourceIndex, iItemPrice, g_IsPurchaseShop);

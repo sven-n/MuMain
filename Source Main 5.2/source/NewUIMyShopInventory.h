@@ -78,6 +78,7 @@ namespace SEASON3B
         void ChangeTargetIndex(int tindex);
         const int GetTargetIndex();
         ITEM* FindItem(int iLinealPos);
+        int GetItemInventoryIndex(ITEM* pItem);
         void ChangeEditBox(const UISTATES type);
         void ChangeTitle(std::wstring& titletext);
         void GetTitle(wchar_t* titletext);
