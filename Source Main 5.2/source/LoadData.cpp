@@ -71,35 +71,33 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
         {
             pModel->IndexTexture[i] = BITMAP_HIDE;
         }
-        else
+        else if (tolower(__ext[1]) == 't') // TGA
+        {
+            pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath, GL_NEAREST, Wrap);
+        }
+        else if (tolower(__ext[1]) == 'j') // JPG
+        {
+            pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath, Type, Wrap);
+        }
+        
+        if (pModel->IndexTexture[i] == BITMAP_UNKNOWN)
         {
             if (auto pBitmap = Bitmaps.FindTextureByName(textureFileName))
             {
+                // we try to find an already loaded texture based on the file name
                 Bitmaps.LoadImage(pBitmap->BitmapIndex, pBitmap->FileName);
                 pModel->IndexTexture[i] = pBitmap->BitmapIndex;
             }
             else
             {
-                if (tolower(__ext[1]) == 't')
-                {
-                    pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath, GL_NEAREST, Wrap);
-                }
-                else if (tolower(__ext[1]) == 'j')
-                {
-                    pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath, Type, Wrap);
-                }
-            }
-        }
-
-        if (pModel->IndexTexture[i] == BITMAP_UNKNOWN)
-        {
-            wchar_t szErrorMsg[256] = { 0, };
-            swprintf(szErrorMsg, L"OpenTexture Failed: %s of %hs", szFullPath, pModel->Name);
+                wchar_t szErrorMsg[256] = { 0, };
+                swprintf(szErrorMsg, L"OpenTexture Failed: %s of %hs", szFullPath, pModel->Name);
 #ifdef FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg);
+                PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK
-            PopUpErrorCheckMsgBox(szErrorMsg, true);
+                PopUpErrorCheckMsgBox(szErrorMsg, true);
 #endif // FOR_WORK
+            }
         }
 
         delete[] textureFileName;
