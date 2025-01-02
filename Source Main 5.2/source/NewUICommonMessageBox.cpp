@@ -2832,8 +2832,11 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
 
     if (pItem && pCha)
     {
-        int sourceIndex = g_pPurchaseShopInventory->GetSourceIndex();
-        SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
+        int sourceIndex = g_pPurchaseShopInventory->GetItemInventoryIndex(pItem);
+        if (sourceIndex >= 0)
+        {
+            SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
+        }
     }
 
     PlayBuffer(SOUND_CLICK01);

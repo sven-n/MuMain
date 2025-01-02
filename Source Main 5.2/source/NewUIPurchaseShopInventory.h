@@ -68,6 +68,7 @@ namespace SEASON3B
         bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
         void DeleteItem(int iIndex);
         ITEM* FindItem(int iLinealPos);
+        int GetItemInventoryIndex(ITEM* pItem);
 
     private:
         void LoadImages();
