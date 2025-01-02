@@ -233,7 +233,7 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
 
     wchar_t szOptionText[64] = { 0, };
     wchar_t szOptionValueText[16] = { 0, };
-    SOCKET_OPTION_INFO* pInfo = NULL;
+
     for (int i = 0; i < pItem->SocketCount; ++i)
     {
         if (pItem->SocketSeedID[i] == SOCKET_EMPTY)
@@ -258,20 +258,23 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
 
     if (pItem->SocketSeedSetOption < MAX_SOCKET_OPTION)
     {
-        swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+        SOCKET_OPTION_INFO* pInfo = &m_SocketOptionInfo[SOT_MIX_SET_BONUS_OPTIONS][pItem->SocketSeedSetOption];
+        if (pInfo && pInfo->m_iOptionValue[0] > 0)
+        {
+            swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
-        swprintf(TextList[iTextNum], L"%s", GlobalText[2656]);
-        TextListColor[iTextNum] = TEXT_COLOR_PURPLE;
-        TextBold[iTextNum] = false;
-        ++iTextNum;
-        swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+            swprintf(TextList[iTextNum], L"%s", GlobalText[2656]);
+            TextListColor[iTextNum] = TEXT_COLOR_PURPLE;
+            TextBold[iTextNum] = false;
+            ++iTextNum;
+            swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
-        pInfo = &m_SocketOptionInfo[SOT_MIX_SET_BONUS_OPTIONS][pItem->SocketSeedSetOption];
-        CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
-        swprintf(TextList[iTextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
-        TextListColor[iTextNum] = TEXT_COLOR_BLUE;
-        TextBold[iTextNum] = false;
-        ++iTextNum;
+            CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
+            swprintf(TextList[iTextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
+            TextListColor[iTextNum] = TEXT_COLOR_BLUE;
+            TextBold[iTextNum] = false;
+            ++iTextNum;
+        }
     }
     return iTextNum;
 }
