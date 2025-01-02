@@ -1489,6 +1489,7 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         }
 
         int itemindex = itemStartData->Index;
+        Offset++;
 
         auto itemData = ReceiveBuffer.subspan(Offset);
         int length = CalcItemLength(itemData);
