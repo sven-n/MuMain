@@ -348,7 +348,7 @@ constexpr int MAX_ITEM = MAX_ITEM_TYPE * MAX_ITEM_INDEX;
 #define MAX_EVENT_ITEM     35
 
 #define MAX_SOCKETS			5
-#define SOCKET_EMPTY		0xFF
+#define SOCKET_EMPTY		0xFE
 
 constexpr int ITEM_GROUP_SWORD = 0;
 constexpr int ITEM_GROUP_AXE = 1;
