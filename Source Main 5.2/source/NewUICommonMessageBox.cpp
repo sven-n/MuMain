@@ -2784,10 +2784,16 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
     else
     {
         ITEM* pItem = g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex());
-        iSourceIndex = g_pMyShopInventory->GetItemInventoryIndex(pItem);
-        int iItemPrice = pMsgBox->GetItemValue();
-        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
-        AddPersonalItemPrice(iSourceIndex, iItemPrice, g_IsPurchaseShop);
+        if (pItem)
+        {
+            iSourceIndex = g_pMyShopInventory->GetItemInventoryIndex(pItem);
+            if (iSourceIndex >= 0)
+            {
+                int iItemPrice = pMsgBox->GetItemValue();
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
+                AddPersonalItemPrice(iSourceIndex, iItemPrice, g_IsPurchaseShop);
+            }
+        }
     }
 
     PlayBuffer(SOUND_CLICK01);
