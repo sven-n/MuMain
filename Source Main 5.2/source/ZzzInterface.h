@@ -61,7 +61,7 @@ void MoveHero();
 void EditObjects();
 
 void ClearInput(BOOL bClearWhisperTarget = TRUE);
-void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2);
+void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, size_t MaxLength);
 void CreateChat(wchar_t* ID, const wchar_t* Text, CHARACTER* c, int Flag = 0, int SetColor = -1);
 int  CreateChat(wchar_t* character_name, const wchar_t* chat_text, OBJECT* Owner, int Flag = 0, int SetColor = -1);
 void AssignChat(wchar_t* ID, const wchar_t* Text, int Flag = 0);
