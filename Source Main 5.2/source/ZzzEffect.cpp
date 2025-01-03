@@ -279,17 +279,17 @@ void CheckTargetRange(OBJECT* o)
                 if (o->SubType == 1)
                 {
                     for (int j = 0; j < 2; j++)
-                        CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                        CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
                 }
                 break;
 
             case BITMAP_ENERGY:
-                CreateParticle(BITMAP_SPARK + 1, o->Position, o->Angle, Light, 1, 6.f);
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, o->Position, o->Angle, Light, 1, 6.f);
                 break;
 
             case MODEL_LIGHTNING_ORB:
             {
-                CreateEffect(MODEL_LIGHTNING_ORB, o->Position, o->Angle, o->Light, 1);
+                CreateEffectFpsChecked(MODEL_LIGHTNING_ORB, o->Position, o->Angle, o->Light, 1);
             }
             break;
 
@@ -297,8 +297,8 @@ void CheckTargetRange(OBJECT* o)
             {
                 for (int j = 0; j < 2; j++)
                 {
-                    CreateEffect(MODEL_SNOW2 + rand() % 2, o->Position, o->Angle, o->Light);
-                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
+                    CreateEffectFpsChecked(MODEL_SNOW2 + rand() % 2, o->Position, o->Angle, o->Light);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light);
                 }
                 PlayBuffer(SOUND_BREAK01);
             }
@@ -308,8 +308,8 @@ void CheckTargetRange(OBJECT* o)
                 {
                     for (int j = 0; j < 20; j++)
                     {
-                        CreateEffect(MODEL_WOOSISTONE, o->Position, o->Angle, o->Light, 1);
-                        CreateParticle(BITMAP_FIRE, o->Position, o->Angle, o->Light, 0, 1, o);
+                        CreateEffectFpsChecked(MODEL_WOOSISTONE, o->Position, o->Angle, o->Light, 1);
+                        CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, o->Light, 0, 1, o);
                     }
                     PlayBuffer(SOUND_BREAK01);
                 }
@@ -7033,7 +7033,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         vec3_t vPos;
         VectorScale(o->Direction, o->Velocity, vPos);
-        VectorAdd(o->Position, vPos, o->Position);
+        VectorAddScaled(o->Position, vPos, o->Position, FPS_ANIMATION_FACTOR);
         CreateSprite(BITMAP_LIGHT + 3, o->Position, 4.0f, o->Light, o);
         CreateSprite(BITMAP_DS_EFFECT, o->Position, 2.5f, o->Light, o);
         CreateParticleFpsChecked(BITMAP_SPARK + 1, o->Position, o->Angle, o->Light, 10, 3.0f);
@@ -7157,7 +7157,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             vec3_t vLight = { 0.3f, 0.5f, 1.f };
             vec3_t vPos;
             VectorScale(o->Direction, o->Velocity, vPos);
-            VectorAdd(o->Position, vPos, o->Position);
+            VectorAddScaled(o->Position, vPos, o->Position, FPS_ANIMATION_FACTOR);
             //			CreateParticle(BITMAP_FLAME, o->Position, o->Angle, vLight, 8, 3.5f);
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 26, 0.2f);
             CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 26, 0.2f);
@@ -7283,7 +7283,7 @@ void MoveEffect(OBJECT* o, int iIndex)
     break;
     case 9:
         VectorScale(o->Direction, o->Velocity, Position);
-        VectorAdd(Position, o->Position, o->Position);
+        VectorAddScaled(Position, o->Position, o->Position, FPS_ANIMATION_FACTOR);
         //        o->Position[2] -= o->Velocity;
         o->Velocity += (3.f) * FPS_ANIMATION_FACTOR;
         o->Angle[0] += (5.f * o->Velocity) * FPS_ANIMATION_FACTOR;//rand()%20+20.f) ;
@@ -11001,7 +11001,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         if (o->SubType == 5)
         {
             if (o->Owner->Live == 0) o->Live = 0;
-            VectorAdd(o->Owner->Position, o->StartPosition, o->Position);
+            VectorAddScaled(o->Owner->Position, o->StartPosition, o->Position, FPS_ANIMATION_FACTOR);
             break;
         }
     case MODEL_ICE_SMALL:
@@ -12944,7 +12944,10 @@ void MoveEffect(OBJECT* o, int iIndex)
         //		VectorAdd(o->Position,Position,o->Position);
 
         o->Direction[1] += (12.f) * FPS_ANIMATION_FACTOR;
-        if (o->Direction[1] >= 0) o->Direction[1] = 0;
+        if (o->Direction[1] >= 0)
+        {
+            o->Direction[1] = 0;
+        }
 
         if (o->SubType == 1) {
             if (o->LifeTime > 1) {
