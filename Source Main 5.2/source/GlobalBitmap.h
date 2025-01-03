@@ -23,6 +23,8 @@ typedef struct
     char	Components;
     GLuint	TextureNumber;
     BYTE	Ref;
+    bool    IsSkin;
+    bool    IsHair;
     BYTE* Buffer;
 
 private:

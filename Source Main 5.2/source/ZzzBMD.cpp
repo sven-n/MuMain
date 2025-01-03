@@ -991,22 +991,13 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
     int textureIndex = IndexTexture[m->Texture];
     if (textureIndex == BITMAP_HIDE)
+    {
         return;
-
-    bool isSkin = textureIndex >= BITMAP_SKIN_BEGIN && textureIndex <= BITMAP_SKIN_END;
-    if (isSkin && HideSkin)
-        {
-            return;
-        }
+    }
 
     if (textureIndex == BITMAP_WATER)
     {
         textureIndex = BITMAP_WATER + WaterTextureNumber;
-    }
-    else  if (textureIndex == BITMAP_HAIR)
-    {
-        if (HideSkin) return;
-        textureIndex = BITMAP_HAIR + (Skin - 8);
     }
 
     if (explicitTextureIndex != -1)
@@ -1015,6 +1006,20 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     }
 
     const auto texture = Bitmaps.GetTexture(textureIndex);
+    if (texture->IsSkin && HideSkin)
+    {
+        return;
+    }
+
+    if (texture->IsHair)
+    {
+        if (HideSkin)
+        {
+            return;
+        }
+
+        textureIndex = BITMAP_HAIR + (Skin - 8);
+    }
 
     bool EnableWave = false;
     int streamMesh = static_cast<u_char>(this->StreamMesh);

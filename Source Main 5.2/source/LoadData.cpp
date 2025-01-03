@@ -79,6 +79,19 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
         {
             pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath, Type, Wrap);
         }
+
+        bool isSkin = (pTexture->FileName[0] == 's' && pTexture->FileName[1] == 'k' && pTexture->FileName[2] == 'i')
+            || !wcsnicmp(textureFileName, L"level", 5);
+        bool isHair = pTexture->FileName[0] == 'h' && pTexture->FileName[1] == 'a' && pTexture->FileName[2] == 'i' && pTexture->FileName[3] == 'r';
+        
+        if (isSkin || isHair)
+        {
+            if (auto pBitmap = Bitmaps.FindTextureByName(textureFileName))
+            {
+                pBitmap->IsSkin = isSkin;
+                pBitmap->IsHair = isHair;
+            }
+        }
         
         if (pModel->IndexTexture[i] == BITMAP_UNKNOWN)
         {
