@@ -533,7 +533,7 @@ void CreateNotice(wchar_t* Text, int Color)
     {
         wchar_t Temp1[256];
         wchar_t Temp2[256];
-        CutText(Text, Temp1, Temp2);
+        CutText(Text, Temp1, Temp2, 256);
         wcscpy(Notice[NoticeCount++].Text, Temp2);
         ScrollNotice();
         Notice[NoticeCount].Color = Color;
@@ -600,39 +600,28 @@ void RenderNotices()
     NoticeInverse += FPS_ANIMATION_FACTOR;
 }
 
-void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2)
+void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, size_t maxLength)
 {
     auto sourceText = std::wstring(Text);
     auto halfLength = sourceText.length() / 2;
-    auto offset = 0;
-    while (offset < sourceText.length())
+    size_t splitOffset = sourceText.find_last_of(L' ', halfLength);
+
+    if (splitOffset == std::wstring::npos)
     {
-        const auto nextSpaceAt = sourceText.find(L' ', offset + 1);
-        if (nextSpaceAt >= halfLength)
-        {
-            // now where above the halfway so we check if the next or previous space is closer
-
-            int splitOffset = offset;
-            if (nextSpaceAt - halfLength < halfLength - offset)
-            {
-                // next space is closer
-                splitOffset = nextSpaceAt;
-            }
-
-            wcsncpy(Text2, Text, splitOffset);
-            Text2[splitOffset] = '\0';
-
-            const auto restCount = sourceText.length() - splitOffset - 1;
-            wcsncpy(Text1, Text + splitOffset + 1, restCount);
-            Text1[restCount] = '\0';
-            return;
-        }
-
-        offset = nextSpaceAt;
+        splitOffset = sourceText.find_first_of(L' ', halfLength);
     }
 
-    wcsncpy(Text1, Text, wcslen(Text1));
-    Text2[0] = L'\0';
+    if (splitOffset != std::wstring::npos)
+    {
+        wcsncpy_s(Text1, maxLength, sourceText.substr(0, splitOffset).c_str(), _TRUNCATE);
+        wcsncpy_s(Text2, maxLength, sourceText.substr(splitOffset + 1).c_str(), _TRUNCATE);
+    }
+    else
+    {
+        // No spaces found, assign everything to Text1
+        wcsncpy_s(Text1, maxLength, sourceText.c_str(), _TRUNCATE);
+        Text2[0] = L'\0';  // Empty Text2
+    }
 }
 
 int     WhisperID_Num = 0;
@@ -1022,7 +1011,7 @@ void AddChat(CHAT* c, const wchar_t* chat_text, int flag)
 
     if (Length >= 20)
     {
-        CutText(chat_text, c->Text[0], c->Text[1]);
+        CutText(chat_text, c->Text[0], c->Text[1], 256);
         c->LifeTime[0] = Time;
         c->LifeTime[1] = Time;
     }

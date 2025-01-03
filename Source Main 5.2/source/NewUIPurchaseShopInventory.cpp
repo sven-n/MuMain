@@ -118,6 +118,16 @@ ITEM* SEASON3B::CNewUIPurchaseShopInventory::FindItem(int iLinealPos)
     return NULL;
 }
 
+int SEASON3B::CNewUIPurchaseShopInventory::GetItemInventoryIndex(ITEM* pItem)
+{
+    if (m_pNewInventoryCtrl && pItem)
+    {
+        return m_pNewInventoryCtrl->GetIndexByItem(pItem);
+    }
+
+    return -1;
+}
+
 void SEASON3B::CNewUIPurchaseShopInventory::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MSGBOX_BACK, GL_LINEAR);

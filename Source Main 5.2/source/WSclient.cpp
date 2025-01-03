@@ -9229,11 +9229,6 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         auto itemindex = Header->ItemSlot;
         auto offset = sizeof(PURCHASEITEM_RESULTINFO);
         auto itemData = ReceiveBuffer.subspan(offset);
-        if (CalcItemLength(itemData) < itemData.size())
-        {
-            assert(false);
-            return;
-        }
 
         if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
         {

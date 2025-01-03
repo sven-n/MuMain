@@ -577,6 +577,11 @@ int SEASON3B::CNewUIMyShopInventory::GetPointedItemIndex()
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }
 
+int SEASON3B::CNewUIMyShopInventory::GetItemInventoryIndex(ITEM* pItem)
+{
+    return m_pNewInventoryCtrl->GetIndexByItem(pItem);
+}
+
 void SEASON3B::CNewUIMyShopInventory::ResetSubject()
 {
     if (m_EditBox)

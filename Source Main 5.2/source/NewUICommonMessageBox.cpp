@@ -2783,10 +2783,17 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
     }
     else
     {
-        iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-        int iItemPrice = pMsgBox->GetItemValue();
-        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
-        AddPersonalItemPrice(iSourceIndex, iItemPrice, g_IsPurchaseShop);
+        ITEM* pItem = g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex());
+        if (pItem)
+        {
+            iSourceIndex = g_pMyShopInventory->GetItemInventoryIndex(pItem);
+            if (iSourceIndex >= 0)
+            {
+                int iItemPrice = pMsgBox->GetItemValue();
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
+                AddPersonalItemPrice(iSourceIndex, iItemPrice, g_IsPurchaseShop);
+            }
+        }
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2832,8 +2839,11 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
 
     if (pItem && pCha)
     {
-        int sourceIndex = g_pPurchaseShopInventory->GetSourceIndex();
-        SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
+        int sourceIndex = g_pPurchaseShopInventory->GetItemInventoryIndex(pItem);
+        if (sourceIndex >= 0)
+        {
+            SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
+        }
     }
 
     PlayBuffer(SOUND_CLICK01);
