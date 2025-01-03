@@ -262,6 +262,11 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER  Header;
     BYTE          Index;
+} PHEADER_DEFAULT_ITEM_EXTENDED_HEAD, * LPPHEADER_DEFAULT_ITEM_EXTENDED_HEAD;
+
+typedef struct {
+    PBMSG_HEADER  Header;
+    BYTE          Index;
     BYTE          Item[PACKET_ITEM_LENGTH_EXTENDED_MIN];
 } PHEADER_DEFAULT_ITEM_EXTENDED, * LPPHEADER_DEFAULT_ITEM_EXTENDED;
 

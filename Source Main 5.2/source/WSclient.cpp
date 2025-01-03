@@ -6297,19 +6297,26 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
 
 void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
 {
-    auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED>(ReceiveBuffer);
+    auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED_HEAD>(ReceiveBuffer);
     if (Data == nullptr)
     {
         assert(false);
         return;
     }
 
+    constexpr BYTE BUY_FAILED = 0xFF;
+
     auto Offset = sizeof(PBMSG_HEADER) + 1;
     auto itemData = ReceiveBuffer.subspan(Offset);
     int length = CalcItemLength(itemData);
     itemData = itemData.subspan(0, length);
 
-    if (Data->Index != 255)
+    if (Data->Index == BUY_FAILED)
+    {
+        g_pNewUISystem->HideAll();
+        g_pChatListBox->AddText(Hero->ID, GlobalText[732], SEASON3B::TYPE_ERROR_MESSAGE);
+    }
+    else
     {
         if (Data->Index >= MAX_EQUIPMENT_INDEX && Data->Index < MAX_MY_INVENTORY_INDEX)
         {
@@ -6322,12 +6329,7 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
 
         PlayBuffer(SOUND_GET_ITEM01);
     }
-    if (Data->Index == 0xfe)
-    {
-        g_pNewUISystem->HideAll();
 
-        g_pChatListBox->AddText(Hero->ID, GlobalText[732], SEASON3B::TYPE_ERROR_MESSAGE);
-    }
     BuyCost = 0;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x32 [ReceiveBuy(%d)]", Data->Index);
