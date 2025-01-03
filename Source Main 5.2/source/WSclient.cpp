@@ -6304,7 +6304,8 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
-    constexpr BYTE BUY_FAILED = 0xFF;
+    constexpr BYTE BUY_FAILED = 0xFE;
+    constexpr BYTE BUY_FAILED_SILENT = 0xFF;
 
     auto Offset = sizeof(PBMSG_HEADER) + 1;
     auto itemData = ReceiveBuffer.subspan(Offset);
@@ -6315,6 +6316,10 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
     {
         g_pNewUISystem->HideAll();
         g_pChatListBox->AddText(Hero->ID, GlobalText[732], SEASON3B::TYPE_ERROR_MESSAGE);
+    }
+    else if (Data->Index == BUY_FAILED_SILENT)
+    {
+        // do nothing, error message is sent separately.
     }
     else
     {
