@@ -531,13 +531,13 @@ void CreateNotice(wchar_t* Text, int Color)
     }
     else
     {
-        wchar_t Temp1[256];
-        wchar_t Temp2[256];
-        CutText(Text, Temp1, Temp2, 256);
-        wcscpy(Notice[NoticeCount++].Text, Temp2);
+        wchar_t TopText[256] = { 0 };
+        wchar_t BottomText[256] = { 0 };
+        CutText(Text, TopText, BottomText, 256);
+        wcscpy(Notice[NoticeCount++].Text, TopText);
         ScrollNotice();
         Notice[NoticeCount].Color = Color;
-        wcscpy(Notice[NoticeCount++].Text, Temp1);
+        wcscpy(Notice[NoticeCount++].Text, BottomText);
     }
     NoticeTime = 300;
 }
@@ -1011,7 +1011,7 @@ void AddChat(CHAT* c, const wchar_t* chat_text, int flag)
 
     if (Length >= 20)
     {
-        CutText(chat_text, c->Text[0], c->Text[1], 256);
+        CutText(chat_text, c->Text[1], c->Text[0], 256);
         c->LifeTime[0] = Time;
         c->LifeTime[1] = Time;
     }
