@@ -6464,25 +6464,31 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
     RenderTipTextList(sx, sy, TextNum, 0, RT3_SORT_CENTER, iRenderPoint);
 }
 
-void SetJewelColor()
+void SetTextColor(float r, float g, float b)
+{
+    glColor3f(r, g, b);
+    g_pRenderText->SetTextColor(r * 255, g * 255, b * 255, 255);
+}
+
+void SetYellowTextColor()
+{
+    SetTextColor(1.f, 0.8f, 0.1f);
+}
+
+void SetGrayTextColor()
+{
+    SetTextColor(0.7f, 0.7f, 0.7f);
+}
+
+void SetOrangeTextColor()
+{
+    SetTextColor(0.9f, 0.53f, 0.13f);
+}
+
+void SetJewelTextColor()
 {
     g_pRenderText->SetFont(g_hFontBold);
-    glColor3f(1.f, 0.8f, 0.1f);
-}
-
-void SetYellowColor()
-{
-    glColor3f(1.f, 0.8f, 0.1f);
-}
-
-void SetGrayColor()
-{
-    glColor3f(0.7f, 0.7f, 0.7f);
-}
-
-void SetOrangeColor()
-{
-    glColor3f(0.9f, 0.53f, 0.13f);
+    SetYellowTextColor();
 }
 
 std::unordered_set<int> boldTextItems = {
@@ -6698,6 +6704,8 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     wchar_t Name[80]{};
     auto ItemLevel = ip->Level;
     auto ItemOption = ip->ExcellentFlags;
+    GLfloat textColor[] = {1, 1, 1, 1};
+
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 255);
@@ -6723,26 +6731,26 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
 
     if (whiteTextItems.count(o->Type) > 0)
     {
-        glColor3f(1.f, 1.f, 1.f);
+        SetTextColor(1.f, 1.f, 1.f);
     }
     else if (yellowTextItems.count(o->Type) > 0)
     {
-        SetYellowColor();
+        SetYellowTextColor();
     }
     else if (orangeTextItems.count(o->Type) > 0)
     {
-        SetOrangeColor();
+        SetOrangeTextColor();
     }
     else if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
-        SetGrayColor();
+        SetGrayTextColor();
         swprintf(Name, L"%s %s", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
     }
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true))
     {
         int iJewelItemIndex = COMGEM::GetJewelIndex(COMGEM::Check_Jewel_Com(o->Type, true), COMGEM::eGEM_NAME);
         g_pRenderText->SetFont(g_hFontBold);
-        SetYellowColor();
+        SetYellowTextColor();
         swprintf(Name, L"%s", GlobalText[iJewelItemIndex]);
     }
     else if (o->Type == MODEL_COMPILED_CELE)
@@ -6814,7 +6822,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     {
         if (ItemLevel == 13)
         {
-            SetYellowColor();
+            SetYellowTextColor();
             swprintf(Name, L"%s", GlobalText[117]);
         }
         else
@@ -6840,16 +6848,16 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_RED_RIBBON_BOX)
     {
-        glColor3f(1.f, 0.3f, 0.3f); // Color: Red
+        SetTextColor(1.f, 0.3f, 0.3f); // Color: Red
 
     }
     else if (o->Type == MODEL_GREEN_RIBBON_BOX)
     {
-        glColor3f(0.3f, 1.0f, 0.3f); // Color: Green
+        SetTextColor(0.3f, 1.0f, 0.3f); // Color: Green
     }
     else if (o->Type == MODEL_BLUE_RIBBON_BOX)
     {
-        glColor3f(0.3f, 0.3f, 1.f); // Color: Blue
+        SetTextColor(0.3f, 0.3f, 1.f); // Color: Blue
     }
     else if (o->Type == MODEL_PINK_CHOCOLATE_BOX)
     {
@@ -6857,12 +6865,12 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         int k = ITEM_PINK_CHOCOLATE_BOX;
         if (ItemLevel == 0)
         {
-            glColor3f(1.f, 0.3f, 1.f);
+            SetTextColor(1.f, 0.3f, 1.f);
         }
         else
             if (ItemLevel == 1)
             {
-                glColor3f(1.f, 0.3f, 1.f);
+                SetTextColor(1.f, 0.3f, 1.f);
                 swprintf(Name, GlobalText[2012]);
             }
     }
@@ -6870,12 +6878,12 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     {
         if (ItemLevel == 0)
         {
-            glColor3f(1.0f, 0.3f, 0.3f);
+            SetTextColor(1.0f, 0.3f, 0.3f);
         }
         else
             if (ItemLevel == 1)
             {
-                glColor3f(1.0f, 0.3f, 0.3f);
+                SetTextColor(1.0f, 0.3f, 0.3f);
                 swprintf(Name, GlobalText[2013]);
             }
     }
@@ -6883,28 +6891,28 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     {
         if (ItemLevel == 0)
         {
-            glColor3f(0.3f, 0.3f, 1.f);
+            SetTextColor(0.3f, 0.3f, 1.f);
         }
         else
             if (ItemLevel == 1)
             {
-                glColor3f(0.3f, 0.3f, 1.f);
+                SetTextColor(0.3f, 0.3f, 1.f);
                 swprintf(Name, GlobalText[2014]);
             }
     }
     else if (o->Type == MODEL_EVENT + 21)
     {
-        glColor3f(1.f, 0.3f, 1.f); // Color: Pink
+        SetTextColor(1.f, 0.3f, 1.f); // Color: Pink
         swprintf(Name, GlobalText[2012]);
     }
     else if (o->Type == MODEL_EVENT + 22)
     {
-        glColor3f(1.0f, 0.3f, 0.3f); // Color: Red
+        SetTextColor(1.0f, 0.3f, 0.3f); // Color: Red
         swprintf(Name, GlobalText[2013]);
     }
     else if (o->Type == MODEL_EVENT + 23)
     {
-        glColor3f(0.3f, 0.3f, 1.f); // Color: Blue
+        SetTextColor(0.3f, 0.3f, 1.f); // Color: Blue
         swprintf(Name, GlobalText[2014]);
     }
     else if (o->Type == MODEL_EVENT + 11)
@@ -6955,7 +6963,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_POTION + 21 && ItemLevel == 3)
     {
-        SetYellowColor();
+        SetYellowTextColor();
         swprintf(Name, GlobalText[1290]);
     }
     else if (o->Type == MODEL_SIEGE_POTION)
@@ -6990,64 +6998,64 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
             || (o->Type >= MODEL_SPHERE_MONO && o->Type <= MODEL_SPHERE_5)
             || (o->Type >= MODEL_SEED_SPHERE_FIRE_1 && o->Type <= MODEL_SEED_SPHERE_EARTH_5))
     {
-        glColor3f(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
+        SetTextColor(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
         wcscpy(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_HELPER + 66)
     {
-        glColor3f(0.6f, 0.4f, 1.0f);
+        SetTextColor(0.6f, 0.4f, 1.0f);
     }
     else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + EWS_BEGIN
         && o->Type <= MODEL_TYPE_CHARM_MIXWING + EWS_END)
     {
-        SetOrangeColor();
+        SetOrangeTextColor();
     }
     else
     {
         if (o->Type == MODEL_DIVINE_STAFF_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL || o->Type == MODEL_DIVINE_CB_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL)
         {
-            glColor3f(1.f, 0.1f, 1.f);
+            SetTextColor(1.f, 0.1f, 1.f);
         }
         else if (g_SocketItemMgr.IsSocketItem(o))
         {
-            glColor3f(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
+            SetTextColor(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
         }
         else if ((ItemOption & 63) > 0 && (o->Type<MODEL_WINGS_OF_SPIRITS || o->Type>MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
             && (o->Type<MODEL_WING_OF_STORM || o->Type>MODEL_CAPE_OF_EMPEROR)
             && (o->Type<MODEL_WINGS_OF_DESPAIR || o->Type>MODEL_WING_OF_DIMENSION)
             && !(o->Type >= MODEL_CAPE_OF_FIGHTER && o->Type <= MODEL_CAPE_OF_OVERRULE))
         {
-            glColor3f(0.1f, 1.f, 0.5f);
+            SetTextColor(0.1f, 1.f, 0.5f);
         }
         else if (ItemLevel >= 7)
         {
-            SetYellowColor();
+            SetYellowTextColor();
         }
         else if (ip->HasSkill || ip->HasLuck || ip->OptionLevel > 0)
         {
-            glColor3f(0.4f, 0.7f, 1.f);
+            SetTextColor(0.4f, 0.7f, 1.f);
         }
         else if (ItemLevel == 0)
         {
-            SetGrayColor();
+            SetGrayTextColor();
         }
         else if (ItemLevel < 3)
         {
-            glColor3f(0.9f, 0.9f, 0.9f);
+            SetTextColor(0.9f, 0.9f, 0.9f);
         }
         else if (ItemLevel < 5)
         {
-            glColor3f(1.f, 0.5f, 0.2f);
+            SetTextColor(1.f, 0.5f, 0.2f);
         }
         else if (ItemLevel < 7)
         {
-            glColor3f(0.4f, 0.7f, 1.f);
+            SetTextColor(0.4f, 0.7f, 1.f);
         }
 
         wchar_t SetName[64]{};
         if (g_csItemOption.GetSetItemName(SetName, o->Type - MODEL_ITEM, ip->AncientDiscriminator))
         {
-            glColor3f(1.f, 1.f, 1.f);
+            SetTextColor(0.f, 1.f, 0.f);
             g_pRenderText->SetFont(g_hFontBold);
             g_pRenderText->SetTextColor(0, 255, 0, 255);
             g_pRenderText->SetBgColor(60, 60, 200, 255);
@@ -7073,11 +7081,6 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         if (ip->HasLuck)
             wcscat(Name, GlobalText[178]);
     }
-
-    GLfloat fCurColor[4] = { 1.f, 1.f, 1.f, 0.0f };
-    glGetFloatv(GL_CURRENT_COLOR, fCurColor);
-    if (fCurColor[0] < 0.9f || fCurColor[1] < 0.9f || fCurColor[2] < 0.9f)
-        g_pRenderText->SetTextColor(fCurColor[0] * 255, fCurColor[1] * 255, fCurColor[2] * 255, 255);
 
     if (!Sort)
     {
