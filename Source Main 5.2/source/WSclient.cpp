@@ -6307,10 +6307,13 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
     constexpr BYTE BUY_FAILED = 0xFE;
     constexpr BYTE BUY_FAILED_SILENT = 0xFF;
 
-    auto Offset = sizeof(PBMSG_HEADER) + 1;
+    auto Offset = sizeof(PHEADER_DEFAULT_ITEM_EXTENDED_HEAD);
     auto itemData = ReceiveBuffer.subspan(Offset);
-    int length = CalcItemLength(itemData);
-    itemData = itemData.subspan(0, length);
+    if (itemData.size() > 0)
+    {
+        int length = CalcItemLength(itemData);
+        itemData = itemData.subspan(0, length);
+    }
 
     if (Data->Index == BUY_FAILED)
     {
