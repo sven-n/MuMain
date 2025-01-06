@@ -4310,8 +4310,10 @@ void MoveParticles()
                 o->Frame = (12 - o->LifeTime) / 3;
                 break;
             case BITMAP_LIGHTNING + 1:
+            {
+                auto lifeTime = max(0, o->LifeTime) * FPS_ANIMATION_FACTOR;
                 o->Rotation = (float)((int)WorldTime % 1000) * 0.001f;
-                Luminosity = (float)(o->LifeTime) / 10.f;
+                Luminosity = (float)(lifeTime) / 10.f;
                 Vector(Luminosity * 0.5f, Luminosity * 1.f, Luminosity * 0.8f, Light);
                 AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
                 if (o->SubType == 2)
@@ -4322,6 +4324,7 @@ void MoveParticles()
                     o->Position[2] += 80.f * FPS_ANIMATION_FACTOR;
                 }
                 break;
+            }
             case BITMAP_LIGHTNING:
                 o->Frame = rand() % 4;
                 Luminosity = (float)(o->LifeTime) / 5.f;
@@ -6624,7 +6627,7 @@ void MoveParticles()
                 {
                     o->Position[2] = Height;
                     o->Gravity = -o->Gravity * 0.6f;
-                    o->LifeTime -= 4;
+                    o->LifeTime -= 4 * FPS_ANIMATION_FACTOR;
                 }
                 VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
                 if (o->SubType == 5 || o->SubType == 6)
@@ -6851,7 +6854,7 @@ void MoveParticles()
                     {
                         o->Position[2] = Height + 3.f;
                         o->Gravity = -o->Gravity * 0.3f;
-                        o->LifeTime -= 2;
+                        o->LifeTime -= 2 * FPS_ANIMATION_FACTOR;
                     }
                 }
                 break;
@@ -6879,7 +6882,7 @@ void MoveParticles()
                     {
                         o->Position[2] = Height + 3.f;
                         o->Gravity = -o->Gravity * 0.3f;
-                        o->LifeTime -= 2;
+                        o->LifeTime -= 2 * FPS_ANIMATION_FACTOR;
                     }
                 }
                 break;
@@ -6976,7 +6979,7 @@ void MoveParticles()
                     {
                         o->Position[2] = Height + 3.f;
                         o->Gravity = -o->Gravity * 0.3f;
-                        o->LifeTime -= 2;
+                        o->LifeTime -= 2 * FPS_ANIMATION_FACTOR;
                     }
                 }
                 break;
@@ -6999,7 +7002,7 @@ void MoveParticles()
                     {
                         o->Position[2] = Height + 3.f;
                         o->Gravity = -o->Gravity * 0.3f;
-                        o->LifeTime -= 2;
+                        o->LifeTime -= 2 * FPS_ANIMATION_FACTOR;
                     }
                 }
                 break;
@@ -7017,7 +7020,7 @@ void MoveParticles()
 
                     o->Scale -=  FPS_ANIMATION_FACTOR * 0.01f;
 
-                    o->LifeTime -= 1;
+                    o->LifeTime -= 1 * FPS_ANIMATION_FACTOR;
                     if (o->LifeTime <= 0) o->Live = false;
                 }
                 break;
@@ -7031,7 +7034,7 @@ void MoveParticles()
                     {
                         o->Position[2] = Height;
                         o->Gravity = -o->Gravity * 0.6f;
-                        o->LifeTime -= 4;
+                        o->LifeTime -= 4 * FPS_ANIMATION_FACTOR;
                     }
                     VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
                 }
@@ -9294,6 +9297,11 @@ void RenderParticles(BYTE byRenderOneMore)
             default:
                 RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
                 break;
+            }
+
+            if (o->LifeTime < 0)
+            {
+                o->LifeTime = 0;
             }
         }
     }

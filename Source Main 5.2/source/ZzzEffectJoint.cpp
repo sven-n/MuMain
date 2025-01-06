@@ -3153,7 +3153,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.8f;
                 Vector(Luminosity * 0.5f, Luminosity * 0.1f, Luminosity, Light);
                 VectorMul(Light, o->Light, Light);
-                CreateParticleFpsChecked(BITMAP_LIGHTNING + 1, o->Position, o->Angle, Light);
+                CreateParticle(BITMAP_LIGHTNING + 1, o->Position, o->Angle, Light);
                 break;
             case 14:
             case 15:
