@@ -1420,7 +1420,7 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         {
             g_pMyInventory->InsertItem(itemindex, itemData);
         }
-        else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
         {
             g_pMyInventoryExt->InsertItem(itemindex, itemData);
         }
@@ -5977,7 +5977,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
                 g_pMyInventory->InsertItem(itemindex, itemData);
             }
-            else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+            else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
