@@ -1575,7 +1575,7 @@ bool CheckAttack()
 
     CHARACTER* c = &CharactersClient[SelectedCharacter];
 
-    if (c->Dead)
+    if (c->Dead > 0)
     {
         return false;
     }
