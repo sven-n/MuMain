@@ -2464,8 +2464,6 @@ void MainScene(HDC hDC)
             SwapBuffers(hDC);
         }
 
-        g_render_lock->unlock();
-
         // Here comes the tricky part of limiting the frame rate:
         // We need to make sure that the frame rate is limited to the target frame rate,
         // but windows sleep functions are pretty inaccurate.
@@ -2509,8 +2507,6 @@ void MainScene(HDC hDC)
 
             current_tick_count += static_cast<int>(rest_ms);
         }
-
-        g_render_lock->lock();
 
         if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
         {
