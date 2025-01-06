@@ -157,7 +157,7 @@ public:
     BYTE        AttackFlag;
     
     BYTE        TargetAngle;
-    BYTE        Dead;
+    float        Dead; // Number of reference frames after death
     WORD		Skill;
     BYTE        SwordCount;
     BYTE		byExtensionSkill;

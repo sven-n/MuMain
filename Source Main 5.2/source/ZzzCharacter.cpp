@@ -1203,7 +1203,7 @@ void SetPlayerTeleport(CHARACTER* c)
 
 void SetPlayerShock(CHARACTER* c, int Hit)
 {
-    if (c->Dead) return;
+    if (c->Dead > 0) return;
     if (c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT) return;
     if (c->Helper.Type == MODEL_DARK_HORSE_ITEM) return;
 
@@ -3089,7 +3089,7 @@ void DeadCharacter(CHARACTER* c, OBJECT* o, BMD* b)
             FallingCharacter(c, o);
             startDeadTime = 15;
         }
-        if (c->Dead <= startDeadTime && c->Dead >= startDeadTime - 10 && (c->Dead % 2))
+        if (c->Dead <= startDeadTime && c->Dead >= startDeadTime - 10 && (((int)c->Dead) % 2))
         {
             vec3_t Position;
 
@@ -3893,7 +3893,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
 
     if (c->Dead > 0)
     {
-        c->Dead++;
+        c->Dead += FPS_ANIMATION_FACTOR;
         if (c->Dead >= 15)
         {
             SetPlayerDie(c);
@@ -11471,7 +11471,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->ContrastEnable = false;
     o->EnableBoneMatrix = true;
     o->EnableShadow = false;
-    c->Dead = false;
+    c->Dead = 0;
     c->Blood = false;
     c->GuildTeam = 0;
     c->Run = 0;

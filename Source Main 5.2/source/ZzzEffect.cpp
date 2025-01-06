@@ -50,7 +50,7 @@ bool CheckCharacterRange(OBJECT* so, float Range, short PKKey, BYTE Kind = 0)
             float dy = so->Position[1] - o->Position[1];
             float Distance = sqrtf(dx * dx + dy * dy);
 
-            if (o->Live && o->Visible && (c != Hero || (Kind == KIND_MONSTER)) && !c->Dead && Distance <= Range)
+            if (o->Live && o->Visible && (c != Hero || (Kind == KIND_MONSTER)) && c->Dead == 0 && Distance <= Range)
             {
                 return true;
             }
@@ -8914,7 +8914,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             OBJECT* pTargetObj = &pTargetChar->Object;
 
             if (pSourceObj == NULL || pSourceObj->Live == false
-                || pTargetObj == NULL || pTargetObj->Live == false || (bool)(pTargetChar->Dead) == true)
+                || pTargetObj == NULL || pTargetObj->Live == false || (pTargetChar->Dead > 0) == true)
             {
                 o->LifeTime = 0;
                 o->Live = false;
@@ -12274,7 +12274,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                             float dx = o->Position[0] - to->Position[0];
                             float dy = o->Position[1] - to->Position[1];
                             float Distance = sqrtf(dx * dx + dy * dy);
-                            if (to->Live && to->Visible && tc != Hero && !tc->Dead && Distance <= 200)
+                            if (to->Live && to->Visible && tc != Hero && tc->Dead == 0 && Distance <= 200)
                             {
                                 if (to->Type == MODEL_PLAYER)
                                 {

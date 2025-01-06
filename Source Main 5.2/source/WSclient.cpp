@@ -1762,7 +1762,7 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
     CHARACTER* c = &CharactersClient[FindCharacterIndex(Key)];
     OBJECT* o = &c->Object;
 
-    if (c->Dead || !o->Live)
+    if (c->Dead > 0 || !o->Live)
     {
         return;
     }
@@ -5466,7 +5466,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         Hero->TargetCharacter = Index;
         CreatePoint(o->Position, Damage, Light);
     }
-    c->Dead = true;
+    c->Dead = 1;
     c->Movement = false;
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
@@ -5533,7 +5533,7 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         CreatePoint(o->Position, damageOfLastHit, Light);
     }
 
-    killedObject->Dead = true;
+    killedObject->Dead = 1;
     killedObject->Movement = false;
 
     switch(experienceType)
@@ -5648,7 +5648,7 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
 
     CHARACTER* c = &CharactersClient[Index];
     OBJECT* o = &c->Object;
-    c->Dead = true;
+    c->Dead = 1;
     c->Movement = false;
 
     WORD SkillType = ((int)(Data->MagicH) << 8) + Data->MagicL;
