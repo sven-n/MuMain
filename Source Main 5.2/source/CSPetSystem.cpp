@@ -70,7 +70,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->ContrastEnable = false;
     o->EnableBoneMatrix = true;
     o->EnableShadow = false;
-    c->Dead = false;
+    c->Dead = 0;
     c->Blood = false;
     c->GuildTeam = 0;
     c->Run = 0;

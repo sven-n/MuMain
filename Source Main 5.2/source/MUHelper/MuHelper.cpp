@@ -346,7 +346,7 @@ namespace MUHelper
             }
 
             CHARACTER* pTarget = &CharactersClient[iIndex];
-            if (!pTarget || (pTarget && (pTarget->Dead || !pTarget->Object.Live)))
+            if (!pTarget || (pTarget && (pTarget->Dead > 0 || !pTarget->Object.Live)))
             {
                 DeleteTarget(iMonsterId);
             }
@@ -867,7 +867,7 @@ namespace MUHelper
             }
 
             CHARACTER* pTarget = &CharactersClient[SelectedCharacter];
-            if (pTarget->Dead)
+            if (pTarget->Dead > 0)
             {
                 DeleteTarget(iTarget);
                 return 0;

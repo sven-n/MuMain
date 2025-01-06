@@ -6812,7 +6812,7 @@ bool CanExecuteSkill(CHARACTER* c, int Skill, float Distance)
 {
     OBJECT* o = &c->Object;
 
-    if (c->Dead)
+    if (c->Dead > 0)
     {
         return false;
     }
@@ -7446,7 +7446,7 @@ void MoveHero()
     {
         StandTime++;
 
-        if (StandTime >= 40 && !MouseOnWindow && !Hero->Dead &&
+        if (StandTime >= 40 && !MouseOnWindow && Hero->Dead == 0 &&
             o->CurrentAction != PLAYER_POSE1 && o->CurrentAction != PLAYER_POSE_FEMALE1 &&
             o->CurrentAction != PLAYER_SIT1 && o->CurrentAction != PLAYER_SIT_FEMALE1 && NoAutoAttacking &&
             o->CurrentAction != PLAYER_ATTACK_TELEPORT &&

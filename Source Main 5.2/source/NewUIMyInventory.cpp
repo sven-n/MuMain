@@ -517,7 +517,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             const int ty = (int)(CollisionPosition[1] / TERRAIN_SCALE);
             if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
             {
-                if (Hero->Dead == false)
+                if (Hero->Dead == 0)
                 {
                     SocketClient->ToGameServer()->SendDropItemRequest(tx, ty, iSourceIndex);
                     SendDropItem = iSourceIndex;
