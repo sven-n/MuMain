@@ -1575,6 +1575,11 @@ bool CheckAttack()
 
     CHARACTER* c = &CharactersClient[SelectedCharacter];
 
+    if (c->Dead > 0)
+    {
+        return false;
+    }
+
     if (gMapManager.InChaosCastle() == true && c != Hero)
     {
         return true;

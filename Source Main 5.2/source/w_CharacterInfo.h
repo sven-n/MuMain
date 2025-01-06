@@ -166,7 +166,7 @@ public:
     BYTE        TargetY;
     BYTE        SkillX;
     BYTE        SkillY;
-    BYTE        Appear;
+    float        Appear;
     BYTE	    CurrentSkill;
     BYTE        CastRenderTime; // unused?
     BYTE        m_byFriend;
