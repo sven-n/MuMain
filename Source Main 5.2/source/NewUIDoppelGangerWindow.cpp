@@ -270,21 +270,7 @@ bool CNewUIDoppelGangerWindow::BtnProcess()
 
     if (m_BtnEnter.UpdateMouseEvent() == true)
     {
-        int iPos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_POTION + 111, 0);
-        if (iPos == -1)
-        {
-            iPos = g_pMyInventory->FindItemIndex(ITEM_HELPER + 125, -1);
-        }
-        if (iPos != -1)
-        {
-            SocketClient->ToGameServer()->SendDoppelgangerEnterRequest((BYTE)iPos);
-        }
-        else
-        {
-            SEASON3B::CNewUICommonMessageBox* pMsgBox;
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
-            pMsgBox->AddMsg(GlobalText[2779], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
-        }
+        SocketClient->ToGameServer()->SendDoppelgangerEnterRequest(0xFF);
         return true;
     }
 
