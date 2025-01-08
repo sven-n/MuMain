@@ -850,7 +850,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     wchar_t strDexterity[32];
     WORD wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
     swprintf(strDexterity, L"%d", wDexterity);
-    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_DEXTERITY + 6, GlobalText[1702], 74, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_DEXTERITY + 6, GlobalText[167], 74, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_DEXTERITY + 6, strDexterity, 86, 0, RT3_SORT_CENTER);
 
     bool bDexSuccess = true;
