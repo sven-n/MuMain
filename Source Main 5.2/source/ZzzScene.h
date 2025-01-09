@@ -1,6 +1,7 @@
 #pragma once
+
+#include <mutex>
 #include "zzzinfomation.h"
-#include "SpinLock.h"
 
 extern EGameScene SceneFlag;
 
@@ -15,7 +16,7 @@ extern wchar_t* szServerIpAddress;
 extern unsigned short g_ServerPort;
 extern int g_iLengthAuthorityCode;
 
-inline SpinLock* g_render_lock = new SpinLock();
+inline std::mutex g_render_lock;
 
 extern void LogInScene(HDC hDC);
 extern void LoadingScene(HDC hDC);
