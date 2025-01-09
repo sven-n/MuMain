@@ -14557,6 +14557,7 @@ static void HandleIncomingPacketLocked(int32_t Handle, const BYTE* ReceiveBuffer
 {
     g_render_lock->lock();
     wglMakeCurrent(g_hDC, g_hRC);
+
     try
     {
         HandleIncomingPacket(Handle, ReceiveBuffer, Size);
@@ -14564,6 +14565,7 @@ static void HandleIncomingPacketLocked(int32_t Handle, const BYTE* ReceiveBuffer
     catch (const std::exception&)
     {
     }
+
     wglMakeCurrent(nullptr, nullptr);
     g_render_lock->unlock();
 }

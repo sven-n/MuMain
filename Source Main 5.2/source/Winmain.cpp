@@ -485,7 +485,6 @@ int g_iMousePopPosition_y = 0;
 
 extern int TimeRemain;
 extern bool EnableFastInput;
-void MainScene(HDC hDC);
 
 LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -1272,6 +1271,12 @@ MSG MainLoop()
         }
         else
         {
+            if (!CheckRenderNextScene())
+            {
+                std::this_thread::yield();
+                continue;
+            }
+
             //Scene
 #if (defined WINDOWMODE)
             if (g_bUseWindowMode || g_bWndActive)
