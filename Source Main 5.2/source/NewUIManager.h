@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <shared_mutex>
 
 #include "NewUIBase.h"
 
@@ -20,6 +21,8 @@ namespace SEASON3B
 
         type_vector_uibase	m_vecUI;		//. for rendering and updating
         type_map_uibase		m_mapUI;		//. for managing
+
+        std::shared_mutex m_mutex;
 
         CNewUIObj* m_pActiveMouseUIObj, * m_pActiveKeyUIObj;
 #ifdef PBG_MOD_STAMINA_UI
