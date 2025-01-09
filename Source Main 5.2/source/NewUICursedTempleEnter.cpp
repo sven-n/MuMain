@@ -183,19 +183,15 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
 {
     if (m_Button[CURSEDTEMPLEENTER_OPEN].UpdateMouseEvent())
     {
-        BYTE ItemPos = 0xff;
         int  EnterLevel = -1;
         bool Result = false;
 
         // CheckHeroLevl
         Result = CheckEnterLevel(EnterLevel);
 
-        // CheckInventoryItem
-        Result = CheckInventory(ItemPos, EnterLevel);
-
         if (Result)
         {
-            SocketClient->ToGameServer()->SendIllusionTempleEnterRequest(static_cast<BYTE>(EnterLevel), static_cast<BYTE>(ItemPos + MAX_EQUIPMENT));
+            SocketClient->ToGameServer()->SendIllusionTempleEnterRequest(static_cast<BYTE>(EnterLevel), 0xFF);
         }
         else
         {

@@ -206,7 +206,7 @@ bool CNewUIEnterBloodCastle::Render()
     g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, GlobalText[846], 72, 0, RT3_SORT_CENTER);
     g_pRenderText->SetFont(g_hFont);
 
-    wchar_t txtline[NUM_LINE_CMB][MAX_LENGTH_CMB];
+    wchar_t txtline[NUM_LINE_CMB][MAX_LENGTH_CMB] = { 0 };
     int tl = SeparateTextIntoLines(GlobalText[832], txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
     for (int j = 0; j < tl; ++j)
     {
@@ -243,23 +243,7 @@ bool CNewUIEnterBloodCastle::BtnProcess()
 
     if ((m_iNumActiveBtn != -1) && (m_BtnEnter[m_iNumActiveBtn].UpdateMouseEvent() == true))
     {
-        int iItemIndex = -1;
-
-        iItemIndex = g_pMyInventory->FindItemIndex(ITEM_INVISIBILITY_CLOAK, m_iNumActiveBtn + 1);
-
-        if (iItemIndex == -1)
-        {
-            iItemIndex = g_pMyInventory->FindItemIndex(ITEM_HELPER + 47, -1);
-        }
-
-        if (iItemIndex > -1)
-        {
-            SocketClient->ToGameServer()->SendBloodCastleEnterRequest(m_iNumActiveBtn + 1, iItemIndex);
-        }
-        else
-        {
-            SEASON3B::CreateOkMessageBox(GlobalText[854]);
-        }
+        SocketClient->ToGameServer()->SendBloodCastleEnterRequest(m_iNumActiveBtn + 1, 0xFF);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_BLOODCASTLE);
     }
 
