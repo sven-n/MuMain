@@ -829,7 +829,6 @@ void MoveCamera()
 }
 
 bool MenuCancel = true;
-bool EnableSocket = false;
 bool InitLogIn = false;
 bool InitLoading = false;
 bool InitCharacterScene = false;

@@ -119,6 +119,7 @@ BYTE Version[SIZE_PROTOCOLVERSION] = { '2', '0', '4', '0', '4' };
 
 BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 Connection* SocketClient = nullptr;
+bool EnableSocket = false;
 
 BYTE    g_byPacketSerialSend = 0;
 BYTE    g_byPacketSerialRecv = 0;

@@ -1310,6 +1310,15 @@ MSG MainLoop()
 
 #endif	//WINDOWMODE(#else)
         }
+
+        if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
+        {
+            g_ErrorReport.Write(L"> Connection closed. ");
+            g_ErrorReport.WriteCurrentTime();
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
+            MessageBox(NULL, L"Connection closed", L"Error", MB_OK);
+            break;
+        }
     } // while( 1 )
 
     return msg;
