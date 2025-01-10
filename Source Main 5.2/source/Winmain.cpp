@@ -1263,6 +1263,7 @@ MSG MainLoop()
         {
             if (!GetMessage(&msg, NULL, 0, 0))
             {
+                MessageBox(NULL, L"WinUser GetMessage error", L"Error", MB_OK);
                 break;
             }
 
@@ -1271,6 +1272,15 @@ MSG MainLoop()
         }
         else
         {
+            if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
+            {
+                g_ErrorReport.Write(L"> Connection closed. ");
+                g_ErrorReport.WriteCurrentTime();
+                g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
+                MessageBox(NULL, L"Connection closed", L"Error", MB_OK);
+                break;
+            }
+
             if (!CheckRenderNextScene())
             {
                 std::this_thread::yield();
@@ -1309,15 +1319,6 @@ MSG MainLoop()
                 Scene(g_hDC);
 
 #endif	//WINDOWMODE(#else)
-        }
-
-        if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
-        {
-            g_ErrorReport.Write(L"> Connection closed. ");
-            g_ErrorReport.WriteCurrentTime();
-            g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
-            MessageBox(NULL, L"Connection closed", L"Error", MB_OK);
-            break;
         }
     } // while( 1 )
 
