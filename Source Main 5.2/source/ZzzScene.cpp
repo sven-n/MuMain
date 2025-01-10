@@ -2746,6 +2746,7 @@ extern GLvoid KillGLWindow(GLvoid);
 
 bool CheckRenderNextScene()
 {
+    current_tick_count = g_pTimer->GetTimeElapsed();
     const auto current_frame_time_ms = current_tick_count - last_render_tick_count;
 
     if (current_frame_time_ms >= ms_per_frame)
@@ -2793,8 +2794,7 @@ void Scene(HDC hDC)
     {
     }
 
-    last_render_tick_count = current_tick_count;
-    current_tick_count = g_pTimer->GetTimeElapsed();
+    last_render_tick_count = g_pTimer->GetTimeElapsed();
 
     wglMakeCurrent(nullptr, nullptr);
     g_render_lock->unlock();
