@@ -485,7 +485,6 @@ int g_iMousePopPosition_y = 0;
 
 extern int TimeRemain;
 extern bool EnableFastInput;
-void MainScene(HDC hDC);
 
 LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -1257,6 +1256,9 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
 
 MSG MainLoop()
 {
+    std::thread limiter(SceneFrameLimiter);
+    limiter.detach();
+
     MSG msg;
     while (1)
     {
@@ -1272,6 +1274,11 @@ MSG MainLoop()
         }
         else
         {
+            if (!g_render_next_frame.load())
+            {
+                continue;
+            }
+
             //Scene
 #if (defined WINDOWMODE)
             if (g_bUseWindowMode || g_bWndActive)
@@ -1304,6 +1311,8 @@ MSG MainLoop()
                 Scene(g_hDC);
 
 #endif	//WINDOWMODE(#else)
+
+            g_render_next_frame = false;
         }
     } // while( 1 )
 

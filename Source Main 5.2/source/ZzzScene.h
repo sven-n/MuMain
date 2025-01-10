@@ -16,8 +16,10 @@ extern wchar_t* szServerIpAddress;
 extern unsigned short g_ServerPort;
 extern int g_iLengthAuthorityCode;
 
-inline std::mutex g_render_lock;
+inline SpinLock* g_render_lock = new SpinLock();
+inline std::atomic<bool> g_render_next_frame = true;
 
+extern void SceneFrameLimiter();
 extern void LogInScene(HDC hDC);
 extern void LoadingScene(HDC hDC);
 extern void Scene(HDC Hdc);
