@@ -1263,7 +1263,6 @@ MSG MainLoop()
         {
             if (!GetMessage(&msg, NULL, 0, 0))
             {
-                MessageBox(NULL, L"WinUser GetMessage error", L"Error", MB_OK);
                 break;
             }
 
