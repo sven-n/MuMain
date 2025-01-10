@@ -2745,64 +2745,16 @@ extern int g_iNoMouseTime;
 extern GLvoid KillGLWindow(GLvoid);
 
 
-void SceneFrameLimiter()
+bool CheckRenderNextScene()
 {
-    // We need to make sure that the frame rate is limited to the target frame rate,
-    // but windows sleep functions are pretty inaccurate.
-    // First, we don't even try to sleep when we are already behind the target frame rate.
-    // Additionally, we only sleep when we have enough time to sleep and spin for the rest of the time.
-    // We use spinning to increase the accuracy of the frame limiting.
+    const auto current_frame_time_ms = current_tick_count - last_render_tick_count;
 
-    while (true)
+    if (current_frame_time_ms >= ms_per_frame)
     {
-        if (g_render_next_frame)
-        {
-            std::this_thread::yield();
-            continue;
-        }
-
-        const auto current_frame_time_ms = current_tick_count - last_render_tick_count;
-
-        if (current_frame_time_ms >= ms_per_frame)
-        {
-            g_render_next_frame = true;
-        }
-        else
-        {
-            constexpr float min_spin_ms = 1.0f;
-            constexpr float spin_yield_threshold_ms = 0.25f;
-            constexpr float sleep_threshold_ms = 8.0f;
-            const auto rest_ms = ms_per_frame - current_frame_time_ms;
-            const auto sleep_ms = rest_ms - min_spin_ms;
-
-            const auto start_sleep = g_pTimer->GetTimeElapsed();
-            if (sleep_ms > sleep_threshold_ms)
-            {
-                std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleep_ms)));
-            }
-
-            const auto actual_sleep_ms = g_pTimer->GetTimeElapsed() - start_sleep;
-            const auto start_spin = g_pTimer->GetTimeElapsed();
-            const auto spin_ms = rest_ms - actual_sleep_ms;
-
-            while (1)
-            {
-                const auto current = g_pTimer->GetTimeElapsed();
-                const auto spinned_ms = current - start_spin;
-                if (spinned_ms >= spin_ms)
-                {
-                    break;
-                }
-
-                if (spin_ms - spinned_ms > spin_yield_threshold_ms)
-                {
-                    std::this_thread::yield();
-                }
-            }
-
-            g_render_next_frame = true;
-        }
+        return true;
     }
+
+    return false;
 }
 
 void Scene(HDC hDC)

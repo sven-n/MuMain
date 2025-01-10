@@ -1256,9 +1256,6 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
 
 MSG MainLoop()
 {
-    std::thread limiter(SceneFrameLimiter);
-    limiter.detach();
-
     MSG msg;
     while (1)
     {
@@ -1274,8 +1271,9 @@ MSG MainLoop()
         }
         else
         {
-            if (!g_render_next_frame.load())
+            if (!CheckRenderNextScene())
             {
+                std::this_thread::yield();
                 continue;
             }
 
@@ -1311,8 +1309,6 @@ MSG MainLoop()
                 Scene(g_hDC);
 
 #endif	//WINDOWMODE(#else)
-
-            g_render_next_frame = false;
         }
     } // while( 1 )
 
