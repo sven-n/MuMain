@@ -144,8 +144,10 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
     m_pActiveKeyUIObj = NULL;
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareKeyEventOrder);
 
-    auto vi = m_vecUI.begin();
-    for (; vi != m_vecUI.end(); vi++)
+    auto vecUI = m_vecUI;
+
+    auto vi = vecUI.begin();
+    for (; vi != vecUI.end(); vi++)
     {
         HWND hRelatedWnd = (*vi)->GetRelatedWnd();
         if (NULL == hRelatedWnd)
