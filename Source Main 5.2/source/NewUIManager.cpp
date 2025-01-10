@@ -281,8 +281,6 @@ void SEASON3B::CNewUIManager::EnableInterface(DWORD dwKey, bool bEnable/* = true
 
 void SEASON3B::CNewUIManager::ShowAllInterfaces(bool bShow/* = true*/)
 {
-    std::shared_lock<std::shared_mutex> lock(m_mutex);
-
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bShow);
@@ -290,8 +288,6 @@ void SEASON3B::CNewUIManager::ShowAllInterfaces(bool bShow/* = true*/)
 
 void SEASON3B::CNewUIManager::EnableAllInterfaces(bool bEnable/* = true*/)
 {
-    std::shared_lock<std::shared_mutex> lock(m_mutex);
-
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bEnable);
