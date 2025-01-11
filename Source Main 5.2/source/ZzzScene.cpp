@@ -2461,6 +2461,19 @@ void MainScene(HDC hDC)
             SwapBuffers(hDC);
         }
 
+        if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
+        {
+            static BOOL s_bClosed = FALSE;
+            if (!s_bClosed)
+            {
+                s_bClosed = TRUE;
+                g_ErrorReport.Write(L"> Connection closed. ");
+                g_ErrorReport.WriteCurrentTime();
+                g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
+                CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
+            }
+        }
+
         if (SceneFlag == MAIN_SCENE)
         {
             switch (gMapManager.WorldActive)
@@ -2764,7 +2777,7 @@ void Scene(HDC hDC)
 
     if (CheckRenderNextScene())
     {
-        last_render_tick_count = g_pTimer->GetTimeElapsed();
+        last_render_tick_count = current_tick_count;
 
         try
         {
