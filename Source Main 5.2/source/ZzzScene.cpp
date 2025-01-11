@@ -2759,50 +2759,51 @@ bool CheckRenderNextScene()
 
 void Scene(HDC hDC)
 {
-    if (!CheckRenderNextScene())
-    {
-        return;
-    }
-
     g_render_lock->lock();
     wglMakeCurrent(hDC, g_hRC);
 
-    try
+    if (CheckRenderNextScene())
     {
-        g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
-        switch (SceneFlag)
+        last_render_tick_count = g_pTimer->GetTimeElapsed();
+
+        try
         {
+            g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
+            switch (SceneFlag)
+            {
 #ifdef MOVIE_DIRECTSHOW
-        case MOVIE_SCENE:
-            MovieScene(hDC);
-            break;
+            case MOVIE_SCENE:
+                MovieScene(hDC);
+                break;
 #endif // MOVIE_DIRECTSHOW
-        case WEBZEN_SCENE:
-            WebzenScene(hDC);
-            break;
-        case LOADING_SCENE:
-            LoadingScene(hDC);
-            break;
-        case LOG_IN_SCENE:
-        case CHARACTER_SCENE:
-        case MAIN_SCENE:
-            MainScene(hDC);
-            break;
-        }
+            case WEBZEN_SCENE:
+                WebzenScene(hDC);
+                break;
+            case LOADING_SCENE:
+                LoadingScene(hDC);
+                break;
+            case LOG_IN_SCENE:
+            case CHARACTER_SCENE:
+            case MAIN_SCENE:
+                MainScene(hDC);
+                break;
+            }
 
-        if (g_iNoMouseTime > 31)
+            if (g_iNoMouseTime > 31)
+            {
+                KillGLWindow();
+            }
+        }
+        catch (const std::exception&)
         {
-            KillGLWindow();
         }
     }
-    catch (const std::exception&)
-    {
-    }
-
-    last_render_tick_count = g_pTimer->GetTimeElapsed();
 
     wglMakeCurrent(nullptr, nullptr);
     g_render_lock->unlock();
+
+    // allow context switching for network thread
+    std::this_thread::yield();
 }
 
 bool GetTimeCheck(int DelayTime)

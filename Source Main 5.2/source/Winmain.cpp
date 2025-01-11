@@ -1280,12 +1280,6 @@ MSG MainLoop()
                 break;
             }
 
-            if (!CheckRenderNextScene())
-            {
-                std::this_thread::yield();
-                continue;
-            }
-
             //Scene
 #if (defined WINDOWMODE)
             if (g_bUseWindowMode || g_bWndActive)
