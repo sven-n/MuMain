@@ -119,6 +119,7 @@ BYTE Version[SIZE_PROTOCOLVERSION] = { '2', '0', '4', '0', '4' };
 
 BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 Connection* SocketClient = nullptr;
+bool EnableSocket = false;
 
 BYTE    g_byPacketSerialSend = 0;
 BYTE    g_byPacketSerialRecv = 0;
@@ -14557,6 +14558,7 @@ static void HandleIncomingPacketLocked(int32_t Handle, const BYTE* ReceiveBuffer
 {
     g_render_lock->lock();
     wglMakeCurrent(g_hDC, g_hRC);
+
     try
     {
         HandleIncomingPacket(Handle, ReceiveBuffer, Size);
@@ -14564,6 +14566,7 @@ static void HandleIncomingPacketLocked(int32_t Handle, const BYTE* ReceiveBuffer
     catch (const std::exception&)
     {
     }
+
     wglMakeCurrent(nullptr, nullptr);
     g_render_lock->unlock();
 }
