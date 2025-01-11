@@ -20,22 +20,16 @@ SEASON3B::CNewUIManager::~CNewUIManager()
 
 void SEASON3B::CNewUIManager::AddUIObj(DWORD dwKey, CNewUIObj* pUIObj)
 {
-    std::unique_lock<std::shared_mutex> lock(m_mutex);
-
     auto mi = m_mapUI.find(dwKey);
     if (mi == m_mapUI.end())
     {
         m_vecUI.push_back(pUIObj);
         m_mapUI.insert(type_map_uibase::value_type(dwKey, pUIObj));
     }
-
-    std::sort(m_vecUI.begin(), m_vecUI.end(), CompareKeyEventOrder);
 }
 
 void SEASON3B::CNewUIManager::RemoveUIObj(DWORD dwKey)
 {
-    std::unique_lock<std::shared_mutex> lock(m_mutex);
-
     auto mi = m_mapUI.find(dwKey);
     if (mi != m_mapUI.end())
     {
@@ -50,8 +44,6 @@ void SEASON3B::CNewUIManager::RemoveUIObj(DWORD dwKey)
 
 void SEASON3B::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
 {
-    std::unique_lock<std::shared_mutex> lock(m_mutex);
-
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
     {
@@ -71,8 +63,6 @@ void SEASON3B::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
 
 void SEASON3B::CNewUIManager::RemoveAllUIObjs()
 {
-    std::unique_lock<std::shared_mutex> lock(m_mutex);
-
 #if defined(_DEBUG)
 
     {
@@ -107,8 +97,6 @@ void SEASON3B::CNewUIManager::RemoveAllUIObjs()
 
 CNewUIObj* SEASON3B::CNewUIManager::FindUIObj(DWORD dwKey)
 {
-    std::shared_lock<std::shared_mutex> lock(m_mutex);
-
     auto mi = m_mapUI.find(dwKey);
     if (mi != m_mapUI.end())
         return (*mi).second;
@@ -117,25 +105,21 @@ CNewUIObj* SEASON3B::CNewUIManager::FindUIObj(DWORD dwKey)
 
 bool SEASON3B::CNewUIManager::UpdateMouseEvent()
 {
-    type_vector_uibase vecUI;
-    {
-        std::shared_lock<std::shared_mutex> lock(m_mutex);
-        vecUI = m_vecUI;
-    }
-
     m_pActiveMouseUIObj = NULL;
 
-    auto vi = vecUI.begin();
-    vi = vecUI.begin();
-    for (; vi != vecUI.end(); vi++)
+    std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepthReverse);
+
+    auto vi = m_vecUI.begin();
+    vi = m_vecUI.begin();
+    for (; vi != m_vecUI.end(); vi++)
     {
         if ((*vi)->IsVisible())
         {
             CNewUIObj* obj_backup = (*vi);
             bool bResult = (*vi)->UpdateMouseEvent();
 
-            auto vi2 = std::find(vecUI.begin(), vecUI.end(), obj_backup);
-            if (vi2 != vecUI.end())
+            auto vi2 = std::find(m_vecUI.begin(), m_vecUI.end(), obj_backup);
+            if (vi2 != m_vecUI.end())
             {
                 vi = vi2;
             }
@@ -157,13 +141,10 @@ bool SEASON3B::CNewUIManager::UpdateMouseEvent()
 
 bool SEASON3B::CNewUIManager::UpdateKeyEvent()
 {
-    type_vector_uibase vecUI;
-    {
-        std::shared_lock<std::shared_mutex> lock(m_mutex);
-        vecUI = m_vecUI;
-    }
-
     m_pActiveKeyUIObj = NULL;
+    std::sort(m_vecUI.begin(), m_vecUI.end(), CompareKeyEventOrder);
+
+    auto vecUI = m_vecUI;
 
     auto vi = vecUI.begin();
     for (; vi != vecUI.end(); vi++)
@@ -190,14 +171,10 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
 
 bool SEASON3B::CNewUIManager::Update()
 {
-    type_vector_uibase vecUI;
-    {
-        std::shared_lock<std::shared_mutex> lock(m_mutex);
-        vecUI = m_vecUI;
-    }
+    std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
 
-    auto vi = vecUI.begin();
-    for (; vi != vecUI.end(); vi++)
+    auto vi = m_vecUI.begin();
+    for (; vi != m_vecUI.end(); vi++)
     {
         if ((*vi)->IsEnabled())
         {
@@ -213,14 +190,10 @@ bool SEASON3B::CNewUIManager::Update()
 
 bool SEASON3B::CNewUIManager::Render()
 {
-    type_vector_uibase vecUI;
-    {
-        std::shared_lock<std::shared_mutex> lock(m_mutex);
-        vecUI = m_vecUI;
-    }
+    std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
 
-    auto vi = vecUI.begin();
-    for (; vi != vecUI.end(); vi++)
+    auto vi = m_vecUI.begin();
+    for (; vi != m_vecUI.end(); vi++)
     {
         if ((*vi)->IsVisible())
         {
@@ -281,8 +254,6 @@ void SEASON3B::CNewUIManager::EnableInterface(DWORD dwKey, bool bEnable/* = true
 
 void SEASON3B::CNewUIManager::ShowAllInterfaces(bool bShow/* = true*/)
 {
-    std::shared_lock<std::shared_mutex> lock(m_mutex);
-
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bShow);
@@ -290,8 +261,6 @@ void SEASON3B::CNewUIManager::ShowAllInterfaces(bool bShow/* = true*/)
 
 void SEASON3B::CNewUIManager::EnableAllInterfaces(bool bEnable/* = true*/)
 {
-    std::shared_lock<std::shared_mutex> lock(m_mutex);
-
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bEnable);
