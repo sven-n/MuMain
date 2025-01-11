@@ -2407,9 +2407,6 @@ void MainScene(HDC hDC)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const auto last_render_tick_count = current_tick_count;
-    current_tick_count = g_pTimer->GetTimeElapsed();
-
     bool Success = false;
 
     try
@@ -2462,50 +2459,6 @@ void MainScene(HDC hDC)
         if (Success)
         {
             SwapBuffers(hDC);
-        }
-
-        // Here comes the tricky part of limiting the frame rate:
-        // We need to make sure that the frame rate is limited to the target frame rate,
-        // but windows sleep functions are pretty inaccurate.
-        // First, we don't even try to sleep when we are already behind the target frame rate.
-        // Additionally, we only sleep when we have enough time to sleep and spin for the rest of the time.
-        // We use spinning to increase the accuracy of the frame limiting.
-        const float current_frame_time_ms = current_tick_count - last_render_tick_count;
-        if (ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
-        {
-            constexpr float min_spin_ms = 1.0f;
-            constexpr float spin_yield_threshold_ms = 0.25f;
-            constexpr float sleep_threshold_ms = 8.0f;
-            const auto rest_ms = ms_per_frame - current_frame_time_ms;
-            auto sleep_ms = rest_ms - min_spin_ms;
-
-            const auto start_sleep = g_pTimer->GetTimeElapsed();
-            if (sleep_ms > sleep_threshold_ms)
-            {
-                // In my tests, it sleeps either for nearly 0 ms, or for about 10 ms ...
-                std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
-            }
-
-            const auto actual_sleep_ms = g_pTimer->GetTimeElapsed() - start_sleep;
-            const auto start_spin = g_pTimer->GetTimeElapsed();
-            const auto spin_ms = rest_ms - actual_sleep_ms;
-            
-            while (true)
-            {
-                const auto current = g_pTimer->GetTimeElapsed();
-                const auto spinned_ms = current - start_spin;
-                if (spinned_ms >= spin_ms)
-                {
-                    break;
-                }
-                // reduce CPU usage by yielding during spin phase
-                if (spin_ms - spinned_ms > spin_yield_threshold_ms)
-                {
-                    std::this_thread::yield();
-                }
-            }
-
-            current_tick_count += static_cast<int>(rest_ms);
         }
 
         if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
@@ -2805,6 +2758,9 @@ extern GLvoid KillGLWindow(GLvoid);
 
 void Scene(HDC hDC)
 {
+    const auto last_render_tick_count = current_tick_count;
+    current_tick_count = g_pTimer->GetTimeElapsed();
+
     g_render_lock->lock();
     wglMakeCurrent(hDC, g_hRC);
     try
@@ -2841,6 +2797,50 @@ void Scene(HDC hDC)
 
     wglMakeCurrent(nullptr, nullptr);
     g_render_lock->unlock();
+
+    // Here comes the tricky part of limiting the frame rate:
+    // We need to make sure that the frame rate is limited to the target frame rate,
+    // but windows sleep functions are pretty inaccurate.
+    // First, we don't even try to sleep when we are already behind the target frame rate.
+    // Additionally, we only sleep when we have enough time to sleep and spin for the rest of the time.
+    // We use spinning to increase the accuracy of the frame limiting.
+    const float current_frame_time_ms = current_tick_count - last_render_tick_count;
+    if (ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
+    {
+        constexpr float min_spin_ms = 1.0f;
+        constexpr float spin_yield_threshold_ms = 0.25f;
+        constexpr float sleep_threshold_ms = 8.0f;
+        const auto rest_ms = ms_per_frame - current_frame_time_ms;
+        auto sleep_ms = rest_ms - min_spin_ms;
+
+        const auto start_sleep = g_pTimer->GetTimeElapsed();
+        if (sleep_ms > sleep_threshold_ms)
+        {
+            // In my tests, it sleeps either for nearly 0 ms, or for about 10 ms ...
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
+        }
+
+        const auto actual_sleep_ms = g_pTimer->GetTimeElapsed() - start_sleep;
+        const auto start_spin = g_pTimer->GetTimeElapsed();
+        const auto spin_ms = rest_ms - actual_sleep_ms;
+
+        while (true)
+        {
+            const auto current = g_pTimer->GetTimeElapsed();
+            const auto spinned_ms = current - start_spin;
+            if (spinned_ms >= spin_ms)
+            {
+                break;
+            }
+            // reduce CPU usage by yielding during spin phase
+            if (spin_ms - spinned_ms > spin_yield_threshold_ms)
+            {
+                std::this_thread::yield();
+            }
+        }
+
+        current_tick_count += static_cast<int>(rest_ms);
+    }
 }
 
 bool GetTimeCheck(int DelayTime)
