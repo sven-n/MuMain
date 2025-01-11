@@ -2405,7 +2405,7 @@ void MainScene(HDC hDC)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    
+    last_render_tick_count = g_pTimer->GetTimeElapsed();
 
     bool Success = false;
 
@@ -2759,6 +2759,11 @@ bool CheckRenderNextScene()
 
 void Scene(HDC hDC)
 {
+    if (!CheckRenderNextScene())
+    {
+        return;
+    }
+
     g_render_lock->lock();
     wglMakeCurrent(hDC, g_hRC);
 
@@ -2793,8 +2798,6 @@ void Scene(HDC hDC)
     catch (const std::exception&)
     {
     }
-
-    last_render_tick_count = g_pTimer->GetTimeElapsed();
 
     wglMakeCurrent(nullptr, nullptr);
     g_render_lock->unlock();
