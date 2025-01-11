@@ -485,6 +485,7 @@ int g_iMousePopPosition_y = 0;
 
 extern int TimeRemain;
 extern bool EnableFastInput;
+void MainScene(HDC hDC);
 
 LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -1271,21 +1272,6 @@ MSG MainLoop()
         }
         else
         {
-            if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
-            {
-                g_ErrorReport.Write(L"> Connection closed. ");
-                g_ErrorReport.WriteCurrentTime();
-                g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
-                MessageBox(NULL, L"Connection closed", L"Error", MB_OK);
-                break;
-            }
-
-            if (!CheckRenderNextScene())
-            {
-                std::this_thread::yield();
-                continue;
-            }
-
             //Scene
 #if (defined WINDOWMODE)
             if (g_bUseWindowMode || g_bWndActive)
