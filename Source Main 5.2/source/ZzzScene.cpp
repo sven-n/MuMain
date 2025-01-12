@@ -2295,7 +2295,6 @@ void UpdateSceneState()
         break;
     }
 
-    g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
     MoveNotices();
 
     if (PressKey(VK_SNAPSHOT))
@@ -2364,6 +2363,8 @@ void RenderMainScene(HDC hDC)
     if (Destroy) {
         return;
     }
+
+    g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
 
     Bitmaps.Manage();
 
@@ -2775,6 +2776,8 @@ void RenderScene(HDC hDC)
 {
     if (CheckRenderNextScene())
     {
+        UpdateSceneState();
+
         last_render_tick_count = current_tick_count;
 
         try

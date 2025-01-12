@@ -1276,9 +1276,6 @@ MSG MainLoop()
             DispatchMessage(&msg);
         }
 
-        // Perform game logic updates or other non-rendering tasks
-        UpdateSceneState();
-
         // Actual rendering
 #if (defined WINDOWMODE)
         if (g_bUseWindowMode || g_bWndActive)
