@@ -2335,10 +2335,8 @@ void UpdateSceneState()
     GrabEnable = false;
 }
 
-void RenderMainScene(HDC hDC)
+void MainScene(HDC hDC)
 {
-    CalcFPS();
-
     if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
     {
         double dDeltaTick = g_pTimer->GetTimeElapsed();
@@ -2776,6 +2774,7 @@ void RenderScene(HDC hDC)
 {
     if (CheckRenderNextScene())
     {
+        CalcFPS();
         UpdateSceneState();
 
         last_render_tick_count = current_tick_count;
@@ -2799,7 +2798,7 @@ void RenderScene(HDC hDC)
             case LOG_IN_SCENE:
             case CHARACTER_SCENE:
             case MAIN_SCENE:
-                RenderMainScene(hDC);
+                MainScene(hDC);
                 break;
             }
 
