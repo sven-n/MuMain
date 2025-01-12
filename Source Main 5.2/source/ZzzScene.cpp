@@ -2305,6 +2305,35 @@ void UpdateSceneState()
         else
             GrabEnable = true;
     }
+
+    const bool addTimeStampToCapture = !HIBYTE(GetAsyncKeyState(VK_SHIFT));
+    wchar_t screenshotText[256];
+    if (GrabEnable)
+    {
+        SYSTEMTIME st;
+        GetLocalTime(&st);
+        swprintf(GrabFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
+        swprintf(screenshotText, GlobalText[459], GrabFileName);
+        wchar_t lpszTemp[64];
+        swprintf(lpszTemp, L" [%s / %s]", g_ServerListManager->GetSelectServerName(), Hero->ID);
+        wcscat(screenshotText, lpszTemp);
+        if (addTimeStampToCapture)
+        {
+            g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        }
+    }
+
+    if (GrabEnable)
+    {
+        SaveScreen();
+    }
+
+    if (GrabEnable && !addTimeStampToCapture)
+    {
+        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
+
+    GrabEnable = false;
 }
 
 void RenderMainScene(HDC hDC)
@@ -2339,23 +2368,6 @@ void RenderMainScene(HDC hDC)
     Bitmaps.Manage();
 
     Set3DSoundPosition();
-
-    const bool addTimeStampToCapture = !HIBYTE(GetAsyncKeyState(VK_SHIFT));
-    wchar_t screenshotText[256];
-    if (GrabEnable)
-    {
-        SYSTEMTIME st;
-        GetLocalTime(&st);
-        swprintf(GrabFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
-        swprintf(screenshotText, GlobalText[459], GrabFileName);
-        wchar_t lpszTemp[64];
-        swprintf(lpszTemp, L" [%s / %s]", g_ServerListManager->GetSelectServerName(), Hero->ID);
-        wcscat(screenshotText, lpszTemp);
-        if (addTimeStampToCapture)
-        {
-            g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-        }
-    }
 
     if (gMapManager.WorldActive == WD_10HEAVEN)
     {
@@ -2426,18 +2438,6 @@ void RenderMainScene(HDC hDC)
         }
 
         g_PhysicsManager.Render();
-
-        if (GrabEnable)
-        {
-            SaveScreen();
-        }
-
-        if (GrabEnable && !addTimeStampToCapture)
-        {
-            g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-        }
-
-        GrabEnable = false;
 
 #ifndef  defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
         BeginBitmap();
