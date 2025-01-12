@@ -2263,11 +2263,13 @@ void MoveCharacter(CHARACTER* c, OBJECT* o);
 
 float target_fps = 60;
 float ms_per_frame = 1000.f / target_fps;
+bool eco_limiter = false;
 
-void SetTargetFps(float targetFps)
+void SetTargetFps(float targetFps, bool ecoLimiter)
 {
     target_fps = targetFps;
     ms_per_frame = 1000.0f / target_fps;
+    eco_limiter = ecoLimiter;
 }
 
 double last_render_tick_count = 0;
@@ -2756,8 +2758,30 @@ float g_Luminosity;
 extern int g_iNoMouseTime;
 extern GLvoid KillGLWindow(GLvoid);
 
+void EconomicSleep()
+{
+    // We only sleep when we have enough time to sleep and have some additional rest time.
+    const float current_frame_time_ms = current_tick_count - last_render_tick_count;
+    if (ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
+    {
+        constexpr float sleep_threshold_ms = 16.0f;
+        constexpr float sleep_ms = 10.0f;
+        constexpr float sleep_duration_offset_ms = 4.0f;
+        const auto rest_ms = ms_per_frame - current_frame_time_ms;
 
-bool CheckRenderNextScene()
+        if (rest_ms - sleep_duration_offset_ms > sleep_threshold_ms)
+        {
+            // In my tests, it sleeps either for nearly 0 ms, or for about 10 ms ...
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
+        }
+        else
+        {
+            std::this_thread::yield();
+        }
+    }
+}
+
+bool CheckRenderNextFrame()
 {
     current_tick_count = g_pTimer->GetTimeElapsed();
     const auto current_frame_time_ms = current_tick_count - last_render_tick_count;
@@ -2770,51 +2794,58 @@ bool CheckRenderNextScene()
     return false;
 }
 
+
 void RenderScene(HDC hDC)
 {
-    if (CheckRenderNextScene())
+    if (!CheckRenderNextFrame())
     {
-        CalcFPS();
-        UpdateSceneState();
-
-        last_render_tick_count = current_tick_count;
-
-        try
+        if (eco_limiter)
         {
-            g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
-            switch (SceneFlag)
-            {
-#ifdef MOVIE_DIRECTSHOW
-            case MOVIE_SCENE:
-                MovieScene(hDC);
-                break;
-#endif // MOVIE_DIRECTSHOW
-            case WEBZEN_SCENE:
-                WebzenScene(hDC);
-                break;
-            case LOADING_SCENE:
-                LoadingScene(hDC);
-                break;
-            case LOG_IN_SCENE:
-            case CHARACTER_SCENE:
-            case MAIN_SCENE:
-                MainScene(hDC);
-                break;
-            }
-
-            if (g_iNoMouseTime > 31)
-            {
-                KillGLWindow();
-            }
+            EconomicSleep();
         }
-        catch (const std::exception&)
+        else
         {
+            std::this_thread::yield();
+        }
+
+        return;
+    }
+
+    CalcFPS();
+    UpdateSceneState();
+
+    last_render_tick_count = current_tick_count;
+
+    try
+    {
+        g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
+        switch (SceneFlag)
+        {
+#ifdef MOVIE_DIRECTSHOW
+        case MOVIE_SCENE:
+            MovieScene(hDC);
+            break;
+#endif // MOVIE_DIRECTSHOW
+        case WEBZEN_SCENE:
+            WebzenScene(hDC);
+            break;
+        case LOADING_SCENE:
+            LoadingScene(hDC);
+            break;
+        case LOG_IN_SCENE:
+        case CHARACTER_SCENE:
+        case MAIN_SCENE:
+            MainScene(hDC);
+            break;
+        }
+
+        if (g_iNoMouseTime > 31)
+        {
+            KillGLWindow();
         }
     }
-    else 
+    catch (const std::exception&)
     {
-        // Avoid a tight loop to reduce CPU usage
-        std::this_thread::yield();
     }
 }
 

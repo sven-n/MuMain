@@ -1440,7 +1440,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (IsVSyncAvailable())
     {
         EnableVSync();
-        SetTargetFps(-1); // unlimited
+        SetTargetFps(-1, false); // unlimited
     }
 
     FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));
