@@ -2812,9 +2812,6 @@ void RenderScene(HDC hDC)
         {
         }
     }
-
-    // allow context switching for other threads
-    std::this_thread::yield();
 }
 
 bool GetTimeCheck(int DelayTime)
