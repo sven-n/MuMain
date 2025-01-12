@@ -69,9 +69,7 @@
 #include <thread>
 
 #include "CharacterManager.h"
-#include "SpinLock.h"
 
-class SpinLock;
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
@@ -831,7 +829,6 @@ void MoveCamera()
 }
 
 bool MenuCancel = true;
-bool EnableSocket = false;
 bool InitLogIn = false;
 bool InitLoading = false;
 bool InitCharacterScene = false;
@@ -2266,31 +2263,22 @@ void MoveCharacter(CHARACTER* c, OBJECT* o);
 
 float target_fps = 60;
 float ms_per_frame = 1000.f / target_fps;
+bool eco_limiter = false;
 
-void SetTargetFps(float targetFps)
+void SetTargetFps(float targetFps, bool ecoLimiter)
 {
     target_fps = targetFps;
     ms_per_frame = 1000.0f / target_fps;
+    eco_limiter = ecoLimiter;
 }
 
-auto current_tick_count = 0;
-auto last_water_change = 0;
+double last_render_tick_count = 0;
+double current_tick_count = 0;
+double last_water_change = 0;
 
-void MainScene(HDC hDC)
+void UpdateSceneState()
 {
-    CalcFPS();
-
     g_pNewKeyInput->ScanAsyncKeyState();
-
-    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
-    {
-        double dDeltaTick = g_pTimer->GetTimeElapsed();
-        dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
-        // g_pTimer->ResetTimer();
-
-        CInput::Instance().Update();
-        CUIMng::Instance().Update(dDeltaTick);
-    }
 
     g_dwMouseUseUIID = 0;
 
@@ -2309,7 +2297,6 @@ void MainScene(HDC hDC)
         break;
     }
 
-    g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
     MoveNotices();
 
     if (PressKey(VK_SNAPSHOT))
@@ -2319,25 +2306,6 @@ void MainScene(HDC hDC)
         else
             GrabEnable = true;
     }
-
-    constexpr int NumberOfWaterTextures = 32;
-    constexpr double timePerFrame = 1000 / REFERENCE_FPS;
-    auto time_since_last_render = current_tick_count - last_water_change;
-    while (time_since_last_render > timePerFrame)
-    {
-        WaterTextureNumber++;
-        WaterTextureNumber %= NumberOfWaterTextures;
-        time_since_last_render -= timePerFrame;
-        last_water_change = current_tick_count;
-    }
-
-    if (Destroy) {
-        return;
-    }
-
-    Bitmaps.Manage();
-
-    Set3DSoundPosition();
 
     const bool addTimeStampToCapture = !HIBYTE(GetAsyncKeyState(VK_SHIFT));
     wchar_t screenshotText[256];
@@ -2355,6 +2323,52 @@ void MainScene(HDC hDC)
             g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
     }
+
+    if (GrabEnable)
+    {
+        SaveScreen();
+    }
+
+    if (GrabEnable && !addTimeStampToCapture)
+    {
+        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
+
+    GrabEnable = false;
+}
+
+void MainScene(HDC hDC)
+{
+    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+    {
+        double dDeltaTick = g_pTimer->GetTimeElapsed();
+        dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
+        // g_pTimer->ResetTimer();
+
+        CInput::Instance().Update();
+        CUIMng::Instance().Update(dDeltaTick);
+    }
+
+    constexpr int NumberOfWaterTextures = 32;
+    constexpr double timePerFrame = 1000 / REFERENCE_FPS;
+    auto time_since_last_render = current_tick_count - last_water_change;
+    while (time_since_last_render > timePerFrame)
+    {
+        WaterTextureNumber++;
+        WaterTextureNumber %= NumberOfWaterTextures;
+        time_since_last_render -= timePerFrame;
+        last_water_change = current_tick_count;
+    }
+
+    if (Destroy) {
+        return;
+    }
+
+    g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
+
+    Bitmaps.Manage();
+
+    Set3DSoundPosition();
 
     if (gMapManager.WorldActive == WD_10HEAVEN)
     {
@@ -2407,9 +2421,6 @@ void MainScene(HDC hDC)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const auto last_render_tick_count = current_tick_count;
-    current_tick_count = g_pTimer->GetTimeElapsed();
-
     bool Success = false;
 
     try
@@ -2428,18 +2439,6 @@ void MainScene(HDC hDC)
         }
 
         g_PhysicsManager.Render();
-
-        if (GrabEnable)
-        {
-            SaveScreen();
-        }
-
-        if (GrabEnable && !addTimeStampToCapture)
-        {
-            g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-        }
-
-        GrabEnable = false;
 
 #ifndef  defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
         BeginBitmap();
@@ -2462,50 +2461,6 @@ void MainScene(HDC hDC)
         if (Success)
         {
             SwapBuffers(hDC);
-        }
-
-        // Here comes the tricky part of limiting the frame rate:
-        // We need to make sure that the frame rate is limited to the target frame rate,
-        // but windows sleep functions are pretty inaccurate.
-        // First, we don't even try to sleep when we are already behind the target frame rate.
-        // Additionally, we only sleep when we have enough time to sleep and spin for the rest of the time.
-        // We use spinning to increase the accuracy of the frame limiting.
-        const float current_frame_time_ms = current_tick_count - last_render_tick_count;
-        if (ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
-        {
-            constexpr float min_spin_ms = 1.0f;
-            constexpr float spin_yield_threshold_ms = 0.25f;
-            constexpr float sleep_threshold_ms = 8.0f;
-            const auto rest_ms = ms_per_frame - current_frame_time_ms;
-            auto sleep_ms = rest_ms - min_spin_ms;
-
-            const auto start_sleep = g_pTimer->GetTimeElapsed();
-            if (sleep_ms > sleep_threshold_ms)
-            {
-                // In my tests, it sleeps either for nearly 0 ms, or for about 10 ms ...
-                std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
-            }
-
-            const auto actual_sleep_ms = g_pTimer->GetTimeElapsed() - start_sleep;
-            const auto start_spin = g_pTimer->GetTimeElapsed();
-            const auto spin_ms = rest_ms - actual_sleep_ms;
-            
-            while (true)
-            {
-                const auto current = g_pTimer->GetTimeElapsed();
-                const auto spinned_ms = current - start_spin;
-                if (spinned_ms >= spin_ms)
-                {
-                    break;
-                }
-                // reduce CPU usage by yielding during spin phase
-                if (spin_ms - spinned_ms > spin_yield_threshold_ms)
-                {
-                    std::this_thread::yield();
-                }
-            }
-
-            current_tick_count += static_cast<int>(rest_ms);
         }
 
         if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
@@ -2803,10 +2758,64 @@ float g_Luminosity;
 extern int g_iNoMouseTime;
 extern GLvoid KillGLWindow(GLvoid);
 
-void Scene(HDC hDC)
+void EconomicSleep()
 {
-    g_render_lock->lock();
-    wglMakeCurrent(hDC, g_hRC);
+    // We only sleep when we have enough time to sleep and have some additional rest time.
+    const float current_frame_time_ms = current_tick_count - last_render_tick_count;
+    if (ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
+    {
+        constexpr float sleep_threshold_ms = 16.0f;
+        constexpr float sleep_ms = 10.0f;
+        constexpr float sleep_duration_offset_ms = 4.0f;
+        const auto rest_ms = ms_per_frame - current_frame_time_ms;
+
+        if (rest_ms - sleep_duration_offset_ms > sleep_threshold_ms)
+        {
+            // In my tests, it sleeps either for nearly 0 ms, or for about 10 ms ...
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
+        }
+        else
+        {
+            std::this_thread::yield();
+        }
+    }
+}
+
+bool CheckRenderNextFrame()
+{
+    current_tick_count = g_pTimer->GetTimeElapsed();
+    const auto current_frame_time_ms = current_tick_count - last_render_tick_count;
+
+    if (current_frame_time_ms >= ms_per_frame)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+void RenderScene(HDC hDC)
+{
+    if (!CheckRenderNextFrame())
+    {
+        if (eco_limiter)
+        {
+            EconomicSleep();
+        }
+        else
+        {
+            std::this_thread::yield();
+        }
+
+        return;
+    }
+
+    CalcFPS();
+    UpdateSceneState();
+
+    last_render_tick_count = current_tick_count;
+
     try
     {
         g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
@@ -2838,9 +2847,6 @@ void Scene(HDC hDC)
     catch (const std::exception&)
     {
     }
-
-    wglMakeCurrent(nullptr, nullptr);
-    g_render_lock->unlock();
 }
 
 bool GetTimeCheck(int DelayTime)

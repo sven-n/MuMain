@@ -53,6 +53,7 @@
 //#define CAMERA_TEST
 
 #define WM_USER_MEMORYHACK	( WM_USER + 1)
+#define WM_RECEIVE_BUFFER	( WM_USER + 2)
 #define WM_NPROTECT_EXIT_TWO  (WM_USER + 10001)
 
 extern bool ashies;
