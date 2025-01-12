@@ -561,6 +561,11 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         }
         break;
+    case WM_RECEIVE_BUFFER: {
+        auto Packet = std::unique_ptr<PacketInfo>(reinterpret_cast<PacketInfo*>(wParam));
+        ProcessPacketCallback(Packet.release());
+        break;
+    }
     case WM_USER_MEMORYHACK:
         //SetTimer( g_hWnd, WINDOWMINIMIZED_TIMER, 1*1000, NULL);
         KillGLWindow();
@@ -1269,41 +1274,38 @@ MSG MainLoop()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        else
-        {
-            //Scene
-#if (defined WINDOWMODE)
-            if (g_bUseWindowMode || g_bWndActive)
-            {
-                Scene(g_hDC);
-            }
-#ifndef FOR_WORK
-            else if (g_bUseWindowMode == FALSE)
-            {
-                SetForegroundWindow(g_hWnd);
-                SetFocus(g_hWnd);
 
-                if (g_iInactiveWarning > 1)
-                {
-                    SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, NULL);
-                    PostMessage(g_hWnd, WM_CLOSE, 0, 0);
-                }
-                else
-                {
-                    g_iInactiveWarning++;
-                    g_bMinimizedEnabled = TRUE;
-                    ShowWindow(g_hWnd, SW_MINIMIZE);
-                    g_bMinimizedEnabled = FALSE;
-                    ShowWindow(g_hWnd, SW_MAXIMIZE);
-                }
+        //Scene
+#if (defined WINDOWMODE)
+        if (g_bUseWindowMode || g_bWndActive)
+        {
+            Scene(g_hDC);
+        }
+#ifndef FOR_WORK
+        else if (g_bUseWindowMode == FALSE)
+        {
+            SetForegroundWindow(g_hWnd);
+            SetFocus(g_hWnd);
+
+            if (g_iInactiveWarning > 1)
+            {
+                SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, NULL);
+                PostMessage(g_hWnd, WM_CLOSE, 0, 0);
             }
+            else
+            {
+                g_iInactiveWarning++;
+                g_bMinimizedEnabled = TRUE;
+                ShowWindow(g_hWnd, SW_MINIMIZE);
+                g_bMinimizedEnabled = FALSE;
+                ShowWindow(g_hWnd, SW_MAXIMIZE);
+            }
+        }
 #endif//FOR_WORK
 #else//WINDOWMODE
-            if (g_bWndActive)
-                Scene(g_hDC);
-
+        if (g_bWndActive)
+            Scene(g_hDC);
 #endif	//WINDOWMODE(#else)
-        }
     } // while( 1 )
 
     return msg;

@@ -2772,9 +2772,6 @@ bool CheckRenderNextScene()
 
 void Scene(HDC hDC)
 {
-    g_render_lock->lock();
-    wglMakeCurrent(hDC, g_hRC);
-
     if (CheckRenderNextScene())
     {
         last_render_tick_count = current_tick_count;
@@ -2812,10 +2809,7 @@ void Scene(HDC hDC)
         }
     }
 
-    wglMakeCurrent(nullptr, nullptr);
-    g_render_lock->unlock();
-
-    // allow context switching for network thread
+    // allow context switching for other threads
     std::this_thread::yield();
 }
 

@@ -3466,6 +3466,7 @@ typedef struct {
     WORD		 TargerIndex[DARKSIDE_TARGET_MAX];
 } PRECEIVE_DARKSIDE_INDEX, * LPPRECEIVE_DARKSIDE_INDEX;
 
+
 //////////////////////////////////////////////////////////////////////////
 // ?????????????????????????????????????
 //////////////////////////////////////////////////////////////////////////
@@ -3503,7 +3504,13 @@ void ReceiveCharacterList(const BYTE* ReceiveBuffer);
 void ReceiveMovePosition(const BYTE* ReceiveBuffer);
 void ReceiveMoveCharacter(const BYTE* ReceiveBuffer);
 //BOOL TranslateProtocol(int HeadCode,BYTE* ReceiveBuffer,int Size,BOOL bEncrypted);
-//static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
+
+struct PacketInfo
+{
+    std::unique_ptr<BYTE[]> ReceiveBuffer;
+    int32_t Size;
+};
+void ProcessPacketCallback(const PacketInfo* Packet);
 
 void InitGame();
 void InitGuildWar();
