@@ -1264,6 +1264,7 @@ MSG MainLoop()
     MSG msg;
     while (1)
     {
+        // Process events and messages
         if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
         {
             if (!GetMessage(&msg, NULL, 0, 0))
@@ -1275,11 +1276,14 @@ MSG MainLoop()
             DispatchMessage(&msg);
         }
 
-        //Scene
+        // Perform game logic updates or other non-rendering tasks
+        UpdateSceneState();
+
+        // Actual rendering
 #if (defined WINDOWMODE)
         if (g_bUseWindowMode || g_bWndActive)
         {
-            Scene(g_hDC);
+            RenderScene(g_hDC);
         }
 #ifndef FOR_WORK
         else if (g_bUseWindowMode == FALSE)

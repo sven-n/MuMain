@@ -2274,21 +2274,9 @@ double last_render_tick_count = 0;
 double current_tick_count = 0;
 double last_water_change = 0;
 
-void MainScene(HDC hDC)
+void UpdateSceneState()
 {
-    CalcFPS();
-
     g_pNewKeyInput->ScanAsyncKeyState();
-
-    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
-    {
-        double dDeltaTick = g_pTimer->GetTimeElapsed();
-        dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
-        // g_pTimer->ResetTimer();
-
-        CInput::Instance().Update();
-        CUIMng::Instance().Update(dDeltaTick);
-    }
 
     g_dwMouseUseUIID = 0;
 
@@ -2316,6 +2304,21 @@ void MainScene(HDC hDC)
             GrabEnable = false;
         else
             GrabEnable = true;
+    }
+}
+
+void RenderMainScene(HDC hDC)
+{
+    CalcFPS();
+
+    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+    {
+        double dDeltaTick = g_pTimer->GetTimeElapsed();
+        dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
+        // g_pTimer->ResetTimer();
+
+        CInput::Instance().Update();
+        CUIMng::Instance().Update(dDeltaTick);
     }
 
     constexpr int NumberOfWaterTextures = 32;
@@ -2404,8 +2407,6 @@ void MainScene(HDC hDC)
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    
 
     bool Success = false;
 
@@ -2770,7 +2771,7 @@ bool CheckRenderNextScene()
     return false;
 }
 
-void Scene(HDC hDC)
+void RenderScene(HDC hDC)
 {
     if (CheckRenderNextScene())
     {
@@ -2795,7 +2796,7 @@ void Scene(HDC hDC)
             case LOG_IN_SCENE:
             case CHARACTER_SCENE:
             case MAIN_SCENE:
-                MainScene(hDC);
+                RenderMainScene(hDC);
                 break;
             }
 
