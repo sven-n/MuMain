@@ -1262,18 +1262,22 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
 MSG MainLoop()
 {
     MSG msg;
+
     while (1)
     {
-        // Process all available events and messages
-        while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+        const int MaxMessagePerCycle = 10;
+        int messageProcessed = 0;
+
+        while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) && messageProcessed < MaxMessagePerCycle)
         {
             if (!GetMessage(&msg, NULL, 0, 0))
             {
-                break;
+                return msg;
             }
 
             TranslateMessage(&msg);
             DispatchMessage(&msg);
+            ++messageProcessed;
         }
 
 #if (defined WINDOWMODE)
