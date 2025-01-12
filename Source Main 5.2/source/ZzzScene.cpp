@@ -2811,6 +2811,11 @@ void RenderScene(HDC hDC)
         {
         }
     }
+    else 
+    {
+        // Avoid a tight loop to reduce CPU usage
+        std::this_thread::yield();
+    }
 }
 
 bool GetTimeCheck(int DelayTime)

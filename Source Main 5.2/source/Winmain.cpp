@@ -1264,8 +1264,8 @@ MSG MainLoop()
     MSG msg;
     while (1)
     {
-        // Process events and messages
-        if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+        // Process all available events and messages
+        while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
         {
             if (!GetMessage(&msg, NULL, 0, 0))
             {
@@ -1276,7 +1276,6 @@ MSG MainLoop()
             DispatchMessage(&msg);
         }
 
-        // Actual rendering
 #if (defined WINDOWMODE)
         if (g_bUseWindowMode || g_bWndActive)
         {
