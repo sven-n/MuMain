@@ -2779,6 +2779,10 @@ void EconomicSleep()
             std::this_thread::yield();
         }
     }
+    else
+    {
+        std::this_thread::yield();
+    }
 }
 
 bool CheckRenderNextFrame()
