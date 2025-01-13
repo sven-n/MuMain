@@ -1320,7 +1320,7 @@ MSG MainLoop()
         {
             if (!PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
             {
-                WaitForNextActivity();
+                WaitForNextActivity(precise != TIMERR_NOERROR);
             }
         }
     } // while( 1 )

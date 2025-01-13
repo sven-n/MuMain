@@ -2756,19 +2756,19 @@ float g_Luminosity;
 extern int g_iNoMouseTime;
 extern GLvoid KillGLWindow(GLvoid);
 
-void WaitForNextActivity()
+void WaitForNextActivity(bool usePreciseSleep)
 {
     // We only sleep when we have enough time to sleep and have some additional rest time.
     const float current_frame_time_ms = current_tick_count - last_render_tick_count;
     if (ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
     {
-        constexpr float sleep_threshold_ms = 5.0f;
-        constexpr float sleep_duration_offset_ms = 1.5f;
+        const float sleep_threshold_ms = usePreciseSleep? 5.0f : 16.0f;
+        const float sleep_duration_offset_ms = usePreciseSleep? 1.5f : 4.0f;
         const auto rest_ms = ms_per_frame - current_frame_time_ms;
 
         if (rest_ms - sleep_duration_offset_ms > sleep_threshold_ms)
         {
-            const float sleep_ms = rest_ms - sleep_duration_offset_ms;
+            const float sleep_ms = usePreciseSleep? rest_ms - sleep_duration_offset_ms : 10.0f;
             std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
         }
         else
