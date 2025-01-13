@@ -1263,9 +1263,12 @@ MSG MainLoop()
 {
     MSG msg;
 
+    constexpr auto target_resolution = 1;
+    auto precise = timeBeginPeriod(target_resolution);
+
     while (1)
     {
-        const int MaxMessagePerCycle = 10;
+        const int MaxMessagePerCycle = 5;
         int messageProcessed = 0;
 
         while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) && messageProcessed < MaxMessagePerCycle)
@@ -1321,6 +1324,11 @@ MSG MainLoop()
             }
         }
     } // while( 1 )
+
+    if (precise != TIMERR_NOERROR)
+    {
+        timeEndPeriod(target_resolution);
+    }
 
     return msg;
 }
@@ -1454,7 +1462,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (IsVSyncAvailable())
     {
         EnableVSync();
-        SetTargetFps(-1, false); // unlimited
+        SetTargetFps(-1); // unlimited
     }
 
     FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));

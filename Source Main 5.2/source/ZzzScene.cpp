@@ -2263,13 +2263,11 @@ void MoveCharacter(CHARACTER* c, OBJECT* o);
 
 float target_fps = 60;
 float ms_per_frame = 1000.f / target_fps;
-bool eco_limiter = false;
 
-void SetTargetFps(float targetFps, bool ecoLimiter)
+void SetTargetFps(float targetFps)
 {
     target_fps = targetFps;
     ms_per_frame = 1000.0f / target_fps;
-    eco_limiter = ecoLimiter;
 }
 
 double last_render_tick_count = 0;
@@ -2758,20 +2756,19 @@ float g_Luminosity;
 extern int g_iNoMouseTime;
 extern GLvoid KillGLWindow(GLvoid);
 
-void EconomicSleep()
+void WaitForNextActivity()
 {
     // We only sleep when we have enough time to sleep and have some additional rest time.
     const float current_frame_time_ms = current_tick_count - last_render_tick_count;
     if (ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < ms_per_frame)
     {
-        constexpr float sleep_threshold_ms = 16.0f;
-        constexpr float sleep_ms = 10.0f;
-        constexpr float sleep_duration_offset_ms = 4.0f;
+        constexpr float sleep_threshold_ms = 5.0f;
+        constexpr float sleep_duration_offset_ms = 1.5f;
         const auto rest_ms = ms_per_frame - current_frame_time_ms;
 
         if (rest_ms - sleep_duration_offset_ms > sleep_threshold_ms)
         {
-            // In my tests, it sleeps either for nearly 0 ms, or for about 10 ms ...
+            const float sleep_ms = rest_ms - sleep_duration_offset_ms;
             std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
         }
         else
@@ -2796,18 +2793,6 @@ bool CheckRenderNextFrame()
     }
 
     return false;
-}
-
-void WaitForNextActivity()
-{
-    if (eco_limiter)
-    {
-        EconomicSleep();
-    }
-    else
-    {
-        std::this_thread::yield();
-    }
 }
 
 void RenderScene(HDC hDC)

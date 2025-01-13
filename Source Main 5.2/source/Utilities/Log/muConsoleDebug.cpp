@@ -73,15 +73,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     {
         auto fps_str = strCommand.substr(5);
         auto target_fps = std::stof(fps_str);
-        SetTargetFps(target_fps, false);
-        return true;
-    }
-
-    if (strCommand._Starts_with(L"$ecofps"))
-    {
-        auto fps_str = strCommand.substr(8);
-        auto target_fps = std::stof(fps_str);
-        SetTargetFps(target_fps, true);
+        SetTargetFps(target_fps);
         return true;
     }
 
