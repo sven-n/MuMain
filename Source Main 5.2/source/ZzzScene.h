@@ -1,4 +1,5 @@
 #pragma once
+
 #include "zzzinfomation.h"
 #include "SpinLock.h"
 
@@ -17,9 +18,12 @@ extern int g_iLengthAuthorityCode;
 
 inline SpinLock* g_render_lock = new SpinLock();
 
+extern bool CheckRenderNextFrame();
+extern void WaitForNextActivity(bool usePreciseSleep);
+extern void UpdateSceneState();
 extern void LogInScene(HDC hDC);
 extern void LoadingScene(HDC hDC);
-extern void Scene(HDC Hdc);
+extern void RenderScene(HDC Hdc);
 extern bool CheckName();
 void    StartGame();
 void SetTargetFps(float targetFps);

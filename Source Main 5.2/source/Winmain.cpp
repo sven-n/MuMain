@@ -485,7 +485,6 @@ int g_iMousePopPosition_y = 0;
 
 extern int TimeRemain;
 extern bool EnableFastInput;
-void MainScene(HDC hDC);
 
 LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -562,6 +561,11 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         }
         break;
+    case WM_RECEIVE_BUFFER: {
+        auto Packet = std::unique_ptr<PacketInfo>(reinterpret_cast<PacketInfo*>(wParam));
+        ProcessPacketCallback(Packet.release());
+        break;
+    }
     case WM_USER_MEMORYHACK:
         //SetTimer( g_hWnd, WINDOWMINIMIZED_TIMER, 1*1000, NULL);
         KillGLWindow();
@@ -1258,25 +1262,33 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
 MSG MainLoop()
 {
     MSG msg;
+
+    constexpr auto target_resolution = 1;
+    auto precise = timeBeginPeriod(target_resolution);
+
     while (1)
     {
-        if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+        const int MaxMessagePerCycle = 5;
+        int messageProcessed = 0;
+
+        while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) && messageProcessed < MaxMessagePerCycle)
         {
             if (!GetMessage(&msg, NULL, 0, 0))
             {
-                break;
+                return msg;
             }
 
             TranslateMessage(&msg);
             DispatchMessage(&msg);
+            ++messageProcessed;
         }
-        else
+
+        if (CheckRenderNextFrame())
         {
-            //Scene
 #if (defined WINDOWMODE)
             if (g_bUseWindowMode || g_bWndActive)
             {
-                Scene(g_hDC);
+                RenderScene(g_hDC);
             }
 #ifndef FOR_WORK
             else if (g_bUseWindowMode == FALSE)
@@ -1301,11 +1313,22 @@ MSG MainLoop()
 #endif//FOR_WORK
 #else//WINDOWMODE
             if (g_bWndActive)
-                Scene(g_hDC);
-
+                RenderScene(g_hDC);
 #endif	//WINDOWMODE(#else)
         }
+        else
+        {
+            if (!PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+            {
+                WaitForNextActivity(precise != TIMERR_NOERROR);
+            }
+        }
     } // while( 1 )
+
+    if (precise != TIMERR_NOERROR)
+    {
+        timeEndPeriod(target_resolution);
+    }
 
     return msg;
 }

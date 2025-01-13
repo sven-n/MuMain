@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include <memory>
 #include "UIManager.h"
 #include "GuildCache.h"
 #include "ZzzBMD.h"
@@ -119,6 +120,7 @@ BYTE Version[SIZE_PROTOCOLVERSION] = { '2', '0', '4', '0', '4' };
 
 BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 Connection* SocketClient = nullptr;
+bool EnableSocket = false;
 
 BYTE    g_byPacketSerialSend = 0;
 BYTE    g_byPacketSerialRecv = 0;
@@ -162,7 +164,7 @@ void AddDebugText(const unsigned char* Buffer, int Size)
 }
 
 // Forward declaration
-static void HandleIncomingPacketLocked(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
+static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
 
 BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port)
 {
@@ -173,7 +175,7 @@ BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port)
 
     // todo: generally, it's a bad idea to assume a specific port number (range).
     const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
-    SocketClient = new Connection(IpAddr, Port, isEncrypted, &HandleIncomingPacketLocked);
+    SocketClient = new Connection(IpAddr, Port, isEncrypted, &HandleIncomingPacket);
     if (!SocketClient->IsConnected())
     {
         bResult = FALSE;
@@ -13075,7 +13077,7 @@ void ReceiveDarkside(const BYTE* ReceiveBuffer)
     }
 }
 
-static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size)
+static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
 {
     auto received_span = std::span<const BYTE>(ReceiveBuffer, Size);
     BYTE HeadCode = 0;
@@ -14553,19 +14555,25 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
     //return ( TRUE);
 }
 
-static void HandleIncomingPacketLocked(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size)
+void ProcessPacketCallback(const PacketInfo* Packet)
 {
-    g_render_lock->lock();
-    wglMakeCurrent(g_hDC, g_hRC);
     try
     {
-        HandleIncomingPacket(Handle, ReceiveBuffer, Size);
+        ProcessPacket(Packet->ReceiveBuffer.get(), Packet->Size);
     }
     catch (const std::exception&)
     {
     }
-    wglMakeCurrent(nullptr, nullptr);
-    g_render_lock->unlock();
+}
+
+static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size)
+{
+    auto Packet = std::make_unique<PacketInfo>();
+    Packet->ReceiveBuffer = std::make_unique<BYTE[]>(Size);
+    std::copy(ReceiveBuffer, ReceiveBuffer + Size, Packet->ReceiveBuffer.get());
+    Packet->Size = Size;
+
+    PostMessage(g_hWnd, WM_RECEIVE_BUFFER, reinterpret_cast<WPARAM>(Packet.release()), 0);
 }
 
 bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
