@@ -2768,7 +2768,7 @@ void WaitForNextActivity(bool usePreciseSleep)
 
         if (rest_ms - sleep_duration_offset_ms > sleep_threshold_ms)
         {
-            const float sleep_ms = usePreciseSleep? rest_ms - sleep_duration_offset_ms : 10.0f;
+            const float sleep_ms = min(usePreciseSleep? rest_ms - sleep_duration_offset_ms : 10.0f, 10.0f);
             std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
         }
         else
