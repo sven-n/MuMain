@@ -2794,23 +2794,20 @@ bool CheckRenderNextFrame()
     return false;
 }
 
+void WaitForNextActivity()
+{
+    if (eco_limiter)
+    {
+        EconomicSleep();
+    }
+    else
+    {
+        std::this_thread::yield();
+    }
+}
 
 void RenderScene(HDC hDC)
 {
-    if (!CheckRenderNextFrame())
-    {
-        if (eco_limiter)
-        {
-            EconomicSleep();
-        }
-        else
-        {
-            std::this_thread::yield();
-        }
-
-        return;
-    }
-
     CalcFPS();
     UpdateSceneState();
 

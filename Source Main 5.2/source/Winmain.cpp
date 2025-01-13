@@ -1280,36 +1280,46 @@ MSG MainLoop()
             ++messageProcessed;
         }
 
+        if (CheckRenderNextFrame())
+        {
 #if (defined WINDOWMODE)
-        if (g_bUseWindowMode || g_bWndActive)
-        {
-            RenderScene(g_hDC);
-        }
+            if (g_bUseWindowMode || g_bWndActive)
+            {
+                RenderScene(g_hDC);
+            }
 #ifndef FOR_WORK
-        else if (g_bUseWindowMode == FALSE)
-        {
-            SetForegroundWindow(g_hWnd);
-            SetFocus(g_hWnd);
+            else if (g_bUseWindowMode == FALSE)
+            {
+                SetForegroundWindow(g_hWnd);
+                SetFocus(g_hWnd);
 
-            if (g_iInactiveWarning > 1)
-            {
-                SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, NULL);
-                PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+                if (g_iInactiveWarning > 1)
+                {
+                    SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, NULL);
+                    PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+                }
+                else
+                {
+                    g_iInactiveWarning++;
+                    g_bMinimizedEnabled = TRUE;
+                    ShowWindow(g_hWnd, SW_MINIMIZE);
+                    g_bMinimizedEnabled = FALSE;
+                    ShowWindow(g_hWnd, SW_MAXIMIZE);
+                }
             }
-            else
-            {
-                g_iInactiveWarning++;
-                g_bMinimizedEnabled = TRUE;
-                ShowWindow(g_hWnd, SW_MINIMIZE);
-                g_bMinimizedEnabled = FALSE;
-                ShowWindow(g_hWnd, SW_MAXIMIZE);
-            }
-        }
 #endif//FOR_WORK
 #else//WINDOWMODE
-        if (g_bWndActive)
-            Scene(g_hDC);
+            if (g_bWndActive)
+                RenderScene(g_hDC);
 #endif	//WINDOWMODE(#else)
+        }
+        else
+        {
+            if (!PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+            {
+                WaitForNextActivity();
+            }
+        }
     } // while( 1 )
 
     return msg;

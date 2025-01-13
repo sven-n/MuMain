@@ -18,7 +18,8 @@ extern int g_iLengthAuthorityCode;
 
 inline SpinLock* g_render_lock = new SpinLock();
 
-extern bool CheckRenderNextScene();
+extern bool CheckRenderNextFrame();
+extern void WaitForNextActivity();
 extern void UpdateSceneState();
 extern void LogInScene(HDC hDC);
 extern void LoadingScene(HDC hDC);
