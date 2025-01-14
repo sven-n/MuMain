@@ -55,7 +55,7 @@ public:
         m_iMinWidth = iMinWidth; m_iMinHeight = iMinHeight; m_iMaxWidth = iMaxWidth; m_iMaxHeight = iMaxHeight;
     }
     virtual void SetTitle(const wchar_t* pszTitle);
-    const wchar_t* GetTitle() { return m_pszTitle.c_str(); }
+    const wchar_t* GetTitle() { return m_strTitle.c_str(); }
     virtual void Maximize();
 
     void Render();
@@ -92,7 +92,7 @@ protected:
     int m_iResizeDir;
     int m_iMinWidth, m_iMinHeight;
     int m_iMaxWidth, m_iMaxHeight;
-    std::wstring m_pszTitle;
+    std::wstring m_strTitle;
     BOOL m_bHaveTextBox;
     int m_iControlButtonClick;
     BOOL m_bIsMaximize;

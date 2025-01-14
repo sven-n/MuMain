@@ -896,7 +896,7 @@ void CUIBaseWindow::SetTitle(const wchar_t* pszTitle)
     if (!pszTitle)
         return;
 
-    m_pszTitle = std::wstring(pszTitle);
+    m_strTitle = std::wstring(pszTitle);
 }
 
 void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
@@ -1031,7 +1031,7 @@ void CUIBaseWindow::Render()
         g_pRenderText->SetBgColor(0);
 
         wchar_t szTempTitle[256] = { 0 };
-        CutText3(m_pszTitle.c_str(), szTempTitle, m_iWidth - 50, 1, 256);
+        CutText3(m_strTitle.c_str(), szTempTitle, m_iWidth - 50, 1, 256);
         g_pRenderText->RenderText(m_iPos_x + 9, m_iPos_y + 8, szTempTitle);
         if (CheckOption(UIWINDOWSTYLE_MINBUTTON))
         {
