@@ -101,7 +101,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
     switch (iWindowType)
     {
     case UIWNDTYPE_EMPTY:
-        pbw = new CUIBaseWindow;
+        pbw = new CUIDefaultWindow;
         break;
     case UIWNDTYPE_CHAT:
     case UIWNDTYPE_CHAT_READY:
@@ -145,9 +145,6 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         g_dwTopWindow = pbw->GetUIID();
         break;
     case UIWNDTYPE_QUESTION:
-        if (g_dwTopWindow != 0)
-            return 0;
-        break;
     case UIWNDTYPE_QUESTION_FORCE:
         pbw = new CUIQuestionWindow(0);
         {
@@ -197,6 +194,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
 
     if (iPos_x == UIWND_DEFAULT) iPos_x = 0;
     if (iPos_y == UIWND_DEFAULT) iPos_y = 332;
+    if (!pbw) return 0;
 
     pbw->Init(pszTitle, dwParentID);
 
@@ -871,7 +869,6 @@ CUIBaseWindow::CUIBaseWindow()
     m_iMinHeight = 100;
     m_iMaxWidth = 0;
     m_iMaxHeight = 0;
-    m_pszTitle = NULL;
     SetOption(UIWINDOWSTYLE_NORMAL);
     m_bHaveTextBox = FALSE;
     m_iControlButtonClick = 0;
@@ -883,11 +880,6 @@ CUIBaseWindow::CUIBaseWindow()
 
 CUIBaseWindow::~CUIBaseWindow()
 {
-    if (m_pszTitle != NULL)
-    {
-        delete[] m_pszTitle;
-        m_pszTitle = NULL;
-    }
 }
 
 void CUIBaseWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
@@ -899,26 +891,12 @@ void CUIBaseWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     SetSize(213, 170);
 }
 
-void CUIBaseWindow::InitControls()
-{
-    // can be overwritten, if needed
-}
-
 void CUIBaseWindow::SetTitle(const wchar_t* pszTitle)
 {
-    if (pszTitle == NULL) return;
-    if (m_pszTitle != NULL)
-    {
-        if (wcscmp(pszTitle, m_pszTitle) == 0) return;
-        delete[] m_pszTitle;
-    }
+    if (!pszTitle)
+        return;
 
-    auto requiredLength = wcslen(pszTitle) + 1;
-    m_pszTitle = new wchar_t[requiredLength];
-    if (m_pszTitle == NULL) return;
-
-    wcsncpy(m_pszTitle, pszTitle, requiredLength - 1);
-    m_pszTitle[requiredLength - 1] = L'\0';
+    m_pszTitle = std::wstring(pszTitle);
 }
 
 void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
@@ -976,11 +954,11 @@ void CUIBaseWindow::SetControlButtonColor(int iSelect)
 
 void CUIBaseWindow::Render()
 {
-    if (!_controlsInitialized)
-    {
-        InitControls();
-        _controlsInitialized = true;
-    }
+    std::call_once(_controlsInitialized, [this]() 
+        { 
+            InitControls(); 
+        }
+    );
 
     EnableAlphaTest();
 
@@ -1053,7 +1031,7 @@ void CUIBaseWindow::Render()
         g_pRenderText->SetBgColor(0);
 
         wchar_t szTempTitle[256] = { 0 };
-        CutText3(m_pszTitle, szTempTitle, m_iWidth - 50, 1, 256);
+        CutText3(m_pszTitle.c_str(), szTempTitle, m_iWidth - 50, 1, 256);
         g_pRenderText->RenderText(m_iPos_x + 9, m_iPos_y + 8, szTempTitle);
         if (CheckOption(UIWINDOWSTYLE_MINBUTTON))
         {
@@ -1326,7 +1304,6 @@ void CUIChatWindow::InitControls()
     m_CloseInviteButton.SetParentUIID(GetUIID());
     m_CloseInviteButton.SetSize(73, 13);
     m_CloseInviteButton.SetArrangeType(3, 74, 14);
-    _controlsInitialized = true;
     Refresh();
 }
 
@@ -1373,11 +1350,6 @@ void CUIChatWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
 
 void CUIChatWindow::Refresh()
 {
-    if (!_controlsInitialized)
-    {
-        return;
-    }
-
     m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
     m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
     m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
@@ -1436,11 +1408,6 @@ void CUIChatWindow::DisconnectToChatServer()
 
 int CUIChatWindow::AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server)
 {
-    if (!_controlsInitialized)
-    {
-        ;
-        // oops
-    }
     BOOL bFind = FALSE;
     for (std::deque<GUILDLIST_TEXT>::iterator iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
     {
@@ -2616,6 +2583,7 @@ void CUILetterWriteWindow::InitControls()
     m_Photo.SetAutoupdatePlayer(TRUE);
     m_Photo.SetAnimation(AT_STAND1);
     m_Photo.SetAngle(90);
+    Refresh();
 }
 
 void CUILetterWriteWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
@@ -3495,8 +3463,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
         {
             if (GetCurrentSelectedFriend() == NULL) break;
             wchar_t tempTxt[MAX_TEXT_LENGTH + 1] = { 0 };
-            wcsncpy(tempTxt, GetCurrentSelectedFriend(), MAX_TEXT_LENGTH);
-            wcscat(tempTxt, GlobalText[1024]);
+            swprintf(tempTxt, L"%s %s", GlobalText[1024], GetCurrentSelectedFriend()); // "Do you really wish to delete this friend?"
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, tempTxt, GetUIID());
         }
         break;
@@ -4965,6 +4932,7 @@ void CUITextInputWindow::InitControls()
     m_CancelButton.SetParentUIID(GetUIID());
     m_CancelButton.SetArrangeType(0, 73, 40);
     m_CancelButton.SetSize(50, 20);
+    Refresh();
 }
 
 
@@ -5072,8 +5040,8 @@ void CUIQuestionWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     else if (m_iDialogType == 1) SetTitle(GlobalText[228]);
     SetParentUIID(0);
     m_dwReturnWindowUIID = dwParentID;
-    m_szCaption[0][0] = m_szCaption[1][0] = '\0';
-    m_szSaveID[0] = '\0';
+    memset(m_szCaption, 0, sizeof(m_szCaption));
+    memset(m_szSaveID, 0, sizeof(m_szSaveID));
     CutText3(pszTitle, m_szCaption[0], 125, 2, 256);
 
     SetPosition(50, 50);
@@ -5217,7 +5185,6 @@ void CUIFriendMenu::Init()
     m_iMinHeight = 100;
     m_iMaxWidth = 0;
     m_iMaxHeight = 0;
-    m_pszTitle = NULL;
     SetOption(UIWINDOWSTYLE_NULL);
     m_bHaveTextBox = FALSE;
     m_iControlButtonClick = 0;
