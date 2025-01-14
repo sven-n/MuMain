@@ -173,9 +173,10 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
 bool SEASON3B::CNewUIManager::Update()
 {
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
+    auto vecUI = m_vecUI;
 
-    auto vi = m_vecUI.begin();
-    for (; vi != m_vecUI.end(); vi++)
+    auto vi = vecUI.begin();
+    for (; vi != vecUI.end(); vi++)
     {
         if ((*vi)->IsEnabled())
         {
@@ -192,9 +193,10 @@ bool SEASON3B::CNewUIManager::Update()
 bool SEASON3B::CNewUIManager::Render()
 {
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
+    auto vecUI = m_vecUI;
 
-    auto vi = m_vecUI.begin();
-    for (; vi != m_vecUI.end(); vi++)
+    auto vi = vecUI.begin();
+    for (; vi != vecUI.end(); vi++)
     {
         if ((*vi)->IsVisible())
         {
