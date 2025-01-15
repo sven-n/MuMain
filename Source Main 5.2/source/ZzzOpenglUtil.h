@@ -87,6 +87,7 @@ bool IsVSyncAvailable();
 bool IsVSyncEnabled();
 void EnableVSync();
 void DisableVSync();
+int GetFPSLimit();
 
 void UpdateMousePositionn();
 extern inline void TEXCOORD(float* c, float u, float v);

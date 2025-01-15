@@ -35,6 +35,7 @@
 #include "./ExternalObject/leaf/ExceptionHandler.h"
 #include "./Utilities/Dump/CrashReporter.h"
 #include "./Utilities/Log/muConsoleDebug.h"
+#include "./Utilities/CpuUsage.h"
 #include "ProtocolSend.h"
 #include "ProtectSysKey.h"
 #include "MUHelper/MuHelper.h"
@@ -1259,8 +1260,48 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
     return true;
 }
 
-int g_MaxMessagePerCycle = 10;
+double CPU_AVG = 0.0;
+void RecordCpuUsage() 
+{
+    constexpr int max_recordings = 60;
+    double CPU_Recordings[max_recordings];
+    double previousAvg = 0.0;
+    int count = 0;
 
+    while (!Destroy) 
+    {
+        CPU_Recordings[count] = CpuUsage::Instance()->GetUsage();
+
+        count++;
+        if (count == max_recordings)
+        {
+            count = 0;
+            double CPU_sum = 0;
+
+            for (int i = 0; i < max_recordings; i++)
+            {
+                CPU_sum += CPU_Recordings[i];
+            }
+
+            double currentAvg = CPU_sum / max_recordings;
+
+            if (previousAvg > 0)
+            {
+                CPU_AVG = (currentAvg + previousAvg) / 2.0;
+            }
+            else
+            {
+                CPU_AVG = currentAvg;
+            }
+
+            previousAvg = currentAvg;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    }
+}
+
+int g_MaxMessagePerCycle = 10;
 void SetMaxMessagePerCycle(int messages)
 {
     g_MaxMessagePerCycle = messages;
@@ -1334,6 +1375,7 @@ MSG MainLoop()
                 WaitForNextActivity(precise != TIMERR_NOERROR);
             }
         }
+
     } // while( 1 )
 
     if (precise != TIMERR_NOERROR)
@@ -1624,6 +1666,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #endif // !FOR_WORK
 #endif // PROTECT_SYSTEMKEY && NDEBUG
 
+    std::thread cpuUsageRecorder(RecordCpuUsage);
     const MSG msg = MainLoop();
 
     DestroyWindow();

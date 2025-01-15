@@ -79,6 +79,7 @@ extern int  m_Resolution;
 extern int m_nColorDepth;
 extern int m_RememberMe;
 extern int g_MaxMessagePerCycle;
+extern double CPU_AVG;
 
 extern void SetMaxMessagePerCycle(int messages);
 extern void CheckHack(void);
