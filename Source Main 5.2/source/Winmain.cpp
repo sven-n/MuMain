@@ -1268,7 +1268,7 @@ MSG MainLoop()
 
     while (1)
     {
-        const int MaxMessagePerCycle = 5;
+        const int MaxMessagePerCycle = 10;
         int messageProcessed = 0;
 
         while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) && messageProcessed < MaxMessagePerCycle)
