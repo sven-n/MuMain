@@ -1268,10 +1268,7 @@ MSG MainLoop()
 
     while (1)
     {
-        const int MaxMessagePerCycle = 5;
-        int messageProcessed = 0;
-
-        while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) && messageProcessed < MaxMessagePerCycle)
+        if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
         {
             if (!GetMessage(&msg, NULL, 0, 0))
             {
@@ -1280,7 +1277,7 @@ MSG MainLoop()
 
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-            ++messageProcessed;
+            continue;
         }
 
         if (CheckRenderNextFrame())
