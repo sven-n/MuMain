@@ -2266,7 +2266,7 @@ double ms_per_frame = 1000.0 / target_fps;
 
 void SetTargetFps(double targetFps)
 {
-    if (targetFps < 0 || targetFps >= GetFPSLimit())
+    if (IsVSyncEnabled() && targetFps >= GetFPSLimit())
     {
         targetFps = -1;
     }
@@ -2775,7 +2775,7 @@ void WaitForNextActivity(bool usePreciseSleep)
         if (rest_ms - sleep_duration_offset_ms > sleep_threshold_ms)
         {
             const auto sleep_ms = min(rest_ms - sleep_duration_offset_ms, max_sleep_ms);
-            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(final_sleep_ms)));
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
         }
         else
         {
