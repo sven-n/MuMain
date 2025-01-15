@@ -664,6 +664,7 @@
     <ClCompile Include="source\UISenatus.cpp" />
     <ClCompile Include="source\UIWindows.cpp" />
     <ClCompile Include="source\UsefulDef.cpp" />
+    <ClCompile Include="source\Utilities\CpuUsage.cpp" />
     <ClCompile Include="source\Utilities\Log\ErrorReport.cpp" />
     <ClCompile Include="source\Utilities\Log\muConsoleDebug.cpp" />
     <ClCompile Include="source\Utilities\Log\WindowsConsole.cpp" />
@@ -1071,6 +1072,7 @@
     <ClInclude Include="source\UISenatus.h" />
     <ClInclude Include="source\UIWindows.h" />
     <ClInclude Include="source\UsefulDef.h" />
+    <ClInclude Include="source\Utilities\CpuUsage.h" />
     <ClInclude Include="source\Utilities\Log\ErrorReport.h" />
     <ClInclude Include="source\Utilities\Log\muConsoleDebug.h" />
     <ClInclude Include="source\Utilities\Log\WindowsConsole.h" />
