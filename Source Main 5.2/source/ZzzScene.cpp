@@ -2441,7 +2441,7 @@ void MainScene(HDC hDC)
 #ifndef  defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
         BeginBitmap();
         wchar_t szDebugText[128];
-        swprintf(szDebugText, L"FPS : %.1f Connected: %d", FPS_AVG, g_bGameServerConnected);
+        swprintf(szDebugText, L"FPS : %.1f WinMsg : %d Connected: %d", FPS_AVG, g_MaxMessagePerCycle, g_bGameServerConnected);
         wchar_t szMousePos[128];
         swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
         wchar_t szCamera3D[128];

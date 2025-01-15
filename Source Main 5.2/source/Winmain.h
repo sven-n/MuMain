@@ -78,7 +78,9 @@ extern int  m_MusicOnOff;
 extern int  m_Resolution;
 extern int m_nColorDepth;
 extern int m_RememberMe;
+extern int g_MaxMessagePerCycle;
 
+extern void SetMaxMessagePerCycle(int messages);
 extern void CheckHack(void);
 extern DWORD GetCheckSum(WORD wKey);
 extern void StopMp3(char* Name, BOOL bEnforce = false);

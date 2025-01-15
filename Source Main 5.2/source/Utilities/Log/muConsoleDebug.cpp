@@ -89,6 +89,14 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         return true;
     }
 
+    if (strCommand._Starts_with(L"$winmsg"))
+    {
+        auto str_limit = strCommand.substr(8);
+        auto message_limit = std::stof(str_limit);
+        SetMaxMessagePerCycle(message_limit);
+        return true;
+    }
+
 #ifdef CSK_LH_DEBUG_CONSOLE
     if (!m_bInit)
         return false;

@@ -1259,6 +1259,13 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
     return true;
 }
 
+int g_MaxMessagePerCycle = 10;
+
+void SetMaxMessagePerCycle(int messages)
+{
+    g_MaxMessagePerCycle = messages;
+}
+
 MSG MainLoop()
 {
     MSG msg;
@@ -1268,12 +1275,11 @@ MSG MainLoop()
 
     while (1)
     {
-        const int MaxMessagePerCycle = 10;
         int messageProcessed = 0;
 
-        while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) && messageProcessed < MaxMessagePerCycle)
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
-            if (!GetMessage(&msg, NULL, 0, 0))
+            if (msg.message == WM_QUIT)
             {
                 return msg;
             }
@@ -1281,6 +1287,11 @@ MSG MainLoop()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
             ++messageProcessed;
+
+            if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
+            {
+                break;
+            }
         }
 
         if (CheckRenderNextFrame())
