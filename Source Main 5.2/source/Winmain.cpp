@@ -1264,39 +1264,46 @@ double CPU_AVG = 0.0;
 void RecordCpuUsage() 
 {
     constexpr int max_recordings = 60;
-    double CPU_Recordings[max_recordings];
-    double previousAvg = 0.0;
+    double CPU_Recordings[max_recordings] = { 0.0 };
+    double currentAvg = 0.0;
+    double sum = 0.0;
     int count = 0;
+    int numFilled = 0;
+    auto lastUpdateTime = std::chrono::steady_clock::now();
 
     while (!Destroy) 
     {
-        CPU_Recordings[count] = CpuUsage::Instance()->GetUsage();
+        double currentUsage = CpuUsage::Instance()->GetUsage();
 
-        count++;
-        if (count == max_recordings)
+        currentUsage = max(0.0, min(100.0, currentUsage));
+
+        // Subtract the old value to maintain the sum
+        sum -= CPU_Recordings[count];
+
+        sum += currentUsage;
+
+        CPU_Recordings[count] = currentUsage;
+
+        // Update the count (wrap around when full - FIFO behavior)
+        count = (count + 1) % max_recordings;
+
+        if (numFilled < max_recordings)
         {
-            count = 0;
-            double CPU_sum = 0;
-
-            for (int i = 0; i < max_recordings; i++)
-            {
-                CPU_sum += CPU_Recordings[i];
-            }
-
-            double currentAvg = CPU_sum / max_recordings;
-
-            if (previousAvg > 0)
-            {
-                CPU_AVG = (currentAvg + previousAvg) / 2.0;
-            }
-            else
-            {
-                CPU_AVG = currentAvg;
-            }
-
-            previousAvg = currentAvg;
+            numFilled++;
         }
 
+        // Calculate the current average
+        currentAvg = sum / numFilled;
+
+        // Update the CPU_AVG every 250 ms
+        auto currentTime = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastUpdateTime).count() >= 250)
+        {
+            CPU_AVG = currentAvg;
+            lastUpdateTime = currentTime;
+        }
+
+        // Sleep to match a 60Hz frame rate as the basis
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 }
