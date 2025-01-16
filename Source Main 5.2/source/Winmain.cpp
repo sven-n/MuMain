@@ -1379,13 +1379,13 @@ MSG MainLoop()
         {
             if (!PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
             {
-                WaitForNextActivity(precise != TIMERR_NOERROR);
+                WaitForNextActivity(precise == TIMERR_NOERROR);
             }
         }
 
     } // while( 1 )
 
-    if (precise != TIMERR_NOERROR)
+    if (precise == TIMERR_NOERROR)
     {
         timeEndPeriod(target_resolution);
     }
