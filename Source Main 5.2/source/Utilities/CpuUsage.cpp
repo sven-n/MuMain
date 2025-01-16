@@ -14,6 +14,8 @@ public:
         GetSystemInfo(&sysInfo);
         m_numProcessors = sysInfo.dwNumberOfProcessors;
         m_lastCheckTime = std::chrono::steady_clock::now();
+        m_lastProcessTime = 0;
+        m_lastSystemTime = 0;
     }
 
     double GetUsage() 
@@ -57,7 +59,7 @@ public:
             return 0.0;
 
         // Calculate CPU usage as a percentage
-        return (100.0 * processTimeElapsed) / (systemTimeElapsed * m_numProcessors);
+        return max(0.0, (100.0 * processTimeElapsed) / (systemTimeElapsed * m_numProcessors));
     }
 
 private:
