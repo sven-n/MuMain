@@ -35,6 +35,7 @@
 #include "./ExternalObject/leaf/ExceptionHandler.h"
 #include "./Utilities/Dump/CrashReporter.h"
 #include "./Utilities/Log/muConsoleDebug.h"
+#include "./Utilities/CpuUsage.h"
 #include "ProtocolSend.h"
 #include "ProtectSysKey.h"
 #include "MUHelper/MuHelper.h"
@@ -1259,6 +1260,60 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
     return true;
 }
 
+double CPU_AVG = 0.0;
+void RecordCpuUsage() 
+{
+    constexpr int max_recordings = 60;
+    double CPU_Recordings[max_recordings] = { 0.0 };
+    double currentAvg = 0.0;
+    double sum = 0.0;
+    int count = 0;
+    int numFilled = 0;
+    auto lastUpdateTime = std::chrono::steady_clock::now();
+
+    while (!Destroy) 
+    {
+        double currentUsage = CpuUsage::Instance()->GetUsage();
+
+        currentUsage = max(0.0, min(100.0, currentUsage));
+
+        // Subtract the old value to maintain the sum
+        sum -= CPU_Recordings[count];
+
+        sum += currentUsage;
+
+        CPU_Recordings[count] = currentUsage;
+
+        // Update the count (wrap around when full - FIFO behavior)
+        count = (count + 1) % max_recordings;
+
+        if (numFilled < max_recordings)
+        {
+            numFilled++;
+        }
+
+        // Calculate the current average
+        currentAvg = sum / numFilled;
+
+        // Update the CPU_AVG every 250 ms
+        auto currentTime = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastUpdateTime).count() >= 250)
+        {
+            CPU_AVG = currentAvg;
+            lastUpdateTime = currentTime;
+        }
+
+        // Sleep to match a 60Hz frame rate as the basis
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    }
+}
+
+int g_MaxMessagePerCycle = 10;
+void SetMaxMessagePerCycle(int messages)
+{
+    g_MaxMessagePerCycle = messages;
+}
+
 MSG MainLoop()
 {
     MSG msg;
@@ -1268,12 +1323,11 @@ MSG MainLoop()
 
     while (1)
     {
-        const int MaxMessagePerCycle = 5;
         int messageProcessed = 0;
 
-        while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) && messageProcessed < MaxMessagePerCycle)
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
-            if (!GetMessage(&msg, NULL, 0, 0))
+            if (msg.message == WM_QUIT)
             {
                 return msg;
             }
@@ -1281,6 +1335,11 @@ MSG MainLoop()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
             ++messageProcessed;
+
+            if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
+            {
+                break;
+            }
         }
 
         if (CheckRenderNextFrame())
@@ -1320,12 +1379,13 @@ MSG MainLoop()
         {
             if (!PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
             {
-                WaitForNextActivity(precise != TIMERR_NOERROR);
+                WaitForNextActivity(precise == TIMERR_NOERROR);
             }
         }
+
     } // while( 1 )
 
-    if (precise != TIMERR_NOERROR)
+    if (precise == TIMERR_NOERROR)
     {
         timeEndPeriod(target_resolution);
     }
@@ -1613,6 +1673,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #endif // !FOR_WORK
 #endif // PROTECT_SYSTEMKEY && NDEBUG
 
+    std::thread cpuUsageRecorder(RecordCpuUsage);
     const MSG msg = MainLoop();
 
     DestroyWindow();

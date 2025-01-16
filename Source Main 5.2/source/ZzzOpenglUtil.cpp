@@ -768,6 +768,11 @@ void DisableVSync()
     _isVSyncEnabled = false;
 }
 
+int GetFPSLimit()
+{
+    return GetDeviceCaps(g_hDC, VREFRESH);
+}
+
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd, int iRequestMSAAValue, int& OutiPixelFormat)
 {
