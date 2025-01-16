@@ -9461,7 +9461,7 @@ void ReceiveRequestAcceptAddFriend(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(szText, Data->Name, MAX_ID_SIZE);
     szText[MAX_ID_SIZE] = '\0';
 
-    wcscat(szText, GlobalText[1051]);
+    swprintf(szText, L"%s %s", szText, GlobalText[1051]); // " has requested to list you as a friend."
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == false)
     {

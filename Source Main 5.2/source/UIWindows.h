@@ -43,7 +43,6 @@ const int UIPHOTOVIEWER_CANCONTROL = 1;
 
 class CUIBaseWindow : public CUIControl
 {
-    bool _controlsInitialized = false;
 public:
     CUIBaseWindow();
     virtual ~CUIBaseWindow();
@@ -56,7 +55,7 @@ public:
         m_iMinWidth = iMinWidth; m_iMinHeight = iMinHeight; m_iMaxWidth = iMaxWidth; m_iMaxHeight = iMaxHeight;
     }
     virtual void SetTitle(const wchar_t* pszTitle);
-    const wchar_t* GetTitle() { return m_pszTitle; }
+    const wchar_t* GetTitle() { return m_strTitle.c_str(); }
     virtual void Maximize();
 
     void Render();
@@ -79,7 +78,7 @@ public:
 protected:
     BOOL DoMouseAction();
 
-    virtual void InitControls();
+    virtual void InitControls() = 0;
 
     virtual void RenderSub() {}
     virtual void RenderOver() {}
@@ -93,11 +92,27 @@ protected:
     int m_iResizeDir;
     int m_iMinWidth, m_iMinHeight;
     int m_iMaxWidth, m_iMaxHeight;
-    wchar_t* m_pszTitle;
+    std::wstring m_strTitle;
     BOOL m_bHaveTextBox;
     int m_iControlButtonClick;
     BOOL m_bIsMaximize;
     int m_iBackPos_y, m_iBackHeight;
+
+    std::once_flag _controlsInitialized;
+};
+
+class CUIDefaultWindow : public CUIBaseWindow
+{
+public:
+    CUIDefaultWindow() {}
+    virtual ~CUIDefaultWindow() {}
+
+    virtual int RPos_x(int iPos_x) { return iPos_x + (m_iPos_x); }
+    virtual int RPos_y(int iPos_y) { return iPos_y + (m_iPos_y); }
+    virtual int RWidth() { return m_iWidth; }
+    virtual int RHeight() { return m_iHeight; }
+protected:
+    virtual void InitControls() {}
 };
 
 class CUIChatWindow : public CUIBaseWindow
@@ -105,7 +120,6 @@ class CUIChatWindow : public CUIBaseWindow
     static void HandlePacketS(int32_t handle, const BYTE* ReceiveBuffer, int32_t Size);
     inline static std::map<int32_t, DWORD> ConnectionHandleToWindowUuid = { };
     Connection* _connection;
-    bool _controlsInitialized = false;
 
 public:
     CUIChatWindow();
@@ -209,6 +223,7 @@ public:
     virtual ~CUILetterReadWindow();
 
     virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
+    virtual void InitControls() {}
     virtual void Refresh();
     void SetLetter(LETTERLIST_TEXT* pLetterHead, const wchar_t* pLetterText);
 
@@ -285,6 +300,9 @@ public:
     virtual int RPos_y(int iPos_y) { return iPos_y + (m_iPos_y); }
     virtual int RWidth() { return m_iWidth; }
     virtual int RHeight() { return m_iHeight; }
+
+protected:
+    virtual void InitControls() {}
 };
 
 class CFriendList
@@ -468,6 +486,7 @@ public:
     int GetTabIndex() { return m_iTabIndex; }
 
 protected:
+    virtual void InitControls() {}
     virtual void RenderSub();
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
@@ -488,11 +507,11 @@ public:
     virtual ~CUITextInputWindow() {}
 
     virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-    void InitControls() override;
     virtual void Refresh();
     void SetText(const wchar_t* pszText) { m_TextInputBox.SetText(pszText); m_TextInputBox.GiveFocus(TRUE); }
 
 protected:
+    void InitControls() override;
     virtual void RenderSub();
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
@@ -519,6 +538,7 @@ public:
     void SaveID(const wchar_t* pszText);
 
 protected:
+    virtual void InitControls() {}
     virtual void RenderSub();
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
@@ -664,6 +684,7 @@ public:
     void CloseAllChatWindow();
     void LockAllChatWindow();
 protected:
+    virtual void InitControls() {}
     virtual void RenderSub();
     virtual BOOL HandleMessage();
     virtual void DoActionSub(BOOL bMessageOnly);
