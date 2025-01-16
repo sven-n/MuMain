@@ -759,10 +759,10 @@ typedef struct
 //cseventmatch start
 typedef struct
 {
-    wchar_t	m_lpID[MAX_ID_SIZE];
-    int		m_iScore;
+    BYTE	m_lpID[MAX_ID_SIZE];
+    DWORD	m_iScore;
     DWORD	m_dwExp;
-    int		m_iZen;
+    DWORD	m_iZen;
 }MatchResult;
 //cseventmatch end
 
