@@ -3,19 +3,22 @@
 #include <chrono>
 #include <functional>
 
-class Debouncer {
+class DebouncedAction 
+{
 public:
-    explicit Debouncer(int period)
+    explicit DebouncedAction(std::function<void()> callback, int period)
         : interval(std::chrono::milliseconds(period)),
-        lastCallTime() {
-    }
+        lastCallTime(),
+        callback(std::move(callback)) {}
 
-    void debounce(std::function<void()> callback) {
+    void invoke()
+    {
         auto now = std::chrono::high_resolution_clock::now();
 
-        // Call immediately on the first invocation (lastCallTime is uninitialized)
+        // Call immediately on the first invocation or on the next interval
         if (lastCallTime == std::chrono::high_resolution_clock::time_point() ||
-            now - lastCallTime >= interval) {
+            now - lastCallTime >= interval) 
+        {
             callback();
             lastCallTime = now;
         }
@@ -24,4 +27,5 @@ public:
 private:
     std::chrono::milliseconds interval;
     std::chrono::high_resolution_clock::time_point lastCallTime;
+    std::function<void()> callback;
 };
