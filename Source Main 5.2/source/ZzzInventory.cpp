@@ -18,6 +18,7 @@
 
 #include "ZzzScene.h"
 #include "./Utilities/Log/ErrorReport.h"
+#include "./Utilities/Debouncer.h"
 #include "CSQuest.h"
 #include "Local.h"
 #include "zzzMixInventory.h"
@@ -2119,22 +2120,27 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (ip->Type == ITEM_DARK_HORSE_ITEM || ip->Type == ITEM_DARK_RAVEN_ITEM)
     {
-        BYTE PetType = PET_TYPE_DARK_SPIRIT;
-        if (ip->Type == ITEM_DARK_HORSE_ITEM)
-        {
-            PetType = PET_TYPE_DARK_HORSE;
+        static Debouncer debouncer(1000);
 
-            if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER)
+        auto sendPetInfoRequest = [ip, Inventype]()
             {
-                // TODO: don't send it every frame
-                SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_HELPER);
-            }
-        }
-        else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
-        {
-            // TODO: don't send it every frame
-            SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_WEAPON_LEFT);
-        }
+                BYTE PetType = PET_TYPE_DARK_SPIRIT;
+                if (ip->Type == ITEM_DARK_HORSE_ITEM)
+                {
+                    PetType = PET_TYPE_DARK_HORSE;
+
+                    if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER)
+                    {
+                        SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_HELPER);
+                    }
+                }
+                else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT)
+                {
+                    SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_WEAPON_LEFT);
+                }
+            };
+
+        debouncer.debounce(sendPetInfoRequest);
 
         giPetManager::RenderPetItemInfo(sx, sy, ip, Inventype);
         return;

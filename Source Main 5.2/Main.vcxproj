@@ -1073,6 +1073,7 @@
     <ClInclude Include="source\UIWindows.h" />
     <ClInclude Include="source\UsefulDef.h" />
     <ClInclude Include="source\Utilities\CpuUsage.h" />
+    <ClInclude Include="source\Utilities\Debouncer.h" />
     <ClInclude Include="source\Utilities\Log\ErrorReport.h" />
     <ClInclude Include="source\Utilities\Log\muConsoleDebug.h" />
     <ClInclude Include="source\Utilities\Log\WindowsConsole.h" />

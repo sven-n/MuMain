@@ -2292,6 +2292,9 @@
     <ClInclude Include="source\Utilities\CpuUsage.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\Utilities\Debouncer.h">
+      <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="script\Mu_Chs.py">
