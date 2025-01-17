@@ -2120,22 +2120,25 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (ip->Type == ITEM_DARK_HORSE_ITEM || ip->Type == ITEM_DARK_RAVEN_ITEM)
     {
-        static DebouncedAction sendPetInfoRequest([ip, Inventype]() {
-            BYTE PetType = PET_TYPE_DARK_SPIRIT;
-            if (ip->Type == ITEM_DARK_HORSE_ITEM) {
-                PetType = PET_TYPE_DARK_HORSE;
+        static DebouncedAction debouncedPetInfoRequest([ip, Inventype]()
+            {
+                BYTE PetType = PET_TYPE_DARK_SPIRIT;
+                if (ip->Type == ITEM_DARK_HORSE_ITEM)
+                {
+                    PetType = PET_TYPE_DARK_HORSE;
 
-                if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER) {
-                    SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_HELPER);
+                    if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_HELPER) 
+                    {
+                        SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_HELPER);
+                    }
                 }
-            }
-            else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT) {
-                SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_WEAPON_LEFT);
-            }
+                else if ((g_pMyInventory->GetPointedItemIndex()) == EQUIPMENT_WEAPON_LEFT) 
+                {
+                    SocketClient->ToGameServer()->SendPetInfoRequest(PetType, Inventype, EQUIPMENT_WEAPON_LEFT);
+                }
             }, 1000); // 1-second intervals
 
-        // Call SendPetInfoRequest with debounce
-        sendPetInfoRequest.invoke();
+        debouncedPetInfoRequest.invoke();
 
         giPetManager::RenderPetItemInfo(sx, sy, ip, Inventype);
         return;
