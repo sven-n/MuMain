@@ -80,6 +80,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     if (strCommand.compare(L"$vsync on") == 0)
     {
         EnableVSync();
+        SetTargetFps(-1); // unlimited
         return true;
     }
 

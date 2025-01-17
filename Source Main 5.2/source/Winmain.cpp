@@ -1311,7 +1311,11 @@ void RecordCpuUsage()
 int g_MaxMessagePerCycle = 10;
 void SetMaxMessagePerCycle(int messages)
 {
-    g_MaxMessagePerCycle = messages;
+    constexpr int minimum = 3;
+    if (messages > 0)
+    {
+        g_MaxMessagePerCycle = max(messages, minimum);
+    }
 }
 
 MSG MainLoop()
