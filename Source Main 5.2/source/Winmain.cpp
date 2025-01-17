@@ -1312,10 +1312,7 @@ int g_MaxMessagePerCycle = 10;
 void SetMaxMessagePerCycle(int messages)
 {
     constexpr int minimum = 3;
-    if (messages > 0)
-    {
-        g_MaxMessagePerCycle = max(messages, minimum);
-    }
+    g_MaxMessagePerCycle = (messages > 0) ? max(messages, minimum) : messages;
 }
 
 MSG MainLoop()
