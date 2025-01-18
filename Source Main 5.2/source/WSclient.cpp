@@ -9726,9 +9726,9 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1069]);
         break;
     case 0x01:
+        g_pFriendMenu->RemoveRequestWindow(szName);
         if (Data->Type == 0)
         {
-            g_pFriendMenu->RemoveRequestWindow(szName);
             DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, GlobalText[994]);
             ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
         }
