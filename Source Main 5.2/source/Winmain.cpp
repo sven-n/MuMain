@@ -1308,11 +1308,13 @@ void RecordCpuUsage()
     }
 }
 
-int g_MaxMessagePerCycle = 10;
+// unlimited as default (same behavior as original)
+int g_MaxMessagePerCycle = -1; 
+
 void SetMaxMessagePerCycle(int messages)
 {
-    constexpr int minimum = 3;
-    g_MaxMessagePerCycle = (messages > 0) ? max(messages, minimum) : messages;
+    constexpr int custom_min = 3;
+    g_MaxMessagePerCycle = (messages > 0) ? max(messages, custom_min) : messages;
 }
 
 MSG MainLoop()
