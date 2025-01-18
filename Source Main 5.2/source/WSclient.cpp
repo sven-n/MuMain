@@ -9741,19 +9741,15 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
                 ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
                 g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
                 g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
-                if (g_pWindowMgr->GetFriendMainWindow() != NULL)
-                    g_pWindowMgr->GetFriendMainWindow()->RemoveWindow(dwUIID);
+
+                g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_HIDE);
+                g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, dwUIID, 0);
             }
             else if (dwUIID == -1);
             else
             {
                 ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->DisconnectToChatServer();
                 ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
-
-                //				SendRequestCRDisconnectRoom(((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->GetCurrentSocket());
-                //				DWORD dwOldRoomNumber = ((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->GetRoomNumber();
-                //				((CUIChatWindow *)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer((char *)szIP, Data->RoomNumber, Data->Ticket);
-                //				g_pChatRoomSocketList->RemoveChatRoomSocket(dwOldRoomNumber);
             }
         }
         else if (Data->Type == 2)
@@ -9762,8 +9758,6 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
             ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
             g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
             g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
-            if (g_pWindowMgr->GetFriendMainWindow() != NULL)
-                g_pWindowMgr->GetFriendMainWindow()->RemoveWindow(dwUIID);
         }
         break;
     case 0x02:
