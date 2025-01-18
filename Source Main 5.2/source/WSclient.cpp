@@ -9716,8 +9716,8 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
     wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
     CMultiLanguage::ConvertFromUtf8(szName, Data->ID, MAX_ID_SIZE);
 
-    wchar_t szIP[16];
-    CMultiLanguage::ConvertFromUtf8(szIP, Data->IP, 15);
+    wchar_t szIP[sizeof(Data->IP) + 1] { };
+    CMultiLanguage::ConvertFromUtf8(szIP, Data->IP, sizeof(Data->IP));
 
     switch (Data->Result)
     {
