@@ -206,36 +206,76 @@ void CSDevilSquareMatch::RenderMatchResult(void)
 
     for (int i = 0; i < m_iNumResult; ++i)
     {
-        MatchResult* pResult = &m_MatchResult[(i + 1) % m_iNumResult];
+        MatchResult* pResult = &m_MatchResult[i];
 
-        if (i == m_iNumResult - 1)
+        // Highlight "my result" with a different color
+        if (i == m_iMyResult - 1)
         {
-            yPos = yStartPos + 16 * 10;
-
-            g_pRenderText->SetTextColor(200, 120, 0, 255);
-            g_pRenderText->RenderText(xPos[0], yPos, GlobalText[685], 230, 0, RT3_SORT_CENTER);
-            yPos += 20;
-            swprintf(lpszStr, L"%2d", m_iMyResult);
+            g_pRenderText->SetTextColor(200, 120, 0, 255); // Special color for "my result"
         }
         else
         {
-            g_pRenderText->SetTextColor(255, 255, 0, 255);
-            swprintf(lpszStr, L"%2d", i + 1);
+            g_pRenderText->SetTextColor(255, 255, 0, 255); // Normal color for others
         }
+
+        // Render rank number (index + 1 for display)
+        swprintf(lpszStr, L"%2d", i + 1);
         g_pRenderText->RenderText(xPos[1], yPos, lpszStr);
 
+        // Render player ID
         ZeroMemory(lpszStr, MAX_ID_SIZE + 1);
-        memcpy(lpszStr, pResult->m_lpID, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(lpszStr, (char*)pResult->m_lpID, MAX_ID_SIZE);
         g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
 
-        swprintf(lpszStr, L"%10d", pResult->m_iScore);
+        // Render score
+        swprintf(lpszStr, L"%10lu", pResult->m_iScore);
         g_pRenderText->RenderText(xPos[3], yPos, lpszStr);
 
-        swprintf(lpszStr, L"%6d", pResult->m_dwExp);
+        // Render experience
+        swprintf(lpszStr, L"%6lu", pResult->m_dwExp);
         g_pRenderText->RenderText(xPos[4], yPos, lpszStr);
 
-        swprintf(lpszStr, L"%6d", pResult->m_iZen);
-        g_pRenderText->RenderText(xPos[5], yPos, lpszStr); yPos += 16;
+        // Render Zen
+        swprintf(lpszStr, L"%6lu", pResult->m_iZen);
+        g_pRenderText->RenderText(xPos[5], yPos, lpszStr);
+
+        // Increment yPos for the next row
+        yPos += 16;
+    }
+
+    // Render a special section for "my result"
+    if (m_iMyResult > 0 && m_iMyResult <= m_iNumResult)
+    {
+        int myIndex = m_iMyResult - 1; // Convert to zero-based index
+        MatchResult* myResult = &m_MatchResult[myIndex];
+
+        yPos = yStartPos + 16 * 10; // Fixed position for the special section
+        g_pRenderText->SetTextColor(200, 120, 0, 255); // Special color
+
+        // "My Ranking" label
+        g_pRenderText->RenderText(xPos[0], yPos, GlobalText[685], 230, 0, RT3_SORT_CENTER);
+        yPos += 20;
+
+        // Render my rank
+        swprintf(lpszStr, L"%2d", m_iMyResult);
+        g_pRenderText->RenderText(xPos[1], yPos, lpszStr);
+
+        // Render my ID
+        ZeroMemory(lpszStr, MAX_ID_SIZE + 1);
+        CMultiLanguage::ConvertFromUtf8(lpszStr, (char*)myResult->m_lpID, MAX_ID_SIZE);
+        g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
+
+        // Render my score
+        swprintf(lpszStr, L"%10lu", myResult->m_iScore);
+        g_pRenderText->RenderText(xPos[3], yPos, lpszStr);
+
+        // Render my experience
+        swprintf(lpszStr, L"%6lu", myResult->m_dwExp);
+        g_pRenderText->RenderText(xPos[4], yPos, lpszStr);
+
+        // Render my Zen
+        swprintf(lpszStr, L"%6lu", myResult->m_iZen);
+        g_pRenderText->RenderText(xPos[5], yPos, lpszStr);
     }
 }
 
