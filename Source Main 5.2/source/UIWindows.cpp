@@ -1401,8 +1401,13 @@ void CUIChatWindow::DisconnectToChatServer()
 {
     if (_connection != nullptr)
     {
-        _connection->ToChatServer()->SendLeaveChatRoom();
-        _connection->Close();
+        if (_connection->IsConnected())
+        {
+            _connection->ToChatServer()->SendLeaveChatRoom();
+            _connection->Close();
+        }
+
+        _connection = nullptr;
     }
 }
 
@@ -5637,7 +5642,8 @@ void CUIFriendMenu::SendChatRoomConnectCheck()
         if (pChatWindow != nullptr)
         {
             Connection* pSocket = pChatWindow->GetCurrentSocket();
-            if (pSocket != nullptr)
+            if (pSocket != nullptr
+                && pSocket->ToChatServer() != nullptr)
             {
                 pSocket->ToChatServer()->SendKeepAlive();
             }
