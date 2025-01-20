@@ -1734,21 +1734,35 @@ typedef struct {
     PBMSG_HEADER    Header;
     WORD			Index;
     char			Name[MAX_ID_SIZE];
-    char			Date[30];
+    char			Date[MAX_LETTER_DATE_LENGTH];
+    char            Separator;
+    char			Time[MAX_LETTER_TIME_LENGTH];
+    char            Reserved[30 - MAX_LETTER_DATE_LENGTH - MAX_LETTER_TIME_LENGTH - 1];
     char			Subject[MAX_LETTER_TITLE_LENGTH];
     BYTE			Read;
 } FS_LETTER_ALERT, * LPFS_LETTER_ALERT;
 
 typedef struct {
     PWMSG_HEADER    Header;
-    WORD			Index;
-    WORD			MemoSize;
-    SERVER_CLASS_TYPE			Class;
+    WORD            Index;
+    SERVER_CLASS_TYPE Class;
     BYTE            Flags;
-    BYTE			Equipment[EQUIPMENT_LENGTH_EXTENDED];
-    BYTE			PhotoDir;
-    BYTE			PhotoAction;
-    char			Memo[MAX_LETTERTEXT_LENGTH];
+    BYTE            Equipment[EQUIPMENT_LENGTH_EXTENDED];
+    BYTE            Reserved[40 - EQUIPMENT_LENGTH_EXTENDED];
+    BYTE            PhotoDir;
+    BYTE            PhotoAction;
+} FS_LETTER_TEXT_HEADER, * LPFS_LETTER_TEXT_HEADER;
+
+typedef struct {
+    PWMSG_HEADER    Header;
+    WORD            Index;
+    SERVER_CLASS_TYPE Class;
+    BYTE            Flags;
+    BYTE            Equipment[EQUIPMENT_LENGTH_EXTENDED];
+    BYTE            Reserved[40 - EQUIPMENT_LENGTH_EXTENDED];
+    BYTE            PhotoDir;
+    BYTE            PhotoAction;
+    char            Memo[MAX_LETTERTEXT_LENGTH];
 } FS_LETTER_TEXT, * LPFS_LETTER_TEXT;
 
 typedef struct {

@@ -2152,7 +2152,7 @@ BOOL CUILetterListBox::RenderDataLine(int iLineNumber)
 
     wcsncpy(Text, m_TextListIter->m_szID, MAX_TEXT_LENGTH);
     g_pRenderText->RenderText(iPos_x + 4 + GetColumnPos_x(1), iPos_y, Text, GetColumnWidth(1) - 4, 0, RT3_SORT_LEFT_CLIP);
-    wcsncpy(Text, m_TextListIter->m_szDate + 2, MAX_TEXT_LENGTH);
+    wcsncpy(Text, m_TextListIter->m_szDate, MAX_TEXT_LENGTH);
     g_pRenderText->RenderText(iPos_x + GetColumnPos_x(2), iPos_y, Text, GetColumnWidth(2), 0, RT3_SORT_CENTER);
     int iMaxWidth = m_iWidth - m_fScrollBarWidth - GetColumnPos_x(3) - 4;
     g_pRenderText->RenderText(iPos_x + 4 + GetColumnPos_x(3), iPos_y, m_TextListIter->m_szText, iMaxWidth, 0, RT3_SORT_LEFT_CLIP);
