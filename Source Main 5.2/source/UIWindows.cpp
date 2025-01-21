@@ -26,7 +26,7 @@ extern DWORD g_dwMouseUseUIID;
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern DWORD g_dwTopWindow;
 extern DWORD g_dwKeyFocusUIID;
-extern void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer);
+extern void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached);
 
 int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
@@ -2300,7 +2300,7 @@ void CUIPhotoViewer::SetEquipmentPacket(BYTE* pbyEquip)
     //CHARACTER *c = CharactersClient;
     //CharactersClient = &m_PhotoChar;
 
-    ChangeCharacterExt(0, pbyEquip, &m_PhotoChar, &m_PhotoHelper);
+    ReadEquipmentExtended(0, 0, pbyEquip, &m_PhotoChar, &m_PhotoHelper);
 
     m_fPhotoHelperScale = m_PhotoHelper.Scale * 0.7f / Hero->Object.Scale;
 
@@ -3114,7 +3114,7 @@ BOOL CUILetterReadWindow::HandleMessage()
                     else
                     {
                         auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwPrevID));
-                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)));
+                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)), true);
                     }
                 }
                 else
@@ -3155,7 +3155,7 @@ BOOL CUILetterReadWindow::HandleMessage()
                     else
                     {
                         auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwNextID));
-                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)));
+                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)), true);
                     }
                 }
                 else
@@ -4198,12 +4198,20 @@ void CLetterList::RemoveLetterTextCache(DWORD dwIndex)
     m_LetterCacheIter = m_LetterCache.find(dwIndex);
     if (m_LetterCacheIter != m_LetterCache.end())
     {
+        auto letter = &m_LetterCacheIter->second;
+        delete letter;
         m_LetterCache.erase(m_LetterCacheIter);
     }
 }
 
 void CLetterList::ClearLetterTextCache()
 {
+    for (auto cachedLetter : m_LetterCache)
+    {
+        auto letter = &cachedLetter.second;
+        delete letter;
+    }
+
     m_LetterCache.clear();
 }
 
@@ -4429,7 +4437,7 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
                 else
                 {
                     auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwLetterID));
-                    ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)));
+                    ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)), true);
                 }
             }
             else

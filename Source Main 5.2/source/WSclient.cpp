@@ -465,72 +465,6 @@ void ReceiveChangePassword(const BYTE* ReceiveBuffer)
     }
 }
 
-void ReceiveCharacterList(std::span<const BYTE> ReceiveBuffer)
-{
-    InitGuildWar();
-
-    auto Data = safe_cast<PHEADER_DEFAULT_CHARACTER_LIST>(ReceiveBuffer);
-    if (Data == nullptr)
-    {
-        assert(false);
-        return;
-    }
-
-    int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
-
-#ifdef _DEBUG
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
-#else
-    g_ErrorReport.Write(L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
-#endif
-
-    CharacterAttribute->IsVaultExtended = Data->IsVaultExtended;
-    for (int i = 0; i < Data->CharacterCount; i++)
-    {
-        auto Data2 = safe_cast<PRECEIVE_CHARACTER_LIST_EXTENDED>(ReceiveBuffer.subspan(Offset));
-        if (Data2 == nullptr)
-        {
-            assert(false);
-            return;
-        }
-
-        auto iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(Data2->Class);
-
-        float fPos[2], fAngle = 0.0f;
-
-        switch (Data2->Index)
-        {
-#ifdef PJH_NEW_SERVER_SELECT_MAP
-        case 0:	fPos[0] = 8008.0f;	fPos[1] = 18885.0f;	fAngle = 115.0f; break;
-        case 1:	fPos[0] = 7986.0f;	fPos[1] = 19145.0f;	fAngle = 90.0f; break;
-        case 2:	fPos[0] = 8046.0f;	fPos[1] = 19400.0f;	fAngle = 75.0f; break;
-        case 3:	fPos[0] = 8133.0f;	fPos[1] = 19645.0f;	fAngle = 60.0f; break;
-        case 4:	fPos[0] = 8282.0f;	fPos[1] = 19845.0f;	fAngle = 35.0f; break;
-#else //PJH_NEW_SERVER_SELECT_MAP
-        case 0:	fPos[0] = 22628.0f;	fPos[1] = 15012.0f;	fAngle = 100.0f; break;
-        case 1:	fPos[0] = 22700.0f;	fPos[1] = 15201.0f;	fAngle = 75.0f; break;
-        case 2:	fPos[0] = 22840.0f;	fPos[1] = 15355.0f;	fAngle = 50.0f; break;
-        case 3:	fPos[0] = 23019.0f;	fPos[1] = 15443.0f;	fAngle = 25.0f; break;
-        case 4:	fPos[0] = 23211.6f;	fPos[1] = 15467.0f;	fAngle = 0.0f; break;
-#endif //PJH_NEW_SERVER_SELECT_MAP
-        default: return;
-        }
-
-        CHARACTER* c = CreateHero(Data2->Index, iClass, 0, fPos[0], fPos[1], fAngle);
-
-        c->Level = Data2->Level;
-        c->CtlCode = Data2->CtlCode;
-
-        CMultiLanguage::ConvertFromUtf8(c->ID, Data2->ID, MAX_ID_SIZE);
-
-        ChangeCharacterExt(Data2->Index, Data2->Equipment);
-
-        c->GuildStatus = Data2->byGuildStatus;
-        Offset += sizeof(PRECEIVE_CHARACTER_LIST_EXTENDED);
-    }
-    CurrentProtocolState = RECEIVE_CHARACTERS_LIST;
-}
-
 void ReceiveCharacterListExtended(const BYTE* ReceiveBuffer)
 {
     InitGuildWar();
@@ -9589,19 +9523,17 @@ void ReceiveLetter(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_LETTER_ALERT)ReceiveBuffer;
 
-    wchar_t szDate[16] = { 0 };
-    CMultiLanguage::ConvertFromUtf8(szDate, Data->Name + 11, 10);
-    szDate[10] = '\0';
+    wchar_t szDate[MAX_LETTER_DATE_LENGTH + 1] = { };
+    CMultiLanguage::ConvertFromUtf8(szDate, Data->Date, MAX_LETTER_DATE_LENGTH);
 
-    wchar_t szTime[16] = { 0 };
-    CMultiLanguage::ConvertFromUtf8(szTime, Data->Name + 11, 8);
-    szTime[8] = '\0';
+    wchar_t szTime[MAX_LETTER_TIME_LENGTH + 1] = { };
+    CMultiLanguage::ConvertFromUtf8(szTime, Data->Time, MAX_LETTER_TIME_LENGTH);
 
-    wchar_t szName[MAX_ID_SIZE + 1] = { 0 };
+    wchar_t szName[MAX_ID_SIZE + 1] = { };
     CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_ID_SIZE);
     szName[MAX_ID_SIZE] = '\0';
 
-    wchar_t szSubject[MAX_TEXT_LENGTH + 1] = { 0 };
+    wchar_t szSubject[MAX_TEXT_LENGTH + 1] = { };
     CMultiLanguage::ConvertFromUtf8(szSubject, Data->Subject, MAX_ID_SIZE);
     szSubject[MAX_ID_SIZE] = '\0';
 
@@ -9633,28 +9565,34 @@ void ReceiveLetter(const BYTE* ReceiveBuffer)
 
 extern int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
-void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer)
+void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached)
 {
-    auto Data = safe_cast<FS_LETTER_TEXT>(ReceiveBuffer);
+    auto Data = safe_cast<FS_LETTER_TEXT_HEADER>(ReceiveBuffer);
     if (Data == nullptr)
     {
         assert(false);
         return;
     }
 
-    g_pLetterList->CacheLetterText(Data->Index, Data);
+    if (!isCached)
+    {
+        // Cache it if you can :)
+        auto CopiedData = new FS_LETTER_TEXT();
+        memcpy(CopiedData, ReceiveBuffer.data(), ReceiveBuffer.size());
+        g_pLetterList->CacheLetterText(Data->Index, CopiedData);
+    }
 
-    auto pLetter = g_pLetterList->GetLetter(Data->Index);
-    if (pLetter == nullptr)
+    auto pLetterHead = g_pLetterList->GetLetter(Data->Index);
+    if (pLetterHead == nullptr)
     {
         return;
     }
 
-    pLetter->m_bIsRead = TRUE;
+    pLetterHead->m_bIsRead = TRUE;
     g_pWindowMgr->RefreshMainWndLetterList();
 
     wchar_t tempTxt[MAX_TEXT_LENGTH + 1];
-    swprintf(tempTxt, GlobalText[1054], pLetter->m_szText);
+    swprintf(tempTxt, GlobalText[1054], pLetterHead->m_szText);
     DWORD dwUIID = 0;
     if (g_iLetterReadNextPos_x == UIWND_DEFAULT)
     {
@@ -9667,13 +9605,15 @@ void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer)
     }
 
     auto* pWindow = (CUILetterReadWindow*)g_pWindowMgr->GetWindow(dwUIID);
-    wchar_t szText[1000 + 1] = { 0 };
-    CMultiLanguage::ConvertFromUtf8(szText, Data->Memo, 1000);
-    szText[1000] = '\0';
-    pWindow->SetLetter(pLetter, szText);
-    g_pWindowMgr->SetLetterReadWindow(pLetter->m_dwLetterID, dwUIID);
+    auto* pLetterText = (char*)ReceiveBuffer.subspan(sizeof(FS_LETTER_TEXT_HEADER)).data();
+    wchar_t letterText[1000 + 1] = { };
+    CMultiLanguage::ConvertFromUtf8(letterText, pLetterText, MAX_LETTERTEXT_LENGTH);
+    letterText[MAX_LETTERTEXT_LENGTH] = '\0';
+    pWindow->SetLetter(pLetterHead, letterText);
 
-    if (wcsnicmp(pLetter->m_szID, L"webzen", MAX_ID_SIZE) == 0)
+    g_pWindowMgr->SetLetterReadWindow(pLetterHead->m_dwLetterID, dwUIID);
+
+    if (wcsnicmp(pLetterHead->m_szID, L"webzen", MAX_ID_SIZE) == 0)
     {
         pWindow->m_Photo.SetWebzenMail(TRUE);
     }
@@ -14282,7 +14222,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         ReceiveLetter(ReceiveBuffer);
         break;
     case 0xC7:
-        ReceiveLetterText(received_span);
+        ReceiveLetterText(received_span, false);
         break;
     case 0xC8:
         ReceiveLetterDeleteResult(ReceiveBuffer);
