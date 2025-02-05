@@ -159,6 +159,11 @@ void SEASON3B::CNewUIMyShopInventory::GetTitle(wchar_t* titletext)
      m_EditBox->GetText(titletext, iMAX_SHOPTITLE_MULTI);
 }
 
+void SEASON3B::CNewUIMyShopInventory::SetTitle(wchar_t* titletext)
+{
+    m_EditBox->SetText(titletext);
+}
+
 bool SEASON3B::CNewUIMyShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
@@ -233,7 +238,7 @@ void SEASON3B::CNewUIMyShopInventory::OpenButtonUnLock()
     m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
     m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1107], true);
+    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1106], true);
 }
 
 const bool SEASON3B::CNewUIMyShopInventory::IsEnablePersonalShop() const
@@ -250,7 +255,6 @@ void SEASON3B::CNewUIMyShopInventory::ChangeEditBox(const UISTATES type)
         m_EditBox->GiveFocus();
     }
 
-    m_EditBox->SetText(NULL);
 }
 
 bool SEASON3B::CNewUIMyShopInventory::UpdateKeyEvent()
@@ -414,7 +418,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
             return false;
             case 1:
             {
-                wchar_t shopTitle[MAX_SHOPTITLE]{};
+                wchar_t shopTitle[MAX_SHOPTITLE + 1]{};
                 g_pMyShopInventory->GetTitle(shopTitle);
                 if (IsExistUndecidedPrice() == false && wcslen(shopTitle) > 0)
                 {
