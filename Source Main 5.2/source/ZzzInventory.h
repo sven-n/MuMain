@@ -106,7 +106,7 @@ extern bool g_bEnablePersonalShop;
 extern int g_iPShopWndType;
 extern POINT g_ptPersonalShop;
 extern int g_iPersonalShopMsgType;
-extern wchar_t g_szPersonalShopTitle[64];
+extern wchar_t g_szPersonalShopTitle[MAX_SHOPTITLE + 1];
 extern CHARACTER g_PersonalShopSeller;
 
 extern bool EnableRenderInventory;

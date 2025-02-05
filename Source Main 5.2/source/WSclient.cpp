@@ -8923,8 +8923,15 @@ void ReceiveCreateShopTitleViewport(const BYTE* ReceiveBuffer)
         if (index >= 0 && index < MAX_CHARACTERS_CLIENT) {
             CHARACTER* pPlayer = &CharactersClient[index];
 
-            wchar_t szShopTitle[40]{};
+            wchar_t szShopTitle[MAX_SHOPTITLE + 1] { };
             CMultiLanguage::ConvertFromUtf8(szShopTitle, pShopTitle->szTitle, MAX_SHOPTITLE);
+
+            if (pPlayer == Hero)
+            {
+                wcscpy(g_szPersonalShopTitle, szShopTitle);
+                g_pMyShopInventory->SetTitle(szShopTitle);
+                g_pMyShopInventory->ChangePersonal(true);
+            }
 
             AddShopTitle(key, pPlayer, szShopTitle);
         }
@@ -9111,7 +9118,39 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
     }
 
     int Offset = sizeof(GETPSHOPITEMLIST_HEADERINFO);
-    if (Header->byResult == Success && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
+    int key = MAKEWORD(Header->byIndexL, Header->byIndexH);
+    if (Header->byResult == Success && Hero->Key == key)
+    {
+        g_pMyShopInventory->GetInventoryCtrl()->RemoveAllItems();
+        for (int i = 0; i < Header->ItemCount; i++)
+        {
+            auto pShopItem = safe_cast<GETPSHOPITEM_DATAINFO>(ReceiveBuffer.subspan(Offset));
+            if (pShopItem == nullptr)
+            {
+                assert(false);
+                return;
+            }
+
+            Offset += 9;
+            auto itemData = ReceiveBuffer.subspan(Offset);
+            int length = CalcItemLength(itemData);
+            itemData = itemData.subspan(0, length);
+
+            g_pMyShopInventory->InsertItem(pShopItem->ItemSlot, itemData);
+            AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_SALE);
+
+            Offset += length;
+        }
+
+        g_pMyShopInventory->ChangePersonal(true);
+        g_bEnablePersonalShop = true;
+        wchar_t shopName[MAX_SHOPTITLE + 1]{};
+        CMultiLanguage::ConvertFromUtf8(shopName, Header->szShopTitle, MAX_SHOPTITLE);
+        wcscpy(g_szPersonalShopTitle, shopName);
+        AddShopTitle(key, Hero, shopName);
+        g_pMyShopInventory->ChangeTitle(shopName);
+    }
+    else if (Header->byResult == Success && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
     {
         g_pPurchaseShopInventory->GetInventoryCtrl()->RemoveAllItems();
 
