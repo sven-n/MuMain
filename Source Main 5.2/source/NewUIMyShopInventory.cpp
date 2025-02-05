@@ -88,7 +88,7 @@ bool SEASON3B::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int x, in
     m_EditBox->SetBackColor(0, 0, 0, 25);
     m_EditBox->SetFont(g_hFont);
 
-    ChangeEditBox(UISTATE_HIDE);
+    ChangeEditBox(UISTATE_NORMAL);
     ChangePersonal(m_EnablePersonalShop);
 
     Show(false);
