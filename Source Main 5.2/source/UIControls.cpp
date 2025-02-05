@@ -3472,14 +3472,17 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 }
 void CUITextInputBox::Render()
 {
+    m_bIsReady = TRUE;
+    if (m_hEditWnd == nullptr || !IsWindowVisible(m_hEditWnd))
+    {
+        return;
+    }
+
     if (m_bSetText)
     {
         SetWindowTextW(m_hEditWnd, m_sTextToSet.c_str());
         m_bSetText = false;
     }
-
-    m_bIsReady = TRUE;
-    if (m_hEditWnd == nullptr || IsWindowVisible(m_hEditWnd) == FALSE) return;
 
     POINT RealWndPos = { (int)(m_iPos_x * g_fScreenRate_x), (int)(m_iPos_y * g_fScreenRate_y) };
     SIZE RealWndSize = { (int)(m_iWidth * g_fScreenRate_x), (int)(m_iHeight * g_fScreenRate_y) };
@@ -3507,26 +3510,23 @@ void CUITextInputBox::Render()
     const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
     SIZE RealTextLine = { 0, 0 };
 
-    if (m_bUseMultiLine == FALSE)
+    if (!m_bUseMultiLine)
     {
-        wchar_t TextCheck[MAX_TEXT_LENGTH + 1] = { 0, };
-        GetText(TextCheck);
-        wchar_t TextCheckUTF16[MAX_TEXT_LENGTH + 1] = { '\0' };
+        wchar_t TextCheckUTF16[MAX_TEXT_LENGTH + 1] = { };
         GetText(TextCheckUTF16);
         SIZE TextSize;
 
-        if (IsPassword() == FALSE)
+        if (!IsPassword())
         {
             GetTextExtentPoint32(m_hMemDC, TextCheckUTF16, wcslen(TextCheckUTF16), &TextSize);
         }
         else
         {
-            wchar_t szPasswd[MAX_TEXT_LENGTH + 1];
+            wchar_t szPasswd[MAX_TEXT_LENGTH + 1] = { };
             memset(szPasswd, '*', MAX_TEXT_LENGTH);
-            szPasswd[MAX_TEXT_LENGTH] = '\0';
             g_pRenderText->SetFont(g_hFontBold);
 
-            GetTextExtentPoint32(m_hMemDC, szPasswd, wcslen(TextCheck), &TextSize);
+            GetTextExtentPoint32(m_hMemDC, szPasswd, wcslen(TextCheckUTF16), &TextSize);
             g_pRenderText->SetFont(g_hFont);
         }
         RealTextLine.cx = TextSize.cx + m_fCaretWidth;
