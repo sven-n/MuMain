@@ -3884,7 +3884,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 Position[2] = o->StartPosition[2] - 200;
 
                 if (o->SubType == 2)
-                    CreateJoint(BITMAP_FLARE, Position, Position, Angle, 2, NULL, 40);
+                    CreateJointFpsChecked(BITMAP_FLARE, Position, Position, Angle, 2, NULL, 40);
             }
 
             if (o->SubType == 22 || o->SubType == 23)
