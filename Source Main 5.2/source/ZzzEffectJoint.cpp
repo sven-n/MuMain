@@ -2759,7 +2759,8 @@ bool SearchJoint(int Type, OBJECT* Target, int SubType)
 
 void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis)
 {
-    o->NumTails += FPS_ANIMATION_FACTOR;
+    o->NumTails++;
+
     if (o->NumTails > o->MaxTails - 1)
     {
         o->NumTails = o->MaxTails - 1;
@@ -3700,10 +3701,10 @@ void MoveJoint(JOINT* o, int iIndex)
             if (o->Scale == 80.f)
             {
                 if (o->SubType == 5)
-                    CreateEffect(MODEL_LASER, o->Position, o->Angle, o->Light, 3);
+                    CreateEffectFpsChecked(MODEL_LASER, o->Position, o->Angle, o->Light, 3);
                 else
                 {
-                    CreateEffect(MODEL_LASER, o->Position, o->Angle, o->Light);
+                    CreateEffectFpsChecked(MODEL_LASER, o->Position, o->Angle, o->Light);
                 }
 
                 if (battleCastle::IsBattleCastleStart())
@@ -3884,7 +3885,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 Position[2] = o->StartPosition[2] - 200;
 
                 if (o->SubType == 2)
-                    CreateJoint(BITMAP_FLARE, Position, Position, Angle, 2, NULL, 40);
+                    CreateJointFpsChecked(BITMAP_FLARE, Position, Position, Angle, 2, NULL, 40);
             }
 
             if (o->SubType == 22 || o->SubType == 23)
@@ -5467,7 +5468,7 @@ void MoveJoint(JOINT* o, int iIndex)
             {
                 vec3_t Angle;
                 Vector(0.f, 0.f, 0.f, Angle);
-                CreateJoint(BITMAP_FLARE, o->Position, o->Position, Angle, 41, NULL, o->Scale);
+                CreateJointFpsChecked(BITMAP_FLARE, o->Position, o->Position, Angle, 41, NULL, o->Scale);
             }
             AddTerrainLight(o->TargetPosition[0], o->TargetPosition[1], o->Light, 2, PrimaryTerrainLight);
         }
