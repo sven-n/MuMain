@@ -445,7 +445,7 @@ void OpenPlayerTextures()
 
     int nIndex;
 
-    for (int j = 0; j < 3; ++j)
+    for (int j = 0; j < MAX_CLASS_STAGES; ++j)
     {
         for (int i = 0; i < MAX_CLASS; ++i)
         {
@@ -461,7 +461,7 @@ void OpenPlayerTextures()
         }
     }
 
-    for (int i = 0; i < 17; i++)
+    for (int i = 0; i <= CLASS_END; i++)
     {
         gLoadData.OpenTexture(MODEL_HELM + i, L"Player\\");
         gLoadData.OpenTexture(MODEL_ARMOR + i, L"Player\\");

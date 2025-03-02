@@ -86,7 +86,12 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
         
         if (isSkin || isHair)
         {
-            if (auto pBitmap = Bitmaps.FindTextureByName(textureFileName))
+            BITMAP_t* pBitmap =
+                pModel->IndexTexture[i] != BITMAP_UNKNOWN
+                ? Bitmaps.FindTexture(pModel->IndexTexture[i])
+                : Bitmaps.FindTextureByName(textureFileName);
+
+            if (pBitmap)
             {
                 pBitmap->IsSkin = isSkin;
                 pBitmap->IsHair = isHair;

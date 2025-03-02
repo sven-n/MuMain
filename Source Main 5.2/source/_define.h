@@ -396,6 +396,7 @@ constexpr int ITEM_GROUP_ETC = 15;
 #define MAX_RESISTANCE		7
 
 #define MAX_CLASS			7
+#define MAX_CLASS_STAGES	3
 
 #define MAX_MONSTER			1024
 

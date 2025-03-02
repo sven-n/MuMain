@@ -1011,14 +1011,9 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         return;
     }
 
-    if (texture->IsHair)
+    if (texture->IsHair && HideSkin)
     {
-        if (HideSkin)
-        {
-            return;
-        }
-
-        textureIndex = BITMAP_HAIR + (Skin - 8);
+        return;
     }
 
     bool EnableWave = false;
