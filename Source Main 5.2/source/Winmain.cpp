@@ -1105,41 +1105,57 @@ BOOL OpenInitFile()
 
 BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString)
 {
-    wchar_t cComp[2];
-    cComp[0] = cOption; cComp[1] = cOption;
-    if (islower((int)cOption))
-    {
-        cComp[1] = toupper((int)cOption);
+    if (!lpszCommandLine) {
+        return FALSE;
     }
-    else if (isupper((int)cOption))
-    {
-        cComp[1] = tolower((int)cOption);
-    }
+
+    // Create both lowercase and uppercase variants of the option character
+    wchar_t cOptionLower = towlower((wint_t)cOption);
+    wchar_t cOptionUpper = towupper((wint_t)cOption);
 
     const wchar_t nFind = L'/';
-    auto* lpFound = lpszCommandLine;
-    while (lpFound)
+    const wchar_t* lpFound = lpszCommandLine;
+
+    while ((lpFound = wcschr(lpFound, nFind)) != nullptr)
     {
-        lpFound = wcschr(lpFound + 1, nFind);
-        if (lpFound && (*(lpFound + 1) == cComp[0] || *(lpFound + 1) == cComp[1]))
+        // Move past the '/' character
+        lpFound++;
+
+        // Check if the next character matches the option
+        if (*lpFound == cOptionLower || *lpFound == cOptionUpper)
         {
+            // Move past the option character
+            lpFound++;
+
             if (lpszString)
             {
-                int nCount = 0;
-                for (wchar_t* lpSeek = lpFound + 2; *lpSeek != L' ' && *lpSeek != L'\0'; lpSeek++)
+                // Count characters until space or end of string
+                size_t nCount = 0;
+                const wchar_t* lpSeek = lpFound;
+                while (*lpSeek != L' ' && *lpSeek != L'\0')
                 {
                     nCount++;
+                    lpSeek++;
                 }
 
-                wcscpy_s(lpszString, nCount, lpFound + 2);
-                lpszString[nCount] = L'\0';
+                if (nCount > 0)
+                {
+                    // Copy the option value safely
+                    wcsncpy_s(lpszString, nCount + 1, lpFound, nCount);
+                    lpszString[nCount] = L'\0';
+                }
+                else
+                {
+                    // Empty string case
+                    lpszString[0] = L'\0';
+                }
             }
 
-            return (TRUE);
+            return TRUE;
         }
     }
 
-    return (FALSE);
+    return FALSE;
 }
 
 BOOL UpdateFile(wchar_t* lpszOld, wchar_t* lpszNew)
