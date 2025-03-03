@@ -1204,24 +1204,6 @@ wchar_t g_lpszCmdURL[50];
 BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
 {
     std::wstring lpszTemp = { 0, };
-    if (Util_CheckOption(szCmdLine, L'y', lpszTemp))
-    {
-        BYTE bySuffle[] = { 0x0C, 0x07, 0x03, 0x13 };
-
-        for (int i = 0; i < lpszTemp.length(); i++)
-            lpszTemp[i] -= bySuffle[i % 4];
-        wcscpy(lpszURL, lpszTemp.c_str());
-
-        if (Util_CheckOption(szCmdLine, L'z', lpszTemp))
-        {
-            for (int j = 0; j < lpszTemp.length(); j++)
-                lpszTemp[j] -= bySuffle[j % 4];
-            *pwPort = _wtoi(lpszTemp.c_str());
-        }
-
-        g_ErrorReport.Write(L"[Virtual Connection] Connect IP : %s, Port : %d\r\n", lpszURL, *pwPort);
-        return TRUE;
-    }
 
     if (!Util_CheckOption(szCmdLine, L'u', lpszTemp))
     {
@@ -1234,7 +1216,7 @@ BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
         return FALSE;
     }
 
-    *pwPort = _wtoi(lpszTemp.c_str());
+    *pwPort = static_cast<WORD>(std::stoi(lpszTemp));
 
     return TRUE;
 }
