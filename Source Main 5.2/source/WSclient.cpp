@@ -276,7 +276,7 @@ void InitGuildWar()
     }
 }
 
-BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString);
+BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring &lpszString);
 
 void ReceiveServerList(const BYTE* ReceiveBuffer)
 {

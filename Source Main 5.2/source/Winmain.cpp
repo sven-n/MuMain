@@ -1103,59 +1103,36 @@ BOOL OpenInitFile()
     return TRUE;
 }
 
-BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString)
+BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring& lpszString)
 {
-    if (!lpszCommandLine) {
+    if (lpszCommandLine.empty()) {
         return FALSE;
     }
 
     // Create both lowercase and uppercase variants of the option character
-    wchar_t cOptionLower = towlower((wint_t)cOption);
-    wchar_t cOptionUpper = towupper((wint_t)cOption);
-
-    const wchar_t nFind = L'/';
-    const wchar_t* lpFound = lpszCommandLine;
-
-    while ((lpFound = wcschr(lpFound, nFind)) != nullptr)
+    std::wstring cOptionLower = L"/";
+    cOptionLower += towlower(static_cast<wint_t>(cOption));
+    auto foundIndex = lpszCommandLine.find(cOptionLower);
+    if (foundIndex == std::wstring::npos)
     {
-        // Move past the '/' character
-        lpFound++;
-
-        // Check if the next character matches the option
-        if (*lpFound == cOptionLower || *lpFound == cOptionUpper)
-        {
-            // Move past the option character
-            lpFound++;
-
-            if (lpszString)
-            {
-                // Count characters until space or end of string
-                size_t nCount = 0;
-                const wchar_t* lpSeek = lpFound;
-                while (*lpSeek != L' ' && *lpSeek != L'\0')
-                {
-                    nCount++;
-                    lpSeek++;
-                }
-
-                if (nCount > 0)
-                {
-                    // Copy the option value safely
-                    wcsncpy_s(lpszString, nCount + 1, lpFound, nCount);
-                    lpszString[nCount] = L'\0';
-                }
-                else
-                {
-                    // Empty string case
-                    lpszString[0] = L'\0';
-                }
-            }
-
-            return TRUE;
-        }
+        std::wstring cOptionUpper = L"/";
+        cOptionUpper += towupper(static_cast<wint_t>(cOption));
+        foundIndex = lpszCommandLine.find(cOptionUpper);
     }
 
-    return FALSE;
+    if (foundIndex == std::wstring::npos)
+    {
+        return FALSE;
+    }
+
+    auto endIndex = lpszCommandLine.find(L' ', foundIndex);
+    if (endIndex == std::wstring::npos)
+    {
+        endIndex = lpszCommandLine.length();
+    }
+
+    lpszString = lpszCommandLine.substr(foundIndex + 2, endIndex - foundIndex - 2);
+    return TRUE;
 }
 
 BOOL UpdateFile(wchar_t* lpszOld, wchar_t* lpszNew)
@@ -1226,37 +1203,40 @@ BOOL KillExeProcess(wchar_t* lpszExe)
 wchar_t g_lpszCmdURL[50];
 BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
 {
-    wchar_t lpszTemp[256] = { 0, };
+    std::wstring lpszTemp = { 0, };
     if (Util_CheckOption(szCmdLine, L'y', lpszTemp))
     {
         BYTE bySuffle[] = { 0x0C, 0x07, 0x03, 0x13 };
 
-        for (int i = 0; i < (int)wcslen(lpszTemp); i++)
+        for (int i = 0; i < lpszTemp.length(); i++)
             lpszTemp[i] -= bySuffle[i % 4];
-        wcscpy(lpszURL, lpszTemp);
+        wcscpy(lpszURL, lpszTemp.c_str());
 
         if (Util_CheckOption(szCmdLine, L'z', lpszTemp))
         {
-            for (int j = 0; j < (int)wcslen(lpszTemp); j++)
+            for (int j = 0; j < lpszTemp.length(); j++)
                 lpszTemp[j] -= bySuffle[j % 4];
-            *pwPort = _wtoi(lpszTemp);
+            *pwPort = _wtoi(lpszTemp.c_str());
         }
 
         g_ErrorReport.Write(L"[Virtual Connection] Connect IP : %s, Port : %d\r\n", lpszURL, *pwPort);
-        return (TRUE);
+        return TRUE;
     }
+
     if (!Util_CheckOption(szCmdLine, L'u', lpszTemp))
     {
-        return (FALSE);
+        return FALSE;
     }
-    wcscpy(lpszURL, lpszTemp);
+
+    wcscpy(lpszURL, lpszTemp.c_str());
     if (!Util_CheckOption(szCmdLine, L'p', lpszTemp))
     {
-        return (FALSE);
+        return FALSE;
     }
-    *pwPort = _wtoi(lpszTemp);
 
-    return (TRUE);
+    *pwPort = _wtoi(lpszTemp.c_str());
+
+    return TRUE;
 }
 
 extern int TimeRemain;

@@ -838,7 +838,7 @@ int  MenuX = -200;
 extern wchar_t LogInID[MAX_ID_SIZE + 1];
 extern wchar_t m_ExeVersion[11];
 
-BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString);
+BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring &lpszString);
 
 extern DWORD g_dwBKConv;
 extern DWORD g_dwBKSent;
@@ -962,10 +962,10 @@ void NewMoveCharacterScene()
     MoveCamera();
 
 #if defined _DEBUG || defined FOR_WORK
-    wchar_t lpszTemp[256];
+    std::wstring lpszTemp = { 0 };
     if (::Util_CheckOption(::GetCommandLine(), L'c', lpszTemp))
     {
-        SelectedHero = ::_wtoi(lpszTemp);
+        SelectedHero = ::_wtoi(lpszTemp.c_str());
         ::StartGame();
     }
 #endif
