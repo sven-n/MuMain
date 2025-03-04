@@ -1103,43 +1103,36 @@ BOOL OpenInitFile()
     return TRUE;
 }
 
-BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString)
+BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring& lpszString)
 {
-    wchar_t cComp[2];
-    cComp[0] = cOption; cComp[1] = cOption;
-    if (islower((int)cOption))
-    {
-        cComp[1] = toupper((int)cOption);
-    }
-    else if (isupper((int)cOption))
-    {
-        cComp[1] = tolower((int)cOption);
+    if (lpszCommandLine.empty()) {
+        return FALSE;
     }
 
-    const wchar_t nFind = L'/';
-    auto* lpFound = lpszCommandLine;
-    while (lpFound)
+    // Create both lowercase and uppercase variants of the option character
+    std::wstring cOptionLower = L"/";
+    cOptionLower += towlower(static_cast<wint_t>(cOption));
+    auto foundIndex = lpszCommandLine.find(cOptionLower);
+    if (foundIndex == std::wstring::npos)
     {
-        lpFound = wcschr(lpFound + 1, nFind);
-        if (lpFound && (*(lpFound + 1) == cComp[0] || *(lpFound + 1) == cComp[1]))
-        {
-            if (lpszString)
-            {
-                int nCount = 0;
-                for (wchar_t* lpSeek = lpFound + 2; *lpSeek != L' ' && *lpSeek != L'\0'; lpSeek++)
-                {
-                    nCount++;
-                }
-
-                wcscpy_s(lpszString, nCount, lpFound + 2);
-                lpszString[nCount] = L'\0';
-            }
-
-            return (TRUE);
-        }
+        std::wstring cOptionUpper = L"/";
+        cOptionUpper += towupper(static_cast<wint_t>(cOption));
+        foundIndex = lpszCommandLine.find(cOptionUpper);
     }
 
-    return (FALSE);
+    if (foundIndex == std::wstring::npos)
+    {
+        return FALSE;
+    }
+
+    auto endIndex = lpszCommandLine.find(L' ', foundIndex);
+    if (endIndex == std::wstring::npos)
+    {
+        endIndex = lpszCommandLine.length();
+    }
+
+    lpszString = lpszCommandLine.substr(foundIndex + 2, endIndex - foundIndex - 2);
+    return TRUE;
 }
 
 BOOL UpdateFile(wchar_t* lpszOld, wchar_t* lpszNew)
@@ -1210,37 +1203,22 @@ BOOL KillExeProcess(wchar_t* lpszExe)
 wchar_t g_lpszCmdURL[50];
 BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
 {
-    wchar_t lpszTemp[256] = { 0, };
-    if (Util_CheckOption(szCmdLine, L'y', lpszTemp))
-    {
-        BYTE bySuffle[] = { 0x0C, 0x07, 0x03, 0x13 };
+    std::wstring lpszTemp = { 0, };
 
-        for (int i = 0; i < (int)wcslen(lpszTemp); i++)
-            lpszTemp[i] -= bySuffle[i % 4];
-        wcscpy(lpszURL, lpszTemp);
-
-        if (Util_CheckOption(szCmdLine, L'z', lpszTemp))
-        {
-            for (int j = 0; j < (int)wcslen(lpszTemp); j++)
-                lpszTemp[j] -= bySuffle[j % 4];
-            *pwPort = _wtoi(lpszTemp);
-        }
-
-        g_ErrorReport.Write(L"[Virtual Connection] Connect IP : %s, Port : %d\r\n", lpszURL, *pwPort);
-        return (TRUE);
-    }
     if (!Util_CheckOption(szCmdLine, L'u', lpszTemp))
     {
-        return (FALSE);
+        return FALSE;
     }
-    wcscpy(lpszURL, lpszTemp);
+
+    wcscpy(lpszURL, lpszTemp.c_str());
     if (!Util_CheckOption(szCmdLine, L'p', lpszTemp))
     {
-        return (FALSE);
+        return FALSE;
     }
-    *pwPort = _wtoi(lpszTemp);
 
-    return (TRUE);
+    *pwPort = static_cast<WORD>(std::stoi(lpszTemp));
+
+    return TRUE;
 }
 
 extern int TimeRemain;
