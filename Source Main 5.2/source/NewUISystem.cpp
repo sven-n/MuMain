@@ -826,7 +826,7 @@ void CNewUISystem::Show(DWORD dwKey)
         {
             g_pMyShopInventory->OpenButtonLock();
         }
-        else
+        else if (!g_pMyShopInventory->IsEnablePersonalShop())
         {
             g_pMyShopInventory->OpenButtonUnLock();
         }

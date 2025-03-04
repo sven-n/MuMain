@@ -260,27 +260,19 @@ void CPersonalShopTitleImp::Draw()
         UpdatePosition();
         RevisionPosition();
 
-        if (m_iHighlightFrame > 6)
-        {
-            m_iHighlightFrame = 0;
-        }
-        else
-        {
-            m_iHighlightFrame++;
-        }
+        auto isHighlightTime = static_cast<INT64>(WorldTime / 265) % 2 == 0;
 
         auto mi = m_listShopTitleDrawObj.begin();
         for (; mi != m_listShopTitleDrawObj.end(); ++mi)
         {
-            CShopTitleDrawObj* pDrawObj = (*mi).second;
+            CShopTitleDrawObj* pDrawObj = mi->second;
             if (SelectedCharacter != -1
-                && m_iHighlightFrame < 3
+                && isHighlightTime
                 && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND)
-                && g_pCommandWindow->GetCurCommandType() == COMMAND_PURCHASE
-                )
+                && g_pCommandWindow->GetCurCommandType() == COMMAND_PURCHASE)
             {
-                CHARACTER* pSeletedPlayer = &CharactersClient[SelectedCharacter];
-                if ((*mi).first == pSeletedPlayer)
+                CHARACTER* selectedPlayer = &CharactersClient[SelectedCharacter];
+                if (mi->first == selectedPlayer)
                 {
                     pDrawObj->EnableHighlight();
                 }
@@ -292,7 +284,7 @@ void CPersonalShopTitleImp::Draw()
 
             if (pDrawObj->IsVisible() && IsShowShopTitles())
             {
-                pDrawObj->Draw((*mi).first->PK);
+                pDrawObj->Draw(mi->first->PK);
             }
         }
     }
