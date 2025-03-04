@@ -877,10 +877,11 @@ namespace MUHelper
 
             TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
             TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
+            int iDistance = ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, { TargetX, TargetY });
 
             PATH_t tempPath;
             bool bHasPath = PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &tempPath, m_iHuntingDistance + fSkillDistance);
-            bool bTargetNear = CheckTile(Hero, &Hero->Object, fSkillDistance);
+            bool bTargetNear = CheckTile(Hero, &Hero->Object, iDistance - fSkillDistance);
             bool bNoWall = CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY);
 
             // target not reachable, ignore it
