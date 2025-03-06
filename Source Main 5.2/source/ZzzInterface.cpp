@@ -5149,7 +5149,6 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
         || Skill == AT_SKILL_PLASMA_STORM_FENRIR
         || Skill == AT_SKILL_DARK_SCREAM
         || (AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP + 4)
-        || Skill == AT_SKILL_WHEEL
         || (AT_SKILL_TORNADO_SWORDA_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDA_UP + 4)
         || (AT_SKILL_TORNADO_SWORDB_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDB_UP + 4)
         || Skill == AT_SKILL_GIGANTIC_STORM
