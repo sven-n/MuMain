@@ -85,7 +85,7 @@ bool g_bEnablePersonalShop = false;
 int g_iPShopWndType = PSHOPWNDTYPE_NONE;
 POINT g_ptPersonalShop = { 0, 0 };
 int g_iPersonalShopMsgType = 0;
-wchar_t g_szPersonalShopTitle[64] = { 0, };
+wchar_t g_szPersonalShopTitle[MAX_SHOPTITLE + 1] = { 0, };
 
 CHARACTER g_PersonalShopSeller;
 bool g_bIsTooltipOn = false;
