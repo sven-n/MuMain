@@ -2034,6 +2034,8 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
     }
     int Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
     if (Skill == AT_SKILL_RIDER
+        || Skill == AT_SKILL_REDUCEDEFENSE
+        || Skill == AT_SKILL_WHEEL
         || Skill == AT_SKILL_DEATHSTAB
         || (AT_SKILL_BLOW_UP <= Skill && Skill <= AT_SKILL_BLOW_UP + 4)
         || (Skill == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_DARK_HORSE_ITEM || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
@@ -2181,7 +2183,6 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
 void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 {
     int Skill = g_MovementSkill.m_bMagic ? CharacterAttribute->Skill[g_MovementSkill.m_iSkill] : g_MovementSkill.m_iSkill;
-
     LetHeroStop();
     c->Movement = false;
     if (o->Type == MODEL_PLAYER)
@@ -2203,6 +2204,10 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         case AT_SKILL_BLOW_UP + 4:
         case AT_SKILL_DEATHSTAB:
             SetAction(o, PLAYER_ATTACK_DEATHSTAB);
+            break;
+        case AT_SKILL_WHEEL:
+        case AT_SKILL_REDUCEDEFENSE:
+            SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
             break;
         case AT_SKILL_RIDER:
             //		    SendRequestMagic(Skill,CharactersClient[g_MovementSkill.m_iTarget].Key);
@@ -2264,7 +2269,23 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
     if (Skill != AT_SKILL_GAOTIC)
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+    {
+        if (Skill == AT_SKILL_WHEEL
+            || Skill == AT_SKILL_REDUCEDEFENSE)
+        {
+            WORD TKey = 0xffff;
+            if (g_MovementSkill.m_iTarget != -1)
+            {
+                TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
+            }
+            SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), 
+                (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
+        }
+        else
+        {
+            SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        }
+    }
 
     if (((!g_isCharacterBuff(o, eDeBuff_Harden)) && c->Helper.Type != MODEL_DARK_HORSE_ITEM)
         && Skill != AT_SKILL_DARK_SCREAM
@@ -3410,6 +3431,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
             }
             break;
+        case AT_SKILL_WHEEL:
         case AT_SKILL_REDUCEDEFENSE:
         {
             AttackKnight(c, iSkill, Distance);
@@ -5251,7 +5273,6 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_TORNADO_SWORDB_UP + 2:
             case AT_SKILL_TORNADO_SWORDB_UP + 3:
             case AT_SKILL_TORNADO_SWORDB_UP + 4:
-            case AT_SKILL_WHEEL:
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                 {
                     BYTE PathX[1];
@@ -5279,6 +5300,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_BLOOD_ATT_UP + 2:
             case AT_SKILL_BLOOD_ATT_UP + 3:
             case AT_SKILL_BLOOD_ATT_UP + 4:
+            case AT_SKILL_WHEEL:
             case AT_SKILL_REDUCEDEFENSE:
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                 {
