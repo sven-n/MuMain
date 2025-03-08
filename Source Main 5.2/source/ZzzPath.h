@@ -36,7 +36,7 @@ public:
     static int s_iDir[8][2];
 
 private:
-    BYTE* m_pbyClosed;
+    EPathNodeState* m_pbyClosed;
     int m_iMinClosed, m_iMaxClosed;
     int* m_piCostToStart;
     int* m_pxPrev;
@@ -111,7 +111,7 @@ inline void PATH::SetMapDimensions(int iWidth, int iHeight, WORD* pbyMap)
     m_pbyMap = pbyMap;
     m_iSize = m_iWidth * m_iHeight;
 
-    m_pbyClosed = new BYTE[m_iSize];
+    m_pbyClosed = new EPathNodeState[m_iSize];
     m_piCostToStart = new int[m_iSize];
     m_pxPrev = new int[m_iSize];
     m_pyPrev = new int[m_iSize];
@@ -153,7 +153,13 @@ inline int PATH::GetNewNodeToTest(void)
         pNode = m_btOpenNodes.GetLeft(pNode);
     }
 
-    return (m_btOpenNodes.RemoveNode(pResult));
+    int iIndex = -1;
+    if (pResult)
+    {
+        iIndex = pResult->GetData();
+        m_btOpenNodes.RemoveNode(pResult);
+    }
+    return iIndex;
 }
 
 inline bool PATH::FindPath(int xStart, int yStart, int xEnd, int yEnd, bool bErrorCheck, int iWall, bool Value, float fDistance)
@@ -216,6 +222,11 @@ inline bool PATH::FindPath(int xStart, int yStart, int xEnd, int yEnd, bool bErr
     {
         int xTest, yTest;
         int iIndex = GetNewNodeToTest();
+        if (iIndex == -1)
+        {
+            return false;
+        }
+
         GetXYPos(iIndex, &xTest, &yTest);
 
         m_piCostToStart[iIndex] = (iCheckCount == iMaxCount) ? 0 : MAX_INT_FORPATH;
@@ -406,4 +417,20 @@ inline bool PATH::GeneratePath(int xStart, int yStart, int xEnd, int yEnd)
     }
 
     return (false);
+}
+
+inline POINT MovePoint(EPathDirection direction, POINT position)
+{
+    switch (direction)
+    {
+    case EPathDirection::WEST:       position.x--; position.y--; break;
+    case EPathDirection::SOUTHWEST:  position.y--; break;
+    case EPathDirection::SOUTH:      position.x++; position.y--; break;
+    case EPathDirection::SOUTHEAST:  position.x++; break;
+    case EPathDirection::EAST:       position.x++; position.y++; break;
+    case EPathDirection::NORTHEAST:  position.y++; break;
+    case EPathDirection::NORTH:      position.x--; position.y++; break;
+    case EPathDirection::NORTHWEST:  position.x--; break;
+    }
+    return position;
 }

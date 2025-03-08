@@ -214,7 +214,7 @@ bool CNewUIStorageInventoryExt::ProcessClosing() const
     return true;
 }
 
-bool CNewUIStorageInventoryExt::InsertItem(int iIndex, BYTE* pbyItemPacket) const
+bool CNewUIStorageInventoryExt::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(iIndex, pbyItemPacket);
@@ -231,7 +231,9 @@ void CNewUIStorageInventoryExt::DeleteAllItems() const
 void CNewUIStorageInventoryExt::ProcessInventoryCtrl()
 {
     if (nullptr == m_pNewInventoryCtrl)
+    {
         return;
+    }
 
     if (const auto pPickedItem = CNewUIInventoryCtrl::GetPickedItem())
     {
@@ -241,7 +243,7 @@ void CNewUIStorageInventoryExt::ProcessInventoryCtrl()
             return;
         }
 
-        if (IsRelease(VK_LBUTTON))
+        if (IsPress(VK_LBUTTON) || IsRelease(VK_LBUTTON))
         {
             const int nDstIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 
@@ -256,8 +258,14 @@ void CNewUIStorageInventoryExt::ProcessInventoryCtrl()
         }
         else
         {
-            if (::IsStoreBan(pItemObj))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
-            else							m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
+            if (::IsStoreBan(pItemObj))
+            {
+                m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
+            }
+            else 
+            {
+                m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
+            }
         }
     }
     else if (IsPress(VK_RBUTTON))
@@ -329,7 +337,7 @@ int CNewUIStorageInventoryExt::FindEmptySlot(const ITEM* pItemObj) const
     return -1;
 }
 
-void CNewUIStorageInventoryExt::ProcessToReceiveStorageItems(int nIndex, BYTE* pbyItemPacket)
+void CNewUIStorageInventoryExt::ProcessToReceiveStorageItems(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
     CNewUIInventoryCtrl::DeletePickedItem();
 

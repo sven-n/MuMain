@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -26,7 +26,7 @@ extern DWORD g_dwMouseUseUIID;
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern DWORD g_dwTopWindow;
 extern DWORD g_dwKeyFocusUIID;
-extern void ReceiveLetterText(const BYTE* ReceiveBuffer);
+extern void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached);
 
 int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
@@ -101,7 +101,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
     switch (iWindowType)
     {
     case UIWNDTYPE_EMPTY:
-        pbw = new CUIBaseWindow;
+        pbw = new CUIDefaultWindow;
         break;
     case UIWNDTYPE_CHAT:
     case UIWNDTYPE_CHAT_READY:
@@ -145,9 +145,6 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         g_dwTopWindow = pbw->GetUIID();
         break;
     case UIWNDTYPE_QUESTION:
-        if (g_dwTopWindow != 0)
-            return 0;
-        break;
     case UIWNDTYPE_QUESTION_FORCE:
         pbw = new CUIQuestionWindow(0);
         {
@@ -197,6 +194,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
 
     if (iPos_x == UIWND_DEFAULT) iPos_x = 0;
     if (iPos_y == UIWND_DEFAULT) iPos_y = 332;
+    if (!pbw) return 0;
 
     pbw->Init(pszTitle, dwParentID);
 
@@ -681,7 +679,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
         {
             pWindow->SetSize(m_iMainWindowWidth, m_iMainWindowHeight);
             pWindow->SetBackPosition(m_bIsMainWindowMaximize, m_iMainWindowBackPos_y, m_iMainWindowBackHeight);
-            // À©µµ¿ì ¸ñ·Ï º¹±¸
+            // ìœˆë„ìš° ëª©ë¡ ë³µêµ¬
             RefreshMainWndChatRoomList();
             pWindow->Refresh();
             //			((CUIFriendWindow *)pWindow)->SetTabIndex(m_iLastFriendWindowTabIndex);
@@ -871,7 +869,6 @@ CUIBaseWindow::CUIBaseWindow()
     m_iMinHeight = 100;
     m_iMaxWidth = 0;
     m_iMaxHeight = 0;
-    m_pszTitle = NULL;
     SetOption(UIWINDOWSTYLE_NORMAL);
     m_bHaveTextBox = FALSE;
     m_iControlButtonClick = 0;
@@ -883,11 +880,6 @@ CUIBaseWindow::CUIBaseWindow()
 
 CUIBaseWindow::~CUIBaseWindow()
 {
-    if (m_pszTitle != NULL)
-    {
-        delete[] m_pszTitle;
-        m_pszTitle = NULL;
-    }
 }
 
 void CUIBaseWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
@@ -899,21 +891,12 @@ void CUIBaseWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     SetSize(213, 170);
 }
 
-void CUIBaseWindow::InitControls()
-{
-    // can be overwritten, if needed
-}
-
 void CUIBaseWindow::SetTitle(const wchar_t* pszTitle)
 {
-    if (pszTitle == NULL) return;
-    if (m_pszTitle != NULL)
-    {
-        if (wcscmp(pszTitle, m_pszTitle) == 0) return;
-        delete[] m_pszTitle;
-    }
-    m_pszTitle = new wchar_t[wcslen(pszTitle) + 1 + 1];
-    wcsncpy(m_pszTitle, pszTitle, wcslen(pszTitle) + 1);
+    if (!pszTitle)
+        return;
+
+    m_strTitle = std::wstring(pszTitle);
 }
 
 void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
@@ -971,11 +954,11 @@ void CUIBaseWindow::SetControlButtonColor(int iSelect)
 
 void CUIBaseWindow::Render()
 {
-    if (!_controlsInitialized)
-    {
-        InitControls();
-        _controlsInitialized = true;
-    }
+    std::call_once(_controlsInitialized, [this]() 
+        { 
+            InitControls(); 
+        }
+    );
 
     EnableAlphaTest();
 
@@ -1048,7 +1031,7 @@ void CUIBaseWindow::Render()
         g_pRenderText->SetBgColor(0);
 
         wchar_t szTempTitle[256] = { 0 };
-        CutText3(m_pszTitle, szTempTitle, m_iWidth - 50, 1, 256);
+        CutText3(m_strTitle.c_str(), szTempTitle, m_iWidth - 50, 1, 256);
         g_pRenderText->RenderText(m_iPos_x + 9, m_iPos_y + 8, szTempTitle);
         if (CheckOption(UIWINDOWSTYLE_MINBUTTON))
         {
@@ -1321,7 +1304,6 @@ void CUIChatWindow::InitControls()
     m_CloseInviteButton.SetParentUIID(GetUIID());
     m_CloseInviteButton.SetSize(73, 13);
     m_CloseInviteButton.SetArrangeType(3, 74, 14);
-    _controlsInitialized = true;
     Refresh();
 }
 
@@ -1344,18 +1326,18 @@ void CUIChatWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     m_PalListBox.SetArrangeType(3, 75, 16);
     m_PalListBox.SetResizeType(2, 75, -16);
 
-    //	m_PalListBox.AddText(L"ÀÌ¸§³×ÀÚ", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§³ËÀÚ", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§¼ö³Ý", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§1ÀÚ", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§2ÀÚ", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§3³Ý", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§4ÀÚ", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§5ÀÚ", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§6³Ý", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§7³Ý", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§8³Ý", 1, 1);
-    //	m_PalListBox.AddText(L"ÀÌ¸§9³Ý", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„ë„¤ìž", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„ë„‰ìž", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„ìˆ˜ë„·", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„1ìž", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„2ìž", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„3ë„·", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„4ìž", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„5ìž", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„6ë„·", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„7ë„·", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„8ë„·", 1, 1);
+    //	m_PalListBox.AddText(L"ì´ë¦„9ë„·", 1, 1);
 
     
 
@@ -1368,11 +1350,6 @@ void CUIChatWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
 
 void CUIChatWindow::Refresh()
 {
-    if (!_controlsInitialized)
-    {
-        return;
-    }
-
     m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
     m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
     m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
@@ -1424,18 +1401,18 @@ void CUIChatWindow::DisconnectToChatServer()
 {
     if (_connection != nullptr)
     {
-        _connection->ToChatServer()->SendLeaveChatRoom();
-        _connection->Close();
+        if (_connection->IsConnected())
+        {
+            _connection->ToChatServer()->SendLeaveChatRoom();
+            _connection->Close();
+        }
+
+        _connection = nullptr;
     }
 }
 
 int CUIChatWindow::AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server)
 {
-    if (!_controlsInitialized)
-    {
-        ;
-        // oops
-    }
     BOOL bFind = FALSE;
     for (std::deque<GUILDLIST_TEXT>::iterator iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
     {
@@ -1804,7 +1781,7 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     glRotatef(-90.0f, 0.f, 0.f, 1.f);
     glTranslatef(-10000.0f, 0.0f, -75.f);
 
-    if (c->Helper.Type == MODEL_HELPER + 4)
+    if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
         glTranslatef(-o->Position[0], -o->Position[1], -o->Position[2] - 50.0f);
     else
         glTranslatef(-o->Position[0], -o->Position[1], -o->Position[2]);
@@ -1835,14 +1812,14 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     if (c->Wing.Type != -1 && m_iSettingAnimation > AT_HEALING1)
         c->SafeZone = true;
     else c->SafeZone = false;
-    if (c->Helper.Type == MODEL_HELPER + 2)
+    if (c->Helper.Type == MODEL_HORN_OF_UNIRIA)
         m_PhotoHelper.Position[2] += 10;
-    else if (c->Helper.Type == MODEL_HELPER + 3)
+    else if (c->Helper.Type == MODEL_HORN_OF_DINORANT)
         m_PhotoHelper.Position[2] += 25;
     RenderMount(&m_PhotoHelper, TRUE);
-    if (c->Helper.Type == MODEL_HELPER + 2)
+    if (c->Helper.Type == MODEL_HORN_OF_UNIRIA)
         m_PhotoHelper.Position[2] -= 10;
-    else if (c->Helper.Type == MODEL_HELPER + 3)
+    else if (c->Helper.Type == MODEL_HORN_OF_DINORANT)
         m_PhotoHelper.Position[2] -= 25;
     RenderCharacter(c, o);
 
@@ -2080,7 +2057,7 @@ void CUIPhotoViewer::Init(int iInitType)
 
     CreateCharacterPointer(&m_PhotoChar, MODEL_PLAYER, (Hero->PositionX), (Hero->PositionY), 0);
 
-    // ÀÌµ¿
+    // ì´ë™
     Vector(-300, -300, -300, m_PhotoChar.Object.Position);
 
     m_bIsInitialized = TRUE;
@@ -2090,7 +2067,7 @@ BOOL CompareItemEqual(const PART_t* item1, const PART_t* item2)
 {
     return (item1->Type == item2->Type &&
         item1->Level == item2->Level &&
-        item1->Option1 == item2->Option1);
+        item1->ExcellentFlags == item2->ExcellentFlags);
 }
 
 BOOL CompareItemEqual(const PART_t* item1, const ITEM* item2, int iDefaultValue)
@@ -2098,14 +2075,14 @@ BOOL CompareItemEqual(const PART_t* item1, const ITEM* item2, int iDefaultValue)
     if (item2->Type == -1)
     {
         return (item1->Type == iDefaultValue &&
-            item1->Level == ((item2->Level >> 3) & 15) &&
-            item1->Option1 == item2->Option1);
+            item1->Level == item2->Level &&
+            item1->ExcellentFlags == item2->ExcellentFlags);
     }
     else
     {
         return (item1->Type == item2->Type + MODEL_ITEM &&
-            item1->Level == ((item2->Level >> 3) & 15) &&
-            item1->Option1 == item2->Option1);
+            item1->Level == item2->Level &&
+            item1->ExcellentFlags == item2->ExcellentFlags);
     }
 }
 
@@ -2114,14 +2091,14 @@ void SetItemToPhoto(PART_t* itemDest, const ITEM* itemSrc, int iDefaultValue)
     if (itemSrc->Type == -1)
     {
         itemDest->Type = iDefaultValue;
-        itemDest->Level = ((itemSrc->Level >> 3) & 15);
-        itemDest->Option1 = itemSrc->Option1;
+        itemDest->Level = itemSrc->Level;
+        itemDest->ExcellentFlags = itemSrc->ExcellentFlags;
     }
     else
     {
         itemDest->Type = itemSrc->Type + MODEL_ITEM;
-        itemDest->Level = ((itemSrc->Level >> 3) & 15);
-        itemDest->Option1 = itemSrc->Option1;
+        itemDest->Level = itemSrc->Level;
+        itemDest->ExcellentFlags = itemSrc->ExcellentFlags;
     }
 }
 
@@ -2165,18 +2142,18 @@ void CUIPhotoViewer::CopyPlayer()
         if (CompareItemEqual(&m_PhotoChar.Helper, &Hero->Helper) == FALSE)
             bChangeHelper = TRUE;
     }
-    else	// º¯½Å »óÅÂ
+    else	// ë³€ì‹  ìƒíƒœ
     {
         if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_HELM], &CharacterMachine->Equipment[EQUIPMENT_HELM],
-            MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+            MODEL_BODY_HELM + Hero->SkinIndex) == FALSE) bChangeArmor = TRUE;
         else if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_ARMOR], &CharacterMachine->Equipment[EQUIPMENT_ARMOR],
-            MODEL_BODY_ARMOR + gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+            MODEL_BODY_ARMOR + Hero->SkinIndex) == FALSE) bChangeArmor = TRUE;
         else if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_PANTS], &CharacterMachine->Equipment[EQUIPMENT_PANTS],
-            MODEL_BODY_PANTS + gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+            MODEL_BODY_PANTS + Hero->SkinIndex) == FALSE) bChangeArmor = TRUE;
         else if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_GLOVES], &CharacterMachine->Equipment[EQUIPMENT_GLOVES],
-            MODEL_BODY_GLOVES + gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+            MODEL_BODY_GLOVES + Hero->SkinIndex) == FALSE) bChangeArmor = TRUE;
         else if (CompareItemEqual(&m_PhotoChar.BodyPart[BODYPART_BOOTS], &CharacterMachine->Equipment[EQUIPMENT_BOOTS],
-            MODEL_BODY_BOOTS + gCharacterManager.GetSkinModelIndex(Hero->Class)) == FALSE) bChangeArmor = TRUE;
+            MODEL_BODY_BOOTS + Hero->SkinIndex) == FALSE) bChangeArmor = TRUE;
 
         for (i = 0; i < 2; ++i)
         {
@@ -2222,23 +2199,23 @@ void CUIPhotoViewer::CopyPlayer()
             memcpy(&m_PhotoChar.Helper, &Hero->Helper, sizeof(PART_t));
         }
     }
-    else	// º¯½Å »óÅÂ
+    else	// ë³€ì‹  ìƒíƒœ
     {
         if (bChangeArmor == TRUE)
         {
             DeleteCloth(&m_PhotoChar, NULL, NULL);
 
-            m_PhotoChar.BodyPart[BODYPART_HEAD].Type = MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(Hero->Class);
+            m_PhotoChar.BodyPart[BODYPART_HEAD].Type = MODEL_BODY_HELM + Hero->SkinIndex;
             SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_HELM], &CharacterMachine->Equipment[EQUIPMENT_HELM],
-                MODEL_BODY_HELM + gCharacterManager.GetSkinModelIndex(Hero->Class));
+                MODEL_BODY_HELM + Hero->SkinIndex);
             SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_ARMOR], &CharacterMachine->Equipment[EQUIPMENT_ARMOR],
-                MODEL_BODY_ARMOR + gCharacterManager.GetSkinModelIndex(Hero->Class));
+                MODEL_BODY_ARMOR + Hero->SkinIndex);
             SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_PANTS], &CharacterMachine->Equipment[EQUIPMENT_PANTS],
-                MODEL_BODY_PANTS + gCharacterManager.GetSkinModelIndex(Hero->Class));
+                MODEL_BODY_PANTS + Hero->SkinIndex);
             SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_GLOVES], &CharacterMachine->Equipment[EQUIPMENT_GLOVES],
-                MODEL_BODY_GLOVES + gCharacterManager.GetSkinModelIndex(Hero->Class));
+                MODEL_BODY_GLOVES + Hero->SkinIndex);
             SetItemToPhoto(&m_PhotoChar.BodyPart[BODYPART_BOOTS], &CharacterMachine->Equipment[EQUIPMENT_BOOTS],
-                MODEL_BODY_BOOTS + gCharacterManager.GetSkinModelIndex(Hero->Class));
+                MODEL_BODY_BOOTS + Hero->SkinIndex);
 
             for (i = 0; i < MAX_BODYPART; ++i)
             {
@@ -2283,16 +2260,16 @@ void CUIPhotoViewer::CopyPlayer()
         case 2:CreateMountSub(MODEL_UNICON, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
         case 3:CreateMountSub(MODEL_PEGASUS, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
         case 4:CreateMountSub(MODEL_DARK_HORSE, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
-        case 37:	//^ Ææ¸± ÆíÁö °ü·Ã
-            if (m_PhotoChar.Helper.Option1 == 0x01)
+        case 37:	//^ íŽœë¦´ íŽ¸ì§€ ê´€ë ¨
+            if (m_PhotoChar.Helper.ExcellentFlags == 0x01)
             {
                 CreateMountSub(MODEL_FENRIR_BLACK, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
-            else if (m_PhotoChar.Helper.Option1 == 0x02)
+            else if (m_PhotoChar.Helper.ExcellentFlags == 0x02)
             {
                 CreateMountSub(MODEL_FENRIR_BLUE, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
-            else if (m_PhotoChar.Helper.Option1 == 0x04)
+            else if (m_PhotoChar.Helper.ExcellentFlags == 0x04)
             {
                 CreateMountSub(MODEL_FENRIR_GOLD, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper);
             }
@@ -2307,7 +2284,7 @@ void CUIPhotoViewer::CopyPlayer()
     }
 }
 
-void CUIPhotoViewer::SetClass(BYTE byClass)
+void CUIPhotoViewer::SetClass(CLASS_TYPE byClass)
 {
     if (m_bIsInitialized == FALSE) return;
     CHARACTER* c = CharactersClient;
@@ -2323,7 +2300,7 @@ void CUIPhotoViewer::SetEquipmentPacket(BYTE* pbyEquip)
     //CHARACTER *c = CharactersClient;
     //CharactersClient = &m_PhotoChar;
 
-    ChangeCharacterExt(0, pbyEquip, &m_PhotoChar, &m_PhotoHelper);
+    ReadEquipmentExtended(0, 0, pbyEquip, &m_PhotoChar, &m_PhotoHelper);
 
     m_fPhotoHelperScale = m_PhotoHelper.Scale * 0.7f / Hero->Object.Scale;
 
@@ -2611,6 +2588,7 @@ void CUILetterWriteWindow::InitControls()
     m_Photo.SetAutoupdatePlayer(TRUE);
     m_Photo.SetAnimation(AT_STAND1);
     m_Photo.SetAngle(90);
+    Refresh();
 }
 
 void CUILetterWriteWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
@@ -3135,7 +3113,8 @@ BOOL CUILetterReadWindow::HandleMessage()
                     }
                     else
                     {
-                        ReceiveLetterText((BYTE*)g_pLetterList->GetLetterText(dwPrevID));
+                        auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwPrevID));
+                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)), true);
                     }
                 }
                 else
@@ -3175,7 +3154,8 @@ BOOL CUILetterReadWindow::HandleMessage()
                     }
                     else
                     {
-                        ReceiveLetterText((BYTE*)g_pLetterList->GetLetterText(dwNextID));
+                        auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwNextID));
+                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)), true);
                     }
                 }
                 else
@@ -3303,7 +3283,7 @@ bool TestAlphabeticOrder(const wchar_t* pszText1, const wchar_t* pszText2, BOOL*
         else return false;
     }
     if (pbEqual != NULL) *pbEqual = TRUE;
-    return false;	// ¿ÏÀüÈ÷ µ¿ÀÏ
+    return false;	// ì™„ì „ížˆ ë™ì¼
 }
 
 bool FriendListSortByID(const GUILDLIST_TEXT& lhs, const GUILDLIST_TEXT& rhs)
@@ -3488,8 +3468,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
         {
             if (GetCurrentSelectedFriend() == NULL) break;
             wchar_t tempTxt[MAX_TEXT_LENGTH + 1] = { 0 };
-            wcsncpy(tempTxt, GetCurrentSelectedFriend(), MAX_TEXT_LENGTH);
-            wcscat(tempTxt, GlobalText[1024]);
+            swprintf(tempTxt, L"%s %s", GlobalText[1024], GetCurrentSelectedFriend()); // "Do you really wish to delete this friend?"
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, tempTxt, GetUIID());
         }
         break;
@@ -3519,11 +3498,11 @@ BOOL CUIFriendListTabWindow::HandleMessage()
             }
         }
         break;
-        case 4:		// ÆíÁö¾²±â
+        case 4:		// íŽ¸ì§€ì“°ê¸°
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
             swprintf(temp, GlobalText[1071], g_cdwLetterCost);
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);	// "ÆíÁö¾²±â"
+            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);	// "íŽ¸ì§€ì“°ê¸°"
             if (dwUIID == 0) break;
             if (GetCurrentSelectedFriend() != NULL)
                 ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText((const wchar_t*)GetCurrentSelectedFriend());
@@ -4219,12 +4198,20 @@ void CLetterList::RemoveLetterTextCache(DWORD dwIndex)
     m_LetterCacheIter = m_LetterCache.find(dwIndex);
     if (m_LetterCacheIter != m_LetterCache.end())
     {
+        auto letter = &m_LetterCacheIter->second;
+        delete letter;
         m_LetterCache.erase(m_LetterCacheIter);
     }
 }
 
 void CLetterList::ClearLetterTextCache()
 {
+    for (auto cachedLetter : m_LetterCache)
+    {
+        auto letter = &cachedLetter.second;
+        delete letter;
+    }
+
     m_LetterCache.clear();
 }
 
@@ -4442,14 +4429,15 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
             DWORD dwLetterID = GetCurrentSelectedLetter()->m_dwLetterID;
             if (g_pWindowMgr->LetterReadCheck(dwLetterID) == FALSE)
             {
-                // Ä³½Ã
+                // ìºì‹œ
                 if (g_pLetterList->GetLetterText(dwLetterID) == NULL)
                 {
                     SocketClient->ToGameServer()->SendLetterReadRequest(dwLetterID);
                 }
                 else
                 {
-                    ReceiveLetterText((BYTE*)g_pLetterList->GetLetterText(dwLetterID));
+                    auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwLetterID));
+                    ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)), true);
                 }
             }
             else
@@ -4957,6 +4945,7 @@ void CUITextInputWindow::InitControls()
     m_CancelButton.SetParentUIID(GetUIID());
     m_CancelButton.SetArrangeType(0, 73, 40);
     m_CancelButton.SetSize(50, 20);
+    Refresh();
 }
 
 
@@ -5064,8 +5053,8 @@ void CUIQuestionWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     else if (m_iDialogType == 1) SetTitle(GlobalText[228]);
     SetParentUIID(0);
     m_dwReturnWindowUIID = dwParentID;
-    m_szCaption[0][0] = m_szCaption[1][0] = '\0';
-    m_szSaveID[0] = '\0';
+    memset(m_szCaption, 0, sizeof(m_szCaption));
+    memset(m_szSaveID, 0, sizeof(m_szSaveID));
     CutText3(pszTitle, m_szCaption[0], 125, 2, 256);
 
     SetPosition(50, 50);
@@ -5209,7 +5198,6 @@ void CUIFriendMenu::Init()
     m_iMinHeight = 100;
     m_iMaxWidth = 0;
     m_iMaxHeight = 0;
-    m_pszTitle = NULL;
     SetOption(UIWINDOWSTYLE_NULL);
     m_bHaveTextBox = FALSE;
     m_iControlButtonClick = 0;
@@ -5662,7 +5650,8 @@ void CUIFriendMenu::SendChatRoomConnectCheck()
         if (pChatWindow != nullptr)
         {
             Connection* pSocket = pChatWindow->GetCurrentSocket();
-            if (pSocket != nullptr)
+            if (pSocket != nullptr
+                && pSocket->ToChatServer() != nullptr)
             {
                 pSocket->ToChatServer()->SendKeepAlive();
             }

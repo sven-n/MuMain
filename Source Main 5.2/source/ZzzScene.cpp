@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -68,9 +68,8 @@
 #include <chrono>
 #include <thread>
 
-#include "SpinLock.h"
+#include "CharacterManager.h"
 
-class SpinLock;
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
@@ -108,12 +107,12 @@ int g_iLengthAuthorityCode = 20;
 
 wchar_t* szServerIpAddress = L"127.127.127.127";
 //char *szServerIpAddress = "210.181.89.215";
-WORD g_ServerPort = 44405;
+WORD g_ServerPort = 44406;
 
 #ifdef MOVIE_DIRECTSHOW
 int  SceneFlag = MOVIE_SCENE;
 #else // MOVIE_DIRECTSHOW
-int  SceneFlag = WEBZEN_SCENE;
+EGameScene  SceneFlag = WEBZEN_SCENE;
 #endif // MOVIE_DIRECTSHOW
 
 extern int g_iKeyPadEnable;
@@ -265,8 +264,8 @@ bool CheckAbuseNameFilter(wchar_t* Text)
 bool CheckName()
 {
     if (CheckAbuseNameFilter(InputText[0]) || CheckAbuseFilter(InputText[0]) ||
-        FindText(InputText[0], L" ") || FindText(InputText[0], L"¡¡") ||
-        FindText(InputText[0], L".") || FindText(InputText[0], L"¡¤") || FindText(InputText[0], L"¡­") ||
+        FindText(InputText[0], L" ") || FindText(InputText[0], L"ã€€") ||
+        FindText(InputText[0], L".") || FindText(InputText[0], L"Â·") || FindText(InputText[0], L"âˆ¼") ||
         FindText(InputText[0], L"Webzen") || FindText(InputText[0], L"WebZen") || FindText(InputText[0], L"webzen") || FindText(InputText[0], L"WEBZEN") ||
         FindText(InputText[0], GlobalText[457]) || FindText(InputText[0], GlobalText[458]))
         return true;
@@ -384,8 +383,6 @@ void WebzenScene(HDC hDC)
     SceneFlag = LOG_IN_SCENE;	//
 }
 
-int MenuStateCurrent = MENU_SERVER_LIST;
-int MenuStateNext = MENU_SERVER_LIST;
 int DeleteGuildIndex = -1;
 
 void DeleteCharacter()
@@ -401,8 +398,6 @@ void DeleteCharacter()
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
     SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
 
-    MenuStateCurrent = MENU_DELETE_LEFT;
-    MenuStateNext = MENU_NEW_DOWN;
     PlayBuffer(SOUND_MENU01);
 
     ClearInput();
@@ -564,11 +559,11 @@ void RenderInfomation3D()
         case MESSAGE_USE_STATE:
         case MESSAGE_USE_STATE2:
         case MESSAGE_PERSONALSHOP_WARNING:
-            RenderItem3D(x, y, Width, Height, TargetItem.Type, TargetItem.Level, TargetItem.Option1, TargetItem.ExtOption, true);
+            RenderItem3D(x, y, Width, Height, TargetItem.Type, TargetItem.Level, TargetItem.ExcellentFlags, TargetItem.AncientDiscriminator, true);
             break;
 
         default:
-            RenderItem3D(x, y, Width, Height, PickItem.Type, PickItem.Level, PickItem.Option1, PickItem.ExtOption, true);
+            RenderItem3D(x, y, Width, Height, PickItem.Type, PickItem.Level, PickItem.ExcellentFlags, PickItem.AncientDiscriminator, true);
             break;
         }
 
@@ -599,9 +594,9 @@ BOOL ShowCheckBox(int num, int index, int message)
     if (message == MESSAGE_USE_STATE || message == MESSAGE_USE_STATE2)
     {
         wchar_t Name[50] = { 0, };
-        if (TargetItem.Type == ITEM_HELPER + 15)
+        if (TargetItem.Type == ITEM_FRUITS)
         {
-            switch ((TargetItem.Level >> 3) & 15)
+            switch (TargetItem.Level)
             {
             case 0:wprintf(Name, L"%s", GlobalText[168]); break;
             case 1:wprintf(Name, L"%s", GlobalText[169]); break;
@@ -834,7 +829,6 @@ void MoveCamera()
 }
 
 bool MenuCancel = true;
-bool EnableSocket = false;
 bool InitLogIn = false;
 bool InitLoading = false;
 bool InitCharacterScene = false;
@@ -844,7 +838,7 @@ int  MenuX = -200;
 extern wchar_t LogInID[MAX_ID_SIZE + 1];
 extern wchar_t m_ExeVersion[11];
 
-BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString);
+BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring &lpszString);
 
 extern DWORD g_dwBKConv;
 extern DWORD g_dwBKSent;
@@ -890,7 +884,8 @@ void CreateCharacterScene()
     OpenCharacterSceneData();
 
     CreateCharacterPointer(&CharacterView, MODEL_FACE + 1, 0, 0);
-    CharacterView.Class = 1;
+    CharacterView.Class = CLASS_KNIGHT;
+    CharacterView.SkinIndex = gCharacterManager.GetSkinModelIndex(CLASS_KNIGHT);
     CharacterView.Object.Kind = 0;
 
     SelectedHero = -1;
@@ -900,7 +895,7 @@ void CreateCharacterScene()
     CharacterAttribute->SkillNumber = 0;
 
     for (int i = 0; i < MAX_MAGIC; i++)
-        CharacterAttribute->Skill[i] = 0;
+        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
 
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < EQUIPMENT_HELPER; i++)
         CharacterMachine->Equipment[i].Level = 0;
@@ -967,10 +962,10 @@ void NewMoveCharacterScene()
     MoveCamera();
 
 #if defined _DEBUG || defined FOR_WORK
-    wchar_t lpszTemp[256];
+    std::wstring lpszTemp = { 0 };
     if (::Util_CheckOption(::GetCommandLine(), L'c', lpszTemp))
     {
-        SelectedHero = ::_wtoi(lpszTemp);
+        SelectedHero = ::_wtoi(lpszTemp.c_str());
         ::StartGame();
     }
 #endif
@@ -1065,7 +1060,7 @@ bool NewRenderCharacterScene(HDC hDC)
     glClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(0, 25, 640, 430);
 
-    CreateFrustrum((float)Width / (float)640, pos);
+    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
 
     OBJECT* o = &CharactersClient[SelectedHero].Object;
 
@@ -1093,7 +1088,7 @@ bool NewRenderCharacterScene(HDC hDC)
     {
         pCha = &CharactersClient[i];
         pObj = &pCha->Object;
-        if (pCha->Helper.Type == MODEL_HELPER + 3)
+        if (pCha->Helper.Type == MODEL_HORN_OF_DINORANT)
         {
 #ifdef PJH_NEW_SERVER_SELECT_MAP
             pObj->Position[2] = 194.5f;
@@ -1148,8 +1143,8 @@ bool NewRenderCharacterScene(HDC hDC)
 
         float Rotation = (int)WorldTime % 3600 / (float)10.f;
         Vector(0.15f, 0.15f, 0.15f, o->Light);
-        CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 4);
-        CreateParticle(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 5);
+        CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 4);
+        CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 5);
 
         g_csMapServer.SetHeroID((wchar_t*)CharactersClient[SelectedHero].ID);
     }
@@ -1346,7 +1341,7 @@ bool NewRenderLogInScene(HDC hDC)
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
     BeginOpengl(0, 25, 640, 430);
-    CreateFrustrum((float)Width / (float)640, pos);
+    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
@@ -1377,7 +1372,7 @@ bool NewRenderLogInScene(HDC hDC)
     if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
 #ifndef PJH_NEW_SERVER_SELECT_MAP
-        // È­¸é Èå¸®±â
+        // í™”ë©´ íë¦¬ê¸°
         EnableAlphaBlend4();
         glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
         float fScale = (sinf(WorldTime * 0.0005f) + 1.f) * 0.00011f;
@@ -1389,17 +1384,17 @@ bool NewRenderLogInScene(HDC hDC)
         fScale = (sinf(WorldTime * 0.0015f) + 1.f) * 0.00021f;
         RenderBitmapLocalRotate(BITMAP_CHROME + 4, 320.0f, 240.0f, 1150.0f, 1150.0f, fAngle, fScale * 512.f, fScale * 512.f, (512.f) / 512.f - fScale * 2 * 512.f, (512.f) / 512.f - fScale * 2 * 512.f);
 
-        // À§¾Æ·¡ ÀÚ¸£±â
+        // ìœ„ì•„ëž˜ ìžë¥´ê¸°
         EnableAlphaTest();
         glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
         RenderColor(0, 0, 640, 25);
         RenderColor(0, 480 - 25, 640, 25);
 
-        // È­¸éÄ¥
+        // í™”ë©´ì¹ 
         glColor4f(0.0f, 0.0f, 0.0f, 0.2f);
         RenderColor(0, 25, 640, 430);
 #endif //PJH_NEW_SERVER_SELECT_MAP
-        // ¹Â·Î°í
+        // ë®¤ë¡œê³ 
         g_fMULogoAlpha += 0.02f;
         if (g_fMULogoAlpha > 10.0f) g_fMULogoAlpha = 10.0f;
 
@@ -1602,7 +1597,7 @@ bool MoveMainCamera()
             {
             }
             else
-                if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HELPER + 3 || Hero->SafeZone)
+                if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
                 {
                     Hero->Object.Position[2] = RequestTerrainHeight(Hero->Object.Position[0], Hero->Object.Position[1]);
                 }
@@ -1907,6 +1902,7 @@ void MoveMainScene()
 
         g_pSlideHelpMgr->Init();
         g_pUIMapName->Init();
+        g_pNewUIMuHelper->Reset();
 
         g_GuildCache.Reset();
 
@@ -2098,7 +2094,7 @@ bool RenderMainScene()
 
     BeginOpengl(0, 0, Width, Height);
 
-    CreateFrustrum((float)Width / (float)640, pos);
+    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
 
     if (gMapManager.InBattleCastle())
     {
@@ -2265,33 +2261,27 @@ extern int  GrabScreen;
 
 void MoveCharacter(CHARACTER* c, OBJECT* o);
 
-float target_fps = 60;
-float ms_per_frame = 1000.f / target_fps;
+double target_fps = 60;
+double ms_per_frame = 1000.0 / target_fps;
 
-void SetTargetFps(float targetFps)
+void SetTargetFps(double targetFps)
 {
+    if (IsVSyncEnabled() && targetFps >= GetFPSLimit())
+    {
+        targetFps = -1;
+    }
+
     target_fps = targetFps;
-    ms_per_frame = 1000.0f / target_fps;
+    ms_per_frame = 1000.0 / target_fps;
 }
 
-uint64_t current_tick_count = GetTickCount64();
-uint64_t last_water_change = GetTickCount64();
+double last_render_tick_count = 0;
+double current_tick_count = 0;
+double last_water_change = 0;
 
-void MainScene(HDC hDC)
+void UpdateSceneState()
 {
-    CalcFPS();
-
     g_pNewKeyInput->ScanAsyncKeyState();
-
-    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
-    {
-        double dDeltaTick = g_pTimer->GetTimeElapsed();
-        dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
-        g_pTimer->ResetTimer();
-
-        CInput::Instance().Update();
-        CUIMng::Instance().Update(dDeltaTick);
-    }
 
     g_dwMouseUseUIID = 0;
 
@@ -2310,7 +2300,6 @@ void MainScene(HDC hDC)
         break;
     }
 
-    g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
     MoveNotices();
 
     if (PressKey(VK_SNAPSHOT))
@@ -2320,25 +2309,6 @@ void MainScene(HDC hDC)
         else
             GrabEnable = true;
     }
-
-    constexpr int NumberOfWaterTextures = 32;
-    constexpr double timePerFrame = 1000 / REFERENCE_FPS;
-    int64_t time_since_last_render = current_tick_count - last_water_change;
-    while (time_since_last_render > timePerFrame)
-    {
-        WaterTextureNumber++;
-        WaterTextureNumber %= NumberOfWaterTextures;
-        time_since_last_render -= timePerFrame;
-        last_water_change = current_tick_count;
-    }
-
-    if (Destroy) {
-        return;
-    }
-
-    Bitmaps.Manage();
-
-    Set3DSoundPosition();
 
     const bool addTimeStampToCapture = !HIBYTE(GetAsyncKeyState(VK_SHIFT));
     wchar_t screenshotText[256];
@@ -2356,6 +2326,52 @@ void MainScene(HDC hDC)
             g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
     }
+
+    if (GrabEnable)
+    {
+        SaveScreen();
+    }
+
+    if (GrabEnable && !addTimeStampToCapture)
+    {
+        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
+
+    GrabEnable = false;
+}
+
+void MainScene(HDC hDC)
+{
+    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+    {
+        double dDeltaTick = g_pTimer->GetTimeElapsed();
+        dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
+        // g_pTimer->ResetTimer();
+
+        CInput::Instance().Update();
+        CUIMng::Instance().Update(dDeltaTick);
+    }
+
+    constexpr int NumberOfWaterTextures = 32;
+    constexpr double timePerFrame = 1000 / REFERENCE_FPS;
+    auto time_since_last_render = current_tick_count - last_water_change;
+    while (time_since_last_render > timePerFrame)
+    {
+        WaterTextureNumber++;
+        WaterTextureNumber %= NumberOfWaterTextures;
+        time_since_last_render -= timePerFrame;
+        last_water_change = current_tick_count;
+    }
+
+    if (Destroy) {
+        return;
+    }
+
+    g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
+
+    Bitmaps.Manage();
+
+    Set3DSoundPosition();
 
     if (gMapManager.WorldActive == WD_10HEAVEN)
     {
@@ -2408,12 +2424,8 @@ void MainScene(HDC hDC)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const uint64_t last_render_tick_count = current_tick_count;
-    current_tick_count = GetTickCount64();
-
     bool Success = false;
 
-    //g_render_lock->lock();
     try
     {
         if (SceneFlag == LOG_IN_SCENE)
@@ -2431,22 +2443,10 @@ void MainScene(HDC hDC)
 
         g_PhysicsManager.Render();
 
-        if (GrabEnable)
-        {
-            SaveScreen();
-        }
-
-        if (GrabEnable && !addTimeStampToCapture)
-        {
-            g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-        }
-
-        GrabEnable = false;
-
 #ifndef  defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
         BeginBitmap();
         wchar_t szDebugText[128];
-        swprintf(szDebugText, L"FPS : %.1f Connected: %d", FPS_AVG, g_bGameServerConnected);
+        swprintf(szDebugText, L"FPS: %.1f Vsync: %d CPU: %.1f%%", FPS_AVG, IsVSyncEnabled(), CPU_AVG);
         wchar_t szMousePos[128];
         swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
         wchar_t szCamera3D[128];
@@ -2463,16 +2463,7 @@ void MainScene(HDC hDC)
 
         if (Success)
         {
-            glFlush();
             SwapBuffers(hDC);
-        }
-
-        const uint64_t current_frame_time_ms = current_tick_count - last_render_tick_count;
-        if (current_frame_time_ms < ms_per_frame)
-        {
-            const uint64_t rest_ms = ms_per_frame - current_frame_time_ms;
-            std::this_thread::sleep_for(std::chrono::milliseconds(rest_ms));
-            current_tick_count += rest_ms;
         }
 
         if (EnableSocket && (SocketClient == nullptr || !SocketClient->IsConnected()))
@@ -2614,9 +2605,9 @@ void MainScene(HDC hDC)
 #ifdef ASG_ADD_MAP_KARUTAN
             if (!IsKarutanMap())
                 StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
-            if (World != WD_80KARUTAN1)
+            if (gMapManager.WorldActive != WD_80KARUTAN1)
                 StopBuffer(SOUND_KARUTAN_INSECT_ENV, true);
-            if (World != WD_81KARUTAN2)
+            if (gMapManager.WorldActive != WD_81KARUTAN2)
                 StopBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, true);
 #endif	// ASG_ADD_MAP_KARUTAN
 
@@ -2770,10 +2761,54 @@ float g_Luminosity;
 extern int g_iNoMouseTime;
 extern GLvoid KillGLWindow(GLvoid);
 
-void Scene(HDC hDC)
+void WaitForNextActivity(bool usePreciseSleep)
 {
-    g_render_lock->lock();
-    wglMakeCurrent(hDC, g_hRC);
+    // We only sleep when we have enough time to sleep and have some additional rest time.
+    const auto current_frame_time_ms = current_tick_count - last_render_tick_count;
+    const auto current_ms_per_frame = ms_per_frame;
+    if (current_ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < current_ms_per_frame)
+    {
+        const auto sleep_threshold_ms = usePreciseSleep? 4.0 : 16.0;
+        const auto sleep_duration_offset_ms = usePreciseSleep? 1.0 : 4.0;
+        const auto max_sleep_ms = 10.0;
+        const auto rest_ms = current_ms_per_frame - current_frame_time_ms;
+
+        if (rest_ms - sleep_duration_offset_ms > sleep_threshold_ms)
+        {
+            const auto sleep_ms = min(rest_ms - sleep_duration_offset_ms, max_sleep_ms);
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
+        }
+        else
+        {
+            std::this_thread::yield();
+        }
+    }
+    else
+    {
+        std::this_thread::yield();
+    }
+}
+
+bool CheckRenderNextFrame()
+{
+    current_tick_count = g_pTimer->GetTimeElapsed();
+    const auto current_frame_time_ms = current_tick_count - last_render_tick_count;
+
+    if (current_frame_time_ms >= ms_per_frame)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void RenderScene(HDC hDC)
+{
+    CalcFPS();
+    UpdateSceneState();
+
+    last_render_tick_count = current_tick_count;
+
     try
     {
         g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
@@ -2805,9 +2840,6 @@ void Scene(HDC hDC)
     catch (const std::exception&)
     {
     }
-
-    wglMakeCurrent(nullptr, nullptr);
-    g_render_lock->unlock();
 }
 
 bool GetTimeCheck(int DelayTime)

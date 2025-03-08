@@ -13,10 +13,10 @@ bool    RenderWaterTerrain(void);
 void    DeleteWaterTerrain(void);
 void    RenderWaterTerrain(int Texture, float xf, float yf, float SizeX, float SizeY, vec3_t Light, float Rotation = 0.f, float Alpha = 1.f, float Height = 0.f);
 void    SettingHellasColor(void);
-BYTE    GetHellasLevel(int Class, int Level);
+BYTE    GetHellasLevel(CLASS_TYPE Class, int Level);
 bool    GetUseLostMap(bool bDrawAlert = false);
 int     RenderHellasItemInfo(ITEM* ip, int textNum);
-bool	EnableKalima(int Class, int Level, int ItemLevel);
+bool	EnableKalima(CLASS_TYPE Class, int Level, int ItemLevel);
 
 void    AddObjectDescription(wchar_t* Text, vec3_t position);
 void    RenderObjectDescription(void);
@@ -38,7 +38,7 @@ void    CreateMonsterSkill_Summon(OBJECT* o, int AttackTime, BYTE time);
 
 void    SetActionDestroy_Def(OBJECT* o);
 void    RenderDestroy_Def(OBJECT* o, BMD* b);
-CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key);
+CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, int Key);
 
 bool    SettingHellasMonsterLinkBone(CHARACTER* c, int Type);
 

@@ -12,6 +12,7 @@ DWORD GetGuildRelationShipTextColor(BYTE GuildRelationShip);
 DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip);
 
 CHARACTER* FindCharacterByID(wchar_t* szName);
+CHARACTER* FindCharacterByKey(int Key);
 
 void CreateMonsterServer(int Type, vec3_t Position, vec3_t Angle, int Level = 0);
 void CreateWeapon(int Type, int Level, CHARACTER* c, int Hand);
@@ -36,6 +37,7 @@ void ClientSendMonsterHit(CHARACTER* cc, int AttackPoint);
 void ClientSendPositionPacket(CHARACTER* c);
 void ClientSendPathPacket(unsigned short ID, unsigned char* PathX, unsigned char* PathY, unsigned char PathNum);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
+void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr, OBJECT* pHelper = nullptr);
 void ClearCharacters(int Key = -1);
 void DeleteCharacter(int Key);
 void DeleteCharacter(CHARACTER* c, OBJECT* o);
@@ -50,9 +52,9 @@ void SetAllAction(int Action);
 void ReleaseCharacters(void);
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation = 0.f);
 CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation = 0.f);
-CHARACTER* CreateHero(int Key, int Class = 0, int Skin = 0, float x = 0.f, float y = 0.f, float Ratate = 0.f);
-CHARACTER* CreateMonster(int Type, int PositionX, int PositionY, int Key = 0);
-CHARACTER* CreateHellGate(char* ID, int Key, int Index, int x, int y, int CreateFlag);
+CHARACTER* CreateHero(int Key, CLASS_TYPE Class, int Skin = 0, float x = 0.f, float y = 0.f, float Rotation = 0.f);
+CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Key = 0);
+CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, int CreateFlag);
 
 void SetAttackSpeed();
 void SetPlayerShock(CHARACTER* c, int Hit);
@@ -86,7 +88,11 @@ extern int       EquipmentLevelSet;
 extern bool      g_bAddDefense;
 
 void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle, int SubType = 0, OBJECT* Target = NULL, float Scale = 10.f, short PK = -1, WORD SkillIndex = 0, WORD SkillSerialNum = 0, int iChaIndex = -1, const float* vColor = NULL, short int sTargetIndex = -1);
+void CreateJointFpsChecked(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle, int SubType = 0, OBJECT* Target = NULL, float Scale = 10.f, short PK = -1, WORD SkillIndex = 0, WORD SkillSerialNum = 0, int iChaIndex = -1, const float* vColor = NULL, short int sTargetIndex = -1);
 bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate);
 bool IsBackItem(CHARACTER* c, int iType);
+
+bool IsPlayer(CHARACTER* c);
+bool IsMonster(CHARACTER* c);
 
 #endif

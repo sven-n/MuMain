@@ -5,8 +5,10 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
 
+#include <dpapi.h>
 #include <locale.h>
 #include <zmouse.h>
+#include <cmath>
 #include "UIWindows.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
@@ -33,8 +35,10 @@
 #include "./ExternalObject/leaf/ExceptionHandler.h"
 #include "./Utilities/Dump/CrashReporter.h"
 #include "./Utilities/Log/muConsoleDebug.h"
+#include "./Utilities/CpuUsage.h"
 #include "ProtocolSend.h"
 #include "ProtectSysKey.h"
+#include "MUHelper/MuHelper.h"
 
 #include "CBTMessageBox.h"
 #include "./ExternalObject/leaf/regkey.h"
@@ -45,7 +49,6 @@
 #include "Input.h"
 #include "./Time/Timer.h"
 #include "UIMng.h"
-#include "./Dotnet/DotNetRuntime.h"
 
 #ifdef MOVIE_DIRECTSHOW
 #include <dshow.h>
@@ -92,7 +95,7 @@ HFONT     g_hFontBold = NULL;
 HFONT     g_hFontBig = NULL;
 HFONT     g_hFixFont = NULL;
 
-CTimer* g_pTimer = NULL;	// performance counter.
+CTimer* g_pTimer = new CTimer();    // performance counter.
 bool      Destroy = false;
 bool      ActiveIME = false;
 
@@ -109,7 +112,7 @@ CErrorReport g_ErrorReport;
 BOOL g_bMinimizedEnabled = FALSE;
 int g_iScreenSaverOldValue = 60 * 15;
 
-extern float g_fScreenRate_x;	// ¡Ø
+extern float g_fScreenRate_x;	// â€»
 extern float g_fScreenRate_y;
 
 #if defined USER_WINDOW_MODE || (defined WINDOWMODE)
@@ -405,8 +408,6 @@ void DestroyWindow()
 
     ReleaseCharacters();
 
-    delete path;
-
     SAFE_DELETE(GateAttribute);
 
     SAFE_DELETE(SkillAttribute);
@@ -485,7 +486,6 @@ int g_iMousePopPosition_y = 0;
 
 extern int TimeRemain;
 extern bool EnableFastInput;
-void MainScene(HDC hDC);
 
 LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -562,6 +562,11 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         }
         break;
+    case WM_RECEIVE_BUFFER: {
+        auto Packet = std::unique_ptr<PacketInfo>(reinterpret_cast<PacketInfo*>(wParam));
+        ProcessPacketCallback(Packet.release());
+        break;
+    }
     case WM_USER_MEMORYHACK:
         //SetTimer( g_hWnd, WINDOWMINIMIZED_TIMER, 1*1000, NULL);
         KillGLWindow();
@@ -599,6 +604,7 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (SocketClient != nullptr)
             {
                 SocketClient->Close();
+                g_bGameServerConnected = false;
             }
 
             CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
@@ -627,6 +633,7 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         if (SocketClient != nullptr)
         {
             SocketClient->Close();
+            g_bGameServerConnected = false;
         }
 
         DestroySound();
@@ -888,12 +895,15 @@ HWND StartWindow(HINSTANCE hInstance, int nCmdShow)
 }
 
 wchar_t m_ID[11];
+wchar_t m_Password[21];
+char m_EncryptedPassword[262];
 wchar_t m_Version[11];
 wchar_t m_ExeVersion[11];
 int  m_SoundOnOff;
 int  m_MusicOnOff;
 int  m_Resolution;
 int	m_nColorDepth;
+int m_RememberMe;
 int	g_iRenderTextType = 0;
 
 wchar_t g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = { '\0' };
@@ -951,20 +961,40 @@ BOOL OpenInitFile()
     //#ifdef _DEBUG
 
     m_ID[0] = '\0';
+    m_Password[0] = '\0';
     m_SoundOnOff = 1;
     m_MusicOnOff = 1;
     m_Resolution = 0;
     m_nColorDepth = 0;
+    m_RememberMe = 0;
 
     HKEY hKey;
     DWORD dwDisp;
     DWORD dwSize;
     if (ERROR_SUCCESS == RegCreateKeyEx(HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
     {
-        dwSize = 11;
+        dwSize = sizeof(m_ID);
         if (RegQueryValueEx(hKey, L"ID", 0, NULL, (LPBYTE)m_ID, &dwSize) != ERROR_SUCCESS)
         {
         }
+        dwSize = sizeof(m_EncryptedPassword);
+        if (RegQueryValueEx(hKey, L"Password", 0, NULL, (LPBYTE)m_EncryptedPassword, &dwSize) != ERROR_SUCCESS)
+        {
+        }
+        else
+        {
+            DATA_BLOB dataIn;
+            DATA_BLOB dataOut;
+            dataIn.pbData = (BYTE*)m_EncryptedPassword;
+            dataIn.cbData = dwSize;
+
+            if (CryptUnprotectData(&dataIn, NULL, NULL, NULL, NULL, 0, &dataOut))
+            {
+                wcscpy(m_Password, (wchar_t*)dataOut.pbData);
+                LocalFree(dataOut.pbData);
+            }
+        }
+
         dwSize = sizeof(int);
         if (RegQueryValueEx(hKey, L"SoundOnOff", 0, NULL, (LPBYTE)&m_SoundOnOff, &dwSize) != ERROR_SUCCESS)
         {
@@ -982,9 +1012,15 @@ BOOL OpenInitFile()
         if (0 == m_Resolution)
             m_Resolution = 1;
 
+        dwSize = sizeof(int);
         if (RegQueryValueEx(hKey, L"ColorDepth", 0, NULL, (LPBYTE)&m_nColorDepth, &dwSize) != ERROR_SUCCESS)
         {
             m_nColorDepth = 0;
+        }
+        dwSize = sizeof(int);
+        if (RegQueryValueEx(hKey, L"RememberMe", 0, NULL, (LPBYTE)&m_RememberMe, &dwSize) != ERROR_SUCCESS)
+        {
+            m_RememberMe = 0;
         }
         dwSize = sizeof(int);
         if (RegQueryValueEx(hKey, L"TextOut", 0, NULL, (LPBYTE)&g_iRenderTextType, &dwSize) != ERROR_SUCCESS)
@@ -1067,43 +1103,36 @@ BOOL OpenInitFile()
     return TRUE;
 }
 
-BOOL Util_CheckOption(wchar_t* lpszCommandLine, wchar_t cOption, wchar_t* lpszString)
+BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring& lpszString)
 {
-    wchar_t cComp[2];
-    cComp[0] = cOption; cComp[1] = cOption;
-    if (islower((int)cOption))
-    {
-        cComp[1] = toupper((int)cOption);
-    }
-    else if (isupper((int)cOption))
-    {
-        cComp[1] = tolower((int)cOption);
+    if (lpszCommandLine.empty()) {
+        return FALSE;
     }
 
-    const wchar_t nFind = L'/';
-    auto* lpFound = lpszCommandLine;
-    while (lpFound)
+    // Create both lowercase and uppercase variants of the option character
+    std::wstring cOptionLower = L"/";
+    cOptionLower += towlower(static_cast<wint_t>(cOption));
+    auto foundIndex = lpszCommandLine.find(cOptionLower);
+    if (foundIndex == std::wstring::npos)
     {
-        lpFound = wcschr(lpFound + 1, nFind);
-        if (lpFound && (*(lpFound + 1) == cComp[0] || *(lpFound + 1) == cComp[1]))
-        {
-            if (lpszString)
-            {
-                int nCount = 0;
-                for (wchar_t* lpSeek = lpFound + 2; *lpSeek != L' ' && *lpSeek != L'\0'; lpSeek++)
-                {
-                    nCount++;
-                }
-
-                wcscpy_s(lpszString, nCount, lpFound + 2);
-                lpszString[nCount] = L'\0';
-            }
-
-            return (TRUE);
-        }
+        std::wstring cOptionUpper = L"/";
+        cOptionUpper += towupper(static_cast<wint_t>(cOption));
+        foundIndex = lpszCommandLine.find(cOptionUpper);
     }
 
-    return (FALSE);
+    if (foundIndex == std::wstring::npos)
+    {
+        return FALSE;
+    }
+
+    auto endIndex = lpszCommandLine.find(L' ', foundIndex);
+    if (endIndex == std::wstring::npos)
+    {
+        endIndex = lpszCommandLine.length();
+    }
+
+    lpszString = lpszCommandLine.substr(foundIndex + 2, endIndex - foundIndex - 2);
+    return TRUE;
 }
 
 BOOL UpdateFile(wchar_t* lpszOld, wchar_t* lpszNew)
@@ -1114,7 +1143,7 @@ BOOL UpdateFile(wchar_t* lpszOld, wchar_t* lpszNew)
     DWORD dwStartTickCount = ::GetTickCount();
     while (::GetTickCount() - dwStartTickCount < 5000) {
         if (CopyFile(lpszOld, lpszNew, FALSE))
-        {	// ¼º°ø
+        {	// ì„±ê³µ
             DeleteFile(lpszOld);
             return (TRUE);
         }
@@ -1174,37 +1203,22 @@ BOOL KillExeProcess(wchar_t* lpszExe)
 wchar_t g_lpszCmdURL[50];
 BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
 {
-    wchar_t lpszTemp[256] = { 0, };
-    if (Util_CheckOption(szCmdLine, L'y', lpszTemp))
-    {
-        BYTE bySuffle[] = { 0x0C, 0x07, 0x03, 0x13 };
+    std::wstring lpszTemp = { 0, };
 
-        for (int i = 0; i < (int)wcslen(lpszTemp); i++)
-            lpszTemp[i] -= bySuffle[i % 4];
-        wcscpy(lpszURL, lpszTemp);
-
-        if (Util_CheckOption(szCmdLine, L'z', lpszTemp))
-        {
-            for (int j = 0; j < (int)wcslen(lpszTemp); j++)
-                lpszTemp[j] -= bySuffle[j % 4];
-            *pwPort = _wtoi(lpszTemp);
-        }
-
-        g_ErrorReport.Write(L"[Virtual Connection] Connect IP : %s, Port : %d\r\n", lpszURL, *pwPort);
-        return (TRUE);
-    }
     if (!Util_CheckOption(szCmdLine, L'u', lpszTemp))
     {
-        return (FALSE);
+        return FALSE;
     }
-    wcscpy(lpszURL, lpszTemp);
+
+    wcscpy(lpszURL, lpszTemp.c_str());
     if (!Util_CheckOption(szCmdLine, L'p', lpszTemp))
     {
-        return (FALSE);
+        return FALSE;
     }
-    *pwPort = _wtoi(lpszTemp);
 
-    return (TRUE);
+    *pwPort = static_cast<WORD>(std::stoi(lpszTemp));
+
+    return TRUE;
 }
 
 extern int TimeRemain;
@@ -1224,28 +1238,97 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
     return true;
 }
 
+double CPU_AVG = 0.0;
+void RecordCpuUsage() 
+{
+    constexpr int max_recordings = 60;
+    double CPU_Recordings[max_recordings] = { 0.0 };
+    double currentAvg = 0.0;
+    double sum = 0.0;
+    int count = 0;
+    int numFilled = 0;
+    auto lastUpdateTime = std::chrono::steady_clock::now();
+
+    while (!Destroy) 
+    {
+        double currentUsage = CpuUsage::Instance()->GetUsage();
+
+        currentUsage = max(0.0, min(100.0, currentUsage));
+
+        // Subtract the old value to maintain the sum
+        sum -= CPU_Recordings[count];
+
+        sum += currentUsage;
+
+        CPU_Recordings[count] = currentUsage;
+
+        // Update the count (wrap around when full - FIFO behavior)
+        count = (count + 1) % max_recordings;
+
+        if (numFilled < max_recordings)
+        {
+            numFilled++;
+        }
+
+        // Calculate the current average
+        currentAvg = sum / numFilled;
+
+        // Update the CPU_AVG every 250 ms
+        auto currentTime = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastUpdateTime).count() >= 250)
+        {
+            CPU_AVG = currentAvg;
+            lastUpdateTime = currentTime;
+        }
+
+        // Sleep to match a 60Hz frame rate as the basis
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    }
+}
+
+// unlimited as default (same behavior as original)
+int g_MaxMessagePerCycle = -1; 
+
+void SetMaxMessagePerCycle(int messages)
+{
+    constexpr int custom_min = 3;
+    g_MaxMessagePerCycle = (messages > 0) ? max(messages, custom_min) : messages;
+}
+
 MSG MainLoop()
 {
     MSG msg;
+
+    constexpr auto target_resolution = 1;
+    auto precise = timeBeginPeriod(target_resolution);
+
     while (1)
     {
-        if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+        int messageProcessed = 0;
+
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
-            if (!GetMessage(&msg, NULL, 0, 0))
+            if (msg.message == WM_QUIT)
             {
-                break;
+                return msg;
             }
 
             TranslateMessage(&msg);
             DispatchMessage(&msg);
+            ++messageProcessed;
+
+            if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
+            {
+                break;
+            }
         }
-        else
+
+        if (CheckRenderNextFrame())
         {
-            //Scene
 #if (defined WINDOWMODE)
             if (g_bUseWindowMode || g_bWndActive)
             {
-                Scene(g_hDC);
+                RenderScene(g_hDC);
             }
 #ifndef FOR_WORK
             else if (g_bUseWindowMode == FALSE)
@@ -1270,11 +1353,23 @@ MSG MainLoop()
 #endif//FOR_WORK
 #else//WINDOWMODE
             if (g_bWndActive)
-                Scene(g_hDC);
-
+                RenderScene(g_hDC);
 #endif	//WINDOWMODE(#else)
         }
+        else
+        {
+            if (!PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+            {
+                WaitForNextActivity(precise == TIMERR_NOERROR);
+            }
+        }
+
     } // while( 1 )
+
+    if (precise == TIMERR_NOERROR)
+    {
+        timeEndPeriod(target_resolution);
+    }
 
     return msg;
 }
@@ -1404,29 +1499,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     //g_ErrorReport.WriteImeInfo( g_hWnd);
     g_ErrorReport.AddSeparator();
 
-    if (g_dotnet->is_initialized())
+    InitVSync();
+    if (IsVSyncAvailable())
     {
-        g_ErrorReport.Write(L".net runtime loaded :)");
-    }
-    else
-    {
-        g_ErrorReport.Write(L".net runtime failed to load :(L");
+        EnableVSync();
+        SetTargetFps(-1); // unlimited
     }
 
-    switch (WindowHeight)
-    {
-        case 480:FontHeight = 13; break;
-        case 600:FontHeight = 14; break;
-        case 768:FontHeight = 16; break;
-        case 900:FontHeight = 16; break;
-        case 1024:FontHeight = 16; break;
-        case 1050:FontHeight = 17; break;
-        case 1080: FontHeight = 17; break;
-        case 1200: FontHeight = 18; break;
-        case 1280: FontHeight = 18; break;
-        case 1400: FontHeight = 19; break;
-        case 1440: FontHeight = 20; break;
-    }
+    FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));
 
     int nFixFontHeight = WindowHeight <= 600 ? 14 : 15;
     int nFixFontSize;
@@ -1471,6 +1551,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     }
 
     SetTimer(g_hWnd, HACK_TIMER, 20 * 1000, NULL);
+    SetTimer(g_hWnd, MUHELPER_TIMER, 250 /* ms */, MUHelper::CMuHelper::TimerProc);
 
     srand((unsigned)time(NULL));
     for (int i = 0; i < 100; i++)
@@ -1509,7 +1590,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     g_pUIManager = new CUIManager;
     g_pUIMapName = new CUIMapName;	// rozy
-    g_pTimer = new CTimer();
 
 #ifdef MOVIE_DIRECTSHOW
     g_pMovieScene = new CMovieScene;
@@ -1557,10 +1637,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (g_bUseWindowMode == FALSE)
     {
 #endif	// ACTIVE_FOCUS_OUT
-        int nOldVal; // °ªÀÌ µé¾î°¥ ÇÊ¿ä°¡ ¾øÀ½
-        SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1, &nOldVal, 0);  // ´ÜÃàÅ°¸¦ ¸ø¾²°Ô ÇÔ
-        SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);  // ½ºÅ©¸°¼¼ÀÌ¹ö Â÷´Ü
-        SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300 * 60, NULL, 0);  // ½ºÅ©¸°¼¼ÀÌ¹ö Â÷´Ü
+        int nOldVal; // ê°’ì´ ë“¤ì–´ê°ˆ í•„ìš”ê°€ ì—†ìŒ
+        SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1, &nOldVal, 0);  // ë‹¨ì¶•í‚¤ë¥¼ ëª»ì“°ê²Œ í•¨
+        SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);  // ìŠ¤í¬ë¦°ì„¸ì´ë²„ ì°¨ë‹¨
+        SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300 * 60, NULL, 0);  // ìŠ¤í¬ë¦°ì„¸ì´ë²„ ì°¨ë‹¨
 #ifdef ACTIVE_FOCUS_OUT
     }
 #endif	// ACTIVE_FOCUS_OUT
@@ -1574,6 +1654,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #endif // !FOR_WORK
 #endif // PROTECT_SYSTEMKEY && NDEBUG
 
+    std::thread cpuUsageRecorder(RecordCpuUsage);
     const MSG msg = MainLoop();
 
     DestroyWindow();

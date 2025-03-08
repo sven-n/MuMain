@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "NewUIChatInputBox.h"
 
 #include "DSPlaySound.h"
@@ -548,7 +548,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                     }
                     else
                     {
-                        if (Hero->SafeZone || (Hero->Helper.Type != MODEL_HELPER + 2 && Hero->Helper.Type != MODEL_HELPER + 3 && Hero->Helper.Type != MODEL_HELPER + 4 && Hero->Helper.Type != MODEL_HELPER + 37))
+                        if (Hero->SafeZone || (Hero->Helper.Type != MODEL_HORN_OF_UNIRIA && Hero->Helper.Type != MODEL_HORN_OF_DINORANT && Hero->Helper.Type != MODEL_DARK_HORSE_ITEM && Hero->Helper.Type != MODEL_HORN_OF_FENRIR))
                         {
                             CheckChatText(szChatText);
                         }

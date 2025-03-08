@@ -7,6 +7,7 @@
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "MapManager.h"
+#include "MUHelper/MuHelper.h"
 
 using namespace SEASON3B;
 
@@ -132,7 +133,8 @@ bool CNewUIHeroPositionInfo::BtnProcess()
 
     if (m_BtnStart.UpdateMouseEvent())
     {
-        // todo: start mu helper when it's implemented :)
+        MUHelper::g_MuHelper.Toggle();
+
         PlayBuffer(SOUND_CLICK01);
         return true;
     }
@@ -192,7 +194,7 @@ bool CNewUIHeroPositionInfo::Render()
     //--
     m_BtnConfig.Render();
 
-    m_BtnStart.Render();
+    MUHelper::g_MuHelper.IsActive() ? m_BtnStop.Render() : m_BtnStart.Render();
     //--
     swprintf(szText, L"%s (%d , %d)", gMapManager.GetMapName(gMapManager.WorldActive), m_CurHeroPosition.x, m_CurHeroPosition.y);
 

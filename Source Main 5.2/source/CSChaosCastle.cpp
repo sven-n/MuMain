@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////
 //  CSChaosCastle.cpp
 //////////////////////////////////////////////////////////////////////////
 
@@ -41,10 +41,10 @@ void    ClearChaosCastleHelper(CHARACTER* c)
     c->Helper.Level = 0;
     c->Weapon[0].Type = -1;
     c->Weapon[0].Level = 0;
-    c->Weapon[0].Option1 = 0;
+    c->Weapon[0].ExcellentFlags = 0;
     c->Weapon[1].Type = -1;
     c->Weapon[1].Level = 0;
-    c->Weapon[1].Option1 = 0;
+    c->Weapon[1].ExcellentFlags = 0;
 #ifdef LJW_FIX_MANY_FLAG_DISAPPEARED_PROBREM
     c->EtcPart = PARTS_NONE;
 #endif
@@ -71,19 +71,19 @@ void    ChangeChaosCastleUnit(CHARACTER* c)
 
     if (Class == CLASS_KNIGHT || Class == CLASS_DARK || Class == CLASS_DARK_LORD || Class == CLASS_RAGEFIGHTER)
     {
-        c->Weapon[0].Type = MODEL_SWORD + 16;
+        c->Weapon[0].Type = MODEL_SWORD_OF_DESTRUCTION;
         c->Weapon[0].Level = 0;
-        c->Weapon[1].Type = MODEL_SWORD + 16;
+        c->Weapon[1].Type = MODEL_SWORD_OF_DESTRUCTION;
         c->Weapon[1].Level = 0;
     }
     else if (Class == CLASS_ELF)
     {
-        c->Weapon[0].Type = MODEL_BOW + 19;
+        c->Weapon[0].Type = MODEL_GREAT_REIGN_CROSSBOW;
         c->Weapon[0].Level = 0;
     }
     else if (Class == CLASS_WIZARD || Class == CLASS_SUMMONER)
     {
-        c->Weapon[0].Type = MODEL_STAFF + 5;
+        c->Weapon[0].Type = MODEL_LEGENDARY_STAFF;
         c->Weapon[0].Level = 0;
     }
 }
@@ -452,7 +452,8 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
                 CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL, 60.f + rand() % 10);
 
                 int randValue = rand() % 2;
-                PlayBuffer(SOUND_CHAOS_THUNDER01 + randValue);
+                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + randValue));
+                o->LifeTime = 9.9f;
             }
 
             if (o->LifeTime < 5)
@@ -524,7 +525,7 @@ void RenderTerrainVisual(int xi, int yi)
         Position[0] = (xi * TERRAIN_SCALE) + (rand() % 30 - 15.f);
         Position[1] = (yi * TERRAIN_SCALE) + (rand() % 30 - 15.f);
         Position[2] = Hero->Object.Position[2];
-        CreateParticle(BITMAP_SMOKE + 4, Position, Angle, Light, 0, 1.5f);
+        CreateParticleFpsChecked(BITMAP_SMOKE + 4, Position, Angle, Light, 0, 1.5f);
 
         if (rand_fps_check(5))
         {

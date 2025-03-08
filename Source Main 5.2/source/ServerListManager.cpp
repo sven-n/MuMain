@@ -120,7 +120,7 @@ void CServerListManager::InsertServerGroup(int iConnectIndex, int iServerPercent
     bool bEqual = false;
     while (iterServerGroup != m_mapServerGroup.end())
     {
-        if ((iterServerGroup->second)->m_iServerIndex == iConnectIndex / 20)
+        if ((iterServerGroup->second)->m_iServerIndex == iConnectIndex / MAX_SERVER_PER_GROUP)
         {
             bEqual = true;
             break;
@@ -137,7 +137,7 @@ void CServerListManager::InsertServerGroup(int iConnectIndex, int iServerPercent
     {
         pServerGroup = new CServerGroup;
 
-        if (MakeServerGroup(iConnectIndex / 20, pServerGroup) == false)
+        if (MakeServerGroup(iConnectIndex / MAX_SERVER_PER_GROUP, pServerGroup) == false)
             return;
 
         m_mapServerGroup.insert(type_mapServerGroup::value_type(pServerGroup->m_iSequence, pServerGroup));
@@ -167,7 +167,7 @@ bool CServerListManager::MakeServerGroup(IN int iServerGroupIndex, OUT CServerGr
         if (0x01 & pServerGroup->m_abyNonPvpServer[i])
             pServerGroup->m_bPvPServer = false;
     }
-    for (; i < MAX_SERVER_LOW; ++i)
+    for (; i < MAX_SERVER_PER_GROUP; ++i)
         pServerGroup->m_abyNonPvpServer[i] = 0;
 
     return true;
@@ -177,7 +177,7 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
 {
     auto* pServerInfo = new CServerInfo;
     pServerInfo->m_iSequence = pServerGroup->GetServerSize();
-    pServerInfo->m_iIndex = (iConnectIndex % 20) + 1;
+    pServerInfo->m_iIndex = (iConnectIndex % MAX_SERVER_PER_GROUP) + 1;
     pServerInfo->m_iConnectIndex = iConnectIndex;
     pServerInfo->m_iPercent = iServerPercent;
     pServerInfo->m_byNonPvP = pServerGroup->m_abyNonPvpServer[pServerInfo->m_iIndex - 1];

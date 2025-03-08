@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "SocketSystem.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "ZzzInventory.h"
@@ -45,27 +45,27 @@ BOOL CSocketItemMgr::IsSocketItem(int iItemType)
 {
     switch (iItemType)
     {
-    case ITEM_SWORD + 26:
-    case ITEM_SWORD + 27:
-    case ITEM_SWORD + 28:
-    case ITEM_MACE + 16:
-    case ITEM_MACE + 17:
-    case ITEM_BOW + 23:
-    case ITEM_STAFF + 30:
-    case ITEM_STAFF + 31:
+    case ITEM_FLAMBERGE:
+    case ITEM_SWORD_BREAKER:
+    case ITEM_IMPERIAL_SWORD:
+    case ITEM_FROST_MACE:
+    case ITEM_ABSOLUTE_SCEPTER:
+    case ITEM_STINGER_BOW:
+    case ITEM_DEADLY_STAFF:
+    case ITEM_IMPERIAL_STAFF:
     case ITEM_STAFF + 32:
-    case ITEM_SHIELD + 17:
-    case ITEM_SHIELD + 18:
-    case ITEM_SHIELD + 19:
-    case ITEM_SHIELD + 20:
-    case ITEM_HELM + 45: case ITEM_ARMOR + 45: case ITEM_PANTS + 45: case ITEM_GLOVES + 45: case ITEM_BOOTS + 45:
-    case ITEM_HELM + 46: case ITEM_ARMOR + 46: case ITEM_PANTS + 46: case ITEM_GLOVES + 46: case ITEM_BOOTS + 46:
-    case ITEM_HELM + 47: case ITEM_ARMOR + 47: case ITEM_PANTS + 47: case ITEM_GLOVES + 47: case ITEM_BOOTS + 47:
-    case ITEM_HELM + 48: case ITEM_ARMOR + 48: case ITEM_PANTS + 48: case ITEM_GLOVES + 48: case ITEM_BOOTS + 48:
-    case ITEM_HELM + 49: case ITEM_ARMOR + 49: case ITEM_PANTS + 49: case ITEM_GLOVES + 49: case ITEM_BOOTS + 49:
-    case ITEM_HELM + 50: case ITEM_ARMOR + 50: case ITEM_PANTS + 50: case ITEM_GLOVES + 50: case ITEM_BOOTS + 50:
-    case ITEM_HELM + 51: case ITEM_ARMOR + 51: case ITEM_PANTS + 51: case ITEM_GLOVES + 51: case ITEM_BOOTS + 51:
-    case ITEM_HELM + 52: case ITEM_ARMOR + 52: case ITEM_PANTS + 52: case ITEM_GLOVES + 52: case ITEM_BOOTS + 52:
+    case ITEM_CRIMSONGLORY:
+    case ITEM_SALAMANDER_SHIELD:
+    case ITEM_FROST_BARRIER:
+    case ITEM_GUARDIAN_SHILED:
+    case ITEM_TITAN_HELM: case ITEM_TITAN_ARMOR: case ITEM_TITAN_PANTS: case ITEM_TITAN_GLOVES: case ITEM_TITAN_BOOTS:
+    case ITEM_BRAVE_HELM: case ITEM_BRAVE_ARMOR: case ITEM_BRAVE_PANTS: case ITEM_BRAVE_GLOVES: case ITEM_BRAVE_BOOTS:
+    case ITEM_HELM + 47: case ITEM_DESTORY_ARMOR: case ITEM_DESTORY_PANTS: case ITEM_DESTORY_GLOVES: case ITEM_DESTORY_BOOTS:
+    case ITEM_HELM + 48: case ITEM_PHANTOM_ARMOR: case ITEM_PHANTOM_PANTS: case ITEM_PHANTOM_GLOVES: case ITEM_PHANTOM_BOOTS:
+    case ITEM_SERAPHIM_HELM: case ITEM_SERAPHIM_ARMOR: case ITEM_SERAPHIM_PANTS: case ITEM_SERAPHIM_GLOVES: case ITEM_SERAPHIM_BOOTS:
+    case ITEM_FAITH_HELM: case ITEM_FAITH_ARMOR: case ITEM_FAITH_PANTS: case ITEM_FAITH_GLOVES: case ITEM_FAITH_BOOTS:
+    case ITEM_PAEWANG_MASK: case ITEM_PAEWANG_ARMOR: case ITEM_PAEWANG_PANTS: case ITEM_PAEWANG_GLOVES: case ITEM_PHAEWANG_BOOTS:
+    case ITEM_HADES_HELM: case ITEM_HADES_ARMOR: case ITEM_HADES_PANTS: case ITEM_HADES_GLOVES: case ITEM_HADES_BOOTS:
     case ITEM_HELM + 53: case ITEM_ARMOR + 53: case ITEM_PANTS + 53: case ITEM_GLOVES + 53: case ITEM_BOOTS + 53:
         return TRUE;
     default:
@@ -86,10 +86,10 @@ int CSocketItemMgr::GetSeedShpereSeedID(const ITEM* pItem)
 {
     BYTE bySocketSeedID = SOCKET_EMPTY;
 
-    if (pItem->Type >= ITEM_WING + 100 && pItem->Type <= ITEM_WING + 129)
+    if (pItem->Type >= ITEM_SEED_SPHERE_FIRE_1 && pItem->Type <= ITEM_SEED_SPHERE_EARTH_5)
     {
-        int iCategoryIndex = (pItem->Type - (ITEM_WING + 100)) % 6 + 1;
-        int iLevel = (pItem->Level >> 3) & 15;
+        int iCategoryIndex = (pItem->Type - (ITEM_SEED_SPHERE_FIRE_1)) % 6 + 1;
+        int iLevel = pItem->Level;
         switch (iCategoryIndex)
         {
         case 1:	// 0~9
@@ -116,17 +116,9 @@ int CSocketItemMgr::GetSeedShpereSeedID(const ITEM* pItem)
     return bySocketSeedID;
 }
 
-#ifdef KJW_FIX_SOCKET_BONUS_BIT_OPERATION
 __int64 CSocketItemMgr::CalcSocketBonusItemValue(const ITEM* pItem, __int64 iOrgGold)
-#else // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
-int CSocketItemMgr::CalcSocketBonusItemValue(const ITEM* pItem, int iOrgGold)
-#endif // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
 {
-#ifdef KJW_FIX_SOCKET_BONUS_BIT_OPERATION
     __int64 iGoldResult = 0;
-#else // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
-    int iGoldResult = 0;
-#endif // KJW_FIX_SOCKET_BONUS_BIT_OPERATION
 
     if (IsSocketItem(pItem))
     {
@@ -145,7 +137,7 @@ int CSocketItemMgr::CalcSocketBonusItemValue(const ITEM* pItem, int iOrgGold)
             else if (pItem->SocketSeedID[i] >= 29 && pItem->SocketSeedID[i] <= 33) iSeedSphereType = 4;
             else if (pItem->SocketSeedID[i] >= 34 && pItem->SocketSeedID[i] <= 40) iSeedSphereType = 5;
 
-            TempSeedSphere.Type = ITEM_WING + 100 + (pItem->SocketSphereLv[i] - 1) * MAX_SOCKET_TYPES + iSeedSphereType;
+            TempSeedSphere.Type = ITEM_SEED_SPHERE_FIRE_1 + (pItem->SocketSphereLv[i] - 1) * MAX_SOCKET_TYPES + iSeedSphereType;
             iGoldResult += ItemValue(&TempSeedSphere, 0);
         }
     }
@@ -174,7 +166,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
     }
     case 4:
     {
-        WORD wLifeMax;
+        DWORD wLifeMax;
 
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
             wLifeMax = Master_Level_Data.wMaxLife;
@@ -185,7 +177,7 @@ int CSocketItemMgr::CalcSocketOptionValue(int iOptionType, float fOptionValue)
     }
     case 5:
     {
-        WORD wManaMax;
+        DWORD wManaMax;
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
             wManaMax = Master_Level_Data.wMaxMana;
         else
@@ -241,7 +233,7 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
 
     wchar_t szOptionText[64] = { 0, };
     wchar_t szOptionValueText[16] = { 0, };
-    SOCKET_OPTION_INFO* pInfo = NULL;
+
     for (int i = 0; i < pItem->SocketCount; ++i)
     {
         if (pItem->SocketSeedID[i] == SOCKET_EMPTY)
@@ -256,7 +248,7 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
         }
         else
         {
-            assert(!"¼ÒÄÏ ÀÎµ¦½º ¿¡·¯");
+            assert(!"ì†Œì¼“ ì¸ë±ìŠ¤ ì—ëŸ¬");
         }
 
         swprintf(TextList[iTextNum], GlobalText[2655], i + 1, szOptionText);
@@ -266,20 +258,23 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
 
     if (pItem->SocketSeedSetOption < MAX_SOCKET_OPTION)
     {
-        swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+        SOCKET_OPTION_INFO* pInfo = &m_SocketOptionInfo[SOT_MIX_SET_BONUS_OPTIONS][pItem->SocketSeedSetOption];
+        if (pInfo && pInfo->m_iOptionValue[0] > 0)
+        {
+            swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
-        swprintf(TextList[iTextNum], L"%s", GlobalText[2656]);
-        TextListColor[iTextNum] = TEXT_COLOR_PURPLE;
-        TextBold[iTextNum] = false;
-        ++iTextNum;
-        swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
+            swprintf(TextList[iTextNum], L"%s", GlobalText[2656]);
+            TextListColor[iTextNum] = TEXT_COLOR_PURPLE;
+            TextBold[iTextNum] = false;
+            ++iTextNum;
+            swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
-        pInfo = &m_SocketOptionInfo[SOT_MIX_SET_BONUS_OPTIONS][pItem->SocketSeedSetOption];
-        CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
-        swprintf(TextList[iTextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
-        TextListColor[iTextNum] = TEXT_COLOR_BLUE;
-        TextBold[iTextNum] = false;
-        ++iTextNum;
+            CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
+            swprintf(TextList[iTextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);
+            TextListColor[iTextNum] = TEXT_COLOR_BLUE;
+            TextBold[iTextNum] = false;
+            ++iTextNum;
+        }
     }
     return iTextNum;
 }
@@ -288,9 +283,9 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
 {
     SOCKET_OPTION_INFO* pInfo = NULL;
 
-    if (pItem->Type >= ITEM_WING + 60 && pItem->Type <= ITEM_WING + 65)
+    if (pItem->Type >= ITEM_SEED_FIRE && pItem->Type <= ITEM_SEED_EARTH)
     {
-        int iCategoryIndex = pItem->Type - (ITEM_WING + 60) + 1;
+        int iCategoryIndex = pItem->Type - (ITEM_SEED_FIRE) + 1;
         swprintf(TextList[iTextNum], GlobalText[2653], GlobalText[2640 + iCategoryIndex - 1]);
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
@@ -299,7 +294,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
         swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
         int iSocketSeedID = 0;
-        int iLevel = (pItem->Level >> 3) & 15;
+        int iLevel = pItem->Level;
         switch (iCategoryIndex)
         {
         case 1:	// 0~9
@@ -327,17 +322,17 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
         TextBold[iTextNum] = false;
         ++iTextNum;
     }
-    else if (pItem->Type >= ITEM_WING + 70 && pItem->Type <= ITEM_WING + 74)
+    else if (pItem->Type >= ITEM_SPHERE_MONO && pItem->Type <= ITEM_SPHERE_5)
     {
-        int iSphereLevel = pItem->Type - (ITEM_WING + 70) + 1;
+        int iSphereLevel = pItem->Type - (ITEM_SPHERE_MONO) + 1;
         swprintf(TextList[iTextNum], GlobalText[2654], iSphereLevel);
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
     }
-    else if (pItem->Type >= ITEM_WING + 100 && pItem->Type <= ITEM_WING + 129)
+    else if (pItem->Type >= ITEM_SEED_SPHERE_FIRE_1 && pItem->Type <= ITEM_SEED_SPHERE_EARTH_5)
     {
-        int iCategoryIndex = (pItem->Type - (ITEM_WING + 100)) % 6 + 1;
+        int iCategoryIndex = (pItem->Type - (ITEM_SEED_SPHERE_FIRE_1)) % 6 + 1;
         swprintf(TextList[iTextNum], GlobalText[2653], GlobalText[2640 + iCategoryIndex - 1]);
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
@@ -346,7 +341,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
         swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
         int iSocketSeedID = 0;
-        int iLevel = (pItem->Level >> 3) & 15;
+        int iLevel = pItem->Level;
         switch (iCategoryIndex)
         {
         case 1:	// 0~9
@@ -373,7 +368,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
 
         wchar_t szOptionValueText[16] = { 0, };
 
-        auto fOptionValue = (float)pInfo->m_iOptionValue[(pItem->Type - (ITEM_WING + 100)) / 6];
+        auto fOptionValue = (float)pInfo->m_iOptionValue[(pItem->Type - (ITEM_SEED_SPHERE_FIRE_1)) / 6];
         CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, fOptionValue);
 
         swprintf(TextList[iTextNum], L"%s %s", pInfo->m_szOptionName, szOptionValueText);

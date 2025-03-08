@@ -1,4 +1,4 @@
-// NewUIItemExplanationWindow.cpp: implementation of the CNewUIItemExplanationWindow class.
+﻿// NewUIItemExplanationWindow.cpp: implementation of the CNewUIItemExplanationWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -126,7 +126,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     int iType = 0;
     int TabSpace = 0;
 
-    if (ItemHelp == ITEM_BOW + 7 || ItemHelp == ITEM_BOW + 15)
+    if (ItemHelp == ITEM_BOLT || ItemHelp == ITEM_ARROWS)
     {
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
         return true;
@@ -166,7 +166,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
         return true;
     }
 
-    if (ItemHelp >= ITEM_STAFF + 21 && ItemHelp <= ITEM_STAFF + 29)
+    if (ItemHelp >= ITEM_BOOK_OF_SAHAMUTT && ItemHelp <= ITEM_STAFF + 29)
     {
         iType = 6;
         TabSpace += int(800 / iInfoWidth);//20

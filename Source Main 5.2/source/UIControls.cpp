@@ -1589,7 +1589,8 @@ CUIChatPalListBox::CUIChatPalListBox()
 
 void CUIChatPalListBox::AddText(const wchar_t* pszID, BYTE Number, BYTE Server)
 {
-    if (pszID == L"")	return;
+    if (wcscmp(pszID, L"") == 0)
+        return;
 
     static GUILDLIST_TEXT text;
     text.m_bIsSelected = FALSE;
@@ -1829,6 +1830,7 @@ void CUIWindowListBox::AddText(DWORD dwUIID, const wchar_t* pszTitle, int iStatu
     static WINDOWLIST_TEXT text;
     text.m_bIsSelected = FALSE;
     text.m_dwUIID = dwUIID;
+    memset(text.m_szTitle, 0, sizeof(text.m_szTitle));
     wcsncpy(text.m_szTitle, pszTitle, 64);
     text.m_iStatus = iStatus;
 
@@ -2150,7 +2152,7 @@ BOOL CUILetterListBox::RenderDataLine(int iLineNumber)
 
     wcsncpy(Text, m_TextListIter->m_szID, MAX_TEXT_LENGTH);
     g_pRenderText->RenderText(iPos_x + 4 + GetColumnPos_x(1), iPos_y, Text, GetColumnWidth(1) - 4, 0, RT3_SORT_LEFT_CLIP);
-    wcsncpy(Text, m_TextListIter->m_szDate + 2, MAX_TEXT_LENGTH);
+    wcsncpy(Text, m_TextListIter->m_szDate, MAX_TEXT_LENGTH);
     g_pRenderText->RenderText(iPos_x + GetColumnPos_x(2), iPos_y, Text, GetColumnWidth(2), 0, RT3_SORT_CENTER);
     int iMaxWidth = m_iWidth - m_fScrollBarWidth - GetColumnPos_x(3) - 4;
     g_pRenderText->RenderText(iPos_x + 4 + GetColumnPos_x(3), iPos_y, m_TextListIter->m_szText, iMaxWidth, 0, RT3_SORT_LEFT_CLIP);
@@ -3470,14 +3472,17 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 }
 void CUITextInputBox::Render()
 {
+    m_bIsReady = TRUE;
+    if (m_hEditWnd == nullptr || !IsWindowVisible(m_hEditWnd))
+    {
+        return;
+    }
+
     if (m_bSetText)
     {
         SetWindowTextW(m_hEditWnd, m_sTextToSet.c_str());
         m_bSetText = false;
     }
-
-    m_bIsReady = TRUE;
-    if (m_hEditWnd == nullptr || IsWindowVisible(m_hEditWnd) == FALSE) return;
 
     POINT RealWndPos = { (int)(m_iPos_x * g_fScreenRate_x), (int)(m_iPos_y * g_fScreenRate_y) };
     SIZE RealWndSize = { (int)(m_iWidth * g_fScreenRate_x), (int)(m_iHeight * g_fScreenRate_y) };
@@ -3505,26 +3510,23 @@ void CUITextInputBox::Render()
     const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
     SIZE RealTextLine = { 0, 0 };
 
-    if (m_bUseMultiLine == FALSE)
+    if (!m_bUseMultiLine)
     {
-        wchar_t TextCheck[MAX_TEXT_LENGTH + 1] = { 0, };
-        GetText(TextCheck);
-        wchar_t TextCheckUTF16[MAX_TEXT_LENGTH + 1] = { '\0' };
+        wchar_t TextCheckUTF16[MAX_TEXT_LENGTH + 1] = { };
         GetText(TextCheckUTF16);
         SIZE TextSize;
 
-        if (IsPassword() == FALSE)
+        if (!IsPassword())
         {
             GetTextExtentPoint32(m_hMemDC, TextCheckUTF16, wcslen(TextCheckUTF16), &TextSize);
         }
         else
         {
-            wchar_t szPasswd[MAX_TEXT_LENGTH + 1];
+            wchar_t szPasswd[MAX_TEXT_LENGTH + 1] = { };
             memset(szPasswd, '*', MAX_TEXT_LENGTH);
-            szPasswd[MAX_TEXT_LENGTH] = '\0';
             g_pRenderText->SetFont(g_hFontBold);
 
-            GetTextExtentPoint32(m_hMemDC, szPasswd, wcslen(TextCheck), &TextSize);
+            GetTextExtentPoint32(m_hMemDC, szPasswd, wcslen(TextCheckUTF16), &TextSize);
             g_pRenderText->SetFont(g_hFont);
         }
         RealTextLine.cx = TextSize.cx + m_fCaretWidth;
@@ -4071,13 +4073,13 @@ void CUISlideHelp::Render(BOOL bForceFadeOut)
 
     if (bFadeOut == FALSE)
     {
-        if (m_iAlphaRate < 205) m_iAlphaRate += 30;
-        if (m_iAlphaRate > 205) m_iAlphaRate = 205;
+        m_iAlphaRate += 30.f * FPS_ANIMATION_FACTOR;
+        m_iAlphaRate = std::min<float>(m_iAlphaRate, 205.f);
     }
     else
     {
-        if (m_iAlphaRate > 0) m_iAlphaRate -= 30;
-        if (m_iAlphaRate < 0) m_iAlphaRate = 0;
+        m_iAlphaRate -= 30 * FPS_ANIMATION_FACTOR;
+        m_iAlphaRate = std::max<float>(m_iAlphaRate, 0.f);
     }
 
     if (m_iAlphaRate <= 0)
@@ -4119,12 +4121,16 @@ void CUISlideHelp::Render(BOOL bForceFadeOut)
     g_pRenderText->SetTextColor(m_dwSlideTextColor & 0x00FFFFFF);
 
     BYTE byAlpha = m_dwSlideTextColor >> 24;
-    byAlpha = (float)byAlpha * ((m_iAlphaRate > 180 ? m_iAlphaRate : (m_iAlphaRate - 25 < 0 ? 0 : m_iAlphaRate - 25)) + 50) / 255.0f;
-    if (m_bBlink == TRUE && g_iNoticeInverse % 10 < 5) byAlpha /= 2;
+    byAlpha = static_cast<float>(byAlpha) * ((m_iAlphaRate > 180 ? m_iAlphaRate : (m_iAlphaRate - 25 < 0 ? 0 : m_iAlphaRate - 25)) + 50) / 255.0f;
+    if (const auto frac = WorldTime - static_cast<long>(WorldTime);
+        m_bBlink == TRUE && frac < 0.5)
+    {
+        byAlpha /= 2;
+    }
 
     g_pRenderText->SetTextColor(g_pRenderText->GetTextColor() + (byAlpha << 24));
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_fMovePosition, m_iPos_y, m_pszSlideText);
+    g_pRenderText->RenderText(static_cast<int>(m_fMovePosition), m_iPos_y, m_pszSlideText);
     DisableAlphaBlend();
 
     ComputeSpeed();
@@ -4160,7 +4166,7 @@ void CUISlideHelp::ComputeSpeed()
         m_fMoveAccel = -1.0f;
     }
 
-    m_fMoveSpeed += m_fMoveAccel;
+    m_fMoveSpeed += m_fMoveAccel * FPS_ANIMATION_FACTOR;
     if (m_fMoveSpeed >= m_fMaxMoveSpeed)
     {
         m_fMoveSpeed = m_fMaxMoveSpeed;
@@ -4169,7 +4175,8 @@ void CUISlideHelp::ComputeSpeed()
     {
         m_fMoveSpeed = 0;
     }
-    m_fMovePosition -= m_fMoveSpeed;
+
+    m_fMovePosition -= m_fMoveSpeed * FPS_ANIMATION_FACTOR;
 }
 
 BOOL CUISlideHelp::AddSlideText(const wchar_t* pszNewText, DWORD dwTextColor)
@@ -6523,3 +6530,131 @@ void CRadioButton::RenderImage(GLuint uiImageType, float x, float y, float width
 }
 int CRadioButton::m_nIterIndex = 0;
 #endif //PBG_ADD_INGAMESHOP_UI_ITEMSHOP
+
+
+CUIExtraItemListBox::CUIExtraItemListBox()
+{
+    m_iMaxLineCount = 12;
+    m_iCurrentRenderEndLine = 0;
+    m_iNumRenderLine = 5;
+
+    m_fScrollBarRange_top = 0;
+    m_fScrollBarRange_bottom = 0;
+
+    m_fScrollBarPos_y = 0;
+    m_fScrollBarWidth = 13;
+    m_fScrollBarHeight = 0;
+
+    m_fScrollBarClickPos_y = 0;
+    m_bScrollBtnClick = FALSE;
+    m_bScrollBarClick = FALSE;
+
+    m_bUseSelectLine = TRUE;
+}
+
+void CUIExtraItemListBox::AddText(const wchar_t* pszPattern)
+{
+    if (pszPattern == nullptr || pszPattern[0] == '\0') return;
+
+    static FILTERLIST_TEXT text;
+    wcsncpy(text.m_szPattern, pszPattern, MAX_ITEM_NAME + 1);
+    text.m_bIsSelected = FALSE;
+    m_TextList.push_front(text);
+
+    RemoveText();
+    SLSetSelectLine(0);
+    if (GetLineNum() > m_iNumRenderLine) ++m_iCurrentRenderEndLine;
+
+    if (GetLineNum() < m_iNumRenderLine);
+    else if (GetLineNum() - m_iCurrentRenderEndLine < m_iNumRenderLine)
+        m_iCurrentRenderEndLine = GetLineNum() - m_iNumRenderLine;
+
+    if (m_TextList.size() == 1)
+        SLSetSelectLine(1);
+
+    if (m_TextList.empty() == FALSE)
+    {
+        SLSetSelectLine(GetLineNum());
+        Scrolling(-10000);
+    }
+}
+
+void CUIExtraItemListBox::SetNumRenderLine(int iLine)
+{
+    if (iLine < m_iNumRenderLine && iLine < GetLineNum()) ++m_iCurrentRenderEndLine;
+    else if (iLine > GetLineNum()) m_iCurrentRenderEndLine = 0;
+    m_iNumRenderLine = iLine;
+}
+
+
+void CUIExtraItemListBox::RenderInterface()
+{
+    return;
+}
+
+int CUIExtraItemListBox::GetRenderLinePos_y(int iLineNumber)
+{
+    if (GetLineNum() > m_iNumRenderLine)
+        return (m_iPos_y - m_iHeight + (m_iNumRenderLine - 1) * 13 - iLineNumber * 13 + 3);
+    else
+        return (m_iPos_y - m_iHeight + (GetLineNum() - 1) * 13 - iLineNumber * 13 + 3);
+}
+
+BOOL CUIExtraItemListBox::RenderDataLine(int iLineNumber)
+{
+    EnableAlphaTest();
+
+    if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
+    {
+        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+        RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        g_pRenderText->SetTextColor(0, 0, 0, 255);
+    }
+    else
+    {
+        g_pRenderText->SetTextColor(230, 220, 200, 255);
+    }
+
+    glEnable(GL_TEXTURE_2D);
+    g_pRenderText->SetBgColor(0);
+
+    int iPos_x = m_iPos_x + 8;
+    int iPos_y = GetRenderLinePos_y(iLineNumber);
+
+    wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
+    swprintf(Text, L"%s", m_TextListIter->m_szPattern);
+    g_pRenderText->RenderText(iPos_x, iPos_y, Text);
+
+    DisableAlphaBlend();
+
+    return TRUE;
+}
+
+BOOL CUIExtraItemListBox::DoLineMouseAction(int iLineNumber)
+{
+    if (::CheckMouseIn(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13))
+    {
+        if (MouseLButtonPush)
+        {
+            SLSetSelectLine(m_iCurrentRenderEndLine + iLineNumber + 1);
+            m_TextListIter->m_bIsSelected = (m_TextListIter->m_bIsSelected + 1) % 2;
+            MouseLButtonPush = false;
+        }
+    }
+    return TRUE;
+}
+
+void CUIExtraItemListBox::DeleteText(const wchar_t* pszPattern)
+{
+    if (pszPattern == nullptr || wcslen(pszPattern) == 0) return;
+    for (m_TextListIter = m_TextList.begin(); m_TextListIter != m_TextList.end(); ++m_TextListIter)
+    {
+        if (wcsncmp(m_TextListIter->m_szPattern, pszPattern, MAX_ITEM_NAME) == 0)
+            break;
+    }
+    if (m_TextListIter == m_TextList.end()) return;
+
+    if (SLGetSelectLineNum() != 1) SLSelectNextLine();
+    m_TextList.erase(m_TextListIter);
+}

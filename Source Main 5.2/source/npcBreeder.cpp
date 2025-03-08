@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////
 //  npcBreeder.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
@@ -28,7 +28,7 @@ namespace npcBreeder
         {
         case REVIVAL_DARKHORSE:
             ip = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-            if (ip->Type != ITEM_HELPER + 4)
+            if (ip->Type != ITEM_DARK_HORSE_ITEM)
             {
                 swprintf(Text, GlobalText[1229]);
                 return -1;
@@ -37,17 +37,20 @@ namespace npcBreeder
 
         case REVIVAL_DARKSPIRIT:
             ip = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-            if (ip->Type != ITEM_HELPER + 5)
+            if (ip->Type != ITEM_DARK_RAVEN_ITEM)
             {
                 swprintf(Text, GlobalText[1229]);
                 return -1;
             }
             break;
+        default:
+            swprintf(Text, GlobalText[1229]);
+            return -1;
         }
+
         ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
 
-        int Level = (ip->Level >> 3) & 15;
-        int maxDurability = calcMaxDurability(ip, p, Level);
+        int maxDurability = CalcMaxDurability(ip, p, ip->Level);
 
         int Gold = 0;
         if (ip->Durability < maxDurability)

@@ -86,6 +86,8 @@ void SEASON3B::CNewUINPCShop::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
+
+    m_pNewInventoryCtrl->SetPos(x + 15, y + 50);
 }
 
 bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
@@ -313,7 +315,7 @@ int SEASON3B::CNewUINPCShop::GetTaxRate()
     return m_iTaxRate;
 }
 
-bool SEASON3B::CNewUINPCShop::InsertItem(int iIndex, BYTE* pbyItemPacket)
+bool SEASON3B::CNewUINPCShop::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
     {

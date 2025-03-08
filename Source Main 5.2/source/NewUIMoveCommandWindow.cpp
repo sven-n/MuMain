@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////
 // NewUIMoveCommandWindow.cpp: implementation of the CNewUIMoveCommandWindow class.
 //////////////////////////////////////////////////////////////////////
 
@@ -372,16 +372,16 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
             {
                 if (
                     (
-                        pEquipedHelper->Type == ITEM_HELPER + 37
-                        || pEquipedHelper->Type == ITEM_HELPER + 3
-                        || pEquipedHelper->Type == ITEM_HELPER + 4
-                        || pEquipedWing->Type == ITEM_HELPER + 30
-                        || (pEquipedWing->Type >= ITEM_WING + 36 && pEquipedWing->Type <= ITEM_WING + 43)
-                        || (pEquipedWing->Type >= ITEM_WING && pEquipedWing->Type <= ITEM_WING + 6)
+                        pEquipedHelper->Type == ITEM_HORN_OF_FENRIR
+                        || pEquipedHelper->Type == ITEM_HORN_OF_DINORANT
+                        || pEquipedHelper->Type == ITEM_DARK_HORSE_ITEM
+                        || pEquipedWing->Type == ITEM_CAPE_OF_LORD
+                        || (pEquipedWing->Type >= ITEM_WING_OF_STORM && pEquipedWing->Type <= ITEM_WING_OF_DIMENSION)
+                        || (pEquipedWing->Type >= ITEM_WING && pEquipedWing->Type <= ITEM_WINGS_OF_DARKNESS)
                         || (ITEM_WING + 130 <= pEquipedWing->Type && pEquipedWing->Type <= ITEM_WING + 134)
-                        || (pEquipedWing->Type >= ITEM_WING + 49 && pEquipedWing->Type <= ITEM_WING + 50)
+                        || (pEquipedWing->Type >= ITEM_CAPE_OF_FIGHTER && pEquipedWing->Type <= ITEM_CAPE_OF_OVERRULE)
                         || (pEquipedWing->Type == ITEM_WING + 135))
-                    && !(pEquipedHelper->Type == ITEM_HELPER + 2)
+                    && !(pEquipedHelper->Type == ITEM_HORN_OF_UNIRIA)
                     && (g_ChangeRingMgr->CheckBanMoveIcarusMap(pEquipedRightRing->Type, pEquipedLeftRing->Type) == false)
                     )
                 {
@@ -392,9 +392,9 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
                     (*li)->_bCanMove = false;
                 }
             }
-            else if (wcsncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], 8) == 0)
+            else if (wcsncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], wcslen(GlobalText[37])) == 0)
             {
-                if (pEquipedHelper->Type == ITEM_HELPER + 2 || pEquipedHelper->Type == ITEM_HELPER + 3)
+                if (pEquipedHelper->Type == ITEM_HORN_OF_UNIRIA || pEquipedHelper->Type == ITEM_HORN_OF_DINORANT)
                 {
                     (*li)->_bCanMove = false;
                 }
@@ -746,7 +746,7 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
     {
         RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, m_ScrollBarPos.x,
             m_ScrollBarPos.y + MOVECOMMAND_SCROLLBAR_TOP_HEIGHT + (icntText * MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
-            MOVECOMMAND_SCROLLBAR_TOP_WIDTH, m_iScrollBarMiddleRemainderPixel);	// MIDDLE ³ª¸ÓÁö
+            MOVECOMMAND_SCROLLBAR_TOP_WIDTH, m_iScrollBarMiddleRemainderPixel);	// MIDDLE ë‚˜ë¨¸ì§€
     }
 
     RenderImage(IMAGE_MOVECOMMAND_SCROLL_BOTTOM, m_ScrollBarPos.x, m_ScrollBarPos.y + m_iScrollBarHeightPixel - MOVECOMMAND_SCROLLBAR_TOP_HEIGHT,

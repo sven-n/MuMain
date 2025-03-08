@@ -1,4 +1,4 @@
-// CharacterManager.cpp: implementation of the CCharacterManager class.
+ï»¿// CharacterManager.cpp: implementation of the CCharacterManager class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -6,29 +6,7 @@
 #include "CSItemOption.h"
 #include "GlobalText.h"
 #include "SkillManager.h"
-//#include "CameraMove.h"
-//#include "CDirection.h"
-//#include "GMBattleCastle.h"
-//#include "GMHellas.h"
-//#include "GM_Kanturu_3rd.h"
-//#include "DSPlaySound.h"
-//#include "GlobalBitmap.h"
-//#include "GM_Kanturu_2nd.h"
-//#include "GM3rdChangeUp.h"
-//#include "GMCryWolf1st.h"
-//#include "GMDoppelGanger2.h"
-//#include "LoadData.h"
-//#include "NewUISystem.h"
-//#include "PersonalShopTitleImp.h"
-//#include "ZzzBMD.h"
 #include "ZzzInfomation.h"
-//#include "ZzzEffect.h"
-//#include "ZzzLodTerrain.h"
-//#include "ZzzObject.h"
-//#include "ZzzOpenData.h"
-//#include "ZzzTexture.h"
-//#include "w_CursedTemple.h"
-//#include "WSclient.h"
 #include "./Utilities/Log/ErrorReport.h"
 
 CCharacterManager gCharacterManager;
@@ -41,139 +19,116 @@ CCharacterManager::~CCharacterManager() // OK
 {
 }
 
-BYTE CCharacterManager::ChangeServerClassTypeToClientClassType(const BYTE byServerClassType)
+CLASS_TYPE CCharacterManager::ChangeServerClassTypeToClientClassType(const SERVER_CLASS_TYPE byServerClassType)
 {
-    BYTE byClass = (((byServerClassType >> 4) & 0x01) << 3) | (byServerClassType >> 5) | (((byServerClassType >> 3) & 0x01) << 4);
-    return byClass;
+    switch (byServerClassType)
+    {
+    case DarkWizard:
+        return CLASS_WIZARD;
+    case SoulMaster:
+        return CLASS_SOULMASTER;
+    case GrandMaster:
+        return CLASS_GRANDMASTER;
+    case DarkKnight:
+        return CLASS_KNIGHT;
+    case BladeKnight:
+        return CLASS_BLADEKNIGHT;
+    case BladeMaster:
+        return CLASS_BLADEMASTER;
+    case FairyElf:
+        return CLASS_ELF;
+    case MuseElf:
+        return CLASS_MUSEELF;
+    case HighElf:
+        return CLASS_HIGHELF;
+    case MagicGladiator:
+        return CLASS_DARK;
+    case DuelMaster:
+        return CLASS_DUELMASTER;
+    case DarkLord:
+        return CLASS_DARK_LORD;
+    case LordEmperor:
+        return CLASS_LORDEMPEROR;
+    case Summoner:
+        return CLASS_SUMMONER;
+    case BloodySummoner:
+        return CLASS_BLOODYSUMMONER;
+    case DimensionMaster:
+        return CLASS_DIMENSIONMASTER;
+    case RageFighter:
+        return CLASS_RAGEFIGHTER;
+    case FistMaster:
+        return CLASS_TEMPLENIGHT;
+    }
+
+    return CLASS_WIZARD;
 }
 
-BYTE CCharacterManager::GetCharacterClass(const BYTE byClass)
+CLASS_TYPE CCharacterManager::GetBaseClass(CLASS_TYPE iClass)
 {
-    BYTE byCharacterClass = 0;
-    BYTE byFirstClass = byClass & 0x7;
-    BYTE bySecondClass = (byClass >> 3) & 0x01;
-    BYTE byThirdClass = (byClass >> 4) & 0x01;
-
-    switch (byFirstClass)
+    switch (iClass)
     {
-    case 0:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_GRANDMASTER;
-        }
-        else if (bySecondClass)
-        {
-            byCharacterClass = CLASS_SOULMASTER;
-        }
-        else
-        {
-            byCharacterClass = CLASS_WIZARD;
-        }
+    case CLASS_GRANDMASTER:
+    case CLASS_SOULMASTER:
+        return CLASS_WIZARD;
+    case CLASS_BLADEKNIGHT:
+    case CLASS_BLADEMASTER:
+        return CLASS_KNIGHT;
+    case CLASS_MUSEELF:
+    case CLASS_HIGHELF:
+        return CLASS_ELF;
+    case CLASS_BLOODYSUMMONER:
+    case CLASS_DIMENSIONMASTER:
+        return CLASS_SUMMONER;
+    case CLASS_DUELMASTER:
+        return CLASS_DARK;
+    case CLASS_LORDEMPEROR:
+        return CLASS_DARK_LORD;
+    case CLASS_TEMPLENIGHT:
+        return CLASS_RAGEFIGHTER;
     }
 
-    break;
-    case 1:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_BLADEMASTER;
-        }
-        else if (bySecondClass)
-        {
-            byCharacterClass = CLASS_BLADEKNIGHT;
-        }
-        else
-        {
-            byCharacterClass = CLASS_KNIGHT;
-        }
-    }
-    break;
-    case 2:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_HIGHELF;
-        }
-        else if (bySecondClass)
-        {
-            byCharacterClass = CLASS_MUSEELF;
-        }
-        else
-        {
-            byCharacterClass = CLASS_ELF;
-        }
-    }
-    break;
-    case 3:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_DUELMASTER;
-        }
-        else
-        {
-            byCharacterClass = CLASS_DARK;
-        }
-    }
-    break;
-    case 4:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_LORDEMPEROR;
-        }
-        else
-        {
-            byCharacterClass = CLASS_DARK_LORD;
-        }
-    }
-    break;
-    case 5:
-    {
-        if (byThirdClass)
-            byCharacterClass = CLASS_DIMENSIONMASTER;
-        else if (bySecondClass)
-            byCharacterClass = CLASS_BLOODYSUMMONER;
-        else
-            byCharacterClass = CLASS_SUMMONER;
-    }
-    break;
-    case 6:
-    {
-        if (byThirdClass)
-        {
-            byCharacterClass = CLASS_TEMPLENIGHT;
-        }
-        else
-        {
-            byCharacterClass = CLASS_RAGEFIGHTER;
-        }
-    }
-    }
-
-    return byCharacterClass;
+    return iClass;
 }
 
-bool CCharacterManager::IsSecondClass(const BYTE byClass)
+bool CCharacterManager::IsSecondClass(const CLASS_TYPE byClass)
 {
-    return (((signed int)byClass >> 3) & 1) != 0;;
+    switch (byClass)
+    {
+    case CLASS_SOULMASTER:
+    case CLASS_BLADEKNIGHT:
+    case CLASS_MUSEELF:
+    case CLASS_BLOODYSUMMONER:
+        return true;
+    }
+
+    return false;
 }
 
-bool CCharacterManager::IsThirdClass(const BYTE byClass)
+bool CCharacterManager::IsThirdClass(const CLASS_TYPE byClass)
 {
-    return (((signed int)byClass >> 4) & 1) != 0;;
+    switch (byClass)
+    {
+    case CLASS_GRANDMASTER:
+    case CLASS_BLADEMASTER:
+    case CLASS_HIGHELF:
+    case CLASS_DIMENSIONMASTER:
+    case CLASS_DUELMASTER:
+    case CLASS_LORDEMPEROR:
+    case CLASS_TEMPLENIGHT:
+        return true;
+    }
+
+    return false;
 }
 
-bool CCharacterManager::IsMasterLevel(const BYTE byClass)
+bool CCharacterManager::IsMasterLevel(const CLASS_TYPE byClass)
 {
     return this->IsThirdClass(byClass);
 }
 
-const wchar_t* CCharacterManager::GetCharacterClassText(const BYTE byClass)
+const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byCharacterClass)
 {
-    BYTE byCharacterClass = this->GetCharacterClass(byClass);
-
     if (byCharacterClass == CLASS_WIZARD)
     {
         return GlobalText[20];
@@ -233,33 +188,31 @@ const wchar_t* CCharacterManager::GetCharacterClassText(const BYTE byClass)
     if (byCharacterClass == CLASS_DIMENSIONMASTER)
         return GlobalText[1689];
     if (byCharacterClass == CLASS_RAGEFIGHTER)
-        return GlobalText[3150];	// 3150 "·¹ÀÌÁöÆÄÀÌÅÍ"
+        return GlobalText[3150];	// 3150 "ë ˆì´ì§€íŒŒì´í„°"
     if (byCharacterClass == CLASS_TEMPLENIGHT)
         return GlobalText[3151];
-    // 3151 "ÅÛÇÃ³ªÀÌÆ®"
+    // 3151 "í…œí”Œë‚˜ì´íŠ¸"
     return GlobalText[2305];
 }
 
-BYTE CCharacterManager::GetSkinModelIndex(const BYTE byClass)
+CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
 {
-    BYTE bySkinIndex = 0;
-    BYTE byFirstClass = byClass & 0x7;
-    BYTE bySecondClass = (byClass >> 3) & 0x01;
-    BYTE byThirdClass = (byClass >> 4) & 0x01;
-
-    if (byFirstClass == CLASS_WIZARD || byFirstClass == CLASS_KNIGHT || byFirstClass == CLASS_ELF || byFirstClass == CLASS_SUMMONER)
+    switch (byClass)
     {
-        bySkinIndex = byFirstClass + (bySecondClass + byThirdClass) * MAX_CLASS;
-    }
-    else
-    {
-        bySkinIndex = byFirstClass + (byThirdClass * 2) * MAX_CLASS;
+    case CLASS_BLOODYSUMMONER: return SKIN_CLASS_BLOODYSUMMONER;
+    case CLASS_GRANDMASTER: return SKIN_CLASS_GRANDMASTER;
+    case CLASS_BLADEMASTER: return SKIN_CLASS_BLADEMASTER;
+    case CLASS_HIGHELF: return SKIN_CLASS_HIGHELF;
+    case CLASS_DUELMASTER:return SKIN_CLASS_DUELMASTER;
+    case CLASS_LORDEMPEROR: return SKIN_CLASS_LORDEMPEROR;
+    case CLASS_DIMENSIONMASTER: return SKIN_CLASS_DIMENSIONMASTER;
+    case CLASS_TEMPLENIGHT: return SKIN_CLASS_TEMPLENIGHT;
     }
 
-    return bySkinIndex;
+    return static_cast<CLASS_SKIN_INDEX>(byClass);
 }
 
-BYTE CCharacterManager::GetStepClass(const BYTE byClass)
+BYTE CCharacterManager::GetStepClass(const CLASS_TYPE byClass)
 {
     if (IsThirdClass(byClass))
     {
@@ -277,11 +230,11 @@ BYTE CCharacterManager::GetStepClass(const BYTE byClass)
 
 int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
 {
-    if ((pChar->Weapon[1].Type != MODEL_BOW + 7) && ((pChar->Weapon[1].Type >= MODEL_BOW) && (pChar->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)))
+    if ((pChar->Weapon[1].Type != MODEL_BOLT) && ((pChar->Weapon[1].Type >= MODEL_BOW) && (pChar->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)))
     {
         return BOWTYPE_BOW;
     }
-    else if ((pChar->Weapon[0].Type != MODEL_BOW + 15) && ((pChar->Weapon[0].Type >= MODEL_BOW + 8) && (pChar->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)))
+    else if ((pChar->Weapon[0].Type != MODEL_ARROWS) && ((pChar->Weapon[0].Type >= MODEL_CROSSBOW) && (pChar->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -290,11 +243,11 @@ int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
 
 int CCharacterManager::GetEquipedBowType()
 {
-    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW + 7) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOLT) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
     {
         return BOWTYPE_BOW;
     }
-    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW + 15) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_BOW + 8) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_ARROWS) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_CROSSBOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -303,12 +256,12 @@ int CCharacterManager::GetEquipedBowType()
 
 int CCharacterManager::GetEquipedBowType(ITEM* pItem)
 {
-    if (((pItem->Type >= ITEM_BOW) && (pItem->Type <= ITEM_BOW + 6)) || (pItem->Type == ITEM_BOW + 17) || ((pItem->Type >= ITEM_BOW + 20) && (pItem->Type <= ITEM_BOW + 23)) || (pItem->Type == ITEM_BOW + 24))
+    if (((pItem->Type >= ITEM_BOW) && (pItem->Type <= ITEM_CHAOS_NATURE_BOW)) || (pItem->Type == ITEM_CELESTIAL_BOW) || ((pItem->Type >= ITEM_ARROW_VIPER_BOW) && (pItem->Type <= ITEM_STINGER_BOW)) || (pItem->Type == ITEM_AIR_LYN_BOW))
     {
         return BOWTYPE_BOW;
     }
 
-    else if (((pItem->Type >= ITEM_BOW + 8) && (pItem->Type <= ITEM_BOW + 14)) || (pItem->Type == ITEM_BOW + 16) || ((pItem->Type >= ITEM_BOW + 18) && (pItem->Type <= ITEM_BOW + 19)))
+    else if (((pItem->Type >= ITEM_CROSSBOW) && (pItem->Type <= ITEM_AQUAGOLD_CROSSBOW)) || (pItem->Type == ITEM_SAINT_CROSSBOW) || ((pItem->Type >= ITEM_DIVINE_CB_OF_ARCHANGEL) && (pItem->Type <= ITEM_GREAT_REIGN_CROSSBOW)))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -317,14 +270,14 @@ int CCharacterManager::GetEquipedBowType(ITEM* pItem)
 
 int CCharacterManager::GetEquipedBowType_Skill()
 {
-    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOW + 7) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOLT) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
     {
-        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_BOW + 15)
+        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_ARROWS)
             return BOWTYPE_BOW;
     }
-    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_BOW + 15) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_BOW + 8) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_ARROWS) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_CROSSBOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
     {
-        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOW + 7)
+        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOLT)
             return BOWTYPE_CROSSBOW;
     }
     return BOWTYPE_NONE;
@@ -334,11 +287,11 @@ bool CCharacterManager::IsEquipedWing()
 {
     ITEM* pEquippedItem = &CharacterMachine->Equipment[EQUIPMENT_WING];
 
-    if ((pEquippedItem->Type >= ITEM_WING && pEquippedItem->Type <= ITEM_WING + 6)
-        || (pEquippedItem->Type >= ITEM_WING + 36 && pEquippedItem->Type <= ITEM_WING + 43)
-        || (pEquippedItem->Type == ITEM_HELPER + 30)
+    if ((pEquippedItem->Type >= ITEM_WING && pEquippedItem->Type <= ITEM_WINGS_OF_DARKNESS)
+        || (pEquippedItem->Type >= ITEM_WING_OF_STORM && pEquippedItem->Type <= ITEM_WING_OF_DIMENSION)
+        || (pEquippedItem->Type == ITEM_CAPE_OF_LORD)
         || (ITEM_WING + 130 <= pEquippedItem->Type && pEquippedItem->Type <= ITEM_WING + 134)
-        || (pEquippedItem->Type >= ITEM_WING + 49 && pEquippedItem->Type <= ITEM_WING + 50) || (pEquippedItem->Type == ITEM_WING + 135))
+        || (pEquippedItem->Type >= ITEM_CAPE_OF_FIGHTER && pEquippedItem->Type <= ITEM_CAPE_OF_OVERRULE) || (pEquippedItem->Type == ITEM_WING + 135))
     {
         return true;
     }
@@ -372,7 +325,6 @@ void CCharacterManager::GetMagicSkillDamage(int iType, int* piMinDamage, int* pi
     }
 
     Damage = 0;
-    g_csItemOption.ClearListOnOff();
     g_csItemOption.PlusMastery(&Damage, p->MasteryType);
     g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
     *piMinDamage += Damage;
@@ -407,7 +359,6 @@ void CCharacterManager::GetSkillDamage(int iType, int* piMinDamage, int* piMaxDa
     *piMaxDamage = Damage + Damage / 2;
 
     Damage = 0;
-    g_csItemOption.ClearListOnOff();
     g_csItemOption.PlusMastery(&Damage, p->MasteryType);
     g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
     *piMinDamage += Damage;

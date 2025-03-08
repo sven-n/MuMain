@@ -81,6 +81,14 @@ void BindTextureStream(int tex);
 void EndTextureStream();
 void BeginOpengl(int x = 0, int y = 0, int Width = 640, int Height = 480);
 void EndOpengl();
+
+void InitVSync();
+bool IsVSyncAvailable();
+bool IsVSyncEnabled();
+void EnableVSync();
+void DisableVSync();
+int GetFPSLimit();
+
 void UpdateMousePositionn();
 extern inline void TEXCOORD(float* c, float u, float v);
 void RenderBox(float Matrix[3][4]);

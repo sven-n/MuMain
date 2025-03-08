@@ -108,18 +108,19 @@ bool SEASON3B::CNewUIManager::UpdateMouseEvent()
     m_pActiveMouseUIObj = NULL;
 
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepthReverse);
+    auto vecUI = m_vecUI;
 
-    auto vi = m_vecUI.begin();
-    vi = m_vecUI.begin();
-    for (; vi != m_vecUI.end(); vi++)
+    auto vi = vecUI.begin();
+    vi = vecUI.begin();
+    for (; vi != vecUI.end(); vi++)
     {
         if ((*vi)->IsVisible())
         {
             CNewUIObj* obj_backup = (*vi);
             bool bResult = (*vi)->UpdateMouseEvent();
 
-            auto vi2 = std::find(m_vecUI.begin(), m_vecUI.end(), obj_backup);
-            if (vi2 != m_vecUI.end())
+            auto vi2 = std::find(vecUI.begin(),vecUI.end(), obj_backup);
+            if (vi2 != vecUI.end())
             {
                 vi = vi2;
             }
@@ -144,8 +145,10 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
     m_pActiveKeyUIObj = NULL;
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareKeyEventOrder);
 
-    auto vi = m_vecUI.begin();
-    for (; vi != m_vecUI.end(); vi++)
+    auto vecUI = m_vecUI;
+
+    auto vi = vecUI.begin();
+    for (; vi != vecUI.end(); vi++)
     {
         HWND hRelatedWnd = (*vi)->GetRelatedWnd();
         if (NULL == hRelatedWnd)
@@ -189,9 +192,10 @@ bool SEASON3B::CNewUIManager::Update()
 bool SEASON3B::CNewUIManager::Render()
 {
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
+    auto vecUI = m_vecUI;
 
-    auto vi = m_vecUI.begin();
-    for (; vi != m_vecUI.end(); vi++)
+    auto vi = vecUI.begin();
+    for (; vi != vecUI.end(); vi++)
     {
         if ((*vi)->IsVisible())
         {

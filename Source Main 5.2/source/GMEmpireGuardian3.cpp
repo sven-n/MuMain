@@ -1,4 +1,4 @@
-// GMEmpireGuardian3.cpp: implementation of the GMEmpireGuardian3 class.
+ï»¿// GMEmpireGuardian3.cpp: implementation of the GMEmpireGuardian3 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
@@ -78,29 +78,29 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
 
     switch (iType)
     {
-    case 510:
+    case MONSTER_DUAL_BERSERKER:
     {
-        OpenMonsterModel(170);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 170, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Ä«Åä");
+        OpenMonsterModel(MONSTER_MODEL_DUAL_BERSERKER);
+        pCharacter = CreateCharacter(Key, MODEL_DUAL_BERSERKER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì¹´í† ");
         pCharacter->Object.Scale = 1.35f;
 
         m_bCurrentIsRage_Kato = false;
     }
     break;
-    case 516:
+    case MONSTER_BANSHEE:
     {
-        OpenMonsterModel(176);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 176, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¾Ï»ì´ÜÀå");
+        OpenMonsterModel(MONSTER_MODEL_BANSHEE);
+        pCharacter = CreateCharacter(Key, MODEL_BANSHEE, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì•”ì‚´ë‹¨ìž¥");
         pCharacter->Object.Scale = 1.55f;
     }
     break;
-    case 517:
+    case MONSTER_HEAD_MOUNTER:
     {
-        OpenMonsterModel(177);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 177, PosX, PosY);
-        wcscpy(pCharacter->ID, L"±â¸¶´ÜÀå");
+        OpenMonsterModel(MONSTER_MODEL_HEAD_MOUNTER);
+        pCharacter = CreateCharacter(Key, MODEL_HEAD_MOUNTER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ê¸°ë§ˆë‹¨ìž¥");
         pCharacter->Object.Scale = 1.25f;
     }
     break;
@@ -217,7 +217,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 170:
+    case MODEL_DUAL_BERSERKER:
     {
         switch (o->CurrentAction)
         {
@@ -245,7 +245,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 176:
+    case MODEL_BANSHEE:
     {
         switch (o->CurrentAction)
         {
@@ -390,7 +390,7 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 177:
+    case MODEL_HEAD_MOUNTER:
     {
         switch (o->CurrentAction)
         {
@@ -402,8 +402,8 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 Vector(0.8f, 0.4f, 0.1f, o->Light);
 
                 b->TransformByObjectBone(vPos, o, 15);
-                CreateParticle(BITMAP_CLUD64, vPos, o->Angle, o->Light, 3, 0.2f);
-                CreateParticle(BITMAP_WATERFALL_3, vPos, o->Angle, o->Light, 13, 1.0f);
+                CreateParticleFpsChecked(BITMAP_CLUD64, vPos, o->Angle, o->Light, 3, 0.2f);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_3, vPos, o->Angle, o->Light, 13, 1.0f);
             }
         }
         break;
@@ -415,13 +415,13 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             {
                 b->TransformByObjectBone(vPos, o, 32);
                 vPos[2] += 25.0f;
-                CreateParticle(BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f);
+                CreateParticleFpsChecked(BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f);
             }
             if (1.0f <= o->AnimationFrame && o->AnimationFrame < 2.0f)
             {
                 b->TransformByObjectBone(vPos, o, 19);
                 vPos[2] += 25.0f;
-                CreateParticle(BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f);
+                CreateParticleFpsChecked(BITMAP_ADV_SMOKE, vPos, o->Angle, o->Light, 3, 2.0f);
             }
         }
         break;
@@ -453,28 +453,28 @@ bool GMEmpireGuardian3::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             float Scale = 0.3f;
             b->TransformByObjectBone(vPos, o, 30);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 17);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 2);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 6);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 98);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 91);
-            CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, Scale);
 
             b->TransformByObjectBone(vPos, o, 2);
-            CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
 
             b->TransformByObjectBone(vPos, o, 3);
-            CreateParticle(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 3, vPos, o->Angle, o->Light, 3, Scale);
         }
         break;
         } //switch end
@@ -489,16 +489,16 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 166:
-    case MODEL_MONSTER01 + 178:
-    case MODEL_MONSTER01 + 179:
-    case MODEL_MONSTER01 + 180:
-    case MODEL_MONSTER01 + 181:
+    case MODEL_RAYMOND:
+    case MODEL_DEFENDER:
+    case MODEL_FORSAKER:
+    case MODEL_OCELOT:
+    case MODEL_ERIC:
     {
         g_EmpireGuardian1.MoveBlurEffect(c, o, b);
     }
     break;
-    case MODEL_MONSTER01 + 170:
+    case MODEL_DUAL_BERSERKER:
     {
         vec3_t  Light;
         vec3_t StartPos, StartRelative;
@@ -621,25 +621,25 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[24], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+                            CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[25], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+                            CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[43], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+                            CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[44], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+                            CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
                             vec3_t	vLight__;
                             Vector(0.9f, 0.9f, 0.9f, vLight__);
@@ -648,33 +648,33 @@ void GMEmpireGuardian3::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[24], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
+                            CreateParticleFpsChecked(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[25], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
+                            CreateParticleFpsChecked(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[43], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
+                            CreateParticleFpsChecked(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
 
                             vRelative[0] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[1] = ((rand() % iOffset) - iOffset * 0.5f);
                             vRelative[2] = ((rand() % iOffset) - iOffset * 0.5f);
                             b->TransformPosition(BoneTransform[44], vRelative, vPosition, false);
-                            CreateParticle(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
+                            CreateParticleFpsChecked(BITMAP_SMOKELINE2, vPosition, o->Angle, vLight__, 3);
                         }
-                    } // °Ë±â
+                    } // ê²€ê¸°
                 }
             }
         }
     }
     break;
-    case MODEL_MONSTER01 + 177:
+    case MODEL_HEAD_MOUNTER:
     {
         switch (o->CurrentAction)
         {
@@ -773,9 +773,9 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             for (int i = 0; i < 4; ++i)
             {
                 Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
-                CreateJoint(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
+                CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
-            CreateParticle(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
+            CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
         }
         else if (o->AnimationFrame > 15.4f && o->AnimationFrame < 16.5f)
         {
@@ -783,9 +783,9 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             for (int i = 0; i < 4; ++i)
             {
                 Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2], Angle);
-                CreateJoint(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
+                CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
-            CreateParticle(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
+            CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
         }
     }
     return true;
@@ -815,8 +815,8 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
         for (int i = 2; i <= 7; i++)
         {
             b->TransformPosition(BoneTransform[i], vRelativePos, vPos);
-            CreateParticle(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight1, 4, o->Scale * 0.6f);
-            CreateParticle(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight2, 4, o->Scale * 0.3f);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight1, 4, o->Scale * 0.6f);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight2, 4, o->Scale * 0.3f);
         }
     }
     return true;
@@ -829,9 +829,9 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             for (int i = 0; i < 4; ++i)
             {
                 Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
-                CreateJoint(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
+                CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
-            CreateParticle(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
+            CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
         }
     }
     return true;
@@ -852,7 +852,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             Vector(0.04f, 0.03f, 0.02f, Light);
             for (int i = 0; i < 3; ++i)
             {
-                CreateParticle(BITMAP_CLOUD, Position, o->Angle, Light, 22, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, Position, o->Angle, Light, 22, o->Scale, o);
             }
         }
     }
@@ -870,13 +870,13 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
         switch (rand() % 3)
         {
         case 0:
-            CreateParticle(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         case 1:
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
             break;
         case 2:
-            CreateParticle(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         }
     }
@@ -892,14 +892,14 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 82:
     {
-        CreateParticle(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 9, o->Scale);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 9, o->Scale);
     }
     return true;
 
     case 83:
     {
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 14, o->Scale);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 14, o->Scale);
     }
     return true;
 
@@ -925,7 +925,7 @@ bool GMEmpireGuardian3::RenderObjectVisual(OBJECT* o, BMD* b)
             int iRand = rand() % 4 + 4;
             for (int i = 0; i < iRand; ++i)
             {
-                CreateEffect(BITMAP_FLAME, o->Position, o->Angle, vLight, 6, NULL, -1, 0, o->Scale);
+                CreateEffectFpsChecked(BITMAP_FLAME, o->Position, o->Angle, vLight, 6, NULL, -1, 0, o->Scale);
             }
         }
     }
@@ -1002,7 +1002,7 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 170:
+    case MODEL_DUAL_BERSERKER:
     {
         vec3_t Light, Position;
 
@@ -1087,14 +1087,14 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 if (i % 5 == 0)
                 {
                     b->TransformByObjectBone(vPosRage, o, i);
-                    CreateParticle(BITMAP_SMOKE, vPosRage, o->Angle, vLightRage, 50, 1.0f);
-                    CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, vPosRage, o->Angle, vLightRage, 50, 1.0f);
+                    CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f);
                 }
             }
         }
     }
     return true;
-    case MODEL_MONSTER01 + 176:
+    case MODEL_BANSHEE:
     {
     }
     return true;
@@ -1158,7 +1158,7 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 510:
+    case MONSTER_DUAL_BERSERKER:
     {
         if (m_bCurrentIsRage_Kato == true)
         {
@@ -1198,7 +1198,7 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 517:
+    case MONSTER_HEAD_MOUNTER:
     {
         switch (c->MonsterSkill)
         {
@@ -1229,7 +1229,7 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 519:
+    case MONSTER_FORSAKER:
     {
         switch (c->MonsterSkill)
         {
@@ -1248,7 +1248,7 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
         }
     }
     return true;
-    case 516:
+    case MONSTER_BANSHEE:
     {
         switch (c->MonsterSkill)
         {
@@ -1304,7 +1304,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 170:
+    case MODEL_DUAL_BERSERKER:
     {
         switch (o->CurrentAction)
         {
@@ -1338,7 +1338,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
     }
     return true;
 
-    case MODEL_MONSTER01 + 176:
+    case MODEL_BANSHEE:
     {
         switch (o->CurrentAction)
         {
@@ -1367,7 +1367,7 @@ bool GMEmpireGuardian3::PlayMonsterSound(OBJECT* o)
     }
     return true;
 
-    case MODEL_MONSTER01 + 177:
+    case MODEL_HEAD_MOUNTER:
     {
         switch (o->CurrentAction)
         {

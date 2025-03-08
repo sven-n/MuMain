@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////
 // NewUIInventoryCtrl.cpp: implementation of the CNewUIInventoryCtrl class.
 //////////////////////////////////////////////////////////////////////
 
@@ -173,7 +173,7 @@ void SEASON3B::CNewUIPickedItem::Render3D()
     {
         m_Pos.x = MouseX - m_Size.cx / 2;
         m_Pos.y = MouseY - m_Size.cy / 2;
-        RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level, m_pPickedItem->Option1, m_pPickedItem->ExtOption, true);
+        RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level, m_pPickedItem->ExcellentFlags, m_pPickedItem->AncientDiscriminator, true);
     }
 }
 
@@ -261,8 +261,8 @@ void SEASON3B::CNewUIInventoryCtrl::SetItemColorState(ITEM* pItem)
     }
 
     ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-    const int iLevel = (pItem->Level >> 3) & 15;
-    const int iMaxDurability = calcMaxDurability(pItem, pItemAttr, iLevel);
+    const int iLevel = pItem->Level;
+    const int iMaxDurability = CalcMaxDurability(pItem, pItemAttr, iLevel);
 
     if (pItem->Durability <= 0)
     {
@@ -298,30 +298,30 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         return true;
     }
 
-    if (pItem->Type == ITEM_BOW + 7 || pItem->Type == ITEM_BOW + 15)
+    if (pItem->Type == ITEM_BOLT || pItem->Type == ITEM_ARROWS)
     {
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 20 && ((pItem->Level >> 3) & 15) == 1 || ((pItem->Level >> 3) & 15) == 2)
+    if (pItem->Type == ITEM_WIZARDS_RING && (pItem->Level == 1 || pItem->Level  == 2))
     {
         return false;
     }
 
-    if (pItem->Type >= ITEM_HELPER + 8 && pItem->Type <= ITEM_HELPER + 9
-        || pItem->Type == ITEM_HELPER + 10
-        || pItem->Type >= ITEM_HELPER + 12 && pItem->Type <= ITEM_HELPER + 13
-        || pItem->Type == ITEM_HELPER + 20
-        || pItem->Type >= ITEM_HELPER + 21 && pItem->Type <= ITEM_HELPER + 28
-        || pItem->Type >= ITEM_HELPER + 38 && pItem->Type <= ITEM_HELPER + 42
+    if (pItem->Type >= ITEM_RING_OF_ICE && pItem->Type <= ITEM_RING_OF_POISON
+        || pItem->Type == ITEM_TRANSFORMATION_RING
+        || pItem->Type >= ITEM_PENDANT_OF_LIGHTING && pItem->Type <= ITEM_PENDANT_OF_FIRE
+        || pItem->Type == ITEM_WIZARDS_RING
+        || pItem->Type >= ITEM_RING_OF_FIRE && pItem->Type <= ITEM_PENDANT_OF_ABILITY
+        || pItem->Type >= ITEM_MOONSTONE_PENDANT && pItem->Type <= ITEM_GAME_MASTER_TRANSFORMATION_RING
 #ifdef PJH_ADD_PANDA_CHANGERING
-        || pItem->Type == ITEM_HELPER + 76
+        || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
 #endif //PJH_ADD_PANDA_CHANGERING
-        || pItem->Type == ITEM_HELPER + 122
-        || pItem->Type == ITEM_HELPER + 80
-        || pItem->Type == ITEM_HELPER + 64
-        || pItem->Type == ITEM_HELPER + 65
-        || pItem->Type == ITEM_HELPER + 123
+        || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING
+        || pItem->Type == ITEM_PET_PANDA
+        || pItem->Type == ITEM_DEMON
+        || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN
+        || pItem->Type == ITEM_PET_SKELETON
         || pItem->Type == ITEM_HELPER + 107
         || pItem->Type == ITEM_HELPER + 109
         || pItem->Type == ITEM_HELPER + 110
@@ -338,7 +338,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         return true;
     }
 
-    if (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_HELPER + 5 || pItem->Type == ITEM_HELPER + 37 || pItem->Type == ITEM_HELPER + 106)
+    if (pItem->Type >= ITEM_HELPER && pItem->Type <= ITEM_DARK_RAVEN_ITEM || pItem->Type == ITEM_HORN_OF_FENRIR || pItem->Type == ITEM_PET_UNICORN)
     {
         return true;
     }
@@ -400,7 +400,7 @@ void SEASON3B::CNewUIInventoryCtrl::Release()
     Init();
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iLinealPos, BYTE* pbyItemPacket)
+bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iLinealPos, std::span<const BYTE> itemData)
 {
     iLinealPos -= m_nIndexOffset;
     if (iLinealPos < 0 || iLinealPos >= m_nColumn * m_nRow)
@@ -409,10 +409,10 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iLinealPos, BYTE* pbyItemPacket)
     const int iColumnX = iLinealPos % m_nColumn;
     const int iRowY = iLinealPos / m_nColumn;
 
-    return AddItem(iColumnX, iRowY, pbyItemPacket);
+    return AddItem(iColumnX, iRowY, itemData);
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE* pbyItemPacket)
+bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, std::span<const BYTE> itemData)
 {
     if (iColumnX < 0 || iRowY < 0 ||
         iColumnX >= m_nColumn || iRowY >= m_nRow)
@@ -420,7 +420,7 @@ bool SEASON3B::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE* pbyIt
         return false;
     }
 
-    ITEM* pNewItem = m_pNewItemMng->CreateItem(pbyItemPacket);
+    ITEM* pNewItem = m_pNewItemMng->CreateItem(itemData);
     if (nullptr == pNewItem)
         return false;
 
@@ -593,7 +593,7 @@ ITEM* SEASON3B::CNewUIInventoryCtrl::FindItem(int iLinealPos)
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItem(int iColumnX, int iRowY)
 {
-    return FindItem(iRowY * m_nColumn + iColumnX);
+    return FindItem(iRowY * m_nColumn + iColumnX + m_nIndexOffset);
 }
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItemByKey(DWORD dwKey)
@@ -629,7 +629,7 @@ int SEASON3B::CNewUIInventoryCtrl::GetItemCount(short int siType, int iLevel)
     auto li = m_vecItem.begin();
     for (; li != m_vecItem.end(); ++li) {
         if ((*li)->Type == siType) {
-            if (iLevel == -1 || (((*li)->Level >> 3) & 15) == iLevel)
+            if (iLevel == -1 || (*li)->Level == iLevel)
             {
                 count += ((*li)->Durability == 0) ? 1 : (*li)->Durability;
             }
@@ -645,7 +645,7 @@ int SEASON3B::CNewUIInventoryCtrl::FindItemIndex(short int siType, int iLevel)
     {
         if ((*li)->Type == siType)
         {
-            if (iLevel == -1 || (((*li)->Level >> 3) & 15) == iLevel)
+            if (iLevel == -1 || (*li)->Level == iLevel)
             {
                 return (*li)->y * GetNumberOfColumn() + (*li)->x + m_nIndexOffset;
             }
@@ -667,7 +667,7 @@ int SEASON3B::CNewUIInventoryCtrl::FindItemReverseIndex(short sType, int iLevel)
             {
                 if (pItem->Type == sType)
                 {
-                    if (iLevel == -1 || ((pItem->Level >> 3) & 15) == iLevel)
+                    if (iLevel == -1 || pItem->Level == iLevel)
                     {
                         return (pItem->y * GetNumberOfColumn()) + pItem->x + m_nIndexOffset;
                     }
@@ -840,7 +840,7 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
         {
             CreateItemToolTip(pItem);
 
-            if ((pItem->Type == ITEM_HELPER + 4) || (pItem->Type == ITEM_HELPER + 5))
+            if ((pItem->Type == ITEM_DARK_HORSE_ITEM) || (pItem->Type == ITEM_DARK_RAVEN_ITEM))
             {
                 const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
                 const int iTargetX = m_Pos.x + m_pToolTipItem->x * INVENTORY_SQUARE_WIDTH + pItemAttr->Width * INVENTORY_SQUARE_WIDTH / 2;
@@ -1051,29 +1051,26 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                     if (pTargetItem)
                                     {
                                         const int	iType = pTargetItem->Type;
-
-                                        int	iLevel = (pTargetItem->Level >> 3) & 15;
-
                                         const int	iDurability = pTargetItem->Durability;
 
-                                        if ((pPickItem->Type == ITEM_POTION + 13) || (pPickItem->Type == ITEM_POTION + 14))
+                                        if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS) || (pPickItem->Type == ITEM_JEWEL_OF_SOUL))
                                         {
                                             bSuccess = CanUpgradeItem(pPickItem, pTargetItem);
                                         }
-                                        else if (pPickItem->Type == ITEM_POTION + 42)
+                                        else if (pPickItem->Type == ITEM_JEWEL_OF_HARMONY)
                                         {
                                             if (pTargetItem->Jewel_Of_Harmony_Option == 0)
                                             {
                                                 const StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pTargetItem->Type));
 
                                                 if ((strengthitem != SI_None) && (!g_SocketItemMgr.IsSocketItem(pTargetItem))
-                                                    && ((pTargetItem->ExtOption % 0x04) != EXT_A_SET_OPTION && (pTargetItem->ExtOption % 0x04) != EXT_B_SET_OPTION))
+                                                    && (pTargetItem->AncientDiscriminator > 0))
                                                 {
                                                     bSuccess = true;
                                                 }
                                             }
                                         }
-                                        else if (pPickItem->Type == ITEM_POTION + 43 || pPickItem->Type == ITEM_POTION + 44)
+                                        else if (pPickItem->Type == ITEM_LOWER_REFINE_STONE || pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
                                         {
                                             if (pTargetItem->Jewel_Of_Harmony_Option != 0)
                                             {
@@ -1081,7 +1078,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                             }
                                         }
 
-                                        if (pPickItem->Type == ITEM_POTION + 13 && iType == ITEM_HELPER + 37 && iDurability != 255)
+                                        if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR && iDurability != 255)
                                         {
                                             bSuccess = true;
                                         }
@@ -1374,17 +1371,17 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
         const float width = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
         float height = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
 
-        if (pItem->Type >= ITEM_POTION && pItem->Type <= ITEM_POTION + 8 && pItem->Durability > 1)
+        if (pItem->Type >= ITEM_POTION && pItem->Type <= ITEM_ANTIDOTE && pItem->Durability > 1)
         {
             glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
-        else if (pItem->Type >= ITEM_POTION + 46 && pItem->Type <= ITEM_POTION + 50 && pItem->Durability > 1)
+        else if (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK && pItem->Durability > 1)
         {
             glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
-        else if (pItem->Type >= ITEM_POTION + 35 && pItem->Type <= ITEM_POTION + 40 && pItem->Durability > 1)
+        else if (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION && pItem->Durability > 1)
         {
             glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
@@ -1404,7 +1401,7 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
             glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
-        else if (pItem->Type >= ITEM_POTION + 85 && pItem->Type <= ITEM_POTION + 90 && pItem->Durability > 1)
+        else if (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH && pItem->Durability > 1)
         {
             glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
@@ -1416,7 +1413,7 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
         }
         else if (COMGEM::isCompiledGem(pItem))
         {
-            const int Level = (pItem->Level >> 3) & 15;
+            const int Level = pItem->Level;
             glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, (Level + 1) * COMGEM::FIRST);
         }
@@ -1521,7 +1518,7 @@ void SEASON3B::CNewUIInventoryCtrl::BackupPickedItem()
 
             g_pMyInventory->CreateEquippingEffect(pEquipmentItemSlot);
 
-            if (pEquipmentItemSlot->Type == ITEM_HELPER + 5 && !gMapManager.InChaosCastle())
+            if (pEquipmentItemSlot->Type == ITEM_DARK_RAVEN_ITEM && !gMapManager.InChaosCastle())
             {
                 PET_INFO* pPetInfo = giPetManager::GetPetInfo(pEquipmentItemSlot);
                 giPetManager::CreatePetDarkSpirit_Now(Hero);
@@ -1551,7 +1548,7 @@ void SEASON3B::CNewUIInventoryCtrl::Render3D()
         const float height = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
         glColor4f(1.f, 1.f, 1.f, 1.f);
 
-        RenderItem3D(x, y, width, height, pItem->Type, pItem->Level, pItem->Option1, pItem->ExtOption, false);
+        RenderItem3D(x, y, width, height, pItem->Type, pItem->Level, pItem->ExcellentFlags, pItem->AncientDiscriminator, false);
     }
 }
 
@@ -1574,42 +1571,42 @@ bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* p
         return false;
     }
 
-    if (iSrcType == ITEM_POTION + 7 && iTarType == ITEM_POTION + 7 && (iSrcDurability < 250 && iTarDurability < 250))
+    if (iSrcType == ITEM_SIEGE_POTION && iTarType == ITEM_SIEGE_POTION && (iSrcDurability < 250 && iTarDurability < 250))
     {
         return true;
     }
 
-    if ((iSrcType >= ITEM_POTION && iSrcType <= ITEM_POTION + 8 && iSrcType != ITEM_POTION + 7) && (iTarType >= ITEM_POTION && iTarType <= ITEM_POTION + 8 && iTarType != ITEM_POTION + 7) && (iSrcDurability < 3 && iTarDurability < 3))
+    if ((iSrcType >= ITEM_POTION && iSrcType <= ITEM_ANTIDOTE && iSrcType != ITEM_SIEGE_POTION) && (iTarType >= ITEM_POTION && iTarType <= ITEM_ANTIDOTE && iTarType != ITEM_SIEGE_POTION) && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if ((iSrcType >= ITEM_POTION + 38 && iSrcType <= ITEM_POTION + 40) && (iTarType >= ITEM_POTION + 38 && iTarType <= ITEM_POTION + 40) && (iSrcDurability < 3 && iTarDurability < 3))
+    if ((iSrcType >= ITEM_SMALL_COMPLEX_POTION && iSrcType <= ITEM_LARGE_COMPLEX_POTION) && (iTarType >= ITEM_SMALL_COMPLEX_POTION && iTarType <= ITEM_LARGE_COMPLEX_POTION) && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if ((iSrcType == ITEM_BOW + 7 && iTarType == ITEM_BOW + 7) && (iSrcLevel == iTarLevel))
+    if ((iSrcType == ITEM_BOLT && iTarType == ITEM_BOLT) && (iSrcLevel == iTarLevel))
     {
         return true;
     }
 
-    if ((iSrcType == ITEM_BOW + 15 && iTarType == ITEM_BOW + 15) && (iSrcLevel == iTarLevel))
+    if ((iSrcType == ITEM_ARROWS && iTarType == ITEM_ARROWS) && (iSrcLevel == iTarLevel))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 29 && iTarType == ITEM_POTION + 29)
+    if (iSrcType == ITEM_SYMBOL_OF_KUNDUN && iTarType == ITEM_SYMBOL_OF_KUNDUN)
     {
         return true;
     }
 
-    if ((iSrcType >= ITEM_HELPER + 32 && iSrcType <= ITEM_HELPER + 34) && (iTarType >= ITEM_HELPER + 32 && iTarType <= ITEM_HELPER + 34))
+    if ((iSrcType >= ITEM_SPLINTER_OF_ARMOR && iSrcType <= ITEM_CLAW_OF_BEAST) && (iTarType >= ITEM_SPLINTER_OF_ARMOR && iTarType <= ITEM_CLAW_OF_BEAST))
     {
         return true;
     }
 
-    if ((iSrcType >= ITEM_POTION + 46 && iSrcType <= ITEM_POTION + 50) && (iTarType >= ITEM_POTION + 46 && iTarType <= ITEM_POTION + 50) && (iSrcDurability < 3 && iTarDurability < 3))
+    if ((iSrcType >= ITEM_JACK_OLANTERN_BLESSINGS && iSrcType <= ITEM_JACK_OLANTERN_DRINK) && (iTarType >= ITEM_JACK_OLANTERN_BLESSINGS && iTarType <= ITEM_JACK_OLANTERN_DRINK) && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
@@ -1654,17 +1651,17 @@ bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* p
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 85 && iTarType == ITEM_POTION + 85 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_CHERRY_BLOSSOM_WINE && iTarType == ITEM_CHERRY_BLOSSOM_WINE && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 86 && iTarType == ITEM_POTION + 86 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_CHERRY_BLOSSOM_RICE_CAKE && iTarType == ITEM_CHERRY_BLOSSOM_RICE_CAKE && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 87 && iTarType == ITEM_POTION + 87 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_CHERRY_BLOSSOM_FLOWER_PETAL && iTarType == ITEM_CHERRY_BLOSSOM_FLOWER_PETAL && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
@@ -1679,7 +1676,7 @@ bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* p
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 90 && iTarType == ITEM_POTION + 90 && (iSrcDurability < 50 && iTarDurability < 50))
+    if (iSrcType == ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH && iTarType == ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH && (iSrcDurability < 50 && iTarDurability < 50))
     {
         return true;
     }
@@ -1694,7 +1691,7 @@ bool SEASON3B::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* p
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 101 && iTarType == ITEM_POTION + 101 && (iSrcDurability < 5 && iTarDurability < 5))
+    if (iSrcType == ITEM_SUSPICIOUS_SCRAP_OF_PAPER && iTarType == ITEM_SUSPICIOUS_SCRAP_OF_PAPER && (iSrcDurability < 5 && iTarDurability < 5))
     {
         return true;
     }
@@ -1714,22 +1711,22 @@ bool SEASON3B::CNewUIInventoryCtrl::CanPushItem()
 
 bool SEASON3B::CNewUIInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem)
 {
-    const int	iTargetLevel = (pTargetItem->Level >> 3) & 15;
+    const int	iTargetLevel = pTargetItem->Level;
 
     if (((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING)
-        && (pTargetItem->Type != ITEM_BOW + 7)
-        && (pTargetItem->Type != ITEM_BOW + 15))
-        || (pTargetItem->Type >= ITEM_WING && pTargetItem->Type <= ITEM_WING + 6)
-        || (pTargetItem->Type >= ITEM_WING + 36 && pTargetItem->Type <= ITEM_WING + 43)
+        && (pTargetItem->Type != ITEM_BOLT)
+        && (pTargetItem->Type != ITEM_ARROWS))
+        || (pTargetItem->Type >= ITEM_WING && pTargetItem->Type <= ITEM_WINGS_OF_DARKNESS)
+        || (pTargetItem->Type >= ITEM_WING_OF_STORM && pTargetItem->Type <= ITEM_WING_OF_DIMENSION)
         )
     {
-        if ((pSourceItem->Type == ITEM_POTION + 13)
+        if ((pSourceItem->Type == ITEM_JEWEL_OF_BLESS)
             && (iTargetLevel >= 0 && iTargetLevel <= 5))
         {
             return true;
         }
 
-        if ((pSourceItem->Type == ITEM_POTION + 14)
+        if ((pSourceItem->Type == ITEM_JEWEL_OF_SOUL)
             && (iTargetLevel >= 0 && iTargetLevel <= 8))
         {
             return true;

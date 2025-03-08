@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <thread>
 
 class SpinLock {
     std::atomic_flag locked = ATOMIC_FLAG_INIT;
@@ -8,7 +9,6 @@ public:
     {
         while (locked.test_and_set(std::memory_order_acquire))
         {
-            Sleep(0);
         }
     }
 

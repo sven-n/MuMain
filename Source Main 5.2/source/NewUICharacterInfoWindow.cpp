@@ -1,4 +1,4 @@
-// NewUICharacterInfoWindow.cpp: implementation of the CNewUICharacterInfoWindow class.
+ï»¿// NewUICharacterInfoWindow.cpp: implementation of the CNewUICharacterInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -170,8 +170,8 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 
     if (m_BtnMasterLevel.UpdateMouseEvent() == true)
     {
-        if (gCharacterManager.IsMasterLevel(Hero->Class) == true
-            && gCharacterManager.GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT)
+        if (gCharacterManager.IsMasterLevel(Hero->Class)
+            && Hero->Class != CLASS_TEMPLENIGHT)
             g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
         return true;
     }
@@ -265,7 +265,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
     wchar_t strID[256];
     swprintf(strID, L"%s", CharacterAttribute->Name);
     wchar_t strClassName[256];
-    swprintf(strClassName, L"(%s) %d", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class), CharacterAttribute->Class);
+    swprintf(strClassName, L"(%s)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(20, 20, 20, 20);
@@ -300,7 +300,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
     else
     {
         swprintf(strLevel, GlobalText[200], CharacterAttribute->Level);
-        swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperince);
+        swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperience);
     }
     if (CharacterAttribute->Level > 9)
     {
@@ -581,7 +581,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     StrengthenCapability SC_r, SC_l;
 
-    int rlevel = (pWeaponRight->Level >> 3) & 15;
+    int rlevel = pWeaponRight->Level;
 
     if (rlevel >= pWeaponRight->Jewel_Of_Harmony_OptionLevel)
     {
@@ -595,7 +595,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         }
     }
 
-    int llevel = (pWeaponLeft->Level >> 3) & 15;
+    int llevel = pWeaponLeft->Level;
 
     if (llevel >= pWeaponLeft->Jewel_Of_Harmony_OptionLevel)
     {
@@ -613,14 +613,14 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     StrengthenCapability rightinfo, leftinfo;
 
-    int iRightLevel = (pWeaponRight->Level >> 3) & 15;
+    int iRightLevel = pWeaponRight->Level;
 
     if (iRightLevel >= pWeaponRight->Jewel_Of_Harmony_OptionLevel)
     {
         g_pUIJewelHarmonyinfo->GetStrengthenCapability(&rightinfo, pWeaponRight, 1);
     }
 
-    int iLeftLevel = (pWeaponLeft->Level >> 3) & 15;
+    int iLeftLevel = pWeaponLeft->Level;
 
     if (iLeftLevel >= pWeaponLeft->Jewel_Of_Harmony_OptionLevel)
     {
@@ -642,7 +642,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         ITEM* pItem = &CharacterMachine->Equipment[k];
 
-        int eqlevel = (pItem->Level >> 3) & 15;
+        int eqlevel = pItem->Level;
 
         if (eqlevel >= pItem->Jewel_Of_Harmony_OptionLevel)
         {
@@ -710,17 +710,17 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         int maxIAttackDamageMin = 0;
         int maxIAttackDamageMax = 0;
-        if (iNonExpiredLRingType == ITEM_HELPER + 41 || iNonExpiredRRingType == ITEM_HELPER + 41)
+        if (iNonExpiredLRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
         {
             maxIAttackDamageMin = max(maxIAttackDamageMin, 20);
             maxIAttackDamageMax = max(maxIAttackDamageMax, 20);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 76 || iNonExpiredRRingType == ITEM_HELPER + 76)
+        if (iNonExpiredLRingType == ITEM_PANDA_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_PANDA_TRANSFORMATION_RING)
         {
             maxIAttackDamageMin = max(maxIAttackDamageMin, 30);
             maxIAttackDamageMax = max(maxIAttackDamageMax, 30);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 122 || iNonExpiredRRingType == ITEM_HELPER + 122)
+        if (iNonExpiredLRingType == ITEM_SKELETON_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_SKELETON_TRANSFORMATION_RING)
         {
             maxIAttackDamageMin = max(maxIAttackDamageMin, 40);
             maxIAttackDamageMax = max(maxIAttackDamageMax, 40);
@@ -733,13 +733,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     ITEM* pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
     if (pItemHelper)
     {
-        if (pItemHelper->Type == ITEM_HELPER + 37 && pItemHelper->Option1 == 0x04)
+        if (pItemHelper->Type == ITEM_HORN_OF_FENRIR && pItemHelper->ExcellentFlags == 0x04)
         {
             WORD wLevel = CharacterAttribute->Level;
             iAttackDamageMin += (wLevel / 12);
             iAttackDamageMax += (wLevel / 12);
         }
-        if (pItemHelper->Type == ITEM_HELPER + 64)
+        if (pItemHelper->Type == ITEM_DEMON)
         {
             if (false == pItemHelper->bExpiredPeriod)
             {
@@ -747,7 +747,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                 iAttackDamageMax += int(float(iAttackDamageMax) * 0.4f);
             }
         }
-        if (pItemHelper->Type == ITEM_HELPER + 123)
+        if (pItemHelper->Type == ITEM_PET_SKELETON)
         {
             if (false == pItemHelper->bExpiredPeriod)
             {
@@ -755,7 +755,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                 iAttackDamageMax += int(float(iAttackDamageMax) * 0.2f);
             }
         }
-        if (pItemHelper->Type == ITEM_HELPER + 1)
+        if (pItemHelper->Type == ITEM_IMP)
         {
             iAttackDamageMin += int(float(iAttackDamageMin) * 0.3f);
             iAttackDamageMax += int(float(iAttackDamageMax) * 0.3f);
@@ -850,7 +850,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     wchar_t strDexterity[32];
     WORD wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
     swprintf(strDexterity, L"%d", wDexterity);
-    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_DEXTERITY + 6, GlobalText[1702], 74, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_DEXTERITY + 6, GlobalText[167], 74, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_DEXTERITY + 6, strDexterity, 86, 0, RT3_SORT_CENTER);
 
     bool bDexSuccess = true;
@@ -895,13 +895,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             iType = CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type;
 
             if (
-                (iType != ITEM_ARMOR + 15)
-                && (iType != ITEM_ARMOR + 20)
-                && (iType != ITEM_ARMOR + 23)
-                && (iType != ITEM_ARMOR + 32)
-                && (iType != ITEM_ARMOR + 37)
-                && (iType != ITEM_ARMOR + 47)
-                && (iType != ITEM_ARMOR + 48)
+                (iType != ITEM_STORM_CROW_ARMOR)
+                && (iType != ITEM_THUNDER_HAWK_ARMOR)
+                && (iType != ITEM_HURRICANE_ARMOR)
+                && (iType != ITEM_VOLCANO_ARMOR)
+                && (iType != ITEM_VALIANT_ARMOR)
+                && (iType != ITEM_DESTORY_ARMOR)
+                && (iType != ITEM_PHANTOM_ARMOR)
                 )
             {
                 bDexSuccess = false;
@@ -955,7 +955,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     for (int j = 0; j < MAX_EQUIPMENT; ++j)
     {
-        int TempLevel = (CharacterMachine->Equipment[j].Level >> 3) & 15;
+        int TempLevel = CharacterMachine->Equipment[j].Level;
         if (TempLevel >= CharacterMachine->Equipment[j].Jewel_Of_Harmony_OptionLevel)
         {
             StrengthenCapability SC;
@@ -973,15 +973,15 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
     pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-    if (pItemRingLeft->Type == ITEM_HELPER + 39 || pItemRingRight->Type == ITEM_HELPER + 39)
+    if (pItemRingLeft->Type == ITEM_ELITE_TRANSFER_SKELETON_RING || pItemRingRight->Type == ITEM_ELITE_TRANSFER_SKELETON_RING)
     {
         iChangeRingAddDefense = (t_adjdef + maxdefense) / 10;
     }
 
-    if (Hero->Helper.Type == MODEL_HELPER + 80)
+    if (Hero->Helper.Type == MODEL_PET_PANDA)
         iChangeRingAddDefense += 50;
 
-    if (Hero->Helper.Type == MODEL_HELPER + 106)
+    if (Hero->Helper.Type == MODEL_PET_UNICORN)
         iChangeRingAddDefense += 50;
 
     wchar_t strBlocking[256];
@@ -1080,7 +1080,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     ITEM* phelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
     if (phelper->Durability != 0 &&
-        (phelper->Type == ITEM_HELPER + 64 || phelper->Type == ITEM_HELPER + 123))
+        (phelper->Type == ITEM_DEMON || phelper->Type == ITEM_PET_SKELETON))
     {
         if (IsRequireEquipItem(phelper))
         {
@@ -1164,7 +1164,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         g_pRenderText->SetTextColor(255, 0, 240, 255);
     }
 
-    if (phelper->Durability != 0 && phelper->Type == ITEM_HELPER + 65)
+    if (phelper->Durability != 0 && phelper->Type == ITEM_SPIRIT_OF_GUARDIAN)
     {
         if (IsRequireEquipItem(phelper))
         {
@@ -1181,7 +1181,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
         iY += 13;
-        //¹°¸®°ø°Ý·Â
+        //ë¬¼ë¦¬ê³µê²©ë ¥
         swprintf(strVitality, GlobalText[3155], 50 + (wVitality / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strVitality);
     }
@@ -1244,7 +1244,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (iBaseClass == CLASS_WIZARD || iBaseClass == CLASS_DARK || iBaseClass == CLASS_SUMMONER)
     {
-        int Level = (pWeaponRight->Level >> 3) & 15;
         int iMagicDamageMin;
         int iMagicDamageMax;
 
@@ -1266,7 +1265,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         for (int j = 0; j < MAX_EQUIPMENT; ++j)
         {
-            int TempLevel = (CharacterMachine->Equipment[j].Level >> 3) & 15;
+            int TempLevel = CharacterMachine->Equipment[j].Level;
 
             if (TempLevel >= CharacterMachine->Equipment[j].Jewel_Of_Harmony_OptionLevel)
             {
@@ -1298,17 +1297,17 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         int maxIMagicDamageMin = 0;
         int maxIMagicDamageMax = 0;
 
-        if (iNonExpiredLRingType == ITEM_HELPER + 41 || iNonExpiredRRingType == ITEM_HELPER + 41)
+        if (iNonExpiredLRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
         {
             maxIMagicDamageMin = max(maxIMagicDamageMin, 20);
             maxIMagicDamageMax = max(maxIMagicDamageMax, 20);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 76 || iNonExpiredRRingType == ITEM_HELPER + 76)
+        if (iNonExpiredLRingType == ITEM_PANDA_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_PANDA_TRANSFORMATION_RING)
         {
             maxIMagicDamageMin = max(maxIMagicDamageMin, 30);
             maxIMagicDamageMax = max(maxIMagicDamageMax, 30);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 122 || iNonExpiredRRingType == ITEM_HELPER + 122)
+        if (iNonExpiredLRingType == ITEM_SKELETON_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_SKELETON_TRANSFORMATION_RING)
         {
             maxIMagicDamageMin = max(maxIMagicDamageMin, 40);
             maxIMagicDamageMax = max(maxIMagicDamageMax, 40);
@@ -1320,14 +1319,14 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
         if (pItemHelper)
         {
-            if (pItemHelper->Type == ITEM_HELPER + 37 && pItemHelper->Option1 == 0x04)
+            if (pItemHelper->Type == ITEM_HORN_OF_FENRIR && pItemHelper->ExcellentFlags == 0x04)
             {
                 WORD wLevel = CharacterAttribute->Level;
                 iMagicDamageMin += (wLevel / 25);
                 iMagicDamageMax += (wLevel / 25);
             }
 
-            if (pItemHelper->Type == ITEM_HELPER + 64)
+            if (pItemHelper->Type == ITEM_DEMON)
             {
                 if (false == pItemHelper->bExpiredPeriod)
                 {
@@ -1335,7 +1334,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                     iMagicDamageMax += int(float(iMagicDamageMax) * 0.4f);
                 }
             }
-            if (pItemHelper->Type == ITEM_HELPER + 123)
+            if (pItemHelper->Type == ITEM_PET_SKELETON)
             {
                 if (false == pItemHelper->bExpiredPeriod)
                 {
@@ -1343,7 +1342,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                     iMagicDamageMax += int(float(iMagicDamageMax) * 0.2f);
                 }
             }
-            if (pItemHelper->Type == ITEM_HELPER + 1)
+            if (pItemHelper->Type == ITEM_IMP)
             {
                 iMagicDamageMin += int(float(iMagicDamageMin) * 0.3f);
                 iMagicDamageMax += int(float(iMagicDamageMax) * 0.3f);
@@ -1360,17 +1359,17 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         if ((pWeaponRight->Type >= MODEL_STAFF - MODEL_ITEM
             && pWeaponRight->Type < (MODEL_STAFF + MAX_ITEM_INDEX - MODEL_ITEM))
-            || pWeaponRight->Type == (MODEL_SWORD + 31 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 23 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 25 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 21 - MODEL_ITEM)
-            || pWeaponRight->Type == (MODEL_SWORD + 28 - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_RUNE_BLADE - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_EXPLOSION_BLADE - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_SWORD_DANCER - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_DARK_REIGN_BLADE - MODEL_ITEM)
+            || pWeaponRight->Type == (MODEL_IMPERIAL_SWORD - MODEL_ITEM)
             )
         {
             float magicPercent = (float)(pWeaponRight->MagicPower) / 100;
 
             ITEM_ATTRIBUTE* p = &ItemAttribute[pWeaponRight->Type];
-            float   percent = CalcDurabilityPercent(pWeaponRight->Durability, p->MagicDur, pWeaponRight->Level, pWeaponRight->Option1, pWeaponRight->ExtOption);
+            float   percent = CalcDurabilityPercent(pWeaponRight->Durability, p->MagicDur, pWeaponRight->Level, pWeaponRight->ExcellentFlags, pWeaponRight->AncientDiscriminator);
 
             magicPercent = magicPercent - magicPercent * percent;
             swprintf(strEnergy, GlobalText[215], iMagicDamageMin + maxMg, iMagicDamageMax + maxMg, (int)((iMagicDamageMaxInitial + maxMg) * magicPercent));
@@ -1431,12 +1430,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         int maxICurseDamageMin = 0;
         int maxICurseDamageMax = 0;
 
-        if (iNonExpiredLRingType == ITEM_HELPER + 76 || iNonExpiredRRingType == ITEM_HELPER + 76)
+        if (iNonExpiredLRingType == ITEM_PANDA_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_PANDA_TRANSFORMATION_RING)
         {
             maxICurseDamageMin = max(maxICurseDamageMin, 30);
             maxICurseDamageMax = max(maxICurseDamageMax, 30);
         }
-        if (iNonExpiredLRingType == ITEM_HELPER + 122 || iNonExpiredRRingType == ITEM_HELPER + 122)
+        if (iNonExpiredLRingType == ITEM_SKELETON_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_SKELETON_TRANSFORMATION_RING)
         {
             maxICurseDamageMin = max(maxICurseDamageMin, 40);
             maxICurseDamageMax = max(maxICurseDamageMax, 40);
@@ -1448,7 +1447,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
         if (pItemHelper)
         {
-            if (pItemHelper->Type == ITEM_HELPER + 64)
+            if (pItemHelper->Type == ITEM_DEMON)
             {
                 if (false == pItemHelper->bExpiredPeriod)
                 {
@@ -1456,7 +1455,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                     iCurseDamageMax += int(float(iCurseDamageMax) * 0.4f);
                 }
             }
-            if (pItemHelper->Type == ITEM_HELPER + 123)
+            if (pItemHelper->Type == ITEM_PET_SKELETON)
             {
                 if (false == pItemHelper->bExpiredPeriod)
                 {
@@ -1466,14 +1465,14 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             }
         }
 
-        if (ITEM_STAFF + 21 <= pWeaponLeft->Type && pWeaponLeft->Type <= ITEM_STAFF + 29)
+        if (ITEM_BOOK_OF_SAHAMUTT <= pWeaponLeft->Type && pWeaponLeft->Type <= ITEM_STAFF + 29)
         {
             float fCursePercent = (float)(pWeaponLeft->MagicPower) / 100;
 
             ITEM_ATTRIBUTE* p = &ItemAttribute[pWeaponLeft->Type];
             float fPercent = ::CalcDurabilityPercent(pWeaponLeft->Durability,
-                p->MagicDur, pWeaponLeft->Level, pWeaponLeft->Option1,
-                pWeaponLeft->ExtOption);
+                p->MagicDur, pWeaponLeft->Level, pWeaponLeft->ExcellentFlags,
+                pWeaponLeft->AncientDiscriminator);
 
             fCursePercent -= fCursePercent * fPercent;
             swprintf(strEnergy, GlobalText[1693],
@@ -1509,11 +1508,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
-        //¸¶¹ý°ø°Ý·Â
+        //ë§ˆë²•ê³µê²©ë ¥
         swprintf(strEnergy, GlobalText[3156], 50 + (wEnergy / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
         iY += 13;
-        //¹üÀ§°ø°Ý·Â
+        //ë²”ìœ„ê³µê²©ë ¥
         swprintf(strEnergy, GlobalText[3157], 100 + (wDexterity / 8 + wEnergy / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
     }
@@ -1637,7 +1636,7 @@ void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
 {
     ResetEquipmentLevel();
 
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true && gCharacterManager.GetCharacterClass(Hero->Class) != CLASS_TEMPLENIGHT)
+    if (gCharacterManager.IsMasterLevel(Hero->Class) == true && Hero->Class != CLASS_TEMPLENIGHT)
     {
         m_BtnMasterLevel.UnLock();
         m_BtnMasterLevel.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
@@ -1671,13 +1670,13 @@ void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
 void SEASON3B::CNewUICharacterInfoWindow::ResetEquipmentLevel()
 {
     ITEM* pItem = CharacterMachine->Equipment;
-    Hero->Weapon[0].Level = (pItem[EQUIPMENT_WEAPON_RIGHT].Level >> 3) & 15;
-    Hero->Weapon[1].Level = (pItem[EQUIPMENT_WEAPON_LEFT].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_HELM].Level = (pItem[EQUIPMENT_HELM].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_ARMOR].Level = (pItem[EQUIPMENT_ARMOR].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_PANTS].Level = (pItem[EQUIPMENT_PANTS].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_GLOVES].Level = (pItem[EQUIPMENT_GLOVES].Level >> 3) & 15;
-    Hero->BodyPart[BODYPART_BOOTS].Level = (pItem[EQUIPMENT_BOOTS].Level >> 3) & 15;
+    Hero->Weapon[0].Level = pItem[EQUIPMENT_WEAPON_RIGHT].Level;
+    Hero->Weapon[1].Level = pItem[EQUIPMENT_WEAPON_LEFT].Level;
+    Hero->BodyPart[BODYPART_HELM].Level = pItem[EQUIPMENT_HELM].Level;
+    Hero->BodyPart[BODYPART_ARMOR].Level = pItem[EQUIPMENT_ARMOR].Level;
+    Hero->BodyPart[BODYPART_PANTS].Level = pItem[EQUIPMENT_PANTS].Level;
+    Hero->BodyPart[BODYPART_GLOVES].Level = pItem[EQUIPMENT_GLOVES].Level;
+    Hero->BodyPart[BODYPART_BOOTS].Level = pItem[EQUIPMENT_BOOTS].Level;
 
     CheckFullSet(Hero);
 }

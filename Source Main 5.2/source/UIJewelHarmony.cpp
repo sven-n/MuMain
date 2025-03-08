@@ -86,14 +86,56 @@ JewelHarmonyInfo::~JewelHarmonyInfo()
 
 const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filename)
 {
+    constexpr size_t NAME_SIZE = 60;
+    constexpr size_t LEVEL_COUNT = 14;
+    constexpr size_t ENTRY_SIZE =
+        sizeof(int) +                  // OptionType
+        NAME_SIZE +                    // Name
+        sizeof(int) +                  // Minlevel
+        LEVEL_COUNT * sizeof(int) +    // HarmonyJewelLevel
+        LEVEL_COUNT * sizeof(int);     // Zen
+
     FILE* fp = ::_wfopen(filename.c_str(), L"rb");
     if (fp != NULL)
     {
-        int nSize = sizeof(HARMONYJEWELOPTION) * MAXHARMONYJEWELOPTIONTYPE * MAXHARMONYJEWELOPTIONINDEX;
+        int nEntries = MAXHARMONYJEWELOPTIONTYPE * MAXHARMONYJEWELOPTIONINDEX;
+        size_t nSize = ENTRY_SIZE * nEntries;
 
-        ::fread(m_OptionData, nSize, 1, fp);
-        ::BuxConvert((BYTE*)m_OptionData, nSize);
+        std::vector<BYTE> tempBuffer(nSize);
+
+        ::fread(tempBuffer.data(), nSize, 1, fp);
+        ::BuxConvert((BYTE*)tempBuffer.data(), nSize);
         ::fclose(fp);
+
+        // Copy to the new HarmonyJewelOption array that uses wchar_t[] for the Name
+        for (int i = 0; i < nEntries; ++i) 
+        {
+            int type = i / MAXHARMONYJEWELOPTIONINDEX;
+            int option = i % MAXHARMONYJEWELOPTIONINDEX;
+
+            // Calculate base offset for the current entry
+            BYTE* entry = tempBuffer.data() + i * ENTRY_SIZE;
+
+            // Read OptionType
+            m_OptionData[type][option].OptionType = *reinterpret_cast<int*>(entry);
+
+            // Read Name and convert to wchar_t
+            char* name = reinterpret_cast<char*>(entry + sizeof(int));
+            CMultiLanguage::GetSingletonPtr()->ConvertFromUtf8(m_OptionData[type][option].Name, name, NAME_SIZE);
+
+            // Read Minlevel
+            m_OptionData[type][option].Minlevel = *reinterpret_cast<int*>(entry + sizeof(int) + NAME_SIZE);
+
+            // Read HarmonyJewelLevel[14]
+            std::memcpy(m_OptionData[type][option].HarmonyJewelLevel,
+                entry + sizeof(int) + NAME_SIZE + sizeof(int),
+                LEVEL_COUNT * sizeof(int));
+
+            // Read Zen[14]
+            std::memcpy(m_OptionData[type][option].Zen,
+                entry + sizeof(int) + NAME_SIZE + sizeof(int) + LEVEL_COUNT * sizeof(int),
+                LEVEL_COUNT * sizeof(int));
+        }
 
         return true;
     }

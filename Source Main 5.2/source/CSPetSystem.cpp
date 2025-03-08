@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////
 //  CSPetSystem.
 //////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +70,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->ContrastEnable = false;
     o->EnableBoneMatrix = true;
     o->EnableShadow = false;
-    c->Dead = false;
+    c->Dead = 0;
     c->Blood = false;
     c->GuildTeam = 0;
     c->Run = 0;
@@ -83,7 +83,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->AlphaTarget = 1.f;
     o->Velocity = 0.f;
     o->ShadowScale = 0.f;
-    o->m_byHurtByOneToOne = 0;
+    o->m_byHurtByDeathstab = 0;
     o->AI = 0;
     o->Velocity = 1.f;
     o->Gravity = 13;
@@ -98,7 +98,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->m_bActionStart = false;
     o->m_bySkillCount = 0;
 
-    c->Class = 0;
+    c->Class = CLASS_WIZARD;
     o->PriorAction = 0;
     o->CurrentAction = 0;
     o->AnimationFrame = 0.f;
@@ -113,7 +113,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->Kind = KIND_PET;
     c->Change = false;
     o->SubType = 0;
-    c->MonsterIndex = -1;
+    c->MonsterIndex = MONSTER_UNDEFINED;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;
     o->Position[0] = (float)(PositionX * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
@@ -147,14 +147,14 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     {
         c->Weapon[i].Type = -1;
         c->Weapon[i].Level = 0;
-        c->Weapon[i].Option1 = 0;
+        c->Weapon[i].ExcellentFlags = 0;
     }
     for (i = 0; i < MAX_BODYPART; i++)
     {
         c->BodyPart[i].Type = -1;
         c->BodyPart[i].Level = 0;
-        c->BodyPart[i].Option1 = 0;
-        c->BodyPart[i].ExtOption = 0;
+        c->BodyPart[i].ExcellentFlags = 0;
+        c->BodyPart[i].AncientDiscriminator = 0;
     }
 
     c->Wing.Type = -1;
@@ -242,6 +242,7 @@ void CSPetSystem::SetAttack(int Key, int attackType)
 
     m_PetCharacter.TargetCharacter = Index;
     m_PetCharacter.AttackTime = 0;
+    m_PetCharacter.LastAttackEffectTime = -1;
     SetAI(PET_ATTACK + attackType);
 
     if (m_PetCharacter.Object.AI == PET_ATTACK)
@@ -409,7 +410,7 @@ void CSPetDarkSpirit::MovePet(void)
             {
                 b->TransformPosition(o->BoneTransform[rand() % 66], p, Pos);
 
-                CreateParticle(BITMAP_SPARK + 1, Pos, o->Angle, Light, 5, 0.8f);
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, Pos, o->Angle, Light, 5, 0.8f);
             }
         }
 
@@ -428,7 +429,7 @@ void CSPetDarkSpirit::MovePet(void)
         int speedRandom = 28;
         int CharacterHeight = 250;
 
-        if (m_PetOwner->Helper.Type == ITEM_HELPER + 4 || gMapManager.WorldActive == WD_55LOGINSCENE)
+        if (m_PetOwner->Helper.Type == ITEM_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
         {
             CharacterHeight = 350;
         }
@@ -668,7 +669,7 @@ void    CSPetDarkSpirit::RenderCmdType(void)
     {
         PartyWidth = 50.f;
     }
-    if ((Hero->Helper.Type >= MODEL_HELPER + 0 && Hero->Helper.Type <= MODEL_HELPER + 4) || Hero->Helper.Type == MODEL_HELPER + 37)
+    if ((Hero->Helper.Type >= MODEL_GUARDIAN_ANGEL && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM) || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         PartyWidth += 60.f;
     }
@@ -710,16 +711,18 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
             {
                 CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL, (float)(rand() % 40 + 20));
             }
-            if ((int)c->AttackTime == 1)
+
+            if (c->CheckAttackTime(1))
             {
                 vec3_t Angle, Light;
 
                 Vector(45.f, (float)(rand() % 180) - 90, 0.f, Angle);
                 Vector(1.f, 0.8f, 0.6f, Light);
                 CreateEffect(MODEL_DARKLORD_SKILL, o->Position, Angle, Light, 3);
+                c->SetLastAttackEffectTime();
             }
         }
-        if (c->AttackTime > 3 && (int)c->AttackTime % 2)
+        if (c->AttackTime > 3 && (int)c->AttackTime % 2 && rand_fps_check(1))
         {
             if (o->Position[2] > (m_PetOwner->Object.Position[2] + 100.f))
             {
@@ -743,7 +746,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
                     if (!b->Bones[i].Dummy && i < b->NumBones)
                     {
                         b->TransformPosition(o->BoneTransform[i], p, Pos);
-                        CreateParticle(BITMAP_LIGHT, Pos, o->Angle, Light, 6, 1.3f);
+                        CreateParticleFpsChecked(BITMAP_LIGHT, Pos, o->Angle, Light, 6, 1.3f);
                     }
                 }
             }
@@ -763,6 +766,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
                 SetAI(PET_FLYING);
             }
             c->AttackTime = 0;
+            c->LastAttackEffectTime = -1;
         }
         break;
 

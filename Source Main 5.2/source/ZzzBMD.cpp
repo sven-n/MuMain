@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -45,12 +45,12 @@ unsigned char ShadowBuffer[256 * 256];
 int           ShadowBufferWidth = 256;
 int           ShadowBufferHeight = 256;
 
-extern int  MouseX;
-extern int  MouseY;
-extern bool MouseLButton;
+//extern int  MouseX;
+//extern int  MouseY;
+//extern bool MouseLButton;
 
-extern double FPS;
-extern float FPS_ANIMATION_FACTOR;
+//extern double FPS;
+//extern float FPS_ANIMATION_FACTOR;
 
 bool  StopMotion = false;
 float ParentMatrix[3][4];
@@ -177,7 +177,7 @@ void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorF
     }
 }
 
-extern int  SceneFlag;
+extern EGameScene SceneFlag;
 extern int EditFlag;
 
 bool HighLight = true;
@@ -447,7 +447,7 @@ bool BMD::PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsig
 
         float fTemp;
 
-        if (SceneFlag == 4)
+        if (SceneFlag == CHARACTER_SCENE)
         {
             fTemp = *AnimationFrame + 2;
         }
@@ -915,6 +915,71 @@ void BMD::EndRender()
 extern double WorldTime;
 extern int WaterTextureNumber;
 
+void BMD::BeginRenderCoinHeap()
+{
+    constexpr int meshIndex = 0;
+    Mesh_t* m = &Meshs[meshIndex];
+    const auto textureIndex = IndexTexture[m->Texture];
+
+    BindTexture(textureIndex);
+    DisableAlphaBlend();
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
+int BMD::AddToCoinHeap(int coinIndex, int target_vertex_index)
+{
+    const auto vertices = RenderArrayVertices;
+    const auto colors = RenderArrayColors;
+    const auto texCoords = RenderArrayTexCoords;
+
+    constexpr auto alpha = 1.0f;
+    constexpr int meshIndex = 0;
+
+    Mesh_t* m = &Meshs[meshIndex];
+
+    for (int j = 0; j < m->NumTriangles; j++)
+    {
+        const auto triangle = &m->Triangles[j];
+        for (int k = 0; k < triangle->Polygon; k++)
+        {
+            const int source_vertex_index = triangle->VertexIndex[k];
+            target_vertex_index++;
+
+            VectorCopy(VertexTransform[meshIndex][source_vertex_index], vertices[target_vertex_index]);
+
+            Vector4(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
+
+            auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
+            texCoords[target_vertex_index][0] = texco.TexCoordU;
+            texCoords[target_vertex_index][1] = texco.TexCoordV;
+        }
+    }
+
+    return target_vertex_index;
+}
+
+void BMD::EndRenderCoinHeap(int coinCount)
+{
+    const auto vertices = RenderArrayVertices;
+    const auto colors = RenderArrayColors;
+    const auto texCoords = RenderArrayTexCoords;
+
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glColorPointer(4, GL_FLOAT, 0, colors);
+    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+
+    constexpr int meshIndex = 0;
+    Mesh_t* m = &Meshs[meshIndex];
+    glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3 * coinCount);
+
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshIndex, float blendMeshAlpha, float blendMeshTextureCoordU, float blendMeshTextureCoordV, int explicitTextureIndex)
 {
     if (meshIndex >= NumMeshs || meshIndex < 0) return;
@@ -926,25 +991,13 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
     int textureIndex = IndexTexture[m->Texture];
     if (textureIndex == BITMAP_HIDE)
-        return;
-
-    if (textureIndex == BITMAP_SKIN)
     {
-        if (HideSkin)
-        {
-            return;
-        }
-
-        textureIndex = BITMAP_SKIN + Skin;
+        return;
     }
-    else if (textureIndex == BITMAP_WATER)
+
+    if (textureIndex == BITMAP_WATER)
     {
         textureIndex = BITMAP_WATER + WaterTextureNumber;
-    }
-    else  if (textureIndex == BITMAP_HAIR)
-    {
-        if (HideSkin) return;
-        textureIndex = BITMAP_HAIR + (Skin - 8);
     }
 
     if (explicitTextureIndex != -1)
@@ -953,6 +1006,15 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     }
 
     const auto texture = Bitmaps.GetTexture(textureIndex);
+    if (texture->IsSkin && HideSkin)
+    {
+        return;
+    }
+
+    if (texture->IsHair && HideSkin)
+    {
+        return;
+    }
 
     bool EnableWave = false;
     int streamMesh = static_cast<u_char>(this->StreamMesh);
@@ -1795,10 +1857,10 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
             case MODEL_GOLEM_STONE:
                 if (rand_fps_check(45) && iEffectCount < 20)
                 {
-                    if (iSubType == 0) {	//. ºÒ°ñ·½
+                    if (iSubType == 0) {	//. ë¶ˆê³¨ë ˜
                         CreateEffect(MODEL_GOLEM_STONE, VertexTransform[i][vi], angle, Light);
                     }
-                    else if (iSubType == 1) {	//. µ¶°ñ·½
+                    else if (iSubType == 1) {	//. ë…ê³¨ë ˜
                         CreateEffect(MODEL_BIG_STONE_PART1, VertexTransform[i][vi], angle, Light, 2);
                         CreateEffect(MODEL_BIG_STONE_PART2, VertexTransform[i][vi], angle, Light, 2);
                     }
@@ -2530,13 +2592,11 @@ void BMD::Release()
                 delete m->m_csTScript;
                 m->m_csTScript = NULL;
             }
-            switch (IndexTexture[m->Texture])
+            auto textureIndex = IndexTexture[m->Texture];
+            auto isSkinTexture = (textureIndex >= BITMAP_SKIN_BEGIN && textureIndex <= BITMAP_SKIN_END);
+            if (!isSkinTexture)
             {
-            case BITMAP_SKIN:
-                break;
-            default:
-                DeleteBitmap(IndexTexture[m->Texture]);
-                break;
+                DeleteBitmap(textureIndex);
             }
         }
     }
@@ -2618,7 +2678,7 @@ void BMD::FindTriangleForEdge(int iMesh, int iTri1, int iIndex11)
     }
 }
 //#endif //USE_SHADOWVOLUME
-
+/*
 bool BMD::Open(wchar_t* DirName, wchar_t* ModelFileName)
 {
     wchar_t ModelName[64];
@@ -2698,11 +2758,11 @@ bool BMD::Open(wchar_t* DirName, wchar_t* ModelFileName)
         delete (TextureScript*)&TSParsing;
     }
     //#ifdef USE_SHADOWVOLUME
-        /*for(i=0;i<NumMeshs;i++)
-        {
-            Mesh_t *m = &Meshs[i];
-            EdgeTriangleIndex(m->Triangles,m->NumTriangles);
-        }*/
+        //for(i=0;i<NumMeshs;i++)
+        //{
+        //    Mesh_t *m = &Meshs[i];
+        //    EdgeTriangleIndex(m->Triangles,m->NumTriangles);
+        //}
     FindNearTriangle();
     //#endif
     for (i = 0; i < NumActions; i++)
@@ -2813,7 +2873,7 @@ bool BMD::Save(wchar_t* DirName, wchar_t* ModelFileName)
     }
     fclose(fp);
     return true;
-}
+}*/
 
 bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
 {

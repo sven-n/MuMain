@@ -1,4 +1,4 @@
-// SummonSystem.cpp: implementation of the CSummonSystem class.
+﻿// SummonSystem.cpp: implementation of the CSummonSystem class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -25,7 +25,7 @@ CSummonSystem::~CSummonSystem()
 
 void CSummonSystem::MoveEquipEffect(CHARACTER* pCharacter, int iItemType, int iItemLevel, int iItemOption1)
 {
-    if (iItemType >= MODEL_STAFF + 21 && iItemType <= MODEL_STAFF + 29)
+    if (iItemType >= MODEL_BOOK_OF_SAHAMUTT && iItemType <= MODEL_STAFF + 29)
     {
         CreateEquipEffect_WristRing(pCharacter, iItemType, iItemLevel, iItemOption1);
         CreateEquipEffect_Summon(pCharacter, iItemType, iItemLevel, iItemOption1);
@@ -47,13 +47,13 @@ void CSummonSystem::SetPlayerSummon(CHARACTER* pCharacter, OBJECT* pObject)
 {
     switch (pCharacter->Helper.Type)
     {
-    case MODEL_HELPER + 2:
+    case MODEL_HORN_OF_UNIRIA:
         SetAction(pObject, PLAYER_SKILL_SUMMON_UNI);
         break;
-    case MODEL_HELPER + 3:
+    case MODEL_HORN_OF_DINORANT:
         SetAction(pObject, PLAYER_SKILL_SUMMON_DINO);
         break;
-    case MODEL_HELPER + 37:
+    case MODEL_HORN_OF_FENRIR:
         SetAction(pObject, PLAYER_SKILL_SUMMON_FENRIR);
         break;
     default:
@@ -279,7 +279,7 @@ void CSummonSystem::CreateEquipEffect_WristRing(CHARACTER* pCharacter, int iItem
     {
         if (rand() % 4)
         {
-            CreateParticle(BITMAP_SPARK + 1, vPos, pObject->Angle, vLight, 23, 0.5f, pObject);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, pObject->Angle, vLight, 23, 0.5f, pObject);
         }
     }
 }
@@ -326,19 +326,19 @@ void CSummonSystem::CreateEquipEffect_Summon(CHARACTER* pCharacter, int iItemTyp
 
     switch (iItemType)
     {
-    case MODEL_STAFF + 21:
+    case MODEL_BOOK_OF_SAHAMUTT:
         if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject, 0) && !pCharacter->SafeZone && sinf(WorldTime * 0.0004f + byRandom * 0.024f) > 0.3f)
         {
             CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, pObject->Position, pObject->Angle, vLight, 0, pObject, -1, byRandom);
         }
         break;
-    case MODEL_STAFF + 22:
+    case MODEL_BOOK_OF_NEIL:
         if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject, 0) && !pCharacter->SafeZone && sinf(WorldTime * 0.0004f + byRandom * 0.024f) > 0.3f)
         {
             CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, pObject->Position, pObject->Angle, vLight, 0, pObject, -1, byRandom);
         }
         break;
-    case MODEL_STAFF + 23:
+    case MODEL_BOOK_OF_LAGLE:
         if (!SearchEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, pObject, 0) && !pCharacter->SafeZone && sinf(WorldTime * 0.0004f + byRandom * 0.024f) > 0.3f)
         {
             CreateEffect(MODEL_SUMMONER_EQUIP_HEAD_LAGUL, pObject->Position, pObject->Angle, vLight, 0, pObject, -1, byRandom);

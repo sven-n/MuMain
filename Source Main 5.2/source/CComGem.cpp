@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "CComGem.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
@@ -34,7 +34,6 @@ namespace COMGEM
 
 void COMGEM::SendReqUnMix()
 {
-    iUnMixIndex += 12;
     SocketClient->ToGameServer()->SendLahapJewelMixRequest(0x01, m_cGemType / 2, iUnMixLevel, iUnMixIndex);
 }
 
@@ -76,9 +75,8 @@ bool COMGEM::FindWantedList()
         if (isCompiledGem(pItem))
         {
             INTBYTEPAIR p;
-            int Level = (pItem->Level >> 3) & 15;
-            p.first = pItem->y * pNewInventoryCtrl->GetNumberOfColumn() + pItem->x;
-            p.second = Level;
+            p.first = pItem->y * pNewInventoryCtrl->GetNumberOfColumn() + pItem->x + MAX_EQUIPMENT_INDEX;
+            p.second = pItem->Level;
             m_UnmixTarList.AddText(p.first, p.second);
             bReturn = true;
         }
@@ -172,7 +170,7 @@ bool COMGEM::CheckMyInvValid()
     }
     else if (m_bType == DETACH)
     {
-        if (iUnMixIndex == -1 || iUnMixIndex >= MAX_INVENTORY)
+        if (iUnMixIndex == -1 || iUnMixIndex >= MAX_MY_INVENTORY_EX_INDEX)
         {
             m_cErr = DEERROR_NOTALLOWED;
             m_cPercent = 0;
@@ -217,15 +215,13 @@ void COMGEM::CalcGen()
 
 char COMGEM::CalcCompiledCount(const ITEM* p)
 {
-    int Level = (p->Level >> 3) & 15;
-
-    if (CheckOneItem(p) % 2)	return (Level + 1) * FIRST;
+    if (CheckOneItem(p) % 2)	return (p->Level + 1) * FIRST;
     else						return 0;
 }
 
 int	COMGEM::CalcItemValue(const ITEM* p)
 {
-    int Level = (p->Level >> 3) & 15;
+    int Level = p->Level;
     switch (CheckOneItem(p))
     {
     case NOGEM:
@@ -322,30 +318,30 @@ int COMGEM::Check_Jewel(int _nJewel, int _nType, bool _bModel)
 
     if (bNon)
     {
-        if (_nJewel == ITEM_POTION + 13)		return eBLESS;
-        if (_nJewel == ITEM_POTION + 14)		return eSOUL;
-        if (_nJewel == ITEM_POTION + 16)		return eLIFE;
-        if (_nJewel == ITEM_POTION + 22)		return eCREATE;
-        if (_nJewel == ITEM_POTION + 31)		return ePROTECT;
-        if (_nJewel == ITEM_POTION + 41)		return eGEMSTONE;
-        if (_nJewel == ITEM_POTION + 42)		return eHARMONY;
-        if (_nJewel == ITEM_WING + 15)		return eCHAOS;
-        if (_nJewel == ITEM_POTION + 43)		return eLOW;
-        if (_nJewel == ITEM_POTION + 44)		return eUPPER;
+        if (_nJewel == ITEM_JEWEL_OF_BLESS)		return eBLESS;
+        if (_nJewel == ITEM_JEWEL_OF_SOUL)		return eSOUL;
+        if (_nJewel == ITEM_JEWEL_OF_LIFE)		return eLIFE;
+        if (_nJewel == ITEM_JEWEL_OF_CREATION)		return eCREATE;
+        if (_nJewel == ITEM_JEWEL_OF_GUARDIAN)		return ePROTECT;
+        if (_nJewel == ITEM_GEMSTONE)		return eGEMSTONE;
+        if (_nJewel == ITEM_JEWEL_OF_HARMONY)		return eHARMONY;
+        if (_nJewel == ITEM_JEWEL_OF_CHAOS)		return eCHAOS;
+        if (_nJewel == ITEM_LOWER_REFINE_STONE)		return eLOW;
+        if (_nJewel == ITEM_HIGHER_REFINE_STONE)		return eUPPER;
     }
 
     if (bCom)
     {
-        if (_nJewel == ITEM_WING + 30)	return eBLESS_C;
-        if (_nJewel == ITEM_WING + 31)	return eSOUL_C;
-        if (_nJewel == ITEM_WING + 136)	return eLIFE_C;
-        if (_nJewel == ITEM_WING + 137)	return eCREATE_C;
-        if (_nJewel == ITEM_WING + 138)	return ePROTECT_C;
-        if (_nJewel == ITEM_WING + 139)	return eGEMSTONE_C;
-        if (_nJewel == ITEM_WING + 140)	return eHARMONY_C;
-        if (_nJewel == ITEM_WING + 141)	return eCHAOS_C;
-        if (_nJewel == ITEM_WING + 142)	return eLOW_C;
-        if (_nJewel == ITEM_WING + 143)	return eUPPER_C;
+        if (_nJewel == ITEM_PACKED_JEWEL_OF_BLESS)	return eBLESS_C;
+        if (_nJewel == ITEM_PACKED_JEWEL_OF_SOUL)	return eSOUL_C;
+        if (_nJewel == ITEM_PACKED_JEWEL_OF_LIFE)	return eLIFE_C;
+        if (_nJewel == ITEM_PACKED_JEWEL_OF_CREATION)	return eCREATE_C;
+        if (_nJewel == ITEM_PACKED_JEWEL_OF_GUARDIAN)	return ePROTECT_C;
+        if (_nJewel == ITEM_PACKED_GEMSTONE)	return eGEMSTONE_C;
+        if (_nJewel == ITEM_PACKED_JEWEL_OF_HARMONY)	return eHARMONY_C;
+        if (_nJewel == ITEM_PACKED_JEWEL_OF_CHAOS)	return eCHAOS_C;
+        if (_nJewel == ITEM_PACKED_LOWER_REFINE_STONE)	return eLOW_C;
+        if (_nJewel == ITEM_PACKED_HIGHER_REFINE_STONE)	return eUPPER_C;
     }
 
     return NOGEM;
@@ -357,83 +353,83 @@ int COMGEM::GetJewelIndex(int _nJewel, int _nType)
     {
     case eBLESS:
         if (_nType == eGEM_NAME)		return 1806;
-        if (_nType == eGEM_INDEX)		return ITEM_POTION + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_JEWEL_OF_BLESS;
         break;
     case eBLESS_C:
         if (_nType == eGEM_NAME)		return 1806;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 14;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_GREATER_FORTITUDE;
         break;
     case eSOUL:
         if (_nType == eGEM_NAME)		return 1807;
-        if (_nType == eGEM_INDEX)		return ITEM_POTION + 14;
+        if (_nType == eGEM_INDEX)		return ITEM_JEWEL_OF_SOUL;
         break;
     case eSOUL_C:
         if (_nType == eGEM_NAME)		return 1807;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_IMPALE;
         break;
     case eLIFE:
         if (_nType == eGEM_NAME)		return 3312;
-        if (_nType == eGEM_INDEX)		return ITEM_POTION + 16;
+        if (_nType == eGEM_INDEX)		return ITEM_JEWEL_OF_LIFE;
         break;
     case eLIFE_C:
         if (_nType == eGEM_NAME)		return 3312;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_IMPALE;
         break;
     case eCREATE:
         if (_nType == eGEM_NAME)		return 3313;
-        if (_nType == eGEM_INDEX)		return ITEM_POTION + 22;
+        if (_nType == eGEM_INDEX)		return ITEM_JEWEL_OF_CREATION;
         break;
     case eCREATE_C:
         if (_nType == eGEM_NAME)		return 3313;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_IMPALE;
         break;
     case ePROTECT:
         if (_nType == eGEM_NAME)		return 3314;
-        if (_nType == eGEM_INDEX)		return ITEM_POTION + 31;
+        if (_nType == eGEM_INDEX)		return ITEM_JEWEL_OF_GUARDIAN;
         break;
     case ePROTECT_C:
         if (_nType == eGEM_NAME)		return 3314;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_IMPALE;
         break;
     case eGEMSTONE:
         if (_nType == eGEM_NAME)		return 2081;
-        if (_nType == eGEM_INDEX)		return ITEM_POTION + 41;
+        if (_nType == eGEM_INDEX)		return ITEM_GEMSTONE;
         break;
     case eGEMSTONE_C:
         if (_nType == eGEM_NAME)		return 2081;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_IMPALE;
         break;
     case eHARMONY:
         if (_nType == eGEM_NAME)		return 3315;
-        if (_nType == eGEM_INDEX)		return ITEM_POTION + 42;
+        if (_nType == eGEM_INDEX)		return ITEM_JEWEL_OF_HARMONY;
         break;
     case eHARMONY_C:
         if (_nType == eGEM_NAME)		return 3315;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_IMPALE;
         break;
     case eCHAOS:
         if (_nType == eGEM_NAME)		return 3316;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 15;
+        if (_nType == eGEM_INDEX)		return ITEM_JEWEL_OF_CHAOS;
         break;
     case eCHAOS_C:
         if (_nType == eGEM_NAME)		return 3316;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_IMPALE;
         break;
     case eLOW:
         if (_nType == eGEM_NAME)		return 3317;
-        if (_nType == eGEM_INDEX)		return ITEM_POTION + 43;
+        if (_nType == eGEM_INDEX)		return ITEM_LOWER_REFINE_STONE;
         break;
     case eLOW_C:
         if (_nType == eGEM_NAME)		return 3317;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_IMPALE;
         break;
     case eUPPER:
         if (_nType == eGEM_NAME)		return 3318;
-        if (_nType == eGEM_INDEX)		return ITEM_POTION + 44;
+        if (_nType == eGEM_INDEX)		return ITEM_HIGHER_REFINE_STONE;
         break;
     case eUPPER_C:
         if (_nType == eGEM_NAME)		return 3318;
-        if (_nType == eGEM_INDEX)		return ITEM_WING + 13;
+        if (_nType == eGEM_INDEX)		return ITEM_ORB_OF_IMPALE;
         break;
     }
 

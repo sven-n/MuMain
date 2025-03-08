@@ -1,4 +1,4 @@
-// GMDoppelGanger1.cpp: implementation of the CGMDoppelGanger1 class.
+ï»¿// GMDoppelGanger1.cpp: implementation of the CGMDoppelGanger1 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "GMDoppelGanger1.h"
@@ -61,117 +61,117 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
 
     switch (iType)
     {
-    case 529:
-        OpenMonsterModel(190);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 190, PosX, PosY);
-        wcscpy(pCharacter->ID, L"µµ»ìÀÚ");
+    case MONSTER_TERRIBLE_BUTCHER:
+        OpenMonsterModel(MONSTER_MODEL_TERRIBLE_BUTCHER);
+        pCharacter = CreateCharacter(Key, MODEL_TERRIBLE_BUTCHER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë„ì‚´ìž");
         pCharacter->Object.Scale = 1.0f;
         break;
-    case 530:
-        OpenMonsterModel(189);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 189, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ºÐ³ëÇÑ µµ»ìÀÚ");
+    case MONSTER_MAD_BUTCHER:
+        OpenMonsterModel(MONSTER_MODEL_MAD_BUTCHER);
+        pCharacter = CreateCharacter(Key, MODEL_MAD_BUTCHER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë¶„ë…¸í•œ ë„ì‚´ìž");
         pCharacter->Object.Scale = 0.8f;
         break;
-    case 531:
-        OpenMonsterModel(145);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 145, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¾ÆÀÌ½º ¿öÄ¿");
+    case MONSTER_ICE_WALKER2:
+        OpenMonsterModel(MONSTER_MODEL_ICE_WALKER);
+        pCharacter = CreateCharacter(Key, MODEL_ICE_WALKER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì•„ì´ìŠ¤ ì›Œì»¤");
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 532:
-        OpenMonsterModel(6);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 6, PosX, PosY);
-        wcscpy(pCharacter->ID, L"À¯Ãæ");
+    case MONSTER_LARVA2:
+        OpenMonsterModel(MONSTER_MODEL_LARVA);
+        pCharacter = CreateCharacter(Key, MODEL_LARVA, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ìœ ì¶©");
         pCharacter->Object.Scale = 0.6f;
         break;
-    case 533:
-        OpenMonsterModel(191);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 191, PosX, PosY);
-        wcscpy(pCharacter->ID, L"µµÇÃ°»¾î");
+    case MONSTER_DOPPELGANGER:
+        OpenMonsterModel(MONSTER_MODEL_DOPPELGANGER);
+        pCharacter = CreateCharacter(Key, MODEL_DOPPELGANGER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë„í”Œê°±ì–´");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Object.m_bRenderShadow = false;
         break;
-    case 534:
+    case MONSTER_DOPPELGANGER_ELF:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_ELF;
-        wcscpy(pCharacter->ID, L"µµÇÃ°»¾î¿äÁ¤");
-        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 13;
-        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 13;
-        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 13;
-        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 13;
-        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 13;
-        pCharacter->Weapon[0].Type = MODEL_BOW + 15;
-        pCharacter->Weapon[1].Type = MODEL_BOW + 17;
+        wcscpy(pCharacter->ID, L"ë„í”Œê°±ì–´ìš”ì •");
+        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_SPIRIT_HELM;
+        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_SPIRIT_ARMOR;
+        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_SPIRIT_PANTS;
+        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_SPIRIT_GLOVES;
+        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_SPIRIT_BOOTS;
+        pCharacter->Weapon[0].Type = MODEL_ARROWS;
+        pCharacter->Weapon[1].Type = MODEL_CELESTIAL_BOW;
         break;
-    case 535:
+    case MONSTER_DOPPELGANGER_KNIGHT:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_KNIGHT;
-        wcscpy(pCharacter->ID, L"µµÇÃ°»¾î±â»ç");
-        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 1;
-        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 1;
-        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 1;
-        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 1;
-        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 1;
-        pCharacter->Weapon[0].Type = MODEL_SWORD + 13;
+        wcscpy(pCharacter->ID, L"ë„í”Œê°±ì–´ê¸°ì‚¬");
+        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DRAGON_HELM;
+        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DRAGON_ARMOR;
+        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DRAGON_PANTS;
+        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_DRAGON_GLOVES;
+        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_DRAGON_BOOTS;
+        pCharacter->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 536:
+    case MONSTER_DOPPELGANGER_WIZARD:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_WIZARD;
-        wcscpy(pCharacter->ID, L"µµÇÃ°»¾î¸¶¹ý»ç");
-        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 18;
-        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 18;
-        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 18;
-        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 18;
-        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 18;
-        pCharacter->Weapon[0].Type = MODEL_STAFF + 9;
-        pCharacter->Weapon[1].Type = MODEL_SHIELD + 15;
+        wcscpy(pCharacter->ID, L"ë„í”Œê°±ì–´ë§ˆë²•ì‚¬");
+        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_GRAND_SOUL_HELM;
+        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_GRAND_SOUL_ARMOR;
+        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_GRAND_SOUL_PANTS;
+        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GRAND_SOUL_GLOVES;
+        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_GRAND_SOUL_BOOTS;
+        pCharacter->Weapon[0].Type = MODEL_DRAGON_SOUL_STAFF;
+        pCharacter->Weapon[1].Type = MODEL_GRAND_SOUL_SHIELD;
         break;
-    case 537:
+    case MONSTER_DOPPELGANGER_MG:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_DARK;
-        wcscpy(pCharacter->ID, L"µµÇÃ°»¾î¸¶°Ë»ç");
+        wcscpy(pCharacter->ID, L"ë„í”Œê°±ì–´ë§ˆê²€ì‚¬");
         pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM + 15;
-        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 15;
-        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 15;
-        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 15;
-        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 15;
-        pCharacter->Weapon[0].Type = MODEL_SWORD + 31;
+        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_STORM_CROW_ARMOR;
+        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_STORM_CROW_PANTS;
+        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_STORM_CROW_GLOVES;
+        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_STORM_CROW_BOOTS;
+        pCharacter->Weapon[0].Type = MODEL_RUNE_BLADE;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 538:
+    case MONSTER_DOPPELGANGER_DL:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_DARK_LORD;
-        wcscpy(pCharacter->ID, L"µµÇÃ°»¾î´Å©·Îµå");
-        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 27;
-        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 27;
-        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 27;
-        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 27;
-        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 27;
-        pCharacter->Weapon[0].Type = MODEL_MACE + 10;
-        pCharacter->Weapon[1].Type = MODEL_SHIELD + 7;
-        pCharacter->Helper.Type = MODEL_HELPER + 4;
+        wcscpy(pCharacter->ID, L"ë„í”Œê°±ì–´ëŠšãˆ†ç¯");
+        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DARK_STEEL_MASK;
+        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DARK_STEEL_ARMOR;
+        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DARK_STEEL_PANTS;
+        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_DARK_STEEL_GLOVES;
+        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_DARK_STEEL_BOOTS;
+        pCharacter->Weapon[0].Type = MODEL_GREAT_SCEPTER;
+        pCharacter->Weapon[1].Type = MODEL_SPIKED_SHIELD;
+        pCharacter->Helper.Type = MODEL_DARK_HORSE_ITEM;
         CreateMount(MODEL_DARK_HORSE, pCharacter->Object.Position, &pCharacter->Object, 1);
         break;
-    case 539:
+    case MONSTER_DOPPELGANGER_SUM:
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_SUMMONER;
-        wcscpy(pCharacter->ID, L"µµÇÃ°»¾î¼ÒÈ¯¼ú»ç");
-        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 40;
-        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 40;
-        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 40;
-        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 40;
-        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 40;
-        pCharacter->Weapon[0].Type = MODEL_STAFF + 18;
+        wcscpy(pCharacter->ID, L"ë„í”Œê°±ì–´ì†Œí™˜ìˆ ì‚¬");
+        pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_RED_WING_HELM;
+        pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_RED_WING_ARMOR;
+        pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_RED_WING_PANTS;
+        pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_RED_WING_GLOVES;
+        pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_RED_WING_BOOTS;
+        pCharacter->Weapon[0].Type = MODEL_DEMONIC_STICK;
         //pCharacter->Weapon[1].Type = MODEL_STAFF+22;
         break;
     }
@@ -211,7 +211,7 @@ bool CGMDoppelGanger1::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 145:
+    case MODEL_ICE_WALKER:
     {
         switch (o->CurrentAction)
         {
@@ -239,22 +239,22 @@ bool CGMDoppelGanger1::MoveMonsterVisual(OBJECT* o, BMD* b)
             float Scale = 3.5f;
             Vector(1.f, 1.f, 1.f, o->Light);
             b->TransformByObjectBone(vPos, o, 6);
-            CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 3, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, o->Light, 3, Scale);
             b->TransformByObjectBone(vPos, o, 79);
-            CreateParticle(BITMAP_SMOKE, vPos, o->Angle, o->Light, 53, Scale);
+            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, o->Light, 53, Scale);
         }
         break;
         }
     }
     return true;
-    case MODEL_MONSTER01 + 189:
-    case MODEL_MONSTER01 + 190:
+    case MODEL_MAD_BUTCHER:
+    case MODEL_TERRIBLE_BUTCHER:
     {
         if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
             o->CurrentAction = MONSTER01_WALK;
     }
     return true;
-    case MODEL_MONSTER01 + 191:
+    case MODEL_DOPPELGANGER:
         if (o->CurrentAction == MONSTER01_APEAR)
         {
             if (o->AnimationFrame > 18.0f)
@@ -272,7 +272,7 @@ bool CGMDoppelGanger1::MoveMonsterVisual(OBJECT* o, BMD* b)
                         vPos[0] += (float)(rand() % 140 - 70);
                         vPos[1] += (float)(rand() % 140 - 70);
                         Vector(0.2f, 1.0f, 0.3f, vLight);
-                        CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
+                        CreateEffectFpsChecked(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
                     }
 
                     Vector(0.4f, 1.0f, 0.6f, vLight);
@@ -281,7 +281,7 @@ bool CGMDoppelGanger1::MoveMonsterVisual(OBJECT* o, BMD* b)
                         vPos[0] = o->Position[0] + (rand() % 100 - 50) * 1.0f;
                         vPos[1] = o->Position[1] + (rand() % 100 - 50) * 1.0f;
                         vPos[2] = o->Position[2] + 10.f + (rand() % 20) * 10.0f;
-                        CreateParticle(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 0, (rand() % 8 + 7) * 0.1f);
+                        CreateParticleFpsChecked(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 0, (rand() % 8 + 7) * 0.1f);
                     }
 
                     Vector(0.0f, 0.5f, 0.0f, vLight);
@@ -290,7 +290,7 @@ bool CGMDoppelGanger1::MoveMonsterVisual(OBJECT* o, BMD* b)
                         vPos[0] = o->Position[0] + (rand() % 200 - 100) * 1.0f;
                         vPos[1] = o->Position[1] + (rand() % 200 - 100) * 1.0f;
                         vPos[2] = o->Position[2] + (rand() % 10) * 10.0f;
-                        CreateEffect(MODEL_DOPPELGANGER_SLIME_CHIP, vPos, o->Angle, vLight, 0, o, 0, 0);
+                        CreateEffectFpsChecked(MODEL_DOPPELGANGER_SLIME_CHIP, vPos, o->Angle, vLight, 0, o, 0, 0);
                     }
 
                     Vector(0.2f, 0.9f, 0.3f, vLight);
@@ -299,11 +299,11 @@ bool CGMDoppelGanger1::MoveMonsterVisual(OBJECT* o, BMD* b)
                         vPos[0] = o->Position[0] + (rand() % 300 - 150) * 1.0f;
                         vPos[1] = o->Position[1] + (rand() % 300 - 150) * 1.0f;
                         vPos[2] = o->Position[2] + 20.0f + (rand() % 10) * 10.0f;
-                        CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 31);
+                        CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 31);
                     }
 
                     Vector(0.8f, 1.0f, 0.8f, vLight);
-                    CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, vLight, 54, 2.8f);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, vLight, 54, 2.8f);
 
                     SetAction(o, MONSTER01_ATTACK1);
                 }
@@ -319,8 +319,8 @@ void CGMDoppelGanger1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 189:
-    case MODEL_MONSTER01 + 190:
+    case MODEL_MAD_BUTCHER:
+    case MODEL_TERRIBLE_BUTCHER:
     {
         if (!(pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2))
             break;
@@ -379,15 +379,15 @@ bool CGMDoppelGanger1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 4000 * 0.00025f);
         b->StreamMesh = -1;
         return true;
-    case MODEL_MONSTER01 + 145:
+    case MODEL_ICE_WALKER:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER0);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER1);
         return true;
-    case MODEL_MONSTER01 + 6:
+    case MODEL_LARVA:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_SNAKE01);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return true;
-    case MODEL_MONSTER01 + 189:
+    case MODEL_MAD_BUTCHER:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -395,14 +395,14 @@ bool CGMDoppelGanger1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
         //b->Actions[MONSTER01_WALK].PlaySpeed =		0.34f;
         return true;
-    case MODEL_MONSTER01 + 190:
+    case MODEL_TERRIBLE_BUTCHER:
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
         return true;
-    case MODEL_MONSTER01 + 191:
+    case MODEL_DOPPELGANGER:
         return true;
     }
 
@@ -424,17 +424,17 @@ bool CGMDoppelGanger1::RenderObjectVisual(OBJECT* o, BMD* b)
         switch (rand() % 3)
         {
         case 0:
-            CreateParticle(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
             break;
         case 1:
-            CreateParticle(BITMAP_FIRE_HIK2_MONO, o->Position, o->Angle, vLight, 6, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK2_MONO, o->Position, o->Angle, vLight, 6, o->Scale);
             break;
         case 2:
-            CreateParticle(BITMAP_FIRE_HIK3_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
             break;
         }
 
-        CreateParticle(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
+        CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
     }
     return true;
     case 80:
@@ -445,16 +445,16 @@ bool CGMDoppelGanger1::RenderObjectVisual(OBJECT* o, BMD* b)
         switch (rand() % 3)
         {
         case 0:
-            CreateParticle(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
             break;
         case 1:
-            CreateParticle(BITMAP_FIRE_HIK2_MONO, o->Position, o->Angle, vLight, 6, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK2_MONO, o->Position, o->Angle, vLight, 6, o->Scale);
             break;
         case 2:
-            CreateParticle(BITMAP_FIRE_HIK3_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
             break;
         }
-        CreateParticle(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
+        CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
     }
     return true;
     case 99:
@@ -464,7 +464,7 @@ bool CGMDoppelGanger1::RenderObjectVisual(OBJECT* o, BMD* b)
             //Vector(0.02f, 0.03f, 0.04f, Light);
             Vector(0.04f, 0.06f, 0.08f, Light);
             for (int i = 0; i < 10; ++i)
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 3, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 3, o->Scale, o);
             //CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 0, o->Scale, o);
         }
         return true;
@@ -477,7 +477,7 @@ bool CGMDoppelGanger1::RenderObjectVisual(OBJECT* o, BMD* b)
             int iScale = o->Scale * 60;
             vPos[0] += rand() % iScale - iScale / 2;
             vPos[1] += rand() % iScale - iScale / 2;
-            CreateParticle(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
+            CreateParticleFpsChecked(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
         }
         return true;
     }
@@ -491,8 +491,8 @@ bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 189:
-    case MODEL_MONSTER01 + 190:
+    case MODEL_MAD_BUTCHER:
+    case MODEL_TERRIBLE_BUTCHER:
         if (rand_fps_check(4))
         {
             b->TransformByObjectBone(vPos, o, 6);
@@ -509,7 +509,7 @@ bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, vLight, 0);
         }
 
-        if (o->Type == MODEL_MONSTER01 + 190)
+        if (o->Type == MODEL_TERRIBLE_BUTCHER)
         {
             Vector(1.0f, 0.2f, 0.1f, vLight);
             for (int j = 0; j < 50; ++j)
@@ -534,19 +534,19 @@ bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 switch (rand() % 3)
                 {
                 case 0:
-                    CreateParticle(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
                     break;
                 case 1:
-                    CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 4, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 4, fScale);
                     break;
                 case 2:
-                    CreateParticle(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 0, fScale);
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 0, fScale);
                     break;
                 }
             }
         }
         return true;
-    case MODEL_MONSTER01 + 191:
+    case MODEL_DOPPELGANGER:
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.3f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         return true;
@@ -614,7 +614,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 145:		// Ice Walker
+    case MODEL_ICE_WALKER:		// Ice Walker
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
             PlayBuffer(SOUND_RAKLION_ICEWALKER_ATTACK);
@@ -633,7 +633,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
             }
         }
         return true;
-    case MODEL_MONSTER01 + 190:
+    case MODEL_TERRIBLE_BUTCHER:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -645,7 +645,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 189:
+    case MODEL_MAD_BUTCHER:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -657,7 +657,7 @@ bool CGMDoppelGanger1::PlayMonsterSound(OBJECT* o)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 191:
+    case MODEL_DOPPELGANGER:
     {
         if (MONSTER01_APEAR == o->CurrentAction)
         {

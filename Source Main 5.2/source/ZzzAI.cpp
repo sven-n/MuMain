@@ -1,8 +1,8 @@
-///////////////////////////////////////////////////////////////////////////////
-// AI°ü·Ã ÇÔ¼ö
-// Å¸ÄÏ¹æÇâÀ¸·Î ¹æÇâ Æ²±â, ±æÃ£±â, fps±¸ÇÏ±â µîµî
+ï»¿///////////////////////////////////////////////////////////////////////////////
+// AIê´€ë ¨ í•¨ìˆ˜
+// íƒ€ì¼“ë°©í–¥ìœ¼ë¡œ ë°©í–¥ í‹€ê¸°, ê¸¸ì°¾ê¸°, fpsêµ¬í•˜ê¸° ë“±ë“±
 //
-// *** ÇÔ¼ö ·¹º§: 2
+// *** í•¨ìˆ˜ ë ˆë²¨: 2
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -303,20 +303,20 @@ void SetAction_Fenrir_Damage(CHARACTER* c, OBJECT* o)
             SetAction(o, PLAYER_FENRIR_DAMAGE_TWO_SWORD);
         else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_RIGHT);
-        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOW + 7)
+        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOLT)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_RIGHT);
         else if (c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
-        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_BOW + 15)
+        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_ARROWS)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
-        else	// ¸Ç¼Õ
+        else	// ë§¨ì†
             SetAction(o, PLAYER_FENRIR_DAMAGE);
     }
 }
 
 void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 {
-    if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_BOW + 15 && c->Weapon[1].Type != MODEL_BOW + 7)
+    if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS && c->Weapon[1].Type != MODEL_BOLT)
     {
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
             SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD_ELF);
@@ -338,7 +338,7 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
         else
             SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT);
     }
-    else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOW + 7)
+    else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOLT)
         SetAction(o, PLAYER_FENRIR_RUN_ONE_RIGHT_ELF);
     else if (c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
     {
@@ -351,7 +351,7 @@ void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
         else
             SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT);
     }
-    else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_BOW + 15)
+    else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_ARROWS)
         SetAction(o, PLAYER_FENRIR_RUN_ONE_LEFT_ELF);
     else
     {
@@ -381,15 +381,15 @@ void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o)
     }
     else
     {
-        if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_BOW + 15 && c->Weapon[1].Type != MODEL_BOW + 7)
+        if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS && c->Weapon[1].Type != MODEL_BOLT)
             SetAction(o, PLAYER_FENRIR_WALK_TWO_SWORD);
         else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
-        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOW + 7)
+        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[1].Type == MODEL_BOLT)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
         else if (c->Weapon[0].Type == -1 && c->Weapon[1].Type != -1)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_LEFT);
-        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_BOW + 15)
+        else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_ARROWS)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_LEFT);
         else
             SetAction(o, PLAYER_FENRIR_WALK);
@@ -605,10 +605,16 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
     }*/
 }
 
+PATH _path;
+PATH* path = &_path;
+
 bool MovePath(CHARACTER* c, bool Turn)
 {
     bool Success = false;
     PATH_t* p = &c->Path;
+
+    p->Lock.lock();
+
     if (p->CurrentPath < p->PathNum)
     {
         if (p->CurrentPathFloat == 0)
@@ -687,6 +693,8 @@ bool MovePath(CHARACTER* c, bool Turn)
         }
     }
 
+    p->Lock.unlock();
+
     return Success;
 }
 
@@ -715,8 +723,6 @@ void DebugUtil_Write(wchar_t* lpszFileName, ...)
 
 #endif
 
-PATH* path = new PATH;
-
 void InitPath()
 {
     path->SetMapDimensions(256, 256, TerrainWall);
@@ -724,6 +730,9 @@ void InitPath()
 
 bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, int iDefaultWall)
 {
+    a->Lock.lock();
+
+    bool Success = false;
     bool Value = false;
 
     if (M34CryWolf1st::Get_State_Only_Elf() == true && M34CryWolf1st::IsCyrWolf1st() == true)
@@ -736,18 +745,18 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
 
     int Wall = iDefaultWall;
 
-    bool Success = path->FindPath(sx, sy, tx, ty, true, Wall, Value, fDistance);
-    if (!Success)
+    bool PathFound = path->FindPath(sx, sy, tx, ty, true, Wall, Value, fDistance);
+    if (!PathFound)
     {
         if (((TerrainWall[TERRAIN_INDEX_REPEAT(sx, sy)] & TW_SAFEZONE) == TW_SAFEZONE || (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_SAFEZONE) == TW_SAFEZONE) && (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_CHARACTER) != TW_CHARACTER)
         {
             Wall = TW_NOMOVE;
         }
 
-        Success = path->FindPath(sx, sy, tx, ty, false, Wall, Value, fDistance);
+        PathFound = path->FindPath(sx, sy, tx, ty, false, Wall, Value, fDistance);
     }
 
-    if (Success)
+    if (PathFound)
     {
         int PathNum = path->GetPath();
         if (PathNum > 1)
@@ -765,10 +774,13 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
             a->CurrentPath = 0;
             a->CurrentPathFloat = 0;
 
-            return true;
+            Success = true;
         }
     }
-    return false;
+
+    a->Lock.unlock();
+
+    return Success;
 }
 
 CTimer* g_WorldTime = new CTimer();
@@ -809,7 +821,6 @@ void CalcFPS()
     static int frame = 0;
     if (!timeinit)
     {
-        g_WorldTime->ResetTimer();
         start = g_WorldTime->GetTimeElapsed();
         timeinit = 1;
     }
@@ -827,7 +838,8 @@ void CalcFPS()
         FPS = 1000 / differenceMs;
     }
 
-    FPS_ANIMATION_FACTOR = minf(static_cast<float>(REFERENCE_FPS / FPS), 2.5f); // no less than 10 fps
+    // animate with no less than 25 fps, otherwise some animations don't work correctly
+    FPS_ANIMATION_FACTOR = minf(static_cast<float>(REFERENCE_FPS / FPS), 1.f);
 
     // Calculate average fps every 2 seconds or 25 frames
     const double diffSinceStart = WorldTime - start;

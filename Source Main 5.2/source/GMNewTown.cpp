@@ -1,4 +1,4 @@
-// GMNewTown.cpp: implementation of the GMNewTown class.
+ï»¿// GMNewTown.cpp: implementation of the GMNewTown class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -20,6 +20,7 @@
 #include "GIPetManager.h"
 #include "MapManager.h"
 #include "SkillManager.h"
+#include "_enum.h"
 
 #ifdef PJH_NEW_SERVER_SELECT_MAP
 #include "w_BaseMap.h"
@@ -309,11 +310,11 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         }
         break;
     case 58:
-        CreateParticle(BITMAP_WATERFALL_5, pObject->Position, pObject->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_5, pObject->Position, pObject->Angle, Light, 0);
         break;
     case 59:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 8, pObject->Scale);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3, pObject->Position, pObject->Angle, Light, 8, pObject->Scale);
         break;
     case 60:
         if (pObject->HiddenMesh != -2)
@@ -406,19 +407,19 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Class = CLASS_KNIGHT;
                 pCharacter->Skin = 0;
                 Level = 9;
-                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 9;
+                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_PLATE_HELM;
                 pCharacter->BodyPart[BODYPART_HELM].Level = Level;
-                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 9;
+                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_PLATE_ARMOR;
                 pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
-                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 9;
+                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PLATE_PANTS;
                 pCharacter->BodyPart[BODYPART_PANTS].Level = Level;
-                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 9;
+                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_PLATE_GLOVES;
                 pCharacter->BodyPart[BODYPART_GLOVES].Level = Level;
-                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 9;
+                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_PLATE_BOOTS;
                 pCharacter->BodyPart[BODYPART_BOOTS].Level = Level;
-                pCharacter->Weapon[0].Type = MODEL_SWORD + 14;
+                pCharacter->Weapon[0].Type = MODEL_LIGHTING_SWORD;
                 pCharacter->Weapon[0].Level = 9;
-                pCharacter->Weapon[1].Type = MODEL_SHIELD + 9;
+                pCharacter->Weapon[1].Type = MODEL_PLATE_SHIELD;
                 pCharacter->Weapon[1].Level = 9;
                 pCharacter->Wing.Type = -1;
                 pCharacter->Helper.Type = -1;
@@ -427,21 +428,21 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Class = CLASS_KNIGHT;
                 pCharacter->Skin = 0;
                 Level = 10;
-                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 1;
+                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DRAGON_HELM;
                 pCharacter->BodyPart[BODYPART_HELM].Level = Level;
-                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 1;
+                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DRAGON_ARMOR;
                 pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
-                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 1;
+                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DRAGON_PANTS;
                 pCharacter->BodyPart[BODYPART_PANTS].Level = Level;
-                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 1;
+                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_DRAGON_GLOVES;
                 pCharacter->BodyPart[BODYPART_GLOVES].Level = Level;
-                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 1;
+                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_DRAGON_BOOTS;
                 pCharacter->BodyPart[BODYPART_BOOTS].Level = Level;
-                pCharacter->Weapon[0].Type = MODEL_SWORD + 16;
+                pCharacter->Weapon[0].Type = MODEL_SWORD_OF_DESTRUCTION;
                 pCharacter->Weapon[0].Level = 10;
-                pCharacter->Weapon[1].Type = MODEL_SWORD + 16;
+                pCharacter->Weapon[1].Type = MODEL_SWORD_OF_DESTRUCTION;
                 pCharacter->Weapon[1].Level = 10;
-                pCharacter->Wing.Type = MODEL_WING + 5;
+                pCharacter->Wing.Type = MODEL_WINGS_OF_DRAGON;
                 pCharacter->Helper.Type = -1;
                 break;
                 // 			case 135:
@@ -449,22 +450,22 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Class = CLASS_KNIGHT;
                 pCharacter->Skin = 0;
                 Level = 13;
-                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 29;
+                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DRAGON_KNIGHT_HELM;
                 pCharacter->BodyPart[BODYPART_HELM].Level = Level;
-                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 29;
+                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DRAGON_KNIGHT_ARMOR;
                 pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
-                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 29;
+                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DRAGON_KNIGHT_PANTS;
                 pCharacter->BodyPart[BODYPART_PANTS].Level = Level;
-                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 29;
+                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_DRAGON_KNIGHT_GLOVES;
                 pCharacter->BodyPart[BODYPART_GLOVES].Level = Level;
-                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 29;
+                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_DRAGON_KNIGHT_BOOTS;
                 pCharacter->BodyPart[BODYPART_BOOTS].Level = Level;
-                pCharacter->Weapon[0].Type = MODEL_SWORD + 17;
+                pCharacter->Weapon[0].Type = MODEL_DARK_BREAKER;
                 pCharacter->Weapon[0].Level = 13;
                 pCharacter->Weapon[1].Type = -1;
                 pCharacter->Weapon[1].Level = 0;
-                pCharacter->Wing.Type = MODEL_WING + 5;
-                pCharacter->Helper.Type = MODEL_HELPER + 37;
+                pCharacter->Wing.Type = MODEL_WINGS_OF_DRAGON;
+                pCharacter->Helper.Type = MODEL_HORN_OF_FENRIR;
                 CreateMount(MODEL_FENRIR_BLUE, pNewObject->Position, pNewObject);
                 break;
                 // 			case 137:
@@ -472,42 +473,42 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Class = CLASS_WIZARD;
                 pCharacter->Skin = 0;
                 Level = 10;
-                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 3;
+                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_LEGENDARY_HELM;
                 pCharacter->BodyPart[BODYPART_HELM].Level = Level;
-                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 3;
+                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_LEGENDARY_ARMOR;
                 pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
-                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 3;
+                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_LEGENDARY_PANTS;
                 pCharacter->BodyPart[BODYPART_PANTS].Level = Level;
-                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 3;
+                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_LEGENDARY_GLOVES;
                 pCharacter->BodyPart[BODYPART_GLOVES].Level = Level;
-                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 3;
+                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_LEGENDARY_BOOTS;
                 pCharacter->BodyPart[BODYPART_BOOTS].Level = Level;
-                pCharacter->Weapon[0].Type = MODEL_STAFF + 5;
+                pCharacter->Weapon[0].Type = MODEL_LEGENDARY_STAFF;
                 pCharacter->Weapon[0].Level = 10;
-                pCharacter->Weapon[1].Type = MODEL_SHIELD + 14;
+                pCharacter->Weapon[1].Type = MODEL_LEGENDARY_SHIELD;
                 pCharacter->Weapon[1].Level = 10;
-                pCharacter->Wing.Type = MODEL_WING + 4;
+                pCharacter->Wing.Type = MODEL_WINGS_OF_SOUL;
                 pCharacter->Helper.Type = -1;
                 break;
             case 139:
                 pCharacter->Class = CLASS_WIZARD;
                 pCharacter->Skin = 0;
                 Level = 13;
-                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 30;
+                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_VENOM_MIST_HELM;
                 pCharacter->BodyPart[BODYPART_HELM].Level = Level;
-                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 30;
+                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_VENOM_MIST_ARMOR;
                 pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
-                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 30;
+                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_VENOM_MIST_PANTS;
                 pCharacter->BodyPart[BODYPART_PANTS].Level = Level;
-                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 30;
+                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_VENOM_MIST_GLOVES;
                 pCharacter->BodyPart[BODYPART_GLOVES].Level = Level;
-                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 30;
+                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_VENOM_MIST_BOOTS;
                 pCharacter->BodyPart[BODYPART_BOOTS].Level = Level;
-                pCharacter->Weapon[0].Type = MODEL_STAFF + 13;
+                pCharacter->Weapon[0].Type = MODEL_PLATINA_STAFF;
                 pCharacter->Weapon[0].Level = 13;
                 pCharacter->Weapon[1].Type = -1;
                 pCharacter->Weapon[1].Level = 0;
-                pCharacter->Wing.Type = MODEL_WING + 37;
+                pCharacter->Wing.Type = MODEL_WING_OF_ETERNAL;
                 pCharacter->Helper.Type = -1;
                 break;
                 // 			case 140:
@@ -516,21 +517,21 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Class = CLASS_ELF;
                 pCharacter->Skin = 0;
                 Level = 13;
-                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 31;
+                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_SYLPHID_RAY_HELM;
                 pCharacter->BodyPart[BODYPART_HELM].Level = Level;
-                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 31;
+                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_SYLPHID_RAY_ARMOR;
                 pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
-                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 31;
+                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_SYLPHID_RAY_PANTS;
                 pCharacter->BodyPart[BODYPART_PANTS].Level = Level;
-                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 31;
+                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_SYLPHID_RAY_GLOVES;
                 pCharacter->BodyPart[BODYPART_GLOVES].Level = Level;
-                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 31;
+                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_SYLPHID_RAY_BOOTS;
                 pCharacter->BodyPart[BODYPART_BOOTS].Level = Level;
                 pCharacter->Weapon[0].Type = -1;
                 pCharacter->Weapon[0].Level = 0;
-                pCharacter->Weapon[1].Type = MODEL_BOW + 22;
+                pCharacter->Weapon[1].Type = MODEL_ALBATROSS_BOW;
                 pCharacter->Weapon[1].Level = 13;
-                pCharacter->Wing.Type = MODEL_WING + 38;
+                pCharacter->Wing.Type = MODEL_WING_OF_ILLUSION;
                 pCharacter->Helper.Type = -1;
                 break;
                 // 			case 143:
@@ -540,19 +541,19 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 Level = 13;
                 pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 32;
                 pCharacter->BodyPart[BODYPART_HELM].Level = Level;
-                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 32;
+                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_VOLCANO_ARMOR;
                 pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
-                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 32;
+                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_VOLCANO_PANTS;
                 pCharacter->BodyPart[BODYPART_PANTS].Level = Level;
-                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 32;
+                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_VOLCANO_GLOVES;
                 pCharacter->BodyPart[BODYPART_GLOVES].Level = Level;
-                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 32;
+                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_VOLCANO_BOOTS;
                 pCharacter->BodyPart[BODYPART_BOOTS].Level = Level;
-                pCharacter->Weapon[0].Type = MODEL_SWORD + 23;
+                pCharacter->Weapon[0].Type = MODEL_EXPLOSION_BLADE;
                 pCharacter->Weapon[0].Level = 13;
                 pCharacter->Weapon[1].Type = -1;
                 pCharacter->Weapon[1].Level = 0;
-                pCharacter->Wing.Type = MODEL_WING + 39;
+                pCharacter->Wing.Type = MODEL_WING_OF_RUIN;
                 pCharacter->Helper.Type = -1;
                 break;
                 // 			case 145:
@@ -560,22 +561,22 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Class = CLASS_DARK_LORD;
                 pCharacter->Skin = 0;
                 Level = 13;
-                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 28;
+                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DARK_MASTER_MASK;
                 pCharacter->BodyPart[BODYPART_HELM].Level = Level;
-                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 28;
+                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DARK_MASTER_ARMOR;
                 pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
-                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 28;
+                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DARK_MASTER_PANTS;
                 pCharacter->BodyPart[BODYPART_PANTS].Level = Level;
-                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 28;
+                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_DARK_MASTER_GLOVES;
                 pCharacter->BodyPart[BODYPART_GLOVES].Level = Level;
-                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 28;
+                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_DARK_MASTER_BOOTS;
                 pCharacter->BodyPart[BODYPART_BOOTS].Level = Level;
-                pCharacter->Weapon[0].Type = MODEL_MACE + 15;
+                pCharacter->Weapon[0].Type = MODEL_SHINING_SCEPTER;
                 pCharacter->Weapon[0].Level = 10;
                 pCharacter->Weapon[1].Type = -1;
                 pCharacter->Weapon[1].Level = 0;
-                pCharacter->Wing.Type = MODEL_HELPER + 30;
-                pCharacter->Helper.Type = MODEL_HELPER + 4;
+                pCharacter->Wing.Type = MODEL_CAPE_OF_LORD;
+                pCharacter->Helper.Type = MODEL_DARK_HORSE_ITEM;
                 CreateMount(MODEL_DARK_HORSE, pNewObject->Position, pNewObject);
                 CreatePetDarkSpirit_Now(pCharacter);
                 break;
@@ -583,21 +584,21 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                 pCharacter->Class = CLASS_DARK_LORD;
                 pCharacter->Skin = 0;
                 Level = 13;
-                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_HELM + 33;
+                pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_SUNLIGHT_MASK;
                 pCharacter->BodyPart[BODYPART_HELM].Level = Level;
-                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + 33;
+                pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_SUNLIGHT_ARMOR;
                 pCharacter->BodyPart[BODYPART_ARMOR].Level = Level;
-                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + 33;
+                pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_SUNLIGHT_PANTS;
                 pCharacter->BodyPart[BODYPART_PANTS].Level = Level;
-                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + 33;
+                pCharacter->BodyPart[BODYPART_GLOVES].Type = MODEL_SUNLIGHT_GLOVES;
                 pCharacter->BodyPart[BODYPART_GLOVES].Level = Level;
-                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + 33;
+                pCharacter->BodyPart[BODYPART_BOOTS].Type = MODEL_SUNLIGHT_BOOTS;
                 pCharacter->BodyPart[BODYPART_BOOTS].Level = Level;
-                pCharacter->Weapon[0].Type = MODEL_MACE + 14;
+                pCharacter->Weapon[0].Type = MODEL_SOLEIL_SCEPTER;
                 pCharacter->Weapon[0].Level = 13;
                 pCharacter->Weapon[1].Type = -1;
                 pCharacter->Weapon[1].Level = 0;
-                pCharacter->Wing.Type = MODEL_WING + 40;
+                pCharacter->Wing.Type = MODEL_CAPE_OF_EMPEROR;
                 pCharacter->Helper.Type = -1;
                 break;
             }
@@ -633,13 +634,13 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
             switch (pObject->Type)
             {
                 //case 148: CreateMonster(418, 0, 0, icntIndex); break;
-            case 149: CreateMonster(419, 0, 0, icntIndex); break;
-            case 150: CreateMonster(420, 0, 0, icntIndex); break;
-            case 151: CreateMonster(421, 0, 0, icntIndex); break;
-                //case 152: CreateMonster(422, 0, 0, icntIndex); break;
-            case 153: CreateMonster(423, 0, 0, icntIndex); break;
-                //case 154: CreateMonster(424, 0, 0, icntIndex); break;
-            case 155: CreateMonster(425, 0, 0, icntIndex); break;
+            case 149: CreateMonster(EMonsterType::MONSTER_POLLUTED_BUTTERFLY, 0, 0, icntIndex); break;
+            case 150: CreateMonster(MONSTER_HIDEOUS_RABBIT, 0, 0, icntIndex); break;
+            case 151: CreateMonster(MONSTER_WEREWOLF2, 0, 0, icntIndex); break;
+            case 152: CreateMonster(MONSTER_CURSED_LICH, 0, 0, icntIndex); break;
+            case 153: CreateMonster(MONSTER_TOTEM_GOLEM, 0, 0, icntIndex); break;
+            case 154: CreateMonster(MONSTER_GRIZZLY, 0, 0, icntIndex); break;
+            case 155: CreateMonster(MONSTER_CAPTAIN_GRIZZLY, 0, 0, icntIndex); break;
             }
 
             VectorCopy(pObject->Position, pNewObject->Position);
@@ -652,7 +653,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
             }
             else
             {
-                assert(!"°ø°Ýµ¿ÀÛÀÌ ¾ø´?");
+                assert(!"ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½?");
             }
             pObject->Owner = pNewObject;
         }
@@ -699,8 +700,8 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                     }
                     else
                     {
-                        SetAction(pObject->Owner, PLAYER_ATTACK_ONETOONE);
-                        pCharacter->Skill = AT_SKILL_ONETOONE;
+                        SetAction(pObject->Owner, PLAYER_ATTACK_DEATHSTAB);
+                        pCharacter->Skill = AT_SKILL_DEATHSTAB;
                         pCharacter->AttackTime = 1;
                         pCharacter->TargetCharacter = -1;
                         pCharacter->AttackFlag = ATTACK_FAIL;
@@ -785,7 +786,7 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
         return g_EmpireGuardian4.RenderObjectMesh(pObject, pModel, ExtraMon);
 #endif //PJH_NEW_SERVER_SELECT_MAP
 
-    // ¹è°æ
+    // ï¿½ï¿½ï¿½
     if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
     {
         Mesh_t* m = NULL;
@@ -862,12 +863,12 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
         pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
         pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
     }
-    else if (pObject->Type == MODEL_MONSTER01 + 130)
+    else if (pObject->Type == MODEL_HIDEOUS_RABBIT)
     {
         pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
         pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
     }
-    else if (pObject->Type == MODEL_MONSTER01 + 133 && pObject->CurrentAction == MONSTER01_DIE)
+    else if (pObject->Type == MODEL_TOTEM_GOLEM && pObject->CurrentAction == MONSTER01_DIE)
     {
     }
 #ifndef PJH_NEW_SERVER_SELECT_MAP
@@ -949,7 +950,7 @@ void GMNewTown::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool Ex
     }
 #endif //PJH_NEW_SERVER_SELECT_MAP
 
-    if (pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// ÆøÆ÷¹°1,2, ¼ö·Î, È¸¿À¸®, ºû
+    if (pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1,2, ï¿½ï¿½ï¿½ï¿½, È¸ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½
     {
         pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
     }
@@ -994,73 +995,73 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
 
     switch (iType)
     {
-    case 415:
+    case MONSTER_SILVIA:
         OpenNpc(MODEL_ELBELAND_SILVIA);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_SILVIA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"½Çºñ¾Æ");
+        wcscpy(pCharacter->ID, L"ï¿½Çºï¿½ï¿½");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
-    case 416:
+    case MONSTER_RHEA:
         OpenNpc(MODEL_ELBELAND_RHEA);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_RHEA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"·¹¾Æ");
+        wcscpy(pCharacter->ID, L"ï¿½ï¿½ï¿½ï¿½");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.m_fEdgeScale = 1.1f;
         Models[MODEL_ELBELAND_RHEA].Actions[0].PlaySpeed = 0.2f;
         Models[MODEL_ELBELAND_RHEA].Actions[1].PlaySpeed = 0.4f;
         break;
-    case 417:
+    case MONSTER_MARCE:
         OpenNpc(MODEL_ELBELAND_MARCE);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_MARCE, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¸¶¸£¼¼");
+        wcscpy(pCharacter->ID, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
         pCharacter->Object.Scale = 1.05f;
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
-    case 418:
-        OpenMonsterModel(128);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 128, PosX, PosY);
-        wcscpy(pCharacter->ID, L"±â±«ÇÑ Åä³¢");
+    case MONSTER_STRANGE_RABBIT:
+        OpenMonsterModel(MONSTER_MODEL_RABBIT);
+        pCharacter = CreateCharacter(Key, MODEL_RABBIT, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ï¿½â±«ï¿½ï¿½ ï¿½ä³¢");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 419:
-        OpenMonsterModel(129);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 129, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÈäÃøÇÑ Åä³¢");
+    case MONSTER_POLLUTED_BUTTERFLY:
+        OpenMonsterModel(MONSTER_MODEL_BUTTERFLY);
+        pCharacter = CreateCharacter(Key, MODEL_BUTTERFLY, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ä³¢");
         pCharacter->Object.Scale = 0.8f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 420:
-        OpenMonsterModel(130);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 130, PosX, PosY);
-        wcscpy(pCharacter->ID, L"´Á´ëÀÎ°£");
+    case MONSTER_HIDEOUS_RABBIT:
+        OpenMonsterModel(MONSTER_MODEL_HIDEOUS_RABBIT);
+        pCharacter = CreateCharacter(Key, MODEL_HIDEOUS_RABBIT, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ï¿½ï¿½ï¿½ï¿½ï¿½Î°ï¿½");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 421:
-        OpenMonsterModel(131);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 131, PosX, PosY);
-        wcscpy(pCharacter->ID, L"¿À¿°µÈ ³ªºñ");
+    case MONSTER_WEREWOLF2:
+        OpenMonsterModel(MONSTER_MODEL_WEREWOLF2);
+        pCharacter = CreateCharacter(Key, MODEL_WEREWOLF2, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
         pCharacter->Object.Scale = 0.8f * 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 422:
-        OpenMonsterModel(132);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 132, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÀúÁÖ¹ÞÀº¸®Ä¡");
+    case MONSTER_CURSED_LICH:
+        OpenMonsterModel(MONSTER_MODEL_CURSED_LICH);
+        pCharacter = CreateCharacter(Key, MODEL_CURSED_LICH, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½Ä¡");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 423:
-        OpenMonsterModel(133);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 133, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÅäÅÛ°ñ·½");
+    case MONSTER_TOTEM_GOLEM:
+        OpenMonsterModel(MONSTER_MODEL_TOTEM_GOLEM);
+        pCharacter = CreateCharacter(Key, MODEL_TOTEM_GOLEM, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ï¿½ï¿½ï¿½Û°ï¿½");
         pCharacter->Object.Scale = 0.17f * 0.95f;
         pCharacter->Object.ShadowScale = 0.01f;
         pCharacter->Object.m_fEdgeScale = 1.05f;
@@ -1068,18 +1069,18 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 424:
-        OpenMonsterModel(134);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 134, PosX, PosY);
-        wcscpy(pCharacter->ID, L"±«¼ö ¿ì¾¾");
+    case MONSTER_GRIZZLY:
+        OpenMonsterModel(MONSTER_MODEL_GRIZZLY);
+        pCharacter = CreateCharacter(Key, MODEL_GRIZZLY, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ï¿½ï¿½ï¿½ï¿½ ï¿½ì¾¾");
         pCharacter->Object.Scale = 1.2f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
-    case 425:
-        OpenMonsterModel(135);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 135, PosX, PosY);
-        wcscpy(pCharacter->ID, L"±«¼ö ¿ì¾¾ ´ëÀå");
+    case MONSTER_CAPTAIN_GRIZZLY:
+        OpenMonsterModel(MONSTER_MODEL_CAPTAIN_GRIZZLY);
+        pCharacter = CreateCharacter(Key, MODEL_CAPTAIN_GRIZZLY, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ï¿½ï¿½ï¿½ï¿½ ï¿½ì¾¾ ï¿½ï¿½ï¿½ï¿½");
         pCharacter->Object.Scale = 1.3f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -1101,7 +1102,7 @@ void GMNewTown::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pMod
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 130:
+    case MODEL_HIDEOUS_RABBIT:
     {
         float Start_Frame = 0.f;
         float End_Frame = 6.0f;
@@ -1173,20 +1174,20 @@ bool GMNewTown::RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD*
         CreateSprite(BITMAP_FLARE_BLUE, vPos, fScale * 0.8f, Light, pObject, -WorldTime * 0.1f);
     }
     break;
-    case MODEL_MONSTER01 + 132:
+    case MODEL_CURSED_LICH:
         for (int i = 0; i < 4; ++i)
         {
             Vector(0, (rand() % 300 - 150) * 0.1f, (rand() % 200 - 100) * 0.1f, vRelative);
             pModel->TransformPosition(pObject->BoneTransform[30], vRelative, vPos, true);
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, pObject->Light, 0, 1, pObject);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, pObject->Light, 0, 1, pObject);
         }
         break;
-    case MODEL_MONSTER01 + 133:
+    case MODEL_TOTEM_GOLEM:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             vec3_t Position;
             Vector(pObject->Position[0] + rand() % 200 - 100, pObject->Position[1] + rand() % 200 - 100, pObject->Position[2], Position);
-            CreateParticle(BITMAP_SMOKE + 1, Position, pObject->Angle, pObject->Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, pObject->Angle, pObject->Light);
         }
         if (pObject->CurrentAction == MONSTER01_DIE)
         {
@@ -1260,7 +1261,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
 
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 128:
+    case MODEL_RABBIT:
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_ATTACK01);
@@ -1270,7 +1271,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_RABBITSTRANGE_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 129:
+    case MODEL_BUTTERFLY:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1287,7 +1288,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_RABBITUGLY_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 130:
+    case MODEL_HIDEOUS_RABBIT:
         if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2
             || pObject->CurrentAction == MONSTER01_WALK)
         {
@@ -1305,7 +1306,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_WOLFHUMAN_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 131:
+    case MODEL_WEREWOLF2:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1318,7 +1319,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 132:
+    case MODEL_CURSED_LICH:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1335,7 +1336,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_CURSERICH_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 133:
+    case MODEL_TOTEM_GOLEM:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(2))
@@ -1356,7 +1357,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_TOTEMGOLEM_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 134:
+    case MODEL_GRIZZLY:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))
@@ -1373,7 +1374,7 @@ bool GMNewTown::PlayMonsterSound(OBJECT* pObject)
             PlayBuffer(SOUND_ELBELAND_BEASTWOO_DEATH01);
         }
         return true;
-    case MODEL_MONSTER01 + 135:
+    case MODEL_CAPTAIN_GRIZZLY:
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(100))

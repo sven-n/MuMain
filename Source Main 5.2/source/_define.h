@@ -19,61 +19,34 @@
 #define BYTECAST(T,X) static_cast<T>(X & 0xFF)
 
 ///////////////////////////////////////////////_Scene start_//////////////////////////////////////////////
-#define MAX_SERVER_HI   30
-#define MAX_SERVER_LOW  20
+constexpr int MAX_SERVER_PER_GROUP = 20;
 
-#define MENU_SERVER_LIST           0
-#define MENU_WAITING_SERVERLIST	   1
-#define MENU_ACCOUNT_UP            2
-#define MENU_ACCOUNT_DOWN          3
-#define MENU_REGISTRATION_UP       4
-#define MENU_REGISTRATION_DOWN     5
-#define MENU_OPTION_UP             6
-#define MENU_OPTION_DOWN           7
-#define MENU_PASSWORD_CONFIRM_UP   8
-#define MENU_PASSWORD_CONFIRM_DOWN 9
-#define MENU_PASSWORD_CHANGE_UP    10
-#define MENU_PASSWORD_CHANGE_DOWN  11
-#define MENU_WAITING_LOGIN		   12
-#define MENU_CHARACTER             20
-#define MENU_NEW_DOWN              21
-#define MENU_NEW_UP                22
-#define MENU_DELETE_RIGHT          23
-#define MENU_DELETE_LEFT           24
-#define MENU_OK_RIGHT              25
-#define MENU_OK_LEFT               26
-#define MENU_NEW_CHARACTER_DOWN    27
-#define MENU_NEW_CHARACTER_UP      28
-#define MENU_EXIT                  29
+enum EGameScene {
+    SERVER_LIST_SCENE = 0,
+    WEBZEN_SCENE = 1,
+    LOG_IN_SCENE = 2,
+    LOADING_SCENE = 3,
+    CHARACTER_SCENE = 4,
+    MAIN_SCENE = 5,
+    MOVIE_SCENE = 6,
+};
 
-#define SERVER_LIST_SCENE   0
-#define	NON_SCENE			0
-#define WEBZEN_SCENE		1
-#define LOG_IN_SCENE		2
-#define LOADING_SCENE		3
-#define CHARACTER_SCENE		4
-#define MAIN_SCENE			5
+constexpr auto MAX_FENRIR_SKILL_MONSTER_NUM = 10;
+constexpr auto FENRIR_TYPE_BLACK = 0;
+constexpr auto FENRIR_TYPE_RED = 1;
+constexpr auto FENRIR_TYPE_BLUE = 2;
+constexpr auto FENRIR_TYPE_GOLD = 3;
 
-#define MOVIE_SCENE			6
+constexpr auto NUM_LINE_CMB = ( 7);
+constexpr auto NUM_BUTTON_CMB = ( 2);
+constexpr auto NUM_PAR_BUTTON_CMB = ( 5);
 
-#define MAX_FENRIR_SKILL_MONSTER_NUM	10
-#define FENRIR_TYPE_BLACK	0
-#define FENRIR_TYPE_RED		1
-#define FENRIR_TYPE_BLUE	2
-#define FENRIR_TYPE_GOLD	3
-
-#define MAX_WAITINGTIME	( 15)
-#define NUM_LINE_CMB	( 7)
-#define NUM_BUTTON_CMB		( 2)
-#define NUM_PAR_BUTTON_CMB	( 5)
-
-#define INGAMESHOP_DISPLAY_ITEMLIST_SIZE (9)
+constexpr auto INGAMESHOP_DISPLAY_ITEMLIST_SIZE = (9);
 
 ///////////////////////////////////////////////_Scene end_//////////////////////////////////////////////////////////
 //////////////////////////////////////////////_Path start_//////////////////////////////////////////////////////////
 
-#define MAX_PATH_FIND  15
-#define NEW_PATH_ALGORITHM
+constexpr auto MAX_PATH_FIND = 15;
 
 #define TW_SAFEZONE		( 0x0001)
 #define TW_CHARACTER	( 0x0002)
@@ -92,15 +65,33 @@
 #define TW_ATT6         ( 0x4000)
 #define TW_ATT7         ( 0x8000)
 
-#define FACTOR_PATH_DIST		( 5)
-#define FACTOR_PATH_DIST_DIAG	( ( int)( ( float)FACTOR_PATH_DIST * 1.414f))
+constexpr auto FACTOR_PATH_DIST = 5;
+constexpr auto FACTOR_PATH_DIST_DIAG = ((int)((float)FACTOR_PATH_DIST * 1.414f));
 
-#define MAX_COUNT_PATH		(500)
-#define MAX_INT_FORPATH		(65000 * 30000)
+constexpr auto MAX_COUNT_PATH = 500;
+constexpr auto MAX_INT_FORPATH = (65000 * 30000);
 
-#define PATH_INTESTLIST		( 0x01)
-#define PATH_TESTED			( 0x02)
-#define PATH_END			( 0x04)
+enum EPathNodeState : BYTE
+{
+    PATH_INTESTLIST = (0x01),
+    PATH_TESTED = (0x02),
+    PATH_END = (0x04),
+};
+
+DEFINE_ENUM_FLAG_OPERATORS(EPathNodeState)
+
+enum EPathDirection
+{
+    UNDEFINED = 0x00,
+    WEST = 0x1,
+    SOUTHWEST = 0x2,
+    SOUTH = 0x3,
+    SOUTHEAST = 0x4,
+    EAST = 0x5,
+    NORTHEAST = 0x6,
+    NORTH = 0x7,
+    NORTHWEST = 0x8,
+};
 
 #define CUSTOM_CAMERA_DISTANCE1  200
 #define CUSTOM_CAMERA_DISTANCE2  -150
@@ -108,9 +99,6 @@
 #define RENDER_ITEMVIEW_NEAR  20.f
 
 #define MAX_MODEL_MONSTER	400
-
-#define MODEL_MONSTER01		MODEL_SKILL_END+1
-#define MODEL_MONSTER_END	MODEL_MONSTER01+MAX_MODEL_MONSTER
 
 #define MODEL_BODY_NUM               24
 #define MODEL_ITEM_COMMON_NUM		2
@@ -131,7 +119,7 @@
 #define MAX_BODYPART    6
 
 #define TELEPORT_NONE   0
-#define TELEPORT_BEGIN  1
+#define TELEPORT_BEGIN  1 
 #define TELEPORT        2
 #define TELEPORT_END    3
 #define KIND_PLAYER  1
@@ -320,6 +308,9 @@ enum struct STORAGE_TYPE
 #define MAX_NAMEFILTERS 500
 
 #define MAX_LETTER_TITLE_LENGTH		60
+#define MAX_LETTER_DATE_LENGTH		10
+#define MAX_LETTER_TIME_LENGTH		8
+
 #define MAX_LETTERTEXT_LENGTH		1000
 #define MAX_CHATROOM_TEXT_LENGTH	150
 #define MAX_LANGUAGE_NAME_LENGTH	4
@@ -340,15 +331,15 @@ enum struct STORAGE_TYPE
 #define MAX_MINIMAP_NAME    100
 
 #define MAX_SKILL_NAME      32
-#define MAX_MONSTER_NAME    32
+#define MAX_MONSTER_NAME    40
 
-#define MAX_ITEM_TYPE      16
+constexpr int MAX_ITEM_TYPE = 16;
 
-#define MAX_ITEM_NAME       30
+constexpr int MAX_ITEM_NAME = 30;
 
-#define MAX_ITEM_INDEX     512
+constexpr int MAX_ITEM_INDEX = 512;
 
-#define MAX_ITEM           (MAX_ITEM_TYPE*MAX_ITEM_INDEX)
+constexpr int MAX_ITEM = MAX_ITEM_TYPE * MAX_ITEM_INDEX;
 
 #define MAX_MINI_MAP_DATA	100
 
@@ -360,31 +351,52 @@ enum struct STORAGE_TYPE
 #define MAX_EVENT_ITEM     35
 
 #define MAX_SOCKETS			5
-#define SOCKET_EMPTY		0xFF
+#define SOCKET_EMPTY		0xFE
+
+constexpr int ITEM_GROUP_SWORD = 0;
+constexpr int ITEM_GROUP_AXE = 1;
+constexpr int ITEM_GROUP_MACE = 2;
+constexpr int ITEM_GROUP_SPEAR = 3;
+constexpr int ITEM_GROUP_BOW = 4;
+constexpr int ITEM_GROUP_STAFF = 5;
+constexpr int ITEM_GROUP_SHIELD = 6;
+constexpr int ITEM_GROUP_HELM = 7;
+constexpr int ITEM_GROUP_ARMOR = 8;
+constexpr int ITEM_GROUP_PANTS = 9;
+constexpr int ITEM_GROUP_GLOVES = 10;
+constexpr int ITEM_GROUP_BOOTS = 11;
+constexpr int ITEM_GROUP_WING = 12;
+constexpr int ITEM_GROUP_HELPER = 13;
+constexpr int ITEM_GROUP_POTION = 14;
+constexpr int ITEM_GROUP_ETC = 15;
 
 //item index
-#define ITEM_SWORD		 (0)
-#define ITEM_AXE		 (1*MAX_ITEM_INDEX)
-#define ITEM_MACE		 (2*MAX_ITEM_INDEX)
-#define ITEM_SPEAR		 (3*MAX_ITEM_INDEX)
-#define ITEM_BOW		 (4*MAX_ITEM_INDEX)
-#define ITEM_STAFF		 (5*MAX_ITEM_INDEX)
-#define ITEM_SHIELD		 (6*MAX_ITEM_INDEX)
-#define ITEM_HELM		 (7*MAX_ITEM_INDEX)
-#define ITEM_ARMOR		 (8*MAX_ITEM_INDEX)
-#define ITEM_PANTS		 (9*MAX_ITEM_INDEX)
-#define ITEM_GLOVES		 (10*MAX_ITEM_INDEX)
-#define ITEM_BOOTS		 (11*MAX_ITEM_INDEX)
-#define ITEM_WING		 (12*MAX_ITEM_INDEX)
-#define ITEM_HELPER		 (13*MAX_ITEM_INDEX)
-#define ITEM_POTION  	 (14*MAX_ITEM_INDEX)
-#define ITEM_ETC 		 (15*MAX_ITEM_INDEX)
+#define ITEM_SWORD		 (ITEM_GROUP_SWORD)
+#define ITEM_AXE		 (ITEM_GROUP_AXE*MAX_ITEM_INDEX)
+#define ITEM_MACE		 (ITEM_GROUP_MACE*MAX_ITEM_INDEX)
+#define ITEM_SPEAR		 (ITEM_GROUP_SPEAR*MAX_ITEM_INDEX)
+#define ITEM_BOW		 (ITEM_GROUP_BOW*MAX_ITEM_INDEX)
+#define ITEM_STAFF		 (ITEM_GROUP_STAFF*MAX_ITEM_INDEX)
+#define ITEM_SHIELD		 (ITEM_GROUP_SHIELD*MAX_ITEM_INDEX)
+#define ITEM_HELM		 (ITEM_GROUP_HELM*MAX_ITEM_INDEX)
+#define ITEM_ARMOR		 (ITEM_GROUP_ARMOR*MAX_ITEM_INDEX)
+#define ITEM_PANTS		 (ITEM_GROUP_PANTS*MAX_ITEM_INDEX)
+#define ITEM_GLOVES		 (ITEM_GROUP_GLOVES*MAX_ITEM_INDEX)
+#define ITEM_BOOTS		 (ITEM_GROUP_BOOTS*MAX_ITEM_INDEX)
+#define ITEM_WING		 (ITEM_GROUP_WING*MAX_ITEM_INDEX)
+#define ITEM_HELPER		 (ITEM_GROUP_HELPER*MAX_ITEM_INDEX)
+#define ITEM_POTION  	 (ITEM_GROUP_POTION*MAX_ITEM_INDEX)
+#define ITEM_ETC 		 (ITEM_GROUP_ETC*MAX_ITEM_INDEX)
+
+
+
 
 #define ITEM_ZEN  	 (ITEM_POTION + 15)
 
 #define MAX_RESISTANCE		7
 
 #define MAX_CLASS			7
+#define MAX_CLASS_STAGES	3
 
 #define MAX_MONSTER			1024
 
@@ -619,3 +631,10 @@ enum struct STORAGE_TYPE
 #define BUFFINDEX( buff )				static_cast<eBuffState>(buff)
 #define BUFFTIMEINDEX( timetype )		static_cast<eBuffTimeType>(timetype)
 #define ITEMINDEX( type, index )        static_cast<DWORD>((type*MAX_ITEM_INDEX)+index)
+
+#define HACK_TIMER 1000
+#define WINDOWMINIMIZED_TIMER 1001
+#define CHATCONNECT_TIMER 1002
+#define SLIDEHELP_TIMER 1003
+#define WARNING_TIMER 1004
+#define MUHELPER_TIMER 1005

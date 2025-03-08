@@ -370,7 +370,7 @@ void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYT
         TempData.s_mapnumber = (short)data2->byMapNumber;
 
         TempData.s_team = static_cast<SEASON3A::eCursedTempleTeam>(data2->btTeam);
-        TempData.s_class = data2->btClass;
+        TempData.s_class = gCharacterManager.ChangeServerClassTypeToClientClassType(data2->btClass);
         TempData.s_addexp = data2->nAddExp;
 
         if (TempData.s_team == SEASON3A::eTeam_Allied)

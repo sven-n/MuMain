@@ -20,6 +20,7 @@ struct HarmonyJewelOption
 
     HarmonyJewelOption() : OptionType(-1), Minlevel(-1)
     {
+        memset(Name, 0, sizeof(Name));
         for (int i = 0; i < 14; ++i)
         {
             HarmonyJewelLevel[i] = -1;

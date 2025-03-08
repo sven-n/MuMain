@@ -406,7 +406,7 @@ void CNewUINPCQuest::RenderItem3D()
 
             int nItemLevel = pQuest->QuestAct[i].byItemLevel;
 
-            ::RenderItem3D(x, y, 20.f, Height, nItemType, nItemLevel << 3, 0, 0, false);
+            ::RenderItem3D(x, y, 20.f, Height, nItemType, nItemLevel, 0, 0, false);
 
             y += Height + 5.f;
         }

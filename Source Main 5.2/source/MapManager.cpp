@@ -1,4 +1,4 @@
-// MapManager.cpp: implementation of the CMapManager class.
+ï»¿// MapManager.cpp: implementation of the CMapManager class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -14,6 +14,7 @@
 #include "GM3rdChangeUp.h"
 #include "GMCryWolf1st.h"
 #include "GMDoppelGanger2.h"
+#include "GMKarutan1.h"
 #include "LoadData.h"
 #include "NewUISystem.h"
 #include "PersonalShopTitleImp.h"
@@ -554,7 +555,7 @@ void CMapManager::Load() // OK
     case WD_41CHANGEUP3RD_1ST:
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"Effect\\firered.jpg", BITMAP_FIRE_RED, GL_LINEAR, GL_CLAMP_TO_EDGE);
-        LoadBitmap(L"Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);      //  ºÒ¾¾.
+        LoadBitmap(L"Effect\\FireSnuff.jpg", BITMAP_FIRE_SNUFF, GL_LINEAR, GL_CLAMP_TO_EDGE);      //  ë¶ˆì”¨.
 
         LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE1, L"Data\\Sound\\w42\\cage01.wav", 1);
         LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_CAGE2, L"Data\\Sound\\w42\\cage02.wav", 1);
@@ -598,11 +599,11 @@ void CMapManager::Load() // OK
             LoadBitmap(L"Logo\\MU-logo.tga", BITMAP_LOG_IN + 16, GL_LINEAR);
             LoadBitmap(L"Logo\\MU-logo_g.jpg", BITMAP_LOG_IN + 17, GL_LINEAR);
 
-            // ¸ó½ºÅÍ ¹Ì¸® ÀÐ¾î³õ±â
-            OpenMonsterModel(129);
-            OpenMonsterModel(130);
-            OpenMonsterModel(131);
-            OpenMonsterModel(133);
+            // ëª¬ìŠ¤í„° ë¯¸ë¦¬ ì½ì–´ë†“ê¸°
+            OpenMonsterModel(MONSTER_MODEL_RED_SKELETON_KNIGHT_6);
+            OpenMonsterModel(MONSTER_MODEL_MAGIC_SKELETON_6);
+            OpenMonsterModel(MONSTER_MODEL_CASTLE_GATE);
+            OpenMonsterModel(MONSTER_MODEL_STATUE_OF_SAINT_2);
             OpenMonsterModel(135);
         }
         else
@@ -1553,9 +1554,10 @@ void CMapManager::LoadWorld(int Map)
         swprintf(FileName, L"%s\\TileGrass03.tga", WorldName);
         LoadBitmap(FileName, BITMAP_MAPGRASS + 2, GL_NEAREST, GL_REPEAT, false);
 
-        swprintf(FileName, L"%s\\leaf01.tga", WorldName);
+        
+        swprintf(FileName, L"%s\\leaf01.tga", WorldName); 
         LoadBitmap(FileName, BITMAP_LEAF1, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
-        swprintf(FileName, L"%s\\leaf01.jpg", WorldName);
+        swprintf(FileName,(Map==0||Map==3||Map==63)? L"%s\\leaf01.tga": L"%s\\leaf01.jpg",WorldName);
         LoadBitmap(FileName, BITMAP_LEAF1, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
         swprintf(FileName, L"%s\\leaf02.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_LEAF2, GL_NEAREST, GL_CLAMP_TO_EDGE, false);
@@ -1645,7 +1647,10 @@ void CMapManager::DeleteObjects()
 
 bool CMapManager::InChaosCastle(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
     if ((iMap >= WD_18CHAOS_CASTLE && iMap <= WD_18CHAOS_CASTLE_END) || iMap == WD_53CAOSCASTLE_MASTER_LEVEL)
     {
@@ -1657,7 +1662,10 @@ bool CMapManager::InChaosCastle(int iMap)
 
 bool CMapManager::InBloodCastle(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
     if ((iMap >= WD_11BLOODCASTLE1 && iMap <= WD_11BLOODCASTLE_END) || iMap == WD_52BLOODCASTLE_MASTER_LEVEL)
     {
@@ -1674,16 +1682,23 @@ bool CMapManager::InDevilSquare()
 
 bool CMapManager::InHellas(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
-    return ((this->WorldActive >= WD_24HELLAS && this->WorldActive <= WD_24HELLAS_END) || (this->WorldActive == WD_24HELLAS_7));
+    return ((iMap >= WD_24HELLAS && iMap <= WD_24HELLAS_END)
+        || (iMap == WD_24HELLAS_7));
 }
 
 bool CMapManager::InHiddenHellas(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
-    return (this->WorldActive == WD_24HELLAS_7) ? true : false;
+    return iMap == WD_24HELLAS_7;
 }
 
 bool CMapManager::IsPKField()
@@ -1735,9 +1750,12 @@ bool CMapManager::IsEmpireGuardian()
 
 bool CMapManager::InBattleCastle(int iMap)
 {
-    if (iMap == -1) return false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
 
-    return (this->WorldActive == WD_30BATTLECASTLE) ? true : false;
+    return (iMap == WD_30BATTLECASTLE) ? true : false;
 }
 
 const wchar_t* CMapManager::GetMapName(int iMap)

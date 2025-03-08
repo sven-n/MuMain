@@ -1,4 +1,4 @@
-/*+++++++++++++++++++++++++++++++++++++
+﻿/*+++++++++++++++++++++++++++++++++++++
     INCLUDE.
 +++++++++++++++++++++++++++++++++++++*/
 #include "stdafx.h"
@@ -20,17 +20,17 @@ extern	wchar_t TextList[50][100];
 extern	int  TextListColor[50];
 extern	int  TextBold[50];
 
-static  CSItemOption csItemOption; // do not delete, required for singleton initialization.
+constexpr BYTE EMPTY_OPTION = 0xFF;
 
-constexpr int MAX_EQUIPPED_SETS = MAX_EQUIPMENT_INDEX - 2; // No Wings and Helper slots
+static  CSItemOption csItemOption; // do not delete, required for singleton initialization.
 
 struct ITEM_SET_OPTION_FILE
 {
     char	strSetName[MAX_ITEM_SET_NAME];
-    BYTE	byStandardOption[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SETS_PER_ITEM];
-    BYTE	byStandardOptionValue[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SETS_PER_ITEM];
-    BYTE	byExtOption[MAX_ITEM_SETS_PER_ITEM];
-    BYTE	byExtOptionValue[MAX_ITEM_SETS_PER_ITEM];
+    BYTE	byStandardOption[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT];
+    BYTE	byStandardOptionValue[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT];
+    BYTE	byExtOption[MAX_ITEM_SET_EXT_OPTION_COUNT];
+    BYTE	byExtOptionValue[MAX_ITEM_SET_EXT_OPTION_COUNT];
     BYTE	byOptionCount;
     BYTE	byFullOption[MAX_ITEM_SET_FULL_OPTION_COUNT];
     BYTE	byFullOptionValue[MAX_ITEM_SET_FULL_OPTION_COUNT];
@@ -48,7 +48,7 @@ static void BuxConvert(BYTE* Buffer, int Size)
 bool CSItemOption::OpenItemSetScript(bool bTestServer)
 {
     std::wstring strFileName = L"";
-    std::wstring strTest = (bTestServer) ? L"Test" : L"";
+    const std::wstring strTest = (bTestServer) ? L"Test" : L"";
 
     strFileName = L"Data\\Local\\ItemSetType" + strTest + L".bmd";
     if (!OpenItemSetType(strFileName.c_str()))		return false;
@@ -63,7 +63,7 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
     FILE* fp = _wfopen(filename, L"rb");
     if (fp != nullptr)
     {
-        int Size = sizeof(ITEM_SET_TYPE);
+        const int Size = sizeof(ITEM_SET_TYPE);
         BYTE* Buffer = new BYTE[Size * MAX_ITEM];
         fread(Buffer, Size * MAX_ITEM, 1, fp);
 
@@ -138,21 +138,26 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
 
                 CMultiLanguage::ConvertFromUtf8(target->strSetName, current.strSetName);
                 target->byOptionCount = current.byOptionCount;
-                for (int setIndex = 0; setIndex < MAX_ITEM_SETS_PER_ITEM; ++setIndex)
+                target->bySetItemCount = 0; // Is calculated below
+                for (int o = 0; o < MAX_ITEM_SET_STANDARD_OPTION_COUNT; ++o)
                 {
-                    target->byExtOption[setIndex] = current.byExtOption[setIndex];
-                    target->byExtOptionValue[setIndex] = current.byExtOptionValue[setIndex];
-                    for (int optionIndex = 0; optionIndex < MAX_ITEM_SET_STANDARD_OPTION_COUNT; ++optionIndex)
+                    for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; n++)
                     {
-                        target->byStandardOption[optionIndex][setIndex] = current.byStandardOption[optionIndex][setIndex];
-                        target->byStandardOptionValue[optionIndex][setIndex] = current.byStandardOptionValue[optionIndex][setIndex];
+                        target->byStandardOption[o][n] = current.byStandardOption[o][n];
+                        target->byStandardOptionValue[o][n] = current.byStandardOptionValue[o][n];
                     }
                 }
 
-                for (int optionIndex = 0; optionIndex < MAX_ITEM_SET_FULL_OPTION_COUNT; ++optionIndex)
+                for (int o = 0; o < MAX_ITEM_SET_EXT_OPTION_COUNT; ++o)
                 {
-                    target->byFullOption[optionIndex] = current.byFullOption[optionIndex];
-                    target->byFullOptionValue[optionIndex] = current.byFullOptionValue[optionIndex];
+                    target->byExtOption[o] = current.byExtOption[o];
+                    target->byExtOptionValue[o] = current.byExtOptionValue[o];
+                }
+
+                for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
+                {
+                    target->byFullOption[o] = current.byFullOption[o];
+                    target->byFullOptionValue[o] = current.byFullOptionValue[o];
                 }
 
                 for (int i = 0; i < MAX_CLASS; i++)
@@ -161,6 +166,19 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
                 }
 
                 pSeek += Size;
+            }
+
+            for (int j = 0; j < MAX_ITEM; j++)
+            {
+                const auto &temptype = m_ItemSetType[j];
+                for (int k = 0; k < MAX_ITEM_SETS_PER_ITEM; k++)
+                {
+                    const auto optionNumber = temptype.byOption[k];
+                    if (optionNumber < MAX_SET_OPTION)
+                    {
+                        m_ItemSetOption[optionNumber].bySetItemCount++;
+                    }
+                }
             }
         }
         delete[] Buffer;
@@ -177,7 +195,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
     return true;
 }
 
-bool CSItemOption::IsDisableSkill(int Type, int Energy, int Charisma)
+bool CSItemOption::IsDisableSkill(ActionSkillType Type, int Energy, int Charisma)
 {
     int SkillEnergy = 20 + SkillAttribute[Type].Energy * (SkillAttribute[Type].Level) * 4 / 100;
 
@@ -249,7 +267,7 @@ bool CSItemOption::IsDisableSkill(int Type, int Energy, int Charisma)
 
     if (Charisma > 0)
     {
-        int SkillCharisma = SkillAttribute[Type].Charisma;
+        const int SkillCharisma = SkillAttribute[Type].Charisma;
         if (Charisma < SkillCharisma)
         {
             return true;
@@ -266,24 +284,17 @@ bool CSItemOption::IsDisableSkill(int Type, int Energy, int Charisma)
 
 BYTE CSItemOption::IsChangeSetItem(const int Type, const int SubType = -1)
 {
-    ITEM_SET_TYPE& itemSType = m_ItemSetType[Type];
+    const ITEM_SET_TYPE& itemSType = m_ItemSetType[Type];
 
     if (SubType == -1)
     {
-        if (itemSType.byOption[0] == 255 && itemSType.byOption[1] == 255)
-            return 0;
-        return 255;
+        return itemSType.byOption[0] == EMPTY_OPTION && itemSType.byOption[1] == EMPTY_OPTION ? 0 : 255;
     }
-    else
-    {
-        if (itemSType.byOption[SubType] == 255)
-            return 0;
 
-        return SubType + 1;
-    }
+    return itemSType.byOption[SubType] == EMPTY_OPTION ? 0 : SubType + 1;
 }
 
-WORD CSItemOption::GetMixItemLevel(const int Type)
+WORD CSItemOption::GetMixItemLevel(const int Type) const
 {
     if (Type < 0) return 0;
 
@@ -295,9 +306,9 @@ WORD CSItemOption::GetMixItemLevel(const int Type)
     return MixLevel;
 }
 
-bool CSItemOption::GetSetItemName(wchar_t* strName, const int iType, const int setType)
+bool CSItemOption::GetSetItemName(wchar_t* strName, const int iType, const int setType) const
 {
-    int setItemType = (setType % 0x04);
+    const int setItemType = (setType % 0x04);
 
     if (setItemType > 0)
     {
@@ -315,42 +326,42 @@ bool CSItemOption::GetSetItemName(wchar_t* strName, const int iType, const int s
             return true;
         }
     }
+
     return false;
 }
 
 
-void CSItemOption::checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int setType)
+void CSItemOption::checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int ancientDiscriminator) const
 {
-    const int setItemType = (setType % 0x04);
-
-    if (setItemType <= 0)
+    if (ancientDiscriminator <= 0)
     {
         return;
     }
 
-    const auto setTypeIndex = static_cast<BYTE>(setItemType - 1);
+    const auto setTypeIndex = static_cast<BYTE>(ancientDiscriminator - 1);
 
     const ITEM_SET_TYPE& itemSetType = m_ItemSetType[iType];
     const auto itemSetNumber = itemSetType.byOption[setTypeIndex];
-
+    
     if (itemSetNumber != 255 && itemSetNumber != 0)
     {
         // add set item to list
-        for (int i = 0; i < MAX_EQUIPPED_SETS; ++i)
+        for (int i = 0; i < MAX_EQUIPPED_SET_ITEMS; ++i)
         {
             const auto current = &optionList[i];
             if (current->SetNumber == 0)
             {
                 // The set wasn't found in another item yet, so add it
                 current->SetNumber = itemSetNumber;
+                current->CompleteSetItemCount = m_ItemSetOption[itemSetNumber].bySetItemCount;
                 current->ItemCount++;
                 current->SetTypeIndex = setTypeIndex;
+                wcscpy(current->SetName, m_ItemSetOption[itemSetNumber].strSetName);
                 break;
             }
 
             if (current->SetNumber == itemSetNumber)
             {
-                // The set wasn't found in another item yet, so add it
                 current->ItemCount++;
                 current->SetTypeIndex = setTypeIndex;
                 break;
@@ -359,240 +370,121 @@ void CSItemOption::checkItemType(SET_SEARCH_RESULT* optionList, const int iType,
     }
 }
 
-void CSItemOption::calcSetOptionList(SET_SEARCH_RESULT* optionList)
+
+bool CSItemOption::isClassRequirementFulfilled(const ITEM_SET_OPTION& setOptions, const int firstClass, int secondClass)
 {
-    int Class = gCharacterManager.GetBaseClass(Hero->Class);
-    int ExClass = gCharacterManager.IsSecondClass(Hero->Class);
-
-    BYTE    bySetOptionListTmp[MAX_ITEM_SETS_PER_ITEM][MAX_OPTIONS_PER_ITEM_SET];
-    BYTE    bySetOptionListTmp2[MAX_ITEM_SETS_PER_ITEM][MAX_OPTIONS_PER_ITEM_SET];
-    int     iSetOptionListValue[MAX_ITEM_SETS_PER_ITEM][MAX_OPTIONS_PER_ITEM_SET];
-
-    unsigned int arruiSetItemTypeSequence[MAX_ITEM_SETS_PER_ITEM][MAX_OPTIONS_PER_ITEM_SET] = {};
-
-    BYTE    optionCount[2] = { 0, 0 };  //
-    BYTE    setType = 0;
-
-    m_bySameSetItem = 0;
-    for (auto& i : m_strSetName)
+    bool RequireClass = false;
+    for (int i = CLASS_WIZARD; i <= CLASS_RAGEFIGHTER; i++)
     {
-        i[0] = 0;
-    }
-
-    for (auto& i : m_bySetOptionIndex)
-    {
-        i = 0;
-    }
-
-    m_bySetOptionANum = 0;
-    m_bySetOptionBNum = 0;
-    Hero->ExtendState = 0;
-
-    unsigned int iSetItemTypeSequence = 0, iCurrentSetItemTypeSequence = 0;
-
-    m_mapEquippedSetItemName.clear();
-    m_mapEquippedSetItemSequence.clear();
-
-    for (int i = 0; i < MAX_EQUIPPED_SETS; i += 3)
-    {
-        const auto current = &optionList[i];
-        if (current->SetNumber == 0)
+        if (setOptions.byRequireClass[i] == 1 && firstClass == i)
         {
-            // we can already stop here
+            RequireClass = true;
+        }
+
+        if (setOptions.byRequireClass[i] == 2 && firstClass == i && secondClass)
+        {
+            RequireClass = true;
+        }
+    }
+
+    return RequireClass;
+}
+
+void CSItemOption::TryAddSetOption(BYTE option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption, bool isExtOption, bool fulfillsClassRequirement, int firstClass, int secondClass)
+{
+    if (option == EMPTY_OPTION
+        || value == 0
+        || (option >= MASTERY_OPTION 
+            && (setOptions.byRequireClass[firstClass] && secondClass >= setOptions.byRequireClass[firstClass] - 1)))
+    {
+        return;
+    }
+
+    const auto setOption = &set.SetOption[set.SetOptionCount];
+    setOption->OptionNumber = option;
+    setOption->FulfillsClassRequirement = fulfillsClassRequirement;
+    setOption->Value = value;
+    setOption->IsActive = isThisSetComplete || optionIndex < set.ItemCount - 1;
+    setOption->IsFullOption = isFullOption;
+    setOption->IsExtOption = isExtOption;
+
+    set.SetOptionCount++;
+}
+
+void CSItemOption::calcSetOptionList(const SET_SEARCH_RESULT* optionList)
+{
+    const int firstClass = gCharacterManager.GetBaseClass(Hero->Class);
+    const int secondClass = gCharacterManager.IsSecondClass(Hero->Class);
+
+    int setCount = 0;
+    for (int i = 0; i < MAX_EQUIPPED_SET_ITEMS; ++i)
+    {
+        if (optionList[i].SetNumber == 0)
+        {
             break;
         }
 
-        assert(current->SetNumber < MAX_SET_OPTION);
-
-        if (current->ItemCount >= 2)
+        if (optionList[i].ItemCount >= 2)
         {
-            const int standardCount = min(current->ItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
-            setType = current->SetTypeIndex;
-            assert(setType < MAX_ITEM_SETS_PER_ITEM);
-
-            ITEM_SET_OPTION& itemOption = m_ItemSetOption[current->SetNumber];
-
-            BYTE RequireClass = 0;
-            if (itemOption.byRequireClass[0] == 1 && Class == CLASS_WIZARD) RequireClass = 1;
-            if (itemOption.byRequireClass[0] == 2 && Class == CLASS_WIZARD && ExClass) RequireClass = 1;
-            if (itemOption.byRequireClass[1] == 1 && Class == CLASS_KNIGHT) RequireClass = 1;
-            if (itemOption.byRequireClass[1] == 2 && Class == CLASS_KNIGHT && ExClass) RequireClass = 1;
-            if (itemOption.byRequireClass[2] == 1 && Class == CLASS_ELF) RequireClass = 1;
-            if (itemOption.byRequireClass[2] == 2 && Class == CLASS_ELF && ExClass) RequireClass = 1;
-            if (itemOption.byRequireClass[3] == 1 && Class == CLASS_DARK) RequireClass = 1;
-            if (itemOption.byRequireClass[3] == 1 && Class == CLASS_DARK && ExClass) RequireClass = 1;
-            if (itemOption.byRequireClass[4] == 1 && Class == CLASS_DARK_LORD) RequireClass = 1;
-            if (itemOption.byRequireClass[4] == 1 && Class == CLASS_DARK_LORD && ExClass) RequireClass = 1;
-            if (itemOption.byRequireClass[5] == 1 && Class == CLASS_SUMMONER) RequireClass = 1;
-            if (itemOption.byRequireClass[5] == 1 && Class == CLASS_SUMMONER && ExClass) RequireClass = 1;
-            if (itemOption.byRequireClass[6] == 1 && Class == CLASS_RAGEFIGHTER) RequireClass = 1;
-            if (itemOption.byRequireClass[6] == 1 && Class == CLASS_RAGEFIGHTER && ExClass) RequireClass = 1;
-
-            m_bySetOptionIndex[setType] = optionList[i].SetNumber;
-
-            if (m_strSetName[setType][0] != 0
-                && wcscmp(m_strSetName[setType], itemOption.strSetName) != 0)
-            {
-                if (m_strSetName[0][0] == 0)
-                    wcscpy(m_strSetName[0], itemOption.strSetName);
-                else
-                    wcscpy(m_strSetName[1], itemOption.strSetName);
-                m_bySameSetItem = current->ItemCount;
-            }
-            else
-            {
-                wcscpy(m_strSetName[setType], itemOption.strSetName);
-            }
-
-            bool	bFind = false;
-            for (m_iterESIN = m_mapEquippedSetItemName.begin(); m_iterESIN != m_mapEquippedSetItemName.end(); ++m_iterESIN)
-            {
-                std::wstring strCur = m_iterESIN->second;
-
-                if (wcscmp(itemOption.strSetName, strCur.c_str()) == 0)
-                {
-                    bFind = true;
-                    break;
-                }
-            }
-
-            if (false == bFind)
-            {
-                iCurrentSetItemTypeSequence = iSetItemTypeSequence++;
-                m_mapEquippedSetItemName.insert(std::pair<int, std::wstring>(iCurrentSetItemTypeSequence, itemOption.strSetName));
-            }
-
-            constexpr BYTE EMPTY_OPTION = 0xFF;
-            BYTE option[MAX_ITEM_SETS_PER_ITEM];
-            int  value[MAX_ITEM_SETS_PER_ITEM];
-            for (int j = 0; j < current->ItemCount; ++j)
-            {
-                option[0] = EMPTY_OPTION;
-                option[1] = EMPTY_OPTION;
-                if (j < standardCount)
-                {
-                    option[0] = itemOption.byStandardOption[j][0];
-                    value[0] = itemOption.byStandardOptionValue[j][0];
-                    option[1] = itemOption.byStandardOption[j][1];
-                    value[1] = itemOption.byStandardOptionValue[j][1];
-                }
-                else if (j < (current->ItemCount - standardCount))
-                {
-                    option[0] = itemOption.byExtOption[j];
-                    value[0] = itemOption.byExtOptionValue[j];
-                }
-
-                if (option[0] != EMPTY_OPTION)
-                {
-                    if (option[0] < MASTERY_OPTION)
-                    {
-                        arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
-                        bySetOptionListTmp[setType][optionCount[setType]] = option[0];
-                        bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
-                        iSetOptionListValue[setType][optionCount[setType]] = value[0];
-                        optionCount[setType]++;
-                    }
-                    else
-                    {
-                        if (itemOption.byRequireClass[Class] && ExClass >= itemOption.byRequireClass[Class] - 1)
-                        {
-                            arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
-                            bySetOptionListTmp[setType][optionCount[setType]] = option[0];
-                            bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
-                            iSetOptionListValue[setType][optionCount[setType]] = value[0];
-                            optionCount[setType]++;
-                        }
-                    }
-                }
-                if (option[1] != EMPTY_OPTION)
-                {
-                    if (option[1] < MASTERY_OPTION)
-                    {
-                        arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
-                        bySetOptionListTmp[setType][optionCount[setType]] = option[1];
-                        bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
-                        iSetOptionListValue[setType][optionCount[setType]] = value[1];
-                        optionCount[setType]++;
-                        assert(optionCount[setType] < MAX_OPTIONS_PER_ITEM_SET);
-                    }
-                    else
-                    {
-                        if (itemOption.byRequireClass[Class] && ExClass >= itemOption.byRequireClass[Class] - 1)
-                        {
-                            arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
-                            bySetOptionListTmp[setType][optionCount[setType]] = option[1];
-                            bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
-                            iSetOptionListValue[setType][optionCount[setType]] = value[1];
-                            optionCount[setType]++;
-                            assert(optionCount[setType] < MAX_OPTIONS_PER_ITEM_SET);
-                        }
-                    }
-                }
-            }
-
-            if (current->ItemCount >= itemOption.byOptionCount - 2)
-            {
-                for (int j = 0; j < MAX_ITEM_SET_FULL_OPTION_COUNT; ++j)
-                {
-                    option[0] = itemOption.byFullOption[j];
-                    value[0] = itemOption.byFullOptionValue[j];
-                    if (option[0] != EMPTY_OPTION)
-                    {
-                        if (option[0] < MASTERY_OPTION)
-                        {
-                            arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
-                            bySetOptionListTmp[setType][optionCount[setType]] = option[0];
-                            bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
-                            iSetOptionListValue[setType][optionCount[setType]] = value[0];
-                            optionCount[setType]++;
-                            assert(optionCount[setType] < MAX_OPTIONS_PER_ITEM_SET);
-
-                            if (m_bySameSetItem != 0) m_bySameSetItem++;
-                        }
-                        else
-                        {
-                            if (itemOption.byRequireClass[Class] && ExClass >= itemOption.byRequireClass[Class] - 1)
-                            {
-                                arruiSetItemTypeSequence[setType][optionCount[setType]] = iCurrentSetItemTypeSequence;
-                                bySetOptionListTmp[setType][optionCount[setType]] = option[0];
-                                bySetOptionListTmp2[setType][optionCount[setType]] = RequireClass;
-                                iSetOptionListValue[setType][optionCount[setType]] = value[0];
-                                optionCount[setType]++;
-                                assert(optionCount[setType] < MAX_OPTIONS_PER_ITEM_SET);
-
-                                if (m_bySameSetItem != 0) m_bySameSetItem++;
-                            }
-                        }
-                    }
-                }
-
-                Hero->ExtendState = 1;
-            }
+            memcpy(&m_SetSearchResult[setCount], &optionList[i], sizeof(SET_SEARCH_RESULT));
+            setCount++;
         }
     }
 
-    for (int i = 0; i < MAX_ITEM_SETS_PER_ITEM; ++i)
+    m_SetSearchResultCount = setCount;
+
+    // now we have all our equipped sets together and can continue to
+    // build up the corresponding option list
+
+    m_bySameSetItem = 0;
+
+    Hero->ExtendState = 0;
+    for (int i = 0; i < m_SetSearchResultCount; ++i)
     {
-        for (int j = 0; j < optionCount[i]; ++j)
+        auto& set = m_SetSearchResult[i];
+
+        const ITEM_SET_OPTION& setOptions = m_ItemSetOption[set.SetNumber];
+        bool isThisSetComplete = false;
+        if (set.CompleteSetItemCount <= set.ItemCount)
         {
-            m_mapEquippedSetItemSequence.insert(std::pair<BYTE, int>((i * optionCount[0]) + j, arruiSetItemTypeSequence[i][j]));
-            m_bySetOptionList[(i * optionCount[0]) + j][0] = bySetOptionListTmp[i][j];
-            m_bySetOptionList[(i * optionCount[0]) + j][1] = bySetOptionListTmp2[i][j];
-            m_iSetOptionListValue[(i * optionCount[0]) + j][0] = iSetOptionListValue[i][j];
-            m_iSetOptionListValue[(i * optionCount[0]) + j][1] = iSetOptionListValue[i][j];
+            Hero->ExtendState = 1;
+            isThisSetComplete = true;
+        }
+
+        const auto requireClass = isClassRequirementFulfilled(setOptions, firstClass, secondClass);
+        const auto standardOptionCount = min(set.CompleteSetItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
+        for (int o = 0; o < standardOptionCount; ++o)
+        {
+            for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; ++n)
+            {
+                TryAddSetOption(setOptions.byStandardOption[o][n], setOptions.byStandardOptionValue[o][n], o, set, setOptions, isThisSetComplete, false, false, requireClass, firstClass, secondClass);
+            }
+        }
+
+        for (int o = 0; o < MAX_ITEM_SET_EXT_OPTION_COUNT; ++o)
+        {
+            TryAddSetOption(setOptions.byExtOption[o], setOptions.byExtOptionValue[o], 0, set, setOptions, isThisSetComplete, false, true, requireClass, firstClass, secondClass);
+        }
+
+        for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
+        {
+            TryAddSetOption(setOptions.byFullOption[o], setOptions.byFullOptionValue[o], 255, set, setOptions, isThisSetComplete, true, false, requireClass, firstClass, secondClass);
         }
     }
-    m_bySetOptionANum = optionCount[0];
-    m_bySetOptionBNum = optionCount[1];
 }
 
-void CSItemOption::getExplainText(wchar_t* text, const BYTE option, const BYTE value, const BYTE SetIndex)
+bool CSItemOption::getExplainText(wchar_t* text, const BYTE option, const int value)
 {
+    if (option == EMPTY_OPTION)
+    {
+        return false;
+    }
+
     switch (option + AT_SET_OPTION_IMPROVE_STRENGTH)
     {
     case AT_SET_OPTION_IMPROVE_MAGIC_POWER:
         swprintf(text, GlobalText[632], value);
-        break;
+        return true;
 
     case AT_SET_OPTION_IMPROVE_STRENGTH:
     case AT_SET_OPTION_IMPROVE_DEXTERITY:
@@ -602,7 +494,7 @@ void CSItemOption::getExplainText(wchar_t* text, const BYTE option, const BYTE v
     case AT_SET_OPTION_IMPROVE_ATTACK_MIN:
     case AT_SET_OPTION_IMPROVE_ATTACK_MAX:
         swprintf(text, GlobalText[950 + option], value);
-        break;
+        return true;
 
     case AT_SET_OPTION_IMPROVE_DAMAGE:
     case AT_SET_OPTION_IMPROVE_ATTACKING_PERCENT:
@@ -618,19 +510,19 @@ void CSItemOption::getExplainText(wchar_t* text, const BYTE option, const BYTE v
     case AT_SET_OPTION_IMPROVE_SKILL_ATTACK:
     case AT_SET_OPTION_DOUBLE_DAMAGE:
         swprintf(text, GlobalText[949 + option], value);
-        break;
+        return true;
 
     case AT_SET_OPTION_DISABLE_DEFENCE:
         swprintf(text, GlobalText[970], value);
-        break;
+        return true;
 
     case AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE:
         swprintf(text, GlobalText[983], value);
-        break;
+        return true;
 
     case AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE:
         swprintf(text, GlobalText[984], value);
-        break;
+        return true;
 
     case AT_SET_OPTION_IMPROVE_ATTACK_1:
     case AT_SET_OPTION_IMPROVE_ATTACK_2:
@@ -647,60 +539,73 @@ void CSItemOption::getExplainText(wchar_t* text, const BYTE option, const BYTE v
     case AT_SET_OPTION_WIND_MASTERY:
     case AT_SET_OPTION_EARTH_MASTERY:
         swprintf(text, GlobalText[971 + (option + AT_SET_OPTION_IMPROVE_STRENGTH - AT_SET_OPTION_IMPROVE_ATTACK_2)], value);
-        break;
+        return true;
+    default:
+        return false;
     }
 }
 
-void CSItemOption::PlusSpecial(WORD* Value, int Special)
+int CSItemOption::AggregateOptionValue(int optionNumber) const
 {
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-    int optionValue = 0;
-    for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
+    WORD result = 0;
+    for (int i = 0; i < m_SetSearchResultCount; i++)
     {
-        if (m_bySetOptionList[i][0] == Special && m_bySetOptionListOnOff[i] == 0)
+        const auto& set = m_SetSearchResult[i];
+        for (int j = 0; j < set.SetOptionCount; j++)
         {
-            optionValue += m_iSetOptionListValue[i][0];
-            m_bySetOptionListOnOff[i] = 1;
+            const auto& option = set.SetOption[j];
+
+            if (option.IsActive
+                && option.OptionNumber == optionNumber
+                && option.Value != 0)
+            {
+                result += option.Value;
+            }
         }
     }
 
-    if (optionValue)
+    return result;
+}
+
+void CSItemOption::PlusSpecial(WORD* Value, int Special) const
+{
+    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
+
+    if (const int optionValue = AggregateOptionValue(Special))
     {
         *Value += optionValue;
     }
 }
 
-void CSItemOption::PlusSpecialPercent(WORD* Value, int Special)
+void CSItemOption::PlusSpecialPercent(WORD* Value, int Special) const
 {
     Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-    int optionValue = 0;
-    for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
-    {
-        if (m_bySetOptionList[i][0] == Special && m_bySetOptionListOnOff[i] == 0)
-        {
-            optionValue += m_iSetOptionListValue[i][0];
-            m_bySetOptionListOnOff[i] = 1;
-        }
-    }
 
-    if (optionValue)
+    if (const int optionValue = AggregateOptionValue(Special))
     {
         *Value += ((*Value) * optionValue) / 100;
     }
 }
 
-void CSItemOption::PlusSpecialLevel(WORD* Value, const WORD SrcValue, int Special)
+void CSItemOption::PlusSpecialLevel(WORD* Value, const WORD SrcValue, int Special) const
 {
     Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
     int optionValue = 0;
     int count = 0;
-    for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
+
+    for (int i = 0; i < m_SetSearchResultCount; i++)
     {
-        if (m_bySetOptionList[i][0] == Special && m_bySetOptionList[i][1] != 0 && m_bySetOptionListOnOff[i] == 0)
+        const auto& set = m_SetSearchResult[i];
+        for (int j = 0; j < set.SetOptionCount; j++)
         {
-            optionValue = m_iSetOptionListValue[i][0];
-            m_bySetOptionListOnOff[i] = 1;
-            count++;
+            const auto& option = set.SetOption[j];
+            if (option.IsActive
+                && option.OptionNumber == Special
+                && option.Value != 0)
+            {
+                optionValue += option.Value;
+                count++;
+            }
         }
     }
 
@@ -711,100 +616,29 @@ void CSItemOption::PlusSpecialLevel(WORD* Value, const WORD SrcValue, int Specia
     }
 }
 
-void CSItemOption::PlusMastery(int* Value, const BYTE MasteryType)
+void CSItemOption::PlusMastery(int* Value, const BYTE MasteryType) const
 {
     int optionValue = 0;
-    for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
+
+    for (int i = 0; i < m_SetSearchResultCount; i++)
     {
-        if (m_bySetOptionList[i][0] >= MASTERY_OPTION && (m_bySetOptionList[i][0] - MASTERY_OPTION - 5) == MasteryType && m_bySetOptionList[i][1] != 0 && m_bySetOptionListOnOff[i] == 0)
+        const auto& set = m_SetSearchResult[i];
+        for (int j = 0; j < set.SetOptionCount; j++)
         {
-            optionValue += m_iSetOptionListValue[i][0];
-            m_bySetOptionListOnOff[i] = 1;
+            const auto& option = set.SetOption[j];
+            if (option.IsActive
+                && option.OptionNumber >= MASTERY_OPTION
+                && (option.OptionNumber - MASTERY_OPTION - 5) == MasteryType
+                && option.Value != 0)
+            {
+                optionValue += option.Value;
+            }
         }
     }
 
     if (optionValue)
     {
         *Value += optionValue;
-    }
-}
-
-void CSItemOption::MinusSpecialPercent(int* Value, int Special)
-{
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-    int optionValue = 0;
-    for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
-    {
-        if (m_bySetOptionList[i][0] == Special && m_bySetOptionList[i][1] != 0 && m_bySetOptionListOnOff[i] == 0)
-        {
-            optionValue += m_iSetOptionListValue[i][0];
-            m_bySetOptionListOnOff[i] = 1;
-        }
-    }
-
-    if (optionValue)
-    {
-        *Value -= *Value * optionValue / 100;
-    }
-}
-
-void CSItemOption::GetSpecial(WORD* Value, int Special)
-{
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-    int optionValue = 0;
-    for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
-    {
-        if (m_bySetOptionList[i][0] == Special && m_bySetOptionListOnOff[i] == 0)
-        {
-            optionValue += m_iSetOptionListValue[i][0];
-            m_bySetOptionListOnOff[i] = 1;
-        }
-    }
-
-    if (optionValue)
-    {
-        *Value += optionValue;
-    }
-}
-
-void	CSItemOption::GetSpecialPercent(WORD* Value, int Special)
-{
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-    int optionValue = 0;
-    for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
-    {
-        if (m_bySetOptionList[i][0] == Special && m_bySetOptionListOnOff[i] == 0)
-        {
-            optionValue += m_iSetOptionListValue[i][0];
-            m_bySetOptionListOnOff[i] = 1;
-        }
-    }
-
-    if (optionValue)
-    {
-        *Value += *Value * optionValue / 100;
-    }
-}
-
-void	CSItemOption::GetSpecialLevel(WORD* Value, const WORD SrcValue, int Special)
-{
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-    int optionValue = 0;
-    int count = 0;
-    for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
-    {
-        if (m_bySetOptionList[i][0] == Special && m_bySetOptionList[i][1] != 0 && m_bySetOptionListOnOff[i] == 0)
-        {
-            optionValue = m_iSetOptionListValue[i][0];
-            m_bySetOptionListOnOff[i] = 1;
-            count++;
-        }
-    }
-
-    if (optionValue)
-    {
-        optionValue = SrcValue * optionValue / 100;
-        *Value += (optionValue * count);
     }
 }
 
@@ -815,9 +649,9 @@ int CSItemOption::GetDefaultOptionValue(ITEM* ip, WORD* Value)
         return -1;
     }
 
-    *Value = ((ip->ExtOption >> 2) % 0x04);
+    *Value = ip->AncientBonusOption;
 
-    ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
+    const ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
 
     return p->AttType;
 }
@@ -829,24 +663,27 @@ bool CSItemOption::GetDefaultOptionText(const ITEM* ip, wchar_t* Text)
         return false;
     }
 
-    if (((ip->ExtOption >> 2) % 0x04) <= 0) return false;
+    if (ip->AncientBonusOption <= 0)
+    {
+        return false;
+    }
 
     switch (ItemAttribute[ip->Type].AttType)
     {
     case SET_OPTION_STRENGTH:
-        swprintf(Text, GlobalText[950], ((ip->ExtOption >> 2) % 0x04) * 5);
+        swprintf(Text, GlobalText[950], ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_DEXTERITY:
-        swprintf(Text, GlobalText[951], ((ip->ExtOption >> 2) % 0x04) * 5);
+        swprintf(Text, GlobalText[951], ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_ENERGY:
-        swprintf(Text, GlobalText[952], ((ip->ExtOption >> 2) % 0x04) * 5);
+        swprintf(Text, GlobalText[952], ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_VITALITY:
-        swprintf(Text, GlobalText[953], ((ip->ExtOption >> 2) % 0x04) * 5);
+        swprintf(Text, GlobalText[953], ip->AncientBonusOption * 5);
         break;
 
     default:
@@ -860,7 +697,7 @@ bool CSItemOption::Special_Option_Check(int Kind)
     int i, j;
     for (i = 0; i < 2; i++)
     {
-        ITEM* item = nullptr;
+        const ITEM* item = nullptr;
         item = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT + i];
         if (item == nullptr || item->Type <= -1)
             continue;
@@ -894,9 +731,9 @@ int CSItemOption::RenderDefaultOptionText(const ITEM* ip, int TextNum)
         TextListColor[TNum] = TEXT_COLOR_BLUE;
         TNum++;
 
-        if ((ip->Type >= ITEM_HELPER + 8 && ip->Type <= ITEM_HELPER + 9) || (ip->Type >= ITEM_HELPER + 12 && ip->Type <= ITEM_HELPER + 13) || (ip->Type >= ITEM_HELPER + 21 && ip->Type <= ITEM_HELPER + 27))
+        if ((ip->Type >= ITEM_RING_OF_ICE && ip->Type <= ITEM_RING_OF_POISON) || (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type <= ITEM_PENDANT_OF_FIRE) || (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_PENDANT_OF_WATER))
         {
-            swprintf(TextList[TNum], GlobalText[1165]);
+            swprintf(TextList[TNum], GlobalText[1165]); // "Increase Attribute Damage"
             TextListColor[TNum] = TEXT_COLOR_BLUE;
             TNum++;
         }
@@ -905,7 +742,7 @@ int CSItemOption::RenderDefaultOptionText(const ITEM* ip, int TextNum)
     return TNum;
 }
 
-void CSItemOption::getAllAddState(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma)
+void CSItemOption::getAllAddState(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma) const
 {
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < MAX_EQUIPMENT; ++i)
     {
@@ -937,18 +774,54 @@ void CSItemOption::getAllAddState(WORD* Strength, WORD* Dexterity, WORD* Energy,
         }
     }
 
-    GetSpecial(Strength, AT_SET_OPTION_IMPROVE_STRENGTH);
-    GetSpecial(Dexterity, AT_SET_OPTION_IMPROVE_DEXTERITY);
-    GetSpecial(Energy, AT_SET_OPTION_IMPROVE_ENERGY);
-    GetSpecial(Vitality, AT_SET_OPTION_IMPROVE_VITALITY);
-    GetSpecial(Charisma, AT_SET_OPTION_IMPROVE_CHARISMA);
+    AddStatsBySetOptions(Strength, Dexterity, Energy, Vitality, Charisma);
 }
 
-void CSItemOption::getAllAddStateOnlyAddValue(WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma)
+void    CSItemOption::AddStatsBySetOptions(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma) const
+{
+    for (int i = 0; i < m_SetSearchResultCount; i++)
+    {
+        auto& set = m_SetSearchResult[i];
+        for (int j = 0; j < set.SetOptionCount; j++)
+        {
+            auto& option = set.SetOption[j];
+            if (!option.IsActive)
+            {
+                continue;
+            }
+
+            switch (option.OptionNumber)
+            {
+            case AT_SET_OPTION_IMPROVE_STRENGTH:
+                *Strength += option.Value;
+                break;
+
+            case AT_SET_OPTION_IMPROVE_DEXTERITY:
+                *Dexterity += option.Value;
+                break;
+
+            case AT_SET_OPTION_IMPROVE_ENERGY:
+                *Energy += option.Value;
+                break;
+
+            case AT_SET_OPTION_IMPROVE_VITALITY:
+                *Vitality += option.Value;
+                break;
+
+            case AT_SET_OPTION_IMPROVE_CHARISMA:
+                *Charisma += option.Value;
+                break;
+            default:
+                // other options are not handled here.
+                break;
+            }
+        }
+    }
+}
+
+void CSItemOption::getAllAddStateOnlyAddValue(WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma) const
 {
     *AddStrength = *AddDexterity = *AddEnergy = *AddVitality = *AddCharisma = 0;
-    memset(m_bySetOptionListOnOff, 0, sizeof m_bySetOptionListOnOff);
-
     getAllAddState(AddStrength, AddDexterity, AddEnergy, AddVitality, AddCharisma);
 }
 
@@ -991,78 +864,16 @@ void CSItemOption::getAllAddOptionStatesbyCompare(WORD* Strength, WORD* Dexterit
         }
     }
 
-    memset(m_bySetOptionListOnOff, 0, sizeof m_bySetOptionListOnOff);
-
-    GetSpecial(Strength, AT_SET_OPTION_IMPROVE_STRENGTH);
-    GetSpecial(Dexterity, AT_SET_OPTION_IMPROVE_DEXTERITY);
-    GetSpecial(Energy, AT_SET_OPTION_IMPROVE_ENERGY);
-    GetSpecial(Vitality, AT_SET_OPTION_IMPROVE_VITALITY);
-    GetSpecial(Charisma, AT_SET_OPTION_IMPROVE_CHARISMA);
-}
-
-void CSItemOption::UpdateCount_SetOptionPerEquippedSetItem(const SET_SEARCH_RESULT* byOptionList, int* arLimitSetItemOptionCount, ITEM* ItemsEquipment)
-{
-    for (int iE = 0; iE < MAX_EQUIPMENT_INDEX; ++iE)
-    {
-        int& iCurCount = arLimitSetItemOptionCount[iE];
-        ITEM& CurItem = ItemsEquipment[iE];
-
-        iCurCount = GetCurrentTypeSetitemCount(CurItem, byOptionList);
-    }
-}
-
-int CSItemOption::Search_From_EquippedSetItemNameMapTable(wchar_t* szSetItemname)
-{
-    int		iSizeFindName = wcslen(szSetItemname);
-
-    for (m_iterESIN = m_mapEquippedSetItemName.begin(); m_iterESIN != m_mapEquippedSetItemName.end(); ++m_iterESIN)
-    {
-        std::wstring	strCur;
-
-        strCur = m_iterESIN->second;
-        int iSizeCurName = strCur.size();
-
-        if (!wcsncmp(szSetItemname, strCur.c_str(), iSizeFindName)
-            && !wcsncmp(szSetItemname, strCur.c_str(), iSizeCurName))
-        {
-            return m_iterESIN->first;
-        }
-    }
-    return -1;
-}
-
-int CSItemOption::GetCurrentTypeSetitemCount(const ITEM& CurItem_, const SET_SEARCH_RESULT* byOptionList)
-{
-    const BYTE bySetType = CurItem_.ExtOption;
-
-    const int setItemType = (bySetType % 0x04);
-
-    const ITEM_SET_TYPE& itemSType = m_ItemSetType[CurItem_.Type];
-
-    for (int i = 0; i < MAX_EQUIPPED_SETS; ++i)
-    {
-        if (byOptionList[i].SetNumber == itemSType.byOption[(setItemType - 1)])
-        {
-            const int iEquippedCount = byOptionList[i + 1].ItemCount;
-            const ITEM_SET_OPTION& itemOption = m_ItemSetOption[byOptionList[i].SetNumber];
-            if (iEquippedCount >= itemOption.byOptionCount - 1)
-            {
-                return 255;
-            }
-
-            return iEquippedCount;
-        }
-    }
-
-    return 0;
+    AddStatsBySetOptions(Strength, Dexterity, Energy, Vitality, Charisma);
 }
 
 void CSItemOption::CheckItemSetOptions()
 {
-    SET_SEARCH_RESULT byOptionList[MAX_EQUIPPED_SETS] = { };
+    SET_SEARCH_RESULT byOptionList[MAX_EQUIPPED_SET_ITEMS] = { };
+
     const ITEM* itemRight = nullptr;
 
-    ZeroMemory(m_bySetOptionList, sizeof(BYTE) * MAX_OPTIONS_PER_ITEM_SET * MAX_ITEM_SETS_PER_ITEM);
+    ZeroMemory(m_SetSearchResult, sizeof(SET_SEARCH_RESULT_OPT) * MAX_EQUIPPED_SETS);
 
     for (int i = 0; i < MAX_EQUIPMENT_INDEX; ++i)
     {
@@ -1071,44 +882,47 @@ void CSItemOption::CheckItemSetOptions()
             continue;
         }
 
-        ITEM* ip = &CharacterMachine->Equipment[i];
+        const ITEM* item = &CharacterMachine->Equipment[i];
 
-        if (ip->Durability <= 0)
+        if (item->Durability <= 0)
         {
             continue;
         }
 
         if ((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT)
-            && itemRight != nullptr && itemRight->Type == ip->Type && (itemRight->ExtOption % 0x04) == (ip->ExtOption % 0x04))
+            && itemRight != nullptr && itemRight->Type == item->Type
+            && (itemRight->AncientDiscriminator == item->AncientDiscriminator))
         {
+            // same item of a set should only count once
             continue;
         }
 
-        if (ip->Type > -1)
+        if (item->Type > -1)
         {
-            checkItemType(byOptionList, ip->Type, ip->ExtOption);
+            checkItemType(byOptionList, item->Type, item->AncientDiscriminator);
         }
 
         if (i == EQUIPMENT_WEAPON_RIGHT || i == EQUIPMENT_RING_RIGHT)
         {
-            itemRight = ip;
+            itemRight = item;
         }
     }
 
     calcSetOptionList(byOptionList);
     getAllAddStateOnlyAddValue(&CharacterAttribute->AddStrength, &CharacterAttribute->AddDexterity, &CharacterAttribute->AddEnergy, &CharacterAttribute->AddVitality, &CharacterAttribute->AddCharisma);
 
-    WORD AllStrength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-    WORD AllDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-    WORD AllEnergy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
+    const WORD AllStrength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
+    const WORD AllDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
+    const WORD AllEnergy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
     WORD AllVitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
-    WORD AllCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-    WORD AllLevel = CharacterAttribute->Level;
+    const WORD AllCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
+    const WORD AllLevel = CharacterAttribute->Level;
 
-    
+    // And now we're doing all that again, just for checking the required stats?!
+    // TODO: How can this be improved?
+
+    ZeroMemory(m_SetSearchResult, sizeof(SET_SEARCH_RESULT_OPT) * MAX_EQUIPPED_SETS);
     ZeroMemory(byOptionList, sizeof byOptionList);
-
-    memset(m_bySetOptionList, 0xFF, sizeof m_bySetOptionList);
 
     for (int i = 0; i < MAX_EQUIPMENT_INDEX; ++i)
     {
@@ -1123,15 +937,16 @@ void CSItemOption::CheckItemSetOptions()
             continue;
         }
 
-        if (((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT)
-            && itemRight != nullptr && itemRight->Type == ip->Type && (itemRight->ExtOption % 0x04) == (ip->ExtOption % 0x04)))
+        if ((i == EQUIPMENT_WEAPON_LEFT || i == EQUIPMENT_RING_LEFT)
+            && itemRight != nullptr && itemRight->Type == ip->Type &&
+            itemRight->AncientDiscriminator == ip->AncientDiscriminator)
         {
             continue;
         }
 
         if (ip->Type > -1)
         {
-            checkItemType(byOptionList, ip->Type, ip->ExtOption);
+            checkItemType(byOptionList, ip->Type, ip->AncientDiscriminator);
         }
 
         if (i == EQUIPMENT_WEAPON_RIGHT || i == EQUIPMENT_RING_RIGHT)
@@ -1140,7 +955,6 @@ void CSItemOption::CheckItemSetOptions()
         }
     }
 
-    UpdateCount_SetOptionPerEquippedSetItem(byOptionList, m_arLimitSetItemOptionCount, CharacterMachine->Equipment);
     calcSetOptionList(byOptionList);
 }
 
@@ -1174,7 +988,7 @@ void CSItemOption::RenderSetOptionButton(const int StartX, const int StartY)
     g_pRenderText->RenderText(StartX + 96, (int)(y + 3), Text, 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetTextColor(0xffffffff);
-    if (m_bySetOptionANum > 0 || m_bySetOptionBNum > 0)
+    if (m_SetSearchResultCount > 0)
         g_pRenderText->SetTextColor(255, 204, 25, 255);
     else
         g_pRenderText->SetTextColor(128, 128, 128, 255);
@@ -1184,7 +998,7 @@ void CSItemOption::RenderSetOptionButton(const int StartX, const int StartY)
 
 void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
 {
-    if (m_bViewOptionList && (m_bySetOptionANum > 0 || m_bySetOptionBNum > 0))
+    if (m_bViewOptionList && m_SetSearchResultCount > 0)
     {
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetBgColor(100, 0, 0, 0);
@@ -1204,44 +1018,17 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
 
         int		iCurSetItemTypeSequence = 0, iCurSetItemType = -1;
 
-        for (int i = 0; i < m_bySetOptionANum + m_bySetOptionBNum; ++i)
+        for (int i = 0; i < m_SetSearchResultCount; i++)
         {
-            std::wstring	strCurrent;
+            const auto& set = m_SetSearchResult[i];
 
-            m_iterESIS = m_mapEquippedSetItemSequence.find(i);
-
-            if (m_mapEquippedSetItemSequence.end() != m_iterESIS)
-            {
-                iCurSetItemTypeSequence = m_iterESIS->second;
-            }
-            else
-            {
-                iCurSetItemTypeSequence = -1;
-            }
-
-            if (iCurSetItemType != iCurSetItemTypeSequence)
-            {
-                iCurSetItemType = iCurSetItemTypeSequence;
-
-                m_iterESIN = m_mapEquippedSetItemName.find(iCurSetItemTypeSequence);
-
-                if (m_iterESIN != m_mapEquippedSetItemName.end())
-                {
-                    strCurrent = m_iterESIN->second;
-
-                    swprintf(TextList[TextNum], L"%s %s", strCurrent.c_str(), GlobalText[1089]);
-                    TextListColor[TextNum] = 3;
-                    TextBold[TextNum] = true;
-                    TextNum++;
-                }
-            }
-            getExplainText(TextList[TextNum], m_bySetOptionList[i][0], m_iSetOptionListValue[i][0], setIndex);
-            if (m_bySetOptionList[i][0] >= AT_SET_OPTION_IMPROVE_ATTACK_1 && m_bySetOptionList[i][1] == 0)
-                TextListColor[TextNum] = 2;
-            else
-                TextListColor[TextNum] = 1;
-            TextBold[TextNum] = false;
+            // print set name:
+            swprintf(TextList[TextNum], L"%s %s", set.SetName, GlobalText[1089]);
+            TextListColor[TextNum] = TEXT_COLOR_YELLOW;
+            TextBold[TextNum] = true;
             TextNum++;
+
+            TextNum = RenderSetOptionList(set, TextNum, true, false);
         }
 
         RenderTipTextList(PosX, PosY, TextNum, 120, RT3_SORT_CENTER);
@@ -1255,7 +1042,7 @@ void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
 
     if (FilterName[0] != '/') return;
 
-    auto Length1 = wcslen(FilterName);
+    const auto Length1 = wcslen(FilterName);
     for (int i = 0; i < MAX_SET_OPTION; ++i)
     {
         ITEM_SET_OPTION& setOption = m_ItemSetOption[i];
@@ -1263,7 +1050,7 @@ void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
         {
             swprintf(Name, L"/%s", setOption.strSetName);
 
-            auto Length2 = wcslen(Name);
+            const auto Length2 = wcslen(Name);
 
             m_byRenderOptionList = 0;
             if (wcsncmp(FilterName, Name, Length1) == NULL && wcsncmp(FilterName, Name, Length2) == NULL)
@@ -1298,10 +1085,6 @@ void CSItemOption::RenderOptionHelper(void)
         return;
     }
 
-    BYTE    option1 = 255;
-    BYTE    option2 = 255;
-    BYTE    value1 = 255;
-    BYTE    value2 = 255;
     swprintf(TextList[TextNum], L"\n"); TextNum++;
     swprintf(TextList[TextNum], L"%s %s %s", setOption.strSetName, GlobalText[1089], GlobalText[159]);
     TextListColor[TextNum] = TEXT_COLOR_YELLOW;
@@ -1310,36 +1093,36 @@ void CSItemOption::RenderOptionHelper(void)
     swprintf(TextList[TextNum], L"\n"); TextNum++;
     swprintf(TextList[TextNum], L"\n"); TextNum++;
 
-    for (int i = 0; i < 13; ++i)
+    for (int o = 0; o < MAX_ITEM_SET_STANDARD_OPTION_COUNT; ++o)
     {
-        if (i < 6)
+        for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; ++n)
         {
-            option1 = setOption.byStandardOption[i][0];
-            option2 = setOption.byStandardOption[i][1];
-            value1 = setOption.byStandardOptionValue[i][0];
-            value2 = setOption.byStandardOptionValue[i][1];
+            if (getExplainText(TextList[TextNum], setOption.byStandardOption[o][n], setOption.byStandardOptionValue[o][n]))
+            {
+                TextListColor[TextNum] = TEXT_COLOR_BLUE;
+                TextBold[TextNum] = false;
+                TextNum++;
+            }
         }
-        else if (i < 8)
+    }
+
+    for (int o = 0; o < MAX_ITEM_SET_EXT_OPTION_COUNT; ++o)
+    {
+        if (getExplainText(TextList[TextNum], setOption.byExtOption[o], setOption.byExtOption[o]))
         {
-            option1 = setOption.byExtOption[i - 6];
-            value1 = setOption.byExtOptionValue[i - 6];
+            TextListColor[TextNum] = TEXT_COLOR_GREEN;
+            TextBold[TextNum] = false;
+            TextNum++;
         }
-        else
+    }
+
+    for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
+    {
+        if (getExplainText(TextList[TextNum], setOption.byFullOption[o], setOption.byFullOption[o]))
         {
-            option1 = setOption.byFullOption[i - 8];
-            value1 = setOption.byFullOptionValue[i - 8];
-        }
-        if (option1 != 255)
-        {
-            getExplainText(TextList[TextNum], option1, value1, 0);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false; TextNum++;
-        }
-        if (option2 != 255)
-        {
-            getExplainText(TextList[TextNum], option2, value2, 0);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false; TextNum++;
+            TextListColor[TextNum] = TEXT_COLOR_YELLOW;
+            TextBold[TextNum] = false;
+            TextNum++;
         }
     }
 
@@ -1351,120 +1134,25 @@ void CSItemOption::RenderOptionHelper(void)
     RenderTipTextList(sx, sy, TextNum, 0);
 }
 
-int CSItemOption::GetSetItmeCount(const ITEM* pselecteditem)
+int CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem)
 {
-    ITEM_SET_TYPE& itemsettype = m_ItemSetType[pselecteditem->Type];
-    BYTE subtype = itemsettype.byOption[(pselecteditem->ExtOption % 0x04) - 1];
+    const ITEM_SET_TYPE& itemSType = m_ItemSetType[ip->Type];
 
-    int setitemcount = 0;
-
-    for (int j = 0; j < MAX_ITEM; j++)
-    {
-        ITEM_SET_TYPE& temptype = m_ItemSetType[j];
-        for (int i = 0; i < 2; i++)
-        {
-            BYTE tempsubtype = temptype.byOption[i];
-
-            if (subtype == tempsubtype)
-            {
-                setitemcount++;
-            }
-        }
-    }
-
-    return setitemcount;
-}
-
-bool CSItemOption::isFullseteffect(const ITEM* pselecteditem)
-{
-    int mysetitemcount = 0;
-
-    ITEM_SET_TYPE& selectedItemType = m_ItemSetType[pselecteditem->Type];
-    BYTE selectedItemOption = selectedItemType.byOption[(pselecteditem->ExtOption % 0x04) - 1];
-    ITEM_SET_OPTION& selecteditemoption = m_ItemSetOption[selectedItemOption];
-    int	Cmp_Buff[10] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-
-    for (int i = 0; i < MAX_EQUIPMENT; i++)
-    {
-        ITEM* p = &CharacterMachine->Equipment[i];
-
-        if (p)
-        {
-            bool Continue_Set = false;
-            for (int ipjh = 0; ipjh < mysetitemcount; ipjh++)
-            {
-                if (p->Type == Cmp_Buff[ipjh])
-                {
-                    Continue_Set = true;
-                    break;
-                }
-            }
-            if (Continue_Set == true)
-                continue;
-
-            ITEM_SET_TYPE& myitemSType = m_ItemSetType[p->Type];
-            BYTE myItemOption = myitemSType.byOption[(p->ExtOption % 0x04) - 1];
-            ITEM_SET_OPTION& setOption = m_ItemSetOption[myItemOption];
-
-            if (wcscmp(selecteditemoption.strSetName, setOption.strSetName) == NULL)
-            {
-                Cmp_Buff[mysetitemcount] = p->Type;
-                mysetitemcount++;
-            }
-        }
-    }
-
-    if (mysetitemcount == GetSetItmeCount(pselecteditem))
-        return true;
-    else
-        return false;
-}
-
-int     CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem)
-{
-    ITEM_SET_TYPE& itemSType = m_ItemSetType[ip->Type];
-
-    m_bySelectedItemOption = itemSType.byOption[(ip->ExtOption % 0x04) - 1];
+    m_bySelectedItemOption = itemSType.byOption[ip->AncientDiscriminator - 1];
 
     if (m_bySelectedItemOption <= 0 || m_bySelectedItemOption == 255) return TextNum;
 
     int TNum = TextNum;
 
-    ITEM_SET_OPTION& setOption = m_ItemSetOption[m_bySelectedItemOption];
+    const ITEM_SET_OPTION& setOption = m_ItemSetOption[m_bySelectedItemOption];
     if (setOption.byOptionCount >= 255)
     {
         m_bySelectedItemOption = 0;
         return TNum;
     }
 
-    BYTE    option1 = 255;
-    BYTE    option2 = 255;
-    BYTE    value1 = 255;
-    BYTE    value2 = 255;
-    BYTE    count1 = 0;
 
-    BYTE    byLimitOptionNum;
-
-    if (m_bySetOptionANum > 0)
-        byLimitOptionNum = m_bySetOptionANum - m_bySameSetItem;//m_bySetOptionANum-1;
-    else
-        byLimitOptionNum = 0;
-
-    if (m_bySetOptionBNum > 0)
-        byLimitOptionNum += m_bySetOptionBNum - m_bySameSetItem;//m_bySetOptionANum-1;
-
-    count1 = Search_From_EquippedSetItemNameSequence(setOption.strSetName);
-
-    if (255 == count1)
-    {
-        byLimitOptionNum = 0;
-    }
-    else
-    {
-        byLimitOptionNum = abs((m_bySetOptionANum + m_bySetOptionBNum) - m_bySameSetItem);
-    }
-
-    swprintf(TextList[TNum], L"\n"); TNum += 1;
+    swprintf(TextList[TNum], L"\n"); TNum++;
     swprintf(TextList[TNum], L"%s %s", GlobalText[1089], GlobalText[159]);
     TextListColor[TNum] = TEXT_COLOR_YELLOW;
     TNum++;
@@ -1472,115 +1160,61 @@ int     CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, boo
     swprintf(TextList[TNum], L"\n"); TNum++;
     swprintf(TextList[TNum], L"\n"); TNum++;
 
-    bool isfulloption = isFullseteffect(ip);
 
-    if (isfulloption)
+    for (int i = 0; i < m_SetSearchResultCount; i++)
     {
-        byLimitOptionNum = 13;
+        const auto& set = m_SetSearchResult[i];
+        if (wcscmp(set.SetName, setOption.strSetName) == 0)
+        {
+            // Set Found.
+            TNum = RenderSetOptionList(set, TNum, bIsEquippedItem, true);
+            break;
+        }
     }
 
-    BYTE byCurrentSelectedSlotIndex = ip->bySelectedSlotIndex;
-
-    int iLimitOptionCount = m_arLimitSetItemOptionCount[byCurrentSelectedSlotIndex] - 1;
-
-    for (int i = 0; i <= MAX_SETITEM_OPTIONS; ++i)
-    {
-        if (i < 6)
-        {
-            option1 = setOption.byStandardOption[i][0];
-            option2 = setOption.byStandardOption[i][1];
-            value1 = setOption.byStandardOptionValue[i][0];
-            value2 = setOption.byStandardOptionValue[i][1];
-        }
-        else if (i < 8)
-        {
-            if (((ip->ExtOption % 0x04) - 1) == 0)
-            {
-                option1 = setOption.byExtOption[i - 6];
-                value1 = setOption.byExtOptionValue[i - 6];
-            }
-            else
-            {
-                option2 = setOption.byExtOption[i - 6];
-                value2 = setOption.byExtOptionValue[i - 6];
-            }
-        }
-        else
-        {
-            if (((ip->ExtOption % 0x04) - 1) == 0)
-            {
-                option1 = setOption.byFullOption[i - 8];
-                value1 = setOption.byFullOptionValue[i - 8];
-            }
-            else
-            {
-                option2 = setOption.byFullOption[i - 8];
-                value2 = setOption.byFullOptionValue[i - 8];
-            }
-
-            if (isfulloption)
-            {
-                byLimitOptionNum = 13;
-            }
-            else
-            {
-                byLimitOptionNum = 255;
-            }
-        }
-
-        if (option1 != 255)
-        {
-            getExplainText(TextList[TNum], option1, value1, 0);
-
-            if (m_bySetOptionList[count1][0] == option1
-                && byLimitOptionNum != 255
-                && iLimitOptionCount > i
-                && byLimitOptionNum != 0
-                && bIsEquippedItem == true
-                )
-            {
-                TextListColor[TNum] = TEXT_COLOR_BLUE;
-                count1++;
-            }
-            else
-            {
-                TextListColor[TNum] = TEXT_COLOR_GRAY;
-            }
-            TextBold[TNum] = false; TNum++;
-        }
-        if (option2 != 255)
-        {
-            getExplainText(TextList[TNum], option2, value2, 0);
-            if (m_bySetOptionList[count1][0] == option2
-                && byLimitOptionNum != 255
-                && iLimitOptionCount > i
-                && byLimitOptionNum != 0
-                )
-            {
-                TextListColor[TNum] = TEXT_COLOR_BLUE;
-                count1++;
-            }
-            else
-            {
-                TextListColor[TNum] = TEXT_COLOR_GRAY;
-            }
-            TextBold[TNum] = false; TNum++;
-        }
-    }
     swprintf(TextList[TNum], L"\n"); TNum++;
     swprintf(TextList[TNum], L"\n"); TNum++;
 
     return TNum;
 }
 
-BYTE CSItemOption::GetSetOptionANum()
+BYTE  CSItemOption::RenderSetOptionList(const SET_SEARCH_RESULT_OPT& set, BYTE textIndex, bool bIsEquippedItem, bool bShowInactive)
 {
-    return m_bySetOptionANum;
-}
+    for (int j = 0; j < set.SetOptionCount; j++)
+    {
+        const auto option = set.SetOption[j];
+        if (!bShowInactive && !option.IsActive)
+        {
+            break;
+        }
 
-BYTE CSItemOption::GetSetOptionBNum()
-{
-    return m_bySetOptionBNum;
+        if (getExplainText(TextList[textIndex], option.OptionNumber, option.Value))
+        {
+            if (!bIsEquippedItem || !option.IsActive)
+            {
+                TextListColor[textIndex] = TEXT_COLOR_GRAY;
+            }
+            else if (option.OptionNumber >= AT_SET_OPTION_IMPROVE_ATTACK_1 && !option.FulfillsClassRequirement)
+            {
+                // Mastery
+                TextListColor[textIndex] = TEXT_COLOR_RED;
+            }
+            else
+            {
+                TextListColor[textIndex] = option.IsFullOption ? TEXT_COLOR_YELLOW
+                                            : option.IsExtOption ? TEXT_COLOR_GREEN
+                                            : TEXT_COLOR_BLUE;
+            }
+
+            TextBold[textIndex] = false;
+            textIndex++;
+        }
+    }
+
+    swprintf(TextList[textIndex], L"\n");
+    textIndex++;
+
+    return textIndex;
 }
 
 void CSItemOption::SetViewOptionList(bool bView)

@@ -15,7 +15,7 @@ public:
     void LoadItemModel();
     void LoadItemTexture();
     bool CheckDarkLordHair(int iType);
-    bool CheckDarkCloak(int iClass, int iType);
+    bool CheckDarkCloak(CLASS_TYPE iClass, int iType);
     bool CheckChangeRing(short RingType);
     bool CheckRepair(int iType);
     bool CheckMoveMap(short sLeftRingType, short sRightRingType);

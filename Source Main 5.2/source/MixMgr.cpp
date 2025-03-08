@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "MixMgr.h"
 #include "./Utilities/Log/ErrorReport.h"
 #include "UIManager.h"
@@ -55,7 +55,8 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
     Reset();
 
     m_sType = pItem->Type;
-    m_iLevel = ((pItem->Level >> 3) & 15);
+    m_iLevel = pItem->Level;
+    
     m_iDurability = pItem->Durability;
     for (int i = 0; i < pItem->SpecialNum; i++)
     {
@@ -76,15 +77,15 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
             break;
         }
     }
-    if ((pItem->Option1 & 63) > 0) m_dwSpecialItem |= RCP_SP_EXCELLENT;
+    if (pItem->ExcellentFlags > 0) m_dwSpecialItem |= RCP_SP_EXCELLENT;
     if (pItem->RequireLevel >= 380) m_dwSpecialItem |= RCP_SP_ADD380ITEM;
-    if ((pItem->ExtOption % 0x04) == EXT_A_SET_OPTION || (pItem->ExtOption % 0x04) == EXT_B_SET_OPTION) m_dwSpecialItem |= RCP_SP_SETITEM;
+    if (pItem->AncientDiscriminator > 0) m_dwSpecialItem |= RCP_SP_SETITEM;
     m_b380AddedItem = pItem->option_380;
 
     if (pItem->Type >= ITEM_SWORD && pItem->Type <= ITEM_BOOTS + MAX_ITEM_INDEX - 1)
         m_bIsEquipment = TRUE;
 
-    if (pItem->Type == ITEM_HELPER + 37 && pItem->Option1 != 0)
+    if (pItem->Type == ITEM_HORN_OF_FENRIR && pItem->ExcellentFlags != 0)
         m_bFenrirAddedItem = TRUE;
 
     if (pItem->Type == ITEM_POTION + 53)
@@ -93,15 +94,15 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
     if (pItem->Type == ITEM_POTION + 96)
         m_bIsChaosCharmItem = TRUE;
 
-    if (pItem->Type == ITEM_WING + 15
-        || pItem->Type == ITEM_WING + 30
-        || pItem->Type == ITEM_WING + 31
-        || pItem->Type == ITEM_POTION + 13
-        || pItem->Type == ITEM_POTION + 14
-        || pItem->Type == ITEM_POTION + 16
-        || pItem->Type == ITEM_POTION + 22
-        || pItem->Type == ITEM_POTION + 31
-        || pItem->Type == ITEM_POTION + 42
+    if (pItem->Type == ITEM_JEWEL_OF_CHAOS
+        || pItem->Type == ITEM_PACKED_JEWEL_OF_BLESS
+        || pItem->Type == ITEM_PACKED_JEWEL_OF_SOUL
+        || pItem->Type == ITEM_JEWEL_OF_BLESS
+        || pItem->Type == ITEM_JEWEL_OF_SOUL
+        || pItem->Type == ITEM_JEWEL_OF_LIFE
+        || pItem->Type == ITEM_JEWEL_OF_CREATION
+        || pItem->Type == ITEM_JEWEL_OF_GUARDIAN
+        || pItem->Type == ITEM_JEWEL_OF_HARMONY
         )
         m_bIsJewelItem = TRUE;
 
@@ -128,27 +129,27 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
     switch (pItem->Type)
     {
     case ITEM_WING:
-    case ITEM_WING + 1:
-    case ITEM_WING + 2:
-    case ITEM_WING + 41:
+    case ITEM_WINGS_OF_HEAVEN:
+    case ITEM_WINGS_OF_SATAN:
+    case ITEM_WING_OF_CURSE:
         m_bIsWing = TRUE;
         break;
-    case ITEM_WING + 3:
-    case ITEM_WING + 4:
-    case ITEM_WING + 5:
-    case ITEM_WING + 6:
-    case ITEM_HELPER + 30:
-    case ITEM_WING + 42:
-    case ITEM_WING + 49:
+    case ITEM_WINGS_OF_SPIRITS:
+    case ITEM_WINGS_OF_SOUL:
+    case ITEM_WINGS_OF_DRAGON:
+    case ITEM_WINGS_OF_DARKNESS:
+    case ITEM_CAPE_OF_LORD:
+    case ITEM_WINGS_OF_DESPAIR:
+    case ITEM_CAPE_OF_FIGHTER:
         m_bIsUpgradedWing = TRUE;
         break;
-    case ITEM_WING + 36:
-    case ITEM_WING + 37:
-    case ITEM_WING + 38:
-    case ITEM_WING + 39:
-    case ITEM_WING + 40:
-    case ITEM_WING + 43:
-    case ITEM_WING + 50:
+    case ITEM_WING_OF_STORM:
+    case ITEM_WING_OF_ETERNAL:
+    case ITEM_WING_OF_ILLUSION:
+    case ITEM_WING_OF_RUIN:
+    case ITEM_CAPE_OF_EMPEROR:
+    case ITEM_WING_OF_DIMENSION:
+    case ITEM_CAPE_OF_OVERRULE:
         m_bIs3rdUpgradedWing = TRUE;
     }
 
@@ -159,13 +160,13 @@ void CMixItem::SetItem(ITEM* pItem, DWORD dwMixValue)
     }
     switch (pItem->Type)
     {
-    case ITEM_POTION + 3:
-    case ITEM_POTION + 38:
-    case ITEM_POTION + 39:
+    case ITEM_LARGE_HEALING_POTION:
+    case ITEM_SMALL_COMPLEX_POTION:
+    case ITEM_MEDIUM_COMPLEX_POTION:
     case ITEM_POTION + 53:
     case ITEM_POTION + 88:
     case ITEM_POTION + 89:
-    case ITEM_POTION + 90:
+    case ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH:
     case ITEM_POTION + 100:
         m_bCanStack = TRUE;
         break;
@@ -210,22 +211,22 @@ DWORD CMixItemInventory::EvaluateMixItemValue(ITEM* pItem)
     DWORD dwMixValue = 0;
     switch (pItem->Type)
     {
-    case ITEM_WING + 15:
+    case ITEM_JEWEL_OF_CHAOS:
         dwMixValue = 40000;
         break;
-    case ITEM_POTION + 13:
+    case ITEM_JEWEL_OF_BLESS:
         dwMixValue = 100000;
         break;
-    case ITEM_POTION + 14:
+    case ITEM_JEWEL_OF_SOUL:
         dwMixValue = 70000;
         break;
-    case ITEM_POTION + 22:
+    case ITEM_JEWEL_OF_CREATION:
         dwMixValue = 450000;
         break;
-    case ITEM_POTION + 16:
+    case ITEM_JEWEL_OF_LIFE:
         dwMixValue = 0;
         break;
-    case ITEM_POTION + 31:
+    case ITEM_JEWEL_OF_GUARDIAN:
     default:
         dwMixValue = ItemValue(pItem, 0);
         break;
@@ -592,7 +593,7 @@ BOOL CMixRecipes::GetRecipeName(MIX_RECIPE* pRecipe, wchar_t* pszNameOut, int iN
             }
             return FALSE;
         }
-        assert(optionTextlist.size() == 2 && L"¿É¼ÇÀº 2°³¿©¾ß ÇÔ");
+        assert(optionTextlist.size() == 2 && L"ì˜µì…˜ì€ 2ê°œì—¬ì•¼ í•¨");
         if (iNameLine == 1)
         {
             wcscpy(pszNameOut, optionTextlist[0].c_str());
@@ -682,26 +683,26 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
             swprintf(szTempName, GlobalText[2337]);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_SHIELD && pMixRecipeItem->m_sTypeMax == ITEM_BOOTS + MAX_ITEM_INDEX - 1)
             swprintf(szTempName, GlobalText[2338]);
-        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING && pMixRecipeItem->m_sTypeMax == ITEM_WING + 2)
+        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING && pMixRecipeItem->m_sTypeMax == ITEM_WINGS_OF_SATAN)
             swprintf(szTempName, GlobalText[2339]);
-        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 3 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 6)
+        else if (pMixRecipeItem->m_sTypeMin == ITEM_WINGS_OF_SPIRITS && pMixRecipeItem->m_sTypeMax == ITEM_WINGS_OF_DARKNESS)
             swprintf(szTempName, GlobalText[2348]);
-        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 41 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 41)
+        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING_OF_CURSE && pMixRecipeItem->m_sTypeMax == ITEM_WING_OF_CURSE)
             swprintf(szTempName, GlobalText[2339]);
-        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 42 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 42)
+        else if (pMixRecipeItem->m_sTypeMin == ITEM_WINGS_OF_DESPAIR && pMixRecipeItem->m_sTypeMax == ITEM_WINGS_OF_DESPAIR)
             swprintf(szTempName, GlobalText[2348]);
         else if (pMixRecipeItem->m_sTypeMin == pMixRecipeItem->m_sTypeMax &&
-            (pMixRecipeItem->m_sTypeMin == ITEM_MACE + 6 || pMixRecipeItem->m_sTypeMin == ITEM_BOW + 6 || pMixRecipeItem->m_sTypeMin == ITEM_STAFF + 7))
+            (pMixRecipeItem->m_sTypeMin == ITEM_CHAOS_DRAGON_AXE || pMixRecipeItem->m_sTypeMin == ITEM_CHAOS_NATURE_BOW || pMixRecipeItem->m_sTypeMin == ITEM_CHAOS_LIGHTNING_STAFF))
             swprintf(szTempName, GlobalText[2340]);
-        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 60 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 65)
+        else if (pMixRecipeItem->m_sTypeMin == ITEM_SEED_FIRE && pMixRecipeItem->m_sTypeMax == ITEM_SEED_EARTH)
             swprintf(szTempName, GlobalText[2680]);
-        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 70 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 74)
+        else if (pMixRecipeItem->m_sTypeMin == ITEM_SPHERE_MONO && pMixRecipeItem->m_sTypeMax == ITEM_SPHERE_5)
             swprintf(szTempName, GlobalText[2681]);
-        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 100 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 129)
+        else if (pMixRecipeItem->m_sTypeMin == ITEM_SEED_SPHERE_FIRE_1 && pMixRecipeItem->m_sTypeMax == ITEM_SEED_SPHERE_EARTH_5)
             swprintf(szTempName, GlobalText[2682]);
-        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 100 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 128)
+        else if (pMixRecipeItem->m_sTypeMin == ITEM_SEED_SPHERE_FIRE_1 && pMixRecipeItem->m_sTypeMax == ITEM_SEED_SPHERE_LIGHTNING_5)
             swprintf(szTempName, L"%s (%s)", GlobalText[2682], GlobalText[2684]);
-        else if (pMixRecipeItem->m_sTypeMin == ITEM_WING + 101 && pMixRecipeItem->m_sTypeMax == ITEM_WING + 129)
+        else if (pMixRecipeItem->m_sTypeMin == ITEM_SEED_SPHERE_WATER_1 && pMixRecipeItem->m_sTypeMax == ITEM_SEED_SPHERE_EARTH_5)
             swprintf(szTempName, L"%s (%s)", GlobalText[2682], GlobalText[2685]);
         else
         {
@@ -1004,13 +1005,13 @@ void CMixRecipes::CalcMixReqZen(int iNumMixItems, CMixItem* pMixItems)
 
 BOOL CMixRecipes::IsChaosItem(CMixItem& rSource)
 {
-    if (rSource.m_sType == ITEM_MACE + 6 || rSource.m_sType == ITEM_BOW + 6 || rSource.m_sType == ITEM_STAFF + 7) return TRUE;
+    if (rSource.m_sType == ITEM_CHAOS_DRAGON_AXE || rSource.m_sType == ITEM_CHAOS_NATURE_BOW || rSource.m_sType == ITEM_CHAOS_LIGHTNING_STAFF) return TRUE;
     return FALSE;
 }
 
 BOOL CMixRecipes::IsChaosJewel(CMixItem& rSource)
 {
-    if (rSource.m_sType == ITEM_WING + 15) return TRUE;
+    if (rSource.m_sType == ITEM_JEWEL_OF_CHAOS) return TRUE;
     return FALSE;
 }
 
@@ -1035,25 +1036,25 @@ BOOL CMixRecipes::IsSourceOfRefiningStone(CMixItem& rSource)
     {
         switch (rSource.m_sType)
         {
-        case ITEM_SWORD + 0: case ITEM_SWORD + 1: case ITEM_SWORD + 2: case ITEM_SWORD + 4:
-        case ITEM_AXE + 0: case ITEM_AXE + 1: case ITEM_AXE + 2:
-        case ITEM_MACE + 0: case ITEM_MACE + 1: case ITEM_MACE + 2:
-        case ITEM_SPEAR + 1: case ITEM_SPEAR + 2: case ITEM_SPEAR + 3: case ITEM_SPEAR + 5: case ITEM_SPEAR + 6:
-        case ITEM_BOW + 0: case ITEM_BOW + 1: case ITEM_BOW + 2: case ITEM_BOW + 3:
-        case ITEM_BOW + 8: case ITEM_BOW + 9: case ITEM_BOW + 10: case ITEM_BOW + 11:
-        case ITEM_STAFF + 0: case ITEM_STAFF + 1: case ITEM_STAFF + 2:
-        case ITEM_SHIELD + 0: case ITEM_SHIELD + 1: case ITEM_SHIELD + 2: case ITEM_SHIELD + 3: case ITEM_SHIELD + 4:
-        case ITEM_SHIELD + 6: case ITEM_SHIELD + 7: case ITEM_SHIELD + 9: case ITEM_SHIELD + 10:
-        case ITEM_HELM + 0: case ITEM_HELM + 2: case ITEM_HELM + 4: case ITEM_HELM + 5: case ITEM_HELM + 6:
-        case ITEM_HELM + 7: case ITEM_HELM + 8: case ITEM_HELM + 10: case ITEM_HELM + 11: case ITEM_HELM + 12:
-        case ITEM_ARMOR + 0: case ITEM_ARMOR + 2: case ITEM_ARMOR + 4: case ITEM_ARMOR + 5: case ITEM_ARMOR + 6:
-        case ITEM_ARMOR + 7: case ITEM_ARMOR + 8: case ITEM_ARMOR + 10: case ITEM_ARMOR + 11: case ITEM_ARMOR + 12:
-        case ITEM_PANTS + 0: case ITEM_PANTS + 2: case ITEM_PANTS + 4: case ITEM_PANTS + 5: case ITEM_PANTS + 6:
-        case ITEM_PANTS + 7: case ITEM_PANTS + 8: case ITEM_PANTS + 10: case ITEM_PANTS + 11: case ITEM_PANTS + 12:
-        case ITEM_GLOVES + 0: case ITEM_GLOVES + 2: case ITEM_GLOVES + 4: case ITEM_GLOVES + 5: case ITEM_GLOVES + 6:
-        case ITEM_GLOVES + 7: case ITEM_GLOVES + 8: case ITEM_GLOVES + 10: case ITEM_GLOVES + 11: case ITEM_GLOVES + 12:
-        case ITEM_BOOTS + 0: case ITEM_BOOTS + 2: case ITEM_BOOTS + 4: case ITEM_BOOTS + 5: case ITEM_BOOTS + 6:
-        case ITEM_BOOTS + 7: case ITEM_BOOTS + 8: case ITEM_BOOTS + 10: case ITEM_BOOTS + 11: case ITEM_BOOTS + 12:
+        case ITEM_KRIS: case ITEM_SHORT_SWORD: case ITEM_RAPIER: case ITEM_SWORD_OF_ASSASSIN:
+        case ITEM_SMALL_AXE: case ITEM_HAND_AXE: case ITEM_DOUBLE_AXE:
+        case ITEM_SMALLMACE: case ITEM_MORNING_STAR: case ITEM_FLAIL:
+        case ITEM__SPEAR: case ITEM_DRAGON_LANCE: case ITEM_GIANT_TRIDENT: case ITEM_DOUBLE_POLEAXE: case ITEM_HALBERD:
+        case ITEM_SHORT_BOW: case ITEM_SMALL_BOW: case ITEM_ELVEN_BOW: case ITEM_BATTLE_BOW:
+        case ITEM_CROSSBOW: case ITEM_GOLDEN_CROSSBOW: case ITEM_ARQUEBUS: case ITEM_LIGHT_CROSSBOW:
+        case ITEM_SKULL_STAFF: case ITEM_ANGELIC_STAFF: case ITEM_SERPENT_STAFF:
+        case ITEM_SMALL_SHIELD: case ITEM_HORN_SHIELD: case ITEM_KITE_SHIELD: case ITEM_ELVEN_SHIELD: case ITEM_BUCKLER:
+        case ITEM_SKULL_SHIELD: case ITEM_SPIKED_SHIELD: case ITEM_PLATE_SHIELD: case ITEM_BIG_ROUND_SHIELD:
+        case ITEM_BRONZE_HELM: case ITEM_PAD_HELM: case ITEM_BONE_HELM: case ITEM_LEATHER_HELM: case ITEM_SCALE_HELM:
+        case ITEM_SPHINX_MASK: case ITEM_BRASS_HELM: case ITEM_VINE_HELM: case ITEM_SILK_HELM: case ITEM_WIND_HELM:
+        case ITEM_BRONZE_ARMOR: case ITEM_PAD_ARMOR: case ITEM_BONE_ARMOR: case ITEM_LEATHER_ARMOR: case ITEM_SCALE_ARMOR:
+        case ITEM_SPHINX_ARMOR: case ITEM_BRASS_ARMOR: case ITEM_VINE_ARMOR: case ITEM_SILK_ARMOR: case ITEM_WIND_ARMOR:
+        case ITEM_BRONZE_PANTS: case ITEM_PAD_PANTS: case ITEM_BONE_PANTS: case ITEM_LEATHER_PANTS: case ITEM_SCALE_PANTS:
+        case ITEM_SPHINX_PANTS: case ITEM_BRASS_PANTS: case ITEM_VINE_PANTS: case ITEM_SILK_PANTS: case ITEM_WIND_PANTS:
+        case ITEM_BRONZE_GLOVES: case ITEM_PAD_GLOVES: case ITEM_BONE_GLOVES: case ITEM_LEATHER_GLOVES: case ITEM_SCALE_GLOVES:
+        case ITEM_SPHINX_GLOVES: case ITEM_BRASS_GLOVES: case ITEM_VINE_GLOVES: case ITEM_SILK_GLOVES: case ITEM_WIND_GLOVES:
+        case ITEM_BRONZE_BOOTS: case ITEM_PAD_BOOTS: case ITEM_BONE_BOOTS: case ITEM_LEATHER_BOOTS: case ITEM_SCALE_BOOTS:
+        case ITEM_SPHINX_BOOTS: case ITEM_BRASS_BOOTS: case ITEM_VINE_BOOTS: case ITEM_SILK_BOOTS: case ITEM_WIND_BOOTS:
             return FALSE;
         }
     }
@@ -1062,7 +1063,7 @@ BOOL CMixRecipes::IsSourceOfRefiningStone(CMixItem& rSource)
 
 BOOL CMixRecipes::IsSourceOfAttachSeedSphereToWeapon(CMixItem& rSource)
 {
-    if (rSource.m_sType >= ITEM_WING + 100 && rSource.m_sType <= ITEM_WING + 129)
+    if (rSource.m_sType >= ITEM_SEED_SPHERE_FIRE_1 && rSource.m_sType <= ITEM_SEED_SPHERE_EARTH_5)
     {
         int iSeedSphereType = rSource.m_sType - ITEM_WING;
         if (iSeedSphereType % 2 == 0) return TRUE;
@@ -1072,7 +1073,7 @@ BOOL CMixRecipes::IsSourceOfAttachSeedSphereToWeapon(CMixItem& rSource)
 
 BOOL CMixRecipes::IsSourceOfAttachSeedSphereToArmor(CMixItem& rSource)
 {
-    if (rSource.m_sType >= ITEM_WING + 100 && rSource.m_sType <= ITEM_WING + 129)
+    if (rSource.m_sType >= ITEM_SEED_SPHERE_FIRE_1 && rSource.m_sType <= ITEM_SEED_SPHERE_EARTH_5)
     {
         int iSeedSphereType = rSource.m_sType - ITEM_WING;
 
@@ -1146,7 +1147,7 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
 
 int CMixRecipeMgr::GetMixInventoryType()
 {
-    assert(m_iMixType >= MIXTYPE_GOBLIN_NORMAL && m_iMixType < MAX_MIX_TYPES && "Á¤ÀÇµÇÁö ¾ÊÀº Á¶ÇÕÃ¢");
+    assert(m_iMixType >= MIXTYPE_GOBLIN_NORMAL && m_iMixType < MAX_MIX_TYPES && "ì •ì˜ë˜ì§€ ì•Šì€ ì¡°í•©ì°½");
     return m_iMixType;
 }
 

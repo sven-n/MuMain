@@ -1,4 +1,4 @@
-// GMUnitedMarketPlace.cpp: implementation of the GMUnitedMarketPlace class.
+ï»¿// GMUnitedMarketPlace.cpp: implementation of the GMUnitedMarketPlace class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -47,7 +47,7 @@ bool GMUnitedMarketPlace::CreateObject(OBJECT* o)
 {
     switch (o->Type)
     {
-    case 67:	// ±â´ë±â ¹Ú½º
+    case 67:	// ê¸°ëŒ€ê¸° ë°•ìŠ¤
     {
         CreateOperate(o);
         Vector(100.f, 100.f, 160.f, o->BoundingBoxMax);
@@ -67,9 +67,9 @@ CHARACTER* GMUnitedMarketPlace::CreateMonster(int iType, int PosX, int PosY, int
     // 	{
     // 	case 526:
     // 		{
-    // 			OpenMonsterModel(185);
+    // 			OpenMonsterModel(MONSTER_MODEL_AEGIS_3);
     // 			pCharacter = CreateCharacter(Key, MODEL_MONSTER01+185, PosX, PosY);
-    // 			wcscpy(pCharacter->ID, L"¼®»ó");
+    // 			wcscpy(pCharacter->ID, L"ì„ìƒ");
     // 			pCharacter->Object.m_bRenderShadow = false;
     // 			pCharacter->Object.Scale = 0.6f;
     // 			pCharacter->Object.LifeTime = 100;
@@ -91,12 +91,12 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
 
     switch (o->Type)
     {
-    case 8:	// chofountain01 ÆøÆ÷¹° Ç¥¸éÀÇ Animation ¼Óµµ Ã³¸® ¾à°£´õ ºü¸£°Ô.
+    case 8:	// chofountain01 í­í¬ë¬¼ í‘œë©´ì˜ Animation ì†ë„ ì²˜ë¦¬ ì•½ê°„ë” ë¹ ë¥´ê²Œ.
     {
         o->Velocity = 0.2f;
     }
     return true;
-    case 30:	// °¡·Îµî
+    case 30:	// ê°€ë¡œë“±
     {
         VectorCopy(o->Position, b->BodyOrigin);
         b->BodyScale = o->Scale;
@@ -113,7 +113,7 @@ bool GMUnitedMarketPlace::MoveObject(OBJECT* o)
         AddTerrainLight(vLightPosition[0], vLightPosition[1], vLightFire, 3, PrimaryTerrainLight);
     }
     return true;
-    case 35:	// º®°¡·Îµî
+    case 35:	// ë²½ê°€ë¡œë“±
     {
         VectorCopy(o->Position, b->BodyOrigin);
         b->BodyScale = o->Scale;
@@ -174,7 +174,7 @@ bool GMUnitedMarketPlace::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     // 	switch(o->Type)
     // 	{
-    // 	case MODEL_MONSTER01+168:	// µ¥½½·¯
+    // 	case MODEL_MONSTER01+168:	// ë°ìŠ¬ëŸ¬
     // 		{
     // 			switch( o->CurrentAction )
     // 			{
@@ -277,13 +277,13 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 54:
     {
-        CreateParticle(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 0);
     }
     return true;
     case 55:
     {
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 8, o->Scale);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3, o->Position, o->Angle, Light, 8, o->Scale);
     }
     return true;
     case 56:
@@ -307,13 +307,13 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
         switch (rand() % 3)
         {
         case 0:
-            CreateParticle(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         case 1:
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
             break;
         case 2:
-            CreateParticle(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         }
     }
@@ -336,7 +336,7 @@ bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 185:
+    case MODEL_STATUE:
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
@@ -366,8 +366,8 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         vec3_t vAngle;
         Vector(10.0f, 0.0f, 0.0f, vAngle);
         b->TransformPosition(o->BoneTransform[43], vRelativePos, vWorldPos, true);
-        CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
-        CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 6, 0.6f, o);
+        CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
+        CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 6, 0.6f, o);
 
         Vector(1.0f, 1.0f, 1.0f, Light);
         Vector(0.0f, 0.0f, 0.0f, vRelativePos);
@@ -444,7 +444,7 @@ bool GMUnitedMarketPlace::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 507:
+    case MONSTER_LUCAS:
     {
         // 			switch(c->MonsterSkill)
         // 			{
@@ -546,7 +546,7 @@ bool GMUnitedMarketPlace::MoveRain(PARTICLE* o)
             o->Position[2] = Height + 10.f;
             if (rand_fps_check(4))
                 CreateParticle(BITMAP_RAIN_CIRCLE, o->Position, o->Angle, o->Light, 2);
-            else
+            else if (rand_fps_check(1))
                 CreateParticle(BITMAP_RAIN_CIRCLE + 1, o->Position, o->Angle, o->Light, 2);
         }
     }

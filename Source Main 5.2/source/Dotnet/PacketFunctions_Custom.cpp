@@ -16,23 +16,15 @@
 #include "PacketBindings_ClientToServer.h"
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLogin)(int32_t, const wchar_t*, const wchar_t*, uint32_t, const BYTE*, const BYTE*);
-inline SendLogin dotnet_SendLogin = reinterpret_cast<SendLogin>(g_dotnet->get_method(type_name_connection_manager, L"SendLogin"));
+inline SendLogin dotnet_SendLogin = reinterpret_cast<SendLogin>(symLoad(munique_client_library_handle, "ConnectionManager_SendLogin"));
 
 void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, const wchar_t* password, const BYTE* clientVersion, const BYTE* clientSerial)
 {
     dotnet_SendLogin(this->GetHandle(), username, password, GetTickCount(), clientVersion, clientSerial);
 }
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendAreaSkillHits)(int32_t, uint16_t, BYTE, BYTE, BYTE, BYTE, const AreaSkillHitTarget*);
-inline SendAreaSkillHits dotnet_SendAreaSkillHits = reinterpret_cast<SendAreaSkillHits>(g_dotnet->get_method(type_name_connection_manager, L"SendAreaSkillHits"));
-
-void PacketFunctions_ClientToServer_Custom::SendAreaSkillHits(uint16_t skillId, BYTE targetX, BYTE targetY, BYTE serial, BYTE targetCount, const AreaSkillHitTarget* targets)
-{
-    dotnet_SendAreaSkillHits(this->GetHandle(), skillId, targetX, targetY, serial, targetCount, targets);
-}
-
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExt)(int32_t, uint16_t, uint32_t);
-inline SendAuthenticateExt dotnet_SendAuthenticateExt = reinterpret_cast<SendAuthenticateExt>(g_dotnet->get_method(type_name_connection_manager, L"SendAuthenticateExt"));
+inline SendAuthenticateExt dotnet_SendAuthenticateExt = reinterpret_cast<SendAuthenticateExt>(symLoad(munique_client_library_handle, "ConnectionManager_SendAuthenticateExt"));
 
 void PacketFunctions_ChatServer_Custom::SendAuthenticateExt(uint16_t roomId, uint32_t token)
 {
@@ -40,7 +32,7 @@ void PacketFunctions_ChatServer_Custom::SendAuthenticateExt(uint16_t roomId, uin
 }
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatMessageExt)(int32_t, BYTE, const wchar_t*);
-inline SendChatMessageExt dotnet_SendChatMessageExt = reinterpret_cast<SendChatMessageExt>(g_dotnet->get_method(type_name_connection_manager, L"SendChatMessageExt"));
+inline SendChatMessageExt dotnet_SendChatMessageExt = reinterpret_cast<SendChatMessageExt>(symLoad(munique_client_library_handle, "ConnectionManager_SendChatMessageExt"));
 
 void PacketFunctions_ChatServer_Custom::SendChatMessageExt(BYTE senderIndex, const wchar_t* message)
 {

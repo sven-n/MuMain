@@ -10,8 +10,8 @@
 
 CMsgBoxIGSCommon::CMsgBoxIGSCommon()
 {
-    m_szTitle[0] = '\0';
-    m_szText[0][0] = '\0';
+    memset(m_szTitle, 0, sizeof(m_szTitle));
+    memset(m_szText, 0, sizeof(m_szText));
     m_iMiddleCount = 0;
 
     m_iMsgBoxWidth = IMAGE_IGS_FRAME_WIDTH;

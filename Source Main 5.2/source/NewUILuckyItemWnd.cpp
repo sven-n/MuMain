@@ -1,4 +1,4 @@
-// NewUILuckyItemWnd.cpp: implementation of the CNewUILuckyItemWnd class.
+ï»¿// NewUILuckyItemWnd.cpp: implementation of the CNewUILuckyItemWnd class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -176,7 +176,7 @@ void CNewUILuckyItemWnd::RenderMixEffect()
     DisableAlphaBlend();
 }
 
-void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, BYTE* _pbyItemPacket)
+void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE> pbyItemPacket)
 {
     int		nDefault = -1;
     int		nMessage = nDefault;
@@ -218,9 +218,9 @@ void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, BYTE* _pbyItemPa
     }
 
     if (nMessage > nDefault)	g_pChatListBox->AddText(L"", GlobalText[nMessage], SEASON3B::TYPE_ERROR_MESSAGE);
-    if (nPlaySound > nDefault)	PlayBuffer(nPlaySound);
+    if (nPlaySound > nDefault)	PlayBuffer(static_cast<ESound>(nPlaySound));
     if (bInitInven)			g_pLuckyItemWnd->Process_InventoryCtrl_DeleteItem(-1);
-    if (nAddInven > nDefault)	Process_InventoryCtrl_InsertItem(nAddInven, _pbyItemPacket);
+    if (nAddInven > nDefault)	Process_InventoryCtrl_InsertItem(nAddInven, pbyItemPacket);
 
     m_eWndAction = eLuckyItem_None;
 }
@@ -328,7 +328,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
         AddText(2223, 0xFF00FFFF);
         AddText(0);
         AddText(3295, 0xFF0000FF), AddText(3296, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(GlobalText[591], true); // Á¶ÇÕ
+        m_BtnMix.ChangeToolTipText(GlobalText[591], true); // ì¡°í•©
         break;
     case eLuckyItemType_Refinery:
         swprintf(m_szSubject, L"%s", GlobalText[3289]);
@@ -336,7 +336,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
         AddText(3300), AddText(3301);
         AddText(0), AddText(0), AddText(0);
         AddText(3302, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(GlobalText[2061], true); // Á¦·Ã
+        m_BtnMix.ChangeToolTipText(GlobalText[2061], true); // ì œë ¨
         break;
     }
 }
@@ -382,7 +382,7 @@ bool CNewUILuckyItemWnd::ClosingProcess(void)
     return true;
 }
 
-bool CNewUILuckyItemWnd::Process_InventoryCtrl_InsertItem(int iIndex, BYTE* pbyItemPacket)
+bool CNewUILuckyItemWnd::Process_InventoryCtrl_InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(iIndex, pbyItemPacket);

@@ -57,7 +57,7 @@ namespace SEASON3B
         bool Create(CNewUIManager* pNewUIMng, int x, int y);
         void Release();
 
-        bool InsertItem(int iIndex, BYTE* pbyItemPacket);
+        bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
         void DeleteItem(int iIndex);
         void DeleteAllItems();
 

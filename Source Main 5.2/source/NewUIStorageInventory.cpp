@@ -1,4 +1,4 @@
-//*****************************************************************************
+﻿//*****************************************************************************
 // File: NewUIStorageInventory.cpp
 //*****************************************************************************
 
@@ -303,7 +303,7 @@ bool CNewUIStorageInventory::ProcessClosing()
     return true;
 }
 
-bool CNewUIStorageInventory::InsertItem(int nIndex, BYTE* pbyItemPacket)
+bool CNewUIStorageInventory::InsertItem(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(nIndex, pbyItemPacket);
@@ -320,14 +320,20 @@ void CNewUIStorageInventory::DeleteAllItems()
 void CNewUIStorageInventory::ProcessInventoryCtrl()
 {
     if (nullptr == m_pNewInventoryCtrl)
+    {
         return;
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    }
 
+    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
     if (pPickedItem)
     {
         ITEM* pItemObj = pPickedItem->GetItem();
-        if (nullptr == pItemObj)	return;
-        if (IsPress(VK_LBUTTON))
+        if (nullptr == pItemObj)
+        {
+            return;
+        }
+
+        if (IsPress(VK_LBUTTON) || IsRelease(VK_LBUTTON))
         {
             const int nDstIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 
@@ -342,8 +348,14 @@ void CNewUIStorageInventory::ProcessInventoryCtrl()
         }
         else
         {
-            if (::IsStoreBan(pItemObj))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
-            else							m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
+            if (::IsStoreBan(pItemObj))
+            {
+                m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
+            }
+            else
+            {
+                m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
+            }
         }
     }
     else if (IsPress(VK_RBUTTON))
@@ -394,7 +406,7 @@ bool CNewUIStorageInventory::ProcessMyInvenItemAutoMove()
     const auto pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
     if (const auto pItemObj = pMyInvenCtrl->FindItemAtPt(MouseX, MouseY))
     {
-        if (pItemObj->Type == ITEM_HELPER + 20)
+        if (pItemObj->Type == ITEM_WIZARDS_RING)
             return false;
 
         const int emptySlotIndex = FindEmptySlot(pItemObj);
@@ -609,7 +621,7 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
     }
 }
 
-void CNewUIStorageInventory::ProcessToReceiveStorageItems(int nIndex, BYTE* pbyItemPacket)
+void CNewUIStorageInventory::ProcessToReceiveStorageItems(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
     CNewUIInventoryCtrl::DeletePickedItem();
 

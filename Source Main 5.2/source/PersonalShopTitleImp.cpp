@@ -260,27 +260,19 @@ void CPersonalShopTitleImp::Draw()
         UpdatePosition();
         RevisionPosition();
 
-        if (m_iHighlightFrame > 6)
-        {
-            m_iHighlightFrame = 0;
-        }
-        else
-        {
-            m_iHighlightFrame++;
-        }
+        auto isHighlightTime = static_cast<INT64>(WorldTime / 265) % 2 == 0;
 
         auto mi = m_listShopTitleDrawObj.begin();
         for (; mi != m_listShopTitleDrawObj.end(); ++mi)
         {
-            CShopTitleDrawObj* pDrawObj = (*mi).second;
+            CShopTitleDrawObj* pDrawObj = mi->second;
             if (SelectedCharacter != -1
-                && m_iHighlightFrame < 3
+                && isHighlightTime
                 && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND)
-                && g_pCommandWindow->GetCurCommandType() == COMMAND_PURCHASE
-                )
+                && g_pCommandWindow->GetCurCommandType() == COMMAND_PURCHASE)
             {
-                CHARACTER* pSeletedPlayer = &CharactersClient[SelectedCharacter];
-                if ((*mi).first == pSeletedPlayer)
+                CHARACTER* selectedPlayer = &CharactersClient[SelectedCharacter];
+                if (mi->first == selectedPlayer)
                 {
                     pDrawObj->EnableHighlight();
                 }
@@ -292,7 +284,7 @@ void CPersonalShopTitleImp::Draw()
 
             if (pDrawObj->IsVisible() && IsShowShopTitles())
             {
-                pDrawObj->Draw((*mi).first->PK);
+                pDrawObj->Draw(mi->first->PK);
             }
         }
     }
@@ -583,12 +575,12 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
 }
 void CPersonalShopTitleImp::CShopTitleDrawObj::SeparateShopTitle(const std::wstring& title, std::wstring& topTitle, std::wstring& bottomTitle)
 {
-    wchar_t pszTopTitle[MAX_SHOPTITLE] = { '\0' };
-    wchar_t pszBottonTitle[MAX_SHOPTITLE] = { '\0' };
-    CutText(title.c_str(), pszBottonTitle, pszTopTitle);
+    wchar_t pszTopTitle[MAX_SHOPTITLE] = { 0 };
+    wchar_t pszBottomTitle[MAX_SHOPTITLE] = { 0 };
+    CutText(title.c_str(), pszTopTitle, pszBottomTitle, MAX_SHOPTITLE);
 
     topTitle = pszTopTitle;
-    bottomTitle = pszBottonTitle;
+    bottomTitle = pszBottomTitle;
 }
 void CPersonalShopTitleImp::CShopTitleDrawObj::CalculateBooleanSize(IN const std::wstring& name, IN const std::wstring& topTitle, IN const std::wstring& bottomTitle, OUT SIZE& size)
 {

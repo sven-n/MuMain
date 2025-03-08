@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Platform>x86</Platform>
+    <PlatformTarget>x86</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <SupportNativeAot>true</SupportNativeAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishAot>true</PublishAot>
+    <OptimizationPreference>Speed</OptimizationPreference>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <WarningsAsErrors>nullable;CS4014;VSTHRD110;VSTHRD100</WarningsAsErrors>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.11.20">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MUnique.OpenMU.Network.Packets" Version="0.9.4" />
+    <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(ci)'!='true'">
+    <!-- We only run the transformation locally on our dev environment with visual studio.
+        The CI environment is identified by the parameter 'ci'. It's set in the azure pipelines and Dockerfile.
+        If you run into errors here under Linux/Mac OS, it might help to add this parameter, too. -->
+    <XslTransformation OutputPaths="ConnectionManager.ClientToServerFunctions.cs" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
+    <XslTransformation OutputPaths="ConnectionManager.ChatServerFunctions.cs" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
+    <XslTransformation OutputPaths="ConnectionManager.ConnectServerFunctions.cs" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
+
+    <XslTransformation OutputPaths="..\Source Main 5.2\source\Dotnet\PacketFunctions_ClientToServer.h" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateFunctionsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
+    <XslTransformation OutputPaths="..\Source Main 5.2\source\Dotnet\PacketFunctions_ChatServer.h" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateFunctionsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
+    <XslTransformation OutputPaths="..\Source Main 5.2\source\Dotnet\PacketFunctions_ConnectServer.h" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateFunctionsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
+
+    <XslTransformation OutputPaths="..\Source Main 5.2\source\Dotnet\PacketFunctions_ClientToServer.cpp" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateFunctions.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
+    <XslTransformation OutputPaths="..\Source Main 5.2\source\Dotnet\PacketFunctions_ChatServer.cpp" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateFunctions.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
+    <XslTransformation OutputPaths="..\Source Main 5.2\source\Dotnet\PacketFunctions_ConnectServer.cpp" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateFunctions.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
+
+    <XslTransformation OutputPaths="..\Source Main 5.2\source\Dotnet\PacketBindings_ClientToServer.h" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateBindingsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
+    <XslTransformation OutputPaths="..\Source Main 5.2\source\Dotnet\PacketBindings_ChatServer.h" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateBindingsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
+    <XslTransformation OutputPaths="..\Source Main 5.2\source\Dotnet\PacketBindings_ConnectServer.h" XmlInputPaths="$(USERPROFILE)\.nuget\packages\munique.openmu.network.packets\0.9.4\contentFiles\any\net9.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateBindingsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
+  </Target>
+</Project>

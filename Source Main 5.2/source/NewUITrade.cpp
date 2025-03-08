@@ -1,4 +1,4 @@
-//*****************************************************************************
+ï»¿//*****************************************************************************
 // Desc: implementation of the CNewUITrade class.
 //*****************************************************************************
 
@@ -374,7 +374,7 @@ void CNewUITrade::ConvertYourLevel(int& rnLevel, DWORD& rdwColor)
         rnLevel = 50;
         rdwColor = (255 << 24) + (0 << 16) + (150 << 8) + (255);
     }
-    else							//  »¡°£»ö.
+    else							//  ë¹¨ê°„ìƒ‰.
     {
         rnLevel = 10;
         rdwColor = (255 << 24) + (0 << 16) + (0 << 8) + (255);
@@ -629,7 +629,7 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
         m_bTradeAlert = false;
         m_nYourGuildType = pTradeData->GuildKey;
         wcsncpy(m_szYourID, szTempID, MAX_ID_SIZE);
-        m_nYourLevel = pTradeData->Level;   //  »ó´ë¹æ ·¹º§.
+        m_nYourLevel = pTradeData->Level;   //  ìƒëŒ€ë°© ë ˆë²¨.
         break;
     }
 }
@@ -651,16 +651,16 @@ void CNewUITrade::BackUpYourInven(int nYourInvenIndex)
 
 void CNewUITrade::BackUpYourInven(ITEM* pYourItemObj)
 {
-    if ((pYourItemObj->Type >= ITEM_HELPER && pYourItemObj->Type <= ITEM_HELPER + 4)
-        || (pYourItemObj->Type == ITEM_POTION + 13 || pYourItemObj->Type == ITEM_POTION + 14 || pYourItemObj->Type == ITEM_POTION + 16)
-        || (pYourItemObj->Type >= ITEM_POTION + 31)
+    if ((pYourItemObj->Type >= ITEM_HELPER && pYourItemObj->Type <= ITEM_DARK_HORSE_ITEM)
+        || (pYourItemObj->Type == ITEM_JEWEL_OF_BLESS || pYourItemObj->Type == ITEM_JEWEL_OF_SOUL || pYourItemObj->Type == ITEM_JEWEL_OF_LIFE)
+        || (pYourItemObj->Type >= ITEM_JEWEL_OF_GUARDIAN)
         || (COMGEM::isCompiledGem(pYourItemObj))
-        || (pYourItemObj->Type >= ITEM_WING && pYourItemObj->Type <= ITEM_WING + 6)
-        || (pYourItemObj->Type >= ITEM_HELPER + 30)
-        || (pYourItemObj->Type >= ITEM_WING + 36 && pYourItemObj->Type <= ITEM_WING + 43)
-        || (pYourItemObj->Type == ITEM_WING + 15)
-        || (pYourItemObj->Type >= ITEM_WING + 49 && pYourItemObj->Type <= ITEM_WING + 50)
-        || ((((pYourItemObj->Level >> 3) & 15) > 4 && pYourItemObj->Type < ITEM_WING) || (pYourItemObj->Option1 & 63) > 0))
+        || (pYourItemObj->Type >= ITEM_WING && pYourItemObj->Type <= ITEM_WINGS_OF_DARKNESS)
+        || (pYourItemObj->Type >= ITEM_CAPE_OF_LORD)
+        || (pYourItemObj->Type >= ITEM_WING_OF_STORM && pYourItemObj->Type <= ITEM_WING_OF_DIMENSION)
+        || (pYourItemObj->Type == ITEM_JEWEL_OF_CHAOS)
+        || (pYourItemObj->Type >= ITEM_CAPE_OF_FIGHTER && pYourItemObj->Type <= ITEM_CAPE_OF_OVERRULE)
+        || ((pYourItemObj->Level > 4 && pYourItemObj->Type < ITEM_WING) || pYourItemObj->ExcellentFlags > 0))
     {
         int nCompareValue;
         bool bSameItem = false;
@@ -702,7 +702,7 @@ void CNewUITrade::BackUpYourInven(ITEM* pYourItemObj)
     }
 }
 
-void CNewUITrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, BYTE* pbyItemPacket)
+void CNewUITrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket)
 {
     m_pYourInvenCtrl->AddItem(byYourInvenIndex, pbyItemPacket);
     AlertYourTradeInven();
@@ -823,7 +823,7 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_TRADE);
 }
 
-void CNewUITrade::ProcessToReceiveTradeItems(int nIndex, BYTE* pbyItemPacket)
+void CNewUITrade::ProcessToReceiveTradeItems(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
     SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 

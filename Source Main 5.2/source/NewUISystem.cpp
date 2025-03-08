@@ -485,6 +485,14 @@ bool CNewUISystem::LoadMainSceneInterface()
     if (m_pNewUIMuHelper->Create(m_pNewUIMng, 640 - 190, 0) == false)
         return false;
 
+    m_pNewUIMuHelperExt = new CNewUIMuHelperExt;
+    if (m_pNewUIMuHelperExt->Create(m_pNewUIMng, 640 - 380, 0) == false)
+        return false;
+
+    m_pNewUIMuHelperSkillList = new CNewUIMuHelperSkillList;
+    if (m_pNewUIMuHelperSkillList->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
+        return false;
+
     return true;
 }
 
@@ -669,20 +677,25 @@ void CNewUISystem::Show(DWORD dwKey)
                 Hide(INTERFACE_CHARACTER);
             }
         }
-        else if (IsVisible(INTERFACE_MYQUEST))
+        if (IsVisible(INTERFACE_MYQUEST))
         {
             Hide(INTERFACE_MYQUEST);
         }
-        else if (IsVisible(INTERFACE_CHARACTER))
+        if (IsVisible(INTERFACE_CHARACTER))
         {
             Hide(INTERFACE_CHARACTER);
         }
-        else if (IsVisible(INTERFACE_MIXINVENTORY))
+        if (IsVisible(INTERFACE_NPCSHOP))
+        {
+            g_pNPCShop->SetPos(640 - 190 * 3, 0);
+            Hide(INTERFACE_HERO_POSITION_INFO);
+        }
+        if (IsVisible(INTERFACE_MIXINVENTORY))
         {
             g_pMixInventory->SetPos(640 - 190 * 3, 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
         }
-        else if (IsVisible(INTERFACE_TRADE))
+        if (IsVisible(INTERFACE_TRADE))
         {
             g_pTrade->SetPos(640 - 190 * 3, 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
@@ -813,7 +826,7 @@ void CNewUISystem::Show(DWORD dwKey)
         {
             g_pMyShopInventory->OpenButtonLock();
         }
-        else
+        else if (!g_pMyShopInventory->IsEnablePersonalShop())
         {
             g_pMyShopInventory->OpenButtonUnLock();
         }
@@ -1074,6 +1087,10 @@ void CNewUISystem::Show(DWORD dwKey)
         g_pLuckyItemWnd->OpeningProcess();
         m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
     }
+    else if (dwKey == INTERFACE_MUHELPER)
+    {
+        HideAllGroupA();
+    }
 
     m_pNewUIMng->ShowInterface(dwKey);
 
@@ -1131,6 +1148,16 @@ void CNewUISystem::Hide(DWORD dwKey)
         if (IsVisible(INTERFACE_STORAGE))
         {
             g_pStorageInventory->SetPos(secondColumnX, 0);
+        }
+
+        if (IsVisible(INTERFACE_NPCSHOP))
+        {
+            g_pNPCShop->SetPos(secondColumnX, 0);
+        }
+
+        if (IsVisible(INTERFACE_MIXINVENTORY))
+        {
+            g_pMixInventory->SetPos(secondColumnX, 0);
         }
 
         Show(INTERFACE_HERO_POSITION_INFO);
@@ -1474,6 +1501,11 @@ void CNewUISystem::Hide(DWORD dwKey)
             m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
         }
     }
+    else if (dwKey == INTERFACE_MUHELPER)
+    {
+        m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST, false);
+        m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_MUHELPER_EXT, false);
+    }
 
     m_pNewUIMng->ShowInterface(dwKey, false);
 
@@ -1515,7 +1547,9 @@ void CNewUISystem::HideAllGroupA()
         //SEASON3B::INTERFACE_INVENTORY,
         //SEASON3B::INTERFACE_CHARACTER,
         //SEASON3B::INTERFACE_WINDOW_MENU,
-
+        INTERFACE_MUHELPER,
+        INTERFACE_MUHELPER_EXT,
+        INTERFACE_MUHELPER_SKILL_LIST,
         INTERFACE_MIXINVENTORY,
         INTERFACE_STORAGE,
         INTERFACE_NPCSHOP,
@@ -1632,6 +1666,9 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
         INTERFACE_GENSRANKING,
+        INTERFACE_MUHELPER,
+        INTERFACE_MUHELPER_EXT,
+        INTERFACE_MUHELPER_SKILL_LIST,
         0,
     };
 
@@ -2300,4 +2337,14 @@ CNewUILuckyItemWnd* SEASON3B::CNewUISystem::Get_pNewUILuckyItemWnd() const
 CNewUIMuHelper* CNewUISystem::Get_pNewUIMuHelper() const
 {
     return m_pNewUIMuHelper;
+}
+
+CNewUIMuHelperExt* CNewUISystem::Get_pNewUIMuHelperExt() const
+{
+    return m_pNewUIMuHelperExt;
+}
+
+CNewUIMuHelperSkillList* CNewUISystem::Get_pNewUIMuHelperSkillList() const
+{
+    return m_pNewUIMuHelperSkillList;
 }

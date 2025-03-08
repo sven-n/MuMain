@@ -275,9 +275,9 @@ bool PetActionUnicorn::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
 
     Vector(0.7f, 0.7f, 1.0f, Light);
     b->TransformPosition(BoneTransform[4], vRelativePos, Position, false);
-    CreateParticle(BITMAP_SMOKELINE1, Position, obj->Angle, Light, 4, 0.6f, obj);
-    CreateParticle(BITMAP_SMOKELINE2, Position, obj->Angle, Light, 4, 0.6f, obj);
-    CreateParticle(BITMAP_SMOKELINE3, Position, obj->Angle, Light, 4, 0.6f, obj);
+    CreateParticleFpsChecked(BITMAP_SMOKELINE1, Position, obj->Angle, Light, 4, 0.6f, obj);
+    CreateParticleFpsChecked(BITMAP_SMOKELINE2, Position, obj->Angle, Light, 4, 0.6f, obj);
+    CreateParticleFpsChecked(BITMAP_SMOKELINE3, Position, obj->Angle, Light, 4, 0.6f, obj);
 
     return TRUE;
 }

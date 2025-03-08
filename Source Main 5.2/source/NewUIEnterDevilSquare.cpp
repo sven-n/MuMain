@@ -1,4 +1,4 @@
-// NewUIEnterBloodCastle.cpp: implementation of the CNewUIPartyInfo class.
+﻿// NewUIEnterBloodCastle.cpp: implementation of the CNewUIPartyInfo class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -199,28 +199,7 @@ bool CNewUIEnterDevilSquare::BtnProcess()
 
     if ((m_iNumActiveBtn != -1) && (m_BtnEnter[m_iNumActiveBtn].UpdateMouseEvent() == true))
     {
-        int iItemIndex = -1;
-
-        iItemIndex = g_pMyInventory->FindItemIndex(ITEM_POTION + 19, 0);
-
-        if (iItemIndex == -1)
-        {
-            iItemIndex = g_pMyInventory->FindItemIndex(ITEM_POTION + 19, m_iNumActiveBtn + 1);
-        }
-
-        if (iItemIndex == -1)
-        {
-            iItemIndex = g_pMyInventory->FindItemIndex(ITEM_HELPER + 46, -1);
-        }
-
-        if (iItemIndex > -1)
-        {
-            SocketClient->ToGameServer()->SendDevilSquareEnterRequest(m_iNumActiveBtn, iItemIndex);
-        }
-        else
-        {
-            SEASON3B::CreateOkMessageBox(GlobalText[677]);
-        }
+        SocketClient->ToGameServer()->SendDevilSquareEnterRequest(m_iNumActiveBtn, 0xFF);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_DEVILSQUARE);
     }
 

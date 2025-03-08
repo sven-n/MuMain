@@ -65,9 +65,10 @@ namespace SEASON3B
         void ChangeSourceIndex(int sindex);
 
     public:
-        bool InsertItem(int iIndex, BYTE* pbyItemPacket);
+        bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
         void DeleteItem(int iIndex);
         ITEM* FindItem(int iLinealPos);
+        int GetItemInventoryIndex(ITEM* pItem);
 
     private:
         void LoadImages();

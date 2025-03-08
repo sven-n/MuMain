@@ -24,7 +24,7 @@ void CHARACTER::Initialize()
     Blood = false;
     Ride = false;
     SkillSuccess = false;
-    m_bFixForm = false;
+    NotRotateOnMagicHit = false;
     Foot[0] = false;
     Foot[1] = false;
     SafeZone = false;
@@ -33,7 +33,7 @@ void CHARACTER::Initialize()
     m_bIsSelected = false;
     Decoy = false;
 
-    Class = 0;
+    Class = CLASS_WIZARD;
     Skin = 0;
     CtlCode = 0;
     ExtendState = 0;
@@ -49,6 +49,7 @@ void CHARACTER::Initialize()
     PK = 0;
     AttackFlag = 0;
     AttackTime = 0;
+    LastAttackEffectTime = -1;
     TargetAngle = 0;
     Dead = 0;
     Run = 0;
@@ -78,7 +79,7 @@ void CHARACTER::Initialize()
     TargetCharacter = 0;
 
     Level = 0;
-    MonsterIndex = 0;
+    MonsterIndex = MONSTER_BULL_FIGHTER;
     Damage = 0;
     Hit = 0;
     MoveSpeed = 0;

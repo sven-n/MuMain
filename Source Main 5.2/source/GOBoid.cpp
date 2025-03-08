@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////////
 //
 //  GOBoid.cpp
 //
@@ -50,13 +50,13 @@ bool IsMount(ITEM* pItem)
         return false;
     }
 
-    if (pItem->Type == ITEM_HELPER + 0
-        || pItem->Type == ITEM_HELPER + 1
-        || pItem->Type == ITEM_HELPER + 2
-        || pItem->Type == ITEM_HELPER + 3
-        || pItem->Type == ITEM_HELPER + 4
-        || pItem->Type == ITEM_HELPER + 5
-        || pItem->Type == ITEM_HELPER + 37
+    if (pItem->Type == ITEM_GUARDIAN_ANGEL
+        || pItem->Type == ITEM_IMP
+        || pItem->Type == ITEM_HORN_OF_UNIRIA
+        || pItem->Type == ITEM_HORN_OF_DINORANT
+        || pItem->Type == ITEM_DARK_HORSE_ITEM
+        || pItem->Type == ITEM_DARK_RAVEN_ITEM
+        || pItem->Type == ITEM_HORN_OF_FENRIR
         )
     {
         return true;
@@ -119,7 +119,7 @@ bool CreateMountSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int Sub
                 Owner->Position[1] + (float)(rand() % 512 - 256),
                 Owner->Position[2] + (float)(rand() % 128 + 128), o->Position);
             break;
-        case MODEL_HELPER + 1:
+        case MODEL_IMP:
             Vector(Owner->Position[0] + (float)(rand() % 128 - 64),
                 Owner->Position[1] + (float)(rand() % 128 - 64),
                 Owner->Position[2], o->Position);
@@ -291,7 +291,7 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                         bWave = true;
                     }
 
-                    if (bWave)
+                    if (bWave && rand_fps_check(1))
                     {
                         Vector(Position[0], Position[1], Position[2], p);
                         CreateEffect(BITMAP_SHOCK_WAVE, p, o->Angle, Light, 1);
@@ -527,7 +527,7 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 || o->Owner->CurrentAction == PLAYER_FLY_RIDE || o->Owner->CurrentAction == PLAYER_FLY_RIDE_WEAPON
                 || o->Owner->CurrentAction == PLAYER_RAGE_UNI_RUN || o->Owner->CurrentAction == PLAYER_RAGE_UNI_RUN_ONE_RIGHT)
             {
-                //  Æä°¡¼ö½º.
+                //  íŽ˜ê°€ìˆ˜ìŠ¤.
                 if (o->Type == MODEL_PEGASUS)
                 {
                     if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene())
@@ -609,14 +609,17 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 FlyRange = 150.f;
                 vec3_t Position, Light;
                 Vector(0.4f, 0.4f, 0.4f, Light);
-                for (j = 0; j < 4; j++)
+                if (rand_fps_check(1))
                 {
-                    Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
-                    VectorAdd(Position, o->Position, Position);
-                    CreateParticle(BITMAP_SPARK, Position, o->Angle, Light, 1);
+                    for (j = 0; j < 4; j++)
+                    {
+                        Vector((float)(rand() % 16 - 8), (float)(rand() % 16 - 8), (float)(rand() % 16 - 8), Position);
+                        VectorAdd(Position, o->Position, Position);
+                        CreateParticle(BITMAP_SPARK, Position, o->Angle, Light, 1);
+                    }
                 }
             }
-        case MODEL_HELPER + 1:
+        case MODEL_IMP:
             FlyRange = 150.f;
             break;
         }
@@ -624,7 +627,7 @@ bool MoveMount(OBJECT* o, bool bForceRender)
 
         b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity, o->Position, o->Angle);
 
-        if (o->Type == MODEL_HELPER || o->Type == MODEL_HELPER + 1)
+        if (o->Type == MODEL_HELPER || o->Type == MODEL_IMP)
         {
             vec3_t Range;
             VectorSubtract(TargetPosition, o->Position, Range);
@@ -830,8 +833,8 @@ int CreateDragon(OBJECT* o, int index)
     if (index < 3)
     {
         o->Live = true;
-        OpenMonsterModel(31);
-        o->Type = MODEL_MONSTER01 + 31;
+        OpenMonsterModel(MONSTER_MODEL_DRAGON);
+        o->Type = MODEL_DRAGON_;
         o->Scale = (float)(rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;
         o->AlphaTarget = o->Alpha;
@@ -1179,11 +1182,11 @@ void MoveBoidGroup(OBJECT* o, int index)
         float dy = o->Position[1] - Hero->Object.Position[1];
         float Range = sqrtf(dx * dx + dy * dy);
         float FlyDistance = 1500.f;
-        if (o->Type == MODEL_MONSTER01 + 31)
+        if (o->Type == MODEL_DRAGON_)
         {
             FlyDistance = 4000.f;
         }
-        else if (o->Type == MODEL_MONSTER01 + 33)
+        else if (o->Type == MODEL_BAHAMUT)
         {
             FlyDistance = 3000.f;
         }
@@ -1298,8 +1301,8 @@ void MoveBoids()
                 if (rand_fps_check(300))
                 {
                     o->Live = true;
-                    OpenMonsterModel(31);
-                    o->Type = MODEL_MONSTER01 + 31;
+                    OpenMonsterModel(MONSTER_MODEL_DRAGON);
+                    o->Type = MODEL_DRAGON_;
                     o->Scale = (float)(rand() % 3 + 6) * 0.1f;
                     o->Alpha = 1.f;
                     o->AlphaTarget = 1.f;
@@ -1409,12 +1412,12 @@ void MoveBoids()
         {
             BMD* b = &Models[o->Type];
             float PlaySpeed = 1.f;
-            if (o->Type == MODEL_MONSTER01 + 31 || o->Type == MODEL_MONSTER01 + 33)
+            if (o->Type == MODEL_DRAGON_ || o->Type == MODEL_BAHAMUT)
             {
                 PlaySpeed = 0.5f;
             }
 
-            if (EnableEvent != 0 && o->Type == MODEL_MONSTER01 + 31)
+            if (EnableEvent != 0 && o->Type == MODEL_DRAGON_)
             {
                 SetAction(o, MONSTER01_DIE + 1);
                 b->CurrentAction = o->CurrentAction;
@@ -1431,7 +1434,7 @@ void MoveBoids()
                 if (o->LifeTime <= 0)
                     o->Live = false;
                 if (rand_fps_check(128))
-                    PlayBuffer(SOUND_MONSTER + 124);
+                    PlayBuffer(SOUND_MONSTER_BULLATTACK1);
             }
             else
             {
@@ -1467,7 +1470,7 @@ void MoveBoids()
                     MoveHeavenBug(o, i);
                     break;
 
-                case MODEL_MONSTER01 + 33:
+                case MODEL_BAHAMUT:
                     MoveBigMon(o);
                     break;
 
@@ -1568,7 +1571,7 @@ void RenderBoids(bool bAfterCharacter)
                 vec3_t p, Position, Light;
                 switch (o->Type)
                 {
-                case MODEL_MONSTER01 + 31:
+                case MODEL_DRAGON_:
                     if (o->SubType == 1)
                     {
                         float Bright = 1.0f;
@@ -1582,7 +1585,7 @@ void RenderBoids(bool bAfterCharacter)
                         Vector(1.f, 0.f, 0.f, Light);
                         CreateSprite(BITMAP_LIGHTNING + 1, Position, 1.f, Light, o);
                         Vector(1.f, 1.f, 1.f, Light);
-                        CreateParticle(BITMAP_FIRE, Position, o->Angle, Light);
+                        CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, Light);
                     }
                     break;
 
@@ -1597,7 +1600,7 @@ void RenderBoids(bool bAfterCharacter)
 
                 case MODEL_MAP_TORNADO:
                 {
-                    CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, o->Light, 18, o->Scale, o);
+                    CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, o->Light, 18, o->Scale, o);
                 }
                 break;
 
@@ -1762,7 +1765,7 @@ void MoveFishs()
                     o->Gravity = 9;
                     o->LifeTime = 100;
                     VectorCopy(o->Position, o->EyeLeft);
-                    CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 4, o, 30.f);
+                    CreateJointFpsChecked(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 4, o, 30.f);
                     break;
                 case WD_34CRYWOLF_1ST:
                     if (Hero->SafeZone != true)
@@ -1773,7 +1776,7 @@ void MoveFishs()
                         VectorCopy(o->Position, o->EyeLeft);
                         o->Gravity = 1;
                         o->LifeTime = 100;
-                        CreateJoint(BITMAP_SCOLPION_TAIL, o->Position, o->Position, o->Angle, 0, o, 30.f);
+                        CreateJointFpsChecked(BITMAP_SCOLPION_TAIL, o->Position, o->Position, o->Angle, 0, o, 30.f);
                     }
                     else
                         o->Live = false;
@@ -1816,7 +1819,7 @@ void MoveFishs()
                     o->Velocity = 2.5f / o->Scale;
                     o->Gravity = 9;
                     o->LifeTime = 70;
-                    CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 8, o, 50.f);
+                    CreateJointFpsChecked(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 8, o, 50.f);
                 }
             }
         }

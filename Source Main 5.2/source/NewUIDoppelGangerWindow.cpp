@@ -1,4 +1,4 @@
-// NewUIDoppelGangerWindow.cpp: implementation of the CNewUIDoppelGangerWindow class.
+﻿// NewUIDoppelGangerWindow.cpp: implementation of the CNewUIDoppelGangerWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -199,7 +199,7 @@ void CNewUIDoppelGangerWindow::RenderItem3D()
     int nItemType = (14 * MAX_ITEM_INDEX) + 111;
     int nItemLevel = 0;
 
-    ::RenderItem3D(ptOrigin.x + (190 - 20) / 2, ptOrigin.y + 75, 20.f, 27, nItemType, nItemLevel << 3, 0, 0, false);
+    ::RenderItem3D(ptOrigin.x + (190 - 20) / 2, ptOrigin.y + 75, 20.f, 27, nItemType, nItemLevel, 0, 0, false);
 }
 
 void CNewUIDoppelGangerWindow::OpeningProcess()
@@ -270,21 +270,7 @@ bool CNewUIDoppelGangerWindow::BtnProcess()
 
     if (m_BtnEnter.UpdateMouseEvent() == true)
     {
-        int iPos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_POTION + 111, 0);
-        if (iPos == -1)
-        {
-            iPos = g_pMyInventory->FindItemIndex(ITEM_HELPER + 125, -1);
-        }
-        if (iPos != -1)
-        {
-            SocketClient->ToGameServer()->SendDoppelgangerEnterRequest((BYTE)iPos);
-        }
-        else
-        {
-            SEASON3B::CNewUICommonMessageBox* pMsgBox;
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
-            pMsgBox->AddMsg(GlobalText[2779], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
-        }
+        SocketClient->ToGameServer()->SendDoppelgangerEnterRequest(0xFF);
         return true;
     }
 

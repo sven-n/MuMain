@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "zzztexture.h"
@@ -98,10 +98,10 @@ bool M34CryingWolf2nd::RenderCryingWolf2ndObjectVisual(OBJECT* pObject, BMD* pMo
         //CreateParticle ( BITMAP_CLOUD, o->Position, o->Angle, Light, 8, o->Scale);
         if (pObject->HiddenMesh != -2)
         {
-            CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
-            CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 2, pObject->Scale, pObject);
-            CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 3, pObject->Scale, pObject);
-            CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 4, pObject->Scale, pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 1, pObject->Scale, pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 2, pObject->Scale, pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 3, pObject->Scale, pObject);
+            CreateParticleFpsChecked(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 4, pObject->Scale, pObject);
         }
         pObject->HiddenMesh = -2;
         //}
@@ -128,10 +128,10 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
 
     switch (iType)
     {
-    case 315:
+    case MONSTER_WEREWOLFHERO:
     {
-        OpenMonsterModel(95);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 95, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_WEREWOLF_HERO);
+        pCharacter = CreateCharacter(Key, MODEL_WEREWOLF_HERO, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -139,10 +139,10 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
         BoneManager::RegisterBone(pCharacter, L"Monster95_Head", 6);
     }
     break;
-    case 316:
+    case MONSTER_VALAM:
     {
-        OpenMonsterModel(96);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 96, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_VALAM);
+        pCharacter = CreateCharacter(Key, MODEL_VALAM, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -152,28 +152,28 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
         BoneManager::RegisterBone(pCharacter, L"Monster96_Bottom", 29);
     }
     break;
-    case 317:
+    case MONSTER_SOLAM:
     {
-        OpenMonsterModel(97);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 97, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SOLAM);
+        pCharacter = CreateCharacter(Key, MODEL_SOLAM, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 318:
+    case MONSTER_SCOUT:
     {
-        OpenMonsterModel(98);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 98, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_SCOUT);
+        pCharacter = CreateCharacter(Key, MODEL_SCOUT, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 310:
+    case MONSTER_HAMMER_SCOUT:
     {
-        OpenMonsterModel(91);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 91, PosX, PosY);
+        OpenMonsterModel(MONSTER_MODEL_BALRAM);
+        pCharacter = CreateCharacter(Key, MODEL_BALRAM, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -190,7 +190,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         return false;
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 95:
+    case MODEL_WEREWOLF_HERO:
     {
         vec3_t Position, Light;
 
@@ -210,7 +210,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         }
     }
     break;
-    case MODEL_MONSTER01 + 97:
+    case MODEL_SOLAM:
     {
         vec3_t Position, Position2, Light;
         Vector(0.f, 0.f, 0.f, Position);
@@ -227,7 +227,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
         }
     }
     break;
-    case MODEL_MONSTER01 + 96:
+    case MODEL_VALAM:
     {
         vec3_t Position, Light;
 
@@ -270,7 +270,7 @@ void M34CryingWolf2nd::MoveCryingWolf2ndBlurEffect(CHARACTER* pCharacter, OBJECT
 {
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 95:
+    case MODEL_WEREWOLF_HERO:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -305,7 +305,7 @@ void M34CryingWolf2nd::MoveCryingWolf2ndBlurEffect(CHARACTER* pCharacter, OBJECT
         }
     }
     break;
-    case MODEL_MONSTER01 + 97:
+    case MODEL_SOLAM:
     {
         if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -343,20 +343,22 @@ bool M34CryingWolf2nd::AttackEffectCryingWolf2ndMonster(CHARACTER* pCharacter, O
 
     switch (pObject->Type)
     {
-    case MODEL_MONSTER01 + 96:
+    case MODEL_VALAM:
     {
-        if ((int)pCharacter->AttackTime == 14)
+        if (pCharacter->CheckAttackTime(14))
         {
             CreateEffect(MODEL_ARROW_NATURE, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, pObject->PKKey);
+            pCharacter->SetLastAttackEffectTime();
             return true;
         }
     }
     break;
-    case MODEL_MONSTER01 + 91:
+    case MODEL_BALRAM:
     {
-        if ((int)pCharacter->AttackTime == 14)
+        if (pCharacter->CheckAttackTime(14))
         {
             CreateEffect(MODEL_ARROW_HOLY, pObject->Position, pObject->Angle, pObject->Light, 1, pObject, pObject->PKKey);
+            pCharacter->SetLastAttackEffectTime();
             return true;
         }
     }

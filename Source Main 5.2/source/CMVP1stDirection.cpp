@@ -103,9 +103,9 @@ void CMVP1STDirection::BeginDirection1()
 {
     if (g_Direction.m_bAction)
     {
-        if (g_Direction.m_iCheckTime == 0) g_Direction.SummonCreateMonster(349, 114, 238, 0, true, true, 0.18f);
-        else if (g_Direction.m_iCheckTime == 1) g_Direction.SummonCreateMonster(340, 113, 238, 0, true, true, 0.227f);
-        else if (g_Direction.m_iCheckTime == 2) g_Direction.SummonCreateMonster(340, 115, 238, 0, true, true, 0.227f);
+        if (g_Direction.m_iCheckTime == 0) g_Direction.SummonCreateMonster(MONSTER_BALGASS, 114, 238, 0, true, true, 0.18f);
+        else if (g_Direction.m_iCheckTime == 1) g_Direction.SummonCreateMonster(MONSTER_DARKELF, 113, 238, 0, true, true, 0.227f);
+        else if (g_Direction.m_iCheckTime == 2) g_Direction.SummonCreateMonster(MONSTER_DARKELF, 115, 238, 0, true, true, 0.227f);
         else if (g_Direction.m_iCheckTime == 3) g_Direction.GetTimeCheck(1000);
         else if (g_Direction.m_iCheckTime == 4)
         {
@@ -120,48 +120,48 @@ void CMVP1STDirection::BeginDirection1()
         else if (g_Direction.m_iCheckTime == 6)
         {
             if (g_Direction.ActionCreatedMonster(1, MONSTER01_ATTACK3, 1))
-                g_Direction.SummonCreateMonster(345, 109, 229, 0);
+                g_Direction.SummonCreateMonster(MONSTER_DEATH_SPIRIT, 109, 229, 0);
         }
         else if (g_Direction.m_iCheckTime == 7) g_Direction.GetTimeCheck(660);
-        else if (g_Direction.m_iCheckTime == 8) g_Direction.SummonCreateMonster(345, 110, 230, 0);
+        else if (g_Direction.m_iCheckTime == 8) g_Direction.SummonCreateMonster(MONSTER_DEATH_SPIRIT, 110, 230, 0);
         else if (g_Direction.m_iCheckTime == 9) g_Direction.GetTimeCheck(660);
-        else if (g_Direction.m_iCheckTime == 10)	g_Direction.SummonCreateMonster(345, 112, 230, 0);
+        else if (g_Direction.m_iCheckTime == 10)	g_Direction.SummonCreateMonster(MONSTER_DEATH_SPIRIT, 112, 230, 0);
         else if (g_Direction.m_iCheckTime == 11)	g_Direction.GetTimeCheck(660);
-        else if (g_Direction.m_iCheckTime == 12)	g_Direction.SummonCreateMonster(345, 113, 229, 0);
+        else if (g_Direction.m_iCheckTime == 12)	g_Direction.SummonCreateMonster(MONSTER_DEATH_SPIRIT, 113, 229, 0);
         else if (g_Direction.m_iCheckTime == 13) g_Direction.GetTimeCheck(1000);
         else if (g_Direction.m_iCheckTime == 14)
         {
             if (g_Direction.ActionCreatedMonster(2, MONSTER01_ATTACK3, 1))
-                g_Direction.SummonCreateMonster(344, 114, 229, 0);
+                g_Direction.SummonCreateMonster(MONSTER_BALRAM, 114, 229, 0);
         }
         else if (g_Direction.m_iCheckTime == 15) g_Direction.GetTimeCheck(660);
-        else if (g_Direction.m_iCheckTime == 16)	g_Direction.SummonCreateMonster(344, 115, 230, 0);
+        else if (g_Direction.m_iCheckTime == 16)	g_Direction.SummonCreateMonster(MONSTER_BALRAM, 115, 230, 0);
         else if (g_Direction.m_iCheckTime == 17) g_Direction.GetTimeCheck(660);
-        else if (g_Direction.m_iCheckTime == 18)	g_Direction.SummonCreateMonster(344, 117, 230, 0);
+        else if (g_Direction.m_iCheckTime == 18)	g_Direction.SummonCreateMonster(MONSTER_BALRAM, 117, 230, 0);
         else if (g_Direction.m_iCheckTime == 19) g_Direction.GetTimeCheck(660);
-        else if (g_Direction.m_iCheckTime == 20)	g_Direction.SummonCreateMonster(344, 118, 229, 0);
+        else if (g_Direction.m_iCheckTime == 20)	g_Direction.SummonCreateMonster(MONSTER_BALRAM, 118, 229, 0);
         else if (g_Direction.m_iCheckTime == 21) g_Direction.GetTimeCheck(1000);
         else if (g_Direction.m_iCheckTime == 22)
         {
-            g_Direction.SummonCreateMonster(341, 110, 227, 0);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 110, 227, 0);
             g_Direction.CameraLevelUp();
         }
         else if (g_Direction.m_iCheckTime == 23) g_Direction.GetTimeCheck(660);
         else if (g_Direction.m_iCheckTime == 24)
         {
-            g_Direction.SummonCreateMonster(341, 112, 227, 0);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 112, 227, 0);
             g_Direction.CameraLevelUp();
         }
         else if (g_Direction.m_iCheckTime == 25) g_Direction.GetTimeCheck(660);
         else if (g_Direction.m_iCheckTime == 26)
         {
-            g_Direction.SummonCreateMonster(341, 114, 227, 0);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 114, 227, 0);
             g_Direction.CameraLevelUp();
         }
         else if (g_Direction.m_iCheckTime == 27) g_Direction.GetTimeCheck(660);
         else if (g_Direction.m_iCheckTime == 28)
         {
-            g_Direction.SummonCreateMonster(341, 116, 227, 0);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 116, 227, 0);
             g_Direction.CameraLevelUp();
         }
         else if (g_Direction.m_iCheckTime == 29) g_Direction.GetTimeCheck(1000);
@@ -181,19 +181,19 @@ void CMVP1STDirection::BeginDirection2()
     {
         if (g_Direction.m_iCheckTime == 0)
         {
-            g_Direction.SummonCreateMonster(348, 110, 240, 0, false, false);
-            g_Direction.SummonCreateMonster(348, 114, 240, 0, false, false);
-            g_Direction.SummonCreateMonster(348, 118, 240, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 110, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 112, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 114, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 116, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 118, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 110, 244, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 112, 244, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 114, 244, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 116, 244, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 118, 244, 0);
+            g_Direction.SummonCreateMonster(MONSTER_BALLISTA, 110, 240, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_BALLISTA, 114, 240, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_BALLISTA, 118, 240, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 110, 242, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 112, 242, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 114, 242, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 116, 242, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 118, 242, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 110, 244, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 112, 244, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 114, 244, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 116, 244, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 118, 244, 0);
         }
         else if (g_Direction.m_iCheckTime == 1)
         {
@@ -261,41 +261,41 @@ void CMVP1STDirection::BeginDirection3()
         }
         else if (g_Direction.m_iCheckTime == 1)
         {
-            g_Direction.SummonCreateMonster(340, 110, 77, 0, false, false);
-            g_Direction.SummonCreateMonster(340, 125, 77, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_DARKELF, 110, 77, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_DARKELF, 125, 77, 0, false, false);
 
-            g_Direction.SummonCreateMonster(341, 90, 37, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 108, 73, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 109, 75, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 110, 73, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 111, 75, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 112, 73, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 123, 73, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 124, 75, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 125, 73, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 126, 75, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 127, 73, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 176, 20, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 90, 37, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 108, 73, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 109, 75, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 110, 73, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 111, 75, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 112, 73, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 123, 73, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 124, 75, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 125, 73, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 126, 75, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 127, 73, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 176, 20, 0, false, false);
 
-            g_Direction.SummonCreateMonster(341, 117, 77, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 119, 77, 0, false, false);
-            g_Direction.SummonCreateMonster(341, 121, 77, 0, true, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 117, 77, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 119, 77, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_SORAM, 121, 77, 0, true, false);
 
-            g_Direction.SummonCreateMonster(340, 119, 83, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_DARKELF, 119, 83, 0, false, false);
 
-            g_Direction.SummonCreateMonster(344, 118, 79, 0, false, false);
-            g_Direction.SummonCreateMonster(344, 120, 79, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_BALRAM, 118, 79, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_BALRAM, 120, 79, 0, false, false);
 
-            g_Direction.SummonCreateMonster(344, 119, 90, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_BALRAM, 119, 90, 0, false, false);
 
-            g_Direction.SummonCreateMonster(345, 116, 81, 0, false, false);
-            g_Direction.SummonCreateMonster(345, 119, 81, 0, false, false);
-            g_Direction.SummonCreateMonster(345, 122, 81, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_DEATH_SPIRIT, 116, 81, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_DEATH_SPIRIT, 119, 81, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_DEATH_SPIRIT, 122, 81, 0, false, false);
 
-            g_Direction.SummonCreateMonster(340, 119, 87, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_DARKELF, 119, 87, 0, false, false);
 
-            g_Direction.SummonCreateMonster(348, 116, 90, 0, false, false);
-            g_Direction.SummonCreateMonster(348, 122, 90, 0, true, false);
+            g_Direction.SummonCreateMonster(MONSTER_BALLISTA, 116, 90, 0, false, false);
+            g_Direction.SummonCreateMonster(MONSTER_BALLISTA, 122, 90, 0, true, false);
         }
         else g_Direction.m_bAction = false;
     }

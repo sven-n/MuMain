@@ -1,4 +1,4 @@
-// w_CursedTemple.cpp: implementation of the CursedTemple class.
+ï»¿// w_CursedTemple.cpp: implementation of the CursedTemple class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -143,36 +143,36 @@ bool CursedTemple::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
     switch (c->MonsterIndex)
     {
-    case 388:
-    case 391:
-    case 394:
-    case 397:
-    case 400:
-    case 403:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
         return CheckMonsterSkill(c, o);
     }
 
     return false;
 }
 
-CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int iKey)
+CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPosY, int iKey)
 {
     CHARACTER* pCharacter = NULL;
 
     switch (iType)
     {
-    case 380:
+    case MONSTER_STONE_STATUE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_STATUE);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_STATUE, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"¼®»ó");
+        wcscpy(pCharacter->ID, L"ì„ìƒ");
         pCharacter->Object.EnableShadow = false;
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         pCharacter->Object.PKKey = 0;
     }
     break;
-    case 381:
+    case MONSTER_MU_ALLIES_GENERAL:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_NPC, iPosX, iPosY);
@@ -180,7 +180,7 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
         pCharacter->Object.Scale = 1.2f;
     }
     break;
-    case 382:
+    case MONSTER_ILLUSION_ELDER:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION_NPC, iPosX, iPosY);
@@ -188,27 +188,27 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
         pCharacter->Object.Scale = 1.2f;
     }
     break;
-    case 383:
+    case MONSTER_ALLIANCE_ITEM_STORAGE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_BASKET, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"¿¬ÇÕ±º ¼º¹°º¸°üÇÔ");
+        wcscpy(pCharacter->ID, L"ì—°í•©êµ° ì„±ë¬¼ë³´ê´€í•¨");
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowAlliedPointEffect = false;
     }
     break;
-    case 384:
+    case MONSTER_ILLUSION_ITEM_STORAGE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION__BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION__BASKET, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´Ü ¼º¹°º¸°üÇÔ");
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ ì„±ë¬¼ë³´ê´€í•¨");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowIllusionPointEffect = false;
     }
     break;
-    case 385:
+    case MONSTER_MIRAGE:
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ENTER_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ENTER_NPC, iPosX, iPosY);
@@ -216,63 +216,63 @@ CHARACTER* CursedTemple::CreateCharacters(int iType, int iPosX, int iPosY, int i
         pCharacter->Object.Scale = 0.95f;
     }
     break;
-    case 386:
-    case 389:
-    case 392:
-    case 395:
-    case 398:
-    case 401:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_LIGHTNING:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_LIGHTNING:
     {
-        OpenMonsterModel(123);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 123, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´ÜÀÇ ¸Á·É(¹ø°³)");
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING);
+        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ì˜ ë§ë ¹(ë²ˆê°œ)"); // Phantom of the Illusion Order (Lightning)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 387:
-    case 390:
-    case 393:
-    case 396:
-    case 399:
-    case 402:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_ICE:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_ICE:
     {
-        OpenMonsterModel(124);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 124, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´ÜÀÇ ¸Á·É(¾óÀ½)");
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE);
+        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_ICE, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ì˜ ë§ë ¹(ì–¼ìŒ)"); // Phantom of the Illusion Order (Ice)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 388:
-    case 391:
-    case 394:
-    case 397:
-    case 400:
-    case 403:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
     {
-        OpenMonsterModel(125);
-        pCharacter = CreateCharacter(iKey, MODEL_MONSTER01 + 125, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´ÜÀÇ ¸Á·É(µ¶)");
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON);
+        pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_POISON, iPosX, iPosY);
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨ì˜ ë§ë ¹(ë…)"); // Phantom of the Illusion Order (Poison)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
     }
     break;
-    case 404:
+    case MONSTER_MU_ALLIES:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"¹Â¿¬ÇÕ");
+        wcscpy(pCharacter->ID, L"ë®¤ì—°í•©"); // Mu Alliance
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ALLIED_PLAYER;
     }
     break;
-    case 405:
+    case MONSTER_ILLUSION_SORCERER:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"È¯¿µ±³´Ü");
+        wcscpy(pCharacter->ID, L"í™˜ì˜êµë‹¨"); // Illusion Order
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ILLUSION_PLAYER;
     }
@@ -292,12 +292,12 @@ bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     Vector(1.f, 1.f, 1.f, Light);
     switch (c->MonsterIndex)
     {
-    case 388:
-    case 391:
-    case 394:
-    case 397:
-    case 400:
-    case 403:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
+    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -309,7 +309,7 @@ bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
                 Vector(0.4f, 0.6f, 1.f, Light);
 
                 for (int i = 0; i < 5; i++)
-                    CreateParticle(BITMAP_SMOKE, to->Position, o->Angle, Light, 1);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, to->Position, o->Angle, Light, 1);
 
                 PlayBuffer(SOUND_HEART);
             }
@@ -381,8 +381,8 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 123:
-    case MODEL_MONSTER01 + 124:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
         if (o->CurrentAction == MONSTER01_STOP1)
         {
@@ -415,7 +415,7 @@ void CursedTemple::MoveMonsterSoundVisual(OBJECT* o, BMD* b)
         }
     }
     break;
-    case MODEL_MONSTER01 + 125:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_POISON:
     {
         /*
                     if(o->CurrentAction == MONSTER01_STOP1)
@@ -479,7 +479,7 @@ void CursedTemple::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 125:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_POISON:
     {
         if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -558,8 +558,8 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             float Rotation = (int)WorldTime % 3600 / (float)10.f;
 
             Vector(0.15f, 0.15f, 0.15f, o->Light);
-            CreateParticle(BITMAP_EFFECT, position, o->Angle, o->Light);
-            CreateParticle(BITMAP_EFFECT, position, o->Angle, o->Light, 3);
+            CreateParticleFpsChecked(BITMAP_EFFECT, position, o->Angle, o->Light);
+            CreateParticleFpsChecked(BITMAP_EFFECT, position, o->Angle, o->Light, 3);
         }
         break;
         case 70:
@@ -568,7 +568,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
         }
         return true;
@@ -578,7 +578,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(221.f / 256.f * fLumi, 121.f / 256.f * fLumi, 201.f / 256.f * fLumi, Light);
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
         }
         return true;
@@ -588,9 +588,9 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 float fLumi = (rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
                 Vector(221.f / 256.f * fLumi, 121.f / 256.f * fLumi, 201.f / 256.f * fLumi, Light);
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
         }
         return true;
@@ -600,7 +600,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 float fLumi = (rand() % 10) * 0.002f + 0.03f;
                 Vector(1.2f * fLumi, 1.2f * fLumi, 1.2f * fLumi, Light);
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
         }
         return true;
@@ -609,7 +609,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             if (rand_fps_check(2))
             {
                 Vector(0.f, 0.f, 0.f, Light);
-                CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 16, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, Light, 16, o->Scale, o);
             }
         }
         return true;
@@ -619,7 +619,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 float fLumi = (rand() % 10) * 0.05f + 0.03f;
                 Vector(256.f / 256.f * fLumi, 256.f / 256.f * fLumi, 256.f / 256.f * fLumi, Light);
-                CreateParticle(BITMAP_GHOST_CLOUD1, o->Position, o->Angle, Light, 0, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_GHOST_CLOUD1, o->Position, o->Angle, Light, 0, o->Scale, o);
             }
         }
         return true;
@@ -632,7 +632,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             VectorCopy(o->Position, vPos);
             for (int i = 0; i < 1; ++i)
             {
-                CreateParticle(BITMAP_TORCH_FIRE, vPos, o->Angle, Light, 0, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_TORCH_FIRE, vPos, o->Angle, Light, 0, o->Scale, o);
             }
             VectorCopy(o->Position, vPos);
             vPos[2] += 20.f;
@@ -648,7 +648,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             VectorCopy(o->Position, vPos);
             for (int i = 0; i < 1; ++i)
             {
-                CreateParticle(BITMAP_TORCH_FIRE, vPos, o->Angle, Light, 0, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_TORCH_FIRE, vPos, o->Angle, Light, 0, o->Scale, o);
             }
             VectorCopy(o->Position, vPos);
             vPos[2] += 20.f;
@@ -664,17 +664,17 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
                 Vector(1.f, 0.8f, 0.8f, Light);
                 for (int i = 0; i < 4; ++i)
                 {
-                    CreateEffect(MODEL_FALL_STONE_EFFECT, o->Position, o->Angle, Light);
+                    CreateEffectFpsChecked(MODEL_FALL_STONE_EFFECT, o->Position, o->Angle, Light);
                 }
-                CreateEffect(MODEL_FALL_STONE_EFFECT, o->Position, o->Angle, Light, 1);
+                CreateEffectFpsChecked(MODEL_FALL_STONE_EFFECT, o->Position, o->Angle, Light, 1);
                 Vector(0.7f, 0.7f, 0.8f, Light);
                 vec3_t vPos;
                 VectorCopy(o->Position, vPos);
                 vPos[0] += (float)(rand() % 80 - 40);
                 vPos[1] += (float)(rand() % 80 - 40);
-                CreateParticle(BITMAP_WATERFALL_3 + (rand() % 2), vPos, o->Angle, Light, 2);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (rand() % 2), vPos, o->Angle, Light, 2);
                 Vector(0.9f, 0.0f, 0.0f, Light);
-                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 0, 1.5f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 0, 1.5f);
             }
         }
         return true;
@@ -763,7 +763,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
 
             b->TransformPosition(o->BoneTransform[1], vRelativePos, vWorldPos, true);
-            CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 0, 0.7f);
+            CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 0, 0.7f);
         }
     }
     break;
@@ -781,25 +781,25 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[22], vRelativePos, vWorldPos, true);
 
                 Vector(0.8f, 0.8f, 1.0f, Light);
-                CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, Light, 2, 0.7f);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 2, vWorldPos, o->Angle, Light, 2, 0.7f);
 
                 Light[0] = static_cast<float>((rand() % 100) * 0.01f);
                 Light[1] = static_cast<float>((rand() % 100) * 0.01f);
                 Light[2] = static_cast<float>((rand() % 100) * 0.01f);
 
-                CreateParticle(BITMAP_SHINY, vWorldPos, o->Angle, Light, 3, 0.8f);
+                CreateParticleFpsChecked(BITMAP_SHINY, vWorldPos, o->Angle, Light, 3, 0.8f);
             }
 
             if (o->AnimationFrame > 7.3f && o->AnimationFrame < (7.5f + fActionSpeed))
             {
                 Vector(0.7f, 0.7f, 1.0f, Light);
-                CreateParticle(BITMAP_GM_AURORA, vWorldPos, o->Angle, Light, 3, 0.7f);
+                CreateParticleFpsChecked(BITMAP_GM_AURORA, vWorldPos, o->Angle, Light, 3, 0.7f);
             }
         }
     }
     return true;
 
-    case MODEL_MONSTER01 + 125:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_POISON:
     {
         vec3_t vRelativePos, vWorldPos;
         Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -810,12 +810,12 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             for (int i = 0; i < 6; ++i)
             {
                 b->TransformPosition(o->BoneTransform[boneindex[i]], vRelativePos, vWorldPos, true);
-                CreateParticle(BITMAP_SMOKE + 3, vWorldPos, o->Angle, Light, 3, 0.5f);
+                CreateParticleFpsChecked(BITMAP_SMOKE + 3, vWorldPos, o->Angle, Light, 3, 0.5f);
             }
         }
     }
     return true;
-    case MODEL_MONSTER01 + 124:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
         vec3_t vRelativePos, vWorldPos;
         float fLuminosity = (float)sinf((WorldTime) * 0.002f) * 0.2f;
@@ -834,14 +834,14 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(0.f, 0.f, 0.f, vRelativePos);
             b->TransformPosition(o->BoneTransform[17], vRelativePos, vWorldPos, true);
             CreateSprite(BITMAP_LIGHT, vWorldPos, 3.f, Light, o, 0.f);
-            CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 4, 0.8f);
-            CreateParticle(BITMAP_SPARK + 1, vWorldPos, o->Angle, Light, 15, 0.7f + (fLuminosity * 0.05f));
+            CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 4, 0.8f);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, vWorldPos, o->Angle, Light, 15, 0.7f + (fLuminosity * 0.05f));
 
             Vector(0.f, 0.f, 0.f, vRelativePos);
             b->TransformPosition(o->BoneTransform[41], vRelativePos, vWorldPos, true);
             CreateSprite(BITMAP_LIGHT, vWorldPos, 3.f, Light, o, 0.f);
-            CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 4, 0.8f);
-            CreateParticle(BITMAP_SPARK + 1, vWorldPos, o->Angle, Light, 15, 0.7f + (fLuminosity * 0.05f));
+            CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 4, 0.8f);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, vWorldPos, o->Angle, Light, 15, 0.7f + (fLuminosity * 0.05f));
         }
         else if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -850,12 +850,12 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             for (int i = 0; i < 4; ++i)
             {
                 b->TransformPosition(o->BoneTransform[boneindex[i]], vRelativePos, vWorldPos, true);
-                CreateParticle(BITMAP_SMOKE + 3, vWorldPos, o->Angle, Light, 3, 0.5f);
+                CreateParticleFpsChecked(BITMAP_SMOKE + 3, vWorldPos, o->Angle, Light, 3, 0.5f);
             }
         }
     }
     return true;
-    case MODEL_MONSTER01 + 123:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
     {
         vec3_t vRelativePos, vWorldPos;
 
@@ -871,18 +871,18 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             Vector(0.6f, 0.0f, 0.0f, Light);
             b->TransformPosition(o->BoneTransform[17], vRelativePos, vWorldPos, true);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
-            CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 4, 1.f);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
+            CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 4, 1.f);
             CreateSprite(BITMAP_LIGHT, vWorldPos, 3.f, Light, o, 0.f);
 
             b->TransformPosition(o->BoneTransform[41], vRelativePos, vWorldPos, true);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
-            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
-            CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 4, 1.f);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
+            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, Light, 2, o);
+            CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 4, 1.f);
             CreateSprite(BITMAP_LIGHT, vWorldPos, 3.f, Light, o, 0.f);
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -892,7 +892,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             for (int i = 0; i < 6; ++i)
             {
                 b->TransformPosition(o->BoneTransform[boneindex[i]], vRelativePos, vWorldPos, true);
-                CreateParticle(BITMAP_SMOKE + 3, vWorldPos, o->Angle, Light, 3, 0.5f);
+                CreateParticleFpsChecked(BITMAP_SMOKE + 3, vWorldPos, o->Angle, Light, 3, 0.5f);
             }
         }
     }
@@ -912,13 +912,13 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 o->PKKey = 1;
                 EarthQuake = (float)(rand() % 16 - 8) * 0.1f;
                 vWorldPos[2] = vRelativePos[2] + 250;
-                CreateEffect(MODEL_CURSEDTEMPLE_STATUE_PART2, vWorldPos, o->Angle, Light, 0, o, 0, 0);
+                CreateEffectFpsChecked(MODEL_CURSEDTEMPLE_STATUE_PART2, vWorldPos, o->Angle, Light, 0, o, 0, 0);
                 for (int i = 0; i < 60; ++i)
                 {
                     vWorldPos[0] = vRelativePos[0] + rand() % 80 - 40;
                     vWorldPos[1] = vRelativePos[1] + rand() % 80 - 40;
                     vWorldPos[2] = vRelativePos[2] + (rand() % 250);
-                    CreateEffect(MODEL_CURSEDTEMPLE_STATUE_PART1, vWorldPos, o->Angle, Light, 0, o, 0, 0);
+                    CreateEffectFpsChecked(MODEL_CURSEDTEMPLE_STATUE_PART1, vWorldPos, o->Angle, Light, 0, o, 0, 0);
                 }
                 Vector(0.5f, 0.5f, 0.5f, Light);
 
@@ -927,7 +927,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     vWorldPos[0] = vRelativePos[0] + rand() % 140 - 70;
                     vWorldPos[1] = vRelativePos[1] + rand() % 140 - 70;
                     vWorldPos[2] = vRelativePos[2] + (rand() % 400) - 100;
-                    CreateParticle(BITMAP_SMOKE, vWorldPos, o->Angle, Light, 48, 1.0f);
+                    CreateParticleFpsChecked(BITMAP_SMOKE, vWorldPos, o->Angle, Light, 48, 1.0f);
                 }
             }
         }
@@ -937,14 +937,14 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(0.2f, 0.3f, 0.4f + (rand() % 3) * 0.1f, Light);
             Vector(0.f, 0.f, 0.f, vRelativePos);
             b->TransformPosition(o->BoneTransform[13], vRelativePos, vWorldPos, true);
-            CreateParticle(BITMAP_FLARE + 1, vWorldPos, o->Angle, Light, 0, 0.15f);
+            CreateParticleFpsChecked(BITMAP_FLARE + 1, vWorldPos, o->Angle, Light, 0, 0.15f);
             vWorldPos[2] += 30;
-            CreateParticle(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 1, 8.0f);
+            CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 1, 8.0f);
 
             vWorldPos[2] += 160;
             Vector(0.2f, 0.1f, 0.0f, Light);
             b->TransformPosition(o->BoneTransform[14], vRelativePos, vWorldPos, true);
-            CreateParticle(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 1, 4.0f);
+            CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 1, 4.0f);
         }
         return true;
     case MODEL_CURSEDTEMPLE_ALLIED_BASKET:
@@ -955,10 +955,10 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(1.0f, 1.0f, 0.5f, Light);
             Vector(0.f, 0.f, 0.f, vRelativePos);
             b->TransformPosition(o->BoneTransform[5], vRelativePos, vWorldPos, true);
-            CreateEffect(BITMAP_FLARE, vWorldPos, o->Angle, Light, 1);
+            CreateEffectFpsChecked(BITMAP_FLARE, vWorldPos, o->Angle, Light, 1);
 
             Vector(0.9f, 0.7f, 0.4f, Light);
-            CreateEffect(BITMAP_MAGIC, o->Position, o->Angle, Light, 8);
+            CreateEffectFpsChecked(BITMAP_MAGIC, o->Position, o->Angle, Light, 8);
 
             m_ShowAlliedPointEffect = false;
         }
@@ -972,10 +972,10 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(0.5f, 1.0f, 1.0f, Light);
             Vector(0.f, 0.f, 0.f, vRelativePos);
             b->TransformPosition(o->BoneTransform[3], vRelativePos, vWorldPos, true);
-            CreateEffect(BITMAP_FLARE, vWorldPos, o->Angle, Light, 2);
+            CreateEffectFpsChecked(BITMAP_FLARE, vWorldPos, o->Angle, Light, 2);
 
             Vector(0.7f, 0.8f, 0.9f, Light);
-            CreateEffect(BITMAP_MAGIC, o->Position, o->Angle, Light, 8);
+            CreateEffectFpsChecked(BITMAP_MAGIC, o->Position, o->Angle, Light, 8);
 
             m_ShowIllusionPointEffect = false;
         }
@@ -1089,8 +1089,8 @@ bool CursedTemple::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 2000 * 0.001f);
     }
     return true;
-    case MODEL_MONSTER01 + 123:
-    case MODEL_MONSTER01 + 124:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
+    case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.8f;

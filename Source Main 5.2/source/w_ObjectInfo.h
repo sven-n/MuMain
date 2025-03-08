@@ -141,7 +141,7 @@ public:
     BYTE          Kind;
     WORD		Skill;
     BYTE		  m_byNumCloth;
-    BYTE		  m_byHurtByOneToOne;
+    float		  m_byHurtByDeathstab;
     BYTE          WeaponLevel;
     BYTE          DamageTime;
     BYTE          m_byBuildTime;

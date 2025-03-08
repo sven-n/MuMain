@@ -96,7 +96,7 @@ void CNewUIMixInventory::SetMixState(int iMixState)
     }
 }
 
-bool CNewUIMixInventory::InsertItem(int iIndex, BYTE* pbyItemPacket)
+bool CNewUIMixInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(iIndex, pbyItemPacket);
@@ -175,6 +175,8 @@ void CNewUIMixInventory::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
+
+    m_pNewInventoryCtrl->SetPos(x + 15, y + 110);
 }
 
 bool CNewUIMixInventory::UpdateMouseEvent()
@@ -525,7 +527,7 @@ void CNewUIMixInventory::RenderFrame()
         g_pRenderText->SetTextColor(220, 220, 220, 255);
         g_pRenderText->SetBgColor(40, 40, 40, 128);
 
-        wchar_t szTempText[2][100];
+        wchar_t szTempText[2][100] = { 0 };
         int iTextLines = 0;
         if (!g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetMostSimilarRecipeName(szTempText[0], 1) == TRUE)
         {

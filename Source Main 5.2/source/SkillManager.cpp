@@ -1,4 +1,4 @@
-// SkillManager.cpp: implementation of the CSkillManager class.
+﻿// SkillManager.cpp: implementation of the CSkillManager class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -110,7 +110,7 @@ float CSkillManager::GetSkillDistance(int Index, CHARACTER* c)
 
     if (c != NULL)
     {
-        if (c->Helper.Type == MODEL_HELPER + 4)
+        if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
         {
             Distance += 2;
         }
@@ -244,7 +244,7 @@ int CSkillManager::MasterSkillToBaseSkillIndex(int iMasterSkillIndex)
     case AT_SKILL_BLOW_UP + 3:
     case AT_SKILL_BLOW_UP + 4:
     {
-        iBaseSkillIndex = AT_SKILL_ONETOONE;
+        iBaseSkillIndex = AT_SKILL_DEATHSTAB;
     }
     break;
     case AT_SKILL_ANGER_SWORD_UP:

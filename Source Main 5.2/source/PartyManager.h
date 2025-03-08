@@ -28,8 +28,10 @@ namespace SEASON3B
 
     public:
         void SearchPartyMember();
+        bool IsPartyActive();
         bool IsPartyMember(int index);
         bool IsPartyMemberChar(CHARACTER* c);
+        CHARACTER* GetPartyMemberChar(PARTY_t* pMember);
 
     public:
         static CPartyManager* GetInstance();

@@ -87,9 +87,9 @@ namespace SEASON3B
 
         int		SetActAction();
         STORAGE_TYPE SetMoveAction();
-        void	GetResult(BYTE _byResult, int _nIndex, BYTE* _pbyItemPacket = NULL);
+        void	GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE> pbyItemPacket);
         bool	Process_BTN_Action(void);
-        bool	Process_InventoryCtrl_InsertItem(int iIndex, BYTE* pbyItemPacket);
+        bool	Process_InventoryCtrl_InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
         void	Process_InventoryCtrl_DeleteItem(int iIndex);
         bool	Check_LuckyItem(ITEM* _pItem);
         bool	Check_LuckyItem_InWnd(void);

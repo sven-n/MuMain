@@ -182,7 +182,7 @@ void CQuestMng::SetQuestRequestReward(const BYTE* pbyRequestRewardPacket)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
             if (pRequestPacket->m_dwType == QUEST_REQUEST_ITEM)
                 sRequestReward.m_aRequest[i].m_pItem
-                = g_pNewItemMng->CreateItem(pRequestPacket->m_byItemInfo);
+                = g_pNewItemMng->CreateItemOld(pRequestPacket->m_byItemInfo);
             ++pRequestPacket;
         }
     }
@@ -211,7 +211,7 @@ void CQuestMng::SetQuestRequestReward(const BYTE* pbyRequestRewardPacket)
                 aTempRandReward[byRandCount].m_dwValue = pRewardPacket->m_dwValue;
                 if (aTempRandReward[byRandCount].m_dwType == QUEST_REWARD_ITEM)
                     aTempRandReward[byRandCount].m_pItem
-                    = g_pNewItemMng->CreateItem(pRewardPacket->m_byItemInfo);
+                    = g_pNewItemMng->CreateItemOld(pRewardPacket->m_byItemInfo);
                 ++byRandCount;
             }
             else
@@ -220,7 +220,7 @@ void CQuestMng::SetQuestRequestReward(const BYTE* pbyRequestRewardPacket)
                 sRequestReward.m_aReward[byGeneralCount].m_wIndex = pRewardPacket->m_wIndex;
                 sRequestReward.m_aReward[byGeneralCount].m_dwValue = pRewardPacket->m_dwValue;
                 if (pRewardPacket->m_dwType == QUEST_REWARD_ITEM)
-                    sRequestReward.m_aReward[byGeneralCount].m_pItem = g_pNewItemMng->CreateItem(pRewardPacket->m_byItemInfo);
+                    sRequestReward.m_aReward[byGeneralCount].m_pItem = g_pNewItemMng->CreateItemOld(pRewardPacket->m_byItemInfo);
                 ++byGeneralCount;
             }
 
@@ -478,7 +478,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             {
                 wchar_t szItemName[32];
                 ::GetItemName((int)pRequestInfo->m_pItem->Type,
-                    (pRequestInfo->m_pItem->Level >> 3) & 15, szItemName);
+                    (pRequestInfo->m_pItem->Level, szItemName);
                 ::swprintf(aDest[nLine].m_szText, L"Item: %s x %lu/%lu", szItemName,
                     MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
                     pRequestInfo->m_dwValue);
@@ -550,7 +550,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
             wchar_t szItemName[32];
-            ::GetItemName((int)pRequestInfo->m_pItem->Type, (pRequestInfo->m_pItem->Level >> 3) & 15,
+            ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level,
                 szItemName);
             ::swprintf(aDest[nLine].m_szText, L"Item: %s x %lu/%lu", szItemName,
                 MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
@@ -742,7 +742,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
             case QUEST_REWARD_ITEM:
                 wchar_t szItemName[32];
-                ::GetItemName((int)pRewardInfo->m_pItem->Type, (pRewardInfo->m_pItem->Level >> 3) & 15,
+                ::GetItemName((int)pRewardInfo->m_pItem->Type, pRewardInfo->m_pItem->Level,
                     szItemName);
                 ::swprintf(aDest[nLine].m_szText, L"Item: %s x %lu",
                     szItemName, pRewardInfo->m_dwValue);

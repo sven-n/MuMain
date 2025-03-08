@@ -31,6 +31,8 @@ void AnimationFlag();
 void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2);
 
 int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, float Scale = 1.f, OBJECT* Owner = NULL);
+int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, float Scale = 1.f, OBJECT* Owner = NULL);
+
 void RenderParticles(BYTE byRenderOneMore = 0);
 void MoveParticles();
 bool DeleteParticle(int iType);
@@ -58,6 +60,8 @@ void CheckClientArrow(OBJECT* o);
 void RenderEffects(bool bRenderBlendMesh = false);
 void RenderAfterEffects(bool bRenderBlendMesh = false);
 void RenderEffectShadows();
+void CreateEffectFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, OBJECT* Target = NULL, short PKKey = -1,
+    WORD SkillIndex = 0, WORD Skill = 0, WORD SkillSerialNum = 0, float Scale = 0.0f, short int sTargetIndex = -1);
 void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, OBJECT* Target = NULL, short PKKey = -1,
     WORD SkillIndex = 0, WORD Skill = 0, WORD SkillSerialNum = 0, float Scale = 0.0f, short int sTargetIndex = -1);
 void MoveEffects();
@@ -78,7 +82,6 @@ void CreateTeleportBegin(OBJECT* o);
 void CreateTeleportEnd(OBJECT* o);
 void CreateMagicShiny(CHARACTER* c, int Hand = 0);
 
-bool AddRangeAttack(vec3_t Position, float Range, short PKKey, int DamageKey[], int* piCount, int iMaxKey);
 bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, short PKKey = -1, WORD SkillSerialNum = 0);
 
 void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Skill, WORD SKKey);

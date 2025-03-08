@@ -6,8 +6,10 @@
 
 #include <codecvt>
 #include <locale>
+#include <shlwapi.h>
 
 #include "GlobalBitmap.h"
+#include "MultiLanguage.h"
 #include "ZzzBMD.h"
 #include "ZzzTexture.h"
 
@@ -65,49 +67,54 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
 
         wchar_t __ext[_MAX_EXT] = { 0, };
         _wsplitpath(textureFileName, NULL, NULL, NULL, __ext);
-        if (pTexture->FileName[0] == 's' && pTexture->FileName[1] == 'k' && pTexture->FileName[2] == 'i')
-        {
-            pModel->IndexTexture[i] = BITMAP_SKIN;
-        }
-        else if (!wcsnicmp(textureFileName, L"level", 5))
-        {
-            pModel->IndexTexture[i] = BITMAP_SKIN;
-        }
-        else if (pTexture->FileName[0] == 'h' && pTexture->FileName[1] == 'i' && pTexture->FileName[2] == 'd')
+        if (pTexture->FileName[0] == 'h' && pTexture->FileName[1] == 'i' && pTexture->FileName[2] == 'd')
         {
             pModel->IndexTexture[i] = BITMAP_HIDE;
         }
-        else if (pTexture->FileName[0] == 'h' && pTexture->FileName[1] == 'a' && pTexture->FileName[2] == 'i' && pTexture->FileName[3] == 'r')
-        {
-            pModel->IndexTexture[i] = BITMAP_HAIR;
-        }
-        else if (tolower(__ext[1]) == 't')
+        else if (tolower(__ext[1]) == 't') // TGA
         {
             pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath, GL_NEAREST, Wrap);
         }
-        else if (tolower(__ext[1]) == 'j')
+        else if (tolower(__ext[1]) == 'j') // JPG
         {
             pModel->IndexTexture[i] = Bitmaps.LoadImage(szFullPath, Type, Wrap);
         }
 
-        if (pModel->IndexTexture[i] == BITMAP_UNKNOWN)
+        bool isSkin = (pTexture->FileName[0] == 's' && pTexture->FileName[1] == 'k' && pTexture->FileName[2] == 'i')
+            || !wcsnicmp(textureFileName, L"level", 5);
+        bool isHair = pTexture->FileName[0] == 'h' && pTexture->FileName[1] == 'a' && pTexture->FileName[2] == 'i' && pTexture->FileName[3] == 'r';
+        
+        if (isSkin || isHair)
         {
-            BITMAP_t* pBitmap = Bitmaps.FindTextureByName(textureFileName);
+            BITMAP_t* pBitmap =
+                pModel->IndexTexture[i] != BITMAP_UNKNOWN
+                ? Bitmaps.FindTexture(pModel->IndexTexture[i])
+                : Bitmaps.FindTextureByName(textureFileName);
+
             if (pBitmap)
             {
+                pBitmap->IsSkin = isSkin;
+                pBitmap->IsHair = isHair;
+            }
+        }
+        
+        if (pModel->IndexTexture[i] == BITMAP_UNKNOWN)
+        {
+            if (auto pBitmap = Bitmaps.FindTextureByName(textureFileName))
+            {
+                // we try to find an already loaded texture based on the file name
                 Bitmaps.LoadImage(pBitmap->BitmapIndex, pBitmap->FileName);
                 pModel->IndexTexture[i] = pBitmap->BitmapIndex;
             }
             else
             {
                 wchar_t szErrorMsg[256] = { 0, };
-                swprintf(szErrorMsg, L"OpenTexture Failed: %s of %s", szFullPath, pModel->Name);
+                swprintf(szErrorMsg, L"OpenTexture Failed: %s of %hs", szFullPath, pModel->Name);
 #ifdef FOR_WORK
                 PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK
                 PopUpErrorCheckMsgBox(szErrorMsg, true);
 #endif // FOR_WORK
-                break;
             }
         }
 

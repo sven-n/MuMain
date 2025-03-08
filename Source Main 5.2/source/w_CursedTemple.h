@@ -37,7 +37,7 @@ namespace SEASON3A
 
     public:
         bool CreateObject(OBJECT* o);
-        CHARACTER* CreateCharacters(int iType, int iPosX, int iPosY, int iKey);
+        CHARACTER* CreateCharacters(EMonsterType iType, int iPosX, int iPosY, int iKey);
 
     public:
         bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);

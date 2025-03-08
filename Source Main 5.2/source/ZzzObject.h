@@ -1,5 +1,6 @@
 #ifndef ZZZ_OBJECT_H
 #define ZZZ_OBJECT_H
+#include "NewUIItemMng.h"
 
 extern OBJECT_BLOCK ObjectBlock[256];
 extern OBJECT       Mounts[];
@@ -53,7 +54,9 @@ extern ITEM   PickItem;
 extern ITEM   TargetItem;
 
 void ItemObjectAttribute(OBJECT* o);
-void CreateItem(ITEM_t* n, BYTE* Item, vec3_t Position, int CreateFlag);
+// void CreateItem(ITEM_t* n, BYTE* Item, vec3_t Position, int CreateFlag);
+void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool isFreshDrop);
+void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop);
 void DeleteItem(int Key);
 void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
 void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
@@ -62,8 +65,8 @@ void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int Ren
 void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture = -1);
 void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType);
 
-void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int Option1 = 0, int ExtOption = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
-void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0, int Option1 = 0, int ExtOption = 0, bool GlobalTransform = false, bool HideSkin = false, bool Translate = false, int Select = 0, int RenderType = RENDER_TEXTURE);
+void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0, int ancientDiscriminator = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
+void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0, int ancientDiscriminator = 0, bool GlobalTransform = false, bool HideSkin = false, bool Translate = false, int Select = 0, int RenderType = RENDER_TEXTURE);
 
 void RenderPartObjectEdge(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale);
 void RenderPartObjectEdge2(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale, OBB_t* OBB);

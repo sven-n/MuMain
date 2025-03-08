@@ -168,7 +168,7 @@ bool CSQuest::OpenQuestScript(wchar_t* filename)
     return  TRUE;
 }
 
-void CSQuest::setQuestLists(BYTE* byList, int num, int Class)
+void CSQuest::setQuestLists(BYTE* byList, int num, CLASS_TYPE Class)
 {
     if (Class != -1)
     {
@@ -602,7 +602,7 @@ int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
         pItem = pInvenCtrl->GetItem(i);
         if (nType == pItem->Type)
         {
-            if (nLevel == -1 || nLevel == (int)((pItem->Level >> 3) & 15))
+            if (nLevel == -1 || nLevel == pItem->Level)
             {
                 if (nCount <= ++nFindItemCount)
                     return 0;

@@ -1,4 +1,4 @@
-// NewUICursedTempleEnter.cpp: implementation of the CNewUICursedTempleEnter class.
+ï»¿// NewUICursedTempleEnter.cpp: implementation of the CNewUICursedTempleEnter class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -102,14 +102,14 @@ void SEASON3B::CNewUICursedTempleEnter::SetButtonInfo()
 
     m_Button[CURSEDTEMPLEENTER_OPEN].ChangeButtonInfo(x, m_Pos.y + 203, 54, 23);
 
-    // 2147 "ÀÔÀåÇÏ±â"
+    // 2147 "ìž…ìž¥í•˜ê¸°"
     m_Button[CURSEDTEMPLEENTER_OPEN].ChangeText(GlobalText[2147]);
 
     x = m_Pos.x + (CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) + (((CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) - MSGBOX_BTN_WIDTH) / 2);
     m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonImgState(true, CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
 
     m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonInfo(x, m_Pos.y + 203, 54, 23);
-    // 1002 "´Ý±â"
+    // 1002 "ë‹«ê¸°"
     m_Button[CURSEDTEMPLEENTER_EXIT].ChangeText(GlobalText[1002]);
 }
 
@@ -143,10 +143,10 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckEnterItem(ITEM* p, int enterlevel)
     }
     else
     {
-        if (p->Type != ITEM_HELPER + 51)
+        if (p->Type != ITEM_SCROLL_OF_BLOOD)
             return false;
 
-        int itemLevel = (p->Level >> 3) & 15;
+        int itemLevel = p->Level;
 
         if (itemLevel != enterlevel)
             return false;
@@ -165,7 +165,7 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckInventory(BYTE& itempos, int enterl
         return false;
     }
 
-    pos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_HELPER + 51, enterlevel);
+    pos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_SCROLL_OF_BLOOD, enterlevel);
     if (pos != -1) {
         itempos = pos;
         return true;
@@ -183,19 +183,15 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
 {
     if (m_Button[CURSEDTEMPLEENTER_OPEN].UpdateMouseEvent())
     {
-        BYTE ItemPos = 0xff;
         int  EnterLevel = -1;
         bool Result = false;
 
         // CheckHeroLevl
         Result = CheckEnterLevel(EnterLevel);
 
-        // CheckInventoryItem
-        Result = CheckInventory(ItemPos, EnterLevel);
-
         if (Result)
         {
-            SocketClient->ToGameServer()->SendIllusionTempleEnterRequest(static_cast<BYTE>(EnterLevel), static_cast<BYTE>(ItemPos + MAX_EQUIPMENT));
+            SocketClient->ToGameServer()->SendIllusionTempleEnterRequest(static_cast<BYTE>(EnterLevel), 0xFF);
         }
         else
         {
@@ -337,7 +333,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderButtons()
 {
     for (int i = 0; i < CURSEDTEMPLEENTER_MAXBUTTONCOUNT; ++i)
     {
-        // ¹öÆ° ·»´õ¸µ
+        // ë²„íŠ¼ ë Œë”ë§
         m_Button[i].Render();
     }
 }

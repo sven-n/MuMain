@@ -1,11 +1,10 @@
 #pragma once
+
 #include "zzzinfomation.h"
 #include "SpinLock.h"
 
-extern int MenuStateCurrent;
-extern int MenuStateNext;
-extern int  SceneFlag;
-//extern bool EnableEdit;
+extern EGameScene SceneFlag;
+
 extern int  ErrorMessage;
 extern bool InitServerList;
 extern bool InitLogIn;
@@ -19,12 +18,15 @@ extern int g_iLengthAuthorityCode;
 
 inline SpinLock* g_render_lock = new SpinLock();
 
+extern bool CheckRenderNextFrame();
+extern void WaitForNextActivity(bool usePreciseSleep);
+extern void UpdateSceneState();
 extern void LogInScene(HDC hDC);
 extern void LoadingScene(HDC hDC);
-extern void Scene(HDC Hdc);
+extern void RenderScene(HDC Hdc);
 extern bool CheckName();
 void    StartGame();
-void SetTargetFps(float targetFps);
+void SetTargetFps(double targetFps);
 
 BOOL	ShowCheckBox(int num, int index, int message = MESSAGE_TRADE_CHECK);
 

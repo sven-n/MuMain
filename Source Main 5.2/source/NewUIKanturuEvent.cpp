@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////
 // NewUIKanturu2ndEnterNpc.cpp: implementation of the CNewUIKanturu2ndEnterNpc class.
 //////////////////////////////////////////////////////////////////////
 
@@ -482,7 +482,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
             pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
             pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
 
-            if (pItemHelper->Type == ITEM_HELPER + 2)
+            if (pItemHelper->Type == ITEM_HORN_OF_UNIRIA)
             {
                 CreateMessageBox(POPUP_UNIRIA);
                 return true;
@@ -495,21 +495,21 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
                 return true;
             }
 
-            if (!((pItemWing->Type >= ITEM_WING + 0 && pItemWing->Type <= ITEM_WING + 6)
-                || (pItemWing->Type >= ITEM_WING + 36 && pItemWing->Type <= ITEM_WING + 43)
+            if (!((pItemWing->Type >= ITEM_WINGS_OF_ELF && pItemWing->Type <= ITEM_WINGS_OF_DARKNESS)
+                || (pItemWing->Type >= ITEM_WING_OF_STORM && pItemWing->Type <= ITEM_WING_OF_DIMENSION)
                 || (ITEM_WING + 130 <= pItemWing->Type && pItemWing->Type <= ITEM_WING + 134)
-                || pItemHelper->Type == ITEM_HELPER + 3
-                || pItemHelper->Type == ITEM_HELPER + 4
-                || pItemWing->Type == ITEM_HELPER + 30
-                || pItemHelper->Type == ITEM_HELPER + 37
-                || (pItemWing->Type >= ITEM_WING + 49 && pItemWing->Type <= ITEM_WING + 50)
+                || pItemHelper->Type == ITEM_HORN_OF_DINORANT
+                || pItemHelper->Type == ITEM_DARK_HORSE_ITEM
+                || pItemWing->Type == ITEM_CAPE_OF_LORD
+                || pItemHelper->Type == ITEM_HORN_OF_FENRIR
+                || (pItemWing->Type >= ITEM_CAPE_OF_FIGHTER && pItemWing->Type <= ITEM_CAPE_OF_OVERRULE)
                 || (pItemWing->Type == ITEM_WING + 135)))
             {
                 CreateMessageBox(POPUP_NOT_HELPER);
                 return true;
             }
 
-            if (pItemRingLeft->Type == ITEM_HELPER + 38 || pItemRingRight->Type == ITEM_HELPER + 38)
+            if (pItemRingLeft->Type == ITEM_MOONSTONE_PENDANT || pItemRingRight->Type == ITEM_MOONSTONE_PENDANT)
             {
                 SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
                 m_bNpcAnimation = true;

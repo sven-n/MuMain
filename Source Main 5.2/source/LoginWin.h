@@ -14,6 +14,7 @@ class CLoginWin : public CWin
 protected:
     CSprite		m_asprInputBox[2];
     CButton		m_aBtn[2];
+    CButton     m_aBtnRememberMe;
     CUITextInputBox* m_pIDInputBox, * m_pPassInputBox;
 
 public:

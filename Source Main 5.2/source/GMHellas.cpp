@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////////
 //  GMHellas.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
@@ -29,7 +29,7 @@ extern	int  TextBold[50];
 static  CSWaterTerrain* g_pCSWaterTerrain = NULL;
 static  std::queue<ObjectDescript> g_qObjDes;
 
-static  const BYTE  ACTION_DESTROY_PHY_DEF = 33;
+static  const BYTE  ACTION_DESTROY_WIZ_DEF = 33;
 static  const BYTE  ACTION_DESTROY_DEF = 34;
 
 #define NUM_HELLAS	7
@@ -128,7 +128,7 @@ void SettingHellasColor()
     glClearColor(0.f, 0.f, 0.f, 1.f);
 }
 
-BYTE GetHellasLevel(int Class, int Level)
+BYTE GetHellasLevel(CLASS_TYPE Class, int Level)
 {
     int startIndex = 0;
     int baseClass = gCharacterManager.GetBaseClass(Class);
@@ -149,11 +149,11 @@ BYTE GetHellasLevel(int Class, int Level)
     return byLevel;
 }
 
-bool EnableKalima(int Class, int Level, int ItemLevel)
+bool EnableKalima(CLASS_TYPE Class, int Level, int ItemLevel)
 {
     int startIndex = 0;
 
-    int baseClass = gCharacterManager.GetBaseClass(Class);
+    auto baseClass = gCharacterManager.GetBaseClass(Class);
     if (baseClass == CLASS_DARK || baseClass == CLASS_DARK_LORD || baseClass == CLASS_RAGEFIGHTER)
     {
         startIndex = NUM_HELLAS;
@@ -205,7 +205,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
     int TextNum = textNum;
     switch (ip->Type)
     {
-    case ITEM_POTION + 28:
+    case ITEM_LOST_MAP:
     {
         int startIndex = 0;
         int baseClass = gCharacterManager.GetBaseClass(Hero->Class);
@@ -215,7 +215,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
         }
 
         int HeroLevel = CharacterAttribute->Level;
-        int ItemLevel = (ip->Level >> 3) & 15;
+        int ItemLevel = ip->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         swprintf(TextList[TextNum], L"%s %s       %s    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
@@ -245,7 +245,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
     }
     break;
 
-    case ITEM_POTION + 29:
+    case ITEM_SYMBOL_OF_KUNDUN:
     {
         swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5); TextNum++;
         if (ip->Durability >= 5)
@@ -312,7 +312,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
     if (LastAmbientSoundPlay < WorldTime - AmbientSoundInterval)
     {
         LastAmbientSoundPlay = WorldTime;
-        PlayBuffer(SOUND_KALIMA_AMBIENT2 + rand() % 2);
+        PlayBuffer(static_cast<ESound>(SOUND_KALIMA_AMBIENT2 + rand() % 2));
     }
 
     if (GetHellasLevel(Hero->Class, CharacterAttribute->Level) == KUNDUN_ZONE)
@@ -323,7 +323,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
         if ((CurrX >= 25 && CurrY >= 44) && (CurrX <= 51 && CurrY <= 119) && (LastKundunSoundPlay < WorldTime - KundunSoundInterval))
         {
             LastKundunSoundPlay = WorldTime;
-            PlayBuffer(SOUND_KUNDUN_AMBIENT1 + rand() % 2);
+            PlayBuffer(static_cast<ESound>(SOUND_KUNDUN_AMBIENT1 + rand() % 2));
         }
     }
 
@@ -460,12 +460,12 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
         break;
     case 35:
         Vector(0.3f, 0.6f, 1.f, Light);
-        CreateParticle(BITMAP_LIGHT, o->Position, o->Angle, Light, 6, 1.f, o);
+        CreateParticleFpsChecked(BITMAP_LIGHT, o->Position, o->Angle, Light, 6, 1.f, o);
         o->HiddenMesh = -2;
         break;
     case 36:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_TRUE_BLUE, o->Position, o->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_TRUE_BLUE, o->Position, o->Angle, Light, 0);
 
         o->Scale = 0.5f;
         o->HiddenMesh = -2;
@@ -473,7 +473,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
 
     case 37:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 0);
         o->Scale = 0.5f;
         PlayBuffer(SOUND_KALIMA_WATER_FALL);
         break;
@@ -488,7 +488,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
         break;
     case 39:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticle(BITMAP_WATERFALL_3 + (rand() % 2), o->Position, o->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (rand() % 2), o->Position, o->Angle, Light, 0);
         o->Scale = 0.5f;
         break;
     case 40:
@@ -506,7 +506,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
 
 bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
 {
-    if (o->Type == MODEL_MONSTER01 + 33 && gMapManager.InHellas())
+    if (o->Type == MODEL_BAHAMUT && gMapManager.InHellas())
     {
         Vector(0.0f, 0.0f, 0.0f, b->BodyLight);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -578,7 +578,7 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
             Vector(2.f, 10.f, 0.f, p);
             b->TransformPosition(BoneTransform[6], p, Position, false);
             Vector(1.0f, 0.2f, 0.0f, Light);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17, 3.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17, 3.0f);
         }
         return true;
     }
@@ -635,8 +635,8 @@ int CreateBigMon(OBJECT* o)
     {
         LastBigMonCreation = WorldTime;
         o->Live = true;
-        OpenMonsterModel(33);
-        o->Type = MODEL_MONSTER01 + 33;
+        OpenMonsterModel(MONSTER_MODEL_BAHAMUT);
+        o->Type = MODEL_BAHAMUT;
         o->Scale = 2.5f + (float)(rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;
         o->AlphaTarget = o->Alpha;
@@ -696,7 +696,7 @@ void CreateMonsterSkill_ReduceDef(OBJECT* o, int AttackTime, BYTE time, float He
         for (int i = 0; i < 3; i++)
         {
             Vector(0.f, 0.f, i * 120.f, Angle);
-            CreateEffect(MODEL_SKULL, Position, Angle, Light, 1, o);
+            CreateEffectFpsChecked(MODEL_SKULL, Position, Angle, Light, 1, o);
         }
 
         PlayBuffer(SOUND_SKILL_SKULL);
@@ -720,7 +720,7 @@ void CreateMonsterSkill_Poison(OBJECT* o, int AttackTime, BYTE time)
             VectorRotate(p, Matrix, Position);
             VectorAdd(o->Position, Position, Position);
 
-            CreateEffect(MODEL_FIRE, Position, o->Angle, Light, 8, NULL, 0);
+            CreateEffectFpsChecked(MODEL_FIRE, Position, o->Angle, Light, 8, NULL, 0);
         }
 
         PlayBuffer(SOUND_GREAT_POISON);
@@ -740,10 +740,10 @@ void SetActionDestroy_Def(OBJECT* o)
 {
     if (o->Type != MODEL_PLAYER)
     {
-        if (g_isCharacterBuff(o, eBuff_PhysDefense))
+        if (g_isCharacterBuff(o, eBuff_WizDefense))
         {
-            o->AI = ACTION_DESTROY_PHY_DEF;
-            g_CharacterUnRegisterBuff(o, eBuff_PhysDefense);
+            o->AI = ACTION_DESTROY_WIZ_DEF;
+            g_CharacterUnRegisterBuff(o, eBuff_WizDefense);
         }
         else if (g_isCharacterBuff(o, eBuff_Defense))
         {
@@ -757,7 +757,7 @@ void RenderDestroy_Def(OBJECT* o, BMD* b)
 {
     if (o->Type != MODEL_PLAYER)
     {
-        if (o->AI == ACTION_DESTROY_PHY_DEF)
+        if (o->AI == ACTION_DESTROY_WIZ_DEF)
         {
             b->RenderMeshEffect(6, MODEL_STONE_COFFIN, 1);
             o->AI = 0;
@@ -774,152 +774,152 @@ void RenderDestroy_Def(OBJECT* o, BMD* b)
     }
 }
 
-CHARACTER* CreateHellasMonster(int Type, int PositionX, int PositionY, int Key)
+CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, int Key)
 {
     CHARACTER* c = NULL;
     OBJECT* o = &c->Object;
     switch (Type)
     {
-    case 144:
-    case 174:
-    case 182:
-    case 190:
-    case 260:
-    case 268:
-    case 334:
-        OpenMonsterModel(63);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 63, PositionX, PositionY);
+    case MONSTER_DEATH_ANGEL_1:
+    case MONSTER_DEATH_ANGEL_2:
+    case MONSTER_DEATH_ANGEL_3:
+    case MONSTER_DEATH_ANGEL_4:
+    case MONSTER_DEATH_ANGEL_5:
+    case MONSTER_DEATH_ANGEL_6:
+    case MONSTER_DEATH_ANGEL_7:
+        OpenMonsterModel(MONSTER_MODEL_DEATH_ANGEL);
+        c = CreateCharacter(Key, MODEL_DEATH_ANGEL, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
         c->Object.Scale = 1.2f;
         o = &c->Object;
         o->BlendMesh = 1;
-        wcscpy(c->ID, L"Àå¼ö°ÅºÏ");
+        wcscpy(c->ID, L"ìž¥ìˆ˜ê±°ë¶");
         break;
-    case 145:
-    case 175:
-    case 183:
-    case 191:
-    case 261:
-    case 269:
-    case 336:
-        OpenMonsterModel(67);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 67, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_SPEAR + 10;
+    case MONSTER_DEATH_CENTURION_1:
+    case MONSTER_DEATH_CENTURION_2:
+    case MONSTER_DEATH_CENTURION_3:
+    case MONSTER_DEATH_CENTURION_4:
+    case MONSTER_DEATH_CENTURION_5:
+    case MONSTER_DEATH_CENTURION_6:
+    case MONSTER_DEATH_CENTURION_7:
+        OpenMonsterModel(MONSTER_MODEL_DEATH_CENTURION);
+        c = CreateCharacter(Key, MODEL_DEATH_CENTURION, PositionX, PositionY);
+        c->Weapon[0].Type = MODEL_DRAGON_SPEAR;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.5f;
         o = &c->Object;
         o->SubType = 9;
         o->BlendMesh = 0;
-        wcscpy(c->ID, L"´ëÇü ºí·ç³ªÀÌÆ®");
+        wcscpy(c->ID, L"ëŒ€í˜• ë¸”ë£¨ë‚˜ì´íŠ¸");
         break;
-    case 146:
-    case 176:
-    case 184:
-    case 192:
-    case 262:
-    case 270:
-    case 333:
-        OpenMonsterModel(65);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 65, PositionX, PositionY);
+    case MONSTER_BLOOD_SOLDIER_1:
+    case MONSTER_BLOOD_SOLDIER_2:
+    case MONSTER_BLOOD_SOLDIER_3:
+    case MONSTER_BLOOD_SOLDIER_4:
+    case MONSTER_BLOOD_SOLDIER_5:
+    case MONSTER_BLOOD_SOLDIER_6:
+    case MONSTER_BLOOD_SOLDIER_7:
+        OpenMonsterModel(MONSTER_MODEL_BLOOD_SOLDIER);
+        c = CreateCharacter(Key, MODEL_BLOOD_SOLDIER, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
         c->Object.Scale = 0.8f;
         o = &c->Object;
-        wcscpy(c->ID, L"¶ø½ºÅÍ");
+        wcscpy(c->ID, L"ëžìŠ¤í„°");
         break;
-    case 147:
-    case 177:
-    case 185:
-    case 193:
-    case 263:
-    case 271:
-    case 331:
-        OpenMonsterModel(66);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 66, PositionX, PositionY);
+    case MONSTER_AEGIS_1:
+    case MONSTER_AEGIS_2:
+    case MONSTER_AEGIS_3:
+    case MONSTER_AEGIS_4:
+    case MONSTER_AEGIS_5:
+    case MONSTER_AEGIS_6:
+    case MONSTER_AEGIS_7:
+        OpenMonsterModel(MONSTER_MODEL_AEGIS);
+        c = CreateCharacter(Key, MODEL_AEGIS, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 0;
         c->Object.Scale = 1.4f;
         o = &c->Object;
         o->BlendMesh = 1;
-        wcscpy(c->ID, L"°¡¿À¸®");
+        wcscpy(c->ID, L"ê°€ì˜¤ë¦¬");
         break;
-    case 148:
-    case 178:
-    case 186:
-    case 194:
-    case 264:
-    case 272:
-    case 332:
-        OpenMonsterModel(67);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 67, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_SPEAR + 10;
+    case MONSTER_ROGUE_CENTURION_1:
+    case MONSTER_ROGUE_CENTURION_2:
+    case MONSTER_ROGUE_CENTURION_3:
+    case MONSTER_ROGUE_CENTURION_4:
+    case MONSTER_ROGUE_CENTURION_5:
+    case MONSTER_ROGUE_CENTURION_6:
+    case MONSTER_ROGUE_CENTURION_7:
+        OpenMonsterModel(MONSTER_MODEL_DEATH_CENTURION);
+        c = CreateCharacter(Key, MODEL_DEATH_CENTURION, PositionX, PositionY);
+        c->Weapon[0].Type = MODEL_DRAGON_SPEAR;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.f;
         o = &c->Object;
         o->BlendMesh = 0;
-        wcscpy(c->ID, L"ºí·ç³ªÀÌÆ®");
+        wcscpy(c->ID, L"ë¸”ë£¨ë‚˜ì´íŠ¸");
         break;
-    case 149:
-    case 179:
-    case 187:
-    case 195:
-    case 265:
-    case 273:
-    case 335:
-        OpenMonsterModel(68);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 68, PositionX, PositionY);
+    case MONSTER_NECRON_1:
+    case MONSTER_NECRON_2:
+    case MONSTER_NECRON_3:
+    case MONSTER_NECRON_4:
+    case MONSTER_NECRON_5:
+    case MONSTER_NECRON_6:
+    case MONSTER_NECRON_7:
+        OpenMonsterModel(MONSTER_MODEL_NECRON);
+        c = CreateCharacter(Key, MODEL_NECRON, PositionX, PositionY);
         c->Weapon[0].Type = -1;
         c->Weapon[0].Level = 7;
         c->Object.Scale = 1.2f;
         o = &c->Object;
         o->BlendMesh = 3;
-        wcscpy(c->ID, L"¸¶¸°º¸ÀÌ");
+        wcscpy(c->ID, L"ë§ˆë¦°ë³´ì´");
         break;
-    case 160:
-    case 180:
-    case 188:
-    case 196:
-    case 266:
-    case 274:
-    case 337:
-        OpenMonsterModel(69);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 69, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_SWORD + 13;
+    case MONSTER_SCHRIKER_1:
+    case MONSTER_SCHRIKER_2:
+    case MONSTER_SCHRIKER_3:
+    case MONSTER_SCHRIKER_4:
+    case MONSTER_SCHRIKER_5:
+    case MONSTER_SCHRIKER_6:
+    case MONSTER_SCHRIKER_7:
+        OpenMonsterModel(MONSTER_MODEL_SHRIKER);
+        c = CreateCharacter(Key, MODEL_SHRIKER, PositionX, PositionY);
+        c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[0].Level = 0;
-        c->Weapon[1].Type = MODEL_SWORD + 13;
+        c->Weapon[1].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[1].Level = 0;
         c->Object.Scale = 1.2f;
         o = &c->Object;
-        wcscpy(c->ID, L"ÄïµÐÈÄº¸");
+        wcscpy(c->ID, L"ì¿¤ë‘”í›„ë³´");
         break;
-    case 161:
-    case 181:
-    case 189:
-    case 197:
-    case 267:
-    case 338:
-        OpenMonsterModel(69);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 69, PositionX, PositionY);
-        c->Weapon[0].Type = MODEL_SWORD + 13;
+    case MONSTER_ILLUSION_OF_KUNDUN_1:
+    case MONSTER_ILLUSION_OF_KUNDUN_2:
+    case MONSTER_ILLUSION_OF_KUNDUN_3:
+    case MONSTER_ILLUSION_OF_KUNDUN_4:
+    case MONSTER_ILLUSION_OF_KUNDUN_5:
+    case MONSTER_ILLUSION_OF_KUNDUN_6:
+        OpenMonsterModel(MONSTER_MODEL_SHRIKER);
+        c = CreateCharacter(Key, MODEL_SHRIKER, PositionX, PositionY);
+        c->Weapon[0].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[0].Level = 0;
-        c->Weapon[1].Type = MODEL_SWORD + 13;
+        c->Weapon[1].Type = MODEL_DOUBLE_BLADE;
         c->Weapon[1].Level = 0;
         o = &c->Object;
         o->SubType = 9;
         o->Scale = 1.5f;
-        wcscpy(c->ID, L"ÄïµÐÈÄº¸");
+        wcscpy(c->ID, L"ì¿¤ë‘”í›„ë³´");
         break;
 
-    case 275:
-        OpenMonsterModel(64);
-        c = CreateCharacter(Key, MODEL_MONSTER01 + 64, PositionX, PositionY);
-        c->Weapon[1].Type = MODEL_STAFF + 11;
+    case MONSTER_ILLUSION_OF_KUNDUN_7:
+        OpenMonsterModel(MONSTER_MODEL_ILLUSION_OF_KUNDUN);
+        c = CreateCharacter(Key, MODEL_ILLUSION_OF_KUNDUN, PositionX, PositionY);
+        c->Weapon[1].Type = MODEL_STAFF_OF_KUNDUN;
         c->Weapon[1].Level = 0;
         c->Object.Scale = 2.0f;
         //		c->Object.Scale = 1.9f;
         o = &c->Object;
-        wcscpy(c->ID, L"ÁøÂ¥ÄïµÐ");
+        wcscpy(c->ID, L"ì§„ì§œì¿¤ë‘”");
         o->LifeTime = 100;
         break;
     }
@@ -931,23 +931,23 @@ bool    SettingHellasMonsterLinkBone(CHARACTER* c, int Type)
 {
     switch (Type)
     {
-    case MODEL_MONSTER01 + 64:
+    case MODEL_ILLUSION_OF_KUNDUN:
         c->Weapon[0].LinkBone = 29;
         c->Weapon[1].LinkBone = 49;
         return true;
-    case MODEL_MONSTER01 + 66:
+    case MODEL_AEGIS:
         c->Weapon[0].LinkBone = 13;
         c->Weapon[1].LinkBone = 14;
         return true;
-    case MODEL_MONSTER01 + 67:
+    case MODEL_DEATH_CENTURION:
         c->Weapon[0].LinkBone = 56;
         c->Weapon[1].LinkBone = 42;
         return true;
-    case MODEL_MONSTER01 + 68:
+    case MODEL_NECRON:
         c->Weapon[0].LinkBone = 60;
         c->Weapon[1].LinkBone = 60;
         return true;
-    case MODEL_MONSTER01 + 69:
+    case MODEL_SHRIKER:
         c->Weapon[0].LinkBone = 41;
         c->Weapon[1].LinkBone = 51;
         return true;
@@ -960,12 +960,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
 {
     switch (c->MonsterIndex)
     {
-    case 145:
-    case 175:
-    case 183:
-    case 191:
-    case 261:
-    case 269:
+    case MONSTER_DEATH_CENTURION_1:
+    case MONSTER_DEATH_CENTURION_2:
+    case MONSTER_DEATH_CENTURION_3:
+    case MONSTER_DEATH_CENTURION_4:
+    case MONSTER_DEATH_CENTURION_5:
+    case MONSTER_DEATH_CENTURION_6:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -988,12 +988,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 147:
-    case 177:
-    case 185:
-    case 193:
-    case 263:
-    case 271:
+    case MONSTER_AEGIS_1:
+    case MONSTER_AEGIS_2:
+    case MONSTER_AEGIS_3:
+    case MONSTER_AEGIS_4:
+    case MONSTER_AEGIS_5:
+    case MONSTER_AEGIS_6:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -1006,12 +1006,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 148:
-    case 178:
-    case 186:
-    case 194:
-    case 264:
-    case 272:
+    case MONSTER_ROGUE_CENTURION_1:
+    case MONSTER_ROGUE_CENTURION_2:
+    case MONSTER_ROGUE_CENTURION_3:
+    case MONSTER_ROGUE_CENTURION_4:
+    case MONSTER_ROGUE_CENTURION_5:
+    case MONSTER_ROGUE_CENTURION_6:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
@@ -1024,12 +1024,12 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 149:
-    case 179:
-    case 187:
-    case 195:
-    case 265:
-    case 273:
+    case MONSTER_NECRON_1:
+    case MONSTER_NECRON_2:
+    case MONSTER_NECRON_3:
+    case MONSTER_NECRON_4:
+    case MONSTER_NECRON_5:
+    case MONSTER_NECRON_6:
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
@@ -1042,21 +1042,21 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         }
         return true;
 
-    case 160:
-    case 180:
-    case 188:
-    case 196:
-    case 266:
-    case 274:
-    case 161:
-    case 181:
-    case 189:
-    case 197:
-    case 267:
+    case MONSTER_SCHRIKER_1:
+    case MONSTER_SCHRIKER_2:
+    case MONSTER_SCHRIKER_3:
+    case MONSTER_SCHRIKER_4:
+    case MONSTER_SCHRIKER_5:
+    case MONSTER_SCHRIKER_6:
+    case MONSTER_ILLUSION_OF_KUNDUN_1:
+    case MONSTER_ILLUSION_OF_KUNDUN_2:
+    case MONSTER_ILLUSION_OF_KUNDUN_3:
+    case MONSTER_ILLUSION_OF_KUNDUN_4:
+    case MONSTER_ILLUSION_OF_KUNDUN_5:
         SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
         return true;
 
-    case 275:
+    case MONSTER_ILLUSION_OF_KUNDUN_7:
         SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
         return true;
     }
@@ -1071,14 +1071,14 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     Vector(1.f, 1.f, 1.f, Light);
     switch (c->MonsterIndex)
     {
-    case 144:
-    case 174:
-    case 182:
-    case 190:
-    case 260:
-    case 268:
-    case 276:
-        if ((int)c->AttackTime == 14)
+    case MONSTER_DEATH_ANGEL_1:
+    case MONSTER_DEATH_ANGEL_2:
+    case MONSTER_DEATH_ANGEL_3:
+    case MONSTER_DEATH_ANGEL_4:
+    case MONSTER_DEATH_ANGEL_5:
+    case MONSTER_DEATH_ANGEL_6:
+    case MONSTER_DEATH_ANGEL_7:
+        if (c->CheckAttackTime(14))
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1092,16 +1092,16 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             }
             Position[2] += 150.f;
             CreateParticle(BITMAP_SHINY + 4, Position, o->Angle, Light, 1, 1.f);
+            c->SetLastAttackEffectTime();
         }
         return true;
 
-    case 145:
-    case 175:
-    case 183:
-    case 191:
-    case 261:
-    case 269:
-    case 277:
+    case MONSTER_DEATH_CENTURION_1:
+    case MONSTER_DEATH_CENTURION_2:
+    case MONSTER_DEATH_CENTURION_3:
+    case MONSTER_DEATH_CENTURION_4:
+    case MONSTER_DEATH_CENTURION_5:
+    case MONSTER_DEATH_CENTURION_6:
         switch ((c->Skill))
         {
         case AT_SKILL_BLOOD_ATT_UP:
@@ -1124,7 +1124,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         case AT_SKILL_MONSTER_MAGIC_DEF:
             if ((int)c->AttackTime >= 13)
             {
-                g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 c->AttackTime = 15;
                 PlayBuffer(SOUND_GREAT_SHIELD);
             }
@@ -1150,14 +1150,14 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 146:
-    case 176:
-    case 184:
-    case 192:
-    case 262:
-    case 270:
-    case 278:
-        if ((int)c->AttackTime == 14)
+    case MONSTER_BLOOD_SOLDIER_1:
+    case MONSTER_BLOOD_SOLDIER_2:
+    case MONSTER_BLOOD_SOLDIER_3:
+    case MONSTER_BLOOD_SOLDIER_4:
+    case MONSTER_BLOOD_SOLDIER_5:
+    case MONSTER_BLOOD_SOLDIER_6:
+    case MONSTER_BLOOD_SOLDIER_7:
+        if (c->CheckAttackTime(14))
         {
             Vector(1.f, 1.f, 1.f, Light);
 
@@ -1171,35 +1171,37 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
             }
             Position[2] += 150.f;
             CreateParticle(BITMAP_SHINY + 4, Position, o->Angle, Light, 1, 1.f);
+            c->SetLastAttackEffectTime();
         }
         return true;
 
-    case 147:
-    case 177:
-    case 185:
-    case 193:
-    case 263:
-    case 271:
-    case 279:
+    case MONSTER_AEGIS_1:
+    case MONSTER_AEGIS_2:
+    case MONSTER_AEGIS_3:
+    case MONSTER_AEGIS_4:
+    case MONSTER_AEGIS_5:
+    case MONSTER_AEGIS_6:
+    case MONSTER_AEGIS_7:
         if (o->CurrentAction == MONSTER01_ATTACK2 && c->AttackTime == 14)
         {
             CreateEffect(MODEL_WATER_WAVE, o->Position, o->Angle, o->Light);
         }
         return true;
 
-    case 148:
-    case 178:
-    case 186:
-    case 194:
-    case 264:
-    case 272:
-    case 280:
+    case MONSTER_ROGUE_CENTURION_1:
+    case MONSTER_ROGUE_CENTURION_2:
+    case MONSTER_ROGUE_CENTURION_3:
+    case MONSTER_ROGUE_CENTURION_4:
+    case MONSTER_ROGUE_CENTURION_5:
+    case MONSTER_ROGUE_CENTURION_6:
+    case MONSTER_ROGUE_CENTURION_7:
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 1, o, -1, 0, 1);
+                c->SetLastAttackEffectTime();
             }
             break;
 
@@ -1208,17 +1210,17 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 149:
-    case 179:
-    case 187:
-    case 195:
-    case 265:
-    case 273:
-    case 281:
+    case MONSTER_NECRON_1:
+    case MONSTER_NECRON_2:
+    case MONSTER_NECRON_3:
+    case MONSTER_NECRON_4:
+    case MONSTER_NECRON_5:
+    case MONSTER_NECRON_6:
+    case MONSTER_NECRON_7:
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 vec3_t Light, Position;
 
@@ -1232,11 +1234,12 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
                     CreateEffect(MODEL_FIRE, Position, o->Angle, Light, 7, NULL, 0);
                 }
+                c->SetLastAttackEffectTime();
             }
             break;
 
         case AT_SKILL_ENERGYBALL:
-            if ((int)c->AttackTime == 14)
+            if (c->CheckAttackTime(14))
             {
                 if (c->TargetCharacter >= 0 && c->TargetCharacter < MAX_CHARACTERS_CLIENT)
                 {
@@ -1254,17 +1257,19 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
                     Angle[2] += 15.f;
                     CreateJoint(BITMAP_FLARE + 1, Position, to->Position, Angle, 6, to, 30.f, 50);
                 }
+
+                c->SetLastAttackEffectTime();
             }
             break;
         }
         return true;
 
-    case 160:
-    case 180:
-    case 188:
-    case 196:
-    case 266:
-    case 274:
+    case MONSTER_SCHRIKER_1:
+    case MONSTER_SCHRIKER_2:
+    case MONSTER_SCHRIKER_3:
+    case MONSTER_SCHRIKER_4:
+    case MONSTER_SCHRIKER_5:
+    case MONSTER_SCHRIKER_6:
         if (o->CurrentAction == MONSTER01_ATTACK1 && c->AttackTime >= 13)
         {
             CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 5, o);
@@ -1273,11 +1278,11 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         }
         return true;
 
-    case 161:
-    case 181:
-    case 189:
-    case 197:
-    case 267:
+    case MONSTER_ILLUSION_OF_KUNDUN_1:
+    case MONSTER_ILLUSION_OF_KUNDUN_2:
+    case MONSTER_ILLUSION_OF_KUNDUN_3:
+    case MONSTER_ILLUSION_OF_KUNDUN_4:
+    case MONSTER_ILLUSION_OF_KUNDUN_5:
         switch ((c->Skill))
         {
         case AT_SKILL_BLOOD_ATT_UP:
@@ -1300,7 +1305,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         case AT_SKILL_MONSTER_MAGIC_DEF:
             if ((int)c->AttackTime >= 13)
             {
-                g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 c->AttackTime = 15;
                 PlayBuffer(SOUND_GREAT_SHIELD);
             }
@@ -1321,19 +1326,20 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
         {
-            if ((int)c->AttackTime == 7)
+            if (c->CheckAttackTime(7))
             {
                 CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, -1, 0, 0);
+                c->SetLastAttackEffectTime();
             }
-            else if ((int)c->AttackTime >= 13)
+            else if (c->CheckAttackTime(13))
             {
                 CreateEffect(MODEL_SKILL_INFERNO, o->Position, o->Angle, o->Light, 0, o);
                 CreateEffect(BITMAP_FLAME, o->Position, o->Angle, o->Light, 1, o);
-                c->AttackTime = 15;
+                c->SetLastAttackEffectTime();
             }
         }
         return true;
-    case 275:
+    case MONSTER_ILLUSION_OF_KUNDUN_7:
         switch ((c->Skill))
         {
         case AT_SKILL_BLOOD_ATT_UP:
@@ -1356,7 +1362,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         case AT_SKILL_MONSTER_MAGIC_DEF:
             if ((int)c->AttackTime >= 13)
             {
-                g_CharacterRegisterBuff(o, eBuff_PhysDefense);
+                g_CharacterRegisterBuff(o, eBuff_WizDefense);
                 c->AttackTime = 15;
 
                 PlayBuffer(SOUND_GREAT_SHIELD);
@@ -1387,7 +1393,7 @@ void MonsterMoveWaterSmoke(OBJECT* o)
     {
         vec3_t Position;
         Vector(o->Position[0] + rand() % 200 - 100, o->Position[1] + rand() % 200 - 100, o->Position[2], Position);
-        CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
+        CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
     }
 }
 void MonsterDieWaterSmoke(OBJECT* o)
@@ -1401,7 +1407,7 @@ void MonsterDieWaterSmoke(OBJECT* o)
             Vector(o->Position[0] + (float)(rand() % 64 - 32),
                 o->Position[1] + (float)(rand() % 64 - 32),
                 o->Position[2] + (float)(rand() % 32 - 16), Position);
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light, 1);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light, 1);
         }
     }
 }
@@ -1420,43 +1426,43 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
             Position[1] = o->Position[1] + rand() % 100 - 50;
             Position[2] = o->Position[2];
 
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
-            CreateParticle(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
-            CreateEffect(MODEL_STONE1, o->Position, o->Angle, o->Light);
-            CreateEffect(MODEL_STONE2, o->Position, o->Angle, o->Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
+            CreateEffectFpsChecked(MODEL_STONE1, o->Position, o->Angle, o->Light);
+            CreateEffectFpsChecked(MODEL_STONE2, o->Position, o->Angle, o->Light);
         }
         o->BlendMesh = 1;
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
         return true;
 
-    case MODEL_MONSTER01 + 63:
+    case MODEL_DEATH_ANGEL:
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.7f + 0.3f;
         return true;
 
-    case MODEL_MONSTER01 + 64:
+    case MODEL_ILLUSION_OF_KUNDUN:
         if (rand_fps_check(2))
         {
             Vector(2.f, 30.f, 0.f, p);
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
             Vector(1.0f, 0.2f, 0.0f, Light);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
         }
         return true;
 
-    case MODEL_MONSTER01 + 65:
+    case MODEL_BLOOD_SOLDIER:
         return true;
 
-    case MODEL_MONSTER01 + 66:
+    case MODEL_AEGIS:
         return true;
 
-    case MODEL_MONSTER01 + 67:
+    case MODEL_DEATH_CENTURION:
         return true;
 
-    case MODEL_MONSTER01 + 68:
+    case MODEL_NECRON:
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.7f + 0.3f;
         return true;
 
-    case MODEL_MONSTER01 + 69:
+    case MODEL_SHRIKER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             if (rand_fps_check(2))
@@ -1471,7 +1477,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
                 {
                     Vector(0.0f, 0.3f, 1.0f, Light);
                 }
-                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
             }
         }
         return true;
@@ -1510,7 +1516,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 63:
+    case MODEL_DEATH_ANGEL:
         Vector(0.f, 0.f, 0.f, p);
 
         if (o->CurrentAction != MONSTER01_DIE)
@@ -1570,7 +1576,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 64:
+    case MODEL_ILLUSION_OF_KUNDUN:
 
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -1579,7 +1585,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else
         {
-            // ´«
+            // ëˆˆ
             Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
             Vector(0, 0, 0, p);
             Vector(Luminosity * 1.0f, Luminosity * 0.0f, Luminosity * 0.0f, Light);
@@ -1671,7 +1677,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                         Position[0] = o->Position[0] + sinf(fAngle) * fDistance;
                         Position[1] = o->Position[1] + cosf(fAngle) * fDistance;
                         Position[2] = o->Position[2] + 800.f;
-                        CreateEffect(9, Position, Angle, Light);
+                        CreateEffectFpsChecked(9, Position, Angle, Light);
                     }
                 }
             }
@@ -1688,7 +1694,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     b->TransformPosition(o->BoneTransform[49], p, Position, true);
                     float fHeight = Position[2];
                     Vector(o->Position[0], o->Position[1], fHeight, Position);
-                    CreateEffect(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 0);
+                    CreateEffectFpsChecked(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 0);
                 }
             }
             if (o->CurrentAction == MONSTER01_ATTACK2)
@@ -1705,7 +1711,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     Vector(0.f, 0.f, 0.f, p);
                     b->TransformPosition(o->BoneTransform[49], p, Position, true);
                     Position[2] = 400;
-                    CreateEffect(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 1);
+                    CreateEffectFpsChecked(MODEL_CUNDUN_SKILL, Position, o->Angle, o->Light, 1);
                 }
                 if ((int)o->LifeTime == 101 && o->AnimationFrame > 6.0f)
                 {
@@ -1721,7 +1727,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     for (i = 0; i < 24; ++i)
                     {
                         Angle[2] = (float)(i * 30);
-                        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 14, NULL, 100.f, 0, 0);
+                        CreateJointFpsChecked(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 14, NULL, 100.f, 0, 0);
                     }
                     if (gMapManager.InHellas())
                     {
@@ -1744,7 +1750,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 65:
+    case MODEL_BLOOD_SOLDIER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
@@ -1792,7 +1798,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 66:
+    case MODEL_AEGIS:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Luminosity = (float)sin(WorldTime * 0.005f) * 0.15f + 0.85f;
@@ -1827,24 +1833,24 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 {
                     b->TransformPosition(o->BoneTransform[i], p, pos1, true);
                     b->TransformPosition(o->BoneTransform[i + 1], p, pos2, true);
-                    CreateJoint(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 30.f);
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 30.f);
                 }
                 for (i = 31; i < 37; ++i)
                 {
                     b->TransformPosition(o->BoneTransform[i], p, pos1, true);
                     b->TransformPosition(o->BoneTransform[i + 1], p, pos2, true);
-                    CreateJoint(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 30.f);
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 30.f);
                 }
             }
         }
         return true;
 
-    case MODEL_MONSTER01 + 67:
+    case MODEL_DEATH_CENTURION:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Vector(0.f, 0.f, 30.f, p);
 
-            if (c->MonsterIndex == 145)
+            if (c->MonsterIndex == MONSTER_DEATH_CENTURION_1)
             {
                 Vector(1.f, 0.f, 0.f, Light);
                 b->TransformPosition(o->BoneTransform[0], p, Position, true);
@@ -1876,7 +1882,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 68:
+    case MODEL_NECRON:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             vec3_t pos;
@@ -1904,7 +1910,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             b->TransformPosition(o->BoneTransform[60], p, pos, true);
             CreateSprite(BITMAP_ENERGY, pos, 0.5f + (Luminosity * 0.2f), Light, o, WorldTime * 0.1f);
             CreateSprite(BITMAP_ENERGY, pos, 0.5f + (Luminosity * 0.2f), Light, o, -WorldTime * 0.1f);
-            CreateParticle(BITMAP_LIGHT, pos, o->Angle, Light, 0, 1.1f);
+            CreateParticleFpsChecked(BITMAP_LIGHT, pos, o->Angle, Light, 0, 1.1f);
 
             Vector(0.1f, 0.4f, 1.f, Light);
             CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o, 0.f);
@@ -1925,7 +1931,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         return true;
 
-    case MODEL_MONSTER01 + 69:
+    case MODEL_SHRIKER:
         if (o->CurrentAction != MONSTER01_DIE)
         {
             vec3_t Pos1, Pos2;
@@ -1969,13 +1975,13 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[51], p, Pos2, true);
                 if (o->SubType == 9)
                 {
-                    CreateParticle(BITMAP_FIRE + 1, Pos1, o->Angle, Light, 1, 7.2f / (i / 2 + 6));
-                    CreateParticle(BITMAP_FIRE + 1, Pos2, o->Angle, Light, 1, 7.2f / (i / 2 + 6));
+                    CreateParticleFpsChecked(BITMAP_FIRE + 1, Pos1, o->Angle, Light, 1, 7.2f / (i / 2 + 6));
+                    CreateParticleFpsChecked(BITMAP_FIRE + 1, Pos2, o->Angle, Light, 1, 7.2f / (i / 2 + 6));
                 }
                 else
                 {
-                    CreateParticle(BITMAP_FIRE + 3, Pos1, o->Angle, Light, 12, 7.2f / (i / 2 + 6) * 0.5f);
-                    CreateParticle(BITMAP_FIRE + 3, Pos2, o->Angle, Light, 12, 7.2f / (i / 2 + 6) * 0.5f);
+                    CreateParticleFpsChecked(BITMAP_FIRE + 3, Pos1, o->Angle, Light, 12, 7.2f / (i / 2 + 6) * 0.5f);
+                    CreateParticleFpsChecked(BITMAP_FIRE + 3, Pos2, o->Angle, Light, 12, 7.2f / (i / 2 + 6) * 0.5f);
                 }
             }
         }
@@ -1997,7 +2003,7 @@ bool RenderHellasMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Selec
 bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
 {
     bool    success = false;
-    if (o->Type == MODEL_MONSTER01 + 63)
+    if (o->Type == MODEL_DEATH_ANGEL)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2010,7 +2016,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 64)
+    else if (o->Type == MODEL_ILLUSION_OF_KUNDUN)
     {
         if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && (int)o->LifeTime == 90)
         {
@@ -2022,33 +2028,36 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
             EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
 
-            vec3_t p, Position;
-            Vector(39.0f, -7.5f, -0.5, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART8, Position, o->Angle, o->Light, 3, o, -130, 3);
-            Vector(24.0f, -7.5f, 32.5f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART1, Position, o->Angle, o->Light, 3, o, -130, 4);
-            Vector(24.0f, -8.5f, -32.5f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART2, Position, o->Angle, o->Light, 3, o, -130, 5);
-            Vector(-0.5f, 4.0f, 0.5f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART3, Position, o->Angle, o->Light, 2, o, -130, 6);
-            Vector(-2.5f, -22.0f, 54.0f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART4, Position, o->Angle, o->Light, 3, o, -130, 1);
-            Vector(-4.5f, -24.5f, -53, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART5, Position, o->Angle, o->Light, 3, o, -130, 2);
-            Vector(-136.0f, -153.5f, 0, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART6, Position, o->Angle, o->Light, 4, o, -10, 2);
-            Vector(-135.0f, -153.0f, 0.0f, p);
-            b->TransformPosition(o->BoneTransform[4], p, Position, true);
-            CreateEffect(MODEL_CUNDUN_PART7, Position, o->Angle, o->Light, 5, o, -130, 2);
+            if (rand_fps_check(1))
+            {
+                vec3_t p, Position;
+                Vector(39.0f, -7.5f, -0.5, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART8, Position, o->Angle, o->Light, 3, o, -130, 3);
+                Vector(24.0f, -7.5f, 32.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART1, Position, o->Angle, o->Light, 3, o, -130, 4);
+                Vector(24.0f, -8.5f, -32.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART2, Position, o->Angle, o->Light, 3, o, -130, 5);
+                Vector(-0.5f, 4.0f, 0.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART3, Position, o->Angle, o->Light, 2, o, -130, 6);
+                Vector(-2.5f, -22.0f, 54.0f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART4, Position, o->Angle, o->Light, 3, o, -130, 1);
+                Vector(-4.5f, -24.5f, -53, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART5, Position, o->Angle, o->Light, 3, o, -130, 2);
+                Vector(-136.0f, -153.5f, 0, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART6, Position, o->Angle, o->Light, 4, o, -10, 2);
+                Vector(-135.0f, -153.0f, 0.0f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART7, Position, o->Angle, o->Light, 5, o, -130, 2);
 
-            CreateEffect(MODEL_CUNDUN_SKILL, o->Position, o->Angle, o->Light, 2);
+                CreateEffect(MODEL_CUNDUN_SKILL, o->Position, o->Angle, o->Light, 2);
+            }
         }
         else
         {
@@ -2059,21 +2068,24 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
                     PlayBuffer(SOUND_KUNDUN_DESTROY);
                 }
                 o->LifeTime = 90;
-
-                vec3_t Angle = { 0.0f, 0.0f, 0.0f };
-                int iCount = 86;
-                for (int i = 0; i < iCount; ++i)
+                if (rand_fps_check(1))
                 {
-                    Angle[0] = -10.f;
-                    Angle[1] = 0.f;
-                    Angle[2] = i * (10.f + rand() % 10);
+                    vec3_t Angle = { 0.0f, 0.0f, 0.0f };
+                    int iCount = 86;
+                    for (int i = 0; i < iCount; ++i)
+                    {
+                        Angle[0] = -10.f;
+                        Angle[1] = 0.f;
+                        Angle[2] = i * (10.f + rand() % 10);
 
-                    vec3_t Position;
-                    VectorCopy(o->Position, Position);
-                    Position[2] += 200.f;
-                    CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
-                    CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                        vec3_t Position;
+                        VectorCopy(o->Position, Position);
+                        Position[2] += 200.f;
+                        CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                    }
                 }
+
                 EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
             }
 
@@ -2112,7 +2124,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 65)
+    else if (o->Type == MODEL_BLOOD_SOLDIER)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2126,7 +2138,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 66)
+    else if (o->Type == MODEL_AEGIS)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2141,7 +2153,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 67)
+    else if (o->Type == MODEL_DEATH_CENTURION)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2182,7 +2194,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         }
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 68)
+    else if (o->Type == MODEL_NECRON)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2198,7 +2210,7 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.8f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         success = true;
     }
-    else if (o->Type == MODEL_MONSTER01 + 69)
+    else if (o->Type == MODEL_SHRIKER)
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -2251,11 +2263,11 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     if (success)
     {
-        if (g_isCharacterBuff(o, eBuff_PhysDefense) || g_isCharacterBuff(o, eBuff_Defense))
+        if (g_isCharacterBuff(o, eBuff_WizDefense) || g_isCharacterBuff(o, eBuff_Defense))
         {
             float Luminosity = sinf(WorldTime * 0.001f) * 0.2f + 0.5f;
 
-            if (g_isCharacterBuff(o, eBuff_PhysDefense))
+            if (g_isCharacterBuff(o, eBuff_WizDefense))
             {
                 Vector(Luminosity * 0.1f, Luminosity * 0.3f, Luminosity * 0.6f, b->BodyLight);
             }

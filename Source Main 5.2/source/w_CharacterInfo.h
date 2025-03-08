@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "SpinLock.h"
+
 typedef struct _PATH_t
 {
     unsigned char CurrentPath;
@@ -20,6 +22,7 @@ typedef struct _PATH_t
     unsigned char Direction;
     unsigned char Run;
     int           Count;
+    SpinLock      Lock;
 
     _PATH_t()
     {
@@ -46,8 +49,8 @@ typedef struct _PART_t
 {
     short Type;
     BYTE  Level;
-    BYTE  Option1;
-    BYTE  ExtOption;
+    BYTE  ExcellentFlags; // Excellent
+    BYTE  AncientDiscriminator; // Ancient
     BYTE  LinkBone;
     BYTE  CurrentAction;
     unsigned short  PriorAction;
@@ -61,8 +64,8 @@ typedef struct _PART_t
     {
         Type = 0;
         Level = 0;
-        Option1 = 0;
-        ExtOption = 0;
+        ExcellentFlags = 0;
+        AncientDiscriminator = 0;
         LinkBone = 0;
         CurrentAction = 0;
         PriorAction = 0;
@@ -124,15 +127,16 @@ public:
     bool			Blood;
     bool			Ride;
     bool			SkillSuccess;
-    BOOL			m_bFixForm;
+    bool			NotRotateOnMagicHit;
     bool			Foot[2];
     bool			SafeZone;
-    bool			Change;
+    bool			Change; // True for transformed players
     bool			HideShadow;
     bool			m_bIsSelected;
     bool			Decoy;
-    BYTE			Class;
-    BYTE			Skin;
+    CLASS_TYPE			Class;
+    CLASS_SKIN_INDEX            SkinIndex;
+    BYTE			Skin; // What is this good for?
     BYTE			CtlCode;
     BYTE			ExtendState;
     BYTE			EtcPart;
@@ -153,7 +157,7 @@ public:
     BYTE        AttackFlag;
     
     BYTE        TargetAngle;
-    BYTE        Dead;
+    float        Dead; // Number of reference frames after death
     WORD		Skill;
     BYTE        SwordCount;
     BYTE		byExtensionSkill;
@@ -162,7 +166,7 @@ public:
     BYTE        TargetY;
     BYTE        SkillX;
     BYTE        SkillY;
-    BYTE        Appear;
+    float        Appear;
     BYTE	    CurrentSkill;
     BYTE        CastRenderTime; // unused?
     BYTE        m_byFriend;
@@ -178,10 +182,12 @@ public:
     short   	TargetCharacter;
 
     WORD        Level;
-    WORD        MonsterIndex;
-    WORD        Damage;
-    WORD        Hit;
+    EMonsterType        MonsterIndex;
+    int        Damage;
+    int        Hit;
     WORD        MoveSpeed;
+    WORD        AttackSpeed;
+    WORD        MagicSpeed;
 
     int			Action;
     int			LongRangeAttack;
@@ -193,6 +199,7 @@ public:
     int         PositionX;
     int         PositionY;
     int			m_iFenrirSkillTarget;
+    int         LastAttackEffectTime;
 
     float       m_iDeleteTime;
     float       LastCritDamageEffect;
@@ -207,6 +214,8 @@ public:
     float       Duplication;
     float		Rot;
     float       Run;
+    float       HealthStatus;
+    float       ShieldStatus;
 
     vec3_t		TargetPosition;
     vec3_t      Light;
@@ -241,6 +250,14 @@ public:
 #ifdef PBG_MOD_STRIFE_GENSMARKRENDER
     BYTE		GensContributionPoints;
 #endif //PBG_MOD_STRIFE_GENSMARKRENDER
+    bool CheckAttackTime(int timeNumber) const
+    {
+        return static_cast<int>(AttackTime) == timeNumber && LastAttackEffectTime != timeNumber;
+    }
+    void SetLastAttackEffectTime()
+    {
+        LastAttackEffectTime = static_cast<int>(AttackTime);
+    }
 };
 
 #endif // !defined(AFX_W_CHARACTERINFO_H__95647591_5047_48A4_81AE_E88B5F17EE94__INCLUDED_)

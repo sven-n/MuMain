@@ -26,12 +26,12 @@ void OpenDialogFile(wchar_t* FileName);
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
-extern int  ConvertItemType(BYTE* Item);
 extern void OpenItemScript(wchar_t* FileName);
 extern BYTE getSkillIndexByBook(int Type);
-extern void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE Attribute3);
-extern float CalcDurabilityPercent(BYTE dur, BYTE maxDur, int Level, int option, int ExtOption = 0);
-extern int ItemValue(ITEM* ip, int goldType = 1);
+// extern void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE ancientDiscriminator);
+void SetItemAttributes(ITEM* ip);
+extern float CalcDurabilityPercent(BYTE dur, BYTE maxDur, int Level, int excellentFlags, int ancientDiscriminator = 0);
+extern int64_t ItemValue(ITEM* ip, int goldType = 1);
 extern void PrintItem(wchar_t* FileName);
 
 extern MONSTER_SCRIPT MonsterScript[MAX_MONSTER];
@@ -82,7 +82,7 @@ public:
 
     void Init();
     void InitAddValue();
-    void SetCharacter(BYTE Class);
+    void SetCharacter(CLASS_TYPE Class);
     void InputEnemyAttribute(MONSTER* Enemy);
     bool IsZeroDurability();
     void CalculateDamage();
@@ -90,7 +90,6 @@ public:
     void CalculateMagicDamage();
     void CalculateCurseDamage();
     void CalculateAttackRating();
-    void CalculateAttackSpeed();
     void CalculateSuccessfulBlocking();
     void CalculateAttackRatingPK();
     void CalculateSuccessfulBlockingPK();

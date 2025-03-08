@@ -140,6 +140,44 @@ void SEASON3B::CNewUINameWindow::RenderName()
                 g_pRenderText->SetTextColor(255, 230, 200, 255);
                 g_pRenderText->SetBgColor(100, 0, 0, 255);
                 g_pRenderText->RenderText(320, 2, c->ID, 0, 0, RT3_WRITE_CENTER);
+
+                if (c->HealthStatus > 0)
+                {
+                    const auto steps = 20;
+                    const auto borderWidth = 2.f;
+                    const auto widthPerStep = 4;
+                    const auto stepSeparatorWidth = 1;
+                    const auto stepsWidth = steps * widthPerStep - 2 * stepSeparatorWidth; //38.f;
+                    const auto totalWidth = stepsWidth + borderWidth * 2;
+                    
+                    auto ScreenX = 320 - totalWidth / 2;
+                    auto ScreenY = 15;
+                    
+
+                    EnableAlphaTest();
+                    glColor4f(0.f, 0.f, 0.f, 0.5f);
+                    RenderColor((float)(ScreenX + 1), (float)(ScreenY + 1), totalWidth, 5.f);
+
+                    EnableAlphaBlend();
+                    glColor3f(0.2f, 0.0f, 0.0f);
+                    RenderColor((float)ScreenX, (float)ScreenY, totalWidth, 5.f);
+
+                    glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
+                    RenderColor((float)(ScreenX + borderWidth), (float)(ScreenY + borderWidth), stepsWidth, 1.f);
+
+                    int stepHP = (int)(c->HealthStatus * steps);
+
+                    glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
+                    for (int k = 0; k < stepHP; ++k)
+                    {
+                        RenderColor(
+                            (float)(ScreenX + borderWidth + (k * widthPerStep)),
+                            (float)(ScreenY + borderWidth),
+                            widthPerStep - stepSeparatorWidth,
+                            2.f);
+                    }
+                    DisableAlphaBlend();
+                }
             }
             else
 #ifdef ASG_ADD_GENS_SYSTEM
@@ -156,7 +194,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
         }
         else if (SelectedItem != -1)
         {
-            RenderItemName(SelectedItem, &Items[SelectedItem].Object, Items[SelectedItem].Item.Level, Items[SelectedItem].Item.Option1, Items[SelectedItem].Item.ExtOption, false);
+            RenderItemName(SelectedItem, &Items[SelectedItem].Object, &Items[SelectedItem].Item, false);
         }
     }
 
@@ -169,7 +207,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
             {
                 if (o->Visible && i != SelectedItem)
                 {
-                    RenderItemName(i, o, Items[i].Item.Level, Items[i].Item.Option1, Items[i].Item.ExtOption, true);
+                    RenderItemName(i, o, &Items[i].Item, true);
                 }
             }
         }

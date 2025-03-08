@@ -48,7 +48,7 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     bool Get_AltarState_State(int Num);
 
     void Set_MyRank(BYTE MyRank, int GettingExp);
-    void Set_WorldRank(BYTE Rank, BYTE Class, int Score, wchar_t* szHeroName);
+    void Set_WorldRank(BYTE Rank, CLASS_TYPE Class, int Score, wchar_t* szHeroName);
 }
 
 using namespace M34CryWolf1st;

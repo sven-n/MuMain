@@ -1,4 +1,4 @@
-//*****************************************************************************
+ï»¿//*****************************************************************************
 // file    : GM_PK_Field.cpp
 //*****************************************************************************
 #include "stdafx.h"
@@ -51,77 +51,77 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     CHARACTER* pCharacter = NULL;
     switch (iType)
     {
-    case 480:
+    case MONSTER_ZOMBIE_FIGHTER:
     {
-        OpenMonsterModel(157);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 157, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Á»ºñ Åõ»ç");
+        OpenMonsterModel(MONSTER_MODEL_ZOMBIE_FIGHTER);
+        pCharacter = CreateCharacter(Key, MODEL_ZOMBIE_FIGHTER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì¢€ë¹„ íˆ¬ì‚¬");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         pCharacter->Object.m_iAnimation = 0;
     }
     break;
-    case 481:
+    case MONSTER_ZOMBIER:
     {
-        OpenMonsterModel(157);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 157, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Á»ºñ Åõ»ç");
+        OpenMonsterModel(MONSTER_MODEL_ZOMBIE_FIGHTER);
+        pCharacter = CreateCharacter(Key, MODEL_ZOMBIE_FIGHTER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ì¢€ë¹„ íˆ¬ì‚¬");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         pCharacter->Object.m_iAnimation = 0;
     }
     break;
-    case 482:
+    case MONSTER_GLADIATOR:
     {
-        OpenMonsterModel(158);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 158, PosX, PosY);
-        wcscpy(pCharacter->ID, L"µÇ»ì¾Æ³­ °ËÅõ»ç");
+        OpenMonsterModel(MONSTER_MODEL_GLADIATOR);
+        pCharacter = CreateCharacter(Key, MODEL_GLADIATOR, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë˜ì‚´ì•„ë‚œ ê²€íˆ¬ì‚¬");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         pCharacter->Object.m_iAnimation = 0;
     }
     break;
-    case 483:
+    case MONSTER_HELL_GLADIATOR:
     {
-        OpenMonsterModel(158);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 158, PosX, PosY);
-        wcscpy(pCharacter->ID, L"µÇ»ì¾Æ³­ °ËÅõ»ç");
+        OpenMonsterModel(MONSTER_MODEL_GLADIATOR);
+        pCharacter = CreateCharacter(Key, MODEL_GLADIATOR, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë˜ì‚´ì•„ë‚œ ê²€íˆ¬ì‚¬");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         pCharacter->Object.m_iAnimation = 0;
     }
     break;
-    case 484:
+    case MONSTER_SLAUGHTERER:
     {
-        OpenMonsterModel(159);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 159, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Àí´õ¹Ì µµ»ìÀÚ");
+        OpenMonsterModel(MONSTER_MODEL_SLAUGTHERER);
+        pCharacter = CreateCharacter(Key, MODEL_SLAUGHTERER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ìž¿ë”ë¯¸ ë„ì‚´ìž");
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         pCharacter->Object.m_iAnimation = 0;
     }
     break;
-    case 485:
+    case MONSTER_ASH_SLAUGHTERER:
     {
-        OpenMonsterModel(159);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 159, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Àí´õ¹Ì µµ»ìÀÚ");
+        OpenMonsterModel(MONSTER_MODEL_SLAUGTHERER);
+        pCharacter = CreateCharacter(Key, MODEL_SLAUGHTERER, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ìž¿ë”ë¯¸ ë„ì‚´ìž");
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         pCharacter->Object.m_iAnimation = 0;
     }
     break;
-    case 486:
+    case MONSTER_BLOOD_ASSASSIN:
     {
-        OpenMonsterModel(160);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 160, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÇÇÀÇ ¾Ï»ìÀÚ");
+        OpenMonsterModel(MONSTER_MODEL_BLOOD_ASSASSIN);
+        pCharacter = CreateCharacter(Key, MODEL_BLOOD_ASSASSIN, PosX, PosY);
+        wcscpy(pCharacter->ID, L"í”¼ì˜ ì•”ì‚´ìž");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -129,11 +129,11 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Object.LifeTime = 100;
     }
     break;
-    case 487:
+    case MONSTER_CRUEL_BLOOD_ASSASSIN:
     {
-        OpenMonsterModel(161);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 161, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÀÜÈ¤ÇÑ ÇÇÀÇ ¾Ï»ìÀÚ");
+        OpenMonsterModel(MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN);
+        pCharacter = CreateCharacter(Key, MODEL_CRUEL_BLOOD_ASSASSIN, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ìž”í˜¹í•œ í”¼ì˜ ì•”ì‚´ìž");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -141,11 +141,11 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Object.LifeTime = 100;
     }
     break;
-    case 488:
+    case MONSTER_COLD_BLOODED_ASSASSIN:
     {
-        OpenMonsterModel(161);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 161, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ÀÜÈ¤ÇÑ ÇÇÀÇ ¾Ï»ìÀÚ");
+        OpenMonsterModel(MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN);
+        pCharacter = CreateCharacter(Key, MODEL_CRUEL_BLOOD_ASSASSIN, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ìž”í˜¹í•œ í”¼ì˜ ì•”ì‚´ìž");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -153,33 +153,33 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
         pCharacter->Object.LifeTime = 100;
     }
     break;
-    case 489:
+    case MONSTER_BURNING_LAVA_GIANT:
     {
-        OpenMonsterModel(163);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 163, PosX, PosY);
-        wcscpy(pCharacter->ID, L"ºÒÅ¸´Â ¿ë¾Ï °ÅÀÎ");
+        OpenMonsterModel(MONSTER_MODEL_BURNING_LAVA_GIANT);
+        pCharacter = CreateCharacter(Key, MODEL_BURNING_LAVA_GIANT, PosX, PosY);
+        wcscpy(pCharacter->ID, L"ë¶ˆíƒ€ëŠ” ìš©ì•” ê±°ì¸");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         pCharacter->Object.m_iAnimation = 0;
     }
     break;
-    case 490:
+    case MONSTER_LAVA_GIANT:
     {
-        OpenMonsterModel(162);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 162, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Æ÷¾ÇÇÑ ¿ë¾Ï °ÅÀÎ");
+        OpenMonsterModel(MONSTER_MODEL_LAVA_GIANT);
+        pCharacter = CreateCharacter(Key, MODEL_LAVA_GIANT, PosX, PosY);
+        wcscpy(pCharacter->ID, L"í¬ì•…í•œ ìš©ì•” ê±°ì¸");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         pCharacter->Object.m_iAnimation = 0;
     }
     break;
-    case 491:
+    case MONSTER_RUTHLESS_LAVA_GIANT:
     {
-        OpenMonsterModel(162);
-        pCharacter = CreateCharacter(Key, MODEL_MONSTER01 + 162, PosX, PosY);
-        wcscpy(pCharacter->ID, L"Æ÷¾ÇÇÑ ¿ë¾Ï °ÅÀÎ");
+        OpenMonsterModel(MONSTER_MODEL_LAVA_GIANT);
+        pCharacter = CreateCharacter(Key, MODEL_LAVA_GIANT, PosX, PosY);
+        wcscpy(pCharacter->ID, L"í¬ì•…í•œ ìš©ì•” ê±°ì¸");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -195,27 +195,27 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     if (!gMapManager.IsPKField())
         return;
 
-    if (o->Type >= MODEL_MONSTER01 + 158 && o->Type <= MODEL_MONSTER01 + 161)
+    if (o->Type >= MODEL_GLADIATOR && o->Type <= MODEL_CRUEL_BLOOD_ASSASSIN)
     {
         float Start_Frame = 0.0f;
         float End_Frame = 0.0f;
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 159:
+        case MODEL_SLAUGHTERER:
         {
             Start_Frame = 4.0f;
             End_Frame = 10.0f;
         }
         break;
-        case MODEL_MONSTER01 + 158:
+        case MODEL_GLADIATOR:
         {
             Start_Frame = 3.0f;
             End_Frame = 7.0f;
         }
         break;
-        case MODEL_MONSTER01 + 160:
-        case MODEL_MONSTER01 + 161:
+        case MODEL_BLOOD_ASSASSIN:
+        case MODEL_CRUEL_BLOOD_ASSASSIN:
         {
             Start_Frame = 3.0f;
             End_Frame = 8.0f;
@@ -248,7 +248,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
                 switch (o->Type)
                 {
-                case MODEL_MONSTER01 + 159:
+                case MODEL_SLAUGHTERER:
                 {
                     Vector(0.3f, 0.3f, 0.3f, Light);
                     b->TransformPosition(BoneTransform[33], StartRelative, StartPos, false);
@@ -256,7 +256,7 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                     CreateBlur(c, StartPos, EndPos, Light, 0);
                 }
                 break;
-                case MODEL_MONSTER01 + 158:
+                case MODEL_GLADIATOR:
                 {
                     Vector(0.0f, 0.3f, 0.2f, Light);
                     b->TransformPosition(BoneTransform[39], StartRelative, StartPos, false);
@@ -264,10 +264,10 @@ void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                     CreateBlur(c, StartPos, EndPos, Light, 0);
                 }
                 break;
-                case MODEL_MONSTER01 + 160:
-                case MODEL_MONSTER01 + 161:
+                case MODEL_BLOOD_ASSASSIN:
+                case MODEL_CRUEL_BLOOD_ASSASSIN:
                 {
-                    if (o->Type == MODEL_MONSTER01 + 160)
+                    if (o->Type == MODEL_BLOOD_ASSASSIN)
                     {
                         Vector(0.9f, 0.2f, 0.1f, Light);
                     }
@@ -372,7 +372,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
             Vector(1.0f, 1.0f, 1.0f, Light);
             for (int i = 0; i < 20; ++i)
             {
-                CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 6, o->Scale, o);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 6, o->Scale, o);
             }
         }
     }
@@ -446,13 +446,13 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
         switch (rand() % 3)
         {
         case 0:
-            CreateParticle(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         case 1:
-            CreateParticle(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, o->Scale);
             break;
         case 2:
-            CreateParticle(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, o->Scale);
             break;
         }
     }
@@ -468,7 +468,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         return false;
     }
 
-    if (o->Type >= MODEL_MONSTER01 + 157 && o->Type <= MODEL_MONSTER01 + 163)
+    if (o->Type >= MODEL_ZOMBIE_FIGHTER && o->Type <= MODEL_BURNING_LAVA_GIANT)
     {
         RenderMonster(o, b, ExtraMon);
 
@@ -529,7 +529,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         Vector(-150.0f, 0.0f, 0.0f, p);
         b->TransformPosition(BoneTransform[4], p, Pos, false);
         if (o->AnimationFrame >= 35.0f && o->AnimationFrame < 50.0f)
-            CreateParticle(BITMAP_SMOKE, Pos, o->Angle, Light, 63, o->Scale * 1.5f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 63, o->Scale * 1.5f);
 
         return true;
     }
@@ -562,7 +562,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
         b->TransformPosition(BoneTransform[4], p, Pos, false);
         if (o->AnimationFrame >= 7.0f && o->AnimationFrame < 13.0f)
-            CreateParticle(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
 
         return true;
     }
@@ -594,8 +594,8 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 160:
-    case MODEL_MONSTER01 + 161:
+    case MODEL_BLOOD_ASSASSIN:
+    case MODEL_CRUEL_BLOOD_ASSASSIN:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -603,7 +603,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
             vec3_t vLight, vPos, vRelative;
             Vector(1.0f, 1.0f, 1.0f, vLight);
             vec3_t vLightFire;
-            if (o->Type == MODEL_MONSTER01 + 160)
+            if (o->Type == MODEL_BLOOD_ASSASSIN)
             {
                 Vector(1.0f, 0.2f, 0.0f, vLightFire);
             }
@@ -632,7 +632,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                     Vector((rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, vRelative);
                     b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
                 }
-                if (o->Type == MODEL_MONSTER01 + 160)
+                if (o->Type == MODEL_BLOOD_ASSASSIN)
                 {
                     for (int i = 0; i < 2; ++i)
                     {
@@ -640,13 +640,13 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                         switch (rand() % 3)
                         {
                         case 0:
-                            CreateParticle(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
                             break;
                         case 1:
-                            CreateParticle(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 4, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 4, fScale);
                             break;
                         case 2:
-                            CreateParticle(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 0, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 0, fScale);
                             break;
                         }
                     }
@@ -660,13 +660,13 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                         switch (rand() % 3)
                         {
                         case 0:
-                            CreateParticle(BITMAP_FIRE_HIK1_MONO, vPos, o->Angle, o->Light, 0, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPos, o->Angle, o->Light, 0, fScale);
                             break;
                         case 1:
-                            CreateParticle(BITMAP_FIRE_HIK2_MONO, vPos, o->Angle, o->Light, 4, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK2_MONO, vPos, o->Angle, o->Light, 4, fScale);
                             break;
                         case 2:
-                            CreateParticle(BITMAP_FIRE_HIK3_MONO, vPos, o->Angle, o->Light, 0, fScale);
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPos, o->Angle, o->Light, 0, fScale);
                             break;
                         }
                     }
@@ -690,15 +690,15 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 157:
+    case MODEL_ZOMBIE_FIGHTER:
     {
     }
     return true;
-    case MODEL_MONSTER01 + 158:
+    case MODEL_GLADIATOR:
     {
     }
     return true;
-    case MODEL_MONSTER01 + 159:
+    case MODEL_SLAUGHTERER:
     {
         vec3_t p, Position;
         if (rand_fps_check(4))
@@ -707,21 +707,21 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
 
             Vector(1.0f, 1.0f, 1.0f, o->Light);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light, 61);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 61);
         }
     }
     return true;
-    case MODEL_MONSTER01 + 160:
-    case MODEL_MONSTER01 + 161:
+    case MODEL_BLOOD_ASSASSIN:
+    case MODEL_CRUEL_BLOOD_ASSASSIN:
     {
         int iBones[] = { 37, 11, 70, 65, 6 };
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 160:
+        case MODEL_BLOOD_ASSASSIN:
             Vector(0.9f, 0.2f, 0.1f, vLight);	//red
             break;
-        case MODEL_MONSTER01 + 161:
+        case MODEL_CRUEL_BLOOD_ASSASSIN:
             Vector(0.3f, 0.9f, 0.2f, vLight);	//green
             break;
         }
@@ -732,8 +732,8 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 if (rand() % 4 > 0) continue;
 
                 b->TransformByObjectBone(vPos, o, iBones[i]);
-                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 50, 1.0f);
-                CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, o->Angle, vLight, 0, 0.01f);
+                CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 50, 1.0f);
+                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, o->Angle, vLight, 0, 0.01f);
             }
 
             if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -752,18 +752,18 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
                 VectorAdd(vPos, TempPos, vPos);
 
-                CreateParticle(BITMAP_LIGHT + 2, vPos, o->Angle, vLight, 7, 0.5f);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 2, vPos, o->Angle, vLight, 7, 0.5f);
 
                 switch (o->Type)
                 {
-                case MODEL_MONSTER01 + 160:
+                case MODEL_BLOOD_ASSASSIN:
                     Vector(0.9f, 0.4f, 0.1f, vLight);	//red
                     break;
-                case MODEL_MONSTER01 + 161:
+                case MODEL_CRUEL_BLOOD_ASSASSIN:
                     Vector(0.6f, 0.9f, 0.2f, vLight);	//green
                     break;
                 }
-                CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 29, 1.0f);
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 29, 1.0f);
             }
         }
         else					//o->CurrentAction == MONSTER01_DIE
@@ -781,11 +781,11 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 b->TransformPosition(o->BoneTransform[5], vRelativePos, vWorldPos, true);
                 switch (o->Type)
                 {
-                case MODEL_MONSTER01 + 160:
+                case MODEL_BLOOD_ASSASSIN:
                     CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD, vWorldPos, o->Angle, Light, 0, o, 0, 0);
                     break;
 
-                case MODEL_MONSTER01 + 161:
+                case MODEL_CRUEL_BLOOD_ASSASSIN:
                     CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD, vWorldPos, o->Angle, Light, 0, o, 0, 0);
                     break;
                 }
@@ -793,20 +793,20 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 162:
-    case MODEL_MONSTER01 + 163:
+    case MODEL_LAVA_GIANT:
+    case MODEL_BURNING_LAVA_GIANT:
     {
         auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
         float fAngle = (sinf(WorldTime * 0.003f) + 1.0f) * 0.4f + 1.5f;
         vec3_t vWorldPos, vLight;
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 162:
+        case MODEL_LAVA_GIANT:
         {
             Vector(0.5f, 0.1f, 0.9f, vLight);
         }
         break;
-        case MODEL_MONSTER01 + 163:
+        case MODEL_BURNING_LAVA_GIANT:
         {
             Vector(0.9f, 0.4f, 0.1f, vLight);
         }
@@ -823,18 +823,18 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         vec3_t vRelative, vPos;
         Vector(1.0f, 1.0f, 1.0f, vLight);
-        int iModel = (o->Type == MODEL_MONSTER01 + 163) ? MODEL_LAVAGIANT_FOOTPRINT_R : MODEL_LAVAGIANT_FOOTPRINT_V;
+        int iModel = (o->Type == MODEL_BURNING_LAVA_GIANT) ? MODEL_LAVAGIANT_FOOTPRINT_R : MODEL_LAVAGIANT_FOOTPRINT_V;
 
         if (o->CurrentAction == MONSTER01_WALK)
         {
-            if (o->AnimationFrame >= 2.0f && o->AnimationFrame <= 2.4f)
+            if (o->AnimationFrame >= 2.0f && o->AnimationFrame <= 2.4f && rand_fps_check(1))
             {
                 Vector(0.0f, 0.0f, 0.0f, vPos);
                 b->TransformPosition(o->BoneTransform[36], vPos, vRelative, true);
                 CreateEffect(iModel, vRelative, o->Angle, vLight, 0, o, -1, 0, 0, 0, 1.3f);
                 CreateParticle(BITMAP_SMOKE, vRelative, o->Angle, vLight, 62, 1.0f);
             }
-            else if (o->AnimationFrame >= 7.0f && o->AnimationFrame <= 7.4f)
+            else if (o->AnimationFrame >= 7.0f && o->AnimationFrame <= 7.4f && rand_fps_check(1))
             {
                 Vector(0.0f, 0.0f, 0.0f, vPos);
                 b->TransformPosition(o->BoneTransform[42], vPos, vRelative, true);
@@ -844,7 +844,7 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == MONSTER01_ATTACK2)
         {
-            if (o->AnimationFrame >= 6.0f && o->AnimationFrame <= 6.4f)
+            if (o->AnimationFrame >= 6.0f && o->AnimationFrame <= 6.4f && rand_fps_check(1))
             {
                 Vector(0.0f, 0.0f, 0.0f, vPos);
                 b->TransformPosition(o->BoneTransform[42], vPos, vRelative, true);
@@ -860,10 +860,10 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             b->TransformPosition(o->BoneTransform[7], p, Position, true);
             switch (o->Type)
             {
-            case MODEL_MONSTER01 + 162:
+            case MODEL_LAVA_GIANT:
                 Vector(0.5f, 0.1f, 0.9f, o->Light);
                 break;
-            case MODEL_MONSTER01 + 163:
+            case MODEL_BURNING_LAVA_GIANT:
                 Vector(0.9f, 0.4f, 0.1f, o->Light);
                 break;
             }
@@ -889,7 +889,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 157:
+    case MODEL_ZOMBIE_FIGHTER:
     {
         b->TransformByObjectBone(vWorldPos, o, 9);
         CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
@@ -901,7 +901,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         EnableDepthTest();
     }
     return true;
-    case MODEL_MONSTER01 + 158:
+    case MODEL_GLADIATOR:
     {
         b->TransformByObjectBone(vWorldPos, o, 9);
         CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
@@ -913,7 +913,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         EnableDepthTest();
     }
     return true;
-    case MODEL_MONSTER01 + 159:
+    case MODEL_SLAUGHTERER:
     {
         float fBlendMeshLight = 0.0f;
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f;
@@ -925,8 +925,8 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
     }
     return true;
-    case MODEL_MONSTER01 + 160:
-    case MODEL_MONSTER01 + 161:
+    case MODEL_BLOOD_ASSASSIN:
+    case MODEL_CRUEL_BLOOD_ASSASSIN:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
@@ -934,12 +934,12 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
             {
                 switch (o->Type)
                 {
-                case MODEL_MONSTER01 + 160:
+                case MODEL_BLOOD_ASSASSIN:
                 {
                     CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
                 }
                 break;
-                case MODEL_MONSTER01 + 161:
+                case MODEL_CRUEL_BLOOD_ASSASSIN:
                 {
                     CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
                 }
@@ -956,7 +956,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
             switch (o->Type)
             {
-            case MODEL_MONSTER01 + 160:
+            case MODEL_BLOOD_ASSASSIN:
             {
                 b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON02);
@@ -965,7 +965,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
                 b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, 3, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON01);
             }
             break;
-            case MODEL_MONSTER01 + 161:
+            case MODEL_CRUEL_BLOOD_ASSASSIN:
             {
                 b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fBlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PKMON04);
@@ -983,8 +983,8 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         }
     }
     return true;
-    case MODEL_MONSTER01 + 162:
-    case MODEL_MONSTER01 + 163:
+    case MODEL_LAVA_GIANT:
+    case MODEL_BURNING_LAVA_GIANT:
     {
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -994,13 +994,13 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
         switch (o->Type)
         {
-        case MODEL_MONSTER01 + 162:
-        case MODEL_MONSTER01 + 163:
+        case MODEL_LAVA_GIANT:
+        case MODEL_BURNING_LAVA_GIANT:
         {
             float fAlpha = 1.0f;
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
-            int iTexture = (o->Type == MODEL_MONSTER01 + 162) ? BITMAP_PKMON06 : BITMAP_PKMON05;
+            int iTexture = (o->Type == MODEL_LAVA_GIANT) ? BITMAP_PKMON06 : BITMAP_PKMON05;
 
             if (fBlendMeshLight < 0)
             {
@@ -1080,7 +1080,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_MONSTER01 + 157:
+    case MODEL_ZOMBIE_FIGHTER:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -1106,7 +1106,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         //	SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE02,
     }
     return true;
-    case MODEL_MONSTER01 + 158:
+    case MODEL_GLADIATOR:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -1132,7 +1132,7 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         //	SOUND_PKFIELD_RAISEDGLADIATOR_MOVE02,
     }
     return true;
-    case MODEL_MONSTER01 + 159:
+    case MODEL_SLAUGHTERER:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -1158,8 +1158,8 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         //SOUND_PKFIELD_ASHESBUTCHER_MOVE02,
     }
     return true;
-    case MODEL_MONSTER01 + 160:
-    case MODEL_MONSTER01 + 161:
+    case MODEL_BLOOD_ASSASSIN:
+    case MODEL_CRUEL_BLOOD_ASSASSIN:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
@@ -1185,8 +1185,8 @@ bool CGM_PK_Field::PlayMonsterSound(OBJECT* o)
         //	SOUND_PKFIELD_BLOODASSASSIN_MOVE01,
     }
     return true;
-    case MODEL_MONSTER01 + 162:
-    case MODEL_MONSTER01 + 163:
+    case MODEL_LAVA_GIANT:
+    case MODEL_BURNING_LAVA_GIANT:
     {
         if (MONSTER01_ATTACK1 == o->CurrentAction)
         {

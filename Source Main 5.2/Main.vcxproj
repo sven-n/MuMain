@@ -142,6 +142,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -149,10 +150,10 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/libpath:""NPGGuard"" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(SolutionDir)\dependencies\netcore\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc.lib;libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
@@ -168,10 +169,6 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\tmp/Global_Debug/Main.bsc</OutputFile>
     </Bscmake>
-    <PostBuildEvent>
-      <Command>xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\bin" "$(OutDir)"
-xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtimeconfig.json" "$(OutDir)"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Global Debug|x64'">
     <Midl>
@@ -206,6 +203,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -213,7 +211,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/libpath:""NPGGuard"" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;$(SolutionDir)\dependencies\netcore\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -232,10 +230,6 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\tmp/Global_Debug/Main.bsc</OutputFile>
     </Bscmake>
-    <PostBuildEvent>
-      <Command>xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\bin" "$(OutDir)"
-xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtimeconfig.json" "$(OutDir)"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Global Release|Win32'">
     <Midl>
@@ -269,6 +263,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <AdditionalOptions>
       </AdditionalOptions>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>
@@ -276,7 +271,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(SolutionDir)\dependencies\netcore\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories))</AdditionalLibraryDirectories>
@@ -295,10 +290,6 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\tmp/Global_Release/Main.bsc</OutputFile>
     </Bscmake>
-    <PostBuildEvent>
-      <Command>xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\bin" "$(OutDir)"
-xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtimeconfig.json" "$(OutDir)"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Global Release|x64'">
     <Midl>
@@ -342,7 +333,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;nethost.lib;ijwhost.lib;libnethost.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;$(SolutionDir)\dependencies\netcore\lib;%(AdditionalLibraryDirectories);C:\Libraries\boost_1_75_0\stage\lib</AdditionalLibraryDirectories>
@@ -361,10 +352,6 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\tmp/Global_Release/Main.bsc</OutputFile>
     </Bscmake>
-    <PostBuildEvent>
-      <Command>xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\bin" "$(OutDir)"
-xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtimeconfig.json" "$(OutDir)"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Image Include="source\icon1.ico" />
@@ -393,8 +380,9 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClCompile Include="source\Dotnet\PacketFunctions_ClientToServer.cpp" />
     <ClCompile Include="source\Dotnet\PacketFunctions_ConnectServer.cpp" />
     <ClCompile Include="source\Dotnet\PacketFunctions_Custom.cpp" />
+    <ClCompile Include="source\MUHelper\MuHelper.cpp" />
+    <ClCompile Include="source\MUHelper\MuHelperData.cpp" />
     <ClCompile Include="source\NewUIInventoryExtension.cpp" />
-    <ClCompile Include="source\Dotnet\DotNetRuntime.cpp" />
     <ClCompile Include="source\BlackWin.cpp" />
     <ClCompile Include="source\BoneManager.cpp" />
     <ClCompile Include="source\Builder.cpp" />
@@ -676,6 +664,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClCompile Include="source\UISenatus.cpp" />
     <ClCompile Include="source\UIWindows.cpp" />
     <ClCompile Include="source\UsefulDef.cpp" />
+    <ClCompile Include="source\Utilities\CpuUsage.cpp" />
     <ClCompile Include="source\Utilities\Log\ErrorReport.cpp" />
     <ClCompile Include="source\Utilities\Log\muConsoleDebug.cpp" />
     <ClCompile Include="source\Utilities\Log\WindowsConsole.cpp" />
@@ -774,6 +763,7 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="afxres.h" />
+    <ClInclude Include="dependencies\include\span.hpp" />
     <ClInclude Include="source\Dotnet\PacketBindings_ChatServer.h" />
     <ClInclude Include="source\Dotnet\PacketBindings_ClientToServer.h" />
     <ClInclude Include="source\Dotnet\PacketBindings_ConnectServer.h" />
@@ -781,8 +771,9 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClInclude Include="source\Dotnet\PacketFunctions_ClientToServer.h" />
     <ClInclude Include="source\Dotnet\PacketFunctions_ConnectServer.h" />
     <ClInclude Include="source\Dotnet\PacketFunctions_Custom.h" />
+    <ClInclude Include="source\MUHelper\MuHelper.h" />
+    <ClInclude Include="source\MUHelper\MuHelperData.h" />
     <ClInclude Include="source\NewUIInventoryExtension.h" />
-    <ClInclude Include="source\Dotnet\DotNetRuntime.h" />
     <ClInclude Include="source\BaseCls.h" />
     <ClInclude Include="source\BlackWin.h" />
     <ClInclude Include="source\BoneManager.h" />
@@ -1081,6 +1072,8 @@ xcopy  /s /r /y /q "$(SolutionDir)dependencies\netcore\Native.NETHostFxr.runtime
     <ClInclude Include="source\UISenatus.h" />
     <ClInclude Include="source\UIWindows.h" />
     <ClInclude Include="source\UsefulDef.h" />
+    <ClInclude Include="source\Utilities\CpuUsage.h" />
+    <ClInclude Include="source\Utilities\Debouncer.h" />
     <ClInclude Include="source\Utilities\Log\ErrorReport.h" />
     <ClInclude Include="source\Utilities\Log\muConsoleDebug.h" />
     <ClInclude Include="source\Utilities\Log\WindowsConsole.h" />

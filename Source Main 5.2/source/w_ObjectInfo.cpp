@@ -111,7 +111,7 @@ void OBJECT::Initialize()
     Kind = 0;
     Skill = 0;
     m_byNumCloth = 0;
-    m_byHurtByOneToOne = 0;
+    m_byHurtByDeathstab = 0;
     WeaponLevel = 0;
     DamageTime = 0;
     m_byBuildTime = 0;

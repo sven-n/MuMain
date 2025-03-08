@@ -1,4 +1,4 @@
-// NewUICommonMessageBox.cpp: implementation of the NewUICommonMessageBox class.
+ï»¿// NewUICommonMessageBox.cpp: implementation of the NewUICommonMessageBox class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "NewUICommonMessageBox.h"
@@ -40,7 +40,7 @@ extern BYTE m_AltarState[];
 extern BYTE Rank;
 extern int Exp;
 extern BYTE Ranking[5];
-extern BYTE HeroClass[5];
+extern CLASS_TYPE HeroClass[5];
 extern int HeroScore[5];
 extern wchar_t HeroName[5][MAX_ID_SIZE + 1];
 extern char	View_Suc_Or_Fail;
@@ -1043,7 +1043,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::Render3D()
     width = MSGBOX_3DITEM_WIDTH;
     height = MSGBOX_3DITEM_HEIGHT;
 
-    RenderItem3D(x, y, width, height, m_Item.Type, m_Item.Level, m_Item.Option1, m_Item.ExtOption, true);		// PickUp
+    RenderItem3D(x, y, width, height, m_Item.Type, m_Item.Level, m_Item.ExcellentFlags, m_Item.AncientDiscriminator, true);		// PickUp
 }
 
 bool SEASON3B::CNewUI3DItemCommonMsgBox::IsVisible() const
@@ -1832,7 +1832,7 @@ CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::OkBtnDown(class CNe
     if (pItem)
     {
         int iSrcIndex = g_pMyInventory->GetStandbyItemIndex();
-        SocketClient->ToGameServer()->SendChaosCastleEnterRequest((pItem->Level >> 3) & 15, iSrcIndex);
+        SocketClient->ToGameServer()->SendChaosCastleEnterRequest(pItem->Level, iSrcIndex);
     }
     else
     {
@@ -1927,7 +1927,7 @@ bool  SEASON3B::CLuckyItemMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    // ¾ÆÀÌÅÛ Á¦¸ñ
+    // ì•„ì´í…œ ì œëª©
     int				nTextIndex[10] = { 0, };
     eLUCKYITEMTYPE	eAct = g_pLuckyItemWnd->GetAct();
 
@@ -2589,9 +2589,9 @@ bool SEASON3B::CUseFruitMsgBoxLayout::SetLayout()
     pMsgBox->Set3DItem(pItem);
 
     wchar_t strName[50] = { 0, };
-    if (pItem->Type == ITEM_HELPER + 15)
+    if (pItem->Type == ITEM_FRUITS)
     {
-        switch ((pItem->Level >> 3) & 15)
+        switch (pItem->Level)
         {
         case 0:
             swprintf(strName, L"%s", GlobalText[168]);
@@ -2783,10 +2783,17 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
     }
     else
     {
-        iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-        int iItemPrice = pMsgBox->GetItemValue();
-        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
-        AddPersonalItemPrice(iSourceIndex, iItemPrice, g_IsPurchaseShop);
+        ITEM* pItem = g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex());
+        if (pItem)
+        {
+            iSourceIndex = g_pMyShopInventory->GetItemInventoryIndex(pItem);
+            if (iSourceIndex >= 0)
+            {
+                int iItemPrice = pMsgBox->GetItemValue();
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iItemPrice);
+                AddPersonalItemPrice(iSourceIndex, iItemPrice, g_IsPurchaseShop);
+            }
+        }
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2832,8 +2839,11 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
 
     if (pItem && pCha)
     {
-        int sourceIndex = g_pPurchaseShopInventory->GetSourceIndex();
-        SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
+        int sourceIndex = g_pPurchaseShopInventory->GetItemInventoryIndex(pItem);
+        if (sourceIndex >= 0)
+        {
+            SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
+        }
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -3305,7 +3315,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::CancelBtnDown(class CNewUIMessag
 
 CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    if (Hero->Helper.Type == MODEL_HELPER + 2 || Hero->Helper.Type == MODEL_HELPER + 3 || Hero->Helper.Type == MODEL_HELPER + 37)
+    if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Dont_Set_Temple));
     }

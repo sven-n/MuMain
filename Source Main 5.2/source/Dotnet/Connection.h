@@ -8,7 +8,21 @@
 #include "PacketFunctions_ConnectServer.h"
 #include "PacketFunctions_ClientToServer.h"
 
-inline const char_t* type_name_connection_manager = L"MUnique.Client.ManagedLibrary.ConnectionManager, MUnique.Client.ManagedLibrary";
+
+#ifdef _WIN32
+#include "windows.h"
+#define symLoad GetProcAddress
+#else
+#include "dlfcn.h"
+#define symLoad dlsym
+#endif
+
+#ifdef _WIN32
+inline const HINSTANCE munique_client_library_handle = LoadLibrary(L"MUnique.Client.Library.dll");
+#else
+inline const void* munique_client_library_handle = dlopen("MUnique.Client.Library.dll", RTLD_LAZY);
+#endif
+
 
 class Connection
 {

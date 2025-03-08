@@ -58,9 +58,9 @@ public:
     void HeroFallingDownInit();
     void FaillingEffect();
 
-    void SummonCreateMonster(int Type, int x, int y, float Angle, bool NextCheck = true, bool SummonAni = true, float AniSpeed = -1.0f);
-    bool MoveCreatedMonster(int Type, int x, int y, float Angle, int Speed);
-    bool ActionCreatedMonster(int Type, int Action, int Count, bool TankerAttack = false, bool NextCheck = false);
+    void SummonCreateMonster(EMonsterType Type, int x, int y, float Angle, bool NextCheck = true, bool SummonAni = true, float AniSpeed = -1.0f);
+    bool MoveCreatedMonster(int Index, int x, int y, float Angle, int Speed);
+    bool ActionCreatedMonster(int Index, int Action, int Count, bool TankerAttack = false, bool NextCheck = false);
 };
 
 #define g_Direction CDirection::GetSingleton()
