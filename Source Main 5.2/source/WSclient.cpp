@@ -6628,6 +6628,18 @@ void ReceiveAddPointExtended(const BYTE* ReceiveBuffer)
     CharacterMachine->CalculateAll();
 }
 
+void ReceiveSetPointsExtended(const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPPRECEIVE_SET_POINTS_EXTENDED)ReceiveBuffer;
+    CharacterAttribute->Strength = Data->Strength;
+    CharacterAttribute->Dexterity = Data->Dexterity;
+    CharacterAttribute->Vitality = Data->Vitality;
+    CharacterAttribute->Energy = Data->Energy;
+    CharacterAttribute->Charisma = Data->Charisma;
+
+    CharacterMachine->CalculateAll();
+}
+
 void ReceiveStatsExtended(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_STATS_EXTENDED)ReceiveBuffer;
@@ -13271,6 +13283,9 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             break;
         case 0x30:
             ReceiveOption(ReceiveBuffer);
+            break;
+        case 0x32:
+            ReceiveSetPointsExtended(ReceiveBuffer);
             break;
         case 0x40:
             ReceiveServerCommand(ReceiveBuffer);
