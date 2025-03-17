@@ -2238,7 +2238,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     }break;
     }
 
-    if (bySkillType == AT_SKILL_WHEEL || (AT_SKILL_TORNADO_SWORDA_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDA_UP + 4) || (AT_SKILL_TORNADO_SWORDB_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDB_UP + 4)
+    if (bySkillType == AT_SKILL_WHEEL || bySkillType == AT_SKILL_FURY_STRIKE || bySkillType == AT_SKILL_DEATHSTAB || (AT_SKILL_TORNADO_SWORDA_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDA_UP + 4) || (AT_SKILL_TORNADO_SWORDB_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDB_UP + 4)
         )
     {
         int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;

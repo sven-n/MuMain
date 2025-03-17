@@ -842,6 +842,16 @@ typedef struct {
 
 typedef struct {
     PBMSG_HEADER Header;
+    BYTE         SubCode;       // 3
+    DWORD        Strength;      // 4
+    DWORD        Dexterity;     // 8
+    DWORD		 Vitality;      // 12
+    DWORD		 Energy;        // 16
+    DWORD		 Charisma;      // 20
+} PRECEIVE_SET_POINTS_EXTENDED, * LPPRECEIVE_SET_POINTS_EXTENDED;
+
+typedef struct {
+    PBMSG_HEADER Header;
     BYTE         KeyH;
     BYTE         KeyL;
     BYTE         PositionX;
