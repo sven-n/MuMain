@@ -2039,7 +2039,8 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         || Skill == AT_SKILL_DEATHSTAB
         || (AT_SKILL_BLOW_UP <= Skill && Skill <= AT_SKILL_BLOW_UP + 4)
         || (Skill == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_DARK_HORSE_ITEM || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
-        || Skill == AT_SKILL_STRONG_PIER
+        || Skill == AT_SKILL_FORCE
+        || Skill == AT_SKILL_FORCE_WAVE
         || Skill == AT_SKILL_LONGPIER_ATTACK
         || (AT_SKILL_FIRE_BUST_UP <= Skill && Skill <= AT_SKILL_FIRE_BUST_UP + 4)
         || Skill == AT_SKILL_RUSH
@@ -2225,7 +2226,8 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             break;
         case AT_SKILL_GAOTIC:
             break;
-        case AT_SKILL_STRONG_PIER:
+        case AT_SKILL_FORCE:
+        case AT_SKILL_FORCE_WAVE:
         case AT_SKILL_FIRE_BUST_UP:
         case AT_SKILL_FIRE_BUST_UP + 1:
         case AT_SKILL_FIRE_BUST_UP + 2:
@@ -2253,7 +2255,9 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
     vec3_t Light;
     Vector(1.f, 1.f, 1.f, Light);
 
-    if (Skill != AT_SKILL_STRONG_PIER && Skill != AT_SKILL_LONGPIER_ATTACK
+    if (Skill != AT_SKILL_FORCE
+        && Skill != AT_SKILL_FORCE_WAVE
+        && Skill != AT_SKILL_LONGPIER_ATTACK
         && Skill != AT_SKILL_SPACE_SPLIT
         && Skill != AT_SKILL_DARK_SCREAM
         && !(AT_SKILL_FIRE_SCREAM_UP <= Skill && AT_SKILL_FIRE_SCREAM_UP + 4 >= Skill)
@@ -2296,7 +2300,8 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         BYTE positionY = (BYTE)(c->TargetPosition[1] / TERRAIN_SCALE);
 
         if ((gMapManager.InBloodCastle() == true)
-            || Skill == AT_SKILL_STRONG_PIER
+            || Skill == AT_SKILL_FORCE
+            || Skill == AT_SKILL_FORCE_WAVE
             || Skill == AT_SKILL_ONEFLASH
             || Skill == AT_SKILL_RUSH
             || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
@@ -2327,7 +2332,8 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             if (Skill != AT_SKILL_SPEAR
                 && Skill != AT_SKILL_DEATHSTAB
                 && Skill != AT_SKILL_RIDER
-                && Skill != AT_SKILL_STRONG_PIER
+                && Skill != AT_SKILL_FORCE
+                && Skill != AT_SKILL_FORCE_WAVE
                 && Skill != AT_SKILL_LONGPIER_ATTACK
                 && Skill != AT_SKILL_SPACE_SPLIT
                 && !(AT_SKILL_BLOW_UP <= Skill && Skill <= AT_SKILL_BLOW_UP + 4)
@@ -3301,7 +3307,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_SWORD3:
         case AT_SKILL_SWORD4:
         case AT_SKILL_SWORD5:
-        case AT_SKILL_STRONG_PIER:
+        case AT_SKILL_FORCE:
+        case AT_SKILL_FORCE_WAVE:
         case AT_SKILL_FIRE_BUST_UP:
         case AT_SKILL_FIRE_BUST_UP + 1:
         case AT_SKILL_FIRE_BUST_UP + 2:
@@ -7089,7 +7096,8 @@ int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
                         case AT_SKILL_BLOW_UP + 3:
                         case AT_SKILL_BLOW_UP + 4:
                         case AT_SKILL_DEATHSTAB:
-                        case AT_SKILL_STRONG_PIER:
+                        case AT_SKILL_FORCE:
+                        case AT_SKILL_FORCE_WAVE:
                         case AT_SKILL_FIRE_BUST_UP:
                         case AT_SKILL_FIRE_BUST_UP + 1:
                         case AT_SKILL_FIRE_BUST_UP + 2:

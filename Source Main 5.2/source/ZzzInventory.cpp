@@ -2001,11 +2001,11 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[745], iMana);
         break;
-    case AT_SKILL_STRONG_PIER:  //
+    case AT_SKILL_FORCE:  //
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[1210], iMana);
         break;
-    case AT_SKILL_LONG_SPEAR:
+    case AT_SKILL_FORCE_WAVE:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[1186], iMana);
         break;
@@ -6047,11 +6047,11 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
     iSkillMaxDamage += AttackDamageMax;
     gSkillManager.GetSkillInformation(CharacterAttribute->Skill[Type], 1, lpszName, &iMana, &iDistance, &iSkillMana);
 
-    if (CharacterAttribute->Skill[Type] == AT_SKILL_STRONG_PIER && Hero->Weapon[0].Type != -1)
+    if (CharacterAttribute->Skill[Type] == AT_SKILL_FORCE && Hero->Weapon[0].Type != -1)
     {
         for (int i = 0; i < CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].SpecialNum; i++)
         {
-            if (CharacterMachine->Equipment[0].Special[i] == AT_SKILL_LONG_SPEAR)
+            if (CharacterMachine->Equipment[0].Special[i] == AT_SKILL_FORCE_WAVE)
             {
                 swprintf(lpszName, L"%s", GlobalText[1200]);
                 break;
