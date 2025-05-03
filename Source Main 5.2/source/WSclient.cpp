@@ -3964,7 +3964,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             CreateTeleportBegin(so);
         break;
 
-    case AT_SKILL_STRONG_PIER:
+    case AT_SKILL_FORCE:
+    case AT_SKILL_FORCE_WAVE:
         if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA && sc->Helper.Type <= MODEL_DARK_HORSE_ITEM) && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_STRIKE);

@@ -2693,7 +2693,8 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             c->AttackTime = 15;
         }
         break;
-    case AT_SKILL_STRONG_PIER:
+    case AT_SKILL_FORCE:
+    case AT_SKILL_FORCE_WAVE:
         if (o->AnimationFrame >= 3.f && o->Type == MODEL_PLAYER && (o->CurrentAction == PLAYER_ATTACK_STRIKE || o->CurrentAction == PLAYER_ATTACK_RIDE_STRIKE
             || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE
             ))
@@ -4914,7 +4915,8 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                 CreateEffect(MODEL_MAGIC2, o->Position, Angle, o->Light);
                 PlayBuffer(SOUND_MAGIC);
                 break;
-            case AT_SKILL_STRONG_PIER:
+            case AT_SKILL_FORCE:
+            case AT_SKILL_FORCE_WAVE:
                 CreateEffect(MODEL_WAVES, o->Position, o->Angle, o->Light, 1);
                 CreateEffect(MODEL_WAVES, o->Position, o->Angle, o->Light, 1);
                 CreateEffect(MODEL_PIERCING2, o->Position, o->Angle, o->Light);
