@@ -191,13 +191,13 @@ void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to,
             Left += MODEL_ITEM;
     }
 
-    if (SKKey == AT_SKILL_PIERCING)
+    if (SKKey == AT_SKILL_PENETRATION || SKKey == AT_SKILL_PENETRATION_STR)
     {
         SubType = 2;
         PlayBuffer(SOUND_BOW01, o);
     }
     CurrentSkill = SKKey;
-    if (SKKey == AT_SKILL_PARALYZE)
+    if (SKKey == AT_SKILL_ICE_ARROW || SKKey == AT_SKILL_ICE_ARROW_STR)
     {
         PlayBuffer(SOUND_ICEARROW, o);
     }
@@ -249,7 +249,10 @@ void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to,
 
 void CreateArrows(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Skill, WORD SKKey)
 {
-    if (SKKey == AT_SKILL_PIERCING || SKKey == AT_SKILL_PARALYZE
+    if (SKKey == AT_SKILL_PENETRATION
+        || SKKey == AT_SKILL_PENETRATION_STR
+        || SKKey == AT_SKILL_ICE_ARROW
+        || SKKey == AT_SKILL_ICE_ARROW_STR
         || SKKey == AT_SKILL_DEEPIMPACT
         )
     {

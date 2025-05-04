@@ -44,18 +44,18 @@ namespace MUHelper
 		void Work();
 		int ActivatePet();
 		int Buff();
-		int BuffTarget(CHARACTER* pTargetChar, int iBuffSkill);
+		int BuffTarget(CHARACTER* pTargetChar, ActionSkillType iBuffSkill);
 		int RecoverHealth();
 		int Heal();
-		int HealSelf(int iHealingSkill);
+		int HealSelf(ActionSkillType iHealingSkill);
 		int DrainLife();
 		int ConsumePotion();
 		int Attack();
 		int RepairEquipments();
 		int Regroup();
-		int SelectAttackSkill();
-		int SimulateAttack(int iSkill);
-		int SimulateSkill(int iSkill, bool bTargetRequired, int iTarget);
+		ActionSkillType SelectAttackSkill();
+		int SimulateAttack(ActionSkillType iSkill);
+		int SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget);
 		int SimulateComboAttack();
 		int GetNearestTarget();
 		int GetFarthestAttackingTarget();
@@ -67,8 +67,8 @@ namespace MUHelper
 		int ObtainItem();
 		int SelectItemToObtain();
 		bool ShouldObtainItem(int iItemId);
-		int GetHealingSkill();
-		int GetDrainLifeSkill();
+		ActionSkillType GetHealingSkill();
+		ActionSkillType GetDrainLifeSkill();
 		bool HasAssignedBuffSkill();
 
 	private:
@@ -85,7 +85,7 @@ namespace MUHelper
 		int m_iCurrentBuffPartyIndex;
 		int m_iCurrentHealPartyIndex;
 		int m_iComboState;
-		int m_iCurrentSkill;
+		ActionSkillType m_iCurrentSkill;
 		int m_iHuntingDistance;
 		int m_iObtainingDistance;
 		int m_iLoopCounter;

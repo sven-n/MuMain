@@ -371,14 +371,17 @@ bool CNewUIPartyListWindow::SelectCharacterInPartyList(PARTY_t* pMember)
         int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
 
         if (Skill == AT_SKILL_HEALING
+            || Skill == AT_SKILL_HEALING_STR
             || Skill == AT_SKILL_DEFENSE
-            || (AT_SKILL_DEF_POWER_UP <= Skill && Skill <= AT_SKILL_DEF_POWER_UP + 4)
-            || (AT_SKILL_ATT_POWER_UP <= Skill && Skill <= AT_SKILL_ATT_POWER_UP + 4)
+            || Skill == AT_SKILL_DEFENSE_STR
+            || Skill == AT_SKILL_DEFENSE_MASTERY
             || Skill == AT_SKILL_ATTACK
-            || Skill == AT_SKILL_TELEPORT_B
-            || Skill == AT_SKILL_WIZARDDEFENSE
-            || (AT_SKILL_HEAL_UP <= Skill && Skill <= AT_SKILL_HEAL_UP + 4)
-            || (AT_SKILL_SOUL_UP <= Skill && Skill <= AT_SKILL_SOUL_UP + 4)
+            || Skill == AT_SKILL_ATTACK_STR
+            || Skill == AT_SKILL_ATTACK_MASTERY
+            || Skill == AT_SKILL_TELEPORT_ALLY
+            || Skill == AT_SKILL_SOUL_BARRIER
+            || Skill == AT_SKILL_SOUL_BARRIER_STR
+            || Skill == AT_SKILL_SOUL_BARRIER_PROFICIENCY
             || Skill == AT_SKILL_ALICE_THORNS
             || Skill == AT_SKILL_RECOVER
             )

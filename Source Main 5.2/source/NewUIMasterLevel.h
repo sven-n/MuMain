@@ -1,86 +1,169 @@
-// NewUIGuildInfoWindow.h: interface for the CNewUIGuildInfoWindow class.
-//
-//////////////////////////////////////////////////////////////////////
+#ifndef __NEW_UI_MASTER_SKILL_TREE_H__
+#define __NEW_UI_MASTER_SKILL_TREE_H__
 
 #pragma once
 
 #include "NewUIBase.h"
-#include "NewUIManager.h"
-//#include "NewUIButton.h"
-#include "NewUIMainFrameWindow.h"
-#include "NewUIChatLogWindow.h"
-#include "NewUIMyInventory.h"
+#include "NewUIButton.h"
+
+#define MAX_MASTER_SKILL_DATA 512
+
+#define MAX_MASTER_SKILL_CATEGORY 3
+
+class CSkillTreeInfo
+{
+public:
+	CSkillTreeInfo()
+	{
+		this->SkillPoint = 0;
+		this->SkillValue = 0.0f;
+		this->SkillNextValue = 0.0f;
+	};
+
+	~CSkillTreeInfo()
+	{
+	};
+
+	void SetSkillTreeInfo(BYTE point, float value, float nextvalue)
+	{
+		this->SkillPoint = point;
+		this->SkillValue = value;
+		this->SkillNextValue = nextvalue;
+	}
+
+	BYTE GetSkillPoint() { return this->SkillPoint; }
+	float GetSkillValue() { return this->SkillValue; }
+	float GetSkillNextValue() { return this->SkillNextValue; }
+private:
+	BYTE SkillPoint;
+	float SkillValue;
+	float SkillNextValue;
+};
+
+struct _MASTER_SKILLTREE_DATA
+{
+	WORD Index;
+	WORD ClassCode;
+	BYTE Group;
+	BYTE RequiredPoints;
+	BYTE MaxLevel;
+	BYTE ArrowDirection;
+	ActionSkillType RequireSkill[2];
+	ActionSkillType Skill;
+	float DefValue;
+};
+
+struct _MASTER_SKILL_TOOLTIP
+{
+	ActionSkillType SkillNumber;
+	WORD ClassCode;
+	wchar_t Info1[64];
+	wchar_t Info2[256];
+	wchar_t Info3[32];
+	wchar_t Info4[64];
+	wchar_t Info5[64];
+	wchar_t Info6[64];
+	wchar_t Info7[64];
+};
+
+struct _MASTER_SKILL_TOOLTIP_FILE
+{
+	_MASTER_SKILL_TOOLTIP_FILE()
+	{
+		sizeof(_MASTER_SKILL_TOOLTIP_FILE);
+	}
+	int SkillNumber;
+	WORD ClassCode;
+	char Info1[64];
+	char Info2[256];
+	char Info3[32];
+	char Info4[64];
+	char Info5[64];
+	char Info6[64];
+	char Info7[64];
+};
 
 namespace SEASON3B
 {
-    class CNewUIMasterLevel : public CNewUIObj
-    {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_MASTER_SCROLLBAR_ON = CNewUIChatLogWindow::IMAGE_SCROLLBAR_ON,
-            IMAGE_MASTER_SCROLLBAR_OFF = CNewUIChatLogWindow::IMAGE_SCROLLBAR_OFF,
-            IMAGE_MASTER_SKILL_ICON = CNewUISkillList::IMAGE_SKILL2,	// newui_skill2.jpg
-            IMAGE_MASTER_EXIT = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,		//. newui_exit_00.tga
-            IMAGE_MASTER_INTERFACE = BITMAP_INTERFACE_MASTER_BEGIN,
-        };
+	//size = 404
+	class CNewUIMasterLevel : public CNewUIObj
+	{
+	public:
+		enum IMAGE_LIST
+		{
+			IMAGE_MASTER_INTERFACE = BITMAP_INTERFACE_MASTER_BEGIN,
+		};
 
-        enum MASTER_DATA
-        {
-            SKILL_ICON_DATA_WDITH = 4,
-            SKILL_ICON_DATA_HEIGHT = 8,
-            SKILL_ICON_WIDTH = 20,
-            SKILL_ICON_HEIGHT = 28,
-            SKILL_ICON_STARTX1 = 75,
-            SKILL_ICON_STARTY1 = 75,
-        };
+		CNewUIMasterLevel();
+		~CNewUIMasterLevel();
+		void ClearSkillTreeInfo();
+		BYTE GetConsumePoint();
+		int GetCurSkillID();
+		bool Create(CNewUIManager* pNewUIMng);
+		void Release();
+		void SetPos();
+		void OpenMasterSkillTreeData(wchar_t* path);
+		void OpenMasterSkillTooltip(wchar_t* path);
+		void InitMasterSkillPoint();
+		void SetMasterType(CLASS_TYPE Class);
+		void SetMasterSkillTreeData();
+		void SetMasterSkillToolTipData();
+		bool SetMasterSkillTreeInfo(int index, int SkillPoint, float value, float nextvalue);
+		int SetDivideString(wchar_t* text, int isItemTollTip, int TextNum, int iTextColor, int iTextBold, bool isPercent);
+		bool Render();
+		bool Update();
+		bool UpdateMouseEvent();
+		bool UpdateKeyEvent();
+		float GetLayerDepth();
+		void LoadImages();
+		void UnloadImages();
+		void RenderText();
+		void RenderIcon();
+		void RenderToolTip();
+		bool CheckMouse(int posx, int posy);
+		bool CheckBtn();
+		
+		bool CheckSkillPoint(WORD mLevelUpPoint, const _MASTER_SKILLTREE_DATA skillData, WORD skillPoint);
+		bool CheckParentSkill(ActionSkillType reqSkill1, ActionSkillType reqSkill2);
+		bool CheckRankPoint(BYTE group, BYTE rank, BYTE skillPoint);
+		bool CheckBeforeSkill(ActionSkillType skill, BYTE skillPoint);
+		int GetBeforeSkillID(int index);
+		int GetBaseSkillID(int index);
+		void SkillUpgrade(int index, char point, float value, float nextvalue);
+		//bool IsLearnSkill(int index);
+		float GetSkillValue(ActionSkillType index);
+		//float GetSkillCumulativeValue(int index, BYTE damage);
+		//BYTE GetSkillLevel(int index);
+		void RegisterSkillInCharacterAttribute(ActionSkillType index);
+		void SetConsumePoint(BYTE ConsumePoint);
+		void SetCurSkillID(int index);
+		void ClearSkillTreeData();
+		void ClearSkillTooltipData();
+	private:
+		int PosX;
+		int PosY;
+		int width;
+		int height;
 
-        enum EVENT_STATE
-        {
-            EVENT_NONE = 0,
-            EVENT_SCROLL_BTN_DOWN,
-        };
+		DWORD ButtonX[MAX_MASTER_SKILL_CATEGORY];
+		DWORD ButtonY[MAX_MASTER_SKILL_CATEGORY];
+		CNewUIButton m_CloseBT;
+		int CategoryPoint[MAX_MASTER_SKILL_CATEGORY];
+		int skillPoint[MAX_MASTER_SKILL_CATEGORY][10];
+		BYTE ConsumePoint;
+		int CurSkillID;
+		DWORD classCode;
+		POINT categoryPos[MAX_MASTER_SKILL_CATEGORY];
+		DWORD CategoryTextIndex;
+		DWORD ClassNameTextIndex;
+		std::map<ActionSkillType, CSkillTreeInfo> map_skilltreeinfo;
+		std::map<ActionSkillType, _MASTER_SKILL_TOOLTIP> map_masterSkillToolTip;
+	    std::map<BYTE, _MASTER_SKILLTREE_DATA> map_masterData;
+		
+		CNewUIManager* m_pNewUIMng;
 
-    private:
-        //		MASTER_LEVEL_DATA		m_MasterLevel[MAX_MASTER];
-        CNewUIManager* m_pNewUIMng;
-        POINT					m_Pos;
-        POINT					m_Width;
-        EVENT_STATE				m_EventState[4];
-        int						m_Loc[4];
-        int						m_BackUp;
-        CNewUIButton				m_BtnExit;
-
-    public:
-        CNewUIMasterLevel();
-        virtual ~CNewUIMasterLevel();
-
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
-        void Release();
-
-        void SetPos(int x, int y);
-
-        bool UpdateMouseEvent();
-        bool UpdateKeyEvent();
-        bool Update();
-        bool Render();
-        //		bool Render(int Posx,int Posy,int nPosx,int nPosy,float su, float sv,int Index);
-
-        float GetLayerDepth();	//. 8.1f
-
-        void OpenningProcess();
-        void ClosingProcess();
-        void OpenMasterLevel(const wchar_t* filename);
-        CNewUIButton m_BtnToolTip;	// ≈¯∆¡¡§∫∏....
-
-    private:
-        void LoadImages();
-        void UnloadImages();
-        void Render_Text();
-        void Render_Icon();
-        void Render_Scroll();
-        bool Check_Mouse(int mx, int my);
-        bool Check_Btn();
-        //		bool SEASON3B::CNewUIMasterLevel::UpdateMouseEvent();
-    };
+		bool CheckAttributeArea(const _MASTER_SKILLTREE_DATA skillData);
+	};
 }
+
+#endif

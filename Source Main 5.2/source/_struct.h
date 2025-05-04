@@ -663,7 +663,7 @@ typedef struct
 typedef struct
 {
     bool m_bMagic;
-    int m_iSkill;
+    int m_iSkill; // When m_bMagic is true, it's the skill index, otherwise it's already the ActionSkillType. TODO: check all usages, refactor. This could be buggy as hell.
     int m_iTarget;
 } MovementSkill;
 //interface end

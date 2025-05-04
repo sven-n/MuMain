@@ -1947,7 +1947,7 @@ void SetCharacterPos(CHARACTER* c, BYTE posX, BYTE posY, vec3_t position)
     SendCharacterMove(c->Key, c->Object.Angle[2], 1, PathX, PathY, PathX[0], PathY[0]);
 }
 
-bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, int iSkill)
+bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, ActionSkillType iSkill)
 {
     if (c == NULL)	return false;
     if (o == NULL)	return false;
@@ -1964,7 +1964,14 @@ bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, int iSkill)
     g_MovementSkill.m_iTarget = SelectedCharacter;
     float Distance = gSkillManager.GetSkillDistance(iSkill, c) * 1.2f;
 
-    if ((gMapManager.InBloodCastle() == true) && (iSkill >= AT_SKILL_SWORD1 && iSkill <= AT_SKILL_SWORD5))
+    if ((gMapManager.InBloodCastle() == true)
+        && ((iSkill >= AT_SKILL_FALLING_SLASH && iSkill <= AT_SKILL_SLASH)
+            || iSkill == AT_SKILL_FALLING_SLASH_STR
+            || iSkill == AT_SKILL_LUNGE_STR
+            || iSkill == AT_SKILL_CYCLONE_STR
+            || iSkill == AT_SKILL_CYCLONE_STR_MG
+            || iSkill == AT_SKILL_SLASH_STR
+            ))
     {
         Distance = 1.8f;
     }
@@ -2032,43 +2039,45 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
     {
         if (o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2) return false;
     }
-    int Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
+    auto Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
     if (Skill == AT_SKILL_RIDER
-        || Skill == AT_SKILL_REDUCEDEFENSE
-        || Skill == AT_SKILL_WHEEL
+        || Skill == AT_SKILL_FIRE_SLASH
+        || Skill == AT_SKILL_FIRE_SLASH_STR
+        || Skill == AT_SKILL_TWISTING_SLASH
+        || Skill == AT_SKILL_TWISTING_SLASH_STR
+        || Skill == AT_SKILL_TWISTING_SLASH_STR_MG
+        || Skill == AT_SKILL_TWISTING_SLASH_MASTERY
         || Skill == AT_SKILL_DEATHSTAB
-        || (AT_SKILL_BLOW_UP <= Skill && Skill <= AT_SKILL_BLOW_UP + 4)
-        || (Skill == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_DARK_HORSE_ITEM || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
+        || Skill == AT_SKILL_DEATHSTAB_STR
+        || (Skill == AT_SKILL_IMPALE && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_DARK_HORSE_ITEM || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
         || Skill == AT_SKILL_FORCE
         || Skill == AT_SKILL_FORCE_WAVE
-        || Skill == AT_SKILL_LONGPIER_ATTACK
-        || (AT_SKILL_FIRE_BUST_UP <= Skill && Skill <= AT_SKILL_FIRE_BUST_UP + 4)
+        || Skill == AT_SKILL_FORCE_WAVE_STR
+        || Skill == AT_SKILL_FIREBURST
+        || Skill == AT_SKILL_FIREBURST_STR
+        || Skill == AT_SKILL_FIREBURST_MASTERY
         || Skill == AT_SKILL_RUSH
-        || Skill == AT_SKILL_ONEFLASH
+        || Skill == AT_SKILL_SPIRAL_SLASH
         || Skill == AT_SKILL_SPACE_SPLIT
         )
     {
         switch (Skill)
         {
-        case AT_SKILL_SPEAR:
+        case AT_SKILL_IMPALE:
             if (!(o->Type == MODEL_PLAYER && Hero->Weapon[0].Type != -1 &&
                 (Hero->Weapon[0].Type >= MODEL_SPEAR && Hero->Weapon[0].Type < MODEL_SPEAR + MAX_ITEM_INDEX)))
             {
                 return false;
             }
             break;
-        case AT_SKILL_BLOW_UP:
-        case AT_SKILL_BLOW_UP + 1:
-        case AT_SKILL_BLOW_UP + 2:
-        case AT_SKILL_BLOW_UP + 3:
-        case AT_SKILL_BLOW_UP + 4:
         case AT_SKILL_DEATHSTAB:
+        case AT_SKILL_DEATHSTAB_STR:
             if (!(Hero->Weapon[0].Type != -1 && (Hero->Weapon[0].Type < MODEL_STAFF || Hero->Weapon[0].Type >= MODEL_STAFF + MAX_ITEM_INDEX)))
             {
                 return false;
             }
             break;
-        case AT_SKILL_ONEFLASH:
+        case AT_SKILL_SPIRAL_SLASH:
             if (Hero->Weapon[0].Type < MODEL_SWORD || Hero->Weapon[0].Type >= MODEL_SWORD + MAX_ITEM_INDEX)
             {
                 return false;
@@ -2134,21 +2143,26 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
                 SendRequestMagic(p->Special[i], Hero->Key);
                 Success = true;
                 break;
-            case AT_SKILL_SWORD1:
-            case AT_SKILL_SWORD2:
-            case AT_SKILL_SWORD3:
-            case AT_SKILL_SWORD4:
-            case AT_SKILL_SWORD5:
+            case AT_SKILL_FALLING_SLASH:
+            case AT_SKILL_FALLING_SLASH_STR:
+            case AT_SKILL_LUNGE:
+            case AT_SKILL_LUNGE_STR:
+            case AT_SKILL_UPPERCUT:
+            case AT_SKILL_CYCLONE:
+            case AT_SKILL_CYCLONE_STR:
+            case AT_SKILL_CYCLONE_STR_MG:
+            case AT_SKILL_SLASH:
+            case AT_SKILL_SLASH_STR:
             case AT_SKILL_RIDER:
                 if (CheckAttack())
-                    Success = CastWarriorSkill(c, o, p, p->Special[i]);
+                    Success = CastWarriorSkill(c, o, p, static_cast<ActionSkillType>(p->Special[i]));
                 break;
             }
         }
     }
 
-    if (CharacterAttribute->Skill[Hero->CurrentSkill] == AT_SKILL_DARK_SCREAM
-        || (AT_SKILL_FIRE_SCREAM_UP <= CharacterAttribute->Skill[Hero->CurrentSkill] && AT_SKILL_FIRE_SCREAM_UP + 4 >= CharacterAttribute->Skill[Hero->CurrentSkill])
+    if (CharacterAttribute->Skill[Hero->CurrentSkill] == AT_SKILL_FIRE_SCREAM
+        || CharacterAttribute->Skill[Hero->CurrentSkill] == AT_SKILL_FIRE_SCREAM_STR
         || Skill == AT_SKILL_GAOTIC
         )
     {
@@ -2183,7 +2197,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
 
 void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 {
-    int Skill = g_MovementSkill.m_bMagic ? CharacterAttribute->Skill[g_MovementSkill.m_iSkill] : g_MovementSkill.m_iSkill;
+    auto Skill = g_MovementSkill.m_bMagic ? CharacterAttribute->Skill[g_MovementSkill.m_iSkill] : static_cast<ActionSkillType>(g_MovementSkill.m_iSkill);
     LetHeroStop();
     c->Movement = false;
     if (o->Type == MODEL_PLAYER)
@@ -2192,22 +2206,22 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 
         switch (Skill)
         {
-        case AT_SKILL_SPEAR:
+        case AT_SKILL_IMPALE:
             if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
                 SetAction(o, PLAYER_FENRIR_ATTACK_SPEAR);
             else
                 SetAction(o, PLAYER_ATTACK_SKILL_SPEAR);
             break;
-        case AT_SKILL_BLOW_UP:
-        case AT_SKILL_BLOW_UP + 1:
-        case AT_SKILL_BLOW_UP + 2:
-        case AT_SKILL_BLOW_UP + 3:
-        case AT_SKILL_BLOW_UP + 4:
         case AT_SKILL_DEATHSTAB:
+        case AT_SKILL_DEATHSTAB_STR:
             SetAction(o, PLAYER_ATTACK_DEATHSTAB);
             break;
-        case AT_SKILL_WHEEL:
-        case AT_SKILL_REDUCEDEFENSE:
+        case AT_SKILL_TWISTING_SLASH:
+        case AT_SKILL_TWISTING_SLASH_STR:
+        case AT_SKILL_TWISTING_SLASH_STR_MG:
+        case AT_SKILL_TWISTING_SLASH_MASTERY:
+        case AT_SKILL_FIRE_SLASH:
+        case AT_SKILL_FIRE_SLASH_STR:
             SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
             break;
         case AT_SKILL_RIDER:
@@ -2217,23 +2231,17 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             else
                 SetAction(o, PLAYER_SKILL_RIDER);
             break;
-        case AT_SKILL_FIRE_SCREAM_UP:
-        case AT_SKILL_FIRE_SCREAM_UP + 1:
-        case AT_SKILL_FIRE_SCREAM_UP + 2:
-        case AT_SKILL_FIRE_SCREAM_UP + 3:
-        case AT_SKILL_FIRE_SCREAM_UP + 4:
-        case AT_SKILL_DARK_SCREAM:
+        case AT_SKILL_FIRE_SCREAM:
+        case AT_SKILL_FIRE_SCREAM_STR:
             break;
         case AT_SKILL_GAOTIC:
             break;
         case AT_SKILL_FORCE:
         case AT_SKILL_FORCE_WAVE:
-        case AT_SKILL_FIRE_BUST_UP:
-        case AT_SKILL_FIRE_BUST_UP + 1:
-        case AT_SKILL_FIRE_BUST_UP + 2:
-        case AT_SKILL_FIRE_BUST_UP + 3:
-        case AT_SKILL_FIRE_BUST_UP + 4:
-        case AT_SKILL_LONGPIER_ATTACK:
+        case AT_SKILL_FORCE_WAVE_STR:
+        case AT_SKILL_FIREBURST:
+        case AT_SKILL_FIREBURST_STR:
+        case AT_SKILL_FIREBURST_MASTERY:
         case AT_SKILL_SPACE_SPLIT:
             break;
         case AT_SKILL_RUSH:
@@ -2241,9 +2249,14 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             break;
         default:
             if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
+            {
                 SetAction(o, PLAYER_FENRIR_ATTACK_MAGIC);
+            }
             else
-                SetAction(o, PLAYER_ATTACK_SKILL_SWORD1 + g_MovementSkill.m_iSkill - AT_SKILL_SWORD1);
+            {
+                auto baseSkill = gSkillManager.MasterSkillToBaseSkillIndex(Skill);
+                SetAction(o, PLAYER_ATTACK_SKILL_SWORD1 + baseSkill - AT_SKILL_FALLING_SLASH);
+            }
             break;
         }
     }
@@ -2257,13 +2270,20 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 
     if (Skill != AT_SKILL_FORCE
         && Skill != AT_SKILL_FORCE_WAVE
-        && Skill != AT_SKILL_LONGPIER_ATTACK
+        && Skill != AT_SKILL_FORCE_WAVE_STR
+        && Skill != AT_SKILL_FIREBURST
+        && Skill != AT_SKILL_FIREBURST_STR
+        && Skill != AT_SKILL_FIREBURST_MASTERY
         && Skill != AT_SKILL_SPACE_SPLIT
-        && Skill != AT_SKILL_DARK_SCREAM
-        && !(AT_SKILL_FIRE_SCREAM_UP <= Skill && AT_SKILL_FIRE_SCREAM_UP + 4 >= Skill)
-        && Skill != AT_SKILL_THRUST
-        && Skill != AT_SKILL_STAMP
-        && !(AT_SKILL_FIRE_BUST_UP <= Skill && AT_SKILL_FIRE_BUST_UP + 4 >= Skill))
+        && Skill != AT_SKILL_FIRE_SCREAM
+        && Skill != AT_SKILL_FIRE_SCREAM_STR
+        && Skill != AT_SKILL_KILLING_BLOW
+        && Skill != AT_SKILL_KILLING_BLOW_STR
+        && Skill != AT_SKILL_KILLING_BLOW_MASTERY
+        && Skill != AT_SKILL_BEAST_UPPERCUT
+        && Skill != AT_SKILL_BEAST_UPPERCUT_STR
+        && Skill != AT_SKILL_BEAST_UPPERCUT_MASTERY
+        )
     {
         CreateParticle(BITMAP_SHINY + 2, o->Position, o->Angle, Light, 0, 0.f, o);
         PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2));
@@ -2274,8 +2294,13 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 
     if (Skill != AT_SKILL_GAOTIC)
     {
-        if (Skill == AT_SKILL_WHEEL
-            || Skill == AT_SKILL_REDUCEDEFENSE)
+        if (Skill == AT_SKILL_TWISTING_SLASH
+            || Skill == AT_SKILL_TWISTING_SLASH_STR
+            || Skill == AT_SKILL_TWISTING_SLASH_STR_MG
+            || Skill == AT_SKILL_TWISTING_SLASH_MASTERY
+            || Skill == AT_SKILL_FIRE_SLASH
+            || Skill == AT_SKILL_FIRE_SLASH_STR
+            )
         {
             WORD TKey = 0xffff;
             if (g_MovementSkill.m_iTarget != -1)
@@ -2292,8 +2317,8 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
     }
 
     if (((!g_isCharacterBuff(o, eDeBuff_Harden)) && c->Helper.Type != MODEL_DARK_HORSE_ITEM)
-        && Skill != AT_SKILL_DARK_SCREAM
-        && !(AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP + 4)
+        && Skill != AT_SKILL_FIRE_SCREAM
+        && Skill != AT_SKILL_FIRE_SCREAM_STR
         )
     {
         BYTE positionX = (BYTE)(c->TargetPosition[0] / TERRAIN_SCALE);
@@ -2302,7 +2327,8 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         if ((gMapManager.InBloodCastle() == true)
             || Skill == AT_SKILL_FORCE
             || Skill == AT_SKILL_FORCE_WAVE
-            || Skill == AT_SKILL_ONEFLASH
+            || Skill == AT_SKILL_FORCE_WAVE_STR
+            || Skill == AT_SKILL_SPIRAL_SLASH
             || Skill == AT_SKILL_RUSH
             || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
             || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_GUARDIAN_STATUE
@@ -2329,16 +2355,17 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 
         if ((TerrainWall[TargetIndex] & TW_NOMOVE) != TW_NOMOVE && (TerrainWall[TargetIndex] & TW_NOGROUND) != TW_NOGROUND)
         {
-            if (Skill != AT_SKILL_SPEAR
+            if (Skill != AT_SKILL_IMPALE
                 && Skill != AT_SKILL_DEATHSTAB
+                && Skill != AT_SKILL_DEATHSTAB_STR
                 && Skill != AT_SKILL_RIDER
                 && Skill != AT_SKILL_FORCE
                 && Skill != AT_SKILL_FORCE_WAVE
-                && Skill != AT_SKILL_LONGPIER_ATTACK
+                && Skill != AT_SKILL_FORCE_WAVE_STR
+                && Skill != AT_SKILL_FIREBURST
+                && Skill != AT_SKILL_FIREBURST_STR
+                && Skill != AT_SKILL_FIREBURST_MASTERY
                 && Skill != AT_SKILL_SPACE_SPLIT
-                && !(AT_SKILL_BLOW_UP <= Skill && Skill <= AT_SKILL_BLOW_UP + 4)
-                && !(AT_SKILL_FIRE_BUST_UP <= Skill && Skill <= AT_SKILL_FIRE_BUST_UP + 4)
-
                 )
             {
                 SocketClient->ToGameServer()->SendInstantMoveRequest(positionX, positionY);
@@ -2352,17 +2379,13 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
 
 void UseSkillWizard(CHARACTER* c, OBJECT* o)
 {
-    int Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
+    auto Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
 
     switch (Skill)
     {
-    case AT_SKILL_SPEAR:
-    case AT_SKILL_BLOW_UP:
-    case AT_SKILL_BLOW_UP + 1:
-    case AT_SKILL_BLOW_UP + 2:
-    case AT_SKILL_BLOW_UP + 3:
-    case AT_SKILL_BLOW_UP + 4:
+    case AT_SKILL_IMPALE:
     case AT_SKILL_DEATHSTAB:
+    case AT_SKILL_DEATHSTAB_STR:
         return;
     }
 
@@ -2377,11 +2400,16 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     switch (Skill)
     {
     case AT_SKILL_POISON:
+    case AT_SKILL_POISON_STR:
     case AT_SKILL_METEO:
-    case AT_SKILL_THUNDER:
+    case AT_SKILL_LIGHTNING:
+    case AT_SKILL_LIGHTNING_STR:
+    case AT_SKILL_LIGHTNING_STR_MG:
     case AT_SKILL_ENERGYBALL:
     case AT_SKILL_POWERWAVE:
-    case AT_SKILL_SLOW:
+    case AT_SKILL_ICE:
+    case AT_SKILL_ICE_STR:
+    case AT_SKILL_ICE_STR_MG:
     case AT_SKILL_FIREBALL:
     case AT_SKILL_JAVELIN:
         SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
@@ -2394,12 +2422,9 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
         SetAttackSpeed();
         LetHeroStop();
         break;
-    case AT_SKILL_BLAST_UP:
-    case AT_SKILL_BLAST_UP + 1:
-    case AT_SKILL_BLAST_UP + 2:
-    case AT_SKILL_BLAST_UP + 3:
-    case AT_SKILL_BLAST_UP + 4:
     case AT_SKILL_BLAST:
+    case AT_SKILL_BLAST_STR:
+    case AT_SKILL_BLAST_STR_MG:
     {
         WORD TKey = 0xffff;
         if (g_MovementSkill.m_iTarget != -1)
@@ -2425,30 +2450,20 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
     switch (Skill)
     {
-    case AT_SKILL_HEAL_UP:
-    case AT_SKILL_HEAL_UP + 1:
-    case AT_SKILL_HEAL_UP + 2:
-    case AT_SKILL_HEAL_UP + 3:
-    case AT_SKILL_HEAL_UP + 4:
     case AT_SKILL_HEALING:
-    case AT_SKILL_ATT_POWER_UP:
-    case AT_SKILL_ATT_POWER_UP + 1:
-    case AT_SKILL_ATT_POWER_UP + 2:
-    case AT_SKILL_ATT_POWER_UP + 3:
-    case AT_SKILL_ATT_POWER_UP + 4:
+    case AT_SKILL_HEALING_STR:
     case AT_SKILL_ATTACK:
+    case AT_SKILL_ATTACK_STR:
     case AT_SKILL_RECOVER:
-    case AT_SKILL_DEF_POWER_UP:
-    case AT_SKILL_DEF_POWER_UP + 1:
-    case AT_SKILL_DEF_POWER_UP + 2:
-    case AT_SKILL_DEF_POWER_UP + 3:
-    case AT_SKILL_DEF_POWER_UP + 4:
     case AT_SKILL_DEFENSE:
+    case AT_SKILL_DEFENSE_STR:
+    case AT_SKILL_DEFENSE_MASTERY:
         SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
         SetPlayerMagic(c);
         break;
 
-    case AT_SKILL_PARALYZE:
+    case AT_SKILL_ICE_ARROW:
+    case AT_SKILL_ICE_ARROW_STR:
     {
         WORD Dexterity;
         const WORD notDexterity = 646;
@@ -2481,17 +2496,12 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
 
     switch (iSkill)
     {
-    case AT_SKILL_ALICE_DRAINLIFE_UP:
-    case AT_SKILL_ALICE_DRAINLIFE_UP + 1:
-    case AT_SKILL_ALICE_DRAINLIFE_UP + 2:
-    case AT_SKILL_ALICE_DRAINLIFE_UP + 3:
-    case AT_SKILL_ALICE_DRAINLIFE_UP + 4:
     case AT_SKILL_ALICE_DRAINLIFE:
+    case AT_SKILL_ALICE_DRAINLIFE_STR:
     case AT_SKILL_ALICE_LIGHTNINGORB:
     {
         LetHeroStop();
-        if (iSkill == AT_SKILL_ALICE_DRAINLIFE
-            || (AT_SKILL_ALICE_DRAINLIFE_UP <= iSkill && iSkill <= AT_SKILL_ALICE_DRAINLIFE_UP + 4))
+        if (iSkill == AT_SKILL_ALICE_DRAINLIFE || iSkill == AT_SKILL_ALICE_DRAINLIFE_STR)
         {
             switch (pCha->Helper.Type)
             {
@@ -2533,12 +2543,8 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
         SendRequestMagicContinue(iSkill, (int)(pCha->TargetPosition[0] / 100.f), (int)(pCha->TargetPosition[1] / 100.f), (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, 0, wTargetKey, 0);
     }
     break;
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 1:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 2:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 3:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 4:
     case AT_SKILL_ALICE_CHAINLIGHTNING:
+    case AT_SKILL_ALICE_CHAINLIGHTNING_STR:
     {
         LetHeroStop();
 
@@ -2567,12 +2573,8 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
     }
     break;
     case AT_SKILL_ALICE_SLEEP:
+    case AT_SKILL_ALICE_SLEEP_STR:
     case AT_SKILL_ALICE_BLIND:
-    case AT_SKILL_ALICE_SLEEP_UP:
-    case AT_SKILL_ALICE_SLEEP_UP + 1:
-    case AT_SKILL_ALICE_SLEEP_UP + 2:
-    case AT_SKILL_ALICE_SLEEP_UP + 3:
-    case AT_SKILL_ALICE_SLEEP_UP + 4:
     case AT_SKILL_ALICE_THORNS:
     {
         LetHeroStop();
@@ -2585,6 +2587,7 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
     }
     break;
     case AT_SKILL_ALICE_BERSERKER:
+    case AT_SKILL_ALICE_BERSERKER_STR:
         LetHeroStop();
         switch (pCha->Helper.Type)
         {
@@ -2670,7 +2673,9 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
 
     switch (iSkill)
     {
-    case AT_SKILL_THRUST:
+    case AT_SKILL_KILLING_BLOW:
+    case AT_SKILL_KILLING_BLOW_STR:
+    case AT_SKILL_KILLING_BLOW_MASTERY:
     case AT_SKILL_OCCUPY:
     {
         WORD wTargetKey = 0;
@@ -2727,7 +2732,9 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         g_CMonkSystem.RageCreateEffect(pObj, iSkill);
     }
     break;
-    case AT_SKILL_STAMP:
+    case AT_SKILL_BEAST_UPPERCUT:
+    case AT_SKILL_BEAST_UPPERCUT_STR:
+    case AT_SKILL_BEAST_UPPERCUT_MASTERY:
     {
         WORD wTargetKey = 0;
         if (g_MovementSkill.m_iTarget != -1)
@@ -2740,7 +2747,8 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         g_CMonkSystem.InitConsecutiveState(3.0f, 7.0f);
     }
     break;
-    case AT_SKILL_GIANTSWING:
+    case AT_SKILL_CHAIN_DRIVE:
+    case AT_SKILL_CHAIN_DRIVE_STR:
     {
         WORD wTargetKey = 0;
         if (g_MovementSkill.m_iTarget != -1)
@@ -2771,6 +2779,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     }
     break;
     case AT_SKILL_DARKSIDE:
+    case AT_SKILL_DARKSIDE_STR:
     {
         WORD wTargetKey = 0;
         if (g_MovementSkill.m_iTarget != -1)
@@ -2785,7 +2794,8 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         g_CMonkSystem.RageCreateEffect(pObj, iSkill);
     }
     break;
-    case AT_SKILL_DRAGON_LOWER:
+    case AT_SKILL_DRAGON_ROAR:
+    case AT_SKILL_DRAGON_ROAR_STR:
     {
         BYTE angle = (BYTE)((((pObj->Angle[2] + 180.f) / 360.f) * 255.f));
         WORD TKey = 0xffff;
@@ -2802,7 +2812,10 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     break;
     case AT_SKILL_ATT_UP_OURFORCES:
     case AT_SKILL_HP_UP_OURFORCES:
+    case AT_SKILL_HP_UP_OURFORCES_STR:
     case AT_SKILL_DEF_UP_OURFORCES:
+    case AT_SKILL_DEF_UP_OURFORCES_STR:
+    case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
     {
         SendRequestMagic(iSkill, HeroKey);
         if (rand_fps_check(2))
@@ -2887,11 +2900,17 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
     {
         switch (nSkill)
         {
-        case AT_SKILL_THRUST:
-        case AT_SKILL_STAMP:
-        case AT_SKILL_GIANTSWING:
+        case AT_SKILL_KILLING_BLOW:
+        case AT_SKILL_KILLING_BLOW_STR:
+        case AT_SKILL_KILLING_BLOW_MASTERY:
+        case AT_SKILL_BEAST_UPPERCUT:
+        case AT_SKILL_BEAST_UPPERCUT_STR:
+        case AT_SKILL_BEAST_UPPERCUT_MASTERY:
+        case AT_SKILL_CHAIN_DRIVE:
+        case AT_SKILL_CHAIN_DRIVE_STR:
         case AT_SKILL_DRAGON_KICK:
-        case AT_SKILL_DRAGON_LOWER:
+        case AT_SKILL_DRAGON_ROAR:
+        case AT_SKILL_DRAGON_ROAR_STR:
         case AT_SKILL_OCCUPY:
         case AT_SKILL_PHOENIX_SHOT:
         {
@@ -2929,11 +2948,15 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
         }
         break;
         case AT_SKILL_DARKSIDE:
+        case AT_SKILL_DARKSIDE_STR:
             UseSkillRagefighter(pCha, pObj);
             break;
         case AT_SKILL_ATT_UP_OURFORCES:
         case AT_SKILL_HP_UP_OURFORCES:
+        case AT_SKILL_HP_UP_OURFORCES_STR:
         case AT_SKILL_DEF_UP_OURFORCES:
+        case AT_SKILL_DEF_UP_OURFORCES_STR:
+        case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
             UseSkillRagefighter(pCha, pObj);
             break;
         case AT_SKILL_PLASMA_STORM_FENRIR:
@@ -2991,7 +3014,7 @@ bool UseSkillRagePosition(CHARACTER* pCha)
         if (pObj->CurrentAction == PLAYER_SKILL_STAMP && pObj->AnimationFrame >= 2.0f)
         {
             pObj->m_sTargetIndex = g_MovementSkill.m_iTarget;
-            g_CMonkSystem.RageCreateEffect(pObj, AT_SKILL_STAMP);
+            g_CMonkSystem.RageCreateEffect(pObj, AT_SKILL_BEAST_UPPERCUT);
         }
     }
     else if (pObj->CurrentAction == PLAYER_SKILL_DARKSIDE_READY)
@@ -3102,12 +3125,16 @@ bool SkillElf(CHARACTER* c, ITEM* p)
 {
     OBJECT* o = &c->Object;
     bool Success = false;
+    auto currentSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
     for (int i = 0; i < p->SpecialNum; i++)
     {
         int Spe_Num = p->Special[i];
-        if (Spe_Num == AT_SKILL_CROSSBOW && (AT_SKILL_MANY_ARROW_UP <= CharacterAttribute->Skill[Hero->CurrentSkill] && CharacterAttribute->Skill[Hero->CurrentSkill] <= AT_SKILL_MANY_ARROW_UP + 4))
-            Spe_Num = CharacterAttribute->Skill[Hero->CurrentSkill];
-        if (CharacterAttribute->Skill[Hero->CurrentSkill] == Spe_Num)
+        if (Spe_Num == AT_SKILL_TRIPLE_SHOT && (AT_SKILL_TRIPLE_SHOT_STR == currentSkill || AT_SKILL_TRIPLE_SHOT_MASTERY == currentSkill))
+        {
+            Spe_Num = currentSkill;
+        }
+
+        if (currentSkill == Spe_Num)
         {
             int iMana, iSkillMana;
             gSkillManager.GetSkillInformation(Spe_Num, 1, NULL, &iMana, NULL, &iSkillMana);
@@ -3137,12 +3164,9 @@ bool SkillElf(CHARACTER* c, ITEM* p)
             float Distance = gSkillManager.GetSkillDistance(Spe_Num, c);
             switch (Spe_Num)
             {
-            case AT_SKILL_MANY_ARROW_UP:
-            case AT_SKILL_MANY_ARROW_UP + 1:
-            case AT_SKILL_MANY_ARROW_UP + 2:
-            case AT_SKILL_MANY_ARROW_UP + 3:
-            case AT_SKILL_MANY_ARROW_UP + 4:
-            case AT_SKILL_CROSSBOW:
+            case AT_SKILL_TRIPLE_SHOT:
+            case AT_SKILL_TRIPLE_SHOT_STR:
+            case AT_SKILL_TRIPLE_SHOT_MASTERY:
                 if (!CheckArrow())
                 {
                     i = p->SpecialNum;
@@ -3285,39 +3309,38 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
     break;
     case MOVEMENT_SKILL:
     {
-        int iSkill = (g_MovementSkill.m_bMagic) ? (CharacterAttribute->Skill[g_MovementSkill.m_iSkill]) : g_MovementSkill.m_iSkill;
+        auto iSkill = static_cast<ActionSkillType>((g_MovementSkill.m_bMagic) ? (CharacterAttribute->Skill[g_MovementSkill.m_iSkill]) : g_MovementSkill.m_iSkill);
 
         float Distance = gSkillManager.GetSkillDistance(iSkill, c);
         switch (iSkill)
         {
-        case AT_SKILL_SPEAR:
+        case AT_SKILL_IMPALE:
             if (Hero->Helper.Type != MODEL_HORN_OF_UNIRIA)
             {
                 break;
             }
-        case AT_SKILL_BLOW_UP:
-        case AT_SKILL_BLOW_UP + 1:
-        case AT_SKILL_BLOW_UP + 2:
-        case AT_SKILL_BLOW_UP + 3:
-        case AT_SKILL_BLOW_UP + 4:
         case AT_SKILL_DEATHSTAB:
+        case AT_SKILL_DEATHSTAB_STR:
         case AT_SKILL_RIDER:
-        case AT_SKILL_SWORD1:
-        case AT_SKILL_SWORD2:
-        case AT_SKILL_SWORD3:
-        case AT_SKILL_SWORD4:
-        case AT_SKILL_SWORD5:
+        case AT_SKILL_FALLING_SLASH:
+        case AT_SKILL_FALLING_SLASH_STR:
+        case AT_SKILL_LUNGE:
+        case AT_SKILL_LUNGE_STR:
+        case AT_SKILL_UPPERCUT:
+        case AT_SKILL_CYCLONE:
+        case AT_SKILL_CYCLONE_STR:
+        case AT_SKILL_CYCLONE_STR_MG:
+        case AT_SKILL_SLASH:
+        case AT_SKILL_SLASH_STR:
         case AT_SKILL_FORCE:
         case AT_SKILL_FORCE_WAVE:
-        case AT_SKILL_FIRE_BUST_UP:
-        case AT_SKILL_FIRE_BUST_UP + 1:
-        case AT_SKILL_FIRE_BUST_UP + 2:
-        case AT_SKILL_FIRE_BUST_UP + 3:
-        case AT_SKILL_FIRE_BUST_UP + 4:
-        case AT_SKILL_LONGPIER_ATTACK:
+        case AT_SKILL_FORCE_WAVE_STR:
+        case AT_SKILL_FIREBURST:
+        case AT_SKILL_FIREBURST_STR:
+        case AT_SKILL_FIREBURST_MASTERY:
         case AT_SKILL_RUSH:
         case AT_SKILL_SPACE_SPLIT:
-        case AT_SKILL_ONEFLASH:
+        case AT_SKILL_SPIRAL_SLASH:
             if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
             {
                 if (g_MovementSkill.m_iTarget <= -1) break;
@@ -3338,11 +3361,16 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             }
             break;
         case AT_SKILL_POISON:
+        case AT_SKILL_POISON_STR:
         case AT_SKILL_METEO:
-        case AT_SKILL_THUNDER:
+        case AT_SKILL_LIGHTNING:
+        case AT_SKILL_LIGHTNING_STR:
+        case AT_SKILL_LIGHTNING_STR_MG:
         case AT_SKILL_ENERGYBALL:
         case AT_SKILL_POWERWAVE:
-        case AT_SKILL_SLOW:
+        case AT_SKILL_ICE:
+        case AT_SKILL_ICE_STR:
+        case AT_SKILL_ICE_STR_MG:
         case AT_SKILL_FIREBALL:
         case AT_SKILL_JAVELIN:
         case AT_SKILL_DEATH_CANNON:
@@ -3371,7 +3399,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             }
             break;
         case AT_SKILL_DEEPIMPACT:
-        case AT_SKILL_PARALYZE:
+        case AT_SKILL_ICE_ARROW:
+        case AT_SKILL_ICE_ARROW_STR:
             if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
             {
                 if (g_MovementSkill.m_iTarget <= -1) break;
@@ -3396,24 +3425,14 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
             }
             break;
-        case AT_SKILL_HEAL_UP:
-        case AT_SKILL_HEAL_UP + 1:
-        case AT_SKILL_HEAL_UP + 2:
-        case AT_SKILL_HEAL_UP + 3:
-        case AT_SKILL_HEAL_UP + 4:
         case AT_SKILL_HEALING:
-        case AT_SKILL_ATT_POWER_UP:
-        case AT_SKILL_ATT_POWER_UP + 1:
-        case AT_SKILL_ATT_POWER_UP + 2:
-        case AT_SKILL_ATT_POWER_UP + 3:
-        case AT_SKILL_ATT_POWER_UP + 4:
+        case AT_SKILL_HEALING_STR:
         case AT_SKILL_ATTACK:
-        case AT_SKILL_DEF_POWER_UP:
-        case AT_SKILL_DEF_POWER_UP + 1:
-        case AT_SKILL_DEF_POWER_UP + 2:
-        case AT_SKILL_DEF_POWER_UP + 3:
-        case AT_SKILL_DEF_POWER_UP + 4:
+        case AT_SKILL_ATTACK_STR:
+        case AT_SKILL_ATTACK_MASTERY:
         case AT_SKILL_DEFENSE:
+        case AT_SKILL_DEFENSE_STR:
+        case AT_SKILL_DEFENSE_MASTERY:
             if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
             {
                 if (g_MovementSkill.m_iTarget <= -1) break;
@@ -3438,17 +3457,26 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
             }
             break;
-        case AT_SKILL_WHEEL:
-        case AT_SKILL_REDUCEDEFENSE:
+        case AT_SKILL_TWISTING_SLASH:
+        case AT_SKILL_TWISTING_SLASH_STR:
+        case AT_SKILL_TWISTING_SLASH_MASTERY:
+        case AT_SKILL_FIRE_SLASH:
+        case AT_SKILL_FIRE_SLASH_STR:
         {
             AttackKnight(c, iSkill, Distance);
         }
         break;
-        case AT_SKILL_THRUST:
-        case AT_SKILL_STAMP:
-        case AT_SKILL_GIANTSWING:
+        case AT_SKILL_KILLING_BLOW:
+        case AT_SKILL_KILLING_BLOW_STR:
+        case AT_SKILL_KILLING_BLOW_MASTERY:
+        case AT_SKILL_BEAST_UPPERCUT:
+        case AT_SKILL_BEAST_UPPERCUT_STR:
+        case AT_SKILL_BEAST_UPPERCUT_MASTERY:
+        case AT_SKILL_CHAIN_DRIVE:
+        case AT_SKILL_CHAIN_DRIVE_STR:
         case AT_SKILL_DRAGON_KICK:
-        case AT_SKILL_DRAGON_LOWER:
+        case AT_SKILL_DRAGON_ROAR:
+        case AT_SKILL_DRAGON_ROAR_STR:
         case AT_SKILL_OCCUPY:
         case AT_SKILL_PHOENIX_SHOT:
         {
@@ -4828,7 +4856,8 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
             }
         return;
 
-    case AT_SKILL_PIERCING:
+    case AT_SKILL_PENETRATION:
+    case AT_SKILL_PENETRATION_STR:
         if ((o->Type == MODEL_PLAYER) && (gCharacterManager.GetEquipedBowType(Hero) != BOWTYPE_NONE))
         {
             if (!CheckArrow())
@@ -4862,12 +4891,18 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
     }
     if (!CheckTile(c, o, Distance))
     {
-        if (SelectedCharacter != -1 && (Skill == AT_SKILL_HEALING || Skill == AT_SKILL_ATTACK || Skill == AT_SKILL_DEFENSE || CheckAttack()
-            || (AT_SKILL_HEAL_UP <= Skill && Skill <= AT_SKILL_HEAL_UP + 4)
-            || Skill == AT_SKILL_DARK_SCREAM
-            || (AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP + 4)
-            || (AT_SKILL_DEF_POWER_UP <= Skill && Skill <= AT_SKILL_DEF_POWER_UP + 4)
-            || (AT_SKILL_ATT_POWER_UP <= Skill && Skill <= AT_SKILL_ATT_POWER_UP + 4)
+        if (SelectedCharacter != -1 && (
+            Skill == AT_SKILL_HEALING
+            || Skill == AT_SKILL_HEALING_STR
+            || Skill == AT_SKILL_ATTACK
+            || Skill == AT_SKILL_ATTACK_STR
+            || Skill == AT_SKILL_ATTACK_MASTERY
+            || Skill == AT_SKILL_DEFENSE
+            || Skill == AT_SKILL_DEFENSE_STR
+            || Skill == AT_SKILL_DEFENSE_MASTERY
+            || CheckAttack()
+            || Skill == AT_SKILL_FIRE_SCREAM
+            || Skill == AT_SKILL_FIRE_SCREAM_STR
             )
             )
         {
@@ -4896,31 +4931,21 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
             {
                 switch (Skill)
                 {
-                case AT_SKILL_HEAL_UP:
-                case AT_SKILL_HEAL_UP + 1:
-                case AT_SKILL_HEAL_UP + 2:
-                case AT_SKILL_HEAL_UP + 3:
-                case AT_SKILL_HEAL_UP + 4:
                 case AT_SKILL_HEALING:
-                case AT_SKILL_ATT_POWER_UP:
-                case AT_SKILL_ATT_POWER_UP + 1:
-                case AT_SKILL_ATT_POWER_UP + 2:
-                case AT_SKILL_ATT_POWER_UP + 3:
-                case AT_SKILL_ATT_POWER_UP + 4:
+                case AT_SKILL_HEALING_STR:
                 case AT_SKILL_ATTACK:
-                case AT_SKILL_DEF_POWER_UP:
-                case AT_SKILL_DEF_POWER_UP + 1:
-                case AT_SKILL_DEF_POWER_UP + 2:
-                case AT_SKILL_DEF_POWER_UP + 3:
-                case AT_SKILL_DEF_POWER_UP + 4:
+                case AT_SKILL_ATTACK_STR:
+                case AT_SKILL_ATTACK_MASTERY:
                 case AT_SKILL_DEFENSE:
+                case AT_SKILL_DEFENSE_STR:
+                case AT_SKILL_DEFENSE_MASTERY:
                     UseSkillElf(c, o);
                     return;
                 }
             }
             if (CheckAttack())
             {
-                if (((Skill == AT_SKILL_PARALYZE) || (Skill == AT_SKILL_DEEPIMPACT)) && ((o->Type == MODEL_PLAYER) && (gCharacterManager.GetEquipedBowType(Hero) != BOWTYPE_NONE)))
+                if (((Skill == AT_SKILL_ICE_ARROW) || (Skill == AT_SKILL_ICE_ARROW_STR) || (Skill == AT_SKILL_DEEPIMPACT)) && ((o->Type == MODEL_PLAYER) && (gCharacterManager.GetEquipedBowType(Hero) != BOWTYPE_NONE)))
                 {
                     UseSkillElf(c, o);
                 }
@@ -4931,6 +4956,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
     switch (Skill)
     {
     case AT_SKILL_INFINITY_ARROW:
+    case AT_SKILL_INFINITY_ARROW_STR:
     {
         if (g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow) == false)
         {
@@ -4982,24 +5008,14 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         //			UseSkillElf( c, o);
     }
     break;
-    case AT_SKILL_HEAL_UP:
-    case AT_SKILL_HEAL_UP + 1:
-    case AT_SKILL_HEAL_UP + 2:
-    case AT_SKILL_HEAL_UP + 3:
-    case AT_SKILL_HEAL_UP + 4:
     case AT_SKILL_HEALING:
-    case AT_SKILL_ATT_POWER_UP:
-    case AT_SKILL_ATT_POWER_UP + 1:
-    case AT_SKILL_ATT_POWER_UP + 2:
-    case AT_SKILL_ATT_POWER_UP + 3:
-    case AT_SKILL_ATT_POWER_UP + 4:
+    case AT_SKILL_HEALING_STR:
     case AT_SKILL_ATTACK:
-    case AT_SKILL_DEF_POWER_UP:
-    case AT_SKILL_DEF_POWER_UP + 1:
-    case AT_SKILL_DEF_POWER_UP + 2:
-    case AT_SKILL_DEF_POWER_UP + 3:
-    case AT_SKILL_DEF_POWER_UP + 4:
+    case AT_SKILL_ATTACK_STR:
+    case AT_SKILL_ATTACK_MASTERY:
     case AT_SKILL_DEFENSE:
+    case AT_SKILL_DEFENSE_STR:
+    case AT_SKILL_DEFENSE_MASTERY:
         SendRequestMagic(Skill, HeroKey);
         SetPlayerMagic(c);
         return;
@@ -5152,7 +5168,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
     c->SkillSuccess = true;
 }
 
-void AttackKnight(CHARACTER* c, int Skill, float Distance)
+void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
 {
     OBJECT* o = &c->Object;
     int ClassIndex = gCharacterManager.GetBaseClass(c->Class);
@@ -5167,21 +5183,28 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
     if (((iTypeR != -1 &&
         (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
         (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX))
-        || Skill == AT_SKILL_VITALITY
+        || Skill == AT_SKILL_SWELL_LIFE
+        || Skill == AT_SKILL_SWELL_LIFE_STR
+        || Skill == AT_SKILL_SWELL_LIFE_PROFICIENCY
         || Skill == AT_SKILL_ADD_CRITICAL
+        || Skill == AT_SKILL_ADD_CRITICAL_STR1
+        || Skill == AT_SKILL_ADD_CRITICAL_STR2
+        || Skill == AT_SKILL_ADD_CRITICAL_STR3
         || Skill == AT_SKILL_PARTY_TELEPORT
         || Skill == AT_SKILL_THUNDER_STRIKE
-        || Skill == AT_SKILL_DARK_HORSE
-        || (AT_SKILL_LIFE_UP <= Skill && Skill <= AT_SKILL_LIFE_UP + 4)
-        || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP + 4)
+        || Skill == AT_SKILL_EARTHSHAKE
+        || Skill == AT_SKILL_EARTHSHAKE_STR
+        || Skill == AT_SKILL_EARTHSHAKE_MASTERY
         || Skill == AT_SKILL_BRAND_OF_SKILL
         || Skill == AT_SKILL_PLASMA_STORM_FENRIR
-        || Skill == AT_SKILL_DARK_SCREAM
-        || (AT_SKILL_FIRE_SCREAM_UP <= Skill && Skill <= AT_SKILL_FIRE_SCREAM_UP + 4)
-        || (AT_SKILL_TORNADO_SWORDA_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDA_UP + 4)
-        || (AT_SKILL_TORNADO_SWORDB_UP <= Skill && Skill <= AT_SKILL_TORNADO_SWORDB_UP + 4)
+        || Skill == AT_SKILL_FIRE_SCREAM
+        || Skill == AT_SKILL_FIRE_SCREAM_STR
         || Skill == AT_SKILL_GIGANTIC_STORM
         || Skill == AT_SKILL_GAOTIC
+        || Skill == AT_SKILL_TWISTING_SLASH
+        || Skill == AT_SKILL_TWISTING_SLASH_STR
+        || Skill == AT_SKILL_TWISTING_SLASH_STR_MG
+        || Skill == AT_SKILL_TWISTING_SLASH_MASTERY
         ))
     {
         bool Success = true;
@@ -5190,8 +5213,11 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
         {
             Success = false;
         }
-        if (g_csItemOption.Special_Option_Check() == false && (Skill == AT_SKILL_ICE_BLADE || (AT_SKILL_POWER_SLASH_UP <= Skill && AT_SKILL_POWER_SLASH_UP + 5 > Skill)))
+
+        if (!g_csItemOption.IsNonWeaponSkillOrIsSkillEquipped(Skill))
+        {
             Success = false;
+        }
 
         if (Skill == AT_SKILL_PARTY_TELEPORT && g_DuelMgr.IsDuelEnabled())
         {
@@ -5203,7 +5229,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             Success = false;
         }
 
-        if (Skill == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP + 4))
+        if (Skill == AT_SKILL_EARTHSHAKE || Skill == AT_SKILL_EARTHSHAKE_STR || Skill == AT_SKILL_EARTHSHAKE_MASTERY)
         {
             BYTE t_DarkLife = 0;
             t_DarkLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
@@ -5212,8 +5238,9 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
 
         if (gMapManager.InChaosCastle())
         {
-            if (Skill == AT_SKILL_DARK_HORSE
-                || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP + 4)
+            if (Skill == AT_SKILL_EARTHSHAKE
+                || Skill == AT_SKILL_EARTHSHAKE_STR
+                || Skill == AT_SKILL_EARTHSHAKE_MASTERY
                 || Skill == AT_SKILL_RIDER
                 || (Skill >= AT_PET_COMMAND_DEFAULT && Skill <= AT_PET_COMMAND_TARGET)
                 || Skill == AT_SKILL_PLASMA_STORM_FENRIR
@@ -5224,7 +5251,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
         }
         else
         {
-            if (Skill == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP + 4))
+            if (Skill == AT_SKILL_EARTHSHAKE || Skill == AT_SKILL_EARTHSHAKE_STR || Skill == AT_SKILL_EARTHSHAKE_MASTERY)
             {
                 BYTE t_DarkLife = 0;
                 t_DarkLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
@@ -5270,16 +5297,9 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
         {
             switch (Skill)
             {
-            case AT_SKILL_TORNADO_SWORDA_UP:
-            case AT_SKILL_TORNADO_SWORDA_UP + 1:
-            case AT_SKILL_TORNADO_SWORDA_UP + 2:
-            case AT_SKILL_TORNADO_SWORDA_UP + 3:
-            case AT_SKILL_TORNADO_SWORDA_UP + 4:
-            case AT_SKILL_TORNADO_SWORDB_UP:
-            case AT_SKILL_TORNADO_SWORDB_UP + 1:
-            case AT_SKILL_TORNADO_SWORDB_UP + 2:
-            case AT_SKILL_TORNADO_SWORDB_UP + 3:
-            case AT_SKILL_TORNADO_SWORDB_UP + 4:
+            case AT_SKILL_TWISTING_SLASH_STR:
+            case AT_SKILL_TWISTING_SLASH_STR_MG:
+            case AT_SKILL_TWISTING_SLASH_MASTERY:
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                 {
                     BYTE PathX[1];
@@ -5302,13 +5322,9 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                     c->Movement = 0;
                 }
                 break;
-            case AT_SKILL_BLOOD_ATT_UP:
-            case AT_SKILL_BLOOD_ATT_UP + 1:
-            case AT_SKILL_BLOOD_ATT_UP + 2:
-            case AT_SKILL_BLOOD_ATT_UP + 3:
-            case AT_SKILL_BLOOD_ATT_UP + 4:
-            case AT_SKILL_WHEEL:
-            case AT_SKILL_REDUCEDEFENSE:
+            case AT_SKILL_TWISTING_SLASH:
+            case AT_SKILL_FIRE_SLASH:
+            case AT_SKILL_FIRE_SLASH_STR:
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                 {
                     WORD Strength;
@@ -5337,12 +5353,8 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                     }
                 }
                 break;
-            case AT_SKILL_POWER_SLASH_UP:
-            case AT_SKILL_POWER_SLASH_UP + 1:
-            case AT_SKILL_POWER_SLASH_UP + 2:
-            case AT_SKILL_POWER_SLASH_UP + 3:
-            case AT_SKILL_POWER_SLASH_UP + 4:
-            case AT_SKILL_ICE_BLADE:
+            case AT_SKILL_POWER_SLASH:
+            case AT_SKILL_POWER_SLASH_STR:
                 if (c->Helper.Type<MODEL_HORN_OF_UNIRIA || c->Helper.Type>MODEL_DARK_HORSE_ITEM && c->Helper.Type != MODEL_HORN_OF_FENRIR)
                 {
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
@@ -5537,6 +5549,9 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                 break;
 
             case AT_SKILL_ADD_CRITICAL:
+            case AT_SKILL_ADD_CRITICAL_STR1:
+            case AT_SKILL_ADD_CRITICAL_STR2:
+            case AT_SKILL_ADD_CRITICAL_STR3:
                 SendRequestMagic(Skill, HeroKey);
                 c->Movement = 0;
                 break;
@@ -5544,12 +5559,8 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                 SendRequestMagic(Skill, HeroKey);
                 c->Movement = 0;
                 break;
-            case AT_SKILL_FIRE_SCREAM_UP:
-            case AT_SKILL_FIRE_SCREAM_UP + 1:
-            case AT_SKILL_FIRE_SCREAM_UP + 2:
-            case AT_SKILL_FIRE_SCREAM_UP + 3:
-            case AT_SKILL_FIRE_SCREAM_UP + 4:
-            case AT_SKILL_DARK_SCREAM:
+            case AT_SKILL_FIRE_SCREAM:
+            case AT_SKILL_FIRE_SCREAM_STR:
                 if (CheckTile(c, o, Distance))
                 {
                     int TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
@@ -5589,13 +5600,13 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                     Attacking = -1;
                 }
                 break;
-            case AT_SKILL_ASHAKE_UP:
-            case AT_SKILL_ASHAKE_UP + 1:
-            case AT_SKILL_ASHAKE_UP + 2:
-            case AT_SKILL_ASHAKE_UP + 3:
-            case AT_SKILL_ASHAKE_UP + 4:
-            case AT_SKILL_DARK_HORSE:
-                if (c->Helper.Type != MODEL_DARK_HORSE_ITEM || c->SafeZone) break;
+            case AT_SKILL_EARTHSHAKE:
+            case AT_SKILL_EARTHSHAKE_STR:
+            case AT_SKILL_EARTHSHAKE_MASTERY:
+                if (c->Helper.Type != MODEL_DARK_HORSE_ITEM || c->SafeZone)
+                {
+                    break;
+                }
 
             case AT_SKILL_THUNDER_STRIKE:
                 if (CheckTile(c, o, Distance))
@@ -5630,7 +5641,7 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                             SetAction(o, PLAYER_SKILL_FLASH);
                         }
                     }
-                    else if (Skill == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= Skill && Skill <= AT_SKILL_ASHAKE_UP + 4))
+                    else if (Skill == AT_SKILL_EARTHSHAKE || Skill == AT_SKILL_EARTHSHAKE_STR || Skill == AT_SKILL_EARTHSHAKE_MASTERY)
                     {
                         SetAction(o, PLAYER_ATTACK_DARKHORSE);
                         PlayBuffer(SOUND_EARTH_QUAKE);
@@ -5642,22 +5653,16 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                     Attacking = -1;
                 }
                 break;
-            case AT_SKILL_LIFE_UP:
-            case AT_SKILL_LIFE_UP + 1:
-            case AT_SKILL_LIFE_UP + 2:
-            case AT_SKILL_LIFE_UP + 3:
-            case AT_SKILL_LIFE_UP + 4:
-            case AT_SKILL_VITALITY:
+            case AT_SKILL_SWELL_LIFE:
+            case AT_SKILL_SWELL_LIFE_STR:
+            case AT_SKILL_SWELL_LIFE_PROFICIENCY:
                 SendRequestMagic(Skill, HeroKey);
                 SetAction(o, PLAYER_SKILL_VITALITY);
                 c->Movement = 0;
                 break;
-            case AT_SKILL_ANGER_SWORD_UP:
-            case AT_SKILL_ANGER_SWORD_UP + 1:
-            case AT_SKILL_ANGER_SWORD_UP + 2:
-            case AT_SKILL_ANGER_SWORD_UP + 3:
-            case AT_SKILL_ANGER_SWORD_UP + 4:
-            case AT_SKILL_FURY_STRIKE:
+            case AT_SKILL_RAGEFUL_BLOW:
+            case AT_SKILL_RAGEFUL_BLOW_STR:
+            case AT_SKILL_RAGEFUL_BLOW_MASTERY:
             {
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
@@ -5683,7 +5688,8 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
                 }
             }
             break;
-            case AT_SKILL_BLOW_OF_DESTRUCTION:
+            case AT_SKILL_STRIKE_OF_DESTRUCTION:
+            case AT_SKILL_STRIKE_OF_DESTRUCTION_STR:
             {
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
@@ -5766,11 +5772,11 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     int ClassIndex = gCharacterManager.GetBaseClass(c->Class);
 
     int iMana, iSkillMana;
-    if (Skill == AT_SKILL_BLAST_HELL_BEGIN || Skill == AT_SKILL_BLAST_HELL)
+    if (Skill == AT_SKILL_NOVA_BEGIN || Skill == AT_SKILL_NOVA)
     {
-        gSkillManager.GetSkillInformation(AT_SKILL_BLAST_HELL, 1, NULL, &iMana, NULL, &iSkillMana);
+        gSkillManager.GetSkillInformation(AT_SKILL_NOVA, 1, NULL, &iMana, NULL, &iSkillMana);
 
-        if (Skill == AT_SKILL_BLAST_HELL)
+        if (Skill == AT_SKILL_NOVA)
         {
             iSkillMana = 0;
         }
@@ -5799,7 +5805,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
     if (iSkillMana > CharacterAttribute->SkillMana)
     {
-        if (Skill == AT_SKILL_BLAST_HELL_BEGIN || Skill == AT_SKILL_BLAST_HELL)
+        if (Skill == AT_SKILL_NOVA_BEGIN || Skill == AT_SKILL_NOVA)
         {
             MouseRButtonPop = false;
             MouseRButtonPush = false;
@@ -5818,7 +5824,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
     switch (Skill)
     {
-    case AT_SKILL_BLAST_HELL_BEGIN:
+    case AT_SKILL_NOVA_BEGIN:
     {
         SendRequestMagic(Skill, HeroKey);
 
@@ -5827,7 +5833,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         c->Movement = 0;
     }
     return;
-    case AT_SKILL_BLAST_HELL:
+    case AT_SKILL_NOVA:
     {
         int iTargetKey = getTargetCharacterKey(c, SelectedCharacter);
         if (iTargetKey == -1) {
@@ -5840,12 +5846,9 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         c->Movement = 0;
     }
     return;
-    case AT_SKILL_SOUL_UP:
-    case AT_SKILL_SOUL_UP + 1:
-    case AT_SKILL_SOUL_UP + 2:
-    case AT_SKILL_SOUL_UP + 3:
-    case AT_SKILL_SOUL_UP + 4:
-    case AT_SKILL_WIZARDDEFENSE:
+    case AT_SKILL_SOUL_BARRIER:
+    case AT_SKILL_SOUL_BARRIER_STR:
+    case AT_SKILL_SOUL_BARRIER_PROFICIENCY:
         if (SelectedCharacter != -1)
         {
             if (CharactersClient[SelectedCharacter].Object.Kind != KIND_PLAYER)
@@ -5892,12 +5895,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         }
         SetPlayerMagic(c);
         break;
-    case AT_SKILL_HELL_FIRE_UP:
-    case AT_SKILL_HELL_FIRE_UP + 1:
-    case AT_SKILL_HELL_FIRE_UP + 2:
-    case AT_SKILL_HELL_FIRE_UP + 3:
-    case AT_SKILL_HELL_FIRE_UP + 4:
-    case AT_SKILL_HELL:
+    case AT_SKILL_HELL_FIRE:
+    case AT_SKILL_HELL_FIRE_STR:
     {
         SendRequestMagicContinue(Skill, (c->PositionX),
             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
@@ -5907,6 +5906,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     }
     return;
     case AT_SKILL_INFERNO:
+    case AT_SKILL_INFERNO_STR:
+    case AT_SKILL_INFERNO_STR_MG:
     {
         SendRequestMagicContinue(Skill, (c->PositionX),
             (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
@@ -5971,14 +5972,21 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     }
     return;
     case AT_SKILL_BLOCKING:
-    case AT_SKILL_SWORD1:
-    case AT_SKILL_SWORD2:
-    case AT_SKILL_SWORD3:
-    case AT_SKILL_SWORD4:
-    case AT_SKILL_SWORD5:
-    case AT_SKILL_SPEAR:
+    case AT_SKILL_FALLING_SLASH:
+    case AT_SKILL_FALLING_SLASH_STR:
+    case AT_SKILL_LUNGE:
+    case AT_SKILL_LUNGE_STR:
+    case AT_SKILL_UPPERCUT:
+    case AT_SKILL_CYCLONE:
+    case AT_SKILL_CYCLONE_STR:
+    case AT_SKILL_CYCLONE_STR_MG:
+    case AT_SKILL_SLASH:
+    case AT_SKILL_SLASH_STR:
+    case AT_SKILL_IMPALE:
         return;
-    case AT_SKILL_SWELL_OF_MAGICPOWER:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY_STR:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY:
     {
         if (g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower) == false)
         {
@@ -6020,6 +6028,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             && Skill != AT_SKILL_MANA && Skill != AT_SKILL_INVISIBLE
             && Skill != AT_SKILL_REMOVAL_INVISIBLE && Skill != AT_SKILL_PLASMA_STORM_FENRIR
             && Skill != AT_SKILL_ALICE_BERSERKER
+            && Skill != AT_SKILL_ALICE_BERSERKER_STR
             && Skill != AT_SKILL_ALICE_WEAKNESS && Skill != AT_SKILL_ALICE_ENERVATION
             )
             return;
@@ -6041,17 +6050,9 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             switch (Skill)
             {
             case AT_SKILL_STORM:
-            case AT_SKILL_EVIL_SPIRIT_UP:
-            case AT_SKILL_EVIL_SPIRIT_UP + 1:
-            case AT_SKILL_EVIL_SPIRIT_UP + 2:
-            case AT_SKILL_EVIL_SPIRIT_UP + 3:
-            case AT_SKILL_EVIL_SPIRIT_UP + 4:
-            case AT_SKILL_EVIL_SPIRIT_UP_M:
-            case AT_SKILL_EVIL_SPIRIT_UP_M + 1:
-            case AT_SKILL_EVIL_SPIRIT_UP_M + 2:
-            case AT_SKILL_EVIL_SPIRIT_UP_M + 3:
-            case AT_SKILL_EVIL_SPIRIT_UP_M + 4:
-            case AT_SKILL_EVIL:
+            case AT_SKILL_EVIL_SPIRIT:
+            case AT_SKILL_EVIL_SPIRIT_STR:
+            case AT_SKILL_EVIL_SPIRIT_STR_MG:
             {
                 SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, &o->m_bySkillSerialNum);
                 SetPlayerMagic(c);
@@ -6073,16 +6074,14 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             }
             return;
             case AT_SKILL_FLAME:
+            case AT_SKILL_FLAME_STR:
+            case AT_SKILL_FLAME_STR_MG:
                 SendRequestMagicContinue(Skill, (BYTE)(c->TargetPosition[0] / TERRAIN_SCALE), (BYTE)(c->TargetPosition[1] / TERRAIN_SCALE), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
                 SetPlayerMagic(c);
                 return;
-            case AT_SKILL_BLAST_POISON:
-            case AT_SKILL_ICE_UP:
-            case AT_SKILL_ICE_UP + 1:
-            case AT_SKILL_ICE_UP + 2:
-            case AT_SKILL_ICE_UP + 3:
-            case AT_SKILL_ICE_UP + 4:
-            case AT_SKILL_BLAST_FREEZE:
+            case AT_SKILL_DECAY:
+            case AT_SKILL_DECAY_STR:
+            case AT_SKILL_ICE_STORM:
             {
                 WORD TKey = 0xffff;
                 if (g_MovementSkill.m_iTarget != -1)
@@ -6101,7 +6100,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     {
         switch (Skill)
         {
-        case AT_SKILL_TELEPORT_B:
+        case AT_SKILL_TELEPORT_ALLY:
             if (gMapManager.IsCursedTemple()
                 && !g_pMyInventory->IsItem(ITEM_POTION + 64, true))
             {
@@ -6187,7 +6186,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             }
 
             WORD byHeroPriorSkill = g_pSkillList->GetHeroPriorSkill();
-            if (c == Hero && byHeroPriorSkill == AT_SKILL_BLAST_HELL)
+            if (c == Hero && byHeroPriorSkill == AT_SKILL_NOVA)
             {
                 g_pSkillList->SetHeroPriorSkill(AT_SKILL_TELEPORT);
                 SendRequestMagic(byHeroPriorSkill, HeroKey);
@@ -6317,16 +6316,13 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         }
         break;
         case AT_SKILL_ALICE_BERSERKER:
+        case AT_SKILL_ALICE_BERSERKER_STR:
         case AT_SKILL_ALICE_WEAKNESS:
         case AT_SKILL_ALICE_ENERVATION:
             UseSkillSummon(c, o);
             break;
-        case AT_SKILL_LIGHTNING_SHOCK_UP:
-        case AT_SKILL_LIGHTNING_SHOCK_UP + 1:
-        case AT_SKILL_LIGHTNING_SHOCK_UP + 2:
-        case AT_SKILL_LIGHTNING_SHOCK_UP + 3:
-        case AT_SKILL_LIGHTNING_SHOCK_UP + 4:
         case AT_SKILL_LIGHTNING_SHOCK:
+        case AT_SKILL_LIGHTNING_SHOCK_STR:
         {
             o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
@@ -6363,19 +6359,11 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
         switch (Skill)
         {
-        case AT_SKILL_ALICE_DRAINLIFE_UP:
-        case AT_SKILL_ALICE_DRAINLIFE_UP + 1:
-        case AT_SKILL_ALICE_DRAINLIFE_UP + 2:
-        case AT_SKILL_ALICE_DRAINLIFE_UP + 3:
-        case AT_SKILL_ALICE_DRAINLIFE_UP + 4:
         case AT_SKILL_ALICE_DRAINLIFE:
+        case AT_SKILL_ALICE_DRAINLIFE_STR:
         case AT_SKILL_ALICE_LIGHTNINGORB:
-        case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
-        case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 1:
-        case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 2:
-        case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 3:
-        case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 4:
         case AT_SKILL_ALICE_CHAINLIGHTNING:
+        case AT_SKILL_ALICE_CHAINLIGHTNING_STR:
         {
             c->TargetCharacter = SelectedCharacter;
             if (0 == CharactersClient[SelectedCharacter].Dead)
@@ -6404,12 +6392,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             }
         }
         break;
-        case AT_SKILL_ALICE_SLEEP_UP:
-        case AT_SKILL_ALICE_SLEEP_UP + 1:
-        case AT_SKILL_ALICE_SLEEP_UP + 2:
-        case AT_SKILL_ALICE_SLEEP_UP + 3:
-        case AT_SKILL_ALICE_SLEEP_UP + 4:
         case AT_SKILL_ALICE_SLEEP:
+        case AT_SKILL_ALICE_SLEEP_STR:
         case AT_SKILL_ALICE_BLIND:
         {
             if (CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
@@ -6712,7 +6696,7 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
 
 bool SkillKeyPush(int Skill)
 {
-    if (Skill == AT_SKILL_BLAST_HELL && MouseLButtonPush)
+    if (Skill == AT_SKILL_NOVA && MouseLButtonPush)
     {
         return true;
     }
@@ -6749,7 +6733,7 @@ void Attack(CHARACTER* c)
 
     bool Success = false;
 
-    int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
+    auto Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
     float Distance = gSkillManager.GetSkillDistance(Skill, c);
 
     if (!EnableFastInput)
@@ -6772,7 +6756,7 @@ void Attack(CHARACTER* c)
         }
         else if ((MouseRButtonPush || MouseRButton) && !(MouseLButtonPush || MouseLButton) && !c->Movement)
         {
-            if (Skill == AT_SKILL_BLAST_HELL)
+            if (Skill == AT_SKILL_NOVA)
             {
                 if (o->Teleport != TELEPORT_END && o->Teleport != TELEPORT_NONE) return;
                 int iReqEng = 0;
@@ -6781,7 +6765,7 @@ void Attack(CHARACTER* c)
 
                 MouseRButtonPress = 1;
                 Hero->Object.m_bySkillCount = 0;
-                Skill = AT_SKILL_BLAST_HELL_BEGIN;
+                Skill = AT_SKILL_NOVA_BEGIN;
             }
             SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
             MouseRButtonPush = false;
@@ -6841,7 +6825,7 @@ void Attack(CHARACTER* c)
     ExecuteSkill(c, Skill, Distance);
 }
 
-bool CanExecuteSkill(CHARACTER* c, int Skill, float Distance)
+bool CanExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
 {
     OBJECT* o = &c->Object;
 
@@ -6854,18 +6838,33 @@ bool CanExecuteSkill(CHARACTER* c, int Skill, float Distance)
     {
         if ((gMapManager.InBloodCastle() == true) || gMapManager.InChaosCastle() == true)
         {
-            if (Skill != AT_SKILL_HEALING && Skill != AT_SKILL_DEFENSE && Skill != AT_SKILL_ATTACK
-                && Skill != AT_SKILL_WIZARDDEFENSE && Skill != AT_SKILL_VITALITY
+            if (Skill != AT_SKILL_HEALING
+                && Skill != AT_SKILL_HEALING_STR
+                && Skill != AT_SKILL_DEFENSE
+                && Skill != AT_SKILL_DEFENSE_STR
+                && Skill != AT_SKILL_DEFENSE_MASTERY
+                && Skill != AT_SKILL_ATTACK
+                && Skill != AT_SKILL_ATTACK_STR
+                && Skill != AT_SKILL_ATTACK_MASTERY
+                && Skill != AT_SKILL_SOUL_BARRIER
+                && Skill != AT_SKILL_SOUL_BARRIER_STR
+                && Skill != AT_SKILL_SOUL_BARRIER_PROFICIENCY
+                && Skill != AT_SKILL_SWELL_LIFE
+                && Skill != AT_SKILL_SWELL_LIFE_STR
+                && Skill != AT_SKILL_SWELL_LIFE_PROFICIENCY
                 && Skill != AT_SKILL_INFINITY_ARROW
-                && Skill != AT_SKILL_SWELL_OF_MAGICPOWER
+                && Skill != AT_SKILL_INFINITY_ARROW_STR
+                && Skill != AT_SKILL_EXPANSION_OF_WIZARDRY
+                && Skill != AT_SKILL_EXPANSION_OF_WIZARDRY_STR
+                && Skill != AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY
                 && Skill != AT_SKILL_RECOVER
                 && Skill != AT_SKILL_ALICE_BERSERKER
-                && !(AT_SKILL_DEF_POWER_UP <= Skill && Skill <= AT_SKILL_DEF_POWER_UP + 4)
-                && !(AT_SKILL_ATT_POWER_UP <= Skill && Skill <= AT_SKILL_ATT_POWER_UP + 4)
-                && !(AT_SKILL_SOUL_UP <= Skill && Skill <= AT_SKILL_SOUL_UP + 4)
-                && !(AT_SKILL_HEAL_UP <= Skill && Skill <= AT_SKILL_HEAL_UP + 4)
-                && !(AT_SKILL_LIFE_UP <= Skill && Skill <= AT_SKILL_LIFE_UP + 4)
-                && Skill != AT_SKILL_IMPROVE_AG && Skill != AT_SKILL_ADD_CRITICAL
+                && Skill != AT_SKILL_ALICE_BERSERKER_STR
+                && Skill != AT_SKILL_IMPROVE_AG
+                && Skill != AT_SKILL_ADD_CRITICAL
+                && Skill != AT_SKILL_ADD_CRITICAL_STR1
+                && Skill != AT_SKILL_ADD_CRITICAL_STR2
+                && Skill != AT_SKILL_ADD_CRITICAL_STR3
                 && Skill != AT_SKILL_PARTY_TELEPORT
                 && (Skill<AT_SKILL_STUN || Skill>AT_SKILL_REMOVAL_BUFF)
                 && Skill != AT_SKILL_BRAND_OF_SKILL
@@ -6910,7 +6909,7 @@ bool CanExecuteSkill(CHARACTER* c, int Skill, float Distance)
         }
     }
 
-    if (!gSkillManager.DemendConditionCheckSkill(Skill))
+    if (!gSkillManager.AreSkillRequirementsFulfilled(Skill))
     {
         return false;
     }
@@ -6949,7 +6948,7 @@ bool CheckMana(CHARACTER* c, int Skill)
     return true;
 }
 
-int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
+int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
 {
     OBJECT* o = &c->Object;
 
@@ -6985,28 +6984,31 @@ int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
         && gMapManager.InChaosCastle() == false)
     {
         if (ClassIndex == CLASS_ELF
-            && (Skill != AT_SKILL_CROSSBOW
+            && (Skill != AT_SKILL_TRIPLE_SHOT
+                && Skill != AT_SKILL_TRIPLE_SHOT_STR
+                && Skill != AT_SKILL_TRIPLE_SHOT_MASTERY
                 && Skill != AT_SKILL_MULTI_SHOT
-                && !(AT_SKILL_MANY_ARROW_UP <= Skill && Skill <= AT_SKILL_MANY_ARROW_UP + 4)
                 && Skill != AT_SKILL_BOW
-                && Skill != AT_SKILL_PIERCING
+                && Skill != AT_SKILL_PENETRATION
+                && Skill != AT_SKILL_PENETRATION_STR
                 && Skill != AT_SKILL_BLAST_CROSSBOW4
                 && Skill != AT_SKILL_PLASMA_STORM_FENRIR
                 ))
         {
             Attacking = -1;
         }
-        else if (ClassIndex == CLASS_KNIGHT && (Skill == AT_SKILL_VITALITY || (AT_SKILL_LIFE_UP <= Skill && Skill <= AT_SKILL_LIFE_UP + 4)))
+        else if (ClassIndex == CLASS_KNIGHT && (Skill == AT_SKILL_SWELL_LIFE || Skill == AT_SKILL_SWELL_LIFE_STR || Skill == AT_SKILL_SWELL_LIFE_PROFICIENCY))
         {
             Attacking = -1;
         }
         else if (ClassIndex == CLASS_DARK_LORD
-            && (Skill == AT_SKILL_ADD_CRITICAL || Skill == AT_SKILL_PARTY_TELEPORT))
+            && (Skill == AT_SKILL_ADD_CRITICAL || Skill == AT_SKILL_ADD_CRITICAL_STR1 || Skill == AT_SKILL_ADD_CRITICAL_STR2 || Skill == AT_SKILL_ADD_CRITICAL_STR3
+                || Skill == AT_SKILL_PARTY_TELEPORT))
         {
             Attacking = -1;
         }
         else if (ClassIndex == CLASS_WIZARD
-            && (Skill == AT_SKILL_BLAST_HELL_BEGIN || Skill == AT_SKILL_BLAST_HELL))
+            && (Skill == AT_SKILL_NOVA_BEGIN || Skill == AT_SKILL_NOVA))
         {
             Attacking = -1;
         }
@@ -7019,13 +7021,21 @@ int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
             Attacking = -1;
         }
         else if (Skill == AT_SKILL_ALICE_THORNS
-            || (AT_SKILL_ALICE_SLEEP_UP <= Skill && Skill <= AT_SKILL_ALICE_SLEEP_UP + 4)
-            || Skill == AT_SKILL_ALICE_BERSERKER || Skill == AT_SKILL_ALICE_SLEEP
+            || Skill == AT_SKILL_ALICE_BERSERKER
+            || Skill == AT_SKILL_ALICE_BERSERKER_STR
+            || Skill == AT_SKILL_ALICE_SLEEP
+            || Skill == AT_SKILL_ALICE_SLEEP_STR
             || Skill == AT_SKILL_ALICE_BLIND || Skill == AT_SKILL_ALICE_WEAKNESS || Skill == AT_SKILL_ALICE_ENERVATION)
         {
             Attacking = -1;
         }
-        else if (AT_SKILL_ATT_UP_OURFORCES <= Skill && Skill <= AT_SKILL_DEF_UP_OURFORCES)
+        else if (AT_SKILL_ATT_UP_OURFORCES == Skill
+            || AT_SKILL_HP_UP_OURFORCES == Skill
+            || AT_SKILL_HP_UP_OURFORCES_STR == Skill
+            || AT_SKILL_DEF_UP_OURFORCES == Skill
+            || AT_SKILL_DEF_UP_OURFORCES_STR == Skill
+            || AT_SKILL_DEF_UP_OURFORCES_MASTERY == Skill
+            )
         {
             Attacking = -1;
         }
@@ -7088,37 +7098,24 @@ int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
                         switch (Skill)
                         {
                         case AT_SKILL_GAOTIC:
-                        case AT_SKILL_SPEAR:
+                        case AT_SKILL_IMPALE:
                         case AT_SKILL_RIDER:
-                        case AT_SKILL_BLOW_UP:
-                        case AT_SKILL_BLOW_UP + 1:
-                        case AT_SKILL_BLOW_UP + 2:
-                        case AT_SKILL_BLOW_UP + 3:
-                        case AT_SKILL_BLOW_UP + 4:
                         case AT_SKILL_DEATHSTAB:
+                        case AT_SKILL_DEATHSTAB_STR:
                         case AT_SKILL_FORCE:
                         case AT_SKILL_FORCE_WAVE:
-                        case AT_SKILL_FIRE_BUST_UP:
-                        case AT_SKILL_FIRE_BUST_UP + 1:
-                        case AT_SKILL_FIRE_BUST_UP + 2:
-                        case AT_SKILL_FIRE_BUST_UP + 3:
-                        case AT_SKILL_FIRE_BUST_UP + 4:
-                        case AT_SKILL_LONGPIER_ATTACK:
-                        case AT_SKILL_ASHAKE_UP:
-                        case AT_SKILL_ASHAKE_UP + 1:
-                        case AT_SKILL_ASHAKE_UP + 2:
-                        case AT_SKILL_ASHAKE_UP + 3:
-                        case AT_SKILL_ASHAKE_UP + 4:
-                        case AT_SKILL_DARK_HORSE:
+                        case AT_SKILL_FORCE_WAVE_STR:
+                        case AT_SKILL_FIREBURST:
+                        case AT_SKILL_FIREBURST_STR:
+                        case AT_SKILL_FIREBURST_MASTERY:
+                        case AT_SKILL_EARTHSHAKE:
+                        case AT_SKILL_EARTHSHAKE_STR:
+                        case AT_SKILL_EARTHSHAKE_MASTERY:
                         case AT_SKILL_THUNDER_STRIKE:
                         case AT_SKILL_SPACE_SPLIT:
                         case AT_SKILL_PLASMA_STORM_FENRIR:
-                        case AT_SKILL_FIRE_SCREAM_UP:
-                        case AT_SKILL_FIRE_SCREAM_UP + 1:
-                        case AT_SKILL_FIRE_SCREAM_UP + 2:
-                        case AT_SKILL_FIRE_SCREAM_UP + 3:
-                        case AT_SKILL_FIRE_SCREAM_UP + 4:
-                        case AT_SKILL_DARK_SCREAM:
+                        case AT_SKILL_FIRE_SCREAM:
+                        case AT_SKILL_FIRE_SCREAM_STR:
                             bOk = true;
                             break;
                         }
@@ -8087,13 +8084,18 @@ void SelectObjects()
             {
                 int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
 
-                if (((Skill >= AT_SKILL_HEALING) && (Skill <= AT_SKILL_ATTACK))
-                    || ((AT_SKILL_HEAL_UP <= Skill) && (Skill <= AT_SKILL_HEAL_UP + 4))
-                    || ((AT_SKILL_ATT_POWER_UP <= Skill) && (Skill <= AT_SKILL_ATT_POWER_UP + 4))
-                    || ((AT_SKILL_DEF_POWER_UP <= Skill) && (Skill <= AT_SKILL_DEF_POWER_UP + 4))
-                    || (Skill == AT_SKILL_TELEPORT_B)
-                    || (Skill == AT_SKILL_WIZARDDEFENSE)
-                    || ((AT_SKILL_SOUL_UP <= Skill) && (Skill <= AT_SKILL_SOUL_UP + 4))
+                if (Skill == AT_SKILL_HEALING
+                    || Skill == AT_SKILL_HEALING_STR
+                    || Skill == AT_SKILL_DEFENSE
+                    || Skill == AT_SKILL_DEFENSE_STR
+                    || Skill == AT_SKILL_DEFENSE_MASTERY
+                    || Skill == AT_SKILL_ATTACK
+                    || Skill == AT_SKILL_ATTACK_STR
+                    || Skill == AT_SKILL_ATTACK_MASTERY
+                    || Skill == AT_SKILL_TELEPORT_ALLY
+                    || Skill == AT_SKILL_SOUL_BARRIER
+                    || Skill == AT_SKILL_SOUL_BARRIER_STR
+                    || Skill == AT_SKILL_SOUL_BARRIER_PROFICIENCY
                     )
                 {
                     CKind_1 = KIND_PLAYER;

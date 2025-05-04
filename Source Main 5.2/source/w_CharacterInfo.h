@@ -167,7 +167,7 @@ public:
     BYTE        SkillX;
     BYTE        SkillY;
     float        Appear;
-    BYTE	    CurrentSkill;
+    BYTE	    CurrentSkill; // Skill Index
     BYTE        CastRenderTime; // unused?
     BYTE        m_byFriend;
     WORD        MonsterSkill;

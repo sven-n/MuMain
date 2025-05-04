@@ -221,28 +221,23 @@ bool CSItemOption::IsDisableSkill(ActionSkillType Type, int Energy, int Charisma
     case 36:SkillEnergy = 300; break;
     case 37:SkillEnergy = 500; break;
     case 60:SkillEnergy = 15; break;
-    case AT_SKILL_ASHAKE_UP:
-    case AT_SKILL_ASHAKE_UP + 1:
-    case AT_SKILL_ASHAKE_UP + 2:
-    case AT_SKILL_ASHAKE_UP + 3:
-    case AT_SKILL_ASHAKE_UP + 4:
-    case AT_SKILL_DARK_HORSE:    SkillEnergy = 0; break;
+    case AT_SKILL_EARTHSHAKE_STR:
+    case AT_SKILL_EARTHSHAKE_MASTERY:
+    case AT_SKILL_EARTHSHAKE:    SkillEnergy = 0; break;
     case AT_PET_COMMAND_DEFAULT: SkillEnergy = 0; break;
     case AT_PET_COMMAND_RANDOM:  SkillEnergy = 0; break;
     case AT_PET_COMMAND_OWNER:   SkillEnergy = 0; break;
     case AT_PET_COMMAND_TARGET:  SkillEnergy = 0; break;
     case AT_SKILL_PLASMA_STORM_FENRIR: SkillEnergy = 0; break;
-    case AT_SKILL_INFINITY_ARROW: SkillEnergy = 0; break;
-    case AT_SKILL_BLOW_OF_DESTRUCTION: SkillEnergy = 0; break;
+    case AT_SKILL_INFINITY_ARROW:
+    case AT_SKILL_INFINITY_ARROW_STR: SkillEnergy = 0; break;
+    case AT_SKILL_STRIKE_OF_DESTRUCTION: 
+    case AT_SKILL_STRIKE_OF_DESTRUCTION_STR: SkillEnergy = 0; break;
     case AT_SKILL_RECOVER:
     case AT_SKILL_GAOTIC:
     case AT_SKILL_MULTI_SHOT:
-    case AT_SKILL_FIRE_SCREAM_UP:
-    case AT_SKILL_FIRE_SCREAM_UP + 1:
-    case AT_SKILL_FIRE_SCREAM_UP + 2:
-    case AT_SKILL_FIRE_SCREAM_UP + 3:
-    case AT_SKILL_FIRE_SCREAM_UP + 4:
-    case AT_SKILL_DARK_SCREAM:
+    case AT_SKILL_FIRE_SCREAM_STR:
+    case AT_SKILL_FIRE_SCREAM:
         SkillEnergy = 0;
         break;
 
@@ -692,34 +687,48 @@ bool CSItemOption::GetDefaultOptionText(const ITEM* ip, wchar_t* Text)
     return true;
 }
 
-bool CSItemOption::Special_Option_Check(int Kind)
+bool CSItemOption::IsNonWeaponSkillOrIsSkillEquipped(ActionSkillType skill)
 {
-    int i, j;
-    for (i = 0; i < 2; i++)
+    bool checkForWeaponSkill;
+    auto baseSkill = gSkillManager.MasterSkillToBaseSkillIndex(skill);
+    switch (baseSkill)
     {
-        const ITEM* item = nullptr;
-        item = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT + i];
-        if (item == nullptr || item->Type <= -1)
-            continue;
+    case AT_SKILL_POWER_SLASH:
+    case AT_SKILL_TRIPLE_SHOT:
+    case AT_SKILL_FALLING_SLASH:
+    case AT_SKILL_LUNGE:
+    case AT_SKILL_UPPERCUT:
+    case AT_SKILL_CYCLONE:
+    case AT_SKILL_SLASH:
+        checkForWeaponSkill = true;
+        break;
+    default:
+        checkForWeaponSkill = false;
+        break;
+    }
 
-        if (Kind == 0)
+    if (!checkForWeaponSkill)
+    {
+        return true;
+    }
+
+    for (int i = 0; i < 2; i++)
+    {
+        const ITEM* item = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT + i];
+        if (item == nullptr || item->Type <= -1)
         {
-            for (j = 0; j < item->SpecialNum; j++)
+            continue;
+        }
+
+        for (int j = 0; j < item->SpecialNum; j++)
+        {
+            if (item->Special[j] == baseSkill)
             {
-                if (item->Special[j] == AT_SKILL_ICE_BLADE)
-                    return true;
+                return true;
             }
         }
-        else
-            if (Kind == 1)
-            {
-                for (j = 0; j < item->SpecialNum; j++)
-                {
-                    if (item->Special[j] == AT_SKILL_CROSSBOW)
-                        return true;
-                }
-            }
     }
+
     return false;
 }
 

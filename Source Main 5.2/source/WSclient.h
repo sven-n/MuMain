@@ -749,6 +749,21 @@ typedef	struct {
     BYTE		  m_byCount;
 } PRECEIVE_EX_SKILL_COUNT, * LPPRECEIVE_EX_SKILL_COUNT;
 
+struct PMSG_MASTER_SKILL_LIST_SEND
+{
+    PWMSG_HEADER header; // C2:F3:E2
+    BYTE subcode;
+    DWORD count;
+};
+
+struct PMSG_MASTER_SKILL_LIST
+{
+    BYTE skill;
+    BYTE level;
+    float MainValue;
+    float NextValue;
+};
+
 //receive gold
 typedef struct {
     PBMSG_HEADER  Header;
@@ -2874,14 +2889,18 @@ typedef struct
     DWORD		wMaxBP;
 } PMSG_MASTERLEVEL_UP_EXTENDED, * LPPMSG_MASTERLEVEL_UP_EXTENDED;
 
+
 typedef struct
 {
     PBMSG_HEADER	h;
     BYTE		subcode;
-    BYTE		btResult;
-    short       nMLPoint;
-    int			nSkillNum;
-    int			nSkillLevel;
+    short		Result;
+    short       MasterLevelUpPoints;
+    int			SkillIndex;
+    int			SkillNumber;
+    int			SkillLevel;
+    float   DisplayValue;
+    float   DisplayValueOfNextLevel;
 } PMSG_ANS_MASTERLEVEL_SKILL, * LPPMSG_ANS_MASTERLEVEL_SKILL;
 
 //----------------------------------------------------------------------------

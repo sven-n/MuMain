@@ -390,19 +390,26 @@ bool CMonkSystem::SetRageSkillAni(int _nSkill, OBJECT* _pObj)
 {
     switch (_nSkill)
     {
-    case AT_SKILL_THRUST:
+    case AT_SKILL_KILLING_BLOW:
+    case AT_SKILL_KILLING_BLOW_STR:
+    case AT_SKILL_KILLING_BLOW_MASTERY:
         SetAction(_pObj, PLAYER_SKILL_THRUST);
         return true;
-    case AT_SKILL_STAMP:
+    case AT_SKILL_BEAST_UPPERCUT:
+    case AT_SKILL_BEAST_UPPERCUT_STR:
+    case AT_SKILL_BEAST_UPPERCUT_MASTERY:
         SetAction(_pObj, PLAYER_SKILL_STAMP);
         return true;
-    case AT_SKILL_GIANTSWING:
+    case AT_SKILL_CHAIN_DRIVE:
+    case AT_SKILL_CHAIN_DRIVE_STR:
         SetAction(_pObj, PLAYER_SKILL_GIANTSWING);
         return true;
     case AT_SKILL_DARKSIDE:
+    case AT_SKILL_DARKSIDE_STR:
         SetAction(_pObj, PLAYER_SKILL_DARKSIDE_READY);
         return true;
-    case AT_SKILL_DRAGON_LOWER:
+    case AT_SKILL_DRAGON_ROAR:
+    case AT_SKILL_DRAGON_ROAR_STR:
         SetAction(_pObj, PLAYER_SKILL_DRAGONLORE);
         return true;
     case AT_SKILL_DRAGON_KICK:
@@ -410,7 +417,10 @@ bool CMonkSystem::SetRageSkillAni(int _nSkill, OBJECT* _pObj)
         return true;
     case AT_SKILL_ATT_UP_OURFORCES:
     case AT_SKILL_HP_UP_OURFORCES:
+    case AT_SKILL_HP_UP_OURFORCES_STR:
     case AT_SKILL_DEF_UP_OURFORCES:
+    case AT_SKILL_DEF_UP_OURFORCES_STR:
+    case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
         return false;
     }
     return false;
@@ -420,8 +430,11 @@ bool CMonkSystem::IsRageHalfwaySkillAni(int _nSkill)
 {
     switch (_nSkill)
     {
-    case AT_SKILL_STAMP:
-    case AT_SKILL_GIANTSWING:
+    case AT_SKILL_BEAST_UPPERCUT:
+    case AT_SKILL_BEAST_UPPERCUT_STR:
+    case AT_SKILL_BEAST_UPPERCUT_MASTERY:
+    case AT_SKILL_CHAIN_DRIVE:
+    case AT_SKILL_CHAIN_DRIVE_STR:
     case AT_SKILL_DRAGON_KICK:
         return true;
     default:
@@ -519,7 +532,7 @@ bool CMonkSystem::RageFighterEffect(OBJECT* _pObj, int _Type)
     return false;
 }
 
-void CMonkSystem::SetDarksideTargetIndex(WORD* _pTargetIndex)
+void CMonkSystem::SetDarksideTargetIndex(WORD* _pTargetIndex, ActionSkillType skill)
 {
     for (int i = 0; i < DARKSIDE_TARGET_MAX; ++i)
     {
@@ -537,7 +550,7 @@ void CMonkSystem::SetDarksideTargetIndex(WORD* _pTargetIndex)
 
     if (!m_nDarksideEffectTotal)
     {
-        SendRequestMagic(AT_SKILL_DARKSIDE, HeroKey);
+        SendRequestMagic(skill, HeroKey);
     }
     else
     {
@@ -994,9 +1007,14 @@ bool CMonkSystem::IsRideNotUseSkill(int _nSkill, short _Type)
     // 탈것타고 있을 경우 사용 불가능한 스킬
     switch (_nSkill)
     {
-    case AT_SKILL_THRUST:
-    case AT_SKILL_STAMP:
-    case AT_SKILL_GIANTSWING:
+    case AT_SKILL_KILLING_BLOW:
+    case AT_SKILL_KILLING_BLOW_STR:
+    case AT_SKILL_KILLING_BLOW_MASTERY:
+    case AT_SKILL_BEAST_UPPERCUT:
+    case AT_SKILL_BEAST_UPPERCUT_STR:
+    case AT_SKILL_BEAST_UPPERCUT_MASTERY:
+    case AT_SKILL_CHAIN_DRIVE:
+    case AT_SKILL_CHAIN_DRIVE_STR:
     case AT_SKILL_DRAGON_KICK:
     case AT_SKILL_OCCUPY:
         return true;
@@ -1010,8 +1028,9 @@ bool CMonkSystem::IsSwordformGlovesUseSkill(int _nSkill)
 {
     switch (_nSkill)
     {
-    case AT_SKILL_GIANTSWING: //여기 스킬들은 장갑형 무기를 착용시에만 사용가능
-    case AT_SKILL_DRAGON_LOWER:
+    case AT_SKILL_CHAIN_DRIVE: //여기 스킬들은 장갑형 무기를 착용시에만 사용가능
+    case AT_SKILL_DRAGON_ROAR:
+    case AT_SKILL_DRAGON_ROAR_STR:
     case AT_SKILL_DRAGON_KICK:
     {
         ITEM* pOtherHand = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
@@ -1068,7 +1087,9 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
 {
     switch (_nSkill)
     {
-    case AT_SKILL_THRUST:
+    case AT_SKILL_KILLING_BLOW:
+    case AT_SKILL_KILLING_BLOW_STR:
+    case AT_SKILL_KILLING_BLOW_MASTERY:
     {
         if (m_bUseEffectOnce)
             return false;
@@ -1083,7 +1104,9 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
         PlayBuffer(SOUND_RAGESKILL_THRUST);
     }
     return true;
-    case AT_SKILL_STAMP:
+    case AT_SKILL_BEAST_UPPERCUT:
+    case AT_SKILL_BEAST_UPPERCUT_STR:
+    case AT_SKILL_BEAST_UPPERCUT_MASTERY:
     {
         if (m_bUseEffectOnce)
             return false;
@@ -1094,7 +1117,8 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
         PlayBuffer(SOUND_RAGESKILL_STAMP);
     }
     return true;
-    case AT_SKILL_GIANTSWING:
+    case AT_SKILL_CHAIN_DRIVE:
+    case AT_SKILL_CHAIN_DRIVE_STR:
     {
         CreateEffect(BITMAP_SWORDEFF, _pObj->Position, _pObj->Angle, _pObj->Light, 0, _pObj);
 
@@ -1131,6 +1155,7 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
     }
     return true;
     case AT_SKILL_HP_UP_OURFORCES:
+    case AT_SKILL_HP_UP_OURFORCES_STR:
     {
         if (m_bUseEffectOnce)
             return false;
@@ -1158,6 +1183,8 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
     }
     return true;
     case AT_SKILL_DEF_UP_OURFORCES:
+    case AT_SKILL_DEF_UP_OURFORCES_STR:
+    case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
     {
         if (m_bUseEffectOnce)
             return false;
@@ -1233,7 +1260,8 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
         PlayBuffer(SOUND_RAGESKILL_DRAGONKICK);
     }
     return true;
-    case AT_SKILL_DRAGON_LOWER:
+    case AT_SKILL_DRAGON_ROAR:
+    case AT_SKILL_DRAGON_ROAR_STR:
     {
         if (m_bUseEffectOnce)
             return false;
@@ -1252,6 +1280,7 @@ bool CMonkSystem::RageCreateEffect(OBJECT* _pObj, int _nSkill)
     }
     break;
     case AT_SKILL_DARKSIDE:
+    case AT_SKILL_DARKSIDE_STR:
     {
         if (m_bUseEffectOnce)
             return false;
