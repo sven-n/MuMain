@@ -49,7 +49,7 @@ extern wchar_t         GrabFileName[];
 extern bool         GrabEnable;
 
 //  etc
-//void OpenExploper(char *Name,char *para=NULL);
+
 bool CheckID_HistoryDay(wchar_t* Name, WORD day);
 void SaveScreen();
 void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar);
