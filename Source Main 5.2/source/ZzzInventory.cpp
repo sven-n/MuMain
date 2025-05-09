@@ -6126,7 +6126,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
             else if (CharacterAttribute->Skill[Type] == AT_SKILL_SOUL_BARRIER_STR
                 || CharacterAttribute->Skill[Type] == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
             {
-                auto additionalValue = SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface()->GetSkillValue(CharacterAttribute->Skill[Type]);
+                auto additionalValue = CharacterAttribute->MasterSkillInfo[CharacterAttribute->Skill[Type]].GetSkillValue();
                 iDamageShield = (int)(10 + (Dexterity / 50.f) + (Energy / 200.f));
                 iDamageShield += (int)additionalValue;
             }
@@ -6272,7 +6272,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         case AT_SKILL_HEALING_STR:
         {
             int value = (Energy / 5) + 5;
-            auto boostPercent = SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface()->GetSkillValue(AT_SKILL_HEALING_STR);
+            auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_HEALING_STR].GetSkillValue();
             value += static_cast<int>((value * boostPercent) / 100.0);
             swprintf(TextList[TextNum], GlobalText[171], value);
         }
@@ -6284,8 +6284,8 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         case AT_SKILL_DEFENSE_MASTERY:
         {
             int value = Energy / 8 + 2;
-            auto boostPercent = SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface()->GetSkillValue(AT_SKILL_DEFENSE_STR);
-            auto masteryBoostPercent = SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface()->GetSkillValue(AT_SKILL_DEFENSE_MASTERY);
+            auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_STR].GetSkillValue();
+            auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_MASTERY].GetSkillValue();;
             value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
             swprintf(TextList[TextNum], GlobalText[172], value);
         }
@@ -6297,8 +6297,8 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         case AT_SKILL_ATTACK_MASTERY:
         {
             int value = Energy / 7 + 3;
-            auto boostPercent = SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface()->GetSkillValue(AT_SKILL_ATTACK_STR);
-            auto masteryBoostPercent = SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface()->GetSkillValue(AT_SKILL_ATTACK_MASTERY);
+            auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_STR].GetSkillValue();
+            auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_MASTERY].GetSkillValue();
             value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
             swprintf(TextList[TextNum], GlobalText[173], value);
         }

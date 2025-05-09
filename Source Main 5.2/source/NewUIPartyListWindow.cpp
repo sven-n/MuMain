@@ -361,14 +361,14 @@ void CNewUIPartyListWindow::ClosingProcess()
 
 bool CNewUIPartyListWindow::SelectCharacterInPartyList(PARTY_t* pMember)
 {
-    int HeroClass = gCharacterManager.GetBaseClass(Hero->Class);
+    auto HeroClass = gCharacterManager.GetBaseClass(Hero->Class);
 
     if (HeroClass == CLASS_ELF
         || HeroClass == CLASS_WIZARD
         || HeroClass == CLASS_SUMMONER
         )
     {
-        int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
+        auto Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
 
         if (Skill == AT_SKILL_HEALING
             || Skill == AT_SKILL_HEALING_STR

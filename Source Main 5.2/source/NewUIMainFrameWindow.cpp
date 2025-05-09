@@ -1856,7 +1856,7 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
             }
         }
 
-        WORD wHotKeySkill = CharacterAttribute->Skill[m_iHotKeySkillType[iHotKey]];
+        auto wHotKeySkill = CharacterAttribute->Skill[m_iHotKeySkillType[iHotKey]];
 
         if (wHotKeySkill == 0)
         {
@@ -1867,7 +1867,7 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
 
         Hero->CurrentSkill = m_iHotKeySkillType[iHotKey];
 
-        WORD bySkill = CharacterAttribute->Skill[Hero->CurrentSkill];
+        auto bySkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 
         if (
             g_pOption->IsAutoAttack() == true

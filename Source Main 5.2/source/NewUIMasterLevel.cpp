@@ -10,25 +10,24 @@
 #include "NewUICommonMessageBox.h"
 #include "SkillManager.h"
 
-// TODO: are these 2 still needed?
-char Need_Point = 0;
-int	 In_Skill = 0;
+namespace 
+{
+    _MASTER_SKILLTREE_DATA m_stMasterSkillTreeData[MAX_MASTER_SKILL_DATA];
+    _MASTER_SKILL_TOOLTIP m_stMasterSkillTooltip[MAX_MASTER_SKILL_DATA];
+}
 
-_MASTER_SKILLTREE_DATA m_stMasterSkillTreeData[MAX_MASTER_SKILL_DATA];
-_MASTER_SKILL_TOOLTIP m_stMasterSkillTooltip[MAX_MASTER_SKILL_DATA];
 
 SEASON3B::CNewUIMasterLevel::CNewUIMasterLevel()
 {
     m_pNewUIMng = nullptr;
     this->ConsumePoint = 0;
     this->CurSkillID = 0;
-    this->classCode = 0;
+    this->classCode = MASTER_SKILL_TREE_CLASS_NONE;
     this->CategoryTextIndex = 0;
     this->categoryPos[0] = { 11,55 };
     this->categoryPos[1] = { 221,55 };
     this->categoryPos[2] = { 431,55 };
     this->InitMasterSkillPoint();
-    this->ClearSkillTreeInfo();
     this->ClearSkillTreeData();
     this->ClearSkillTooltipData();
 }
@@ -38,18 +37,12 @@ SEASON3B::CNewUIMasterLevel::~CNewUIMasterLevel()
     this->Release();
 }
 
-void SEASON3B::CNewUIMasterLevel::ClearSkillTreeInfo()
-{
-    if (!this->map_skilltreeinfo.empty())
-        this->map_skilltreeinfo.clear();
-}
-
-BYTE SEASON3B::CNewUIMasterLevel::GetConsumePoint()
+BYTE SEASON3B::CNewUIMasterLevel::GetConsumePoint() const
 {
     return this->ConsumePoint;
 }
 
-int SEASON3B::CNewUIMasterLevel::GetCurSkillID()
+int SEASON3B::CNewUIMasterLevel::GetCurSkillID() const
 {
     return this->CurSkillID;
 }
@@ -84,7 +77,6 @@ bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng)
 
 void SEASON3B::CNewUIMasterLevel::Release()
 {
-    this->ClearSkillTreeInfo();
     this->ClearSkillTreeData();
     this->ClearSkillTooltipData();
     if (m_pNewUIMng)
@@ -119,9 +111,9 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(wchar_t* path)
         return;
     }
 
-    int Size = sizeof(_MASTER_SKILLTREE_DATA);
+    constexpr int Size = sizeof(_MASTER_SKILLTREE_DATA);
 
-    BYTE* Buffer = new BYTE[Size * MAX_MASTER_SKILL_DATA];
+    auto Buffer = new BYTE[Size * MAX_MASTER_SKILL_DATA];
 
     fread(Buffer, Size * MAX_MASTER_SKILL_DATA, 1, fp);
 
@@ -175,24 +167,13 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTooltip(wchar_t* path)
         return;
     }
 
-    int record_size = sizeof(_MASTER_SKILL_TOOLTIP_FILE);
-    BYTE* file_buffer = new BYTE[record_size * MAX_MASTER_SKILL_DATA];
+    constexpr int record_size = sizeof(_MASTER_SKILL_TOOLTIP_FILE);
+    auto file_buffer = new BYTE[record_size * MAX_MASTER_SKILL_DATA];
     fread(file_buffer, record_size * MAX_MASTER_SKILL_DATA, 1, fp);
     DWORD dwCheckSum;
     fread(&dwCheckSum, sizeof(DWORD), 1u, fp);
     fclose(fp);
 
-
-    /*
-    if (dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
-    {
-        swprintf(Text, "%s - File corrupted.", path);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-        return;
-    }
-    */
     BYTE* pSeek = file_buffer;
 
     for (int i = 0; i < MAX_MASTER_SKILL_DATA; i++)
@@ -204,7 +185,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTooltip(wchar_t* path)
 
         const auto target = &m_stMasterSkillTooltip[i];
         target->SkillNumber = static_cast<ActionSkillType>(current.SkillNumber);
-        target->ClassCode = current.ClassCode;
+        target->ClassCode = static_cast<MASTER_SKILL_TREE_CLASS>(current.ClassCode);
         CMultiLanguage::ConvertFromUtf8(target->Info1, current.Info1);
         CMultiLanguage::ConvertFromUtf8(target->Info2, current.Info2);
         CMultiLanguage::ConvertFromUtf8(target->Info3, current.Info3);
@@ -241,25 +222,25 @@ void SEASON3B::CNewUIMasterLevel::SetMasterType(CLASS_TYPE Class)
     switch (Class)
     {
     case CLASS_GRANDMASTER:
-        this->classCode = 2;
+        this->classCode = MASTER_SKILL_TREE_CLASS_GRANDMASTER;
         break;
     case CLASS_BLADEMASTER:
-        this->classCode = 1;
+        this->classCode = MASTER_SKILL_TREE_CLASS_BLADEMASTER;
         break;
     case CLASS_HIGHELF:
-        this->classCode = 4;
+        this->classCode = MASTER_SKILL_TREE_CLASS_HIGHELF;
         break;
     case CLASS_DUELMASTER:
-        this->classCode = 16;
+        this->classCode = MASTER_SKILL_TREE_CLASS_DUELMASTER;
         break;
     case CLASS_LORDEMPEROR:
-        this->classCode = 32;
+        this->classCode = MASTER_SKILL_TREE_CLASS_LORDEMPEROR;
         break;
     case CLASS_DIMENSIONMASTER:
-        this->classCode = 8;
+        this->classCode = MASTER_SKILL_TREE_CLASS_DIMENSIONMASTER;
         break;
     case CLASS_TEMPLENIGHT:
-        this->classCode = 64;
+        this->classCode = MASTER_SKILL_TREE_CLASS_TEMPLEKNIGHT;
         break;
     default:
         break;
@@ -361,26 +342,19 @@ void SEASON3B::CNewUIMasterLevel::SetMasterSkillToolTipData()
     }
 }
 
-bool SEASON3B::CNewUIMasterLevel::SetMasterSkillTreeInfo(int index, int SkillPoint, float value, float nextvalue)
+bool SEASON3B::CNewUIMasterLevel::SetMasterSkillTreeInfo(int index, BYTE skillLevel, float value, float nextvalue)
 {
-    std::map<BYTE, _MASTER_SKILLTREE_DATA>::iterator it = this->map_masterData.find(index);
+    const auto it = this->map_masterData.find(index);
 
     if (it == this->map_masterData.end())
-    {
-        return true;
-    }
-
-    CSkillTreeInfo skillInfo;
-
-    skillInfo.SetSkillTreeInfo(SkillPoint, value, nextvalue);
-
-    this->CategoryPoint[it->second.Group] += SkillPoint;
-
-    if (this->map_skilltreeinfo.insert(std::pair(it->second.Skill, skillInfo)).second == false)
     {
         return false;
     }
 
+    const CSkillTreeInfo skillInfo = { skillLevel, value, nextvalue };
+    CharacterAttribute->MasterSkillInfo[it->second.Skill] = skillInfo;
+
+    this->CategoryPoint[it->second.Group] += skillLevel;
 
     return true;
 }
@@ -392,7 +366,7 @@ int SEASON3B::CNewUIMasterLevel::SetDivideString(wchar_t* text, int isItemTollTi
         return TextNum;
     }
 
-    wchar_t alpszDst[10][256] = {};
+    constexpr wchar_t alpszDst[10][256] = {};
 
     int  nLine = 0;
 
@@ -534,7 +508,7 @@ void SEASON3B::CNewUIMasterLevel::UnloadImages()
     }
 }
 
-void SEASON3B::CNewUIMasterLevel::RenderText()
+void SEASON3B::CNewUIMasterLevel::RenderText() const
 {
     g_pRenderText->SetFont(g_hFont);
 
@@ -563,11 +537,11 @@ void SEASON3B::CNewUIMasterLevel::RenderText()
 
     if (Master_Level_Data.lNext_MasterLevel_Experince != 0)
     {
-        __int64 iTotalLevel = Master_Level_Data.nMLevel + 400;				// 종합레벨 - 400렙이 만렙이기 때문에 더해준다.
-        __int64 iTOverLevel = iTotalLevel - 255;		// 255레벨 이상 기준 레벨
+        const __int64 iTotalLevel = Master_Level_Data.nMLevel + 400;				// 종합레벨 - 400렙이 만렙이기 때문에 더해준다.
+        const __int64 iTOverLevel = iTotalLevel - 255;		// 255레벨 이상 기준 레벨
         __int64 iBaseExperience = 0;					// 레벨 초기 경험치
 
-        __int64 iData_Master =	// A
+        const __int64 iData_Master =	// A
             (
                 (
                     (__int64)9 + (__int64)iTotalLevel
@@ -589,10 +563,10 @@ void SEASON3B::CNewUIMasterLevel::RenderText()
         iBaseExperience = (iData_Master - (__int64)3892250000) / (__int64)2;	// B
 
         // 레벨업 경험치
-        double fNeedExp = (double)Master_Level_Data.lNext_MasterLevel_Experince - (double)iBaseExperience;
+        const double fNeedExp = (double)Master_Level_Data.lNext_MasterLevel_Experince - (double)iBaseExperience;
 
         // 현재 획득한 경험치
-        double fExp = (double)Master_Level_Data.lMasterLevel_Experince - (double)iBaseExperience;
+        const double fExp = (double)Master_Level_Data.lMasterLevel_Experince - (double)iBaseExperience;
 
         swprintf(Buffer, GlobalText[3335], fExp / fNeedExp * 100.0);
 
@@ -618,35 +592,29 @@ void SEASON3B::CNewUIMasterLevel::RenderText()
 
 void SEASON3B::CNewUIMasterLevel::RenderIcon()
 {
-    int SKILL_ICON_WIDTH = 20;
-    int SKILL_ICON_HEIGHT = 28;
+    constexpr int SKILL_ICON_WIDTH = 20;
+    constexpr int SKILL_ICON_HEIGHT = 28;
 
-    for (std::map<BYTE, _MASTER_SKILLTREE_DATA>::iterator it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
+    for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
     {
-        auto group = it->second.Group;
-        auto skill = it->second.Skill;
-        auto skillAttribute = &SkillAttribute[skill];
-        int skillPoint = 0;
-        int index = (it->second.Index - 1) % 4;
-        BYTE rank = skillAttribute->SkillRank;
+        const auto group = it->second.Group;
+        const auto skill = it->second.Skill;
+        const auto skillAttribute = &SkillAttribute[skill];
+        const auto skillLevel = CharacterAttribute->MasterSkillInfo[skill].GetSkillLevel();
 
-        int CalcX = (int)(index * 49.0f + this->categoryPos[group].x);
-        int CalcY = (int)(this->categoryPos[group].y + (skillAttribute->SkillRank - 1) * 41.0f);
+        const int index = (it->second.Index - 1) % 4;
+        const BYTE rank = skillAttribute->SkillRank;
 
-        auto sit = this->map_skilltreeinfo.find(skill);
-
-        if (sit != this->map_skilltreeinfo.end())
-        {
-            skillPoint = sit->second.GetSkillPoint();
-        }
+        const int CalcX = (int)(index * 49.0f + this->categoryPos[group].x);
+        const int CalcY = (int)(this->categoryPos[group].y + (skillAttribute->SkillRank - 1) * 41.0f);
 
         DWORD textColor;
 
         RenderImage(IMAGE_MASTER_INTERFACE + 4, CalcX, CalcY, 50, 38, 0, 0, 50.f / 64.f, 38.f / 64.f);
 
-        if (!this->CheckParentSkill(it->second.RequireSkill[0], it->second.RequireSkill[1])
-            || !this->CheckRankPoint(group, rank, skillPoint)
-            || !this->CheckBeforeSkill(skill, skillPoint)
+        if (!this->CheckParentSkill(it->second)
+            || !this->CheckRankPoint(group, rank, skillLevel)
+            || !this->CheckBeforeSkill(skill, skillLevel)
             || !g_csItemOption.IsNonWeaponSkillOrIsSkillEquipped(skill)
             )
         {
@@ -681,7 +649,7 @@ void SEASON3B::CNewUIMasterLevel::RenderIcon()
         if (it->second.ArrowDirection == 8)
             RenderImage(IMAGE_MASTER_INTERFACE + 13, CalcX, CalcY, 40, 28, 0, 0, 40 / 64.f, 28 / 32.f);
 
-        g_pRenderText->RenderText(CalcX + 8 + 30, CalcY + 28 - 5, std::to_wstring(skillPoint).c_str());
+        g_pRenderText->RenderText(CalcX + 8 + 30, CalcY + 28 - 5, std::to_wstring(skillLevel).c_str());
     }
 
     this->RenderToolTip();
@@ -689,9 +657,9 @@ void SEASON3B::CNewUIMasterLevel::RenderIcon()
 
 void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 {
-    for (std::map<BYTE, _MASTER_SKILLTREE_DATA>::iterator it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
+    for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
     {
-        BYTE group = it->second.Group;
+        const BYTE group = it->second.Group;
 
         auto Skill = it->second.Skill;
 
@@ -702,11 +670,11 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
             break;
         }
 
-        int index = (it->second.Index - 1) % 4;
+        const int index = (it->second.Index - 1) % 4;
 
-        int CalcX = (int)(index * 49.0f + this->categoryPos[group].x);
+        const int CalcX = (int)(index * 49.0f + this->categoryPos[group].x);
 
-        int CalcY = (int)(this->categoryPos[group].y + (p->SkillRank - 1) * 41.0f);
+        const int CalcY = (int)(this->categoryPos[group].y + (p->SkillRank - 1) * 41.0f);
 
         if (SEASON3B::IsPress(VK_LBUTTON) == true || SEASON3B::CheckMouseIn(CalcX + 8, CalcY + 5, 20, 28) == false)
         {
@@ -720,22 +688,10 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
             return;
         }
 
-        int skillPoint = 0;
-
-        float skillValue = 0.0f;
-
-        float skillNextValue = 0.0f;
-
-        auto sit = this->map_skilltreeinfo.find(Skill);
-
-        if (sit != this->map_skilltreeinfo.end())
-        {
-            skillPoint = sit->second.GetSkillPoint();
-
-            skillValue = sit->second.GetSkillValue();
-
-            skillNextValue = sit->second.GetSkillNextValue();
-        }
+        auto skillInfo = CharacterAttribute->MasterSkillInfo[Skill];
+        const auto skillLevel = skillInfo.GetSkillLevel();
+        auto skillValue = skillInfo.GetSkillValue();
+        const auto skillNextValue = skillInfo.GetSkillNextValue();
 
         for (int i = 0; i < 30; i++)
         {
@@ -757,7 +713,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 
         lineCount++;
 
-        swprintf(TextList[lineCount], mtit->second.Info1, p->SkillRank, skillPoint, it->second.MaxLevel);
+        swprintf(TextList[lineCount], mtit->second.Info1, p->SkillRank, skillLevel, it->second.MaxLevel);
 
         lineCount++;
 
@@ -769,12 +725,12 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
         }
         else
         {
-            swprintf(buffer, mtit->second.Info2, skillPoint != 0 ? skillValue : it->second.DefValue);
+            swprintf(buffer, mtit->second.Info2, skillLevel != 0 ? skillValue : it->second.DefValue);
         }
 
         lineCount = this->SetDivideString(buffer, 0, lineCount, 0, 0, true);
 
-        if (skillPoint != 0 && skillPoint < it->second.MaxLevel)
+        if (skillLevel != 0 && skillLevel < it->second.MaxLevel)
         {
             swprintf(buffer, GlobalText[3328]);
 
@@ -787,7 +743,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
             lineCount = this->SetDivideString(buffer, 0, lineCount, 0, 0, true);
         }
 
-        if (skillPoint < it->second.MaxLevel)
+        if (skillLevel < it->second.MaxLevel)
         {
             swprintf(buffer, GlobalText[3329]);
 
@@ -807,57 +763,31 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
             }
         }
 
-        int iTextColor = this->CheckBeforeSkill(Skill, skillPoint) == true ? 0 : 2;
+        int iTextColor = this->CheckBeforeSkill(Skill, skillLevel) == true ? 0 : 2;
 
         swprintf(buffer, mtit->second.Info4);
 
         lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
 
-        if (skillPoint < it->second.MaxLevel && p->SkillRank != 1)
+        if (skillLevel < it->second.MaxLevel && p->SkillRank != 1)
         {
-            iTextColor = this->CheckRankPoint(group, p->SkillRank, skillPoint) == true ? 0 : 2;
+            iTextColor = this->CheckRankPoint(group, p->SkillRank, skillLevel) == true ? 0 : 2;
 
             swprintf(buffer, mtit->second.Info5);
 
             lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
 
-            auto RequireSkill1 = it->second.RequireSkill[0];
-            auto RequireSkill2 = it->second.RequireSkill[1];
-
-            if (RequireSkill1 != AT_SKILL_UNDEFINED)
+            for (int i = 0; i < MAX_MASTER_SKILL_REQUIRES; i++)
             {
-                auto rq1it = this->map_skilltreeinfo.find(RequireSkill1);
+                const auto RequireSkill = it->second.RequireSkill[i];
 
-                if (rq1it != this->map_skilltreeinfo.end())
+                if (RequireSkill >= AT_SKILL_MASTER_BEGIN && RequireSkill <= AT_SKILL_MASTER_END)
                 {
-                    iTextColor = rq1it->second.GetSkillValue() < 10 ? 2 : 0;
+                    auto requiredSkill = CharacterAttribute->MasterSkillInfo[RequireSkill];
+                    iTextColor = requiredSkill.GetSkillValue() < 10 ? 2 : 0;
+                    swprintf(buffer, i == 0 ? mtit->second.Info6 : mtit->second.Info7);
+                    lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
                 }
-                else
-                {
-                    iTextColor = 2;
-                }
-
-                swprintf(buffer, mtit->second.Info6);
-
-                lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
-            }
-
-            if (RequireSkill2 != AT_SKILL_UNDEFINED)
-            {
-                auto rq1it = this->map_skilltreeinfo.find(RequireSkill2);
-
-                if (rq1it != this->map_skilltreeinfo.end())
-                {
-                    iTextColor = rq1it->second.GetSkillValue() < 10 ? 2 : 0;
-                }
-                else
-                {
-                    iTextColor = 2;
-                }
-
-                swprintf(buffer, mtit->second.Info7);
-
-                lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
             }
         }
 
@@ -876,7 +806,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 
 bool SEASON3B::CNewUIMasterLevel::CheckMouse(int posx, int posy)
 {
-    POINT position[3] = { {185,65},{385,65},{585,65} };
+    constexpr POINT position[3] = { {185,65},{385,65},{585,65} };
 
     for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
     {
@@ -893,7 +823,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckMouse(int posx, int posy)
 
 bool SEASON3B::CNewUIMasterLevel::CheckBtn()
 {
-    int posX = 220;
+    constexpr int posX = 220;
 
     for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
     {
@@ -918,7 +848,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckBtn()
         }
     }
 
-    for (std::map<BYTE, _MASTER_SKILLTREE_DATA>::iterator it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
+    for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
     {
         auto selectedSkill = it->second;
         
@@ -935,39 +865,32 @@ bool SEASON3B::CNewUIMasterLevel::CheckBtn()
     return true;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DATA skillData)// int group, int index, int reqPoint, unsigned int ReqSkill1, unsigned int ReqSkill2, unsigned int Skill, int defValue)
+bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DATA& skillData)
 {
     if (skillData.Group < 0 || skillData.Group >= 3)
     {
         return false;
     }
 
-    auto lpskill = &SkillAttribute[skillData.Skill];
+    const auto lpskill = &SkillAttribute[skillData.Skill];
 
     if (lpskill == nullptr)
     {
         return false;
     }
 
-    int tindex = (skillData.Index - 1) % 4;
+    const int tindex = (skillData.Index - 1) % 4;
 
-    int posX = (int)((double)this->categoryPos[skillData.Group].x + tindex * 49.0);
+    const int posX = (int)((double)this->categoryPos[skillData.Group].x + tindex * 49.0);
 
-    int posY = (int)((double)this->categoryPos[skillData.Group].y + (lpskill->SkillRank - 1) * 41.0);
+    const int posY = (int)((double)this->categoryPos[skillData.Group].y + (lpskill->SkillRank - 1) * 41.0);
 
     if (!SEASON3B::IsPress(VK_LBUTTON) || SEASON3B::CheckMouseIn(posX + 8, posY + 5, 20, 28) == false)
     {
         return true;
     }
 
-    auto it = this->map_skilltreeinfo.find(skillData.Skill);
-
-    int skillPoint = 0;
-
-    if (it != this->map_skilltreeinfo.end())
-    {
-        skillPoint = it->second.GetSkillPoint();
-    }
+    const auto skillPoint = CharacterAttribute->MasterSkillInfo[skillData.Skill].GetSkillLevel();
 
     PlayBuffer(SOUND_CLICK01);
 
@@ -982,7 +905,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
         return true;
     }
 
-    if (!this->CheckParentSkill(skillData.RequireSkill[0], skillData.RequireSkill[1])
+    if (!this->CheckParentSkill(skillData)
         || !this->CheckRankPoint(skillData.Group, lpskill->SkillRank, skillPoint)
         || !this->CheckBeforeSkill(skillData.Skill, skillPoint))
     {
@@ -991,9 +914,9 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
         return true;
     }
 
-    this->SetConsumePoint(skillData.RequiredPoints);
-
-    this->SetCurSkillID(skillData.Skill);
+    this->ConsumePoint = skillData.RequiredPoints;
+    
+    this->CurSkillID = skillData.Skill;
 
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMaster_Level_Interface));
 
@@ -1006,10 +929,10 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
     return true;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MASTER_SKILLTREE_DATA skillData, WORD skillPoint)
+bool SEASON3B::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MASTER_SKILLTREE_DATA& skillData, BYTE skillLevel)
 {
 
-    if (skillPoint >= skillData.MaxLevel)
+    if (skillLevel >= skillData.MaxLevel)
     {
         SEASON3B::CreateOkMessageBox(GlobalText[3326]);
         return false;
@@ -1029,50 +952,36 @@ bool SEASON3B::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MAS
     return false;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckParentSkill(ActionSkillType reqSkill1, ActionSkillType reqSkill2)
+bool SEASON3B::CNewUIMasterLevel::CheckParentSkill(const _MASTER_SKILLTREE_DATA& masterSkill)
 {
-    if (reqSkill1 == 0)
+    for (int i = 0; i < MAX_MASTER_SKILL_REQUIRES; i++)
     {
-        return true;
-    }
+        const auto requiredSkill = masterSkill.RequireSkill[i];
+        if (requiredSkill == AT_SKILL_UNDEFINED)
+        {
+            return true;
+        }
 
-    auto it = this->map_skilltreeinfo.find(reqSkill1);
+        if (requiredSkill < AT_SKILL_MASTER_BEGIN || requiredSkill > AT_SKILL_MASTER_END)
+        {
+            return true;
+        }
 
-    if (it == this->map_skilltreeinfo.end())
-    {
-        return false;
-    }
-
-    if (it->second.GetSkillPoint() < 10)
-    {
-        return false;
-    }
-
-    if (reqSkill2 == 0)
-    {
-        return true;
-    }
-
-    it = this->map_skilltreeinfo.find(reqSkill2);
-
-    if (it == this->map_skilltreeinfo.end())
-    {
-        return false;
-    }
-
-    if (it->second.GetSkillPoint() < 10)
-    {
-        return false;
+        const auto reqSkillLevel = CharacterAttribute->MasterSkillInfo[requiredSkill].GetSkillLevel();
+        if (reqSkillLevel < MASTER_SKILL_LEVEL_REQ_FOR_NEXT_RANK)
+        {
+            return false;
+        }
     }
 
     return true;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckRankPoint(BYTE group, BYTE rank, BYTE skillPoint)
+bool SEASON3B::CNewUIMasterLevel::CheckRankPoint(BYTE group, BYTE rank, BYTE skillLevel)
 {
-    if (this->skillPoint[group][rank] < skillPoint)
+    if (this->skillPoint[group][rank] < skillLevel)
     {
-        this->skillPoint[group][rank] = skillPoint;
+        this->skillPoint[group][rank] = skillLevel;
     }
 
     if (rank == 1)
@@ -1080,24 +989,24 @@ bool SEASON3B::CNewUIMasterLevel::CheckRankPoint(BYTE group, BYTE rank, BYTE ski
         return true;
     }
 
-    return this->skillPoint[group][rank - 1] >= 10;	//PUEDE SER +2 SI HAY ALGUN ERROR
+    return this->skillPoint[group][rank - 1] >= 10;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckBeforeSkill(ActionSkillType skill, BYTE skillPoint)
+bool SEASON3B::CNewUIMasterLevel::CheckBeforeSkill(ActionSkillType skill, BYTE skillLevel)
 {
-    if (skillPoint != 0)
+    if (skillLevel != 0)
     {
         return true;
     }
 
-    int Index = this->GetBeforeSkillID(skill);
+    const auto Index = SkillAttribute[skill].SkillBrand;
 
     if (Index == 0)
     {
         return true;
     }
 
-    SKILL_ATTRIBUTE* lpSkill = &SkillAttribute[Index];
+    const SKILL_ATTRIBUTE* lpSkill = &SkillAttribute[Index];
 
     if (lpSkill == nullptr)
     {
@@ -1120,168 +1029,23 @@ bool SEASON3B::CNewUIMasterLevel::CheckBeforeSkill(ActionSkillType skill, BYTE s
     return false;
 }
 
-int SEASON3B::CNewUIMasterLevel::GetBeforeSkillID(int index)
+void SEASON3B::CNewUIMasterLevel::SkillUpgrade(int index, BYTE skillLevel, float value, float nextValue)
 {
-    return SkillAttribute[index].SkillBrand;
-}
-
-int SEASON3B::CNewUIMasterLevel::GetBaseSkillID(int index)
-{
-    if (index >= MAX_SKILLS)
-    {
-        return 0;
-    }
-
-    while (SkillAttribute[index].SkillBrand != 0 && SkillAttribute[index].SkillBrand != 75)
-    {
-        index = SkillAttribute[index].SkillBrand;
-    }
-
-    return index;
-}
-
-void SEASON3B::CNewUIMasterLevel::SkillUpgrade(int index, char point, float value, float nextvalue)
-{
-    auto it = this->map_masterData.find(index);
+    const auto it = this->map_masterData.find(index);
     if (it == this->map_masterData.end())
     {
         return;
     }
 
-    auto realSkill = it->second.Skill;
-    int oldPoints = 0;
+    const auto realSkill = it->second.Skill;
+    const int oldLevel = CharacterAttribute->MasterSkillInfo[realSkill].GetSkillLevel();
 
-    // First, remove old skill info if it exists
-    auto oldSkillTreeInfo = this->map_skilltreeinfo.find(realSkill);
-    if (oldSkillTreeInfo != this->map_skilltreeinfo.end())
-    {
-        oldPoints = oldSkillTreeInfo->second.GetSkillPoint();
-        this->map_skilltreeinfo.erase(oldSkillTreeInfo);
-    }
-
-    // Then add the updated skill tree info
-    CSkillTreeInfo skillTreeInfo;
-    skillTreeInfo.SetSkillTreeInfo(point, value, nextvalue);
-    this->map_skilltreeinfo.insert(std::pair(realSkill, skillTreeInfo));
+    const CSkillTreeInfo skillTreeInfo = { skillLevel, value, nextValue };
+    CharacterAttribute->MasterSkillInfo[realSkill] = skillTreeInfo;
 
     // And update the category points
-    int addedPoints = point - oldPoints;
+    const int addedPoints = skillLevel - oldLevel;
     this->CategoryPoint[it->second.Group] += addedPoints;
-
-}
-
-//bool SEASON3B::CNewUIMasterLevel::IsLearnSkill(int index)
-//{
-//    std::map<DWORD, CSkillTreeInfo>::iterator it = this->map_skilltreeinfo.find(index);
-//
-//    if (it == this->map_skilltreeinfo.end())
-//    {
-//        return false;
-//    }
-//
-//    return true;
-//}
-
-float SEASON3B::CNewUIMasterLevel::GetSkillValue(ActionSkillType index)
-{
-    auto it = this->map_skilltreeinfo.find(index);
-
-    if (it == this->map_skilltreeinfo.end())
-    {
-        return 0.0f;
-    }
-
-    return it->second.GetSkillValue();
-}
-/*
-float SEASON3B::CNewUIMasterLevel::GetSkillCumulativeValue(int index, BYTE damage)
-{
-    if (!index || index < 300 || index > 608 || damage == 0 || damage >= 5)
-    {
-        return 0.0;
-    }
-
-    float value = 0.0;
-
-    SKILL_ATTRIBUTE* lpSkill;
-
-    for (int i = index; i != 75; i = lpSkill->SkillBrand)
-    {
-        if (i == 0)
-        {
-            break;
-        }
-
-        lpSkill = &SkillAttribute[i];
-
-        if (damage == lpSkill->IsDamage)
-        {
-            value += this->GetSkillValue(i);
-        }
-    }
-
-    return value;
-}*/
-/*
-BYTE SEASON3B::CNewUIMasterLevel::GetSkillLevel(int index)
-{
-    std::map<DWORD, CSkillTreeInfo>::iterator it = this->map_skilltreeinfo.find(index);
-
-    if (it == this->map_skilltreeinfo.end())
-    {
-        return 0;
-    }
-
-    return it->second.GetSkillPoint();
-}*/
-
-void SEASON3B::CNewUIMasterLevel::RegisterSkillInCharacterAttribute(ActionSkillType index)
-{
-    if (index < AT_SKILL_MASTER_BEGIN || index > AT_SKILL_MASTER_END)
-    {
-        return;
-    }
-
-    const auto skillAttribute = &SkillAttribute[index];
-
-    if (skillAttribute->SkillUseType == SKILL_USE_TYPE_MASTERACTIVE)
-    {
-        for (int i = 0; i < MAX_MAGIC; i++)
-        {
-            if (skillAttribute->SkillBrand != CharacterAttribute->Skill[i])
-            {
-                continue;
-            }
-
-            CharacterAttribute->Skill[i] = index;
-
-            return;
-        }
-
-        return;
-    }
-
-    for (int i = 0; i < MAX_MAGIC; i++)
-    {
-        if (CharacterAttribute->Skill[i] != AT_SKILL_UNDEFINED)
-        {
-            continue;
-        }
-
-        CharacterAttribute->Skill[i] = index;
-
-        return;
-    }
-}
-
-void SEASON3B::CNewUIMasterLevel::SetConsumePoint(BYTE ConsumePoint)
-{
-    this->ConsumePoint = ConsumePoint;
-}
-
-void SEASON3B::CNewUIMasterLevel::SetCurSkillID(int index)
-{
-    this->CurSkillID = index;
 }
 
 void SEASON3B::CNewUIMasterLevel::ClearSkillTreeData()

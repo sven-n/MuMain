@@ -430,6 +430,34 @@ typedef struct
     BYTE ClassSkill[MAX_SKILLS];
 } CLASS_ATTRIBUTE;
 
+class CSkillTreeInfo
+{
+public:
+    CSkillTreeInfo()
+    {
+        this->skillLevel = 0;
+        this->skillValue = 0.0f;
+        this->skillNextValue = 0.0f;
+    }
+
+    CSkillTreeInfo(BYTE point, float value, float nextValue)
+    {
+        this->skillLevel = point;
+        this->skillValue = value;
+        this->skillNextValue = nextValue;
+    }
+
+    ~CSkillTreeInfo() = default;
+
+    BYTE GetSkillLevel() const { return this->skillLevel; }
+    float GetSkillValue() const { return this->skillValue; }
+    float GetSkillNextValue() const { return this->skillNextValue; }
+private:
+    BYTE skillLevel;
+    float skillValue;
+    float skillNextValue;
+};
+
 typedef struct
 {
     wchar_t Name[MAX_ID_SIZE + 1];
@@ -493,8 +521,11 @@ typedef struct
     uint64_t NextExperience;
 
     ActionSkillType Skill[MAX_SKILLS];
-    BYTE SkillLevel[MAX_SKILLS];
     int  SkillDelay[MAX_SKILLS];
+    BYTE SkillLevel[MAX_SKILLS]; // Do we even need this array when we have the map of CSkillTreeInfo?
+
+    CSkillTreeInfo MasterSkillInfo[AT_SKILL_MASTER_END + 1]; // Index = ActionSkillType
+    
 } CHARACTER_ATTRIBUTE;
 
 typedef struct _MASTER_LEVEL_VALUE

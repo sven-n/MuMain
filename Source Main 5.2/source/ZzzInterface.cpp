@@ -2111,13 +2111,15 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
         }
     }
 
+
+    auto baseSkill = gSkillManager.MasterSkillToBaseSkillIndex(Skill);
     bool Success = false;
     for (int i = 0; i < p->SpecialNum; i++)
     {
-        if (CharacterAttribute->Skill[Hero->CurrentSkill] == p->Special[i])
+        if (baseSkill == p->Special[i]) // current skill is available as weapon skill?
         {
             int iMana;
-            gSkillManager.GetSkillInformation(p->Special[i], 1, NULL, &iMana, NULL);
+            gSkillManager.GetSkillInformation(Skill, 1, NULL, &iMana, NULL);
             if (CharacterAttribute->Mana < iMana)
             {
                 int Index = g_pMyInventory->FindManaItemIndex();
@@ -2128,11 +2130,13 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
                 }
                 continue;
             }
+
             if (!gSkillManager.CheckSkillDelay(Hero->CurrentSkill))
             {
                 continue;
             }
-            switch (p->Special[i])
+
+            switch (Skill)
             {
             case AT_SKILL_BLOCKING:
                 c->Movement = false;
@@ -2140,7 +2144,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
                     SetAction(o, PLAYER_DEFENSE1);
                 else
                     SetPlayerAttack(c);
-                SendRequestMagic(p->Special[i], Hero->Key);
+                SendRequestMagic(Skill, Hero->Key);
                 Success = true;
                 break;
             case AT_SKILL_FALLING_SLASH:
@@ -2155,19 +2159,19 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
             case AT_SKILL_SLASH_STR:
             case AT_SKILL_RIDER:
                 if (CheckAttack())
-                    Success = CastWarriorSkill(c, o, p, static_cast<ActionSkillType>(p->Special[i]));
+                    Success = CastWarriorSkill(c, o, p, Skill);
                 break;
             }
         }
     }
 
-    if (CharacterAttribute->Skill[Hero->CurrentSkill] == AT_SKILL_FIRE_SCREAM
-        || CharacterAttribute->Skill[Hero->CurrentSkill] == AT_SKILL_FIRE_SCREAM_STR
+    if (Skill == AT_SKILL_FIRE_SCREAM
+        || Skill == AT_SKILL_FIRE_SCREAM_STR
         || Skill == AT_SKILL_GAOTIC
         )
     {
         int iMana;
-        gSkillManager.GetSkillInformation(CharacterAttribute->Skill[Hero->CurrentSkill], 1, NULL, &iMana, NULL);
+        gSkillManager.GetSkillInformation(Skill, 1, nullptr, &iMana, nullptr);
         if (CharacterAttribute->Mana < iMana)
         {
             int Index = g_pMyInventory->FindManaItemIndex();
@@ -2179,8 +2183,8 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
             return Success;
         }
 
-        float Distance = gSkillManager.GetSkillDistance(CharacterAttribute->Skill[Hero->CurrentSkill], c);
-        if (CheckTile(c, o, Distance))
+        float distance = gSkillManager.GetSkillDistance(Skill, c);
+        if (CheckTile(c, o, distance))
         {
             o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
             WORD TKey = 0xffff;
@@ -8082,7 +8086,7 @@ void SelectObjects()
 
             if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_WIZARD)
             {
-                int Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
+                auto Skill = CharacterAttribute->Skill[Hero->CurrentSkill];
 
                 if (Skill == AT_SKILL_HEALING
                     || Skill == AT_SKILL_HEALING_STR

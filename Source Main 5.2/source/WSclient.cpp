@@ -1167,9 +1167,9 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
         Hero->CurrentSkill = 0;
     if (CharacterAttribute->SkillNumber == 1)
         Hero->CurrentSkill = 0;
-    if (Hero->CurrentSkill >= 0 && CharacterAttribute->Skill[Hero->CurrentSkill] == 0)
+    if (Hero->CurrentSkill >= 0 && CharacterAttribute->Skill[Hero->CurrentSkill] == AT_SKILL_UNDEFINED)
         Hero->CurrentSkill = 0;
-    int Skill = 0;
+    auto Skill = AT_SKILL_UNDEFINED;
 
     for (int i = 0; i < MAX_SKILLS; i++)
     {
@@ -1204,11 +1204,13 @@ void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
     auto interface = CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
     interface->SetMasterType(Hero->Class);
     interface->InitMasterSkillPoint();
-    interface->ClearSkillTreeInfo();
+
+    memset(CharacterAttribute->MasterSkillInfo, 0, sizeof(CharacterAttribute->MasterSkillInfo));
+
     for (int n = 0; n < lpMsg->count; n++)
     {
-        PMSG_MASTER_SKILL_LIST* lpInfo = (PMSG_MASTER_SKILL_LIST*)(((BYTE*)lpMsg) + sizeof(PMSG_MASTER_SKILL_LIST_SEND) + (sizeof(PMSG_MASTER_SKILL_LIST) * n));
-        interface->SetMasterSkillTreeInfo(lpInfo->skill, lpInfo->level, lpInfo->MainValue, lpInfo->NextValue);
+        auto lpInfo = (PMSG_MASTER_SKILL_LIST*)(((BYTE*)lpMsg) + sizeof(PMSG_MASTER_SKILL_LIST_SEND) + (sizeof(PMSG_MASTER_SKILL_LIST) * n));
+        interface->SetMasterSkillTreeInfo(lpInfo->SkillIndex, lpInfo->SkillLevel, lpInfo->MainValue, lpInfo->NextValue);
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x53 [Receive_Master_SetSkillList]");
@@ -3578,6 +3580,9 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
         UnRegisterBuff(eBuff_AddAG, o);
         break;
     case AT_SKILL_ADD_CRITICAL:
+    case AT_SKILL_ADD_CRITICAL_STR1:
+    case AT_SKILL_ADD_CRITICAL_STR2:
+    case AT_SKILL_ADD_CRITICAL_STR3:
         UnRegisterBuff(eBuff_AddCriticalDamage, o);
         break;
     case AT_SKILL_SWELL_LIFE:
@@ -7772,8 +7777,6 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
 
         auto interface = CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
 
-        // todo: why is this needed at two functions?
-        // interface->SetMasterSkillTreeInfo(Data->SkillIndex, Data->SkillLevel, Data->DisplayValue, Data->DisplayValueOfNextLevel);
         interface->SkillUpgrade(Data->SkillIndex, Data->SkillLevel, Data->DisplayValue, Data->DisplayValueOfNextLevel);
     }
     Master_Level_Data.nMLevelUpMPoint = Data->MasterLevelUpPoints;

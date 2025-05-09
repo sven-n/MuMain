@@ -10312,7 +10312,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
         else if (o->CurrentAction >= PLAYER_SKILL_SLEEP && o->CurrentAction <= PLAYER_SKILL_SLEEP_FENRIR)
         {
-            int iSkillType = CharacterAttribute->Skill[Hero->CurrentSkill];
+            auto iSkillType = CharacterAttribute->Skill[Hero->CurrentSkill];
 
             vec3_t vLight, vRelativePos, vWorldPos;
             Vector(1.0f, 1.0f, 1.0f, vLight);

@@ -339,7 +339,7 @@ void CNewUIPetInfoWindow::CalcDamage(int iNumTapButton)
         auto masterLevelUi = SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
         if (masterLevelUi != nullptr)
         {
-            master_boost = static_cast<int>(masterLevelUi->GetSkillValue(AT_SKILL_EARTHSHAKE_STR));
+            master_boost = static_cast<int>(CharacterAttribute->MasterSkillInfo[AT_SKILL_EARTHSHAKE_STR].GetSkillValue());
         }
 
         pPetInfo = Hero->GetEquipedPetInfo(PET_TYPE_DARK_HORSE);

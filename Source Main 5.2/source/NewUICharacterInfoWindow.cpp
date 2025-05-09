@@ -472,7 +472,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     for (int i = 0; i < MAX_SKILLS; ++i)
     {
         auto currentSkill = CharacterAttribute->Skill[i];
-        auto skillValue = g_pMasterLevelInterface->GetSkillValue(currentSkill);
+        if (currentSkill < AT_SKILL_MASTER_BEGIN || currentSkill > AT_SKILL_MASTER_END)
+        {
+            continue;
+        }
+
+        auto skillValue = CharacterAttribute->MasterSkillInfo[currentSkill].GetSkillValue();
         switch (currentSkill)
         {
         case AT_SKILL_AttackSuccRateInc:

@@ -758,8 +758,8 @@ struct PMSG_MASTER_SKILL_LIST_SEND
 
 struct PMSG_MASTER_SKILL_LIST
 {
-    BYTE skill;
-    BYTE level;
+    BYTE SkillIndex; // Index in skill tree
+    BYTE SkillLevel;
     float MainValue;
     float NextValue;
 };
