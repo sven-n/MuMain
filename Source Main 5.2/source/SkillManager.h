@@ -22,8 +22,13 @@ typedef struct DemendConditionInfo
     }
     BOOL operator<=(const DemendConditionInfo& rhs) const
     {
-        return SkillStrength <= rhs.SkillStrength && SkillDexterity <= rhs.SkillDexterity &&
-            SkillVitality <= rhs.SkillVitality && SkillEnergy <= rhs.SkillEnergy && SkillCharisma <= rhs.SkillCharisma;
+        return
+            SkillLevel <= rhs.SkillLevel
+            && SkillStrength <= rhs.SkillStrength
+            && SkillDexterity <= rhs.SkillDexterity
+            && SkillVitality <= rhs.SkillVitality
+            && SkillEnergy <= rhs.SkillEnergy
+            && SkillCharisma <= rhs.SkillCharisma;
     }
 } DemendConditionInfo;
 
@@ -40,10 +45,10 @@ public:
     void GetSkillInformation_Damage(int iType, int* piDamage);
     bool CheckSkillDelay(int SkillIndex);
     void CalcSkillDelay(int time);
-    BYTE GetSkillMasteryType(int iType);
-    int MasterSkillToBaseSkillIndex(int iMasterSkillIndex);
+    BYTE GetSkillMasteryType(ActionSkillType iType);
+    ActionSkillType MasterSkillToBaseSkillIndex(ActionSkillType masterSkill);
     bool skillVScharactorCheck(const DemendConditionInfo& basicInfo, const DemendConditionInfo& heroInfo);
-    bool DemendConditionCheckSkill(WORD skilltype);
+    bool AreSkillRequirementsFulfilled(ActionSkillType skilltype);
 public:
 };
 

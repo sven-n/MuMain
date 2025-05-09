@@ -1105,11 +1105,13 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     {
         auto Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer + Offset);
         CharacterAttribute->Skill[Data2->Index] = AT_SKILL_UNDEFINED;
+        CharacterAttribute->SkillLevel[Data2->Index] = 0;
     }
     else if (Data->Value == 0xFE)
     {
         auto Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer + Offset);
         CharacterAttribute->Skill[Data2->Index] = (ActionSkillType)Data2->Type;
+        CharacterAttribute->SkillLevel[Data2->Index] = Data2->Level;
     }
     else if (Data->ListType == 0x02)
     {
@@ -1117,6 +1119,7 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
         {
             auto Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer + Offset);
             CharacterAttribute->Skill[Data2->Index] = AT_SKILL_UNDEFINED;
+            CharacterAttribute->SkillLevel[Data2->Index] = 0;
         }
     }
     else
@@ -1124,13 +1127,16 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
         if (Data->ListType == 0x00)
         {
             ZeroMemory(CharacterAttribute->Skill, MAX_SKILLS * sizeof(WORD));
+            ZeroMemory(CharacterAttribute->SkillLevel, MAX_SKILLS * sizeof(BYTE));
         }
         for (int i = 0; i < Data->Value; i++)
         {
             auto Data2 = (LPPRECEIVE_MAGIC_LIST)(ReceiveBuffer + Offset);
             CharacterAttribute->Skill[Data2->Index] = (ActionSkillType)Data2->Type;
+            CharacterAttribute->SkillLevel[Data2->Index] = Data2->Level;
             Offset += sizeof(PRECEIVE_MAGIC_LIST);
         }
+
         if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
         {
             for (int i = 0; i < PET_CMD_END; ++i)
@@ -1161,9 +1167,9 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
         Hero->CurrentSkill = 0;
     if (CharacterAttribute->SkillNumber == 1)
         Hero->CurrentSkill = 0;
-    if (Hero->CurrentSkill >= 0 && CharacterAttribute->Skill[Hero->CurrentSkill] == 0)
+    if (Hero->CurrentSkill >= 0 && CharacterAttribute->Skill[Hero->CurrentSkill] == AT_SKILL_UNDEFINED)
         Hero->CurrentSkill = 0;
-    int Skill = 0;
+    auto Skill = AT_SKILL_UNDEFINED;
 
     for (int i = 0; i < MAX_SKILLS; i++)
     {
@@ -1173,22 +1179,41 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
         else
             break;
     }
+
     for (int i = 0; i < MAX_SKILLS; i++)
     {
         Skill = CharacterAttribute->Skill[i];
-        if ((AT_SKILL_POWER_SLASH_UP <= Skill && AT_SKILL_POWER_SLASH_UP + 4 >= Skill) || (AT_SKILL_MANY_ARROW_UP <= Skill && AT_SKILL_MANY_ARROW_UP + 4 >= Skill))
+        if (AT_SKILL_POWER_SLASH_STR == Skill || AT_SKILL_TRIPLE_SHOT_STR == Skill || AT_SKILL_TRIPLE_SHOT_MASTERY == Skill)
         {
             Master_Skill_Bool = i;
         }
-        if (AT_SKILL_ICE_BLADE == Skill || Skill == AT_SKILL_CROSSBOW)
+        if (AT_SKILL_POWER_SLASH == Skill || Skill == AT_SKILL_TRIPLE_SHOT)
         {
             Skill_Bool = i;
         }
     }
+
     if (Master_Skill_Bool > -1 && Skill_Bool > -1)
         CharacterAttribute->Skill[Skill_Bool] = AT_SKILL_UNDEFINED;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
+}
+
+void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
+{
+    auto interface = CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
+    interface->SetMasterType(Hero->Class);
+    interface->InitMasterSkillPoint();
+
+    memset(CharacterAttribute->MasterSkillInfo, 0, sizeof(CharacterAttribute->MasterSkillInfo));
+
+    for (int n = 0; n < lpMsg->count; n++)
+    {
+        auto lpInfo = (PMSG_MASTER_SKILL_LIST*)(((BYTE*)lpMsg) + sizeof(PMSG_MASTER_SKILL_LIST_SEND) + (sizeof(PMSG_MASTER_SKILL_LIST) * n));
+        interface->SetMasterSkillTreeInfo(lpInfo->SkillIndex, lpInfo->SkillLevel, lpInfo->MainValue, lpInfo->NextValue);
+    }
+
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x53 [Receive_Master_SetSkillList]");
 }
 
 void ReceiveMuHelperConfigurationData(std::span<const BYTE> ReceiveBuffer)
@@ -3517,28 +3542,26 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     switch ((ActionSkillType)Data->Value) // todo: is this correct? Data->Value is a byte, but ActionSkillType is an int
     {
     case AT_SKILL_POISON:
+    case AT_SKILL_POISON_STR:
         UnRegisterBuff(eDeBuff_Poison, o);
         break;
-    case AT_SKILL_SLOW:
+    case AT_SKILL_ICE:
+    case AT_SKILL_ICE_STR:
+    case AT_SKILL_ICE_STR_MG:
         UnRegisterBuff(eDeBuff_Freeze, o);
         break;
-    case AT_SKILL_BLOW_OF_DESTRUCTION:
+    case AT_SKILL_STRIKE_OF_DESTRUCTION:
+    case AT_SKILL_STRIKE_OF_DESTRUCTION_STR:
         UnRegisterBuff(eDeBuff_BlowOfDestruction, o);
         break;
-    case AT_SKILL_ATT_POWER_UP:
-    case AT_SKILL_ATT_POWER_UP + 1:
-    case AT_SKILL_ATT_POWER_UP + 2:
-    case AT_SKILL_ATT_POWER_UP + 3:
-    case AT_SKILL_ATT_POWER_UP + 4:
     case AT_SKILL_ATTACK:
+    case AT_SKILL_ATTACK_STR:
+    case AT_SKILL_ATTACK_MASTERY:
         UnRegisterBuff(eBuff_Attack, o);
         break;
-    case AT_SKILL_DEF_POWER_UP:
-    case AT_SKILL_DEF_POWER_UP + 1:
-    case AT_SKILL_DEF_POWER_UP + 2:
-    case AT_SKILL_DEF_POWER_UP + 3:
-    case AT_SKILL_DEF_POWER_UP + 4:
     case AT_SKILL_DEFENSE:
+    case AT_SKILL_DEFENSE_STR:
+    case AT_SKILL_DEFENSE_MASTERY:
         UnRegisterBuff(eBuff_Defense, o);
         break;
     case AT_SKILL_STUN:
@@ -3557,45 +3580,34 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
         UnRegisterBuff(eBuff_AddAG, o);
         break;
     case AT_SKILL_ADD_CRITICAL:
+    case AT_SKILL_ADD_CRITICAL_STR1:
+    case AT_SKILL_ADD_CRITICAL_STR2:
+    case AT_SKILL_ADD_CRITICAL_STR3:
         UnRegisterBuff(eBuff_AddCriticalDamage, o);
         break;
-    case AT_SKILL_LIFE_UP:
-    case AT_SKILL_LIFE_UP + 1:
-    case AT_SKILL_LIFE_UP + 2:
-    case AT_SKILL_LIFE_UP + 3:
-    case AT_SKILL_LIFE_UP + 4:
-    case AT_SKILL_VITALITY:
+    case AT_SKILL_SWELL_LIFE:
+    case AT_SKILL_SWELL_LIFE_STR:
+    case AT_SKILL_SWELL_LIFE_PROFICIENCY:
         UnRegisterBuff(eBuff_Life, o);
         break;
-    case AT_SKILL_PARALYZE:
+    case AT_SKILL_ICE_ARROW:
+    case AT_SKILL_ICE_ARROW_STR:
         UnRegisterBuff(eDeBuff_Harden, o);
         break;
-    case AT_SKILL_BLOOD_ATT_UP:
-    case AT_SKILL_BLOOD_ATT_UP + 1:
-    case AT_SKILL_BLOOD_ATT_UP + 2:
-    case AT_SKILL_BLOOD_ATT_UP + 3:
-    case AT_SKILL_BLOOD_ATT_UP + 4:
-    case AT_SKILL_REDUCEDEFENSE:
+    case AT_SKILL_FIRE_SLASH:
+    case AT_SKILL_FIRE_SLASH_STR:
         UnRegisterBuff(eDeBuff_Defense, o);
         break;
-    case AT_SKILL_SOUL_UP:
-    case AT_SKILL_SOUL_UP + 1:
-    case AT_SKILL_SOUL_UP + 2:
-    case AT_SKILL_SOUL_UP + 3:
-    case AT_SKILL_SOUL_UP + 4:
-    case AT_SKILL_WIZARDDEFENSE:
+    case AT_SKILL_SOUL_BARRIER:
+    case AT_SKILL_SOUL_BARRIER_STR:
+    case AT_SKILL_SOUL_BARRIER_PROFICIENCY:
         UnRegisterBuff(eBuff_WizDefense, o);
         break;
-    case AT_SKILL_BLAST_POISON:
+    case AT_SKILL_DECAY:
+    case AT_SKILL_DECAY_STR:
         UnRegisterBuff(eDeBuff_Poison, o);
         break;
-        //AT_SKILL_ICE_UP
-    case AT_SKILL_ICE_UP:
-    case AT_SKILL_ICE_UP + 1:
-    case AT_SKILL_ICE_UP + 2:
-    case AT_SKILL_ICE_UP + 3:
-    case AT_SKILL_ICE_UP + 4:
-    case AT_SKILL_BLAST_FREEZE:
+    case AT_SKILL_ICE_STORM:
         UnRegisterBuff(eDeBuff_Freeze, o);
         break;
         //  몬스터.
@@ -3611,15 +3623,19 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
         UnRegisterBuff(eBuff_Att_up_Ourforces, o);
         break;
     case AT_SKILL_HP_UP_OURFORCES:
+    case AT_SKILL_HP_UP_OURFORCES_STR:
         UnRegisterBuff(eBuff_Hp_up_Ourforces, o);
         break;
     case AT_SKILL_DEF_UP_OURFORCES:
+    case AT_SKILL_DEF_UP_OURFORCES_STR:
+    case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
         UnRegisterBuff(eBuff_Def_up_Ourforces, o);
         break;
     case AT_SKILL_ALICE_THORNS:
         UnRegisterBuff(eBuff_Thorns, o);
         break;
     case AT_SKILL_ALICE_BERSERKER:
+    case AT_SKILL_ALICE_BERSERKER_STR:
         UnRegisterBuff(eBuff_Berserker, o);
         break;
     }
@@ -3770,7 +3786,12 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
     WORD MagicNumber = ((WORD)(Data->MagicH) << 8) + Data->MagicL;
 
-    if (MagicNumber == AT_SKILL_ATTACK || MagicNumber == AT_SKILL_DEFENSE || (AT_SKILL_DEF_POWER_UP <= MagicNumber && MagicNumber <= AT_SKILL_DEF_POWER_UP + 4) || (AT_SKILL_ATT_POWER_UP <= MagicNumber && MagicNumber <= AT_SKILL_ATT_POWER_UP + 4))
+    if (MagicNumber == AT_SKILL_ATTACK
+        || MagicNumber == AT_SKILL_DEFENSE
+        || MagicNumber == AT_SKILL_ATTACK_STR
+        || MagicNumber == AT_SKILL_DEFENSE_STR
+        || MagicNumber == AT_SKILL_ATTACK_MASTERY
+        || MagicNumber == AT_SKILL_DEFENSE_MASTERY)
     {
         if (Success == false)
         {
@@ -3794,7 +3815,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
     if (MagicNumber != AT_SKILL_COMBO)
     {
-        if (sc != Hero && MagicNumber != AT_SKILL_TELEPORT && MagicNumber != AT_SKILL_TELEPORT_B && to->Visible)
+        if (sc != Hero && MagicNumber != AT_SKILL_TELEPORT && MagicNumber != AT_SKILL_TELEPORT_ALLY && to->Visible)
             so->Angle[2] = CreateAngle2D(so->Position, to->Position);
         sc->TargetCharacter = TargetIndex;
 
@@ -3869,24 +3890,14 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         g_CharacterRegisterBuff(so, eBuff_Defense);
         SetPlayerAttack(sc);
         break;
-    case AT_SKILL_HEAL_UP:
-    case AT_SKILL_HEAL_UP + 1:
-    case AT_SKILL_HEAL_UP + 2:
-    case AT_SKILL_HEAL_UP + 3:
-    case AT_SKILL_HEAL_UP + 4:
     case AT_SKILL_HEALING:
-    case AT_SKILL_ATT_POWER_UP:
-    case AT_SKILL_ATT_POWER_UP + 1:
-    case AT_SKILL_ATT_POWER_UP + 2:
-    case AT_SKILL_ATT_POWER_UP + 3:
-    case AT_SKILL_ATT_POWER_UP + 4:
+    case AT_SKILL_HEALING_STR:
     case AT_SKILL_ATTACK:
-    case AT_SKILL_DEF_POWER_UP:
-    case AT_SKILL_DEF_POWER_UP + 1:
-    case AT_SKILL_DEF_POWER_UP + 2:
-    case AT_SKILL_DEF_POWER_UP + 3:
-    case AT_SKILL_DEF_POWER_UP + 4:
+    case AT_SKILL_ATTACK_STR:
+    case AT_SKILL_ATTACK_MASTERY:
     case AT_SKILL_DEFENSE:
+    case AT_SKILL_DEFENSE_STR:
+    case AT_SKILL_DEFENSE_MASTERY:
     case AT_SKILL_SUMMON:
     case AT_SKILL_SUMMON + 1:
     case AT_SKILL_SUMMON + 2:
@@ -3901,12 +3912,9 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         {
             PlayBuffer(SOUND_SKILL_DEFENSE);
         }
-    case AT_SKILL_SOUL_UP:
-    case AT_SKILL_SOUL_UP + 1:
-    case AT_SKILL_SOUL_UP + 2:
-    case AT_SKILL_SOUL_UP + 3:
-    case AT_SKILL_SOUL_UP + 4:
-    case AT_SKILL_WIZARDDEFENSE:
+    case AT_SKILL_SOUL_BARRIER:
+    case AT_SKILL_SOUL_BARRIER_STR:
+    case AT_SKILL_SOUL_BARRIER_PROFICIENCY:
         if (sc != Hero)
         {
             SetPlayerMagic(sc);
@@ -3914,7 +3922,9 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         }
         sc->AttackTime = 1;
         break;
-    case AT_SKILL_THUNDER:
+    case AT_SKILL_LIGHTNING:
+    case AT_SKILL_LIGHTNING_STR:
+    case AT_SKILL_LIGHTNING_STR_MG:
         if (so->Type != MODEL_QUEEN_BEE)
             PlayBuffer(SOUND_THUNDER01);
         if (to->CurrentAction == PLAYER_POSE1 || to->CurrentAction == PLAYER_POSE_FEMALE1 ||
@@ -3922,11 +3932,16 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             SetPlayerStop(tc);
     case AT_SKILL_FIREBALL:
     case AT_SKILL_METEO:
-    case AT_SKILL_SLOW:
+    case AT_SKILL_ICE:
+    case AT_SKILL_ICE_STR:
+    case AT_SKILL_ICE_STR_MG:
     case AT_SKILL_ENERGYBALL:
     case AT_SKILL_POWERWAVE:
     case AT_SKILL_POISON:
+    case AT_SKILL_POISON_STR:
     case AT_SKILL_FLAME:
+    case AT_SKILL_FLAME_STR:
+    case AT_SKILL_FLAME_STR_MG:
         if (sc != Hero)
         {
             if (so->Type == MODEL_PLAYER)
@@ -3943,7 +3958,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         sc->AttackTime = 1;
         break;
 
-    case AT_SKILL_TELEPORT_B:
+    case AT_SKILL_TELEPORT_ALLY:
         CreateTeleportBegin(to);
         CreateTeleportEnd(so);
 
@@ -3966,6 +3981,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
     case AT_SKILL_FORCE:
     case AT_SKILL_FORCE_WAVE:
+    case AT_SKILL_FORCE_WAVE_STR:
         if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA && sc->Helper.Type <= MODEL_DARK_HORSE_ITEM) && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_STRIKE);
@@ -3981,12 +3997,9 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         sc->AttackTime = 1;
         PlayBuffer(SOUND_SKILL_SWORD1);
         break;
-    case AT_SKILL_FIRE_BUST_UP:
-    case AT_SKILL_FIRE_BUST_UP + 1:
-    case AT_SKILL_FIRE_BUST_UP + 2:
-    case AT_SKILL_FIRE_BUST_UP + 3:
-    case AT_SKILL_FIRE_BUST_UP + 4:
-    case AT_SKILL_LONGPIER_ATTACK:
+    case AT_SKILL_FIREBURST:
+    case AT_SKILL_FIREBURST_STR:
+    case AT_SKILL_FIREBURST_MASTERY:
         if ((sc->Helper.Type >= MODEL_HORN_OF_UNIRIA && sc->Helper.Type <= MODEL_DARK_HORSE_ITEM) && !sc->SafeZone)
         {
             SetAction(so, PLAYER_ATTACK_RIDE_STRIKE);
@@ -4003,34 +4016,39 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         PlayBuffer(SOUND_ATTACK_FIRE_BUST);
         break;
 
-    case AT_SKILL_SWORD1:
-        SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + MagicNumber - AT_SKILL_SWORD1);
+    case AT_SKILL_FALLING_SLASH:
+    case AT_SKILL_FALLING_SLASH_STR:
+        SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + AT_SKILL_FALLING_SLASH - AT_SKILL_FALLING_SLASH);
         sc->AttackTime = 1;
         PlayBuffer(SOUND_SKILL_SWORD1);
         break;
 
-    case AT_SKILL_SWORD2:
-        SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + MagicNumber - AT_SKILL_SWORD1);
+    case AT_SKILL_LUNGE:
+    case AT_SKILL_LUNGE_STR:
+        SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + AT_SKILL_LUNGE - AT_SKILL_FALLING_SLASH);
         sc->AttackTime = 1;
         PlayBuffer(SOUND_SKILL_SWORD2);
         break;
 
-    case AT_SKILL_SWORD3:
-        SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + MagicNumber - AT_SKILL_SWORD1);
+    case AT_SKILL_UPPERCUT:
+        SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + AT_SKILL_UPPERCUT - AT_SKILL_FALLING_SLASH);
         sc->AttackTime = 1;
         PlayBuffer(SOUND_SKILL_SWORD3);
         break;
 
-    case AT_SKILL_SWORD4:
-        SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + MagicNumber - AT_SKILL_SWORD1);
+    case AT_SKILL_CYCLONE:
+    case AT_SKILL_CYCLONE_STR:
+    case AT_SKILL_CYCLONE_STR_MG:
+        SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + AT_SKILL_CYCLONE - AT_SKILL_FALLING_SLASH);
         sc->AttackTime = 1;
         PlayBuffer(SOUND_SKILL_SWORD4);
         break;
 
-    case AT_SKILL_SWORD5://베기
+    case AT_SKILL_SLASH://베기
+    case AT_SKILL_SLASH_STR:
         if (sc->SwordCount % 2 == 0)
         {
-            SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + MagicNumber - AT_SKILL_SWORD1);
+            SetAction(so, PLAYER_ATTACK_SKILL_SWORD1 + AT_SKILL_SLASH - AT_SKILL_FALLING_SLASH);
         }
         else
         {
@@ -4041,30 +4059,22 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         sc->AttackTime = 1;
         PlayBuffer(SOUND_SKILL_SWORD4);
         break;
-    case AT_SKILL_POWER_SLASH_UP:
-    case AT_SKILL_POWER_SLASH_UP + 1:
-    case AT_SKILL_POWER_SLASH_UP + 2:
-    case AT_SKILL_POWER_SLASH_UP + 3:
-    case AT_SKILL_POWER_SLASH_UP + 4:
-    case AT_SKILL_ICE_BLADE:
+    case AT_SKILL_POWER_SLASH:
+    case AT_SKILL_POWER_SLASH_STR:
         SetAction(so, PLAYER_ATTACK_TWO_HAND_SWORD_TWO);
         sc->AttackTime = 1;
         PlayBuffer(SOUND_SKILL_SWORD4);
         break;
 
-    case AT_SKILL_SPEAR:	// 창찌르기
+    case AT_SKILL_IMPALE:	// 창찌르기
         if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
             SetAction(so, PLAYER_FENRIR_ATTACK_SPEAR);
         else
             SetAction(so, PLAYER_ATTACK_SKILL_SPEAR);
         sc->AttackTime = 1;
         break;
-    case AT_SKILL_BLOW_UP:
-    case AT_SKILL_BLOW_UP + 1:
-    case AT_SKILL_BLOW_UP + 2:
-    case AT_SKILL_BLOW_UP + 3:
-    case AT_SKILL_BLOW_UP + 4:
     case AT_SKILL_DEATHSTAB:
+    case AT_SKILL_DEATHSTAB_STR:
         SetAction(so, PLAYER_ATTACK_DEATHSTAB);
         if (sc != Hero && so->Type == MODEL_PLAYER)
         {
@@ -4072,12 +4082,9 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         }
         sc->AttackTime = 1;
         break;
-    case AT_SKILL_MANY_ARROW_UP:
-    case AT_SKILL_MANY_ARROW_UP + 1:
-    case AT_SKILL_MANY_ARROW_UP + 2:
-    case AT_SKILL_MANY_ARROW_UP + 3:
-    case AT_SKILL_MANY_ARROW_UP + 4:
-    case AT_SKILL_CROSSBOW:
+    case AT_SKILL_TRIPLE_SHOT:
+    case AT_SKILL_TRIPLE_SHOT_STR:
+    case AT_SKILL_TRIPLE_SHOT_MASTERY:
         SetPlayerBow(sc);
         sc->AttackTime = 1;
         break;
@@ -4093,12 +4100,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         SetPlayerBow(sc);
         sc->AttackTime = 1;
         break;
-    case AT_SKILL_BLOOD_ATT_UP:
-    case AT_SKILL_BLOOD_ATT_UP + 1:
-    case AT_SKILL_BLOOD_ATT_UP + 2:
-    case AT_SKILL_BLOOD_ATT_UP + 3:
-    case AT_SKILL_BLOOD_ATT_UP + 4:
-    case AT_SKILL_REDUCEDEFENSE:
+    case AT_SKILL_FIRE_SLASH:
+    case AT_SKILL_FIRE_SLASH_STR:
         if (sc->SkillSuccess)
         {
             DeleteEffect(BITMAP_SKULL, to, 0);
@@ -4116,12 +4119,14 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         }
         break;
 
-    case AT_SKILL_PIERCING:
+    case AT_SKILL_PENETRATION:
+    case AT_SKILL_PENETRATION_STR:
         SetPlayerBow(sc);
         sc->AttackTime = 1;
         break;
 
-    case AT_SKILL_PARALYZE:
+    case AT_SKILL_ICE_ARROW:
+    case AT_SKILL_ICE_ARROW_STR:
         SetPlayerBow(sc);
         if (sc->SkillSuccess)
         {
@@ -4209,7 +4214,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         sc->AttackTime = 1;
         break;
 
-    case AT_SKILL_ONEFLASH:
+    case AT_SKILL_SPIRAL_SLASH:
         SetAction(so, PLAYER_ATTACK_ONE_FLASH);
         sc->AttackTime = 1;
         PlayBuffer(SOUND_SKILL_SWORD2);
@@ -4453,12 +4458,9 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         }
         sc->AttackTime = 1;
         break;
-    case AT_SKILL_LIFE_UP:
-    case AT_SKILL_LIFE_UP + 1:
-    case AT_SKILL_LIFE_UP + 2:
-    case AT_SKILL_LIFE_UP + 3:
-    case AT_SKILL_LIFE_UP + 4:
-    case AT_SKILL_VITALITY:
+    case AT_SKILL_SWELL_LIFE:
+    case AT_SKILL_SWELL_LIFE_STR:
+    case AT_SKILL_SWELL_LIFE_PROFICIENCY:
         if (!g_isCharacterBuff(to, eBuff_Life))
         {
             DeleteEffect(BITMAP_LIGHT, to, 1);
@@ -4488,12 +4490,12 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         CreateEffect(MODEL_COMBO, so->Position, so->Angle, so->Light);
         PlayBuffer(SOUND_COMBO);
         break;
-    case AT_SKILL_BLAST_HELL_BEGIN:
+    case AT_SKILL_NOVA_BEGIN:
         SetAction(so, PLAYER_SKILL_HELL_BEGIN);
         PlayBuffer(SOUND_NUKE1);
         so->m_bySkillCount = 0;
         break;
-    case AT_SKILL_BLAST_HELL:
+    case AT_SKILL_NOVA:
         SetAction(so, PLAYER_SKILL_HELL_START);
         if (sc == Hero)
         {
@@ -4505,12 +4507,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         }
         sc->AttackTime = 1;
         break;
-    case AT_SKILL_FIRE_SCREAM_UP:
-    case AT_SKILL_FIRE_SCREAM_UP + 1:
-    case AT_SKILL_FIRE_SCREAM_UP + 2:
-    case AT_SKILL_FIRE_SCREAM_UP + 3:
-    case AT_SKILL_FIRE_SCREAM_UP + 4:
-    case AT_SKILL_DARK_SCREAM:
+    case AT_SKILL_FIRE_SCREAM:
+    case AT_SKILL_FIRE_SCREAM_STR:
     {
         if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
         {
@@ -4542,29 +4540,22 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     }
     break;
     case AT_SKILL_INFINITY_ARROW:
+    case AT_SKILL_INFINITY_ARROW_STR:
     {
         CharacterMachine->InfinityArrowAdditionalMana = 10;
         CreateEffect(MODEL_INFINITY_ARROW, so->Position, so->Angle, so->Light, 0, so);
         PlayBuffer(SOUND_INFINITYARROW);
     }
     break;
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 1:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 2:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 3:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 4:
     case AT_SKILL_ALICE_CHAINLIGHTNING:
+    case AT_SKILL_ALICE_CHAINLIGHTNING_STR:
     {
         sc->AttackTime = 1;
         PlayBuffer(SOUND_SKILL_CHAIN_LIGHTNING);
     }
     break;
-    case AT_SKILL_ALICE_SLEEP_UP:
-    case AT_SKILL_ALICE_SLEEP_UP + 1:
-    case AT_SKILL_ALICE_SLEEP_UP + 2:
-    case AT_SKILL_ALICE_SLEEP_UP + 3:
-    case AT_SKILL_ALICE_SLEEP_UP + 4:
     case AT_SKILL_ALICE_SLEEP:
+    case AT_SKILL_ALICE_SLEEP_STR:
     {
         sc->AttackTime = 1;
 
@@ -4606,6 +4597,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         PlayBuffer(SOUND_SUMMON_SKILL_THORNS);
         break;
     case AT_SKILL_ALICE_BERSERKER:
+    case AT_SKILL_ALICE_BERSERKER_STR:
         sc->AttackTime = 1; // todo: what is this?
 
         SetAttackSpeed();
@@ -4615,7 +4607,9 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
         PlayBuffer(SOUND_SKILL_BERSERKER);
         break;
-    case AT_SKILL_SWELL_OF_MAGICPOWER:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY_STR:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY:
     {
         SetAttackSpeed();
         SetAction(so, PLAYER_SKILL_SWELL_OF_MP);
@@ -4687,7 +4681,9 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         PlayBuffer(SOUND_SKILL_CAOTIC);
     }
     break;
-    case AT_SKILL_THRUST:
+    case AT_SKILL_KILLING_BLOW:
+    case AT_SKILL_KILLING_BLOW_STR:
+    case AT_SKILL_KILLING_BLOW_MASTERY:
     {
         g_CMonkSystem.SetRageSkillAni(MagicNumber, so);
         so->m_sTargetIndex = TargetIndex;
@@ -4701,7 +4697,10 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     break;
     case AT_SKILL_ATT_UP_OURFORCES:
     case AT_SKILL_HP_UP_OURFORCES:
+    case AT_SKILL_HP_UP_OURFORCES_STR:
     case AT_SKILL_DEF_UP_OURFORCES:
+    case AT_SKILL_DEF_UP_OURFORCES_STR:
+    case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
     {
         if (sc == Hero)
         {
@@ -4721,12 +4720,12 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             g_CMonkSystem.RageCreateEffect(_pObj, MagicNumber);
         }
 
-        if (MagicNumber == AT_SKILL_HP_UP_OURFORCES)
+        if (MagicNumber == AT_SKILL_HP_UP_OURFORCES || MagicNumber == AT_SKILL_HP_UP_OURFORCES_STR)
         {
             DeleteEffect(BITMAP_LIGHT_RED, _pObj, 0);
             CreateEffect(BITMAP_LIGHT_RED, _pObj->Position, _pObj->Angle, _pObj->Light, 0, _pObj, -1, 0, 0, 0, 1.5f);
         }
-        else if (MagicNumber == AT_SKILL_DEF_UP_OURFORCES)
+        else if (MagicNumber == AT_SKILL_DEF_UP_OURFORCES || MagicNumber == AT_SKILL_DEF_UP_OURFORCES_STR || MagicNumber == AT_SKILL_DEF_UP_OURFORCES_MASTERY)
         {
             DeleteEffect(BITMAP_LIGHT_RED, _pObj, 2);
             CreateEffect(BITMAP_LIGHT_RED, _pObj->Position, _pObj->Angle, _pObj->Light, 2, _pObj, -1, 0, 0, 0, 1.5f);
@@ -4748,21 +4747,27 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             g_CharacterRegisterBuff(_pObj, eBuff_Att_up_Ourforces);
             break;
         case AT_SKILL_HP_UP_OURFORCES:
+        case AT_SKILL_HP_UP_OURFORCES_STR:
             g_CharacterRegisterBuff(_pObj, eBuff_Hp_up_Ourforces);
             break;
         case AT_SKILL_DEF_UP_OURFORCES:
+        case AT_SKILL_DEF_UP_OURFORCES_STR:
+        case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
             g_CharacterRegisterBuff(_pObj, eBuff_Def_up_Ourforces);
             break;
         }
         sc->AttackTime = 1;
     }
     break;
-    case AT_SKILL_STAMP:
+    case AT_SKILL_BEAST_UPPERCUT:
+    case AT_SKILL_BEAST_UPPERCUT_STR:
+    case AT_SKILL_BEAST_UPPERCUT_MASTERY:
     {
         sc->AttackTime = 1;
     }
     break;
-    case AT_SKILL_GIANTSWING:
+    case AT_SKILL_CHAIN_DRIVE:
+    case AT_SKILL_CHAIN_DRIVE_STR:
     case AT_SKILL_DRAGON_KICK:
     {
         sc->AttackTime = 1;
@@ -4777,7 +4782,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         PlayBuffer(SOUND_SKILL_SWORD2);
     }
     break;
-    case AT_SKILL_DRAGON_LOWER:
+    case AT_SKILL_DRAGON_ROAR:
+    case AT_SKILL_DRAGON_ROAR_STR:
     {
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
@@ -4792,6 +4798,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     }
     break;
     case AT_SKILL_DARKSIDE:
+    case AT_SKILL_DARKSIDE_STR:
     {
         if (sc != Hero)
             g_CMonkSystem.SetDarksideCnt();
@@ -4828,28 +4835,22 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         {
             switch (MagicNumber)
             {
-            case AT_SKILL_MANY_ARROW_UP:
-            case AT_SKILL_MANY_ARROW_UP + 1:
-            case AT_SKILL_MANY_ARROW_UP + 2:
-            case AT_SKILL_MANY_ARROW_UP + 3:
-            case AT_SKILL_MANY_ARROW_UP + 4:
-            case AT_SKILL_CROSSBOW:
+            case AT_SKILL_TRIPLE_SHOT:
+            case AT_SKILL_TRIPLE_SHOT_STR:
+            case AT_SKILL_TRIPLE_SHOT_MASTERY:
                 SetPlayerAttack(sc);
                 break;
             case AT_SKILL_BLAST_CROSSBOW4:
                 SetPlayerAttack(sc);
                 break;
-            case AT_SKILL_BLAST_POISON:
-            case AT_SKILL_ICE_UP:
-            case AT_SKILL_ICE_UP + 1:
-            case AT_SKILL_ICE_UP + 2:
-            case AT_SKILL_ICE_UP + 3:
-            case AT_SKILL_ICE_UP + 4:
-            case AT_SKILL_BLAST_FREEZE:
+            case AT_SKILL_DECAY:
+            case AT_SKILL_DECAY_STR:
+            case AT_SKILL_ICE_STORM:
                 SetPlayerMagic(sc);
                 break;
 
-            case AT_SKILL_PIERCING:
+            case AT_SKILL_PENETRATION:
+            case AT_SKILL_PENETRATION_STR:
                 SetPlayerAttack(sc);
                 break;
 
@@ -4857,30 +4858,20 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
                 SetAction(so, PLAYER_SKILL_FLASH);
                 break;
 
-            case AT_SKILL_HELL_FIRE_UP:
-            case AT_SKILL_HELL_FIRE_UP + 1:
-            case AT_SKILL_HELL_FIRE_UP + 2:
-            case AT_SKILL_HELL_FIRE_UP + 3:
-            case AT_SKILL_HELL_FIRE_UP + 4:
-            case AT_SKILL_HELL:
+            case AT_SKILL_HELL_FIRE:
+            case AT_SKILL_HELL_FIRE_STR:
                 SetAction(so, PLAYER_SKILL_HELL);
                 break;
 
             case AT_SKILL_INFERNO:
+            case AT_SKILL_INFERNO_STR:
+            case AT_SKILL_INFERNO_STR_MG:
                 SetAction(so, PLAYER_SKILL_INFERNO);
                 break;
-            case AT_SKILL_TORNADO_SWORDA_UP:
-            case AT_SKILL_TORNADO_SWORDA_UP + 1:
-            case AT_SKILL_TORNADO_SWORDA_UP + 2:
-            case AT_SKILL_TORNADO_SWORDA_UP + 3:
-            case AT_SKILL_TORNADO_SWORDA_UP + 4:
-
-            case AT_SKILL_TORNADO_SWORDB_UP:
-            case AT_SKILL_TORNADO_SWORDB_UP + 1:
-            case AT_SKILL_TORNADO_SWORDB_UP + 2:
-            case AT_SKILL_TORNADO_SWORDB_UP + 3:
-            case AT_SKILL_TORNADO_SWORDB_UP + 4:
-            case AT_SKILL_WHEEL:
+            case AT_SKILL_TWISTING_SLASH:
+            case AT_SKILL_TWISTING_SLASH_STR:
+            case AT_SKILL_TWISTING_SLASH_MASTERY:
+            case AT_SKILL_TWISTING_SLASH_STR_MG:
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
                 switch (sc->Helper.Type)
                 {
@@ -4902,12 +4893,8 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 #endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
                 break;
 
-            case AT_SKILL_FIRE_SCREAM_UP:
-            case AT_SKILL_FIRE_SCREAM_UP + 1:
-            case AT_SKILL_FIRE_SCREAM_UP + 2:
-            case AT_SKILL_FIRE_SCREAM_UP + 3:
-            case AT_SKILL_FIRE_SCREAM_UP + 4:
-            case AT_SKILL_DARK_SCREAM:
+            case AT_SKILL_FIRE_SCREAM:
+            case AT_SKILL_FIRE_SCREAM_STR:
             {
                 if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
                 {
@@ -4931,38 +4918,30 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
                 else
                     SetAction(so, PLAYER_SKILL_FLASH);
                 break;
-            case AT_SKILL_ASHAKE_UP:
-            case AT_SKILL_ASHAKE_UP + 1:
-            case AT_SKILL_ASHAKE_UP + 2:
-            case AT_SKILL_ASHAKE_UP + 3:
-            case AT_SKILL_ASHAKE_UP + 4:
-            case AT_SKILL_DARK_HORSE:
+            case AT_SKILL_EARTHSHAKE:
+            case AT_SKILL_EARTHSHAKE_STR:
+            case AT_SKILL_EARTHSHAKE_MASTERY:
                 SetAction(so, PLAYER_ATTACK_DARKHORSE);
                 PlayBuffer(SOUND_EARTH_QUAKE);
                 break;
-            case AT_SKILL_ANGER_SWORD_UP:
-            case AT_SKILL_ANGER_SWORD_UP + 1:
-            case AT_SKILL_ANGER_SWORD_UP + 2:
-            case AT_SKILL_ANGER_SWORD_UP + 3:
-            case AT_SKILL_ANGER_SWORD_UP + 4:
-            case AT_SKILL_FURY_STRIKE:
+            case AT_SKILL_RAGEFUL_BLOW:
+            case AT_SKILL_RAGEFUL_BLOW_STR:
+            case AT_SKILL_RAGEFUL_BLOW_MASTERY:
+                
                 SetAction(so, PLAYER_ATTACK_SKILL_FURY_STRIKE);
                 break;
-            case AT_SKILL_BLOW_OF_DESTRUCTION:
+            case AT_SKILL_STRIKE_OF_DESTRUCTION:
+            case AT_SKILL_STRIKE_OF_DESTRUCTION_STR:
                 SetAction(so, PLAYER_SKILL_BLOW_OF_DESTRUCTION);
                 break;
-            case AT_SKILL_SPEAR:
+            case AT_SKILL_IMPALE:
                 if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
                     SetAction(so, PLAYER_FENRIR_ATTACK_SPEAR);
                 else
                     SetAction(so, PLAYER_ATTACK_SKILL_SPEAR);
                 break;
-            case AT_SKILL_BLOOD_ATT_UP:
-            case AT_SKILL_BLOOD_ATT_UP + 1:
-            case AT_SKILL_BLOOD_ATT_UP + 2:
-            case AT_SKILL_BLOOD_ATT_UP + 3:
-            case AT_SKILL_BLOOD_ATT_UP + 4:
-            case AT_SKILL_REDUCEDEFENSE:
+            case AT_SKILL_FIRE_SLASH:
+            case AT_SKILL_FIRE_SLASH_STR:
 #ifdef YDG_ADD_SKILL_RIDING_ANIMATIONS
                 switch (sc->Helper.Type)
                 {
@@ -4983,20 +4962,12 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
                 SetAction(so, PLAYER_ATTACK_SKILL_WHEEL);
 #endif	// YDG_ADD_SKILL_RIDING_ANIMATIONS
                 break;
-            case AT_SKILL_POWER_SLASH_UP:
-            case AT_SKILL_POWER_SLASH_UP + 1:
-            case AT_SKILL_POWER_SLASH_UP + 2:
-            case AT_SKILL_POWER_SLASH_UP + 3:
-            case AT_SKILL_POWER_SLASH_UP + 4:
-            case AT_SKILL_ICE_BLADE:
+            case AT_SKILL_POWER_SLASH:
+            case AT_SKILL_POWER_SLASH_STR:
                 SetAction(so, PLAYER_ATTACK_TWO_HAND_SWORD_TWO);
                 break;
-            case AT_SKILL_BLOW_UP:
-            case AT_SKILL_BLOW_UP + 1:
-            case AT_SKILL_BLOW_UP + 2:
-            case AT_SKILL_BLOW_UP + 3:
-            case AT_SKILL_BLOW_UP + 4:
             case AT_SKILL_DEATHSTAB:
+            case AT_SKILL_DEATHSTAB_STR:
                 SetAction(so, PLAYER_ATTACK_DEATHSTAB);
                 break;
 
@@ -5166,12 +5137,8 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
                 }
             }
             break;
-            case AT_SKILL_ALICE_DRAINLIFE_UP:
-            case AT_SKILL_ALICE_DRAINLIFE_UP + 1:
-            case AT_SKILL_ALICE_DRAINLIFE_UP + 2:
-            case AT_SKILL_ALICE_DRAINLIFE_UP + 3:
-            case AT_SKILL_ALICE_DRAINLIFE_UP + 4:
             case AT_SKILL_ALICE_DRAINLIFE:
+            case AT_SKILL_ALICE_DRAINLIFE_STR:
             {
                 switch (sc->Helper.Type)
                 {
@@ -5223,15 +5190,12 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
                 SetAction(so, PLAYER_SKILL_GIGANTICSTORM);
                 break;
 
-            case AT_SKILL_LIGHTNING_SHOCK_UP:
-            case AT_SKILL_LIGHTNING_SHOCK_UP + 1:
-            case AT_SKILL_LIGHTNING_SHOCK_UP + 2:
-            case AT_SKILL_LIGHTNING_SHOCK_UP + 3:
-            case AT_SKILL_LIGHTNING_SHOCK_UP + 4:
             case AT_SKILL_LIGHTNING_SHOCK:
+            case AT_SKILL_LIGHTNING_SHOCK_STR:
                 SetAction(so, PLAYER_SKILL_LIGHTNING_SHOCK);
                 break;
-            case AT_SKILL_DRAGON_LOWER:
+            case AT_SKILL_DRAGON_ROAR:
+            case AT_SKILL_DRAGON_ROAR_STR:
             {
                 if (sc != Hero)
                     g_CMonkSystem.RageCreateEffect(so, MagicNumber);
@@ -5368,10 +5332,10 @@ void ReceiveSkillCount(const BYTE* ReceiveBuffer)
 
     switch (Data->m_byType)
     {
-    case AT_SKILL_BLAST_HELL_BEGIN:
+    case AT_SKILL_NOVA_BEGIN:
         break;
 
-    case AT_SKILL_BLAST_HELL:
+    case AT_SKILL_NOVA:
         to->m_bySkillCount = Data->m_byCount;
         break;
     }
@@ -5611,7 +5575,7 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
 
         switch (SkillType)
         {
-        case AT_SKILL_BLAST_HELL:
+        case AT_SKILL_NOVA:
         case AT_SKILL_COMBO:
             o->m_bActionStart = true;
             c->StormTime = 0;
@@ -5623,7 +5587,7 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
             break;
         }
 
-        if (SkillType == AT_SKILL_BLAST_HELL || SkillType == AT_SKILL_COMBO)
+        if (SkillType == AT_SKILL_NOVA || SkillType == AT_SKILL_COMBO)
         {
             int TKey = ((int)(Data->TKeyH) << 8) + Data->TKeyL;
             int TIndex = FindCharacterIndex(TKey);
@@ -7769,134 +7733,53 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_ANS_MASTERLEVEL_SKILL)ReceiveBuffer;
 
-    if (Data->btResult == 1)
+    if (Data->Result == 1 && Data->SkillNumber > -1)
     {
-        if (Data->nSkillNum > -1)
+        const auto newSkill = (ActionSkillType)Data->SkillNumber;
+        if (auto search = SKILL_REPLACEMENTS.find(newSkill); search != SKILL_REPLACEMENTS.end())
         {
-            for (int i = 0; i < MAX_MAGIC; ++i)
+            const auto replacedSkill = search->second;
+            for (int i = 0; i < MAX_SKILLS; ++i)
             {
-                switch (Data->nSkillNum)
+                if (CharacterAttribute->Skill[i] == replacedSkill)
                 {
-                case AT_SKILL_ASHAKE_UP:
-                    if (AT_SKILL_DARK_HORSE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
+                    CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
                     break;
-                case AT_SKILL_BLAST_UP:
-                    if (AT_SKILL_BLAST == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_MANY_ARROW_UP:
-                    if (AT_SKILL_CROSSBOW == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_TORNADO_SWORDA_UP:
-                case AT_SKILL_TORNADO_SWORDB_UP:
-                    if (AT_SKILL_WHEEL == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_HEAL_UP:
-                    if (AT_SKILL_HEALING == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_LIFE_UP:
-                    if (AT_SKILL_VITALITY == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_SOUL_UP:
-                    if (AT_SKILL_WIZARDDEFENSE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_FIRE_BUST_UP:
-                    if (AT_SKILL_LONGPIER_ATTACK == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_HELL_FIRE_UP:
-                    if (AT_SKILL_HELL == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_EVIL_SPIRIT_UP:
-                case AT_SKILL_EVIL_SPIRIT_UP_M:
-                    if (AT_SKILL_EVIL == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_BLOW_UP:
-                    if (AT_SKILL_DEATHSTAB == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_ANGER_SWORD_UP:
-                    if (AT_SKILL_FURY_STRIKE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_BLOOD_ATT_UP:
-                    if (AT_SKILL_REDUCEDEFENSE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_POWER_SLASH_UP:
-                    if (AT_SKILL_ICE_BLADE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_FIRE_SCREAM_UP:
-                    if (AT_SKILL_DARK_SCREAM == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_DEF_POWER_UP:
-                    if (AT_SKILL_DEFENSE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_ATT_POWER_UP:
-                    if (AT_SKILL_ATTACK == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_ICE_UP:
-                    if (AT_SKILL_BLAST_FREEZE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_ALICE_SLEEP_UP:
-                    if (AT_SKILL_ALICE_SLEEP == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
-                    if (AT_SKILL_ALICE_CHAINLIGHTNING == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_LIGHTNING_SHOCK_UP:
-                    if (AT_SKILL_LIGHTNING_SHOCK == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                case AT_SKILL_ALICE_DRAINLIFE_UP:
-                    if (AT_SKILL_ALICE_DRAINLIFE == CharacterAttribute->Skill[i])
-                        CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
-                    break;
-                }
-            }
-            bool Check_Add = false;
-
-            for (int i = 0; i < MAX_MAGIC; ++i)
-            {
-                if (Data->nSkillNum % 5 != 0)
-                {
-                    if (CharacterAttribute->Skill[i] == (Data->nSkillNum - 1))
-                    {
-                        CharacterAttribute->Skill[i] = (ActionSkillType)Data->nSkillNum;
-                        Check_Add = true;
-                        break;
-                    }
-                }
-            }
-            if (Check_Add == false)
-            {
-                for (int i = 0; i < MAX_MAGIC; ++i)
-                {
-                    if (CharacterAttribute->Skill[i] == 0)
-                    {
-                        CharacterAttribute->Skill[i] = (ActionSkillType)Data->nSkillNum;
-                        break;
-                    }
                 }
             }
         }
+
+        bool isSkillUpdated = false;
+
+        for (int i = 0; i < MAX_SKILLS; ++i)
+        {
+            if (CharacterAttribute->Skill[i] == Data->SkillNumber)
+            {
+                CharacterAttribute->SkillLevel[i] = Data->SkillLevel;
+                isSkillUpdated = true;
+                break;
+            }
+        }
+
+        if (!isSkillUpdated)
+        {
+            // then we need to add it to the next free index
+            for (int i = 0; i < MAX_MAGIC; ++i)
+            {
+                if (CharacterAttribute->Skill[i] == AT_SKILL_UNDEFINED)
+                {
+                    CharacterAttribute->Skill[i] = (ActionSkillType)Data->SkillNumber;
+                    CharacterAttribute->SkillLevel[i] = Data->SkillLevel;
+                    break;
+                }
+            }
+        }
+
+        auto interface = CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
+
+        interface->SkillUpgrade(Data->SkillIndex, Data->SkillLevel, Data->DisplayValue, Data->DisplayValueOfNextLevel);
     }
-    Master_Level_Data.nMLevelUpMPoint = Data->nMLPoint;
+    Master_Level_Data.nMLevelUpMPoint = Data->MasterLevelUpPoints;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x52 [Receive_Master_LevelGetSkill]");
 }
@@ -13003,7 +12886,7 @@ BOOL ReceiveStraightAttack(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     TargetKey &= 0x7FFF;
     int Index = FindCharacterIndex(SourceKey);
     int TargetIndex = FindCharacterIndex(TargetKey);
-    if (TargetIndex == MAX_CHARACTERS_CLIENT && AttackNumber != AT_SKILL_DARKSIDE)
+    if (TargetIndex == MAX_CHARACTERS_CLIENT && AttackNumber != AT_SKILL_DARKSIDE && AttackNumber != AT_SKILL_DARKSIDE_STR)
         return (TRUE);
 
     AttackPlayer = Index;
@@ -13024,12 +12907,13 @@ BOOL ReceiveStraightAttack(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
     if (g_CMonkSystem.IsRageHalfwaySkillAni(AttackNumber))
     {
-        if (sc != Hero && AttackNumber == AT_SKILL_STAMP)
+        auto isBeastUppercut = AttackNumber == AT_SKILL_BEAST_UPPERCUT || AttackNumber == AT_SKILL_BEAST_UPPERCUT_STR || AttackNumber == AT_SKILL_BEAST_UPPERCUT_MASTERY;
+        if (sc != Hero && isBeastUppercut)
         {
             g_CMonkSystem.SetRageSkillAni(AttackNumber, so);
             g_CMonkSystem.RageCreateEffect(so, AttackNumber);
         }
-        else if (AttackNumber != AT_SKILL_STAMP)
+        else if (!isBeastUppercut)
         {
             g_CMonkSystem.SetRageSkillAni(AttackNumber, so);
         }
@@ -13039,6 +12923,7 @@ BOOL ReceiveStraightAttack(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     switch (AttackNumber)
     {
     case AT_SKILL_DARKSIDE:
+    case AT_SKILL_DARKSIDE_STR:
     {
         if (sc != Hero)
             g_CMonkSystem.RageCreateEffect(so, AttackNumber);
@@ -13056,10 +12941,11 @@ void ReceiveDarkside(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_DARKSIDE_INDEX)ReceiveBuffer;
 
-    if (Data->MagicNumber == AT_SKILL_DARKSIDE)
+    auto skill = static_cast<ActionSkillType>(Data->MagicNumber);
+    if (skill == AT_SKILL_DARKSIDE || skill == AT_SKILL_DARKSIDE_STR)
     {
         g_CMonkSystem.InitDarksideTarget();
-        g_CMonkSystem.SetDarksideTargetIndex(Data->TargerIndex);
+        g_CMonkSystem.SetDarksideTargetIndex(Data->TargerIndex, skill);
     }
 }
 
@@ -13299,6 +13185,9 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             break;
         case 0x52:
             Receive_Master_LevelGetSkill(ReceiveBuffer);
+            break;
+        case 0x53:
+            Receive_Master_SetSkillList((PMSG_MASTER_SKILL_LIST_SEND*)ReceiveBuffer);
             break;
         }
         break;

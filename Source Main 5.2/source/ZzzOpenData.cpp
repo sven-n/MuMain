@@ -5394,7 +5394,8 @@ void OpenBasicData(HDC hDC)
 
     OpenMonsterSkillScript(L"Data\\Local\\MonsterSkill.bmd");
 
-    g_pMasterLevelInterface->OpenMasterLevel(L"Data\\Local\\MasterSKillTree.bmd");
+    g_pMasterLevelInterface->OpenMasterSkillTreeData(L"Data\\Local\\MasterSkillTreeData.bmd");
+    g_pMasterLevelInterface->OpenMasterSkillTooltip(L"Data\\Local\\Eng\\MasterSkillTooltip_eng.bmd");
 
     rUIMng.RenderTitleSceneUI(hDC, 9, 11);
 

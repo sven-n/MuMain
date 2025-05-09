@@ -334,11 +334,17 @@ void CNewUIPetInfoWindow::CalcDamage(int iNumTapButton)
     case TAB_TYPE_DARKHORSE:
     {
         int iSkillDamage[2];
-        gCharacterManager.GetSkillDamage(AT_SKILL_DARK_HORSE, &iSkillDamage[0], &iSkillDamage[1]);
+        int master_boost = 0;
+        gCharacterManager.GetSkillDamage(AT_SKILL_EARTHSHAKE, &iSkillDamage[0], &iSkillDamage[1]);
+        auto masterLevelUi = SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
+        if (masterLevelUi != nullptr)
+        {
+            master_boost = static_cast<int>(CharacterAttribute->MasterSkillInfo[AT_SKILL_EARTHSHAKE_STR].GetSkillValue());
+        }
 
         pPetInfo = Hero->GetEquipedPetInfo(PET_TYPE_DARK_HORSE);
-        m_aiDamage[0] = pPetInfo->m_wDamageMin + iSkillDamage[0];
-        m_aiDamage[1] = pPetInfo->m_wDamageMax + iSkillDamage[1];
+        m_aiDamage[0] = pPetInfo->m_wDamageMin + iSkillDamage[0] + master_boost;
+        m_aiDamage[1] = pPetInfo->m_wDamageMax + iSkillDamage[1] + master_boost;
     }
     break;
     case TAB_TYPE_DARKSPIRIT:

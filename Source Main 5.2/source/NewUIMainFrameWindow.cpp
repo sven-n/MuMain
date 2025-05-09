@@ -32,13 +32,6 @@
 #include "GameShop/InGameShopSystem.h"
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
-extern int  MouseUpdateTime;
-extern int  MouseUpdateTimeMax;
-extern int SelectedCharacter;
-extern int Attacking;
-
 SEASON3B::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
 {
     m_bExpEffect = false;
@@ -1833,9 +1826,9 @@ int SEASON3B::CNewUISkillList::GetHotKey(int iHotKey)
 int SEASON3B::CNewUISkillList::GetSkillIndex(int iSkillType)
 {
     // special handling for skills with different skill id for the trigger
-    if (iSkillType == AT_SKILL_BLAST_HELL_BEGIN)
+    if (iSkillType == AT_SKILL_NOVA_BEGIN)
     {
-        iSkillType = AT_SKILL_BLAST_HELL;
+        iSkillType = AT_SKILL_NOVA;
     }
 
     int iReturn = -1;
@@ -1863,7 +1856,7 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
             }
         }
 
-        WORD wHotKeySkill = CharacterAttribute->Skill[m_iHotKeySkillType[iHotKey]];
+        auto wHotKeySkill = CharacterAttribute->Skill[m_iHotKeySkillType[iHotKey]];
 
         if (wHotKeySkill == 0)
         {
@@ -1874,13 +1867,13 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
 
         Hero->CurrentSkill = m_iHotKeySkillType[iHotKey];
 
-        WORD bySkill = CharacterAttribute->Skill[Hero->CurrentSkill];
+        auto bySkill = CharacterAttribute->Skill[Hero->CurrentSkill];
 
         if (
             g_pOption->IsAutoAttack() == true
             && gMapManager.WorldActive != WD_6STADIUM
             && gMapManager.InChaosCastle() == false
-            && (bySkill == AT_SKILL_TELEPORT || bySkill == AT_SKILL_TELEPORT_B))
+            && (bySkill == AT_SKILL_TELEPORT || bySkill == AT_SKILL_TELEPORT_ALLY))
         {
             SelectedCharacter = -1;
             Attacking = -1;
@@ -2114,7 +2107,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
     int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
 
-    if (!gSkillManager.DemendConditionCheckSkill(bySkillType))
+    if (!gSkillManager.AreSkillRequirementsFulfilled(bySkillType))
     {
         bCantSkill = true;
     }
@@ -2127,13 +2120,13 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     {
         bCantSkill = true;
     }
-
-    if (bySkillType == AT_SKILL_SPEAR && (Hero->Helper.Type<MODEL_HORN_OF_UNIRIA || Hero->Helper.Type>MODEL_HORN_OF_DINORANT) && Hero->Helper.Type != MODEL_HORN_OF_FENRIR)
+    auto isSittingOnPet = (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR);
+    if (bySkillType == AT_SKILL_IMPALE && !isSittingOnPet)
     {
         bCantSkill = true;
     }
 
-    if (bySkillType == AT_SKILL_SPEAR && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
+    if (bySkillType == AT_SKILL_IMPALE && isSittingOnPet)
     {
         int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
         int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
@@ -2143,12 +2136,20 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         }
     }
 
-    if (bySkillType >= AT_SKILL_BLOCKING && bySkillType <= AT_SKILL_SWORD5 && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
+    if (isSittingOnPet
+        && ((bySkillType >= AT_SKILL_BLOCKING && bySkillType <= AT_SKILL_SLASH)
+            || bySkillType == AT_SKILL_FALLING_SLASH_STR
+            || bySkillType == AT_SKILL_LUNGE_STR
+            || bySkillType == AT_SKILL_CYCLONE_STR
+            || bySkillType == AT_SKILL_CYCLONE_STR_MG
+            || bySkillType == AT_SKILL_SLASH_STR
+            ))
     {
         bCantSkill = true;
     }
 
-    if ((bySkillType == AT_SKILL_ICE_BLADE || (AT_SKILL_POWER_SLASH_UP <= bySkillType && AT_SKILL_POWER_SLASH_UP + 4 >= bySkillType)) && (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR))
+    if ((bySkillType == AT_SKILL_POWER_SLASH || bySkillType == AT_SKILL_POWER_SLASH_STR)
+        && isSittingOnPet)
     {
         bCantSkill = true;
     }
@@ -2170,7 +2171,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         bCantSkill = true;
     }
 
-    if (bySkillType == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= bySkillType && bySkillType <= AT_SKILL_ASHAKE_UP + 4))
+    if (bySkillType == AT_SKILL_EARTHSHAKE || bySkillType == AT_SKILL_EARTHSHAKE_STR || bySkillType == AT_SKILL_EARTHSHAKE_MASTERY)
     {
         BYTE byDarkHorseLife = 0;
         byDarkHorseLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
@@ -2193,7 +2194,12 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         }
     }
 #endif //PJH_FIX_SPRIT
-    if ((bySkillType == AT_SKILL_INFINITY_ARROW) || (bySkillType == AT_SKILL_SWELL_OF_MAGICPOWER))
+    if ((bySkillType == AT_SKILL_INFINITY_ARROW)
+        || (bySkillType == AT_SKILL_INFINITY_ARROW_STR)
+        || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY)
+        || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_STR)
+        || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
+        )
     {
         if (g_csItemOption.IsDisableSkill(bySkillType, iEnergy))
         {
@@ -2205,7 +2211,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         }
     }
 
-    if (bySkillType == AT_SKILL_REDUCEDEFENSE || (AT_SKILL_BLOOD_ATT_UP <= bySkillType && bySkillType <= AT_SKILL_BLOOD_ATT_UP + 4))
+    if (bySkillType == AT_SKILL_FIRE_SLASH || bySkillType == AT_SKILL_FIRE_SLASH_STR)
     {
         WORD Strength;
         const WORD wRequireStrength = 596;
@@ -2226,7 +2232,8 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     switch (bySkillType)
     {
         //case AT_SKILL_PIERCING:
-    case AT_SKILL_PARALYZE:
+    case AT_SKILL_ICE_ARROW:
+    case AT_SKILL_ICE_ARROW_STR:
     {
         WORD  Dexterity;
         const WORD wRequireDexterity = 646;
@@ -2238,7 +2245,15 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     }break;
     }
 
-    if (bySkillType == AT_SKILL_WHEEL || bySkillType == AT_SKILL_FURY_STRIKE || bySkillType == AT_SKILL_DEATHSTAB || (AT_SKILL_TORNADO_SWORDA_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDA_UP + 4) || (AT_SKILL_TORNADO_SWORDB_UP <= bySkillType && bySkillType <= AT_SKILL_TORNADO_SWORDB_UP + 4)
+    if (bySkillType == AT_SKILL_TWISTING_SLASH
+        || bySkillType == AT_SKILL_TWISTING_SLASH_STR
+        || bySkillType == AT_SKILL_TWISTING_SLASH_STR_MG
+        || bySkillType == AT_SKILL_TWISTING_SLASH_MASTERY
+        || bySkillType == AT_SKILL_RAGEFUL_BLOW
+        || bySkillType == AT_SKILL_RAGEFUL_BLOW_STR
+        || bySkillType == AT_SKILL_RAGEFUL_BLOW_MASTERY
+        || bySkillType == AT_SKILL_DEATHSTAB
+        || bySkillType == AT_SKILL_DEATHSTAB_STR
         )
     {
         int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
@@ -2252,14 +2267,21 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 
     if (gMapManager.InChaosCastle() == true)
     {
-        if (bySkillType == AT_SKILL_DARK_HORSE || bySkillType == AT_SKILL_RIDER || (bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_TARGET) || (AT_SKILL_ASHAKE_UP <= bySkillType && bySkillType <= AT_SKILL_ASHAKE_UP + 4))
+        if (bySkillType == AT_SKILL_EARTHSHAKE
+            || bySkillType == AT_SKILL_EARTHSHAKE_STR
+            || bySkillType == AT_SKILL_EARTHSHAKE_MASTERY
+            || bySkillType == AT_SKILL_RIDER
+            || (bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_TARGET)
+            )
         {
             bCantSkill = true;
         }
     }
     else
     {
-        if (bySkillType == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= bySkillType && bySkillType <= AT_SKILL_ASHAKE_UP + 4))
+        if (bySkillType == AT_SKILL_EARTHSHAKE
+            || bySkillType == AT_SKILL_EARTHSHAKE_STR
+            || bySkillType == AT_SKILL_EARTHSHAKE_MASTERY)
         {
             BYTE byDarkHorseLife = 0;
             byDarkHorseLife = CharacterMachine->Equipment[EQUIPMENT_HELPER].Durability;
@@ -2298,13 +2320,10 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     float fU, fV;
     int iKindofSkill = 0;
 
-    if (g_csItemOption.Special_Option_Check() == false && (bySkillType == AT_SKILL_ICE_BLADE || (AT_SKILL_POWER_SLASH_UP <= bySkillType && AT_SKILL_POWER_SLASH_UP + 4 >= bySkillType)))
+    if (!g_csItemOption.IsNonWeaponSkillOrIsSkillEquipped(bySkillType))
     {
         bCantSkill = true;
     }
-
-    if (g_csItemOption.Special_Option_Check(1) == false && (bySkillType == AT_SKILL_CROSSBOW || (AT_SKILL_MANY_ARROW_UP <= bySkillType && AT_SKILL_MANY_ARROW_UP + 4 >= bySkillType)))
-        bCantSkill = true;
 
     if (bySkillType >= AT_PET_COMMAND_DEFAULT && bySkillType <= AT_PET_COMMAND_END)
     {
@@ -2354,7 +2373,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         fV = 3 * height / 256.f;
         iKindofSkill = KOS_SKILL2;
     }
-    else if (bySkillType == AT_SKILL_BLOW_OF_DESTRUCTION)
+    else if (bySkillType == AT_SKILL_STRIKE_OF_DESTRUCTION)
     {
         fU = 7 * width / 256.f;
         fV = 2 * height / 256.f;
@@ -2409,13 +2428,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         fV = 3 * height / 256.f;
         iKindofSkill = KOS_SKILL2;
     }
-    else if (AT_SKILL_LIGHTNING_SHOCK_UP <= bySkillType && bySkillType <= AT_SKILL_LIGHTNING_SHOCK_UP + 4)
-    {
-        fU = 6 * width / 256.f;
-        fV = 8 * height / 256.f;
-        iKindofSkill = KOS_SKILL2;
-    }
-    else if (bySkillType == AT_SKILL_SWELL_OF_MAGICPOWER)
+    else if (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY)
     {
         fU = 8 * width / 256.f;
         fV = 2 * height / 256.f;
@@ -2427,16 +2440,16 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         fV = (height / 256.f) * ((Skill_Icon / 12) + 4);
         iKindofSkill = KOS_SKILL2;
     }
-    else if (bySkillType >= AT_SKILL_THRUST)
+    else if (bySkillType >= AT_SKILL_KILLING_BLOW)
     {
-        fU = ((bySkillType - 260) % 12) * width / 256.f;
-        fV = ((bySkillType - 260) / 12) * height / 256.f;
+        fU = ((bySkillType - AT_SKILL_KILLING_BLOW) % 12) * width / 256.f;
+        fV = ((bySkillType - AT_SKILL_KILLING_BLOW) / 12) * height / 256.f;
         iKindofSkill = KOS_SKILL3;
     }
-    else if (bySkillType >= 57)
+    else if (bySkillType >= AT_SKILL_SPIRAL_SLASH)
     {
-        fU = ((bySkillType - 57) % 8) * width / 256.f;
-        fV = ((bySkillType - 57) / 8) * height / 256.f;
+        fU = ((bySkillType - AT_SKILL_SPIRAL_SLASH) % 8) * width / 256.f;
+        fV = ((bySkillType - AT_SKILL_SPIRAL_SLASH) / 8) * height / 256.f;
         iKindofSkill = KOS_SKILL2;
     }
     else
@@ -2466,14 +2479,28 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     }break;
     }
 
-    if (bCantSkill == true)
+    if (bySkillType >= AT_SKILL_MASTER_BEGIN)
     {
-        iSkillIndex += 6;
+        if (bCantSkill)
+        {
+            RenderImage(BITMAP_INTERFACE_MASTER_BEGIN + 3, x, y, width, height, (20.f / 512.f) * (Skill_Icon % 25), ((28.f / 512.f) * ((Skill_Icon / 25))), 20.f / 512.f, 28.f / 512.f);
+        }
+        else
+        {
+            RenderImage(BITMAP_INTERFACE_MASTER_BEGIN + 2, x, y, width, height, (20.f / 512.f)* (Skill_Icon % 25), ((28.f / 512.f)* ((Skill_Icon / 25))), 20.f / 512.f, 28.f / 512.f);
+        }
     }
-
-    if (iSkillIndex != 0)
+    else
     {
-        RenderBitmap(iSkillIndex, x, y, width, height, fU, fV, width / 256.f, height / 256.f);
+        if (bCantSkill == true)
+        {
+            iSkillIndex += 6;
+        }
+
+        if (iSkillIndex != 0)
+        {
+            RenderBitmap(iSkillIndex, x, y, width, height, fU, fV, width / 256.f, height / 256.f);
+        }
     }
 
     int iHotKey = -1;
@@ -2493,11 +2520,19 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         glColor3f(1.f, 1.f, 1.f);
     }
 
-    if ((bySkillType == AT_SKILL_GIANTSWING || bySkillType == AT_SKILL_DRAGON_KICK
-        || bySkillType == AT_SKILL_DRAGON_LOWER) && (bCantSkill))
+    if ((bySkillType == AT_SKILL_CHAIN_DRIVE
+        || bySkillType == AT_SKILL_CHAIN_DRIVE_STR
+        || bySkillType == AT_SKILL_DRAGON_KICK
+        || bySkillType == AT_SKILL_DRAGON_ROAR
+        || bySkillType == AT_SKILL_DRAGON_ROAR_STR) && (bCantSkill))
         return;
 
-    if ((bySkillType != AT_SKILL_INFINITY_ARROW) && (bySkillType != AT_SKILL_SWELL_OF_MAGICPOWER))
+    if ((bySkillType != AT_SKILL_INFINITY_ARROW)
+        && (bySkillType != AT_SKILL_INFINITY_ARROW_STR)
+        && (bySkillType != AT_SKILL_EXPANSION_OF_WIZARDRY)
+        && (bySkillType != AT_SKILL_EXPANSION_OF_WIZARDRY_STR)
+        && (bySkillType != AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
+        )
     {
         RenderSkillDelay(iIndex, x, y, width, height);
     }

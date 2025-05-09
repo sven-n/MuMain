@@ -6626,7 +6626,8 @@ void CheckClientArrow(OBJECT* o)
 
             switch (Skill)
             {
-            case AT_SKILL_PIERCING:
+            case AT_SKILL_PENETRATION:
+            case AT_SKILL_PENETRATION_STR:
                 if (o->SubType == 2)
                 {
                     CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 6, o, 30.0f);
@@ -6637,7 +6638,8 @@ void CheckClientArrow(OBJECT* o)
                     CreateBomb(o->Position, true);
                 }
                 break;
-            case AT_SKILL_PARALYZE:
+            case AT_SKILL_ICE_ARROW:
+            case AT_SKILL_ICE_ARROW_STR:
                 o->Live = false;
                 if (o->Type == MODEL_ARROW_BOMB || o->Type == MODEL_ARROW_HOLY)
                     CreateBomb(o->Position, true);
@@ -6667,7 +6669,7 @@ void CheckClientArrow(OBJECT* o)
                 float range = 100.f;
                 int Skill = CharacterAttribute->Skill[o->Skill];
 
-                if (Skill == AT_SKILL_PIERCING && o->Type == MODEL_ARROW_BOMB)
+                if ((Skill == AT_SKILL_PENETRATION || Skill == AT_SKILL_PENETRATION_STR) && o->Type == MODEL_ARROW_BOMB)
                 {
                     float dx = o->Position[0] - Hero->Object.Position[0];
                     float dy = o->Position[1] - Hero->Object.Position[1];
@@ -6677,7 +6679,8 @@ void CheckClientArrow(OBJECT* o)
                     }
                 }
 
-                if ((Skill == AT_SKILL_PIERCING
+                if ((Skill == AT_SKILL_PENETRATION
+                    || Skill == AT_SKILL_PENETRATION_STR
 #ifdef PJH_FIX_4_BUGFIX_7
                     || Skill == AT_SKILL_DARK_SCREAM
 #endif //#ifdef PJH_FIX_4_BUGFIX_7
@@ -6702,7 +6705,8 @@ void CheckClientArrow(OBJECT* o)
                     }
                     break;
 #endif //#ifdef PJH_FIX_4_BUGFIX_7
-                    case AT_SKILL_PIERCING:
+                    case AT_SKILL_PENETRATION:
+                    case AT_SKILL_PENETRATION_STR:
                         if (o->SubType == 2)
                         {
                             if (o->Type == MODEL_ARROW_HOLY && o->LifeTime > 14)
@@ -6725,7 +6729,8 @@ void CheckClientArrow(OBJECT* o)
                             CreateBomb(o->Position, true);
                         }
                         break;
-                    case AT_SKILL_PARALYZE:
+                    case AT_SKILL_ICE_ARROW:
+                    case AT_SKILL_ICE_ARROW_STR:
                         o->Live = false;
                         if (o->Type == MODEL_ARROW_BOMB || o->Type == MODEL_ARROW_HOLY)
                             CreateBomb(o->Position, true);

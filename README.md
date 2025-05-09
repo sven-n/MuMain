@@ -17,6 +17,7 @@ What I have done so far:
   * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
     a better frame rate when many players and objects are visible.
   * 🔥 Added inventory and vault extensions.
+  * 🔥 The master skill tree system was upgraded to Season 6
   * 🔥 Unicode support: The client works with UTF-16LE instead of ANSI in memory.
     All strings and char arrays have been changed to use wide characters.
     Strings coming from files and the network are handled as UTF-8.
@@ -47,10 +48,6 @@ What I have done so far:
     enums and constants.
 
 What needs to be done for Season 6:
-  * The master skill tree system needs to be overhauled:
-    * The old one has up to 5 master levels per skill, and each was a separate skill.
-    * The new system has one per normal skill, one per master skill, and additional
-      levels that are sent to the client.
   * Lucky Items
 
 ## How to build & run

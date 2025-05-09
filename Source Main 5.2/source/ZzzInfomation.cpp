@@ -582,17 +582,17 @@ void PrintItem(wchar_t* FileName)
     fclose(fp);
 }
 
-BYTE getSkillIndexByBook(int Type)
+ActionSkillType GetSkillByBook(int Type)
 {
-    int SkillIndex = Type - ITEM_SCROLL_OF_METEORITE;
+    auto SkillIndex = Type - ITEM_SCROLL_OF_METEORITE;
     switch (SkillIndex)
     {
-    case 17: SkillIndex = AT_SKILL_BLAST_POISON; break;
-    case 18: SkillIndex = AT_SKILL_BLAST_FREEZE; break;
-    case 19: SkillIndex = AT_SKILL_BLAST_HELL;   break;
+    case 17: SkillIndex = AT_SKILL_DECAY; break;
+    case 18: SkillIndex = AT_SKILL_ICE_STORM; break;
+    case 19: SkillIndex = AT_SKILL_NOVA;   break;
     }
 
-    return SkillIndex;
+    return static_cast<ActionSkillType>(SkillIndex);
 }
 
 bool IsCepterItem(int iType)
@@ -2055,28 +2055,30 @@ int64_t ItemValue(ITEM* ip, int goldType)
             switch (ip->Special[i])
             {
             case AT_SKILL_BLOCKING:
-            case AT_SKILL_SWORD1:
-            case AT_SKILL_SWORD2:
-            case AT_SKILL_SWORD3:
-            case AT_SKILL_SWORD4:
-            case AT_SKILL_SWORD5:
-            case AT_SKILL_MANY_ARROW_UP:
-            case AT_SKILL_MANY_ARROW_UP + 1:
-            case AT_SKILL_MANY_ARROW_UP + 2:
-            case AT_SKILL_MANY_ARROW_UP + 3:
-            case AT_SKILL_MANY_ARROW_UP + 4:
-            case AT_SKILL_CROSSBOW:
+            case AT_SKILL_FALLING_SLASH:
+            case AT_SKILL_FALLING_SLASH_STR:
+            case AT_SKILL_LUNGE:
+            case AT_SKILL_LUNGE_STR:
+            case AT_SKILL_UPPERCUT:
+            case AT_SKILL_CYCLONE:
+            case AT_SKILL_CYCLONE_STR:
+            case AT_SKILL_CYCLONE_STR_MG:
+            case AT_SKILL_SLASH:
+            case AT_SKILL_SLASH_STR:
+            case AT_SKILL_TRIPLE_SHOT:
+            case AT_SKILL_TRIPLE_SHOT_STR:
+            case AT_SKILL_TRIPLE_SHOT_MASTERY:
             case AT_SKILL_RECOVER:
             case AT_SKILL_GAOTIC:
             case AT_SKILL_MULTI_SHOT:
-            case AT_SKILL_POWER_SLASH_UP:
-            case AT_SKILL_POWER_SLASH_UP + 1:
-            case AT_SKILL_POWER_SLASH_UP + 2:
-            case AT_SKILL_POWER_SLASH_UP + 3:
-            case AT_SKILL_POWER_SLASH_UP + 4:
-            case AT_SKILL_ICE_BLADE:
-            case AT_SKILL_THRUST:
-            case AT_SKILL_STAMP:
+            case AT_SKILL_POWER_SLASH:
+            case AT_SKILL_POWER_SLASH_STR:
+            case AT_SKILL_KILLING_BLOW:
+            case AT_SKILL_KILLING_BLOW_STR:
+            case AT_SKILL_KILLING_BLOW_MASTERY:
+            case AT_SKILL_BEAST_UPPERCUT:
+            case AT_SKILL_BEAST_UPPERCUT_STR:
+            case AT_SKILL_BEAST_UPPERCUT_MASTERY:
                 Gold += (long long)((double)Gold * 1.5f);
                 break;
             case AT_IMPROVE_DAMAGE:
