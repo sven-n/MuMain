@@ -1036,7 +1036,7 @@ BOOL OpenInitFile()
             g_bUseWindowMode = FALSE;
         }
 
-        dwSize = MAX_LANGUAGE_NAME_LENGTH;
+        dwSize = MAX_LANGUAGE_NAME_LENGTH * sizeof(wchar_t);
         if (RegQueryValueEx(hKey, L"LangSelection", 0, NULL, (LPBYTE)g_aszMLSelection, &dwSize) != ERROR_SUCCESS)
         {
             wcscpy(g_aszMLSelection, L"Eng");
