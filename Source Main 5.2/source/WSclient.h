@@ -379,6 +379,23 @@ typedef struct
     BYTE		 InventoryExtensions;
 } PRECEIVE_JOIN_MAP_SERVER_EXTENDED, * LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED;
 
+typedef struct
+{
+    PBMSG_HEADER Header;
+    BYTE         SubCode;
+    BYTE         PositionX;
+    BYTE         PositionY;
+    BYTE         Map;
+    BYTE         Angle;
+    DWORD       Life;
+    DWORD       Mana;
+    DWORD       Shield;
+    DWORD       SkillMana;
+    uint64_t    CurrentExperience;
+
+    DWORD        Gold;
+} PRECEIVE_REVIVAL_EXTENDED, * LPPRECEIVE_REVIVAL_EXTENDED;
+
 //inventory
 typedef struct {
     BYTE          Index;

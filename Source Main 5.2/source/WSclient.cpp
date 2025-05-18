@@ -937,44 +937,26 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 
     return (TRUE);
 }
-/*
+
 void ReceiveRevival(const BYTE* ReceiveBuffer)
 {
     MouseLButton = false;
-    Teleport = false;
+    Hero->Object.Teleport = false;
     Hero->Object.Live = false;
-    auto Data = (LPPRECEIVE_REVIVAL)ReceiveBuffer;
+    auto Data = (LPPRECEIVE_REVIVAL_EXTENDED)ReceiveBuffer;
 
     CharacterAttribute->Life = Data->Life;
     CharacterAttribute->Mana = Data->Mana;
     CharacterAttribute->Shield = Data->Shield;
     CharacterAttribute->SkillMana = Data->SkillMana;
 
-    __int64 Data_Exp = 0x0000000000000000;
-    Master_Level_Data.lMasterLevel_Experince = 0x0000000000000000;
-    Data_Exp |= Data->btMExp1;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp2;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp3;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp4;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp5;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp6;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp7;
-    Data_Exp <<= 8;
-    Data_Exp |= Data->btMExp8;
-
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
-        Master_Level_Data.lMasterLevel_Experince = Data_Exp;
+        Master_Level_Data.lMasterLevel_Experince = Data->CurrentExperience;
     }
     else
     {
-        CharacterAttribute->Experience = (int)Data_Exp;
+        CharacterAttribute->Experience = Data->CurrentExperience;
     }
 
     CharacterMachine->Gold = Data->Gold;
@@ -1009,11 +991,6 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     c->GuildMarkIndex = TempGuild;
     c->SafeZone = true;
     SetCharacterClass(c);
-
-#ifdef PK_ATTACK_TESTSERVER_LOG
-    PrintPKLog(c);
-#endif // PK_ATTACK_TESTSERVER_LOG
-
     SetPlayerStop(c);
     CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
     ClearItems();
@@ -1076,7 +1053,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     SummonLife = 0;
     GuildTeam(c);
 
-    g_pUIMapName->ShowMapName();	// rozy
+    g_pUIMapName->ShowMapName();
 
     CreateMyGensInfluenceGroundEffect();
 
@@ -1092,7 +1069,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     g_pNewUISystem->HideAll();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x04 [ReceiveRevival]");
-}*/
+}
 
 void ReceiveMagicList(const BYTE* ReceiveBuffer)
 {
@@ -13229,8 +13206,8 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
                 //return ( FALSE);
             }
             break;
-        //case 0x04: //receive revival
-        //    ReceiveRevival(ReceiveBuffer);
+        case 0x04: //receive revival
+            ReceiveRevival(ReceiveBuffer);
             break;
         case 0x10: //receive inventory
             ReceiveInventoryExtended(received_span);
