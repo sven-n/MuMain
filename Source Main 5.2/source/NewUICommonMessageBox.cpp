@@ -44,8 +44,6 @@ extern CLASS_TYPE HeroClass[5];
 extern int HeroScore[5];
 extern wchar_t HeroName[5][MAX_ID_SIZE + 1];
 extern char	View_Suc_Or_Fail;
-extern char Need_Point;
-extern int In_Skill;
 
 extern int BuyCost;
 
@@ -1609,7 +1607,7 @@ bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
 
     wchar_t strText[MAX_GLOBAL_TEXT_STRING];
     swprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_INFINITY_ARROW].Name, GlobalText[2046]);
-    g_iCancelSkillTarget = AT_SKILL_INFINITY_ARROW;
+    g_iCancelSkillTarget = AT_SKILL_INFINITY_ARROW; // todo: is considering master skill required here?
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CInfinityArrowCancelMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -1650,8 +1648,8 @@ bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
         return false;
 
     wchar_t strText[MAX_GLOBAL_TEXT_STRING];
-    swprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_SWELL_OF_MAGICPOWER].Name, GlobalText[2046]);
-    g_iCancelSkillTarget = AT_SKILL_SWELL_OF_MAGICPOWER;
+    swprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_EXPANSION_OF_WIZARDRY].Name, GlobalText[2046]);
+    g_iCancelSkillTarget = AT_SKILL_EXPANSION_OF_WIZARDRY;
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
 
@@ -3248,6 +3246,7 @@ bool SEASON3B::CMaster_Level_Interface::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
+    auto Need_Point = g_pMasterLevelInterface->GetConsumePoint();
     wchar_t szText[256];
     pMsgBox->AddMsg(GlobalText[1771]);
     swprintf(szText, GlobalText[1772], Need_Point);
@@ -3272,6 +3271,7 @@ CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::CancelBtnDown(class CNewUIMes
 
 CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
+    auto In_Skill = g_pMasterLevelInterface->GetCurSkillID();
     SocketClient->ToGameServer()->SendAddMasterSkillPoint(In_Skill);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

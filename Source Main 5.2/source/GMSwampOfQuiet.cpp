@@ -1446,7 +1446,7 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
     {
         switch (pCharacter->Skill)
         {
-        case AT_SKILL_BLAST_POISON:
+        case AT_SKILL_DECAY:
         {
             SetAction(pObject, MONSTER01_ATTACK2);
             pCharacter->MonsterSkill = -1;
@@ -1461,7 +1461,7 @@ bool GMSwampOfQuiet::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObj
             SetAction(pObject, MONSTER01_ATTACK3);
             pCharacter->MonsterSkill = -1;
         } break;
-        case AT_SKILL_EVIL:
+        case AT_SKILL_EVIL_SPIRIT:
         {
             SetAction(pObject, MONSTER01_ATTACK1);
             pCharacter->MonsterSkill = -1;

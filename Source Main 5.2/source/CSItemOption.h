@@ -152,7 +152,7 @@ public:
     static bool    GetDefaultOptionText(const ITEM* ip, wchar_t* Text);
     static int     RenderDefaultOptionText(const ITEM* ip, int TextNum);
 
-    static bool    Special_Option_Check(int Kind = 0);
+    static bool    IsNonWeaponSkillOrIsSkillEquipped(ActionSkillType skill);
     void	CheckItemSetOptions(void);
     void	MoveSetOptionList(const int StartX, const int StartY);
     void	RenderSetOptionButton(const int StartX, const int StartY);

@@ -459,86 +459,93 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     bool bAttackDamage = GetAttackDamage(&iAttackDamageMin, &iAttackDamageMax);
 
-    int Add_Dex = 0;
-    int Add_Rat = 0;
-    int Add_Dfe = 0;
-    int Add_Att_Max = 0;
-    int Add_Att_Min = 0;
-    int Add_Dfe_Rat = 0;
-    int Add_Ch_Dfe = 0;
-    int Add_Mana_Max = 0;
-    int Add_Mana_Min = 0;
+    int add_attack_success_rate_pvm = 0;
+    int add_attack_success_rate_pvp = 0;
+    int add_defense_success_rate_pvm = 0;
+    int add_defense_success_rate_pvp = 0;
+    int add_attack_dmg_max = 0;
+    int add_attack_dmg_min = 0;
+    int add_defense = 0;
+    int add_magic_damage_min = 0;
+    int add_magic_damage_max = 0;
 
-    for (int i = 0; i < MAX_MAGIC; ++i)
+    for (int i = 0; i < MAX_SKILLS; ++i)
     {
-        if (CharacterAttribute->Skill[i] >= AT_SKILL_TOMAN_ATTACKUP && CharacterAttribute->Skill[i] < AT_SKILL_TOMAN_ATTACKUP + 5)
+        auto currentSkill = CharacterAttribute->Skill[i];
+        if (currentSkill < AT_SKILL_MASTER_BEGIN || currentSkill > AT_SKILL_MASTER_END)
         {
-            Add_Dex = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
+            continue;
         }
-        else
-            if (CharacterAttribute->Skill[i] >= AT_SKILL_ATTACK_RATEUP && CharacterAttribute->Skill[i] < AT_SKILL_ATTACK_RATEUP + 5)
+
+        auto skillValue = CharacterAttribute->MasterSkillInfo[currentSkill].GetSkillValue();
+        switch (currentSkill)
+        {
+        case AT_SKILL_AttackSuccRateInc:
+        case AT_SKILL_IncreaseAttackSuccessRate:
+            add_attack_success_rate_pvm = skillValue;
+            break;
+        case AT_SKILL_PvPAttackRate:
+        case AT_SKILL_IncreasePvPAttackRate:
+            add_attack_success_rate_pvp = skillValue;
+            break;
+        case AT_SKILL_DefenseSuccessRateInc:
+        case AT_SKILL_IncreaseDefenseSuccessRate:
+            add_defense_success_rate_pvm = skillValue;
+            break;
+        case AT_SKILL_PvPDefenceRateInc:
+        case AT_SKILL_IncreasePvPDefenseRate:
+            add_defense_success_rate_pvp = skillValue;
+            break;
+        case AT_SKILL_DefenseIncrease:
+        case AT_SKILL_IncreasesDefense:
+            add_defense = skillValue;
+            break;
+        case AT_SKILL_MinimumWizardryInc:
+            add_magic_damage_min = skillValue;
+            break;
+            // to be continued ...
+            // depending on the equipped weapons this may get complex. Maybe we should leave these calculations to the server.
+        }
+            /*
+            else
+            if (CharacterAttribute->Skill[i] >= AT_SKILL_MAX_ATTACKRATE_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_ATTACKRATE_UP + 5)
             {
-                Add_Rat = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
+            add_attack_dmg_max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
             }
             else
-                if (CharacterAttribute->Skill[i] >= AT_SKILL_TOMAN_DEFENCEUP && CharacterAttribute->Skill[i] < AT_SKILL_TOMAN_DEFENCEUP + 5)
-                {
-                    Add_Dfe = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-                }
-                else
-                    if (CharacterAttribute->Skill[i] >= AT_SKILL_DEF_UP && CharacterAttribute->Skill[i] < AT_SKILL_DEF_UP + 5)
-                    {
-                        Add_Ch_Dfe = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-                    }
-        //		else
-        //		if(CharacterAttribute->Skill[i] >= AT_SKILL_MAX_HP_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_HP_UP + 5)
-        //		{
-        //			Add_Life = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-        //		}
-        //		else
-        //		if(CharacterAttribute->Skill[i] >= AT_SKILL_MAX_AG_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_AG_UP + 5)
-        //		{
-        //			Add_Ag = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-        //		}
-                    else
-                        if (CharacterAttribute->Skill[i] >= AT_SKILL_MAX_ATTACKRATE_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_ATTACKRATE_UP + 5)
-                        {
-                            Add_Att_Max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-                        }
-                        else
-                            if (CharacterAttribute->Skill[i] >= AT_SKILL_MAX_ATT_MAGIC_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_ATT_MAGIC_UP + 5)
-                            {
-                                Add_Mana_Max = Add_Att_Max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-                            }
-                            else
-                                if (CharacterAttribute->Skill[i] >= AT_SKILL_MIN_ATT_MAGIC_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_ATT_MAGIC_UP + 5)
-                                {
-                                    Add_Mana_Min = Add_Att_Min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-                                }
-                                else
-                                    if (CharacterAttribute->Skill[i] >= AT_SKILL_MAX_MANA_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_MANA_UP + 5)
-                                    {
-                                        Add_Mana_Max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-                                    }
-                                    else
-                                        if (CharacterAttribute->Skill[i] >= AT_SKILL_MIN_MANA_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_MANA_UP + 5)
-                                        {
-                                            Add_Mana_Min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-                                        }
-                                        else
-                                            if (CharacterAttribute->Skill[i] >= AT_SKILL_MIN_ATTACKRATE_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_ATTACKRATE_UP + 5)
-                                            {
-                                                Add_Att_Min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-                                            }
+            if (CharacterAttribute->Skill[i] >= AT_SKILL_MAX_ATT_MAGIC_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_ATT_MAGIC_UP + 5)
+            {
+            add_mana_max = add_attack_dmg_max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
+            }
+            else
+            if (CharacterAttribute->Skill[i] >= AT_SKILL_MIN_ATT_MAGIC_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_ATT_MAGIC_UP + 5)
+            {
+            add_magic_damage_min = add_attack_dmg_min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
+            }
+            else
+            if (CharacterAttribute->Skill[i] >= at_skill_mana && CharacterAttribute->Skill[i] < AT_SKILL_MAX_MANA_UP + 5)
+            {
+            add_mana_max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
+            }
+            else
+            if (CharacterAttribute->Skill[i] >= AT_SKILL_MIN_MANA_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_MANA_UP + 5)
+            {
+            add_magic_damage_min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
+            }
+            else
+            if (CharacterAttribute->Skill[i] >= AT_SKILL_MIN_ATTACKRATE_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_ATTACKRATE_UP + 5)
+            {
+                add_attack_dmg_min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
+            }*/
     }
 
     ITEM* pWeaponRight = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
     ITEM* pWeaponLeft = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
 
-    int iAttackRating = CharacterAttribute->AttackRating + Add_Rat;
-    int iAttackRatingPK = CharacterAttribute->AttackRatingPK + Add_Dex;
-    iAttackDamageMax += Add_Att_Max;
-    iAttackDamageMin += Add_Att_Min;
+    int iAttackRating = CharacterAttribute->AttackRating + add_attack_success_rate_pvm;
+    int iAttackRatingPK = CharacterAttribute->AttackRatingPK + add_attack_success_rate_pvp;
+    iAttackDamageMax += add_attack_dmg_max;
+    iAttackDamageMin += add_attack_dmg_min;
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_AddAG))
     {
@@ -929,7 +936,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         }
     }
 
-    int t_adjdef = CharacterAttribute->Defense + Add_Ch_Dfe;
+    int t_adjdef = CharacterAttribute->Defense + add_defense;
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_HelpNpc))
     {
@@ -1095,11 +1102,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (itemoption380Defense != 0 || iDefenseRate != 0)
     {
-        swprintf(strBlocking, GlobalText[2110], CharacterAttribute->SuccessfulBlockingPK + Add_Dfe, itemoption380Defense + iDefenseRate);
+        swprintf(strBlocking, GlobalText[2110], CharacterAttribute->SuccessfulBlockingPK + add_defense_success_rate_pvp, itemoption380Defense + iDefenseRate);
     }
     else
     {
-        swprintf(strBlocking, GlobalText[2045], CharacterAttribute->SuccessfulBlockingPK + Add_Dfe);
+        swprintf(strBlocking, GlobalText[2045], CharacterAttribute->SuccessfulBlockingPK + add_defense_success_rate_pvp);
     }
 
     iY += 13;
@@ -1252,8 +1259,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         int iMagicDamageMinInitial = iMagicDamageMin;
         int iMagicDamageMaxInitial = iMagicDamageMax;
 
-        iMagicDamageMin += Add_Mana_Min;
-        iMagicDamageMax += Add_Mana_Max;
+        iMagicDamageMin += add_magic_damage_min;
+        iMagicDamageMax += add_magic_damage_max;
 
         if (CharacterAttribute->Ability & ABILITY_PLUS_DAMAGE)
         {

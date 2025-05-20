@@ -27,7 +27,7 @@ void OpenDialogFile(wchar_t* FileName);
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
 extern void OpenItemScript(wchar_t* FileName);
-extern BYTE getSkillIndexByBook(int Type);
+extern ActionSkillType GetSkillByBook(int Type);
 // extern void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE ancientDiscriminator);
 void SetItemAttributes(ITEM* ip);
 extern float CalcDurabilityPercent(BYTE dur, BYTE maxDur, int Level, int excellentFlags, int ancientDiscriminator = 0);

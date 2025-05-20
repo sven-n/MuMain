@@ -52,6 +52,7 @@
 #include "MapManager.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
+#include "NewUISystem.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern int g_iChatInputType;
@@ -1876,33 +1877,34 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[80], iMana);
         break;
-    case AT_SKILL_SWORD1:
+    case AT_SKILL_FALLING_SLASH:
+    case AT_SKILL_FALLING_SLASH_STR:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[81], iMana);
         break;
-    case AT_SKILL_SWORD2:
+    case AT_SKILL_LUNGE:
+    case AT_SKILL_LUNGE_STR:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[82], iMana);
         break;
-    case AT_SKILL_SWORD3:
+    case AT_SKILL_UPPERCUT:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[83], iMana);
         break;
-    case AT_SKILL_SWORD4:
+    case AT_SKILL_CYCLONE:
+    case AT_SKILL_CYCLONE_STR:
+    case AT_SKILL_CYCLONE_STR_MG:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[84], iMana);
         break;
-    case AT_SKILL_SWORD5:
+    case AT_SKILL_SLASH:
+    case AT_SKILL_SLASH_STR:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[85], iMana);
         break;
-    case AT_SKILL_MANY_ARROW_UP:
-    case AT_SKILL_MANY_ARROW_UP + 1:
-    case AT_SKILL_MANY_ARROW_UP + 2:
-    case AT_SKILL_MANY_ARROW_UP + 3:
-    case AT_SKILL_MANY_ARROW_UP + 4:
-
-    case AT_SKILL_CROSSBOW:
+    case AT_SKILL_TRIPLE_SHOT:
+    case AT_SKILL_TRIPLE_SHOT_STR:
+    case AT_SKILL_TRIPLE_SHOT_MASTERY:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[86], iMana);
         break;
@@ -1918,12 +1920,8 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[920], iMana);
         break;
-    case AT_SKILL_POWER_SLASH_UP:
-    case AT_SKILL_POWER_SLASH_UP + 1:
-    case AT_SKILL_POWER_SLASH_UP + 2:
-    case AT_SKILL_POWER_SLASH_UP + 3:
-    case AT_SKILL_POWER_SLASH_UP + 4:
-    case AT_SKILL_ICE_BLADE:
+    case AT_SKILL_POWER_SLASH:
+    case AT_SKILL_POWER_SLASH_STR:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[98], iMana);
         break;
@@ -2001,20 +1999,18 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[745], iMana);
         break;
-    case AT_SKILL_STRONG_PIER:  //
+    case AT_SKILL_FORCE:  //
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[1210], iMana);
         break;
-    case AT_SKILL_LONG_SPEAR:
+    case AT_SKILL_FORCE_WAVE:
+    case AT_SKILL_FORCE_WAVE_STR:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[1186], iMana);
         break;
-    case AT_SKILL_ASHAKE_UP:
-    case AT_SKILL_ASHAKE_UP + 1:
-    case AT_SKILL_ASHAKE_UP + 2:
-    case AT_SKILL_ASHAKE_UP + 3:
-    case AT_SKILL_ASHAKE_UP + 4:
-    case AT_SKILL_DARK_HORSE:
+    case AT_SKILL_EARTHSHAKE:
+    case AT_SKILL_EARTHSHAKE_STR:
+    case AT_SKILL_EARTHSHAKE_MASTERY:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[1189], iMana);
         break;
@@ -2082,11 +2078,15 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
     case AT_SKILL_SUMMON_POLLUTION:
         swprintf(Text, GlobalText[1789], iMana);
         break;
-    case AT_SKILL_THRUST:
+    case AT_SKILL_KILLING_BLOW:
+    case AT_SKILL_KILLING_BLOW_STR:
+    case AT_SKILL_KILLING_BLOW_MASTERY:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[3153], iMana);
         break;
-    case AT_SKILL_STAMP:
+    case AT_SKILL_BEAST_UPPERCUT:
+    case AT_SKILL_BEAST_UPPERCUT_STR:
+    case AT_SKILL_BEAST_UPPERCUT_MASTERY:
         gSkillManager.GetSkillInformation(Option, 1, NULL, &iMana, NULL);
         swprintf(Text, GlobalText[3154], iMana);
         break;
@@ -2118,7 +2118,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextList[i][0] = NULL;
     }
 
-    if (ip->Type == ITEM_DARK_HORSE_ITEM || ip->Type == ITEM_DARK_RAVEN_ITEM)
+    if (!Sell && (ip->Type == ITEM_DARK_HORSE_ITEM || ip->Type == ITEM_DARK_RAVEN_ITEM))
     {
         static DebouncedAction debouncedPetInfoRequest([ip, Inventype]()
             {
@@ -2710,7 +2710,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         break;
         case 1:
         {
-            gSkillManager.GetSkillInformation(AT_SKILL_SWORD4, 1, NULL, &iMana, NULL);
+            gSkillManager.GetSkillInformation(AT_SKILL_CYCLONE, 1, NULL, &iMana, NULL);
             swprintf(TextList[TextNum], GlobalText[84], iMana); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
             swprintf(TextList[TextNum], GlobalText[629]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
             swprintf(TextList[TextNum], GlobalText[630], 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
@@ -2718,7 +2718,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         break;
         case 2:
         {
-            gSkillManager.GetSkillInformation(AT_SKILL_CROSSBOW, 1, NULL, &iMana, NULL);
+            gSkillManager.GetSkillInformation(AT_SKILL_TRIPLE_SHOT, 1, NULL, &iMana, NULL);
             swprintf(TextList[TextNum], GlobalText[86], iMana); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
             swprintf(TextList[TextNum], GlobalText[629]); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
             swprintf(TextList[TextNum], GlobalText[630], 2); TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;
@@ -3958,7 +3958,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             if (ip->Type >= ITEM_ETC && ip->Type < ITEM_ETC + MAX_ITEM_INDEX)
             {
-                int SkillIndex = getSkillIndexByBook(ip->Type);
+                auto SkillIndex = GetSkillByBook(ip->Type);
 
                 SKILL_ATTRIBUTE* skillAtt = &SkillAttribute[SkillIndex];
 
@@ -5156,7 +5156,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             swprintf(TextList[TextNum], GlobalText[179]);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
         }
-        else if (ip->Special[i] == AT_SKILL_DARK_HORSE || (AT_SKILL_ASHAKE_UP <= ip->Special[i] && ip->Special[i] <= AT_SKILL_ASHAKE_UP + 4))
+        else if (ip->Special[i] == AT_SKILL_EARTHSHAKE
+            || ip->Special[i] == AT_SKILL_EARTHSHAKE_STR
+            || ip->Special[i] == AT_SKILL_EARTHSHAKE_MASTERY
+            )
         {
             swprintf(TextList[TextNum], GlobalText[1201]);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
@@ -6047,11 +6050,11 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
     iSkillMaxDamage += AttackDamageMax;
     gSkillManager.GetSkillInformation(CharacterAttribute->Skill[Type], 1, lpszName, &iMana, &iDistance, &iSkillMana);
 
-    if (CharacterAttribute->Skill[Type] == AT_SKILL_STRONG_PIER && Hero->Weapon[0].Type != -1)
+    if (CharacterAttribute->Skill[Type] == AT_SKILL_FORCE && Hero->Weapon[0].Type != -1)
     {
         for (int i = 0; i < CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].SpecialNum; i++)
         {
-            if (CharacterMachine->Equipment[0].Special[i] == AT_SKILL_LONG_SPEAR)
+            if (CharacterMachine->Equipment[0].Special[i] == AT_SKILL_FORCE_WAVE)
             {
                 swprintf(lpszName, L"%s", GlobalText[1200]);
                 break;
@@ -6109,16 +6112,23 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
 
     if (HeroClass == CLASS_WIZARD || HeroClass == CLASS_SUMMONER)
     {
-        if (CharacterAttribute->Skill[Type] == AT_SKILL_WIZARDDEFENSE || (AT_SKILL_SOUL_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_SOUL_UP + 4))
+        if (CharacterAttribute->Skill[Type] == AT_SKILL_SOUL_BARRIER
+            || CharacterAttribute->Skill[Type] == AT_SKILL_SOUL_BARRIER_STR
+            || CharacterAttribute->Skill[Type] == AT_SKILL_SOUL_BARRIER_PROFICIENCY
+            )
         {
             int iDamageShield;
-            if (CharacterAttribute->Skill[Type] == AT_SKILL_WIZARDDEFENSE)
+            
+            if (CharacterAttribute->Skill[Type] == AT_SKILL_SOUL_BARRIER)
             {
                 iDamageShield = (int)(10 + (Dexterity / 50.f) + (Energy / 200.f));
             }
-            else if ((AT_SKILL_SOUL_UP <= CharacterAttribute->Skill[Type]) && (CharacterAttribute->Skill[Type] <= AT_SKILL_SOUL_UP + 4))
+            else if (CharacterAttribute->Skill[Type] == AT_SKILL_SOUL_BARRIER_STR
+                || CharacterAttribute->Skill[Type] == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
             {
-                iDamageShield = (int)(10 + (Dexterity / 50.f) + (Energy / 200.f)) + ((CharacterAttribute->Skill[Type] - AT_SKILL_SOUL_UP + 1) * 5);
+                auto additionalValue = CharacterAttribute->MasterSkillInfo[CharacterAttribute->Skill[Type]].GetSkillValue();
+                iDamageShield = (int)(10 + (Dexterity / 50.f) + (Energy / 200.f));
+                iDamageShield += (int)additionalValue;
             }
 
             int iDeleteMana = (int)(CharacterAttribute->ManaMax * 0.02f);
@@ -6133,10 +6143,15 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
             swprintf(TextList[TextNum], GlobalText[881], iLimitTime);
             TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         }
-        else if (SkillType != AT_SKILL_SWELL_OF_MAGICPOWER && SkillType != AT_SKILL_ALICE_SLEEP && !(AT_SKILL_ALICE_SLEEP_UP <= SkillType && SkillType <= AT_SKILL_ALICE_SLEEP_UP + 4))
+        else if (SkillType != AT_SKILL_EXPANSION_OF_WIZARDRY
+            && SkillType != AT_SKILL_EXPANSION_OF_WIZARDRY_STR
+            && SkillType != AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY
+            && SkillType != AT_SKILL_ALICE_SLEEP
+            && SkillType != AT_SKILL_ALICE_SLEEP_STR
+            )
         {
             WORD bySkill = CharacterAttribute->Skill[Type];
-            if (!(AT_SKILL_STUN <= bySkill && bySkill <= AT_SKILL_MANA) && !(AT_SKILL_ALICE_THORNS <= bySkill && bySkill <= AT_SKILL_ALICE_ENERVATION) && bySkill != AT_SKILL_TELEPORT && bySkill != AT_SKILL_TELEPORT_B)
+            if (!(AT_SKILL_STUN <= bySkill && bySkill <= AT_SKILL_MANA) && !(AT_SKILL_ALICE_THORNS <= bySkill && bySkill <= AT_SKILL_ALICE_ENERVATION) && bySkill != AT_SKILL_TELEPORT && bySkill != AT_SKILL_TELEPORT_ALLY)
             {
                 if (AT_SKILL_SUMMON_EXPLOSION <= bySkill && bySkill <= AT_SKILL_SUMMON_POLLUTION)
                 {
@@ -6155,41 +6170,22 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         switch (CharacterAttribute->Skill[Type])
         {
         case AT_SKILL_TELEPORT:
-        case AT_SKILL_TELEPORT_B:
-        case AT_SKILL_SOUL_UP:
-        case AT_SKILL_SOUL_UP + 1:
-        case AT_SKILL_SOUL_UP + 2:
-        case AT_SKILL_SOUL_UP + 3:
-        case AT_SKILL_SOUL_UP + 4:
-
-        case AT_SKILL_HEAL_UP:
-        case AT_SKILL_HEAL_UP + 1:
-        case AT_SKILL_HEAL_UP + 2:
-        case AT_SKILL_HEAL_UP + 3:
-        case AT_SKILL_HEAL_UP + 4:
-
-        case AT_SKILL_LIFE_UP:
-        case AT_SKILL_LIFE_UP + 1:
-        case AT_SKILL_LIFE_UP + 2:
-        case AT_SKILL_LIFE_UP + 3:
-        case AT_SKILL_LIFE_UP + 4:
-
-        case AT_SKILL_WIZARDDEFENSE:
+        case AT_SKILL_TELEPORT_ALLY:
+        case AT_SKILL_SOUL_BARRIER:
+        case AT_SKILL_SOUL_BARRIER_STR:
+        case AT_SKILL_SOUL_BARRIER_PROFICIENCY:
         case AT_SKILL_BLOCKING:
-        case AT_SKILL_VITALITY:
+        case AT_SKILL_SWELL_LIFE:
+        case AT_SKILL_SWELL_LIFE_STR:
+        case AT_SKILL_SWELL_LIFE_PROFICIENCY:
         case AT_SKILL_HEALING:
-        case AT_SKILL_DEF_POWER_UP:
-        case AT_SKILL_DEF_POWER_UP + 1:
-        case AT_SKILL_DEF_POWER_UP + 2:
-        case AT_SKILL_DEF_POWER_UP + 3:
-        case AT_SKILL_DEF_POWER_UP + 4:
+        case AT_SKILL_HEALING_STR:
         case AT_SKILL_DEFENSE:
-        case AT_SKILL_ATT_POWER_UP:
-        case AT_SKILL_ATT_POWER_UP + 1:
-        case AT_SKILL_ATT_POWER_UP + 2:
-        case AT_SKILL_ATT_POWER_UP + 3:
-        case AT_SKILL_ATT_POWER_UP + 4:
+        case AT_SKILL_DEFENSE_STR:
+        case AT_SKILL_DEFENSE_MASTERY:
         case AT_SKILL_ATTACK:
+        case AT_SKILL_ATTACK_STR:
+        case AT_SKILL_ATTACK_MASTERY:
         case AT_SKILL_SUMMON:
         case AT_SKILL_SUMMON + 1:
         case AT_SKILL_SUMMON + 2:
@@ -6208,13 +6204,13 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
             break;
         case AT_SKILL_PARTY_TELEPORT:
         case AT_SKILL_ADD_CRITICAL:
+        case AT_SKILL_ADD_CRITICAL_STR1:
+        case AT_SKILL_ADD_CRITICAL_STR2:
+        case AT_SKILL_ADD_CRITICAL_STR3:
             break;
-        case AT_SKILL_ASHAKE_UP:
-        case AT_SKILL_ASHAKE_UP + 1:
-        case AT_SKILL_ASHAKE_UP + 2:
-        case AT_SKILL_ASHAKE_UP + 3:
-        case AT_SKILL_ASHAKE_UP + 4:
-        case AT_SKILL_DARK_HORSE:
+        case AT_SKILL_EARTHSHAKE:
+        case AT_SKILL_EARTHSHAKE_STR:
+        case AT_SKILL_EARTHSHAKE_MASTERY:
             swprintf(TextList[TextNum], GlobalText[1237]);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
             break;
@@ -6224,7 +6220,10 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         case AT_SKILL_RECOVER:
         case AT_SKILL_ATT_UP_OURFORCES:
         case AT_SKILL_HP_UP_OURFORCES:
+        case AT_SKILL_HP_UP_OURFORCES_STR:
         case AT_SKILL_DEF_UP_OURFORCES:
+        case AT_SKILL_DEF_UP_OURFORCES_STR:
+        case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
             break;
         default:
             swprintf(TextList[TextNum], GlobalText[879], iSkillMinDamage, iSkillMaxDamage + skillattackpowerRate);
@@ -6270,41 +6269,43 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         bool Success = true;
         switch (CharacterAttribute->Skill[Type])
         {
-        case AT_SKILL_HEAL_UP:
-        case AT_SKILL_HEAL_UP + 1:
-        case AT_SKILL_HEAL_UP + 2:
-        case AT_SKILL_HEAL_UP + 3:
-        case AT_SKILL_HEAL_UP + 4:
+        case AT_SKILL_HEALING_STR:
         {
-            int Cal = (Energy / 5) + 5;
-            swprintf(TextList[TextNum], GlobalText[171], (Cal)+(int)((float)Cal * (float)(SkillAttribute[CharacterAttribute->Skill[Type]].Damage / (float)100)));
+            int value = (Energy / 5) + 5;
+            auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_HEALING_STR].GetSkillValue();
+            value += static_cast<int>((value * boostPercent) / 100.0);
+            swprintf(TextList[TextNum], GlobalText[171], value);
         }
         break;
         case AT_SKILL_HEALING:
             swprintf(TextList[TextNum], GlobalText[171], Energy / 5 + 5);
             break;
-        case AT_SKILL_DEF_POWER_UP:
-        case AT_SKILL_DEF_POWER_UP + 1:
-        case AT_SKILL_DEF_POWER_UP + 2:
-        case AT_SKILL_DEF_POWER_UP + 3:
-        case AT_SKILL_DEF_POWER_UP + 4:
+        case AT_SKILL_DEFENSE_STR:
+        case AT_SKILL_DEFENSE_MASTERY:
         {
-            int Cal = Energy / 8 + 2;
-            swprintf(TextList[TextNum], GlobalText[172], (Cal)+(int)((float)Cal / (float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage / (float)10)));
+            int value = Energy / 8 + 2;
+            auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_STR].GetSkillValue();
+            auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_MASTERY].GetSkillValue();;
+            value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
+            swprintf(TextList[TextNum], GlobalText[172], value);
         }
         break;
-        case AT_SKILL_DEFENSE:swprintf(TextList[TextNum], GlobalText[172], Energy / 8 + 2); break;
-        case AT_SKILL_ATT_POWER_UP:
-        case AT_SKILL_ATT_POWER_UP + 1:
-        case AT_SKILL_ATT_POWER_UP + 2:
-        case AT_SKILL_ATT_POWER_UP + 3:
-        case AT_SKILL_ATT_POWER_UP + 4:
+        case AT_SKILL_DEFENSE:
+            swprintf(TextList[TextNum], GlobalText[172], Energy / 8 + 2);
+            break;
+        case AT_SKILL_ATTACK_STR:
+        case AT_SKILL_ATTACK_MASTERY:
         {
-            int Cal = Energy / 7 + 3;
-            swprintf(TextList[TextNum], GlobalText[173], (Cal)+(int)((float)Cal / (float)((float)SkillAttribute[CharacterAttribute->Skill[Type]].Damage / (float)10)));
+            int value = Energy / 7 + 3;
+            auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_STR].GetSkillValue();
+            auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_MASTERY].GetSkillValue();
+            value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
+            swprintf(TextList[TextNum], GlobalText[173], value);
         }
         break;
-        case AT_SKILL_ATTACK:swprintf(TextList[TextNum], GlobalText[173], Energy / 7 + 3); break;
+        case AT_SKILL_ATTACK:
+            swprintf(TextList[TextNum], GlobalText[173], Energy / 7 + 3);
+            break;
         case AT_SKILL_RECOVER:
         {
             int Cal = Energy / 4;
@@ -6319,7 +6320,9 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         }
     }
 
-    if (SkillType != AT_SKILL_SWELL_OF_MAGICPOWER)
+    if (SkillType != AT_SKILL_EXPANSION_OF_WIZARDRY
+        && SkillType != AT_SKILL_EXPANSION_OF_WIZARDRY_STR
+        && SkillType != AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
     {
         if (iDistance)
         {
@@ -6337,7 +6340,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
     }
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT)
     {
-        if (CharacterAttribute->Skill[Type] == AT_SKILL_SPEAR)
+        if (CharacterAttribute->Skill[Type] == AT_SKILL_IMPALE)
         {
             swprintf(TextList[TextNum], GlobalText[96]);
             TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
@@ -6345,13 +6348,22 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
 
         if (Hero->byExtensionSkill == 1 && CharacterAttribute->Level >= 220)
         {
-            if ((CharacterAttribute->Skill[Type] >= AT_SKILL_SWORD1 && CharacterAttribute->Skill[Type] <= AT_SKILL_SWORD5)
-                || CharacterAttribute->Skill[Type] == AT_SKILL_WHEEL || CharacterAttribute->Skill[Type] == AT_SKILL_FURY_STRIKE
+            // Combo skills:
+            if ((CharacterAttribute->Skill[Type] >= AT_SKILL_FALLING_SLASH && CharacterAttribute->Skill[Type] <= AT_SKILL_SLASH)
+                || CharacterAttribute->Skill[Type] == AT_SKILL_FALLING_SLASH_STR
+                || CharacterAttribute->Skill[Type] == AT_SKILL_LUNGE_STR
+                || CharacterAttribute->Skill[Type] == AT_SKILL_CYCLONE_STR
+                || CharacterAttribute->Skill[Type] == AT_SKILL_CYCLONE_STR_MG
+                || CharacterAttribute->Skill[Type] == AT_SKILL_SLASH_STR
+                || CharacterAttribute->Skill[Type] == AT_SKILL_TWISTING_SLASH
+                || CharacterAttribute->Skill[Type] == AT_SKILL_TWISTING_SLASH_STR
+                || CharacterAttribute->Skill[Type] == AT_SKILL_TWISTING_SLASH_STR_MG
+                || CharacterAttribute->Skill[Type] == AT_SKILL_TWISTING_SLASH_MASTERY
+                || CharacterAttribute->Skill[Type] == AT_SKILL_RAGEFUL_BLOW
+                || CharacterAttribute->Skill[Type] == AT_SKILL_RAGEFUL_BLOW_STR
+                || CharacterAttribute->Skill[Type] == AT_SKILL_RAGEFUL_BLOW_MASTERY
                 || CharacterAttribute->Skill[Type] == AT_SKILL_DEATHSTAB
-                || (AT_SKILL_ANGER_SWORD_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_ANGER_SWORD_UP + 4)
-                || (AT_SKILL_BLOW_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_BLOW_UP + 4)
-                || (AT_SKILL_TORNADO_SWORDA_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_TORNADO_SWORDA_UP + 4)
-                || (AT_SKILL_TORNADO_SWORDB_UP <= CharacterAttribute->Skill[Type] && CharacterAttribute->Skill[Type] <= AT_SKILL_TORNADO_SWORDB_UP + 4)
+                || CharacterAttribute->Skill[Type] == AT_SKILL_DEATHSTAB_STR
                 )
             {
                 swprintf(TextList[TextNum], GlobalText[99]);
@@ -6359,7 +6371,8 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
                 TextBold[TextNum] = false;
                 TextNum++;
             }
-            else if (CharacterAttribute->Skill[Type] == AT_SKILL_BLOW_OF_DESTRUCTION)
+            else if (CharacterAttribute->Skill[Type] == AT_SKILL_STRIKE_OF_DESTRUCTION
+                || CharacterAttribute->Skill[Type] == AT_SKILL_STRIKE_OF_DESTRUCTION_STR)
             {
                 swprintf(TextList[TextNum], GlobalText[2115]);
                 TextListColor[TextNum] = TEXT_COLOR_DARKRED;
@@ -6412,7 +6425,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
     }
 
-    if (CharacterAttribute->Skill[Type] == AT_SKILL_INFINITY_ARROW)
+    if (CharacterAttribute->Skill[Type] == AT_SKILL_INFINITY_ARROW || CharacterAttribute->Skill[Type] == AT_SKILL_INFINITY_ARROW_STR)
     {
         swprintf(TextList[1], lpszName);
         TextListColor[1] = TEXT_COLOR_BLUE; TextBold[1] = true;
@@ -6430,7 +6443,7 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
 
     if (CharacterAttribute->Skill[Type] == AT_SKILL_RUSH || CharacterAttribute->Skill[Type] == AT_SKILL_SPACE_SPLIT
         || CharacterAttribute->Skill[Type] == AT_SKILL_DEEPIMPACT || CharacterAttribute->Skill[Type] == AT_SKILL_JAVELIN
-        || CharacterAttribute->Skill[Type] == AT_SKILL_ONEFLASH || CharacterAttribute->Skill[Type] == AT_SKILL_DEATH_CANNON
+        || CharacterAttribute->Skill[Type] == AT_SKILL_SPIRAL_SLASH || CharacterAttribute->Skill[Type] == AT_SKILL_DEATH_CANNON
         || CharacterAttribute->Skill[Type] == AT_SKILL_OCCUPY
         )
     {
@@ -6444,13 +6457,13 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         swprintf(TextList[TextNum], GlobalText[2048]);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
     }
-    if (CharacterAttribute->Skill[Type] == AT_SKILL_SPEAR)
+    if (CharacterAttribute->Skill[Type] == AT_SKILL_IMPALE)
     {
         swprintf(TextList[TextNum], GlobalText[2049]);
         TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextBold[TextNum] = false; TextNum++;
     }
 
-    if (SkillType == AT_SKILL_SWELL_OF_MAGICPOWER)
+    if (SkillType == AT_SKILL_EXPANSION_OF_WIZARDRY || SkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_STR || SkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
     {
         swprintf(TextList[TextNum], GlobalText[2054]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = false; TextNum++;

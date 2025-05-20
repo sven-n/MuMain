@@ -85,7 +85,7 @@ namespace MUHelper
         m_iCurrentBuffIndex = 0;
         m_iCurrentBuffPartyIndex = 0;
         m_iCurrentTarget = -1;
-        m_iCurrentSkill = m_config.aiSkill[0];
+        m_iCurrentSkill = (ActionSkillType)m_config.aiSkill[0];
         m_iCurrentItem = MAX_ITEMS;
         m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
@@ -405,7 +405,7 @@ namespace MUHelper
                     m_bTimerActivatedBuffOngoing = true;
                 }
 
-                if (!BuffTarget(pChar, m_config.aiBuff[m_iCurrentBuffIndex]))
+                if (!BuffTarget(pChar, (ActionSkillType)m_config.aiBuff[m_iCurrentBuffIndex]))
                 {
                     return 0;
                 }
@@ -422,7 +422,7 @@ namespace MUHelper
                 m_bTimerActivatedBuffOngoing = true;
             }
 
-            if (!BuffTarget(Hero, m_config.aiBuff[m_iCurrentBuffIndex]))
+            if (!BuffTarget(Hero, (ActionSkillType)m_config.aiBuff[m_iCurrentBuffIndex]))
             {
                 return 0;
             }
@@ -443,54 +443,41 @@ namespace MUHelper
         return 1;
     }
 
-    int CMuHelper::BuffTarget(CHARACTER* pTargetChar, int iBuffSkill)
+    int CMuHelper::BuffTarget(CHARACTER* pTargetChar, ActionSkillType iBuffSkill)
     {
         // TODO: List other buffs here
         if ((iBuffSkill == AT_SKILL_ATTACK
-            || iBuffSkill == AT_SKILL_ATT_POWER_UP
-            || iBuffSkill == AT_SKILL_ATT_POWER_UP + 1
-            || iBuffSkill == AT_SKILL_ATT_POWER_UP + 2
-            || iBuffSkill == AT_SKILL_ATT_POWER_UP + 3
-            || iBuffSkill == AT_SKILL_ATT_POWER_UP + 4)
+            || iBuffSkill == AT_SKILL_ATTACK_STR)
             && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Attack) || m_bTimerActivatedBuffOngoing))
         {
             return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
         }
 
         if ((iBuffSkill == AT_SKILL_DEFENSE
-            || iBuffSkill == AT_SKILL_DEF_POWER_UP
-            || iBuffSkill == AT_SKILL_DEF_POWER_UP + 1
-            || iBuffSkill == AT_SKILL_DEF_POWER_UP + 2
-            || iBuffSkill == AT_SKILL_DEF_POWER_UP + 3
-            || iBuffSkill == AT_SKILL_DEF_POWER_UP + 4)
+            || iBuffSkill == AT_SKILL_DEFENSE_STR
+            || iBuffSkill == AT_SKILL_DEFENSE_MASTERY)
             && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Defense) || m_bTimerActivatedBuffOngoing))
         {
             return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
         }
 
-        if ((iBuffSkill == AT_SKILL_INFINITY_ARROW) &&
+        if ((iBuffSkill == AT_SKILL_INFINITY_ARROW || iBuffSkill == AT_SKILL_INFINITY_ARROW_STR) &&
             (!g_isCharacterBuff((&pTargetChar->Object), eBuff_InfinityArrow)))
         {
             return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
         }
 
-        if ((iBuffSkill == AT_SKILL_WIZARDDEFENSE
-            || iBuffSkill == AT_SKILL_SOUL_UP
-            || iBuffSkill == AT_SKILL_SOUL_UP + 1
-            || iBuffSkill == AT_SKILL_SOUL_UP + 2
-            || iBuffSkill == AT_SKILL_SOUL_UP + 3
-            || iBuffSkill == AT_SKILL_SOUL_UP + 4)
+        if ((iBuffSkill == AT_SKILL_SOUL_BARRIER
+            || iBuffSkill == AT_SKILL_SOUL_BARRIER_STR
+            || iBuffSkill == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
             && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_WizDefense) || m_bTimerActivatedBuffOngoing))
         {
             return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
         }
 
-        if ((iBuffSkill == AT_SKILL_VITALITY
-            || iBuffSkill == AT_SKILL_LIFE_UP
-            || iBuffSkill == AT_SKILL_LIFE_UP + 1
-            || iBuffSkill == AT_SKILL_LIFE_UP + 2
-            || iBuffSkill == AT_SKILL_LIFE_UP + 3
-            || iBuffSkill == AT_SKILL_LIFE_UP + 4)
+        if ((iBuffSkill == AT_SKILL_SWELL_LIFE
+            || iBuffSkill == AT_SKILL_SWELL_LIFE_STR
+            || iBuffSkill == AT_SKILL_SWELL_LIFE_PROFICIENCY)
             && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Life) || m_bTimerActivatedBuffOngoing))
         {
             if (m_iComboState == 2)
@@ -501,19 +488,19 @@ namespace MUHelper
             return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
         }
 
-        if ((iBuffSkill == AT_SKILL_SWELL_OF_MAGICPOWER)
+        if ((iBuffSkill == AT_SKILL_EXPANSION_OF_WIZARDRY || iBuffSkill == AT_SKILL_EXPANSION_OF_WIZARDRY_STR || iBuffSkill == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
             && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_SwellOfMagicPower)))
         {
             return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
         }
 
-        if ((iBuffSkill == AT_SKILL_ADD_CRITICAL)
+        if ((iBuffSkill == AT_SKILL_ADD_CRITICAL || iBuffSkill == AT_SKILL_ADD_CRITICAL_STR1 || iBuffSkill == AT_SKILL_ADD_CRITICAL_STR2 || iBuffSkill == AT_SKILL_ADD_CRITICAL_STR3)
             && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_AddCriticalDamage)))
         {
             return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
         }
 
-        if ((iBuffSkill == AT_SKILL_ALICE_BERSERKER)
+        if ((iBuffSkill == AT_SKILL_ALICE_BERSERKER || iBuffSkill == AT_SKILL_ALICE_BERSERKER_STR)
             && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Berserker)))
         {
             return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
@@ -575,8 +562,8 @@ namespace MUHelper
             return 1;
         }
 
-        int iHealingSkill = GetHealingSkill();
-        if (iHealingSkill == -1)
+        auto iHealingSkill = GetHealingSkill();
+        if (iHealingSkill == AT_SKILL_UNDEFINED)
         {
             return 1;
         }
@@ -609,7 +596,7 @@ namespace MUHelper
         return 1;
     }
 
-    int CMuHelper::HealSelf(int iHealingSkill)
+    int CMuHelper::HealSelf(ActionSkillType iHealingSkill)
     {
         int64_t iLife = CharacterAttribute->Life;
         int64_t iLifeMax = CharacterAttribute->LifeMax;
@@ -630,8 +617,8 @@ namespace MUHelper
             return 1;
         }
 
-        int iDrainLife = GetDrainLifeSkill();
-        if (iDrainLife == -1)
+        auto iDrainLife = GetDrainLifeSkill();
+        if (iDrainLife == AT_SKILL_UNDEFINED)
         {
             return 1;
         }
@@ -721,7 +708,7 @@ namespace MUHelper
         }
 
         m_iCurrentSkill = SelectAttackSkill();
-        if (m_iCurrentSkill > 0)
+        if (m_iCurrentSkill > AT_SKILL_UNDEFINED)
         {
             SimulateAttack(m_iCurrentSkill);
         }
@@ -729,7 +716,7 @@ namespace MUHelper
         return 1;
     }
 
-    int CMuHelper::SelectAttackSkill()
+    ActionSkillType CMuHelper::SelectAttackSkill()
     {
         // try skill 2 activation conditions
         if (m_config.aiSkill[1] > 0 && m_config.aiSkill[1] < MAX_SKILLS)
@@ -738,7 +725,7 @@ namespace MUHelper
                 && m_config.aiSkillInterval[1] != 0
                 && m_iSecondsElapsed % m_config.aiSkillInterval[1] == 0)
             {
-                return m_config.aiSkill[1];
+                return (ActionSkillType)m_config.aiSkill[1];
             }
 
             if (m_config.aiSkillCondition[1] & ON_CONDITION)
@@ -752,7 +739,7 @@ namespace MUHelper
                         || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
                         || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                     {
-                        return m_config.aiSkill[1];
+                        return (ActionSkillType)m_config.aiSkill[1];
                     }
                 }
                 else if (m_config.aiSkillCondition[1] & ON_MOBS_ATTACKING)
@@ -764,7 +751,7 @@ namespace MUHelper
                         || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
                         || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                     {
-                        return m_config.aiSkill[1];
+                        return (ActionSkillType)m_config.aiSkill[1];
                     }
                 }
             }
@@ -777,7 +764,7 @@ namespace MUHelper
                 && m_config.aiSkillInterval[2] != 0
                 && m_iSecondsElapsed % m_config.aiSkillInterval[2] == 0)
             {
-                return m_config.aiSkill[2];
+                return (ActionSkillType)m_config.aiSkill[2];
             }
 
             if (m_config.aiSkillCondition[2] & ON_CONDITION)
@@ -791,7 +778,7 @@ namespace MUHelper
                         || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
                         || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                     {
-                        return m_config.aiSkill[2];
+                        return (ActionSkillType)m_config.aiSkill[2];
                     }
                 }
                 else if (m_config.aiSkillCondition[2] & ON_MOBS_ATTACKING)
@@ -803,7 +790,7 @@ namespace MUHelper
                         || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
                         || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
                     {
-                        return m_config.aiSkill[2];
+                        return (ActionSkillType)m_config.aiSkill[2];
                     }
                 }
             }
@@ -812,10 +799,10 @@ namespace MUHelper
         // no skill for activation yet, default to basic skill
         if (m_config.aiSkill[0] > 0)
         {
-            return m_config.aiSkill[0];
+            return (ActionSkillType)m_config.aiSkill[0];
         }
 
-        return -1;
+        return AT_SKILL_UNDEFINED;
     }
 
     int CMuHelper::SimulateComboAttack()
@@ -828,7 +815,7 @@ namespace MUHelper
             }
         }
 
-        if (SimulateAttack(m_config.aiSkill[m_iComboState]))
+        if (SimulateAttack((ActionSkillType)m_config.aiSkill[m_iComboState]))
         {
             m_iComboState = (m_iComboState + 1) % 3;
         }
@@ -836,12 +823,12 @@ namespace MUHelper
         return 1;
     }
 
-    int CMuHelper::SimulateAttack(int iSkill)
+    int CMuHelper::SimulateAttack(ActionSkillType iSkill)
     {
         return SimulateSkill(iSkill, true, m_iCurrentTarget);
     }
 
-    int CMuHelper::SimulateSkill(int iSkill, bool bTargetRequired, int iTarget)
+    int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
     {
         extern MovementSkill g_MovementSkill;
         extern int SelectedCharacter;
@@ -977,16 +964,12 @@ namespace MUHelper
         return false;
     }
 
-    int CMuHelper::GetHealingSkill()
+    ActionSkillType CMuHelper::GetHealingSkill()
     {
-        std::vector<int> aiHealingSkills =
+        std::vector<ActionSkillType> aiHealingSkills =
         {
-            AT_SKILL_HEAL_UP,
-            AT_SKILL_HEAL_UP + 1,
-            AT_SKILL_HEAL_UP + 2,
-            AT_SKILL_HEAL_UP + 3,
-            AT_SKILL_HEAL_UP + 4,
-            AT_SKILL_HEALING
+            AT_SKILL_HEALING,
+            AT_SKILL_HEALING_STR,
         };
 
         for (int i = 0; i < aiHealingSkills.size(); i++)
@@ -998,19 +981,15 @@ namespace MUHelper
             }
         }
 
-        return -1;
+        return AT_SKILL_UNDEFINED;
     }
 
-    int CMuHelper::GetDrainLifeSkill()
+    ActionSkillType CMuHelper::GetDrainLifeSkill()
     {
-        std::vector<int> aiDrainLifeSkills =
+        std::vector<ActionSkillType> aiDrainLifeSkills =
         {
-            AT_SKILL_ALICE_DRAINLIFE_UP,
-            AT_SKILL_ALICE_DRAINLIFE_UP + 1,
-            AT_SKILL_ALICE_DRAINLIFE_UP + 2,
-            AT_SKILL_ALICE_DRAINLIFE_UP + 3,
-            AT_SKILL_ALICE_DRAINLIFE_UP + 4,
             AT_SKILL_ALICE_DRAINLIFE,
+            AT_SKILL_ALICE_DRAINLIFE_STR
         };
 
         for (int i = 0; i < aiDrainLifeSkills.size(); i++)
@@ -1022,7 +1001,7 @@ namespace MUHelper
             }
         }
 
-        return -1;
+        return AT_SKILL_UNDEFINED;
     }
 
     int CMuHelper::ObtainItem()

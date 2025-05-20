@@ -678,7 +678,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                     {
                         pCharacter->Helper.Type = -1;
                         SetAction(pObject->Owner, PLAYER_ATTACK_SKILL_WHEEL);
-                        pCharacter->Skill = AT_SKILL_WHEEL;
+                        pCharacter->Skill = AT_SKILL_TWISTING_SLASH;
                         pCharacter->AttackTime = 1;
                         pCharacter->TargetCharacter = -1;
                         pCharacter->AttackFlag = ATTACK_FAIL;
@@ -691,7 +691,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
                     if (rand_fps_check(2))
                     {
                         SetAction(pObject->Owner, PLAYER_ATTACK_SKILL_WHEEL);
-                        pCharacter->Skill = AT_SKILL_WHEEL;
+                        pCharacter->Skill = AT_SKILL_TWISTING_SLASH;
                         pCharacter->AttackTime = 1;
                         pCharacter->TargetCharacter = -1;
                         pCharacter->AttackFlag = ATTACK_FAIL;

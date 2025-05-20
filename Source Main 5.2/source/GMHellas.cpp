@@ -969,13 +969,10 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         switch ((c->Skill))
         {
         case AT_SKILL_ENERGYBALL:
-        case AT_SKILL_BLOOD_ATT_UP:
-        case AT_SKILL_BLOOD_ATT_UP + 1:
-        case AT_SKILL_BLOOD_ATT_UP + 2:
-        case AT_SKILL_BLOOD_ATT_UP + 3:
-        case AT_SKILL_BLOOD_ATT_UP + 4:
-        case AT_SKILL_REDUCEDEFENSE:
+        case AT_SKILL_FIRE_SLASH:
+        case AT_SKILL_FIRE_SLASH_STR:
         case AT_SKILL_POISON:
+        case AT_SKILL_POISON_STR:
         case AT_SKILL_MONSTER_SUMMON:
         case AT_SKILL_MONSTER_MAGIC_DEF:
         case AT_SKILL_MONSTER_PHY_DEF:
@@ -1033,6 +1030,7 @@ bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
+        case AT_SKILL_POISON_STR:
             SetAction(o, MONSTER01_ATTACK2);
             break;
 
@@ -1104,16 +1102,13 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case MONSTER_DEATH_CENTURION_6:
         switch ((c->Skill))
         {
-        case AT_SKILL_BLOOD_ATT_UP:
-        case AT_SKILL_BLOOD_ATT_UP + 1:
-        case AT_SKILL_BLOOD_ATT_UP + 2:
-        case AT_SKILL_BLOOD_ATT_UP + 3:
-        case AT_SKILL_BLOOD_ATT_UP + 4:
-        case AT_SKILL_REDUCEDEFENSE:
+        case AT_SKILL_FIRE_SLASH:
+        case AT_SKILL_FIRE_SLASH_STR:
             CreateMonsterSkill_ReduceDef(o, c->AttackTime, 13, 200.f);
             break;
 
         case AT_SKILL_POISON:
+        case AT_SKILL_POISON_STR:
             CreateMonsterSkill_Poison(o, c->AttackTime, 13);
             break;
 
@@ -1220,6 +1215,7 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
         switch ((c->Skill))
         {
         case AT_SKILL_POISON:
+        case AT_SKILL_POISON_STR:
             if (c->CheckAttackTime(14))
             {
                 vec3_t Light, Position;
@@ -1285,16 +1281,13 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case MONSTER_ILLUSION_OF_KUNDUN_5:
         switch ((c->Skill))
         {
-        case AT_SKILL_BLOOD_ATT_UP:
-        case AT_SKILL_BLOOD_ATT_UP + 1:
-        case AT_SKILL_BLOOD_ATT_UP + 2:
-        case AT_SKILL_BLOOD_ATT_UP + 3:
-        case AT_SKILL_BLOOD_ATT_UP + 4:
-        case AT_SKILL_REDUCEDEFENSE:
+        case AT_SKILL_FIRE_SLASH:
+        case AT_SKILL_FIRE_SLASH_STR:
             CreateMonsterSkill_ReduceDef(o, c->AttackTime, 13, 200.f);
             break;
 
         case AT_SKILL_POISON:
+        case AT_SKILL_POISON_STR:
             CreateMonsterSkill_Poison(o, c->AttackTime, 13);
             break;
 
@@ -1342,16 +1335,13 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
     case MONSTER_ILLUSION_OF_KUNDUN_7:
         switch ((c->Skill))
         {
-        case AT_SKILL_BLOOD_ATT_UP:
-        case AT_SKILL_BLOOD_ATT_UP + 1:
-        case AT_SKILL_BLOOD_ATT_UP + 2:
-        case AT_SKILL_BLOOD_ATT_UP + 3:
-        case AT_SKILL_BLOOD_ATT_UP + 4:
-        case AT_SKILL_REDUCEDEFENSE:
+        case AT_SKILL_FIRE_SLASH:
+        case AT_SKILL_FIRE_SLASH_STR:
             CreateMonsterSkill_ReduceDef(o, c->AttackTime, 13, 200.f);
             break;
 
         case AT_SKILL_POISON:
+        case AT_SKILL_POISON_STR:
             CreateMonsterSkill_Poison(o, c->AttackTime, 13);
             break;
 

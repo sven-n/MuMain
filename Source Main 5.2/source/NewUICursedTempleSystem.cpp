@@ -1243,7 +1243,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill(const BY
         return;
     }
 
-    if (sc != Hero && magNumber != AT_SKILL_TELEPORT && magNumber != AT_SKILL_TELEPORT_B && tco->Visible)
+    if (sc != Hero && magNumber != AT_SKILL_TELEPORT && magNumber != AT_SKILL_TELEPORT_ALLY && tco->Visible)
     {
         sco->Angle[2] = CreateAngle2D(sco->Position, tco->Position);
     }

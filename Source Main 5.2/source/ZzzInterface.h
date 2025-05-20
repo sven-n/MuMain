@@ -143,7 +143,7 @@ bool CheckTile(CHARACTER* c, OBJECT* o, float Range);
 void LetHeroStop(CHARACTER* c = NULL, BOOL bSetMovementFalse = FALSE);
 void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
 void Attack(CHARACTER* c);
-int ExecuteSkill(CHARACTER* c, int Skill, float Distance);
+int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance);
 bool ExecuteSkillComplete(CHARACTER* c);
 bool CheckMana(CHARACTER* c, int Skill);
 bool SkillElf(CHARACTER* c, ITEM* p);
@@ -159,7 +159,7 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance);
 bool UseSkillRagePosition(CHARACTER* pCha);
 bool CheckTarget(CHARACTER* c);
 void MouseRButtonReset();
-void AttackKnight(CHARACTER* c, int Skill, float Distance);
+void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance);
 
 bool IsGMCharacter();
 bool IsNonAttackGM();

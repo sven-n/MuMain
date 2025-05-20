@@ -102,18 +102,9 @@ float CSkillManager::GetSkillDistance(int Index, CHARACTER* c)
 {
     auto Distance = (float)(SkillAttribute[Index].Distance);
 
-    if (Index == AT_SKILL_BLOW_UP + 4)
+    if (c != nullptr && c->Helper.Type == MODEL_DARK_HORSE_ITEM)
     {
-        if (Distance != 3)
-            int aaa = 0;
-    }
-
-    if (c != NULL)
-    {
-        if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
-        {
-            Distance += 2;
-        }
+        Distance += 2;
     }
 
     return Distance;
@@ -125,7 +116,11 @@ bool CSkillManager::CheckSkillDelay(int SkillIndex)
 
     int Delay = SkillAttribute[Skill].Delay;
 
-    if (!CheckAttack() && (Skill == AT_SKILL_GIANTSWING || Skill == AT_SKILL_DRAGON_LOWER ||
+    if (!CheckAttack() && (
+        Skill == AT_SKILL_CHAIN_DRIVE ||
+        Skill == AT_SKILL_CHAIN_DRIVE_STR ||
+        Skill == AT_SKILL_DRAGON_ROAR ||
+        Skill == AT_SKILL_DRAGON_ROAR_STR ||
         Skill == AT_SKILL_DRAGON_KICK))
     {
         return false;
@@ -168,236 +163,34 @@ void CSkillManager::CalcSkillDelay(int time)
     }
 }
 
-BYTE CSkillManager::GetSkillMasteryType(int iType)
+BYTE CSkillManager::GetSkillMasteryType(ActionSkillType iType)
 {
     BYTE MasteryType = 255;
-    SKILL_ATTRIBUTE* p = &SkillAttribute[iType];
-
-    MasteryType = p->MasteryType;
+    if (const SKILL_ATTRIBUTE* p = &SkillAttribute[iType])
+    {
+        MasteryType = p->MasteryType;
+    }
 
     return MasteryType;
 }
 
-int CSkillManager::MasterSkillToBaseSkillIndex(int iMasterSkillIndex)
+ActionSkillType CSkillManager::MasterSkillToBaseSkillIndex(ActionSkillType masterSkill)
 {
-    int iBaseSkillIndex = 0;
-    switch (iMasterSkillIndex)
+    auto baseSkill = masterSkill;
+
+    while (true)
     {
-    case AT_SKILL_EVIL_SPIRIT_UP:
-    case AT_SKILL_EVIL_SPIRIT_UP + 1:
-    case AT_SKILL_EVIL_SPIRIT_UP + 2:
-    case AT_SKILL_EVIL_SPIRIT_UP + 3:
-    case AT_SKILL_EVIL_SPIRIT_UP + 4:
-    case AT_SKILL_EVIL_SPIRIT_UP_M:
-    case AT_SKILL_EVIL_SPIRIT_UP_M + 1:
-    case AT_SKILL_EVIL_SPIRIT_UP_M + 2:
-    case AT_SKILL_EVIL_SPIRIT_UP_M + 3:
-    case AT_SKILL_EVIL_SPIRIT_UP_M + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_EVIL;
-    }
-    break;
-    case AT_SKILL_SOUL_UP:
-    case AT_SKILL_SOUL_UP + 1:
-    case AT_SKILL_SOUL_UP + 2:
-    case AT_SKILL_SOUL_UP + 3:
-    case AT_SKILL_SOUL_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_WIZARDDEFENSE;
-    }
-    break;
-    case AT_SKILL_HELL_FIRE_UP:
-    case AT_SKILL_HELL_FIRE_UP + 1:
-    case AT_SKILL_HELL_FIRE_UP + 2:
-    case AT_SKILL_HELL_FIRE_UP + 3:
-    case AT_SKILL_HELL_FIRE_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_BLAST_HELL;
-    }
-    break;
-    case AT_SKILL_ICE_UP:
-    case AT_SKILL_ICE_UP + 1:
-    case AT_SKILL_ICE_UP + 2:
-    case AT_SKILL_ICE_UP + 3:
-    case AT_SKILL_ICE_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_BLAST_FREEZE;
-    }
-    break;
-    case AT_SKILL_TORNADO_SWORDA_UP:
-    case AT_SKILL_TORNADO_SWORDA_UP + 1:
-    case AT_SKILL_TORNADO_SWORDA_UP + 2:
-    case AT_SKILL_TORNADO_SWORDA_UP + 3:
-    case AT_SKILL_TORNADO_SWORDA_UP + 4:
-    case AT_SKILL_TORNADO_SWORDB_UP:
-    case AT_SKILL_TORNADO_SWORDB_UP + 1:
-    case AT_SKILL_TORNADO_SWORDB_UP + 2:
-    case AT_SKILL_TORNADO_SWORDB_UP + 3:
-    case AT_SKILL_TORNADO_SWORDB_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_WHEEL;
-    }
-    break;
-    case AT_SKILL_BLOW_UP:
-    case AT_SKILL_BLOW_UP + 1:
-    case AT_SKILL_BLOW_UP + 2:
-    case AT_SKILL_BLOW_UP + 3:
-    case AT_SKILL_BLOW_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_DEATHSTAB;
-    }
-    break;
-    case AT_SKILL_ANGER_SWORD_UP:
-    case AT_SKILL_ANGER_SWORD_UP + 1:
-    case AT_SKILL_ANGER_SWORD_UP + 2:
-    case AT_SKILL_ANGER_SWORD_UP + 3:
-    case AT_SKILL_ANGER_SWORD_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_FURY_STRIKE;
-    }
-    break;
-    case AT_SKILL_LIFE_UP:
-    case AT_SKILL_LIFE_UP + 1:
-    case AT_SKILL_LIFE_UP + 2:
-    case AT_SKILL_LIFE_UP + 3:
-    case AT_SKILL_LIFE_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_VITALITY;
-    }
-    break;
-    case AT_SKILL_HEAL_UP:
-    case AT_SKILL_HEAL_UP + 1:
-    case AT_SKILL_HEAL_UP + 2:
-    case AT_SKILL_HEAL_UP + 3:
-    case AT_SKILL_HEAL_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_HEALING;
-    }
-    break;
-    case AT_SKILL_DEF_POWER_UP:
-    case AT_SKILL_DEF_POWER_UP + 1:
-    case AT_SKILL_DEF_POWER_UP + 2:
-    case AT_SKILL_DEF_POWER_UP + 3:
-    case AT_SKILL_DEF_POWER_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_DEFENSE;
-    }
-    break;
-    case AT_SKILL_ATT_POWER_UP:
-    case AT_SKILL_ATT_POWER_UP + 1:
-    case AT_SKILL_ATT_POWER_UP + 2:
-    case AT_SKILL_ATT_POWER_UP + 3:
-    case AT_SKILL_ATT_POWER_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_ATTACK;
-    }
-    break;
-    case AT_SKILL_MANY_ARROW_UP:
-    case AT_SKILL_MANY_ARROW_UP + 1:
-    case AT_SKILL_MANY_ARROW_UP + 2:
-    case AT_SKILL_MANY_ARROW_UP + 3:
-    case AT_SKILL_MANY_ARROW_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_CROSSBOW;
-    }
-    break;
-    case AT_SKILL_BLOOD_ATT_UP:
-    case AT_SKILL_BLOOD_ATT_UP + 1:
-    case AT_SKILL_BLOOD_ATT_UP + 2:
-    case AT_SKILL_BLOOD_ATT_UP + 3:
-    case AT_SKILL_BLOOD_ATT_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_REDUCEDEFENSE;
-    }
-    break;
-    case AT_SKILL_POWER_SLASH_UP:
-    case AT_SKILL_POWER_SLASH_UP + 1:
-    case AT_SKILL_POWER_SLASH_UP + 2:
-    case AT_SKILL_POWER_SLASH_UP + 3:
-    case AT_SKILL_POWER_SLASH_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_ICE_BLADE;
-    }
-    break;
-    case AT_SKILL_BLAST_UP:
-    case AT_SKILL_BLAST_UP + 1:
-    case AT_SKILL_BLAST_UP + 2:
-    case AT_SKILL_BLAST_UP + 3:
-    case AT_SKILL_BLAST_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_BLAST;
-    }
-    break;
-    case AT_SKILL_ASHAKE_UP:
-    case AT_SKILL_ASHAKE_UP + 1:
-    case AT_SKILL_ASHAKE_UP + 2:
-    case AT_SKILL_ASHAKE_UP + 3:
-    case AT_SKILL_ASHAKE_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_DARK_HORSE;
-    }
-    break;
-    case AT_SKILL_FIRE_BUST_UP:
-    case AT_SKILL_FIRE_BUST_UP + 1:
-    case AT_SKILL_FIRE_BUST_UP + 2:
-    case AT_SKILL_FIRE_BUST_UP + 3:
-    case AT_SKILL_FIRE_BUST_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_LONGPIER_ATTACK;
-    }
-    break;
-    case AT_SKILL_FIRE_SCREAM_UP:
-    case AT_SKILL_FIRE_SCREAM_UP + 1:
-    case AT_SKILL_FIRE_SCREAM_UP + 2:
-    case AT_SKILL_FIRE_SCREAM_UP + 3:
-    case AT_SKILL_FIRE_SCREAM_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_DARK_SCREAM;
-    }
-    break;
-    case AT_SKILL_ALICE_SLEEP_UP:
-    case AT_SKILL_ALICE_SLEEP_UP + 1:
-    case AT_SKILL_ALICE_SLEEP_UP + 2:
-    case AT_SKILL_ALICE_SLEEP_UP + 3:
-    case AT_SKILL_ALICE_SLEEP_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_ALICE_SLEEP;
-    }
-    break;
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 1:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 2:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 3:
-    case AT_SKILL_ALICE_CHAINLIGHTNING_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_ALICE_CHAINLIGHTNING;
-    }
-    break;
-    case AT_SKILL_LIGHTNING_SHOCK_UP:
-    case AT_SKILL_LIGHTNING_SHOCK_UP + 1:
-    case AT_SKILL_LIGHTNING_SHOCK_UP + 2:
-    case AT_SKILL_LIGHTNING_SHOCK_UP + 3:
-    case AT_SKILL_LIGHTNING_SHOCK_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_ALICE_LIGHTNINGORB;
-    }
-    break;
-    case AT_SKILL_ALICE_DRAINLIFE_UP:
-    case AT_SKILL_ALICE_DRAINLIFE_UP + 1:
-    case AT_SKILL_ALICE_DRAINLIFE_UP + 2:
-    case AT_SKILL_ALICE_DRAINLIFE_UP + 3:
-    case AT_SKILL_ALICE_DRAINLIFE_UP + 4:
-    {
-        iBaseSkillIndex = AT_SKILL_ALICE_DRAINLIFE;
-    }
-    break;
-    default:
-    {
-        iBaseSkillIndex = iMasterSkillIndex;
-    }
+        if (auto search = SKILL_REPLACEMENTS.find(baseSkill); search != SKILL_REPLACEMENTS.end())
+        {
+            baseSkill = search->second;
+        }
+        else
+        {
+            break;
+        }
     }
 
-    return iBaseSkillIndex;
+    return baseSkill;
 }
 
 bool CSkillManager::skillVScharactorCheck(const DemendConditionInfo& basicInfo, const DemendConditionInfo& heroInfo)
@@ -409,46 +202,44 @@ bool CSkillManager::skillVScharactorCheck(const DemendConditionInfo& basicInfo, 
     return false;
 }
 
-bool CSkillManager::DemendConditionCheckSkill(WORD SkillType)
+bool CSkillManager::AreSkillRequirementsFulfilled(ActionSkillType skillType)
 {
-    if (SkillType >= MAX_SKILLS)
+    if (skillType >= MAX_SKILLS)
     {
         return false;
     }
 
-    if ((true == gMapManager.IsEmpireGuardian()) && (SkillType == AT_SKILL_TELEPORT_B || SkillType == AT_SKILL_TELEPORT))
+    if ((true == gMapManager.IsEmpireGuardian()) && (skillType == AT_SKILL_TELEPORT_ALLY || skillType == AT_SKILL_TELEPORT))
     {
         return false;
     }
 
-    if (SkillAttribute[SkillType].Energy == 0)
-    {
-        return true;
-    }
+    //if (SkillAttribute[SkillType].Energy == 0)
+    //{
+    //    return true;
+    //}
 
-    SkillType = MasterSkillToBaseSkillIndex(SkillType);
+    skillType = MasterSkillToBaseSkillIndex(skillType);
 
-    bool result = true;
+    DemendConditionInfo skillRequirements;
 
-    DemendConditionInfo BasicCharacterInfo;
+    skillRequirements.SkillLevel = SkillAttribute[skillType].Level;
+    skillRequirements.SkillStrength = SkillAttribute[skillType].Strength;
+    skillRequirements.SkillDexterity = SkillAttribute[skillType].Dexterity;
+    skillRequirements.SkillVitality = 0;
+    skillRequirements.SkillEnergy = (20 + (SkillAttribute[skillType].Energy * SkillAttribute[skillType].Level) * 0.04);
+    skillRequirements.SkillCharisma = SkillAttribute[skillType].Charisma;
 
-    BasicCharacterInfo.SkillLevel = SkillAttribute[SkillType].Level;
-    BasicCharacterInfo.SkillStrength = SkillAttribute[SkillType].Strength;
-    BasicCharacterInfo.SkillDexterity = SkillAttribute[SkillType].Dexterity;
-    BasicCharacterInfo.SkillVitality = 0;
-    BasicCharacterInfo.SkillEnergy = (20 + (SkillAttribute[SkillType].Energy * SkillAttribute[SkillType].Level) * 0.04);
-    BasicCharacterInfo.SkillCharisma = SkillAttribute[SkillType].Charisma;
+    DemendConditionInfo heroCharacterInfo;
 
-    DemendConditionInfo HeroCharacterInfo;
+    heroCharacterInfo.SkillLevel = CharacterMachine->Character.Level;
+    heroCharacterInfo.SkillStrength = CharacterMachine->Character.Strength + CharacterMachine->Character.AddStrength;
+    heroCharacterInfo.SkillDexterity = CharacterMachine->Character.Dexterity + CharacterMachine->Character.AddDexterity;
+    heroCharacterInfo.SkillVitality = CharacterMachine->Character.Vitality + CharacterMachine->Character.AddVitality;
+    heroCharacterInfo.SkillEnergy = CharacterMachine->Character.Energy + CharacterMachine->Character.AddEnergy;
+    heroCharacterInfo.SkillCharisma = CharacterMachine->Character.Charisma + CharacterMachine->Character.AddCharisma;
 
-    HeroCharacterInfo.SkillLevel = CharacterMachine->Character.Level;
-    HeroCharacterInfo.SkillStrength = CharacterMachine->Character.Strength + CharacterMachine->Character.AddStrength;
-    HeroCharacterInfo.SkillDexterity = CharacterMachine->Character.Dexterity + CharacterMachine->Character.AddDexterity;
-    HeroCharacterInfo.SkillVitality = CharacterMachine->Character.Vitality + CharacterMachine->Character.AddVitality;
-    HeroCharacterInfo.SkillEnergy = CharacterMachine->Character.Energy + CharacterMachine->Character.AddEnergy;
-    HeroCharacterInfo.SkillCharisma = CharacterMachine->Character.Charisma + CharacterMachine->Character.AddCharisma;
-
-    result = skillVScharactorCheck(BasicCharacterInfo, HeroCharacterInfo);
+    auto result = skillRequirements <= heroCharacterInfo;
 
     return result;
 }
