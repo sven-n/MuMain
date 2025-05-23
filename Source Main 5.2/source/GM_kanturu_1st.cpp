@@ -17,8 +17,6 @@
 #include "BoneManager.h"
 #include "dsplaysound.h"
 
-#include "GM_Kanturu_1st.h"
-#include "GMGmArea.h"
 
 bool M40GMArea::IsGmArea()
 {

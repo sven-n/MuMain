@@ -1,6 +1,6 @@
 ﻿#include "stdafx.h"
 #include "SocketSystem.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "ZzzInventory.h"
 #include "ZzzBMD.h"
 #include "ZzzCharacter.h"

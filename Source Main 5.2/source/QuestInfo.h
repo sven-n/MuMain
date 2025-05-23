@@ -13,7 +13,7 @@
 
 namespace info
 {
-    BoostSmartPointer(QuestInfo);
+    SmartPointer(QuestInfo);
     class QuestInfo : public InfoFile
     {
     private:

@@ -12,12 +12,7 @@
 
 #define	LMW_BTN_MENU		0
 #define	LMW_BTN_CREDIT		1
-#ifdef MOVIE_DIRECTSHOW
-#define	LMW_BTN_MOVIE		2
-#define	LMW_BTN_MAX			3
-#else	// MOVIE_DIRECTSHOW
 #define	LMW_BTN_MAX			2
-#endif	// MOVIE_DIRECTSHOW
 
 class CLoginMainWin : public CWin
 {

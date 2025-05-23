@@ -1,7 +1,6 @@
 #ifndef _CBTMESSAGEBOX_H_
 #define _CBTMESSAGEBOX_H_
 
-#include <windows.h>
 
 #pragma warning(disable : 4786)
 #include <string>

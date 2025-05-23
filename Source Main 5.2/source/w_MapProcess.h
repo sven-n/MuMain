@@ -7,7 +7,7 @@
 #include "w_BaseMap.h"
 #include "MapManager.h"
 
-BoostSmartPointer(MapProcess);
+SmartPointer(MapProcess);
 class MapProcess
 {
 public:
@@ -40,7 +40,7 @@ public:
     bool ReceiveMapMessage(BYTE code, BYTE subcode, BYTE* ReceiveBuffer);
 
 public:
-    void Register(BoostSmart_Ptr(BaseMap) pMap);
+    void Register(Smart_Ptr(BaseMap) pMap);
     void UnRegister(ENUM_WORLD type);
 
 public:
@@ -54,7 +54,7 @@ private:
     MapProcess();
 
 private:
-    typedef std::list< BoostSmart_Ptr(BaseMap) >		MapList;
+    typedef std::list< Smart_Ptr(BaseMap) >		MapList;
 
 private:
     MapList				m_MapList;

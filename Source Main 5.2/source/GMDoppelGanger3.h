@@ -3,7 +3,7 @@
 #pragma once
 #include "w_BaseMap.h"
 
-BoostSmartPointer(CGMDoppelGanger3);
+SmartPointer(CGMDoppelGanger3);
 class CGMDoppelGanger3 : public BaseMap
 {
 public:

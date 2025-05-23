@@ -15,17 +15,14 @@
 #include "ZzzObject.h"
 #include "DSPlaySound.h"
 #include "BoneManager.h"
-#include "GMNewTown.h"
 #include "GOBoid.h"
 #include "GIPetManager.h"
 #include "MapManager.h"
 #include "SkillManager.h"
 #include "_enum.h"
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 #include "w_BaseMap.h"
 #include "w_MapHeaders.h"
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
 using namespace SEASON3B;
 
@@ -42,26 +39,17 @@ GMNewTown::~GMNewTown()
 
 bool GMNewTown::IsCurrentMap()
 {
-    return (gMapManager.WorldActive == WD_51HOME_6TH_CHAR ||
-#ifdef PJH_NEW_SERVER_SELECT_MAP
-        gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
-#else
-        gMapManager.WorldActive == WD_77NEW_LOGIN_SCENE || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
-        );
+    return (gMapManager.WorldActive == WD_51HOME_6TH_CHAR || gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE );
 }
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 bool GMNewTown::IsNewMap73_74()
 {
     return (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE);
 }
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
 void GMNewTown::CreateObject(OBJECT* pObject)
 {
     if (!IsCurrentMap())
         return;
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     if (IsNewMap73_74())
     {
         if (g_EmpireGuardian4.CreateObject(pObject))
@@ -79,7 +67,6 @@ void GMNewTown::CreateObject(OBJECT* pObject)
         }
         return;
     }
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
     switch (pObject->Type)
     {
@@ -95,15 +82,6 @@ void GMNewTown::CreateObject(OBJECT* pObject)
     {
         pObject->CollisionRange = -300;
     }
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    if (World == WD_77NEW_LOGIN_SCENE || World == WD_78NEW_CHARACTER_SCENE)
-    {
-        if (pObject->Type == 62)
-        {
-            pObject->SubType = 0;
-        }
-    }
-#endif //PJH_NEW_SERVER_SELECT_MAP
 }
 
 bool GMNewTown::MoveObject(OBJECT* pObject)
@@ -111,10 +89,8 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
     if (!IsCurrentMap())
         return false;
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     if (IsNewMap73_74())
         return g_EmpireGuardian4.MoveObject(pObject);
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
     if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
         PlayObjectSound(pObject);
@@ -177,24 +153,6 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
         pObject->HiddenMesh = -2;
         {
             int iEagleIndex = 1;
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-            if (World == WD_77NEW_LOGIN_SCENE || World == WD_78NEW_CHARACTER_SCENE)
-            {
-                if (pObject->SubType == 0)
-                {
-                    pObject->SubType = iEagleIndex;
-                    while (Boids[pObject->SubType].Live)
-                    {
-                        ++pObject->SubType;
-                    };
-                    iEagleIndex = pObject->SubType;
-                }
-                else
-                {
-                    break;
-                }
-            }
-#endif //PJH_NEW_SERVER_SELECT_MAP
             OBJECT* pBoid = &Boids[iEagleIndex];
             if (!pBoid->Live)
             {
@@ -211,12 +169,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
                 pBoid->Scale = 0.5f;
 
                 if (
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                     gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
-#else //PJH_NEW_SERVER_SELECT_MAP
-                    gMapManager.WorldActive == WD_77NEW_LOGIN_SCENE
-                    || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
                     )
                     pBoid->ShadowScale = 0.f;
                 else
@@ -283,13 +236,11 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
     if (!IsCurrentMap())
         return false;
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     if (IsNewMap73_74())
     {
         g_EmpireGuardian4.RenderObjectVisual(pObject, pModel);
         return true;
     }
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
     vec3_t p, Position, Light;
 
@@ -323,11 +274,6 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
             Vector(0.06f, 0.07f, 0.08f, Light);
             for (int i = 0; i < 10; ++i)
             {
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-                if (World == WD_77NEW_LOGIN_SCENE)
-                    CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 3, pObject->Scale * 2, pObject);
-                else
-#endif //PJH_NEW_SERVER_SELECT_MAP
                     CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 3, pObject->Scale, pObject);
             }
             pObject->HiddenMesh = -2;
@@ -781,10 +727,8 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
     if (!IsCurrentMap())
         return false;
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     if (IsNewMap73_74())
         return g_EmpireGuardian4.RenderObjectMesh(pObject, pModel, ExtraMon);
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
     // ���
     if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
@@ -800,22 +744,7 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
         }
         Vector(1.0f, 1.0f, 1.0f, pObject->Light);
     }
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    else
-        if (World == WD_77NEW_LOGIN_SCENE)
-        {
-            Mesh_t* m = NULL;
-            for (int i = 0; i < pModel->NumMeshs; i++)
-            {
-                m = &pModel->Meshs[i];
-                for (int j = 0; j < m->NumNormals; j++)
-                {
-                    IntensityTransform[i][j] *= 3.0f;
-                }
-            }
-            Vector(1.0f, 1.0f, 1.0f, pObject->Light);
-        }
-#endif //PJH_NEW_SERVER_SELECT_MAP
+
     if (pObject->Type == 53 || pObject->Type == 55
         || pObject->Type == 110 || pObject->Type == 89
         || pObject->Type == 78 || pObject->Type == 79
@@ -871,67 +800,7 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
     else if (pObject->Type == MODEL_TOTEM_GOLEM && pObject->CurrentAction == MONSTER01_DIE)
     {
     }
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    else if (World == WD_77NEW_LOGIN_SCENE &&
-        ((pObject->Type >= 133 && pObject->Type <= 164) || pObject->Type == 0 || pObject->Type == 54
-            || pObject->Type == 58 || pObject->Type == 59 || pObject->Type == 60 || pObject->Type == 61
-            || pObject->Type == 62))
-    {
-    }
-    else if (World == WD_78NEW_CHARACTER_SCENE && pObject->Type == 4)
-    {
-        if (pObject->CurrentAction == 0 && pObject->AnimationFrame >= 15.5)
-        {
-            if (CharacterSceneCheckMouse(pObject) == false)
-            {
-                SetAction(pObject, rand() % 2 + 1);
-            }
-        }
-        else if (pObject->CurrentAction == 1 && pObject->AnimationFrame >= 15.5)
-        {
-            if (CharacterSceneCheckMouse(pObject) == false)
-            {
-                int iRand = rand() % 10;
-                if (iRand >= 0 && iRand <= 1)
-                {
-                    iRand = 0;
-                }
-                else if (iRand >= 3 && iRand <= 6)
-                {
-                    iRand = 1;
-                }
-                else
-                {
-                    iRand = 2;
-                }
-                SetAction(pObject, iRand);
-            }
-        }
-        else if (pObject->CurrentAction == 2 && pObject->AnimationFrame >= 14.2)
-        {
-            if (CharacterSceneCheckMouse(pObject) == false)
-            {
-                int iRand = rand() % 10;
-                if (iRand >= 0 && iRand <= 1)
-                {
-                    iRand = 0;
-                }
-                else if (iRand >= 3 && iRand <= 6)
-                {
-                    iRand = 1;
-                }
-                else
-                {
-                    iRand = 2;
-                }
-                SetAction(pObject, iRand);
-            }
-        }
-
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-    }
-#endif //PJH_NEW_SERVER_SELECT_MAP
-    else
+   else
         return false;
 
     return true;
@@ -942,13 +811,11 @@ void GMNewTown::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool Ex
     if (!IsCurrentMap())
         return;
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     if (IsNewMap73_74())
     {
         g_EmpireGuardian4.RenderAfterObjectMesh(pObject, pModel, ExtraMon0);
         return;
     }
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
     if (pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// ������1,2, ����, ȸ����, ��
     {

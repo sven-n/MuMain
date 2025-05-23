@@ -18,7 +18,6 @@
 #include "CDirection.h"
 #include "UIBaseDef.h"
 #include "MapManager.h"
-#include "GM_Kanturu_2nd.h"
 #include "DSPlaySound.h"
 
 #include "ChangeRingManager.h"

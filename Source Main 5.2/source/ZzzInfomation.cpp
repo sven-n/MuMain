@@ -14,11 +14,10 @@
 #include "ReadScript.h"
 #include "zzzInventory.h"
 #include "zzzopenglutil.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "zzzLodTerrain.h"
 #include "CSItemOption.h"
 #include "GIPetManager.h"
-#include "GMHellas.h"
 #include "CComGem.h"
 #include "NewUIInventoryCtrl.h"
 #include "SocketSystem.h"

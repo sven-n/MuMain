@@ -4,7 +4,7 @@
 
 #include "w_BaseMap.h"
 
-BoostSmartPointer(CGMDoppelGanger2);
+SmartPointer(CGMDoppelGanger2);
 class CGMDoppelGanger2 : public BaseMap
 {
 public:

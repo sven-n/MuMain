@@ -5,12 +5,8 @@
 
 #include "NewUIPartyInfoWindow.h"
 #include "NewUISystem.h"
-
-#include "GMBattleCastle.h"
 #include "CSChaosCastle.h"
 #include "DSPlaySound.h"
-#include "GMHellas.h"
-#include "GM3rdChangeUp.h"
 #include "w_CursedTemple.h"
 #include "MapManager.h"
 

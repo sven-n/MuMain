@@ -296,11 +296,7 @@ void CSummonSystem::CreateEquipEffect_Summon(CHARACTER* pCharacter, int iItemTyp
     OBJECT* pObject = &pCharacter->Object;
 
     if (
-#ifdef PJH_NEW_SERVER_SELECT_MAP
         gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
-#else //PJH_NEW_SERVER_SELECT_MAP
-        gMapManager.WorldActive == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
         ) return;
 
     if (pObject->CurrentAction == PLAYER_SKILL_SUMMON || pObject->CurrentAction == PLAYER_SKILL_SUMMON_UNI

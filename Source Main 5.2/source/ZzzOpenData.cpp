@@ -13,7 +13,7 @@
 #include "DSPlaySound.h"
 
 #include "SMD.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "PhysicsManager.h"
 #include "CSQuest.h"
 #include "CSItemOption.h"
@@ -4814,10 +4814,6 @@ void SaveOptions()
 
 void OpenLogoSceneData()
 {
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    gLoadData.AccessModel(MODEL_LOGO + 2, L"Data\\Logo\\", L"Logo", 3);
-    gLoadData.OpenTexture(MODEL_LOGO + 2, L"Logo\\", GL_REPEAT, GL_LINEAR);
-#endif //PJH_NEW_SERVER_SELECT_MAP
     //image
     ::LoadBitmap(L"Interface\\cha_bt.tga", BITMAP_LOG_IN);
     ::LoadBitmap(L"Interface\\server_b2_all.tga", BITMAP_LOG_IN + 1);
@@ -4832,9 +4828,6 @@ void OpenLogoSceneData()
     ::LoadBitmap(L"Interface\\server_ex01.tga", BITMAP_LOG_IN + 12);
     ::LoadBitmap(L"Interface\\server_ex02.jpg", BITMAP_LOG_IN + 13, GL_NEAREST, GL_REPEAT);
     ::LoadBitmap(L"Interface\\cr_mu_lo.tga", BITMAP_LOG_IN + 14, GL_LINEAR);
-#ifdef MOVIE_DIRECTSHOW
-    ::LoadBitmap(L"Interface\\movie_b_all.tga", BITMAP_LOG_IN + 15);// 동영상 버튼.
-#endif	// MOVIE_DIRECTSHOW
 }
 
 void ReleaseLogoSceneData()
@@ -5382,7 +5375,7 @@ void OpenBasicData(HDC hDC)
 
     OpenTextData();		//. Text.bmd, Testtest.bmd
 
-    g_csItemOption.OpenItemSetScript(false);
+    g_csItemOption.OpenItemSetScript();
 
     g_QuestMng.LoadQuestScript();
 

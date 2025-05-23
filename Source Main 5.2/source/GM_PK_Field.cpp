@@ -2,7 +2,6 @@
 // file    : GM_PK_Field.cpp
 //*****************************************************************************
 #include "stdafx.h"
-#include "GM_PK_Field.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "_GlobalFunctions.h"
-#include "GMEmpireGuardian1.h"
 
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
 bool g_bRenderBoundingBox = false;

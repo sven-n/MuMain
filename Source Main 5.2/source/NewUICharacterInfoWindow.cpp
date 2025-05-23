@@ -292,16 +292,9 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
     wchar_t strExp[128];
     wchar_t strPoint[128];
 
-    if (gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true)
-    {
-        swprintf(strLevel, GlobalText[1745]);
-        swprintf(strExp, L"----------");
-    }
-    else
-    {
-        swprintf(strLevel, GlobalText[200], CharacterAttribute->Level);
-        swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperience);
-    }
+    swprintf(strLevel, GlobalText[200], CharacterAttribute->Level);
+    swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperience);
+
     if (CharacterAttribute->Level > 9)
     {
         int iMinus, iMaxMinus;

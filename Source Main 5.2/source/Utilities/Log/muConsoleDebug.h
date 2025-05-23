@@ -29,22 +29,3 @@ protected:
 
 #define g_ConsoleDebug	CmuConsoleDebug::GetInstance()
 
-class CmuSimpleLog
-{
-public:
-    CmuSimpleLog(void);
-    ~CmuSimpleLog(void);
-    static CmuSimpleLog* getInstance() { static CmuSimpleLog sInstance; return &sInstance; }
-
-    void setFilename(const wchar_t* strFilename);
-    void log(wchar_t* str, ...);
-
-private:
-    bool m_bLogfirst;
-
-    std::wstring m_strFilename;
-
-    FILE* m_pFile;
-};
-
-#define g_ConsoleDebugLog	CmuSimpleLog::getInstance()

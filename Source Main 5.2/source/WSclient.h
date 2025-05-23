@@ -507,7 +507,6 @@ typedef struct {
     BYTE         Flags;
     BYTE         Equipment[EQUIPMENT_LENGTH_EXTENDED];
     BYTE         s_BuffCount;
-    // BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
 } PCREATE_CHARACTER_EXTENDED, * LPPCREATE_CHARACTER_EXTENDED;
 
 //receive other map character
@@ -3549,21 +3548,11 @@ extern int  SoccerTime;
 extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
-#ifdef ACC_PACKETSIZE
-extern int g_iTotalPacketRecv;
-extern int g_iTotalPacketSend;
-extern DWORD g_dwPacketInitialTick;
-#endif //ACC_PACKETSIZE
-
 void BuxConvert(BYTE* Buffer, int Size);
 
 BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port);
 void DeleteSocket();
-//void ProtocolCompiler( CWsctlc *pSocketClient = &SocketClient, int iTranslation = 0, int iParam = 0);
-void ReceiveCharacterList(const BYTE* ReceiveBuffer);
 void ReceiveMovePosition(const BYTE* ReceiveBuffer);
-void ReceiveMoveCharacter(const BYTE* ReceiveBuffer);
-//BOOL TranslateProtocol(int HeadCode,BYTE* ReceiveBuffer,int Size,BOOL bEncrypted);
 
 struct PacketInfo
 {

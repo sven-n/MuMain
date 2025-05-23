@@ -1,7 +1,6 @@
 ﻿// GMDoppelGanger3.cpp: implementation of the CGMDoppelGanger3 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "GMDoppelGanger3.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

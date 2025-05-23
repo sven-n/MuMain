@@ -53,9 +53,6 @@ protected:
     int				m_nScene;
     bool			m_bWinActive;
     bool			m_bSysMenuWinShow;
-#ifdef MOVIE_DIRECTSHOW
-    bool			m_bMoving;
-#endif // MOVIE_DIRECTSHOW
 
 public:
     virtual ~CUIMng();
@@ -82,11 +79,6 @@ public:
     void CloseMsgWin() { HideWin(&m_MsgWin); }
     void SetSysMenuWinShow(bool bShow) { m_bSysMenuWinShow = bShow; }
     bool IsSysMenuWinShow() { return m_bSysMenuWinShow; };
-
-#ifdef MOVIE_DIRECTSHOW
-    void SetMoving(bool bMoving) { m_bMoving = bMoving; };
-    bool IsMoving() { return m_bMoving; };
-#endif // MOVIE_DIRECTSHOW
 
 protected:
     CUIMng();

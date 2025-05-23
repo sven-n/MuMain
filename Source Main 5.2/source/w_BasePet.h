@@ -7,7 +7,7 @@
 #include "ZzzBMD.h"
 #include "Time/Timer.h"
 
-BoostSmartPointer(PetObject);
+SmartPointer(PetObject);
 class PetObject
 {
 public:
@@ -29,7 +29,7 @@ public:
     OBJECT* GetObject() { return m_obj; }
     bool IsSameOwner(OBJECT* Owner);
     bool IsSameObject(OBJECT* Owner, int itemType);
-    void SetActions(ActionType type, BoostWeak_Ptr(PetAction) action, float speed);
+    void SetActions(ActionType type, Weak_Ptr(PetAction) action, float speed);
     void SetCommand(int targetKey, ActionType cmdType);
 
     void SetScale(float scale = 0.0f);
@@ -53,7 +53,7 @@ private:
     PetObject();
 
 public:
-    typedef std::map< ActionType, BoostWeak_Ptr(PetAction) > ActionMap;
+    typedef std::map< ActionType, Weak_Ptr(PetAction) > ActionMap;
     typedef std::map< ActionType, float > SpeedMap;
 
 private:

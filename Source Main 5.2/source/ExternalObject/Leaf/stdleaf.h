@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <windows.h>
 
 #pragma warning(disable : 4786)
 #include <string>

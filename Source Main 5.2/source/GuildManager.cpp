@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "GuildManager.h"
 #include "UIGuildInfo.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 
 CGuildManager gGuildManager;
 

@@ -5,8 +5,8 @@
 #include "stdafx.h"
 #include "ServerListManager.h"
 
-#include "MultiLanguage.h"
-#include "./Utilities/Log/ErrorReport.h"
+
+
 
 CServerListManager::CServerListManager()
 {
@@ -36,7 +36,6 @@ void CServerListManager::Release()
 
     m_mapServerGroup.clear();
     m_iTotalServer = 0;
-    m_bTestServer = false;
 }
 
 void CServerListManager::BuxConvert(BYTE* pbyBuffer, int nSize)
@@ -263,13 +262,11 @@ CServerGroup* CServerListManager::GetServerGroupByBtnPos(int iBtnPos)
     return NULL;
 }
 
-void CServerListManager::SetSelectServerInfo(wchar_t* pszName, int iIndex, int iCensorshipIndex, BYTE byNonPvP, bool bTestServer)
+void CServerListManager::SetSelectServerInfo(wchar_t* pszName, int iIndex, BYTE byNonPvP)
 {
     wcscpy(m_szSelectServerName, pszName);
     m_iSelectServerIndex = iIndex;
-    m_iCensorshipIndex = iCensorshipIndex;
     m_byNonPvP = byNonPvP;
-    m_bTestServer = bTestServer;
 }
 
 wchar_t* CServerListManager::GetSelectServerName()
@@ -282,10 +279,6 @@ int CServerListManager::GetSelectServerIndex()
     return m_iSelectServerIndex;
 }
 
-int CServerListManager::GetCensorshipIndex()
-{
-    return m_iCensorshipIndex;
-}
 
 BYTE CServerListManager::GetNonPVPInfo()
 {
@@ -295,11 +288,6 @@ BYTE CServerListManager::GetNonPVPInfo()
 bool CServerListManager::IsNonPvP()
 {
     return bool(0x01 & GetNonPVPInfo());
-}
-
-bool CServerListManager::IsTestServer()
-{
-    return m_bTestServer;
 }
 
 void CServerListManager::SetTotalServer(int iTotalServer)

@@ -21,7 +21,6 @@
 #include "ZzzEffect.h"
 #include "zzzScene.h"
 #include "DSPlaySound.h"
-#include "GMCrywolf1st.h"
 #include "ZzzPath.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"

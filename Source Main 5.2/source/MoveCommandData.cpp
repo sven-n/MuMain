@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "MoveCommandData.h"
 
-#include "MultiLanguage.h"
+
 
 using namespace SEASON3B;
 

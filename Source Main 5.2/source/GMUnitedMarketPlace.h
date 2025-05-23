@@ -4,7 +4,7 @@
 
 #include "w_BaseMap.h"
 
-BoostSmartPointer(GMUnitedMarketPlace);
+SmartPointer(GMUnitedMarketPlace);
 
 class GMUnitedMarketPlace : public BaseMap
 {

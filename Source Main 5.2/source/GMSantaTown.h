@@ -5,7 +5,7 @@
 
 #include "w_BaseMap.h"
 
-BoostSmartPointer(CGMSantaTown);
+SmartPointer(CGMSantaTown);
 
 class CGMSantaTown : public BaseMap
 {

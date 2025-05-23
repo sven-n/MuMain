@@ -16,7 +16,7 @@
 #define	UNICORN			6
 #define SKELETON		7
 
-BoostSmartPointer(PetInfo);
+SmartPointer(PetInfo);
 class PetInfo
 {
 public:
@@ -53,24 +53,24 @@ private:
     int m_count;
 };
 
-BoostSmartPointer(PetProcess);
+SmartPointer(PetProcess);
 
 class PetProcess
 {
 public:
-    typedef std::list< BoostSmart_Ptr(PetObject) > PetList;
-    typedef std::map< int, BoostSmart_Ptr(PetAction) > ActionMap;	//actionNum, actionClass
-    typedef std::map< int, BoostSmart_Ptr(PetInfo) > InfoMap;		//PetType, PetInfo
+    typedef std::list< Smart_Ptr(PetObject) > PetList;
+    typedef std::map< int, Smart_Ptr(PetAction) > ActionMap;	//actionNum, actionClass
+    typedef std::map< int, Smart_Ptr(PetInfo) > InfoMap;		//PetType, PetInfo
 
 public:
     static PetProcessPtr Make();
     virtual ~PetProcess();
 
 private:
-    void Register(BoostSmart_Ptr(PetObject) pPet);
+    void Register(Smart_Ptr(PetObject) pPet);
     void UnRegister(CHARACTER* Owner, int itemType, bool isUnregistAll = false);
 
-    BoostWeak_Ptr(PetAction) Find(int key);
+    Weak_Ptr(PetAction) Find(int key);
 
     void Init();
     void Destroy();

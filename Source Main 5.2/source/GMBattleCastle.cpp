@@ -20,7 +20,6 @@
 #include "MapManager.h"
 #include "GIPetManager.h"
 #include "BoneManager.h"
-#include "GMBattleCastle.h"
 
 #include "GuildCache.h"
 #include "ZzzInterface.h"

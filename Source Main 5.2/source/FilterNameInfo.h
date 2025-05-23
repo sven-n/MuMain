@@ -13,7 +13,7 @@
 
 namespace info
 {
-    BoostSmartPointer(FilterNameInfo);
+    SmartPointer(FilterNameInfo);
     class FilterNameInfo : public InfoFile
     {
     private:

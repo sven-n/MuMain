@@ -9,13 +9,6 @@
 #include "UIMng.h"
 #include "WSclient.h"
 
-#ifdef MOVIE_DIRECTSHOW
-#include <dshow.h>
-#include "MovieScene.h"
-
-extern CMovieScene* g_pMovieScene;
-#endif // MOVIE_DIRECTSHOW
-
 extern char* g_lpszMp3[NUM_MUSIC];
 
 CLoginMainWin::CLoginMainWin()
@@ -30,9 +23,6 @@ void CLoginMainWin::Create()
 {
     for (int i = 0; i <= LMW_BTN_CREDIT; ++i)
         m_aBtn[i].Create(54, 30, BITMAP_LOG_IN + 4 + i, 3, 2, 1);
-#ifdef MOVIE_DIRECTSHOW
-    m_aBtn[LMW_BTN_MOVIE].Create(54, 30, BITMAP_LOG_IN + 15, 3, 2, 1);
-#endif	// MOVIE_DIRECTSHOW
 
     CWin::Create(CInput::Instance().GetScreenWidth() - 30 * 2,
         m_aBtn[0].GetHeight(), -2);
@@ -56,10 +46,6 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
     m_aBtn[LMW_BTN_CREDIT].SetPosition(
         nXCoord + CWin::GetWidth() - m_aBtn[LMW_BTN_CREDIT].GetWidth(),
         nYCoord);
-#ifdef MOVIE_DIRECTSHOW
-    m_aBtn[LMW_BTN_MOVIE].SetPosition(m_aBtn[LMW_BTN_CREDIT].GetXPos()
-        - 10 - m_aBtn[LMW_BTN_MOVIE].GetWidth(), nYCoord);
-#endif	// MOVIE_DIRECTSHOW
     m_sprDeco.SetPosition(
         m_aBtn[LMW_BTN_CREDIT].GetXPos(), m_aBtn[LMW_BTN_CREDIT].GetYPos());
 }
@@ -105,22 +91,6 @@ void CLoginMainWin::UpdateWhileActive(double dDeltaTick)
         ::StopMp3(g_lpszMp3[MUSIC_MAIN_THEME]);
         ::PlayMp3(g_lpszMp3[MUSIC_MUTHEME]);
     }
-#ifdef MOVIE_DIRECTSHOW
-    else if (m_aBtn[LMW_BTN_MOVIE].IsClick())
-    {
-        g_pMovieScene = new CMovieScene;
-        g_pMovieScene->Initialize_DirectShow(g_hWnd, MOVIE_FILE_WMV);
-        if (g_pMovieScene->IsFile() == FALSE || g_pMovieScene->IsFailDirectShow() == TRUE)
-        {
-            g_pMovieScene->Destroy();
-            SAFE_DELETE(g_pMovieScene);
-            return;
-        }
-        ::StopMp3(g_lpszMp3[MUSIC_MAIN_THEME]);
-        CUIMng& rUIMng = CUIMng::Instance();
-        rUIMng.SetMoving(true);
-    }
-#endif	// MOVIE_DIRECTSHOW
 }
 
 void CLoginMainWin::RenderControls()

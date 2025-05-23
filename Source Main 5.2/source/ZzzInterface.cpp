@@ -20,7 +20,7 @@
 #include "ZzzPath.h"
 #include "DSPlaySound.h"
 
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "MatchEvent.h"
 #include "CSQuest.h"
 #include "PersonalShopTitleImp.h"
@@ -29,30 +29,22 @@
 #include "npcBreeder.h"
 #include "GIPetManager.h"
 #include "CSParts.h"
-#include "GMBattleCastle.h"
-#include "GMCrywolf1st.h"
 #include "UIMapName.h"	// rozy
-#include "GMCrywolf1st.h"
 #include "CDirection.h"
-#include "GM_Kanturu_3rd.h"
-#include "GM_Kanturu_2nd.h"
 #include "MapManager.h"
 #include "Event.h"
-#include "./Utilities/Log/muConsoleDebug.h"
+
 #include "NewUISystem.h"
 #include "w_CursedTemple.h"
 #include "UIControls.h"
-#include "GM3rdChangeUp.h"
 #include "PartyManager.h"
 #include "NewUICommonMessageBox.h"
 #include "SummonSystem.h"
-#include "GMSwampOfQuiet.h"
 #include "w_MapHeaders.h"
 #include "DuelMgr.h"
 #include "ChangeRingManager.h"
 #include "NewUIGensRanking.h"
 #include "MonkSystem.h"
-#include "ProtocolSend.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
 #include "MUHelper/MuHelper.h"
@@ -69,9 +61,7 @@ extern DWORD g_dwLatestZoneMoving;
 extern bool LogOut;
 extern int DirTable[16];
 
-#ifdef WINDOWMODE
 extern BOOL g_bUseWindowMode;
-#endif //WINDOWMODE
 extern void SetPlayerBow(CHARACTER* c);
 
 #ifdef _PVP_ADD_MOVE_SCROLL

@@ -2,8 +2,6 @@
 #define _WINDOWSCONSOLE_H_
 
 #pragma once
-
-#include <windows.h>
 #include "./Time/Timer.h"
 
 #pragma warning(disable : 4786)

@@ -30,29 +30,17 @@
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "GIPetManager.h"
-#include "GMHellas.h"
 #include "CSParts.h"
-#include "GMBattleCastle.h"
-#include "GMHuntingGround.h"
-#include "GMCryingWolf2nd.h"
 #include "BoneManager.h"
-#include "GMAida.h"
-#include "GMCryWolf1st.h"
-#include "GM_Kanturu_1st.h"
-#include "GM_Kanturu_2nd.h"
 #include "CDirection.h"
-#include "GM_Kanturu_3rd.h"
-#include "GM3rdChangeUp.h"
 #include "Input.h"
 #include "ChangeRingManager.h"
 #include "Event.h"
 #include "PartyManager.h"
-#include "GMNewTown.h"
 #include "w_CursedTemple.h"
 #include "SummonSystem.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
-#include "GMSwampOfQuiet.h"
 #include "w_MapHeaders.h"
 #include "w_PetProcess.h"
 #include "DuelMgr.h"
@@ -738,11 +726,106 @@ void SetPlayerWalk(CHARACTER* c)
 extern int CurrentSkill;
 int AttackHand = 0;
 
+#define RGZ_FIX_ATTACK_SPEED
+
 void SetAttackSpeed()
 {
+#ifndef RGZ_FIX_ATTACK_SPEED
     float AttackSpeed1 = CharacterAttribute->AttackSpeed * 0.004f;
     float MagicSpeed1 = CharacterAttribute->MagicSpeed * 0.004f;
     float MagicSpeed2 = CharacterAttribute->MagicSpeed * 0.002f;
+#else
+    float AttackSpeed1 = CharacterAttribute->AttackSpeed;
+    float MagicSpeed1 = CharacterAttribute->MagicSpeed;
+    float MagicSpeed2 = CharacterAttribute->MagicSpeed;
+
+    if (CharacterAttribute->AttackSpeed >= 509 && CharacterAttribute->AttackSpeed <= 549)
+    {
+        AttackSpeed1 = AttackSpeed1 * 0.0026000f;
+    }
+    else if (CharacterAttribute->AttackSpeed >= 550 && CharacterAttribute->AttackSpeed <= 750)
+    {
+        AttackSpeed1 = AttackSpeed1 * 0.0017000f;
+    }
+    else
+    {
+        AttackSpeed1 = AttackSpeed1 * 0.0040000f;
+    }
+
+    if (CharacterAttribute->MagicSpeed >= 509 && CharacterAttribute->MagicSpeed <= 549)
+    {
+        MagicSpeed1 = MagicSpeed1 * 0.0026000f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 550 && CharacterAttribute->MagicSpeed <= 750)
+    {
+        MagicSpeed1 = MagicSpeed1 * 0.0017000f;
+    }
+    else
+    {
+        MagicSpeed1 = MagicSpeed1 * 0.0040000f;
+    }
+
+    if (CharacterAttribute->MagicSpeed >= 455 && CharacterAttribute->MagicSpeed <= 479)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0024700f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 605 && CharacterAttribute->MagicSpeed <= 636)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0019000f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 637 && CharacterAttribute->MagicSpeed <= 668)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0018000f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 669 && CharacterAttribute->MagicSpeed <= 688)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0017000f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 855 && CharacterAttribute->MagicSpeed <= 1040)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0016300f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 1041 && CharacterAttribute->MagicSpeed <= 1104)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0015500f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 1301 && CharacterAttribute->MagicSpeed <= 1500)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0017500f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 1501 && CharacterAttribute->MagicSpeed <= 1524)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0015000f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 1525 && CharacterAttribute->MagicSpeed <= 1800)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0014500f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 1801 && CharacterAttribute->MagicSpeed <= 1999)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0013000f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 2000 && CharacterAttribute->MagicSpeed <= 2167)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0012500f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 2168 && CharacterAttribute->MagicSpeed <= 2354)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0011500f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 2855 && CharacterAttribute->MagicSpeed <= 3011)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0009000f;
+    }
+    else if (CharacterAttribute->MagicSpeed >= 3011)
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0008100f;
+    }
+    else
+    {
+        MagicSpeed2 = MagicSpeed2 * 0.0020000f;
+    }
+#endif
 
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_FIST].PlaySpeed = 0.6f + AttackSpeed1;
 
@@ -1111,11 +1194,7 @@ void SetPlayerAttack(CHARACTER* c)
             }
         }
     }
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE);
-#else //PJH_NEW_SERVER_SELECT_MAP
-    if (World == WD_77NEW_LOGIN_SCENE);
-#endif //PJH_NEW_SERVER_SELECT_MAP
     else
         if (c->Object.AnimationFrame == 0.f)
         {
@@ -4872,7 +4951,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                 vec3_t Angle = { 0.f, 0.f, o->Angle[2] };
                 vec3_t Pos = { 0.f, 0.f, (to->BoundingBoxMax[2] / 1.f) };
 
-                Vector(80.f, 0.f, 20.f, p);
+                Vector(40.f, 0.f, 10.f, p);
                 b->TransformPosition(o->BoneTransform[0], p, Position, true);
                 Angle[2] = o->Angle[2] + 90;
                 CreateEffect(MODEL_PIER_PART, Position, Angle, Pos, 0, to);
@@ -6267,16 +6346,6 @@ void MoveCharacterClient(CHARACTER* cc)
     OBJECT* co = &cc->Object;
     if (co->Live)
     {
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-        if (World == WD_77NEW_LOGIN_SCENE)
-        {
-            float fDistance_x = CameraPosition[0] - co->Position[0];
-            float fDistance_y = CameraPosition[1] - co->Position[1];
-            float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
-            if (!TestFrustrum2D(co->Position[0] * 0.01f, co->Position[1] * 0.01f, -100.f) || fDistance > 3800.f)
-                return;
-        }
-#endif //PJH_NEW_SERVER_SELECT_MAP
         co->Visible = TestFrustrum2D(co->Position[0] * 0.01f, co->Position[1] * 0.01f, -20.f);
 
         MoveMonsterClient(cc, co);
@@ -11837,7 +11906,6 @@ void SetCharacterScale(CHARACTER* c)
         c->BodyPart[BODYPART_HEAD].Type = -1;
     }
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     if (SceneFlag == CHARACTER_SCENE)
     {
         switch (gCharacterManager.GetBaseClass(c->Class))
@@ -11848,7 +11916,6 @@ void SetCharacterScale(CHARACTER* c)
     }
     else
     {
-#endif //PJH_NEW_SERVER_SELECT_MAP
         if (c->Skin == 0)
         {
             switch (gCharacterManager.GetBaseClass(c->Class))
@@ -11875,9 +11942,7 @@ void SetCharacterScale(CHARACTER* c)
             case CLASS_RAGEFIGHTER:	c->Object.Scale = 1.03f; break;
             }
         }
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     }
-#endif //PJH_NEW_SERVER_SELECT_MAP
 }
 
 void SetCharacterClass(CHARACTER* c)

@@ -4,10 +4,9 @@
 #include "stdafx.h"
 #include <setjmp.h>
 #include "ZzzTexture.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "WSclient.h"
 #include "turbojpeg.h"
-#include "ProtocolSend.h"
 
 CGlobalBitmap Bitmaps;
 

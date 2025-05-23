@@ -14,7 +14,7 @@
 
 namespace info
 {
-    BoostSmartPointer(SkillInfo);
+    SmartPointer(SkillInfo);
     class SkillInfo : public InfoFile
     {
     public:

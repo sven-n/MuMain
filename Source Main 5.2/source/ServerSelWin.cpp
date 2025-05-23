@@ -13,7 +13,7 @@
 #include "ZzzCharacter.h"
 
 #include "UIControls.h"
-#include "GameCensorship.h"
+
 #include "NewUISystem.h"
 #include "ServerListManager.h"
 
@@ -439,27 +439,12 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
                 g_pSystemLogBox->AddText(GlobalText[470], SEASON3B::TYPE_SYSTEM_MESSAGE);
                 g_pSystemLogBox->AddText(GlobalText[471], SEASON3B::TYPE_SYSTEM_MESSAGE);
 
-                int iCensorshipIndex = CGameCensorship::STATE_12;
+                //if (m_pSelectServerGroup->m_iSequence == 0)
+                //{
+                //    bTestServer = true;
+                //}
 
-                if (m_pSelectServerGroup->m_bPvPServer == true)
-                {
-                    iCensorshipIndex = CGameCensorship::STATE_18;
-                }
-                else
-                {
-                    if (0x01 & pServerInfo->m_byNonPvP)
-                    {
-                        iCensorshipIndex = CGameCensorship::STATE_15;
-                    }
-                }
-
-                bool bTestServer = false;
-                if (m_pSelectServerGroup->m_iSequence == 0)
-                {
-                    bTestServer = true;
-                }
-
-                g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, iCensorshipIndex, pServerInfo->m_byNonPvP, bTestServer);
+                g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, pServerInfo->m_byNonPvP);
 
                 break;
             }

@@ -4,7 +4,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzInterface.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "UIManager.h"
 #include "NewUISystem.h"
 

@@ -13,7 +13,7 @@
 
 namespace info
 {
-    BoostSmartPointer(CreditInfo);
+    SmartPointer(CreditInfo);
     class CreditInfo : public InfoFile
     {
     public:

@@ -30,7 +30,6 @@ namespace
     const int TEXTFILENAMECOUNT = eInfo_File_Count;
     const int TEXTFILENAMELENGTH = 64;
     const wchar_t TEXTFILEPOSITION[TEXTFILENAMELENGTH] = "data\\local\\";
-    const wchar_t TEXTFILETESTSERVER[TEXTFILENAMELENGTH] = "test";
     const wchar_t TEXTFILEBMD[TEXTFILENAMELENGTH] = ".bmd";
     const wchar_t TEXTFILETXT[TEXTFILENAMELENGTH] = ".txt";
     const wchar_t TEXTFILENAME[TEXTFILENAMECOUNT][TEXTFILENAMELENGTH] =
@@ -55,7 +54,7 @@ namespace
     };
 }
 
-Builder::Builder() : m_isTestServer(false)
+Builder::Builder()
 {
     try {
         InitBuilder();
@@ -89,10 +88,6 @@ void Builder::Clear()
 
 void Builder::InitBuilder()
 {
-#ifdef _TEST_SERVER
-    m_isTestServer = true;
-#endif //_TEST_SERVER
-
 #ifdef KJH_MOD_NATION_LANGUAGE_REDEFINE
 #ifdef _LANGUAGE_KOR
     swprintf(m_Language, L"(%s)", L"Kor");
@@ -153,7 +148,7 @@ BoostSmart_Ptr(InfoFile) Builder::MakeInfo(InfoTextType type)
     swprintf(TextFileName, L"%s%s%s%s%s", //경로, 파일명, 테스트, 나라별, 확장명
         TEXTFILEPOSITION,
         TEXTFILENAME[type],
-        m_isTestServer ? TEXTFILETESTSERVER : "",
+        "",
         type == eInfo_NpcName_File ? m_Language : "",
         type == eInfo_NpcName_File ? TEXTFILETXT : TEXTFILEBMD
     );

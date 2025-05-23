@@ -6,10 +6,10 @@
 #include "Input.h"
 #include "UsefulDef.h"
 #include "./Time/Timer.h"
-#if	defined WINDOWMODE
+
 #include "UIManager.h"
 extern bool g_bWndActive;
-#endif
+
 extern CTimer* g_pTimer;
 
 CInput::CInput()
@@ -215,7 +215,6 @@ void CInput::Update()
             m_bMBtnUp = true;
         }
     }
-#if	defined WINDOWMODE
     if (GetActiveWindow() == NULL)
     {
         m_lDX = m_lDY = 0L;
@@ -227,5 +226,4 @@ void CInput::Update()
         m_ptCursor.x = m_ptCursor.y = 0;
         return;
     }
-#endif
 }

@@ -7,7 +7,7 @@
 
 #pragma once
 
-BoostSmartPointer(BuffStateValueControl);
+SmartPointer(BuffStateValueControl);
 
 class BuffStateValueControl
 {

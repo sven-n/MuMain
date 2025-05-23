@@ -34,7 +34,6 @@
 #define ERROR_LOAD_SCRIPT					0x07
 #define ERROR_THREAD						0x08
 
-#include <Windows.h>
 #include <Wininet.h>
 #include <vector>
 #include <string>

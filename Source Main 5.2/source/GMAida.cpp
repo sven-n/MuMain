@@ -11,7 +11,6 @@
 #include "ZzzCharacter.h"
 #include "DSPlaySound.h"
 #include "MapManager.h"
-#include "GMAida.h"
 #include "BoneManager.h"
 
 DWORD g_MusicStartStamp2 = 0;

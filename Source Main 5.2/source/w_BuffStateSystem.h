@@ -11,7 +11,7 @@
 #include "w_BuffTimeControl.h"
 #include "w_BuffScriptLoader.h"
 
-BoostSmartPointer(BuffStateSystem);
+SmartPointer(BuffStateSystem);
 class BuffStateSystem : public util::WindowMessageHandler
 {
 public:

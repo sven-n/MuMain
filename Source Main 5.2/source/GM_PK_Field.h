@@ -11,7 +11,7 @@ class BMD;
 #include "w_BaseMap.h"
 #include "./Time/Timer.h"
 
-BoostSmartPointer(CGM_PK_Field);
+SmartPointer(CGM_PK_Field);
 class CGM_PK_Field : public BaseMap
 {
 public:

@@ -2,7 +2,6 @@
 // GM_Raklion.cpp: implementation of the CGM_Raklion class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "GM_Raklion.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -11,7 +10,7 @@
 #include "ZzzOpenData.h"
 #include "BoneManager.h"
 #include "ZzzLodTerrain.h"
-#include "./Utilities/Log/muConsoleDebug.h"
+
 #include "w_MapHeaders.h"
 #include "DSPlaySound.h"
 

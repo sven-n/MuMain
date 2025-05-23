@@ -1,7 +1,6 @@
 ﻿// GMEmpireGuardian2.cpp: implementation of the GMEmpireGuardian2 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "GMEmpireGuardian2.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

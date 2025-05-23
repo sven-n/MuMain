@@ -12,8 +12,6 @@
 #include "ZzzAi.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "GMHellas.h"
-#include "GMBattleCastle.h"
 #include "UIManager.h"
 #include "CDirection.h"
 #include "MapManager.h"

@@ -13,9 +13,8 @@
 #include "SMD.h"
 #include "zzzEffect.h"
 #include "MapManager.h"
-#include "./Utilities/Log/muConsoleDebug.h"
+
 //#include "FillPolygon.h"
-#include "GMBattleCastle.h"
 #include "UIMng.h"
 #include "CameraMove.h"
 #include "PhysicsManager.h"

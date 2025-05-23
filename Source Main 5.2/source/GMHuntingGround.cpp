@@ -10,7 +10,6 @@
 #include "zzzOpenData.h"
 #include "DSPlaySound.h"
 #include "MapManager.h"
-#include "GMHuntingGround.h"
 #include "BoneManager.h"
 #include "SkillManager.h"
 

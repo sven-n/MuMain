@@ -10,7 +10,6 @@
 #include "ZzzEffect.h"
 
 #include "ChangeRingManager.h"
-#include "GM_Kanturu_3rd.h"
 #include "CDirection.h"
 #include "DSPlaySound.h"
 

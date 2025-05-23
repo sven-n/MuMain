@@ -134,7 +134,7 @@ public:
         m_bySelectedItemOption = 0;
         m_bySameSetItem = 0;
     }
-    bool    OpenItemSetScript(bool bTestServer);
+    bool OpenItemSetScript();
 
     static bool    IsDisableSkill(ActionSkillType Type, int Energy, int Charisma = 0);
     BYTE    IsChangeSetItem(const int Type, const int SubType);

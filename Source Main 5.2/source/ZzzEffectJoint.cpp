@@ -14,7 +14,6 @@
 #include "DSPlaySound.h"
 #include "WSClient.h"
 #include "CSPetSystem.h"
-#include "GMBattleCastle.h"
 
 extern float g_fBoneSave[10][3][4];
 

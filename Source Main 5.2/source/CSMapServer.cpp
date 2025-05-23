@@ -5,7 +5,7 @@
 
 #include "CSMapServer.h"
 
-#include "MultiLanguage.h"
+
 #include "WSclient.h"
 
 extern int  LogIn;
