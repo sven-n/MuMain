@@ -14,13 +14,11 @@
 #include "zzztexture.h"
 #include "GuildCache.h"
 #include "zzzlodterrain.h"
-#include "GMBattleCastle.h"
 #include "CSParts.h"
 
 void CreatePartsFactory(CHARACTER* c)
 {
-    if (g_isCharacterBuff((&c->Object), eBuff_GMEffect)
-        || ((c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR)))
+    if (g_isCharacterBuff((&c->Object), eBuff_GMEffect) || ((c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR)))
     {
         if (c->m_pParts != NULL && c->EtcPart != PARTS_WEBZEN)
         {
@@ -35,7 +33,7 @@ void CreatePartsFactory(CHARACTER* c)
         {
         case PARTS_WEBZEN:
         {
-            c->m_pParts = (CSIPartsMDL*)new CSParts(MODEL_WEBZEN_MARK, 20, true, 70.f, -5.f, 0.f, 0.f, 0.f, 45.f);
+            c->m_pParts = (CSIPartsMDL*)new CSParts(MODEL_WEBZEN_MARK, 20, false, 70.f, -5.f, 0.f, 0.f, 0.f, 45.f);
         }
         break;
         case PARTS_ATTACK_TEAM_MARK:

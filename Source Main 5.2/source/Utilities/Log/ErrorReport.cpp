@@ -2,62 +2,15 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#define DIRECTINPUT_VERSION 0x0800
-
 #include "stdafx.h"
 #include <ddraw.h>
 #include <dinput.h>
 #include <dmusicc.h>
-#include <windows.h>
 #include <eh.h>
 #include <imagehlp.h>
 #include "ErrorReport.h"
 
 void DeleteSocket();
-
-#define XOR_KEY_SIZE	(16)
-
-void Xor_ConvertBlock(BYTE* lpBuffer, int iSize, int iKey)
-{
-    assert(iKey >= 0);
-    assert(iSize >= 0);
-    assert(iSize + iKey <= XOR_KEY_SIZE);
-
-    BYTE byXorKey[XOR_KEY_SIZE] = { 0x7C, 0xBD, 0x81, 0x9F, 0x3D, 0x93, 0xE2, 0x56,
-                                    0x2A, 0x73, 0xD2, 0x3E, 0xF2, 0x83, 0x95, 0xBF };
-
-    for (int i = 0; i < iSize; ++i)
-    {
-        lpBuffer[i] ^= byXorKey[i + iKey];
-    }
-}
-
-int Xor_ConvertBuffer(void* lpBuffer, int iSize, int iKey = 0)
-{
-    int iSizeLeft = iSize;
-    BYTE* lpCurrent = (BYTE*)lpBuffer;
-
-    int iConvertSize = min((XOR_KEY_SIZE - iKey) % XOR_KEY_SIZE, iSize);
-    Xor_ConvertBlock(lpCurrent, iConvertSize, iKey);
-    lpCurrent += iConvertSize;
-    iSizeLeft -= iConvertSize;
-    if (iSizeLeft <= 0)
-    {
-        return (iConvertSize + iKey);
-    }
-
-    while (iSizeLeft >= XOR_KEY_SIZE)
-    {
-        iConvertSize = XOR_KEY_SIZE;
-        Xor_ConvertBlock(lpCurrent, iConvertSize, 0);
-        lpCurrent += iConvertSize;
-        iSizeLeft -= iConvertSize;
-    }
-
-    iConvertSize = iSizeLeft;
-    Xor_ConvertBlock(lpCurrent, iConvertSize, 0);
-    return (iConvertSize);
-}
 
 CErrorReport::CErrorReport()
 {

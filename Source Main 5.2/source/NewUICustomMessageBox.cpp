@@ -11,7 +11,6 @@
 #include "MatchEvent.h"
 #include "MixMgr.h"
 #include "npcBreeder.h"
-#include "GMCrywolf1st.h"
 #include "ZzzOpenData.h"
 #include "DuelMgr.h"
 #include "NewUISystem.h"

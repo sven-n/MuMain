@@ -7,7 +7,7 @@
 
 #pragma once
 
-BoostSmartPointer(BuffTimeControl);
+SmartPointer(BuffTimeControl);
 
 class BuffTimeControl
 {

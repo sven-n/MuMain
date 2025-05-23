@@ -17,7 +17,7 @@
 #include "DSPlaySound.h"
 
 #include "ZzzScene.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "./Utilities/Debouncer.h"
 #include "CSQuest.h"
 #include "Local.h"
@@ -26,21 +26,17 @@
 #include "GOBoid.h"
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
-#include "GMHellas.h"
 #include "npcBreeder.h"
 #include "GIPetManager.h"
 #include "CSParts.h"
 #include "npcGateSwitch.h"
-#include "GMBattleCastle.h"
 #include "CComGem.h"
-#include "GMCrywolf1st.h"
 #include "CDirection.h"
 #include "ChangeRingManager.h"
 #include "MixMgr.h"
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
 #include "NewUIInventoryCtrl.h"
-#include "GM3rdChangeUp.h"
 #include "w_CursedTemple.h"
 #include "SocketSystem.h"
 #include "PortalMgr.h"
@@ -11089,7 +11085,6 @@ bool IsExistUndecidedPrice()
     for (int i = 0; i < MAX_PERSONALSHOP_INVEN; ++i)
     {
         int iPrice = 0;
-        int iIndex;
         ITEM* pItem = inventoryCtrl->GetItem(i);
         if (pItem)
         {

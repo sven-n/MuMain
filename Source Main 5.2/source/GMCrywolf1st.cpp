@@ -10,7 +10,6 @@
 #include "zzzOpenData.h"
 #include "ZzzInterface.h"
 #include "DSPlaySound.h"
-#include "GMCryWolf1st.h"
 #include "BoneManager.h"
 #include "CMVP1stDirection.h"
 #include "CSChaosCastle.h"

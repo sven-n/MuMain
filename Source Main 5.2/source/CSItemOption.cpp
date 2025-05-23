@@ -45,10 +45,10 @@ static void BuxConvert(BYTE* Buffer, int Size)
         Buffer[i] ^= bBuxCode[i % 3];
 }
 
-bool CSItemOption::OpenItemSetScript(bool bTestServer)
+bool CSItemOption::OpenItemSetScript()
 {
     std::wstring strFileName = L"";
-    const std::wstring strTest = (bTestServer) ? L"Test" : L"";
+    const std::wstring strTest = L"";
 
     strFileName = L"Data\\Local\\ItemSetType" + strTest + L".bmd";
     if (!OpenItemSetType(strFileName.c_str()))		return false;

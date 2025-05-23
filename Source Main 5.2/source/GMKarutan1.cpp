@@ -6,8 +6,6 @@
 
 #ifdef ASG_ADD_MAP_KARUTAN
 
-#include "GMKarutan1.h"
-
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

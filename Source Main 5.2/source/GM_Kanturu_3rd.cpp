@@ -11,7 +11,6 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "CDirection.h"
-#include "GM_Kanturu_3rd.h"
 #include "BoneManager.h"
 #include "./Time/CTimCheck.h"
 #include "DSPlaySound.h"

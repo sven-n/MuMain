@@ -11,7 +11,7 @@
 #include "ZzzBMD.h"
 #include "SMD.h"
 #include "ReadScript.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 
 NodeGroup_t     NodeGroup;
 SkeletonGroup_t SkeletonGroup;

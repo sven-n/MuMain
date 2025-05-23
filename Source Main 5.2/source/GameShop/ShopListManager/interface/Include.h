@@ -9,7 +9,6 @@
 #pragma warning(disable : 4995)
 
 #include <iostream>
-#include <Windows.h>
 #include <Wininet.h>
 
 #include <crtdbg.h>

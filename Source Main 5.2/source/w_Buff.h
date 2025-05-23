@@ -4,7 +4,7 @@
 
 #pragma once
 
-BoostSmartPointer(Buff);
+SmartPointer(Buff);
 
 class Buff
 {

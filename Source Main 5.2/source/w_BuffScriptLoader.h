@@ -43,7 +43,7 @@ public:
     std::list<std::wstring> s_BuffDescriptlist;
 };
 
-BoostSmartPointer(BuffScriptLoader);
+SmartPointer(BuffScriptLoader);
 class BuffScriptLoader
 {
 public:

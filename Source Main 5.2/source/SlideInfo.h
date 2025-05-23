@@ -13,7 +13,7 @@
 
 namespace info
 {
-    BoostSmartPointer(SlideInfo);
+    SmartPointer(SlideInfo);
     class SlideInfo : public InfoFile
     {
     public:

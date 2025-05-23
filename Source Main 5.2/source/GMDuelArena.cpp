@@ -2,7 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "GMDuelArena.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

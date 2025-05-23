@@ -15,7 +15,7 @@
 
 #include "w_BaseMap.h"
 
-BoostSmartPointer(CGMKarutan1);
+SmartPointer(CGMKarutan1);
 
 class CGMKarutan1 : public BaseMap
 {

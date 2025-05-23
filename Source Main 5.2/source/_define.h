@@ -2,20 +2,20 @@
 
 #include <memory>
 
-#define BoostSmart_Ptr( classname )  std::shared_ptr<classname>
-#define BoostWeak_Ptr( classname )   std::weak_ptr<classname>
+#define Smart_Ptr( classname )  std::shared_ptr<classname>
+#define Weak_Ptr( classname )   std::weak_ptr<classname>
 
-#define BoostSmartPointer(classname) \
+#define SmartPointer(classname) \
     class classname; \
-    typedef BoostSmart_Ptr(classname) classname##Ptr
+    typedef Smart_Ptr(classname) classname##Ptr
 
-#define BoostRest(p) { if(p) { p.reset(); } }
+#define PtrReset(p) { if(p) { p.reset(); } }
 
 //util
 #define SAFE_DELETE(p)  { if(p) { delete (p);     (p)=NULL; } }
 #define SAFE_DELETE_ARRAY(p)  { if(p) { delete [] (p);     (p)=NULL; } }
 #define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
-#define DIRECTINPUT_VERSION	0x0800
+#define DIRECTINPUT_VERSION	0x0500
 #define BYTECAST(T,X) static_cast<T>(X & 0xFF)
 
 ///////////////////////////////////////////////_Scene start_//////////////////////////////////////////////
@@ -28,7 +28,6 @@ enum EGameScene {
     LOADING_SCENE = 3,
     CHARACTER_SCENE = 4,
     MAIN_SCENE = 5,
-    MOVIE_SCENE = 6,
 };
 
 constexpr auto MAX_FENRIR_SKILL_MONSTER_NUM = 10;
@@ -538,8 +537,6 @@ constexpr int ITEM_GROUP_ETC = 15;
 ////////////////////////////////////_npcbreederfile start_////////////////////////////////////////////////////
 
 #define WM_GRAPHNOTIFY  WM_USER+13
-#define MOVIE_FILE_TXT	"Data\\Movie\\Movie.txt"
-#define MOVIE_FILE_WMV	"Data\\Movie\\MU.wmv"
 
 /////////////////////////////////////_npcbreederfile end_//////////////////////////////////////////////////////
 //////////////////////////////////////_matchevent start_//////////////////////////////////////////////////////

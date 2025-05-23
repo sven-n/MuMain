@@ -51,7 +51,6 @@ extern bool         GrabEnable;
 //  etc
 //void OpenExploper(char *Name,char *para=NULL);
 bool CheckID_HistoryDay(wchar_t* Name, WORD day);
-void SaveScreen();
 void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar);
 void glViewport2(int x, int y, int Width, int Height);
 void CreateScreenVector(int sx, int sy, vec3_t Target, bool bFixView = true);

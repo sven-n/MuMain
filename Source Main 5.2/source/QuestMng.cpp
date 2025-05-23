@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "QuestMng.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 
 
 #include <crtdbg.h>

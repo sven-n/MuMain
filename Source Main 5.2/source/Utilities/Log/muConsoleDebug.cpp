@@ -11,7 +11,7 @@
 #include "ZzzInterface.h"
 #include "ZzzOpenglUtil.h"
 #include "WindowsConsole.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "GlobalBitmap.h"
 #include "ZzzTexture.h"
 #include "ZzzScene.h"
@@ -230,47 +230,5 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
 
         std::wcout << szBuffer << std::endl;
     }
-#endif
-}
-
-CmuSimpleLog::CmuSimpleLog(void)
-{
-#ifdef CSK_LH_DEBUG_CONSOLE
-    m_bLogfirst = true;
-    m_strFilename = L"SimpleLog.txt";
-    m_pFile = NULL;
-#endif
-}
-
-CmuSimpleLog::~CmuSimpleLog(void)
-{
-}
-
-void CmuSimpleLog::setFilename(const wchar_t* strFilename)
-{
-#ifdef CSK_LH_DEBUG_CONSOLE
-    m_strFilename = strFilename;
-#endif
-}
-
-void CmuSimpleLog::log(wchar_t* str, ...)
-{
-#ifdef CSK_LH_DEBUG_CONSOLE
-    //if (m_bLogfirst)
-    //{
-    //    m_pFile = _wfopen(m_strFilename.c_str(), L"a");
-    //    fclose(m_pFile);
-    //    m_bLogfirst = false;
-    //}
-
-    //m_pFile = _wfopen(m_strFilename.c_str(), L"a");
-
-    //va_list ap;
-
-    //va_start(ap, str);
-    //vfprintf(m_pFile, str, ap);
-    //va_end(ap);
-
-    //fclose(m_pFile);
 #endif
 }

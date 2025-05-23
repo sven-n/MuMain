@@ -23,17 +23,12 @@
 #include "Local.h"
 #include "MatchEvent.h"
 #include "PhysicsManager.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "CSQuest.h"
 #include "PersonalShopTitleImp.h"
 #include "uicontrols.h"
 #include "GOBoid.h"
-#include "GMHellas.h"
 #include "CSItemOption.h"
-#include "GMBattleCastle.h"
-#include "GMHuntingGround.h"
-#include "GMAida.h"
-#include "GMCrywolf1st.h"
 #include "npcBreeder.h"
 #include "CSPetSystem.h"
 #include "GIPetManager.h"
@@ -44,16 +39,9 @@
 #include "UIMng.h"
 #include "LoadingScene.h"
 #include "CDirection.h"
-#include "GM_Kanturu_3rd.h"
-#ifdef MOVIE_DIRECTSHOW
-#include <dshow.h>
-#include "MovieScene.h"
-#endif // MOVIE_DIRECTSHOW
 #include "Event.h"
-#include "./Utilities/Log/muConsoleDebug.h"
 #include "MixMgr.h"
-#include "GameCensorship.h"
-#include "GM3rdChangeUp.h"
+
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"
 #include "PartyManager.h"
@@ -63,7 +51,6 @@
 #include "w_PetProcess.h"
 #include "PortalMgr.h"
 #include "ServerListManager.h"
-#include "ProtocolSend.h"
 #include "MapManager.h"
 #include <chrono>
 #include <thread>
@@ -81,10 +68,6 @@ extern CUIMapName* g_pUIMapName;
 extern bool HighLight;
 extern CTimer* g_pTimer;
 extern BOOL g_bGameServerConnected;
-
-#ifdef MOVIE_DIRECTSHOW
-extern CMovieScene* g_pMovieScene;
-#endif // MOVIE_DIRECTSHOW
 
 bool	g_bTimeCheck = false;
 int 	g_iBackupTime = 0;
@@ -109,11 +92,7 @@ wchar_t* szServerIpAddress = L"127.127.127.127";
 //char *szServerIpAddress = "210.181.89.215";
 WORD g_ServerPort = 44406;
 
-#ifdef MOVIE_DIRECTSHOW
-int  SceneFlag = MOVIE_SCENE;
-#else // MOVIE_DIRECTSHOW
 EGameScene  SceneFlag = WEBZEN_SCENE;
-#endif // MOVIE_DIRECTSHOW
 
 extern int g_iKeyPadEnable;
 
@@ -272,53 +251,6 @@ bool CheckName()
     return false;
 }
 
-#ifdef MOVIE_DIRECTSHOW
-void MovieScene(HDC hDC)
-{
-    if (g_pMovieScene->GetPlayNum() == 0)
-    {
-        g_pMovieScene->InitOpenGLClear(hDC);
-
-        g_pMovieScene->Initialize_DirectShow(g_hWnd, MOVIE_FILE_WMV);
-
-        if (g_pMovieScene->IsFile() == FALSE || g_pMovieScene->IsFailDirectShow() == TRUE)
-        {
-            g_pMovieScene->Destroy();
-            SAFE_DELETE(g_pMovieScene);
-            SceneFlag = WEBZEN_SCENE;
-            return;
-        }
-
-        g_pMovieScene->PlayMovie();
-
-        if (g_pMovieScene->IsEndMovie())
-        {
-            g_pMovieScene->Destroy();
-            SAFE_DELETE(g_pMovieScene);
-            SceneFlag = WEBZEN_SCENE;
-            return;
-        }
-        else
-        {
-            if (HIBYTE(GetAsyncKeyState(VK_ESCAPE)) == 128 || HIBYTE(GetAsyncKeyState(VK_RETURN)) == 128)
-            {
-                g_pMovieScene->Destroy();
-                SAFE_DELETE(g_pMovieScene);
-                SceneFlag = WEBZEN_SCENE;
-                return;
-            }
-        }
-    }
-    else
-    {
-        g_pMovieScene->Destroy();
-        SAFE_DELETE(g_pMovieScene);
-        SceneFlag = WEBZEN_SCENE;
-        return;
-    }
-}
-#endif // MOVIE_DIRECTSHOW
-
 bool EnableMainRender = false;
 extern int HeroKey;
 
@@ -331,9 +263,7 @@ void WebzenScene(HDC hDC)
 
     LoadBitmap(L"Interface\\New_lo_back_01.jpg", BITMAP_TITLE, GL_LINEAR);
     LoadBitmap(L"Interface\\New_lo_back_02.jpg", BITMAP_TITLE + 1, GL_LINEAR);
-    LoadBitmap(L"Interface\\MU_TITLE.tga", BITMAP_TITLE + 2, GL_LINEAR);
     LoadBitmap(L"Interface\\lo_121518.tga", BITMAP_TITLE + 3, GL_LINEAR);
-    LoadBitmap(L"Interface\\New_lo_webzen_logo.tga", BITMAP_TITLE + 4, GL_LINEAR);
     LoadBitmap(L"Interface\\lo_lo.jpg", BITMAP_TITLE + 5, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Interface\\lo_back_s5_03.jpg", BITMAP_TITLE + 6, GL_LINEAR);
     LoadBitmap(L"Interface\\lo_back_s5_04.jpg", BITMAP_TITLE + 7, GL_LINEAR);
@@ -370,9 +300,7 @@ void WebzenScene(HDC hDC)
     rUIMng.ReleaseTitleSceneUI();
     DeleteBitmap(BITMAP_TITLE);
     DeleteBitmap(BITMAP_TITLE + 1);
-    DeleteBitmap(BITMAP_TITLE + 2);
     DeleteBitmap(BITMAP_TITLE + 3);
-    DeleteBitmap(BITMAP_TITLE + 4);
     DeleteBitmap(BITMAP_TITLE + 5);
 
     for (int i = 6; i < 14; ++i)
@@ -874,11 +802,7 @@ void CreateCharacterScene()
     MouseOnWindow = false;
     ErrorMessage = NULL;
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     gMapManager.WorldActive = WD_74NEW_CHARACTER_SCENE;
-#else //PJH_NEW_SERVER_SELECT_MAP
-    gMapManager.WorldActive = WD_78NEW_CHARACTER_SCENE;
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
     gMapManager.LoadWorld(gMapManager.WorldActive);
     OpenCharacterSceneData();
@@ -1046,14 +970,6 @@ bool NewRenderCharacterScene(HDC hDC)
     int Width, Height;
 
     glColor3f(1.f, 1.f, 1.f);
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    BeginBitmap();
-    Width = 320;
-    Height = 320;
-    RenderBitmap(BITMAP_LOG_IN + 9, (float)0, (float)25, (float)Width, (float)Height, 0.f, 0.f);
-    RenderBitmap(BITMAP_LOG_IN + 10, (float)320, (float)25, (float)Width, (float)Height, 0.f, 0.f);
-    EndBitmap();
-#endif //PJH_NEW_SERVER_SELECT_MAP
     Height = 480;
     Width = GetScreenWidth();
 
@@ -1090,19 +1006,11 @@ bool NewRenderCharacterScene(HDC hDC)
         pObj = &pCha->Object;
         if (pCha->Helper.Type == MODEL_HORN_OF_DINORANT)
         {
-#ifdef PJH_NEW_SERVER_SELECT_MAP
             pObj->Position[2] = 194.5f;
-#else //PJH_NEW_SERVER_SELECT_MAP
-            pObj->Position[2] = 55.0f;
-#endif //PJH_NEW_SERVER_SELECT_MAP
         }
         else
         {
-#ifdef PJH_NEW_SERVER_SELECT_MAP
             pObj->Position[2] = 169.5f;
-#else //PJH_NEW_SERVER_SELECT_MAP
-            pObj->Position[2] = 30.0f;
-#endif //PJH_NEW_SERVER_SELECT_MAP
         }
     }
 
@@ -1129,15 +1037,11 @@ bool NewRenderCharacterScene(HDC hDC)
         Vector(1.0f, 1.0f, 1.f, vLight);
         float fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
         Vector(fLumi * vLight[0], fLumi * vLight[1], fLumi * vLight[2], vLight);
-#ifdef PJH_NEW_SERVER_SELECT_MAP
+
         EnableAlphaBlend();
         RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.8f, 1.8f, vLight, WorldTime * 0.01f);
         RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.2f, 1.2f, vLight, -WorldTime * 0.01f);
         DisableAlphaBlend();
-#else //PJH_NEW_SERVER_SELECT_MAP
-        RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight, WorldTime * 0.01f);
-        RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.f, 1.f, vLight, -WorldTime * 0.01f);
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
         //CreateParticle(BITMAP_FLARE+1,o->Position,o->Angle,Light,0,0.15f);
 
@@ -1171,11 +1075,8 @@ bool NewRenderCharacterScene(HDC hDC)
 void CreateLogInScene()
 {
     EnableMainRender = true;
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     gMapManager.WorldActive = WD_73NEW_LOGIN_SCENE;
-#else
-    World = WD_77NEW_LOGIN_SCENE;
-#endif //PJH_NEW_SERVER_SELECT_MAP
+
     gMapManager.LoadWorld(gMapManager.WorldActive);
 
     OpenLogoSceneData();
@@ -1204,11 +1105,7 @@ void CreateLogInScene()
     InputTextHide[1] = 1;
 
     CCameraMove::GetInstancePtr()->PlayCameraWalk(Hero->Object.Position, 1000);
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     CCameraMove::GetInstancePtr()->SetTourMode(TRUE, FALSE, 1);
-#else //PJH_NEW_SERVER_SELECT_MAP
-    CCameraMove::GetInstancePtr()->SetTourMode(TRUE, TRUE);
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
     MoveMainCamera();
 
@@ -1227,12 +1124,6 @@ void NewMoveLogInScene()
         CreateLogInScene();
     }
 
-#ifdef MOVIE_DIRECTSHOW
-    if (CUIMng::Instance().IsMoving() == true)
-    {
-        return;
-    }
-#endif // MOVIE_DIRECTSHOW
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
         InitTerrainLight();
@@ -1285,36 +1176,6 @@ bool NewRenderLogInScene(HDC hDC)
     if (!InitLogIn) return false;
 
     FogEnable = false;
-    // 	extern GLfloat FogColor[4];
-    // 	FogColor[0] = 178.f/256.f; FogColor[1] = 178.f/256.f; FogColor[2] = 178.f/256.f; FogColor[3] = 0.f;
-    // 	glFogf(GL_FOG_START, 3700.0f);
-    // 	glFogf(GL_FOG_END, 4000.0f);
-
-#ifdef MOVIE_DIRECTSHOW
-    if (CUIMng::Instance().IsMoving() == true)
-    {
-        g_pMovieScene->PlayMovie();
-
-        if (g_pMovieScene->IsEndMovie())
-        {
-            g_pMovieScene->Destroy();
-            SAFE_DELETE(g_pMovieScene);
-            CUIMng::Instance().SetMoving(false);
-            ::PlayMp3(g_lpszMp3[MUSIC_MAIN_THEME]);
-        }
-        else
-        {
-            if (HIBYTE(GetAsyncKeyState(VK_ESCAPE)) == 128 || HIBYTE(GetAsyncKeyState(VK_RETURN)) == 128)
-            {
-                g_pMovieScene->Destroy();
-                SAFE_DELETE(g_pMovieScene);
-                CUIMng::Instance().SetMoving(false);
-                ::PlayMp3(g_lpszMp3[MUSIC_MAIN_THEME]);
-            }
-        }
-        return true;
-    }
-#endif // MOVIE_DIRECTSHOW
 
     vec3_t pos;
     if (CCameraMove::GetInstancePtr()->IsCameraMove())
@@ -1327,14 +1188,6 @@ bool NewRenderLogInScene(HDC hDC)
     int Width, Height;
 
     glColor3f(1.f, 1.f, 1.f);
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    BeginBitmap();
-    Width = 320;
-    Height = 320;
-    RenderBitmap(BITMAP_LOG_IN + 9, (float)0, (float)25, (float)Width, (float)Height, 0.f, 0.f);
-    RenderBitmap(BITMAP_LOG_IN + 10, (float)320, (float)25, (float)Width, (float)Height, 0.f, 0.f);
-    EndBitmap();
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
     Height = 480;
     Width = GetScreenWidth();
@@ -1346,9 +1199,7 @@ bool NewRenderLogInScene(HDC hDC)
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
         CameraViewFar = 330.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-        BeginOpengl();
-#endif //PJH_NEW_SERVER_SELECT_MAP
+
         RenderTerrain(false);
         CameraViewFar = 7000.f;
         RenderCharactersClient();
@@ -1371,50 +1222,15 @@ bool NewRenderLogInScene(HDC hDC)
 
     if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-        // 화면 흐리기
-        EnableAlphaBlend4();
-        glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-        float fScale = (sinf(WorldTime * 0.0005f) + 1.f) * 0.00011f;
-        //RenderBitmap(BITMAP_CHROME+3, 0.0f,0.0f, 640.0f,480.0f, 800.f,600.f, (800.f)/1024.f,(600.f)/1024.f);
-        RenderBitmap(BITMAP_CHROME + 3, 0.0f, 0.0f, 640.0f, 480.0f, 800.f * fScale, 600.f * fScale, (800.f) / 1024.f - 800.f * fScale * 2, (600.f) / 1024.f - 600.f * fScale * 2);
-        float fAngle = WorldTime * 0.00018f;
-        float fLumi = 1.0f - (sinf(WorldTime * 0.0015f) + 1.f) * 0.25f;
-        glColor4f(fLumi * 0.3f, fLumi * 0.3f, fLumi * 0.7f, fLumi);
-        fScale = (sinf(WorldTime * 0.0015f) + 1.f) * 0.00021f;
-        RenderBitmapLocalRotate(BITMAP_CHROME + 4, 320.0f, 240.0f, 1150.0f, 1150.0f, fAngle, fScale * 512.f, fScale * 512.f, (512.f) / 512.f - fScale * 2 * 512.f, (512.f) / 512.f - fScale * 2 * 512.f);
-
-        // 위아래 자르기
-        EnableAlphaTest();
-        glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-        RenderColor(0, 0, 640, 25);
-        RenderColor(0, 480 - 25, 640, 25);
-
-        // 화면칠
-        glColor4f(0.0f, 0.0f, 0.0f, 0.2f);
-        RenderColor(0, 25, 640, 430);
-#endif //PJH_NEW_SERVER_SELECT_MAP
-        // 뮤로고
         g_fMULogoAlpha += 0.02f;
         if (g_fMULogoAlpha > 10.0f) g_fMULogoAlpha = 10.0f;
 
         EnableAlphaBlend();
         glColor4f(g_fMULogoAlpha - 0.3f, g_fMULogoAlpha - 0.3f, g_fMULogoAlpha - 0.3f, g_fMULogoAlpha - 0.3f);
-#ifdef PBG_ADD_MUBLUE_LOGO
-        BITMAP_t* pImage = NULL;
-        pImage = &Bitmaps[BITMAP_LOG_IN + 17];
-        RenderBitmap(BITMAP_LOG_IN + 17, 320.0f - 432 * 0.4f * 0.5f, 25.0f, 432 * 0.4f, 384 * 0.4f, 0, 0, (432 - 0.5f) / pImage->Width, (384 - 0.5f) / pImage->Height);
-#else //PBG_ADD_MUBLUE_LOGO
         RenderBitmap(BITMAP_LOG_IN + 17, 320.0f - 128.0f * 0.8f, 25.0f, 256.0f * 0.8f, 128.0f * 0.8f);
-#endif //PBG_ADD_MUBLUE_LOGO
         EnableAlphaTest();
         glColor4f(g_fMULogoAlpha, g_fMULogoAlpha, g_fMULogoAlpha, g_fMULogoAlpha);
-#ifdef PBG_ADD_MUBLUE_LOGO
-        pImage = &Bitmaps[BITMAP_LOG_IN + 16];
-        RenderBitmap(BITMAP_LOG_IN + 16, 320.0f - 432 * 0.4f * 0.5f, 25.0f, 432 * 0.4f, 384 * 0.4f, 0, 0, 432 / pImage->Width, 384 / pImage->Height);
-#else //PBG_ADD_MUBLUE_LOGO
         RenderBitmap(BITMAP_LOG_IN + 16, 320.0f - 128.0f * 0.8f, 25.0f, 256.0f * 0.8f, 128.0f * 0.8f);
-#endif //PBG_ADD_MUBLUE_LOGO
     }
 
     SIZE Size;
@@ -1532,19 +1348,11 @@ bool MoveMainCamera()
     bool bLockCamera = false;
 
     if (
-#ifdef PJH_NEW_SERVER_SELECT_MAP
         gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
-#else
-        gMapManager.WorldActive == WD_77NEW_LOGIN_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
         && CCameraMove::GetInstancePtr()->IsTourMode())
-#ifdef PJH_NEW_SERVER_SELECT_MAP
         CameraFOV = 65.0f;
-#else //PJH_NEW_SERVER_SELECT_MAP
-        CameraFOV = 61.0f;
-#endif //PJH_NEW_SERVER_SELECT_MAP
     else
-        CameraFOV = 35.f;
+        CameraFOV = 30.f;
 
 #ifdef ENABLE_EDIT2
     {
@@ -1555,6 +1363,15 @@ bool MoveMainCamera()
                 CameraAngle[2] += 15;
             if (HIBYTE(GetAsyncKeyState(VK_DELETE)) == 128)
                 CameraAngle[2] -= 15;
+            if (HIBYTE(GetAsyncKeyState(VK_HOME)) == 128)
+                CameraAngle[2] = -45;
+
+            // Camera limit -360 ~ 0 degrees
+            if (CameraAngle[2] < -360)
+                CameraAngle[2] += 360;
+            else if (CameraAngle[2] > 0)
+                CameraAngle[2] -= 360;
+
 
             vec3_t p1, p2;
             Vector(0.f, 0.f, 0.f, p1);
@@ -1667,11 +1484,7 @@ bool MoveMainCamera()
                 }
                 else if (SceneFlag == CHARACTER_SCENE)
                 {
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                     CameraViewFar = 3500.f;
-#else //PJH_NEW_SERVER_SELECT_MAP
-                    CameraViewFar = 10000.f;
-#endif //PJH_NEW_SERVER_SELECT_MAP
                 }
                 else if (g_Direction.m_CKanturu.IsMayaScene())
                 {
@@ -1720,13 +1533,11 @@ bool MoveMainCamera()
         }
         else g_shCameraLevel = 0;
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
         if (CCameraMove::GetInstancePtr()->IsTourMode())
         {
             vec3_t temp = { 0.0f,0.0f,-100.0f };
             VectorAdd(TransformPosition, temp, TransformPosition);
         }
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
         VectorAdd(Position, TransformPosition, CameraPosition);
 
@@ -1748,32 +1559,19 @@ bool MoveMainCamera()
 
         if (CCameraMove::GetInstancePtr()->IsTourMode())
         {
-#ifdef PJH_NEW_SERVER_SELECT_MAP
             CCameraMove::GetInstancePtr()->SetAngleFrustum(-112.5f);
             CameraAngle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
-#else	// PJH_NEW_SERVER_SELECT_MAP
-            CameraAngle[0] = -78.5f;
-#endif	// PJH_NEW_SERVER_SELECT_MAP
             CameraAngle[1] = 0.0f;
             CameraAngle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
         }
         else if (SceneFlag == CHARACTER_SCENE)
         {
-#ifdef PJH_NEW_SERVER_SELECT_MAP
             CameraAngle[0] = -84.5f;
             CameraAngle[1] = 0.0f;
             CameraAngle[2] = -75.0f;
             CameraPosition[0] = 9758.93f;
             CameraPosition[1] = 18913.11f;
             CameraPosition[2] = 675.5f;
-#else //PJH_NEW_SERVER_SELECT_MAP
-            CameraAngle[0] = -84.5f;
-            CameraAngle[1] = 0.0f;
-            CameraAngle[2] = -30.0f;
-            CameraPosition[0] = 23566.75f;
-            CameraPosition[1] = 14085.51f;
-            CameraPosition[2] = 395.0f;
-#endif //PJH_NEW_SERVER_SELECT_MAP
         }
         else
         {
@@ -1843,16 +1641,6 @@ bool MoveMainCamera()
             case 5: CameraDistanceTarget = g_Direction.m_fCameraViewFar; CameraDistance += (CameraDistanceTarget - CameraDistance) / 3; break;
             }
         }
-    }
-
-    if (SceneFlag == MAIN_SCENE)
-    {
-        if (MouseWheel)
-        {
-            Camera3DFov += MouseWheel;
-            MouseWheel = 0;
-        }
-        CameraFOV += Camera3DFov;
     }
 
     return bLockCamera;
@@ -2012,8 +1800,6 @@ void MoveMainScene()
 #ifdef ENABLE_EDIT
     EditObjects();
 #endif //ENABLE_EDIT
-
-    g_GameCensorship->Update();
 
     g_ConsoleDebug->UpdateMainScene();
 }
@@ -2325,11 +2111,17 @@ void UpdateSceneState()
         {
             g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
-    }
 
-    if (GrabEnable)
-    {
-        SaveScreen();
+        auto Buffer = new unsigned char[WindowWidth * WindowHeight * 3];
+
+        glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, &Buffer[0]);
+
+        WriteJpeg(GrabFileName, WindowWidth, WindowHeight, &Buffer[0], 100);
+
+        SAFE_DELETE_ARRAY(Buffer);
+
+        GrabScreen++;
+        GrabScreen %= 10000;
     }
 
     if (GrabEnable && !addTimeStampToCapture)
@@ -2377,12 +2169,10 @@ void MainScene(HDC hDC)
     {
         glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
     }
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
     {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     }
-#endif //PJH_NEW_SERVER_SELECT_MAP
     else if (gMapManager.InHellas(gMapManager.WorldActive))
     {
         glClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);
@@ -2400,19 +2190,10 @@ void MainScene(HDC hDC)
         glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
     }
     else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-        || World == WD_77NEW_LOGIN_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
         )
     {
         glClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);
     }
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    else if (World == WD_78NEW_CHARACTER_SCENE)
-    {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
-    }
-#endif //PJH_NEW_SERVER_SELECT_MAP
     else if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
     {
         glClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);
@@ -2814,11 +2595,6 @@ void RenderScene(HDC hDC)
         g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
         switch (SceneFlag)
         {
-#ifdef MOVIE_DIRECTSHOW
-        case MOVIE_SCENE:
-            MovieScene(hDC);
-            break;
-#endif // MOVIE_DIRECTSHOW
         case WEBZEN_SCENE:
             WebzenScene(hDC);
             break;

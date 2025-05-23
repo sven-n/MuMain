@@ -5,7 +5,7 @@
 #include "w_PetAction.h"
 #include "ZzzBMD.h"
 
-BoostSmartPointer(PetActionStand);
+SmartPointer(PetActionStand);
 
 class PetActionStand : public PetAction
 {

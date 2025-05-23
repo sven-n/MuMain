@@ -150,7 +150,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/libpath:""NPGGuard"" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;wzAudio.lib;shlwapi.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -271,7 +271,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;glprocs.lib;wzAudio.lib;shlwapi.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imm32.lib;vfw32.lib;dsound.lib;dxguid.lib;turbojpeg-static.lib;opengl32.lib;glu32.lib;winmm.lib;ws2_32.lib;version.lib;wzAudio.lib;shlwapi.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\lib;$(SolutionDir)\dependencies\netcore\lib;$(MU_SDK)\DXSDK\Lib;%(AdditionalLibraryDirectories))</AdditionalLibraryDirectories>
@@ -364,16 +364,6 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Global Release|Win32'">source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Global Release|x64'">source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
-    <ResourceCompile Include="source\resourceblue.rc">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Global Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Global Debug|x64'">true</ExcludedFromBuild>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Global Debug|Win32'">source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Global Debug|x64'">source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Global Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Global Release|x64'">true</ExcludedFromBuild>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Global Release|Win32'">source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Global Release|x64'">source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Dotnet\PacketFunctions_ChatServer.cpp" />
@@ -383,7 +373,6 @@
     <ClCompile Include="source\MUHelper\MuHelper.cpp" />
     <ClCompile Include="source\MUHelper\MuHelperData.cpp" />
     <ClCompile Include="source\NewUIInventoryExtension.cpp" />
-    <ClCompile Include="source\BlackWin.cpp" />
     <ClCompile Include="source\BoneManager.cpp" />
     <ClCompile Include="source\Builder.cpp" />
     <ClCompile Include="source\Button.cpp" />
@@ -416,17 +405,11 @@
     <ClCompile Include="source\DuelMgr.cpp" />
     <ClCompile Include="source\Event.cpp" />
     <ClCompile Include="source\ExplanationInfo.cpp" />
-    <ClCompile Include="source\ExternalObject\Leaf\callstackdmp.cpp" />
-    <ClCompile Include="source\ExternalObject\Leaf\checkintegrity.cpp" />
-    <ClCompile Include="source\ExternalObject\Leaf\ExceptionHandler.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\stdleaf.cpp" />
-    <ClCompile Include="source\ExternalObject\Leaf\sysinfo.cpp" />
-    <ClCompile Include="source\ExternalObject\Leaf\xortrans.cpp" />
     <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp" />
     <ClCompile Include="source\FilterInfo.cpp" />
     <ClCompile Include="source\FilterNameInfo.cpp" />
     <ClCompile Include="source\GambleSystem.cpp" />
-    <ClCompile Include="source\GameCensorship.cpp" />
     <ClCompile Include="source\GameShop\FileDownloader\DownloadInfo.cpp" />
     <ClCompile Include="source\GameShop\FileDownloader\FileDownloader.cpp" />
     <ClCompile Include="source\GameShop\FileDownloader\FTPConnecter.cpp" />
@@ -515,7 +498,6 @@
     <ClCompile Include="source\MonkSystem.cpp" />
     <ClCompile Include="source\MoveCommandData.cpp" />
     <ClCompile Include="source\MovereqInfo.cpp" />
-    <ClCompile Include="source\MovieScene.cpp" />
     <ClCompile Include="source\MsgWin.cpp" />
     <ClCompile Include="source\MultiLanguage.cpp" />
     <ClCompile Include="source\NewBloodCastleSystem.cpp" />
@@ -619,7 +601,6 @@
     <ClCompile Include="source\PhysicsManager.cpp" />
     <ClCompile Include="source\PList.cpp" />
     <ClCompile Include="source\PortalMgr.cpp" />
-    <ClCompile Include="source\ProtectSysKey.cpp" />
     <ClCompile Include="source\QuestInfo.cpp" />
     <ClCompile Include="source\QuestMng.cpp" />
     <ClCompile Include="source\ServerGroup.cpp" />
@@ -668,7 +649,6 @@
     <ClCompile Include="source\Utilities\Log\ErrorReport.cpp" />
     <ClCompile Include="source\Utilities\Log\muConsoleDebug.cpp" />
     <ClCompile Include="source\Utilities\Log\WindowsConsole.cpp" />
-    <ClCompile Include="source\Utilities\Memory\MemoryLock.cpp" />
     <ClCompile Include="source\Win.cpp" />
     <ClCompile Include="source\WinEx.cpp" />
     <ClCompile Include="source\Winmain.cpp" />
@@ -775,7 +755,6 @@
     <ClInclude Include="source\MUHelper\MuHelperData.h" />
     <ClInclude Include="source\NewUIInventoryExtension.h" />
     <ClInclude Include="source\BaseCls.h" />
-    <ClInclude Include="source\BlackWin.h" />
     <ClInclude Include="source\BoneManager.h" />
     <ClInclude Include="source\Builder.h" />
     <ClInclude Include="source\Button.h" />
@@ -810,23 +789,12 @@
     <ClInclude Include="source\DuelMgr.h" />
     <ClInclude Include="source\Event.h" />
     <ClInclude Include="source\ExplanationInfo.h" />
-    <ClInclude Include="source\ExternalObject\Leaf\callstackdmp.h" />
-    <ClInclude Include="source\ExternalObject\Leaf\checkintegrity.h" />
-    <ClInclude Include="source\ExternalObject\Leaf\ExceptionHandler.h" />
-    <ClInclude Include="source\ExternalObject\Leaf\rdtsc.h" />
     <ClInclude Include="source\ExternalObject\Leaf\regkey.h" />
     <ClInclude Include="source\ExternalObject\Leaf\stdleaf.h" />
-    <ClInclude Include="source\ExternalObject\Leaf\sysinfo.h" />
-    <ClInclude Include="source\ExternalObject\Leaf\xortrans.h" />
     <ClInclude Include="source\ExternalObject\Leaf\xstreambuf.h" />
-    <ClInclude Include="source\ExternalObject\ResourceGuard\MuRGReport.h" />
-    <ClInclude Include="source\ExternalObject\ResourceGuard\ResourceGuard.h" />
-    <ClInclude Include="source\ExternalObject\ResourceGuard\RGReportConsole.h" />
-    <ClInclude Include="source\ExternalObject\ResourceGuard\RGReportObj.h" />
     <ClInclude Include="source\FilterInfo.h" />
     <ClInclude Include="source\FilterNameInfo.h" />
     <ClInclude Include="source\GambleSystem.h" />
-    <ClInclude Include="source\GameCensorship.h" />
     <ClInclude Include="source\GameShop\FileDownloader\FTPConnecter.h" />
     <ClInclude Include="source\GameShop\FileDownloader\HTTPConnecter.h" />
     <ClInclude Include="source\GameShop\FileDownloader\Include.h" />
@@ -923,7 +891,6 @@
     <ClInclude Include="source\MonkSystem.h" />
     <ClInclude Include="source\MoveCommandData.h" />
     <ClInclude Include="source\MovereqInfo.h" />
-    <ClInclude Include="source\MovieScene.h" />
     <ClInclude Include="source\MsgWin.h" />
     <ClInclude Include="source\MultiLanguage.h" />
     <ClInclude Include="source\NewBloodCastleSystem.h" />
@@ -1028,7 +995,6 @@
     <ClInclude Include="source\PhysicsManager.h" />
     <ClInclude Include="source\PList.h" />
     <ClInclude Include="source\PortalMgr.h" />
-    <ClInclude Include="source\ProtectSysKey.h" />
     <ClInclude Include="source\QuestInfo.h" />
     <ClInclude Include="source\QuestMng.h" />
     <ClInclude Include="source\ReadScript.h" />
@@ -1077,8 +1043,6 @@
     <ClInclude Include="source\Utilities\Log\ErrorReport.h" />
     <ClInclude Include="source\Utilities\Log\muConsoleDebug.h" />
     <ClInclude Include="source\Utilities\Log\WindowsConsole.h" />
-    <ClInclude Include="source\Utilities\Memory\HashTable.h" />
-    <ClInclude Include="source\Utilities\Memory\MemoryLock.h" />
     <ClInclude Include="source\Win.h" />
     <ClInclude Include="source\WinEx.h" />
     <ClInclude Include="source\Winmain.h" />

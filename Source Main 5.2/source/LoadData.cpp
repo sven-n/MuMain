@@ -9,7 +9,7 @@
 #include <shlwapi.h>
 
 #include "GlobalBitmap.h"
-#include "MultiLanguage.h"
+
 #include "ZzzBMD.h"
 #include "ZzzTexture.h"
 

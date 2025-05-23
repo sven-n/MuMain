@@ -11,7 +11,7 @@
 
 #include "w_BaseMap.h"
 
-BoostSmartPointer(TestEventMap);
+SmartPointer(TestEventMap);
 class TestEventMap : public BaseMap
 {
 public:

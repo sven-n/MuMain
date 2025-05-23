@@ -4,7 +4,6 @@
 #pragma once
 
 #include "UIControls.h"
-#include "wsctlc.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

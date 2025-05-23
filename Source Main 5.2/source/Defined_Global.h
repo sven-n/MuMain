@@ -2,11 +2,6 @@
 #define KWAK_FIX_ALT_KEYDOWN_MENU_BLOCK
 #endif // _DEBUG
 
-// USE_EXTENDED_PROTOCOL activates compatibility with the extended protocol of OpenMU.
-#define USE_EXTENDED_PROTOCOL
-
-#define PJH_NEW_SERVER_SELECT_MAP
-
 #define ASG_ADD_GENS_SYSTEM
 #ifdef ASG_ADD_GENS_SYSTEM
 #define ASG_ADD_INFLUENCE_GROUND_EFFECT

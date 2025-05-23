@@ -5,7 +5,7 @@
 #pragma once
 #include "w_BaseMap.h"
 
-BoostSmartPointer(GMEmpireGuardian1);
+SmartPointer(GMEmpireGuardian1);
 
 class GMEmpireGuardian1 : public BaseMap
 {

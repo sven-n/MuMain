@@ -18,24 +18,19 @@
 #include "ZzzScene.h"
 
 #include "DSPlaySound.h"
-#include "./Utilities/Log/ErrorReport.h"
-#include "./Utilities/Memory/MemoryLock.h"
+
 #include "MatchEvent.h"
 #include "GOBoid.h"
 #include "CSQuest.h"
 #include "PersonalShopTitleImp.h"
-#include "GMHellas.h"
 #include "npcBreeder.h"
 #include "GIPetManager.h"
 #include "CSMapServer.h"
-#include "GMBattleCastle.h"
 #include "npcGateSwitch.h"
 #include "CComGem.h"
 #include "UIMapName.h" // rozy
 #include "UIMng.h"
-#include "GMCrywolf1st.h"
 #include "CDirection.h"
-#include "GM_Kanturu_3rd.h"
 #include "CSParts.h"
 #include "PhysicsManager.h"
 #include "Event.h"
@@ -48,7 +43,7 @@
 #include "NewUIInventoryCtrl.h"
 #include "w_CursedTemple.h"
 #include "SummonSystem.h"
-#include "ProtocolSend.h"
+
 #include "CharacterManager.h"
 #include "SkillManager.h"
 
@@ -83,9 +78,7 @@ extern BYTE m_AltarState[];
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
 
-#ifdef WINDOWMODE
 extern BOOL g_bUseWindowMode;
-#endif //WINDOWMODE
 extern CUITextInputBox* g_pSingleTextInputBox;
 
 #ifdef _PVP_ADD_MOVE_SCROLL
@@ -489,20 +482,12 @@ void ReceiveCharacterListExtended(const BYTE* ReceiveBuffer)
 
         switch (Data2->Index)
         {
-#ifdef PJH_NEW_SERVER_SELECT_MAP
-        case 0:	fPos[0] = 8008.0f;	fPos[1] = 18885.0f;	fAngle = 115.0f; break;
-        case 1:	fPos[0] = 7986.0f;	fPos[1] = 19145.0f;	fAngle = 90.0f; break;
-        case 2:	fPos[0] = 8046.0f;	fPos[1] = 19400.0f;	fAngle = 75.0f; break;
-        case 3:	fPos[0] = 8133.0f;	fPos[1] = 19645.0f;	fAngle = 60.0f; break;
-        case 4:	fPos[0] = 8282.0f;	fPos[1] = 19845.0f;	fAngle = 35.0f; break;
-#else //PJH_NEW_SERVER_SELECT_MAP
-        case 0:	fPos[0] = 22628.0f;	fPos[1] = 15012.0f;	fAngle = 100.0f; break;
-        case 1:	fPos[0] = 22700.0f;	fPos[1] = 15201.0f;	fAngle = 75.0f; break;
-        case 2:	fPos[0] = 22840.0f;	fPos[1] = 15355.0f;	fAngle = 50.0f; break;
-        case 3:	fPos[0] = 23019.0f;	fPos[1] = 15443.0f;	fAngle = 25.0f; break;
-        case 4:	fPos[0] = 23211.6f;	fPos[1] = 15467.0f;	fAngle = 0.0f; break;
-#endif //PJH_NEW_SERVER_SELECT_MAP
-        default: return;
+            case 0:	fPos[0] = 8008.0f;	fPos[1] = 18885.0f;	fAngle = 115.0f; break;
+            case 1:	fPos[0] = 7986.0f;	fPos[1] = 19145.0f;	fAngle = 90.0f; break;
+            case 2:	fPos[0] = 8046.0f;	fPos[1] = 19400.0f;	fAngle = 75.0f; break;
+            case 3:	fPos[0] = 8133.0f;	fPos[1] = 19645.0f;	fAngle = 60.0f; break;
+            case 4:	fPos[0] = 8282.0f;	fPos[1] = 19845.0f;	fAngle = 35.0f; break;
+            default: return;
         }
 
         CHARACTER* c = CreateHero(Data2->Index, iClass, 0, fPos[0], fPos[1], fAngle);
@@ -553,19 +538,11 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
 
         switch (Data->Index)
         {
-#ifdef PJH_NEW_SERVER_SELECT_MAP
-        case 0:	fPos[0] = 8008.0f;	fPos[1] = 18885.0f;	fAngle = 115.0f; break;
-        case 1:	fPos[0] = 7986.0f;	fPos[1] = 19145.0f;	fAngle = 90.0f; break;
-        case 2:	fPos[0] = 8046.0f;	fPos[1] = 19400.0f;	fAngle = 75.0f; break;
-        case 3:	fPos[0] = 8133.0f;	fPos[1] = 19645.0f;	fAngle = 60.0f; break;
-        case 4:	fPos[0] = 8282.0f;	fPos[1] = 19845.0f;	fAngle = 35.0f; break;
-#else //PJH_NEW_SERVER_SELECT_MAP
-        case 0:	fPos[0] = 22628.0f;	fPos[1] = 15012.0f;	fAngle = 100.0f; break;
-        case 1:	fPos[0] = 22700.0f;	fPos[1] = 15201.0f;	fAngle = 75.0f; break;
-        case 2:	fPos[0] = 22840.0f;	fPos[1] = 15355.0f;	fAngle = 50.0f; break;
-        case 3:	fPos[0] = 23019.0f;	fPos[1] = 15443.0f;	fAngle = 25.0f; break;
-        case 4:	fPos[0] = 23211.6f;	fPos[1] = 15467.0f;	fAngle = 0.0f; break;
-#endif //PJH_NEW_SERVER_SELECT_MAP
+            case 0:	fPos[0] = 8008.0f;	fPos[1] = 18885.0f;	fAngle = 115.0f; break;
+            case 1:	fPos[0] = 7986.0f;	fPos[1] = 19145.0f;	fAngle = 90.0f; break;
+            case 2:	fPos[0] = 8046.0f;	fPos[1] = 19400.0f;	fAngle = 75.0f; break;
+            case 3:	fPos[0] = 8133.0f;	fPos[1] = 19645.0f;	fAngle = 60.0f; break;
+            case 4:	fPos[0] = 8282.0f;	fPos[1] = 19845.0f;	fAngle = 35.0f; break;
         }
 
         INT		iCharacterKey;
@@ -780,7 +757,6 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     HeroIndex = rand() % MAX_CHARACTERS_CLIENT;
     CHARACTER* c = &CharactersClient[HeroIndex];
 
-    BYTE pk, ctlCode, posX, posY, angle;
     CharacterAttribute->Ability = 0;
     CharacterAttribute->AbilityTime[0] = 0;
     CharacterAttribute->AbilityTime[1] = 0;
@@ -7947,153 +7923,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         break;
     }
 }
-/*
-void ReceiveMix(const BYTE* ReceiveBuffer)
-{
-    auto Data = (LPPHEADER_DEFAULT_ITEM)ReceiveBuffer;
 
-    switch (Data->Index)
-    {
-    case 0:
-    {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
-        {
-            std::span<const BYTE> empty = {};
-            g_pLuckyItemWnd->GetResult(0, Data->Index, empty, Old);
-            break;
-        }
-        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        wchar_t szText[256] = { 0, };
-        switch (g_MixRecipeMgr.GetMixInventoryType())
-        {
-        case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        case SEASON3A::MIXTYPE_SEED_SPHERE:
-            swprintf(szText, GlobalText[594]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-            // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				wprintf(szText, GlobalText[1208]);	// 부활 실패
-            // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            // 				break;
-        case SEASON3A::MIXTYPE_OSBOURNE:
-            swprintf(szText, GlobalText[2105], GlobalText[2061]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_JERRIDON:
-            swprintf(szText, GlobalText[2105], GlobalText[2062]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_ELPIS:
-            swprintf(szText, GlobalText[2112], GlobalText[2063]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHAOS_CARD:
-            swprintf(szText, GlobalText[2112], GlobalText[2265]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            swprintf(szText, GlobalText[2112], GlobalText[2560]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
-            break;
-        }
-    }
-    break;
-    case 1:
-    {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
-        {
-            g_pLuckyItemWnd->GetResult(1, 0, Data->Item, Old);
-            break;
-        }
-        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        wchar_t szText[256] = { 0, };
-        switch (g_MixRecipeMgr.GetMixInventoryType())
-        {
-        case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        case SEASON3A::MIXTYPE_SEED_SPHERE:
-            swprintf(szText, GlobalText[595]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-            // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				wprintf(szText, GlobalText[1209]);
-            // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            // 				break;
-        case SEASON3A::MIXTYPE_OSBOURNE:
-            swprintf(szText, GlobalText[2106], GlobalText[2061]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_JERRIDON:
-            swprintf(szText, GlobalText[2106], GlobalText[2062]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_ELPIS:
-            swprintf(szText, GlobalText[2113], GlobalText[2063]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHAOS_CARD:
-            swprintf(szText, GlobalText[2113], GlobalText[2265]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            swprintf(szText, GlobalText[2113], GlobalText[2560]);
-            g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            break;
-        }
-
-        g_pMixInventory->DeleteAllItems();
-        g_pMixInventory->InsertItem(0, Data->Item, Old);
-
-        PlayBuffer(SOUND_MIX01);
-        PlayBuffer(SOUND_JEWEL01);
-    }
-    break;
-    case 2:
-    case 0x0B:
-    {
-        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_READY);
-        g_pSystemLogBox->AddText(GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
-    }
-    break;
-    case 4:
-        SEASON3B::CreateOkMessageBox(GlobalText[649]);
-        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        break;
-
-    case 9:
-        SEASON3B::CreateOkMessageBox(GlobalText[689]);
-        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        break;
-
-    case 100:
-        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        g_pMixInventory->DeleteAllItems();
-        g_pMixInventory->InsertItem(0, Data->Item, Old);
-        break;
-    case 0x20:
-        if (g_pLuckyItemWnd->GetAct())
-        {
-            g_pLuckyItemWnd->GetResult(0, Data->Index, Data->Item, Old);
-        }
-        break;
-    case 3:
-    case 5:
-    case 7:
-    case 8:
-    case 0x0A:
-    default:
-        g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
-        break;
-    }
-
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x86 [ReceiveMix(%d)]", Data->Index);
-}
-*/
 void ReceiveMixExit(const BYTE* ReceiveBuffer)
 {
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x87 [ReceiveMixExit]");

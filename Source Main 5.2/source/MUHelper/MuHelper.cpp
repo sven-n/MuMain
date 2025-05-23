@@ -65,7 +65,8 @@ namespace MUHelper
 
     void CMuHelper::TriggerStart()
     {
-        SocketClient->ToGameServer()->SendMuHelperStatusChangeRequest(0);
+        if (!Hero->SafeZone)
+            SocketClient->ToGameServer()->SendMuHelperStatusChangeRequest(0);
     }
 
     void CMuHelper::TriggerStop()

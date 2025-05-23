@@ -8,7 +8,7 @@
 #include "MsgBoxIGSCommon.h"
 
 #ifdef CONSOLE_DEBUG
-#include "./Utilities/Log/muConsoleDebug.h"
+
 #endif // CONSOLE_DEBUG
 
 CInGameShopSystem::CInGameShopSystem()

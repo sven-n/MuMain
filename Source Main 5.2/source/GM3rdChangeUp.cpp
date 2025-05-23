@@ -16,7 +16,6 @@
 #include "MapManager.h"
 #include "BoneManager.h"
 #include "dsplaysound.h"
-#include "GM3rdChangeUp.h"
 #include "CSChaosCastle.h"
 
 extern char* g_lpszMp3[NUM_MUSIC];

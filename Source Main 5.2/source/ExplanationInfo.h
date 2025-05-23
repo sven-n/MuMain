@@ -14,7 +14,7 @@
 
 namespace info
 {
-    BoostSmartPointer(ExplanationInfo);
+    SmartPointer(ExplanationInfo);
     class ExplanationInfo : public InfoFile
     {
     public:

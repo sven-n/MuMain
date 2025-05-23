@@ -13,7 +13,7 @@
 
 namespace info
 {
-    BoostSmartPointer(DialogInfo);
+    SmartPointer(DialogInfo);
     class DialogInfo : public InfoFile
     {
     public:

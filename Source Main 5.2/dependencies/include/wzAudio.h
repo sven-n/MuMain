@@ -34,7 +34,7 @@ enum enMixerMode
 	_mmMasterVolume, // system default master volume control
 	_mmWaveVolume,	// system wave mixer
 	_mmInternalVolume // wzAudio internal volume control
-} m_enMixerMode;
+}; // m_enMixerMode
 
 // Equalizer Bank slots
 enum enEq

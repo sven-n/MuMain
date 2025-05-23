@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "turbojpeg.h"
 #include "GlobalBitmap.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 
 
 CBitmapCache::CBitmapCache()

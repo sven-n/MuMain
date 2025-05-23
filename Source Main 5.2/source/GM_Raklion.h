@@ -10,7 +10,7 @@ class BMD;
 
 namespace SEASON4A
 {
-    BoostSmartPointer(CGM_Raklion);
+    SmartPointer(CGM_Raklion);
     class CGM_Raklion : public BaseMap
     {
     public:

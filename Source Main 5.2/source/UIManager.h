@@ -14,7 +14,6 @@
 #include "UIPopup.h"
 #include "UIJewelHarmony.h"
 #include "ItemAddOptioninfo.h"
-#include "GM_Kanturu_2nd.h"
 
 extern CUIGateKeeper* g_pUIGateKeeper;
 extern CUIPopup* g_pUIPopup;

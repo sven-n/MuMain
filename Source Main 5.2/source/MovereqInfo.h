@@ -13,7 +13,7 @@
 
 namespace info
 {
-    BoostSmartPointer(MovereqInfo);
+    SmartPointer(MovereqInfo);
     class MovereqInfo : public InfoFile
     {
     private:

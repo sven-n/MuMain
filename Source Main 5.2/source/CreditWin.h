@@ -34,52 +34,52 @@
 
 class CCreditWin : public CWin
 {
-    enum SHOW_STATE { HIDE, FADEIN, SHOW, FADEOUT };
+	enum SHOW_STATE { HIDE, FADEIN, SHOW, FADEOUT };
 
-    struct SCreditItem
-    {
-        BYTE	byClass;
-        wchar_t	szName[CRW_NAME_MAX];
-    };
+	struct SCreditItem
+	{
+		BYTE	byClass;
+		char	szName[CRW_NAME_MAX];
+	};
 
 protected:
-    CSprite		m_aSpr[CRW_SPR_MAX];
-    CButton		m_btnClose;
+	CSprite		m_aSpr[CRW_SPR_MAX];
+	CButton		m_btnClose;
 
-    SHOW_STATE	m_eIllustState;
-    double		m_dIllustDeltaTickSum;
-    BYTE		m_byIllust;
-    wchar_t* m_apszIllustPath[CRW_ILLUST_MAX][2];
+	SHOW_STATE	m_eIllustState;
+	double		m_dIllustDeltaTickSum;
+	BYTE		m_byIllust;
+	wchar_t* m_apszIllustPath[CRW_ILLUST_MAX][2];
 
-    HFONT		m_hFont;
-    SCreditItem	m_aCredit[CRW_ITEM_MAX];
-    int			m_nNowIndex;
-    int			m_nNameCount;
-    int			m_anTextIndex[CRW_INDEX_MAX];
-    SHOW_STATE	m_aeTextState[CRW_INDEX_NAME + 1];
-    double		m_dTextDeltaTickSum;
+	HFONT		m_hFont;
+	SCreditItem	m_aCredit[CRW_ITEM_MAX];
+	int			m_nNowIndex;
+	int			m_nNameCount;
+	int			m_anTextIndex[CRW_INDEX_MAX];
+	SHOW_STATE	m_aeTextState[CRW_INDEX_NAME + 1];
+	double		m_dTextDeltaTickSum;
 
 public:
-    CCreditWin();
-    virtual ~CCreditWin();
+	CCreditWin();
+	virtual ~CCreditWin();
 
-    void Create();
-    void SetPosition();
-    void Show(bool bShow);
-    bool CursorInWin(int nArea);
+	void Create();
+	void SetPosition();
+	void Show(bool bShow);
+	bool CursorInWin(int nArea);
 
 protected:
-    void PreRelease();
-    void UpdateWhileActive(double dDeltaTick);
-    void RenderControls();
+	void PreRelease();
+	void UpdateWhileActive(double dDeltaTick);
+	void RenderControls();
 
-    void CloseWin();
-    void Init();
-    void LoadIllust();
-    void AnimationIllust(double dDeltaTick);
-    void LoadText();
-    void SetTextIndex();
-    void AnimationText(int nClass, double dDeltaTick);
+	void CloseWin();
+	void Init();
+	void LoadIllust();
+	void AnimationIllust(double dDeltaTick);
+	void LoadText();
+	void SetTextIndex();
+	void AnimationText(int nClass, double dDeltaTick);
 };
 
 #endif // !defined(AFX_CREDITWIN_H__9D392798_811A_46FE_918B_7753E6BA35D0__INCLUDED_)
