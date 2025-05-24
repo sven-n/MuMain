@@ -2722,7 +2722,7 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     FILE* fp = _wfopen(ModelPath, L"rb");
     if (!fp)
     {
-        wprintf(L"[Open2] ERROR: Unable to open file: %s\n", ModelPath);
+        //// wprintf(L"[Open2] ERROR: Unable to open file: %s\n", ModelPath);
         m_bCompletedAlloc = false;
         return false;
     }
@@ -2745,7 +2745,7 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     // *** Check the "BMD" header ***
     if (!(fileData[0] == 'B' && fileData[1] == 'M' && fileData[2] == 'D'))
     {
-        wprintf(L"[Open2] ERROR: Invalid file header (expected 'BMD')\n");
+        wprintf(L"[Open2] ERROR: Invalid file header (expected 'BMD') in file %.64s\n", ModelPath);
         m_bCompletedAlloc = false;
         return false;
     }
@@ -2757,13 +2757,13 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     std::unique_ptr<unsigned char[]> decryptedData;
     if (Version == 0xC)
     {
-        wprintf(L"[Open2] Version: %d\n", Version);
+        //// wprintf(L"[Open2] Version: %d\n", Version);
         long encSize = *(long*)(fileData.get() + ptr); ptr += sizeof(long);
         unsigned char* encData = fileData.get() + ptr;
-        wprintf(L"[Open2] Encrypted Size: %ld\n", encSize);
+        //// wprintf(L"[Open2] Encrypted Size: %ld\n", encSize);
 
         long decSize = MapFileDecrypt(nullptr, encData, encSize);
-        wprintf(L"[Open2] Decrypted Size: %ld\n", decSize);
+        //// wprintf(L"[Open2] Decrypted Size: %ld\n", decSize);
 
         decryptedData.reset(new(std::nothrow) unsigned char[decSize]);
         if (!decryptedData)
@@ -2777,18 +2777,18 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     }
     else if (Version == 0xE)
     {
-        wprintf(L"[Open2] Version: %d\n", Version);
+        wprintf(L"[Open2] Version: %d\n, not yet supported. File: %.64s\n", Version, ModelPath);
         // FIXME FOR NEW MAPS 
         // DECRYPT KEY: webzen#@!01webzen#@!01webzen#@!0
     }
     else if (Version == 0xA)
     {
-        wprintf(L"[Open2] Version: %d\n", Version);
+        // wprintf(L"[Open2] Version: %d\n", Version);
         ptr = 4;
     }
     else
     {
-        wprintf(L"[Open2] Unknown BMD version: %ld\n", Version);
+        wprintf(L"[Open2] Unknown BMD version: %ld\n in %.64s\n", Version, ModelPath);
         m_bCompletedAlloc = false;
         return false;
     }
@@ -2800,13 +2800,15 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
 
     const char* ext = strrchr(Name, '.');
     if (!ext || (_stricmp(ext, ".smd") != 0))
-        wprintf(L"[Open2] WARNING: Invalid file extension: %.32hs\n", Name);
+    {
+        wprintf(L"[Open2] WARNING: Invalid file extension: %.64hs in %.64s\n", Name, ModelPath);
+    }
 
-    NumMeshs = *(short*)(data + ptr); ptr += 2;
-    NumBones = *(short*)(data + ptr); ptr += 2;
-    NumActions = *(short*)(data + ptr); ptr += 2;
+    NumMeshs = *(short*)(data + ptr); ptr += sizeof(short);
+    NumBones = *(short*)(data + ptr); ptr += sizeof(short);
+    NumActions = *(short*)(data + ptr); ptr += sizeof(short);
 
-    wprintf(L"[Open2] Model: %.32hs | Meshes: %d | Bones: %d | Actions: %d\n", Name, NumMeshs, NumBones, NumActions);
+    //// wprintf(L"[Open2] Model: %.32hs | Meshes: %d | Bones: %d | Actions: %d\n", Name, NumMeshs, NumBones, NumActions);
 
     const int meshCount = NumMeshs > 0 ? NumMeshs : 1;
     const int boneCount = NumBones > 0 ? NumBones : 1;
@@ -2828,15 +2830,14 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     for (int i = 0; i < NumMeshs; ++i)
     {
         Mesh_t& m = Meshs[i];
-        m.NumVertices = *(short*)(data + ptr); ptr += 2;
-        m.NumNormals = *(short*)(data + ptr); ptr += 2;
-        m.NumTexCoords = *(short*)(data + ptr); ptr += 2;
-        m.NumTriangles = *(short*)(data + ptr); ptr += 2;
-        m.Texture = *(short*)(data + ptr); ptr += 2;
+        m.NumVertices = *(short*)(data + ptr); ptr += sizeof(short);
+        m.NumNormals = *(short*)(data + ptr); ptr += sizeof(short);
+        m.NumTexCoords = *(short*)(data + ptr); ptr += sizeof(short);
+        m.NumTriangles = *(short*)(data + ptr); ptr += sizeof(short);
+        m.Texture = *(short*)(data + ptr); ptr += sizeof(short);
         m.NoneBlendMesh = false;
 
-        wprintf(L"[Open2] Mesh[%d] V:%d N:%d T:%d Tri:%d Tex:%d\n",
-            i, m.NumVertices, m.NumNormals, m.NumTexCoords, m.NumTriangles, m.Texture);
+        //// wprintf(L"[Open2] Mesh[%d] V:%d N:%d T:%d Tri:%d Tex:%d\n", i, m.NumVertices, m.NumNormals, m.NumTexCoords, m.NumTriangles, m.Texture);
 
         m.Vertices = new Vertex_t[m.NumVertices];
         m.Normals = new Normal_t[m.NumNormals];
@@ -2871,10 +2872,10 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     {
         Action_t& a = Actions[i];
         a.Loop = false;
-        a.NumAnimationKeys = *(short*)(data + ptr); ptr += 2;
-        a.LockPositions = *(bool*)(data + ptr);  ptr += 1;
+        a.NumAnimationKeys = *(short*)(data + ptr); ptr += sizeof(short);
+        a.LockPositions = *(bool*)(data + ptr);  ptr += sizeof(bool);
 
-        wprintf(L"[Open2] Action[%d] Keys: %d Lock: %d\n", i, a.NumAnimationKeys, a.LockPositions);
+        //// wprintf(L"[Open2] Action[%d] Keys: %d Lock: %d\n", i, a.NumAnimationKeys, a.LockPositions);
 
         if (a.LockPositions && a.NumAnimationKeys > 0)
         {
@@ -2891,14 +2892,14 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     for (int i = 0; i < NumBones; ++i)
     {
         Bone_t& b = Bones[i];
-        b.Dummy = *(char*)(data + ptr); ptr += 1;
+        b.Dummy = *(char*)(data + ptr); ptr += sizeof(char);
 
         if (!b.Dummy)
         {
             memcpy(b.Name, data + ptr, 32); ptr += 32;
-            b.Parent = *(short*)(data + ptr); ptr += 2;
+            b.Parent = *(short*)(data + ptr); ptr += sizeof(short);
 
-            wprintf(L"[Open2] Bone[%d] Name: %.32hs Parent: %d\n", i, b.Name, b.Parent);
+            //// wprintf(L"[Open2] Bone[%d] Name: %.32hs Parent: %d\n", i, b.Name, b.Parent);
 
             b.BoneMatrixes = new BoneMatrix_t[NumActions]();
 
