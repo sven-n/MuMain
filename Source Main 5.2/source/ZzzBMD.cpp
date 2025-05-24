@@ -2808,6 +2808,7 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     NumBones = *(short*)(data + ptr); ptr += sizeof(short);
     NumActions = *(short*)(data + ptr); ptr += sizeof(short);
 
+    assert(NumBones <= MAX_BONES && "Bones 200");
     //// wprintf(L"[Open2] Model: %.32hs | Meshes: %d | Bones: %d | Actions: %d\n", Name, NumMeshs, NumBones, NumActions);
 
     const int meshCount = NumMeshs > 0 ? NumMeshs : 1;
