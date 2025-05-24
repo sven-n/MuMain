@@ -12,15 +12,12 @@
 #include "ZzzAI.h"
 #include "SMD.h"
 #include "zzzEffect.h"
-#include "MapManager.h"
 
-//#include "FillPolygon.h"
 #include "UIMng.h"
 #include "CameraMove.h"
 #include "PhysicsManager.h"
 #include "NewUISystem.h"
 
-//BMD Models[MAX_MODELS];
 BMD* Models;
 BMD* ModelsDump;
 
@@ -43,13 +40,6 @@ vec2_t RenderArrayTexCoords[MAX_VERTICES * 3];
 unsigned char ShadowBuffer[256 * 256];
 int           ShadowBufferWidth = 256;
 int           ShadowBufferHeight = 256;
-
-//extern int  MouseX;
-//extern int  MouseY;
-//extern bool MouseLButton;
-
-//extern double FPS;
-//extern float FPS_ANIMATION_FACTOR;
 
 bool  StopMotion = false;
 float ParentMatrix[3][4];
@@ -682,29 +672,16 @@ void BMD::Chrome(float* pchrome, int bone, vec3_t normal)
 
     float n;
 
-    //if (g_chromeage[bone] != g_smodels_total)
     {
-        // calculate vectors from the viewer to the bone. This roughly adjusts for position
-        vec3_t chromeupvec;		// g_chrome t vector in world reference frame
-        vec3_t chromerightvec;	// g_chrome s vector in world reference frame
-        vec3_t tmp;				// vector pointing at bone in world reference frame
+        vec3_t chromeupvec;		
+        vec3_t chromerightvec;
+        vec3_t tmp;			
         VectorScale(BodyOrigin, -1, tmp);
-        //tmp[0] += BoneMatrix[bone][0][3];
-        //tmp[1] += BoneMatrix[bone][1][3];
-        //tmp[2] += BoneMatrix[bone][2][3];
-        //tmp[0] += LinkBoneMatrix[0][3];
-        //tmp[1] += LinkBoneMatrix[1][3];
-        //tmp[2] += LinkBoneMatrix[2][3];
         VectorNormalize(tmp);
         CrossProduct(tmp, g_vright, chromeupvec);
         VectorNormalize(chromeupvec);
         CrossProduct(tmp, chromeupvec, chromerightvec);
         VectorNormalize(chromerightvec);
-
-        //VectorIRotate( chromeupvec, BoneMatrix[bone], g_chromeup[bone] );
-        //VectorIRotate( chromerightvec, BoneMatrix[bone], g_chromeright[bone] );
-        //VectorIRotate( chromeupvec, LinkBoneMatrix, g_chromeup[bone] );
-        //VectorIRotate( chromerightvec, LinkBoneMatrix, g_chromeright[bone] );
 
         g_chromeage[bone] = g_smodels_total;
     }
@@ -2522,7 +2499,7 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
                 }
                 glBegin(GL_LINES);
                 glVertex3fv(BoneVertices[0]);
-                glVertex3fv(BoneVertices[1]);
+                glVertex3fv(BoneVertices[1]); 
                 glVertex3fv(BoneVertices[1]);
                 glVertex3fv(BoneVertices[2]);
                 glVertex3fv(BoneVertices[2]);
@@ -2549,62 +2526,84 @@ void BlurShadow()
 
 void BMD::Release()
 {
-    for (int i = 0; i < NumBones; i++)
+    if (Bones)
     {
-        Bone_t* b = &Bones[i];
-
-        if (!b->Dummy)
+        for (int i = 0; i < NumBones; ++i)
         {
-            for (int j = 0; j < NumActions; j++)
+            Bone_t* b = &Bones[i];
+
+            if (!b->Dummy && b->BoneMatrixes)
             {
-                BoneMatrix_t* bm = &b->BoneMatrixes[j];
-                delete[]bm->Position;
-                delete[]bm->Rotation;
-                delete[]bm->Quaternion;
+                for (int j = 0; j < NumActions; ++j)
+                {
+                    BoneMatrix_t* bm = &b->BoneMatrixes[j];
+                    if (bm)
+                    {
+                        if (bm->Position) { delete[] bm->Position; bm->Position = nullptr; }
+                        if (bm->Rotation) { delete[] bm->Rotation; bm->Rotation = nullptr; }
+                        if (bm->Quaternion) { delete[] bm->Quaternion; bm->Quaternion = nullptr; }
+                    }
+                }
+                SAFE_DELETE_ARRAY(b->BoneMatrixes);
             }
-            SAFE_DELETE_ARRAY(b->BoneMatrixes);
         }
     }
 
-    for (int i = 0; i < NumActions; i++)
+    if (Actions)
     {
-        Action_t* a = &Actions[i];
-        if (a->LockPositions)
+        for (int i = 0; i < NumActions; ++i)
         {
-            delete[]a->Positions;
+            Action_t* a = &Actions[i];
+            if (a && a->LockPositions && a->Positions)
+            {
+                delete[] a->Positions;
+                a->Positions = nullptr;
+            }
         }
     }
 
     if (Meshs)
     {
-        for (int i = 0; i < NumMeshs; i++)
+        for (int i = 0; i < NumMeshs; ++i)
         {
             Mesh_t* m = &Meshs[i];
 
-            delete[]m->Vertices;
-            delete[]m->Normals;
-            delete[]m->TexCoords;
-            delete[]m->Triangles;
+            delete[] m->Vertices;   m->Vertices = nullptr;
+            delete[] m->Normals;    m->Normals = nullptr;
+            delete[] m->TexCoords;  m->TexCoords = nullptr;
+            delete[] m->Triangles;  m->Triangles = nullptr;
 
             if (m->m_csTScript)
             {
                 delete m->m_csTScript;
-                m->m_csTScript = NULL;
+                m->m_csTScript = nullptr;
             }
-            auto textureIndex = IndexTexture[m->Texture];
-            auto isSkinTexture = (textureIndex >= BITMAP_SKIN_BEGIN && textureIndex <= BITMAP_SKIN_END);
-            if (!isSkinTexture)
+
+            if (IndexTexture && m->Texture >= 0)
             {
+                auto textureIndex = IndexTexture[m->Texture];
+                if (textureIndex >= BITMAP_SKIN_BEGIN && textureIndex <= BITMAP_SKIN_END)
+                    continue;
+
                 DeleteBitmap(textureIndex);
             }
         }
     }
 
-    SAFE_DELETE_ARRAY(Meshs);
-    SAFE_DELETE_ARRAY(Bones);
-    SAFE_DELETE_ARRAY(Actions);
-    SAFE_DELETE_ARRAY(Textures);
-    SAFE_DELETE_ARRAY(IndexTexture);
+    delete[] Meshs;
+    Meshs = nullptr;
+
+    delete[] Bones;
+    Bones = nullptr;
+
+    delete[] Actions;
+    Actions = nullptr;
+
+    delete[] Textures;
+    Textures = nullptr;
+
+    delete[] IndexTexture;
+    IndexTexture = nullptr;
 
     NumBones = 0;
     NumActions = 0;
@@ -2612,7 +2611,7 @@ void BMD::Release()
 
 #ifdef LDS_FIX_SETNULLALLOCVALUE_WHEN_BMDRELEASE
     m_bCompletedAlloc = false;
-#endif // LDS_FIX_SETNULLALLOCVALUE_WHEN_BMDRELEASE
+#endif
 }
 
 void BMD::FindNearTriangle(void)
@@ -2677,385 +2676,236 @@ void BMD::FindTriangleForEdge(int iMesh, int iTri1, int iIndex11)
     }
 }
 //#endif //USE_SHADOWVOLUME
-/*
-bool BMD::Open(wchar_t* DirName, wchar_t* ModelFileName)
-{
-    wchar_t ModelName[64];
-    wcscpy(ModelName, DirName);
-    wcscat(ModelName, ModelFileName);
-    FILE* fp = _wfopen(ModelName, L"rb");
-    if (fp == NULL)
-    {
-        return false;
-    }
-    fseek(fp, 0, SEEK_END);
-    int DataBytes = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    auto* Data = new unsigned char[DataBytes];
-    fread(Data, 1, DataBytes, fp);
-    fclose(fp);
-
-    int Size;
-    int DataPtr = 3;
-    Version = *((char*)(Data + DataPtr)); DataPtr += 1;
-    memcpy(Name, Data + DataPtr, 32); DataPtr += 32 * sizeof(char);
-    NumMeshs = *((short*)(Data + DataPtr)); DataPtr += 2;
-    NumBones = *((short*)(Data + DataPtr)); DataPtr += 2;
-    NumActions = *((short*)(Data + DataPtr)); DataPtr += 2;
-
-    Meshs = new Mesh_t[max(1, NumMeshs)];
-    Bones = new Bone_t[max(1, NumBones)];
-    Actions = new Action_t[max(1, NumActions)];
-    Textures = new Texture_t[max(1, NumMeshs)];
-    IndexTexture = new GLuint[max(1, NumMeshs)];
-
-    int i;
-    for (i = 0; i < NumMeshs; i++)
-    {
-        Mesh_t* m = &Meshs[i];
-        m->NumVertices = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->NumNormals = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->NumTexCoords = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->NumTriangles = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->Texture = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->NoneBlendMesh = false;
-        //m->NumCommandBytes  = *((int   *)(Data+DataPtr));DataPtr+=4;
-        m->Vertices = new Vertex_t[m->NumVertices];
-        m->Normals = new Normal_t[m->NumNormals];
-        m->TexCoords = new TexCoord_t[m->NumTexCoords];
-        m->Triangles = new Triangle_t[m->NumTriangles];
-        //m->Commands  = new unsigned char [m->NumCommandBytes];
-        Size = m->NumVertices * sizeof(Vertex_t);
-        memcpy(m->Vertices, Data + DataPtr, Size); DataPtr += Size;
-        Size = m->NumNormals * sizeof(Normal_t);
-        memcpy(m->Normals, Data + DataPtr, Size); DataPtr += Size;
-        Size = m->NumTexCoords * sizeof(TexCoord_t);
-        memcpy(m->TexCoords, Data + DataPtr, Size); DataPtr += Size;
-        //Size = m->NumTriangles * sizeof(Triangle_t);
-        //memcpy(m->Triangles,Data+DataPtr,Size);DataPtr+=Size;
-        Size = sizeof(Triangle_t);
-        int Size2 = sizeof(Triangle_t2);
-        for (int j = 0; j < m->NumTriangles; j++)
-        {
-            memcpy(&m->Triangles[j], Data + DataPtr, Size); DataPtr += Size2;
-        }
-        //memcpy(m->Commands ,Data+DataPtr,m->NumCommandBytes);DataPtr+=m->NumCommandBytes;
-        memcpy(Textures[i].FileName, Data + DataPtr, 32); DataPtr += 32;
-
-        TextureScriptParsing TSParsing;
-
-        if (TSParsing.parsingTScriptA(Textures[i].FileName))
-        {
-            m->m_csTScript = new TextureScript;
-            m->m_csTScript->setScript((TextureScript&)TSParsing);
-        }
-        else
-        {
-            m->m_csTScript = nullptr;
-        }
-
-        delete (TextureScript*)&TSParsing;
-    }
-    //#ifdef USE_SHADOWVOLUME
-        //for(i=0;i<NumMeshs;i++)
-        //{
-        //    Mesh_t *m = &Meshs[i];
-        //    EdgeTriangleIndex(m->Triangles,m->NumTriangles);
-        //}
-    FindNearTriangle();
-    //#endif
-    for (i = 0; i < NumActions; i++)
-    {
-        Action_t* a = &Actions[i];
-        a->Loop = false;
-        a->NumAnimationKeys = *((short*)(Data + DataPtr)); DataPtr += 2;
-        a->LockPositions = *((bool*)(Data + DataPtr)); DataPtr += 1;
-        if (a->LockPositions)
-        {
-            a->Positions = new vec3_t[a->NumAnimationKeys];
-            Size = a->NumAnimationKeys * sizeof(vec3_t);
-            memcpy(a->Positions, Data + DataPtr, Size); DataPtr += Size;
-        }
-    }
-    for (i = 0; i < NumBones; i++)
-    {
-        Bone_t* b = &Bones[i];
-        b->Dummy = *((wchar_t*)(Data + DataPtr)); DataPtr += 1;
-        if (!b->Dummy)
-        {
-            memcpy(b->Name, Data + DataPtr, 32); DataPtr += 32;
-            b->Parent = *((short*)(Data + DataPtr)); DataPtr += 2;
-            b->BoneMatrixes = new BoneMatrix_t[NumActions];
-            for (int j = 0; j < NumActions; j++)
-            {
-                BoneMatrix_t* bm = &b->BoneMatrixes[j];
-                Size = Actions[j].NumAnimationKeys * sizeof(vec3_t);
-                int NumAnimationKeys = Actions[j].NumAnimationKeys;
-                bm->Position = new vec3_t[NumAnimationKeys];
-                bm->Rotation = new vec3_t[NumAnimationKeys];
-                bm->Quaternion = new vec4_t[NumAnimationKeys];
-                memcpy(bm->Position, Data + DataPtr, Size); DataPtr += Size;
-                memcpy(bm->Rotation, Data + DataPtr, Size); DataPtr += Size;
-                for (int k = 0; k < NumAnimationKeys; k++)
-                {
-                    AngleQuaternion(bm->Rotation[k], bm->Quaternion[k]);
-                }
-            }
-        }
-    }
-    delete[] Data;
-    Init(false);
-    return true;
-}
-
-bool BMD::Save(wchar_t* DirName, wchar_t* ModelFileName)
-{
-    wchar_t ModelName[64];
-    wcscpy(ModelName, DirName);
-    wcscat(ModelName, ModelFileName);
-    FILE* fp = _wfopen(ModelName, L"wb");
-    if (fp == NULL) return false;
-    putc('B', fp);
-    putc('M', fp);
-    putc('D', fp);
-    fwrite(&Version, 1, 1, fp);
-    fwrite(Name, 32, 1, fp);
-    fwrite(&NumMeshs, 2, 1, fp);
-    fwrite(&NumBones, 2, 1, fp);
-    fwrite(&NumActions, 2, 1, fp);
-    int i;
-    for (i = 0; i < NumMeshs; i++)
-    {
-        Mesh_t* m = &Meshs[i];
-        fwrite(&m->NumVertices, 2, 1, fp);
-        fwrite(&m->NumNormals, 2, 1, fp);
-        fwrite(&m->NumTexCoords, 2, 1, fp);
-        fwrite(&m->NumTriangles, 2, 1, fp);
-        fwrite(&m->Texture, 2, 1, fp);
-        //fwrite(&m->NumCommandBytes ,4,1,fp);
-        fwrite(m->Vertices, m->NumVertices * sizeof(Vertex_t), 1, fp);
-        fwrite(m->Normals, m->NumNormals * sizeof(Normal_t), 1, fp);
-        fwrite(m->TexCoords, m->NumTexCoords * sizeof(TexCoord_t), 1, fp);
-        //fwrite(m->Triangles,m->NumTriangles*sizeof(Triangle_t),1,fp);
-        for (int j = 0; j < m->NumTriangles; j++)
-        {
-            fwrite(&m->Triangles[j], sizeof(Triangle_t2), 1, fp);
-        }
-        //fwrite(m->Commands ,m->NumCommandBytes                ,1,fp);
-        fwrite(Textures[i].FileName, 32, 1, fp);
-    }
-    for (i = 0; i < NumActions; i++)
-    {
-        Action_t* a = &Actions[i];
-        fwrite(&a->NumAnimationKeys, 2, 1, fp);
-        fwrite(&a->LockPositions, 1, 1, fp);
-        if (a->LockPositions)
-        {
-            fwrite(a->Positions, a->NumAnimationKeys * sizeof(vec3_t), 1, fp);
-        }
-    }
-    for (i = 0; i < NumBones; i++)
-    {
-        Bone_t* b = &Bones[i];
-        fwrite(&b->Dummy, 1, 1, fp);
-        if (!b->Dummy)
-        {
-            fwrite(b->Name, 32, 1, fp);
-            fwrite(&b->Parent, 2, 1, fp);
-            for (int j = 0; j < NumActions; j++)
-            {
-                BoneMatrix_t* bm = &b->BoneMatrixes[j];
-                fwrite(bm->Position, Actions[j].NumAnimationKeys * sizeof(vec3_t), 1, fp);
-                fwrite(bm->Rotation, Actions[j].NumAnimationKeys * sizeof(vec3_t), 1, fp);
-            }
-        }
-    }
-    fclose(fp);
-    return true;
-}*/
 
 bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
 {
-    if (true == m_bCompletedAlloc)
+    if (m_bCompletedAlloc)
     {
-        if (true == bReAlloc)
-        {
-            // release
-            Release();
-        }
-        else
-        {
+        if (!bReAlloc)
             return true;
-        }
+        Release();
     }
 
-    wchar_t ModelName[64];
-    wcscpy(ModelName, DirName);
-    wcscat(ModelName, ModelFileName);
-    FILE* fp = _wfopen(ModelName, L"rb");
-    if (fp == NULL)
+    wchar_t ModelPath[260] = {};
+    _snwprintf(ModelPath, std::size(ModelPath), L"%s%s", DirName, ModelFileName);
+
+    FILE* fp = _wfopen(ModelPath, L"rb");
+    if (!fp)
     {
+        //// wprintf(L"[Open2] ERROR: Unable to open file: %s\n", ModelPath);
         m_bCompletedAlloc = false;
         return false;
     }
 
     fseek(fp, 0, SEEK_END);
-    int DataBytes = ftell(fp);
+    int dataSize = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    auto* Data = new unsigned char[DataBytes];
-    fread(Data, 1, DataBytes, fp);
+
+    std::unique_ptr<unsigned char[]> fileData(new(std::nothrow) unsigned char[dataSize]);
+    if (!fileData)
+    {
+        fclose(fp);
+        m_bCompletedAlloc = false;
+        return false;
+    }
+
+    fread(fileData.get(), 1, dataSize, fp);
     fclose(fp);
 
-    int Size;
-    int DataPtr = 3;
-    Version = *((char*)(Data + DataPtr)); DataPtr += 1;
-    if (Version == 12)
+    // *** Check the "BMD" header ***
+    if (!(fileData[0] == 'B' && fileData[1] == 'M' && fileData[2] == 'D'))
     {
-        long lSize = *((long*)(Data + DataPtr)); DataPtr += sizeof(long);
-        long lDecSize = MapFileDecrypt(NULL, Data + DataPtr, lSize);
-        BYTE* pbyDec = new BYTE[lDecSize];
-        MapFileDecrypt(pbyDec, Data + DataPtr, lSize);
-        delete[] Data;
-        Data = pbyDec;
-        DataPtr = 0;
+        wprintf(L"[Open2] ERROR: Invalid file header (expected 'BMD') in file %.64s\n", ModelPath);
+        m_bCompletedAlloc = false;
+        return false;
     }
 
-    memcpy(Name, Data + DataPtr, 32); DataPtr += 32;
+    int ptr = 3;
+    Version = fileData[ptr++];
+    
 
-    NumMeshs = *((short*)(Data + DataPtr)); DataPtr += 2;
-    NumBones = *((short*)(Data + DataPtr)); DataPtr += 2;
-    assert(NumBones <= MAX_BONES && "Bones 200");
-    NumActions = *((short*)(Data + DataPtr)); DataPtr += 2;
-
-    Meshs = new Mesh_t[max(1, NumMeshs)];
-    Bones = new Bone_t[max(1, NumBones)];
-    Actions = new Action_t[max(1, NumActions)];
-    Textures = new Texture_t[max(1, NumMeshs)];
-    IndexTexture = new GLuint[max(1, NumMeshs)];
-
-    int i;
-
-    for (i = 0; i < NumMeshs; i++)
+    std::unique_ptr<unsigned char[]> decryptedData;
+    if (Version == 0xC)
     {
-        Mesh_t* m = &Meshs[i];
-        m->NumVertices = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->NumNormals = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->NumTexCoords = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->NumTriangles = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->Texture = *((short*)(Data + DataPtr)); DataPtr += 2;
-        m->NoneBlendMesh = false;
-        //m->NumCommandBytes  = *((int   *)(Data+DataPtr));DataPtr+=4;
-        m->Vertices = new Vertex_t[m->NumVertices];
-        m->Normals = new Normal_t[m->NumNormals];
-        m->TexCoords = new TexCoord_t[m->NumTexCoords];
-        m->Triangles = new Triangle_t[m->NumTriangles];
-        //m->Commands  = new unsigned char [m->NumCommandBytes];
-        Size = m->NumVertices * sizeof(Vertex_t);
-        memcpy(m->Vertices, Data + DataPtr, Size); DataPtr += Size;
-        Size = m->NumNormals * sizeof(Normal_t);
-        memcpy(m->Normals, Data + DataPtr, Size); DataPtr += Size;
-        Size = m->NumTexCoords * sizeof(TexCoord_t);
-        memcpy(m->TexCoords, Data + DataPtr, Size); DataPtr += Size;
-        //Size = m->NumTriangles * sizeof(Triangle_t);
-        //memcpy(m->Triangles,Data+DataPtr,Size);DataPtr+=Size;
-        Size = sizeof(Triangle_t);
-        int Size2 = sizeof(Triangle_t2);
+        //// wprintf(L"[Open2] Version: %d\n", Version);
+        long encSize = *(long*)(fileData.get() + ptr); ptr += sizeof(long);
+        unsigned char* encData = fileData.get() + ptr;
+        //// wprintf(L"[Open2] Encrypted Size: %ld\n", encSize);
 
-        for (int j = 0; j < m->NumTriangles; j++)
+        long decSize = MapFileDecrypt(nullptr, encData, encSize);
+        //// wprintf(L"[Open2] Decrypted Size: %ld\n", decSize);
+
+        decryptedData.reset(new(std::nothrow) unsigned char[decSize]);
+        if (!decryptedData)
         {
-            memcpy(&m->Triangles[j], Data + DataPtr, Size); DataPtr += Size2;
-        }
-
-
-        //memcpy(m->Commands ,Data+DataPtr,m->NumCommandBytes);DataPtr+=m->NumCommandBytes;
-        if (DataPtr + 32 > DataBytes) {
-            delete[] Data;
+            m_bCompletedAlloc = false;
             return false;
         }
-        memcpy(Textures[i].FileName, Data + DataPtr, 32);
-        DataPtr += 32;
 
-        TextureScriptParsing TSParsing;
+        MapFileDecrypt(decryptedData.get(), encData, encSize);
+        ptr = 0;
+    }
+    else if (Version == 0xE)
+    {
+        wprintf(L"[Open2] Version: %d\n, not yet supported. File: %.64s\n", Version, ModelPath);
+        // FIXME FOR NEW MAPS 
+        // DECRYPT KEY: webzen#@!01webzen#@!01webzen#@!0
+    }
+    else if (Version == 0xA)
+    {
+        // wprintf(L"[Open2] Version: %d\n", Version);
+        ptr = 4;
+    }
+    else
+    {
+        wprintf(L"[Open2] Unknown BMD version: %ld\n in %.64s\n", Version, ModelPath);
+        m_bCompletedAlloc = false;
+        return false;
+    }
 
-        if (TSParsing.parsingTScriptA(Textures[i].FileName))
+
+    unsigned char* data = decryptedData ? decryptedData.get() : fileData.get();
+
+    memcpy(Name, data + ptr, 32); ptr += 32;
+
+    const char* ext = strrchr(Name, '.');
+    if (!ext || (_stricmp(ext, ".smd") != 0))
+    {
+        wprintf(L"[Open2] WARNING: Invalid file extension: %.64hs in %.64s\n", Name, ModelPath);
+    }
+
+    NumMeshs = *(short*)(data + ptr); ptr += sizeof(short);
+    NumBones = *(short*)(data + ptr); ptr += sizeof(short);
+    NumActions = *(short*)(data + ptr); ptr += sizeof(short);
+
+    assert(NumBones <= MAX_BONES && "Bones 200");
+    //// wprintf(L"[Open2] Model: %.32hs | Meshes: %d | Bones: %d | Actions: %d\n", Name, NumMeshs, NumBones, NumActions);
+
+    const int meshCount = NumMeshs > 0 ? NumMeshs : 1;
+    const int boneCount = NumBones > 0 ? NumBones : 1;
+    const int actionCount = NumActions > 0 ? NumActions : 1;
+
+    Meshs = new(std::nothrow) Mesh_t[meshCount]();
+    Bones = new(std::nothrow) Bone_t[boneCount]();
+    Actions = new(std::nothrow) Action_t[actionCount]();
+    Textures = new(std::nothrow) Texture_t[meshCount]();
+    IndexTexture = new(std::nothrow) GLuint[meshCount]();
+
+    if (!Meshs || !Bones || !Actions || !Textures || !IndexTexture)
+    {
+        Release();
+        m_bCompletedAlloc = false;
+        return false;
+    }
+
+    for (int i = 0; i < NumMeshs; ++i)
+    {
+        Mesh_t& m = Meshs[i];
+        m.NumVertices = *(short*)(data + ptr); ptr += sizeof(short);
+        m.NumNormals = *(short*)(data + ptr); ptr += sizeof(short);
+        m.NumTexCoords = *(short*)(data + ptr); ptr += sizeof(short);
+        m.NumTriangles = *(short*)(data + ptr); ptr += sizeof(short);
+        m.Texture = *(short*)(data + ptr); ptr += sizeof(short);
+        m.NoneBlendMesh = false;
+
+        //// wprintf(L"[Open2] Mesh[%d] V:%d N:%d T:%d Tri:%d Tex:%d\n", i, m.NumVertices, m.NumNormals, m.NumTexCoords, m.NumTriangles, m.Texture);
+
+        m.Vertices = new Vertex_t[m.NumVertices];
+        m.Normals = new Normal_t[m.NumNormals];
+        m.TexCoords = new TexCoord_t[m.NumTexCoords];
+        m.Triangles = new Triangle_t[m.NumTriangles];
+
+        memcpy(m.Vertices, data + ptr, m.NumVertices * sizeof(Vertex_t));  ptr += m.NumVertices * sizeof(Vertex_t);
+        memcpy(m.Normals, data + ptr, m.NumNormals * sizeof(Normal_t));   ptr += m.NumNormals * sizeof(Normal_t);
+        memcpy(m.TexCoords, data + ptr, m.NumTexCoords * sizeof(TexCoord_t)); ptr += m.NumTexCoords * sizeof(TexCoord_t);
+
+        for (int j = 0; j < m.NumTriangles; ++j)
         {
-            m->m_csTScript = new TextureScript;
-            m->m_csTScript->setScript((TextureScript&)TSParsing);
+            memcpy(&m.Triangles[j], data + ptr, sizeof(Triangle_t));
+            ptr += sizeof(Triangle_t2);
+        }
+
+        memcpy(Textures[i].FileName, data + ptr, 32); ptr += 32;
+
+        TextureScriptParsing script;
+        if (script.parsingTScriptA(Textures[i].FileName))
+        {
+            m.m_csTScript = new TextureScript;
+            m.m_csTScript->setScript(script);
         }
         else
         {
-            m->m_csTScript = NULL;
+            m.m_csTScript = nullptr;
         }
     }
 
-    for (i = 0; i < NumActions; i++)
+    for (int i = 0; i < NumActions; ++i)
     {
-        Action_t* a = &Actions[i];
-        a->Loop = false;
-        a->NumAnimationKeys = *((short*)(Data + DataPtr)); DataPtr += 2;
-        a->LockPositions = *((bool*)(Data + DataPtr)); DataPtr += 1;
-        if (a->LockPositions)
+        Action_t& a = Actions[i];
+        a.Loop = false;
+        a.NumAnimationKeys = *(short*)(data + ptr); ptr += sizeof(short);
+        a.LockPositions = *(bool*)(data + ptr);  ptr += sizeof(bool);
+
+        //// wprintf(L"[Open2] Action[%d] Keys: %d Lock: %d\n", i, a.NumAnimationKeys, a.LockPositions);
+
+        if (a.LockPositions && a.NumAnimationKeys > 0)
         {
-            a->Positions = new vec3_t[a->NumAnimationKeys];
-            Size = a->NumAnimationKeys * sizeof(vec3_t);
-            memcpy(a->Positions, Data + DataPtr, Size); DataPtr += Size;
+            a.Positions = new vec3_t[a.NumAnimationKeys];
+            memcpy(a.Positions, data + ptr, sizeof(vec3_t) * a.NumAnimationKeys);
+            ptr += sizeof(vec3_t) * a.NumAnimationKeys;
         }
         else
         {
-            a->Positions = NULL;
+            a.Positions = nullptr;
         }
     }
 
-    for (i = 0; i < NumBones; i++)
+    for (int i = 0; i < NumBones; ++i)
     {
-        Bone_t* b = &Bones[i];
-        b->Dummy = *((char*)(Data + DataPtr)); DataPtr += 1;
+        Bone_t& b = Bones[i];
+        b.Dummy = *(char*)(data + ptr); ptr += sizeof(char);
 
-        if (!b->Dummy)
+        if (!b.Dummy)
         {
-            memcpy(b->Name, Data + DataPtr, 32); DataPtr += 32;
-            b->Parent = *((short*)(Data + DataPtr)); DataPtr += 2;
+            memcpy(b.Name, data + ptr, 32); ptr += 32;
+            b.Parent = *(short*)(data + ptr); ptr += sizeof(short);
 
-            b->BoneMatrixes = new BoneMatrix_t[NumActions];
+            //// wprintf(L"[Open2] Bone[%d] Name: %.32hs Parent: %d\n", i, b.Name, b.Parent);
 
-            for (int j = 0; j < NumActions; j++)
+            b.BoneMatrixes = new BoneMatrix_t[NumActions]();
+
+            for (int j = 0; j < NumActions; ++j)
             {
-                BoneMatrix_t* bm = &b->BoneMatrixes[j];
-                int NumAnimationKeys = Actions[j].NumAnimationKeys;
+                BoneMatrix_t& bm = b.BoneMatrixes[j];
+                int numKeys = Actions[j].NumAnimationKeys;
 
-                bm->Position = nullptr;
-                bm->Rotation = nullptr;
-                bm->Quaternion = nullptr;
-
-                if (NumAnimationKeys > 0)
+                if (numKeys > 0)
                 {
-                    Size = NumAnimationKeys * sizeof(vec3_t);
+                    bm.Position = new vec3_t[numKeys];
+                    bm.Rotation = new vec3_t[numKeys];
+                    bm.Quaternion = new vec4_t[numKeys];
 
-                    bm->Position = new vec3_t[NumAnimationKeys];
-                    bm->Rotation = new vec3_t[NumAnimationKeys];
-                    bm->Quaternion = new vec4_t[NumAnimationKeys];
+                    memcpy(bm.Position, data + ptr, sizeof(vec3_t) * numKeys); ptr += sizeof(vec3_t) * numKeys;
+                    memcpy(bm.Rotation, data + ptr, sizeof(vec3_t) * numKeys); ptr += sizeof(vec3_t) * numKeys;
 
-                    memcpy(bm->Position, Data + DataPtr, Size);
-                    DataPtr += Size;
-
-                    memcpy(bm->Rotation, Data + DataPtr, Size);
-                    DataPtr += Size;
-
-                    for (int k = 0; k < NumAnimationKeys; k++)
-                    {
-                        AngleQuaternion(bm->Rotation[k], bm->Quaternion[k]);
-                    }
+                    for (int k = 0; k < numKeys; ++k)
+                        AngleQuaternion(bm.Rotation[k], bm.Quaternion[k]);
+                }
+                else
+                {
+                    bm.Position = nullptr;
+                    bm.Rotation = nullptr;
+                    bm.Quaternion = nullptr;
                 }
             }
         }
     }
 
-    delete[] Data;
     Init(false);
-
     m_bCompletedAlloc = true;
     return true;
 }
+
 
 bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
 {
