@@ -2965,8 +2965,15 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
         {
             memcpy(&m->Triangles[j], Data + DataPtr, Size); DataPtr += Size2;
         }
+
+
         //memcpy(m->Commands ,Data+DataPtr,m->NumCommandBytes);DataPtr+=m->NumCommandBytes;
-        memcpy(Textures[i].FileName, Data + DataPtr, 32); DataPtr += 32;
+        if (DataPtr + 32 > DataBytes) {
+            delete[] Data;
+            return false;
+        }
+        memcpy(Textures[i].FileName, Data + DataPtr, 32);
+        DataPtr += 32;
 
         TextureScriptParsing TSParsing;
 
@@ -3003,24 +3010,41 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     {
         Bone_t* b = &Bones[i];
         b->Dummy = *((char*)(Data + DataPtr)); DataPtr += 1;
+
         if (!b->Dummy)
         {
             memcpy(b->Name, Data + DataPtr, 32); DataPtr += 32;
             b->Parent = *((short*)(Data + DataPtr)); DataPtr += 2;
+
             b->BoneMatrixes = new BoneMatrix_t[NumActions];
+
             for (int j = 0; j < NumActions; j++)
             {
                 BoneMatrix_t* bm = &b->BoneMatrixes[j];
-                Size = Actions[j].NumAnimationKeys * sizeof(vec3_t);
                 int NumAnimationKeys = Actions[j].NumAnimationKeys;
-                bm->Position = new vec3_t[NumAnimationKeys];
-                bm->Rotation = new vec3_t[NumAnimationKeys];
-                bm->Quaternion = new vec4_t[NumAnimationKeys];
-                memcpy(bm->Position, Data + DataPtr, Size); DataPtr += Size;
-                memcpy(bm->Rotation, Data + DataPtr, Size); DataPtr += Size;
-                for (int k = 0; k < NumAnimationKeys; k++)
+
+                bm->Position = nullptr;
+                bm->Rotation = nullptr;
+                bm->Quaternion = nullptr;
+
+                if (NumAnimationKeys > 0)
                 {
-                    AngleQuaternion(bm->Rotation[k], bm->Quaternion[k]);
+                    Size = NumAnimationKeys * sizeof(vec3_t);
+
+                    bm->Position = new vec3_t[NumAnimationKeys];
+                    bm->Rotation = new vec3_t[NumAnimationKeys];
+                    bm->Quaternion = new vec4_t[NumAnimationKeys];
+
+                    memcpy(bm->Position, Data + DataPtr, Size);
+                    DataPtr += Size;
+
+                    memcpy(bm->Rotation, Data + DataPtr, Size);
+                    DataPtr += Size;
+
+                    for (int k = 0; k < NumAnimationKeys; k++)
+                    {
+                        AngleQuaternion(bm->Rotation[k], bm->Quaternion[k]);
+                    }
                 }
             }
         }
