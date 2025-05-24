@@ -2677,36 +2677,6 @@ void BMD::FindTriangleForEdge(int iMesh, int iTri1, int iIndex11)
 }
 //#endif //USE_SHADOWVOLUME
 
-
-class BMDReader {
-public:
-    BMDReader(unsigned char* data, size_t size) : data(data), size(size), ptr(0) {}
-
-    void Skip(size_t bytes) { ptr += bytes; }
-
-    template <typename T>
-    T Read() {
-        T value;
-        memcpy(&value, data + ptr, sizeof(T));
-        ptr += sizeof(T);
-        return value;
-    }
-
-    void ReadBytes(void* dst, size_t count) {
-        memcpy(dst, data + ptr, count);
-        ptr += count;
-    }
-
-    size_t Tell() const { return ptr; }
-    unsigned char* GetPointer() const { return data + ptr; }
-
-private:
-    unsigned char* data;
-    size_t size;
-    size_t ptr;
-};
-
-
 bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
 {
     if (m_bCompletedAlloc)
