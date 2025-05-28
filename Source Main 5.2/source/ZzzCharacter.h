@@ -14,28 +14,18 @@ DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip);
 CHARACTER* FindCharacterByID(wchar_t* szName);
 CHARACTER* FindCharacterByKey(int Key);
 
-void CreateMonsterServer(int Type, vec3_t Position, vec3_t Angle, int Level = 0);
-void CreateWeapon(int Type, int Level, CHARACTER* c, int Hand);
 void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1, bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true);
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
 void RenderCharactersClient();
-void RenderCharactersServer();
-void RenderCharactersShadow();
 void MoveCharacterClient(CHARACTER* cc);
 void MoveCharactersClient();
-void MoveCharactersServer();
 
 void MoveEye(OBJECT* o, BMD* b, int Right, int Left, int Right2 = -1, int Left2 = -1, int Right3 = -1, int Left3 = -1);
 void DeleteCloth(CHARACTER* c, OBJECT* o = NULL, PART_t* p2 = NULL);
 
 bool CheckFullSet(CHARACTER* c);
 
-void AttackRange(vec3_t Position, float Range, int Damage);
-
 void MoveCharacterPosition(CHARACTER* c);
-void ClientSendMonsterHit(CHARACTER* cc, int AttackPoint);
-void ClientSendPositionPacket(CHARACTER* c);
-void ClientSendPathPacket(unsigned short ID, unsigned char* PathX, unsigned char* PathY, unsigned char PathNum);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr, OBJECT* pHelper = nullptr);
 void ClearCharacters(int Key = -1);
@@ -73,7 +63,6 @@ int LevelConvert(BYTE Level);
 float CharacterMoveSpeed(CHARACTER* c);
 
 bool CheckMonsterSkill(CHARACTER* c, OBJECT* o);
-bool CheckMonsterInRange(CHARACTER* c, float Range);
 bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);
 

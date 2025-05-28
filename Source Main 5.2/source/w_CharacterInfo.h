@@ -1,9 +1,3 @@
-// w_CharacterInfo.h: interface for the CHARACTER class.
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_W_CHARACTER_H__95647591_5047_48A4_81AE_E88B5F17EE94__INCLUDED_)
-#define AFX_W_CHARACTER_H__95647591_5047_48A4_81AE_E88B5F17EE94__INCLUDED_
-
 #pragma once
 
 #include "SpinLock.h"
@@ -259,5 +253,3 @@ public:
         LastAttackEffectTime = static_cast<int>(AttackTime);
     }
 };
-
-#endif // !defined(AFX_W_CHARACTERINFO_H__95647591_5047_48A4_81AE_E88B5F17EE94__INCLUDED_)

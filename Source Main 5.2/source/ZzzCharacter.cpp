@@ -2529,7 +2529,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         }
 
         if (2 <= c->AttackTime && c->AttackTime <= 8 && rand_fps_check(1))
-        {	// 기 모으기
+        {
             for (int j = 0; j < 3; ++j)
             {
                 vec3_t CurPos;
@@ -14728,19 +14728,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"신녀 베이나");
         c->Object.Position[2] += 145.0f;
         break;
-    case MONSTER_WANDERING_MERCHANT_ZYRO:
-    {
-        OpenNpc(MODEL_ZAIRO);
-        c = CreateCharacter(Key, MODEL_ZAIRO, PositionX, PositionY);
-        wcscpy(c->ID, L"떠돌이상인 자이로");
-        c->Object.LifeTime = 100;
-        c->Object.Scale = 0.8f;
-        c->Object.m_fEdgeScale = 1.1f;
-        int i;
-        for (i = 0; i < 6; ++i)
-            Models[MODEL_ZAIRO].Actions[i].PlaySpeed = 0.33f;
-    }
-    break;
     case MONSTER_LEINA_THE_GENERAL_GOODS_MERCHANT:
         OpenNpc(MODEL_KARUTAN_NPC_REINA);
         c = CreateCharacter(Key, MODEL_KARUTAN_NPC_REINA, PositionX, PositionY);

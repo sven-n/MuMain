@@ -1,9 +1,4 @@
-#ifndef _REGKEY_H_
-#define _REGKEY_H_
-
-//. soyaviper
-
-#pragma warning(disable : 4786)
+#pragma once
 #include <string>
 
 namespace leaf {
@@ -16,91 +11,72 @@ namespace leaf {
             _HKEY_LOCAL_MACHINE = (LONG)(ULONG_PTR)HKEY_LOCAL_MACHINE,
             _HKEY_USERS = (LONG)(ULONG_PTR)HKEY_USERS
         };
-        CRegKey() {}
-        ~CRegKey() {}
+
+        CRegKey() = default;
+        ~CRegKey() = default;
 
         void SetKey(_HKEY hKey, const std::wstring& subkey) {
-            m_hKey = (HKEY)hKey;
+            m_hKey = reinterpret_cast<HKEY>(hKey);
             m_subkey = subkey;
         }
+
         bool ReadDword(const std::wstring& name, DWORD& value) {
-            HKEY	hKey = NULL;
-            DWORD	dwDisp;
-            DWORD	dwType = REG_DWORD;
-            DWORD	dwSize = sizeof(DWORD);
-
-            if (ERROR_SUCCESS != RegCreateKeyEx(m_hKey, m_subkey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
-                return false;
-
-            if (ERROR_SUCCESS != RegQueryValueEx(hKey, name.c_str(), NULL, &dwType, (LPBYTE)&value, &dwSize)) {
-                RegCloseKey(hKey);
-                return false;
-            }
-
-            RegCloseKey(hKey);
-            return true;
+            return OpenKey([&](HKEY hKey) {
+                DWORD type = REG_DWORD;
+                DWORD size = sizeof(DWORD);
+                return RegQueryValueEx(hKey, name.c_str(), nullptr, &type, reinterpret_cast<LPBYTE>(&value), &size) == ERROR_SUCCESS;
+                });
         }
+
         bool ReadString(const std::wstring& name, std::wstring& value) {
-            wchar_t	szTempKey[256];
-            HKEY	hKey = NULL;
-            DWORD	dwDisp;
-            DWORD	dwType = REG_EXPAND_SZ;
-            DWORD	dwSize = 256;
-
-            if (ERROR_SUCCESS != RegCreateKeyEx(m_hKey, m_subkey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
-                return false;
-
-            if (ERROR_SUCCESS != RegQueryValueEx(hKey, name.c_str(), NULL, &dwType, (LPBYTE)szTempKey, &dwSize)) {
-                RegCloseKey(hKey);
-                return false;
-            }
-            value = szTempKey;
-            RegCloseKey(hKey);
-            return true;
+            return OpenKey([&](HKEY hKey) {
+                wchar_t buffer[256];
+                DWORD type = REG_EXPAND_SZ;
+                DWORD size = sizeof(buffer);
+                if (RegQueryValueEx(hKey, name.c_str(), nullptr, &type, reinterpret_cast<LPBYTE>(buffer), &size) != ERROR_SUCCESS)
+                    return false;
+                value = buffer;
+                return true;
+                });
         }
+
         bool WriteDword(const std::wstring& name, DWORD value) {
-            HKEY	hKey = NULL;
-            DWORD	dwDisp;
-            DWORD	dwSize = sizeof(DWORD);
-
-            if (ERROR_SUCCESS != RegCreateKeyEx(m_hKey, m_subkey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
-                return false;
-
-            RegSetValueEx(hKey, name.c_str(), 0L, REG_DWORD, (BYTE*)&value, dwSize);
-            RegCloseKey(hKey);
-            return true;
+            return OpenKey([&](HKEY hKey) {
+                return RegSetValueEx(hKey, name.c_str(), 0, REG_DWORD, reinterpret_cast<const BYTE*>(&value), sizeof(DWORD)) == ERROR_SUCCESS;
+                });
         }
+
         bool WriteString(const std::wstring& name, const std::wstring& value) {
-            HKEY	hKey = NULL;
-            DWORD	dwDisp;
-            DWORD	dwSize = value.size();
-
-            if (ERROR_SUCCESS != RegCreateKeyEx(m_hKey, m_subkey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp))
-                return false;
-
-            RegSetValueEx(hKey, name.c_str(), 0L, REG_SZ, (CONST BYTE*)value.c_str(), dwSize);
-            RegCloseKey(hKey);
-            return true;
+            return OpenKey([&](HKEY hKey) {
+                DWORD size = static_cast<DWORD>((value.size() + 1) * sizeof(wchar_t)); 
+                return RegSetValueEx(hKey, name.c_str(), 0, REG_SZ, reinterpret_cast<const BYTE*>(value.c_str()), size) == ERROR_SUCCESS;
+                });
         }
+
         bool DeleteKey() {
-            if (ERROR_SUCCESS != RegDeleteKey(m_hKey, m_subkey.c_str()))
-                return false;
-            return true;
+            return RegDeleteKey(m_hKey, m_subkey.c_str()) == ERROR_SUCCESS;
         }
-        bool DeleteValue(const std::wstring& name) {
-            HKEY	hKey = NULL;
-            if (ERROR_SUCCESS != RegOpenKeyEx(m_hKey, m_subkey.c_str(), REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, &hKey))
-                return false;
 
-            RegDeleteValue(hKey, name.c_str());
-            RegCloseKey(hKey);
-            return true;
+        bool DeleteValue(const std::wstring& name) {
+            return OpenKey([&](HKEY hKey) {
+                return RegDeleteValue(hKey, name.c_str()) == ERROR_SUCCESS;
+                });
         }
 
     private:
-        HKEY	m_hKey;
-        std::wstring	m_subkey;
+        HKEY m_hKey = nullptr;
+        std::wstring m_subkey;
+
+        template<typename Func>
+        bool OpenKey(Func&& func) {
+            HKEY hKey = nullptr;
+            DWORD disp;
+            if (RegCreateKeyEx(m_hKey, m_subkey.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &hKey, &disp) != ERROR_SUCCESS)
+                return false;
+
+            bool result = func(hKey);
+            RegCloseKey(hKey);
+            return result;
+        }
     };
 }
-
-#endif /* _REGKEY_H_ */

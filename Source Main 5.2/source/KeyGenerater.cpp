@@ -28,13 +28,6 @@ CKeyGenerater::~CKeyGenerater()
 {
 }
 
-#ifdef USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
-DWORD CKeyGenerater::GenerateSeedValue()
-{
-    return GetLargeRand();
-}
-#endif // USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
-
 DWORD CKeyGenerater::GenerateKeyValue(DWORD dwKeyValue)
 {
     DWORD dwRegenerateKeyValue = 0;
@@ -59,17 +52,3 @@ bool CKeyGenerater::CheckKeyValue(DWORD* dwOldKeyValue, DWORD dwReceiveKeyValue)
 
     return false;
 }
-
-#ifdef USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE
-void CKeyGenerater::_SimulationKeyGenerate()
-{
-    DWORD dwKeyValue = 0;
-
-    dwKeyValue = GenerateSeedValue();
-
-    for (int i = 0; i < 10000; i++)
-    {
-        dwKeyValue = GenerateKeyValue(dwKeyValue);
-    }
-}
-#endif // USE_MAPMOVE_KEY_GENERATOR_SERVER_SIDE

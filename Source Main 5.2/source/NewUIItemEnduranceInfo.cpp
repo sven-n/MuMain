@@ -11,7 +11,7 @@
 #include "GIPetManager.h"
 #endif //PJH_FIX_SPRIT
 
-extern float g_fScreenRate_x;
+
 
 using namespace SEASON3B;
 

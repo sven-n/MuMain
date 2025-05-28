@@ -32,8 +32,8 @@ public:
     int		m_iNumServer;
     bool	m_bPvPServer;
     BYTE	m_abyNonPvpServer[MAX_SERVER_PER_GROUP];
-    unicode::t_char	m_szName[MAX_TEXT_LENGTH];
-    unicode::t_char	m_szDescription[MAX_TEXT_LENGTH];
+    wchar_t	m_szName[MAX_TEXT_LENGTH];
+    wchar_t	m_szDescription[MAX_TEXT_LENGTH];
 
     type_listServer				m_listServerInfo;
 

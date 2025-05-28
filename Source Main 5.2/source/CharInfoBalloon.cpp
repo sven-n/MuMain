@@ -9,8 +9,8 @@
 #include "UIControls.h"
 #include "CharacterManager.h"
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 
 CCharInfoBalloon::CCharInfoBalloon() : m_pCharInfo(NULL)
 {

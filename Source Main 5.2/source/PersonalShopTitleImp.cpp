@@ -537,8 +537,8 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
     break;
     }
 
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    
+    
     POINT RenderPos = { m_pos.x / g_fScreenRate_x, m_pos.y / g_fScreenRate_y };
     SIZE RenderBoxSize = { m_size.cx / g_fScreenRate_x, m_size.cy / g_fScreenRate_y };
     SIZE RenderIconSize = { m_icon.cx / g_fScreenRate_x, m_icon.cy / g_fScreenRate_y };

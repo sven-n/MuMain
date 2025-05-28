@@ -1,9 +1,3 @@
-// ChangeRingManager.h: interface for the CChangeRingManager class.
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_CHANGERINGMANAGER_H__ABB6CFCF_B65B_48BB_B54B_73685EE2E30A__INCLUDED_)
-#define AFX_CHANGERINGMANAGER_H__ABB6CFCF_B65B_48BB_B54B_73685EE2E30A__INCLUDED_
-
 #pragma once
 
 class CChangeRingManager
@@ -23,5 +17,3 @@ public:
 };
 
 #define g_ChangeRingMgr CChangeRingManager::GetInstance()
-
-#endif // !defined(AFX_CHANGERINGMANAGER_H__ABB6CFCF_B65B_48BB_B54B_73685EE2E30A__INCLUDED_)

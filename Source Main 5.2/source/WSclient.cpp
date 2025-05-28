@@ -85,10 +85,6 @@ extern CUITextInputBox* g_pSingleTextInputBox;
 extern CMurdererMove g_MurdererMove;
 #endif	// _PVP_ADD_MOVE_SCROLL
 
-#ifdef _PVP_DYNAMIC_SERVER_TYPE
-extern BOOL g_bIsCurrentServerPvP;
-#endif	// _PVP_DYNAMIC_SERVER_TYPE
-
 extern  short   g_shCameraLevel;
 
 extern BYTE DebugText[MAX_DEBUG_MAX][256];
@@ -100,7 +96,7 @@ extern int g_iKeyPadEnable;
 extern BOOL g_bWhileMovingZone;
 extern DWORD g_dwLatestZoneMoving;
 
-extern CUIMapName* g_pUIMapName; // rozy
+extern CUIMapName* g_pUIMapName; 
 
 extern bool g_PetEnableDuel;
 
@@ -110,13 +106,10 @@ MASTER_LEVEL_VALUE	Master_Level_Data;
 //BYTE Serial[SIZE_PROTOCOLSERIAL+1] = {"TbYehR2hFUPBKgZj"};
 
 BYTE Version[SIZE_PROTOCOLVERSION] = { '2', '0', '4', '0', '4' };
-
 BYTE Serial[SIZE_PROTOCOLSERIAL + 1] = { "k1Pk2jcET48mxL3b" };
 Connection* SocketClient = nullptr;
 bool EnableSocket = false;
 
-BYTE    g_byPacketSerialSend = 0;
-BYTE    g_byPacketSerialRecv = 0;
 
 BOOL    g_bGameServerConnected = FALSE;
 
@@ -124,7 +117,7 @@ MATCH_RESULT	g_wtMatchResult;
 PMSG_MATCH_TIMEVIEW	g_wtMatchTimeLeft;
 int g_iGoalEffect = 0;
 
-CROWN_SWITCH_INFO* Switch_Info = NULL;
+CROWN_SWITCH_INFO* Switch_Info = nullptr;
 
 int     HeroKey;
 int     CurrentProtocolState;
@@ -162,8 +155,6 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
 BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
-    g_byPacketSerialSend = 0;
-    g_byPacketSerialRecv = 0;
     g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
 
     // todo: generally, it's a bad idea to assume a specific port number (range).
@@ -191,13 +182,6 @@ void DeleteSocket()
     }
 }
 
-static BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
-
-void BuxConvert(BYTE* Buffer, int Size)
-{
-    for (int i = 0; i < Size; i++)
-        Buffer[i] ^= bBuxCode[i % 3];
-}
 
 int  LogIn = 0;
 wchar_t LogInID[MAX_ID_SIZE + 1] = { 0, };
@@ -551,7 +535,7 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
 
         CreateHero(Data->Index, CharacterView.Class, CharacterView.Skin, fPos[0], fPos[1], fAngle);
         CharactersClient[Data->Index].Level = Data->Level;
-        SERVER_CLASS_TYPE serverClass = (SERVER_CLASS_TYPE)(Data->Class >> 3);
+        auto serverClass = (SERVER_CLASS_TYPE)(Data->Class >> 3);
         auto iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(serverClass);
 
         CharactersClient[Data->Index].Class = iClass;
@@ -623,7 +607,7 @@ void InitGame()
     g_pOption->SetAutoAttack(true);
     g_pOption->SetWhisperSound(false);
 
-    CheckInventory = NULL;
+    CheckInventory = nullptr;
 
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
@@ -824,11 +808,11 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     memset(c->ID, 0, sizeof c->ID);
     wcscpy(c->ID, CharacterAttribute->Name);
 
-    for (int i = 0; i < MAX_EQUIPMENT; ++i)
+    for (auto & i : CharacterMachine->Equipment)
     {
-        CharacterMachine->Equipment[i].Type = -1;
-        CharacterMachine->Equipment[i].Level = 0;
-        CharacterMachine->Equipment[i].ExcellentFlags = 0;
+        i.Type = -1;
+        i.Level = 0;
+        i.ExcellentFlags = 0;
     }
     
     CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
@@ -1103,9 +1087,9 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     CharacterAttribute->SkillMasterNumber = 0;
 
     int SkillType = 0;
-    for (int i = 0; i < MAX_SKILLS; i++)
+    for (auto & i : CharacterAttribute->Skill)
     {
-        SkillType = CharacterAttribute->Skill[i];
+        SkillType = i;
         if (SkillType != 0)
         {
             CharacterAttribute->SkillNumber++;
@@ -1284,11 +1268,11 @@ int CalcItemLength(std::span<const BYTE> ReceiveBuffer)
 
 BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
 {
-    for (int i = 0; i < MAX_EQUIPMENT; i++)
+    for (auto & i : CharacterMachine->Equipment)
     {
-        CharacterMachine->Equipment[i].Type = -1;
-        CharacterMachine->Equipment[i].Number = 0;
-        CharacterMachine->Equipment[i].ExcellentFlags = 0;
+        i.Type = -1;
+        i.Number = 0;
+        i.ExcellentFlags = 0;
     }
 
     g_pMyInventory->UnequipAllItems();
@@ -1381,10 +1365,10 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     }
     else
     {
-        for (int i = 0; i < MAX_SHOP_INVENTORY; i++)
+        for (auto & i : ShopInventory)
         {
-            ShopInventory[i].Type = -1;
-            ShopInventory[i].Number = 0;
+            i.Type = -1;
+            i.Number = 0;
         }
 
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
@@ -1487,7 +1471,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             for (int i = 0; i < messageSize - 1; i++)
                 Text[i] = Text[i + 1];
 
-            CHARACTER* pFindGm = NULL;
+            CHARACTER* pFindGm = nullptr;
 
             for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
             {
@@ -1514,7 +1498,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
         }
         else
         {
-            CHARACTER* pFindGm = NULL;
+            CHARACTER* pFindGm = nullptr;
             for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
             {
                 CHARACTER* c = &CharactersClient[i];
@@ -1588,7 +1572,7 @@ void ReceiveChatKey(const BYTE* ReceiveBuffer)
     int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
     int Index = FindCharacterIndex(Key);
 
-    if (Hero->GuildStatus == G_MASTER && !wcscmp(CharactersClient[Index].ID, L"길드 마스터"))
+    if (Hero->GuildStatus == G_MASTER && wcscmp(CharactersClient[Index].ID, L"길드 마스터") == 0)
     {
         g_pNewUISystem->Show(SEASON3B::INTERFACE_NPCGUILDMASTER);
 
@@ -1640,7 +1624,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     }
     else if (Data->Result >= 10 && Data->Result <= 15)
     {
-        if (Data->Notice != NULL && Data->Notice[0] != '\0')
+        if (Data->Notice != nullptr && Data->Notice[0] != '\0')
         {
             g_pSlideHelpMgr->AddSlide(Data->Count, Data->Delay, Text, Data->Result - 10, Data->Speed / 10.0f, Data->Color);
         }
@@ -1849,7 +1833,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
             if ((gMapManager.InChaosCastle(OldWorld) == true && OldWorld != gMapManager.WorldActive) || gMapManager.InChaosCastle() == true)
             {
-                PlayBuffer(SOUND_CHAOS_ENVIR, NULL, true);
+                PlayBuffer(SOUND_CHAOS_ENVIR, nullptr, true);
 
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_FRIEND);
 
@@ -2506,10 +2490,10 @@ void AppearMonster(CHARACTER* c)
             vec3_t vPos;
             Vector(c->Object.Position[0] + 20.0f, c->Object.Position[1] + 20.0f, c->Object.Position[2], vPos);
 
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, NULL, 60.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, NULL, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, NULL, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, NULL, 60.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
 
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
@@ -2569,7 +2553,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
 
         g_ConsoleDebug->Write(MCD_RECEIVE, L"0x13 [ReceiveCreateMonsterViewport(Type : %d | Key : %d)]", Type, Key);
 
-        if (c == NULL) break;
+        if (c == nullptr) break;
 
         OBJECT* o = &c->Object;
         if (IsMonster(c))
@@ -2700,7 +2684,7 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
             c = CreateMonster(Type, Data2->PositionX, Data2->PositionY, Key);
         }
 
-        if (c == NULL) break;
+        if (c == nullptr) break;
 
         OBJECT* o = &c->Object;
 
@@ -2762,7 +2746,7 @@ void ReceiveDeleteCharacterViewport(const BYTE* ReceiveBuffer)
     {
         auto Data2 = (LPPDELETE_CHARACTER)(ReceiveBuffer + Offset);
 
-        if (Switch_Info != NULL)
+        if (Switch_Info != nullptr)
         {
             WORD Key = ((WORD)(Data2->KeyH) << 8) + Data2->KeyL;
             if (Key == FIRST_CROWN_SWITCH_NUMBER)
@@ -3455,7 +3439,7 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
             }
             else if (bufftype == eBuff_GMEffect)
             {
-                if (c->m_pParts != NULL)
+                if (c->m_pParts != nullptr)
                 {
                     DeleteParts(c);
                 }
@@ -5186,7 +5170,7 @@ void ReceiveChainMagic(const BYTE* ReceiveBuffer)
 
     CHARACTER* pSourceChar = &CharactersClient[FindCharacterIndex(pPacketData->wUserIndex)];
     OBJECT* pSourceObject = &pSourceChar->Object;
-    OBJECT* pTempObject = NULL;
+    OBJECT* pTempObject = nullptr;
 
     //SetAction(pSourceObject, PLAYER_SKILL_CHAIN_LIGHTNING);
 
@@ -5217,7 +5201,7 @@ void ReceiveChainMagic(const BYTE* ReceiveBuffer)
         CHARACTER* pTargetChar = &CharactersClient[FindCharacterIndex(pPacketData2->wTargetIndex)];
         OBJECT* pTargetObject = &pTargetChar->Object;
 
-        if (pTempObject != pTargetObject && pTargetObject != NULL && pTargetObject->Live == true)
+        if (pTempObject != pTargetObject && pTargetObject != nullptr && pTargetObject->Live == true)
         {
             vec3_t vAngle;
             Vector(-60.f, 0.f, pSourceObject->Angle[2], vAngle);
@@ -5445,8 +5429,8 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
 void FallingStartCharacter(CHARACTER* c, OBJECT* o)
 {
-    BYTE positionX = (BYTE)(o->Position[0] / TERRAIN_SCALE);
-    BYTE positionY = (BYTE)(o->Position[1] / TERRAIN_SCALE);
+    auto positionX = (BYTE)(o->Position[0] / TERRAIN_SCALE);
+    auto positionY = (BYTE)(o->Position[1] / TERRAIN_SCALE);
     int WallIndex = TERRAIN_INDEX_REPEAT(positionX, positionY);
     int Wall = TerrainWall[WallIndex] & TW_ACTION;
 
@@ -6163,7 +6147,7 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
 
     auto Offset = sizeof(PHEADER_DEFAULT_ITEM_EXTENDED_HEAD);
     auto itemData = ReceiveBuffer.subspan(Offset);
-    if (itemData.size() > 0)
+    if (!itemData.empty())
     {
         int length = CalcItemLength(itemData);
         itemData = itemData.subspan(0, length);
@@ -7692,11 +7676,11 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
         if (auto search = SKILL_REPLACEMENTS.find(newSkill); search != SKILL_REPLACEMENTS.end())
         {
             const auto replacedSkill = search->second;
-            for (int i = 0; i < MAX_SKILLS; ++i)
+            for (auto & i : CharacterAttribute->Skill)
             {
-                if (CharacterAttribute->Skill[i] == replacedSkill)
+                if (i == replacedSkill)
                 {
-                    CharacterAttribute->Skill[i] = AT_SKILL_UNDEFINED;
+                    i = AT_SKILL_UNDEFINED;
                     break;
                 }
             }
@@ -7775,7 +7759,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         break;
     case 5:
     {
-        SEASON3B::CDialogMsgBox* pMsgBox = NULL;
+        SEASON3B::CDialogMsgBox* pMsgBox = nullptr;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDialogMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
@@ -7840,7 +7824,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     break;
     case 16:
     {
-        SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
+        SEASON3B::CNewUICommonMessageBox* pMsgBox = nullptr;
 
         switch (Data->Cmd2)
         {
@@ -7897,7 +7881,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         int Index = FindCharacterIndex(Key);
         if (Index >= 0 && Index != MAX_CHARACTERS_CLIENT) {
             OBJECT* to = &CharactersClient[Index].Object;
-            if (to != NULL) {
+            if (to != nullptr) {
                 CreateEffect(MODEL_EFFECT_SKURA_ITEM, to->Position, to->Angle, to->Light, 0, to);
                 PlayBuffer(SOUND_CHERRYBLOSSOM_EFFECT0, to);
             }
@@ -8211,7 +8195,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             GlobalText.Add(1154, szOpenTime1);
             GlobalText.Add(1155, szOpenTime2);
 
-            SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
+            SEASON3B::CNewUICommonMessageBox* pMsgBox = nullptr;
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
             if (pMsgBox)
             {
@@ -8222,7 +8206,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
         else
         {
             wchar_t Text[256];
-            int Hour = (int)(time / 60);
+            auto Hour = (int)(time / 60);
             int Mini = (int)(time)-(Hour * 60);
 
             wchar_t szOpenTime[256] = { 0, };
@@ -8234,7 +8218,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             GlobalText.Remove(1154);
             GlobalText.Add(1154, szOpenTime);
 
-            SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
+            SEASON3B::CNewUICommonMessageBox* pMsgBox = nullptr;
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
             if (pMsgBox)
             {
@@ -8585,7 +8569,7 @@ void ReceiveDuelResult(const BYTE* ReceiveBuffer)
     swprintf(szMessage, GlobalText[2689], 10);
     g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
-    SEASON3B::CDuelResultMsgBox* lpMsgBox = NULL;
+    SEASON3B::CDuelResultMsgBox* lpMsgBox = nullptr;
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDuelResultMsgBoxLayout), &lpMsgBox);
     if (lpMsgBox)
     {
@@ -9200,7 +9184,7 @@ void ReceiveFriendStateChange(const BYTE* ReceiveBuffer)
     if (dwChatRoomUIID > 0)
     {
         auto* pWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwChatRoomUIID);
-        if (pWindow == NULL);
+        if (pWindow == nullptr);
         else if (Data->Server >= 0xFD/* || Data->Server == 0xFB*/)
         {
             pWindow->Lock(TRUE);
@@ -9455,7 +9439,7 @@ void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_CHAT_INVITE_RESULT)ReceiveBuffer;
     auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid);
-    if (pChatWindow == NULL) return;
+    if (pChatWindow == nullptr) return;
 
     switch (Data->Result)
     {
@@ -9463,7 +9447,7 @@ void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
         pChatWindow->AddChatText(255, GlobalText[1056], 1, 0);
         break;
     case 0x01:
-        if (pChatWindow->GetCurrentInvitePal() != NULL)
+        if (pChatWindow->GetCurrentInvitePal() != nullptr)
         {
             wchar_t szText[MAX_TEXT_LENGTH + 1] = { 0 };
             wcsncpy(szText, pChatWindow->GetCurrentInvitePal()->m_szID, MAX_ID_SIZE);
@@ -9992,7 +9976,7 @@ void ReceiveProgressQuestRequestReward(const BYTE* ReceiveBuffer)
 
 void ReceiveProgressQuestListReady(const BYTE* ReceiveBuffer)
 {
-    g_QuestMng.SetQuestIndexByEtcList(NULL, 0);
+    g_QuestMng.SetQuestIndexByEtcList(nullptr, 0);
     SocketClient->ToGameServer()->SendActiveQuestListRequest();
     SocketClient->ToGameServer()->SendEventQuestStateListRequest();
 }
@@ -10443,7 +10427,7 @@ void ReceiveBCRegInfo(const BYTE* ReceiveBuffer)
     {
         g_GuardsMan.SetRegStatus(!Data->btIsGiveUp);
         DWORD dwMarkCount;
-        BYTE* pMarkCount = (BYTE*)&dwMarkCount;
+        auto* pMarkCount = (BYTE*)&dwMarkCount;
         *pMarkCount++ = Data->btGuildMark4;
         *pMarkCount++ = Data->btGuildMark3;
         *pMarkCount++ = Data->btGuildMark2;
@@ -10469,7 +10453,7 @@ void ReceiveBCRegMark(const BYTE* ReceiveBuffer)
     case 0x01:
     {
         DWORD dwMarkCount;
-        BYTE* pMarkCount = (BYTE*)&dwMarkCount;
+        auto* pMarkCount = (BYTE*)&dwMarkCount;
         *pMarkCount++ = Data->btGuildMark4;
         *pMarkCount++ = Data->btGuildMark3;
         *pMarkCount++ = Data->btGuildMark2;
@@ -10522,7 +10506,7 @@ void ReceiveBCNPCRepair(const BYTE* ReceiveBuffer)
     break;
     case 1:
     {
-        LPPMSG_NPCDBLIST pNPCInfo = NULL;
+        LPPMSG_NPCDBLIST pNPCInfo = nullptr;
         pNPCInfo = g_SenatusInfo.GetNPCInfo(Data->iNpcNumber, Data->iNpcIndex);
         pNPCInfo->iNpcHp = Data->iNpcHP;
         pNPCInfo->iNpcMaxHp = Data->iNpcMaxHP;
@@ -10547,7 +10531,7 @@ void ReceiveBCNPCUpgrade(const BYTE* ReceiveBuffer)
         break;
     case 1:
     {
-        LPPMSG_NPCDBLIST pNPCInfo = NULL;
+        LPPMSG_NPCDBLIST pNPCInfo = nullptr;
         pNPCInfo = g_SenatusInfo.GetNPCInfo(Data->iNpcNumber, Data->iNpcIndex);
         if (Data->iNpcUpType == 1)
             pNPCInfo->iNpcDfLevel = Data->iNpcUpValue;
@@ -10664,7 +10648,7 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
     case 0:
     {
         g_pUIPopup->CancelPopup();
-        g_pUIPopup->SetPopup(GlobalText[860], 1, 50, POPUP_OK, NULL);
+        g_pUIPopup->SetPopup(GlobalText[860], 1, 50, POPUP_OK, nullptr);
     }
     break;
 
@@ -10675,7 +10659,7 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
     case 2:
     {
         g_pUIPopup->CancelPopup();
-        g_pUIPopup->SetPopup(GlobalText[1386], 1, 50, POPUP_OK, NULL);
+        g_pUIPopup->SetPopup(GlobalText[1386], 1, 50, POPUP_OK, nullptr);
     }
     break;
     }
@@ -10726,7 +10710,7 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
 
             // WTF - why not just use an int?
             DWORD dwMarkCount;
-            BYTE* pMarkCount = (BYTE*)&dwMarkCount;
+            auto* pMarkCount = (BYTE*)&dwMarkCount;
             *pMarkCount++ = pData2->btRegMarks4;
             *pMarkCount++ = pData2->btRegMarks3;
             *pMarkCount++ = pData2->btRegMarks2;
@@ -10844,11 +10828,11 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
 
     CHARACTER* CrownSwitch = &CharactersClient[iIndex];
 
-    if (CrownSwitch == NULL)
+    if (CrownSwitch == nullptr)
     {
         return;
     }
-    if (CrownSwitch->ID == NULL)
+    if (CrownSwitch->ID == nullptr)
     {
         return;
     }
@@ -10882,11 +10866,11 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
         CHARACTER* pCha = &CharactersClient[iIndex];
         wchar_t strText[256];
 
-        SEASON3B::CProgressMsgBox* pMsgBox = NULL;
+        SEASON3B::CProgressMsgBox* pMsgBox = nullptr;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCrownSwitchOtherPushLayout), &pMsgBox);
         if (pMsgBox)
         {
-            if (pCha != NULL && pCha->ID != NULL)
+            if (pCha != nullptr && pCha->ID != nullptr)
             {
                 swprintf(strText, GlobalText[1486], pCha->ID);
             }
@@ -10921,7 +10905,7 @@ void ReceiveCrownRegist(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        SEASON3B::CProgressMsgBox* pMsgBox = NULL;
+        SEASON3B::CProgressMsgBox* pMsgBox = nullptr;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSealRegisterStartLayout), &pMsgBox);
         if (pMsgBox)
         {
@@ -10942,7 +10926,7 @@ void ReceiveCrownRegist(const BYTE* ReceiveBuffer)
 
     case 2:
     {
-        SEASON3B::CProgressMsgBox* pMsgBox = NULL;
+        SEASON3B::CProgressMsgBox* pMsgBox = nullptr;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSealRegisterFailLayout), &pMsgBox);
         if (pMsgBox)
         {
@@ -11037,7 +11021,7 @@ void ReceiveBattleCasleSwitchInfo(const BYTE* ReceiveBuffer)
 
 bool Check_Switch(PRECEIVE_CROWN_SWITCH_INFO* Data)
 {
-    if (Switch_Info == NULL)
+    if (Switch_Info == nullptr)
     {
         Switch_Info = new CROWN_SWITCH_INFO[2];
 
@@ -11078,10 +11062,10 @@ bool Check_Switch(PRECEIVE_CROWN_SWITCH_INFO* Data)
 
 bool Delete_Switch()
 {
-    if (Switch_Info != NULL)
+    if (Switch_Info != nullptr)
     {
         delete[] Switch_Info;
-        Switch_Info = NULL;
+        Switch_Info = nullptr;
     }
     return true;
 }
@@ -11090,7 +11074,7 @@ void ReceiveBattleCastleStart(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
 
-    bool bStartBattleCastle = (bool)(pData->m_byCrownState);
+    auto bStartBattleCastle = (bool)(pData->m_byCrownState);
 
     battleCastle::SetBattleCastleStart(bStartBattleCastle);
 
@@ -11303,7 +11287,7 @@ void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
         {
             auto Type = (EMonsterType)(((WORD)(pData2->m_byTypeH) << 8) + pData2->m_byTypeL);
             CHARACTER* c = CreateMonster(Type, pData2->m_byPosX, pData2->m_byPosY, Key);
-            if (c == NULL) break;
+            if (c == nullptr) break;
             OBJECT* o = &c->Object;
 
             for (int j = 0; j < pData2->s_BuffCount; ++j)
@@ -11718,12 +11702,7 @@ void ReceiveCheckSumRequest(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveCheckSumRequest]");
 }
 
-void Action(CHARACTER* c, OBJECT* o, bool Now);
-
 extern int TimeRemain;
-
-BOOL TranslateProtocol(int HeadCode, BYTE* ReceiveBuffer, int Size, BOOL bEcrypted);
-void TranslateChattingProtocol(DWORD dwWindowUIID, int HeadCode, BYTE* ReceiveBuffer, int Size, BOOL bEcrypted);
 
 bool ReceiveRegistedLuckyCoin(const BYTE* ReceiveBuffer)
 {
@@ -12155,21 +12134,21 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
     {
     case -2:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[2953]);
     }
     break;
     case -1:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[2954]);
     }
     break;
     case 0:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2900], GlobalText[2901]);
 
@@ -12181,67 +12160,67 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
     break;
     case 1:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[2903]);
     }
     break;
     case 2:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[2904]);
     }
     break;
     case 3:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[2956]);
     }
     break;
     case 4:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[2957]);
     }
     break;
     case 5:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[2958]);
     }
     break;
     case 6:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[3052]);
     }break;
     case 7:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[3053]);
     }break;
     case 8:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[3054]);
     }break;
     case 9:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2902], GlobalText[3264]);
     }
     break;
     default:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);
     }
@@ -12261,21 +12240,21 @@ bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
     {
     case -2:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2953]);
     }
     break;
     case -1:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2954]);
     }
     break;
     case 0:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2910], GlobalText[2911]);
 
@@ -12284,83 +12263,83 @@ bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
     break;
     case 1:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2913]);
     }
     break;
     case 2:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2914]);
     }
     break;
     case 3:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2915]);
     }
     break;
     case 4:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2956]);
     }
     break;
     case 5:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2958]);
     }
     break;
     case 6:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2945], GlobalText[2958]);
     }break;
     case 7:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2959]);
     }
     break;
     case 8:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2960]);
     }
     break;
     case 9:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[2961]);
     }
     break;
     case 10:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[3264]);
     }
     break;
     case 20:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2912], GlobalText[3263]);
     }
     break;
     default:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);
     }
@@ -12443,21 +12422,21 @@ bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
     {
     case -2:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2928], GlobalText[2967]);
     }
     break;
     case -1:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2928], GlobalText[2966]);
     }
     break;
     case 0:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2924], GlobalText[2925]);
 
@@ -12466,41 +12445,41 @@ bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
     break;
     case 1:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2928], GlobalText[2962]);
     }
     break;
     case 2:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2928], GlobalText[2963]);
     }
     break;
     case 3:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2928], GlobalText[2964]);
     }
     break;
     case 4:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2928], GlobalText[2965]);
     }break;
     case 21:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2928], GlobalText[2284]);
     }
     break;
     case 22:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2928], GlobalText[3036]);
     }
@@ -12516,7 +12495,7 @@ bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
 #endif	// LEM_FIX_SERVERMSG_SEALITEM
     default:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
+        CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);
     }
@@ -12671,7 +12650,7 @@ bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
     {
         ITEM* pItem = g_pMyInventory->FindItem(Data->wItemSlotIndex);
 
-        if (pItem == NULL)
+        if (pItem == nullptr)
             return false;
 
         pItem->lExpireTime = (long)Data->lExpireDate;
@@ -14304,16 +14283,14 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
 
         return true;
     }
-    else
-    {
-        switch (buff)
+    
+    switch (buff)
         {
         case eBuff_CastleRegimentAttack3:
         {
             g_CharacterUnRegisterBuff(o, eBuff_CastleRegimentDefense);
         }
         break;
-
         case eBuff_SoulPotion:
         {
             if (o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
@@ -14323,7 +14300,6 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             }
         }
         break;
-
         case eBuff_CastleGateIsOpen:
         {
             if (o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
@@ -14333,7 +14309,6 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             }
         }
         break;
-
         case eBuff_CastleRegimentDefense:
         {
             if (o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
@@ -14348,7 +14323,6 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             }
         }
         break;
-
         case eBuff_CastleRegimentAttack1:
         {
             if (o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
@@ -14362,7 +14336,6 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             }
         }
         break;
-
         case eBuff_RemovalMagic:
         {
             if (o->Type >= MODEL_CRYWOLF_ALTAR1 && o->Type <= MODEL_CRYWOLF_ALTAR5)
@@ -14372,7 +14345,6 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
             }
         }
         break;
-
         case eBuff_CastleRegimentAttack2:
         {
             if (g_isCharacterBuff(o, eBuff_CastleRegimentDefense))
@@ -14380,9 +14352,7 @@ bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
         }
         break;
         }
-
         return true;
-    }
 }
 
 void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)

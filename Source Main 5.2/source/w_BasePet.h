@@ -1,6 +1,3 @@
-// w_BasePet.h: interface for the BasePet class.
-//////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "w_PetAction.h"

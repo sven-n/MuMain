@@ -84,7 +84,6 @@ extern void StopMp3(char* Name, BOOL bEnforce = false);
 extern void PlayMp3(char* Name, BOOL bEnforce = false);
 extern bool IsEndMp3();
 extern int GetMp3PlayPosition();
-extern unsigned int GenID();
 
 extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();

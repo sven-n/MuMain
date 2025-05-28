@@ -357,7 +357,6 @@ void OpenPlayers()
     Models[MODEL_PLAYER].Actions[PLAYER_RUN_TWO_HAND_SWORD_TWO].PlaySpeed = 0.3f;
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_TWO_HAND_SWORD_TWO].PlaySpeed = 0.24f;
 
-    //Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_ONETOONE    ].PlaySpeed = 0.30f;
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_DEATHSTAB].PlaySpeed = 0.45f;
 
     Models[MODEL_PLAYER].Actions[PLAYER_DIE1].Loop = true;
@@ -1800,7 +1799,10 @@ void OpenItemTextures()
 void DeleteNpcs()
 {
     for (int i = MODEL_NPC_BEGIN; i < MODEL_NPC_END; i++)
-        Models[i].Release();
+    {
+        if(Models[i].Version)
+            Models[i].Release();
+    }
 
     for (int i = SOUND_NPC; i < SOUND_NPC_END; i++)
         ReleaseBuffer(i);
@@ -2216,10 +2218,7 @@ void OpenNpc(int Type)
         gLoadData.AccessModel(MODEL_BENA, L"Data\\Npc\\", L"bena");
         gLoadData.OpenTexture(MODEL_BENA, L"Npc\\");
         break;
-    case MODEL_ZAIRO:
-        gLoadData.AccessModel(MODEL_ZAIRO, L"Data\\Npc\\", L"volvo"); // TODO: find the right BMD file
-        gLoadData.OpenTexture(MODEL_ZAIRO, L"Npc\\");
-        break;
+
     }
 
     for (int i = 0; i < b->NumActions; i++)
@@ -2297,8 +2296,9 @@ void SetMonsterSound(int Type, int s1, int s2, int s3, int s4, int s5, int s6 = 
 
 void DeleteMonsters()
 {
-    for (int i = MODEL_MONSTER01; i < MODEL_MONSTER_END; i++)
-        Models[i].Release();
+	for (int i = MODEL_MONSTER01; i < MODEL_MONSTER_END; i++)
+		if (Models[i].Version)
+         Models[i].Release();
 
     for (int i = SOUND_MONSTER; i < SOUND_MONSTER_END; i++)
         ReleaseBuffer(i);

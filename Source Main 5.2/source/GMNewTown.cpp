@@ -865,14 +865,12 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_SILVIA:
         OpenNpc(MODEL_ELBELAND_SILVIA);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_SILVIA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"�Ǻ��");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_RHEA:
         OpenNpc(MODEL_ELBELAND_RHEA);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_RHEA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"����");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.m_fEdgeScale = 1.1f;
         Models[MODEL_ELBELAND_RHEA].Actions[0].PlaySpeed = 0.2f;
@@ -881,14 +879,12 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_MARCE:
         OpenNpc(MODEL_ELBELAND_MARCE);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_MARCE, PosX, PosY);
-        wcscpy(pCharacter->ID, L"������");
         pCharacter->Object.Scale = 1.05f;
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_STRANGE_RABBIT:
         OpenMonsterModel(MONSTER_MODEL_RABBIT);
         pCharacter = CreateCharacter(Key, MODEL_RABBIT, PosX, PosY);
-        wcscpy(pCharacter->ID, L"�Ⱬ�� �䳢");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -896,7 +892,6 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_POLLUTED_BUTTERFLY:
         OpenMonsterModel(MONSTER_MODEL_BUTTERFLY);
         pCharacter = CreateCharacter(Key, MODEL_BUTTERFLY, PosX, PosY);
-        wcscpy(pCharacter->ID, L"������ �䳢");
         pCharacter->Object.Scale = 0.8f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -904,7 +899,6 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_HIDEOUS_RABBIT:
         OpenMonsterModel(MONSTER_MODEL_HIDEOUS_RABBIT);
         pCharacter = CreateCharacter(Key, MODEL_HIDEOUS_RABBIT, PosX, PosY);
-        wcscpy(pCharacter->ID, L"�����ΰ�");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -912,7 +906,6 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_WEREWOLF2:
         OpenMonsterModel(MONSTER_MODEL_WEREWOLF2);
         pCharacter = CreateCharacter(Key, MODEL_WEREWOLF2, PosX, PosY);
-        wcscpy(pCharacter->ID, L"������ ����");
         pCharacter->Object.Scale = 0.8f * 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -920,7 +913,6 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_CURSED_LICH:
         OpenMonsterModel(MONSTER_MODEL_CURSED_LICH);
         pCharacter = CreateCharacter(Key, MODEL_CURSED_LICH, PosX, PosY);
-        wcscpy(pCharacter->ID, L"���ֹ�����ġ");
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -928,7 +920,6 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_TOTEM_GOLEM:
         OpenMonsterModel(MONSTER_MODEL_TOTEM_GOLEM);
         pCharacter = CreateCharacter(Key, MODEL_TOTEM_GOLEM, PosX, PosY);
-        wcscpy(pCharacter->ID, L"���۰�");
         pCharacter->Object.Scale = 0.17f * 0.95f;
         pCharacter->Object.ShadowScale = 0.01f;
         pCharacter->Object.m_fEdgeScale = 1.05f;
@@ -939,7 +930,6 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_GRIZZLY:
         OpenMonsterModel(MONSTER_MODEL_GRIZZLY);
         pCharacter = CreateCharacter(Key, MODEL_GRIZZLY, PosX, PosY);
-        wcscpy(pCharacter->ID, L"���� �쾾");
         pCharacter->Object.Scale = 1.2f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -947,7 +937,6 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_CAPTAIN_GRIZZLY:
         OpenMonsterModel(MONSTER_MODEL_CAPTAIN_GRIZZLY);
         pCharacter = CreateCharacter(Key, MODEL_CAPTAIN_GRIZZLY, PosX, PosY);
-        wcscpy(pCharacter->ID, L"���� �쾾 ����");
         pCharacter->Object.Scale = 1.3f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;

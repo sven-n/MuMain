@@ -13,8 +13,8 @@
 #include "ZzzInventory.h"
 #endif	// ASG_ADD_GENS_SYSTEM
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 
 #define	UIMN_SHOW_TIME			5000
 #define	UIMN_ALPHA_VARIATION	0.015f

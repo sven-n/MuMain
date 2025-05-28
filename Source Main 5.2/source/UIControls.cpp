@@ -22,8 +22,7 @@
 
 extern BYTE m_CrywolfState;
 
-float g_fScreenRate_x = 0;
-float g_fScreenRate_y = 0;
+
 int g_iWidthEx = 5;
 
 extern int g_iChatInputType;

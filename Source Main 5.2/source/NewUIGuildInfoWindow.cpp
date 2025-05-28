@@ -16,7 +16,6 @@
 #include "ZzzInfomation.h"
 
 #include "CharacterManager.h"
-#include "GuildManager.h"
 
 int	DeleteIndex = 0;
 int AppointStatus = 0;
@@ -155,30 +154,6 @@ bool SEASON3B::CNewUIGuildInfoWindow::UpdateMouseEvent()
     {
         if (SEASON3B::IsRepeat(VK_LBUTTON))
         {
-            /*
-            if(GetNumberOfLines() > GetNumberOfShowingLines())
-            {
-                extern int MouseY;
-                if(MouseY-m_iGrapRelativePosY < m_WndPos.y-m_WndSize.cy+WND_TOP_BOTTOM_EDGE)
-                {
-                    Scrolling(GetNumberOfShowingLines()-1);
-                    m_ScrollBtnPos.y = m_WndPos.y-m_WndSize.cy+WND_TOP_BOTTOM_EDGE;
-                }
-                else if(MouseY-m_iGrapRelativePosY > m_WndPos.y-SCROLL_BTN_HEIGHT-WND_TOP_BOTTOM_EDGE)
-                {
-                    Scrolling(GetNumberOfLines()-1);
-                    m_ScrollBtnPos.y = m_WndPos.y-SCROLL_BTN_HEIGHT-WND_TOP_BOTTOM_EDGE;
-                }
-                else
-                {
-                    float fScrollRate = (float)((MouseY-m_iGrapRelativePosY) - (m_WndPos.y-m_WndSize.cy+WND_TOP_BOTTOM_EDGE))
-                        / (float)(m_WndSize.cy-WND_TOP_BOTTOM_EDGE*2-SCROLL_BTN_HEIGHT);
-                    Scrolling(GetNumberOfShowingLines() + (float)(GetNumberOfLines()-GetNumberOfShowingLines())*fScrollRate);
-
-                    m_ScrollBtnPos.y = MouseY - m_iGrapRelativePosY;
-                }
-            }
-            */
             return false;
         }
         if (SEASON3B::IsRelease(VK_LBUTTON))
@@ -490,7 +465,7 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderNoneGuild()
     ptOrigin.y += 8;
 
     wchar_t Text[128];
-    memset(&Text, 0, sizeof(unicode::t_char) * 128);
+    memset(&Text, 0, sizeof(wchar_t) * 128);
     swprintf(Text, GlobalText[180]);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0);
@@ -876,7 +851,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Enum()
     RenderImage(IMAGE_GUILDINFO_BOTTOM_LEFT, m_Pos.x + 8, m_Pos.y + 347, 14, 14);
     RenderImage(IMAGE_GUILDINFO_BOTTOM_RIGHT, m_Pos.x + 168, m_Pos.y + 347, 14, 14);
 
-    if (gGuildManager.IsGuildMaster())
+    if (Hero->GuildStatus == G_MASTER)
     {
         m_Button[BUTTON_GET_POSITION].Render();
         m_Button[BUTTON_FREE_POSITION].Render();

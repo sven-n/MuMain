@@ -13,19 +13,19 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "Local.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "UIControls.h"
 
-#define	CRW_ILLUST_FADE_TIME	2000.0
+#define	CRW_ILLUST_FADE_TIME	2000.0 
 #define	CRW_ILLUST_SHOW_TIME	22000.0
 
-#define	CRW_TEXT_FADE_TIME		300.0
+#define	CRW_TEXT_FADE_TIME		1000.0
 #define	CRW_NAME_SHOW_TIME		2300.0
 
 #define	CRW_DATA_FILE		"Data\\Local\\credit.bmd"
 
-extern float g_fScreenRate_x;
-extern char* g_lpszMp3[NUM_MUSIC];
+
+
 
 CCreditWin::CCreditWin() : m_hFont(NULL)
 {
@@ -242,8 +242,8 @@ void CCreditWin::CloseWin()
 
 	SocketClient->ToConnectServer()->SendServerListRequest();
 
-	::StopMp3(g_lpszMp3[MUSIC_MUTHEME]);
-	::PlayMp3(g_lpszMp3[MUSIC_MAIN_THEME]);
+	::StopMp3(MUSIC_MUTHEME);
+	::PlayMp3(MUSIC_MAIN_THEME);
 }
 
 void CCreditWin::Init()
@@ -324,8 +324,6 @@ void CCreditWin::AnimationIllust(double dDeltaTick)
 		break;
 	}
 }
-
-void BuxConvert(BYTE* Buffer, int Size);
 
 void CCreditWin::LoadText()
 {

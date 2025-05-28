@@ -12,8 +12,8 @@
 #include "MixMgr.h"
 
 extern DWORD		g_dwActiveUIID;
-extern float		g_fScreenRate_x;
-extern float		g_fScreenRate_y;
+
+
 
 extern int   ShopInventoryStartX;
 extern int   ShopInventoryStartY;

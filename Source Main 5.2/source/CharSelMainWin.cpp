@@ -16,8 +16,8 @@
 #include "ZzzOpenglUtil.h"
 #include "ServerListManager.h"
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 
 CCharSelMainWin::CCharSelMainWin()
 {

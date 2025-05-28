@@ -9,7 +9,7 @@
 
 using namespace SEASON3B;
 
-extern float g_fScreenRate_y;
+
 
 SEASON3B::CNewUIChatLogWindow::CNewUIChatLogWindow()
 {
@@ -666,7 +666,7 @@ bool SEASON3B::CNewUIChatLogWindow::IsShowFrame()
 
 bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 {
-    extern float g_fScreenRate_x;
+    
 
     if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
         SEASON3B::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
@@ -898,7 +898,7 @@ float SEASON3B::CNewUIChatLogWindow::GetKeyEventOrder()
 
 void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2)
 {
-    extern float g_fScreenRate_x;
+    
 
     SIZE TextSize;
     

@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
-#include "ZzzInfomation.h"
+#include "ZzzInfomation.h" 
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -37,10 +37,6 @@ vec3_t RenderArrayVertices[MAX_VERTICES * 3];
 vec4_t RenderArrayColors[MAX_VERTICES * 3];
 vec2_t RenderArrayTexCoords[MAX_VERTICES * 3];
 
-unsigned char ShadowBuffer[256 * 256];
-int           ShadowBufferWidth = 256;
-int           ShadowBufferHeight = 256;
-
 bool  StopMotion = false;
 float ParentMatrix[3][4];
 
@@ -58,10 +54,8 @@ void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorF
     CurrentAnimation = AnimationFrame;
     CurrentAnimationFrame = (int)AnimationFrame;
     float s1 = (CurrentAnimation - CurrentAnimationFrame);
-    //if(StopMotion)
-    //	s1 = (int)(s1*4)/4;
     float s2 = 1.f - s1;
-    int PriorAnimationFrame = (int)PriorFrame;
+    auto PriorAnimationFrame = (int)PriorFrame;
     if (NumActions > 0)
     {
         if (PriorAnimationFrame < 0)
@@ -137,18 +131,14 @@ void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorF
         {
             if (!Parent)
             {
-                //memcpy(BoneMatrix[i],BoneMatrix,sizeof(float)*12);
                 AngleMatrix(BodyAngle, ParentMatrix);
                 if (Translate)
                 {
-                    //ParentMatrix[0][0] *= BodyScale;
-                    //ParentMatrix[1][1] *= BodyScale;
-                    //ParentMatrix[2][2] *= BodyScale;
-                    for (int y = 0; y < 3; ++y)
+                    for (auto & y : ParentMatrix)
                     {
                         for (int x = 0; x < 3; ++x)
                         {
-                            ParentMatrix[y][x] *= BodyScale;
+                            y[x] *= BodyScale;
                         }
                     }
 
@@ -174,7 +164,6 @@ float BoneScale = 1.f;
 
 void BMD::Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate, float _Scale)
 {
-    // transform
     vec3_t LightPosition;
 
     if (LightEnable)
@@ -286,7 +275,6 @@ void BMD::Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Boun
     }
     fTransformedSize = max(max(BoundingMax[0] - BoundingMin[0], BoundingMax[1] - BoundingMin[1]),
         BoundingMax[2] - BoundingMin[2]);
-    //fTransformedSize *= 0.3f;
     VectorAdd(OBB->StartPos, BodyOrigin, OBB->StartPos);
     OBB->XAxis[1] = 0.f;
     OBB->XAxis[2] = 0.f;
@@ -296,7 +284,6 @@ void BMD::Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Boun
     OBB->ZAxis[1] = 0.f;
 }
 
-// vResultPosition = (BoneTransformMatrix * vRelativePosition) * BMD::BodyScale + vObjectPosition;
 void BMD::TransformByObjectBone(vec3_t vResultPosition, OBJECT* pObject, int iBoneNumber, vec3_t vRelativePosition)
 {
     if (iBoneNumber < 0 || iBoneNumber >= NumBones)
@@ -304,14 +291,14 @@ void BMD::TransformByObjectBone(vec3_t vResultPosition, OBJECT* pObject, int iBo
         assert(!"Bone number error");
         return;
     }
-    if (pObject == NULL)
+    if (pObject == nullptr)
     {
         assert(!"Empty Bone");
         return;
     }
 
     float(*TransformMatrix)[4];
-    if (pObject->BoneTransform != NULL)
+    if (pObject->BoneTransform != nullptr)
     {
         TransformMatrix = pObject->BoneTransform[iBoneNumber];
     }
@@ -321,7 +308,7 @@ void BMD::TransformByObjectBone(vec3_t vResultPosition, OBJECT* pObject, int iBo
     }
 
     vec3_t vTemp;
-    if (vRelativePosition == NULL)
+    if (vRelativePosition == nullptr)
     {
         vTemp[0] = TransformMatrix[0][3];
         vTemp[1] = TransformMatrix[1][3];
@@ -337,14 +324,14 @@ void BMD::TransformByObjectBone(vec3_t vResultPosition, OBJECT* pObject, int iBo
 
 void BMD::TransformByBoneMatrix(vec3_t vResultPosition, float(*BoneMatrix)[4], vec3_t vWorldPosition, vec3_t vRelativePosition)
 {
-    if (BoneMatrix == NULL)
+    if (BoneMatrix == nullptr)
     {
         assert(!"Empty Matrix");
         return;
     }
 
     vec3_t vTemp;
-    if (vRelativePosition == NULL)
+    if (vRelativePosition == nullptr)
     {
         vTemp[0] = BoneMatrix[0][3];
         vTemp[1] = BoneMatrix[1][3];
@@ -354,7 +341,7 @@ void BMD::TransformByBoneMatrix(vec3_t vResultPosition, float(*BoneMatrix)[4], v
     {
         VectorTransform(vRelativePosition, BoneMatrix, vTemp);
     }
-    if (vWorldPosition != NULL)
+    if (vWorldPosition != nullptr)
     {
         VectorScale(vTemp, BodyScale, vTemp);
         VectorAdd(vTemp, vWorldPosition, vResultPosition);
@@ -406,7 +393,7 @@ bool BMD::PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsig
         return Loop;
     }
 
-    const int priorAnimationFrame = (int)*AnimationFrame;
+    const auto priorAnimationFrame = (int)*AnimationFrame;
     *AnimationFrame += Speed * FPS_ANIMATION_FACTOR;
     if (priorAnimationFrame != (int)*AnimationFrame)
     {
@@ -451,7 +438,7 @@ bool BMD::PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsig
 
         if (fTemp >= (int)Key)
         {
-            int Frame = (int)*AnimationFrame;
+            auto Frame = (int)*AnimationFrame;
             *AnimationFrame = (float)(Frame % (Key)) + (*AnimationFrame - (float)Frame);
             Loop = false;
         }
@@ -486,7 +473,7 @@ void BMD::AnimationTransformWithAttachHighModel_usingGlobalTM(OBJECT* oHighHiera
     tmBoneHierarchicalObject[1][3] = tmBoneHierarchicalObject[1][3] * BodyScale;
     tmBoneHierarchicalObject[2][3] = tmBoneHierarchicalObject[2][3] * BodyScale;
 
-    if (NULL != vOutPosHighHiearachyModelBone)
+    if (nullptr != vOutPosHighHiearachyModelBone)
     {
         Vector(tmBoneHierarchicalObject[0][3], tmBoneHierarchicalObject[1][3], tmBoneHierarchicalObject[2][3],
             vOutPosHighHiearachyModelBone);
@@ -545,7 +532,7 @@ void BMD::AnimationTransformWithAttachHighModel(OBJECT* oHighHierarchyModel, BMD
     tmBoneHierarchicalObject[1][3] = tmBoneHierarchicalObject[1][3] * BodyScale;
     tmBoneHierarchicalObject[2][3] = tmBoneHierarchicalObject[2][3] * BodyScale;
 
-    if (NULL != vOutPosHighHiearachyModelBone)
+    if (nullptr != vOutPosHighHiearachyModelBone)
     {
         Vector(tmBoneHierarchicalObject[0][3], tmBoneHierarchicalObject[1][3], tmBoneHierarchicalObject[2][3],
             vOutPosHighHiearachyModelBone);
@@ -622,7 +609,7 @@ void BMD::AnimationTransformOnlySelf(vec3_t* arrOutSetfAllBonePositions,
 
     memset(arrBonesTMLocal, 0, sizeof(vec34_t) * NumBones);
 
-    if (NULL == oRefAnimation)
+    if (nullptr == oRefAnimation)
     {
         Animation(arrBonesTMLocal, 0, 0, 0, v3RootAngle, Temp, false, true);
     }
@@ -686,11 +673,9 @@ void BMD::Chrome(float* pchrome, int bone, vec3_t normal)
         g_chromeage[bone] = g_smodels_total;
     }
 
-    // calc s coord
     n = DotProduct(normal, g_chromeright[bone]);
     pchrome[0] = (n + 1.f); // FIX: make this a float
 
-    // calc t coord
     n = DotProduct(normal, g_chromeup[bone]);
     pchrome[1] = (n + 1.f); // FIX: make this a float
 }
@@ -772,7 +757,7 @@ void BMD::CreateLightMapSurface(Light_t* lp, Mesh_t* m, int i, int j, int MapWid
     float d = -DotProduct(vp, np);
 
     Bitmap_t* lmp = &LightMaps[NumLightMaps];
-    if (lmp->Buffer == NULL)
+    if (lmp->Buffer == nullptr)
     {
         lmp->Width = MapWidthMax;
         lmp->Height = MapHeightMax;
@@ -846,7 +831,7 @@ void BMD::BindLightMaps()
     for (int i = 0; i < NumLightMaps; i++)
     {
         Bitmap_t* lmp = &LightMaps[i];
-        if (lmp->Buffer != NULL)
+        if (lmp->Buffer != nullptr)
         {
             SmoothBitmap(lmp->Width, lmp->Height, lmp->Buffer);
             SmoothBitmap(lmp->Width, lmp->Height, lmp->Buffer);
@@ -869,10 +854,10 @@ void BMD::ReleaseLightMaps()
     for (int i = 0; i < NumLightMaps; i++)
     {
         Bitmap_t* lmp = &LightMaps[i];
-        if (lmp->Buffer != NULL)
+        if (lmp->Buffer != nullptr)
         {
             delete lmp->Buffer;
-            lmp->Buffer = NULL;
+            lmp->Buffer = nullptr;
         }
     }
     LightMapEnable = false;
@@ -1405,7 +1390,7 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
 
     bool EnableWave = false;
     int streamMesh = StreamMesh;
-    if (m->m_csTScript != NULL)
+    if (m->m_csTScript != nullptr)
     {
         if (m->m_csTScript->getStreamMesh())
         {
@@ -1468,7 +1453,7 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
         (RenderFlag & RENDER_OIL) == RENDER_OIL
         )
     {
-        if (m->m_csTScript != NULL)
+        if (m->m_csTScript != nullptr)
         {
             if (m->m_csTScript->getNoneBlendMesh()) return;
         }
@@ -1853,7 +1838,7 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
                 Vector(0.08f, 0.08f, 0.08f, Light);
                 if (iSubType == 0)
                 {
-                    CreateSprite(BITMAP_LIGHT, VertexTransform[i][vi], BodyScale, Light, NULL);
+                    CreateSprite(BITMAP_LIGHT, VertexTransform[i][vi], BodyScale, Light, nullptr);
                 }
                 else if (iSubType == 1)
                 {
@@ -1899,7 +1884,7 @@ void BMD::RenderBody(int Flag, float Alpha, int BlendMesh, float BlendMeshLight,
         iBlendMesh = BlendMesh;
 
         Mesh_t* m = &Meshs[i];
-        if (m->m_csTScript != NULL)
+        if (m->m_csTScript != nullptr)
         {
             if (m->m_csTScript->getHiddenMesh() == false && i != HiddenMesh)
             {
@@ -1978,7 +1963,7 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
     int Texture = IndexTexture[m->Texture];
     if (Texture == BITMAP_HIDE)
         return;
-    else if (Texture == BITMAP_SKIN)
+    if (Texture == BITMAP_SKIN)
     {
         if (HideSkin) return;
         Texture = BITMAP_SKIN + Skin;
@@ -1994,7 +1979,7 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
 
     bool EnableWave = false;
     int streamMesh = StreamMesh;
-    if (m->m_csTScript != NULL)
+    if (m->m_csTScript != nullptr)
     {
         if (m->m_csTScript->getStreamMesh())
         {
@@ -2039,7 +2024,7 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         || (RenderFlag & RENDER_CHROME6) == RENDER_CHROME6
         )
     {
-        if (m->m_csTScript != NULL)
+        if (m->m_csTScript != nullptr)
         {
             if (m->m_csTScript->getNoneBlendMesh()) return;
         }
@@ -2493,9 +2478,9 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
                 VectorTransform(Position[0], BoneMatrix[Parent], BoneVertices[0]);
                 VectorTransform(Position[1], BoneMatrix[Parent], BoneVertices[1]);
                 VectorTransform(Position[2], BoneMatrix[i], BoneVertices[2]);
-                for (int j = 0; j < 3; j++)
+                for (auto & BoneVertice : BoneVertices)
                 {
-                    VectorMA(BodyOrigin, BodyScale, BoneVertices[j], BoneVertices[j]);
+                    VectorMA(BodyOrigin, BodyScale, BoneVertice, BoneVertice);
                 }
                 glBegin(GL_LINES);
                 glVertex3fv(BoneVertices[0]);
@@ -2509,19 +2494,6 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
         }
     }
     glDepthFunc(GL_LEQUAL);
-}
-
-void BlurShadow()
-{
-    for (int i = 1; i < ShadowBufferHeight - 1; i++)
-    {
-        unsigned char* ptr = &ShadowBuffer[i * ShadowBufferWidth];
-        for (int j = 1; j < ShadowBufferWidth - 1; j++)
-        {
-            ptr[j] = (ptr[j - ShadowBufferWidth] + ptr[j + ShadowBufferWidth] +
-                ptr[j - 1] + ptr[j + 1]) >> 2;
-        }
-    }
 }
 
 void BMD::Release()
@@ -2539,12 +2511,22 @@ void BMD::Release()
                     BoneMatrix_t* bm = &b->BoneMatrixes[j];
                     if (bm)
                     {
-                        if (bm->Position) { delete[] bm->Position; bm->Position = nullptr; }
-                        if (bm->Rotation) { delete[] bm->Rotation; bm->Rotation = nullptr; }
-                        if (bm->Quaternion) { delete[] bm->Quaternion; bm->Quaternion = nullptr; }
+                        if (bm->Position) {
+							delete[] bm->Position;
+							bm->Position = nullptr;
+                        }
+                        if (bm->Rotation) {
+							delete[] bm->Rotation;
+							bm->Rotation = nullptr;
+                        }
+						if (bm->Quaternion) {
+							delete[] bm->Quaternion;
+							bm->Quaternion = nullptr;
+
+                        }
                     }
                 }
-                SAFE_DELETE_ARRAY(b->BoneMatrixes);
+                if (b->BoneMatrixes) { delete[] b->BoneMatrixes; b->BoneMatrixes = nullptr; }
             }
         }
     }
@@ -2568,10 +2550,10 @@ void BMD::Release()
         {
             Mesh_t* m = &Meshs[i];
 
-            delete[] m->Vertices;   m->Vertices = nullptr;
-            delete[] m->Normals;    m->Normals = nullptr;
-            delete[] m->TexCoords;  m->TexCoords = nullptr;
-            delete[] m->Triangles;  m->Triangles = nullptr;
+            if (m->Vertices) { delete[] m->Vertices; m->Vertices = nullptr; }
+            if (m->Normals) { delete[] m->Normals; m->Normals = nullptr; }
+            if (m->TexCoords) { delete[] m->TexCoords; m->TexCoords = nullptr; }
+            if (m->Triangles) { delete[] m->Triangles; m->Triangles = nullptr; }
 
             if (m->m_csTScript)
             {
@@ -2590,20 +2572,11 @@ void BMD::Release()
         }
     }
 
-    delete[] Meshs;
-    Meshs = nullptr;
-
-    delete[] Bones;
-    Bones = nullptr;
-
-    delete[] Actions;
-    Actions = nullptr;
-
-    delete[] Textures;
-    Textures = nullptr;
-
-    delete[] IndexTexture;
-    IndexTexture = nullptr;
+    if (Meshs) { delete[] Meshs; Meshs = nullptr; }
+    if (Bones) { delete[] Bones; Bones = nullptr; }
+    if (Actions) { delete[] Actions; Actions = nullptr; }
+    if (Textures) { delete[] Textures; Textures = nullptr; }
+    if (IndexTexture) { delete[] IndexTexture; IndexTexture = nullptr; }
 
     NumBones = 0;
     NumActions = 0;
@@ -2614,7 +2587,7 @@ void BMD::Release()
 #endif
 }
 
-void BMD::FindNearTriangle(void)
+void BMD::FindNearTriangle()
 {
     for (int iMesh = 0; iMesh < NumMeshs; iMesh++)
     {
@@ -2676,6 +2649,36 @@ void BMD::FindTriangleForEdge(int iMesh, int iTri1, int iIndex11)
     }
 }
 //#endif //USE_SHADOWVOLUME
+
+
+class BMDReader {
+public:
+    BMDReader(unsigned char* data, size_t size) : data(data), size(size), ptr(0) {}
+
+    void Skip(size_t bytes) { ptr += bytes; }
+
+    template <typename T>
+    T Read() {
+        T value;
+        memcpy(&value, data + ptr, sizeof(T));
+        ptr += sizeof(T);
+        return value;
+    }
+
+    void ReadBytes(void* dst, size_t count) {
+        memcpy(dst, data + ptr, count);
+        ptr += count;
+    }
+
+    size_t Tell() const { return ptr; }
+    unsigned char* GetPointer() const { return data + ptr; }
+
+private:
+    unsigned char* data;
+    size_t size;
+    size_t ptr;
+};
+
 
 bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
 {
@@ -2890,6 +2893,7 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
 
                     for (int k = 0; k < numKeys; ++k)
                         AngleQuaternion(bm.Rotation[k], bm.Quaternion[k]);
+
                 }
                 else
                 {
@@ -2913,14 +2917,14 @@ bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
     wcscpy(ModelName, DirName);
     wcscat(ModelName, ModelFileName);
     FILE* fp = _wfopen(ModelName, L"wb");
-    if (fp == NULL) return false;
+    if (fp == nullptr) return false;
     putc('B', fp);
     putc('M', fp);
     putc('D', fp);
     Version = 12;
     fwrite(&Version, 1, 1, fp);
 
-    BYTE* pbyBuffer = new BYTE[1024 * 1024];
+    auto* pbyBuffer = new BYTE[1024 * 1024];
     BYTE* pbyCur = pbyBuffer;
     memcpy(pbyCur, Name, 32); pbyCur += 32;
     memcpy(pbyCur, &NumMeshs, 2); pbyCur += 2;
@@ -2936,16 +2940,13 @@ bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
         memcpy(pbyCur, &m->NumTexCoords, 2); pbyCur += 2;
         memcpy(pbyCur, &m->NumTriangles, 2); pbyCur += 2;
         memcpy(pbyCur, &m->Texture, 2); pbyCur += 2;
-        //fwrite(&m->NumCommandBytes ,4,1,fp);
         memcpy(pbyCur, m->Vertices, m->NumVertices * sizeof(Vertex_t)); pbyCur += m->NumVertices * sizeof(Vertex_t);
         memcpy(pbyCur, m->Normals, m->NumNormals * sizeof(Normal_t)); pbyCur += m->NumNormals * sizeof(Normal_t);
         memcpy(pbyCur, m->TexCoords, m->NumTexCoords * sizeof(TexCoord_t)); pbyCur += m->NumTexCoords * sizeof(TexCoord_t);
-        //fwrite(m->Triangles,m->NumTriangles*sizeof(Triangle_t),1,fp);
         for (int j = 0; j < m->NumTriangles; j++)
         {
             memcpy(pbyCur, &m->Triangles[j], sizeof(Triangle_t2)); pbyCur += sizeof(Triangle_t2);
         }
-        //fwrite(m->Commands ,m->NumCommandBytes                ,1,fp);
         memcpy(pbyCur, Textures[i].FileName, 32); pbyCur += 32;
     }
     for (i = 0; i < NumActions; i++)
@@ -2974,9 +2975,9 @@ bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
             }
         }
     }
-    long lSize = (long)(pbyCur - pbyBuffer);
-    long lEncSize = MapFileEncrypt(NULL, pbyBuffer, lSize);
-    BYTE* pbyEnc = new BYTE[lEncSize];
+    auto lSize = (long)(pbyCur - pbyBuffer);
+    long lEncSize = MapFileEncrypt(nullptr, pbyBuffer, lSize);
+    auto* pbyEnc = new BYTE[lEncSize];
     MapFileEncrypt(pbyEnc, pbyBuffer, lSize);
     fwrite(&lEncSize, sizeof(long), 1, fp);
     fwrite(pbyEnc, lEncSize, 1, fp);
@@ -2988,8 +2989,6 @@ bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
 
 void BMD::Init(bool Dummy)
 {
-    //for(i=0;i<NumActions;i++)
-    //	Actions[i].Loop = false;
     if (Dummy)
     {
         int i;
@@ -3001,18 +3000,6 @@ void BMD::Init(bool Dummy)
             else
                 b->Dummy = false;
         }
-        /*for(i=0;i<NumMeshs;i++)
-        {
-            Mesh_t *m = &Meshs[i];
-            for(int j=0;j<m->NumVertices;j++)
-            {
-                Vertex_t *v = &m->Vertices[j];
-                if(v->Node != -1)
-                {
-                    Bones[v->Node].Dummy = false;
-                }
-            }
-        }*/
     }
     renderCount = 0;
     BoneHead = -1;

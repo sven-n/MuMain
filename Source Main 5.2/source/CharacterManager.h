@@ -1,5 +1,3 @@
-// CharacterManager.h: interface for the CCharacterManager class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 class CCharacterManager

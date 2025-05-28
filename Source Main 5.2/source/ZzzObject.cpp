@@ -10503,8 +10503,6 @@ void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, floa
     RenderPartObjectEdge(b, o, Flag, Translate, Scale);
 }
 
-void BodyLight(OBJECT* o, BMD* b);
-
 void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags, int ancientDiscriminator, bool GlobalTransform, bool HideSkin, bool Translate, int Select, int RenderType)
 {
     if (Alpha <= 0.01f)

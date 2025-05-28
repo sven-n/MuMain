@@ -20,8 +20,6 @@ BYTE  CalcTargetPos(float x, float y, int Tx, int Ty);
 void  Alpha(OBJECT* o);
 void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX);
 void PushObject(vec3_t PushPosition, vec3_t Position, float Power, vec3_t Angle);
-bool CollisionCharacters(CHARACTER* Hero);
-bool CollisionObjects(CHARACTER* Hero);
 
 void SetAction(OBJECT* o, int Action, bool bBlending = true);
 
@@ -30,11 +28,7 @@ bool TestDistance(CHARACTER* c, vec3_t TargetPosition, float Range);
 void LookAtTarget(OBJECT* o, const CHARACTER* targetCharacter);
 void MoveHead(CHARACTER* c);
 void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint, bool Hit);
-int  CalculateAttackPoint(CHARACTER* sc, CHARACTER* tc);
-void AttackCharacter(CHARACTER* sc, CHARACTER* tc, float AttackRange, int AttackPoint, bool Success = true);
-void AttackObject(int Type, vec3_t Position, CHARACTER* Owner);
 
-bool PathFinding(int sx, int sy, int tx, int ty, PATH_t* a);
 bool MovePath(CHARACTER* c, bool Turn = true);
 void InitPath();
 bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance = 0.0f, int iDefaultWall = TW_CHARACTER);

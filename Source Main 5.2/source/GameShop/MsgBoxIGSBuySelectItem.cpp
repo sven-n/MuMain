@@ -74,7 +74,7 @@ void CMsgBoxIGSBuySelectItem::Initialize(CShopPackage* pPackage)
 
     wcsncpy(m_szPackageName, pPackage->PackageProductName, MAX_TEXT_LENGTH);
 
-    ZeroMemory(m_szDescription, sizeof(unicode::t_char) * UIMAX_TEXT_LINE * MAX_TEXT_LENGTH);
+    ZeroMemory(m_szDescription, sizeof(wchar_t) * UIMAX_TEXT_LINE * MAX_TEXT_LENGTH);
 
     g_pRenderText->SetFont(g_hFont);
     m_iDescriptionLine = ::DivideStringByPixel(&m_szDescription[0][0], UIMAX_TEXT_LINE, MAX_TEXT_LENGTH, pPackage->Description, IGS_TEXT_DISCRIPTION_WIDTH, false, '#');

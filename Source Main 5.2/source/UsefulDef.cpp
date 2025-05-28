@@ -10,7 +10,7 @@
 #include "UsefulDef.h"
 #include "UIControls.h"
 
-extern float g_fScreenRate_x;
+
 
 bool ReduceStringByPixel(LPTSTR lpszDst, int nDstSize, LPCTSTR lpszSrc, int nPixel)
 {
