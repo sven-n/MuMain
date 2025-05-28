@@ -56,11 +56,6 @@ DWORD		 MouseRButtonPress = 0;
 
 //bool    showShoppingMall = false;
 
-void OpenExploper(wchar_t* Name, wchar_t* para)
-{
-    ShellExecute(NULL, L"open", Name, para, L"", SW_SHOW);
-}
-
 bool CheckID_HistoryDay(wchar_t* Name, WORD day)
 {
     typedef struct  __day_history__
@@ -1205,6 +1200,31 @@ void EndRenderColor()
     glEnable(GL_TEXTURE_2D);
 }
 
+void CompensateAspectRatio(float& width, float& x, bool scale, bool startScale)
+{
+    // Calculate the aspect ratio of the window and adjust Width and Height to maintain 4:3 aspect ratio  
+    float windowAspectRatio = (float)WindowWidth / (float)WindowHeight;
+    float targetAspectRatio = 4.0f / 3.0f;
+
+    if (windowAspectRatio > targetAspectRatio)
+    {
+        if (scale) {
+            // Window is wider than 4:3, adjust Width
+            width = width / windowAspectRatio * targetAspectRatio;
+        }
+
+        if (startScale)
+        {
+            // now we need to add an offset to the x as well:
+            auto maxWidth = targetAspectRatio * WindowHeight;
+            auto maxOffset = ((WindowWidth - maxWidth) / 1.0f);
+            auto distanceFromCenter = x - (WindowWidth / 2.0f);
+            auto offset = distanceFromCenter / WindowWidth * maxOffset;
+            x += offset * -1.f;
+        }
+    }
+}
+
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight, unsigned int color)
 {
     x = ConvertX(x);
@@ -1212,6 +1232,8 @@ void RenderColorBitmap(int Texture, float x, float y, float Width, float Height,
 
     Width = ConvertX(Width);
     Height = ConvertY(Height);
+
+    CompensateAspectRatio(Width, x, true, true);
 
     BindTexture(Texture);
 
@@ -1247,6 +1269,8 @@ void RenderColorBitmap(int Texture, float x, float y, float Width, float Height,
     glEnd();
 }
 
+
+
 void RenderBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight, bool Scale, bool StartScale, float Alpha)
 {
     if (StartScale)
@@ -1259,6 +1283,8 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
         Width = ConvertX(Width);
         Height = ConvertY(Height);
     }
+
+    CompensateAspectRatio(Width, x, Scale, StartScale);
 
     BindTexture(Texture);
 
@@ -1300,6 +1326,8 @@ void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height
     y = ConvertY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
+
+    CompensateAspectRatio(Width, x, true, true);
     //x -= Width *0.5f;
     //y -= Height*0.5f;
     BindTexture(Texture);
@@ -1460,6 +1488,7 @@ void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float H
     y = WindowHeight - y;
     Width = ConvertX(Width);
     Height = ConvertY(Height);
+    CompensateAspectRatio(Width, x, true, true);
 
     vec3_t vCenter, vDir;
     Vector(x, y, 0, vCenter);
@@ -1538,6 +1567,8 @@ void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, fl
     y = ConvertY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
+    CompensateAspectRatio(Width, x, true, true);
+
     BindTexture(Texture);
 
     float p[4][2];
