@@ -1922,41 +1922,42 @@ bool CNewUIMuHelperSkillList::Update()
 
 bool CNewUIMuHelperSkillList::Render()
 {
-    float x = 640 - 190 - 32;
-    float y = m_bFilterByAttackSkills ? 171 : 293;
-    float fOrigY = y;
-    float width = 32, height = 38;
-    int iSkillPerRow = m_bFilterByAttackSkills ? 9 : 5;
+    float scale = 1.0f; // 
+    float boxWidth = 32.f * scale;
+    float boxHeight = 38.f * scale;
+    float iconWidth = 20.f * scale;
+    float iconHeight = 28.f * scale;
+    float iconOffsetX = (boxWidth - iconWidth) / 2.f;
+    float iconOffsetY = (boxHeight - iconHeight) / 2.f;
+
+    // top skills Helper basic
+    float startX = 640.f - 190.f - 32.f;
+    float startY = m_bFilterByAttackSkills ? 20.f : 260.f;
+
+    int itemsPerColumn = m_bFilterByAttackSkills ? 10 : 6;
     int iSkillCount = 0;
 
     for (int iSkillType : m_aiSkillsToRender)
     {
-        if (iSkillCount == iSkillPerRow)
-        {
-            x -= width;
-        }
+        int col = iSkillCount / itemsPerColumn;
+        int row = iSkillCount % itemsPerColumn;
 
-        int iRemainder = iSkillCount % 2;
-        int iQuotient = iSkillCount / 2;
+        float x = startX - col * boxWidth;
+        float y = startY + row * boxHeight;
 
-        if (iRemainder == 0)
-        {
-            y = fOrigY + iQuotient * height;
-        }
-        else
-        {
-            y = fOrigY - (iQuotient + 1) * height;
-        }
+        RenderImage(IMAGE_SKILLBOX, x, y, boxWidth, boxHeight);
+        RenderSkillIcon(iSkillType, x + iconOffsetX, y + iconOffsetY, iconWidth, iconHeight);
 
-        RenderImage(IMAGE_SKILLBOX, x, y, width, height);
-        RenderSkillIcon(iSkillType, x + 6, y + 6, 20, 28);
-
-        m_skillIconMap.insert_or_assign(iSkillType, cSkillIcon{ iSkillType, { static_cast<LONG>(x), static_cast<LONG>(y) }, { static_cast<LONG>(width), static_cast<LONG>(height) } });
+        m_skillIconMap.insert_or_assign(iSkillType, cSkillIcon{
+            iSkillType,
+            { static_cast<LONG>(x), static_cast<LONG>(y) },
+            { static_cast<LONG>(boxWidth), static_cast<LONG>(boxHeight) }
+            });
 
         iSkillCount++;
     }
 
-    if (m_bRenderSkillInfo == true && m_pNewUI3DRenderMng)
+    if (m_bRenderSkillInfo && m_pNewUI3DRenderMng)
     {
         m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
         m_bRenderSkillInfo = false;
