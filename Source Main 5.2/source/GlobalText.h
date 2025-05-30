@@ -1,6 +1,3 @@
-#ifndef _GLOBALTEXT_H_
-#define _GLOBALTEXT_H_
-
 #pragma once
 
 #include "stringset.h"
@@ -11,7 +8,7 @@ class TGlobalText
 #pragma pack(push, 1)
     struct GLOBALTEXT_HEADER
     {
-        WORD	wSignature;	//. 0x5447
+        WORD	wSignature;	
         DWORD	dwNumberOfText;
     };
     struct GLOBALTEXT_STRING_HEADER
@@ -239,4 +236,3 @@ typedef TGlobalText<wchar_t>	CGlobalTextW;
 
 extern CGlobalTextW GlobalText;
 
-#endif /* _GLOBALTEXT_H_ */

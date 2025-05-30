@@ -14,7 +14,7 @@
 
 #include "LoadData.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 GMEmpireGuardian4Ptr GMEmpireGuardian4::Make()
 {
@@ -1549,10 +1549,10 @@ void GMEmpireGuardian4::PlayBGM()
 {
     if (gMapManager.IsEmpireGuardian4())
     {
-        PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN4]);
+        PlayMp3(MUSIC_EMPIREGUARDIAN4);
     }
     else
     {
-        StopMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN4]);
+        StopMp3(MUSIC_EMPIREGUARDIAN4);
     }
 }

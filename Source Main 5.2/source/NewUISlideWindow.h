@@ -1,10 +1,3 @@
-// NewUISlideWindow.h: interface for the CNewUISlideWindow class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_NEWUISLIDEWINDOW_H__9A5B5D3E_1F9A_4778_8DC7_5367287F45AC__INCLUDED_)
-#define AFX_NEWUISLIDEWINDOW_H__9A5B5D3E_1F9A_4778_8DC7_5367287F45AC__INCLUDED_
-
 #pragma once
 
 #include "NewUIBase.h"
@@ -44,6 +37,3 @@ namespace SEASON3B
     };
 }
 
-extern std::wstring g_strSelectedML;
-
-#endif // !defined(AFX_NEWUISLIDEWINDOW_H__9A5B5D3E_1F9A_4778_8DC7_5367287F45AC__INCLUDED_)

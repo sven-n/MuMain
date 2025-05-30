@@ -45,7 +45,7 @@ protected:
     int				m_iSelectServerBtnIndex;
     CServerGroup* m_pSelectServerGroup;
 
-    unicode::t_char		m_szDescription[SSW_DESC_LINE_MAX][SSW_DESC_ROW_MAX];
+    wchar_t		m_szDescription[SSW_DESC_LINE_MAX][SSW_DESC_ROW_MAX];
 
 public:
     CServerSelWin();

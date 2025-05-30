@@ -11,7 +11,7 @@
 #include "ZzzOpenData.h"
 #include "ZzzLodTerrain.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 CGMDoppelGanger3Ptr CGMDoppelGanger3::Make()
 {

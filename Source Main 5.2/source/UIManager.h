@@ -1,10 +1,3 @@
-//////////////////////////////////////////////////////////////////////////
-//  UIManager.h
-//////////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_UIMANAGER_H__2A2AD8F0_E731_4B40_AA6E_E86226026AF9__INCLUDED_)
-#define AFX_UIMANAGER_H__2A2AD8F0_E731_4B40_AA6E_E86226026AF9__INCLUDED_
-
 #pragma once
 
 #include "UIGuildInfo.h"
@@ -83,5 +76,3 @@ public:
     void GetInsertInterface(std::list<DWORD>& outflag, DWORD insertflag);
     void GetDeleteInterface(std::list<DWORD>& outflag, DWORD deleteflag);
 };
-
-#endif // !defined(AFX_UIMANAGER_H__2A2AD8F0_E731_4B40_AA6E_E86226026AF9__INCLUDED_)

@@ -239,7 +239,7 @@ void SEASON3B::CNewUICursedTempleResult::RenderTextLine(const CursedTempleGameRe
 {
     wchar_t Text[200];
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 200);
+    memset(&Text, 0, sizeof(wchar_t) * 200);
     if (SEASON3A::eTeam_Allied == resultinfo.s_team)
     {
         swprintf(Text, GlobalText[2387]);
@@ -250,19 +250,19 @@ void SEASON3B::CNewUICursedTempleResult::RenderTextLine(const CursedTempleGameRe
     }
     DrawText(Text, x + 5, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 200);
+    memset(&Text, 0, sizeof(wchar_t) * 200);
     swprintf(Text, resultinfo.s_characterId);
     DrawText(Text, x + 56, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 200);
+    memset(&Text, 0, sizeof(wchar_t) * 200);
     swprintf(Text, gCharacterManager.GetCharacterClassText(resultinfo.s_class));
     DrawText(Text, x + 106, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 200);
+    memset(&Text, 0, sizeof(wchar_t) * 200);
     swprintf(Text, L"%d", resultinfo.s_addexp);
     DrawText(Text, x + 150, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 200);
+    memset(&Text, 0, sizeof(wchar_t) * 200);
     swprintf(Text, L"%d", resultinfo.s_point);
     DrawText(Text, x + 190, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 }
@@ -271,11 +271,11 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
 {
     wchar_t Text[200];
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 200);
+    memset(&Text, 0, sizeof(wchar_t) * 200);
     swprintf(Text, GlobalText[2414]);
     DrawText(Text, m_Pos.x, m_Pos.y + 13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 200);
+    memset(&Text, 0, sizeof(wchar_t) * 200);
     swprintf(Text, L"  %s           %s        %s     %s    %s", GlobalText[2415], GlobalText[681], GlobalText[1973], GlobalText[683], GlobalText[682]);
     DrawText(Text, m_Pos.x, m_Pos.y + 38, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 
@@ -311,7 +311,7 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
         ++i;
     }
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 200);
+    memset(&Text, 0, sizeof(wchar_t) * 200);
     swprintf(Text, GlobalText[2416]);
     DrawText(Text, m_Pos.x, m_Pos.y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 55, 0xFF0000FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 }

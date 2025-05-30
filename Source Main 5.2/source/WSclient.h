@@ -3530,7 +3530,6 @@ typedef struct {
 // ?????????????????????????????????????
 //////////////////////////////////////////////////////////////////////////
 extern Connection* SocketClient;
-extern bool EnableSocket;
 extern int HeroKey;
 
 extern int SummonLife;
@@ -3547,8 +3546,6 @@ extern BYTE HeroSoccerTeam;
 extern int  SoccerTime;
 extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
-
-void BuxConvert(BYTE* Buffer, int Size);
 
 BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port);
 void DeleteSocket();

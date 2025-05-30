@@ -49,6 +49,8 @@
 #include "SkillManager.h"
 #include "MUHelper/MuHelper.h"
 
+#include "ZzzInterface.h"
+
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
@@ -68,10 +70,10 @@ extern void SetPlayerBow(CHARACTER* c);
 extern CMurdererMove g_MurdererMove;
 #endif	// _PVP_ADD_MOVE_SCROLL
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
+
+
 
 extern vec3_t MousePosition, MouseTarget;
 
@@ -710,8 +712,7 @@ void SetBooleanPosition(CHAT* c)
     SIZE Size[5];
     memset(&Size[0], 0, sizeof(SIZE) * 5);
 
-    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || // GM 일경우
-        (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))
+    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))
     {
         g_pRenderText->SetFont(g_hFontBold);
         bResult[0] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
@@ -769,8 +770,8 @@ void SetPlayerColor(BYTE PK)
     }
 }
 
-extern float g_fScreenRate_x;	// ※
-extern float g_fScreenRate_y;
+	// ※
+
 const int ciSystemColor = 240;
 
 void RenderBoolean(int x, int y, CHAT* c)
@@ -3529,198 +3530,162 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             SocketClient->ToGameServer()->SendPickupItemRequest(ItemKey);
         }
         break;
-    case MOVEMENT_TALK:
-        MouseUpdateTimeMax = 12;
+	case MOVEMENT_TALK :
+		{
+			MouseUpdateTimeMax = 12;
 
-        if (!(
-            M34CryWolf1st::Get_State_Only_Elf() == true &&
-            M34CryWolf1st::IsCyrWolf1st() == true))
-        {
-            SetPlayerStop(c);
-            c->Movement = false;
-        }
+			const bool isCryWolfElf = M34CryWolf1st::Get_State_Only_Elf() && M34CryWolf1st::IsCyrWolf1st();
+			if (!isCryWolfElf)
+			{
+				SetPlayerStop(c);
+				c->Movement = false;
+			}
 
-        if (TargetNpc != -1)
-        {
-            int npcIndex = 229;
-            npcIndex = 226;
-            npcIndex = 205;
+			if (TargetNpc == -1)
+				break;
 
-            if (CharactersClient[TargetNpc].MonsterIndex >= npcIndex)
-            {
-                int level = CharacterAttribute->Level;
-                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_CHAOS_GOBLIN && level < 10)
-                {
-                    wchar_t Text[100];
-                    swprintf(Text, GlobalText[663], CHAOS_MIX_LEVEL);
-                    g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
-                    break;
-                }
-                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_EO_THE_CRAFTSMAN ||
-                    CharactersClient[TargetNpc].MonsterIndex == MONSTER_ZIENNA_THE_WEAPONS_MERCHANT ||
-                    CharactersClient[TargetNpc].MonsterIndex == MONSTER_HANZO_THE_BLACKSMITH
-                    || CharactersClient[TargetNpc].MonsterIndex == MONSTER_RHEA
-                    || CharactersClient[TargetNpc].MonsterIndex == MONSTER_WEAPONS_MERCHANT_BOLO
-                    )
-                {
-                    g_pNPCShop->SetRepairShop(true);
-                }
-                else
-                {
-                    g_pNPCShop->SetRepairShop(false);
-                }
+			// === Rozpoznanie napotkanego NPC ===
+			const int npcIndex = 205;
+			const int monsterIndex = CharactersClient[TargetNpc].MonsterIndex;
 
-                if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST))
-                {
-                    g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYQUEST);
-                }
+			if (monsterIndex >= npcIndex)
+			{
+				const int level = CharacterAttribute->Level;
 
-                if (g_csQuest.IsInit())
-                {
-                    SocketClient->ToGameServer()->SendLegacyQuestStateRequest();
-                }
+				if (monsterIndex == MONSTER_CHAOS_GOBLIN && level < 10)
+				{
+					wchar_t text[100];
+					swprintf(text, GlobalText[663], CHAOS_MIX_LEVEL);
+					g_pSystemLogBox->AddText(text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+					break;
+				}
 
-                if (M34CryWolf1st::Get_State_Only_Elf() == true && M34CryWolf1st::IsCyrWolf1st() == true)
-                {
-                    if (CharactersClient[TargetNpc].Object.Type >= MODEL_CRYWOLF_ALTAR1 && CharactersClient[TargetNpc].Object.Type <= MODEL_CRYWOLF_ALTAR5)
-                    {
-                        int Num = CharactersClient[TargetNpc].Object.Type - MODEL_CRYWOLF_ALTAR1;
+				// Sklepy
+				bool isRepairNpc =
+					monsterIndex == MONSTER_EO_THE_CRAFTSMAN ||
+					monsterIndex == MONSTER_ZIENNA_THE_WEAPONS_MERCHANT ||
+					monsterIndex == MONSTER_HANZO_THE_BLACKSMITH ||
+					monsterIndex == MONSTER_RHEA ||
+					monsterIndex == MONSTER_WEAPONS_MERCHANT_BOLO;
 
-                        if ((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF) && M34CryWolf1st::Get_AltarState_State(Num) == false)
-                        {
-                            BYTE State = (m_AltarState[Num] & 0x0f);
-                            if (State > 0)
-                            {
-                                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Get_Temple));
-                            }
-                            else
-                                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Destroy_Set_Temple));
-                        }
-                        else
-                            if ((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF) && M34CryWolf1st::Get_AltarState_State(Num) == true)
-                            {
-                                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Ing_Set_Temple));
-                            }
-                            else
-                                SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                    }
-                    else
-                        SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else if (M34CryWolf1st::IsCyrWolf1st() == true)
-                {
-                    if (!(CharactersClient[TargetNpc].Object.Type >= MODEL_CRYWOLF_ALTAR1 && CharactersClient[TargetNpc].Object.Type <= MODEL_CRYWOLF_ALTAR5))
-                    {
-                        if (MODEL_NPC_QUARREL == CharactersClient[TargetNpc].Object.Type)
-                        {
-                            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterWerwolfMsgBoxLayout));
-                        }
-                        SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                    }
-                }
-                else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+				g_pNPCShop->SetRepairShop(isRepairNpc);
 
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && CharactersClient[TargetNpc].MonsterIndex <= MONSTER_LITTLE_SANTA_PINK)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+				if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST))
+					g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYQUEST);
 
-                    wchar_t _Temp[32] = { 0, };
-                    if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LITTLE_SANTA_RED)
-                    {
-                        swprintf(_Temp, GlobalText[2596], 100);
-                        g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
-                    }
-                    else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LITTLE_SANTA_BLUE)
-                    {
-                        swprintf(_Temp, GlobalText[2597], 100);
-                        g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
-                    }
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_DELGADO)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LUGARD)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_MARKET_UNION_MEMBER_JULIA)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_DAVID)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else
-                {
-                    if (M38Kanturu2nd::Is_Kanturu2nd() == TRUE)
-                    {
-                        if (g_pKanturu2ndEnterNpc->IsNpcAnimation() == false)
-                        {
-                            SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                        }
-                    }
-                    else if (gMapManager.IsCursedTemple())
-                    {
-                        if (!g_CursedTemple->IsGaugebarEnabled())
-                        {
-#ifdef LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE
-                                || (g_pCursedTempleWindow->CheckInventoryHolyItem(Hero)
-                                    && ((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied && CharactersClient[TargetNpc].MonsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE)
-                                        || (g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && CharactersClient[TargetNpc].MonsterIndex == MONSTER_ILLUSION_ITEM_STORAGE))
-                                    ))
-#else  //LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE ||
-                                ((CharactersClient[TargetNpc].MonsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE || CharactersClient[TargetNpc].MonsterIndex == MONSTER_ILLUSION_ITEM_STORAGE)
-                                    && g_pCursedTempleWindow->CheckInventoryHolyItem(Hero)))
-#endif //LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            {
-                                g_CursedTemple->SetGaugebarEnabled(true);
-                            }
-                            g_pCursedTempleWindow->CheckTalkProgressNpc(CharactersClient[TargetNpc].MonsterIndex, CharactersClient[TargetNpc].Key);
-                        }
-                    }
-                    else
-                    {
-                        SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                    }
-                }
-                //#else
-                //				SendRequestTalk(CharactersClient[TargetNpc].Key);
-                //#endif
-                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_MARLON)
-                    bCheckNPC = true;
-                else
-                    bCheckNPC = false;
+				if (g_csQuest.IsInit())
+					SocketClient->ToGameServer()->SendLegacyQuestStateRequest();
 
-                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_PET_TRAINER)
-                {
-                    ITEM* pItem = NULL;
+				// === Specjalne rozmowy ===
+				const int objectType = CharactersClient[TargetNpc].Object.Type;
+				if (isCryWolfElf)
+				{
+					if (objectType >= MODEL_CRYWOLF_ALTAR1 && objectType <= MODEL_CRYWOLF_ALTAR5)
+					{
+						const int altarNum = objectType - MODEL_CRYWOLF_ALTAR1;
+						const bool isElf = gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF;
+						const bool altarActive = M34CryWolf1st::Get_AltarState_State(altarNum);
+						const BYTE state = (m_AltarState[altarNum] & 0x0f);
 
-                    pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
+						if (isElf && !altarActive)
+						{
+							if (state > 0)
+								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Get_Temple));
+							else
+								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Destroy_Set_Temple));
+						}
+						else if (isElf && altarActive)
+						{
+							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Ing_Set_Temple));
+						}
+						else
+						{
+							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+						}
+					}
+					else
+					{
+						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					}
+				}
+				else if (M34CryWolf1st::IsCyrWolf1st())
+				{
+					if (!(objectType >= MODEL_CRYWOLF_ALTAR1 && objectType <= MODEL_CRYWOLF_ALTAR5))
+					{
+						if (objectType == MODEL_NPC_QUARREL)
+							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterWerwolfMsgBoxLayout));
 
-                    if (pItem->Type == ITEM_DARK_HORSE_ITEM)
-                    {
-                        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER);
-                    }
+						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					}
+				}
+				else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
+				{
+					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
+				}
+				else if (monsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && monsterIndex <= MONSTER_LITTLE_SANTA_PINK)
+				{
+					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
 
-                    pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
+					wchar_t temp[32] = { 0 };
+					if (monsterIndex == MONSTER_LITTLE_SANTA_RED)
+						swprintf(temp, GlobalText[2596], 100);
+					else if (monsterIndex == MONSTER_LITTLE_SANTA_BLUE)
+						swprintf(temp, GlobalText[2597], 100);
 
-                    if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
-                    {
-                        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT);
-                    }
-                }
-            }
-            TargetNpc = -1;
-        }
-        break;
+					g_pSystemLogBox->AddText(temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+				}
+				else if (monsterIndex == MONSTER_DELGADO || monsterIndex == MONSTER_LUGARD ||
+					monsterIndex == MONSTER_MARKET_UNION_MEMBER_JULIA || monsterIndex == MONSTER_DAVID)
+				{
+					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+				}
+				else
+				{
+					if (M38Kanturu2nd::Is_Kanturu2nd())
+					{
+						if (!g_pKanturu2ndEnterNpc->IsNpcAnimation())
+							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					}
+					else if (gMapManager.IsCursedTemple())
+					{
+						if (!g_CursedTemple->IsGaugebarEnabled())
+						{
+							if (
+								CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE ||
+								(g_pCursedTempleWindow->CheckInventoryHolyItem(Hero) &&
+									((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied && monsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE) ||
+										(g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && monsterIndex == MONSTER_ILLUSION_ITEM_STORAGE)))
+								)
+							{
+								g_CursedTemple->SetGaugebarEnabled(true);
+							}
+							g_pCursedTempleWindow->CheckTalkProgressNpc(monsterIndex, CharactersClient[TargetNpc].Key);
+						}
+					}
+					else
+					{
+						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					}
+				}
+
+				bCheckNPC = (monsterIndex == MONSTER_MARLON);
+
+				if (monsterIndex == MONSTER_PET_TRAINER)
+				{
+					ITEM* pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
+					if (pItem->Type == ITEM_DARK_HORSE_ITEM)
+						SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER);
+
+					pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
+					if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
+						SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT);
+				}
+			}
+
+			TargetNpc = -1;
+			break;
+		}
     case MOVEMENT_OPERATE:
         if (max(abs((Hero->PositionX) - TargetX), abs((Hero->PositionY) - TargetY)) <= 1)
         {

@@ -1,9 +1,3 @@
-// CameraMove.h: interface for the CCameraMove class.
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_CAMERAMOVE_H__B3723780_481C_43B7_B72C_5D1782D8324C__INCLUDED_)
-#define AFX_CAMERAMOVE_H__B3723780_481C_43B7_B72C_5D1782D8324C__INCLUDED_
-
 #pragma once
 
 #include <vector>
@@ -81,9 +75,8 @@ public:
     static CCameraMove* GetInstancePtr();
 
 public:
-    CCameraMove();		//. ban create instance
+    CCameraMove();
 
-    // tourmode
 private:
     BOOL m_bTourMode;
     BOOL m_bTourPause;
@@ -108,5 +101,3 @@ public:
 
     float GetCameraAngle() { return m_fTourCameraAngle; }
 };
-
-#endif // !defined(AFX_CAMERAMOVE_H__B3723780_481C_43B7_B72C_5D1782D8324C__INCLUDED_)

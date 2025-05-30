@@ -22,8 +22,8 @@
 #define	CMW_OK		0
 #define	CMW_CANCEL	1
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 extern int g_iChatInputType;
 extern CUITextInputBox* g_pSingleTextInputBox;
 

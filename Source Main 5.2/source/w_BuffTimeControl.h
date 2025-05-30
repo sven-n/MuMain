@@ -1,10 +1,3 @@
-// w_BuffTimeControl.h: interface for the BuffTimeControl class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_W_BUFFTIMECONTROL_H__BBD38A0F_DFE7_4E2E_893A_39A5C7C0803C__INCLUDED_)
-#define AFX_W_BUFFTIMECONTROL_H__BBD38A0F_DFE7_4E2E_893A_39A5C7C0803C__INCLUDED_
-
 #pragma once
 
 SmartPointer(BuffTimeControl);
@@ -50,5 +43,3 @@ private:
 private:
     BuffTimeInfoMap		m_BuffTimeList;
 };
-
-#endif // !defined(AFX_W_BUFFTIMECONTROL_H__BBD38A0F_DFE7_4E2E_893A_39A5C7C0803C__INCLUDED_)

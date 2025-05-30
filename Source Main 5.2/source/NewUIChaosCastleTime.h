@@ -42,7 +42,7 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
         POINT						m_Pos;
 
-        unicode::t_char				m_szTime[256];		// 시간
+        wchar_t				m_szTime[256];		// 시간
         int							m_iTime;			// 시간
         int							m_iTimeState;		// 시간상태( 기본, 임박 )
         int							m_iMaxKillMonster;	// 죽여야하는 몬스터숫자

@@ -21,7 +21,6 @@
 #include "./Utilities/Debouncer.h"
 #include "CSQuest.h"
 #include "Local.h"
-#include "zzzMixInventory.h"
 #include "PersonalShopTitleImp.h"
 #include "GOBoid.h"
 #include "CSItemOption.h"
@@ -138,8 +137,8 @@ BYTE BuyItem[4];
 
 static  int iStateNum = 4;
 
-extern float g_fScreenRate_x;	// ※
-extern float g_fScreenRate_y;
+	// ※
+
 
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;

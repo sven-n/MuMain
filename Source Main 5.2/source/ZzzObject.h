@@ -1,5 +1,4 @@
-#ifndef ZZZ_OBJECT_H
-#define ZZZ_OBJECT_H
+#pragma once
 #include "NewUIItemMng.h"
 
 extern OBJECT_BLOCK ObjectBlock[256];
@@ -17,7 +16,6 @@ void CopyShadowAngle(OBJECT* o, BMD* b);
 void CreateShadowAngle();
 
 OBJECT* CollisionDetectObjects(OBJECT* PickObject);
-void ClearWorld();
 
 void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects();
@@ -54,10 +52,8 @@ extern ITEM   PickItem;
 extern ITEM   TargetItem;
 
 void ItemObjectAttribute(OBJECT* o);
-// void CreateItem(ITEM_t* n, BYTE* Item, vec3_t Position, int CreateFlag);
 void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool isFreshDrop);
 void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop);
-void DeleteItem(int Key);
 void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
 void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
 
@@ -98,5 +94,3 @@ bool isPartyMemberBuff(int partyindex);
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
 void RenderBoundingBox(OBJECT* pObj);
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
-
-#endif //ZZZ_OBJECT_H

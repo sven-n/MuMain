@@ -1,10 +1,3 @@
-// w_BuffStateValueControl.h: interface for the BuffStateValueControl class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_W_BUFFSTATEVALUECONTROL_H__E3E0DAB0_313B_471B_B631_5B6F588846AA__INCLUDED_)
-#define AFX_W_BUFFSTATEVALUECONTROL_H__E3E0DAB0_313B_471B_B631_5B6F588846AA__INCLUDED_
-
 #pragma once
 
 SmartPointer(BuffStateValueControl);
@@ -43,5 +36,3 @@ private:
 private:
     BuffStateValueMap				m_BuffStateValue;
 };
-
-#endif // !defined(AFX_W_BUFFSTATEVALUECONTROL_H__E3E0DAB0_313B_471B_B631_5B6F588846AA__INCLUDED_)

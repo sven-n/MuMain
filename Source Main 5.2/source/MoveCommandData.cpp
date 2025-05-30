@@ -74,13 +74,6 @@ void CMoveCommandData::Release()
     m_listMoveInfoData.clear();
 }
 
-void CMoveCommandData::BuxConvert(BYTE* pBuffer, int size)
-{
-    BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
-    for (int i = 0; i < size; i++)
-        pBuffer[i] ^= bBuxCode[i % 3];
-}
-
 bool CMoveCommandData::OpenMoveReqScript(const std::wstring& filename)
 {
     return CMoveCommandData::GetInstance()->Create(filename);

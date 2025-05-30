@@ -12,7 +12,7 @@
 #include "ZzzLodTerrain.h"
 #include "GOBoid.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 GMEmpireGuardian2Ptr GMEmpireGuardian2::Make()
 {
@@ -79,7 +79,6 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_HAMMERIZE);
         pCharacter = CreateCharacter(Key, MODEL_HAMMERIZE, PosX, PosY);
-        wcscpy(pCharacter->ID, L"버몬트");
 
         pCharacter->Object.Scale = 1.3f;
 
@@ -90,7 +89,6 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_ATICLES_HEAD);
         pCharacter = CreateCharacter(Key, MODEL_ATICLES_HEAD, PosX, PosY);
-        wcscpy(pCharacter->ID, L"기사단장");
 
         pCharacter->Object.Scale = 1.35f;
     }
@@ -99,7 +97,6 @@ CHARACTER* GMEmpireGuardian2::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_DARK_GHOST);
         pCharacter = CreateCharacter(Key, MODEL_DARK_GHOST, PosX, PosY);
-        wcscpy(pCharacter->ID, L"대마법사");
 
         OBJECT* pObject = &pCharacter->Object;
         pObject->Scale = 1.3f;
@@ -1332,10 +1329,10 @@ void GMEmpireGuardian2::PlayBGM()
 {
     if (gMapManager.IsEmpireGuardian2())
     {
-        PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN2]);
+        PlayMp3(MUSIC_EMPIREGUARDIAN2);
     }
     else
     {
-        StopMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN2]);
+        StopMp3(MUSIC_EMPIREGUARDIAN2);
     }
 }

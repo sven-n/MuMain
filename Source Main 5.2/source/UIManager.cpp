@@ -25,8 +25,8 @@ JewelHarmonyInfo* g_pUIJewelHarmonyinfo = NULL;
 ItemAddOptioninfo* g_pItemAddOptioninfo = NULL;
 CUIPopup* g_pUIPopup = NULL;
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 
 extern int   ShopInventoryStartX;
 extern int   ShopInventoryStartY;

@@ -1,7 +1,3 @@
-//////////////////////////////////////////////////////////////////////
-// muDebugHelper.h: interface for the CmuConsoleDebug class.
-//////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 enum MSG_TYPE
@@ -24,7 +20,7 @@ public:
     void Write(int iType, const wchar_t* pStr, ...);
 
 protected:
-    CmuConsoleDebug();	//. ban to create instance
+    CmuConsoleDebug();
 };
 
 #define g_ConsoleDebug	CmuConsoleDebug::GetInstance()

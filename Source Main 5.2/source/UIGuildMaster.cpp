@@ -18,8 +18,6 @@
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern int				g_iChatInputType;
-extern float			g_fScreenRate_x;
-extern float			g_fScreenRate_y;
 
 static eCurrentMode		m_nCurrMode;
 static eCurrentStep		m_eCurrStep;

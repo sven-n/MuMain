@@ -54,7 +54,7 @@ namespace SEASON3B
         float					m_fInvenClrWarning[3];
         sImgList				m_sImgList[eImgList_END];
         sImgFrame				m_sFrame[eFrame_END];
-        unicode::t_char			m_szSubject[255];
+        wchar_t			m_szSubject[255];
         sText					m_sText[LUCKYITEMMAXLINE];
         int						m_nTextMaxLine;
         POINT					m_ptPos;

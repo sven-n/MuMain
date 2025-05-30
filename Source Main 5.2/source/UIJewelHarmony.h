@@ -1,10 +1,5 @@
-// UIRefinery.h: interface for the UIRefinery class.
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_UIREFINERY_H__29D29488_91BA_4EB6_AEE3_F936A9C872EE__INCLUDED_)
-#define AFX_UIREFINERY_H__29D29488_91BA_4EB6_AEE3_F936A9C872EE__INCLUDED_
-
 #pragma once
+
 #define MAXHARMONYJEWELOPTIONTYPE 3
 #define MAXHARMONYJEWELOPTIONINDEX 10
 
@@ -112,7 +107,3 @@ const HARMONYJEWELOPTION& JewelHarmonyInfo::GetHarmonyJewelOptionInfo(int type, 
 {
     return m_OptionData[type][option - 1];
 }
-
-extern std::wstring g_strSelectedML;
-
-#endif // !defined(AFX_UIREFINERY_H__29D29488_91BA_4EB6_AEE3_F936A9C872EE__INCLUDED_)

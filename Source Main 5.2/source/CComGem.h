@@ -36,7 +36,6 @@ namespace COMGEM
     void	SendReqUnMix();
     void	ProcessCSAction();
 
-    void	SetJewelList(void);
     int		GetJewelRequireCount(int i);
     int		GetJewelIndex(int _nJewel, int _nType);
     int		Check_Jewel(int _nJewel, int _nType = 0, bool _bModel = false);

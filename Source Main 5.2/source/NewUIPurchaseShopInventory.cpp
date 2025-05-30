@@ -243,35 +243,35 @@ void SEASON3B::CNewUIPurchaseShopInventory::RenderTextInfo()
     RenderText(m_TitleText.c_str(), m_Pos.x, m_Pos.y + 58, 190, 0, RGBA(0, 255, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold);
     wchar_t Text[100];
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 100);
+    memset(&Text, 0, sizeof(wchar_t) * 100);
     swprintf(Text, GlobalText[370]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 100);
+    memset(&Text, 0, sizeof(wchar_t) * 100);
     swprintf(Text, GlobalText[1109]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 250, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 100);
+    memset(&Text, 0, sizeof(wchar_t) * 100);
     swprintf(Text, GlobalText[1111]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 262, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 100);
+    memset(&Text, 0, sizeof(wchar_t) * 100);
     swprintf(Text, GlobalText[1112]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 274, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 100);
+    memset(&Text, 0, sizeof(wchar_t) * 100);
     swprintf(Text, GlobalText[1114]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 286, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 100);
+    memset(&Text, 0, sizeof(wchar_t) * 100);
     swprintf(Text, GlobalText[1115]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 298, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 100);
+    memset(&Text, 0, sizeof(wchar_t) * 100);
     swprintf(Text, GlobalText[1134]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 320, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
-    memset(&Text, 0, sizeof(unicode::t_char) * 100);
+    memset(&Text, 0, sizeof(wchar_t) * 100);
     swprintf(Text, GlobalText[1135]);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 }

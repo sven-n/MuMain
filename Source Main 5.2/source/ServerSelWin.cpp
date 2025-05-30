@@ -22,8 +22,8 @@
 #define	SSW_GB_POS_X	16
 #define	SSW_GB_POS_Y	19
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 
 using namespace SEASON3A;
 

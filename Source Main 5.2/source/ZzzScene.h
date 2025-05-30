@@ -21,7 +21,6 @@ inline SpinLock* g_render_lock = new SpinLock();
 extern bool CheckRenderNextFrame();
 extern void WaitForNextActivity(bool usePreciseSleep);
 extern void UpdateSceneState();
-extern void LogInScene(HDC hDC);
 extern void LoadingScene(HDC hDC);
 extern void RenderScene(HDC Hdc);
 extern bool CheckName();

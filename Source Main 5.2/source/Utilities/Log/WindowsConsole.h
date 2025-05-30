@@ -90,12 +90,11 @@ namespace leaf {
         static CConsoleWindow* GetInstance();
 
     protected:
-        CConsoleWindow();	//. Ban to create instance
+        CConsoleWindow();
 
         void SetWndHandle(HWND hWnd);
         DWORD Get32ColorFromColorIndex(WORD wColorIndex);
         static BOOL CALLBACK EnumChildProc(HWND hWnd, LPARAM lParam);
-        static BOOL CALLBACK EnumThreadWndProc(HWND hWnd, LPARAM lParam);
     };
 }
 

@@ -62,7 +62,7 @@ void COMGEM::ResetWantedList()
 bool COMGEM::FindWantedList()
 {
     SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-    ITEM* pItem = NULL;
+    ITEM* pItem = nullptr;
 
     bool	bReturn = false;
     int		nInvenMaxIndex = MAX_MY_INVENTORY_INDEX;
@@ -146,7 +146,7 @@ bool COMGEM::CheckMyInvValid()
     if (m_bType == ATTACH)
     {
         SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-        ITEM* pItem = NULL;
+        ITEM* pItem = nullptr;
 
         for (int i = 0; i < nInvenMaxIndex; ++i)
         {
@@ -189,12 +189,10 @@ bool COMGEM::CheckMyInvValid()
             CalcGen();
             return true;
         }
-        else
-        {
-            m_cErr = DEERROR_NOTALLOWED;
+        
+        m_cErr = DEERROR_NOTALLOWED;
             m_cPercent = 0;
             return false;
-        }
     }
     m_cErr = ERROR_UNKNOWN;
     return false;
@@ -216,7 +214,7 @@ void COMGEM::CalcGen()
 char COMGEM::CalcCompiledCount(const ITEM* p)
 {
     if (CheckOneItem(p) % 2)	return (p->Level + 1) * FIRST;
-    else						return 0;
+    return 0;
 }
 
 int	COMGEM::CalcItemValue(const ITEM* p)

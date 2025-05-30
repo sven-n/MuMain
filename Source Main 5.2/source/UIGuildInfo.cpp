@@ -14,8 +14,8 @@
 #include "DSPlaySound.h"
 #include "ZzzInventory.h"
 
-extern float		g_fScreenRate_x;
-extern float		g_fScreenRate_y;
+
+
 extern int			DeleteGuildIndex;
 extern DWORD		g_dwActiveUIID;
 

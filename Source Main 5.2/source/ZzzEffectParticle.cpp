@@ -2467,7 +2467,6 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 30;
                 }
 
-                //if ( o->SubType != 1)
                 {
                     if (o->SubType == 10)
                     {

@@ -23,8 +23,8 @@
 #define	MW_OK		0
 #define	MW_CANCEL	1
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 extern int g_iChatInputType;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
 
@@ -94,7 +94,6 @@ void CMsgWin::SetCtrlPosition()
         m_sprInput.SetPosition(nBaseXPos + 32, nBtnYPos + 4);
         m_aBtn[MW_OK].SetPosition(nBaseXPos + 209, nBtnYPos);
         m_aBtn[MW_CANCEL].SetPosition(nBaseXPos + 264, nBtnYPos);
-        // �Է� �ؽ�Ʈ ��ġ ����.
         if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
             if (g_iChatInputType == 1)
                 g_pSinglePasswdInputBox->SetPosition(
@@ -270,8 +269,6 @@ void CMsgWin::RenderControls()
 
 void CMsgWin::SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2)
 {
-    //_ASSERTE(lpszMsg);
-
     m_eType = eType;
 
     SetCtrlPosition();
@@ -529,5 +526,4 @@ void CMsgWin::RequestDeleteCharacter()
     InputEnable = false;
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
     SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
-    // SendRequestDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
 }

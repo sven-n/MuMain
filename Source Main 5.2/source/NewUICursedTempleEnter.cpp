@@ -238,7 +238,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
 {
     wchar_t Text[100];
 
-    memset(&Text, 0, sizeof(unicode::t_char));
+    memset(&Text, 0, sizeof(wchar_t));
 
     swprintf(Text, GlobalText[2358]);
     DrawText(Text, m_Pos.x, m_Pos.y + 13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, true);

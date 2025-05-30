@@ -50,7 +50,6 @@ protected:
     const SServerGroupInfo* GetServerGroupInfoInScript(WORD wServerGroupIndex);
     bool MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup);
     void InsertServer(CServerGroup* pServerGroup, int iConnectIndex, int iServerPercent);
-    void BuxConvert(BYTE* pbyBuffer, int nSize);
 
 public:
     type_mapServerGroup			m_mapServerGroup;

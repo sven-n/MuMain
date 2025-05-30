@@ -1,10 +1,3 @@
-//*****************************************************************************
-// File: Button.h
-//*****************************************************************************
-
-#if !defined(AFX_BUTTON_H__7A986F2A_91A7_4525_8790_AC6C2E95AE63__INCLUDED_)
-#define AFX_BUTTON_H__7A986F2A_91A7_4525_8790_AC6C2E95AE63__INCLUDED_
-
 #pragma once
 
 #include "Sprite.h"
@@ -49,7 +42,6 @@ public:
     void SetEnable(bool bEnable = true) { m_bEnable = bEnable; }
     bool IsEnable() { return m_bEnable; }
     void SetActive(bool bActive = true) { m_bActive = bActive; }
-    //	bool IsActive(){ return m_bActive; }
     bool IsClick() { return m_bClick; }
     void SetCheck(bool bCheck = true) { m_bCheck = bCheck; }
     bool IsCheck() { return m_bCheck; }
@@ -59,5 +51,3 @@ public:
 protected:
     void ReleaseText();
 };
-
-#endif // !defined(AFX_BUTTON_H__7A986F2A_91A7_4525_8790_AC6C2E95AE63__INCLUDED_)

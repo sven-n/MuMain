@@ -166,57 +166,55 @@ enum ItemOptionFlags : BYTE
 DEFINE_ENUM_FLAG_OPERATORS(ItemOptionFlags);
 
 //scene start
-enum ENUM_MUSIC
-{
-    MUSIC_PUB = 0,
-    MUSIC_MUTHEME,
-    MUSIC_CHURCH,
-    MUSIC_DEVIAS,
-    MUSIC_NORIA,
-    MUSIC_DUNGEON,
-    MUSIC_ATLANS,
-    MUSIC_ICARUS,
-    MUSIC_TARKAN,
-    MUSIC_LOSTTOWER_A,
-    MUSIC_LOSTTOWER_B,
-    MUSIC_KALIMA,
-    MUSIC_CASTLE_PEACE,
-    MUSIC_CASTLE_BATTLE_START,
-    MUSIC_CASTLE_BATTLE_ING,
-    MUSIC_BC_HUNTINGGROUND,
-    MUSIC_BC_ADIA,
-    MUSIC_BC_CRYWOLF_1ST,
-    MUSIC_CRYWOLF_READY,
-    MUSIC_CRYWOLF_BEFORE,
-    MUSIC_CRYWOLF_BACK,
-    MUSIC_MAIN_THEME,
-    MUSIC_KANTURU_1ST,
-    MUSIC_KANTURU_2ND,
-    MUSIC_KANTURU_MAYA_BATTLE,
-    MUSIC_KANTURU_NIGHTMARE_BATTLE,
-    MUSIC_KANTURU_TOWER,
-    MUSIC_BALGAS_BARRACK,
-    MUSIC_BALGAS_REFUGE,
-    MUSIC_CURSEDTEMPLE_WAIT,
-    MUSIC_CURSEDTEMPLE_GAME,
-    MUSIC_ELBELAND,
-    MUSIC_LOGIN_THEME,
-    MUSIC_SWAMP_OF_QUIET,
-    MUSIC_RAKLION,
-    MUSIC_RAKLION_BOSS,
-    MUSIC_SANTA_TOWN,
-    MUSIC_DUEL_ARENA,
-    MUSIC_PKFIELD,
-    MUSIC_EMPIREGUARDIAN1,
-    MUSIC_EMPIREGUARDIAN2,
-    MUSIC_EMPIREGUARDIAN3,
-    MUSIC_EMPIREGUARDIAN4,
-    MUSIC_DOPPELGANGER,
-    MUSIC_UNITEDMARKETPLACE,
-    MUSIC_KARUTAN1,
-    MUSIC_KARUTAN2,
-    NUM_MUSIC
-};
+constexpr char* MUSIC_PUB = "data\\music\\Pub.mp3";
+constexpr char* MUSIC_MUTHEME = "data\\music\\Mutheme.mp3";
+constexpr char* MUSIC_CHURCH = "data\\music\\Church.mp3";
+constexpr char* MUSIC_DEVIAS = "data\\music\\Devias.mp3";
+constexpr char* MUSIC_NORIA = "data\\music\\Noria.mp3";
+constexpr char* MUSIC_DUNGEON = "data\\music\\Dungeon.mp3";
+constexpr char* MUSIC_ATLANS = "data\\music\\atlans.mp3";
+constexpr char* MUSIC_ICARUS = "data\\music\\icarus.mp3";
+constexpr char* MUSIC_TARKAN = "data\\music\\tarkan.mp3";
+constexpr char* MUSIC_LOSTTOWER_A = "data\\music\\lost_tower_a.mp3";
+constexpr char* MUSIC_LOSTTOWER_B = "data\\music\\lost_tower_b.mp3";
+constexpr char* MUSIC_KALIMA = "data\\music\\kalima.mp3";
+constexpr char* MUSIC_CASTLE_PEACE = "data\\music\\castle.mp3";
+constexpr char* MUSIC_CASTLE_BATTLE_START = "data\\music\\charge.mp3";
+constexpr char* MUSIC_CASTLE_BATTLE_ING = "data\\music\\lastend.mp3";
+constexpr char* MUSIC_BC_HUNTINGGROUND = "data\\music\\huntingground.mp3";
+constexpr char* MUSIC_BC_ADIA = "data\\music\\Aida.mp3";
+constexpr char* MUSIC_BC_CRYWOLF_1ST = "data\\music\\crywolf1st.mp3";
+constexpr char* MUSIC_CRYWOLF_READY = "data\\music\\crywolf_ready-02.ogg";
+constexpr char* MUSIC_CRYWOLF_BEFORE = "data\\music\\crywolf_before-01.ogg";
+constexpr char* MUSIC_CRYWOLF_BACK = "data\\music\\crywolf_back-03.ogg";
+constexpr char* MUSIC_MAIN_THEME = "data\\music\\main_theme.mp3";
+constexpr char* MUSIC_KANTURU_1ST = "data\\music\\kanturu_1st.mp3";
+constexpr char* MUSIC_KANTURU_2ND = "data\\music\\kanturu_2nd.mp3";
+constexpr char* MUSIC_KANTURU_MAYA_BATTLE = "data\\music\\KanturuMayaBattle.mp3";
+constexpr char* MUSIC_KANTURU_NIGHTMARE_BATTLE = "data\\music\\KanturuNightmareBattle.mp3";
+constexpr char* MUSIC_KANTURU_TOWER = "data\\music\\KanturuTower.mp3";
+constexpr char* MUSIC_BALGAS_BARRACK = "data\\music\\BalgasBarrack.mp3";
+constexpr char* MUSIC_BALGAS_REFUGE = "data\\music\\BalgasRefuge.mp3";
+constexpr char* MUSIC_CURSEDTEMPLE_WAIT = "data\\music\\cursedtemplewait.mp3";
+constexpr char* MUSIC_CURSEDTEMPLE_GAME = "data\\music\\cursedtempleplay.mp3";
+constexpr char* MUSIC_ELBELAND = "data\\music\\elbeland.mp3";
+constexpr char* MUSIC_LOGIN_THEME = "data\\music\\login_theme.mp3";
+constexpr char* MUSIC_SWAMP_OF_QUIET = "data\\music\\SwampOfCalmness.mp3";
+constexpr char* MUSIC_RAKLION = "data\\music\\Raklion.mp3";
+constexpr char* MUSIC_RAKLION_BOSS = "data\\music\\Raklion_Hatchery.mp3";
+constexpr char* MUSIC_SANTA_TOWN = "data\\music\\Santa_Village.mp3";
+constexpr char* MUSIC_DUEL_ARENA = "data\\music\\DuelArena.mp3";
+constexpr char* MUSIC_PKFIELD = "data\\music\\PK_Field.mp3";
+constexpr char* MUSIC_EMPIREGUARDIAN1 = "data\\music\\ImperialGuardianFort.mp3";
+constexpr char* MUSIC_EMPIREGUARDIAN2 = "data\\music\\ImperialGuardianFort.mp3";
+constexpr char* MUSIC_EMPIREGUARDIAN3 = "data\\music\\ImperialGuardianFort.mp3";
+constexpr char* MUSIC_EMPIREGUARDIAN4 = "data\\music\\ImperialGuardianFort.mp3";
+constexpr char* MUSIC_DOPPELGANGER = "data\\music\\iDoppelganger.mp3";
+constexpr char* MUSIC_UNITEDMARKETPLACE = "data\\music\\iDoppelganger.mp3";
+#ifdef ASG_ADD_MAP_KARUTAN
+constexpr char* MUSIC_KARUTAN1 = "data\\music\\Karutan_A.mp3";
+constexpr char* MUSIC_KARUTAN2 = "data\\music\\Karutan_B.mp3";
+#endif
 
 enum
 {
@@ -1433,7 +1431,6 @@ enum
     MODEL_LUCKYITEM_NPC,
     MODEL_TERSIA,
     MODEL_BENA,
-    MODEL_ZAIRO,
     MODEL_NPC_END,
     //player
     MODEL_PLAYER,

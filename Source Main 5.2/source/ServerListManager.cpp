@@ -5,9 +5,6 @@
 #include "stdafx.h"
 #include "ServerListManager.h"
 
-
-
-
 CServerListManager::CServerListManager()
 {
     m_iTotalServer = 0;
@@ -36,13 +33,6 @@ void CServerListManager::Release()
 
     m_mapServerGroup.clear();
     m_iTotalServer = 0;
-}
-
-void CServerListManager::BuxConvert(BYTE* pbyBuffer, int nSize)
-{
-    BYTE abyBuxCode[3] = { 0xfc, 0xcf, 0xab };
-    for (int i = 0; i < nSize; ++i)
-        pbyBuffer[i] ^= abyBuxCode[i % 3];
 }
 
 void CServerListManager::LoadServerListScript()
@@ -89,11 +79,6 @@ void CServerListManager::LoadServerListScript()
         sServerGroupInfo.m_bySequence = sServerGroupScript.m_bySequence;
         for (i = 0; i < SLM_MAX_SERVER_COUNT; ++i)
             sServerGroupInfo.m_abyNonPVP[i] = sServerGroupScript.m_abyNonPVP[i];
-
-        //wchars_num = MultiByteToWideChar(CP_UTF8, 0, sServerGroupScript., -1, NULL, 0);
-        //MultiByteToWideChar(CP_UTF8, 0, sServerGroupScript.m_szName, -1, sServerGroupInfo.m_szName, wchars_num);
-        
-        //sServerGroupInfo.m_strDescript = szDescript;
 
         m_mapServerListScript.insert(std::make_pair(sServerGroupScript.m_wIndex, sServerGroupInfo));
     }

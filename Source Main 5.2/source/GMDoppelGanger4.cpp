@@ -12,7 +12,7 @@
 #include "ZzzLodTerrain.h"
 #include "MapManager.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 CGMDoppelGanger4Ptr CGMDoppelGanger4::Make()
 {

@@ -70,8 +70,6 @@ void ClearNotice(void);
 void CreateNotice(wchar_t* Text, int Color);
 void MoveNotices();
 void RenderNotices();
-void CreateWhisper(wchar_t* ID, const wchar_t* Text, int Type);
-void MoveWhispers();
 void RenderSwichState();
 void CheckChatText(wchar_t* Text);
 
@@ -102,8 +100,6 @@ bool CheckArrow();
 void ReloadArrow();
 int SearchArrowCount();
 
-int  SelectCharacter();
-bool IsWebzenCharacter();
 bool FindText(const wchar_t* Text, const wchar_t* Token, bool First = false);
 bool FindTextABS(const wchar_t* Text, const wchar_t* Token, bool First = false);
 bool CheckAbuseFilter(wchar_t* Text, bool bCheckSlash = true);
@@ -114,8 +110,6 @@ void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType);
 void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disabled = false, bool clipping = true);
 void RenderOutSides();
 void RenderBooleans();
-void RenderInventoryInterface();
-int  RenderLimitTime(bool arrow);
 void RenderTimes();
 void RenderPartyHP();
 void SetPositionIME_Wnd(float x, float y);

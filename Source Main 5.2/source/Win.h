@@ -1,10 +1,3 @@
-//*****************************************************************************
-// File: Win.h
-//*****************************************************************************
-
-#if !defined(AFX_WIN_H__A06C4911_F775_4A87_97B9_42FE76BC1DEB__INCLUDED_)
-#define AFX_WIN_H__A06C4911_F775_4A87_97B9_42FE76BC1DEB__INCLUDED_
-
 #pragma once
 
 #include "UIBaseDef.h"
@@ -89,5 +82,3 @@ protected:
     void RegisterButton(CButton* pBtn);
     void RenderButtons();
 };
-
-#endif // !defined(AFX_WIN_H__A06C4911_F775_4A87_97B9_42FE76BC1DEB__INCLUDED_)

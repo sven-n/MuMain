@@ -1,10 +1,3 @@
-// BuffScriptLoader.h: interface for the CBuffScriptLoader class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_BUFFSCRIPTLOADER_H__AD3819A4_1C9A_4886_AB83_DA77FAAD7433__INCLUDED_)
-#define AFX_BUFFSCRIPTLOADER_H__AD3819A4_1C9A_4886_AB83_DA77FAAD7433__INCLUDED_
-
 #pragma once
 
 #define MAX_BUFF_NAME_LENGTH	50
@@ -71,5 +64,3 @@ private:
 private:
     BuffInfoMap			m_Info;
 };
-
-#endif // !defined(AFX_BUFFSCRIPTLOADER_H__AD3819A4_1C9A_4886_AB83_DA77FAAD7433__INCLUDED_)
