@@ -691,12 +691,12 @@ BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstrin
 
     // Create both lowercase and uppercase variants of the option character
     std::wstring cOptionLower = L"/";
-    cOptionLower += std::to_wstring(towlower(static_cast<wint_t>(cOption)));
+    cOptionLower += static_cast<wchar_t>(towlower(static_cast<wint_t>(cOption)));
     auto foundIndex = lpszCommandLine.find(cOptionLower);
     if (foundIndex == std::wstring::npos)
     {
         std::wstring cOptionUpper = L"/";
-        cOptionUpper += std::to_wstring(towupper(static_cast<wint_t>(cOption)));
+        cOptionUpper += static_cast<wchar_t>(towupper(static_cast<wint_t>(cOption)));
         foundIndex = lpszCommandLine.find(cOptionUpper);
     }
 
