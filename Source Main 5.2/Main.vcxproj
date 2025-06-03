@@ -98,7 +98,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Global Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)source\$(Configuration)\</IntDir>
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(VC_ExecutablePath_x86);$(CommonExecutablePath)</ExecutablePath>
@@ -259,7 +259,7 @@
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>
       </AdditionalOptions>
@@ -367,6 +367,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Camera3D.cpp" />
     <ClCompile Include="source\CharInfoBalloonMng.cpp" />
     <ClCompile Include="source\Dotnet\PacketFunctions_ChatServer.cpp" />
     <ClCompile Include="source\Dotnet\PacketFunctions_ClientToServer.cpp" />
@@ -729,6 +730,7 @@
   <ItemGroup>
     <ClInclude Include="afxres.h" />
     <ClInclude Include="dependencies\include\span.hpp" />
+    <ClInclude Include="source\Camera3D.h" />
     <ClInclude Include="source\CharInfoBalloonMng.h" />
     <ClInclude Include="source\Dotnet\PacketBindings_ChatServer.h" />
     <ClInclude Include="source\Dotnet\PacketBindings_ClientToServer.h" />

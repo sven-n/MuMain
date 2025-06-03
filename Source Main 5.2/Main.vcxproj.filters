@@ -1120,6 +1120,9 @@
     <ClCompile Include="source\CharInfoBalloonMng.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Camera3D.cpp">
+      <Filter>MU\Client\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Button.h">
@@ -2116,6 +2119,9 @@
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\CharInfoBalloonMng.h">
+      <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Camera3D.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

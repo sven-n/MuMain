@@ -679,6 +679,7 @@ int  m_Resolution;
 int	m_nColorDepth;
 int m_RememberMe;
 int	g_iRenderTextType = 0;
+int	m_CameraOnOff;
 
 wchar_t g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = { '\0' };
 
