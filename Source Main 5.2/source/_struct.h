@@ -515,9 +515,8 @@ typedef struct
     WORD LevelUpPoint;
     BYTE SkillNumber;
     BYTE SkillMasterNumber;
-
-    uint64_t Experience;
-    uint64_t NextExperience;
+    DWORD Experience;
+    DWORD NextExperience;
 
     ActionSkillType Skill[MAX_SKILLS];
     int  SkillDelay[MAX_SKILLS];
