@@ -2699,7 +2699,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         if (g_MovementSkill.m_iTarget != -1)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
-            VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
+			VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
         }
         pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
         SendRequestMagic(iSkill, wTargetKey);
@@ -3361,7 +3361,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_RUSH:
         case AT_SKILL_SPACE_SPLIT:
         case AT_SKILL_SPIRAL_SLASH:
-            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
+            if (g_MovementSkill.m_iTarget >= 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
@@ -3392,7 +3392,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_FIREBALL:
         case AT_SKILL_JAVELIN:
         case AT_SKILL_DEATH_CANNON:
-            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
+            if (g_MovementSkill.m_iTarget >= 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
@@ -3417,7 +3417,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_DEEPIMPACT:
         case AT_SKILL_ICE_ARROW:
         case AT_SKILL_ICE_ARROW_STR:
-            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
+            if (g_MovementSkill.m_iTarget >= 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
@@ -3447,7 +3447,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_DEFENSE:
         case AT_SKILL_DEFENSE_STR:
         case AT_SKILL_DEFENSE_MASTERY:
-            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
+            if (g_MovementSkill.m_iTarget >= 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
@@ -3494,7 +3494,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         {
             g_ConsoleDebug->Write(MCD_RECEIVE, L"Action ID : %d, %d | %d %d | %d %d", iSkill, Distance, CharactersClient[g_MovementSkill.m_iTarget].Dead, g_MovementSkill.m_iTarget,
                 CheckTile(c, o, Distance * 1.2f), !c->SafeZone);
-            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
+            if (g_MovementSkill.m_iTarget >= 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
