@@ -2220,7 +2220,6 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
             break;
         case AT_SKILL_RIDER:
-            //		    SendRequestMagic(Skill,CharactersClient[g_MovementSkill.m_iTarget].Key);
             if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene())
                 SetAction(o, PLAYER_SKILL_RIDER_FLY);
             else
@@ -2284,11 +2283,20 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2));
     }
 
-    VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+    if (g_MovementSkill.m_iTarget >= 0)
+    {
+        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+    }
     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
     if (Skill != AT_SKILL_GAOTIC)
     {
+        WORD TKey = 0xffff;
+        if (g_MovementSkill.m_iTarget != -1)
+        {
+            TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
+        }
+
         if (Skill == AT_SKILL_TWISTING_SLASH
             || Skill == AT_SKILL_TWISTING_SLASH_STR
             || Skill == AT_SKILL_TWISTING_SLASH_STR_MG
@@ -2297,17 +2305,12 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             || Skill == AT_SKILL_FIRE_SLASH_STR
             )
         {
-            WORD TKey = 0xffff;
-            if (g_MovementSkill.m_iTarget != -1)
-            {
-                TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
-            }
             SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), 
                 (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
         }
         else
         {
-            SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+            SendRequestMagic(Skill, TKey);
         }
     }
 
@@ -2390,8 +2393,18 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
             return;
     }
 
-    VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+    if (g_MovementSkill.m_iTarget >= 0)
+    {
+        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+    }
     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
+
+    WORD TKey = 0xffff;
+    if (g_MovementSkill.m_iTarget != -1)
+    {
+        TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
+    }
+
     switch (Skill)
     {
     case AT_SKILL_POISON:
@@ -2407,12 +2420,12 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     case AT_SKILL_ICE_STR_MG:
     case AT_SKILL_FIREBALL:
     case AT_SKILL_JAVELIN:
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetPlayerMagic(c);
         LetHeroStop();
         break;
     case AT_SKILL_DEATH_CANNON:
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetAction(o, PLAYER_ATTACK_DEATH_CANNON);
         SetAttackSpeed();
         LetHeroStop();
@@ -2421,11 +2434,6 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     case AT_SKILL_BLAST_STR:
     case AT_SKILL_BLAST_STR_MG:
     {
-        WORD TKey = 0xffff;
-        if (g_MovementSkill.m_iTarget != -1)
-        {
-            TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
-        }
         SendRequestMagicContinue(Skill, (int)(c->TargetPosition[0] / 100.f), (int)(c->TargetPosition[1] / 100.f), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
     }
     SetPlayerMagic(c);
@@ -2441,8 +2449,18 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     LetHeroStop();
     int Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
 
-    VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+    if (g_MovementSkill.m_iTarget >= 0)
+    {
+        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+    }
     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
+
+    WORD TKey = 0xffff;
+    if (g_MovementSkill.m_iTarget != -1)
+    {
+        TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
+    }
+
     switch (Skill)
     {
     case AT_SKILL_HEALING:
@@ -2453,7 +2471,7 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     case AT_SKILL_DEFENSE:
     case AT_SKILL_DEFENSE_STR:
     case AT_SKILL_DEFENSE_MASTERY:
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetPlayerMagic(c);
         break;
 
@@ -2469,7 +2487,7 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
         }
         if (!CheckArrow())
             break;
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetPlayerAttack(c);
     }
     break;
@@ -2477,7 +2495,7 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     case AT_SKILL_DEEPIMPACT:
         if (!CheckArrow())
             break;
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetPlayerHighBowAttack(c);
         break;
     }
@@ -2533,9 +2551,11 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
             }
         }
 
-        WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
-
-        SendRequestMagicContinue(iSkill, (int)(pCha->TargetPosition[0] / 100.f), (int)(pCha->TargetPosition[1] / 100.f), (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, 0, wTargetKey, 0);
+        if (g_MovementSkill.m_iTarget >= 0)
+        {
+            WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
+            SendRequestMagicContinue(iSkill, (int)(pCha->TargetPosition[0] / 100.f), (int)(pCha->TargetPosition[1] / 100.f), (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, 0, wTargetKey, 0);
+        }
     }
     break;
     case AT_SKILL_ALICE_CHAINLIGHTNING:
@@ -2559,12 +2579,15 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
             break;
         }
 
-        WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
+        if (g_MovementSkill.m_iTarget >= 0)
+        {
+            WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
 
-        SendRequestMagicContinue(iSkill, (int)(pCha->TargetPosition[0] / 100.f),
-            (int)(pCha->TargetPosition[1] / 100.f),
-            (BYTE)(pObj->Angle[2] / 360.f * 256.f),
-            0, 0, wTargetKey, 0);
+            SendRequestMagicContinue(iSkill, (int)(pCha->TargetPosition[0] / 100.f),
+                (int)(pCha->TargetPosition[1] / 100.f),
+                (BYTE)(pObj->Angle[2] / 360.f * 256.f),
+                0, 0, wTargetKey, 0);
+        }
     }
     break;
     case AT_SKILL_ALICE_SLEEP:
@@ -2574,11 +2597,14 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
     {
         LetHeroStop();
 
-        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
-        pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
+        if (g_MovementSkill.m_iTarget >= 0)
+        {
+            VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
+            pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
 
-        WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
-        SendRequestMagic(iSkill, wTargetKey);
+            WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
+            SendRequestMagic(iSkill, wTargetKey);
+        }
     }
     break;
     case AT_SKILL_ALICE_BERSERKER:
@@ -2677,8 +2703,8 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         if (g_MovementSkill.m_iTarget != -1)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
+            VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
         }
-        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
         pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
         SendRequestMagic(iSkill, wTargetKey);
 
@@ -2686,10 +2712,12 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         BYTE TargetPosY = (BYTE)(pCha->TargetPosition[1] / TERRAIN_SCALE);
 
         if ((gMapManager.InBloodCastle()) || iSkill == AT_SKILL_OCCUPY
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
+            || (g_MovementSkill.m_iTarget >= 0 && (
+               CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
             || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_GUARDIAN_STATUE
             || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_LIFE_STONE
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CANON_TOWER)
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CANON_TOWER))
+            )
         {
             int angle = abs((int)(pObj->Angle[2] / 45.f));
             switch (angle)
@@ -2917,8 +2945,9 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
             pCha->TargetCharacter = SelectedCharacter;
             if (CharactersClient[SelectedCharacter].Dead == 0)
             {
-                TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
-                TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
+                
+                TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
+                TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
 
                 if (bCheckAttack)
                 {
@@ -3336,10 +3365,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_RUSH:
         case AT_SKILL_SPACE_SPLIT:
         case AT_SKILL_SPIRAL_SLASH:
-            if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
+            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance * 1.2f) && !c->SafeZone)
@@ -3369,10 +3396,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_FIREBALL:
         case AT_SKILL_JAVELIN:
         case AT_SKILL_DEATH_CANNON:
-            if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
+            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance) && !c->SafeZone)
@@ -3396,10 +3421,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_DEEPIMPACT:
         case AT_SKILL_ICE_ARROW:
         case AT_SKILL_ICE_ARROW_STR:
-            if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
+            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance) && !c->SafeZone)
@@ -3428,10 +3451,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_DEFENSE:
         case AT_SKILL_DEFENSE_STR:
         case AT_SKILL_DEFENSE_MASTERY:
-            if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
+            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance) && !c->SafeZone)
@@ -3477,10 +3498,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         {
             g_ConsoleDebug->Write(MCD_RECEIVE, L"Action ID : %d, %d | %d %d | %d %d", iSkill, Distance, CharactersClient[g_MovementSkill.m_iTarget].Dead, g_MovementSkill.m_iTarget,
                 CheckTile(c, o, Distance * 1.2f), !c->SafeZone);
-            if (CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
+            if (g_MovementSkill.m_iTarget > 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance * 1.2f) && !c->SafeZone) {
@@ -6327,8 +6346,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             c->TargetCharacter = SelectedCharacter;
             if (0 == CharactersClient[SelectedCharacter].Dead)
             {
-                TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
-                TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
+                TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
+                TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
 
                 if (CheckAttack() == true)
                 {
@@ -6371,8 +6390,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             }
             if (0 == CharactersClient[SelectedCharacter].Dead)
             {
-                TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
-                TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
+                TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
+                TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
 
                 if (CheckAttack() == true)
                 {
