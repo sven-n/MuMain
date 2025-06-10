@@ -1854,12 +1854,8 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
             return sc->Key;
         }
     }
-    else
-    {
-        return -1;
-    }
 
-    return -1;
+    return sc->Key;
 }
 
 void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY)
