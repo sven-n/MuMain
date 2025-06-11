@@ -1789,9 +1789,16 @@ bool CheckAttack()
 int	getTargetCharacterKey(CHARACTER* c, int selected)
 {
     if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+    {
         return -1;
+    }
 
-    if (c != Hero || selected < 0 || selected >= MAX_CHARACTERS_CLIENT)
+    if (c != Hero)
+    {
+        return -1;
+    }
+
+    if (selected < 0 || selected >= MAX_CHARACTERS_CLIENT)
     {
         return -1;
     }
@@ -1804,55 +1811,67 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
     }
 
     if (EnableGuildWar && sc->PK >= PVP_MURDERER2 && sc->GuildMarkIndex != -1 && wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[sc->GuildMarkIndex].GuildName) == NULL)
+    {
         return  -1;
+    }
 
-    else if (g_DuelMgr.IsDuelEnabled())
+    if (g_DuelMgr.IsDuelEnabled())
     {
         if (g_DuelMgr.IsDuelPlayer(sc, DUEL_ENEMY))
+        {
             return sc->Key;
-        else
-            return -1;
+        }
+
+        return -1;
     }
-    else if (sc->GuildRelationShip == GR_RIVAL || sc->GuildRelationShip == GR_RIVALUNION)
+
+    if (sc->GuildRelationShip == GR_RIVAL || sc->GuildRelationShip == GR_RIVALUNION)
     {
         return sc->Key;
     }
-    else if (EnableGuildWar)
+
+    if (EnableGuildWar)
     {
         if (sc->GuildTeam == 2 && sc != Hero)
+        {
             return sc->Key;
-        else
-            return -1;
+        }
+
+        return -1;
     }
-    else if (::IsStrifeMap(gMapManager.WorldActive) && sc != Hero && sc->m_byGensInfluence != Hero->m_byGensInfluence && HIBYTE(GetAsyncKeyState(VK_MENU)) != 128)
+
+    if (::IsStrifeMap(gMapManager.WorldActive) && sc != Hero && sc->m_byGensInfluence != Hero->m_byGensInfluence && HIBYTE(GetAsyncKeyState(VK_MENU)) != 128)
     {
         if (sc->GuildRelationShip == GR_NONE && !g_pPartyManager->IsPartyMember(SelectedCharacter))
         {
             return sc->Key;
         }
-        else if ((wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[c->GuildMarkIndex].GuildName) == NULL) ||
+
+        if ((wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[c->GuildMarkIndex].GuildName) == NULL) ||
             g_pPartyManager->IsPartyMember(SelectedCharacter))
         {
             if (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128)
+            {
                 return sc->Key;
-            else
-                return -1;
+            }
+
+            return -1;
         }
     }
-    else if ((sc->PK >= PVP_MURDERER2 && sc->Object.Type == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
+
+    if ((sc->PK >= PVP_MURDERER2 && sc->Object.Type == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
     {
         return sc->Key;
     }
-    else if (gMapManager.IsCursedTemple())
+
+    if (gMapManager.IsCursedTemple())
     {
         if (g_CursedTemple->IsPartyMember(selected))
         {
             return -1;
         }
-        else
-        {
-            return sc->Key;
-        }
+
+        return sc->Key;
     }
 
     return sc->Key;
@@ -2285,8 +2304,8 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
     if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+        o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
     }
-    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
     if (Skill != AT_SKILL_GAOTIC)
     {
@@ -2395,8 +2414,8 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+        o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
     }
-    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
     WORD TKey = 0xffff;
     if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
@@ -2451,8 +2470,8 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+        o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
     }
-    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
     WORD TKey = 0xffff;
     if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
@@ -2703,8 +2722,8 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
 			VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
+            pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
         }
-        pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
         SendRequestMagic(iSkill, wTargetKey);
 
         BYTE TargetPosX = (BYTE)(pCha->TargetPosition[0] / TERRAIN_SCALE);
@@ -2936,7 +2955,7 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
         case AT_SKILL_OCCUPY:
         case AT_SKILL_PHOENIX_SHOT:
         {
-            if (SelectedCharacter >= 0 && CharactersClient[SelectedCharacter].Dead == 0)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT && CharactersClient[SelectedCharacter].Dead == 0)
             {
                 pCha->TargetCharacter = SelectedCharacter;
                 
