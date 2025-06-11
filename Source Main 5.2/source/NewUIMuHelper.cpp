@@ -455,8 +455,6 @@ bool CNewUIMuHelper::Update()
             m_Skill2DelayInput.SetState(UISTATE_NORMAL);
             m_Skill3DelayInput.SetState(UISTATE_NORMAL);
             m_ItemInput.SetState(UISTATE_HIDE);
-
-            m_DistanceTimeInput.GiveFocus();
         }
         else if (m_iCurrentOpenTab == 1)
         {
@@ -464,8 +462,6 @@ bool CNewUIMuHelper::Update()
             m_Skill2DelayInput.SetState(UISTATE_HIDE);
             m_Skill3DelayInput.SetState(UISTATE_HIDE);
             m_ItemInput.SetState(UISTATE_NORMAL);
-
-            m_ItemInput.GiveFocus();
         }
     }
     return true;
@@ -683,6 +679,16 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         else if (iIconIndex == TEXTBOX_IMG_ADD_EXTRA_ITEM)
         {
             m_ItemInput.GiveFocus();
+        }
+        else
+        {
+            SetFocus(g_hWnd);
+        }
+
+        POINT ptExitBtn = { m_Pos.x + 169, m_Pos.y + 7 };
+        if (CheckMouseIn(ptExitBtn.x, ptExitBtn.y, 13, 12))
+        {
+            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
         }
     }
     if (IsRelease(VK_RBUTTON))
@@ -929,6 +935,7 @@ void CNewUIMuHelper::SaveExtraItem()
     }
 
     m_ItemInput.SetText(L"");
+    SetFocus(g_hWnd);
 }
 
 void CNewUIMuHelper::RemoveExtraItem()
