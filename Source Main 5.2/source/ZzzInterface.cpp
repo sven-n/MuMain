@@ -2288,10 +2288,10 @@ if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS
     if (Skill != AT_SKILL_GAOTIC)
     {
         WORD TKey = 0xffff;
-        if (g_MovementSkill.m_iTarget != -1)
-        {
-            TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
-        }
+if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+		{
+			TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
+		}
 
         if (Skill == AT_SKILL_TWISTING_SLASH
             || Skill == AT_SKILL_TWISTING_SLASH_STR
