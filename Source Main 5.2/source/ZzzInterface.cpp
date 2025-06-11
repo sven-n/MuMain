@@ -2279,7 +2279,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2));
     }
 
-if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
     }
@@ -2288,7 +2288,7 @@ if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS
     if (Skill != AT_SKILL_GAOTIC)
     {
         WORD TKey = 0xffff;
-if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
 		{
 			TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
 		}
@@ -2389,14 +2389,14 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
             return;
     }
 
-    if (g_MovementSkill.m_iTarget >= 0)
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
     }
     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
     WORD TKey = 0xffff;
-    if (g_MovementSkill.m_iTarget != -1)
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
     }
@@ -2445,14 +2445,14 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     LetHeroStop();
     int Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
 
-    if (g_MovementSkill.m_iTarget >= 0)
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
     }
     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
     WORD TKey = 0xffff;
-    if (g_MovementSkill.m_iTarget != -1)
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
     }
@@ -2933,20 +2933,16 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
         case AT_SKILL_OCCUPY:
         case AT_SKILL_PHOENIX_SHOT:
         {
-            if (SelectedCharacter <= -1)
-                return;
-
-            fDistance = gSkillManager.GetSkillDistance(nSkill, pCha) * 1.2f;
-
-            pCha->TargetCharacter = SelectedCharacter;
-            if (CharactersClient[SelectedCharacter].Dead == 0)
+            if (SelectedCharacter >= 0 && CharactersClient[SelectedCharacter].Dead == 0)
             {
+                pCha->TargetCharacter = SelectedCharacter;
                 
                 TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
 
                 if (bCheckAttack)
                 {
+                    fDistance = gSkillManager.GetSkillDistance(nSkill, pCha) * 1.2f;
                     if (CheckTile(pCha, pObj, fDistance) && pCha->SafeZone == false)
                     {
                         bool bNoneWall = CheckWall((pCha->PositionX), (pCha->PositionY), TargetX, TargetY);
@@ -3447,7 +3443,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_DEFENSE:
         case AT_SKILL_DEFENSE_STR:
         case AT_SKILL_DEFENSE_MASTERY:
-            if (g_MovementSkill.m_iTarget >= 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
+            if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
@@ -3494,7 +3490,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         {
             g_ConsoleDebug->Write(MCD_RECEIVE, L"Action ID : %d, %d | %d %d | %d %d", iSkill, Distance, CharactersClient[g_MovementSkill.m_iTarget].Dead, g_MovementSkill.m_iTarget,
                 CheckTile(c, o, Distance * 1.2f), !c->SafeZone);
-            if (g_MovementSkill.m_iTarget >= 0 && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
+            if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
@@ -6326,11 +6322,6 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         break;
         }
 
-        if (SelectedCharacter == -1)
-        {
-            return;
-        }
-
         switch (Skill)
         {
         case AT_SKILL_ALICE_DRAINLIFE:
@@ -6340,7 +6331,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         case AT_SKILL_ALICE_CHAINLIGHTNING_STR:
         {
             c->TargetCharacter = SelectedCharacter;
-            if (0 == CharactersClient[SelectedCharacter].Dead)
+            if (SelectedCharacter >= 0 && CharactersClient[SelectedCharacter].Dead == 0)
             {
                 TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
@@ -6384,7 +6375,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                     break;
                 }
             }
-            if (0 == CharactersClient[SelectedCharacter].Dead)
+            if (SelectedCharacter >= 0 && CharactersClient[SelectedCharacter].Dead == 0)
             {
                 TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
