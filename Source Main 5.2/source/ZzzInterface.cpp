@@ -2279,7 +2279,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2));
     }
 
-    if (g_MovementSkill.m_iTarget >= 0)
+if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
     }
