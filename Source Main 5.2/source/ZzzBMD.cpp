@@ -2774,7 +2774,7 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     const char* ext = strrchr(Name, '.');
     if (!ext || (_stricmp(ext, ".smd") != 0))
     {
-        wprintf(L"[Open2] WARNING: Invalid file extension: %.64hs in %.64s\n", Name, ModelPath);
+        // wprintf(L"[Open2] WARNING: Invalid file extension: %.64hs in %.64s\n", Name, ModelPath);
     }
 
     NumMeshs = *(short*)(data + ptr); ptr += sizeof(short);
