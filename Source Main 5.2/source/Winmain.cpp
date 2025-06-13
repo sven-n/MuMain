@@ -105,6 +105,8 @@ char Mp3FileName[256];
 
 void StopMusic()
 {
+    if (!m_MusicOnOff) return;
+
     wzAudioStop();
 }
 
