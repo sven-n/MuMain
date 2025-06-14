@@ -12,6 +12,8 @@
 
 void DeleteSocket();
 
+CErrorReport g_ErrorReport;
+
 CErrorReport::CErrorReport()
 {
     Clear();
@@ -33,10 +35,15 @@ void CErrorReport::Clear(void)
 void CErrorReport::Create(wchar_t* lpszFileName)
 {
     wcscpy(m_lpszFileName, lpszFileName);
-
-    //DeleteFile( m_lpszFileName);
     m_iKey = 0;
     m_hFile = CreateFile(m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    // Write UTF-16 BOM if new file
+    if (m_hFile != INVALID_HANDLE_VALUE && GetLastError() != ERROR_ALREADY_EXISTS) {
+        const wchar_t BOM = 0xFEFF;
+        DWORD written;
+        ::WriteFile(m_hFile, &BOM, sizeof(BOM), &written, NULL);
+    }
 
     CutHead();
     SetFilePointer(m_hFile, 0, NULL, FILE_END);
@@ -53,7 +60,6 @@ void CErrorReport::CutHead(void)
     DWORD dwNumber;
     wchar_t lpszBuffer[128 * 1024];
     ReadFile(m_hFile, lpszBuffer, 128 * 1024 - 1, &dwNumber, NULL);
-    //m_iKey = Xor_ConvertBuffer( lpszBuffer, dwNumber);
     lpszBuffer[dwNumber] = '\0';
     wchar_t* lpCut = CheckHeadToCut(lpszBuffer, dwNumber);
     if (dwNumber >= 32 * 1024 - 1)
@@ -105,8 +111,7 @@ wchar_t* CErrorReport::CheckHeadToCut(wchar_t* lpszBuffer, DWORD dwNumber)
 
 BOOL CErrorReport::WriteFile(HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 {
-    //m_iKey = Xor_ConvertBuffer( lpBuffer, nNumberOfBytesToWrite, m_iKey);
-    return (::WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped));
+    return ::WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
 }
 
 void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
@@ -114,7 +119,7 @@ void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
     if (m_hFile != INVALID_HANDLE_VALUE)
     {
         DWORD dwNumber;
-        WriteFile(m_hFile, lpszToWrite, wcslen(lpszToWrite), &dwNumber, NULL);
+        WriteFile(m_hFile, lpszToWrite, wcslen(lpszToWrite) * sizeof(wchar_t), &dwNumber, NULL);
 
         if (dwNumber == 0)
         {
@@ -126,10 +131,10 @@ void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
 
 void CErrorReport::Write(const wchar_t* lpszFormat, ...)
 {
-    wchar_t lpszBuffer[1024] = { 0, };
+    wchar_t lpszBuffer[2048] = { 0 };
     va_list va;
     va_start(va, lpszFormat);
-    vswprintf(lpszBuffer, lpszFormat, va);
+    vswprintf(lpszBuffer, _countof(lpszBuffer), lpszFormat, va);
     va_end(va);
 
     WriteDebugInfoStr(lpszBuffer);
@@ -138,122 +143,111 @@ void CErrorReport::Write(const wchar_t* lpszFormat, ...)
 void CErrorReport::HexWrite(void* pBuffer, int iSize)
 {
     DWORD dwWritten = 0;
-    wchar_t szLine[256] = { 0, };
+    wchar_t szLine[256] = { 0 };
     int offset = 0;
-    offset += swprintf(szLine, L"0x%00000008X : ", (DWORD*)pBuffer);
+    offset += swprintf(szLine, L"0x%08X : ", (DWORD*)pBuffer);
     for (int i = 0; i < iSize; i++) {
         offset += swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
         if (i > 0 && i < iSize - 1) {
-            if (i % 16 == 15) {	//. new line
+            if (i % 16 == 15) {
                 offset += swprintf(szLine + offset, L"\r\n");
-                WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
+                WriteFile(m_hFile, szLine, wcslen(szLine) * sizeof(wchar_t), &dwWritten, NULL);
                 offset = 0;
                 offset += swprintf(szLine + offset, L"           : ");
             }
-            else if (i % 4 == 3) { //. space
+            else if (i % 4 == 3) {
                 offset += swprintf(szLine + offset, L" ");
             }
         }
     }
     offset += swprintf(szLine + offset, L"\r\n");
-    WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
+    WriteFile(m_hFile, szLine, wcslen(szLine) * sizeof(wchar_t), &dwWritten, NULL);
 }
 
 void CErrorReport::AddSeparator(void)
 {
-    Write(L"-------------------------------------------------------------------------------------\r\n");
+    Write(L"------------------------------------------------------------\r\n");
 }
 
 void CErrorReport::WriteLogBegin(void)
 {
-    Write(L"###### Log Begin ######\r\n");
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    Write(L"\n###### Log Begin ######\r\n");
+    Write(L"Date: %04d/%02d/%02d\r\n", st.wYear, st.wMonth, st.wDay);
+    Write(L"Time: %02d:%02d:%02d\r\n", st.wHour, st.wMinute, st.wSecond);
+    AddSeparator();
 }
 
 void CErrorReport::WriteCurrentTime(BOOL bLineShift)
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
-    g_ErrorReport.Write(L"%4d/%02d/%02d %02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute);
+    Write(L"%04d/%02d/%02d %02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute);
     if (bLineShift)
     {
-        g_ErrorReport.Write(L"\r\n");
+        Write(L"\r\n");
     }
+}
+
+void CErrorReport::WriteLabelValue(const wchar_t* label, const wchar_t* value)
+{
+    const int labelWidth = 25;
+    wchar_t buffer[256];
+    swprintf(buffer, L"%-*s: %s\r\n", labelWidth, label, value);
+    WriteDebugInfoStr(buffer);
 }
 
 void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
 {
-    Write(L"<System information>\r\n");
-    Write(L"OS \t\t\t: %s\r\n", si->m_lpszOS);
-    Write(L"CPU \t\t\t: %s\r\n", si->m_lpszCPU);
-    Write(L"RAM \t\t\t: %dMB\r\n", 1 + (si->m_iMemorySize / 1024 / 1024));
+    Write(L"\n===== SYSTEM INFORMATION =====\r\n");
+    WriteLabelValue(L"OS", si->m_lpszOS);
+    WriteLabelValue(L"CPU", si->m_lpszCPU);
+
+    wchar_t ram[32];
+    swprintf(ram, L"%dMB", 1 + (si->m_iMemorySize / 1024 / 1024));
+    WriteLabelValue(L"RAM", ram);
+
     AddSeparator();
-    Write(L"Direct-X \t\t: %s\r\n", si->m_lpszDxVersion);
+    WriteLabelValue(L"Direct-X", si->m_lpszDxVersion);
 }
 
 void CErrorReport::WriteOpenGLInfo(void)
 {
-    Write(L"<OpenGL information>\r\n");
-    Write(L"Vendor\t\t: %s\r\n", (wchar_t*)glGetString(GL_VENDOR));
-    Write(L"Render\t\t: %s\r\n", (wchar_t*)glGetString(GL_RENDERER));
-    Write(L"OpenGL version\t: %s\r\n", (wchar_t*)glGetString(GL_VERSION));
+    Write(L"\n===== OPENGL INFORMATION =====\r\n");
+    WriteLabelValue(L"Vendor", (wchar_t*)glGetString(GL_VENDOR));
+    WriteLabelValue(L"Renderer", (wchar_t*)glGetString(GL_RENDERER));
+    WriteLabelValue(L"OpenGL version", (wchar_t*)glGetString(GL_VERSION));
+
     GLint iResult[2];
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, iResult);
-    Write(L"Max Texture size\t: %d x %d\r\n", iResult[0], iResult[0]);
+    wchar_t texSize[32];
+    swprintf(texSize, L"%d x %d", iResult[0], iResult[0]);
+    WriteLabelValue(L"Max Texture size", texSize);
+
     glGetIntegerv(GL_MAX_VIEWPORT_DIMS, iResult);
-    Write(L"Max Viewport size\t: %d x %d\r\n", iResult[0], iResult[1]);
+    swprintf(texSize, L"%d x %d", iResult[0], iResult[1]);
+    WriteLabelValue(L"Max Viewport size", texSize);
 }
 
 void CErrorReport::WriteImeInfo(HWND hWnd)
 {
+    Write(L"\n===== IME INFORMATION =====\r\n");
     wchar_t lpszTemp[256];
-    Write(L"<IME information>\r\n");
 
     HIMC hImc = ImmGetContext(hWnd);
     if (hImc)
     {
         HKL hKl = GetKeyboardLayout(0);
         ImmGetDescription(hKl, lpszTemp, 256);
-        Write(L"IME Name\t\t: %s\r\n", lpszTemp);
+        WriteLabelValue(L"IME Name", lpszTemp);
         ImmGetIMEFileName(hKl, lpszTemp, 256);
-        Write(L"IME File Name\t\t: %s\r\n", lpszTemp);
+        WriteLabelValue(L"IME File Name", lpszTemp);
         ImmReleaseContext(hWnd, hImc);
     }
     GetKeyboardLayoutName(lpszTemp);
-    Write(L"Keyboard type\t\t: %s\r\n", lpszTemp);
+    WriteLabelValue(L"Keyboard type", lpszTemp);
 }
-
-typedef struct tagER_SOUNDDEVICE {
-    wchar_t	szGuid[64];
-    wchar_t	szDeviceName[128];
-    wchar_t	szDriverName[128];
-} ER_SOUNDDEVICEINFO;
-
-typedef struct tagSOUNDDEVICEENUM {
-    enum { MAX_DEVICENUM = 20 };
-    tagSOUNDDEVICEENUM() { nDeivceCount = 0; }
-    ER_SOUNDDEVICEINFO		infoSoundDevice[MAX_DEVICENUM];
-    size_t				nDeivceCount;
-
-    tagER_SOUNDDEVICE& operator [] (size_t p) {
-        return infoSoundDevice[p];
-    }
-    tagER_SOUNDDEVICE& GetNextDevice() {
-        return infoSoundDevice[nDeivceCount];
-    }
-} ER_SOUNDDEVICEENUMINFO;
-
-INT_PTR CALLBACK DSoundEnumCallback(GUID* pGUID, LPWSTR strDesc, LPWSTR strDrvName, VOID* pContext)
-{
-    if (pGUID) {
-        auto* pSoundDeviceEnumInfo = (ER_SOUNDDEVICEENUMINFO*)pContext;
-        wcscpy(pSoundDeviceEnumInfo->GetNextDevice().szDeviceName, strDesc);
-        wcscpy(pSoundDeviceEnumInfo->GetNextDevice().szDriverName, strDrvName);
-        pSoundDeviceEnumInfo->nDeivceCount++;
-    }
-    return TRUE;
-}
-
-BOOL GetFileVersion(wchar_t* lpszFileName, WORD* pwVersion);
 
 void CErrorReport::WriteSoundCardInfo(void)
 {
@@ -262,30 +256,40 @@ void CErrorReport::WriteSoundCardInfo(void)
 
     if (sdi.nDeivceCount > 0)
     {
-        Write(L"<Sound card information>\r\n");
+        Write(L"\n===== SOUND CARD INFORMATION =====\r\n");
     }
     else
     {
-        Write(L"No sound card found.\r\n");
+        Write(L"\nNo sound card found.\r\n");
         return;
     }
 
     for (unsigned int i = 0; i < sdi.nDeivceCount; ++i)
     {
-        Write(L"Sound Card \t\t: %s\r\n", sdi.infoSoundDevice[i].szDeviceName);
+        WriteLabelValue(L"Sound Card", sdi.infoSoundDevice[i].szDeviceName);
 
         wchar_t lpszBuffer[MAX_PATH];
         GetSystemDirectory(lpszBuffer, MAX_PATH);
         wcscat(lpszBuffer, L"\\drivers\\");
         wcscat(lpszBuffer, sdi.infoSoundDevice[i].szDriverName);
         WORD wVersion[4];
-        GetFileVersion(lpszBuffer, wVersion);
-
-        Write(L"Sound Card Driver\t: %s (%d.%d.%d.%d)\r\n", sdi.infoSoundDevice[i].szDriverName, wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+        if (GetFileVersion(lpszBuffer, wVersion))
+        {
+            wchar_t driverInfo[256];
+            swprintf(driverInfo, L"%s (%d.%d.%d.%d)",
+                sdi.infoSoundDevice[i].szDriverName,
+                wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+            WriteLabelValue(L"Driver", driverInfo);
+        }
+        else
+        {
+            WriteLabelValue(L"Driver", sdi.infoSoundDevice[i].szDriverName);
+        }
     }
-
     AddSeparator();
 }
+
+// [Rest of your existing functions (GetOSVersion, GetCPUFrequency, GetCPUInfo, GetDXVersion, GetSystemInfo) remain exactly the same]
 
 void GetOSVersion(ER_SystemInfo* si)
 {
