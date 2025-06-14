@@ -79,9 +79,11 @@ CConsoleWindow::~CConsoleWindow() {}
 bool CConsoleWindow::Open(const std::wstring& title)
 {
     Close();
+    if (m_started)
+        return true;
+    m_started = true;
 
-    if (FALSE == ::AllocConsole())
-        return false;
+    assert(::AllocConsole());
 
     freopen("CONIN$", "r", stdin);
     freopen("CONOUT$", "w", stdout);
@@ -101,11 +103,6 @@ bool CConsoleWindow::Open(const std::wstring& title)
             break;
         ::Sleep(500);
     }
-    if (GetWndHandle() == NULL || false == SetTitle(title))
-    {
-        Close();
-        return false;
-    }
 
     m_bActiveCloseButton = true;
 
@@ -120,6 +117,7 @@ void CConsoleWindow::Close()
     FreeConsole();
 
     m_hWnd = NULL;
+    m_started = false;
 }
 
 bool CConsoleWindow::SetTitle(const std::wstring& title)
@@ -139,7 +137,7 @@ const std::wstring& CConsoleWindow::GetTitle()
 
 HWND CConsoleWindow::GetWndHandle() { return m_hWnd; }
 
-bool CConsoleWindow::IsVisible() { return ::IsWindowVisible(GetWndHandle()) ? true : false; }
+bool CConsoleWindow::IsVisible() { return GetWndHandle() && ::IsWindowVisible(GetWndHandle()) ? true : false; }
 void CConsoleWindow::Show(bool bShow)
 {
     if (m_hWnd)
@@ -219,7 +217,7 @@ void CConsoleWindow::ActivateCloseButton(bool bActive)
         ::DrawMenuBar(m_hWnd);
         m_bActiveCloseButton = true;
     }
-    else
+    else if (m_hWnd != NULL)
     {
         // disable the [x] button if we found our console
         HMENU hMenu = ::GetSystemMenu(m_hWnd, FALSE);

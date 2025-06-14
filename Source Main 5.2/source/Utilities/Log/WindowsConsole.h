@@ -62,6 +62,7 @@ namespace leaf {
         CTimer2	m_LimitTimer;
         HWND	m_hWnd;
         bool	m_bActiveCloseButton;
+        bool    m_started;
 
     public:
         ~CConsoleWindow();
