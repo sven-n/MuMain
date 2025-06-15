@@ -83,7 +83,8 @@ bool CConsoleWindow::Open(const std::wstring& title)
         return true;
     m_started = true;
 
-    assert(::AllocConsole());
+    if (FALSE == ::AllocConsole())
+        return false;
 
     freopen("CONIN$", "r", stdin);
     freopen("CONOUT$", "w", stdout);

@@ -22,12 +22,14 @@
 CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
 {
 #ifdef CSK_LH_DEBUG_CONSOLE
-    assert(leaf::OpenConsoleWindow(L"Mu Debug Console Window"));
-    leaf::ActivateCloseButton(false);
-    leaf::ShowConsole(true);
-    m_bInit = true;
+    if (leaf::OpenConsoleWindow(L"Mu Debug Console Window"))
+    {
+        leaf::ActivateCloseButton(false);
+        leaf::ShowConsole(true);
+        m_bInit = true;
 
-    g_ErrorReport.Write(L"Mu Debug Console Window Init - completed(Handle:0x%00000008X)\r\n", leaf::GetConsoleWndHandle());
+        g_ErrorReport.Write(L"Mu Debug Console Window Init - completed(Handle:0x%00000008X)\r\n", leaf::GetConsoleWndHandle());
+    }
 #endif
 }
 
