@@ -71,6 +71,7 @@ CConsoleWindow::CConsoleWindow()
 {
     m_hWnd = NULL;
     m_bActiveCloseButton = false;
+    m_started = false;
 
     m_LimitTimer.SetTimer(12000);	//. 12√ 
 }
