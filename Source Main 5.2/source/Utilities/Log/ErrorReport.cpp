@@ -129,7 +129,7 @@ void CErrorReport::Write(const wchar_t* lpszFormat, ...)
     wchar_t lpszBuffer[1024] = { 0, };
     va_list va;
     va_start(va, lpszFormat);
-    vswprintf(lpszBuffer, lpszFormat, va);
+    vswprintf(lpszBuffer, 1024, lpszFormat, va);
     va_end(va);
 
     WriteDebugInfoStr(lpszBuffer);
