@@ -8363,7 +8363,10 @@ void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
     wchar_t playerName[MAX_ID_SIZE + 1]{};
     CMultiLanguage::ConvertFromUtf8(playerName, Data->szID, MAX_ID_SIZE);
 
-    g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
+    auto enemyCharacter = FindCharacterByID(playerName);
+    short enemyKey = enemyCharacter->Key;
+
+    g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, enemyKey, playerName);
 
     if (g_pNewUISystem->IsImpossibleDuelInterface() == true)
     {

@@ -4,8 +4,8 @@
 
 typedef struct _DUEL_PLAYER_INFO
 {
-    int m_iIndex;
-    wchar_t m_szID[24];
+    short m_sIndex;
+    wchar_t m_szID[MAX_ID_SIZE + 1]{};
     int m_iScore;
     float m_fHPRate;
     float m_fSDRate;
@@ -22,8 +22,8 @@ typedef struct _DUEL_CHANNEL_INFO
 {
     BOOL m_bEnable;
     BOOL m_bJoinable;
-    wchar_t m_szID1[24];
-    wchar_t m_szID2[24];
+    wchar_t m_szID1[MAX_ID_SIZE + 1]{};
+    wchar_t m_szID2[MAX_ID_SIZE + 1]{};
 } DUEL_CHANNEL_INFO;
 
 #define MAX_DUEL_CHANNELS 4
@@ -41,7 +41,7 @@ public:
     void EnablePetDuel(BOOL bEnable);
     BOOL IsPetDuelEnabled();
 
-    void SetDuelPlayer(int iPlayerNum, int iIndex, wchar_t* pszID);
+    void SetDuelPlayer(int iPlayerNum, short iIndex, wchar_t* pszID);
     void SetHeroAsDuelPlayer(int iPlayerNum);
     void SetScore(int iPlayerNum, int iScore);
     void SetHP(int iPlayerNum, int iRate);

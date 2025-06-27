@@ -58,18 +58,17 @@ BOOL CDuelMgr::IsPetDuelEnabled()
     return m_bIsPetDuelEnabled;
 }
 
-void CDuelMgr::SetDuelPlayer(int iPlayerNum, int iIndex, wchar_t* pszID)
+void CDuelMgr::SetDuelPlayer(int iPlayerNum, short sIndex, wchar_t* pszID)
 {
-    m_DuelPlayer[iPlayerNum].m_iIndex = iIndex;
-    wcsncpy(m_DuelPlayer[iPlayerNum].m_szID, pszID, MAX_ID_SIZE);
-    m_DuelPlayer[iPlayerNum].m_szID[MAX_ID_SIZE] = '\0';
+    m_DuelPlayer[iPlayerNum].m_sIndex = sIndex;
+    wcscpy_s(m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE, pszID);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[SetDuelPlayer] %d, %s", sIndex, pszID);
 }
 
 void CDuelMgr::SetHeroAsDuelPlayer(int iPlayerNum)
 {
-    m_DuelPlayer[iPlayerNum].m_iIndex = Hero->Key;
-    wcsncpy(m_DuelPlayer[iPlayerNum].m_szID, Hero->ID, MAX_ID_SIZE);
-    m_DuelPlayer[iPlayerNum].m_szID[MAX_ID_SIZE] = '\0';
+    m_DuelPlayer[iPlayerNum].m_sIndex = Hero->Key;
+    wcscpy_s(m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE, Hero->ID);
 }
 
 void CDuelMgr::SetScore(int iPlayerNum, int iScore)
@@ -109,7 +108,7 @@ float CDuelMgr::GetSD(int iPlayerNum)
 
 BOOL CDuelMgr::IsDuelPlayer(CHARACTER* pCharacter, int iPlayerNum, BOOL bIncludeSummon)
 {
-    if (pCharacter->Key == m_DuelPlayer[iPlayerNum].m_iIndex && wcsncmp(pCharacter->ID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
+    if (pCharacter->Key == m_DuelPlayer[iPlayerNum].m_sIndex && wcsncmp(pCharacter->ID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
     {
         return TRUE;
     }
@@ -123,12 +122,12 @@ BOOL CDuelMgr::IsDuelPlayer(CHARACTER* pCharacter, int iPlayerNum, BOOL bInclude
 
 BOOL CDuelMgr::IsDuelPlayer(WORD wIndex, int iPlayerNum)
 {
-    return (m_DuelPlayer[iPlayerNum].m_iIndex == wIndex);
+    return (m_DuelPlayer[iPlayerNum].m_sIndex == wIndex);
 }
 
 void CDuelMgr::SendDuelRequestAnswer(int iPlayerNum, BOOL bOK)
 {
-    SocketClient->ToGameServer()->SendDuelStartResponse(bOK, m_DuelPlayer[iPlayerNum].m_iIndex, m_DuelPlayer[iPlayerNum].m_szID);
+    SocketClient->ToGameServer()->SendDuelStartResponse(bOK, m_DuelPlayer[iPlayerNum].m_sIndex, m_DuelPlayer[iPlayerNum].m_szID);
 }
 
 void CDuelMgr::SetDuelChannel(int iChannelIndex, BOOL bEnable, BOOL bJoinable, wchar_t* pszID1, wchar_t* pszID2)
@@ -136,9 +135,7 @@ void CDuelMgr::SetDuelChannel(int iChannelIndex, BOOL bEnable, BOOL bJoinable, w
     m_DuelChannels[iChannelIndex].m_bEnable = bEnable;
     m_DuelChannels[iChannelIndex].m_bJoinable = bJoinable;
     wcscpy_s(m_DuelChannels[iChannelIndex].m_szID1, MAX_ID_SIZE, pszID1);
-    m_DuelChannels[iChannelIndex].m_szID1[MAX_ID_SIZE] = '\0';
     wcscpy_s(m_DuelChannels[iChannelIndex].m_szID2, MAX_ID_SIZE, pszID2);
-    m_DuelChannels[iChannelIndex].m_szID2[MAX_ID_SIZE] = '\0';
 }
 
 void CDuelMgr::RemoveAllDuelWatchUser()
