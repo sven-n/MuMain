@@ -1,5 +1,5 @@
 // ErrorReport.cpp: implementation of the CErrorReport class.
-//
+// By Dr@Cy ...
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -12,9 +12,23 @@
 
 void DeleteSocket();
 
+void CErrorReport::WriteLabelValue(const wchar_t* label, const wchar_t* value) {
+    const int labelWidth = 25;
+    wchar_t buffer[256];
+    swprintf(buffer, L"%-*s: %s\r\n", labelWidth, label, value);
+    WriteDebugInfoStr(buffer);
+}
+
 CErrorReport::CErrorReport()
 {
     Clear();
+
+    // Check and delete the existing file.
+    const wchar_t* logFile = L"MuError.log";
+    if (GetFileAttributes(logFile) != INVALID_FILE_ATTRIBUTES) {
+        DeleteFile(logFile);
+    }
+
     Create(L"MuError.log");
 }
 
@@ -33,18 +47,30 @@ void CErrorReport::Clear(void)
 void CErrorReport::Create(wchar_t* lpszFileName)
 {
     wcscpy(m_lpszFileName, lpszFileName);
-
-    //DeleteFile( m_lpszFileName);
     m_iKey = 0;
-    m_hFile = CreateFile(m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-    CutHead();
-    SetFilePointer(m_hFile, 0, NULL, FILE_END);
+    m_hFile = ::CreateFile(m_lpszFileName,  // Using :: to explicitly call Windows API
+        GENERIC_READ | GENERIC_WRITE, // Read/write access
+        FILE_SHARE_READ,  // Allow others to read
+        NULL,
+        CREATE_ALWAYS, // Overwrite if exists
+        FILE_ATTRIBUTE_NORMAL, // Normal file attributes
+        NULL);
+
+    if (m_hFile != INVALID_HANDLE_VALUE) {
+        // Adaugă BOM UTF-16
+        const wchar_t BOM = 0xFEFF;
+        DWORD written;
+        ::WriteFile(m_hFile, &BOM, sizeof(BOM), &written, NULL);  // :: for Windows API
+        ::SetFilePointer(m_hFile, 0, NULL, FILE_END);
+    }
 }
 
 void CErrorReport::Destroy(void)
 {
-    CloseHandle(m_hFile);
+    if (m_hFile != INVALID_HANDLE_VALUE) {
+        CloseHandle(m_hFile);
+    }
     Clear();
 }
 
@@ -53,7 +79,6 @@ void CErrorReport::CutHead(void)
     DWORD dwNumber;
     wchar_t lpszBuffer[128 * 1024];
     ReadFile(m_hFile, lpszBuffer, 128 * 1024 - 1, &dwNumber, NULL);
-    //m_iKey = Xor_ConvertBuffer( lpszBuffer, dwNumber);
     lpszBuffer[dwNumber] = '\0';
     wchar_t* lpCut = CheckHeadToCut(lpszBuffer, dwNumber);
     if (dwNumber >= 32 * 1024 - 1)
@@ -105,7 +130,6 @@ wchar_t* CErrorReport::CheckHeadToCut(wchar_t* lpszBuffer, DWORD dwNumber)
 
 BOOL CErrorReport::WriteFile(HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 {
-    //m_iKey = Xor_ConvertBuffer( lpBuffer, nNumberOfBytesToWrite, m_iKey);
     return (::WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped));
 }
 
@@ -114,7 +138,7 @@ void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
     if (m_hFile != INVALID_HANDLE_VALUE)
     {
         DWORD dwNumber;
-        WriteFile(m_hFile, lpszToWrite, wcslen(lpszToWrite), &dwNumber, NULL);
+        WriteFile(m_hFile, lpszToWrite, wcslen(lpszToWrite) * sizeof(wchar_t), &dwNumber, NULL);
 
         if (dwNumber == 0)
         {
@@ -126,10 +150,10 @@ void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
 
 void CErrorReport::Write(const wchar_t* lpszFormat, ...)
 {
-    wchar_t lpszBuffer[1024] = { 0, };
+    wchar_t lpszBuffer[2048] = { 0 };
     va_list va;
     va_start(va, lpszFormat);
-    vswprintf(lpszBuffer, 1024, lpszFormat, va);
+    vswprintf(lpszBuffer, _countof(lpszBuffer), lpszFormat, va);
     va_end(va);
 
     WriteDebugInfoStr(lpszBuffer);
@@ -138,71 +162,84 @@ void CErrorReport::Write(const wchar_t* lpszFormat, ...)
 void CErrorReport::HexWrite(void* pBuffer, int iSize)
 {
     DWORD dwWritten = 0;
-    wchar_t szLine[256] = { 0, };
+    wchar_t szLine[256] = { 0 };
     int offset = 0;
-    offset += swprintf(szLine, L"0x%00000008X : ", (DWORD*)pBuffer);
+    offset += swprintf(szLine, L"0x%08X : ", (DWORD*)pBuffer);
     for (int i = 0; i < iSize; i++) {
         offset += swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
         if (i > 0 && i < iSize - 1) {
-            if (i % 16 == 15) {	//. new line
+            if (i % 16 == 15) {
                 offset += swprintf(szLine + offset, L"\r\n");
-                WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
+                WriteFile(m_hFile, szLine, wcslen(szLine) * sizeof(wchar_t), &dwWritten, NULL);
                 offset = 0;
                 offset += swprintf(szLine + offset, L"           : ");
             }
-            else if (i % 4 == 3) { //. space
+            else if (i % 4 == 3) {
                 offset += swprintf(szLine + offset, L" ");
             }
         }
     }
     offset += swprintf(szLine + offset, L"\r\n");
-    WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
+    WriteFile(m_hFile, szLine, wcslen(szLine) * sizeof(wchar_t), &dwWritten, NULL);
 }
 
 void CErrorReport::AddSeparator(void)
 {
-    Write(L"-------------------------------------------------------------------------------------\r\n");
+    Write(L"------------------------------------------------------------\r\n");
 }
 
 void CErrorReport::WriteLogBegin(void)
 {
-    Write(L"###### Log Begin ######\r\n");
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    Write(L"\n###### Log Begin ######\r\n");
+    Write(L"Date: %04d/%02d/%02d\r\n", st.wYear, st.wMonth, st.wDay);
+    Write(L"Time: %02d:%02d:%02d\r\n", st.wHour, st.wMinute, st.wSecond);
+    AddSeparator();
 }
 
 void CErrorReport::WriteCurrentTime(BOOL bLineShift)
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
-    g_ErrorReport.Write(L"%4d/%02d/%02d %02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute);
+    Write(L"%04d/%02d/%02d %02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute);
     if (bLineShift)
     {
-        g_ErrorReport.Write(L"\r\n");
+        Write(L"\r\n");
     }
 }
 
 void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
 {
-    Write(L"<System information>\r\n");
-    Write(L"OS \t\t\t: %s\r\n", si->m_lpszOS);
-    Write(L"CPU \t\t\t: %s\r\n", si->m_lpszCPU);
-    Write(L"RAM \t\t\t: %dMB\r\n", 1 + (si->m_iMemorySize / 1024 / 1024));
+    Write(L"\n===== SYSTEM INFORMATION =====\r\n");
+    WriteLabelValue(L"OS", si->m_lpszOS);
+    WriteLabelValue(L"CPU", si->m_lpszCPU);
+
+    wchar_t ram[32];
+    swprintf(ram, L"%dMB", 1 + (si->m_iMemorySize / 1024 / 1024));
+    WriteLabelValue(L"RAM", ram);
+
     AddSeparator();
-    Write(L"Direct-X \t\t: %s\r\n", si->m_lpszDxVersion);
+    WriteLabelValue(L"Direct-X", si->m_lpszDxVersion);
 }
 
 void CErrorReport::WriteOpenGLInfo(void)
 {
-    Write(L"<OpenGL information>\r\n");
-    Write(L"Vendor\t\t: %s\r\n", (wchar_t*)glGetString(GL_VENDOR));
-    Write(L"Render\t\t: %s\r\n", (wchar_t*)glGetString(GL_RENDERER));
-    Write(L"OpenGL version\t: %s\r\n", (wchar_t*)glGetString(GL_VERSION));
+    Write(L"\n===== OPENGL INFORMATION =====\r\n");
+    WriteLabelValue(L"Vendor", (wchar_t*)glGetString(GL_VENDOR));
+    WriteLabelValue(L"Render", (wchar_t*)glGetString(GL_RENDERER));
+    WriteLabelValue(L"OpenGL version", (wchar_t*)glGetString(GL_VERSION));
+
     GLint iResult[2];
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, iResult);
-    Write(L"Max Texture size\t: %d x %d\r\n", iResult[0], iResult[0]);
-    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, iResult);
-    Write(L"Max Viewport size\t: %d x %d\r\n", iResult[0], iResult[1]);
-}
+    wchar_t texSize[32];
+    swprintf(texSize, L"%d x %d", iResult[0], iResult[0]);
+    WriteLabelValue(L"Max Texture size", texSize);
 
+    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, iResult);
+    swprintf(texSize, L"%d x %d", iResult[0], iResult[1]);
+    WriteLabelValue(L"Max Viewport size", texSize);
+}
 void CErrorReport::WriteImeInfo(HWND hWnd)
 {
     wchar_t lpszTemp[256];
