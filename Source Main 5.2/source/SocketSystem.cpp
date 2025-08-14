@@ -1,6 +1,6 @@
 ﻿#include "stdafx.h"
 #include "SocketSystem.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "ZzzInventory.h"
 #include "ZzzBMD.h"
 #include "ZzzCharacter.h"
@@ -10,13 +10,7 @@
 
 using namespace SEASON4A;
 
-static BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
 
-static void BuxConvert(BYTE* Buffer, int Size)
-{
-    for (int i = 0; i < Size; i++)
-        Buffer[i] ^= bBuxCode[i % 3];
-}
 
 CSocketItemMgr g_SocketItemMgr;
 

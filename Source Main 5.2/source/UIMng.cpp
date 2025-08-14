@@ -13,7 +13,7 @@
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
-#include "GameCensorship.h"
+
 #include "UIControls.h"
 #include "ServerListManager.h"
 
@@ -22,9 +22,7 @@
 //#define	UIM_TS_BG_BLACK		0
 #define	UIM_TS_BACK0		0
 #define	UIM_TS_BACK1		1
-#define	UIM_TS_MU			2
 #define	UIM_TS_121518		3
-#define	UIM_TS_WEBZEN		4
 #define UIM_TS_BACK2		5
 #define UIM_TS_BACK3		6
 #define UIM_TS_BACK4		7
@@ -40,10 +38,6 @@ CUIMng::CUIMng()
     m_asprTitle = NULL;
     m_pgbLoding = NULL;
     m_pLoadingScene = NULL;
-
-#ifdef MOVIE_DIRECTSHOW
-    m_bMoving = false;
-#endif // MOVIE_DIRECTSHOW
 }
 
 CUIMng::~CUIMng()
@@ -59,9 +53,6 @@ CUIMng& CUIMng::Instance()
 void CUIMng::CreateTitleSceneUI()
 {
     ReleaseTitleSceneUI();
-
-    g_GameCensorship->SetVisible(true);
-    g_GameCensorship->SetState(SEASON3A::CGameCensorship::STATE_LOADING);
 
     CInput& rInput = CInput::Instance();
     float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
@@ -112,20 +103,10 @@ void CUIMng::CreateTitleSceneUI()
         false, SPR_SIZING_DATUMS_LT, _fScaleXTemp, _fScaleYTemp);
     m_asprTitle[UIM_TS_BACK9].SetPosition(1024, 512 + 119);
 
-    m_asprTitle[UIM_TS_MU].Create(216, 138, BITMAP_TITLE + 2, 0, NULL, 0, 0,
-        false, SPR_SIZING_DATUMS_LT, _fScaleXTemp, _fScaleXTemp);
-
-    if ((float)rInput.GetScreenWidth() == 1280)
-        m_asprTitle[UIM_TS_MU].SetPosition(640 - 108, 663 + 53);
-    else
-        m_asprTitle[UIM_TS_MU].SetPosition(640 - 108, 663);
-
+  
     m_asprTitle[UIM_TS_121518].Create(256, 206, BITMAP_TITLE + 3, 0, NULL, 0, 0,
         false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
     m_asprTitle[UIM_TS_121518].SetPosition(544, 60);
-    m_asprTitle[UIM_TS_WEBZEN].Create(187, 151, BITMAP_TITLE + 4, 0, NULL, 0, 0,
-        false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
-    m_asprTitle[UIM_TS_WEBZEN].SetPosition(307, 225);
 
     m_pgbLoding = new CGaugeBar;
 
@@ -144,8 +125,6 @@ void CUIMng::CreateTitleSceneUI()
 
 void CUIMng::ReleaseTitleSceneUI()
 {
-    g_GameCensorship->SetVisible(false);
-
     SAFE_DELETE_ARRAY(m_asprTitle);
     SAFE_DELETE(m_pgbLoding);
 
@@ -165,7 +144,6 @@ void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
         m_asprTitle[i].Render();
     }
 
-    m_asprTitle[UIM_TS_MU].Render();
     m_pgbLoding->SetValue(dwNow, dwTotal);
     m_pgbLoding->Render();
 
@@ -206,8 +184,6 @@ void CUIMng::Release()
 
 void CUIMng::CreateLoginScene()
 {
-    g_GameCensorship->SetVisible(false);
-
     RemoveWinList();
 
     m_CharInfoBalloonMng.Release();
@@ -252,8 +228,6 @@ void CUIMng::CreateLoginScene()
 
 void CUIMng::CreateCharacterScene()
 {
-    g_GameCensorship->SetState(g_ServerListManager->GetCensorshipIndex());
-
     RemoveWinList();
 
     m_CharInfoBalloonMng.Create();

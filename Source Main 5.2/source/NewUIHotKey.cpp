@@ -5,7 +5,6 @@
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
 #include "DSPlaySound.h"
-#include "GMBattleCastle.h"
 #include "CSChaosCastle.h"
 #include "w_CursedTemple.h"
 #include "ZzzInterface.h"

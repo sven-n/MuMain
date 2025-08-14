@@ -1,7 +1,6 @@
 ﻿// GMEmpireGuardian1.cpp: implementation of the GMEmpireGuardian1 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "GMEmpireGuardian1.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -16,7 +15,7 @@
 #include "MapManager.h"
 #include "GOBoid.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 GMEmpireGuardian1Ptr GMEmpireGuardian1::Make()
 {
@@ -79,7 +78,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_RAYMOND);
         pCharacter = CreateCharacter(Key, MODEL_RAYMOND, PosX, PosY);
-        wcscpy(pCharacter->ID, L"레이몬드");
 
         pCharacter->Object.Scale = 1.45f;
 
@@ -90,7 +88,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_LUCAS);
         pCharacter = CreateCharacter(Key, MODEL_LUCAS, PosX, PosY);
-        wcscpy(pCharacter->ID, L"에르칸느");
 
         pCharacter->Object.Scale = 1.25f;
 
@@ -101,7 +98,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_FRED);
         pCharacter = CreateCharacter(Key, MODEL_FRED, PosX, PosY);
-        wcscpy(pCharacter->ID, L"데슬러");
         pCharacter->Object.Scale = 1.55f;
 
         BoneManager::RegisterBone(pCharacter, L"node_eyes01", 14);
@@ -133,7 +129,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_DEVIL_LORD);
         pCharacter = CreateCharacter(Key, MODEL_DEVIL_LORD, PosX, PosY);
-        wcscpy(pCharacter->ID, L"갈리아");
         pCharacter->Object.Scale = 1.35f;
 
         m_bCurrentIsRage_Gallia = false;
@@ -143,7 +138,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_QUARTER_MASTER);
         pCharacter = CreateCharacter(Key, MODEL_QUARTER_MASTER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"병참장교");
         pCharacter->Object.Scale = 1.27f;
     }
     break;
@@ -151,7 +145,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_COMBAT_INSTRUCTOR);
         pCharacter = CreateCharacter(Key, MODEL_COMBAT_INSTRUCTOR, PosX, PosY);
-        wcscpy(pCharacter->ID, L"전투교관");
         pCharacter->Object.Scale = 1.25f;
     }
     break;
@@ -159,7 +152,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_DEFENDER);
         pCharacter = CreateCharacter(Key, MODEL_DEFENDER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"수호군방패병");
         pCharacter->Object.Scale = 1.2f;
 
         Vector(0.0f, 0.0f, 0.0f, pCharacter->Object.EyeRight3);
@@ -170,7 +162,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_FORSAKER);
         pCharacter = CreateCharacter(Key, MODEL_FORSAKER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"수호군치유병");
         pCharacter->Object.Scale = 0.9f;
     }
     break;
@@ -178,7 +169,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_OCELOT);
         pCharacter = CreateCharacter(Key, MODEL_OCELOT, PosX, PosY);
-        wcscpy(pCharacter->ID, L"기사단");
         pCharacter->Object.Scale = 1.1f;
     }
     break;
@@ -186,7 +176,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_ERIC);
         pCharacter = CreateCharacter(Key, MODEL_ERIC, PosX, PosY);
-        wcscpy(pCharacter->ID, L"호위병");
         pCharacter->Object.Scale = 1.1f;
     }
     break;
@@ -194,7 +183,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_EVIL_GATE);
         pCharacter = CreateCharacter(Key, MODEL_EVIL_GATE, PosX, PosY);
-        wcscpy(pCharacter->ID, L"창살형 성문");
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.Scale = 1.25f;
     }
@@ -203,7 +191,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_LION_GATE);
         pCharacter = CreateCharacter(Key, MODEL_LION_GATE, PosX, PosY);
-        wcscpy(pCharacter->ID, L"사자머리 성문");
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.LifeTime = 100;
         pCharacter->Object.Scale = 1.25f;
@@ -213,7 +200,6 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_STATUE);
         pCharacter = CreateCharacter(Key, MODEL_STATUE, PosX, PosY);
-        wcscpy(pCharacter->ID, L"석상");
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.Scale = 0.6f;
         pCharacter->Object.LifeTime = 100;
@@ -2891,10 +2877,10 @@ void GMEmpireGuardian1::PlayBGM()
 {
     if (gMapManager.IsEmpireGuardian1())
     {
-        PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN1]);
+        PlayMp3(MUSIC_EMPIREGUARDIAN1);
     }
     else
     {
-        StopMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN1]);
+        StopMp3(MUSIC_EMPIREGUARDIAN1);
     }
 }

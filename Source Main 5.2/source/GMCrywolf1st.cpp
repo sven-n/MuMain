@@ -10,7 +10,6 @@
 #include "zzzOpenData.h"
 #include "ZzzInterface.h"
 #include "DSPlaySound.h"
-#include "GMCryWolf1st.h"
 #include "BoneManager.h"
 #include "CMVP1stDirection.h"
 #include "CSChaosCastle.h"
@@ -64,7 +63,7 @@ BYTE m_OccupationState = 0;
 BYTE m_CrywolfState = 0;
 int m_StatueHP = 0;
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 void M34CryWolf1st::CryWolfMVPInit()
 {
@@ -272,29 +271,29 @@ void M34CryWolf1st::ChangeBackGroundMusic(int World)
     {
         if (m_CrywolfState == CRYWOLF_STATE_NOTIFY_2)
         {
-            StopMp3(g_lpszMp3[MUSIC_BC_CRYWOLF_1ST]);
-            PlayMp3(g_lpszMp3[MUSIC_CRYWOLF_BEFORE]);
+            StopMp3(MUSIC_BC_CRYWOLF_1ST);
+            PlayMp3(MUSIC_CRYWOLF_BEFORE);
 
-            if (IsEndMp3()) StopMp3(g_lpszMp3[MUSIC_CRYWOLF_BEFORE]);
+            if (IsEndMp3()) StopMp3(MUSIC_CRYWOLF_BEFORE);
         }
         else if (m_CrywolfState == CRYWOLF_STATE_READY)
         {
-            StopMp3(g_lpszMp3[MUSIC_CRYWOLF_BEFORE]);
-            PlayMp3(g_lpszMp3[MUSIC_CRYWOLF_READY]);
+            StopMp3(MUSIC_CRYWOLF_BEFORE);
+            PlayMp3(MUSIC_CRYWOLF_READY);
 
-            if (IsEndMp3()) StopMp3(g_lpszMp3[MUSIC_CRYWOLF_READY]);
+            if (IsEndMp3()) StopMp3(MUSIC_CRYWOLF_READY);
         }
         else if (m_CrywolfState == CRYWOLF_STATE_START)
         {
-            StopMp3(g_lpszMp3[MUSIC_CRYWOLF_READY]);
-            PlayMp3(g_lpszMp3[MUSIC_CRYWOLF_BACK]);
+            StopMp3(MUSIC_CRYWOLF_READY);
+            PlayMp3(MUSIC_CRYWOLF_BACK);
 
-            if (IsEndMp3()) StopMp3(g_lpszMp3[MUSIC_CRYWOLF_BACK]);
+            if (IsEndMp3()) StopMp3(MUSIC_CRYWOLF_BACK);
         }
         else if (m_CrywolfState == CRYWOLF_STATE_END)
         {
-            StopMp3(g_lpszMp3[MUSIC_CRYWOLF_READY]);
-            StopMp3(g_lpszMp3[MUSIC_CRYWOLF_BACK]);
+            StopMp3(MUSIC_CRYWOLF_READY);
+            StopMp3(MUSIC_CRYWOLF_BACK);
 
             if (Add_Num == 10)
                 PlayBuffer(SOUND_CRY1ST_FAILED);
@@ -303,14 +302,14 @@ void M34CryWolf1st::ChangeBackGroundMusic(int World)
         }
         else
         {
-            PlayMp3(g_lpszMp3[MUSIC_BC_CRYWOLF_1ST]);
+            PlayMp3(MUSIC_BC_CRYWOLF_1ST);
 
-            if (IsEndMp3()) StopMp3(g_lpszMp3[MUSIC_BC_CRYWOLF_1ST]);
+            if (IsEndMp3()) StopMp3(MUSIC_BC_CRYWOLF_1ST);
         }
     }
     else
     {
-        StopMp3(g_lpszMp3[MUSIC_BC_CRYWOLF_1ST]);
+        StopMp3(MUSIC_BC_CRYWOLF_1ST);
     }
 }
 

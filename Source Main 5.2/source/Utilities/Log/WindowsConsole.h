@@ -2,8 +2,6 @@
 #define _WINDOWSCONSOLE_H_
 
 #pragma once
-
-#include <windows.h>
 #include "./Time/Timer.h"
 
 #pragma warning(disable : 4786)
@@ -64,6 +62,7 @@ namespace leaf {
         CTimer2	m_LimitTimer;
         HWND	m_hWnd;
         bool	m_bActiveCloseButton;
+        bool    m_started;
 
     public:
         ~CConsoleWindow();
@@ -92,12 +91,11 @@ namespace leaf {
         static CConsoleWindow* GetInstance();
 
     protected:
-        CConsoleWindow();	//. Ban to create instance
+        CConsoleWindow();
 
         void SetWndHandle(HWND hWnd);
         DWORD Get32ColorFromColorIndex(WORD wColorIndex);
         static BOOL CALLBACK EnumChildProc(HWND hWnd, LPARAM lParam);
-        static BOOL CALLBACK EnumThreadWndProc(HWND hWnd, LPARAM lParam);
     };
 }
 

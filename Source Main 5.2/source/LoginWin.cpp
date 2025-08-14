@@ -16,7 +16,7 @@
 
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "./Utilities/Log/muConsoleDebug.h"
+
 
 #include "ServerListManager.h"
 #include <dpapi.h>
@@ -27,8 +27,8 @@
 #define LIW_OK			0
 #define LIW_CANCEL		1
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 extern int g_iChatInputType;
 extern int  LogIn;
 extern wchar_t LogInID[MAX_ID_SIZE + 1];
@@ -99,25 +99,24 @@ void CLoginWin::PreRelease()
         m_asprInputBox[i].Release();
 }
 
-void CLoginWin::SetPosition(int nXCoord, int nYCoord)
+void CLoginWin::SetPosition(int x, int y)
 {
-    CWin::SetPosition(nXCoord, nYCoord);
+	CWin::SetPosition(x, y);
 
-    m_asprInputBox[LIW_ACCOUNT].SetPosition(nXCoord + 109, nYCoord + 106);
-    m_asprInputBox[LIW_PASSWORD].SetPosition(nXCoord + 109, nYCoord + 131);
+	const int boxOffsetX = x + 109;
+	m_asprInputBox[LIW_ACCOUNT].SetPosition(boxOffsetX, y + 106);
+	m_asprInputBox[LIW_PASSWORD].SetPosition(boxOffsetX, y + 131);
 
-    if (g_iChatInputType == 1)
-    {
-        m_pIDInputBox->SetPosition(int((m_asprInputBox[LIW_ACCOUNT].GetXPos() + 6) / g_fScreenRate_x),
-            int((m_asprInputBox[LIW_ACCOUNT].GetYPos() + 6) / g_fScreenRate_y));
+	if (g_iChatInputType == 1)
+	{
+		const int boxX = int((x + 115) / g_fScreenRate_x);
+		m_pIDInputBox->SetPosition(boxX, int((y + 112) / g_fScreenRate_y));
+		m_pPassInputBox->SetPosition(boxX, int((y + 137) / g_fScreenRate_y));
+	}
 
-        m_pPassInputBox->SetPosition(int((m_asprInputBox[LIW_PASSWORD].GetXPos() + 6) / g_fScreenRate_x),
-            int((m_asprInputBox[LIW_PASSWORD].GetYPos() + 6) / g_fScreenRate_y));
-    }
-
-    m_aBtn[LIW_OK].SetPosition(nXCoord + 150, nYCoord + 178);
-    m_aBtn[LIW_CANCEL].SetPosition(nXCoord + 211, nYCoord + 178);
-    m_aBtnRememberMe.SetPosition(nXCoord + 109, nYCoord + 156);
+	m_aBtn[LIW_OK].SetPosition(x + 150, y + 178);
+	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 178);
+	m_aBtnRememberMe.SetPosition(x + 109, y + 156);
 }
 
 void CLoginWin::Show(bool bShow)
@@ -146,27 +145,25 @@ bool CLoginWin::CursorInWin(int nArea)
     return CWin::CursorInWin(nArea);
 }
 
-void CLoginWin::UpdateWhileActive(double dDeltaTick)
+void CLoginWin::UpdateWhileActive(double)
 {
-    CInput& rInput = CInput::Instance();
+	if (m_aBtn[LIW_OK].IsClick() || CInput::Instance().IsKeyDown(VK_RETURN))
+	{
+		PlayBuffer(SOUND_CLICK01);
+		RequestLogin();
+		return;
+	}
 
-    if (m_aBtn[LIW_OK].IsClick())
-        RequestLogin();
-    else if (m_aBtn[LIW_CANCEL].IsClick())
-        CancelLogin();
-    else if (m_aBtnRememberMe.IsClick())
-        m_RememberMe = m_aBtnRememberMe.IsCheck();
-    else if (CInput::Instance().IsKeyDown(VK_RETURN))
-    {
-        ::PlayBuffer(SOUND_CLICK01);
-        RequestLogin();
-    }
-    else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-    {
-        ::PlayBuffer(SOUND_CLICK01);
-        CancelLogin();
-        CUIMng::Instance().SetSysMenuWinShow(false);
-    }
+	if (m_aBtn[LIW_CANCEL].IsClick() || CInput::Instance().IsKeyDown(VK_ESCAPE))
+	{
+		PlayBuffer(SOUND_CLICK01);
+		CancelLogin();
+		CUIMng::Instance().SetSysMenuWinShow(false);
+		return;
+	}
+
+	if (m_aBtnRememberMe.IsClick())
+		m_RememberMe = m_aBtnRememberMe.IsCheck();
 }
 
 void CLoginWin::UpdateWhileShow(double dDeltaTick)
@@ -177,43 +174,34 @@ void CLoginWin::UpdateWhileShow(double dDeltaTick)
 
 void CLoginWin::RenderControls()
 {
-    if (this->FirstLoad == 1)
+    if (FirstLoad)
     {
-        if (wcslen(m_ID) > 0)
-            CUIMng::Instance().m_LoginWin.GetPassInputBox()->GiveFocus();
-        else
-            CUIMng::Instance().m_LoginWin.GetIDInputBox()->GiveFocus();
-        this->FirstLoad = 0;
+        (wcslen(m_ID) > 0 ? m_pPassInputBox : m_pIDInputBox)->GiveFocus();
+        FirstLoad = 0;
     }
 
     CWin::RenderButtons();
-
-    for (int i = 0; i < 2; ++i)
-        m_asprInputBox[i].Render();
-
+    m_asprInputBox[LIW_ACCOUNT].Render();
+    m_asprInputBox[LIW_PASSWORD].Render();
     m_pIDInputBox->Render();
     m_pPassInputBox->Render();
 
     g_pRenderText->SetFont(g_hFixFont);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->RenderText(int((CWin::GetXPos() + 30) / g_fScreenRate_x),
-        int((CWin::GetYPos() + 113) / g_fScreenRate_y), GlobalText[450]);
-    g_pRenderText->RenderText(int((CWin::GetXPos() + 30) / g_fScreenRate_x),
-        int((CWin::GetYPos() + 139) / g_fScreenRate_y), GlobalText[451]);
 
-    wchar_t szServerName[MAX_TEXT_LENGTH];
+    const int baseX = GetXPos();
+    const int baseY = GetYPos();
 
-    const wchar_t* apszGlobalText[4]
-        = { GlobalText[461], GlobalText[460], GlobalText[3130], GlobalText[3131] };
-    swprintf(szServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
-        g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
+    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 113) / g_fScreenRate_y), GlobalText[450]);
+    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 139) / g_fScreenRate_y), GlobalText[451]);
 
-    g_pRenderText->RenderText(int((CWin::GetXPos() + 111) / g_fScreenRate_x),
-        int((CWin::GetYPos() + 80) / g_fScreenRate_y), szServerName);
+    wchar_t szServerName[MAX_TEXT_LENGTH] = {};
+    const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? GlobalText[461] : GlobalText[460];
+    swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
+    g_pRenderText->RenderText(int((baseX + 111) / g_fScreenRate_x), int((baseY + 80) / g_fScreenRate_y), szServerName);
 
-    g_pRenderText->RenderText(int((CWin::GetXPos() + 130) / g_fScreenRate_x),
-        int((CWin::GetYPos() + 159) / g_fScreenRate_y), L"Remember me?");
+    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), L"Remember me?");
 }
 
 void CLoginWin::RequestLogin()

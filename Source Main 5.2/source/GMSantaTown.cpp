@@ -2,7 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "GMSantaTown.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -12,7 +11,7 @@
 #include "DSPlaySound.h"
 #include "ZzzOpenData.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 CGMSantaTownPtr CGMSantaTown::Make()
 {
@@ -61,13 +60,11 @@ CHARACTER* CGMSantaTown::CreateMonster(int iType, int PosX, int PosY, int Key)
     case 465:
         OpenNpc(MODEL_XMAS2008_SANTA_NPC);
         pCharacter = CreateCharacter(Key, MODEL_XMAS2008_SANTA_NPC, PosX, PosY);
-        ::wcscpy(pCharacter->ID, L"산타클로스");
         pCharacter->Object.Scale = 1.7f;
         break;
     case 467:
         OpenNpc(MODEL_XMAS2008_SNOWMAN_NPC);
         pCharacter = CreateCharacter(Key, MODEL_XMAS2008_SNOWMAN_NPC, PosX, PosY);
-        ::wcscpy(pCharacter->ID, L"눈사람");
         pCharacter->Object.Scale = 1.3f;
         break;
     }
@@ -284,6 +281,6 @@ void CGMSantaTown::PlayBGM()
 {
     if (IsSantaTown())
     {
-        PlayMp3(g_lpszMp3[MUSIC_SANTA_TOWN]);
+        PlayMp3(MUSIC_SANTA_TOWN);
     }
 }

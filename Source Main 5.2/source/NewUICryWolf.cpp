@@ -13,8 +13,6 @@
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
 
-#include "GMCrywolf1st.h"
-
 extern bool	View_Bal;
 extern char	Suc_Or_Fail;
 extern char	View_Suc_Or_Fail;

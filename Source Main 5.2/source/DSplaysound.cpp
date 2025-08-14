@@ -17,8 +17,8 @@
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
 #include "DSPlaySound.h"
-#include "./Utilities/Log/ErrorReport.h"
-#include "./Utilities/Log/muConsoleDebug.h"
+
+
 
 bool                    g_EnableSound = false;
 bool                    g_Enable3DSound = false;

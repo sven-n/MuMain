@@ -20,13 +20,13 @@
 #include "NewUIInventoryCtrl.h"
 #include "MapManager.h"
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 
 extern int TextNum;
 extern wchar_t TextList[50][100];
 extern int  TextListColor[50];
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 using namespace SEASON3A;
 
@@ -165,7 +165,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     {
         OpenNpc(MODEL_CURSEDTEMPLE_STATUE);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_STATUE, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"석상");
         pCharacter->Object.EnableShadow = false;
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.m_fEdgeScale = 1.03f;
@@ -176,7 +175,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_NPC, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"EventMap NPC");
         pCharacter->Object.Scale = 1.2f;
     }
     break;
@@ -184,7 +182,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION_NPC, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"EventMap NPC");
         pCharacter->Object.Scale = 1.2f;
     }
     break;
@@ -192,7 +189,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ALLIED_BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ALLIED_BASKET, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"연합군 성물보관함");
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowAlliedPointEffect = false;
@@ -202,7 +198,7 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ILLUSION__BASKET);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ILLUSION__BASKET, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"환영교단 성물보관함");
+
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.m_fEdgeScale = 1.03f;
         m_ShowIllusionPointEffect = false;
@@ -212,7 +208,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     {
         OpenNpc(MODEL_CURSEDTEMPLE_ENTER_NPC);
         pCharacter = CreateCharacter(iKey, MODEL_CURSEDTEMPLE_ENTER_NPC, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"EventMap NPC");
         pCharacter->Object.Scale = 0.95f;
     }
     break;
@@ -225,7 +220,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     {
         OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING);
         pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"환영교단의 망령(번개)"); // Phantom of the Illusion Order (Lightning)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -240,7 +234,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     {
         OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_ICE);
         pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_ICE, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"환영교단의 망령(얼음)"); // Phantom of the Illusion Order (Ice)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -255,7 +248,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     {
         OpenMonsterModel(MONSTER_MODEL_ILLUSION_SORCERER_SPIRIT_POISON);
         pCharacter = CreateCharacter(iKey, MODEL_ILLUSION_SORCERER_SPIRIT_POISON, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"환영교단의 망령(독)"); // Phantom of the Illusion Order (Poison)
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -264,7 +256,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     case MONSTER_MU_ALLIES:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"뮤연합"); // Mu Alliance
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ALLIED_PLAYER;
     }
@@ -272,7 +263,6 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
     case MONSTER_ILLUSION_SORCERER:
     {
         pCharacter = CreateCharacter(iKey, MODEL_PLAYER, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"환영교단"); // Illusion Order
         pCharacter->Object.Scale = 1.f;
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ILLUSION_PLAYER;
     }
@@ -1125,22 +1115,22 @@ void CursedTemple::PlayBGM()
 {
     if (m_CursedTempleState == eCursedTempleState_Wait)
     {
-        ::PlayMp3(g_lpszMp3[MUSIC_CURSEDTEMPLE_WAIT]);
+        ::PlayMp3(MUSIC_CURSEDTEMPLE_WAIT);
 
-        if (::IsEndMp3()) ::StopMp3(g_lpszMp3[MUSIC_CURSEDTEMPLE_WAIT]);
+        if (::IsEndMp3()) ::StopMp3(MUSIC_CURSEDTEMPLE_WAIT);
     }
     else if (m_CursedTempleState == eCursedTempleState_Ready
         || m_CursedTempleState == eCursedTempleState_Play)
     {
-        ::StopMp3(g_lpszMp3[MUSIC_CURSEDTEMPLE_WAIT]);
-        ::PlayMp3(g_lpszMp3[MUSIC_CURSEDTEMPLE_GAME]);
+        ::StopMp3(MUSIC_CURSEDTEMPLE_WAIT);
+        ::PlayMp3(MUSIC_CURSEDTEMPLE_GAME);
 
-        if (::IsEndMp3()) ::StopMp3(g_lpszMp3[MUSIC_CURSEDTEMPLE_GAME]);
+        if (::IsEndMp3()) ::StopMp3(MUSIC_CURSEDTEMPLE_GAME);
     }
     else if (m_CursedTempleState == eCursedTempleState_None)
     {
-        ::StopMp3(g_lpszMp3[MUSIC_CURSEDTEMPLE_WAIT]);
-        ::StopMp3(g_lpszMp3[MUSIC_CURSEDTEMPLE_GAME]);
+        ::StopMp3(MUSIC_CURSEDTEMPLE_WAIT);
+        ::StopMp3(MUSIC_CURSEDTEMPLE_GAME);
     }
 }
 

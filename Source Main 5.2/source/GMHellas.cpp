@@ -14,7 +14,6 @@
 #include "ZzzInterface.h"
 #include "PhysicsManager.h"
 #include "CSWaterTerrain.h"
-#include "GMHellas.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "MapManager.h"

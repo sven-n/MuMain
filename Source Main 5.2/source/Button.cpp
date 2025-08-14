@@ -14,8 +14,8 @@
 #include "DSPlaySound.h"
 #include "UIControls.h"
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 
 CButton* CButton::m_pBtnHeld;
 

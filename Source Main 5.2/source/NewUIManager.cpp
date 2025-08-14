@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "NewUIManager.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 
 using namespace SEASON3B;
 

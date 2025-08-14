@@ -17,30 +17,25 @@
 #include "DSPlaySound.h"
 
 #include "ZzzScene.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "./Utilities/Debouncer.h"
 #include "CSQuest.h"
 #include "Local.h"
-#include "zzzMixInventory.h"
 #include "PersonalShopTitleImp.h"
 #include "GOBoid.h"
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
-#include "GMHellas.h"
 #include "npcBreeder.h"
 #include "GIPetManager.h"
 #include "CSParts.h"
 #include "npcGateSwitch.h"
-#include "GMBattleCastle.h"
 #include "CComGem.h"
-#include "GMCrywolf1st.h"
 #include "CDirection.h"
 #include "ChangeRingManager.h"
 #include "MixMgr.h"
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
 #include "NewUIInventoryCtrl.h"
-#include "GM3rdChangeUp.h"
 #include "w_CursedTemple.h"
 #include "SocketSystem.h"
 #include "PortalMgr.h"
@@ -142,8 +137,8 @@ BYTE BuyItem[4];
 
 static  int iStateNum = 4;
 
-extern float g_fScreenRate_x;	// ※
-extern float g_fScreenRate_y;
+	// ※
+
 
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;
@@ -11089,7 +11084,6 @@ bool IsExistUndecidedPrice()
     for (int i = 0; i < MAX_PERSONALSHOP_INVEN; ++i)
     {
         int iPrice = 0;
-        int iIndex;
         ITEM* pItem = inventoryCtrl->GetItem(i);
         if (pItem)
         {

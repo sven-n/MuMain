@@ -11,7 +11,6 @@
 #include "MatchEvent.h"
 #include "MixMgr.h"
 #include "npcBreeder.h"
-#include "GMCrywolf1st.h"
 #include "ZzzOpenData.h"
 #include "DuelMgr.h"
 #include "NewUISystem.h"
@@ -208,7 +207,7 @@ void SEASON3B::CNewUITextInputMsgBox::AddButtonBlank(int iAddLine)
 
 int SEASON3B::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
-    extern float g_fScreenRate_x;
+    
 
     SIZE TextSize;
     size_t TextExtentWidth;
@@ -356,8 +355,8 @@ bool SEASON3B::CNewUITextInputMsgBox::Render()
 
 void SEASON3B::CNewUITextInputMsgBox::RenderTexts()
 {
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    
+    
 
     float x, y;
     x = GetPos().x; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
@@ -815,8 +814,8 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderKeyPadInput()
 
 void SEASON3B::CNewUIKeyPadMsgBox::RenderTexts()
 {
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    
+    
 
     float x, y;
     x = GetPos().x; y = GetPos().y + 25;
@@ -1119,8 +1118,8 @@ void SEASON3B::CUseFruitCheckMsgBox::RenderFrame()
 
 void SEASON3B::CUseFruitCheckMsgBox::RenderTexts()
 {
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    
+    
 
     float x, y;
 
@@ -1361,8 +1360,8 @@ void SEASON3B::CGemIntegrationMsgBox::RenderFrame()
 
 void SEASON3B::CGemIntegrationMsgBox::RenderTexts()
 {
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    
+    
 
     float x, y;
 
@@ -1598,8 +1597,8 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderFrame()
 
 void SEASON3B::CGemIntegrationUnityMsgBox::RenderTexts()
 {
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    
+    
 
     float x, y;
 
@@ -2152,8 +2151,8 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderFrame()
 
 void SEASON3B::CGemIntegrationDisjointMsgBox::RenderTexts()
 {
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    
+    
 
     float x, y;
 
@@ -2188,8 +2187,8 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderTexts()
 
 void SEASON3B::CGemIntegrationDisjointMsgBox::RenderGemList()
 {
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    
+    
 
     int x, y;
     y = GetPos().y + 80;
@@ -3143,7 +3142,7 @@ void SEASON3B::CDialogMsgBox::SetAddCallbackFunc()
 
 int SEASON3B::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
-    extern float g_fScreenRate_x;
+    
 
     SIZE TextSize;
     size_t TextExtentWidth;
@@ -3265,7 +3264,7 @@ void SEASON3B::CDialogMsgBox::RenderFrame()
 
 void SEASON3B::CDialogMsgBox::RenderTexts()
 {
-    extern float g_fScreenRate_x, g_fScreenRate_y;
+    
 
     float x, y;
 
@@ -3377,7 +3376,7 @@ void SEASON3B::CProgressMsgBox::SetElapseTime(DWORD dwElapseTime)
 
 int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
-    extern float g_fScreenRate_x;
+    
 
     SIZE TextSize;
     size_t TextExtentWidth;
@@ -3508,7 +3507,7 @@ void SEASON3B::CProgressMsgBox::RenderFrame()
 
 void SEASON3B::CProgressMsgBox::RenderTexts()
 {
-    extern float g_fScreenRate_x, g_fScreenRate_y;
+    
 
     float x, y;
 
@@ -3629,7 +3628,7 @@ void SEASON3B::CCursedTempleProgressMsgBox::AddMsg(const type_string& strMsg, DW
 
 int SEASON3B::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
-    extern float g_fScreenRate_x;
+    
 
     SIZE TextSize;
     size_t TextExtentWidth;
@@ -3794,7 +3793,7 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderFrame()
 
 void SEASON3B::CCursedTempleProgressMsgBox::RenderTexts()
 {
-    extern float g_fScreenRate_x, g_fScreenRate_y;
+    
 
     float x, y;
 
@@ -5257,8 +5256,6 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::CancelBtnDown(class CNewUI
 
 bool SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
 {
-    extern int g_iLengthAuthorityCode;
-
     CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
@@ -7319,8 +7316,8 @@ void SEASON3B::CGuild_ToPerson_Position::RenderFrame()
 
 void SEASON3B::CGuild_ToPerson_Position::RenderTexts()
 {
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    
+    
 
     float x, y;
 

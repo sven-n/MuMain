@@ -1,17 +1,9 @@
-///////////////////////////////////////////////////////////////////////////////
-// 그래픽 툴 Max의 플러그인에서 저장한 *.smd파일을 읽어들임
-// 뮤에서 사용되는 모든 3D 오브젝트는 *.smd로 작업된 것임
-//
-// *** 함수 레벨: 1
-///////////////////////////////////////////////////////////////////////////////
-//#ifdef CONVERT
-
 #include "stdafx.h"
 #include <ctype.h>
 #include "ZzzBMD.h"
 #include "SMD.h"
 #include "ReadScript.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 
 NodeGroup_t     NodeGroup;
 SkeletonGroup_t SkeletonGroup;
@@ -38,7 +30,6 @@ void ParseNodes()
         if (Token == NUMBER)
         {
             Node_t* n = &ng->Node[ng->NodeNum];
-            //n->Node = TokenNumber;
             Token = (*GetToken)(); strcpy(n->Name, TokenString);
             Token = (*GetToken)(); n->Parent = (short)TokenNumber;
         }
@@ -219,8 +210,6 @@ bool OpenSMDModel(int ID, wchar_t* FileName1, int Actions, bool Flip)
         WideCharToMultiByte(CP_UTF8, 0, FileName1, wcslen(FileName1), Models[ID].Name, 32, 0, 0);
         Models[ID].Version = 10;
         FixupSMD();
-        //Models[ID].Version = 11;
-        //Triangle2Strip();
         SMD2BMDModel(ID, Actions);
         return true;
     }
@@ -239,5 +228,3 @@ bool OpenSMDAnimation(int ID, wchar_t* FileName2, bool LockPosition)
     }
     return false;
 }
-
-//#endif

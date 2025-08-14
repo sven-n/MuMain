@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "MoveCommandData.h"
 
-#include "MultiLanguage.h"
+
 
 using namespace SEASON3B;
 
@@ -72,13 +72,6 @@ void CMoveCommandData::Release()
     for (; li != m_listMoveInfoData.end(); li++)
         delete (*li);
     m_listMoveInfoData.clear();
-}
-
-void CMoveCommandData::BuxConvert(BYTE* pBuffer, int size)
-{
-    BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
-    for (int i = 0; i < size; i++)
-        pBuffer[i] ^= bBuxCode[i % 3];
 }
 
 bool CMoveCommandData::OpenMoveReqScript(const std::wstring& filename)

@@ -2,20 +2,20 @@
 
 #include <memory>
 
-#define BoostSmart_Ptr( classname )  std::shared_ptr<classname>
-#define BoostWeak_Ptr( classname )   std::weak_ptr<classname>
+#define Smart_Ptr( classname )  std::shared_ptr<classname>
+#define Weak_Ptr( classname )   std::weak_ptr<classname>
 
-#define BoostSmartPointer(classname) \
+#define SmartPointer(classname) \
     class classname; \
-    typedef BoostSmart_Ptr(classname) classname##Ptr
+    typedef Smart_Ptr(classname) classname##Ptr
 
-#define BoostRest(p) { if(p) { p.reset(); } }
+#define PtrReset(p) { if(p) { p.reset(); } }
 
 //util
 #define SAFE_DELETE(p)  { if(p) { delete (p);     (p)=NULL; } }
 #define SAFE_DELETE_ARRAY(p)  { if(p) { delete [] (p);     (p)=NULL; } }
 #define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
-#define DIRECTINPUT_VERSION	0x0800
+#define DIRECTINPUT_VERSION	0x0500
 #define BYTECAST(T,X) static_cast<T>(X & 0xFF)
 
 ///////////////////////////////////////////////_Scene start_//////////////////////////////////////////////
@@ -28,7 +28,6 @@ enum EGameScene {
     LOADING_SCENE = 3,
     CHARACTER_SCENE = 4,
     MAIN_SCENE = 5,
-    MOVIE_SCENE = 6,
 };
 
 constexpr auto MAX_FENRIR_SKILL_MONSTER_NUM = 10;
@@ -48,22 +47,22 @@ constexpr auto INGAMESHOP_DISPLAY_ITEMLIST_SIZE = (9);
 
 constexpr auto MAX_PATH_FIND = 15;
 
-#define TW_SAFEZONE		( 0x0001)
-#define TW_CHARACTER	( 0x0002)
-#define TW_NOMOVE		( 0x0004)
-#define TW_NOGROUND		( 0x0008)
-#define TW_WATER		( 0x0010)
-#define TW_ACTION       ( 0x0020)
-#define TW_HEIGHT       ( 0x0040)
-#define TW_CAMERA_UP    ( 0x0080)
-#define TW_NOATTACKZONE ( 0x0100)
-#define TW_ATT1         ( 0x0200)
-#define TW_ATT2         ( 0x0400)
-#define TW_ATT3         ( 0x0800)
-#define TW_ATT4         ( 0x1000)
-#define TW_ATT5         ( 0x2000)
-#define TW_ATT6         ( 0x4000)
-#define TW_ATT7         ( 0x8000)
+#define TW_SAFEZONE		(0x0001)
+#define TW_CHARACTER	(0x0002)
+#define TW_NOMOVE		(0x0004)
+#define TW_NOGROUND		(0x0008)
+#define TW_WATER		(0x0010)
+#define TW_ACTION       (0x0020)
+#define TW_HEIGHT       (0x0040)
+#define TW_CAMERA_UP    (0x0080)
+#define TW_NOATTACKZONE (0x0100)
+#define TW_ATT1         (0x0200)
+#define TW_ATT2         (0x0400)
+#define TW_ATT3         (0x0800)
+#define TW_ATT4         (0x1000)
+#define TW_ATT5         (0x2000)
+#define TW_ATT6         (0x4000)
+#define TW_ATT7         (0x8000)
 
 constexpr auto FACTOR_PATH_DIST = 5;
 constexpr auto FACTOR_PATH_DIST_DIAG = ((int)((float)FACTOR_PATH_DIST * 1.414f));
@@ -463,18 +462,17 @@ constexpr int ITEM_GROUP_ETC = 15;
 #define ATTACK_SUCCESS 1
 #define ATTACK_DIE     2
 
-#define ABILITY_FAST_ATTACK_SPEED	( 0x01)
-#define ABILITY_PLUS_DAMAGE			( 0x02)
-#define ABILITY_FAST_ATTACK_RING	( 0x04)
-#define ABILITY_FAST_ATTACK_SPEED2	( 0x08)
+#define ABILITY_FAST_ATTACK_SPEED	0x01
+#define ABILITY_PLUS_DAMAGE			0x02
+#define ABILITY_FAST_ATTACK_RING	0x04
+#define ABILITY_FAST_ATTACK_SPEED2	0x08
 
-#define CTLCODE_01BLOCKCHAR			( 0x01)
-#define CTLCODE_02BLOCKITEM			( 0x02)
-#define CTLCODE_04FORTV				( 0x04)
-#define CTLCODE_08OPERATOR			( 0x08)
-#define CTLCODE_10ACCOUNT_BLOCKITEM	( 0x10)
-#define CTLCODE_20OPERATOR			( 0x20)
-#define CTLCODE_80MANAGER_MOVE_CHAR	( 0x80)
+#define CTLCODE_01BLOCKCHAR			0x01
+#define CTLCODE_02BLOCKITEM			0x02
+#define CTLCODE_04FORTV				0x04
+#define CTLCODE_08OPERATOR			0x08
+#define CTLCODE_10ACCOUNT_BLOCKITEM	0x10
+#define CTLCODE_20OPERATOR			0x20
 
 #define PVP_HERO2		1
 #define PVP_HERO1		2
@@ -538,8 +536,6 @@ constexpr int ITEM_GROUP_ETC = 15;
 ////////////////////////////////////_npcbreederfile start_////////////////////////////////////////////////////
 
 #define WM_GRAPHNOTIFY  WM_USER+13
-#define MOVIE_FILE_TXT	"Data\\Movie\\Movie.txt"
-#define MOVIE_FILE_WMV	"Data\\Movie\\MU.wmv"
 
 /////////////////////////////////////_npcbreederfile end_//////////////////////////////////////////////////////
 //////////////////////////////////////_matchevent start_//////////////////////////////////////////////////////

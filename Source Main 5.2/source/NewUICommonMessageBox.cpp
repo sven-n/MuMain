@@ -27,8 +27,8 @@
 using namespace SEASON3B;
 
 extern int DoBreakUpGuildAction_New(POPUP_RESULT Result);
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 extern int DeleteGuildIndex;
 extern wchar_t DeleteID[];
 extern int DeleteIndex, AppointStatus;

@@ -28,7 +28,6 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 
 extern void OpenItemScript(wchar_t* FileName);
 extern ActionSkillType GetSkillByBook(int Type);
-// extern void ItemConvert(ITEM* ip, BYTE Attribute1, BYTE Attribute2, BYTE ancientDiscriminator);
 void SetItemAttributes(ITEM* ip);
 extern float CalcDurabilityPercent(BYTE dur, BYTE maxDur, int Level, int excellentFlags, int ancientDiscriminator = 0);
 extern int64_t ItemValue(ITEM* ip, int goldType = 1);

@@ -1,6 +1,6 @@
 ﻿#include "stdafx.h"
 #include "MixMgr.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "UIManager.h"
 #include "ZzzInventory.h"
 #include "CSItemOption.h"
@@ -10,13 +10,6 @@
 
 using namespace SEASON3A;
 
-static BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
-
-static void BuxConvert(BYTE* Buffer, int Size)
-{
-    for (int i = 0; i < Size; i++)
-        Buffer[i] ^= bBuxCode[i % 3];
-}
 CMixRecipeMgr g_MixRecipeMgr;
 
 void CMixItem::Reset()

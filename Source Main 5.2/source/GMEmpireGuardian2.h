@@ -4,7 +4,7 @@
 
 #include "w_BaseMap.h"
 
-BoostSmartPointer(GMEmpireGuardian2);
+SmartPointer(GMEmpireGuardian2);
 
 class GMEmpireGuardian2 : public BaseMap
 {

@@ -5,8 +5,6 @@
 #ifndef _PLIST_H_
 #define _PLIST_H_
 
-#include <windows.h>
-
 struct NODE
 {
     NODE* pNext;

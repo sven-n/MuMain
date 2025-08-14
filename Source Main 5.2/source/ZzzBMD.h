@@ -17,7 +17,7 @@
 #define RENDER_DARK         0x00000080
 #define RENDER_EXTRA        0x00000100
 #define RENDER_CHROME2      0x00000200
-#define RENDER_WAVE			0x00000400
+#define RENDER_WAVE			0x00000400 
 #define RENDER_CHROME3      0x00000800
 #define RENDER_CHROME4      0x00001000
 #define RENDER_NODEPTH      0x00002000
@@ -102,8 +102,6 @@ typedef struct
     short      TexCoordIndex[4];
     short      EdgeTriangleIndex[4];
     bool       Front;
-    //TexCoord_t LightMapCoord[4]; //ver1.2
-    //short      LightMapIndexes; //ver1.2
 } Triangle_t;
 
 typedef struct
@@ -165,7 +163,7 @@ typedef struct _Mesh_t
 class BMD
 {
 public:
-    char          Name[32];
+    char          Name[64];
     char          Version;
     short         NumBones;
     short         NumMeshs;
@@ -225,28 +223,21 @@ public:
     ~BMD();
     //utility
     void Init(bool Dummy);
-    //bool Open(wchar_t* DirName, wchar_t* FileName);
-    //bool Save(wchar_t* DirName, wchar_t* FileName);
     bool Open2(wchar_t* DirName, wchar_t* FileName, bool bReAlloc = true);
     bool Save2(wchar_t* DirName, wchar_t* FileName);
     void Release();
     void CreateBoundingBox();
 
-    //transform
     bool PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsigned short* PriorAction, float Speed, vec3_t Origin, vec3_t Angle);
     void Animation(float(*BoneTransform)[3][4], float AnimationFrame, float PriorAnimationFrame, unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent = false, bool Translate = true);
     void InterpolationTrans(float(*Mat1)[4], float(*TransMat2)[4], float _Scale);
     void Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate = false, float _Scale = 0.0f);
     void TransformByObjectBone(vec3_t vResultPosition, OBJECT* pObject, int iBoneNumber, vec3_t vRelativePosition = NULL);
-    // (vResultPosition = (pObject->BoneTransform[iBoneNumber] * vRelativePosition) + pObject->Position)
     void TransformByBoneMatrix(vec3_t vResultPosition, float(*BoneMatrix)[4], vec3_t vWorldPosition = NULL, vec3_t vRelativePosition = NULL);
-    // (vResultPosition = (BoneMatrix * vRelativePosition) + vWorldPosition)
     void TransformPosition(float(*Matrix)[4], vec3_t Position, vec3_t WorldPosition, bool Translate = false);
     void RotationPosition(float(*Matrix)[4], vec3_t Position, vec3_t WorldPosition);
 
 public:
-    //typedef vector<vec3_t>		VECVEC3_TS;
-
     void AnimationTransformWithAttachHighModel_usingGlobalTM(
         OBJECT* oHighHierarchyModel,
         BMD* bmdHighHierarchyModel,
@@ -284,19 +275,7 @@ public:
 
     void RenderMeshEffect(int i, int iType, int iSubType = 0, vec3_t Angle = 0, VOID* obj = NULL);
 
-    /**
-     * \brief Renders a mesh of the BMD file.
-     * \param meshIndex The index of the mesh in the file.
-     * \param renderFlags The render flags.
-     * \param alpha The alpha for the texture of the mesh.
-     * \param blendMeshIndex The blend mesh index, if available.
-     * \param blendMeshAlpha The blend mesh alpha, if available.
-     * \param blendMeshTextureCoordU The blend mesh texture U-coordinate.
-     * \param blendMeshTextureCoordV The blend mesh texture V-coordinate.
-     * \param textureIndex The texture index of the mesh, if another texture should be used, other than defined in the BMD.
-     */
     void RenderMesh(int meshIndex, int renderFlags, float alpha = 1.f, int blendMeshIndex = -1, float blendMeshAlpha = 1.f, float blendMeshTextureCoordU = 0.f, float blendMeshTextureCoordV = 0.f, int textureIndex = -1);
-
     void BeginRenderCoinHeap();
     int AddToCoinHeap(int coinIndex, int target_vertex_index);
     void EndRenderCoinHeap(int coinCount);
@@ -310,7 +289,6 @@ public:
 
     void SetBodyLight(vec3_t right) { VectorCopy(right, BodyLight); }
 
-    //lightmap(ver1.2)
     bool LightMapEnable;
     bool CollisionDetectLineToMesh(vec3_t, vec3_t, bool Collision = true, int Mesh = -1, int Triangle = -1);
     void CreateLightMapSurface(Light_t*, Mesh_t*, int, int, int, int, int, int, vec3_t, vec3_t, int);
@@ -322,17 +300,14 @@ public:
     void FindNearTriangle(void);
 
     void FindTriangleForEdge(int iMesh, int iTri, int iIndex11);
-
     //#endif //USE_SHADOWVOLUME
 private:
     BMD(const BMD& b);
-    BMD& operator=(const BMD& b);
 
     void AddClothesShadowTriangles(void* pClothes, int clothesCount, float sx, float sy) const;
     void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy) const;
 };
 
-//extern BMD   Models[];
 extern BMD* Models;
 extern BMD* ModelsDump;
 extern float BoneTransform[MAX_BONES][3][4];

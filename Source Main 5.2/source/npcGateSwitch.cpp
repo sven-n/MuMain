@@ -6,7 +6,6 @@
 #include "zzzcharacter.h"
 #include "ZzzTexture.h"
 #include "zzzAi.h"
-#include "GMBattleCastle.h"
 #include "npcGateSwitch.h"
 
 #include "DSPlaySound.h"

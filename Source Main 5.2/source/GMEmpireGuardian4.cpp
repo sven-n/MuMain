@@ -1,7 +1,6 @@
 ﻿// GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "GMEmpireGuardian4.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -12,10 +11,10 @@
 #include "ZzzOpenData.h"
 #include "ZzzLodTerrain.h"
 #include "GOBoid.h"
-#include "./Utilities/Log/muConsoleDebug.h"
+
 #include "LoadData.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 GMEmpireGuardian4Ptr GMEmpireGuardian4::Make()
 {
@@ -1550,10 +1549,10 @@ void GMEmpireGuardian4::PlayBGM()
 {
     if (gMapManager.IsEmpireGuardian4())
     {
-        PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN4]);
+        PlayMp3(MUSIC_EMPIREGUARDIAN4);
     }
     else
     {
-        StopMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN4]);
+        StopMp3(MUSIC_EMPIREGUARDIAN4);
     }
 }

@@ -2,7 +2,6 @@
 // file    : GM_PK_Field.cpp
 //*****************************************************************************
 #include "stdafx.h"
-#include "GM_PK_Field.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -12,7 +11,7 @@
 #include "w_MapHeaders.h"
 #include "DSPlaySound.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 CGM_PK_FieldPtr CGM_PK_Field::Make()
 {
@@ -55,7 +54,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_ZOMBIE_FIGHTER);
         pCharacter = CreateCharacter(Key, MODEL_ZOMBIE_FIGHTER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"좀비 투사");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -66,7 +64,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_ZOMBIE_FIGHTER);
         pCharacter = CreateCharacter(Key, MODEL_ZOMBIE_FIGHTER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"좀비 투사");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -77,7 +74,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_GLADIATOR);
         pCharacter = CreateCharacter(Key, MODEL_GLADIATOR, PosX, PosY);
-        wcscpy(pCharacter->ID, L"되살아난 검투사");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -88,7 +84,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_GLADIATOR);
         pCharacter = CreateCharacter(Key, MODEL_GLADIATOR, PosX, PosY);
-        wcscpy(pCharacter->ID, L"되살아난 검투사");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -99,7 +94,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_SLAUGTHERER);
         pCharacter = CreateCharacter(Key, MODEL_SLAUGHTERER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"잿더미 도살자");
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -110,7 +104,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_SLAUGTHERER);
         pCharacter = CreateCharacter(Key, MODEL_SLAUGHTERER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"잿더미 도살자");
         pCharacter->Object.Scale = 0.7f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -121,7 +114,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_BLOOD_ASSASSIN);
         pCharacter = CreateCharacter(Key, MODEL_BLOOD_ASSASSIN, PosX, PosY);
-        wcscpy(pCharacter->ID, L"피의 암살자");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -133,7 +125,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN);
         pCharacter = CreateCharacter(Key, MODEL_CRUEL_BLOOD_ASSASSIN, PosX, PosY);
-        wcscpy(pCharacter->ID, L"잔혹한 피의 암살자");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -145,7 +136,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN);
         pCharacter = CreateCharacter(Key, MODEL_CRUEL_BLOOD_ASSASSIN, PosX, PosY);
-        wcscpy(pCharacter->ID, L"잔혹한 피의 암살자");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -157,7 +147,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_BURNING_LAVA_GIANT);
         pCharacter = CreateCharacter(Key, MODEL_BURNING_LAVA_GIANT, PosX, PosY);
-        wcscpy(pCharacter->ID, L"불타는 용암 거인");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -168,7 +157,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_LAVA_GIANT);
         pCharacter = CreateCharacter(Key, MODEL_LAVA_GIANT, PosX, PosY);
-        wcscpy(pCharacter->ID, L"포악한 용암 거인");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -179,7 +167,6 @@ CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_LAVA_GIANT);
         pCharacter = CreateCharacter(Key, MODEL_LAVA_GIANT, PosX, PosY);
-        wcscpy(pCharacter->ID, L"포악한 용암 거인");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -1229,10 +1216,10 @@ void CGM_PK_Field::PlayBGM()
 {
     if (gMapManager.IsPKField())
     {
-        PlayMp3(g_lpszMp3[MUSIC_PKFIELD]);
+        PlayMp3(MUSIC_PKFIELD);
     }
     else
     {
-        StopMp3(g_lpszMp3[MUSIC_PKFIELD]);
+        StopMp3(MUSIC_PKFIELD);
     }
 }

@@ -94,7 +94,7 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
 
     m_wItemCode = _wtoi(pPackage->InGamePackageID);
 
-    ZeroMemory(m_szDescription, sizeof(unicode::t_char) * UIMAX_TEXT_LINE * MAX_TEXT_LENGTH);
+    ZeroMemory(m_szDescription, sizeof(wchar_t) * UIMAX_TEXT_LINE * MAX_TEXT_LENGTH);
 
     g_pRenderText->SetFont(g_hFont);
     int nLine = ::DivideStringByPixel(&m_szDescription[0][0], UIMAX_TEXT_LINE, MAX_TEXT_LENGTH, pPackage->Description, IGS_LISTBOX_WIDTH, false, '#');

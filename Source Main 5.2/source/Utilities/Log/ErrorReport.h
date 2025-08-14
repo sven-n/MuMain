@@ -1,10 +1,3 @@
-// ErrorReport.h: interface for the CErrorReport class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_ERROR_REPORT_H__8C7DEDBA_0557_4B98_AD53_900F41EAC8AD__INCLUDED_)
-#define AFX_ERROR_REPORT_H__8C7DEDBA_0557_4B98_AD53_900F41EAC8AD__INCLUDED_
-
 #pragma once
 
 #define MAX_LENGTH_CPUNAME	( 128)
@@ -32,10 +25,6 @@ protected:
     HANDLE m_hFile;
     wchar_t m_lpszFileName[MAX_PATH];
     int m_iKey;
-#ifdef ASG_ADD_MULTI_CLIENT
-    int m_nFileCount;		// 로그 파일 개수.
-#endif	// ASG_ADD_MULTI_CLIENT
-
 public:
     void Create(wchar_t* lpszFileName);
     void Destroy(void);
@@ -62,10 +51,5 @@ public:
 
 extern CErrorReport g_ErrorReport;
 
-//////////////////////////////////////////////////////////////////////
-// System Setting check
-//////////////////////////////////////////////////////////////////////
-
 void GetSystemInfo(ER_SystemInfo* si);
 
-#endif // !defined(AFX_ERROR_REPORT_H__8C7DEDBA_0557_4B98_AD53_900F41EAC8AD__INCLUDED_)

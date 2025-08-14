@@ -16,17 +16,14 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzEffect.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "CSChaosCastle.h"
-#include "GMBattleCastle.h"
 #include "CMVP1stDirection.h"
 #include "CDirection.h"
 #include "MapManager.h"
-#include "./Utilities/Log/muConsoleDebug.h"
+
 #include "w_MapHeaders.h"
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 #include "CameraMove.h"
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -110,13 +107,6 @@ void ExitProgram()
     PostQuitMessage(0);
 }
 
-static const BYTE bBuxCode[3] = { 0xFC, 0xCF, 0xAB };
-
-static void BuxConvert(BYTE* Buffer, int Size)
-{
-    for (int i = 0; i < Size; ++i)
-        Buffer[i] ^= bBuxCode[i % 3];
-}
 
 int OpenTerrainAttribute(wchar_t* FileName)
 {
@@ -1378,10 +1368,6 @@ void RenderFace(int Texture, int mx, int my)
         }
     }
     else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-        || World == WD_77NEW_LOGIN_SCENE
-        || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
         )
     {
         if (Texture == 2)
@@ -1394,9 +1380,7 @@ void RenderFace(int Texture, int mx, int my)
         }
     }
     else if (gMapManager.WorldActive == WD_69EMPIREGUARDIAN1 || gMapManager.WorldActive == WD_70EMPIREGUARDIAN2 || gMapManager.WorldActive == WD_71EMPIREGUARDIAN3 || gMapManager.WorldActive == WD_72EMPIREGUARDIAN4
-#ifdef PJH_NEW_SERVER_SELECT_MAP
         || gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
         )
     {
         if (Texture == 10)
@@ -2534,11 +2518,7 @@ void RenderTerrainFrustrum(bool EditFlag)
         {
             if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange) || CameraTopViewEnable)
             {
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                 if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
-#else
-                if (World == WD_77NEW_LOGIN_SCENE)
-#endif //PJH_NEW_SERVER_SELECT_MAP
                 {
                     float fDistance_x = CameraPosition[0] - xf / 0.01f;
                     float fDistance_y = CameraPosition[1] - yf / 0.01f;

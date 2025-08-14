@@ -79,7 +79,7 @@
 #include "NewUIMiniMap.h"
 #include "NewUIGensRanking.h"
 #include "NewUIUnitedMarketPlaceWindow.h"
-#include "MultiLanguage.h"
+
 #include "NewUILuckyItemWnd.h"
 #include "NewUIMuHelper.h"
 

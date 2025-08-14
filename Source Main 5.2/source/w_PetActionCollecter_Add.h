@@ -9,7 +9,7 @@
 
 #pragma once
 
-BoostSmartPointer(PetActionCollecterAdd);
+SmartPointer(PetActionCollecterAdd);
 class PetActionCollecterAdd : public PetAction
 {
 public:
@@ -60,7 +60,7 @@ protected:
 };
 #endif //PJH_ADD_PANDA_PET
 
-BoostSmartPointer(PetActionCollecterSkeleton);
+SmartPointer(PetActionCollecterSkeleton);
 class PetActionCollecterSkeleton : public PetActionCollecterAdd
 {
 public:

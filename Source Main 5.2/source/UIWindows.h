@@ -1,10 +1,6 @@
-#ifndef __UIWINDOW_H__
-#define __UIWINDOW_H__
-
 #pragma once
 
 #include "UIControls.h"
-#include "wsctlc.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -285,7 +281,6 @@ protected:
     CUITextInputBox m_TextInputBox;
     CUIButton m_SendButton;
     CUIButton m_CloseButton;
-    //CUIButton m_PhotoShowButton;
     CUIButton m_PrevPoseButton;
     CUIButton m_NextPoseButton;
 };
@@ -437,7 +432,6 @@ protected:
     CUIButton m_ReadButton;
     CUIButton m_ReplyButton;
     CUIButton m_DeleteButton;
-    //CUIButton m_DeliveryButton;
     BOOL m_bCheckAllState;
 };
 
@@ -452,8 +446,6 @@ public:
     void Reset();
     void Close();
     void RefreshPalList() { m_FriendListWnd.RefreshPalList(); }
-    //	const wchar_t* GetCurrentSelectedFriend()
-    //	{ return m_FriendListWnd.GetCurrentSelectedFriend(); }
 
     void AddWindow(DWORD dwUIID, const wchar_t* pszTitle)
     {
@@ -649,8 +641,6 @@ public:
 
     void Reset();
     void Init();
-    //	BOOL DoMouseAction();
-    //	void Render();
     void AddWindow(DWORD dwUIID, CUIBaseWindow* pWindow);
     void RemoveWindow(DWORD dwUIID);
 
@@ -708,5 +698,3 @@ protected:
     std::deque<wchar_t*> m_RequestChatWindowList;
     std::deque<wchar_t*>::iterator m_RequestChatWindowListIter;
 };
-
-#endif	// __UIWINDOW_H__

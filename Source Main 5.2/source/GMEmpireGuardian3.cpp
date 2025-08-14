@@ -2,7 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
-#include "GMEmpireGuardian3.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -14,7 +13,7 @@
 #include "ZzzLodTerrain.h"
 #include "GOBoid.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 GMEmpireGuardian3Ptr GMEmpireGuardian3::Make()
 {
@@ -82,7 +81,6 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_DUAL_BERSERKER);
         pCharacter = CreateCharacter(Key, MODEL_DUAL_BERSERKER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"카토");
         pCharacter->Object.Scale = 1.35f;
 
         m_bCurrentIsRage_Kato = false;
@@ -92,7 +90,6 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_BANSHEE);
         pCharacter = CreateCharacter(Key, MODEL_BANSHEE, PosX, PosY);
-        wcscpy(pCharacter->ID, L"암살단장");
         pCharacter->Object.Scale = 1.55f;
     }
     break;
@@ -100,7 +97,6 @@ CHARACTER* GMEmpireGuardian3::CreateMonster(int iType, int PosX, int PosY, int K
     {
         OpenMonsterModel(MONSTER_MODEL_HEAD_MOUNTER);
         pCharacter = CreateCharacter(Key, MODEL_HEAD_MOUNTER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"기마단장");
         pCharacter->Object.Scale = 1.25f;
     }
     break;
@@ -1417,10 +1413,10 @@ void GMEmpireGuardian3::PlayBGM()
 {
     if (gMapManager.IsEmpireGuardian3())
     {
-        PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN3]);
+        PlayMp3(MUSIC_EMPIREGUARDIAN3);
     }
     else
     {
-        StopMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN3]);
+        StopMp3(MUSIC_EMPIREGUARDIAN3);
     }
 }

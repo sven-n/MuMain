@@ -39,20 +39,16 @@
 #endif // _DEBUG
 #endif // FOR_WORK
 
-#define WINDOWMODE						// (2006-07-18)
-//#define ENABLE_FULLSCREEN
+#define WINDOWMODE
 
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 #define ACTIVE_FOCUS_OUT
-#endif	// USER_WINDOW_MODE
 
 //#define DEVIAS_XMAS_EVENT  //more snow in devias
 //#define GUILD_WAR_EVENT
 #define DUEL_SYSTEM
-#define PROTECT_SYSTEMKEY   //alow alt+tab on fullscreen mode
 //#define CAMERA_TEST
 
-#define WM_USER_MEMORYHACK	( WM_USER + 1)
+
 #define WM_RECEIVE_BUFFER	( WM_USER + 2)
 #define WM_NPROTECT_EXIT_TWO  (WM_USER + 10001)
 
@@ -88,7 +84,6 @@ extern void StopMp3(char* Name, BOOL bEnforce = false);
 extern void PlayMp3(char* Name, BOOL bEnforce = false);
 extern bool IsEndMp3();
 extern int GetMp3PlayPosition();
-extern unsigned int GenID();
 
 extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();

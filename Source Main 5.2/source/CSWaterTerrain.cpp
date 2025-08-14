@@ -15,7 +15,6 @@
 #include "zzzinventory.h"
 #include "zzzLodTerrain.h"
 #include "CSWaterTerrain.h"
-#include "GMHellas.h"
 #include "MapManager.h"
 
 extern  double   WorldTime;

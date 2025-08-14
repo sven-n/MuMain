@@ -86,16 +86,6 @@ namespace leaf {
         }
     };
 
-    class xfstreambuf : public xstreambuf {
-    public:
-        xfstreambuf();
-        xfstreambuf(const xstreambuf& xbuf);
-        xfstreambuf(const std::wstring& filename);
-        virtual ~xfstreambuf();
-
-        bool load(const std::wstring& filename);
-        bool save(const std::wstring& filename);
-    };
 }
 
 #endif // _XSTREAMBUF_H_

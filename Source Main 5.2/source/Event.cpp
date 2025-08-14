@@ -102,18 +102,17 @@ void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType)
     pCha->m_iTempKey = m_iEffectID;
     c->Object.Scale = 0.30f;
     c->Object.SubType = iType + MODEL_XMAS_EVENT_CHA_SSANTA;
-    //c->Object.SubType = MODEL_XMAS_EVENT_CHA_DEER;
 
     switch (c->Object.SubType)
     {
     case MODEL_XMAS_EVENT_CHA_SSANTA:
-        ::wcscpy(c->ID, GlobalText[2245]);	// 2245
+        ::wcscpy(c->ID, GlobalText[2245]);	
         break;
     case MODEL_XMAS_EVENT_CHA_DEER:
-        ::wcscpy(c->ID, GlobalText[2246]);	// 2246
+        ::wcscpy(c->ID, GlobalText[2246]);	
         break;
     case MODEL_XMAS_EVENT_CHA_SNOWMAN:
-        ::wcscpy(c->ID, GlobalText[2247]);	// 2247
+        ::wcscpy(c->ID, GlobalText[2247]);	
         break;
     }
 

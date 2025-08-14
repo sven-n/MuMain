@@ -16,10 +16,9 @@
 #include "MapManager.h"
 #include "BoneManager.h"
 #include "dsplaysound.h"
-#include "GM3rdChangeUp.h"
 #include "CSChaosCastle.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 SEASON3A::CGM3rdChangeUp::CGM3rdChangeUp() : m_nDarkElfAppearance(false)
 {
@@ -376,19 +375,19 @@ void SEASON3A::CGM3rdChangeUp::PlayBGM()
     if (IsBalgasBarrackMap())
     {
         if (::IsEndMp3())
-            ::StopMp3(g_lpszMp3[MUSIC_BALGAS_BARRACK]);
-        ::PlayMp3(g_lpszMp3[MUSIC_BALGAS_BARRACK]);
+            ::StopMp3(MUSIC_BALGAS_BARRACK);
+        ::PlayMp3(MUSIC_BALGAS_BARRACK);
     }
     else if (IsBalgasRefugeMap())
     {
         if (::IsEndMp3())
-            ::StopMp3(g_lpszMp3[MUSIC_BALGAS_REFUGE]);
-        ::PlayMp3(g_lpszMp3[MUSIC_BALGAS_REFUGE]);
+            ::StopMp3(MUSIC_BALGAS_REFUGE);
+        ::PlayMp3(MUSIC_BALGAS_REFUGE);
     }
     else
     {
-        ::StopMp3(g_lpszMp3[MUSIC_BALGAS_BARRACK]);
-        ::StopMp3(g_lpszMp3[MUSIC_BALGAS_REFUGE]);
+        ::StopMp3(MUSIC_BALGAS_BARRACK);
+        ::StopMp3(MUSIC_BALGAS_REFUGE);
     }
 }
 

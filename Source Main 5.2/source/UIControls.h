@@ -2,7 +2,7 @@
 #define __UICONTROL_H__
 
 #include "zzzinfomation.h"
-#include "MultiLanguage.h"
+
 #include "WSclient.h"
 #include "Time/Timer.h"
 
@@ -943,17 +943,13 @@ public:
     void SetBuddyPosition(int iPos_x, int iPos_y) { m_BuddyInputBox.SetPosition(iPos_x, iPos_y); }
     BOOL HaveFocus() { return (m_TextInputBox.HaveFocus() || m_BuddyInputBox.HaveFocus()); }
     BOOL DoMouseAction();
-#if defined FOR_WORK || defined USER_WINDOW_MODE || (defined WINDOWMODE)
     void RestoreFocus() { m_bFocusLose = TRUE; }
-#endif
 
 protected:
     CUITextInputBox m_TextInputBox;
     CUITextInputBox m_BuddyInputBox;
-#if defined FOR_WORK || defined USER_WINDOW_MODE || (defined WINDOWMODE)
     BOOL m_bFocusLose;
     int m_iBackupFocus;
-#endif
 
 public:
     virtual void AddHistory(const wchar_t* pszText);

@@ -38,14 +38,11 @@ public:
 
     int GetServerGroupSize();
 
-    void SetSelectServerInfo(wchar_t* pszName, int iIndex, int iCensorshipIndex,
-        BYTE byNonPvP, bool bTestServer);
+    void SetSelectServerInfo(wchar_t* pszName, int iIndex, BYTE byNonPvP);
     wchar_t* GetSelectServerName();
     int	GetSelectServerIndex();
-    int GetCensorshipIndex();
     BYTE GetNonPVPInfo();
     bool IsNonPvP();
-    bool IsTestServer();
     void SetTotalServer(int iTotalServer);
     int GetTotalServer();
 
@@ -53,7 +50,6 @@ protected:
     const SServerGroupInfo* GetServerGroupInfoInScript(WORD wServerGroupIndex);
     bool MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup);
     void InsertServer(CServerGroup* pServerGroup, int iConnectIndex, int iServerPercent);
-    void BuxConvert(BYTE* pbyBuffer, int nSize);
 
 public:
     type_mapServerGroup			m_mapServerGroup;
@@ -62,9 +58,7 @@ public:
     int				m_iTotalServer;
     wchar_t m_szSelectServerName[MAX_TEXT_LENGTH];
     int				m_iSelectServerIndex;
-    int				m_iCensorshipIndex;
     BYTE			m_byNonPvP;
-    bool			m_bTestServer;
 
 protected:
     ServerListScriptMap		m_mapServerListScript;

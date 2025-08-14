@@ -10,14 +10,7 @@
 #include "w_PetActionUnicorn.h"
 #include "w_PetProcess.h"
 #include "ReadScript.h"
-#include "./Utilities/Log/ErrorReport.h"
 
-static BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
-static void BuxConvert(BYTE* Buffer, int Size)
-{
-    for (int i = 0; i < Size; i++)
-        Buffer[i] ^= bBuxCode[i % 3];
-}
 
 PetInfoPtr PetInfo::Make()
 {
@@ -121,7 +114,7 @@ void PetProcess::Destroy()
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(PetObject) basepet = *tempiter;
+        Weak_Ptr(PetObject) basepet = *tempiter;
 
         if (basepet.expired() == FALSE)
         {
@@ -134,7 +127,7 @@ void PetProcess::Destroy()
     m_petsAction.clear();
 }
 
-BoostWeak_Ptr(PetAction) PetProcess::Find(int key)
+Weak_Ptr(PetAction) PetProcess::Find(int key)
 {
     auto iter = m_petsAction.find(key);
 
@@ -143,12 +136,12 @@ BoostWeak_Ptr(PetAction) PetProcess::Find(int key)
         return (*iter).second;
     }
 
-    BoostWeak_Ptr(PetAction) temp;
+    Weak_Ptr(PetAction) temp;
 
     return temp;
 }
 
-void PetProcess::Register(BoostSmart_Ptr(PetObject) pPet)
+void PetProcess::Register(Smart_Ptr(PetObject) pPet)
 {
     m_petsList.push_back(pPet);
 }
@@ -161,7 +154,7 @@ void PetProcess::UnRegister(CHARACTER* Owner, int itemType, bool isUnregistAll)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(PetObject) basepet = *tempiter;
+        Weak_Ptr(PetObject) basepet = *tempiter;
 
         if (basepet.expired() == FALSE)
         {
@@ -280,7 +273,7 @@ bool PetProcess::IsPet(int itemType)
     auto iter = m_petsInfo.find(itemType);
     if (iter == m_petsInfo.end()) return FALSE;
 
-    BoostWeak_Ptr(PetInfo) petInfo = (*iter).second;
+    Weak_Ptr(PetInfo) petInfo = (*iter).second;
     if (petInfo.expired()) return FALSE;
 
     return TRUE;
@@ -296,7 +289,7 @@ bool PetProcess::CreatePet(int itemType, int modelType, vec3_t Position, CHARACT
         auto iter = m_petsInfo.find(itemType);
         if (iter == m_petsInfo.end()) return FALSE;
 
-        BoostWeak_Ptr(PetInfo) petInfo = (*iter).second;
+        Weak_Ptr(PetInfo) petInfo = (*iter).second;
 
         int _count = 0;
         int* action = NULL;
@@ -337,7 +330,7 @@ void PetProcess::SetCommandPet(CHARACTER* Owner, int targetKey, PetObject::Actio
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(PetObject) basepet = *tempiter;
+        Weak_Ptr(PetObject) basepet = *tempiter;
 
         if (basepet.expired() == FALSE)
         {
@@ -355,7 +348,7 @@ void PetProcess::UpdatePets()
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(PetObject) basepet = *tempiter;
+        Weak_Ptr(PetObject) basepet = *tempiter;
 
         if (basepet.expired() == false)
         {
@@ -370,7 +363,7 @@ void PetProcess::RenderPets()
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(PetObject) basepet = *tempiter;
+        Weak_Ptr(PetObject) basepet = *tempiter;
 
         if (basepet.expired() == FALSE)
         {

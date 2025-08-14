@@ -16,10 +16,7 @@ namespace SEASON3B
         virtual ~GMNewTown();
 
         static bool IsCurrentMap();
-#ifdef PJH_NEW_SERVER_SELECT_MAP
         static bool IsNewMap73_74();
-#endif //PJH_NEW_SERVER_SELECT_MAP
-
         //. 오브젝트
         static void CreateObject(OBJECT* pObject);
         static bool MoveObject(OBJECT* pObject);

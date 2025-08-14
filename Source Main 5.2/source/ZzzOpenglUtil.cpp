@@ -33,7 +33,6 @@ GLfloat FogColor[4] = { 30 / 256.f,20 / 256.f,10 / 256.f, };
 bool _isVSyncAvailable = false;
 bool _isVSyncEnabled = false;
 PFNWGLSWAPINTERVALEXTPROC       wglSwapIntervalEXT = nullptr;
-//PFNWGLGETSWAPINTERVALEXTPROC    wglGetSwapIntervalEXT = nullptr;
 
 
 unsigned int WindowWidth = 1024;
@@ -138,23 +137,6 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
 bool GrabEnable = false;
 wchar_t GrabFileName[MAX_PATH];
 int  GrabScreen = 0;
-bool GrabFirst = false;
-
-void SaveScreen()
-{
-    GrabFirst = true;
-
-    auto Buffer = new unsigned char[WindowWidth * WindowHeight * 3];
-
-    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, &Buffer[0]);
-
-    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, &Buffer[0], 100);
-
-    SAFE_DELETE_ARRAY(Buffer);
-
-    GrabScreen++;
-    GrabScreen %= 10000;
-}
 
 float PerspectiveX;
 float PerspectiveY;
@@ -186,8 +168,6 @@ void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar)
     float AspectY = (float)(WindowHeight) / (float)(OpenglWindowHeight);
     PerspectiveX = tanf(Fov * 0.5f * Q_PI / 180.f) / (float)(OpenglWindowWidth / 2) * Aspect;
     PerspectiveY = tanf(Fov * 0.5f * Q_PI / 180.f) / (float)(OpenglWindowHeight / 2) * AspectY;
-    //PerspectiveX = (float)ScreenCenterX/tanf(Fov*0.5f*3.141592f/180.f)*Aspect;
-    //PerspectiveY = (float)ScreenCenterY/tanf(Fov*0.5f*3.141592f/180.f);
 }
 
 void CreateScreenVector(int sx, int sy, vec3_t Target, bool bFixView)

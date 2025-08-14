@@ -455,8 +455,6 @@ bool CNewUIMuHelper::Update()
             m_Skill2DelayInput.SetState(UISTATE_NORMAL);
             m_Skill3DelayInput.SetState(UISTATE_NORMAL);
             m_ItemInput.SetState(UISTATE_HIDE);
-
-            m_DistanceTimeInput.GiveFocus();
         }
         else if (m_iCurrentOpenTab == 1)
         {
@@ -464,8 +462,6 @@ bool CNewUIMuHelper::Update()
             m_Skill2DelayInput.SetState(UISTATE_HIDE);
             m_Skill3DelayInput.SetState(UISTATE_HIDE);
             m_ItemInput.SetState(UISTATE_NORMAL);
-
-            m_ItemInput.GiveFocus();
         }
     }
     return true;
@@ -683,6 +679,16 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         else if (iIconIndex == TEXTBOX_IMG_ADD_EXTRA_ITEM)
         {
             m_ItemInput.GiveFocus();
+        }
+        else
+        {
+            SetFocus(g_hWnd);
+        }
+
+        POINT ptExitBtn = { m_Pos.x + 169, m_Pos.y + 7 };
+        if (CheckMouseIn(ptExitBtn.x, ptExitBtn.y, 13, 12))
+        {
+            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
         }
     }
     if (IsRelease(VK_RBUTTON))
@@ -929,6 +935,7 @@ void CNewUIMuHelper::SaveExtraItem()
     }
 
     m_ItemInput.SetText(L"");
+    SetFocus(g_hWnd);
 }
 
 void CNewUIMuHelper::RemoveExtraItem()
@@ -1922,41 +1929,47 @@ bool CNewUIMuHelperSkillList::Update()
 
 bool CNewUIMuHelperSkillList::Render()
 {
-    float x = 640 - 190 - 32;
-    float y = m_bFilterByAttackSkills ? 171 : 293;
-    float fOrigY = y;
-    float width = 32, height = 38;
-    int iSkillPerRow = m_bFilterByAttackSkills ? 9 : 5;
-    int iSkillCount = 0;
+    float scale = 1.0f; // 
+    float boxWidth = 32.f * scale;
+    float boxHeight = 38.f * scale;
+    float iconWidth = 20.f * scale;
+    float iconHeight = 28.f * scale;
+    float iconOffsetX = (boxWidth - iconWidth) / 2.f;
+    float iconOffsetY = (boxHeight - iconHeight) / 2.f;
 
-    for (int iSkillType : m_aiSkillsToRender)
+    // x position relative to the position of mu helper window
+    float startX = 640.f - 190.f - 32.f;
+    // y position relative to the skill/buff selection in mu helper window
+    float startY = m_bFilterByAttackSkills ? 171.f : 293.f;
+
+    int itemsPerColumn = m_bFilterByAttackSkills ? 10 : 5;
+
+    for (int i = 0; i < m_aiSkillsToRender.size(); i++)
     {
-        if (iSkillCount == iSkillPerRow)
-        {
-            x -= width;
-        }
+        int iSkillType = m_aiSkillsToRender[i];
 
-        int iRemainder = iSkillCount % 2;
-        int iQuotient = iSkillCount / 2;
+        int col = i / itemsPerColumn;
+        int rowInColumn = i % itemsPerColumn;
 
-        if (iRemainder == 0)
-        {
-            y = fOrigY + iQuotient * height;
-        }
-        else
-        {
-            y = fOrigY - (iQuotient + 1) * height;
-        }
+        int offset = (rowInColumn + 1) / 2;
+        bool skillCountEven = (rowInColumn % 2 == 0);
 
-        RenderImage(IMAGE_SKILLBOX, x, y, width, height);
-        RenderSkillIcon(iSkillType, x + 6, y + 6, 20, 28);
+        float x = startX - col * boxWidth; // left to right
+        float y = skillCountEven           // bounce up and down from center
+            ? startY - offset * boxHeight
+            : startY + offset * boxHeight;
 
-        m_skillIconMap.insert_or_assign(iSkillType, cSkillIcon{ iSkillType, { static_cast<LONG>(x), static_cast<LONG>(y) }, { static_cast<LONG>(width), static_cast<LONG>(height) } });
+        RenderImage(IMAGE_SKILLBOX, x, y, boxWidth, boxHeight);
+        RenderSkillIcon(iSkillType, x + iconOffsetX, y + iconOffsetY, iconWidth, iconHeight);
 
-        iSkillCount++;
+        m_skillIconMap.insert_or_assign(iSkillType, cSkillIcon{
+            iSkillType,
+            { static_cast<LONG>(x), static_cast<LONG>(y) },
+            { static_cast<LONG>(boxWidth), static_cast<LONG>(boxHeight) }
+            });
     }
 
-    if (m_bRenderSkillInfo == true && m_pNewUI3DRenderMng)
+    if (m_bRenderSkillInfo && m_pNewUI3DRenderMng)
     {
         m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
         m_bRenderSkillInfo = false;

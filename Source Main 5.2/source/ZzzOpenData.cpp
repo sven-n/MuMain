@@ -13,7 +13,7 @@
 #include "DSPlaySound.h"
 
 #include "SMD.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "PhysicsManager.h"
 #include "CSQuest.h"
 #include "CSItemOption.h"
@@ -357,7 +357,6 @@ void OpenPlayers()
     Models[MODEL_PLAYER].Actions[PLAYER_RUN_TWO_HAND_SWORD_TWO].PlaySpeed = 0.3f;
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_TWO_HAND_SWORD_TWO].PlaySpeed = 0.24f;
 
-    //Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_ONETOONE    ].PlaySpeed = 0.30f;
     Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_DEATHSTAB].PlaySpeed = 0.45f;
 
     Models[MODEL_PLAYER].Actions[PLAYER_DIE1].Loop = true;
@@ -1800,7 +1799,10 @@ void OpenItemTextures()
 void DeleteNpcs()
 {
     for (int i = MODEL_NPC_BEGIN; i < MODEL_NPC_END; i++)
-        Models[i].Release();
+    {
+        if(Models[i].Version)
+            Models[i].Release();
+    }
 
     for (int i = SOUND_NPC; i < SOUND_NPC_END; i++)
         ReleaseBuffer(i);
@@ -2216,10 +2218,7 @@ void OpenNpc(int Type)
         gLoadData.AccessModel(MODEL_BENA, L"Data\\Npc\\", L"bena");
         gLoadData.OpenTexture(MODEL_BENA, L"Npc\\");
         break;
-    case MODEL_ZAIRO:
-        gLoadData.AccessModel(MODEL_ZAIRO, L"Data\\Npc\\", L"volvo"); // TODO: find the right BMD file
-        gLoadData.OpenTexture(MODEL_ZAIRO, L"Npc\\");
-        break;
+
     }
 
     for (int i = 0; i < b->NumActions; i++)
@@ -2297,8 +2296,9 @@ void SetMonsterSound(int Type, int s1, int s2, int s3, int s4, int s5, int s6 = 
 
 void DeleteMonsters()
 {
-    for (int i = MODEL_MONSTER01; i < MODEL_MONSTER_END; i++)
-        Models[i].Release();
+	for (int i = MODEL_MONSTER01; i < MODEL_MONSTER_END; i++)
+		if (Models[i].Version)
+         Models[i].Release();
 
     for (int i = SOUND_MONSTER; i < SOUND_MONSTER_END; i++)
         ReleaseBuffer(i);
@@ -4814,10 +4814,6 @@ void SaveOptions()
 
 void OpenLogoSceneData()
 {
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    gLoadData.AccessModel(MODEL_LOGO + 2, L"Data\\Logo\\", L"Logo", 3);
-    gLoadData.OpenTexture(MODEL_LOGO + 2, L"Logo\\", GL_REPEAT, GL_LINEAR);
-#endif //PJH_NEW_SERVER_SELECT_MAP
     //image
     ::LoadBitmap(L"Interface\\cha_bt.tga", BITMAP_LOG_IN);
     ::LoadBitmap(L"Interface\\server_b2_all.tga", BITMAP_LOG_IN + 1);
@@ -4832,9 +4828,6 @@ void OpenLogoSceneData()
     ::LoadBitmap(L"Interface\\server_ex01.tga", BITMAP_LOG_IN + 12);
     ::LoadBitmap(L"Interface\\server_ex02.jpg", BITMAP_LOG_IN + 13, GL_NEAREST, GL_REPEAT);
     ::LoadBitmap(L"Interface\\cr_mu_lo.tga", BITMAP_LOG_IN + 14, GL_LINEAR);
-#ifdef MOVIE_DIRECTSHOW
-    ::LoadBitmap(L"Interface\\movie_b_all.tga", BITMAP_LOG_IN + 15);// 동영상 버튼.
-#endif	// MOVIE_DIRECTSHOW
 }
 
 void ReleaseLogoSceneData()
@@ -5382,7 +5375,7 @@ void OpenBasicData(HDC hDC)
 
     OpenTextData();		//. Text.bmd, Testtest.bmd
 
-    g_csItemOption.OpenItemSetScript(false);
+    g_csItemOption.OpenItemSetScript();
 
     g_QuestMng.LoadQuestScript();
 

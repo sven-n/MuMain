@@ -14,24 +14,20 @@
 #include "ZzzInterface.h"
 #include "DSPlaySound.h"
 
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "ReadScript.h"
-#include "GMCrywolf1st.h"
 #include "CMVP1stDirection.h"
 #include "UIManager.h"
 #include "NewUISystem.h"
 
 extern BYTE m_CrywolfState;
 
-float g_fScreenRate_x = 0;
-float g_fScreenRate_y = 0;
+
 int g_iWidthEx = 5;
 
 extern int g_iChatInputType;
 
-#if defined USER_WINDOW_MODE || (defined WINDOWMODE)
 extern BOOL g_bUseWindowMode;
-#endif
 
 #define ARRAY_SIZE(pArray) (sizeof(pArray)/sizeof(pArray[0]))
 
@@ -2169,7 +2165,7 @@ BOOL CUILetterListBox::DoLineMouseAction(int iLineNumber)
         {
             if (::CheckMouseIn(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, 12, 13))
             {
-                m_TextListIter->m_bIsSelected = (m_TextListIter->m_bIsSelected + 1) % 2;	// T/F Reverse
+                m_TextListIter->m_bIsSelected = (m_TextListIter->m_bIsSelected + 1) % 2;
                 LETTERLIST_TEXT* lt = g_pLetterList->GetLetter(m_TextListIter->m_dwLetterID);
                 lt->m_bIsSelected = m_TextListIter->m_bIsSelected;
             }
@@ -2251,7 +2247,6 @@ void CUILetterTextListBox::RenderInterface()
 {
     ComputeScrollBar();
 
-    //if (GetLineNum() >= m_iNumRenderLine)
     {
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 13.0f / 16.0f, 29.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
@@ -2334,7 +2329,6 @@ void CUILetterTextListBox::AddTextToRenderList(const wchar_t* pszText)
             if (Text1[i][0] != '\0')
             {
                 wcsncpy(text.m_szText, Text1[i], MAX_TEXT_LENGTH + 1);
-                //memcpy(text.m_szText, Text1[i], wcslen(Text1[i]) + 2);
                 m_RenderTextList.push_front(text);
             }
         }
@@ -2342,7 +2336,6 @@ void CUILetterTextListBox::AddTextToRenderList(const wchar_t* pszText)
     else
     {
         wcsncpy(text.m_szText, pszText, MAX_TEXT_LENGTH + 1);
-        //memcpy(text.m_szText, pszText, wcslen(pszText) + 1);
         m_RenderTextList.push_front(text);
     }
 }
@@ -2377,7 +2370,7 @@ CUISocketListBox::CUISocketListBox()
 {
     m_iMaxLineCount = UIMAX_TEXT_LINE;
     m_iCurrentRenderEndLine = 0;
-    m_iNumRenderLine = 6;	// 3의 배수로 -_-
+    m_iNumRenderLine = 6;
 
     m_fScrollBarRange_top = 0;
     m_fScrollBarRange_bottom = 0;

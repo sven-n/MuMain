@@ -49,6 +49,5 @@ namespace SEASON3B
     protected:
         bool Create(const std::wstring& filename);
         void Release();
-        void BuxConvert(BYTE* pBuffer, int size);
     };
 }

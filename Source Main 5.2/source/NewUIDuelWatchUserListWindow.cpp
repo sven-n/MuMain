@@ -85,7 +85,7 @@ bool CNewUIDuelWatchUserListWindow::Render()
 
     RenderFrame();
 
-    extern float g_fScreenRate_y;
+    
 
     SIZE TextSize;
 

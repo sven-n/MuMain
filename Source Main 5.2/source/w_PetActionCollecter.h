@@ -16,7 +16,7 @@ typedef struct _RootingItem
     vec3_t position;
 }RootingItem;
 
-BoostSmartPointer(PetActionCollecter);
+SmartPointer(PetActionCollecter);
 class PetActionCollecter : public PetAction
 {
 public:

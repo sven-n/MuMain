@@ -14,11 +14,10 @@
 #include "ReadScript.h"
 #include "zzzInventory.h"
 #include "zzzopenglutil.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "zzzLodTerrain.h"
 #include "CSItemOption.h"
 #include "GIPetManager.h"
-#include "GMHellas.h"
 #include "CComGem.h"
 #include "NewUIInventoryCtrl.h"
 #include "SocketSystem.h"
@@ -38,13 +37,6 @@ CHARACTER_ATTRIBUTE* CharacterAttribute = NULL;
 static  int     g_iWorldStateTime = 0;
 static  DWORD   g_dwWorldStateBack = 0;
 #endif// STATE_LIMIT_TIME
-
-static BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
-static void BuxConvert(BYTE* Buffer, int Size)
-{
-    for (int i = 0; i < Size; i++)
-        Buffer[i] ^= bBuxCode[i % 3];
-}
 
 CGlobalTextW GlobalText;
 

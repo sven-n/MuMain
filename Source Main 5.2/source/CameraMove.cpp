@@ -3,8 +3,8 @@
 
 #include "stdafx.h"
 #include "CameraMove.h"
-#include "ProtocolSend.h"
 #include "ZzzLodTerrain.h"
+#include "ZzzAI.h"
 
 CCameraMove::CCameraMove()
 {
@@ -35,10 +35,8 @@ void CCameraMove::Init()
     m_fTourCameraAngle = 0;
     m_fTargetTourCameraAngle = 0;
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     m_fCameraAngle = 0;
     m_fFrustumAngle = 0;
-#endif //PJH_NEW_SERVER_SELECT_MAP
 }
 
 bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
@@ -410,14 +408,7 @@ CCameraMove* CCameraMove::GetInstancePtr()
     return &s_CameraWalkInstance;
 }
 
-float CreateAngle(float x1, float y1, float x2, float y2);
-float absf(float a);
-
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 BOOL CCameraMove::SetTourMode(BOOL bFlag, BOOL bRandomStart, int _index)
-#else //PJH_NEW_SERVER_SELECT_MAP
-BOOL CCameraMove::SetTourMode(BOOL bFlag, BOOL bRandomStart)
-#endif //PJH_NEW_SERVER_SELECT_MAP
 {
     if (m_listWayPoint.size() <= 1) return FALSE;
 
@@ -429,12 +420,10 @@ BOOL CCameraMove::SetTourMode(BOOL bFlag, BOOL bRandomStart)
         {
             m_dwCurrentIndex = rand() % m_listWayPoint.size();
         }
-#ifdef PJH_NEW_SERVER_SELECT_MAP
         else
         {
             m_dwCurrentIndex = _index;
         }
-#endif //PJH_NEW_SERVER_SELECT_MAP
 
         DWORD dwTargetIndex = (m_dwCurrentIndex < m_listWayPoint.size() ? m_dwCurrentIndex : 0);
         WAYPOINT* pTargetWayPoint = m_listWayPoint[dwTargetIndex];
@@ -556,7 +545,6 @@ UPDATE_WAY_POINT_ENTRY:
             {
                 m_fTargetTourCameraAngle = CreateAngle(0, 0, fTourDirVector[0], -fTourDirVector[1]);
             }
-            //if (m_fTargetTourCameraAngle != m_fTourCameraAngle)
             {
                 float fRotDir = 0;
                 float fAngleDistance = 0;
@@ -645,7 +633,6 @@ UPDATE_WAY_POINT_ENTRY:
     }
 }
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
 void CCameraMove::SetAngleFrustum(float _Value)
 {
     m_fCameraAngle = _Value;
@@ -658,4 +645,3 @@ float CCameraMove::GetFrustumAngle()
 {
     return (m_fCameraAngle - m_fFrustumAngle);
 }
-#endif //PJH_NEW_SERVER_SELECT_MAP

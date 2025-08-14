@@ -1,7 +1,6 @@
 ﻿// GMDoppelGanger4.cpp: implementation of the CGMDoppelGanger4 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "GMDoppelGanger4.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -13,7 +12,7 @@
 #include "ZzzLodTerrain.h"
 #include "MapManager.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 CGMDoppelGanger4Ptr CGMDoppelGanger4::Make()
 {

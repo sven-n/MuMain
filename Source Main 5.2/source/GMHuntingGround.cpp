@@ -10,7 +10,6 @@
 #include "zzzOpenData.h"
 #include "DSPlaySound.h"
 #include "MapManager.h"
-#include "GMHuntingGround.h"
 #include "BoneManager.h"
 #include "SkillManager.h"
 
@@ -280,8 +279,7 @@ CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int
     case MONSTER_PK_DARK_KNIGHT:
     {
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"저주받은 기사");
-        pCharacter->Skin = 1;	//. 기사
+        pCharacter->Skin = 1;
         pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DRAGON_HELM;
         pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DRAGON_ARMOR;
         pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DRAGON_PANTS;

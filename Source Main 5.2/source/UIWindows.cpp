@@ -18,8 +18,8 @@
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 extern int	 g_iChatInputType;
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;

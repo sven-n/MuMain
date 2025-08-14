@@ -209,21 +209,12 @@
     <ResourceCompile Include="source\resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-    <ResourceCompile Include="source\resourceblue.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\BlackWin.cpp">
-      <Filter>MU\Interface\ui</Filter>
-    </ClCompile>
     <ClCompile Include="source\Button.cpp">
       <Filter>MU\Interface\ui</Filter>
     </ClCompile>
     <ClCompile Include="source\CharInfoBalloon.cpp">
-      <Filter>MU\Interface\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="source\CharInfoBalloonMng.cpp">
       <Filter>MU\Interface\ui</Filter>
     </ClCompile>
     <ClCompile Include="source\CharMakeWin.cpp">
@@ -334,39 +325,6 @@
     <ClCompile Include="source\StdAfx.cpp">
       <Filter>MU\Common</Filter>
     </ClCompile>
-    <ClCompile Include="source\Builder.cpp">
-      <Filter>MU\Client\info</Filter>
-    </ClCompile>
-    <ClCompile Include="source\CreditInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DialogInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExplanationInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="source\FilterInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="source\FilterNameInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ItemInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="source\MovereqInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="source\QuestInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="source\SkillInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
-    <ClCompile Include="source\SlideInfo.cpp">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClCompile>
     <ClCompile Include="source\Winmain.cpp">
       <Filter>MU\Client\core</Filter>
     </ClCompile>
@@ -430,9 +388,6 @@
     <ClCompile Include="source\GambleSystem.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\GameCensorship.cpp">
-      <Filter>MU\Client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\GIPetManager.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
@@ -457,9 +412,6 @@
     <ClCompile Include="source\MonkSystem.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\MovieScene.cpp">
-      <Filter>MU\Client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\npcBreeder.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
@@ -476,9 +428,6 @@
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\PortalMgr.cpp">
-      <Filter>MU\Client\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ProtectSysKey.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\QuestMng.cpp">
@@ -529,9 +478,6 @@
     <ClCompile Include="source\ZzzLodTerrain.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\zzzMixInvetory.cpp">
-      <Filter>MU\Client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\ZzzObject.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
@@ -572,9 +518,6 @@
       <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectMagicSkill.cpp">
-      <Filter>MU\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ZzzEffectNoUse.cpp">
       <Filter>MU\Effect</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzEffectParticle.cpp">
@@ -940,9 +883,6 @@
     <ClCompile Include="source\GMUnitedMarketPlace.cpp">
       <Filter>MU\Map\NewMap\MapExpress</Filter>
     </ClCompile>
-    <ClCompile Include="source\TestEventMap.cpp">
-      <Filter>MU\Map\NewMap\MapExpress</Filter>
-    </ClCompile>
     <ClCompile Include="source\w_CursedTemple.cpp">
       <Filter>MU\Map\NewMap\MapExpress</Filter>
     </ClCompile>
@@ -1000,9 +940,6 @@
     <ClCompile Include="source\Utilities\Log\WindowsConsole.cpp">
       <Filter>Utilities\log</Filter>
     </ClCompile>
-    <ClCompile Include="source\Utilities\Memory\MemoryLock.cpp">
-      <Filter>Utilities\memory</Filter>
-    </ClCompile>
     <ClCompile Include="source\MapManager.cpp">
       <Filter>MU\Map</Filter>
     </ClCompile>
@@ -1014,9 +951,6 @@
     </ClCompile>
     <ClCompile Include="source\CharacterManager.cpp">
       <Filter>MU\Character</Filter>
-    </ClCompile>
-    <ClCompile Include="source\GuildManager.cpp">
-      <Filter>MU\Guild</Filter>
     </ClCompile>
     <ClCompile Include="source\w_BuffScriptLoader.cpp">
       <Filter>MU\Buff</Filter>
@@ -1147,21 +1081,6 @@
     <ClCompile Include="source\GameShop\ShopListManager\interface\PathMethod\Path.cpp">
       <Filter>MU\GameShop\ShopListManager\interface\PathMethod</Filter>
     </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\callstackdmp.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\checkintegrity.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\ExceptionHandler.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\stdleaf.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\sysinfo.cpp">
-      <Filter>External Object\Leaf</Filter>
-    </ClCompile>
     <ClCompile Include="source\Dotnet\Connection.cpp">
       <Filter>MU\Dotnet</Filter>
     </ClCompile>
@@ -1183,9 +1102,6 @@
     <ClCompile Include="source\Dotnet\PacketFunctions_ConnectServer.cpp">
       <Filter>MU\Dotnet</Filter>
     </ClCompile>
-    <ClCompile Include="source\ExternalObject\Leaf\xortrans.cpp">
-      <Filter>MU\Client\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\ExternalObject\Leaf\xstreambuf.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
@@ -1201,18 +1117,15 @@
     <ClCompile Include="source\Utilities\CpuUsage.cpp">
       <Filter>MU\Client\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\CharInfoBalloonMng.cpp">
+      <Filter>MU\Client\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\BlackWin.h">
-      <Filter>MU\Interface\ui</Filter>
-    </ClInclude>
     <ClInclude Include="source\Button.h">
       <Filter>MU\Interface\ui</Filter>
     </ClInclude>
     <ClInclude Include="source\CharInfoBalloon.h">
-      <Filter>MU\Interface\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CharInfoBalloonMng.h">
       <Filter>MU\Interface\ui</Filter>
     </ClInclude>
     <ClInclude Include="source\CharMakeWin.h">
@@ -1404,9 +1317,6 @@
     <ClInclude Include="source\GambleSystem.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\GameCensorship.h">
-      <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\GIPetManager.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
@@ -1437,9 +1347,6 @@
     <ClInclude Include="source\MonkSystem.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\MovieScene.h">
-      <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\npcBreeder.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
@@ -1456,9 +1363,6 @@
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\PortalMgr.h">
-      <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ProtectSysKey.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\QuestMng.h">
@@ -1515,9 +1419,6 @@
     <ClInclude Include="source\ZzzLodTerrain.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\zzzMixInventory.h">
-      <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\ZzzObject.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
@@ -1529,45 +1430,6 @@
     </ClInclude>
     <ClInclude Include="source\ZzzPath.h">
       <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Builder.h">
-      <Filter>MU\Client\info</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CreditInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\DialogInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExplanationInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\FilterInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\FilterNameInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ItemInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MovereqInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\QuestInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\SkillInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\SlideInfo.h">
-      <Filter>MU\Client\info\resource</Filter>
-    </ClInclude>
-    <ClInclude Include="source\InfoHelperFunctions.h">
-      <Filter>MU\Client\info\helper</Filter>
-    </ClInclude>
-    <ClInclude Include="source\interface.h">
-      <Filter>MU\Client\info\helper</Filter>
     </ClInclude>
     <ClInclude Include="source\Defined_Global.h">
       <Filter>MU\Client\core</Filter>
@@ -1962,9 +1824,6 @@
     <ClInclude Include="source\GMUnitedMarketPlace.h">
       <Filter>MU\Map\NewMap\MapExpress</Filter>
     </ClInclude>
-    <ClInclude Include="source\TestEventMap.h">
-      <Filter>MU\Map\NewMap\MapExpress</Filter>
-    </ClInclude>
     <ClInclude Include="source\w_CursedTemple.h">
       <Filter>MU\Map\NewMap\MapExpress</Filter>
     </ClInclude>
@@ -2025,24 +1884,6 @@
     <ClInclude Include="source\Utilities\Log\WindowsConsole.h">
       <Filter>Utilities\log</Filter>
     </ClInclude>
-    <ClInclude Include="source\Utilities\Memory\HashTable.h">
-      <Filter>Utilities\memory</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Utilities\Memory\MemoryLock.h">
-      <Filter>Utilities\memory</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\ResourceGuard\MuRGReport.h">
-      <Filter>External Object\ResourceGuard</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\ResourceGuard\ResourceGuard.h">
-      <Filter>External Object\ResourceGuard</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\ResourceGuard\RGReportConsole.h">
-      <Filter>External Object\ResourceGuard</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\ResourceGuard\RGReportObj.h">
-      <Filter>External Object\ResourceGuard</Filter>
-    </ClInclude>
     <ClInclude Include="source\w_WindowMessageHandler.h">
       <Filter>MU\Common</Filter>
     </ClInclude>
@@ -2057,9 +1898,6 @@
     </ClInclude>
     <ClInclude Include="source\CharacterManager.h">
       <Filter>MU\Character</Filter>
-    </ClInclude>
-    <ClInclude Include="source\GuildManager.h">
-      <Filter>MU\Guild</Filter>
     </ClInclude>
     <ClInclude Include="source\w_BuffScriptLoader.h">
       <Filter>MU\Buff</Filter>
@@ -2214,25 +2052,7 @@
     <ClInclude Include="source\GameShop\FileDownloader\Include.h">
       <Filter>MU\GameShop\FileDownloader</Filter>
     </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\callstackdmp.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\checkintegrity.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\ExceptionHandler.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\rdtsc.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
     <ClInclude Include="source\ExternalObject\Leaf\regkey.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\stdleaf.h">
-      <Filter>External Object\Leaf</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\sysinfo.h">
       <Filter>External Object\Leaf</Filter>
     </ClInclude>
     <ClInclude Include="afxres.h">
@@ -2271,9 +2091,6 @@
     <ClInclude Include="source\Dotnet\PacketBindings_ConnectServer.h">
       <Filter>MU\Dotnet</Filter>
     </ClInclude>
-    <ClInclude Include="source\ExternalObject\Leaf\xortrans.h">
-      <Filter>MU\Client\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\ExternalObject\Leaf\xstreambuf.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
@@ -2293,6 +2110,12 @@
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Utilities\Debouncer.h">
+      <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\_crypt.h">
+      <Filter>MU\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\CharInfoBalloonMng.h">
       <Filter>MU\Client\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

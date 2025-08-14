@@ -5,16 +5,8 @@
 #include "MapManager.h"
 #include "CameraMove.h"
 #include "CDirection.h"
-#include "GMBattleCastle.h"
-#include "GMHellas.h"
-#include "GM_Kanturu_3rd.h"
 #include "DSPlaySound.h"
 #include "GlobalBitmap.h"
-#include "GM_Kanturu_2nd.h"
-#include "GM3rdChangeUp.h"
-#include "GMCryWolf1st.h"
-#include "GMDoppelGanger2.h"
-#include "GMKarutan1.h"
 #include "LoadData.h"
 #include "NewUISystem.h"
 #include "PersonalShopTitleImp.h"
@@ -27,7 +19,7 @@
 #include "ZzzTexture.h"
 #include "w_CursedTemple.h"
 #include "WSclient.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 
 CMapManager gMapManager;
 
@@ -587,31 +579,6 @@ void CMapManager::Load() // OK
         LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_VOLCANO, L"Data\\Sound\\w42\\volcano.wav", 1);
         LoadWaveFile(SOUND_3RD_CHANGE_UP_BG_FIREPILLAR, L"Data\\Sound\\w42\\firepillar.wav", 1);
         break;
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    case WD_77NEW_LOGIN_SCENE:
-    case WD_78NEW_CHARACTER_SCENE:
-        if (gMapManager.WorldActive == WD_77NEW_LOGIN_SCENE)
-        {
-            LoadBitmap(L"Logo\\New_Login_Back01.jpg", BITMAP_LOG_IN + 9);
-            LoadBitmap(L"Logo\\New_Login_Back02.jpg", BITMAP_LOG_IN + 10);
-            LoadBitmap(L"World78\\bg_b_05.jpg", BITMAP_CHROME + 3, GL_LINEAR, GL_REPEAT);
-            LoadBitmap(L"World78\\bg_b_08.jpg", BITMAP_CHROME + 4, GL_LINEAR, GL_REPEAT);
-            LoadBitmap(L"Logo\\MU-logo.tga", BITMAP_LOG_IN + 16, GL_LINEAR);
-            LoadBitmap(L"Logo\\MU-logo_g.jpg", BITMAP_LOG_IN + 17, GL_LINEAR);
-
-            // 몬스터 미리 읽어놓기
-            OpenMonsterModel(MONSTER_MODEL_RED_SKELETON_KNIGHT_6);
-            OpenMonsterModel(MONSTER_MODEL_MAGIC_SKELETON_6);
-            OpenMonsterModel(MONSTER_MODEL_CASTLE_GATE);
-            OpenMonsterModel(MONSTER_MODEL_STATUE_OF_SAINT_2);
-            OpenMonsterModel(135);
-        }
-        else
-        {
-            LoadBitmap(L"Logo\\sos3sky01.jpg", BITMAP_LOG_IN + 9);
-            LoadBitmap(L"Logo\\sos3sky02.jpg", BITMAP_LOG_IN + 10);
-        }
-#endif //PJH_NEW_SERVER_SELECT_MAP
     case WD_51HOME_6TH_CHAR:
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"Effect\\Map_Smoke1.jpg", BITMAP_CHROME + 2, GL_LINEAR, GL_REPEAT);
@@ -1174,10 +1141,6 @@ void CMapManager::Load() // OK
             Models[79].StreamMesh = 0;
         }
         if (this->WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-            || this->WorldActive == WD_77NEW_LOGIN_SCENE
-            || this->WorldActive == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
             )
         {
             Models[MODEL_EAGLE].Actions[0].PlaySpeed = 0.5f;
@@ -1260,44 +1223,7 @@ void CMapManager::LoadWorld(int Map)
     battleCastle::Init();
 
     swprintf(WorldName, L"World%d", iMapWorld);
-    {
-#if defined DEVIAS_XMAS_END_LOADFIX_FOR_TESTSERVER
-        if (World == WD_2DEVIAS)
-        {
-            swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
-        }
-        else
-#endif	// defined DEVIAS_XMAS_END_LOADFIX_FOR_TESTSERVER
-#ifdef ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
-            if (World == WD_33AIDA)
-                swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
-            else
-#endif	// ASG_ADD_AIDA_KARUTAN_GATE_FOR_TESTSERVER
-#ifdef CHAOSCASTLE_MAP_FOR_TESTSERVER
-                if (InChaosCastle())
-                {
-                    swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
-                }
-                else
-#endif	// CHAOSCASTLE_MAP_FOR_TESTSERVER
-#ifdef KJH_EXTENSIONMAP_FOR_TESTSERVER
-                    if ((World == WD_33AIDA) || (World == WD_37KANTURU_1ST) || (World == WD_56MAP_SWAMP_OF_QUIET) || (World == WD_57ICECITY))
-                    {
-                        swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
-                    }
-                    else
-#endif // KJH_EXTENSIONMAP_FOR_TESTSERVER
-#ifdef KJH_FIX_ICARUS_MAP_ATTRIBUTE_FOR_TESTSERVER
-                        if ((World == WD_10HEAVEN))
-                        {
-                            swprintf(FileName, L"Data\\%s\\EncTerraintest%d.map", WorldName, iMapWorld);
-                        }
-                        else
-#endif // KJH_FIX_ICARUS_MAP_ATTRIBUTE_FOR_TESTSERVER
-                        {
-                            swprintf(FileName, L"Data\\%s\\EncTerrain%d.map", WorldName, iMapWorld);
-                        }
-    }
+    swprintf(FileName, L"Data\\%s\\EncTerrain%d.map", WorldName, iMapWorld);
 
     int iResult = OpenTerrainMapping(FileName);
 
@@ -1312,11 +1238,7 @@ void CMapManager::LoadWorld(int Map)
         return;
     }
 
-#ifdef PJH_NEW_SERVER_SELECT_MAP
     if (this->WorldActive == WD_73NEW_LOGIN_SCENE)
-#else
-    if (this->WorldActive == WD_77NEW_LOGIN_SCENE)
-#endif //PJH_NEW_SERVER_SELECT_MAP
     {
         swprintf(FileName, L"Data\\%s\\CWScript%d.cws", WorldName, iMapWorld);
         CCameraMove::GetInstancePtr()->LoadCameraWalkScript(FileName);
@@ -1444,10 +1366,6 @@ void CMapManager::LoadWorld(int Map)
         swprintf(FileName, L"%s\\TileGrass02.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE + 1, GL_NEAREST, GL_REPEAT, false);
         if (this->WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-            || World == WD_77NEW_LOGIN_SCENE
-            || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
             )
         {
             swprintf(FileName, L"%s\\AlphaTileGround01.Tga", WorldName);
@@ -1490,7 +1408,7 @@ void CMapManager::LoadWorld(int Map)
         LoadBitmap(FileName, BITMAP_MAPTILE + 8, GL_NEAREST, GL_REPEAT, false);
         swprintf(FileName, L"%s\\TileRock03.jpg", WorldName);
         LoadBitmap(FileName, BITMAP_MAPTILE + 9, GL_NEAREST, GL_REPEAT, false);
-#ifdef PJH_NEW_SERVER_SELECT_MAP
+
         if (this->WorldActive == WD_73NEW_LOGIN_SCENE || this->WorldActive == WD_74NEW_CHARACTER_SCENE)
         {
             swprintf(FileName, L"%s\\AlphaTile01.Tga", WorldName);
@@ -1498,12 +1416,10 @@ void CMapManager::LoadWorld(int Map)
         }
         else
         {
-#endif //PJH_NEW_SERVER_SELECT_MAP
             swprintf(FileName, L"%s\\TileRock04.jpg", WorldName);
             LoadBitmap(FileName, BITMAP_MAPTILE + 10, GL_NEAREST, GL_REPEAT, false);
-#ifdef PJH_NEW_SERVER_SELECT_MAP
         }
-#endif //PJH_NEW_SERVER_SELECT_MAP
+
         if (IsPKField() || IsDoppelGanger2())
         {
             LoadBitmap(L"Object64\\song_lava1.jpg", BITMAP_MAPTILE + 11, GL_NEAREST, GL_REPEAT, false);

@@ -20,14 +20,13 @@
 #include "MapManager.h"
 #include "GIPetManager.h"
 #include "BoneManager.h"
-#include "GMBattleCastle.h"
 
 #include "GuildCache.h"
 #include "ZzzInterface.h"
 
 
 extern  int     WaterTextureNumber;
-extern  char* g_lpszMp3[NUM_MUSIC];
+extern  char* NUM_MUSIC;
 
 namespace battleCastle
 {
@@ -715,15 +714,15 @@ namespace battleCastle
             g_iMp3PlayTime = current;
             if (IsBattleCastleStart())
             {
-                StopMp3(g_lpszMp3[MUSIC_CASTLE_PEACE]);
-                PlayMp3(g_lpszMp3[MUSIC_CASTLE_BATTLE_START]);
-                //            PlayMp3 ( g_lpszMp3[MUSIC_CASTLE_BATTLE_ING] );
+                StopMp3(MUSIC_CASTLE_PEACE);
+                PlayMp3(MUSIC_CASTLE_BATTLE_START);
+                //            PlayMp3 ( MUSIC_CASTLE_BATTLE_ING );
             }
             else
             {
-                StopMp3(g_lpszMp3[MUSIC_CASTLE_BATTLE_START]);
-                //            StopMp3 ( g_lpszMp3[MUSIC_CASTLE_BATTLE_ING] );
-                PlayMp3(g_lpszMp3[MUSIC_CASTLE_PEACE]);
+                StopMp3(MUSIC_CASTLE_BATTLE_START);
+                //            StopMp3 ( MUSIC_CASTLE_BATTLE_ING );
+                PlayMp3(MUSIC_CASTLE_PEACE);
             }
         }
 
@@ -1294,7 +1293,6 @@ namespace battleCastle
             c->Object.LifeTime = 0;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"왕관");
             break;
 
         case MONSTER_CROWN:
@@ -1304,7 +1302,6 @@ namespace battleCastle
             c->Object.m_bRenderShadow = false;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"왕관");
             break;
 
         case MONSTER_CROWN_SWITCH1:
@@ -1313,7 +1310,6 @@ namespace battleCastle
             c->NotRotateOnMagicHit = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"왕관 발판2");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
@@ -1325,7 +1321,6 @@ namespace battleCastle
             c->NotRotateOnMagicHit = true;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"왕관 발판1");
             c->Object.Velocity = c->Object.Position[2];
             if (IsBattleCastleStart() == false)
                 c->Object.Position[2] -= 100.f;
@@ -1338,7 +1333,6 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"성문 스위치");
             break;
 
         case MONSTER_GUARD:
@@ -1348,7 +1342,6 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"사냥터 문지기");
             break;
 
         case MONSTER_SLINGSHOT_ATTACK:
@@ -1380,7 +1373,6 @@ namespace battleCastle
             c->Object.Scale = 1.1f;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"원로원");
             break;
 
         case MONSTER_GUARDSMAN:
@@ -1391,7 +1383,6 @@ namespace battleCastle
             c->Object.SubType = rand() % 2 + 10;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
-            wcscpy(c->ID, L"굼㎈?");
             break;
 
         case MONSTER_CASTLE_GATE1:

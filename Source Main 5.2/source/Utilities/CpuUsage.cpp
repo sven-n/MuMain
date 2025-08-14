@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include <chrono>
-#include <windows.h>
 #include <stdexcept>
 #include "CpuUsage.h"
 

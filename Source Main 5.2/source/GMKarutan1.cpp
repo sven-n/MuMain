@@ -6,8 +6,6 @@
 
 #ifdef ASG_ADD_MAP_KARUTAN
 
-#include "GMKarutan1.h"
-
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -20,7 +18,7 @@
 #include "GOBoid.h"
 #include "NewUISystem.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 CGMKarutan1::CGMKarutan1()
 {
@@ -369,50 +367,42 @@ CHARACTER* CGMKarutan1::CreateMonster(int iType, int PosX, int PosY, int Key)
     case MONSTER_VENOMOUS_CHAIN_SCORPION:
         OpenMonsterModel(MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION);
         pCharacter = CreateCharacter(Key, MODEL_VENOMOUS_CHAIN_SCORPION, PosX, PosY);
-        wcscpy(pCharacter->ID, L"맹독고리전갈");
         pCharacter->Object.Scale = 1.0f;
         break;
     case MONSTER_BONE_SCORPION:
         OpenMonsterModel(MONSTER_MODEL_BONE_SCORPION);
         pCharacter = CreateCharacter(Key, MODEL_BONE_SCORPION, PosX, PosY);
-        wcscpy(pCharacter->ID, L"본스콜피온");
         pCharacter->Object.Scale = 0.58f;
         break;
     case MONSTER_ORCUS:
         OpenMonsterModel(MONSTER_MODEL_ORCUS);
         pCharacter = CreateCharacter(Key, MODEL_ORCUS, PosX, PosY);
-        wcscpy(pCharacter->ID, L"오르커스");
         pCharacter->Object.Scale = 0.64f;
         break;
     case MONSTER_GOLLOCK:
         OpenMonsterModel(MONSTER_MODEL_GOLLOCK);
         pCharacter = CreateCharacter(Key, MODEL_GOLLOCK, PosX, PosY);
-        wcscpy(pCharacter->ID, L"골록");
         pCharacter->Object.Scale = 1.5f;
         break;
     case MONSTER_CRYPTA:
         OpenMonsterModel(MONSTER_MODEL_CRYPTA);
         pCharacter = CreateCharacter(Key, MODEL_CRYPTA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"크립타");
         pCharacter->Object.Scale = 1.5f;
         break;
     case MONSTER_CRYPOS:
         OpenMonsterModel(MONSTER_MODEL_CRYPOS);
         pCharacter = CreateCharacter(Key, MODEL_CRYPOS, PosX, PosY);
-        wcscpy(pCharacter->ID, L"크립포스");
         pCharacter->Object.Scale = 1.25f;
         break;
     case MONSTER_CONDRA:
         OpenMonsterModel(MONSTER_MODEL_CONDRA);
         pCharacter = CreateCharacter(Key, MODEL_CONDRA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"콘드라");
         pCharacter->Object.Scale = 1.45f;
         pCharacter->Object.LifeTime = 100;
         break;
     case MONSTER_NARCONDRA:
         OpenMonsterModel(MONSTER_MODEL_NACONDRA);
         pCharacter = CreateCharacter(Key, MODEL_NACONDRA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"나르콘드라");
         pCharacter->Object.Scale = 1.55f;
         pCharacter->Object.LifeTime = 100;
 
@@ -879,14 +869,14 @@ bool CGMKarutan1::PlayMonsterSound(OBJECT* o)
 void CGMKarutan1::PlayBGM()
 {
     if (gMapManager.WorldActive == WD_80KARUTAN1)
-        PlayMp3(g_lpszMp3[MUSIC_KARUTAN1]);
+        PlayMp3(MUSIC_KARUTAN1);
     else
-        StopMp3(g_lpszMp3[MUSIC_KARUTAN1]);
+        StopMp3(MUSIC_KARUTAN1);
 
     if (gMapManager.WorldActive == WD_81KARUTAN2)
-        PlayMp3(g_lpszMp3[MUSIC_KARUTAN2]);
+        PlayMp3(MUSIC_KARUTAN2);
     else
-        StopMp3(g_lpszMp3[MUSIC_KARUTAN2]);
+        StopMp3(MUSIC_KARUTAN2);
 }
 
 bool IsKarutanMap()

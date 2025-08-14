@@ -2,7 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "GMUnitedMarketPlace.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -17,7 +16,7 @@
 
 #include "GOBoid.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 GMUnitedMarketPlacePtr GMUnitedMarketPlace::Make()
 {
@@ -504,7 +503,7 @@ void GMUnitedMarketPlace::PlayBGM()
 {
     // 	if (IsUnitedMarketPlace())
     // 	{
-    // 		PlayMp3(g_lpszMp3[MUSIC_EMPIREGUARDIAN1]);
+    // 		PlayMp3(MUSIC_EMPIREGUARDIAN1);
     // 	}
 }
 

@@ -39,9 +39,6 @@ void AddTerrainAttribute(int x, int y, BYTE att);
 void SubTerrainAttribute(int x, int y, BYTE att);
 void AddTerrainAttributeRange(int x, int y, int dx, int dy, BYTE att, BYTE Add = 0);
 void SetTerrainWaterState(std::list<int>& terrainIndex, int state = 0);
-void CreateGround(int Type, int x, int y, float Angle);
-void DeleteGround(int x, int y);
-void RenderGrounds();
 
 //Vector RequestTerrainNormal(float xf,float yf);
 void AddTerrainHeight(float xf, float yf, float Height, int Range, float* Buffer);
@@ -64,12 +61,9 @@ bool TestFrustrum(vec3_t Position, float Range);
 bool TestFrustrum2D(float x, float y, float Range);
 
 bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
-void RenderTerrainBlock(float xf, float yf, int xi, int yi, int distance);
-void RenderCloudBlock(float xf, float yf, int xi, int yi, int distance, float u, float v);
 void RenderTerrain(bool EditFlag);
 
 void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
-void RenderTerrainBlock_After(float xf, float yf, int xi, int yi, int distance);
 void RenderTerrain_After(bool EditFlag);
 
 void RenderTerrainBitmap(int Texture, int mxi, int myi, float Rotation);

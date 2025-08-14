@@ -7,7 +7,7 @@
 #include "ZzzBMD.h"
 #include "w_PetActionCollecter.h"
 
-BoostSmartPointer(PetActionUnicorn);
+SmartPointer(PetActionUnicorn);
 class PetActionUnicorn : public PetAction
 {
 public:

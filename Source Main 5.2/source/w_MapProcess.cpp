@@ -98,7 +98,7 @@ void MapProcess::Destroy()
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             m_MapList.erase(tempiter);
@@ -113,7 +113,7 @@ bool MapProcess::FindMap(ENUM_WORLD type)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             bool result = basemap.lock()->IsCurrentMap(type);
@@ -131,7 +131,7 @@ BaseMap& MapProcess::FindBaseMap(ENUM_WORLD type)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(type) == true) {
@@ -143,7 +143,7 @@ BaseMap& MapProcess::FindBaseMap(ENUM_WORLD type)
     throw;
 }
 
-void MapProcess::Register(BoostSmart_Ptr(BaseMap) pMap)
+void MapProcess::Register(Smart_Ptr(BaseMap) pMap)
 {
     ENUM_WORLD type = pMap->FindMapIndex();
     if (type == NUM_WD) {
@@ -162,7 +162,7 @@ void MapProcess::UnRegister(ENUM_WORLD type)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             bool result = basemap.lock()->IsCurrentMap(type);
@@ -185,7 +185,7 @@ bool MapProcess::LoadMapData()
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -208,7 +208,7 @@ bool MapProcess::CreateObject(OBJECT* o)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             bool result = basemap.lock()->CreateObject(o);
@@ -229,7 +229,7 @@ bool MapProcess::MoveObject(OBJECT* o)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -253,7 +253,7 @@ bool MapProcess::RenderObjectVisual(OBJECT* o, BMD* b)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -276,7 +276,7 @@ bool MapProcess::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -299,7 +299,7 @@ void MapProcess::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -318,7 +318,7 @@ void MapProcess::RenderFrontSideVisual()
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false)
         {
@@ -340,7 +340,7 @@ CHARACTER* MapProcess::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             CHARACTER* p = basemap.lock()->CreateMonster(iType, PosX, PosY, Key);
@@ -362,7 +362,7 @@ bool MapProcess::MoveMonsterVisual(OBJECT* o, BMD* b)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -385,7 +385,7 @@ void MapProcess::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -404,7 +404,7 @@ bool MapProcess::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -427,7 +427,7 @@ bool MapProcess::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -450,7 +450,7 @@ bool MapProcess::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -473,7 +473,7 @@ bool MapProcess::PlayMonsterSound(OBJECT* o)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {
@@ -496,7 +496,7 @@ bool MapProcess::ReceiveMapMessage(BYTE code, BYTE subcode, BYTE* ReceiveBuffer)
     {
         auto tempiter = iter;
         ++iter;
-        BoostWeak_Ptr(BaseMap) basemap = *tempiter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
 
         if (basemap.expired() == false) {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive)) {

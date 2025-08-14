@@ -31,13 +31,6 @@ extern  wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGT
 
 static  CSQuest csQuest;
 
-static BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
-
-static void BuxConvert(BYTE* Buffer, int Size)
-{
-    for (int i = 0; i < Size; i++)
-        Buffer[i] ^= bBuxCode[i % 3];
-}
 
 CSQuest::CSQuest(void) : m_byClass(255), m_byCurrQuestIndex(0), m_byCurrQuestIndexWnd(0),
 m_byStartQuestList(0), m_shCurrPage(0), m_byViewQuest(QUEST_VIEW_NONE), m_byQuestType(TYPE_QUEST), m_iStartX(640 - 190), m_iStartY(0)

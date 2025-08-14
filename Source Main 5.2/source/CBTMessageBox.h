@@ -1,17 +1,7 @@
-#ifndef _CBTMESSAGEBOX_H_
-#define _CBTMESSAGEBOX_H_
-
-#include <windows.h>
-
-#pragma warning(disable : 4786)
 #include <string>
 
 namespace leaf {
-    //. Interface Declaration
-
     int CBTMessageBox(HWND hWnd, const std::wstring& text, const std::wstring& caption, UINT uType, bool bAlwaysOnTop = false);
-
-    //. class CCBTMessageBox
 
     class CCBTMessageBox
     {
@@ -37,5 +27,3 @@ namespace leaf {
         static LRESULT CALLBACK CBTProc(INT nCode, WPARAM wParam, LPARAM lParam);
     };
 }
-
-#endif // _CBTMESSAGEBOX_H_

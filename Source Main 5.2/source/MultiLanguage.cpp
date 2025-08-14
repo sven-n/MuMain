@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "MultiLanguage.h"
+
 
 CMultiLanguage* CMultiLanguage::ms_Singleton = NULL;
 

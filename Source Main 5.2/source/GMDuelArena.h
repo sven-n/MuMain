@@ -4,7 +4,7 @@
 
 #include "w_BaseMap.h"
 
-BoostSmartPointer(CGMDuelArena);
+SmartPointer(CGMDuelArena);
 class CGMDuelArena : public BaseMap
 {
 public:

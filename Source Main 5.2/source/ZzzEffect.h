@@ -68,15 +68,6 @@ void MoveEffects();
 
 void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation = 0.f, float LightTop = 1.f, float TextureV = 0.f);
 void RenderCircle2D(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation = 0.f, float TextureV = 0.f, float TextureVScale = 0.f);
-void RenderMagicBox(int Texture, vec3_t Position, float Angle);
-void RenderShpere(int Type, vec3_t ShperePosition, float Scale, vec3_t ShpereLight, float Rotation, float TextureV);
-void MappingEffect(int ScrIndex, int DstIndex, int Flag);
-void RenderFog(vec3_t Position, int Flag, float Height, float u, float v);
-
-void CreatePlane(int Type, vec3_t Position, vec3_t Light, float Angle = 0.f);
-void MovePlanes();
-void RenderPlane(int Texture, vec3_t Position, float Scale, float Angle);
-void RenderPlanes();
 
 void CreateTeleportBegin(OBJECT* o);
 void CreateTeleportEnd(OBJECT* o);
@@ -100,22 +91,11 @@ void CreateBomb(vec3_t p, bool Exp, int SubType = 0);
 void CreateBomb2(vec3_t p, bool Exp, int SubType = 0, float Scale = 0.0f);
 void CreateBomb3(vec3_t vPos, int iSubType, float fScale = 1.0f);
 void CreateInferno(vec3_t Position, int SubType = 0);
-void RenderSky3();
-void RenderBackLight(vec3_t Position, vec3_t Light);
 
-void initBackLight(void);
-void AnimationBackLight(void);
-void RenderBackLight(OBJECT* o, vec3_t Position, vec3_t Light1, vec3_t Light2);
-
-//void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int SubType,OBJECT *Target,float Scale,short PKKey,BYTE SkillIndex,BYTE SkillSerialNum, int iChaIndex, const float* vColor, short int sTargetIndex);
-//void CreateJoint(int Type,vec3_t Position,vec3_t TargetPosition,vec3_t Angle,int SubType=0,OBJECT *Target=NULL,float Scale=10.f,short PK=-1,BYTE SkillIndex=0,BYTE SkillSerialNum=0, int iChaIndex=-1, const float* vColor = NULL, short int sTargetIndex = -1);
 void DeleteJoint(int Type, OBJECT* Target, int SubType = -1);
 bool SearchJoint(int Type, OBJECT* Target, int SubType = -1);
 void CreateTail(JOINT* o, float Matrix[3][4], bool Blur = false);
-void CreateTail(JOINT* o, float Matrix[3][4], float ScaleX, float ScaleY);
-
 void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis = 0);
-void CreateTailAxis(JOINT* o, float Matrix[3][4], float ScaleX, float ScaleY, BYTE axis = 0);
 
 void MoveJoint(JOINT* o, int iIndex);
 void MoveJoints();

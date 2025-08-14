@@ -70,17 +70,16 @@ namespace info
     {
         BYTE	byClass;
         wchar_t	szName[32];
-        //char	szName[CRW_NAME_MAX];
     };
 
     struct Script_Movereq
     {
         int index;
-        wchar_t szMainMapName[32];			//. Main map name
-        wchar_t szSubMapName[32];			//. Substitute map name
-        int	iReqLevel;					//. required level
-        int iReqZen;					//. required zen
-        int iGateNum;					//. Gate number
+        wchar_t szMainMapName[32];
+        wchar_t szSubMapName[32];
+        int	iReqLevel;
+        int iReqZen;
+        int iGateNum;
     };
 
     struct Script_Quest_Class_Act

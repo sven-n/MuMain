@@ -1,7 +1,6 @@
 ﻿// GMDoppelGanger2.cpp: implementation of the GMDoppelGanger2 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "GMDoppelGanger2.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -13,7 +12,7 @@
 #include "ZzzLodTerrain.h"
 #include "MapManager.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 CGMDoppelGanger2Ptr CGMDoppelGanger2::Make()
 {

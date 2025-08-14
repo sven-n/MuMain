@@ -21,7 +21,6 @@
 #include "ZzzEffect.h"
 #include "zzzScene.h"
 #include "DSPlaySound.h"
-#include "GMCrywolf1st.h"
 #include "ZzzPath.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
@@ -53,7 +52,7 @@ float CreateAngle(float x1, float y1, float x2, float y2)
         else if (nx2 >= 0.f && ny2 < 0.f) r = angle;
         else                          r = angle;
     }
-    //if(r<0.f) r+=360.f;else if(r>=360.f) r-=360.f;
+    if(r<0.f) r+=360.f;else if(r>=360.f) r-=360.f;
     return r;
 }
 
@@ -66,13 +65,11 @@ int TurnAngle(int iTheta, int iHeading, int maxTURN)
     {
         if (Delta < abs((iHeading + 360) - iTheta)) iChange = -min(maxTURN, Delta);
         else iChange = min(maxTURN, Delta);
-        //else iTheta = iHeading;
     }
     if (iTheta < iHeading)
     {
         if (Delta < abs((iTheta + 360) - iHeading)) iChange = min(maxTURN, Delta);
         else iChange = -min(maxTURN, Delta);
-        //else iTheta = iHeading;
     }
     iTheta += iChange + 360;
     iTheta %= 360;
@@ -254,7 +251,6 @@ void PushObject(vec3_t PushPosition, vec3_t Position, float Power, vec3_t Angle)
     vec3_t p1, p2;
     Vector(0.f, -Power, 0.f, p1);
     VectorRotate(p1, Matrix, p2);
-    //VectorSubtract(Position,p2,Position);
     Position[2] = RequestTerrainHeight(Position[0], Position[1]);
 }
 
@@ -430,7 +426,7 @@ bool IsAliceRideAction_Fenrir(unsigned short byAction)
 void SetAction(OBJECT* o, int Action, bool bBlending)
 {
     BMD* b = &Models[o->Type];
-    if (Action >= b->NumActions /*&& Action!=PLAYER_FLY_RIDE_WEAPON && Action!=PLAYER_FLY_RIDE*/) return;
+    if (Action >= b->NumActions) return;
     if (o->CurrentAction != Action)
     {
         o->PriorAction = o->CurrentAction;
@@ -450,8 +446,6 @@ bool TestDistance(CHARACTER* c, vec3_t TargetPosition, float Range)
     VectorSubtract(c->Object.Position, TargetPosition, Range2);
     float Distance = Range2[0] * Range2[0] + Range2[1] * Range2[1];
     float ZoneRange = Range;
-    //float ZoneRange = Range+(float)c->CollisionTime*10.f;
-    //if(AttackEnable==true) ZoneRange *= 10.f;
     if (Distance <= ZoneRange * ZoneRange) return true;
     return false;
 }
@@ -520,51 +514,14 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
 {
     return;
     if (tc == NULL) return;
-    //if(tc->Attribute.Life <= 0) return;
 
     OBJECT* to = &tc->Object;
-    //tc->TargetPosition[0] = HeroObject->Position[0]+(float)(rand()%512-256);
-    //tc->TargetPosition[1] = HeroObject->Position[1]+(float)(rand()%512-256);
 
-    //attack
-    if (AttackPoint <= 0) Hit = false;
-    else if (AttackPoint >= 20) Hit = true;
-    if (Hit)
-    {
-        //Push = 20.f;
-        //tc->Movement = false;
-        switch (to->Type)
-        {
-        case MODEL_MONSTER01:
-            //SetAction(to,MONSTER01_SHOCK);
-            break;
-        case MODEL_PLAYER:
-            //SetAction(to,PLAYER_SHOCK);
-            break;
-        }
-    }
-    else
-    {
-        switch (to->Type)
-        {
-        case MODEL_MONSTER01:
-            break;
-        case MODEL_PLAYER:
-            break;
-        }
-    }
     vec3_t Position;
     if (AttackPoint > 0)
     {
         vec3_t Range;
         VectorSubtract(soPosition, to->Position, Range);
-        /*if(to->Type==MODEL_KNIGHT)
-        {
-            float Distance = sqrtf(Range[0]*Range[0]+Range[1]*Range[1]);
-            vec3_t Angle;
-            PushObject(soPosition,to->Position,AttackRange-Distance+Push,Angle);
-            //to->Angle[2] = Angle[2];
-        }*/
         VectorMA(to->Position, 0.3f, Range, Position);
         Position[2] += 80.f;
         vec3_t Light;
@@ -578,7 +535,6 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
         }
         CreateParticle(BITMAP_SPARK + 1, Position, to->Angle, Light);
     }
-    //ClientSendMonsterHit(tc,AttackPoint);
 
     //point
     VectorCopy(to->Position, Position);
@@ -586,23 +542,6 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
     vec3_t Color;
     Vector(1.f, 0.1f, 0.1f, Color);
     CreatePoint(Position, AttackPoint, Color);
-
-    /*//dead
-    if(tc->Life <= 0)
-    {
-        tc->Movement = false;
-        tc->Angry = false;
-        switch(to->Type)
-        {
-        case MODEL_MONSTER01:
-            sc->Experience += 8;
-            SetAction(to,MONSTER01_DIE);
-            break;
-        case MODEL_KNIGHT:
-            SetAction(to,PLAYER_DIE);
-            break;
-        }
-    }*/
 }
 
 PATH _path;
@@ -697,31 +636,6 @@ bool MovePath(CHARACTER* c, bool Turn)
 
     return Success;
 }
-
-#ifdef SAVE_PATH_TIME
-
-void WriteDebugInfoStr(wchar_t* lpszFileName, wchar_t* lpszToWrite)
-{
-    HANDLE hFile = CreateFile(lpszFileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL, NULL);
-    SetFilePointer(hFile, 0, NULL, FILE_END);
-    DWORD dwNumber;
-    WriteFile(hFile, lpszToWrite, wcslen(lpszToWrite), &dwNumber, NULL);
-    CloseHandle(hFile);
-}
-
-void DebugUtil_Write(wchar_t* lpszFileName, ...)
-{
-    wchar_t lpszBuffer[1024];
-    va_list va;
-    va_start(va, lpszFileName);
-    wchar_t* lpszFormat = va_arg(va, wchar_t*);
-    wvswprintf(lpszBuffer, lpszFormat, va);
-    WriteDebugInfoStr(lpszFileName, lpszBuffer);
-    va_end(va);
-}
-
-#endif
 
 void InitPath()
 {

@@ -17,8 +17,6 @@
 #include "BoneManager.h"
 #include "dsplaysound.h"
 
-#include "GM_Kanturu_1st.h"
-#include "GMGmArea.h"
 
 bool M40GMArea::IsGmArea()
 {
@@ -448,7 +446,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Weapon[1].Type = -1;
         BoneManager::RegisterBone(pCharacter, L"SPL_WOLF_EYE_26", 16);
         BoneManager::RegisterBone(pCharacter, L"SPL_WOLF_EYE_25", 17);
-        wcscpy(pCharacter->ID, L"스플린터 울프");
 
         OBJECT* o = &pCharacter->Object;
         BMD* b = &Models[o->Type];
@@ -471,7 +468,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BOW_6", 42);
         BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BOW_15", 52);
         BoneManager::RegisterBone(pCharacter, L"IRON_RIDER_BOW_16", 47);
-        wcscpy(pCharacter->ID, L"아이언 라이더");
     }
     break;
     case MONSTER_BLADE_HUNTER:
@@ -487,7 +483,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"BLADE_L_HAND", 12);
         BoneManager::RegisterBone(pCharacter, L"BOX1", 54);
         BoneManager::RegisterBone(pCharacter, L"BOX2", 55);
-        wcscpy(pCharacter->ID, L"블레이드 헌터");
     }
     break;
     case MONSTER_SATYROS:
@@ -497,7 +492,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
-        wcscpy(pCharacter->ID, L"사티로스");
     }
     break;
     case MONSTER_KENTAUROS:
@@ -521,7 +515,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_1", 4);
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_2", 5);
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_3", 6);
-        wcscpy(pCharacter->ID, L"켄타우로스");
     }
     break;
     case MONSTER_BERSERKER_WARRIOR:
@@ -557,7 +550,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_1", 4);
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_2", 5);
         BoneManager::RegisterBone(pCharacter, L"KENTAUROS_BIP_SPAIN_3", 6);
-        wcscpy(pCharacter->ID, L"켄타우로스워리어");
     }
     break;
     case MONSTER_GIGANTIS_WARRIOR:

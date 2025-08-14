@@ -11,7 +11,6 @@
 #include "CSParts.h"
 #include "UIJewelHarmony.h"
 #include "CDirection.h"
-#include "GMCryWolf1st.h"
 #include "ZzzInventory.h"
 #include "ZzzLodTerrain.h"
 #include "CSQuest.h"
@@ -25,7 +24,6 @@
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 #include "Event.h"
 #endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
-#include "GMUnitedMarketPlace.h"
 #include "ChangeRingManager.h"
 #include "MonkSystem.h"
 #include "CharacterManager.h"

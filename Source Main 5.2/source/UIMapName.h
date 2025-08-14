@@ -1,12 +1,3 @@
-//*****************************************************************************
-// File: UIMapName.h
-//
-// producer: Ahn Sang-Kyu (2005. 6. 16)
-//*****************************************************************************
-
-#if !defined(AFX_UIMAPNAME_H__6771C771_B81D_4D5C_8484_63D6961ED6C0__INCLUDED_)
-#define AFX_UIMAPNAME_H__6771C771_B81D_4D5C_8484_63D6961ED6C0__INCLUDED_
-
 #pragma once
 
 typedef std::map<int, std::wstring> ImgPathMap;
@@ -39,6 +30,3 @@ protected:
     void InitImgPathMap();
 };
 
-extern std::wstring g_strSelectedML;
-
-#endif // !defined(AFX_UIMAPNAME_H__6771C771_B81D_4D5C_8484_63D6961ED6C0__INCLUDED_)

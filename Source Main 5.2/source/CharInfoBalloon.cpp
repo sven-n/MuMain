@@ -9,8 +9,8 @@
 #include "UIControls.h"
 #include "CharacterManager.h"
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+
+
 
 CCharInfoBalloon::CCharInfoBalloon() : m_pCharInfo(NULL)
 {
@@ -33,51 +33,61 @@ void CCharInfoBalloon::Create(CHARACTER* pCharInfo)
 
 void CCharInfoBalloon::Render()
 {
-    if (NULL == m_pCharInfo || !CSprite::m_bShow)
+    if (m_pCharInfo == nullptr || !CSprite::m_bShow)
         return;
 
     CSprite::Render();
 
     vec3_t afPos;
     VectorCopy(m_pCharInfo->Object.Position, afPos);
-    afPos[2] += 350.f;
+    afPos[2] += 350.0f;
+
     int nPosX, nPosY;
     ::Projection(afPos, &nPosX, &nPosY);
 
-    CSprite::SetPosition(int(nPosX * g_fScreenRate_x),
-        int(nPosY * g_fScreenRate_y));
+    CSprite::SetPosition(
+        int(nPosX * g_fScreenRate_x),
+        int(nPosY * g_fScreenRate_y)
+    );
 
     g_pRenderText->SetFont(g_hFixFont);
-
-    int nTextPosX = int(CSprite::GetXPos() / g_fScreenRate_x);
     g_pRenderText->SetBgColor(0);
+
+    const int spriteX = CSprite::GetXPos();
+    const int spriteY = CSprite::GetYPos();
+    const int spriteW = CSprite::GetWidth();
+
+    const int nTextPosX = int(spriteX / g_fScreenRate_x);
+
     g_pRenderText->SetTextColor(m_dwNameColor);
-    g_pRenderText->RenderText(nTextPosX, int((CSprite::GetYPos() + 7) / g_fScreenRate_y), m_szName, CSprite::GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(
+        nTextPosX,
+        int((spriteY + 6) / g_fScreenRate_y),
+        m_szName,
+        spriteW / g_fScreenRate_x,
+        0,
+        RT3_SORT_CENTER
+    );
+
     g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->RenderText(nTextPosX, int((CSprite::GetYPos() + 23) / g_fScreenRate_y), m_szGuild, CSprite::GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(
+        nTextPosX,
+        int((spriteY + 22) / g_fScreenRate_y),
+        m_szGuild,
+        spriteW / g_fScreenRate_x,
+        0,
+        RT3_SORT_CENTER
+    );
+
     g_pRenderText->SetTextColor(CLRDW_BR_ORANGE);
-    g_pRenderText->RenderText(nTextPosX - 10, int((CSprite::GetYPos() + 39) / g_fScreenRate_y),
-        m_szClass, (CSprite::GetWidth() + 30) / g_fScreenRate_x, 0, RT3_SORT_CENTER);
-
-    if (m_pCharInfo->CtlCode & CTLCODE_80MANAGER_MOVE_CHAR)
-    {
-        g_pRenderText->SetTextColor(255, 200, 180, 255);
-
-        for (int i = 0; i < 3; ++i)
-        {
-            if (i == 0)
-            {
-                g_pRenderText->SetFont(g_hFontBold);
-            }
-            else
-            {
-                g_pRenderText->SetFont(g_hFont);
-            }
-            g_pRenderText->RenderText(nTextPosX,
-                int((CSprite::GetYPos() - 46 + i * 16) / g_fScreenRate_y),
-                GlobalText[1241 + i], CSprite::GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
-        }
-    }
+    g_pRenderText->RenderText(
+        nTextPosX,
+        int((spriteY + 38) / g_fScreenRate_y),
+        m_szClass,
+        spriteW / g_fScreenRate_x,
+        0,
+        RT3_SORT_CENTER
+    );
 }
 
 void CCharInfoBalloon::SetInfo()

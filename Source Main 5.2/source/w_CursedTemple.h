@@ -1,10 +1,3 @@
-// ursedTemple.h: interface for the CursedTemple class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_URSEDTEMPLE_H__82D1D8BF_A93D_49BE_B384_159381C2495D__INCLUDED_)
-#define AFX_URSEDTEMPLE_H__82D1D8BF_A93D_49BE_B384_159381C2495D__INCLUDED_
-
 #pragma once
 
 class BMD;
@@ -78,5 +71,3 @@ namespace SEASON3A
 
 #define g_TimeController SEASON3A::TimeController::GetInstance()
 #define g_CursedTemple SEASON3A::CursedTemple::GetInstance()
-
-#endif // !defined(AFX_URSEDTEMPLE_H__82D1D8BF_A93D_49BE_B384_159381C2495D__INCLUDED_)

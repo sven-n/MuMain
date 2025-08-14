@@ -10,9 +10,6 @@ extern vec3_t CollisionPosition;
 extern double  FPS;
 extern double  FPS_AVG;
 extern float  FPS_ANIMATION_FACTOR;
-#if defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)		// 실FPS.(고정 20FPS 상황에서 추정용.)
-extern float g_fFrameEstimate;
-#endif // defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 extern double  WorldTime;
 extern bool   CameraTopViewEnable;
 extern float  CameraViewNear;
@@ -49,9 +46,7 @@ extern wchar_t         GrabFileName[];
 extern bool         GrabEnable;
 
 //  etc
-//void OpenExploper(char *Name,char *para=NULL);
 bool CheckID_HistoryDay(wchar_t* Name, WORD day);
-void SaveScreen();
 void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar);
 void glViewport2(int x, int y, int Width, int Height);
 void CreateScreenVector(int sx, int sy, vec3_t Target, bool bFixView = true);

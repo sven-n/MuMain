@@ -2,7 +2,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "GMDuelArena.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -13,7 +12,7 @@
 #include "ZzzOpenData.h"
 #include "ZzzLodTerrain.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 CGMDuelArenaPtr CGMDuelArena::Make()
 {
@@ -228,6 +227,6 @@ void CGMDuelArena::PlayBGM()
 {
     if (IsDuelArena())
     {
-        PlayMp3(g_lpszMp3[MUSIC_DUEL_ARENA]);
+        PlayMp3(MUSIC_DUEL_ARENA);
     }
 }

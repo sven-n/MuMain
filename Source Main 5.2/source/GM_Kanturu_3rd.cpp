@@ -11,14 +11,13 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "CDirection.h"
-#include "GM_Kanturu_3rd.h"
 #include "BoneManager.h"
 #include "./Time/CTimCheck.h"
 #include "DSPlaySound.h"
 #include "MapManager.h"
 
 extern unsigned int WindowWidth;
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 bool KanturuSuccessMap = false;
 bool KanturuSuccessMapBackup = false;
@@ -1748,32 +1747,32 @@ void M39Kanturu3rd::ChangeBackGroundMusic(int World)
     {
         if (g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE || g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_STANDBY)
         {
-            StopMp3(g_lpszMp3[MUSIC_KANTURU_TOWER]);
-            PlayMp3(g_lpszMp3[MUSIC_KANTURU_MAYA_BATTLE]);
+            StopMp3(MUSIC_KANTURU_TOWER);
+            PlayMp3(MUSIC_KANTURU_MAYA_BATTLE);
 
-            if (IsEndMp3()) StopMp3(g_lpszMp3[MUSIC_KANTURU_MAYA_BATTLE]);
+            if (IsEndMp3()) StopMp3(MUSIC_KANTURU_MAYA_BATTLE);
         }
         else if (g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_NIGHTMARE_BATTLE)
         {
-            StopMp3(g_lpszMp3[MUSIC_KANTURU_TOWER]);
-            StopMp3(g_lpszMp3[MUSIC_KANTURU_MAYA_BATTLE]);
-            PlayMp3(g_lpszMp3[MUSIC_KANTURU_NIGHTMARE_BATTLE]);
+            StopMp3(MUSIC_KANTURU_TOWER);
+            StopMp3(MUSIC_KANTURU_MAYA_BATTLE);
+            PlayMp3(MUSIC_KANTURU_NIGHTMARE_BATTLE);
 
-            if (IsEndMp3()) StopMp3(g_lpszMp3[MUSIC_KANTURU_NIGHTMARE_BATTLE]);
+            if (IsEndMp3()) StopMp3(MUSIC_KANTURU_NIGHTMARE_BATTLE);
         }
         else
         {
-            StopMp3(g_lpszMp3[MUSIC_KANTURU_MAYA_BATTLE]);
-            StopMp3(g_lpszMp3[MUSIC_KANTURU_NIGHTMARE_BATTLE]);
-            PlayMp3(g_lpszMp3[MUSIC_KANTURU_TOWER]);
+            StopMp3(MUSIC_KANTURU_MAYA_BATTLE);
+            StopMp3(MUSIC_KANTURU_NIGHTMARE_BATTLE);
+            PlayMp3(MUSIC_KANTURU_TOWER);
 
-            if (IsEndMp3()) StopMp3(g_lpszMp3[MUSIC_KANTURU_TOWER]);
+            if (IsEndMp3()) StopMp3(MUSIC_KANTURU_TOWER);
         }
     }
     else
     {
-        StopMp3(g_lpszMp3[MUSIC_KANTURU_MAYA_BATTLE]);
-        StopMp3(g_lpszMp3[MUSIC_KANTURU_NIGHTMARE_BATTLE]);
-        StopMp3(g_lpszMp3[MUSIC_KANTURU_TOWER]);
+        StopMp3(MUSIC_KANTURU_MAYA_BATTLE);
+        StopMp3(MUSIC_KANTURU_NIGHTMARE_BATTLE);
+        StopMp3(MUSIC_KANTURU_TOWER);
     }
 }

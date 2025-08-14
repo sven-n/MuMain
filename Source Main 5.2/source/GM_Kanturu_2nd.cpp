@@ -18,14 +18,13 @@
 #include "CDirection.h"
 #include "UIBaseDef.h"
 #include "MapManager.h"
-#include "GM_Kanturu_2nd.h"
 #include "DSPlaySound.h"
 
 #include "ChangeRingManager.h"
 #include "LoadData.h"
 #include "NewUISystem.h"
 
-extern float g_fScreenRate_x;
+
 CTrapCanon g_TrapCanon;
 
 using namespace M38Kanturu2nd;
@@ -108,7 +107,6 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
     {
         OpenNpc(MODEL_KANTURU2ND_ENTER_NPC);
         pCharacter = CreateCharacter(Key, MODEL_KANTURU2ND_ENTER_NPC, PosX, PosY);
-        wcscpy(pCharacter->ID, L"출입 관리 장치");
         pCharacter->Object.Scale = 4.76f;
         pCharacter->Object.Position[0] -= 20.0f;
         pCharacter->Object.Position[1] -= 200.0f;
@@ -1347,17 +1345,17 @@ void M38Kanturu2nd::Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 
 void M38Kanturu2nd::PlayBGM()
 {
     if (gMapManager.WorldActive == WD_38KANTURU_2ND)
     {
-        PlayMp3(g_lpszMp3[MUSIC_KANTURU_2ND]);
+        PlayMp3(MUSIC_KANTURU_2ND);
     }
     else
     {
-        StopMp3(g_lpszMp3[MUSIC_KANTURU_2ND]);
+        StopMp3(MUSIC_KANTURU_2ND);
     }
 }
 

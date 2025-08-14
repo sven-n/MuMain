@@ -20,7 +20,7 @@
 #include "ZzzPath.h"
 #include "DSPlaySound.h"
 
-#include "./Utilities/Log/ErrorReport.h"
+
 #include "MatchEvent.h"
 #include "CSQuest.h"
 #include "PersonalShopTitleImp.h"
@@ -29,33 +29,27 @@
 #include "npcBreeder.h"
 #include "GIPetManager.h"
 #include "CSParts.h"
-#include "GMBattleCastle.h"
-#include "GMCrywolf1st.h"
 #include "UIMapName.h"	// rozy
-#include "GMCrywolf1st.h"
 #include "CDirection.h"
-#include "GM_Kanturu_3rd.h"
-#include "GM_Kanturu_2nd.h"
 #include "MapManager.h"
 #include "Event.h"
-#include "./Utilities/Log/muConsoleDebug.h"
+
 #include "NewUISystem.h"
 #include "w_CursedTemple.h"
 #include "UIControls.h"
-#include "GM3rdChangeUp.h"
 #include "PartyManager.h"
 #include "NewUICommonMessageBox.h"
 #include "SummonSystem.h"
-#include "GMSwampOfQuiet.h"
 #include "w_MapHeaders.h"
 #include "DuelMgr.h"
 #include "ChangeRingManager.h"
 #include "NewUIGensRanking.h"
 #include "MonkSystem.h"
-#include "ProtocolSend.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
 #include "MUHelper/MuHelper.h"
+
+#include "ZzzInterface.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
@@ -69,19 +63,17 @@ extern DWORD g_dwLatestZoneMoving;
 extern bool LogOut;
 extern int DirTable[16];
 
-#ifdef WINDOWMODE
 extern BOOL g_bUseWindowMode;
-#endif //WINDOWMODE
 extern void SetPlayerBow(CHARACTER* c);
 
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;
 #endif	// _PVP_ADD_MOVE_SCROLL
 
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
+
+
 
 extern vec3_t MousePosition, MouseTarget;
 
@@ -720,8 +712,7 @@ void SetBooleanPosition(CHAT* c)
     SIZE Size[5];
     memset(&Size[0], 0, sizeof(SIZE) * 5);
 
-    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || // GM 일경우
-        (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))
+    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))
     {
         g_pRenderText->SetFont(g_hFontBold);
         bResult[0] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
@@ -779,8 +770,8 @@ void SetPlayerColor(BYTE PK)
     }
 }
 
-extern float g_fScreenRate_x;	// ※
-extern float g_fScreenRate_y;
+	// ※
+
 const int ciSystemColor = 240;
 
 void RenderBoolean(int x, int y, CHAT* c)
@@ -1563,7 +1554,7 @@ bool CheckAttack()
         return false;
     }
 
-    if (SelectedCharacter == -1)
+    if (SelectedCharacter < 0 || SelectedCharacter >= MAX_CHARACTERS_CLIENT)
     {
         return false;
     }
@@ -1798,9 +1789,16 @@ bool CheckAttack()
 int	getTargetCharacterKey(CHARACTER* c, int selected)
 {
     if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+    {
         return -1;
+    }
 
-    if (c != Hero || selected < 0 || selected >= MAX_CHARACTERS_CLIENT)
+    if (c != Hero)
+    {
+        return -1;
+    }
+
+    if (selected < 0 || selected >= MAX_CHARACTERS_CLIENT)
     {
         return -1;
     }
@@ -1813,62 +1811,70 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
     }
 
     if (EnableGuildWar && sc->PK >= PVP_MURDERER2 && sc->GuildMarkIndex != -1 && wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[sc->GuildMarkIndex].GuildName) == NULL)
+    {
         return  -1;
+    }
 
-    else if (g_DuelMgr.IsDuelEnabled())
+    if (g_DuelMgr.IsDuelEnabled())
     {
         if (g_DuelMgr.IsDuelPlayer(sc, DUEL_ENEMY))
+        {
             return sc->Key;
-        else
-            return -1;
+        }
+
+        return -1;
     }
-    else if (sc->GuildRelationShip == GR_RIVAL || sc->GuildRelationShip == GR_RIVALUNION)
+
+    if (sc->GuildRelationShip == GR_RIVAL || sc->GuildRelationShip == GR_RIVALUNION)
     {
         return sc->Key;
     }
-    else if (EnableGuildWar)
+
+    if (EnableGuildWar)
     {
         if (sc->GuildTeam == 2 && sc != Hero)
+        {
             return sc->Key;
-        else
-            return -1;
+        }
+
+        return -1;
     }
-    else if (::IsStrifeMap(gMapManager.WorldActive) && sc != Hero && sc->m_byGensInfluence != Hero->m_byGensInfluence && HIBYTE(GetAsyncKeyState(VK_MENU)) != 128)
+
+    if (::IsStrifeMap(gMapManager.WorldActive) && sc != Hero && sc->m_byGensInfluence != Hero->m_byGensInfluence && HIBYTE(GetAsyncKeyState(VK_MENU)) != 128)
     {
         if (sc->GuildRelationShip == GR_NONE && !g_pPartyManager->IsPartyMember(SelectedCharacter))
         {
             return sc->Key;
         }
-        else if ((wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[c->GuildMarkIndex].GuildName) == NULL) ||
+
+        if ((wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[c->GuildMarkIndex].GuildName) == NULL) ||
             g_pPartyManager->IsPartyMember(SelectedCharacter))
         {
             if (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128)
+            {
                 return sc->Key;
-            else
-                return -1;
+            }
+
+            return -1;
         }
     }
-    else if ((sc->PK >= PVP_MURDERER2 && sc->Object.Type == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
+
+    if ((sc->PK >= PVP_MURDERER2 && sc->Object.Type == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
     {
         return sc->Key;
     }
-    else if (gMapManager.IsCursedTemple())
+
+    if (gMapManager.IsCursedTemple())
     {
         if (g_CursedTemple->IsPartyMember(selected))
         {
             return -1;
         }
-        else
-        {
-            return sc->Key;
-        }
-    }
-    else
-    {
-        return -1;
+
+        return sc->Key;
     }
 
-    return -1;
+    return sc->Key;
 }
 
 void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY)
@@ -1954,7 +1960,10 @@ bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, ActionSkillType iSkill)
     //if (p == NULL)	return false;
     bool Success = false;
 
-    if (SelectedCharacter <= -1) return false;
+    if (SelectedCharacter < 0 || SelectedCharacter >= MAX_CHARACTERS_CLIENT)
+    {
+        return false;
+    }
 
     TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
     TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
@@ -2229,7 +2238,6 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
             break;
         case AT_SKILL_RIDER:
-            //		    SendRequestMagic(Skill,CharactersClient[g_MovementSkill.m_iTarget].Key);
             if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN || g_Direction.m_CKanturu.IsMayaScene())
                 SetAction(o, PLAYER_SKILL_RIDER_FLY);
             else
@@ -2293,11 +2301,20 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2));
     }
 
-    VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
-    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+    {
+        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+        o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
+    }
 
     if (Skill != AT_SKILL_GAOTIC)
     {
+        WORD TKey = 0xffff;
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+		{
+			TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
+		}
+
         if (Skill == AT_SKILL_TWISTING_SLASH
             || Skill == AT_SKILL_TWISTING_SLASH_STR
             || Skill == AT_SKILL_TWISTING_SLASH_STR_MG
@@ -2306,17 +2323,12 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             || Skill == AT_SKILL_FIRE_SLASH_STR
             )
         {
-            WORD TKey = 0xffff;
-            if (g_MovementSkill.m_iTarget != -1)
-            {
-                TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
-            }
             SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), 
                 (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
         }
         else
         {
-            SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+            SendRequestMagic(Skill, TKey);
         }
     }
 
@@ -2399,8 +2411,18 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
             return;
     }
 
-    VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
-    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+    {
+        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+        o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
+    }
+
+    WORD TKey = 0xffff;
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+    {
+        TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
+    }
+
     switch (Skill)
     {
     case AT_SKILL_POISON:
@@ -2416,12 +2438,12 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     case AT_SKILL_ICE_STR_MG:
     case AT_SKILL_FIREBALL:
     case AT_SKILL_JAVELIN:
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetPlayerMagic(c);
         LetHeroStop();
         break;
     case AT_SKILL_DEATH_CANNON:
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetAction(o, PLAYER_ATTACK_DEATH_CANNON);
         SetAttackSpeed();
         LetHeroStop();
@@ -2430,11 +2452,6 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     case AT_SKILL_BLAST_STR:
     case AT_SKILL_BLAST_STR_MG:
     {
-        WORD TKey = 0xffff;
-        if (g_MovementSkill.m_iTarget != -1)
-        {
-            TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
-        }
         SendRequestMagicContinue(Skill, (int)(c->TargetPosition[0] / 100.f), (int)(c->TargetPosition[1] / 100.f), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
     }
     SetPlayerMagic(c);
@@ -2450,8 +2467,18 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     LetHeroStop();
     int Skill = CharacterAttribute->Skill[g_MovementSkill.m_iSkill];
 
-    VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
-    o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+    {
+        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, c->TargetPosition);
+        o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
+    }
+
+    WORD TKey = 0xffff;
+    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+    {
+        TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
+    }
+
     switch (Skill)
     {
     case AT_SKILL_HEALING:
@@ -2462,7 +2489,7 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     case AT_SKILL_DEFENSE:
     case AT_SKILL_DEFENSE_STR:
     case AT_SKILL_DEFENSE_MASTERY:
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetPlayerMagic(c);
         break;
 
@@ -2478,7 +2505,7 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
         }
         if (!CheckArrow())
             break;
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetPlayerAttack(c);
     }
     break;
@@ -2486,7 +2513,7 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     case AT_SKILL_DEEPIMPACT:
         if (!CheckArrow())
             break;
-        SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        SendRequestMagic(Skill, TKey);
         SetPlayerHighBowAttack(c);
         break;
     }
@@ -2542,9 +2569,11 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
             }
         }
 
-        WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
-
-        SendRequestMagicContinue(iSkill, (int)(pCha->TargetPosition[0] / 100.f), (int)(pCha->TargetPosition[1] / 100.f), (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, 0, wTargetKey, 0);
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+        {
+            WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
+            SendRequestMagicContinue(iSkill, (int)(pCha->TargetPosition[0] / 100.f), (int)(pCha->TargetPosition[1] / 100.f), (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, 0, wTargetKey, 0);
+        }
     }
     break;
     case AT_SKILL_ALICE_CHAINLIGHTNING:
@@ -2568,12 +2597,15 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
             break;
         }
 
-        WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+        {
+            WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
 
-        SendRequestMagicContinue(iSkill, (int)(pCha->TargetPosition[0] / 100.f),
-            (int)(pCha->TargetPosition[1] / 100.f),
-            (BYTE)(pObj->Angle[2] / 360.f * 256.f),
-            0, 0, wTargetKey, 0);
+            SendRequestMagicContinue(iSkill, (int)(pCha->TargetPosition[0] / 100.f),
+                (int)(pCha->TargetPosition[1] / 100.f),
+                (BYTE)(pObj->Angle[2] / 360.f * 256.f),
+                0, 0, wTargetKey, 0);
+        }
     }
     break;
     case AT_SKILL_ALICE_SLEEP:
@@ -2583,11 +2615,14 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
     {
         LetHeroStop();
 
-        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
-        pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
+        {
+            VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
+            pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
 
-        WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
-        SendRequestMagic(iSkill, wTargetKey);
+            WORD wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
+            SendRequestMagic(iSkill, wTargetKey);
+        }
     }
     break;
     case AT_SKILL_ALICE_BERSERKER:
@@ -2683,22 +2718,24 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     case AT_SKILL_OCCUPY:
     {
         WORD wTargetKey = 0;
-        if (g_MovementSkill.m_iTarget != -1)
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
+			VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
+            pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
         }
-        VectorCopy(CharactersClient[g_MovementSkill.m_iTarget].Object.Position, pCha->TargetPosition);
-        pObj->Angle[2] = CreateAngle2D(pObj->Position, pCha->TargetPosition);
         SendRequestMagic(iSkill, wTargetKey);
 
         BYTE TargetPosX = (BYTE)(pCha->TargetPosition[0] / TERRAIN_SCALE);
         BYTE TargetPosY = (BYTE)(pCha->TargetPosition[1] / TERRAIN_SCALE);
 
         if ((gMapManager.InBloodCastle()) || iSkill == AT_SKILL_OCCUPY
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
+            || (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT && (
+               CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CASTLE_GATE1
             || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_GUARDIAN_STATUE
             || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_LIFE_STONE
-            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CANON_TOWER)
+            || CharactersClient[g_MovementSkill.m_iTarget].MonsterIndex == MONSTER_CANON_TOWER))
+            )
         {
             int angle = abs((int)(pObj->Angle[2] / 45.f));
             switch (angle)
@@ -2741,7 +2778,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     case AT_SKILL_BEAST_UPPERCUT_MASTERY:
     {
         WORD wTargetKey = 0;
-        if (g_MovementSkill.m_iTarget != -1)
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
@@ -2755,7 +2792,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     case AT_SKILL_CHAIN_DRIVE_STR:
     {
         WORD wTargetKey = 0;
-        if (g_MovementSkill.m_iTarget != -1)
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
@@ -2770,7 +2807,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     case AT_SKILL_DRAGON_KICK:
     {
         WORD wTargetKey = 0;
-        if (g_MovementSkill.m_iTarget != -1)
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
@@ -2786,7 +2823,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     case AT_SKILL_DARKSIDE_STR:
     {
         WORD wTargetKey = 0;
-        if (g_MovementSkill.m_iTarget != -1)
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
         {
             wTargetKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
@@ -2803,7 +2840,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     {
         BYTE angle = (BYTE)((((pObj->Angle[2] + 180.f) / 360.f) * 255.f));
         WORD TKey = 0xffff;
-        if (g_MovementSkill.m_iTarget != -1)
+        if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
         {
             TKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
@@ -2918,19 +2955,16 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
         case AT_SKILL_OCCUPY:
         case AT_SKILL_PHOENIX_SHOT:
         {
-            if (SelectedCharacter <= -1)
-                return;
-
-            fDistance = gSkillManager.GetSkillDistance(nSkill, pCha) * 1.2f;
-
-            pCha->TargetCharacter = SelectedCharacter;
-            if (CharactersClient[SelectedCharacter].Dead == 0)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT && CharactersClient[SelectedCharacter].Dead == 0)
             {
-                TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
-                TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
+                pCha->TargetCharacter = SelectedCharacter;
+                
+                TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
+                TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
 
                 if (bCheckAttack)
                 {
+                    fDistance = gSkillManager.GetSkillDistance(nSkill, pCha) * 1.2f;
                     if (CheckTile(pCha, pObj, fDistance) && pCha->SafeZone == false)
                     {
                         bool bNoneWall = CheckWall((pCha->PositionX), (pCha->PositionY), TargetX, TargetY);
@@ -3345,10 +3379,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_RUSH:
         case AT_SKILL_SPACE_SPLIT:
         case AT_SKILL_SPIRAL_SLASH:
-            if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
+            if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance * 1.2f) && !c->SafeZone)
@@ -3378,10 +3410,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_FIREBALL:
         case AT_SKILL_JAVELIN:
         case AT_SKILL_DEATH_CANNON:
-            if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
+            if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance) && !c->SafeZone)
@@ -3405,10 +3435,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_DEEPIMPACT:
         case AT_SKILL_ICE_ARROW:
         case AT_SKILL_ICE_ARROW_STR:
-            if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
+            if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance) && !c->SafeZone)
@@ -3437,10 +3465,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_DEFENSE:
         case AT_SKILL_DEFENSE_STR:
         case AT_SKILL_DEFENSE_MASTERY:
-            if (0 == CharactersClient[g_MovementSkill.m_iTarget].Dead)
+            if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance) && !c->SafeZone)
@@ -3486,10 +3512,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         {
             g_ConsoleDebug->Write(MCD_RECEIVE, L"Action ID : %d, %d | %d %d | %d %d", iSkill, Distance, CharactersClient[g_MovementSkill.m_iTarget].Dead, g_MovementSkill.m_iTarget,
                 CheckTile(c, o, Distance * 1.2f), !c->SafeZone);
-            if (CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
+            if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT && CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
-                if (g_MovementSkill.m_iTarget <= -1) break;
-
                 TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance * 1.2f) && !c->SafeZone) {
@@ -3539,198 +3563,162 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             SocketClient->ToGameServer()->SendPickupItemRequest(ItemKey);
         }
         break;
-    case MOVEMENT_TALK:
-        MouseUpdateTimeMax = 12;
+	case MOVEMENT_TALK :
+		{
+			MouseUpdateTimeMax = 12;
 
-        if (!(
-            M34CryWolf1st::Get_State_Only_Elf() == true &&
-            M34CryWolf1st::IsCyrWolf1st() == true))
-        {
-            SetPlayerStop(c);
-            c->Movement = false;
-        }
+			const bool isCryWolfElf = M34CryWolf1st::Get_State_Only_Elf() && M34CryWolf1st::IsCyrWolf1st();
+			if (!isCryWolfElf)
+			{
+				SetPlayerStop(c);
+				c->Movement = false;
+			}
 
-        if (TargetNpc != -1)
-        {
-            int npcIndex = 229;
-            npcIndex = 226;
-            npcIndex = 205;
+			if (TargetNpc == -1)
+				break;
 
-            if (CharactersClient[TargetNpc].MonsterIndex >= npcIndex)
-            {
-                int level = CharacterAttribute->Level;
-                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_CHAOS_GOBLIN && level < 10)
-                {
-                    wchar_t Text[100];
-                    swprintf(Text, GlobalText[663], CHAOS_MIX_LEVEL);
-                    g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
-                    break;
-                }
-                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_EO_THE_CRAFTSMAN ||
-                    CharactersClient[TargetNpc].MonsterIndex == MONSTER_ZIENNA_THE_WEAPONS_MERCHANT ||
-                    CharactersClient[TargetNpc].MonsterIndex == MONSTER_HANZO_THE_BLACKSMITH
-                    || CharactersClient[TargetNpc].MonsterIndex == MONSTER_RHEA
-                    || CharactersClient[TargetNpc].MonsterIndex == MONSTER_WEAPONS_MERCHANT_BOLO
-                    )
-                {
-                    g_pNPCShop->SetRepairShop(true);
-                }
-                else
-                {
-                    g_pNPCShop->SetRepairShop(false);
-                }
+			// === Rozpoznanie napotkanego NPC ===
+			const int npcIndex = 205;
+			const int monsterIndex = CharactersClient[TargetNpc].MonsterIndex;
 
-                if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST))
-                {
-                    g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYQUEST);
-                }
+			if (monsterIndex >= npcIndex)
+			{
+				const int level = CharacterAttribute->Level;
 
-                if (g_csQuest.IsInit())
-                {
-                    SocketClient->ToGameServer()->SendLegacyQuestStateRequest();
-                }
+				if (monsterIndex == MONSTER_CHAOS_GOBLIN && level < 10)
+				{
+					wchar_t text[100];
+					swprintf(text, GlobalText[663], CHAOS_MIX_LEVEL);
+					g_pSystemLogBox->AddText(text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+					break;
+				}
 
-                if (M34CryWolf1st::Get_State_Only_Elf() == true && M34CryWolf1st::IsCyrWolf1st() == true)
-                {
-                    if (CharactersClient[TargetNpc].Object.Type >= MODEL_CRYWOLF_ALTAR1 && CharactersClient[TargetNpc].Object.Type <= MODEL_CRYWOLF_ALTAR5)
-                    {
-                        int Num = CharactersClient[TargetNpc].Object.Type - MODEL_CRYWOLF_ALTAR1;
+				// Sklepy
+				bool isRepairNpc =
+					monsterIndex == MONSTER_EO_THE_CRAFTSMAN ||
+					monsterIndex == MONSTER_ZIENNA_THE_WEAPONS_MERCHANT ||
+					monsterIndex == MONSTER_HANZO_THE_BLACKSMITH ||
+					monsterIndex == MONSTER_RHEA ||
+					monsterIndex == MONSTER_WEAPONS_MERCHANT_BOLO;
 
-                        if ((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF) && M34CryWolf1st::Get_AltarState_State(Num) == false)
-                        {
-                            BYTE State = (m_AltarState[Num] & 0x0f);
-                            if (State > 0)
-                            {
-                                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Get_Temple));
-                            }
-                            else
-                                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Destroy_Set_Temple));
-                        }
-                        else
-                            if ((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF) && M34CryWolf1st::Get_AltarState_State(Num) == true)
-                            {
-                                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Ing_Set_Temple));
-                            }
-                            else
-                                SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                    }
-                    else
-                        SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else if (M34CryWolf1st::IsCyrWolf1st() == true)
-                {
-                    if (!(CharactersClient[TargetNpc].Object.Type >= MODEL_CRYWOLF_ALTAR1 && CharactersClient[TargetNpc].Object.Type <= MODEL_CRYWOLF_ALTAR5))
-                    {
-                        if (MODEL_NPC_QUARREL == CharactersClient[TargetNpc].Object.Type)
-                        {
-                            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterWerwolfMsgBoxLayout));
-                        }
-                        SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                    }
-                }
-                else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+				g_pNPCShop->SetRepairShop(isRepairNpc);
 
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && CharactersClient[TargetNpc].MonsterIndex <= MONSTER_LITTLE_SANTA_PINK)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+				if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST))
+					g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYQUEST);
 
-                    wchar_t _Temp[32] = { 0, };
-                    if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LITTLE_SANTA_RED)
-                    {
-                        swprintf(_Temp, GlobalText[2596], 100);
-                        g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
-                    }
-                    else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LITTLE_SANTA_BLUE)
-                    {
-                        swprintf(_Temp, GlobalText[2597], 100);
-                        g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
-                    }
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_DELGADO)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_LUGARD)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_MARKET_UNION_MEMBER_JULIA)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_DAVID)
-                {
-                    SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                }
-                else
-                {
-                    if (M38Kanturu2nd::Is_Kanturu2nd() == TRUE)
-                    {
-                        if (g_pKanturu2ndEnterNpc->IsNpcAnimation() == false)
-                        {
-                            SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                        }
-                    }
-                    else if (gMapManager.IsCursedTemple())
-                    {
-                        if (!g_CursedTemple->IsGaugebarEnabled())
-                        {
-#ifdef LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE
-                                || (g_pCursedTempleWindow->CheckInventoryHolyItem(Hero)
-                                    && ((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied && CharactersClient[TargetNpc].MonsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE)
-                                        || (g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && CharactersClient[TargetNpc].MonsterIndex == MONSTER_ILLUSION_ITEM_STORAGE))
-                                    ))
-#else  //LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE ||
-                                ((CharactersClient[TargetNpc].MonsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE || CharactersClient[TargetNpc].MonsterIndex == MONSTER_ILLUSION_ITEM_STORAGE)
-                                    && g_pCursedTempleWindow->CheckInventoryHolyItem(Hero)))
-#endif //LJH_FIX_CANNOT_CLICK_BASKETS_IN_CURSED_TEMPLE
-                            {
-                                g_CursedTemple->SetGaugebarEnabled(true);
-                            }
-                            g_pCursedTempleWindow->CheckTalkProgressNpc(CharactersClient[TargetNpc].MonsterIndex, CharactersClient[TargetNpc].Key);
-                        }
-                    }
-                    else
-                    {
-                        SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-                    }
-                }
-                //#else
-                //				SendRequestTalk(CharactersClient[TargetNpc].Key);
-                //#endif
-                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_MARLON)
-                    bCheckNPC = true;
-                else
-                    bCheckNPC = false;
+				if (g_csQuest.IsInit())
+					SocketClient->ToGameServer()->SendLegacyQuestStateRequest();
 
-                if (CharactersClient[TargetNpc].MonsterIndex == MONSTER_PET_TRAINER)
-                {
-                    ITEM* pItem = NULL;
+				// === Specjalne rozmowy ===
+				const int objectType = CharactersClient[TargetNpc].Object.Type;
+				if (isCryWolfElf)
+				{
+					if (objectType >= MODEL_CRYWOLF_ALTAR1 && objectType <= MODEL_CRYWOLF_ALTAR5)
+					{
+						const int altarNum = objectType - MODEL_CRYWOLF_ALTAR1;
+						const bool isElf = gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF;
+						const bool altarActive = M34CryWolf1st::Get_AltarState_State(altarNum);
+						const BYTE state = (m_AltarState[altarNum] & 0x0f);
 
-                    pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
+						if (isElf && !altarActive)
+						{
+							if (state > 0)
+								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Get_Temple));
+							else
+								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Destroy_Set_Temple));
+						}
+						else if (isElf && altarActive)
+						{
+							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Ing_Set_Temple));
+						}
+						else
+						{
+							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+						}
+					}
+					else
+					{
+						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					}
+				}
+				else if (M34CryWolf1st::IsCyrWolf1st())
+				{
+					if (!(objectType >= MODEL_CRYWOLF_ALTAR1 && objectType <= MODEL_CRYWOLF_ALTAR5))
+					{
+						if (objectType == MODEL_NPC_QUARREL)
+							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterWerwolfMsgBoxLayout));
 
-                    if (pItem->Type == ITEM_DARK_HORSE_ITEM)
-                    {
-                        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER);
-                    }
+						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					}
+				}
+				else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
+				{
+					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
+				}
+				else if (monsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && monsterIndex <= MONSTER_LITTLE_SANTA_PINK)
+				{
+					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
 
-                    pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
+					wchar_t temp[32] = { 0 };
+					if (monsterIndex == MONSTER_LITTLE_SANTA_RED)
+						swprintf(temp, GlobalText[2596], 100);
+					else if (monsterIndex == MONSTER_LITTLE_SANTA_BLUE)
+						swprintf(temp, GlobalText[2597], 100);
 
-                    if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
-                    {
-                        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT);
-                    }
-                }
-            }
-            TargetNpc = -1;
-        }
-        break;
+					g_pSystemLogBox->AddText(temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+				}
+				else if (monsterIndex == MONSTER_DELGADO || monsterIndex == MONSTER_LUGARD ||
+					monsterIndex == MONSTER_MARKET_UNION_MEMBER_JULIA || monsterIndex == MONSTER_DAVID)
+				{
+					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+				}
+				else
+				{
+					if (M38Kanturu2nd::Is_Kanturu2nd())
+					{
+						if (!g_pKanturu2ndEnterNpc->IsNpcAnimation())
+							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					}
+					else if (gMapManager.IsCursedTemple())
+					{
+						if (!g_CursedTemple->IsGaugebarEnabled())
+						{
+							if (
+								CharactersClient[TargetNpc].MonsterIndex == MONSTER_STONE_STATUE ||
+								(g_pCursedTempleWindow->CheckInventoryHolyItem(Hero) &&
+									((g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Allied && monsterIndex == MONSTER_ALLIANCE_ITEM_STORAGE) ||
+										(g_pCursedTempleWindow->GetMyTeam() == SEASON3A::eTeam_Illusion && monsterIndex == MONSTER_ILLUSION_ITEM_STORAGE)))
+								)
+							{
+								g_CursedTemple->SetGaugebarEnabled(true);
+							}
+							g_pCursedTempleWindow->CheckTalkProgressNpc(monsterIndex, CharactersClient[TargetNpc].Key);
+						}
+					}
+					else
+					{
+						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+					}
+				}
+
+				bCheckNPC = (monsterIndex == MONSTER_MARLON);
+
+				if (monsterIndex == MONSTER_PET_TRAINER)
+				{
+					ITEM* pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
+					if (pItem->Type == ITEM_DARK_HORSE_ITEM)
+						SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER);
+
+					pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
+					if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
+						SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT);
+				}
+			}
+
+			TargetNpc = -1;
+			break;
+		}
     case MOVEMENT_OPERATE:
         if (max(abs((Hero->PositionX) - TargetX), abs((Hero->PositionY) - TargetY)) <= 1)
         {
@@ -4037,7 +4025,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     return true;
                 }
 
-                if (SelectedCharacter != -1)
+                if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
                 {
                     CHARACTER* c = &CharactersClient[SelectedCharacter];
                     OBJECT* o = &c->Object;
@@ -4142,7 +4130,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             wchar_t szId[MAX_ID_SIZE];
             swscanf(Text, L"%s %s", szCmd, szId);
 
-            if (SelectedCharacter != -1)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
             {
                 CHARACTER* c = &CharactersClient[SelectedCharacter];
                 OBJECT* o = &c->Object;
@@ -4214,7 +4202,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     return 3;
                 }
                 else
-                    if (SelectedCharacter != -1)
+                    if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
                     {
                         CHARACTER* c = &CharactersClient[SelectedCharacter];
                         OBJECT* o = &c->Object;
@@ -4275,7 +4263,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 return true;
             }
 
-            if (SelectedCharacter != -1)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
             {
                 CHARACTER* c = &CharactersClient[SelectedCharacter];
                 OBJECT* o = &c->Object;
@@ -4329,7 +4317,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 return true;
             }
 
-            if (SelectedCharacter != -1)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
             {
                 CHARACTER* c = &CharactersClient[SelectedCharacter];
                 OBJECT* o = &c->Object;
@@ -4404,7 +4392,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 return true;
             }
 
-            if (SelectedCharacter != -1)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
             {
                 CHARACTER* c = &CharactersClient[SelectedCharacter];
                 OBJECT* o = &c->Object;
@@ -4779,7 +4767,7 @@ void CheckChatText(wchar_t* Text)
 
 bool CheckTarget(CHARACTER* c)
 {
-    if (SelectedCharacter != -1)
+    if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
     {
         TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
         TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
@@ -4895,7 +4883,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
     }
     if (!CheckTile(c, o, Distance))
     {
-        if (SelectedCharacter != -1 && (
+        if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT && (
             Skill == AT_SKILL_HEALING
             || Skill == AT_SKILL_HEALING_STR
             || Skill == AT_SKILL_ATTACK
@@ -4929,7 +4917,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
     bool Wall = CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY);
     if (Wall)
     {
-        if (SelectedCharacter != -1)
+        if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
         {
             if (CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
             {
@@ -5001,7 +4989,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         CreateEffect(BITMAP_IMPACT, Position, o->Angle, Light, 0, o);
         SetAction(o, PLAYER_RECOVER_SKILL);
 
-        if (SelectedCharacter > -1 && CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
+        if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT && CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
         {
             SendRequestMagic(Skill, CharactersClient[SelectedCharacter].Key);
         }
@@ -5412,7 +5400,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
 
                     BYTE angle = (BYTE)((((o->Angle[2] + 180.f) / 360.f) * 255.f));
                     WORD TKey = 0xffff;
-                    if (g_MovementSkill.m_iTarget != -1)
+                    if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
                     {
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                         if (TKey == 0xffff)
@@ -5465,7 +5453,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         Position[2] = (o->Position[2] + 49.f) + (float)(rand() % 60);
                         CreateJoint(BITMAP_2LINE_GHOST, Position, o->Position, o->Angle, 0, o, 20.f, o->PKKey, 0, o->m_bySkillSerialNum);
                     }
-                    if (c == Hero && SelectedCharacter != -1)
+                    if (c == Hero && SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
                     {
                         vec3_t Pos;
                         CHARACTER* sc = &CharactersClient[SelectedCharacter];
@@ -5853,7 +5841,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     case AT_SKILL_SOUL_BARRIER:
     case AT_SKILL_SOUL_BARRIER_STR:
     case AT_SKILL_SOUL_BARRIER_PROFICIENCY:
-        if (SelectedCharacter != -1)
+        if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
         {
             if (CharactersClient[SelectedCharacter].Object.Kind != KIND_PLAYER)
             {
@@ -5867,7 +5855,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
                 c->TargetCharacter = SelectedCharacter;
 
-                if (SelectedCharacter != -1)
+                if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
                 {
                     ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
                     g_MovementSkill.m_bMagic = TRUE;
@@ -5877,7 +5865,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
                 if (!CheckTile(c, o, Distance))
                 {
-                    if (SelectedCharacter != -1)
+                    if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
                     {
                         if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
                         {
@@ -6110,7 +6098,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             {
                 return;
             }
-            if (SelectedCharacter != -1)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
             {
                 if (!g_pPartyManager->IsPartyMember(SelectedCharacter))
                     return;
@@ -6356,11 +6344,6 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         break;
         }
 
-        if (SelectedCharacter == -1)
-        {
-            return;
-        }
-
         switch (Skill)
         {
         case AT_SKILL_ALICE_DRAINLIFE:
@@ -6370,10 +6353,10 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         case AT_SKILL_ALICE_CHAINLIGHTNING_STR:
         {
             c->TargetCharacter = SelectedCharacter;
-            if (0 == CharactersClient[SelectedCharacter].Dead)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT && CharactersClient[SelectedCharacter].Dead == 0)
             {
-                TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
-                TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
+                TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
+                TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
 
                 if (CheckAttack() == true)
                 {
@@ -6400,7 +6383,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         case AT_SKILL_ALICE_SLEEP_STR:
         case AT_SKILL_ALICE_BLIND:
         {
-            if (CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT && CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
             {
                 if (gMapManager.InChaosCastle() == true
                     || gMapManager.IsCursedTemple() == true
@@ -6414,10 +6397,10 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                     break;
                 }
             }
-            if (0 == CharactersClient[SelectedCharacter].Dead)
+            if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT && CharactersClient[SelectedCharacter].Dead == 0)
             {
-                TargetX = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[0] / TERRAIN_SCALE);
-                TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
+                TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
+                TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
 
                 if (CheckAttack() == true)
                 {
@@ -7557,7 +7540,7 @@ void MoveHero()
                 }
             }
         }
-        if (g_iFollowCharacter != -1)
+        if (g_iFollowCharacter >= 0 && g_iFollowCharacter < MAX_CHARACTERS_CLIENT)
         {
             CHARACTER* followCharacter = &CharactersClient[g_iFollowCharacter];
             if (followCharacter->Object.Live == 0)
@@ -7630,7 +7613,7 @@ void MoveHero()
                 }
 #endif
 
-                if (SelectedCharacter >= -1)
+                if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
                 {
                     Attacking = 1;
 

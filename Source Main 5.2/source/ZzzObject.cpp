@@ -22,24 +22,12 @@
 #include "CSparts.h"
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
-#include "GMHellas.h"
 #include "MapManager.h"
-#include "GMBattleCastle.h"
-#include "GMHuntingGround.h"
-#include "GMCryingWolf2nd.h"
-#include "GMAida.h"
-#include "GMCryWolf1st.h"
-#include "GM_Kanturu_1st.h"
 #include "UIManager.h"
-#include "GM_Kanturu_2nd.h"
-#include "GM_Kanturu_3rd.h"
 #include "CDirection.h"
 #include "CComGem.h"
-#include "GM3rdChangeUp.h"
 #include "BoneManager.h"
-#include "GMNewTown.h"
 #include "w_CursedTemple.h"
-#include "GMSwampOfQuiet.h"
 #include "CharacterManager.h"
 #include "w_MapHeaders.h"
 #include "MonkSystem.h"
@@ -3284,13 +3272,8 @@ void RenderObjects()
             ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
             if (g_Direction.m_CKanturu.IsMayaScene()
                 || gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                 || gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
                 || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE
-#else //PJH_NEW_SERVER_SELECT_MAP
-                || World == WD_77NEW_LOGIN_SCENE
-                || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
                 || IsIceCity()
                 || gMapManager.IsPKField()
                 || IsDoppelGanger2()
@@ -3308,7 +3291,6 @@ void RenderObjects()
                             RenderObjectVisual(o);
                         }
                         else
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                             if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                             {
                                 float fDistance_x = CameraPosition[0] - o->Position[0];
@@ -3349,64 +3331,18 @@ void RenderObjects()
                                     o->AlphaTarget = 0.0f;
                                 }
                             }
-#else	// PJH_NEW_SERVER_SELECT_MAP
-                            if (World == WD_77NEW_LOGIN_SCENE)
-                            {
-                                float fDistance_x = CameraPosition[0] - o->Position[0];
-                                float fDistance_y = CameraPosition[1] - o->Position[1];
-                                float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
 
-                                if (((o->Type >= 5 && o->Type <= 14) || (o->Type >= 87 && o->Type <= 88) || (o->Type == 4 || o->Type == 129))
-                                    && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < 5000.f)
-                                {
-                                    if (o->AlphaTarget < 1.0f)
-                                        o->AlphaTarget += 0.03f;
-                                    else
-                                        o->AlphaTarget = 1.0f;
-
-                                    RenderObject(o);
-                                    RenderObjectVisual(o);
-                                }
-                                else if (o->Type == 130
-                                    || (TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < 4500.f))
-                                {
-                                    if (o->BlendMeshLight < 1.0f)
-                                        o->BlendMeshLight += 0.03f;
-                                    else
-                                        o->BlendMeshLight = 1.0f;
-
-                                    if (o->AlphaTarget < 1.0f)
-                                        o->AlphaTarget += 0.03f;
-                                    else
-                                        o->AlphaTarget = 1.0f;
-
-                                    RenderObject(o);
-                                    RenderObjectVisual(o);
-                                }
-                                else if (o->AlphaTarget != 0 && fDistance > 2000.f)
-                                {
-                                    o->BlendMeshLight = 0.0f;
-                                    o->Alpha = 0.0f;
-                                    o->AlphaTarget = 0.0f;
-                                }
-                            }
-#endif //PJH_NEW_SERVER_SELECT_MAP
                             else if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-                                || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
                                 ) && ((o->Type >= 5 && o->Type <= 14) || (o->Type >= 87 && o->Type <= 88) || (o->Type == 4 || o->Type == 129)) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -400.f))
                             {
                                 RenderObject(o);
                                 RenderObjectVisual(o);
                             }
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                             else if ((gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE) && (o->Type == 129 || o->Type == 98))
                             {
                                 RenderObject(o);
                                 RenderObjectVisual(o);
                             }
-#endif //PJH_NEW_SERVER_SELECT_MAP
                             else if ((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && (o->Type == 30 || o->Type == 31) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
                             {
                                 RenderObject(o);
@@ -3444,9 +3380,6 @@ void RenderObjects()
                         {
                             o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, o->CollisionRange + range);
                             if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-                                || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
                                 ) &&
                                 ((o->Type >= 5 && o->Type <= 14) || (o->Type >= 87 && o->Type <= 88) || (o->Type == 4 || o->Type == 129)));
                             else
@@ -3454,14 +3387,9 @@ void RenderObjects()
                                 else
                                     if ((gMapManager.IsPKField() || IsDoppelGanger2()) && (o->Type == 16 || o->Type == 67 || o->Type == 68));
                                     else
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                                         if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE);
-#else
-                                        if (World == WD_77NEW_LOGIN_SCENE);
-#endif //PJH_NEW_SERVER_SELECT_MAP
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                                         else if ((gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE) && (o->Type == 129 || o->Type == 98));
-#endif //PJH_NEW_SERVER_SELECT_MAP
+
                                         else
                                             if (o->Visible || CameraTopViewEnable)
                                             {
@@ -3540,10 +3468,6 @@ void RenderObjects_AfterCharacter()
         || gMapManager.IsCursedTemple()
 
         || gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-        || World == WD_77NEW_LOGIN_SCENE
-        || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
         || gMapManager.WorldActive == WD_56MAP_SWAMP_OF_QUIET
         || IsIceCity()
         || gMapManager.IsPKField()
@@ -3599,10 +3523,6 @@ void RenderObjects_AfterCharacter()
             }
 
             if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-                || World == WD_77NEW_LOGIN_SCENE
-                || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
                 || IsIceCity()
                 || gMapManager.IsPKField()
                 || IsDoppelGanger2()
@@ -3653,10 +3573,6 @@ void RenderObjects_AfterCharacter()
                         {
                             o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, o->CollisionRange + range);
                             if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-                                || World == WD_77NEW_LOGIN_SCENE
-                                || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
                                 ) && (o->Type == 89));
                             else
                                 if (IsIceCity() && o->Type == 76);
@@ -3766,34 +3682,6 @@ void MoveObject(OBJECT* o)
             break;
         }
     }
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-    else if (World == WD_78NEW_CHARACTER_SCENE)
-    {
-        if (o->Type == 4)
-        {
-            if (o->CurrentAction == 0)
-            {
-                fSpeed *= pow(2.2f, FPS_ANIMATION_FACTOR);
-            }
-            else
-            {
-                fSpeed *= pow(2.0f, FPS_ANIMATION_FACTOR);
-            }
-
-            if (SEASON3B::GMNewTown::IsCheckMouseIn() == true)
-            {
-                if (o->CurrentAction == 0)
-                {
-                    fSpeed *= pow(2.0f, FPS_ANIMATION_FACTOR);
-                }
-                else
-                {
-                    fSpeed *= pow(3.0f, FPS_ANIMATION_FACTOR);
-                }
-            }
-        }
-    }
-#endif //PJH_NEW_SERVER_SELECT_MAP
     else if (IsIceCity() && (o->Type == 16 || o->Type == 17 || o->Type == 68))
     {
         fSpeed = b->Actions[o->CurrentAction].PlaySpeed;
@@ -10614,8 +10502,6 @@ void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, floa
     Vector(Luminosity * 1.f, Luminosity * 0.8f, Luminosity * 0.3f, b->BodyLight);
     RenderPartObjectEdge(b, o, Flag, Translate, Scale);
 }
-
-void BodyLight(OBJECT* o, BMD* b);
 
 void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags, int ancientDiscriminator, bool GlobalTransform, bool HideSkin, bool Translate, int Select, int RenderType)
 {

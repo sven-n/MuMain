@@ -28,8 +28,6 @@ extern  double   WorldTime;
 extern	wchar_t    TextList[50][100];
 extern	int     TextListColor[50];
 extern	int     TextBold[50];
-extern  float   g_fScreenRate_x;
-extern  float   g_fScreenRate_y;
 
 CSPetSystem::~CSPetSystem()
 {

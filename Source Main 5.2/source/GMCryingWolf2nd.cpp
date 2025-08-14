@@ -9,7 +9,6 @@
 #include "zzzAi.h"
 #include "zzzOpenData.h"
 #include "MapManager.h"
-#include "GMCryingWolf2nd.h"
 #include "BoneManager.h"
 
 bool M34CryingWolf2nd::IsCyringWolf2nd()

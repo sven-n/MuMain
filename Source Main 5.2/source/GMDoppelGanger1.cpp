@@ -1,7 +1,6 @@
 ﻿// GMDoppelGanger1.cpp: implementation of the CGMDoppelGanger1 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "GMDoppelGanger1.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -15,7 +14,7 @@
 #include "NewUISystem.h"
 #include "MapManager.h"
 
-extern char* g_lpszMp3[NUM_MUSIC];
+
 extern int GetMp3PlayPosition();
 
 CGMDoppelGanger1Ptr CGMDoppelGanger1::Make()
@@ -64,19 +63,16 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_TERRIBLE_BUTCHER:
         OpenMonsterModel(MONSTER_MODEL_TERRIBLE_BUTCHER);
         pCharacter = CreateCharacter(Key, MODEL_TERRIBLE_BUTCHER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"도살자");
         pCharacter->Object.Scale = 1.0f;
         break;
     case MONSTER_MAD_BUTCHER:
         OpenMonsterModel(MONSTER_MODEL_MAD_BUTCHER);
         pCharacter = CreateCharacter(Key, MODEL_MAD_BUTCHER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"분노한 도살자");
         pCharacter->Object.Scale = 0.8f;
         break;
     case MONSTER_ICE_WALKER2:
         OpenMonsterModel(MONSTER_MODEL_ICE_WALKER);
         pCharacter = CreateCharacter(Key, MODEL_ICE_WALKER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"아이스 워커");
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -84,13 +80,11 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
     case MONSTER_LARVA2:
         OpenMonsterModel(MONSTER_MODEL_LARVA);
         pCharacter = CreateCharacter(Key, MODEL_LARVA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"유충");
         pCharacter->Object.Scale = 0.6f;
         break;
     case MONSTER_DOPPELGANGER:
         OpenMonsterModel(MONSTER_MODEL_DOPPELGANGER);
         pCharacter = CreateCharacter(Key, MODEL_DOPPELGANGER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"도플갱어");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Object.m_bRenderShadow = false;
         break;
@@ -98,7 +92,6 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_ELF;
-        wcscpy(pCharacter->ID, L"도플갱어요정");
         pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_SPIRIT_HELM;
         pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_SPIRIT_ARMOR;
         pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_SPIRIT_PANTS;
@@ -111,7 +104,6 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_KNIGHT;
-        wcscpy(pCharacter->ID, L"도플갱어기사");
         pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DRAGON_HELM;
         pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DRAGON_ARMOR;
         pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DRAGON_PANTS;
@@ -124,7 +116,6 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_WIZARD;
-        wcscpy(pCharacter->ID, L"도플갱어마법사");
         pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_GRAND_SOUL_HELM;
         pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_GRAND_SOUL_ARMOR;
         pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_GRAND_SOUL_PANTS;
@@ -137,7 +128,6 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_DARK;
-        wcscpy(pCharacter->ID, L"도플갱어마검사");
         pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_BODY_HELM + 15;
         pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_STORM_CROW_ARMOR;
         pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_STORM_CROW_PANTS;
@@ -150,7 +140,6 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_DARK_LORD;
-        wcscpy(pCharacter->ID, L"도플갱어늚㈆琯");
         pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_DARK_STEEL_MASK;
         pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_DARK_STEEL_ARMOR;
         pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_DARK_STEEL_PANTS;
@@ -165,7 +154,6 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
         pCharacter = CreateCharacter(Key, MODEL_PLAYER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Class = CLASS_SUMMONER;
-        wcscpy(pCharacter->ID, L"도플갱어소환술사");
         pCharacter->BodyPart[BODYPART_HELM].Type = MODEL_RED_WING_HELM;
         pCharacter->BodyPart[BODYPART_ARMOR].Type = MODEL_RED_WING_ARMOR;
         pCharacter->BodyPart[BODYPART_PANTS].Type = MODEL_RED_WING_PANTS;
@@ -684,19 +672,19 @@ void CGMDoppelGanger1::PlayBGM()
     {
         if (!g_pDoppelGangerFrame->IsDoppelGangerEnabled())
         {
-            StopMp3(g_lpszMp3[MUSIC_DOPPELGANGER]);
+            StopMp3(MUSIC_DOPPELGANGER);
             m_bIsMP3Playing = FALSE;
         }
         else
         {
             if (m_bIsMP3Playing == TRUE && GetMp3PlayPosition() == 0)
             {
-                StopMp3(g_lpszMp3[MUSIC_DOPPELGANGER]);
+                StopMp3(MUSIC_DOPPELGANGER);
                 m_bIsMP3Playing = FALSE;
             }
             if (m_bIsMP3Playing == FALSE)
             {
-                PlayMp3(g_lpszMp3[MUSIC_DOPPELGANGER]);
+                PlayMp3(MUSIC_DOPPELGANGER);
 
                 if (GetMp3PlayPosition() > 0)
                 {

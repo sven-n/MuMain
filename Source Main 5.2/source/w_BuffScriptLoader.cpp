@@ -14,20 +14,6 @@
 
 namespace
 {
-    //BYTE bBuxCode[3] = { 0xfc,0xcf,0xab };
-    //void BuxConvert(BYTE* Buffer, int Size)
-    //{
-    //    for (int i = 0; i < Size; i++)
-    //        Buffer[i] ^= bBuxCode[i % 3];
-    //}
-
-    //wchar_t wBuxCode[3] = { 0xcd56, 0x1d93, 0x5b81 };
-    //void BuxConvertW(wchar_t* Buffer, int Size)
-    //{
-    //    for (int i = 0; i < Size; i++)
-    //        Buffer[i] ^= wBuxCode[i % 3];
-    //}
-
     void CutTokenString(wchar_t* pcCuttoken, std::list<std::wstring>& out)
     {
         if (wcslen(pcCuttoken) == 0) return;

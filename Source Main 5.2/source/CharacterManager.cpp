@@ -7,7 +7,7 @@
 #include "GlobalText.h"
 #include "SkillManager.h"
 #include "ZzzInfomation.h"
-#include "./Utilities/Log/ErrorReport.h"
+
 
 CCharacterManager gCharacterManager;
 

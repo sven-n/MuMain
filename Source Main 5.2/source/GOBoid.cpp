@@ -15,8 +15,6 @@
 #include "ZzzEffect.h"
 #include "zzzOpenData.h"
 #include "CSChaosCastle.h"
-#include "GMHellas.h"
-#include "GMAida.h"
 #include "CDirection.h"
 #include "DSPlaySound.h"
 #include "MapManager.h"
@@ -685,11 +683,7 @@ bool RenderMount(OBJECT* o, bool bForceRender)
             if (bForceRender)
                 o->Scale = o->Scale;
             else if (SceneFlag == CHARACTER_SCENE)
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                 o->Scale = 1.2f;
-#else //PJH_NEW_SERVER_SELECT_MAP
-                o->Scale = 1.0f;
-#endif //PJH_NEW_SERVER_SELECT_MAP
             else if (o->Type != MODEL_FENRIR_BLACK && o->Type != MODEL_FENRIR_BLUE && o->Type != MODEL_FENRIR_RED
                 && o->Type != MODEL_FENRIR_GOLD
                 )
@@ -1191,22 +1185,12 @@ void MoveBoidGroup(OBJECT* o, int index)
             FlyDistance = 3000.f;
         }
         else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-            || World == WD_77NEW_LOGIN_SCENE
-            || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
             );
         else
         {
             if (rand_fps_check(512))
                 o->Live = false;
         }
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-        if (World == WD_77NEW_LOGIN_SCENE ||
-            World == WD_78NEW_CHARACTER_SCENE
-            );
-        else
-#endif //PJH_NEW_SERVER_SELECT_MAP
             if (Range >= FlyDistance)
                 o->Live = false;
     }
@@ -1260,15 +1244,6 @@ void MoveBoids()
                 bOut = TRUE;
             }
             break;
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-        case WD_77NEW_LOGIN_SCENE:
-        case WD_78NEW_CHARACTER_SCENE:
-            if (i >= 20)
-            {
-                bOut = TRUE;
-            }
-            break;
-#endif //PJH_NEW_SERVER_SELECT_MAP
         default:
             if (gMapManager.InHellas() == true)
             {
@@ -1441,10 +1416,6 @@ void MoveBoids()
                 b->CurrentAction = o->CurrentAction;
 
                 if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-                    || World == WD_77NEW_LOGIN_SCENE
-                    || World == WD_78NEW_CHARACTER_SCENE
-#endif //PJH_NEW_SERVER_SELECT_MAP
                     )
                 {
                     PlaySpeed = b->Actions[b->CurrentAction].PlaySpeed;
@@ -1559,12 +1530,6 @@ void RenderBoids(bool bAfterCharacter)
                 {
                     continue;
                 }
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-                if (World == WD_77NEW_LOGIN_SCENE && i == 0 && !CCameraMove::GetInstancePtr()->IsTourMode())
-                {
-                    continue;
-                }
-#endif //PJH_NEW_SERVER_SELECT_MAP
                 RenderObject(o, true);
 
                 BMD* b = &Models[o->Type];

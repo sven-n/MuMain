@@ -14,7 +14,6 @@
 #include "ZzzObject.h"
 #include "DSPlaySound.h"
 #include "BoneManager.h"
-#include "GMSwampOfQuiet.h"
 #include "GOBoid.h"
 #include "GIPetManager.h"
 #include "MapManager.h"
@@ -288,7 +287,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_SAPIUNUS:
         OpenMonsterModel(MONSTER_MODEL_SAPIUNUS);
         pCharacter = CreateCharacter(Key, MODEL_SAPIUNUS, PosX, PosY);
-        wcscpy(pCharacter->ID, L"사피-우누스");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -306,7 +304,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_SAPIDUO:
         OpenMonsterModel(MONSTER_MODEL_SAPIDUO);
         pCharacter = CreateCharacter(Key, MODEL_SAPIDUO, PosX, PosY);
-        wcscpy(pCharacter->ID, L"사피-두오");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -324,7 +321,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_SAPITRES:
         OpenMonsterModel(MONSTER_MODEL_SAPITRES);
         pCharacter = CreateCharacter(Key, MODEL_SAPITRES, PosX, PosY);
-        wcscpy(pCharacter->ID, L"사피-트레스");
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -342,7 +338,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_SHADOW_PAWN:
         OpenMonsterModel(MONSTER_MODEL_SHADOW_PAWN);
         pCharacter = CreateCharacter(Key, MODEL_SHADOW_PAWN, PosX, PosY);
-        wcscpy(pCharacter->ID, L"쉐도우");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -351,7 +346,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_SHADOW_KNIGHT:
         OpenMonsterModel(MONSTER_MODEL_SHADOW_KNIGHT);
         pCharacter = CreateCharacter(Key, MODEL_SHADOW_KNIGHT, PosX, PosY);
-        wcscpy(pCharacter->ID, L"쉐도우 나이트");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -360,7 +354,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_SHADOW_LOOK:
         OpenMonsterModel(MONSTER_MODEL_SHADOW_LOOK);
         pCharacter = CreateCharacter(Key, MODEL_SHADOW_LOOK, PosX, PosY);
-        wcscpy(pCharacter->ID, L"쉐도우 룩");
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -369,7 +362,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_THUNDER_NAPIN:
         OpenMonsterModel(MONSTER_MODEL_NAPIN);
         pCharacter = CreateCharacter(Key, MODEL_NAPIN, PosX, PosY);
-        wcscpy(pCharacter->ID, L"썬더 네이핀");
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -377,7 +369,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_GHOST_NAPIN:
         OpenMonsterModel(MONSTER_MODEL_GHOST_NAPIN);
         pCharacter = CreateCharacter(Key, MODEL_GHOST_NAPIN, PosX, PosY);
-        wcscpy(pCharacter->ID, L"고스트 네이핀");
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -385,7 +376,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_BLAZE_NAPIN:
         OpenMonsterModel(MONSTER_MODEL_BLAZE_NAPIN);
         pCharacter = CreateCharacter(Key, MODEL_BLAZE_NAPIN, PosX, PosY);
-        wcscpy(pCharacter->ID, L"블레이즈 네이핀");
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -393,7 +383,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_MEDUSA:
         OpenMonsterModel(MONSTER_MODEL_MEDUSA);
         pCharacter = CreateCharacter(Key, MODEL_MEDUSA, PosX, PosY);
-        wcscpy(pCharacter->ID, L"메듀사");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.LifeTime = 100;
         break;
@@ -401,7 +390,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_SAPI_QUEEN2:
         OpenMonsterModel(MONSTER_MODEL_SAPI_QUEEN);
         pCharacter = CreateCharacter(Key, MODEL_SAPI_QUEEN, PosX, PosY);
-        wcscpy(pCharacter->ID, L"사피퀸");
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -409,7 +397,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_ICE_NAPIN:
         OpenMonsterModel(MONSTER_MODEL_ICE_NAPIN);
         pCharacter = CreateCharacter(Key, MODEL_ICE_NAPIN, PosX, PosY);
-        wcscpy(pCharacter->ID, L"아이스 네이핀");
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -417,7 +404,6 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     case MONSTER_SHADOW_MASTER:
         OpenMonsterModel(MONSTER_MODEL_SHADOW_MASTER);
         pCharacter = CreateCharacter(Key, MODEL_SHADOW_MASTER, PosX, PosY);
-        wcscpy(pCharacter->ID, L"쉐도우 마스터");
         pCharacter->Object.Scale = 1.56f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;

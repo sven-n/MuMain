@@ -14,7 +14,6 @@
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
 #include "WSClient.h"
-#include "GMCrywolf1st.h"
 #include "MapManager.h"
 #include "NewUISystem.h"
 
@@ -121,34 +120,24 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 if (o->SubType == 4)
                 {
                     o->Gravity = 0.0f;
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                     o->Scale = (float)(rand() % 5 + 20) * 0.1f * 1.3f;
                     o->Position[0] = Position[0] + (float)(rand() % 80 - 40) * 1.3f;
-#else //PJH_NEW_SERVER_SELECT_MAP
                     o->Scale = (float)(rand() % 5 + 20) * 0.1f;
 
                     o->Position[0] = Position[0] + (float)(rand() % 80 - 40);
-#endif //PJH_NEW_SERVER_SELECT_MAP
                     o->Position[2] -= (100.f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 5)
                 {
                     o->TexType = BITMAP_EXT_LOG_IN + 2;
-#ifdef PJH_NEW_SERVER_SELECT_MAP
                     o->Scale = (float)(rand() % 10 + 20) * 0.01f * 1.3f;
                     o->Gravity = (float)(rand() % 10 + 20) * 0.05f * 1.3f;
-#else //PJH_NEW_SERVER_SELECT_MAP
-                    o->Scale = (float)(rand() % 10 + 20) * 0.01f;
-                    o->Gravity = (float)(rand() % 10 + 20) * 0.05f;
-#endif //PJH_NEW_SERVER_SELECT_MAP
                     o->Position[2] -= (100.f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 6)
                 {
                     o->Gravity = (float)(rand() % 20 + 80) * 0.1f;
                     o->Scale = (float)(rand() % 5 + 20) * 0.1f;
-
-                    //o->Position[0] = Position[0] + (float)(rand()%80 - 40);
                     o->Position[2] -= (200.f) * FPS_ANIMATION_FACTOR;
                 }
                 else if (o->SubType == 7)
@@ -279,14 +268,10 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 o->Angle[0] = 30.f;
                 Vector((float)(rand() % 4 + 6) * 0.1f, (float)(rand() % 4 + 6) * 0.1f, (float)(rand() % 4 + 6) * 0.1f, o->Light);
                 o->Position[2] += (260.f) * FPS_ANIMATION_FACTOR;
-                //CreateEffect(BITMAP_LIGHTNING+1,o->Position,o->Angle,o->Light);
-                //for(i=0;i<5;i++)
-                //	CreateParticle(BITMAP_SMOKE,o->Position,o->Angle,o->Light,3);
                 break;
             case BITMAP_CHROME_ENERGY2:
                 o->LifeTime = 8;
                 Vector(0.f, 0.f, 0.f, o->Velocity);
-                //Vector(0.f,-(float)(rand()%16+32)*0.1f,0.f,o->Velocity);
                 o->Scale = Scale * (float)(rand() % 64 + 128) * 0.01f;
                 o->Rotation = (float)(rand() % 360);
                 break;
@@ -374,7 +359,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 }
                 else if (o->SubType == 8)
                 {
-                    o->LifeTime = 8;//rand()%5+5;
+                    o->LifeTime = 8;
                     o->Scale = (float)(rand() % 42 + 12) * 0.01f * Scale;
                     o->Rotation = (float)(rand() % 360);
                     o->Gravity = (float)(rand() % 14 + 44) * 0.1f;
@@ -2482,7 +2467,6 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     o->LifeTime = 30;
                 }
 
-                //if ( o->SubType != 1)
                 {
                     if (o->SubType == 10)
                     {
@@ -2825,25 +2809,6 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                 o->Rotation = o->Angle[2] + 135.f;
                 break;
             case BITMAP_CLOUD:
-#ifndef PJH_NEW_SERVER_SELECT_MAP
-                if (World == WD_77NEW_LOGIN_SCENE && o->SubType == 3)
-                {
-                    o->LifeTime = 30;
-                    o->Gravity = (float)(rand() % 1000);
-
-                    o->Position[0] += ((float)(rand() % 500 - 250);//*Scale) * FPS_ANIMATION_FACTOR;
-                    o->Position[1] += ((float)(rand() % 500 - 250);//*Scale) * FPS_ANIMATION_FACTOR;
-                    o->Position[2] += ((float)(rand() % 20 + 20)) * FPS_ANIMATION_FACTOR;
-
-                    o->StartPosition[1] = (rand() % 100) / 100.f;
-                    o->StartPosition[2] = o->Position[2];
-
-                    o->Scale = (float)(rand() % 40 + 280) * 0.01f;
-                    o->TurningForce[0] = (Scale + rand() % 30 / 100.f) * 0.1f;
-                    Vector(0.f, 0.f, 0.f, o->Velocity);
-                }
-                else
-#endif//PJH_NEW_SERVER_SELECT_MAP
                     if (o->SubType == 6)
                     {
                         o->LifeTime = 25 + rand() % 5;

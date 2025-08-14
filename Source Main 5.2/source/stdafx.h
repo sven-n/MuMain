@@ -85,8 +85,22 @@
 #include "w_WindowMessageHandler.h"
 #include "_GlobalFunctions.h"
 #include "_TextureIndex.h"
-#include "InfoHelperFunctions.h"
 #include "UIDefaultBase.h"
 #include "NewUICommon.h"
 #include "./Math/ZzzMathLib.h"
 #include "ZzzOpenglUtil.h"
+
+#include "MultiLanguage.h"
+
+
+#include "./Utilities/Log/muConsoleDebug.h"
+#include "./Utilities/Log/ErrorReport.h"
+#include "./Utilities/Log/WindowsConsole.h"
+
+#include "w_MapHeaders.h"
+
+#include "_crypt.h"
+
+inline std::wstring g_strSelectedML = L"";
+inline float g_fScreenRate_x = 0;
+inline float g_fScreenRate_y = 0;

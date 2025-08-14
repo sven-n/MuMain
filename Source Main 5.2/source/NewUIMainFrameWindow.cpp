@@ -21,10 +21,6 @@
 #include "MapManager.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
-#include "GMDoppelGanger1.h"
-#include "GMDoppelGanger2.h"
-#include "GMDoppelGanger3.h"
-#include "GMDoppelGanger4.h"
 #include "./Time/CTimCheck.h"
 #include "MonkSystem.h"
 
