@@ -1,0 +1,61 @@
+name: Build MuMain (.NET Framework)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest  # Windows Server 2022 c VS Build Tools и .NET Fx 4.8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Устанавливает MSBuild из установленной VS
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      # Устанавливает nuget.exe в PATH
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      # Кэш nuget-пакетов (ускоряет последующие сборки)
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\NuGet\Cache
+            ~\.nuget\packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.config', '**/*.csproj', '**/*.sln') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      # ВАЖНО: путь с пробелами — берем в кавычки
+      - name: NuGet restore
+        run: nuget restore "Source Main 5.2/Main.sln"
+
+      # Сборка Release; чаще всего платформа "Any CPU".
+      # Если проект требует x86, поменяй Platform на "x86".
+      - name: Build (Release)
+        run: msbuild "Source Main 5.2/Main.sln" /m /v:m /p:Configuration=Release /p:Platform="Any CPU"
+
+      # Соберём артефакты: exe+dll из всех проектов Release
+      - name: Gather artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          Get-ChildItem -Path "." -Recurse -Include *.exe,*.dll `
+            | Where-Object { $_.FullName -match "\\bin\\Release\\" } `
+            | Copy-Item -Destination artifacts -Force
+          # опционально — сложить всё по подпапкам проектов:
+          # robocopy .\ "artifacts" *.exe *.dll /S /XF *.pdb *.xml
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MuMain-Release
+          path: artifacts
+          if-no-files-found: error
