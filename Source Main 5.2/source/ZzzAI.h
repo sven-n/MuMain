@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 /**
  * \brief It's the FPS for which the game was initially developed.
  * All speeds of animations, positional movements, etc. are based on it.
@@ -13,10 +15,10 @@ float CreateAngle(float x1, float y1, float x2, float y2);
 float CreateAngle2D(const vec3_t from, const vec2_t to);
 int TurnAngle(int iTheta, int iHeading, int maxTURN);
 float TurnAngle2(float angle, float a, float d);
-float FarAngle(float angle1, float angle2, bool abs = true);
+float FarAngle(float angle1, float angle2, bool absolute = true);
 float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn);
 void  MovePosition(vec3_t Position, vec3_t Angle, vec3_t Speed);
-BYTE  CalcTargetPos(float x, float y, int Tx, int Ty);
+std::uint8_t  CalcTargetPos(float x, float y, int Tx, int Ty);
 void  Alpha(OBJECT* o);
 void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX);
 void PushObject(vec3_t PushPosition, vec3_t Position, float Power, vec3_t Angle);
