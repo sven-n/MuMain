@@ -34,6 +34,8 @@ namespace
 constexpr float FULL_ROTATION_DEGREES = 360.f;
 constexpr float HALF_ROTATION_DEGREES = 180.f;
 constexpr float RAD_TO_DEG = 180.f / static_cast<float>(Q_PI);
+constexpr double MIN_FRAME_TIME_MS = 0.001;
+constexpr double MILLISECONDS_IN_SECOND = 1000.0;
 
 float NormalizeAngleDegrees(float angle)
 {
@@ -163,7 +165,7 @@ std::uint8_t CalcTargetPos(float x, float y, int Tx, int Ty)
     const std::uint8_t dx = static_cast<std::uint8_t>(8 + TargetX - PositionX);
     const std::uint8_t dy = static_cast<std::uint8_t>(8 + TargetY - PositionY);
 
-    return static_cast<std::uint8_t>(dx | static_cast<std::uint8_t>(dy << 4));
+    return static_cast<std::uint8_t>((dx & 0x0F) | ((dy & 0x0F) << 4));
 }
 
 void Alpha(OBJECT* o)
@@ -731,8 +733,8 @@ void CalcFPS()
     frame++;
     WorldTime = g_WorldTime->GetTimeElapsed();
 
-    const double differenceMs = std::max(WorldTime - last, 0.001);
-    FPS = 1000.0 / differenceMs;
+    const double differenceMs = std::max(WorldTime - last, MIN_FRAME_TIME_MS);
+    FPS = MILLISECONDS_IN_SECOND / differenceMs;
 
     // animate with no less than REFERENCE_FPS, otherwise some animations don't work correctly
     const double fpsRatio = (FPS <= 0.0) ? 0.0 : REFERENCE_FPS / FPS;
@@ -742,7 +744,7 @@ void CalcFPS()
     const double diffSinceStart = WorldTime - start;
     if (diffSinceStart > 2000.0 || frame > 25)
     {
-        FPS_AVG = (1000 * frame) / diffSinceStart;
+        FPS_AVG = (MILLISECONDS_IN_SECOND * frame) / diffSinceStart;
         start = WorldTime;
         frame = 0;
     }
