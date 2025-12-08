@@ -2153,7 +2153,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
         }
         Gold += g_SocketItemMgr.CalcSocketBonusItemValue(ip, Gold);
     }
-    Gold = std::min<int>(Gold, 3000000000);
+    Gold = std::min<int64_t>(Gold, 3000000000LL);
 
     if (goldType == 2)
     {

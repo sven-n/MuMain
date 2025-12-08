@@ -636,7 +636,20 @@ bool OpenTerrainHeight(wchar_t* filename)
     auto* Buffer = new unsigned char[Size];
 
     fseek(fp, 4, SEEK_SET);
-    fread(Buffer, 1, Size, fp);
+    const size_t bytesRead = fread(Buffer, 1, Size, fp);
+    if (bytesRead != static_cast<size_t>(Size))
+    {
+        fclose(fp);
+        delete[] Buffer;
+
+        wchar_t Text[256];
+        swprintf(Text, L"%ls file read error.", FileName);
+        g_ErrorReport.Write(Text);
+        g_ErrorReport.Write(L"\r\n");
+        MessageBox(g_hWnd, Text, NULL, MB_OK);
+        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        return false;
+    }
     fclose(fp);
 
     memcpy(BMPHeader, Buffer, Index);

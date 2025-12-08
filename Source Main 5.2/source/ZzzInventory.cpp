@@ -1201,7 +1201,7 @@ void ConvertChaosTaxGold(DWORD Gold, wchar_t* Text)
 int64_t CalcRepairCost(int64_t ItemValue, int Durability, int MaxDurability, short Type, bool SelfRepair)
 {
     // Cap ItemValue at 400M
-    int64_t repairGold = std::min<int>(ItemValue, int64_t(400000000));
+    int64_t repairGold = std::min<int64_t>(ItemValue, 400000000LL);
 
     // Calculate percentage of durability lost
     float percent = 1.f - static_cast<float>(Durability) / MaxDurability;

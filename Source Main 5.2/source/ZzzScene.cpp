@@ -460,11 +460,11 @@ BOOL ShowCheckBox(int num, int index, int message)
         {
             switch (TargetItem.Level)
             {
-            case 0:wprintf(Name, L"%ls", GlobalText[168]); break;
-            case 1:wprintf(Name, L"%ls", GlobalText[169]); break;
-            case 2:wprintf(Name, L"%ls", GlobalText[167]); break;
-            case 3:wprintf(Name, L"%ls", GlobalText[166]); break;
-            case 4:wprintf(Name, L"%ls", GlobalText[1900]); break;
+            case 0:swprintf(Name, L"%ls", GlobalText[168]); break;
+            case 1:swprintf(Name, L"%ls", GlobalText[169]); break;
+            case 2:swprintf(Name, L"%ls", GlobalText[167]); break;
+            case 3:swprintf(Name, L"%ls", GlobalText[166]); break;
+            case 4:swprintf(Name, L"%ls", GlobalText[1900]); break;
             }
         }
 
