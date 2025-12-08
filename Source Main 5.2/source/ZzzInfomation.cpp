@@ -12,10 +12,10 @@
 #include "ZzzScene.h"
 #include "ZzzInterface.h"
 #include "ReadScript.h"
-#include "zzzInventory.h"
-#include "zzzopenglutil.h"
+#include "ZzzInventory.h"
+#include "ZzzOpenglUtil.h"
 
-#include "zzzLodTerrain.h"
+#include "ZzzLodTerrain.h"
 #include "CSItemOption.h"
 #include "GIPetManager.h"
 #include "CComGem.h"
@@ -67,7 +67,7 @@ void OpenFilterFile(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -106,7 +106,7 @@ void OpenNameFilterFile(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -123,7 +123,7 @@ void OpenNameFilterFile(wchar_t* FileName)
     if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_NAMEFILTERS, 0x2BC1))
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File corrupted.", FileName);
+        swprintf(Text, L"%ls - File corrupted.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -169,7 +169,7 @@ void OpenGateScript(wchar_t* FileName)
     else
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -205,7 +205,7 @@ void OpenMonsterSkillScript(wchar_t* FileName)
     else
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -217,7 +217,7 @@ void OpenNpcScript(wchar_t* FileName)
     if ((SMDFile = _wfopen(FileName, L"rb")) == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -257,7 +257,7 @@ void OpenSkillScript(wchar_t* FileName)
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_SKILLS, 0x5A18))
         {
             wchar_t Text[256];
-            swprintf(Text, L"%s - File corrupted.", FileName);
+            swprintf(Text, L"%ls - File corrupted.", FileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -285,7 +285,7 @@ void OpenSkillScript(wchar_t* FileName)
     else
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -352,7 +352,7 @@ void OpenDialogFile(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -390,7 +390,7 @@ void OpenItemScript(wchar_t* FileName)
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE2F1))
         {
             wchar_t Text[256];
-            swprintf(Text, L"%s - File corrupted.", FileName);
+            swprintf(Text, L"%ls - File corrupted.", FileName);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -449,7 +449,7 @@ void OpenItemScript(wchar_t* FileName)
     else
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -669,7 +669,7 @@ void CalcDamageMin(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         ip->DamageMin += 5 + (GetDropLevel(p) / 40);
     }
 
-    ip->DamageMin += (min(9, ip->Level) * 3);
+    ip->DamageMin += (std::min<int>(9, ip->Level) * 3);
 
     if (ip->Level - 9 > 0)
     {
@@ -700,7 +700,7 @@ void CalcDamageMax(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         ip->DamageMax += 5 + (GetDropLevel(p) / 40);
     }
 
-    ip->DamageMax += (min(9, ip->Level) * 3);
+    ip->DamageMax += (std::min<int>(9, ip->Level) * 3);
 
     if (ip->Level - 9 > 0)
     {
@@ -731,7 +731,7 @@ void CalcMagicPower(ITEM* ip, ITEM_ATTRIBUTE* p, int excelAddValue)
         ip->MagicPower += 2 + (GetDropLevel(p) / 60);
     }
 
-    ip->MagicPower += (min(9, ip->Level) * 3);
+    ip->MagicPower += (std::min<int>(9, ip->Level) * 3);
 
     if (ip->Level - 9 > 0)
     {
@@ -758,7 +758,7 @@ void CalcSuccessfulBlocking(ITEM* ip, ITEM_ATTRIBUTE* p)
         if (p->Level)
             ip->SuccessfulBlocking += p->SuccessfulBlocking * 25 / p->Level + 5;
     }
-    ip->SuccessfulBlocking += (min(9, p->Level) * 3);	// ~ +9
+    ip->SuccessfulBlocking += (std::min<int>(9, p->Level) * 3);	// ~ +9
     if (p->Level - 9 > 0)
     {
         ip->SuccessfulBlocking += p->Level - 6;
@@ -769,7 +769,7 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 {
     if (p->MagicDefense > 0)
     {
-        ip->MagicDefense += (min(9, p->Level) * 3);	// ~ +9
+        ip->MagicDefense += (std::min<int>(9, p->Level) * 3);	// ~ +9
         if(p->Level - 9 > 0)
         {
             ip->MagicDefense += p->Level - 6;
@@ -814,21 +814,21 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 
     if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_WINGS_OF_DESPAIR)
     {
-        ip->Defense += (min(9, ip->Level) * 2);	// ~ +9
+        ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
     }
     else if (ip->Type == ITEM_CAPE_OF_LORD
         || ip->Type == ITEM_CAPE_OF_FIGHTER)
     {
-        ip->Defense += (min(9, ip->Level) * 2);	// ~ +9
+        ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
     }
     else if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
         || (ip->Type == ITEM_CAPE_OF_OVERRULE))
     {
-        ip->Defense += (min(9, ip->Level) * 4);	// ~ +9
+        ip->Defense += (std::min<int>(9, ip->Level) * 4);	// ~ +9
     }
     else
     {
-        ip->Defense += (min(9, ip->Level) * 3);	// ~ +9
+        ip->Defense += (std::min<int>(9, ip->Level) * 3);	// ~ +9
     }
     if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
         || ip->Type == ITEM_CAPE_OF_OVERRULE)
@@ -1820,17 +1820,17 @@ int64_t ItemValue(ITEM* ip, int goldType)
     else if (ip->Type == ITEM_DEVILS_EYE)
     {
         int iValue[8] = { 30000, 10000, 50000, 100000, 300000, 500000, 800000, 1000000 };
-        Gold = iValue[min(max(0, Level), 7)];
+        Gold = iValue[std::min<int>(std::max<int>(0, Level), 7)];
     }
     else if (ip->Type == ITEM_DEVILS_KEY)
     {
         int iValue[8] = { 30000, 15000, 75000, 150000, 450000, 750000, 1200000, 1500000 };
-        Gold = iValue[min(max(0, Level), 7)];
+        Gold = iValue[std::min<int>(std::max<int>(0, Level), 7)];
     }
     else if (ip->Type == ITEM_DEVILS_INVITATION)
     {
         int iValue[8] = { 120000, 60000, 84000, 120000, 180000, 240000, 300000, 180000 };
-        Gold = iValue[min(max(0, Level), 7)];
+        Gold = iValue[std::min<int>(std::max<int>(0, Level), 7)];
     }
     else if (ip->Type == ITEM_OLD_SCROLL || ip->Type == ITEM_ILLUSION_SORCERER_COVENANT || ip->Type == ITEM_SCROLL_OF_BLOOD)
     {
@@ -2153,7 +2153,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
         }
         Gold += g_SocketItemMgr.CalcSocketBonusItemValue(ip, Gold);
     }
-    Gold = min(Gold, 3000000000);
+    Gold = std::min<int>(Gold, 3000000000);
 
     if (goldType == 2)
     {
@@ -2486,7 +2486,7 @@ void OpenMonsterScript(wchar_t* FileName)
     if ((SMDFile = _wfopen(FileName, L"rb")) == nullptr)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         return;

@@ -1,7 +1,7 @@
 #ifndef __ZZZINVENTORY_H__
 #define __ZZZINVENTORY_H__
 
-const enum _COLUMN_TYPE
+enum _COLUMN_TYPE
 {
     _COLUMN_TYPE_LEVEL = 0,
     _COLUMN_TYPE_CAN_EQUIP,
@@ -22,7 +22,7 @@ const enum _COLUMN_TYPE
     _COLUMN_TYPE_REQNLV
 };
 
-const enum ITEMSETOPTION
+enum ITEMSETOPTION
 {
     eITEM_PERSONALSHOP = 0,
     eITEM_STORE,
@@ -39,7 +39,7 @@ struct sItemAct
     bool	s_bType[eITEM_END];
 };
 
-const enum SKILL_TOOLTIP_RENDER_POINT
+enum SKILL_TOOLTIP_RENDER_POINT
 {
     STRP_NONE = 0,
     STRP_TOPLEFT,
@@ -53,7 +53,7 @@ const enum SKILL_TOOLTIP_RENDER_POINT
     STRP_BOOTOMRIGHT
 };
 
-// ¼¼À²Á¤º¸
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 extern int		g_nTaxRate;
 extern int		g_nChaosTaxRate;
@@ -77,7 +77,7 @@ extern int			GuildTotalScore;
 extern int AllRepairGold;
 
 //////////////////////////////////////////////////////////////////////////
-// text °ü·Ã
+// text ï¿½ï¿½ï¿½ï¿½
 //////////////////////////////////////////////////////////////////////////
 extern wchar_t TextList[50][100];
 extern int TextListColor[50];

@@ -9,10 +9,10 @@
 #include "ZzzCharacter.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzTexture.h"
-#include "ZzzAi.h"
+#include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "WSClient.h"
+#include "WSclient.h"
 #include "NewUISystem.h"
 
 PARTICLE  Points[MAX_POINTS];

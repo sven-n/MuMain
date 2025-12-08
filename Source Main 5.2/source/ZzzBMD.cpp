@@ -7,11 +7,11 @@
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzTexture.h"
 #include "ZzzAI.h"
 #include "SMD.h"
-#include "zzzEffect.h"
+#include "ZzzEffect.h"
 
 #include "UIMng.h"
 #include "CameraMove.h"
@@ -273,7 +273,7 @@ void BMD::Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Boun
         OBB->YAxis[1] = (BoundingBoxMax[1] - BoundingBoxMin[1]);
         OBB->ZAxis[2] = (BoundingBoxMax[2] - BoundingBoxMin[2]);
     }
-    fTransformedSize = max(max(BoundingMax[0] - BoundingMin[0], BoundingMax[1] - BoundingMin[1]),
+    fTransformedSize = std::max<float>(std::max<float>(BoundingMax[0] - BoundingMin[0], BoundingMax[1] - BoundingMin[1]),
         BoundingMax[2] - BoundingMin[2]);
     VectorAdd(OBB->StartPos, BodyOrigin, OBB->StartPos);
     OBB->XAxis[1] = 0.f;
@@ -2690,12 +2690,12 @@ bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
     }
 
     wchar_t ModelPath[260] = {};
-    _snwprintf(ModelPath, std::size(ModelPath), L"%s%s", DirName, ModelFileName);
+    _snwprintf(ModelPath, std::size(ModelPath), L"%ls%ls", DirName, ModelFileName);
 
     FILE* fp = _wfopen(ModelPath, L"rb");
     if (!fp)
     {
-        //// wprintf(L"[Open2] ERROR: Unable to open file: %s\n", ModelPath);
+        //// wprintf(L"[Open2] ERROR: Unable to open file: %ls\n", ModelPath);
         m_bCompletedAlloc = false;
         return false;
     }

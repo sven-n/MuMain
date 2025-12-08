@@ -904,7 +904,7 @@ void ComputeItemInfo(int iHelpItem)
 
         if (DamageMin > 0)
         {
-            DamageMin += (min(9, Level) * 3);
+            DamageMin += (std::min<int>(9, Level) * 3);
             switch (Level - 9)
             {
             case 6: DamageMin += 9; break;	// +15
@@ -918,7 +918,7 @@ void ComputeItemInfo(int iHelpItem)
         }
         if (DamageMax > 0)
         {
-            DamageMax += (min(9, Level) * 3);
+            DamageMax += (std::min<int>(9, Level) * 3);
             switch (Level - 9)
             {
             case 6: DamageMax += 9; break;	// +15
@@ -933,7 +933,7 @@ void ComputeItemInfo(int iHelpItem)
 
         if (Magic > 0)
         {
-            Magic += (min(9, Level) * 3);	// ~ +9
+            Magic += (std::min<int>(9, Level) * 3);	// ~ +9
             switch (Level - 9)
             {
             case 6: Magic += 9; break;		// +15
@@ -960,7 +960,7 @@ void ComputeItemInfo(int iHelpItem)
             }
             else
             {
-                Defense += (min(9, Level) * 3);	// ~ +9
+                Defense += (std::min<int>(9, Level) * 3);	// ~ +9
                 switch (Level - 9)
                 {
                 case 6: Defense += 9; break;	// +15
@@ -975,7 +975,7 @@ void ComputeItemInfo(int iHelpItem)
         }
         if (Blocking > 0)
         {
-            Blocking += (min(9, Level) * 3);	// ~ +9
+            Blocking += (std::min<int>(9, Level) * 3);	// ~ +9
             switch (Level - 9)
             {
             case 6: Blocking += 9; break;	// +15
@@ -1201,7 +1201,7 @@ void ConvertChaosTaxGold(DWORD Gold, wchar_t* Text)
 int64_t CalcRepairCost(int64_t ItemValue, int Durability, int MaxDurability, short Type, bool SelfRepair)
 {
     // Cap ItemValue at 400M
-    int64_t repairGold = min(ItemValue, int64_t(400000000));
+    int64_t repairGold = std::min<int>(ItemValue, int64_t(400000000));
 
     // Calculate percentage of durability lost
     float percent = 1.f - static_cast<float>(Durability) / MaxDurability;
@@ -1636,50 +1636,50 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         {
             switch (iLevel)
             {
-            case 0: swprintf(Text, L"%s", p->Name); break;
-            case 1: swprintf(Text, L"%s", GlobalText[906]); break;
+            case 0: swprintf(Text, L"%ls", p->Name); break;
+            case 1: swprintf(Text, L"%ls", GlobalText[906]); break;
             }
         }
         else if (iType == ITEM_BROKEN_SWORD_DARK_STONE)
         {
             switch (iLevel)
             {
-            case 0: swprintf(Text, L"%s", p->Name); break;
-            case 1: swprintf(Text, L"%s", GlobalText[907]); break;
+            case 0: swprintf(Text, L"%ls", p->Name); break;
+            case 1: swprintf(Text, L"%ls", GlobalText[907]); break;
             }
         }
         else
         {
-            swprintf(Text, L"%s", p->Name);
+            swprintf(Text, L"%ls", p->Name);
         }
     }
     else if (iType == ITEM_POTION + 12)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s", GlobalText[100]); break;
-        case 1: swprintf(Text, L"%s", GlobalText[101]); break;
-        case 2: swprintf(Text, L"%s", ChaosEventName[p->Durability]); break;
+        case 0: swprintf(Text, L"%ls", GlobalText[100]); break;
+        case 1: swprintf(Text, L"%ls", GlobalText[101]); break;
+        case 2: swprintf(Text, L"%ls", ChaosEventName[p->Durability]); break;
         }
     }
     else if (iType == ITEM_BOX_OF_LUCK)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s", p->Name); break;
-        case 1: swprintf(Text, L"%s", GlobalText[105]); break;
-        case 2: swprintf(Text, L"%s", GlobalText[106]); break;
-        case 3: swprintf(Text, L"%s", GlobalText[107]); break;
-        case 5: swprintf(Text, L"%s", GlobalText[109]); break;
-        case 6: swprintf(Text, L"%s", GlobalText[110]); break;
-        case 7: swprintf(Text, L"%s", GlobalText[111]); break;
+        case 0: swprintf(Text, L"%ls", p->Name); break;
+        case 1: swprintf(Text, L"%ls", GlobalText[105]); break;
+        case 2: swprintf(Text, L"%ls", GlobalText[106]); break;
+        case 3: swprintf(Text, L"%ls", GlobalText[107]); break;
+        case 5: swprintf(Text, L"%ls", GlobalText[109]); break;
+        case 6: swprintf(Text, L"%ls", GlobalText[110]); break;
+        case 7: swprintf(Text, L"%ls", GlobalText[111]); break;
             break;
         case 8:
         case 9:
         case 10:
         case 11:
         case 12:
-            swprintf(Text, L"%s +%d", GlobalText[115], iLevel - 7);
+            swprintf(Text, L"%ls +%d", GlobalText[115], iLevel - 7);
             break;
         case 13:
             swprintf(Text, GlobalText[117]); break;
@@ -1696,107 +1696,107 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
     {
         switch (iLevel)
         {
-        case 0:swprintf(Text, L"%s %s", GlobalText[168], p->Name); break;
-        case 1:swprintf(Text, L"%s %s", GlobalText[169], p->Name); break;
-        case 2:swprintf(Text, L"%s %s", GlobalText[167], p->Name); break;
-        case 3:swprintf(Text, L"%s %s", GlobalText[166], p->Name); break;
-        case 4:swprintf(Text, L"%s %s", GlobalText[1900], p->Name); break;
+        case 0:swprintf(Text, L"%ls %ls", GlobalText[168], p->Name); break;
+        case 1:swprintf(Text, L"%ls %ls", GlobalText[169], p->Name); break;
+        case 2:swprintf(Text, L"%ls %ls", GlobalText[167], p->Name); break;
+        case 3:swprintf(Text, L"%ls %ls", GlobalText[166], p->Name); break;
+        case 4:swprintf(Text, L"%ls %ls", GlobalText[1900], p->Name); break;
         }
     }
     else if (iType == ITEM_LOCHS_FEATHER)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s", p->Name); break;
-        case 1: swprintf(Text, L"%s", GlobalText[1235]); break;
+        case 0: swprintf(Text, L"%ls", p->Name); break;
+        case 1: swprintf(Text, L"%ls", GlobalText[1235]); break;
         }
     }
     else if (iType == ITEM_SPIRIT)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s %s", GlobalText[1187], p->Name); break;
-        case 1: swprintf(Text, L"%s %s", GlobalText[1214], p->Name); break;
+        case 0: swprintf(Text, L"%ls %ls", GlobalText[1187], p->Name); break;
+        case 1: swprintf(Text, L"%ls %ls", GlobalText[1214], p->Name); break;
         }
     }
     else if (iType == ITEM_POTION + 21)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s", p->Name); break;
-        case 1: swprintf(Text, L"%s", GlobalText[810]); break;
-        case 2: swprintf(Text, L"%s", GlobalText[1098]); break;
-        case 3: swprintf(Text, L"%s", GlobalText[1290]); break;
+        case 0: swprintf(Text, L"%ls", p->Name); break;
+        case 1: swprintf(Text, L"%ls", GlobalText[810]); break;
+        case 2: swprintf(Text, L"%ls", GlobalText[1098]); break;
+        case 3: swprintf(Text, L"%ls", GlobalText[1290]); break;
         }
     }
     else if (iType == ITEM_WEAPON_OF_ARCHANGEL)
     {
-        swprintf(Text, L"%s", GlobalText[809]);
+        swprintf(Text, L"%ls", GlobalText[809]);
     }
     else if (iType == ITEM_WIZARDS_RING)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s", p->Name); break;
-        case 1: swprintf(Text, L"%s", GlobalText[922]); break;
-        case 2: swprintf(Text, L"%s", GlobalText[928]); break;
-        case 3: swprintf(Text, L"%s", GlobalText[929]); break;
+        case 0: swprintf(Text, L"%ls", p->Name); break;
+        case 1: swprintf(Text, L"%ls", GlobalText[922]); break;
+        case 2: swprintf(Text, L"%ls", GlobalText[928]); break;
+        case 3: swprintf(Text, L"%ls", GlobalText[929]); break;
         }
     }
     else if (iType == ITEM_ALE)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s", p->Name); break;
-        case 1:	swprintf(Text, L"%s", GlobalText[108]); break;
+        case 0: swprintf(Text, L"%ls", p->Name); break;
+        case 1:	swprintf(Text, L"%ls", GlobalText[108]); break;
         }
     }
     else if (iType == ITEM_ORB_OF_SUMMONING)
     {
-        swprintf(Text, L"%s %s", SkillAttribute[30 + iLevel].Name, GlobalText[102]);
+        swprintf(Text, L"%ls %ls", SkillAttribute[30 + iLevel].Name, GlobalText[102]);
     }
     else if (iType == ITEM_RED_RIBBON_BOX)
     {
-        swprintf(Text, L"%s", p->Name);
+        swprintf(Text, L"%ls", p->Name);
     }
     else if (iType == ITEM_GREEN_RIBBON_BOX)
     {
-        swprintf(Text, L"%s", p->Name);
+        swprintf(Text, L"%ls", p->Name);
     }
     else if (iType == ITEM_BLUE_RIBBON_BOX)
     {
-        swprintf(Text, L"%s", p->Name);
+        swprintf(Text, L"%ls", p->Name);
     }
     else if (iType == ITEM_SCROLL_OF_FIRE_SCREAM)
     {
-        swprintf(Text, L"%s", p->Name);
+        swprintf(Text, L"%ls", p->Name);
     }
     else if (iType >= ITEM_PUMPKIN_OF_LUCK && iType <= ITEM_JACK_OLANTERN_DRINK)
     {
-        swprintf(Text, L"%s", p->Name);
+        swprintf(Text, L"%ls", p->Name);
     }
     else if (iType == ITEM_PINK_CHOCOLATE_BOX)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s", p->Name); break;
-        case 1:	swprintf(Text, L"%s", GlobalText[2012]); break;
+        case 0: swprintf(Text, L"%ls", p->Name); break;
+        case 1:	swprintf(Text, L"%ls", GlobalText[2012]); break;
         }
     }
     else if (iType == ITEM_RED_CHOCOLATE_BOX)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s", p->Name); break;
-        case 1:	swprintf(Text, L"%s", GlobalText[2013]); break;
+        case 0: swprintf(Text, L"%ls", p->Name); break;
+        case 1:	swprintf(Text, L"%ls", GlobalText[2013]); break;
         }
     }
     else if (iType == ITEM_BLUE_CHOCOLATE_BOX)
     {
         switch (iLevel)
         {
-        case 0: swprintf(Text, L"%s", p->Name); break;
-        case 1:	swprintf(Text, L"%s", GlobalText[2014]); break;
+        case 0: swprintf(Text, L"%ls", p->Name); break;
+        case 1:	swprintf(Text, L"%ls", GlobalText[2014]); break;
         }
     }
     else if (iType == ITEM_TRANSFORMATION_RING)
@@ -1805,62 +1805,62 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         {
             if (SommonTable[iLevel] == MonsterScript[i].Type)
             {
-                swprintf(Text, L"%s %s", MonsterScript[i].Name, GlobalText[103]);
+                swprintf(Text, L"%ls %ls", MonsterScript[i].Name, GlobalText[103]);
             }
         }
     }
     else if (iType >= ITEM_WINGS_OF_SPIRITS && iType <= ITEM_WINGS_OF_DARKNESS)
     {
         if (iLevel == 0)
-            swprintf(Text, L"%s", p->Name);
+            swprintf(Text, L"%ls", p->Name);
         else
-            swprintf(Text, L"%s +%d", p->Name, iLevel);
+            swprintf(Text, L"%ls +%d", p->Name, iLevel);
     }
     else if ((iType >= ITEM_WING_OF_STORM && iType <= ITEM_CAPE_OF_EMPEROR) || (iType >= ITEM_WINGS_OF_DESPAIR && iType <= ITEM_WING_OF_DIMENSION)
         || (iType == ITEM_CAPE_OF_OVERRULE))
     {
         if (iLevel == 0)
-            swprintf(Text, L"%s", p->Name);
+            swprintf(Text, L"%ls", p->Name);
         else
-            swprintf(Text, L"%s +%d", p->Name, iLevel);
+            swprintf(Text, L"%ls +%d", p->Name, iLevel);
     }
     else if (iType == ITEM_DIVINE_SWORD_OF_ARCHANGEL || iType == ITEM_DIVINE_CB_OF_ARCHANGEL || iType == ITEM_DIVINE_STAFF_OF_ARCHANGEL || iType == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
     {
         if (iLevel == 0)
-            swprintf(Text, L"%s", p->Name);
+            swprintf(Text, L"%ls", p->Name);
         else
-            swprintf(Text, L"%s +%d", p->Name, iLevel);
+            swprintf(Text, L"%ls +%d", p->Name, iLevel);
     }
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(iType))
     {
-        swprintf(Text, L"%s +%d", p->Name, iLevel + 1);
+        swprintf(Text, L"%ls +%d", p->Name, iLevel + 1);
     }
     else if (iType == INDEX_COMPILED_CELE)
     {
-        swprintf(Text, L"%s +%d", GlobalText[1806], iLevel + 1);
+        swprintf(Text, L"%ls +%d", GlobalText[1806], iLevel + 1);
     }
     else if (iType == INDEX_COMPILED_SOUL)
     {
-        swprintf(Text, L"%s +%d", GlobalText[1807], iLevel + 1);
+        swprintf(Text, L"%ls +%d", GlobalText[1807], iLevel + 1);
     }
     else if ((iType >= ITEM_SEED_FIRE && iType <= ITEM_SEED_EARTH)
         || (iType >= ITEM_SPHERE_MONO && iType <= ITEM_SPHERE_5)
         || (iType >= ITEM_SEED_SPHERE_FIRE_1 && iType <= ITEM_SEED_SPHERE_EARTH_5))
     {
-        swprintf(Text, L"%s", p->Name);
+        swprintf(Text, L"%ls", p->Name);
     }
     else if (iType == ITEM_SIEGE_POTION)
     {
         int iTextIndex = 0;
         iTextIndex = (iLevel == 0) ? 1413 : 1414;
-        swprintf(Text, L"%s", GlobalText[iTextIndex]);
+        swprintf(Text, L"%ls", GlobalText[iTextIndex]);
     }
     else
     {
         if (iLevel == 0)
-            swprintf(Text, L"%s", p->Name);
+            swprintf(Text, L"%ls", p->Name);
         else
-            swprintf(Text, L"%s +%d", p->Name, iLevel);
+            swprintf(Text, L"%ls +%d", p->Name, iLevel);
     }
 }
 
@@ -2304,7 +2304,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             Color = TEXT_COLOR_YELLOW;
             switch (Level)
             {
-            case 0: swprintf(TextList[TextNum], L"%s", p->Name); break;
+            case 0: swprintf(TextList[TextNum], L"%ls", p->Name); break;
             case 1: swprintf(TextList[TextNum], GlobalText[906]); break;
             }
         }
@@ -2313,12 +2313,12 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             Color = TEXT_COLOR_YELLOW;
             switch (Level)
             {
-            case 0: swprintf(TextList[TextNum], L"%s", p->Name); break;
+            case 0: swprintf(TextList[TextNum], L"%ls", p->Name); break;
             case 1: swprintf(TextList[TextNum], GlobalText[907]); break;
             }
         }
         else {
-            swprintf(TextList[TextNum], L"%s", p->Name);
+            swprintf(TextList[TextNum], L"%ls", p->Name);
             Color = TEXT_COLOR_YELLOW;
         }
     }
@@ -2328,14 +2328,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
         case 0:swprintf(TextList[TextNum], GlobalText[100]); break;
         case 1:swprintf(TextList[TextNum], GlobalText[101]); break;
-        case 2:swprintf(TextList[TextNum], L"%s", ChaosEventName[ip->Durability]); break;
+        case 2:swprintf(TextList[TextNum], L"%ls", ChaosEventName[ip->Durability]); break;
         }
     }
     else if (ip->Type == ITEM_BOX_OF_LUCK)
     {
         switch (Level)
         {
-        case 0:swprintf(TextList[TextNum], L"%s", p->Name); break;
+        case 0:swprintf(TextList[TextNum], L"%ls", p->Name); break;
         case 1:swprintf(TextList[TextNum], GlobalText[105]); break;
         case 2:swprintf(TextList[TextNum], GlobalText[106]); break;
         case 3:swprintf(TextList[TextNum], GlobalText[107]); break;
@@ -2347,7 +2347,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         case 10:
         case 11:
         case 12:
-            swprintf(TextList[TextNum], L"%s +%d", GlobalText[115], Level - 7);
+            swprintf(TextList[TextNum], L"%ls +%d", GlobalText[115], Level - 7);
             break;
         case 13:
             swprintf(TextList[TextNum], GlobalText[117]);
@@ -2366,7 +2366,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
         case 0:swprintf(TextList[TextNum], GlobalText[100]); break;
         case 1:swprintf(TextList[TextNum], GlobalText[101]); break;
-        case 2:swprintf(TextList[TextNum], L"%s", ChaosEventName[ip->Durability]); break;
+        case 2:swprintf(TextList[TextNum], L"%ls", ChaosEventName[ip->Durability]); break;
         }
     }
     else if (ip->Type == ITEM_FRUITS)
@@ -2374,11 +2374,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
         switch (Level)
         {
-        case 0:swprintf(TextList[TextNum], L"%s %s", GlobalText[168], p->Name); break;
-        case 1:swprintf(TextList[TextNum], L"%s %s", GlobalText[169], p->Name); break;
-        case 2:swprintf(TextList[TextNum], L"%s %s", GlobalText[167], p->Name); break;
-        case 3:swprintf(TextList[TextNum], L"%s %s", GlobalText[166], p->Name); break;
-        case 4:swprintf(TextList[TextNum], L"%s %s", GlobalText[1900], p->Name); break;
+        case 0:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[168], p->Name); break;
+        case 1:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[169], p->Name); break;
+        case 2:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[167], p->Name); break;
+        case 3:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[166], p->Name); break;
+        case 4:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[1900], p->Name); break;
         }
     }
     else if (ip->Type == ITEM_LOCHS_FEATHER)
@@ -2386,8 +2386,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
         switch (Level)
         {
-        case 0: swprintf(TextList[TextNum], L"%s", p->Name); break;
-        case 1: swprintf(TextList[TextNum], L"%s", GlobalText[1235]); break;
+        case 0: swprintf(TextList[TextNum], L"%ls", p->Name); break;
+        case 1: swprintf(TextList[TextNum], L"%ls", GlobalText[1235]); break;
         }
     }
     else if (ip->Type == ITEM_POTION + 21)
@@ -2395,7 +2395,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         Color = TEXT_COLOR_YELLOW;
         switch (Level)
         {
-        case 0: swprintf(TextList[TextNum], L"%s", p->Name); break;
+        case 0: swprintf(TextList[TextNum], L"%ls", p->Name); break;
         case 1: swprintf(TextList[TextNum], GlobalText[810]); break;
         case 2: swprintf(TextList[TextNum], GlobalText[1098]); break;
         case 3: swprintf(TextList[TextNum], GlobalText[1290]); break;
@@ -2455,13 +2455,13 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         switch (Level)
         {
-        case 0:swprintf(TextList[TextNum], L"%s", p->Name); break;
+        case 0:swprintf(TextList[TextNum], L"%ls", p->Name); break;
         case 1:swprintf(TextList[TextNum], GlobalText[108]); break;
         }
     }
     else if (ip->Type == ITEM_ORB_OF_SUMMONING)
     {
-        swprintf(TextList[TextNum], L"%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
+        swprintf(TextList[TextNum], L"%ls %ls", SkillAttribute[30 + Level].Name, GlobalText[102]);
     }
     else if (ip->Type == ITEM_TRANSFORMATION_RING)
     {
@@ -2469,7 +2469,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             if (SommonTable[Level] == MonsterScript[i].Type)
             {
-                swprintf(TextList[TextNum], L"%s %s", MonsterScript[i].Name, GlobalText[103]);
+                swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, GlobalText[103]);
                 break;
             }
         }
@@ -2477,32 +2477,32 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS)
     {
         if (Level == 0)
-            swprintf(TextList[TextNum], L"%s", p->Name);
+            swprintf(TextList[TextNum], L"%ls", p->Name);
         else
-            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
     }
     else if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || (ip->Type >= ITEM_WINGS_OF_DESPAIR && ip->Type <= ITEM_WING_OF_DIMENSION)
         || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
     {
         if (Level == 0)
-            swprintf(TextList[TextNum], L"%s", p->Name);
+            swprintf(TextList[TextNum], L"%ls", p->Name);
         else
-            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
     }
     else if (ip->Type == ITEM_SPIRIT)
     {
         switch (Level)
         {
-        case 0: swprintf(TextList[TextNum], L"%s of %s", p->Name, GlobalText[1187]); break;
-        case 1: swprintf(TextList[TextNum], L"%s of %s", p->Name, GlobalText[1214]); break;
+        case 0: swprintf(TextList[TextNum], L"%ls of %ls", p->Name, GlobalText[1187]); break;
+        case 1: swprintf(TextList[TextNum], L"%ls of %ls", p->Name, GlobalText[1214]); break;
         }
     }
     else if (ip->Type == ITEM_CAPE_OF_LORD)
     {
         if (Level == 0)
-            swprintf(TextList[TextNum], L"%s", p->Name);
+            swprintf(TextList[TextNum], L"%ls", p->Name);
         else
-            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
     }
     else if (ip->Type == ITEM_SYMBOL_OF_KUNDUN)
     {
@@ -2511,36 +2511,36 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ip->Type == ITEM_LOST_MAP)
     {
         Color = TEXT_COLOR_YELLOW;
-        swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
+        swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
     }
     else if (ip->Type == ITEM_RED_RIBBON_BOX)
     {
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
     }
     else if (ip->Type == ITEM_GREEN_RIBBON_BOX)
     {
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
     }
     else if (ip->Type == ITEM_BLUE_RIBBON_BOX)
     {
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
     }
     else if (ip->Type == ITEM_SCROLL_OF_FIRE_SCREAM)
     {
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
     }
     else if (ip->Type >= ITEM_PUMPKIN_OF_LUCK && ip->Type <= ITEM_JACK_OLANTERN_DRINK)
     {
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
     }
     else if (ip->Type == ITEM_PINK_CHOCOLATE_BOX)
     {
         switch (Level)
         {
         case 0:
-            swprintf(TextList[TextNum], L"%s", p->Name); break;
+            swprintf(TextList[TextNum], L"%ls", p->Name); break;
         case 1:
-            swprintf(TextList[TextNum], L"%s", GlobalText[2012]); break;
+            swprintf(TextList[TextNum], L"%ls", GlobalText[2012]); break;
         }
     }
     else if (ip->Type == ITEM_RED_CHOCOLATE_BOX)
@@ -2548,9 +2548,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         switch (Level)
         {
         case 0:
-            swprintf(TextList[TextNum], L"%s", p->Name); break;
+            swprintf(TextList[TextNum], L"%ls", p->Name); break;
         case 1:
-            swprintf(TextList[TextNum], L"%s", GlobalText[2013]); break;
+            swprintf(TextList[TextNum], L"%ls", GlobalText[2013]); break;
         }
     }
     else if (ip->Type == ITEM_BLUE_CHOCOLATE_BOX)
@@ -2558,9 +2558,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         switch (Level)
         {
         case 0:
-            swprintf(TextList[TextNum], L"%s", p->Name); break;
+            swprintf(TextList[TextNum], L"%ls", p->Name); break;
         case 1:
-            swprintf(TextList[TextNum], L"%s", GlobalText[2014]); break;
+            swprintf(TextList[TextNum], L"%ls", GlobalText[2014]); break;
         }
     }
     else if (ip->Type >= ITEM_SPLINTER_OF_ARMOR && ip->Type <= ITEM_HORN_OF_FENRIR)
@@ -2569,56 +2569,56 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             Color = TEXT_COLOR_BLUE;
             if ((ip->ExcellentFlags & 63) == 0x01)
-                swprintf(TextList[TextNum], L"%s %s", p->Name, GlobalText[1863]);
+                swprintf(TextList[TextNum], L"%ls %ls", p->Name, GlobalText[1863]);
             else if ((ip->ExcellentFlags & 63) == 0x02)
-                swprintf(TextList[TextNum], L"%s %s", p->Name, GlobalText[1864]);
+                swprintf(TextList[TextNum], L"%ls %ls", p->Name, GlobalText[1864]);
             else if ((ip->ExcellentFlags & 63) == 0x04)
-                swprintf(TextList[TextNum], L"%s %s", p->Name, GlobalText[1866]);
+                swprintf(TextList[TextNum], L"%ls %ls", p->Name, GlobalText[1866]);
             else
-                swprintf(TextList[TextNum], L"%s", p->Name);
+                swprintf(TextList[TextNum], L"%ls", p->Name);
         }
         else
         {
             Color = TEXT_COLOR_WHITE;
-            swprintf(TextList[TextNum], L"%s", p->Name);
+            swprintf(TextList[TextNum], L"%ls", p->Name);
         }
     }
     else if (ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
     {
         if (Level == 0)
-            swprintf(TextList[TextNum], L"%s", p->Name);
+            swprintf(TextList[TextNum], L"%ls", p->Name);
         else
-            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
     }
     else if (nGemType != COMGEM::NOGEM && nGemType % 2 == 1)
     {
         int nGlobalIndex = COMGEM::GetJewelIndex(nGemType, COMGEM::eGEM_NAME);
-        swprintf(TextList[TextNum], L"%s +%d", GlobalText[nGlobalIndex], Level + 1);
+        swprintf(TextList[TextNum], L"%ls +%d", GlobalText[nGlobalIndex], Level + 1);
     }
     else if (ip->Type == ITEM_GEMSTONE || ip->Type == ITEM_JEWEL_OF_HARMONY ||
         ip->Type == ITEM_LOWER_REFINE_STONE || ip->Type == ITEM_HIGHER_REFINE_STONE ||
         ip->Type == ITEM_MOONSTONE_PENDANT
         )
     {
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
         Color = TEXT_COLOR_YELLOW;
     }
     else if ((ip->Type >= ITEM_SEED_FIRE && ip->Type <= ITEM_SEED_EARTH)
         || (ip->Type >= ITEM_SPHERE_MONO && ip->Type <= ITEM_SPHERE_5)
         || (ip->Type >= ITEM_SEED_SPHERE_FIRE_1 && ip->Type <= ITEM_SEED_SPHERE_EARTH_5))
     {
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
         Color = TEXT_COLOR_VIOLET;
     }
     else if (ip->Type == ITEM_POTION + 111)
     {
         Color = TEXT_COLOR_YELLOW;
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
     }
     else if (ITEM_SUSPICIOUS_SCRAP_OF_PAPER <= ip->Type && ip->Type <= ITEM_COMPLETE_SECROMICON)
     {
         Color = TEXT_COLOR_YELLOW;
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
     }
     else
     {
@@ -2635,16 +2635,16 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         if (ip->ExcellentFlags > 0)
         {
             if (Level == 0)
-                swprintf(TextList[TextNum], L"%s %s", GlobalText[620], TextName);
+                swprintf(TextList[TextNum], L"%ls %ls", GlobalText[620], TextName);
             else
-                swprintf(TextList[TextNum], L"%s %s +%d", GlobalText[620], TextName, Level);
+                swprintf(TextList[TextNum], L"%ls %ls +%d", GlobalText[620], TextName, Level);
         }
         else
         {
             if (Level == 0)
-                swprintf(TextList[TextNum], L"%s", TextName);
+                swprintf(TextList[TextNum], L"%ls", TextName);
             else
-                swprintf(TextList[TextNum], L"%s +%d", TextName, Level);
+                swprintf(TextList[TextNum], L"%ls +%d", TextName, Level);
         }
     }
 
@@ -2668,19 +2668,19 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         switch (Level)
         {
         case 0:
-            swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[42], 107, 110);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[42], 107, 110);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             iWeaponSpeed = 20;
             iNeedStrength = 132;
             iNeedDex = 32;
             break;
         case 1:
-            swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[40], 110, 120);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[40], 110, 120);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             iWeaponSpeed = 35;
             iNeedStrength = 381;
             iNeedDex = 149;
             break;
         case 2:
-            swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[41], 120, 140);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+            swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[41], 120, 140);  TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
             iWeaponSpeed = 35;
             iNeedStrength = 140;
             iNeedDex = 350;
@@ -3913,7 +3913,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
 
     Color = TEXT_COLOR_YELLOW;
-    swprintf(TextList[TextNum], L"%s", p->Name);
+    swprintf(TextList[TextNum], L"%ls", p->Name);
 
     if (ip->Type == ITEM_DEVILS_INVITATION)
     {
@@ -3947,7 +3947,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         int DamageMax = ip->DamageMax;
         if (ip->Type >> 4 == 15)
         {
-            swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[40 + 2], DamageMin, DamageMax);
+            swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[40 + 2], DamageMin, DamageMax);
         }
         else if (ip->Type != ITEM_SCROLL_OF_TELEPORT && ip->Type != ITEM_SCROLL_OF_TELEPORT_ALLY && ip->Type != ITEM_SCROLL_OF_SOUL_BARRIER)
         {
@@ -3960,14 +3960,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 DamageMin = skillAtt->Damage;
                 DamageMax = skillAtt->Damage + skillAtt->Damage / 2;
 
-                swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[42], DamageMin, DamageMax);
+                swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[42], DamageMin, DamageMax);
             }
             else
             {
                 if (DamageMin + minindex >= DamageMax + maxindex)
-                    swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[40 + p->TwoHand], DamageMax + maxindex, DamageMax + maxindex);
+                    swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[40 + p->TwoHand], DamageMax + maxindex, DamageMax + maxindex);
                 else
-                    swprintf(TextList[TextNum], L"%s: %d ~ %d", GlobalText[40 + p->TwoHand], DamageMin + minindex, DamageMax + maxindex);
+                    swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[40 + p->TwoHand], DamageMin + minindex, DamageMax + maxindex);
             }
         }
         else
@@ -4361,8 +4361,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch (Level)
         {
-        case 0: swprintf(TextList[TextNum], L"%s", GlobalText[748]); TextNum++; break;
-        case 1: swprintf(TextList[TextNum], L"%s", GlobalText[1236]); TextNum++; break;
+        case 0: swprintf(TextList[TextNum], L"%ls", GlobalText[748]); TextNum++; break;
+        case 1: swprintf(TextList[TextNum], L"%ls", GlobalText[1236]); TextNum++; break;
         }
     }
 
@@ -4371,21 +4371,21 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch (Level)
         {
-        case 0:swprintf(TextList[TextNum], L"%s %s", GlobalText[168], GlobalText[636]); break;
-        case 1:swprintf(TextList[TextNum], L"%s %s", GlobalText[169], GlobalText[636]); break;
-        case 2:swprintf(TextList[TextNum], L"%s %s", GlobalText[167], GlobalText[636]); break;
-        case 3:swprintf(TextList[TextNum], L"%s %s", GlobalText[166], GlobalText[636]); break;
-        case 4:swprintf(TextList[TextNum], L"%s %s", GlobalText[1900], GlobalText[636]); break;
+        case 0:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[168], GlobalText[636]); break;
+        case 1:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[169], GlobalText[636]); break;
+        case 2:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[167], GlobalText[636]); break;
+        case 3:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[166], GlobalText[636]); break;
+        case 4:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[1900], GlobalText[636]); break;
         }
         TextNum++;
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         switch (Level)
         {
-        case 0:swprintf(TextList[TextNum], L"%s %s", GlobalText[168], GlobalText[1910]); break;
-        case 1:swprintf(TextList[TextNum], L"%s %s", GlobalText[169], GlobalText[1910]); break;
-        case 2:swprintf(TextList[TextNum], L"%s %s", GlobalText[167], GlobalText[1910]); break;
-        case 3:swprintf(TextList[TextNum], L"%s %s", GlobalText[166], GlobalText[1910]); break;
-        case 4:swprintf(TextList[TextNum], L"%s %s", GlobalText[1900], GlobalText[1910]); break;
+        case 0:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[168], GlobalText[1910]); break;
+        case 1:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[169], GlobalText[1910]); break;
+        case 2:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[167], GlobalText[1910]); break;
+        case 3:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[166], GlobalText[1910]); break;
+        case 4:swprintf(TextList[TextNum], L"%ls %ls", GlobalText[1900], GlobalText[1910]); break;
         }
         TextNum++;
         TextListColor[TextNum] = TEXT_COLOR_DARKRED;
@@ -4482,13 +4482,13 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         int HeroLevel = CharacterAttribute->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        swprintf(TextList[TextNum], L"%s %s    %s      %s    ", GlobalText[1147], GlobalText[368], GlobalText[935], GlobalText[936]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], L"%ls %ls    %ls      %ls    ", GlobalText[1147], GlobalText[368], GlobalText[935], GlobalText[936]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
 
         for (int i = 0; i < 6; i++)
         {
             int Zen = g_iChaosCastleZen[i];
 
-            swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1, g_iChaosCastleLevel[startIndex + i][0], min(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
+            swprintf(TextList[TextNum], L"        %d             %3d~%3d     %3d,000", i + 1, g_iChaosCastleLevel[startIndex + i][0], std::min<int>(400, g_iChaosCastleLevel[startIndex + i][1]), Zen);
             if ((HeroLevel >= g_iChaosCastleLevel[startIndex + i][0] && HeroLevel <= g_iChaosCastleLevel[startIndex + i][1]) && gCharacterManager.IsMasterLevel(Hero->Class) == false)
             {
                 TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
@@ -4499,7 +4499,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             }
             TextBold[TextNum] = false; TextNum++;
         }
-        swprintf(TextList[TextNum], L"         %d          %s   %3d,000", 7, GlobalText[737], 1000);
+        swprintf(TextList[TextNum], L"         %d          %ls   %3d,000", 7, GlobalText[737], 1000);
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
         {
             TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
@@ -5087,11 +5087,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
                     if (type == SI_Defense && ip->Jewel_Of_Harmony_Option == 7)
                     {
-                        swprintf(TextList[TextNum], L"%s +%d%%", harmonyjewel.Name, harmonyjewel.HarmonyJewelLevel[ip->Jewel_Of_Harmony_OptionLevel]);
+                        swprintf(TextList[TextNum], L"%ls +%d%%", harmonyjewel.Name, harmonyjewel.HarmonyJewelLevel[ip->Jewel_Of_Harmony_OptionLevel]);
                     }
                     else
                     {
-                        swprintf(TextList[TextNum], L"%s +%d", harmonyjewel.Name, harmonyjewel.HarmonyJewelLevel[ip->Jewel_Of_Harmony_OptionLevel]);
+                        swprintf(TextList[TextNum], L"%ls +%d", harmonyjewel.Name, harmonyjewel.HarmonyJewelLevel[ip->Jewel_Of_Harmony_OptionLevel]);
                     }
 
                     if (Level >= ip->Jewel_Of_Harmony_OptionLevel) TextListColor[TextNum] = TEXT_COLOR_YELLOW;
@@ -5105,7 +5105,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 {
                     swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-                    swprintf(TextList[TextNum], L"%s : %d %d %d"
+                    swprintf(TextList[TextNum], L"%ls : %d %d %d"
                         , GlobalText[2204]
                         , (int)type
                         , (int)ip->Jewel_Of_Harmony_Option
@@ -5269,7 +5269,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         wchar_t strText[100];
         swprintf(strText, GlobalText[959], 10);
-        swprintf(TextList[TextNum], L"%s%%", strText);
+        swprintf(TextList[TextNum], L"%ls%%", strText);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
 
@@ -5299,7 +5299,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
     {
-        swprintf(TextList[TextNum], L"%s", GlobalText[2232]);
+        swprintf(TextList[TextNum], L"%ls", GlobalText[2232]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
 
         swprintf(TextList[TextNum], GlobalText[3088]);
@@ -5324,7 +5324,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
         swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-        swprintf(TextList[TextNum], L"%s", GlobalText[2248]);
+        swprintf(TextList[TextNum], L"%ls", GlobalText[2248]);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextNum++;
         swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
@@ -5380,7 +5380,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_CHRISTMAS_STAR)
     {
-        swprintf(TextList[TextNum], L"%s", GlobalText[2244]);
+        swprintf(TextList[TextNum], L"%ls", GlobalText[2244]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
     }
@@ -5405,7 +5405,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         swprintf(TextList[TextNum], GlobalText[2260], ip->Durability);
         TextListColor[TextNum] = TEXT_COLOR_RED;
         TextNum++;
-        swprintf(TextList[TextNum], L"%s", GlobalText[2589]);
+        swprintf(TextList[TextNum], L"%ls", GlobalText[2589]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextNum++;
     }
@@ -5856,7 +5856,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
 
     if (ip->Type == ITEM_ORB_OF_SUMMONING)
     {
-        swprintf(TextList[TextNum], L"%s %s", SkillAttribute[30 + Level].Name, GlobalText[102]);
+        swprintf(TextList[TextNum], L"%ls %ls", SkillAttribute[30 + Level].Name, GlobalText[102]);
     }
     else if (ip->Type == ITEM_TRANSFORMATION_RING)
     {
@@ -5864,14 +5864,14 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         {
             if (SommonTable[Level] == MonsterScript[i].Type)
             {
-                swprintf(TextList[TextNum], L"%s %s", MonsterScript[i].Name, GlobalText[103]);
+                swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, GlobalText[103]);
                 break;
             }
         }
     }
     else if ((ip->Type == ITEM_DARK_HORSE_ITEM) || (ip->Type == ITEM_DARK_RAVEN_ITEM))
     {
-        swprintf(TextList[TextNum], L"%s", p->Name);
+        swprintf(TextList[TextNum], L"%ls", p->Name);
     }
     else if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS)
         || ip->Type >= ITEM_CAPE_OF_LORD
@@ -5880,25 +5880,25 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         || (ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
     {
         if (Level == 0)
-            swprintf(TextList[TextNum], L"%s", p->Name);
+            swprintf(TextList[TextNum], L"%ls", p->Name);
         else
-            swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
+            swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
     }
     else
     {
         if (ip->ExcellentFlags > 0)
         {
             if (Level == 0)
-                swprintf(TextList[TextNum], L"%s %s", GlobalText[620], p->Name);
+                swprintf(TextList[TextNum], L"%ls %ls", GlobalText[620], p->Name);
             else
-                swprintf(TextList[TextNum], L"%s %s +%d", GlobalText[620], p->Name, Level);
+                swprintf(TextList[TextNum], L"%ls %ls +%d", GlobalText[620], p->Name, Level);
         }
         else
         {
             if (Level == 0)
-                swprintf(TextList[TextNum], L"%s", p->Name);
+                swprintf(TextList[TextNum], L"%ls", p->Name);
             else
-                swprintf(TextList[TextNum], L"%s +%d", p->Name, Level);
+                swprintf(TextList[TextNum], L"%ls +%d", p->Name, Level);
         }
     }
     TextListColor[TextNum] = Color; TextBold[TextNum] = true; TextNum++;
@@ -6051,14 +6051,14 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         {
             if (CharacterMachine->Equipment[0].Special[i] == AT_SKILL_FORCE_WAVE)
             {
-                swprintf(lpszName, L"%s", GlobalText[1200]);
+                swprintf(lpszName, L"%ls", GlobalText[1200]);
                 break;
             }
         }
     }
 
     swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-    swprintf(TextList[TextNum], L"%s", lpszName);
+    swprintf(TextList[TextNum], L"%ls", lpszName);
     TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
     swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
@@ -6725,15 +6725,15 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     // Use the item name by default
     if (o->Type == MODEL_ZEN) // Zen
     {
-        swprintf(Name, L"%s %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        swprintf(Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
     else if (ItemLevel == 0)
     {
-        swprintf(Name, L"%s", ItemAttribute[o->Type - MODEL_ITEM].Name);
+        swprintf(Name, L"%ls", ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else
     {
-        swprintf(Name, L"%s +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        swprintf(Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
 
     if (boldTextItems.count(o->Type) > 0)
@@ -6756,22 +6756,22 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     else if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
         SetGrayTextColor();
-        swprintf(Name, L"%s %s", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
+        swprintf(Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
     }
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true))
     {
         int iJewelItemIndex = COMGEM::GetJewelIndex(COMGEM::Check_Jewel_Com(o->Type, true), COMGEM::eGEM_NAME);
         g_pRenderText->SetFont(g_hFontBold);
         SetYellowTextColor();
-        swprintf(Name, L"%s", GlobalText[iJewelItemIndex]);
+        swprintf(Name, L"%ls", GlobalText[iJewelItemIndex]);
     }
     else if (o->Type == MODEL_COMPILED_CELE)
     {
-        swprintf(Name, L"%s", ItemAttribute[MODEL_JEWEL_OF_BLESS - MODEL_ITEM].Name);
+        swprintf(Name, L"%ls", ItemAttribute[MODEL_JEWEL_OF_BLESS - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_COMPILED_SOUL)
     {
-        swprintf(Name, L"%s", ItemAttribute[MODEL_JEWEL_OF_SOUL - MODEL_ITEM].Name);
+        swprintf(Name, L"%ls", ItemAttribute[MODEL_JEWEL_OF_SOUL - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7)
     {
@@ -6790,19 +6790,19 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     {
         switch (ItemLevel)
         {
-        case 0:swprintf(Name, L"%s %s", GlobalText[168], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 1:swprintf(Name, L"%s %s", GlobalText[169], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 2:swprintf(Name, L"%s %s", GlobalText[167], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 3:swprintf(Name, L"%s %s", GlobalText[166], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 4:swprintf(Name, L"%s %s", GlobalText[1900], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 0:swprintf(Name, L"%ls %ls", GlobalText[168], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 1:swprintf(Name, L"%ls %ls", GlobalText[169], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 2:swprintf(Name, L"%ls %ls", GlobalText[167], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 3:swprintf(Name, L"%ls %ls", GlobalText[166], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 4:swprintf(Name, L"%ls %ls", GlobalText[1900], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
         }
     }
     else if (o->Type == MODEL_SPIRIT)
     {
         switch (ItemLevel)
         {
-        case 0:swprintf(Name, L"%s of %s", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1187]); break;
-        case 1:swprintf(Name, L"%s of %s", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1214]); break;
+        case 0:swprintf(Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1187]); break;
+        case 1:swprintf(Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1214]); break;
         }
     }
     else if (o->Type == MODEL_EVENT + 16)
@@ -6835,7 +6835,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         if (ItemLevel == 13)
         {
             SetYellowTextColor();
-            swprintf(Name, L"%s", GlobalText[117]);
+            swprintf(Name, L"%ls", GlobalText[117]);
         }
         else
         {
@@ -6856,7 +6856,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_EVENT + 10)
     {
-        swprintf(Name, L"%s +%d", GlobalText[115], ItemLevel - 7);
+        swprintf(Name, L"%ls +%d", GlobalText[115], ItemLevel - 7);
     }
     else if (o->Type == MODEL_RED_RIBBON_BOX)
     {
@@ -6960,7 +6960,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
-        swprintf(Name, L"%s %s", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
+        swprintf(Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
     }
     else if (o->Type == MODEL_TRANSFORMATION_RING)
     {
@@ -6968,7 +6968,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         {
             if (SommonTable[ItemLevel] == MonsterScript[i].Type)
             {
-                swprintf(Name, L"%s %s", MonsterScript[i].Name, GlobalText[103]);
+                swprintf(Name, L"%ls %ls", MonsterScript[i].Name, GlobalText[103]);
                 break;
             }
         }
@@ -7293,7 +7293,7 @@ int CompareItem(ITEM item1, ITEM item2)
                 }
                 else
                 {
-                    int     Num = max(item1.SpecialNum, item2.SpecialNum);
+                    int     Num = std::max<int>(item1.SpecialNum, item2.SpecialNum);
                     int     addOption1 = 0;
                     int     addOptionV1 = 0;
                     int     addOption2 = 0;
@@ -11413,7 +11413,7 @@ void RenderGuildList(int StartX, int StartY)
     if (Hero->GuildMarkIndex == -1)
         swprintf(Text, GlobalText[180]);
     else
-        swprintf(Text, L"%s (Score:%d)", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
+        swprintf(Text, L"%ls (Score:%d)", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
 
     g_pRenderText->RenderText(StartX + 95 - 60, StartY + 12, Text, 120 * WindowWidth / 640, true, 3);
 

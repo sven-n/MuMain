@@ -9,10 +9,10 @@
 #include "ZzzCharacter.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzTexture.h"
-#include "ZzzAi.h"
+#include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "WSClient.h"
+#include "WSclient.h"
 #include "CSPetSystem.h"
 
 extern float g_fBoneSave[10][3][4];
@@ -4239,7 +4239,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 break;
             }
             o->Scale = (float)o->LifeTime * 3.0f;
-            float fRate1 = max(0.0f, min((float)(o->LifeTime - 10) / (float)10, 1.0f));
+            float fRate1 = std::max<float>(0.0f, std::min<float>((float)(o->LifeTime - 10) / (float)10, 1.0f));
             float fRate2 = 1.0f - fRate1;
 
             vec3_t MagicPos;
@@ -5530,8 +5530,8 @@ void MoveJoint(JOINT* o, int iIndex)
                 {
                     count = (o->Direction[0] + (o->LifeTime * 0.5f));
                 }
-                vPos[0] = -cosf(count) * ((float)max(o->LifeTime, 1) * 2.f);
-                vPos[1] = sinf(count) * ((float)max(o->LifeTime, 1) * 2.f);
+                vPos[0] = -cosf(count) * ((float)std::max<int>(o->LifeTime, 1) * 2.f);
+                vPos[1] = sinf(count) * ((float)std::max<int>(o->LifeTime, 1) * 2.f);
             }
             else if (o->SubType == 12)
             {
@@ -5542,8 +5542,8 @@ void MoveJoint(JOINT* o, int iIndex)
             else
             {
                 count = (o->Direction[0] + o->LifeTime) * 0.1f;
-                vPos[0] = -cosf(count) * ((float)max(o->LifeTime + 40, 10) * .65f);
-                vPos[1] = sinf(count) * ((float)max(o->LifeTime + 40, 10) * .65f);
+                vPos[0] = -cosf(count) * ((float)std::max<int>(o->LifeTime + 40, 10) * .65f);
+                vPos[1] = sinf(count) * ((float)std::max<int>(o->LifeTime + 40, 10) * .65f);
             }
             vPos[2] = 0.0f;
             o->TargetPosition[0] += (o->Direction[1]) * FPS_ANIMATION_FACTOR;
@@ -5631,11 +5631,11 @@ void MoveJoint(JOINT* o, int iIndex)
             float fCircle;
             if (o->SubType == 11 || o->SubType == 25)
             {
-                fCircle = min(max(0.f, fLife - 10) * 5.f, 150.f);
+                fCircle = std::min<float>(std::max<float>(0.f, fLife - 10) * 5.f, 150.f);
             }
             else
             {
-                fCircle = min(max(0.f, 40.f - fLife) * 15.f, 150.f);
+                fCircle = std::min<float>(std::max<float>(0.f, 40.f - fLife) * 15.f, 150.f);
             }
             o->Position[0] = o->TargetPosition[0] + vDir[0] * fCircle;
             o->Position[1] = o->TargetPosition[1] + vDir[1] * fCircle;
@@ -5890,7 +5890,7 @@ void MoveJoint(JOINT* o, int iIndex)
             {
                 o->SubType = 1;
                 o->m_bCreateTails = false;
-                o->LifeTime = min(10, o->LifeTime);
+                o->LifeTime = std::min<int>(10, o->LifeTime);
             }
         }
         break;
@@ -6493,7 +6493,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 VectorCopy(o->StartPosition, o->Position);
 
                 o->NumTails = 0;
-                int MaxTails = min(o->MaxTails, o->Weapon);
+                int MaxTails = std::min<int>(o->MaxTails, o->Weapon);
                 o->MaxTails = MaxTails;
                 o->TargetPosition[1] = o->TargetPosition[2];
 
@@ -6964,7 +6964,7 @@ void RenderJoints(BYTE bRenderOneMore)
                 case 4:
                 case 9:
                 case 10:
-                    fAlpha = (float)min(o->LifeTime, 20) * 0.05f;
+                    fAlpha = (float)std::min<int>(o->LifeTime, 20) * 0.05f;
                     glColor3f(fAlpha * o->Light[0], fAlpha * o->Light[1], fAlpha * o->Light[2]);
                     break;
                 case 3:
@@ -6990,7 +6990,7 @@ void RenderJoints(BYTE bRenderOneMore)
             }
             else if (o->Type == BITMAP_SMOKE && o->SubType == 0)
             {
-                float fAlpha = (float)min(o->LifeTime, 20) * 0.1f;
+                float fAlpha = (float)std::min<int>(o->LifeTime, 20) * 0.1f;
                 glColor3f(fAlpha * o->Light[0], fAlpha * o->Light[1], fAlpha * o->Light[2]);
             }
             else if (o->Type == BITMAP_JOINT_SPARK)
