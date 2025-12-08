@@ -29,6 +29,10 @@ constexpr int MAX_OBJECT_BLURS = 1000;
 constexpr int MAX_OBJECT_BLUR_TAILS = 600;
 constexpr int MAX_OBJECT_BLUR_LIFETIME = 30;
 
+constexpr int FLAG_WIDTH = 7;
+constexpr int FLAG_HEIGHT = 10;
+constexpr float FLAG_SCALE = 10.f;
+
 struct Blur
 {
     bool Live = false;
@@ -56,12 +60,39 @@ struct ObjectBlur
     int SubType = 0;
 };
 
+struct physics_vertex
+{
+    int link_num;
+    int link[4];
+    float link_length[4];
+    vec3_t p;
+    vec3_t v;
+    vec3_t f;
+    vec3_t uf;
+    vec3_t normal;
+    float  light;
+    bool collision;
+};
+
+struct physics_face
+{
+    int vlist[4];
+    vec3_t normal;
+};
+
+struct physics_boundbox
+{
+    physics_vertex vtx[8];
+};
+
 std::array<Blur, MAX_BLURS> g_blurs{};
 std::array<ObjectBlur, MAX_OBJECT_BLURS> g_objectBlurs{};
+std::array<physics_vertex, FLAG_HEIGHT * FLAG_WIDTH> g_flagVertices{};
+std::array<physics_face, (FLAG_HEIGHT - 1) * (FLAG_WIDTH - 1)> g_flagFaces{};
 
 std::mt19937& RandomEngine()
 {
-    static std::mt19937 engine{std::random_device{}()};
+    thread_local static std::mt19937 engine{std::random_device{}()};
     return engine;
 }
 
@@ -94,31 +125,35 @@ void AddBlur(Blur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 
 void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType)
 {
+    Blur* freeBlur = nullptr;
     for (auto& blur : g_blurs)
     {
-        if (blur.Live && blur.Owner == Owner)
+        if (blur.Live)
         {
-            if (SubType > 0 && blur.SubType != SubType)
+            if (blur.Owner == Owner)
             {
-                continue;
+                if (SubType > 0 && blur.SubType != SubType)
+                {
+                    continue;
+                }
+                AddBlur(&blur, p1, p2, Light, Type);
+                return;
             }
-            AddBlur(&blur, p1, p2, Light, Type);
-            return;
+        }
+        else if (freeBlur == nullptr)
+        {
+            freeBlur = &blur;
         }
     }
 
-    for (auto& blur : g_blurs)
+    if (freeBlur != nullptr)
     {
-        if (!blur.Live)
-        {
-            blur.Live = true;
-            blur.Owner = Owner;
-            blur.Number = 0;
-            blur.LifeTime = Short ? 15 : MAX_BLUR_LIFETIME;
-            blur.SubType = SubType;
-            AddBlur(&blur, p1, p2, Light, Type);
-            return;
-        }
+        freeBlur->Live = true;
+        freeBlur->Owner = Owner;
+        freeBlur->Number = 0;
+        freeBlur->LifeTime = Short ? 15 : MAX_BLUR_LIFETIME;
+        freeBlur->SubType = SubType;
+        AddBlur(freeBlur, p1, p2, Light, Type);
     }
 }
 
@@ -250,41 +285,45 @@ void AddObjectBlur(ObjectBlur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 
 void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType, int iLimitLifeTime)
 {
+    ObjectBlur* freeBlur = nullptr;
     for (auto& blur : g_objectBlurs)
     {
-        if (blur.Live && blur.Owner == Owner)
+        if (blur.Live)
         {
-            if (SubType > 0 && blur.SubType != SubType)
+            if (blur.Owner == Owner)
             {
-                continue;
+                if (SubType > 0 && blur.SubType != SubType)
+                {
+                    continue;
+                }
+                AddObjectBlur(&blur, p1, p2, Light, Type);
+                return;
             }
-            AddObjectBlur(&blur, p1, p2, Light, Type);
-            return;
+        }
+        else if (freeBlur == nullptr)
+        {
+            freeBlur = &blur;
         }
     }
 
-    for (auto& blur : g_objectBlurs)
+    if (freeBlur != nullptr)
     {
-        if (!blur.Live)
+        freeBlur->Live = true;
+        freeBlur->Owner = Owner;
+        freeBlur->Number = 0;
+        if (iLimitLifeTime > -1)
         {
-            blur.Live = true;
-            blur.Owner = Owner;
-            blur.Number = 0;
-            if (iLimitLifeTime > -1)
-            {
-                blur.LifeTime = iLimitLifeTime;
-                blur.LimitLifeTime = iLimitLifeTime;
-            }
-            else
-            {
-                blur.LimitLifeTime = Short ? 15 : MAX_OBJECT_BLUR_LIFETIME;
-                blur.LifeTime = blur.LimitLifeTime;
-            }
-            blur.SubType = SubType;
-
-            AddObjectBlur(&blur, p1, p2, Light, Type);
-            return;
+            freeBlur->LifeTime = iLimitLifeTime;
+            freeBlur->LimitLifeTime = iLimitLifeTime;
         }
+        else
+        {
+            freeBlur->LimitLifeTime = Short ? 15 : MAX_OBJECT_BLUR_LIFETIME;
+            freeBlur->LifeTime = freeBlur->LimitLifeTime;
+        }
+        freeBlur->SubType = SubType;
+
+        AddObjectBlur(freeBlur, p1, p2, Light, Type);
     }
 }
 
@@ -355,7 +394,7 @@ void RenderObjectBlurs()
                 if (blur.SubType == 113 || blur.SubType == 114)
                 {
                     if (std::fabs(blur.P1[j][0] - blur.P1[j + 1][0]) > Data || std::fabs(blur.P1[j][1] - blur.P1[j + 1][1]) > Data || std::fabs(blur.P1[j][2] - blur.P1[j + 1][2]) > Data ||
-                        std::fabs(blur.P1[j][0] - blur.P2[j + 1][0]) > Data || std::fabs(blur.P1[j][1] - blur.P2[j + 1][1]) > Data || std::fabs(blur.P2[j][2] - blur.P2[j + 1][2]) > Data)
+                        std::fabs(blur.P1[j][0] - blur.P2[j + 1][0]) > Data || std::fabs(blur.P1[j][1] - blur.P2[j + 1][1]) > Data || std::fabs(blur.P1[j][2] - blur.P2[j + 1][2]) > Data)
                     {
                         continue;
                     }
@@ -443,40 +482,6 @@ void CreateBlood(OBJECT* o)
         }
     }
 }
-
-#pragma region FlagSimulationConstants
-constexpr int FLAG_WIDTH = 7;
-constexpr int FLAG_HEIGHT = 10;
-constexpr float FLAG_SCALE = 10.f;
-#pragma endregion
-
-struct physics_vertex
-{
-    int link_num;
-    int link[4];
-    float link_length[4];
-    vec3_t p;
-    vec3_t v;
-    vec3_t f;
-    vec3_t uf;
-    vec3_t normal;
-    float  light;
-    bool collision;
-};
-
-struct physics_face
-{
-    int vlist[4];
-    vec3_t normal;
-};
-
-struct physics_boundbox
-{
-    physics_vertex vtx[8];
-};
-
-std::array<physics_vertex, FLAG_HEIGHT * FLAG_WIDTH> g_flagVertices;
-std::array<physics_face, (FLAG_HEIGHT - 1) * (FLAG_WIDTH - 1)> g_flagFaces;
 
 vec3_t Gravity;
 float Damping = 0.04f;
