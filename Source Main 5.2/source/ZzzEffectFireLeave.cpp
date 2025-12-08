@@ -32,16 +32,19 @@ std::mt19937& RandomEngine()
     return engine;
 }
 
+static std::uniform_int_distribution<int> g_uniformIntDistribution;
+static std::uniform_real_distribution<float> g_uniformFloatDistribution;
+
 int RandomInt(int minInclusive, int maxInclusive)
 {
-    std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
-    return dist(RandomEngine());
+    using Dist = std::uniform_int_distribution<int>;
+    return g_uniformIntDistribution(RandomEngine(), Dist::param_type{minInclusive, maxInclusive});
 }
 
 float RandomFloat(float minInclusive, float maxInclusive)
 {
-    std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
-    return dist(RandomEngine());
+    using Dist = std::uniform_real_distribution<float>;
+    return g_uniformFloatDistribution(RandomEngine(), Dist::param_type{minInclusive, maxInclusive});
 }
 } // namespace
 
@@ -116,7 +119,7 @@ void CheckSkull(OBJECT* o)
         {
             float dx = Position[0] - o->Position[0];
             float dy = Position[1] - o->Position[1];
-            float Distance = std::sqrt(dx * dx + dy * dy);
+            float Distance = std::hypot(dx, dy);
             if (Distance < 50.f)
             {
                 Vector(-dx * 0.4f, -dy * 0.4f, 0.f, o->Direction);
@@ -145,21 +148,23 @@ bool CreateDevilSquareRain(PARTICLE* o, int Index)
         return false;
 
     o->Type = BITMAP_RAIN;
-    const float randomX = static_cast<float>(RandomInt(-800, 799));
-    const float randomYFront = static_cast<float>(RandomInt(-500, 899));
-    const float randomYBack = static_cast<float>(RandomInt(1000, 1299)) - RainPosition;
-    const float randomZ = static_cast<float>(RandomInt(300, 499));
     if (Index < 300)
     {
+        const float randomX = static_cast<float>(RandomInt(-800, 799));
+        const float randomY = static_cast<float>(RandomInt(-500, 899));
+        const float randomZ = static_cast<float>(RandomInt(300, 499));
         Vector(Hero->Object.Position[0] + randomX,
-               Hero->Object.Position[1] + randomYFront,
+               Hero->Object.Position[1] + randomY,
                Hero->Object.Position[2] + randomZ,
                o->Position);
     }
     else
     {
+        const float randomX = static_cast<float>(RandomInt(-800, 799));
+        const float randomY = static_cast<float>(RandomInt(1000, 1299)) - RainPosition;
+        const float randomZ = static_cast<float>(RandomInt(300, 499));
         Vector(Hero->Object.Position[0] + randomX,
-               Hero->Object.Position[1] + randomYBack,
+               Hero->Object.Position[1] + randomY,
                Hero->Object.Position[2] + randomZ,
                o->Position);
     }
@@ -190,21 +195,23 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
     o->TurningForce[0] = 1.f;
     o->TurningForce[1] = 30.f + static_cast<float>(RandomInt(0, 9));
 
-    const float randomX = static_cast<float>(RandomInt(-800, 799));
-    const float randomYFront = static_cast<float>(RandomInt(-500, 899));
-    const float randomYBack = static_cast<float>(RandomInt(1000, 1299)) - RainPosition;
-    const float randomZ = static_cast<float>(RandomInt(300, 499));
     if (Index < 300)
     {
+        const float randomX = static_cast<float>(RandomInt(-800, 799));
+        const float randomY = static_cast<float>(RandomInt(-500, 899));
+        const float randomZ = static_cast<float>(RandomInt(300, 499));
         Vector(Hero->Object.Position[0] + randomX,
-               Hero->Object.Position[1] + randomYFront,
+               Hero->Object.Position[1] + randomY,
                Hero->Object.Position[2] + randomZ,
                o->Position);
     }
     else
     {
+        const float randomX = static_cast<float>(RandomInt(-800, 799));
+        const float randomY = static_cast<float>(RandomInt(1000, 1299)) - RainPosition;
+        const float randomZ = static_cast<float>(RandomInt(300, 499));
         Vector(Hero->Object.Position[0] + randomX,
-               Hero->Object.Position[1] + randomYBack,
+               Hero->Object.Position[1] + randomY,
                Hero->Object.Position[2] + randomZ,
                o->Position);
     }
