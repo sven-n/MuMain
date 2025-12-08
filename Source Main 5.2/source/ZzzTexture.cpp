@@ -5,6 +5,7 @@
 #include <setjmp.h>
 #include <array>
 #include <cstdio>
+#include <memory>
 #include <string>
 #include <vector>
 #include "ZzzTexture.h"
@@ -16,16 +17,17 @@ CGlobalBitmap Bitmaps;
 
 bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality)
 {
-    auto outfile = _wfopen(filename, L"wb");
-    if (outfile == nullptr)
+    const auto fileCloser = [](FILE* fp) { if (fp != nullptr) { fclose(fp); } };
+    std::unique_ptr<FILE, decltype(fileCloser)> outfile(_wfopen(filename, L"wb"), fileCloser);
+    if (!outfile)
     {
         return false;
     }
 
-    const auto handle = tjInitCompress();
-    if (handle == nullptr)
+    const auto jpegDestroyer = [](tjhandle handle) { if (handle != nullptr) { tjDestroy(handle); } };
+    std::unique_ptr<void, decltype(jpegDestroyer)> handle(tjInitCompress(), jpegDestroyer);
+    if (!handle)
     {
-        fclose(outfile);
         return false;
     }
 
@@ -34,17 +36,15 @@ bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, 
     unsigned long jpegSize = maxSize;
     unsigned char* jpegPtr = outputBuffer.data();
     const int flags = TJFLAG_BOTTOMUP | TJFLAG_NOREALLOC;
-    const auto result = tjCompress2(handle, Buffer, Width, 0, Height, TJPF_RGB, &jpegPtr, &jpegSize, TJSAMP_444, quality, flags);
+    const auto result = tjCompress2(handle.get(), Buffer, Width, 0, Height, TJPF_RGB, &jpegPtr, &jpegSize, TJSAMP_444, quality, flags);
 
-    bool success = (result == 0);
-    if (success)
+    if (result != 0)
     {
-        fwrite(jpegPtr, 1, jpegSize, outfile);
+        return false;
     }
 
-    fclose(outfile);
-    tjDestroy(handle);
-    return success;
+    const auto written = fwrite(jpegPtr, 1, jpegSize, outfile.get());
+    return written == jpegSize;
 }
 
 namespace
@@ -77,22 +77,25 @@ void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer,
     {
         std::wstring openFileName = L"Data2\\";
         openFileName += filename;
-        auto fp = _wfopen(openFileName.c_str(), L"rb");
-        if (fp == nullptr)
+        const auto fileCloser = [](FILE* f) { if (f != nullptr) { fclose(f); } };
+        std::unique_ptr<FILE, decltype(fileCloser)> fp(_wfopen(openFileName.c_str(), L"rb"), fileCloser);
+        if (!fp)
         {
             return;
         }
-        fseek(fp, 0, SEEK_END);
-        const auto fileSize = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
+        fseek(fp.get(), 0, SEEK_END);
+        const auto fileSize = ftell(fp.get());
         if (fileSize <= 0)
         {
-            fclose(fp);
             return;
         }
+        fseek(fp.get(), 0, SEEK_SET);
         localBuffer.resize(static_cast<size_t>(fileSize));
-        fread(localBuffer.data(), 1, localBuffer.size(), fp);
-        fclose(fp);
+        const auto read = fread(localBuffer.data(), 1, localBuffer.size(), fp.get());
+        if (read != localBuffer.size())
+        {
+            return;
+        }
     }
 
     const unsigned char* buffer = hasExternalBuffer ? PakBuffer : localBuffer.data();
@@ -116,15 +119,19 @@ void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer,
     std::wstring saveFileName = L"Data\\";
     saveFileName += newFileName;
 
-    auto fp = _wfopen(saveFileName.c_str(), L"wb");
-    if (fp == nullptr)
+    const auto fileCloser = [](FILE* f) { if (f != nullptr) { fclose(f); } };
+    std::unique_ptr<FILE, decltype(fileCloser)> fp(_wfopen(saveFileName.c_str(), L"wb"), fileCloser);
+    if (!fp)
     {
         return;
     }
 
-    fwrite(header.data(), 1, HeaderSize, fp);
-    fwrite(buffer, 1, bufferSize, fp);
-    fclose(fp);
+    const auto headerWritten = fwrite(header.data(), 1, HeaderSize, fp.get());
+    const auto dataWritten = fwrite(buffer, 1, bufferSize, fp.get());
+    if (headerWritten != static_cast<size_t>(HeaderSize) || dataWritten != bufferSize)
+    {
+        return;
+    }
 }
 
 bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
