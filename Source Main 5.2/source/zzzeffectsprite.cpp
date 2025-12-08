@@ -9,11 +9,32 @@
 #include "ZzzCharacter.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzTexture.h"
-#include "ZzzAi.h"
+#include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "WSClient.h"
+#include "WSclient.h"
 #include "NewUISystem.h"
+
+#include <algorithm>
+
+namespace
+{
+constexpr float kSpriteFrameMin = 0.2f;
+constexpr float kSpriteFrameMax = 1.0f;
+constexpr float kSpriteFrameStep = 0.1f;
+
+float ComputeFrameDelta()
+{
+    return kSpriteFrameStep * static_cast<float>(FPS_ANIMATION_FACTOR);
+}
+
+float UpdateAnimationFrame(float currentFrame, bool isVisible)
+{
+    const float delta = ComputeFrameDelta();
+    currentFrame += isVisible ? delta : -delta;
+    return std::clamp(currentFrame, kSpriteFrameMin, kSpriteFrameMax);
+}
+} // namespace
 
 OBJECT	Sprites[MAX_SPRITES];
 
@@ -47,22 +68,7 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
 
 void RenderSprite(OBJECT* o, OBJECT* Owner)
 {
-    if (o->Visible)
-    {
-        o->AnimationFrame += 0.1f * static_cast<float>(FPS_ANIMATION_FACTOR);
-        if (o->AnimationFrame > 1.f)
-        {
-            o->AnimationFrame = 1.f;
-        }
-    }
-    else
-    {
-        o->AnimationFrame -= 0.1f * static_cast<float>(FPS_ANIMATION_FACTOR);
-        if (o->AnimationFrame < 0.2f)
-        {
-            o->AnimationFrame = 0.2f;
-        }
-    }
+    o->AnimationFrame = UpdateAnimationFrame(o->AnimationFrame, o->Visible);
     float Scale = o->AnimationFrame * o->Scale;
 
     BITMAP_t* pBitmap = Bitmaps.GetTexture(o->Type);
