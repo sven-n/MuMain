@@ -28,8 +28,9 @@ std::mt19937& RandomEngine()
 
 float RandomFloat(float minInclusive, float maxInclusive)
 {
-    std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
-    return dist(RandomEngine());
+    static std::uniform_real_distribution<float> dist;
+    using Dist = std::uniform_real_distribution<float>;
+    return dist(RandomEngine(), Dist::param_type{minInclusive, maxInclusive});
 }
 } // namespace
 
