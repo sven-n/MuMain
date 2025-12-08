@@ -25,7 +25,7 @@ constexpr float kSpriteFrameStep = 0.1f;
 
 float ComputeFrameDelta()
 {
-    return kSpriteFrameStep * static_cast<float>(FPS_ANIMATION_FACTOR);
+    return kSpriteFrameStep * FPS_ANIMATION_FACTOR;
 }
 
 float UpdateAnimationFrame(float currentFrame, bool isVisible)
