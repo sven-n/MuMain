@@ -319,7 +319,7 @@ void CMsgBoxIGSGiftStorageItemInfo::UnloadImages()
 bool CMsgBoxIGSGiftStorageItemInfoLayout::SetLayout()
 {
     CMsgBoxIGSGiftStorageItemInfo* pMsgBox = GetMsgBox();
-    if (pMsgBox == NULL)
+    if (pMsgBox == nullptr)
         return false;
 
     if (false == pMsgBox->Create())

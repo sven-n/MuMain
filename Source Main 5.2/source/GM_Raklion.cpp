@@ -17,6 +17,7 @@
 using namespace SEASON4A;
 
 extern int g_iLimitAttackTime;
+extern float IntensityTransform[MAX_MESH][MAX_VERTICES];
 
 CGM_RaklionPtr CGM_Raklion::Make()
 {

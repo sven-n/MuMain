@@ -191,7 +191,7 @@ void CMsgBoxIGSCommon::UnloadImages()
 bool CMsgBoxIGSCommonLayout::SetLayout()
 {
     CMsgBoxIGSCommon* pMsgBox = GetMsgBox();
-    if (pMsgBox == NULL)
+    if (pMsgBox == nullptr)
         return false;
 
     if (false == pMsgBox->Create())

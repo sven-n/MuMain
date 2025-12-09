@@ -369,7 +369,7 @@ void CMsgBoxIGSBuySelectItem::AddData(int iPackageSeq, int iDisplaySeq, int iPri
 bool CMsgBoxIGSBuySelectItemLayout::SetLayout()
 {
     CMsgBoxIGSBuySelectItem* pMsgBox = GetMsgBox();
-    if (pMsgBox == NULL)
+    if (pMsgBox == nullptr)
         return false;
 
     if (false == pMsgBox->Create())

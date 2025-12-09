@@ -246,7 +246,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
             std::wstring temp = GlobalText[260];
             temp += ' ';
             swprintf(lpszStr1, src.c_str());
-            lpszStr2 = wcstok(lpszStr1, temp.c_str());
+            wchar_t* context = nullptr;
+            lpszStr2 = wcstok_s(lpszStr1, temp.c_str(), &context);
             if (lpszStr2 == NULL) return false;
 
             SettingCanMoveMap();
@@ -264,7 +265,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
             std::wstring temp = L"/move";
             temp += ' ';
             swprintf(lpszStr1, src.c_str());
-            lpszStr2 = wcstok(lpszStr1, temp.c_str());
+            wchar_t* context = nullptr;
+            lpszStr2 = wcstok_s(lpszStr1, temp.c_str(), &context);
             if (lpszStr2 == NULL) return false;
 
             SettingCanMoveMap();

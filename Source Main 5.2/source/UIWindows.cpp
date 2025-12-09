@@ -2978,11 +2978,12 @@ void CUILetterReadWindow::SetLetter(LETTERLIST_TEXT* pLetterHead, const wchar_t*
 
     wchar_t* temp = new wchar_t[wcslen(pLetterText) + 20];
     wcsncpy(temp, pLetterText, wcslen(pLetterText) + 1);
-    wchar_t* token = wcstok(temp, L"\n");
+    wchar_t* context = nullptr;
+    wchar_t* token = wcstok_s(temp, L"\n", &context);
     while (token != NULL)
     {
         m_LetterTextBox.AddText(token);
-        token = wcstok(NULL, L"\n");
+        token = wcstok_s(NULL, L"\n", &context);
     }
     m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
     delete[] temp;
@@ -5496,7 +5497,8 @@ void CUIFriendMenu::RenderWindowList()
 
         wchar_t temp[MAX_TEXT_LENGTH + 1] = { 0 };
         wcsncpy(temp, pszChatTitleOriginal, MAX_TEXT_LENGTH + 1);
-        wchar_t* pszChatTitle = wcstok(temp, L",");
+        wchar_t* context = nullptr;
+        wchar_t* pszChatTitle = wcstok_s(temp, L",", &context);
 
         if (wcslen(pszChatTitle) > GlobalText.GetStringSize(994))
         {
