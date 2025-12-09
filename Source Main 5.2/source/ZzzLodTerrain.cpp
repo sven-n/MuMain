@@ -1,15 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Terrain °ü·Ã ÇÔ¼ö
+// Terrain ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include <gl\gl.h>
-#include <gl\glu.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <math.h>
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzLodTerrain.h"
-#include "zzzpath.h"
+#include "ZzzPath.h"
 #include "ZzzTexture.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
@@ -70,23 +70,6 @@ extern  float CameraDistance;
 
 static  float   g_fFrustumRange = -40.f;
 
-inline int TERRAIN_INDEX(int x, int y)
-{
-    return (y)*TERRAIN_SIZE + (x);
-}
-
-inline int TERRAIN_INDEX_REPEAT(int x, int y)
-{
-    return ((y & TERRAIN_SIZE_MASK) * TERRAIN_SIZE) + (x & TERRAIN_SIZE_MASK);
-}
-
-inline BYTE TERRAIN_ATTRIBUTE(float x, float y)
-{
-    const int xf = static_cast<int>(x / TERRAIN_SCALE + 0.5f);
-    const int yf = static_cast<int>(y / TERRAIN_SCALE + 0.5f);
-    return TerrainWall[yf * TERRAIN_SIZE + xf];
-}
-
 void InitTerrainMappingLayer()
 {
     for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; ++i)
@@ -114,7 +97,7 @@ int OpenTerrainAttribute(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s file not found.", FileName);
+        swprintf(Text, L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -220,7 +203,7 @@ bool SaveTerrainAttribute(wchar_t* FileName, int iMap)
     FILE* fp = _wfopen(FileName, L"wb");
     if (fp == NULL) {
         wchar_t Text[256];
-        swprintf_s(Text, sizeof(Text), L"%s file not found.", FileName);
+        swprintf_s(Text, sizeof(Text), L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -642,7 +625,45 @@ bool OpenTerrainHeight(wchar_t* filename)
     if (err != 0 || fp == NULL)
     {
         wchar_t Text[256];
-        swprintf_s(Text, L"%s file not found.", FileName);
+        swprintf_s(Text, L"%ls file not found.", FileName);
+        g_ErrorReport.Write(Text);
+        g_ErrorReport.Write(L"\r\n");
+        MessageBox(g_hWnd, Text, NULL, MB_OK);
+        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        return false;
+    }
+
+    if (fseek(fp, 0, SEEK_END) != 0)
+    {
+        fclose(fp);
+        wchar_t Text[256];
+        swprintf_s(Text, L"Failed to seek in %ls.", FileName);
+        g_ErrorReport.Write(Text);
+        g_ErrorReport.Write(L"\r\n");
+        MessageBox(g_hWnd, Text, NULL, MB_OK);
+        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        return false;
+    }
+
+    long fileSize = ftell(fp);
+    const long RequiredSize = Size + 4;
+    if (fileSize < 0 || fileSize < RequiredSize)
+    {
+        fclose(fp);
+        wchar_t Text[256];
+        swprintf_s(Text, L"%ls is too small (%ld bytes, needs %ld).", FileName, fileSize, RequiredSize);
+        g_ErrorReport.Write(Text);
+        g_ErrorReport.Write(L"\r\n");
+        MessageBox(g_hWnd, Text, NULL, MB_OK);
+        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        return false;
+    }
+
+    if (fseek(fp, 4, SEEK_SET) != 0)
+    {
+        fclose(fp);
+        wchar_t Text[256];
+        swprintf_s(Text, L"Failed to rewind %ls.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -652,9 +673,19 @@ bool OpenTerrainHeight(wchar_t* filename)
 
     auto* Buffer = new unsigned char[Size];
 
-    fseek(fp, 4, SEEK_SET);
-    fread_s(Buffer, Size, 1, Size, fp);
+    size_t readBytes = fread(Buffer, 1, Size, fp);
     fclose(fp);
+    if (readBytes != Size)
+    {
+        delete[] Buffer;
+        wchar_t Text[256];
+        swprintf_s(Text, L"Failed to read %ls (expected %d bytes, got %zu).", FileName, Size, readBytes);
+        g_ErrorReport.Write(Text);
+        g_ErrorReport.Write(L"\r\n");
+        MessageBox(g_hWnd, Text, NULL, MB_OK);
+        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        return false;
+    }
 
     memcpy(BMPHeader, Buffer, Index);
 
@@ -724,7 +755,7 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
     if (!fp)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s file not found.", FileName);
+        swprintf(Text, L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -2369,11 +2400,11 @@ void InitTerrainLight()
 #endif	// ASG_ADD_MAP_KARUTAN
     yi = FrustrumBoundMinY;
 
-    for (; yi <= min(FrustrumBoundMaxY + 3, TERRAIN_SIZE_MASK); yi += 1)
+    for (; yi <= std::min<int>(FrustrumBoundMaxY + 3, TERRAIN_SIZE_MASK); yi += 1)
     {
         xi = FrustrumBoundMinX;
         auto xf = (float)xi;
-        for (; xi <= min(FrustrumBoundMaxX + 3, TERRAIN_SIZE_MASK); xi += 1, xf += 1.f)
+        for (; xi <= std::min<int>(FrustrumBoundMaxX + 3, TERRAIN_SIZE_MASK); xi += 1, xf += 1.f)
         {
             int Index = TERRAIN_INDEX(xi, yi);
             if (gMapManager.WorldActive == WD_8TARKAN)

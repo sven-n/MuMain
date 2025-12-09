@@ -1,13 +1,13 @@
 ﻿#include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
-#include "zzztexture.h"
+#include "ZzzTexture.h"
 #include "ZzzBMD.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzScene.h"
-#include "zzzEffect.h"
-#include "zzzAi.h"
-#include "zzzOpenData.h"
+#include "ZzzEffect.h"
+#include "ZzzAI.h"
+#include "ZzzOpenData.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "CDirection.h"
@@ -79,11 +79,11 @@ void M39Kanturu3rd::CheckSuccessBattle(BYTE State, BYTE DetailState)
     if (KanturuSuccessMap)
     {
         PlayBuffer(SOUND_KANTURU_3RD_MAP_SOUND02);
-        swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
+        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
     }
     else
     {
-        swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
+        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
     }
 
     OpenTerrainAttribute(FileName);
@@ -658,7 +658,7 @@ void M39Kanturu3rd::RenderKanturu3rdAfterObjectMesh(OBJECT* o, BMD* b, bool Extr
 CHARACTER* M39Kanturu3rd::CreateKanturu3rdMonster(int iType, int PosX, int PosY, int Key)
 {
     if (!IsInKanturu3rd())
-        return false;
+        return NULL;
 
     CHARACTER* c = NULL;
 

@@ -9,10 +9,10 @@
 #include "ZzzCharacter.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzTexture.h"
-#include "ZzzAi.h"
+#include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "WSClient.h"
+#include "WSclient.h"
 #include "SkillManager.h"
 
 void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation, float LightTop, float TextureV)

@@ -62,7 +62,7 @@ void CDuelMgr::SetDuelPlayer(int iPlayerNum, short sIndex, wchar_t* pszID)
 {
     m_DuelPlayer[iPlayerNum].m_sIndex = sIndex;
     wcscpy_s(m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE, pszID);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[SetDuelPlayer] %d, %s", sIndex, pszID);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[SetDuelPlayer] %d, %ls", sIndex, pszID);
 }
 
 void CDuelMgr::SetHeroAsDuelPlayer(int iPlayerNum)

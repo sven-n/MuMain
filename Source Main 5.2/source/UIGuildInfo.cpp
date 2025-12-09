@@ -285,7 +285,7 @@ void CUIGuildInfo::RenderGuildInfoTab()
     RenderGoldRect(ptOrigin.x, ptOrigin.y, 140, 62);
     ptOrigin.x += 5;
     ptOrigin.y += 8;
-    swprintf(szTemp, L"%s :", GlobalText[1332]);
+    swprintf(szTemp, L"%ls :", GlobalText[1332]);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
     ptOrigin.y += 13;
     swprintf(szTemp, GlobalText[1256], GuildTotalScore);
@@ -311,7 +311,7 @@ void CUIGuildInfo::RenderGuildInfoTab()
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
     ptOrigin.y += 13;
-    swprintf(szTemp, L"%s : %s", GlobalText[1321], m_szRivalGuildName[0] ? m_szRivalGuildName : GlobalText[1361]);
+    swprintf(szTemp, L"%ls : %ls", GlobalText[1321], m_szRivalGuildName[0] ? m_szRivalGuildName : GlobalText[1361]);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
     ptOrigin.x -= 5;
@@ -661,7 +661,7 @@ void CUIGuildInfo::Render()
         ptOrigin.x = GetPosition_x() + 35;
         ptOrigin.y = GetPosition_y() + 53;
         g_pRenderText->SetTextColor(200, 255, 100, 255);
-        swprintf(szTemp, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
+        swprintf(szTemp, L"%ls ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 120, 0, RT3_SORT_CENTER);
     }
 

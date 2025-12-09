@@ -408,7 +408,7 @@ CQueue<T>::~CQueue()
 template <class T>
 BOOL CQueue<T>::Insert(T NewElement)
 {
-    if (NULL == AddTail(NewElement))
+    if (NULL == this->AddTail(NewElement))
     {	// 실패하면
         return (FALSE);
     }
@@ -419,19 +419,19 @@ BOOL CQueue<T>::Insert(T NewElement)
 template <class T>
 T CQueue<T>::Remove(void)
 {
-    return(RemoveHead());
+    return(this->RemoveHead());
 }
 
 template <class T>
 void CQueue<T>::CleanUp(void)
 {
-    RemoveAll();
+    this->RemoveAll();
 }
 
 template <class T>
 BOOL CQueue<T>::Find(T Element)
 {
-    if (NULL == FindNode(Element))
+    if (NULL == this->FindNode(Element))
     {	// 찾지 못하면
         return (FALSE);
     }
@@ -1034,7 +1034,8 @@ void CDimension<T>::CheckDimensionSize(int nIndex)
 {
     if (nIndex >= m_nSize)
     {
-        for (int nNewSize = m_nSize; nNewSize <= nIndex; nNewSize *= 2)
+        int nNewSize = m_nSize;
+        for (; nNewSize <= nIndex; nNewSize *= 2)
         {
         }
 

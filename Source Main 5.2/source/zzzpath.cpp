@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "zzzpath.h"
+#include "ZzzPath.h"
 
 #ifdef CSK_DEBUG_MAP_PATHFINDING
 bool g_bShowPath = false;

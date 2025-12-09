@@ -15,7 +15,7 @@ bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, 
     FILE* outfile;
     if ((outfile = _wfopen(filename, L"wb")) == NULL)
     {
-        //fprintf(stderr, L"can't open %s\n", filename);
+        //fprintf(stderr, L"can't open %ls\n", filename);
         //exit(1);
         return FALSE;
     }
@@ -103,7 +103,7 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     if (compressedFile == nullptr)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", FileName);
+        swprintf(Text, L"%ls - File not exist.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -188,7 +188,7 @@ bool LoadBitmap(const wchar_t* szFileName, GLuint uiTextureIndex, GLuint uiFilte
         if (false == Bitmaps.LoadImage(uiTextureIndex, szFullPath, uiFilter, uiWrapMode))
         {
             wchar_t szErrorMsg[256] = { 0, };
-            swprintf(szErrorMsg, L"LoadBitmap Failed: %s", szFullPath);
+            swprintf(szErrorMsg, L"LoadBitmap Failed: %ls", szFullPath);
 #ifdef FOR_WORK
             PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK

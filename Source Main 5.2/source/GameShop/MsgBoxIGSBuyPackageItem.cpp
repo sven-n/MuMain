@@ -75,7 +75,7 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
 
     wcsncpy(m_szPackageName, pPackage->PackageProductName, MAX_TEXT_LENGTH);
     ConvertGold(pPackage->Price, szText);
-    swprintf(m_szPrice, L"%s %s", szText, pPackage->PricUnitName);
+    swprintf(m_szPrice, L"%ls %ls", szText, pPackage->PricUnitName);
 
     // Period
     pPackage->SetProductSeqFirst();
@@ -85,7 +85,7 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
 
     if (iValue > 0)
     {
-        swprintf(m_szPeriod, L"%d %s", iValue, szText);
+        swprintf(m_szPeriod, L"%d %ls", iValue, szText);
     }
     else
     {
@@ -187,7 +187,7 @@ void CMsgBoxIGSBuyPackageItem::RenderTexts()
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        swprintf(szText, L"아이템코드가 없습니다.");
+        swprintf(szText, L"Package item information is not available.");
     }
     else
     {
@@ -327,7 +327,7 @@ void CMsgBoxIGSBuyPackageItem::ReleaseListBox()
 bool CMsgBoxBuyPackageItemLayout::SetLayout()
 {
     CMsgBoxIGSBuyPackageItem* pMsgBox = GetMsgBox();
-    if (false == pMsgBox)
+    if (pMsgBox == NULL)
         return false;
 
     if (false == pMsgBox->Create())

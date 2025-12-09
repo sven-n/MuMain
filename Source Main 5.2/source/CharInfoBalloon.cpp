@@ -128,6 +128,6 @@ void CCharInfoBalloon::SetInfo()
         case 64:	nText = 1301;	break;
         case 128:	nText = 1300;	break;
     }
-    swprintf(m_szGuild, L"(%s)", GlobalText[nText]);
-    swprintf(m_szClass, L"%s %d", gCharacterManager.GetCharacterClassText(m_pCharInfo->Class), m_pCharInfo->Level);
+    swprintf(m_szGuild, L"(%ls)", GlobalText[nText]);
+    swprintf(m_szClass, L"%ls %d", gCharacterManager.GetCharacterClassText(m_pCharInfo->Class), m_pCharInfo->Level);
 }

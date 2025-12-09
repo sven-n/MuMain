@@ -1,5 +1,5 @@
 ﻿#include "stdafx.h"
-#include "WinMain.h"
+#include "Winmain.h"
 #include "ZzzTexture.h"
 #include "CSItemOption.h"
 #include "UIControls.h"
@@ -104,7 +104,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(wchar_t* path)
 
     if (fp == nullptr)
     {
-        swprintf(Text, L"%s - File not exist.", path);
+        swprintf(Text, L"%ls - File not exist.", path);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -125,7 +125,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(wchar_t* path)
 
     if (dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
     {
-        swprintf(Text, L"%s - File corrupted.", path);
+        swprintf(Text, L"%ls - File corrupted.", path);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -160,7 +160,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTooltip(wchar_t* path)
     if (fp == nullptr)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", path);
+        swprintf(Text, L"%ls - File not exist.", path);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -707,7 +707,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 
         int lineCount = 0;
 
-        swprintf(TextList[lineCount], L"%s", p->Name);
+        swprintf(TextList[lineCount], L"%ls", p->Name);
 
         TextBold[lineCount] = true;
 

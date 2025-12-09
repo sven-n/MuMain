@@ -3,13 +3,13 @@
 +++++++++++++++++++++++++++++++++++++*/
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
-#include "zzzInfomation.h"
-#include "zzzBmd.h"
-#include "zzztexture.h"
-#include "zzzCharacter.h"
-#include "zzzscene.h"
-#include "zzzInterface.h"
-#include "zzzinventory.h"
+#include "ZzzInfomation.h"
+#include "ZzzBMD.h"
+#include "ZzzTexture.h"
+#include "ZzzCharacter.h"
+#include "ZzzScene.h"
+#include "ZzzInterface.h"
+#include "ZzzInventory.h"
 #include "CSItemOption.h"
 #include "CharacterManager.h"
 #include "UIControls.h"
@@ -67,7 +67,7 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE5F1))
         {
             wchar_t Text[256];
-            swprintf(Text, L"%s - File corrupted.", filename);
+            swprintf(Text, L"%ls - File corrupted.", filename);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, nullptr, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -88,7 +88,7 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
     else
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", filename);
+        swprintf(Text, L"%ls - File not exist.", filename);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -113,7 +113,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_SET_OPTION, 0xA2F1))
         {
             wchar_t Text[256];
-            swprintf(Text, L"%s - File corrupted.", filename);
+            swprintf(Text, L"%ls - File corrupted.", filename);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, nullptr, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -179,7 +179,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
     else
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File does not exist.", filename);
+        swprintf(Text, L"%ls - File does not exist.", filename);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -440,7 +440,7 @@ void CSItemOption::calcSetOptionList(const SET_SEARCH_RESULT* optionList)
         }
 
         const auto requireClass = isClassRequirementFulfilled(setOptions, firstClass, secondClass);
-        const auto standardOptionCount = min(set.CompleteSetItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
+        const auto standardOptionCount = std::min<int>(set.CompleteSetItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
         for (int o = 0; o < standardOptionCount; ++o)
         {
             for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; ++n)
@@ -986,7 +986,7 @@ void CSItemOption::RenderSetOptionButton(const int StartX, const int StartY)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0, 0, 0, 255);
     g_pRenderText->SetBgColor(100, 0, 0, 0);
-    swprintf(Text, L"[%s]", GlobalText[989]);
+    swprintf(Text, L"[%ls]", GlobalText[989]);
     g_pRenderText->RenderText(StartX + 96, (int)(y + 3), Text, 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetTextColor(0xffffffff);
@@ -1025,7 +1025,7 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
             const auto& set = m_SetSearchResult[i];
 
             // print set name:
-            swprintf(TextList[TextNum], L"%s %s", set.SetName, GlobalText[1089]);
+            swprintf(TextList[TextNum], L"%ls %ls", set.SetName, GlobalText[1089]);
             TextListColor[TextNum] = TEXT_COLOR_YELLOW;
             TextBold[TextNum] = true;
             TextNum++;
@@ -1050,7 +1050,7 @@ void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
         ITEM_SET_OPTION& setOption = m_ItemSetOption[i];
         if (setOption.byOptionCount < 255)
         {
-            swprintf(Name, L"/%s", setOption.strSetName);
+            swprintf(Name, L"/%ls", setOption.strSetName);
 
             const auto Length2 = wcslen(Name);
 
@@ -1088,7 +1088,7 @@ void CSItemOption::RenderOptionHelper(void)
     }
 
     swprintf(TextList[TextNum], L"\n"); TextNum++;
-    swprintf(TextList[TextNum], L"%s %s %s", setOption.strSetName, GlobalText[1089], GlobalText[159]);
+    swprintf(TextList[TextNum], L"%ls %ls %ls", setOption.strSetName, GlobalText[1089], GlobalText[159]);
     TextListColor[TextNum] = TEXT_COLOR_YELLOW;
     TextNum++;
 
@@ -1155,7 +1155,7 @@ int CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bI
 
 
     swprintf(TextList[TNum], L"\n"); TNum++;
-    swprintf(TextList[TNum], L"%s %s", GlobalText[1089], GlobalText[159]);
+    swprintf(TextList[TNum], L"%ls %ls", GlobalText[1089], GlobalText[159]);
     TextListColor[TNum] = TEXT_COLOR_YELLOW;
     TNum++;
 

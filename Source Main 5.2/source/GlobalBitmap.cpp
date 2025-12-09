@@ -396,7 +396,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
             }
             else
             {
-                g_ErrorReport.Write(L"File not found %s (%d)->%s\r\n", pBitmap->FileName, uiBitmapIndex, filename.c_str());
+                g_ErrorReport.Write(L"File not found %ls (%d)->%ls\r\n", pBitmap->FileName, uiBitmapIndex, filename.c_str());
                 UnloadImage(uiBitmapIndex, true);
             }
         }
@@ -452,7 +452,7 @@ void CGlobalBitmap::UnloadAllImages()
 #ifdef _DEBUG
         if (pBitmap->Ref > 1)
         {
-            g_ErrorReport.Write(L"Bitmap %s(RefCount= %d)\r\n", pBitmap->FileName, pBitmap->Ref);
+            g_ErrorReport.Write(L"Bitmap %ls(RefCount= %d)\r\n", pBitmap->FileName, pBitmap->Ref);
         }
 #endif // _DEBUG
         delete[] pBitmap->Buffer;
@@ -647,7 +647,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
 
         pNewBitmap->BitmapIndex = uiBitmapIndex;
 
-        filename._Copy_s(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME, MAX_BITMAP_FILE_NAME);
+        wcsncpy(pNewBitmap->FileName, filename.c_str(), MAX_BITMAP_FILE_NAME - 1);
+        pNewBitmap->FileName[MAX_BITMAP_FILE_NAME - 1] = L'\0';
 
         pNewBitmap->Width = static_cast<float>(textureWidth);
         pNewBitmap->Height = static_cast<float>(textureHeight);
@@ -661,7 +662,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         int offset = 0;
         int jpeg_row_size = jpegWidth * 3;
         int texture_row_size = textureWidth * 3;
-        int rows = min(jpegHeight, textureHeight);
+        int rows = std::min<int>(jpegHeight, textureHeight);
         if (jpegWidth != textureWidth)
         {
             // we need copy it line by line
@@ -746,7 +747,8 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
 
     pNewBitmap->BitmapIndex = uiBitmapIndex;
 
-    filename._Copy_s(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME, MAX_BITMAP_FILE_NAME);
+    wcsncpy(pNewBitmap->FileName, filename.c_str(), MAX_BITMAP_FILE_NAME - 1);
+    pNewBitmap->FileName[MAX_BITMAP_FILE_NAME - 1] = L'\0';
 
     pNewBitmap->Width = (float)Width;
     pNewBitmap->Height = (float)Height;

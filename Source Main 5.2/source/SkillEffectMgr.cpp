@@ -96,7 +96,7 @@ OBJECT* CSkillEffectMgr::CreateEffect()
         }
     }
 
-    assert(!"스킬이펙트 한계 도달!");
+    assert(!"Skill effect allocation failed!");
     return &m_SkillEffects[MAX_SKILL_EFFECTS - 1];
 }
 

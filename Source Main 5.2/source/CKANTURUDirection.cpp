@@ -9,7 +9,7 @@
 #include "ZzzLodTerrain.h"
 #include "ZzzInterface.h"
 #include "CDirection.h"
-#include "CKanturuDirection.h"
+#include "CKANTURUDirection.h"
 #include "MapManager.h"
 
 CKanturuDirection::CKanturuDirection()

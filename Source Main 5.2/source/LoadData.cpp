@@ -27,11 +27,11 @@ void CLoadData::AccessModel(int Type, wchar_t* Dir, wchar_t* FileName, int i)
 {
     wchar_t Name[64];
     if (i == -1)
-        swprintf(Name, L"%s.bmd", FileName);
+        swprintf(Name, L"%ls.bmd", FileName);
     else if (i < 10)
-        swprintf(Name, L"%s0%d.bmd", FileName, i);
+        swprintf(Name, L"%ls0%d.bmd", FileName, i);
     else
-        swprintf(Name, L"%s%d.bmd", FileName, i);
+        swprintf(Name, L"%ls%d.bmd", FileName, i);
 
     bool Success = false;
 
@@ -42,7 +42,7 @@ void CLoadData::AccessModel(int Type, wchar_t* Dir, wchar_t* FileName, int i)
     if (Success == false && (wcscmp(FileName, L"Monster") == NULL || wcscmp(FileName, L"Player") == NULL || wcscmp(FileName, L"PlayerTest") == NULL || wcscmp(FileName, L"Angel") == NULL))
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s file does not exist.", Name);
+        swprintf(Text, L"%ls file does not exist.", Name);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
@@ -109,7 +109,7 @@ void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, b
             else
             {
                 wchar_t szErrorMsg[256] = { 0, };
-                swprintf(szErrorMsg, L"OpenTexture Failed: %s of %hs", szFullPath, pModel->Name);
+                swprintf(szErrorMsg, L"OpenTexture Failed: %ls of %hs", szFullPath, pModel->Name);
 #ifdef FOR_WORK
                 PopUpErrorCheckMsgBox(szErrorMsg);
 #else // FOR_WORK

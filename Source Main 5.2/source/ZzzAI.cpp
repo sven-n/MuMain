@@ -19,7 +19,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzInterface.h"
 #include "ZzzEffect.h"
-#include "zzzScene.h"
+#include "ZzzScene.h"
 #include "DSPlaySound.h"
 #include "ZzzPath.h"
 #include "CharacterManager.h"
@@ -63,13 +63,13 @@ int TurnAngle(int iTheta, int iHeading, int maxTURN)
     int Delta = abs(iTheta - iHeading);
     if (iTheta > iHeading)
     {
-        if (Delta < abs((iHeading + 360) - iTheta)) iChange = -min(maxTURN, Delta);
-        else iChange = min(maxTURN, Delta);
+        if (Delta < abs((iHeading + 360) - iTheta)) iChange = -std::min<int>(maxTURN, Delta);
+        else iChange = std::min<int>(maxTURN, Delta);
     }
     if (iTheta < iHeading)
     {
-        if (Delta < abs((iTheta + 360) - iHeading)) iChange = min(maxTURN, Delta);
-        else iChange = -min(maxTURN, Delta);
+        if (Delta < abs((iTheta + 360) - iHeading)) iChange = std::min<int>(maxTURN, Delta);
+        else iChange = -std::min<int>(maxTURN, Delta);
     }
     iTheta += iChange + 360;
     iTheta %= 360;
@@ -719,7 +719,7 @@ std::uniform_real_distribution<> distrib(0.0, 1.0);
 bool rand_fps_check(int reference_frames)
 {
     // return rand() % reference_frames == 0;
-    const auto animation_factor = min(1.0, static_cast<double>(FPS_ANIMATION_FACTOR));
+    const auto animation_factor = std::min<double>(1.0, static_cast<double>(FPS_ANIMATION_FACTOR));
     const auto rand_value = distrib(gen);// *1.5;
     const auto chance = reference_frames == 1
         ? animation_factor

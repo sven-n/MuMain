@@ -155,7 +155,7 @@ BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight, int CoordType
     }
 }
 
-void CUIMessage::SendUIMessage(int iMessage, int iParam1, int iParam2)
+void CUIMessage::SendUIMessage(int iMessage, LONG_PTR iParam1, LONG_PTR iParam2)
 {
     static UI_MESSAGE tempmsg;
     tempmsg.m_iMessage = iMessage;
@@ -524,7 +524,7 @@ void CUITextListBox<T>::Clear()
 template <class T>
 void CUITextListBox<T>::ResetCheckedLine(BOOL bFlag)
 {
-    std::deque<T>::iterator EndIter = m_TextList.end();
+    typename std::deque<T>::iterator EndIter = m_TextList.end();
     for (m_TextListIter = m_TextList.begin(); m_TextListIter != EndIter; ++m_TextListIter)
     {
         m_TextListIter->m_bIsSelected = bFlag;
@@ -534,7 +534,7 @@ void CUITextListBox<T>::ResetCheckedLine(BOOL bFlag)
 template <class T>
 BOOL CUITextListBox<T>::HaveCheckedLine()
 {
-    std::deque<T>::iterator EndIter = m_TextList.end();
+    typename std::deque<T>::iterator EndIter = m_TextList.end();
     for (m_TextListIter = m_TextList.begin(); m_TextListIter != EndIter; ++m_TextListIter)
     {
         if (m_TextListIter->m_bIsSelected == TRUE) return TRUE;
@@ -546,7 +546,7 @@ template <class T>
 int CUITextListBox<T>::GetCheckedLines(std::deque<T*>* pSelectLineList)
 {
     int iSelectLineNum = 0;
-    std::deque<T>::iterator EndIter = m_TextList.end();
+    typename std::deque<T>::iterator EndIter = m_TextList.end();
     for (m_TextListIter = m_TextList.begin(); m_TextListIter != EndIter; ++m_TextListIter)
     {
         if (m_TextListIter->m_bIsSelected == TRUE)
@@ -594,7 +594,6 @@ void CUITextListBox<T>::SLSelectNextLine(int iLineNum)
 }
 
 template <class T>
-
 typename std::deque<T>::iterator CUITextListBox<T>::SLGetSelectLine()
 {
     if (m_TextList.empty())
@@ -605,7 +604,7 @@ typename std::deque<T>::iterator CUITextListBox<T>::SLGetSelectLine()
     else if (m_iSelectLineNum == 0) return m_TextList.end();
 
     int iLineCount = 1;
-    for (std::deque<T>::iterator resultIter = m_TextList.begin(); resultIter != m_TextList.end(); ++resultIter, ++iLineCount)
+    for (typename std::deque<T>::iterator resultIter = m_TextList.begin(); resultIter != m_TextList.end(); ++resultIter, ++iLineCount)
     {
         if (iLineCount == m_iSelectLineNum) return resultIter;
     }
@@ -1098,6 +1097,25 @@ BOOL CUITextListBox<T>::DoMouseAction()
     return bResult;
 }
 
+template class CUITextListBox<GUILDLIST_TEXT>;
+template class CUITextListBox<WHISPER_TEXT>;
+template class CUITextListBox<LETTER_TEXT>;
+template class CUITextListBox<WINDOWLIST_TEXT>;
+template class CUITextListBox<LETTERLIST_TEXT>;
+template class CUITextListBox<SOCKETLIST_TEXT>;
+template class CUITextListBox<GUILDLOG_TEXT>;
+template class CUITextListBox<UNIONGUILD_TEXT>;
+template class CUITextListBox<FILTERLIST_TEXT>;
+template class CUITextListBox<UNMIX_TEXT>;
+template class CUITextListBox<BCDECLAREGUILD_TEXT>;
+template class CUITextListBox<BCGUILD_TEXT>;
+template class CUITextListBox<MOVECOMMAND_TEXT>;
+template class CUITextListBox<SCurQuestItem>;
+template class CUITextListBox<SQuestContents>;
+template class CUITextListBox<IGS_StorageItem>;
+template class CUITextListBox<IGS_BuyList>;
+template class CUITextListBox<IGS_SelectBuyItem>;
+
 CUIGuildListBox::CUIGuildListBox()
 {
     m_iMaxLineCount = UIMAX_TEXT_LINE;
@@ -1207,7 +1225,7 @@ BOOL CUIGuildListBox::RenderDataLine(int iLineNumber)
     }
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->m_szID);
+    swprintf(Text, L"%ls", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     if (m_TextListIter->m_Server != 255/* && m_TextListIter->m_Number != 0*/)
@@ -1479,7 +1497,7 @@ BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
 
     SIZE TextSize = { 0, 0 };
-    // ÀÌ¸§
+    // ì´ë¦„
     if (m_TextListIter->m_szID[0] != NULL)
     {
         switch (m_TextListIter->m_iType)
@@ -1511,7 +1529,7 @@ BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
         }
 
         EnableAlphaTest();
-        swprintf(Text, L"%s: ", m_TextListIter->m_szID);
+        swprintf(Text, L"%ls: ", m_TextListIter->m_szID);
         g_pRenderText->RenderText(m_iPos_x + 8, m_iPos_y - 16 - iLineNumber * 13, Text, 0, 0, RT3_SORT_LEFT, &TextSize);
         DisableAlphaBlend();
     }
@@ -1545,7 +1563,7 @@ BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
     }
 
     EnableAlphaTest();
-    swprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%ls", m_TextListIter->m_szText);
     g_pRenderText->RenderText(m_iPos_x + 8 + TextSize.cx, m_iPos_y - 16 - iLineNumber * 13, Text);
     DisableAlphaBlend();
 
@@ -1685,12 +1703,12 @@ void CUIChatPalListBox::RenderInterface()
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 13.0f / 16.0f, 29.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡ã
+            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–²
 
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 13.0f / 16.0f, 16.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡å
+            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–¼
 
         SetLineColor(2);
         RenderColor((float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarRange_top, (float)1, (float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
@@ -1746,7 +1764,7 @@ BOOL CUIChatPalListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->m_szID);
+    swprintf(Text, L"%ls", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x + GetColumnPos_x(0), iPos_y, Text);
 
     if (m_iLayoutType == 1)
@@ -1924,7 +1942,7 @@ BOOL CUIWindowListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->m_szTitle);
+    swprintf(Text, L"%ls", m_TextListIter->m_szTitle);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     DisableAlphaBlend();
@@ -2352,11 +2370,11 @@ BOOL CUILetterTextListBox::RenderDataLine(int iLineNumber)
 {
     EnableAlphaTest();
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    // ³»¿ë
+    // ë‚´ìš©
     g_pRenderText->SetTextColor(230, 220, 200, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    swprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%ls", m_TextListIter->m_szText);
     int iPos_x = m_iPos_x + 10;
     int iPos_y = GetRenderLinePos_y(iLineNumber);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
@@ -2470,7 +2488,7 @@ BOOL CUISocketListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%ls", m_TextListIter->m_szText);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     DisableAlphaBlend();
@@ -2527,16 +2545,32 @@ CUIRenderText* CUIRenderText::GetInstance()
 
 bool CUIRenderText::Create(int iRenderTextType, HDC hDC)
 {
-    if (iRenderTextType == 0)
+    if (m_pRenderText && m_iRenderTextType == iRenderTextType)
     {
+        return true;
+    }
+
+    Release();
+
+    switch (iRenderTextType)
+    {
+    case 0:
         m_pRenderText = new CUIRenderTextOriginal;
-        if (false == m_pRenderText->Create(hDC))
+        if (!m_pRenderText->Create(hDC))
+        {
+            delete m_pRenderText;
+            m_pRenderText = nullptr;
             return false;
-    }
-    else if (iRenderTextType == 1)
-    {
+        }
+        break;
+    case 1:
         //m_pRenderText = new CUIRenderTextAdvance;
+        return false;
+    default:
+        return false;
     }
+
+    m_iRenderTextType = iRenderTextType;
     return true;
 }
 void CUIRenderText::Release()
@@ -2546,6 +2580,7 @@ void CUIRenderText::Release()
         delete m_pRenderText;
         m_pRenderText = nullptr;
     }
+    m_iRenderTextType = -1;
 }
 
 int CUIRenderText::GetRenderTextType() const { return m_iRenderTextType; }
@@ -3003,8 +3038,11 @@ CUITextInputBox::CUITextInputBox()
 
 CUITextInputBox::~CUITextInputBox()
 {
-    SetWindowLongW(m_hEditWnd, GWL_WNDPROC, (LONG)m_hOldProc);
-    m_hOldProc = nullptr;
+    if (m_hEditWnd != nullptr && m_hOldProc != nullptr)
+    {
+        SetWindowLongPtrW(m_hEditWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(m_hOldProc));
+        m_hOldProc = nullptr;
+    }
 
     if (m_hEditWnd != nullptr)
     {
@@ -3053,7 +3091,7 @@ BOOL ClipboardCheck(HWND hWnd)
 
 LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    auto* pTextInputBox = (CUITextInputBox*)GetWindowLongW(hWnd, GWL_USERDATA);
+    auto* pTextInputBox = reinterpret_cast<CUITextInputBox*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 
     if (pTextInputBox == nullptr)
         return 0;
@@ -3325,8 +3363,8 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
     if (m_hEditWnd)
     {
         SetTextLimit(iMaxLength);
-        m_hOldProc = (WNDPROC)SetWindowLongW(m_hEditWnd, GWL_WNDPROC, (LONG)EditWndProc);
-        SetWindowLongW(m_hEditWnd, GWL_USERDATA, (LONG)this);
+        m_hOldProc = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(m_hEditWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(EditWndProc)));
+        SetWindowLongPtrW(m_hEditWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
         ShowWindow(m_hEditWnd, SW_HIDE);
     }
 
@@ -3594,12 +3632,12 @@ void CUITextInputBox::RenderScrollbar()
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - m_fScrollBarWidth, m_iPos_y - 4, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y - 4, 13.0f, 13.0f, 13.0f / 16.0f, 29.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y - 4, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡ã
+            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y - 4, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–²
 
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - m_fScrollBarWidth, m_iPos_y + m_iHeight - 9, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9, 13.0f, 13.0f, 13.0f / 16.0f, 16.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡å
+            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–¼
 
         EnableAlphaTest();
         SetLineColor(2);
@@ -3619,7 +3657,7 @@ void CUITextInputBox::SetFont(HFONT hFont)
     if (m_hEditWnd == nullptr || hFont == nullptr)
         return;
 
-    SendMessageW(m_hEditWnd, WM_SETFONT, (UINT)hFont, FALSE);
+    SendMessageW(m_hEditWnd, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), FALSE);
     SelectObject(m_hMemDC, hFont);
 }
 
@@ -4371,7 +4409,7 @@ void CSlideHelpMgr::OpenSlideTextFile(const wchar_t* szFileName)
     if (fp == nullptr)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", szFileName);
+        swprintf(Text, L"%ls - File not exist.", szFileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -4541,12 +4579,12 @@ void CUIGuildNoticeListBox::RenderInterface()
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 13.0f / 16.0f, 29.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡ã
+            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–²
 
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 13.0f / 16.0f, 16.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡å
+            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–¼
 
         EnableAlphaTest();
         SetLineColor(2);
@@ -4707,12 +4745,12 @@ void CUINewGuildMemberListBox::RenderInterface()
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - m_iHeight - 1, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 13.0f / 16.0f, 29.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡ã
+            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–²
 
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 13.0f / 16.0f, 16.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡å
+            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–¼
 
         EnableAlphaTest();
         SetLineColor(2);
@@ -4798,7 +4836,7 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->m_szID);
+    swprintf(Text, L"%ls", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     if (iCharacterLevel == 0) g_pRenderText->RenderText(iPos_x + 45, iPos_y, GlobalText[1300], 70, 0, RT3_SORT_CENTER);
@@ -4919,14 +4957,14 @@ void CUIUnionGuildListBox::RenderInterface()
                 13.0f, 13.0f, 13.0f / 16.0f, 29.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - m_iHeight - 1,
-                13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡ã
+                13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–²
 
         if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - 12, m_iPos_y - 12, 13.0f, 13.0f) == TRUE)
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
                 13.0f, 13.0f, 13.0f / 16.0f, 16.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
         else
             RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - 12, (float)m_iPos_y - 12,
-                13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ¡å
+                13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// â–¼
 
         EnableAlphaTest();
         SetLineColor(2);
@@ -4996,7 +5034,7 @@ BOOL CUIUnionGuildListBox::RenderDataLine(int iLineNumber)
         memset(GuildMark[MARK_EDIT].Mark, 0, 64);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->szName);
+    swprintf(Text, L"%ls", m_TextListIter->szName);
     g_pRenderText->RenderText(iPos_x + 12, iPos_y, Text);
 
     swprintf(Text, L"%d", m_TextListIter->nMemberCount);
@@ -5166,7 +5204,7 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
     if (pItem)
     {
         int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
-        swprintf(oText, L"%s,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
+        swprintf(oText, L"%ls,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
     }
 
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, oText);
@@ -5314,7 +5352,7 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
 {
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
 
-    swprintf(Text, L"%s", m_TextListIter->szName);
+    swprintf(Text, L"%ls", m_TextListIter->szName);
 
     if ((wcscmp(GuildMark[Hero->GuildMarkIndex].UnionName, Text) != NULL && wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, Text) != NULL))
     {
@@ -5346,9 +5384,9 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
     g_pRenderText->RenderText(iPos_x + 70, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     if (m_TextListIter->byIsGiveUp)
-        swprintf(Text, L"%s", GlobalText[1531]);
+        swprintf(Text, L"%ls", GlobalText[1531]);
     else
-        swprintf(Text, L"%s", GlobalText[1532]);
+        swprintf(Text, L"%ls", GlobalText[1532]);
     g_pRenderText->RenderText(iPos_x + 120, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     swprintf(Text, L"%u", m_TextListIter->bySeqNum);
@@ -5507,19 +5545,19 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->szName);
+    swprintf(Text, L"%ls", m_TextListIter->szName);
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, Text);
 
     if (m_TextListIter->byJoinSide == 1)
-        swprintf(Text, L"%s", GlobalText[1606]);
+        swprintf(Text, L"%ls", GlobalText[1606]);
     else
-        swprintf(Text, L"%s", GlobalText[1605]);
+        swprintf(Text, L"%ls", GlobalText[1605]);
     g_pRenderText->RenderText(iPos_x + 100, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     if (m_TextListIter->byGuildInvolved == 1)
-        swprintf(Text, L"%s", GlobalText[1607]);
+        swprintf(Text, L"%ls", GlobalText[1607]);
     else
-        swprintf(Text, L"%s", GlobalText[1608]);
+        swprintf(Text, L"%ls", GlobalText[1608]);
 
     g_pRenderText->RenderText(iPos_x + 137, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
@@ -5529,7 +5567,7 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
         if (m_TextListIter->byJoinSide == 1)
             swprintf(Dummy, L"--");
         else
-            swprintf(Dummy, L"%s :     %d", m_TextListIter->szName, m_TextListIter->iGuildScore);
+            swprintf(Dummy, L"%ls :     %d", m_TextListIter->szName, m_TextListIter->iGuildScore);
         g_pRenderText->RenderText(m_iPos_x + 60, m_iPos_y + 31 - 1, Dummy);
     }
 
@@ -5748,7 +5786,7 @@ BOOL CUICurQuestListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%ls", m_TextListIter->m_szText);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     return TRUE;
@@ -5909,7 +5947,7 @@ BOOL CUIQuestContentsListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->m_szText);
+    swprintf(Text, L"%ls", m_TextListIter->m_szText);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text, GetWidth() - 18, 0, m_TextListIter->m_nSort);
 
     return TRUE;
@@ -5922,7 +5960,7 @@ void CUIQuestContentsListBox::RenderCoveredInterface()
     if (SLGetSelectLine() == m_TextList.end())
         return;
 
-    // ¾ÆÀÌÅÛÀÎ°¡?
+    // ì•„ì´í…œì¸ê°€?
     if (QUEST_REQUEST_ITEM == m_TextListIter->m_dwType
         || QUEST_REWARD_ITEM == m_TextListIter->m_dwType)
     {
@@ -6062,7 +6100,7 @@ BOOL CUIInGameShopListBox::RenderDataLine(int iLineNumber)
     wchar_t szItemName[MAX_TEXT_LENGTH];
     if (m_TextListIter->m_iNum > 1)
     {
-        swprintf(szItemName, L"%s(%d)", m_TextListIter->m_szName, m_TextListIter->m_iNum);
+        swprintf(szItemName, L"%ls(%d)", m_TextListIter->m_szName, m_TextListIter->m_iNum);
         g_pRenderText->RenderText(iPos_x, iPos_y, szItemName, 98, 0, RT3_SORT_LEFT);
     }
     else
@@ -6208,7 +6246,7 @@ BOOL CUIBuyingListBox::RenderDataLine(int iLineNumber)
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
     if (m_TextListIter->m_pszItemExplanation != nullptr)
     {
-        swprintf(Text, L"%s", m_TextListIter->m_pszItemExplanation);
+        swprintf(Text, L"%ls", m_TextListIter->m_pszItemExplanation);
         g_pRenderText->RenderText(iPos_x, iPos_y, Text);
     }
     DisableAlphaBlend();
@@ -6364,11 +6402,11 @@ BOOL CUIPackCheckBuyingListBox::RenderDataLine(int nLine)
         m_TextListIter->m_RadioBtn.RadiobuttonBoxRender();
 
         g_pRenderText->SetFont(g_hFontBold);
-        swprintf(Text, L"%s", m_TextListIter->m_szItemName);
+        swprintf(Text, L"%ls", m_TextListIter->m_szItemName);
         g_pRenderText->RenderText(iPos_x + 20, iPos_y + 5, Text);
 
         g_pRenderText->SetFont(g_hFont);
-        swprintf(Text, L"%s", m_TextListIter->m_szAttribute);
+        swprintf(Text, L"%ls", m_TextListIter->m_szAttribute);
         g_pRenderText->RenderText(iPos_x + 20, iPos_y + 17, Text);
     }
     DisableAlphaBlend();
@@ -6616,7 +6654,7 @@ BOOL CUIExtraItemListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%s", m_TextListIter->m_szPattern);
+    swprintf(Text, L"%ls", m_TextListIter->m_szPattern);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     DisableAlphaBlend();

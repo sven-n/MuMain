@@ -331,7 +331,7 @@ void CCreditWin::LoadText()
 	if (fp == NULL)
 	{
 		wchar_t szMessage[256];
-		::wsprintf(szMessage, L"%s file not found.\r\n", CRW_DATA_FILE);
+		::wsprintf(szMessage, L"%ls file not found.\r\n", CRW_DATA_FILE);
 		g_ErrorReport.Write(szMessage);
 		::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
 		::PostMessage(g_hWnd, WM_DESTROY, 0, 0);

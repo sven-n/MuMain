@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 3D Æ¯¼öÈ¿°ú °ü·Ã ÇÔ¼ö
+// 3D Æ¯ï¿½ï¿½È¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 //
-// *** ÇÔ¼ö ·¹º§: 3
+// *** ï¿½Ô¼ï¿½ ï¿½ï¿½ï¿½ï¿½: 3
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -12,10 +12,10 @@
 #include "ZzzCharacter.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzTexture.h"
-#include "ZzzAi.h"
+#include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "WSClient.h"
+#include "WSclient.h"
 #include "CSChaosCastle.h"
 #include "MapManager.h"
 #include "w_MapHeaders.h"

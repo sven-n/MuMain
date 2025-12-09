@@ -56,6 +56,34 @@ It requires:
   * Visual Studio 2022 with the newest update, workloads for C++ and C#
   * A compatible server: [OpenMU](https://github.com/MUnique/OpenMU).
 
+### Building with CMake and MinGW-w64 (Linux)
+
+The repository also contains a CMake setup to cross-compile the Windows client
+from Linux using a MinGW-w64 toolchain.
+
+**Prerequisites**
+
+  * A working MinGW-w64 toolchain (for example `i686-w64-mingw32-g++`).
+  * A MinGW-w64 build of libjpeg-turbo which provides a `libturbojpeg` library
+    (static or import library) on the library search path of your toolchain.
+  * Standard Windows / OpenGL libraries shipped with MinGW-w64 (e.g. `opengl32`,
+    `glu32`, `winmm`, `imm32`, `ws2_32`, etc.).
+
+**Example build commands**
+
+From the repository root:
+
+```sh
+cmake -S . -B build-mingw \
+  -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-i686.cmake
+cmake --build build-mingw -j$(nproc)
+```
+
+If the linker reports `cannot find -lturbojpeg`, install a MinGW-w64 build of
+libjpeg-turbo (providing `libturbojpeg.a` / `libturbojpeg.dll.a`) or adjust the
+`target_link_libraries` entry in `Source Main 5.2/CMakeLists.txt` to match the
+name of the library available on your system.
+
 Because of the integrated C# code, you need to publish the ManagedLibrary first
 to the debug output folder of the main.exe, so that the DLL is built with Native AOT.
 A simple build is not enough in this case, however the publish just needs to be done once.

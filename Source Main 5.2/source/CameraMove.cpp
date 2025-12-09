@@ -470,10 +470,10 @@ UPDATE_WAY_POINT_ENTRY:
         float targetCameraAcc = pTargetWayPoint->fCameraMoveAccel * static_cast<float>(FPS_ANIMATION_FACTOR);
         float originCameraAcc = pOriginWayPoint->fCameraMoveAccel * static_cast<float>(FPS_ANIMATION_FACTOR);
 
-        targetCameraAcc = min(targetCameraAcc, 100);
-        originCameraAcc = min(originCameraAcc, 100);
-        targetCameraAcc = max(targetCameraAcc, 0.1f);
-        originCameraAcc = max(originCameraAcc, 0.1f);
+        targetCameraAcc = std::min<float>(targetCameraAcc, 100.0f);
+        originCameraAcc = std::min<float>(originCameraAcc, 100.0f);
+        targetCameraAcc = std::max<float>(targetCameraAcc, 0.1f);
+        originCameraAcc = std::max<float>(originCameraAcc, 0.1f);
 
         if (m_iDelayCount >= pTargetWayPoint->iDelay)
         {

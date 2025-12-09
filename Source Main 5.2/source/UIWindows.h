@@ -6,6 +6,7 @@
 #include "ZzzCharacter.h"
 #include "WSclient.h"
 #include "Dotnet/Connection.h"
+#include <mutex>
 
 #define WM_CHATROOMMSG_BEGIN (WM_USER+0x100)
 #define WM_CHATROOMMSG_END (WM_USER+0x200)
@@ -570,7 +571,7 @@ public:
 
     void AddWindowFinder(CUIBaseWindow* pWindow);
     void RemoveWindowFinder(DWORD dwUIID);
-    void SendUIMessageToWindow(DWORD dwUIID, int iMessage, int iParam1, int iParam2);
+    void SendUIMessageToWindow(DWORD dwUIID, int iMessage, LONG_PTR iParam1, LONG_PTR iParam2);
 
     void OpenMainWnd(int iPos_x, int iPos_y);
     void CloseMainWnd();

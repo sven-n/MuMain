@@ -1,7 +1,7 @@
 //*****************************************************************************
 // File: UsefulDef.cpp
 //
-// Desc: À¯¿ëÇÑ Á¤ÀÇ ¸ðÀ½.
+// Desc: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 //
 // producer: Ahn Sang-Kyu
 //*****************************************************************************
@@ -46,7 +46,7 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
     {
         if (bSpaceInsert)
         {
-            swprintf(szWorkToken, L" %s", pszToken);
+            swprintf(szWorkToken, L" %ls", pszToken);
             nLine += CutText3(szWorkToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
         else

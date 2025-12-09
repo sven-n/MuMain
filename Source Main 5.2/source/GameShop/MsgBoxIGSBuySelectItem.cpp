@@ -341,12 +341,12 @@ void CMsgBoxIGSBuySelectItem::AddData(int iPackageSeq, int iDisplaySeq, int iPri
     wcscpy(Item.m_szItemName, szText);
 
     g_InGameShopSystem->GetProductInfoFromPriceSeq(iProductSeq, iPriceSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_PRICE, iValue, szText);
-    swprintf(Item.m_szItemPrice, L"%s %s", szText, pszPriceUnit);
+    swprintf(Item.m_szItemPrice, L"%ls %ls", szText, pszPriceUnit);
 
     g_InGameShopSystem->GetProductInfoFromPriceSeq(iProductSeq, iPriceSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_USE_LIMIT_PERIOD, iValue, szText);
     if (iValue > 0)
     {
-        swprintf(Item.m_szItemPeriod, L"%d %s", iValue, szText);
+        swprintf(Item.m_szItemPeriod, L"%d %ls", iValue, szText);
     }
     else
     {
@@ -369,7 +369,7 @@ void CMsgBoxIGSBuySelectItem::AddData(int iPackageSeq, int iDisplaySeq, int iPri
 bool CMsgBoxIGSBuySelectItemLayout::SetLayout()
 {
     CMsgBoxIGSBuySelectItem* pMsgBox = GetMsgBox();
-    if (false == pMsgBox)
+    if (pMsgBox == NULL)
         return false;
 
     if (false == pMsgBox->Create())

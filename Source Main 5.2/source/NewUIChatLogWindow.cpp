@@ -565,8 +565,8 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
     strFilterText.copy(szTemp, MAX_CHAT_BUFFER_SIZE);
     szTemp[MAX_CHAT_BUFFER_SIZE] = '\0';
 
-    wchar_t* token = _wcstok(szTemp, L" ");
-    token = _wcstok(nullptr, L" ");
+	wchar_t* token = wcstok(szTemp, L" ");
+	token = wcstok(nullptr, L" ");
 
     if (token == nullptr)
     {
@@ -582,7 +582,7 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
                 break;
             }
             AddFilterWord(token);
-            token = _wcstok(nullptr, L" ");
+            token = wcstok(nullptr, L" ");
         }
 
         AddText(L"", GlobalText[755], TYPE_SYSTEM_MESSAGE);

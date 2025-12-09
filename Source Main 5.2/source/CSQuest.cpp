@@ -3,14 +3,14 @@
 #include "stdafx.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
-#include "zzzInfomation.h"
-#include "zzzBmd.h"
-#include "zzzObject.h"
-#include "zzztexture.h"
-#include "zzzCharacter.h"
-#include "zzzscene.h"
-#include "zzzInterface.h"
-#include "zzzinventory.h"
+#include "ZzzInfomation.h"
+#include "ZzzBMD.h"
+#include "ZzzObject.h"
+#include "ZzzTexture.h"
+#include "ZzzCharacter.h"
+#include "ZzzScene.h"
+#include "ZzzInterface.h"
+#include "ZzzInventory.h"
 
 #include "CSQuest.h"
 #include "GIPetManager.h"
@@ -131,7 +131,7 @@ bool CSQuest::OpenQuestScript(wchar_t* filename)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", filename);
+        swprintf(Text, L"%ls - File not exist.", filename);
         return  FALSE;
     }
 
@@ -216,7 +216,7 @@ void CSQuest::setQuestList(int index, int result)
 {
     m_byCurrQuestIndex = index;
 
-    m_byCurrQuestIndexWnd = max(index, m_byCurrQuestIndexWnd);
+    m_byCurrQuestIndexWnd = std::max<int>(index, m_byCurrQuestIndexWnd);
 
     int questIndex = (int)(m_byCurrQuestIndex / 4);
     m_byQuestList[questIndex] = result;
@@ -477,7 +477,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
     {
         wchar_t answerText[64];
         CMultiLanguage::ConvertFromUtf8(answerText, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
-        swprintf(lpszAnswer, L"%d) %s", i + 1, answerText);
+        swprintf(lpszAnswer, L"%d) %ls", i + 1, answerText);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)
         {
@@ -490,7 +490,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     if (0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
     {
-        swprintf(lpszAnswer, L"%d) %s", iTextSize + 1, GlobalText[609]);
+        swprintf(lpszAnswer, L"%d) %ls", iTextSize + 1, GlobalText[609]);
         wcscpy(g_lpszDialogAnswer[0][0], lpszAnswer);
         g_iNumAnswer = 1;
     }

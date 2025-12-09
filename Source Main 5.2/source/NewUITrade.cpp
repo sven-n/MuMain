@@ -299,7 +299,7 @@ void CNewUITrade::RenderText()
     g_pRenderText->SetTextColor(210, 230, 255, 255);
     g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 253, Hero->ID);
 
-    int nAlpha = int(min(255, sin(WorldTime / 200) * 200 + 275));
+    int nAlpha = int(std::min<int>(255, sin(WorldTime / 200) * 200 + 275));
     g_pRenderText->SetTextColor(210, 0, 0, nAlpha);
     g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 185, GlobalText[370]);
     g_pRenderText->SetTextColor(255, 220, 150, 255);

@@ -906,25 +906,25 @@ bool SEASON3B::CUseFruitCheckMsgBox::Create(float fPriority)
         switch (pItem->Level)
         {
         case 0:
-            swprintf(strName, L"%s", GlobalText[168]);
+            swprintf(strName, L"%ls", GlobalText[168]);
             break;
         case 1:
-            swprintf(strName, L"%s", GlobalText[169]);
+            swprintf(strName, L"%ls", GlobalText[169]);
             break;
         case 2:
-            swprintf(strName, L"%s", GlobalText[167]);
+            swprintf(strName, L"%ls", GlobalText[167]);
             break;
         case 3:
-            swprintf(strName, L"%s", GlobalText[166]);
+            swprintf(strName, L"%ls", GlobalText[166]);
             break;
         case 4:
-            swprintf(strName, L"%s", GlobalText[1900]);
+            swprintf(strName, L"%ls", GlobalText[1900]);
             break;
         }
     }
 
     wchar_t strText[128] = { 0, };
-    swprintf(strText, L"( %s%s )", strName, GlobalText[1901]);
+    swprintf(strText, L"( %ls%ls )", strName, GlobalText[1901]);
     AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
     AddMsg(GlobalText[1902], RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
 
@@ -2012,7 +2012,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::LButtonUp(class CNewUIM
 CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }
@@ -2039,7 +2039,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class C
 CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }
@@ -3985,7 +3985,7 @@ void SEASON3B::CDuelMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(strDuelID, L"[%s]", g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
+    swprintf(strDuelID, L"[%ls]", g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 115, strDuelID, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -4386,14 +4386,14 @@ void CCherryBlossomMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(title, L"%s", m->Name);
+    swprintf(title, L"%ls", m->Name);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 10, title, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 
     wchar_t titleinfo[256];
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(titleinfo, L"%s", GlobalText[2544]);
+    swprintf(titleinfo, L"%ls", GlobalText[2544]);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 70, titleinfo, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 }
 
@@ -4913,7 +4913,7 @@ CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMes
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }
@@ -4968,7 +4968,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class CNewUI
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }
@@ -5026,7 +5026,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class C
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }
@@ -5112,7 +5112,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::ProcessOk(class CNewUIMessag
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
 
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }
@@ -5166,7 +5166,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class C
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }
@@ -5221,7 +5221,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::OkBtnDown(class CNewUIMess
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
 
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }
@@ -5275,7 +5275,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(class CNew
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }
@@ -7143,7 +7143,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewU
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
 
-    if (pMsgBox == false)
+    if (pMsgBox == NULL)
     {
         return CALLBACK_CONTINUE;
     }

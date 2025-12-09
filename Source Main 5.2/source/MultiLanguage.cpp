@@ -38,7 +38,7 @@ int32_t CMultiLanguage::ConvertFromUtf8(wchar_t* target, char* source, int maxSo
     int count = MultiByteToWideChar(CP_UTF8, 0, source, maxSourceLength, NULL, 0);
     if (maxSourceLength > 0)
     {
-        count = min(count, maxSourceLength);
+        count = std::min<int>(count, maxSourceLength);
     }
 
     MultiByteToWideChar(CP_UTF8, 0, source, -1, target, count);
@@ -50,7 +50,7 @@ int32_t CMultiLanguage::ConvertToUtf8(char* target, wchar_t* source, int maxSour
     auto count = WideCharToMultiByte(0, 0, source, maxSourceLength, 0, 0, 0, 0);
     if (maxSourceLength > 0)
     {
-        count = min(count, maxSourceLength);
+        count = std::min<int>(count, maxSourceLength);
     }
 
     WideCharToMultiByte(0, 0, source, -1, target, count, 0, 0);
