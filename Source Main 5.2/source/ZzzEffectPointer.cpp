@@ -14,6 +14,24 @@
 #include "DSPlaySound.h"
 #include "WSclient.h"
 
+#include <random>
+
+namespace
+{
+std::mt19937& RandomEngine()
+{
+    static std::mt19937 engine{std::random_device{}()};
+    return engine;
+}
+
+int RandomInt(int minInclusive, int maxInclusive)
+{
+    static std::uniform_int_distribution<int> dist;
+    using Dist = std::uniform_int_distribution<int>;
+    return dist(RandomEngine(), Dist::param_type{minInclusive, maxInclusive});
+}
+} // namespace
+
 PARTICLE  Pointers[MAX_POINTERS];
 
 void CreatePointer(int Type, vec3_t Position, float Angle, vec3_t Light, float Scale)
@@ -37,7 +55,7 @@ void CreatePointer(int Type, vec3_t Position, float Angle, vec3_t Light, float S
             case BITMAP_BLOOD:
             case BITMAP_BLOOD + 1:
             case BITMAP_FOOT:
-                o->LifeTime = 50 + rand() % 32;
+                o->LifeTime = 50 + RandomInt(0, 31);
                 break;
             }
             return;

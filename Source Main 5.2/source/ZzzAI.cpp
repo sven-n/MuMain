@@ -13,6 +13,10 @@
 #include "ZzzLodTerrain.h"
 #include "ZzzAI.h"
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <mutex>
 #include <random>
 
 #include "ZzzTexture.h"
@@ -25,6 +29,56 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 
+namespace
+{
+constexpr float FULL_ROTATION_DEGREES = 360.f;
+constexpr float HALF_ROTATION_DEGREES = 180.f;
+constexpr float RAD_TO_DEG = 180.f / static_cast<float>(Q_PI);
+constexpr double MIN_FRAME_TIME_MS = 0.001;
+constexpr double MILLISECONDS_IN_SECOND = 1000.0;
+
+float NormalizeAngleDegrees(float angle)
+{
+    angle = std::fmod(angle, FULL_ROTATION_DEGREES);
+    if (angle < 0.f)
+    {
+        angle += FULL_ROTATION_DEGREES;
+    }
+
+    return angle;
+}
+
+int NormalizeAngleInt(int angle)
+{
+    angle %= static_cast<int>(FULL_ROTATION_DEGREES);
+    if (angle < 0)
+    {
+        angle += static_cast<int>(FULL_ROTATION_DEGREES);
+    }
+    return angle;
+}
+
+float SignedAngleDelta(float from, float to)
+{
+    float delta = NormalizeAngleDegrees(to) - NormalizeAngleDegrees(from);
+    if (delta > HALF_ROTATION_DEGREES)
+    {
+        delta -= FULL_ROTATION_DEGREES;
+    }
+    else if (delta < -HALF_ROTATION_DEGREES)
+    {
+        delta += FULL_ROTATION_DEGREES;
+    }
+    return delta;
+}
+
+float StepTowardsAngle(float current, float target, float maxDelta)
+{
+    const float clampedDelta = std::clamp(SignedAngleDelta(current, target), -maxDelta, maxDelta);
+    return NormalizeAngleDegrees(current + clampedDelta);
+}
+} // namespace
+
 float CreateAngle2D(const vec3_t from, const vec2_t to)
 {
     return CreateAngle(from[0], from[1], to[0], to[1]);
@@ -32,104 +86,49 @@ float CreateAngle2D(const vec3_t from, const vec2_t to)
 
 float CreateAngle(float x1, float y1, float x2, float y2)
 {
-    float nx2 = x2 - x1, ny2 = y2 - y1;
-    float r, angle;
-    if (absf(nx2) < 0.0001f)
+    const float dx = x2 - x1;
+    const float dy = y2 - y1;
+
+    if (std::fabs(dx) < std::numeric_limits<float>::epsilon() && std::fabs(dy) < std::numeric_limits<float>::epsilon())
     {
-        if (ny2 < 0.f) return 0.f;   //s
-        else        return 180.f; //n
+        return 0.f;
     }
-    else if (absf(ny2) < 0.0001f)
-    {
-        if (nx2 < 0.f) return 270.f; //e
-        else        return 90.f;  //w
-    }
-    else
-    {
-        angle = (float)atan(ny2 / nx2) / Q_PI * 180.f + 90.f;
-        if (nx2 < 0.f && ny2 >= 0.f) r = angle + 180.f;
-        else if (nx2 < 0.f && ny2 < 0.f) r = angle + 180.f;
-        else if (nx2 >= 0.f && ny2 < 0.f) r = angle;
-        else                          r = angle;
-    }
-    if(r<0.f) r+=360.f;else if(r>=360.f) r-=360.f;
-    return r;
+
+    const float angle = std::atan2(dx, -dy) * RAD_TO_DEG;
+    return NormalizeAngleDegrees(angle);
 }
 
 int TurnAngle(int iTheta, int iHeading, int maxTURN)
 {
-    int iChange = 0;
+    if (maxTURN <= 0)
+    {
+        return NormalizeAngleInt(iTheta);
+    }
 
-    int Delta = abs(iTheta - iHeading);
-    if (iTheta > iHeading)
-    {
-        if (Delta < abs((iHeading + 360) - iTheta)) iChange = -std::min<int>(maxTURN, Delta);
-        else iChange = std::min<int>(maxTURN, Delta);
-    }
-    if (iTheta < iHeading)
-    {
-        if (Delta < abs((iTheta + 360) - iHeading)) iChange = std::min<int>(maxTURN, Delta);
-        else iChange = -std::min<int>(maxTURN, Delta);
-    }
-    iTheta += iChange + 360;
-    iTheta %= 360;
-    return iTheta;
+    const float updated = StepTowardsAngle(static_cast<float>(iTheta), static_cast<float>(iHeading), static_cast<float>(maxTURN));
+    return NormalizeAngleInt(static_cast<int>(std::lround(updated)));
 }
 
 float TurnAngle2(float angle, float a, float d)
 {
-    if (angle < 0.f) angle += 360.f;
-    if (a < 0.f) a += 360.f;
-    float aa;
-    if (angle < 180.f)
+    if (d <= 0.f)
     {
-        aa = angle - d;
-        if (a >= angle + d && (a < angle + 180.f)) angle += d;
-        else if (aa >= 0 && (a >= angle + 180.f || a < aa)) angle -= d;
-        else if (aa < 0 && (a >= angle + 180.f && a < aa + 360.f)) { angle = angle - d + 360.f; }
-        else                                                  angle = a;
+        return NormalizeAngleDegrees(angle);
     }
-    else
-    {
-        aa = angle + d;
-        if (a < angle - d && (a >= angle - 180.f)) angle -= d;
-        else if (aa < 360.f && (a < angle - 180.f || a >= aa)) angle += d;
-        else if (aa >= 360.f && (a < angle - 180.f && a >= aa - 360.f)) { angle = angle + d - 360.f; }
-        else                                                  angle = a;
-    }
-    return angle;
+
+    return StepTowardsAngle(angle, a, d);
 }
 
-float FarAngle(float angle1, float angle2, bool abs)
+float FarAngle(float angle1, float angle2, bool absolute)
 {
-    if (angle1 < 0.f) angle1 += 360.f;
-    if (angle2 < 0.f) angle2 += 360.f;
-    float d = angle2 - angle1;
-    if (angle1 < 180.f)
-    {
-        if (angle2 >= angle1 + 180.f) d = (360.f - angle2 + angle1);
-    }
-    else
-    {
-        if (angle2 < angle1 - 180.f) d = (360.f - angle1 + angle2);
-    }
-    if (abs == true) if (d < 0.f) d = -d;
-    return d;
+    const float delta = SignedAngleDelta(angle1, angle2);
+    return absolute ? std::fabs(delta) : delta;
 }
 
 int CalcAngle(float PositionX, float PositionY, float TargetX, float TargetY)
 {
-    float Grad;
-    if (TargetX - PositionX == 0.f)
-        Grad = 0.f;
-    else
-        Grad = (PositionY - TargetY) / (TargetX - PositionX);
-    int TargetTheta = (int)(atanf(Grad) * (180.f / Q_PI));
-    if (TargetX < PositionX) TargetTheta += 180;
-    if (TargetTheta < 0) TargetTheta += 360;
-    TargetTheta = 360 - TargetTheta;
-    TargetTheta %= 360;
-    return TargetTheta;
+    const float targetAngle = CreateAngle(PositionX, PositionY, TargetX, TargetY);
+    return NormalizeAngleInt(static_cast<int>(std::lround(targetAngle)));
 }
 
 float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Turn)
@@ -139,7 +138,7 @@ float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Tu
     Angle[2] = TurnAngle2(Angle[2], targetAngle, scaledTurn);
     vec3_t Range;
     VectorSubtract(Position, TargetPosition, Range);
-    float distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
+    float distance = std::sqrt(Range[0] * Range[0] + Range[1] * Range[1]);
     targetAngle = 360.f - CreateAngle(Position[2], distance, TargetPosition[2], 0.f);
     Angle[0] = TurnAngle2(Angle[0], targetAngle, scaledTurn);
     return VectorLength(Range);
@@ -147,30 +146,26 @@ float MoveHumming(vec3_t Position, vec3_t Angle, vec3_t TargetPosition, float Tu
 
 void MovePosition(vec3_t Position, vec3_t Angle, vec3_t Speed)
 {
-
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
 
     vec3_t Velocity;
     VectorRotate(Speed, Matrix, Velocity);
-    VectorScale(Velocity, FPS_ANIMATION_FACTOR, Velocity)
+    VectorScale(Velocity, FPS_ANIMATION_FACTOR, Velocity);
     VectorAdd(Position, Velocity, Position);
 }
 
-BYTE CalcTargetPos(float x, float y, int Tx, int Ty)
+std::uint8_t CalcTargetPos(float x, float y, int Tx, int Ty)
 {
-    BYTE position;
-    int PositionX = (int)(x / TERRAIN_SCALE);
-    int PositionY = (int)(y / TERRAIN_SCALE);
-    int TargetX = (int)(Tx / TERRAIN_SCALE);
-    int TargetY = (int)(Ty / TERRAIN_SCALE);
+    const int PositionX = static_cast<int>(x / TERRAIN_SCALE);
+    const int PositionY = static_cast<int>(y / TERRAIN_SCALE);
+    const int TargetX = static_cast<int>(Tx / TERRAIN_SCALE);
+    const int TargetY = static_cast<int>(Ty / TERRAIN_SCALE);
 
-    BYTE dx = 8 + TargetX - PositionX;
-    BYTE dy = 8 + TargetY - PositionY;
+    const std::uint8_t dx = static_cast<std::uint8_t>(8 + TargetX - PositionX);
+    const std::uint8_t dy = static_cast<std::uint8_t>(8 + TargetY - PositionY);
 
-    position = ((BYTE)((BYTE)dx | (BYTE)(dy << 4)));
-
-    return position;
+    return static_cast<std::uint8_t>((dx & 0x0F) | ((dy & 0x0F) << 4));
 }
 
 void Alpha(OBJECT* o)
@@ -224,7 +219,7 @@ void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
 
                 xdist *= FPS_ANIMATION_FACTOR;
                 ydist *= FPS_ANIMATION_FACTOR;
-                float pdist = sqrtf(xdist * xdist + ydist * ydist);
+                float pdist = std::sqrt(xdist * xdist + ydist * ydist);
                 TargetX += xdist / pdist;
                 TargetY += ydist / pdist;
                 NumBirds++;
@@ -552,7 +547,7 @@ bool MovePath(CHARACTER* c, bool Turn)
     bool Success = false;
     PATH_t* p = &c->Path;
 
-    p->Lock.lock();
+    std::lock_guard<SpinLock> guard(p->Lock);
 
     if (p->CurrentPath < p->PathNum)
     {
@@ -598,7 +593,7 @@ bool MovePath(CHARACTER* c, bool Turn)
         OBJECT* o = &c->Object;
         float dx = o->Position[0] - cx;
         float dy = o->Position[1] - cy;
-        float Distance = sqrtf(dx * dx + dy * dy);
+        float Distance = std::sqrt(dx * dx + dy * dy);
         if (Distance <= 20.f)
         {
             p->CurrentPathFloat++;
@@ -632,8 +627,6 @@ bool MovePath(CHARACTER* c, bool Turn)
         }
     }
 
-    p->Lock.unlock();
-
     return Success;
 }
 
@@ -644,7 +637,7 @@ void InitPath()
 
 bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, int iDefaultWall)
 {
-    a->Lock.lock();
+    std::lock_guard<SpinLock> guard(a->Lock);
 
     bool Success = false;
     bool Value = false;
@@ -691,8 +684,6 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
             Success = true;
         }
     }
-
-    a->Lock.unlock();
 
     return Success;
 }
@@ -742,24 +733,18 @@ void CalcFPS()
     frame++;
     WorldTime = g_WorldTime->GetTimeElapsed();
 
-    const double differenceMs = WorldTime - last;
-    if (differenceMs <= 0)
-    {
-        FPS = 0.01;
-    }
-    else
-    {
-        FPS = 1000 / differenceMs;
-    }
+    const double differenceMs = std::max(WorldTime - last, MIN_FRAME_TIME_MS);
+    FPS = MILLISECONDS_IN_SECOND / differenceMs;
 
-    // animate with no less than 25 fps, otherwise some animations don't work correctly
-    FPS_ANIMATION_FACTOR = minf(static_cast<float>(REFERENCE_FPS / FPS), 1.f);
+    // animate with no less than REFERENCE_FPS, otherwise some animations don't work correctly
+    const double fpsRatio = (FPS <= 0.0) ? 0.0 : REFERENCE_FPS / FPS;
+    FPS_ANIMATION_FACTOR = std::clamp(static_cast<float>(fpsRatio), 0.f, 1.f);
 
     // Calculate average fps every 2 seconds or 25 frames
     const double diffSinceStart = WorldTime - start;
     if (diffSinceStart > 2000.0 || frame > 25)
     {
-        FPS_AVG = (1000 * frame) / diffSinceStart;
+        FPS_AVG = (MILLISECONDS_IN_SECOND * frame) / diffSinceStart;
         start = WorldTime;
         frame = 0;
     }

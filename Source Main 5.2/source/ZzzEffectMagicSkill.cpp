@@ -15,6 +15,25 @@
 #include "WSclient.h"
 #include "SkillManager.h"
 
+#include <cmath>
+#include <random>
+
+namespace
+{
+std::mt19937& RandomEngine()
+{
+    static std::mt19937 engine{std::random_device{}()};
+    return engine;
+}
+
+float RandomFloat(float minInclusive, float maxInclusive)
+{
+    static std::uniform_real_distribution<float> dist;
+    using Dist = std::uniform_real_distribution<float>;
+    return dist(RandomEngine(), Dist::param_type{minInclusive, maxInclusive});
+}
+} // namespace
+
 void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation, float LightTop, float TextureV)
 {
     BindTexture(Type);
@@ -309,7 +328,7 @@ void CreateArrows(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Ski
             vec3_t a;
             for (int i = 0; i < 15; ++i)
             {
-                Vector((float)(rand() % 360), 0.f, 0.f, a);
+                Vector(RandomFloat(0.f, 360.f), 0.f, 0.f, a);
                 if (rand_fps_check(2))
                 {
                     CreateJoint(BITMAP_JOINT_SPARK, Position, Position, a, 3);
