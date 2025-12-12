@@ -24,7 +24,7 @@ protected:
     bool m_isInitialized{ false };
 
 public:
-    CCharInfoBalloonMng();
+    CCharInfoBalloonMng() = default;
     virtual ~CCharInfoBalloonMng();
 
     void Release();

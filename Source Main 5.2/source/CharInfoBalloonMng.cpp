@@ -11,8 +11,6 @@
 
 #include "CharInfoBalloon.h"
 
-CCharInfoBalloonMng::CCharInfoBalloonMng() = default;
-
 CCharInfoBalloonMng::~CCharInfoBalloonMng()
 {
     Release();
