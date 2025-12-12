@@ -35,11 +35,11 @@ namespace
     };
 
     constexpr std::array<GuildStatusText, 5> kGuildStatusTexts{ {
-        { 255, 488 },
         {   0, 1330 },
         {  32, 1302 },
         {  64, 1301 },
         { 128, 1300 },
+        { 255, 488 },
     } };
 
     DWORD ResolveNameColor(std::uint8_t controlCode)
@@ -58,9 +58,13 @@ namespace
 
     int ResolveGuildTextIndex(std::uint8_t guildStatus)
     {
-        const auto it = std::find_if(kGuildStatusTexts.begin(), kGuildStatusTexts.end(),
-            [guildStatus](const GuildStatusText& entry) { return entry.status == guildStatus; });
-        return (it != kGuildStatusTexts.end()) ? it->textIndex : 0;
+        const auto it = std::lower_bound(
+            kGuildStatusTexts.begin(),
+            kGuildStatusTexts.end(),
+            guildStatus,
+            [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
+
+        return (it != kGuildStatusTexts.end() && it->status == guildStatus) ? it->textIndex : 0;
     }
 }
 
@@ -160,8 +164,8 @@ void CCharInfoBalloon::SetInfo()
     CopyWideString(m_szName, m_pCharInfo->ID);
 
     const int guildTextIndex = ResolveGuildTextIndex(m_pCharInfo->GuildStatus);
-    swprintf(m_szGuild, L"(%ls)", GlobalText[guildTextIndex]);
-    swprintf(m_szClass, L"%ls %d",
+    swprintf_s(m_szGuild, L"(%ls)", GlobalText[guildTextIndex]);
+    swprintf_s(m_szClass, L"%ls %d",
         gCharacterManager.GetCharacterClassText(m_pCharInfo->Class),
         m_pCharInfo->Level);
 }
