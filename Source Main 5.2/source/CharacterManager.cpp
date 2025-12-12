@@ -28,6 +28,12 @@ namespace
         int textIndex;
     };
 
+    constexpr int kThirdGenWingMin = ITEM_WING + 130;
+    constexpr int kThirdGenWingMax = ITEM_WING + 134;
+    constexpr int kSpecialWingType = ITEM_WING + 135;
+
+    constexpr int kDefaultClassTextIndex = 2305;
+
     constexpr std::array<ClassTextEntry, 18> kClassTextEntries{{
         { CLASS_WIZARD, 20 },
         { CLASS_SOULMASTER, 25 },
@@ -54,29 +60,24 @@ namespace
         return InRange(type, ITEM_WING, ITEM_WINGS_OF_DARKNESS) ||
                InRange(type, ITEM_WING_OF_STORM, ITEM_WING_OF_DIMENSION) ||
                type == ITEM_CAPE_OF_LORD ||
-               InRange(type, ITEM_WING + 130, ITEM_WING + 134) ||
+               InRange(type, kThirdGenWingMin, kThirdGenWingMax) ||
                InRange(type, ITEM_CAPE_OF_FIGHTER, ITEM_CAPE_OF_OVERRULE) ||
-               type == ITEM_WING + 135;
+               type == kSpecialWingType;
     }
 
     constexpr bool IsBowModel(int type)
     {
-        return type != MODEL_BOLT && InRange(type, MODEL_BOW, MODEL_BOW + MAX_ITEM_INDEX - 1);
+        return InRange(type, MODEL_BOW, MODEL_CHAOS_NATURE_BOW) ||
+               type == MODEL_CELESTIAL_BOW ||
+               InRange(type, MODEL_ARROW_VIPER_BOW, MODEL_STINGER_BOW) ||
+               type == MODEL_AIR_LYN_BOW;
     }
 
     constexpr bool IsCrossbowModel(int type)
     {
-        return type != MODEL_ARROWS && InRange(type, MODEL_CROSSBOW, MODEL_BOW + MAX_ITEM_INDEX - 1);
-    }
-
-    constexpr bool IsEquippedBowItem(int type)
-    {
-        return type != ITEM_BOLT && InRange(type, ITEM_BOW, ITEM_BOW + MAX_ITEM_INDEX - 1);
-    }
-
-    constexpr bool IsEquippedCrossbowItem(int type)
-    {
-        return type != ITEM_ARROWS && InRange(type, ITEM_CROSSBOW, ITEM_BOW + MAX_ITEM_INDEX - 1);
+        return InRange(type, MODEL_CROSSBOW, MODEL_AQUAGOLD_CROSSBOW) ||
+               type == MODEL_SAINT_CROSSBOW ||
+               InRange(type, MODEL_DIVINE_CB_OF_ARCHANGEL, MODEL_GREAT_REIGN_CROSSBOW);
     }
 
     constexpr bool IsGeneralBowItem(int type)
@@ -92,6 +93,16 @@ namespace
         return InRange(type, ITEM_CROSSBOW, ITEM_AQUAGOLD_CROSSBOW) ||
                type == ITEM_SAINT_CROSSBOW ||
                InRange(type, ITEM_DIVINE_CB_OF_ARCHANGEL, ITEM_GREAT_REIGN_CROSSBOW);
+    }
+
+    constexpr bool IsEquippedBowItem(int type)
+    {
+        return IsGeneralBowItem(type);
+    }
+
+    constexpr bool IsEquippedCrossbowItem(int type)
+    {
+        return IsGeneralCrossbowItem(type);
     }
 }
 
@@ -217,7 +228,7 @@ const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byChara
 {
     const auto it = std::find_if(kClassTextEntries.begin(), kClassTextEntries.end(),
         [byCharacterClass](const ClassTextEntry& entry) { return entry.type == byCharacterClass; });
-    return (it != kClassTextEntries.end()) ? GlobalText[it->textIndex] : GlobalText[2305];
+    return (it != kClassTextEntries.end()) ? GlobalText[it->textIndex] : GlobalText[kDefaultClassTextIndex];
 }
 
 CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
