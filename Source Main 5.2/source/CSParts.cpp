@@ -21,7 +21,7 @@ namespace
 constexpr float kRenderableAlphaThreshold = 0.01f;
 constexpr int kDefaultBoneIndex = 20;
 
-bool ShouldAssignWebzenPart(const CHARACTER& character)
+bool ShouldAssignWebzenPart(CHARACTER& character)
 {
     const bool hasGmBuff = g_isCharacterBuff((&character.Object), eBuff_GMEffect) != FALSE;
     const bool isOperator = (character.CtlCode == CTLCODE_20OPERATOR) || (character.CtlCode == CTLCODE_08OPERATOR);
@@ -87,7 +87,7 @@ void InitializeCommonObjectState(OBJECT& object, int type, bool billboard)
     object.Velocity = 0.5f;
     object.bBillBoard = billboard;
 
-    g_CharacterClearBuff(&object);
+    g_CharacterClearBuff((&object));
     Vector(1.f, 1.f, 1.f, object.Light);
     Vector(0.f, 0.f, 0.f, object.HeadAngle);
 }
