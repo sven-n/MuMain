@@ -1,95 +1,96 @@
-﻿# ifndef __BASE_CLASSES_H__
-# define __BASE_CLASSES_H__
+﻿#ifndef __BASE_CLASSES_H__
+#define __BASE_CLASSES_H__
 
-template <class T> class CList;
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+
+template <class T>
+class CList;
 
 template <class T>
 class CNode
 {
-protected:
-    T m_Data;
-    CNode<T>* m_pPrev;
-    CNode<T>* m_pNext;
+public:
+    CNode() = default;
+    explicit CNode(const T& data) : m_Data(data) {}
 
-    void SetPrev(CNode<T>* pPrev) { m_pPrev = pPrev; }
-    CNode<T>* GetPrev(void) { return (m_pPrev); }
+    void SetData(const T& data) { m_Data = data; }
+    T& GetData() { return m_Data; }
+    const T& GetData() const { return m_Data; }
 
-    void SetNext(CNode<T>* pNext) { m_pNext = pNext; }
-    CNode<T>* GetNext(void) { return (m_pNext); }
+private:
+    void SetPrev(CNode<T>* previous) { m_pPrev = previous; }
+    void SetNext(CNode<T>* next) { m_pNext = next; }
+    CNode<T>* GetPrev() { return m_pPrev; }
+    const CNode<T>* GetPrev() const { return m_pPrev; }
+    CNode<T>* GetNext() { return m_pNext; }
+    const CNode<T>* GetNext() const { return m_pNext; }
 
     friend class CList<T>;
 
-public:
-    CNode();
-    CNode(T Data);
-    ~CNode();
-    void SetData(T Data) { m_Data = Data; }
-    T& GetData(void) { return (m_Data); }
+    T m_Data{};
+    CNode<T>* m_pPrev{nullptr};
+    CNode<T>* m_pNext{nullptr};
 };
-
-template <class T>
-CNode<T>::CNode()
-{
-    m_pPrev = m_pNext = NULL;
-}
-
-template <class T>
-CNode<T>::CNode(T Data)
-{
-    m_Data = Data;
-    m_pPrev = m_pNext = NULL;
-}
-
-template <class T>
-CNode<T>::~CNode()
-{
-}
 
 template <class T>
 class CList
 {
-private:
-    long m_lCount;
-    //T m_NullData;
-    CNode<T>* m_pHead;
-    CNode<T>* m_pTail;
-
 public:
-    CList();	// Constructor
-    ~CList();	// Destructor
+    CList();
+    ~CList();
 
-    LONG GetCount(void) { return (m_lCount); }
+    std::size_t GetCount() const { return m_Count; }
+    bool IsEmpty() const { return m_Count == 0; }
 
-    CNode<T>* AddHead(T NewElement);
-    CNode<T>* AddTail(T NewElement);
-    CNode<T>* InsertBefore(CNode<T>* pNode, T NewElement);
-    CNode<T>* InsertAfter(CNode<T>* pNode, T NewElement);
+    CNode<T>* AddHead(const T& newElement);
+    CNode<T>* AddTail(const T& newElement);
+    CNode<T>* InsertBefore(CNode<T>* node, const T& newElement);
+    CNode<T>* InsertAfter(CNode<T>* node, const T& newElement);
 
-    T RemoveHead(void);
-    T RemoveTail(void);
-    T RemoveNode(CNode<T>*& pNode);
-    void RemoveAll(void);
+    T RemoveHead();
+    T RemoveTail();
+    T RemoveNode(CNode<T>*& node);
+    void RemoveAll();
 
-    BOOL IsEmpty(void) { return (m_pHead->GetNext() == m_pTail); }
+    CNode<T>* FindHead();
+    const CNode<T>* FindHead() const;
+    CNode<T>* FindTail();
+    const CNode<T>* FindTail() const;
+    CNode<T>* FindNode(const T& searchValue);
+    const CNode<T>* FindNode(const T& searchValue) const;
 
-    CNode<T>* FindHead(void);
-    CNode<T>* FindTail(void);
-    CNode<T>* FindNode(T SearchValue);
+    CNode<T>* GetPrev(CNode<T>* node);
+    const CNode<T>* GetPrev(const CNode<T>* node) const;
+    CNode<T>* GetNext(CNode<T>* node);
+    const CNode<T>* GetNext(const CNode<T>* node) const;
 
-    CNode<T>* GetPrev(CNode<T>* pNode);
-    CNode<T>* GetNext(CNode<T>* pNode);
-    void SetData(CNode<T>* pNode, T Data);
-    T& GetData(CNode<T>* pNode);
+    void SetData(CNode<T>* node, const T& data);
+    T& GetData(CNode<T>* node);
+    const T& GetData(const CNode<T>* node) const;
+
+private:
+    CNode<T>* CreateDataNode(const T& value);
+    bool IsSentinel(const CNode<T>* node) const { return node == m_pHead || node == m_pTail; }
+
+    std::size_t m_Count{0};
+    CNode<T>* m_pHead{nullptr};
+    CNode<T>* m_pTail{nullptr};
+    T m_NullData{};
 };
 
 template <class T>
 CList<T>::CList()
+    : m_pHead(new CNode<T>()), m_pTail(new CNode<T>())
 {
-    m_pHead = new CNode<T>;
-    m_pTail = new CNode<T>;
     m_pHead->SetNext(m_pTail);
     m_pTail->SetPrev(m_pHead);
-    m_lCount = 0;
 }
 
 template <class T>
@@ -101,464 +102,403 @@ CList<T>::~CList()
 }
 
 template <class T>
-CNode<T>* CList<T>::AddHead(T NewElement)
+CNode<T>* CList<T>::CreateDataNode(const T& value)
 {
-    CNode<T>* pOne = new CNode<T>;
-
-    if (pOne == NULL)
-    {
-        return (NULL);
-    }
-
-    pOne->SetData(NewElement);
-
-    pOne->SetNext(m_pHead->GetNext());
-    (m_pHead->GetNext())->SetPrev(pOne);
-    pOne->SetPrev(m_pHead);
-    m_pHead->SetNext(pOne);
-
-    m_lCount++;
-
-    return (pOne);
+    return new CNode<T>(value);
 }
 
 template <class T>
-CNode<T>* CList<T>::AddTail(T NewElement)
+CNode<T>* CList<T>::AddHead(const T& newElement)
 {
-    CNode<T>* pOne = new CNode<T>;
-
-    if (pOne == NULL)
-    {
-        return (NULL);
-    }
-
-    pOne->SetData(NewElement);
-
-    pOne->SetPrev(m_pTail->GetPrev());
-    (m_pTail->GetPrev())->SetNext(pOne);
-    pOne->SetNext(m_pTail);
-    m_pTail->SetPrev(pOne);
-
-    m_lCount++;
-
-    return (pOne);
+    auto* node = CreateDataNode(newElement);
+    auto* first = m_pHead->GetNext();
+    node->SetNext(first);
+    first->SetPrev(node);
+    node->SetPrev(m_pHead);
+    m_pHead->SetNext(node);
+    ++m_Count;
+    return node;
 }
 
 template <class T>
-CNode<T>* CList<T>::InsertBefore(CNode<T>* pNode, T NewElement)
+CNode<T>* CList<T>::AddTail(const T& newElement)
 {
-    CNode<T>* pOne = new CNode<T>;
-
-    if (pOne == NULL)
-    {
-        return (NULL);
-    }
-
-    pOne->SetData(NewElement);
-    pOne->SetPrev(pNode->GetPrev());
-    (pNode->GetPrev())->SetNext(pOne);
-    pOne->SetNext(pNode);
-    pNode->SetPrev(pOne);
-
-    m_lCount++;
-
-    return (pOne);
+    auto* node = CreateDataNode(newElement);
+    auto* last = m_pTail->GetPrev();
+    node->SetPrev(last);
+    last->SetNext(node);
+    node->SetNext(m_pTail);
+    m_pTail->SetPrev(node);
+    ++m_Count;
+    return node;
 }
 
 template <class T>
-CNode<T>* CList<T>::InsertAfter(CNode<T>* pNode, T NewElement)
+CNode<T>* CList<T>::InsertBefore(CNode<T>* node, const T& newElement)
 {
-    CNode<T>* pOne = new CNode<T>;
-
-    if (pOne == NULL)
+    if (!node || node == m_pHead)
     {
-        return (NULL);
+        return nullptr;
     }
 
-    pOne->SetData(NewElement);
-
-    pOne->SetNext(pNode->GetNext());
-    (pNode->GetNext())->SetPrev(pOne);
-    pOne->SetPrev(pNode);
-    pNode->SetNext(pOne);
-
-    m_lCount++;
-
-    return (pOne);
+    auto* previous = node->GetPrev();
+    auto* newNode = CreateDataNode(newElement);
+    newNode->SetPrev(previous);
+    newNode->SetNext(node);
+    previous->SetNext(newNode);
+    node->SetPrev(newNode);
+    ++m_Count;
+    return newNode;
 }
 
 template <class T>
-T CList<T>::RemoveHead(void)
+CNode<T>* CList<T>::InsertAfter(CNode<T>* node, const T& newElement)
 {
-    CNode<T>* pOne = m_pHead->GetNext();
-
-    if (pOne == m_pTail)
+    if (!node || node == m_pTail)
     {
-        T NullData;
-        memset(&NullData, 0, sizeof(T));
-
-        return (NullData);
+        return nullptr;
     }
 
-    T Data = pOne->GetData();
-
-    (pOne->GetNext())->SetPrev(m_pHead);
-    m_pHead->SetNext(pOne->GetNext());
-
-    delete pOne;
-
-    m_lCount--;
-
-    return (Data);
+    auto* next = node->GetNext();
+    auto* newNode = CreateDataNode(newElement);
+    newNode->SetNext(next);
+    newNode->SetPrev(node);
+    next->SetPrev(newNode);
+    node->SetNext(newNode);
+    ++m_Count;
+    return newNode;
 }
 
 template <class T>
-T CList<T>::RemoveTail(void)
+T CList<T>::RemoveHead()
 {
-    CNode<T>* pOne = m_pTail->GetPrev();
-
-    if (pOne == m_pHead)
+    if (IsEmpty())
     {
-        T NullData;
-        memset(&NullData, 0, sizeof(T));
-
-        return (NullData);
+        throw std::out_of_range("Cannot remove from an empty list.");
     }
 
-    T Data = pOne->GetData();
-
-    (pOne->GetPrev())->SetNext(m_pTail);
-    m_pTail->SetPrev(pOne->GetPrev());
-
-    delete pOne;
-
-    m_lCount--;
-
-    return (Data);
+    auto* node = m_pHead->GetNext();
+    auto* next = node->GetNext();
+    next->SetPrev(m_pHead);
+    m_pHead->SetNext(next);
+    T data = node->GetData();
+    delete node;
+    --m_Count;
+    return data;
 }
 
 template <class T>
-T CList<T>::RemoveNode(CNode<T>*& pNode)
+T CList<T>::RemoveTail()
 {
-    if (pNode == NULL)
+    if (IsEmpty())
     {
-        T NullData;
-        memset(&NullData, 0, sizeof(T));
-
-        return (NullData);
+        throw std::out_of_range("Cannot remove from an empty list.");
     }
 
-    T Data = pNode->GetData();
-    CNode<T>* pNextNode = pNode->GetNext();
-
-    (pNode->GetPrev())->SetNext(pNextNode);
-    pNextNode->SetPrev(pNode->GetPrev());
-
-    delete pNode;
-    pNode = (pNextNode != m_pTail) ? pNextNode : NULL;
-
-    m_lCount--;
-
-    return (Data);
+    auto* node = m_pTail->GetPrev();
+    auto* previous = node->GetPrev();
+    previous->SetNext(m_pTail);
+    m_pTail->SetPrev(previous);
+    T data = node->GetData();
+    delete node;
+    --m_Count;
+    return data;
 }
 
 template <class T>
-void CList<T>::RemoveAll(void)
+T CList<T>::RemoveNode(CNode<T>*& node)
 {
-    (m_pTail->GetPrev())->SetNext(NULL);
-
-    CNode<T>* pToSeek, * pToDelete;
-
-    pToDelete = pToSeek = m_pHead->GetNext();
-    while (pToSeek)
+    if (!node || IsSentinel(node))
     {
-        pToSeek = pToSeek->GetNext();
-        delete pToDelete;
-        pToDelete = pToSeek;
+        throw std::invalid_argument("Cannot remove a null or sentinel node.");
+    }
+
+    auto* next = node->GetNext();
+    auto* prev = node->GetPrev();
+    prev->SetNext(next);
+    next->SetPrev(prev);
+    T data = node->GetData();
+    delete node;
+    node = (next != m_pTail) ? next : nullptr;
+    --m_Count;
+    return data;
+}
+
+template <class T>
+void CList<T>::RemoveAll()
+{
+    CNode<T>* current = m_pHead->GetNext();
+    while (current != m_pTail)
+    {
+        CNode<T>* toDelete = current;
+        current = current->GetNext();
+        delete toDelete;
     }
 
     m_pHead->SetNext(m_pTail);
     m_pTail->SetPrev(m_pHead);
-
-    m_lCount = 0;
+    m_Count = 0;
 }
 
 template <class T>
-CNode<T>* CList<T>::FindHead(void)
+CNode<T>* CList<T>::FindHead()
 {
-    if (IsEmpty())
-    {
-        return (NULL);
-    }
-    else
-    {
-        return (m_pHead->GetNext());
-    }
+    return IsEmpty() ? nullptr : m_pHead->GetNext();
 }
 
 template <class T>
-CNode<T>* CList<T>::FindTail(void)
+const CNode<T>* CList<T>::FindHead() const
 {
-    if (IsEmpty())
-    {
-        return (NULL);
-    }
-    else
-    {
-        return (m_pTail->GetPrev());
-    }
+    return IsEmpty() ? nullptr : m_pHead->GetNext();
 }
 
 template <class T>
-CNode<T>* CList<T>::FindNode(T SearchValue)
+CNode<T>* CList<T>::FindTail()
 {
-    (m_pTail->GetPrev())->SetNext(NULL);
+    return IsEmpty() ? nullptr : m_pTail->GetPrev();
+}
 
-    CNode<T>* pToSeek = m_pHead->GetNext();
+template <class T>
+const CNode<T>* CList<T>::FindTail() const
+{
+    return IsEmpty() ? nullptr : m_pTail->GetPrev();
+}
 
-    while (pToSeek)
+template <class T>
+CNode<T>* CList<T>::FindNode(const T& searchValue)
+{
+    CNode<T>* current = m_pHead->GetNext();
+    while (current != m_pTail)
     {
-        if (pToSeek->GetData() == SearchValue)
+        if (current->GetData() == searchValue)
         {
-            (m_pTail->GetPrev())->SetNext(m_pTail);
-            return (pToSeek);
+            return current;
         }
-
-        pToSeek = pToSeek->GetNext();
+        current = current->GetNext();
     }
-
-    (m_pTail->GetPrev())->SetNext(m_pTail);
-    return (NULL);
+    return nullptr;
 }
 
 template <class T>
-CNode<T>* CList<T>::GetPrev(CNode<T>* pNode)
+const CNode<T>* CList<T>::FindNode(const T& searchValue) const
 {
-    if (m_pHead == pNode->GetPrev())
+    const CNode<T>* current = m_pHead->GetNext();
+    while (current != m_pTail)
     {
-        return (NULL);
+        if (current->GetData() == searchValue)
+        {
+            return current;
+        }
+        current = current->GetNext();
     }
-    else
-    {
-        return (pNode->GetPrev());
-    }
+    return nullptr;
 }
 
 template <class T>
-CNode<T>* CList<T>::GetNext(CNode<T>* pNode)
+CNode<T>* CList<T>::GetPrev(CNode<T>* node)
 {
-    if (m_pTail == (pNode->GetNext()))
+    if (!node)
     {
-        return (NULL);
+        return nullptr;
     }
-    else
-    {
-        return (pNode->GetNext());
-    }
+    auto* prev = node->GetPrev();
+    return (prev == m_pHead) ? nullptr : prev;
 }
 
 template <class T>
-void CList<T>::SetData(CNode<T>* pNode, T Data)
+const CNode<T>* CList<T>::GetPrev(const CNode<T>* node) const
 {
-    pNode->SetData(Data);
+    if (!node)
+    {
+        return nullptr;
+    }
+    auto* prev = node->GetPrev();
+    return (prev == m_pHead) ? nullptr : prev;
 }
 
 template <class T>
-T& CList<T>::GetData(CNode<T>* pNode)
+CNode<T>* CList<T>::GetNext(CNode<T>* node)
 {
-    if (m_pHead == pNode || m_pTail == pNode)
+    if (!node)
     {
-        T NullData;	// NULL 리턴에 필요한 값
-        memset(&NullData, 0, sizeof(T));
+        return nullptr;
+    }
+    auto* next = node->GetNext();
+    return (next == m_pTail) ? nullptr : next;
+}
 
-        return (NullData);
-    }
-    else
+template <class T>
+const CNode<T>* CList<T>::GetNext(const CNode<T>* node) const
+{
+    if (!node)
     {
-        return (pNode->GetData());
+        return nullptr;
     }
+    auto* next = node->GetNext();
+    return (next == m_pTail) ? nullptr : next;
+}
+
+template <class T>
+void CList<T>::SetData(CNode<T>* node, const T& data)
+{
+    if (!node || IsSentinel(node))
+    {
+        return;
+    }
+    node->SetData(data);
+}
+
+template <class T>
+T& CList<T>::GetData(CNode<T>* node)
+{
+    if (IsSentinel(node))
+    {
+        throw std::out_of_range("Attempted to get data from a sentinel node.");
+    }
+    return node->GetData();
+}
+
+template <class T>
+const T& CList<T>::GetData(const CNode<T>* node) const
+{
+    if (IsSentinel(node))
+    {
+        throw std::out_of_range("Attempted to get data from a sentinel node.");
+    }
+    return node->GetData();
 }
 
 template <class T>
 class CQueue : private CList<T>
 {
 public:
-    CQueue();
-    ~CQueue();
+    CQueue() = default;
+    ~CQueue() = default;
 
-    BOOL Insert(T NewElement);
-    T Remove(void);
-    void CleanUp(void);
+    bool Insert(const T& newElement);
+    T Remove();
+    void CleanUp();
 
-    BOOL Find(T Element);
+    bool Find(const T& element);
 
-    LONG GetCount(void) { return (CList<T>::GetCount()); }
+    std::size_t GetCount() const { return CList<T>::GetCount(); }
 };
 
 template <class T>
-CQueue<T>::CQueue() : CList<T>()
+bool CQueue<T>::Insert(const T& newElement)
 {
+    return this->AddTail(newElement) != nullptr;
 }
 
 template <class T>
-CQueue<T>::~CQueue()
+T CQueue<T>::Remove()
 {
+    return this->RemoveHead();
 }
 
 template <class T>
-BOOL CQueue<T>::Insert(T NewElement)
-{
-    if (NULL == this->AddTail(NewElement))
-    {	// 실패하면
-        return (FALSE);
-    }
-
-    return (TRUE);
-}
-
-template <class T>
-T CQueue<T>::Remove(void)
-{
-    return(this->RemoveHead());
-}
-
-template <class T>
-void CQueue<T>::CleanUp(void)
+void CQueue<T>::CleanUp()
 {
     this->RemoveAll();
 }
 
 template <class T>
-BOOL CQueue<T>::Find(T Element)
+bool CQueue<T>::Find(const T& element)
 {
-    if (NULL == this->FindNode(Element))
-    {	// 찾지 못하면
-        return (FALSE);
-    }
-
-    return (TRUE);
+    return this->FindNode(element) != nullptr;
 }
 
-template <class T, class S> class CBTree;
+template <class T, class S>
+class CBTree;
 
 template <class T, class S>
 class CBNode
 {
-protected:
-    T m_Data;
-    S m_CompValue;
-    CBNode<T, S>* m_pLeft = NULL;
-    CBNode<T, S>* m_pRight = NULL;
-    CBNode<T, S>* m_pParent = NULL;
+public:
+    CBNode() = default;
+    CBNode(const T& data, const S& value) : m_Data(data), m_CompValue(value) {}
 
-    void SetLeft(CBNode<T, S>* pLeft) { m_pLeft = pLeft; pLeft->m_pParent = this; }
-    void SetRight(CBNode<T, S>* pRight) { m_pRight = pRight; pRight->m_pParent = this; }
-    CBNode<T, S>* GetLeft(void) { return (m_pLeft); }
-    CBNode<T, S>* GetRight(void) { return (m_pRight); }
-    CBNode<T, S>* GetParent(void) { return (m_pParent); }
+    void SetData(const T& data) { m_Data = data; }
+    void SetValue(const S& value) { m_CompValue = value; }
+    T& GetData() { return m_Data; }
+    const T& GetData() const { return m_Data; }
+    S GetValue() const { return m_CompValue; }
+
+private:
+    void SetLeft(CBNode<T, S>* left)
+    {
+        m_pLeft = left;
+        if (m_pLeft)
+        {
+            m_pLeft->m_pParent = this;
+        }
+    }
+
+    void SetRight(CBNode<T, S>* right)
+    {
+        m_pRight = right;
+        if (m_pRight)
+        {
+            m_pRight->m_pParent = this;
+        }
+    }
+
+    CBNode<T, S>* GetLeft() { return m_pLeft; }
+    const CBNode<T, S>* GetLeft() const { return m_pLeft; }
+    CBNode<T, S>* GetRight() { return m_pRight; }
+    const CBNode<T, S>* GetRight() const { return m_pRight; }
+    CBNode<T, S>* GetParent() { return m_pParent; }
+    const CBNode<T, S>* GetParent() const { return m_pParent; }
 
     friend class CBTree<T, S>;
-    friend CBTree<T, S>& operator + (const CBTree<T, S>& Value1, const CBTree<T, S>& Value2);
 
-public:
-
-    CBNode();
-    CBNode(T Data, S CompValue);
-    ~CBNode();
-
-    // 데이터 처리
-    void SetData(T Data) { m_Data = Data; }
-    void SetValue(S CompValue) { m_CompValue = CompValue; }
-    T& GetData(void) { return (m_Data); }
-    S GetValue(void) { return (m_CompValue); }
+    T m_Data{};
+    S m_CompValue{};
+    CBNode<T, S>* m_pLeft{nullptr};
+    CBNode<T, S>* m_pRight{nullptr};
+    CBNode<T, S>* m_pParent{nullptr};
 };
-
-template <class T, class S>
-CBNode<T, S>::CBNode()
-{
-    m_pLeft = m_pRight = m_pParent = NULL;
-}
-
-template <class T, class S>
-CBNode<T, S>::CBNode(T Data, S CompValue)
-{
-    m_pLeft = m_pRight = m_pParent = NULL;
-    m_Data = Data;
-    m_CompValue = CompValue;
-}
-
-template <class T, class S>
-CBNode<T, S>::~CBNode()
-{
-}
 
 template <class T, class S>
 class CBTree
 {
-protected:
-    long m_lCount = 0;
-    CBNode<T, S>* m_pHead = NULL;
-
-    void RemoveFrom(CBNode<T, S>* pNode);
-    void CycleFrom(CBNode<T, S>* pNode, DWORD dwParam);
-    void (*m_Process)(T Data, S CompValue, DWORD dwParam);
-
 public:
-    CBTree();	// Constructor
-    CBTree(const CBTree<T, S>& RValue);
-    ~CBTree();	// Destructor
+    CBTree();
+    ~CBTree();
 
-    CBTree<T, S>& operator = (const CBTree<T, S>& RValue);
-    friend CBTree<T, S>& operator + (const CBTree<T, S>& Value1, const CBTree<T, S>& Value2);
+    CBNode<T, S>* Add(const T& newElement, const S& value);
+    void RemoveNode(CBNode<T, S>*& node);
+    void RemoveAll();
 
-    CBNode<T, S>* Add(T NewElement, S CompValue);
-    void RemoveNode(CBNode<T, S>*& pNode);
-    void RemoveAll(void);
+    bool IsEmpty() const { return m_Count == 0; }
+    std::size_t GetCount() const { return m_Count; }
 
-    BOOL IsEmpty(void) { return (m_lCount == 0); }
-    virtual LONG GetCount(void) { return (m_lCount); }
+    CBNode<T, S>* FindHead();
+    CBNode<T, S>* FindNode(const S& value);
+    const CBNode<T, S>* FindNode(const S& value) const;
+    CBNode<T, S>* GetLeft(CBNode<T, S>* node);
+    CBNode<T, S>* GetRight(CBNode<T, S>* node);
+    CBNode<T, S>* GetParent(CBNode<T, S>* node);
 
-    CBNode<T, S>* FindNode(S CompValue);
+    void SetData(CBNode<T, S>* node, const T& data);
+    T& GetData(CBNode<T, S>* node);
+    S GetValue(CBNode<T, S>* node);
 
-    CBNode<T, S>* FindHead(void);
-    CBNode<T, S>* GetLeft(CBNode<T, S>* pNode);
-    CBNode<T, S>* GetRight(CBNode<T, S>* pNode);
-    CBNode<T, S>* GetParent(CBNode<T, S>* pNode);
+    void Cycle(std::function<void(const T&, const S&)> process);
 
-    void SetData(CBNode<T, S>* pNode, T Data);
-    T& GetData(CBNode<T, S>* pNode);
-    S GetValue(CBNode<T, S>* pNode);
+private:
+    CBNode<T, S>* CreateNode(const T& value, const S& compValue);
+    void RemoveFrom(CBNode<T, S>* node);
+    void CycleFrom(CBNode<T, S>* node, std::function<void(const T&, const S&)> process);
 
-    void Cycle(void (*Process)(T Data, S CompValue, DWORD dwParam), DWORD dwParam);
-
-protected:
-    void CopyFrom(CBNode<T, S>* pNode);
-    void UnlinkOneBottomNode(CBNode<T, S>*& pNode);
-
-public:
-    BOOL Optimize(void);
-protected:
-    BOOL GetOptimizeList(T* pData, S* pCompValue);
-    void AddDataByOptimization(T* pData, S* pCompValue, int nLeft, int nRight);
+    std::size_t m_Count{0};
+    CBNode<T, S>* m_pHead{nullptr};
 };
 
 template <class T, class S>
 CBTree<T, S>::CBTree()
+    : m_pHead(nullptr)
 {
-    m_lCount = 0;
-    m_pHead = NULL;
-}
-
-template <class T, class S>
-CBTree<T, S>::CBTree(const CBTree<T, S>& RValue)
-{
-    m_lCount = 0;
-    m_pHead = NULL;
-
-    if (RValue.m_pHead)
-    {
-        CopyFrom(RValue.m_pHead);
-    }
 }
 
 template <class T, class S>
@@ -568,418 +508,281 @@ CBTree<T, S>::~CBTree()
 }
 
 template <class T, class S>
-CBTree<T, S>& CBTree<T, S>::operator = (const CBTree<T, S>& RValue)
+CBNode<T, S>* CBTree<T, S>::CreateNode(const T& value, const S& compValue)
 {
-    if (&RValue == this)
-    {
-        return (*this);
-    }
-
-    RemoveAll();
-    if (RValue.m_pHead)
-    {
-        CopyFrom(RValue.m_pHead);
-    }
-
-    return (*this);
+    return new CBNode<T, S>(value, compValue);
 }
 
 template <class T, class S>
-CBTree<T, S>& operator + (const CBTree<T, S>& Value1, const CBTree<T, S>& Value2)
+CBNode<T, S>* CBTree<T, S>::Add(const T& newElement, const S& value)
 {
-    CBTree<T, S> Result;
-    CBTree<T, S> Left;
-    CBTree<T, S> Right;
-    if (Value1.m_pHead->GetValue() <= Value2.m_pHead->GetValue())
+    if (!m_pHead)
     {
-        Left = Value1;
-        Right = Value2;
-    }
-    else
-    {
-        Left = Value2;
-        Right = Value1;
+        m_pHead = CreateNode(newElement, value);
+        ++m_Count;
+        return m_pHead;
     }
 
-    T NullData;
-    memset(&NullData, 0, sizeof(T));
-    S CompValue = 0;
-    if (Left.m_pHead != NULL && Right.m_pHead != NULL)
+    CBNode<T, S>* current = m_pHead;
+    while (true)
     {
-        CompValue = (Left.m_pHead->GetValue() + Left.m_pHead->GetValue() + 1) / 2;
-    }
-    Result.Add(NullData, CompValue);
-    Result.m_pHead->SetLeft(Left.m_pHead);
-    Result.m_pHead->SetRight(Right.m_pHead);
-    Result.m_lCount = Left.m_lCount + Right.m_lCount + 1;
-    Left.m_pHead = NULL;
-    Right.m_pHead = NULL;
-
-    return (CBTree<T, S>(Result));
-}
-
-template <class T, class S>
-void CBTree<T, S>::CopyFrom(CBNode<T, S>* pNode)
-{
-    Add(pNode->GetData(), pNode->GetValue());
-    if (pNode->GetLeft())
-    {
-        CopyFrom(pNode->GetLeft());
-    }
-    if (pNode->GetLeft())
-    {
-        CopyFrom(pNode->GetRight());
-    }
-}
-
-template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::Add(T NewElement, S CompValue)
-{
-    if (m_pHead == NULL)
-    {
-        m_lCount++;
-        m_pHead = new CBNode<T, S>(NewElement, CompValue);
-        m_pHead->m_pParent = NULL;
-        m_pHead->m_pLeft = NULL;
-        m_pHead->m_pRight = NULL;
-
-        return (m_pHead);
-    }
-
-    CBNode<T, S>* pNode = m_pHead;
-    CBNode<T, S>* pPrev = m_pHead;
-    while (pNode != NULL)
-    {
-        if (CompValue < pNode->GetValue())
+        if (value < current->GetValue())
         {
-            pPrev = pNode;
-            pNode = pNode->GetLeft();
-        }
-        else
-        {
-            pPrev = pNode;
-            pNode = pNode->GetRight();
-        }
-    }
-
-    if (pNode == NULL)
-    {
-        m_lCount++;
-        auto* pOne = new CBNode<T, S>(NewElement, CompValue);
-
-        if (CompValue < pPrev->GetValue())
-        {
-            pPrev->SetLeft(pOne);
-        }
-        else
-        {
-            pPrev->SetRight(pOne);
-        }
-
-        return (pOne);
-    }
-    else
-    {
-        return (pNode);
-    }
-}
-
-template <class T, class S>
-void CBTree<T, S>::RemoveNode(CBNode<T, S>*& pNode)
-{
-    if (!pNode)
-    {
-        return;
-    }
-
-    CBNode<T, S>* pOld = NULL;
-
-    CBNode<T, S>* pSeek = pNode->GetLeft();
-    if (pSeek)
-    {
-        if (!pNode->GetRight())
-        {
-            if (pNode == m_pHead)
+            if (current->GetLeft())
             {
-                m_pHead = pSeek;
-                m_pHead->m_pParent = NULL;
+                current = current->GetLeft();
             }
             else
             {
-                if (pNode == pNode->GetParent()->m_pRight)
-                {
-                    pNode->GetParent()->SetRight(pSeek);
-                }
-                else
-                {
-                    pNode->GetParent()->SetLeft(pSeek);
-                }
+                current->SetLeft(CreateNode(newElement, value));
+                ++m_Count;
+                return current->GetLeft();
             }
-            delete pNode;
-            m_lCount--;
-            return;
         }
-
-        pOld = pSeek;
-        while (pSeek)
+        else
         {
-            pOld = pSeek;
-            pSeek = pSeek->GetRight();
-        }
-
-        T Data = pOld->m_Data;
-        S CompValue = pOld->m_CompValue;
-        //UnlinkOneBottomNode( pOld);
-        RemoveNode(pOld);
-
-        pNode->m_Data = Data;
-        pNode->m_CompValue = CompValue;
-
-        return;
-    }
-    else
-    {
-        pSeek = pNode->GetRight();
-        if (pSeek)
-        {
-            if (pNode == m_pHead)
+            if (current->GetRight())
             {
-                m_pHead = pSeek;
-                m_pHead->m_pParent = NULL;
+                current = current->GetRight();
             }
             else
             {
-                if (pNode == pNode->GetParent()->m_pRight)
-                {
-                    pNode->GetParent()->SetRight(pSeek);
-                }
-                else
-                {
-                    pNode->GetParent()->SetLeft(pSeek);
-                }
+                current->SetRight(CreateNode(newElement, value));
+                ++m_Count;
+                return current->GetRight();
             }
-            delete pNode;
-            m_lCount--;
-            return;
         }
     }
-    UnlinkOneBottomNode(pNode);
 }
 
 template <class T, class S>
-void CBTree<T, S>::UnlinkOneBottomNode(CBNode<T, S>*& pNode)
+CBNode<T, S>* CBTree<T, S>::FindNode(const S& value)
 {
-    if (pNode->GetParent())
+    CBNode<T, S>* current = m_pHead;
+    while (current)
     {
-        if (pNode->GetParent()->GetLeft() == pNode)
+        if (value == current->GetValue())
         {
-            pNode->GetParent()->m_pLeft = NULL;
+            return current;
+        }
+        if (value < current->GetValue())
+        {
+            current = current->GetLeft();
         }
         else
         {
-            pNode->GetParent()->m_pRight = NULL;
+            current = current->GetRight();
         }
+    }
+    return nullptr;
+}
+
+template <class T, class S>
+const CBNode<T, S>* CBTree<T, S>::FindNode(const S& value) const
+{
+    const CBNode<T, S>* current = m_pHead;
+    while (current)
+    {
+        if (value == current->GetValue())
+        {
+            return current;
+        }
+        if (value < current->GetValue())
+        {
+            current = current->GetLeft();
+        }
+        else
+        {
+            current = current->GetRight();
+        }
+    }
+    return nullptr;
+}
+
+template <class T, class S>
+void CBTree<T, S>::RemoveNode(CBNode<T, S>*& node)
+{
+    if (!node)
+    {
+        return;
+    }
+
+    if (node->GetLeft() && node->GetRight())
+    {
+        CBNode<T, S>* minNode = node->GetRight();
+        while (minNode->GetLeft())
+        {
+            minNode = minNode->GetLeft();
+        }
+
+        node->SetData(minNode->GetData());
+        node->SetValue(minNode->GetValue());
+        RemoveNode(minNode);
+    }
+    else if (node->GetLeft())
+    {
+        CBNode<T, S>* left = node->GetLeft();
+        if (node == m_pHead)
+        {
+            m_pHead = left;
+        }
+        else if (node->GetParent()->GetLeft() == node)
+        {
+            node->GetParent()->SetLeft(left);
+        }
+        else
+        {
+            node->GetParent()->SetRight(left);
+        }
+        delete node;
+        --m_Count;
+    }
+    else if (node->GetRight())
+    {
+        CBNode<T, S>* right = node->GetRight();
+        if (node == m_pHead)
+        {
+            m_pHead = right;
+        }
+        else if (node->GetParent()->GetLeft() == node)
+        {
+            node->GetParent()->SetLeft(right);
+        }
+        else
+        {
+            node->GetParent()->SetRight(right);
+        }
+        delete node;
+        --m_Count;
     }
     else
     {
-        m_pHead = NULL;
-    }
-
-    m_lCount--;
-    delete pNode;
-    pNode = NULL;
-}
-
-template <class T, class S>
-void CBTree<T, S>::RemoveAll(void)
-{
-    if (m_pHead != NULL)
-    {
-        RemoveFrom(m_pHead);
-        m_pHead = NULL;
-    }
-    m_lCount = 0;
-}
-
-template <class T, class S>
-void CBTree<T, S>::RemoveFrom(CBNode<T, S>* pNode)
-{
-    if (!pNode)
-    {
-        return;
-    }
-
-    if (pNode->GetLeft() != NULL)
-    {
-        RemoveFrom(pNode->GetLeft());
-    }
-
-    if (pNode->GetRight() != NULL)
-    {
-        RemoveFrom(pNode->GetRight());
-    }
-
-    RemoveNode(pNode);
-}
-
-template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::FindNode(S CompValue)
-{
-    CBNode<T, S>* pNode = m_pHead;
-    while (pNode != NULL && pNode->GetValue() != CompValue)
-    {
-        if (CompValue < pNode->GetValue())
+        if (node == m_pHead)
         {
-            pNode = pNode->GetLeft();
+            m_pHead = nullptr;
+        }
+        else if (node->GetParent()->GetLeft() == node)
+        {
+            node->GetParent()->SetLeft(nullptr);
         }
         else
         {
-            pNode = pNode->GetRight();
+            node->GetParent()->SetRight(nullptr);
+        }
+        delete node;
+        --m_Count;
+    }
+}
+
+template <class T, class S>
+void CBTree<T, S>::RemoveAll()
+{
+    RemoveFrom(m_pHead);
+    m_pHead = nullptr;
+    m_Count = 0;
+}
+
+template <class T, class S>
+void CBTree<T, S>::RemoveFrom(CBNode<T, S>* node)
+{
+    if (!node)
+    {
+        return;
+    }
+
+    std::vector<std::pair<CBNode<T, S>*, bool>> stack;
+    stack.emplace_back(node, false);
+
+    while (!stack.empty())
+    {
+        auto currentEntry = stack.back();
+        stack.pop_back();
+
+        CBNode<T, S>* current = currentEntry.first;
+        bool visited = currentEntry.second;
+
+        if (!current)
+        {
+            continue;
+        }
+
+        if (visited)
+        {
+            delete current;
+            continue;
+        }
+
+        stack.emplace_back(current, true);
+        if (current->GetRight())
+        {
+            stack.emplace_back(current->GetRight(), false);
+        }
+        if (current->GetLeft())
+        {
+            stack.emplace_back(current->GetLeft(), false);
         }
     }
-
-    return (pNode);
 }
 
 template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::FindHead(void)
+CBNode<T, S>* CBTree<T, S>::FindHead()
 {
-    return (m_pHead);
+    return m_pHead;
 }
 
 template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::GetLeft(CBNode<T, S>* pNode)
+CBNode<T, S>* CBTree<T, S>::GetLeft(CBNode<T, S>* node)
 {
-    return (pNode->GetLeft());
+    return node->GetLeft();
 }
 
 template <class T, class S>
-CBNode<T, S>* CBTree<T, S>::GetRight(CBNode<T, S>* pNode)
+CBNode<T, S>* CBTree<T, S>::GetRight(CBNode<T, S>* node)
 {
-    return (pNode->GetRight());
+    return node->GetRight();
 }
 
 template <class T, class S>
-CBNode<T, S>* GetParent(CBNode<T, S>* pNode)
+CBNode<T, S>* CBTree<T, S>::GetParent(CBNode<T, S>* node)
 {
-    return (pNode->GetParent());
+    return node->GetParent();
 }
 
 template <class T, class S>
-void CBTree<T, S>::SetData(CBNode<T, S>* pNode, T Data)
+void CBTree<T, S>::SetData(CBNode<T, S>* node, const T& data)
 {
-    pNode->SetData(Data);
+    node->SetData(data);
 }
 
 template <class T, class S>
-T& CBTree<T, S>::GetData(CBNode<T, S>* pNode)
+T& CBTree<T, S>::GetData(CBNode<T, S>* node)
 {
-    return (pNode->GetData());
+    return node->GetData();
 }
 
 template <class T, class S>
-S CBTree<T, S>::GetValue(CBNode<T, S>* pNode)
+S CBTree<T, S>::GetValue(CBNode<T, S>* node)
 {
-    return (pNode->GetValue());
+    return node->GetValue();
 }
 
 template <class T, class S>
-void CBTree<T, S>::Cycle(void (*Process)(T Data, S CompValue, DWORD dwParam), DWORD dwParam)
+void CBTree<T, S>::Cycle(std::function<void(const T&, const S&)> process)
 {
-    m_Process = Process;
+    CycleFrom(m_pHead, process);
+}
 
-    if (m_pHead == NULL)
+template <class T, class S>
+void CBTree<T, S>::CycleFrom(CBNode<T, S>* node, std::function<void(const T&, const S&)> process)
+{
+    if (!node)
     {
         return;
     }
 
-    if (m_pHead->GetLeft() != NULL)
-    {
-        CycleFrom(m_pHead->GetLeft(), dwParam);
-    }
-
-    (*m_Process)(m_pHead->GetData(), m_pHead->GetValue(), dwParam);
-
-    if (m_pHead->GetRight() != NULL)
-    {
-        CycleFrom(m_pHead->GetRight(), dwParam);
-    }
-}
-
-template <class T, class S>
-void CBTree<T, S>::CycleFrom(CBNode<T, S>* pNode, DWORD dwParam)
-{
-    if (pNode->GetLeft() != NULL)
-    {
-        CycleFrom(pNode->GetLeft(), dwParam);
-    }
-
-    (*m_Process)(pNode->GetData(), pNode->GetValue(), dwParam);
-
-    if (pNode->GetRight() != NULL)
-    {
-        CycleFrom(pNode->GetRight(), dwParam);
-    }
-}
-
-template <class T, class S>
-BOOL CBTree<T, S>::Optimize(void)
-{
-    T* pData = new T[GetCount()];
-    S* pCompValue = new S[GetCount()];
-    if (!GetOptimizeList(pData, pCompValue))
-    {
-        delete[] pCompValue;
-        delete[] pData;
-        return (FALSE);
-    }
-
-    long lCount = GetCount();
-    RemoveAll();
-    AddDataByOptimization(pData, pCompValue, 0, lCount);
-    delete[] pCompValue;
-    delete[] pData;
-
-    return (TRUE);
-}
-
-template <class T, class S>
-void ProcessGetOptimizeList(T Data, S CompValue, DWORD dwParam)
-{
-    DWORD* pdwParam = (DWORD*)dwParam;
-    long* pCount = (long*)pdwParam[0];
-    T* pData = (T*)pdwParam[1];
-    S* pCompValue = (S*)pdwParam[2];
-    pData[*pCount] = Data;
-    pCompValue[(*pCount)++] = CompValue;
-}
-
-template <class T, class S>
-BOOL CBTree<T, S>::GetOptimizeList(T* pData, S* pCompValue)
-{
-    long lOptimizeCount = 0;
-    DWORD dwOptimizeData[3] = { (DWORD)&lOptimizeCount, (DWORD)pData, (DWORD)pCompValue };
-    Cycle(ProcessGetOptimizeList, (DWORD)dwOptimizeData);
-    if (GetCount() != lOptimizeCount)
-    {
-        return (FALSE);
-    }
-
-    return (TRUE);
-}
-
-template <class T, class S>
-void CBTree<T, S>::AddDataByOptimization(T* pData, S* pCompValue, int nLeft, int nRight)
-{
-    if (nLeft == nRight)
-    {
-        return;
-    }
-
-    Add(pData[(nLeft + nRight) / 2], pCompValue[(nLeft + nRight) / 2]);
-
-    AddDataByOptimization(pData, pCompValue, nLeft, (nLeft + nRight) / 2);
-    AddDataByOptimization(pData, pCompValue, (nLeft + nRight) / 2 + 1, nRight);
+    CycleFrom(node->GetLeft(), process);
+    process(node->GetData(), node->GetValue());
+    CycleFrom(node->GetRight(), process);
 }
 
 template <class T>
@@ -1049,4 +852,4 @@ void CDimension<T>::CheckDimensionSize(int nIndex)
     }
 }
 
-# endif //__BASE_CLASSES_H__
+#endif //__BASE_CLASSES_H__
