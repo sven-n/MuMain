@@ -17,6 +17,7 @@
 #include "ServerListManager.h"
 
 #include <algorithm>
+#include <utility>
 
 namespace
 {
@@ -41,16 +42,15 @@ namespace
     constexpr int kAccountBlockPrimaryY = 330;
     constexpr int kAccountBlockSecondaryY = 348;
     constexpr int kWindowAlpha = 143;
+    constexpr int kInfoSpriteHeight = 21;
 
     template <typename Predicate>
     bool AnyCharacter(Predicate&& predicate)
     {
-        for (int index = 0; index < kCharacterSlotCount; ++index)
-        {
-            if (predicate(CharactersClient[index]))
-                return true;
-        }
-        return false;
+        return std::any_of(
+            CharactersClient,
+            CharactersClient + kCharacterSlotCount,
+            std::forward<Predicate>(predicate));
     }
 
     bool HasAccountBlockedCharacter()
@@ -85,17 +85,6 @@ namespace
         return &CharactersClient[SelectedHero];
     }
 
-    bool CanDeleteSelectedCharacter()
-    {
-        if (CHARACTER* selected = GetSelectedCharacter())
-        {
-            const bool hasGuild = selected->GuildStatus != G_NONE;
-            const bool blocked = (selected->CtlCode & (CTLCODE_02BLOCKITEM | CTLCODE_10ACCOUNT_BLOCKITEM)) != 0;
-            return !hasGuild && !blocked;
-        }
-        return false;
-    }
-
     void RenderAccountBlockMessage()
     {
         g_pRenderText->SetTextColor(0, 0, 0, 255);
@@ -119,7 +108,7 @@ void CCharSelMainWin::Create()
 
     m_asprBack[CSMW_SPR_DECO].Create(189, 103, BITMAP_LOG_IN + 2);
     m_asprBack[CSMW_SPR_INFO].Create(
-        input.GetScreenWidth() - 266, 21);
+        input.GetScreenWidth() - 266, kInfoSpriteHeight);
     m_asprBack[CSMW_SPR_INFO].SetColor(0, 0, 0);
     m_asprBack[CSMW_SPR_INFO].SetAlpha(kWindowAlpha);
 
