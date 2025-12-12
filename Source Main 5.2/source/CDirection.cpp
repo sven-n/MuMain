@@ -21,7 +21,8 @@ static CDirection Direction;
 
 namespace
 {
-    constexpr float kRadToDeg = 57.295779513082320876798154814105f;
+    constexpr float kPi = 3.14159265358979323846f;
+    constexpr float kRadToDeg = 180.0f / kPi;
 
     float UnwindDegrees360(float degrees)
     {
@@ -33,13 +34,11 @@ namespace
 
     CHARACTER* FindLiveCharacterByKey(int key)
     {
-        for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
-        {
-            CHARACTER* c = &CharactersClient[i];
-            if (c->Object.Live && c->Key == key)
-                return c;
-        }
-        return nullptr;
+        auto* const end = CharactersClient + MAX_CHARACTERS_CLIENT;
+        auto* const it = std::find_if(CharactersClient, end, [key](const CHARACTER& c) {
+            return c.Object.Live && c.Key == key;
+        });
+        return (it != end) ? it : nullptr;
     }
 }
 
