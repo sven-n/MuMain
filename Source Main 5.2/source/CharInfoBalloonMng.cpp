@@ -11,13 +11,7 @@
 
 #include "CharInfoBalloon.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
-CCharInfoBalloonMng::CCharInfoBalloonMng() : m_pCharInfoBalloon(NULL)
-{
-}
+CCharInfoBalloonMng::CCharInfoBalloonMng() = default;
 
 CCharInfoBalloonMng::~CCharInfoBalloonMng()
 {
@@ -26,45 +20,47 @@ CCharInfoBalloonMng::~CCharInfoBalloonMng()
 
 void CCharInfoBalloonMng::Release()
 {
-    SAFE_DELETE_ARRAY(m_pCharInfoBalloon);
+    if (!m_isInitialized)
+        return;
+
+    m_isInitialized = false;
 }
 
 //*****************************************************************************
-// ÇÔ¼ö ÀÌ¸§ : Create()
-// ÇÔ¼ö ¼³¸í : Ä³¸¯ÅÍ Á¤º¸ Ç³¼± ¸Å´ÏÀú »ı¼º.
-//			   (Ä³¸¯ÅÍ ¼±ÅÃ¾À¿¡¼­ ¾²ÀÓ. Ç³¼± 5°³ »ı¼º.)
+// í•¨ìˆ˜ ì´ë¦„ : Create()
+// í•¨ìˆ˜ ì„¤ëª… : ìºë¦­í„° ì •ë³´ í’ì„  ë§¤ë‹ˆì € ìƒì„±.
+//			   (ìºë¦­í„° ì„ íƒì”¬ì—ì„œ ì“°ì„. í’ì„  5ê°œ ìƒì„±.)
 //*****************************************************************************
 void CCharInfoBalloonMng::Create()
 {
-    if (NULL == m_pCharInfoBalloon)
-        m_pCharInfoBalloon = new CCharInfoBalloon[5];
+    for (std::size_t i = 0; i < kBalloonCount; ++i)
+        m_charInfoBalloons[i].Create(&CharactersClient[i]);
 
-    for (int i = 0; i < 5; ++i)
-        m_pCharInfoBalloon[i].Create(&CharactersClient[i]);
+    m_isInitialized = true;
 }
 
 //*****************************************************************************
-// ÇÔ¼ö ÀÌ¸§ : Render()
-// ÇÔ¼ö ¼³¸í : Ä³¸¯ÅÍ Á¤º¸ Ç³¼±µé ·»´õ.
+// í•¨ìˆ˜ ì´ë¦„ : Render()
+// í•¨ìˆ˜ ì„¤ëª… : ìºë¦­í„° ì •ë³´ í’ì„ ë“¤ ë Œë”.
 //*****************************************************************************
 void CCharInfoBalloonMng::Render()
 {
-    if (NULL == m_pCharInfoBalloon)
+    if (!m_isInitialized)
         return;
 
-    for (int i = 0; i < 5; ++i)
-        m_pCharInfoBalloon[i].Render();
+    for (auto& balloon : m_charInfoBalloons)
+        balloon.Render();
 }
 
 //*****************************************************************************
-// ÇÔ¼ö ÀÌ¸§ : UpdateDisplay()
-// ÇÔ¼ö ¼³¸í : Ä³¸¯ÅÍ Á¤º¸¸¦ ¾÷µ¥ÀÌÆ®.
+// í•¨ìˆ˜ ì´ë¦„ : UpdateDisplay()
+// í•¨ìˆ˜ ì„¤ëª… : ìºë¦­í„° ì •ë³´ë¥¼ ì—…ë°ì´íŠ¸.
 //*****************************************************************************
 void CCharInfoBalloonMng::UpdateDisplay()
 {
-    if (NULL == m_pCharInfoBalloon)
+    if (!m_isInitialized)
         return;
 
-    for (int i = 0; i < 5; ++i)
-        m_pCharInfoBalloon[i].SetInfo();
+    for (auto& balloon : m_charInfoBalloons)
+        balloon.SetInfo();
 }
