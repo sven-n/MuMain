@@ -184,6 +184,7 @@ void CMVP1STDirection::MoveBeginDirection()
 void CMVP1STDirection::BeginDirection0()
 {
     QueueCameraMove(kBeginDirection0Target.x, kBeginDirection0Target.y, kBeginDirection0Target.z, kBeginDirection0Target.speed);
+    g_Direction.m_iTimeSchedule--;
 }
 
 void CMVP1STDirection::BeginDirection1()
@@ -286,27 +287,22 @@ void CMVP1STDirection::BeginDirection2()
         }
         else if (g_Direction.m_iCheckTime == 2)
         {
-            std::array<bool, kBeginDirection2MoveCommands.size()> moveResults{};
-            std::size_t completedMoves = 0;
-            for (std::size_t i = 0; i < kBeginDirection2MoveCommands.size(); ++i)
+            bool allMovesSucceeded = true;
+            for (const auto& command : kBeginDirection2MoveCommands)
             {
-                const auto& command = kBeginDirection2MoveCommands[i];
-                moveResults[i] = g_Direction.MoveCreatedMonster(
-                    command.index,
-                    command.x,
-                    command.y,
-                    command.angle,
-                    command.speed);
-
-                if (!moveResults[i])
+                if (!g_Direction.MoveCreatedMonster(
+                        command.index,
+                        command.x,
+                        command.y,
+                        command.angle,
+                        command.speed))
                 {
+                    allMovesSucceeded = false;
                     break;
                 }
-
-                completedMoves = i + 1;
             }
 
-            if (completedMoves == kBeginDirection2MoveCommands.size())
+            if (allMovesSucceeded)
             {
                 g_Direction.m_iCheckTime++;
             }
@@ -426,5 +422,4 @@ void CMVP1STDirection::ResetSequence()
 void CMVP1STDirection::QueueCameraMove(int x, int y, int z, float speed)
 {
     g_Direction.SetNextDirectionPosition(x, y, z, speed);
-    g_Direction.m_iTimeSchedule--;
 }
