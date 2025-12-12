@@ -47,6 +47,7 @@ namespace
     constexpr int kStatLineSpacing = 17;
     constexpr int kStatYOffset = 10;
     constexpr int kStatValueOffset = 54;
+    constexpr int kStatTextOffsetX = 22;
     constexpr int kDarkLordStatHeight = 96;
     constexpr int kDefaultStatHeight = 80;
     constexpr const wchar_t* kDarkLordLeadershipStatValue = L"25";
@@ -171,10 +172,10 @@ void CCharMakeWin::Create()
         CWin::RegisterButton(&m_abtnJob[classIndex]);
     }
 
-    for (auto& button : m_aBtn)
+    for (int i = 0; i < 2; ++i)
     {
-        button.Create(54, 30, BITMAP_BUTTON + (&button - m_aBtn), 3, 2, 1);
-        CWin::RegisterButton(&button);
+        m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
+        CWin::RegisterButton(&m_aBtn[i]);
     }
 
     std::fill(&m_aszJobDesc[0][0],
@@ -401,7 +402,7 @@ void CCharMakeWin::RenderControls()
     g_pRenderText->SetBgColor(0);
 
     const auto& stats = kClassStatTable[static_cast<std::size_t>(m_nSelJob)];
-    const int statBaseX = m_asprBack[CMW_SPR_STAT].GetXPos() + 22;
+    const int statBaseX = m_asprBack[CMW_SPR_STAT].GetXPos() + kStatTextOffsetX;
     for (std::size_t statIndex = 0; statIndex < stats.values.size(); ++statIndex)
     {
         const int statScreenY = int(
