@@ -1,8 +1,7 @@
 #ifndef _KANTURUDIRECTION_H_
 #define _KANTURUDIRECTION_H_
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
+#include <cstdint>
 
 class CKanturuDirection
 {
@@ -16,23 +15,31 @@ public:
     virtual ~CKanturuDirection();
 
     void Init();
-    bool IsKanturuDirection();
-    bool IsKanturu3rdTimer();
-    bool IsMayaScene();
-    void GetKanturuAllState(BYTE State, BYTE DetailState);
+    bool IsKanturuDirection() const;
+    bool IsKanturu3rdTimer() const;
+    bool IsMayaScene() const;
+    void GetKanturuAllState(std::uint8_t State, std::uint8_t DetailState);
     void KanturuAllDirection();
-    bool GetMayaExplotion();
+    bool GetMayaExplotion() const;
     void SetMayaExplotion(bool MayaDie);
-    bool GetMayaAppear();
+    bool GetMayaAppear() const;
     void SetMayaAppear(bool MayaDie);
 
 private:
+    struct DirectionTarget
+    {
+        int x;
+        int y;
+        int z;
+        float distance;
+    };
+
     bool	m_bMayaDie;
     bool	m_bMayaAppear;
     bool	m_bDirectionEnd;
 
-    void GetKanturuMayaState(BYTE DetailState);
-    void GetKanturuNightmareState(BYTE DetailState);
+    void GetKanturuMayaState(std::uint8_t DetailState);
+    void GetKanturuNightmareState(std::uint8_t DetailState);
 
     void KanturuMayaDirection();
     void Move1stDirection();
@@ -50,6 +57,12 @@ private:
     void Move4thDirection();
     void Direction4th0();
     void Direction4th1();
+
+    bool IsKanturuWorldActive() const;
+    void PrepareCameraFocus();
+    void ActivateDirectionSequence();
+    void ResetDirectionState();
+    void ApplyDirectionTarget(const DirectionTarget& target) const;
 };
 
 #endif //_KANTURUDIRECTION_H_
