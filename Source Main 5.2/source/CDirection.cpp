@@ -13,7 +13,35 @@
 #include "NewUIInventoryCtrl.h"
 #include "NewUISystem.h"
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+
 static CDirection Direction;
+
+namespace
+{
+    constexpr float kRadToDeg = 57.295779513082320876798154814105f;
+
+    float UnwindDegrees360(float degrees)
+    {
+        degrees = std::fmod(degrees, 360.0f);
+        if (degrees < 0.0f)
+            degrees += 360.0f;
+        return degrees;
+    }
+
+    CHARACTER* FindLiveCharacterByKey(int key)
+    {
+        for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+        {
+            CHARACTER* c = &CharactersClient[i];
+            if (c->Object.Live && c->Key == key)
+                return c;
+        }
+        return nullptr;
+    }
+}
 
 CDirection::CDirection()
 {
@@ -128,16 +156,14 @@ bool CDirection::DirectionCameraMove()
 
 void CDirection::DeleteMonster()
 {
-    int Count = stl_Monster.size();
-
-    if (Count == 0)
+    const int count = static_cast<int>(stl_Monster.size());
+    if (count == 0)
         return;
 
-    for (int i = 0; i < Count; i++)
-    {
+    for (int i = 0; i < count; ++i)
         DeleteCharacter(i + NUMOFMON);
-        stl_Monster.erase(stl_Monster.begin());
-    }
+
+    stl_Monster.clear();
 }
 
 float CDirection::CalculateAngle(CHARACTER* c, int x, int y, float Angle)
@@ -154,16 +180,13 @@ float CDirection::CalculateAngle(CHARACTER* c, int x, int y, float Angle)
 
     VectorNormalize(vResult);
 
-    float fAngle = acos(DotProduct(vResult, vTemp2)) / Q_PI * 180;
-
-    if (vResult[0] > 0) fAngle = 360 - fAngle;
-
-    return fAngle;
+    const float yawFromPositiveY = std::atan2(vResult[0], vResult[1]) * kRadToDeg;
+    return UnwindDegrees360(yawFromPositiveY);
 }
 
 void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angle, bool NextCheck, bool SummonAni, float AniSpeed)
 {
-    CHARACTER* c = NULL;
+    CHARACTER* c = nullptr;
     DirectionMonster DMonster = { 0, };
 
     DMonster.m_Index = stl_Monster.size();
@@ -206,9 +229,9 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
 
             Vector(0.5f, 0.8f, 1.0f, Light);
             Vector(0.0f, 0.0f, 0.0f, Angle);
-            CreateEffect(MODEL_STORM2, c->Object.Position, Angle, Light, 1, NULL, -1, 0, 0, 0, 1.6f);
-            CreateEffect(MODEL_STORM2, c->Object.Position, Angle, Light, 1, NULL, -1, 0, 0, 0, 1.3f);
-            CreateEffect(MODEL_STORM2, c->Object.Position, Angle, Light, 1, NULL, -1, 0, 0, 0, 0.7f);
+            CreateEffect(MODEL_STORM2, c->Object.Position, Angle, Light, 1, nullptr, -1, 0, 0, 0, 1.6f);
+            CreateEffect(MODEL_STORM2, c->Object.Position, Angle, Light, 1, nullptr, -1, 0, 0, 0, 1.3f);
+            CreateEffect(MODEL_STORM2, c->Object.Position, Angle, Light, 1, nullptr, -1, 0, 0, 0, 0.7f);
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYA_END);
         }
@@ -219,10 +242,10 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
             vec3_t vPos;
             Vector(c->Object.Position[0] + 20.0f, c->Object.Position[1] + 20.0f, c->Object.Position[2], vPos);
 
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, NULL, 60.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, NULL, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, NULL, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, NULL, 60.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
 
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
@@ -241,16 +264,12 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
 
 bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Speed)
 {
-    CHARACTER* c = NULL;
+    CHARACTER* c = nullptr;
     bool bNext = false;
 
-    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
-    {
-        c = &CharactersClient[i];
-
-        if (c->Object.Live && c->Key == Index + NUMOFMON)
-            break;
-    }
+    c = FindLiveCharacterByKey(Index + NUMOFMON);
+    if (c == nullptr)
+        return false;
 
     int PresentX = (int)(c->Object.Position[0]) / TERRAIN_SCALE;
     int PresentY = (int)(c->Object.Position[1]) / TERRAIN_SCALE;
@@ -310,15 +329,12 @@ bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Sp
 
 bool CDirection::ActionCreatedMonster(int Index, int Action, int Count, bool TankerAttack, bool NextCheck)
 {
-    CHARACTER* c = NULL;
+    CHARACTER* c = nullptr;
     bool bNext = false;
 
-    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
-    {
-        c = &CharactersClient[i];
-
-        if (c->Object.Live && c->Key == Index + NUMOFMON) break;
-    }
+    c = FindLiveCharacterByKey(Index + NUMOFMON);
+    if (c == nullptr)
+        return false;
 
     if (stl_Monster[Index].m_iActionCheck == Count) bNext = true;
 
