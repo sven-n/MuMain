@@ -32,19 +32,16 @@ std::mt19937& RandomEngine()
     return engine;
 }
 
-static std::uniform_int_distribution<int> g_uniformIntDistribution;
-static std::uniform_real_distribution<float> g_uniformFloatDistribution;
-
 int RandomInt(int minInclusive, int maxInclusive)
 {
-    using Dist = std::uniform_int_distribution<int>;
-    return g_uniformIntDistribution(RandomEngine(), Dist::param_type{minInclusive, maxInclusive});
+    std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
+    return dist(RandomEngine());
 }
 
 float RandomFloat(float minInclusive, float maxInclusive)
 {
-    using Dist = std::uniform_real_distribution<float>;
-    return g_uniformFloatDistribution(RandomEngine(), Dist::param_type{minInclusive, maxInclusive});
+    std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
+    return dist(RandomEngine());
 }
 } // namespace
 
