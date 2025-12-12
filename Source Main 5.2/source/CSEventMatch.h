@@ -4,15 +4,20 @@
 #ifndef __CSEVENT_MATCH_H__
 #define __CSEVENT_MATCH_H__
 
-#include "wsclient.h"
+#include <chrono>
+#include <cstdint>
+
+#include "WSclient.h"
+
+using MatchClock = std::chrono::steady_clock;
 
 class CSBaseMatch
 {
 protected:
-    BYTE        m_byMatchEventType;
+    std::uint8_t m_byMatchEventType;
     MATCH_TYPE  m_iMatchCountDownType;
-    DWORD       m_dwMatchCountDownStart;
-    BYTE        m_byMatchType;
+    MatchClock::time_point m_matchCountDownStart;
+    std::uint8_t m_byMatchType;
     int         m_iMatchTimeMax;
     int         m_iMatchTime;
 
@@ -30,16 +35,26 @@ protected:
     void    renderOnlyTime(float x, float y, int MatchTime);
 
 public:
-    CSBaseMatch() : m_dwMatchCountDownStart(0), m_byMatchType(0), m_iMatchTimeMax(-1), m_iMatchTime(-1), m_iMaxKillMonster(-1), m_iKillMonster(-1), m_iNumResult(0), m_iMyResult(0)
+    CSBaseMatch()
+        : m_byMatchEventType(0)
+        , m_iMatchCountDownType(TYPE_MATCH_NONE)
+        , m_matchCountDownStart(MatchClock::time_point{})
+        , m_byMatchType(0)
+        , m_iMatchTimeMax(-1)
+        , m_iMatchTime(-1)
+        , m_iMaxKillMonster(-1)
+        , m_iKillMonster(-1)
+        , m_iNumResult(0)
+        , m_iMyResult(0)
     {
         memset(m_MatchResult, 0, sizeof(MatchResult) * 11);
     }
     virtual ~CSBaseMatch() {};
 
     void    clearMatchInfo(void);
-    BYTE    GetMatchEventType(void) { return m_byMatchEventType; }
+    std::uint8_t GetMatchEventType(void) { return m_byMatchEventType; }
 
-    BYTE	GetMatchType() { return m_byMatchType; }
+    std::uint8_t GetMatchType() { return m_byMatchType; }
     int		GetMatchTime() { return m_iMatchTime; }
     int		GetMatchMaxTime() { return m_iMatchTimeMax; };
     int		GetNumMustKillMonster() { return m_iMaxKillMonster; }
@@ -47,7 +62,7 @@ public:
 
     void	SetPosition(int ix, int iy);
     void    StartMatchCountDown(int iType);
-    void    SetMatchInfo(const BYTE byType, const int iMaxTime, const int iTime, const int iMaxMonster = 0, const int iKillMonster = 0);
+    void    SetMatchInfo(std::uint8_t byType, int iMaxTime, int iTime, int iMaxMonster = 0, int iKillMonster = 0);
 
     void    RenderTime(void);
     virtual void    RenderMatchTimes(void) = 0;
