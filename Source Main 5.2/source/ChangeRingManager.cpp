@@ -17,9 +17,16 @@
 namespace
 {
     template <typename Container, typename T>
-    bool Contains(const Container& container, const T& value)
+    constexpr bool Contains(const Container& container, const T& value)
     {
-        return std::find(container.begin(), container.end(), value) != container.end();
+        for (const auto& item : container)
+        {
+            if (item == value)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     constexpr std::array<int, 12> kDarkLordHairModels{
@@ -118,7 +125,7 @@ bool CChangeRingManager::CheckChangeRing(short RingType)
 
 bool CChangeRingManager::CheckRepair(int iType)
 {
-    return Contains(kChangeRingTypes, static_cast<short>(iType));
+    return Contains(kChangeRingTypes, iType);
 }
 
 bool CChangeRingManager::CheckMoveMap(short sLeftRingType, short sRightRingType)
