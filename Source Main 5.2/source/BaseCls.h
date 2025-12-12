@@ -174,7 +174,7 @@ T CList<T>::RemoveHead()
 {
     if (IsEmpty())
     {
-        return T{};
+        throw std::out_of_range("Cannot remove from an empty list.");
     }
 
     auto* node = m_pHead->GetNext();
@@ -192,7 +192,7 @@ T CList<T>::RemoveTail()
 {
     if (IsEmpty())
     {
-        return T{};
+        throw std::out_of_range("Cannot remove from an empty list.");
     }
 
     auto* node = m_pTail->GetPrev();
@@ -210,7 +210,7 @@ T CList<T>::RemoveNode(CNode<T>*& node)
 {
     if (!node || IsSentinel(node))
     {
-        return T{};
+        throw std::invalid_argument("Cannot remove a null or sentinel node.");
     }
 
     auto* next = node->GetNext();
@@ -351,13 +351,21 @@ void CList<T>::SetData(CNode<T>* node, const T& data)
 template <class T>
 T& CList<T>::GetData(CNode<T>* node)
 {
-    return IsSentinel(node) ? m_NullData : node->GetData();
+    if (IsSentinel(node))
+    {
+        throw std::out_of_range("Attempted to get data from a sentinel node.");
+    }
+    return node->GetData();
 }
 
 template <class T>
 const T& CList<T>::GetData(const CNode<T>* node) const
 {
-    return IsSentinel(node) ? m_NullData : node->GetData();
+    if (IsSentinel(node))
+    {
+        throw std::out_of_range("Attempted to get data from a sentinel node.");
+    }
+    return node->GetData();
 }
 
 template <class T>
@@ -443,7 +451,6 @@ private:
     const CBNode<T, S>* GetParent() const { return m_pParent; }
 
     friend class CBTree<T, S>;
-    friend CBTree<T, S>& operator+(const CBTree<T, S>& left, const CBTree<T, S>& right);
 
     T m_Data{};
     S m_CompValue{};
@@ -467,6 +474,8 @@ public:
     std::size_t GetCount() const { return m_Count; }
 
     CBNode<T, S>* FindHead();
+    CBNode<T, S>* FindNode(const S& value);
+    const CBNode<T, S>* FindNode(const S& value) const;
     CBNode<T, S>* GetLeft(CBNode<T, S>* node);
     CBNode<T, S>* GetRight(CBNode<T, S>* node);
     CBNode<T, S>* GetParent(CBNode<T, S>* node);
@@ -544,6 +553,50 @@ CBNode<T, S>* CBTree<T, S>::Add(const T& newElement, const S& value)
             }
         }
     }
+}
+
+template <class T, class S>
+CBNode<T, S>* CBTree<T, S>::FindNode(const S& value)
+{
+    CBNode<T, S>* current = m_pHead;
+    while (current)
+    {
+        if (value == current->GetValue())
+        {
+            return current;
+        }
+        if (value < current->GetValue())
+        {
+            current = current->GetLeft();
+        }
+        else
+        {
+            current = current->GetRight();
+        }
+    }
+    return nullptr;
+}
+
+template <class T, class S>
+const CBNode<T, S>* CBTree<T, S>::FindNode(const S& value) const
+{
+    const CBNode<T, S>* current = m_pHead;
+    while (current)
+    {
+        if (value == current->GetValue())
+        {
+            return current;
+        }
+        if (value < current->GetValue())
+        {
+            current = current->GetLeft();
+        }
+        else
+        {
+            current = current->GetRight();
+        }
+    }
+    return nullptr;
 }
 
 template <class T, class S>
@@ -637,9 +690,38 @@ void CBTree<T, S>::RemoveFrom(CBNode<T, S>* node)
         return;
     }
 
-    RemoveFrom(node->GetLeft());
-    RemoveFrom(node->GetRight());
-    delete node;
+    std::vector<std::pair<CBNode<T, S>*, bool>> stack;
+    stack.emplace_back(node, false);
+
+    while (!stack.empty())
+    {
+        auto currentEntry = stack.back();
+        stack.pop_back();
+
+        CBNode<T, S>* current = currentEntry.first;
+        bool visited = currentEntry.second;
+
+        if (!current)
+        {
+            continue;
+        }
+
+        if (visited)
+        {
+            delete current;
+            continue;
+        }
+
+        stack.emplace_back(current, true);
+        if (current->GetRight())
+        {
+            stack.emplace_back(current->GetRight(), false);
+        }
+        if (current->GetLeft())
+        {
+            stack.emplace_back(current->GetLeft(), false);
+        }
+    }
 }
 
 template <class T, class S>
