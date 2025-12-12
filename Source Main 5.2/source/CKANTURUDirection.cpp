@@ -132,7 +132,7 @@ void CKanturuDirection::GetKanturuNightmareState(std::uint8_t DetailState)
     switch (m_iNightmareState)
     {
     case KANTURU_NIGHTMARE_DIRECTION_NIGHTMARE:
-        PrepareCameraFocus();
+        PrepareCameraFocus(false);
         ActivateDirectionSequence();
         break;
     case KANTURU_NIGHTMARE_DIRECTION_END:
@@ -369,11 +369,11 @@ bool CKanturuDirection::IsKanturuWorldActive() const
     return gMapManager.WorldActive == WD_39KANTURU_3RD;
 }
 
-void CKanturuDirection::PrepareCameraFocus()
+void CKanturuDirection::PrepareCameraFocus(bool adjustViewDistance)
 {
     g_Direction.CloseAllWindows();
     g_Direction.m_CameraLevel = 5;
-    if (g_Direction.m_fCameraViewFar <= 1200.0f)
+    if (adjustViewDistance && g_Direction.m_fCameraViewFar <= 1200.0f)
         g_Direction.m_fCameraViewFar += 10.0f;
 }
 
@@ -389,7 +389,7 @@ void CKanturuDirection::ResetDirectionState()
     Init();
 }
 
-void CKanturuDirection::ApplyDirectionTarget(const DirectionTarget& target) const
+void CKanturuDirection::ApplyDirectionTarget(const DirectionTarget& target)
 {
     g_Direction.SetNextDirectionPosition(target.x, target.y, target.z, target.distance);
     g_Direction.m_iTimeSchedule--;

@@ -59,10 +59,10 @@ private:
     void Direction4th1();
 
     bool IsKanturuWorldActive() const;
-    void PrepareCameraFocus();
+    void PrepareCameraFocus(bool adjustViewDistance = true);
     void ActivateDirectionSequence();
     void ResetDirectionState();
-    void ApplyDirectionTarget(const DirectionTarget& target) const;
+    void ApplyDirectionTarget(const DirectionTarget& target);
 };
 
 #endif //_KANTURUDIRECTION_H_
