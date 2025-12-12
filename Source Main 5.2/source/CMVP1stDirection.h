@@ -4,6 +4,7 @@
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
+#include <cstdint>
 #include "Singleton.h"
 
 class CMVP1STDirection
@@ -20,6 +21,12 @@ private:
     void BeginDirection3();
     void BeginDirection4();
     void BeginDirection5();
+
+    bool IsCrywolfWorldActive() const;
+    bool IsSequenceReady() const;
+    void ResetSequence();
+    void QueueCameraMove(int x, int y, int z, float speed);
+
 public:
     int		m_iCryWolfState;
 
@@ -27,8 +34,8 @@ public:
     virtual ~CMVP1STDirection();
 
     void Init();
-    void GetCryWolfState(BYTE CryWolfState);
-    bool IsCryWolfDirection();
+    void GetCryWolfState(std::uint8_t CryWolfState);
+    bool IsCryWolfDirection() const;
     void CryWolfDirection();
 };
 
