@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
+#include <memory>
 #include <string>
+#include <vector>
 
 class CCameraMove
 {
@@ -19,7 +20,7 @@ class CCameraMove
     };
 #pragma pack(pop)
 
-    typedef std::vector<WAYPOINT*>	t_WayPointList;
+    using t_WayPointList = std::vector<std::unique_ptr<WAYPOINT>>;
     t_WayPointList m_listWayPoint;
 
     float m_CameraStartPos[3];
@@ -78,6 +79,11 @@ public:
     CCameraMove();
 
 private:
+    WAYPOINT* GetWayPointByIndex(std::size_t index);
+    const WAYPOINT* GetWayPointByIndex(std::size_t index) const;
+    WAYPOINT* FindWayPointByTile(int tileIndex);
+    const WAYPOINT* FindWayPointByTile(int tileIndex) const;
+
     BOOL m_bTourMode;
     BOOL m_bTourPause;
     float m_fForceSpeed;
