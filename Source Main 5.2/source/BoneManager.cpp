@@ -1,9 +1,8 @@
 #include "stdafx.h"
 
+#include <algorithm>
+
 #include "BoneManager.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
-#include "ZzzInterface.h"
 
 
 void BoneManager::RegisterBone(CHARACTER* pCharacter, const std::wstring& name, int nBone)
@@ -56,44 +55,44 @@ void CBoneManager::RegisterBone(CHARACTER* pCharacter, const std::wstring& name,
             if (FindBone(&pCharacter->Object, name) != NULL)
                 UnregisterBone(pCharacter, name);
 
-            auto _lpBoneInfo = new BONEINFO;
-            _lpBoneInfo->name = name;
-            _lpBoneInfo->pCharacter = pCharacter;
-            _lpBoneInfo->pModel = pModel;
-            _lpBoneInfo->nBone = nBone;
+            auto boneInfo = std::make_unique<BONEINFO>();
+            boneInfo->name = name;
+            boneInfo->pCharacter = pCharacter;
+            boneInfo->pModel = pModel;
+            boneInfo->nBone = nBone;
 
-            m_listBone.push_back(_lpBoneInfo);
+            m_listBone.push_back(std::move(boneInfo));
         }
     }
 }
 void CBoneManager::UnregisterBone(CHARACTER* pCharacter, const std::wstring& name)
 {
     if (pCharacter != NULL) {
-        LPBONEINFO _lpBoneInfo = FindBone(&pCharacter->Object, name);
-        if (_lpBoneInfo) {
-            delete _lpBoneInfo;
-            m_listBone.remove(_lpBoneInfo);
+        auto iter = FindBoneIterator(&pCharacter->Object, name);
+        if (iter != m_listBone.end())
+        {
+            m_listBone.erase(iter);
         }
     }
 }
 void CBoneManager::UnregisterBone(CHARACTER* pCharacter)
 {
     auto iter = m_listBone.begin();
-    for (; iter != m_listBone.end(); ) {
-        LPBONEINFO _lpBoneInfo = (*iter);
-        if (_lpBoneInfo->pCharacter == pCharacter) {
-            delete _lpBoneInfo;
+    while (iter != m_listBone.end())
+    {
+        const auto& boneInfo = *iter;
+        if (boneInfo && boneInfo->pCharacter == pCharacter)
+        {
             iter = m_listBone.erase(iter);
         }
         else
-            iter++;
+        {
+            ++iter;
+        }
     }
 }
 void CBoneManager::UnregisterAll()
 {
-    auto iter = m_listBone.begin();
-    for (; iter != m_listBone.end(); iter++)
-        delete (*iter);
     m_listBone.clear();
 }
 
@@ -145,12 +144,39 @@ CBoneManager* CBoneManager::GetInstance()
 
 CBoneManager::LPBONEINFO CBoneManager::FindBone(OBJECT* pObject, const std::wstring& name)
 {
-    auto iter = m_listBone.begin();
-    for (; iter != m_listBone.end(); iter++)
+    auto iter = FindBoneIterator(pObject, name);
+    if (iter == m_listBone.end())
     {
-        LPBONEINFO _lpBoneInfo = (*iter);
-        if ((&_lpBoneInfo->pCharacter->Object == pObject) && (_lpBoneInfo->name == name))
-            return _lpBoneInfo;
+        return nullptr;
     }
-    return NULL;
+
+    return iter->get();
+}
+
+CBoneManager::t_bone_list::iterator CBoneManager::FindBoneIterator(OBJECT* pObject, const std::wstring& name)
+{
+    return std::find_if(
+        m_listBone.begin(),
+        m_listBone.end(),
+        [pObject, &name](const std::unique_ptr<BONEINFO>& boneInfo)
+        {
+            return boneInfo != nullptr &&
+                boneInfo->pCharacter != nullptr &&
+                (&boneInfo->pCharacter->Object == pObject) &&
+                (boneInfo->name == name);
+        });
+}
+
+CBoneManager::t_bone_list::const_iterator CBoneManager::FindBoneIterator(OBJECT* pObject, const std::wstring& name) const
+{
+    return std::find_if(
+        m_listBone.cbegin(),
+        m_listBone.cend(),
+        [pObject, &name](const std::unique_ptr<BONEINFO>& boneInfo)
+        {
+            return boneInfo != nullptr &&
+                boneInfo->pCharacter != nullptr &&
+                (&boneInfo->pCharacter->Object == pObject) &&
+                (boneInfo->name == name);
+        });
 }
