@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <string>
+#include <vector>
 
 #include "Sprite.h"
 
@@ -28,6 +29,7 @@ protected:
 
     std::array<int, BTN_IMG_MAX> m_imageFrames{};
     std::wstring m_text;
+    mutable std::vector<wchar_t> m_textBuffer;
     std::array<DWORD, BTN_IMG_MAX> m_textColors{};
     std::size_t m_textColorCount{0};
     DWORD	m_textColor{0};

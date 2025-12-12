@@ -43,10 +43,6 @@ CButton::CButton()
     , m_bCheck(false)
 {
     m_imageFrames.fill(-1);
-    m_textColors.fill(0);
-    m_textColorCount = 0;
-    m_textColor = 0;
-    m_fTextAddYPos = 0.0f;
 }
 
 CButton::~CButton()
@@ -63,8 +59,8 @@ void CButton::Create(int nWidth, int nHeight, int nTexID, int nMaxFrame, int nDo
 {
     Release();
 
-    const int frameCount = std::max(1, nMaxFrame);
-    std::vector<SFrameCoord> frameCoords(static_cast<std::size_t>(frameCount));
+    const int frameCount = nMaxFrame;
+    std::vector<SFrameCoord> frameCoords(static_cast<std::size_t>(frameCount > 0 ? frameCount : 0));
     for (int i = 0; i < frameCount; ++i)
     {
         auto& coord = frameCoords[static_cast<std::size_t>(i)];
@@ -244,10 +240,7 @@ void CButton::SetText(const wchar_t* pszText, DWORD* adwColor)
     if (adwColor != nullptr)
     {
         m_textColorCount = colorCount;
-        for (std::size_t i = 0; i < m_textColorCount; ++i)
-        {
-            m_textColors[i] = adwColor[i];
-        }
+        std::copy_n(adwColor, m_textColorCount, m_textColors.begin());
     }
 
     ApplyTextColorForState(m_bCheck ? BTN_UP_CHECK : BTN_UP);
@@ -255,7 +248,14 @@ void CButton::SetText(const wchar_t* pszText, DWORD* adwColor)
 
 wchar_t* CButton::GetText() const
 {
-    return m_text.empty() ? nullptr : const_cast<wchar_t*>(m_text.c_str());
+    if (m_text.empty())
+    {
+        return nullptr;
+    }
+
+    m_textBuffer.assign(m_text.begin(), m_text.end());
+    m_textBuffer.push_back(L'\0');
+    return m_textBuffer.data();
 }
 
 void CButton::ApplyVisualState(int frameIndex)
@@ -285,10 +285,7 @@ void CButton::ApplyTextColorForState(int colorIndex)
     }
 
     const std::size_t index = static_cast<std::size_t>(resolvedIndex);
-    if (index < m_textColorCount)
-    {
-        m_textColor = m_textColors[index];
-    }
+    m_textColor = m_textColors[index];
 }
 
 bool CButton::HasCheckVisuals() const
@@ -305,19 +302,7 @@ int CButton::ResolveColorIndex(int requestedIndex) const
 
     if (m_textColorCount == BTN_IMG_MAX / 2)
     {
-        switch (ClampStateIndex(requestedIndex))
-        {
-        case BTN_UP_CHECK:
-            return BTN_UP;
-        case BTN_DOWN_CHECK:
-            return BTN_DOWN;
-        case BTN_ACTIVE_CHECK:
-            return BTN_ACTIVE;
-        case BTN_DISABLE_CHECK:
-            return BTN_DISABLE;
-        default:
-            return ClampStateIndex(requestedIndex);
-        }
+        return ClampStateIndex(requestedIndex) % (BTN_IMG_MAX / 2);
     }
 
     if (m_textColorCount == 0)
