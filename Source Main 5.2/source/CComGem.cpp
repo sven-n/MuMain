@@ -90,7 +90,7 @@ bool COMGEM::FindWantedList()
 
     for (int i = 0; i < nInvenMaxIndex; ++i)
     {
-        ITEM* pItem = pNewInventoryCtrl->GetItem(i);
+        const ITEM* pItem = pNewInventoryCtrl->GetItem(i);
         if (!pItem) continue;
         if (isCompiledGem(pItem))
         {
@@ -175,7 +175,7 @@ bool COMGEM::CheckMyInvValid()
 
         for (int i = 0; i < nInvenMaxIndex; ++i)
         {
-            ITEM* pItem = pNewInventoryCtrl->GetItem(i);
+            const ITEM* pItem = pNewInventoryCtrl->GetItem(i);
             if (!pItem) continue;
             if (m_cGemType == Check_Jewel_Unit(pItem->Type))	++m_cCount;
 
@@ -204,7 +204,7 @@ bool COMGEM::CheckMyInvValid()
 
         //SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
         //ITEM * pItem = pNewInventoryCtrl->GetItem(iUnMixIndex);
-        ITEM* pItem = (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(iUnMixIndex) : nullptr;
+        const ITEM* pItem = (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(iUnMixIndex) : nullptr;
         if (pItem != nullptr && isCompiledGem(pItem))
         {
             ++m_cCount;
