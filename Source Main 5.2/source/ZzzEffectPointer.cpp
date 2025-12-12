@@ -26,9 +26,8 @@ std::mt19937& RandomEngine()
 
 int RandomInt(int minInclusive, int maxInclusive)
 {
-    static std::uniform_int_distribution<int> dist;
-    using Dist = std::uniform_int_distribution<int>;
-    return dist(RandomEngine(), Dist::param_type{minInclusive, maxInclusive});
+    std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
+    return dist(RandomEngine());
 }
 } // namespace
 
