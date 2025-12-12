@@ -77,19 +77,11 @@ void CBoneManager::UnregisterBone(CHARACTER* pCharacter, const std::wstring& nam
 }
 void CBoneManager::UnregisterBone(CHARACTER* pCharacter)
 {
-    auto iter = m_listBone.begin();
-    while (iter != m_listBone.end())
-    {
-        const auto& boneInfo = *iter;
-        if (boneInfo && boneInfo->pCharacter == pCharacter)
+    m_listBone.remove_if(
+        [pCharacter](const std::unique_ptr<BONEINFO>& boneInfo)
         {
-            iter = m_listBone.erase(iter);
-        }
-        else
-        {
-            ++iter;
-        }
-    }
+            return boneInfo && boneInfo->pCharacter == pCharacter;
+        });
 }
 void CBoneManager::UnregisterAll()
 {
@@ -160,9 +152,7 @@ CBoneManager::t_bone_list::iterator CBoneManager::FindBoneIterator(OBJECT* pObje
         m_listBone.end(),
         [pObject, &name](const std::unique_ptr<BONEINFO>& boneInfo)
         {
-            return boneInfo != nullptr &&
-                boneInfo->pCharacter != nullptr &&
-                (&boneInfo->pCharacter->Object == pObject) &&
+            return (&boneInfo->pCharacter->Object == pObject) &&
                 (boneInfo->name == name);
         });
 }
@@ -174,9 +164,7 @@ CBoneManager::t_bone_list::const_iterator CBoneManager::FindBoneIterator(OBJECT*
         m_listBone.cend(),
         [pObject, &name](const std::unique_ptr<BONEINFO>& boneInfo)
         {
-            return boneInfo != nullptr &&
-                boneInfo->pCharacter != nullptr &&
-                (&boneInfo->pCharacter->Object == pObject) &&
+            return (&boneInfo->pCharacter->Object == pObject) &&
                 (boneInfo->name == name);
         });
 }
