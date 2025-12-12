@@ -19,6 +19,112 @@
 #include "Local.h"
 #include "CharacterManager.h"
 
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <cwchar>
+#include <iterator>
+#include <string>
+
+namespace
+{
+    constexpr std::array<DWORD, BTN_IMG_MAX> kJobButtonColors{
+        CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, CLRDW_GRAY,
+        CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, CLRDW_GRAY
+    };
+
+    constexpr std::array<int, MAX_CLASS> kClassButtonTextIds{
+        20, 21, 22, 23, 24, 1687, 3150
+    };
+
+    constexpr std::size_t kMinCharacterNameLength = 4;
+
+    constexpr int kSummonerDescriptionTextId = 1690;
+    constexpr int kRageFighterDescriptionTextId = 3152;
+    constexpr int kDefaultDescriptionBase = 1705;
+
+    constexpr int kStatLabelBaseId = 1701;
+    constexpr int kStatLineSpacing = 17;
+    constexpr int kStatYOffset = 10;
+    constexpr int kStatValueOffset = 54;
+    constexpr int kDarkLordStatHeight = 96;
+    constexpr int kDefaultStatHeight = 80;
+    constexpr const wchar_t* kDarkLordLeadershipStatValue = L"25";
+    constexpr int kDarkLordLeadershipTextId = 1738;
+
+    constexpr int kJobButtonStartY = 131;
+    constexpr int kJobButtonSummonerRow = 3;
+    constexpr int kJobButtonRageFighterY = 246;
+    constexpr int kOkButtonOffsetY = 325;
+    constexpr int kCancelButtonOffsetX = 400;
+    constexpr int kInputSpriteOffsetY = 317;
+    constexpr int kInputTextOffsetX = 78;
+    constexpr int kInputTextOffsetY = 21;
+    constexpr int kDescSpriteOffsetY = 355;
+    constexpr int kStatSpriteOffsetY = 24;
+    constexpr int kDescriptionTextOffsetX = 10;
+    constexpr int kDescriptionTextOffsetY = 12;
+    constexpr int kDescriptionLineSpacing = 19;
+
+    struct ClassStats
+    {
+        std::array<const wchar_t*, 4> values;
+    };
+
+    constexpr std::array<ClassStats, MAX_CLASS> kClassStatTable{ {
+        ClassStats{ { L"18", L"18", L"15", L"30" } }, // Knight
+        ClassStats{ { L"28", L"20", L"25", L"10" } }, // Wizard
+        ClassStats{ { L"22", L"25", L"20", L"15" } }, // Elf
+        ClassStats{ { L"26", L"26", L"26", L"26" } }, // Magic Gladiator
+        ClassStats{ { L"26", L"20", L"20", L"15" } }, // Dark Lord
+        ClassStats{ { L"21", L"21", L"18", L"23" } }, // Summoner
+        ClassStats{ { L"32", L"27", L"25", L"20" } }, // Rage Fighter
+    } };
+
+    struct ClassRenderParameters
+    {
+        bool overrideAngle;
+        float angleX;
+        float angleY;
+        float angleZ;
+        float scale;
+        float positionOffsetX;
+        float positionOffsetZ;
+    };
+
+    constexpr ClassRenderParameters GetRenderParameters(CLASS_TYPE classType)
+    {
+        switch (classType)
+        {
+        case CLASS_KNIGHT:
+            return { true, 0.0f, 0.0f, -12.0f, 6.05f, 0.0f, 0.0f };
+        case CLASS_WIZARD:
+            return { true, 0.0f, 0.0f, -40.0f, 5.9f, 0.0f, 0.0f };
+        case CLASS_ELF:
+            return { true, 8.0f, 0.0f, 5.0f, 9.1f, 4.8f, 0.0f };
+        case CLASS_DARK:
+            return { true, 8.0f, 0.0f, -13.0f, 6.0f, 0.0f, 1.8f };
+        case CLASS_DARK_LORD:
+            return { true, 8.0f, 0.0f, -18.0f, 6.0f, 0.0f, 0.0f };
+        case CLASS_SUMMONER:
+            return { true, 2.0f, 0.0f, 2.0f, 9.1f, 4.8f, 4.0f };
+        case CLASS_RAGEFIGHTER:
+            return { false, 0.0f, 0.0f, 0.0f, 6.0f, 9.8f, -7.5f };
+        default:
+            return { false, 0.0f, 0.0f, 0.0f, 6.0f, 0.0f, 0.0f };
+        }
+    }
+
+    constexpr int ResolveDescriptionTextId(CLASS_TYPE selectedClass)
+    {
+        if (selectedClass == CLASS_SUMMONER)
+            return kSummonerDescriptionTextId;
+        if (selectedClass == CLASS_RAGEFIGHTER)
+            return kRageFighterDescriptionTextId;
+        return kDefaultDescriptionBase + selectedClass;
+    }
+}
+
 #define	CMW_OK		0
 #define	CMW_CANCEL	1
 
@@ -39,7 +145,7 @@ CCharMakeWin::~CCharMakeWin()
 
 void CCharMakeWin::Create()
 {
-    CInput rInput = CInput::Instance();
+    CInput& rInput = CInput::Instance();
     CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
 
     m_winBack.Create(454, 406, -2);
@@ -50,37 +156,29 @@ void CCharMakeWin::Create()
 
     m_asprBack[CMW_SPR_DESC].Create(454, 51);
 
-    int i;
-    for (i = CMW_SPR_STAT; i < CMW_SPR_MAX; ++i)
+    for (int spriteIndex = CMW_SPR_STAT; spriteIndex < CMW_SPR_MAX; ++spriteIndex)
     {
-        m_asprBack[i].SetAlpha(143);
-        m_asprBack[i].SetColor(0, 0, 0);
+        m_asprBack[spriteIndex].SetAlpha(143);
+        m_asprBack[spriteIndex].SetColor(0, 0, 0);
     }
 
-    DWORD adwJobBtnClr[8] =
+    std::array<DWORD, BTN_IMG_MAX> jobButtonColors = kJobButtonColors;
+    for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
     {
-        CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, CLRDW_GRAY,
-        CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, CLRDW_GRAY
-    };
-
-    int nText;
-    for (i = 0; i < MAX_CLASS; ++i)
-    {
-        m_abtnJob[i].Create(108, 26, BITMAP_LOG_IN + 1, 4, 2, 1, 0, 3, 3, 3, 0);
-        int _btn_classname[MAX_CLASS] = { 20, 21, 22, 23, 24, 1687, 3150 };
-        nText = _btn_classname[i];
-        m_abtnJob[i].SetText(GlobalText[nText], adwJobBtnClr);
-        CWin::RegisterButton(&m_abtnJob[i]);
+        m_abtnJob[classIndex].Create(108, 26, BITMAP_LOG_IN + 1, 4, 2, 1, 0, 3, 3, 3, 0);
+        const int textId = kClassButtonTextIds[classIndex];
+        m_abtnJob[classIndex].SetText(GlobalText[textId], jobButtonColors.data());
+        CWin::RegisterButton(&m_abtnJob[classIndex]);
     }
 
-    for (i = 0; i < 2; ++i)
+    for (auto& button : m_aBtn)
     {
-        m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
-        CWin::RegisterButton(&m_aBtn[i]);
+        button.Create(54, 30, BITMAP_BUTTON + (&button - m_aBtn), 3, 2, 1);
+        CWin::RegisterButton(&button);
     }
 
-    ::memset(m_aszJobDesc, 0,
-        sizeof(char) * CMW_DESC_LINE_MAX * CMW_DESC_ROW_MAX);
+    std::fill(&m_aszJobDesc[0][0],
+        &m_aszJobDesc[0][0] + (CMW_DESC_LINE_MAX * CMW_DESC_ROW_MAX), L'\0');
     m_nDescLine = 0;
 
     m_nSelJob = CLASS_KNIGHT;
@@ -100,36 +198,40 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 {
     m_winBack.SetPosition(nXCoord, nYCoord);
 
-    int nBaseX = nXCoord + 346;
-    m_asprBack[CMW_SPR_STAT].SetPosition(nBaseX, nYCoord + 24);
+    const int baseX = nXCoord + 346;
+    m_asprBack[CMW_SPR_STAT].SetPosition(baseX, nYCoord + kStatSpriteOffsetY);
 
-    int i;
-    int nBaseY = nYCoord + 131;
-    int nBtnHeight = m_abtnJob[0].GetHeight();
-    for (i = 0; i < 3; ++i)
-        m_abtnJob[i].SetPosition(nBaseX, nBaseY + i * nBtnHeight);
-    m_abtnJob[CLASS_SUMMONER].SetPosition(nBaseX, nBaseY + 3 * nBtnHeight);
-    nBaseY = nYCoord + 246;
+    const int buttonHeight = m_abtnJob[0].GetHeight();
+    int baseY = nYCoord + kJobButtonStartY;
 
-    m_abtnJob[CLASS_RAGEFIGHTER].SetPosition(nBaseX, nBaseY);
+    for (int classIndex = 0; classIndex < 3; ++classIndex)
+        m_abtnJob[classIndex].SetPosition(baseX, baseY + classIndex * buttonHeight);
 
-    for (; i <= CLASS_DARK_LORD; ++i)
-        m_abtnJob[i].SetPosition(nBaseX, nBaseY + (i - 2) * nBtnHeight);
+    m_abtnJob[CLASS_SUMMONER].SetPosition(baseX, baseY + kJobButtonSummonerRow * buttonHeight);
 
-    nBaseY = nYCoord + 325;
-    m_aBtn[CMW_OK].SetPosition(nBaseX, nBaseY);
-    m_aBtn[CMW_CANCEL].SetPosition(nXCoord + 400, nBaseY);
+    baseY = nYCoord + kJobButtonRageFighterY;
+    m_abtnJob[CLASS_RAGEFIGHTER].SetPosition(baseX, baseY);
 
-    m_asprBack[CMW_SPR_INPUT].SetPosition(nXCoord, nYCoord + 317);
+    for (int classIndex = CLASS_DARK; classIndex <= CLASS_DARK_LORD; ++classIndex)
+    {
+        const int row = (classIndex - CLASS_DARK) + 1;
+        m_abtnJob[classIndex].SetPosition(baseX, baseY + row * buttonHeight);
+    }
+
+    baseY = nYCoord + kOkButtonOffsetY;
+    m_aBtn[CMW_OK].SetPosition(baseX, baseY);
+    m_aBtn[CMW_CANCEL].SetPosition(nXCoord + kCancelButtonOffsetX, baseY);
+
+    m_asprBack[CMW_SPR_INPUT].SetPosition(nXCoord, nYCoord + kInputSpriteOffsetY);
 
     if (g_iChatInputType == 1)
     {
         g_pSingleTextInputBox->SetPosition(
-            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + 78) / g_fScreenRate_x),
-            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + 21) / g_fScreenRate_y));
+            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + kInputTextOffsetX) / g_fScreenRate_x),
+            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + kInputTextOffsetY) / g_fScreenRate_y));
     }
 
-    m_asprBack[CMW_SPR_DESC].SetPosition(nXCoord, nYCoord + 355);
+    m_asprBack[CMW_SPR_DESC].SetPosition(nXCoord, nYCoord + kDescSpriteOffsetY);
 }
 
 void CCharMakeWin::Show(bool bShow)
@@ -187,17 +289,11 @@ bool CCharMakeWin::CursorInWin(int nArea)
 
 void CCharMakeWin::UpdateDisplay()
 {
-    int i;
-
-    const int _SecondClassCnt = 3;
-
-    for (i = 0; i <= (MAX_CLASS - 1); ++i)
-    {
-        m_abtnJob[i].SetEnable(true);
-    }
+    for (auto& button : m_abtnJob)
+        button.SetEnable(true);
 
 #ifdef PBG_ADD_CHARACTERCARD
-    for (i = 0; i < CLASS_CHARACTERCARD_TOTALCNT; ++i)
+    for (int i = 0; i < CLASS_CHARACTERCARD_TOTALCNT; ++i)
     {
         if (!g_CharCardEnable.bCharacterEnable[i])
             m_abtnJob[i + CLASS_DARK].SetEnable(false);
@@ -206,39 +302,36 @@ void CCharMakeWin::UpdateDisplay()
     m_abtnJob[CLASS_SUMMONER].SetEnable(true);
 #endif //PBG_ADD_CHARACTERCARD
 
-    if (m_nSelJob == CLASS_DARK_LORD)
-        m_asprBack[CMW_SPR_STAT].SetSize(0, 96, Y);
-    else
-        m_asprBack[CMW_SPR_STAT].SetSize(0, 80, Y);
+    const bool isDarkLord = (m_nSelJob == CLASS_DARK_LORD);
+    m_asprBack[CMW_SPR_STAT].SetSize(0, isDarkLord ? kDarkLordStatHeight : kDefaultStatHeight, Y);
 
-    int nText = m_nSelJob == CLASS_SUMMONER ? 1690 : 1705 + m_nSelJob;
-    if (m_nSelJob == CLASS_RAGEFIGHTER)
-        nText = 3152;
-    m_nDescLine = ::SeparateTextIntoLines(GlobalText[nText], m_aszJobDesc[0], CMW_DESC_LINE_MAX, CMW_DESC_ROW_MAX);
+    const int descriptionTextId = ResolveDescriptionTextId(m_nSelJob);
+    m_nDescLine = ::SeparateTextIntoLines(
+        GlobalText[descriptionTextId],
+        m_aszJobDesc[0],
+        CMW_DESC_LINE_MAX,
+        CMW_DESC_ROW_MAX);
 
     SelectCreateCharacter();
 }
 
 void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
 {
-    int i, j;
+    for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
     {
-        for (i = 0; i < MAX_CLASS; ++i)
+        if (!m_abtnJob[classIndex].IsClick())
+            continue;
+
+        for (auto& button : m_abtnJob)
+            button.SetCheck(false);
+        m_abtnJob[classIndex].SetCheck(true);
+
+        if (m_nSelJob != classIndex)
         {
-            if (m_abtnJob[i].IsClick())
-            {
-                for (j = 0; j < MAX_CLASS; ++j)
-                    m_abtnJob[j].SetCheck(false);
-                m_abtnJob[i].SetCheck(true);
-
-                if (m_nSelJob == i)
-                    break;
-
-                m_nSelJob = (CLASS_TYPE)i;
-                UpdateDisplay();
-                break;
-            }
+            m_nSelJob = static_cast<CLASS_TYPE>(classIndex);
+            UpdateDisplay();
         }
+        break;
     }
 
     {
@@ -272,10 +365,10 @@ void CCharMakeWin::RequestCreateCharacter()
 
     CUIMng& rUIMng = CUIMng::Instance();
 
-    const auto character_name = std::wstring(InputText[0]);
+    const std::wstring characterName = InputText[0];
 
     // todo: check with regex from server
-    if (character_name.length() < 4)
+    if (characterName.length() < kMinCharacterNameLength)
         rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
     else if (::CheckName())
         rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);
@@ -283,7 +376,8 @@ void CCharMakeWin::RequestCreateCharacter()
         rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
     else
     {
-        BYTE classByte = (BYTE)(((CharacterView.Class) << 2) + (CharacterView.Skin));
+        const std::uint8_t classByte =
+            static_cast<std::uint8_t>((CharacterView.Class << 2) + CharacterView.Skin);
         CurrentProtocolState = REQUEST_CREATE_CHARACTER;
         SocketClient->ToGameServer()->SendCreateCharacter(InputText[0], classByte);
         //SendRequestCreateCharacter(InputText[0], CharacterView.Class, CharacterView.Skin);
@@ -297,58 +391,60 @@ void CCharMakeWin::RenderControls()
     RenderCreateCharacter();
     ::EnableAlphaTest();
 
-    int i;
-    for (i = 0; i < CMW_SPR_MAX; ++i)
+    for (auto& sprite : m_asprBack)
     {
-        m_asprBack[i].Render();
+        sprite.Render();
     }
     CWin::RenderButtons();
     g_pRenderText->SetFont(g_hFixFont);
     g_pRenderText->SetTextColor(CLRDW_WHITE);
     g_pRenderText->SetBgColor(0);
 
-    wchar_t* apszStat[MAX_CLASS][4] =
+    const auto& stats = kClassStatTable[static_cast<std::size_t>(m_nSelJob)];
+    const int statBaseX = m_asprBack[CMW_SPR_STAT].GetXPos() + 22;
+    for (std::size_t statIndex = 0; statIndex < stats.values.size(); ++statIndex)
     {
-        L"18", L"18", L"15", L"30",
-        L"28", L"20", L"25", L"10",
-        L"22", L"25", L"20", L"15",
-        L"26", L"26", L"26", L"26",
-        L"26", L"20", L"20", L"15",
-        L"21", L"21", L"18", L"23",
-        L"32", L"27", L"25", L"20",
-    };
-    int nStatBaseX = m_asprBack[CMW_SPR_STAT].GetXPos() + 22;
-    int nStatY;
-    for (i = 0; i < 4; ++i)
-    {
-        nStatY = int((m_asprBack[CMW_SPR_STAT].GetYPos() + 10 + i * 17)
+        const int statScreenY = int(
+            (m_asprBack[CMW_SPR_STAT].GetYPos() + kStatYOffset + static_cast<int>(statIndex) * kStatLineSpacing)
             / g_fScreenRate_y);
 
         g_pRenderText->SetTextColor(CLRDW_ORANGE);
-        g_pRenderText->RenderText(int((nStatBaseX + 54) / g_fScreenRate_x), nStatY,
-            apszStat[m_nSelJob][i]);
+        g_pRenderText->RenderText(
+            int((statBaseX + kStatValueOffset) / g_fScreenRate_x),
+            statScreenY,
+            stats.values[statIndex]);
+
         g_pRenderText->SetTextColor(CLRDW_WHITE);
-        g_pRenderText->RenderText(int(nStatBaseX / g_fScreenRate_x), nStatY,
-            GlobalText[1701 + i]);
+        g_pRenderText->RenderText(
+            int(statBaseX / g_fScreenRate_x),
+            statScreenY,
+            GlobalText[kStatLabelBaseId + static_cast<int>(statIndex)]);
     }
 
     if (m_nSelJob == CLASS_DARK_LORD)
     {
-        nStatY = int((m_asprBack[CMW_SPR_STAT].GetYPos() + 10 + 4 * 17) / g_fScreenRate_y);
+        const int leadershipY = int(
+            (m_asprBack[CMW_SPR_STAT].GetYPos() + kStatYOffset + 4 * kStatLineSpacing) / g_fScreenRate_y);
 
         g_pRenderText->SetTextColor(CLRDW_ORANGE);
-        g_pRenderText->RenderText(int((nStatBaseX + 54) / g_fScreenRate_x), nStatY, L"25");
+        g_pRenderText->RenderText(
+            int((statBaseX + kStatValueOffset) / g_fScreenRate_x),
+            leadershipY,
+            kDarkLordLeadershipStatValue);
         g_pRenderText->SetTextColor(CLRDW_WHITE);
-        g_pRenderText->RenderText(int(nStatBaseX / g_fScreenRate_x), nStatY, GlobalText[1738]);
+        g_pRenderText->RenderText(
+            int(statBaseX / g_fScreenRate_x),
+            leadershipY,
+            GlobalText[kDarkLordLeadershipTextId]);
     }
 
+    for (int lineIndex = 0; lineIndex < m_nDescLine; ++lineIndex)
     {
-        for (i = 0; i < m_nDescLine; ++i)
-        {
-            g_pRenderText->RenderText(int((m_asprBack[CMW_SPR_DESC].GetXPos() + 10) / g_fScreenRate_x),
-                int((m_asprBack[CMW_SPR_DESC].GetYPos() + 12 + i * 19)
-                    / g_fScreenRate_y), m_aszJobDesc[i]);
-        }
+        g_pRenderText->RenderText(
+            int((m_asprBack[CMW_SPR_DESC].GetXPos() + kDescriptionTextOffsetX) / g_fScreenRate_x),
+            int((m_asprBack[CMW_SPR_DESC].GetYPos() + kDescriptionTextOffsetY + lineIndex * kDescriptionLineSpacing)
+                / g_fScreenRate_y),
+            m_aszJobDesc[lineIndex]);
     }
 
     g_pRenderText->SetFont(g_hFont);
@@ -389,46 +485,16 @@ void CCharMakeWin::RenderCreateCharacter()
 
     BeginOpengl(m_winBack.GetXPos() / g_fScreenRate_x, m_winBack.GetYPos() / g_fScreenRate_y, 410 / g_fScreenRate_x, 335 / g_fScreenRate_y);
 
-    if (CharacterView.Class == CLASS_WIZARD)
-    {
-        Vector(0.f, 0.f, -40.0f, o->Angle);
-        o->Scale = 5.9f;
-    }
-    else if (CharacterView.Class == CLASS_KNIGHT)
-    {
-        Vector(0.f, 0.f, -12.0f, o->Angle);
-        o->Scale = 6.05f;
-    }
-    else if (CharacterView.Class == CLASS_ELF)
-    {
-        Vector(8.f, 0.f, 5.0f, o->Angle);
-        o->Scale = 9.1f;
-        CharacterView.Object.Position[0] += 4.8f;
-    }
-    else if (CharacterView.Class == CLASS_DARK)
-    {
-        Vector(8.f, 0.f, -13.0f, o->Angle);
-        o->Scale = 6.0f;
-        CharacterView.Object.Position[2] += 1.8f;
-    }
-    else if (CharacterView.Class == CLASS_DARK_LORD)
-    {
-        Vector(8.f, 0.f, -18.0f, o->Angle);
-        o->Scale = 6.0f;
-    }
-    else if (CharacterView.Class == CLASS_SUMMONER)
-    {
-        Vector(2.f, 0.f, 2.0f, o->Angle);
-        o->Scale = 9.1f;
-        CharacterView.Object.Position[0] += 4.8f;
-        CharacterView.Object.Position[2] += 4.0f;
-    }
-    else if (CharacterView.Class == CLASS_RAGEFIGHTER)
-    {
-        o->Scale = 6.0f;
-        CharacterView.Object.Position[0] += 9.8f;
-        CharacterView.Object.Position[2] -= 7.5f;
-    }
+    const ClassRenderParameters params = GetRenderParameters(CharacterView.Class);
+    if (params.overrideAngle)
+        Vector(params.angleX, params.angleY, params.angleZ, o->Angle);
+
+    o->Scale = params.scale;
+
+    if (params.positionOffsetX != 0.0f)
+        CharacterView.Object.Position[0] += params.positionOffsetX;
+    if (params.positionOffsetZ != 0.0f)
+        CharacterView.Object.Position[2] += params.positionOffsetZ;
 
     RenderCharacter(&CharacterView, o);
 
