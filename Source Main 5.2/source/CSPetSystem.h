@@ -1,6 +1,10 @@
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 #pragma once
+
+#include <cstdint>
+#include <memory>
+
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
@@ -14,10 +18,11 @@ protected:
     CHARACTER   m_PetCharacter;
     PET_TYPE    m_PetType;
     PET_INFO* m_pPetInfo;
-    BYTE        m_byCommand;
+    std::uint8_t m_byCommand;
+    std::unique_ptr<vec34_t[]> m_BoneTransforms;
 
 public:
-    CSPetSystem() {};
+    CSPetSystem();
     virtual ~CSPetSystem();
 
     PET_TYPE    GetPetType(void) { return m_PetType; }
@@ -38,7 +43,7 @@ public:
     void    RenderInventory(void);
 
     void    SetAI(int AI);
-    void    SetCommand(int Key, BYTE cmd);
+    void    SetCommand(int Key, std::uint8_t cmd);
     void    SetAttack(int Key, int attackType);
 
     int		GetObjectType()
