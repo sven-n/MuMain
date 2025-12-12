@@ -41,6 +41,7 @@ namespace
     constexpr float kFullCircleDegrees = 360.0f;
     constexpr float kWaypointRenderOffset = 50.0f;
     constexpr float kWaypointRenderHalfSize = 10.0f;
+    constexpr float kTourCameraZPosition = -300.0f;
 
     template <typename T>
     constexpr const T& Clamp(const T& value, const T& minValue, const T& maxValue)
@@ -794,7 +795,7 @@ void CCameraMove::UpdateTourWayPoint()
                 AdvancePosition(m_vTourCameraPos, tourDir, targetCameraAcc);
             }
             m_CurrentCameraPos[2] = RequestTerrainHeight(m_CurrentCameraPos[0], m_CurrentCameraPos[1]);
-            m_vTourCameraPos[2] = -300.0f;
+            m_vTourCameraPos[2] = kTourCameraZPosition;
 
             const float totalBlendDistance = distanceToOrigin + distanceToTarget;
             if (totalBlendDistance > std::numeric_limits<float>::epsilon())
