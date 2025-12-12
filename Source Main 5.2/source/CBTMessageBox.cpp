@@ -1,115 +1,138 @@
 #include "stdafx.h"
 #include "CBTMessageBox.h"
 
+#include <algorithm>
+
 int leaf::CBTMessageBox(HWND hWnd, const std::wstring& text, const std::wstring& caption, UINT uType, bool bAlwaysOnTop)
 {
     return CCBTMessageBox::GetInstance()->OpenMessageBox(hWnd, text.c_str(), caption.c_str(), uType, bAlwaysOnTop);
 }
 
-using namespace leaf;
-
-CCBTMessageBox::CCBTMessageBox() : m_hParentWnd(NULL), m_hCBT(NULL), m_bAlwaysOnTop(false)
-{}
-CCBTMessageBox::~CCBTMessageBox()
-{}
-
-int CCBTMessageBox::OpenMessageBox(HWND hWnd, const wchar_t* lpText, const wchar_t* lpCaption, UINT uType, bool bAlwaysOnTop)
+namespace
 {
-    if (hWnd != NULL) {
-        m_hParentWnd = hWnd;
-    }
-    else {
-        m_hParentWnd = GetDesktopWindow();
+    int ClampInt(int value, int minValue, int maxValue)
+    {
+        return std::min(std::max(value, minValue), maxValue);
     }
 
-    if (HookCBT()) {
-        m_bAlwaysOnTop = bAlwaysOnTop;
-        return MessageBox(hWnd, lpText, lpCaption, uType);
+    POINT ComputeCenteredTopLeft(const RECT& parentRect, const RECT& childRect, const RECT& desktopRect)
+    {
+        const int width = (childRect.right - childRect.left);
+        const int height = (childRect.bottom - childRect.top);
+
+        const int centerX = parentRect.left + ((parentRect.right - parentRect.left) / 2);
+        const int centerY = parentRect.top + ((parentRect.bottom - parentRect.top) / 2);
+
+        POINT result{};
+        result.x = centerX - (width / 2);
+        result.y = centerY - (height / 2);
+
+        const int desktopRight = static_cast<int>(desktopRect.right);
+        const int desktopBottom = static_cast<int>(desktopRect.bottom);
+        const int maxX = std::max(0, desktopRight - width);
+        const int maxY = std::max(0, desktopBottom - height);
+
+        result.x = ClampInt(result.x, 0, maxX);
+        result.y = ClampInt(result.y, 0, maxY);
+        return result;
     }
-    return 0;
+
+    struct ScopedCbtUnhook
+    {
+        leaf::CCBTMessageBox* owner{nullptr};
+        ~ScopedCbtUnhook()
+        {
+            if (owner)
+            {
+                owner->UnhookCBT();
+            }
+        }
+    };
 }
 
-HWND CCBTMessageBox::GetParentWndHandle() const
+leaf::CCBTMessageBox::CCBTMessageBox() : m_hParentWnd(nullptr), m_hCBT(nullptr), m_bAlwaysOnTop(false)
+{}
+
+leaf::CCBTMessageBox::~CCBTMessageBox()
+{
+    UnhookCBT();
+}
+
+int leaf::CCBTMessageBox::OpenMessageBox(HWND hWnd, const wchar_t* lpText, const wchar_t* lpCaption, UINT uType, bool bAlwaysOnTop)
+{
+    m_hParentWnd = (hWnd != nullptr) ? hWnd : GetDesktopWindow();
+    m_bAlwaysOnTop = bAlwaysOnTop;
+
+    if (!HookCBT())
+    {
+        return 0;
+    }
+
+    ScopedCbtUnhook unhookGuard{this};
+    return MessageBox(m_hParentWnd, lpText, lpCaption, uType);
+}
+
+HWND leaf::CCBTMessageBox::GetParentWndHandle() const
 {
     return m_hParentWnd;
 }
-bool CCBTMessageBox::IsAlwaysOnTop() const
+bool leaf::CCBTMessageBox::IsAlwaysOnTop() const
 {
     return m_bAlwaysOnTop;
 }
 
-HHOOK CCBTMessageBox::GetHookHandle() const
+HHOOK leaf::CCBTMessageBox::GetHookHandle() const
 {
     return m_hCBT;
 }
-bool CCBTMessageBox::HookCBT()
+bool leaf::CCBTMessageBox::HookCBT()
 {
     if (m_hCBT)
         return false;
     m_hCBT = SetWindowsHookEx(WH_CBT, &CBTProc, 0, GetCurrentThreadId());
-    if (m_hCBT == NULL)
+    if (m_hCBT == nullptr)
         return false;
     return true;
 }
-void CCBTMessageBox::UnhookCBT()
+void leaf::CCBTMessageBox::UnhookCBT()
 {
     if (m_hCBT) {
         UnhookWindowsHookEx(m_hCBT);
-        m_hCBT = NULL;
+        m_hCBT = nullptr;
     }
 }
 
-CCBTMessageBox* CCBTMessageBox::GetInstance()
+leaf::CCBTMessageBox* leaf::CCBTMessageBox::GetInstance()
 {
     static CCBTMessageBox s_Instance;
     return &s_Instance;
 }
 
-LRESULT CALLBACK CCBTMessageBox::CBTProc(INT nCode, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK leaf::CCBTMessageBox::CBTProc(INT nCode, WPARAM wParam, LPARAM lParam)
 {
     // notification that a window is about to be activated
     // window handle is wParam
     if (nCode == HCBT_ACTIVATE && GetInstance()->GetHookHandle())
     {
-        HWND	hChildWnd = (HWND)wParam;    // msgbox is "child"
-        HWND	hParentWnd = GetInstance()->GetParentWndHandle();
-        RECT  rParent, rChild, rDesktop;
-        POINT pCenter, pStart;
-        INT   nWidth, nHeight;
+        HWND hChildWnd = reinterpret_cast<HWND>(wParam);    // msgbox is "child"
+        HWND hParentWnd = GetInstance()->GetParentWndHandle();
+        RECT rParent{};
+        RECT rChild{};
+        RECT rDesktop{};
 
         // exit CBT hook
         GetInstance()->UnhookCBT();
 
-        if ((hParentWnd != NULL) &&
-            (hChildWnd != NULL) &&
+        if ((hParentWnd != nullptr) &&
+            (hChildWnd != nullptr) &&
             (GetWindowRect(GetDesktopWindow(), &rDesktop) != 0) &&
             (GetWindowRect(hParentWnd, &rParent) != 0) &&
             (GetWindowRect(hChildWnd, &rChild) != 0))
         {
-            // calculate message box dimensions
-            nWidth = (rChild.right - rChild.left);
-            nHeight = (rChild.bottom - rChild.top);
-
-            // calculate parent window center point
-            pCenter.x = rParent.left + ((rParent.right
-                - rParent.left) / 2);
-            pCenter.y = rParent.top + ((rParent.bottom
-                - rParent.top) / 2);
-
-            // calculate message box starting point
-            pStart.x = (pCenter.x - (nWidth / 2));
-            pStart.y = (pCenter.y - (nHeight / 2));
-
-            // adjust if message box is off desktop
-            if (pStart.x < 0) pStart.x = 0;
-            if (pStart.y < 0) pStart.y = 0;
-            if (pStart.x + nWidth > rDesktop.right)
-                pStart.x = rDesktop.right - nWidth;
-            if (pStart.y + nHeight > rDesktop.bottom)
-                pStart.y = rDesktop.bottom - nHeight;
+            const POINT pStart = ComputeCenteredTopLeft(rParent, rChild, rDesktop);
 
             // move message box
-            HWND hWndInsertAfter = NULL;
+            HWND hWndInsertAfter = nullptr;
             if (GetInstance()->IsAlwaysOnTop())
                 hWndInsertAfter = HWND_TOPMOST;
             SetWindowPos(hChildWnd, hWndInsertAfter, pStart.x, pStart.y, 0, 0, SWP_HIDEWINDOW | SWP_NOSIZE);
