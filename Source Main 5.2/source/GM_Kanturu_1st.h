@@ -1,7 +1,7 @@
 //*****************************************************************************
 // File: GM_kanturu_1st.h
 //
-// Desc: Ä­Åõ¸£ 1Â÷(¿ÜºÎ) ¸Ê, ¸ó½ºÅÍ.
+// Desc: Ä­ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½(ï¿½Üºï¿½) ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½.
 //
 // producer: Ahn Sang-Kyu
 //*****************************************************************************
@@ -11,23 +11,23 @@
 
 namespace M37Kanturu1st
 {
-    bool IsKanturu1st();						// Ä­Åõ¸£ ¿ÜºÎ ¸ÊÀÎ°¡?
+    bool IsKanturu1st();						// Ä­ï¿½ï¿½ï¿½ï¿½ ï¿½Üºï¿½ ï¿½ï¿½ï¿½Î°ï¿½?
 
-    // ¿ÀºêÁ§Æ® °ü·Ã
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
     bool CreateKanturu1stObject(OBJECT* pObject);
     bool MoveKanturu1stObject(OBJECT* pObject);
     bool RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel);
-    bool RenderKanturu1stObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);	// ¿ÀºêÁ§Æ® ·»´õ(¸ó½ºÅÍ Æ÷ÇÔ)
-    void RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b);				// ¹ÝÅõ¸í ¿ÀºêÁ§Æ® ³ªÁß ·£´õ.
+    bool RenderKanturu1stObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+    void RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b);				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 
-    // ¸ó½ºÅÍ °ü·Ã
-    CHARACTER* CreateKanturu1stMonster(int iType, int PosX, int PosY, int Key);	// ¸ó½ºÅÍ »ý¼º
-    bool SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o);		// ¸ó½ºÅÍ ÇöÀç ¾×¼Ç ¼¼ÆÃ
-    bool AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* b);	// ¸ó½ºÅÍ °ø°Ý ÀÌÆåÆ®
-    bool MoveKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);		// ¸ó½ºÅÍ È¿°ú ¾÷µ¥ÀÌÆ®
-    void MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);		// ¸ó½ºÅÍ ¹«±âÀÇ ÀÜ»ó Ã³¸®
-    bool RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon);	// ¸ó½ºÅÍ ¿ÀºêÁ§Æ® ·»´õ¸µ
-    bool RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);	// ¸ó½ºÅÍ È¿°ú ·»´õ¸µ
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    CHARACTER* CreateKanturu1stMonster(int iType, int PosX, int PosY, int Key);	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    bool SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o);		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×¼ï¿½ ï¿½ï¿½ï¿½ï¿½
+    bool AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* b);	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
+    bool MoveKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);		// ï¿½ï¿½ï¿½ï¿½ È¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+    void MoveKanturu1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ü»ï¿½ Ã³ï¿½ï¿½
+    bool RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon);	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    bool RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);	// ï¿½ï¿½ï¿½ï¿½ È¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 };
 
 #endif	// _GM_KANTURU_1ST_H_
