@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <cstring>
 #include <cwchar>
+#include <cwctype>
+#include <string>
 
 #include "ZzzCharacter.h"
 #include "ZzzInfomation.h"
@@ -22,7 +24,6 @@
 #include "UIManager.h"
 #include "ZzzBMD.h"
 #include "ZzzEffect.h"
-#include "ZzzInfomation.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "ZzzOpenglUtil.h"
@@ -43,6 +44,91 @@ namespace
     constexpr std::size_t kTooltipBufferCapacity = 100;
     constexpr int kPetCommandCount = AT_PET_COMMAND_END - AT_PET_COMMAND_DEFAULT;
     constexpr int kTooltipLineLimit = 50;
+
+    std::wstring SanitizeWideStringFormat(const wchar_t* format)
+    {
+        if (format == nullptr)
+        {
+            return L"";
+        }
+
+        std::wstring sanitized;
+        sanitized.reserve(std::wcslen(format) + 1);
+
+        const wchar_t* ptr = format;
+        while (*ptr != L'\0')
+        {
+            if (*ptr != L'%')
+            {
+                sanitized.push_back(*ptr++);
+                continue;
+            }
+
+            sanitized.push_back(*ptr++);
+
+            if (*ptr == L'%')
+            {
+                sanitized.push_back(*ptr++);
+                continue;
+            }
+
+            bool hasLengthModifier = false;
+
+            while (*ptr && std::wcschr(L"-+ #0", *ptr))
+            {
+                sanitized.push_back(*ptr++);
+            }
+
+            while (*ptr && std::iswdigit(*ptr))
+            {
+                sanitized.push_back(*ptr++);
+            }
+
+            if (*ptr == L'*')
+            {
+                sanitized.push_back(*ptr++);
+            }
+
+            if (*ptr == L'.')
+            {
+                sanitized.push_back(*ptr++);
+                while (*ptr && std::iswdigit(*ptr))
+                {
+                    sanitized.push_back(*ptr++);
+                }
+                if (*ptr == L'*')
+                {
+                    sanitized.push_back(*ptr++);
+                }
+            }
+
+            if (*ptr && std::wcschr(L"hljztL", *ptr))
+            {
+                hasLengthModifier = true;
+                wchar_t lengthChar = *ptr;
+                sanitized.push_back(lengthChar);
+                ++ptr;
+
+                if ((lengthChar == L'h' && *ptr == L'h') || (lengthChar == L'l' && *ptr == L'l'))
+                {
+                    sanitized.push_back(*ptr);
+                    ++ptr;
+                }
+            }
+
+            if ((*ptr == L's' || *ptr == L'S') && !hasLengthModifier)
+            {
+                sanitized.push_back(L'l');
+            }
+
+            if (*ptr != L'\0')
+            {
+                sanitized.push_back(*ptr++);
+            }
+        }
+
+        return sanitized;
+    }
 
     std::uint32_t ComposeItemIndex(int sx, int sy)
     {
@@ -199,7 +285,8 @@ namespace giPetManager
 
     bool SendPetCommand(CHARACTER* c, int Index)
     {
-        if (!ResolvePetSystem(c))
+        auto* petSystem = ResolvePetSystem(c);
+        if (petSystem == nullptr)
         {
             return false;
         }
@@ -210,12 +297,6 @@ namespace giPetManager
         }
 
         if (Index < AT_PET_COMMAND_DEFAULT || Index >= AT_PET_COMMAND_END)
-        {
-            return false;
-        }
-
-        auto* petSystem = ResolvePetSystem(c);
-        if (petSystem == nullptr)
         {
             return false;
         }
@@ -490,7 +571,7 @@ namespace giPetManager
     {
         std::uint32_t gold = 0;
 
-        if (pPetInfo->m_dwPetType == -1)
+        if (pPetInfo->m_dwPetType == PET_TYPE_NONE)
         {
             return gold;
         }
@@ -522,6 +603,8 @@ namespace giPetManager
         int SkipNum = 0;
         int RequireLevel = 0;
         int RequireCharisma = 0;
+        const std::wstring priceFormat = SanitizeWideStringFormat(GlobalText[63]);
+        const std::wstring ownershipFormat = SanitizeWideStringFormat(GlobalText[61]);
 
         auto appendLine = [&](int color, bool bold, bool countForHeight, const wchar_t* format, auto... args)
         {
@@ -552,7 +635,7 @@ namespace giPetManager
             gold = (gold / 100u) * 100u;
 
             ConvertGold(gold, textBuffer);
-            appendLine(TEXT_COLOR_WHITE, true, false, GlobalText[63], textBuffer);
+            appendLine(TEXT_COLOR_WHITE, true, false, priceFormat.c_str(), textBuffer);
             appendEmptyLine();
         }
         else if ((iInvenType == SEASON3B::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP))
@@ -579,11 +662,11 @@ namespace giPetManager
                     priceColor = TEXT_COLOR_GREEN;
                 }
 
-                appendLine(priceColor, true, false, GlobalText[63], textBuffer);
+                appendLine(priceColor, true, false, priceFormat.c_str(), textBuffer);
                 appendEmptyLine();
 
                 const auto heroGold = CharacterMachine->Gold;
-                if ((static_cast<int>(heroGold) < price) && (g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE))
+                if ((static_cast<std::int64_t>(heroGold) < static_cast<std::int64_t>(price)) && (g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE))
                 {
                     appendLine(TEXT_COLOR_RED, true, false, GlobalText[423]);
                     appendEmptyLine();
@@ -648,7 +731,7 @@ namespace giPetManager
         appendEmptyLine();
 
         const int ownershipColor = (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD) ? TEXT_COLOR_WHITE : TEXT_COLOR_DARKRED;
-        appendLine(ownershipColor, false, true, GlobalText[61], GlobalText[24]);
+        appendLine(ownershipColor, false, true, ownershipFormat.c_str(), GlobalText[24]);
 
         for (int i = 0; i < pItem->SpecialNum; ++i)
         {
