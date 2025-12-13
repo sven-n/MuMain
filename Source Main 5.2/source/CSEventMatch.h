@@ -46,8 +46,8 @@ public:
         , m_iKillMonster(-1)
         , m_iNumResult(0)
         , m_iMyResult(0)
+        , m_MatchResult{}
     {
-        memset(m_MatchResult, 0, sizeof(MatchResult) * 11);
     }
     virtual ~CSBaseMatch() {};
 

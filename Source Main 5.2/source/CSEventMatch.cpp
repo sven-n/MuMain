@@ -27,7 +27,7 @@ constexpr std::chrono::seconds kMatchCountdownDuration{30};
 template <std::size_t N>
 void ClearWideBuffer(wchar_t (&buffer)[N])
 {
-    buffer[0] = L'\0';
+    std::fill(std::begin(buffer), std::end(buffer), L'\0');
 }
 
 template <std::size_t N, typename... Args>
