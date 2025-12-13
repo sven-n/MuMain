@@ -12,6 +12,8 @@
 #include "CKANTURUDirection.h"
 #include "MapManager.h"
 
+#include <cstdint>
+
 CKanturuDirection::CKanturuDirection()
 {
     m_iKanturuState = 0;
@@ -32,47 +34,49 @@ void CKanturuDirection::Init()
     m_bMayaAppear = false;
 }
 
-bool CKanturuDirection::IsKanturuDirection()
+bool CKanturuDirection::IsKanturuDirection() const
 {
-    if (m_bKanturuDirection)
+    return m_bKanturuDirection;
+}
+
+bool CKanturuDirection::IsMayaScene() const
+{
+    if (!IsKanturuWorldActive())
+        return false;
+
+    switch (m_iKanturuState)
+    {
+    case KANTURU_STATE_NIGHTMARE_BATTLE:
+    case KANTURU_STATE_TOWER:
+    case KANTURU_STATE_END:
+        return false;
+    default:
         return true;
-
-    return false;
-}
-
-bool CKanturuDirection::IsMayaScene()
-{
-    if (gMapManager.WorldActive == WD_39KANTURU_3RD)
-    {
-        if (m_iKanturuState == KANTURU_STATE_NIGHTMARE_BATTLE || m_iKanturuState == KANTURU_STATE_TOWER || m_iKanturuState == KANTURU_STATE_END)
-            return false;
-        else
-            return true;
     }
-    else
-        return false;
 }
 
-bool CKanturuDirection::IsKanturu3rdTimer()
+bool CKanturuDirection::IsKanturu3rdTimer() const
 {
-    if (gMapManager.WorldActive == WD_39KANTURU_3RD)
-    {
-        if (m_iMayaState == KANTURU_MAYA_DIRECTION_MONSTER1 || m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA1)
-            return true;
-        else if (m_iMayaState == KANTURU_MAYA_DIRECTION_MONSTER2 || m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA2)
-            return true;
-        else if (m_iMayaState == KANTURU_MAYA_DIRECTION_MONSTER3 || m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA3)
-            return true;
-        else if (m_iNightmareState == KANTURU_NIGHTMARE_DIRECTION_BATTLE)
-            return true;
-        else
-            return false;
-    }
-    else
+    if (!IsKanturuWorldActive())
         return false;
+
+    switch (m_iMayaState)
+    {
+    case KANTURU_MAYA_DIRECTION_MONSTER1:
+    case KANTURU_MAYA_DIRECTION_MAYA1:
+    case KANTURU_MAYA_DIRECTION_MONSTER2:
+    case KANTURU_MAYA_DIRECTION_MAYA2:
+    case KANTURU_MAYA_DIRECTION_MONSTER3:
+    case KANTURU_MAYA_DIRECTION_MAYA3:
+        return true;
+    default:
+        break;
+    }
+
+    return (m_iNightmareState == KANTURU_NIGHTMARE_DIRECTION_BATTLE);
 }
 
-void CKanturuDirection::GetKanturuAllState(BYTE State, BYTE DetailState)
+void CKanturuDirection::GetKanturuAllState(std::uint8_t State, std::uint8_t DetailState)
 {
     m_iKanturuState = State;
 
@@ -95,68 +99,59 @@ void CKanturuDirection::GetKanturuAllState(BYTE State, BYTE DetailState)
     }
 }
 
-void CKanturuDirection::GetKanturuMayaState(BYTE DetailState)
+void CKanturuDirection::GetKanturuMayaState(std::uint8_t DetailState)
 {
     m_iMayaState = DetailState;
 
-    if (gMapManager.WorldActive != WD_39KANTURU_3RD)
+    if (!IsKanturuWorldActive())
         return;
 
     switch (m_iMayaState)
     {
     case KANTURU_MAYA_DIRECTION_NOTIFY:
-        g_Direction.CloseAllWindows();
-        g_Direction.m_CameraLevel = 5;
-        if (g_Direction.m_fCameraViewFar <= 1200.0f)
-            g_Direction.m_fCameraViewFar += 10.0f;
-        if (!m_bDirectionEnd && !m_bKanturuDirection)
-            m_bKanturuDirection = true;
+        PrepareCameraFocus();
+        ActivateDirectionSequence();
         break;
     case KANTURU_MAYA_DIRECTION_ENDCYCLE_MAYA3:
-        g_Direction.CloseAllWindows();
-        g_Direction.m_CameraLevel = 5;
-        if (g_Direction.m_fCameraViewFar <= 1200.0f)
-            g_Direction.m_fCameraViewFar += 10.0f;
-        if (!m_bDirectionEnd && !m_bKanturuDirection)
-            m_bKanturuDirection = true;
+        PrepareCameraFocus();
+        ActivateDirectionSequence();
         break;
     default:
-        g_Direction.Init();
-        Init();
+        ResetDirectionState();
         break;
     }
 }
 
-void CKanturuDirection::GetKanturuNightmareState(BYTE DetailState)
+void CKanturuDirection::GetKanturuNightmareState(std::uint8_t DetailState)
 {
     m_iNightmareState = DetailState;
 
-    if (gMapManager.WorldActive != WD_39KANTURU_3RD)
+    if (!IsKanturuWorldActive())
         return;
 
     switch (m_iNightmareState)
     {
     case KANTURU_NIGHTMARE_DIRECTION_NIGHTMARE:
-        g_Direction.CloseAllWindows();
-        g_Direction.m_CameraLevel = 5;
-        if (!m_bDirectionEnd && !m_bKanturuDirection)
-            m_bKanturuDirection = true;
+        PrepareCameraFocus(false);
+        ActivateDirectionSequence();
         break;
     case KANTURU_NIGHTMARE_DIRECTION_END:
         g_Direction.m_CameraLevel = 5;
-        if (!m_bDirectionEnd && !m_bKanturuDirection)
-            m_bKanturuDirection = true;
+        ActivateDirectionSequence();
+        g_Direction.DeleteMonster();
+        ResetDirectionState();
+        break;
     default:
         g_Direction.DeleteMonster();
-        g_Direction.Init();
-        Init();
+        ResetDirectionState();
         break;
     }
 }
 
 void CKanturuDirection::KanturuAllDirection()
 {
-    if (m_bDirectionEnd || gMapManager.WorldActive != WD_39KANTURU_3RD) return;
+    if (m_bDirectionEnd || !IsKanturuWorldActive())
+        return;
 
     if (m_iMayaState == KANTURU_MAYA_DIRECTION_END)
         g_Direction.m_bDownHero = true;
@@ -195,15 +190,14 @@ void CKanturuDirection::Move1stDirection()
 
     switch (g_Direction.m_iTimeSchedule)
     {
-    case 0:		Direction1st0();		break;
-    case 1:		Direction1st1();		break;
+    case 0:        Direction1st0();        break;
+    case 1:        Direction1st1();        break;
     }
 }
 
 void CKanturuDirection::Direction1st0()
 {
-    g_Direction.SetNextDirectionPosition(196, 85, 0, 100.0f);
-    g_Direction.m_iTimeSchedule--;
+    ApplyDirectionTarget(DirectionTarget{ 196, 85, 0, 100.0f });
 }
 
 void CKanturuDirection::Direction1st1()
@@ -239,16 +233,15 @@ void CKanturuDirection::Move2ndDirection()
 
     switch (g_Direction.m_iTimeSchedule)
     {
-    case 0:		Direction2nd0();		break;
-    case 1:		Direction2nd1();		break;
-    case 2:		Direction2nd2();		break;
+    case 0:        Direction2nd0();        break;
+    case 1:        Direction2nd1();        break;
+    case 2:        Direction2nd2();        break;
     }
 }
 
 void CKanturuDirection::Direction2nd0()
 {
-    g_Direction.SetNextDirectionPosition(196, 85, 0, 100.0f);
-    g_Direction.m_iTimeSchedule--;
+    ApplyDirectionTarget(DirectionTarget{ 196, 85, 0, 100.0f });
 }
 
 void CKanturuDirection::Direction2nd1()
@@ -284,7 +277,7 @@ void CKanturuDirection::Direction2nd2()
     }
 }
 
-bool CKanturuDirection::GetMayaExplotion()
+bool CKanturuDirection::GetMayaExplotion() const
 {
     return m_bMayaDie;
 }
@@ -294,7 +287,7 @@ void CKanturuDirection::SetMayaExplotion(bool MayaDie)
     m_bMayaDie = MayaDie;
 }
 
-bool CKanturuDirection::GetMayaAppear()
+bool CKanturuDirection::GetMayaAppear() const
 {
     return m_bMayaAppear;
 }
@@ -323,15 +316,14 @@ void CKanturuDirection::Move3rdDirection()
 
     switch (g_Direction.m_iTimeSchedule)
     {
-    case 0:		Direction3rd0();		break;
-    case 1:		Direction3rd1();		break;
+    case 0:        Direction3rd0();        break;
+    case 1:        Direction3rd1();        break;
     }
 }
 
 void CKanturuDirection::Direction3rd0()
 {
-    g_Direction.SetNextDirectionPosition(80, 142, 0, 100.0f);
-    g_Direction.m_iTimeSchedule--;
+    ApplyDirectionTarget(DirectionTarget{ 80, 142, 0, 100.0f });
 }
 
 void CKanturuDirection::Direction3rd1()
@@ -358,17 +350,47 @@ void CKanturuDirection::Move4thDirection()
 
     switch (g_Direction.m_iTimeSchedule)
     {
-    case 0:		Direction4th0();		break;
-    case 1:		Direction4th1();		break;
+    case 0:        Direction4th0();        break;
+    case 1:        Direction4th1();        break;
     }
 }
 
 void CKanturuDirection::Direction4th0()
 {
-    g_Direction.SetNextDirectionPosition(113, 232, 0, 300.0f);
-    g_Direction.m_iTimeSchedule--;
+    ApplyDirectionTarget(DirectionTarget{ 113, 232, 0, 300.0f });
 }
 
 void CKanturuDirection::Direction4th1()
 {
+}
+
+bool CKanturuDirection::IsKanturuWorldActive() const
+{
+    return gMapManager.WorldActive == WD_39KANTURU_3RD;
+}
+
+void CKanturuDirection::PrepareCameraFocus(bool adjustViewDistance)
+{
+    g_Direction.CloseAllWindows();
+    g_Direction.m_CameraLevel = 5;
+    if (adjustViewDistance && g_Direction.m_fCameraViewFar <= 1200.0f)
+        g_Direction.m_fCameraViewFar += 10.0f;
+}
+
+void CKanturuDirection::ActivateDirectionSequence()
+{
+    if (!m_bDirectionEnd && !m_bKanturuDirection)
+        m_bKanturuDirection = true;
+}
+
+void CKanturuDirection::ResetDirectionState()
+{
+    g_Direction.Init();
+    Init();
+}
+
+void CKanturuDirection::ApplyDirectionTarget(const DirectionTarget& target)
+{
+    g_Direction.SetNextDirectionPosition(target.x, target.y, target.z, target.distance);
+    g_Direction.m_iTimeSchedule--;
 }
