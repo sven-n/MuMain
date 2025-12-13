@@ -41,7 +41,6 @@ class TGlobalText
             }
             m_strKeyCode.resize(9);
         }
-        ~CKeyCode() { }
 
         std::uint16_t GetTypeCode() const
         {
@@ -136,7 +135,6 @@ public:
                 else
                 {
                     auto* decrypted = reinterpret_cast<char*>(stringBuffer.data());
-                    decrypted[GTStringHeader.dwSizeOfString] = '\0';
                     m_StringSet.Add(GTStringHeader.dwKey, decrypted);
                 }
             }
@@ -302,6 +300,18 @@ protected:
                     return false;
                 }
                 codepoint = (codepoint << 6) | (cc & 0x3F);
+            }
+
+            if ((codepoint >= 0xD800 && codepoint <= 0xDFFF) || codepoint > 0x10FFFF)
+            {
+                return false;
+            }
+
+            if ((extra == 1 && codepoint < 0x80) ||
+                (extra == 2 && codepoint < 0x800) ||
+                (extra == 3 && codepoint < 0x10000))
+            {
+                return false;
             }
             if constexpr (sizeof(wchar_t) == 2)
             {
