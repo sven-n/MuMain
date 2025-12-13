@@ -37,11 +37,6 @@ namespace
 void CSWaterTerrain::Init(void)
 {
     Vector(1.f, -1.f, 1.f, m_vLightVector);
-    for (auto& grid : m_iWaveHeight)
-    {
-        grid.fill(0);
-    }
-    m_lastAutoWaveTime = 0.0;
 }
 
 void CSWaterTerrain::Update(void)
@@ -210,8 +205,8 @@ void    CSWaterTerrain::CreateTerrain(int x, int y)
             m_Normals[i][0] *= invCount;
             m_Normals[i][1] *= invCount;
             m_Normals[i][2] *= invCount;
+            VectorNormalize(m_Normals[i]);
         }
-        VectorNormalize(m_Normals[i]);
     }
 }
 
@@ -230,13 +225,13 @@ void CSWaterTerrain::addSineWave(int x, int y, int radiusX, int radiusY, int hei
     {
         const int minX = 1 + radiusX;
         const int maxX = WATER_TERRAIN_SIZE - radiusX - 1;
-        x = RandomInt(minX, std::max(minX, maxX));
+        x = RandomInt(minX, std::max<int>(minX, maxX));
     }
     if (y < 0)
     {
         const int minY = 1 + radiusY;
         const int maxY = WATER_TERRAIN_SIZE - radiusY - 1;
-        y = RandomInt(minY, std::max(minY, maxY));
+        y = RandomInt(minY, std::max<int>(minY, maxY));
     }
 
     const int radsquare = (radiusX * radiusY);
@@ -378,7 +373,7 @@ void CSWaterTerrain::RenderWaterAlphaBitmap(int Texture, float xf, float yf, flo
     int   mxi = (int)(mxf);
     int   myi = (int)(myf);
 
-    float sizeMax = std::max(SizeX, SizeY);
+    float sizeMax = std::max<float>(SizeX, SizeY);
     float TexU = (((float)mxi - mxf) + 0.5f * sizeMax);
     float TexV = (((float)myi - myf) + 0.5f * sizeMax);
     float TexScaleU = 1.f / sizeMax;
