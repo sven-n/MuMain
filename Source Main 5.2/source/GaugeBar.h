@@ -54,7 +54,7 @@ public:
     void SetAlpha(std::uint8_t dwAlpha);
     void SetColor(std::uint8_t byRed, std::uint8_t byGreen, std::uint8_t byBlue);
     void Show(bool bShow = true);
-    bool IsShow() const { return const_cast<CSprite&>(m_sprGauge).IsShow() != FALSE; };
+    bool IsShow() const { return m_sprGauge.IsShow(); };
     void Render();
 
 private:
