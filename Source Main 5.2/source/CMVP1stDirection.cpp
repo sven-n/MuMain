@@ -12,6 +12,100 @@
 #include "CMVP1stDirection.h"
 #include "MapManager.h"
 
+#include <array>
+#include <cstdint>
+
+namespace
+{
+    constexpr int kCrywolfNotifyDelayMs = 5000;
+    constexpr int kCrywolfBeginCameraSpeedFast = 300;
+    constexpr int kCrywolfBeginCameraSpeedSlow = 40;
+    constexpr int kCrywolfSecondPhaseCameraSpeed = 300;
+    constexpr int kCrywolfThirdPhaseCameraSpeed = 300;
+    constexpr int kCrywolfFourthPhaseCameraSpeed = 40;
+
+    struct CameraTarget
+    {
+        int x;
+        int y;
+        int z;
+        float speed;
+    };
+
+    struct MonsterSpawnCommand
+    {
+        EMonsterType type;
+        int x;
+        int y;
+        float angle;
+        bool nextCheck;
+        bool summonAnimation;
+        float animationSpeed;
+    };
+
+    struct MonsterMoveCommand
+    {
+        int index;
+        int x;
+        int y;
+        float angle;
+        int speed;
+    };
+
+    constexpr CameraTarget kBeginDirection0Target{113, 232, 0, static_cast<float>(kCrywolfBeginCameraSpeedFast)};
+    constexpr CameraTarget kBeginDirection1Fallback{114, 220, 0, static_cast<float>(kCrywolfBeginCameraSpeedSlow)};
+    constexpr CameraTarget kBeginDirection2Fallback{114, 160, 0, static_cast<float>(kCrywolfSecondPhaseCameraSpeed)};
+    constexpr CameraTarget kBeginDirection3Fallback{121, 75, 0, static_cast<float>(kCrywolfThirdPhaseCameraSpeed)}; 
+    constexpr CameraTarget kBeginDirection4Fallback{121, 87, 0, static_cast<float>(kCrywolfFourthPhaseCameraSpeed)}; 
+
+    constexpr std::array<MonsterSpawnCommand, 13> kBeginDirection2WaveOne = {
+        MonsterSpawnCommand{MONSTER_BALLISTA, 110, 240, 0.0f, false, false, -1.0f},
+        {MONSTER_BALLISTA, 114, 240, 0.0f, false, false, -1.0f},
+        {MONSTER_BALLISTA, 118, 240, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 110, 242, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 112, 242, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 114, 242, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 116, 242, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 118, 242, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 110, 244, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 112, 244, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 114, 244, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 116, 244, 0.0f, false, false, -1.0f},
+        {MONSTER_SORAM, 118, 244, 0.0f, true, true, -1.0f},
+    };
+
+    constexpr std::array<MonsterMoveCommand, 28> kBeginDirection2MoveCommands = {
+        MonsterMoveCommand{0, 114, 222, 0.0f, 9},
+        {1, 110, 222, 0.0f, 12},
+        {2, 118, 222, 0.0f, 12},
+        {3, 107, 219, 0.0f, 12},
+        {4, 108, 220, 0.0f, 12},
+        {5, 110, 220, 0.0f, 12},
+        {6, 111, 219, 0.0f, 12},
+        {7, 116, 219, 0.0f, 12},
+        {8, 117, 220, 0.0f, 12},
+        {9, 119, 220, 0.0f, 12},
+        {10, 120, 219, 0.0f, 12},
+        {11, 110, 217, 0.0f, 12},
+        {12, 112, 217, 0.0f, 12},
+        {13, 114, 217, 0.0f, 12},
+        {14, 116, 217, 0.0f, 12},
+        {15, 110, 227, 0.0f, 12},
+        {16, 114, 227, 0.0f, 12},
+        {17, 118, 227, 0.0f, 12},
+        {18, 110, 229, 0.0f, 12},
+        {19, 112, 229, 0.0f, 12},
+        {20, 114, 229, 0.0f, 12},
+        {21, 116, 229, 0.0f, 12},
+        {22, 118, 229, 0.0f, 12},
+        {23, 110, 231, 0.0f, 12},
+        {24, 112, 231, 0.0f, 12},
+        {25, 114, 231, 0.0f, 12},
+        {26, 116, 231, 0.0f, 12},
+        {27, 118, 231, 0.0f, 12},
+    };
+}
+
 CMVP1STDirection::CMVP1STDirection()
 {
     Init();
@@ -23,41 +117,36 @@ CMVP1STDirection::~CMVP1STDirection()
 
 void CMVP1STDirection::Init()
 {
-    //g_Direction.Init();
     m_bTimerCheck = true;
     m_iCryWolfState = 0;
 }
 
-void CMVP1STDirection::GetCryWolfState(BYTE CryWolfState)
+void CMVP1STDirection::GetCryWolfState(std::uint8_t CryWolfState)
 {
     m_iCryWolfState = CryWolfState;
 }
 
-bool CMVP1STDirection::IsCryWolfDirection()
+bool CMVP1STDirection::IsCryWolfDirection() const
 {
-    if (!g_Direction.m_bOrderExit && !m_bTimerCheck && m_iCryWolfState == CRYWOLF_STATE_NOTIFY_2)
-        return true;
-
-    return false;
+    return IsSequenceReady() && !m_bTimerCheck && m_iCryWolfState == CRYWOLF_STATE_NOTIFY_2;
 }
 
 void CMVP1STDirection::IsCryWolfDirectionTimer()
 {
-    if (m_iCryWolfState == CRYWOLF_STATE_NOTIFY_2 && m_bTimerCheck && GetTimeCheck(5000))
+    if (m_iCryWolfState == CRYWOLF_STATE_NOTIFY_2 && m_bTimerCheck && GetTimeCheck(kCrywolfNotifyDelayMs))
     {
         m_bTimerCheck = false;
     }
 
     if (m_iCryWolfState == CRYWOLF_STATE_READY)
     {
-        g_Direction.DeleteMonster();
-        Init();
+        ResetSequence();
     }
 }
 
 void CMVP1STDirection::CryWolfDirection()
 {
-    if (gMapManager.WorldActive != WD_34CRYWOLF_1ST)
+    if (!IsCrywolfWorldActive())
         return;
 
     IsCryWolfDirectionTimer();
@@ -72,8 +161,7 @@ void CMVP1STDirection::CryWolfDirection()
         MoveBeginDirection();
         break;
     default:
-        g_Direction.DeleteMonster();
-        Init();
+        ResetSequence();
         break;
     }
 }
@@ -95,7 +183,7 @@ void CMVP1STDirection::MoveBeginDirection()
 
 void CMVP1STDirection::BeginDirection0()
 {
-    g_Direction.SetNextDirectionPosition(113, 232, 0, 300.0f);
+    QueueCameraMove(kBeginDirection0Target.x, kBeginDirection0Target.y, kBeginDirection0Target.z, kBeginDirection0Target.speed);
     g_Direction.m_iTimeSchedule--;
 }
 
@@ -171,7 +259,7 @@ void CMVP1STDirection::BeginDirection1()
     }
     else
     {
-        g_Direction.SetNextDirectionPosition(114, 220, 0, 40.0f);
+        QueueCameraMove(kBeginDirection1Fallback.x, kBeginDirection1Fallback.y, kBeginDirection1Fallback.z, kBeginDirection1Fallback.speed);
     }
 }
 
@@ -181,19 +269,17 @@ void CMVP1STDirection::BeginDirection2()
     {
         if (g_Direction.m_iCheckTime == 0)
         {
-            g_Direction.SummonCreateMonster(MONSTER_BALLISTA, 110, 240, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_BALLISTA, 114, 240, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_BALLISTA, 118, 240, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 110, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 112, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 114, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 116, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 118, 242, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 110, 244, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 112, 244, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 114, 244, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 116, 244, 0, false, false);
-            g_Direction.SummonCreateMonster(MONSTER_SORAM, 118, 244, 0);
+            for (const auto& command : kBeginDirection2WaveOne)
+            {
+                g_Direction.SummonCreateMonster(
+                    command.type,
+                    command.x,
+                    command.y,
+                    command.angle,
+                    command.nextCheck,
+                    command.summonAnimation,
+                    command.animationSpeed);
+            }
         }
         else if (g_Direction.m_iCheckTime == 1)
         {
@@ -201,42 +287,24 @@ void CMVP1STDirection::BeginDirection2()
         }
         else if (g_Direction.m_iCheckTime == 2)
         {
-            bool bSuccess[28];
-            int iMovingMonCount = sizeof(bSuccess);
-
-            bSuccess[0] = g_Direction.MoveCreatedMonster(0, 114, 222, 0, 9);
-            bSuccess[1] = g_Direction.MoveCreatedMonster(1, 110, 222, 0, 12);
-            bSuccess[2] = g_Direction.MoveCreatedMonster(2, 118, 222, 0, 12);
-            bSuccess[3] = g_Direction.MoveCreatedMonster(3, 107, 219, 0, 12);
-            bSuccess[4] = g_Direction.MoveCreatedMonster(4, 108, 220, 0, 12);
-            bSuccess[5] = g_Direction.MoveCreatedMonster(5, 110, 220, 0, 12);
-            bSuccess[6] = g_Direction.MoveCreatedMonster(6, 111, 219, 0, 12);
-            bSuccess[7] = g_Direction.MoveCreatedMonster(7, 116, 219, 0, 12);
-            bSuccess[8] = g_Direction.MoveCreatedMonster(8, 117, 220, 0, 12);
-            bSuccess[9] = g_Direction.MoveCreatedMonster(9, 119, 220, 0, 12);
-            bSuccess[10] = g_Direction.MoveCreatedMonster(10, 120, 219, 0, 12);
-            bSuccess[11] = g_Direction.MoveCreatedMonster(11, 110, 217, 0, 12);
-            bSuccess[12] = g_Direction.MoveCreatedMonster(12, 112, 217, 0, 12);
-            bSuccess[13] = g_Direction.MoveCreatedMonster(13, 114, 217, 0, 12);
-            bSuccess[14] = g_Direction.MoveCreatedMonster(14, 116, 217, 0, 12);
-            bSuccess[15] = g_Direction.MoveCreatedMonster(15, 110, 227, 0, 12);
-            bSuccess[16] = g_Direction.MoveCreatedMonster(16, 114, 227, 0, 12);
-            bSuccess[17] = g_Direction.MoveCreatedMonster(17, 118, 227, 0, 12);
-            bSuccess[18] = g_Direction.MoveCreatedMonster(18, 110, 229, 0, 12);
-            bSuccess[19] = g_Direction.MoveCreatedMonster(19, 112, 229, 0, 12);
-            bSuccess[20] = g_Direction.MoveCreatedMonster(20, 114, 229, 0, 12);
-            bSuccess[21] = g_Direction.MoveCreatedMonster(21, 116, 229, 0, 12);
-            bSuccess[22] = g_Direction.MoveCreatedMonster(22, 118, 229, 0, 12);
-            bSuccess[23] = g_Direction.MoveCreatedMonster(23, 110, 231, 0, 12);
-            bSuccess[24] = g_Direction.MoveCreatedMonster(24, 112, 231, 0, 12);
-            bSuccess[25] = g_Direction.MoveCreatedMonster(25, 114, 231, 0, 12);
-            bSuccess[26] = g_Direction.MoveCreatedMonster(26, 116, 231, 0, 12);
-            bSuccess[27] = g_Direction.MoveCreatedMonster(27, 118, 231, 0, 12);
-
-            for (int i = 0; i < iMovingMonCount; i++)
+            bool allMovesSucceeded = true;
+            for (const auto& command : kBeginDirection2MoveCommands)
             {
-                if (!bSuccess[i]) break;
-                if (i == iMovingMonCount - 1) g_Direction.m_iCheckTime++;
+                if (!g_Direction.MoveCreatedMonster(
+                        command.index,
+                        command.x,
+                        command.y,
+                        command.angle,
+                        command.speed))
+                {
+                    allMovesSucceeded = false;
+                    break;
+                }
+            }
+
+            if (allMovesSucceeded)
+            {
+                g_Direction.m_iCheckTime++;
             }
         }
         else if (g_Direction.m_iCheckTime == 3) g_Direction.GetTimeCheck(1000);
@@ -247,7 +315,7 @@ void CMVP1STDirection::BeginDirection2()
         else g_Direction.m_bAction = false;
     }
     else
-        g_Direction.SetNextDirectionPosition(114, 160, 0, 300.0f);
+        QueueCameraMove(kBeginDirection2Fallback.x, kBeginDirection2Fallback.y, kBeginDirection2Fallback.z, kBeginDirection2Fallback.speed);
 }
 
 void CMVP1STDirection::BeginDirection3()
@@ -300,7 +368,7 @@ void CMVP1STDirection::BeginDirection3()
         else g_Direction.m_bAction = false;
     }
     else
-        g_Direction.SetNextDirectionPosition(121, 75, 0, 300.0f);
+        QueueCameraMove(kBeginDirection3Fallback.x, kBeginDirection3Fallback.y, kBeginDirection3Fallback.z, kBeginDirection3Fallback.speed);
 }
 
 void CMVP1STDirection::BeginDirection4()
@@ -311,7 +379,7 @@ void CMVP1STDirection::BeginDirection4()
         else g_Direction.m_bAction = false;
     }
     else
-        g_Direction.SetNextDirectionPosition(121, 87, 0, 40.0f);
+        QueueCameraMove(kBeginDirection4Fallback.x, kBeginDirection4Fallback.y, kBeginDirection4Fallback.z, kBeginDirection4Fallback.speed);
 }
 
 void CMVP1STDirection::BeginDirection5()
@@ -332,4 +400,26 @@ void CMVP1STDirection::BeginDirection5()
         g_Direction.DeleteMonster();
         g_Direction.m_bOrderExit = true;
     }
+}
+
+bool CMVP1STDirection::IsCrywolfWorldActive() const
+{
+    return gMapManager.WorldActive == WD_34CRYWOLF_1ST;
+}
+
+bool CMVP1STDirection::IsSequenceReady() const
+{
+    return !g_Direction.m_bOrderExit;
+}
+
+void CMVP1STDirection::ResetSequence()
+{
+    g_Direction.DeleteMonster();
+    g_Direction.m_bOrderExit = false;
+    Init();
+}
+
+void CMVP1STDirection::QueueCameraMove(int x, int y, int z, float speed)
+{
+    g_Direction.SetNextDirectionPosition(x, y, z, speed);
 }
