@@ -48,14 +48,14 @@ namespace
     short IncreaseAlpha(short alpha, T ratio)
     {
         const double delta = 255.0 * std::clamp(static_cast<double>(ratio), 0.0, 1.0);
-        return static_cast<short>(std::min(255.0, static_cast<double>(alpha) + delta));
+        return static_cast<short>(std::min<double>(255.0, static_cast<double>(alpha) + delta));
     }
 
     template<typename T>
     short DecreaseAlpha(short alpha, T ratio)
     {
         const double delta = 255.0 * std::clamp(static_cast<double>(ratio), 0.0, 1.0);
-        return static_cast<short>(std::max(0.0, static_cast<double>(alpha) - delta));
+        return static_cast<short>(std::max<double>(0.0, static_cast<double>(alpha) - delta));
     }
 
     template<std::size_t N>
