@@ -121,8 +121,8 @@ int CGaugeBar::GetHeight() const
 
 void CGaugeBar::SetValue(std::uint32_t dwNow, std::uint32_t dwTotal)
 {
-    const std::uint32_t safeTotal = std::max(dwTotal, 1u);
-    const std::uint32_t clampedNow = std::min(dwNow, safeTotal);
+    const std::uint32_t safeTotal = std::max<std::uint32_t>(dwTotal, 1u);
+    const std::uint32_t clampedNow = std::min<std::uint32_t>(dwNow, safeTotal);
     const int gaugeWidth = m_gaugeRect.right - m_gaugeRect.left;
 
     int nNowSize = static_cast<int>((static_cast<std::uint64_t>(clampedNow) * gaugeWidth) / safeTotal);
