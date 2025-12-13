@@ -2,21 +2,12 @@
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
-#include <algorithm>
-#include <limits>
-
 #include "GambleSystem.h"
 
 namespace
 {
 constexpr std::int32_t kDefaultItemIndex = 0;
 constexpr std::uint32_t kDefaultItemCost = 0;
-
-bool IsValidCost(std::uint32_t cost) noexcept
-{
-    constexpr std::uint32_t kMaxAffordableCost = std::numeric_limits<std::uint32_t>::max();
-    return cost <= kMaxAffordableCost;
-}
 
 bool IsValidItemIndex(std::int32_t index) noexcept
 {
@@ -30,10 +21,7 @@ GambleSystem& GambleSystem::Instance()
     return s_GambleSys;
 }
 
-GambleSystem::GambleSystem()
-{
-    Init();
-}
+GambleSystem::GambleSystem() = default;
 
 void GambleSystem::Init()
 {
@@ -45,7 +33,7 @@ void GambleSystem::Init()
 
 void GambleSystem::SetBuyItemInfo(const std::int32_t index, const std::uint32_t cost)
 {
-    if (IsValidItemIndex(index) && IsValidCost(cost))
+    if (IsValidItemIndex(index))
     {
         m_itemInfo.ItemIndex = index;
         m_itemInfo.ItemCost = cost;

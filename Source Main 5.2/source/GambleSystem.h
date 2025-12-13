@@ -4,18 +4,34 @@
 
 #include <cstdint>
 
-struct BUYITEMINFO
+struct BuyItemInfo
 {
-    std::int32_t ItemIndex{0};
-    std::uint32_t ItemCost{0};
+    union
+    {
+        struct
+        {
+            std::int32_t itemIndex;
+            std::uint32_t itemCost;
+        };
+        struct
+        {
+            std::int32_t ItemIndex;
+            std::uint32_t ItemCost;
+        };
+    };
+
+    constexpr BuyItemInfo() noexcept
+        : itemIndex(0)
+        , itemCost(0)
+    {
+    }
 };
-using LPBUYITEMINFO = BUYITEMINFO*;
+using BuyItemInfoPtr = BuyItemInfo*;
+using LPBUYITEMINFO = BuyItemInfoPtr; // Legacy alias; prefer BuyItemInfoPtr going forward.
 
 class GambleSystem final
 {
 public:
-    using BuyItemInfo = BUYITEMINFO;
-
     static GambleSystem& Instance();
 
     GambleSystem(const GambleSystem&) = delete;
@@ -31,7 +47,6 @@ public:
     bool IsGambleShop() const { return m_isGambleShop; }
 
     void SetBuyItemInfo(std::int32_t index, std::uint32_t cost);
-    LPBUYITEMINFO GetBuyItemInfo() { return &m_itemInfo; }
     const BuyItemInfo& GetBuyItemInfoConst() const { return m_itemInfo; }
 
     void SetBuyItemPosition(std::uint8_t position) { m_buyItemPosition = position; }
