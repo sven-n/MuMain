@@ -1,47 +1,52 @@
 //////////////////////////////////////////////////////////////////////////
 //  CSMapServer.h
 //////////////////////////////////////////////////////////////////////////
-#ifndef __CS_MAP_SERVER_H__
-#define __CS_MAP_SERVER_H__
+#pragma once
+
+#include <cstdint>
+#include <cstddef>
+#include <array>
+#include <string>
 
 #include "Singleton.h"
-typedef struct
+
+struct MapServerInfo
 {
-    char            m_szMapSvrIpAddress[16];
-    WORD            m_wMapSvrPort;
-    WORD            m_wMapSvrCode;
-    int             m_iJoinAuthCode1;
-    int             m_iJoinAuthCode2;
-    int             m_iJoinAuthCode3;
-    int             m_iJoinAuthCode4;
-}MServerInfo;
+    std::array<char, 16> m_szMapSvrIpAddress {};
+    std::uint16_t m_wMapSvrPort {0};
+    std::uint16_t m_wMapSvrCode {0};
+    std::int32_t m_iJoinAuthCode1 {0};
+    std::int32_t m_iJoinAuthCode2 {0};
+    std::int32_t m_iJoinAuthCode3 {0};
+    std::int32_t m_iJoinAuthCode4 {0};
+};
+
+using MServerInfo = MapServerInfo;
 
 class CSMServer : public Singleton<CSMServer>
 {
-private:
-    bool        m_bFillServerInfo;
-    std::wstring m_strHeroID;
-    MServerInfo m_vServerInfo;
-
 public:
     CSMServer();
-    ~CSMServer() {}
+    ~CSMServer() = default;
 
-    void    Init(void);
+    void Init(void);
 
-    void    SetHeroID(wchar_t* ID);
+    void SetHeroID(wchar_t* ID);
 
-    void    SetServerInfo(MServerInfo sInfo);
-    void    GetServerInfo(MServerInfo& sInfo);
+    void SetServerInfo(MServerInfo sInfo);
+    void GetServerInfo(MServerInfo& sInfo);
 
-    void    GetServerAddress(wchar_t* szAddress);
-    WORD    GetServerPort(void) { return (m_bFillServerInfo ? m_vServerInfo.m_wMapSvrPort : 0); }
-    WORD    GetServerCode(void) { return (m_bFillServerInfo ? m_vServerInfo.m_wMapSvrCode : 0); }
+    void GetServerAddress(wchar_t* szAddress);
+    std::uint16_t GetServerPort() const { return (m_hasServerInfo ? m_serverInfo.m_wMapSvrPort : 0); }
+    std::uint16_t GetServerCode() const { return (m_hasServerInfo ? m_serverInfo.m_wMapSvrCode : 0); }
 
-    void    ConnectChangeMapServer(MServerInfo sInfo);
-    void    SendChangeMapServer(void);
+    void ConnectChangeMapServer(MServerInfo sInfo);
+    void SendChangeMapServer(void);
+
+private:
+    std::wstring m_heroId;
+    MapServerInfo m_serverInfo {};
+    bool m_hasServerInfo {false};
 };
 
-#define g_csMapServer CSMServer::GetSingleton ()
-
-#endif// __CS_MAP_SERVER_H__
+#define g_csMapServer CSMServer::GetSingleton()
