@@ -6,75 +6,95 @@
 #include "turbojpeg.h"
 #include "GlobalBitmap.h"
 
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <codecvt>
+#include <fstream>
+#include <iterator>
+#include <locale>
+#include <limits>
+#include <memory>
+#include <string>
+#include <vector>
 
 
-CBitmapCache::CBitmapCache()
-{
-    memset(m_QuickCache, 0, sizeof(QUICK_CACHE) * NUMBER_OF_QUICK_CACHE);
-}
+
+CBitmapCache::CBitmapCache() = default;
 CBitmapCache::~CBitmapCache() { Release(); }
+
+namespace
+{
+    constexpr std::uint32_t RangeFor(std::uint32_t begin, std::uint32_t end)
+    {
+        return (end > begin) ? (end - begin) : 0;
+    }
+
+    class TurboJpegHandle
+    {
+    public:
+        TurboJpegHandle() : handle(tjInitDecompress()) {}
+        ~TurboJpegHandle()
+        {
+            if (handle != nullptr)
+            {
+                tjDestroy(handle);
+            }
+        }
+
+        tjhandle get() const { return handle; }
+        bool valid() const { return handle != nullptr; }
+
+    private:
+        tjhandle handle;
+    };
+
+    void ReportTurboError(const wchar_t* context)
+    {
+        const char* message = tjGetErrorStr();
+        if (message == nullptr)
+        {
+            message = "Unknown TurboJPEG error";
+        }
+        g_ErrorReport.Write(L"[TurboJPEG] %ls: %hs", context, message);
+    }
+
+    int NextPowerOfTwo(int value, int maxValue)
+    {
+        int result = 1;
+        while (result < value && result < maxValue)
+        {
+            result <<= 1;
+        }
+        return std::min<int>(result, maxValue);
+    }
+
+    std::string NarrowPath(const std::wstring& wide)
+    {
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+        return conv.to_bytes(wide);
+    }
+}
 
 bool CBitmapCache::Create()
 {
     Release();
 
-    DWORD dwRange = 0;
+    auto configureCache = [](QUICK_CACHE& cache, std::uint32_t minIndex, std::uint32_t maxIndex)
+    {
+        cache.dwBitmapIndexMin = minIndex;
+        cache.dwBitmapIndexMax = maxIndex;
+        cache.bitmaps.assign(RangeFor(minIndex, maxIndex), nullptr);
+    };
 
-    dwRange = BITMAP_MAPTILE_END - BITMAP_MAPTILE_BEGIN;
-    m_QuickCache[QUICK_CACHE_MAPTILE].dwBitmapIndexMin = BITMAP_MAPTILE_BEGIN;
-    m_QuickCache[QUICK_CACHE_MAPTILE].dwBitmapIndexMax = BITMAP_MAPTILE_END;
-    m_QuickCache[QUICK_CACHE_MAPTILE].dwRange = dwRange;
-    m_QuickCache[QUICK_CACHE_MAPTILE].ppBitmap = new BITMAP_t * [dwRange];
-    memset(m_QuickCache[QUICK_CACHE_MAPTILE].ppBitmap, 0, dwRange * sizeof(BITMAP_t*));
-
-    dwRange = BITMAP_MAPGRASS_END - BITMAP_MAPGRASS_BEGIN;
-    m_QuickCache[QUICK_CACHE_MAPGRASS].dwBitmapIndexMin = BITMAP_MAPGRASS_BEGIN;
-    m_QuickCache[QUICK_CACHE_MAPGRASS].dwBitmapIndexMax = BITMAP_MAPGRASS_END;
-    m_QuickCache[QUICK_CACHE_MAPGRASS].dwRange = dwRange;
-    m_QuickCache[QUICK_CACHE_MAPGRASS].ppBitmap = new BITMAP_t * [dwRange];
-    memset(m_QuickCache[QUICK_CACHE_MAPGRASS].ppBitmap, 0, dwRange * sizeof(BITMAP_t*));
-
-    dwRange = BITMAP_WATER_END - BITMAP_WATER_BEGIN;
-    m_QuickCache[QUICK_CACHE_WATER].dwBitmapIndexMin = BITMAP_WATER_BEGIN;
-    m_QuickCache[QUICK_CACHE_WATER].dwBitmapIndexMax = BITMAP_WATER_END;
-    m_QuickCache[QUICK_CACHE_WATER].dwRange = dwRange;
-    m_QuickCache[QUICK_CACHE_WATER].ppBitmap = new BITMAP_t * [dwRange];
-    memset(m_QuickCache[QUICK_CACHE_WATER].ppBitmap, 0, dwRange * sizeof(BITMAP_t*));
-
-    dwRange = BITMAP_CURSOR_END - BITMAP_CURSOR_BEGIN;
-    m_QuickCache[QUICK_CACHE_CURSOR].dwBitmapIndexMin = BITMAP_CURSOR_BEGIN;
-    m_QuickCache[QUICK_CACHE_CURSOR].dwBitmapIndexMax = BITMAP_CURSOR_END;
-    m_QuickCache[QUICK_CACHE_CURSOR].dwRange = dwRange;
-    m_QuickCache[QUICK_CACHE_CURSOR].ppBitmap = new BITMAP_t * [dwRange];
-    memset(m_QuickCache[QUICK_CACHE_CURSOR].ppBitmap, 0, dwRange * sizeof(BITMAP_t*));
-
-    dwRange = BITMAP_FONT_END - BITMAP_FONT_BEGIN;
-    m_QuickCache[QUICK_CACHE_FONT].dwBitmapIndexMin = BITMAP_FONT_BEGIN;
-    m_QuickCache[QUICK_CACHE_FONT].dwBitmapIndexMax = BITMAP_FONT_END;
-    m_QuickCache[QUICK_CACHE_FONT].dwRange = dwRange;
-    m_QuickCache[QUICK_CACHE_FONT].ppBitmap = new BITMAP_t * [dwRange];
-    memset(m_QuickCache[QUICK_CACHE_FONT].ppBitmap, 0, dwRange * sizeof(BITMAP_t*));
-
-    dwRange = BITMAP_INTERFACE_NEW_MAINFRAME_END - BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN;
-    m_QuickCache[QUICK_CACHE_MAINFRAME].dwBitmapIndexMin = BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN;
-    m_QuickCache[QUICK_CACHE_MAINFRAME].dwBitmapIndexMax = BITMAP_INTERFACE_NEW_MAINFRAME_END;
-    m_QuickCache[QUICK_CACHE_MAINFRAME].dwRange = dwRange;
-    m_QuickCache[QUICK_CACHE_MAINFRAME].ppBitmap = new BITMAP_t * [dwRange];
-    memset(m_QuickCache[QUICK_CACHE_MAINFRAME].ppBitmap, 0, dwRange * sizeof(BITMAP_t*));
-
-    dwRange = BITMAP_INTERFACE_NEW_SKILLICON_END - BITMAP_INTERFACE_NEW_SKILLICON_BEGIN;
-    m_QuickCache[QUICK_CACHE_SKILLICON].dwBitmapIndexMin = BITMAP_INTERFACE_NEW_SKILLICON_BEGIN;
-    m_QuickCache[QUICK_CACHE_SKILLICON].dwBitmapIndexMax = BITMAP_INTERFACE_NEW_SKILLICON_END;
-    m_QuickCache[QUICK_CACHE_SKILLICON].dwRange = dwRange;
-    m_QuickCache[QUICK_CACHE_SKILLICON].ppBitmap = new BITMAP_t * [dwRange];
-    memset(m_QuickCache[QUICK_CACHE_SKILLICON].ppBitmap, 0, dwRange * sizeof(BITMAP_t*));
-
-    dwRange = BITMAP_PLAYER_TEXTURE_END - BITMAP_PLAYER_TEXTURE_BEGIN;
-    m_QuickCache[QUICK_CACHE_PLAYER].dwBitmapIndexMin = BITMAP_PLAYER_TEXTURE_BEGIN;
-    m_QuickCache[QUICK_CACHE_PLAYER].dwBitmapIndexMax = BITMAP_PLAYER_TEXTURE_END;
-    m_QuickCache[QUICK_CACHE_PLAYER].dwRange = dwRange;
-    m_QuickCache[QUICK_CACHE_PLAYER].ppBitmap = new BITMAP_t * [dwRange];
-    memset(m_QuickCache[QUICK_CACHE_PLAYER].ppBitmap, 0, dwRange * sizeof(BITMAP_t*));
+    configureCache(m_QuickCache[QUICK_CACHE_MAPTILE], BITMAP_MAPTILE_BEGIN, BITMAP_MAPTILE_END);
+    configureCache(m_QuickCache[QUICK_CACHE_MAPGRASS], BITMAP_MAPGRASS_BEGIN, BITMAP_MAPGRASS_END);
+    configureCache(m_QuickCache[QUICK_CACHE_WATER], BITMAP_WATER_BEGIN, BITMAP_WATER_END);
+    configureCache(m_QuickCache[QUICK_CACHE_CURSOR], BITMAP_CURSOR_BEGIN, BITMAP_CURSOR_END);
+    configureCache(m_QuickCache[QUICK_CACHE_FONT], BITMAP_FONT_BEGIN, BITMAP_FONT_END);
+    configureCache(m_QuickCache[QUICK_CACHE_MAINFRAME], BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN, BITMAP_INTERFACE_NEW_MAINFRAME_END);
+    configureCache(m_QuickCache[QUICK_CACHE_SKILLICON], BITMAP_INTERFACE_NEW_SKILLICON_BEGIN, BITMAP_INTERFACE_NEW_SKILLICON_END);
+    configureCache(m_QuickCache[QUICK_CACHE_PLAYER], BITMAP_PLAYER_TEXTURE_BEGIN, BITMAP_PLAYER_TEXTURE_END);
 
     m_pNullBitmap = new BITMAP_t;
     memset(m_pNullBitmap, 0, sizeof(BITMAP_t));
@@ -88,26 +108,20 @@ void CBitmapCache::Release()
     SAFE_DELETE(m_pNullBitmap);
 
     RemoveAll();
-
-    for (const auto& cache : m_QuickCache)
+    for (auto& cache : m_QuickCache)
     {
-        delete[] cache.ppBitmap;
+        cache.bitmaps.clear();
     }
-
-    memset(m_QuickCache, 0, sizeof(QUICK_CACHE) * NUMBER_OF_QUICK_CACHE);
 }
 
 void CBitmapCache::Add(GLuint uiBitmapIndex, BITMAP_t* pBitmap)
 {
-    for (const auto& cache : m_QuickCache)
+    for (auto& cache : m_QuickCache)
     {
         if (uiBitmapIndex > cache.dwBitmapIndexMin && uiBitmapIndex < cache.dwBitmapIndexMax)
         {
-            const auto dwVI = uiBitmapIndex - cache.dwBitmapIndexMin;
-            if (pBitmap)
-                cache.ppBitmap[dwVI] = pBitmap;
-            else
-                cache.ppBitmap[dwVI] = m_pNullBitmap;
+            const auto index = static_cast<std::size_t>(uiBitmapIndex - cache.dwBitmapIndexMin);
+            cache.bitmaps[index] = pBitmap ? pBitmap : m_pNullBitmap;
             return;
         }
     }
@@ -130,8 +144,8 @@ void CBitmapCache::Remove(GLuint uiBitmapIndex)
     {
         if (uiBitmapIndex > m_QuickCache[i].dwBitmapIndexMin && uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
         {
-            DWORD dwVI = uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin;
-            m_QuickCache[i].ppBitmap[dwVI] = NULL;
+            const auto dwVI = static_cast<std::size_t>(uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin);
+            m_QuickCache[i].bitmaps[dwVI] = nullptr;
             return;
         }
     }
@@ -165,7 +179,7 @@ void CBitmapCache::RemoveAll()
 {
     for (int i = 0; i < NUMBER_OF_QUICK_CACHE; i++)
     {
-        memset(m_QuickCache[i].ppBitmap, 0, m_QuickCache[i].dwRange * sizeof(BITMAP_t*));
+        std::fill(m_QuickCache[i].bitmaps.begin(), m_QuickCache[i].bitmaps.end(), nullptr);
     }
     m_mapCacheMain.clear();
     m_mapCachePlayer.clear();
@@ -260,15 +274,11 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
         if (uiBitmapIndex > m_QuickCache[i].dwBitmapIndexMin &&
             uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
         {
-            DWORD dwVI = uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin;
-            if (m_QuickCache[i].ppBitmap[dwVI])
+            const auto dwVI = static_cast<std::size_t>(uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin);
+            BITMAP_t* cached = m_QuickCache[i].bitmaps[dwVI];
+            if (cached != nullptr)
             {
-                if (m_QuickCache[i].ppBitmap[dwVI] == m_pNullBitmap)
-                    *ppBitmap = NULL;
-                else
-                {
-                    *ppBitmap = m_QuickCache[i].ppBitmap[dwVI];
-                }
+                *ppBitmap = (cached == m_pNullBitmap) ? nullptr : cached;
                 return true;
             }
             return false;
@@ -386,7 +396,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     auto mi = m_mapBitmap.find(uiBitmapIndex);
     if (mi != m_mapBitmap.end())
     {
-        BITMAP_t* pBitmap = (*mi).second;
+        BITMAP_t* pBitmap = mi->second.get();
         if (pBitmap->Ref > 0)
         {
             if (0 == _wcsicmp(pBitmap->FileName, filename.c_str()))
@@ -396,7 +406,7 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
             }
             else
             {
-                g_ErrorReport.Write(L"File not found %s (%d)->%s\r\n", pBitmap->FileName, uiBitmapIndex, filename.c_str());
+                g_ErrorReport.Write(L"File not found %ls (%d)->%ls\r\n", pBitmap->FileName, uiBitmapIndex, filename.c_str());
                 UnloadImage(uiBitmapIndex, true);
             }
         }
@@ -417,16 +427,15 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
     auto mi = m_mapBitmap.find(uiBitmapIndex);
     if (mi != m_mapBitmap.end())
     {
-        BITMAP_t* pBitmap = (*mi).second;
+        BITMAP_t* pBitmap = mi->second.get();
 
         if (--pBitmap->Ref == 0 || bForce)
         {
             glDeleteTextures(1, &(pBitmap->TextureNumber));
 
-            m_dwUsedTextureMemory -= (DWORD)(pBitmap->Width * pBitmap->Height * pBitmap->Components);
+            const auto memoryUsed = static_cast<std::uint32_t>(pBitmap->Width * pBitmap->Height * pBitmap->Components);
+            m_dwUsedTextureMemory -= memoryUsed;
 
-            delete[] pBitmap->Buffer;
-            delete pBitmap;
             m_mapBitmap.erase(mi);
 
             if (uiBitmapIndex >= BITMAP_NONAMED_TEXTURES_BEGIN && uiBitmapIndex <= BITMAP_NONAMED_TEXTURES_END)
@@ -444,19 +453,16 @@ void CGlobalBitmap::UnloadAllImages()
         g_ErrorReport.Write(L"Unload Images\r\n");
 #endif // _DEBUG
 
-    auto mi = m_mapBitmap.begin();
-    for (; mi != m_mapBitmap.end(); mi++)
+    for (auto& pair : m_mapBitmap)
     {
-        BITMAP_t* pBitmap = (*mi).second;
+        BITMAP_t* pBitmap = pair.second.get();
 
 #ifdef _DEBUG
         if (pBitmap->Ref > 1)
         {
-            g_ErrorReport.Write(L"Bitmap %s(RefCount= %d)\r\n", pBitmap->FileName, pBitmap->Ref);
+            g_ErrorReport.Write(L"Bitmap %ls(RefCount= %d)\r\n", pBitmap->FileName, pBitmap->Ref);
         }
 #endif // _DEBUG
-        delete[] pBitmap->Buffer;
-        delete pBitmap;
     }
 
     m_mapBitmap.clear();
@@ -468,15 +474,15 @@ void CGlobalBitmap::UnloadAllImages()
 
 BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
 {
-    BITMAP_t* pBitmap = NULL;
+    BITMAP_t* pBitmap = nullptr;
     if (false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))
     {
         auto mi = m_mapBitmap.find(uiBitmapIndex);
         if (mi != m_mapBitmap.end())
-            pBitmap = (*mi).second;
+            pBitmap = mi->second.get();
         m_BitmapCache.Add(uiBitmapIndex, pBitmap);
     }
-    if (NULL == pBitmap)
+    if (nullptr == pBitmap)
     {
         static BITMAP_t s_Error;
         memset(&s_Error, 0, sizeof(BITMAP_t));
@@ -487,13 +493,13 @@ BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
 }
 BITMAP_t* CGlobalBitmap::FindTexture(GLuint uiBitmapIndex)
 {
-    BITMAP_t* pBitmap = NULL;
+    BITMAP_t* pBitmap = nullptr;
     if (false == m_BitmapCache.Find(uiBitmapIndex, &pBitmap))
     {
         auto mi = m_mapBitmap.find(uiBitmapIndex);
         if (mi != m_mapBitmap.end())
-            pBitmap = (*mi).second;
-        if (pBitmap != NULL)
+            pBitmap = mi->second.get();
+        if (pBitmap != nullptr)
             m_BitmapCache.Add(uiBitmapIndex, pBitmap);
     }
     return pBitmap;
@@ -501,31 +507,29 @@ BITMAP_t* CGlobalBitmap::FindTexture(GLuint uiBitmapIndex)
 
 BITMAP_t* CGlobalBitmap::FindTexture(const std::wstring& filename)
 {
-    auto mi = m_mapBitmap.begin();
-    for (; mi != m_mapBitmap.end(); mi++)
+    for (auto& pair : m_mapBitmap)
     {
-        BITMAP_t* pBitmap = (*mi).second;
+        BITMAP_t* pBitmap = pair.second.get();
         if (0 == wcsicmp(filename.c_str(), pBitmap->FileName))
             return pBitmap;
     }
-    return NULL;
+    return nullptr;
 }
 
 BITMAP_t* CGlobalBitmap::FindTextureByName(const std::wstring& name)
 {
-    auto mi = m_mapBitmap.begin();
-    for (; mi != m_mapBitmap.end(); mi++)
+    for (auto& pair : m_mapBitmap)
     {
-        BITMAP_t* pBitmap = (*mi).second;
+        BITMAP_t* pBitmap = pair.second.get();
         std::wstring texname;
         SplitFileName(pBitmap->FileName, texname, true);
         if (0 == wcsicmp(texname.c_str(), name.c_str()))
             return pBitmap;
     }
-    return NULL;
+    return nullptr;
 }
 
-DWORD CGlobalBitmap::GetUsedTextureMemory() const
+std::uint32_t CGlobalBitmap::GetUsedTextureMemory() const
 {
     return m_dwUsedTextureMemory;
 }
@@ -570,129 +574,116 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
 
 bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
-    // create a reuseable buffer with the maximum size of the uncompressed image
-    static unsigned char buffer[MAX_WIDTH * MAX_HEIGHT * 3];
-
     std::wstring filename_ozj;
     ExchangeExt(filename, L"OZJ", filename_ozj);
 
-    auto* compressedFile = _wfopen(filename_ozj.c_str(), L"rb");
-    if (compressedFile == nullptr)
+    std::ifstream compressedFile(NarrowPath(filename_ozj), std::ios::binary);
+    if (!compressedFile)
     {
         return false;
     }
 
-    fseek(compressedFile, 0, SEEK_END);
-    const auto fileSize = ftell(compressedFile);
-    assert(fileSize > 24);
+    std::vector<unsigned char> jpegBuf((std::istreambuf_iterator<char>(compressedFile)), std::istreambuf_iterator<char>());
+    compressedFile.close();
 
-    // Skip first 24 bytes, because these are added by the OZJ format
-    fseek(compressedFile, 24, SEEK_SET);
+    if (jpegBuf.size() <= 24)
+    {
+        return false;
+    }
 
-    const auto jpegSize = fileSize - 24;
+    // Skip first 24 bytes (OZJ header)
+    const unsigned char* jpegData = jpegBuf.data() + 24;
+    const auto jpegSize = static_cast<unsigned long>(jpegBuf.size() - 24);
+
     int jpegWidth = 0, jpegHeight = 0;
     int jpegSubsamp = TJSAMP_444;
     int jpegColorspace = TJCS_RGB;
 
-    auto tjhandle = tjInitDecompress();
-
-    auto* jpegBuf = new unsigned char[jpegSize];
-    fread(jpegBuf, 1, jpegSize, compressedFile);
-    fclose(compressedFile);
-
-    // First reading the header with the size information
-    auto result = tjDecompressHeader3(tjhandle, jpegBuf, jpegSize, &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
-    if (result != 0)
+    TurboJpegHandle tjHandle;
+    if (!tjHandle.valid())
     {
-        auto errorstr = tjGetErrorStr();
-        auto errorCode = tjGetErrorCode(compressedFile);
-        assert(false);
+        ReportTurboError(L"tjInitDecompress");
+        return false;
     }
-    //assert(jpegColorspace == TJCS_RGB);
-    assert(jpegWidth <= MAX_WIDTH);
-    assert(jpegHeight <= MAX_HEIGHT);
 
-    // decompress into the buffer
-    result = tjDecompress2(tjhandle, jpegBuf, jpegSize, buffer, jpegWidth, 0, jpegHeight, TJPF_RGB, TJFLAG_FASTDCT);
-    if (result != 0)
+    auto headerResult = tjDecompressHeader3(tjHandle.get(), jpegData, jpegSize, &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
+    if (headerResult != 0 || jpegWidth <= 0 || jpegHeight <= 0 || jpegWidth > MAX_WIDTH || jpegHeight > MAX_HEIGHT)
     {
-        auto errorstr = tjGetErrorStr();
-        auto errorCode = tjGetErrorCode(compressedFile);
-        assert(false);
+        ReportTurboError(L"tjDecompressHeader3");
+        return false;
     }
-    delete[] jpegBuf;
-    jpegBuf = nullptr;
 
-    // now we can cleanup already
-    tjDestroy(tjhandle);
-
-
-    if (jpegWidth <= MAX_WIDTH && jpegHeight <= MAX_HEIGHT)
+    std::vector<unsigned char> decompressedBuffer(static_cast<std::size_t>(jpegWidth) * static_cast<std::size_t>(jpegHeight) * 3u);
+    auto decompressResult = tjDecompress2(
+        tjHandle.get(),
+        jpegData,
+        jpegSize,
+        decompressedBuffer.data(),
+        jpegWidth,
+        0,
+        jpegHeight,
+        TJPF_RGB,
+        TJFLAG_FASTDCT);
+    if (decompressResult != 0)
     {
-        // rounds up to the next n^2 value, because that's what OpenGL supports
-        int textureWidth = 0, textureHeight = 0;
-        for (int i = 1; i <= MAX_WIDTH; i <<= 1)
-        {
-            textureWidth = i;
-            if (i >= jpegWidth) break;
-        }
-        for (int i = 1; i <= MAX_HEIGHT; i <<= 1)
-        {
-            textureHeight = i;
-            if (i >= jpegHeight) break;
-        }
-
-        auto* pNewBitmap = new BITMAP_t;
-        memset(pNewBitmap, 0, sizeof(BITMAP_t));
-
-        pNewBitmap->BitmapIndex = uiBitmapIndex;
-
-        filename._Copy_s(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME, MAX_BITMAP_FILE_NAME);
-
-        pNewBitmap->Width = static_cast<float>(textureWidth);
-        pNewBitmap->Height = static_cast<float>(textureHeight);
-        pNewBitmap->Components = 3;
-        pNewBitmap->Ref = 1;
-
-        const auto textureBufferSize = textureWidth * textureHeight * pNewBitmap->Components;
-        pNewBitmap->Buffer = new BYTE[textureBufferSize];
-        m_dwUsedTextureMemory += textureBufferSize;
-
-        int offset = 0;
-        int jpeg_row_size = jpegWidth * 3;
-        int texture_row_size = textureWidth * 3;
-        int rows = min(jpegHeight, textureHeight);
-        if (jpegWidth != textureWidth)
-        {
-            // we need copy it line by line
-            for (int row = 0; row < rows; row++)
-            {
-                memcpy(&pNewBitmap->Buffer[offset], &buffer[row * jpeg_row_size], jpeg_row_size);
-                offset += texture_row_size;
-            }
-        }
-        else
-        {
-            // we can copy it 1:1
-            memcpy(pNewBitmap->Buffer, buffer, jpegHeight * jpegWidth * 3);
-        }
-
-        m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, pNewBitmap));
-
-        glGenTextures(1, &(pNewBitmap->TextureNumber));
-
-        glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
+        ReportTurboError(L"tjDecompress2");
+        return false;
     }
+
+    const int textureWidth = NextPowerOfTwo(jpegWidth, MAX_WIDTH);
+    const int textureHeight = NextPowerOfTwo(jpegHeight, MAX_HEIGHT);
+
+    auto pNewBitmap = std::make_unique<BITMAP_t>();
+    memset(pNewBitmap.get(), 0, sizeof(BITMAP_t));
+
+    pNewBitmap->BitmapIndex = uiBitmapIndex;
+
+    wcsncpy(pNewBitmap->FileName, filename.c_str(), MAX_BITMAP_FILE_NAME - 1);
+    pNewBitmap->FileName[MAX_BITMAP_FILE_NAME - 1] = L'\0';
+
+    pNewBitmap->Width = static_cast<float>(textureWidth);
+    pNewBitmap->Height = static_cast<float>(textureHeight);
+    pNewBitmap->Components = 3;
+    pNewBitmap->Ref = 1;
+
+    const auto textureBufferSize = static_cast<std::size_t>(textureWidth) * static_cast<std::size_t>(textureHeight) * 3u;
+    pNewBitmap->BufferStorage.resize(textureBufferSize);
+    pNewBitmap->Buffer = pNewBitmap->BufferStorage.data();
+    m_dwUsedTextureMemory += static_cast<std::uint32_t>(textureBufferSize);
+
+    const int jpegRowSize = jpegWidth * 3;
+    const int textureRowSize = textureWidth * 3;
+    const int rows = std::min<int>(jpegHeight, textureHeight);
+
+    std::size_t offset = 0;
+    if (jpegWidth != textureWidth)
+    {
+        for (int row = 0; row < rows; ++row)
+        {
+            memcpy(&pNewBitmap->Buffer[offset], &decompressedBuffer[static_cast<std::size_t>(row) * jpegRowSize], static_cast<std::size_t>(jpegRowSize));
+            offset += static_cast<std::size_t>(textureRowSize);
+        }
+    }
+    else
+    {
+        memcpy(pNewBitmap->Buffer, decompressedBuffer.data(), static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
+    }
+
+    glGenTextures(1, &(pNewBitmap->TextureNumber));
+
+    glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
+
+    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
 
     return true;
 }
@@ -702,65 +693,57 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     std::wstring filename_ozt;
     ExchangeExt(filename, L"OZT", filename_ozt);
 
-    FILE* fp = _wfopen(filename_ozt.c_str(), L"rb");
-    if (fp == NULL)
+    std::ifstream input(NarrowPath(filename_ozt), std::ios::binary);
+    if (!input)
     {
         return false;
     }
 
-    fseek(fp, 0, SEEK_END);
-    int Size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
+    std::vector<unsigned char> pakBuffer((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    input.close();
 
-    auto* PakBuffer = new unsigned char[Size];
-    fread(PakBuffer, 1, Size, fp);
-    fclose(fp);
+    if (pakBuffer.size() < 18) // minimal TGA header length check for OZT payload
+    {
+        return false;
+    }
 
     int index = 12;
     index += 4;
-    short nx = *((short*)(PakBuffer + index)); index += 2;
-    short ny = *((short*)(PakBuffer + index)); index += 2;
-    char bit = *((char*)(PakBuffer + index)); index += 1;
+    const std::int16_t nx = *reinterpret_cast<const std::int16_t*>(&pakBuffer[index]); index += 2;
+    const std::int16_t ny = *reinterpret_cast<const std::int16_t*>(&pakBuffer[index]); index += 2;
+    const char bit = *reinterpret_cast<const char*>(&pakBuffer[index]); index += 1;
     index += 1;
 
-    if (bit != 32 || nx > MAX_WIDTH || ny > MAX_HEIGHT)
+    if (bit != 32 || nx <= 0 || ny <= 0 || nx > MAX_WIDTH || ny > MAX_HEIGHT)
     {
-        SAFE_DELETE_ARRAY(PakBuffer);
         return false;
     }
 
-    int Width = 0, Height = 0;
-    for (int i = 1; i <= MAX_WIDTH; i <<= 1)
-    {
-        Width = i;
-        if (i >= nx) break;
-    }
-    for (int i = 1; i <= MAX_HEIGHT; i <<= 1)
-    {
-        Height = i;
-        if (i >= ny) break;
-    }
+    const int Width = NextPowerOfTwo(nx, MAX_WIDTH);
+    const int Height = NextPowerOfTwo(ny, MAX_HEIGHT);
 
-    auto* pNewBitmap = new BITMAP_t;
-    memset(pNewBitmap, 0, sizeof(BITMAP_t));
+    auto pNewBitmap = std::make_unique<BITMAP_t>();
+    memset(pNewBitmap.get(), 0, sizeof(BITMAP_t));
 
     pNewBitmap->BitmapIndex = uiBitmapIndex;
 
-    filename._Copy_s(pNewBitmap->FileName, MAX_BITMAP_FILE_NAME, MAX_BITMAP_FILE_NAME);
+    wcsncpy(pNewBitmap->FileName, filename.c_str(), MAX_BITMAP_FILE_NAME - 1);
+    pNewBitmap->FileName[MAX_BITMAP_FILE_NAME - 1] = L'\0';
 
-    pNewBitmap->Width = (float)Width;
-    pNewBitmap->Height = (float)Height;
+    pNewBitmap->Width = static_cast<float>(Width);
+    pNewBitmap->Height = static_cast<float>(Height);
     pNewBitmap->Components = 4;
     pNewBitmap->Ref = 1;
 
-    size_t BufferSize = Width * Height * pNewBitmap->Components;
-    pNewBitmap->Buffer = (unsigned char*)new BYTE[BufferSize];
+    const std::size_t BufferSize = static_cast<std::size_t>(Width) * static_cast<std::size_t>(Height) * 4u;
+    pNewBitmap->BufferStorage.resize(BufferSize);
+    pNewBitmap->Buffer = pNewBitmap->BufferStorage.data();
 
-    m_dwUsedTextureMemory += BufferSize;
+    m_dwUsedTextureMemory += static_cast<std::uint32_t>(BufferSize);
 
     for (int y = 0; y < ny; y++)
     {
-        unsigned char* src = &PakBuffer[index];
+        const unsigned char* src = &pakBuffer[index];
         index += nx * 4;
         unsigned char* dst = &pNewBitmap->Buffer[(ny - 1 - y) * Width * pNewBitmap->Components];
 
@@ -774,15 +757,14 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
             dst += pNewBitmap->Components;
         }
     }
-    SAFE_DELETE_ARRAY(PakBuffer);
-
-    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, pNewBitmap));
 
     glGenTextures(1, &(pNewBitmap->TextureNumber));
 
     glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
 
     glTexImage2D(GL_TEXTURE_2D, 0, 4, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
+
+    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
 
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
@@ -868,29 +850,35 @@ bool CGlobalBitmap::Convert_Format(const std::wstring& filename)
 
 bool CGlobalBitmap::Save_Image(const std::wstring& src, const std::wstring& dest, int cDumpHeader)
 {
-    FILE* fp = _wfopen(src.c_str(), L"rb");
-    if (fp == NULL)
+    const auto srcPath = NarrowPath(src);
+    const auto destPath = NarrowPath(dest);
+
+    std::ifstream input(srcPath, std::ios::binary);
+    if (!input)
     {
         return false;
     }
 
-    fseek(fp, 0, SEEK_END);
-    int size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
+    std::vector<char> buffer((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    input.close();
 
-    char* pTempBuf = new char[size];
-    fread(pTempBuf, 1, size, fp);
-    fclose(fp);
-
-    fp = _wfopen(dest.c_str(), L"wb");
-    if (fp == NULL)
+    if (buffer.empty())
+    {
         return false;
+    }
 
-    fwrite(pTempBuf, 1, cDumpHeader, fp);
-    fwrite(pTempBuf, 1, size, fp);
-    fclose(fp);
+    const auto headerBytes = static_cast<std::size_t>(std::max<int>(0, cDumpHeader));
+    const auto headerCount = std::min<std::size_t>(headerBytes, buffer.size());
 
-    delete[] pTempBuf;
+    std::ofstream output(destPath, std::ios::binary);
+    if (!output)
+    {
+        return false;
+    }
 
-    return true;
+    output.write(buffer.data(), static_cast<std::streamsize>(headerCount));
+    output.write(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+    output.flush();
+
+    return output.good();
 }
