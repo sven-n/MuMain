@@ -2,7 +2,7 @@
 // File: CharInfoBalloonMng.h
 //
 // Desc: interface for the CCharInfoBalloonMng class.
-//		 дЁ╦╞ем а╓╨╦ гЁ╪╠ ╟Э╦╝ е╛╥║╫╨.(дЁ╦╞ем ╪╠ец╬ю©║╪╜ ╬╡юс)
+//		 Л╨░К╕╜М└╟ Л═∙КЁ╢ М▓█Л└═ Й╢─К╕╛ М│╢К·≤Л┼╓.(Л╨░К╕╜М└╟ Л└═М┐²Л■╛Л≈░Л└° Л⌠╟Л·└)
 //
 // producer: Ahn Sang-Kyu
 //*****************************************************************************
@@ -12,15 +12,19 @@
 
 #pragma once
 
-class CCharInfoBalloon;
+#include <array>
+
+#include "CharInfoBalloon.h"
 
 class CCharInfoBalloonMng
 {
 protected:
-    CCharInfoBalloon* m_pCharInfoBalloon;	// дЁ╦╞ем а╓╨╦ гЁ╪╠ ╧Х©╜юг аж╪р.
+    static constexpr std::size_t kBalloonCount = 5;
+    std::array<CCharInfoBalloon, kBalloonCount> m_charInfoBalloons{};
+    bool m_isInitialized{ false };
 
 public:
-    CCharInfoBalloonMng();
+    CCharInfoBalloonMng() = default;
     virtual ~CCharInfoBalloonMng();
 
     void Release();
