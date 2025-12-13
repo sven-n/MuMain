@@ -9,10 +9,66 @@
 #include "UIControls.h"
 #include "CharacterManager.h"
 
+#include <algorithm>
+#include <array>
+#include <cwchar>
 
+namespace
+{
+    template <std::size_t N>
+    void CopyWideString(wchar_t (&destination)[N], const wchar_t* source)
+    {
+        if (source == nullptr)
+        {
+            destination[0] = L'\0';
+            return;
+        }
 
+        std::wcsncpy(destination, source, N - 1);
+        destination[N - 1] = L'\0';
+    }
 
-CCharInfoBalloon::CCharInfoBalloon() : m_pCharInfo(NULL)
+    struct GuildStatusText
+    {
+        std::uint8_t status;
+        int textIndex;
+    };
+
+    constexpr std::array<GuildStatusText, 5> kGuildStatusTexts{ {
+        {   0, 1330 },
+        {  32, 1302 },
+        {  64, 1301 },
+        { 128, 1300 },
+        { 255, 488 },
+    } };
+
+    DWORD ResolveNameColor(std::uint8_t controlCode)
+    {
+        if (controlCode & CTLCODE_01BLOCKCHAR)
+            return ARGB(255, 0, 255, 255);
+        if (controlCode & (CTLCODE_02BLOCKITEM | CTLCODE_10ACCOUNT_BLOCKITEM))
+            return CLRDW_BR_ORANGE;
+        if (controlCode & CTLCODE_04FORTV)
+            return CLRDW_WHITE;
+        if (controlCode & (CTLCODE_08OPERATOR | CTLCODE_20OPERATOR))
+            return ARGB(255, 255, 0, 0);
+
+        return CLRDW_WHITE;
+    }
+
+    int ResolveGuildTextIndex(std::uint8_t guildStatus)
+    {
+        const auto it = std::lower_bound(
+            kGuildStatusTexts.begin(),
+            kGuildStatusTexts.end(),
+            guildStatus,
+            [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
+
+        return (it != kGuildStatusTexts.end() && it->status == guildStatus) ? it->textIndex : 0;
+    }
+}
+
+CCharInfoBalloon::CCharInfoBalloon() : m_pCharInfo(nullptr)
 {
 }
 
@@ -22,13 +78,13 @@ CCharInfoBalloon::~CCharInfoBalloon()
 
 void CCharInfoBalloon::Create(CHARACTER* pCharInfo)
 {
-    CSprite::Create(118, 54, BITMAP_LOG_IN + 7, 0, NULL, 59, 54);
+    CSprite::Create(118, 54, BITMAP_LOG_IN + 7, 0, nullptr, 59, 54);
 
     m_pCharInfo = pCharInfo;
     m_dwNameColor = 0;
-    memset(m_szName, 0, sizeof(char) * 64);
-    memset(m_szGuild, 0, sizeof(char) * 64);
-    memset(m_szClass, 0, sizeof(char) * 64);
+    std::fill(std::begin(m_szName), std::end(m_szName), L'\0');
+    std::fill(std::begin(m_szGuild), std::end(m_szGuild), L'\0');
+    std::fill(std::begin(m_szClass), std::end(m_szClass), L'\0');
 }
 
 void CCharInfoBalloon::Render()
@@ -92,7 +148,7 @@ void CCharInfoBalloon::Render()
 
 void CCharInfoBalloon::SetInfo()
 {
-    if (NULL == m_pCharInfo)
+    if (m_pCharInfo == nullptr)
         return;
 
     if (!m_pCharInfo->Object.Live)
@@ -103,31 +159,13 @@ void CCharInfoBalloon::SetInfo()
 
     CSprite::m_bShow = true;
 
-    if (m_pCharInfo->CtlCode & CTLCODE_01BLOCKCHAR)
-        m_dwNameColor = ARGB(255, 0, 255, 255);
-    else if (m_pCharInfo->CtlCode
-        & (CTLCODE_02BLOCKITEM | CTLCODE_10ACCOUNT_BLOCKITEM))
-        m_dwNameColor = CLRDW_BR_ORANGE;
-    else if (m_pCharInfo->CtlCode & CTLCODE_04FORTV)
-        m_dwNameColor = CLRDW_WHITE;
-    else if (m_pCharInfo->CtlCode & CTLCODE_08OPERATOR)
-        m_dwNameColor = ARGB(255, 255, 0, 0);
-    else if (m_pCharInfo->CtlCode & CTLCODE_20OPERATOR)
-        m_dwNameColor = ARGB(255, 255, 0, 0);
-    else
-        m_dwNameColor = CLRDW_WHITE;
+    m_dwNameColor = ResolveNameColor(m_pCharInfo->CtlCode);
 
-    wcscpy(m_szName, m_pCharInfo->ID);
+    CopyWideString(m_szName, m_pCharInfo->ID);
 
-    int nText = 0;
-    switch (m_pCharInfo->GuildStatus)
-    {
-        case 255:	nText = 488;	break;
-        case 0:		nText = 1330;	break;
-        case 32:	nText = 1302;	break;
-        case 64:	nText = 1301;	break;
-        case 128:	nText = 1300;	break;
-    }
-    swprintf(m_szGuild, L"(%s)", GlobalText[nText]);
-    swprintf(m_szClass, L"%s %d", gCharacterManager.GetCharacterClassText(m_pCharInfo->Class), m_pCharInfo->Level);
+    const int guildTextIndex = ResolveGuildTextIndex(m_pCharInfo->GuildStatus);
+    swprintf_s(m_szGuild, L"(%ls)", GlobalText[guildTextIndex]);
+    swprintf_s(m_szClass, L"%ls %d",
+        gCharacterManager.GetCharacterClassText(m_pCharInfo->Class),
+        m_pCharInfo->Level);
 }
