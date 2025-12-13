@@ -3,6 +3,9 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 
+#include <algorithm>
+#include <cstdint>
+
 #include "ZzzInventory.h"
 #include "NewUIInventoryCtrl.h"
 #include "NewUISystem.h"
@@ -13,9 +16,22 @@ extern int   InventoryStartY;
 
 namespace COMGEM
 {
+    namespace
+    {
+        constexpr int kInvWidth = 190;
+        constexpr int kInvHeight = 433;
+        constexpr int kAttachValue = 1000000;
+        constexpr int kDetachUnitValue = 50000;
+
+        SEASON3B::CNewUIInventoryCtrl* GetInventoryCtrl()
+        {
+            return (g_pMyInventory != nullptr) ? g_pMyInventory->GetInventoryCtrl() : nullptr;
+        }
+    }
+
     //Locals
-    int		iInvWidth = 190.f;
-    int		iInvHeight = 433.f;
+    int		iInvWidth = kInvWidth;
+    int		iInvHeight = kInvHeight;
     int		iUnMixIndex = -1;
     int		iUnMixLevel = -1;
 
@@ -61,16 +77,20 @@ void COMGEM::ResetWantedList()
 
 bool COMGEM::FindWantedList()
 {
-    SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-    ITEM* pItem = nullptr;
+    SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
+    if (pNewInventoryCtrl == nullptr)
+    {
+        ResetWantedList();
+        return false;
+    }
 
-    bool	bReturn = false;
-    int		nInvenMaxIndex = MAX_MY_INVENTORY_INDEX;
+    bool foundAny = false;
+    const int nInvenMaxIndex = MAX_MY_INVENTORY_INDEX;
     ResetWantedList();
 
     for (int i = 0; i < nInvenMaxIndex; ++i)
     {
-        pItem = pNewInventoryCtrl->GetItem(i);
+        const ITEM* pItem = pNewInventoryCtrl->GetItem(i);
         if (!pItem) continue;
         if (isCompiledGem(pItem))
         {
@@ -78,10 +98,10 @@ bool COMGEM::FindWantedList()
             p.first = pItem->y * pNewInventoryCtrl->GetNumberOfColumn() + pItem->x + MAX_EQUIPMENT_INDEX;
             p.second = pItem->Level;
             m_UnmixTarList.AddText(p.first, p.second);
-            bReturn = true;
+            foundAny = true;
         }
     }
-    return bReturn;
+    return foundAny;
 }
 
 void COMGEM::SelectFromList(int iIndex, int iLevel)
@@ -141,16 +161,21 @@ bool COMGEM::CheckMyInvValid()
     m_cPercent = 0;
     m_cCount = 0;
 
-    int nInvenMaxIndex = MAX_MY_INVENTORY_INDEX;
+    const int nInvenMaxIndex = MAX_MY_INVENTORY_INDEX;
 
     if (m_bType == ATTACH)
     {
-        SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-        ITEM* pItem = nullptr;
+        SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
+        if (pNewInventoryCtrl == nullptr)
+        {
+            m_cErr = COMERROR_NOTALLOWED;
+            m_cPercent = 0;
+            return false;
+        }
 
         for (int i = 0; i < nInvenMaxIndex; ++i)
         {
-            pItem = pNewInventoryCtrl->GetItem(i);
+            const ITEM* pItem = pNewInventoryCtrl->GetItem(i);
             if (!pItem) continue;
             if (m_cGemType == Check_Jewel_Unit(pItem->Type))	++m_cCount;
 
@@ -179,20 +204,18 @@ bool COMGEM::CheckMyInvValid()
 
         //SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
         //ITEM * pItem = pNewInventoryCtrl->GetItem(iUnMixIndex);
-        ITEM* pItem = g_pMyInventory->FindItem(iUnMixIndex);
-
-        if (isCompiledGem(pItem))
-
+        const ITEM* pItem = (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(iUnMixIndex) : nullptr;
+        if (pItem != nullptr && isCompiledGem(pItem))
         {
             ++m_cCount;
             m_cPercent = 100;
             CalcGen();
             return true;
         }
-        
+
         m_cErr = DEERROR_NOTALLOWED;
-            m_cPercent = 0;
-            return false;
+        m_cPercent = 0;
+        return false;
     }
     m_cErr = ERROR_UNKNOWN;
     return false;
@@ -203,11 +226,11 @@ void COMGEM::CalcGen()
     m_iValue = 0;
     if (m_bType)
     {
-        m_iValue = 1000000;
+        m_iValue = kAttachValue;
     }
     else
     {
-        m_iValue = m_cComType * 50000;
+        m_iValue = m_cComType * kDetachUnitValue;
     }
 }
 
@@ -226,28 +249,21 @@ int	COMGEM::CalcItemValue(const ITEM* p)
         return 0;
     case eBLESS_C:
         return 9000000 * (Level + 1) * FIRST;
-        break;
     case eSOUL_C:
         return 6000000 * (Level + 1) * FIRST;
-        break;
     case eLIFE_C:
         return 45000000 * (Level + 1) * FIRST;
-        break;
     case eCREATE_C:
         return 36000000 * (Level + 1) * FIRST;
-        break;
     case ePROTECT_C:
         return 60000000 * (Level + 1) * FIRST;
-        break;
     case eCHAOS_C:
         return 810000 * (Level + 1) * FIRST;
-        break;
     case eGEMSTONE_C:
     case eHARMONY_C:
     case eLOW_C:
     case eUPPER_C:
         return 18600 * (Level + 1) * FIRST;
-        break;
     default:
         return 0;
     }
@@ -255,8 +271,8 @@ int	COMGEM::CalcItemValue(const ITEM* p)
 
 int COMGEM::CalcEmptyInv()
 {
-    SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-    return pNewInventoryCtrl->GetEmptySlotCount();
+    SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
+    return (pNewInventoryCtrl != nullptr) ? pNewInventoryCtrl->GetEmptySlotCount() : 0;
 }
 
 void COMGEM::Init()
@@ -298,11 +314,17 @@ void COMGEM::Exit()
 
 int	COMGEM::GetJewelRequireCount(int i)
 {
-    if (i == 0)	return FIRST;
-    if (i == 1)	return SECOND;
-    if (i == 2)	return THIRD;
-
-    return -1;
+    switch (i)
+    {
+    case 0:
+        return FIRST;
+    case 1:
+        return SECOND;
+    case 2:
+        return THIRD;
+    default:
+        return -1;
+    }
 }
 
 int COMGEM::Check_Jewel(int _nJewel, int _nType, bool _bModel)
