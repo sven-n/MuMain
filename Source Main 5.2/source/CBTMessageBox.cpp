@@ -12,7 +12,7 @@ namespace
 {
     int ClampInt(int value, int minValue, int maxValue)
     {
-        return std::min(std::max(value, minValue), maxValue);
+        return std::min<int>(std::max<int>(value, minValue), maxValue);
     }
 
     POINT ComputeCenteredTopLeft(const RECT& parentRect, const RECT& childRect, const RECT& desktopRect)
@@ -29,8 +29,8 @@ namespace
 
         const int desktopRight = static_cast<int>(desktopRect.right);
         const int desktopBottom = static_cast<int>(desktopRect.bottom);
-        const int maxX = std::max(0, desktopRight - width);
-        const int maxY = std::max(0, desktopBottom - height);
+        const int maxX = std::max<int>(0, desktopRight - width);
+        const int maxY = std::max<int>(0, desktopBottom - height);
 
         result.x = ClampInt(result.x, 0, maxX);
         result.y = ClampInt(result.y, 0, maxY);
