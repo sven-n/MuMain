@@ -12,15 +12,21 @@
 
 class CSQuest : public Singleton<CSQuest>
 {
-private:
-    using QuestStateList = std::array<std::uint8_t, MAX_QUESTS / 4>;
-    using QuestAttributes = std::array<QUEST_ATTRIBUTE, MAX_QUESTS>;
-    using QuestEventCounters = std::array<std::uint8_t, TYPE_QUEST_END>;
-    using KillTracker = std::array<int, 5>;
+public:
+    static constexpr std::uint8_t QUEST_STATE_INVALID = 0xFF;
+    static constexpr std::uint8_t QUEST_STATE_MASK = 0x03;
+    static constexpr std::uint8_t QUEST_STATES_PER_ENTRY = 4;
+    static constexpr std::uint8_t QUEST_STATE_BIT_WIDTH = 2;
+    static constexpr int QUEST_MONSTER_SLOT_COUNT = 5;
 
 private:
+    using QuestStateList = std::array<std::uint8_t, (MAX_QUESTS + (QUEST_STATES_PER_ENTRY - 1)) / QUEST_STATES_PER_ENTRY>;
+    using QuestAttributes = std::array<QUEST_ATTRIBUTE, MAX_QUESTS>;
+    using QuestEventCounters = std::array<std::uint8_t, TYPE_QUEST_END>;
+    using KillTracker = std::array<int, QUEST_MONSTER_SLOT_COUNT>;
+
     std::uint8_t getQuestState(int questIndex = -1);
-    std::uint8_t CheckQuestState(std::uint8_t state = 0xFF);
+    std::uint8_t CheckQuestState(std::uint8_t state = QUEST_STATE_INVALID);
     short FindQuestContext(QUEST_ATTRIBUTE* pQuest, int index);
     bool CheckRequestCondition(QUEST_ATTRIBUTE* pQuest, bool bLastCheck = false);
     bool CheckActCondition(QUEST_ATTRIBUTE* pQuest);
