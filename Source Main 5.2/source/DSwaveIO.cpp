@@ -34,7 +34,7 @@ bool waveIO::LoadWaveHeader(const wchar_t* szFilename)
         return false;
 
     // Open the wave file for reading using buffered I/O.
-    m_hmmio = mmioOpen(szFilename, nullptr, MMIO_ALLOCBUF | MMIO_READ);
+    m_hmmio = mmioOpen(const_cast<wchar_t*>(szFilename), nullptr, MMIO_ALLOCBUF | MMIO_READ);
     if (m_hmmio == nullptr)
     {
         wprintf(L"Cannot find file %s\n", szFilename);
