@@ -1,34 +1,43 @@
-// waveIO.h: interface for the waveIO class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_WAVEIO_H__A0449D63_0097_11D4_A092_A64970C5F176__INCLUDED_)
-#define AFX_WAVEIO_H__A0449D63_0097_11D4_A092_A64970C5F176__INCLUDED_
-
 #pragma once
 
-#define INPUT	0
-#define OUTPUT	1
+#include <windows.h>
+#include <mmsystem.h>
+#include <cstdint>
 
 class waveIO
 {
 public:
-    waveIO(bool IO);
-    virtual ~waveIO();
-    bool LoadWaveHeader(const wchar_t* szFilename);
-    bool WriteWaveHeader(wchar_t* szFilename, PCMWAVEFORMAT wf, int nWaveDateSize);
-    bool CloseWaveFile();
-    WAVEFORMATEX GetWaveFormatEx() { return m_wfex; }
-    bool ReadWaveData(char* buffer, int nSizeOfBuffer);
-    bool WriteWaveData(char* buffer, int nSizeOfBuffer);
-    int GetDataSize() { return m_DataSize; }
-private:
-    HMMIO			m_hmmio;	// Handle to WAVE file
-    WAVEFORMATEX	m_wfex;		// WAVEFORMATEX structure
-    int				m_DataSize;	// Stores size of wave data
-    int				m_DataLeft;
-    int				m_SilentSample;
-    bool			m_IO;
-};
+    enum class Mode : std::uint8_t
+    {
+        Input = 0,
+        Output = 1
+    };
 
-#endif // !defined(AFX_WAVEIO_H__A0449D63_0097_11D4_A092_A64970C5F176__INCLUDED_)
+    explicit waveIO(Mode mode);
+    waveIO();
+    explicit waveIO(bool legacyMode);
+    ~waveIO();
+
+    waveIO(const waveIO&) = delete;
+    waveIO& operator=(const waveIO&) = delete;
+
+    bool LoadWaveHeader(const wchar_t* filename);
+    bool WriteWaveHeader(const wchar_t* filename, const PCMWAVEFORMAT& format, int waveDataSize);
+    bool CloseWaveFile();
+
+    WAVEFORMATEX GetWaveFormatEx() const { return m_wfex; }
+    bool ReadWaveData(char* buffer, int bufferSize);
+    bool WriteWaveData(const char* buffer, int bufferSize);
+    int GetDataSize() const { return m_DataSize; }
+
+private:
+    bool IsInputMode() const noexcept;
+    bool IsOutputMode() const noexcept;
+
+    HMMIO        m_hmmio;
+    WAVEFORMATEX m_wfex;
+    int          m_DataSize;
+    int          m_DataLeft;
+    int          m_SilentSample;
+    Mode         m_mode;
+};

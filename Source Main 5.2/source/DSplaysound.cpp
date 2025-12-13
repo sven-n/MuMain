@@ -508,7 +508,7 @@ HRESULT DirectSoundManager::CreateStaticBuffer(SoundBufferEntry& entry, ESound b
         return E_FAIL;
     }
 
-    std::unique_ptr<waveIO> waveFile = std::make_unique<waveIO>(INPUT);
+    std::unique_ptr<waveIO> waveFile = std::make_unique<waveIO>(waveIO::Mode::Input);
     if (!waveFile->LoadWaveHeader(filename))
     {
         g_ErrorReport.Write(L"CreateStaticBuffer - Failed to load %ls\r\n", filename);

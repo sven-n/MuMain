@@ -1,15 +1,48 @@
-#include "stdafx.h"
 #include "DSwaveIO.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#include <algorithm>
+#include <cstring>
+#include <cwchar>
 
-waveIO::waveIO(bool IO)
+#include <windows.h>
+#include <mmsystem.h>
+
+namespace
 {
-    m_IO = IO;
-    m_hmmio = nullptr;
-    m_SilentSample = 0;  // Default assumes we are dealing with 16bit samples
+constexpr int kWaveHeaderSize = 16;
+constexpr int kSilentSample8Bit = 128;
+
+void ReportWaveWarning(const wchar_t* message, const wchar_t* filename = nullptr)
+{
+    if (filename != nullptr)
+    {
+        std::fwprintf(stderr, L"%ls (%ls)\n", message, filename);
+    }
+    else
+    {
+        std::fwprintf(stderr, L"%ls\n", message);
+    }
+}
+} // namespace
+
+waveIO::waveIO(Mode mode)
+    : m_hmmio(nullptr)
+    , m_wfex{}
+    , m_DataSize(0)
+    , m_DataLeft(0)
+    , m_SilentSample(0)
+    , m_mode(mode)
+{
+}
+
+waveIO::waveIO()
+    : waveIO(Mode::Input)
+{
+}
+
+waveIO::waveIO(bool legacyMode)
+    : waveIO(legacyMode ? Mode::Output : Mode::Input)
+{
 }
 
 waveIO::~waveIO()
@@ -19,225 +52,193 @@ waveIO::~waveIO()
 
 bool waveIO::CloseWaveFile()
 {
-    if (m_hmmio)
+    if (m_hmmio != nullptr)
+    {
         mmioClose(m_hmmio, 0);
-
+        m_hmmio = nullptr;
+    }
     return true;
 }
 
-bool waveIO::LoadWaveHeader(const wchar_t* szFilename)
+bool waveIO::IsInputMode() const noexcept
 {
-    MMCKINFO		ckOutRIFF;          // chunk info. for output RIFF chunk
-    MMCKINFO		ckOut;              // info. for a chunk in output file
+    return m_mode == Mode::Input;
+}
 
-    if (m_IO != INPUT)
+bool waveIO::IsOutputMode() const noexcept
+{
+    return m_mode == Mode::Output;
+}
+
+bool waveIO::LoadWaveHeader(const wchar_t* filename)
+{
+    if (filename == nullptr || !IsInputMode())
+    {
         return false;
+    }
 
-    // Open the wave file for reading using buffered I/O.
-    m_hmmio = mmioOpen(const_cast<wchar_t*>(szFilename), nullptr, MMIO_ALLOCBUF | MMIO_READ);
+    CloseWaveFile();
+
+    m_hmmio = mmioOpenW(const_cast<wchar_t*>(filename), nullptr, MMIO_ALLOCBUF | MMIO_READ);
     if (m_hmmio == nullptr)
     {
-        wprintf(L"Cannot find file %s\n", szFilename);
+        ReportWaveWarning(L"Cannot find wave file", filename);
         return false;
     }
 
-    // Descend the file into the 'RIFF' chunk.
-    if (mmioDescend(m_hmmio, &ckOutRIFF, nullptr, 0) != 0)
+    MMCKINFO riffChunk {};
+    if (mmioDescend(m_hmmio, &riffChunk, nullptr, 0) != 0)
     {
-        mmioClose(m_hmmio, 0);
-        wprintf(L"Cannot read file!\n");
+        ReportWaveWarning(L"Cannot descend into RIFF chunk", filename);
+        CloseWaveFile();
         return false;
     }
 
-    // Make sure the file is a WAVE file.
-    if ((ckOutRIFF.ckid != FOURCC_RIFF) ||
-        (ckOutRIFF.fccType != mmioFOURCC('W', 'A', 'V', 'E')))
+    if (riffChunk.ckid != FOURCC_RIFF || riffChunk.fccType != mmioFOURCC('W', 'A', 'V', 'E'))
     {
-        mmioClose(m_hmmio, 0);
-        wprintf(L"Bad Wave Format!\n");
+        ReportWaveWarning(L"File is not a valid WAVE container", filename);
+        CloseWaveFile();
         return false;
     }
 
-    // Search the file for for the 'fmt ' chunk.
-    ckOut.ckid = mmioFOURCC('f', 'm', 't', ' ');
-    if (mmioDescend(m_hmmio, &ckOut, &ckOutRIFF, MMIO_FINDCHUNK) != 0)
+    MMCKINFO formatChunk {};
+    formatChunk.ckid = mmioFOURCC('f', 'm', 't', ' ');
+    if (mmioDescend(m_hmmio, &formatChunk, &riffChunk, MMIO_FINDCHUNK) != 0)
     {
-        mmioClose(m_hmmio, 0);
-        wprintf(L"Bad Riff Format!\n");
+        ReportWaveWarning(L"Failed to locate fmt chunk", filename);
+        CloseWaveFile();
         return false;
     }
 
-    // Read PCM wave format data from file into WAVEFORMATEX struct.
-    // NOTE: Read ONLY sizeof(PCMWAVEFORMAT) into wf
-    if (mmioRead(m_hmmio, (char*)&m_wfex, sizeof(PCMWAVEFORMAT)) == -1)
+    if (mmioRead(m_hmmio, reinterpret_cast<char*>(&m_wfex), sizeof(PCMWAVEFORMAT)) == -1)
     {
-        mmioClose(m_hmmio, 0);
-        wprintf(L"Bad Riff Format!\n");
+        ReportWaveWarning(L"Failed to read wave format", filename);
+        CloseWaveFile();
         return false;
     }
 
     if (m_wfex.wBitsPerSample == 8)
     {
-        m_SilentSample = 128;
+        m_SilentSample = kSilentSample8Bit;
     }
 
-    // Check it is PCM not some compressed format which we do not cope with..
     if (m_wfex.wFormatTag != WAVE_FORMAT_PCM)
     {
-        mmioClose(m_hmmio, 0);
-        wprintf(L"UnSupported Wave Format!\n");
+        ReportWaveWarning(L"Unsupported wave format (expecting PCM)", filename);
+        CloseWaveFile();
         return false;
     }
 
-    // Ascend the file out of the 'fmt ' chunk.
-    if (mmioAscend(m_hmmio, &ckOut, 0) != 0)
+    if (mmioAscend(m_hmmio, &formatChunk, 0) != 0)
     {
-        mmioClose(m_hmmio, 0);
-        wprintf(L"Cannot read file!\n");
+        ReportWaveWarning(L"Failed to ascend fmt chunk", filename);
+        CloseWaveFile();
         return false;
     }
 
-    // Search the file for the 'data' chunk.
-    ckOut.ckid = mmioFOURCC('d', 'a', 't', 'a');
-    if (mmioDescend(m_hmmio, &ckOut, &ckOutRIFF, MMIO_FINDCHUNK) != 0)
+    MMCKINFO dataChunk {};
+    dataChunk.ckid = mmioFOURCC('d', 'a', 't', 'a');
+    if (mmioDescend(m_hmmio, &dataChunk, &riffChunk, MMIO_FINDCHUNK) != 0)
     {
-        mmioClose(m_hmmio, 0);
-        MessageBox(nullptr, L"Bad Format in Wave file!", L"WaveLoad", MB_OK | MB_ICONSTOP);
-        return FALSE;
+        MessageBoxW(nullptr, L"Bad Format in Wave file!", L"WaveLoad", MB_OK | MB_ICONSTOP);
+        CloseWaveFile();
+        return false;
     }
 
-    m_DataSize = ckOut.cksize;
+    m_DataSize = static_cast<int>(dataChunk.cksize);
     m_DataLeft = m_DataSize;
-
     return true;
 }
 
-bool waveIO::ReadWaveData(char* buffer, int nSizeOfBuffer)
+bool waveIO::ReadWaveData(char* buffer, int bufferSize)
 {
-    int nBytesToRead;
-    int hResult;
-
-    if (m_IO != INPUT)
-        return false;
-
-    // Read in nSizeOfBuffer bytes from the current file pointer location
-    // and store them in buffer (checking for possible end of file)
-    if (m_DataLeft < nSizeOfBuffer)
+    if (!IsInputMode() || buffer == nullptr || bufferSize <= 0 || m_hmmio == nullptr)
     {
-        nBytesToRead = m_DataLeft;
-        // Because our data won't fill up the buffer, lets first fill it with silence
-        memset(buffer, 0, nSizeOfBuffer);
-    }
-    else
-        nBytesToRead = nSizeOfBuffer;
-
-    hResult = mmioRead(m_hmmio, buffer, nBytesToRead);
-    if (hResult < nBytesToRead)
-    {
-        wprintf(L"hResult is %d", hResult);
-        wprintf(L"Failed to read audio data\n");
-        mmioClose(m_hmmio, 0);
         return false;
     }
-    else
+
+    int bytesToRead = bufferSize;
+    if (m_DataLeft < bufferSize)
     {
-        m_DataLeft = (m_DataLeft - nBytesToRead);
+        bytesToRead = m_DataLeft;
+        std::memset(buffer, 0, static_cast<std::size_t>(bufferSize));
     }
 
+    const int readResult = mmioRead(m_hmmio, buffer, bytesToRead);
+    if (readResult < bytesToRead)
+    {
+        ReportWaveWarning(L"Failed to read expected number of bytes");
+        CloseWaveFile();
+        return false;
+    }
+
+    m_DataLeft -= bytesToRead;
     return true;
 }
 
-bool waveIO::WriteWaveData(char* buffer, int nSizeOfBuffer)
+bool waveIO::WriteWaveData(const char* buffer, int bufferSize)
 {
-    int result;
-
-    if (m_IO != OUTPUT)
-        return false;
-
-    // Write nSizeOfBuffer bytes from buffer to our resulting wavefile
-    result = mmioWrite(m_hmmio, buffer, nSizeOfBuffer);
-    if (result != nSizeOfBuffer)
+    if (!IsOutputMode() || buffer == nullptr || bufferSize <= 0 || m_hmmio == nullptr)
     {
-        wprintf(L"Failed to write audio data\n");
-        mmioClose(m_hmmio, 0);
+        return false;
+    }
+
+    const int result = mmioWrite(m_hmmio, const_cast<char*>(buffer), bufferSize);
+    if (result != bufferSize)
+    {
+        ReportWaveWarning(L"Failed to write audio data");
+        CloseWaveFile();
         return false;
     }
     return true;
 }
 
-bool waveIO::WriteWaveHeader(wchar_t* szFilename, PCMWAVEFORMAT wf, int nWaveDataSize)
+bool waveIO::WriteWaveHeader(const wchar_t* filename, const PCMWAVEFORMAT& format, int waveDataSize)
 {
-    int	nRIFFSize, nFormatSize, result;
-
-    if (m_IO != OUTPUT)
+    if (filename == nullptr || !IsOutputMode())
+    {
         return false;
+    }
 
-    m_hmmio = mmioOpen(szFilename, nullptr, MMIO_CREATE | MMIO_WRITE);
+    CloseWaveFile();
 
+    m_hmmio = mmioOpenW(const_cast<wchar_t*>(filename), nullptr, MMIO_CREATE | MMIO_WRITE);
     if (m_hmmio == nullptr)
     {
-        wprintf(L"Failed to create output file\n");
+        ReportWaveWarning(L"Failed to create output wave file", filename);
         return false;
     }
 
-    nFormatSize = 16;
-    nRIFFSize = 12 + sizeof(PCMWAVEFORMAT) + 8 + nWaveDataSize;
+    const int riffSize = 12 + sizeof(PCMWAVEFORMAT) + 8 + waveDataSize;
 
-    if ((result = mmioWrite(m_hmmio, "RIFF", 4)) != 4)
+    if (mmioWrite(m_hmmio, "RIFF", 4) != 4 ||
+        mmioWrite(m_hmmio, reinterpret_cast<const char*>(&riffSize), 4) != 4 ||
+        mmioWrite(m_hmmio, "WAVE", 4) != 4)
     {
-        wprintf(L"Failed to write RIFF\n");
-        mmioClose(m_hmmio, 0);
+        ReportWaveWarning(L"Failed to write RIFF header", filename);
+        CloseWaveFile();
         return false;
     }
 
-    if ((result = mmioWrite(m_hmmio, (char*)&nRIFFSize, 4)) != 4)
+    if (mmioWrite(m_hmmio, "fmt ", 4) != 4 ||
+        mmioWrite(m_hmmio, reinterpret_cast<const char*>(&kWaveHeaderSize), 4) != 4 ||
+        mmioWrite(m_hmmio, reinterpret_cast<const char*>(&format), sizeof(format)) != sizeof(format))
     {
-        wprintf(L"Failed to write RIFF size\n");
-        mmioClose(m_hmmio, 0);
+        ReportWaveWarning(L"Failed to write fmt chunk", filename);
+        CloseWaveFile();
         return false;
     }
 
-    if ((result = mmioWrite(m_hmmio, "WAVE", 4)) != 4)
+    if (mmioWrite(m_hmmio, "data", 4) != 4 ||
+        mmioWrite(m_hmmio, reinterpret_cast<const char*>(&waveDataSize), 4) != 4)
     {
-        wprintf(L"Failed to write WAVE\n");
-        mmioClose(m_hmmio, 0);
+        ReportWaveWarning(L"Failed to write data chunk header", filename);
+        CloseWaveFile();
         return false;
     }
 
-    if ((result = mmioWrite(m_hmmio, "fmt ", 4)) != 4)
-    {
-        wprintf(L"Failed to write fmt \n");
-        mmioClose(m_hmmio, 0);
-        return false;
-    }
-
-    if ((result = mmioWrite(m_hmmio, (char*)&nFormatSize, 4)) != 4)
-    {
-        wprintf(L"Failed to write fmt size\n");
-        mmioClose(m_hmmio, 0);
-        return false;
-    }
-
-    if ((result = mmioWrite(m_hmmio, (char*)&wf, sizeof(wf))) != sizeof(wf))
-    {
-        wprintf(L"Failed to write Wave Format header\n");
-        mmioClose(m_hmmio, 0);
-        return false;
-    }
-
-    if ((result = mmioWrite(m_hmmio, "data", 4)) != 4)
-    {
-        wprintf(L"Failed to write data\n");
-        mmioClose(m_hmmio, 0);
-        return false;
-    }
-
-    if ((result = mmioWrite(m_hmmio, (char*)&nWaveDataSize, 4)) != 4)
-    {
-        wprintf(L"Failed to write data size\n");
-        mmioClose(m_hmmio, 0);
-        return false;
-    }
-
+    m_wfex = *reinterpret_cast<const WAVEFORMATEX*>(&format);
+    m_DataSize = waveDataSize;
+    m_DataLeft = waveDataSize;
     return true;
 }
