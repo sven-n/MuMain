@@ -10,6 +10,7 @@
 #include <array>
 #include <cstdint>
 #include <codecvt>
+#include <cstring>
 #include <fstream>
 #include <iterator>
 #include <locale>
@@ -97,7 +98,7 @@ bool CBitmapCache::Create()
     configureCache(m_QuickCache[QUICK_CACHE_PLAYER], BITMAP_PLAYER_TEXTURE_BEGIN, BITMAP_PLAYER_TEXTURE_END);
 
     m_pNullBitmap = new BITMAP_t;
-    memset(m_pNullBitmap, 0, sizeof(BITMAP_t));
+    *m_pNullBitmap = {};
 
     m_ManageTimer.SetTimer(1500);
 
@@ -118,7 +119,7 @@ void CBitmapCache::Add(GLuint uiBitmapIndex, BITMAP_t* pBitmap)
 {
     for (auto& cache : m_QuickCache)
     {
-        if (uiBitmapIndex > cache.dwBitmapIndexMin && uiBitmapIndex < cache.dwBitmapIndexMax)
+        if (uiBitmapIndex >= cache.dwBitmapIndexMin && uiBitmapIndex < cache.dwBitmapIndexMax)
         {
             const auto index = static_cast<std::size_t>(uiBitmapIndex - cache.dwBitmapIndexMin);
             cache.bitmaps[index] = pBitmap ? pBitmap : m_pNullBitmap;
@@ -142,7 +143,7 @@ void CBitmapCache::Remove(GLuint uiBitmapIndex)
 {
     for (int i = 0; i < NUMBER_OF_QUICK_CACHE; i++)
     {
-        if (uiBitmapIndex > m_QuickCache[i].dwBitmapIndexMin && uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
+        if (uiBitmapIndex >= m_QuickCache[i].dwBitmapIndexMin && uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
         {
             const auto dwVI = static_cast<std::size_t>(uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin);
             m_QuickCache[i].bitmaps[dwVI] = nullptr;
@@ -271,7 +272,7 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
 {
     for (int i = 0; i < NUMBER_OF_QUICK_CACHE; i++)
     {
-        if (uiBitmapIndex > m_QuickCache[i].dwBitmapIndexMin &&
+        if (uiBitmapIndex >= m_QuickCache[i].dwBitmapIndexMin &&
             uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
         {
             const auto dwVI = static_cast<std::size_t>(uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin);
@@ -634,7 +635,6 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     const int textureHeight = NextPowerOfTwo(jpegHeight, MAX_HEIGHT);
 
     auto pNewBitmap = std::make_unique<BITMAP_t>();
-    memset(pNewBitmap.get(), 0, sizeof(BITMAP_t));
 
     pNewBitmap->BitmapIndex = uiBitmapIndex;
 
@@ -709,9 +709,10 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
 
     int index = 12;
     index += 4;
-    const std::int16_t nx = *reinterpret_cast<const std::int16_t*>(&pakBuffer[index]); index += 2;
-    const std::int16_t ny = *reinterpret_cast<const std::int16_t*>(&pakBuffer[index]); index += 2;
-    const char bit = *reinterpret_cast<const char*>(&pakBuffer[index]); index += 1;
+    std::int16_t nx, ny;
+    std::memcpy(&nx, &pakBuffer[index], sizeof(nx)); index += 2;
+    std::memcpy(&ny, &pakBuffer[index], sizeof(ny)); index += 2;
+    const char bit = pakBuffer[index]; index += 1;
     index += 1;
 
     if (bit != 32 || nx <= 0 || ny <= 0 || nx > MAX_WIDTH || ny > MAX_HEIGHT)
@@ -723,7 +724,6 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     const int Height = NextPowerOfTwo(ny, MAX_HEIGHT);
 
     auto pNewBitmap = std::make_unique<BITMAP_t>();
-    memset(pNewBitmap.get(), 0, sizeof(BITMAP_t));
 
     pNewBitmap->BitmapIndex = uiBitmapIndex;
 
