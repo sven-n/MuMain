@@ -6,10 +6,10 @@
 
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
-#include "zzztexture.h"
+#include "ZzzTexture.h"
 #include "ZzzBMD.h"
 #include "ZzzScene.h"
-#include "zzzEffect.h"
+#include "ZzzEffect.h"
 #include "UIManager.h"
 #include "CSChaosCastle.h"
 
@@ -19,6 +19,11 @@
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <random>
+
 extern int g_iChatInputType;
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
 extern  int g_iActionObjectType;
@@ -26,12 +31,103 @@ extern  int g_iActionWorld;
 extern  int g_iActionTime;
 extern  float g_fActionObjectVelocity;
 
-//const   int     g_iChaosCastleLimitArea[3][4] = { { 24, 76, 43, 107 }, { 26, 78, 41, 105 }, { 28, 80, 39, 103 } };
-const   int     g_iChaosCastleLimitArea1[16] = { 23, 75, 44, 76, 43, 77, 44, 108, 23, 107, 42, 108, 23, 77, 24, 106 };
-const   int     g_iChaosCastleLimitArea2[16] = { 25, 77, 42, 78, 41, 79, 42, 106, 25, 105, 40, 106, 25, 79, 26, 104 };
-const   int     g_iChaosCastleLimitArea3[16] = { 27, 79, 40, 80, 39, 81, 40, 104, 27, 103, 38, 104, 27, 81, 28, 102 };
-static  BYTE    g_byCurrCastleLevel = 255;
-static  bool    g_bActionMatch = true;
+namespace
+{
+using CastleArea = std::array<int, 4>;
+using CastleAreaSet = std::array<CastleArea, 4>;
+
+constexpr CastleAreaSet gChaosCastleLimitArea1{{
+    CastleArea{23, 75, 44, 76},
+    CastleArea{43, 77, 44, 108},
+    CastleArea{23, 107, 42, 108},
+    CastleArea{23, 77, 24, 106},
+}};
+
+constexpr CastleAreaSet gChaosCastleLimitArea2{{
+    CastleArea{25, 77, 42, 78},
+    CastleArea{41, 79, 42, 106},
+    CastleArea{25, 105, 40, 106},
+    CastleArea{25, 79, 26, 104},
+}};
+
+constexpr CastleAreaSet gChaosCastleLimitArea3{{
+    CastleArea{27, 79, 40, 80},
+    CastleArea{39, 81, 40, 104},
+    CastleArea{27, 103, 38, 104},
+    CastleArea{27, 81, 28, 102},
+}};
+
+constexpr std::array<const CastleAreaSet*, 9> kCastleLimitAreas{{
+    &gChaosCastleLimitArea1, // 0
+    nullptr,                 // 1
+    nullptr,                 // 2
+    &gChaosCastleLimitArea2, // 3
+    nullptr,                 // 4
+    nullptr,                 // 5
+    &gChaosCastleLimitArea3, // 6
+    nullptr,                 // 7
+    nullptr,                 // 8
+}};
+
+enum class CastleLevel : std::uint8_t
+{
+    Zero = 0,
+    One = 1,
+    Two = 2,
+    Three = 3,
+    Four = 4,
+    Five = 5,
+    Six = 6,
+    Seven = 7,
+    Eight = 8,
+    Invalid = 255,
+};
+
+constexpr std::uint8_t LevelValue(CastleLevel level)
+{
+    return static_cast<std::uint8_t>(level);
+}
+
+constexpr int kActionTriggerTime = 30;
+
+CastleLevel g_currentCastleLevel = CastleLevel::Invalid;
+bool g_actionMatch = true;
+
+std::mt19937& RandomEngine()
+{
+    thread_local static std::mt19937 engine{std::random_device{}()};
+    return engine;
+}
+
+int RandomInt(int minInclusive, int maxInclusive)
+{
+    std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
+    return dist(RandomEngine());
+}
+
+float RandomFloat(float minInclusive, float maxInclusive)
+{
+    std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
+    return dist(RandomEngine());
+}
+
+const CastleAreaSet* SelectLimitArea(CastleLevel level)
+{
+    const auto index = LevelValue(level);
+    if (index < kCastleLimitAreas.size())
+    {
+        return kCastleLimitAreas[index];
+    }
+    return nullptr;
+}
+
+bool IsWithinLimitArea(const CastleAreaSet& areas, int xi, int yi)
+{
+    return std::any_of(areas.begin(), areas.end(), [xi, yi](const CastleArea& area) {
+        return xi >= area[0] && xi <= area[2] && yi >= area[1] && yi <= area[3];
+    });
+}
+} // namespace
 
 void    ClearChaosCastleHelper(CHARACTER* c)
 {
@@ -94,7 +190,7 @@ bool MoveChaosCastleObjectSetting(int& objCount, int object)
 
     if (rand_fps_check(10) && object)
     {
-        objCount = rand() % object;
+        objCount = RandomInt(0, object - 1);
         return true;
     }
 
@@ -102,11 +198,11 @@ bool MoveChaosCastleObjectSetting(int& objCount, int object)
     {
         vec3_t Position;
 
-        Position[0] = Hero->Object.Position[0] + rand() % 800 - 400.f;
-        Position[1] = Hero->Object.Position[1] + rand() % 800 - 400.f;
+        Position[0] = Hero->Object.Position[0] + static_cast<float>(RandomInt(-400, 399));
+        Position[1] = Hero->Object.Position[1] + static_cast<float>(RandomInt(-400, 399));
         Position[2] = Hero->Object.Position[2] - 150.f;
 
-        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Hero->Object.Angle, 9, NULL, rand() % 10 + 50.f);
+        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Hero->Object.Angle, 9, NULL, static_cast<float>(RandomInt(50, 59)));
     }
 
     return true;
@@ -120,11 +216,11 @@ bool MoveChaosCastleObject(OBJECT* o, int& object, int& visibleObject)
         if (o->Type == 3)
         {
             visibleObject++;
-            if (g_bActionMatch)
+            if (g_actionMatch)
             {
                 o->LifeTime = 10;
                 o->PKKey = 1;
-                g_bActionMatch = false;
+                g_actionMatch = false;
             }
             else if (objectCount)
             {
@@ -159,29 +255,29 @@ bool MoveChaosCastleAllObject(OBJECT* o)
     case    27:
     case    28:
     case    29:
-        if (g_byCurrCastleLevel == 7)
+        if (g_currentCastleLevel == CastleLevel::Seven)
         {
-            if (g_iActionTime >= 30)
+            if (g_iActionTime >= kActionTriggerTime)
             {
                 vec3_t Light = { 1.f, 1.f, 1.f };
 
-                Position[0] = o->Position[0] + (rand() % 300 - 150.f);
+                Position[0] = o->Position[0] + static_cast<float>(RandomInt(-150, 149));
                 Position[1] = o->Position[1];
                 Position[2] = Hero->Object.Position[2];
                 CreateParticle(BITMAP_SMOKE + 4, Position, o->Angle, Light, 0, 1.5f);
 
-                EarthQuake = (float)(rand() % 3 - 3) * 0.1f;
+                EarthQuake = static_cast<float>(RandomInt(-3, -1)) * 0.1f;
             }
             else if (g_iActionTime <= 0)
             {
                 o->HiddenMesh = -2;
-                g_byCurrCastleLevel = 8;
+                g_currentCastleLevel = CastleLevel::Eight;
 
                 ClearActionObject();
             }
             else
             {
-                o->Position[2] = o->StartPosition[2] - ((30 - g_iActionTime) * g_fActionObjectVelocity);
+                o->Position[2] = o->StartPosition[2] - ((kActionTriggerTime - g_iActionTime) * g_fActionObjectVelocity);
                 g_fActionObjectVelocity += 0.4f;
             }
         }
@@ -193,23 +289,23 @@ bool MoveChaosCastleAllObject(OBJECT* o)
     case    33:
     case    34:
     case    35:
-        if (g_byCurrCastleLevel == 4)
+        if (g_currentCastleLevel == CastleLevel::Four)
         {
-            if (g_iActionTime >= 30)
+            if (g_iActionTime >= kActionTriggerTime)
             {
                 vec3_t Light = { 1.f, 1.f, 1.f };
 
-                Position[0] = o->Position[0] + (rand() % 300 - 150.f);
+                Position[0] = o->Position[0] + static_cast<float>(RandomInt(-150, 149));
                 Position[1] = o->Position[1];
                 Position[2] = Hero->Object.Position[2];
                 CreateParticle(BITMAP_SMOKE + 4, Position, o->Angle, Light, 0, 1.5f);
 
-                EarthQuake = (float)(rand() % 3 - 3) * 0.1f;
+                EarthQuake = static_cast<float>(RandomInt(-3, -1)) * 0.1f;
             }
             else if (g_iActionTime <= 0)
             {
                 o->HiddenMesh = -2;
-                g_byCurrCastleLevel = 5;
+                g_currentCastleLevel = CastleLevel::Five;
 
                 ClearActionObject();
             }
@@ -232,23 +328,23 @@ bool MoveChaosCastleAllObject(OBJECT* o)
     case    15:
     case    16:
     case    17:
-        if (g_byCurrCastleLevel == 1)
+        if (g_currentCastleLevel == CastleLevel::One)
         {
-            if (g_iActionTime >= 30)
+            if (g_iActionTime >= kActionTriggerTime)
             {
                 vec3_t Light = { 1.f, 1.f, 1.f };
 
-                Position[0] = o->Position[0] + (rand() % 300 - 150.f);
+                Position[0] = o->Position[0] + static_cast<float>(RandomInt(-150, 149));
                 Position[1] = o->Position[1];
                 Position[2] = Hero->Object.Position[2];
                 CreateParticle(BITMAP_SMOKE + 4, Position, o->Angle, Light, 0, 1.5f);
 
-                EarthQuake = (float)(rand() % 3 - 3) * 0.1f;
+                EarthQuake = static_cast<float>(RandomInt(-3, -1)) * 0.1f;
             }
             else if (g_iActionTime <= 0)
             {
                 o->HiddenMesh = -2;
-                g_byCurrCastleLevel = 2;
+                g_currentCastleLevel = CastleLevel::Two;
 
                 ClearActionObject();
             }
@@ -397,7 +493,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
     case    19:
     case    20:
     case    21:
-        if (g_byCurrCastleLevel == 7 || g_byCurrCastleLevel == 8)
+        if (g_currentCastleLevel == CastleLevel::Seven || g_currentCastleLevel == CastleLevel::Eight)
         {
             o->HiddenMesh = -1;
         }
@@ -413,11 +509,11 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
     case    27:
     case    28:
     case    29:
-        if (g_byCurrCastleLevel == 4 || g_byCurrCastleLevel == 5)
+        if (g_currentCastleLevel == CastleLevel::Four || g_currentCastleLevel == CastleLevel::Five)
         {
             o->HiddenMesh = -1;
         }
-        else if (g_byCurrCastleLevel >= 8)
+        else if (LevelValue(g_currentCastleLevel) >= LevelValue(CastleLevel::Eight))
         {
             o->HiddenMesh = -2;
         }
@@ -429,11 +525,11 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
     case    33:
     case    34:
     case    35:
-        if (g_byCurrCastleLevel == 1 || g_byCurrCastleLevel == 2)
+        if (g_currentCastleLevel == CastleLevel::One || g_currentCastleLevel == CastleLevel::Two)
         {
             o->HiddenMesh = -1;
         }
-        else if (g_byCurrCastleLevel >= 5)
+        else if (LevelValue(g_currentCastleLevel) >= LevelValue(CastleLevel::Five))
         {
             o->HiddenMesh = -2;
         }
@@ -449,9 +545,9 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
             b->TransformPosition(BoneTransform[1], p, Position);
             if ((int)o->LifeTime == 10)
             {
-                CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL, 60.f + rand() % 10);
+                CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL, 60.f + static_cast<float>(RandomInt(0, 9)));
 
-                int randValue = rand() % 2;
+                int randValue = RandomInt(0, 1);
                 PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + randValue));
                 o->LifeTime = 9.9f;
             }
@@ -472,7 +568,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
     case    15:
     case    16:
     case    17:
-        if (g_byCurrCastleLevel >= 2 && g_byCurrCastleLevel != 255)
+        if (LevelValue(g_currentCastleLevel) >= LevelValue(CastleLevel::Two) && g_currentCastleLevel != CastleLevel::Invalid)
         {
             o->HiddenMesh = -2;
         }
@@ -484,52 +580,31 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
 
 void RenderTerrainVisual(int xi, int yi)
 {
-    if (gMapManager.InChaosCastle() == false || rand() % 8) return;
-
-    const int* Area = NULL;
-    bool  InArea = false;
-
-    if (g_byCurrCastleLevel == 0)
-    {
-        Area = &g_iChaosCastleLimitArea1[0];
-    }
-    else if (g_byCurrCastleLevel == 3)
-    {
-        Area = &g_iChaosCastleLimitArea2[0];
-    }
-    else if (g_byCurrCastleLevel == 6)
-    {
-        Area = &g_iChaosCastleLimitArea3[0];
-    }
-    else
+    if (gMapManager.InChaosCastle() == false || RandomInt(0, 7) != 0)
     {
         return;
     }
 
-    for (int i = 0; i < 4; i++)
+    const CastleAreaSet* areaSet = SelectLimitArea(g_currentCastleLevel);
+    if (areaSet == nullptr)
     {
-        if (xi >= Area[0] && xi <= Area[2] && yi >= Area[1] && yi <= Area[3])
-        {
-            InArea = true;
-            break;
-        }
-        Area += 4;
+        return;
     }
 
-    if (InArea)
+    if (IsWithinLimitArea(*areaSet, xi, yi))
     {
         vec3_t Light = { 1.f, 1.f, 1.f };
         vec3_t Angle = { 0.f, 0.f, 0.f };
         vec3_t Position;
 
-        Position[0] = (xi * TERRAIN_SCALE) + (rand() % 30 - 15.f);
-        Position[1] = (yi * TERRAIN_SCALE) + (rand() % 30 - 15.f);
+        Position[0] = (xi * TERRAIN_SCALE) + static_cast<float>(RandomInt(-15, 14));
+        Position[1] = (yi * TERRAIN_SCALE) + static_cast<float>(RandomInt(-15, 14));
         Position[2] = Hero->Object.Position[2];
         CreateParticleFpsChecked(BITMAP_SMOKE + 4, Position, Angle, Light, 0, 1.5f);
 
         if (rand_fps_check(5))
         {
-            EarthQuake = (float)(rand() % 3 - 3) * 0.1f;
+            EarthQuake = static_cast<float>(RandomInt(-3, -1)) * 0.1f;
         }
     }
 }
