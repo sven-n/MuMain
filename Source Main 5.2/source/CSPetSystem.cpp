@@ -318,10 +318,7 @@ CSPetDarkSpirit::CSPetDarkSpirit(CHARACTER* c)
     m_PetCharacter.Object.CurrentAction = 0;
 }
 
-CSPetDarkSpirit::~CSPetDarkSpirit(void)
-{
-    SAFE_DELETE_ARRAY(m_PetCharacter.Object.BoneTransform);
-}
+CSPetDarkSpirit::~CSPetDarkSpirit(void) = default;
 
 void CSPetDarkSpirit::MovePet(void)
 {
