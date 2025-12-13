@@ -1,40 +1,46 @@
-// GambleSystem.h: interface for the GembleSystem class.
+// GambleSystem.h: interface for the GambleSystem class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-typedef struct _buyItemInfo
+#include <cstdint>
+
+struct BUYITEMINFO
 {
-    int ItemIndex;
-    DWORD ItemCost;
+    std::int32_t ItemIndex{0};
+    std::uint32_t ItemCost{0};
+};
+using LPBUYITEMINFO = BUYITEMINFO*;
 
-    _buyItemInfo()
-    {
-        ItemIndex = 0;
-        ItemCost = 0;
-    }
-}BUYITEMINFO, * LPBUYITEMINFO;
-
-class GambleSystem
+class GambleSystem final
 {
-private:
-    bool m_isGambleShop;
-    BYTE m_byBuyItemPos;
-
-    BUYITEMINFO	m_itemInfo;
-
 public:
+    using BuyItemInfo = BUYITEMINFO;
+
     static GambleSystem& Instance();
 
-    virtual ~GambleSystem();
+    GambleSystem(const GambleSystem&) = delete;
+    GambleSystem& operator=(const GambleSystem&) = delete;
+    GambleSystem(GambleSystem&&) = delete;
+    GambleSystem& operator=(GambleSystem&&) = delete;
+
+    ~GambleSystem() = default;
 
     void Init();
 
-    void SetGambleShop(bool isGambleshop = true) { m_isGambleShop = isGambleshop; }
-    bool IsGambleShop() { return m_isGambleShop; }
+    void SetGambleShop(bool isGambleShop = true) { m_isGambleShop = isGambleShop; }
+    bool IsGambleShop() const { return m_isGambleShop; }
 
-    void SetBuyItemInfo(int index, DWORD cost) { m_itemInfo.ItemIndex = index; m_itemInfo.ItemCost = cost; }
+    void SetBuyItemInfo(std::int32_t index, std::uint32_t cost);
     LPBUYITEMINFO GetBuyItemInfo() { return &m_itemInfo; }
+    const BuyItemInfo& GetBuyItemInfoConst() const { return m_itemInfo; }
+
+    void SetBuyItemPosition(std::uint8_t position) { m_buyItemPosition = position; }
+    std::uint8_t GetBuyItemPosition() const { return m_buyItemPosition; }
 
 private:
-    GambleSystem() { Init(); }
+    GambleSystem();
+
+    bool m_isGambleShop{false};
+    std::uint8_t m_buyItemPosition{0};
+    BuyItemInfo m_itemInfo{};
 };
