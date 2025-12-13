@@ -16,10 +16,14 @@
 #include "ZzzLodTerrain.h"
 #include "CSParts.h"
 
+#include <memory>
+
 namespace
 {
 constexpr float kRenderableAlphaThreshold = 0.01f;
 constexpr int kDefaultBoneIndex = 20;
+constexpr int kDefaultLifetimeTicks = 30;
+constexpr float kDefaultVelocity = 0.5f;
 
 bool ShouldAssignWebzenPart(CHARACTER& character)
 {
@@ -34,28 +38,28 @@ bool ShouldHideCastleMarks(const CHARACTER& character)
     return isCastleMark && !battleCastle::IsBattleCastleStart();
 }
 
-CSIPartsMDL* CreatePartsByType(int etcPart)
+std::unique_ptr<CSIPartsMDL> CreatePartsByType(int etcPart)
 {
     switch (etcPart)
     {
     case PARTS_WEBZEN:
-        return new CSParts(MODEL_WEBZEN_MARK, kDefaultBoneIndex, false, 70.f, -5.f, 0.f, 0.f, 0.f, 45.f);
+        return std::make_unique<CSParts>(MODEL_WEBZEN_MARK, kDefaultBoneIndex, false, 70.f, -5.f, 0.f, 0.f, 0.f, 45.f);
     case PARTS_ATTACK_TEAM_MARK:
-        return new CSParts2D(BITMAP_FORMATION_MARK, 0, kDefaultBoneIndex, 120.f, 0.f, 0.f);
+        return std::make_unique<CSParts2D>(BITMAP_FORMATION_MARK, 0, kDefaultBoneIndex, 120.f, 0.f, 0.f);
     case PARTS_ATTACK_TEAM_MARK2:
-        return new CSParts2D(BITMAP_FORMATION_MARK, 1, kDefaultBoneIndex, 120.f, 0.f, 0.f);
+        return std::make_unique<CSParts2D>(BITMAP_FORMATION_MARK, 1, kDefaultBoneIndex, 120.f, 0.f, 0.f);
     case PARTS_ATTACK_TEAM_MARK3:
-        return new CSParts2D(BITMAP_FORMATION_MARK, 2, kDefaultBoneIndex, 120.f, 0.f, 0.f);
+        return std::make_unique<CSParts2D>(BITMAP_FORMATION_MARK, 2, kDefaultBoneIndex, 120.f, 0.f, 0.f);
     case PARTS_ATTACK_KING_TEAM_MARK:
-        return new CSParts2D(BITMAP_FORMATION_MARK, 3, kDefaultBoneIndex, 120.f, 0.f, 0.f);
+        return std::make_unique<CSParts2D>(BITMAP_FORMATION_MARK, 3, kDefaultBoneIndex, 120.f, 0.f, 0.f);
     case PARTS_ATTACK_KING_TEAM_MARK2:
-        return new CSParts2D(BITMAP_FORMATION_MARK, 4, kDefaultBoneIndex, 120.f, 0.f, 0.f);
+        return std::make_unique<CSParts2D>(BITMAP_FORMATION_MARK, 4, kDefaultBoneIndex, 120.f, 0.f, 0.f);
     case PARTS_ATTACK_KING_TEAM_MARK3:
-        return new CSParts2D(BITMAP_FORMATION_MARK, 5, kDefaultBoneIndex, 120.f, 0.f, 0.f);
+        return std::make_unique<CSParts2D>(BITMAP_FORMATION_MARK, 5, kDefaultBoneIndex, 120.f, 0.f, 0.f);
     case PARTS_DEFENSE_TEAM_MARK:
-        return new CSParts2D(BITMAP_FORMATION_MARK, 6, kDefaultBoneIndex, 120.f, 0.f, 0.f);
+        return std::make_unique<CSParts2D>(BITMAP_FORMATION_MARK, 6, kDefaultBoneIndex, 120.f, 0.f, 0.f);
     case PARTS_DEFENSE_KING_TEAM_MARK:
-        return new CSParts2D(BITMAP_FORMATION_MARK, 7, kDefaultBoneIndex, 120.f, 0.f, 0.f);
+        return std::make_unique<CSParts2D>(BITMAP_FORMATION_MARK, 7, kDefaultBoneIndex, 120.f, 0.f, 0.f);
     default:
         return nullptr;
     }
@@ -76,7 +80,7 @@ void InitializeCommonObjectState(OBJECT& object, int type, bool billboard)
     object.BlendMesh = -1;
     object.BlendMeshLight = 1.f;
     object.Scale = 1.f;
-    object.LifeTime = 30;
+    object.LifeTime = kDefaultLifetimeTicks;
     object.Alpha = 1.f;
     object.AlphaTarget = 1.f;
     object.EnableShadow = false;
@@ -84,7 +88,7 @@ void InitializeCommonObjectState(OBJECT& object, int type, bool billboard)
     object.PriorAction = 0;
     object.PriorAnimationFrame = 0.f;
     object.AnimationFrame = 0.f;
-    object.Velocity = 0.5f;
+    object.Velocity = kDefaultVelocity;
     object.bBillBoard = billboard;
 
     g_CharacterClearBuff((&object));
@@ -111,9 +115,9 @@ void CreatePartsFactory(CHARACTER* c)
 
     if (c->m_pParts == nullptr && c->EtcPart != 0)
     {
-        if (CSIPartsMDL* newParts = CreatePartsByType(c->EtcPart))
+        if (auto newParts = CreatePartsByType(c->EtcPart))
         {
-            c->m_pParts = newParts;
+            c->m_pParts = newParts.release();
         }
     }
 }
