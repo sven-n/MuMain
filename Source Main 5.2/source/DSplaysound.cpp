@@ -20,9 +20,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <cwchar>
+#include <cstring>
 #include <memory>
 #include <mutex>
 #include <thread>
+#include <vector>
 
 #include <objbase.h>
 #include <dsound.h>
@@ -31,11 +33,6 @@
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
 #include "DSPlaySound.h"
-
-bool g_EnableSound = false;
-bool g_Enable3DSound = false;
-int SoundLoadCount = 0;
-long g_MasterVolume = 0L;
 
 namespace
 {
@@ -65,6 +62,8 @@ struct SoundBufferEntry
     int activeChannel = 0;
     int maxChannels = 0;
     bool enable3D = false;
+    std::vector<std::uint8_t> waveData {};
+    DWORD waveDataSize = 0;
 };
 
 class DirectSoundManager
@@ -95,6 +94,7 @@ public:
 
 private:
     HRESULT CreateStaticBuffer(SoundBufferEntry& entry, ESound bufferId, const wchar_t* filename, bool enable3D);
+    HRESULT CopyWaveDataToBuffer(SoundBufferEntry& entry, int bufferId, int channel);
     void ResetEntry(SoundBufferEntry& entry);
     bool IsValidBufferIndex(int bufferId) const noexcept;
     bool IsValidChannelIndex(int channel) const noexcept;
@@ -109,6 +109,10 @@ private:
     std::array<SoundBufferEntry, MAX_BUFFER> entries_ {};
     std::atomic<bool> comInitialized_ { false };
     std::uint32_t bufferBytes_ = 0;
+    bool enableSound_ = false;
+    bool enable3DSound_ = false;
+    int loadCount_ = 0;
+    long masterVolume_ = 0L;
 };
 
 DirectSoundManager& Manager()
@@ -123,7 +127,7 @@ HRESULT DirectSoundManager::Initialize(HWND windowHandle)
 
     if (device_)
     {
-        g_EnableSound = true;
+        enableSound_ = true;
         return S_OK;
     }
 
@@ -192,7 +196,7 @@ HRESULT DirectSoundManager::Initialize(HWND windowHandle)
     }
 
     bufferBytes_ = 0;
-    g_EnableSound = true;
+    enableSound_ = true;
     return S_OK;
 }
 
@@ -203,8 +207,8 @@ void DirectSoundManager::Shutdown()
     ReleaseAllBuffers();
     listener_.reset();
     device_.reset();
-    g_EnableSound = false;
-    g_Enable3DSound = false;
+    enableSound_ = false;
+    enable3DSound_ = false;
     CoUninitializeIfNeeded();
 }
 
@@ -220,17 +224,17 @@ void DirectSoundManager::SetEnabled(bool enabled)
 
 bool DirectSoundManager::IsEnabled() const noexcept
 {
-    return g_EnableSound;
+    return enableSound_;
 }
 
 void DirectSoundManager::Set3DEnabled(bool enabled)
 {
-    g_Enable3DSound = enabled;
+    enable3DSound_ = enabled;
 }
 
 bool DirectSoundManager::Is3DEnabled() const noexcept
 {
-    return g_Enable3DSound;
+    return enable3DSound_;
 }
 
 HRESULT DirectSoundManager::LoadWaveFile(ESound bufferId, const wchar_t* filename, int maxChannel, bool enable3D)
@@ -255,23 +259,24 @@ HRESULT DirectSoundManager::LoadWaveFile(ESound bufferId, const wchar_t* filenam
     }
 
     const bool enable3DBuffer = enable3D && Is3DEnabled();
-    HRESULT hr = CreateStaticBuffer(entry, bufferId, filename, enable3DBuffer);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
     entry.activeChannel = 0;
     entry.maxChannels = clampedChannels;
     entry.enable3D = enable3DBuffer;
+
+    HRESULT hr = CreateStaticBuffer(entry, bufferId, filename, enable3DBuffer);
+    if (FAILED(hr))
+    {
+        ResetEntry(entry);
+        return hr;
+    }
     entry.name.fill(L'\0');
     if (filename != nullptr)
     {
         wcsncpy_s(entry.name.data(), entry.name.size(), filename, _TRUNCATE);
     }
 
-    ++SoundLoadCount;
-    SetVolume(bufferId, g_MasterVolume);
+    ++loadCount_;
+    SetVolume(bufferId, masterVolume_);
     return S_OK;
 }
 
@@ -285,9 +290,9 @@ HRESULT DirectSoundManager::ReleaseBuffer(ESound bufferId)
     std::lock_guard lock(mutex_);
     auto& entry = entries_[bufferId];
     ResetEntry(entry);
-    if (SoundLoadCount > 0)
+    if (loadCount_ > 0)
     {
-        --SoundLoadCount;
+        --loadCount_;
     }
     return S_OK;
 }
@@ -298,7 +303,7 @@ void DirectSoundManager::ReleaseAllBuffers()
     {
         ResetEntry(entries_[i]);
     }
-    SoundLoadCount = 0;
+    loadCount_ = 0;
 }
 
 HRESULT DirectSoundManager::PlayBuffer(ESound bufferId, OBJECT* object, bool looped)
@@ -415,6 +420,17 @@ HRESULT DirectSoundManager::RestoreBuffers(int bufferId, int channel)
         }
     } while (hr == DSERR_BUFFERLOST);
 
+    if (SUCCEEDED(hr))
+    {
+        auto& entry = entries_[bufferId];
+        hr = CopyWaveDataToBuffer(entry, bufferId, channel);
+        if (FAILED(hr))
+        {
+            g_ErrorReport.Write(L"RestoreBuffers - CopyWaveDataToBuffer failed for %d channel %d (0x%08X)\r\n", bufferId, channel, hr);
+            return hr;
+        }
+    }
+
     return hr;
 }
 
@@ -437,10 +453,10 @@ void DirectSoundManager::SetVolume(ESound bufferId, long volume)
 
 void DirectSoundManager::SetMasterVolume(long volume)
 {
-    g_MasterVolume = std::clamp<long>(volume, DSBVOLUME_MIN, DSBVOLUME_MAX);
+    masterVolume_ = std::clamp<long>(volume, DSBVOLUME_MIN, DSBVOLUME_MAX);
     for (int i = 0; i < MAX_BUFFER; ++i)
     {
-        SetVolume(static_cast<ESound>(i), g_MasterVolume);
+        SetVolume(static_cast<ESound>(i), masterVolume_);
     }
 }
 
@@ -492,7 +508,7 @@ HRESULT DirectSoundManager::CreateStaticBuffer(SoundBufferEntry& entry, ESound b
     }
 
     std::unique_ptr<waveIO> waveFile = std::make_unique<waveIO>(INPUT);
-    if (!waveFile->LoadWaveHeader(const_cast<wchar_t*>(filename)))
+    if (!waveFile->LoadWaveHeader(filename))
     {
         g_ErrorReport.Write(L"CreateStaticBuffer - Failed to load %ls\r\n", filename);
         return E_FAIL;
@@ -501,6 +517,14 @@ HRESULT DirectSoundManager::CreateStaticBuffer(SoundBufferEntry& entry, ESound b
     const WAVEFORMATEX format = waveFile->GetWaveFormatEx();
     const DWORD dataSize = waveFile->GetDataSize();
     bufferBytes_ = dataSize;
+
+    std::vector<std::uint8_t> waveData(dataSize);
+    HRESULT hr = waveFile->ReadWaveData(reinterpret_cast<char*>(waveData.data()), dataSize);
+    if (FAILED(hr))
+    {
+        g_ErrorReport.Write(L"CreateStaticBuffer - ReadWaveData failed for %ls\r\n", filename);
+        return hr;
+    }
 
     DSBUFFERDESC desc {};
     desc.dwSize = sizeof(DSBUFFERDESC);
@@ -517,7 +541,7 @@ HRESULT DirectSoundManager::CreateStaticBuffer(SoundBufferEntry& entry, ESound b
     }
 
     IDirectSoundBuffer* rawBuffer = nullptr;
-    HRESULT hr = device_->CreateSoundBuffer(&desc, &rawBuffer, nullptr);
+    hr = device_->CreateSoundBuffer(&desc, &rawBuffer, nullptr);
     if (FAILED(hr))
     {
         g_ErrorReport.Write(L"CreateStaticBuffer - CreateSoundBuffer failed for %ls (0x%08X)\r\n", filename, hr);
@@ -540,40 +564,79 @@ HRESULT DirectSoundManager::CreateStaticBuffer(SoundBufferEntry& entry, ESound b
         entry.buffers3D[0]->SetPosition(-2.f, 0.f, 2.f, DS3D_IMMEDIATE);
     }
 
+    entry.waveData = std::move(waveData);
+    entry.waveDataSize = dataSize;
+
+    hr = CopyWaveDataToBuffer(entry, bufferId, 0);
+    if (FAILED(hr))
+    {
+        entry.buffers[0].reset();
+        entry.buffers3D[0].reset();
+        entry.waveData.clear();
+        entry.waveDataSize = 0;
+        return hr;
+    }
+
+    for (int channel = 1; channel < entry.maxChannels; ++channel)
+    {
+        IDirectSoundBuffer* duplicate = nullptr;
+        hr = device_->DuplicateSoundBuffer(entry.buffers[0].get(), &duplicate);
+        if (FAILED(hr))
+        {
+            g_ErrorReport.Write(L"CreateStaticBuffer - DuplicateSoundBuffer failed for %ls channel %d (0x%08X)\r\n", filename, channel, hr);
+            return hr;
+        }
+
+        entry.buffers[channel].reset(duplicate);
+        if (enable3D)
+        {
+            IDirectSound3DBuffer* raw3D = nullptr;
+            hr = entry.buffers[channel]->QueryInterface(IID_IDirectSound3DBuffer, reinterpret_cast<void**>(&raw3D));
+            if (FAILED(hr))
+            {
+                g_ErrorReport.Write(L"CreateStaticBuffer - QueryInterface 3D failed for %ls channel %d (0x%08X)\r\n", filename, channel, hr);
+                return hr;
+            }
+
+            entry.buffers3D[channel].reset(raw3D);
+            entry.buffers3D[channel]->SetPosition(-2.f, 0.f, 2.f, DS3D_IMMEDIATE);
+        }
+    }
+
+    return S_OK;
+}
+
+HRESULT DirectSoundManager::CopyWaveDataToBuffer(SoundBufferEntry& entry, int bufferId, int channel)
+{
+    if (entry.waveData.empty() || entry.waveDataSize == 0)
+    {
+        return E_FAIL;
+    }
+
+    IDirectSoundBuffer* buffer = GetBuffer(bufferId, channel);
+    if (buffer == nullptr)
+    {
+        return E_FAIL;
+    }
+
     std::uint8_t* part1 = nullptr;
     std::uint8_t* part2 = nullptr;
     DWORD part1Size = 0;
     DWORD part2Size = 0;
-
-    hr = entry.buffers[0]->Lock(0, bufferBytes_, reinterpret_cast<void**>(&part1), &part1Size,
+    HRESULT hr = buffer->Lock(0, entry.waveDataSize, reinterpret_cast<void**>(&part1), &part1Size,
         reinterpret_cast<void**>(&part2), &part2Size, 0);
     if (FAILED(hr))
     {
-        g_ErrorReport.Write(L"CreateStaticBuffer - Lock failed for %ls (0x%08X)\r\n", filename, hr);
-        entry.buffers[0].reset();
-        entry.buffers3D[0].reset();
         return hr;
     }
 
-    if (part1Size != bufferBytes_)
+    std::memcpy(part1, entry.waveData.data(), part1Size);
+    if (part2 != nullptr && part2Size > 0)
     {
-        g_ErrorReport.Write(L"CreateStaticBuffer - Partial lock for %ls\r\n", filename);
-        entry.buffers[0]->Unlock(part1, part1Size, part2, part2Size);
-        entry.buffers[0].reset();
-        entry.buffers3D[0].reset();
-        return E_FAIL;
+        std::memcpy(part2, entry.waveData.data() + part1Size, part2Size);
     }
 
-    hr = waveFile->ReadWaveData(reinterpret_cast<char*>(part1), bufferBytes_);
-    entry.buffers[0]->Unlock(part1, bufferBytes_, part2, part2Size);
-    if (FAILED(hr))
-    {
-        g_ErrorReport.Write(L"CreateStaticBuffer - ReadWaveData failed for %ls\r\n", filename);
-        entry.buffers[0].reset();
-        entry.buffers3D[0].reset();
-        return hr;
-    }
-
+    buffer->Unlock(part1, part1Size, part2, part2Size);
     return S_OK;
 }
 
@@ -592,6 +655,8 @@ void DirectSoundManager::ResetEntry(SoundBufferEntry& entry)
     entry.activeChannel = 0;
     entry.maxChannels = 0;
     entry.enable3D = false;
+    entry.waveData.clear();
+    entry.waveDataSize = 0;
 }
 
 bool DirectSoundManager::IsValidBufferIndex(int bufferId) const noexcept
@@ -650,11 +715,11 @@ void SetEnableSound(bool enabled)
 {
     if (enabled)
     {
-        g_EnableSound = true;
+        Manager().SetEnabled(true);
         return;
     }
 
-    Manager().SetEnabled(false);
+    Manager().StopAll();
 }
 
 void FreeDirectSound()

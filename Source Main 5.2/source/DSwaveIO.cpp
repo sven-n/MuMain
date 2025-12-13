@@ -25,7 +25,7 @@ bool waveIO::CloseWaveFile()
     return true;
 }
 
-bool waveIO::LoadWaveHeader(wchar_t* szFilename)
+bool waveIO::LoadWaveHeader(const wchar_t* szFilename)
 {
     MMCKINFO		ckOutRIFF;          // chunk info. for output RIFF chunk
     MMCKINFO		ckOut;              // info. for a chunk in output file
