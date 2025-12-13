@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "NewUINameWindow.h"
-#include "ZzzBmd.h"
+#include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"

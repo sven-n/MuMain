@@ -3,7 +3,7 @@
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzScene.h"
 #include "MatchEvent.h"
 #include "MapManager.h"

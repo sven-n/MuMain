@@ -93,11 +93,11 @@ void CPortalMgr::GetPortalPositionText(wchar_t* pszOut)
 
     if (m_iPortalWorld == -1)
     {
-        assert(!"ÀÌµ¿ À§Ä¡°¡ ÁöÁ¤µÇÁö ¾ÊÀº »óÅÂÀÓ");
+        assert(!"ï¿½Ìµï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
     }
     else
     {
-        swprintf(pszOut, L"%s (%d, %d)", gMapManager.GetMapName(m_iPortalWorld), m_iPortalPosition_x, m_iPortalPosition_y);
+        swprintf(pszOut, L"%ls (%d, %d)", gMapManager.GetMapName(m_iPortalWorld), m_iPortalPosition_x, m_iPortalPosition_y);
     }
 }
 
@@ -107,10 +107,10 @@ void CPortalMgr::GetRevivePositionText(wchar_t* pszOut)
 
     if (m_iReviveWorld == -1)
     {
-        assert(!"ÀÌµ¿ À§Ä¡°¡ ÁöÁ¤µÇÁö ¾ÊÀº »óÅÂÀÓ");
+        assert(!"ï¿½Ìµï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
     }
     else
     {
-        swprintf(pszOut, L"%s (%d, %d)", gMapManager.GetMapName(m_iReviveWorld), m_iRevivePosition_x, m_iRevivePosition_y);
+        swprintf(pszOut, L"%ls (%d, %d)", gMapManager.GetMapName(m_iReviveWorld), m_iRevivePosition_x, m_iRevivePosition_y);
     }
 }

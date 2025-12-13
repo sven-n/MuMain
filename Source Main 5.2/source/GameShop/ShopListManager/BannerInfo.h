@@ -1,6 +1,6 @@
 #pragma once
 
-#include "include.h"
+#include "Include.h"
 #include <map>
 
 class CBannerInfo
@@ -12,14 +12,14 @@ public:
     bool	SetBanner(std::wstring strdata, std::wstring strDirPath, bool bDonwLoad);
 
 public:
-    int		BannerSeq;									//  1. ¹è³Ê ±×·ì ¼ø¹ø
-    wchar_t	BannerName[BANNER_LENGTH_NAME];				//  2. ¹è³Ê ±×·ì ¸í
-    wchar_t	BannerImageURL[INTERNET_MAX_URL_LENGTH];	//  3. ¹è³Ê ÀÌ¹ÌÁö URL
-    int		BannerOrder;								//  4. ¹è³Ê ³ëÃâ ¼ø¼­
-    int		BannerDirection;							//  5. ¹è³Ê ³ëÃâ ¹æÇâ * °øÅë ÄÚµå Á¤ÀÇ Âü°í
-    tm 		BannerStartDate;							//  6. ¹è³Ê ³ëÃâ ½ÃÀÛÀÏ
-    tm 		BannerEndDate;								//  7. ¹è³Ê ³ëÃâ Á¾·áÀÏ
-    wchar_t	BannerLinkURL[INTERNET_MAX_URL_LENGTH];		//  8. ¹è³Ê ¸µÅ© URL
+    int		BannerSeq;									//  1. ï¿½ï¿½ï¿½ ï¿½×·ï¿½ ï¿½ï¿½ï¿½ï¿½
+    wchar_t	BannerName[BANNER_LENGTH_NAME];				//  2. ï¿½ï¿½ï¿½ ï¿½×·ï¿½ ï¿½ï¿½
+    wchar_t	BannerImageURL[INTERNET_MAX_URL_LENGTH];	//  3. ï¿½ï¿½ï¿½ ï¿½Ì¹ï¿½ï¿½ï¿½ URL
+    int		BannerOrder;								//  4. ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    int		BannerDirection;							//  5. ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ * ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    tm 		BannerStartDate;							//  6. ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    tm 		BannerEndDate;								//  7. ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    wchar_t	BannerLinkURL[INTERNET_MAX_URL_LENGTH];		//  8. ï¿½ï¿½ï¿½ ï¿½ï¿½Å© URL
 
-    wchar_t	BannerImagePath[MAX_PATH];					// ¹è³Ê ÀÌ¹ÌÁö ÆÄÀÏ ·ÎÄÃ °æ·Î
+    wchar_t	BannerImagePath[MAX_PATH];					// ï¿½ï¿½ï¿½ ï¿½Ì¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 };

@@ -239,7 +239,7 @@ bool CNewUIMixInventory::Update()
                     {
                         g_SocketItemMgr.CreateSocketOptionText(szSocketText, g_MixRecipeMgr.GetFirstItemSocketSeedID(i), g_MixRecipeMgr.GetFirstItemSocketShpereLv(i));
                     }
-                    swprintf(szText, L"%d: %s", i + 1, szSocketText);
+                    swprintf(szText, L"%d: %ls", i + 1, szSocketText);
                     m_SocketListBox.AddText(i, szText);
                 }
                 m_SocketListBox.SLSetSelectLine(0);
@@ -346,60 +346,60 @@ void CNewUIMixInventory::RenderFrame()
     switch (g_MixRecipeMgr.GetMixInventoryType())
     {
     case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        swprintf(szText, L"%s", GlobalText[735]);
+        swprintf(szText, L"%ls", GlobalText[735]);
         break;
     case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        swprintf(szText, L"%s", GlobalText[736]);
+        swprintf(szText, L"%ls", GlobalText[736]);
         break;
     case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        swprintf(szText, L"%s", GlobalText[2193]);
+        swprintf(szText, L"%ls", GlobalText[2193]);
         break;
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[1640]);
+        swprintf(szText, L"%ls", GlobalText[1640]);
         break;
     case SEASON3A::MIXTYPE_TRAINER:
-        swprintf(szText, L"%s", GlobalText[1205]);
+        swprintf(szText, L"%ls", GlobalText[1205]);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[2061]);
+        swprintf(szText, L"%ls", GlobalText[2061]);
         break;
     case SEASON3A::MIXTYPE_JERRIDON:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[2062]);
+        swprintf(szText, L"%ls", GlobalText[2062]);
         break;
     case SEASON3A::MIXTYPE_ELPIS:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[2063]);
+        swprintf(szText, L"%ls", GlobalText[2063]);
         break;
     case SEASON3A::MIXTYPE_CHAOS_CARD:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[2265]);
+        swprintf(szText, L"%ls", GlobalText[2265]);
         break;
     case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[2563]);
+        swprintf(szText, L"%ls", GlobalText[2563]);
         break;
     case SEASON3A::MIXTYPE_EXTRACT_SEED:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[2660]);
+        swprintf(szText, L"%ls", GlobalText[2660]);
         break;
     case SEASON3A::MIXTYPE_SEED_SPHERE:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[2661]);
+        swprintf(szText, L"%ls", GlobalText[2661]);
         break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[2662]);
+        swprintf(szText, L"%ls", GlobalText[2662]);
         break;
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[2663]);
+        swprintf(szText, L"%ls", GlobalText[2663]);
         break;
     default:
         fLine_y += 5.0f;
-        swprintf(szText, L"%s", GlobalText[583]);
+        swprintf(szText, L"%ls", GlobalText[583]);
         break;
     }
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
@@ -454,7 +454,7 @@ void CNewUIMixInventory::RenderFrame()
             g_pRenderText->SetTextColor(255, 255, 48, 255);
             g_pRenderText->SetBgColor(40, 40, 40, 128);
             swprintf(szText, GlobalText[584], GlobalText[591], g_MixRecipeMgr.GetSuccessRate());
-            swprintf(szText, L"%s + %d%%", szText, g_MixRecipeMgr.GetPlusChaosRate());
+            swprintf(szText, L"%ls + %d%%", szText, g_MixRecipeMgr.GetPlusChaosRate());
             g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
             g_pRenderText->SetTextColor(210, 230, 255, 255);
         }

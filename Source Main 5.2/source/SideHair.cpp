@@ -4,12 +4,12 @@
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
-#include "ZzzBmd.h"
+#include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ShadowVolume.h"
 #include "ZzzLodTerrain.h"
-#include "zzzTexture.h"
+#include "ZzzTexture.h"
 #include "SideHair.h"
 #include "ZzzCharacter.h"
 

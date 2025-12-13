@@ -1,6 +1,6 @@
 #pragma once
 
-#include "zzzinfomation.h"
+#include "ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

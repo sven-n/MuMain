@@ -9,7 +9,7 @@
 #include "ZzzCharacter.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzTexture.h"
-#include "ZzzAi.h"
+#include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
 #include "UIManager.h"
@@ -10896,7 +10896,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             else
                 o->BlendMeshLight = o->LifeTime * 0.1f;
 
-            o->BlendMeshLight = min(0.5f, o->BlendMeshLight);
+            o->BlendMeshLight = std::min<float>(0.5f, o->BlendMeshLight);
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.01f;
             if (o->LifeTime > 30 && rand_fps_check(value))
             {
@@ -10929,7 +10929,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             else
                 o->BlendMeshLight = o->LifeTime * 0.1f;
 
-            o->BlendMeshLight = min(0.5f, o->BlendMeshLight);
+            o->BlendMeshLight = std::min<float>(0.5f, o->BlendMeshLight);
             o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.01f;
             if (rand_fps_check(value) && o->LifeTime > 5)
             {

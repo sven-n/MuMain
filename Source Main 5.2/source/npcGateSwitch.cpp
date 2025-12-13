@@ -3,9 +3,9 @@
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UIManager.h"
-#include "zzzcharacter.h"
+#include "ZzzCharacter.h"
 #include "ZzzTexture.h"
-#include "zzzAi.h"
+#include "ZzzAI.h"
 #include "npcGateSwitch.h"
 
 #include "DSPlaySound.h"

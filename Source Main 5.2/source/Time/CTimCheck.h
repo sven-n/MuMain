@@ -1,13 +1,13 @@
 #pragma once
 
-#include <VECTOR>
+#include <vector>
 #include "Singleton.h"
 
 struct TimeCheck
 {
-    double		iBackupTime;	// ½Ã°£ °ü·Ã ¹é¾÷
-    int		iIndex;			// ½Ã°£ °ü·Ã ¹øÈ£
-    bool	bTimeCheck;		// ½Ã°£ °ü·Ã Ã¼Å©
+    double		iBackupTime;	// ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+    int		iIndex;			// ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È£
+    bool	bTimeCheck;		// ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã¼Å©
 };
 
 class CTimeCheck : public Singleton <CTimeCheck>

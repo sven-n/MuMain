@@ -8,6 +8,7 @@
 #include "PacketFunctions_ConnectServer.h"
 #include "PacketFunctions_ClientToServer.h"
 
+#include <cwchar>
 
 #ifdef _WIN32
 #include "windows.h"
@@ -23,6 +24,30 @@ inline const HINSTANCE munique_client_library_handle = LoadLibrary(L"MUnique.Cli
 inline const void* munique_client_library_handle = dlopen("MUnique.Client.Library.dll", RTLD_LAZY);
 #endif
 
+namespace DotNetBridge
+{
+void ReportDotNetError(const char* detail);
+bool IsManagedLibraryAvailable();
+
+template<typename T>
+T LoadManagedSymbol(const char* name)
+{
+    if (!IsManagedLibraryAvailable())
+    {
+        return nullptr;
+    }
+
+    const auto symbol = reinterpret_cast<T>(symLoad(munique_client_library_handle, name));
+    if (!symbol)
+    {
+        ReportDotNetError(name);
+    }
+
+    return symbol;
+}
+}
+
+using DotNetBridge::LoadManagedSymbol;
 
 class Connection
 {

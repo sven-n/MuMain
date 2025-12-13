@@ -9,11 +9,11 @@
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "zzzInterface.h"
-#include "zzzEffect.h"
-#include "zzztexture.h"
+#include "ZzzInterface.h"
+#include "ZzzEffect.h"
+#include "ZzzTexture.h"
 #include "GuildCache.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "CSParts.h"
 
 void CreatePartsFactory(CHARACTER* c)

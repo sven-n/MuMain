@@ -1,9 +1,10 @@
 #ifndef __UICONTROL_H__
 #define __UICONTROL_H__
 
-#include "zzzinfomation.h"
+#include "ZzzInfomation.h"
 
 #include "WSclient.h"
+#include "QuestMng.h"
 #include "Time/Timer.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -173,8 +174,8 @@ enum UI_MESSAGE_ENUM
 struct UI_MESSAGE
 {
     int m_iMessage;
-    int m_iParam1;
-    int m_iParam2;
+    LONG_PTR m_iParam1;
+    LONG_PTR m_iParam2;
 };
 
 class CUIMessage
@@ -183,7 +184,7 @@ public:
     CUIMessage() {}
     virtual ~CUIMessage() { m_MessageList.clear(); }
 
-    void SendUIMessage(int iMessage, int iParam1, int iParam2);
+    void SendUIMessage(int iMessage, LONG_PTR iParam1, LONG_PTR iParam2);
     void GetUIMessage();
 protected:
     std::deque<UI_MESSAGE> m_MessageList;
@@ -669,8 +670,6 @@ protected:
     virtual BOOL DoLineMouseAction(int nLine);
     virtual int GetRenderLinePos_y(int nLine);
 };
-
-enum REQUEST_REWARD_CLASSIFY;
 
 struct SQuestContents
 {

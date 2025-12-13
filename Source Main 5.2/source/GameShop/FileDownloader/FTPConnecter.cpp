@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "FTPConnecter.h"
-#include "GameShop\ShopListManager\interface\PathMethod\Path.h"
+#include "GameShop/ShopListManager/interface/PathMethod/Path.h"
 
 FTPConnecter::FTPConnecter(DownloadServerInfo* pServerInfo, DownloadFileInfo* pFileInfo) : IConnecter(pServerInfo, pFileInfo)
 {
@@ -33,7 +33,7 @@ WZResult		FTPConnecter::CreateSession(HINTERNET& hSession)
     }
     else
     {
-        this->m_Result.SetResult(DL_CREATE_SESSION, GetLastError(), L"[FTPConnecter::CreateSession] Fail : InternetOpen, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_CREATE_SESSION, GetLastError(), L"[FTPConnecter::CreateSession] Fail : InternetOpen, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;
@@ -56,7 +56,7 @@ WZResult		FTPConnecter::CreateConnection(HINTERNET& hSession,
     }
     else
     {
-        this->m_Result.SetResult(DL_CREATE_CONNECTION, GetLastError(), L"[FTPConnecter::CreateConnection] Fail : InternetConnect, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_CREATE_CONNECTION, GetLastError(), L"[FTPConnecter::CreateConnection] Fail : InternetConnect, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;
@@ -84,12 +84,12 @@ WZResult		FTPConnecter::OpenRemoteFile(HINTERNET& hConnection,
         }
         else
         {
-            this->m_Result.SetResult(DL_OPEN_REMOTEFILE, GetLastError(), L"[FTPConnecter::OpenRemoteFile] Fail : FtpOpenFile, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+            this->m_Result.SetResult(DL_OPEN_REMOTEFILE, GetLastError(), L"[FTPConnecter::OpenRemoteFile] Fail : FtpOpenFile, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
         }
     }
     else
     {
-        this->m_Result.SetResult(DL_GET_FILE_LENGTH, 0, L"[FTPConnecter::OpenRemoteFile] Fail : FtpFindFirstFile, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_GET_FILE_LENGTH, 0, L"[FTPConnecter::OpenRemoteFile] Fail : FtpFindFirstFile, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;
@@ -107,7 +107,7 @@ WZResult		FTPConnecter::ReadRemoteFile(HINTERNET& hRemoteFile,
     }
     else
     {
-        this->m_Result.SetResult(DL_READ_REMOTEFILE, GetLastError(), L"[FTPConnecter::ReadRemoteFile] Fail : InternetReadFile, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_READ_REMOTEFILE, GetLastError(), L"[FTPConnecter::ReadRemoteFile] Fail : InternetReadFile, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;

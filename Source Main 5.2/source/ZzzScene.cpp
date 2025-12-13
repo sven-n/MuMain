@@ -26,7 +26,7 @@
 
 #include "CSQuest.h"
 #include "PersonalShopTitleImp.h"
-#include "uicontrols.h"
+#include "UIControls.h"
 #include "GOBoid.h"
 #include "CSItemOption.h"
 #include "npcBreeder.h"
@@ -189,7 +189,10 @@ void WebzenScene(HDC hDC)
 {
     CUIMng& rUIMng = CUIMng::Instance();
 
-    OpenFont();
+    if (!OpenFont())
+    {
+        return;
+    }
     ClearInput();
 
     LoadBitmap(L"Interface\\New_lo_back_01.jpg", BITMAP_TITLE, GL_LINEAR);
@@ -299,7 +302,7 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
         iMbclen = _tclen(lpSeek);
         if (iMbclen + (lpSeek - lpLineStart) >= iLineSize)
         {
-            if (lpSpace && (lpSeek - lpSpace) < min(10, iLineSize / 2))
+            if (lpSpace && (lpSeek - lpSpace) < std::min<int>(10, iLineSize / 2))
             {
                 lpDst -= lpSeek - lpSpace - 1;
                 lpSeek = lpSpace + 1;
@@ -457,18 +460,18 @@ BOOL ShowCheckBox(int num, int index, int message)
         {
             switch (TargetItem.Level)
             {
-            case 0:wprintf(Name, L"%s", GlobalText[168]); break;
-            case 1:wprintf(Name, L"%s", GlobalText[169]); break;
-            case 2:wprintf(Name, L"%s", GlobalText[167]); break;
-            case 3:wprintf(Name, L"%s", GlobalText[166]); break;
-            case 4:wprintf(Name, L"%s", GlobalText[1900]); break;
+            case 0:swprintf(Name, L"%ls", GlobalText[168]); break;
+            case 1:swprintf(Name, L"%ls", GlobalText[169]); break;
+            case 2:swprintf(Name, L"%ls", GlobalText[167]); break;
+            case 3:swprintf(Name, L"%ls", GlobalText[166]); break;
+            case 4:swprintf(Name, L"%ls", GlobalText[1900]); break;
             }
         }
 
         if (message == MESSAGE_USE_STATE2)
-            swprintf(g_lpszMessageBoxCustom[0], L"( %s%s )", Name, GlobalText[1901]);
+            swprintf(g_lpszMessageBoxCustom[0], L"( %ls%ls )", Name, GlobalText[1901]);
         else
-            swprintf(g_lpszMessageBoxCustom[0], L"( %s )", Name);
+            swprintf(g_lpszMessageBoxCustom[0], L"( %ls )", Name);
 
         num++;
         for (int i = 1; i < num; ++i)
@@ -536,7 +539,7 @@ BOOL ShowCheckBox(int num, int index, int message)
     else if (message == MESSAGE_CANCEL_SKILL)
     {
         wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-        swprintf(tBuf, L"%s%s", SkillAttribute[index].Name, GlobalText[2046]);
+        swprintf(tBuf, L"%ls%ls", SkillAttribute[index].Name, GlobalText[2046]);
         g_iNumLineMessageBoxCustom = SeparateTextIntoLines(tBuf, g_lpszMessageBoxCustom[0], 2, MAX_LENGTH_CMB);
         g_iCancelSkillTarget = index;
     }
@@ -1556,9 +1559,9 @@ void MoveMainScene()
     {
         g_pMainFrame->ResetSkillHotKey();
 
-        g_ConsoleDebug->Write(MCD_NORMAL, L"Join the game with the following character: %s", CharactersClient[SelectedHero].ID);
+        g_ConsoleDebug->Write(MCD_NORMAL, L"Join the game with the following character: %ls", CharactersClient[SelectedHero].ID);
 
-        g_ErrorReport.Write(L"> Character selected <%d> \"%s\"\r\n", SelectedHero + 1, CharactersClient[SelectedHero].ID);
+        g_ErrorReport.Write(L"> Character selected <%d> \"%ls\"\r\n", SelectedHero + 1, CharactersClient[SelectedHero].ID);
 
         InitMainScene = true;
 
@@ -2008,7 +2011,7 @@ void UpdateSceneState()
         swprintf(GrabFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
         swprintf(screenshotText, GlobalText[459], GrabFileName);
         wchar_t lpszTemp[64];
-        swprintf(lpszTemp, L" [%s / %s]", g_ServerListManager->GetSelectServerName(), Hero->ID);
+        swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
         wcscat(screenshotText, lpszTemp);
         if (addTimeStampToCapture)
         {
@@ -2458,7 +2461,7 @@ void WaitForNextActivity(bool usePreciseSleep)
 
         if (rest_ms - sleep_duration_offset_ms > sleep_threshold_ms)
         {
-            const auto sleep_ms = min(rest_ms - sleep_duration_offset_ms, max_sleep_ms);
+            const auto sleep_ms = std::min<double>(rest_ms - sleep_duration_offset_ms, max_sleep_ms);
             std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(sleep_ms)));
         }
         else

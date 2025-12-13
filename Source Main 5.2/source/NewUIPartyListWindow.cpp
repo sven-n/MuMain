@@ -273,7 +273,7 @@ bool CNewUIPartyListWindow::Render()
             g_pRenderText->RenderText(m_Pos.x + 4, m_Pos.y + 4 + iVal, Party[i].Name, m_iLimitUserIDHeight[1], 0, RT3_SORT_LEFT);
         }
 
-        int iStepHP = min(10, Party[i].stepHP);
+        int iStepHP = std::min<int>(10, Party[i].stepHP);
         float fLife = ((float)iStepHP / (float)10) * (float)PARTY_LIST_HP_BAR_WIDTH;
         RenderImage(IMAGE_PARTY_LIST_HPBAR, m_Pos.x + 4, m_Pos.y + 16 + iVal, fLife, 3);
 
@@ -333,7 +333,7 @@ void SEASON3B::CNewUIPartyListWindow::RenderPartyHPOnHead()
         glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
         RenderColor((float)(ScreenX + 2), (float)(ScreenY + 2), Width, 1.f);
 
-        int stepHP = min(10, p->stepHP);
+        int stepHP = std::min<int>(10, p->stepHP);
 
         glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
         for (int k = 0; k < stepHP; ++k)

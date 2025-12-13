@@ -58,7 +58,7 @@ void CPartyManager::SearchPartyMember()
                 if (p->index != -2) continue;
                 if (p->index > -1) continue;
 
-                int length = max(wcslen(p->Name), max(1, wcslen(c->ID)));
+                int length = std::max<int>(wcslen(p->Name), std::max<int>(1, wcslen(c->ID)));
 
                 if (!wcsncmp(p->Name, c->ID, length))
                 {
@@ -75,7 +75,7 @@ void CPartyManager::SearchPartyMember()
 
         if (p->index >= 0) continue;
 
-        int length = max(wcslen(p->Name), max(1, wcslen(Hero->ID)));
+        int length = std::max<int>(wcslen(p->Name), std::max<int>(1, wcslen(Hero->ID)));
 
         if (!wcsncmp(p->Name, Hero->ID, length))
         {
@@ -122,7 +122,7 @@ bool CPartyManager::IsPartyMemberChar(CHARACTER* c)
     {
         PARTY_t* p = &Party[i];
 
-        int length = max(1, wcslen(c->ID));
+        int length = std::max<int>(1, wcslen(c->ID));
         if (!wcsncmp(p->Name, c->ID, length)) return true;
     }
 

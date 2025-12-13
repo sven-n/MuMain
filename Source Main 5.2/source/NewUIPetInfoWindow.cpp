@@ -72,7 +72,7 @@ void CNewUIPetInfoWindow::InitButtons()
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_PETINFO_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);	// 1002 "´Ý±â"
+    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);	// 1002 "ï¿½Ý±ï¿½"
 }
 
 void CNewUIPetInfoWindow::SetPos(int x, int y)
@@ -206,7 +206,7 @@ bool CNewUIPetInfoWindow::RenderDarkHorseInfo(PET_INFO* pPetInfo)
     swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 28, szText, 0, 0, RT3_SORT_CENTER);
     RenderImage(IMAGE_PETINFO_LIFEBAR, iPosX + 7, iPosY + 40, 151, 12);
-    int iHP = (min(pPetInfo->m_wLife, 255) * 147) / 255;
+    int iHP = (std::min<int>(pPetInfo->m_wLife, 255) * 147) / 255;
     RenderImage(IMAGE_PETINFO_LIFE, iPosX + 9, iPosY + 42, iHP, 8);
     swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 59, szText, 0, 0, RT3_SORT_CENTER);
@@ -246,7 +246,7 @@ bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
     swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 28, szText, 0, 0, RT3_SORT_CENTER);
     RenderImage(IMAGE_PETINFO_LIFEBAR, iGBox1PosX + 7, iGBox1PosY + 40, 151, 12);
-    int iHP = (min(pPetInfo->m_wLife, 255) * 147) / 255;
+    int iHP = (std::min<int>(pPetInfo->m_wLife, 255) * 147) / 255;
     RenderImage(IMAGE_PETINFO_LIFE, iGBox1PosX + 9, iGBox1PosY + 42, iHP, 8);
     swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 59, szText, 0, 0, RT3_SORT_CENTER);

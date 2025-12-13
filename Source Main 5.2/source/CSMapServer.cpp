@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ZzzCharacter.h"
 #include "ZzzTexture.h"
-#include "zzzOpenData.h"
+#include "ZzzOpenData.h"
 
 #include "CSMapServer.h"
 

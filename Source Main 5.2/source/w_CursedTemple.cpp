@@ -130,7 +130,7 @@ bool CursedTemple::IsPartyMember(DWORD selectcharacterindex)
     for (int i = 0; i < PartyNumber; ++i)
     {
         PARTY_t* p = &Party[i];
-        int length = max(1, wcslen(c->ID));
+        int length = std::max<int>(1, wcslen(c->ID));
         if (!wcsncmp(p->Name, c->ID, length)) return true;
     }
     return false;

@@ -19,7 +19,7 @@
 #include "SideHair.h"
 #include "PhysicsManager.h"
 #include "GOBoid.h"
-#include "CSparts.h"
+#include "CSParts.h"
 #include "CSItemOption.h"
 #include "CSChaosCastle.h"
 #include "MapManager.h"
@@ -4880,7 +4880,7 @@ int OpenObjects(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s file not found.", FileName);
+        swprintf(Text, L"%ls file not found.", FileName);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);
@@ -4923,7 +4923,7 @@ int OpenObjectsEnc(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s file not found.", FileName);
+        swprintf(Text, L"%ls file not found.", FileName);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);
@@ -6295,7 +6295,7 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 
     int coinCount = static_cast<int>(sqrtf(static_cast<float>(Items[k].Item.Level))) / 2;
 
-    coinCount = max(min(coinCount, 80), 3);
+    coinCount = std::max<int>(std::min<int>(coinCount, 80), 3);
 
     vec3_t randomRadius;
     vec3_t randomAngle;
@@ -9553,7 +9553,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
 
     if (g_pOption->GetRenderLevel() < 4)
     {
-        Level = min(Level, g_pOption->GetRenderLevel() * 2 + 5);
+        Level = std::min<int>(Level, g_pOption->GetRenderLevel() * 2 + 5);
     }
 
     if (o->Type == MODEL_BILL_OF_BALROG)

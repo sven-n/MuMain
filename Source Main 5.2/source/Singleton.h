@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-//  - ½Ì±ÛÅæ -
+//  - ì‹±ê¸€í†¤ -
 //
 //
 //////////////////////////////////////////////////////////////////////////
@@ -19,8 +19,7 @@ public:
     {
         if (_Singleton == 0)
         {
-            int offset = (int)(T*)1 - (int)(Singleton <T>*)(T*)1;
-            _Singleton = (T*)((int)this + offset);
+            _Singleton = static_cast<T*>(this);
         }
     }
 
@@ -30,9 +29,9 @@ public:
     static T* GetSingletonPtr(void) { return (_Singleton); }
     static bool IsInitialized(void) { return _Singleton ? true : false; }
 
-    //¿©±â ºÎºĞÀº Á» »ı°¢À» ÇØº¸ÀÚ..
-    //new·Î ¸¸µé¾î¼­ ³ÖÀ¸¸é...delete¸¦ ÇØÁà¾ß ÇÏ´Âµ¥...
-    //ÇÒ·Á¸é boost·Î ¸¸µé¾îÁø data¸¸ ³Öµµ·Ï ÇÏÀÚ.
+    //ì—¬ê¸° ë¶€ë¶„ì€ ì¢€ ìƒê°ì„ í•´ë³´ì..
+    //newë¡œ ë§Œë“¤ì–´ì„œ ë„£ìœ¼ë©´...deleteë¥¼ í•´ì¤˜ì•¼ í•˜ëŠ”ë°...
+    //í• ë ¤ë©´ boostë¡œ ë§Œë“¤ì–´ì§„ dataë§Œ ë„£ë„ë¡ í•˜ì.
     //static void RegisterSingleton ( T* p ) { _Singleton = p; }
 };
 

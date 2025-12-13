@@ -787,12 +787,12 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 
         SKILL_ATTRIBUTE* p = &SkillAttribute[CursedTempleCurSkillType];
         wcscpy(skillname, p->Name);
-        swprintf(TextList[TextNum], L"%s", skillname);
+        swprintf(TextList[TextNum], L"%ls", skillname);
         TextListColor[TextNum] = TEXT_COLOR_BLUE; TextNum++;
 
         swprintf(TextList[TextNum], L"\n"); TextNum++;
 
-        swprintf(TextList[TextNum], L"%s", GlobalText[2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)]);
+        swprintf(TextList[TextNum], L"%ls", GlobalText[2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)]);
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
 
         RenderTipTextList(x, y - 20, TextNum, 0);
@@ -808,7 +808,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = NULL;
         }
 
-        swprintf(TextList[TextNum], L"%s", GlobalText[2378]);
+        swprintf(TextList[TextNum], L"%ls", GlobalText[2378]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
@@ -825,7 +825,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = NULL;
         }
 
-        swprintf(TextList[TextNum], L"%s", GlobalText[2377]);
+        swprintf(TextList[TextNum], L"%ls", GlobalText[2377]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 

@@ -5,7 +5,7 @@
 #include "SummonSystem.h"
 
 #include "DSPlaySound.h"
-#include "zzzEffect.h"
+#include "ZzzEffect.h"
 
 #include "ZzzAI.h"
 #include "MapManager.h"

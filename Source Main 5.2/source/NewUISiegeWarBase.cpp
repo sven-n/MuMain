@@ -386,8 +386,8 @@ void SEASON3B::CNewUISiegeWarBase::UpdateHeroPos()
     m_HeroPosInWorld.x = (Hero->PositionX) / m_iMiniMapScale;
     m_HeroPosInWorld.y = (256 - (Hero->PositionY)) / m_iMiniMapScale;
 
-    m_MiniMapScaleOffset.x = max((m_HeroPosInWorld.x - (64 * m_iMiniMapScale)), 0);
-    m_MiniMapScaleOffset.y = min(max((m_HeroPosInWorld.y - (64 * m_iMiniMapScale)), 0), 128);
+    m_MiniMapScaleOffset.x = std::max<int>((m_HeroPosInWorld.x - (64 * m_iMiniMapScale)), 0);
+    m_MiniMapScaleOffset.y = std::min<int>(std::max<int>((m_HeroPosInWorld.y - (64 * m_iMiniMapScale)), 0), 128);
 
     m_HeroPosInMiniMap.x = m_HeroPosInWorld.x - m_MiniMapScaleOffset.x + m_MiniMapPos.x;
     m_HeroPosInMiniMap.y = m_HeroPosInWorld.y - m_MiniMapScaleOffset.y + m_MiniMapPos.y;

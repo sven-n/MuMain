@@ -10,10 +10,10 @@
 #include "ZzzCharacter.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzTexture.h"
-#include "ZzzAi.h"
+#include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "WSClient.h"
+#include "WSclient.h"
 #include "MapManager.h"
 #include "NewUISystem.h"
 
@@ -3843,14 +3843,14 @@ void MoveParticles()
     for (int i = 0; i < 2; ++i)
     {
         g_vParticleWindVelo[i] += (rand() % 2001 - 1000) * (0.001f * 0.6f);
-        g_vParticleWindVelo[i] = max(-.6f, min(g_vParticleWindVelo[i], .6f));
+        g_vParticleWindVelo[i] = std::max<float>(-.6f, std::min<float>(g_vParticleWindVelo[i], .6f));
         g_vParticleWindVelo[i] *= FPS_ANIMATION_FACTOR;
     }
 
     for (int i = 0; i < 2; ++i)
     {
         g_vParticleWind[i] += g_vParticleWindVelo[i];
-        g_vParticleWind[i] = max(-1.7f, min(g_vParticleWind[i], 1.7f));
+        g_vParticleWind[i] = std::max<float>(-1.7f, std::min<float>(g_vParticleWind[i], 1.7f));
         g_vParticleWind[i] *= FPS_ANIMATION_FACTOR;
     }
 
@@ -3950,7 +3950,7 @@ void MoveParticles()
                     o->Scale = 0.2f;//sin( WorldTime*0.001f )*0.2f+0.35f;
 
                     o->Velocity[2] += (0.4f) * FPS_ANIMATION_FACTOR;
-                    o->Velocity[2] = min(8.f * FPS_ANIMATION_FACTOR, o->Velocity[2]);
+                    o->Velocity[2] = std::min<float>(8.f * FPS_ANIMATION_FACTOR, o->Velocity[2]);
 
                     if (o->LifeTime < 5)
                     {
@@ -4276,7 +4276,7 @@ void MoveParticles()
                 break;
             case BITMAP_LIGHTNING + 1:
             {
-                auto lifeTime = max(0, o->LifeTime) * FPS_ANIMATION_FACTOR;
+                auto lifeTime = std::max<int>(0, o->LifeTime) * FPS_ANIMATION_FACTOR;
                 o->Rotation = (float)((int)WorldTime % 1000) * 0.001f;
                 Luminosity = (float)(lifeTime) / 10.f;
                 Vector(Luminosity * 0.5f, Luminosity * 1.f, Luminosity * 0.8f, Light);
@@ -5082,7 +5082,7 @@ void MoveParticles()
                         || (o->Target->CurrentAction == PLAYER_RAGE_UNI_RUN || o->Target->CurrentAction == PLAYER_RAGE_UNI_RUN_ONE_RIGHT))
                     {
                         o->SubType = 1;
-                        o->LifeTime = min(20, o->LifeTime);
+                        o->LifeTime = std::min<int>(20, o->LifeTime);
                         Vector(0.f, 0.f, 0.f, o->Velocity);
                         VectorCopy(o->Position, o->StartPosition);
                     }
@@ -9097,10 +9097,10 @@ void RenderParticles(BYTE byRenderOneMore)
                     for (int k = 0; k < 3; ++k)
                     {
                         Position[k] = o->Position[k] - (float)j * o->Velocity[k] * 0.1f;
-                        Light[k] = (float)(min(iCount - j, 10)) *
+                        Light[k] = (float)(std::min<int>(iCount - j, 10)) *
                             (o->Light[(k + iColor) % 3] * (10 - iColorChange) +
                                 o->Light[(k + iColor + 1) % 3] * iColorChange) *
-                            ((float)min(o->LifeTime, 10) * 0.001f);
+                            ((float)std::min<int>(o->LifeTime, 10) * 0.001f);
                     }
                     RenderSprite(o->TexType, Position, Width, Height, Light, o->Rotation);
                 }

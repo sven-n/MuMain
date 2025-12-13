@@ -230,16 +230,16 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
         wLifeMax = Master_Level_Data.wMaxLife;
-        wLife = min(max(0, CharacterAttribute->Life), wLifeMax);
+        wLife = std::min<int>(std::max<int>(0, CharacterAttribute->Life), wLifeMax);
         wManaMax = Master_Level_Data.wMaxMana;
-        wMana = min(max(0, CharacterAttribute->Mana), wManaMax);
+        wMana = std::min<int>(std::max<int>(0, CharacterAttribute->Mana), wManaMax);
     }
     else
     {
         wLifeMax = CharacterAttribute->LifeMax;
-        wLife = min(max(0, CharacterAttribute->Life), wLifeMax);
+        wLife = std::min<int>(std::max<int>(0, CharacterAttribute->Life), wLifeMax);
         wManaMax = CharacterAttribute->ManaMax;
-        wMana = min(max(0, CharacterAttribute->Mana), wManaMax);
+        wMana = std::min<int>(std::max<int>(0, CharacterAttribute->Mana), wManaMax);
     }
 
     if (wLifeMax > 0)
@@ -323,13 +323,13 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
-        dwMaxSkillMana = max(1, Master_Level_Data.wMaxBP);
-        dwSkillMana = min(dwMaxSkillMana, CharacterAttribute->SkillMana);
+        dwMaxSkillMana = std::max<int>(1, Master_Level_Data.wMaxBP);
+        dwSkillMana = std::min<int>(dwMaxSkillMana, CharacterAttribute->SkillMana);
     }
     else
     {
-        dwMaxSkillMana = max(1, CharacterAttribute->SkillManaMax);
-        dwSkillMana = min(dwMaxSkillMana, CharacterAttribute->SkillMana);
+        dwMaxSkillMana = std::max<int>(1, CharacterAttribute->SkillManaMax);
+        dwSkillMana = std::min<int>(dwMaxSkillMana, CharacterAttribute->SkillMana);
     }
 
     float fSkillMana = 0.0f;
@@ -366,13 +366,13 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
     //Master_Level_Data.wMaxShield
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
-        wMaxShield = max(1, Master_Level_Data.wMaxShield);
-        wShield = min(wMaxShield, CharacterAttribute->Shield);
+        wMaxShield = std::max<int>(1, Master_Level_Data.wMaxShield);
+        wShield = std::min<int>(wMaxShield, CharacterAttribute->Shield);
     }
     else
     {
-        wMaxShield = max(1, CharacterAttribute->ShieldMax);
-        wShield = min(wMaxShield, CharacterAttribute->Shield);
+        wMaxShield = std::max<int>(1, CharacterAttribute->ShieldMax);
+        wShield = std::min<int>(wMaxShield, CharacterAttribute->Shield);
     }
 
     float fShield = 0.0f;
@@ -464,7 +464,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
             fExpBarNum = ((double)fExp / (double)fNeedExp) * (double)10.f;
         }
 
-        double fProgress = fExpBarNum - __int64(fExpBarNum);
+        double fProgress = fExpBarNum - static_cast<long long>(fExpBarNum);
 
         if (m_bExpEffect == true)
         {
@@ -486,7 +486,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
                 {
                     fPreProgress = ((double)fPreExp / (double)fNeedExp) * (double)10.f;
                     iPreExpBarNum = (int)fPreProgress;
-                    fPreProgress = (double)fPreProgress - __int64(fPreProgress);
+                    fPreProgress = static_cast<double>(fPreProgress) - static_cast<long long>(fPreProgress);
                 }
                 iExpBarNum = (int)fExpBarNum;
 

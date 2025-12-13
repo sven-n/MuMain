@@ -1,6 +1,6 @@
 #pragma once
 
-#include "include.h"
+#include "Include.h"
 
 class CStringToken
 {
@@ -9,16 +9,16 @@ public:
     virtual ~CStringToken();
     CStringToken(const std::wstring& dataLine, const std::wstring& delim);
 
-    size_t countTokens();						//ÅäÅ«ÀÇ °¹¼ö
-    bool hasMoreTokens();						//ÅäÅ«ÀÌ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
-    std::wstring nextToken();					//´ÙÀ½ ÅäÅ«
+    size_t countTokens();						//ï¿½ï¿½Å«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    bool hasMoreTokens();						//ï¿½ï¿½Å«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
+    std::wstring nextToken();					//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å«
 
 private:
     std::wstring data;
-    std::wstring delimiter;						//µ¥ÀÌÅÍ, ±¸ºÐÀÚ
-    std::vector<std::wstring> tokens;			//ÅäÅ«À» º¤ÅÍ¿¡ ÀúÀå
-    std::vector<std::wstring>::iterator index;	//º¤ÅÍ¿¡ ´ëÇÑ ¹Ýº¹ÀÚ
+    std::wstring delimiter;						//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    std::vector<std::wstring> tokens;			//ï¿½ï¿½Å«ï¿½ï¿½ ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½
+    std::vector<std::wstring>::iterator index;	//ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ýºï¿½ï¿½ï¿½
 
-    void split();								//½ºÆ®¸µÀ» ±¸ºÐÀÚ·Î ³ª´²¼­ º¤ÅÍ¿¡ ÀúÀå
-    void IsNullString(std::wstring::size_type pos);						//ÅäÅ«¿¡ ³ÎÀÌ ÀÖÀ¸¸é º¤ÅÍ¿¡ ³Î°ª ³Ö¾îÁÖ±â
+    void split();								//ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½
+    void IsNullString(std::wstring::size_type pos);						//ï¿½ï¿½Å«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½Î°ï¿½ ï¿½Ö¾ï¿½ï¿½Ö±ï¿½
 };

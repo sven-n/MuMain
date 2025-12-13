@@ -15,14 +15,14 @@ namespace SEASON3A
         void Reset();
         void SetItem(ITEM* pItem, DWORD dwMixValue);
 
-        bool IsSameItem(CMixItem& rhs)
+        bool IsSameItem(const CMixItem& rhs) const
         {
             return (m_sType == rhs.m_sType && m_iLevel == rhs.m_iLevel &&
                 (m_bCanStack || m_iDurability == rhs.m_iDurability) && m_iOption == rhs.m_iOption &&
                 m_dwSpecialItem == rhs.m_dwSpecialItem);
         }
 
-        bool operator==(ITEM* rhs)
+        bool operator==(ITEM* rhs) const
         {
             return IsSameItem(CMixItem(rhs, 0));
         }
@@ -207,14 +207,14 @@ namespace SEASON3A
 #endif //LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
 
     protected:
-        bool IsOptionItem(MIX_RECIPE_ITEM& rItem) { return (rItem.m_iCountMin == 0); }	// ø…º«(æ»≥÷æÓµµ µ«¥¬) æ∆¿Ã≈€¿Œ∞°
+        bool IsOptionItem(MIX_RECIPE_ITEM& rItem) { return (rItem.m_iCountMin == 0); }	// ÏòµÏÖò(ÏïàÎÑ£Ïñ¥ÎèÑ ÎêòÎäî) ÏïÑÏù¥ÌÖúÏù∏Í∞Ä
         BOOL CheckRecipeSub(std::vector<MIX_RECIPE*>::iterator iter, int iNumMixItems, CMixItem* pMixItems);
-        int CheckRecipeSimilaritySub(std::vector<MIX_RECIPE*>::iterator iter, int iNumMixItems, CMixItem* pMixItems);	// ¿ØªÁµµ ∫Ò±≥
-        bool CheckItem(MIX_RECIPE_ITEM& rItem, CMixItem& rSource);	// ∞∞¿∫ æ∆¿Ã≈€¿Œ¡ˆ ∫Ò±≥
+        int CheckRecipeSimilaritySub(std::vector<MIX_RECIPE*>::iterator iter, int iNumMixItems, CMixItem* pMixItems);	// Ïú†ÏÇ¨ÎèÑ ÎπÑÍµê
+        bool CheckItem(MIX_RECIPE_ITEM& rItem, CMixItem& rSource);	// Í∞ôÏùÄ ÏïÑÏù¥ÌÖúÏù∏ÏßÄ ÎπÑÍµê
         void EvaluateMixItems(int iNumMixItems, CMixItem* pMixItems);
         void CalcMixRate(int iNumMixItems, CMixItem* pMixItems);
         void CalcMixReqZen(int iNumMixItems, CMixItem* pMixItems);
-        BOOL GetRecipeName(MIX_RECIPE* pRecipe, wchar_t* pszNameOut, int iNameLine, BOOL bSimilarRecipe);	// ¡÷æÓ¡¯ ¡∂«’π˝¿« ¿Ã∏ß æÚ±‚
+        BOOL GetRecipeName(MIX_RECIPE* pRecipe, wchar_t* pszNameOut, int iNameLine, BOOL bSimilarRecipe);	// Ï£ºÏñ¥ÏßÑ Ï°∞Ìï©Î≤ïÏùò Ïù¥Î¶Ñ ÏñªÍ∏∞
         BOOL IsChaosItem(CMixItem& rSource);
         BOOL IsChaosJewel(CMixItem& rSource);
         BOOL Is380AddedItem(CMixItem& rSource);

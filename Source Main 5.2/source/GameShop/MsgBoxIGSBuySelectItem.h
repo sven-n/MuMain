@@ -88,7 +88,7 @@ private:
     void RenderListBox();
     void ReleaseListBox();
     void ListBoxDoAction();
-    void CMsgBoxIGSBuySelectItem::AddData(int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iProductSeq, wchar_t* pszPriceUnit, int iCashType);
+    void AddData(int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iProductSeq, wchar_t* pszPriceUnit, int iCashType);
 
 private:
 

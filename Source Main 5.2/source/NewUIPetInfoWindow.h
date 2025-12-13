@@ -10,7 +10,7 @@
 #include "NewUIButton.h"
 #include "NewUIMessageBox.h"
 #include "NewUIMyInventory.h"
-#include "NewUIInventoryctrl.h"
+#include "NewUIInventoryCtrl.h"
 #include "NewUIGuildInfoWindow.h"
 #include "NewUIMainFrameWindow.h"
 

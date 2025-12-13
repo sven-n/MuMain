@@ -21,7 +21,7 @@ bool CPersonalShopTitleImp::AddShopTitle(int key, CHARACTER* pPlayer, const std:
         return false;
     if (pPlayer->Object.Kind != KIND_PLAYER)
     {
-        g_ErrorReport.Write(L"@ AddShopTitle - there is NOT player object(id : %s) \n", pPlayer->ID);
+        g_ErrorReport.Write(L"@ AddShopTitle - there is NOT player object(id : %ls) \n", pPlayer->ID);
         return false;
     }
 
@@ -39,7 +39,7 @@ bool CPersonalShopTitleImp::AddShopTitle(int key, CHARACTER* pPlayer, const std:
         }
         else
         {
-            g_ErrorReport.Write(L"@ AddShopTitle - player key-value dismatch(id : %s) \n", pPlayer->ID);
+            g_ErrorReport.Write(L"@ AddShopTitle - player key-value dismatch(id : %ls) \n", pPlayer->ID);
         }
     }
     else
@@ -376,14 +376,14 @@ void CPersonalShopTitleImp::CheckKeyIntegrity()
         {
             delete pDrawObj;
             mi = m_listShopTitleDrawObj.erase(mi);
-            g_ErrorReport.Write(L"@ CheckKeyIntegrity - player key-value dismatch(id : %s, server's key : %d, client array's key : %d) \n",
+            g_ErrorReport.Write(L"@ CheckKeyIntegrity - player key-value dismatch(id : %ls, server's key : %d, client array's key : %d) \n",
                 pPlayer->ID, pDrawObj->GetKey(), pPlayer->Key);
         }
         else if (pPlayer->Object.Kind != KIND_PLAYER)
         {
             delete pDrawObj;
             mi = m_listShopTitleDrawObj.erase(mi);
-            g_ErrorReport.Write(L"@ CheckKeyIntegrity - player type invalid(id : %s, server's key : %d, client array's key : %d) \n",
+            g_ErrorReport.Write(L"@ CheckKeyIntegrity - player type invalid(id : %ls, server's key : %d, client array's key : %d) \n",
                 pPlayer->ID, pDrawObj->GetKey(), pPlayer->Key);
         }
         else
@@ -425,7 +425,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Init()
     m_bHighlight = false;
 }
 
-bool CPersonalShopTitleImp::CShopTitleDrawObj::Create(int key, const std::wstring& name, const std::wstring& title, POINT& pos)
+bool CPersonalShopTitleImp::CShopTitleDrawObj::Create(int key, const std::wstring& name, const std::wstring& title, POINT pos)
 {
     m_key = key & 0x7FFF;
     SetBoxContent(name, title);
@@ -455,7 +455,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxContent(const std::wstring&
     SeparateShopTitle(title, m_topTitle, m_bottomTitle);
     CalculateBooleanSize(name, m_topTitle, m_bottomTitle, m_size);
 }
-void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxPos(POINT& pos)
+void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxPos(POINT pos)
 {
     m_pos = pos;
 }
@@ -594,12 +594,12 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::CalculateBooleanSize(IN const std
     int maxWidth, maxHeight;
     if (!bottomTitle.empty())
     {
-        maxWidth = max(text_size[0].cx + m_icon.cx, max(text_size[1].cx, text_size[2].cx));
+        maxWidth = std::max<int>(text_size[0].cx + m_icon.cx, std::max<int>(text_size[1].cx, text_size[2].cx));
         maxHeight = FontHeight * 3;
     }
     else if (!topTitle.empty())
     {
-        maxWidth = max(text_size[0].cx + m_icon.cx, text_size[1].cx);
+        maxWidth = std::max<int>(text_size[0].cx + m_icon.cx, text_size[1].cx);
         maxHeight = FontHeight * 2;
     }
     else

@@ -58,7 +58,7 @@ public:
             return 0.0;
 
         // Calculate CPU usage as a percentage
-        return max(0.0, (100.0 * processTimeElapsed) / (systemTimeElapsed * m_numProcessors));
+        return std::max<double>(0.0, (100.0 * processTimeElapsed) / (systemTimeElapsed * m_numProcessors));
     }
 
 private:

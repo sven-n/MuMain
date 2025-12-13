@@ -26,7 +26,7 @@ bool TextureScriptParsing::parsingTScriptA(char* filename)
     if (strTokenFile != NULL)
     {
         strDest = strtok(strTokenFile, ".");
-        int length = min(5, strlen(strDest));
+        int length = std::min<int>(5, strlen(strDest));
 
         int result = strcspn(strDest, str);
         if (result)//if ( m_strDest!=NULL )
@@ -94,8 +94,9 @@ bool TextureScriptParsing::parsingTScript(wchar_t* filename)
     strTokenFile = wcschr(strFileName, ch);
     if (strTokenFile != NULL)
     {
-        strDest = _wcstok(strTokenFile, L".");
-        int length = min(5, wcslen(strDest));
+        wchar_t* context = nullptr;
+        strDest = wcstok_s(strTokenFile, L".", &context);
+        int length = std::min<int>(5, wcslen(strDest));
 
         int result = wcscspn(strDest, str);
         if (result)//if ( m_strDest!=NULL )

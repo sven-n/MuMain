@@ -1,7 +1,7 @@
 #ifndef __ZZZINVENTORY_H__
 #define __ZZZINVENTORY_H__
 
-const enum _COLUMN_TYPE
+enum _COLUMN_TYPE
 {
     _COLUMN_TYPE_LEVEL = 0,
     _COLUMN_TYPE_CAN_EQUIP,
@@ -22,7 +22,7 @@ const enum _COLUMN_TYPE
     _COLUMN_TYPE_REQNLV
 };
 
-const enum ITEMSETOPTION
+enum ITEMSETOPTION
 {
     eITEM_PERSONALSHOP = 0,
     eITEM_STORE,
@@ -39,7 +39,7 @@ struct sItemAct
     bool	s_bType[eITEM_END];
 };
 
-const enum SKILL_TOOLTIP_RENDER_POINT
+enum SKILL_TOOLTIP_RENDER_POINT
 {
     STRP_NONE = 0,
     STRP_TOPLEFT,

@@ -29,9 +29,14 @@
 // Exclude rarely-used stuff from Windows headers
 #define WIN32_LEAN_AND_MEAN
 
+// Use 32-bit time_t only for 32-bit MSVC builds. This avoids conflicts
+// with 64-bit toolchains such as x86_64-w64-mingw32, which require
+// 64-bit time_t.
+#if defined(_MSC_VER) && !defined(_WIN64)
 #ifndef _USE_32BIT_TIME_T
 #define _USE_32BIT_TIME_T
 #endif //_USE_32BIT_TIME_T
+#endif
 
 #define _CRT_SECURE_NO_DEPRECATE
 #define _CRT_NONSTDC_NO_DEPRECATE
@@ -41,7 +46,7 @@
 #include <windows.h>
 
 //windows
-#include <WinSock2.h>
+#include <winsock2.h>
 #include <mmsystem.h>
 #include <shellapi.h>
 
@@ -70,7 +75,7 @@
 
 //opengl
 #include <gl/glew.h>
-#include <gl/gl.h>
+#include <gl/GL.h>
 
 //patch
 //winmain

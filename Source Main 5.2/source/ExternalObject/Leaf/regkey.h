@@ -5,19 +5,27 @@ namespace leaf {
     class CRegKey {
     public:
         enum _HKEY {
-            _HKEY_CLASSES_ROOT = (LONG)(ULONG_PTR)HKEY_CLASSES_ROOT,
-            _HKEY_CURRENT_CONFIG = (LONG)(ULONG_PTR)HKEY_CURRENT_CONFIG,
-            _HKEY_CURRENT_USER = (LONG)(ULONG_PTR)HKEY_CURRENT_USER,
-            _HKEY_LOCAL_MACHINE = (LONG)(ULONG_PTR)HKEY_LOCAL_MACHINE,
-            _HKEY_USERS = (LONG)(ULONG_PTR)HKEY_USERS
+			_HKEY_CLASSES_ROOT,
+			_HKEY_CURRENT_CONFIG,
+			_HKEY_CURRENT_USER,
+			_HKEY_LOCAL_MACHINE,
+			_HKEY_USERS
         };
 
         CRegKey() = default;
         ~CRegKey() = default;
 
         void SetKey(_HKEY hKey, const std::wstring& subkey) {
-            m_hKey = reinterpret_cast<HKEY>(hKey);
-            m_subkey = subkey;
+			switch (hKey)
+			{
+			case _HKEY_CLASSES_ROOT:   m_hKey = HKEY_CLASSES_ROOT;   break;
+			case _HKEY_CURRENT_CONFIG: m_hKey = HKEY_CURRENT_CONFIG; break;
+			case _HKEY_CURRENT_USER:   m_hKey = HKEY_CURRENT_USER;   break;
+			case _HKEY_LOCAL_MACHINE:  m_hKey = HKEY_LOCAL_MACHINE;  break;
+			case _HKEY_USERS:          m_hKey = HKEY_USERS;          break;
+			default:                   m_hKey = nullptr;            break;
+			}
+			m_subkey = subkey;
         }
 
         bool ReadDword(const std::wstring& name, DWORD& value) {

@@ -37,7 +37,7 @@ bool waveIO::LoadWaveHeader(wchar_t* szFilename)
     m_hmmio = mmioOpen(szFilename, nullptr, MMIO_ALLOCBUF | MMIO_READ);
     if (m_hmmio == nullptr)
     {
-        wprintf(L"Cannot find file %s\n", szFilename);
+        wprintf(L"Cannot find file %ls\n", szFilename);
         return false;
     }
 

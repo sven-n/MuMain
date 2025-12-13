@@ -5,9 +5,9 @@
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzScene.h"
-#include "zzzAi.h"
+#include "ZzzAI.h"
 #include "CSEventMatch.h"
 
 #include "NewUICustomMessageBox.h"
@@ -160,7 +160,8 @@ void CSDevilSquareMatch::SetMatchResult(const int iNumDevilRank, const int iMyRa
 
     memcpy(m_MatchResult, pMatchResult, m_iNumResult * sizeof(MatchResult));
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDevilSquareRankMsgBoxLayout));
+    SEASON3B::TMsgBoxLayoutContainer<SEASON3B::CDevilSquareRankMsgBoxLayout> msgBoxLayout;
+    SEASON3B::CreateMessageBox(msgBoxLayout);
 }
 
 void CSDevilSquareMatch::RenderMatchTimes(void)

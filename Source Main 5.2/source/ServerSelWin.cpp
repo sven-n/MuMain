@@ -6,7 +6,7 @@
 #include "ServerSelWin.h"
 #include "Input.h"
 #include "UIMng.h"
-#include "local.h"
+#include "Local.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"

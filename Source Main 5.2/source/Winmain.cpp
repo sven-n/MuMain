@@ -19,12 +19,12 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "zzzLodTerrain.h"
+#include "ZzzLodTerrain.h"
 #include "DSPlaySound.h"
 
-#include "Resource.h"
+#include "resource.h"
 #include <imm.h>
-#include "zzzpath.h"
+#include "ZzzPath.h"
 #include "Local.h"
 #include "PersonalShopTitleImp.h"
 
@@ -34,7 +34,7 @@
 #include "MUHelper/MuHelper.h"
 
 #include "CBTMessageBox.h"
-#include "./ExternalObject/leaf/regkey.h"
+#include "./ExternalObject/Leaf/regkey.h"
 
 #include "CSChaosCastle.h"
 #include <io.h>
@@ -445,7 +445,7 @@ int g_iMousePopPosition_y = 0;
 extern int TimeRemain;
 extern bool EnableFastInput;
 
-LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
@@ -768,7 +768,7 @@ void RecordCpuUsage()
     {
         double currentUsage = CpuUsage::Instance()->GetUsage();
 
-        currentUsage = max(0.0, min(100.0, currentUsage));
+        currentUsage = std::max<double>(0.0, std::min<double>(100.0, currentUsage));
 
         // Subtract the old value to maintain the sum
         sum -= CPU_Recordings[count];
@@ -807,7 +807,7 @@ int g_MaxMessagePerCycle = -1;
 void SetMaxMessagePerCycle(int messages)
 {
     constexpr int custom_min = 3;
-    g_MaxMessagePerCycle = (messages > 0) ? max(messages, custom_min) : messages;
+    g_MaxMessagePerCycle = (messages > 0) ? std::max<int>(messages, custom_min) : messages;
 }
 
 MSG MainLoop()
@@ -887,7 +887,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_ErrorReport.Write(L"\r\n");
     g_ErrorReport.WriteLogBegin();
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, L"Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+    g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, L"Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 

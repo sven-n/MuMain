@@ -6,7 +6,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzCharacter.h"
-#include "zzzEffect.h"
+#include "ZzzEffect.h"
 #include "MapManager.h"
 
 #define RENDER_CLOTH
@@ -56,7 +56,7 @@ void CPhysicsVertex::UpdateForce(unsigned int iKey, DWORD dwType, float fWind)
 
     float fGravityRate = 1.0f;
 
-    int iTemp = min(max(0, 5 - iKey), 4);
+    int iTemp = std::min<int>(std::max<int>(0, 5 - iKey), 4);
     auto fRand = (float)(iTemp == 0 ? 0 : iTemp + 2);
 #ifndef DISABLE_WIND
     for (int i = 0; i < 3; ++i)
@@ -153,7 +153,7 @@ BOOL CPhysicsVertex::KeepLength(CPhysicsVertex* pVertex2, float* pfLength)
     }
 
     vec3_t vDistance;
-    float fDistance = max(0.001f, GetDistance(pVertex2, &vDistance));
+    float fDistance = std::max<float>(0.001f, GetDistance(pVertex2, &vDistance));
 
     if (fDistance > pfLength[1] * 20.0f)
     {
@@ -177,7 +177,7 @@ BOOL CPhysicsVertex::KeepLength(CPhysicsVertex* pVertex2, float* pfLength)
 void CPhysicsVertex::AddOneTimeMoveToKeepLength(CPhysicsVertex* pVertex2, float fLength)
 {
     vec3_t vDistance;
-    float fDistance = max(0.001f, GetDistance(pVertex2, &vDistance));
+    float fDistance = std::max<float>(0.001f, GetDistance(pVertex2, &vDistance));
     VectorScale(vDistance, (fDistance - fLength) * 0.5f / fDistance, vDistance);
     VectorSubtract(m_vOneTimeMove, vDistance, m_vOneTimeMove);
     VectorAdd(pVertex2->m_vOneTimeMove, vDistance, pVertex2->m_vOneTimeMove);
@@ -650,7 +650,7 @@ void CPhysicsCloth::MoveVertices(float fTime)
             CPhysicsVertex* pVertex1 = &m_pVertices[pLink->m_nVertices[0]];
             CPhysicsVertex* pVertex2 = &m_pVertices[pLink->m_nVertices[1]];
             vec3_t vDistance;
-            float fDistance = max(0.001f, pVertex1->GetDistance(pVertex2, &vDistance));
+            float fDistance = std::max<float>(0.001f, pVertex1->GetDistance(pVertex2, &vDistance));
             if (fDistance > pLink->m_fDistance[1] + 0.01f)
             {
                 vec3_t vForce;
@@ -869,7 +869,7 @@ void CPhysicsCloth::RenderVertex(vec3_t* pvRenderPos, int xVertex, int yVertex)
 {
     int iVertex = m_iNumHor * yVertex + xVertex;
     vec3_t* pvPos = &pvRenderPos[iVertex];
-    glTexCoord2f((float)xVertex / (float)(m_iNumHor - 1), min(0.99f, (float)yVertex / (float)(m_iNumVer - 1)));
+    glTexCoord2f((float)xVertex / (float)(m_iNumHor - 1), std::min<float>(0.99f, (float)yVertex / (float)(m_iNumVer - 1)));
     glVertex3f((*pvPos)[0], (*pvPos)[1], (*pvPos)[2]);
 }
 

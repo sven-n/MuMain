@@ -44,7 +44,7 @@ int CGuildCache::MakeGuildMarkIndex(int nGuildKey)
 {
     if (m_dwCurrIndex >= MAX_MARKS)
     {
-        assert(!"길드마크 버퍼초과");
+        assert(!"Guild mark buffer exceeded");
         return -1;
     }
 
@@ -59,8 +59,8 @@ int CGuildCache::SetGuildMark(int nGuildKey, char* UnionName, char* GuildName, B
     {
         CMultiLanguage::ConvertFromUtf8(GuildMark[nIndex].UnionName, UnionName, 8);
         CMultiLanguage::ConvertFromUtf8(GuildMark[nIndex].GuildName, GuildName, 8);
-        GuildMark[nIndex].UnionName[8] = NULL;
-        GuildMark[nIndex].GuildName[8] = NULL;
+        GuildMark[nIndex].UnionName[8] = L'\0';
+        GuildMark[nIndex].GuildName[8] = L'\0';
         for (int i = 0; i < 64; ++i)
         {
             if (i % 2 == 0)
@@ -70,7 +70,7 @@ int CGuildCache::SetGuildMark(int nGuildKey, char* UnionName, char* GuildName, B
         }
     }
     else
-        assert(!"없는 길드마크");
+        assert(!"Guild mark not found");
 
     return nIndex;
 }

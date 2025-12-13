@@ -222,7 +222,7 @@ void CNewUIGoldBowmanLena::RenderTexts()
     int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    swprintf(Text, L"%s", GlobalText[245]);
+    swprintf(Text, L"%ls", GlobalText[245]);
     RenderText(Text, m_Pos.x + 20, m_Pos.y + 180, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
@@ -230,7 +230,7 @@ void CNewUIGoldBowmanLena::RenderTexts()
     RenderText(Text, m_Pos.x + 5, m_Pos.y + 202, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    swprintf(Text, L"%s", GlobalText[246]);
+    swprintf(Text, L"%ls", GlobalText[246]);
     RenderText(Text, m_Pos.x + 20, m_Pos.y + 225, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);

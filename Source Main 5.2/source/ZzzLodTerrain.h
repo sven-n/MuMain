@@ -10,9 +10,22 @@ extern unsigned char TerrainMappingLayer2[];
 extern float         TerrainMappingAlpha[];
 extern WORD          TerrainWall[];
 
-extern inline int TERRAIN_INDEX(int x, int y);
-extern inline int TERRAIN_INDEX_REPEAT(int x, int y);
-extern inline BYTE TERRAIN_ATTRIBUTE(float x, float y);
+inline int TERRAIN_INDEX(int x, int y)
+{
+    return (y) * TERRAIN_SIZE + (x);
+}
+
+inline int TERRAIN_INDEX_REPEAT(int x, int y)
+{
+    return ((y & TERRAIN_SIZE_MASK) * TERRAIN_SIZE) + (x & TERRAIN_SIZE_MASK);
+}
+
+inline BYTE TERRAIN_ATTRIBUTE(float x, float y)
+{
+    const int xf = static_cast<int>(x / TERRAIN_SCALE + 0.5f);
+    const int yf = static_cast<int>(y / TERRAIN_SCALE + 0.5f);
+    return TerrainWall[yf * TERRAIN_SIZE + xf];
+}
 
 bool OpenTerrainHeight(wchar_t* name);
 void SaveTerrainHeight(wchar_t* name);
@@ -34,7 +47,7 @@ bool SaveTerrainMapping(wchar_t* FileName, int iMapNumber);
 int OpenTerrainAttribute(wchar_t* FileName);
 bool SaveTerrainAttribute(wchar_t* FileName, int iMapNumber);
 
-//  ¼Ó¼º º¯°æ.
+//  ì†ì„± ë³€ê²½.
 void AddTerrainAttribute(int x, int y, BYTE att);
 void SubTerrainAttribute(int x, int y, BYTE att);
 void AddTerrainAttributeRange(int x, int y, int dx, int dy, BYTE att, BYTE Add = 0);
@@ -100,7 +113,7 @@ public:
     CFrustrum() {}
     ~CFrustrum() {}
 
-    //3DÇÁ·¯½ºÅÒ Ä¸½¶È­
+    //3Dí”„ëŸ¬ìŠ¤í…€ ìº¡ìŠí™”
     void Create(vec3_t vEye, float fFov, float fAspect, float fDist);
     bool Test(vec3_t vPos, float fRange);
     void Reset();
@@ -115,7 +128,7 @@ void ResetAllFrustrum();
 void DeleteAllFrustrum();
 CFrustrum* FindFrustrum(unsigned int iID);
 typedef std::map<unsigned int, CFrustrum* > FrustrumMap_t;
-extern FrustrumMap_t g_FrustrumMap; //ÀüÃ¼ ÇÁ·¯½ºÅÒ°ú º°°³·Î ¾ÆÀÌµğ·Î ÁöÁ¤ÇÒ ¼ö ÀÖ´Â ÇÁ·¯½ºÅÒ
+extern FrustrumMap_t g_FrustrumMap; //ì „ì²´ í”„ëŸ¬ìŠ¤í…€ê³¼ ë³„ê°œë¡œ ì•„ì´ë””ë¡œ ì§€ì •í•  ìˆ˜ ìˆëŠ” í”„ëŸ¬ìŠ¤í…€
 #endif //DYNAMIC_FRUSTRUM
 
 inline int MapFileEncrypt(BYTE* pbyDst, BYTE* pbySrc, int iSize)

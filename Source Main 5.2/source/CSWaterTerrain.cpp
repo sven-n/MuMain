@@ -5,15 +5,15 @@
 #include "stdafx.h"
 
 #include "ZzzOpenglUtil.h"
-#include "zzzInfomation.h"
-#include "zzzBmd.h"
-#include "zzzObject.h"
-#include "zzztexture.h"
-#include "zzzCharacter.h"
-#include "zzzscene.h"
-#include "zzzInterface.h"
-#include "zzzinventory.h"
-#include "zzzLodTerrain.h"
+#include "ZzzInfomation.h"
+#include "ZzzBMD.h"
+#include "ZzzObject.h"
+#include "ZzzTexture.h"
+#include "ZzzCharacter.h"
+#include "ZzzScene.h"
+#include "ZzzInterface.h"
+#include "ZzzInventory.h"
+#include "ZzzLodTerrain.h"
 #include "CSWaterTerrain.h"
 #include "MapManager.h"
 
@@ -243,23 +243,23 @@ void    CSWaterTerrain::calcBaseWave(void)
         int HeroY = ( Hero->Object.Position[1]/TERRAIN_SCALE )*2;
     */
 
-    int StartX = max(0, HeroX - (VIEW_WATER_GRID / 2));
-    int StartY = max(0, HeroY - (VIEW_WATER_GRID / 2));
-    int EndX = min(WATER_TERRAIN_SIZE, HeroX + (VIEW_WATER_GRID / 2));
-    int EndY = min(WATER_TERRAIN_SIZE, HeroY + (VIEW_WATER_GRID / 2));
+    int StartX = std::max<int>(0, HeroX - (VIEW_WATER_GRID / 2));
+    int StartY = std::max<int>(0, HeroY - (VIEW_WATER_GRID / 2));
+    int EndX = std::min<int>(WATER_TERRAIN_SIZE, HeroX + (VIEW_WATER_GRID / 2));
+    int EndY = std::min<int>(WATER_TERRAIN_SIZE, HeroY + (VIEW_WATER_GRID / 2));
     for (int i = StartY; i < EndY; i++)        //  y
     {
         for (int j = StartX; j < EndX; j++)    //  x
         {
             offset = j + (i * WATER_TERRAIN_SIZE);
 
-            //  Å« »çÀÎ°î¼±
+            //  Å« ï¿½ï¿½ï¿½Î°î¼±
             float alpha = 0.f;//TerrainMappingAlpha[(j/2)+(i/2)*WATER_TERRAIN_SIZE];
 
             MaxHeight = (int)(sin((WorldTime * 0.005f) + (i * 0.1f) + (j * 0.1f)) * 50 * (1 + alpha));
             m_iWaveHeight[2][offset] = (int)(MaxHeight - sin((WorldTime * 0.003f) + (j * 0.1f) + (i * 0.5f)) * 50 * (1 + alpha));
 
-            //  ÀÛÀº »çÀÎ°î¼±
+            //  ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î°î¼±
             MaxHeight = (int)(sin((WorldTime * 0.001f) + (i * 0.5f) + (j * 0.5f)) * 25 * (1 + alpha));
             m_iWaveHeight[3][offset] = (int)(MaxHeight - sin((WorldTime * 0.002f) + (j * 1.f) + (i * 0.3f)) * 25 * (1 + alpha));
         }

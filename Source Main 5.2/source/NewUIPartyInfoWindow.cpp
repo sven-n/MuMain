@@ -271,7 +271,7 @@ void CNewUIPartyInfoWindow::RenderMemberStatue(int iIndex, PARTY_t* pMember, boo
     RenderImage(IMAGE_PARTY_HPBAR_BACK, iPosX + 8, iPosY + 39, 151, 8);
     RenderImage(IMAGE_PARTY_HPBAR, iPosX + 10, iPosY + 41, iHP, 4);
 
-    swprintf(szText, L"%d %s %d", pMember->currHP, GlobalText[2374], pMember->maxHP);
+    swprintf(szText, L"%d %ls %d", pMember->currHP, GlobalText[2374], pMember->maxHP);
     g_pRenderText->RenderText(iPosX + 88, iPosY + 51, szText, 70, 0, RT3_SORT_RIGHT);
 
     if (bExitBtnRender)

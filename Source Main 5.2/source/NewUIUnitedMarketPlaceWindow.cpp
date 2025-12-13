@@ -126,7 +126,7 @@ bool CNewUIUnitedMarketPlaceWindow::Update()
         // 			else
         // 				m_bChannelEnable[i] = FALSE;
         //
-        // 			// ¹öÆ° Àá±Ý
+        // 			// ï¿½ï¿½Æ° ï¿½ï¿½ï¿½
         // 			if (m_bChannelEnable[i] == TRUE && g_DuelMgr.IsDuelChannelJoinable(i))
         // 			{
         // 				m_BtnChannel[i].UnLock();
@@ -272,7 +272,7 @@ void CNewUIUnitedMarketPlaceWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    swprintf(szText, L"%s", GlobalText[3000]);
+    swprintf(szText, L"%ls", GlobalText[3000]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 

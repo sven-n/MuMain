@@ -202,7 +202,7 @@ bool CNewUINPCQuest::Render()
     }
     else if (QUEST_NO == byCurQuestState)
     {
-        // ÇÊ¿ä Á¨.
+        // ï¿½Ê¿ï¿½ ï¿½ï¿½.
         RenderImage(IMAGE_NPCQUEST_ZEN, m_Pos.x + 11, m_Pos.y + 361, 170.f, 24.f);
 
         g_pRenderText->SetFont(g_hFontBold);
@@ -344,7 +344,7 @@ bool CNewUINPCQuest::RenderItemMobText()
 
             wchar_t szItemName[128];
             GetItemName(nItemType, nItemLevel, szItemName);
-            swprintf(szTemp, L"%s x %d", szItemName, nItemNum);
+            swprintf(szTemp, L"%ls x %d", szItemName, nItemNum);
             g_pRenderText->RenderText(m_Pos.x + 60, nPosY, szTemp);
         }
         break;
@@ -366,7 +366,7 @@ bool CNewUINPCQuest::RenderItemMobText()
             }
 
             auto name = getMonsterName(int(pQuest->QuestAct[i].wItemType));
-            swprintf(szTemp, L"%s x %d/%d", name, nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
+            swprintf(szTemp, L"%ls x %d/%d", name, nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
 
             g_pRenderText->RenderText(m_Pos.x + 50, nPosY, szTemp);
         }

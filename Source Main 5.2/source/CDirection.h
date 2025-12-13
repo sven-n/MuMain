@@ -1,7 +1,7 @@
 #ifndef _DIRECTION_H_
 #define _DIRECTION_H_
 
-#include <VECTOR>
+#include <vector>
 #include "Singleton.h"
 #include "CMVP1stDirection.h"
 #include "CKANTURUDirection.h"
@@ -65,4 +65,4 @@ public:
 
 #define g_Direction CDirection::GetSingleton()
 
-#endif _DIRECTION_H_
+#endif // _DIRECTION_H_

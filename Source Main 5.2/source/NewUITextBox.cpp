@@ -2,7 +2,7 @@
 //	NewUITextBox.cpp
 //=============================================================================
 #pragma once
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "NewUITextBox.h"
 #include "UIControls.h"
 #include "UsefulDef.h"

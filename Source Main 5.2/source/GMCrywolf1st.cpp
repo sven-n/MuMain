@@ -1,13 +1,13 @@
 ﻿#include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
-#include "zzztexture.h"
+#include "ZzzTexture.h"
 #include "ZzzBMD.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzScene.h"
-#include "zzzEffect.h"
-#include "zzzAi.h"
-#include "zzzOpenData.h"
+#include "ZzzEffect.h"
+#include "ZzzAI.h"
+#include "ZzzOpenData.h"
 #include "ZzzInterface.h"
 #include "DSPlaySound.h"
 #include "BoneManager.h"
@@ -157,13 +157,13 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
     switch (m_OccupationState)
     {
     case CRYWOLF_OCCUPATION_STATE_PEACE:
-        swprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
+        swprintf(FileName, L"%ls\\TerrainLight.jpg", WorldName);
         break;
     case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
-        swprintf(FileName, L"%s\\TerrainLight1.jpg", WorldName);
+        swprintf(FileName, L"%ls\\TerrainLight1.jpg", WorldName);
         break;
     case CRYWOLF_OCCUPATION_STATE_WAR:
-        swprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
+        swprintf(FileName, L"%ls\\TerrainLight2.jpg", WorldName);
         break;
     }
     OpenTerrainLight(FileName);
@@ -171,13 +171,13 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
     switch (m_OccupationState)
     {
     case CRYWOLF_OCCUPATION_STATE_PEACE:
-        swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
+        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
         break;
     case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
-        swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
+        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
         break;
     case CRYWOLF_OCCUPATION_STATE_WAR:
-        swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
+        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
         break;
     }
     OpenTerrainAttribute(FileName);
@@ -2414,13 +2414,13 @@ bool M34CryWolf1st::Render_Mvp_Interface()
         g_pRenderText->SetTextColor(255, 148, 21, 255);
         g_pRenderText->SetBgColor(0x00000000);
 
-        swprintf(Text, L"%s", GlobalText[680]);
+        swprintf(Text, L"%ls", GlobalText[680]);
         g_pRenderText->RenderText(240, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        swprintf(Text, L"%s", GlobalText[681]);
+        swprintf(Text, L"%ls", GlobalText[681]);
         g_pRenderText->RenderText(285, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        swprintf(Text, L"%s", GlobalText[1973]);
+        swprintf(Text, L"%ls", GlobalText[1973]);
         g_pRenderText->RenderText(333, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        swprintf(Text, L"%s", GlobalText[1977]);
+        swprintf(Text, L"%ls", GlobalText[1977]);
         g_pRenderText->RenderText(387, 160, Text, 0, 0, RT3_WRITE_CENTER);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetBgColor(0x00000000);
@@ -2434,10 +2434,10 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 
             swprintf(Text, L"%d", i + 1);
             g_pRenderText->RenderText(240, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
-            swprintf(Text, L"%s", HeroName[i]);
+            swprintf(Text, L"%ls", HeroName[i]);
             g_pRenderText->RenderText(285, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
 
-            swprintf(Text, L"%s", gCharacterManager.GetCharacterClassText(HeroClass[i]));
+            swprintf(Text, L"%ls", gCharacterManager.GetCharacterClassText(HeroClass[i]));
 
             g_pRenderText->RenderText(335, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
             swprintf(Text, L"%d", HeroScore[i]);

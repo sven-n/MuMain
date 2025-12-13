@@ -4,7 +4,7 @@
 #ifndef __GOBOID_H__
 #define __GOBOID_H__
 
-#include "zzzObject.h"
+#include "ZzzObject.h"
 
 bool CreateMountSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int SubType = 0, int LinkBone = 0);
 void CreateMount(int Type, vec3_t Position, OBJECT* Owner, int SubType = 0, int LinkBone = 0);
@@ -15,7 +15,7 @@ void RenderMount(void);
 void RenderDarkHorseSkill(OBJECT* o, BMD* b);
 void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill = 30);
 void DeleteMount(OBJECT* Owner);
-// ¾ÆÀÌÅÛÀÌ Æê ¾ÆÀÌÅÛÀÎ°¡?
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î°ï¿½?
 bool IsMount(ITEM* pItem);
 
 void MoveBoids(void);

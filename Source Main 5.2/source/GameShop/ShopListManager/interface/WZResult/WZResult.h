@@ -1,12 +1,12 @@
 /*******************************************************************************
-*	ÀÛ ¼º ÀÚ : ÁøÇıÁø
-*	ÀÛ ¼º ÀÏ : 2009.06.10
-*	³»    ¿ë : WZResult - Ã³¸® °á°ú °´Ã¼
+*	ì‘ ì„± ì : ì§„í˜œì§„
+*	ì‘ ì„± ì¼ : 2009.06.10
+*	ë‚´    ìš© : WZResult - ì²˜ë¦¬ ê²°ê³¼ ê°ì²´
 *******************************************************************************/
 
 #pragma once
 
-#include "GameShop\ShopListManager\interface\WZResult\ErrorCodeDefine.h"
+#include "GameShop/ShopListManager/interface/WZResult/ErrorCodeDefine.h"
 #define	MAX_ERROR_MESSAGE	1024
 
 class WZResult

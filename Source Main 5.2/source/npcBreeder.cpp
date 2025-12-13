@@ -5,9 +5,9 @@
 #include <process.h>
 #include "UIManager.h"
 #include "ZzzBMD.h"
-#include "zzzinfomation.h"
-#include "zzzcharacter.h"
-#include "zzzinventory.h"
+#include "ZzzInfomation.h"
+#include "ZzzCharacter.h"
+#include "ZzzInventory.h"
 #include "ZzzTexture.h"
 
 #include "npcBreeder.h"

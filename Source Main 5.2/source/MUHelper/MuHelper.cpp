@@ -23,8 +23,19 @@ constexpr int DEFAULT_DURABILITY_THRESHOLD = 50;
 SpinLock _targetsLock;
 SpinLock _itemsLock;
 
+// Movement/target globals are defined in ZzzInterface.cpp.
+extern MovementSkill g_MovementSkill;
+extern int SelectedCharacter;
+extern int TargetX;
+extern int TargetY;
+
 namespace MUHelper
 {
+	MovementSkill& g_MovementSkill = ::g_MovementSkill;
+	int& SelectedCharacter = ::SelectedCharacter;
+	int& TargetX = ::TargetX;
+	int& TargetY = ::TargetY;
+
     CMuHelper g_MuHelper;
 
     void CALLBACK CMuHelper::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -262,7 +273,7 @@ namespace MUHelper
         posB = { pTarget->TargetX, pTarget->TargetX };
         int iNextDistance = ComputeDistanceBetween(posA, posB);
 
-        return min(iPrevDistance, iNextDistance);
+        return std::min<int>(iPrevDistance, iNextDistance);
     }
 
     int CMuHelper::ComputeDistanceBetween(POINT posA, POINT posB)
@@ -831,10 +842,6 @@ namespace MUHelper
 
     int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
     {
-        extern MovementSkill g_MovementSkill;
-        extern int SelectedCharacter;
-        extern int TargetX, TargetY;
-
         g_MovementSkill.m_iSkill = iSkill;
         g_MovementSkill.m_bMagic = true;
 
@@ -884,7 +891,7 @@ namespace MUHelper
                 Hero->Path.Lock.lock();
 
                 // Limit movement to 2 steps at a time
-                int pathNum = min(tempPath.PathNum, 2);
+                int pathNum = std::min<int>(tempPath.PathNum, 2);
                 for (int i = 0; i < pathNum; i++)
                 {
                     Hero->Path.PathX[i] = tempPath.PathX[i];
@@ -934,8 +941,6 @@ namespace MUHelper
 
     int CMuHelper::SimulateMove(POINT posMove)
     {
-        extern int TargetX, TargetY;
-
         Hero->MovementType = MOVEMENT_MOVE;
         TargetX = (int)posMove.x;
         TargetY = (int)posMove.y;
@@ -1024,9 +1029,6 @@ namespace MUHelper
             DeleteItem(m_iCurrentItem);
             return 1;
         }
-
-        extern int TargetX;
-        extern int TargetY;
 
         TargetX = (int)(Items[m_iCurrentItem].Object.Position[0] / TERRAIN_SCALE);
         TargetY = (int)(Items[m_iCurrentItem].Object.Position[1] / TERRAIN_SCALE);

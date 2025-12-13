@@ -6,9 +6,9 @@
 #include "ZzzTexture.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
-#include "zzzObject.h"
-#include "zzzcharacter.h"
-#include "Zzzinfomation.h"
+#include "ZzzObject.h"
+#include "ZzzCharacter.h"
+#include "ZzzInfomation.h"
 #include "NewUISystem.h"
 #include "wglext.h"
 
@@ -879,12 +879,6 @@ void SetDisableMultisample()
 ///////////////////////////////////////////////////////////////////////////////
 // render util
 ///////////////////////////////////////////////////////////////////////////////
-
-inline void TEXCOORD(float* c, float u, float v)
-{
-    c[0] = u;
-    c[1] = v;
-}
 
 void RenderBox(float Matrix[3][4])
 {

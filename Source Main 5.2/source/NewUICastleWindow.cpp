@@ -286,7 +286,7 @@ void CNewUICastleWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    swprintf(szText, L"%s", GlobalText[1588]);
+    swprintf(szText, L"%ls", GlobalText[1588]);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -868,7 +868,7 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
     const int nDefenseBlockSize = 24 / (g_SenatusInfo.GetMaxDefenseLevel() + 1);
     const int nRecoverBlockSize = 24 / (g_SenatusInfo.GetMaxRecoverLevel() + 1);
 
-    if (g_SenatusInfo.IsGate(pInfo))	// ¼º¹®
+    if (g_SenatusInfo.IsGate(pInfo))	// ï¿½ï¿½ï¿½ï¿½
     {
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -945,7 +945,7 @@ void CNewUICastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)
     *pszTextFound = '\0';
     ConvertGold(dwNumber, szNumber);
 
-    swprintf(pszText, L"%s%s%s", pszTextBegin, szNumber, pszTextNext);
+    swprintf(pszText, L"%ls%ls%ls", pszTextBegin, szNumber, pszTextNext);
 }
 
 void CNewUICastleWindow::InsertComma64(wchar_t* pszText, __int64 iNumber)
@@ -961,5 +961,5 @@ void CNewUICastleWindow::InsertComma64(wchar_t* pszText, __int64 iNumber)
     *pszTextFound = '\0';
     ConvertGold64(iNumber, szNumber);
 
-    swprintf(pszText, L"%s%s%s", pszTextBegin, szNumber, pszTextNext);
+    swprintf(pszText, L"%ls%ls%ls", pszTextBegin, szNumber, pszTextNext);
 }

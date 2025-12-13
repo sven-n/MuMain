@@ -27,7 +27,7 @@ namespace
             iMbclen = _mbclen((unsigned char*)lpSeek);
             if (iMbclen + (int)(lpSeek - lpLineStart) >= lineSize)
             {
-                if (lpSpace && (int)(lpSeek - lpSpace) < min(10, lineSize / 2))
+                if (lpSpace && (int)(lpSeek - lpSpace) < std::min<int>(10, lineSize / 2))
                 {
                     lpDst -= (lpSeek - lpSpace - 1);
                     lpSeek = lpSpace + 1;
@@ -73,7 +73,7 @@ JewelHarmonyInfo::JewelHarmonyInfo()
     if (!Result)
     {
         wchar_t szMessage[256];
-        ::swprintf(szMessage, L"%s file not found.\r\n", L"JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd");
+        ::swprintf(szMessage, L"%ls file not found.\r\n", L"JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd");
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -127,12 +127,12 @@ const bool JewelHarmonyInfo::OpenJewelHarmonyInfoFile(const std::wstring& filena
             m_OptionData[type][option].Minlevel = *reinterpret_cast<int*>(entry + sizeof(int) + NAME_SIZE);
 
             // Read HarmonyJewelLevel[14]
-            std::memcpy(m_OptionData[type][option].HarmonyJewelLevel,
+            memcpy(m_OptionData[type][option].HarmonyJewelLevel,
                 entry + sizeof(int) + NAME_SIZE + sizeof(int),
                 LEVEL_COUNT * sizeof(int));
 
             // Read Zen[14]
-            std::memcpy(m_OptionData[type][option].Zen,
+            memcpy(m_OptionData[type][option].Zen,
                 entry + sizeof(int) + NAME_SIZE + sizeof(int) + LEVEL_COUNT * sizeof(int),
                 LEVEL_COUNT * sizeof(int));
         }

@@ -1,7 +1,7 @@
 /*******************************************************************************
-*	ÀÛ ¼º ÀÚ : ÁøÇýÁø
-*	ÀÛ ¼º ÀÏ : 2009.06.10
-*	³»    ¿ë : Include Header
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : 2009.06.10
+*	ï¿½ï¿½    ï¿½ï¿½ : Include Header
 *******************************************************************************/
 
 #pragma once
@@ -9,14 +9,14 @@
 #pragma warning(disable : 4995)
 
 #include <iostream>
-#include <Wininet.h>
+#include <wininet.h>
 
 #include <crtdbg.h>
 #include <tchar.h>
 #include <strsafe.h>
 
-#include "GameShop\ShopListManager\interface\WZResult\WZResult.h"
-#include "GameShop\ShopListManager\interface\DownloadInfo.h"
-#include "GameShop\ShopListManager\interface\IDownloaderStateEvent.h"
+#include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
+#include "GameShop/ShopListManager/interface/DownloadInfo.h"
+#include "GameShop/ShopListManager/interface/IDownloaderStateEvent.h"
 
 #pragma comment(lib, "Wininet.lib")

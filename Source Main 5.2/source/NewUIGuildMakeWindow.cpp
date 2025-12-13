@@ -417,7 +417,7 @@ void CNewUIGuildMakeWindow::RenderGMResultInfo()
 
     wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    swprintf(Text, L"%s : %s", GlobalText[182], GuildMark[MARK_EDIT].GuildName);
+    swprintf(Text, L"%ls : %ls", GlobalText[182], GuildMark[MARK_EDIT].GuildName);
     RenderText(Text, m_Pos.x, m_Pos.y + 140, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 
     m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].Render();

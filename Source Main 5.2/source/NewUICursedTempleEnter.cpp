@@ -268,13 +268,13 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
             if (enterlevel == i + 1)
             {
                 DisableAlphaBlend();
-                swprintf(Text, L"%s %s", Text, GlobalText[2412]);
+                swprintf(Text, L"%ls %ls", Text, GlobalText[2412]);
                 DrawText(Text, m_Pos.x + 3, m_Pos.y + 67 + (i * 15), 0xffffffff, 0xff0000ff, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
                 EnableAlphaTest();
             }
             else
             {
-                swprintf(Text, L"%s %s", Text, GlobalText[2413]);
+                swprintf(Text, L"%ls %ls", Text, GlobalText[2413]);
                 DrawText(Text, m_Pos.x + 3, m_Pos.y + 67 + (i * 15), 0xffffffff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
             }
         }

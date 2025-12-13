@@ -6,12 +6,12 @@
 #include "CSPetSystem.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
-#include "zzzInfomation.h"
-#include "zzzBmd.h"
-#include "zzztexture.h"
-#include "zzzCharacter.h"
-#include "zzzInterface.h"
-#include "zzzinventory.h"
+#include "ZzzInfomation.h"
+#include "ZzzBMD.h"
+#include "ZzzTexture.h"
+#include "ZzzCharacter.h"
+#include "ZzzInterface.h"
+#include "ZzzInventory.h"
 
 #include "GIPetManager.h"
 #include "MapManager.h"
@@ -538,7 +538,7 @@ namespace giPetManager
         swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
         swprintf(TextList[TextNum], GlobalText[201], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2); TextNum++; SkipNum++;
-        swprintf(TextList[TextNum], L"%s : %d", GlobalText[368], pPetInfo->m_wLevel); TextNum++; SkipNum++;
+        swprintf(TextList[TextNum], L"%ls : %d", GlobalText[368], pPetInfo->m_wLevel); TextNum++; SkipNum++;
 
         if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
         {

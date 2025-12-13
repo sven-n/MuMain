@@ -48,8 +48,8 @@
 #include "SkillManager.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#include "GameShop\InGameShopSystem.h"
-#include "GameShop\MsgBoxIGSCommon.h"
+#include "GameShop/InGameShopSystem.h"
+#include "GameShop/MsgBoxIGSCommon.h"
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "w_MapHeaders.h"
@@ -155,7 +155,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
 BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %s, port = %d", IpAddr, Port);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);
 
     // todo: generally, it's a bad idea to assume a specific port number (range).
     const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
@@ -371,7 +371,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 //        wchar_t lpszTemp[256];
 //        if (Util_CheckOption(GetCommandLineW(), L'i', lpszTemp))
 //        {
-//            g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", m_ID);
+//            g_ErrorReport.Write(L"> Try to Login \"%ls\"\r\n", m_ID);
 //            SendRequestLogIn(m_ID, lpszTemp);
 //        }
 //    }
@@ -872,7 +872,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     else
     {
         wchar_t Text[256];
-        swprintf(Text, L"%s%s", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
+        swprintf(Text, L"%ls%ls", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
 
         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
@@ -1630,7 +1630,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%s)]", Text);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%ls)]", Text);
 }
 
 void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
@@ -1676,7 +1676,7 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
     c->TargetY = Data->TargetY;
     c->TargetAngle = Data->PathMetadata >> 4;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %ls | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
 
     if (Key == HeroKey)
     {
@@ -1875,7 +1875,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             else
             {
                 wchar_t Text[256];
-                swprintf(Text, L"%s%s", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
+                swprintf(Text, L"%ls%ls", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
 
                 g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
@@ -2256,7 +2256,7 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
         break;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"(RCPV)ID : %s | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"(RCPV)ID : %ls | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX, c->PositionY, c->TargetX, c->TargetY);
 
     if (CreateFlag)
     {
@@ -2303,7 +2303,7 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
             auto buff = static_cast<eBuffState>(buffs[j]);
             RegisterBuff(buff, o);
             battleCastle::SettingBattleFormation(c, buff);
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s, Buff : %d", c->ID, static_cast<int>(buff));
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %ls, Buff : %d", c->ID, static_cast<int>(buff));
         }
 
         if (gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart())
@@ -2409,7 +2409,7 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
                 RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
                 battleCastle::SettingBattleFormation(c, static_cast<eBuffState>(Data2->s_BuffEffectState[j]));
 
-                g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
+                g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %ls, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
             }
 
             c->PositionX = Data2->PositionX;
@@ -2565,7 +2565,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         {
             RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %s, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %ls, Buff : %d", c->ID, static_cast<int>(Data2->s_BuffEffectState[j]));
         }
 
         float fAngle = 45.0f;
@@ -3446,7 +3446,7 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
                 c->EtcPart = PARTS_WEBZEN;
             }
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"RegisterBuff ID : %s, Buff : %d", c->ID, static_cast<int>(bufftype));
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"RegisterBuff ID : %ls, Buff : %d", c->ID, static_cast<int>(bufftype));
         }
     }
     else // clear
@@ -3461,7 +3461,7 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
         {
             battleCastle::DeleteBattleFormation(c, bufftype);
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"UnRegisterBuff ID : %s, Buff : %d", c->ID, static_cast<int>(bufftype));
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"UnRegisterBuff ID : %ls, Buff : %d", c->ID, static_cast<int>(bufftype));
         }
         else if (bufftype == eBuff_GMEffect)
         {
@@ -5668,7 +5668,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 
             if (getGold > 0)
             {
-                swprintf(szMessage, L"%d %s %s", getGold, GlobalText[224], GlobalText[918]);
+                swprintf(szMessage, L"%d %ls %ls", getGold, GlobalText[224], GlobalText[918]);
                 g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
@@ -5711,7 +5711,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             GetItemName(pickedItem->Type, level, szItem);
 
             wchar_t szMessage[128];
-            swprintf(szMessage, L"%s %s", szItem, GlobalText[918]);
+            swprintf(szMessage, L"%ls %ls", szItem, GlobalText[918]);
             g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
             int Type = pickedItem->Type;
@@ -6628,7 +6628,7 @@ void ReceivePK(const BYTE* ReceiveBuffer)
     case 5:
     {
         wchar_t szTemp[100];
-        swprintf(szTemp, L"%s %d%s", GlobalText[490], 1, GlobalText[491]);
+        swprintf(szTemp, L"%ls %d%ls", GlobalText[490], 1, GlobalText[491]);
         wcscat(message, szTemp);
         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_ERROR_MESSAGE);
     }
@@ -6636,7 +6636,7 @@ void ReceivePK(const BYTE* ReceiveBuffer)
     case 6:
     {
         wchar_t szTemp[100];
-        swprintf(szTemp, L"%s %d%s", GlobalText[490], 2, GlobalText[491]);
+        swprintf(szTemp, L"%ls %d%ls", GlobalText[490], 2, GlobalText[491]);
         wcscat(message, szTemp);
         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_ERROR_MESSAGE);
     }
@@ -6875,7 +6875,7 @@ void ReceivePartyInfo(const BYTE* ReceiveBuffer)
 
         PARTY_t* p = &Party[i];
 
-        p->stepHP = min(10, max(0, stepHP));
+        p->stepHP = std::min<int>(10, std::max<int>(0, stepHP));
 
         Offset += sizeof(PRECEIVE_PARTY_INFO);
     }
@@ -6917,8 +6917,8 @@ void ReceivePartyGetItem(const BYTE* ReceiveBuffer)
     wchar_t itemName[100] = { 0, };
     wchar_t Text[200] = { 0, };
 
-    if ((Data->ItemInfo & 0x10000))      swprintf(itemName, L"%s ", GlobalText[620]);
-    else if ((Data->ItemInfo & 0x20000)) swprintf(itemName, L"%s ", GlobalText[1089]);
+    if ((Data->ItemInfo & 0x10000))      swprintf(itemName, L"%ls ", GlobalText[620]);
+    else if ((Data->ItemInfo & 0x20000)) swprintf(itemName, L"%ls ", GlobalText[1089]);
 
     int itemLevel = Data->ItemLevel;
     GetItemName(itemType, itemLevel, Text);
@@ -6927,7 +6927,7 @@ void ReceivePartyGetItem(const BYTE* ReceiveBuffer)
     if ((Data->ItemInfo & 0x08000)) wcscat(itemName, GlobalText[177]);
     if ((Data->ItemInfo & 0x04000)) wcscat(itemName, GlobalText[178]);
 
-    swprintf(Text, L"%s : %s %s", c->ID, itemName, GlobalText[918]);
+    swprintf(Text, L"%ls : %ls %ls", c->ID, itemName, GlobalText[918]);
 
     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
@@ -6971,7 +6971,7 @@ void ReceiveGuildList(const BYTE* ReceiveBuffer)
 
     g_nGuildMemberCount = Data->Count;
     GuildTotalScore = Data->TotalScore;
-    GuildTotalScore = max(0, GuildTotalScore);
+    GuildTotalScore = std::max<int>(0, GuildTotalScore);
 
     wchar_t rivalGuildName[sizeof Data->szRivalGuildName + 1] {};
     CMultiLanguage::ConvertFromUtf8(rivalGuildName, Data->szRivalGuildName, sizeof Data->szRivalGuildName);
@@ -7924,7 +7924,7 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     case 2:
     case 3:
     {
-        swprintf(sBuf, L"%s%s %s", GlobalText[1801], GlobalText[1816], GlobalText[868]);
+        swprintf(sBuf, L"%ls%ls %ls", GlobalText[1801], GlobalText[1816], GlobalText[868]);
         g_pSystemLogBox->AddText(sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
@@ -7960,7 +7960,7 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     case 0:
     case 5:
     {
-        swprintf(sBuf, L"%s%s %s", GlobalText[1800], GlobalText[1816], GlobalText[868]);
+        swprintf(sBuf, L"%ls%ls %ls", GlobalText[1800], GlobalText[1816], GlobalText[868]);
         g_pSystemLogBox->AddText(sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
@@ -9124,7 +9124,7 @@ void ReceiveRequestAcceptAddFriend(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(szText, Data->Name, MAX_ID_SIZE);
     szText[MAX_ID_SIZE] = '\0';
 
-    swprintf(szText, L"%s %s", szText, GlobalText[1051]); // " has requested to list you as a friend."
+    swprintf(szText, L"%ls %ls", szText, GlobalText[1051]); // " has requested to list you as a friend."
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == false)
     {
@@ -12068,7 +12068,7 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
         wchar_t szText[256] = { NULL, };
         swprintf(szText, GlobalText[2801], day);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        swprintf(szText, L"%d%s", zone, GlobalText[2840]);
+        swprintf(szText, L"%d%ls", zone, GlobalText[2840]);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     case 2:

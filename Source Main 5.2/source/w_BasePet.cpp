@@ -12,9 +12,9 @@ extern float EarthQuake;
 
 PetObjectPtr PetObject::Make()
 {
-    PetObjectPtr PetObject(new PetObject);
-    PetObject->Init();
-    return PetObject;
+    PetObjectPtr ptr(new PetObject());
+    ptr->Init();
+    return ptr;
 }
 
 PetObject::PetObject() :

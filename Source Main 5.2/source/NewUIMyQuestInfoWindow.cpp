@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "NewUIMyQuestInfoWindow.h"
 
-#include "csQuest.h"
+#include "CSQuest.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "QuestMng.h"
@@ -460,7 +460,7 @@ void CNewUIMyQuestInfoWindow::SetCurQuestList(DWordList* pDWordList)
     DWordList::iterator iter;
     for (iter = pDWordList->begin(), i = 1; iter != pDWordList->end(); advance(iter, 1), ++i)
     {
-        ::swprintf(szInput, L"%d.%s", i, g_QuestMng.GetSubject(*iter));
+        ::swprintf(szInput, L"%d.%ls", i, g_QuestMng.GetSubject(*iter));
         ::ReduceStringByPixel(szOutput, 64, szInput, 150);
         m_CurQuestListBox.AddText(*iter, szOutput);
     }

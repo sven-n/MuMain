@@ -1,7 +1,7 @@
 //=============================================================================
 //	NewUIScrollBar.cpp
 //=============================================================================
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "NewUIScrollBar.h"
 
 using namespace SEASON3B;

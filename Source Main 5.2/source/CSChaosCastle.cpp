@@ -6,10 +6,10 @@
 
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
-#include "zzztexture.h"
+#include "ZzzTexture.h"
 #include "ZzzBMD.h"
 #include "ZzzScene.h"
-#include "zzzEffect.h"
+#include "ZzzEffect.h"
 #include "UIManager.h"
 #include "CSChaosCastle.h"
 

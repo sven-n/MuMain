@@ -14,7 +14,7 @@
 #include "ZzzLodTerrain.h"
 #include "BoneManager.h"
 #include "UIManager.h"
-#include "CKanturuDirection.h"
+#include "CKANTURUDirection.h"
 #include "CDirection.h"
 #include "UIBaseDef.h"
 #include "MapManager.h"

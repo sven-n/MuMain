@@ -1,14 +1,14 @@
 /*******************************************************************************
-*	ÀÛ ¼º ÀÚ : ÁøÇýÁø
-*	ÀÛ ¼º ÀÏ : 2009.06.10
-*	³»    ¿ë : FileDownloader
-*				File ´ÜÀ§ ´Ù¿î·Îµå ±â´É Á¦°ø
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : 2009.06.10
+*	ï¿½ï¿½    ï¿½ï¿½ : FileDownloader
+*				File ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 *******************************************************************************/
 
 #pragma once
 
-#include "GameShop\ShopListManager\interface\IConnecter.h"
-#include "GameShop\ShopListManager\interface\IDownloaderStateEvent.h"
+#include "GameShop/ShopListManager/interface/IConnecter.h"
+#include "GameShop/ShopListManager/interface/IDownloaderStateEvent.h"
 
 class FileDownloader
 {
@@ -22,67 +22,67 @@ public:
 
     // public Function
 
-        //					´Ù¿î·Îµå ÁßÁö
+        //					ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½
     void				Break();
-    //					ÁöÁ¤ÇÑ ÆÄÀÏ ´Ù¿î·Îµå ½ÇÇà : ¼¼¼Ç, Ä¿³¼Æ®, ÆÄÀÏ ¿ÀÇÂ ¸ðµÎ Ã³¸®
+    //					ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ : ï¿½ï¿½ï¿½ï¿½, Ä¿ï¿½ï¿½Æ®, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
     WZResult			DownloadFile();
 
 private:
     // private Function
 
-        //					ÁøÇà ¿©ºÎ
+        //					ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     BOOL				CanBeContinue();
-    //					¸±¸®Áî
+    //					ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void				Release();
 
-    //					Ä¿³ØÅÍ »ý¼º
+    //					Ä¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     IConnecter* CreateConnecter();
-    //					Á¢¼Ó Ã³¸®
+    //					ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
     WZResult 			CreateConnection();
     static unsigned int __stdcall RunConnectThread(LPVOID pParam);
     WZResult 			Connection();
 
-    //					Àü¼Û Ã³¸®
+    //					ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
     WZResult 			TransferRemoteFile();
 
-    //					·ÎÄÃ ÆÄÀÏ »ý¼º
+    //					ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     WZResult 			CreateLocalFile();
-    //					´Ù¿î·Îµå ÆÄÀÏ ÀÐ±â
+    //					ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ð±ï¿½
     WZResult 			ReadRemoteFile(BYTE* byReadBuffer, DWORD* dwBytesRead);
-    //					·ÎÄÃ ÆÄÀÏ ¾²±â
+    //					ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     WZResult 			WriteLocalFile(BYTE* byReadBuffer, DWORD dwBytesRead);
 
-    //					´Ù¿î·Îµå ½ÃÀÛ ÀÌº¥Æ® º¸³»±â
+    //					ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void				SendStartedDownloadFileEvent(ULONGLONG nFileLength);
-    //					´Ù¿î·Îµå ¿Ï·á ÀÌº¥Æ® º¸³»±â
+    //					ï¿½Ù¿ï¿½Îµï¿½ ï¿½Ï·ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void				SendCompletedDownloadFileEvent(WZResult wzResult);
-    //					´Ù¿î·Îµå ÁøÇà »óÈ² ÀÌº¥Æ® º¸³»±â : ÆÐÅ¶ ´ÜÀ§
+    //					ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È² ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ : ï¿½ï¿½Å¶ ï¿½ï¿½ï¿½ï¿½
     void				SendProgressDownloadFileEvent(ULONGLONG nTotalBytesRead);
 
     // Member Object
 
-        //							´Ù¿î·Îµå ÁßÁö ÇÃ·¡±×
+        //							ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½ï¿½
     volatile BOOL				m_bBreak;
-    //							°á°ú..
+    //							ï¿½ï¿½ï¿½..
     WZResult 					m_Result;
 
-    //							´Ù¿î·Îµå »óÅÂ ÀÌº¥Æ® ¹ÞÀ» °´Ã¼
+    //							ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼
     IDownloaderStateEvent* m_pStateEvent;
-    //							´Ù¿î·Îµå ¼­¹ö Á¤º¸ °´Ã¼
+    //							ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼
     DownloadServerInfo* m_pServerInfo;
-    //							´Ù¿î·Îµå ÆÄÀÏ Á¤º¸ °´Ã¼
+    //							ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼
     DownloadFileInfo* m_pFileInfo;
-    //							Ä¿³ØÅÍ
+    //							Ä¿ï¿½ï¿½ï¿½ï¿½
     IConnecter* m_pConnecter;
 
-    //							WinINet ¼¼¼Ç ÇÚµé
+    //							WinINet ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½
     HINTERNET					m_hSession;
-    //							WinINet Ä¿³¼¼Ç ÇÚµé
+    //							WinINet Ä¿ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½
     HINTERNET					m_hConnection;
-    //							¼­¹ö ÆÄÀÏ ÇÚµé
+    //							ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½
     HINTERNET					m_hRemoteFile;
-    //							·ÎÄÃ ÆÄÀÏ ÇÚµé
+    //							ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½
     HANDLE						m_hLocalFile;
-    //							ÆÄÀÏ »çÀÌÁî
+    //							ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     ULONGLONG					m_nFileLength;
 };

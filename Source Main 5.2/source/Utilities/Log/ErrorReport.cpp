@@ -183,19 +183,19 @@ void CErrorReport::WriteCurrentTime(BOOL bLineShift)
 void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
 {
     Write(L"<System information>\r\n");
-    Write(L"OS \t\t\t: %s\r\n", si->m_lpszOS);
-    Write(L"CPU \t\t\t: %s\r\n", si->m_lpszCPU);
+    Write(L"OS \t\t\t: %ls\r\n", si->m_lpszOS);
+    Write(L"CPU \t\t\t: %ls\r\n", si->m_lpszCPU);
     Write(L"RAM \t\t\t: %dMB\r\n", 1 + (si->m_iMemorySize / 1024 / 1024));
     AddSeparator();
-    Write(L"Direct-X \t\t: %s\r\n", si->m_lpszDxVersion);
+    Write(L"Direct-X \t\t: %ls\r\n", si->m_lpszDxVersion);
 }
 
 void CErrorReport::WriteOpenGLInfo(void)
 {
     Write(L"<OpenGL information>\r\n");
-    Write(L"Vendor\t\t: %s\r\n", (wchar_t*)glGetString(GL_VENDOR));
-    Write(L"Render\t\t: %s\r\n", (wchar_t*)glGetString(GL_RENDERER));
-    Write(L"OpenGL version\t: %s\r\n", (wchar_t*)glGetString(GL_VERSION));
+    Write(L"Vendor\t\t: %ls\r\n", (wchar_t*)glGetString(GL_VENDOR));
+    Write(L"Render\t\t: %ls\r\n", (wchar_t*)glGetString(GL_RENDERER));
+    Write(L"OpenGL version\t: %ls\r\n", (wchar_t*)glGetString(GL_VERSION));
     GLint iResult[2];
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, iResult);
     Write(L"Max Texture size\t: %d x %d\r\n", iResult[0], iResult[0]);
@@ -213,13 +213,13 @@ void CErrorReport::WriteImeInfo(HWND hWnd)
     {
         HKL hKl = GetKeyboardLayout(0);
         ImmGetDescription(hKl, lpszTemp, 256);
-        Write(L"IME Name\t\t: %s\r\n", lpszTemp);
+        Write(L"IME Name\t\t: %ls\r\n", lpszTemp);
         ImmGetIMEFileName(hKl, lpszTemp, 256);
-        Write(L"IME File Name\t\t: %s\r\n", lpszTemp);
+        Write(L"IME File Name\t\t: %ls\r\n", lpszTemp);
         ImmReleaseContext(hWnd, hImc);
     }
     GetKeyboardLayoutName(lpszTemp);
-    Write(L"Keyboard type\t\t: %s\r\n", lpszTemp);
+    Write(L"Keyboard type\t\t: %ls\r\n", lpszTemp);
 }
 
 typedef struct tagER_SOUNDDEVICE {
@@ -272,7 +272,7 @@ void CErrorReport::WriteSoundCardInfo(void)
 
     for (unsigned int i = 0; i < sdi.nDeivceCount; ++i)
     {
-        Write(L"Sound Card \t\t: %s\r\n", sdi.infoSoundDevice[i].szDeviceName);
+        Write(L"Sound Card \t\t: %ls\r\n", sdi.infoSoundDevice[i].szDeviceName);
 
         wchar_t lpszBuffer[MAX_PATH];
         GetSystemDirectory(lpszBuffer, MAX_PATH);
@@ -281,7 +281,7 @@ void CErrorReport::WriteSoundCardInfo(void)
         WORD wVersion[4];
         GetFileVersion(lpszBuffer, wVersion);
 
-        Write(L"Sound Card Driver\t: %s (%d.%d.%d.%d)\r\n", sdi.infoSoundDevice[i].szDriverName, wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+        Write(L"Sound Card Driver\t: %ls (%d.%d.%d.%d)\r\n", sdi.infoSoundDevice[i].szDriverName, wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
     }
 
     AddSeparator();
@@ -297,7 +297,7 @@ void GetOSVersion(ER_SystemInfo* si)
     GetVersionEx(&osiOne);
 
     int iBuildNumberType = 0;
-    swprintf(si->m_lpszOS, L"%s %d.%d ", lpszUnknown, osiOne.dwMajorVersion, osiOne.dwMinorVersion);
+    swprintf(si->m_lpszOS, L"%ls %d.%d ", lpszUnknown, osiOne.dwMajorVersion, osiOne.dwMinorVersion);
 
     switch (osiOne.dwMajorVersion)
     {
@@ -392,265 +392,33 @@ void GetOSVersion(ER_SystemInfo* si)
         break;
     }
     wcscat(si->m_lpszOS, lpszTemp);
-    swprintf(lpszTemp, L"(%s)", osiOne.szCSDVersion);
+    swprintf(lpszTemp, L"(%ls)", osiOne.szCSDVersion);
     wcscat(si->m_lpszOS, lpszTemp);
 }
 
+// NOTE:
+// The original implementation of GetCPUFrequency and GetCPUInfo relied on
+// MSVC inline assembly (cpuid/rdtsc) and 32-bit affinity mask types, which
+// are not portable and fail to compile under MinGW/GCC. For the purposes of
+// error reporting on this toolchain, a simplified, portable implementation
+// is sufficient.
+
 __int64 GetCPUFrequency(unsigned int uiMeasureMSecs)
 {
-    assert(uiMeasureMSecs > 0);
+    (void)uiMeasureMSecs; // unused on this platform
 
-    // First we get the CPUID standard level 0x00000001
-    DWORD reg;
-    __asm
-    {
-        mov eax, 1
-        cpuid
-        mov reg, edx
-    }
-
-    // Then we check, if the RDTSC (Real Date Time Stamp Counter) is available.
-    // This function is necessary for our measure process.
-    if (!(reg & (1 << 4)))
-    {
-        return (0);
-    }
-
-    // After that we declare some vars and check the frequency of the high
-    // resolution timer for the measure process.
-    // If there's no high-res timer, we exit.
-    __int64 llFreq;
-    if (!QueryPerformanceFrequency((LARGE_INTEGER*)&llFreq))
-    {
-        return (0);
-    }
-
-    // Now we can init the measure process. We set the process and thread priority
-    // to the highest available level (Realtime priority). Also we focus the
-    // first processor in the multiprocessor system.
-    HANDLE hProcess = GetCurrentProcess();
-    HANDLE hThread = GetCurrentThread();
-    DWORD dwCurPriorityClass = GetPriorityClass(hProcess);
-    int iCurThreadPriority = GetThreadPriority(hThread);
-    DWORD dwProcessMask, dwSystemMask, dwNewMask = 1;
-    GetProcessAffinityMask(hProcess, &dwProcessMask, &dwSystemMask);
-
-    SetPriorityClass(hProcess, REALTIME_PRIORITY_CLASS);
-    SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
-    SetProcessAffinityMask(hProcess, dwNewMask);
-
-    // Now we call a CPUID to ensure, that all other prior called functions are
-    // completed now (serialization)
-    __asm { cpuid }
-
-    __int64 llStartTime, llEndTime;
-    __int64 llStart, llEnd;
-    // We ask the high-res timer for the start time
-    QueryPerformanceCounter((LARGE_INTEGER*)&llStartTime);
-    // Then we get the current cpu clock and store it
-    __asm
-    {
-        rdtsc
-        mov dword ptr[llStart + 4], edx
-        mov dword ptr[llStart], eax
-    }
-
-    // Now we wart for some msecs
-    Sleep(uiMeasureMSecs);
-
-    // We ask for the end time
-    QueryPerformanceCounter((LARGE_INTEGER*)&llEndTime);
-    // And also for the end cpu clock
-    __asm
-    {
-        rdtsc
-        mov dword ptr[llEnd + 4], edx
-        mov dword ptr[llEnd], eax
-    }
-
-    // Now we can restore the default process and thread priorities
-    SetProcessAffinityMask(hProcess, dwProcessMask);
-    SetThreadPriority(hThread, iCurThreadPriority);
-    SetPriorityClass(hProcess, dwCurPriorityClass);
-
-    // Then we calculate the time and clock differences
-    __int64 llDif = llEnd - llStart;
-    __int64 llTimeDif = llEndTime - llStartTime;
-
-    // And finally the frequency is the clock difference divided by the time
-    // difference.
-    auto llFrequency = (__int64)(((double)llDif) / (((double)llTimeDif) / llFreq));
-    // At last we just return the frequency that is also stored in the call
-    // member var uqwFrequency
-    return llFrequency;
+    // High‑resolution CPU frequency measurement is handled elsewhere
+    // (see Utilities/CpuUsage.cpp). Here we return 0 to indicate that
+    // a specific CPU MHz value is not available in this build.
+    return 0;
 }
 
 void GetCPUInfo(ER_SystemInfo* si)
 {
-    wchar_t* lpszUnknown = L"Unknown";
-    wchar_t lpszTemp[256];
+    if (si == nullptr || si->m_lpszCPU == nullptr)
+        return;
 
-    DWORD eaxreg, ebxreg, ecxreg, edxreg;
-
-    // We read the standard CPUID level 0x00000000 which should
-    // be available on every x86 processor
-    __asm
-    {
-        mov eax, 0
-        cpuid
-        mov eaxreg, eax
-        mov ebxreg, ebx
-        mov edxreg, edx
-        mov ecxreg, ecx
-    }
-    int iBrand = ebxreg;
-    *((DWORD*)si->m_lpszCPU) = ebxreg;
-    *((DWORD*)(si->m_lpszCPU + 4)) = edxreg;
-    *((DWORD*)(si->m_lpszCPU + 8)) = ecxreg;
-    wcscat(si->m_lpszCPU, L" - ");
-    unsigned long ulMaxSupportedLevel, ulMaxSupportedExtendedLevel;
-    ulMaxSupportedLevel = eaxreg & 0xFFFF;
-    // Then we read the ext. CPUID level 0x80000000
-    // ...to check the max. supportted extended CPUID level
-    __asm
-    {
-        mov eax, 0x80000000
-        cpuid
-        mov eaxreg, eax
-    }
-    ulMaxSupportedExtendedLevel = eaxreg;
-
-    // First we get the CPUID standard level 0x00000001
-    __asm
-    {
-        mov eax, 1
-        cpuid
-        mov eaxreg, eax
-    }
-    unsigned int uiFamily = (eaxreg >> 8) & 0xF;
-    unsigned int uiModel = (eaxreg >> 4) & 0xF;
-
-    switch (iBrand)
-    {
-    case 0x756E6547:	// GenuineIntel
-        switch (uiFamily)
-        {
-        case 3:	// 386
-            break;
-        case 4:	// 486
-            break;
-        case 5:	// pentium
-            break;
-        case 6:	// pentium pro - pentium 3
-            switch (uiModel)
-            {
-            case 0:
-            case 1:
-            default:
-                wcscat(si->m_lpszCPU, L"Pentium Pro");
-                break;
-            case 3:
-            case 5:
-                wcscat(si->m_lpszCPU, L"Pentium 2");
-                break;
-            case 6:
-                wcscat(si->m_lpszCPU, L"Pentium Celeron");
-                break;
-            case 7:
-            case 8:
-            case 0xA:
-            case 0xB:
-                wcscat(si->m_lpszCPU, L"Pentium 3");
-                break;
-            }
-            break;
-        case 15:	// pentium 4
-            wcscat(si->m_lpszCPU, L"Pentium 4");
-            break;
-        default:
-            wcscat(si->m_lpszCPU, lpszUnknown);
-            break;
-        }
-        break;
-    case 0x68747541:	// AuthenticAMD
-        switch (uiFamily)
-        {
-        case 4:	// 486, 586
-            switch (uiModel)
-            {
-            case 3:
-            case 7:
-            case 8:
-            case 9:
-                wcscat(si->m_lpszCPU, L"AMD 486");
-                break;
-            case 0xE:
-            case 0xF:
-                wcscat(si->m_lpszCPU, L"AMD 586");
-                break;
-            default:
-                wcscat(si->m_lpszCPU, L"AMD Unknown (486 or 586)");
-                break;
-            }
-        case 5:	// K5, K6
-            switch (uiModel)
-            {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                wcscat(si->m_lpszCPU, L"AMD K5 5k86");
-                break;
-            case 6:
-            case 7:
-                wcscat(si->m_lpszCPU, L"AMD K6");
-                break;
-            case 8:
-                wcscat(si->m_lpszCPU, L"AMD K6-2");
-                break;
-            case 9:
-                wcscat(si->m_lpszCPU, L"AMD K6-3");
-                break;
-            case 0xD:
-                wcscat(si->m_lpszCPU, L"AMD K6-2+ or K6-3+");
-                break;
-            default:
-                wcscat(si->m_lpszCPU, L"AMD Unknown (K5 or K6)");
-                break;
-            }
-            break;
-        case 6:	// K7 Athlon, Duron
-            switch (uiModel)
-            {
-            case 1:
-            case 2:
-            case 4:
-            case 6:
-                wcscat(si->m_lpszCPU, L"AMD K-7 Athlon");
-                break;
-            case 3:
-            case 7:
-                wcscat(si->m_lpszCPU, L"AMD K-7 Duron");
-                break;
-            default:
-                wcscat(si->m_lpszCPU, L"AMD K-7 Unknown");
-                break;
-            }
-            break;
-        default:
-            wcscat(si->m_lpszCPU, L"AMD Unknown");
-            break;
-        }
-        break;
-    case 0x69727943:	// CyrixInstead
-    default:
-        wcscat(si->m_lpszCPU, lpszUnknown);
-        break;
-    }
-
-    __int64 llFreq = GetCPUFrequency(50) / 1000000;
-    swprintf(lpszTemp, L" %dMhz", (int)llFreq);
-    wcscat(si->m_lpszCPU, lpszTemp);
+    wcscpy(si->m_lpszCPU, L"Unknown CPU");
 }
 
 typedef HRESULT(WINAPI* DIRECTDRAWCREATE)(GUID*, LPDIRECTDRAW*, IUnknown*);

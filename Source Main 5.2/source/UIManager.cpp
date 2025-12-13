@@ -25,8 +25,23 @@ JewelHarmonyInfo* g_pUIJewelHarmonyinfo = NULL;
 ItemAddOptioninfo* g_pItemAddOptioninfo = NULL;
 CUIPopup* g_pUIPopup = NULL;
 
+extern int g_iCancelSkillTarget;
+extern int TextNum;
+extern int g_iItemInfo[16][17];
 
-
+namespace SEASON3B
+{
+	int& MouseY = ::MouseY;
+	int& g_iCancelSkillTarget = ::g_iCancelSkillTarget;
+	wchar_t (&TextList)[50][100] = ::TextList;
+	int (&TextListColor)[50] = ::TextListColor;
+	int (&TextBold)[50] = ::TextBold;
+	int& TextNum = ::TextNum;
+	int (&g_iItemInfo)[16][17] = ::g_iItemInfo;
+	int& ItemHelp = ::ItemHelp;
+	JewelHarmonyInfo*& g_pUIJewelHarmonyinfo = ::g_pUIJewelHarmonyinfo;
+	int& SelectedCharacter = ::SelectedCharacter;
+}
 
 extern int   ShopInventoryStartX;
 extern int   ShopInventoryStartY;
