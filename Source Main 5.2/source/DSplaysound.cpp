@@ -28,7 +28,6 @@
 
 #include <objbase.h>
 #include <dsound.h>
-
 #include "DSwaveIO.h"
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
@@ -214,12 +213,7 @@ void DirectSoundManager::Shutdown()
 
 void DirectSoundManager::SetEnabled(bool enabled)
 {
-    if (enabled)
-    {
-        return;
-    }
-
-    Shutdown();
+    enableSound_ = enabled;
 }
 
 bool DirectSoundManager::IsEnabled() const noexcept
@@ -365,16 +359,19 @@ void DirectSoundManager::StopBuffer(ESound bufferId, bool resetPosition)
 
     std::lock_guard lock(mutex_);
     auto& entry = entries_[bufferId];
-    IDirectSoundBuffer* buffer = GetBuffer(bufferId, 0);
-    if (buffer == nullptr)
+    for (int channel = 0; channel < entry.maxChannels; ++channel)
     {
-        return;
-    }
+        IDirectSoundBuffer* buffer = GetBuffer(bufferId, channel);
+        if (buffer == nullptr)
+        {
+            continue;
+        }
 
-    buffer->Stop();
-    if (resetPosition)
-    {
-        buffer->SetCurrentPosition(0);
+        buffer->Stop();
+        if (resetPosition)
+        {
+            buffer->SetCurrentPosition(0);
+        }
     }
 }
 
@@ -444,10 +441,14 @@ void DirectSoundManager::SetVolume(ESound bufferId, long volume)
     const long clamped = std::clamp<long>(volume, DSBVOLUME_MIN, DSBVOLUME_MAX);
 
     std::lock_guard lock(mutex_);
-    IDirectSoundBuffer* buffer = GetBuffer(bufferId, 0);
-    if (buffer != nullptr)
+    auto& entry = entries_[bufferId];
+    for (int channel = 0; channel < entry.maxChannels; ++channel)
     {
-        buffer->SetVolume(clamped);
+        IDirectSoundBuffer* buffer = GetBuffer(bufferId, channel);
+        if (buffer != nullptr)
+        {
+            buffer->SetVolume(clamped);
+        }
     }
 }
 
@@ -713,13 +714,11 @@ HRESULT InitDirectSound(HWND windowHandle)
 
 void SetEnableSound(bool enabled)
 {
-    if (enabled)
+    Manager().SetEnabled(enabled);
+    if (!enabled)
     {
-        Manager().SetEnabled(true);
-        return;
+        Manager().StopAll();
     }
-
-    Manager().StopAll();
 }
 
 void FreeDirectSound()
