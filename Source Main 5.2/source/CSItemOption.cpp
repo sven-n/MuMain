@@ -86,7 +86,7 @@ bool CSItemOption::OpenItemSetType(const wchar_t* filename)
     auto file = OpenBinaryFile(filename);
     if (!file)
     {
-        ReportFileIssue(filename, L"File not exist.");
+        ReportFileIssue(filename, L"File does not exist.");
         return false;
     }
 
@@ -1054,14 +1054,14 @@ void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
 
             const auto Length2 = wcslen(Name);
 
-            byRenderOptionList = 0;
+            m_byRenderOptionList = 0;
             if (wcsncmp(FilterName, Name, Length1) == 0 && wcsncmp(FilterName, Name, Length2) == 0)
             {
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_HELP);
                 g_pNewUISystem->Show(SEASON3B::INTERFACE_SETITEM_EXPLANATION);
 
-                byRenderOptionList = static_cast<std::uint8_t>(i + 1);
+                m_byRenderOptionList = static_cast<std::uint8_t>(i + 1);
                 return;
             }
         }
@@ -1070,23 +1070,20 @@ void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
 
 void CSItemOption::RenderOptionHelper(void)
 {
-    if (byRenderOptionList == 0) return;
+    if (m_byRenderOptionList == 0) return;
 
     int TextNum = 0;
     int sx = 0, sy = 0;
-    for (int i = 0; i < 50; ++i)
-    {
-        TextListColor[i] = 0;
-    }
+    std::fill(std::begin(TextListColor), std::end(TextListColor), 0);
     for (int i = 0; i < 30; i++)
     {
         TextList[i][0] = L'\0';
     }
 
-    ITEM_SET_OPTION& setOption = m_ItemSetOption[byRenderOptionList - 1];
+    ITEM_SET_OPTION& setOption = m_ItemSetOption[m_byRenderOptionList - 1];
     if (setOption.byOptionCount >= 255)
     {
-        byRenderOptionList = 0;
+        m_byRenderOptionList = 0;
         return;
     }
 

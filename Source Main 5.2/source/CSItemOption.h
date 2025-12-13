@@ -94,7 +94,7 @@ private:
     SET_SEARCH_RESULT_OPT m_SetSearchResult[MAX_EQUIPPED_SETS];
 
     bool	m_bViewOptionList;
-    std::uint8_t byRenderOptionList;
+    std::uint8_t m_byRenderOptionList;
     std::uint8_t m_bySelectedItemOption;
     std::uint8_t m_bySameSetItem;
 
@@ -129,7 +129,7 @@ public:
     void init(void)
     {
         m_bViewOptionList = false;
-        byRenderOptionList = 0;
+        m_byRenderOptionList = 0;
         m_bySelectedItemOption = 0;
         m_bySameSetItem = 0;
     }
@@ -159,7 +159,7 @@ public:
 
     int     RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem = false);
 
-    void    ClearOptionHelper(void) { byRenderOptionList = 0; }
+    void    ClearOptionHelper(void) { m_byRenderOptionList = 0; }
     void    CheckRenderOptionHelper(const wchar_t* FilterName);
     void    RenderOptionHelper(void);
 
