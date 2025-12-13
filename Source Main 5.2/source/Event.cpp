@@ -49,7 +49,16 @@ constexpr std::array<std::array<float, 3>, 3> kSnowBurstOffsets{{
 
 std::mt19937& EventRandomEngine()
 {
-    static std::mt19937 engine{std::random_device{}()};
+    static std::mt19937 engine{
+        []()
+        {
+            std::seed_seq seed{
+                std::random_device{}(),
+                std::random_device{}(),
+                std::random_device{}(),
+                std::random_device{}()};
+            return std::mt19937{seed};
+        }()};
     return engine;
 }
 
@@ -68,12 +77,6 @@ int RandomInt(int minValueInclusive, int maxValueInclusive)
 float RandomUnit()
 {
     return RandomFloat(0.0f, 1.0f);
-}
-
-std::uint32_t GetMillisecondsTimestamp()
-{
-    return static_cast<std::uint32_t>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now().time_since_epoch()).count());
 }
 
 template <std::size_t N>
