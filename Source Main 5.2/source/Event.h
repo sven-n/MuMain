@@ -12,6 +12,14 @@ struct BMD;
 
 constexpr std::chrono::milliseconds XMAS_EVENT_TIME{60000};
 
+inline std::uint32_t GetMillisecondsTimestamp()
+{
+    return static_cast<std::uint32_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch())
+            .count());
+}
+
 class CXmasEvent
 {
 public:
