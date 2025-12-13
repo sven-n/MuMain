@@ -67,8 +67,8 @@ public:
     void SetDuelChannel(int iChannelIndex, BOOL bEnable, BOOL bJoinable, const wchar_t* pszID1, const wchar_t* pszID2);
     BOOL IsDuelChannelEnabled(int iChannelIndex) { return m_DuelChannels[iChannelIndex].m_bEnable; }
     BOOL IsDuelChannelJoinable(int iChannelIndex) { return m_DuelChannels[iChannelIndex].m_bJoinable; }
-    const wchar_t* GetDuelChannelUserID1(int iChannelIndex) { return m_DuelChannels[iChannelIndex].m_szID1; }
-    const wchar_t* GetDuelChannelUserID2(int iChannelIndex) { return m_DuelChannels[iChannelIndex].m_szID2; }
+    const wchar_t* GetDuelChannelUserID1(int iChannelIndex) const { return m_DuelChannels[iChannelIndex].m_szID1; }
+    const wchar_t* GetDuelChannelUserID2(int iChannelIndex) const { return m_DuelChannels[iChannelIndex].m_szID2; }
 
     void SetCurrentChannel(int iChannel = -1) { m_iCurrentChannel = iChannel; }
     int GetCurrentChannel() { return m_iCurrentChannel; }

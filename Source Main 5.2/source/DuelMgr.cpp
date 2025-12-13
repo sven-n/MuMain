@@ -29,14 +29,8 @@ void CDuelMgr::Reset()
 {
     m_bIsDuelEnabled = FALSE;
     m_bIsPetDuelEnabled = FALSE;
-    for (auto& player : m_DuelPlayer)
-    {
-        player = DUEL_PLAYER_INFO{};
-    }
-    for (auto& channel : m_DuelChannels)
-    {
-        channel = DUEL_CHANNEL_INFO{};
-    }
+    m_DuelPlayer = {};
+    m_DuelChannels = {};
     m_iCurrentChannel = -1;
     m_bRegenerated = FALSE;
     RemoveAllDuelWatchUser();
@@ -78,7 +72,7 @@ void CDuelMgr::SetDuelPlayer(int iPlayerNum, short sIndex, const wchar_t* pszID)
     {
         m_DuelPlayer[iPlayerNum].m_szID[0] = L'\0';
     }
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[SetDuelPlayer] %d, %ls", sIndex, pszID);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[SetDuelPlayer] %d, %ls", sIndex, pszID ? pszID : L"(null)");
 }
 
 void CDuelMgr::SetHeroAsDuelPlayer(int iPlayerNum)
@@ -181,12 +175,7 @@ void CDuelMgr::AddDuelWatchUser(const wchar_t* pszUserID)
         return;
     }
 
-    std::wstring userId(pszUserID);
-    if (userId.length() > MAX_ID_SIZE)
-    {
-        userId.resize(MAX_ID_SIZE);
-    }
-    m_DuelWatchUserList.push_back(std::move(userId));
+    m_DuelWatchUserList.emplace_back(pszUserID, wcsnlen(pszUserID, MAX_ID_SIZE));
 }
 
 void CDuelMgr::RemoveDuelWatchUser(const wchar_t* pszUserID)
