@@ -46,7 +46,7 @@ namespace
     template <typename T>
     constexpr const T& Clamp(const T& value, const T& minValue, const T& maxValue)
     {
-        return std::max(minValue, std::min(value, maxValue));
+        return std::max<T>(minValue, std::min<T>(value, maxValue));
     }
 
     template <std::size_t Size>
@@ -229,7 +229,7 @@ void CCameraMove::AddWayPoint(int iGridX, int iGridY, float fCameraMoveAccel, fl
 
     waypoint->fCameraMoveAccel = Clamp(fCameraMoveAccel, kMinMoveAccel, kMaxMoveAccel);
     waypoint->fCameraDistanceLevel = Clamp(fCameraDistanceLevel, kMinDistanceLevel, kMaxDistanceLevel);
-    waypoint->iDelay = std::max(iDelay, 0);
+    waypoint->iDelay = std::max<int>(iDelay, 0);
 
     m_listWayPoint.push_back(std::move(waypoint));
 }
@@ -276,7 +276,7 @@ void CCameraMove::SetCameraDistanceLevel(int iTileIndex, float fCameraDistanceLe
 }
 void CCameraMove::SetDelay(int iTileIndex, int iDelay)
 {
-    const int clampedDelay = std::max(iDelay, 0);
+    const int clampedDelay = std::max<int>(iDelay, 0);
     for (auto& waypoint : m_listWayPoint)
     {
         if (waypoint->iIndex == iTileIndex)

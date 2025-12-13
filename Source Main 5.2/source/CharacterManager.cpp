@@ -8,6 +8,103 @@
 #include "SkillManager.h"
 #include "ZzzInfomation.h"
 
+#include <algorithm>
+#include <array>
+#include <type_traits>
+
+namespace
+{
+    template <typename T, typename U, typename V>
+    constexpr bool InRange(const T value, const U minValue, const V maxValue)
+    {
+        using Common = std::common_type_t<T, U, V>;
+        const Common commonValue = static_cast<Common>(value);
+        return (commonValue >= static_cast<Common>(minValue)) && (commonValue <= static_cast<Common>(maxValue));
+    }
+
+    struct ClassTextEntry
+    {
+        CLASS_TYPE type;
+        int textIndex;
+    };
+
+    constexpr int kThirdGenWingMin = ITEM_WING + 130;
+    constexpr int kThirdGenWingMax = ITEM_WING + 134;
+    constexpr int kSpecialWingType = ITEM_WING + 135;
+
+    constexpr int kDefaultClassTextIndex = 2305;
+
+    constexpr std::array<ClassTextEntry, 18> kClassTextEntries{{
+        { CLASS_WIZARD, 20 },
+        { CLASS_SOULMASTER, 25 },
+        { CLASS_GRANDMASTER, 1669 },
+        { CLASS_KNIGHT, 21 },
+        { CLASS_BLADEKNIGHT, 26 },
+        { CLASS_BLADEMASTER, 1668 },
+        { CLASS_ELF, 22 },
+        { CLASS_MUSEELF, 27 },
+        { CLASS_HIGHELF, 1670 },
+        { CLASS_DARK, 23 },
+        { CLASS_DUELMASTER, 1671 },
+        { CLASS_DARK_LORD, 24 },
+        { CLASS_LORDEMPEROR, 1672 },
+        { CLASS_SUMMONER, 1687 },
+        { CLASS_BLOODYSUMMONER, 1688 },
+        { CLASS_DIMENSIONMASTER, 1689 },
+        { CLASS_RAGEFIGHTER, 3150 },
+        { CLASS_TEMPLENIGHT, 3151 },
+    }};
+
+    constexpr bool IsWingType(int type)
+    {
+        return InRange(type, ITEM_WING, ITEM_WINGS_OF_DARKNESS) ||
+               InRange(type, ITEM_WING_OF_STORM, ITEM_WING_OF_DIMENSION) ||
+               type == ITEM_CAPE_OF_LORD ||
+               InRange(type, kThirdGenWingMin, kThirdGenWingMax) ||
+               InRange(type, ITEM_CAPE_OF_FIGHTER, ITEM_CAPE_OF_OVERRULE) ||
+               type == kSpecialWingType;
+    }
+
+    constexpr bool IsBowModel(int type)
+    {
+        return InRange(type, MODEL_BOW, MODEL_CHAOS_NATURE_BOW) ||
+               type == MODEL_CELESTIAL_BOW ||
+               InRange(type, MODEL_ARROW_VIPER_BOW, MODEL_STINGER_BOW) ||
+               type == MODEL_AIR_LYN_BOW;
+    }
+
+    constexpr bool IsCrossbowModel(int type)
+    {
+        return InRange(type, MODEL_CROSSBOW, MODEL_AQUAGOLD_CROSSBOW) ||
+               type == MODEL_SAINT_CROSSBOW ||
+               InRange(type, MODEL_DIVINE_CB_OF_ARCHANGEL, MODEL_GREAT_REIGN_CROSSBOW);
+    }
+
+    constexpr bool IsGeneralBowItem(int type)
+    {
+        return InRange(type, ITEM_BOW, ITEM_CHAOS_NATURE_BOW) ||
+               type == ITEM_CELESTIAL_BOW ||
+               InRange(type, ITEM_ARROW_VIPER_BOW, ITEM_STINGER_BOW) ||
+               type == ITEM_AIR_LYN_BOW;
+    }
+
+    constexpr bool IsGeneralCrossbowItem(int type)
+    {
+        return InRange(type, ITEM_CROSSBOW, ITEM_AQUAGOLD_CROSSBOW) ||
+               type == ITEM_SAINT_CROSSBOW ||
+               InRange(type, ITEM_DIVINE_CB_OF_ARCHANGEL, ITEM_GREAT_REIGN_CROSSBOW);
+    }
+
+    constexpr bool IsEquippedBowItem(int type)
+    {
+        return IsGeneralBowItem(type);
+    }
+
+    constexpr bool IsEquippedCrossbowItem(int type)
+    {
+        return IsGeneralCrossbowItem(type);
+    }
+}
 
 CCharacterManager gCharacterManager;
 
@@ -129,70 +226,9 @@ bool CCharacterManager::IsMasterLevel(const CLASS_TYPE byClass)
 
 const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byCharacterClass)
 {
-    if (byCharacterClass == CLASS_WIZARD)
-    {
-        return GlobalText[20];
-    }
-    if (byCharacterClass == CLASS_SOULMASTER)
-    {
-        return GlobalText[25];
-    }
-    if (byCharacterClass == CLASS_GRANDMASTER)
-    {
-        return GlobalText[1669];
-    }
-    if (byCharacterClass == CLASS_KNIGHT)
-    {
-        return GlobalText[21];
-    }
-    if (byCharacterClass == CLASS_BLADEKNIGHT)
-    {
-        return GlobalText[26];
-    }
-    if (byCharacterClass == CLASS_BLADEMASTER)
-    {
-        return GlobalText[1668];
-    }
-    if (byCharacterClass == CLASS_ELF)
-    {
-        return GlobalText[22];
-    }
-    if (byCharacterClass == CLASS_MUSEELF)
-    {
-        return GlobalText[27];
-    }
-    if (byCharacterClass == CLASS_HIGHELF)
-    {
-        return GlobalText[1670];
-    }
-    if (byCharacterClass == CLASS_DARK)
-    {
-        return GlobalText[23];
-    }
-    if (byCharacterClass == CLASS_DUELMASTER)
-    {
-        return GlobalText[1671];
-    }
-    if (byCharacterClass == CLASS_DARK_LORD)
-    {
-        return GlobalText[24];
-    }
-    if (byCharacterClass == CLASS_LORDEMPEROR)
-    {
-        return GlobalText[1672];
-    }
-    if (byCharacterClass == CLASS_SUMMONER)
-        return GlobalText[1687];
-    if (byCharacterClass == CLASS_BLOODYSUMMONER)
-        return GlobalText[1688];
-    if (byCharacterClass == CLASS_DIMENSIONMASTER)
-        return GlobalText[1689];
-    if (byCharacterClass == CLASS_RAGEFIGHTER)
-        return GlobalText[3150];	// 3150 "레이지파이터"
-    if (byCharacterClass == CLASS_TEMPLENIGHT)
-        return GlobalText[3151];
-    // 3151 "템플나이트"
-    return GlobalText[2305];
+    const auto it = std::find_if(kClassTextEntries.begin(), kClassTextEntries.end(),
+        [byCharacterClass](const ClassTextEntry& entry) { return entry.type == byCharacterClass; });
+    return (it != kClassTextEntries.end()) ? GlobalText[it->textIndex] : GlobalText[kDefaultClassTextIndex];
 }
 
 CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)
@@ -230,11 +266,11 @@ BYTE CCharacterManager::GetStepClass(const CLASS_TYPE byClass)
 
 int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
 {
-    if ((pChar->Weapon[1].Type != MODEL_BOLT) && ((pChar->Weapon[1].Type >= MODEL_BOW) && (pChar->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)))
+    if (IsBowModel(pChar->Weapon[1].Type))
     {
         return BOWTYPE_BOW;
     }
-    else if ((pChar->Weapon[0].Type != MODEL_ARROWS) && ((pChar->Weapon[0].Type >= MODEL_CROSSBOW) && (pChar->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)))
+    if (IsCrossbowModel(pChar->Weapon[0].Type))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -243,25 +279,29 @@ int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
 
 int CCharacterManager::GetEquipedBowType()
 {
-    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOLT) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    const ITEM& left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
+    if (IsEquippedBowItem(left.Type))
     {
         return BOWTYPE_BOW;
     }
-    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_ARROWS) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_CROSSBOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+
+    const ITEM& right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
+    if (IsEquippedCrossbowItem(right.Type))
     {
         return BOWTYPE_CROSSBOW;
     }
+
     return BOWTYPE_NONE;
 }
 
 int CCharacterManager::GetEquipedBowType(ITEM* pItem)
 {
-    if (((pItem->Type >= ITEM_BOW) && (pItem->Type <= ITEM_CHAOS_NATURE_BOW)) || (pItem->Type == ITEM_CELESTIAL_BOW) || ((pItem->Type >= ITEM_ARROW_VIPER_BOW) && (pItem->Type <= ITEM_STINGER_BOW)) || (pItem->Type == ITEM_AIR_LYN_BOW))
+    if (IsGeneralBowItem(pItem->Type))
     {
         return BOWTYPE_BOW;
     }
 
-    else if (((pItem->Type >= ITEM_CROSSBOW) && (pItem->Type <= ITEM_AQUAGOLD_CROSSBOW)) || (pItem->Type == ITEM_SAINT_CROSSBOW) || ((pItem->Type >= ITEM_DIVINE_CB_OF_ARCHANGEL) && (pItem->Type <= ITEM_GREAT_REIGN_CROSSBOW)))
+    if (IsGeneralCrossbowItem(pItem->Type))
     {
         return BOWTYPE_CROSSBOW;
     }
@@ -270,33 +310,26 @@ int CCharacterManager::GetEquipedBowType(ITEM* pItem)
 
 int CCharacterManager::GetEquipedBowType_Skill()
 {
-    if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOLT) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type >= ITEM_BOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+    const ITEM& left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
+    const ITEM& right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
+
+    if (IsEquippedBowItem(left.Type) && right.Type == ITEM_ARROWS)
     {
-        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type == ITEM_ARROWS)
-            return BOWTYPE_BOW;
+        return BOWTYPE_BOW;
     }
-    else if ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_ARROWS) && ((CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type >= ITEM_CROSSBOW) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type < ITEM_BOW + MAX_ITEM_INDEX)))
+
+    if (IsEquippedCrossbowItem(right.Type) && left.Type == ITEM_BOLT)
     {
-        if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type == ITEM_BOLT)
-            return BOWTYPE_CROSSBOW;
+        return BOWTYPE_CROSSBOW;
     }
+
     return BOWTYPE_NONE;
 }
 
 bool CCharacterManager::IsEquipedWing()
 {
-    ITEM* pEquippedItem = &CharacterMachine->Equipment[EQUIPMENT_WING];
-
-    if ((pEquippedItem->Type >= ITEM_WING && pEquippedItem->Type <= ITEM_WINGS_OF_DARKNESS)
-        || (pEquippedItem->Type >= ITEM_WING_OF_STORM && pEquippedItem->Type <= ITEM_WING_OF_DIMENSION)
-        || (pEquippedItem->Type == ITEM_CAPE_OF_LORD)
-        || (ITEM_WING + 130 <= pEquippedItem->Type && pEquippedItem->Type <= ITEM_WING + 134)
-        || (pEquippedItem->Type >= ITEM_CAPE_OF_FIGHTER && pEquippedItem->Type <= ITEM_CAPE_OF_OVERRULE) || (pEquippedItem->Type == ITEM_WING + 135))
-    {
-        return true;
-    }
-
-    return false;
+    const ITEM& equippedWing = CharacterMachine->Equipment[EQUIPMENT_WING];
+    return IsWingType(equippedWing.Type);
 }
 
 void CCharacterManager::GetMagicSkillDamage(int iType, int* piMinDamage, int* piMaxDamage)

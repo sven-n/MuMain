@@ -120,7 +120,7 @@ void AddBlur(Blur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
     }
     VectorCopy(p1, b->P1[0]);
     VectorCopy(p2, b->P2[0]);
-    b->Number = std::min(b->Number + 1, MAX_BLUR_TAILS - 1);
+    b->Number = std::min<int>(b->Number + 1, MAX_BLUR_TAILS - 1);
 }
 
 void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType)
@@ -167,7 +167,7 @@ void MoveBlurs()
         }
 
         blur.LifeTime--;
-        blur.Number = std::max(blur.Number - 1, 0);
+        blur.Number = std::max<int>(blur.Number - 1, 0);
 
         for (int i = blur.Number - 1; i >= 0; --i)
         {
@@ -177,7 +177,7 @@ void MoveBlurs()
 
         if (blur.LifeTime <= 0)
         {
-            blur.Number = std::max(blur.Number - 1, 0);
+            blur.Number = std::max<int>(blur.Number - 1, 0);
             if (blur.Number <= 0)
             {
                 blur.Live = false;
@@ -280,7 +280,7 @@ void AddObjectBlur(ObjectBlur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
     }
     VectorCopy(p1, b->P1[0]);
     VectorCopy(p2, b->P2[0]);
-    b->Number = std::min(b->Number + 1, MAX_OBJECT_BLUR_TAILS - 1);
+    b->Number = std::min<int>(b->Number + 1, MAX_OBJECT_BLUR_TAILS - 1);
 }
 
 void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType, int iLimitLifeTime)
@@ -337,7 +337,7 @@ void MoveObjectBlurs()
         }
 
         blur.LifeTime--;
-        blur.Number = std::max(blur.Number - 1, 0);
+        blur.Number = std::max<int>(blur.Number - 1, 0);
 
         if (blur.LifeTime <= 0)
         {

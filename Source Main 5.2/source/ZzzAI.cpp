@@ -733,7 +733,7 @@ void CalcFPS()
     frame++;
     WorldTime = g_WorldTime->GetTimeElapsed();
 
-    const double differenceMs = std::max(WorldTime - last, MIN_FRAME_TIME_MS);
+    const double differenceMs = std::max<double>(WorldTime - last, MIN_FRAME_TIME_MS);
     FPS = MILLISECONDS_IN_SECOND / differenceMs;
 
     // animate with no less than REFERENCE_FPS, otherwise some animations don't work correctly
