@@ -18,6 +18,7 @@ protected:
 
 public:
     CSIPartsMDL(void) : m_iBoneNumber(-1) {};
+    virtual ~CSIPartsMDL() = default;
     virtual void    IRender(CHARACTER* c) = 0;
     inline OBJECT* GetObject() { return &m_pObj; }
 };

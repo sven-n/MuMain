@@ -248,8 +248,15 @@ void CSAnimationParts::Animation(CHARACTER* c)
 
 void CSAnimationParts::IRender(CHARACTER* c)
 {
-    if (c == NULL) return;
-    if (m_pObj.Alpha < 0.01f) return;
+    if (c == nullptr)
+    {
+        return;
+    }
+
+    if (m_pObj.Alpha < kRenderableAlphaThreshold)
+    {
+        return;
+    }
 
     OBJECT* o = &c->Object;
     BMD* b = &Models[o->Type];
@@ -257,7 +264,7 @@ void CSAnimationParts::IRender(CHARACTER* c)
 
     b->TransformPosition(o->BoneTransform[m_iBoneNumber], m_vOffset, Position, true);
     VectorAdd(o->Position, Position, m_pObj.Position);
-    if (m_pObj.bBillBoard == false)
+    if (!m_pObj.bBillBoard)
     {
         VectorCopy(o->Angle, m_pObj.Angle);
     }
@@ -274,9 +281,8 @@ CSParts2D::CSParts2D(int Type, int SubType, int BoneNumber, float x, float y, fl
     m_vOffset[1] = y;
     m_vOffset[2] = z;
 
-    m_pObj.Type = Type;
+    InitializeCommonObjectState(m_pObj, Type, true);
     m_pObj.SubType = SubType;
-    Vector(1.f, 1.f, 1.f, m_pObj.Light);
 }
 
 void CSParts2D::IRender(CHARACTER* c)
