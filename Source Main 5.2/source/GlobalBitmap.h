@@ -5,32 +5,37 @@
 
 #pragma warning(disable : 4786)
 
-#include <map>
+#include <array>
 #include <deque>
+#include <map>
+#include <memory>
 #include <string>
+#include <vector>
 #include <setjmp.h>
+#include <cstdint>
 #include "./Time/Timer.h"
 
 #define MAX_BITMAP_FILE_NAME 256
 
 #pragma pack(push, 1)
-typedef struct
+struct BITMAP_t
 {
-    GLuint	BitmapIndex;
+    GLuint BitmapIndex;
     wchar_t FileName[MAX_BITMAP_FILE_NAME];
-    float	Width;
-    float	Height;
-    char	Components;
-    GLuint	TextureNumber;
-    BYTE	Ref;
-    bool    IsSkin;
-    bool    IsHair;
+    float Width;
+    float Height;
+    char Components;
+    GLuint TextureNumber;
+    std::uint8_t Ref;
+    bool IsSkin;
+    bool IsHair;
     BYTE* Buffer;
+    std::vector<std::uint8_t> BufferStorage;
 
 private:
     friend class CBitmapCache;
-    DWORD	dwCallCount;
-} BITMAP_t;
+    std::uint32_t dwCallCount;
+};
 #pragma pack(pop)
 
 class CBitmapCache
@@ -49,14 +54,13 @@ class CBitmapCache
         NUMBER_OF_QUICK_CACHE,
     };
 
-    typedef struct _QUICK_CACHE
+    struct QUICK_CACHE
     {
-        DWORD		dwBitmapIndexMin;
-        DWORD		dwBitmapIndexMax;
-        DWORD		dwRange;
-        BITMAP_t** ppBitmap;
-    } QUICK_CACHE;
-    typedef std::map<GLuint, BITMAP_t*, std::less<GLuint> > type_cache_map;
+        std::uint32_t dwBitmapIndexMin = 0;
+        std::uint32_t dwBitmapIndexMax = 0;
+        std::vector<BITMAP_t*> bitmaps;
+    };
+    using type_cache_map = std::map<GLuint, BITMAP_t*>;
 
     type_cache_map		m_mapCacheMain;
     type_cache_map		m_mapCachePlayer;
@@ -94,14 +98,15 @@ class CGlobalBitmap
         MAX_HEIGHT = 1024,
     };
 
-    typedef std::map<GLuint, BITMAP_t*, std::less<GLuint> >	type_bitmap_map;
-    typedef std::list<GLuint> type_index_list;
+    using BitmapPtr = std::unique_ptr<BITMAP_t>;
+    using type_bitmap_map = std::map<GLuint, BitmapPtr>;
+    using type_index_list = std::list<GLuint>;
 
     type_bitmap_map	m_mapBitmap;
     type_index_list m_listNonamedIndex;
 
-    GLuint	m_uiAlternate, m_uiTextureIndexStream;
-    DWORD	m_dwUsedTextureMemory;
+    GLuint m_uiAlternate, m_uiTextureIndexStream;
+    std::uint32_t m_dwUsedTextureMemory;
 
     CBitmapCache	m_BitmapCache;
 #ifdef DEBUG_BITMAP_CACHE
@@ -124,7 +129,7 @@ public:
     BITMAP_t* FindTexture(const std::wstring& filename);
     BITMAP_t* FindTextureByName(const std::wstring& name);
 
-    DWORD GetUsedTextureMemory() const;
+    std::uint32_t GetUsedTextureMemory() const;
     size_t GetNumberOfTexture() const;
 
     bool Convert_Format(const std::wstring& filename);
