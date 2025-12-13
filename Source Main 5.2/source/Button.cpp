@@ -311,5 +311,5 @@ int CButton::ResolveColorIndex(int requestedIndex) const
     }
 
     const int clamped = ClampStateIndex(requestedIndex);
-    return std::min(clamped, static_cast<int>(m_textColorCount - 1));
+    return std::min<int>(clamped, static_cast<int>(m_textColorCount - 1));
 }
