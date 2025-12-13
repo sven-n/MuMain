@@ -11,6 +11,69 @@
 #include "LoadData.h"
 #include "CharacterManager.h"
 
+#include <algorithm>
+#include <array>
+
+namespace
+{
+    template <typename Container, typename T>
+    constexpr bool Contains(const Container& container, const T& value)
+    {
+        for (const auto& item : container)
+        {
+            if (item == value)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    constexpr std::array<int, 12> kDarkLordHairModels{
+        MODEL_SKELETON1,
+        MODEL_SKELETON2,
+        MODEL_SKELETON3,
+        MODEL_SKELETON_PCBANG,
+        MODEL_HALLOWEEN,
+        MODEL_XMAS_EVENT_CHANGE_GIRL,
+        MODEL_GM_CHARACTER,
+        MODEL_CURSEDTEMPLE_ALLIED_PLAYER,
+        MODEL_CURSEDTEMPLE_ILLUSION_PLAYER,
+        MODEL_XMAS2008_SNOWMAN,
+        MODEL_PANDA,
+        MODEL_SKELETON_CHANGED,
+    };
+
+    constexpr std::array<int, 6> kDarkCloakModels{
+        MODEL_HALLOWEEN,
+        MODEL_XMAS_EVENT_CHANGE_GIRL,
+        MODEL_GM_CHARACTER,
+        MODEL_XMAS2008_SNOWMAN,
+        MODEL_PANDA,
+        MODEL_SKELETON_CHANGED,
+    };
+
+    constexpr std::array<short, 8> kChangeRingTypes{
+        ITEM_TRANSFORMATION_RING,
+        ITEM_ELITE_TRANSFER_SKELETON_RING,
+        ITEM_JACK_OLANTERN_TRANSFORMATION_RING,
+        ITEM_CHRISTMAS_TRANSFORMATION_RING,
+        ITEM_GAME_MASTER_TRANSFORMATION_RING,
+        ITEM_SNOWMAN_TRANSFORMATION_RING,
+        ITEM_PANDA_TRANSFORMATION_RING,
+        ITEM_SKELETON_TRANSFORMATION_RING,
+    };
+
+    constexpr std::array<short, 6> kIcarusBanRingTypes{
+        ITEM_TRANSFORMATION_RING,
+        ITEM_ELITE_TRANSFER_SKELETON_RING,
+        ITEM_JACK_OLANTERN_TRANSFORMATION_RING,
+        ITEM_CHRISTMAS_TRANSFORMATION_RING,
+        ITEM_GAME_MASTER_TRANSFORMATION_RING,
+        ITEM_SNOWMAN_TRANSFORMATION_RING,
+    };
+}
+
 CChangeRingManager::CChangeRingManager()
 {
 }
@@ -44,225 +107,33 @@ void CChangeRingManager::LoadItemTexture()
 
 bool CChangeRingManager::CheckDarkLordHair(int iType)
 {
-    if ((iType >= MODEL_SKELETON1 && iType <= MODEL_SKELETON3) || iType == MODEL_SKELETON_PCBANG)
-    {
-        return true;
-    }
-    if (iType == MODEL_HALLOWEEN)
-    {
-        return true;
-    }
-    if (iType == MODEL_XMAS_EVENT_CHANGE_GIRL)
-    {
-        return true;
-    }
-    if (iType == MODEL_GM_CHARACTER)
-    {
-        return true;
-    }
-    if (iType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || iType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
-    {
-        return true;
-    }
-    if (iType == MODEL_XMAS2008_SNOWMAN)
-    {
-        return true;
-    }
-    if (iType == MODEL_PANDA)
-    {
-        return true;
-    }
-    if (iType == MODEL_SKELETON_CHANGED)
-    {
-        return true;
-    }
-    return false;
+    return Contains(kDarkLordHairModels, iType);
 }
 
 bool CChangeRingManager::CheckDarkCloak(CLASS_TYPE iClass, int iType)
 {
-    if (iClass == CLASS_DARK)
-    {
-        if (iType == MODEL_HALLOWEEN)
-        {
-            return true;
-        }
+    if (iClass != CLASS_DARK)
+        return false;
 
-        if (iType == MODEL_XMAS_EVENT_CHANGE_GIRL)
-        {
-            return true;
-        }
-
-        if (iType == MODEL_GM_CHARACTER)
-        {
-            return true;
-        }
-
-        if (iType == MODEL_XMAS2008_SNOWMAN)
-        {
-            return true;
-        }
-
-        if (iType == MODEL_PANDA)
-        {
-            return true;
-        }
-
-        if (iType == MODEL_SKELETON_CHANGED)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return Contains(kDarkCloakModels, iType);
 }
 
 bool CChangeRingManager::CheckChangeRing(short RingType)
 {
-    if (RingType == ITEM_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (RingType == ITEM_ELITE_TRANSFER_SKELETON_RING)
-    {
-        return true;
-    }
-    if (RingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (RingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (RingType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-
-    if (RingType == ITEM_SNOWMAN_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-
-    if (RingType == ITEM_PANDA_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-
-    if (RingType == ITEM_SKELETON_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    return false;
+    return Contains(kChangeRingTypes, RingType);
 }
 
 bool CChangeRingManager::CheckRepair(int iType)
 {
-    if (iType == ITEM_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-
-    if (iType == ITEM_ELITE_TRANSFER_SKELETON_RING)
-    {
-        return true;
-    }
-
-    if (iType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-
-    if (iType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-
-    if (iType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-
-    if (iType == ITEM_SNOWMAN_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-
-    if (iType == ITEM_PANDA_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-
-    if (iType == ITEM_SKELETON_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    return false;
+    return Contains(kChangeRingTypes, iType);
 }
 
 bool CChangeRingManager::CheckMoveMap(short sLeftRingType, short sRightRingType)
 {
-    if (sLeftRingType == ITEM_TRANSFORMATION_RING || sRightRingType == ITEM_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_ELITE_TRANSFER_SKELETON_RING || sRightRingType == ITEM_ELITE_TRANSFER_SKELETON_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING || sRightRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || sRightRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING || sRightRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_SNOWMAN_TRANSFORMATION_RING || sRightRingType == ITEM_SNOWMAN_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_PANDA_TRANSFORMATION_RING || sRightRingType == ITEM_PANDA_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_SKELETON_TRANSFORMATION_RING || sRightRingType == ITEM_SKELETON_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    return false;
+    return Contains(kChangeRingTypes, sLeftRingType) || Contains(kChangeRingTypes, sRightRingType);
 }
 
 bool CChangeRingManager::CheckBanMoveIcarusMap(short sLeftRingType, short sRightRingType)
 {
-    if (sLeftRingType == ITEM_TRANSFORMATION_RING || sRightRingType == ITEM_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_ELITE_TRANSFER_SKELETON_RING || sRightRingType == ITEM_ELITE_TRANSFER_SKELETON_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING || sRightRingType == ITEM_JACK_OLANTERN_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || sRightRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING || sRightRingType == ITEM_GAME_MASTER_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    if (sLeftRingType == ITEM_SNOWMAN_TRANSFORMATION_RING || sRightRingType == ITEM_SNOWMAN_TRANSFORMATION_RING)
-    {
-        return true;
-    }
-    return false;
+    return Contains(kIcarusBanRingTypes, sLeftRingType) || Contains(kIcarusBanRingTypes, sRightRingType);
 }
