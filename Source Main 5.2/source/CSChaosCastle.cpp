@@ -57,24 +57,45 @@ constexpr CastleAreaSet gChaosCastleLimitArea3{{
     CastleArea{27, 81, 28, 102},
 }};
 
-constexpr std::uint8_t kCastleLevelZero = 0;
-constexpr std::uint8_t kCastleLevelOne = 1;
-constexpr std::uint8_t kCastleLevelTwo = 2;
-constexpr std::uint8_t kCastleLevelThree = 3;
-constexpr std::uint8_t kCastleLevelFour = 4;
-constexpr std::uint8_t kCastleLevelFive = 5;
-constexpr std::uint8_t kCastleLevelSix = 6;
-constexpr std::uint8_t kCastleLevelSeven = 7;
-constexpr std::uint8_t kCastleLevelEight = 8;
-constexpr std::uint8_t kInvalidCastleLevel = 255;
+constexpr std::array<const CastleAreaSet*, 9> kCastleLimitAreas{{
+    &gChaosCastleLimitArea1, // 0
+    nullptr,                 // 1
+    nullptr,                 // 2
+    &gChaosCastleLimitArea2, // 3
+    nullptr,                 // 4
+    nullptr,                 // 5
+    &gChaosCastleLimitArea3, // 6
+    nullptr,                 // 7
+    nullptr,                 // 8
+}};
+
+enum class CastleLevel : std::uint8_t
+{
+    Zero = 0,
+    One = 1,
+    Two = 2,
+    Three = 3,
+    Four = 4,
+    Five = 5,
+    Six = 6,
+    Seven = 7,
+    Eight = 8,
+    Invalid = 255,
+};
+
+constexpr std::uint8_t LevelValue(CastleLevel level)
+{
+    return static_cast<std::uint8_t>(level);
+}
+
 constexpr int kActionTriggerTime = 30;
 
-std::uint8_t g_currentCastleLevel = kInvalidCastleLevel;
+CastleLevel g_currentCastleLevel = CastleLevel::Invalid;
 bool g_actionMatch = true;
 
 std::mt19937& RandomEngine()
 {
-    static std::mt19937 engine{std::random_device{}()};
+    thread_local static std::mt19937 engine{std::random_device{}()};
     return engine;
 }
 
@@ -90,19 +111,14 @@ float RandomFloat(float minInclusive, float maxInclusive)
     return dist(RandomEngine());
 }
 
-const CastleAreaSet* SelectLimitArea(std::uint8_t level)
+const CastleAreaSet* SelectLimitArea(CastleLevel level)
 {
-    switch (level)
+    const auto index = LevelValue(level);
+    if (index < kCastleLimitAreas.size())
     {
-    case kCastleLevelZero:
-        return &gChaosCastleLimitArea1;
-    case kCastleLevelThree:
-        return &gChaosCastleLimitArea2;
-    case kCastleLevelSix:
-        return &gChaosCastleLimitArea3;
-    default:
-        return nullptr;
+        return kCastleLimitAreas[index];
     }
+    return nullptr;
 }
 
 bool IsWithinLimitArea(const CastleAreaSet& areas, int xi, int yi)
@@ -239,7 +255,7 @@ bool MoveChaosCastleAllObject(OBJECT* o)
     case    27:
     case    28:
     case    29:
-        if (g_currentCastleLevel == kCastleLevelSeven)
+        if (g_currentCastleLevel == CastleLevel::Seven)
         {
             if (g_iActionTime >= kActionTriggerTime)
             {
@@ -255,7 +271,7 @@ bool MoveChaosCastleAllObject(OBJECT* o)
             else if (g_iActionTime <= 0)
             {
                 o->HiddenMesh = -2;
-                g_currentCastleLevel = kCastleLevelEight;
+                g_currentCastleLevel = CastleLevel::Eight;
 
                 ClearActionObject();
             }
@@ -273,7 +289,7 @@ bool MoveChaosCastleAllObject(OBJECT* o)
     case    33:
     case    34:
     case    35:
-        if (g_currentCastleLevel == kCastleLevelFour)
+        if (g_currentCastleLevel == CastleLevel::Four)
         {
             if (g_iActionTime >= kActionTriggerTime)
             {
@@ -289,7 +305,7 @@ bool MoveChaosCastleAllObject(OBJECT* o)
             else if (g_iActionTime <= 0)
             {
                 o->HiddenMesh = -2;
-                g_currentCastleLevel = kCastleLevelFive;
+                g_currentCastleLevel = CastleLevel::Five;
 
                 ClearActionObject();
             }
@@ -312,7 +328,7 @@ bool MoveChaosCastleAllObject(OBJECT* o)
     case    15:
     case    16:
     case    17:
-        if (g_currentCastleLevel == kCastleLevelOne)
+        if (g_currentCastleLevel == CastleLevel::One)
         {
             if (g_iActionTime >= kActionTriggerTime)
             {
@@ -328,7 +344,7 @@ bool MoveChaosCastleAllObject(OBJECT* o)
             else if (g_iActionTime <= 0)
             {
                 o->HiddenMesh = -2;
-                g_currentCastleLevel = kCastleLevelTwo;
+                g_currentCastleLevel = CastleLevel::Two;
 
                 ClearActionObject();
             }
@@ -477,7 +493,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
     case    19:
     case    20:
     case    21:
-        if (g_currentCastleLevel == kCastleLevelSeven || g_currentCastleLevel == kCastleLevelEight)
+        if (g_currentCastleLevel == CastleLevel::Seven || g_currentCastleLevel == CastleLevel::Eight)
         {
             o->HiddenMesh = -1;
         }
@@ -493,11 +509,11 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
     case    27:
     case    28:
     case    29:
-        if (g_currentCastleLevel == kCastleLevelFour || g_currentCastleLevel == kCastleLevelFive)
+        if (g_currentCastleLevel == CastleLevel::Four || g_currentCastleLevel == CastleLevel::Five)
         {
             o->HiddenMesh = -1;
         }
-        else if (g_currentCastleLevel >= kCastleLevelEight)
+        else if (LevelValue(g_currentCastleLevel) >= LevelValue(CastleLevel::Eight))
         {
             o->HiddenMesh = -2;
         }
@@ -509,11 +525,11 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
     case    33:
     case    34:
     case    35:
-        if (g_currentCastleLevel == kCastleLevelOne || g_currentCastleLevel == kCastleLevelTwo)
+        if (g_currentCastleLevel == CastleLevel::One || g_currentCastleLevel == CastleLevel::Two)
         {
             o->HiddenMesh = -1;
         }
-        else if (g_currentCastleLevel >= kCastleLevelFive)
+        else if (LevelValue(g_currentCastleLevel) >= LevelValue(CastleLevel::Five))
         {
             o->HiddenMesh = -2;
         }
@@ -552,7 +568,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
     case    15:
     case    16:
     case    17:
-        if (g_currentCastleLevel >= kCastleLevelTwo && g_currentCastleLevel != kInvalidCastleLevel)
+        if (LevelValue(g_currentCastleLevel) >= LevelValue(CastleLevel::Two) && g_currentCastleLevel != CastleLevel::Invalid)
         {
             o->HiddenMesh = -2;
         }
