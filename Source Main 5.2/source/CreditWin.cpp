@@ -91,6 +91,8 @@ CCreditWin::CCreditWin()
     , m_font(nullptr, &FontDeleter)
     , m_nNowIndex(0)
     , m_nNameCount(0)
+    , m_anTextIndex{}
+    , m_aeTextState{}
     , m_textElapsed(DurationMs::zero())
 {
 }
@@ -246,7 +248,7 @@ void CCreditWin::RenderControls()
 	case 2:
 		nTextBoxWidth = lScreenWidth / 4 / g_fScreenRate_x;
 		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]], 160, 72, nTextBoxWidth);
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]], 320, 72, nTextBoxWidth);
+		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]], 320, 72, nTextBoxWidth);
 		break;
 	case 3:
 		nTextBoxWidth = lScreenWidth / 3 / g_fScreenRate_x;
@@ -376,7 +378,15 @@ void CCreditWin::LoadText()
 	}
 
 	const std::size_t nSize = sizeof(SCreditItem) * CRW_ITEM_MAX;
-	std::fread(m_aCredit, nSize, 1, file.get());
+	if (std::fread(m_aCredit, nSize, 1, file.get()) != 1)
+	{
+		wchar_t szMessage[256];
+		std::swprintf(szMessage, std::size(szMessage), L"Failed to read %hs file or file is corrupt.\r\n", kCreditDataPath.data());
+		g_ErrorReport.Write(szMessage);
+		::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
+		::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
+		return;
+	}
 	::BuxConvert(reinterpret_cast<BYTE*>(m_aCredit), static_cast<int>(nSize));
 }
 
