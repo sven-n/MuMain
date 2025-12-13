@@ -93,7 +93,7 @@ void CSMServer::GetServerAddress(wchar_t* szAddress)
 
     CMultiLanguage::ConvertFromUtf8(
         szAddress,
-        const_cast<char*>(m_serverInfo.m_szMapSvrIpAddress.data()),
+        m_serverInfo.m_szMapSvrIpAddress.data(),
         static_cast<int>(kIpAddressLength));
 }
 
@@ -116,7 +116,7 @@ void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
     std::array<wchar_t, kIpAddressLength> ipAddress {};
     CMultiLanguage::ConvertFromUtf8(
         ipAddress.data(),
-        const_cast<char*>(m_serverInfo.m_szMapSvrIpAddress.data()),
+        m_serverInfo.m_szMapSvrIpAddress.data(),
         static_cast<int>(kIpAddressLength));
 
     if (CreateSocket(ipAddress.data(), m_serverInfo.m_wMapSvrPort))
