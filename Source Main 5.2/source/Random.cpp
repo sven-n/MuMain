@@ -42,8 +42,9 @@ namespace Random
             return minInclusive;
         }
 
-        std::uniform_int_distribution<std::int32_t> dist(minInclusive, maxInclusive);
-        return dist(GetThreadEngine());
+        thread_local static std::uniform_int_distribution<std::int32_t> dist;
+        using param_type = std::uniform_int_distribution<std::int32_t>::param_type;
+        return dist(GetThreadEngine(), param_type(minInclusive, maxInclusive));
     }
 
     float RangeFloat(float minInclusive, float maxInclusive)
@@ -53,19 +54,20 @@ namespace Random
             return minInclusive;
         }
 
-        std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
-        return dist(GetThreadEngine());
+        thread_local static std::uniform_real_distribution<float> dist;
+        using param_type = std::uniform_real_distribution<float>::param_type;
+        return dist(GetThreadEngine(), param_type(minInclusive, maxInclusive));
     }
 
     float Unit()
     {
-        std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+        thread_local static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
         return dist(GetThreadEngine());
     }
 
     double UnitDouble()
     {
-        std::uniform_real_distribution<double> dist(0.0, 1.0);
+        thread_local static std::uniform_real_distribution<double> dist(0.0, 1.0);
         return dist(GetThreadEngine());
     }
 

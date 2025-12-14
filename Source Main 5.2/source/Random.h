@@ -55,4 +55,3 @@ namespace Random
 
 } // namespace Random
 
-#endif // Random.h
