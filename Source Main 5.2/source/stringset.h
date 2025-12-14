@@ -46,7 +46,7 @@ namespace leaf {
             auto mi = m_mapString.find(key);
             if (mi == m_mapString.end())
             {
-                m_mapString.insert(string_map_type::value_type(key, strString));
+                m_mapString.insert(typename string_map_type::value_type(key, strString));
                 return true;
             }
             return false;

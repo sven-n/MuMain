@@ -35,26 +35,52 @@ BYTE CMultiLanguage::GetLanguage()
 
 int32_t CMultiLanguage::ConvertFromUtf8(wchar_t* target, char* source, int maxSourceLength)
 {
-    int count = MultiByteToWideChar(CP_UTF8, 0, source, maxSourceLength, NULL, 0);
-    if (maxSourceLength > 0)
+    if (target == nullptr || source == nullptr)
     {
-        count = std::min<int>(count, maxSourceLength);
+        return 0;
     }
 
-    MultiByteToWideChar(CP_UTF8, 0, source, -1, target, count);
-    return count;
+    const int sourceLength = (maxSourceLength < 0) ? -1 : maxSourceLength;
+    int requiredChars = MultiByteToWideChar(CP_UTF8, 0, source, sourceLength, nullptr, 0);
+    if (requiredChars <= 0)
+    {
+        target[0] = L'\0';
+        return 0;
+    }
+
+    if (maxSourceLength > 0)
+    {
+        requiredChars = std::min(requiredChars, maxSourceLength - 1);
+    }
+
+    const int written = MultiByteToWideChar(CP_UTF8, 0, source, sourceLength, target, requiredChars + 1);
+    target[written] = L'\0';
+    return written;
 }
 
 int32_t CMultiLanguage::ConvertToUtf8(char* target, wchar_t* source, int maxSourceLength)
 {
-    auto count = WideCharToMultiByte(0, 0, source, maxSourceLength, 0, 0, 0, 0);
-    if (maxSourceLength > 0)
+    if (target == nullptr || source == nullptr)
     {
-        count = std::min<int>(count, maxSourceLength);
+        return 0;
     }
 
-    WideCharToMultiByte(0, 0, source, -1, target, count, 0, 0);
-    return count;
+    const int sourceLength = (maxSourceLength < 0) ? -1 : maxSourceLength;
+    int requiredBytes = WideCharToMultiByte(CP_UTF8, 0, source, sourceLength, nullptr, 0, nullptr, nullptr);
+    if (requiredBytes <= 0)
+    {
+        target[0] = '\0';
+        return 0;
+    }
+
+    if (maxSourceLength > 0)
+    {
+        requiredBytes = std::min(requiredBytes, maxSourceLength - 1);
+    }
+
+    const int written = WideCharToMultiByte(CP_UTF8, 0, source, sourceLength, target, requiredBytes + 1, nullptr, nullptr);
+    target[written] = '\0';
+    return written;
 }
 
 
