@@ -16,7 +16,8 @@
 
 using namespace SEASON4A;
 
-
+extern int g_iLimitAttackTime;
+extern float IntensityTransform[MAX_MESH][MAX_VERTICES];
 
 CGM_RaklionPtr CGM_Raklion::Make()
 {
@@ -1072,7 +1073,6 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
     if (o->Type >= 6 && o->Type <= 12)
     {
-        extern float IntensityTransform[MAX_MESH][MAX_VERTICES];
         for (int i = 0; i < b->NumMeshs; i++)
         {
             Mesh_t* m = &b->Meshs[i];
@@ -1838,7 +1838,6 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_ATTACK2)
         {
-            extern int g_iLimitAttackTime;
 
             // 			if ( 8 == c->AttackTime)
             // 			{
@@ -2092,8 +2091,6 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_ATTACK2)
         {
-            extern int g_iLimitAttackTime;
-
             // 			if ( 8 == c->AttackTime)
             // 			{
             // 				PlayBuffer(SOUND_SKILL_SWORD2);
