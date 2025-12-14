@@ -50,7 +50,7 @@ int32_t CMultiLanguage::ConvertFromUtf8(wchar_t* target, char* source, int maxSo
 
     if (maxSourceLength > 0)
     {
-        requiredChars = std::min(requiredChars, maxSourceLength - 1);
+        requiredChars = std::min<int>(requiredChars, maxSourceLength - 1);
     }
 
     const int written = MultiByteToWideChar(CP_UTF8, 0, source, sourceLength, target, requiredChars + 1);
@@ -75,7 +75,7 @@ int32_t CMultiLanguage::ConvertToUtf8(char* target, wchar_t* source, int maxSour
 
     if (maxSourceLength > 0)
     {
-        requiredBytes = std::min(requiredBytes, maxSourceLength - 1);
+        requiredBytes = std::min<int>(requiredBytes, maxSourceLength - 1);
     }
 
     const int written = WideCharToMultiByte(CP_UTF8, 0, source, sourceLength, target, requiredBytes + 1, nullptr, nullptr);
