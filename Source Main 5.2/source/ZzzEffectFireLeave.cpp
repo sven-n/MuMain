@@ -169,7 +169,7 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
 
     o->Type = BITMAP_RAIN;
     o->TurningForce[0] = 1.f;
-    o->TurningForce[1] = 30.f + RandomFloat(0, 9);
+    o->TurningForce[1] = 30.f + Random::RangeFloat(0, 9);
 
     if (Index < 300)
     {
