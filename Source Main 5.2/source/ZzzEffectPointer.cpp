@@ -13,23 +13,7 @@
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
 #include "WSclient.h"
-
-#include <random>
-
-namespace
-{
-std::mt19937& RandomEngine()
-{
-    static std::mt19937 engine{std::random_device{}()};
-    return engine;
-}
-
-int RandomInt(int minInclusive, int maxInclusive)
-{
-    std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
-    return dist(RandomEngine());
-}
-} // namespace
+#include "Random.h"
 
 PARTICLE  Pointers[MAX_POINTERS];
 
@@ -54,7 +38,7 @@ void CreatePointer(int Type, vec3_t Position, float Angle, vec3_t Light, float S
             case BITMAP_BLOOD:
             case BITMAP_BLOOD + 1:
             case BITMAP_FOOT:
-                o->LifeTime = 50 + RandomInt(0, 31);
+                o->LifeTime = 50 + Random::RangeInt(0, 31);
                 break;
             }
             return;

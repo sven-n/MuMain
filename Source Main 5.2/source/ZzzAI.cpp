@@ -17,8 +17,8 @@
 #include <cmath>
 #include <limits>
 #include <mutex>
-#include <random>
 
+#include "Random.h"
 #include "ZzzTexture.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzInterface.h"
@@ -486,8 +486,8 @@ void MoveHead(CHARACTER* c)
         {
             if (rand_fps_check(32))
             {
-                o->HeadTargetAngle[0] = (float)(rand() % 128 - 64);
-                o->HeadTargetAngle[1] = (float)(rand() % 48 - 16);
+                o->HeadTargetAngle[0] = static_cast<float>(Random::RangeInt(-64, 63));
+                o->HeadTargetAngle[1] = static_cast<float>(Random::RangeInt(-16, 31));
                 for (int i = 0; i < 2; i++)
                     if (o->HeadTargetAngle[i] < 0) o->HeadTargetAngle[i] += 360.f;
             }
@@ -525,7 +525,7 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
         {
             CreateParticle(BITMAP_SPARK, Position, to->Angle, Light);
             vec3_t Angle;
-            Vector(-(float)(rand() % 60 + 30), 0.f, (float)(rand() % 360), Angle);
+            Vector(-static_cast<float>(Random::RangeInt(30, 89)), 0.f, static_cast<float>(Random::RangeInt(0, 359)), Angle);
             CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
         }
         CreateParticle(BITMAP_SPARK + 1, Position, to->Angle, Light);
@@ -703,20 +703,9 @@ float   FPS_ANIMATION_FACTOR;
 double   FPS_AVG;
 double   WorldTime = 0.0;
 
-std::random_device rd;  // a seed source for the random number engine
-std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
-std::uniform_real_distribution<> distrib(0.0, 1.0);
-
 bool rand_fps_check(int reference_frames)
 {
-    // return rand() % reference_frames == 0;
-    const auto animation_factor = std::min<double>(1.0, static_cast<double>(FPS_ANIMATION_FACTOR));
-    const auto rand_value = distrib(gen);// *1.5;
-    const auto chance = reference_frames == 1
-        ? animation_factor
-        : (1.0 / reference_frames) * animation_factor;
-
-    return rand_value <= chance;
+    return Random::FpsCheck(reference_frames, static_cast<double>(FPS_ANIMATION_FACTOR));
 }
 
 void CalcFPS()

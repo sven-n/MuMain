@@ -13,11 +13,11 @@
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
 #include "WSclient.h"
+#include "Random.h"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <random>
 
 namespace
 {
@@ -90,23 +90,6 @@ std::array<ObjectBlur, MAX_OBJECT_BLURS> g_objectBlurs{};
 std::array<physics_vertex, FLAG_HEIGHT * FLAG_WIDTH> g_flagVertices{};
 std::array<physics_face, (FLAG_HEIGHT - 1) * (FLAG_WIDTH - 1)> g_flagFaces{};
 
-std::mt19937& RandomEngine()
-{
-    thread_local static std::mt19937 engine{std::random_device{}()};
-    return engine;
-}
-
-int RandomInt(int minInclusive, int maxInclusive)
-{
-    std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
-    return dist(RandomEngine());
-}
-
-float RandomFloat(float minInclusive, float maxInclusive)
-{
-    std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
-    return dist(RandomEngine());
-}
 } // namespace
 
 void AddBlur(Blur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
@@ -451,7 +434,7 @@ void CreateSpark(int Type, CHARACTER* tc, vec3_t Position, vec3_t Angle)
     for (int i = 0; i < 20; i++)
     {
         vec3_t a;
-        Vector(RandomFloat(0.f, 360.f), 0.f, RandomFloat(0.f, 360.f), a);
+        Vector(Random::RangeFloat(0.f, 360.f), 0.f, Random::RangeFloat(0.f, 360.f), a);
         VectorAdd(a, Angle, a);
         CreateParticle(BITMAP_SPARK, Position, to->Angle, Light);
     }
@@ -473,10 +456,10 @@ void CreateBlood(OBJECT* o)
             vec3_t p, Position;
             for (int i = 0; i < 2; i++)
             {
-                Vector(RandomFloat(-50.f, 50.f), RandomFloat(-50.f, 50.f), 0.f, p);
+                Vector(Random::RangeFloat(-50.f, 50.f), Random::RangeFloat(-50.f, 50.f), 0.f, p);
                 Models[o->Type].TransformPosition(o->BoneTransform[BoneHead], p, Position, true);
-                const float rotation = RandomFloat(0.f, 360.f);
-                const float scale = RandomFloat(0.8f, 1.2f);
+                const float rotation = Random::RangeFloat(0.f, 360.f);
+                const float scale = Random::RangeFloat(0.8f, 1.2f);
                 CreatePointer(BITMAP_BLOOD, Position, rotation, o->Light, scale);
             }
         }
