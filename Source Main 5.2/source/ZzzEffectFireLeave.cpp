@@ -33,9 +33,9 @@ static  int RainPosition = 0;
 
 void CreateBonfire(vec3_t Position, vec3_t Angle)
 {
-    Position[0] += static_cast<float>(Random::RangeInt(-8, 7));
-    Position[1] += static_cast<float>(Random::RangeInt(-8, 7));
-    Position[2] += static_cast<float>(Random::RangeInt(-8, 7));
+    Position[0] += Random::RangeFloat(-8, 7);
+    Position[1] += Random::RangeFloat(-8, 7);
+    Position[2] += Random::RangeFloat(-8, 7);
     vec3_t Light;
     Vector(1.f, 1.f, 1.f, Light);
     CreateParticle(BITMAP_FIRE, Position, Angle, Light, Random::RangeInt(0, 3));
@@ -43,10 +43,10 @@ void CreateBonfire(vec3_t Position, vec3_t Angle)
     {
         CreateParticle(BITMAP_SPARK, Position, Angle, Light);
         vec3_t a;
-        Vector(-static_cast<float>(Random::RangeInt(30, 89)), 0.f, Random::RangeFloat(0.f, 360.f), a);
+        Vector(-Random::RangeFloat(30, 89), 0.f, Random::RangeFloat(0.f, 360.f), a);
         CreateJoint(BITMAP_JOINT_SPARK, Position, Position, a);
     }
-    const float Luminosity = static_cast<float>(Random::RangeInt(6, 11)) * 0.1f;
+    const float Luminosity = Random::RangeFloat(6, 11) * 0.1f;
     Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.4f, Light);
     AddTerrainLight(Position[0], Position[1], Light, 4, PrimaryTerrainLight);
 }
@@ -61,13 +61,13 @@ void CreateFire(int Type, OBJECT* o, float x, float y, float z)
     Vector(x, y, z, p);
     VectorRotate(p, Matrix, Position);
     VectorAdd(Position, o->Position, Position);
-    Position[0] += static_cast<float>(Random::RangeInt(-8, 7));
-    Position[1] += static_cast<float>(Random::RangeInt(-8, 7));
-    Position[2] += static_cast<float>(Random::RangeInt(-8, 7));
+    Position[0] += Random::RangeFloat(-8, 7);
+    Position[1] += Random::RangeFloat(-8, 7);
+    Position[2] += Random::RangeFloat(-8, 7);
     switch (Type)
     {
     case 0:
-        Luminosity = static_cast<float>(Random::RangeInt(6, 11)) * 0.1f;
+        Luminosity = Random::RangeFloat(6, 11) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.4f, Light);
         if (Random::FpsCheck(2))
             CreateParticle(BITMAP_FIRE, Position, o->Angle, Light, Random::RangeInt(0, 3));
@@ -126,9 +126,9 @@ bool CreateDevilSquareRain(PARTICLE* o, int Index)
     o->Type = BITMAP_RAIN;
     if (Index < 300)
     {
-        const float randomX = static_cast<float>(Random::RangeInt(-800, 799));
-        const float randomY = static_cast<float>(Random::RangeInt(-500, 899));
-        const float randomZ = static_cast<float>(Random::RangeInt(300, 499));
+        const float randomX = Random::RangeFloat(-800, 799);
+        const float randomY = Random::RangeFloat(-500, 899);
+        const float randomZ = Random::RangeFloat(300, 499);
         Vector(Hero->Object.Position[0] + randomX,
                Hero->Object.Position[1] + randomY,
                Hero->Object.Position[2] + randomZ,
@@ -136,9 +136,9 @@ bool CreateDevilSquareRain(PARTICLE* o, int Index)
     }
     else
     {
-        const float randomX = static_cast<float>(Random::RangeInt(-800, 799));
-        const float randomY = static_cast<float>(Random::RangeInt(1000, 1299)) - RainPosition;
-        const float randomZ = static_cast<float>(Random::RangeInt(300, 499));
+        const float randomX = Random::RangeFloat(-800, 799);
+        const float randomY = Random::RangeFloat(1000, 1299) - RainPosition;
+        const float randomZ = Random::RangeFloat(300, 499);
         Vector(Hero->Object.Position[0] + randomX,
                Hero->Object.Position[1] + randomY,
                Hero->Object.Position[2] + randomZ,
@@ -147,15 +147,15 @@ bool CreateDevilSquareRain(PARTICLE* o, int Index)
 
     if (Random::FpsCheck(2))
     {
-        Vector(-static_cast<float>(Random::RangeInt(20, 39)), 0.f, 0.f, o->Angle);
+        Vector(-Random::RangeFloat(20, 39), 0.f, 0.f, o->Angle);
     }
     else
     {
-        Vector(-static_cast<float>(Random::RangeInt(30, 49) + RainAngle), 0.f, 0.f, o->Angle);
+        Vector(-Random::RangeFloat(30, 49) - RainAngle, 0.f, 0.f, o->Angle);
     }
 
     vec3_t Velocity;
-    Vector(0.f, 0.f, -static_cast<float>((Random::RangeInt(0, 39) + RainSpeed) * FPS_ANIMATION_FACTOR), Velocity);
+    Vector(0.f, 0.f, -((Random::RangeFloat(0, 39) + RainSpeed) * FPS_ANIMATION_FACTOR), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -169,13 +169,13 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
 
     o->Type = BITMAP_RAIN;
     o->TurningForce[0] = 1.f;
-    o->TurningForce[1] = 30.f + static_cast<float>(Random::RangeInt(0, 9));
+    o->TurningForce[1] = 30.f + RandomFloat(0, 9);
 
     if (Index < 300)
     {
-        const float randomX = static_cast<float>(Random::RangeInt(-800, 799));
-        const float randomY = static_cast<float>(Random::RangeInt(-500, 899));
-        const float randomZ = static_cast<float>(Random::RangeInt(300, 499));
+        const float randomX = Random::RangeFloat(-800, 799);
+        const float randomY = Random::RangeFloat(-500, 899);
+        const float randomZ = Random::RangeFloat(300, 499);
         Vector(Hero->Object.Position[0] + randomX,
                Hero->Object.Position[1] + randomY,
                Hero->Object.Position[2] + randomZ,
@@ -183,9 +183,9 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
     }
     else
     {
-        const float randomX = static_cast<float>(Random::RangeInt(-800, 799));
-        const float randomY = static_cast<float>(Random::RangeInt(1000, 1299)) - RainPosition;
-        const float randomZ = static_cast<float>(Random::RangeInt(300, 499));
+        const float randomX = Random::RangeFloat(-800, 799);
+        const float randomY = Random::RangeFloat(1000, 1299) - RainPosition;
+        const float randomZ = Random::RangeFloat(300, 499);
         Vector(Hero->Object.Position[0] + randomX,
                Hero->Object.Position[1] + randomY,
                Hero->Object.Position[2] + randomZ,
@@ -193,14 +193,14 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
     }
     if (Random::FpsCheck(2))
     {
-        Vector(-static_cast<float>(Random::RangeInt(20, 39)), 0.f, 0.f, o->Angle);
+        Vector(-Random::RangeFloat(20, 39), 0.f, 0.f, o->Angle);
     }
     else
     {
-        Vector(-static_cast<float>(Random::RangeInt(30, 49) + RainAngle), 0.f, 0.f, o->Angle);
+        Vector(-(Random::RangeFloat(30, 49) + RainAngle), 0.f, 0.f, o->Angle);
     }
     vec3_t Velocity;
-    Vector(0.f, 0.f, -static_cast<float>((Random::RangeInt(0, 39) + RainSpeed + 20) * FPS_ANIMATION_FACTOR), Velocity);
+    Vector(0.f, 0.f, -((Random::RangeFloat(0, 39) + RainSpeed + 20) * FPS_ANIMATION_FACTOR), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -214,24 +214,24 @@ bool CreateLorenciaLeaf(PARTICLE* o)
 
     o->Type = BITMAP_LEAF1;
     vec3_t Position;
-    Vector(Hero->Object.Position[0] + static_cast<float>(Random::RangeInt(-800, 799)),
-        Hero->Object.Position[1] + static_cast<float>(Random::RangeInt(-500, 899)),
-        Hero->Object.Position[2] + static_cast<float>(Random::RangeInt(50, 349)),
+    Vector(Hero->Object.Position[0] + (Random::RangeFloat(-800, 799)),
+        Hero->Object.Position[1] + (Random::RangeFloat(-500, 899)),
+        Hero->Object.Position[2] + (Random::RangeFloat(50, 349)),
         Position);
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
-    o->Velocity[0] = -static_cast<float>(Random::RangeInt(64, 127)) * 0.1f;
+    o->Velocity[0] = -Random::RangeFloat(64, 127) * 0.1f;
     if (Position[1] < CameraPosition[1] + 400.f)
     {
         o->Velocity[0] = -o->Velocity[0] + 3.2f;
     }
 
     o->Velocity[0] *= FPS_ANIMATION_FACTOR;
-    o->Velocity[1] = static_cast<float>(Random::RangeInt(-16, 15)) * 0.1f * FPS_ANIMATION_FACTOR;
-    o->Velocity[2] = static_cast<float>(Random::RangeInt(-16, 15)) * 0.1f * FPS_ANIMATION_FACTOR;
-    o->TurningForce[0] = static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f;
-    o->TurningForce[1] = static_cast<float>(Random::RangeInt(-32, 31)) * 0.1f;
-    o->TurningForce[2] = static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f;
+    o->Velocity[1] = Random::RangeFloat(-16, 15) * 0.1f * FPS_ANIMATION_FACTOR;
+    o->Velocity[2] = Random::RangeFloat(-16, 15) * 0.1f * FPS_ANIMATION_FACTOR;
+    o->TurningForce[0] = Random::RangeFloat(-8, 7) * 0.1f;
+    o->TurningForce[1] = Random::RangeFloat(-32, 31) * 0.1f;
+    o->TurningForce[2] = Random::RangeFloat(-8, 7) * 0.1f;
 
     return true;
 }
@@ -250,13 +250,13 @@ bool CreateHeavenRain(PARTICLE* o, int index)
     {
         o->Type = BITMAP_RAIN;
         Vector(
-            Hero->Object.Position[0] + static_cast<float>(Random::RangeInt(-800, 799)),
-            Hero->Object.Position[1] + static_cast<float>(Random::RangeInt(-500, 899)),
-            Hero->Object.Position[2] + static_cast<float>(Random::RangeInt(200, 399)),
+            Hero->Object.Position[0] + Random::RangeFloat(-800, 799),
+            Hero->Object.Position[1] + Random::RangeFloat(-500, 899),
+            Hero->Object.Position[2] + Random::RangeFloat(200, 399),
             o->Position);
         Vector(-30.f, 0.f, 0.f, o->Angle);
         vec3_t Velocity;
-        Vector(0.f, 0.f, -static_cast<float>(Random::RangeInt(20, 43)), Velocity);
+        Vector(0.f, 0.f, -Random::RangeFloat(20, 43), Velocity);
         float Matrix[3][4];
         AngleMatrix(o->Angle, Matrix);
         VectorRotate(Velocity, Matrix, o->Velocity);
@@ -275,13 +275,13 @@ bool CreateDeviasSnow(PARTICLE* o)
         o->Type = BITMAP_LEAF2;
         o->Scale = 10.f;
     }
-    Vector(Hero->Object.Position[0] + static_cast<float>(Random::RangeInt(-800, 799)),
-        Hero->Object.Position[1] + static_cast<float>(Random::RangeInt(-500, 899)),
-        Hero->Object.Position[2] + static_cast<float>(Random::RangeInt(200, 399)),
+    Vector(Hero->Object.Position[0] + Random::RangeFloat(-800, 799),
+        Hero->Object.Position[1] + Random::RangeFloat(-500, 899),
+        Hero->Object.Position[2] + Random::RangeFloat(200, 399),
         o->Position);
     Vector(-30.f, 0.f, 0.f, o->Angle);
     vec3_t Velocity;
-    Vector(0.f, 0.f, -static_cast<float>(Random::RangeInt(8, 23)), Velocity);
+    Vector(0.f, 0.f, -Random::RangeFloat(8, 23), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -295,19 +295,19 @@ bool CreateAtlanseLeaf(PARTICLE* o)
 
     o->Type = BITMAP_LEAF1;
     vec3_t Position;
-    Vector(Hero->Object.Position[0] + static_cast<float>(Random::RangeInt(-800, 799)),
-        Hero->Object.Position[1] + static_cast<float>(Random::RangeInt(-500, 899)),
-        Hero->Object.Position[2] + static_cast<float>(Random::RangeInt(50, 349)),
+    Vector(Hero->Object.Position[0] + Random::RangeFloat(-800, 799),
+        Hero->Object.Position[1] + Random::RangeFloat(-500, 899),
+        Hero->Object.Position[2] + Random::RangeFloat(50, 349),
         Position);
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
-    o->Velocity[0] = -static_cast<float>(Random::RangeInt(64, 127)) * 0.1f;
+    o->Velocity[0] = -Random::RangeFloat(64, 127) * 0.1f;
     if (Position[1] < CameraPosition[1] + 400.f) o->Velocity[0] = -o->Velocity[0] + 3.2f;
-    o->Velocity[1] = static_cast<float>(Random::RangeInt(-16, 15)) * 0.1f;
-    o->Velocity[2] = static_cast<float>(Random::RangeInt(-16, 15)) * 0.1f;
-    o->TurningForce[0] = static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f;
-    o->TurningForce[1] = static_cast<float>(Random::RangeInt(-32, 31)) * 0.1f;
-    o->TurningForce[2] = static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f;
+    o->Velocity[1] = Random::RangeFloat(-16, 15) * 0.1f;
+    o->Velocity[2] = Random::RangeFloat(-16, 15) * 0.1f;
+    o->TurningForce[0] = Random::RangeFloat(-8, 7) * 0.1f;
+    o->TurningForce[1] = Random::RangeFloat(-32, 31) * 0.1f;
+    o->TurningForce[2] = Random::RangeFloat(-8, 7) * 0.1f;
 
     return true;
 }
@@ -372,14 +372,14 @@ bool MoveHeavenRain(PARTICLE* o)
     }
     else
     {
-        o->Velocity[0] += static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f * FPS_ANIMATION_FACTOR;
-        o->Velocity[1] += static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f * FPS_ANIMATION_FACTOR;
-        o->Velocity[2] += static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[0] += Random::RangeFloat(-8, 7) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[1] += Random::RangeFloat(-8, 7) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[2] += Random::RangeFloat(-8, 7) * 0.1f * FPS_ANIMATION_FACTOR;
         VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
-        o->TurningForce[0] += static_cast<float>(Random::RangeInt(-4, 3)) * 0.02f * FPS_ANIMATION_FACTOR;
-        o->TurningForce[1] += static_cast<float>(Random::RangeInt(-8, 7)) * 0.02f * FPS_ANIMATION_FACTOR;
-        o->TurningForce[2] += static_cast<float>(Random::RangeInt(-4, 3)) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[0] += Random::RangeFloat(-4, 3) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[1] += Random::RangeFloat(-8, 7) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[2] += Random::RangeFloat(-4, 3) * 0.02f * FPS_ANIMATION_FACTOR;
         VectorAdd(o->Angle, o->TurningForce, o->Angle);
 
         vec3_t Range;
@@ -405,9 +405,9 @@ void MoveEtcLeaf(PARTICLE* o)
     }
     else
     {
-        o->Velocity[0] += static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f * FPS_ANIMATION_FACTOR;
-        o->Velocity[1] += static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f * FPS_ANIMATION_FACTOR;
-        o->Velocity[2] += static_cast<float>(Random::RangeInt(-8, 7)) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[0] += Random::RangeFloat(-8, 7) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[1] += Random::RangeFloat(-8, 7) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[2] += Random::RangeFloat(-8, 7) * 0.1f * FPS_ANIMATION_FACTOR;
         VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
     }
 }
