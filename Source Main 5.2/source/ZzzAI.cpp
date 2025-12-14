@@ -486,8 +486,8 @@ void MoveHead(CHARACTER* c)
         {
             if (rand_fps_check(32))
             {
-                o->HeadTargetAngle[0] = static_cast<float>(Random::RangeInt(-64, 63));
-                o->HeadTargetAngle[1] = static_cast<float>(Random::RangeInt(-16, 31));
+                o->HeadTargetAngle[0] = Random::RangeFloat(-64, 63);
+                o->HeadTargetAngle[1] = Random::RangeFloat(-16, 31);
                 for (int i = 0; i < 2; i++)
                     if (o->HeadTargetAngle[i] < 0) o->HeadTargetAngle[i] += 360.f;
             }
@@ -525,7 +525,7 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
         {
             CreateParticle(BITMAP_SPARK, Position, to->Angle, Light);
             vec3_t Angle;
-            Vector(-static_cast<float>(Random::RangeInt(30, 89)), 0.f, static_cast<float>(Random::RangeInt(0, 359)), Angle);
+            Vector(-Random::RangeFloat(30, 89), 0.f, Random::RangeFloat(0, 359), Angle);
             CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
         }
         CreateParticle(BITMAP_SPARK + 1, Position, to->Angle, Light);
