@@ -3607,16 +3607,13 @@ bool SEASON3B::CGambleBuyMsgBoxLayout::SetLayout()
 CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     GambleSystem& gambleSys = GambleSystem::Instance();
-    LPBUYITEMINFO pItemInfo = NULL;
-
     if (gambleSys.IsGambleShop() && BuyCost != 0)
     {
-        pItemInfo = gambleSys.GetBuyItemInfo();
-        SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(pItemInfo->ItemIndex);
-        BuyCost = pItemInfo->ItemCost;
-        g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", pItemInfo->ItemIndex);
+        const auto& itemInfo = gambleSys.GetBuyItemInfoConst();
+        SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(itemInfo.ItemIndex);
+        BuyCost = itemInfo.ItemCost;
+        g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", itemInfo.ItemIndex);
     }
-
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 

@@ -13,7 +13,52 @@
 #include "NewUICustomMessageBox.h"
 #include "NewUISystem.h"
 
+#include <algorithm>
+#include <chrono>
+#include <cwchar>
+#include <iterator>
+
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
+
+namespace
+{
+constexpr std::chrono::seconds kMatchCountdownDuration{30};
+
+template <std::size_t N>
+void ClearWideBuffer(wchar_t (&buffer)[N])
+{
+    std::fill(std::begin(buffer), std::end(buffer), L'\0');
+}
+
+template <std::size_t N, typename... Args>
+void WriteWide(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
+{
+    if (format == nullptr)
+    {
+        buffer[0] = L'\0';
+        return;
+    }
+
+    std::swprintf(buffer, static_cast<std::size_t>(N), format, args...);
+}
+
+template <std::size_t N, typename... Args>
+void AppendWide(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
+{
+    if (format == nullptr)
+    {
+        return;
+    }
+
+    const std::size_t currentLength = std::wcslen(buffer);
+    if (currentLength >= N)
+    {
+        return;
+    }
+
+    std::swprintf(buffer + currentLength, static_cast<std::size_t>(N - currentLength), format, args...);
+}
+} // namespace
 
 void CSBaseMatch::clearMatchInfo(void)
 {
@@ -41,10 +86,10 @@ void CSBaseMatch::StartMatchCountDown(int iType)
             return;
         }
     }
-    m_iMatchCountDownType = (MATCH_TYPE)iType;
-    m_dwMatchCountDownStart = GetTickCount();
+    m_iMatchCountDownType = static_cast<MATCH_TYPE>(iType);
+    m_matchCountDownStart = MatchClock::now();
 }
-void CSBaseMatch::SetMatchInfo(const BYTE byType, const int iMaxTime, const int iTime, const int iMaxMonster, const int iKillMonster)
+void CSBaseMatch::SetMatchInfo(const std::uint8_t byType, const int iMaxTime, const int iTime, const int iMaxMonster, const int iKillMonster)
 {
     m_byMatchType = byType;
     m_iMatchTimeMax = iMaxTime;
@@ -58,75 +103,75 @@ void CSBaseMatch::RenderTime(void)
 {
     float x, y;
 
-    if (m_iMatchCountDownType > TYPE_MATCH_NONE && m_iMatchCountDownType < TYPE_MATCH_END)
+    if (m_iMatchCountDownType <= TYPE_MATCH_NONE || m_iMatchCountDownType >= TYPE_MATCH_END)
     {
-        DWORD dwCurrent = GetTickCount();
-        if (dwCurrent - m_dwMatchCountDownStart > 30000)
-        {
-            m_iMatchCountDownType = TYPE_MATCH_NONE;
-        }
-        else
-        {
-            DisableAlphaBlend();
-            EnableAlphaTest(false);
-
-            x = 10;
-            y = 480 - 70;
-            g_pRenderText->SetTextColor(128, 128, 255, 255);
-            g_pRenderText->SetBgColor(0, 0, 0, 128);
-
-            wchar_t lpszStr[256] { 0 };
-            int iTime = (dwCurrent - m_dwMatchCountDownStart) / 1000;
-            if (m_iMatchCountDownType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_CASTLE_END)
-            {
-                int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CASTLE_ENTER_CLOSE;
-                swprintf(lpszStr, GlobalText[textNum], GlobalText[1146], 30 - iTime);
-            }
-            else if (m_iMatchCountDownType >= TYPE_MATCH_CHAOS_ENTER_START && m_iMatchCountDownType <= TYPE_MATCH_CHAOS_END)
-            {
-                int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CHAOS_ENTER_START;
-                if (textNum == 825)
-                {
-                    textNum = 828;
-                }
-                swprintf(lpszStr, GlobalText[textNum], GlobalText[1147], 30 - iTime);
-            }
-            else if (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE
-                || m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START)
-            {
-                int textNum = 2384;
-
-                if (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START) textNum = 2386;
-
-                swprintf(lpszStr, GlobalText[textNum], 30 - iTime);
-            }
-            else if (m_iMatchCountDownType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
-            {
-                int textNum = 2860 + m_iMatchCountDownType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE;
-                swprintf(lpszStr, GlobalText[textNum], 30 - iTime);
-            }
-            else
-            {
-                swprintf(lpszStr, GlobalText[640 + m_iMatchCountDownType - TYPE_MATCH_DEVIL_ENTER_START], 30 - iTime);
-            }
-            g_pRenderText->RenderText(640 / 2, (int)y, lpszStr, 0, 0, RT3_WRITE_CENTER);
-        }
+        return;
     }
+
+    const auto now = MatchClock::now();
+    const auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - m_matchCountDownStart);
+    if (elapsedSeconds >= kMatchCountdownDuration)
+    {
+        m_iMatchCountDownType = TYPE_MATCH_NONE;
+        return;
+    }
+
+    DisableAlphaBlend();
+    EnableAlphaTest(false);
+
+    x = 10.0f;
+    y = 480.0f - 70.0f;
+    g_pRenderText->SetTextColor(128, 128, 255, 255);
+    g_pRenderText->SetBgColor(0, 0, 0, 128);
+
+    const int remainingSeconds = static_cast<int>((kMatchCountdownDuration - elapsedSeconds).count());
+    wchar_t lpszStr[256]{0};
+
+    if (m_iMatchCountDownType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_CASTLE_END)
+    {
+        const int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CASTLE_ENTER_CLOSE;
+        WriteWide(lpszStr, GlobalText[textNum], GlobalText[1146], remainingSeconds);
+    }
+    else if (m_iMatchCountDownType >= TYPE_MATCH_CHAOS_ENTER_START && m_iMatchCountDownType <= TYPE_MATCH_CHAOS_END)
+    {
+        int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CHAOS_ENTER_START;
+        if (textNum == 825)
+        {
+            textNum = 828;
+        }
+        WriteWide(lpszStr, GlobalText[textNum], GlobalText[1147], remainingSeconds);
+    }
+    else if (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE
+        || m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START)
+    {
+        int textNum = (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START) ? 2386 : 2384;
+        WriteWide(lpszStr, GlobalText[textNum], remainingSeconds);
+    }
+    else if (m_iMatchCountDownType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
+    {
+        const int textNum = 2860 + m_iMatchCountDownType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE;
+        WriteWide(lpszStr, GlobalText[textNum], remainingSeconds);
+    }
+    else
+    {
+        const int textNum = 640 + m_iMatchCountDownType - TYPE_MATCH_DEVIL_ENTER_START;
+        WriteWide(lpszStr, GlobalText[textNum], remainingSeconds);
+    }
+
+    g_pRenderText->RenderText(640 / 2, static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);
 }
 
 void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
 {
-    wchar_t lpszStr[256] { 0 };
-    wchar_t lpszStrS[10] { 0 };
-    int iMinute = MatchTime / 60;
+    wchar_t lpszStr[256]{0};
+    const int iMinute = MatchTime / 60;
+    const int iSecondTime = MatchTime - (iMinute * 60);
 
-    swprintf(lpszStr, L" %.2d :", iMinute);
+    WriteWide(lpszStr, L" %.2d :", iMinute);
 
-    int iSecondTime = MatchTime - (iMinute * 60);
     if (iSecondTime >= 0)
     {
-        swprintf(lpszStrS, L" %.2d", iSecondTime);
-        wcscat(lpszStr, lpszStrS);
+        AppendWide(lpszStr, L" %.2d", iSecondTime);
     }
 
     if (iMinute < 5)
@@ -135,11 +180,10 @@ void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
     }
     if (iMinute < 15)
     {
-        swprintf(lpszStrS, L": %.2d", ((int)WorldTime % 60));
-        wcscat(lpszStr, lpszStrS);
+        AppendWide(lpszStr, L": %.2d", static_cast<int>(WorldTime) % 60);
     }
     g_pRenderText->SetFont(g_hFontBig);
-    g_pRenderText->RenderText((int)x, (int)y, lpszStr, 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(static_cast<int>(x), static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);
 }
 
 void CSBaseMatch::SetPosition(int ix, int iy)
@@ -192,7 +236,7 @@ void CSDevilSquareMatch::RenderMatchResult(void)
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->RenderText(xPos[2], yPos, GlobalText[647]);
     yPos += 16;
-    swprintf(lpszStr, GlobalText[648], Hero->ID);
+    WriteWide(lpszStr, GlobalText[648], Hero->ID);
     g_pRenderText->RenderText((xPos[2]), yPos, lpszStr);
     yPos += 24;
 
@@ -220,24 +264,24 @@ void CSDevilSquareMatch::RenderMatchResult(void)
         }
 
         // Render rank number (index + 1 for display)
-        swprintf(lpszStr, L"%2d", i + 1);
+        WriteWide(lpszStr, L"%2d", i + 1);
         g_pRenderText->RenderText(xPos[1], yPos, lpszStr);
 
         // Render player ID
-        ZeroMemory(lpszStr, MAX_ID_SIZE + 1);
-        CMultiLanguage::ConvertFromUtf8(lpszStr, (char*)pResult->m_lpID, MAX_ID_SIZE);
+        std::fill(std::begin(lpszStr), std::end(lpszStr), L'\0');
+        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(pResult->m_lpID), MAX_ID_SIZE);
         g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
 
         // Render score
-        swprintf(lpszStr, L"%10lu", pResult->m_iScore);
+        WriteWide(lpszStr, L"%10lu", pResult->m_iScore);
         g_pRenderText->RenderText(xPos[3], yPos, lpszStr);
 
         // Render experience
-        swprintf(lpszStr, L"%6lu", pResult->m_dwExp);
+        WriteWide(lpszStr, L"%6lu", pResult->m_dwExp);
         g_pRenderText->RenderText(xPos[4], yPos, lpszStr);
 
         // Render Zen
-        swprintf(lpszStr, L"%6lu", pResult->m_iZen);
+        WriteWide(lpszStr, L"%6lu", pResult->m_iZen);
         g_pRenderText->RenderText(xPos[5], yPos, lpszStr);
 
         // Increment yPos for the next row
@@ -258,24 +302,24 @@ void CSDevilSquareMatch::RenderMatchResult(void)
         yPos += 20;
 
         // Render my rank
-        swprintf(lpszStr, L"%2d", m_iMyResult);
+        WriteWide(lpszStr, L"%2d", m_iMyResult);
         g_pRenderText->RenderText(xPos[1], yPos, lpszStr);
 
         // Render my ID
-        ZeroMemory(lpszStr, MAX_ID_SIZE + 1);
-        CMultiLanguage::ConvertFromUtf8(lpszStr, (char*)myResult->m_lpID, MAX_ID_SIZE);
+        std::fill(std::begin(lpszStr), std::end(lpszStr), L'\0');
+        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(myResult->m_lpID), MAX_ID_SIZE);
         g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
 
         // Render my score
-        swprintf(lpszStr, L"%10lu", myResult->m_iScore);
+        WriteWide(lpszStr, L"%10lu", myResult->m_iScore);
         g_pRenderText->RenderText(xPos[3], yPos, lpszStr);
 
         // Render my experience
-        swprintf(lpszStr, L"%6lu", myResult->m_dwExp);
+        WriteWide(lpszStr, L"%6lu", myResult->m_dwExp);
         g_pRenderText->RenderText(xPos[4], yPos, lpszStr);
 
         // Render my Zen
-        swprintf(lpszStr, L"%6lu", myResult->m_iZen);
+        WriteWide(lpszStr, L"%6lu", myResult->m_iZen);
         g_pRenderText->RenderText(xPos[5], yPos, lpszStr);
     }
 }
