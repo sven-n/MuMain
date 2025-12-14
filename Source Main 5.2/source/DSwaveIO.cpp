@@ -1,7 +1,6 @@
+#include "stdafx.h"
 #include "DSwaveIO.h"
 
-#include <algorithm>
-#include <cstring>
 #include <cwchar>
 
 #include <windows.h>
