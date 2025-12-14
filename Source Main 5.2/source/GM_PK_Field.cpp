@@ -1,6 +1,14 @@
 ﻿//*****************************************************************************
 // file    : GM_PK_Field.cpp
 //*****************************************************************************
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdint>
+#include <optional>
+#include <random>
+
 #include "stdafx.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -11,7 +19,73 @@
 #include "w_MapHeaders.h"
 #include "DSPlaySound.h"
 
+namespace
+{
+    struct MonsterDefinition
+    {
+        int monsterType;
+        EMonsterModelType monsterModelId;
+        int objectModelId;
+        float scale;
+        bool assignLifetime;
+        int lifetime;
+    };
 
+    constexpr std::array<MonsterDefinition, 12> kMonsterDefinitions{ {
+        {MONSTER_ZOMBIE_FIGHTER, EMonsterModelType::MONSTER_MODEL_ZOMBIE_FIGHTER, MODEL_ZOMBIE_FIGHTER, 1.0f, false, 0},
+        {MONSTER_ZOMBIER, EMonsterModelType::MONSTER_MODEL_ZOMBIE_FIGHTER, MODEL_ZOMBIE_FIGHTER, 1.0f, false, 0},
+        {MONSTER_GLADIATOR, EMonsterModelType::MONSTER_MODEL_GLADIATOR, MODEL_GLADIATOR, 1.0f, false, 0},
+        {MONSTER_HELL_GLADIATOR, EMonsterModelType::MONSTER_MODEL_GLADIATOR, MODEL_GLADIATOR, 1.0f, false, 0},
+        {MONSTER_SLAUGHTERER, EMonsterModelType::MONSTER_MODEL_SLAUGTHERER, MODEL_SLAUGHTERER, 0.7f, false, 0},
+        {MONSTER_ASH_SLAUGHTERER, EMonsterModelType::MONSTER_MODEL_SLAUGTHERER, MODEL_SLAUGHTERER, 0.7f, false, 0},
+        {MONSTER_BLOOD_ASSASSIN, EMonsterModelType::MONSTER_MODEL_BLOOD_ASSASSIN, MODEL_BLOOD_ASSASSIN, 1.0f, true, 100},
+        {MONSTER_CRUEL_BLOOD_ASSASSIN, EMonsterModelType::MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN, MODEL_CRUEL_BLOOD_ASSASSIN, 1.0f, true, 100},
+        {MONSTER_COLD_BLOODED_ASSASSIN, EMonsterModelType::MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN, MODEL_CRUEL_BLOOD_ASSASSIN, 1.0f, true, 100},
+        {MONSTER_BURNING_LAVA_GIANT, EMonsterModelType::MONSTER_MODEL_BURNING_LAVA_GIANT, MODEL_BURNING_LAVA_GIANT, 1.0f, false, 0},
+        {MONSTER_LAVA_GIANT, EMonsterModelType::MONSTER_MODEL_LAVA_GIANT, MODEL_LAVA_GIANT, 1.0f, false, 0},
+        {MONSTER_RUTHLESS_LAVA_GIANT, EMonsterModelType::MONSTER_MODEL_LAVA_GIANT, MODEL_LAVA_GIANT, 1.0f, false, 0},
+    } };
+
+    const MonsterDefinition* FindMonsterDefinition(int monsterType)
+    {
+        const auto it = std::find_if(kMonsterDefinitions.begin(), kMonsterDefinitions.end(),
+            [monsterType](const MonsterDefinition& def) { return def.monsterType == monsterType; });
+        return (it != kMonsterDefinitions.end()) ? &(*it) : nullptr;
+    }
+
+    std::mt19937& RandomEngine()
+    {
+        static std::mt19937 engine{ std::random_device{}() };
+        return engine;
+    }
+
+    int RandomInt(int minInclusive, int maxInclusive)
+    {
+        if (minInclusive >= maxInclusive)
+        {
+            return minInclusive;
+        }
+        std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
+        return dist(RandomEngine());
+    }
+
+    float RandomFloat(float minInclusive, float maxInclusive)
+    {
+        if (minInclusive >= maxInclusive)
+        {
+            return minInclusive;
+        }
+        std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
+        return dist(RandomEngine());
+    }
+
+    bool IsWithin(float value, float minInclusive, float maxInclusive)
+    {
+        return value >= minInclusive && value <= maxInclusive;
+    }
+
+    constexpr int kBlurSampleCount = 5;
+}
 
 CGM_PK_FieldPtr CGM_PK_Field::Make()
 {
@@ -40,141 +114,38 @@ void CGM_PK_Field::Destroy()
     //n/a
 }
 
-CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
+CHARACTER* CGM_PK_Field::CreateMonster(int type, int positionX, int positionY, int key)
 {
     if (!gMapManager.IsPKField())
     {
-        return NULL;
+        return nullptr;
     }
 
-    CHARACTER* pCharacter = NULL;
-    switch (iType)
+    const MonsterDefinition* definition = FindMonsterDefinition(type);
+    if (definition == nullptr)
     {
-    case MONSTER_ZOMBIE_FIGHTER:
+        return nullptr;
+    }
+
+    OpenMonsterModel(definition->monsterModelId);
+
+    CHARACTER* character = CreateCharacter(key, definition->objectModelId, positionX, positionY);
+    if (character == nullptr)
     {
-        OpenMonsterModel(MONSTER_MODEL_ZOMBIE_FIGHTER);
-        pCharacter = CreateCharacter(Key, MODEL_ZOMBIE_FIGHTER, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
+        return nullptr;
     }
-    break;
-    case MONSTER_ZOMBIER:
+
+    character->Object.Scale = definition->scale;
+    character->Object.m_iAnimation = 0;
+    character->Weapon[0].Type = -1;
+    character->Weapon[1].Type = -1;
+
+    if (definition->assignLifetime)
     {
-        OpenMonsterModel(MONSTER_MODEL_ZOMBIE_FIGHTER);
-        pCharacter = CreateCharacter(Key, MODEL_ZOMBIE_FIGHTER, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
+        character->Object.LifeTime = definition->lifetime;
     }
-    break;
-    case MONSTER_GLADIATOR:
-    {
-        OpenMonsterModel(MONSTER_MODEL_GLADIATOR);
-        pCharacter = CreateCharacter(Key, MODEL_GLADIATOR, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_HELL_GLADIATOR:
-    {
-        OpenMonsterModel(MONSTER_MODEL_GLADIATOR);
-        pCharacter = CreateCharacter(Key, MODEL_GLADIATOR, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_SLAUGHTERER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SLAUGTHERER);
-        pCharacter = CreateCharacter(Key, MODEL_SLAUGHTERER, PosX, PosY);
-        pCharacter->Object.Scale = 0.7f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_ASH_SLAUGHTERER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SLAUGTHERER);
-        pCharacter = CreateCharacter(Key, MODEL_SLAUGHTERER, PosX, PosY);
-        pCharacter->Object.Scale = 0.7f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_BLOOD_ASSASSIN:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BLOOD_ASSASSIN);
-        pCharacter = CreateCharacter(Key, MODEL_BLOOD_ASSASSIN, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-        pCharacter->Object.LifeTime = 100;
-    }
-    break;
-    case MONSTER_CRUEL_BLOOD_ASSASSIN:
-    {
-        OpenMonsterModel(MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN);
-        pCharacter = CreateCharacter(Key, MODEL_CRUEL_BLOOD_ASSASSIN, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-        pCharacter->Object.LifeTime = 100;
-    }
-    break;
-    case MONSTER_COLD_BLOODED_ASSASSIN:
-    {
-        OpenMonsterModel(MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN);
-        pCharacter = CreateCharacter(Key, MODEL_CRUEL_BLOOD_ASSASSIN, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-        pCharacter->Object.LifeTime = 100;
-    }
-    break;
-    case MONSTER_BURNING_LAVA_GIANT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BURNING_LAVA_GIANT);
-        pCharacter = CreateCharacter(Key, MODEL_BURNING_LAVA_GIANT, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_LAVA_GIANT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_LAVA_GIANT);
-        pCharacter = CreateCharacter(Key, MODEL_LAVA_GIANT, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_RUTHLESS_LAVA_GIANT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_LAVA_GIANT);
-        pCharacter = CreateCharacter(Key, MODEL_LAVA_GIANT, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    }
-    return pCharacter;
+
+    return character;
 }
 
 void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)

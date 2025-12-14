@@ -3,51 +3,50 @@
 // producer: BGPARK
 //*****************************************************************************
 
-#ifndef _GM_PK_FIELD_H_
-#define _GM_PK_FIELD_H_
+#pragma once
 
-class BMD;
+#include <memory>
 
 #include "w_BaseMap.h"
-#include "./Time/Timer.h"
+#include "_struct.h"
 
-SmartPointer(CGM_PK_Field);
-class CGM_PK_Field : public BaseMap
+class BMD;
+struct OBJECT;
+struct CHARACTER;
+
+class CGM_PK_Field;
+using CGM_PK_FieldPtr = std::shared_ptr<CGM_PK_Field>;
+
+class CGM_PK_Field final : public BaseMap
 {
 public:
     static CGM_PK_FieldPtr Make();
-    virtual ~CGM_PK_Field();
+    ~CGM_PK_Field() override;
 
-public:
-    virtual bool CreateObject(OBJECT* o);
-    virtual bool MoveObject(OBJECT* o);
-    virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
-    virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-    virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    bool CreateObject(OBJECT* object) override;
+    bool MoveObject(OBJECT* object) override;
+    bool RenderObjectVisual(OBJECT* object, BMD* bmd) override;
+    bool RenderObjectMesh(OBJECT* object, BMD* bmd, bool extraMon = false) override;
+    void RenderAfterObjectMesh(OBJECT* object, BMD* bmd, bool extraMon = false) override;
 
-public:
-    bool CreateFireSpark(PARTICLE* o);
+    CHARACTER* CreateMonster(int type, int positionX, int positionY, int key) override;
+    bool MoveMonsterVisual(OBJECT* object, BMD* bmd) override;
+    void MoveBlurEffect(CHARACTER* character, OBJECT* object, BMD* bmd) override;
+    bool RenderMonsterVisual(CHARACTER* character, OBJECT* object, BMD* bmd) override;
 
-public:
-    virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
-    virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
-    virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-    virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+    bool PlayMonsterSound(OBJECT* object) override;
+    void PlayObjectSound(OBJECT* object) override;
 
-public:
-    virtual bool PlayMonsterSound(OBJECT* o);
-    virtual void PlayObjectSound(OBJECT* o);
     void PlayBGM();
+    bool CreateFireSpark(PARTICLE* particle);
 
-public:
     void Init();
     void Destroy();
 
 private:
     CGM_PK_Field();
-    bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
+
+    bool RenderMonster(OBJECT* object, BMD* bmd, bool extraMon);
 };
 
-extern bool IsPKField();
-
-#endif //_GM_PK_FIELD_H_
+bool IsPKField();
