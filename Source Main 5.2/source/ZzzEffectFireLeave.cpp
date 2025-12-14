@@ -64,7 +64,7 @@ void CreateBonfire(vec3_t Position, vec3_t Angle)
     {
         CreateParticle(BITMAP_SPARK, Position, Angle, Light);
         vec3_t a;
-        Vector(-(RandomFloat(30, 89)), 0.f, RandomFloat(0.f, 360.f), a);
+        Vector(-RandomFloat(30, 89), 0.f, RandomFloat(0.f, 360.f), a);
         CreateJoint(BITMAP_JOINT_SPARK, Position, Position, a);
     }
     const float Luminosity = RandomFloat(6, 11) * 0.1f;
@@ -214,7 +214,7 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
     }
     if (rand_fps_check(2))
     {
-        Vector(-(RandomFloat(20, 39)), 0.f, 0.f, o->Angle);
+        Vector(-RandomFloat(20, 39), 0.f, 0.f, o->Angle);
     }
     else
     {
@@ -271,13 +271,13 @@ bool CreateHeavenRain(PARTICLE* o, int index)
     {
         o->Type = BITMAP_RAIN;
         Vector(
-            Hero->Object.Position[0] + (RandomFloat(-800, 799)),
-            Hero->Object.Position[1] + (RandomFloat(-500, 899)),
-            Hero->Object.Position[2] + (RandomFloat(200, 399)),
+            Hero->Object.Position[0] + RandomFloat(-800, 799),
+            Hero->Object.Position[1] + RandomFloat(-500, 899),
+            Hero->Object.Position[2] + RandomFloat(200, 399),
             o->Position);
         Vector(-30.f, 0.f, 0.f, o->Angle);
         vec3_t Velocity;
-        Vector(0.f, 0.f, -(RandomFloat(20, 43)), Velocity);
+        Vector(0.f, 0.f, -RandomFloat(20, 43), Velocity);
         float Matrix[3][4];
         AngleMatrix(o->Angle, Matrix);
         VectorRotate(Velocity, Matrix, o->Velocity);
@@ -296,13 +296,13 @@ bool CreateDeviasSnow(PARTICLE* o)
         o->Type = BITMAP_LEAF2;
         o->Scale = 10.f;
     }
-    Vector(Hero->Object.Position[0] + (RandomFloat(-800, 799)),
-        Hero->Object.Position[1] + (RandomFloat(-500, 899)),
-        Hero->Object.Position[2] + (RandomFloat(200, 399)),
+    Vector(Hero->Object.Position[0] + RandomFloat(-800, 799),
+        Hero->Object.Position[1] + RandomFloat(-500, 899),
+        Hero->Object.Position[2] + RandomFloat(200, 399),
         o->Position);
     Vector(-30.f, 0.f, 0.f, o->Angle);
     vec3_t Velocity;
-    Vector(0.f, 0.f, -(RandomFloat(8, 23)), Velocity);
+    Vector(0.f, 0.f, -RandomFloat(8, 23), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -316,9 +316,9 @@ bool CreateAtlanseLeaf(PARTICLE* o)
 
     o->Type = BITMAP_LEAF1;
     vec3_t Position;
-    Vector(Hero->Object.Position[0] + (RandomFloat(-800, 799)),
-        Hero->Object.Position[1] + (RandomFloat(-500, 899)),
-        Hero->Object.Position[2] + (RandomFloat(50, 349)),
+    Vector(Hero->Object.Position[0] + RandomFloat(-800, 799),
+        Hero->Object.Position[1] + RandomFloat(-500, 899),
+        Hero->Object.Position[2] + RandomFloat(50, 349),
         Position);
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
