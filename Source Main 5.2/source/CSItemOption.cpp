@@ -1138,6 +1138,11 @@ void CSItemOption::RenderOptionHelper(void)
 
 int CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem)
 {
+    if (ip->AncientDiscriminator == 0)
+    {
+        return TextNum;
+    }
+
     const ITEM_SET_TYPE& itemSType = m_ItemSetType[ip->Type];
 
     m_bySelectedItemOption = itemSType.byOption[ip->AncientDiscriminator - 1];
