@@ -78,7 +78,7 @@ namespace Random
             return false;
         }
 
-        const double clampedFactor = std::min(1.0, std::max(0.0, animationFactor));
+        const double clampedFactor = std::min<double>(1.0, std::max<double>(0.0, animationFactor));
         
         const double randomValue = UnitDouble();
         
