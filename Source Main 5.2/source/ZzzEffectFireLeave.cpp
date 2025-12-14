@@ -39,7 +39,7 @@ void CreateBonfire(vec3_t Position, vec3_t Angle)
     vec3_t Light;
     Vector(1.f, 1.f, 1.f, Light);
     CreateParticle(BITMAP_FIRE, Position, Angle, Light, Random::RangeInt(0, 3));
-    if (Random::FpsCheck(4))
+    if (rand_fps_check(4))
     {
         CreateParticle(BITMAP_SPARK, Position, Angle, Light);
         vec3_t a;
@@ -69,16 +69,16 @@ void CreateFire(int Type, OBJECT* o, float x, float y, float z)
     case 0:
         Luminosity = Random::RangeFloat(6, 11) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.4f, Light);
-        if (Random::FpsCheck(2))
+        if (rand_fps_check(2))
             CreateParticle(BITMAP_FIRE, Position, o->Angle, Light, Random::RangeInt(0, 3));
         AddTerrainLight(Position[0], Position[1], Light, 4, PrimaryTerrainLight);
         break;
     case 1:
-        if (Random::FpsCheck(2))
+        if (rand_fps_check(2))
             CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
         break;
     case 2:
-        if (Random::FpsCheck(2))
+        if (rand_fps_check(2))
             CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light, 2);
         break;
     }
@@ -145,7 +145,7 @@ bool CreateDevilSquareRain(PARTICLE* o, int Index)
                o->Position);
     }
 
-    if (Random::FpsCheck(2))
+    if (rand_fps_check(2))
     {
         Vector(-Random::RangeFloat(20, 39), 0.f, 0.f, o->Angle);
     }
@@ -191,7 +191,7 @@ bool CreateChaosCastleRain(PARTICLE* o, int Index)
                Hero->Object.Position[2] + randomZ,
                o->Position);
     }
-    if (Random::FpsCheck(2))
+    if (rand_fps_check(2))
     {
         Vector(-Random::RangeFloat(20, 39), 0.f, 0.f, o->Angle);
     }
@@ -270,7 +270,7 @@ bool CreateDeviasSnow(PARTICLE* o)
 
     o->Type = BITMAP_LEAF1;
     o->Scale = 5.f;
-    if (Random::FpsCheck(10))
+    if (rand_fps_check(10))
     {
         o->Type = BITMAP_LEAF2;
         o->Scale = 10.f;
@@ -328,7 +328,7 @@ bool MoveDevilSquareRain(PARTICLE* o)
     {
         o->Live = false;
         o->Position[2] = Height + 10.f;
-        if (Random::FpsCheck(4))
+        if (rand_fps_check(4))
             CreateParticle(BITMAP_RAIN_CIRCLE, o->Position, o->Angle, o->Light);
         else
             CreateParticle(BITMAP_RAIN_CIRCLE + 1, o->Position, o->Angle, o->Light);
@@ -346,7 +346,7 @@ bool MoveChaosCastleRain(PARTICLE* o)
     {
         o->Live = false;
         o->Position[2] = Height + 10.f;
-        if (Random::FpsCheck(4))
+        if (rand_fps_check(4))
             CreateParticle(BITMAP_RAIN_CIRCLE, o->Position, o->Angle, o->Light);
         else
             CreateParticle(BITMAP_RAIN_CIRCLE + 1, o->Position, o->Angle, o->Light);
