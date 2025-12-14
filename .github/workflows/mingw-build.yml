@@ -1,0 +1,41 @@
+name: MinGW Cross-Compilation Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-mingw:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install MinGW-w64 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64 g++-mingw-w64-i686 cmake
+      
+      - name: Install libjpeg-turbo for MinGW
+        run: |
+          sudo apt-get install -y libturbojpeg0-dev
+          # Create symlink for MinGW cross-compilation if needed
+          sudo ln -sf /usr/lib/x86_64-linux-gnu/libturbojpeg.a /usr/lib/i686-w64-mingw32/ 2>/dev/null || true
+      
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build-mingw \
+            -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-i686.cmake
+      
+      - name: Build
+        run: |
+          cmake --build build-mingw -j$(nproc)
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-exe-mingw
+          path: build-mingw/Source Main 5.2/Main.exe
+          if-no-files-found: error

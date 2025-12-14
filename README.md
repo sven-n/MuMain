@@ -1,5 +1,7 @@
 ﻿# MU Online Client Sources
 
+[![MinGW Build](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml/badge.svg?branch=main)](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml)
+
 This is my special fork of the Season 5.2 client sources [uploaded by Luois](https://github.com/LouisEmulator/Main5.2).
 
 The ultimate goal is to clean it up and make it compatible and feature complete
@@ -83,6 +85,8 @@ If the linker reports `cannot find -lturbojpeg`, install a MinGW-w64 build of
 libjpeg-turbo (providing `libturbojpeg.a` / `libturbojpeg.dll.a`) or adjust the
 `target_link_libraries` entry in `Source Main 5.2/CMakeLists.txt` to match the
 name of the library available on your system.
+
+---
 
 Because of the integrated C# code, you need to publish the ManagedLibrary first
 to the debug output folder of the main.exe, so that the DLL is built with Native AOT.
