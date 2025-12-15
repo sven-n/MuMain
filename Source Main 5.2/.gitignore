@@ -23,3 +23,4 @@
 *.wav
 *.mp3
 build/bin/x86/Global Debug/Main.exe
+!/CMakeLists.txt
