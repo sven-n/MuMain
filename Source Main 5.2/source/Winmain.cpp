@@ -16,6 +16,7 @@
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
+#include "ZzzAI.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
@@ -439,6 +440,9 @@ bool HangulDelete = false;
 int Hangul = 0;
 bool g_bEnterPressed = false;
 
+static double g_TargetFpsBeforeInactive = -1.0;
+static bool g_HasInactiveFpsOverride = false;
+
 int g_iMousePopPosition_x = 0;
 int g_iMousePopPosition_y = 0;
 
@@ -461,6 +465,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (g_bUseWindowMode == FALSE)
 #endif	// ACTIVE_FOCUS_OUT
                 g_bWndActive = false;
+
+            if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
+            {
+                g_TargetFpsBeforeInactive = GetTargetFps();
+                SetTargetFps(REFERENCE_FPS);
+                g_HasInactiveFpsOverride = true;
+            }
             if (g_bUseWindowMode == TRUE)
             {
                 MouseLButton = false;
@@ -479,6 +490,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         else
         {
             g_bWndActive = true;
+
+            if (g_HasInactiveFpsOverride)
+            {
+                SetTargetFps(g_TargetFpsBeforeInactive);
+                g_HasInactiveFpsOverride = false;
+            }
         }
         break;
     case WM_TIMER:
@@ -840,7 +857,7 @@ MSG MainLoop()
 
         if (CheckRenderNextFrame())
         {
-            if (g_bUseWindowMode || g_bWndActive)
+            if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
             {
                 RenderScene(g_hDC);
             }

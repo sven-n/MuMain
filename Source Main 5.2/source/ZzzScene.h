@@ -26,6 +26,7 @@ extern void RenderScene(HDC Hdc);
 extern bool CheckName();
 void    StartGame();
 void SetTargetFps(double targetFps);
+double GetTargetFps();
 
 BOOL	ShowCheckBox(int num, int index, int message = MESSAGE_TRADE_CHECK);
 

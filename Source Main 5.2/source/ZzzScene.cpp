@@ -1967,6 +1967,11 @@ void SetTargetFps(double targetFps)
     ms_per_frame = 1000.0 / target_fps;
 }
 
+double GetTargetFps()
+{
+    return target_fps;
+}
+
 double last_render_tick_count = 0;
 double current_tick_count = 0;
 double last_water_change = 0;
