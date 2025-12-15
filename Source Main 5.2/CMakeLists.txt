@@ -28,6 +28,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set_target_properties(Main PROPERTIES
     WIN32_EXECUTABLE TRUE
   )
+
+  enable_language(RC)
+  target_sources(Main PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/resource.rc"
+  )
 endif()
 
 # Skeleton Linux-native linkage. This intentionally depends only on
