@@ -77,7 +77,8 @@ From the repository root:
 
 ```sh
 cmake -S . -B build-mingw \
-  -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-i686.cmake
+  -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-i686.cmake \
+  -DCMAKE_BUILD_TYPE=Release
 cmake --build build-mingw -j$(nproc)
 ```
 
