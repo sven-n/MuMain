@@ -1,13 +1,13 @@
 ﻿#include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
-#include "zzztexture.h"
+#include "ZzzTexture.h"
 #include "ZzzBMD.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzScene.h"
-#include "zzzEffect.h"
-#include "zzzAi.h"
-#include "zzzOpenData.h"
+#include "ZzzEffect.h"
+#include "ZzzAI.h"
+#include "ZzzOpenData.h"
 #include "MapManager.h"
 #include "BoneManager.h"
 
@@ -122,7 +122,7 @@ bool M34CryingWolf2nd::RenderCryingWolf2ndObjectMesh(OBJECT* pObject, BMD* pMode
 CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int PosY, int Key)
 {
     if (!IsCyringWolf2nd())
-        return false;
+        return NULL;
     CHARACTER* pCharacter = NULL;
 
     switch (iType)

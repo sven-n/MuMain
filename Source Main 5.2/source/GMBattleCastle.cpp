@@ -5,15 +5,15 @@
 #include "stdafx.h"
 #include "UIWindows.h"
 #include "UIManager.h"
-#include "dsplaysound.h"
+#include "DSPlaySound.h"
 #include "ZzzOpenglUtil.h"
-#include "zzztexture.h"
+#include "ZzzTexture.h"
 #include "ZzzBMD.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzScene.h"
-#include "zzzEffect.h"
-#include "zzzAi.h"
-#include "zzzOpenData.h"
+#include "ZzzEffect.h"
+#include "ZzzAI.h"
+#include "ZzzOpenData.h"
 #include "PhysicsManager.h"
 #include "CSParts.h"
 
@@ -86,18 +86,18 @@ namespace battleCastle
             swprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
             if (g_bBattleCastleStart)
             {
-                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
+                swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
                 OpenTerrainAttribute(FileName);
 
-                swprintf(FileName, L"%s\\TerrainLight2.jpg", WorldName);
+                swprintf(FileName, L"%ls\\TerrainLight2.jpg", WorldName);
                 OpenTerrainLight(FileName);
             }
             else
             {
-                swprintf(FileName, L"Data\\%s\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
+                swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
                 OpenTerrainAttribute(FileName);
 
-                swprintf(FileName, L"%s\\TerrainLight.jpg", WorldName);
+                swprintf(FileName, L"%ls\\TerrainLight.jpg", WorldName);
             }
 
             g_iMp3PlayTime = 0;

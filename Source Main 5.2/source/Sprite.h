@@ -84,7 +84,7 @@ public:
     float GetScaleX() { return m_fScaleX; }
     float GetScaleY() { return m_fScaleY; }
     void Show(bool bShow = true) { m_bShow = bShow; }
-    bool IsShow() { return m_bShow; }
+    bool IsShow() const { return m_bShow; }
     int GetSizingDatums() { return m_nSizingDatums; }
     BOOL PtInSprite(long lXPos, long lYPos);
     BOOL CursorInObject();

@@ -1,7 +1,7 @@
 //*****************************************************************************
 // File: UsefulDef.cpp
 //
-// Desc: À¯¿ëÇÑ Á¤ÀÇ ¸ðÀ½.
+// Desc: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 //
 // producer: Ahn Sang-Kyu
 //*****************************************************************************
@@ -40,13 +40,14 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
     wchar_t szWorkToken[1024];
     int nLine = 0;
 
-    wchar_t* pszToken = wcstok(&szWorkSrc[0], &szNewlineChar);
+    wchar_t* context = nullptr;
+    wchar_t* pszToken = wcstok_s(&szWorkSrc[0], &szNewlineChar, &context);
 
     while (pszToken != nullptr)
     {
         if (bSpaceInsert)
         {
-            swprintf(szWorkToken, L" %s", pszToken);
+            swprintf(szWorkToken, L" %ls", pszToken);
             nLine += CutText3(szWorkToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
         else
@@ -54,7 +55,7 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
             nLine += CutText3(pszToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
 
-        pszToken = wcstok(nullptr, &szNewlineChar);
+        pszToken = wcstok_s(nullptr, &szNewlineChar, &context);
     }
 
     return nLine;

@@ -1,18 +1,21 @@
 #pragma once
 #include "Singleton.h"
+
+#include <array>
+#include <cstdint>
 #include <map>
 
-constexpr BYTE MAX_SET_OPTION = 64; // Maximum number of possible ancient sets
-constexpr BYTE MASTERY_OPTION = 24; // A mastery option increases a specific skill
+constexpr std::uint8_t MAX_SET_OPTION = 64; // Maximum number of possible ancient sets
+constexpr std::uint8_t MASTERY_OPTION = 24; // A mastery option increases a specific skill
 
 // Each item can be part of up to 2 ancient sets. The following are their identifier.
-constexpr BYTE EXT_A_SET_OPTION = 1;
-constexpr BYTE EXT_B_SET_OPTION = 2;
+constexpr std::uint8_t EXT_A_SET_OPTION = 1;
+constexpr std::uint8_t EXT_B_SET_OPTION = 2;
 
 // Maximum number of equipped sets. This is the maximum number of sets that can be equipped at the same time.
 // It's 5, because the number of equippable items is 12, but one is a wing and one is a pet. To make any set, you need at least 2 items.
-constexpr BYTE MAX_EQUIPPED_SET_ITEMS = MAX_EQUIPMENT_INDEX - 2;
-constexpr BYTE MAX_EQUIPPED_SETS = MAX_EQUIPPED_SET_ITEMS / 2;
+constexpr std::uint8_t MAX_EQUIPPED_SET_ITEMS = MAX_EQUIPMENT_INDEX - 2;
+constexpr std::uint8_t MAX_EQUIPPED_SETS = MAX_EQUIPPED_SET_ITEMS / 2;
 
 constexpr auto MAX_ITEM_SET_NAME = 64;
 
@@ -28,31 +31,31 @@ constexpr auto MAX_OPTIONS_PER_ITEM_SET = MAX_ITEM_SET_STANDARD_OPTION_COUNT * M
 
 struct ITEM_SET_TYPE
 {
-    BYTE	byOption[MAX_ITEM_SETS_PER_ITEM];
-    BYTE	byMixItemLevel[MAX_ITEM_SETS_PER_ITEM];
+    std::array<std::uint8_t, MAX_ITEM_SETS_PER_ITEM> byOption{};
+    std::array<std::uint8_t, MAX_ITEM_SETS_PER_ITEM> byMixItemLevel{};
 };
 
 struct ITEM_SET_OPTION
 {
     wchar_t strSetName[MAX_ITEM_SET_NAME];
-    BYTE bySetItemCount; // The number of items in the set
-    BYTE byOptionCount; // The total number of options in the set
+    std::uint8_t bySetItemCount; // The number of items in the set
+    std::uint8_t byOptionCount; // The total number of options in the set
 
     // The following arrays are used to store the standard options of the ancient sets.
     // There is typically one option less than the number of items in the set.
     // These 2-element-arrays are somehow strange. Only the first element is actually used, I found no use case for the second one.
     // Theoretically Webzen planned to have 2 options per item, but never implemented it.
-    BYTE byStandardOption[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT];
-    BYTE byStandardOptionValue[MAX_ITEM_SET_STANDARD_OPTION_COUNT][MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT];
+    std::array<std::array<std::uint8_t, MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT>, MAX_ITEM_SET_STANDARD_OPTION_COUNT> byStandardOption{};
+    std::array<std::array<std::uint8_t, MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT>, MAX_ITEM_SET_STANDARD_OPTION_COUNT> byStandardOptionValue{};
 
     // There are up to 2 ext options which always apply when there are at least two items of a set equipped.
     // Found no set which uses an ExtOption.
-    BYTE byExtOption[MAX_ITEM_SET_EXT_OPTION_COUNT];
-    BYTE byExtOptionValue[MAX_ITEM_SET_EXT_OPTION_COUNT];
+    std::array<std::uint8_t, MAX_ITEM_SET_EXT_OPTION_COUNT> byExtOption{};
+    std::array<std::uint8_t, MAX_ITEM_SET_EXT_OPTION_COUNT> byExtOptionValue{};
 
-    BYTE byFullOption[MAX_ITEM_SET_FULL_OPTION_COUNT];
-    BYTE byFullOptionValue[MAX_ITEM_SET_FULL_OPTION_COUNT];
-    BYTE byRequireClass[MAX_CLASS];
+    std::array<std::uint8_t, MAX_ITEM_SET_FULL_OPTION_COUNT> byFullOption{};
+    std::array<std::uint8_t, MAX_ITEM_SET_FULL_OPTION_COUNT> byFullOptionValue{};
+    std::array<std::uint8_t, MAX_CLASS> byRequireClass{};
 };
 
 struct SET_OPTION
@@ -61,16 +64,16 @@ struct SET_OPTION
     bool IsFullOption;
     bool IsExtOption;
     bool FulfillsClassRequirement; // If the option requires a specific class and the character fulfills that. //m_bySetOptionList[x][1]
-    BYTE OptionNumber; // m_bySetOptionList[x][0]
+    std::uint8_t OptionNumber; // m_bySetOptionList[x][0]
     int Value; //m_iSetOptionListValue
 };
 
 struct SET_SEARCH_RESULT
 {
-    BYTE SetNumber;
-    BYTE CompleteSetItemCount;
-    BYTE ItemCount;
-    BYTE SetTypeIndex;
+    std::uint8_t SetNumber;
+    std::uint8_t CompleteSetItemCount;
+    std::uint8_t ItemCount;
+    std::uint8_t SetTypeIndex;
     wchar_t SetName[MAX_ITEM_SET_NAME];
 };
 
@@ -91,30 +94,30 @@ private:
     SET_SEARCH_RESULT_OPT m_SetSearchResult[MAX_EQUIPPED_SETS];
 
     bool	m_bViewOptionList;
-    BYTE    m_byRenderOptionList;
-    BYTE    m_bySelectedItemOption;
-    BYTE    m_bySameSetItem;
+    std::uint8_t m_byRenderOptionList;
+    std::uint8_t m_bySelectedItemOption;
+    std::uint8_t m_bySameSetItem;
 
     typedef std::map<int, std::wstring>	MAP_EQUIPPEDSETITEMNAME;
-    typedef std::map<BYTE, int>		MAP_EQUIPPEDSETITEM_SEQUENCE;
+    typedef std::map<std::uint8_t, int>		MAP_EQUIPPEDSETITEM_SEQUENCE;
 
     MAP_EQUIPPEDSETITEMNAME	            m_mapEquippedSetItemName;
     MAP_EQUIPPEDSETITEMNAME::iterator   m_iterESIN;
 
     static bool isClassRequirementFulfilled(const ITEM_SET_OPTION& setOptions, int firstClass, int secondClass);
-    static void TryAddSetOption(BYTE option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption, bool isExtOption, bool fulfillsClassRequirement, int firstClass, int secondClass);
+    static void TryAddSetOption(std::uint8_t option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption, bool isExtOption, bool fulfillsClassRequirement, int firstClass, int secondClass);
 
-    static bool getExplainText(wchar_t* text, const BYTE option, const int value);
-    static BYTE RenderSetOptionList(const SET_SEARCH_RESULT_OPT& set, BYTE textIndex, bool bIsEquippedItem, bool bShowInactive);
+    static bool getExplainText(wchar_t* text, std::uint8_t option, int value);
+    static std::uint8_t RenderSetOptionList(const SET_SEARCH_RESULT_OPT& set, std::uint8_t textIndex, bool bIsEquippedItem, bool bShowInactive);
 
     bool	OpenItemSetType(const wchar_t* filename);
     bool	OpenItemSetOption(const wchar_t* filename);
     void	checkItemType(SET_SEARCH_RESULT* optionList, const int iType, const int ancientDiscriminator) const;
     void	calcSetOptionList(const SET_SEARCH_RESULT* optionList);
     
-    void    getAllAddState(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma) const;
+    void    getAllAddState(std::uint16_t* Strength, std::uint16_t* Dexterity, std::uint16_t* Energy, std::uint16_t* Vitality, std::uint16_t* Charisma) const;
 
-    void    AddStatsBySetOptions(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma) const; //Adds the stats of the active ancient set options to the given pointers, without bonus options
+    void    AddStatsBySetOptions(std::uint16_t* Strength, std::uint16_t* Dexterity, std::uint16_t* Energy, std::uint16_t* Vitality, std::uint16_t* Charisma) const; //Adds the stats of the active ancient set options to the given pointers, without bonus options
 
     int AggregateOptionValue(int optionNumber) const;
 
@@ -133,18 +136,18 @@ public:
     bool OpenItemSetScript();
 
     static bool    IsDisableSkill(ActionSkillType Type, int Energy, int Charisma = 0);
-    BYTE    IsChangeSetItem(const int Type, const int SubType);
-    WORD    GetMixItemLevel(const int Type) const;
+    std::uint8_t    IsChangeSetItem(const int Type, const int SubType = -1);
+    std::uint16_t    GetMixItemLevel(const int Type) const;
     bool	GetSetItemName(wchar_t* strName, const int iType, const int setType) const;
 
-    void	PlusSpecial(WORD* Value, const int Special) const;
-    void	PlusSpecialPercent(WORD* Value, const int Special) const;
-    void	PlusSpecialLevel(WORD* Value, const WORD SrcValue, const int Special) const;
-    void    PlusMastery(int* Value, const BYTE MasteryType) const;
+    void	PlusSpecial(std::uint16_t* Value, int Special) const;
+    void	PlusSpecialPercent(std::uint16_t* Value, int Special) const;
+    void	PlusSpecialLevel(std::uint16_t* Value, std::uint16_t SrcValue, int Special) const;
+    void    PlusMastery(int* Value, std::uint8_t MasteryType) const;
 
     
 
-    static int     GetDefaultOptionValue(ITEM* ip, WORD* Value);
+    static int     GetDefaultOptionValue(ITEM* ip, std::uint16_t* Value);
     static bool    GetDefaultOptionText(const ITEM* ip, wchar_t* Text);
     static int     RenderDefaultOptionText(const ITEM* ip, int TextNum);
 
@@ -165,9 +168,9 @@ public:
     void SetViewOptionList(bool bView);
     bool IsViewOptionList();
 
-    void	getAllAddOptionStatesbyCompare(WORD* Strength, WORD* Dexterity, WORD* Energy, WORD* Vitality, WORD* Charisma, WORD iCompareStrength, WORD iCompareDexterity, WORD iCompareEnergy, WORD iCompareVitality, WORD iC);
+    void	getAllAddOptionStatesbyCompare(std::uint16_t* Strength, std::uint16_t* Dexterity, std::uint16_t* Energy, std::uint16_t* Vitality, std::uint16_t* Charisma, std::uint16_t iCompareStrength, std::uint16_t iCompareDexterity, std::uint16_t iCompareEnergy, std::uint16_t iCompareVitality, std::uint16_t iC);
 
-    void	getAllAddStateOnlyAddValue(WORD* AddStrength, WORD* AddDexterity, WORD* AddEnergy, WORD* AddVitality, WORD* AddCharisma) const; // Gets only the added stats of the active ancient set options plus bonus options
+    void	getAllAddStateOnlyAddValue(std::uint16_t* AddStrength, std::uint16_t* AddDexterity, std::uint16_t* AddEnergy, std::uint16_t* AddVitality, std::uint16_t* AddCharisma) const; // Gets only the added stats of the active ancient set options plus bonus options
 };
 
 #define g_csItemOption CSItemOption::GetSingleton ()

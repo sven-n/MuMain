@@ -4,7 +4,7 @@
 #pragma once
 
 #include "NewUIBase.h"
-#include "./ExternalObject/leaf/xstreambuf.h"
+#include "ExternalObject/Leaf/xstreambuf.h"
 #include "ZzzTexture.h"
 #include "UIBaseDef.h"
 
@@ -168,7 +168,7 @@ namespace SEASON3B
         class TContainer
         {
             T* m_pObj;
-            INSTANCE_STATE	m_InstState;
+			mutable INSTANCE_STATE	m_InstState;
         public:
 
             TContainer() : m_pObj(NULL), m_InstState(INSTANCE_NEW) { m_pObj = new T; }		//. create instance
@@ -183,8 +183,8 @@ namespace SEASON3B
                     delete m_pObj;
             }
 
-            T* GetInstance() { return m_pObj; }
-            void SetInstState(INSTANCE_STATE InstState) { m_InstState = InstState; }
+			T* GetInstance() const { return m_pObj; }
+			void SetInstState(INSTANCE_STATE InstState) const { m_InstState = InstState; }
 
             TContainer<T>& operator = (const TContainer<T>& _container)
             {
@@ -199,7 +199,7 @@ namespace SEASON3B
         };
         template <class T>
 
-        T* NewMessageBox(TContainer<T>& _container)
+		T* NewMessageBox(const TContainer<T>& _container)
         {
             T* pObj = _container.GetInstance();
             m_listMsgBoxes.push_back(pObj);
@@ -305,7 +305,7 @@ namespace SEASON3B
 
         template <class T>
 
-        T* NewMessageBox(CNewUIMessageBoxFactory::TContainer<T>& container)
+		T* NewMessageBox(const CNewUIMessageBoxFactory::TContainer<T>& container)
         {
             T* pMsgBox = NULL;
             if (m_pMsgBoxFactory)
@@ -350,7 +350,8 @@ namespace SEASON3B
         TMsgBoxLayout()
         {
             CNewUIMessageBoxMng* pNewUIMsgBoxMng = CNewUIMessageBoxMng::GetInstance();
-            ms_pMsgBox = pNewUIMsgBoxMng->NewMessageBox(CNewUIMessageBoxFactory::TContainer<_M>());
+            CNewUIMessageBoxFactory::TContainer<_M> container;
+            ms_pMsgBox = pNewUIMsgBoxMng->NewMessageBox(container);
         }
         virtual ~TMsgBoxLayout() {}
 
@@ -361,24 +362,24 @@ namespace SEASON3B
     template <class _L>
     class TMsgBoxLayoutContainer
     {
-        _L* m_pMsgBoxLayout;
+        mutable _L* m_pMsgBoxLayout;
     public:
         TMsgBoxLayoutContainer() : m_pMsgBoxLayout(NULL) {}
         ~TMsgBoxLayoutContainer() { Release(); }
 
-        bool Create()
+        bool Create() const
         {
             if (m_pMsgBoxLayout)
                 return false;
             m_pMsgBoxLayout = new _L;
             return true;
         }
-        void Release()
+        void Release() const
         {
             delete m_pMsgBoxLayout;
             m_pMsgBoxLayout = NULL;
         }
-        bool SetLayout()
+        bool SetLayout() const
         {
             if (m_pMsgBoxLayout)
                 return m_pMsgBoxLayout->SetLayout();
@@ -387,7 +388,7 @@ namespace SEASON3B
     };
 
     template <class _L>
-    bool CreateMessageBox(TMsgBoxLayoutContainer<_L>& container)
+    bool CreateMessageBox(const TMsgBoxLayoutContainer<_L>& container)
     {
         if (false == container.Create()) //. MessageBox Layout
             return false;
@@ -395,7 +396,7 @@ namespace SEASON3B
         return container.SetLayout();
     }
     template <class _L, class _M>
-    bool CreateMessageBox(TMsgBoxLayoutContainer<_L>& container, _M** ppMsgBox)
+    bool CreateMessageBox(const TMsgBoxLayoutContainer<_L>& container, _M** ppMsgBox)
     {
         if (false == container.Create()) //. MessageBox Layout
             return false;

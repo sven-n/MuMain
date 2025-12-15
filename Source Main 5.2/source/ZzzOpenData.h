@@ -10,7 +10,7 @@ void OpenMonsterModel(EMonsterModelType Type);
 void OpenModel(int Type, wchar_t* Dir, wchar_t* ModelFileName, ...);
 void OpenBasicData(HDC hDC);
 void ReleaseMainData();
-void OpenFont();
+bool OpenFont();
 void OpenLogoSceneData();
 void ReleaseLogoSceneData();
 void OpenCharacterSceneData();

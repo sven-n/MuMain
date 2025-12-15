@@ -148,7 +148,7 @@ void CSkillManager::CalcSkillDelay(int time)
 {
     int iSkillNumber;
     iSkillNumber = CharacterAttribute->SkillNumber + 2;
-    iSkillNumber = min(iSkillNumber, MAX_SKILLS);
+    iSkillNumber = std::min<int>(iSkillNumber, MAX_SKILLS);
 
     for (int i = 0; i < iSkillNumber; ++i)
     {

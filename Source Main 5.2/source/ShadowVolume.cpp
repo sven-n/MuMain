@@ -4,12 +4,12 @@
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
-#include "ZzzBmd.h"
+#include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ShadowVolume.h"
 #include "ZzzLodTerrain.h"
-#include "zzzTexture.h"
+#include "ZzzTexture.h"
 #include "BaseCls.h"
 #include "ZzzCharacter.h"
 
@@ -142,7 +142,7 @@ BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VE
         {
             if (SkipTga) continue;
         }
-        iNumTriangles += max(0, b->Meshs[i].NumTriangles);
+        iNumTriangles += std::max<int>(0, b->Meshs[i].NumTriangles);
     }
     m_iNumEdge = 0;
     m_pEdges = new St_Edges[iNumTriangles * 3];
@@ -274,10 +274,10 @@ void CShadowVolume::GenerateSidePolygon(vec3_t ppVertexTransformed[MAX_MESH][MAX
     {
         VectorCopy(ppVertexTransformed[m_pEdges[i].m_nMesh][m_pEdges[i].m_nVertexIndex[0]], Vertex[0]);
         VectorCopy(ppVertexTransformed[m_pEdges[i].m_nMesh][m_pEdges[i].m_nVertexIndex[1]], Vertex[1]);
-        //float fLength = ( max( GROUND_HEIGHT, max( Vertex[0][2], Vertex[1][2])) / -m_vLight[2]);
-        float fLength = (max(GROUND_HEIGHT, Vertex[0][2]) / -m_vLight[2]);
+        //float fLength = ( std::max<float>( GROUND_HEIGHT, max( Vertex[0][2], Vertex[1][2])) / -m_vLight[2]);
+        float fLength = (std::max<float>(GROUND_HEIGHT, Vertex[0][2]) / -m_vLight[2]);
         VectorMA(Vertex[0], fLength, m_vLight, Vertex[2]);
-        fLength = (max(GROUND_HEIGHT, Vertex[1][2]) / -m_vLight[2]);
+        fLength = (std::max<float>(GROUND_HEIGHT, Vertex[1][2]) / -m_vLight[2]);
         VectorMA(Vertex[1], fLength, m_vLight, Vertex[3]);
 
         VectorCopy(Vertex[0], m_pVertices[m_nNumVertices]); m_nNumVertices++;

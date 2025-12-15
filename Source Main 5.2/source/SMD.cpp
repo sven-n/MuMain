@@ -172,7 +172,7 @@ bool OpenSMDFile(wchar_t* FileName, int Type, bool Flip)
 #ifdef _DEBUG
         extern HWND g_hWnd;
         wchar_t Text[1024];
-        swprintf(Text, L"%s - File not exist..\r\n", FileName);
+        swprintf(Text, L"%ls - File not exist..\r\n", FileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
 #endif
