@@ -57,6 +57,12 @@ target_compile_definitions(Main PRIVATE
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
 )
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  target_compile_definitions(Main PRIVATE
+    STRSAFE_NO_DEPRECATE
+  )
+endif()
+
 if (MSVC)
   target_compile_definitions(Main PRIVATE
     WIN32
