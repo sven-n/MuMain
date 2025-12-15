@@ -494,7 +494,7 @@ BOOL CUIWindowMgr::IsWindow(DWORD dwUIID)
         return TRUE;
 }
 
-void CUIWindowMgr::SendUIMessageToWindow(DWORD dwUIID, int iMessage, int iParam1, int iParam2)
+void CUIWindowMgr::SendUIMessageToWindow(DWORD dwUIID, int iMessage, LONG_PTR iParam1, LONG_PTR iParam2)
 {
     CUIBaseWindow* pWindow = GetWindow(dwUIID);
     if (pWindow != NULL)
@@ -2818,7 +2818,7 @@ BOOL CUILetterWriteWindow::HandleMessage()
                 }
 
                 szText[MAX_LETTERTEXT_LENGTH] = '\0';
-                WORD len = min(MAX_LETTERTEXT_LENGTH, wcslen(szText));
+                WORD len = std::min<int>(MAX_LETTERTEXT_LENGTH, wcslen(szText));
                 m_bIsSend = TRUE;
                 int iAngle = m_Photo.GetCurrentAngle() / 6;
                 int iZoom = (m_Photo.GetCurrentZoom() * 100.0f - 80 + 5) / 10;
@@ -2978,11 +2978,12 @@ void CUILetterReadWindow::SetLetter(LETTERLIST_TEXT* pLetterHead, const wchar_t*
 
     wchar_t* temp = new wchar_t[wcslen(pLetterText) + 20];
     wcsncpy(temp, pLetterText, wcslen(pLetterText) + 1);
-    wchar_t* token = _wcstok(temp, L"\n");
+    wchar_t* context = nullptr;
+    wchar_t* token = wcstok_s(temp, L"\n", &context);
     while (token != NULL)
     {
         m_LetterTextBox.AddText(token);
-        token = _wcstok(NULL, L"\n");
+        token = wcstok_s(NULL, L"\n", &context);
     }
     m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
     delete[] temp;
@@ -3275,7 +3276,7 @@ void CFriendList::UpdateAllFriendState(BYTE Number, BYTE Server)
 bool TestAlphabeticOrder(const wchar_t* pszText1, const wchar_t* pszText2, BOOL* pbEqual = FALSE)
 {
     if (pbEqual != NULL) *pbEqual = FALSE;
-    int iLength = min(wcslen(pszText1), wcslen(pszText2));
+    int iLength = std::min<int>(wcslen(pszText1), wcslen(pszText2));
     for (int i = 0; i < iLength; ++i)
     {
         if (pszText1[i] == pszText2[i]);
@@ -3468,7 +3469,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
         {
             if (GetCurrentSelectedFriend() == NULL) break;
             wchar_t tempTxt[MAX_TEXT_LENGTH + 1] = { 0 };
-            swprintf(tempTxt, L"%s %s", GlobalText[1024], GetCurrentSelectedFriend()); // "Do you really wish to delete this friend?"
+            swprintf(tempTxt, L"%ls %ls", GlobalText[1024], GetCurrentSelectedFriend()); // "Do you really wish to delete this friend?"
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, tempTxt, GetUIID());
         }
         break;
@@ -4995,7 +4996,7 @@ void CUITextInputWindow::ReturnText()
     m_TextInputBox.SetText(NULL);
     if (pszReturnText[0] == '\0') return;
 
-    g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(), (DWORD)pszReturnText);
+    g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(), reinterpret_cast<LONG_PTR>(pszReturnText));
     g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
 }
 
@@ -5496,7 +5497,8 @@ void CUIFriendMenu::RenderWindowList()
 
         wchar_t temp[MAX_TEXT_LENGTH + 1] = { 0 };
         wcsncpy(temp, pszChatTitleOriginal, MAX_TEXT_LENGTH + 1);
-        wchar_t* pszChatTitle = _wcstok(temp, L",");
+        wchar_t* context = nullptr;
+        wchar_t* pszChatTitle = wcstok_s(temp, L",", &context);
 
         if (wcslen(pszChatTitle) > GlobalText.GetStringSize(994))
         {

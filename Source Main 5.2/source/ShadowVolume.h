@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "ZzzBmd.h"
+#include "ZzzBMD.h"
 
 typedef struct
 {
@@ -24,31 +24,31 @@ public:
 
     void Clear(void);
 
-    // a) ÃÖÁ¾ »ý¼ºµÈ ¼¨µµ¿ì º¼·ý Á¤º¸
+    // a) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 protected:
-    short	m_nNumVertices;	// Á¡ °³¼ö
-    vec3_t* m_pVertices;	// Á¡µé
+    short	m_nNumVertices;	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    vec3_t* m_pVertices;	// ï¿½ï¿½ï¿½ï¿½
 protected:
-    BOOL GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga = true);	// »ý¼º
+    BOOL GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga = true);	// ï¿½ï¿½ï¿½ï¿½
 public:
-    virtual void Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga = true);	// »ý¼º
-    virtual void Destroy(void);	// Á¦°Å
-    void RenderAsFrame(void);	// ¼¨µµ¿ì º¼·ýÀ» frame À¸·Î ±×¸®±â
-    void Shade(void);	// ¹öÆÛ¿¡ ±×¸²ÀÚ ±×¸®±â
+    virtual void Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga = true);	// ï¿½ï¿½ï¿½ï¿½
+    virtual void Destroy(void);	// ï¿½ï¿½ï¿½ï¿½
+    void RenderAsFrame(void);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ frame ï¿½ï¿½ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½
+    void Shade(void);	// ï¿½ï¿½ï¿½Û¿ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½
 
-    // b) Áß°£ °úÁ¤
+    // b) ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½
 protected:
-    vec3_t m_vLight;	// ºû
-    int m_iNumEdge;		// °¡ÀåÀÚ¸® °³¼ö
-    St_Edges* m_pEdges;	// °¡ÀåÀÚ¸®
-    void DeterminateSilhouette(short nMesh, vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], short nNumTriangles, Triangle_t* pTriangles, bool Tga);	// Mesh º° °¡ÀåÀÚ¸® µû±â
-    void AddEdge(short nV1, short nV2, short nMesh);	// °¡ÀåÀÚ¸® Ãß°¡
-    void AddEdgeFast(short nV1, short nV2, short nMesh, int iTriangle, int Edge, Triangle_t* pTriangles);	// °¡ÀåÀÚ¸® Ãß°¡
-    void GenerateSidePolygon(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES]);	// °¡ÀåÀÚ¸®¸¦ ÀÌ¿ëÇÑ Æú¸®°ï »ý¼º
+    vec3_t m_vLight;	// ï¿½ï¿½
+    int m_iNumEdge;		// ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½ï¿½
+    St_Edges* m_pEdges;	// ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½
+    void DeterminateSilhouette(short nMesh, vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], short nNumTriangles, Triangle_t* pTriangles, bool Tga);	// Mesh ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½ï¿½
+    void AddEdge(short nV1, short nV2, short nMesh);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ß°ï¿½
+    void AddEdgeFast(short nV1, short nV2, short nMesh, int iTriangle, int Edge, Triangle_t* pTriangles);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ß°ï¿½
+    void GenerateSidePolygon(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES]);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-    // c) Ç¥Çö
+    // c) Ç¥ï¿½ï¿½
 protected:
-    void RenderShadowVolume(void);	// ¼¨µµ¿ì º¼·ýÀ» ÁöÁ¤µÈ ¹æ½ÄÀ¸·Î ±×¸®±â
+    void RenderShadowVolume(void);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½
 };
 
 void InsertShadowVolume(CShadowVolume* psv);

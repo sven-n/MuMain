@@ -16,15 +16,16 @@
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
+#include "ZzzAI.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "zzzLodTerrain.h"
+#include "ZzzLodTerrain.h"
 #include "DSPlaySound.h"
 
-#include "Resource.h"
+#include "resource.h"
 #include <imm.h>
-#include "zzzpath.h"
+#include "ZzzPath.h"
 #include "Local.h"
 #include "PersonalShopTitleImp.h"
 
@@ -34,7 +35,7 @@
 #include "MUHelper/MuHelper.h"
 
 #include "CBTMessageBox.h"
-#include "./ExternalObject/leaf/regkey.h"
+#include "./ExternalObject/Leaf/regkey.h"
 
 #include "CSChaosCastle.h"
 #include <io.h>
@@ -439,13 +440,16 @@ bool HangulDelete = false;
 int Hangul = 0;
 bool g_bEnterPressed = false;
 
+static double g_TargetFpsBeforeInactive = -1.0;
+static bool g_HasInactiveFpsOverride = false;
+
 int g_iMousePopPosition_x = 0;
 int g_iMousePopPosition_y = 0;
 
 extern int TimeRemain;
 extern bool EnableFastInput;
 
-LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
@@ -461,6 +465,13 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (g_bUseWindowMode == FALSE)
 #endif	// ACTIVE_FOCUS_OUT
                 g_bWndActive = false;
+
+            if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
+            {
+                g_TargetFpsBeforeInactive = GetTargetFps();
+                SetTargetFps(REFERENCE_FPS);
+                g_HasInactiveFpsOverride = true;
+            }
             if (g_bUseWindowMode == TRUE)
             {
                 MouseLButton = false;
@@ -479,6 +490,12 @@ LONG FAR PASCAL WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         else
         {
             g_bWndActive = true;
+
+            if (g_HasInactiveFpsOverride)
+            {
+                SetTargetFps(g_TargetFpsBeforeInactive);
+                g_HasInactiveFpsOverride = false;
+            }
         }
         break;
     case WM_TIMER:
@@ -768,7 +785,7 @@ void RecordCpuUsage()
     {
         double currentUsage = CpuUsage::Instance()->GetUsage();
 
-        currentUsage = max(0.0, min(100.0, currentUsage));
+        currentUsage = std::max<double>(0.0, std::min<double>(100.0, currentUsage));
 
         // Subtract the old value to maintain the sum
         sum -= CPU_Recordings[count];
@@ -807,7 +824,7 @@ int g_MaxMessagePerCycle = -1;
 void SetMaxMessagePerCycle(int messages)
 {
     constexpr int custom_min = 3;
-    g_MaxMessagePerCycle = (messages > 0) ? max(messages, custom_min) : messages;
+    g_MaxMessagePerCycle = (messages > 0) ? std::max<int>(messages, custom_min) : messages;
 }
 
 MSG MainLoop()
@@ -840,7 +857,7 @@ MSG MainLoop()
 
         if (CheckRenderNextFrame())
         {
-            if (g_bUseWindowMode || g_bWndActive)
+            if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
             {
                 RenderScene(g_hDC);
             }
@@ -887,7 +904,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_ErrorReport.Write(L"\r\n");
     g_ErrorReport.WriteLogBegin();
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"Mu online %s (%s) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, L"Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+    g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, L"Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 

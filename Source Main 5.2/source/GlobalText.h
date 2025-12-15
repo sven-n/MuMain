@@ -1,6 +1,75 @@
 #pragma once
 
 #include "stringset.h"
+#include <cwchar>
+#include <cwctype>
+#include <string>
+
+namespace detail
+{
+    template <class T>
+    std::basic_string<T> NormalizePrintfSpecifiers(const T* text)
+    {
+        return std::basic_string<T>(text);
+    }
+
+    template <>
+    inline std::basic_string<wchar_t> NormalizePrintfSpecifiers(const wchar_t* text)
+    {
+        std::wstring result;
+        result.reserve(wcslen(text));
+
+        bool inFormat = false;
+        bool hasLengthModifier = false;
+        for (size_t i = 0; text[i] != L'\0'; ++i)
+        {
+            const wchar_t ch = text[i];
+            if (!inFormat)
+            {
+                if (ch == L'%')
+                {
+                    inFormat = true;
+                    hasLengthModifier = false;
+                }
+                result.push_back(ch);
+                continue;
+            }
+
+            if (ch == L'%')
+            {
+                inFormat = false;
+                result.push_back(L'%');
+                continue;
+            }
+
+            if (wcschr(L"hlLjztI", ch))
+            {
+                hasLengthModifier = true;
+                result.push_back(ch);
+                continue;
+            }
+
+            if (wcschr(L"cCdiouxXeEfgGaAnpsS", ch))
+            {
+                if ((ch == L's' || ch == L'S') && !hasLengthModifier)
+                {
+                    result.push_back(L'l');
+                    result.push_back(L's');
+                }
+                else
+                {
+                    result.push_back(ch == L'S' ? L's' : ch);
+                }
+                inFormat = false;
+                continue;
+            }
+
+            result.push_back(ch);
+        }
+
+        return result;
+    }
+}
 
 template <class T>
 class TGlobalText
@@ -111,7 +180,10 @@ public:
                 auto* text = new wchar_t[wchars_num];
                 MultiByteToWideChar(CP_UTF8, 0, pStringBuffer, -1, text, wchars_num);
 
-                m_StringSet.Add(GTStringHeader.dwKey, text);
+                auto normalized = detail::NormalizePrintfSpecifiers(text);
+                m_StringSet.Add(GTStringHeader.dwKey, normalized);
+
+                delete[] text;
             }
 
             delete[] pStringBuffer;

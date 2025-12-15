@@ -2,6 +2,7 @@
 #include "DSwaveIO.h"
 
 #include <cwchar>
+#include <cstring>
 
 #include <windows.h>
 #include <mmsystem.h>

@@ -386,7 +386,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM
     int iMaxDurability = CalcMaxDurability(pItem, pItemAtt, iLevel);
 
     wchar_t szText[256] = { NULL, };
-    swprintf(szText, L"%s (%d/%d)", pItemAtt->Name, pItem->Durability, iMaxDurability);
+    swprintf(szText, L"%ls (%d/%d)", pItemAtt->Name, pItem->Durability, iMaxDurability);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), szText, 1, &TextSize);
 
     g_pRenderText->SetBgColor(0, 0, 0, 128);

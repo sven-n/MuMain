@@ -276,7 +276,7 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
     DrawText(Text, m_Pos.x, m_Pos.y + 13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 
     memset(&Text, 0, sizeof(wchar_t) * 200);
-    swprintf(Text, L"  %s           %s        %s     %s    %s", GlobalText[2415], GlobalText[681], GlobalText[1973], GlobalText[683], GlobalText[682]);
+    swprintf(Text, L"  %ls           %ls        %ls     %ls    %ls", GlobalText[2415], GlobalText[681], GlobalText[1973], GlobalText[683], GlobalText[682]);
     DrawText(Text, m_Pos.x, m_Pos.y + 38, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 
     int i = 0;

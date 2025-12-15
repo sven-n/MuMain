@@ -66,7 +66,7 @@
 #include "NewUIDuelWatchMainFrameWindow.h"
 #include "NewUIDuelWatchUserListWindow.h"
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-#include "GameShop\NewUIInGameShop.h"
+#include "GameShop/NewUIInGameShop.h"
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #include "NewUIDoppelGangerWindow.h"
 #include "NewUIDoppelGangerFrame.h"

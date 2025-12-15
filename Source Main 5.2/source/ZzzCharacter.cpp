@@ -3931,7 +3931,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
     {
         wchar_t Text[100];
         wchar_t ID[100];
-        swprintf(ID, L"%s .", c->ID);
+        swprintf(ID, L"%ls .", c->ID);
         swprintf(Text, GlobalText[1176], c->Level);
         wcscat(ID, Text);
         AddObjectDescription(ID, o->Position);
@@ -10771,7 +10771,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                     c->ExtendStateTime = 0;
                 }
-                c->ExtendStateTime += min(1, FPS_ANIMATION_FACTOR);
+                c->ExtendStateTime += std::min<int>(1, FPS_ANIMATION_FACTOR);
             }
 
             if (fullset && g_pOption->GetRenderLevel() >= 2)

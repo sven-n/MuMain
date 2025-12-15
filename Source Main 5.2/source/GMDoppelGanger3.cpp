@@ -432,9 +432,9 @@ void CGMDoppelGanger3::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         break;
     case 38:
     {
-        b->BodyLight[0] = min(b->BodyLight[0] * 2.0f, 1.0f);
-        b->BodyLight[1] = min(b->BodyLight[1] * 2.0f, 1.0f);
-        b->BodyLight[2] = min(b->BodyLight[2] * 2.0f, 1.0f);
+        b->BodyLight[0] = std::min<float>(b->BodyLight[0] * 2.0f, 1.0f);
+        b->BodyLight[1] = std::min<float>(b->BodyLight[1] * 2.0f, 1.0f);
+        b->BodyLight[2] = std::min<float>(b->BodyLight[2] * 2.0f, 1.0f);
         b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     break;
