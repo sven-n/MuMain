@@ -31,7 +31,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
   enable_language(RC)
   target_sources(Main PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/source/resource.rc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/MUMain/Resources/Windows/resource.rc"
   )
 endif()
 

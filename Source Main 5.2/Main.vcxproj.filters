@@ -206,7 +206,7 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="source\resource.rc">
+    <ResourceCompile Include="source\MUMain/Resources/Windows/resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
