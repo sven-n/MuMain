@@ -183,22 +183,22 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     switch (pServerInfo->m_byNonPvP)
     {
     case 0:
-        swprintf(pServerInfo->m_bName, L"%s-%d %s", pServerGroup->m_szName,
+        swprintf(pServerInfo->m_bName, L"%ls-%d %ls", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 1:
-        swprintf(pServerInfo->m_bName, L"%s-%d(Non-PVP) %s", pServerGroup->m_szName,
+        swprintf(pServerInfo->m_bName, L"%ls-%d(Non-PVP) %ls", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 2:
-        swprintf(pServerInfo->m_bName, L"%s-%d(Gold PVP) %s", pServerGroup->m_szName,
+        swprintf(pServerInfo->m_bName, L"%ls-%d(Gold PVP) %ls", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 3:
-        swprintf(pServerInfo->m_bName, L"%s-%d(Gold) %s", pServerGroup->m_szName,
+        swprintf(pServerInfo->m_bName, L"%ls-%d(Gold) %ls", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
     }

@@ -13,7 +13,7 @@ T& TheWorld(int type)
 #include "GMAida.h"
 #include "GMBattleCastle.h"
 #include "GMCryingWolf2nd.h"
-#include "GMCryWolf1st.h"
+#include "GMCrywolf1st.h"
 #include "GMDoppelGanger1.h"
 #include "GMDoppelGanger2.h"
 #include "GMDoppelGanger3.h"

@@ -323,10 +323,6 @@ bool SEASON3B::CNewUIMessageBoxMng::Update()
                 {
                     PopEvent(); break;
                 }
-                if (CALLBACK_EXCEPTION == Result)
-                {
-                    __asm { int 3 };
-                }
                 if (CALLBACK_POP_ALL_EVENTS == Result)
                 {
                     PopAllEvents(); break;

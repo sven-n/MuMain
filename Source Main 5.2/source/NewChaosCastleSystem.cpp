@@ -9,8 +9,8 @@ using namespace SEASON3B;
 #include "NewChaosCastleSystem.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
-#include "zzztexture.h"
-#include "zzzlodterrain.h"
+#include "ZzzTexture.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzScene.h"
 #include "NewUICustomMessageBox.h"
 #include "MapManager.h"
@@ -185,12 +185,12 @@ void CNewChaosCastleSystem::RenderMatchResult(void)
     {
         g_pRenderText->RenderText(x, yPos, GlobalText[1151], 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
-        swprintf(lpszStr, L"%s %s", GlobalText[1152], GlobalText[858]);
+        swprintf(lpszStr, L"%ls %ls", GlobalText[1152], GlobalText[858]);
         g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
     }
     else
     {
-        swprintf(lpszStr, L"%s %s", GlobalText[1152], GlobalText[860]);
+        swprintf(lpszStr, L"%ls %ls", GlobalText[1152], GlobalText[860]);
         g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
         g_pRenderText->RenderText(x, yPos, GlobalText[1153], 0, 0, RT3_WRITE_CENTER);

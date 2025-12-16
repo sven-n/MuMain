@@ -499,7 +499,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     ptOrigin.y = m_Pos.y + 48;
 
     g_pRenderText->SetTextColor(200, 255, 100, 255);
-    swprintf(Text, L"%s ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
+    swprintf(Text, L"%ls ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, Text, 120, 0, RT3_SORT_CENTER);
 
     glColor4f(0.6f, 0.6f, 0.6f, 1.f);
@@ -548,7 +548,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
         m_GuildNotice.Render();
 
         int Nm_Loc = m_Pos.y + 169;
-        swprintf(Text, L"%s :", GlobalText[1332]);
+        swprintf(Text, L"%ls :", GlobalText[1332]);
         RenderText(Text, m_Pos.x + 22, Nm_Loc, 40, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT);
         Nm_Loc += 13;
 
@@ -579,7 +579,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
         RenderText(Text, m_Pos.x + 22, Nm_Loc, 80, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT);
 
         Nm_Loc += 13;
-        swprintf(Text, L"%s : %s", GlobalText[1321], m_RivalGuildName[0] ? m_RivalGuildName : GlobalText[1361]);
+        swprintf(Text, L"%ls : %ls", GlobalText[1321], m_RivalGuildName[0] ? m_RivalGuildName : GlobalText[1361]);
         RenderText(Text, m_Pos.x + 22, Nm_Loc, 0, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT);
     }
     else if (m_nCurrentTab == 1)

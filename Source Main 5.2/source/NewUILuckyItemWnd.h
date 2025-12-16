@@ -25,7 +25,7 @@ namespace SEASON3B
         float	s_fWid;
         float	s_fHgt;
         int		s_nImgIndex;
-        void sImgList::Set(int _nIndex, float _fWid, float _fHgt)
+        void Set(int _nIndex, float _fWid, float _fHgt)
         {
             s_nImgIndex = _nIndex;
             s_fWid = _fWid;
@@ -39,9 +39,9 @@ namespace SEASON3B
     };
     struct sText
     {
-        int		s_nTextIndex;	// ±Û·Î¹ú ÅØ½ºÆ® ÀÎµ¦½º
-        DWORD	s_dwColor;		// ÅØ½ºÆ® »ö±ò
-        int		s_nLine;		// ÅØ½ºÆ® Á¤·Ä
+        int		s_nTextIndex;	// ê¸€ë¡œë²Œ í…ìŠ¤íŠ¸ ì¸ë±ìŠ¤
+        DWORD	s_dwColor;		// í…ìŠ¤íŠ¸ ìƒ‰ê¹”
+        int		s_nLine;		// í…ìŠ¤íŠ¸ ì •ë ¬
     };
 
     class CNewUILuckyItemWnd : public CNewUIObj

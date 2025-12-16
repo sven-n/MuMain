@@ -144,7 +144,7 @@ void CNewUIInGameShop::RenderTexts()
         g_pRenderText->RenderText(m_Pos.x + IGS_PACKAGE_NAME_POS_X + ((i % IGS_NUM_ITEMS_WIDTH) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X), m_Pos.y + IGS_PACKAGE_NAME_POS_Y + ((i / IGS_NUM_ITEMS_HEIGHT) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y), pPackage->PackageProductName, IGS_PACKAGE_NAME_WIDTH, 0, RT3_SORT_CENTER);
         // Package
         ConvertGold(pPackage->Price, szValue);
-        swprintf(szText, L"%s %s", szValue, pPackage->PricUnitName);
+        swprintf(szText, L"%ls %ls", szValue, pPackage->PricUnitName);
         g_pRenderText->SetTextColor(255, 238, 161, 255);
         g_pRenderText->RenderText(m_Pos.x + IGS_PACKAGE_NAME_POS_X + ((i % IGS_NUM_ITEMS_WIDTH) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X), m_Pos.y + IGS_PACKAGE_PRICE_POS_Y + 53 + ((i / IGS_NUM_ITEMS_HEIGHT) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y), szText, IGS_PACKAGE_NAME_WIDTH, 0, RT3_SORT_CENTER);
     }
@@ -618,7 +618,7 @@ bool CNewUIInGameShop::IsInGameShopOpen()
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[3028], GlobalText[3051]);
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%s>", GlobalText[3051]);
+        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", GlobalText[3051]);
         return false;
     }
 
@@ -627,7 +627,7 @@ bool CNewUIInGameShop::IsInGameShopOpen()
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[3028], GlobalText[3035]);
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%s>", GlobalText[3035]);
+        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", GlobalText[3035]);
         return false;
     }
     g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - true");
@@ -809,7 +809,7 @@ void CNewUIInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int 
             g_InGameShopSystem->GetProductInfoFromPriceSeq(iProductSeq, iPriceSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_NUM, iValue, szText);
             if (iValue > 0)
             {
-                swprintf(Item.m_szNum, L"%d %s", iValue, szText);
+                swprintf(Item.m_szNum, L"%d %ls", iValue, szText);
                 Item.m_iNum = iValue;
             }
             else
@@ -821,7 +821,7 @@ void CNewUIInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int 
             g_InGameShopSystem->GetProductInfoFromPriceSeq(iProductSeq, iPriceSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_USE_LIMIT_PERIOD, iValue, szText);
             if (iValue > 0)
             {
-                swprintf(Item.m_szPeriod, L"%d %s", iValue, szText);
+                swprintf(Item.m_szPeriod, L"%d %ls", iValue, szText);
             }
             else
             {
@@ -840,7 +840,7 @@ void CNewUIInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int 
             g_InGameShopSystem->GetProductInfoFromProductSeq(iProductSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_NUM, iValue, szText);
             if (iValue > 0)
             {
-                swprintf(Item.m_szNum, L"%d %s", iValue, szText);
+                swprintf(Item.m_szNum, L"%d %ls", iValue, szText);
                 Item.m_iNum = iValue;
             }
             else
@@ -852,7 +852,7 @@ void CNewUIInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int 
             g_InGameShopSystem->GetProductInfoFromProductSeq(iProductSeq, CInGameShopSystem::IGS_PRODUCT_ATT_TYPE_USE_LIMIT_PERIOD, iValue, szText);
             if (iValue > 0)
             {
-                swprintf(Item.m_szPeriod, L"%d %s", iValue, szText);
+                swprintf(Item.m_szPeriod, L"%d %ls", iValue, szText);
             }
             else
             {

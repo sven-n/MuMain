@@ -84,9 +84,9 @@ void OpenModels(int Model, wchar_t* FileName, int i)
 {
     wchar_t Name[64];
     if (i < 10)
-        swprintf(Name, L"%s0%d.smd", FileName, i);
+        swprintf(Name, L"%ls0%d.smd", FileName, i);
     else
-        swprintf(Name, L"%s%d.smd", FileName, i);
+        swprintf(Name, L"%ls%d.smd", FileName, i);
     OpenSMDModel(Model, Name);
     OpenSMDAnimation(Model, Name);
 }
@@ -1228,7 +1228,7 @@ void OpenItems()
 
     for (int i = 0; i < 11; i++)
     {
-        swprintf(szLuckySetPathName, L"%s%d\\", szLuckySetPath, nIndex);
+        swprintf(szLuckySetPathName, L"%ls%d\\", szLuckySetPath, nIndex);
         if (nIndex != 71)	gLoadData.AccessModel(MODEL_HELM + nIndex, szLuckySetPathName, szLuckySetFileName[0], i + 1);
         gLoadData.AccessModel(MODEL_ARMOR + nIndex, szLuckySetPathName, szLuckySetFileName[1], i + 1);
         gLoadData.AccessModel(MODEL_PANTS + nIndex, szLuckySetPathName, szLuckySetFileName[2], i + 1);
@@ -1773,7 +1773,7 @@ void OpenItemTextures()
 
     for (int i = 0; i < 11; i++)
     {
-        swprintf(szLuckySetPathName, L"%s%d\\", szLuckySetPath, nIndex);
+        swprintf(szLuckySetPathName, L"%ls%d\\", szLuckySetPath, nIndex);
         if (nIndex != 71)	gLoadData.OpenTexture(MODEL_HELM + nIndex, szLuckySetPathName);
         gLoadData.OpenTexture(MODEL_ARMOR + nIndex, szLuckySetPathName);
         gLoadData.OpenTexture(MODEL_PANTS + nIndex, szLuckySetPathName);
@@ -4453,15 +4453,15 @@ void SaveWorld(int World)
     wchar_t FileName[64];
     swprintf(WorldName, L"World%d", World);
 
-    swprintf(FileName, L"Data2\\%s\\TerrainLight.jpg", WorldName);
+    swprintf(FileName, L"Data2\\%ls\\TerrainLight.jpg", WorldName);
     SaveTerrainLight(FileName);
-    swprintf(FileName, L"Data2\\%s\\TerrainHeight.bmp", WorldName);
+    swprintf(FileName, L"Data2\\%ls\\TerrainHeight.bmp", WorldName);
     SaveTerrainHeight(FileName);
-    swprintf(FileName, L"Data\\%s\\Terrain.map", WorldName);
+    swprintf(FileName, L"Data\\%ls\\Terrain.map", WorldName);
     SaveTerrainMapping(FileName, World);
-    swprintf(FileName, L"Data\\%s\\Terrain.att", WorldName);
+    swprintf(FileName, L"Data\\%ls\\Terrain.att", WorldName);
     SaveTerrainAttribute(FileName, World);
-    swprintf(FileName, L"Data\\%s\\Terrain.obj", WorldName);
+    swprintf(FileName, L"Data\\%ls\\Terrain.obj", WorldName);
     SaveObjects(FileName, World);
 }
 
@@ -4715,7 +4715,7 @@ void OpenSounds()
 
 extern int	g_iRenderTextType;
 
-void OpenFont()
+bool OpenFont()
 {
     InitPath();
 
@@ -4723,7 +4723,18 @@ void OpenFont()
     LoadBitmap(L"Interface\\FontTest.tga", BITMAP_FONT + 1);
     LoadBitmap(L"Interface\\Hit.tga", BITMAP_FONT_HIT, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
-    g_pRenderText->Create(0, g_hDC);
+    const int requestedType = g_iRenderTextType;
+    if (!g_pRenderText->Create(requestedType, g_hDC))
+    {
+        if (requestedType == 0 || !g_pRenderText->Create(0, g_hDC))
+        {
+            return false;
+        }
+
+        g_iRenderTextType = 0;
+    }
+
+    return true;
 }
 
 void SaveMacro(const wchar_t* FileName)
@@ -4731,7 +4742,7 @@ void SaveMacro(const wchar_t* FileName)
     FILE* fp = _wfopen(FileName, L"wt");
     for (int i = 0; i < 10; i++)
     {
-        fwprintf(fp, L"%s\n", MacroText[i]);
+        fwprintf(fp, L"%ls\n", MacroText[i]);
     }
     fclose(fp);
 }
@@ -4742,7 +4753,7 @@ void OpenMacro(const wchar_t* FileName)
     if (fp == NULL) return;
     for (int i = 0; i < 10; i++)
     {
-        fwscanf(fp, L"%s", MacroText[i]);
+        fwscanf(fp, L"%ls", MacroText[i]);
     }
     fclose(fp);
 }
@@ -5028,7 +5039,7 @@ void OpenBasicData(HDC hDC)
     LoadBitmap(L"Effect\\Shiny03.jpg", BITMAP_SHINY + 2, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\eye01.jpg", BITMAP_SHINY + 3, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\ring.jpg", BITMAP_SHINY + 4, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap(L"Effect\\Shiny04.jpg", BITMAP_SHINY + 5, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Effect\\shiny04.jpg", BITMAP_SHINY + 5, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\Chrome01.jpg", BITMAP_CHROME, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Effect\\blur01.jpg", BITMAP_BLUR, GL_NEAREST, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\bab2.jpg", BITMAP_CHROME + 1, GL_LINEAR, GL_REPEAT);
@@ -5074,7 +5085,7 @@ void OpenBasicData(HDC hDC)
     LoadBitmap(L"Effect\\firecracker0005.jpg", BITMAP_FIRECRACKER0005, GL_NEAREST, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\firecracker0006.jpg", BITMAP_FIRECRACKER0006, GL_NEAREST, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\firecracker0007.jpg", BITMAP_FIRECRACKER0007, GL_NEAREST, GL_CLAMP_TO_EDGE);
-    LoadBitmap(L"Effect\\Shiny05.jpg", BITMAP_SHINY + 5, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    LoadBitmap(L"Effect\\shiny05.jpg", BITMAP_SHINY + 5, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
     LoadBitmap(L"Effect\\partCharge1\\bujuckline.jpg", BITMAP_LUCKY_SEAL_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
@@ -5352,25 +5363,25 @@ void OpenBasicData(HDC hDC)
 
     g_ServerListManager->LoadServerListScript();
 
-    swprintf(Text, L"Data\\Local\\%s\\Dialog_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    swprintf(Text, L"Data\\Local\\%ls\\Dialog_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     OpenDialogFile(Text);
 
-    swprintf(Text, L"Data\\Local\\%s\\Item_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    swprintf(Text, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     OpenItemScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%s\\movereq_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%s\\NpcName_%s.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    swprintf(Text, L"Data\\Local\\%ls\\NpcName_%ls.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     OpenMonsterScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%s\\Quest_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    swprintf(Text, L"Data\\Local\\%ls\\Quest_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_csQuest.OpenQuestScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%s\\Skill_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    swprintf(Text, L"Data\\Local\\%ls\\Skill_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     OpenSkillScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%s\\SocketItem_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    swprintf(Text, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SocketItemMgr.OpenSocketItemScript(Text);
 
     OpenTextData();		//. Text.bmd, Testtest.bmd
@@ -5416,7 +5427,7 @@ void OpenTextData()
 {
     wchar_t Text[100];
 
-    swprintf(Text, L"Data\\Local\\%s\\Text_%s.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    swprintf(Text, L"Data\\Local\\%ls\\Text_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     GlobalText.Load(Text, CGlobalText::LD_USA_CANADA_TEXTS | CGlobalText::LD_FOREIGN_TEXTS);
     OpenMacro(L"Data\\Macro.txt");
 }

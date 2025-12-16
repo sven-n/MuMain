@@ -10,10 +10,10 @@
 
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#include "GameShop\ShopListManager\interface\FileDownloader.h"
+#include "GameShop/ShopListManager/interface/FileDownloader.h"
 #include "HTTPConnecter.h"
 #include "FTPConnecter.h"
-#include <GameShop\ShopListManager\interface\PathMethod\\Path.h>
+#include <GameShop/ShopListManager/interface/PathMethod/Path.h>
 
 #include <process.h>
 
@@ -129,7 +129,7 @@ WZResult 			FileDownloader::CreateConnection()
 
         if (hHandle == INVALID_HANDLE_VALUE)
         {
-            this->m_Result.SetResult(DL_BEGIN_THREAD_CONNECTION, GetLastError(), L"[FileDownloader::CreateConnection] Fail : _beginthreadex, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+            this->m_Result.SetResult(DL_BEGIN_THREAD_CONNECTION, GetLastError(), L"[FileDownloader::CreateConnection] Fail : _beginthreadex, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
         }
         else
         {
@@ -142,7 +142,7 @@ WZResult 			FileDownloader::CreateConnection()
 
                 CloseHandle(hHandle);
 
-                this->m_Result.SetResult(DL_CONNECTION_TIMEOUT, 0, L"[FileDownloader::CreateConnection] Fail : WAIT_TIMEOUT, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+                this->m_Result.SetResult(DL_CONNECTION_TIMEOUT, 0, L"[FileDownloader::CreateConnection] Fail : WAIT_TIMEOUT, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
             }
             else
             {
@@ -216,7 +216,7 @@ WZResult 			FileDownloader::TransferRemoteFile()
                     }
                     else
                     {
-                        this->m_Result.SetResult(DL_DIFFERENT_FILE_LENGTH, 0, L"[FileDownloader::TransferRemoteFile] Fail : Different Down File Size, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+                        this->m_Result.SetResult(DL_DIFFERENT_FILE_LENGTH, 0, L"[FileDownloader::TransferRemoteFile] Fail : Different Down File Size, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
                     }
                 }
 
@@ -251,7 +251,7 @@ WZResult 			FileDownloader::CreateLocalFile()
 
         if (this->m_hLocalFile == INVALID_HANDLE_VALUE)
         {
-            this->m_Result.SetResult(DL_CREATE_LOCALFILE, GetLastError(), L"[FileDownloader::CreateLocalFile] Fail : CreateFile, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+            this->m_Result.SetResult(DL_CREATE_LOCALFILE, GetLastError(), L"[FileDownloader::CreateLocalFile] Fail : CreateFile, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
         }
         else
         {
@@ -260,7 +260,7 @@ WZResult 			FileDownloader::CreateLocalFile()
     }
     else
     {
-        this->m_Result.SetResult(DL_LOCALFILE_EXISTS, 0, L"[FileDownloader::CreateLocalFile] Fail : Local File Exists, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_LOCALFILE_EXISTS, 0, L"[FileDownloader::CreateLocalFile] Fail : Local File Exists, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;
@@ -274,7 +274,7 @@ WZResult 			FileDownloader::ReadRemoteFile(BYTE* byReadBuffer, DWORD* dwBytesRea
     }
     else
     {
-        this->m_Result.SetResult(DL_READ_REMOTEFILE, 0, L"[FileDownloader::ReadRemoteFile] Fail : ReadRemoteFile, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_READ_REMOTEFILE, 0, L"[FileDownloader::ReadRemoteFile] Fail : ReadRemoteFile, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;
@@ -290,7 +290,7 @@ WZResult 			FileDownloader::WriteLocalFile(BYTE* byReadBuffer, DWORD dwBytesRead
     }
     else
     {
-        this->m_Result.SetResult(DL_WRITE_LOCALFILE, GetLastError(), L"[FileDownloader::WriteLocalFile] Fail : WriteFile, FileName = %s", this->m_pFileInfo->GetRemoteFilePath());
+        this->m_Result.SetResult(DL_WRITE_LOCALFILE, GetLastError(), L"[FileDownloader::WriteLocalFile] Fail : WriteFile, FileName = %ls", this->m_pFileInfo->GetRemoteFilePath());
     }
 
     return this->m_Result;

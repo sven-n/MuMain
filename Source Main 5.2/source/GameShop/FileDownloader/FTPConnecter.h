@@ -1,12 +1,12 @@
 /*******************************************************************************
-*	ÀÛ ¼º ÀÚ : ÁøÇýÁø
-*	ÀÛ ¼º ÀÏ : 2009.07.07
-*	³»    ¿ë : FTP Connecter
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : 2009.07.07
+*	ï¿½ï¿½    ï¿½ï¿½ : FTP Connecter
 *******************************************************************************/
 
 #pragma once
 
-#include "GameShop\ShopListManager\interface\IConnecter.h"
+#include "GameShop/ShopListManager/interface/IConnecter.h"
 
 class FTPConnecter : public IConnecter
 {
@@ -19,16 +19,16 @@ public:
 
     // abstract Function
 
-        //						¼¼¼Ç
+        //						ï¿½ï¿½ï¿½ï¿½
     virtual WZResult		CreateSession(HINTERNET& hSession);
-    //						Ä¿³¼Æ®
+    //						Ä¿ï¿½ï¿½Æ®
     virtual WZResult		CreateConnection(HINTERNET& hSession,
         HINTERNET& hConnection);
-    //						´Ù¿î·Îµå ÆÄÀÏ ¿ÀÇÂ & »çÀÌÁî °¡Á®¿À±â
+    //						ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     virtual WZResult		OpenRemoteFile(HINTERNET& hConnection,
         HINTERNET& hRemoteFile,
         ULONGLONG& nFileLength);
-    //						¸®¸ðÆ® ÆÄÀÏ ÀÐ±â
+    //						ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½Ð±ï¿½
     virtual WZResult		ReadRemoteFile(HINTERNET& hRemoteFile,
         BYTE* byReadBuffer,
         DWORD* dwBytesRead);

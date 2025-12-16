@@ -714,7 +714,7 @@ void CNewUIMyInventory::RenderSetOption()
     }
 
     wchar_t strText[128];
-    swprintf(strText, L"[%s]", GlobalText[989]);
+    swprintf(strText, L"[%ls]", GlobalText[989]);
     g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.2f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
 
     if (g_csItemOption.IsViewOptionList() == true)
@@ -738,7 +738,7 @@ void CNewUIMyInventory::RenderSocketOption()
     }
 
     wchar_t strText[128];
-    swprintf(strText, L"[%s]", GlobalText[2651]);
+    swprintf(strText, L"[%ls]", GlobalText[2651]);
     g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
 
     if (CheckMouseIn(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 20, INVENTORY_WIDTH * 0.5f, 15) == true)
@@ -1772,7 +1772,7 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
         if (IsUnitedMarketPlace())
         {
             wchar_t	szOutputText[512];
-            swprintf(szOutputText, L"%s %s", GlobalText[3014], GlobalText[3015]);
+            swprintf(szOutputText, L"%ls %ls", GlobalText[3014], GlobalText[3015]);
 
             CreateOkMessageBox(szOutputText);
             return true;
