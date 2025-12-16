@@ -1434,7 +1434,7 @@
     <ClInclude Include="source\Defined_Global.h">
       <Filter>MU\Client\core</Filter>
     </ClInclude>
-    <ClInclude Include="source\Winmain.h">
+    <ClInclude Include="source\MUMain/Winmain.h">
       <Filter>MU\Client\core</Filter>
     </ClInclude>
     <ClInclude Include="source\ZzzScene.h">

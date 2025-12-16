@@ -1015,7 +1015,7 @@
     <ClInclude Include="source\Utilities\Log\WindowsConsole.h" />
     <ClInclude Include="source\Win.h" />
     <ClInclude Include="source\WinEx.h" />
-    <ClInclude Include="source\Winmain.h" />
+    <ClInclude Include="source\MUMain/Winmain.h" />
     <ClInclude Include="source\WSclient.h" />
     <ClInclude Include="source\w_BaseMap.h" />
     <ClInclude Include="source\w_BasePet.h" />

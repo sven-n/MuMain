@@ -81,7 +81,7 @@
 
 // Patch
 // WinMain
-#include "Winmain.h"
+#include "MUMain/Winmain.h"
 #include "Defined_Global.h"
 
 // Client
