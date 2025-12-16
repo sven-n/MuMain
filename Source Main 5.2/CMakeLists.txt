@@ -28,6 +28,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set_target_properties(Main PROPERTIES
     WIN32_EXECUTABLE TRUE
   )
+
+  enable_language(RC)
+  target_sources(Main PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/resource.rc"
+  )
 endif()
 
 # Skeleton Linux-native linkage. This intentionally depends only on
@@ -56,6 +61,12 @@ target_compile_definitions(Main PRIVATE
   $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  target_compile_definitions(Main PRIVATE
+    STRSAFE_NO_DEPRECATE
+  )
+endif()
 
 if (MSVC)
   target_compile_definitions(Main PRIVATE
