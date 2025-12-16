@@ -7,6 +7,11 @@
 
 #pragma once
 
+#include <array>
+#include <chrono>
+#include <cstdint>
+#include <memory>
+
 #include "Win.h"
 #include "Button.h"
 
@@ -36,28 +41,30 @@ class CCreditWin : public CWin
 {
 	enum SHOW_STATE { HIDE, FADEIN, SHOW, FADEOUT };
 
+	using DurationMs = std::chrono::duration<double, std::milli>;
+
 	struct SCreditItem
 	{
-		BYTE	byClass;
-		char	szName[CRW_NAME_MAX];
+		std::uint8_t    byClass;
+		char            szName[CRW_NAME_MAX];
 	};
 
 protected:
 	CSprite		m_aSpr[CRW_SPR_MAX];
 	CButton		m_btnClose;
 
-	SHOW_STATE	m_eIllustState;
-	double		m_dIllustDeltaTickSum;
-	BYTE		m_byIllust;
-	wchar_t* m_apszIllustPath[CRW_ILLUST_MAX][2];
+	SHOW_STATE  m_eIllustState;
+	DurationMs  m_illustElapsed;
+	std::uint8_t        m_byIllust;
+	std::array<std::array<const wchar_t*, 2>, CRW_ILLUST_MAX> m_illustPaths;
 
-	HFONT		m_hFont;
+	std::unique_ptr<std::remove_pointer_t<HFONT>, void(*)(HFONT)>	m_font;
 	SCreditItem	m_aCredit[CRW_ITEM_MAX];
 	int			m_nNowIndex;
 	int			m_nNameCount;
 	int			m_anTextIndex[CRW_INDEX_MAX];
 	SHOW_STATE	m_aeTextState[CRW_INDEX_NAME + 1];
-	double		m_dTextDeltaTickSum;
+	DurationMs	m_textElapsed;
 
 public:
 	CCreditWin();
@@ -76,10 +83,10 @@ protected:
 	void CloseWin();
 	void Init();
 	void LoadIllust();
-	void AnimationIllust(double dDeltaTick);
+	void AnimationIllust(DurationMs deltaTime);
 	void LoadText();
 	void SetTextIndex();
-	void AnimationText(int nClass, double dDeltaTick);
+	void AnimationText(int nClass, DurationMs deltaTime);
 };
 
 #endif // !defined(AFX_CREDITWIN_H__9D392798_811A_46FE_918B_7753E6BA35D0__INCLUDED_)

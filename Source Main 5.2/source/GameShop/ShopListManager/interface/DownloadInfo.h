@@ -1,12 +1,12 @@
 /*******************************************************************************
-*	ÀÛ ¼º ÀÚ : ÁøÇýÁø
-*	ÀÛ ¼º ÀÏ : 2009.06.10
-*	³»    ¿ë : Download¿¡ ÇÊ¿äÇÑ Á¤º¸ ¼³Á¤
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : 2009.06.10
+*	ï¿½ï¿½    ï¿½ï¿½ : Downloadï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 *******************************************************************************/
 
 #pragma once
 
-#include <Wininet.h>
+#include <wininet.h>
 #define DL_DEFAULT_BUFFER_SIZE			4096
 
 typedef enum _DownloaderType
@@ -24,14 +24,14 @@ public:
     ~DownloadFileInfo();
 
     // Get Function
-        //			ÆÄÀÏ °æ·Î °¡Á®¿À±â
+        //			ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     TCHAR* GetFileName();
     TCHAR* GetLocalFilePath();
     TCHAR* GetRemoteFilePath();
     TCHAR* GetTargetDirPath();
     ULONGLONG	GetFileLength();
     // Set Function
-        //		ÆÄÀÏ °æ·Î ¼³Á¤
+        //		ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     void	SetFilePath(TCHAR* szFileName,
         TCHAR* szLocalFilePath,
         TCHAR* szRemoteFilePath,
@@ -41,15 +41,15 @@ public:
 private:
     // Member Object
 
-        //			ÆÄÀÏ ÀÌ¸§
+        //			ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½
     TCHAR		m_szFileName[MAX_PATH];
-    //			·ÎÄÃ ÀüÃ¼ °æ·Î
+    //			ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½
     TCHAR		m_szLocalFilePath[MAX_PATH];
-    //			¸®¸ðÆ® ÀüÃ¼ °æ·Î
+    //			ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½
     TCHAR		m_szRemoteFilePath[INTERNET_MAX_URL_LENGTH];
-    //			ÆÐÄ¡ Ç®¾î³¾ Æú´õ °æ·Î
+    //			ï¿½ï¿½Ä¡ Ç®ï¿½î³¾ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     TCHAR		m_szTargerDirPath[MAX_PATH];
-    //			ÆÄÀÏ »çÀÌÁî
+    //			ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     ULONGLONG	m_uFileLength;
 };
 
@@ -63,62 +63,62 @@ public:
 
     // Get Function
 
-        //				¼­¹ö ÁÖ¼Ò °¡Á®¿À±â
+        //				ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     TCHAR* GetServerURL();
-    //				¼­¹ö Á¢¼Ó °èÁ¤ °¡Á®¿À±â
+    //				ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     TCHAR* GetUserID();
-    //				¼­¹ö Á¢¼Ó °èÁ¤ ºñ¹ø °¡Á®¿À±â
+    //				ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     TCHAR* GetPassword();
-    //				Æ÷Æ® ¹øÈ£ °¡Á®¿À±â
+    //				ï¿½ï¿½Æ® ï¿½ï¿½È£ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     INTERNET_PORT	GetPort();
-    //				Å¸¿î·Îµå Å¸ÀÔ °¡Á®¿À±â
+    //				Å¸ï¿½ï¿½Îµï¿½ Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     DownloaderType	GetDownloaderType();
-    //				¹öÆÛ »çÀÌÁî °¡Á®¿À±â
+    //				ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     DWORD			GetReadBufferSize();
-    //				Ä¿³¼Æ® Å¸ÀÓ¾Æ¿ô °¡Á®¿À±â
+    //				Ä¿ï¿½ï¿½Æ® Å¸ï¿½Ó¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     DWORD			GetConnectTimeout();
-    //				µ¤¾î¾²±â À¯¹«
+    //				ï¿½ï¿½ï¿½î¾²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     BOOL			IsOverWrite();
-    //				ÆÐ½Ãºê ¸ðµå À¯¹«
+    //				ï¿½Ð½Ãºï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     BOOL			IsPassive();
 
     // Set Function
 
-        //				¼­¹ö Á¤º¸ ¼³Á¤
+        //				ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     void			SetServerInfo(TCHAR* szServerURL,
         INTERNET_PORT		nPort,
         TCHAR* szUserID,
         TCHAR* szPassword);
-    //				´Ù¿î·Îµå Å¸ÀÔ ¼³Á¤
+    //				ï¿½Ù¿ï¿½Îµï¿½ Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     void			SetDownloaderType(DownloaderType dwDownloaderType);
-    //				¹öÆÛ »çÀÌÁî ¼³Á¤
+    //				ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     void			SetReadBufferSize(DWORD dwReadBufferSize);
-    //				·ÎÄÃ ÆÄÀÏ Á¸Àç ½Ã µ¤¾î¾²±â ¼³Á¤
+    //				ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½î¾²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     void			SetOverWrite(BOOL bOverWrite);
-    //				ÆÐ½Ãºê ¸ðµå ¼³Á¤
+    //				ï¿½Ð½Ãºï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     void			SetPassiveMode(BOOL bPassive);
-    //				Ä¿³¼Æ® Å¸ÀÓ¾Æ¿ô ¼³Á¤
+    //				Ä¿ï¿½ï¿½Æ® Å¸ï¿½Ó¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
     void			SetConnectTimeout(DWORD dwConnectTimeout);
 
 private:
     // Member Object
 
-        // 							Server ÁÖ¼Ò
+        // 							Server ï¿½Ö¼ï¿½
     TCHAR						m_szServerURL[INTERNET_MAX_URL_LENGTH];
-    // 							Á¢¼Ó °èÁ¤ ¸í
+    // 							ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
     TCHAR						m_szUserID[INTERNET_MAX_USER_NAME_LENGTH];
-    // 							Á¢¼Ó °èÁ¤ Password
+    // 							ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Password
     TCHAR						m_szPassword[INTERNET_MAX_PASSWORD_LENGTH];
-    // 							Á¢¼Ó Æ÷Æ® default = INTERNET_DEFAULT_FTP_PORT (21)
+    // 							ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ® default = INTERNET_DEFAULT_FTP_PORT (21)
     INTERNET_PORT				m_nPort;
-    //							´Ù¿î·Î´õ Å¸ÀÔ - ÇÁ·ÎÅäÄÝ
+    //							ï¿½Ù¿ï¿½Î´ï¿½ Å¸ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     DownloaderType				m_DownloaderType;
-    // 							´Ù¿î·Îµå ÆÐÅ¶ »çÀÌÁî Á¦ÇÑ default = 4096
+    // 							ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½Å¶ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ default = 4096
     DWORD						m_dwReadBufferSize;
-    //							Local File Á¸ÀçÇÒ °æ¿ì µ¤¾î¾²±â ¼³Á¤ default = TRUE
+    //							Local File ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½î¾²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ default = TRUE
     BOOL						m_bOverWrite;
-    //							Passive ¼³Á¤ default = FALSE
+    //							Passive ï¿½ï¿½ï¿½ï¿½ default = FALSE
     BOOL						m_bPassive;
-    //							Ä¿³¼Æ® Å¸ÀÓ¾Æ¿ô
+    //							Ä¿ï¿½ï¿½Æ® Å¸ï¿½Ó¾Æ¿ï¿½
     DWORD						m_dwConnectTimeout;
 };

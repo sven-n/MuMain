@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzAI.h"
@@ -15,7 +15,7 @@
 #include "CDirection.h"
 #include "MapManager.h"
 #include "BoneManager.h"
-#include "dsplaysound.h"
+#include "DSPlaySound.h"
 #include "CSChaosCastle.h"
 
 

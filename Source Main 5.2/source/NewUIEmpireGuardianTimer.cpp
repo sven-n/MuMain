@@ -99,7 +99,7 @@ bool CNewUIEmpireGuardianTimer::Render()
         break;
     case 2:
         g_pRenderText->SetTextColor(255, 150, 0, 255);
-        swprintf(szText, L"%s (%s)", GlobalText[865], GlobalText[2845]);
+        swprintf(szText, L"%ls (%ls)", GlobalText[865], GlobalText[2845]);
         g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 38, szText, 110, 0, RT3_SORT_CENTER);
         break;
     }

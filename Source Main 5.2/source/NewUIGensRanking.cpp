@@ -170,7 +170,7 @@ void CNewUIGensRanking::RenderTexts()
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFont);
 
-    swprintf(szText, L"%s", GetGensTeamName());
+    swprintf(szText, L"%ls", GetGensTeamName());
     _y += 20;
     g_pRenderText->RenderText(_x + 102, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
@@ -178,7 +178,7 @@ void CNewUIGensRanking::RenderTexts()
     _y += 24;
     g_pRenderText->RenderText(_x + 100, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
-    swprintf(szText, L"%s", GetTitleName(Hero->GensRanking));
+    swprintf(szText, L"%ls", GetTitleName(Hero->GensRanking));
     g_pRenderText->RenderText(_x + 66, _y, szText + 1, GENSRANKING_WIDTH - 16, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(230, 230, 0, 255);

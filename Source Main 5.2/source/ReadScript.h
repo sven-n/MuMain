@@ -1,4 +1,4 @@
-static enum SMDToken
+enum SMDToken
 {
     NAME,
     NUMBER,

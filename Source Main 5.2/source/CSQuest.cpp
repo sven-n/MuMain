@@ -1,25 +1,36 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <cwchar>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <vector>
+
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
-#include "zzzInfomation.h"
-#include "zzzBmd.h"
-#include "zzzObject.h"
-#include "zzztexture.h"
-#include "zzzCharacter.h"
-#include "zzzscene.h"
-#include "zzzInterface.h"
-#include "zzzinventory.h"
+#include "ZzzInfomation.h"
+#include "ZzzBMD.h"
+#include "ZzzObject.h"
+#include "ZzzTexture.h"
+#include "ZzzCharacter.h"
+#include "ZzzScene.h"
+#include "ZzzInterface.h"
+#include "ZzzInventory.h"
 
 #include "CSQuest.h"
-#include "GIPetManager.h"
 #include "UsefulDef.h"
 #include "NewUIInventoryCtrl.h"
 #include "CharacterManager.h"
 #include "NewUISystem.h"
 
-bool bCheckNPC;
+bool bCheckNPC = false;
 extern  int  g_iMessageTextStart;
 extern  char g_cMessageTextCurrNum;
 extern  char g_cMessageTextNum;
@@ -29,7 +40,92 @@ extern  int g_iCurrentDialogScript;
 extern  int g_iNumAnswer;
 extern  wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 
-static  CSQuest csQuest;
+namespace
+{
+    constexpr std::uint8_t QUEST_STATE_INVALID = 0xFF;
+    constexpr std::uint8_t QUEST_STATE_MASK = 0x03;
+    constexpr std::uint8_t QUEST_STATES_PER_ENTRY = 4;
+    constexpr std::uint8_t QUEST_STATE_BIT_WIDTH = 2;
+    constexpr int QUEST_MONSTER_SLOT_COUNT = 5;
+    constexpr int QUEST_MONSTER_INFO_STRIDE = 2;
+
+    struct QuestStateSlot
+    {
+        std::size_t byteIndex {};
+        std::uint8_t bitShift {};
+    };
+
+    QuestStateSlot MakeQuestStateSlot(int questIndex)
+    {
+        QuestStateSlot slot {};
+        if (questIndex < 0)
+        {
+            return slot;
+        }
+
+        slot.byteIndex = static_cast<std::size_t>(questIndex) / QUEST_STATES_PER_ENTRY;
+        slot.bitShift = static_cast<std::uint8_t>((questIndex % QUEST_STATES_PER_ENTRY) * QUEST_STATE_BIT_WIDTH);
+        return slot;
+    }
+
+    std::uint8_t ExtractQuestState(const std::uint8_t* questList, std::size_t storageSize, int questIndex)
+    {
+        if (questList == nullptr)
+        {
+            return QUEST_STATE_INVALID;
+        }
+
+        const auto slot = MakeQuestStateSlot(questIndex);
+        if (slot.byteIndex >= storageSize)
+        {
+            return QUEST_STATE_INVALID;
+        }
+
+        return (questList[slot.byteIndex] >> slot.bitShift) & QUEST_STATE_MASK;
+    }
+
+    void StoreQuestState(std::uint8_t* questList, std::size_t storageSize, int questIndex, std::uint8_t state)
+    {
+        if (questList == nullptr)
+        {
+            return;
+        }
+
+        const auto slot = MakeQuestStateSlot(questIndex);
+        if (slot.byteIndex >= storageSize)
+        {
+            return;
+        }
+
+        questList[slot.byteIndex] &= ~(QUEST_STATE_MASK << slot.bitShift);
+        questList[slot.byteIndex] |= ((state & QUEST_STATE_MASK) << slot.bitShift);
+    }
+
+    std::size_t ComputeQuestListByteCount(int questCount)
+    {
+        if (questCount <= 0)
+        {
+            return 0;
+        }
+
+        return static_cast<std::size_t>(
+            (questCount + (QUEST_STATES_PER_ENTRY - 1)) / QUEST_STATES_PER_ENTRY);
+    }
+
+    struct QuestAttributeFile
+    {
+        short   shQuestConditionNum;
+        short   shQuestRequestNum;
+        WORD	wNpcType;
+
+        char strQuestName[32];
+
+        QUEST_CLASS_ACT     QuestAct[MAX_QUEST_CONDITION];
+        QUEST_CLASS_REQUEST QuestRequest[MAX_QUEST_REQUEST];
+    };
+}
+
+static CSQuest g_csQuestSingleton;
 
 
 CSQuest::CSQuest(void) : m_byClass(255), m_byCurrQuestIndex(0), m_byCurrQuestIndexWnd(0),
@@ -59,16 +155,13 @@ void CSQuest::clearQuest(void)
     m_byStartQuestList = 0;
     m_byCurrQuestIndex = 0;
     m_byCurrQuestIndexWnd = 0;
-    memset(m_byQuestList, 0, sizeof(BYTE) * (MAX_QUESTS / 4));
-    memset(m_byEventCount, 0, sizeof(BYTE) * TYPE_QUEST_END);
-
-    for (int i = 0; i < 5; ++i)
-    {
-        m_anKillMobType[i] = m_anKillMobCount[i] = -1;
-    }
+    m_byQuestList.fill(0);
+    m_byEventCount.fill(0);
+    std::fill(m_anKillMobType.begin(), m_anKillMobType.end(), -1);
+    std::fill(m_anKillMobCount.begin(), m_anKillMobCount.end(), -1);
 }
 
-BYTE CSQuest::getCurrQuestState(void)
+std::uint8_t CSQuest::getCurrQuestState(void)
 {
     return CheckQuestState();
 }
@@ -93,9 +186,9 @@ wchar_t* CSQuest::getQuestTitleWindow()
     return m_Quest[m_byCurrQuestIndexWnd].strQuestName;
 }
 
-void CSQuest::SetEventCount(BYTE type, BYTE count)
+void CSQuest::SetEventCount(std::uint8_t type, std::uint8_t count)
 {
-    if (type > TYPE_QUEST_END)
+    if (type >= TYPE_QUEST_END)
     {
         return;
     }
@@ -103,9 +196,9 @@ void CSQuest::SetEventCount(BYTE type, BYTE count)
     m_byEventCount[type] = count;
 }
 
-int CSQuest::GetEventCount(BYTE byType)
+int CSQuest::GetEventCount(std::uint8_t byType)
 {
-    if (byType > TYPE_QUEST_END)
+    if (byType >= TYPE_QUEST_END)
     {
         return 0;
     }
@@ -113,55 +206,50 @@ int CSQuest::GetEventCount(BYTE byType)
     return m_byEventCount[byType];
 }
 
-typedef struct
+bool CSQuest::OpenQuestScript(const wchar_t* filename)
 {
-    short   shQuestConditionNum;
-    short   shQuestRequestNum;
-    WORD	wNpcType;
-
-    char strQuestName[32];
-
-    QUEST_CLASS_ACT     QuestAct[MAX_QUEST_CONDITION];
-    QUEST_CLASS_REQUEST QuestRequest[MAX_QUEST_REQUEST];
-} QUEST_ATTRIBUTE_FILE;
-
-bool CSQuest::OpenQuestScript(wchar_t* filename)
-{
-    FILE* fp = _wfopen(filename, L"rb");
-    if (fp == NULL)
+    if (filename == nullptr || filename[0] == L'\0')
     {
-        wchar_t Text[256];
-        swprintf(Text, L"%s - File not exist.", filename);
-        return  FALSE;
+        return false;
     }
 
-    memset(m_Quest, 0, sizeof m_Quest);
-
-    int Size = sizeof(QUEST_ATTRIBUTE_FILE);
-    BYTE* Buffer = new BYTE[Size];
-    for (int i = 0; i < MAX_QUESTS; i++)
+    const std::filesystem::path filePath(filename);
+    std::ifstream file(filePath, std::ios::binary);
+    if (!file)
     {
-        fread(Buffer, Size, 1, fp);
-        BuxConvert(Buffer, Size);
-
-        auto* current = (QUEST_ATTRIBUTE_FILE*)Buffer;
-        auto* target = &m_Quest[i];
-
-        target->shQuestConditionNum = current->shQuestConditionNum;
-        target->shQuestRequestNum = current->shQuestRequestNum;
-        target->wNpcType = current->wNpcType;
-        CMultiLanguage::ConvertFromUtf8(target->strQuestName, current->strQuestName);
-
-        memcpy(target->QuestAct, current->QuestAct, sizeof target->QuestAct);
-        memcpy(target->QuestRequest, current->QuestRequest, sizeof target->QuestRequest);
+        wchar_t text[256];
+        swprintf_s(text, std::size(text), L"%ls - File not exist.", filename);
+        return false;
     }
-    SAFE_DELETE_ARRAY(Buffer);
-    fclose(fp);
 
-    return  TRUE;
+    m_Quest.fill({});
+
+    const auto recordSize = sizeof(QuestAttributeFile);
+    std::vector<std::uint8_t> buffer(recordSize);
+
+    for (auto& quest : m_Quest)
+    {
+        if (!file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(recordSize)))
+        {
+            return false;
+        }
+
+        BuxConvert(buffer.data(), static_cast<int>(buffer.size()));
+        auto* current = reinterpret_cast<QuestAttributeFile*>(buffer.data());
+
+        quest.shQuestConditionNum = current->shQuestConditionNum;
+        quest.shQuestRequestNum = current->shQuestRequestNum;
+        quest.wNpcType = current->wNpcType;
+        CMultiLanguage::ConvertFromUtf8(quest.strQuestName, current->strQuestName);
+
+        std::memcpy(quest.QuestAct, current->QuestAct, sizeof quest.QuestAct);
+        std::memcpy(quest.QuestRequest, current->QuestRequest, sizeof quest.QuestRequest);
+    }
+
+    return true;
 }
 
-void CSQuest::setQuestLists(BYTE* byList, int num, CLASS_TYPE Class)
+void CSQuest::setQuestLists(const std::uint8_t* byList, int num, CLASS_TYPE Class)
 {
     if (Class != -1)
     {
@@ -171,8 +259,12 @@ void CSQuest::setQuestLists(BYTE* byList, int num, CLASS_TYPE Class)
         m_byClass = gCharacterManager.GetBaseClass(Class);
     }
 
-    memset(m_byQuestList, 0, sizeof(BYTE) * (MAX_QUESTS / 4));
-    ::memcpy(m_byQuestList, byList, sizeof(BYTE) * (num / 4 + 1));
+    m_byQuestList.fill(0);
+    if (byList != nullptr)
+    {
+        const auto bytesToCopy = std::min<std::size_t>(ComputeQuestListByteCount(num), m_byQuestList.size());
+        std::memcpy(m_byQuestList.data(), byList, bytesToCopy);
+    }
 
     int i;
     if (CLASS_KNIGHT == m_byClass)
@@ -214,12 +306,16 @@ void CSQuest::setQuestLists(BYTE* byList, int num, CLASS_TYPE Class)
 
 void CSQuest::setQuestList(int index, int result)
 {
-    m_byCurrQuestIndex = index;
+    if (index < 0 || index >= MAX_QUESTS)
+    {
+        return;
+    }
 
-    m_byCurrQuestIndexWnd = max(index, m_byCurrQuestIndexWnd);
+    m_byCurrQuestIndex = static_cast<std::uint8_t>(index);
+    m_byCurrQuestIndexWnd = std::max<std::uint8_t>(static_cast<std::uint8_t>(index), m_byCurrQuestIndexWnd);
 
-    int questIndex = (int)(m_byCurrQuestIndex / 4);
-    m_byQuestList[questIndex] = result;
+    const auto questState = static_cast<std::uint8_t>(result & QUEST_STATE_MASK);
+    StoreQuestState(m_byQuestList.data(), m_byQuestList.size(), index, questState);
 
     Hero->byExtensionSkill = 0;
     if (getQuestState(QUEST_COMBO) == QUEST_END)
@@ -343,7 +439,7 @@ bool CSQuest::CheckActCondition(QUEST_ATTRIBUTE* pQuest)
             {
                 bool bFind = false;
 
-                for (int j = 0; j < 5; ++j)
+                for (int j = 0; j < QUEST_MONSTER_SLOT_COUNT; ++j)
                 {
                     if (m_anKillMobType[j] == int(pQuest->QuestAct[i].wItemType)
                         && m_anKillMobCount[j] >= int(pQuest->QuestAct[i].byItemNum))
@@ -366,46 +462,27 @@ bool CSQuest::CheckActCondition(QUEST_ATTRIBUTE* pQuest)
     return true;
 }
 
-BYTE CSQuest::getQuestState(int questIndex)
+std::uint8_t CSQuest::getQuestState(int questIndex)
 {
-    int  Index;
-    BYTE byCurrState;
-    int  SubIndex;
+    const int targetIndex = (questIndex < 0) ? m_byCurrQuestIndex : questIndex;
+    const auto state = ExtractQuestState(m_byQuestList.data(), m_byQuestList.size(), targetIndex);
+    const std::uint8_t normalizedState = (state == QUEST_STATE_INVALID) ? 0 : state;
 
     if (questIndex == -1)
     {
-        Index = int(m_byCurrQuestIndex) / 4;
-        SubIndex = m_byCurrQuestIndex % 4;
-    }
-    else
-    {
-        Index = questIndex / 4;
-        SubIndex = questIndex % 4;
+        m_byCurrState = normalizedState;
     }
 
-    byCurrState = (m_byQuestList[Index] >> (SubIndex * 2)) & 0x03;
-
-    if (questIndex == -1)
-    {
-        m_byCurrState = byCurrState;
-    }
-
-    return byCurrState;
+    return normalizedState;
 }
 
-BYTE CSQuest::getQuestState2(int questIndex)
+std::uint8_t CSQuest::getQuestState2(int questIndex)
 {
-    int  Index;
-    BYTE byCurrState;
-
-    Index = questIndex / 4;
-    int SubIndex = questIndex % 4;
-    byCurrState = (m_byQuestList[Index] >> (SubIndex * 2)) & 0x03;
-
-    return byCurrState;
+    const auto state = ExtractQuestState(m_byQuestList.data(), m_byQuestList.size(), questIndex);
+    return (state == QUEST_STATE_INVALID) ? 0 : state;
 }
 
-BYTE CSQuest::CheckQuestState(BYTE state)
+std::uint8_t CSQuest::CheckQuestState(std::uint8_t state)
 {
     if (Hero->Class != -1)
     {
@@ -419,13 +496,13 @@ BYTE CSQuest::CheckQuestState(BYTE state)
     QUEST_ATTRIBUTE* lpQuest = &m_Quest[m_byCurrQuestIndex];
     //    m_byCurrState = m_byQuestList[m_byCurrQuestIndex];
 
-    if (state == 255)
+    if (state == QUEST_STATE_INVALID)
     {
         getQuestState();
     }
     else
     {
-        m_byCurrState = state;
+        m_byCurrState = state & QUEST_STATE_MASK;
     }
     switch (m_byCurrState)
     {
@@ -462,22 +539,22 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 {
     g_iCurrentDialogScript = iDialogIndex;
 
-    wchar_t Text[300];
+    wchar_t Text[300] {};
     CMultiLanguage::ConvertFromUtf8(Text, g_DialogScript[g_iCurrentDialogScript].m_lpszText);
 
     g_iNumLineMessageBoxCustom = SeparateTextIntoLines(Text, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 
-    wchar_t lpszAnswer[MAX_LENGTH_ANSWER + 8];
+    wchar_t lpszAnswer[MAX_LENGTH_ANSWER + 8] {};
     g_iNumAnswer = 0;
-    ZeroMemory(g_lpszDialogAnswer, MAX_ANSWER_FOR_DIALOG * NUM_LINE_DA * MAX_LENGTH_CMB);
+    std::memset(g_lpszDialogAnswer, 0, sizeof g_lpszDialogAnswer);
 
     int iTextSize = 0;
 
     for (int i = 0; i < g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer; ++i)
     {
-        wchar_t answerText[64];
+        wchar_t answerText[64] {};
         CMultiLanguage::ConvertFromUtf8(answerText, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
-        swprintf(lpszAnswer, L"%d) %s", i + 1, answerText);
+        swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", i + 1, answerText);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)
         {
@@ -490,8 +567,8 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     if (0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
     {
-        swprintf(lpszAnswer, L"%d) %s", iTextSize + 1, GlobalText[609]);
-        wcscpy(g_lpszDialogAnswer[0][0], lpszAnswer);
+        swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", iTextSize + 1, GlobalText[609]);
+        wcscpy_s(g_lpszDialogAnswer[0][0], MAX_LENGTH_CMB, lpszAnswer);
         g_iNumAnswer = 1;
     }
 }
@@ -500,23 +577,26 @@ void CSQuest::ShowQuestPreviewWindow(int index)
 {
     if (index != -1)
     {
-        m_byCurrQuestIndex = index;
+        m_byCurrQuestIndex = static_cast<std::uint8_t>(index);
     }
 
     m_byViewQuest = QUEST_VIEW_PREVIEW;
 
-    BYTE tmp = m_byCurrQuestIndex;
+    const std::uint8_t previousIndex = m_byCurrQuestIndex;
     m_byCurrQuestIndex = m_byCurrQuestIndexWnd;
 
     CheckQuestState();
     ShowDialogText(m_shCurrPage);
 
-    m_byCurrQuestIndex = tmp;
+    m_byCurrQuestIndex = previousIndex;
 }
 
 void CSQuest::ShowQuestNpcWindow(int index)
 {
-    if (index != -1) m_byCurrQuestIndex = index;
+    if (index != -1)
+    {
+        m_byCurrQuestIndex = static_cast<std::uint8_t>(index);
+    }
 
     g_bEventChipDialogEnable = EVENT_NONE;
 
@@ -560,7 +640,7 @@ bool CSQuest::BeQuestItem(void)
                     bCompleteItem = true;
                     bool bFind = false;
 
-                    for (int j = 0; j < 5; ++j)
+                    for (int j = 0; j < QUEST_MONSTER_SLOT_COUNT; ++j)
                     {
                         if (m_anKillMobType[j] == int(pQuest->QuestAct[i].wItemType)
                             && m_anKillMobCount[j] >= int(pQuest->QuestAct[i].byItemNum))
@@ -587,7 +667,7 @@ int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
     SEASON3B::CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
 
     int nItemsInInven = pInvenCtrl->GetNumberOfItems();
-    ITEM* pItem = NULL;
+    ITEM* pItem = nullptr;
     int nFindItemCount = 0;
 
     for (int i = 0; i < nItemsInInven; ++i)
@@ -608,7 +688,7 @@ int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
 
 int CSQuest::GetKillMobCount(int nMobType)
 {
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < QUEST_MONSTER_SLOT_COUNT; ++i)
     {
         if (nMobType == m_anKillMobType[i])
             return m_anKillMobCount[i];
@@ -632,12 +712,20 @@ bool CSQuest::ProcessNextProgress()
     }
 }
 
-void CSQuest::SetKillMobInfo(int* anKillMobInfo)
+void CSQuest::SetKillMobInfo(const int* anKillMobInfo)
 {
-    for (int i = 0; i < 10; i += 2)
+    if (anKillMobInfo == nullptr)
     {
-        m_anKillMobType[i / 2] = anKillMobInfo[i];
-        m_anKillMobCount[i / 2] = anKillMobInfo[i + 1];
+        std::fill(m_anKillMobType.begin(), m_anKillMobType.end(), -1);
+        std::fill(m_anKillMobCount.begin(), m_anKillMobCount.end(), -1);
+        return;
+    }
+
+    for (int i = 0; i < QUEST_MONSTER_SLOT_COUNT; ++i)
+    {
+        const int typeIndex = i * QUEST_MONSTER_INFO_STRIDE;
+        m_anKillMobType[i] = anKillMobInfo[typeIndex];
+        m_anKillMobCount[i] = anKillMobInfo[typeIndex + 1];
     }
 }
 
@@ -654,7 +742,7 @@ void CSQuest::RenderDevilSquare(void)
 
 void CSQuest::RenderBloodCastle(void)
 {
-    wchar_t Text[100];
+    wchar_t Text[100] {};
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(230, 230, 230, 255);
     g_pRenderText->SetBgColor(20, 20, 20, 255);
@@ -662,13 +750,13 @@ void CSQuest::RenderBloodCastle(void)
 
     g_pRenderText->SetTextColor(223, 191, 103, 255);
     g_pRenderText->SetBgColor(0);
-    swprintf(Text, GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
+    swprintf_s(Text, std::size(Text), GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 80, Text, 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->SetTextColor(255, 230, 210, 255);
     g_pRenderText->RenderText(m_iStartX + 85, m_iStartY + 100, GlobalText[877], 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->RenderText(m_iStartX + 105, m_iStartY + 120, GlobalText[878], 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetFont(g_hFontBig);
-    swprintf(Text, GlobalText[868], m_byEventCount[m_byQuestType]);
+    swprintf_s(Text, std::size(Text), GlobalText[868], m_byEventCount[m_byQuestType]);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 65 + 60 * 4, Text, 0, 0, RT3_WRITE_CENTER);
 }

@@ -69,7 +69,7 @@ void CmuConsoleDebug::UpdateMainScene()
 
 bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
-    if (strCommand._Starts_with(L"$fps"))
+    if (strCommand.compare(0, 4, L"$fps") == 0)
     {
         auto fps_str = strCommand.substr(5);
         auto target_fps = std::stof(fps_str);
@@ -90,7 +90,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         return true;
     }
 
-    if (strCommand._Starts_with(L"$winmsg"))
+    if (strCommand.compare(0, 7, L"$winmsg") == 0)
     {
         auto str_limit = strCommand.substr(8);
         auto message_limit = std::stof(str_limit);
