@@ -199,7 +199,8 @@ public:
                     {
                         return false;
                     }
-                    m_StringSet.Add(GTStringHeader.dwKey, decoded.c_str());
+                    auto normalized = detail::NormalizePrintfSpecifiers(decoded.c_str());
+                    m_StringSet.Add(GTStringHeader.dwKey, normalized);
                 }
                 else
                 {
