@@ -1553,7 +1553,7 @@ bool SEASON3B::CFenrirRepairMsgBoxLayout::SetLayout()
 CALLBACK_RESULT SEASON3B::CFenrirRepairMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CFenrirRepairMsgBox*>(pOwner);
-    if (pMsgBox == false)
+    if (pMsgBox == nullptr)
     {
         return CALLBACK_CONTINUE;
     }
@@ -1606,7 +1606,7 @@ bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[MAX_GLOBAL_TEXT_STRING];
-    swprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_INFINITY_ARROW].Name, GlobalText[2046]);
+    swprintf(strText, L"%ls%ls", SkillAttribute[AT_SKILL_INFINITY_ARROW].Name, GlobalText[2046]);
     g_iCancelSkillTarget = AT_SKILL_INFINITY_ARROW; // todo: is considering master skill required here?
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -1648,7 +1648,7 @@ bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
         return false;
 
     wchar_t strText[MAX_GLOBAL_TEXT_STRING];
-    swprintf(strText, L"%s%s", SkillAttribute[AT_SKILL_EXPANSION_OF_WIZARDRY].Name, GlobalText[2046]);
+    swprintf(strText, L"%ls%ls", SkillAttribute[AT_SKILL_EXPANSION_OF_WIZARDRY].Name, GlobalText[2046]);
     g_iCancelSkillTarget = AT_SKILL_EXPANSION_OF_WIZARDRY;
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -1729,7 +1729,7 @@ bool SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[256] = { 0, };
-    swprintf(strText, L"%s%s %s", GlobalText[1801], GlobalText[1816], GlobalText[858]);
+    swprintf(strText, L"%ls%ls %ls", GlobalText[1801], GlobalText[1816], GlobalText[858]);
     pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationUnityResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
@@ -1793,7 +1793,7 @@ bool SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[256] = { 0, };
-    swprintf(strText, L"%s%s %s", GlobalText[1800], GlobalText[1816], GlobalText[858]);
+    swprintf(strText, L"%ls%ls %ls", GlobalText[1800], GlobalText[1816], GlobalText[858]);
     pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationDisjointResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     return true;
@@ -1831,10 +1831,6 @@ CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::OkBtnDown(class CNe
     {
         int iSrcIndex = g_pMyInventory->GetStandbyItemIndex();
         SocketClient->ToGameServer()->SendChaosCastleEnterRequest(pItem->Level, iSrcIndex);
-    }
-    else
-    {
-        __asm { int 3 };
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -1988,16 +1984,16 @@ bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
     wchar_t strText[256];
     if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1] == 0)
     {
-        swprintf(strText, L"%s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]]);
+        swprintf(strText, L"%ls", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]]);
     }
     else if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2] == 0)
     {
-        swprintf(strText, L"%s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
+        swprintf(strText, L"%ls %ls", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
             GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]]);
     }
     else
     {
-        swprintf(strText, L"%s %s %s", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
+        swprintf(strText, L"%ls %ls %ls", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
             GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]],
             GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]]);
     }
@@ -2592,19 +2588,19 @@ bool SEASON3B::CUseFruitMsgBoxLayout::SetLayout()
         switch (pItem->Level)
         {
         case 0:
-            swprintf(strName, L"%s", GlobalText[168]);
+            swprintf(strName, L"%ls", GlobalText[168]);
             break;
         case 1:
-            swprintf(strName, L"%s", GlobalText[169]);
+            swprintf(strName, L"%ls", GlobalText[169]);
             break;
         case 2:
-            swprintf(strName, L"%s", GlobalText[167]);
+            swprintf(strName, L"%ls", GlobalText[167]);
             break;
         case 3:
-            swprintf(strName, L"%s", GlobalText[166]);
+            swprintf(strName, L"%ls", GlobalText[166]);
             break;
         case 4:
-            swprintf(strName, L"%s", GlobalText[1900]);
+            swprintf(strName, L"%ls", GlobalText[1900]);
             break;
         }
     }
@@ -2654,23 +2650,23 @@ bool SEASON3B::CUsePartChargeFruitMsgBoxLayout::SetLayout()
 
     if (pItem->Type == ITEM_HELPER + 54)
     {
-        swprintf(strName, L"%s", GlobalText[166]);
+        swprintf(strName, L"%ls", GlobalText[166]);
     }
     else if (pItem->Type == ITEM_HELPER + 55)
     {
-        swprintf(strName, L"%s", GlobalText[167]);
+        swprintf(strName, L"%ls", GlobalText[167]);
     }
     else if (pItem->Type == ITEM_HELPER + 56)
     {
-        swprintf(strName, L"%s", GlobalText[169]);
+        swprintf(strName, L"%ls", GlobalText[169]);
     }
     else if (pItem->Type == ITEM_HELPER + 57)
     {
-        swprintf(strName, L"%s", GlobalText[168]);
+        swprintf(strName, L"%ls", GlobalText[168]);
     }
     else if (pItem->Type == ITEM_HELPER + 58)
     {
-        swprintf(strName, L"%s", GlobalText[1900]);
+        swprintf(strName, L"%ls", GlobalText[1900]);
     }
 
     pMsgBox->AddMsg(strName, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
@@ -2734,7 +2730,7 @@ bool SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::SetLayout()
 CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUI3DItemCommonMsgBox*>(pOwner);
-    if (pMsgBox == false)
+    if (pMsgBox == nullptr)
     {
         return CALLBACK_CONTINUE;
     }
@@ -3026,7 +3022,7 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
 
     wchar_t Text[300];
 
-    swprintf(Text, L"%s    %s    %s    %s", GlobalText[680], GlobalText[681], GlobalText[1973], GlobalText[1977]);
+    swprintf(Text, L"%ls    %ls    %ls    %ls", GlobalText[680], GlobalText[681], GlobalText[1973], GlobalText[1977]);
 
     int TextColor = (255 << 24) + (21 << 16) + (148 << 8) + (255);
     pMsgBox->AddMsg(Text, TextColor);
@@ -3038,7 +3034,7 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
         if (HeroScore[i] == -1)
             continue;
 
-        swprintf(Text, L"%d      %s      %s      %d", i + 1, HeroName[i], gCharacterManager.GetCharacterClassText(HeroClass[i]), HeroScore[i]);
+        swprintf(Text, L"%d      %ls      %ls      %d", i + 1, HeroName[i], gCharacterManager.GetCharacterClassText(HeroClass[i]), HeroScore[i]);
 
         pMsgBox->AddMsg(Text, TextColor);
     }
@@ -3611,16 +3607,13 @@ bool SEASON3B::CGambleBuyMsgBoxLayout::SetLayout()
 CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     GambleSystem& gambleSys = GambleSystem::Instance();
-    LPBUYITEMINFO pItemInfo = NULL;
-
     if (gambleSys.IsGambleShop() && BuyCost != 0)
     {
-        pItemInfo = gambleSys.GetBuyItemInfo();
-        SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(pItemInfo->ItemIndex);
-        BuyCost = pItemInfo->ItemCost;
-        g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", pItemInfo->ItemIndex);
+        const auto& itemInfo = gambleSys.GetBuyItemInfoConst();
+        SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(itemInfo.ItemIndex);
+        BuyCost = itemInfo.ItemCost;
+        g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", itemInfo.ItemIndex);
     }
-
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 

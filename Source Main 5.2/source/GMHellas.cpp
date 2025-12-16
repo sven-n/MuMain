@@ -4,13 +4,13 @@
 #include "stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
-#include "zzztexture.h"
+#include "ZzzTexture.h"
 #include "ZzzBMD.h"
-#include "zzzlodterrain.h"
+#include "ZzzLodTerrain.h"
 #include "ZzzScene.h"
-#include "zzzEffect.h"
-#include "zzzAi.h"
-#include "zzzOpenData.h"
+#include "ZzzEffect.h"
+#include "ZzzAI.h"
+#include "ZzzOpenData.h"
 #include "ZzzInterface.h"
 #include "PhysicsManager.h"
 #include "CSWaterTerrain.h"
@@ -217,10 +217,10 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
         int ItemLevel = ip->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        swprintf(TextList[TextNum], L"%s %s       %s    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        swprintf(TextList[TextNum], L"%ls %ls       %ls    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         for (int i = 0; i < NUM_HELLAS; i++)
         {
-            swprintf(TextList[TextNum], L"        %d             %3d~%3d     ", i + 1, g_iKalimaLevel[startIndex + i][0], min(400, g_iKalimaLevel[startIndex + i][1]));
+            swprintf(TextList[TextNum], L"        %d             %3d~%3d     ", i + 1, g_iKalimaLevel[startIndex + i][0], std::min<int>(400, g_iKalimaLevel[startIndex + i][1]));
 
             if (ItemLevel == i + 1)
             {

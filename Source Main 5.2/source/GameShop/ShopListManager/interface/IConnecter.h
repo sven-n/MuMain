@@ -1,13 +1,13 @@
 /*******************************************************************************
-*	ÀÛ ¼º ÀÚ : ÁøÇýÁø
-*	ÀÛ ¼º ÀÏ : 2009.07.07
-*	³»    ¿ë : Connecter Interface
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*	ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ : 2009.07.07
+*	ï¿½ï¿½    ï¿½ï¿½ : Connecter Interface
 *******************************************************************************/
 
 #pragma once
 
-#include "GameShop\ShopListManager\interface\WZResult\WZResult.h"
-#include "GameShop\ShopListManager\interface\DownloadInfo.h"
+#include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
+#include "GameShop/ShopListManager/interface/DownloadInfo.h"
 
 class IConnecter
 {
@@ -23,16 +23,16 @@ public:
 
     // abstract Function
 
-        //						¼¼¼Ç
+        //						ï¿½ï¿½ï¿½ï¿½
     virtual WZResult		CreateSession(HINTERNET& hSession) = 0;
-    //						Ä¿³¼Æ®
+    //						Ä¿ï¿½ï¿½Æ®
     virtual WZResult		CreateConnection(HINTERNET& hSession,
         HINTERNET& hConnection) = 0;
-    //						´Ù¿î·Îµå ÆÄÀÏ ¿ÀÇÂ & »çÀÌÁî °¡Á®¿À±â
+    //						ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     virtual WZResult		OpenRemoteFile(HINTERNET& hConnection,
         HINTERNET& hRemoteFile,
         ULONGLONG& nFileLength) = 0;
-    //						¸®¸ðÆ® ÆÄÀÏ ÀÐ±â
+    //						ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½Ð±ï¿½
     virtual WZResult		ReadRemoteFile(HINTERNET& hRemoteFile,
         BYTE* byReadBuffer,
         DWORD* dwBytesRead) = 0;
@@ -40,10 +40,10 @@ public:
 protected:
     // Member Object
 
-        //						°á°ú..
+        //						ï¿½ï¿½ï¿½..
     WZResult 				m_Result;
-    //						´Ù¿î·Îµå ¼­¹ö Á¤º¸ °´Ã¼
+    //						ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼
     DownloadServerInfo* m_pServerInfo;
-    //						´Ù¿î·Îµå ÆÄÀÏ Á¤º¸ °´Ã¼
+    //						ï¿½Ù¿ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼
     DownloadFileInfo* m_pFileInfo;
 };

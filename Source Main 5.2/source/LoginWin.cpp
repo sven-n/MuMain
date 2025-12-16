@@ -241,10 +241,10 @@ void CLoginWin::RequestLogin()
     {
         if (CurrentProtocolState == RECEIVE_JOIN_SERVER_SUCCESS)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %s", m_ID);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", m_ID);
 
             g_ErrorReport.Write(L"> Login Request.\r\n");
-            g_ErrorReport.Write(L"> Try to Login \"%s\"\r\n", m_ID);
+            g_ErrorReport.Write(L"> Try to Login \"%ls\"\r\n", m_ID);
 
             LogIn = 1;
             wcscpy(LogInID, (m_ID));

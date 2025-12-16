@@ -26,7 +26,7 @@ private:
     BYTE m_xPath[MAX_COUNT_PATH];
     BYTE m_yPath[MAX_COUNT_PATH];
 public:
-    int GetPath(void) { return (min(m_iNumPath, MAX_PATH_FIND)); }
+    int GetPath(void) { return (std::min<int>(m_iNumPath, MAX_PATH_FIND)); }
     BYTE* GetPathX(void) { return (m_xPath + MAX_COUNT_PATH - m_iNumPath); }
     BYTE* GetPathY(void) { return (m_yPath + MAX_COUNT_PATH - m_iNumPath); }
 
@@ -125,8 +125,8 @@ inline bool PATH::AddClearPos(int iIndex)
         return false;
     }
 
-    m_iMinClosed = min(iIndex, m_iMinClosed);
-    m_iMaxClosed = max(iIndex, m_iMaxClosed);
+    m_iMinClosed = std::min<int>(iIndex, m_iMinClosed);
+    m_iMaxClosed = std::max<int>(iIndex, m_iMaxClosed);
 
     return true;
 }
@@ -393,7 +393,7 @@ inline int PATH::EstimateCostToGoal(int xStart, int yStart, int xNew, int yNew)
         yDist = 0;
     }
 
-    return (abs(xDist - yDist) * FACTOR_PATH_DIST + min(xDist, yDist) * FACTOR_PATH_DIST_DIAG + 1) * 3 / 4;
+    return (abs(xDist - yDist) * FACTOR_PATH_DIST + std::min<int>(xDist, yDist) * FACTOR_PATH_DIST_DIAG + 1) * 3 / 4;
 }
 
 inline bool PATH::GeneratePath(int xStart, int yStart, int xEnd, int yEnd)

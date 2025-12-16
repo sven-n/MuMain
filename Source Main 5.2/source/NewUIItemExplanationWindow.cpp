@@ -191,7 +191,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     TextBold[TextNum] = true;
     TextNum++;
 
-    swprintf(TextList[TextNum], L"%s", p->Name);
+    swprintf(TextList[TextNum], L"%ls", p->Name);
     TextListColor[TextNum] = TEXT_COLOR_WHITE;
     TextBold[TextNum] = true;
     TextNum++;
@@ -263,7 +263,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
         if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 1 ) )
         {
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            swprintf(TextList[TextNum],"%s %s %s:(%s+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], HIBYTE( mixLevel ) );TextNum++;
+            swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], HIBYTE( mixLevel ) );TextNum++;
         }
     }
     if ( LOBYTE( mixLevel)<=3 )
@@ -272,7 +272,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
         if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 2 ) )
         {
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            swprintf(TextList[TextNum],"%s %s %s:(%s+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], LOBYTE( mixLevel ) );TextNum++;
+            swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], LOBYTE( mixLevel ) );TextNum++;
         }
     }
     */

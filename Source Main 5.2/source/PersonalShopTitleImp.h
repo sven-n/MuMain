@@ -1,9 +1,9 @@
 #ifndef _PERSONALSHOPTITLEIMP_H_
 #define _PERSONALSHOPTITLEIMP_H_
 
-// - ÀÌÇö
+// - ï¿½ï¿½ï¿½ï¿½
 
-#include "zzzinfomation.h"
+#include "ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -30,13 +30,13 @@ class CPersonalShopTitleImp
         CShopTitleDrawObj();
         ~CShopTitleDrawObj();
 
-        bool Create(int key, const std::wstring& name, const std::wstring& title, POINT& pos);
+        bool Create(int key, const std::wstring& name, const std::wstring& title, POINT pos);
         void Release();
 
         int	GetKey() const;
 
         void SetBoxContent(const std::wstring& name, const std::wstring& title);
-        void SetBoxPos(POINT& pos);
+        void SetBoxPos(POINT pos);
         void GetFullTitle(std::wstring& title);
 
         void GetBoxSize(SIZE& size);

@@ -222,7 +222,7 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(
     if (pbySocketOptions == NULL)
     {
         pNewItem->SocketCount = 0;
-        assert(!"여기로 오는 경우에 소켓 옵션 관련 확인 필요");
+        assert(!"Socket options expected but missing");
     }
     else
     {

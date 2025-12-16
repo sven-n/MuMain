@@ -779,19 +779,21 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
         break;
 
     case CHECKBOX_ID_COMBO:
-        auto cboxCombo = m_CheckBoxList[CHECKBOX_ID_COMBO];
+	{
+		auto cboxCombo = m_CheckBoxList[CHECKBOX_ID_COMBO];
 
-        if (bState == true)
-        {
-            if (m_aiSelectedSkills[0] <= 0 || m_aiSelectedSkills[1] <= 0 || m_aiSelectedSkills[2] <= 0)
-            {
-                g_pSystemLogBox->AddText(GlobalText[3565], SEASON3B::TYPE_ERROR_MESSAGE);
-                cboxCombo.box->RegisterBoxState(false);
-            }
-        }
-        
-        _TempConfig.bUseCombo = cboxCombo.box->GetBoxState();
-        break;
+		if (bState == true)
+		{
+			if (m_aiSelectedSkills[0] <= 0 || m_aiSelectedSkills[1] <= 0 || m_aiSelectedSkills[2] <= 0)
+			{
+				g_pSystemLogBox->AddText(GlobalText[3565], SEASON3B::TYPE_ERROR_MESSAGE);
+				cboxCombo.box->RegisterBoxState(false);
+			}
+		}
+		
+		_TempConfig.bUseCombo = cboxCombo.box->GetBoxState();
+		break;
+	}
 
     case CHECKBOX_ID_BUFF_DURATION:
         _TempConfig.bBuffDuration = bState;
@@ -830,22 +832,26 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
         break;
 
     case CHECKBOX_ID_PICK_ALL:
-        auto cboxPickSelected = m_CheckBoxList[CHECKBOX_ID_PICK_SELECTED];
-        if (cboxPickSelected.box->GetBoxState())
-        {
-            cboxPickSelected.box->RegisterBoxState(false);
-        }
-        _TempConfig.bPickAllItems = bState;
-        break;
+	{
+		auto cboxPickSelected = m_CheckBoxList[CHECKBOX_ID_PICK_SELECTED];
+		if (cboxPickSelected.box->GetBoxState())
+		{
+			cboxPickSelected.box->RegisterBoxState(false);
+		}
+		_TempConfig.bPickAllItems = bState;
+		break;
+	}
 
     case CHECKBOX_ID_PICK_SELECTED:
-        auto cboxPickAll = m_CheckBoxList[CHECKBOX_ID_PICK_ALL];
-        if (cboxPickAll.box->GetBoxState())
-        {
-            cboxPickAll.box->RegisterBoxState(false);
-        }
-        _TempConfig.bPickSelectItems = bState;
-        break;
+	{
+		auto cboxPickAll = m_CheckBoxList[CHECKBOX_ID_PICK_ALL];
+		if (cboxPickAll.box->GetBoxState())
+		{
+			cboxPickAll.box->RegisterBoxState(false);
+		}
+		_TempConfig.bPickSelectItems = bState;
+		break;
+	}
 
     case CHECKBOX_ID_PICK_JEWEL:
         _TempConfig.bPickJewel = bState;
@@ -931,7 +937,7 @@ void CNewUIMuHelper::SaveExtraItem()
     int iItemIndex = 0;
     for (const auto& item : _TempConfig.aExtraItems)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"%s", item.c_str());
+        g_ConsoleDebug->Write(MCD_NORMAL, L"%ls", item.c_str());
     }
 
     m_ItemInput.SetText(L"");

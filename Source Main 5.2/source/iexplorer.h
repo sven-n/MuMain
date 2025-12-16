@@ -9,7 +9,8 @@ namespace leaf {
     inline bool OpenExplorer(const std::wstring& url)
     {
         // SW_SHOW
-        if (32 < (UINT)ShellExecute(NULL, L"open", url.c_str(), NULL, NULL, SW_NORMAL))
+		INT_PTR result = (INT_PTR)ShellExecute(NULL, L"open", url.c_str(), NULL, NULL, SW_NORMAL);
+		if (result > 32)
             return true;
         return false;
     }

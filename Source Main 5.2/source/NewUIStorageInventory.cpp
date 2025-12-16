@@ -11,7 +11,7 @@
 #include "ZzzInventory.h"
 
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-#include "GameShop\MsgBoxIGSCommon.h"
+#include "GameShop/MsgBoxIGSCommon.h"
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
 using namespace SEASON3B;
@@ -206,7 +206,7 @@ void CNewUIStorageInventory::RenderText()
     g_pRenderText->SetBgColor(0);
 
     swprintf(
-        szTemp, L"%s (%s)", GlobalText[234], GlobalText[m_bLock ? 241 : 240]);
+        szTemp, L"%ls (%ls)", GlobalText[234], GlobalText[m_bLock ? 241 : 240]);
     if (m_bLock)
         g_pRenderText->SetTextColor(240, 32, 32, 255);
     else
@@ -227,7 +227,7 @@ void CNewUIStorageInventory::RenderText()
 
     nTempZen = int(double(iTotalLevel) * double(iTotalLevel) * 0.04);
     nTempZen += m_bLock ? int(CharacterAttribute->Level) * 2 : 0;
-    nTempZen = max(1, nTempZen);
+    nTempZen = std::max<int>(1, nTempZen);
 
     if (nTempZen >= 1000)
         nTempZen = nTempZen / 100 * 100;

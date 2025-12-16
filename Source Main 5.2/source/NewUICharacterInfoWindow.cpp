@@ -74,7 +74,7 @@ void SEASON3B::CNewUICharacterInfoWindow::SetButtonInfo()
     m_BtnExit.ChangeToolTipText(strText, true);
     m_BtnQuest.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_QUEST, false);
     m_BtnQuest.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 392, 36, 29);
-    swprintf(strText, L"%s(%s)", GlobalText[1140], L"T");
+    swprintf(strText, L"%ls(%ls)", GlobalText[1140], L"T");
     m_BtnQuest.ChangeToolTipText(strText, true);
     m_BtnPet.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_PET, false);
     m_BtnPet.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 392, 36, 29);
@@ -263,9 +263,9 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTexts()
 void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
 {
     wchar_t strID[256];
-    swprintf(strID, L"%s", CharacterAttribute->Name);
+    swprintf(strID, L"%ls", CharacterAttribute->Name);
     wchar_t strClassName[256];
-    swprintf(strClassName, L"(%s)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
+    swprintf(strClassName, L"(%ls)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(20, 20, 20, 20);
@@ -309,13 +309,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 
         iMaxMinus = -CharacterAttribute->wMaxMinusPoint;
 
-        swprintf(strPoint, L"%s %d/%d | %s %d/%d",
+        swprintf(strPoint, L"%ls %d/%d | %ls %d/%d",
             GlobalText[1412], CharacterAttribute->AddPoint, CharacterAttribute->MaxAddPoint,
             GlobalText[1903], iMinus, iMaxMinus);
     }
     else
     {
-        swprintf(strPoint, L"%s %d/%d | %s %d/%d", GlobalText[1412], 0, 0, GlobalText[1903], 0, 0);
+        swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", GlobalText[1412], 0, 0, GlobalText[1903], 0, 0);
     }
 
     g_pRenderText->SetFont(g_hFontBold);
@@ -712,18 +712,18 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         int maxIAttackDamageMax = 0;
         if (iNonExpiredLRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
         {
-            maxIAttackDamageMin = max(maxIAttackDamageMin, 20);
-            maxIAttackDamageMax = max(maxIAttackDamageMax, 20);
+            maxIAttackDamageMin = std::max<int>(maxIAttackDamageMin, 20);
+            maxIAttackDamageMax = std::max<int>(maxIAttackDamageMax, 20);
         }
         if (iNonExpiredLRingType == ITEM_PANDA_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_PANDA_TRANSFORMATION_RING)
         {
-            maxIAttackDamageMin = max(maxIAttackDamageMin, 30);
-            maxIAttackDamageMax = max(maxIAttackDamageMax, 30);
+            maxIAttackDamageMin = std::max<int>(maxIAttackDamageMin, 30);
+            maxIAttackDamageMax = std::max<int>(maxIAttackDamageMax, 30);
         }
         if (iNonExpiredLRingType == ITEM_SKELETON_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_SKELETON_TRANSFORMATION_RING)
         {
-            maxIAttackDamageMin = max(maxIAttackDamageMin, 40);
-            maxIAttackDamageMax = max(maxIAttackDamageMax, 40);
+            maxIAttackDamageMin = std::max<int>(maxIAttackDamageMin, 40);
+            maxIAttackDamageMax = std::max<int>(maxIAttackDamageMax, 40);
         }
 
         iAttackDamageMin += maxIAttackDamageMin;
@@ -1299,18 +1299,18 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         if (iNonExpiredLRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_CHRISTMAS_TRANSFORMATION_RING)
         {
-            maxIMagicDamageMin = max(maxIMagicDamageMin, 20);
-            maxIMagicDamageMax = max(maxIMagicDamageMax, 20);
+            maxIMagicDamageMin = std::max<int>(maxIMagicDamageMin, 20);
+            maxIMagicDamageMax = std::max<int>(maxIMagicDamageMax, 20);
         }
         if (iNonExpiredLRingType == ITEM_PANDA_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_PANDA_TRANSFORMATION_RING)
         {
-            maxIMagicDamageMin = max(maxIMagicDamageMin, 30);
-            maxIMagicDamageMax = max(maxIMagicDamageMax, 30);
+            maxIMagicDamageMin = std::max<int>(maxIMagicDamageMin, 30);
+            maxIMagicDamageMax = std::max<int>(maxIMagicDamageMax, 30);
         }
         if (iNonExpiredLRingType == ITEM_SKELETON_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_SKELETON_TRANSFORMATION_RING)
         {
-            maxIMagicDamageMin = max(maxIMagicDamageMin, 40);
-            maxIMagicDamageMax = max(maxIMagicDamageMax, 40);
+            maxIMagicDamageMin = std::max<int>(maxIMagicDamageMin, 40);
+            maxIMagicDamageMax = std::max<int>(maxIMagicDamageMax, 40);
         }
 
         iMagicDamageMin += maxIMagicDamageMin;
@@ -1432,13 +1432,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
         if (iNonExpiredLRingType == ITEM_PANDA_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_PANDA_TRANSFORMATION_RING)
         {
-            maxICurseDamageMin = max(maxICurseDamageMin, 30);
-            maxICurseDamageMax = max(maxICurseDamageMax, 30);
+            maxICurseDamageMin = std::max<int>(maxICurseDamageMin, 30);
+            maxICurseDamageMax = std::max<int>(maxICurseDamageMax, 30);
         }
         if (iNonExpiredLRingType == ITEM_SKELETON_TRANSFORMATION_RING || iNonExpiredRRingType == ITEM_SKELETON_TRANSFORMATION_RING)
         {
-            maxICurseDamageMin = max(maxICurseDamageMin, 40);
-            maxICurseDamageMax = max(maxICurseDamageMax, 40);
+            maxICurseDamageMin = std::max<int>(maxICurseDamageMin, 40);
+            maxICurseDamageMax = std::max<int>(maxICurseDamageMax, 40);
         }
 
         iCurseDamageMin += maxICurseDamageMin;

@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "NewUINPCDialogue.h"
 
-#include "CRTDBG.h"
+#include <crtdbg.h>
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 
