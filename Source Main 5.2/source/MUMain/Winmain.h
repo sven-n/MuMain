@@ -1,6 +1,7 @@
 #ifndef __WINMAIN_H__
 #define __WINMAIN_H__
 
+#include <windef.h>
 #define FOR_WORK
 /*--------------------------------------------------------------------------------------*/
 
@@ -85,7 +86,7 @@ extern void PlayMp3(char* Name, BOOL bEnforce = false);
 extern bool IsEndMp3();
 extern int GetMp3PlayPosition();
 
-extern GLvoid KillGLWindow(GLvoid);
+extern void KillGLWindow();
 extern void DestroyWindow();
 extern void DestroySound();
 
