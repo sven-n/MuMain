@@ -971,7 +971,7 @@
     <ClInclude Include="source\PortalMgr.h" />
     <ClInclude Include="source\QuestMng.h" />
     <ClInclude Include="source\ReadScript.h" />
-    <ClInclude Include="source\resource.h" />
+    <ClInclude Include="source\MUMain/Resources/Windows/resource.h" />
     <ClInclude Include="source\ServerGroup.h" />
     <ClInclude Include="source\ServerInfo.h" />
     <ClInclude Include="source\ServerListManager.h" />
