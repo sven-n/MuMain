@@ -198,15 +198,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="source\MUMain/Resources/Windows/icon1.ico">
+    <Image Include="source\MUMain\Resources\Windows\icon1.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="source\MUMain/Resources/Windows/icon2.ico">
+    <Image Include="source\MUMain\Resources\Windows\icon2.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="source\MUMain/Resources/Windows/resource.rc">
+    <ResourceCompile Include="source\MUMain\Resources\Windows\resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -1251,10 +1251,10 @@
     <ClInclude Include="source\_types.h">
       <Filter>MU\Common</Filter>
     </ClInclude>
-    <ClInclude Include="source\MUMain/Resources/Windows/resource.h">
+    <ClInclude Include="source\MUMain\Resources\Windows\resource.h">
       <Filter>MU\Common</Filter>
     </ClInclude>
-    <ClInclude Include="source\MUMain/stdafx.h">
+    <ClInclude Include="source\MUMain\stdafx.h">
       <Filter>MU\Common</Filter>
     </ClInclude>
     <ClInclude Include="source\BaseCls.h">
@@ -1434,7 +1434,7 @@
     <ClInclude Include="source\Defined_Global.h">
       <Filter>MU\Client\core</Filter>
     </ClInclude>
-    <ClInclude Include="source\MUMain/Winmain.h">
+    <ClInclude Include="source\MUMain\Winmain.h">
       <Filter>MU\Client\core</Filter>
     </ClInclude>
     <ClInclude Include="source\ZzzScene.h">
