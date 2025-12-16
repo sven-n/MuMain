@@ -98,7 +98,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON    DISCARDABLE     "icon1.ico"
+IDI_ICON1               ICON    DISCARDABLE     "MUMain/Resources/Windows/icon1.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

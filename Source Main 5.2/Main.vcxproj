@@ -355,8 +355,8 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Image Include="source\icon1.ico" />
-    <Image Include="source\icon2.ico" />
+    <Image Include="source\MUMain/Resources/Windows/icon1.ico" />
+    <Image Include="source\MUMain/Resources/Windows/icon2.ico" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="source\MUMain/Resources/Windows/resource.rc">

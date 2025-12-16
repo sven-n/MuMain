@@ -198,10 +198,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="source\icon1.ico">
+    <Image Include="source\MUMain/Resources/Windows/icon1.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="source\icon2.ico">
+    <Image Include="source\MUMain/Resources/Windows/icon2.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
