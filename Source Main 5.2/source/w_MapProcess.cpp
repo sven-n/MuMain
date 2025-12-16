@@ -1,7 +1,7 @@
 // w_MapProcess.cpp: implementation of the MapProcess class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "w_MapProcess.h"
 #include "w_MapHeaders.h"
 

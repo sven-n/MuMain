@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "_GlobalFunctions.h"
 
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX

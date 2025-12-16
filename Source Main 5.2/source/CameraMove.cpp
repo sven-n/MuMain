@@ -1,7 +1,7 @@
 // CameraMove.cpp: implementation of the CCameraMove class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include <algorithm>
 #include <cstddef>

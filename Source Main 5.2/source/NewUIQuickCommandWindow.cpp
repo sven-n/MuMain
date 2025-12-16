@@ -2,7 +2,7 @@
 // NewUIQuickCommandWindow.cpp: implementation of the CNewUIQuickCommandWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIQuickCommandWindow.h"
 #include "NewUISystem.h"
 #include "DSPlaySound.h"

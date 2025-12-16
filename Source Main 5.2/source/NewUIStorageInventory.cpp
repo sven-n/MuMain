@@ -2,7 +2,7 @@
 // File: NewUIStorageInventory.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIStorageInventory.h"
 
 #include "DSPlaySound.h"

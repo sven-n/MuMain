@@ -8,7 +8,7 @@
 //
 //
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "FTPConnecter.h"
 #include "GameShop/ShopListManager/interface/PathMethod/Path.h"

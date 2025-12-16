@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 // common
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzTexture.h"
 #include "ZzzOpenData.h"
 #include "ZzzBMD.h"

@@ -1,7 +1,7 @@
 ﻿// NewUIItemEnduranceInfo.cpp: implementation of the CNewUIItemEnduranceInfo class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIItemEnduranceInfo.h"
 #include "NewUISystem.h"
 

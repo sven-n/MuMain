@@ -1,7 +1,7 @@
 // w_PetActionStand.cpp: implementation of the PetActionStand class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "w_PetActionStand.h"
 #include "ZzzAI.h"
 #include "ZzzEffect.h"

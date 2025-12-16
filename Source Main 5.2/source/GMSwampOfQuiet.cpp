@@ -1,7 +1,7 @@
 ﻿// GMSwampOfQuiet.cpp: implementation of the GMSwampOfQuiet class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzBMD.h"

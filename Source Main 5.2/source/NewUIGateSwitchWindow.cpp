@@ -1,7 +1,7 @@
 // NewUIGateSwitchWindow.cpp: implementation of the CNewUIGateSwitchWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIGateSwitchWindow.h"
 
 #include "DSPlaySound.h"

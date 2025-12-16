@@ -2,7 +2,7 @@
 // File: UIMapName.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "UIMapName.h"
 #include "MapManager.h"
 #include "ZzzOpenglUtil.h"

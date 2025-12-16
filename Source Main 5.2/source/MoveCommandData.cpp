@@ -1,7 +1,7 @@
 // MoveCommandData.cpp: implementation of the CMoveCommandData class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "MoveCommandData.h"
 
 

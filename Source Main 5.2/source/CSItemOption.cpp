@@ -1,7 +1,7 @@
 ﻿/*+++++++++++++++++++++++++++++++++++++
     INCLUDE.
 +++++++++++++++++++++++++++++++++++++*/
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"

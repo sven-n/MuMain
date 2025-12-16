@@ -1,7 +1,7 @@
 //  UIPopup.cpp
 //////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzInterface.h"

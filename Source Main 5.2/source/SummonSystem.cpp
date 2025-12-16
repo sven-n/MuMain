@@ -1,7 +1,7 @@
 ﻿// SummonSystem.cpp: implementation of the CSummonSystem class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "SummonSystem.h"
 
 #include "DSPlaySound.h"

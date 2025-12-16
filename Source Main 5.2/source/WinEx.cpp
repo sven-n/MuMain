@@ -2,7 +2,7 @@
 // File: WinEx.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "WinEx.h"
 
 #include "Input.h"

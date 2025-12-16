@@ -1,7 +1,7 @@
 // NewUIMyShopInventory.cpp: implementation of the CNewUIMyShopInventory class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIMyShopInventory.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"

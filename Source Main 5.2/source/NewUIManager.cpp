@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIManager.h"
 
 
@@ -287,7 +287,7 @@ bool SEASON3B::CNewUIManager::CompareKeyEventOrder(INewUIBase* pObj1, INewUIBase
 int SEASON3B::CNewUIManager::GetShowUICnt()
 {
     int m_nShowUICnt = 0;
-    // ÀÏºÎ Æ¯Á¤ ÀÎÅÍÆäÀÌ½º°¡ ¸î°³ ¿­·ÁÀÖ´ÂÁö
+    // ï¿½Ïºï¿½ Æ¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½î°³ ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½
     for (int i = INTERFACE_PARTY; i < INTERFACE_CHARACTER + 1; ++i)
     {
         if (IsInterfaceVisible(i))

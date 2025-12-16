@@ -1,7 +1,7 @@
 // w_PetProcess.cpp: implementation of the PetProcess class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "w_PetActionStand.h"
 #include "w_PetActionRound.h"
 #include "w_PetActionDemon.h"

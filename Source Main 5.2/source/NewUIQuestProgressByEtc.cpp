@@ -2,7 +2,7 @@
 // File: NewUIQuestProgressByEtc.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIQuestProgressByEtc.h"
 
 #include "DSPlaySound.h"
@@ -44,7 +44,7 @@ bool CNewUIQuestProgressByEtc::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_btnProgressR.ChangeButtonImgState(true, IMAGE_QPE_BTN_R);
     m_btnProgressR.ChangeButtonInfo(x + 153, y + 165, 17, 18);
 
-    m_btnComplete.ChangeText(GlobalText[2811]);	// "È®     ÀÎ"
+    m_btnComplete.ChangeText(GlobalText[2811]);	// "È®     ï¿½ï¿½"
     m_btnComplete.ChangeButtonImgState(true, IMAGE_QPE_BTN_COMPLETE, true);
     m_btnComplete.ChangeButtonInfo(x + (QPE_WIDTH - 108) / 2, y + 362, 108, 29);
 

@@ -2,7 +2,7 @@
 // NewUIItemMng.cpp: implementation of the CNewUIItemMng class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIItemMng.h"
 #include "CSItemOption.h"
 #include "GIPetManager.h"

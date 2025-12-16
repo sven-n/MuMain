@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include <ddraw.h>
 #include <dinput.h>
 #include <dmusicc.h>

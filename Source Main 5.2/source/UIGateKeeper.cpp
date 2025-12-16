@@ -2,7 +2,7 @@
 //  UIGateKeeper.cpp
 //////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "UIGateKeeper.h"
 
 #include "WSclient.h"

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzPath.h"
 
 #ifdef CSK_DEBUG_MAP_PATHFINDING

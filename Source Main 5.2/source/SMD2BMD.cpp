@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include <ctype.h>
 #include "ZzzBMD.h"
 #include "SMD.h"

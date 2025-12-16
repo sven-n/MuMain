@@ -2,7 +2,7 @@
 // File: LoginWin.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "LoginWin.h"
 #include "Input.h"
 #include "UIMng.h"

@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ReadScript.h"
 #include "UIManager.h"
 #include "ItemAddOptioninfo.h"

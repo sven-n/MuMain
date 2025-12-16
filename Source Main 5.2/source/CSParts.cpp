@@ -2,7 +2,7 @@
 //  CSParts.cpp
 //////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"

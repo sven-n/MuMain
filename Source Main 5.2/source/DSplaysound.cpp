@@ -11,7 +11,7 @@
 // Copyright (c) 1999 Microsoft Corp. All rights reserved.
 //-----------------------------------------------------------------------------
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include <algorithm>
 #include <array>

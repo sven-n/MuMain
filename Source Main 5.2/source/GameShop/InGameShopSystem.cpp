@@ -1,7 +1,7 @@
 // InGameShopSystem.cpp: implementation of the InGameShopSystem class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "InGameShopSystem.h"
 #include "ZzzInventory.h"

@@ -2,7 +2,7 @@
 // File: ServerMsgWin.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ServerMsgWin.h"
 #include "UIControls.h"
 

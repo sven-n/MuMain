@@ -2,7 +2,7 @@
 // File: NewUIQuestProgress.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIQuestProgress.h"
 
 #include "DSPlaySound.h"

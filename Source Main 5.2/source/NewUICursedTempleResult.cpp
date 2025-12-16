@@ -1,7 +1,7 @@
 // NewUICursedTempleResult.cpp: implementation of the CNewUICursedTempleResult class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUICursedTempleResult.h"
 #include "NewUICommonMessageBox.h"
 #include "UIBaseDef.h"

@@ -1,6 +1,6 @@
 ﻿// GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

@@ -1,7 +1,7 @@
 // NewUIDuelWatchWindow.cpp: implementation of the CNewUIDuelWatchWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIDuelWatchWindow.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"

@@ -1,7 +1,7 @@
 // NewUIRenderNumber.cpp: implementation of the CNewUIRenderNumber class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUIRenderNumber.h"	// self
 

@@ -1,7 +1,7 @@
 // LoadData.cpp: implementation of the CLoadData class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "LoadData.h"
 
 #include <codecvt>

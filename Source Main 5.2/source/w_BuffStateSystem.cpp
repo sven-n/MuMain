@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "w_BuffStateSystem.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ BuffStateSystem::~BuffStateSystem()
 
 void BuffStateSystem::Initialize()
 {
-    // ÀÓ½Ã ÄÚµå
+    // ï¿½Ó½ï¿½ ï¿½Úµï¿½
     m_BuffInfo = BuffScriptLoader::Make();
     m_BuffTimeControl = BuffTimeControl::Make();
     m_BuffStateValueControl = BuffStateValueControl::Make();

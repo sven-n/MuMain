@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIItemExplanationWindow.h"
 #include "NewUISystem.h"
 #include "DSPlaySound.h"

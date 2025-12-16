@@ -1,7 +1,7 @@
 // NewUIHelpWindow.cpp: implementation of the CNewUIHelpWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIHelpWindow.h"
 #include "NewUISystem.h"
 #include "ZzzInventory.h"

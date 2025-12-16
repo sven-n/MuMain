@@ -2,7 +2,7 @@
 //  UIGuildMaster.cpp
 //////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "UIGuildInfo.h"
 #include "ZzzInventory.h"
 #include "ZzzOpenglUtil.h"

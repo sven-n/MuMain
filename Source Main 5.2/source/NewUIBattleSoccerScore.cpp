@@ -2,7 +2,7 @@
 // File: NewUIBattleSoccerScore.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIBattleSoccerScore.h"
 #include "UIControls.h"
 #include "WSclient.h"
@@ -110,10 +110,10 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
             g_pRenderText->SetTextColor(0, 150, 255, 255);
 
         swprintf(szTemp, L"%d", GuildWarScore[0]);
-        g_pRenderText->RenderText(nX, nY, szTemp);				// Á¡¼ö
+        g_pRenderText->RenderText(nX, nY, szTemp);				// ï¿½ï¿½ï¿½ï¿½
         ::CreateGuildMark(Hero->GuildMarkIndex);
-        ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY), 8, 8);// ±æµå ¸¶Å©
-        g_pRenderText->RenderText(nX + 33, nY, GuildMark[Hero->GuildMarkIndex].GuildName);// ±æµå¸í
+        ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY), 8, 8);// ï¿½ï¿½ï¿½ ï¿½ï¿½Å©
+        g_pRenderText->RenderText(nX + 33, nY, GuildMark[Hero->GuildMarkIndex].GuildName);// ï¿½ï¿½ï¿½ï¿½
 
         if (HeroSoccerTeam == 0)
             g_pRenderText->SetTextColor(0, 150, 255, 255);
@@ -121,10 +121,10 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
             g_pRenderText->SetTextColor(255, 60, 0, 255);
 
         swprintf(szTemp, L"%d", GuildWarScore[1]);
-        g_pRenderText->RenderText(nX, nY + 22, szTemp);			// Á¡¼ö
+        g_pRenderText->RenderText(nX, nY + 22, szTemp);			// ï¿½ï¿½ï¿½ï¿½
         ::CreateGuildMark(FindGuildMark(GuildWarName));
-        ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY + 22), 8, 8);// ±æµå ¸¶Å©
-        g_pRenderText->RenderText(nX + 33, nY + 22, GuildWarName);	// ±æµå¸í
+        ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY + 22), 8, 8);// ï¿½ï¿½ï¿½ ï¿½ï¿½Å©
+        g_pRenderText->RenderText(nX + 33, nY + 22, GuildWarName);	// ï¿½ï¿½ï¿½ï¿½
     }
     else if (SoccerObserver)
     {

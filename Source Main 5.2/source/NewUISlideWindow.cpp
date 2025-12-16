@@ -1,7 +1,7 @@
 // NewUISlideWindow.cpp: implementation of the CNewUISlideWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUISlideWindow.h"
 #include "NewUIManager.h"

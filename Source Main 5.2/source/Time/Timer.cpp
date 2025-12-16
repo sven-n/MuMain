@@ -1,6 +1,6 @@
 // Timer.cpp: implementation of the CTimer class.
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "Timer.h"
 #include <chrono>
 

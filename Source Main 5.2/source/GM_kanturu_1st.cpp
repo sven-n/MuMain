@@ -1,7 +1,7 @@
 ﻿//*****************************************************************************
 // File: GM_kanturu_1st.cpp
 //*****************************************************************************
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "ZzzLodTerrain.h"

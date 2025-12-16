@@ -2,7 +2,7 @@
 // File: Win.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "Win.h"
 #include "Input.h"
 #include "Button.h"

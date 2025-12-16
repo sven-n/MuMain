@@ -2,7 +2,7 @@
 // w_PetActionCollecter.cpp: implementation of the PetActionStand class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #ifdef PJH_ADD_PANDA_PET
 

@@ -1,6 +1,6 @@
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "WindowsConsole.h"
 
@@ -73,7 +73,7 @@ CConsoleWindow::CConsoleWindow()
     m_bActiveCloseButton = false;
     m_started = false;
 
-    m_LimitTimer.SetTimer(12000);	//. 12ÃÊ
+    m_LimitTimer.SetTimer(12000);	//. 12ï¿½ï¿½
 }
 CConsoleWindow::~CConsoleWindow() {}
 

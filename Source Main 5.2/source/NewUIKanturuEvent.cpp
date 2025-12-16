@@ -2,7 +2,7 @@
 // NewUIKanturu2ndEnterNpc.cpp: implementation of the CNewUIKanturu2ndEnterNpc class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIKanturuEvent.h"
 #include "NewUICommonMessageBox.h"
 #include "NewUISystem.h"

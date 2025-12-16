@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUICastleWindow.h"
 #include "NewUISystem.h"

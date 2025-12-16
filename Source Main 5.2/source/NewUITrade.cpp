@@ -2,7 +2,7 @@
 // Desc: implementation of the CNewUITrade class.
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUITrade.h"
 #include "NewUISystem.h"

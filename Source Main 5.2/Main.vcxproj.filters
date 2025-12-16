@@ -1254,7 +1254,7 @@
     <ClInclude Include="source\resource.h">
       <Filter>MU\Common</Filter>
     </ClInclude>
-    <ClInclude Include="source\stdafx.h">
+    <ClInclude Include="source\MUMain/stdafx.h">
       <Filter>MU\Common</Filter>
     </ClInclude>
     <ClInclude Include="source\BaseCls.h">

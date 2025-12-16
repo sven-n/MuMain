@@ -1,7 +1,7 @@
 ﻿// MapManager.cpp: implementation of the CMapManager class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "MapManager.h"
 #include "CameraMove.h"
 #include "CDirection.h"

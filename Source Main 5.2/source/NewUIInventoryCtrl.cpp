@@ -2,7 +2,7 @@
 // NewUIInventoryCtrl.cpp: implementation of the CNewUIInventoryCtrl class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIInventoryCtrl.h"
 #include "NewUIItemMng.h"
 #include "NewUISystem.h"

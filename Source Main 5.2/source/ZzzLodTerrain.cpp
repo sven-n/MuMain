@@ -2,7 +2,7 @@
 // Terrain ���� �Լ�
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <math.h>

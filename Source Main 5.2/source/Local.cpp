@@ -1,7 +1,7 @@
 // Local.cpp: implementation of the Local
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "Local.h"
 
 bool CheckSpecialText(wchar_t* Text)

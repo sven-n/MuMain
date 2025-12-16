@@ -2,7 +2,7 @@
 // SkillEffectMgr.cpp: implementation of the CSkillEffectMgr class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "SkillEffectMgr.h"
 #include "ZzzLodTerrain.h"
 #include "CDirection.h"

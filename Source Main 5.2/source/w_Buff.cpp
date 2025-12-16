@@ -2,7 +2,7 @@
 // w_Buff.cpp: implementation of the Buff class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "w_Buff.h"
 
 namespace

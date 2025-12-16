@@ -1,7 +1,7 @@
 // NewUIDuelWatchMainFrameWindow.cpp: implementation of the CNewUIDuelWatchMainFrameWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIDuelWatchMainFrameWindow.h"
 #include "NewUISystem.h"
 #include "DuelMgr.h"

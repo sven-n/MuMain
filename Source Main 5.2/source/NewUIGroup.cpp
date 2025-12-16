@@ -2,7 +2,7 @@
 //	NewUIGroup.cpp
 //=============================================================================
 #pragma once
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIGroup.h"
 
 using namespace SEASON3B;

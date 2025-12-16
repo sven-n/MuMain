@@ -2,7 +2,7 @@
 // NewUIMoveCommandWindow.cpp: implementation of the CNewUIMoveCommandWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIMoveCommandWindow.h"
 #include "NewUISystem.h"
 #include "ZzzInterface.h"

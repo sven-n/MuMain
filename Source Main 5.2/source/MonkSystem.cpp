@@ -1,7 +1,7 @@
 ﻿// MonkSystem.cpp: implementation of the CMonkSystem class.
 //
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "MonkSystem.h"
 #include "ZzzEffect.h"

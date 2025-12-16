@@ -2,7 +2,7 @@
 // File: CharSelMainWin.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "CharSelMainWin.h"
 #include "Input.h"
 #include "UIMng.h"

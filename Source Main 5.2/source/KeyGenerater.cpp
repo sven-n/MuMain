@@ -1,7 +1,7 @@
 // KeyGenerater.cpp: implementation of the CKeyGenerater class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "KeyGenerater.h"
 
 CKeyGenerater g_KeyGenerater;

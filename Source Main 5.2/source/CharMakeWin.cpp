@@ -2,7 +2,7 @@
 // File: CharMakeWin.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "CharMakeWin.h"
 #include "Input.h"
 #include "UIMng.h"

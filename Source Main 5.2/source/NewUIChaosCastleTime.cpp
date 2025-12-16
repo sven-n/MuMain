@@ -1,7 +1,7 @@
 // NewUIChaosCastleTime.cpp: implementation of the CNewUIChaosCastleTime class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "MapManager.h"
 #include "NewUIChaosCastleTime.h"
 #include "NewUISystem.h"

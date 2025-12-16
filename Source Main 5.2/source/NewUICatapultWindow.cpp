@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUICatapultWindow.h"
 #include "NewUISystem.h"
 #include "ZzzCharacter.h"

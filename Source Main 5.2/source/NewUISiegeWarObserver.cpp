@@ -1,7 +1,7 @@
 // NewUISiegeWarObserver.cpp: implementation of the CNewUISiegeWarObserver class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUISiegeWarObserver.h"
 
 #include "UIControls.h"

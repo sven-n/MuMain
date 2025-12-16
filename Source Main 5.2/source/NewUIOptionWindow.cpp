@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIOptionWindow.h"
 #include "NewUISystem.h"
 #include "ZzzTexture.h"

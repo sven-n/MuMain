@@ -1,7 +1,7 @@
 // NewUIGuildInfoWindow.cpp: implementation of the CNewUIGuildInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUICryWolf.h"
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"

@@ -1,7 +1,7 @@
 // NewUINPCShop.cpp: implementation of the CNewUINPCShop class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUINPCShop.h"
 
 #include "DSPlaySound.h"
