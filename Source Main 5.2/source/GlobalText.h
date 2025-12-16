@@ -71,19 +71,28 @@ namespace detail
     }
 }
 
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <cstring>
+#include <fstream>
+#include <string>
+#include <type_traits>
+#include <vector>
+
 template <class T>
 class TGlobalText
 {
 #pragma pack(push, 1)
     struct GLOBALTEXT_HEADER
     {
-        WORD	wSignature;	
-        DWORD	dwNumberOfText;
+        std::uint16_t	wSignature;
+        std::uint32_t	dwNumberOfText;
     };
     struct GLOBALTEXT_STRING_HEADER
     {
-        DWORD	dwKey;
-        DWORD	dwSizeOfString;
+        std::uint32_t	dwKey;
+        std::uint32_t	dwSizeOfString;
     };
 #pragma pack(pop)
 
@@ -91,35 +100,31 @@ class TGlobalText
     {
         std::wstring	m_strKeyCode;
     public:
-        CKeyCode(int key)
+        explicit CKeyCode(int key)
         {
-            wchar_t szKeyCode[12] = { 0, };
-            _itow(key, szKeyCode, 10);
-            m_strKeyCode = szKeyCode;
-
+            m_strKeyCode = std::to_wstring(key);
             if (m_strKeyCode.size() < 9)
             {
-                int nInsertChar = 9 - m_strKeyCode.size();
-                m_strKeyCode.insert(m_strKeyCode.begin(), nInsertChar, '0');
+                const int nInsertChar = static_cast<int>(9 - m_strKeyCode.size());
+                m_strKeyCode.insert(m_strKeyCode.begin(), nInsertChar, L'0');
             }
             m_strKeyCode.resize(9);
         }
-        ~CKeyCode() { }
 
-        WORD GetTypeCode()
+        std::uint16_t GetTypeCode() const
         {
             std::wstring strTypeCode(m_strKeyCode, 0, 2);
-            return _wtoi(strTypeCode.c_str());
+            return static_cast<std::uint16_t>(std::stoi(strTypeCode));
         }
-        WORD GetCountryCode()
+        std::uint16_t GetCountryCode() const
         {
             std::wstring strCountryCode(m_strKeyCode, 2, 3);
-            return _wtoi(strCountryCode.c_str());
+            return static_cast<std::uint16_t>(std::stoi(strCountryCode));
         }
-        WORD GetIndexCode()
+        std::uint16_t GetIndexCode() const
         {
             std::wstring strIndexCode(m_strKeyCode, 5, 4);
-            return _wtoi(strIndexCode.c_str());
+            return static_cast<std::uint16_t>(std::stoi(strIndexCode));
         }
     };
 
@@ -151,82 +156,96 @@ public:
         LD_ALL_TEXTS = 0xFFFFFFFF
     };
 
-    bool Load(const std::wstring& strFilePath, DWORD dwLoadDisposition)
+    bool Load(const std::wstring& strFilePath, std::uint32_t dwLoadDisposition)
     {
-        FILE* fp = _wfopen(strFilePath.c_str(), L"rb");
-        if (NULL == fp)
-            return false;
-
-        GLOBALTEXT_HEADER GTHeader;
-        fread(&GTHeader, sizeof(GLOBALTEXT_HEADER), 1, fp);
-
-        if (GTHeader.wSignature != 0x5447)
-            return false;
-
-        for (int i = 0; i < (int)(GTHeader.dwNumberOfText); i++)
+        std::ifstream file(strFilePath.c_str(), std::ios::binary);
+        if (!file)
         {
-            GLOBALTEXT_STRING_HEADER GTStringHeader;
-            fread(&GTStringHeader, sizeof(GLOBALTEXT_STRING_HEADER), 1, fp);
+            return false;
+        }
 
-            char* pStringBuffer = new char[GTStringHeader.dwSizeOfString + 1];
-            fread(pStringBuffer, sizeof(char), GTStringHeader.dwSizeOfString, fp);
+        GLOBALTEXT_HEADER GTHeader{};
+        file.read(reinterpret_cast<char*>(&GTHeader), sizeof(GLOBALTEXT_HEADER));
 
-            if (CheckLoadDisposition(GTStringHeader.dwKey, dwLoadDisposition) || GTStringHeader.dwKey < MAX_NUMBER_OF_TEXTS)
+        if (!file || GTHeader.wSignature != 0x5447)
+        {
+            return false;
+        }
+
+        for (std::uint32_t i = 0; i < GTHeader.dwNumberOfText; i++)
+        {
+            GLOBALTEXT_STRING_HEADER GTStringHeader{};
+            file.read(reinterpret_cast<char*>(&GTStringHeader), sizeof(GLOBALTEXT_STRING_HEADER));
+            if (!file)
             {
-                BuxConvert(pStringBuffer, sizeof(char) * GTStringHeader.dwSizeOfString);		//. decoding
-                pStringBuffer[GTStringHeader.dwSizeOfString] = '\0';
-
-                int wchars_num = MultiByteToWideChar(CP_UTF8, 0, pStringBuffer, -1, NULL, 0);
-                auto* text = new wchar_t[wchars_num];
-                MultiByteToWideChar(CP_UTF8, 0, pStringBuffer, -1, text, wchars_num);
-
-                auto normalized = detail::NormalizePrintfSpecifiers(text);
-                m_StringSet.Add(GTStringHeader.dwKey, normalized);
-
-                delete[] text;
+                return false;
             }
 
-            delete[] pStringBuffer;
+            std::vector<std::uint8_t> stringBuffer(GTStringHeader.dwSizeOfString + 1u, 0);
+            file.read(reinterpret_cast<char*>(stringBuffer.data()), GTStringHeader.dwSizeOfString);
+            if (!file)
+            {
+                return false;
+            }
+
+            if (CheckLoadDisposition(static_cast<int>(GTStringHeader.dwKey), dwLoadDisposition) ||
+                GTStringHeader.dwKey < MAX_NUMBER_OF_TEXTS)
+            {
+                BuxConvert(stringBuffer.data(), GTStringHeader.dwSizeOfString);
+                if constexpr (std::is_same_v<T, wchar_t>)
+                {
+                    std::wstring decoded;
+                    if (!Utf8ToWide(reinterpret_cast<const char*>(stringBuffer.data()), decoded))
+                    {
+                        return false;
+                    }
+                    auto normalized = detail::NormalizePrintfSpecifiers(decoded.c_str());
+                    m_StringSet.Add(GTStringHeader.dwKey, normalized);
+                }
+                else
+                {
+                    auto* decrypted = reinterpret_cast<char*>(stringBuffer.data());
+                    m_StringSet.Add(GTStringHeader.dwKey, decrypted);
+                }
+            }
         }
-        fclose(fp);
         return true;
     }
     bool Save(const std::wstring& strFilePath)
     {
-        FILE* fp = _wfopen(strFilePath.c_str(), L"wb");
-        if (NULL == fp)
+        std::ofstream file(strFilePath.c_str(), std::ios::binary | std::ios::trunc);
+        if (!file)
+        {
             return false;
+        }
 
-        GLOBALTEXT_HEADER GTHeader;
+        GLOBALTEXT_HEADER GTHeader{};
         GTHeader.wSignature = 0x5447;
         GTHeader.dwNumberOfText = m_StringSet.GetCount();
-        fwrite(&GTHeader, sizeof(GLOBALTEXT_HEADER), 1, fp);
+        file.write(reinterpret_cast<const char*>(&GTHeader), sizeof(GLOBALTEXT_HEADER));
 
-        for (int i = 0; i < GTHeader.dwNumberOfText; i++)
+        for (std::uint32_t i = 0; i < GTHeader.dwNumberOfText; i++)
         {
-            int key = m_StringSet.GetKey(i);
-            if (-1 == key)
+            const int key = m_StringSet.GetKey(static_cast<int>(i));
+            if (key == -1)
             {
-                fclose(fp);
                 return false;
             }
 
-            GLOBALTEXT_STRING_HEADER GTStringHeader;
-            GTStringHeader.dwKey = key;
-            GTStringHeader.dwSizeOfString = m_StringSet.FindObj(key).size();
+            const auto& strObj = m_StringSet.FindObj(key);
+            GLOBALTEXT_STRING_HEADER GTStringHeader{};
+            GTStringHeader.dwKey = static_cast<std::uint32_t>(key);
+            GTStringHeader.dwSizeOfString = static_cast<std::uint32_t>(strObj.size());
 
-            fwrite(&GTStringHeader, sizeof(GLOBALTEXT_STRING_HEADER), 1, fp);
+            file.write(reinterpret_cast<const char*>(&GTStringHeader), sizeof(GLOBALTEXT_STRING_HEADER));
 
-            T* pStringBuffer = new T[GTStringHeader.dwSizeOfString];
-            memcpy(pStringBuffer, m_StringSet[key], sizeof(T) * GTStringHeader.dwSizeOfString);
+            std::vector<std::uint8_t> buffer(sizeof(T) * GTStringHeader.dwSizeOfString);
+            std::memcpy(buffer.data(), m_StringSet[key], buffer.size());
 
-            BuxConvert(pStringBuffer, sizeof(T) * GTStringHeader.dwSizeOfString);		//. encoding
-            fwrite(pStringBuffer, sizeof(T), GTStringHeader.dwSizeOfString, fp);
-
-            delete[] pStringBuffer;
+            BuxConvert(buffer.data(), buffer.size());
+            file.write(reinterpret_cast<const char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
         }
-        fclose(fp);
-        return true;
+        return file.good();
     }
 
     bool Add(int key, const T* szString) { return m_StringSet.Add(key, szString); }
@@ -236,7 +255,7 @@ public:
     const T* Get(int key) { return m_StringSet[key]; }
     size_t GetStringSize(int key) { return m_StringSet.FindObj(key).size(); }
 
-    WORD GetNumCountryCode(const std::wstring& strAlpha3Code)
+    std::uint16_t GetNumCountryCode(const std::wstring& strAlpha3Code)
     {	//. strAlpha3Code: Official Alpha-3 Code
         if (0 == strAlpha3Code.compare(L"USA") || 0 == strAlpha3Code.compare(L"CAN")) return 130;
         if (0 == strAlpha3Code.compare(L"JPN")) return 450;
@@ -258,15 +277,15 @@ public:
     }
 
 protected:
-    void BuxConvert(PVOID pvBuffer, DWORD dwSize)
+    static void BuxConvert(std::uint8_t* data, std::size_t length)
     {
-        PBYTE pbyBuffer = (PBYTE)(pvBuffer);
-        BYTE byBuxCode[3] = { 0xfc,0xcf,0xab };
-
-        for (int i = 0; i < (int)dwSize; i++)
-            pbyBuffer[i] ^= byBuxCode[i % 3];
+        static constexpr std::array<std::uint8_t, 3> byBuxCode{ 0xfc,0xcf,0xab };
+        for (std::size_t i = 0; i < length; ++i)
+        {
+            data[i] ^= byBuxCode[i % byBuxCode.size()];
+        }
     }
-    bool CheckLoadDisposition(int key, DWORD dwLoadDisposition)
+    bool CheckLoadDisposition(int key, std::uint32_t dwLoadDisposition)
     {
         CKeyCode KeyCode(key);
         if (((dwLoadDisposition & LD_USA_CANADA_TEXTS) == LD_USA_CANADA_TEXTS) &&
@@ -300,6 +319,90 @@ protected:
             (KeyCode.GetCountryCode() == GetNumCountryCode(L"FRN")))
             return true;
         return false;
+    }
+
+    static bool Utf8ToWide(const char* utf8, std::wstring& out)
+    {
+        out.clear();
+        if (utf8 == nullptr)
+        {
+            return false;
+        }
+
+        const unsigned char* bytes = reinterpret_cast<const unsigned char*>(utf8);
+        std::size_t i = 0;
+        while (bytes[i] != '\0')
+        {
+            std::uint32_t codepoint = 0;
+            unsigned char c = bytes[i];
+            std::size_t extra = 0;
+            if (c <= 0x7F)
+            {
+                codepoint = c;
+                extra = 0;
+            }
+            else if ((c & 0xE0) == 0xC0)
+            {
+                codepoint = c & 0x1F;
+                extra = 1;
+            }
+            else if ((c & 0xF0) == 0xE0)
+            {
+                codepoint = c & 0x0F;
+                extra = 2;
+            }
+            else if ((c & 0xF8) == 0xF0)
+            {
+                codepoint = c & 0x07;
+                extra = 3;
+            }
+            else
+            {
+                return false;
+            }
+
+            for (std::size_t j = 0; j < extra; ++j)
+            {
+                ++i;
+                unsigned char cc = bytes[i];
+                if ((cc & 0xC0) != 0x80)
+                {
+                    return false;
+                }
+                codepoint = (codepoint << 6) | (cc & 0x3F);
+            }
+
+            if ((codepoint >= 0xD800 && codepoint <= 0xDFFF) || codepoint > 0x10FFFF)
+            {
+                return false;
+            }
+
+            if ((extra == 1 && codepoint < 0x80) ||
+                (extra == 2 && codepoint < 0x800) ||
+                (extra == 3 && codepoint < 0x10000))
+            {
+                return false;
+            }
+            if constexpr (sizeof(wchar_t) == 2)
+            {
+                if (codepoint <= 0xFFFF)
+                {
+                    out.push_back(static_cast<wchar_t>(codepoint));
+                }
+                else
+                {
+                    codepoint -= 0x10000;
+                    out.push_back(static_cast<wchar_t>((codepoint >> 10) + 0xD800));
+                    out.push_back(static_cast<wchar_t>((codepoint & 0x3FF) + 0xDC00));
+                }
+            }
+            else
+            {
+                out.push_back(static_cast<wchar_t>(codepoint));
+            }
+            ++i;
+        }
+        return true;
     }
 };
 
