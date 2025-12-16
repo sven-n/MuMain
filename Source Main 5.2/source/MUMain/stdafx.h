@@ -1,7 +1,7 @@
 // MUMain/stdafx.h : include file for standard system include files,
 #pragma once
 
-//warining
+// Warning control
 #pragma warning( disable : 4067 )
 #pragma warning( disable : 4786 )
 #pragma warning( disable : 4800 )
@@ -47,12 +47,12 @@
 
 #include <windows.h>
 
-//windows
+// Windows
 #include <winsock2.h>
 #include <mmsystem.h>
 #include <shellapi.h>
 
-//c runtime
+// C runtime
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
@@ -75,16 +75,16 @@
 
 #pragma warning( pop )
 
-//opengl
+// OpenGL
 #include <gl/glew.h>
 #include <gl/GL.h>
 
-//patch
-//winmain
+// Patch
+// WinMain
 #include "Winmain.h"
 #include "Defined_Global.h"
 
-//client
+// Client
 #include "_define.h"
 #include "_enum.h"
 #include "_types.h"
@@ -109,5 +109,5 @@
 #include "_crypt.h"
 
 inline std::wstring g_strSelectedML = L"";
-inline float g_fScreenRate_x = 0;
-inline float g_fScreenRate_y = 0;
+inline float g_fScreenRate_x = 0.0f;
+inline float g_fScreenRate_y = 0.0f;
