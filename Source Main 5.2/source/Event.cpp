@@ -21,6 +21,7 @@
 #include "DSPlaySound.h"
 #include "LoadData.h"
 #include "Event.h"
+#include "Random.h"
 
 #include <algorithm>
 #include <array>
@@ -30,7 +31,6 @@
 #include <cstdint>
 #include <cwchar>
 #include <limits>
-#include <random>
 
 namespace
 {
@@ -46,38 +46,6 @@ constexpr std::array<std::array<float, 3>, 3> kSnowBurstOffsets{{
     {-50.f, -50.f, 50.f},
     {50.f, -50.f, 50.f},
 }};
-
-std::mt19937& EventRandomEngine()
-{
-    static std::mt19937 engine{
-        []()
-        {
-            std::seed_seq seed{
-                std::random_device{}(),
-                std::random_device{}(),
-                std::random_device{}(),
-                std::random_device{}()};
-            return std::mt19937{seed};
-        }()};
-    return engine;
-}
-
-float RandomFloat(float minValue, float maxValue)
-{
-    std::uniform_real_distribution<float> dist(minValue, maxValue);
-    return dist(EventRandomEngine());
-}
-
-int RandomInt(int minValueInclusive, int maxValueInclusive)
-{
-    std::uniform_int_distribution<int> dist(minValueInclusive, maxValueInclusive);
-    return dist(EventRandomEngine());
-}
-
-float RandomUnit()
-{
-    return RandomFloat(0.0f, 1.0f);
-}
 
 template <std::size_t N>
 void CopyWideString(wchar_t (&destination)[N], const wchar_t* source)
@@ -350,9 +318,9 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 }
                 else
                 {
-                    vLight[0] = RandomUnit();
-                    vLight[1] = RandomUnit();
-                    vLight[2] = RandomUnit();
+                    vLight[0] = Random::Unit();
+                    vLight[1] = Random::Unit();
+                    vLight[2] = Random::Unit();
                 }
                 CreateParticle(BITMAP_SHINY, vWorldPos, o->Angle, vLight, 4, 0.8f);
             }
@@ -374,9 +342,9 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     }
                     else
                     {
-                        vLight[0] = RandomUnit();
-                        vLight[1] = RandomUnit();
-                        vLight[2] = RandomUnit();
+                        vLight[0] = Random::Unit();
+                        vLight[1] = Random::Unit();
+                        vLight[2] = Random::Unit();
                     }
                     CreateParticle(BITMAP_SHINY, vWorldPos, o->Angle, vLight, 4, 0.8f);
                 }
@@ -392,7 +360,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if (o->AnimationFrame <= 0.3f)
             {
-                o->m_iAnimation = RandomInt(0, 5) + MODEL_NEWYEARSDAY_EVENT_BEKSULKI;
+                o->m_iAnimation = Random::RangeInt(0, 5) + MODEL_NEWYEARSDAY_EVENT_BEKSULKI;
                 CreateParticleFpsChecked(BITMAP_EXPLOTION, vWorldPos, o->Angle, vLight, 0, 0.5f);
                 if (rand_fps_check(4)) o->m_iAnimation = MODEL_NEWYEARSDAY_EVENT_PIG;
 
