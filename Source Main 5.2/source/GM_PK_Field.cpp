@@ -7,7 +7,6 @@
 #include <cmath>
 #include <cstdint>
 #include <optional>
-#include <random>
 
 #include "stdafx.h"
 #include "ZzzBMD.h"
@@ -18,6 +17,7 @@
 #include "ZzzOpenData.h"
 #include "w_MapHeaders.h"
 #include "DSPlaySound.h"
+#include "Random.h"
 
 namespace
 {
@@ -53,31 +53,6 @@ namespace
         return (it != kMonsterDefinitions.end()) ? &(*it) : nullptr;
     }
 
-    std::mt19937& RandomEngine()
-    {
-        thread_local static std::mt19937 engine{ std::random_device{}() };
-        return engine;
-    }
-
-    int RandomInt(int minInclusive, int maxInclusive)
-    {
-        if (minInclusive >= maxInclusive)
-        {
-            return minInclusive;
-        }
-        std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
-        return dist(RandomEngine());
-    }
-
-    float RandomFloat(float minInclusive, float maxInclusive)
-    {
-        if (minInclusive >= maxInclusive)
-        {
-            return minInclusive;
-        }
-        std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
-        return dist(RandomEngine());
-    }
     constexpr int kBlurSampleCount = 5;
 }
 
@@ -355,7 +330,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         if (rand_fps_check(4))
         {
-            float fRed = static_cast<float>(RandomInt(0, 2)) * 0.01f + 0.015f;
+            float fRed = Random::RangeFloat(0, 2) * 0.01f + 0.015f;
             Vector(fRed, 0.0f, 0.0f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 11, o->Scale, o);
         }
@@ -368,7 +343,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
         vec3_t vAngle;
         if (rand_fps_check(3))
         {
-            Vector(static_cast<float>(RandomInt(120, 159)), 0.f, static_cast<float>(RandomInt(0, 29)), vAngle);
+            Vector(Random::RangeFloat(120, 159), 0.f, Random::RangeFloat(0, 29), vAngle);
             VectorAdd(vAngle, o->Angle, vAngle);
             CreateJoint(BITMAP_JOINT_SPARK, o->Position, o->Position, vAngle, 4, o, o->Scale);
             CreateParticle(BITMAP_SPARK, o->Position, vAngle, Light, 9, o->Scale);
@@ -395,7 +370,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
-        switch (RandomInt(0, 2))
+        switch (Random::RangeInt(0, 2))
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
@@ -465,7 +440,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         {
             o->AnimationFrame = 1;
 
-            int test = RandomInt(0, 999);
+            int test = Random::RangeInt(0, 999);
             if (test >= 0 && test < 2)
             {
                 o->PKKey = 1;
@@ -477,7 +452,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         }
         vec3_t p, Pos, Light;
         Vector(0.4f, 0.1f, 0.1f, Light);
-        //Vector(static_cast<float>(RandomInt(-30, -11)), static_cast<float>(RandomInt(-30, -11)), 0.0f, p);
+        //Vector(Random::RangeFloat(-30, -11), Random::RangeFloat(-30, -11), 0.0f, p);
         Vector(-150.0f, 0.0f, 0.0f, p);
         b->TransformPosition(BoneTransform[4], p, Pos, false);
         if (o->AnimationFrame >= 35.0f && o->AnimationFrame < 50.0f)
@@ -511,7 +486,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         vec3_t p, Pos, Light;
         //Vector(0.08f, 0.08f, 0.08f, Light);
         Vector(0.3f, 0.1f, 0.1f, Light);
-        Vector(static_cast<float>(RandomInt(-30, -11)), static_cast<float>(RandomInt(-30, -11)), 0.0f, p);
+        Vector(Random::RangeFloat(-30, -11), Random::RangeFloat(-30, -11), 0.0f, p);
         b->TransformPosition(BoneTransform[4], p, Pos, false);
         if (o->AnimationFrame >= 7.0f && o->AnimationFrame < 13.0f)
             CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
@@ -572,7 +547,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                     CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLightFire, o);
 
                     fScale = 0.7f;
-                    Vector(static_cast<float>(RandomInt(-5, 4)), static_cast<float>(RandomInt(-5, 4)), static_cast<float>(RandomInt(-5, 4)), vRelative);
+                    Vector(Random::RangeFloat(-5, 4), Random::RangeFloat(-5, 4), Random::RangeFloat(-5, 4), vRelative);
                     b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
                 }
                 else
@@ -581,15 +556,15 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                     vPos[2] += 50.0f;
                     CreateSprite(BITMAP_LIGHT, vPos, 2.5f, vLightFire, o);
 
-                    Vector(static_cast<float>(RandomInt(-10, 9)), static_cast<float>(RandomInt(-10, 9)), static_cast<float>(RandomInt(-10, 9)), vRelative);
+                    Vector(Random::RangeFloat(-10, 9), Random::RangeFloat(-10, 9), Random::RangeFloat(-10, 9), vRelative);
                     b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
                 }
                 if (o->Type == MODEL_BLOOD_ASSASSIN)
                 {
                     for (int i = 0; i < 2; ++i)
                     {
-                        float fScale = static_cast<float>(RandomInt(18, 22)) * 0.03f;
-                        switch (RandomInt(0, 2))
+                        float fScale = Random::RangeFloat(18, 22) * 0.03f;
+                        switch (Random::RangeInt(0, 2))
                         {
                         case 0:
                             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
@@ -607,9 +582,9 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                 {
                     for (int i = 0; i < 2; ++i)
                     {
-                        float fScale = static_cast<float>(RandomInt(18, 22)) * 0.03f;
+                        float fScale = Random::RangeFloat(18, 22) * 0.03f;
                         Vector(0.6f, 0.9f, 0.1f, o->Light);
-                        switch (RandomInt(0, 2))
+                        switch (Random::RangeInt(0, 2))
                         {
                         case 0:
                             CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPos, o->Angle, o->Light, 0, fScale);
@@ -681,11 +656,11 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             for (int i = 0; i < 4; ++i)
             {
-                if (RandomInt(0, 3) > 0) continue;
+                if (Random::RangeInt(0, 3) > 0) continue;
 
                 b->TransformByObjectBone(vPos, o, iBones[i]);
                 CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 50, 1.0f);
-                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + RandomInt(0, 2), vPos, o->Angle, vLight, 0, 0.01f);
+                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::RangeInt(0, 2), vPos, o->Angle, vLight, 0, 0.01f);
             }
 
             if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -995,22 +970,22 @@ bool CGM_PK_Field::CreateFireSpark(PARTICLE* o)
     }
 
     o->Type = BITMAP_FIRE_SNUFF;
-    o->Scale = static_cast<float>(RandomInt(0, 49)) / 100.f + 0.4f;
+    o->Scale = Random::RangeFloat(0, 49) / 100.f + 0.4f;
     vec3_t Position;
-    Vector(Hero->Object.Position[0] + static_cast<float>(RandomInt(-800, 799)), Hero->Object.Position[1] + static_cast<float>(RandomInt(-500, 899)), Hero->Object.Position[2] + static_cast<float>(RandomInt(50, 349)), Position);
+    Vector(Hero->Object.Position[0] + Random::RangeFloat(-800, 799), Hero->Object.Position[1] + Random::RangeFloat(-500, 899), Hero->Object.Position[2] + Random::RangeFloat(50, 349), Position);
 
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
-    o->Velocity[0] = -static_cast<float>(RandomInt(64, 127)) * 0.1f;
+    o->Velocity[0] = -Random::RangeFloat(64, 127) * 0.1f;
     if (Position[1] < CameraPosition[1] + 400.f)
     {
         o->Velocity[0] = -o->Velocity[0] + 2.2f;
     }
-    o->Velocity[1] = static_cast<float>(RandomInt(-16, 15)) * 0.1f;
-    o->Velocity[2] = static_cast<float>(RandomInt(-16, 15)) * 0.1f;
-    o->TurningForce[0] = static_cast<float>(RandomInt(-8, 7)) * 0.1f;
-    o->TurningForce[1] = static_cast<float>(RandomInt(-32, 31)) * 0.1f;
-    o->TurningForce[2] = static_cast<float>(RandomInt(-8, 7)) * 0.1f;
+    o->Velocity[1] = Random::RangeFloat(-16, 15) * 0.1f;
+    o->Velocity[2] = Random::RangeFloat(-16, 15) * 0.1f;
+    o->TurningForce[0] = Random::RangeFloat(-8, 7) * 0.1f;
+    o->TurningForce[1] = Random::RangeFloat(-32, 31) * 0.1f;
+    o->TurningForce[2] = Random::RangeFloat(-8, 7) * 0.1f;
 
     Vector(1.f, 0.f, 0.f, o->Light);
 
