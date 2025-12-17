@@ -22,6 +22,7 @@
 #include "ZzzInventory.h"
 #include "ZzzLodTerrain.h"
 #include "DSPlaySound.h"
+#include "Random.h"
 
 #include "MUMain/Resources/Windows/resource.h"
 #include <imm.h>
@@ -67,7 +68,7 @@ CUIMapName* g_pUIMapName = nullptr;		// rozy
 
 float Time_Effect = 0;
 bool ashies = false;
-int weather = rand() % 3;
+int weather = Random::RangeInt(0, 2);
 
 HWND      g_hWnd = nullptr;
 HINSTANCE g_hInst = nullptr;
@@ -1284,18 +1285,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     SetTimer(g_hWnd, HACK_TIMER, 20 * 1000, nullptr);
     SetTimer(g_hWnd, MUHELPER_TIMER, 250 /* ms */, MUHelper::CMuHelper::TimerProc);
 
-    srand((unsigned)time(nullptr));
-
     for (int & i : RandomTable)
-        i = rand() % 360;
+        i = Random::RangeInt(0, 359);
 
-    RendomMemoryDump = new BYTE[rand() % 100 + 1];
+    RendomMemoryDump = new BYTE[Random::RangeInt(1, 100)];
     GateAttribute = new GATE_ATTRIBUTE[MAX_GATES] { };
     SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS] { };
     ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024] { };
-    ItemAttribute = ((ITEM_ATTRIBUTE*)ItemAttRibuteMemoryDump) + rand() % 1024;
+    ItemAttribute = ((ITEM_ATTRIBUTE*)ItemAttRibuteMemoryDump) + Random::RangeInt(0, 1023);
     CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128] { };
-    CharactersClient = ((CHARACTER*)CharacterMemoryDump) + rand() % 128;
+    CharactersClient = ((CHARACTER*)CharacterMemoryDump) + Random::RangeInt(0, 127);
     CharacterMachine = new CHARACTER_MACHINE;
 
     memset(GateAttribute, 0, sizeof(GATE_ATTRIBUTE) * (MAX_GATES));
