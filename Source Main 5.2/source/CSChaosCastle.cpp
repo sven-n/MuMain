@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 
+#include "Random.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
@@ -22,7 +23,6 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <random>
 
 extern int g_iChatInputType;
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
@@ -92,24 +92,6 @@ constexpr int kActionTriggerTime = 30;
 
 CastleLevel g_currentCastleLevel = CastleLevel::Invalid;
 bool g_actionMatch = true;
-
-std::mt19937& RandomEngine()
-{
-    thread_local static std::mt19937 engine{std::random_device{}()};
-    return engine;
-}
-
-int RandomInt(int minInclusive, int maxInclusive)
-{
-    std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
-    return dist(RandomEngine());
-}
-
-float RandomFloat(float minInclusive, float maxInclusive)
-{
-    std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
-    return dist(RandomEngine());
-}
 
 const CastleAreaSet* SelectLimitArea(CastleLevel level)
 {
@@ -190,7 +172,7 @@ bool MoveChaosCastleObjectSetting(int& objCount, int object)
 
     if (rand_fps_check(10) && object)
     {
-        objCount = RandomInt(0, object - 1);
+        objCount = Random::RangeInt(0, object - 1);
         return true;
     }
 
@@ -198,11 +180,11 @@ bool MoveChaosCastleObjectSetting(int& objCount, int object)
     {
         vec3_t Position;
 
-        Position[0] = Hero->Object.Position[0] + static_cast<float>(RandomInt(-400, 399));
-        Position[1] = Hero->Object.Position[1] + static_cast<float>(RandomInt(-400, 399));
+        Position[0] = Hero->Object.Position[0] + Random::RangeFloat(-400, 399);
+        Position[1] = Hero->Object.Position[1] + Random::RangeFloat(-400, 399);
         Position[2] = Hero->Object.Position[2] - 150.f;
 
-        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Hero->Object.Angle, 9, NULL, static_cast<float>(RandomInt(50, 59)));
+        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Hero->Object.Angle, 9, NULL, Random::RangeFloat(50, 59));
     }
 
     return true;
@@ -261,12 +243,12 @@ bool MoveChaosCastleAllObject(OBJECT* o)
             {
                 vec3_t Light = { 1.f, 1.f, 1.f };
 
-                Position[0] = o->Position[0] + static_cast<float>(RandomInt(-150, 149));
+                Position[0] = o->Position[0] + Random::RangeFloat(-150, 149);
                 Position[1] = o->Position[1];
                 Position[2] = Hero->Object.Position[2];
                 CreateParticle(BITMAP_SMOKE + 4, Position, o->Angle, Light, 0, 1.5f);
 
-                EarthQuake = static_cast<float>(RandomInt(-3, -1)) * 0.1f;
+                EarthQuake = Random::RangeFloat(-3, -1) * 0.1f;
             }
             else if (g_iActionTime <= 0)
             {
@@ -295,12 +277,12 @@ bool MoveChaosCastleAllObject(OBJECT* o)
             {
                 vec3_t Light = { 1.f, 1.f, 1.f };
 
-                Position[0] = o->Position[0] + static_cast<float>(RandomInt(-150, 149));
+                Position[0] = o->Position[0] + Random::RangeFloat(-150, 149);
                 Position[1] = o->Position[1];
                 Position[2] = Hero->Object.Position[2];
                 CreateParticle(BITMAP_SMOKE + 4, Position, o->Angle, Light, 0, 1.5f);
 
-                EarthQuake = static_cast<float>(RandomInt(-3, -1)) * 0.1f;
+                EarthQuake = Random::RangeFloat(-3, -1) * 0.1f;
             }
             else if (g_iActionTime <= 0)
             {
@@ -334,12 +316,12 @@ bool MoveChaosCastleAllObject(OBJECT* o)
             {
                 vec3_t Light = { 1.f, 1.f, 1.f };
 
-                Position[0] = o->Position[0] + static_cast<float>(RandomInt(-150, 149));
+                Position[0] = o->Position[0] + Random::RangeFloat(-150, 149);
                 Position[1] = o->Position[1];
                 Position[2] = Hero->Object.Position[2];
                 CreateParticle(BITMAP_SMOKE + 4, Position, o->Angle, Light, 0, 1.5f);
 
-                EarthQuake = static_cast<float>(RandomInt(-3, -1)) * 0.1f;
+                EarthQuake = Random::RangeFloat(-3, -1) * 0.1f;
             }
             else if (g_iActionTime <= 0)
             {
@@ -545,9 +527,9 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
             b->TransformPosition(BoneTransform[1], p, Position);
             if ((int)o->LifeTime == 10)
             {
-                CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL, 60.f + static_cast<float>(RandomInt(0, 9)));
+                CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL, 60.f + Random::RangeFloat(0, 9));
 
-                int randValue = RandomInt(0, 1);
+                int randValue = Random::RangeInt(0, 1);
                 PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + randValue));
                 o->LifeTime = 9.9f;
             }
@@ -580,7 +562,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
 
 void RenderTerrainVisual(int xi, int yi)
 {
-    if (gMapManager.InChaosCastle() == false || RandomInt(0, 7) != 0)
+    if (gMapManager.InChaosCastle() == false || Random::RangeInt(0, 7) != 0)
     {
         return;
     }
@@ -597,14 +579,14 @@ void RenderTerrainVisual(int xi, int yi)
         vec3_t Angle = { 0.f, 0.f, 0.f };
         vec3_t Position;
 
-        Position[0] = (xi * TERRAIN_SCALE) + static_cast<float>(RandomInt(-15, 14));
-        Position[1] = (yi * TERRAIN_SCALE) + static_cast<float>(RandomInt(-15, 14));
+        Position[0] = (xi * TERRAIN_SCALE) + Random::RangeFloat(-15, 14);
+        Position[1] = (yi * TERRAIN_SCALE) + Random::RangeFloat(-15, 14);
         Position[2] = Hero->Object.Position[2];
         CreateParticleFpsChecked(BITMAP_SMOKE + 4, Position, Angle, Light, 0, 1.5f);
 
         if (rand_fps_check(5))
         {
-            EarthQuake = static_cast<float>(RandomInt(-3, -1)) * 0.1f;
+            EarthQuake = Random::RangeFloat(-3, -1) * 0.1f;
         }
     }
 }
