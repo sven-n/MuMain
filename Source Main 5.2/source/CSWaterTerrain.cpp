@@ -8,8 +8,8 @@
 #include <array>
 #include <chrono>
 #include <cmath>
-#include <random>
 
+#include "Random.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"
@@ -103,20 +103,10 @@ void CSWaterTerrain::SpawnAmbientWave(double currentTimeMs)
     }
 
     const int heroWaveX = static_cast<int>(Hero->PositionX * 2.0f);
-    const int waveX = heroWaveX + RandomInt(-15, 14);
+    const int waveX = heroWaveX + Random::RangeInt(-15, 14);
     const int waveY = static_cast<int>((Hero->PositionY) * 2) + 25;
     addSineWave(waveX, waveY, 20, 2, 2000);
     m_lastAutoWaveTime = currentTimeMs;
-}
-
-int CSWaterTerrain::RandomInt(int minInclusive, int maxInclusive)
-{
-    if (minInclusive >= maxInclusive)
-    {
-        return minInclusive;
-    }
-    std::uniform_int_distribution<int> distribution(minInclusive, maxInclusive);
-    return distribution(m_randomEngine);
 }
 
 void    CSWaterTerrain::CreateTerrain(int x, int y)
@@ -225,13 +215,13 @@ void CSWaterTerrain::addSineWave(int x, int y, int radiusX, int radiusY, int hei
     {
         const int minX = 1 + radiusX;
         const int maxX = WATER_TERRAIN_SIZE - radiusX - 1;
-        x = RandomInt(minX, std::max<int>(minX, maxX));
+        x = Random::RangeInt(minX, std::max<int>(minX, maxX));
     }
     if (y < 0)
     {
         const int minY = 1 + radiusY;
         const int maxY = WATER_TERRAIN_SIZE - radiusY - 1;
-        y = RandomInt(minY, std::max<int>(minY, maxY));
+        y = Random::RangeInt(minY, std::max<int>(minY, maxY));
     }
 
     const int radsquare = (radiusX * radiusY);

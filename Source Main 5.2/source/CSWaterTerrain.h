@@ -6,7 +6,6 @@
 
 #include <array>
 #include <cstdint>
-#include <random>
 
 class CSWaterTerrain
 {
@@ -23,7 +22,6 @@ private:
     int     m_iTriangleList[MAX_WATER_GRID * MAX_WATER_GRID * 6];
     int     m_iTriangleListNum;
 
-    std::mt19937 m_randomEngine;
     double  m_lastAutoWaveTime;
 
     void    calcBaseWave(void);
@@ -33,14 +31,12 @@ private:
     void    RenderWaterBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable, float Alpha, float Height = 0.f);
 
     void    SpawnAmbientWave(double currentTimeMs);
-    int     RandomInt(int minInclusive, int maxInclusive);
 
 public:
     CSWaterTerrain(int map)
         : m_iMapIndex(map)
         , m_iWaterPage(0)
         , m_iTriangleListNum(0)
-        , m_randomEngine(std::random_device{}())
         , m_lastAutoWaveTime(0.0)
     {
         Init();
