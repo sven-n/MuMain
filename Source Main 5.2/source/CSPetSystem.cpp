@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <random>
 
+#include "Random.h"
 #include "CSPetSystem.h"
 #include "MapManager.h"
 #include "DuelMgr.h"
@@ -29,24 +29,6 @@
 
 namespace
 {
-std::mt19937& GetRandomEngine()
-{
-    static std::mt19937 engine{ std::random_device{}() };
-    return engine;
-}
-
-int RandomInt(int minInclusive, int maxInclusive)
-{
-    std::uniform_int_distribution<int> dist(minInclusive, maxInclusive);
-    return dist(GetRandomEngine());
-}
-
-float RandomFloat(float minInclusive, float maxInclusive)
-{
-    std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
-    return dist(GetRandomEngine());
-}
-
 bool IsValidCharacterIndex(int index)
 {
     return index >= 0 && index < MAX_CHARACTERS_CLIENT;
@@ -291,7 +273,7 @@ void CSPetSystem::SetAttack(int Key, int attackType)
         OBJECT* o = &m_PetCharacter.Object;
 
         o->m_bActionStart = true;
-        o->Velocity = static_cast<float>(RandomInt(0, 9)) + 20.f;
+        o->Velocity = Random::RangeFloat(0, 9) + 20.f;
         o->Gravity = 0.5f;
 
         PlayBuffer(SOUND_DSPIRIT_RUSH);
@@ -447,7 +429,7 @@ void CSPetDarkSpirit::MovePet(void)
         {
             for (int i = 0; i < 1; ++i)
             {
-                b->TransformPosition(o->BoneTransform[RandomInt(0, 65)], p, Pos);
+                b->TransformPosition(o->BoneTransform[Random::RangeInt(0, 65)], p, Pos);
 
                 CreateParticleFpsChecked(BITMAP_SPARK + 1, Pos, o->Angle, Light, 5, 0.8f);
             }
@@ -457,7 +439,7 @@ void CSPetDarkSpirit::MovePet(void)
         if (Distance >= FlyRange * FlyRange)
         {
             float Angle = CreateAngle2D(o->Position, TargetPosition);
-            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, static_cast<float>(RandomInt(0, 14)) + 5.f);
+            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, Random::RangeFloat(0, 14) + 5.f);
         }
         AngleMatrix(o->Angle, o->Matrix);
 
@@ -492,12 +474,12 @@ void CSPetDarkSpirit::MovePet(void)
         {
             if (Distance >= FlyRange * FlyRange)
             {
-                Speed = -static_cast<float>(RandomInt(0, 63) + 128) * 0.1f;
+                Speed = -(Random::RangeFloat(0, 63) + 128.f) * 0.1f;
             }
             else
             {
-                Speed = -static_cast<float>(RandomInt(0, 7) + 32) * 0.1f;
-                o->Angle[2] += static_cast<float>(RandomInt(0, 59)) * FPS_ANIMATION_FACTOR;
+                Speed = -(Random::RangeFloat(0, 7) + 32.f) * 0.1f;
+                o->Angle[2] += Random::RangeFloat(0, 59) * FPS_ANIMATION_FACTOR;
             }
 
             Speed += o->Direction[1] * FPS_ANIMATION_FACTOR;
@@ -505,7 +487,7 @@ void CSPetDarkSpirit::MovePet(void)
 
             o->Direction[0] = 0.f;
             o->Direction[1] = Speed;
-            o->Direction[2] = static_cast<float>(RandomInt(-32, 31)) * 0.1f;
+            o->Direction[2] = Random::RangeFloat(-32, 31) * 0.1f;
         }
 
         if (o->Direction[1] < -12.f)
@@ -748,14 +730,14 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
         {
             for (int i = 0; i < 10; i++)
             {
-                CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL, static_cast<float>(RandomInt(0, 39) + 20));
+                CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL, (Random::RangeFloat(0, 39) + 20.f));
             }
 
             if (c->CheckAttackTime(1))
             {
                 vec3_t Angle, Light;
 
-                Vector(45.f, static_cast<float>(RandomInt(0, 179)) - 90.f, 0.f, Angle);
+                Vector(45.f, Random::RangeFloat(0, 179) - 90.f, 0.f, Angle);
                 Vector(1.f, 0.8f, 0.6f, Light);
                 CreateEffect(MODEL_DARKLORD_SKILL, o->Position, Angle, Light, 3);
                 c->SetLastAttackEffectTime();
@@ -780,7 +762,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
             {
                 Vector(1.f, 0.6f, 0.4f, Light);
                 Vector(0.f, 0.f, 0.f, p);
-                for (int i = RandomInt(0, 1); i < 66; i += 2)
+                for (int i = Random::RangeInt(0, 1); i < 66; i += 2)
                 {
                     if (!b->Bones[i].Dummy && i < b->NumBones)
                     {
