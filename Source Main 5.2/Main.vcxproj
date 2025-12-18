@@ -711,6 +711,7 @@
     <ClCompile Include="source\ZzzLodTerrain.cpp" />
     <ClCompile Include="source\ZzzObject.cpp" />
     <ClCompile Include="source\ZzzOpenData.cpp" />
+    <ClCompile Include="source\Random.cpp" />
     <ClCompile Include="source\ZzzOpenglUtil.cpp" />
     <ClCompile Include="source\zzzpath.cpp" />
     <ClCompile Include="source\ZzzScene.cpp">
