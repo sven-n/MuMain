@@ -8359,7 +8359,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         o->CurrentAction = pOwner->CurrentAction;
         o->AnimationFrame = pOwner->AnimationFrame;
 
-        if (timeGetTime() - o->m_dwTime >= XMAS_EVENT_TIME)
+        if (GetMillisecondsTimestamp() - o->m_dwTime >= XMAS_EVENT_TIME.count())
         {
             DeleteCharacter(c, o);
         }

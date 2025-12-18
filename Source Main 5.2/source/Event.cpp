@@ -21,17 +21,84 @@
 #include "DSPlaySound.h"
 #include "LoadData.h"
 #include "Event.h"
+#include "Random.h"
+
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cwchar>
+#include <limits>
+
+namespace
+{
+using Clock = std::chrono::steady_clock;
+
+constexpr std::int32_t kChristmasEffectIdBase =
+    static_cast<std::int32_t>(std::numeric_limits<std::int16_t>::max()) - 60;
+constexpr std::int32_t kChristmasEffectIdLimit =
+    static_cast<std::int32_t>(std::numeric_limits<std::int16_t>::max()) - 10;
+
+constexpr std::array<std::array<float, 3>, 3> kSnowBurstOffsets{{
+    {50.f, 50.f, 50.f},
+    {-50.f, -50.f, 50.f},
+    {50.f, -50.f, 50.f},
+}};
+
+template <std::size_t N>
+void CopyWideString(wchar_t (&destination)[N], const wchar_t* source)
+{
+    if constexpr (N == 0)
+    {
+        return;
+    }
+
+    if (source == nullptr)
+    {
+        destination[0] = L'\0';
+        return;
+    }
+
+    std::wcsncpy(destination, source, N - 1);
+    destination[N - 1] = L'\0';
+}
+
+void CreateSnowBursts(OBJECT& object, vec3_t light)
+{
+    for (const auto& offset : kSnowBurstOffsets)
+    {
+        vec3_t position;
+        VectorCopy(object.Position, position);
+        position[0] += offset[0];
+        position[1] += offset[1];
+        position[2] += offset[2];
+
+        CreateParticle(BITMAP_EXPLOTION_MONO, position, object.Angle, light, 0, 0.6f);
+        for (int i = 0; i < 2; ++i)
+        {
+            CreateEffect(MODEL_ICE_SMALL, position, object.Angle, light, 0);
+            CreateParticle(BITMAP_CLUD64, position, object.Angle, light, 3, 1.0f);
+            CreateParticle(BITMAP_CLUD64, position, object.Angle, light, 3, 1.0f);
+            CreateEffect(MODEL_HALLOWEEN_CANDY_STAR, position, object.Angle, light, 1);
+            CreateParticle(BITMAP_SNOW_EFFECT_1, position, object.Angle, light, 0, 0.5f);
+            CreateParticle(BITMAP_SNOW_EFFECT_1, position, object.Angle, light, 0, 0.5f);
+        }
+    }
+}
+} // namespace
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // 크리스마스 이벤트
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CXmasEvent::CXmasEvent(void)
+CXmasEvent::CXmasEvent()
 {
-    m_iEffectID = SHRT_MAX - 60;
+    m_iEffectID = kChristmasEffectIdBase;
 }
 
-CXmasEvent::~CXmasEvent(void)
+CXmasEvent::~CXmasEvent()
 {
 }
 
@@ -106,20 +173,23 @@ void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType)
     switch (c->Object.SubType)
     {
     case MODEL_XMAS_EVENT_CHA_SSANTA:
-        ::wcscpy(c->ID, GlobalText[2245]);	
+        CopyWideString(c->ID, GlobalText[2245]);
         break;
     case MODEL_XMAS_EVENT_CHA_DEER:
-        ::wcscpy(c->ID, GlobalText[2246]);	
+        CopyWideString(c->ID, GlobalText[2246]);
         break;
     case MODEL_XMAS_EVENT_CHA_SNOWMAN:
-        ::wcscpy(c->ID, GlobalText[2247]);	
+        CopyWideString(c->ID, GlobalText[2247]);
+        break;
+    default:
+        CopyWideString(c->ID, L"");
         break;
     }
 
     c->Object.m_bRenderShadow = false;
     c->Object.Owner = pObj;
 
-    c->Object.m_dwTime = timeGetTime();
+    c->Object.m_dwTime = GetMillisecondsTimestamp();
 
     OBJECT* o = &c->Object;
 
@@ -130,54 +200,10 @@ void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType)
     o->CurrentAction = pObj->CurrentAction;
     o->AnimationFrame = pObj->AnimationFrame;
 
-    vec3_t vPos, vLight;
+    vec3_t vLight;
     Vector(0.6f, 0.6f, 0.6f, vLight);
 
-    VectorCopy(o->Position, vPos);
-    vPos[0] += 50.f;
-    vPos[1] += 50.f;
-    vPos[2] += 50.f;
-    CreateParticle(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 0, 0.6f);
-    int i;
-    for (i = 0; i < 2; ++i)
-    {
-        CreateEffect(MODEL_ICE_SMALL, vPos, o->Angle, vLight, 0);
-        CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 3, 1.0f);
-        CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 3, 1.0f);
-        CreateEffect(MODEL_HALLOWEEN_CANDY_STAR, vPos, o->Angle, vLight, 1);
-        CreateParticle(BITMAP_SNOW_EFFECT_1, vPos, o->Angle, vLight, 0, 0.5f);
-        CreateParticle(BITMAP_SNOW_EFFECT_1, vPos, o->Angle, vLight, 0, 0.5f);
-    }
-
-    VectorCopy(o->Position, vPos);
-    vPos[0] -= 50.f;
-    vPos[1] -= 50.f;
-    vPos[2] += 50.f;
-    CreateParticle(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 0, 0.6f);
-    for (i = 0; i < 2; ++i)
-    {
-        CreateEffect(MODEL_ICE_SMALL, vPos, o->Angle, vLight, 0);
-        CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 3, 1.0f);
-        CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 3, 1.0f);
-        CreateEffect(MODEL_HALLOWEEN_CANDY_STAR, vPos, o->Angle, vLight, 1);
-        CreateParticle(BITMAP_SNOW_EFFECT_1, vPos, o->Angle, vLight, 0, 0.5f);
-        CreateParticle(BITMAP_SNOW_EFFECT_1, vPos, o->Angle, vLight, 0, 0.5f);
-    }
-
-    VectorCopy(o->Position, vPos);
-    vPos[0] += 50.f;
-    vPos[1] -= 50.f;
-    vPos[2] += 50.f;
-    CreateParticle(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 0, 0.6f);
-    for (i = 0; i < 2; ++i)
-    {
-        CreateEffect(MODEL_ICE_SMALL, vPos, o->Angle, vLight, 0);
-        CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 3, 1.0f);
-        CreateParticle(BITMAP_CLUD64, vPos, o->Angle, vLight, 3, 1.0f);
-        CreateEffect(MODEL_HALLOWEEN_CANDY_STAR, vPos, o->Angle, vLight, 1);
-        CreateParticle(BITMAP_SNOW_EFFECT_1, vPos, o->Angle, vLight, 0, 0.5f);
-        CreateParticle(BITMAP_SNOW_EFFECT_1, vPos, o->Angle, vLight, 0, 0.5f);
-    }
+    CreateSnowBursts(*o, vLight);
 
     if (o->CurrentAction == PLAYER_SANTA_2)
     {
@@ -195,12 +221,12 @@ void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType)
 
 void CXmasEvent::GenID()
 {
-    if (m_iEffectID >= SHRT_MAX - 10)
+    if (m_iEffectID >= kChristmasEffectIdLimit)
     {
-        m_iEffectID = SHRT_MAX - 60;
+        m_iEffectID = kChristmasEffectIdBase;
     }
 
-    m_iEffectID++;
+    ++m_iEffectID;
 }
 
 CNewYearsDayEvent::CNewYearsDayEvent()
@@ -242,7 +268,7 @@ void CNewYearsDayEvent::LoadSound()
 
 CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int iKey)
 {
-    CHARACTER* pCharacter = NULL;
+    CHARACTER* pCharacter = nullptr;
 
     switch (iType)
     {
@@ -250,8 +276,11 @@ CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int
     {
         OpenMonsterModel(MONSTER_MODEL_POUCH_OF_BLESSING);
         pCharacter = CreateCharacter(iKey, MODEL_POUCH_OF_BLESSING, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"Fortune Pouch");
-        pCharacter->Object.Scale = 1.5f;
+        if (pCharacter != nullptr)
+        {
+            CopyWideString(pCharacter->ID, L"Fortune Pouch");
+            pCharacter->Object.Scale = 1.5f;
+        }
     }
     break;
     }
@@ -261,9 +290,10 @@ CHARACTER* CNewYearsDayEvent::CreateMonster(int iType, int iPosX, int iPosY, int
 
 bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (c == NULL)	return false;
-    if (o == NULL)	return false;
-    if (b == NULL)	return false;
+    if (c == nullptr || o == nullptr || b == nullptr)
+    {
+        return false;
+    }
     switch (o->Type)
     {
     case MODEL_POUCH_OF_BLESSING:
@@ -288,13 +318,9 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 }
                 else
                 {
-                    float fLumi;
-                    fLumi = (float)(rand() % 100) * 0.01f;
-                    vLight[0] = fLumi;
-                    fLumi = (float)(rand() % 100) * 0.01f;
-                    vLight[1] = fLumi;
-                    fLumi = (float)(rand() % 100) * 0.01f;
-                    vLight[2] = fLumi;
+                    vLight[0] = Random::Unit();
+                    vLight[1] = Random::Unit();
+                    vLight[2] = Random::Unit();
                 }
                 CreateParticle(BITMAP_SHINY, vWorldPos, o->Angle, vLight, 4, 0.8f);
             }
@@ -304,9 +330,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             if (rand_fps_check(3))
             {
                 Vector(1.0f, 0.4f, 0.0f, vLight);
-                float fScale;
-                if (o->CurrentAction == MONSTER01_SHOCK)	fScale = 0.4f;
-                else if (o->CurrentAction == MONSTER01_DIE) fScale = 0.5f;
+                const float fScale = (o->CurrentAction == MONSTER01_SHOCK) ? 0.4f : 0.5f;
 
                 CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, vLight, 0, fScale);
 
@@ -318,13 +342,9 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     }
                     else
                     {
-                        float fLumi;
-                        fLumi = (float)(rand() % 100) * 0.01f;
-                        vLight[0] = fLumi;
-                        fLumi = (float)(rand() % 100) * 0.01f;
-                        vLight[1] = fLumi;
-                        fLumi = (float)(rand() % 100) * 0.01f;
-                        vLight[2] = fLumi;
+                        vLight[0] = Random::Unit();
+                        vLight[1] = Random::Unit();
+                        vLight[2] = Random::Unit();
                     }
                     CreateParticle(BITMAP_SHINY, vWorldPos, o->Angle, vLight, 4, 0.8f);
                 }
@@ -340,7 +360,7 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if (o->AnimationFrame <= 0.3f)
             {
-                o->m_iAnimation = rand() % 6 + MODEL_NEWYEARSDAY_EVENT_BEKSULKI;
+                o->m_iAnimation = Random::RangeInt(0, 5) + MODEL_NEWYEARSDAY_EVENT_BEKSULKI;
                 CreateParticleFpsChecked(BITMAP_EXPLOTION, vWorldPos, o->Angle, vLight, 0, 0.5f);
                 if (rand_fps_check(4)) o->m_iAnimation = MODEL_NEWYEARSDAY_EVENT_PIG;
 
@@ -348,12 +368,16 @@ bool CNewYearsDayEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
 
             if (o->AnimationFrame >= 4.5f)
+            {
                 CreateEffectFpsChecked(MODEL_NEWYEARSDAY_EVENT_MONEY, vWorldPos, o->Angle, vLight);
+            }
 
             if (o->m_iAnimation != 0 && rand_fps_check(3))
             {
                 if (o->AnimationFrame >= 4.5f)
+                {
                     CreateEffectFpsChecked(o->m_iAnimation, vWorldPos, o->Angle, vLight);
+                }
             }
         }
     }
@@ -426,18 +450,19 @@ void C09SummerEvent::LoadSound()
 
 CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iKey)
 {
-    CHARACTER* pCharacter = NULL;
+    CHARACTER* pCharacter = nullptr;
 
     if (iType == MONSTER_FIRE_FLAME_GHOST)
     {
         OpenMonsterModel(MONSTER_MODEL_FIRE_FLAME_GHOST);
         pCharacter = CreateCharacter(iKey, MODEL_FIRE_FLAME_GHOST, iPosX, iPosY);
-        wcscpy(pCharacter->ID, L"Initial Helper");
-        pCharacter->Object.Scale = 0.8f;
-        pCharacter->Object.HiddenMesh = 2;
-        pCharacter->Object.m_iAnimation = 0;
-
-        OBJECT* pObject = &pCharacter->Object;
+        if (pCharacter != nullptr)
+        {
+            CopyWideString(pCharacter->ID, L"Initial Helper");
+            pCharacter->Object.Scale = 0.8f;
+            pCharacter->Object.HiddenMesh = 2;
+            pCharacter->Object.m_iAnimation = 0;
+        }
     }
 
     return pCharacter;
@@ -445,15 +470,17 @@ CHARACTER* C09SummerEvent::CreateMonster(int iType, int iPosX, int iPosY, int iK
 
 bool C09SummerEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (o->Type != MODEL_FIRE_FLAME_GHOST)
+    if (o == nullptr || o->Type != MODEL_FIRE_FLAME_GHOST)
+    {
         return false;
+    }
 
     vec3_t vRelativePos, vWorldPos;
     Vector(0.f, 0.f, 0.f, vRelativePos);
     b->TransformPosition(o->BoneTransform[39], vRelativePos, vWorldPos, true);
 
     vec3_t vLight;
-    float fLumi = (sinf(WorldTime * 0.0015f) + 1.0f) * 0.4f + 0.2f;
+    const float fLumi = (std::sin(WorldTime * 0.0015f) + 1.0f) * 0.4f + 0.2f;
 
     Vector(0.8f, 0.4f, 0.2f, vLight);
 
@@ -493,11 +520,11 @@ bool C09SummerEvent::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Position[0] = o->Position[0];
             Position[1] = o->Position[1];
             Position[2] = RequestTerrainHeight(Position[0], Position[1]);
-            ZeroMemory(Angle, sizeof(Angle));
-            Light[0] = Light[1] = Light[2] = 1.0f;
+            Vector(0.f, 0.f, 0.f, Angle);
+            Vector(1.0f, 1.0f, 1.0f, Light);
             CreateEffect(BITMAP_FIRECRACKER0001, Position, Angle, Light, 0);
             CreateEffect(MODEL_EFFECT_UMBRELLA_DIE, o->Position, o->Angle, o->Light, 0, o);
-            for (int i = 0; i < 40; i++)
+            for (int i = 0; i < 40; ++i)
             {
                 CreateEffect(MODEL_EFFECT_UMBRELLA_GOLD, o->Position, o->Angle, o->Light, 0, o);
             }
