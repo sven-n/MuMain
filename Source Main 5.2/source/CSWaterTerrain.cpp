@@ -4,6 +4,12 @@
 
 #include "stdafx.h"
 
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <cmath>
+
+#include "Random.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"
@@ -21,14 +27,16 @@ extern  double   WorldTime;
 extern  float   TerrainMappingAlpha[TERRAIN_SIZE * TERRAIN_SIZE];
 extern  float   g_chrome[MAX_VERTICES][2];
 
-constexpr float WavePeriodMs = 40.0 / 25.0 * 1000.0; // = 1600 ms
-float LastWaveStart = 0;
+namespace
+{
+    constexpr double kAutoWaveIntervalMs = (40.0 / 25.0) * 1000.0; // 1600 ms
+    constexpr float kDefaultWaterHeight = 350.0f;
+    constexpr float kTileHeightOffset = 400.0f;
+}
 
 void CSWaterTerrain::Init(void)
 {
     Vector(1.f, -1.f, 1.f, m_vLightVector);
-
-    memset(m_iWaveHeight, 0, sizeof(int) * WATER_TERRAIN_SIZE * WATER_TERRAIN_SIZE * 4);
 }
 
 void CSWaterTerrain::Update(void)
@@ -39,13 +47,7 @@ void CSWaterTerrain::Update(void)
         return;
     }
 
-    if (LastWaveStart < WorldTime - WavePeriodMs)
-    {
-        int waveX = ((Hero->PositionX) * 2) + (rand() % 30) - 15;
-        int waveY = ((Hero->PositionY) * 2) + 25;
-        addSineWave(waveX, waveY, 20, 2, 2000);
-        LastWaveStart = WorldTime;
-    }
+    SpawnAmbientWave(WorldTime);
 
     m_iWaterPage ^= 1;
     calcWave();
@@ -93,33 +95,47 @@ void    CSWaterTerrain::Render(void)
     glEnd();
 }
 
+void CSWaterTerrain::SpawnAmbientWave(double currentTimeMs)
+{
+    if ((currentTimeMs - m_lastAutoWaveTime) < kAutoWaveIntervalMs)
+    {
+        return;
+    }
+
+    const int heroWaveX = static_cast<int>(Hero->PositionX * 2.0f);
+    const int waveX = heroWaveX + Random::RangeInt(-15, 14);
+    const int waveY = static_cast<int>((Hero->PositionY) * 2) + 25;
+    addSineWave(waveX, waveY, 20, 2, 2000);
+    m_lastAutoWaveTime = currentTimeMs;
+}
+
 void    CSWaterTerrain::CreateTerrain(int x, int y)
 {
     float   fHeight, fHeight1;
     int     offset;
-    int     grid = MAX_WATER_GRID / 2;
+    constexpr int grid = MAX_WATER_GRID / 2;
 
     m_iTriangleListNum = 0;
     for (int offY = 0, i = y - grid + 6; offY < MAX_WATER_GRID; ++i, offY++)
     {
         for (int offX = 0, j = x - grid - 4; offX < MAX_WATER_GRID; ++j, offX++)
         {
-            if (i < 0 || j < 0) fHeight = 350.f;
-            else if (i >= WATER_TERRAIN_SIZE || j >= WATER_TERRAIN_SIZE) fHeight = 350.f;
+            if (i < 0 || j < 0) fHeight = kDefaultWaterHeight;
+            else if (i >= WATER_TERRAIN_SIZE || j >= WATER_TERRAIN_SIZE) fHeight = kDefaultWaterHeight;
             else
             {
                 offset = j + (i * WATER_TERRAIN_SIZE);
 
-                fHeight = m_iWaveHeight[m_iWaterPage][offset] + 350.f;
+                fHeight = m_iWaveHeight[m_iWaterPage][offset] + kDefaultWaterHeight;
 
-                fHeight1 = m_iWaveHeight[2][offset] + 350.f;
-                fHeight1 += m_iWaveHeight[3][offset] + 350.f;
+                fHeight1 = m_iWaveHeight[2][offset] + kDefaultWaterHeight;
+                fHeight1 += m_iWaveHeight[3][offset] + kDefaultWaterHeight;
 
-                fHeight = (fHeight + fHeight1 / 2.f) / 2.f;
+                fHeight = (fHeight + fHeight1 / 2.f) * 0.5f;
             }
 
             offset = offX + (offY * MAX_WATER_GRID);
-            Vector((float)j * WAVE_SCALE, (float)i * WAVE_SCALE, fHeight, m_Vertices[offset]);
+            Vector(static_cast<float>(j) * WAVE_SCALE, static_cast<float>(i) * WAVE_SCALE, fHeight, m_Vertices[offset]);
             Vector(0.f, 0.f, 0.f, m_Normals[offset]);
             if (offX >= MAX_WATER_GRID - 1 || offY >= MAX_WATER_GRID - 1)
             {
@@ -152,14 +168,13 @@ void    CSWaterTerrain::CreateTerrain(int x, int y)
         }
     }
 
-    int     v1, v2, v3;
+    std::array<int, MAX_WATER_GRID * MAX_WATER_GRID> normalUseCounts{};
     vec3_t  normalV;
-    int     NormalNum[MAX_WATER_GRID * MAX_WATER_GRID] = { 0, };
     for (int j = 0; j < m_iTriangleListNum; j += 3)
     {
-        v1 = m_iTriangleList[j + 0];
-        v2 = m_iTriangleList[j + 1];
-        v3 = m_iTriangleList[j + 2];
+        const int v1 = m_iTriangleList[j + 0];
+        const int v2 = m_iTriangleList[j + 1];
+        const int v3 = m_iTriangleList[j + 2];
 
         FaceNormalize(m_Vertices[v1], m_Vertices[v2], m_Vertices[v3], normalV);
 
@@ -167,40 +182,54 @@ void    CSWaterTerrain::CreateTerrain(int x, int y)
         VectorAdd(normalV, m_Normals[v2], m_Normals[v2]);
         VectorAdd(normalV, m_Normals[v3], m_Normals[v3]);
 
-        NormalNum[v1]++;
-        NormalNum[v2]++;
-        NormalNum[v3]++;
+        normalUseCounts[v1]++;
+        normalUseCounts[v2]++;
+        normalUseCounts[v3]++;
     }
 
-    for (int i = 0; i < MAX_WATER_GRID * MAX_WATER_GRID; i++)
+    for (int i = 0; i < MAX_WATER_GRID * MAX_WATER_GRID; ++i)
     {
-        m_Normals[i][0] /= (float)(NormalNum[i]);
-        m_Normals[i][1] /= (float)(NormalNum[i]);
-        m_Normals[i][2] /= (float)(NormalNum[i]);
-
-        VectorNormalize(m_Normals[i]);
+        if (normalUseCounts[i] > 0)
+        {
+            const float invCount = 1.0f / static_cast<float>(normalUseCounts[i]);
+            m_Normals[i][0] *= invCount;
+            m_Normals[i][1] *= invCount;
+            m_Normals[i][2] *= invCount;
+            VectorNormalize(m_Normals[i]);
+        }
     }
 }
 
 void CSWaterTerrain::addSineWave(int x, int y, int radiusX, int radiusY, int height)
 {
-    int* p = &m_iWaveHeight[m_iWaterPage][0];
+    if (radiusX <= 0 || radiusY <= 0 || height == 0)
+    {
+        return;
+    }
 
-    int     cx, cy;
-    int     left, top, right, bottom;
-    int     square;
-    int     radsquare;
-    float   length = (1024.f / (float)radiusX) * (1024.f / (float)radiusX);
+    int* waveBuffer = m_iWaveHeight[m_iWaterPage].data();
 
-    if (x < 0) x = 1 + radiusX + rand() % (WATER_TERRAIN_SIZE - 2 * radiusX - 1);
-    if (y < 0) y = 1 + radiusY + rand() % (WATER_TERRAIN_SIZE - 2 * radiusY - 1);
+    const float length = (1024.f / static_cast<float>(radiusX)) * (1024.f / static_cast<float>(radiusX));
 
-    //  radsquare = (radiusX*radiusX) << 8;
-    radsquare = (radiusX * radiusY);
+    if (x < 0)
+    {
+        const int minX = 1 + radiusX;
+        const int maxX = WATER_TERRAIN_SIZE - radiusX - 1;
+        x = Random::RangeInt(minX, std::max<int>(minX, maxX));
+    }
+    if (y < 0)
+    {
+        const int minY = 1 + radiusY;
+        const int maxY = WATER_TERRAIN_SIZE - radiusY - 1;
+        y = Random::RangeInt(minY, std::max<int>(minY, maxY));
+    }
 
-    //  height /= 8;
-    left = -radiusX; right = radiusX;
-    top = -radiusY; bottom = radiusY;
+    const int radsquare = (radiusX * radiusY);
+
+    int left = -radiusX;
+    int right = radiusX;
+    int top = -radiusY;
+    int bottom = radiusY;
 
     // Perform edge clipping...
     if ((x - radiusX) < 1) left -= (x - radiusX - 1);
@@ -208,17 +237,17 @@ void CSWaterTerrain::addSineWave(int x, int y, int radiusX, int radiusY, int hei
     if ((x + radiusX) > WATER_TERRAIN_SIZE - 1) right -= (x + radiusX - WATER_TERRAIN_SIZE + 1);
     if ((y + radiusY) > WATER_TERRAIN_SIZE - 1) bottom -= (y + radiusY - WATER_TERRAIN_SIZE + 1);
 
-    for (cy = top; cy < bottom; cy++)
+    for (int cy = top; cy < bottom; ++cy)
     {
-        for (cx = left; cx < right; cx++)
+        for (int cx = left; cx < right; ++cx)
         {
-            square = cy * cy + cx * cx;
+            const int square = cy * cy + cx * cx;
             if (square < radsquare)
             {
-                float dist = sqrtf(square * length);
-                int   sine = (int)((cos(dist) + 0xffff) * height) >> 19;
+                const float dist = std::sqrt(static_cast<float>(square) * length);
+                int   sine = static_cast<int>((std::cos(dist) + 0xffff) * height) >> 19;
                 sine *= FPS_ANIMATION_FACTOR;
-                p[WATER_TERRAIN_SIZE * (cy + y) + cx + x] += sine;
+                waveBuffer[WATER_TERRAIN_SIZE * (cy + y) + cx + x] += sine;
             }
         }
     }
@@ -236,8 +265,8 @@ void    CSWaterTerrain::calcBaseWave(void)
     */
     int MaxHeight;
     int offset;
-    int HeroX = (Hero->PositionX) * 2;
-    int HeroY = (Hero->PositionY) * 2;
+    int HeroX = static_cast<int>((Hero->PositionX) * 2);
+    int HeroY = static_cast<int>((Hero->PositionY) * 2);
     /*
         int HeroX = ( Hero->Object.Position[0]/TERRAIN_SCALE )*2;
         int HeroY = ( Hero->Object.Position[1]/TERRAIN_SCALE )*2;
@@ -270,8 +299,8 @@ void CSWaterTerrain::calcWave(void)
 {
     int newh;
 
-    int* newptr = &m_iWaveHeight[m_iWaterPage][0];
-    int* oldptr = &m_iWaveHeight[m_iWaterPage ^ 1][0];
+    int* newptr = m_iWaveHeight[m_iWaterPage].data();
+    int* oldptr = m_iWaveHeight[m_iWaterPage ^ 1].data();
 
     int x;
     int y = (WATER_TERRAIN_SIZE - 1) * WATER_TERRAIN_SIZE;
@@ -293,22 +322,25 @@ void CSWaterTerrain::calcWave(void)
 
 float CSWaterTerrain::GetWaterTerrain(float xf, float yf)
 {
-    int x = (int)(xf / TERRAIN_SCALE * 2);
-    int y = (int)(yf / TERRAIN_SCALE * 2);
+    int x = static_cast<int>(xf / TERRAIN_SCALE * 2);
+    int y = static_cast<int>(yf / TERRAIN_SCALE * 2);
+
+    x = std::clamp(x, 0, WATER_TERRAIN_SIZE - 1);
+    y = std::clamp(y, 0, WATER_TERRAIN_SIZE - 1);
 
     float fHeight;
     if (m_iWaterPage)
     {
-        fHeight = m_iWaveHeight[1][x + (y * WATER_TERRAIN_SIZE)] + 350.f;
+        fHeight = m_iWaveHeight[1][x + (y * WATER_TERRAIN_SIZE)] + kDefaultWaterHeight;
     }
     else
     {
-        fHeight = m_iWaveHeight[0][x + (y * WATER_TERRAIN_SIZE)] + 350.f;
+        fHeight = m_iWaveHeight[0][x + (y * WATER_TERRAIN_SIZE)] + kDefaultWaterHeight;
     }
 
-    float fHeight1 = m_iWaveHeight[2][x + (y * WATER_TERRAIN_SIZE)] + 350.f;
-    fHeight1 += m_iWaveHeight[3][x + (y * WATER_TERRAIN_SIZE)] + 350.f;
-    fHeight = (fHeight + fHeight1 / 2.f) / 4.f;
+    float fHeight1 = m_iWaveHeight[2][x + (y * WATER_TERRAIN_SIZE)] + kDefaultWaterHeight;
+    fHeight1 += m_iWaveHeight[3][x + (y * WATER_TERRAIN_SIZE)] + kDefaultWaterHeight;
+    fHeight = (fHeight + fHeight1 / 2.f) * 0.25f;
 
     return fHeight;
 }
@@ -331,20 +363,16 @@ void CSWaterTerrain::RenderWaterAlphaBitmap(int Texture, float xf, float yf, flo
     int   mxi = (int)(mxf);
     int   myi = (int)(myf);
 
-    float Size;
-    if (SizeX >= SizeY)
-        Size = SizeX;
-    else
-        Size = SizeY;
-    float TexU = (((float)mxi - mxf) + 0.5f * Size);
-    float TexV = (((float)myi - myf) + 0.5f * Size);
-    float TexScaleU = 1.f / Size;
-    float TexScaleV = 1.f / Size;
-    Size = (float)((int)Size + 1);
+    float sizeMax = std::max<float>(SizeX, SizeY);
+    float TexU = (((float)mxi - mxf) + 0.5f * sizeMax);
+    float TexV = (((float)myi - myf) + 0.5f * sizeMax);
+    float TexScaleU = 1.f / sizeMax;
+    float TexScaleV = 1.f / sizeMax;
+    sizeMax = static_cast<float>(static_cast<int>(sizeMax) + 1);
     float Aspect = SizeX / SizeY;
-    for (float y = -Size; y <= Size; y += 1.f)
+    for (float y = -sizeMax; y <= sizeMax; y += 1.f)
     {
-        for (float x = -Size; x <= Size; x += 1.f)
+        for (float x = -sizeMax; x <= sizeMax; x += 1.f)
         {
             vec3_t p1[4], p2[4];
             Vector((TexU + x) * TexScaleU, (TexV + y) * TexScaleV, 0.f, p1[0]);
@@ -381,10 +409,10 @@ void    CSWaterTerrain::RenderWaterBitmapTile(float xf, float yf, float lodf, in
     int TerrainIndex2 = xi + lodi + (yi * WATER_TERRAIN_SIZE);
     int TerrainIndex3 = xi + lodi + ((yi + lodi) * WATER_TERRAIN_SIZE);
     int TerrainIndex4 = xi + ((yi + lodi) * WATER_TERRAIN_SIZE);
-    Vector(sx, sy, m_iWaveHeight[0][TerrainIndex1] + 400.f + Height, TerrainVertex[0]);
-    Vector(sx + TileScale, sy, m_iWaveHeight[0][TerrainIndex2] + 400.f + Height, TerrainVertex[1]);
-    Vector(sx + TileScale, sy + TileScale, m_iWaveHeight[0][TerrainIndex3] + 400.f + Height, TerrainVertex[2]);
-    Vector(sx, sy + TileScale, m_iWaveHeight[0][TerrainIndex4] + 400.f + Height, TerrainVertex[3]);
+    Vector(sx, sy, m_iWaveHeight[0][TerrainIndex1] + kTileHeightOffset + Height, TerrainVertex[0]);
+    Vector(sx + TileScale, sy, m_iWaveHeight[0][TerrainIndex2] + kTileHeightOffset + Height, TerrainVertex[1]);
+    Vector(sx + TileScale, sy + TileScale, m_iWaveHeight[0][TerrainIndex3] + kTileHeightOffset + Height, TerrainVertex[2]);
+    Vector(sx, sy + TileScale, m_iWaveHeight[0][TerrainIndex4] + kTileHeightOffset + Height, TerrainVertex[3]);
 
     vec3_t Light[4];
     if (LightEnable)
