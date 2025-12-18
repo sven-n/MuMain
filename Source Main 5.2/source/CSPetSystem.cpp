@@ -3,24 +3,37 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
+#include "Random.h"
 #include "CSPetSystem.h"
-#include "ZzzLodTerrain.h"
+#include "MapManager.h"
+#include "DuelMgr.h"
+#include "UIManager.h"
 #include "ZzzAI.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzInfomation.h"
 #include "ZzzBMD.h"
-#include "ZzzObject.h"
-#include "ZzzTexture.h"
 #include "ZzzCharacter.h"
-#include "ZzzScene.h"
+#include "ZzzEffect.h"
+#include "ZzzInfomation.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "ZzzEffect.h"
+#include "ZzzLodTerrain.h"
+#include "ZzzObject.h"
+#include "ZzzOpenglUtil.h"
+#include "ZzzScene.h"
+#include "ZzzTexture.h"
 #include "DSPlaySound.h"
 
-#include "UIManager.h"
-#include "DuelMgr.h"
-#include "MapManager.h"
+namespace
+{
+bool IsValidCharacterIndex(int index)
+{
+    return index >= 0 && index < MAX_CHARACTERS_CLIENT;
+}
+} // namespace
 
 extern bool g_PetEnableDuel;
 
@@ -29,9 +42,22 @@ extern	wchar_t    TextList[50][100];
 extern	int     TextListColor[50];
 extern	int     TextBold[50];
 
+CSPetSystem::CSPetSystem()
+    : m_PetOwner(nullptr)
+    , m_PetTarget(nullptr)
+    , m_PetCharacter()
+    , m_PetType(PET_TYPE_NONE)
+    , m_pPetInfo(nullptr)
+    , m_byCommand(PET_CMD_DEFAULT)
+    , m_BoneTransforms()
+{
+    m_PetCharacter.Object.BoneTransform = nullptr;
+}
+
 CSPetSystem::~CSPetSystem()
 {
-    SAFE_DELETE_ARRAY(m_PetCharacter.Object.BoneTransform);
+    m_BoneTransforms.reset();
+    m_PetCharacter.Object.BoneTransform = nullptr;
 }
 
 void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
@@ -39,9 +65,9 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     CHARACTER* c = &m_PetCharacter;
     OBJECT* o = &c->Object;
 
-    m_PetTarget = NULL;
+    m_PetTarget = nullptr;
     m_byCommand = PET_CMD_DEFAULT;
-    m_pPetInfo = NULL;
+    m_pPetInfo = nullptr;
 
     o->Initialize();
     c->PositionX = PositionX;
@@ -50,7 +76,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     c->TargetY = PositionY;
 
     c->byExtensionSkill = 0;
-    c->m_pPet = NULL;
+    c->m_pPet = nullptr;
 
     int Index = TERRAIN_INDEX_REPEAT(c->PositionX, c->PositionY);
     if ((TerrainWall[Index] & TW_SAFEZONE) == TW_SAFEZONE)
@@ -123,22 +149,19 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     Vector(0.f, 0.f, Rotation, o->Angle);
     Vector(0.5f, 0.5f, 0.5f, o->Light);
     Vector(-60.f, -60.f, 0.f, o->BoundingBoxMin);
-    switch (Type)
-    {
-    case MODEL_DARK_SPIRIT:
-        Vector(50.f, 50.f, 150.f, o->BoundingBoxMax);
-        break;
-    default:
-        Vector(50.f, 50.f, 150.f, o->BoundingBoxMax);
-        break;
-    }
+    Vector(50.f, 50.f, 150.f, o->BoundingBoxMax);
 
-    if (o->BoneTransform != NULL)
+    const int boneCount = Models[Type].NumBones;
+    if (boneCount > 0)
     {
-        delete[] o->BoneTransform;
-        o->BoneTransform = NULL;
+        m_BoneTransforms = std::make_unique<vec34_t[]>(boneCount);
+        o->BoneTransform = m_BoneTransforms.get();
     }
-    o->BoneTransform = new vec34_t[Models[Type].NumBones];
+    else
+    {
+        m_BoneTransforms.reset();
+        o->BoneTransform = nullptr;
+    }
 
     int i;
     for (i = 0; i < 2; i++)
@@ -169,17 +192,8 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     o->BlendMesh = -1;
     o->BlendMeshLight = 1.f;
 
-    switch (Type)
-    {
-    case MODEL_DARK_SPIRIT:
-        c->Weapon[0].LinkBone = 0;
-        c->Weapon[1].LinkBone = 0;
-        break;
-    default:
-        c->Weapon[0].LinkBone = 0;
-        c->Weapon[1].LinkBone = 0;
-        break;
-    }
+    c->Weapon[0].LinkBone = 0;
+    c->Weapon[1].LinkBone = 0;
     m_byCommand = PET_CMD_DEFAULT;
 }
 
@@ -205,7 +219,7 @@ void CSPetSystem::SetAI(int AI)
     m_PetCharacter.Object.LifeTime = 0;
 }
 
-void CSPetSystem::SetCommand(int Key, BYTE cmd)
+void CSPetSystem::SetCommand(int Key, std::uint8_t cmd)
 {
     m_byCommand = cmd;
     if (m_PetCharacter.Object.AI != PET_ATTACK && m_PetCharacter.Object.AI != PET_ATTACK_MAGIC)
@@ -214,8 +228,14 @@ void CSPetSystem::SetCommand(int Key, BYTE cmd)
     }
     if (cmd == PET_CMD_TARGET)
     {
-        int Index = FindCharacterIndex(Key);
-        m_PetTarget = &CharactersClient[Index];
+        const int index = FindCharacterIndex(Key);
+        if (!IsValidCharacterIndex(index))
+        {
+            m_PetTarget = nullptr;
+            return;
+        }
+
+        m_PetTarget = &CharactersClient[index];
 
         m_PetCharacter.Object.m_bActionStart = true;
     }
@@ -223,8 +243,13 @@ void CSPetSystem::SetCommand(int Key, BYTE cmd)
 
 void CSPetSystem::SetAttack(int Key, int attackType)
 {
-    int Index = FindCharacterIndex(Key);
-    m_PetTarget = &CharactersClient[Index];
+    const int index = FindCharacterIndex(Key);
+    if (!IsValidCharacterIndex(index) || m_PetOwner == nullptr)
+    {
+        return;
+    }
+
+    m_PetTarget = &CharactersClient[index];
     OBJECT* Owner = &m_PetOwner->Object;
 
     if (g_isCharacterBuff(Owner, eDeBuff_Stun))
@@ -233,12 +258,12 @@ void CSPetSystem::SetAttack(int Key, int attackType)
     }
     else if (g_isCharacterBuff(Owner, eBuff_Cloaking))
     {
-        m_PetCharacter.TargetCharacter = Index;
+        m_PetCharacter.TargetCharacter = index;
         SetAI(PET_ATTACK + attackType);
         return;
     }
 
-    m_PetCharacter.TargetCharacter = Index;
+    m_PetCharacter.TargetCharacter = index;
     m_PetCharacter.AttackTime = 0;
     m_PetCharacter.LastAttackEffectTime = -1;
     SetAI(PET_ATTACK + attackType);
@@ -248,7 +273,7 @@ void CSPetSystem::SetAttack(int Key, int attackType)
         OBJECT* o = &m_PetCharacter.Object;
 
         o->m_bActionStart = true;
-        o->Velocity = rand() % 10 + 20.f;
+        o->Velocity = Random::RangeFloat(0, 9) + 20.f;
         o->Gravity = 0.5f;
 
         PlayBuffer(SOUND_DSPIRIT_RUSH);
@@ -275,10 +300,7 @@ CSPetDarkSpirit::CSPetDarkSpirit(CHARACTER* c)
     m_PetCharacter.Object.CurrentAction = 0;
 }
 
-CSPetDarkSpirit::~CSPetDarkSpirit(void)
-{
-    SAFE_DELETE_ARRAY(m_PetCharacter.Object.BoneTransform);
-}
+CSPetDarkSpirit::~CSPetDarkSpirit(void) = default;
 
 void CSPetDarkSpirit::MovePet(void)
 {
@@ -291,7 +313,8 @@ void CSPetDarkSpirit::MovePet(void)
         return;
 
     BMD* b = &Models[Owner->Type];
-    o->WeaponLevel = (BYTE)c->Level;
+    const int ownerLevel = std::clamp(static_cast<int>(c->Level), 0, 0xFF);
+    o->WeaponLevel = static_cast<std::uint8_t>(ownerLevel);
 
     if (!g_DuelMgr.IsPetDuelEnabled())
     {
@@ -406,7 +429,7 @@ void CSPetDarkSpirit::MovePet(void)
         {
             for (int i = 0; i < 1; ++i)
             {
-                b->TransformPosition(o->BoneTransform[rand() % 66], p, Pos);
+                b->TransformPosition(o->BoneTransform[Random::RangeInt(0, 65)], p, Pos);
 
                 CreateParticleFpsChecked(BITMAP_SPARK + 1, Pos, o->Angle, Light, 5, 0.8f);
             }
@@ -416,7 +439,7 @@ void CSPetDarkSpirit::MovePet(void)
         if (Distance >= FlyRange * FlyRange)
         {
             float Angle = CreateAngle2D(o->Position, TargetPosition);
-            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, rand() % 15 + 5.f);
+            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, Random::RangeFloat(0, 14) + 5.f);
         }
         AngleMatrix(o->Angle, o->Matrix);
 
@@ -451,12 +474,12 @@ void CSPetDarkSpirit::MovePet(void)
         {
             if (Distance >= FlyRange * FlyRange)
             {
-                Speed = -(float)(rand() % 64 + 128) * 0.1f;
+                Speed = -(Random::RangeFloat(0, 63) + 128.f) * 0.1f;
             }
             else
             {
-                Speed = -(float)(rand() % 8 + 32) * 0.1f;
-                o->Angle[2] += (float)(rand() % 60) * FPS_ANIMATION_FACTOR;
+                Speed = -(Random::RangeFloat(0, 7) + 32.f) * 0.1f;
+                o->Angle[2] += Random::RangeFloat(0, 59) * FPS_ANIMATION_FACTOR;
             }
 
             Speed += o->Direction[1] * FPS_ANIMATION_FACTOR;
@@ -464,7 +487,7 @@ void CSPetDarkSpirit::MovePet(void)
 
             o->Direction[0] = 0.f;
             o->Direction[1] = Speed;
-            o->Direction[2] = (float)(rand() % 64 - 32) * 0.1f;
+            o->Direction[2] = Random::RangeFloat(-32, 31) * 0.1f;
         }
 
         if (o->Direction[1] < -12.f)
@@ -605,7 +628,7 @@ void    CSPetDarkSpirit::RenderPet(int PetState)
     }
 
     if (m_pPetInfo)
-        o->WeaponLevel = static_cast<BYTE>(m_pPetInfo->m_wLevel & 0xFF);
+        o->WeaponLevel = static_cast<std::uint8_t>(m_pPetInfo->m_wLevel & 0xFF);
 
     if (o->Live)
     {
@@ -707,14 +730,14 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
         {
             for (int i = 0; i < 10; i++)
             {
-                CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL, (float)(rand() % 40 + 20));
+                CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL, (Random::RangeFloat(0, 39) + 20.f));
             }
 
             if (c->CheckAttackTime(1))
             {
                 vec3_t Angle, Light;
 
-                Vector(45.f, (float)(rand() % 180) - 90, 0.f, Angle);
+                Vector(45.f, Random::RangeFloat(0, 179) - 90.f, 0.f, Angle);
                 Vector(1.f, 0.8f, 0.6f, Light);
                 CreateEffect(MODEL_DARKLORD_SKILL, o->Position, Angle, Light, 3);
                 c->SetLastAttackEffectTime();
@@ -739,7 +762,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
             {
                 Vector(1.f, 0.6f, 0.4f, Light);
                 Vector(0.f, 0.f, 0.f, p);
-                for (int i = rand() % 2; i < 66; i += 2)
+                for (int i = Random::RangeInt(0, 1); i < 66; i += 2)
                 {
                     if (!b->Bones[i].Dummy && i < b->NumBones)
                     {
