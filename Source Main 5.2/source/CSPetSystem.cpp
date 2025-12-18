@@ -20,6 +20,7 @@
 #include "ZzzScene.h"
 #include "ZzzTexture.h"
 #include "DSPlaySound.h"
+#include "Random.h"
 
 namespace
 {
