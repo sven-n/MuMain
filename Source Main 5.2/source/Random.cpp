@@ -34,6 +34,28 @@ namespace Random
             return engine;
         }
 
+        /// Adapter that clamps the RNG output to 31 bits to avoid
+        /// runtime narrowing checks when casting to signed 32-bit types.
+        struct Engine31
+        {
+            using result_type = std::uint32_t;
+
+            static constexpr result_type min()
+            {
+                return 0;
+            }
+
+            static constexpr result_type max()
+            {
+                return 0x7FFFFFFFu;
+            }
+
+            result_type operator()()
+            {
+                return GetThreadEngine()() & max();
+            }
+        };
+
     } // anonymous namespace
 
     std::int32_t RangeInt(std::int32_t minInclusive, std::int32_t maxInclusive)
@@ -44,8 +66,9 @@ namespace Random
         }
 
         thread_local static std::uniform_int_distribution<std::int32_t> dist;
+        thread_local static Engine31 engine31;
         using param_type = std::uniform_int_distribution<std::int32_t>::param_type;
-        return dist(GetThreadEngine(), param_type(minInclusive, maxInclusive));
+        return dist(engine31, param_type(minInclusive, maxInclusive));
     }
 
     float RangeFloat(float minInclusive, float maxInclusive)
