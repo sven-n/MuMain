@@ -1,6 +1,6 @@
 ﻿// GMDoppelGanger1.cpp: implementation of the CGMDoppelGanger1 class.
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

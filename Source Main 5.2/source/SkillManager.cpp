@@ -1,7 +1,7 @@
 ﻿// SkillManager.cpp: implementation of the CSkillManager class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "SkillManager.h"
 #include "CharacterManager.h"
 #include "MapManager.h"

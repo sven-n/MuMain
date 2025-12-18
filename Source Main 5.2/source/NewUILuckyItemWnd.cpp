@@ -1,7 +1,7 @@
 ﻿// NewUILuckyItemWnd.cpp: implementation of the CNewUILuckyItemWnd class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUILuckyItemWnd.h"
 #include "NewUISystem.h"

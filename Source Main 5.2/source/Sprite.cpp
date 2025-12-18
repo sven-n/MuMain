@@ -2,7 +2,7 @@
 // File: Sprite.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "Sprite.h"
 
 #include "Input.h"

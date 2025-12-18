@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"

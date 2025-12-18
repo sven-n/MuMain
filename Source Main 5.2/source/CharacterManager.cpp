@@ -1,7 +1,7 @@
 ﻿// CharacterManager.cpp: implementation of the CCharacterManager class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "CharacterManager.h"
 #include "CSItemOption.h"
 #include "GlobalText.h"

@@ -5,7 +5,7 @@
 // *** 함수 레벨: 3
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "_enum.h"
 #include <eh.h>
 #include "UIManager.h"

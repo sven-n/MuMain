@@ -2,7 +2,7 @@
 // File: SysMenuWin.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "SysMenuWin.h"
 
 #include "Input.h"

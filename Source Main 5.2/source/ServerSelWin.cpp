@@ -2,7 +2,7 @@
 // Desc: implementation of the CServerSelWin class.
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ServerSelWin.h"
 #include "Input.h"
 #include "UIMng.h"

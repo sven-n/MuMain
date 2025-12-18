@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 

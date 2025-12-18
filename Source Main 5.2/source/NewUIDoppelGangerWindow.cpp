@@ -1,7 +1,7 @@
 ﻿// NewUIDoppelGangerWindow.cpp: implementation of the CNewUIDoppelGangerWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIDoppelGangerWindow.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"

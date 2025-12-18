@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include <coreclr_delegates.h>
 

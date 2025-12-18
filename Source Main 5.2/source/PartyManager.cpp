@@ -1,7 +1,7 @@
 // PartyManager.cpp: implementation of the CPartyManager class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "PartyManager.h"
 #include "ZzzBMD.h"
 #include "ZzzCharacter.h"

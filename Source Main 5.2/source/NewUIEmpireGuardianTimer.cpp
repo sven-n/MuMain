@@ -1,6 +1,6 @@
 // NewUIEmpireGuardianTimer.cpp: implementation of the CNewUIEmpireGuardianTimer class.
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUISystem.h"
 #include "NewUIEmpireGuardianTimer.h"
 

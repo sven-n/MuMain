@@ -1,7 +1,7 @@
 // NewUIPartyInfo.cpp: implementation of the CNewUIPartyInfo class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUIPartyInfoWindow.h"
 #include "NewUISystem.h"

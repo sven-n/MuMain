@@ -1,7 +1,7 @@
 // w_PetActionDemon.cpp: implementation of the PetActionDemon class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "w_PetActionDemon.h"
 #include "ZzzAI.h"
 #include "ZzzEffect.h"

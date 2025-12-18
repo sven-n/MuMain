@@ -1,7 +1,7 @@
 // NewUISiegeWarBase.cpp: implementation of the CNewUISiegeWarBase class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 using namespace SEASON3B;
 

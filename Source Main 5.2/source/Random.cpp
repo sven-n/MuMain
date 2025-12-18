@@ -4,7 +4,7 @@
 // Implementation of thread-safe random number generation.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "Random.h"
 
 #include <algorithm>

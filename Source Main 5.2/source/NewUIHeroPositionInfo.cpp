@@ -1,7 +1,7 @@
 // NewUIHeroPositionInfo.cpp: implementation of the CNewUIHeroPositionInfo class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIHeroPositionInfo.h"
 
 #include "DSPlaySound.h"

@@ -1,7 +1,7 @@
 ﻿// NewUIRegistrationLuckyCoin.cpp: implementation of the CNewUIRegistrationLuckyCoin class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIRegistrationLuckyCoin.h"
 #include "NewUISystem.h"
 

@@ -2,7 +2,7 @@
 // NewBloodCastleSystem.cpp: implementation of the CNewBloodCastleSystem class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewBloodCastleSystem.h"
 #include "NewUICustomMessageBox.h"

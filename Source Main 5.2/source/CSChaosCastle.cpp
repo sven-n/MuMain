@@ -2,7 +2,7 @@
 //  CSChaosCastle.cpp
 //////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "Random.h"
 #include "UIWindows.h"

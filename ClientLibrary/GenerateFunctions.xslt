@@ -22,7 +22,7 @@
 // &lt;/auto-generated&gt;
 //------------------------------------------------------------------------------
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "PacketFunctions_</xsl:text><xsl:value-of select="$subNamespace"/><xsl:text>.h"
 #include "PacketBindings_</xsl:text><xsl:value-of select="$subNamespace"/><xsl:text>.h"
 

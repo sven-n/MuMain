@@ -1,7 +1,7 @@
 // w_CharacterInfo.cpp: implementation of the CHARACTER class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "w_CharacterInfo.h"
 #include "SkillManager.h"
 

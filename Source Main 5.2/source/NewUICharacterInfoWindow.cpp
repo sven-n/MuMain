@@ -1,7 +1,7 @@
 ﻿// NewUICharacterInfoWindow.cpp: implementation of the CNewUICharacterInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUICharacterInfoWindow.h"
 #include "NewUISystem.h"
 #include "CharacterManager.h"

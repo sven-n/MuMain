@@ -1,7 +1,7 @@
 ﻿// NewUICursedTempleSystem.cpp: implementation of the CNewUICursedTempleSystem class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUICursedTempleSystem.h"
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"

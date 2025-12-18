@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ServerGroup.h"
 
 CServerGroup::CServerGroup()

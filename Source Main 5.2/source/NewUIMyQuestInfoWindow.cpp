@@ -1,7 +1,7 @@
 // NewUIMyQuestInfoWindow.cpp: implementation of the CNewUIMyQuestInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIMyQuestInfoWindow.h"
 
 #include "CSQuest.h"

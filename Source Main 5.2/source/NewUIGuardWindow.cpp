@@ -1,7 +1,7 @@
 // NewUIGuardWindow.cpp: implementation of the CNewUIGuardWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIGuardWindow.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"

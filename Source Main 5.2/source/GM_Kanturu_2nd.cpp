@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"

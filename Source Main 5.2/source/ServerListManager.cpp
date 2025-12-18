@@ -2,7 +2,7 @@
 // ServerListManager.cpp: implementation of the CServerListManager class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ServerListManager.h"
 
 CServerListManager::CServerListManager()

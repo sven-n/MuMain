@@ -11,7 +11,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "PacketFunctions_ClientToServer.h"
 #include "PacketBindings_ClientToServer.h"
 

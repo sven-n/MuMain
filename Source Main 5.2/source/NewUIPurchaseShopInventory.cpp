@@ -1,7 +1,7 @@
 // NewUIPurchaseShopInventory.cpp: implementation of the CNewUIPurchaseShopInventory class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIPurchaseShopInventory.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"

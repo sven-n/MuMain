@@ -1,7 +1,7 @@
 // NewUIGuildMakeWindow.cpp: implementation of the CNewUIGuildMakeWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIGuildMakeWindow.h"
 #include "NewUIManager.h"
 #include "NewUICommonMessageBox.h"

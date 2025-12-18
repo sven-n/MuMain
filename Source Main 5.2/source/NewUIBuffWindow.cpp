@@ -1,7 +1,7 @@
 // NewUIBuffWindow.cpp: implementation of the CNewUIBuffWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUIBuffWindow.h"
 #include "ZzzBMD.h"
@@ -231,7 +231,7 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffStatus(BUFF_RENDER renderstate)
         }
         else if (renderstate == BUFF_RENDER_TOOLTIP)
         {
-            // ¹öÇÁ ÅøÆÁ ·»´õ¸µ
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if (SEASON3B::CheckMouseIn(x, y, BUFF_IMG_WIDTH, BUFF_IMG_HEIGHT)) {
                 float fTooltip_x = x + (BUFF_IMG_WIDTH / 2);
                 float fTooltip_y = y + BUFF_IMG_WIDTH;

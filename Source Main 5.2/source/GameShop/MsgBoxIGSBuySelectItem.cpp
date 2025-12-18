@@ -1,7 +1,7 @@
 // MsgBoxIGSBuySelectItem.cpp: implementation of the CMsgBoxIGSBuySelectItem class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSBuySelectItem.h"

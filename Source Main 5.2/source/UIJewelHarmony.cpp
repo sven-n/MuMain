@@ -1,6 +1,6 @@
 // UIRefinery.cpp: implementation of the UIRefinery class.
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "UIManager.h"

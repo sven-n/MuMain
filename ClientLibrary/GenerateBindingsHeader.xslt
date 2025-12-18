@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "Connection.h"
 #include &lt;coreclr_delegates.h&gt;
 

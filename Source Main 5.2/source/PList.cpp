@@ -2,7 +2,7 @@
 // File: PList.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "PList.h"
 
 CPList::CPList()

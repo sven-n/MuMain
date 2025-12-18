@@ -2,7 +2,7 @@
 // NewUIWindowMenu.cpp: implementation of the CNewUIWindowMenu class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIWindowMenu.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"

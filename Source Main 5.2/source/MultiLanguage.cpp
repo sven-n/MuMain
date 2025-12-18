@@ -1,7 +1,7 @@
 // MultiLanguage.cpp: implementation of the CMultiLanguage class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include <cstring>
 

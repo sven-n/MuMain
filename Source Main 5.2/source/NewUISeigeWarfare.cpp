@@ -1,7 +1,7 @@
 // CNewUISiegeWarfare.cpp: implementation of the CNewUISiegeWarfare class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUISeigeWarfare.h"
 #include "NewUISystem.h"
 #include "NewUISiegeWarCommander.h"

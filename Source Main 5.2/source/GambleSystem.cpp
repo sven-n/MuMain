@@ -1,6 +1,6 @@
 // GambleSystem.cpp: implementation of the GambleSystem class.
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "GambleSystem.h"
 

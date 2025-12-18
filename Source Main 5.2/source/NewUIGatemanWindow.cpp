@@ -2,7 +2,7 @@
 // NewGatemanWindow.cpp: implementation of the CNewGatemanWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIGatemanWindow.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"

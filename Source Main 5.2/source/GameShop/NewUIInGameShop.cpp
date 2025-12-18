@@ -1,7 +1,7 @@
 ﻿// NewUIInGameShop.cpp: implementation of the NewUIInGameShop class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 #include "iexplorer.h"

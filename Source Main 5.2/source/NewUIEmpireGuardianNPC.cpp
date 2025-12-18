@@ -1,7 +1,7 @@
 ﻿// CNewUIEmpireGuardianNPC.cpp: implementation of the CNewUIEmpireGuardianNPC class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUISystem.h"
 #include "NewUICommon.h"
 #include "NewUIEmpireGuardianNPC.h"

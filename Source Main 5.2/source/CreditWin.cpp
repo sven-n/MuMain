@@ -2,7 +2,7 @@
 // File: CreditWin.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "CreditWin.h"
 #include "Input.h"
 #include "UIMng.h"

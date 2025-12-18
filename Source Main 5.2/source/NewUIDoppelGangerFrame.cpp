@@ -1,7 +1,7 @@
 // NewUIDoppelGangerFrame.cpp: implementation of the CNewUIDoppelGangerFrame class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIDoppelGangerFrame.h"
 #include "NewUISystem.h"
 

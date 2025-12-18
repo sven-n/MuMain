@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIMessageBox.h"	// self
 #include "NewUIManager.h"
 #include "UIControls.h"

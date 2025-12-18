@@ -2,7 +2,7 @@
 // File: OptionWin.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "OptionWin.h"
 #include "Input.h"
 #include "UIMng.h"

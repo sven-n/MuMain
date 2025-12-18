@@ -1,7 +1,7 @@
 ﻿// NewUIGoldBowmanLena.cpp: implementation of the NewUIGoldBowmanLena class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIGoldBowmanLena.h"
 #include "NewUISystem.h"
 

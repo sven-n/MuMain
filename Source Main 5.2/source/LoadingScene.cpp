@@ -2,7 +2,7 @@
 // File: LoadingScene.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "LoadingScene.h"
 
 #include "Input.h"

@@ -1,14 +1,7 @@
 ﻿//*****************************************************************************
 // file    : GM_PK_Field.cpp
 //*****************************************************************************
-
-#include <algorithm>
-#include <array>
-#include <cmath>
-#include <cstdint>
-#include <optional>
-
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

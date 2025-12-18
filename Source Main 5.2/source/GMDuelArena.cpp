@@ -1,7 +1,7 @@
 // GMDuelArena.cpp: implementation of the CGMDuelArena class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

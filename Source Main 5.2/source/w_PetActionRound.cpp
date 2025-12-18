@@ -1,7 +1,7 @@
 // w_PetActionRound.cpp: implementation of the PetActionRound class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "w_PetActionRound.h"
 #include "ZzzAI.h"
 

@@ -1,7 +1,7 @@
 ﻿// w_BasePet.cpp: implementation of the BasePet class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "w_BasePet.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzObject.h"

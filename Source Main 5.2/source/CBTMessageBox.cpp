@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "CBTMessageBox.h"
 
 #include <algorithm>

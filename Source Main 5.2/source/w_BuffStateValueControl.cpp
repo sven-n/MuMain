@@ -1,7 +1,7 @@
 // w_BuffStateControl.cpp: implementation of the BuffStateControl class.
 //
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "UIManager.h"
 #include "ItemAddOptioninfo.h"
 #include "w_BuffStateValueControl.h"

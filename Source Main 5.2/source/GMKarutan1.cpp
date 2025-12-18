@@ -2,7 +2,7 @@
 // File: GMKarutan1.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #ifdef ASG_ADD_MAP_KARUTAN
 

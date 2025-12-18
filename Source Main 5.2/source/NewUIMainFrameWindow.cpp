@@ -2,7 +2,7 @@
 // NewUIMainFrameWindow.cpp: implementation of the CNewUIMainFrameWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUIMainFrameWindow.h"	// self
 #include "NewUIOptionWindow.h"

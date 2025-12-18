@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "PacketFunctions_Custom.h"
 #include <coreclr_delegates.h>
 

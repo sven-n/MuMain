@@ -1,8 +1,8 @@
 // ItemAddOptioninfo.cpp: implementation of the ItemAddOptioninfo class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "UIManager.h"

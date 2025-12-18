@@ -2,7 +2,7 @@
 // File: CharInfoBalloon.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "CharInfoBalloon.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzInterface.h"

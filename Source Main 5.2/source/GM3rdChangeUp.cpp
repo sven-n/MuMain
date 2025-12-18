@@ -1,7 +1,7 @@
 ﻿// GM3rdChangeUp.cpp: implementation of the CGM3rdChangeUp class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "ZzzLodTerrain.h"

@@ -2,7 +2,7 @@
 // File: UIMng.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "UIMng.h"
 #include "Input.h"
 #include "Sprite.h"

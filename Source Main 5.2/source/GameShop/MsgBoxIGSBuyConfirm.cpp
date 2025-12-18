@@ -1,7 +1,7 @@
 // MsgBoxIGSBuyConfirm.cpp: implementation of the CMsgBoxIGSBuyConfirm class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSBuyConfirm.h"

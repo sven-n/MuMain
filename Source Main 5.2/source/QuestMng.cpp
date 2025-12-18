@@ -2,7 +2,7 @@
 // File: CQuestMng.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "QuestMng.h"
 
 

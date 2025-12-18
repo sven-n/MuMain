@@ -1,7 +1,7 @@
 // muDebugHelper.cpp: implementation of the CmuConsoleDebug class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "muConsoleDebug.h"	// self
 

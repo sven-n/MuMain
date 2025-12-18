@@ -1,7 +1,7 @@
 // w_BuffTimeControl.cpp: implementation of the BuffTimeControl class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "ZzzInfomation.h"
 #include "UIManager.h"
 #include "ItemAddOptioninfo.h"

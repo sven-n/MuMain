@@ -2,7 +2,7 @@
 // File: MsgWin.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "MsgWin.h"
 #include "Input.h"
 #include "UIMng.h"

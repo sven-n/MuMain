@@ -1,6 +1,6 @@
 ﻿// NewUICommonMessageBox.cpp: implementation of the NewUICommonMessageBox class.
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
 #include "NewUIGuildMakeWindow.h"

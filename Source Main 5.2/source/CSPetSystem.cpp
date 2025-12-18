@@ -2,13 +2,7 @@
 //  CSPetSystem.
 //////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-
-#include <algorithm>
-#include <cmath>
-#include <limits>
-
-#include "Random.h"
+#include "MUMain/stdafx.h"
 #include "CSPetSystem.h"
 #include "MapManager.h"
 #include "DuelMgr.h"
@@ -26,6 +20,7 @@
 #include "ZzzScene.h"
 #include "ZzzTexture.h"
 #include "DSPlaySound.h"
+#include "Random.h"
 
 namespace
 {

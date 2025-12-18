@@ -1,7 +1,7 @@
 // NewUIPetInformation.cpp: imp0lementation of the CNewUIPetInfoWindow class.
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUIPetInfoWindow.h"
 #include "NewUISystem.h"

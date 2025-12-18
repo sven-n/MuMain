@@ -2,7 +2,7 @@
 // File: Input.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "Input.h"
 #include "UsefulDef.h"
 #include "./Time/Timer.h"

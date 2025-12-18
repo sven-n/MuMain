@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUINameWindow.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"

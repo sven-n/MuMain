@@ -1,7 +1,7 @@
 // MsgBoxIGSSendGiftConfirm.cpp: implementation of the CMsgBoxIGSSendGiftConfirm class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSSendGiftConfirm.h"
 #include "DSPlaySound.h"

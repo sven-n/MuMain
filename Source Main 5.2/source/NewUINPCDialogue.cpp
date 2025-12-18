@@ -2,7 +2,7 @@
 // File: NewUINPCDialogue.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUINPCDialogue.h"
 
 #include <crtdbg.h>

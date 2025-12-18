@@ -2,7 +2,7 @@
 //  GMBattleCastle.cpp
 //////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "UIWindows.h"
 #include "UIManager.h"
 #include "DSPlaySound.h"

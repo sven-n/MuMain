@@ -2,7 +2,7 @@
 // File: NewUINPCQuest.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUINPCQuest.h"
 #include "NewUISystem.h"
 #include "CSQuest.h"

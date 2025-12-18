@@ -1,6 +1,6 @@
 // NewUIGensRanking.cpp: implementation of the CNewUIGensRanking class.
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #ifdef PBG_ADD_GENSRANKING
 #include "NewUIGensRanking.h"

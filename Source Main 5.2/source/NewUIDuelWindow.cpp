@@ -1,7 +1,7 @@
 // NewUIDuelWindow.cpp: implementation of the CNewUIDuelWindow class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "NewUIDuelWindow.h"
 #include "ZzzTexture.h"
 #include "ZzzInventory.h"

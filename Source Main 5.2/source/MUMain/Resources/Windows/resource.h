@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
-// Used by resource.rc
+// Used by MUMain/Resources/Windows/resource.rc
 //
 #define VS_VERSION_INFO_BLUE            1
 #define IDI_ICON1                       101

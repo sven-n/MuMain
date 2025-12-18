@@ -1,7 +1,7 @@
 ﻿// NewUIEnterBloodCastle.cpp: implementation of the CNewUIPartyInfo class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 
 #include "NewUIEnterDevilSquare.h"
 #include "NewUISystem.h"

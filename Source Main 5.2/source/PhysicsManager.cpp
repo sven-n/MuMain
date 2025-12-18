@@ -1,7 +1,7 @@
 // PhysicsManager.cpp: implementation of the CPhysicsManager class.
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "MUMain/stdafx.h"
 #include "PhysicsManager.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
