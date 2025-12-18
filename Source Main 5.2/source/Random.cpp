@@ -52,7 +52,7 @@ namespace Random
 
             result_type operator()()
             {
-                return GetThreadEngine()() & 0x7FFFFFFFu;
+                return GetThreadEngine()() & max();
             }
         };
 
