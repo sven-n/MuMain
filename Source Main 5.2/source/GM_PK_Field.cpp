@@ -1,6 +1,13 @@
 ﻿//*****************************************************************************
 // file    : GM_PK_Field.cpp
 //*****************************************************************************
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdint>
+#include <optional>
+
 #include "stdafx.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -10,8 +17,44 @@
 #include "ZzzOpenData.h"
 #include "w_MapHeaders.h"
 #include "DSPlaySound.h"
+#include "Random.h"
 
+namespace
+{
+    struct MonsterDefinition
+    {
+        int monsterType;
+        EMonsterModelType monsterModelId;
+        int objectModelId;
+        float scale;
+        bool assignLifetime;
+        int lifetime;
+    };
 
+    constexpr std::array<MonsterDefinition, 12> kMonsterDefinitions{ {
+        {MONSTER_ZOMBIE_FIGHTER, EMonsterModelType::MONSTER_MODEL_ZOMBIE_FIGHTER, MODEL_ZOMBIE_FIGHTER, 1.0f, false, 0},
+        {MONSTER_ZOMBIER, EMonsterModelType::MONSTER_MODEL_ZOMBIE_FIGHTER, MODEL_ZOMBIE_FIGHTER, 1.0f, false, 0},
+        {MONSTER_GLADIATOR, EMonsterModelType::MONSTER_MODEL_GLADIATOR, MODEL_GLADIATOR, 1.0f, false, 0},
+        {MONSTER_HELL_GLADIATOR, EMonsterModelType::MONSTER_MODEL_GLADIATOR, MODEL_GLADIATOR, 1.0f, false, 0},
+        {MONSTER_SLAUGHTERER, EMonsterModelType::MONSTER_MODEL_SLAUGTHERER, MODEL_SLAUGHTERER, 0.7f, false, 0},
+        {MONSTER_ASH_SLAUGHTERER, EMonsterModelType::MONSTER_MODEL_SLAUGTHERER, MODEL_SLAUGHTERER, 0.7f, false, 0},
+        {MONSTER_BLOOD_ASSASSIN, EMonsterModelType::MONSTER_MODEL_BLOOD_ASSASSIN, MODEL_BLOOD_ASSASSIN, 1.0f, true, 100},
+        {MONSTER_CRUEL_BLOOD_ASSASSIN, EMonsterModelType::MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN, MODEL_CRUEL_BLOOD_ASSASSIN, 1.0f, true, 100},
+        {MONSTER_COLD_BLOODED_ASSASSIN, EMonsterModelType::MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN, MODEL_CRUEL_BLOOD_ASSASSIN, 1.0f, true, 100},
+        {MONSTER_BURNING_LAVA_GIANT, EMonsterModelType::MONSTER_MODEL_BURNING_LAVA_GIANT, MODEL_BURNING_LAVA_GIANT, 1.0f, false, 0},
+        {MONSTER_LAVA_GIANT, EMonsterModelType::MONSTER_MODEL_LAVA_GIANT, MODEL_LAVA_GIANT, 1.0f, false, 0},
+        {MONSTER_RUTHLESS_LAVA_GIANT, EMonsterModelType::MONSTER_MODEL_LAVA_GIANT, MODEL_LAVA_GIANT, 1.0f, false, 0},
+    } };
+
+    const MonsterDefinition* FindMonsterDefinition(int monsterType)
+    {
+        const auto it = std::find_if(kMonsterDefinitions.begin(), kMonsterDefinitions.end(),
+            [monsterType](const MonsterDefinition& def) { return def.monsterType == monsterType; });
+        return (it != kMonsterDefinitions.end()) ? &(*it) : nullptr;
+    }
+
+    constexpr int kBlurSampleCount = 5;
+}
 
 CGM_PK_FieldPtr CGM_PK_Field::Make()
 {
@@ -40,141 +83,38 @@ void CGM_PK_Field::Destroy()
     //n/a
 }
 
-CHARACTER* CGM_PK_Field::CreateMonster(int iType, int PosX, int PosY, int Key)
+CHARACTER* CGM_PK_Field::CreateMonster(int type, int positionX, int positionY, int key)
 {
     if (!gMapManager.IsPKField())
     {
-        return NULL;
+        return nullptr;
     }
 
-    CHARACTER* pCharacter = NULL;
-    switch (iType)
+    const MonsterDefinition* definition = FindMonsterDefinition(type);
+    if (definition == nullptr)
     {
-    case MONSTER_ZOMBIE_FIGHTER:
+        return nullptr;
+    }
+
+    OpenMonsterModel(definition->monsterModelId);
+
+    CHARACTER* character = CreateCharacter(key, definition->objectModelId, positionX, positionY);
+    if (character == nullptr)
     {
-        OpenMonsterModel(MONSTER_MODEL_ZOMBIE_FIGHTER);
-        pCharacter = CreateCharacter(Key, MODEL_ZOMBIE_FIGHTER, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
+        return nullptr;
     }
-    break;
-    case MONSTER_ZOMBIER:
+
+    character->Object.Scale = definition->scale;
+    character->Object.m_iAnimation = 0;
+    character->Weapon[0].Type = -1;
+    character->Weapon[1].Type = -1;
+
+    if (definition->assignLifetime)
     {
-        OpenMonsterModel(MONSTER_MODEL_ZOMBIE_FIGHTER);
-        pCharacter = CreateCharacter(Key, MODEL_ZOMBIE_FIGHTER, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
+        character->Object.LifeTime = definition->lifetime;
     }
-    break;
-    case MONSTER_GLADIATOR:
-    {
-        OpenMonsterModel(MONSTER_MODEL_GLADIATOR);
-        pCharacter = CreateCharacter(Key, MODEL_GLADIATOR, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_HELL_GLADIATOR:
-    {
-        OpenMonsterModel(MONSTER_MODEL_GLADIATOR);
-        pCharacter = CreateCharacter(Key, MODEL_GLADIATOR, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_SLAUGHTERER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SLAUGTHERER);
-        pCharacter = CreateCharacter(Key, MODEL_SLAUGHTERER, PosX, PosY);
-        pCharacter->Object.Scale = 0.7f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_ASH_SLAUGHTERER:
-    {
-        OpenMonsterModel(MONSTER_MODEL_SLAUGTHERER);
-        pCharacter = CreateCharacter(Key, MODEL_SLAUGHTERER, PosX, PosY);
-        pCharacter->Object.Scale = 0.7f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_BLOOD_ASSASSIN:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BLOOD_ASSASSIN);
-        pCharacter = CreateCharacter(Key, MODEL_BLOOD_ASSASSIN, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-        pCharacter->Object.LifeTime = 100;
-    }
-    break;
-    case MONSTER_CRUEL_BLOOD_ASSASSIN:
-    {
-        OpenMonsterModel(MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN);
-        pCharacter = CreateCharacter(Key, MODEL_CRUEL_BLOOD_ASSASSIN, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-        pCharacter->Object.LifeTime = 100;
-    }
-    break;
-    case MONSTER_COLD_BLOODED_ASSASSIN:
-    {
-        OpenMonsterModel(MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN);
-        pCharacter = CreateCharacter(Key, MODEL_CRUEL_BLOOD_ASSASSIN, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-        pCharacter->Object.LifeTime = 100;
-    }
-    break;
-    case MONSTER_BURNING_LAVA_GIANT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_BURNING_LAVA_GIANT);
-        pCharacter = CreateCharacter(Key, MODEL_BURNING_LAVA_GIANT, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_LAVA_GIANT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_LAVA_GIANT);
-        pCharacter = CreateCharacter(Key, MODEL_LAVA_GIANT, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    case MONSTER_RUTHLESS_LAVA_GIANT:
-    {
-        OpenMonsterModel(MONSTER_MODEL_LAVA_GIANT);
-        pCharacter = CreateCharacter(Key, MODEL_LAVA_GIANT, PosX, PosY);
-        pCharacter->Object.Scale = 1.0f;
-        pCharacter->Weapon[0].Type = -1;
-        pCharacter->Weapon[1].Type = -1;
-        pCharacter->Object.m_iAnimation = 0;
-    }
-    break;
-    }
-    return pCharacter;
+
+    return character;
 }
 
 void CGM_PK_Field::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
@@ -390,7 +330,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         if (rand_fps_check(4))
         {
-            float fRed = (rand() % 3) * 0.01f + 0.015f;
+            float fRed = Random::RangeFloat(0, 2) * 0.01f + 0.015f;
             Vector(fRed, 0.0f, 0.0f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 11, o->Scale, o);
         }
@@ -403,7 +343,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
         vec3_t vAngle;
         if (rand_fps_check(3))
         {
-            Vector((float)(rand() % 40 + 120), 0.f, (float)(rand() % 30), vAngle);
+            Vector(Random::RangeFloat(120, 159), 0.f, Random::RangeFloat(0, 29), vAngle);
             VectorAdd(vAngle, o->Angle, vAngle);
             CreateJoint(BITMAP_JOINT_SPARK, o->Position, o->Position, vAngle, 4, o, o->Scale);
             CreateParticle(BITMAP_SPARK, o->Position, vAngle, Light, 9, o->Scale);
@@ -430,7 +370,7 @@ bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
 
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
-        switch (rand() % 3)
+        switch (Random::RangeInt(0, 2))
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
@@ -500,7 +440,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         {
             o->AnimationFrame = 1;
 
-            int test = rand() % 1000;
+            int test = Random::RangeInt(0, 999);
             if (test >= 0 && test < 2)
             {
                 o->PKKey = 1;
@@ -512,7 +452,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         }
         vec3_t p, Pos, Light;
         Vector(0.4f, 0.1f, 0.1f, Light);
-        //Vector(rand()%20-30.0f, rand()%20-30.0f, 0.0f, p);
+        //Vector(Random::RangeFloat(-30, -11), Random::RangeFloat(-30, -11), 0.0f, p);
         Vector(-150.0f, 0.0f, 0.0f, p);
         b->TransformPosition(BoneTransform[4], p, Pos, false);
         if (o->AnimationFrame >= 35.0f && o->AnimationFrame < 50.0f)
@@ -546,7 +486,7 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         vec3_t p, Pos, Light;
         //Vector(0.08f, 0.08f, 0.08f, Light);
         Vector(0.3f, 0.1f, 0.1f, Light);
-        Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
+        Vector(Random::RangeFloat(-30, -11), Random::RangeFloat(-30, -11), 0.0f, p);
         b->TransformPosition(BoneTransform[4], p, Pos, false);
         if (o->AnimationFrame >= 7.0f && o->AnimationFrame < 13.0f)
             CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
@@ -607,7 +547,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                     CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLightFire, o);
 
                     fScale = 0.7f;
-                    Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
+                    Vector(Random::RangeFloat(-5, 4), Random::RangeFloat(-5, 4), Random::RangeFloat(-5, 4), vRelative);
                     b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
                 }
                 else
@@ -616,15 +556,15 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                     vPos[2] += 50.0f;
                     CreateSprite(BITMAP_LIGHT, vPos, 2.5f, vLightFire, o);
 
-                    Vector((rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, vRelative);
+                    Vector(Random::RangeFloat(-10, 9), Random::RangeFloat(-10, 9), Random::RangeFloat(-10, 9), vRelative);
                     b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
                 }
                 if (o->Type == MODEL_BLOOD_ASSASSIN)
                 {
                     for (int i = 0; i < 2; ++i)
                     {
-                        float fScale = (rand() % 5 + 18) * 0.03f;
-                        switch (rand() % 3)
+                        float fScale = Random::RangeFloat(18, 22) * 0.03f;
+                        switch (Random::RangeInt(0, 2))
                         {
                         case 0:
                             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
@@ -642,9 +582,9 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
                 {
                     for (int i = 0; i < 2; ++i)
                     {
-                        float fScale = (rand() % 5 + 18) * 0.03f;
+                        float fScale = Random::RangeFloat(18, 22) * 0.03f;
                         Vector(0.6f, 0.9f, 0.1f, o->Light);
-                        switch (rand() % 3)
+                        switch (Random::RangeInt(0, 2))
                         {
                         case 0:
                             CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPos, o->Angle, o->Light, 0, fScale);
@@ -716,11 +656,11 @@ bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             for (int i = 0; i < 4; ++i)
             {
-                if (rand() % 4 > 0) continue;
+                if (Random::RangeInt(0, 3) > 0) continue;
 
                 b->TransformByObjectBone(vPos, o, iBones[i]);
                 CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 50, 1.0f);
-                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, o->Angle, vLight, 0, 0.01f);
+                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::RangeInt(0, 2), vPos, o->Angle, vLight, 0, 0.01f);
             }
 
             if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1030,22 +970,22 @@ bool CGM_PK_Field::CreateFireSpark(PARTICLE* o)
     }
 
     o->Type = BITMAP_FIRE_SNUFF;
-    o->Scale = rand() % 50 / 100.f + 0.4f;
+    o->Scale = Random::RangeFloat(0, 49) / 100.f + 0.4f;
     vec3_t Position;
-    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800), Hero->Object.Position[1] + (float)(rand() % 1400 - 500), Hero->Object.Position[2] + (float)(rand() % 300 + 50), Position);
+    Vector(Hero->Object.Position[0] + Random::RangeFloat(-800, 799), Hero->Object.Position[1] + Random::RangeFloat(-500, 899), Hero->Object.Position[2] + Random::RangeFloat(50, 349), Position);
 
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
-    o->Velocity[0] = -(float)(rand() % 64 + 64) * 0.1f;
+    o->Velocity[0] = -Random::RangeFloat(64, 127) * 0.1f;
     if (Position[1] < CameraPosition[1] + 400.f)
     {
         o->Velocity[0] = -o->Velocity[0] + 2.2f;
     }
-    o->Velocity[1] = (float)(rand() % 32 - 16) * 0.1f;
-    o->Velocity[2] = (float)(rand() % 32 - 16) * 0.1f;
-    o->TurningForce[0] = (float)(rand() % 16 - 8) * 0.1f;
-    o->TurningForce[1] = (float)(rand() % 64 - 32) * 0.1f;
-    o->TurningForce[2] = (float)(rand() % 16 - 8) * 0.1f;
+    o->Velocity[1] = Random::RangeFloat(-16, 15) * 0.1f;
+    o->Velocity[2] = Random::RangeFloat(-16, 15) * 0.1f;
+    o->TurningForce[0] = Random::RangeFloat(-8, 7) * 0.1f;
+    o->TurningForce[1] = Random::RangeFloat(-32, 31) * 0.1f;
+    o->TurningForce[2] = Random::RangeFloat(-8, 7) * 0.1f;
 
     Vector(1.f, 0.f, 0.f, o->Light);
 
