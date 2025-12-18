@@ -322,10 +322,10 @@
     <ClCompile Include="source\_GlobalFunctions.cpp">
       <Filter>MU\Common</Filter>
     </ClCompile>
-    <ClCompile Include="source\StdAfx.cpp">
+    <ClCompile Include="source\MUMain\StdAfx.cpp">
       <Filter>MU\Common</Filter>
     </ClCompile>
-    <ClCompile Include="source\Winmain.cpp">
+    <ClCompile Include="source\MUMain\Winmain.cpp">
       <Filter>MU\Client\core</Filter>
     </ClCompile>
     <ClCompile Include="source\ZzzScene.cpp">
