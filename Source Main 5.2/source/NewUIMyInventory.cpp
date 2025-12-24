@@ -2142,20 +2142,21 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
                 return false;
             }
 
-            // Create a picked item and remove from inventory (same as drag-and-drop)
+            // Create a picked item (same as drag-and-drop)
             if (!CNewUIInventoryCtrl::CreatePickedItem(targetControl, pItem))
             {
                 return false;
             }
 
-            // Remove item from inventory display (will be restored if sell fails)
-            targetControl->RemoveItem(pItem);
-
+            // Verify the picked item was created successfully before removing from inventory
             CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
             if (!pPickedItem)
             {
                 return false;
             }
+
+            // Now it's safe to remove item from inventory display (will be restored if sell fails)
+            targetControl->RemoveItem(pItem);
 
             // Hide the picked item so it's not visually displayed while selling
             pPickedItem->HidePickedItem();
