@@ -1484,7 +1484,8 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
         const int iSourceIndex = m_iPointedSlot;
         if (GetRepairMode() != REPAIR_MODE_ON && EquipmentItem == false
             && pPickedItem == nullptr
-            && iSourceIndex != -1)
+            && iSourceIndex != -1
+            && !g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP))  // Don't unequip when NPC shop is open
         {
             ResetMouseRButton();
 
@@ -2094,6 +2095,83 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
         if (g_pNewUISystem->IsVisible(INTERFACE_STORAGE))
         {
             return g_pStorageInventory->ProcessMyInvenItemAutoMove();
+        }
+
+        // Right-click to sell items at NPC shop
+        if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) && g_pNewUISystem->IsVisible(INTERFACE_INVENTORY))
+        {
+            // Don't process right-click if there's already a picked item (being dragged)
+            CNewUIPickedItem* pExistingPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+            if (pExistingPickedItem)
+            {
+                return false;
+            }
+
+            // Only process if mouse is over the inventory control area
+            if (!targetControl->CheckPtInRect(MouseX, MouseY))
+            {
+                return false;
+            }
+
+            // Only process for inventory storage type
+            if (targetControl->GetStorageType() != STORAGE_TYPE::INVENTORY)
+            {
+                return false;
+            }
+
+            ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
+            if (!pItem)
+            {
+                return false;
+            }
+
+            if (g_pNPCShop->IsSellingItem())
+            {
+                return false;
+            }
+
+            if (IsSellingBan(pItem))
+            {
+                g_pSystemLogBox->AddText(GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
+                return true;
+            }
+
+            const int iIndex = targetControl->GetIndexByItem(pItem);
+            if (iIndex < 0)
+            {
+                return false;
+            }
+
+            // Create a picked item (same as drag-and-drop)
+            if (!CNewUIInventoryCtrl::CreatePickedItem(targetControl, pItem))
+            {
+                return false;
+            }
+
+            // Verify the picked item was created successfully before removing from inventory
+            CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+            if (!pPickedItem)
+            {
+                return false;
+            }
+
+            // Now it's safe to remove item from inventory display (will be restored if sell fails)
+            targetControl->RemoveItem(pItem);
+
+            // Hide the picked item so it's not visually displayed while selling
+            pPickedItem->HidePickedItem();
+
+            if (IsHighValueItem(pItem))
+            {
+                // Show confirmation dialog for expensive items
+                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHighValueItemCheckMsgBoxLayout));
+                return true;
+            }
+
+            // For regular items, send sell request immediately
+            SocketClient->ToGameServer()->SendSellItemToNpcRequest(iIndex);
+            g_pNPCShop->SetSellingItem(true);
+            return true;
         }
 
         if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY)

@@ -2548,6 +2548,12 @@ CALLBACK_RESULT SEASON3B::CHighValueItemCheckMsgBoxLayout::OkBtnDown(class CNewU
     {
         SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
         g_pNPCShop->SetSellingItem(true);
+        // Note: picked item will be cleaned up by ReceiveSell when server responds
+    }
+    else
+    {
+        // If no valid item, restore it
+        CNewUIInventoryCtrl::BackupPickedItem();
     }
 
     PlayBuffer(SOUND_CLICK01);
