@@ -1484,7 +1484,8 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
         const int iSourceIndex = m_iPointedSlot;
         if (GetRepairMode() != REPAIR_MODE_ON && EquipmentItem == false
             && pPickedItem == nullptr
-            && iSourceIndex != -1)
+            && iSourceIndex != -1
+            && !g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP))  // Don't unequip when NPC shop is open
         {
             ResetMouseRButton();
 
