@@ -20,6 +20,7 @@
 #include "SkillManager.h"
 #include <NewUISystem.h>
 #include "ZzzInterface.h"
+#include "CustomCamera3D.h"
 
 PARTICLE  Particles[MAX_PARTICLES];
 #ifdef DEVIAS_XMAS_EVENT
@@ -18091,7 +18092,14 @@ void RenderEffects(bool bRenderBlendMesh)
 
         if (o->Live)
         {
-            o->Visible = TestFrustrum(o->Position, 400.f);
+            // Increase frustum test radius when 3D camera is zoomed out
+            float frustrumRadius = 400.f;
+            if (CCustomCamera3D::IsEnabled())
+            {
+                float zoomScale = CCustomCamera3D::GetZoomDistance() / 100.0f;
+                frustrumRadius = 400.f * (1.0f + zoomScale * 2.0f);
+            }
+            o->Visible = TestFrustrum(o->Position, frustrumRadius);
 
             if (gMapManager.WorldActive == WD_39KANTURU_3RD)
                 if (o->Type == MODEL_STORM3 || o->Type == MODEL_MAYASTAR)
@@ -19449,7 +19457,7 @@ void RenderEffectShadows()
                 {
                     if (o->SubType == 0)
                     {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light);
+                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, 0.f, 1.f, o->Position[2]);
                     }
                 }
                 break;

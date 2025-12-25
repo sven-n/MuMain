@@ -48,6 +48,7 @@
 #include "w_CursedTemple.h"
 #include "CameraMove.h"
 #include "w_MapHeaders.h"
+#include "CustomCamera3D.h"
 #include "w_PetProcess.h"
 #include "PortalMgr.h"
 #include "ServerListManager.h"
@@ -1455,7 +1456,7 @@ bool MoveMainCamera()
         else if (CCameraMove::GetInstancePtr()->IsTourMode());
         else
         {
-            CameraPosition[2] = Hero->Object.Position[2];//700
+            CameraPosition[2] = Hero->Object.Position[2] + CAMERA_HEIGHT_OFFSET; // Add offset to better center the char on screen
         }
 
         if ((TerrainWall[iIndex] & TW_HEIGHT) == TW_HEIGHT)
@@ -1603,6 +1604,9 @@ void MoveMainScene()
 
         g_PortalMgr.Reset();
 
+        // Initialize Custom 3D Camera System
+        CCustomCamera3D::Initialize();
+
         ClearAllObjectBlurs();
 
         SetFocus(g_hWnd);
@@ -1629,6 +1633,56 @@ void MoveMainScene()
     CheckInventory = NULL;
     CheckSkill = -1;
     MouseOnWindow = false;
+
+    //===========================================
+    // CUSTOM 3D CAMERA SYSTEM - INPUT HANDLING (Before UI)
+    //===========================================
+
+    // F9 Key Toggle
+    static bool bF9KeyWasPressed = false;
+    bool bF9KeyIsPressed = (GetAsyncKeyState(VK_F9) & 0x8000) != 0;
+    if (bF9KeyIsPressed && !bF9KeyWasPressed)
+    {
+        CCustomCamera3D::Toggle();
+    }
+    bF9KeyWasPressed = bF9KeyIsPressed;
+
+    // Handle middle mouse button for rotation
+    bool buttonHeld = (MouseMButton || MouseMButtonPush);
+
+    // Debug: Log button state changes
+    static bool lastButtonHeld = false;
+    if (buttonHeld != lastButtonHeld)
+    {
+        lastButtonHeld = buttonHeld;
+    }
+
+    if (CCustomCamera3D::IsEnabled())
+    {
+        // Mouse Wheel Zoom - Capture before UI system
+        if (MouseWheel != 0)
+        {
+            CCustomCamera3D::ProcessMouseWheel(MouseWheel);
+            MouseWheel = 0;
+        }
+
+        // Middle Mouse Button Rotation
+        if (buttonHeld)
+        {
+            // Button is held - start/continue rotation (both horizontal and vertical)
+            CCustomCamera3D::StartRotation(MouseX, MouseY);
+            CCustomCamera3D::ProcessMouseRotation(MouseX, MouseY);
+        }
+        else
+        {
+            // Button not held - ensure rotation is stopped
+            CCustomCamera3D::StopRotation();
+        }
+    }
+
+    //===========================================
+    // CUSTOM 3D CAMERA SYSTEM - END
+    //===========================================
 
     if (!CameraTopViewEnable && LoadingWorld < 30)
     {

@@ -14,6 +14,7 @@
 #include "DSPlaySound.h"
 #include "WSclient.h"
 #include "Random.h"
+#include "CustomCamera3D.h"
 
 PARTICLE  Pointers[MAX_POINTERS];
 
@@ -88,6 +89,14 @@ void MovePointers()
 void RenderPointers()
 {
     EnableAlphaBlend();
+    // Disable depth test and face culling to ensure pointers are always visible
+    DisableDepthTest();
+    bool wasCulling = CullFaceEnable;
+    if (wasCulling) {
+        glDisable(GL_CULL_FACE);
+        CullFaceEnable = false;
+    }
+
     for (int i = 0; i < MAX_POINTERS; i++)
     {
         PARTICLE* o = &Pointers[i];
@@ -97,7 +106,26 @@ void RenderPointers()
                 EnableAlphaBlend();
             else
                 EnableAlphaTest();
-            RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2], o->Alpha);
+
+            // Scale up pointer when 3D camera is zoomed out for better visibility
+            float effectiveScale = o->Scale;
+            if (CCustomCamera3D::IsEnabled())
+            {
+                float zoomScale = CCustomCamera3D::GetZoomDistance() / 100.0f;
+                // Scale much more aggressively so indicator is visible when far away
+                // At 1.0x zoom: 1.0 + 1.0 * 2.0 = 3.0x scale
+                // At 2.0x zoom: 1.0 + 2.0 * 2.0 = 5.0x scale
+                effectiveScale = o->Scale * (1.0f + zoomScale * 2.0f);
+            }
+
+            RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], effectiveScale, effectiveScale, o->Light, -o->Angle[2], o->Alpha, o->Position[2]);
         }
+    }
+
+    // Re-enable depth test and restore face culling state
+    EnableDepthTest();
+    if (wasCulling) {
+        glEnable(GL_CULL_FACE);
+        CullFaceEnable = true;
     }
 }

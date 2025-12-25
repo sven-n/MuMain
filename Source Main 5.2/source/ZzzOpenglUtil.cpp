@@ -11,6 +11,9 @@
 #include "ZzzInfomation.h"
 #include "NewUISystem.h"
 #include "wglext.h"
+#include "CustomCamera3D.h"
+
+extern CHARACTER* Hero;
 
 int     OpenglWindowX;
 int     OpenglWindowY;
@@ -177,9 +180,18 @@ void CreateScreenVector(int sx, int sy, vec3_t Target, bool bFixView)
     vec3_t p1, p2;
     if (bFixView)
     {
-        p1[0] = (float)(sx - ScreenCenterX) * CameraViewFar * PerspectiveX;
-        p1[1] = -(float)(sy - ScreenCenterY) * CameraViewFar * PerspectiveY;
-        p1[2] = -CameraViewFar;
+        // Adjust far distance for 3D camera zoom to ensure ray reaches far enough
+        float adjustedViewFar = CameraViewFar;
+        if (CCustomCamera3D::IsEnabled())
+        {
+            float zoomScale = CCustomCamera3D::GetZoomDistance() / 100.0f;
+            // Use same multiplier as rendering to ensure ray reaches visible terrain
+            adjustedViewFar = CameraViewFar * (3.0f + zoomScale * 4.0f) * 2.5f;
+        }
+
+        p1[0] = (float)(sx - ScreenCenterX) * adjustedViewFar * PerspectiveX;
+        p1[1] = -(float)(sy - ScreenCenterY) * adjustedViewFar * PerspectiveY;
+        p1[2] = -adjustedViewFar;
     }
     else
     {
@@ -580,6 +592,11 @@ float ConvertY(float y)
     return y * (float)WindowHeight / 480.f;
 }
 
+// Store original camera state for restoration
+static vec3_t g_SavedCameraAngle;
+static vec3_t g_SavedCameraPosition;
+static bool g_bCameraStateSaved = false;
+
 void BeginOpengl(int x, int y, int Width, int Height)
 {
     x = x * WindowWidth / 640;
@@ -592,16 +609,69 @@ void BeginOpengl(int x, int y, int Width, int Height)
     glLoadIdentity();
     glViewport2(x, y, Width, Height);
 
-    gluPerspective2(CameraFOV, (float)Width / (float)Height, CameraViewNear, CameraViewFar * 1.4f);
+    // Adjust far clipping plane for custom 3D camera zoom
+    float adjustedViewFar = CameraViewFar;
+    if (CCustomCamera3D::IsEnabled())
+    {
+        // Increase far clipping plane dramatically when zoomed out
+        // Formula: base * (3.0 + zoomScale * 4.0) * 2.5
+        // At 1.0x zoom: 3.0 + 1.0 * 4.0 = 7.0x * 2.5 = 17.5x
+        // At 2.0x zoom: 3.0 + 2.0 * 4.0 = 11.0x * 2.5 = 27.5x
+        float zoomScale = CCustomCamera3D::GetZoomDistance() / 100.0f;
+        adjustedViewFar = CameraViewFar * (3.0f + zoomScale * 4.0f) * 2.5f;
+    }
+    else
+    {
+        adjustedViewFar = CameraViewFar * 1.4f;
+    }
+
+    gluPerspective2(CameraFOV, (float)Width / (float)Height, CameraViewNear, adjustedViewFar);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    glRotatef(CameraAngle[1], 0.f, 1.f, 0.f);
+
+    // Get modified camera angle (with custom camera rotation applied)
+    vec3_t modifiedAngle;
+    CCustomCamera3D::GetModifiedCameraAngle(CameraAngle, modifiedAngle);
+
+    // Save original camera state before modifying
+    if (CCustomCamera3D::IsEnabled())
+    {
+        VectorCopy(CameraAngle, g_SavedCameraAngle);
+        VectorCopy(CameraPosition, g_SavedCameraPosition);
+        g_bCameraStateSaved = true;
+
+        // Update CameraAngle so frustum culling uses the correct view direction
+        VectorCopy(modifiedAngle, CameraAngle);
+    }
+
+    glRotatef(modifiedAngle[1], 0.f, 1.f, 0.f);
     if (CameraTopViewEnable == false)
-        glRotatef(CameraAngle[0], 1.f, 0.f, 0.f);
-    glRotatef(CameraAngle[2], 0.f, 0.f, 1.f);
-    glTranslatef(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+        glRotatef(modifiedAngle[0], 1.f, 0.f, 0.f);
+    glRotatef(modifiedAngle[2], 0.f, 0.f, 1.f);
+
+    // Get modified camera position (with zoom applied)
+    vec3_t modifiedPos;
+    if (Hero != nullptr)
+    {
+        // Pass character position to properly calculate camera zoom relative to character
+        CCustomCamera3D::GetModifiedCameraPosition(CameraPosition, Hero->Object.Position, modifiedPos);
+    }
+    else
+    {
+        // Fallback if Hero not available
+        vec3_t origin = { 0.0f, 0.0f, 0.0f };
+        CCustomCamera3D::GetModifiedCameraPosition(CameraPosition, origin, modifiedPos);
+    }
+
+    // Update CameraPosition so frustum culling uses the correct position
+    if (CCustomCamera3D::IsEnabled())
+    {
+        VectorCopy(modifiedPos, CameraPosition);
+    }
+
+    glTranslatef(-modifiedPos[0], -modifiedPos[1], -modifiedPos[2]);
 
     glDisable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
@@ -636,6 +706,14 @@ void EndOpengl()
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
+
+    // Restore original camera state if it was modified
+    if (g_bCameraStateSaved)
+    {
+        VectorCopy(g_SavedCameraAngle, CameraAngle);
+        VectorCopy(g_SavedCameraPosition, CameraPosition);
+        g_bCameraStateSaved = false;
+    }
 }
 
 void UpdateMousePositionn()
@@ -643,7 +721,40 @@ void UpdateMousePositionn()
     vec3_t vPos;
 
     glLoadIdentity();
-    glTranslatef(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+
+    // Use modified camera position/angle for mouse picking when 3D camera is enabled
+    vec3_t modifiedAngle;
+    vec3_t modifiedPos;
+
+    if (CCustomCamera3D::IsEnabled())
+    {
+        // Get the modified camera angle
+        CCustomCamera3D::GetModifiedCameraAngle(CameraAngle, modifiedAngle);
+
+        // Apply the same rotations as in BeginOpengl
+        glRotatef(modifiedAngle[1], 0.f, 1.f, 0.f);
+        if (CameraTopViewEnable == false)
+            glRotatef(modifiedAngle[0], 1.f, 0.f, 0.f);
+        glRotatef(modifiedAngle[2], 0.f, 0.f, 1.f);
+
+        // Get the modified camera position
+        if (Hero != nullptr)
+        {
+            CCustomCamera3D::GetModifiedCameraPosition(CameraPosition, Hero->Object.Position, modifiedPos);
+        }
+        else
+        {
+            vec3_t origin = { 0.0f, 0.0f, 0.0f };
+            CCustomCamera3D::GetModifiedCameraPosition(CameraPosition, origin, modifiedPos);
+        }
+
+        glTranslatef(-modifiedPos[0], -modifiedPos[1], -modifiedPos[2]);
+    }
+    else
+    {
+        glTranslatef(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+    }
+
     GetOpenGLMatrix(CameraMatrix);
 
     Vector(-CameraMatrix[0][3], -CameraMatrix[1][3], -CameraMatrix[2][3], vPos);

@@ -25,6 +25,7 @@
 
 #include "w_MapHeaders.h"
 #include "CameraMove.h"
+#include "CustomCamera3D.h"
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -1854,26 +1855,65 @@ void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[
 {
     int xi = (int)xf;
     int yi = (int)yf;
-    if (xi < 0 || yi < 0 || xi >= TERRAIN_SIZE_MASK || yi >= TERRAIN_SIZE_MASK) return;
+
     float TileScale = TERRAIN_SCALE * lodf;
     float sx = xf * TERRAIN_SCALE;
     float sy = yf * TERRAIN_SCALE;
-    TerrainIndex1 = TERRAIN_INDEX(xi, yi);
-    TerrainIndex2 = TERRAIN_INDEX(xi + lodi, yi);
-    TerrainIndex3 = TERRAIN_INDEX(xi + lodi, yi + lodi);
-    TerrainIndex4 = TERRAIN_INDEX(xi, yi + lodi);
-    Vector(sx, sy, BackTerrainHeight[TerrainIndex1] + Height, TerrainVertex[0]);
-    Vector(sx + TileScale, sy, BackTerrainHeight[TerrainIndex2] + Height, TerrainVertex[1]);
-    Vector(sx + TileScale, sy + TileScale, BackTerrainHeight[TerrainIndex3] + Height, TerrainVertex[2]);
-    Vector(sx, sy + TileScale, BackTerrainHeight[TerrainIndex4] + Height, TerrainVertex[3]);
+
+    // Check if tile is out of bounds - if so, use a flat default height
+    bool outOfBounds = (xi < 0 || yi < 0 || xi >= TERRAIN_SIZE_MASK || yi >= TERRAIN_SIZE_MASK);
+
+    float h1, h2, h3, h4;
+
+    if (outOfBounds)
+    {
+        // Use zero for out-of-bounds tiles since Height will be added later
+        h1 = h2 = h3 = h4 = 0.0f;
+    }
+    else
+    {
+        // Clamp indices to valid terrain bounds to prevent partial rendering at edges
+        int xi2 = xi + lodi;
+        int yi2 = yi + lodi;
+        if (xi2 >= TERRAIN_SIZE) xi2 = TERRAIN_SIZE - 1;
+        if (yi2 >= TERRAIN_SIZE) yi2 = TERRAIN_SIZE - 1;
+
+        TerrainIndex1 = TERRAIN_INDEX(xi, yi);
+        TerrainIndex2 = TERRAIN_INDEX(xi2, yi);
+        TerrainIndex3 = TERRAIN_INDEX(xi2, yi2);
+        TerrainIndex4 = TERRAIN_INDEX(xi, yi2);
+
+        // Get terrain heights, using the primary terrain height as fallback if back height is not initialized
+        h1 = (BackTerrainHeight[TerrainIndex1] != 0.0f || PrimaryTerrainHeight[TerrainIndex1] == 0.0f) ? BackTerrainHeight[TerrainIndex1] : PrimaryTerrainHeight[TerrainIndex1];
+        h2 = (BackTerrainHeight[TerrainIndex2] != 0.0f || PrimaryTerrainHeight[TerrainIndex2] == 0.0f) ? BackTerrainHeight[TerrainIndex2] : PrimaryTerrainHeight[TerrainIndex2];
+        h3 = (BackTerrainHeight[TerrainIndex3] != 0.0f || PrimaryTerrainHeight[TerrainIndex3] == 0.0f) ? BackTerrainHeight[TerrainIndex3] : PrimaryTerrainHeight[TerrainIndex3];
+        h4 = (BackTerrainHeight[TerrainIndex4] != 0.0f || PrimaryTerrainHeight[TerrainIndex4] == 0.0f) ? BackTerrainHeight[TerrainIndex4] : PrimaryTerrainHeight[TerrainIndex4];
+    }
+
+    Vector(sx, sy, h1 + Height, TerrainVertex[0]);
+    Vector(sx + TileScale, sy, h2 + Height, TerrainVertex[1]);
+    Vector(sx + TileScale, sy + TileScale, h3 + Height, TerrainVertex[2]);
+    Vector(sx, sy + TileScale, h4 + Height, TerrainVertex[3]);
 
     vec3_t Light[4];
     if (LightEnable)
     {
-        VectorCopy(PrimaryTerrainLight[TerrainIndex1], Light[0]);
-        VectorCopy(PrimaryTerrainLight[TerrainIndex2], Light[1]);
-        VectorCopy(PrimaryTerrainLight[TerrainIndex3], Light[2]);
-        VectorCopy(PrimaryTerrainLight[TerrainIndex4], Light[3]);
+        if (outOfBounds)
+        {
+            // Use default white light for out-of-bounds tiles
+            vec3_t defaultLight = { 1.0f, 1.0f, 1.0f };
+            VectorCopy(defaultLight, Light[0]);
+            VectorCopy(defaultLight, Light[1]);
+            VectorCopy(defaultLight, Light[2]);
+            VectorCopy(defaultLight, Light[3]);
+        }
+        else
+        {
+            VectorCopy(PrimaryTerrainLight[TerrainIndex1], Light[0]);
+            VectorCopy(PrimaryTerrainLight[TerrainIndex2], Light[1]);
+            VectorCopy(PrimaryTerrainLight[TerrainIndex3], Light[2]);
+            VectorCopy(PrimaryTerrainLight[TerrainIndex4], Light[3]);
+        }
     }
 
     glBegin(GL_TRIANGLE_FAN);
@@ -2140,6 +2180,19 @@ void CreateFrustrum2D(vec3_t Position)
         }
     }
 
+    // Adjust for custom 3D camera zoom
+    if (CCustomCamera3D::IsEnabled())
+    {
+        float zoomScale = CCustomCamera3D::GetZoomDistance() / 100.0f;
+        float zoomMultiplier = (2.0f + zoomScale * 2.5f);
+        // Scale CameraViewFar more aggressively for top of screen
+        CameraViewFar *= zoomMultiplier * 1.8f;
+        CameraViewNear *= zoomMultiplier;
+        CameraViewTarget *= zoomMultiplier;
+        WidthFar *= zoomMultiplier * 1.5f;
+        WidthNear *= zoomMultiplier;
+    }
+
     vec3_t p[4];
     Vector(-WidthFar, CameraViewFar - CameraViewTarget, 0.f, p[0]);
     Vector(WidthFar, CameraViewFar - CameraViewTarget, 0.f, p[1]);
@@ -2157,7 +2210,15 @@ void CreateFrustrum2D(vec3_t Position)
     }
     else
     {
-        Vector(0.f, 0.f, -CameraAngle[2], Angle);
+        // Include camera pitch (X angle) for proper frustum calculation with 3D camera
+        if (CCustomCamera3D::IsEnabled())
+        {
+            Vector(-CameraAngle[0], 0.f, -CameraAngle[2], Angle);
+        }
+        else
+        {
+            Vector(0.f, 0.f, -CameraAngle[2], Angle);
+        }
     }
 
     AngleMatrix(Angle, Matrix);
@@ -2222,10 +2283,18 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
 
     int tileWidth = 4;
 
-    FrustrumBoundMinX = (int)(FrustrumMinX / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
-    FrustrumBoundMinY = (int)(FrustrumMinY / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
-    FrustrumBoundMaxX = (int)(FrustrumMaxX / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
-    FrustrumBoundMaxY = (int)(FrustrumMaxY / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
+    // Add extra buffer for 3D camera to ensure all visible terrain is included
+    int extraBuffer = tileWidth;
+    if (CCustomCamera3D::IsEnabled())
+    {
+        float zoomScale = CCustomCamera3D::GetZoomDistance() / 100.0f;
+        extraBuffer = tileWidth * (int)(2.0f + zoomScale * 2.0f);
+    }
+
+    FrustrumBoundMinX = (int)(FrustrumMinX / TERRAIN_SCALE) / tileWidth * tileWidth - extraBuffer;
+    FrustrumBoundMinY = (int)(FrustrumMinY / TERRAIN_SCALE) / tileWidth * tileWidth - extraBuffer;
+    FrustrumBoundMaxX = (int)(FrustrumMaxX / TERRAIN_SCALE) / tileWidth * tileWidth + extraBuffer;
+    FrustrumBoundMaxY = (int)(FrustrumMaxY / TERRAIN_SCALE) / tileWidth * tileWidth + extraBuffer;
     FrustrumBoundMinX = FrustrumBoundMinX < 0 ? 0 : FrustrumBoundMinX;
     FrustrumBoundMinY = FrustrumBoundMinY < 0 ? 0 : FrustrumBoundMinY;
     FrustrumBoundMaxX = FrustrumBoundMaxX > TERRAIN_SIZE_MASK - tileWidth ? TERRAIN_SIZE_MASK - tileWidth : FrustrumBoundMaxX;
@@ -2542,13 +2611,21 @@ void RenderTerrainFrustrum(bool EditFlag)
     float   xf;
     auto yf = (float)yi;
 
+    // Adjust frustum range buffer for 3D camera zoom
+    float frustumRange = g_fFrustumRange;
+    if (CCustomCamera3D::IsEnabled())
+    {
+        float zoomScale = CCustomCamera3D::GetZoomDistance() / 100.0f;
+        frustumRange = g_fFrustumRange * (1.0f + zoomScale * 3.0f);
+    }
+
     for (; yi <= FrustrumBoundMaxY; yi += 4, yf += 4.f)
     {
         xi = FrustrumBoundMinX;
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange) || CameraTopViewEnable)
+            if (TestFrustrum2D(xf + 2.f, yf + 2.f, frustumRange) || CameraTopViewEnable)
             {
                 if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                 {
