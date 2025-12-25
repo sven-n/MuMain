@@ -249,6 +249,11 @@ void CNewUIGuildMakeWindow::ClosingProcess()
     ChangeWindowState(GUILDMAKE_INFO);
     ChangeEditBox(UISTATE_HIDE);
 
+    // Clear guild creation data to prevent persistence across character/server switches
+    memset(GuildMark[MARK_EDIT].Mark, 0, sizeof(GuildMark[MARK_EDIT].Mark));
+    memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
+    SelectMarkColor = 0;
+
     SocketClient->ToGameServer()->SendGuildMasterAnswer(false);
 }
 
