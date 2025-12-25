@@ -4847,16 +4847,38 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (ip->RequireStrength && bRequireStat)
     {
-        swprintf(TextList[TextNum], GlobalText[73], ip->RequireStrength - si_iNeedStrength);
+#ifdef _EDITOR
+        // In editor mode, always read fresh data from ItemAttribute and calculate
+        ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
+        WORD actualReqStr;
+        if (p->RequireStrength)
+        {
+            // Apply the same formula used when creating items
+            int ItemLevel = p->Level;
+            bool isExcellent = ip->ExcellentFlags > 0;
+            if (isExcellent)
+            {
+                ItemLevel = p->Level + 25;
+            }
+            actualReqStr = 20 + (p->RequireStrength) * (ItemLevel + ip->Level * 3) * 3 / 100;
+        }
+        else
+        {
+            actualReqStr = 0;
+        }
+#else
+        WORD actualReqStr = ip->RequireStrength;
+#endif
+        swprintf(TextList[TextNum], GlobalText[73], actualReqStr - si_iNeedStrength);
 
         WORD Strength;
         Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-        if (Strength < ip->RequireStrength - si_iNeedStrength)
+        if (Strength < actualReqStr - si_iNeedStrength)
         {
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            swprintf(TextList[TextNum], GlobalText[74], (ip->RequireStrength - Strength) - si_iNeedStrength);
+            swprintf(TextList[TextNum], GlobalText[74], (actualReqStr - Strength) - si_iNeedStrength);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
