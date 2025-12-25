@@ -19,6 +19,10 @@
 #include "ZzzAI.h"
 #include "DSPlaySound.h"
 
+#ifdef _EDITOR
+#include "MuEditor/MuEditor.h"
+#endif
+
 #include "SMD.h"
 #include "Local.h"
 #include "MatchEvent.h"
@@ -1233,6 +1237,17 @@ void LoadingScene(HDC hDC)
     ::EndBitmap();
     ::EndOpengl();
     ::glFlush();
+#ifdef _EDITOR
+    // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
+    g_MuEditor.Render();
+
+    // Always render default cursor on top of ImGui
+    EnableAlphaTest();
+    glColor3f(1.f, 1.f, 1.f);
+    BeginBitmap();
+    RenderBitmap(BITMAP_CURSOR, (float)MouseX - 2.f, (float)MouseY - 2.f, 24.f, 24.f);
+    EndBitmap();
+#endif
     ::SwapBuffers(hDC);
 
     SAFE_DELETE(rUIMng.m_pLoadingScene);
@@ -2154,6 +2169,17 @@ void MainScene(HDC hDC)
 
         if (Success)
         {
+#ifdef _EDITOR
+            // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
+            g_MuEditor.Render();
+
+            // Always render default cursor on top of ImGui (even when just showing "Open Editor" button)
+            EnableAlphaTest();
+            glColor3f(1.f, 1.f, 1.f);
+            BeginBitmap();
+            RenderBitmap(BITMAP_CURSOR, (float)MouseX - 2.f, (float)MouseY - 2.f, 24.f, 24.f);
+            EndBitmap();
+#endif
             SwapBuffers(hDC);
         }
 

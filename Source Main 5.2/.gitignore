@@ -24,3 +24,7 @@
 *.mp3
 build/bin/x86/Global Debug/Main.exe
 !/CMakeLists.txt
+
+# ImGui settings (user-specific)
+imgui.ini
+bin/imgui.ini

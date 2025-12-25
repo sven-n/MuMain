@@ -371,6 +371,115 @@ void OpenDialogFile(wchar_t* FileName)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// BMD to CSV converters
+///////////////////////////////////////////////////////////////////////////////
+
+void ConvertItemBmdToCsv(const wchar_t* bmdFile, const wchar_t* csvFile)
+{
+    std::fwprintf(stderr, L"[BMD Converter] Converting %ls to %ls...\n", bmdFile, csvFile);
+    std::fflush(stderr);
+
+    FILE* fp = _wfopen(bmdFile, L"rb");
+    if (!fp)
+    {
+        std::fwprintf(stderr, L"[BMD Converter] Failed to open %ls\n", bmdFile);
+        std::fflush(stderr);
+        return; // Silently fail if BMD doesn't exist
+    }
+
+    const int Size = sizeof(ITEM_ATTRIBUTE_FILE);
+    BYTE* Buffer = new BYTE[Size * MAX_ITEM];
+    fread(Buffer, Size * MAX_ITEM, 1, fp);
+
+    DWORD dwCheckSum;
+    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
+    fclose(fp);
+
+    if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE2F1))
+    {
+        std::fwprintf(stderr, L"[BMD Converter] Checksum mismatch for %ls\n", bmdFile);
+        std::fflush(stderr);
+        delete[] Buffer;
+        return; // Invalid checksum, skip conversion
+    }
+
+    FILE* csvFp = _wfopen(csvFile, L"w, ccs=UTF-8");
+    if (!csvFp)
+    {
+        std::fwprintf(stderr, L"[BMD Converter] Failed to create %ls\n", csvFile);
+        std::fflush(stderr);
+        delete[] Buffer;
+        return;
+    }
+
+    // Write CSV header
+    fwprintf(csvFp, L"Index,Name,TwoHand,Level,ItemSlot,SkillIndex,Width,Height,DamageMin,DamageMax,SuccessfulBlocking,Defense,MagicDefense,WeaponSpeed,WalkSpeed,Durability,MagicDur,MagicPower,RequireStrength,RequireDexterity,RequireEnergy,RequireVitality,RequireCharisma,RequireLevel,Value,Zen,AttType,RequireClass0,RequireClass1,RequireClass2,RequireClass3,RequireClass4,RequireClass5,RequireClass6,Resistance0,Resistance1,Resistance2,Resistance3,Resistance4,Resistance5,Resistance6,Resistance7\n");
+
+    BYTE* pSeek = Buffer;
+    int itemCount = 0;
+    for (int i = 0; i < MAX_ITEM; i++)
+    {
+        BuxConvert(pSeek, Size);
+        ITEM_ATTRIBUTE_FILE* item = (ITEM_ATTRIBUTE_FILE*)pSeek;
+
+        // Convert name from UTF-8 to wide char
+        wchar_t wName[MAX_ITEM_NAME] = {0};
+        MultiByteToWideChar(CP_UTF8, 0, item->Name, -1, wName, MAX_ITEM_NAME);
+
+        // Only export items with names
+        if (wName[0] != 0)
+        {
+            // Escape quotes in name
+            wchar_t escapedName[MAX_ITEM_NAME * 2] = {0};
+            int idx = 0;
+            for (int j = 0; j < MAX_ITEM_NAME && wName[j] != 0 && idx < (MAX_ITEM_NAME * 2 - 2); j++)
+            {
+                if (wName[j] == L'"')
+                {
+                    escapedName[idx++] = L'"';
+                    escapedName[idx++] = L'"';
+                }
+                else
+                {
+                    escapedName[idx++] = wName[j];
+                }
+            }
+            escapedName[idx] = L'\0';
+
+            fwprintf(csvFp, L"%d,\"%ls\",%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+                i, escapedName, item->TwoHand ? 1 : 0, item->Level, item->m_byItemSlot, item->m_wSkillIndex,
+                item->Width, item->Height, item->DamageMin, item->DamageMax, item->SuccessfulBlocking,
+                item->Defense, item->MagicDefense, item->WeaponSpeed, item->WalkSpeed,
+                item->Durability, item->MagicDur, item->MagicPower,
+                item->RequireStrength, item->RequireDexterity, item->RequireEnergy,
+                item->RequireVitality, item->RequireCharisma, item->RequireLevel,
+                item->Value, item->iZen, item->AttType);
+
+            for (int c = 0; c < MAX_CLASS; c++)
+            {
+                fwprintf(csvFp, L",%d", item->RequireClass[c]);
+            }
+
+            for (int r = 0; r < MAX_RESISTANCE + 1; r++)
+            {
+                fwprintf(csvFp, L",%d", item->Resistance[r]);
+            }
+
+            fwprintf(csvFp, L"\n");
+            itemCount++;
+        }
+
+        pSeek += Size;
+    }
+
+    fclose(csvFp);
+    delete[] Buffer;
+
+    std::fwprintf(stderr, L"[BMD Converter] Successfully converted %d items to %ls\n", itemCount, csvFile);
+    std::fflush(stderr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // item
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -479,7 +588,7 @@ void PrintItem(wchar_t* FileName)
             for (int j = 0; j < Plus; j++)
             {
                 int Level = j;
-                int RequireStrength = 0;
+                int RequireStrength = p->RequireStrength;
                 int RequireDexterity = 0;
                 int RequireEnergy = 0;
                 int DamageMin = p->DamageMin;
