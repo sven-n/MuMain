@@ -8,6 +8,8 @@
 #include "imgui_impl_opengl2.h"
 #include <sstream>
 #include <ctime>
+#include <algorithm>
+#include <cctype>
 
 CMuEditor::CMuEditor()
     : m_bEditorMode(false)
@@ -18,6 +20,7 @@ CMuEditor::CMuEditor()
     , m_hGameWindow(nullptr)
     , m_hGameConsole(nullptr)
 {
+    memset(m_szItemSearchBuffer, 0, sizeof(m_szItemSearchBuffer));
 }
 
 CMuEditor::~CMuEditor()
@@ -349,6 +352,18 @@ void CMuEditor::RenderItemEditor()
 
         ImGui::Separator();
 
+        // Search bar
+        ImGui::Text("Search:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(300);
+        ImGui::InputText("##ItemSearch", m_szItemSearchBuffer, sizeof(m_szItemSearchBuffer));
+
+        // Convert search to lowercase for case-insensitive search
+        std::string searchLower = m_szItemSearchBuffer;
+        std::transform(searchLower.begin(), searchLower.end(), searchLower.begin(), ::tolower);
+
+        ImGui::Separator();
+
         // Create a table with scrolling
         if (ImGui::BeginTable("ItemTable", 11, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable))
         {
@@ -367,9 +382,32 @@ void CMuEditor::RenderItemEditor()
             ImGui::TableSetupColumn("Durability", ImGuiTableColumnFlags_WidthFixed, 80.0f);
             ImGui::TableHeadersRow();
 
-            // Render items (limit to first 100 for performance, add pagination later)
-            for (int i = 0; i < 100; i++)
+            // Render all items with filtering
+            for (int i = 0; i < 1000; i++)
             {
+                // Get item name
+                char nameBuffer[128];
+                wcstombs(nameBuffer, ItemAttribute[i].Name, sizeof(nameBuffer));
+
+                // Apply search filter (only if search is not empty)
+                if (searchLower.length() > 0)
+                {
+                    // For empty names, only show if search is also empty
+                    if (nameBuffer[0] == '\0')
+                    {
+                        continue;
+                    }
+
+                    std::string nameLower = nameBuffer;
+                    std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+
+                    // Skip if search string not found in name
+                    if (nameLower.find(searchLower) == std::string::npos)
+                    {
+                        continue;
+                    }
+                }
+
                 ImGui::TableNextRow();
 
                 // Index
@@ -378,8 +416,6 @@ void CMuEditor::RenderItemEditor()
 
                 // Name
                 ImGui::TableSetColumnIndex(1);
-                char nameBuffer[128];
-                wcstombs(nameBuffer, ItemAttribute[i].Name, sizeof(nameBuffer));
                 ImGui::Text("%s", nameBuffer);
 
                 // Level
