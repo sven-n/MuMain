@@ -597,6 +597,11 @@ bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog)
                 originalItems[i].RequireEnergy = orig->RequireEnergy;
                 originalItems[i].RequireVitality = orig->RequireVitality;
                 originalItems[i].RequireLevel = orig->RequireLevel;
+                originalItems[i].DamageMin = orig->DamageMin;
+                originalItems[i].DamageMax = orig->DamageMax;
+                originalItems[i].WeaponSpeed = orig->WeaponSpeed;
+                originalItems[i].Defense = orig->Defense;
+                originalItems[i].Durability = orig->Durability;
 
                 pSeek += Size;
             }
@@ -691,6 +696,31 @@ bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog)
             if (originalItems[i].RequireLevel != ItemAttribute[i].RequireLevel)
             {
                 itemChanges << "  Lvl: " << originalItems[i].RequireLevel << " -> " << ItemAttribute[i].RequireLevel << "\n";
+                changed = true;
+            }
+            if (originalItems[i].DamageMin != ItemAttribute[i].DamageMin)
+            {
+                itemChanges << "  DmgMin: " << (int)originalItems[i].DamageMin << " -> " << (int)ItemAttribute[i].DamageMin << "\n";
+                changed = true;
+            }
+            if (originalItems[i].DamageMax != ItemAttribute[i].DamageMax)
+            {
+                itemChanges << "  DmgMax: " << (int)originalItems[i].DamageMax << " -> " << (int)ItemAttribute[i].DamageMax << "\n";
+                changed = true;
+            }
+            if (originalItems[i].WeaponSpeed != ItemAttribute[i].WeaponSpeed)
+            {
+                itemChanges << "  AtkSpd: " << (int)originalItems[i].WeaponSpeed << " -> " << (int)ItemAttribute[i].WeaponSpeed << "\n";
+                changed = true;
+            }
+            if (originalItems[i].Defense != ItemAttribute[i].Defense)
+            {
+                itemChanges << "  Def: " << (int)originalItems[i].Defense << " -> " << (int)ItemAttribute[i].Defense << "\n";
+                changed = true;
+            }
+            if (originalItems[i].Durability != ItemAttribute[i].Durability)
+            {
+                itemChanges << "  Dur: " << (int)originalItems[i].Durability << " -> " << (int)ItemAttribute[i].Durability << "\n";
                 changed = true;
             }
 
