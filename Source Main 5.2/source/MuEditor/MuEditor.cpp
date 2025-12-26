@@ -294,6 +294,59 @@ void CMuEditor::RenderItemEditor()
     if (ImGui::Begin("Item Editor", &m_bShowItemEditor, flags))
     {
         ImGui::Text("Edit Item Attributes - Total Items: 1000");
+        ImGui::SameLine();
+
+        // Save button on the right
+        ImGui::SameLine(ImGui::GetWindowWidth() - 120);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.8f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.9f, 1.0f));
+        if (ImGui::Button("Save Items"))
+        {
+            extern bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog);
+            extern std::wstring g_strSelectedML;
+
+            wchar_t fileName[256];
+            swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+
+            std::string changeLog;
+            if (SaveItemScript(fileName, &changeLog))
+            {
+                // Log to editor console
+                LogEditor("=== SAVE COMPLETED ===\n");
+                LogEditor(changeLog);
+                LogEditor("======================\n");
+                ImGui::OpenPopup("Save Success");
+            }
+            else
+            {
+                LogEditor("ERROR: Failed to save item attributes!\n");
+                ImGui::OpenPopup("Save Failed");
+            }
+        }
+        ImGui::PopStyleColor(2);
+
+        // Success popup
+        if (ImGui::BeginPopupModal("Save Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Item attributes saved successfully!");
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+        // Failed popup
+        if (ImGui::BeginPopupModal("Save Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Failed to save item attributes!");
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
         ImGui::Separator();
 
         // Create a table with scrolling
