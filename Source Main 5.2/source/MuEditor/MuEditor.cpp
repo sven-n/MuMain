@@ -350,7 +350,7 @@ void CMuEditor::RenderItemEditor()
         ImGui::Separator();
 
         // Create a table with scrolling
-        if (ImGui::BeginTable("ItemTable", 10, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable))
+        if (ImGui::BeginTable("ItemTable", 11, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable))
         {
             // Setup columns
             ImGui::TableSetupScrollFreeze(0, 1); // Freeze header row
@@ -362,6 +362,7 @@ void CMuEditor::RenderItemEditor()
             ImGui::TableSetupColumn("Req Ene", ImGuiTableColumnFlags_WidthFixed, 80.0f);
             ImGui::TableSetupColumn("Req Vit", ImGuiTableColumnFlags_WidthFixed, 80.0f);
             ImGui::TableSetupColumn("Damage", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+            ImGui::TableSetupColumn("Atk Spd", ImGuiTableColumnFlags_WidthFixed, 80.0f);
             ImGui::TableSetupColumn("Defense", ImGuiTableColumnFlags_WidthFixed, 80.0f);
             ImGui::TableSetupColumn("Durability", ImGuiTableColumnFlags_WidthFixed, 80.0f);
             ImGui::TableHeadersRow();
@@ -387,7 +388,7 @@ void CMuEditor::RenderItemEditor()
 
                 // Required Strength (EDITABLE)
                 ImGui::TableSetColumnIndex(3);
-                ImGui::PushID(i);
+                ImGui::PushID(i * 10 + 0);
                 int reqStr = ItemAttribute[i].RequireStrength;
                 if (ImGui::InputInt("##str", &reqStr, 0, 0))
                 {
@@ -399,29 +400,119 @@ void CMuEditor::RenderItemEditor()
                 }
                 ImGui::PopID();
 
-                // Required Dexterity
+                // Required Dexterity (EDITABLE)
                 ImGui::TableSetColumnIndex(4);
-                ImGui::Text("%d", ItemAttribute[i].RequireDexterity);
+                ImGui::PushID(i * 10 + 1);
+                int reqDex = ItemAttribute[i].RequireDexterity;
+                if (ImGui::InputInt("##dex", &reqDex, 0, 0))
+                {
+                    if (reqDex >= 0 && reqDex <= 65535)
+                    {
+                        ItemAttribute[i].RequireDexterity = (WORD)reqDex;
+                        LogEditor("Changed item " + std::to_string(i) + " RequireDexterity to " + std::to_string(reqDex));
+                    }
+                }
+                ImGui::PopID();
 
-                // Required Energy
+                // Required Energy (EDITABLE)
                 ImGui::TableSetColumnIndex(5);
-                ImGui::Text("%d", ItemAttribute[i].RequireEnergy);
+                ImGui::PushID(i * 10 + 2);
+                int reqEne = ItemAttribute[i].RequireEnergy;
+                if (ImGui::InputInt("##ene", &reqEne, 0, 0))
+                {
+                    if (reqEne >= 0 && reqEne <= 65535)
+                    {
+                        ItemAttribute[i].RequireEnergy = (WORD)reqEne;
+                        LogEditor("Changed item " + std::to_string(i) + " RequireEnergy to " + std::to_string(reqEne));
+                    }
+                }
+                ImGui::PopID();
 
-                // Required Vitality
+                // Required Vitality (EDITABLE)
                 ImGui::TableSetColumnIndex(6);
-                ImGui::Text("%d", ItemAttribute[i].RequireVitality);
+                ImGui::PushID(i * 10 + 3);
+                int reqVit = ItemAttribute[i].RequireVitality;
+                if (ImGui::InputInt("##vit", &reqVit, 0, 0))
+                {
+                    if (reqVit >= 0 && reqVit <= 65535)
+                    {
+                        ItemAttribute[i].RequireVitality = (WORD)reqVit;
+                        LogEditor("Changed item " + std::to_string(i) + " RequireVitality to " + std::to_string(reqVit));
+                    }
+                }
+                ImGui::PopID();
 
-                // Damage
+                // Damage Min/Max (EDITABLE)
                 ImGui::TableSetColumnIndex(7);
-                ImGui::Text("%d-%d", ItemAttribute[i].DamageMin, ItemAttribute[i].DamageMax);
+                ImGui::PushID(i * 10 + 4);
+                int dmgMin = ItemAttribute[i].DamageMin;
+                ImGui::SetNextItemWidth(40);
+                if (ImGui::InputInt("##dmgmin", &dmgMin, 0, 0))
+                {
+                    if (dmgMin >= 0 && dmgMin <= 255)
+                    {
+                        ItemAttribute[i].DamageMin = (BYTE)dmgMin;
+                        LogEditor("Changed item " + std::to_string(i) + " DamageMin to " + std::to_string(dmgMin));
+                    }
+                }
+                ImGui::PopID();
+                ImGui::SameLine();
+                ImGui::Text("-");
+                ImGui::SameLine();
+                ImGui::PushID(i * 10 + 5);
+                int dmgMax = ItemAttribute[i].DamageMax;
+                ImGui::SetNextItemWidth(40);
+                if (ImGui::InputInt("##dmgmax", &dmgMax, 0, 0))
+                {
+                    if (dmgMax >= 0 && dmgMax <= 255)
+                    {
+                        ItemAttribute[i].DamageMax = (BYTE)dmgMax;
+                        LogEditor("Changed item " + std::to_string(i) + " DamageMax to " + std::to_string(dmgMax));
+                    }
+                }
+                ImGui::PopID();
 
-                // Defense
+                // Attack Speed (EDITABLE)
                 ImGui::TableSetColumnIndex(8);
-                ImGui::Text("%d", ItemAttribute[i].Defense);
+                ImGui::PushID(i * 10 + 6);
+                int atkSpd = ItemAttribute[i].WeaponSpeed;
+                if (ImGui::InputInt("##atkspd", &atkSpd, 0, 0))
+                {
+                    if (atkSpd >= 0 && atkSpd <= 255)
+                    {
+                        ItemAttribute[i].WeaponSpeed = (BYTE)atkSpd;
+                        LogEditor("Changed item " + std::to_string(i) + " WeaponSpeed to " + std::to_string(atkSpd));
+                    }
+                }
+                ImGui::PopID();
 
-                // Durability
+                // Defense (EDITABLE)
                 ImGui::TableSetColumnIndex(9);
-                ImGui::Text("%d", ItemAttribute[i].Durability);
+                ImGui::PushID(i * 10 + 7);
+                int def = ItemAttribute[i].Defense;
+                if (ImGui::InputInt("##def", &def, 0, 0))
+                {
+                    if (def >= 0 && def <= 255)
+                    {
+                        ItemAttribute[i].Defense = (BYTE)def;
+                        LogEditor("Changed item " + std::to_string(i) + " Defense to " + std::to_string(def));
+                    }
+                }
+                ImGui::PopID();
+
+                // Durability (EDITABLE)
+                ImGui::TableSetColumnIndex(10);
+                ImGui::PushID(i * 10 + 8);
+                int dur = ItemAttribute[i].Durability;
+                if (ImGui::InputInt("##dur", &dur, 0, 0))
+                {
+                    if (dur >= 0 && dur <= 255)
+                    {
+                        ItemAttribute[i].Durability = (BYTE)dur;
+                        LogEditor("Changed item " + std::to_string(i) + " Durability to " + std::to_string(dur));
+                    }
+                }
+                ImGui::PopID();
             }
 
             ImGui::EndTable();
