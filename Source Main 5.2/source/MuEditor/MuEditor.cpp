@@ -296,7 +296,7 @@ void CMuEditor::RenderItemEditor()
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
     if (ImGui::Begin("Item Editor", &m_bShowItemEditor, flags))
     {
-        ImGui::Text("Edit Item Attributes - Total Items: 1000");
+        ImGui::Text("Edit Item Attributes - Total Items: %d", MAX_ITEM);
         ImGui::SameLine();
 
         // Save button on the right
@@ -383,21 +383,21 @@ void CMuEditor::RenderItemEditor()
             ImGui::TableHeadersRow();
 
             // Render all items with filtering
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < MAX_ITEM; i++)
             {
                 // Get item name
                 char nameBuffer[128];
                 wcstombs(nameBuffer, ItemAttribute[i].Name, sizeof(nameBuffer));
 
+                // Skip uninitialized items (no name)
+                if (nameBuffer[0] == '\0')
+                {
+                    continue;
+                }
+
                 // Apply search filter (only if search is not empty)
                 if (searchLower.length() > 0)
                 {
-                    // For empty names, only show if search is also empty
-                    if (nameBuffer[0] == '\0')
-                    {
-                        continue;
-                    }
-
                     std::string nameLower = nameBuffer;
                     std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
 
