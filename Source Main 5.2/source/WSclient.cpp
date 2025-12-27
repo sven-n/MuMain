@@ -5708,7 +5708,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 
             wchar_t szItem[64] = { 0, };
             int level = pickedItem->Level;
-            GetItemName(pickedItem->Type, level, szItem);
+            get_item_name(pickedItem->Type, level, szItem);
 
             wchar_t szMessage[128];
             swprintf(szMessage, L"%ls %ls", szItem, GlobalText[918]);
@@ -6921,7 +6921,7 @@ void ReceivePartyGetItem(const BYTE* ReceiveBuffer)
     else if ((Data->ItemInfo & 0x20000)) swprintf(itemName, L"%ls ", GlobalText[1089]);
 
     int itemLevel = Data->ItemLevel;
-    GetItemName(itemType, itemLevel, Text);
+    get_item_name(itemType, itemLevel, Text);
     wcscat(itemName, Text);
     if ((Data->ItemInfo & 0x02000)) wcscat(itemName, GlobalText[176]);
     if ((Data->ItemInfo & 0x08000)) wcscat(itemName, GlobalText[177]);

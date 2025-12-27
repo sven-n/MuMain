@@ -1189,39 +1189,8 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
     ip->RequireEnergy = CalcStatRequirement(STAT_ENERGY, p->RequireEnergy, ItemLevel, ip->Level, isExcellent, ip->Type, p->RequireLevel);
     ip->RequireCharisma = CalcStatRequirement(STAT_CHARISMA, p->RequireCharisma, ItemLevel, ip->Level, isExcellent);
 
-    if (ip->Type == ITEM_ORB_OF_SUMMONING)
-    {
-        WORD Energy = 0;
-
-        switch (ip->Level)
-        {
-        case 0:Energy = 30; break;
-        case 1:Energy = 60; break;
-        case 2:Energy = 90; break;
-        case 3:Energy = 130; break;
-        case 4:Energy = 170; break;
-        case 5:Energy = 210; break;
-        case 6:Energy = 300; break;
-        case 7:Energy = 500; break;
-        }
-        ip->RequireEnergy = Energy;
-    }
-
-    if (p->RequireCharisma)
-    {
-        if (ip->Type == MODEL_DARK_RAVEN_ITEM)
-            ip->RequireCharisma = (185 + (p->RequireCharisma * 15));
-        else
-            ip->RequireCharisma = p->RequireCharisma;
-    }
-
-    if (ip->Type == ITEM_TRANSFORMATION_RING)
-    {
-        if (ip->Level <= 2)
-            ip->RequireLevel = 20;
-        else
-            ip->RequireLevel = 50;
-    }
+    // Apply special item-specific requirement overrides
+    ApplyItemSpecificRequirementOverrides(ip, p);
 
     if ((ip->Type >= ITEM_DRAGON_KNIGHT_HELM && ip->Type <= ITEM_SUNLIGHT_MASK) ||
         (ip->Type >= ITEM_DRAGON_KNIGHT_ARMOR && ip->Type <= ITEM_SUNLIGHT_ARMOR) ||
