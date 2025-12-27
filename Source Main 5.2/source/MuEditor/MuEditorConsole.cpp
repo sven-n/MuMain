@@ -352,14 +352,8 @@ void CMuEditorConsole::CaptureConsoleOutput()
     delete[] pCharBuffer;
 }
 
-void CMuEditorConsole::Update()
-{
-    CaptureConsoleOutput();
-}
-
 void CMuEditorConsole::Render()
 {
-    // Capture new console output each frame
     CaptureConsoleOutput();
 
     ImGuiIO& io = ImGui::GetIO();
