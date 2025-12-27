@@ -3,7 +3,6 @@
 #ifdef _EDITOR
 
 #include "stdafx.h"
-#include <string>
 
 class CMuEditor
 {
@@ -19,36 +18,16 @@ public:
     void SetEnabled(bool enabled) { m_bEditorMode = enabled; }
     void ToggleEditor() { m_bEditorMode = !m_bEditorMode; }
 
+    bool IsShowingItemEditor() const { return m_bShowItemEditor; }
+
 private:
     CMuEditor();
     ~CMuEditor();
 
-    void RenderTopToolbar();
-    void RenderCenterViewport();
-    void RenderBottomConsole();
-    void RenderItemEditor();
-
-    void StartGame();
-    void StopGame();
-    void LogEditor(const std::string& message);
-    void LogGame(const std::string& message);
-
     bool m_bEditorMode;
     bool m_bInitialized;
-    bool m_bGameRunning;
     bool m_bFrameStarted;
     bool m_bShowItemEditor;
-
-    // Item Editor search
-    char m_szItemSearchBuffer[256];
-
-    // Console buffers
-    std::string m_strEditorConsole;
-    std::string m_strGameConsole;
-
-    // Window handles (if we need to embed separate game instance)
-    HWND m_hGameWindow;
-    HWND m_hGameConsole;
 };
 
 // Global accessor
