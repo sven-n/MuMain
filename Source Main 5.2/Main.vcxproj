@@ -759,6 +759,14 @@
     <!-- MU Editor (Debug only) -->
     <ClInclude Include="source\MuEditor\MuEditor.h" Condition="'$(Configuration)'=='Global Debug'" />
     <ClCompile Include="source\MuEditor\MuEditor.cpp" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="source\MuEditor\MuEditorConsole.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClCompile Include="source\MuEditor\MuEditorConsole.cpp" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="source\MuEditor\MuEditorUI.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClCompile Include="source\MuEditor\MuEditorUI.cpp" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="source\MuEditor\MuInputBlocker.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClCompile Include="source\MuEditor\MuInputBlocker.cpp" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="source\MuEditor\MuItemEditor\MuItemEditor.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClCompile Include="source\MuEditor\MuItemEditor\MuItemEditor.cpp" Condition="'$(Configuration)'=='Global Debug'" />
     <!-- End MU Editor (Debug only) -->
     <ClInclude Include="afxres.h" />
     <ClInclude Include="dependencies\include\span.hpp" />
