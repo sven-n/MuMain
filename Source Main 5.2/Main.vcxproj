@@ -120,7 +120,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)source\;$(SolutionDir)dependencies\include;$(SolutionDir)dependencies\netcore\includes</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)source\;$(SolutionDir)ThirdParty\imgui;$(SolutionDir)ThirdParty\imgui\backends;$(SolutionDir)dependencies\include;$(SolutionDir)dependencies\netcore\includes</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_FOREIGN_DEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;UNICODE;_ALLOW_RTCc_IN_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -728,6 +728,34 @@
     <ClCompile Include="source\_GlobalFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <!-- ImGui Files -->
+    <ClCompile Include="ThirdParty\imgui\imgui.cpp" Condition="'$(Configuration)'=='Global Debug'">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\imgui\imgui_draw.cpp" Condition="'$(Configuration)'=='Global Debug'">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\imgui\imgui_tables.cpp" Condition="'$(Configuration)'=='Global Debug'">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\imgui\imgui_widgets.cpp" Condition="'$(Configuration)'=='Global Debug'">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\imgui\backends\imgui_impl_win32.cpp" Condition="'$(Configuration)'=='Global Debug'">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\imgui\backends\imgui_impl_opengl2.cpp" Condition="'$(Configuration)'=='Global Debug'">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClInclude Include="ThirdParty\imgui\imconfig.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="ThirdParty\imgui\imgui.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="ThirdParty\imgui\imgui_internal.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="ThirdParty\imgui\imstb_rectpack.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="ThirdParty\imgui\imstb_textedit.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="ThirdParty\imgui\imstb_truetype.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="ThirdParty\imgui\backends\imgui_impl_opengl2.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="ThirdParty\imgui\backends\imgui_impl_win32.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <!-- End ImGui Files -->
     <ClInclude Include="afxres.h" />
     <ClInclude Include="dependencies\include\span.hpp" />
     <ClInclude Include="source\CharInfoBalloonMng.h" />
