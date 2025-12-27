@@ -120,7 +120,6 @@ std::streamsize ConsoleStreamBuf::xsputn(const char* s, std::streamsize n)
 CMuEditorConsole::CMuEditorConsole()
     : m_pStdoutBuf(nullptr)
     , m_pStderrBuf(nullptr)
-    , m_lastConsoleY(0)
 {
     Initialize();
 }

@@ -60,9 +60,7 @@ private:
     // Stream redirection
     ConsoleStreamBuf* m_pStdoutBuf;
     ConsoleStreamBuf* m_pStderrBuf;
-
-    // Console buffer tracking
-    short m_lastConsoleY;
+    
     std::string m_lastConsoleContent;
 };
 
