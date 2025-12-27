@@ -330,7 +330,7 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
             return false;
         }
 
-        const auto requiredCharisma = (185 + (pPetInfo->m_wLevel * 15));
+        const auto requiredCharisma = CalcDarkRavenCharismaRequirement(pPetInfo->m_wLevel);
         if (requiredCharisma > wCharisma)
         {
             return false;

@@ -2183,7 +2183,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         int iCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
         PET_INFO PetInfo;
         giPetManager::GetPetInfo(PetInfo, 421 - PET_TYPE_DARK_SPIRIT);
-        int RequireCharisma = (185 + (PetInfo.m_wLevel * 15));
+        int RequireCharisma = CalcDarkRavenCharismaRequirement(PetInfo.m_wLevel);
         if (RequireCharisma > iCharisma)
         {
             bCantSkill = true;

@@ -686,7 +686,7 @@ namespace giPetManager
         }
         else if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
         {
-            RequireCharisma = (185 + (pPetInfo->m_wLevel * 15));
+            RequireCharisma = CalcDarkRavenCharismaRequirement(pPetInfo->m_wLevel);
             appendLine(TEXT_COLOR_BLUE, true, true, GlobalText[1214]);
         }
 

@@ -357,7 +357,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszN
         int iCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
         PET_INFO PetInfo;
         giPetManager::GetPetInfo(PetInfo, 421 - PET_TYPE_DARK_SPIRIT);
-        int RequireCharisma = (185 + (PetInfo.m_wLevel * 15));
+        int RequireCharisma = CalcDarkRavenCharismaRequirement(PetInfo.m_wLevel);
         if (RequireCharisma > iCharisma)
             glColor4f(1.f, 0.5f, 0.5f, 1.f);
         else

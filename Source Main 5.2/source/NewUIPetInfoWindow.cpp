@@ -255,7 +255,7 @@ bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 72, szText, 0, 0, RT3_SORT_CENTER);
     swprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 85, szText, 0, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[698], (185 + (pPetInfo->m_wLevel * 15)));
+    swprintf(szText, GlobalText[698], CalcDarkRavenCharismaRequirement(pPetInfo->m_wLevel));
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 98, szText, 0, 0, RT3_SORT_CENTER);
 
     // SkillBox
