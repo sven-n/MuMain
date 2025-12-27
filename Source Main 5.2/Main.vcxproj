@@ -143,6 +143,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -205,6 +206,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -759,6 +761,7 @@
     <!-- MU Editor (Debug only) -->
     <ClInclude Include="source\MuEditor\MuEditor.h" Condition="'$(Configuration)'=='Global Debug'" />
     <ClCompile Include="source\MuEditor\MuEditor.cpp" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="source\MuEditor\MuEditorConsoleRedirect.h" Condition="'$(Configuration)'=='Global Debug'" />
     <ClInclude Include="source\MuEditor\MuEditorConsole.h" Condition="'$(Configuration)'=='Global Debug'" />
     <ClCompile Include="source\MuEditor\MuEditorConsole.cpp" Condition="'$(Configuration)'=='Global Debug'" />
     <ClInclude Include="source\MuEditor\MuEditorUI.h" Condition="'$(Configuration)'=='Global Debug'" />

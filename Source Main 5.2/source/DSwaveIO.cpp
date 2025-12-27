@@ -16,11 +16,11 @@ void ReportWaveWarning(const wchar_t* message, const wchar_t* filename = nullptr
 {
     if (filename != nullptr)
     {
-        std::fwprintf(stderr, L"%ls (%ls)\n", message, filename);
+        fwprintf(stderr, L"%ls (%ls)\n", message, filename);
     }
     else
     {
-        std::fwprintf(stderr, L"%ls\n", message);
+        fwprintf(stderr, L"%ls\n", message);
     }
 }
 } // namespace

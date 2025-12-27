@@ -377,14 +377,14 @@ void OpenDialogFile(wchar_t* FileName)
 
 void ConvertItemBmdToCsv(const wchar_t* bmdFile, const wchar_t* csvFile)
 {
-    std::fwprintf(stderr, L"[BMD Converter] Converting %ls to %ls...\n", bmdFile, csvFile);
-    std::fflush(stderr);
+    fwprintf(stderr, L"[BMD Converter] Converting %ls to %ls...\n", bmdFile, csvFile);
+    fflush(stderr);
 
     FILE* fp = _wfopen(bmdFile, L"rb");
     if (!fp)
     {
-        std::fwprintf(stderr, L"[BMD Converter] Failed to open %ls\n", bmdFile);
-        std::fflush(stderr);
+        fwprintf(stderr, L"[BMD Converter] Failed to open %ls\n", bmdFile);
+        fflush(stderr);
         return; // Silently fail if BMD doesn't exist
     }
 
@@ -398,7 +398,7 @@ void ConvertItemBmdToCsv(const wchar_t* bmdFile, const wchar_t* csvFile)
 
     if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE2F1))
     {
-        std::fwprintf(stderr, L"[BMD Converter] Checksum mismatch for %ls\n", bmdFile);
+        fwprintf(stderr, L"[BMD Converter] Checksum mismatch for %ls\n", bmdFile);
         std::fflush(stderr);
         delete[] Buffer;
         return; // Invalid checksum, skip conversion
@@ -407,7 +407,7 @@ void ConvertItemBmdToCsv(const wchar_t* bmdFile, const wchar_t* csvFile)
     FILE* csvFp = _wfopen(csvFile, L"w, ccs=UTF-8");
     if (!csvFp)
     {
-        std::fwprintf(stderr, L"[BMD Converter] Failed to create %ls\n", csvFile);
+        fwprintf(stderr, L"[BMD Converter] Failed to create %ls\n", csvFile);
         std::fflush(stderr);
         delete[] Buffer;
         return;
@@ -476,7 +476,7 @@ void ConvertItemBmdToCsv(const wchar_t* bmdFile, const wchar_t* csvFile)
     fclose(csvFp);
     delete[] Buffer;
 
-    std::fwprintf(stderr, L"[BMD Converter] Successfully converted %d items to %ls\n", itemCount, csvFile);
+    fwprintf(stderr, L"[BMD Converter] Successfully converted %d items to %ls\n", itemCount, csvFile);
     std::fflush(stderr);
 }
 
