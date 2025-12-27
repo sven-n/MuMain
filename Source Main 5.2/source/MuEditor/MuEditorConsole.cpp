@@ -128,7 +128,7 @@ void CMuEditorConsole::Render()
         // Editor Console (Left)
         ImGui::BeginChild("EditorConsole", ImVec2(split_width - 5, 0), true);
 
-        // Header with copy button
+        // Fixed header - not scrollable
         ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "Editor Console");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 20);
@@ -141,11 +141,15 @@ void CMuEditorConsole::Render()
         {
             ClearEditorLog();
         }
-
         ImGui::Separator();
+
+        // Scrollable content area
+        ImGui::BeginChild("EditorConsoleContent", ImVec2(0, 0), false);
         ImGui::TextWrapped("%s", m_strEditorConsole.c_str());
         if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
             ImGui::SetScrollHereY(1.0f);
+        ImGui::EndChild();
+
         ImGui::EndChild();
 
         ImGui::SameLine();
@@ -153,7 +157,7 @@ void CMuEditorConsole::Render()
         // Game Console (Right)
         ImGui::BeginChild("GameConsole", ImVec2(0, 0), true);
 
-        // Header with copy button
+        // Fixed header - not scrollable
         ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "Game Console");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 20);
@@ -166,11 +170,15 @@ void CMuEditorConsole::Render()
         {
             ClearGameLog();
         }
-
         ImGui::Separator();
+
+        // Scrollable content area
+        ImGui::BeginChild("GameConsoleContent", ImVec2(0, 0), false);
         ImGui::TextWrapped("%s", m_strGameConsole.c_str());
         if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
             ImGui::SetScrollHereY(1.0f);
+        ImGui::EndChild();
+
         ImGui::EndChild();
 
         // Show log file path at bottom
