@@ -21,6 +21,8 @@
 
 #ifdef _EDITOR
 #include "MuEditor/MuEditor.h"
+#include "MuEditor/MuEditorConsole.h"
+#include "imgui.h"
 #endif
 
 #include "SMD.h"
@@ -1241,12 +1243,14 @@ void LoadingScene(HDC hDC)
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
     g_MuEditor.Render();
 
-    // Always render default cursor on top of ImGui
-    EnableAlphaTest();
-    glColor3f(1.f, 1.f, 1.f);
-    BeginBitmap();
-    RenderBitmap(BITMAP_CURSOR, (float)MouseX - 2.f, (float)MouseY - 2.f, 24.f, 24.f);
-    EndBitmap();
+    // Render game cursor on top of ImGui if not hovering UI
+    extern bool g_bRenderGameCursor;
+    if (g_bRenderGameCursor)
+    {
+        BeginBitmap();
+        RenderCursor();
+        EndBitmap();
+    }
 #endif
     ::SwapBuffers(hDC);
 
@@ -2173,12 +2177,14 @@ void MainScene(HDC hDC)
             // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
             g_MuEditor.Render();
 
-            // Always render default cursor on top of ImGui (even when just showing "Open Editor" button)
-            EnableAlphaTest();
-            glColor3f(1.f, 1.f, 1.f);
-            BeginBitmap();
-            RenderBitmap(BITMAP_CURSOR, (float)MouseX - 2.f, (float)MouseY - 2.f, 24.f, 24.f);
-            EndBitmap();
+            // Render game cursor on top of ImGui if not hovering UI
+            extern bool g_bRenderGameCursor;
+            if (g_bRenderGameCursor)
+            {
+                BeginBitmap();
+                RenderCursor();
+                EndBitmap();
+            }
 #endif
             SwapBuffers(hDC);
         }

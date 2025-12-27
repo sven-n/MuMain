@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MuItemEditor.h"
+#include "MuEditor/MuEditor.h"
 #include "MuEditor/MuEditorConsole.h"
 #include "imgui.h"
 #include <algorithm>
@@ -36,6 +37,12 @@ void CMuItemEditor::Render(bool& showEditor)
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
     if (ImGui::Begin("Item Editor", &showEditor, flags))
     {
+        // Check if hovering this window
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+        {
+            g_MuEditor.SetHoveringUI(true);
+        }
+
         ImGui::Text("Edit Item Attributes - Total Items: %d", MAX_ITEM);
         ImGui::SameLine();
 

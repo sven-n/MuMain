@@ -19,6 +19,8 @@ public:
     void ToggleEditor() { m_bEditorMode = !m_bEditorMode; }
 
     bool IsShowingItemEditor() const { return m_bShowItemEditor; }
+    bool IsHoveringUI() const { return m_bHoveringUI; }
+    void SetHoveringUI(bool hovering) { m_bHoveringUI = hovering; }
 
 private:
     CMuEditor();
@@ -28,6 +30,7 @@ private:
     bool m_bInitialized;
     bool m_bFrameStarted;
     bool m_bShowItemEditor;
+    bool m_bHoveringUI;
 };
 
 // Global accessor
