@@ -7,6 +7,12 @@
 #include <windows.h>
 #include <mmsystem.h>
 
+// Undefine the editor redirect macro so we can use std::fwprintf directly
+#ifdef _EDITOR
+#undef fwprintf
+extern "C" int editor_fwprintf(FILE* stream, const wchar_t* format, ...);
+#endif
+
 namespace
 {
 constexpr int kWaveHeaderSize = 16;
@@ -16,11 +22,17 @@ void ReportWaveWarning(const wchar_t* message, const wchar_t* filename = nullptr
 {
     if (filename != nullptr)
     {
-        fwprintf(stderr, L"%ls (%ls)\n", message, filename);
+        (void)std::fwprintf(stderr, L"%ls (%ls)\n", message, filename);
+#ifdef _EDITOR
+        editor_fwprintf(stderr, L"%ls (%ls)\n", message, filename);
+#endif
     }
     else
     {
-        fwprintf(stderr, L"%ls\n", message);
+        (void)std::fwprintf(stderr, L"%ls\n", message);
+#ifdef _EDITOR
+        editor_fwprintf(stderr, L"%ls\n", message);
+#endif
     }
 }
 } // namespace
