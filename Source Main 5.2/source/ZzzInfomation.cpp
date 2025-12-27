@@ -772,7 +772,6 @@ void PrintItem(wchar_t* FileName)
     FILE* fp = _wfopen(FileName, L"wt");
     fwprintf(fp, L"                이름  최소공격력 최대공격력 방어력 방어율 필요힘 필요민첩 필요에너지\n");
     //fwprintf(fp,"                이름    카오스성공확률\n");
-    bool Excellent = true;
     for (int i = 0; i < 16 * MAX_ITEM_INDEX; i++)
     {
         if ((i & 0x1FF) == 0)
@@ -789,6 +788,7 @@ void PrintItem(wchar_t* FileName)
                 Plus = 10;
             for (int j = 0; j < Plus; j++)
             {
+                bool isExcelent = true;
                 int Level = j;
                 int RequireStrength = p->RequireStrength;
                 int RequireDexterity = 0;
@@ -799,7 +799,7 @@ void PrintItem(wchar_t* FileName)
                 int SuccessfulBlocking = p->SuccessfulBlocking;
                 if (DamageMin > 0)
                 {
-                    if (Excellent)
+                    if (isExcelent)
                     {
                         if (p->Level)
                             DamageMin += p->DamageMin * 25 / p->Level + 5;
@@ -808,7 +808,7 @@ void PrintItem(wchar_t* FileName)
                 }
                 if (DamageMax > 0)
                 {
-                    if (Excellent)
+                    if (isExcelent)
                     {
                         if (p->Level)
                             DamageMax += p->DamageMin * 25 / p->Level + 5;
@@ -823,7 +823,7 @@ void PrintItem(wchar_t* FileName)
                     }
                     else
                     {
-                        if (Excellent)
+                        if (isExcelent)
                         {
                             if (p->Level)
                                 Defense += p->Defense * 12 / p->Level + 4 + p->Level / 5;
@@ -833,32 +833,16 @@ void PrintItem(wchar_t* FileName)
                 }
                 if (SuccessfulBlocking > 0)
                 {
-                    if (Excellent)
+                    if (isExcelent)
                     {
                         if (p->Level)
                             SuccessfulBlocking += p->SuccessfulBlocking * 25 / p->Level + 5;
                     }
                     SuccessfulBlocking += Level * 3;
                 }
-                int ItemLevel = p->Level;
-                if (Excellent)
-                    ItemLevel = p->Level + 25;
-                if (p->RequireStrength)
-                    RequireStrength = 20 + p->RequireStrength * (ItemLevel + Level * 3) * 3 / 100;
-                else
-                    RequireStrength = 0;
-                if (p->RequireDexterity)
-                    RequireDexterity = 20 + p->RequireDexterity * (ItemLevel + Level * 3) * 3 / 100;
-                else
-                    RequireDexterity = 0;
-                if (p->RequireEnergy)
-                {
-                    RequireEnergy = 20 + p->RequireEnergy * (ItemLevel + Level * 3) * 4 / 10;
-                }
-                else
-                {
-                    RequireEnergy = 0;
-                }
+                RequireStrength = CalcStatRequirement(STAT_STRENGTH, p->RequireStrength, p->Level, Level, isExcelent);
+                RequireDexterity = CalcStatRequirement(STAT_DEXTERITY, p->RequireDexterity, p->Level, Level, isExcelent);
+                RequireEnergy = CalcStatRequirement(STAT_ENERGY, p->RequireEnergy, p->Level, Level, isExcelent, i, p->RequireLevel);
                 if (i >= ITEM_STAFF && i < ITEM_STAFF * MAX_ITEM_INDEX)
                 {
                     DamageMin = DamageMin / 2 + Level * 2;
@@ -866,7 +850,7 @@ void PrintItem(wchar_t* FileName)
                 }
                 ITEM ip;
                 ip.Type = i;
-                ip.ExcellentFlags = Excellent;
+                ip.ExcellentFlags = isExcelent;
                 ip.Level = Level;
                 SetItemAttributes(&ip);
 
@@ -1199,44 +1183,11 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
     else
         ip->RequireLevel = 0;
 
-    if (p->RequireStrength)
-        ip->RequireStrength = 20 + (p->RequireStrength) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireStrength = 0;
-
-    if (p->RequireDexterity)
-        ip->RequireDexterity = 20 + (p->RequireDexterity) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireDexterity = 0;
-
-    if (p->RequireVitality)
-        ip->RequireVitality = 20 + (p->RequireVitality) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireVitality = 0;
-
-    if (p->RequireEnergy)
-    {
-        if (ip->Type >= ITEM_BOOK_OF_SAHAMUTT && ip->Type <= ITEM_STAFF + 29)
-        {
-            ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 1) * 3 / 100;
-        }
-        else
-
-            if ((p->RequireLevel > 0) && (ip->Type >= ITEM_ETC && ip->Type < ITEM_ETC + MAX_ITEM_INDEX))
-            {
-                ip->RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
-            }
-            else
-
-            {
-                ip->RequireEnergy = 20 + (p->RequireEnergy) * (ItemLevel + ip->Level * 3) * 4 / 100;
-            }
-    }
-    else
-    {
-        ip->RequireEnergy = 0;
-    }
-
-    if (p->RequireCharisma)
-        ip->RequireCharisma = 20 + (p->RequireCharisma) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    else	ip->RequireCharisma = 0;
+    ip->RequireStrength = CalcStatRequirement(STAT_STRENGTH, p->RequireStrength, ItemLevel, ip->Level, isExcellent);
+    ip->RequireDexterity = CalcStatRequirement(STAT_DEXTERITY, p->RequireDexterity, ItemLevel, ip->Level, isExcellent);
+    ip->RequireVitality = CalcStatRequirement(STAT_VITALITY, p->RequireVitality, ItemLevel, ip->Level, isExcellent);
+    ip->RequireEnergy = CalcStatRequirement(STAT_ENERGY, p->RequireEnergy, ItemLevel, ip->Level, isExcellent, ip->Type, p->RequireLevel);
+    ip->RequireCharisma = CalcStatRequirement(STAT_CHARISMA, p->RequireCharisma, ItemLevel, ip->Level, isExcellent);
 
     if (ip->Type == ITEM_ORB_OF_SUMMONING)
     {

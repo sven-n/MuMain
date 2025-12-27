@@ -997,46 +997,11 @@ void ComputeItemInfo(int iHelpItem)
             RequireLevel = 0;
         }
 
-        if (p->RequireStrength)
-        {
-            RequireStrength = 20 + p->RequireStrength * (p->Level + Level * 3) * 3 / 100;
-        }
-        else
-        {
-            RequireStrength = 0;
-        }
-
-        if (p->RequireDexterity)	RequireDexterity = 20 + p->RequireDexterity * (p->Level + Level * 3) * 3 / 100;
-        else RequireDexterity = 0;
-
-        if (p->RequireVitality)	RequireVitality = 20 + p->RequireVitality * (p->Level + Level * 3) * 3 / 100;
-        else RequireVitality = 0;
-
-        if (p->RequireEnergy)
-        {
-            if (ItemHelp >= ITEM_BOOK_OF_SAHAMUTT && ItemHelp <= ITEM_STAFF + 29)
-            {
-                RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 1) * 3 / 100;
-            }
-            else
-            {
-                if ((p->RequireLevel > 0) && (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX))
-                {
-                    RequireEnergy = 20 + (p->RequireEnergy) * (p->RequireLevel) * 4 / 100;
-                }
-                else
-                {
-                    RequireEnergy = 20 + p->RequireEnergy * (p->Level + Level * 3) * 4 / 100;
-                }
-            }
-        }
-        else
-        {
-            RequireEnergy = 0;
-        }
-
-        if (p->RequireCharisma)	RequireCharisma = 20 + p->RequireCharisma * (p->Level + Level * 3) * 3 / 100;
-        else RequireCharisma = 0;
+        RequireStrength = CalcStatRequirement(STAT_STRENGTH, p->RequireStrength, p->Level, Level, false);
+        RequireDexterity = CalcStatRequirement(STAT_DEXTERITY, p->RequireDexterity, p->Level, Level, false);
+        RequireVitality = CalcStatRequirement(STAT_VITALITY, p->RequireVitality, p->Level, Level, false);
+        RequireEnergy = CalcStatRequirement(STAT_ENERGY, p->RequireEnergy, p->Level, Level, false, ItemHelp, p->RequireLevel);
+        RequireCharisma = CalcStatRequirement(STAT_CHARISMA, p->RequireCharisma, p->Level, Level, false);
 
         g_iItemInfo[Level][_COLUMN_TYPE_LEVEL] = Level;
         g_iItemInfo[Level][_COLUMN_TYPE_ATTMIN] = DamageMin;
@@ -1624,6 +1589,89 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     }
 
     return  maxDurability;
+}
+
+// Item stat requirement calculation constants
+namespace ItemRequirement
+{
+    // Base requirement offset
+    const int BASE_OFFSET = 20;
+
+    // Level bonuses
+    const int EXCELLENT_LEVEL_BONUS = 25;
+    const int ANCIENT_LEVEL_BONUS = 30;
+
+    // Enhancement multipliers
+    const int NORMAL_ENHANCEMENT_MULTIPLIER = 3;
+    const int BOOK_STAFF_ENHANCEMENT_MULTIPLIER = 1;
+
+    // Stat type multipliers (percentage as numerator/denominator)
+    const int STRENGTH_DEX_VIT_MULTIPLIER_NUM = 3;
+    const int STRENGTH_DEX_VIT_MULTIPLIER_DEN = 100;
+
+    const int ENERGY_DEFAULT_MULTIPLIER_NUM = 4;
+    const int ENERGY_DEFAULT_MULTIPLIER_DEN = 100;
+
+    const int ENERGY_BOOK_STAFF_MULTIPLIER_NUM = 3;
+    const int ENERGY_BOOK_STAFF_MULTIPLIER_DEN = 100;
+
+    const int ENERGY_ETC_MULTIPLIER_NUM = 4;
+    const int ENERGY_ETC_MULTIPLIER_DEN = 100;
+}
+
+// Helper function to calculate effective item level based on flags
+static int CalcEffectiveItemLevel(int itemLevel, bool isExcellent)
+{
+    if (isExcellent)
+    {
+        return itemLevel + ItemRequirement::EXCELLENT_LEVEL_BONUS;
+    }
+    return itemLevel;
+}
+
+WORD CalcStatRequirement(STAT_TYPE statType, WORD baseRequirement, int itemLevel, int enhancementLevel, bool isExcellent, int itemType, int requireLevel)
+{
+    if (baseRequirement == 0)
+    {
+        return 0;
+    }
+
+    int effectiveItemLevel = CalcEffectiveItemLevel(itemLevel, isExcellent);
+
+    // Handle non-Energy stats (Strength, Dexterity, Vitality, Charisma)
+    if (statType != STAT_ENERGY)
+    {
+        int levelComponent = effectiveItemLevel + enhancementLevel * ItemRequirement::NORMAL_ENHANCEMENT_MULTIPLIER;
+        return ItemRequirement::BASE_OFFSET +
+               baseRequirement * levelComponent *
+               ItemRequirement::STRENGTH_DEX_VIT_MULTIPLIER_NUM /
+               ItemRequirement::STRENGTH_DEX_VIT_MULTIPLIER_DEN;
+    }
+
+    // Energy stat - special cases based on item type
+    // Special case: Books and Staves (ITEM_BOOK_OF_SAHAMUTT to ITEM_STAFF + 29)
+    if (itemType >= ITEM_BOOK_OF_SAHAMUTT && itemType <= ITEM_STAFF + 29)
+    {
+        int levelComponent = effectiveItemLevel + enhancementLevel * ItemRequirement::BOOK_STAFF_ENHANCEMENT_MULTIPLIER;
+        return ItemRequirement::BASE_OFFSET +
+               baseRequirement * levelComponent *
+               ItemRequirement::ENERGY_BOOK_STAFF_MULTIPLIER_NUM /
+               ItemRequirement::ENERGY_BOOK_STAFF_MULTIPLIER_DEN;
+    }
+    // Special case: ETC items with RequireLevel
+    if (requireLevel > 0 && itemType >= ITEM_ETC && itemType < ITEM_ETC + MAX_ITEM_INDEX)
+    {
+        return ItemRequirement::BASE_OFFSET +
+               baseRequirement * requireLevel *
+               ItemRequirement::ENERGY_ETC_MULTIPLIER_NUM /
+               ItemRequirement::ENERGY_ETC_MULTIPLIER_DEN;
+    }
+    // Default Energy case
+    int levelComponent = effectiveItemLevel + enhancementLevel * ItemRequirement::NORMAL_ENHANCEMENT_MULTIPLIER;
+    return ItemRequirement::BASE_OFFSET +
+           baseRequirement * levelComponent *
+           ItemRequirement::ENERGY_DEFAULT_MULTIPLIER_NUM /
+           ItemRequirement::ENERGY_DEFAULT_MULTIPLIER_DEN;
 }
 
 void GetItemName(int iType, int iLevel, wchar_t* Text)
@@ -4866,22 +4914,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     // In editor mode, read fresh data from ItemAttribute
 #ifdef _EDITOR
     ITEM_ATTRIBUTE* pStr = &ItemAttribute[ip->Type];
-    WORD actualReqStr;
-    if (pStr->RequireStrength)
-    {
-        // Apply the same formula used when creating items
-        int ItemLevel = pStr->Level;
-        bool isExcellent = ip->ExcellentFlags > 0;
-        if (isExcellent)
-        {
-            ItemLevel = pStr->Level + 25;
-        }
-        actualReqStr = 20 + (pStr->RequireStrength) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    }
-    else
-    {
-        actualReqStr = 0;
-    }
+    WORD actualReqStr = CalcStatRequirement(STAT_STRENGTH, pStr->RequireStrength, pStr->Level, ip->Level, ip->ExcellentFlags > 0);
 #else
     WORD actualReqStr = ip->RequireStrength;
 #endif
@@ -4920,22 +4953,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     // In editor mode, read fresh data from ItemAttribute
 #ifdef _EDITOR
     ITEM_ATTRIBUTE* pDex = &ItemAttribute[ip->Type];
-    WORD actualReqDex;
-    if (pDex->RequireDexterity)
-    {
-        // Apply the same formula used when creating items
-        int ItemLevel = pDex->Level;
-        bool isExcellent = ip->ExcellentFlags > 0;
-        if (isExcellent)
-        {
-            ItemLevel = pDex->Level + 25;
-        }
-        actualReqDex = 20 + (pDex->RequireDexterity) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    }
-    else
-    {
-        actualReqDex = 0;
-    }
+    WORD actualReqDex = CalcStatRequirement(STAT_DEXTERITY, pDex->RequireDexterity, pDex->Level, ip->Level, ip->ExcellentFlags > 0);
 #else
     WORD actualReqDex = ip->RequireDexterity;
 #endif
@@ -4974,22 +4992,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     // In editor mode, read fresh data from ItemAttribute
 #ifdef _EDITOR
     ITEM_ATTRIBUTE* pVit = &ItemAttribute[ip->Type];
-    WORD actualReqVit;
-    if (pVit->RequireVitality)
-    {
-        // Apply the same formula used when creating items
-        int ItemLevel = pVit->Level;
-        bool isExcellent = ip->ExcellentFlags > 0;
-        if (isExcellent)
-        {
-            ItemLevel = pVit->Level + 25;
-        }
-        actualReqVit = 20 + (pVit->RequireVitality) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    }
-    else
-    {
-        actualReqVit = 0;
-    }
+    WORD actualReqVit = CalcStatRequirement(STAT_VITALITY, pVit->RequireVitality, pVit->Level, ip->Level, ip->ExcellentFlags > 0);
 #else
     WORD actualReqVit = ip->RequireVitality;
 #endif
@@ -5021,22 +5024,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     // In editor mode, read fresh data from ItemAttribute
 #ifdef _EDITOR
     ITEM_ATTRIBUTE* pEne = &ItemAttribute[ip->Type];
-    WORD actualReqEne;
-    if (pEne->RequireEnergy)
-    {
-        // Apply the same formula used when creating items
-        int ItemLevel = pEne->Level;
-        bool isExcellent = ip->ExcellentFlags > 0;
-        if (isExcellent)
-        {
-            ItemLevel = pEne->Level + 25;
-        }
-        actualReqEne = 20 + (pEne->RequireEnergy) * (ItemLevel + ip->Level * 3) * 3 / 100;
-    }
-    else
-    {
-        actualReqEne = 0;
-    }
+    WORD actualReqEne = CalcStatRequirement(STAT_ENERGY, pEne->RequireEnergy, pEne->Level, ip->Level, ip->ExcellentFlags > 0, ip->Type, pEne->RequireLevel);
 #else
     WORD actualReqEne = ip->RequireEnergy;
 #endif
