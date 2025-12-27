@@ -1617,6 +1617,10 @@ namespace ItemRequirement
 
     const int ENERGY_ETC_MULTIPLIER_NUM = 4;
     const int ENERGY_ETC_MULTIPLIER_DEN = 100;
+
+    // Dark Raven pet charisma formula constants
+    const int DARK_RAVEN_CHARISMA_BASE = 185;
+    const int DARK_RAVEN_CHARISMA_PER_LEVEL = 15;
 }
 
 // Helper function to calculate effective item level based on flags
@@ -1674,6 +1678,11 @@ WORD CalcStatRequirement(STAT_TYPE statType, WORD baseRequirement, int itemLevel
            ItemRequirement::ENERGY_DEFAULT_MULTIPLIER_DEN;
 }
 
+WORD CalcDarkRavenCharismaRequirement(int petLevel)
+{
+    return ItemRequirement::DARK_RAVEN_CHARISMA_BASE + (petLevel * ItemRequirement::DARK_RAVEN_CHARISMA_PER_LEVEL);
+}
+
 void ApplyItemSpecificRequirementOverrides(ITEM* ip, ITEM_ATTRIBUTE* p)
 {
     // Special case: Orb of Summoning - hardcoded energy requirements by level
@@ -1694,17 +1703,10 @@ void ApplyItemSpecificRequirementOverrides(ITEM* ip, ITEM_ATTRIBUTE* p)
         ip->RequireEnergy = Energy;
     }
 
-    // Special case: Dark Raven - special charisma formula
-    if (p->RequireCharisma)
+    // Special case: Dark Raven - special charisma formula (overrides CalcStatRequirement)
+    if (ip->Type == MODEL_DARK_RAVEN_ITEM && p->RequireCharisma)
     {
-        if (ip->Type == MODEL_DARK_RAVEN_ITEM)
-        {
-            ip->RequireCharisma = (185 + (p->RequireCharisma * 15));
-        }
-        else
-        {
-            ip->RequireCharisma = p->RequireCharisma;
-        }
+        ip->RequireCharisma = CalcDarkRavenCharismaRequirement(p->RequireCharisma);
     }
 
     // Special case: Transformation Ring - hardcoded level requirements

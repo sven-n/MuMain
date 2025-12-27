@@ -165,6 +165,7 @@ enum STAT_TYPE
 WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
 WORD CalcStatRequirement(STAT_TYPE statType, WORD baseRequirement, int itemLevel, int enhancementLevel, bool isExcellent, int itemType = 0, int requireLevel = 0);
 void ApplyItemSpecificRequirementOverrides(ITEM* ip, ITEM_ATTRIBUTE* p);
+WORD CalcDarkRavenCharismaRequirement(int petLevel);
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
 
 void SendRequestUse(int Index, int Target);

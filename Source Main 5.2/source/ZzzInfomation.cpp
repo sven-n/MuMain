@@ -2632,7 +2632,7 @@ bool IsRequireEquipItem(ITEM* pItem)
     if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
     {
         PET_INFO* pPetInfo = giPetManager::GetPetInfo(pItem);
-        WORD wRequireCharisma = static_cast<WORD>((185 + pPetInfo->m_wLevel * 15) & 0xFFFF);
+        WORD wRequireCharisma = CalcDarkRavenCharismaRequirement(pPetInfo->m_wLevel);
         if (wRequireCharisma > wCharisma) {
             return false;
         }
