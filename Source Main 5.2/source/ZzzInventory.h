@@ -164,6 +164,7 @@ enum STAT_TYPE
 
 WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
 WORD CalcStatRequirement(STAT_TYPE statType, WORD baseRequirement, int itemLevel, int enhancementLevel, bool isExcellent, int itemType = 0, int requireLevel = 0);
+void ApplyItemSpecificRequirementOverrides(ITEM* ip, ITEM_ATTRIBUTE* p);
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
 
 void SendRequestUse(int Index, int Target);
@@ -186,7 +187,7 @@ void CreateCastleMark(int Type, BYTE* buffer = NULL, bool blend = true);
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp = false);
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
-void GetItemName(int iType, int iLevel, wchar_t* Text);
+void get_item_name(int iType, int iLevel, wchar_t* Text);
 std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
 void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);

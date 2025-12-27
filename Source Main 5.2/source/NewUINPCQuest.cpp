@@ -343,7 +343,7 @@ bool CNewUINPCQuest::RenderItemMobText()
             }
 
             wchar_t szItemName[128];
-            GetItemName(nItemType, nItemLevel, szItemName);
+            get_item_name(nItemType, nItemLevel, szItemName);
             swprintf(szTemp, L"%ls x %d", szItemName, nItemNum);
             g_pRenderText->RenderText(m_Pos.x + 60, nPosY, szTemp);
         }

@@ -550,7 +550,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
             wchar_t szItemName[32];
-            ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level,
+            ::get_item_name((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level,
                 szItemName);
             ::swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu/%lu", szItemName,
                 MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
@@ -742,7 +742,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
             case QUEST_REWARD_ITEM:
                 wchar_t szItemName[32];
-                ::GetItemName((int)pRewardInfo->m_pItem->Type, pRewardInfo->m_pItem->Level,
+                ::get_item_name((int)pRewardInfo->m_pItem->Type, pRewardInfo->m_pItem->Level,
                     szItemName);
                 ::swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu",
                     szItemName, pRewardInfo->m_dwValue);

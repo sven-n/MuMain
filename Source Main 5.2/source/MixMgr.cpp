@@ -655,7 +655,7 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
     MIX_RECIPE_ITEM* pMixRecipeItem = &GetMostSimilarRecipe()->m_MixSources[iItemNum];
 
     wchar_t szTempName[100];
-    GetItemName(pMixRecipeItem->m_sTypeMin, pMixRecipeItem->m_iLevelMin, szTempName);
+    get_item_name(pMixRecipeItem->m_sTypeMin, pMixRecipeItem->m_iLevelMin, szTempName);
 
     if (pMixRecipeItem->m_sTypeMin == pMixRecipeItem->m_sTypeMax &&
         (pMixRecipeItem->m_iLevelMin == pMixRecipeItem->m_iLevelMax || (pMixRecipeItem->m_iLevelMin == 0 && pMixRecipeItem->m_iLevelMax == 255)) &&
