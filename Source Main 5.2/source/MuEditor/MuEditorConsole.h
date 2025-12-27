@@ -4,6 +4,26 @@
 
 #include <string>
 #include <fstream>
+#include <sstream>
+#include <iostream>
+
+// Custom stream buffer that captures output and forwards to ImGui console
+class ConsoleStreamBuf : public std::streambuf
+{
+public:
+    ConsoleStreamBuf(std::ostream& stream, bool isStdout);
+    ~ConsoleStreamBuf();
+
+protected:
+    virtual int_type overflow(int_type c) override;
+    virtual std::streamsize xsputn(const char* s, std::streamsize n) override;
+
+private:
+    std::ostream& m_stream;
+    std::streambuf* m_oldBuf;
+    std::string m_buffer;
+    bool m_isStdout;
+};
 
 class CMuEditorConsole
 {
@@ -23,17 +43,27 @@ public:
     void ClearGameLog() { m_strGameConsole.clear(); }
 
     void Render();
+    void Update(); // Call this periodically to capture console output
 
 private:
     CMuEditorConsole();
     ~CMuEditorConsole();
 
     void WriteToLogFile(const std::string& message);
+    void CaptureConsoleOutput(); // Capture new output from Windows console
 
     std::string m_strEditorConsole;
     std::string m_strGameConsole;
     std::ofstream m_logFile;
     std::string m_strLogFilePath;
+
+    // Stream redirection
+    ConsoleStreamBuf* m_pStdoutBuf;
+    ConsoleStreamBuf* m_pStderrBuf;
+
+    // Console buffer tracking
+    short m_lastConsoleY;
+    std::string m_lastConsoleContent;
 };
 
 #define g_MuEditorConsole CMuEditorConsole::GetInstance()
