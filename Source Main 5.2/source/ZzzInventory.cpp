@@ -4101,21 +4101,25 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextNum--;
         }
     }
-    // Use the unified CalculateDefenseValue function for consistent calculation
-    // This ensures ItemEditor changes are immediately visible and both debug/release show same values
-    int calculatedDefense = CalculateDefenseValue(pAttr->Defense, ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, pAttr->Level);
+    // For tooltip display, always use ip->Defense which has bonuses from CalcDefense
+    // In editor mode, CalcDefense recalculates from ItemAttribute, so changes are immediate
+    int calculatedDefense = ip->Defense;
 
-    // Apply enhancement level bonus for armor (Helm through Boots)
-    // This bonus is specific to tooltip display and NOT in CalcDefense
+    // Apply enhancement level bonus for armor (Helm through Boots) ONLY - not for wings/capes
+    // This bonus is specific to tooltip display and is NOT in CalcDefense
     if (ip->Type >= ITEM_HELM && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
     {
-        // Armor gets +4 defense per enhancement level, with adjustment above +9
-        int armorBonus = ip->Level * 4;
-        if (ip->Level > 9)
+        // Verify this is NOT a wing/cape by checking it's not in the wing range
+        if (!(ip->Type >= ITEM_WINGS_OF_SPIRITS))
         {
-            armorBonus -= 3;  // Slight reduction for levels above +9
+            // Armor gets +4 defense per enhancement level, with adjustment above +9
+            int armorBonus = ip->Level * 4;
+            if (ip->Level > 9)
+            {
+                armorBonus -= 3;  // Slight reduction for levels above +9
+            }
+            calculatedDefense += armorBonus;
         }
-        calculatedDefense += armorBonus;
     }
 
     if (calculatedDefense || ip->Defense)
