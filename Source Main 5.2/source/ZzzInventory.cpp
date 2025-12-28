@@ -4956,13 +4956,21 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
 
-    // In editor mode, read fresh data from ItemAttribute
+    // Helper macro to get actual requirement value (fresh from ItemAttribute in editor mode)
 #ifdef _EDITOR
-    ITEM_ATTRIBUTE* pStr = &ItemAttribute[ip->Type];
-    WORD actualReqStr = CalcStatRequirement(STAT_STRENGTH, pStr->RequireStrength, pStr->Level, ip->Level, ip->ExcellentFlags > 0);
+    #define GET_ACTUAL_REQUIREMENT(statType, attrField) \
+        [&]() -> WORD { \
+            ITEM_ATTRIBUTE* pAttr = &ItemAttribute[ip->Type]; \
+            if (statType == STAT_ENERGY) \
+                return CalcStatRequirement(statType, pAttr->attrField, pAttr->Level, ip->Level, ip->ExcellentFlags > 0, ip->Type, pAttr->RequireLevel); \
+            else \
+                return CalcStatRequirement(statType, pAttr->attrField, pAttr->Level, ip->Level, ip->ExcellentFlags > 0); \
+        }()
 #else
-    WORD actualReqStr = ip->RequireStrength;
+    #define GET_ACTUAL_REQUIREMENT(statType, attrField) (ip->attrField)
 #endif
+
+    WORD actualReqStr = GET_ACTUAL_REQUIREMENT(STAT_STRENGTH, RequireStrength);
 
     if (actualReqStr && bRequireStat)
     {
@@ -4995,13 +5003,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextNum++;
         }
     }
-    // In editor mode, read fresh data from ItemAttribute
-#ifdef _EDITOR
-    ITEM_ATTRIBUTE* pDex = &ItemAttribute[ip->Type];
-    WORD actualReqDex = CalcStatRequirement(STAT_DEXTERITY, pDex->RequireDexterity, pDex->Level, ip->Level, ip->ExcellentFlags > 0);
-#else
-    WORD actualReqDex = ip->RequireDexterity;
-#endif
+
+    WORD actualReqDex = GET_ACTUAL_REQUIREMENT(STAT_DEXTERITY, RequireDexterity);
 
     if (actualReqDex && bRequireStat)
     {
@@ -5034,13 +5037,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
 
-    // In editor mode, read fresh data from ItemAttribute
-#ifdef _EDITOR
-    ITEM_ATTRIBUTE* pVit = &ItemAttribute[ip->Type];
-    WORD actualReqVit = CalcStatRequirement(STAT_VITALITY, pVit->RequireVitality, pVit->Level, ip->Level, ip->ExcellentFlags > 0);
-#else
-    WORD actualReqVit = ip->RequireVitality;
-#endif
+    WORD actualReqVit = GET_ACTUAL_REQUIREMENT(STAT_VITALITY, RequireVitality);
 
     if (actualReqVit && bRequireStat) //  요구체력.
     {
@@ -5066,13 +5063,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
 
-    // In editor mode, read fresh data from ItemAttribute
-#ifdef _EDITOR
-    ITEM_ATTRIBUTE* pEne = &ItemAttribute[ip->Type];
-    WORD actualReqEne = CalcStatRequirement(STAT_ENERGY, pEne->RequireEnergy, pEne->Level, ip->Level, ip->ExcellentFlags > 0, ip->Type, pEne->RequireLevel);
-#else
-    WORD actualReqEne = ip->RequireEnergy;
-#endif
+    WORD actualReqEne = GET_ACTUAL_REQUIREMENT(STAT_ENERGY, RequireEnergy);
 
     if (actualReqEne && bRequireStat)
     {
@@ -5099,13 +5090,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
 
-    // In editor mode, read fresh data from ItemAttribute
-#ifdef _EDITOR
-    ITEM_ATTRIBUTE* pCha = &ItemAttribute[ip->Type];
-    WORD actualReqCha = CalcStatRequirement(STAT_CHARISMA, pCha->RequireCharisma, pCha->Level, ip->Level, ip->ExcellentFlags > 0);
-#else
-    WORD actualReqCha = ip->RequireCharisma;
-#endif
+    WORD actualReqCha = GET_ACTUAL_REQUIREMENT(STAT_CHARISMA, RequireCharisma);
 
     if (actualReqCha && bRequireStat)
     {
@@ -5130,6 +5115,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextNum++;
         }
     }
+
+    // Clean up the helper macro
+#undef GET_ACTUAL_REQUIREMENT
 
     if (IsRequireClassRenderItem(ip->Type))
     {
