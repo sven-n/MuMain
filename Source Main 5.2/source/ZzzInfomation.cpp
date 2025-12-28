@@ -1103,25 +1103,38 @@ int CalculateDefenseValue(int baseDefense, int itemType, int enhancementLevel, i
     }
 
     // Wings/capes defense bonus based on enhancement level
-    if ((itemType >= ITEM_WINGS_OF_SPIRITS && itemType <= ITEM_WINGS_OF_DARKNESS) || itemType == ITEM_WINGS_OF_DESPAIR)
+    // Check if this is a wing/cape item (starts from ITEM_WING)
+    bool isWingOrCape = (itemType >= ITEM_WING && itemType < ITEM_WING + MAX_ITEM_INDEX) ||
+                        (itemType >= ITEM_HELPER + 30); // Capes start at ITEM_HELPER + 30
+
+    if (isWingOrCape)
     {
-        calculatedDefense += (std::min<int>(9, enhancementLevel) * 2);
-    }
-    else if (itemType == ITEM_CAPE_OF_LORD || itemType == ITEM_CAPE_OF_FIGHTER)
-    {
-        calculatedDefense += (std::min<int>(9, enhancementLevel) * 2);
-    }
-    else if ((itemType >= ITEM_WING_OF_STORM && itemType <= ITEM_CAPE_OF_EMPEROR) || itemType == ITEM_WING_OF_DIMENSION || (itemType == ITEM_CAPE_OF_OVERRULE))
-    {
-        calculatedDefense += (std::min<int>(9, enhancementLevel) * 4);
-    }
-    else if (itemType >= ITEM_WINGS_OF_SPIRITS)  // Other wings/capes
-    {
-        calculatedDefense += (std::min<int>(9, enhancementLevel) * 3);
+        // Different wing tiers get different bonuses
+        if ((itemType >= ITEM_WING_OF_STORM && itemType <= ITEM_CAPE_OF_EMPEROR) ||
+            itemType == ITEM_WING_OF_DIMENSION || itemType == ITEM_CAPE_OF_OVERRULE)
+        {
+            // Higher tier wings: *4 multiplier
+            calculatedDefense += (std::min<int>(9, enhancementLevel) * 4);
+        }
+        else if (itemType >= ITEM_WINGS_OF_SPIRITS && itemType <= ITEM_WINGS_OF_DARKNESS)
+        {
+            // Mid-tier wings (Spirits, Soul, Dragon, Darkness): *2 multiplier
+            calculatedDefense += (std::min<int>(9, enhancementLevel) * 2);
+        }
+        else if (itemType == ITEM_CAPE_OF_LORD || itemType == ITEM_CAPE_OF_FIGHTER)
+        {
+            // Basic capes: *2 multiplier
+            calculatedDefense += (std::min<int>(9, enhancementLevel) * 2);
+        }
+        else
+        {
+            // Early wings (Elf, Heaven, Satan, etc.): *3 multiplier for levels 0-9
+            calculatedDefense += (std::min<int>(9, enhancementLevel) * 3);
+        }
     }
 
     // Additional progressive bonus for levels above +9 for wings/capes only
-    if (itemType >= ITEM_WINGS_OF_SPIRITS && enhancementLevel > 9)
+    if (isWingOrCape && enhancementLevel > 9)
     {
         int levelsAbove9 = enhancementLevel - 9;
         if ((itemType >= ITEM_WING_OF_STORM && itemType <= ITEM_CAPE_OF_EMPEROR) || itemType == ITEM_WING_OF_DIMENSION || itemType == ITEM_CAPE_OF_OVERRULE)
@@ -1131,11 +1144,25 @@ int CalculateDefenseValue(int baseDefense, int itemType, int enhancementLevel, i
             int last = levelsAbove9 + 3;
             calculatedDefense += levelsAbove9 * (first + last) / 2;
         }
-        else
+        else if (itemType >= ITEM_WINGS_OF_SPIRITS && itemType <= ITEM_WINGS_OF_DARKNESS)
         {
-            // Cape of Lord and similar: sum from 3 to (levelsAbove9 + 2)
+            // Mid-tier wings (Spirits, Soul, Dragon, Darkness): sum from 3 to (levelsAbove9 + 2)
             int first = 3;
             int last = levelsAbove9 + 2;
+            calculatedDefense += levelsAbove9 * (first + last) / 2;
+        }
+        else if (itemType == ITEM_CAPE_OF_LORD || itemType == ITEM_CAPE_OF_FIGHTER)
+        {
+            // Basic capes: sum from 3 to (levelsAbove9 + 2)
+            int first = 3;
+            int last = levelsAbove9 + 2;
+            calculatedDefense += levelsAbove9 * (first + last) / 2;
+        }
+        else
+        {
+            // Early wings (Elf, Heaven, Satan): sum from 4 to (levelsAbove9 + 3)
+            int first = 4;
+            int last = levelsAbove9 + 3;
             calculatedDefense += levelsAbove9 * (first + last) / 2;
         }
     }
