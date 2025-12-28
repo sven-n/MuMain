@@ -54,6 +54,7 @@
 
 #ifdef _EDITOR
 #include "MuEditor/MuEditor.h"
+#include "MuEditor/MuEditorConsole.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 

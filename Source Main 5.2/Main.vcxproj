@@ -768,6 +768,8 @@
     <ClCompile Include="source\MuEditor\MuEditorUI.cpp" Condition="'$(Configuration)'=='Global Debug'" />
     <ClInclude Include="source\MuEditor\MuInputBlocker.h" Condition="'$(Configuration)'=='Global Debug'" />
     <ClCompile Include="source\MuEditor\MuInputBlocker.cpp" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClInclude Include="source\MuEditor\MuEditorCenterPane.h" Condition="'$(Configuration)'=='Global Debug'" />
+    <ClCompile Include="source\MuEditor\MuEditorCenterPane.cpp" Condition="'$(Configuration)'=='Global Debug'" />
     <ClInclude Include="source\MuEditor\MuItemEditor\MuItemEditor.h" Condition="'$(Configuration)'=='Global Debug'" />
     <ClCompile Include="source\MuEditor\MuItemEditor\MuItemEditor.cpp" Condition="'$(Configuration)'=='Global Debug'" />
     <!-- End MU Editor (Debug only) -->
