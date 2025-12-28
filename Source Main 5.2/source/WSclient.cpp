@@ -671,6 +671,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     switch (Data->Value)
     {
     case 0:
+        g_GuildCache.Reset();
         PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         break;
     case 1:
@@ -702,6 +703,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             ReleaseMainData();
         }
 
+        g_GuildCache.Reset();
         g_ErrorReport.Write(L"[ReceiveLogOut]");
         if (SocketClient != nullptr)
         {
