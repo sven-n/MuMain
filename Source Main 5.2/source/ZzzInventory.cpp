@@ -5099,18 +5099,26 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
 
-    if (ip->RequireCharisma && bRequireStat)
+    // In editor mode, read fresh data from ItemAttribute
+#ifdef _EDITOR
+    ITEM_ATTRIBUTE* pCha = &ItemAttribute[ip->Type];
+    WORD actualReqCha = CalcStatRequirement(STAT_CHARISMA, pCha->RequireCharisma, pCha->Level, ip->Level, ip->ExcellentFlags > 0);
+#else
+    WORD actualReqCha = ip->RequireCharisma;
+#endif
+
+    if (actualReqCha && bRequireStat)
     {
-        swprintf(TextList[TextNum], GlobalText[698], ip->RequireCharisma);
+        swprintf(TextList[TextNum], GlobalText[698], actualReqCha);
 
         WORD Charisma;
         Charisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-        if (Charisma < ip->RequireCharisma)
+        if (Charisma < actualReqCha)
         {
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
-            swprintf(TextList[TextNum], GlobalText[74], ip->RequireCharisma - Charisma);
+            swprintf(TextList[TextNum], GlobalText[74], actualReqCha - Charisma);
             TextListColor[TextNum] = TEXT_COLOR_RED;
             TextBold[TextNum] = false;
             TextNum++;
