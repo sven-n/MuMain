@@ -1155,13 +1155,6 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
         }
     }
 
-    // Cape of Lord special case - force base defense to 15
-    if (ip->Type == ITEM_CAPE_OF_LORD)
-    {
-        p->Defense = 15;
-        ip->Defense = 15;
-    }
-
     // Use the unified CalculateDefenseValue function
     ip->Defense = CalculateDefenseValue(p->Defense, ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, p->Level);
 }
