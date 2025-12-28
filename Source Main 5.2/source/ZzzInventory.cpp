@@ -4021,8 +4021,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
 
     // Read damage from ItemAttribute in editor mode for immediate updates
-#ifdef _EDITOR
     ITEM_ATTRIBUTE* pAttr = &ItemAttribute[ip->Type];
+#ifdef _EDITOR
     int baseDamageMin = pAttr->DamageMin;
     int baseDamageMax = pAttr->DamageMax;
 #else
@@ -4101,15 +4101,24 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextNum--;
         }
     }
-    // Read defense from ItemAttribute in editor mode for immediate updates
-#ifdef _EDITOR
-    ITEM_ATTRIBUTE* pDefAttr = &ItemAttribute[ip->Type];
-    int baseDefense = pDefAttr->Defense;
-#else
-    int baseDefense = ip->Defense;
-#endif
+    // Use the unified CalculateDefenseValue function for consistent calculation
+    // This ensures ItemEditor changes are immediately visible and both debug/release show same values
+    int calculatedDefense = CalculateDefenseValue(pAttr->Defense, ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, pAttr->Level);
 
-    if (baseDefense || ip->Defense)
+    // Apply enhancement level bonus for armor (Helm through Boots)
+    // This bonus is specific to tooltip display and NOT in CalcDefense
+    if (ip->Type >= ITEM_HELM && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
+    {
+        // Armor gets +4 defense per enhancement level, with adjustment above +9
+        int armorBonus = ip->Level * 4;
+        if (ip->Level > 9)
+        {
+            armorBonus -= 3;  // Slight reduction for levels above +9
+        }
+        calculatedDefense += armorBonus;
+    }
+
+    if (calculatedDefense || ip->Defense)
     {
         int maxdefense = 0;
 
@@ -4123,7 +4132,8 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 maxdefense = SC.SI_SD.SI_defense;
             }
         }
-        swprintf(TextList[TextNum], GlobalText[65], baseDefense + maxdefense);
+
+        swprintf(TextList[TextNum], GlobalText[65], calculatedDefense + maxdefense);
 
         if (maxdefense != 0)
             TextListColor[TextNum] = TEXT_COLOR_YELLOW;

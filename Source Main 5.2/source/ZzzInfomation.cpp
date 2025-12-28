@@ -1066,8 +1066,86 @@ void CalcSuccessfulBlocking(ITEM* ip, ITEM_ATTRIBUTE* p)
     }
 }
 
+// Unified defense calculation function used by both CalcDefense and RenderItemInfo
+int CalculateDefenseValue(int baseDefense, int itemType, int enhancementLevel, int excellentFlags, int ancientDiscriminator, int itemLevel)
+{
+    if (baseDefense == 0)
+    {
+        return 0;
+    }
+
+    int calculatedDefense = baseDefense;
+    auto isAncientItem = ancientDiscriminator > 0;
+    auto isExcellent = excellentFlags > 0;
+    auto setItemDropLevel = itemLevel + 30; // GetDropLevel inline
+
+    // Shields get +enhancement level bonus
+    if (itemType >= ITEM_SHIELD && itemType < ITEM_SHIELD + MAX_ITEM_INDEX)
+    {
+        calculatedDefense += enhancementLevel;
+        if (isAncientItem)
+        {
+            calculatedDefense = calculatedDefense + (calculatedDefense * 20 / setItemDropLevel + 2);
+        }
+        return calculatedDefense;
+    }
+
+    // Excellent items get a bonus based on item level (not shields/wings)
+    if (isExcellent && itemLevel > 0)
+    {
+        calculatedDefense += baseDefense * 12 / itemLevel + 4 + itemLevel / 5;
+    }
+
+    // Ancient item bonus
+    if (isAncientItem)
+    {
+        calculatedDefense += baseDefense + (calculatedDefense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30);
+    }
+
+    // Wings/capes defense bonus based on enhancement level
+    if ((itemType >= ITEM_WINGS_OF_SPIRITS && itemType <= ITEM_WINGS_OF_DARKNESS) || itemType == ITEM_WINGS_OF_DESPAIR)
+    {
+        calculatedDefense += (std::min<int>(9, enhancementLevel) * 2);
+    }
+    else if (itemType == ITEM_CAPE_OF_LORD || itemType == ITEM_CAPE_OF_FIGHTER)
+    {
+        calculatedDefense += (std::min<int>(9, enhancementLevel) * 2);
+    }
+    else if ((itemType >= ITEM_WING_OF_STORM && itemType <= ITEM_CAPE_OF_EMPEROR) || itemType == ITEM_WING_OF_DIMENSION || (itemType == ITEM_CAPE_OF_OVERRULE))
+    {
+        calculatedDefense += (std::min<int>(9, enhancementLevel) * 4);
+    }
+    else if (itemType >= ITEM_WINGS_OF_SPIRITS)  // Other wings/capes
+    {
+        calculatedDefense += (std::min<int>(9, enhancementLevel) * 3);
+    }
+
+    // Additional progressive bonus for levels above +9 for wings/capes only
+    if (itemType >= ITEM_WINGS_OF_SPIRITS && enhancementLevel > 9)
+    {
+        int levelsAbove9 = enhancementLevel - 9;
+        if ((itemType >= ITEM_WING_OF_STORM && itemType <= ITEM_CAPE_OF_EMPEROR) || itemType == ITEM_WING_OF_DIMENSION || itemType == ITEM_CAPE_OF_OVERRULE)
+        {
+            // Higher tier wings: sum from 4 to (levelsAbove9 + 3)
+            int first = 4;
+            int last = levelsAbove9 + 3;
+            calculatedDefense += levelsAbove9 * (first + last) / 2;
+        }
+        else
+        {
+            // Cape of Lord and similar: sum from 3 to (levelsAbove9 + 2)
+            int first = 3;
+            int last = levelsAbove9 + 2;
+            calculatedDefense += levelsAbove9 * (first + last) / 2;
+        }
+    }
+
+    return calculatedDefense;
+}
+
 void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
 {
+    // Calculate magic defense
     if (p->MagicDefense > 0)
     {
         ip->MagicDefense += (std::min<int>(9, p->Level) * 3);	// ~ +9
@@ -1077,75 +1155,15 @@ void CalcDefense(ITEM* ip, ITEM_ATTRIBUTE* p)
         }
     }
 
+    // Cape of Lord special case - force base defense to 15
     if (ip->Type == ITEM_CAPE_OF_LORD)
     {
         p->Defense = 15;
         ip->Defense = 15;
     }
 
-    if (p->Defense == 0)
-    {
-        return;
-    }
-
-    auto isAncientItem = ip->AncientDiscriminator > 0;
-    auto isExcellent = ip->ExcellentFlags > 0;
-    auto setItemDropLevel = GetDropLevel(p);
-
-    if (ip->Type >= ITEM_SHIELD && ip->Type < ITEM_SHIELD + MAX_ITEM_INDEX)
-    {
-        ip->Defense += ip->Level;
-        if (isAncientItem)
-        {
-            ip->Defense = ip->Defense + (ip->Defense * 20 / setItemDropLevel + 2);
-        }
-
-        return;
-    }
-
-    if (isExcellent && p->Level > 0)
-    {
-        ip->Defense += p->Defense * 12 / p->Level + 4 + p->Level / 5;
-    }
-
-    if (isAncientItem)
-    {
-        ip->Defense += p->Defense + (ip->Defense * 3 / setItemDropLevel + 2 + setItemDropLevel / 30);
-    }
-
-    if ((ip->Type >= ITEM_WINGS_OF_SPIRITS && ip->Type <= ITEM_WINGS_OF_DARKNESS) || ip->Type == ITEM_WINGS_OF_DESPAIR)
-    {
-        ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
-    }
-    else if (ip->Type == ITEM_CAPE_OF_LORD
-        || ip->Type == ITEM_CAPE_OF_FIGHTER)
-    {
-        ip->Defense += (std::min<int>(9, ip->Level) * 2);	// ~ +9
-    }
-    else if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-        || (ip->Type == ITEM_CAPE_OF_OVERRULE))
-    {
-        ip->Defense += (std::min<int>(9, ip->Level) * 4);	// ~ +9
-    }
-    else
-    {
-        ip->Defense += (std::min<int>(9, ip->Level) * 3);	// ~ +9
-    }
-    if ((ip->Type >= ITEM_WING_OF_STORM && ip->Type <= ITEM_CAPE_OF_EMPEROR) || ip->Type == ITEM_WING_OF_DIMENSION
-        || ip->Type == ITEM_CAPE_OF_OVERRULE)
-    {
-        if (ip->Level - 9 > 0)
-        {
-            ip->Defense += ip->Level - 5;
-        }
-    }
-    else
-    {
-        if (ip->Level - 9 > 0)
-        {
-            ip->Defense += ip->Level - 6;
-        }
-    }
+    // Use the unified CalculateDefenseValue function
+    ip->Defense = CalculateDefenseValue(p->Defense, ip->Type, ip->Level, ip->ExcellentFlags, ip->AncientDiscriminator, p->Level);
 }
 
 void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
