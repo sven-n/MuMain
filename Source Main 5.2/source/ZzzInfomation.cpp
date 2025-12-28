@@ -1091,7 +1091,7 @@ int CalculateDefenseValue(int baseDefense, int itemType, int enhancementLevel, i
     }
 
     // Excellent items get a bonus based on item level (not shields/wings)
-    if (isExcellent && itemLevel > 0)
+    if (isExcellent && itemLevel > 0 && !(itemType >= ITEM_SHIELD && itemType < ITEM_SHIELD + MAX_ITEM_INDEX) && !(itemType >= ITEM_WINGS_OF_SPIRITS))
     {
         calculatedDefense += baseDefense * 12 / itemLevel + 4 + itemLevel / 5;
     }
