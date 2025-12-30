@@ -9,7 +9,7 @@
 #include "_enum.h"
 #include <eh.h>
 #include "UIManager.h"
-#include "GuildCache.h"
+#include "Guild/GuildCache.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"

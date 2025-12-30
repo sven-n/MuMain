@@ -10,7 +10,7 @@
 #include "NewUISystem.h"
 #include "ZzzInterface.h"
 #include "PersonalShopTitleImp.h"
-#include "UIGuildInfo.h"
+#include "Guild/UIGuildInfo.h"
 #include "ZzzAI.h"
 #include "w_CursedTemple.h"
 #include "DuelMgr.h"

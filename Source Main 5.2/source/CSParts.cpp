@@ -12,7 +12,7 @@
 #include "ZzzInterface.h"
 #include "ZzzEffect.h"
 #include "ZzzTexture.h"
-#include "GuildCache.h"
+#include "Guild/GuildCache.h"
 #include "ZzzLodTerrain.h"
 #include "CSParts.h"
 

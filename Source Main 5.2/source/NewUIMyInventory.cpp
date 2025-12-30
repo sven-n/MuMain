@@ -14,7 +14,7 @@
 #include "ZzzInventory.h"
 #include "ZzzLodTerrain.h"
 #include "CSQuest.h"
-#include "UIGuildInfo.h"
+#include "Guild/UIGuildInfo.h"
 #include "UIManager.h"
 #include "CSItemOption.h"
 #include "MapManager.h"

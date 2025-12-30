@@ -14,7 +14,7 @@
 #include "ZzzCharacter.h"
 
 #include "DSPlaySound.h"
-#include "UIGuildInfo.h"
+#include "Guild/UIGuildInfo.h"
 #include "UIGuardsMan.h"
 
 using namespace SEASON3B;

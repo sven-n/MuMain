@@ -1,7 +1,7 @@
 #pragma once
 
-#include "UIGuildInfo.h"
-#include "UIGuildMaster.h"
+#include "Guild/UIGuildInfo.h"
+#include "Guild/UIGuildMaster.h"
 #include "UISenatus.h"
 #include "UIGateKeeper.h"
 #include "UIPopup.h"

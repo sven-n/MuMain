@@ -21,7 +21,7 @@
 #include "GIPetManager.h"
 #include "BoneManager.h"
 
-#include "GuildCache.h"
+#include "Guild/GuildCache.h"
 #include "ZzzInterface.h"
 
 

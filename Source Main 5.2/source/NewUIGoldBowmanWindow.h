@@ -6,7 +6,7 @@
 #include "NewUIInventoryCtrl.h"
 #include "NewUIMessageBox.h"
 #include "NewUIMyInventory.h"
-#include "NewUIGuildMakeWindow.h"
+#include "Guild/NewUIGuildMakeWindow.h"
 
 namespace SEASON3B
 {
