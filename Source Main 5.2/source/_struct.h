@@ -9,6 +9,7 @@
 class OBJECT;
 #include "w_CharacterInfo.h"
 class CHARACTER;
+#include "Guild/GuildConstants.h"
 
 namespace SEASON3B
 {
@@ -661,9 +662,9 @@ typedef struct
 typedef struct
 {
     int  Key;
-    wchar_t UnionName[8 + 1];
-    wchar_t GuildName[8 + 1];
-    BYTE Mark[64];
+    wchar_t UnionName[GuildConstants::GUILD_NAME_BUFFER_SIZE];
+    wchar_t GuildName[GuildConstants::GUILD_NAME_BUFFER_SIZE];
+    BYTE Mark[GuildConstants::GUILD_MARK_SIZE];
 } MARK_t;
 
 typedef struct

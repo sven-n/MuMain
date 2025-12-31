@@ -3,6 +3,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "GuildCache.h"
+#include "GuildConstants.h"
 
 CGuildCache g_GuildCache;
 
@@ -19,7 +20,7 @@ void CGuildCache::Reset()
 {
     m_dwCurrIndex = 0;
     for (int i = 0; i < MAX_MARKS; ++i)
-        GuildMark[i].Key = -1;
+        GuildMark[i].Key = GuildConstants::INVALID_MARK_INDEX;
 }
 
 int CGuildCache::GetGuildMarkIndex(int nGuildKey)
@@ -29,12 +30,12 @@ int CGuildCache::GetGuildMarkIndex(int nGuildKey)
         if (GuildMark[i].Key == nGuildKey)
             return i;
     }
-    return -1;
+    return GuildConstants::INVALID_MARK_INDEX;
 }
 
 BOOL CGuildCache::IsExistGuildMark(int nGuildKey)
 {
-    if (GetGuildMarkIndex(nGuildKey) == -1)
+    if (GetGuildMarkIndex(nGuildKey) == GuildConstants::INVALID_MARK_INDEX)
         return FALSE;
     else
         return TRUE;
@@ -45,7 +46,7 @@ int CGuildCache::MakeGuildMarkIndex(int nGuildKey)
     if (m_dwCurrIndex >= MAX_MARKS)
     {
         assert(!"Guild mark buffer exceeded");
-        return -1;
+        return GuildConstants::INVALID_MARK_INDEX;
     }
 
     GuildMark[m_dwCurrIndex].Key = nGuildKey;
@@ -55,18 +56,20 @@ int CGuildCache::MakeGuildMarkIndex(int nGuildKey)
 int CGuildCache::SetGuildMark(int nGuildKey, char* UnionName, char* GuildName, BYTE* Mark)
 {
     int nIndex = GetGuildMarkIndex(nGuildKey);
-    if (nIndex != -1)
+    if (nIndex != GuildConstants::INVALID_MARK_INDEX)
     {
-        CMultiLanguage::ConvertFromUtf8(GuildMark[nIndex].UnionName, UnionName, 8);
-        CMultiLanguage::ConvertFromUtf8(GuildMark[nIndex].GuildName, GuildName, 8);
-        GuildMark[nIndex].UnionName[8] = L'\0';
-        GuildMark[nIndex].GuildName[8] = L'\0';
-        for (int i = 0; i < 64; ++i)
+        CMultiLanguage::ConvertFromUtf8(GuildMark[nIndex].UnionName, UnionName, GuildConstants::GUILD_NAME_LENGTH);
+        CMultiLanguage::ConvertFromUtf8(GuildMark[nIndex].GuildName, GuildName, GuildConstants::GUILD_NAME_LENGTH);
+        GuildMark[nIndex].UnionName[GuildConstants::GUILD_NAME_LENGTH] = L'\0';
+        GuildMark[nIndex].GuildName[GuildConstants::GUILD_NAME_LENGTH] = L'\0';
+
+        // Unpack compressed mark data: each byte contains two 4-bit values (nibbles)
+        for (int i = 0; i < GuildConstants::GUILD_MARK_SIZE; ++i)
         {
             if (i % 2 == 0)
-                GuildMark[nIndex].Mark[i] = (Mark[i / 2] >> 4) & 0x0f;
+                GuildMark[nIndex].Mark[i] = (Mark[i / 2] >> GuildConstants::MARK_NIBBLE_SHIFT) & GuildConstants::MARK_NIBBLE_MASK;
             else
-                GuildMark[nIndex].Mark[i] = Mark[i / 2] & 0x0f;
+                GuildMark[nIndex].Mark[i] = Mark[i / 2] & GuildConstants::MARK_NIBBLE_MASK;
         }
     }
     else
