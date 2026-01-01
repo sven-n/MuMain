@@ -672,6 +672,9 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     {
     case 0:
         g_GuildCache.Reset();
+        memset(GuildMark[MARK_EDIT].Mark, 0, sizeof(GuildMark[MARK_EDIT].Mark));
+        memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
+        SelectMarkColor = 0;
         PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         break;
     case 1:
@@ -704,6 +707,9 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         }
 
         g_GuildCache.Reset();
+        memset(GuildMark[MARK_EDIT].Mark, 0, sizeof(GuildMark[MARK_EDIT].Mark));
+        memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
+        SelectMarkColor = 0;
         g_ErrorReport.Write(L"[ReceiveLogOut]");
         if (SocketClient != nullptr)
         {
