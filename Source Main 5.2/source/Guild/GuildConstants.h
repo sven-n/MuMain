@@ -100,6 +100,7 @@ namespace GuildConstants
     namespace MakeWindow
     {
         constexpr int MAX_GUILD_NAME = 8;
+        constexpr int TEMP_TEXT_BUFFER_SIZE = 100;
 
         enum class State : int
         {

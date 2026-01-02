@@ -249,8 +249,8 @@ void CNewUIGuildMakeWindow::ClosingProcess()
     // Save any text in the editbox before closing
     if (m_GuildMakeState == GUILDMAKE_MARK && m_EditBox->GetState() == UISTATE_NORMAL)
     {
-        wchar_t tempText[100];
-        memset(&tempText, 0, sizeof(char) * 100);
+        wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
+        memset(&tempText, 0, sizeof(tempText));
         m_EditBox->GetText(tempText);
         if (tempText[0] != L'\0')
         {
@@ -330,8 +330,8 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
     if (m_Button[GUILDMAKEBUTTON_MARK_LNEXT].UpdateMouseEvent())
     {
         // Save the current text before going back
-        wchar_t tempText[100];
-        memset(&tempText, 0, sizeof(char) * 100);
+        wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
+        memset(&tempText, 0, sizeof(tempText));
         m_EditBox->GetText(tempText);
         if (tempText[0] != L'\0')
         {
@@ -345,8 +345,8 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
     if (m_Button[GUILDMAKEBUTTON_MARK_RNEXT].UpdateMouseEvent())
     {
-        wchar_t tempText[100];
-        memset(&tempText, 0, sizeof(char) * 100);
+        wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
+        memset(&tempText, 0, sizeof(tempText));
 
         m_EditBox->GetText(tempText);
 
