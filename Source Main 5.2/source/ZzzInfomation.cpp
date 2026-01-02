@@ -1383,12 +1383,12 @@ void SetItemAttributes(ITEM* ip)
             }
             else if (ip->Type == ITEM_WINGS_OF_SPIRITS)
             {
-                if ((ip->ExcellentFlags >> 5) & 0x01)
+                if (ip->OptionType == 2)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3;
                     ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
                 }
-                else
+                if (ip->OptionType == 0)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
@@ -1396,25 +1396,25 @@ void SetItemAttributes(ITEM* ip)
             }
             else if (ip->Type == ITEM_WINGS_OF_SOUL)
             {
-                if ((ip->ExcellentFlags >> 5) & 0x01)
-                {
-                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                    ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC; ip->SpecialNum++;
-                }
-                else
+                if (ip->OptionType == 0)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3;
                     ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
                 }
+                if (ip->OptionType == 2)
+                {
+                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
+                    ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC; ip->SpecialNum++;
+                }
             }
             else if (ip->Type == ITEM_WINGS_OF_DRAGON)
             {
-                if ((ip->ExcellentFlags >> 5) & 0x01)
+                if (ip->OptionType == 2)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
                 }
-                else
+                if (ip->OptionType == 0)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3;
                     ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
@@ -1422,12 +1422,12 @@ void SetItemAttributes(ITEM* ip)
             }
             else if (ip->Type == ITEM_WINGS_OF_DARKNESS)
             {
-                if ((ip->ExcellentFlags >> 5) & 0x01)
+                if (ip->OptionType == 2)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
                 }
-                else
+                if (ip->OptionType == 0)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC; ip->SpecialNum++;
@@ -1440,12 +1440,12 @@ void SetItemAttributes(ITEM* ip)
             }
             else if (ip->Type == ITEM_CAPE_OF_FIGHTER)
             {
-                if ((ip->ExcellentFlags >> 5) & 0x01)
+                if (ip->OptionType == 2)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
                 }
-                else
+                if (ip->OptionType == 0)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3;
                     ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
@@ -1454,119 +1454,124 @@ void SetItemAttributes(ITEM* ip)
             else if (ip->Type == ITEM_WINGS_OF_DESPAIR)
             {
                 ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                if ((ip->ExcellentFlags >> 5) & 0x01)
+
+                if (ip->OptionType == 2)
+                {
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC;
-                else
+                }
+                if (ip->OptionType == 0)
+                {
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_CURSE;
+                }
+
                 ip->SpecialNum++;
             }
             else if (ip->Type == ITEM_WING_OF_STORM)
             {
-                if ((ip->ExcellentFlags >> 4) & 0x01)
+                if (ip->OptionType == 0)
                 {
-                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                    ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
+                    ip->SpecialValue[ip->SpecialNum] = Option3;
+                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
                 }
-                else if ((ip->ExcellentFlags >> 5) & 0x01)
+                else if (ip->OptionType == 2)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE; ip->SpecialNum++;
                 }
-                else
+                else if (ip->OptionType == 3)
                 {
-                    ip->SpecialValue[ip->SpecialNum] = Option3;
-                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
+                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
+                    ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
                 }
             }
             else if (ip->Type == ITEM_WING_OF_ETERNAL)
             {
-                if ((ip->ExcellentFlags >> 4) & 0x01)
+                if (ip->OptionType == 0)
                 {
-                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                    ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC; ip->SpecialNum++;
+                    ip->SpecialValue[ip->SpecialNum] = Option3;
+                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
                 }
-                else if ((ip->ExcellentFlags >> 5) & 0x01)
+                else if (ip->OptionType == 2)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE; ip->SpecialNum++;
                 }
-                else
+                else if (ip->OptionType == 3)
                 {
-                    ip->SpecialValue[ip->SpecialNum] = Option3;
-                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
+                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
+                    ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC; ip->SpecialNum++;
                 }
             }
             else if (ip->Type == ITEM_WING_OF_ILLUSION)
             {
-                if ((ip->ExcellentFlags >> 4) & 0x01)
+                if (ip->OptionType == 0)
                 {
-                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                    ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
+                    ip->SpecialValue[ip->SpecialNum] = Option3;
+                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
                 }
-                else if ((ip->ExcellentFlags >> 5) & 0x01)
+                else if (ip->OptionType == 2)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE; ip->SpecialNum++;
                 }
-                else
+                else if (ip->OptionType == 3)
                 {
-                    ip->SpecialValue[ip->SpecialNum] = Option3;
-                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
+                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
+                    ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
                 }
             }
             else if (ip->Type == ITEM_WING_OF_RUIN)
             {
-                if ((ip->ExcellentFlags >> 4) & 0x01)
-                {
-                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                    ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
-                }
-                else if ((ip->ExcellentFlags >> 5) & 0x01)
-                {
-                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                    ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC; ip->SpecialNum++;
-                }
-                else
+                if (ip->OptionType == 0)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3;
                     ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
                 }
-            }
-            else if (ip->Type == ITEM_CAPE_OF_EMPEROR
-                || (ip->Type == ITEM_CAPE_OF_OVERRULE))
-            {
-                if ((ip->ExcellentFlags >> 4) & 0x01)
+                else if (ip->OptionType == 2)
+                {
+                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
+                    ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC; ip->SpecialNum++;
+                }
+                else if (ip->OptionType == 3)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
                 }
-                else if ((ip->ExcellentFlags >> 5) & 0x01)
+            }
+            else if (ip->Type == ITEM_CAPE_OF_EMPEROR || ip->Type == ITEM_CAPE_OF_OVERRULE)
+            {
+                if (ip->OptionType == 0)
+                {
+                    ip->SpecialValue[ip->SpecialNum] = Option3;
+                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
+                }
+                else if (ip->OptionType == 2)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_DEFENSE; ip->SpecialNum++;
                 }
-                else
+                else if (ip->OptionType == 3)
                 {
-                    ip->SpecialValue[ip->SpecialNum] = Option3;
-                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
+                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
+                    ip->Special[ip->SpecialNum] = AT_IMPROVE_DAMAGE; ip->SpecialNum++;
                 }
             }
             else if (ip->Type == ITEM_WING_OF_DIMENSION)
             {
-                if ((ip->ExcellentFlags >> 4) & 0x01)
+                if (ip->OptionType == 0)
                 {
-                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
-                    ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC; ip->SpecialNum++;
+                    ip->SpecialValue[ip->SpecialNum] = Option3;
+                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
                 }
-                else if ((ip->ExcellentFlags >> 5) & 0x01)
+                else if (ip->OptionType == 2)
                 {
                     ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
                     ip->Special[ip->SpecialNum] = AT_IMPROVE_CURSE; ip->SpecialNum++;
                 }
-                else
+                else if (ip->OptionType == 3)
                 {
-                    ip->SpecialValue[ip->SpecialNum] = Option3;
-                    ip->Special[ip->SpecialNum] = AT_LIFE_REGENERATION; ip->SpecialNum++;
+                    ip->SpecialValue[ip->SpecialNum] = Option3 * 4;
+                    ip->Special[ip->SpecialNum] = AT_IMPROVE_MAGIC; ip->SpecialNum++;
                 }
             }
         }
