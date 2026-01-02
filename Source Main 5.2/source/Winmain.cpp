@@ -633,7 +633,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         g_iNoMouseTime = 0;
         MouseMButtonPush = false;
         if (MouseMButton) MouseMButtonPop = true;
-        MouseRButton = false;
+        MouseMButton = false;  // Fixed: was incorrectly setting MouseRButton
         ReleaseCapture();
         break;
     case WM_MOUSEWHEEL:

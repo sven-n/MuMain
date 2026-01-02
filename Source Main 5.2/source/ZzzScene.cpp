@@ -48,6 +48,7 @@
 #include "w_CursedTemple.h"
 #include "CameraMove.h"
 #include "w_MapHeaders.h"
+#include "Camera/CustomCamera3D.h"
 #include "w_PetProcess.h"
 #include "PortalMgr.h"
 #include "ServerListManager.h"
@@ -81,7 +82,7 @@ short   g_shCameraLevel = 0;
 int g_iLengthAuthorityCode = 20;
 
 wchar_t* szServerIpAddress = L"127.127.127.127";
-WORD g_ServerPort = 44406;
+WORD g_ServerPort = 55902;
 
 EGameScene  SceneFlag = WEBZEN_SCENE;
 
@@ -907,7 +908,7 @@ bool NewRenderCharacterScene(HDC hDC)
     Height = 480;
     Width = GetScreenWidth();
 
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClearColor(0.85f, 0.9f, 0.95f, 1.0f);  // White-bluish sky tone matching fog
     BeginOpengl(0, 25, 640, 430);
 
     CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
@@ -1122,7 +1123,7 @@ bool NewRenderLogInScene(HDC hDC)
 
     Height = 480;
     Width = GetScreenWidth();
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClearColor(00.5f, 0.7f, 1.0f, 1.0f);  // White-bluish sky tone matching fog
 
     BeginOpengl(0, 25, 640, 430);
     CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
@@ -1455,7 +1456,7 @@ bool MoveMainCamera()
         else if (CCameraMove::GetInstancePtr()->IsTourMode());
         else
         {
-            CameraPosition[2] = Hero->Object.Position[2];//700
+            CameraPosition[2] = Hero->Object.Position[2] + CAMERA_HEIGHT_OFFSET; // Add offset to better center the char on screen
         }
 
         if ((TerrainWall[iIndex] & TW_HEIGHT) == TW_HEIGHT)
@@ -1603,6 +1604,9 @@ void MoveMainScene()
 
         g_PortalMgr.Reset();
 
+        // Initialize Custom 3D Camera System
+        CCustomCamera3D::Initialize();
+
         ClearAllObjectBlurs();
 
         SetFocus(g_hWnd);
@@ -1629,6 +1633,52 @@ void MoveMainScene()
     CheckInventory = NULL;
     CheckSkill = -1;
     MouseOnWindow = false;
+
+    //===========================================
+    // CUSTOM 3D CAMERA SYSTEM - INPUT HANDLING (Before UI)
+    //===========================================
+
+    // F9 Key Toggle
+    static bool bF9KeyWasPressed = false;
+    bool bF9KeyIsPressed = (GetAsyncKeyState(VK_F9) & 0x8000) != 0;
+    if (bF9KeyIsPressed && !bF9KeyWasPressed)
+    {
+        CCustomCamera3D::Toggle();
+    }
+    bF9KeyWasPressed = bF9KeyIsPressed;
+
+    // Handle middle mouse button for rotation
+    bool buttonHeld = (MouseMButton || MouseMButtonPush);
+
+    if (CCustomCamera3D::IsEnabled())
+    {
+        // Update camera (for auto-roll and other animations)
+        CCustomCamera3D::Update();
+
+        // Mouse Wheel Zoom - Capture before UI system
+        if (MouseWheel != 0)
+        {
+            CCustomCamera3D::ProcessMouseWheel(MouseWheel);
+            MouseWheel = 0;
+        }
+
+        // Middle Mouse Button Rotation
+        if (buttonHeld)
+        {
+            // Button is held - start/continue rotation (both horizontal and vertical)
+            CCustomCamera3D::StartRotation(MouseX, MouseY);
+            CCustomCamera3D::ProcessMouseRotation(MouseX, MouseY);
+        }
+        else
+        {
+            // Button not held - ensure rotation is stopped
+            CCustomCamera3D::StopRotation();
+        }
+    }
+
+    //===========================================
+    // CUSTOM 3D CAMERA SYSTEM - END
+    //===========================================
 
     if (!CameraTopViewEnable && LoadingWorld < 30)
     {
@@ -1754,35 +1804,10 @@ bool RenderMainScene()
     }
 
     Width = GetScreenWidth();
-    if (gMapManager.WorldActive == WD_0LORENCIA)
-    {
-        glClearColor(10 / 256.f, 20 / 256.f, 14 / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_2DEVIAS)
-    {
-        glClearColor(0.f / 256.f, 0.f / 256.f, 10.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_10HEAVEN)
-    {
-        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InChaosCastle() == true)
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
-    {
-        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InHellas() == true)
-    {
-        byWaterMap = 1;
-        glClearColor(0.f / 256.f, 0.f / 256.f, 0.f / 256.f, 1.f);
-    }
-    else
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
+
+
+    glClearColor(0.85f, 0.9f, 0.95f, 1.0f);  // White-bluish sky tone matching fog
+    
 
     BeginOpengl(0, 0, Width, Height);
 
@@ -2075,43 +2100,10 @@ void MainScene(HDC hDC)
 
     Set3DSoundPosition();
 
-    if (gMapManager.WorldActive == WD_10HEAVEN)
-    {
-        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
-    {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    }
-    else if (gMapManager.InHellas(gMapManager.WorldActive))
-    {
-        glClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InChaosCastle() == true)
-    {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
-    }
-    else if (gMapManager.InBattleCastle() && battleCastle::InBattleCastle2(Hero->Object.Position))
-    {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
-    }
-    else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
-    {
-        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-        )
-    {
-        glClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
-    {
-        glClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);
-    }
-    else
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
+
+    glClearColor(0.85f, 0.9f, 0.95f, 1.0f);  // White-bluish sky tone matching fog
+
+    
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

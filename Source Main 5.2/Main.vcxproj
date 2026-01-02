@@ -367,6 +367,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Camera\CustomCamera3D.cpp" />
     <ClCompile Include="source\CharInfoBalloonMng.cpp" />
     <ClCompile Include="source\Dotnet\PacketFunctions_ChatServer.cpp" />
     <ClCompile Include="source\Dotnet\PacketFunctions_ClientToServer.cpp" />
@@ -730,6 +731,7 @@
   <ItemGroup>
     <ClInclude Include="afxres.h" />
     <ClInclude Include="dependencies\include\span.hpp" />
+    <ClInclude Include="source\Camera\CustomCamera3D.h" />
     <ClInclude Include="source\CharInfoBalloonMng.h" />
     <ClInclude Include="source\Dotnet\PacketBindings_ChatServer.h" />
     <ClInclude Include="source\Dotnet\PacketBindings_ClientToServer.h" />
