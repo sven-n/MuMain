@@ -54,9 +54,47 @@ What needs to be done for Season 6:
 
 ## How to build & run
 
-It requires:
-  * Visual Studio 2022 with the newest update, workloads for C++ and C#
-  * A compatible server: [OpenMU](https://github.com/MUnique/OpenMU).
+### Requirements
+  * **Visual Studio Build Tools 2022** (minimum requirement - older versions won't work, newer versions are not tested)
+  * Visual Studio 2022 with the newest update, workloads for C++ and C#, Jetbrains Rider also Works
+  * A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
+
+### First Time Setup - Initialize Submodules
+
+The project uses ImGui as a git submodule for the in-game editor (debug builds only). After cloning the repository, you must initialize the submodules:
+
+```bash
+# From the repository root
+git submodule update --init --recursive
+```
+
+This will download the ImGui library into `Source Main 5.2/ThirdParty/imgui`.
+
+**Note:** This is only required for **Debug builds** (`Global Debug` configuration). Release builds do not require ImGui.
+
+### Updating ImGui Submodule
+
+To update ImGui to the latest version:
+
+```bash
+# From the repository root
+git submodule update --remote "Source Main 5.2/ThirdParty/imgui"
+```
+
+### Build Configurations
+
+#### Debug Builds (`Global Debug`)
+- Includes the in-game MU Editor (ImGui-based)
+- Requires ImGui submodule to be initialized (see above)
+- Press **F12** in-game to toggle the editor
+- Start with `--editor` flag to launch with editor enabled
+- Preprocessor define: `_EDITOR`
+
+#### Release Builds (`Global Release`)
+- No editor code included
+- ImGui submodule not required
+- Optimized for production use
+- Zero editor overhead
 
 ### Building with CMake and MinGW-w64 (Linux)
 
