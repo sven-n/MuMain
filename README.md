@@ -126,7 +126,7 @@ This publish step only needs to be done once (unless you modify the C# networkin
    ```
    **For Release builds:**
    ```bash
-   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Release -r win-x86 -o "Source Main 5.2/Global Release"
+   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Release -r win-x86 -o "Source Main 5.2\Global Release"
    ```
 1. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` in your output folder
 1. Now you can build and run the `Main` project normally
