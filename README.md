@@ -122,7 +122,7 @@ This publish step only needs to be done once (unless you modify the C# networkin
 1. From the repository root, run:<br/>
    **For Debug builds:**
    ```bash
-   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Debug -r win-x86 -o "Source Main 5.2/Global Debug"
+   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Debug -r win-x86 -o "Source Main 5.2\Global Debug"
    ```
    **For Release builds:**
    ```bash
