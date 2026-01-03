@@ -89,9 +89,38 @@ name of the library available on your system.
 
 ---
 
-Because of the integrated C# code, you need to publish the ManagedLibrary first
-to the debug output folder of the main.exe, so that the DLL is built with Native AOT.
-A simple build is not enough in this case, however the publish just needs to be done once.
+### Publishing the MUnique.Client.Library (Required for First Build)
+
+**Important:** Because of the integrated C# code, you **must** publish the `MUnique.Client.Library` project before building the C++ client. A simple build is not enough - the DLL must be built with Native AOT and placed in the correct output folder.
+
+This publish step only needs to be done once (unless you modify the C# networking code).
+
+#### Step-by-Step Instructions:
+You only have to do this once. If you modify the C# networking code, you will have to repeat this step.
+
+1. From the repository root, run:<br/>
+   **For Debug builds:**
+   ```bash
+   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Debug -r win-x86 -o "Source Main 5.2/Global Debug"
+   ```
+   **For Release builds:**
+   ```bash
+   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Release -r win-x86 -o "Source Main 5.2/Global Release"
+   ```
+1. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` in your output folder
+1. Now you can build and run the `Main` project normally
+
+##### Verifying the Publish
+
+After publishing, verify that the following file exists:
+- Debug: `Source Main 5.2\Global Debug\MUnique.Client.Library.dll`
+- Release: `Source Main 5.2\Global Release\MUnique.Client.Library.dll`
+
+If this file is missing, the C++ client will fail to link or run.
+
+---
+
+### Running the Client
 
 It supports the common starting parameters `/u` and `/p`, example: `main.exe connect /u192.168.0.20 /p55902`.
 The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.17/MUnique.OpenMU.ClientLauncher_0.8.17.zip)
