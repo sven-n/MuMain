@@ -54,9 +54,10 @@ What needs to be done for Season 6:
 
 ## How to build & run
 
-It requires:
-  * Visual Studio 2022 with the newest update, workloads for C++ and C#
-  * A compatible server: [OpenMU](https://github.com/MUnique/OpenMU).
+### Requirements
+* **Visual Studio Build Tools 2022** (minimum requirement - older versions won't work, newer versions are not tested)
+* Visual Studio 2022 with the newest update, workloads for C++ and C#, Jetbrains Rider also Works
+* A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
 
 ### Building with CMake and MinGW-w64 (Linux)
 
