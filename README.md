@@ -90,14 +90,34 @@ name of the library available on your system.
 
 ---
 
-### Publishing the MUnique.Client.Library (Required for First Build)
 
+
+
+
+### Step-by-Step Instructions:
+#### Publishing the MUnique.Client.Library (Required for First Build)
 **Important:** Because of the integrated C# code, you **must** publish the `MUnique.Client.Library` project before building the C++ client. A simple build is not enough - the DLL must be built with Native AOT and placed in the correct output folder.
 
 This publish step only needs to be done once (unless you modify the C# networking code).
 
-#### Step-by-Step Instructions:
-You only have to do this once. If you modify the C# networking code, you will have to repeat this step.
+#### Option 1: Using Visual Studio (Recommended for Beginners)
+
+1. Open the solution in Visual Studio 2022
+2. In **Solution Explorer**, locate the `MUnique.Client.Library` project (under the `ClientLibrary` folder)
+3. **Right-click** on `MUnique.Client.Library`
+4. Select **Publish...**
+5. If a publish profile exists, click **Publish**
+   - If no profile exists:
+     - Click **Add a publish profile**
+     - Choose **Folder** as the target
+     - Set the target location to:
+       - For Debug: `Source Main 5.2\Global Debug\`
+       - For Release: `Source Main 5.2\Global Release\`
+     - Click **Finish**, then **Publish**
+6. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` in your output folder
+7. Now you can build the `Main` project normally
+
+#### Option 2: Using Command Line
 
 1. From the repository root, run:<br/>
    **For Debug builds:**
@@ -111,7 +131,7 @@ You only have to do this once. If you modify the C# networking code, you will ha
 1. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` in your output folder
 1. Now you can build and run the `Main` project normally
 
-##### Verifying the Publish
+#### Verifying the Publish
 
 After publishing, verify that the following file exists:
 - Debug: `Source Main 5.2\Global Debug\MUnique.Client.Library.dll`
