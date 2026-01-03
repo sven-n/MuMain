@@ -72,7 +72,7 @@ from Linux using a MinGW-w64 toolchain.
   * Standard Windows / OpenGL libraries shipped with MinGW-w64 (e.g. `opengl32`,
     `glu32`, `winmm`, `imm32`, `ws2_32`, etc.).
 
-**Example build commands**
+**Example build commands on Linux**
 
 From the repository root:
 
