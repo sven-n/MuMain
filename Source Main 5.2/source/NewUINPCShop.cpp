@@ -150,14 +150,6 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, NPCSHOP_WIDTH, NPCSHOP_HEIGHT))
     {
-        if (SEASON3B::IsPress(VK_RBUTTON))
-        {
-            MouseRButton = false;
-            MouseRButtonPop = false;
-            MouseRButtonPush = false;
-            return false;
-        }
-
         if (SEASON3B::IsNone(VK_LBUTTON) == false)
         {
             return false;
