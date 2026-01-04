@@ -54,9 +54,10 @@ What needs to be done for Season 6:
 
 ## How to build & run
 
-It requires:
-  * Visual Studio 2022 with the newest update, workloads for C++ and C#
-  * A compatible server: [OpenMU](https://github.com/MUnique/OpenMU).
+### Requirements
+* **Visual Studio Build Tools 2022** (minimum requirement - older versions won't work, newer versions are not tested)
+* Visual Studio 2022 with the newest update, workloads for C++ and C#, Jetbrains Rider also works
+* A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
 
 ### Building with CMake and MinGW-w64 (Linux)
 
@@ -71,7 +72,7 @@ from Linux using a MinGW-w64 toolchain.
   * Standard Windows / OpenGL libraries shipped with MinGW-w64 (e.g. `opengl32`,
     `glu32`, `winmm`, `imm32`, `ws2_32`, etc.).
 
-**Example build commands**
+**Example build commands on Linux**
 
 From the repository root:
 
@@ -89,9 +90,58 @@ name of the library available on your system.
 
 ---
 
-Because of the integrated C# code, you need to publish the ManagedLibrary first
-to the debug output folder of the main.exe, so that the DLL is built with Native AOT.
-A simple build is not enough in this case, however the publish just needs to be done once.
+
+
+
+
+### Step-by-Step Instructions:
+#### Publishing the MUnique.Client.Library (Required for First Build)
+**Important:** Because of the integrated C# code, you **must** publish the `MUnique.Client.Library` project before building the C++ client. A simple build is not enough - the DLL must be built with Native AOT and placed in the correct output folder.
+
+This publish step only needs to be done once (unless you modify the C# networking code).
+
+#### Option 1: Using Visual Studio (Recommended for Beginners)
+
+1. Open the solution in Visual Studio 2022
+2. In **Solution Explorer**, locate the `MUnique.Client.Library` project (under the `ClientLibrary` folder)
+3. **Right-click** on `MUnique.Client.Library`
+4. Select **Publish...**
+5. If a publish profile exists, click **Publish**
+   - If no profile exists:
+     - Click **Add a publish profile**
+     - Choose **Folder** as the target
+     - Set the target location to:
+       - For Debug: `Source Main 5.2\Global Debug\`
+       - For Release: `Source Main 5.2\Global Release\`
+     - Click **Finish**, then **Publish**
+6. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` in your output folder
+7. Now you can build the `Main` project normally
+
+#### Option 2: Using Command Line
+
+1. From the repository root, run:<br/>
+   **For Debug builds:**
+   ```bash
+   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Debug -r win-x86 -o "Source Main 5.2\Global Debug"
+   ```
+   **For Release builds:**
+   ```bash
+   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Release -r win-x86 -o "Source Main 5.2\Global Release"
+   ```
+2. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` in your output folder
+3. Now you can build and run the `Main` project normally
+
+#### Verifying the Publish
+
+After publishing, verify that the following file exists:
+- Debug: `Source Main 5.2\Global Debug\MUnique.Client.Library.dll`
+- Release: `Source Main 5.2\Global Release\MUnique.Client.Library.dll`
+
+If this file is missing, the C++ client will fail to link or run.
+
+---
+
+### Running the Client
 
 It supports the common starting parameters `/u` and `/p`, example: `main.exe connect /u192.168.0.20 /p55902`.
 The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.17/MUnique.OpenMU.ClientLauncher_0.8.17.zip)
