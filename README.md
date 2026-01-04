@@ -24,7 +24,7 @@ What I have done so far:
     All strings and char arrays have been changed to use wide characters.
     Strings coming from files and the network are handled as UTF-8.
   * 🔥 Replaced the network stack with MUnique.OpenMU.Network to make it easier to
-    apply changes. This repository includes a C# .NET 9 client library which is built
+    apply changes. This repository includes a C# .NET 10 client library which is built
     with Native AOT.
   * 🔥 The network protocol has been adapted for Season 6 Episode 3 - there is probably
     still some work to do, but it connects to [OpenMU](https://github.com/MUnique/OpenMU)
@@ -102,7 +102,7 @@ This publish step only needs to be done once (unless you modify the C# networkin
 
 #### Option 1: Using Visual Studio (Recommended for Beginners)
 
-1. Open the solution in Visual Studio 2022
+1. Open the solution in Visual Studio 2026
 2. In **Solution Explorer**, locate the `MUnique.Client.Library` project (under the `ClientLibrary` folder)
 3. **Right-click** on `MUnique.Client.Library`
 4. Select **Publish...**
@@ -114,7 +114,7 @@ This publish step only needs to be done once (unless you modify the C# networkin
        - For Debug: `Source Main 5.2\Global Debug\`
        - For Release: `Source Main 5.2\Global Release\`
      - Click **Finish**, then **Publish**
-6. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` in your output folder
+6. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` (~ 5 MB) in your output folder
 7. Now you can build the `Main` project normally
 
 #### Option 2: Using Command Line
