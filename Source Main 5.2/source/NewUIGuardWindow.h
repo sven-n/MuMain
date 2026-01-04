@@ -11,7 +11,7 @@
 #include "NewUIButton.h"
 #include "NewUIMessageBox.h"
 #include "NewUIMyInventory.h"
-#include "NewUIGuildInfoWindow.h"
+#include "Guild/NewUIGuildInfoWindow.h"
 
 namespace SEASON3B
 {
@@ -58,20 +58,20 @@ namespace SEASON3B
         POINT m_Pos;
 
         CNewUIRadioGroupButton	m_TabBtn;
-        int						m_iNumCurOpenTab;		// ÇöÀç ¿­·ÁÀÖ´Â ÅÇ¹öÆ°¹øÈ£
+        int						m_iNumCurOpenTab;		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½Ç¹ï¿½Æ°ï¿½ï¿½È£
 
         CNewUIButton m_BtnExit;
 
-        CNewUIButton m_BtnProclaim;			// °ø¼º ¼±Æ÷ ¹öÆ°
-        CNewUIButton m_BtnRegister;			// Ç¥½Ä µî·Ï ¹öÆ°
-        CNewUIButton m_BtnGiveUp;			// °ø¼º Æ÷±â ¹öÆ°
+        CNewUIButton m_BtnProclaim;			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
+        CNewUIButton m_BtnRegister;			// Ç¥ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
+        CNewUIButton m_BtnGiveUp;			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
 
-        // ¼±Æ÷ÇÑ ±æµå ¸®½ºÆ®
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
         CUIBCDeclareGuildListBox	m_DeclareGuildListBox;
-        // È®Á¤µÈ ±æµå ¸®½ºÆ®
+        // È®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
         CUIBCGuildListBox			m_GuildListBox;
 
-        // UI Ãâ·Â °ª
+        // UI ï¿½ï¿½ï¿½ ï¿½ï¿½
         CASTLESIEGE_STATE	m_eTimeType;
 
         wchar_t		m_szOwnerGuild[8 + 1];
@@ -116,7 +116,7 @@ namespace SEASON3B
 
         float GetLayerDepth();	//. 5.0f
 
-        void SetData(LPPMSG_ANS_CASTLESIEGESTATE Info);	// ¼­¹ö¿¡¼­ ¹Þ¾Æ È­¸é Ç¥½Ã ¼³Á¤
+        void SetData(LPPMSG_ANS_CASTLESIEGESTATE Info);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾ï¿½ È­ï¿½ï¿½ Ç¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         void AddDeclareGuildList(wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum);
         void ClearDeclareGuildList();

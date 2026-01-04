@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "UIGuildInfo.h"
+#include "Guild/UIGuildInfo.h"
 #include "PersonalShopTitleImp.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"

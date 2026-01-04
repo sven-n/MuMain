@@ -7,7 +7,7 @@
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
 #include "DSPlaySound.h"
-#include "UIGuildInfo.h"
+#include "Guild/UIGuildInfo.h"
 #include "UIControls.h"
 #include "UIPopup.h"
 #include "ZzzInterface.h"

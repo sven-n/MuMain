@@ -14,6 +14,7 @@
 #include "NewUIChatLogWindow.h"
 #include "NewUIGuildMakeWindow.h"
 #include "NewUIButton.h"
+#include "GuildConstants.h"
 
 namespace SEASON3B
 {
@@ -70,8 +71,8 @@ namespace SEASON3B
     private:
         enum
         {
-            GUILDINFO_WIDTH = 190,
-            GUILDINFO_HEIGHT = 429,
+            GUILDINFO_WIDTH = GuildConstants::UILayout::WINDOW_WIDTH,
+            GUILDINFO_HEIGHT = GuildConstants::UILayout::WINDOW_HEIGHT,
         };
         enum EVENT_STATE
         {
@@ -80,13 +81,13 @@ namespace SEASON3B
         };
         enum BUTTON_EVENT
         {
-            BUTTON_GUILD_OUT = 0,
-            BUTTON_GET_POSITION,
-            BUTTON_FREE_POSITION,
-            BUTTON_GET_OUT,
-            BUTTON_UNION_CREATE,
-            BUTTON_UNION_OUT,
-            BUTTON_END,
+            BUTTON_GUILD_OUT = static_cast<int>(GuildConstants::GuildInfoButton::GUILD_OUT),
+            BUTTON_GET_POSITION = static_cast<int>(GuildConstants::GuildInfoButton::GET_POSITION),
+            BUTTON_FREE_POSITION = static_cast<int>(GuildConstants::GuildInfoButton::FREE_POSITION),
+            BUTTON_GET_OUT = static_cast<int>(GuildConstants::GuildInfoButton::GET_OUT),
+            BUTTON_UNION_CREATE = static_cast<int>(GuildConstants::GuildInfoButton::UNION_CREATE),
+            BUTTON_UNION_OUT = static_cast<int>(GuildConstants::GuildInfoButton::UNION_OUT),
+            BUTTON_END = static_cast<int>(GuildConstants::GuildInfoButton::END),
         };
         EVENT_STATE				m_EventState;
 

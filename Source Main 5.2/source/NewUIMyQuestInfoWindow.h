@@ -7,7 +7,7 @@
 #include "NewUIManager.h"
 #include "NewUIMessageBox.h"
 #include "NewUIMyInventory.h"
-#include "NewUIGuildInfoWindow.h"
+#include "Guild/NewUIGuildInfoWindow.h"
 #include "UIControls.h"
 
 typedef std::list<DWORD> DWordList;

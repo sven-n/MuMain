@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include <memory>
 #include "UIManager.h"
-#include "GuildCache.h"
+#include "Guild/GuildCache.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
@@ -671,6 +671,10 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     switch (Data->Value)
     {
     case 0:
+        g_GuildCache.Reset();
+        memset(GuildMark[MARK_EDIT].Mark, 0, sizeof(GuildMark[MARK_EDIT].Mark));
+        memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
+        SelectMarkColor = 0;
         PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         break;
     case 1:
@@ -702,6 +706,10 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             ReleaseMainData();
         }
 
+        g_GuildCache.Reset();
+        memset(GuildMark[MARK_EDIT].Mark, 0, sizeof(GuildMark[MARK_EDIT].Mark));
+        memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
+        SelectMarkColor = 0;
         g_ErrorReport.Write(L"[ReceiveLogOut]");
         if (SocketClient != nullptr)
         {

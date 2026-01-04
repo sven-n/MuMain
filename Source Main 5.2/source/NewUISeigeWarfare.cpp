@@ -8,7 +8,7 @@
 #include "NewUISiegeWarSoldier.h"
 #include "NewUISiegeWarObserver.h"
 #include "ZzzInventory.h"
-#include "UIGuildInfo.h"
+#include "Guild/UIGuildInfo.h"
 #include "MapManager.h"
 
 using namespace SEASON3B;

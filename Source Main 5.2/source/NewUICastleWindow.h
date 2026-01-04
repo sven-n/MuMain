@@ -11,7 +11,7 @@
 #include "NewUIButton.h"
 #include "NewUIMessageBox.h"
 #include "NewUIMyInventory.h"
-#include "NewUIGuildInfoWindow.h"
+#include "Guild/NewUIGuildInfoWindow.h"
 #include "NewUINPCShop.h"
 #include "NewUIMyQuestInfoWindow.h"
 

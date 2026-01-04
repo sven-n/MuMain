@@ -246,6 +246,18 @@ float CNewUIGuildMakeWindow::GetLayerDepth()
 
 void CNewUIGuildMakeWindow::ClosingProcess()
 {
+    // Save any text in the editbox before closing
+    if (m_GuildMakeState == GUILDMAKE_MARK && m_EditBox->GetState() == UISTATE_NORMAL)
+    {
+        wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
+        memset(&tempText, 0, sizeof(tempText));
+        m_EditBox->GetText(tempText);
+        if (tempText[0] != L'\0')
+        {
+            wcscpy(GuildMark[MARK_EDIT].GuildName, tempText);
+        }
+    }
+
     ChangeWindowState(GUILDMAKE_INFO);
     ChangeEditBox(UISTATE_HIDE);
 
@@ -259,14 +271,25 @@ void CNewUIGuildMakeWindow::ChangeWindowState(const GUILDMAKE_STATE state)
 
 void CNewUIGuildMakeWindow::ChangeEditBox(const UISTATES type)
 {
-    m_EditBox->SetState(type);
-
     if (type == UISTATE_NORMAL)
     {
+        // Restore guild name if it exists BEFORE setting state
+        if (GuildMark[MARK_EDIT].GuildName[0] != L'\0')
+        {
+            m_EditBox->SetText(GuildMark[MARK_EDIT].GuildName);
+        }
+        else
+        {
+            m_EditBox->SetText(NULL);
+        }
+        m_EditBox->SetState(type);
         m_EditBox->GiveFocus();
     }
-
-    m_EditBox->SetText(NULL);
+    else
+    {
+        m_EditBox->SetText(NULL);
+        m_EditBox->SetState(type);
+    }
 }
 
 bool CNewUIGuildMakeWindow::UpdateGMInfo()
@@ -306,6 +329,15 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
     if (m_Button[GUILDMAKEBUTTON_MARK_LNEXT].UpdateMouseEvent())
     {
+        // Save the current text before going back
+        wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
+        memset(&tempText, 0, sizeof(tempText));
+        m_EditBox->GetText(tempText);
+        if (tempText[0] != L'\0')
+        {
+            wcscpy(GuildMark[MARK_EDIT].GuildName, tempText);
+        }
+
         ChangeWindowState(GUILDMAKE_INFO);
         ChangeEditBox(UISTATE_HIDE);
         return true;
@@ -313,8 +345,8 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
     if (m_Button[GUILDMAKEBUTTON_MARK_RNEXT].UpdateMouseEvent())
     {
-        wchar_t tempText[100];
-        memset(&tempText, 0, sizeof(char) * 100);
+        wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
+        memset(&tempText, 0, sizeof(tempText));
 
         m_EditBox->GetText(tempText);
 

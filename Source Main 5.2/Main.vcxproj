@@ -287,6 +287,10 @@
     <ClInclude Include="source\MUHelper\*.h" />
     <ClCompile Include="source\MUHelper\*.cpp" />
 
+   <!-- Guild Files -->
+   <ClInclude Include="source\Guild\**\*.h" />
+   <ClCompile Include="source\Guild\**\*.cpp" />
+      
     <!-- Math Files -->
     <ClInclude Include="source\Math\*.h" />
     <ClCompile Include="source\Math\*.cpp" />

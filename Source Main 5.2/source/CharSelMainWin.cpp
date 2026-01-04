@@ -11,7 +11,7 @@
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
-#include "UIGuildInfo.h"
+#include "Guild/UIGuildInfo.h"
 #include "ZzzOpenData.h"
 #include "ZzzOpenglUtil.h"
 #include "ServerListManager.h"
