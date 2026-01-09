@@ -12,6 +12,35 @@
 CMuItemEditor::CMuItemEditor()
 {
     memset(m_szItemSearchBuffer, 0, sizeof(m_szItemSearchBuffer));
+
+    // Initialize column visibility - default to commonly used columns
+    m_columnVisibility["Index"] = true;
+    m_columnVisibility["Name"] = true;
+    m_columnVisibility["TwoHand"] = false;
+    m_columnVisibility["Level"] = true;
+    m_columnVisibility["Slot"] = false;
+    m_columnVisibility["Skill"] = false;
+    m_columnVisibility["Width"] = false;
+    m_columnVisibility["Height"] = false;
+    m_columnVisibility["DamageMin"] = true;
+    m_columnVisibility["DamageMax"] = true;
+    m_columnVisibility["SuccessfulBlocking"] = false;
+    m_columnVisibility["Defense"] = true;
+    m_columnVisibility["MagicDefense"] = false;
+    m_columnVisibility["WeaponSpeed"] = true;
+    m_columnVisibility["WalkSpeed"] = false;
+    m_columnVisibility["Durability"] = true;
+    m_columnVisibility["MagicDur"] = false;
+    m_columnVisibility["MagicPower"] = false;
+    m_columnVisibility["ReqStr"] = true;
+    m_columnVisibility["ReqDex"] = true;
+    m_columnVisibility["ReqEne"] = true;
+    m_columnVisibility["ReqVit"] = true;
+    m_columnVisibility["ReqCha"] = true;
+    m_columnVisibility["ReqLevel"] = false;
+    m_columnVisibility["Value"] = false;
+    m_columnVisibility["Zen"] = false;
+    m_columnVisibility["AttType"] = false;
 }
 
 CMuItemEditor& CMuItemEditor::GetInstance()
@@ -66,6 +95,8 @@ void CMuItemEditor::Render(bool& showEditor)
         ImGui::Separator();
 
         RenderSearchBar();
+        ImGui::SameLine();
+        RenderColumnVisibilityMenu();
         ImGui::Separator();
 
         // Convert search to lowercase for case-insensitive search
@@ -144,23 +175,53 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
 {
     extern ITEM_ATTRIBUTE* ItemAttribute;
 
-    // Create a table with scrolling
-    if (ImGui::BeginTable("ItemTable", 12, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable))
+    // Count visible columns
+    int visibleColumnCount = 0;
+    for (const auto& col : m_columnVisibility)
     {
-        // Setup columns
+        if (col.second) visibleColumnCount++;
+    }
+
+    if (visibleColumnCount == 0)
+    {
+        ImGui::Text("No columns selected. Click 'Columns' to show columns.");
+        return;
+    }
+
+    // Create a table with scrolling
+    if (ImGui::BeginTable("ItemTable", visibleColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable))
+    {
+        // Setup columns based on visibility
         ImGui::TableSetupScrollFreeze(0, 1); // Freeze header row
-        ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed, 50.0f);
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 150.0f);
-        ImGui::TableSetupColumn("Level", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-        ImGui::TableSetupColumn("Req Str", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-        ImGui::TableSetupColumn("Req Dex", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-        ImGui::TableSetupColumn("Req Ene", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-        ImGui::TableSetupColumn("Req Vit", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-        ImGui::TableSetupColumn("Req Cha", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-        ImGui::TableSetupColumn("Damage", ImGuiTableColumnFlags_WidthFixed, 100.0f);
-        ImGui::TableSetupColumn("Atk Spd", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-        ImGui::TableSetupColumn("Defense", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-        ImGui::TableSetupColumn("Durability", ImGuiTableColumnFlags_WidthFixed, 80.0f);
+
+        if (m_columnVisibility["Index"]) ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed, 50.0f);
+        if (m_columnVisibility["Name"]) ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 150.0f);
+        if (m_columnVisibility["TwoHand"]) ImGui::TableSetupColumn("TwoHand", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["Level"]) ImGui::TableSetupColumn("Level", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["Slot"]) ImGui::TableSetupColumn("Slot", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["Skill"]) ImGui::TableSetupColumn("Skill", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["Width"]) ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["Height"]) ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["DamageMin"]) ImGui::TableSetupColumn("DmgMin", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["DamageMax"]) ImGui::TableSetupColumn("DmgMax", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["SuccessfulBlocking"]) ImGui::TableSetupColumn("Block", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["Defense"]) ImGui::TableSetupColumn("Defense", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["MagicDefense"]) ImGui::TableSetupColumn("MagDef", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["WeaponSpeed"]) ImGui::TableSetupColumn("WpnSpd", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["WalkSpeed"]) ImGui::TableSetupColumn("WalkSpd", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["Durability"]) ImGui::TableSetupColumn("Dur", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["MagicDur"]) ImGui::TableSetupColumn("MagDur", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["MagicPower"]) ImGui::TableSetupColumn("MagPow", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["ReqStr"]) ImGui::TableSetupColumn("ReqStr", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["ReqDex"]) ImGui::TableSetupColumn("ReqDex", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["ReqEne"]) ImGui::TableSetupColumn("ReqEne", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["ReqVit"]) ImGui::TableSetupColumn("ReqVit", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["ReqCha"]) ImGui::TableSetupColumn("ReqCha", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["ReqLevel"]) ImGui::TableSetupColumn("ReqLvl", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        if (m_columnVisibility["Value"]) ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["Zen"]) ImGui::TableSetupColumn("Zen", ImGuiTableColumnFlags_WidthFixed, 80.0f);
+        if (m_columnVisibility["AttType"]) ImGui::TableSetupColumn("AttType", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+
         ImGui::TableHeadersRow();
 
         // Render all items with filtering
@@ -172,181 +233,516 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
 
             // Skip uninitialized items (no name)
             if (nameBuffer[0] == '\0')
-            {
                 continue;
-            }
 
-            // Apply search filter (only if search is not empty)
+            // Apply search filter
             if (searchLower.length() > 0)
             {
                 std::string nameLower = nameBuffer;
                 std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
-
-                // Skip if search string not found in name
                 if (nameLower.find(searchLower) == std::string::npos)
-                {
                     continue;
-                }
             }
 
             ImGui::TableNextRow();
+            int colIdx = 0;
 
             // Index
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("%d", i);
+            if (m_columnVisibility["Index"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::Text("%d", i);
+            }
 
             // Name
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%s", nameBuffer);
+            if (m_columnVisibility["Name"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::Text("%s", nameBuffer);
+            }
+
+            // TwoHand
+            if (m_columnVisibility["TwoHand"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 0);
+                bool twoHand = ItemAttribute[i].TwoHand;
+                if (ImGui::Checkbox("##twohand", &twoHand))
+                {
+                    ItemAttribute[i].TwoHand = twoHand;
+                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " TwoHand to " + std::to_string(twoHand));
+                }
+                ImGui::PopID();
+            }
 
             // Level
-            ImGui::TableSetColumnIndex(2);
-            ImGui::Text("%d", ItemAttribute[i].Level);
+            if (m_columnVisibility["Level"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 1);
+                int level = ItemAttribute[i].Level;
+                if (ImGui::InputInt("##lvl", &level, 0, 0))
+                {
+                    if (level >= 0 && level <= 65535)
+                    {
+                        ItemAttribute[i].Level = (WORD)level;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Level to " + std::to_string(level));
+                    }
+                }
+                ImGui::PopID();
+            }
 
-            // Required Strength (EDITABLE)
-            ImGui::TableSetColumnIndex(3);
-            ImGui::PushID(i * 10 + 0);
-            int reqStr = ItemAttribute[i].RequireStrength;
-            if (ImGui::InputInt("##str", &reqStr, 0, 0))
+            // Slot
+            if (m_columnVisibility["Slot"])
             {
-                if (reqStr >= 0 && reqStr <= 65535)
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 2);
+                int slot = ItemAttribute[i].m_byItemSlot;
+                if (ImGui::InputInt("##slot", &slot, 0, 0))
                 {
-                    ItemAttribute[i].RequireStrength = (WORD)reqStr;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireStrength to " + std::to_string(reqStr));
+                    if (slot >= 0 && slot <= 255)
+                    {
+                        ItemAttribute[i].m_byItemSlot = (BYTE)slot;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Slot to " + std::to_string(slot));
+                    }
                 }
+                ImGui::PopID();
             }
-            ImGui::PopID();
 
-            // Required Dexterity (EDITABLE)
-            ImGui::TableSetColumnIndex(4);
-            ImGui::PushID(i * 10 + 1);
-            int reqDex = ItemAttribute[i].RequireDexterity;
-            if (ImGui::InputInt("##dex", &reqDex, 0, 0))
+            // Skill
+            if (m_columnVisibility["Skill"])
             {
-                if (reqDex >= 0 && reqDex <= 65535)
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 3);
+                int skill = ItemAttribute[i].m_wSkillIndex;
+                if (ImGui::InputInt("##skill", &skill, 0, 0))
                 {
-                    ItemAttribute[i].RequireDexterity = (WORD)reqDex;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireDexterity to " + std::to_string(reqDex));
+                    if (skill >= 0 && skill <= 65535)
+                    {
+                        ItemAttribute[i].m_wSkillIndex = (WORD)skill;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Skill to " + std::to_string(skill));
+                    }
                 }
+                ImGui::PopID();
             }
-            ImGui::PopID();
 
-            // Required Energy (EDITABLE)
-            ImGui::TableSetColumnIndex(5);
-            ImGui::PushID(i * 10 + 2);
-            int reqEne = ItemAttribute[i].RequireEnergy;
-            if (ImGui::InputInt("##ene", &reqEne, 0, 0))
+            // Width
+            if (m_columnVisibility["Width"])
             {
-                if (reqEne >= 0 && reqEne <= 65535)
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 4);
+                int width = ItemAttribute[i].Width;
+                if (ImGui::InputInt("##width", &width, 0, 0))
                 {
-                    ItemAttribute[i].RequireEnergy = (WORD)reqEne;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireEnergy to " + std::to_string(reqEne));
+                    if (width >= 0 && width <= 255)
+                    {
+                        ItemAttribute[i].Width = (BYTE)width;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Width to " + std::to_string(width));
+                    }
                 }
+                ImGui::PopID();
             }
-            ImGui::PopID();
 
-            // Required Vitality (EDITABLE)
-            ImGui::TableSetColumnIndex(6);
-            ImGui::PushID(i * 10 + 3);
-            int reqVit = ItemAttribute[i].RequireVitality;
-            if (ImGui::InputInt("##vit", &reqVit, 0, 0))
+            // Height
+            if (m_columnVisibility["Height"])
             {
-                if (reqVit >= 0 && reqVit <= 65535)
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 5);
+                int height = ItemAttribute[i].Height;
+                if (ImGui::InputInt("##height", &height, 0, 0))
                 {
-                    ItemAttribute[i].RequireVitality = (WORD)reqVit;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireVitality to " + std::to_string(reqVit));
+                    if (height >= 0 && height <= 255)
+                    {
+                        ItemAttribute[i].Height = (BYTE)height;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Height to " + std::to_string(height));
+                    }
                 }
+                ImGui::PopID();
             }
-            ImGui::PopID();
 
-            // Required Charisma (EDITABLE)
-            ImGui::TableSetColumnIndex(7);
-            ImGui::PushID(i * 10 + 9);
-            int reqCha = ItemAttribute[i].RequireCharisma;
-            if (ImGui::InputInt("##cha", &reqCha, 0, 0))
+            // DamageMin
+            if (m_columnVisibility["DamageMin"])
             {
-                if (reqCha >= 0 && reqCha <= 65535)
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 6);
+                int dmgMin = ItemAttribute[i].DamageMin;
+                if (ImGui::InputInt("##dmgmin", &dmgMin, 0, 0))
                 {
-                    ItemAttribute[i].RequireCharisma = (WORD)reqCha;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireCharisma to " + std::to_string(reqCha));
+                    if (dmgMin >= 0 && dmgMin <= 255)
+                    {
+                        ItemAttribute[i].DamageMin = (BYTE)dmgMin;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " DamageMin to " + std::to_string(dmgMin));
+                    }
                 }
+                ImGui::PopID();
             }
-            ImGui::PopID();
 
-            // Damage Min/Max (EDITABLE)
-            ImGui::TableSetColumnIndex(8);
-            ImGui::PushID(i * 10 + 4);
-            int dmgMin = ItemAttribute[i].DamageMin;
-            ImGui::SetNextItemWidth(40);
-            if (ImGui::InputInt("##dmgmin", &dmgMin, 0, 0))
+            // DamageMax
+            if (m_columnVisibility["DamageMax"])
             {
-                if (dmgMin >= 0 && dmgMin <= 255)
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 7);
+                int dmgMax = ItemAttribute[i].DamageMax;
+                if (ImGui::InputInt("##dmgmax", &dmgMax, 0, 0))
                 {
-                    ItemAttribute[i].DamageMin = (BYTE)dmgMin;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " DamageMin to " + std::to_string(dmgMin));
+                    if (dmgMax >= 0 && dmgMax <= 255)
+                    {
+                        ItemAttribute[i].DamageMax = (BYTE)dmgMax;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " DamageMax to " + std::to_string(dmgMax));
+                    }
                 }
+                ImGui::PopID();
             }
-            ImGui::PopID();
-            ImGui::SameLine();
-            ImGui::Text("-");
-            ImGui::SameLine();
-            ImGui::PushID(i * 10 + 5);
-            int dmgMax = ItemAttribute[i].DamageMax;
-            ImGui::SetNextItemWidth(40);
-            if (ImGui::InputInt("##dmgmax", &dmgMax, 0, 0))
-            {
-                if (dmgMax >= 0 && dmgMax <= 255)
-                {
-                    ItemAttribute[i].DamageMax = (BYTE)dmgMax;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " DamageMax to " + std::to_string(dmgMax));
-                }
-            }
-            ImGui::PopID();
 
-            // Attack Speed (EDITABLE)
-            ImGui::TableSetColumnIndex(9);
-            ImGui::PushID(i * 10 + 6);
-            int atkSpd = ItemAttribute[i].WeaponSpeed;
-            if (ImGui::InputInt("##atkspd", &atkSpd, 0, 0))
+            // SuccessfulBlocking
+            if (m_columnVisibility["SuccessfulBlocking"])
             {
-                if (atkSpd >= 0 && atkSpd <= 255)
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 8);
+                int block = ItemAttribute[i].SuccessfulBlocking;
+                if (ImGui::InputInt("##block", &block, 0, 0))
                 {
-                    ItemAttribute[i].WeaponSpeed = (BYTE)atkSpd;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " WeaponSpeed to " + std::to_string(atkSpd));
+                    if (block >= 0 && block <= 255)
+                    {
+                        ItemAttribute[i].SuccessfulBlocking = (BYTE)block;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " SuccessfulBlocking to " + std::to_string(block));
+                    }
                 }
+                ImGui::PopID();
             }
-            ImGui::PopID();
 
-            // Defense (EDITABLE)
-            ImGui::TableSetColumnIndex(10);
-            ImGui::PushID(i * 10 + 7);
-            int def = ItemAttribute[i].Defense;
-            if (ImGui::InputInt("##def", &def, 0, 0))
+            // Defense
+            if (m_columnVisibility["Defense"])
             {
-                if (def >= 0 && def <= 255)
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 9);
+                int def = ItemAttribute[i].Defense;
+                if (ImGui::InputInt("##def", &def, 0, 0))
                 {
-                    ItemAttribute[i].Defense = (BYTE)def;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Defense to " + std::to_string(def));
+                    if (def >= 0 && def <= 255)
+                    {
+                        ItemAttribute[i].Defense = (BYTE)def;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Defense to " + std::to_string(def));
+                    }
                 }
+                ImGui::PopID();
             }
-            ImGui::PopID();
 
-            // Durability (EDITABLE)
-            ImGui::TableSetColumnIndex(11);
-            ImGui::PushID(i * 10 + 8);
-            int dur = ItemAttribute[i].Durability;
-            if (ImGui::InputInt("##dur", &dur, 0, 0))
+            // MagicDefense
+            if (m_columnVisibility["MagicDefense"])
             {
-                if (dur >= 0 && dur <= 255)
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 10);
+                int magDef = ItemAttribute[i].MagicDefense;
+                if (ImGui::InputInt("##magdef", &magDef, 0, 0))
                 {
-                    ItemAttribute[i].Durability = (BYTE)dur;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Durability to " + std::to_string(dur));
+                    if (magDef >= 0 && magDef <= 255)
+                    {
+                        ItemAttribute[i].MagicDefense = (BYTE)magDef;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " MagicDefense to " + std::to_string(magDef));
+                    }
                 }
+                ImGui::PopID();
             }
-            ImGui::PopID();
+
+            // WeaponSpeed
+            if (m_columnVisibility["WeaponSpeed"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 11);
+                int wpnSpd = ItemAttribute[i].WeaponSpeed;
+                if (ImGui::InputInt("##wpnspd", &wpnSpd, 0, 0))
+                {
+                    if (wpnSpd >= 0 && wpnSpd <= 255)
+                    {
+                        ItemAttribute[i].WeaponSpeed = (BYTE)wpnSpd;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " WeaponSpeed to " + std::to_string(wpnSpd));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // WalkSpeed
+            if (m_columnVisibility["WalkSpeed"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 12);
+                int walkSpd = ItemAttribute[i].WalkSpeed;
+                if (ImGui::InputInt("##walkspd", &walkSpd, 0, 0))
+                {
+                    if (walkSpd >= 0 && walkSpd <= 255)
+                    {
+                        ItemAttribute[i].WalkSpeed = (BYTE)walkSpd;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " WalkSpeed to " + std::to_string(walkSpd));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // Durability
+            if (m_columnVisibility["Durability"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 13);
+                int dur = ItemAttribute[i].Durability;
+                if (ImGui::InputInt("##dur", &dur, 0, 0))
+                {
+                    if (dur >= 0 && dur <= 255)
+                    {
+                        ItemAttribute[i].Durability = (BYTE)dur;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Durability to " + std::to_string(dur));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // MagicDur
+            if (m_columnVisibility["MagicDur"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 14);
+                int magDur = ItemAttribute[i].MagicDur;
+                if (ImGui::InputInt("##magdur", &magDur, 0, 0))
+                {
+                    if (magDur >= 0 && magDur <= 255)
+                    {
+                        ItemAttribute[i].MagicDur = (BYTE)magDur;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " MagicDur to " + std::to_string(magDur));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // MagicPower
+            if (m_columnVisibility["MagicPower"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 15);
+                int magPow = ItemAttribute[i].MagicPower;
+                if (ImGui::InputInt("##magpow", &magPow, 0, 0))
+                {
+                    if (magPow >= 0 && magPow <= 255)
+                    {
+                        ItemAttribute[i].MagicPower = (BYTE)magPow;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " MagicPower to " + std::to_string(magPow));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // ReqStr
+            if (m_columnVisibility["ReqStr"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 16);
+                int reqStr = ItemAttribute[i].RequireStrength;
+                if (ImGui::InputInt("##str", &reqStr, 0, 0))
+                {
+                    if (reqStr >= 0 && reqStr <= 65535)
+                    {
+                        ItemAttribute[i].RequireStrength = (WORD)reqStr;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireStrength to " + std::to_string(reqStr));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // ReqDex
+            if (m_columnVisibility["ReqDex"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 17);
+                int reqDex = ItemAttribute[i].RequireDexterity;
+                if (ImGui::InputInt("##dex", &reqDex, 0, 0))
+                {
+                    if (reqDex >= 0 && reqDex <= 65535)
+                    {
+                        ItemAttribute[i].RequireDexterity = (WORD)reqDex;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireDexterity to " + std::to_string(reqDex));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // ReqEne
+            if (m_columnVisibility["ReqEne"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 18);
+                int reqEne = ItemAttribute[i].RequireEnergy;
+                if (ImGui::InputInt("##ene", &reqEne, 0, 0))
+                {
+                    if (reqEne >= 0 && reqEne <= 65535)
+                    {
+                        ItemAttribute[i].RequireEnergy = (WORD)reqEne;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireEnergy to " + std::to_string(reqEne));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // ReqVit
+            if (m_columnVisibility["ReqVit"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 19);
+                int reqVit = ItemAttribute[i].RequireVitality;
+                if (ImGui::InputInt("##vit", &reqVit, 0, 0))
+                {
+                    if (reqVit >= 0 && reqVit <= 65535)
+                    {
+                        ItemAttribute[i].RequireVitality = (WORD)reqVit;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireVitality to " + std::to_string(reqVit));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // ReqCha
+            if (m_columnVisibility["ReqCha"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 20);
+                int reqCha = ItemAttribute[i].RequireCharisma;
+                if (ImGui::InputInt("##cha", &reqCha, 0, 0))
+                {
+                    if (reqCha >= 0 && reqCha <= 65535)
+                    {
+                        ItemAttribute[i].RequireCharisma = (WORD)reqCha;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireCharisma to " + std::to_string(reqCha));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // ReqLevel
+            if (m_columnVisibility["ReqLevel"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 21);
+                int reqLvl = ItemAttribute[i].RequireLevel;
+                if (ImGui::InputInt("##reqlvl", &reqLvl, 0, 0))
+                {
+                    if (reqLvl >= 0 && reqLvl <= 65535)
+                    {
+                        ItemAttribute[i].RequireLevel = (WORD)reqLvl;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireLevel to " + std::to_string(reqLvl));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // Value
+            if (m_columnVisibility["Value"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 22);
+                int value = ItemAttribute[i].Value;
+                if (ImGui::InputInt("##value", &value, 0, 0))
+                {
+                    if (value >= 0 && value <= 255)
+                    {
+                        ItemAttribute[i].Value = (BYTE)value;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Value to " + std::to_string(value));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // Zen
+            if (m_columnVisibility["Zen"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 23);
+                int zen = ItemAttribute[i].iZen;
+                if (ImGui::InputInt("##zen", &zen, 0, 0))
+                {
+                    ItemAttribute[i].iZen = zen;
+                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Zen to " + std::to_string(zen));
+                }
+                ImGui::PopID();
+            }
+
+            // AttType
+            if (m_columnVisibility["AttType"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 100 + 24);
+                int attType = ItemAttribute[i].AttType;
+                if (ImGui::InputInt("##atttype", &attType, 0, 0))
+                {
+                    if (attType >= 0 && attType <= 255)
+                    {
+                        ItemAttribute[i].AttType = (BYTE)attType;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " AttType to " + std::to_string(attType));
+                    }
+                }
+                ImGui::PopID();
+            }
         }
 
         ImGui::EndTable();
+    }
+}
+
+void CMuItemEditor::RenderColumnVisibilityMenu()
+{
+    if (ImGui::Button("Columns"))
+    {
+        ImGui::OpenPopup("ColumnVisibility");
+    }
+
+    if (ImGui::BeginPopup("ColumnVisibility"))
+    {
+        ImGui::Text("Toggle Column Visibility:");
+        ImGui::Separator();
+
+        // Group related columns
+        ImGui::Text("Basic Info:");
+        ImGui::Checkbox("Index", &m_columnVisibility["Index"]);
+        ImGui::Checkbox("Name", &m_columnVisibility["Name"]);
+        ImGui::Checkbox("TwoHand", &m_columnVisibility["TwoHand"]);
+        ImGui::Checkbox("Level", &m_columnVisibility["Level"]);
+        ImGui::Checkbox("Slot", &m_columnVisibility["Slot"]);
+        ImGui::Checkbox("Skill", &m_columnVisibility["Skill"]);
+
+        ImGui::Separator();
+        ImGui::Text("Dimensions:");
+        ImGui::Checkbox("Width", &m_columnVisibility["Width"]);
+        ImGui::Checkbox("Height", &m_columnVisibility["Height"]);
+
+        ImGui::Separator();
+        ImGui::Text("Combat Stats:");
+        ImGui::Checkbox("DamageMin", &m_columnVisibility["DamageMin"]);
+        ImGui::Checkbox("DamageMax", &m_columnVisibility["DamageMax"]);
+        ImGui::Checkbox("SuccessfulBlocking", &m_columnVisibility["SuccessfulBlocking"]);
+        ImGui::Checkbox("Defense", &m_columnVisibility["Defense"]);
+        ImGui::Checkbox("MagicDefense", &m_columnVisibility["MagicDefense"]);
+        ImGui::Checkbox("WeaponSpeed", &m_columnVisibility["WeaponSpeed"]);
+        ImGui::Checkbox("WalkSpeed", &m_columnVisibility["WalkSpeed"]);
+
+        ImGui::Separator();
+        ImGui::Text("Durability & Magic:");
+        ImGui::Checkbox("Durability", &m_columnVisibility["Durability"]);
+        ImGui::Checkbox("MagicDur", &m_columnVisibility["MagicDur"]);
+        ImGui::Checkbox("MagicPower", &m_columnVisibility["MagicPower"]);
+
+        ImGui::Separator();
+        ImGui::Text("Requirements:");
+        ImGui::Checkbox("ReqStr", &m_columnVisibility["ReqStr"]);
+        ImGui::Checkbox("ReqDex", &m_columnVisibility["ReqDex"]);
+        ImGui::Checkbox("ReqEne", &m_columnVisibility["ReqEne"]);
+        ImGui::Checkbox("ReqVit", &m_columnVisibility["ReqVit"]);
+        ImGui::Checkbox("ReqCha", &m_columnVisibility["ReqCha"]);
+        ImGui::Checkbox("ReqLevel", &m_columnVisibility["ReqLevel"]);
+
+        ImGui::Separator();
+        ImGui::Text("Other:");
+        ImGui::Checkbox("Value", &m_columnVisibility["Value"]);
+        ImGui::Checkbox("Zen", &m_columnVisibility["Zen"]);
+        ImGui::Checkbox("AttType", &m_columnVisibility["AttType"]);
+
+        ImGui::EndPopup();
     }
 }
 
