@@ -75,26 +75,10 @@ void CMuItemEditor::Render(bool& showEditor)
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
     if (ImGui::Begin("Item Editor", &showEditor, flags))
     {
-        // ALWAYS check if hovering, with multiple fallbacks
-        bool isHovering = false;
-
-        // Method 1: Standard hover check
-        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows))
-        {
-            isHovering = true;
-        }
-
-        // Method 2: Check with AllowWhenBlockedByActiveItem flag
-        if (!isHovering && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
-        {
-            isHovering = true;
-        }
-
-        // Method 3: Check if any ImGui window is hovered and it's THIS one
-        if (!isHovering && ImGui::IsAnyItemHovered())
-        {
-            isHovering = true;
-        }
+        // Check if hovering this window OR any popup
+        bool isHovering = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup) ||
+                         ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) ||
+                         ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId);
 
         if (isHovering)
         {
