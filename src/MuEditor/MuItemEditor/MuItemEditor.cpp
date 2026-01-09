@@ -8,6 +8,8 @@
 #include "imgui.h"
 #include <algorithm>
 #include <cctype>
+#include <fstream>
+#include <direct.h>
 
 #include "imgui_internal.h"
 
@@ -54,6 +56,15 @@ CMuItemEditor::CMuItemEditor()
     m_columnVisibility["DL"] = false;
     m_columnVisibility["SUM"] = false;
     m_columnVisibility["RF"] = false;
+
+    // Load column preferences from file
+    LoadColumnPreferences();
+}
+
+CMuItemEditor::~CMuItemEditor()
+{
+    // Save column preferences when destroying
+    SaveColumnPreferences();
 }
 
 CMuItemEditor& CMuItemEditor::GetInstance()
@@ -1035,6 +1046,10 @@ void CMuItemEditor::RenderColumnVisibilityMenu()
         ImGui::OpenPopup("ColumnVisibility");
     }
 
+    // Track if popup was open in previous frame
+    static bool wasPopupOpen = false;
+    bool isPopupOpen = ImGui::IsPopupOpen("ColumnVisibility");
+
     if (ImGui::BeginPopup("ColumnVisibility"))
     {
         ImGui::Text("Toggle Column Visibility:");
@@ -1047,6 +1062,7 @@ void CMuItemEditor::RenderColumnVisibilityMenu()
             {
                 col.second = true;
             }
+            SaveColumnPreferences();
         }
         ImGui::SameLine();
         if (ImGui::Button("Unselect All"))
@@ -1055,66 +1071,123 @@ void CMuItemEditor::RenderColumnVisibilityMenu()
             {
                 col.second = false;
             }
+            SaveColumnPreferences();
         }
         ImGui::Separator();
 
-        // Group related columns
+        // Group related columns - track if any checkbox changed
+        bool changed = false;
+
         ImGui::Text("Basic Info:");
-        ImGui::Checkbox("Index", &m_columnVisibility["Index"]);
-        ImGui::Checkbox("Name", &m_columnVisibility["Name"]);
-        ImGui::Checkbox("TwoHand", &m_columnVisibility["TwoHand"]);
-        ImGui::Checkbox("Level", &m_columnVisibility["Level"]);
-        ImGui::Checkbox("Slot", &m_columnVisibility["Slot"]);
-        ImGui::Checkbox("Skill", &m_columnVisibility["Skill"]);
+        changed |= ImGui::Checkbox("Index", &m_columnVisibility["Index"]);
+        changed |= ImGui::Checkbox("Name", &m_columnVisibility["Name"]);
+        changed |= ImGui::Checkbox("TwoHand", &m_columnVisibility["TwoHand"]);
+        changed |= ImGui::Checkbox("Level", &m_columnVisibility["Level"]);
+        changed |= ImGui::Checkbox("Slot", &m_columnVisibility["Slot"]);
+        changed |= ImGui::Checkbox("Skill", &m_columnVisibility["Skill"]);
 
         ImGui::Separator();
         ImGui::Text("Dimensions:");
-        ImGui::Checkbox("Width", &m_columnVisibility["Width"]);
-        ImGui::Checkbox("Height", &m_columnVisibility["Height"]);
+        changed |= ImGui::Checkbox("Width", &m_columnVisibility["Width"]);
+        changed |= ImGui::Checkbox("Height", &m_columnVisibility["Height"]);
 
         ImGui::Separator();
         ImGui::Text("Combat Stats:");
-        ImGui::Checkbox("DamageMin", &m_columnVisibility["DamageMin"]);
-        ImGui::Checkbox("DamageMax", &m_columnVisibility["DamageMax"]);
-        ImGui::Checkbox("SuccessfulBlocking", &m_columnVisibility["SuccessfulBlocking"]);
-        ImGui::Checkbox("Defense", &m_columnVisibility["Defense"]);
-        ImGui::Checkbox("MagicDefense", &m_columnVisibility["MagicDefense"]);
-        ImGui::Checkbox("WeaponSpeed", &m_columnVisibility["WeaponSpeed"]);
-        ImGui::Checkbox("WalkSpeed", &m_columnVisibility["WalkSpeed"]);
+        changed |= ImGui::Checkbox("DamageMin", &m_columnVisibility["DamageMin"]);
+        changed |= ImGui::Checkbox("DamageMax", &m_columnVisibility["DamageMax"]);
+        changed |= ImGui::Checkbox("SuccessfulBlocking", &m_columnVisibility["SuccessfulBlocking"]);
+        changed |= ImGui::Checkbox("Defense", &m_columnVisibility["Defense"]);
+        changed |= ImGui::Checkbox("MagicDefense", &m_columnVisibility["MagicDefense"]);
+        changed |= ImGui::Checkbox("WeaponSpeed", &m_columnVisibility["WeaponSpeed"]);
+        changed |= ImGui::Checkbox("WalkSpeed", &m_columnVisibility["WalkSpeed"]);
 
         ImGui::Separator();
         ImGui::Text("Durability & Magic:");
-        ImGui::Checkbox("Durability", &m_columnVisibility["Durability"]);
-        ImGui::Checkbox("MagicDur", &m_columnVisibility["MagicDur"]);
-        ImGui::Checkbox("MagicPower", &m_columnVisibility["MagicPower"]);
+        changed |= ImGui::Checkbox("Durability", &m_columnVisibility["Durability"]);
+        changed |= ImGui::Checkbox("MagicDur", &m_columnVisibility["MagicDur"]);
+        changed |= ImGui::Checkbox("MagicPower", &m_columnVisibility["MagicPower"]);
 
         ImGui::Separator();
         ImGui::Text("Requirements:");
-        ImGui::Checkbox("ReqStr", &m_columnVisibility["ReqStr"]);
-        ImGui::Checkbox("ReqDex", &m_columnVisibility["ReqDex"]);
-        ImGui::Checkbox("ReqEne", &m_columnVisibility["ReqEne"]);
-        ImGui::Checkbox("ReqVit", &m_columnVisibility["ReqVit"]);
-        ImGui::Checkbox("ReqCha", &m_columnVisibility["ReqCha"]);
-        ImGui::Checkbox("ReqLevel", &m_columnVisibility["ReqLevel"]);
+        changed |= ImGui::Checkbox("ReqStr", &m_columnVisibility["ReqStr"]);
+        changed |= ImGui::Checkbox("ReqDex", &m_columnVisibility["ReqDex"]);
+        changed |= ImGui::Checkbox("ReqEne", &m_columnVisibility["ReqEne"]);
+        changed |= ImGui::Checkbox("ReqVit", &m_columnVisibility["ReqVit"]);
+        changed |= ImGui::Checkbox("ReqCha", &m_columnVisibility["ReqCha"]);
+        changed |= ImGui::Checkbox("ReqLevel", &m_columnVisibility["ReqLevel"]);
 
         ImGui::Separator();
         ImGui::Text("Other:");
-        ImGui::Checkbox("Value", &m_columnVisibility["Value"]);
-        ImGui::Checkbox("Zen", &m_columnVisibility["Zen"]);
-        ImGui::Checkbox("AttType", &m_columnVisibility["AttType"]);
+        changed |= ImGui::Checkbox("Value", &m_columnVisibility["Value"]);
+        changed |= ImGui::Checkbox("Zen", &m_columnVisibility["Zen"]);
+        changed |= ImGui::Checkbox("AttType", &m_columnVisibility["AttType"]);
 
         ImGui::Separator();
         ImGui::Text("Class Requirements:");
-        ImGui::Checkbox("DW/SM", &m_columnVisibility["DW/SM"]);
-        ImGui::Checkbox("DK/BK", &m_columnVisibility["DK/BK"]);
-        ImGui::Checkbox("ELF/ME", &m_columnVisibility["ELF/ME"]);
-        ImGui::Checkbox("MG", &m_columnVisibility["MG"]);
-        ImGui::Checkbox("DL", &m_columnVisibility["DL"]);
-        ImGui::Checkbox("SUM", &m_columnVisibility["SUM"]);
-        ImGui::Checkbox("RF", &m_columnVisibility["RF"]);
+        changed |= ImGui::Checkbox("DW/SM", &m_columnVisibility["DW/SM"]);
+        changed |= ImGui::Checkbox("DK/BK", &m_columnVisibility["DK/BK"]);
+        changed |= ImGui::Checkbox("ELF/ME", &m_columnVisibility["ELF/ME"]);
+        changed |= ImGui::Checkbox("MG", &m_columnVisibility["MG"]);
+        changed |= ImGui::Checkbox("DL", &m_columnVisibility["DL"]);
+        changed |= ImGui::Checkbox("SUM", &m_columnVisibility["SUM"]);
+        changed |= ImGui::Checkbox("RF", &m_columnVisibility["RF"]);
+
+        // Save immediately when any checkbox changes
+        if (changed)
+        {
+            SaveColumnPreferences();
+        }
 
         ImGui::EndPopup();
+        wasPopupOpen = true;
     }
+    else if (wasPopupOpen)
+    {
+        // Popup just closed - save one final time
+        SaveColumnPreferences();
+        wasPopupOpen = false;
+    }
+}
+
+void CMuItemEditor::SaveColumnPreferences()
+{
+    // Create MuEditor directory if it doesn't exist
+    _mkdir("MuEditor");
+
+    std::ofstream file(muitemeditor_columns_cfg);
+    if (!file.is_open())
+        return;
+
+    for (const auto& col : m_columnVisibility)
+    {
+        file << col.first << "=" << (col.second ? "1" : "0") << "\n";
+    }
+    file.close();
+}
+
+void CMuItemEditor::LoadColumnPreferences()
+{
+    std::ifstream file(muitemeditor_columns_cfg);
+    if (!file.is_open())
+        return; // File doesn't exist yet, use defaults
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        size_t pos = line.find('=');
+        if (pos != std::string::npos)
+        {
+            std::string key = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+
+            // Only update if the column exists in our map
+            if (m_columnVisibility.find(key) != m_columnVisibility.end())
+            {
+                m_columnVisibility[key] = (value == "1");
+            }
+        }
+    }
+    file.close();
 }
 
 #endif // _EDITOR
