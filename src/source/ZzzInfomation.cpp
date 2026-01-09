@@ -487,6 +487,7 @@ bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog)
                 originalItems[i].RequireDexterity = orig->RequireDexterity;
                 originalItems[i].RequireEnergy = orig->RequireEnergy;
                 originalItems[i].RequireVitality = orig->RequireVitality;
+                originalItems[i].RequireCharisma = orig->RequireCharisma;
                 originalItems[i].RequireLevel = orig->RequireLevel;
                 originalItems[i].DamageMin = orig->DamageMin;
                 originalItems[i].DamageMax = orig->DamageMax;
@@ -582,6 +583,11 @@ bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog)
             if (originalItems[i].RequireVitality != ItemAttribute[i].RequireVitality)
             {
                 itemChanges << "  Vit: " << originalItems[i].RequireVitality << " -> " << ItemAttribute[i].RequireVitality << "\n";
+                changed = true;
+            }
+            if (originalItems[i].RequireCharisma != ItemAttribute[i].RequireCharisma)
+            {
+                itemChanges << "  Cha: " << originalItems[i].RequireCharisma << " -> " << ItemAttribute[i].RequireCharisma << "\n";
                 changed = true;
             }
             if (originalItems[i].RequireLevel != ItemAttribute[i].RequireLevel)
