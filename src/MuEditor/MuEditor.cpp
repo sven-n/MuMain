@@ -8,6 +8,8 @@
 #include "imgui_impl_opengl2.h"
 #include <sstream>
 #include <ctime>
+#include <algorithm>
+#include <cctype>
 
 CMuEditor::CMuEditor()
     : m_bEditorMode(false)
@@ -18,6 +20,7 @@ CMuEditor::CMuEditor()
     , m_hGameWindow(nullptr)
     , m_hGameConsole(nullptr)
 {
+    memset(m_szItemSearchBuffer, 0, sizeof(m_szItemSearchBuffer));
 }
 
 CMuEditor::~CMuEditor()
@@ -293,7 +296,72 @@ void CMuEditor::RenderItemEditor()
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
     if (ImGui::Begin("Item Editor", &m_bShowItemEditor, flags))
     {
-        ImGui::Text("Edit Item Attributes - Total Items: 1000");
+        ImGui::Text("Edit Item Attributes - Total Items: %d", MAX_ITEM);
+        ImGui::SameLine();
+
+        // Save button on the right
+        ImGui::SameLine(ImGui::GetWindowWidth() - 120);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.8f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.9f, 1.0f));
+        if (ImGui::Button("Save Items"))
+        {
+            extern bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog);
+            extern std::wstring g_strSelectedML;
+
+            wchar_t fileName[256];
+            swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+
+            std::string changeLog;
+            if (SaveItemScript(fileName, &changeLog))
+            {
+                // Log to editor console
+                LogEditor("=== SAVE COMPLETED ===\n");
+                LogEditor(changeLog);
+                LogEditor("======================\n");
+                ImGui::OpenPopup("Save Success");
+            }
+            else
+            {
+                LogEditor("ERROR: Failed to save item attributes!\n");
+                ImGui::OpenPopup("Save Failed");
+            }
+        }
+        ImGui::PopStyleColor(2);
+
+        // Success popup
+        if (ImGui::BeginPopupModal("Save Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Item attributes saved successfully!");
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+        // Failed popup
+        if (ImGui::BeginPopupModal("Save Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Failed to save item attributes!");
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+        ImGui::Separator();
+
+        // Search bar
+        ImGui::Text("Search:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(300);
+        ImGui::InputText("##ItemSearch", m_szItemSearchBuffer, sizeof(m_szItemSearchBuffer));
+
+        // Convert search to lowercase for case-insensitive search
+        std::string searchLower = m_szItemSearchBuffer;
+        std::transform(searchLower.begin(), searchLower.end(), searchLower.begin(), ::tolower);
+
         ImGui::Separator();
 
         // Create a table with scrolling
@@ -314,9 +382,32 @@ void CMuEditor::RenderItemEditor()
             ImGui::TableSetupColumn("Durability", ImGuiTableColumnFlags_WidthFixed, 80.0f);
             ImGui::TableHeadersRow();
 
-            // Render items (limit to first 100 for performance, add pagination later)
-            for (int i = 0; i < 100; i++)
+            // Render all items with filtering
+            for (int i = 0; i < MAX_ITEM; i++)
             {
+                // Get item name
+                char nameBuffer[128];
+                wcstombs(nameBuffer, ItemAttribute[i].Name, sizeof(nameBuffer));
+
+                // Skip uninitialized items (no name)
+                if (nameBuffer[0] == '\0')
+                {
+                    continue;
+                }
+
+                // Apply search filter (only if search is not empty)
+                if (searchLower.length() > 0)
+                {
+                    std::string nameLower = nameBuffer;
+                    std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+
+                    // Skip if search string not found in name
+                    if (nameLower.find(searchLower) == std::string::npos)
+                    {
+                        continue;
+                    }
+                }
+
                 ImGui::TableNextRow();
 
                 // Index
@@ -325,8 +416,6 @@ void CMuEditor::RenderItemEditor()
 
                 // Name
                 ImGui::TableSetColumnIndex(1);
-                char nameBuffer[128];
-                wcstombs(nameBuffer, ItemAttribute[i].Name, sizeof(nameBuffer));
                 ImGui::Text("%s", nameBuffer);
 
                 // Level
