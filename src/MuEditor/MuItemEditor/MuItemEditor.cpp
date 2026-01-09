@@ -286,16 +286,73 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             if (m_columnVisibility["Index"])
             {
                 ImGui::TableSetColumnIndex(colIdx++);
-                ImGui::Text("%d", i);
-                if (ImGui::IsItemClicked()) rowInteracted = true;
+                ImGui::PushID(i * 100 + 100);
+                int newIndex = i;
+                if (ImGui::InputInt("##index", &newIndex, 0, 0))
+                {
+                    // Check if new index is valid and not a duplicate
+                    if (newIndex >= 0 && newIndex < MAX_ITEM && newIndex != i)
+                    {
+                        // Check if target index is already used (has a name)
+                        char targetName[128];
+                        WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[newIndex].Name, -1, targetName, sizeof(targetName), NULL, NULL);
+
+                        if (targetName[0] == '\0')
+                        {
+                            // Target index is empty, safe to swap
+                            ITEM_ATTRIBUTE temp = ItemAttribute[i];
+                            ItemAttribute[i] = ItemAttribute[newIndex];
+                            ItemAttribute[newIndex] = temp;
+                            g_MuEditorConsole.LogEditor("Moved item from index " + std::to_string(i) + " to " + std::to_string(newIndex));
+                        }
+                        else
+                        {
+                            g_MuEditorConsole.LogEditor("Error: Index " + std::to_string(newIndex) + " already in use!");
+                        }
+                    }
+                }
+                if (ImGui::IsItemActivated()) rowInteracted = true;
+                ImGui::PopID();
             }
 
             // Name
             if (m_columnVisibility["Name"])
             {
                 ImGui::TableSetColumnIndex(colIdx++);
-                ImGui::Text("%s", nameBuffer);
-                if (ImGui::IsItemClicked()) rowInteracted = true;
+                ImGui::PushID(i * 100 + 101);
+                char editableNameBuffer[128];
+                strcpy_s(editableNameBuffer, sizeof(editableNameBuffer), nameBuffer);
+                if (ImGui::InputText("##name", editableNameBuffer, sizeof(editableNameBuffer)))
+                {
+                    // Check if name already exists in another item
+                    bool nameExists = false;
+                    for (int j = 0; j < MAX_ITEM; j++)
+                    {
+                        if (j == i) continue;
+
+                        char existingName[128];
+                        WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[j].Name, -1, existingName, sizeof(existingName), NULL, NULL);
+
+                        if (strcmp(editableNameBuffer, existingName) == 0 && existingName[0] != '\0')
+                        {
+                            nameExists = true;
+                            break;
+                        }
+                    }
+
+                    if (!nameExists)
+                    {
+                        // Convert to wide char and save
+                        MultiByteToWideChar(CP_UTF8, 0, editableNameBuffer, -1, ItemAttribute[i].Name, sizeof(ItemAttribute[i].Name) / sizeof(WCHAR));
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Name to " + std::string(editableNameBuffer));
+                    }
+                    else
+                    {
+                        g_MuEditorConsole.LogEditor("Error: Name '" + std::string(editableNameBuffer) + "' already exists!");
+                    }
+                }
+                if (ImGui::IsItemActivated()) rowInteracted = true;
+                ImGui::PopID();
             }
 
             // TwoHand
