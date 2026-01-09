@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include <string>
+#include <map>
 
 class CMuItemEditor
 {
@@ -19,8 +20,12 @@ private:
     void RenderSearchBar();
     void RenderItemTable(const std::string& searchLower);
     void RenderSaveButton();
+    void RenderColumnVisibilityMenu();
 
     char m_szItemSearchBuffer[256];
+
+    // Column visibility state
+    std::map<std::string, bool> m_columnVisibility;
 };
 
 #define g_MuItemEditor CMuItemEditor::GetInstance()
