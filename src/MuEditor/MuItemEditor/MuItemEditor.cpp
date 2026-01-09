@@ -10,6 +10,7 @@
 #include <cctype>
 #include <fstream>
 #include <direct.h>
+#include <vector>
 
 #include "imgui_internal.h"
 
@@ -393,43 +394,70 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
 
         ImGui::TableHeadersRow();
 
-        // Render all items with filtering
-        for (int i = 0; i < MAX_ITEM; i++)
+        // Pre-filter items to build a list of valid items (only do once per frame)
+        static std::vector<int> filteredItems;
+        static std::string lastSearchFilter;
+        static bool isInitialized = false;
+
+        // Rebuild filtered list if search changed or first time
+        if (searchLower != lastSearchFilter || !isInitialized)
         {
-            // Get item name
-            char nameBuffer[256];
-            WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
-
-            // Skip uninitialized items (no name)
-            if (nameBuffer[0] == '\0')
-                continue;
-
-            // Apply search filter
-            if (searchLower.length() > 0)
+            filteredItems.clear();
+            for (int i = 0; i < MAX_ITEM; i++)
             {
-                std::string nameLower = nameBuffer;
-                std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
-                if (nameLower.find(searchLower) == std::string::npos)
+                char nameBuffer[256];
+                WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
+
+                // Skip uninitialized items (no name)
+                if (nameBuffer[0] == '\0')
                     continue;
+
+                // Apply search filter
+                if (searchLower.length() > 0)
+                {
+                    std::string nameLower = nameBuffer;
+                    std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+                    if (nameLower.find(searchLower) == std::string::npos)
+                        continue;
+                }
+
+                filteredItems.push_back(i);
             }
+            lastSearchFilter = searchLower;
+            isInitialized = true;
+        }
 
-            ImGui::TableNextRow();
+        // Use ImGuiListClipper to only render visible rows
+        ImGuiListClipper clipper;
+        clipper.Begin((int)filteredItems.size());
 
-            // Apply row highlighting if this row is selected
-            if (m_selectedRow == i)
+        while (clipper.Step())
+        {
+            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
             {
-                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImVec4(0.3f, 0.5f, 0.8f, 0.3f)));
-            }
+                int i = filteredItems[row];
 
-            // Get the row bounds for click detection
-            ImGui::TableSetColumnIndex(0);
-            ImVec2 rowStartPos = ImGui::GetCursorScreenPos();
-            float rowHeight = ImGui::GetTextLineHeightWithSpacing();
+                // Get item name for this row
+                char nameBuffer[256];
+                WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
 
-            int colIdx = 0;
-            bool rowInteracted = false;
+                ImGui::TableNextRow();
 
-            // Index
+                // Apply row highlighting if this row is selected
+                if (m_selectedRow == i)
+                {
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImVec4(0.3f, 0.5f, 0.8f, 0.3f)));
+                }
+
+                // Get the row bounds for click detection
+                ImGui::TableSetColumnIndex(0);
+                ImVec2 rowStartPos = ImGui::GetCursorScreenPos();
+                float rowHeight = ImGui::GetTextLineHeightWithSpacing();
+
+                int colIdx = 0;
+                bool rowInteracted = false;
+
+                // Index
             if (m_columnVisibility["Index"])
             {
                 ImGui::TableSetColumnIndex(colIdx++);
@@ -1101,7 +1129,8 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 m_selectedRow = i;
             }
-        }
+            }  // end for (clipper.DisplayStart to DisplayEnd)
+        }  // end while (clipper.Step())
 
         ImGui::EndTable();
     }
