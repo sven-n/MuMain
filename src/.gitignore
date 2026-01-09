@@ -24,3 +24,14 @@
 *.mp3
 build/bin/x86/Global Debug/Main.exe
 !/CMakeLists.txt
+
+#MuEditor
+bin/MuEditor/
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# ImGui settings (user-specific)
+imgui.ini
+bin/imgui.ini
