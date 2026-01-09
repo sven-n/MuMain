@@ -125,8 +125,8 @@ void CMuItemEditor::Render(bool& showEditor)
 
 void CMuItemEditor::RenderSaveButton()
 {
-    // Save button on the right (accounting for both buttons)
-    ImGui::SameLine(ImGui::GetWindowWidth() - 260);
+    // Save button on the right (accounting for three buttons)
+    ImGui::SameLine(ImGui::GetWindowWidth() - 390);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.8f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.9f, 1.0f));
     if (ImGui::Button("Save Items"))
@@ -150,6 +150,32 @@ void CMuItemEditor::RenderSaveButton()
         {
             g_MuEditorConsole.LogEditor("ERROR: Failed to save item attributes!\n");
             ImGui::OpenPopup("Save Failed");
+        }
+    }
+    ImGui::PopStyleColor(2);
+
+    ImGui::SameLine();
+
+    // Save as S6E3 Legacy button
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.4f, 0.8f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.5f, 0.9f, 1.0f));
+    if (ImGui::Button("Save as S6E3"))
+    {
+        extern bool SaveItemScriptLegacy(wchar_t* FileName);
+        extern std::wstring g_strSelectedML;
+
+        wchar_t fileName[256];
+        swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls_S6E3.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+
+        if (SaveItemScriptLegacy(fileName))
+        {
+            g_MuEditorConsole.LogEditor("Saved items in S6E3 legacy format: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd\n");
+            ImGui::OpenPopup("Save S6E3 Success");
+        }
+        else
+        {
+            g_MuEditorConsole.LogEditor("ERROR: Failed to save item attributes in S6E3 format!\n");
+            ImGui::OpenPopup("Save S6E3 Failed");
         }
     }
     ImGui::PopStyleColor(2);
@@ -206,6 +232,39 @@ void CMuItemEditor::RenderSaveButton()
     if (ImGui::BeginPopupModal("Export Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("Items exported to CSV successfully!");
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    // S6E3 Success popup
+    if (ImGui::BeginPopupModal("Save S6E3 Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Items saved in S6E3 legacy format successfully!");
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    // S6E3 Failed popup
+    if (ImGui::BeginPopupModal("Save S6E3 Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Failed to save items in S6E3 format!");
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    // Export Failed popup (if missing)
+    if (ImGui::BeginPopupModal("Export Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Failed to export items to CSV!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();

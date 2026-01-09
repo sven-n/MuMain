@@ -407,6 +407,38 @@ static void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, TSource& source)
     memcpy(dest.RequireClass, source.RequireClass, sizeof(source.RequireClass));
     memcpy(dest.Resistance, source.Resistance, sizeof(source.Resistance));
 }
+template<typename TDest>
+static void CopyItemAttributeToDestination(TDest& dest, ITEM_ATTRIBUTE& source)
+{
+    CMultiLanguage::ConvertToUtf8(dest.Name, source.Name, sizeof(dest.Name));
+    dest.TwoHand = source.TwoHand;
+    dest.Level = source.Level;
+    dest.m_byItemSlot = source.m_byItemSlot;
+    dest.m_wSkillIndex = source.m_wSkillIndex;
+    dest.Width = source.Width;
+    dest.Height = source.Height;
+    dest.DamageMin = source.DamageMin;
+    dest.DamageMax = source.DamageMax;
+    dest.SuccessfulBlocking = source.SuccessfulBlocking;
+    dest.Defense = source.Defense;
+    dest.MagicDefense = source.MagicDefense;
+    dest.WeaponSpeed = source.WeaponSpeed;
+    dest.WalkSpeed = source.WalkSpeed;
+    dest.Durability = source.Durability;
+    dest.MagicDur = source.MagicDur;
+    dest.MagicPower = source.MagicPower;
+    dest.RequireStrength = source.RequireStrength;
+    dest.RequireDexterity = source.RequireDexterity;
+    dest.RequireEnergy = source.RequireEnergy;
+    dest.RequireVitality = source.RequireVitality;
+    dest.RequireCharisma = source.RequireCharisma;
+    dest.RequireLevel = source.RequireLevel;
+    dest.Value = source.Value;
+    dest.iZen = source.iZen;
+    dest.AttType = source.AttType;
+    memcpy(dest.RequireClass, source.RequireClass, sizeof(dest.RequireClass));
+    memcpy(dest.Resistance, source.Resistance, sizeof(dest.Resistance));
+}
 
 void OpenItemScript(wchar_t* FileName)
 {
@@ -679,6 +711,44 @@ bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog)
             }
         }
     }
+
+    return true;
+}
+
+bool SaveItemScriptLegacy(wchar_t* FileName)
+{
+    const int Size = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
+
+    FILE* fp = _wfopen(FileName, L"wb");
+    if (fp == NULL)
+    {
+        return false;
+    }
+
+    BYTE* Buffer = new BYTE[Size * MAX_ITEM];
+    BYTE* pSeek = Buffer;
+
+    for (int i = 0; i < MAX_ITEM; i++)
+    {
+        ITEM_ATTRIBUTE_FILE_LEGACY dest;
+        memset(&dest, 0, Size);
+
+        CopyItemAttributeToDestination(dest, ItemAttribute[i]);
+
+        memcpy(pSeek, &dest, Size);
+        BuxConvert(pSeek, Size);
+        pSeek += Size;
+    }
+
+    // Write buffer
+    fwrite(Buffer, Size * MAX_ITEM, 1, fp);
+
+    // Write checksum
+    DWORD dwCheckSum = GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE2F1);
+    fwrite(&dwCheckSum, sizeof(DWORD), 1, fp);
+
+    fclose(fp);
+    delete[] Buffer;
 
     return true;
 }

@@ -28,6 +28,7 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 
 extern void OpenItemScript(wchar_t* FileName);
 extern bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog = nullptr);
+extern bool SaveItemScriptLegacy(wchar_t* FileName);
 extern bool ExportItemAttributeToCsv(wchar_t* FileName);
 extern ActionSkillType GetSkillByBook(int Type);
 void SetItemAttributes(ITEM* ip);
