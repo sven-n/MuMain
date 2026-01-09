@@ -396,6 +396,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 100);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int newIndex = i;
                 if (ImGui::InputInt("##index", &newIndex, 0, 0))
                 {
@@ -429,6 +430,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 101);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 char editableNameBuffer[128];
                 strcpy_s(editableNameBuffer, sizeof(editableNameBuffer), nameBuffer);
                 if (ImGui::InputText("##name", editableNameBuffer, sizeof(editableNameBuffer)))
@@ -484,6 +486,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 1);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int level = ItemAttribute[i].Level;
                 if (ImGui::InputInt("##lvl", &level, 0, 0))
                 {
@@ -503,6 +506,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 2);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int slot = ItemAttribute[i].m_byItemSlot;
                 if (ImGui::InputInt("##slot", &slot, 0, 0))
                 {
@@ -521,6 +525,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 3);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int skill = ItemAttribute[i].m_wSkillIndex;
                 if (ImGui::InputInt("##skill", &skill, 0, 0))
                 {
@@ -539,6 +544,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 4);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int width = ItemAttribute[i].Width;
                 if (ImGui::InputInt("##width", &width, 0, 0))
                 {
@@ -557,6 +563,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 5);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int height = ItemAttribute[i].Height;
                 if (ImGui::InputInt("##height", &height, 0, 0))
                 {
@@ -575,6 +582,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 6);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int dmgMin = ItemAttribute[i].DamageMin;
                 if (ImGui::InputInt("##dmgmin", &dmgMin, 0, 0))
                 {
@@ -593,6 +601,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 7);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int dmgMax = ItemAttribute[i].DamageMax;
                 if (ImGui::InputInt("##dmgmax", &dmgMax, 0, 0))
                 {
@@ -611,6 +620,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 8);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int block = ItemAttribute[i].SuccessfulBlocking;
                 if (ImGui::InputInt("##block", &block, 0, 0))
                 {
@@ -628,6 +638,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 9);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int def = ItemAttribute[i].Defense;
                 if (ImGui::InputInt("##def", &def, 0, 0))
                 {
@@ -645,6 +656,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 10);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int magDef = ItemAttribute[i].MagicDefense;
                 if (ImGui::InputInt("##magdef", &magDef, 0, 0))
                 {
@@ -662,6 +674,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 11);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int wpnSpd = ItemAttribute[i].WeaponSpeed;
                 if (ImGui::InputInt("##wpnspd", &wpnSpd, 0, 0))
                 {
@@ -679,6 +692,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 12);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int walkSpd = ItemAttribute[i].WalkSpeed;
                 if (ImGui::InputInt("##walkspd", &walkSpd, 0, 0))
                 {
@@ -696,6 +710,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 13);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int dur = ItemAttribute[i].Durability;
                 if (ImGui::InputInt("##dur", &dur, 0, 0))
                 {
@@ -713,6 +728,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 14);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int magDur = ItemAttribute[i].MagicDur;
                 if (ImGui::InputInt("##magdur", &magDur, 0, 0))
                 {
@@ -730,6 +746,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 15);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int magPow = ItemAttribute[i].MagicPower;
                 if (ImGui::InputInt("##magpow", &magPow, 0, 0))
                 {
@@ -747,6 +764,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 16);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqStr = ItemAttribute[i].RequireStrength;
                 if (ImGui::InputInt("##str", &reqStr, 0, 0))
                 {
@@ -764,6 +782,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 17);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqDex = ItemAttribute[i].RequireDexterity;
                 if (ImGui::InputInt("##dex", &reqDex, 0, 0))
                 {
@@ -781,6 +800,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 18);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqEne = ItemAttribute[i].RequireEnergy;
                 if (ImGui::InputInt("##ene", &reqEne, 0, 0))
                 {
@@ -798,6 +818,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 19);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqVit = ItemAttribute[i].RequireVitality;
                 if (ImGui::InputInt("##vit", &reqVit, 0, 0))
                 {
@@ -815,6 +836,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 20);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqCha = ItemAttribute[i].RequireCharisma;
                 if (ImGui::InputInt("##cha", &reqCha, 0, 0))
                 {
@@ -832,6 +854,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 21);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqLvl = ItemAttribute[i].RequireLevel;
                 if (ImGui::InputInt("##reqlvl", &reqLvl, 0, 0))
                 {
@@ -849,6 +872,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 22);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int value = ItemAttribute[i].Value;
                 if (ImGui::InputInt("##value", &value, 0, 0))
                 {
@@ -866,6 +890,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 23);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int zen = ItemAttribute[i].iZen;
                 if (ImGui::InputInt("##zen", &zen, 0, 0))
                 {
@@ -880,6 +905,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 100 + 24);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int attType = ItemAttribute[i].AttType;
                 if (ImGui::InputInt("##atttype", &attType, 0, 0))
                 {
@@ -898,6 +924,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 1000 + 25);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqClass = ItemAttribute[i].RequireClass[0];
                 if (ImGui::InputInt("##dwsm", &reqClass, 0, 0))
                 {
@@ -915,6 +942,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 1000 + 26);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqClass = ItemAttribute[i].RequireClass[1];
                 if (ImGui::InputInt("##dkbk", &reqClass, 0, 0))
                 {
@@ -932,6 +960,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 1000 + 27);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqClass = ItemAttribute[i].RequireClass[2];
                 if (ImGui::InputInt("##elfme", &reqClass, 0, 0))
                 {
@@ -949,6 +978,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 1000 + 28);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqClass = ItemAttribute[i].RequireClass[3];
                 if (ImGui::InputInt("##mg", &reqClass, 0, 0))
                 {
@@ -966,6 +996,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 1000 + 29);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqClass = ItemAttribute[i].RequireClass[4];
                 if (ImGui::InputInt("##dl", &reqClass, 0, 0))
                 {
@@ -983,6 +1014,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 1000 + 30);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqClass = ItemAttribute[i].RequireClass[5];
                 if (ImGui::InputInt("##sum", &reqClass, 0, 0))
                 {
@@ -1000,6 +1032,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::PushID(i * 1000 + 31);
+                ImGui::SetNextItemWidth(-FLT_MIN);
                 int reqClass = ItemAttribute[i].RequireClass[6];
                 if (ImGui::InputInt("##rf", &reqClass, 0, 0))
                 {
