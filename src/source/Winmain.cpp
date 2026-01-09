@@ -898,9 +898,9 @@ MSG MainLoop()
                     if (!wasF12Pressed)
                     {
                         g_MuEditor.ToggleEditor();
-                        std::fwprintf(stderr, L"[Editor] Toggled: %s\n",
+                        fwprintf(stderr, L"[Editor] Toggled: %s\n",
                             g_MuEditor.IsEnabled() ? L"ON" : L"OFF");
-                        std::fflush(stderr);
+                        fflush(stderr);
                         wasF12Pressed = true;
                     }
                 }
@@ -1290,7 +1290,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
     {
         g_MuEditor.SetEnabled(true);
-        std::fwprintf(stderr, L"[Editor] Starting in editor mode (--editor flag detected)\n");
+        fwprintf(stderr, L"[Editor] Starting in editor mode (--editor flag detected)\n");
         std::fflush(stderr);
     }
 #endif

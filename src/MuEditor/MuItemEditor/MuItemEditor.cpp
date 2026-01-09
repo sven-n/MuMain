@@ -151,7 +151,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
         {
             // Get item name
             char nameBuffer[128];
-            wcstombs(nameBuffer, ItemAttribute[i].Name, sizeof(nameBuffer));
+            WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
 
             // Skip uninitialized items (no name)
             if (nameBuffer[0] == '\0')

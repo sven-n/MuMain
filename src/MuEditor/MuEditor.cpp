@@ -41,8 +41,8 @@ void CMuEditor::Initialize(HWND hwnd, HDC hdc)
     if (m_bInitialized)
         return;
 
-    std::fwprintf(stderr, L"[MuEditor] Initialize() called\n");
-    std::fflush(stderr);
+    fwprintf(stderr, L"[MuEditor] Initialize() called\n");
+    fflush(stderr);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -52,8 +52,8 @@ void CMuEditor::Initialize(HWND hwnd, HDC hdc)
     // Game cursor is disabled when editor is open (see ZzzScene.cpp)
     io.MouseDrawCursor = false; // Don't let ImGui draw its own cursor, use Windows cursor
 
-    std::fwprintf(stderr, L"[MuEditor] ImGui context created\n");
-    std::fflush(stderr);
+    fwprintf(stderr, L"[MuEditor] ImGui context created\n");
+    fflush(stderr);
 
     // Dark theme
     ImGui::StyleColorsDark();
@@ -64,14 +64,14 @@ void CMuEditor::Initialize(HWND hwnd, HDC hdc)
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplOpenGL2_Init();
 
-    std::fwprintf(stderr, L"[MuEditor] ImGui backends initialized\n");
-    std::fflush(stderr);
+    fwprintf(stderr, L"[MuEditor] ImGui backends initialized\n");
+    fflush(stderr);
 
     m_bInitialized = true;
     g_MuEditorConsole.LogEditor("MU Editor initialized");
 
-    std::fwprintf(stderr, L"[MuEditor] Initialize() completed\n");
-    std::fflush(stderr);
+    fwprintf(stderr, L"[MuEditor] Initialize() completed\n");
+    fflush(stderr);
 }
 
 void CMuEditor::Shutdown()
