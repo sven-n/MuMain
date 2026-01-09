@@ -39,6 +39,9 @@ private:
     bool m_bFrameStarted;
     bool m_bShowItemEditor;
 
+    // Item Editor search
+    char m_szItemSearchBuffer[256];
+
     // Console buffers
     std::string m_strEditorConsole;
     std::string m_strGameConsole;
