@@ -375,19 +375,64 @@ void OpenDialogFile(wchar_t* FileName)
 // item
 ///////////////////////////////////////////////////////////////////////////////
 
+template<typename TSource>
+static void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, TSource& source)
+{
+    CMultiLanguage::ConvertFromUtf8(dest.Name, source.Name, MAX_ITEM_NAME);
+    dest.TwoHand = source.TwoHand;
+    dest.Level = source.Level;
+    dest.m_byItemSlot = source.m_byItemSlot;
+    dest.m_wSkillIndex = source.m_wSkillIndex;
+    dest.Width = source.Width;
+    dest.Height = source.Height;
+    dest.DamageMin = source.DamageMin;
+    dest.DamageMax = source.DamageMax;
+    dest.SuccessfulBlocking = source.SuccessfulBlocking;
+    dest.Defense = source.Defense;
+    dest.MagicDefense = source.MagicDefense;
+    dest.WeaponSpeed = source.WeaponSpeed;
+    dest.WalkSpeed = source.WalkSpeed;
+    dest.Durability = source.Durability;
+    dest.MagicDur = source.MagicDur;
+    dest.MagicPower = source.MagicPower;
+    dest.RequireStrength = source.RequireStrength;
+    dest.RequireDexterity = source.RequireDexterity;
+    dest.RequireEnergy = source.RequireEnergy;
+    dest.RequireVitality = source.RequireVitality;
+    dest.RequireCharisma = source.RequireCharisma;
+    dest.RequireLevel = source.RequireLevel;
+    dest.Value = source.Value;
+    dest.iZen = source.iZen;
+    dest.AttType = source.AttType;
+    memcpy(dest.RequireClass, source.RequireClass, sizeof(source.RequireClass));
+    memcpy(dest.Resistance, source.Resistance, sizeof(source.Resistance));
+}
 
 void OpenItemScript(wchar_t* FileName)
 {
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
     {
-        const int Size = sizeof(ITEM_ATTRIBUTE_FILE);
+        // Get file size to determine structure version
+        fseek(fp, 0, SEEK_END);
+        long fileSize = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+
+        const int LegacySize = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
+        const int NewSize = sizeof(ITEM_ATTRIBUTE_FILE);
+        const long expectedLegacySize = LegacySize * MAX_ITEM + sizeof(DWORD);
+        const long expectedNewSize = NewSize * MAX_ITEM + sizeof(DWORD);
+
+        bool isLegacyFormat = (fileSize == expectedLegacySize);
+        int Size = isLegacyFormat ? LegacySize : NewSize;
+
         BYTE* Buffer = new BYTE[Size * MAX_ITEM];
         fread(Buffer, Size * MAX_ITEM, 1, fp);
         // crc
         DWORD dwCheckSum;
         fread(&dwCheckSum, sizeof(DWORD), 1, fp);
         fclose(fp);
+
         if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE2F1))
         {
             wchar_t Text[256];
@@ -403,43 +448,17 @@ void OpenItemScript(wchar_t* FileName)
             {
                 BuxConvert(pSeek, Size);
 
-                ITEM_ATTRIBUTE_FILE source;
-                memcpy(&source, pSeek, Size);
-
-                CMultiLanguage::ConvertFromUtf8(ItemAttribute[i].Name, source.Name, MAX_ITEM_NAME);
-                ItemAttribute[i].TwoHand = source.TwoHand;
-                ItemAttribute[i].Level = source.Level;
-                ItemAttribute[i].m_byItemSlot = source.m_byItemSlot;
-                ItemAttribute[i].m_wSkillIndex = source.m_wSkillIndex;
-                ItemAttribute[i].Width = source.Width;
-                ItemAttribute[i].Height = source.Height;
-                ItemAttribute[i].DamageMin = source.DamageMin;
-                ItemAttribute[i].DamageMax = source.DamageMax;
-                ItemAttribute[i].SuccessfulBlocking = source.SuccessfulBlocking;
-                ItemAttribute[i].Defense =source.Defense;
-                ItemAttribute[i].MagicDefense = source.MagicDefense;
-                ItemAttribute[i].WeaponSpeed = source.WeaponSpeed;
-                ItemAttribute[i].WalkSpeed = source.WalkSpeed;
-                ItemAttribute[i].Durability = source.Durability;
-                ItemAttribute[i].MagicDur = source.MagicDur;
-                ItemAttribute[i].MagicPower = source.MagicPower;
-                ItemAttribute[i].RequireStrength = source.RequireStrength;
-                ItemAttribute[i].RequireDexterity = source.RequireDexterity;
-                ItemAttribute[i].RequireEnergy = source.RequireEnergy;
-                ItemAttribute[i].RequireVitality = source.RequireVitality;
-                ItemAttribute[i].RequireCharisma = source.RequireCharisma;
-                ItemAttribute[i].RequireLevel = source.RequireLevel;
-                ItemAttribute[i].Value = source.Value;
-                ItemAttribute[i].iZen = source.iZen;
-                ItemAttribute[i].AttType = source.AttType;
-                for (int c = 0; c < MAX_CLASS; ++c)
+                if (isLegacyFormat)
                 {
-                    ItemAttribute[i].RequireClass[c] = source.RequireClass[c];
+                    ITEM_ATTRIBUTE_FILE_LEGACY source;
+                    memcpy(&source, pSeek, sizeof(source));
+                    CopyItemAttributeFromSource(ItemAttribute[i], source);
                 }
-
-                for (int r = 0; r < MAX_RESISTANCE; ++r)
+                else
                 {
-                    ItemAttribute[i].Resistance[r] = source.Resistance[r];
+                    ITEM_ATTRIBUTE_FILE source;
+                    memcpy(&source, pSeek, sizeof(source));
+                    CopyItemAttributeFromSource(ItemAttribute[i], source);
                 }
 
                 pSeek += Size;
