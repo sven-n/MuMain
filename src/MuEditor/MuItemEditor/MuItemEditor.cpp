@@ -80,12 +80,50 @@ void CMuItemEditor::Render(bool& showEditor)
     if (!ItemAttribute)
         return;
 
-    // Item editor is now rendered inside the center pane
-    // No need to set position/size here - the center pane handles layout
+    // Constants for layout
+    constexpr float TOOLBAR_HEIGHT = 40.0f;
+    constexpr float CONSOLE_HEIGHT = 200.0f;
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Calculate available space between toolbar and console
+    float availableTop = TOOLBAR_HEIGHT;
+    float availableBottom = io.DisplaySize.y - CONSOLE_HEIGHT;
+    float availableHeight = availableBottom - availableTop;
+
+    // Set initial window size and constraints
+    ImGui::SetNextWindowSizeConstraints(
+        ImVec2(400, 300),  // Min size
+        ImVec2(io.DisplaySize.x, availableHeight)  // Max size
+    );
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
     if (ImGui::Begin("Item Editor", &showEditor, flags))
     {
+        // Clamp window position to stay within bounds
+        ImVec2 windowPos = ImGui::GetWindowPos();
+        ImVec2 windowSize = ImGui::GetWindowSize();
+
+        // Clamp to keep window between toolbar and console
+        if (windowPos.y < availableTop)
+        {
+            ImGui::SetWindowPos(ImVec2(windowPos.x, availableTop));
+        }
+        if (windowPos.y + windowSize.y > availableBottom)
+        {
+            ImGui::SetWindowPos(ImVec2(windowPos.x, availableBottom - windowSize.y));
+        }
+
+        // Clamp horizontally to stay within screen bounds
+        if (windowPos.x < 0)
+        {
+            ImGui::SetWindowPos(ImVec2(0, windowPos.y));
+        }
+        if (windowPos.x + windowSize.x > io.DisplaySize.x)
+        {
+            ImGui::SetWindowPos(ImVec2(io.DisplaySize.x - windowSize.x, windowPos.y));
+        }
+
         // Check if hovering this window OR any popup
         bool isHovering = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup) ||
                          ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) ||
