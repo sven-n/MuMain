@@ -29,6 +29,9 @@ private:
 
     // Selected row tracking
     int m_selectedRow;
+
+    // Column freezing state
+    bool m_bFreezeColumns;
 };
 
 #define g_MuItemEditor CMuItemEditor::GetInstance()
