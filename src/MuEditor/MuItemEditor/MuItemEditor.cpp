@@ -13,6 +13,7 @@
 
 CMuItemEditor::CMuItemEditor()
     : m_selectedRow(-1)
+    , m_bFreezeColumns(false)
 {
     memset(m_szItemSearchBuffer, 0, sizeof(m_szItemSearchBuffer));
 
@@ -100,6 +101,8 @@ void CMuItemEditor::Render(bool& showEditor)
         RenderSearchBar();
         ImGui::SameLine();
         RenderColumnVisibilityMenu();
+        ImGui::SameLine();
+        ImGui::Checkbox("Freeze Index/Name", &m_bFreezeColumns);
         ImGui::Separator();
 
         // Convert search to lowercase for case-insensitive search
@@ -199,7 +202,19 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
     if (ImGui::BeginTable("ItemTable", visibleColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable))
     {
         // Setup columns based on visibility
-        ImGui::TableSetupScrollFreeze(0, 1); // Freeze header row
+        // Freeze columns based on toggle state (Index and Name columns if enabled)
+        if (m_bFreezeColumns && m_columnVisibility["Index"] && m_columnVisibility["Name"])
+        {
+            ImGui::TableSetupScrollFreeze(2, 1); // Freeze first 2 columns + header row
+        }
+        else if (m_bFreezeColumns && m_columnVisibility["Index"])
+        {
+            ImGui::TableSetupScrollFreeze(1, 1); // Freeze first column + header row
+        }
+        else
+        {
+            ImGui::TableSetupScrollFreeze(0, 1); // Freeze header row only
+        }
 
         if (m_columnVisibility["Index"]) ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed, 50.0f);
         if (m_columnVisibility["Name"]) ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 150.0f);
