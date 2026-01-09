@@ -26,6 +26,9 @@ private:
 
     // Column visibility state
     std::map<std::string, bool> m_columnVisibility;
+
+    // Selected row tracking
+    int m_selectedRow;
 };
 
 #define g_MuItemEditor CMuItemEditor::GetInstance()

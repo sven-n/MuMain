@@ -9,7 +9,10 @@
 #include <algorithm>
 #include <cctype>
 
+#include "imgui_internal.h"
+
 CMuItemEditor::CMuItemEditor()
+    : m_selectedRow(-1)
 {
     memset(m_szItemSearchBuffer, 0, sizeof(m_szItemSearchBuffer));
 
@@ -188,6 +191,10 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
         return;
     }
 
+    // Push style to reduce input field padding
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(4, 2));
+
     // Create a table with scrolling
     if (ImGui::BeginTable("ItemTable", visibleColumnCount, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable))
     {
@@ -245,13 +252,27 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             }
 
             ImGui::TableNextRow();
+
+            // Apply row highlighting if this row is selected
+            if (m_selectedRow == i)
+            {
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImVec4(0.3f, 0.5f, 0.8f, 0.3f)));
+            }
+
+            // Get the row bounds for click detection
+            ImGui::TableSetColumnIndex(0);
+            ImVec2 rowStartPos = ImGui::GetCursorScreenPos();
+            float rowHeight = ImGui::GetTextLineHeightWithSpacing();
+
             int colIdx = 0;
+            bool rowInteracted = false;
 
             // Index
             if (m_columnVisibility["Index"])
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::Text("%d", i);
+                if (ImGui::IsItemClicked()) rowInteracted = true;
             }
 
             // Name
@@ -259,6 +280,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 ImGui::TableSetColumnIndex(colIdx++);
                 ImGui::Text("%s", nameBuffer);
+                if (ImGui::IsItemClicked()) rowInteracted = true;
             }
 
             // TwoHand
@@ -272,6 +294,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     ItemAttribute[i].TwoHand = twoHand;
                     g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " TwoHand to " + std::to_string(twoHand));
                 }
+                // if (ImGui::IsItemClicked(0)) rowInteracted = true;
                 ImGui::PopID();
             }
 
@@ -289,6 +312,8 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Level to " + std::to_string(level));
                     }
                 }
+                // Select row when clicking on this input field
+                if (ImGui::IsItemClicked(0)) m_selectedRow = i;
                 ImGui::PopID();
             }
 
@@ -306,6 +331,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Slot to " + std::to_string(slot));
                     }
                 }
+                if (ImGui::IsItemClicked(0)) m_selectedRow = i;
                 ImGui::PopID();
             }
 
@@ -323,6 +349,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Skill to " + std::to_string(skill));
                     }
                 }
+                // if (ImGui::IsItemClicked(0)) rowInteracted = true;
                 ImGui::PopID();
             }
 
@@ -340,6 +367,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Width to " + std::to_string(width));
                     }
                 }
+                // if (ImGui::IsItemClicked(0)) rowInteracted = true;
                 ImGui::PopID();
             }
 
@@ -357,6 +385,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Height to " + std::to_string(height));
                     }
                 }
+                // if (ImGui::IsItemClicked(0)) rowInteracted = true;
                 ImGui::PopID();
             }
 
@@ -374,6 +403,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " DamageMin to " + std::to_string(dmgMin));
                     }
                 }
+                // if (ImGui::IsItemClicked(0)) rowInteracted = true;
                 ImGui::PopID();
             }
 
@@ -391,6 +421,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " DamageMax to " + std::to_string(dmgMax));
                     }
                 }
+                // if (ImGui::IsItemClicked(0)) rowInteracted = true;
                 ImGui::PopID();
             }
 
@@ -677,12 +708,35 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " AttType to " + std::to_string(attType));
                     }
                 }
+                if (ImGui::IsItemClicked(0)) rowInteracted = true;
                 ImGui::PopID();
+            }
+
+            // Detect clicks on empty row space
+            if (!rowInteracted && ImGui::IsMouseClicked(0))
+            {
+                ImVec2 mousePos = ImGui::GetMousePos();
+                ImVec2 rowEndPos = ImGui::GetCursorScreenPos();
+
+                // Check if mouse is within this row's vertical bounds
+                if (mousePos.y >= rowStartPos.y && mousePos.y <= rowStartPos.y + rowHeight)
+                {
+                    rowInteracted = true;
+                }
+            }
+
+            // Update selected row if any interaction occurred
+            if (rowInteracted)
+            {
+                m_selectedRow = i;
             }
         }
 
         ImGui::EndTable();
     }
+
+    // Pop the style variables
+    ImGui::PopStyleVar(2);
 }
 
 void CMuItemEditor::RenderColumnVisibilityMenu()
