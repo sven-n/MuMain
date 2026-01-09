@@ -1,3 +1,5 @@
+
+
 #pragma once
 
 #include <memory>
@@ -334,7 +336,7 @@ enum struct STORAGE_TYPE
 
 constexpr int MAX_ITEM_TYPE = 16;
 
-constexpr int MAX_ITEM_NAME = 30;
+constexpr int MAX_ITEM_NAME = 50;
 
 constexpr int MAX_ITEM_INDEX = 512;
 
