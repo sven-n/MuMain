@@ -327,8 +327,8 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Level to " + std::to_string(level));
                     }
                 }
-                // Select row when clicking on this input field
-                if (ImGui::IsItemClicked(0)) m_selectedRow = i;
+                // Select row when activating this input field
+                if (ImGui::IsItemActivated()) rowInteracted = true;
                 ImGui::PopID();
             }
 
@@ -346,7 +346,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Slot to " + std::to_string(slot));
                     }
                 }
-                if (ImGui::IsItemClicked(0)) m_selectedRow = i;
+                if (ImGui::IsItemActivated()) rowInteracted = true;
                 ImGui::PopID();
             }
 
@@ -723,7 +723,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                         g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " AttType to " + std::to_string(attType));
                     }
                 }
-                if (ImGui::IsItemClicked(0)) rowInteracted = true;
+                if (ImGui::IsItemActivated()) rowInteracted = true;
                 ImGui::PopID();
             }
 
