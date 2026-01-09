@@ -16,6 +16,12 @@
 // The cursor is hidden when the counter is < CURSOR_VISIBLE_THRESHOLD
 constexpr int CURSOR_VISIBLE_THRESHOLD = 0;
 
+// "Open Editor" button layout constants
+constexpr float EDITOR_BTN_X_OFFSET = 110.0f;
+constexpr float EDITOR_BTN_Y = 8.0f;
+constexpr float EDITOR_BTN_WIDTH = 100.0f;
+constexpr float EDITOR_BTN_HEIGHT = 24.0f;
+
 CMuEditor::CMuEditor()
     : m_bEditorMode(false)
     , m_bInitialized(false)
@@ -138,10 +144,10 @@ void CMuEditor::Update()
         io.WantCaptureKeyboard = false;
 
         // Check if mouse is over button area (top-right corner)
-        float buttonX = io.DisplaySize.x - 110;
-        float buttonY = 8.0f;
-        float buttonWidth = 100.0f;
-        float buttonHeight = 24.0f;
+        float buttonX = io.DisplaySize.x - EDITOR_BTN_X_OFFSET;
+        float buttonY = EDITOR_BTN_Y;
+        float buttonWidth = EDITOR_BTN_WIDTH;
+        float buttonHeight = EDITOR_BTN_HEIGHT;
 
         if (io.MousePos.x >= buttonX && io.MousePos.x <= (buttonX + buttonWidth) &&
             io.MousePos.y >= buttonY && io.MousePos.y <= (buttonY + buttonHeight))
