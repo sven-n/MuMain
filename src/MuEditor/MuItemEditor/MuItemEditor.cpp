@@ -125,8 +125,8 @@ void CMuItemEditor::Render(bool& showEditor)
 
 void CMuItemEditor::RenderSaveButton()
 {
-    // Save button on the right
-    ImGui::SameLine(ImGui::GetWindowWidth() - 120);
+    // Save button on the right (accounting for both buttons)
+    ImGui::SameLine(ImGui::GetWindowWidth() - 260);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.8f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.9f, 1.0f));
     if (ImGui::Button("Save Items"))
@@ -154,6 +154,32 @@ void CMuItemEditor::RenderSaveButton()
     }
     ImGui::PopStyleColor(2);
 
+    ImGui::SameLine();
+
+    // Export to CSV button
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.9f, 0.7f, 1.0f));
+    if (ImGui::Button("Export to CSV"))
+    {
+        extern bool ExportItemAttributeToCsv(wchar_t* FileName);
+        extern std::wstring g_strSelectedML;
+
+        wchar_t csvFileName[256];
+        swprintf(csvFileName, L"Data\\Local\\%ls\\Item_%ls_export.csv", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+
+        if (ExportItemAttributeToCsv(csvFileName))
+        {
+            g_MuEditorConsole.LogEditor("Exported items to CSV: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv");
+            ImGui::OpenPopup("Export Success");
+        }
+        else
+        {
+            g_MuEditorConsole.LogEditor("ERROR: Failed to export items to CSV!");
+            ImGui::OpenPopup("Export Failed");
+        }
+    }
+    ImGui::PopStyleColor(2);
+
     // Success popup
     if (ImGui::BeginPopupModal("Save Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
@@ -169,6 +195,17 @@ void CMuItemEditor::RenderSaveButton()
     if (ImGui::BeginPopupModal("Save Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("Failed to save item attributes!");
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    // Export Success popup
+    if (ImGui::BeginPopupModal("Export Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Items exported to CSV successfully!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
