@@ -51,6 +51,7 @@ private:
 
     void WriteToLogFile(const std::string& message);
     void CaptureConsoleOutput(); // Capture new output from Windows console
+    void CleanupOldLogs(); // Delete log files older than 14 days
 
     std::string m_strEditorConsole;
     std::string m_strGameConsole;

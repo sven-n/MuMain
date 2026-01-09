@@ -10,6 +10,9 @@
 #include <iomanip>
 #include <mutex>
 #include <cstdarg>
+#include <filesystem>
+#include <vector>
+#include <algorithm>
 
 // Mutex for thread-safe console access
 static std::mutex g_consoleMutex;
@@ -135,26 +138,75 @@ CMuEditorConsole& CMuEditorConsole::GetInstance()
     return instance;
 }
 
+void CMuEditorConsole::CleanupOldLogs()
+{
+    try
+    {
+        namespace fs = std::filesystem;
+
+        // Get current time
+        time_t now = time(0);
+        const time_t maxAge = 14 * 24 * 60 * 60; // 14 days in seconds
+
+        // Ensure MuEditor directory exists
+        fs::path logDir = "MuEditor";
+        if (!fs::exists(logDir))
+        {
+            fs::create_directory(logDir);
+        }
+
+        // Find all log files matching pattern in MuEditor folder
+        std::vector<fs::path> logFiles;
+        for (const auto& entry : fs::directory_iterator(logDir))
+        {
+            if (entry.is_regular_file())
+            {
+                std::string filename = entry.path().filename().string();
+                if (filename.find("MuEditor_") == 0 && filename.find(".log") != std::string::npos)
+                {
+                    logFiles.push_back(entry.path());
+                }
+            }
+        }
+
+        // Delete logs older than 14 days
+        for (const auto& logPath : logFiles)
+        {
+            auto ftime = fs::last_write_time(logPath);
+            auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+                ftime - fs::file_time_type::clock::now() + std::chrono::system_clock::now());
+            time_t fileTime = std::chrono::system_clock::to_time_t(sctp);
+
+            if ((now - fileTime) > maxAge)
+            {
+                fs::remove(logPath);
+            }
+        }
+    }
+    catch (const std::exception&)
+    {
+        // Silently fail if cleanup encounters any errors
+    }
+}
+
 void CMuEditorConsole::Initialize()
 {
-    // Create log file with timestamp
+    // Create log file with date only (one log per day)
     time_t now = time(0);
     tm timeinfo;
     localtime_s(&timeinfo, &now);
 
     std::ostringstream filename;
-    filename << "MuEditor_"
+    filename << "MuEditor\\MuEditor_"
              << std::setfill('0') << std::setw(4) << (timeinfo.tm_year + 1900)
              << std::setfill('0') << std::setw(2) << (timeinfo.tm_mon + 1)
              << std::setfill('0') << std::setw(2) << timeinfo.tm_mday
-             << "_"
-             << std::setfill('0') << std::setw(2) << timeinfo.tm_hour
-             << std::setfill('0') << std::setw(2) << timeinfo.tm_min
-             << std::setfill('0') << std::setw(2) << timeinfo.tm_sec
              << ".log";
 
     m_strLogFilePath = filename.str();
-    m_logFile.open(m_strLogFilePath, std::ios::out);
+
+    // Open in append mode to continue writing to today's log
+    m_logFile.open(m_strLogFilePath, std::ios::app);
 
     if (m_logFile.is_open())
     {
@@ -163,6 +215,9 @@ void CMuEditorConsole::Initialize()
         m_logFile << "===========================" << std::endl << std::endl;
         m_logFile.flush();
     }
+
+    // Clean up old log files (keep only last 14 days)
+    CleanupOldLogs();
 
     // Redirect stdout and stderr to capture all console output
     m_pStdoutBuf = new ConsoleStreamBuf(std::cout, true);
