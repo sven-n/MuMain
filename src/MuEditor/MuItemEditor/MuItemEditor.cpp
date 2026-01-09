@@ -45,6 +45,15 @@ CMuItemEditor::CMuItemEditor()
     m_columnVisibility["Value"] = false;
     m_columnVisibility["Zen"] = false;
     m_columnVisibility["AttType"] = false;
+
+    // RequireClass array (7 classes) - these are the class restrictions
+    m_columnVisibility["DW/SM"] = false;
+    m_columnVisibility["DK/BK"] = false;
+    m_columnVisibility["ELF/ME"] = false;
+    m_columnVisibility["MG"] = false;
+    m_columnVisibility["DL"] = false;
+    m_columnVisibility["SUM"] = false;
+    m_columnVisibility["RF"] = false;
 }
 
 CMuItemEditor& CMuItemEditor::GetInstance()
@@ -244,13 +253,22 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
         if (m_columnVisibility["Zen"]) ImGui::TableSetupColumn("Zen", ImGuiTableColumnFlags_WidthFixed, 80.0f);
         if (m_columnVisibility["AttType"]) ImGui::TableSetupColumn("AttType", ImGuiTableColumnFlags_WidthFixed, 70.0f);
 
+        // RequireClass array columns (7 classes)
+        if (m_columnVisibility["DW/SM"]) ImGui::TableSetupColumn("DW/SM", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["DK/BK"]) ImGui::TableSetupColumn("DK/BK", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+        if (m_columnVisibility["ELF/ME"]) ImGui::TableSetupColumn("ELF/ME", ImGuiTableColumnFlags_WidthFixed, 65.0f);
+        if (m_columnVisibility["MG"]) ImGui::TableSetupColumn("MG", ImGuiTableColumnFlags_WidthFixed, 50.0f);
+        if (m_columnVisibility["DL"]) ImGui::TableSetupColumn("DL", ImGuiTableColumnFlags_WidthFixed, 50.0f);
+        if (m_columnVisibility["SUM"]) ImGui::TableSetupColumn("SUM", ImGuiTableColumnFlags_WidthFixed, 55.0f);
+        if (m_columnVisibility["RF"]) ImGui::TableSetupColumn("RF", ImGuiTableColumnFlags_WidthFixed, 50.0f);
+
         ImGui::TableHeadersRow();
 
         // Render all items with filtering
         for (int i = 0; i < MAX_ITEM; i++)
         {
             // Get item name
-            char nameBuffer[128];
+            char nameBuffer[256];
             WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
 
             // Skip uninitialized items (no name)
@@ -784,6 +802,125 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                 ImGui::PopID();
             }
 
+            // RequireClass array - DW/SM (index 0)
+            if (m_columnVisibility["DW/SM"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 1000 + 25);
+                int reqClass = ItemAttribute[i].RequireClass[0];
+                if (ImGui::InputInt("##dwsm", &reqClass, 0, 0))
+                {
+                    if (reqClass >= 0 && reqClass <= 255)
+                    {
+                        ItemAttribute[i].RequireClass[0] = (BYTE)reqClass;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[DW/SM] to " + std::to_string(reqClass));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // RequireClass array - DK/BK (index 1)
+            if (m_columnVisibility["DK/BK"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 1000 + 26);
+                int reqClass = ItemAttribute[i].RequireClass[1];
+                if (ImGui::InputInt("##dkbk", &reqClass, 0, 0))
+                {
+                    if (reqClass >= 0 && reqClass <= 255)
+                    {
+                        ItemAttribute[i].RequireClass[1] = (BYTE)reqClass;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[DK/BK] to " + std::to_string(reqClass));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // RequireClass array - ELF/ME (index 2)
+            if (m_columnVisibility["ELF/ME"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 1000 + 27);
+                int reqClass = ItemAttribute[i].RequireClass[2];
+                if (ImGui::InputInt("##elfme", &reqClass, 0, 0))
+                {
+                    if (reqClass >= 0 && reqClass <= 255)
+                    {
+                        ItemAttribute[i].RequireClass[2] = (BYTE)reqClass;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[ELF/ME] to " + std::to_string(reqClass));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // RequireClass array - MG (index 3)
+            if (m_columnVisibility["MG"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 1000 + 28);
+                int reqClass = ItemAttribute[i].RequireClass[3];
+                if (ImGui::InputInt("##mg", &reqClass, 0, 0))
+                {
+                    if (reqClass >= 0 && reqClass <= 255)
+                    {
+                        ItemAttribute[i].RequireClass[3] = (BYTE)reqClass;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[MG] to " + std::to_string(reqClass));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // RequireClass array - DL (index 4)
+            if (m_columnVisibility["DL"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 1000 + 29);
+                int reqClass = ItemAttribute[i].RequireClass[4];
+                if (ImGui::InputInt("##dl", &reqClass, 0, 0))
+                {
+                    if (reqClass >= 0 && reqClass <= 255)
+                    {
+                        ItemAttribute[i].RequireClass[4] = (BYTE)reqClass;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[DL] to " + std::to_string(reqClass));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // RequireClass array - SUM (index 5)
+            if (m_columnVisibility["SUM"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 1000 + 30);
+                int reqClass = ItemAttribute[i].RequireClass[5];
+                if (ImGui::InputInt("##sum", &reqClass, 0, 0))
+                {
+                    if (reqClass >= 0 && reqClass <= 255)
+                    {
+                        ItemAttribute[i].RequireClass[5] = (BYTE)reqClass;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[SUM] to " + std::to_string(reqClass));
+                    }
+                }
+                ImGui::PopID();
+            }
+
+            // RequireClass array - RF (index 6)
+            if (m_columnVisibility["RF"])
+            {
+                ImGui::TableSetColumnIndex(colIdx++);
+                ImGui::PushID(i * 1000 + 31);
+                int reqClass = ItemAttribute[i].RequireClass[6];
+                if (ImGui::InputInt("##rf", &reqClass, 0, 0))
+                {
+                    if (reqClass >= 0 && reqClass <= 255)
+                    {
+                        ItemAttribute[i].RequireClass[6] = (BYTE)reqClass;
+                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[RF] to " + std::to_string(reqClass));
+                    }
+                }
+                ImGui::PopID();
+            }
+
             // Detect clicks on empty row space
             if (!rowInteracted && ImGui::IsMouseClicked(0))
             {
@@ -867,6 +1004,16 @@ void CMuItemEditor::RenderColumnVisibilityMenu()
         ImGui::Checkbox("Value", &m_columnVisibility["Value"]);
         ImGui::Checkbox("Zen", &m_columnVisibility["Zen"]);
         ImGui::Checkbox("AttType", &m_columnVisibility["AttType"]);
+
+        ImGui::Separator();
+        ImGui::Text("Class Requirements:");
+        ImGui::Checkbox("DW/SM", &m_columnVisibility["DW/SM"]);
+        ImGui::Checkbox("DK/BK", &m_columnVisibility["DK/BK"]);
+        ImGui::Checkbox("ELF/ME", &m_columnVisibility["ELF/ME"]);
+        ImGui::Checkbox("MG", &m_columnVisibility["MG"]);
+        ImGui::Checkbox("DL", &m_columnVisibility["DL"]);
+        ImGui::Checkbox("SUM", &m_columnVisibility["SUM"]);
+        ImGui::Checkbox("RF", &m_columnVisibility["RF"]);
 
         ImGui::EndPopup();
     }
