@@ -453,9 +453,8 @@ void CMuEditorConsole::Render()
 
         // Scrollable content area
         ImGui::BeginChild("EditorConsoleContent", ImVec2(0, 0), false);
-        ImGui::TextWrapped("%s", m_strEditorConsole.c_str());
-        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-            ImGui::SetScrollHereY(1.0f);
+        ImGui::InputTextMultiline("##EditorConsoleText", const_cast<char*>(m_strEditorConsole.c_str()),
+            m_strEditorConsole.length() + 1, ImVec2(-1, -1), ImGuiInputTextFlags_ReadOnly);
         ImGui::EndChild();
 
         ImGui::EndChild();
@@ -482,9 +481,8 @@ void CMuEditorConsole::Render()
 
         // Scrollable content area
         ImGui::BeginChild("GameConsoleContent", ImVec2(0, 0), false);
-        ImGui::TextWrapped("%s", m_strGameConsole.c_str());
-        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-            ImGui::SetScrollHereY(1.0f);
+        ImGui::InputTextMultiline("##GameConsoleText", const_cast<char*>(m_strGameConsole.c_str()),
+            m_strGameConsole.length() + 1, ImVec2(-1, -1), ImGuiInputTextFlags_ReadOnly);
         ImGui::EndChild();
 
         ImGui::EndChild();
