@@ -9,8 +9,7 @@
 #include "SceneCore.h"
 
 #ifdef _EDITOR
-#include "../MuEditor/MuEditor.h"
-#include "../MuEditor/MuEditorConsole.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 #include "imgui.h"
 #endif
 

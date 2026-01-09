@@ -14,7 +14,7 @@
 #include "Scenes/SceneCommon.h"
 
 #ifdef _EDITOR
-#include "../MuEditor/MuEditor.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 #endif
 
 CLoadingScene::CLoadingScene()
@@ -97,7 +97,7 @@ void LoadingScene(HDC hDC)
     ::glFlush();
 #ifdef _EDITOR
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
-    g_MuEditor.Render();
+    g_MuEditorCore.Render();
 
     // Render game cursor on top of ImGui if not hovering UI
     extern bool g_bRenderGameCursor;

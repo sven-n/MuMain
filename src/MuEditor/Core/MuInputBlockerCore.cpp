@@ -2,17 +2,18 @@
 
 #ifdef _EDITOR
 
-#include "MuInputBlocker.h"
+#include "MuInputBlockerCore.h"
+
 #include "imgui.h"
 #include "NewUICommon.h"
 
-CMuInputBlocker& CMuInputBlocker::GetInstance()
+CMuInputBlockerCore& CMuInputBlockerCore::GetInstance()
 {
-    static CMuInputBlocker instance;
+    static CMuInputBlockerCore instance;
     return instance;
 }
 
-void CMuInputBlocker::ProcessInputBlocking()
+void CMuInputBlockerCore::ProcessInputBlocking()
 {
     // Block game input when hovering UI
     ImGuiIO& io = ImGui::GetIO();

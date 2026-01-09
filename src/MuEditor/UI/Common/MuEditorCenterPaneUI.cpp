@@ -3,24 +3,22 @@
 #ifdef _EDITOR
 
 #include "../MuEditor/MuEditorCenterPane.h"
-#include "MuEditor.h"
-#include "../MuEditor/MuItemEditor/MuItemEditor.h"
-#include "imgui.h"
+#include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 
-CMuEditorCenterPane& CMuEditorCenterPane::GetInstance()
+CMuEditorCenterPaneUI& CMuEditorCenterPaneUI::GetInstance()
 {
-    static CMuEditorCenterPane instance;
+    static CMuEditorCenterPaneUI instance;
     return instance;
 }
 
-void CMuEditorCenterPane::Render(bool& showItemEditor)
+void CMuEditorCenterPaneUI::Render(bool& showItemEditor)
 {
     // Simply render editor windows directly without a container
     // The container was causing an extra debug window to appear
 
     if (showItemEditor)
     {
-        g_MuItemEditor.Render(showItemEditor);
+        g_MuItemEditorUI.Render(showItemEditor);
     }
 
     // Future editor windows can be added here

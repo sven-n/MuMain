@@ -4,10 +4,10 @@
 
 #include "stdafx.h"
 
-class CMuEditor
+class CMuEditorCore
 {
 public:
-    static CMuEditor& GetInstance();
+    static CMuEditorCore& GetInstance();
 
     void Initialize(HWND hwnd, HDC hdc);
     void Shutdown();
@@ -23,8 +23,8 @@ public:
     void SetHoveringUI(bool hovering) { m_bHoveringUI = hovering; }
 
 private:
-    CMuEditor();
-    ~CMuEditor();
+    CMuEditorCore();
+    ~CMuEditorCore();
 
     bool m_bEditorMode;
     bool m_bInitialized;
@@ -35,6 +35,6 @@ private:
 };
 
 // Global accessor
-#define g_MuEditor CMuEditor::GetInstance()
+#define g_MuEditorCore CMuEditorCore::GetInstance()
 
 #endif // _EDITOR

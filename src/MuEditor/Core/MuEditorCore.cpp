@@ -2,14 +2,14 @@
 
 #ifdef _EDITOR
 
-#include "MuEditor.h"
-#include "MuEditorUI.h"
-#include "MuEditorConsole.h"
-#include "../MuEditor/MuEditorCenterPane.h"
-#include "../MuEditor/MuItemEditor/MuItemEditor.h"
+#include "MuEditorCore.h"
+#include "../MuEditor/UI/Common/MuEditorUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
+#include "MuEditor/UI/Common/MuEditorCenterPaneUI.h"
+#include "MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 
 // Windows cursor display counter thresholds
 // The cursor is visible when the counter is >= CURSOR_VISIBLE_THRESHOLD
@@ -22,7 +22,7 @@ constexpr float EDITOR_BTN_Y = 8.0f;
 constexpr float EDITOR_BTN_WIDTH = 100.0f;
 constexpr float EDITOR_BTN_HEIGHT = 24.0f;
 
-CMuEditor::CMuEditor()
+CMuEditorCore::CMuEditorCore()
     : m_bEditorMode(false)
     , m_bInitialized(false)
     , m_bFrameStarted(false)
@@ -32,18 +32,18 @@ CMuEditor::CMuEditor()
 {
 }
 
-CMuEditor::~CMuEditor()
+CMuEditorCore::~CMuEditorCore()
 {
     Shutdown();
 }
 
-CMuEditor& CMuEditor::GetInstance()
+CMuEditorCore& CMuEditorCore::GetInstance()
 {
-    static CMuEditor instance;
+    static CMuEditorCore instance;
     return instance;
 }
 
-void CMuEditor::Initialize(HWND hwnd, HDC hdc)
+void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
 {
     if (m_bInitialized)
         return;
@@ -75,19 +75,19 @@ void CMuEditor::Initialize(HWND hwnd, HDC hdc)
     fflush(stderr);
 
     m_bInitialized = true;
-    g_MuEditorConsole.LogEditor("MU Editor initialized");
+    g_MuEditorConsoleUI.LogEditor("MU Editor initialized");
 
     fwprintf(stderr, L"[MuEditor] Initialize() completed\n");
     fflush(stderr);
 }
 
-void CMuEditor::Shutdown()
+void CMuEditorCore::Shutdown()
 {
     if (!m_bInitialized)
         return;
 
     // Save item editor preferences before shutting down
-    g_MuItemEditor.SaveColumnPreferences();
+    g_MuItemEditorUI.SaveColumnPreferences();
 
     ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -96,7 +96,7 @@ void CMuEditor::Shutdown()
     m_bInitialized = false;
 }
 
-void CMuEditor::Update()
+void CMuEditorCore::Update()
 {
     if (!m_bInitialized)
         return;
@@ -230,7 +230,7 @@ void CMuEditor::Update()
     }
 }
 
-void CMuEditor::Render()
+void CMuEditorCore::Render()
 {
     if (!m_bInitialized)
         return;
@@ -248,10 +248,10 @@ void CMuEditor::Render()
     if (m_bEditorMode)
     {
         // Render center pane (handles all editor windows and input blocking)
-        g_MuEditorCenterPane.Render(m_bShowItemEditor);
+        g_MuEditorCenterPaneUI.Render(m_bShowItemEditor);
 
         // Render console
-        g_MuEditorConsole.Render();
+        g_MuEditorConsoleUI.Render();
     }
 
     // Store current hover state for next frame's input blocking

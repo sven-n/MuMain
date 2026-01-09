@@ -2,8 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "MuEditorConsole.h"
-#include "MuEditor.h"
+#include "MuEditor\UI\Console\MuEditorConsoleUI.h"
 #include "imgui.h"
 #include <ctime>
 #include <sstream>
@@ -13,6 +12,9 @@
 #include <filesystem>
 #include <vector>
 #include <algorithm>
+
+#include "MuEditor/Core/MuEditorCore.h"
+#include "MuEditor/UI/Common/MuEditorUI.h"
 
 // Mutex for thread-safe console access
 static std::mutex g_consoleMutex;
@@ -37,7 +39,7 @@ extern "C" {
             str.pop_back();
 
         if (!str.empty())
-            g_MuEditorConsole.LogGame(str);
+            g_MuEditorConsoleUI.LogGame(str);
 
         return result;
     }
@@ -60,7 +62,7 @@ extern "C" {
             str.pop_back();
 
         if (!str.empty())
-            g_MuEditorConsole.LogGame(str);
+            g_MuEditorConsoleUI.LogGame(str);
 
         return result;
     }
@@ -99,7 +101,7 @@ std::streambuf::int_type ConsoleStreamBuf::overflow(int_type c)
             // Send to ImGui console
             if (!line.empty())
             {
-                g_MuEditorConsole.LogGame(line);
+                g_MuEditorConsoleUI.LogGame(line);
             }
 
             // Also write to original stream
@@ -120,25 +122,25 @@ std::streamsize ConsoleStreamBuf::xsputn(const char* s, std::streamsize n)
     return n;
 }
 
-CMuEditorConsole::CMuEditorConsole()
+CMuEditorConsoleUI::CMuEditorConsoleUI()
     : m_pStdoutBuf(nullptr)
     , m_pStderrBuf(nullptr)
 {
     Initialize();
 }
 
-CMuEditorConsole::~CMuEditorConsole()
+CMuEditorConsoleUI::~CMuEditorConsoleUI()
 {
     Shutdown();
 }
 
-CMuEditorConsole& CMuEditorConsole::GetInstance()
+CMuEditorConsoleUI& CMuEditorConsoleUI::GetInstance()
 {
-    static CMuEditorConsole instance;
+    static CMuEditorConsoleUI instance;
     return instance;
 }
 
-void CMuEditorConsole::CleanupOldLogs()
+void CMuEditorConsoleUI::CleanupOldLogs()
 {
     try
     {
@@ -189,7 +191,7 @@ void CMuEditorConsole::CleanupOldLogs()
     }
 }
 
-void CMuEditorConsole::Initialize()
+void CMuEditorConsoleUI::Initialize()
 {
     // Create log file with date only (one log per day)
     time_t now = time(0);
@@ -227,7 +229,7 @@ void CMuEditorConsole::Initialize()
     CaptureConsoleOutput();
 }
 
-void CMuEditorConsole::Shutdown()
+void CMuEditorConsoleUI::Shutdown()
 {
     // Restore original stream buffers
     if (m_pStdoutBuf)
@@ -248,7 +250,7 @@ void CMuEditorConsole::Shutdown()
     }
 }
 
-void CMuEditorConsole::WriteToLogFile(const std::string& message)
+void CMuEditorConsoleUI::WriteToLogFile(const std::string& message)
 {
     if (m_logFile.is_open())
     {
@@ -257,7 +259,7 @@ void CMuEditorConsole::WriteToLogFile(const std::string& message)
     }
 }
 
-void CMuEditorConsole::LogEditor(const std::string& message)
+void CMuEditorConsoleUI::LogEditor(const std::string& message)
 {
     // Add timestamp
     time_t now = time(0);
@@ -275,7 +277,7 @@ void CMuEditorConsole::LogEditor(const std::string& message)
     WriteToLogFile(fullMessage);
 }
 
-void CMuEditorConsole::LogGame(const std::string& message)
+void CMuEditorConsoleUI::LogGame(const std::string& message)
 {
     std::lock_guard<std::mutex> lock(g_consoleMutex);
 
@@ -286,7 +288,7 @@ void CMuEditorConsole::LogGame(const std::string& message)
     WriteToLogFile("[GAME] " + message);
 }
 
-void CMuEditorConsole::CaptureConsoleOutput()
+void CMuEditorConsoleUI::CaptureConsoleOutput()
 {
     // Get console screen buffer info
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -406,7 +408,7 @@ void CMuEditorConsole::CaptureConsoleOutput()
     delete[] pCharBuffer;
 }
 
-void CMuEditorConsole::Render()
+void CMuEditorConsoleUI::Render()
 {
     CaptureConsoleOutput();
 
@@ -427,7 +429,7 @@ void CMuEditorConsole::Render()
         // Check if hovering this window or any of its children
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         {
-            g_MuEditor.SetHoveringUI(true);
+            g_MuEditorCore.SetHoveringUI(true);
         }
 
         // Split horizontally

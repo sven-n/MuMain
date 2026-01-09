@@ -2,18 +2,21 @@
 
 #ifdef _EDITOR
 
-#include "MuItemEditor.h"
-#include "../MuEditor/MuEditor.h"
-#include "../MuEditor/MuEditorConsole.h"
+#include "MuItemEditorUI.h"
+#include "MuEditor/Core/MuEditorCore.h"
+#include "DataHandler/ItemData/ItemDataHandler.h"
 #include "imgui.h"
 #include <algorithm>
 #include <cctype>
 #include <fstream>
 #include <direct.h>
+#include <vector>
 
 #include "imgui_internal.h"
+#include "MuEditor/Core/MuEditorCore.h"
+#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
 
-CMuItemEditor::CMuItemEditor()
+CMuItemEditorUI::CMuItemEditorUI()
     : m_selectedRow(-1)
     , m_bFreezeColumns(false)
 {
@@ -61,19 +64,19 @@ CMuItemEditor::CMuItemEditor()
     LoadColumnPreferences();
 }
 
-CMuItemEditor::~CMuItemEditor()
+CMuItemEditorUI::~CMuItemEditorUI()
 {
     // Save column preferences when destroying
     SaveColumnPreferences();
 }
 
-CMuItemEditor& CMuItemEditor::GetInstance()
+CMuItemEditorUI& CMuItemEditorUI::GetInstance()
 {
-    static CMuItemEditor instance;
+    static CMuItemEditorUI instance;
     return instance;
 }
 
-void CMuItemEditor::Render(bool& showEditor)
+void CMuItemEditorUI::Render(bool& showEditor)
 {
     // Access external item data
     extern ITEM_ATTRIBUTE* ItemAttribute;
@@ -131,7 +134,7 @@ void CMuItemEditor::Render(bool& showEditor)
 
         if (isHovering)
         {
-            g_MuEditor.SetHoveringUI(true);
+            g_MuEditorCore.SetHoveringUI(true);
         }
 
         ImGui::Text("Edit Item Attributes - Total Items: %d", MAX_ITEM);
@@ -156,7 +159,7 @@ void CMuItemEditor::Render(bool& showEditor)
     ImGui::End();
 }
 
-void CMuItemEditor::RenderSaveButton()
+void CMuItemEditorUI::RenderSaveButton()
 {
     // Save button on the right (accounting for three buttons)
     ImGui::SameLine(ImGui::GetWindowWidth() - 390);
@@ -164,24 +167,23 @@ void CMuItemEditor::RenderSaveButton()
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.9f, 1.0f));
     if (ImGui::Button("Save Items"))
     {
-        extern bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog);
         extern std::wstring g_strSelectedML;
 
         wchar_t fileName[256];
         swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
         std::string changeLog;
-        if (SaveItemScript(fileName, &changeLog))
+        if (g_ItemDataHandler.Save(fileName, &changeLog))
         {
             // Log to editor console
-            g_MuEditorConsole.LogEditor("=== SAVE COMPLETED ===\n");
-            g_MuEditorConsole.LogEditor(changeLog);
-            g_MuEditorConsole.LogEditor("======================\n");
+            g_MuEditorConsoleUI.LogEditor("=== SAVE COMPLETED ===\n");
+            g_MuEditorConsoleUI.LogEditor(changeLog);
+            g_MuEditorConsoleUI.LogEditor("======================\n");
             ImGui::OpenPopup("Save Success");
         }
         else
         {
-            g_MuEditorConsole.LogEditor("ERROR: Failed to save item attributes!\n");
+            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to save item attributes!\n");
             ImGui::OpenPopup("Save Failed");
         }
     }
@@ -189,52 +191,50 @@ void CMuItemEditor::RenderSaveButton()
 
     ImGui::SameLine();
 
-    // Save as S6E3 Legacy button
+    // Export as S6E3 Legacy button
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.4f, 0.8f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.5f, 0.9f, 1.0f));
-    if (ImGui::Button("Save as S6E3"))
+    if (ImGui::Button("Export as S6E3"))
     {
-        extern bool SaveItemScriptLegacy(wchar_t* FileName);
         extern std::wstring g_strSelectedML;
 
         wchar_t fileName[256];
         swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls_S6E3.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
-        if (SaveItemScriptLegacy(fileName))
+        if (g_ItemDataHandler.SaveLegacy(fileName))
         {
-            g_MuEditorConsole.LogEditor("Saved items in S6E3 legacy format: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd\n");
-            ImGui::OpenPopup("Save S6E3 Success");
+            g_MuEditorConsoleUI.LogEditor("Exported items in S6E3 legacy format: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd\n");
+            ImGui::OpenPopup("Export S6E3 Success");
         }
         else
         {
-            g_MuEditorConsole.LogEditor("ERROR: Failed to save item attributes in S6E3 format!\n");
-            ImGui::OpenPopup("Save S6E3 Failed");
+            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to export item attributes in S6E3 format!\n");
+            ImGui::OpenPopup("Export S6E3 Failed");
         }
     }
     ImGui::PopStyleColor(2);
 
     ImGui::SameLine();
 
-    // Export to CSV button
+    // Export as CSV button
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.9f, 0.7f, 1.0f));
-    if (ImGui::Button("Export to CSV"))
+    if (ImGui::Button("Export as CSV"))
     {
-        extern bool ExportItemAttributeToCsv(wchar_t* FileName);
         extern std::wstring g_strSelectedML;
 
         wchar_t csvFileName[256];
         swprintf(csvFileName, L"Data\\Local\\%ls\\Item_%ls_export.csv", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
-        if (ExportItemAttributeToCsv(csvFileName))
+        if (g_ItemDataHandler.ExportToCsv(csvFileName))
         {
-            g_MuEditorConsole.LogEditor("Exported items to CSV: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv");
-            ImGui::OpenPopup("Export Success");
+            g_MuEditorConsoleUI.LogEditor("Exported items as CSV: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv\n");
+            ImGui::OpenPopup("Export CSV Success");
         }
         else
         {
-            g_MuEditorConsole.LogEditor("ERROR: Failed to export items to CSV!");
-            ImGui::OpenPopup("Export Failed");
+            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to export item attributes as CSV!\n");
+            ImGui::OpenPopup("Export CSV Failed");
         }
     }
     ImGui::PopStyleColor(2);
@@ -261,10 +261,10 @@ void CMuItemEditor::RenderSaveButton()
         ImGui::EndPopup();
     }
 
-    // Export Success popup
-    if (ImGui::BeginPopupModal("Export Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // CSV Export Success popup
+    if (ImGui::BeginPopupModal("Export CSV Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Items exported to CSV successfully!");
+        ImGui::Text("Items exported as CSV successfully!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
@@ -272,10 +272,10 @@ void CMuItemEditor::RenderSaveButton()
         ImGui::EndPopup();
     }
 
-    // S6E3 Success popup
-    if (ImGui::BeginPopupModal("Save S6E3 Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // CSV Export Failed popup
+    if (ImGui::BeginPopupModal("Export CSV Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Items saved in S6E3 legacy format successfully!");
+        ImGui::Text("Failed to export item attributes as CSV!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
@@ -283,10 +283,10 @@ void CMuItemEditor::RenderSaveButton()
         ImGui::EndPopup();
     }
 
-    // S6E3 Failed popup
-    if (ImGui::BeginPopupModal("Save S6E3 Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // S6E3 Export Success popup
+    if (ImGui::BeginPopupModal("Export S6E3 Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Failed to save items in S6E3 format!");
+        ImGui::Text("Items exported as S6E3 legacy format successfully!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
@@ -294,10 +294,10 @@ void CMuItemEditor::RenderSaveButton()
         ImGui::EndPopup();
     }
 
-    // Export Failed popup (if missing)
-    if (ImGui::BeginPopupModal("Export Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // S6E3 Export Failed popup
+    if (ImGui::BeginPopupModal("Export S6E3 Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Failed to export items to CSV!");
+        ImGui::Text("Failed to export item attributes as S6E3 format!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
@@ -306,7 +306,7 @@ void CMuItemEditor::RenderSaveButton()
     }
 }
 
-void CMuItemEditor::RenderSearchBar()
+void CMuItemEditorUI::RenderSearchBar()
 {
     // Search bar
     ImGui::Text("Search:");
@@ -315,7 +315,7 @@ void CMuItemEditor::RenderSearchBar()
     ImGui::InputText("##ItemSearch", m_szItemSearchBuffer, sizeof(m_szItemSearchBuffer));
 }
 
-void CMuItemEditor::RenderItemTable(const std::string& searchLower)
+void CMuItemEditorUI::RenderItemTable(const std::string& searchLower)
 {
     extern ITEM_ATTRIBUTE* ItemAttribute;
 
@@ -393,43 +393,70 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
 
         ImGui::TableHeadersRow();
 
-        // Render all items with filtering
-        for (int i = 0; i < MAX_ITEM; i++)
+        // Pre-filter items to build a list of valid items (only do once per frame)
+        static std::vector<int> filteredItems;
+        static std::string lastSearchFilter;
+        static bool isInitialized = false;
+
+        // Rebuild filtered list if search changed or first time
+        if (searchLower != lastSearchFilter || !isInitialized)
         {
-            // Get item name
-            char nameBuffer[256];
-            WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
-
-            // Skip uninitialized items (no name)
-            if (nameBuffer[0] == '\0')
-                continue;
-
-            // Apply search filter
-            if (searchLower.length() > 0)
+            filteredItems.clear();
+            for (int i = 0; i < MAX_ITEM; i++)
             {
-                std::string nameLower = nameBuffer;
-                std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
-                if (nameLower.find(searchLower) == std::string::npos)
+                char nameBuffer[256];
+                WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
+
+                // Skip uninitialized items (no name)
+                if (nameBuffer[0] == '\0')
                     continue;
+
+                // Apply search filter
+                if (searchLower.length() > 0)
+                {
+                    std::string nameLower = nameBuffer;
+                    std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+                    if (nameLower.find(searchLower) == std::string::npos)
+                        continue;
+                }
+
+                filteredItems.push_back(i);
             }
+            lastSearchFilter = searchLower;
+            isInitialized = true;
+        }
 
-            ImGui::TableNextRow();
+        // Use ImGuiListClipper to only render visible rows
+        ImGuiListClipper clipper;
+        clipper.Begin((int)filteredItems.size());
 
-            // Apply row highlighting if this row is selected
-            if (m_selectedRow == i)
+        while (clipper.Step())
+        {
+            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
             {
-                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImVec4(0.3f, 0.5f, 0.8f, 0.3f)));
-            }
+                int i = filteredItems[row];
 
-            // Get the row bounds for click detection
-            ImGui::TableSetColumnIndex(0);
-            ImVec2 rowStartPos = ImGui::GetCursorScreenPos();
-            float rowHeight = ImGui::GetTextLineHeightWithSpacing();
+                // Get item name for this row
+                char nameBuffer[256];
+                WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, nameBuffer, sizeof(nameBuffer), NULL, NULL);
 
-            int colIdx = 0;
-            bool rowInteracted = false;
+                ImGui::TableNextRow();
 
-            // Index
+                // Apply row highlighting if this row is selected
+                if (m_selectedRow == i)
+                {
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImVec4(0.3f, 0.5f, 0.8f, 0.3f)));
+                }
+
+                // Get the row bounds for click detection
+                ImGui::TableSetColumnIndex(0);
+                ImVec2 rowStartPos = ImGui::GetCursorScreenPos();
+                float rowHeight = ImGui::GetTextLineHeightWithSpacing();
+
+                int colIdx = 0;
+                bool rowInteracted = false;
+
+                // Index
             if (m_columnVisibility["Index"])
             {
                 ImGui::TableSetColumnIndex(colIdx++);
@@ -451,11 +478,11 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                             ITEM_ATTRIBUTE temp = ItemAttribute[i];
                             ItemAttribute[i] = ItemAttribute[newIndex];
                             ItemAttribute[newIndex] = temp;
-                            g_MuEditorConsole.LogEditor("Moved item from index " + std::to_string(i) + " to " + std::to_string(newIndex));
+                            g_MuEditorConsoleUI.LogEditor("Moved item from index " + std::to_string(i) + " to " + std::to_string(newIndex));
                         }
                         else
                         {
-                            g_MuEditorConsole.LogEditor("Error: Index " + std::to_string(newIndex) + " already in use!");
+                            g_MuEditorConsoleUI.LogEditor("Error: Index " + std::to_string(newIndex) + " already in use!");
                         }
                     }
                 }
@@ -493,11 +520,11 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     {
                         // Convert to wide char and save
                         MultiByteToWideChar(CP_UTF8, 0, editableNameBuffer, -1, ItemAttribute[i].Name, sizeof(ItemAttribute[i].Name) / sizeof(WCHAR));
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Name to " + std::string(editableNameBuffer));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Name to " + std::string(editableNameBuffer));
                     }
                     else
                     {
-                        g_MuEditorConsole.LogEditor("Error: Name '" + std::string(editableNameBuffer) + "' already exists!");
+                        g_MuEditorConsoleUI.LogEditor("Error: Name '" + std::string(editableNameBuffer) + "' already exists!");
                     }
                 }
                 if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -513,7 +540,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                 if (ImGui::Checkbox("##twohand", &twoHand))
                 {
                     ItemAttribute[i].TwoHand = twoHand;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " TwoHand to " + std::to_string(twoHand));
+                    g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " TwoHand to " + std::to_string(twoHand));
                 }
                 // if (ImGui::IsItemClicked(0)) rowInteracted = true;
                 ImGui::PopID();
@@ -531,7 +558,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (level >= 0 && level <= 65535)
                     {
                         ItemAttribute[i].Level = (WORD)level;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Level to " + std::to_string(level));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Level to " + std::to_string(level));
                     }
                 }
                 // Select row when activating this input field
@@ -551,7 +578,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (slot >= 0 && slot <= 255)
                     {
                         ItemAttribute[i].m_byItemSlot = (BYTE)slot;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Slot to " + std::to_string(slot));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Slot to " + std::to_string(slot));
                     }
                 }
                 if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -570,7 +597,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (skill >= 0 && skill <= 65535)
                     {
                         ItemAttribute[i].m_wSkillIndex = (WORD)skill;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Skill to " + std::to_string(skill));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Skill to " + std::to_string(skill));
                     }
                 }
                 // if (ImGui::IsItemClicked(0)) rowInteracted = true;
@@ -589,7 +616,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (width >= 0 && width <= 255)
                     {
                         ItemAttribute[i].Width = (BYTE)width;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Width to " + std::to_string(width));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Width to " + std::to_string(width));
                     }
                 }
                 // if (ImGui::IsItemClicked(0)) rowInteracted = true;
@@ -608,7 +635,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (height >= 0 && height <= 255)
                     {
                         ItemAttribute[i].Height = (BYTE)height;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Height to " + std::to_string(height));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Height to " + std::to_string(height));
                     }
                 }
                 // if (ImGui::IsItemClicked(0)) rowInteracted = true;
@@ -627,7 +654,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (dmgMin >= 0 && dmgMin <= 255)
                     {
                         ItemAttribute[i].DamageMin = (BYTE)dmgMin;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " DamageMin to " + std::to_string(dmgMin));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " DamageMin to " + std::to_string(dmgMin));
                     }
                 }
                 // if (ImGui::IsItemClicked(0)) rowInteracted = true;
@@ -646,7 +673,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (dmgMax >= 0 && dmgMax <= 255)
                     {
                         ItemAttribute[i].DamageMax = (BYTE)dmgMax;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " DamageMax to " + std::to_string(dmgMax));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " DamageMax to " + std::to_string(dmgMax));
                     }
                 }
                 // if (ImGui::IsItemClicked(0)) rowInteracted = true;
@@ -665,7 +692,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (block >= 0 && block <= 255)
                     {
                         ItemAttribute[i].SuccessfulBlocking = (BYTE)block;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " SuccessfulBlocking to " + std::to_string(block));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " SuccessfulBlocking to " + std::to_string(block));
                     }
                 }
                 ImGui::PopID();
@@ -683,7 +710,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (def >= 0 && def <= 255)
                     {
                         ItemAttribute[i].Defense = (BYTE)def;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Defense to " + std::to_string(def));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Defense to " + std::to_string(def));
                     }
                 }
                 ImGui::PopID();
@@ -701,7 +728,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (magDef >= 0 && magDef <= 255)
                     {
                         ItemAttribute[i].MagicDefense = (BYTE)magDef;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " MagicDefense to " + std::to_string(magDef));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " MagicDefense to " + std::to_string(magDef));
                     }
                 }
                 ImGui::PopID();
@@ -719,7 +746,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (wpnSpd >= 0 && wpnSpd <= 255)
                     {
                         ItemAttribute[i].WeaponSpeed = (BYTE)wpnSpd;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " WeaponSpeed to " + std::to_string(wpnSpd));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " WeaponSpeed to " + std::to_string(wpnSpd));
                     }
                 }
                 ImGui::PopID();
@@ -737,7 +764,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (walkSpd >= 0 && walkSpd <= 255)
                     {
                         ItemAttribute[i].WalkSpeed = (BYTE)walkSpd;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " WalkSpeed to " + std::to_string(walkSpd));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " WalkSpeed to " + std::to_string(walkSpd));
                     }
                 }
                 ImGui::PopID();
@@ -755,7 +782,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (dur >= 0 && dur <= 255)
                     {
                         ItemAttribute[i].Durability = (BYTE)dur;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Durability to " + std::to_string(dur));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Durability to " + std::to_string(dur));
                     }
                 }
                 ImGui::PopID();
@@ -773,7 +800,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (magDur >= 0 && magDur <= 255)
                     {
                         ItemAttribute[i].MagicDur = (BYTE)magDur;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " MagicDur to " + std::to_string(magDur));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " MagicDur to " + std::to_string(magDur));
                     }
                 }
                 ImGui::PopID();
@@ -791,7 +818,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (magPow >= 0 && magPow <= 255)
                     {
                         ItemAttribute[i].MagicPower = (BYTE)magPow;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " MagicPower to " + std::to_string(magPow));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " MagicPower to " + std::to_string(magPow));
                     }
                 }
                 ImGui::PopID();
@@ -809,7 +836,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqStr >= 0 && reqStr <= 65535)
                     {
                         ItemAttribute[i].RequireStrength = (WORD)reqStr;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireStrength to " + std::to_string(reqStr));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireStrength to " + std::to_string(reqStr));
                     }
                 }
                 ImGui::PopID();
@@ -827,7 +854,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqDex >= 0 && reqDex <= 65535)
                     {
                         ItemAttribute[i].RequireDexterity = (WORD)reqDex;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireDexterity to " + std::to_string(reqDex));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireDexterity to " + std::to_string(reqDex));
                     }
                 }
                 ImGui::PopID();
@@ -845,7 +872,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqEne >= 0 && reqEne <= 65535)
                     {
                         ItemAttribute[i].RequireEnergy = (WORD)reqEne;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireEnergy to " + std::to_string(reqEne));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireEnergy to " + std::to_string(reqEne));
                     }
                 }
                 ImGui::PopID();
@@ -863,7 +890,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqVit >= 0 && reqVit <= 65535)
                     {
                         ItemAttribute[i].RequireVitality = (WORD)reqVit;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireVitality to " + std::to_string(reqVit));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireVitality to " + std::to_string(reqVit));
                     }
                 }
                 ImGui::PopID();
@@ -881,7 +908,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqCha >= 0 && reqCha <= 65535)
                     {
                         ItemAttribute[i].RequireCharisma = (WORD)reqCha;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireCharisma to " + std::to_string(reqCha));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireCharisma to " + std::to_string(reqCha));
                     }
                 }
                 ImGui::PopID();
@@ -899,7 +926,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqLvl >= 0 && reqLvl <= 65535)
                     {
                         ItemAttribute[i].RequireLevel = (WORD)reqLvl;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireLevel to " + std::to_string(reqLvl));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireLevel to " + std::to_string(reqLvl));
                     }
                 }
                 ImGui::PopID();
@@ -917,7 +944,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (value >= 0 && value <= 255)
                     {
                         ItemAttribute[i].Value = (BYTE)value;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Value to " + std::to_string(value));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Value to " + std::to_string(value));
                     }
                 }
                 ImGui::PopID();
@@ -933,7 +960,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                 if (ImGui::InputInt("##zen", &zen, 0, 0))
                 {
                     ItemAttribute[i].iZen = zen;
-                    g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " Zen to " + std::to_string(zen));
+                    g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " Zen to " + std::to_string(zen));
                 }
                 ImGui::PopID();
             }
@@ -950,7 +977,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (attType >= 0 && attType <= 255)
                     {
                         ItemAttribute[i].AttType = (BYTE)attType;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " AttType to " + std::to_string(attType));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " AttType to " + std::to_string(attType));
                     }
                 }
                 if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -969,7 +996,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqClass >= 0 && reqClass <= 255)
                     {
                         ItemAttribute[i].RequireClass[0] = (BYTE)reqClass;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[DW/SM] to " + std::to_string(reqClass));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireClass[DW/SM] to " + std::to_string(reqClass));
                     }
                 }
                 ImGui::PopID();
@@ -987,7 +1014,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqClass >= 0 && reqClass <= 255)
                     {
                         ItemAttribute[i].RequireClass[1] = (BYTE)reqClass;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[DK/BK] to " + std::to_string(reqClass));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireClass[DK/BK] to " + std::to_string(reqClass));
                     }
                 }
                 ImGui::PopID();
@@ -1005,7 +1032,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqClass >= 0 && reqClass <= 255)
                     {
                         ItemAttribute[i].RequireClass[2] = (BYTE)reqClass;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[ELF/ME] to " + std::to_string(reqClass));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireClass[ELF/ME] to " + std::to_string(reqClass));
                     }
                 }
                 ImGui::PopID();
@@ -1023,7 +1050,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqClass >= 0 && reqClass <= 255)
                     {
                         ItemAttribute[i].RequireClass[3] = (BYTE)reqClass;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[MG] to " + std::to_string(reqClass));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireClass[MG] to " + std::to_string(reqClass));
                     }
                 }
                 ImGui::PopID();
@@ -1041,7 +1068,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqClass >= 0 && reqClass <= 255)
                     {
                         ItemAttribute[i].RequireClass[4] = (BYTE)reqClass;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[DL] to " + std::to_string(reqClass));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireClass[DL] to " + std::to_string(reqClass));
                     }
                 }
                 ImGui::PopID();
@@ -1059,7 +1086,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqClass >= 0 && reqClass <= 255)
                     {
                         ItemAttribute[i].RequireClass[5] = (BYTE)reqClass;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[SUM] to " + std::to_string(reqClass));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireClass[SUM] to " + std::to_string(reqClass));
                     }
                 }
                 ImGui::PopID();
@@ -1077,7 +1104,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
                     if (reqClass >= 0 && reqClass <= 255)
                     {
                         ItemAttribute[i].RequireClass[6] = (BYTE)reqClass;
-                        g_MuEditorConsole.LogEditor("Changed item " + std::to_string(i) + " RequireClass[RF] to " + std::to_string(reqClass));
+                        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(i) + " RequireClass[RF] to " + std::to_string(reqClass));
                     }
                 }
                 ImGui::PopID();
@@ -1101,7 +1128,8 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
             {
                 m_selectedRow = i;
             }
-        }
+            }  // end for (clipper.DisplayStart to DisplayEnd)
+        }  // end while (clipper.Step())
 
         ImGui::EndTable();
     }
@@ -1110,7 +1138,7 @@ void CMuItemEditor::RenderItemTable(const std::string& searchLower)
     ImGui::PopStyleVar(2);
 }
 
-void CMuItemEditor::RenderColumnVisibilityMenu()
+void CMuItemEditorUI::RenderColumnVisibilityMenu()
 {
     if (ImGui::Button("Columns"))
     {
@@ -1220,7 +1248,7 @@ void CMuItemEditor::RenderColumnVisibilityMenu()
     }
 }
 
-void CMuItemEditor::SaveColumnPreferences()
+void CMuItemEditorUI::SaveColumnPreferences()
 {
     // Create MuEditor directory if it doesn't exist
     _mkdir("MuEditor");
@@ -1236,7 +1264,7 @@ void CMuItemEditor::SaveColumnPreferences()
     file.close();
 }
 
-void CMuItemEditor::LoadColumnPreferences()
+void CMuItemEditorUI::LoadColumnPreferences()
 {
     std::ifstream file(muitemeditor_columns_cfg);
     if (!file.is_open())

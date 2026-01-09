@@ -17,7 +17,7 @@
 #include "Scenes/SceneCore.h"
 
 #ifdef _EDITOR
-#include "../MuEditor/MuEditorConsole.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #endif
 #ifdef CSK_DEBUG_MAP_PATHFINDING
 #include "ZzzPath.h"
@@ -244,7 +244,7 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
         // Also log to ImGui console
         char szUtf8Buffer[512];
         WideCharToMultiByte(CP_UTF8, 0, szBuffer, -1, szUtf8Buffer, sizeof(szUtf8Buffer), NULL, NULL);
-        g_MuEditorConsole.LogGame(szUtf8Buffer);
+        g_MuEditorConsoleUI.LogGame(szUtf8Buffer);
 #endif
     }
 #endif

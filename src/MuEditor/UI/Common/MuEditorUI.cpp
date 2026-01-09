@@ -2,9 +2,9 @@
 
 #ifdef _EDITOR
 
-#include "MuEditorUI.h"
-#include "MuEditor.h"
+#include "MuEditor\UI\Common\MuEditorUI.h"
 #include "imgui.h"
+#include "MuEditor/Core/MuEditorCore.h"
 
 // UI Layout constants
 constexpr float TOOLBAR_HEIGHT = 40.0f;
@@ -79,7 +79,7 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
 
         if (isHoveringButton)
         {
-            g_MuEditor.SetHoveringUI(true);
+            g_MuEditorCore.SetHoveringUI(true);
 
             if (ImGui::IsMouseClicked(MOUSE_BUTTON_LEFT))
             {
@@ -116,7 +116,7 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor)
         // Check if hovering this window
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         {
-            g_MuEditor.SetHoveringUI(true);
+            g_MuEditorCore.SetHoveringUI(true);
         }
 
         ImGui::Spacing();
