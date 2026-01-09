@@ -5,6 +5,7 @@
 #include "ZzzInfomation.h"
 
 #include <codecvt>
+#include <sstream>
 
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -454,6 +455,207 @@ void OpenItemScript(wchar_t* FileName)
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
+}
+
+bool SaveItemScript(wchar_t* FileName, std::string* outChangeLog)
+{
+    const int Size = sizeof(ITEM_ATTRIBUTE_FILE);
+
+    // Load original file for comparison if change log is requested
+    ITEM_ATTRIBUTE* originalItems = nullptr;
+    if (outChangeLog)
+    {
+        originalItems = new ITEM_ATTRIBUTE[MAX_ITEM];
+        memcpy(originalItems, ItemAttribute, sizeof(ITEM_ATTRIBUTE) * MAX_ITEM);
+
+        // Read original file
+        FILE* fpOrig = _wfopen(FileName, L"rb");
+        if (fpOrig)
+        {
+            BYTE* OrigBuffer = new BYTE[Size * MAX_ITEM];
+            fread(OrigBuffer, Size * MAX_ITEM, 1, fpOrig);
+            fclose(fpOrig);
+
+            BYTE* pSeek = OrigBuffer;
+            for (int i = 0; i < MAX_ITEM; i++)
+            {
+                BuxConvert(pSeek, Size);
+                ITEM_ATTRIBUTE_FILE* orig = (ITEM_ATTRIBUTE_FILE*)pSeek;
+
+                // Store original values
+                originalItems[i].RequireStrength = orig->RequireStrength;
+                originalItems[i].RequireDexterity = orig->RequireDexterity;
+                originalItems[i].RequireEnergy = orig->RequireEnergy;
+                originalItems[i].RequireVitality = orig->RequireVitality;
+                originalItems[i].RequireLevel = orig->RequireLevel;
+                originalItems[i].DamageMin = orig->DamageMin;
+                originalItems[i].DamageMax = orig->DamageMax;
+                originalItems[i].WeaponSpeed = orig->WeaponSpeed;
+                originalItems[i].Defense = orig->Defense;
+                originalItems[i].Durability = orig->Durability;
+
+                pSeek += Size;
+            }
+            delete[] OrigBuffer;
+        }
+    }
+
+    // Prepare new buffer
+    FILE* fp = _wfopen(FileName, L"wb");
+    if (fp == NULL)
+    {
+        if (originalItems) delete[] originalItems;
+        return false;
+    }
+
+    BYTE* Buffer = new BYTE[Size * MAX_ITEM];
+    BYTE* pSeek = Buffer;
+
+    // Track changes
+    std::stringstream changeLog;
+    int changeCount = 0;
+
+    // Convert ItemAttribute back to ITEM_ATTRIBUTE_FILE format
+    for (int i = 0; i < MAX_ITEM; i++)
+    {
+        ITEM_ATTRIBUTE_FILE dest;
+        memset(&dest, 0, Size);
+
+        CMultiLanguage::ConvertToUtf8(dest.Name, ItemAttribute[i].Name, MAX_ITEM_NAME);
+        dest.TwoHand = ItemAttribute[i].TwoHand;
+        dest.Level = ItemAttribute[i].Level;
+        dest.m_byItemSlot = ItemAttribute[i].m_byItemSlot;
+        dest.m_wSkillIndex = ItemAttribute[i].m_wSkillIndex;
+        dest.Width = ItemAttribute[i].Width;
+        dest.Height = ItemAttribute[i].Height;
+        dest.DamageMin = ItemAttribute[i].DamageMin;
+        dest.DamageMax = ItemAttribute[i].DamageMax;
+        dest.SuccessfulBlocking = ItemAttribute[i].SuccessfulBlocking;
+        dest.Defense = ItemAttribute[i].Defense;
+        dest.MagicDefense = ItemAttribute[i].MagicDefense;
+        dest.WeaponSpeed = ItemAttribute[i].WeaponSpeed;
+        dest.WalkSpeed = ItemAttribute[i].WalkSpeed;
+        dest.Durability = ItemAttribute[i].Durability;
+        dest.MagicDur = ItemAttribute[i].MagicDur;
+        dest.MagicPower = ItemAttribute[i].MagicPower;
+        dest.RequireStrength = ItemAttribute[i].RequireStrength;
+        dest.RequireDexterity = ItemAttribute[i].RequireDexterity;
+        dest.RequireEnergy = ItemAttribute[i].RequireEnergy;
+        dest.RequireVitality = ItemAttribute[i].RequireVitality;
+        dest.RequireCharisma = ItemAttribute[i].RequireCharisma;
+        dest.RequireLevel = ItemAttribute[i].RequireLevel;
+        dest.Value = ItemAttribute[i].Value;
+        dest.iZen = ItemAttribute[i].iZen;
+        dest.AttType = ItemAttribute[i].AttType;
+
+        for (int c = 0; c < MAX_CLASS; ++c)
+        {
+            dest.RequireClass[c] = ItemAttribute[i].RequireClass[c];
+        }
+
+        for (int r = 0; r < MAX_RESISTANCE; ++r)
+        {
+            dest.Resistance[r] = ItemAttribute[i].Resistance[r];
+        }
+
+        // Track changes
+        if (originalItems && ItemAttribute[i].Name[0] != 0)
+        {
+            bool changed = false;
+            std::stringstream itemChanges;
+
+            if (originalItems[i].RequireStrength != ItemAttribute[i].RequireStrength)
+            {
+                itemChanges << "  Str: " << originalItems[i].RequireStrength << " -> " << ItemAttribute[i].RequireStrength << "\n";
+                changed = true;
+            }
+            if (originalItems[i].RequireDexterity != ItemAttribute[i].RequireDexterity)
+            {
+                itemChanges << "  Dex: " << originalItems[i].RequireDexterity << " -> " << ItemAttribute[i].RequireDexterity << "\n";
+                changed = true;
+            }
+            if (originalItems[i].RequireEnergy != ItemAttribute[i].RequireEnergy)
+            {
+                itemChanges << "  Ene: " << originalItems[i].RequireEnergy << " -> " << ItemAttribute[i].RequireEnergy << "\n";
+                changed = true;
+            }
+            if (originalItems[i].RequireVitality != ItemAttribute[i].RequireVitality)
+            {
+                itemChanges << "  Vit: " << originalItems[i].RequireVitality << " -> " << ItemAttribute[i].RequireVitality << "\n";
+                changed = true;
+            }
+            if (originalItems[i].RequireLevel != ItemAttribute[i].RequireLevel)
+            {
+                itemChanges << "  Lvl: " << originalItems[i].RequireLevel << " -> " << ItemAttribute[i].RequireLevel << "\n";
+                changed = true;
+            }
+            if (originalItems[i].DamageMin != ItemAttribute[i].DamageMin)
+            {
+                itemChanges << "  DmgMin: " << (int)originalItems[i].DamageMin << " -> " << (int)ItemAttribute[i].DamageMin << "\n";
+                changed = true;
+            }
+            if (originalItems[i].DamageMax != ItemAttribute[i].DamageMax)
+            {
+                itemChanges << "  DmgMax: " << (int)originalItems[i].DamageMax << " -> " << (int)ItemAttribute[i].DamageMax << "\n";
+                changed = true;
+            }
+            if (originalItems[i].WeaponSpeed != ItemAttribute[i].WeaponSpeed)
+            {
+                itemChanges << "  AtkSpd: " << (int)originalItems[i].WeaponSpeed << " -> " << (int)ItemAttribute[i].WeaponSpeed << "\n";
+                changed = true;
+            }
+            if (originalItems[i].Defense != ItemAttribute[i].Defense)
+            {
+                itemChanges << "  Def: " << (int)originalItems[i].Defense << " -> " << (int)ItemAttribute[i].Defense << "\n";
+                changed = true;
+            }
+            if (originalItems[i].Durability != ItemAttribute[i].Durability)
+            {
+                itemChanges << "  Dur: " << (int)originalItems[i].Durability << " -> " << (int)ItemAttribute[i].Durability << "\n";
+                changed = true;
+            }
+
+            if (changed)
+            {
+                char itemName[MAX_ITEM_NAME];
+                CMultiLanguage::ConvertToUtf8(itemName, ItemAttribute[i].Name, MAX_ITEM_NAME);
+                changeLog << "[" << i << "] " << itemName << "\n" << itemChanges.str();
+                changeCount++;
+            }
+        }
+
+        memcpy(pSeek, &dest, Size);
+        BuxConvert(pSeek, Size);
+        pSeek += Size;
+    }
+
+    // Write buffer
+    fwrite(Buffer, Size * MAX_ITEM, 1, fp);
+
+    // Write checksum
+    DWORD dwCheckSum = GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE2F1);
+    fwrite(&dwCheckSum, sizeof(DWORD), 1, fp);
+
+    fclose(fp);
+    delete[] Buffer;
+
+    if (originalItems)
+    {
+        delete[] originalItems;
+        if (outChangeLog)
+        {
+            if (changeCount > 0)
+            {
+                *outChangeLog = "=== Item Changes (" + std::to_string(changeCount) + " items modified) ===\n" + changeLog.str();
+            }
+            else
+            {
+                *outChangeLog = "No changes detected.\n";
+            }
+        }
+    }
+
+    return true;
 }
 
 void PrintItem(wchar_t* FileName)
