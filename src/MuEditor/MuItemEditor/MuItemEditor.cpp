@@ -1056,6 +1056,24 @@ void CMuItemEditor::RenderColumnVisibilityMenu()
         ImGui::Text("Toggle Column Visibility:");
         ImGui::Separator();
 
+        // Select All / Unselect All buttons
+        if (ImGui::Button("Select All"))
+        {
+            for (auto& col : m_columnVisibility)
+            {
+                col.second = true;
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Unselect All"))
+        {
+            for (auto& col : m_columnVisibility)
+            {
+                col.second = false;
+            }
+        }
+        ImGui::Separator();
+
         // Group related columns
         ImGui::Text("Basic Info:");
         ImGui::Checkbox("Index", &m_columnVisibility["Index"]);
