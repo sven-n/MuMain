@@ -31,6 +31,7 @@ private:
     bool m_bFrameStarted;
     bool m_bShowItemEditor;
     bool m_bHoveringUI;
+    bool m_bPreviousFrameHoveringUI;  // Store previous frame's hover state for input blocking
 };
 
 // Global accessor

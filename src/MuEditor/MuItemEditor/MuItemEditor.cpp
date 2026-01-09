@@ -27,18 +27,34 @@ void CMuItemEditor::Render(bool& showEditor)
     if (!ItemAttribute)
         return;
 
-    // Fill the entire center view area (between toolbar and console)
-    ImGuiIO& io = ImGui::GetIO();
-    float width = io.DisplaySize.x;
-    float height = io.DisplaySize.y - 40 - 200; // Full height minus toolbar (40px) and console (200px)
-    ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
-    ImGui::SetNextWindowPos(ImVec2(0, 40), ImGuiCond_Always); // Start below toolbar
+    // Item editor is now rendered inside the center pane
+    // No need to set position/size here - the center pane handles layout
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
     if (ImGui::Begin("Item Editor", &showEditor, flags))
     {
-        // Check if hovering this window
-        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+        // ALWAYS check if hovering, with multiple fallbacks
+        bool isHovering = false;
+
+        // Method 1: Standard hover check
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows))
+        {
+            isHovering = true;
+        }
+
+        // Method 2: Check with AllowWhenBlockedByActiveItem flag
+        if (!isHovering && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+        {
+            isHovering = true;
+        }
+
+        // Method 3: Check if any ImGui window is hovered and it's THIS one
+        if (!isHovering && ImGui::IsAnyItemHovered())
+        {
+            isHovering = true;
+        }
+
+        if (isHovering)
         {
             g_MuEditor.SetHoveringUI(true);
         }
