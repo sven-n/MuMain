@@ -23,6 +23,12 @@ public:
                 int& selectedRow,
                 bool freezeColumns);
 
+    // Request scroll to a specific item index
+    static void RequestScrollToIndex(int index);
+
+    // Force rebuild of filtered list (call after data changes)
+    void InvalidateFilter();
+
 private:
     // Filter state
     std::vector<int> m_filteredItems;
@@ -31,6 +37,9 @@ private:
 
     // Column renderer
     CItemEditorColumns* m_pColumns;
+
+    // Scroll request state
+    static int s_scrollToIndex;
 };
 
 #endif // _EDITOR

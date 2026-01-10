@@ -16,11 +16,25 @@
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
+// Static member initialization
+int CItemEditorTable::s_scrollToIndex = -1;
+
+void CItemEditorTable::RequestScrollToIndex(int index)
+{
+    s_scrollToIndex = index;
+}
+
+void CItemEditorTable::InvalidateFilter()
+{
+    m_isInitialized = false;
+}
+
 CItemEditorTable::CItemEditorTable()
     : m_isInitialized(false)
     , m_pColumns(nullptr)
 {
     m_pColumns = new CItemEditorColumns();
+    m_pColumns->SetTable(this);
 }
 
 CItemEditorTable::~CItemEditorTable()
@@ -141,6 +155,23 @@ void CItemEditorTable::Render(
     // Use ImGuiListClipper for performance
     ImGuiListClipper clipper;
     clipper.Begin((int)m_filteredItems.size());
+
+    // Handle scroll request
+    if (s_scrollToIndex >= 0)
+    {
+        // Find the row index in filtered items
+        for (int row = 0; row < (int)m_filteredItems.size(); row++)
+        {
+            if (m_filteredItems[row] == s_scrollToIndex)
+            {
+                // Force the clipper to include this row and scroll to it
+                ImGui::SetScrollY(ImGui::GetTextLineHeightWithSpacing() * (row + 1)); // +1 for header
+                selectedRow = s_scrollToIndex;
+                break;
+            }
+        }
+        s_scrollToIndex = -1; // Reset
+    }
 
     while (clipper.Step())
     {

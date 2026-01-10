@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "ItemEditorColumns.h"
+#include "ItemEditorTable.h"
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "GameData/ItemData/ItemFieldMetadata.h"
 #include "Translation/i18n.h"
@@ -208,33 +209,61 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
     ImGui::PushID(itemIndex * 100000 + 999999);
     ImGui::SetNextItemWidth(-FLT_MIN);
 
+    static int s_lastEditedIndex = -1;
+    static bool s_errorLogged = false;
+
     int newIndex = itemIndex;
-    if (ImGui::InputInt("##index", &newIndex, 0, 0))
+    ImGui::InputInt("##index", &newIndex, 0, 0);
+    
+    // Only process the change when the input is deactivated (Enter pressed or focus lost)
+    bool wasActive = ImGui::IsItemActive();
+    bool wasDeactivated = ImGui::IsItemDeactivatedAfterEdit();
+    
+    if (wasDeactivated && newIndex >= 0 && newIndex < MAX_ITEM && newIndex != itemIndex)
     {
-        if (newIndex >= 0 && newIndex < MAX_ITEM && newIndex != itemIndex)
+        char targetName[128];
+        WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[newIndex].Name, -1, targetName, sizeof(targetName), NULL, NULL);
+
+        if (targetName[0] == '\0')
         {
-            char targetName[128];
-            WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[newIndex].Name, -1, targetName, sizeof(targetName), NULL, NULL);
+            ITEM_ATTRIBUTE temp = ItemAttribute[itemIndex];
+            ItemAttribute[itemIndex] = ItemAttribute[newIndex];
+            ItemAttribute[newIndex] = temp;
 
-            if (targetName[0] == '\0')
+            std::string logMsg = i18n::FormatEditor("log_moved_item", {
+                std::to_string(itemIndex),
+                std::to_string(newIndex)
+            });
+            g_MuEditorConsoleUI.LogEditor(logMsg);
+            
+            s_errorLogged = false;
+            
+            // Invalidate the filter to rebuild the item list
+            if (m_pTable)
             {
-                ITEM_ATTRIBUTE temp = ItemAttribute[itemIndex];
-                ItemAttribute[itemIndex] = ItemAttribute[newIndex];
-                ItemAttribute[newIndex] = temp;
-
-                std::string logMsg = i18n::FormatEditor("log_moved_item", {
-                    std::to_string(itemIndex),
-                    std::to_string(newIndex)
-                });
-                g_MuEditorConsoleUI.LogEditor(logMsg);
+                m_pTable->InvalidateFilter();
             }
-            else
-            {
-                std::string errorMsg = i18n::FormatEditor("error_index_in_use", {
-                    std::to_string(newIndex)
-                });
-                g_MuEditorConsoleUI.LogEditor(errorMsg);
-            }
+            
+            // Scroll to new index position
+            CItemEditorTable::RequestScrollToIndex(newIndex);
+        }
+        else if (!s_errorLogged)
+        {
+            std::string errorMsg = i18n::FormatEditor("error_index_in_use", {
+                std::to_string(newIndex)
+            });
+            g_MuEditorConsoleUI.LogEditor(errorMsg);
+            s_errorLogged = true;
+        }
+    }
+    
+    // Reset error flag when user starts editing a different field
+    if (wasActive)
+    {
+        if (s_lastEditedIndex != itemIndex)
+        {
+            s_errorLogged = false;
+            s_lastEditedIndex = itemIndex;
         }
     }
 
