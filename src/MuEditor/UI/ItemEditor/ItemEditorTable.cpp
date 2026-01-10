@@ -4,6 +4,7 @@
 
 #include "ItemEditorTable.h"
 #include "ItemEditorColumns.h"
+#include "ItemEditorActions.h"
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "_struct.h"
 #include "_define.h"
@@ -205,6 +206,13 @@ void CItemEditorTable::Render(
 
     ImGui::EndTable();
     ImGui::PopStyleVar(2);
+
+    // Handle Ctrl+C to copy selected row as CSV
+    if (selectedRow >= 0 && selectedRow < MAX_ITEM && ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))
+    {
+        std::string output = CItemEditorActions::ExportItemCombined(selectedRow, ItemAttribute[selectedRow]);
+        ImGui::SetClipboardText(output.c_str());
+    }
 }
 
 #endif // _EDITOR
