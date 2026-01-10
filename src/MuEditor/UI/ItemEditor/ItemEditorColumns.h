@@ -14,8 +14,11 @@ class CItemEditorTable;
 class CItemEditorColumns
 {
 public:
-    CItemEditorColumns() = default;
+    CItemEditorColumns() : m_pTable(nullptr) {}
     ~CItemEditorColumns() = default;
+
+    // Set the parent table instance (needed for invalidating filter)
+    void SetTable(CItemEditorTable* table) { m_pTable = table; }
 
     // Metadata-driven rendering - automatically renders any field based on metadata
     void RenderFieldByMetadata(const ItemFieldMetadata& meta, int& colIdx, int itemIndex,
@@ -36,6 +39,9 @@ private:
                          bool& value, bool& rowInteracted, bool isVisible);
     void RenderWCharArrayColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
                                wchar_t* value, int arraySize, bool& rowInteracted, bool isVisible);
+
+    // Parent table reference
+    CItemEditorTable* m_pTable;
 };
 
 #endif // _EDITOR
