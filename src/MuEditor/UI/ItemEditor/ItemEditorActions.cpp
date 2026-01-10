@@ -7,8 +7,124 @@
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "imgui.h"
 #include <string>
+#include <sstream>
 
 extern std::wstring g_strSelectedML;
+
+void CItemEditorActions::ConvertItemName(char* outBuffer, size_t bufferSize, const wchar_t* name)
+{
+    WideCharToMultiByte(CP_UTF8, 0, name, -1, outBuffer, (int)bufferSize, NULL, NULL);
+}
+
+std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBUTE& item)
+{
+    std::stringstream ss;
+    char nameBuffer[256];
+    ConvertItemName(nameBuffer, sizeof(nameBuffer), item.Name);
+
+    ss << "Row " << itemIndex << "\n"
+       << "Index = " << itemIndex << ", "
+       << "Name = " << nameBuffer << ", "
+       << "TwoHand = " << (item.TwoHand ? 1 : 0) << ", "
+       << "Level = " << item.Level << ", "
+       << "Slot = " << (int)item.m_byItemSlot << ", "
+       << "Skill = " << item.m_wSkillIndex << ", "
+       << "Width = " << (int)item.Width << ", "
+       << "Height = " << (int)item.Height << ", "
+       << "DamageMin = " << (int)item.DamageMin << ", "
+       << "DamageMax = " << (int)item.DamageMax << ", "
+       << "Block = " << (int)item.SuccessfulBlocking << ", "
+       << "Defense = " << (int)item.Defense << ", "
+       << "MagicDefense = " << (int)item.MagicDefense << ", "
+       << "WeaponSpeed = " << (int)item.WeaponSpeed << ", "
+       << "WalkSpeed = " << (int)item.WalkSpeed << ", "
+       << "Durability = " << (int)item.Durability << ", "
+       << "MagicDur = " << (int)item.MagicDur << ", "
+       << "MagicPower = " << (int)item.MagicPower << ", "
+       << "ReqStr = " << item.RequireStrength << ", "
+       << "ReqDex = " << item.RequireDexterity << ", "
+       << "ReqEne = " << item.RequireEnergy << ", "
+       << "ReqVit = " << item.RequireVitality << ", "
+       << "ReqCha = " << item.RequireCharisma << ", "
+       << "ReqLevel = " << item.RequireLevel << ", "
+       << "Value = " << (int)item.Value << ", "
+       << "Zen = " << item.iZen << ", "
+       << "AttType = " << (int)item.AttType << ", "
+       << "DW/SM = " << (int)item.RequireClass[0] << ", "
+       << "DK/BK = " << (int)item.RequireClass[1] << ", "
+       << "ELF/ME = " << (int)item.RequireClass[2] << ", "
+       << "MG = " << (int)item.RequireClass[3] << ", "
+       << "DL = " << (int)item.RequireClass[4] << ", "
+       << "SUM = " << (int)item.RequireClass[5] << ", "
+       << "RF = " << (int)item.RequireClass[6] << ", "
+       << "Res0 = " << (int)item.Resistance[0] << ", "
+       << "Res1 = " << (int)item.Resistance[1] << ", "
+       << "Res2 = " << (int)item.Resistance[2] << ", "
+       << "Res3 = " << (int)item.Resistance[3] << ", "
+       << "Res4 = " << (int)item.Resistance[4] << ", "
+       << "Res5 = " << (int)item.Resistance[5] << ", "
+       << "Res6 = " << (int)item.Resistance[6] << ", "
+       << "Res7 = " << (int)item.Resistance[7];
+
+    return ss.str();
+}
+
+std::string CItemEditorActions::ExportItemToCSV(int itemIndex, ITEM_ATTRIBUTE& item)
+{
+    std::stringstream ss;
+    char nameBuffer[256];
+    ConvertItemName(nameBuffer, sizeof(nameBuffer), item.Name);
+
+    ss << itemIndex << ","
+       << "\"" << nameBuffer << "\","
+       << (item.TwoHand ? 1 : 0) << ","
+       << item.Level << ","
+       << (int)item.m_byItemSlot << ","
+       << item.m_wSkillIndex << ","
+       << (int)item.Width << ","
+       << (int)item.Height << ","
+       << (int)item.DamageMin << ","
+       << (int)item.DamageMax << ","
+       << (int)item.SuccessfulBlocking << ","
+       << (int)item.Defense << ","
+       << (int)item.MagicDefense << ","
+       << (int)item.WeaponSpeed << ","
+       << (int)item.WalkSpeed << ","
+       << (int)item.Durability << ","
+       << (int)item.MagicDur << ","
+       << (int)item.MagicPower << ","
+       << item.RequireStrength << ","
+       << item.RequireDexterity << ","
+       << item.RequireEnergy << ","
+       << item.RequireVitality << ","
+       << item.RequireCharisma << ","
+       << item.RequireLevel << ","
+       << (int)item.Value << ","
+       << item.iZen << ","
+       << (int)item.AttType << ","
+       << (int)item.RequireClass[0] << ","
+       << (int)item.RequireClass[1] << ","
+       << (int)item.RequireClass[2] << ","
+       << (int)item.RequireClass[3] << ","
+       << (int)item.RequireClass[4] << ","
+       << (int)item.RequireClass[5] << ","
+       << (int)item.RequireClass[6] << ","
+       << (int)item.Resistance[0] << ","
+       << (int)item.Resistance[1] << ","
+       << (int)item.Resistance[2] << ","
+       << (int)item.Resistance[3] << ","
+       << (int)item.Resistance[4] << ","
+       << (int)item.Resistance[5] << ","
+       << (int)item.Resistance[6] << ","
+       << (int)item.Resistance[7];
+
+    return ss.str();
+}
+
+std::string CItemEditorActions::ExportItemCombined(int itemIndex, ITEM_ATTRIBUTE& item)
+{
+    return ExportItemToReadable(itemIndex, item) + "\n" + ExportItemToCSV(itemIndex, item);
+}
 
 void CItemEditorActions::RenderSaveButton()
 {
