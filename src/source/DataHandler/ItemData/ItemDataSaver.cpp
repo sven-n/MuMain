@@ -96,6 +96,17 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
             bool changed = false;
             std::stringstream itemChanges;
 
+            // Name
+            if (wcscmp(originalItems[i].Name, ItemAttribute[i].Name) != 0)
+            {
+                char oldName[MAX_ITEM_NAME];
+                char newName[MAX_ITEM_NAME];
+                CMultiLanguage::ConvertToUtf8(oldName, originalItems[i].Name, MAX_ITEM_NAME);
+                CMultiLanguage::ConvertToUtf8(newName, ItemAttribute[i].Name, MAX_ITEM_NAME);
+                itemChanges << "  Name: \"" << oldName << "\" -> \"" << newName << "\"\n";
+                changed = true;
+            }
+
             // Basic properties
             if (originalItems[i].TwoHand != ItemAttribute[i].TwoHand)
             {
