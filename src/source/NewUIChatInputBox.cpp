@@ -2,12 +2,14 @@
 #include "NewUIChatInputBox.h"
 
 #include "DSPlaySound.h"
+#include "imgui.h"
 #include "NewUIChatLogWindow.h"
 #include "UIControls.h"
 #include "NewUISystem.h"
 #include "ZzzOpenData.h"
 #include "MapManager.h"
 #include "ZzzInterface.h"
+#include "MuEditor/Core/MuEditorCore.h"
 
 using namespace SEASON3B;
 
@@ -471,6 +473,18 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 
     if (false == IsVisible() && SEASON3B::IsPress(VK_RETURN))
     {
+#ifdef _EDITOR
+        // Don't open chat if editor has keyboard focus
+        if (g_MuEditorCore.IsEnabled())
+        {
+            ImGuiIO& io = ImGui::GetIO();
+            if (io.WantCaptureKeyboard || io.WantCaptureMouse)
+            {
+                return false;
+            }
+        }
+#endif // _EDITOR
+
         if (gMapManager.InChaosCastle() == true && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME) == false)
         {
             g_pNewUISystem->Show(SEASON3B::INTERFACE_CHATINPUTBOX);
