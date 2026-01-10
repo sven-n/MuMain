@@ -59,55 +59,107 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
         originalItems = new ITEM_ATTRIBUTE[MAX_ITEM];
         memset(originalItems, 0, sizeof(ITEM_ATTRIBUTE) * MAX_ITEM);
 
-        // Read original file
+        // Read original file and detect format
         FILE* fpOrig = _wfopen(fileName, L"rb");
         if (fpOrig)
         {
-            BYTE* OrigBuffer = ItemDataFileIO::ReadAndDecryptBuffer(fpOrig, Size, MAX_ITEM, nullptr);
+            // Get file size to determine structure version
+            fseek(fpOrig, 0, SEEK_END);
+            long fileSize = ftell(fpOrig);
+            fseek(fpOrig, 0, SEEK_SET);
+
+            const int LegacySize = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
+            const int NewSize = sizeof(ITEM_ATTRIBUTE_FILE);
+            const long expectedLegacySize = LegacySize * MAX_ITEM + sizeof(DWORD);
+            const long expectedNewSize = NewSize * MAX_ITEM + sizeof(DWORD);
+
+            bool isLegacyFormat = (fileSize == expectedLegacySize);
+            int readSize = isLegacyFormat ? LegacySize : NewSize;
+
+            BYTE* OrigBuffer = ItemDataFileIO::ReadAndDecryptBuffer(fpOrig, readSize, MAX_ITEM, nullptr);
             fclose(fpOrig);
 
             if (OrigBuffer)
             {
-                ItemDataFileIO::DecryptBuffer(OrigBuffer, Size, MAX_ITEM);
+                ItemDataFileIO::DecryptBuffer(OrigBuffer, readSize, MAX_ITEM);
 
                 BYTE* pSeek = OrigBuffer;
                 for (int i = 0; i < MAX_ITEM; i++)
                 {
-                    // Use field-by-field copy to avoid alignment issues
-                    ITEM_ATTRIBUTE_FILE source;
-                    memcpy(&source, pSeek, Size);
+                    if (isLegacyFormat)
+                    {
+                        // Use legacy format structure
+                        ITEM_ATTRIBUTE_FILE_LEGACY source;
+                        memcpy(&source, pSeek, LegacySize);
 
-                    // Copy all fields individually (same approach as loader)
-                    CMultiLanguage::ConvertFromUtf8(originalItems[i].Name, source.Name, MAX_ITEM_NAME);
-                    originalItems[i].TwoHand = source.TwoHand;
-                    originalItems[i].Level = source.Level;
-                    originalItems[i].m_byItemSlot = source.m_byItemSlot;
-                    originalItems[i].m_wSkillIndex = source.m_wSkillIndex;
-                    originalItems[i].Width = source.Width;
-                    originalItems[i].Height = source.Height;
-                    originalItems[i].DamageMin = source.DamageMin;
-                    originalItems[i].DamageMax = source.DamageMax;
-                    originalItems[i].SuccessfulBlocking = source.SuccessfulBlocking;
-                    originalItems[i].Defense = source.Defense;
-                    originalItems[i].MagicDefense = source.MagicDefense;
-                    originalItems[i].WeaponSpeed = source.WeaponSpeed;
-                    originalItems[i].WalkSpeed = source.WalkSpeed;
-                    originalItems[i].Durability = source.Durability;
-                    originalItems[i].MagicDur = source.MagicDur;
-                    originalItems[i].MagicPower = source.MagicPower;
-                    originalItems[i].RequireStrength = source.RequireStrength;
-                    originalItems[i].RequireDexterity = source.RequireDexterity;
-                    originalItems[i].RequireEnergy = source.RequireEnergy;
-                    originalItems[i].RequireVitality = source.RequireVitality;
-                    originalItems[i].RequireCharisma = source.RequireCharisma;
-                    originalItems[i].RequireLevel = source.RequireLevel;
-                    originalItems[i].Value = source.Value;
-                    originalItems[i].iZen = source.iZen;
-                    originalItems[i].AttType = source.AttType;
-                    memcpy(originalItems[i].RequireClass, source.RequireClass, sizeof(source.RequireClass));
-                    memcpy(originalItems[i].Resistance, source.Resistance, sizeof(source.Resistance));
+                        // Copy all fields individually
+                        CMultiLanguage::ConvertFromUtf8(originalItems[i].Name, source.Name, MAX_ITEM_NAME);
+                        originalItems[i].TwoHand = source.TwoHand;
+                        originalItems[i].Level = source.Level;
+                        originalItems[i].m_byItemSlot = source.m_byItemSlot;
+                        originalItems[i].m_wSkillIndex = source.m_wSkillIndex;
+                        originalItems[i].Width = source.Width;
+                        originalItems[i].Height = source.Height;
+                        originalItems[i].DamageMin = source.DamageMin;
+                        originalItems[i].DamageMax = source.DamageMax;
+                        originalItems[i].SuccessfulBlocking = source.SuccessfulBlocking;
+                        originalItems[i].Defense = source.Defense;
+                        originalItems[i].MagicDefense = source.MagicDefense;
+                        originalItems[i].WeaponSpeed = source.WeaponSpeed;
+                        originalItems[i].WalkSpeed = source.WalkSpeed;
+                        originalItems[i].Durability = source.Durability;
+                        originalItems[i].MagicDur = source.MagicDur;
+                        originalItems[i].MagicPower = source.MagicPower;
+                        originalItems[i].RequireStrength = source.RequireStrength;
+                        originalItems[i].RequireDexterity = source.RequireDexterity;
+                        originalItems[i].RequireEnergy = source.RequireEnergy;
+                        originalItems[i].RequireVitality = source.RequireVitality;
+                        originalItems[i].RequireCharisma = source.RequireCharisma;
+                        originalItems[i].RequireLevel = source.RequireLevel;
+                        originalItems[i].Value = source.Value;
+                        originalItems[i].iZen = source.iZen;
+                        originalItems[i].AttType = source.AttType;
+                        memcpy(originalItems[i].RequireClass, source.RequireClass, sizeof(source.RequireClass));
+                        memcpy(originalItems[i].Resistance, source.Resistance, sizeof(source.Resistance));
+                    }
+                    else
+                    {
+                        // Use current format structure
+                        ITEM_ATTRIBUTE_FILE source;
+                        memcpy(&source, pSeek, NewSize);
 
-                    pSeek += Size;
+                        // Copy all fields individually
+                        CMultiLanguage::ConvertFromUtf8(originalItems[i].Name, source.Name, MAX_ITEM_NAME);
+                        originalItems[i].TwoHand = source.TwoHand;
+                        originalItems[i].Level = source.Level;
+                        originalItems[i].m_byItemSlot = source.m_byItemSlot;
+                        originalItems[i].m_wSkillIndex = source.m_wSkillIndex;
+                        originalItems[i].Width = source.Width;
+                        originalItems[i].Height = source.Height;
+                        originalItems[i].DamageMin = source.DamageMin;
+                        originalItems[i].DamageMax = source.DamageMax;
+                        originalItems[i].SuccessfulBlocking = source.SuccessfulBlocking;
+                        originalItems[i].Defense = source.Defense;
+                        originalItems[i].MagicDefense = source.MagicDefense;
+                        originalItems[i].WeaponSpeed = source.WeaponSpeed;
+                        originalItems[i].WalkSpeed = source.WalkSpeed;
+                        originalItems[i].Durability = source.Durability;
+                        originalItems[i].MagicDur = source.MagicDur;
+                        originalItems[i].MagicPower = source.MagicPower;
+                        originalItems[i].RequireStrength = source.RequireStrength;
+                        originalItems[i].RequireDexterity = source.RequireDexterity;
+                        originalItems[i].RequireEnergy = source.RequireEnergy;
+                        originalItems[i].RequireVitality = source.RequireVitality;
+                        originalItems[i].RequireCharisma = source.RequireCharisma;
+                        originalItems[i].RequireLevel = source.RequireLevel;
+                        originalItems[i].Value = source.Value;
+                        originalItems[i].iZen = source.iZen;
+                        originalItems[i].AttType = source.AttType;
+                        memcpy(originalItems[i].RequireClass, source.RequireClass, sizeof(source.RequireClass));
+                        memcpy(originalItems[i].Resistance, source.Resistance, sizeof(source.Resistance));
+                    }
+
+                    pSeek += readSize;
                 }
                 delete[] OrigBuffer;
             }
