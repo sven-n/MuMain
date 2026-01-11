@@ -1,5 +1,10 @@
 {
   "_comment": "MuEditor UI Translations - Indonesian",
+  "_language_info": {
+    "code": "id",
+    "name": "Indonesian",
+    "native_name": "Bahasa Indonesia"
+  },
 
   "btn_save": "Simpan Item",
   "btn_save_skills": "Simpan Skill",

@@ -1,5 +1,10 @@
 {
   "_comment": "MuEditor UI Translations - Russian",
+  "_language_info": {
+    "code": "ru",
+    "name": "Russian",
+    "native_name": "Русский"
+  },
 
   "btn_save": "Сохранить Предметы",
   "btn_save_skills": "Сохранить Навыки",

@@ -1,5 +1,10 @@
 {
   "_comment": "MuEditor UI Translations - German",
+  "_language_info": {
+    "code": "de",
+    "name": "German",
+    "native_name": "Deutsch"
+  },
 
   "btn_save": "Gegenstände Speichern",
   "btn_save_skills": "Fähigkeiten Speichern",
