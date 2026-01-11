@@ -5,6 +5,8 @@
 #include "MuEditor\UI\Common\MuEditorUI.h"
 #include "imgui.h"
 #include "MuEditor/Core/MuEditorCore.h"
+#include "Translation/i18n.h"
+#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
 
 // UI Layout constants
 constexpr float TOOLBAR_HEIGHT = 40.0f;
@@ -128,6 +130,41 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor)
         if (ImGui::Button("Item Editor"))
         {
             showItemEditor = !showItemEditor;
+        }
+
+        // Language selector
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(100.0f);
+        
+        i18n::Translator& translator = i18n::Translator::GetInstance();
+        const std::string& currentLocale = translator.GetLocale();
+        
+        // Language options
+        const char* languages[] = { "English", "Español", "Português" };
+        const char* locales[] = { "en", "es", "pt" };
+        int currentIndex = 0;
+        
+        // Find current language index
+        for (int i = 0; i < 3; i++)
+        {
+            if (currentLocale == locales[i])
+            {
+                currentIndex = i;
+                break;
+            }
+        }
+        
+        if (ImGui::Combo("##Language", &currentIndex, languages, 3))
+        {
+            // Language changed
+            if (translator.SwitchLanguage(locales[currentIndex]))
+            {
+                g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + languages[currentIndex]);
+            }
+            else
+            {
+                g_MuEditorConsoleUI.LogEditor(std::string("Failed to load translations for: ") + languages[currentIndex]);
+            }
         }
 
         // Close button on the far right
