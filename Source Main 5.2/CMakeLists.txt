@@ -25,8 +25,8 @@ file(GLOB_RECURSE MU_MAIN_SOURCES
   "source/*.cpp"
 )
 
-# ImGui sources (required when _EDITOR is defined)
-set(IMGUI_SOURCES
+# ImGui static library (required when _EDITOR is defined)
+add_library(imgui STATIC
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp"
@@ -35,7 +35,12 @@ set(IMGUI_SOURCES
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_opengl2.cpp"
 )
 
-add_executable(Main ${MU_MAIN_SOURCES} ${IMGUI_SOURCES})
+target_include_directories(imgui PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends"
+)
+
+add_executable(Main ${MU_MAIN_SOURCES})
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
@@ -70,8 +75,6 @@ target_include_directories(Main PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/source"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends"
 )
 
 # Basic compile definitions, roughly mirroring the original MSVC project
@@ -118,15 +121,21 @@ if (MSVC)
     urlmon
     turbojpeg-static
     wzAudio
+    imgui
+  )
+
+  # Define required DLLs for better maintainability
+  set(REQUIRED_DLLS
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin/wzAudio.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin/glew32.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin/ogg.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin/vorbisfile.dll"
   )
 
   # Copy required DLLs to build directory for MSVC builds
   add_custom_command(TARGET Main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${CMAKE_CURRENT_SOURCE_DIR}/bin/wzAudio.dll"
-      "${CMAKE_CURRENT_SOURCE_DIR}/bin/glew32.dll"
-      "${CMAKE_CURRENT_SOURCE_DIR}/bin/ogg.dll"
-      "${CMAKE_CURRENT_SOURCE_DIR}/bin/vorbisfile.dll"
+      ${REQUIRED_DLLS}
       $<TARGET_FILE_DIR:Main>
     COMMENT "Copying required DLLs to build directory"
   )
@@ -198,5 +207,6 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
     advapi32
     ${MU_TURBOJPEG_STATIC_LIB}
     wzAudio
+    imgui
   )
 endif()
