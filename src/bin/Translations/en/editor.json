@@ -37,12 +37,12 @@
   "popup_save_failed": "Failed to save items!",
   "popup_save_skills_success": "Skills saved successfully!",
   "popup_save_skills_failed": "Failed to save skills!",
+  "popup_export_s6e3_success": "Exported as legacy format successfully!",
+  "popup_export_s6e3_failed": "Failed to export as legacy format!",
   "popup_export_csv_success": "Items exported as CSV successfully!",
   "popup_export_csv_failed": "Failed to export item attributes as CSV!",
   "popup_export_csv_skills_success": "Skills exported as CSV successfully!",
   "popup_export_csv_skills_failed": "Failed to export skill attributes as CSV!",
-  "popup_export_s6e3_success": "Items exported as S6E3 legacy format successfully!",
-  "popup_export_s6e3_failed": "Failed to export item attributes as S6E3 format!",
 
   "label_skill_editor_title": "Skill Editor",
   "label_search_skills": "Search Skills:"

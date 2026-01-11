@@ -1,0 +1,49 @@
+{
+  "_comment": "MuEditor UI Translations - Filipino (Tagalog)",
+  "language_name": "Tagalog",
+
+  "btn_save": "I-save ang mga Aytem",
+  "btn_save_skills": "I-save ang mga Kasanayan",
+  "btn_export_s6e3": "I-export bilang S6E3",
+  "btn_export_csv": "I-export bilang CSV",
+  "btn_export_csv_skills": "I-export ang mga Kasanayan bilang CSV",
+  "btn_columns": "Mga Kolum",
+  "btn_select_all": "Piliin Lahat",
+  "btn_unselect_all": "I-unselect Lahat",
+  "btn_ok": "OK",
+
+  "msg_save_success": "Matagumpay na nai-save!",
+  "msg_save_failed": "Hindi nai-save ang mga aytem!",
+  "msg_save_skills_success": "Matagumpay na nai-save ang mga kasanayan!",
+  "msg_save_skills_failed": "Hindi nai-save ang mga kasanayan!",
+  "msg_export_s6e3_success": "Matagumpay na nai-export ang S6E3!",
+  "msg_export_s6e3_failed": "Hindi nai-export sa S6E3 format!",
+  "msg_export_csv_success": "Matagumpay na nai-export ang CSV!",
+  "msg_export_csv_failed": "Hindi nai-export sa CSV!",
+  "msg_export_csv_skills_success": "Matagumpay na nai-export ang mga kasanayan bilang CSV!",
+  "msg_export_csv_skills_failed": "Hindi nai-export ang mga kasanayan sa CSV!",
+
+  "error_file_not_found": "Hindi nahanap ang file: {0}",
+  "error_invalid_index": "Di-wastong index: {0}",
+  "error_index_in_use": "Error: Ginagamit na ang index {0}!",
+
+  "label_search_text": "Maghanap:",
+  "label_freeze_columns": "I-freeze ang Index/Pangalan",
+  "label_no_columns": "Walang napiling kolum. I-click ang 'Mga Kolum' para ipakita ang mga kolum.",
+  "label_index": "Index",
+
+  "popup_toggle_columns": "I-toggle ang Visibility ng Kolum:",
+  "popup_save_success": "Matagumpay na nai-save ang mga aytem!",
+  "popup_save_failed": "Hindi nai-save ang mga aytem!",
+  "popup_save_skills_success": "Matagumpay na nai-save ang mga kasanayan!",
+  "popup_save_skills_failed": "Hindi nai-save ang mga kasanayan!",
+  "popup_export_csv_success": "Matagumpay na nai-export ang mga aytem bilang CSV!",
+  "popup_export_csv_failed": "Hindi nai-export ang mga katangian ng aytem sa CSV!",
+  "popup_export_csv_skills_success": "Matagumpay na nai-export ang mga kasanayan bilang CSV!",
+  "popup_export_csv_skills_failed": "Hindi nai-export ang mga katangian ng kasanayan sa CSV!",
+  "popup_export_s6e3_success": "Matagumpay na na-export bilang legacy format!",
+  "popup_export_s6e3_failed": "Nabigo ang pag-export bilang legacy format!",
+
+  "label_skill_editor_title": "Editor ng Kasanayan",
+  "label_search_skills": "Maghanap ng Kasanayan:"
+}
