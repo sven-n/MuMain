@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef _EDITOR
-
 #include <string>
 #include <map>
 #include <vector>
@@ -13,9 +11,11 @@ namespace i18n {
 
 // Translation domain (separate namespaces for editor, game, metadata)
 enum class Domain {
-    Editor,
-    Game,
-    Metadata
+#ifdef _EDITOR
+    Editor,     // Only available in debug/editor builds
+    Metadata,   // Only available in debug/editor builds
+#endif
+    Game        // Always available (both debug and release)
 };
 
 // Main translator class
@@ -61,18 +61,24 @@ private:
     std::string m_currentLocale;
 
     // Separate translation maps for each domain
-    std::map<std::string, std::string> m_editorTranslations;
-    std::map<std::string, std::string> m_gameTranslations;
-    std::map<std::string, std::string> m_metadataTranslations;
+#ifdef _EDITOR
+    std::map<std::string, std::string> m_editorTranslations;   // Debug/Editor only
+    std::map<std::string, std::string> m_metadataTranslations; // Debug/Editor only
+#endif
+    std::map<std::string, std::string> m_gameTranslations;      // Always available
 };
 
 // Convenience functions
-inline const char* TranslateEditor(const char* key, const char* fallback = nullptr) {
-    return Translator::GetInstance().Translate(Domain::Editor, key, fallback);
-}
 
+// Game translations - always available
 inline const char* TranslateGame(const char* key, const char* fallback = nullptr) {
     return Translator::GetInstance().Translate(Domain::Game, key, fallback);
+}
+
+#ifdef _EDITOR
+// Editor and Metadata translations - only in debug/editor builds
+inline const char* TranslateEditor(const char* key, const char* fallback = nullptr) {
+    return Translator::GetInstance().Translate(Domain::Editor, key, fallback);
 }
 
 inline const char* TranslateMetadata(const char* key, const char* fallback = nullptr) {
@@ -86,12 +92,14 @@ inline bool HasTranslation(Domain domain, const char* key) {
 inline std::string FormatEditor(const char* key, const std::vector<std::string>& args) {
     return Translator::GetInstance().Format(Domain::Editor, key, args);
 }
+#endif // _EDITOR
 
 } // namespace i18n
 
 // Convenience macros
-#define EDITOR_TEXT(key) i18n::TranslateEditor(key, key)
 #define GAME_TEXT(key) i18n::TranslateGame(key, key)
-#define META_TEXT(key, fallback) i18n::TranslateMetadata(key, fallback)
 
+#ifdef _EDITOR
+#define EDITOR_TEXT(key) i18n::TranslateEditor(key, key)
+#define META_TEXT(key, fallback) i18n::TranslateMetadata(key, fallback)
 #endif // _EDITOR
