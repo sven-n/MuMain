@@ -18,11 +18,11 @@
 // Include X-macro field definitions (single source of truth)
 #include "ItemFieldDefs.h"
 
-// Legacy file format structure (S6E3) with 31-byte(maybe 30byte is the saver bet) name
+// Legacy file format structure (S6E3) with 30-byte name
 // Used for backward compatibility with old BMD files
 typedef struct
 {
-    char Name[31];
+    char Name[30];
     ITEM_ATTRIBUTE_FIELDS
 } ITEM_ATTRIBUTE_FILE_LEGACY;
 
