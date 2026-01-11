@@ -53,7 +53,7 @@ void CItemEditorTable::Render(
     bool freezeColumns)
 {
     // Get metadata fields once at function scope
-    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     // Count visible columns - only count columns that actually exist
     int visibleColumnCount = 0;

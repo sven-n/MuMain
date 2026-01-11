@@ -17,11 +17,11 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 
 // ===== X-MACRO-DRIVEN RENDERING =====
 
-void CItemEditorColumns::RenderFieldByDescriptor(const FieldDescriptor& desc, int& colIdx, int itemIndex,
+void CItemEditorColumns::RenderFieldByDescriptor(const ItemFieldDescriptor& desc, int& colIdx, int itemIndex,
                                                   ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible)
 {
-    // Use the template helper function from ItemFieldDefs.h
-    ::RenderFieldByDescriptor(desc, this, item, colIdx, itemIndex, rowInteracted, isVisible);
+    // Use the template helper function from ItemFieldMetadata.h
+    ::RenderFieldByDescriptor(desc, this, item, colIdx, itemIndex, rowInteracted, isVisible, MAX_ITEM_NAME);
 }
 
 // ===== LOW-LEVEL TYPE-SPECIFIC RENDERING =====
