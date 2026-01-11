@@ -1,7 +1,4 @@
 #include "stdafx.h"
-
-#ifdef _EDITOR
-
 #include "i18n.h"
 #include <algorithm>
 #include <cctype>
@@ -81,14 +78,16 @@ bool Translator::LoadTranslations(Domain domain, const std::wstring& filePath) {
     std::map<std::string, std::string>* targetMap = nullptr;
 
     switch (domain) {
+#ifdef _EDITOR
         case Domain::Editor:
             targetMap = &m_editorTranslations;
             break;
-        case Domain::Game:
-            targetMap = &m_gameTranslations;
-            break;
         case Domain::Metadata:
             targetMap = &m_metadataTranslations;
+            break;
+#endif
+        case Domain::Game:
+            targetMap = &m_gameTranslations;
             break;
         default:
             return false;
@@ -107,14 +106,16 @@ const char* Translator::Translate(Domain domain, const char* key, const char* fa
     const std::map<std::string, std::string>* sourceMap = nullptr;
 
     switch (domain) {
+#ifdef _EDITOR
         case Domain::Editor:
             sourceMap = &m_editorTranslations;
             break;
-        case Domain::Game:
-            sourceMap = &m_gameTranslations;
-            break;
         case Domain::Metadata:
             sourceMap = &m_metadataTranslations;
+            break;
+#endif
+        case Domain::Game:
+            sourceMap = &m_gameTranslations;
             break;
         default:
             return fallback ? fallback : key;
@@ -134,14 +135,16 @@ bool Translator::HasTranslation(Domain domain, const char* key) const {
     const std::map<std::string, std::string>* sourceMap = nullptr;
 
     switch (domain) {
+#ifdef _EDITOR
         case Domain::Editor:
             sourceMap = &m_editorTranslations;
             break;
-        case Domain::Game:
-            sourceMap = &m_gameTranslations;
-            break;
         case Domain::Metadata:
             sourceMap = &m_metadataTranslations;
+            break;
+#endif
+        case Domain::Game:
+            sourceMap = &m_gameTranslations;
             break;
         default:
             return false;
@@ -171,11 +174,11 @@ std::string Translator::Format(Domain domain, const char* key, const std::vector
 }
 
 void Translator::Clear() {
+#ifdef _EDITOR
     m_editorTranslations.clear();
-    m_gameTranslations.clear();
     m_metadataTranslations.clear();
+#endif
+    m_gameTranslations.clear();
 }
 
 } // namespace i18n
-
-#endif // _EDITOR
