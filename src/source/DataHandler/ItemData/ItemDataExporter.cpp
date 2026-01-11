@@ -23,8 +23,7 @@ bool ItemDataExporter::ExportToCsv(wchar_t* fileName)
 
     // Write CSV header
     fprintf(csvFp, "Index,Name,TwoHand,Level,ItemSlot,SkillIndex,Width,Height,DamageMin,DamageMax,SuccessfulBlocking,Defense,MagicDefense,WeaponSpeed,WalkSpeed,Durability,MagicDur,MagicPower,RequireStrength,RequireDexterity,RequireEnergy,RequireVitality,RequireCharisma,RequireLevel,Value,Zen,AttType,RequireClass0,RequireClass1,RequireClass2,RequireClass3,RequireClass4,RequireClass5,RequireClass6,Resistance0,Resistance1,Resistance2,Resistance3,Resistance4,Resistance5,Resistance6,Resistance7\n");
-
-    int itemCount = 0;
+    
     for (int i = 0; i < MAX_ITEM; i++)
     {
         // Only export items with names
@@ -90,7 +89,6 @@ bool ItemDataExporter::ExportToCsv(wchar_t* fileName)
             }
 
             fprintf(csvFp, "\n");
-            itemCount++;
         }
     }
 
