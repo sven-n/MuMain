@@ -3,15 +3,16 @@
 #ifdef _EDITOR
 
 #include "MuEditorCore.h"
-#include "../MuEditor/UI/Common/MuEditorUI.h"
-#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
-#include "../MuEditor/Config/MuEditorConfig.h"
+#include "MuEditor\UI\Common\MuEditorUI.h"
+#include "MuEditor\UI\Console\MuEditorConsoleUI.h"
+#include "MuEditor\Config\MuEditorConfig.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
 #include "MuInputBlockerCore.h"
-#include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
-#include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "MuEditor/UI/Common/MuEditorCenterPaneUI.h"
+#include "MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
 #include "Translation/i18n.h"
 
 // Windows cursor display counter thresholds
@@ -30,6 +31,7 @@ CMuEditorCore::CMuEditorCore()
     , m_bInitialized(false)
     , m_bFrameStarted(false)
     , m_bShowItemEditor(false)
+    , m_bShowSkillEditor(false)
     , m_bHoveringUI(false)
     , m_bPreviousFrameHoveringUI(false)
 {
@@ -146,6 +148,9 @@ void CMuEditorCore::Shutdown()
 
     // Save item editor preferences before shutting down
     g_MuItemEditorUI.SaveColumnPreferences();
+
+    // Save skill editor preferences before shutting down
+    g_MuSkillEditorUI.SaveColumnPreferences();
 
     ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -310,6 +315,12 @@ void CMuEditorCore::Render()
     {
         // Render center pane (handles all editor windows and input blocking)
         g_MuEditorCenterPaneUI.Render(m_bShowItemEditor);
+
+        // Render skill editor window
+        if (m_bShowSkillEditor)
+        {
+            g_MuSkillEditorUI.Render(m_bShowSkillEditor);
+        }
 
         // Render console
         g_MuEditorConsoleUI.Render();
