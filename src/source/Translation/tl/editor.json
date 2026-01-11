@@ -1,5 +1,10 @@
 {
   "_comment": "MuEditor UI Translations - Filipino (Tagalog)",
+  "_language_info": {
+    "code": "tl",
+    "name": "Filipino",
+    "native_name": "Tagalog"
+  },
 
   "btn_save": "I-save ang mga Aytem",
   "btn_save_skills": "I-save ang mga Kasanayan",

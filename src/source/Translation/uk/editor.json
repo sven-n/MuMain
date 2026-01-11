@@ -1,5 +1,10 @@
 {
   "_comment": "MuEditor UI Translations - Ukrainian",
+  "_language_info": {
+    "code": "uk",
+    "name": "Ukrainian",
+    "native_name": "Українська"
+  },
 
   "btn_save": "Зберегти Предмети",
   "btn_save_skills": "Зберегти Навички",
