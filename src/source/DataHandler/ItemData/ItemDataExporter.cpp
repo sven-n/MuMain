@@ -6,9 +6,26 @@
 #include "_struct.h"
 #include "_define.h"
 #include "ZzzInfomation.h"
+#include "GameData/ItemData/ItemFieldDefs.h"
 
 // External references
 extern ITEM_ATTRIBUTE* ItemAttribute;
+
+// X-Macro helpers for CSV generation
+#define CSV_HEADER_SIMPLE(name, type, arraySize, width) "," #name
+#define CSV_HEADER_ARRAY(nameWithIndex, baseName, index, type, width) "," #nameWithIndex
+
+// Complete CSV header with Index and Name
+#define CSV_FULL_HEADER "Index,Name" ITEM_FIELDS_SIMPLE(CSV_HEADER_SIMPLE) ITEM_FIELDS_ARRAYS(CSV_HEADER_ARRAY)
+
+// Helper to print field values (handles bool conversion)
+#define PRINT_FIELD_Bool(item, name) fprintf(csvFp, ",%d", (item).name ? 1 : 0)
+#define PRINT_FIELD_Byte(item, name) fprintf(csvFp, ",%d", (item).name)
+#define PRINT_FIELD_Word(item, name) fprintf(csvFp, ",%d", (item).name)
+#define PRINT_FIELD_Int(item, name) fprintf(csvFp, ",%d", (item).name)
+
+#define CSV_PRINT_SIMPLE(name, type, arraySize, width) PRINT_FIELD_##type(item, name);
+#define CSV_PRINT_ARRAY(nameWithIndex, baseName, index, type, width) fprintf(csvFp, ",%d", item.baseName[index]);
 
 bool ItemDataExporter::ExportToCsv(wchar_t* fileName)
 {
@@ -21,8 +38,8 @@ bool ItemDataExporter::ExportToCsv(wchar_t* fileName)
     // Write BOM for UTF-8
     fprintf(csvFp, "\xEF\xBB\xBF");
 
-    // Write CSV header
-    fprintf(csvFp, "Index,Name,TwoHand,Level,ItemSlot,SkillIndex,Width,Height,DamageMin,DamageMax,SuccessfulBlocking,Defense,MagicDefense,WeaponSpeed,WalkSpeed,Durability,MagicDur,MagicPower,RequireStrength,RequireDexterity,RequireEnergy,RequireVitality,RequireCharisma,RequireLevel,Value,Zen,AttType,RequireClass0,RequireClass1,RequireClass2,RequireClass3,RequireClass4,RequireClass5,RequireClass6,Resistance0,Resistance1,Resistance2,Resistance3,Resistance4,Resistance5,Resistance6,Resistance7\n");
+    // Write CSV header using X-macros
+    fprintf(csvFp, CSV_FULL_HEADER "\n");
     
     for (int i = 0; i < MAX_ITEM; i++)
     {
@@ -50,43 +67,13 @@ bool ItemDataExporter::ExportToCsv(wchar_t* fileName)
             }
             escapedName[idx] = '\0';
 
-            fprintf(csvFp, "%d,\"%s\",%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
-                i, escapedName,
-                ItemAttribute[i].TwoHand ? 1 : 0,
-                ItemAttribute[i].Level,
-                ItemAttribute[i].m_byItemSlot,
-                ItemAttribute[i].m_wSkillIndex,
-                ItemAttribute[i].Width,
-                ItemAttribute[i].Height,
-                ItemAttribute[i].DamageMin,
-                ItemAttribute[i].DamageMax,
-                ItemAttribute[i].SuccessfulBlocking,
-                ItemAttribute[i].Defense,
-                ItemAttribute[i].MagicDefense,
-                ItemAttribute[i].WeaponSpeed,
-                ItemAttribute[i].WalkSpeed,
-                ItemAttribute[i].Durability,
-                ItemAttribute[i].MagicDur,
-                ItemAttribute[i].MagicPower,
-                ItemAttribute[i].RequireStrength,
-                ItemAttribute[i].RequireDexterity,
-                ItemAttribute[i].RequireEnergy,
-                ItemAttribute[i].RequireVitality,
-                ItemAttribute[i].RequireCharisma,
-                ItemAttribute[i].RequireLevel,
-                ItemAttribute[i].Value,
-                ItemAttribute[i].iZen,
-                ItemAttribute[i].AttType);
+            // Print index and name
+            fprintf(csvFp, "%d,\"%s\"", i, escapedName);
 
-            for (int c = 0; c < MAX_CLASS; c++)
-            {
-                fprintf(csvFp, ",%d", ItemAttribute[i].RequireClass[c]);
-            }
-
-            for (int r = 0; r < MAX_RESISTANCE + 1; r++)
-            {
-                fprintf(csvFp, ",%d", ItemAttribute[i].Resistance[r]);
-            }
+            // Print all fields using X-macros
+            ITEM_ATTRIBUTE& item = ItemAttribute[i];
+            ITEM_FIELDS_SIMPLE(CSV_PRINT_SIMPLE)
+            ITEM_FIELDS_ARRAYS(CSV_PRINT_ARRAY)
 
             fprintf(csvFp, "\n");
         }

@@ -13,12 +13,24 @@ namespace ItemDataFileIO
         BYTE* buffer = new BYTE[bufferSize];
 
         // Read buffer
-        fread(buffer, bufferSize, 1, fp);
+        size_t bytesRead = fread(buffer, bufferSize, 1, fp);
+        if (bytesRead != 1)
+        {
+            delete[] buffer;
+            ShowErrorAndExit(L"Failed to read item data from file");
+            return nullptr;
+        }
 
         // Read checksum if requested
         if (outChecksum)
         {
-            fread(outChecksum, sizeof(DWORD), 1, fp);
+            bytesRead = fread(outChecksum, sizeof(DWORD), 1, fp);
+            if (bytesRead != 1)
+            {
+                delete[] buffer;
+                ShowErrorAndExit(L"Failed to read checksum from file");
+                return nullptr;
+            }
         }
 
         return buffer;
