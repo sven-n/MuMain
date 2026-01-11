@@ -309,18 +309,12 @@ void CMuEditorCore::Render()
     m_bHoveringUI = false;
 
     // Render toolbar (handles both open and closed states)
-    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor);
+    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor);
 
     if (m_bEditorMode)
     {
         // Render center pane (handles all editor windows and input blocking)
-        g_MuEditorCenterPaneUI.Render(m_bShowItemEditor);
-
-        // Render skill editor window
-        if (m_bShowSkillEditor)
-        {
-            g_MuSkillEditorUI.Render(m_bShowSkillEditor);
-        }
+        g_MuEditorCenterPaneUI.Render(m_bShowItemEditor, m_bShowSkillEditor);
 
         // Render console
         g_MuEditorConsoleUI.Render();
