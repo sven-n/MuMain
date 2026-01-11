@@ -43,14 +43,12 @@ public:
     void ClearGameLog() { m_strGameConsole.clear(); }
 
     void Render();
-    void Update(); // Call this periodically to capture console output
 
 private:
     CMuEditorConsoleUI();
     ~CMuEditorConsoleUI();
 
     void WriteToLogFile(const std::string& message);
-    void CaptureConsoleOutput(); // Capture new output from Windows console
     void CleanupOldLogs(); // Delete log files older than 14 days
 
     std::string m_strEditorConsole;
@@ -61,8 +59,6 @@ private:
     // Stream redirection
     ConsoleStreamBuf* m_pStdoutBuf;
     ConsoleStreamBuf* m_pStderrBuf;
-    
-    std::string m_lastConsoleContent;
 };
 
 #define g_MuEditorConsoleUI CMuEditorConsoleUI::GetInstance()
