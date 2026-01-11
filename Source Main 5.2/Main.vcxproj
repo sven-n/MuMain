@@ -46,6 +46,7 @@
   <PropertyGroup>
     <_ProjectFileVersion>14.0.25431.1</_ProjectFileVersion>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <!-- Win32-specific output directories -->
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
@@ -54,26 +55,20 @@
   </PropertyGroup>
   <!-- Debug Win32-specific paths -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Global Debug|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;</LibraryPath>
     <SourcePath>$(VC_SourcePath)</SourcePath>
   </PropertyGroup>
   <!-- Debug x64-specific paths -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Global Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;</LibraryPath>
     <SourcePath>$(VC_SourcePath)</SourcePath>
   </PropertyGroup>
   <!-- Release Win32-specific paths -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Global Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(VC_ExecutablePath_x86);$(CommonExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <!-- Release x64-specific paths -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Global Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(VC_ExecutablePath_x64);$(CommonExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <!-- Common build settings for all configurations -->
@@ -187,7 +182,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\netcore\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>shlwapi.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
 
@@ -198,7 +193,14 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>glprocs.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\netcore\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <!-- Release-specific platform settings -->
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Global Release'">
+    <Link>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\netcore\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
 
@@ -209,17 +211,6 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;_FOREIGN_NDEBUG;_LANGUAGE_FOREIGN;_LANGUAGE_ENG;UNICODE;LDS_PATCH_GLOBAL_100520;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <Link>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
-  </ItemDefinitionGroup>
-
-  <!-- Release Win32 additional lib dirs -->
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Global Release|Win32'">
-    <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\netcore\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Image Include="source\icon1.ico" />
@@ -243,31 +234,7 @@
     </ClCompile>
 
     <!-- Performance-critical files with aggressive optimization (Release builds only) -->
-    <ClCompile Update="source\WSclient.cpp">
-      <Optimization Condition="'$(Configuration)'=='Global Release'">MaxSpeed</Optimization>
-      <InlineFunctionExpansion Condition="'$(Configuration)'=='Global Release'">AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions Condition="'$(Configuration)'=='Global Release'">true</IntrinsicFunctions>
-      <FavorSizeOrSpeed Condition="'$(Configuration)'=='Global Release'">Speed</FavorSizeOrSpeed>
-    </ClCompile>
-    <ClCompile Update="source\ZzzEffect.cpp">
-      <Optimization Condition="'$(Configuration)'=='Global Release'">MaxSpeed</Optimization>
-      <InlineFunctionExpansion Condition="'$(Configuration)'=='Global Release'">AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions Condition="'$(Configuration)'=='Global Release'">true</IntrinsicFunctions>
-      <FavorSizeOrSpeed Condition="'$(Configuration)'=='Global Release'">Speed</FavorSizeOrSpeed>
-    </ClCompile>
-    <ClCompile Update="source\ZzzInterface.cpp">
-      <Optimization Condition="'$(Configuration)'=='Global Release'">MaxSpeed</Optimization>
-      <InlineFunctionExpansion Condition="'$(Configuration)'=='Global Release'">AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions Condition="'$(Configuration)'=='Global Release'">true</IntrinsicFunctions>
-      <FavorSizeOrSpeed Condition="'$(Configuration)'=='Global Release'">Speed</FavorSizeOrSpeed>
-    </ClCompile>
-    <ClCompile Update="source\ZzzInventory.cpp">
-      <Optimization Condition="'$(Configuration)'=='Global Release'">MaxSpeed</Optimization>
-      <InlineFunctionExpansion Condition="'$(Configuration)'=='Global Release'">AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions Condition="'$(Configuration)'=='Global Release'">true</IntrinsicFunctions>
-      <FavorSizeOrSpeed Condition="'$(Configuration)'=='Global Release'">Speed</FavorSizeOrSpeed>
-    </ClCompile>
-    <ClCompile Update="source\ZzzScene.cpp">
+    <ClCompile Update="source\WSclient.cpp;source\ZzzEffect.cpp;source\ZzzInterface.cpp;source\ZzzInventory.cpp;source\ZzzScene.cpp">
       <Optimization Condition="'$(Configuration)'=='Global Release'">MaxSpeed</Optimization>
       <InlineFunctionExpansion Condition="'$(Configuration)'=='Global Release'">AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions Condition="'$(Configuration)'=='Global Release'">true</IntrinsicFunctions>
