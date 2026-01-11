@@ -1,4 +1,5 @@
 #pragma once
+#include "GameData/ItemData/ItemFieldMetadata.h"
 
 #ifdef _EDITOR
 
@@ -34,7 +35,7 @@ private:
     static void ConvertItemName(char* outBuffer, size_t bufferSize, const wchar_t* name);
 
     // Get field value as string (descriptor-driven)
-    static std::string GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const struct FieldDescriptor& desc);
+    static std::string GetFieldValueAsString(const ITEM_ATTRIBUTE &item, const ItemFieldDescriptor &desc);
 };
 
 #endif // _EDITOR
