@@ -77,12 +77,11 @@ target_include_directories(Main PRIVATE
 # Basic compile definitions, roughly mirroring the original MSVC project
 # (fine-tuning per configuration can be done later if needed.)
 target_compile_definitions(Main PRIVATE
-  _EDITOR
   _LANGUAGE_FOREIGN
   _LANGUAGE_ENG
   UNICODE
   _USE_32BIT_TIME_T  # Use 32-bit time_t for 32-bit builds
-  $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
+  $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG;_EDITOR>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
 )
 
