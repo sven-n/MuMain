@@ -11,3 +11,4 @@ Source Main 5.2/Global Release/Main
 # CMake build directories
 build/
 build-mingw/
+/.idea/
