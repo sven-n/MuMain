@@ -67,6 +67,46 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     fwprintf(stderr, L"[MuEditor] ImGui context created\n");
     fflush(stderr);
 
+    // Load font with extended Unicode support for multiple languages
+    // This includes Latin, Cyrillic, Greek, and other common character sets
+    ImFontConfig fontConfig;
+    fontConfig.OversampleH = 2;
+    fontConfig.OversampleV = 2;
+    fontConfig.PixelSnapH = true;
+
+    // Build font atlas with multiple Unicode ranges
+    ImFontGlyphRangesBuilder builder;
+    builder.AddRanges(io.Fonts->GetGlyphRangesDefault());        // Basic Latin + Latin Supplement
+    builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());       // Cyrillic (Russian, Ukrainian, etc.)
+    builder.AddRanges(io.Fonts->GetGlyphRangesGreek());          // Greek
+    builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());       // Includes common Asian characters
+
+    // Add additional specific characters if needed
+    static const ImWchar additionalRanges[] = {
+        0x0100, 0x017F, // Latin Extended-A (Polish, etc.)
+        0x0180, 0x024F, // Latin Extended-B
+        0x1E00, 0x1EFF, // Latin Extended Additional (Vietnamese)
+        0,
+    };
+    builder.AddRanges(additionalRanges);
+
+    ImVector<ImWchar> ranges;
+    builder.BuildRanges(&ranges);
+
+    // Load default font with extended ranges
+    io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 16.0f, &fontConfig, ranges.Data);
+
+    // Fallback to default font if Segoe UI is not available
+    if (io.Fonts->Fonts.Size == 0)
+    {
+        io.Fonts->AddFontDefault(&fontConfig);
+    }
+
+    // Note: Don't call io.Fonts->Build() - the backend will build it automatically
+
+    fwprintf(stderr, L"[MuEditor] Font loaded with Unicode support\n");
+    fflush(stderr);
+
     // Dark theme
     ImGui::StyleColorsDark();
     ImGuiStyle& style = ImGui::GetStyle();
