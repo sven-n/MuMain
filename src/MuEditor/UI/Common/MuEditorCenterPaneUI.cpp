@@ -4,7 +4,8 @@
 
 #include "MuEditorCenterPaneUI.h"
 #include "imgui.h"
-#include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
 
 CMuEditorCenterPaneUI& CMuEditorCenterPaneUI::GetInstance()
 {
@@ -12,7 +13,7 @@ CMuEditorCenterPaneUI& CMuEditorCenterPaneUI::GetInstance()
     return instance;
 }
 
-void CMuEditorCenterPaneUI::Render(bool& showItemEditor)
+void CMuEditorCenterPaneUI::Render(bool& showItemEditor, bool& showSkillEditor)
 {
     // Simply render editor windows directly without a container
     // The container was causing an extra debug window to appear
@@ -22,8 +23,10 @@ void CMuEditorCenterPaneUI::Render(bool& showItemEditor)
         g_MuItemEditorUI.Render(showItemEditor);
     }
 
-    // Future editor windows can be added here
-    // if (showOtherEditor) { g_MuOtherEditor.Render(showOtherEditor); }
+    if (showSkillEditor)
+    {
+        g_MuSkillEditorUI.Render(showSkillEditor);
+    }
 }
 
 #endif // _EDITOR
