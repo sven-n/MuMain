@@ -48,6 +48,7 @@ What I have done so far:
     * Ancient set labels
   * The code has been refactored. A lot of magic values have been replaced by
     enums and constants.
+  * 🔥 New Translation system (see [TRANSLATION_SYSTEM_INTEGRATION.md](TRANSLATION_SYSTEM_INTEGRATION.md))
 
 What needs to be done for Season 6:
   * Lucky Items
