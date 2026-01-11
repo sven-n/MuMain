@@ -52,6 +52,7 @@
 
 #include "NewUISystem.h"
 #include "MuEditor/Core/MuEditorCore.h"
+#include "Translation/i18n.h"
 
 #ifdef _EDITOR
 #include "imgui.h"
@@ -1281,6 +1282,25 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
+
+    // Initialize game translations (always available)
+    {
+        i18n::Translator& translator = i18n::Translator::GetInstance();
+        bool gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
+            L"Translations\\en\\game.json");
+        if (!gameLoaded) gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
+            L"bin\\Translations\\en\\game.json");
+        translator.SetLocale("en");
+        
+        if (gameLoaded)
+        {
+            g_ErrorReport.Write(L"> Game translations loaded successfully.\r\n");
+        }
+        else
+        {
+            g_ErrorReport.Write(L"> WARNING: Game translations not found (game.json missing).\r\n");
+        }
+    }
 
 #ifdef _EDITOR
     // Initialize MU Editor
