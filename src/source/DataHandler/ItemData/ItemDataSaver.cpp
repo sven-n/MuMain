@@ -269,8 +269,7 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
             {
                 char itemName[MAX_ITEM_NAME];
                 CMultiLanguage::ConvertToUtf8(itemName, ItemAttribute[i].Name, MAX_ITEM_NAME);
-                std::string entryHeader = i18n::FormatEditor("log_item_change_entry", {std::to_string(i), std::string(itemName)});
-                changeLog << entryHeader << "\n" << itemChanges.str();
+                changeLog << "[" << i << "] " << itemName << "\n" << itemChanges.str();
                 changeCount++;
             }
         }
@@ -288,7 +287,7 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
         
         if (outChangeLog)
         {
-            *outChangeLog = std::string(EDITOR_TEXT("log_no_changes_detected")) + "\n";
+            *outChangeLog = "No changes detected.\n";
         }
         
         return false; // Return false to indicate no save was needed
@@ -317,8 +316,7 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
         delete[] originalItems;
         if (outChangeLog && changeCount > 0)
         {
-            std::string header = i18n::FormatEditor("log_item_changes_header", {std::to_string(changeCount)});
-            *outChangeLog = header + "\n" + changeLog.str();
+            *outChangeLog = "=== Item Changes (" + std::to_string(changeCount) + " items modified) ===\n" + changeLog.str();
         }
     }
 
