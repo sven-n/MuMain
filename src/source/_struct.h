@@ -298,32 +298,9 @@ typedef struct
     /*+86*/	WORD Effect;
 } SKILL_ATTRIBUTE_FILE;
 
-typedef struct
-{
-    wchar_t Name[MAX_SKILL_NAME];
-    WORD Level;
-    WORD Damage;
-    WORD Mana;
-    WORD AbilityGuage;
-    DWORD Distance;
-    int Delay;
-    int Energy;
-    WORD Charisma;
-    BYTE MasteryType;
-    BYTE SkillUseType;
-    DWORD SkillBrand;
-    BYTE KillCount;
-    BYTE RequireDutyClass[MAX_DUTY_CLASS];
-    BYTE RequireClass[MAX_CLASS];
-    BYTE SkillRank;
-    WORD Magic_Icon;
-    BYTE TypeSkill;
-    int Strength;
-    int Dexterity;
-    BYTE ItemSkill;
-    BYTE IsDamage;
-    WORD Effect;
-} SKILL_ATTRIBUTE;
+// SKILL_ATTRIBUTE definition moved to GameData/SkillData/SkillStructs.h
+// This is now the single source of truth for ALL builds (editor and release)
+#include "GameData/SkillData/SkillStructs.h"
 /*
 typedef struct
 {
