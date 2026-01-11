@@ -40,6 +40,8 @@ private:
                          WORD& value, bool& rowInteracted, bool isVisible);
     void RenderIntColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
                         int& value, bool& rowInteracted, bool isVisible);
+    void RenderDWordColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
+                          DWORD& value, bool& rowInteracted, bool isVisible);
     void RenderBoolColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
                          bool& value, bool& rowInteracted, bool isVisible);
     void RenderWCharArrayColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
