@@ -6124,7 +6124,7 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
         else
         {
 #ifdef _DEBUG
-            __asm { int 3 };
+            __debugbreak();
 #endif // _DEBUG
         }
 

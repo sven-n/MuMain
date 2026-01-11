@@ -2733,7 +2733,7 @@ void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
             if ((SrcIndex > iPitch * FontDCSize.cy) || (DstIndex > LIMIT_WIDTH * 4 * LIMIT_HEIGHT))
             {
 #ifdef _DEBUG
-                __asm { int 3 };
+                __debugbreak();
 #endif // _DEBUG
                 return;
             }
@@ -3470,7 +3470,7 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
             if ((SrcIndex > iPitch * RealBoxSize.cy) || (DstIndex > LIMIT_WIDTH * 4 * LIMIT_HEIGHT))
             {
 #ifdef _DEBUG
-                __asm { int 3 };
+                __debugbreak();
 #endif // _DEBUG
                 return;
             }
