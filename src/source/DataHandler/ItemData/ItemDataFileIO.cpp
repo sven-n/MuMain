@@ -63,11 +63,19 @@ namespace ItemDataFileIO
     bool WriteAndEncryptBuffer(FILE* fp, BYTE* buffer, int bufferSize)
     {
         // Write buffer
-        fwrite(buffer, bufferSize, 1, fp);
+        size_t bytesWritten = fwrite(buffer, bufferSize, 1, fp);
+        if (bytesWritten != 1)
+        {
+            return false;
+        }
 
         // Write checksum
         DWORD dwCheckSum = GenerateCheckSum2(buffer, bufferSize, 0xE2F1);
-        fwrite(&dwCheckSum, sizeof(DWORD), 1, fp);
+        bytesWritten = fwrite(&dwCheckSum, sizeof(DWORD), 1, fp);
+        if (bytesWritten != 1)
+        {
+            return false;
+        }
 
         return true;
     }
