@@ -224,9 +224,6 @@ void CMuEditorConsoleUI::Initialize()
     // Redirect stdout and stderr to capture all console output
     m_pStdoutBuf = new ConsoleStreamBuf(std::cout, true);
     m_pStderrBuf = new ConsoleStreamBuf(std::cerr, false);
-
-    // Capture all existing console output from the start
-    CaptureConsoleOutput();
 }
 
 void CMuEditorConsoleUI::Shutdown()
@@ -288,130 +285,9 @@ void CMuEditorConsoleUI::LogGame(const std::string& message)
     WriteToLogFile("[GAME] " + message);
 }
 
-void CMuEditorConsoleUI::CaptureConsoleOutput()
-{
-    // Get console screen buffer info
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hConsole == INVALID_HANDLE_VALUE)
-        return;
-
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    if (!GetConsoleScreenBufferInfo(hConsole, &csbi))
-        return;
-
-    // Read entire visible console buffer
-    COORD bufferSize;
-    bufferSize.X = csbi.dwSize.X;
-    bufferSize.Y = csbi.dwCursorPosition.Y + 1;
-
-    if (bufferSize.Y <= 0)
-        return;
-
-    CHAR_INFO* pCharBuffer = new CHAR_INFO[bufferSize.X * bufferSize.Y];
-
-    COORD startPoint = { 0, 0 };
-    SMALL_RECT readRegion;
-    readRegion.Left = 0;
-    readRegion.Top = 0;
-    readRegion.Right = bufferSize.X - 1;
-    readRegion.Bottom = bufferSize.Y - 1;
-
-    if (ReadConsoleOutput(hConsole, pCharBuffer, bufferSize, startPoint, &readRegion))
-    {
-        // Convert entire console buffer to text
-        std::string currentContent;
-        for (short y = 0; y < bufferSize.Y; ++y)
-        {
-            std::wstring wline;
-            for (short x = 0; x < bufferSize.X; ++x)
-            {
-                CHAR_INFO& charInfo = pCharBuffer[y * bufferSize.X + x];
-                wchar_t wch = charInfo.Char.UnicodeChar;
-                if (wch != L'\0')
-                    wline += wch;
-            }
-
-            // Trim trailing spaces
-            while (!wline.empty() && (wline.back() == L' ' || wline.back() == L'\0'))
-                wline.pop_back();
-
-            // Convert to UTF-8
-            if (!wline.empty())
-            {
-                char utf8Buffer[4096];
-                WideCharToMultiByte(CP_UTF8, 0, wline.c_str(), -1, utf8Buffer, sizeof(utf8Buffer), NULL, NULL);
-                std::string line(utf8Buffer);
-
-                // Trim trailing null/spaces again
-                while (!line.empty() && (line.back() == ' ' || line.back() == '\0'))
-                    line.pop_back();
-
-                if (!line.empty())
-                {
-                    currentContent += line;
-                    currentContent += '\n';
-                }
-            }
-        }
-
-        // Determine what's new content
-        std::string newContent;
-        if (m_lastConsoleContent.empty())
-        {
-            // First time - capture everything
-            newContent = currentContent;
-        }
-        else if (currentContent.size() > m_lastConsoleContent.size())
-        {
-            // Subsequent times - only capture new content
-            newContent = currentContent.substr(m_lastConsoleContent.size());
-        }
-
-        if (!newContent.empty())
-        {
-            // Split by newlines and add each line
-            size_t pos = 0;
-            while (pos < newContent.size())
-            {
-                size_t newlinePos = newContent.find('\n', pos);
-                if (newlinePos == std::string::npos)
-                {
-                    // Last line without newline
-                    std::string line = newContent.substr(pos);
-                    if (!line.empty())
-                    {
-                        std::lock_guard<std::mutex> lock(g_consoleMutex);
-                        m_strGameConsole += line;
-                        m_strGameConsole += "\n";
-                        WriteToLogFile("[GAME] " + line);
-                    }
-                    break;
-                }
-                else
-                {
-                    std::string line = newContent.substr(pos, newlinePos - pos);
-                    if (!line.empty())
-                    {
-                        std::lock_guard<std::mutex> lock(g_consoleMutex);
-                        m_strGameConsole += line;
-                        m_strGameConsole += "\n";
-                        WriteToLogFile("[GAME] " + line);
-                    }
-                    pos = newlinePos + 1;
-                }
-            }
-
-            m_lastConsoleContent = currentContent;
-        }
-    }
-
-    delete[] pCharBuffer;
-}
 
 void CMuEditorConsoleUI::Render()
 {
-    CaptureConsoleOutput();
-
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 bottom_pos = ImVec2(0, io.DisplaySize.y - 200);
     ImVec2 bottom_size = ImVec2(io.DisplaySize.x, 200);
