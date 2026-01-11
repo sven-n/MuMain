@@ -26,6 +26,7 @@ enum class EItemFieldType
     Byte,
     Word,
     Int,
+    DWord,
     WCharArray
 };
 
@@ -97,6 +98,9 @@ inline void RenderFieldByDescriptor(const FieldDescriptor& desc, TColumns* cols,
         break;
     case EItemFieldType::Int:
         cols->RenderIntColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<int*>(fieldPtr), rowInteracted, isVisible);
+        break;
+    case EItemFieldType::DWord:
+        cols->RenderDWordColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<DWORD*>(fieldPtr), rowInteracted, isVisible);
         break;
     case EItemFieldType::WCharArray:
         cols->RenderWCharArrayColumn(displayName, colIdx, itemIndex, uniqueId, reinterpret_cast<wchar_t*>(fieldPtr), MAX_ITEM_NAME, rowInteracted, isVisible);
