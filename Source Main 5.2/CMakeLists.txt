@@ -25,7 +25,17 @@ file(GLOB_RECURSE MU_MAIN_SOURCES
   "source/*.cpp"
 )
 
-add_executable(Main ${MU_MAIN_SOURCES})
+# ImGui sources (required when _EDITOR is defined)
+set(IMGUI_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_widgets.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_win32.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_opengl2.cpp"
+)
+
+add_executable(Main ${MU_MAIN_SOURCES} ${IMGUI_SOURCES})
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
@@ -67,6 +77,7 @@ target_include_directories(Main PRIVATE
 # Basic compile definitions, roughly mirroring the original MSVC project
 # (fine-tuning per configuration can be done later if needed.)
 target_compile_definitions(Main PRIVATE
+  _EDITOR
   _LANGUAGE_FOREIGN
   _LANGUAGE_ENG
   UNICODE
