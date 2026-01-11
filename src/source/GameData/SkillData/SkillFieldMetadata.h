@@ -48,6 +48,12 @@ inline constexpr int GetSkillFieldCount()
     return sizeof(SkillFieldMetadataInternal::s_descriptors) / sizeof(SkillFieldDescriptor);
 }
 
+// Get display name for a skill field (with translation support)
+inline const char* GetSkillFieldDisplayName(const char* fieldName)
+{
+    return GetFieldDisplayName(fieldName);
+}
+
 // Helper to render a skill field by descriptor (uses generic helper)
 template<typename TColumns>
 inline void RenderSkillFieldByDescriptor(const SkillFieldDescriptor& desc, TColumns* cols, SKILL_ATTRIBUTE& skill,
