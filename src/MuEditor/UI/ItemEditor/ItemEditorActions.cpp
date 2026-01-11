@@ -21,7 +21,7 @@ void CItemEditorActions::ConvertItemName(char* outBuffer, size_t bufferSize, con
     WideCharToMultiByte(CP_UTF8, 0, name, -1, outBuffer, (int)bufferSize, NULL, NULL);
 }
 
-std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const FieldDescriptor& desc)
+std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const ItemFieldDescriptor& desc)
 {
     std::stringstream ss;
 
@@ -64,7 +64,7 @@ std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item
 std::string CItemEditorActions::GetCSVHeader()
 {
     std::stringstream ss;
-    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     ss << "Index";
     for (int i = 0; i < fieldCount; ++i)
@@ -78,7 +78,7 @@ std::string CItemEditorActions::GetCSVHeader()
 std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBUTE& item)
 {
     std::stringstream ss;
-    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     ss << "Row " << itemIndex << "\n";
     ss << "Index = " << itemIndex;
@@ -95,7 +95,7 @@ std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBU
 std::string CItemEditorActions::ExportItemToCSV(int itemIndex, ITEM_ATTRIBUTE& item)
 {
     std::stringstream ss;
-    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     ss << itemIndex;
 

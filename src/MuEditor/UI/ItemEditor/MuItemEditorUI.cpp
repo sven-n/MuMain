@@ -32,7 +32,7 @@ CMuItemEditorUI::CMuItemEditorUI()
     m_columnVisibility["Index"] = true;  // Special column (not in metadata)
 
     // Get all fields from metadata and set default visibility
-    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
     for (int i = 0; i < fieldCount; ++i)
     {
         // Default commonly used columns to visible, rest to hidden
@@ -220,7 +220,7 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
         changed |= ImGui::Checkbox(EDITOR_TEXT("label_index"), &m_columnVisibility["Index"]);
 
         // Get all fields from metadata and render checkboxes
-        const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+        const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
         for (int i = 0; i < fieldCount; ++i)
         {
             const char* displayName = GetFieldDisplayName(fields[i].name);
