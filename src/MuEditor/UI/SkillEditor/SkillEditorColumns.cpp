@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "SkillEditorColumns.h"
+#include "SkillEditorTable.h"
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "GameData/SkillData/SkillFieldDefs.h"
 #include "Translation/i18n.h"
@@ -11,9 +12,6 @@
 #include "imgui.h"
 #include <algorithm>
 #include <sstream>
-
-// Forward declaration - will be defined in SkillEditorTable.cpp (COMMIT 12)
-class CSkillEditorTable;
 
 extern SKILL_ATTRIBUTE* SkillAttribute;
 
@@ -196,8 +194,7 @@ void CSkillEditorColumns::RenderIndexColumn(int& colIdx, int skillIndex, bool& r
             }
 
             // Scroll to new index position
-            // TODO: Uncomment in COMMIT 12 when SkillEditorTable is created
-            // CSkillEditorTable::RequestScrollToIndex(newIndex);
+            CSkillEditorTable::RequestScrollToIndex(newIndex);
         }
         else if (!m_errorLogged)
         {
