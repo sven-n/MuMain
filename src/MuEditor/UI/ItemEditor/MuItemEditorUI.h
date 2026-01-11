@@ -27,11 +27,8 @@ private:
 
     char m_szItemSearchBuffer[256];
 
-    // Column visibility state
+    // Column visibility state (cached from config)
     std::map<std::string, bool> m_columnVisibility;
-
-    // Config file path
-    const char* muitemeditor_columns_cfg = "MuEditor\\MuItemEditorColumns.cfg";
 
     // Selected row tracking
     int m_selectedRow;
