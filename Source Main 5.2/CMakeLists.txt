@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Force 32-bit build for MSVC to match available libraries
+if (MSVC)
+  # For Ninja generator, we need to configure the toolchain before project()
+  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "This project requires 32-bit libraries. Please configure CMake with: -DCMAKE_GENERATOR_PLATFORM=Win32 (for Visual Studio generator) or use the x86 MSVC toolchain in CLion settings")
+  endif()
+endif()
+
+project(MuMain)
+
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
       "Build type (default RelWithDebInfo for useful symbols)" FORCE)
@@ -50,6 +60,8 @@ target_include_directories(Main PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/source"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends"
 )
 
 # Basic compile definitions, roughly mirroring the original MSVC project
@@ -58,6 +70,7 @@ target_compile_definitions(Main PRIVATE
   _LANGUAGE_FOREIGN
   _LANGUAGE_ENG
   UNICODE
+  _USE_32BIT_TIME_T  # Use 32-bit time_t for 32-bit builds
   $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
 )
@@ -95,6 +108,17 @@ if (MSVC)
     urlmon
     turbojpeg-static
     wzAudio
+  )
+
+  # Copy required DLLs to build directory for MSVC builds
+  add_custom_command(TARGET Main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${CMAKE_CURRENT_SOURCE_DIR}/bin/wzAudio.dll"
+      "${CMAKE_CURRENT_SOURCE_DIR}/bin/glew32.dll"
+      "${CMAKE_CURRENT_SOURCE_DIR}/bin/ogg.dll"
+      "${CMAKE_CURRENT_SOURCE_DIR}/bin/vorbisfile.dll"
+      $<TARGET_FILE_DIR:Main>
+    COMMENT "Copying required DLLs to build directory"
   )
 endif()
 
