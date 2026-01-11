@@ -299,7 +299,8 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
     int iMbclen = 0;
     for (const wchar_t* lpSeek = lpszText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
     {
-        iMbclen = _tclen(lpSeek);
+        // For wide characters, always 1 character per unit
+        iMbclen = 1;
         if (iMbclen + (lpSeek - lpLineStart) >= iLineSize)
         {
             if (lpSpace && (lpSeek - lpSpace) < std::min<int>(10, iLineSize / 2))
