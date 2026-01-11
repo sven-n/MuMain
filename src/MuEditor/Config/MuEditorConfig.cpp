@@ -71,6 +71,10 @@ void CMuEditorConfig::Load()
             {
                 m_columnVisibility[key] = (value == "1" || value == "true");
             }
+            else if (currentSection == "SkillEditorColumnVisibility")
+            {
+                m_skillEditorColumnVisibility[key] = (value == "1" || value == "true");
+            }
         }
     }
 
@@ -97,6 +101,14 @@ void CMuEditorConfig::Save()
     // Write [ColumnVisibility] section
     file << "[ColumnVisibility]\n";
     for (const auto& col : m_columnVisibility)
+    {
+        file << col.first << "=" << (col.second ? "1" : "0") << "\n";
+    }
+    file << "\n";
+
+    // Write [SkillEditorColumnVisibility] section
+    file << "[SkillEditorColumnVisibility]\n";
+    for (const auto& col : m_skillEditorColumnVisibility)
     {
         file << col.first << "=" << (col.second ? "1" : "0") << "\n";
     }
