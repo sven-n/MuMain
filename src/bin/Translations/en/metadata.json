@@ -43,5 +43,30 @@
   "field_Resistance[4]": "Earth Resistance",
   "field_Resistance[5]": "Wind Resistance",
   "field_Resistance[6]": "Water Resistance",
-  "field_Resistance[7]": "Resistance 7"
+  "field_Resistance[7]": "Resistance 7",
+
+  "_comment_skills": "Skill Field Translations",
+  "field_Damage": "Damage",
+  "field_Mana": "Mana",
+  "field_AbilityGuage": "AG Cost",
+  "field_Distance": "Range",
+  "field_Delay": "Cooldown",
+  "field_Energy": "Req Energy",
+  "field_Charisma": "Req Leadership",
+  "field_MasteryType": "Mastery Type",
+  "field_SkillUseType": "Use Type",
+  "field_SkillBrand": "Brand",
+  "field_KillCount": "Kill Count",
+  "field_SkillRank": "Rank",
+  "field_Magic_Icon": "Icon",
+  "field_TypeSkill": "Type",
+  "field_Strength": "Req Strength",
+  "field_Dexterity": "Req Dexterity",
+  "field_ItemSkill": "Item Skill",
+  "field_IsDamage": "Is Damage",
+  "field_Effect": "Effect",
+
+  "field_RequireDutyClass[0]": "Duty 0",
+  "field_RequireDutyClass[1]": "Duty 1",
+  "field_RequireDutyClass[2]": "Duty 2"
 }
