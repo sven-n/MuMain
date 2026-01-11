@@ -5,6 +5,7 @@
 #include "MuEditor\UI\Common\MuEditorUI.h"
 #include "imgui.h"
 #include "MuEditor/Core/MuEditorCore.h"
+#include "MuEditor/Config/MuEditorConfig.h"
 #include "Translation/i18n.h"
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
 
@@ -159,6 +160,10 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor)
             // Language changed
             if (translator.SwitchLanguage(locales[currentIndex]))
             {
+                // Save language preference to config
+                g_MuEditorConfig.SetLanguage(locales[currentIndex]);
+                g_MuEditorConfig.Save();
+
                 g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + languages[currentIndex]);
             }
             else
