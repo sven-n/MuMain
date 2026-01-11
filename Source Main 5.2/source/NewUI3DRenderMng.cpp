@@ -204,7 +204,7 @@ void SEASON3B::CNewUI3DRenderMng::Add3DRenderObj(INewUI3DRenderObj* pObj, float 
         else
         {
 #ifdef _DEBUG
-            __asm { int 3 };
+            __debugbreak();
 #endif // _DEBUG
         }
     }
