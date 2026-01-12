@@ -133,6 +133,27 @@ if (MSVC)
       $<TARGET_FILE_DIR:Main>
     COMMENT "Copying required DLLs to build directory"
   )
+
+  # 1. Define the output path using a variable CMake can understand early
+  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library.dll")
+  set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
+
+  # 2. Tell CMake to watch ALL .cs files in the ClientLibrary folder
+  file(GLOB_RECURSE DOTNET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/*.cs")
+
+  # 3. This only runs if DOTNET_SOURCES or the .csproj change
+  add_custom_command(
+          OUTPUT "${DOTNET_DLL_PATH}"
+          COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
+          COMMAND dotnet publish "${DOTNET_PROJ}" -c $<CONFIG> -r win-x86 -o "${CMAKE_CURRENT_BINARY_DIR}" --nologo
+          DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
+          COMMENT "Checking for .NET Client Library updates..."
+          VERBATIM
+  )
+
+  # 4. Create a target for the DLL and link it to Main
+  add_custom_target(BuildDotNetLib DEPENDS "${DOTNET_DLL_PATH}")
+  add_dependencies(Main BuildDotNetLib)
 endif()
 
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
