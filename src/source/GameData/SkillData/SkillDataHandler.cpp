@@ -53,7 +53,7 @@ bool CSkillDataHandler::Save(wchar_t* fileName, std::string* outChangeLog)
     return SkillDataSaver::Save(fileName, outChangeLog);
 }
 
-bool CSkillDataHandler::SaveLegacy(wchar_t* fileName)
+bool CSkillDataHandler::ExportAsS6E3(wchar_t* fileName)
 {
     return SkillDataSaverLegacy::SaveLegacy(fileName);
 }
