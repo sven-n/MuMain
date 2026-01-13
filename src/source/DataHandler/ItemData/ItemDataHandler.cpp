@@ -52,7 +52,7 @@ bool CItemDataHandler::Save(wchar_t* fileName, std::string* outChangeLog)
     return ItemDataSaver::Save(fileName, outChangeLog);
 }
 
-bool CItemDataHandler::SaveLegacy(wchar_t* fileName)
+bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName)
 {
     return ItemDataSaverLegacy::SaveLegacy(fileName);
 }
