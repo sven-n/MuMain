@@ -141,7 +141,7 @@ if (MSVC)
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
   # 2. Tell CMake to watch ALL .cs files in the ClientLibrary folder
-  file(GLOB_RECURSE DOTNET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/*.cs")
+  file(GLOB_RECURSE DOTNET_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/*.cs")
 
   # 3. This only runs if DOTNET_SOURCES or the .csproj change
   add_custom_command(
