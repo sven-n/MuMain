@@ -12,6 +12,7 @@ class CSkillEditorActions
 {
 public:
     static void RenderSaveButton();
+    static void RenderExportLegacyButton();
     static void RenderExportCSVButton();
 
     // Render all action buttons in a row

@@ -142,6 +142,7 @@ void CSkillEditorActions::RenderSaveButton()
             // Log change details first, then save completion message
             g_MuEditorConsoleUI.LogEditor(changeLog);
             g_MuEditorConsoleUI.LogEditor("=== SAVE COMPLETED ===");
+            ImGui::OpenPopup("Save Success");
         }
         else
         {
@@ -153,7 +154,37 @@ void CSkillEditorActions::RenderSaveButton()
             else
             {
                 g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_save_failed"));
+                ImGui::OpenPopup("Save Failed");
             }
+        }
+    }
+
+    ImGui::PopStyleColor(2);
+}
+
+void CSkillEditorActions::RenderExportLegacyButton()
+{
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.4f, 0.8f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.5f, 0.9f, 1.0f));
+
+    if (ImGui::Button(EDITOR_TEXT("btn_export_s6e3")))
+    {
+        wchar_t fileName[256];
+        swprintf(fileName, L"Data\\Local\\%ls\\Skill_%ls_Legacy.bmd",
+                 g_strSelectedML.c_str(), g_strSelectedML.c_str());
+
+        if (g_SkillDataHandler.SaveLegacy(fileName))
+        {
+            std::string filename_str = "Skill_" +
+                std::string(g_strSelectedML.begin(), g_strSelectedML.end()) +
+                "_Legacy.bmd";
+            g_MuEditorConsoleUI.LogEditor("Exported skills as legacy format (32-byte names): " + filename_str);
+            ImGui::OpenPopup("Export S6E3 Success");
+        }
+        else
+        {
+            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_export_s6e3_failed"));
+            ImGui::OpenPopup("Export S6E3 Failed");
         }
     }
 
@@ -170,13 +201,17 @@ void CSkillEditorActions::RenderExportCSVButton()
         wchar_t fileName[256];
         swprintf(fileName, L"Skills_%ls.csv", g_strSelectedML.c_str());
 
-        if ( g_SkillDataHandler.ExportToCsv(fileName))
+        if (g_SkillDataHandler.ExportToCsv(fileName))
         {
-            CSkillEditorPopups::ShowExportCSVSuccessPopup();
+            std::string filename_str = "Skills_" +
+                std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + ".csv";
+            g_MuEditorConsoleUI.LogEditor("Exported skills as CSV: " + filename_str);
+            ImGui::OpenPopup("Export CSV Success");
         }
         else
         {
-            CSkillEditorPopups::ShowExportCSVFailedPopup();
+            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_export_csv_skills_failed"));
+            ImGui::OpenPopup("Export CSV Failed");
         }
     }
 
@@ -191,6 +226,8 @@ void CSkillEditorActions::RenderExportCSVButton()
 void CSkillEditorActions::RenderAllButtons()
 {
     RenderSaveButton();
+    ImGui::SameLine();
+    RenderExportLegacyButton();
     ImGui::SameLine();
     RenderExportCSVButton();
 }

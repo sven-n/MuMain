@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Windows.h>
+
 // X-Macro definition for all SKILL_ATTRIBUTE fields (except Name which is special)
 // Format: X(FieldName, TypeEnum, ArraySize, DefaultColumnWidth)
 // This is the SINGLE SOURCE OF TRUTH for skill field definitions
@@ -16,15 +18,7 @@
     X(MasteryType, Byte, 1, 80.0f) \
     X(SkillUseType, Byte, 1, 80.0f) \
     X(SkillBrand, DWord, 1, 90.0f) \
-    X(KillCount, Byte, 1, 80.0f) \
-    X(SkillRank, Byte, 1, 70.0f) \
-    X(Magic_Icon, Word, 1, 80.0f) \
-    X(TypeSkill, Byte, 1, 80.0f) \
-    X(Strength, Int, 1, 80.0f) \
-    X(Dexterity, Int, 1, 80.0f) \
-    X(ItemSkill, Byte, 1, 80.0f) \
-    X(IsDamage, Byte, 1, 70.0f) \
-    X(Effect, Word, 1, 70.0f)
+    X(KillCount, Byte, 1, 80.0f)
 
 #define SKILL_FIELDS_ARRAYS(X) \
     X(RequireDutyClass[0], RequireDutyClass, 0, Byte, 80.0f) \
@@ -44,5 +38,27 @@
 #define SKILL_FIELD_TYPE_Word WORD
 #define SKILL_FIELD_TYPE_Int int
 #define SKILL_FIELD_TYPE_DWord DWORD
+
+// Generate struct field declarations from X-macro
+#define DECLARE_SKILL_FIELD(name, type, arraySize, width) SKILL_FIELD_TYPE_##type name;
+
+// Fields that come after the arrays (must be in correct order for binary compatibility)
+#define SKILL_FIELDS_AFTER_ARRAYS(X) \
+    X(SkillRank, Byte, 1, 70.0f) \
+    X(Magic_Icon, Word, 1, 80.0f) \
+    X(TypeSkill, Byte, 1, 80.0f) \
+    X(Strength, Int, 1, 80.0f) \
+    X(Dexterity, Int, 1, 80.0f) \
+    X(ItemSkill, Byte, 1, 80.0f) \
+    X(IsDamage, Byte, 1, 70.0f) \
+    X(Effect, Word, 1, 70.0f)
+
+// Macro to generate all fields for struct definition (excludes Name)
+// IMPORTANT: Field order must match original binary format!
+#define SKILL_ATTRIBUTE_FIELDS \
+    SKILL_FIELDS_SIMPLE(DECLARE_SKILL_FIELD) \
+    BYTE RequireDutyClass[MAX_DUTY_CLASS]; \
+    BYTE RequireClass[MAX_CLASS]; \
+    SKILL_FIELDS_AFTER_ARRAYS(DECLARE_SKILL_FIELD)
 
 // Note: WCharArray for Name field is handled specially in SkillFieldMetadata.h
