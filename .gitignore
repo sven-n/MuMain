@@ -11,4 +11,10 @@ Source Main 5.2/Global Release/Main
 # CMake build directories
 build/
 build-mingw/
+
+# Jetbrains Ides
 /.idea/
+**/.idea/
+
+# ImGui
+**/imgui.ini
