@@ -170,10 +170,9 @@ void CSkillEditorActions::RenderExportLegacyButton()
     if (ImGui::Button(EDITOR_TEXT("btn_export_s6e3")))
     {
         wchar_t fileName[256];
-        swprintf(fileName, L"Data\\Local\\%ls\\Skill_%ls_Legacy.bmd",
-                 g_strSelectedML.c_str(), g_strSelectedML.c_str());
+        swprintf(fileName, L"Data\\Local\\%ls\\Skill_S6E3.bmd", g_strSelectedML.c_str());
 
-        if (g_SkillDataHandler.SaveLegacy(fileName))
+        if (g_SkillDataHandler.ExportAsS6E3(fileName))
         {
             std::string filename_str = "Skill_" +
                 std::string(g_strSelectedML.begin(), g_strSelectedML.end()) +
@@ -199,7 +198,7 @@ void CSkillEditorActions::RenderExportCSVButton()
     if (ImGui::Button(EDITOR_TEXT("btn_export_csv_skills"), ImVec2(150, 0)))
     {
         wchar_t fileName[256];
-        swprintf(fileName, L"Skills_%ls.csv", g_strSelectedML.c_str());
+        swprintf(fileName, L"Data\\Local\\%ls\\Skills.csv", g_strSelectedML.c_str());
 
         if (g_SkillDataHandler.ExportToCsv(fileName))
         {
