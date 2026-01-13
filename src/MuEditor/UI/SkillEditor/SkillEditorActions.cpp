@@ -128,28 +128,36 @@ std::string CSkillEditorActions::ExportSkillCombined(int skillIndex, SKILL_ATTRI
 
 void CSkillEditorActions::RenderSaveButton()
 {
-    if (ImGui::Button(EDITOR_TEXT("btn_save_skills"), ImVec2(150, 0)))
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.8f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.9f, 1.0f));
+
+    if (ImGui::Button(EDITOR_TEXT("btn_save_skills")))
     {
         wchar_t fileName[256];
         swprintf(fileName, L"Data\\Local\\%ls\\Skill_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
         std::string changeLog;
-        bool success = g_SkillDataHandler.Save(fileName, &changeLog);
-
-        if (success)
+        if (g_SkillDataHandler.Save(fileName, &changeLog))
         {
-            CSkillEditorPopups::ShowSaveSuccessPopup(changeLog);
+            // Log change details first, then save completion message
+            g_MuEditorConsoleUI.LogEditor(changeLog);
+            g_MuEditorConsoleUI.LogEditor("=== SAVE COMPLETED ===");
         }
         else
         {
-            CSkillEditorPopups::ShowSaveFailedPopup();
+            // Check if it failed due to no changes
+            if (!changeLog.empty() && changeLog.find("No changes") != std::string::npos)
+            {
+                g_MuEditorConsoleUI.LogEditor(changeLog);
+            }
+            else
+            {
+                g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_save_failed"));
+            }
         }
     }
 
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::SetTooltip("Save all skill changes to Skill_%ls.bmd", g_strSelectedML.c_str());
-    }
+    ImGui::PopStyleColor(2);
 }
 
 void CSkillEditorActions::RenderExportCSVButton()
