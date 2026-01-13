@@ -8,6 +8,7 @@
 
 #ifdef _EDITOR
 #include "SkillDataSaver.h"
+#include "SkillDataSaverLegacy.h"
 #include "SkillDataExporter.h"
 #endif
 
@@ -50,6 +51,11 @@ bool CSkillDataHandler::Load(wchar_t* fileName)
 bool CSkillDataHandler::Save(wchar_t* fileName, std::string* outChangeLog)
 {
     return SkillDataSaver::Save(fileName, outChangeLog);
+}
+
+bool CSkillDataHandler::SaveLegacy(wchar_t* fileName)
+{
+    return SkillDataSaverLegacy::SaveLegacy(fileName);
 }
 
 bool CSkillDataHandler::ExportToCsv(wchar_t* fileName)

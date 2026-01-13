@@ -44,19 +44,26 @@ bool SkillDataLoader::Load(wchar_t* fileName)
         return false;
     }
 
-    const int Size = sizeof(SKILL_ATTRIBUTE_FILE);
-    const long expectedSize = Size * MAX_SKILLS + sizeof(DWORD);
-
-    // Verify file size
+    // Get file size to determine structure version
     fseek(fp, 0, SEEK_END);
     long fileSize = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    if (fileSize != expectedSize)
+    const int LegacySize = sizeof(SKILL_ATTRIBUTE_FILE_LEGACY);
+    const int NewSize = sizeof(SKILL_ATTRIBUTE_FILE);
+    const long expectedLegacySize = LegacySize * MAX_SKILLS + sizeof(DWORD);
+    const long expectedNewSize = NewSize * MAX_SKILLS + sizeof(DWORD);
+
+    bool isLegacyFormat = (fileSize == expectedLegacySize);
+    int readSize = isLegacyFormat ? LegacySize : NewSize;
+
+    // Validate file size
+    if (fileSize != expectedLegacySize && fileSize != expectedNewSize)
     {
         fclose(fp);
         wchar_t errorMsg[256];
-        swprintf(errorMsg, L"Skill file size mismatch. Expected: %ld, Got: %ld", expectedSize, fileSize);
+        swprintf(errorMsg, L"Skill file size mismatch. Expected: %ld (new) or %ld (legacy), Got: %ld",
+                 expectedNewSize, expectedLegacySize, fileSize);
 #ifdef _EDITOR
         g_MuEditorConsoleUI.LogEditor(WideToNarrow(errorMsg));
 #else
@@ -65,9 +72,16 @@ bool SkillDataLoader::Load(wchar_t* fileName)
         return false;
     }
 
+#ifdef _EDITOR
+    if (isLegacyFormat)
+    {
+        g_MuEditorConsoleUI.LogEditor("Detected legacy skill format (32-byte names)");
+    }
+#endif
+
     // Read file data
-    BYTE* Buffer = new BYTE[Size * MAX_SKILLS];
-    fread(Buffer, Size * MAX_SKILLS, 1, fp);
+    BYTE* Buffer = new BYTE[readSize * MAX_SKILLS];
+    fread(Buffer, readSize * MAX_SKILLS, 1, fp);
 
     // Read checksum
     DWORD dwCheckSum;
@@ -75,7 +89,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     fclose(fp);
 
     // Verify checksum
-    DWORD calculatedChecksum = GenerateCheckSum2(Buffer, Size * MAX_SKILLS, 0x5A18);
+    DWORD calculatedChecksum = GenerateCheckSum2(Buffer, readSize * MAX_SKILLS, 0x5A18);
     if (dwCheckSum != calculatedChecksum)
     {
         delete[] Buffer;
@@ -94,17 +108,22 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     BYTE* pSeek = Buffer;
     for (int i = 0; i < MAX_SKILLS; i++)
     {
-        BuxConvert(pSeek, Size);
+        BuxConvert(pSeek, readSize);
 
-        // Read name as UTF-8, convert to UTF-16
-        char rawName[MAX_SKILL_NAME]{};
-        memcpy(rawName, pSeek, MAX_SKILL_NAME);
-        CMultiLanguage::ConvertFromUtf8(SkillAttribute[i].Name, rawName);
-        pSeek += MAX_SKILL_NAME;
+        if (isLegacyFormat)
+        {
+            SKILL_ATTRIBUTE_FILE_LEGACY source;
+            memcpy(&source, pSeek, LegacySize);
+            CopySkillAttributeFromSource(SkillAttribute[i], source);
+        }
+        else
+        {
+            SKILL_ATTRIBUTE_FILE source;
+            memcpy(&source, pSeek, NewSize);
+            CopySkillAttributeFromSource(SkillAttribute[i], source);
+        }
 
-        // Copy remaining fields
-        memcpy(&(SkillAttribute[i].Level), pSeek, Size - MAX_SKILL_NAME);
-        pSeek += Size - MAX_SKILL_NAME;
+        pSeek += readSize;
     }
 
     delete[] Buffer;

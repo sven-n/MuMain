@@ -247,7 +247,19 @@ void OpenSkillScript(wchar_t* FileName)
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
     {
-        int Size = sizeof(SKILL_ATTRIBUTE_FILE);
+        // Get file size to determine structure version
+        fseek(fp, 0, SEEK_END);
+        long fileSize = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+
+        const int LegacySize = sizeof(SKILL_ATTRIBUTE_FILE_LEGACY);
+        const int NewSize = sizeof(SKILL_ATTRIBUTE_FILE);
+        const long expectedLegacySize = LegacySize * MAX_SKILLS + sizeof(DWORD);
+        const long expectedNewSize = NewSize * MAX_SKILLS + sizeof(DWORD);
+
+        bool isLegacyFormat = (fileSize == expectedLegacySize);
+        int Size = isLegacyFormat ? LegacySize : NewSize;
+
         // 읽기
         BYTE* Buffer = new BYTE[Size * MAX_SKILLS];
         fread(Buffer, Size * MAX_SKILLS, 1, fp);
@@ -269,16 +281,21 @@ void OpenSkillScript(wchar_t* FileName)
             for (int i = 0; i < MAX_SKILLS; i++)
             {
                 BuxConvert(pSeek, Size);
-                // memcpy(&SkillAttribute[i], pSeek, Size);
 
-                char rawName[MAX_SKILL_NAME]{};
+                if (isLegacyFormat)
+                {
+                    SKILL_ATTRIBUTE_FILE_LEGACY source;
+                    memcpy(&source, pSeek, LegacySize);
+                    CopySkillAttributeFromSource(SkillAttribute[i], source);
+                }
+                else
+                {
+                    SKILL_ATTRIBUTE_FILE source;
+                    memcpy(&source, pSeek, NewSize);
+                    CopySkillAttributeFromSource(SkillAttribute[i], source);
+                }
 
-                memcpy(rawName, pSeek, MAX_SKILL_NAME);
-                CMultiLanguage::ConvertFromUtf8(SkillAttribute[i].Name, rawName);
-                pSeek += MAX_SKILL_NAME;
-                memcpy(&(SkillAttribute[i].Level), pSeek, Size - MAX_SKILL_NAME);
-
-                pSeek += Size - MAX_SKILL_NAME;
+                pSeek += Size;
             }
         }
         delete[] Buffer;
