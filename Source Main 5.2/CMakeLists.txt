@@ -50,8 +50,11 @@ endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   # Build as a Windows GUI application (no console window) and let CMake
   # add the default system libraries like kernel32, user32, gdi32, etc.
+  set(WORKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+  message(STATUS "Setting debugger working directory to: ${WORKING_DIR}")
   set_target_properties(Main PROPERTIES
     WIN32_EXECUTABLE TRUE
+    VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}"
   )
 
   enable_language(RC)
