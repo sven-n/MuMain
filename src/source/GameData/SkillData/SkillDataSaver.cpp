@@ -200,16 +200,30 @@ bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
         pSeek += Size;
     }
 
+    // Check if we should skip saving when no changes detected
+    if (originalSkills && changeCount == 0)
+    {
+        // No changes - skip save
+        delete[] Buffer;
+        delete[] originalSkills;
+
+        if (outChangeLog)
+        {
+            *outChangeLog = "No changes detected.\n";
+        }
+
+        return false; // Return false to indicate no save was needed
+    }
+
     // Generate checksum
     DWORD dwCheckSum = GenerateCheckSum2(Buffer, Size * MAX_SKILLS, 0x5A18);
 
-    // Write to file
+    // Open file for writing only after we know we need to save
     FILE* fp = _wfopen(fileName, L"wb");
     if (fp == NULL)
     {
         delete[] Buffer;
         if (originalSkills) delete[] originalSkills;
-        g_MuEditorConsoleUI.LogEditor(WideToNarrow(L"Failed to open file for writing"));
         return false;
     }
 
@@ -219,29 +233,14 @@ bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
 
     delete[] Buffer;
 
-    // Output change log
-    if (outChangeLog)
+    if (originalSkills)
     {
-        if (changeCount > 0)
-        {
-            *outChangeLog = "=== Skill Changes ===\n";
-            *outChangeLog += "Total skills modified: " + std::to_string(changeCount) + "\n\n";
-            *outChangeLog += changeLog.str();
-        }
-        else
-        {
-            *outChangeLog = "No skills were modified.";
-        }
-
         delete[] originalSkills;
+        if (outChangeLog && changeCount > 0)
+        {
+            *outChangeLog = "=== Skill Changes (" + std::to_string(changeCount) + " skills modified) ===\n" + changeLog.str();
+        }
     }
-
-    std::string successMsg = "Successfully saved " + std::to_string(MAX_SKILLS) + " skills";
-    if (changeCount > 0)
-    {
-        successMsg += " (" + std::to_string(changeCount) + " modified)";
-    }
-    g_MuEditorConsoleUI.LogEditor(successMsg);
 
     return true;
 }
