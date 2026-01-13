@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
+project(MuMain)
+
 # Force 32-bit build for MSVC to match available libraries
 if (MSVC)
-  # For Ninja generator, we need to configure the toolchain before project()
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "This project requires 32-bit libraries. Please configure CMake with: -DCMAKE_GENERATOR_PLATFORM=Win32 (for Visual Studio generator) or use the x86 MSVC toolchain in CLion settings")
   endif()
 endif()
-
-project(MuMain)
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
