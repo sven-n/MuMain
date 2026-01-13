@@ -11,6 +11,13 @@ Source Main 5.2/Global Release/Main
 # CMake build directories
 build/
 build-mingw/
+/cmake-build-debug/
+/cmake-build-release/
+/CMakeFiles/
+**/cmake-build-debug/
+**/cmake-build-release/
+**/CMakeFiles/
+/Win32/
 
 # Jetbrains Ides
 /.idea/
