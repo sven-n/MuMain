@@ -154,14 +154,15 @@ void CSkillEditorActions::RenderSaveButton()
 
 void CSkillEditorActions::RenderExportCSVButton()
 {
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.9f, 0.7f, 1.0f));
+
     if (ImGui::Button(EDITOR_TEXT("btn_export_csv_skills"), ImVec2(150, 0)))
     {
         wchar_t fileName[256];
         swprintf(fileName, L"Skills_%ls.csv", g_strSelectedML.c_str());
 
-        bool success = g_SkillDataHandler.ExportToCsv(fileName);
-
-        if (success)
+        if ( g_SkillDataHandler.ExportToCsv(fileName))
         {
             CSkillEditorPopups::ShowExportCSVSuccessPopup();
         }
@@ -175,6 +176,8 @@ void CSkillEditorActions::RenderExportCSVButton()
     {
         ImGui::SetTooltip("Export all skills to CSV format");
     }
+
+    ImGui::PopStyleColor(2);
 }
 
 void CSkillEditorActions::RenderAllButtons()
