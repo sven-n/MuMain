@@ -40,8 +40,6 @@ extern wchar_t* getMonsterName(int type);
 
 extern SKILL_ATTRIBUTE* SkillAttribute;
 
-void OpenSkillScript(wchar_t* FileName);
-
 BOOL IsValidateSkillIdx(INT iSkillIdx);
 BOOL IsCorrectSkillType(INT iSkillSeq, eTypeSkill iSkillTypeIdx);
 BOOL IsCorrectSkillType_FrendlySkill(INT iSkillSeq);
