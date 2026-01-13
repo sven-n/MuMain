@@ -55,8 +55,9 @@ What needs to be done for Season 6:
 ## How to build & run
 
 ### Requirements
-* **Visual Studio Build Tools 2022** (minimum requirement - older versions won't work, newer versions are not tested)
-* Visual Studio 2022 with the newest update, workloads for C++ and C#, Jetbrains Rider also works
+* **CMake** 3.16 or newer (bundled with Visual Studio and CLion)
+* **.NET SDK 10.0** or newer (for building the Client Library)
+* **Visual Studio 2022+** with C++ and C# workloads, **CLion**, or **Rider** (see IDE-specific instructions below)
 * A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
 
 ### Building with CMake and MinGW-w64 (Linux)
@@ -94,50 +95,82 @@ name of the library available on your system.
 
 
 
-### Step-by-Step Instructions:
-#### Publishing the MUnique.Client.Library (Required for First Build)
-**Important:** Because of the integrated C# code, you **must** publish the `MUnique.Client.Library` project before building the C++ client. A simple build is not enough - the DLL must be built with Native AOT and placed in the correct output folder.
+### Building the Project
 
-This publish step only needs to be done once (unless you modify the C# networking code).
+The project uses **CMake** as its build system. The `.NET Client Library` is automatically built by CMake when you build the main project - no manual publishing required!
 
-#### Option 1: Using Visual Studio (Recommended for Beginners)
+#### Option 1: Visual Studio 2022+ (Recommended)
 
-1. Open the solution in Visual Studio 2026
-2. In **Solution Explorer**, locate the `MUnique.Client.Library` project (under the `ClientLibrary` folder)
-3. **Right-click** on `MUnique.Client.Library`
-4. Select **Publish...**
-5. If a publish profile exists, click **Publish**
-   - If no profile exists:
-     - Click **Add a publish profile**
-     - Choose **Folder** as the target
-     - Set the target location to:
-       - For Debug: `Source Main 5.2\Global Debug\`
-       - For Release: `Source Main 5.2\Global Release\`
-     - Click **Finish**, then **Publish**
-6. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` (~ 5 MB) in your output folder
-7. Now you can build the `Main` project normally
+1. **Open the project:**
+   - File → Open → Folder
+   - Select the root `MuMain` folder (not `Source Main 5.2`)
 
-#### Option 2: Using Command Line
+2. **Wait for CMake to configure** (automatically happens, check Output window)
 
-1. From the repository root, run:<br/>
-   **For Debug builds:**
+3. **Select build configuration:**
+   - Use the dropdown to select `x86-Debug` or `x86-Release`
+
+4. **Build:**
+   - Build → Build All
+   - Or press `Ctrl+Shift+B`
+
+5. **Run/Debug:**
+   - Select `Main.exe` as startup item
+   - Press `F5` to debug or `Ctrl+F5` to run
+   - Working directory is automatically set to `Source Main 5.2/bin`
+
+**Note:** The working directory is pre-configured in `.vs/launch.vs.json`. If it's not working, ensure you opened the root `MuMain` folder, not a subfolder.
+
+#### Option 2: CLion
+
+1. **Open the project:**
+   - File → Open
+   - Select the root `MuMain` folder
+
+2. **Wait for CMake to configure** (automatically happens)
+
+3. **Configure working directory:**
+   - Run → Edit Configurations
+   - Select `Main`
+   - Set "Working directory" to: `$ProjectFileDir$/Source Main 5.2/bin`
+
+4. **Build and Run:**
+   - Click the hammer icon to build
+   - Click the play icon to run
+
+#### Option 3: Rider (CMake via Command Line + Rider for Development)
+
+Rider doesn't have full CMake support for C++ projects, so you need to generate a Visual Studio solution first:
+
+1. **Generate the solution** (one-time setup):
    ```bash
-   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Debug -r win-x86 -o "Source Main 5.2\Global Debug"
+   cmake -B build -G "Visual Studio 17 2022" -A Win32
    ```
-   **For Release builds:**
-   ```bash
-   dotnet publish ClientLibrary\MUnique.Client.Library.csproj -c Release -r win-x86 -o "Source Main 5.2\Global Release"
-   ```
-2. Wait for the publish to complete - you should see `MUnique.Client.Library.dll` in your output folder
-3. Now you can build and run the `Main` project normally
+   *(Adjust the generator version based on your installed Visual Studio)*
 
-#### Verifying the Publish
+2. **Open in Rider:**
+   - File → Open
+   - Select `build/MuMain.sln`
 
-After publishing, verify that the following file exists:
-- Debug: `Source Main 5.2\Global Debug\MUnique.Client.Library.dll`
-- Release: `Source Main 5.2\Global Release\MUnique.Client.Library.dll`
+3. **Build and Run:**
+   - Build → Build Solution
+   - Run → Run 'Main'
 
-If this file is missing, the C++ client will fail to link or run.
+**Important:** When you modify `CMakeLists.txt`, you must manually regenerate the solution by running the cmake command again.
+
+#### Option 4: Command Line Build
+
+```bash
+# Configure (first time only, or when CMakeLists.txt changes)
+cmake -B build -A Win32
+
+# Build
+cmake --build build --config Debug
+
+# Run
+cd "Source Main 5.2/bin"
+../../build/bin/Main.exe
+```
 
 ---
 
