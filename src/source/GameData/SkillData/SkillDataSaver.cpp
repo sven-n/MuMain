@@ -92,8 +92,21 @@ bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
         FILE* fpOrig = _wfopen(fileName, L"rb");
         if (fpOrig)
         {
-            BYTE* OrigBuffer = new BYTE[Size * MAX_SKILLS];
-            fread(OrigBuffer, Size * MAX_SKILLS, 1, fpOrig);
+            // Get file size to determine structure version
+            fseek(fpOrig, 0, SEEK_END);
+            long fileSize = ftell(fpOrig);
+            fseek(fpOrig, 0, SEEK_SET);
+
+            const int LegacySize = sizeof(SKILL_ATTRIBUTE_FILE_LEGACY);
+            const int NewSize = sizeof(SKILL_ATTRIBUTE_FILE);
+            const long expectedLegacySize = LegacySize * MAX_SKILLS + sizeof(DWORD);
+            const long expectedNewSize = NewSize * MAX_SKILLS + sizeof(DWORD);
+
+            bool isLegacyFormat = (fileSize == expectedLegacySize);
+            int readSize = isLegacyFormat ? LegacySize : NewSize;
+
+            BYTE* OrigBuffer = new BYTE[readSize * MAX_SKILLS];
+            fread(OrigBuffer, readSize * MAX_SKILLS, 1, fpOrig);
             DWORD dwOrigCheckSum;
             fread(&dwOrigCheckSum, sizeof(DWORD), 1, fpOrig);
             fclose(fpOrig);
@@ -102,15 +115,22 @@ bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
             BYTE* pSeek = OrigBuffer;
             for (int i = 0; i < MAX_SKILLS; i++)
             {
-                BuxConvert(pSeek, Size);
+                BuxConvert(pSeek, readSize);
 
-                char rawName[MAX_SKILL_NAME]{};
-                memcpy(rawName, pSeek, MAX_SKILL_NAME);
-                CMultiLanguage::ConvertFromUtf8(originalSkills[i].Name, rawName);
-                pSeek += MAX_SKILL_NAME;
+                if (isLegacyFormat)
+                {
+                    SKILL_ATTRIBUTE_FILE_LEGACY source;
+                    memcpy(&source, pSeek, LegacySize);
+                    CopySkillAttributeFromSource(originalSkills[i], source);
+                }
+                else
+                {
+                    SKILL_ATTRIBUTE_FILE source;
+                    memcpy(&source, pSeek, NewSize);
+                    CopySkillAttributeFromSource(originalSkills[i], source);
+                }
 
-                memcpy(&(originalSkills[i].Level), pSeek, Size - MAX_SKILL_NAME);
-                pSeek += Size - MAX_SKILL_NAME;
+                pSeek += readSize;
             }
             delete[] OrigBuffer;
         }
@@ -133,32 +153,7 @@ bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
         SKILL_ATTRIBUTE_FILE dest;
         memset(&dest, 0, Size);
 
-        // Convert name from UTF-16 to UTF-8
-        CMultiLanguage::ConvertToUtf8(dest.Name, SkillAttribute[i].Name, MAX_SKILL_NAME);
-
-        // Copy all other fields
-        dest.Level = SkillAttribute[i].Level;
-        dest.Damage = SkillAttribute[i].Damage;
-        dest.Mana = SkillAttribute[i].Mana;
-        dest.AbilityGuage = SkillAttribute[i].AbilityGuage;
-        dest.Distance = SkillAttribute[i].Distance;
-        dest.Delay = SkillAttribute[i].Delay;
-        dest.Energy = SkillAttribute[i].Energy;
-        dest.Charisma = SkillAttribute[i].Charisma;
-        dest.MasteryType = SkillAttribute[i].MasteryType;
-        dest.SkillUseType = SkillAttribute[i].SkillUseType;
-        dest.SkillBrand = SkillAttribute[i].SkillBrand;
-        dest.KillCount = SkillAttribute[i].KillCount;
-        memcpy(dest.RequireDutyClass, SkillAttribute[i].RequireDutyClass, MAX_DUTY_CLASS);
-        memcpy(dest.RequireClass, SkillAttribute[i].RequireClass, MAX_CLASS);
-        dest.SkillRank = SkillAttribute[i].SkillRank;
-        dest.Magic_Icon = SkillAttribute[i].Magic_Icon;
-        dest.TypeSkill = SkillAttribute[i].TypeSkill;
-        dest.Strength = SkillAttribute[i].Strength;
-        dest.Dexterity = SkillAttribute[i].Dexterity;
-        dest.ItemSkill = SkillAttribute[i].ItemSkill;
-        dest.IsDamage = SkillAttribute[i].IsDamage;
-        dest.Effect = SkillAttribute[i].Effect;
+        CopySkillAttributeToDestination(dest, SkillAttribute[i]);
 
         // Track changes using X-macros
         if (originalSkills && SkillAttribute[i].Name[0] != 0)
@@ -186,6 +181,10 @@ bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
             #undef COMPARE_SIMPLE
 
             SKILL_FIELDS_ARRAYS(COMPARE_ARRAY_FIELD)
+
+            #define COMPARE_SIMPLE(name, type, arraySize, width) COMPARE_FIELD_##type(name, type, arraySize, width)
+            SKILL_FIELDS_AFTER_ARRAYS(COMPARE_SIMPLE)
+            #undef COMPARE_SIMPLE
 
             if (changed)
             {

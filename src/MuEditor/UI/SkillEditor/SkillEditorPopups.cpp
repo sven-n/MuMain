@@ -6,102 +6,34 @@
 #include "imgui.h"
 #include "Translation/i18n.h"
 
-// Static member initialization
-bool CSkillEditorPopups::s_showSaveSuccess = false;
-bool CSkillEditorPopups::s_showSaveFailure = false;
-bool CSkillEditorPopups::s_showExportCSVSuccess = false;
-bool CSkillEditorPopups::s_showExportCSVFailure = false;
-std::string CSkillEditorPopups::s_changeLog = "";
-
-// ===== SHOW POPUP FUNCTIONS =====
-
-void CSkillEditorPopups::ShowSaveSuccessPopup(const std::string& changeLog)
+bool CSkillEditorPopups::RenderSimplePopup(const char* popupId, const char* message)
 {
-    s_changeLog = changeLog;
-    s_showSaveSuccess = true;
-    ImGui::OpenPopup("Skill Save Success");
+    if (ImGui::BeginPopupModal(popupId, NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("%s", message);
+        if (ImGui::Button(EDITOR_TEXT("btn_ok"), ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+        return true;
+    }
+    return false;
 }
-
-void CSkillEditorPopups::ShowSaveFailedPopup()
-{
-    s_showSaveFailure = true;
-    ImGui::OpenPopup("Skill Save Failed");
-}
-
-void CSkillEditorPopups::ShowExportCSVSuccessPopup()
-{
-    s_showExportCSVSuccess = true;
-    ImGui::OpenPopup("Skill Export CSV Success");
-}
-
-void CSkillEditorPopups::ShowExportCSVFailedPopup()
-{
-    s_showExportCSVFailure = true;
-    ImGui::OpenPopup("Skill Export CSV Failed");
-}
-
-// ===== RENDER FUNCTIONS =====
 
 void CSkillEditorPopups::RenderPopups()
 {
-    // Save Success popup with changelog
-    if (s_showSaveSuccess && ImGui::BeginPopupModal("Skill Save Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("%s", EDITOR_TEXT("popup_save_skills_success"));
+    // Save popups
+    RenderSimplePopup("Save Success", EDITOR_TEXT("popup_save_skills_success"));
+    RenderSimplePopup("Save Failed", EDITOR_TEXT("popup_save_skills_failed"));
 
-        if (!s_changeLog.empty())
-        {
-            ImGui::Separator();
-            ImGui::TextWrapped("%s", s_changeLog.c_str());
-        }
+    // Legacy Export popups
+    RenderSimplePopup("Export S6E3 Success", EDITOR_TEXT("popup_export_s6e3_success"));
+    RenderSimplePopup("Export S6E3 Failed", EDITOR_TEXT("popup_export_s6e3_failed"));
 
-        if (ImGui::Button(EDITOR_TEXT("btn_ok"), ImVec2(120, 0)))
-        {
-            s_showSaveSuccess = false;
-            s_changeLog.clear();
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
-
-    // Save Failed popup
-    if (s_showSaveFailure && ImGui::BeginPopupModal("Skill Save Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("%s", EDITOR_TEXT("popup_save_skills_failed"));
-
-        if (ImGui::Button(EDITOR_TEXT("btn_ok"), ImVec2(120, 0)))
-        {
-            s_showSaveFailure = false;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
-
-    // Export CSV Success popup
-    if (s_showExportCSVSuccess && ImGui::BeginPopupModal("Skill Export CSV Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("%s", EDITOR_TEXT("popup_export_csv_skills_success"));
-
-        if (ImGui::Button(EDITOR_TEXT("btn_ok"), ImVec2(120, 0)))
-        {
-            s_showExportCSVSuccess = false;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
-
-    // Export CSV Failed popup
-    if (s_showExportCSVFailure && ImGui::BeginPopupModal("Skill Export CSV Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("%s", EDITOR_TEXT("popup_export_csv_skills_failed"));
-
-        if (ImGui::Button(EDITOR_TEXT("btn_ok"), ImVec2(120, 0)))
-        {
-            s_showExportCSVFailure = false;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
+    // CSV Export popups
+    RenderSimplePopup("Export CSV Success", EDITOR_TEXT("popup_export_csv_skills_success"));
+    RenderSimplePopup("Export CSV Failed", EDITOR_TEXT("popup_export_csv_skills_failed"));
 }
 
 #endif // _EDITOR
