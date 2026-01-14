@@ -94,10 +94,65 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     builder.BuildRanges(&ranges);
 
     // Load default font with extended ranges
-    io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 16.0f, &fontConfig, ranges.Data);
+    // Try platform-specific fonts that support extended Unicode
+    bool fontLoaded = false;
 
-    // Fallback to default font if Segoe UI is not available
-    if (io.Fonts->Fonts.Size == 0)
+#ifdef _WIN32
+    // Windows: Get fonts directory dynamically
+    wchar_t windowsDir[MAX_PATH];
+    if (GetWindowsDirectoryW(windowsDir, MAX_PATH) > 0)
+    {
+        std::wstring fontPathW = std::wstring(windowsDir) + L"\\Fonts\\segoeui.ttf";
+
+        // Convert to UTF-8
+        int utf8Size = WideCharToMultiByte(CP_UTF8, 0, fontPathW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        if (utf8Size > 0)
+        {
+            std::string fontPath(utf8Size, 0);
+            WideCharToMultiByte(CP_UTF8, 0, fontPathW.c_str(), -1, &fontPath[0], utf8Size, nullptr, nullptr);
+
+            if (io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, &fontConfig, ranges.Data) != nullptr)
+            {
+                fontLoaded = true;
+            }
+        }
+    }
+#elif __APPLE__
+    // macOS: Try system fonts
+    const char* macFonts[] = {
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",
+        "/Library/Fonts/Arial Unicode.ttf"
+    };
+    for (const char* fontPath : macFonts)
+    {
+        if (io.Fonts->AddFontFromFileTTF(fontPath, 16.0f, &fontConfig, ranges.Data) != nullptr)
+        {
+            fontLoaded = true;
+            break;
+        }
+    }
+#else
+    // Linux: Try common fonts with Unicode support
+    const char* linuxFonts[] = {
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+    };
+    for (const char* fontPath : linuxFonts)
+    {
+        if (io.Fonts->AddFontFromFileTTF(fontPath, 16.0f, &fontConfig, ranges.Data) != nullptr)
+        {
+            fontLoaded = true;
+            break;
+        }
+    }
+#endif
+
+    // Fallback to ImGui's default font if no system font loaded
+    // Note: Default font only supports basic ASCII, not extended ranges
+    if (!fontLoaded)
     {
         io.Fonts->AddFontDefault(&fontConfig);
     }
