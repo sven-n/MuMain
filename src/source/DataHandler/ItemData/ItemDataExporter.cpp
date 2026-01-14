@@ -7,6 +7,7 @@
 #include "_define.h"
 #include "ZzzInfomation.h"
 #include "GameData/ItemData/ItemFieldDefs.h"
+#include <string>
 
 // External references
 extern ITEM_ATTRIBUTE* ItemAttribute;
@@ -50,25 +51,22 @@ bool ItemDataExporter::ExportToCsv(wchar_t* fileName)
             char utf8Name[MAX_ITEM_NAME * 3] = {0};
             WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, utf8Name, sizeof(utf8Name), NULL, NULL);
 
-            // Escape quotes in name
-            char escapedName[MAX_ITEM_NAME * 6] = {0};
-            int idx = 0;
-            for (int j = 0; utf8Name[j] != 0 && idx < (MAX_ITEM_NAME * 6 - 2); j++)
+            // Escape quotes in name using std::string
+            std::string escapedName;
+            for (const char* p = utf8Name; *p != '\0'; ++p)
             {
-                if (utf8Name[j] == '"')
+                if (*p == '"')
                 {
-                    escapedName[idx++] = '"';
-                    escapedName[idx++] = '"';
+                    escapedName += "\"\"";
                 }
                 else
                 {
-                    escapedName[idx++] = utf8Name[j];
+                    escapedName += *p;
                 }
             }
-            escapedName[idx] = '\0';
 
             // Print index and name
-            fprintf(csvFp, "%d,\"%s\"", i, escapedName);
+            fprintf(csvFp, "%d,\"%s\"", i, escapedName.c_str());
 
             // Print all fields using X-macros
             ITEM_ATTRIBUTE& item = ItemAttribute[i];
