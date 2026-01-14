@@ -1,13 +1,15 @@
 #pragma once
 
 #include <Windows.h>
+#include <memory>
+#include <vector>
 
 // Common file I/O operations for item data
 namespace ItemDataFileIO
 {
     // Read buffer from file with decryption
-    // Returns allocated buffer (caller must delete[]) or nullptr on failure
-    BYTE* ReadAndDecryptBuffer(FILE* fp, int itemSize, int itemCount, DWORD* outChecksum = nullptr);
+    // Returns unique_ptr for automatic memory management
+    std::unique_ptr<BYTE[]> ReadAndDecryptBuffer(FILE* fp, int itemSize, int itemCount, DWORD* outChecksum = nullptr);
 
     // Verify checksum of buffer
     bool VerifyChecksum(BYTE* buffer, int bufferSize, DWORD expectedChecksum);
