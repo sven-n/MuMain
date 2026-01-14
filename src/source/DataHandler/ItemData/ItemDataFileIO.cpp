@@ -7,16 +7,15 @@ extern HWND g_hWnd;
 
 namespace ItemDataFileIO
 {
-    BYTE* ReadAndDecryptBuffer(FILE* fp, int itemSize, int itemCount, DWORD* outChecksum)
+    std::unique_ptr<BYTE[]> ReadAndDecryptBuffer(FILE* fp, int itemSize, int itemCount, DWORD* outChecksum)
     {
         int bufferSize = itemSize * itemCount;
-        BYTE* buffer = new BYTE[bufferSize];
+        auto buffer = std::make_unique<BYTE[]>(bufferSize);
 
         // Read buffer
-        size_t bytesRead = fread(buffer, bufferSize, 1, fp);
+        size_t bytesRead = fread(buffer.get(), bufferSize, 1, fp);
         if (bytesRead != 1)
         {
-            delete[] buffer;
             ShowErrorAndExit(L"Failed to read item data from file");
             return nullptr;
         }
@@ -27,7 +26,6 @@ namespace ItemDataFileIO
             bytesRead = fread(outChecksum, sizeof(DWORD), 1, fp);
             if (bytesRead != 1)
             {
-                delete[] buffer;
                 ShowErrorAndExit(L"Failed to read checksum from file");
                 return nullptr;
             }
@@ -55,8 +53,8 @@ namespace ItemDataFileIO
     void ShowErrorAndExit(const wchar_t* message)
     {
         g_ErrorReport.Write(message);
-        MessageBox(g_hWnd, message, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+        MessageBox(g_hWnd, message, L"Item Data Error", MB_OK | MB_ICONERROR);
+        // Note: Application continues running - error handling left to caller
     }
 
 #ifdef _EDITOR
