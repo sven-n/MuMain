@@ -158,6 +158,15 @@ if (MSVC)
   add_dependencies(Main BuildDotNetLib)
 endif()
 
+# Custom target to run the application with correct working directory (cross-platform)
+add_custom_target(run
+  COMMAND "$<TARGET_FILE:Main>"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+  DEPENDS Main
+  COMMENT "Running Main from bin directory"
+  USES_TERMINAL
+)
+
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
 # system libraries so that gl*, wgl*, Imm*, timeGetTime, etc. resolve.
 # For turbojpeg and wzAudio we link against the logically named libraries,

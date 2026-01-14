@@ -158,18 +158,67 @@ Rider doesn't have full CMake support for C++ projects, so you need to generate 
 
 **Important:** When you modify `CMakeLists.txt`, you must manually regenerate the solution by running the cmake command again.
 
-#### Option 4: Command Line Build
+#### Option 4: Command Line Build (Windows)
 
-```bash
+```powershell
 # Configure (first time only, or when CMakeLists.txt changes)
-cmake -B build -A Win32
+cmake -B build -G "Visual Studio 17 2022" -A Win32
 
-# Build
+# Build and run Debug
+cmake --build build --config Debug --target run
+
+# Or build and run Release
+cmake --build build --config Release --target run
+```
+
+**Note:** You can switch between Debug and Release without reconfiguring. The `run` target automatically builds the project and runs it from the correct working directory (`Source Main 5.2/bin`).
+
+**To start fresh (clean build):**
+```powershell
+Remove-Item -Recurse -Force build
+cmake -B build -G "Visual Studio 17 2022" -A Win32
+```
+
+**Manual execution (if needed):**
+```powershell
+# Build only
 cmake --build build --config Debug
 
-# Run
+# Run manually
 cd "Source Main 5.2/bin"
-../../build/bin/Main.exe
+../../build/"Source Main 5.2"/Debug/Main.exe
+```
+
+#### Option 5: Command Line Build (Linux)
+
+For native Linux builds or when using Unix Makefiles/Ninja generators:
+
+```bash
+# Configure for Debug (first time or when switching build types)
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+
+# Build and run
+cmake --build build --target run
+
+# To switch to Release, reconfigure:
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target run
+```
+
+**To start fresh (clean build):**
+```bash
+rm -rf build
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+```
+
+**Manual execution (if needed):**
+```bash
+# Build only
+cmake --build build
+
+# Run manually
+cd "Source Main 5.2/bin"
+../../build/Main
 ```
 
 ---
