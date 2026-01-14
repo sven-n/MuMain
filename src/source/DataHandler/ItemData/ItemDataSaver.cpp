@@ -76,14 +76,14 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
             bool isLegacyFormat = (fileSize == expectedLegacySize);
             int readSize = isLegacyFormat ? LegacySize : NewSize;
 
-            BYTE* OrigBuffer = ItemDataFileIO::ReadAndDecryptBuffer(fpOrig, readSize, MAX_ITEM, nullptr);
+            auto origBuffer = ItemDataFileIO::ReadAndDecryptBuffer(fpOrig, readSize, MAX_ITEM, nullptr);
             fclose(fpOrig);
 
-            if (OrigBuffer)
+            if (origBuffer)
             {
-                ItemDataFileIO::DecryptBuffer(OrigBuffer, readSize, MAX_ITEM);
+                ItemDataFileIO::DecryptBuffer(origBuffer.get(), readSize, MAX_ITEM);
 
-                BYTE* pSeek = OrigBuffer;
+                BYTE* pSeek = origBuffer.get();
                 for (int i = 0; i < MAX_ITEM; i++)
                 {
                     if (isLegacyFormat)
@@ -101,7 +101,6 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
 
                     pSeek += readSize;
                 }
-                delete[] OrigBuffer;
             }
         }
     }

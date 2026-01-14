@@ -49,78 +49,53 @@ bool ItemDataLoader::Load(wchar_t* fileName)
     return success;
 }
 
-bool ItemDataLoader::LoadLegacyFormat(FILE* fp, long fileSize)
+template<typename TFileFormat>
+bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
 {
-    const int Size = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
+    const int Size = sizeof(TFileFormat);
 
     // Read buffer and checksum
     DWORD dwCheckSum;
-    BYTE* Buffer = ItemDataFileIO::ReadAndDecryptBuffer(fp, Size, MAX_ITEM, &dwCheckSum);
-    if (!Buffer)
+    auto buffer = ItemDataFileIO::ReadAndDecryptBuffer(fp, Size, MAX_ITEM, &dwCheckSum);
+    if (!buffer)
     {
-        ItemDataFileIO::ShowErrorAndExit(L"Failed to read item file (legacy format).");
+        wchar_t errorMsg[256];
+        swprintf(errorMsg, L"Failed to read item file (%ls).", formatName);
+        ItemDataFileIO::ShowErrorAndExit(errorMsg);
         return false;
     }
 
     // Verify checksum
-    if (!ItemDataFileIO::VerifyChecksum(Buffer, Size * MAX_ITEM, dwCheckSum))
+    if (!ItemDataFileIO::VerifyChecksum(buffer.get(), Size * MAX_ITEM, dwCheckSum))
     {
-        delete[] Buffer;
-        ItemDataFileIO::ShowErrorAndExit(L"Item file corrupted (legacy format).");
+        wchar_t errorMsg[256];
+        swprintf(errorMsg, L"Item file corrupted (%ls).", formatName);
+        ItemDataFileIO::ShowErrorAndExit(errorMsg);
         return false;
     }
 
     // Decrypt buffer
-    ItemDataFileIO::DecryptBuffer(Buffer, Size, MAX_ITEM);
+    ItemDataFileIO::DecryptBuffer(buffer.get(), Size, MAX_ITEM);
 
     // Copy items
-    BYTE* pSeek = Buffer;
+    BYTE* pSeek = buffer.get();
     for (int i = 0; i < MAX_ITEM; i++)
     {
-        ITEM_ATTRIBUTE_FILE_LEGACY source;
+        TFileFormat source;
         memcpy(&source, pSeek, sizeof(source));
         CopyItemAttributeFromSource(ItemAttribute[i], source);
         pSeek += Size;
     }
 
-    delete[] Buffer;
     return true;
+}
+
+bool ItemDataLoader::LoadLegacyFormat(FILE* fp, long fileSize)
+{
+    return LoadFormat<ITEM_ATTRIBUTE_FILE_LEGACY>(fp, L"legacy format");
 }
 
 bool ItemDataLoader::LoadNewFormat(FILE* fp, long fileSize)
 {
-    const int Size = sizeof(ITEM_ATTRIBUTE_FILE);
-
-    // Read buffer and checksum
-    DWORD dwCheckSum;
-    BYTE* Buffer = ItemDataFileIO::ReadAndDecryptBuffer(fp, Size, MAX_ITEM, &dwCheckSum);
-    if (!Buffer)
-    {
-        ItemDataFileIO::ShowErrorAndExit(L"Failed to read item file.");
-        return false;
-    }
-
-    // Verify checksum
-    if (!ItemDataFileIO::VerifyChecksum(Buffer, Size * MAX_ITEM, dwCheckSum))
-    {
-        delete[] Buffer;
-        ItemDataFileIO::ShowErrorAndExit(L"Item file corrupted.");
-        return false;
-    }
-
-    // Decrypt buffer
-    ItemDataFileIO::DecryptBuffer(Buffer, Size, MAX_ITEM);
-
-    // Copy items
-    BYTE* pSeek = Buffer;
-    for (int i = 0; i < MAX_ITEM; i++)
-    {
-        ITEM_ATTRIBUTE_FILE source;
-        memcpy(&source, pSeek, sizeof(source));
-        CopyItemAttributeFromSource(ItemAttribute[i], source);
-        pSeek += Size;
-    }
-
-    delete[] Buffer;
-    return true;
+    return LoadFormat<ITEM_ATTRIBUTE_FILE>(fp, L"new format");
 }
