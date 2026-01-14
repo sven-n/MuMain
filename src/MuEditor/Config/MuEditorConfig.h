@@ -33,7 +33,7 @@ private:
     ~CMuEditorConfig();
 
     // Config file path
-    const char* m_configPath = "MuEditor\MuEditor.ini";
+    const char* m_configPath = "MuEditor/MuEditor.ini";
 
     // Settings storage
     std::string m_language;
