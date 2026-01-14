@@ -41,10 +41,10 @@ When `_EDITOR` is defined:
 4. **g_ConsoleDebug is hooked** - Game debug messages also go to ImGui console
 
 ### Console Output Sources Captured
-- ✅ `wprintf()` calls
-- ✅ `fwprintf(stderr, ...)` calls
-- ✅ `g_ConsoleDebug->Write()` calls
-- ✅ All standard output streams
+- ✅ `wprintf()` calls (redirected via macros to `editor_wprintf`)
+- ✅ `fwprintf(stderr, ...)` calls (redirected via macros to `editor_fwprintf`)
+- ✅ `g_ConsoleDebug->Write()` calls (hooked directly)
+- ✅ C++ streams (`std::cout`, `std::cerr`) via `ConsoleStreamBuf` redirection
 
 ### Console Features
 - **Dual panels** - Editor Console (left) and Game Console (right)
@@ -178,7 +178,7 @@ if (g_MuEditor.IsEnabled())
 CMuEditor (main editor singleton)
 ├── CMuEditorUI (toolbar rendering)
 ├── CMuEditorConsole (console rendering & logging)
-│   └── ConsoleStreamBuf (C++ stream redirection - currently unused)
+│   └── ConsoleStreamBuf (C++ stream redirection for cout/cerr)
 ├── CMuItemEditor (item editor window)
 └── CMuInputBlocker (input blocking when hovering UI)
 ```
