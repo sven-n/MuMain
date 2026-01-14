@@ -120,13 +120,20 @@ if (MSVC)
     imgui
   )
 
-  # Define required DLLs for better maintainability
-  set(REQUIRED_DLLS
-    "${CMAKE_CURRENT_SOURCE_DIR}/bin/wzAudio.dll"
-    "${CMAKE_CURRENT_SOURCE_DIR}/bin/glew32.dll"
-    "${CMAKE_CURRENT_SOURCE_DIR}/bin/ogg.dll"
-    "${CMAKE_CURRENT_SOURCE_DIR}/bin/vorbisfile.dll"
-  )
+  # Locate required DLLs in bin directory
+  set(DLL_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+  set(REQUIRED_DLL_NAMES wzAudio glew32 ogg vorbisfile)
+  set(REQUIRED_DLLS)
+
+  foreach(DLL_NAME IN LISTS REQUIRED_DLL_NAMES)
+    find_file(${DLL_NAME}_DLL
+      NAMES "${DLL_NAME}.dll"
+      PATHS "${DLL_SEARCH_PATH}"
+      NO_DEFAULT_PATH
+      REQUIRED
+    )
+    list(APPEND REQUIRED_DLLS "${${DLL_NAME}_DLL}")
+  endforeach()
 
   # Copy required DLLs to build directory for MSVC builds
   add_custom_command(TARGET Main POST_BUILD
