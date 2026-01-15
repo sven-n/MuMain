@@ -30,7 +30,6 @@ public:
 
 private:
     CMuEditorConfig();
-    ~CMuEditorConfig();
 
     // Config file path
     const char* m_configPath = "MuEditor/MuEditor.ini";
