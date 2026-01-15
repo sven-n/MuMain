@@ -8,6 +8,12 @@
       "projectTarget": "Main.exe (src\\Main.exe)",
       "name": "Main.exe (src\\Main.exe)",
       "currentDir": "${projectDir}\\src\\bin"
+    },
+    {
+      "type": "default",
+      "project": "ConstantsReplacer\\ConstantsReplacer.csproj",
+      "projectTarget": "",
+      "name": "ConstantsReplacer.exe"
     }
   ]
 }
