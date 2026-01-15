@@ -19,11 +19,6 @@ CMuEditorConfig::CMuEditorConfig()
 {
 }
 
-CMuEditorConfig::~CMuEditorConfig()
-{
-    Save();
-}
-
 std::string CMuEditorConfig::Trim(const std::string& str)
 {
     size_t start = str.find_first_not_of(" \t\r\n");
