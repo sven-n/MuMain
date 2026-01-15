@@ -2,6 +2,41 @@ cmake_minimum_required(VERSION 3.16)
 
 project(MuMain)
 
+# Initialize imgui submodule automatically if missing
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
+  find_package(Git QUIET)
+  if(NOT GIT_FOUND)
+    message(FATAL_ERROR "Git not found. Please run 'git submodule update --init' manually from repository root.")
+  endif()
+
+  # Use CMake's file(LOCK) for atomic locking across processes
+  set(LOCK_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/.cmake_init_lock")
+
+  message(STATUS "Initializing imgui submodule (without --recursive to exclude examples)...")
+  file(LOCK "${LOCK_FILE}" GUARD PROCESS TIMEOUT 60)
+
+  # Check again inside lock - another process may have initialized it
+  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
+    # Clean any stale git state, then initialize
+    execute_process(COMMAND ${GIT_EXECUTABLE} submodule deinit -f "Source Main 5.2/ThirdParty/imgui"
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.. OUTPUT_QUIET ERROR_QUIET)
+    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init "Source Main 5.2/ThirdParty/imgui"
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
+                    RESULT_VARIABLE GIT_RESULT ERROR_VARIABLE GIT_ERROR)
+
+    if(NOT GIT_RESULT EQUAL "0")
+      message(FATAL_ERROR "Submodule initialization failed:\n${GIT_ERROR}\nPlease run 'git submodule update --init' manually.")
+    endif()
+    message(STATUS "ImGui submodule initialized successfully")
+  endif()
+
+  # Lock is automatically released here
+
+  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
+    message(FATAL_ERROR "ImGui submodule missing. Please run 'git submodule update --init' manually.")
+  endif()
+endif()
+
 # Force 32-bit build for MSVC to match available libraries
 if (MSVC)
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
