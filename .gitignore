@@ -20,6 +20,12 @@ build-mingw/
 **/CMakeFiles/
 /Win32/
 
+# .NET build outputs
+**/bin/
+**/obj/
+*.user
+*.suo
+
 # Jetbrains Ides
 /.idea/
 **/.idea/
