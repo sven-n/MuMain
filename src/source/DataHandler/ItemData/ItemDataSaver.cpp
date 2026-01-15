@@ -13,6 +13,7 @@
 #include "MultiLanguage.h"
 #include "CSChaosCastle.h"
 #include <sstream>
+#include <memory>
 
 // External references
 extern ITEM_ATTRIBUTE* ItemAttribute;
@@ -53,11 +54,11 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
     const int Size = sizeof(ITEM_ATTRIBUTE_FILE);
 
     // Load original file for comparison if change log is requested
-    ITEM_ATTRIBUTE* originalItems = nullptr;
+    std::unique_ptr<ITEM_ATTRIBUTE[]> originalItems;
     if (outChangeLog)
     {
-        originalItems = new ITEM_ATTRIBUTE[MAX_ITEM];
-        memset(originalItems, 0, sizeof(ITEM_ATTRIBUTE) * MAX_ITEM);
+        originalItems = std::make_unique<ITEM_ATTRIBUTE[]>(MAX_ITEM);
+        memset(originalItems.get(), 0, sizeof(ITEM_ATTRIBUTE) * MAX_ITEM);
 
         // Read original file and detect format
         FILE* fpOrig = _wfopen(fileName, L"rb");
@@ -106,8 +107,8 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
     }
 
     // Prepare new buffer
-    BYTE* Buffer = new BYTE[Size * MAX_ITEM];
-    BYTE* pSeek = Buffer;
+    auto Buffer = std::make_unique<BYTE[]>(Size * MAX_ITEM);
+    BYTE* pSeek = Buffer.get();
 
     // Track changes
     std::stringstream changeLog;
@@ -165,14 +166,11 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
     if (originalItems && changeCount == 0)
     {
         // No changes - skip save
-        delete[] Buffer;
-        delete[] originalItems;
-        
         if (outChangeLog)
         {
             *outChangeLog = "No changes detected.\n";
         }
-        
+
         return false; // Return false to indicate no save was needed
     }
 
@@ -180,27 +178,20 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
     FILE* fp = _wfopen(fileName, L"wb");
     if (fp == NULL)
     {
-        delete[] Buffer;
-        if (originalItems) delete[] originalItems;
         return false;
     }
 
     // Encrypt buffer
-    ItemDataFileIO::EncryptBuffer(Buffer, Size, MAX_ITEM);
+    ItemDataFileIO::EncryptBuffer(Buffer.get(), Size, MAX_ITEM);
 
     // Write buffer and checksum
-    ItemDataFileIO::WriteAndEncryptBuffer(fp, Buffer, Size * MAX_ITEM);
+    ItemDataFileIO::WriteAndEncryptBuffer(fp, Buffer.get(), Size * MAX_ITEM);
 
     fclose(fp);
-    delete[] Buffer;
 
-    if (originalItems)
+    if (originalItems && outChangeLog && changeCount > 0)
     {
-        delete[] originalItems;
-        if (outChangeLog && changeCount > 0)
-        {
-            *outChangeLog = "=== Item Changes (" + std::to_string(changeCount) + " items modified) ===\n" + changeLog.str();
-        }
+        *outChangeLog = "=== Item Changes (" + std::to_string(changeCount) + " items modified) ===\n" + changeLog.str();
     }
 
     return true;
