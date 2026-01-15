@@ -7,6 +7,7 @@
 #include "_define.h"
 #include "ZzzInfomation.h"
 #include "GameData/ItemData/ItemFieldDefs.h"
+#include "Utilities/StringUtils.h"
 #include <string>
 
 // External references
@@ -48,12 +49,11 @@ bool ItemDataExporter::ExportToCsv(wchar_t* fileName)
         if (ItemAttribute[i].Name[0] != 0)
         {
             // Convert wide char name to UTF-8
-            char utf8Name[MAX_ITEM_NAME * 3] = {0};
-            WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[i].Name, -1, utf8Name, sizeof(utf8Name), NULL, NULL);
+            std::string utf8Name = StringUtils::WideToNarrow(ItemAttribute[i].Name);
 
-            // Escape quotes in name using std::string
+            // Escape quotes in name
             std::string escapedName;
-            for (const char* p = utf8Name; *p != '\0'; ++p)
+            for (const char* p = utf8Name.c_str(); *p != '\0'; ++p)
             {
                 if (*p == '"')
                 {
