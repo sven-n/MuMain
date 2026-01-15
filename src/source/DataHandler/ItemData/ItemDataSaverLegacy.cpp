@@ -9,6 +9,7 @@
 #include "_define.h"
 #include "ZzzInfomation.h"
 #include "MultiLanguage.h"
+#include <memory>
 
 // External references
 extern ITEM_ATTRIBUTE* ItemAttribute;
@@ -23,8 +24,8 @@ bool ItemDataSaverLegacy::SaveLegacy(wchar_t* fileName)
         return false;
     }
 
-    BYTE* Buffer = new BYTE[Size * MAX_ITEM];
-    BYTE* pSeek = Buffer;
+    auto Buffer = std::make_unique<BYTE[]>(Size * MAX_ITEM);
+    BYTE* pSeek = Buffer.get();
 
     // Convert ItemAttribute to ITEM_ATTRIBUTE_FILE_LEGACY format
     for (int i = 0; i < MAX_ITEM; i++)
@@ -39,13 +40,12 @@ bool ItemDataSaverLegacy::SaveLegacy(wchar_t* fileName)
     }
 
     // Encrypt buffer
-    ItemDataFileIO::EncryptBuffer(Buffer, Size, MAX_ITEM);
+    ItemDataFileIO::EncryptBuffer(Buffer.get(), Size, MAX_ITEM);
 
     // Write buffer and checksum
-    ItemDataFileIO::WriteAndEncryptBuffer(fp, Buffer, Size * MAX_ITEM);
+    ItemDataFileIO::WriteAndEncryptBuffer(fp, Buffer.get(), Size * MAX_ITEM);
 
     fclose(fp);
-    delete[] Buffer;
 
     return true;
 }
