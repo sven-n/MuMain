@@ -1,5 +1,6 @@
 
 .vs/
+.nuget/
 
 src/source/Global Debug/
 src/Global Debug/
