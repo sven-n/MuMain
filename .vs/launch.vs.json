@@ -5,9 +5,9 @@
     {
       "type": "default",
       "project": "CMakeLists.txt",
-      "projectTarget": "Main.exe (Source Main 5.2\\Main.exe)",
-      "name": "Main.exe (Source Main 5.2\\Main.exe)",
-      "currentDir": "${projectDir}\\Source Main 5.2\\bin"
+      "projectTarget": "Main.exe (src\\Main.exe)",
+      "name": "Main.exe (src\\Main.exe)",
+      "currentDir": "${projectDir}\\src\\bin"
     }
   ]
 }

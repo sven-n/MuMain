@@ -69,7 +69,7 @@ In Root dir execute:
 git submodule update --init --recursive
 ```
 
-This will download the required **ImGui** library into `Source Main 5.2/ThirdParty/imgui`.
+This will download the required **ImGui** library into `src/ThirdParty/imgui`.
 
 ### Building with CMake and MinGW-w64 (Linux)
 
@@ -97,7 +97,7 @@ cmake --build build-mingw -j$(nproc)
 
 If the linker reports `cannot find -lturbojpeg`, install a MinGW-w64 build of
 libjpeg-turbo (providing `libturbojpeg.a` / `libturbojpeg.dll.a`) or adjust the
-`target_link_libraries` entry in `Source Main 5.2/CMakeLists.txt` to match the
+`target_link_libraries` entry in `src/CMakeLists.txt` to match the
 name of the library available on your system.
 
 ---
@@ -114,7 +114,7 @@ The project uses **CMake** as its build system. The `.NET Client Library` is aut
 
 1. **Open the project:**
    - File → Open → Folder
-   - Select the root `MuMain` folder (not `Source Main 5.2`)
+   - Select the root `MuMain` folder (not `src`)
 
 2. **Wait for CMake to configure** (automatically happens, check Output window)
 
@@ -128,7 +128,7 @@ The project uses **CMake** as its build system. The `.NET Client Library` is aut
 5. **Run/Debug:**
    - Select `Main.exe` as startup item
    - Press `F5` to debug or `Ctrl+F5` to run
-   - Working directory is automatically set to `Source Main 5.2/bin`
+   - Working directory is automatically set to `src/bin`
 
 **Note:** The working directory is pre-configured in `.vs/launch.vs.json`. If it's not working, ensure you opened the root `MuMain` folder, not a subfolder.
 
@@ -143,7 +143,7 @@ The project uses **CMake** as its build system. The `.NET Client Library` is aut
 3. **Configure working directory:**
    - Run → Edit Configurations
    - Select `Main`
-   - Set "Working directory" to: `$ProjectFileDir$/Source Main 5.2/bin`
+   - Set "Working directory" to: `$ProjectFileDir$/src/bin`
 
 4. **Build and Run:**
    - Click the hammer icon to build
@@ -182,7 +182,7 @@ cmake --build build --config Debug --target run
 cmake --build build --config Release --target run
 ```
 
-**Note:** You can switch between Debug and Release without reconfiguring. The `run` target automatically builds the project and runs it from the correct working directory (`Source Main 5.2/bin`).
+**Note:** You can switch between Debug and Release without reconfiguring. The `run` target automatically builds the project and runs it from the correct working directory (`src/bin`).
 
 **To start fresh (clean build):**
 ```powershell
@@ -196,8 +196,8 @@ cmake -B build -G "Visual Studio 17 2022" -A Win32
 cmake --build build --config Debug
 
 # Run manually
-cd "Source Main 5.2/bin"
-../../build/"Source Main 5.2"/Debug/Main.exe
+cd "src/bin"
+../../build/"src"/Debug/Main.exe
 ```
 
 #### Option 5: Command Line Build (Linux)
@@ -228,7 +228,7 @@ cmake -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 
 # Run manually
-cd "Source Main 5.2/bin"
+cd "src/bin"
 ../../build/Main
 ```
 

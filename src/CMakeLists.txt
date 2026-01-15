@@ -18,9 +18,9 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
   # Check again inside lock - another process may have initialized it
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
     # Clean any stale git state, then initialize
-    execute_process(COMMAND ${GIT_EXECUTABLE} submodule deinit -f "Source Main 5.2/ThirdParty/imgui"
+    execute_process(COMMAND ${GIT_EXECUTABLE} submodule deinit -f "src/ThirdParty/imgui"
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.. OUTPUT_QUIET ERROR_QUIET)
-    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init "Source Main 5.2/ThirdParty/imgui"
+    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init "src/ThirdParty/imgui"
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
                     RESULT_VARIABLE GIT_RESULT ERROR_VARIABLE GIT_ERROR)
 
