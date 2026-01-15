@@ -60,7 +60,7 @@ file(GLOB_RECURSE MU_MAIN_SOURCES
 )
 
 # ImGui static library (required when _EDITOR is defined)
-add_library(imgui STATIC
+add_library(imgui STATIC EXCLUDE_FROM_ALL
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp"
@@ -212,18 +212,22 @@ if (MSVC)
   )
 
   # 4. Create a target for the DLL and link it to Main
-  add_custom_target(BuildDotNetLib DEPENDS "${DOTNET_DLL_PATH}")
-  add_dependencies(Main BuildDotNetLib)
-endif()
+  add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
+  add_dependencies(Main ClientLibrary)
+  set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-# Custom target to run the application with correct working directory (cross-platform)
-add_custom_target(run
-  COMMAND "$<TARGET_FILE:Main>"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
-  DEPENDS Main
-  COMMENT "Running Main from bin directory"
-  USES_TERMINAL
-)
+  # Optional C# ConstantsReplacer tool - builds and runs
+  set(CONSTANTS_REPLACER_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/ConstantsReplacer.csproj")
+
+  add_custom_target(ConstantsReplacer
+    COMMAND dotnet build "${CONSTANTS_REPLACER_PROJ}" -c $<CONFIG> --nologo
+    COMMAND dotnet run --project "${CONSTANTS_REPLACER_PROJ}" -c $<CONFIG> --no-build
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer"
+    COMMENT "Building and running ConstantsReplacer tool..."
+    USES_TERMINAL
+    VERBATIM
+  )
+endif()
 
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
 # system libraries so that gl*, wgl*, Imm*, timeGetTime, etc. resolve.
