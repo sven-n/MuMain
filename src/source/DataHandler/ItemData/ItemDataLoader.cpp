@@ -8,6 +8,7 @@
 #include "ZzzInfomation.h"
 #include "MultiLanguage.h"
 #include "CSChaosCastle.h"
+#include <sstream>
 
 // External references
 extern ITEM_ATTRIBUTE* ItemAttribute;
@@ -17,9 +18,9 @@ bool ItemDataLoader::Load(wchar_t* fileName)
     FILE* fp = _wfopen(fileName, L"rb");
     if (fp == NULL)
     {
-        wchar_t Text[256];
-        swprintf(Text, L"%ls - File not exist.", fileName);
-        ItemDataFileIO::ShowErrorAndExit(Text);
+        std::wstringstream ss;
+        ss << fileName << L" - File not exist.";
+        ItemDataFileIO::ShowErrorAndExit(ss.str().c_str());
         return false;
     }
 
@@ -59,18 +60,18 @@ bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
     auto buffer = ItemDataFileIO::ReadAndDecryptBuffer(fp, Size, MAX_ITEM, &dwCheckSum);
     if (!buffer)
     {
-        wchar_t errorMsg[256];
-        swprintf(errorMsg, L"Failed to read item file (%ls).", formatName);
-        ItemDataFileIO::ShowErrorAndExit(errorMsg);
+        std::wstringstream ss;
+        ss << L"Failed to read item file (" << formatName << L").";
+        ItemDataFileIO::ShowErrorAndExit(ss.str().c_str());
         return false;
     }
 
     // Verify checksum
     if (!ItemDataFileIO::VerifyChecksum(buffer.get(), Size * MAX_ITEM, dwCheckSum))
     {
-        wchar_t errorMsg[256];
-        swprintf(errorMsg, L"Item file corrupted (%ls).", formatName);
-        ItemDataFileIO::ShowErrorAndExit(errorMsg);
+        std::wstringstream ss;
+        ss << L"Item file corrupted (" << formatName << L").";
+        ItemDataFileIO::ShowErrorAndExit(ss.str().c_str());
         return false;
     }
 
