@@ -182,14 +182,30 @@ if (MSVC)
   set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library.dll")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
+  # Create temp directories for Native AOT build (avoiding paths with umlauts)
+  set(DOTNET_TEMP_OUTPUT "${CMAKE_BINARY_DIR}/dotnet_out")
+  set(DOTNET_TEMP_DIR "${CMAKE_BINARY_DIR}/.dotnet_temp")
+  set(DOTNET_NUGET_DIR "${CMAKE_SOURCE_DIR}/.nuget")
+  file(MAKE_DIRECTORY "${DOTNET_TEMP_OUTPUT}")
+  file(MAKE_DIRECTORY "${DOTNET_TEMP_DIR}")
+  file(MAKE_DIRECTORY "${DOTNET_NUGET_DIR}")
+
   # 2. Tell CMake to watch ALL .cs files in the ClientLibrary folder
   file(GLOB_RECURSE DOTNET_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/*.cs")
 
-  # 3. This only runs if DOTNET_SOURCES or the .csproj change
+  # 3. Build to temp directory with Native AOT, then copy to build and bin directories
+  # Override environment variables to avoid issues with umlauts in Windows username
   add_custom_command(
           OUTPUT "${DOTNET_DLL_PATH}"
           COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
-          COMMAND dotnet publish "${DOTNET_PROJ}" -c $<CONFIG> -r win-x86 -o "${CMAKE_CURRENT_BINARY_DIR}" --nologo
+          COMMAND ${CMAKE_COMMAND} -E env
+                  "NUGET_PACKAGES=${DOTNET_NUGET_DIR}"
+                  "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR}"
+                  "TEMP=${DOTNET_TEMP_DIR}"
+                  "TMP=${DOTNET_TEMP_DIR}"
+                  dotnet publish "${DOTNET_PROJ}" -c $<CONFIG> -r win-x86 -o "${DOTNET_TEMP_OUTPUT}" --nologo
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${CMAKE_CURRENT_SOURCE_DIR}/bin/MUnique.Client.Library.dll"
           DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
           COMMENT "Checking for .NET Client Library updates..."
           VERBATIM
