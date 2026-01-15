@@ -8,6 +8,7 @@
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "Translation/i18n.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include <filesystem>
 
 // UI Layout constants
 constexpr float TOOLBAR_HEIGHT = 40.0f;
@@ -181,39 +182,25 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, b
             };
 
             // Scan Translations directory for available languages
-            WIN32_FIND_DATAW findData;
-            const wchar_t* paths[] = {L"Translations\\*", L"bin\\Translations\\*"};
+            namespace fs = std::filesystem;
+            const std::wstring paths[] = {L"Translations", L"bin/Translations"};
 
-            for (const wchar_t* basePath : paths)
+            for (const std::wstring& basePath : paths)
             {
-                HANDLE hFind = FindFirstFileW(basePath, &findData);
-
-                if (hFind != INVALID_HANDLE_VALUE)
+                std::error_code ec;
+                if (fs::exists(basePath, ec) && fs::is_directory(basePath, ec))
                 {
-                    do
+                    for (const auto& entry : fs::directory_iterator(basePath, ec))
                     {
-                        if ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
-                            wcscmp(findData.cFileName, L".") != 0 &&
-                            wcscmp(findData.cFileName, L"..") != 0)
+                        if (entry.is_directory(ec))
                         {
-                            // Convert wide string to narrow
-                            char localeCode[32];
-                            WideCharToMultiByte(CP_UTF8, 0, findData.cFileName, -1, localeCode, sizeof(localeCode), NULL, NULL);
-                            std::string locale = localeCode;
+                            std::string locale = entry.path().filename().string();
 
                             // Build path to editor.json
-                            std::wstring editorJsonPath;
-                            if (wcscmp(basePath, L"Translations\\*") == 0)
-                            {
-                                editorJsonPath = std::wstring(L"Translations\\") + findData.cFileName + L"\\editor.json";
-                            }
-                            else
-                            {
-                                editorJsonPath = std::wstring(L"bin\\Translations\\") + findData.cFileName + L"\\editor.json";
-                            }
+                            fs::path editorJsonPath = entry.path() / "editor.json";
 
                             // Read language name from JSON file
-                            std::string displayName = ReadLanguageName(editorJsonPath);
+                            std::string displayName = ReadLanguageName(editorJsonPath.wstring());
 
                             // Fallback to locale code if reading failed
                             if (displayName.empty())
@@ -223,15 +210,13 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, b
 
                             availableLanguages.push_back({locale, displayName});
                         }
-                    } while (FindNextFileW(hFind, &findData));
+                    }
 
-                    FindClose(hFind);
-                }
-
-                // If we found languages, no need to try alternate path
-                if (!availableLanguages.empty())
-                {
-                    break;
+                    // If we found languages, no need to try alternate path
+                    if (!availableLanguages.empty())
+                    {
+                        break;
+                    }
                 }
             }
 
