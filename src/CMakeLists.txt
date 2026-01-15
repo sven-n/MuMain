@@ -216,17 +216,20 @@ if (MSVC)
   add_dependencies(Main ClientLibrary)
   set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-  # Optional C# ConstantsReplacer tool - builds and runs
+  # ConstantsReplacer build target
   set(CONSTANTS_REPLACER_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/ConstantsReplacer.csproj")
+  file(GLOB_RECURSE CONSTANTS_REPLACER_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/*.cs")
+  set(CONSTANTS_REPLACER_OUTPUT "${CMAKE_BINARY_DIR}/ConstantsReplacer/ConstantsReplacer.exe")
 
-  add_custom_target(ConstantsReplacer
-    COMMAND dotnet build "${CONSTANTS_REPLACER_PROJ}" -c $<CONFIG> --nologo
-    COMMAND dotnet run --project "${CONSTANTS_REPLACER_PROJ}" -c $<CONFIG> --no-build
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer"
-    COMMENT "Building and running ConstantsReplacer tool..."
-    USES_TERMINAL
+  add_custom_command(
+    OUTPUT "${CONSTANTS_REPLACER_OUTPUT}"
+    COMMAND dotnet build "${CONSTANTS_REPLACER_PROJ}" -c $<CONFIG> -o "${CMAKE_BINARY_DIR}/ConstantsReplacer" --nologo
+    DEPENDS "${CONSTANTS_REPLACER_PROJ}" ${CONSTANTS_REPLACER_SOURCES}
+    COMMENT "Building ConstantsReplacer tool..."
     VERBATIM
   )
+
+  add_custom_target(ConstantsReplacer DEPENDS "${CONSTANTS_REPLACER_OUTPUT}")
 endif()
 
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
