@@ -9,20 +9,8 @@
 
 #ifdef _EDITOR
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "Utilities/StringUtils.h"
 #include <string>
-
-// Helper to convert wide string to narrow string for logging
-static std::string WideToNarrow(const wchar_t* wstr)
-{
-    if (!wstr) return "";
-    size_t len = wcslen(wstr);
-    if (len == 0) return "";
-
-    int size = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)len, NULL, 0, NULL, NULL);
-    std::string result(size, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr, (int)len, &result[0], size, NULL, NULL);
-    return result;
-}
 #endif
 
 // External references
@@ -37,7 +25,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
         wchar_t errorMsg[256];
         swprintf(errorMsg, L"Skill file not found: %ls", fileName);
 #ifdef _EDITOR
-        g_MuEditorConsoleUI.LogEditor(WideToNarrow(errorMsg));
+        g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(errorMsg));
 #else
         MessageBox(g_hWnd, errorMsg, NULL, MB_OK);
 #endif
@@ -65,7 +53,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
         swprintf(errorMsg, L"Skill file size mismatch. Expected: %ld (new) or %ld (legacy), Got: %ld",
                  expectedNewSize, expectedLegacySize, fileSize);
 #ifdef _EDITOR
-        g_MuEditorConsoleUI.LogEditor(WideToNarrow(errorMsg));
+        g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(errorMsg));
 #else
         MessageBox(g_hWnd, errorMsg, NULL, MB_OK);
 #endif
@@ -96,7 +84,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
         wchar_t errorMsg[256];
         swprintf(errorMsg, L"Skill file corrupted: %ls (checksum mismatch)", fileName);
 #ifdef _EDITOR
-        g_MuEditorConsoleUI.LogEditor(WideToNarrow(errorMsg));
+        g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(errorMsg));
 #else
         MessageBox(g_hWnd, errorMsg, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -131,7 +119,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
 #ifdef _EDITOR
     wchar_t successMsg[256];
     swprintf(successMsg, L"Loaded %d skills from %ls", MAX_SKILLS, fileName);
-    g_MuEditorConsoleUI.LogEditor(WideToNarrow(successMsg));
+    g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
 #endif
 
     return true;
