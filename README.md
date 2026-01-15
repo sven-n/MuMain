@@ -60,6 +60,17 @@ What needs to be done for Season 6:
 * **Visual Studio 2022+** with C++ and C# workloads, **CLion**, or **Rider** (see IDE-specific instructions below)
 * A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
 
+### First-time Setup
+
+After cloning the repository, initialize the git submodules:
+
+In Root dir execute:
+```bash
+git submodule update --init --recursive
+```
+
+This will download the required **ImGui** library into `Source Main 5.2/ThirdParty/imgui`.
+
 ### Building with CMake and MinGW-w64 (Linux)
 
 The repository also contains a CMake setup to cross-compile the Windows client
