@@ -87,16 +87,23 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     // Load translation files (editor only - game translations loaded by main game code)
     i18n::Translator& translator = i18n::Translator::GetInstance();
 
-    // Try multiple possible paths since working directory varies
-    bool editorLoaded = translator.LoadTranslations(i18n::Domain::Editor,
-        L"Translations\\en\\editor.json");
-    if (!editorLoaded) editorLoaded = translator.LoadTranslations(i18n::Domain::Editor,
-        L"bin\\Translations\\en\\editor.json");
+    // Helper lambda to try loading from multiple possible paths
+    auto TryLoadTranslation = [&translator](i18n::Domain domain, const wchar_t* relativePath) -> bool {
+        std::wstring paths[] = {
+            std::wstring(L"Translations\\en\\") + relativePath,
+            std::wstring(L"bin\\Translations\\en\\") + relativePath
+        };
 
-    bool metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
-        L"Translations\\en\\metadata.json");
-    if (!metadataLoaded) metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
-        L"bin\\Translations\\en\\metadata.json");
+        for (const auto& path : paths) {
+            if (translator.LoadTranslations(domain, path.c_str())) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    bool editorLoaded = TryLoadTranslation(i18n::Domain::Editor, L"editor.json");
+    bool metadataLoaded = TryLoadTranslation(i18n::Domain::Metadata, L"metadata.json");
 
     // Set locale to saved language preference (or default "en")
     if (!savedLanguage.empty() && translator.SwitchLanguage(savedLanguage))
