@@ -5,6 +5,9 @@
 #include <string>
 #include <map>
 
+// Forward declarations
+class CItemEditorTable;
+
 class CMuItemEditorUI
 {
 public:
@@ -20,8 +23,6 @@ private:
     ~CMuItemEditorUI();
 
     void RenderSearchBar();
-    void RenderItemTable(const std::string& searchLower);
-    void RenderSaveButton();
     void RenderColumnVisibilityMenu();
 
     char m_szItemSearchBuffer[256];
@@ -37,6 +38,9 @@ private:
 
     // Column freezing state
     bool m_bFreezeColumns;
+
+    // Table renderer
+    CItemEditorTable* m_pTable;
 };
 
 #define g_MuItemEditorUI CMuItemEditorUI::GetInstance()
