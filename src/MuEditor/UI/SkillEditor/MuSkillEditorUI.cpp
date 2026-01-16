@@ -7,15 +7,15 @@
 #include "SkillEditorActions.h"
 #include "SkillEditorPopups.h"
 #include "GameData/SkillData/SkillFieldMetadata.h"
-#include "MuEditor/Core/MuEditorCore.h"
-#include "MuEditor/Config/MuEditorConfig.h"
+#include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/Config/MuEditorConfig.h"
 #include "Translation/i18n.h"
 #include "imgui.h"
 #include <algorithm>
 #include <cctype>
 
 #include "imgui_internal.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 
 CMuSkillEditorUI::CMuSkillEditorUI()
     : m_selectedRow(-1)

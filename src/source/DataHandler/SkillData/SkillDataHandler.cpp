@@ -1,14 +1,15 @@
 #include "stdafx.h"
 #include "SkillDataHandler.h"
+
 #include "SkillDataLoader.h"
+#include "SkillDataSaver.h"
+#include "SkillDataSaverLegacy.h"
 #include "GameData/SkillData/SkillStructs.h"
 #include "_struct.h"
 #include "_define.h"
 #include "ZzzInfomation.h"
 
 #ifdef _EDITOR
-#include "SkillDataSaver.h"
-#include "SkillDataSaverLegacy.h"
 #include "SkillDataExporter.h"
 #endif
 

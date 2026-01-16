@@ -4,7 +4,7 @@
 
 #include "SkillEditorColumns.h"
 #include "SkillEditorTable.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "GameData/SkillData/SkillFieldDefs.h"
 #include "Translation/i18n.h"
 #include "_struct.h"

@@ -8,7 +8,7 @@
 #include "_struct.h"
 #include "_define.h"
 #include "ZzzInfomation.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Utilities/StringUtils.h"
 #include <string>
 

@@ -3,16 +3,16 @@
 #ifdef _EDITOR
 
 #include "MuEditorCore.h"
-#include "MuEditor\UI\Common\MuEditorUI.h"
-#include "MuEditor\UI\Console\MuEditorConsoleUI.h"
-#include "MuEditor\Config\MuEditorConfig.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
 #include "MuInputBlockerCore.h"
-#include "MuEditor/UI/Common/MuEditorCenterPaneUI.h"
-#include "MuEditor/UI/ItemEditor/MuItemEditorUI.h"
-#include "MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
+#include "../Config/MuEditorConfig.h"
+#include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
+#include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
+#include "../UI/Common/MuEditorUI.h"
+#include "../UI/Console/MuEditorConsoleUI.h"
 #include "Translation/i18n.h"
 
 // Windows cursor display counter thresholds

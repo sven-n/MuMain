@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "../../../../Source Main 5.2/source/DataHandler/SkillData/SkillDataLoader.h"
+#include "DataHandler/SkillData/SkillDataLoader.h"
 #include "GameData/SkillData/SkillStructs.h"
 #include "_struct.h"
 #include "_define.h"
@@ -8,7 +8,7 @@
 #include "MultiLanguage.h"
 
 #ifdef _EDITOR
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Utilities/StringUtils.h"
 #include <string>
 #endif

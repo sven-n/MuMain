@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "GameData/SkillData/SkillStructs.h"
+
 // Skill Data Handler - Singleton Facade
 // Provides centralized access to skill data operations
 class CSkillDataHandler
