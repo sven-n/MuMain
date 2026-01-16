@@ -10,10 +10,10 @@
 #include "NewUICommonMessageBox.h"
 #include "ZzzTexture.h"
 #include "ZzzOpenglUtil.h"
-#include "MuEditor/Core/MuEditorCore.h"
 
 #ifdef _EDITOR
 #include "imgui.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 #endif
 
 extern int MouseX, MouseY;
