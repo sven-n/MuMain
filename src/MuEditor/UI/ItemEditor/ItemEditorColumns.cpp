@@ -4,7 +4,7 @@
 
 #include "ItemEditorColumns.h"
 #include "ItemEditorTable.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "GameData/ItemData/ItemFieldDefs.h"
 #include "Translation/i18n.h"
 #include "_struct.h"

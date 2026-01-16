@@ -9,7 +9,10 @@
 #include "ZzzOpenData.h"
 #include "MapManager.h"
 #include "ZzzInterface.h"
-#include "MuEditor/Core/MuEditorCore.h"
+
+#ifdef _EDITOR
+#include "../MuEditor/Core/MuEditorCore.h"
+#endif
 
 using namespace SEASON3B;
 

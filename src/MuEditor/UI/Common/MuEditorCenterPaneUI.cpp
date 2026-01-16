@@ -4,7 +4,7 @@
 
 #include "MuEditorCenterPaneUI.h"
 #include "imgui.h"
-#include "MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 
 CMuEditorCenterPaneUI& CMuEditorCenterPaneUI::GetInstance()
 {

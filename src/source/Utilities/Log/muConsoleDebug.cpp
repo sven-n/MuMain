@@ -15,9 +15,9 @@
 #include "GlobalBitmap.h"
 #include "ZzzTexture.h"
 #include "ZzzScene.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
 
 #ifdef _EDITOR
+#include "../../../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #endif
 #ifdef CSK_DEBUG_MAP_PATHFINDING
 #include "ZzzPath.h"

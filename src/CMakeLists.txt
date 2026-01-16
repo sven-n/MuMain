@@ -74,7 +74,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Collect all C++ source files under source/
 file(GLOB_RECURSE MU_MAIN_SOURCES
   CONFIGURE_DEPENDS
-  "source/*.cpp"
+        "source/*.cpp"
+        "MuEditor/*.cpp"
 )
 
 # ImGui static library (required when _EDITOR is defined)
