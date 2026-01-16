@@ -140,14 +140,23 @@ void CItemEditorActions::RenderSaveButton()
         std::string changeLog;
         if (g_ItemDataHandler.Save(fileName, &changeLog))
         {
-            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("log_save_complete"));
+            // Log change details first, then save completion message
             g_MuEditorConsoleUI.LogEditor(changeLog);
+            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("log_save_complete"));
             ImGui::OpenPopup("Save Success");
         }
         else
         {
-            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_save_failed"));
-            ImGui::OpenPopup("Save Failed");
+            // Check if it failed due to no changes
+            if (!changeLog.empty() && changeLog.find("No changes") != std::string::npos)
+            {
+                g_MuEditorConsoleUI.LogEditor(changeLog);
+            }
+            else
+            {
+                g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_save_failed"));
+                ImGui::OpenPopup("Save Failed");
+            }
         }
     }
 

@@ -5,6 +5,7 @@
 #include "ItemDataSaver.h"
 #include "ItemDataFileIO.h"
 #include "GameData/ItemData/ItemAttributeHelpers.h"
+#include "Translation/i18n.h"
 #include "_struct.h"
 #include "_define.h"
 #include "ZzzInfomation.h"
@@ -74,13 +75,6 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
     }
 
     // Prepare new buffer
-    FILE* fp = _wfopen(fileName, L"wb");
-    if (fp == NULL)
-    {
-        if (originalItems) delete[] originalItems;
-        return false;
-    }
-
     BYTE* Buffer = new BYTE[Size * MAX_ITEM];
     BYTE* pSeek = Buffer;
 
@@ -264,13 +258,38 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
             {
                 char itemName[MAX_ITEM_NAME];
                 CMultiLanguage::ConvertToUtf8(itemName, ItemAttribute[i].Name, MAX_ITEM_NAME);
-                changeLog << "[" << i << "] " << itemName << "\n" << itemChanges.str();
+                std::string entryHeader = i18n::FormatEditor("log_item_change_entry", {std::to_string(i), std::string(itemName)});
+                changeLog << entryHeader << "\n" << itemChanges.str();
                 changeCount++;
             }
         }
 
         memcpy(pSeek, &dest, Size);
         pSeek += Size;
+    }
+
+    // Check if we should skip saving when no changes detected
+    if (originalItems && changeCount == 0)
+    {
+        // No changes - skip save
+        delete[] Buffer;
+        delete[] originalItems;
+        
+        if (outChangeLog)
+        {
+            *outChangeLog = std::string(EDITOR_TEXT("log_no_changes_detected")) + "\n";
+        }
+        
+        return false; // Return false to indicate no save was needed
+    }
+
+    // Open file for writing only after we know we need to save
+    FILE* fp = _wfopen(fileName, L"wb");
+    if (fp == NULL)
+    {
+        delete[] Buffer;
+        if (originalItems) delete[] originalItems;
+        return false;
     }
 
     // Encrypt buffer
@@ -285,16 +304,10 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
     if (originalItems)
     {
         delete[] originalItems;
-        if (outChangeLog)
+        if (outChangeLog && changeCount > 0)
         {
-            if (changeCount > 0)
-            {
-                *outChangeLog = "=== Item Changes (" + std::to_string(changeCount) + " items modified) ===\n" + changeLog.str();
-            }
-            else
-            {
-                *outChangeLog = "No changes detected.\n";
-            }
+            std::string header = i18n::FormatEditor("log_item_changes_header", {std::to_string(changeCount)});
+            *outChangeLog = header + "\n" + changeLog.str();
         }
     }
 
