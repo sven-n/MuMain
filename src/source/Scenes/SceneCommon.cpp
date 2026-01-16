@@ -69,7 +69,8 @@ bool CheckAbuseFilter(wchar_t* Text, bool bCheckSlash)
 
     int icntText = 0;
     wchar_t TmpText[2048];
-    for (int i = 0; i < wcslen(Text); ++i)
+    int textLength = wcslen(Text);
+    for (int i = 0; i < textLength; ++i)
     {
         if (Text[i] != 32)
         {
@@ -93,7 +94,8 @@ bool CheckAbuseNameFilter(wchar_t* Text)
 {
     int icntText = 0;
     wchar_t TmpText[256];
-    for (int i = 0; i < wcslen(Text); ++i)
+    int textLength = wcslen(Text);
+    for (int i = 0; i < textLength; ++i)
     {
         if (Text[i] != 32)
         {
@@ -320,23 +322,23 @@ BOOL ShowCheckBox(int num, int index, int message)
         {
             switch (TargetItem.Level)
             {
-            case 0:swprintf(Name, L"%ls", GlobalText[168]); break;
-            case 1:swprintf(Name, L"%ls", GlobalText[169]); break;
-            case 2:swprintf(Name, L"%ls", GlobalText[167]); break;
-            case 3:swprintf(Name, L"%ls", GlobalText[166]); break;
-            case 4:swprintf(Name, L"%ls", GlobalText[1900]); break;
+            case 0:swprintf_s(Name, 50, L"%ls", GlobalText[168]); break;
+            case 1:swprintf_s(Name, 50, L"%ls", GlobalText[169]); break;
+            case 2:swprintf_s(Name, 50, L"%ls", GlobalText[167]); break;
+            case 3:swprintf_s(Name, 50, L"%ls", GlobalText[166]); break;
+            case 4:swprintf_s(Name, 50, L"%ls", GlobalText[1900]); break;
             }
         }
 
         if (message == MESSAGE_USE_STATE2)
-            swprintf(g_lpszMessageBoxCustom[0], L"( %ls%ls )", Name, GlobalText[1901]);
+            swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls%ls )", Name, GlobalText[1901]);
         else
-            swprintf(g_lpszMessageBoxCustom[0], L"( %ls )", Name);
+            swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls )", Name);
 
         num++;
         for (int i = 1; i < num; ++i)
         {
-            swprintf(g_lpszMessageBoxCustom[i], GlobalText[index]);
+            swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, GlobalText[index]);
         }
         g_iNumLineMessageBoxCustom = num;
     }
@@ -344,11 +346,11 @@ BOOL ShowCheckBox(int num, int index, int message)
     {
         wchar_t szGold[256];
         ConvertGold(InputGold, szGold);
-        swprintf(g_lpszMessageBoxCustom[0], GlobalText[index], szGold);
+        swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, GlobalText[index], szGold);
 
         for (int i = 1; i < num; ++i)
         {
-            swprintf(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
+            swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, GlobalText[index + i]);
         }
         g_iNumLineMessageBoxCustom = num;
     }
@@ -368,38 +370,38 @@ BOOL ShowCheckBox(int num, int index, int message)
         g_iNumLineMessageBoxCustom = 0;
         if (COMGEM::isComMode())
         {
-            if (COMGEM::m_cGemType == 0) swprintf(tBuf, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
-            else swprintf(tBuf, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+            if (COMGEM::m_cGemType == 0) swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+            else swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
 
             g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
                 tLines[g_iNumLineMessageBoxCustom], 2, 30);
 
             for (int t = 0; t < 2; ++t)
-                wcscpy(g_lpszMessageBoxCustom[t], tLines[t]);
+                wcscpy_s(g_lpszMessageBoxCustom[t], MAX_LENGTH_CMB, tLines[t]);
 
-            swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1810], COMGEM::m_iValue);
+            swprintf_s(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], MAX_LENGTH_CMB, GlobalText[1810], COMGEM::m_iValue);
             ++g_iNumLineMessageBoxCustom;
         }
         else
         {
             int t_GemLevel = COMGEM::GetUnMixGemLevel() + 1;
-            if (COMGEM::m_cGemType == 0) swprintf(tBuf, GlobalText[1813], GlobalText[1806], t_GemLevel);
-            else swprintf(tBuf, GlobalText[1813], GlobalText[1807], t_GemLevel);
+            if (COMGEM::m_cGemType == 0) swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, GlobalText[1813], GlobalText[1806], t_GemLevel);
+            else swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, GlobalText[1813], GlobalText[1807], t_GemLevel);
 
             g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
                 tLines[g_iNumLineMessageBoxCustom], 2, 30);
 
             for (int t = 0; t < 2; ++t)
-                wcscpy(g_lpszMessageBoxCustom[t], tLines[t]);
+                wcscpy_s(g_lpszMessageBoxCustom[t], MAX_LENGTH_CMB, tLines[t]);
 
-            swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1814], COMGEM::m_iValue);
+            swprintf_s(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], MAX_LENGTH_CMB, GlobalText[1814], COMGEM::m_iValue);
             ++g_iNumLineMessageBoxCustom;
         }
     }
     else if (message == MESSAGE_CANCEL_SKILL)
     {
         wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-        swprintf(tBuf, L"%ls%ls", SkillAttribute[index].Name, GlobalText[2046]);
+        swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, L"%ls%ls", SkillAttribute[index].Name, GlobalText[2046]);
         g_iNumLineMessageBoxCustom = SeparateTextIntoLines(tBuf, g_lpszMessageBoxCustom[0], 2, MAX_LENGTH_CMB);
         g_iCancelSkillTarget = index;
     }
@@ -407,7 +409,7 @@ BOOL ShowCheckBox(int num, int index, int message)
     {
         for (int i = 0; i < num; ++i)
         {
-            wcscpy(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
+            wcscpy_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, GlobalText[index + i]);
         }
 
         g_iNumLineMessageBoxCustom = num;

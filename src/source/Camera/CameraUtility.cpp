@@ -93,8 +93,10 @@ bool MoveMainCamera()
 
         if (gMapManager.InChaosCastle() == false || !Hero->Object.m_bActionStart)
         {
+            // Skip height adjustment for Kanturu 3rd when action has started
             if (gMapManager.WorldActive == WD_39KANTURU_3RD && Hero->Object.m_bActionStart)
             {
+                // No-op: Hero maintains current Z position during action in Kanturu 3rd
             }
             else
                 if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
@@ -162,8 +164,10 @@ bool MoveMainCamera()
             switch (g_shCameraLevel)
             {
             case 0:
+                // Login scene uses default CameraViewFar set earlier in function
                 if (SceneFlag == LOG_IN_SCENE)
                 {
+                    // No-op: CameraViewFar already set
                 }
                 else if (SceneFlag == CHARACTER_SCENE)
                 {

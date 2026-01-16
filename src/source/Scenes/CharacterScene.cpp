@@ -65,7 +65,7 @@ void StartGame()
             CharacterAttribute->Level = CharactersClient[SelectedHero].Level;
             CharacterAttribute->Class = CharactersClient[SelectedHero].Class;
             CharacterAttribute->Skin = CharactersClient[SelectedHero].Skin;
-            ::wcscpy(CharacterAttribute->Name, CharactersClient[SelectedHero].ID);
+            ::wcscpy_s(CharacterAttribute->Name, MAX_ID_SIZE + 1, CharactersClient[SelectedHero].ID);
 
             ::ReleaseCharacterSceneData();
             InitLoading = false;
@@ -181,7 +181,7 @@ void NewMoveCharacterScene()
     {
         if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_CharMakeWin.IsShow()
             || rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow())
-            && SelectedHero > -1 && SelectedHero < 5)
+            && SelectedHero > -1 && SelectedHero < MAX_CHARACTERS_PER_ACCOUNT)
         {
             ::PlayBuffer(SOUND_CLICK01);
 
@@ -210,7 +210,7 @@ void NewMoveCharacterScene()
 
     if (rInput.IsLBtnDbl() && rUIMng.m_CharSelMainWin.IsShow())
     {
-        if (SelectedCharacter < 0 || SelectedCharacter > 4)
+        if (SelectedCharacter < 0 || SelectedCharacter >= MAX_CHARACTERS_PER_ACCOUNT)
         {
             return;
         }
@@ -220,7 +220,7 @@ void NewMoveCharacterScene()
     }
     else if (rInput.IsLBtnDn())
     {
-        if (SelectedCharacter < 0 || SelectedCharacter > 4)
+        if (SelectedCharacter < 0 || SelectedCharacter >= MAX_CHARACTERS_PER_ACCOUNT)
             SelectedHero = -1;
         else
             SelectedHero = SelectedCharacter;
@@ -261,7 +261,7 @@ bool NewRenderCharacterScene(HDC hDC)
     OBJECT* o = &CharactersClient[SelectedHero].Object;
 
     CreateScreenVector(MouseX, MouseY, MouseTarget);
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; i++)
     {
         CharactersClient[i].Object.Position[2] = 163.0f;
         Vector(0.0f, 0.0f, 0.0f, CharactersClient[i].Object.Light);
@@ -280,7 +280,7 @@ bool NewRenderCharacterScene(HDC hDC)
     CHARACTER* pCha = NULL;
     OBJECT* pObj = NULL;
 
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; ++i)
     {
         pCha = &CharactersClient[i];
         pObj = &pCha->Object;

@@ -60,7 +60,14 @@ extern HWND g_hWnd;
 
 void DeleteCharacter()
 {
+    if (SelectedHero < 0 || SelectedHero >= MAX_CHARACTERS_PER_ACCOUNT)
+    {
+        return;
+    }
+
+    int characterToDelete = SelectedHero;
     SelectedHero = -1;
+
     if (g_iChatInputType == 1)
     {
         g_pSinglePasswdInputBox->GetText(InputText[0]);
@@ -69,7 +76,7 @@ void DeleteCharacter()
     }
 
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
-    SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[SelectedHero].ID, InputText[0]);
+    SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[characterToDelete].ID, InputText[0]);
 
     PlayBuffer(SOUND_MENU01);
 
@@ -183,7 +190,7 @@ void CreateLogInScene()
 
     if (g_iChatInputType == 0)
     {
-        wcscpy(InputText[0], m_ID);
+        wcscpy_s(InputText[0], 256, m_ID);
         InputLength[0] = wcslen(InputText[0]);
         InputTextMax[0] = MAX_ID_SIZE;
         if (InputLength[0] == 0)	InputIndex = 0;
@@ -331,16 +338,16 @@ bool NewRenderLogInScene(HDC hDC)
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 128);
 
-    wcscpy(Text, GlobalText[454]);
+    wcscpy_s(Text, 100, GlobalText[454]);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(335 - Size.cx * 640 / WindowWidth, 480 - Size.cy * 640 / WindowWidth - 1, Text);
 
-    wcscpy(Text, GlobalText[455]);
+    wcscpy_s(Text, 100, GlobalText[455]);
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(335, 480 - Size.cy * 640 / WindowWidth - 1, Text);
 
-    swprintf(Text, GlobalText[456], m_ExeVersion);
+    swprintf_s(Text, 100, GlobalText[456], m_ExeVersion);
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(0, 480 - Size.cy * 640 / WindowWidth - 1, Text);
