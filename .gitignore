@@ -1,13 +1,34 @@
 
 .vs/
+.nuget/
 
-Source Main 5.2/source/Global Debug/
-Source Main 5.2/Global Debug/
-Source Main 5.2/Global Debug/Main
-Source Main 5.2/source/Global Release/
-Source Main 5.2/Global Release/
-Source Main 5.2/Global Release/Main
+src/source/Global Debug/
+src/Global Debug/
+src/Global Debug/Main
+src/source/Global Release/
+src/Global Release/
+src/Global Release/Main
 
 # CMake build directories
 build/
 build-mingw/
+/cmake-build-debug/
+/cmake-build-release/
+/CMakeFiles/
+**/cmake-build-debug/
+**/cmake-build-release/
+**/CMakeFiles/
+/Win32/
+
+# .NET build outputs
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Jetbrains Ides
+/.idea/
+**/.idea/
+
+# ImGui
+**/imgui.ini
