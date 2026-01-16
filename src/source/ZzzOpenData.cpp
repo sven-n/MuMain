@@ -28,6 +28,8 @@
 #include "QuestMng.h"
 #include "ServerListManager.h"
 #include "MonkSystem.h"
+
+#include "DataHandler/ItemData/ItemDataHandler.h"
 #include "SocketSystem.h"
 
 ///////////////////////////////////////////
@@ -5367,7 +5369,7 @@ void OpenBasicData(HDC hDC)
     OpenDialogFile(Text);
 
     swprintf(Text, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-    OpenItemScript(Text);
+    g_ItemDataHandler.Load(Text);
 
     swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);

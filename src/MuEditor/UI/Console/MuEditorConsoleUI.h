@@ -25,10 +25,10 @@ private:
     bool m_isStdout;
 };
 
-class CMuEditorConsole
+class CMuEditorConsoleUI
 {
 public:
-    static CMuEditorConsole& GetInstance();
+    static CMuEditorConsoleUI& GetInstance();
 
     void Initialize();
     void Shutdown();
@@ -46,8 +46,8 @@ public:
     void Update(); // Call this periodically to capture console output
 
 private:
-    CMuEditorConsole();
-    ~CMuEditorConsole();
+    CMuEditorConsoleUI();
+    ~CMuEditorConsoleUI();
 
     void WriteToLogFile(const std::string& message);
     void CaptureConsoleOutput(); // Capture new output from Windows console
@@ -65,6 +65,6 @@ private:
     std::string m_lastConsoleContent;
 };
 
-#define g_MuEditorConsole CMuEditorConsole::GetInstance()
+#define g_MuEditorConsoleUI CMuEditorConsoleUI::GetInstance()
 
 #endif // _EDITOR

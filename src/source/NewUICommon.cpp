@@ -10,9 +10,9 @@
 #include "NewUICommonMessageBox.h"
 #include "ZzzTexture.h"
 #include "ZzzOpenglUtil.h"
+#include "MuEditor/Core/MuEditorCore.h"
 
 #ifdef _EDITOR
-#include "MuEditor/MuEditor.h"
 #include "imgui.h"
 #endif
 
@@ -156,7 +156,7 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
     // This ensures keyboard input doesn't leak through to the game when typing.
     // This is the primary keyboard blocking mechanism - it blocks at the source
     // by preventing GetAsyncKeyState() from being polled.
-    if (g_MuEditor.IsEnabled())
+    if (g_MuEditorCore.IsEnabled())
     {
         ImGuiIO& io = ImGui::GetIO();
         if (io.WantCaptureKeyboard)

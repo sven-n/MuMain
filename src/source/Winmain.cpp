@@ -51,10 +51,9 @@
 
 
 #include "NewUISystem.h"
+#include "MuEditor/Core/MuEditorCore.h"
 
 #ifdef _EDITOR
-#include "MuEditor/MuEditor.h"
-#include "MuEditor/MuEditorConsole.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 
@@ -464,7 +463,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 #ifdef _EDITOR
     // Only forward messages to ImGui when editor is open
     // When editor is closed, we handle button clicks manually in RenderToolbarOpen
-    if (g_MuEditor.IsEnabled())
+    if (g_MuEditorCore.IsEnabled())
     {
         if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
             return true;
@@ -584,7 +583,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 #ifdef _EDITOR
         // When hovering UI (including Open Editor button), let Windows show cursor
         // Otherwise hide Windows cursor for game cursor
-        if (g_MuEditor.IsHoveringUI())
+        if (g_MuEditorCore.IsHoveringUI())
         {
             // Let Windows cursor show - don't hide it
             return DefWindowProc(hwnd, msg, wParam, lParam);
@@ -898,9 +897,9 @@ MSG MainLoop()
                 {
                     if (!wasF12Pressed)
                     {
-                        g_MuEditor.ToggleEditor();
+                        g_MuEditorCore.ToggleEditor();
                         fwprintf(stderr, L"[Editor] Toggled: %s\n",
-                            g_MuEditor.IsEnabled() ? L"ON" : L"OFF");
+                            g_MuEditorCore.IsEnabled() ? L"ON" : L"OFF");
                         fflush(stderr);
                         wasF12Pressed = true;
                     }
@@ -911,7 +910,7 @@ MSG MainLoop()
                 }
 
                 // Update editor UI (must be before RenderScene)
-                g_MuEditor.Update();
+                g_MuEditorCore.Update();
 #endif
 
                 // Render game scene (ImGui rendering happens inside before SwapBuffers)
@@ -1285,12 +1284,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
 #ifdef _EDITOR
     // Initialize MU Editor
-    g_MuEditor.Initialize(g_hWnd, g_hDC);
+    g_MuEditorCore.Initialize(g_hWnd, g_hDC);
 
     // Check for --editor command line flag
     if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
     {
-        g_MuEditor.SetEnabled(true);
+        g_MuEditorCore.SetEnabled(true);
         fwprintf(stderr, L"[Editor] Starting in editor mode (--editor flag detected)\n");
         std::fflush(stderr);
     }
