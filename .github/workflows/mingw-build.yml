@@ -63,5 +63,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: main-exe-mingw
-          path: build-mingw/Source Main 5.2/Main.exe
+          path: build-mingw/src/Main.exe
           if-no-files-found: error
