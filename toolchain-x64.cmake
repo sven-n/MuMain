@@ -4,6 +4,9 @@
 set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_SYSTEM_PROCESSOR AMD64)
 
+# Force 64-bit pointer size BEFORE compiler detection
+set(CMAKE_SIZEOF_VOID_P 8 CACHE INTERNAL "Pointer size in bytes" FORCE)
+
 # Find the latest MSVC installation
 file(GLOB MSVC_VERSIONS LIST_DIRECTORIES true "C:/Program Files/Microsoft Visual Studio/*/Community/VC/Tools/MSVC/*")
 if (MSVC_VERSIONS)
@@ -54,6 +57,3 @@ if (MSVC_VERSIONS)
     message(STATUS "x64 Toolchain: Library paths set to x64")
   endif()
 endif()
-
-# Tell CMake we want x64 architecture
-set(CMAKE_SIZEOF_VOID_P 8)
