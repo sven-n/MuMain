@@ -37,10 +37,12 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
   endif()
 endif()
 
-# Force 32-bit build for MSVC to match available libraries
+# Check architecture and configure accordingly
 if (MSVC)
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(FATAL_ERROR "This project requires 32-bit libraries. Please configure CMake with: -DCMAKE_GENERATOR_PLATFORM=Win32 (for Visual Studio generator) or use the x86 MSVC toolchain in CLion settings")
+    message(STATUS "Configuring for 64-bit (x64) build")
+  else()
+    message(STATUS "Configuring for 32-bit (x86) build")
   endif()
 endif()
 
@@ -120,7 +122,7 @@ target_compile_definitions(Main PRIVATE
   _LANGUAGE_FOREIGN
   _LANGUAGE_ENG
   UNICODE
-  _USE_32BIT_TIME_T  # Use 32-bit time_t for 32-bit builds
+  $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:_USE_32BIT_TIME_T>  # Use 32-bit time_t only for 32-bit builds
   $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG;_EDITOR>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
 )
@@ -195,6 +197,15 @@ if (MSVC)
 
   # 3. Build to temp directory with Native AOT, then copy to build and bin directories
   # Override environment variables to avoid issues with umlauts in Windows username
+  # Determine runtime identifier and platform target based on architecture
+  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(DOTNET_RID "win-x64")
+    set(DOTNET_PLATFORM "x64")
+  else()
+    set(DOTNET_RID "win-x86")
+    set(DOTNET_PLATFORM "x86")
+  endif()
+
   add_custom_command(
           OUTPUT "${DOTNET_DLL_PATH}"
           COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
@@ -203,7 +214,7 @@ if (MSVC)
                   "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR}"
                   "TEMP=${DOTNET_TEMP_DIR}"
                   "TMP=${DOTNET_TEMP_DIR}"
-                  dotnet publish "${DOTNET_PROJ}" -c $<CONFIG> -r win-x86 -o "${DOTNET_TEMP_OUTPUT}" --nologo
+                  dotnet publish "${DOTNET_PROJ}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT}" --nologo
           COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
           COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${CMAKE_CURRENT_SOURCE_DIR}/bin/MUnique.Client.Library.dll"
           DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
