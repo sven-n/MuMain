@@ -15,35 +15,8 @@
 #define MAX_ITEM_NAME 50
 #endif
 
-// Macro to define item attribute fields (excludes Name field which varies)
-#define ITEM_ATTRIBUTE_FIELDS \
-    bool TwoHand; \
-    WORD Level; \
-    BYTE m_byItemSlot; \
-    WORD m_wSkillIndex; \
-    BYTE Width; \
-    BYTE Height; \
-    BYTE DamageMin; \
-    BYTE DamageMax; \
-    BYTE SuccessfulBlocking; \
-    BYTE Defense; \
-    BYTE MagicDefense; \
-    BYTE WeaponSpeed; \
-    BYTE WalkSpeed; \
-    BYTE Durability; \
-    BYTE MagicDur; \
-    BYTE MagicPower; \
-    WORD RequireStrength; \
-    WORD RequireDexterity; \
-    WORD RequireEnergy; \
-    WORD RequireVitality; \
-    WORD RequireCharisma; \
-    WORD RequireLevel; \
-    BYTE Value; \
-    int  iZen; \
-    BYTE AttType; \
-    BYTE RequireClass[MAX_CLASS]; \
-    BYTE Resistance[MAX_RESISTANCE + 1];
+// Include X-macro field definitions (single source of truth)
+#include "ItemFieldDefs.h"
 
 // Legacy file format structure (S6E3) with 31-byte(maybe 30byte is the saver bet) name
 // Used for backward compatibility with old BMD files
@@ -68,3 +41,36 @@ typedef struct
     wchar_t Name[MAX_ITEM_NAME];
     ITEM_ATTRIBUTE_FIELDS
 } ITEM_ATTRIBUTE;
+
+// ============================================================================
+// COPY HELPERS (replaces ItemAttributeHelpers.h)
+// ============================================================================
+
+// Generate field copy statements from X-macro
+#define COPY_FIELD(name, type, arraySize, width) (dest).name = (source).name;
+
+// Macro to copy all non-name fields from source to dest
+#define COPY_ITEM_ATTRIBUTE_FIELDS(dest, source) \
+    do { \
+        ITEM_FIELDS_SIMPLE(COPY_FIELD) \
+        memcpy((dest).RequireClass, (source).RequireClass, sizeof((source).RequireClass)); \
+        memcpy((dest).Resistance, (source).Resistance, sizeof((source).Resistance)); \
+    } while(0)
+
+// Helper template to copy from file structure to runtime structure
+// Requires: #include "MultiLanguage.h"
+template<typename TSource>
+inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, TSource& source)
+{
+    CMultiLanguage::ConvertFromUtf8(dest.Name, source.Name, MAX_ITEM_NAME);
+    COPY_ITEM_ATTRIBUTE_FIELDS(dest, source);
+}
+
+// Helper template to copy from runtime structure to file structure
+// Requires: #include "MultiLanguage.h"
+template<typename TDest>
+inline void CopyItemAttributeToDestination(TDest& dest, ITEM_ATTRIBUTE& source)
+{
+    CMultiLanguage::ConvertToUtf8(dest.Name, source.Name, sizeof(dest.Name));
+    COPY_ITEM_ATTRIBUTE_FIELDS(dest, source);
+}

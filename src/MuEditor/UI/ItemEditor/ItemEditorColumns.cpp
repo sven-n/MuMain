@@ -5,7 +5,7 @@
 #include "ItemEditorColumns.h"
 #include "ItemEditorTable.h"
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
-#include "GameData/ItemData/ItemFieldMetadata.h"
+#include "GameData/ItemData/ItemFieldDefs.h"
 #include "Translation/i18n.h"
 #include "_struct.h"
 #include "_define.h"
@@ -15,52 +15,13 @@
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
-// ===== METADATA-DRIVEN RENDERING =====
+// ===== X-MACRO-DRIVEN RENDERING =====
 
-void CItemEditorColumns::RenderFieldByMetadata(const ItemFieldMetadata& meta, int& colIdx, int itemIndex,
-                                                ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible)
+void CItemEditorColumns::RenderFieldByDescriptor(const FieldDescriptor& desc, int& colIdx, int itemIndex,
+                                                  ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible)
 {
-    if (!isVisible) return;
-
-    // Get pointer to the field using offset
-    BYTE* itemPtr = reinterpret_cast<BYTE*>(&item);
-    void* fieldPtr = itemPtr + meta.offset;
-
-    // Get translated display name (with fallback to defaultDisplayName)
-    const char* displayName = meta.GetDisplayName();
-
-    // Generate unique ID based on field name hash
-    int uniqueId = 0;
-    for (const char* p = meta.fieldName; *p; ++p)
-        uniqueId = (uniqueId * 31) + *p;
-
-    // Render based on field type
-    switch (meta.type)
-    {
-    case EItemFieldType::Bool:
-        RenderBoolColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<bool*>(fieldPtr), rowInteracted, isVisible);
-        break;
-
-    case EItemFieldType::Byte:
-        RenderByteColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<BYTE*>(fieldPtr), rowInteracted, isVisible);
-        break;
-
-    case EItemFieldType::Word:
-        RenderWordColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<WORD*>(fieldPtr), rowInteracted, isVisible);
-        break;
-
-    case EItemFieldType::Int:
-        RenderIntColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<int*>(fieldPtr), rowInteracted, isVisible);
-        break;
-
-    case EItemFieldType::WCharArray:
-        RenderWCharArrayColumn(displayName, colIdx, itemIndex, uniqueId, reinterpret_cast<wchar_t*>(fieldPtr), meta.arraySize, rowInteracted, isVisible);
-        break;
-
-    case EItemFieldType::ByteArray:
-        // Not currently used - individual array elements are exposed as separate fields
-        break;
-    }
+    // Use the template helper function from ItemFieldDefs.h
+    ::RenderFieldByDescriptor(desc, this, item, colIdx, itemIndex, rowInteracted, isVisible);
 }
 
 // ===== LOW-LEVEL TYPE-SPECIFIC RENDERING =====

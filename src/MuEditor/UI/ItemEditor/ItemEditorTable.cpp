@@ -53,7 +53,7 @@ void CItemEditorTable::Render(
     bool freezeColumns)
 {
     // Get metadata fields once at function scope
-    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
+    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     // Count visible columns - only count columns that actually exist
     int visibleColumnCount = 0;
@@ -65,10 +65,10 @@ void CItemEditorTable::Render(
     }
 
     // Count metadata fields that are visible
-    for (const auto& meta : fields)
+    for (int i = 0; i < fieldCount; ++i)
     {
-        if (columnVisibility.find(meta.fieldName) != columnVisibility.end() &&
-            columnVisibility[meta.fieldName])
+        if (columnVisibility.find(fields[i].name) != columnVisibility.end() &&
+            columnVisibility[fields[i].name])
         {
             visibleColumnCount++;
         }
@@ -139,14 +139,14 @@ void CItemEditorTable::Render(
         ImGui::TableSetupColumn(EDITOR_TEXT("label_index"), ImGuiTableColumnFlags_WidthFixed, 50.0f);
     }
 
-    for (const auto& meta : fields)
+    for (int i = 0; i < fieldCount; ++i)
     {
-        if (columnVisibility.find(meta.fieldName) != columnVisibility.end() &&
-            columnVisibility[meta.fieldName])
+        if (columnVisibility.find(fields[i].name) != columnVisibility.end() &&
+            columnVisibility[fields[i].name])
         {
-            ImGui::TableSetupColumn(meta.GetDisplayName(),
+            ImGui::TableSetupColumn(GetFieldDisplayName(fields[i].name),
                                    ImGuiTableColumnFlags_WidthFixed,
-                                   meta.defaultColumnWidth);
+                                   fields[i].width);
         }
     }
 
@@ -195,14 +195,14 @@ void CItemEditorTable::Render(
             }
 
             // Render all other columns via metadata - AUTO-ADAPTING
-            for (const auto& meta : fields)
+            for (int fieldIdx = 0; fieldIdx < fieldCount; ++fieldIdx)
             {
-                bool isVisible = columnVisibility.find(meta.fieldName) != columnVisibility.end() &&
-                                 columnVisibility[meta.fieldName];
+                bool isVisible = columnVisibility.find(fields[fieldIdx].name) != columnVisibility.end() &&
+                                 columnVisibility[fields[fieldIdx].name];
 
                 if (isVisible)
                 {
-                    m_pColumns->RenderFieldByMetadata(meta, colIdx, i, ItemAttribute[i], rowInteracted, true);
+                    m_pColumns->RenderFieldByDescriptor(fields[fieldIdx], colIdx, i, ItemAttribute[i], rowInteracted, true);
                 }
             }
 
