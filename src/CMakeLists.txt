@@ -134,8 +134,16 @@ if (MSVC)
   )
 
   # Link against Windows system libraries and local static libs
+  # Use architecture-specific library directories
+  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(LIB_ARCH_DIR "x64")
+  else()
+    set(LIB_ARCH_DIR "x86")
+  endif()
+
   target_link_directories(Main PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib"
+    "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/${LIB_ARCH_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib"  # Fallback for arch-independent libs
   )
 
   target_link_libraries(Main PRIVATE
