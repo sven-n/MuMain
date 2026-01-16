@@ -4,67 +4,93 @@
 
 #include "ItemEditorActions.h"
 #include "DataHandler/ItemData/ItemDataHandler.h"
+#include "GameData/ItemData/ItemFieldMetadata.h"
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "Translation/i18n.h"
 #include "imgui.h"
 #include <string>
 #include <sstream>
 
 extern std::wstring g_strSelectedML;
 
+// ===== HELPER FUNCTIONS =====
+
 void CItemEditorActions::ConvertItemName(char* outBuffer, size_t bufferSize, const wchar_t* name)
 {
     WideCharToMultiByte(CP_UTF8, 0, name, -1, outBuffer, (int)bufferSize, NULL, NULL);
 }
 
+std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const ItemFieldMetadata& meta)
+{
+    std::stringstream ss;
+
+    // Get pointer to the field using offset
+    const BYTE* itemPtr = reinterpret_cast<const BYTE*>(&item);
+    const void* fieldPtr = itemPtr + meta.offset;
+
+    switch (meta.type)
+    {
+    case EItemFieldType::Bool:
+        ss << (*reinterpret_cast<const bool*>(fieldPtr) ? 1 : 0);
+        break;
+
+    case EItemFieldType::Byte:
+        ss << (int)*reinterpret_cast<const BYTE*>(fieldPtr);
+        break;
+
+    case EItemFieldType::Word:
+        ss << *reinterpret_cast<const WORD*>(fieldPtr);
+        break;
+
+    case EItemFieldType::Int:
+        ss << *reinterpret_cast<const int*>(fieldPtr);
+        break;
+
+    case EItemFieldType::WCharArray:
+    {
+        char buffer[256];
+        ConvertItemName(buffer, sizeof(buffer), reinterpret_cast<const wchar_t*>(fieldPtr));
+        ss << buffer;
+        break;
+    }
+
+    case EItemFieldType::ByteArray:
+        // Not currently used
+        break;
+    }
+
+    return ss.str();
+}
+
+// ===== EXPORT FUNCTIONS =====
+
+std::string CItemEditorActions::GetCSVHeader()
+{
+    std::stringstream ss;
+    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
+
+    ss << "Index";
+    for (const auto& meta : fields)
+    {
+        ss << "," << meta.GetDisplayName();
+    }
+
+    return ss.str();
+}
+
 std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBUTE& item)
 {
     std::stringstream ss;
-    char nameBuffer[256];
-    ConvertItemName(nameBuffer, sizeof(nameBuffer), item.Name);
+    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
 
-    ss << "Row " << itemIndex << "\n"
-       << "Index = " << itemIndex << ", "
-       << "Name = " << nameBuffer << ", "
-       << "TwoHand = " << (item.TwoHand ? 1 : 0) << ", "
-       << "Level = " << item.Level << ", "
-       << "Slot = " << (int)item.m_byItemSlot << ", "
-       << "Skill = " << item.m_wSkillIndex << ", "
-       << "Width = " << (int)item.Width << ", "
-       << "Height = " << (int)item.Height << ", "
-       << "DamageMin = " << (int)item.DamageMin << ", "
-       << "DamageMax = " << (int)item.DamageMax << ", "
-       << "Block = " << (int)item.SuccessfulBlocking << ", "
-       << "Defense = " << (int)item.Defense << ", "
-       << "MagicDefense = " << (int)item.MagicDefense << ", "
-       << "WeaponSpeed = " << (int)item.WeaponSpeed << ", "
-       << "WalkSpeed = " << (int)item.WalkSpeed << ", "
-       << "Durability = " << (int)item.Durability << ", "
-       << "MagicDur = " << (int)item.MagicDur << ", "
-       << "MagicPower = " << (int)item.MagicPower << ", "
-       << "ReqStr = " << item.RequireStrength << ", "
-       << "ReqDex = " << item.RequireDexterity << ", "
-       << "ReqEne = " << item.RequireEnergy << ", "
-       << "ReqVit = " << item.RequireVitality << ", "
-       << "ReqCha = " << item.RequireCharisma << ", "
-       << "ReqLevel = " << item.RequireLevel << ", "
-       << "Value = " << (int)item.Value << ", "
-       << "Zen = " << item.iZen << ", "
-       << "AttType = " << (int)item.AttType << ", "
-       << "DW/SM = " << (int)item.RequireClass[0] << ", "
-       << "DK/BK = " << (int)item.RequireClass[1] << ", "
-       << "ELF/ME = " << (int)item.RequireClass[2] << ", "
-       << "MG = " << (int)item.RequireClass[3] << ", "
-       << "DL = " << (int)item.RequireClass[4] << ", "
-       << "SUM = " << (int)item.RequireClass[5] << ", "
-       << "RF = " << (int)item.RequireClass[6] << ", "
-       << "Res0 = " << (int)item.Resistance[0] << ", "
-       << "Res1 = " << (int)item.Resistance[1] << ", "
-       << "Res2 = " << (int)item.Resistance[2] << ", "
-       << "Res3 = " << (int)item.Resistance[3] << ", "
-       << "Res4 = " << (int)item.Resistance[4] << ", "
-       << "Res5 = " << (int)item.Resistance[5] << ", "
-       << "Res6 = " << (int)item.Resistance[6] << ", "
-       << "Res7 = " << (int)item.Resistance[7];
+    ss << "Row " << itemIndex << "\n";
+    ss << "Index = " << itemIndex;
+
+    for (const auto& meta : fields)
+    {
+        ss << ", " << meta.GetDisplayName() << " = ";
+        ss << GetFieldValueAsString(item, meta);
+    }
 
     return ss.str();
 }
@@ -72,51 +98,24 @@ std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBU
 std::string CItemEditorActions::ExportItemToCSV(int itemIndex, ITEM_ATTRIBUTE& item)
 {
     std::stringstream ss;
-    char nameBuffer[256];
-    ConvertItemName(nameBuffer, sizeof(nameBuffer), item.Name);
+    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
 
-    ss << itemIndex << ","
-       << "\"" << nameBuffer << "\","
-       << (item.TwoHand ? 1 : 0) << ","
-       << item.Level << ","
-       << (int)item.m_byItemSlot << ","
-       << item.m_wSkillIndex << ","
-       << (int)item.Width << ","
-       << (int)item.Height << ","
-       << (int)item.DamageMin << ","
-       << (int)item.DamageMax << ","
-       << (int)item.SuccessfulBlocking << ","
-       << (int)item.Defense << ","
-       << (int)item.MagicDefense << ","
-       << (int)item.WeaponSpeed << ","
-       << (int)item.WalkSpeed << ","
-       << (int)item.Durability << ","
-       << (int)item.MagicDur << ","
-       << (int)item.MagicPower << ","
-       << item.RequireStrength << ","
-       << item.RequireDexterity << ","
-       << item.RequireEnergy << ","
-       << item.RequireVitality << ","
-       << item.RequireCharisma << ","
-       << item.RequireLevel << ","
-       << (int)item.Value << ","
-       << item.iZen << ","
-       << (int)item.AttType << ","
-       << (int)item.RequireClass[0] << ","
-       << (int)item.RequireClass[1] << ","
-       << (int)item.RequireClass[2] << ","
-       << (int)item.RequireClass[3] << ","
-       << (int)item.RequireClass[4] << ","
-       << (int)item.RequireClass[5] << ","
-       << (int)item.RequireClass[6] << ","
-       << (int)item.Resistance[0] << ","
-       << (int)item.Resistance[1] << ","
-       << (int)item.Resistance[2] << ","
-       << (int)item.Resistance[3] << ","
-       << (int)item.Resistance[4] << ","
-       << (int)item.Resistance[5] << ","
-       << (int)item.Resistance[6] << ","
-       << (int)item.Resistance[7];
+    ss << itemIndex;
+
+    for (const auto& meta : fields)
+    {
+        ss << ",";
+
+        // Quote strings for CSV
+        if (meta.type == EItemFieldType::WCharArray)
+        {
+            ss << "\"" << GetFieldValueAsString(item, meta) << "\"";
+        }
+        else
+        {
+            ss << GetFieldValueAsString(item, meta);
+        }
+    }
 
     return ss.str();
 }
@@ -126,12 +125,14 @@ std::string CItemEditorActions::ExportItemCombined(int itemIndex, ITEM_ATTRIBUTE
     return ExportItemToReadable(itemIndex, item) + "\n" + ExportItemToCSV(itemIndex, item);
 }
 
+// ===== BUTTON RENDERING =====
+
 void CItemEditorActions::RenderSaveButton()
 {
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.8f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.9f, 1.0f));
 
-    if (ImGui::Button("Save Items"))
+    if (ImGui::Button(EDITOR_TEXT("btn_save")))
     {
         wchar_t fileName[256];
         swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
@@ -139,13 +140,13 @@ void CItemEditorActions::RenderSaveButton()
         std::string changeLog;
         if (g_ItemDataHandler.Save(fileName, &changeLog))
         {
-            g_MuEditorConsoleUI.LogEditor("=== SAVE COMPLETED ===\n");
+            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("log_save_complete"));
             g_MuEditorConsoleUI.LogEditor(changeLog);
             ImGui::OpenPopup("Save Success");
         }
         else
         {
-            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to save item attributes!\n");
+            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_save_failed"));
             ImGui::OpenPopup("Save Failed");
         }
     }
@@ -158,20 +159,21 @@ void CItemEditorActions::RenderExportS6E3Button()
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.4f, 0.8f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.5f, 0.9f, 1.0f));
 
-    if (ImGui::Button("Export as S6E3"))
+    if (ImGui::Button(EDITOR_TEXT("btn_export_s6e3")))
     {
         wchar_t fileName[256];
         swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls_S6E3.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
         if (g_ItemDataHandler.SaveLegacy(fileName))
         {
-            g_MuEditorConsoleUI.LogEditor("Exported items as S6E3 legacy format: Item_" +
-                                         std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd\n");
+            std::string filename_str = "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd";
+            std::string logMsg = i18n::FormatEditor("log_exported_s6e3", {filename_str});
+            g_MuEditorConsoleUI.LogEditor(logMsg);
             ImGui::OpenPopup("Export S6E3 Success");
         }
         else
         {
-            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to export item attributes as S6E3 format!\n");
+            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_export_s6e3_failed"));
             ImGui::OpenPopup("Export S6E3 Failed");
         }
     }
@@ -184,20 +186,21 @@ void CItemEditorActions::RenderExportCSVButton()
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.9f, 0.7f, 1.0f));
 
-    if (ImGui::Button("Export as CSV"))
+    if (ImGui::Button(EDITOR_TEXT("btn_export_csv")))
     {
         wchar_t csvFileName[256];
         swprintf(csvFileName, L"Data\\Local\\%ls\\Item_%ls_export.csv", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
         if (g_ItemDataHandler.ExportToCsv(csvFileName))
         {
-            g_MuEditorConsoleUI.LogEditor("Exported items as CSV: Item_" +
-                                         std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv\n");
+            std::string filename_str = "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv";
+            std::string logMsg = i18n::FormatEditor("log_exported_csv", {filename_str});
+            g_MuEditorConsoleUI.LogEditor(logMsg);
             ImGui::OpenPopup("Export CSV Success");
         }
         else
         {
-            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to export item attributes as CSV!\n");
+            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_export_csv_failed"));
             ImGui::OpenPopup("Export CSV Failed");
         }
     }

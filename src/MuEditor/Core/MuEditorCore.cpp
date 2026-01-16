@@ -10,6 +10,7 @@
 #include "imgui_impl_opengl2.h"
 #include "MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "Translation/i18n.h"
 
 // Windows cursor display counter thresholds
 // The cursor is visible when the counter is >= CURSOR_VISIBLE_THRESHOLD
@@ -76,6 +77,47 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
 
     m_bInitialized = true;
     g_MuEditorConsoleUI.LogEditor("MU Editor initialized");
+
+    // Load translation files
+    i18n::Translator& translator = i18n::Translator::GetInstance();
+
+    // Try multiple possible paths since working directory varies
+    bool editorLoaded = translator.LoadTranslations(i18n::Domain::Editor,
+        L"Translations\\en\\editor.json");
+    if (!editorLoaded) editorLoaded = translator.LoadTranslations(i18n::Domain::Editor,
+        L"bin\\Translations\\en\\editor.json");
+
+    bool gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
+        L"Translations\\en\\game.json");
+    if (!gameLoaded) gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
+        L"bin\\Translations\\en\\game.json");
+
+    bool metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
+        L"Translations\\en\\metadata.json");
+    if (!metadataLoaded) metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
+        L"bin\\Translations\\en\\metadata.json");
+
+    translator.SetLocale("en");
+
+    if (editorLoaded && metadataLoaded)
+    {
+        g_MuEditorConsoleUI.LogEditor("Translations loaded successfully");
+    }
+    else
+    {
+        g_MuEditorConsoleUI.LogEditor("WARNING: Some translation files not loaded");
+        if (!editorLoaded) g_MuEditorConsoleUI.LogEditor("  - editor.json missing");
+        if (!metadataLoaded) g_MuEditorConsoleUI.LogEditor("  - metadata.json missing");
+
+        // Debug: Log current working directory
+        wchar_t cwd[MAX_PATH];
+        if (GetCurrentDirectoryW(MAX_PATH, cwd))
+        {
+            char cwdUtf8[MAX_PATH];
+            WideCharToMultiByte(CP_UTF8, 0, cwd, -1, cwdUtf8, MAX_PATH, NULL, NULL);
+            g_MuEditorConsoleUI.LogEditor(std::string("  Working directory: ") + cwdUtf8);
+        }
+    }
 
     fwprintf(stderr, L"[MuEditor] Initialize() completed\n");
     fflush(stderr);

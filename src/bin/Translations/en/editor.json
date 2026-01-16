@@ -1,0 +1,33 @@
+{
+  "_comment": "MuEditor UI Translations - English",
+
+  "btn_save": "Save Items",
+  "btn_export_s6e3": "Export as S6E3",
+  "btn_export_csv": "Export as CSV",
+
+  "msg_save_success": "Save completed successfully!",
+  "msg_save_failed": "Failed to save items!",
+  "msg_export_s6e3_success": "S6E3 export completed successfully!",
+  "msg_export_s6e3_failed": "Failed to export as S6E3 format!",
+  "msg_export_csv_success": "CSV export completed successfully!",
+  "msg_export_csv_failed": "Failed to export as CSV!",
+
+  "error_file_not_found": "File not found: {0}",
+  "error_invalid_index": "Invalid index: {0}",
+  "error_index_in_use": "Error: Index {0} already in use!",
+
+  "label_search": "Search",
+  "label_columns": "Columns",
+  "label_freeze_columns": "Freeze Columns",
+  "label_no_columns": "No columns selected. Click 'Columns' to show columns.",
+  "label_index": "Index",
+
+  "log_changed_item": "Changed item {0} {1} to {2}",
+  "log_moved_item": "Moved item from index {0} to {1}",
+  "log_save_complete": "=== SAVE COMPLETED ===",
+  "log_exported_s6e3": "Exported items as S6E3 legacy format: {0}",
+  "log_exported_csv": "Exported items as CSV: {0}",
+  "log_no_changes_detected": "No changes detected.",
+  "log_item_changes_header": "=== Item Changes ({0} items modified) ===",
+  "log_item_change_entry": "[{0}] {1}"
+}

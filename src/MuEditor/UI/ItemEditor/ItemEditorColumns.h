@@ -3,19 +3,29 @@
 #ifdef _EDITOR
 
 #include <Windows.h>
+#include "GameData/ItemData/ItemFieldMetadata.h"
+#include "_struct.h"
 
 // Forward declaration
 class CItemEditorTable;
 
 // Handles all column rendering for the Item Editor
-// Contains reusable column rendering methods to eliminate duplication
+// Uses metadata-driven approach for automatic field rendering
 class CItemEditorColumns
 {
 public:
     CItemEditorColumns() = default;
     ~CItemEditorColumns() = default;
 
-    // Column rendering helpers
+    // Metadata-driven rendering - automatically renders any field based on metadata
+    void RenderFieldByMetadata(const ItemFieldMetadata& meta, int& colIdx, int itemIndex,
+                               ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible);
+
+    // Render Index column (special - not part of ITEM_ATTRIBUTE fields)
+    void RenderIndexColumn(int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible);
+
+private:
+    // Low-level type-specific rendering helpers
     void RenderByteColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
                          BYTE& value, bool& rowInteracted, bool isVisible);
     void RenderWordColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
@@ -24,13 +34,8 @@ public:
                         int& value, bool& rowInteracted, bool isVisible);
     void RenderBoolColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
                          bool& value, bool& rowInteracted, bool isVisible);
-    void RenderByteArrayColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
-                              BYTE* array, int arraySize, bool& rowInteracted, bool isVisible);
-
-    // Special columns
-    void RenderIndexColumn(int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible);
-    void RenderNameColumn(int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible);
-    void RenderTwoHandColumn(int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible);
+    void RenderWCharArrayColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
+                               wchar_t* value, int arraySize, bool& rowInteracted, bool isVisible);
 };
 
 #endif // _EDITOR
