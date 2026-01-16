@@ -2,8 +2,10 @@
 <project version="4">
   <component name="CMakeSharedSettings">
     <configurations>
-      <configuration PROFILE_NAME="x86Debug" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" />
-      <configuration PROFILE_NAME="x86Release" ENABLED="true" CONFIG_NAME="Release" TOOLCHAIN_NAME="Visual Studio" />
+      <configuration PROFILE_NAME="x86Debug" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja" />
+      <configuration PROFILE_NAME="x86Release" ENABLED="true" CONFIG_NAME="Release" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja" />
+      <configuration PROFILE_NAME="x64Release" ENABLED="true" CONFIG_NAME="Release" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja" TOOLCHAIN_ARCH="amd64" />
+      <configuration PROFILE_NAME="x64Debug" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja" TOOLCHAIN_ARCH="amd64" />
     </configurations>
   </component>
 </project>
