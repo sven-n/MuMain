@@ -5,10 +5,10 @@
 #include <string>
 #include <map>
 
-class CMuItemEditor
+class CMuItemEditorUI
 {
 public:
-    static CMuItemEditor& GetInstance();
+    static CMuItemEditorUI& GetInstance();
 
     void Render(bool& showEditor);
     void ClearSearch() { m_szItemSearchBuffer[0] = '\0'; }
@@ -16,8 +16,8 @@ public:
     void LoadColumnPreferences();
 
 private:
-    CMuItemEditor();
-    ~CMuItemEditor();
+    CMuItemEditorUI();
+    ~CMuItemEditorUI();
 
     void RenderSearchBar();
     void RenderItemTable(const std::string& searchLower);
@@ -39,6 +39,6 @@ private:
     bool m_bFreezeColumns;
 };
 
-#define g_MuItemEditor CMuItemEditor::GetInstance()
+#define g_MuItemEditorUI CMuItemEditorUI::GetInstance()
 
 #endif // _EDITOR
