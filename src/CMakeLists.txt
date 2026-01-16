@@ -37,6 +37,22 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
   endif()
 endif()
 
+# Determine architecture if CMAKE_SIZEOF_VOID_P isn't set
+if (NOT DEFINED CMAKE_SIZEOF_VOID_P OR CMAKE_SIZEOF_VOID_P EQUAL 0)
+  # Try to detect from compiler path
+  if (CMAKE_CXX_COMPILER MATCHES "x64|amd64|AMD64")
+    set(CMAKE_SIZEOF_VOID_P 8 CACHE INTERNAL "Pointer size" FORCE)
+    message(STATUS "Detected x64 from compiler path, setting CMAKE_SIZEOF_VOID_P=8")
+  elseif (CMAKE_CXX_COMPILER MATCHES "x86|i386|i686")
+    set(CMAKE_SIZEOF_VOID_P 4 CACHE INTERNAL "Pointer size" FORCE)
+    message(STATUS "Detected x86 from compiler path, setting CMAKE_SIZEOF_VOID_P=4")
+  else()
+    # Default fallback
+    set(CMAKE_SIZEOF_VOID_P 4 CACHE INTERNAL "Pointer size" FORCE)
+    message(WARNING "Could not detect architecture, defaulting to x86")
+  endif()
+endif()
+
 # Check architecture and configure accordingly
 if (MSVC)
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -209,9 +225,11 @@ if (MSVC)
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(DOTNET_RID "win-x64")
     set(DOTNET_PLATFORM "x64")
+    message(STATUS ".NET Client Library will build for x64 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
   else()
     set(DOTNET_RID "win-x86")
     set(DOTNET_PLATFORM "x86")
+    message(STATUS ".NET Client Library will build for x86 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
   endif()
 
   add_custom_command(
