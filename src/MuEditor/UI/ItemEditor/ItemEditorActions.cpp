@@ -213,9 +213,6 @@ void CItemEditorActions::RenderExportCSVButton()
 
 void CItemEditorActions::RenderAllButtons()
 {
-    // Position buttons on the right side
-    ImGui::SameLine(ImGui::GetWindowWidth() - 390);
-
     RenderSaveButton();
     ImGui::SameLine();
     RenderExportS6E3Button();
