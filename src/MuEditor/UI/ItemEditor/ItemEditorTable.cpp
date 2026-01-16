@@ -5,7 +5,9 @@
 #include "ItemEditorTable.h"
 #include "ItemEditorColumns.h"
 #include "ItemEditorActions.h"
+#include "GameData/ItemData/ItemFieldMetadata.h"
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "Translation/i18n.h"
 #include "_struct.h"
 #include "_define.h"
 #include "imgui.h"
@@ -36,16 +38,31 @@ void CItemEditorTable::Render(
     int& selectedRow,
     bool freezeColumns)
 {
-    // Count visible columns
+    // Get metadata fields once at function scope
+    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
+
+    // Count visible columns - only count columns that actually exist
     int visibleColumnCount = 0;
-    for (const auto& col : columnVisibility)
+
+    // Count Index column if visible
+    if (columnVisibility.find("Index") != columnVisibility.end() && columnVisibility["Index"])
     {
-        if (col.second) visibleColumnCount++;
+        visibleColumnCount++;
+    }
+
+    // Count metadata fields that are visible
+    for (const auto& meta : fields)
+    {
+        if (columnVisibility.find(meta.fieldName) != columnVisibility.end() &&
+            columnVisibility[meta.fieldName])
+        {
+            visibleColumnCount++;
+        }
     }
 
     if (visibleColumnCount == 0)
     {
-        ImGui::Text("No columns selected. Click 'Columns' to show columns.");
+        ImGui::Text(EDITOR_TEXT("label_no_columns"));
         return;
     }
 
@@ -86,11 +103,14 @@ void CItemEditorTable::Render(
     }
 
     // Setup frozen columns based on toggle state
-    if (freezeColumns && columnVisibility["Index"] && columnVisibility["Name"])
+    bool hasIndex = columnVisibility.find("Index") != columnVisibility.end() && columnVisibility["Index"];
+    bool hasName = columnVisibility.find("Name") != columnVisibility.end() && columnVisibility["Name"];
+
+    if (freezeColumns && hasIndex && hasName)
     {
         ImGui::TableSetupScrollFreeze(2, 1); // Freeze first 2 columns + header row
     }
-    else if (freezeColumns && columnVisibility["Index"])
+    else if (freezeColumns && hasIndex)
     {
         ImGui::TableSetupScrollFreeze(1, 1); // Freeze first column + header row
     }
@@ -99,43 +119,22 @@ void CItemEditorTable::Render(
         ImGui::TableSetupScrollFreeze(0, 1); // Freeze header row only
     }
 
-    // Setup columns based on visibility
-    if (columnVisibility["Index"]) ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed, 50.0f);
-    if (columnVisibility["Name"]) ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 150.0f);
-    if (columnVisibility["TwoHand"]) ImGui::TableSetupColumn("TwoHand", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["Level"]) ImGui::TableSetupColumn("Level", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["Slot"]) ImGui::TableSetupColumn("Slot", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["Skill"]) ImGui::TableSetupColumn("Skill", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["Width"]) ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["Height"]) ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["DamageMin"]) ImGui::TableSetupColumn("DmgMin", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["DamageMax"]) ImGui::TableSetupColumn("DmgMax", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["SuccessfulBlocking"]) ImGui::TableSetupColumn("Block", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["Defense"]) ImGui::TableSetupColumn("Defense", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["MagicDefense"]) ImGui::TableSetupColumn("MagDef", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["WeaponSpeed"]) ImGui::TableSetupColumn("WpnSpd", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["WalkSpeed"]) ImGui::TableSetupColumn("WalkSpd", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["Durability"]) ImGui::TableSetupColumn("Dur", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["MagicDur"]) ImGui::TableSetupColumn("MagDur", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["MagicPower"]) ImGui::TableSetupColumn("MagPow", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["ReqStr"]) ImGui::TableSetupColumn("ReqStr", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["ReqDex"]) ImGui::TableSetupColumn("ReqDex", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["ReqEne"]) ImGui::TableSetupColumn("ReqEne", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["ReqVit"]) ImGui::TableSetupColumn("ReqVit", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["ReqCha"]) ImGui::TableSetupColumn("ReqCha", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["ReqLevel"]) ImGui::TableSetupColumn("ReqLvl", ImGuiTableColumnFlags_WidthFixed, 70.0f);
-    if (columnVisibility["Value"]) ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["Zen"]) ImGui::TableSetupColumn("Zen", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-    if (columnVisibility["AttType"]) ImGui::TableSetupColumn("AttType", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+    // Setup columns based on visibility - METADATA-DRIVEN
+    if (hasIndex)
+    {
+        ImGui::TableSetupColumn(EDITOR_TEXT("label_index"), ImGuiTableColumnFlags_WidthFixed, 50.0f);
+    }
 
-    // Individual class requirement columns
-    if (columnVisibility["DW/SM"]) ImGui::TableSetupColumn("DW/SM", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["DK/BK"]) ImGui::TableSetupColumn("DK/BK", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-    if (columnVisibility["ELF/ME"]) ImGui::TableSetupColumn("ELF/ME", ImGuiTableColumnFlags_WidthFixed, 65.0f);
-    if (columnVisibility["MG"]) ImGui::TableSetupColumn("MG", ImGuiTableColumnFlags_WidthFixed, 50.0f);
-    if (columnVisibility["DL"]) ImGui::TableSetupColumn("DL", ImGuiTableColumnFlags_WidthFixed, 50.0f);
-    if (columnVisibility["SUM"]) ImGui::TableSetupColumn("SUM", ImGuiTableColumnFlags_WidthFixed, 55.0f);
-    if (columnVisibility["RF"]) ImGui::TableSetupColumn("RF", ImGuiTableColumnFlags_WidthFixed, 50.0f);
+    for (const auto& meta : fields)
+    {
+        if (columnVisibility.find(meta.fieldName) != columnVisibility.end() &&
+            columnVisibility[meta.fieldName])
+        {
+            ImGui::TableSetupColumn(meta.GetDisplayName(),
+                                   ImGuiTableColumnFlags_WidthFixed,
+                                   meta.defaultColumnWidth);
+        }
+    }
 
     ImGui::TableHeadersRow();
 
@@ -158,43 +157,23 @@ void CItemEditorTable::Render(
             int colIdx = 0;
             bool rowInteracted = false;
 
-            // Render all columns using CItemEditorColumns - MUST match setup order!
-            m_pColumns->RenderIndexColumn(colIdx, i, rowInteracted, columnVisibility["Index"]);
-            m_pColumns->RenderNameColumn(colIdx, i, rowInteracted, columnVisibility["Name"]);
-            m_pColumns->RenderTwoHandColumn(colIdx, i, rowInteracted, columnVisibility["TwoHand"]);
-            m_pColumns->RenderWordColumn("Level", colIdx, i, 1, ItemAttribute[i].Level, rowInteracted, columnVisibility["Level"]);
-            m_pColumns->RenderByteColumn("Slot", colIdx, i, 2, ItemAttribute[i].m_byItemSlot, rowInteracted, columnVisibility["Slot"]);
-            m_pColumns->RenderWordColumn("Skill", colIdx, i, 3, ItemAttribute[i].m_wSkillIndex, rowInteracted, columnVisibility["Skill"]);
-            m_pColumns->RenderByteColumn("Width", colIdx, i, 4, ItemAttribute[i].Width, rowInteracted, columnVisibility["Width"]);
-            m_pColumns->RenderByteColumn("Height", colIdx, i, 5, ItemAttribute[i].Height, rowInteracted, columnVisibility["Height"]);
-            m_pColumns->RenderByteColumn("DamageMin", colIdx, i, 6, ItemAttribute[i].DamageMin, rowInteracted, columnVisibility["DamageMin"]);
-            m_pColumns->RenderByteColumn("DamageMax", colIdx, i, 7, ItemAttribute[i].DamageMax, rowInteracted, columnVisibility["DamageMax"]);
-            m_pColumns->RenderByteColumn("SuccessfulBlocking", colIdx, i, 8, ItemAttribute[i].SuccessfulBlocking, rowInteracted, columnVisibility["SuccessfulBlocking"]);
-            m_pColumns->RenderByteColumn("Defense", colIdx, i, 9, ItemAttribute[i].Defense, rowInteracted, columnVisibility["Defense"]);
-            m_pColumns->RenderByteColumn("MagicDefense", colIdx, i, 10, ItemAttribute[i].MagicDefense, rowInteracted, columnVisibility["MagicDefense"]);
-            m_pColumns->RenderByteColumn("WeaponSpeed", colIdx, i, 11, ItemAttribute[i].WeaponSpeed, rowInteracted, columnVisibility["WeaponSpeed"]);
-            m_pColumns->RenderByteColumn("WalkSpeed", colIdx, i, 12, ItemAttribute[i].WalkSpeed, rowInteracted, columnVisibility["WalkSpeed"]);
-            m_pColumns->RenderByteColumn("Durability", colIdx, i, 13, ItemAttribute[i].Durability, rowInteracted, columnVisibility["Durability"]);
-            m_pColumns->RenderByteColumn("MagicDur", colIdx, i, 14, ItemAttribute[i].MagicDur, rowInteracted, columnVisibility["MagicDur"]);
-            m_pColumns->RenderByteColumn("MagicPower", colIdx, i, 15, ItemAttribute[i].MagicPower, rowInteracted, columnVisibility["MagicPower"]);
-            m_pColumns->RenderWordColumn("ReqStr", colIdx, i, 16, ItemAttribute[i].RequireStrength, rowInteracted, columnVisibility["ReqStr"]);
-            m_pColumns->RenderWordColumn("ReqDex", colIdx, i, 17, ItemAttribute[i].RequireDexterity, rowInteracted, columnVisibility["ReqDex"]);
-            m_pColumns->RenderWordColumn("ReqEne", colIdx, i, 18, ItemAttribute[i].RequireEnergy, rowInteracted, columnVisibility["ReqEne"]);
-            m_pColumns->RenderWordColumn("ReqVit", colIdx, i, 19, ItemAttribute[i].RequireVitality, rowInteracted, columnVisibility["ReqVit"]);
-            m_pColumns->RenderWordColumn("ReqCha", colIdx, i, 20, ItemAttribute[i].RequireCharisma, rowInteracted, columnVisibility["ReqCha"]);
-            m_pColumns->RenderWordColumn("ReqLevel", colIdx, i, 21, ItemAttribute[i].RequireLevel, rowInteracted, columnVisibility["ReqLevel"]);
-            m_pColumns->RenderByteColumn("Value", colIdx, i, 22, ItemAttribute[i].Value, rowInteracted, columnVisibility["Value"]);
-            m_pColumns->RenderIntColumn("Zen", colIdx, i, 23, ItemAttribute[i].iZen, rowInteracted, columnVisibility["Zen"]);
-            m_pColumns->RenderByteColumn("AttType", colIdx, i, 24, ItemAttribute[i].AttType, rowInteracted, columnVisibility["AttType"]);
+            // Render Index column (special - not in metadata)
+            if (hasIndex)
+            {
+                m_pColumns->RenderIndexColumn(colIdx, i, rowInteracted, true);
+            }
 
-            // Individual class requirement columns
-            m_pColumns->RenderByteColumn("DW/SM", colIdx, i, 25, ItemAttribute[i].RequireClass[0], rowInteracted, columnVisibility["DW/SM"]);
-            m_pColumns->RenderByteColumn("DK/BK", colIdx, i, 26, ItemAttribute[i].RequireClass[1], rowInteracted, columnVisibility["DK/BK"]);
-            m_pColumns->RenderByteColumn("ELF/ME", colIdx, i, 27, ItemAttribute[i].RequireClass[2], rowInteracted, columnVisibility["ELF/ME"]);
-            m_pColumns->RenderByteColumn("MG", colIdx, i, 28, ItemAttribute[i].RequireClass[3], rowInteracted, columnVisibility["MG"]);
-            m_pColumns->RenderByteColumn("DL", colIdx, i, 29, ItemAttribute[i].RequireClass[4], rowInteracted, columnVisibility["DL"]);
-            m_pColumns->RenderByteColumn("SUM", colIdx, i, 30, ItemAttribute[i].RequireClass[5], rowInteracted, columnVisibility["SUM"]);
-            m_pColumns->RenderByteColumn("RF", colIdx, i, 31, ItemAttribute[i].RequireClass[6], rowInteracted, columnVisibility["RF"]);
+            // Render all other columns via metadata - AUTO-ADAPTING
+            for (const auto& meta : fields)
+            {
+                bool isVisible = columnVisibility.find(meta.fieldName) != columnVisibility.end() &&
+                                 columnVisibility[meta.fieldName];
+
+                if (isVisible)
+                {
+                    m_pColumns->RenderFieldByMetadata(meta, colIdx, i, ItemAttribute[i], rowInteracted, true);
+                }
+            }
 
             // Handle row selection
             if (rowInteracted)

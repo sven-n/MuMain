@@ -4,6 +4,8 @@
 
 #include "ItemEditorColumns.h"
 #include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "GameData/ItemData/ItemFieldMetadata.h"
+#include "Translation/i18n.h"
 #include "_struct.h"
 #include "_define.h"
 #include "imgui.h"
@@ -12,6 +14,56 @@
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
+// ===== METADATA-DRIVEN RENDERING =====
+
+void CItemEditorColumns::RenderFieldByMetadata(const ItemFieldMetadata& meta, int& colIdx, int itemIndex,
+                                                ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible)
+{
+    if (!isVisible) return;
+
+    // Get pointer to the field using offset
+    BYTE* itemPtr = reinterpret_cast<BYTE*>(&item);
+    void* fieldPtr = itemPtr + meta.offset;
+
+    // Get translated display name (with fallback to defaultDisplayName)
+    const char* displayName = meta.GetDisplayName();
+
+    // Generate unique ID based on field name hash
+    int uniqueId = 0;
+    for (const char* p = meta.fieldName; *p; ++p)
+        uniqueId = (uniqueId * 31) + *p;
+
+    // Render based on field type
+    switch (meta.type)
+    {
+    case EItemFieldType::Bool:
+        RenderBoolColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<bool*>(fieldPtr), rowInteracted, isVisible);
+        break;
+
+    case EItemFieldType::Byte:
+        RenderByteColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<BYTE*>(fieldPtr), rowInteracted, isVisible);
+        break;
+
+    case EItemFieldType::Word:
+        RenderWordColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<WORD*>(fieldPtr), rowInteracted, isVisible);
+        break;
+
+    case EItemFieldType::Int:
+        RenderIntColumn(displayName, colIdx, itemIndex, uniqueId, *reinterpret_cast<int*>(fieldPtr), rowInteracted, isVisible);
+        break;
+
+    case EItemFieldType::WCharArray:
+        RenderWCharArrayColumn(displayName, colIdx, itemIndex, uniqueId, reinterpret_cast<wchar_t*>(fieldPtr), meta.arraySize, rowInteracted, isVisible);
+        break;
+
+    case EItemFieldType::ByteArray:
+        // Not currently used - individual array elements are exposed as separate fields
+        break;
+    }
+}
+
+// ===== LOW-LEVEL TYPE-SPECIFIC RENDERING =====
+
 void CItemEditorColumns::RenderByteColumn(
     const char* columnName, int& colIdx, int itemIndex, int uniqueId,
     BYTE& value, bool& rowInteracted, bool isVisible)
@@ -19,7 +71,7 @@ void CItemEditorColumns::RenderByteColumn(
     if (!isVisible) return;
 
     ImGui::TableSetColumnIndex(colIdx++);
-    ImGui::PushID(itemIndex * 100 + uniqueId);
+    ImGui::PushID(itemIndex * 100000 + uniqueId);
     ImGui::SetNextItemWidth(-FLT_MIN);
 
     int intValue = value;
@@ -28,9 +80,12 @@ void CItemEditorColumns::RenderByteColumn(
         if (intValue >= 0 && intValue <= 255)
         {
             value = (BYTE)intValue;
-            std::stringstream ss;
-            ss << "Changed item " << itemIndex << " " << columnName << " to " << intValue;
-            g_MuEditorConsoleUI.LogEditor(ss.str());
+            std::string logMsg = i18n::FormatEditor("log_changed_item", {
+                std::to_string(itemIndex),
+                columnName,
+                std::to_string(intValue)
+            });
+            g_MuEditorConsoleUI.LogEditor(logMsg);
         }
     }
 
@@ -45,7 +100,7 @@ void CItemEditorColumns::RenderWordColumn(
     if (!isVisible) return;
 
     ImGui::TableSetColumnIndex(colIdx++);
-    ImGui::PushID(itemIndex * 100 + uniqueId);
+    ImGui::PushID(itemIndex * 100000 + uniqueId);
     ImGui::SetNextItemWidth(-FLT_MIN);
 
     int intValue = value;
@@ -54,9 +109,12 @@ void CItemEditorColumns::RenderWordColumn(
         if (intValue >= 0 && intValue <= 65535)
         {
             value = (WORD)intValue;
-            std::stringstream ss;
-            ss << "Changed item " << itemIndex << " " << columnName << " to " << intValue;
-            g_MuEditorConsoleUI.LogEditor(ss.str());
+            std::string logMsg = i18n::FormatEditor("log_changed_item", {
+                std::to_string(itemIndex),
+                columnName,
+                std::to_string(intValue)
+            });
+            g_MuEditorConsoleUI.LogEditor(logMsg);
         }
     }
 
@@ -71,14 +129,17 @@ void CItemEditorColumns::RenderIntColumn(
     if (!isVisible) return;
 
     ImGui::TableSetColumnIndex(colIdx++);
-    ImGui::PushID(itemIndex * 100 + uniqueId);
+    ImGui::PushID(itemIndex * 100000 + uniqueId);
     ImGui::SetNextItemWidth(-FLT_MIN);
 
     if (ImGui::InputInt("##input", &value, 0, 0))
     {
-        std::stringstream ss;
-        ss << "Changed item " << itemIndex << " " << columnName << " to " << value;
-        g_MuEditorConsoleUI.LogEditor(ss.str());
+        std::string logMsg = i18n::FormatEditor("log_changed_item", {
+            std::to_string(itemIndex),
+            columnName,
+            std::to_string(value)
+        });
+        g_MuEditorConsoleUI.LogEditor(logMsg);
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -92,72 +153,59 @@ void CItemEditorColumns::RenderBoolColumn(
     if (!isVisible) return;
 
     ImGui::TableSetColumnIndex(colIdx++);
-    ImGui::PushID(itemIndex * 100 + uniqueId);
+    ImGui::PushID(itemIndex * 100000 + uniqueId);
     ImGui::SetNextItemWidth(-FLT_MIN);
 
     if (ImGui::Checkbox("##checkbox", &value))
     {
-        std::stringstream ss;
-        ss << "Changed item " << itemIndex << " " << columnName << " to " << (value ? "true" : "false");
-        g_MuEditorConsoleUI.LogEditor(ss.str());
+        std::string logMsg = i18n::FormatEditor("log_changed_item", {
+            std::to_string(itemIndex),
+            columnName,
+            value ? "true" : "false"
+        });
+        g_MuEditorConsoleUI.LogEditor(logMsg);
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
     ImGui::PopID();
 }
 
-void CItemEditorColumns::RenderByteArrayColumn(
+void CItemEditorColumns::RenderWCharArrayColumn(
     const char* columnName, int& colIdx, int itemIndex, int uniqueId,
-    BYTE* array, int arraySize, bool& rowInteracted, bool isVisible)
+    wchar_t* value, int arraySize, bool& rowInteracted, bool isVisible)
 {
     if (!isVisible) return;
 
     ImGui::TableSetColumnIndex(colIdx++);
-    ImGui::PushID(itemIndex * 100 + uniqueId);
+    ImGui::PushID(itemIndex * 100000 + uniqueId);
     ImGui::SetNextItemWidth(-FLT_MIN);
 
-    std::stringstream displayText;
-    for (int j = 0; j < arraySize; j++)
+    char editableBuffer[256];
+    WideCharToMultiByte(CP_UTF8, 0, value, -1, editableBuffer, sizeof(editableBuffer), NULL, NULL);
+
+    if (ImGui::InputText("##input", editableBuffer, sizeof(editableBuffer)))
     {
-        if (j > 0) displayText << ",";
-        displayText << (int)array[j];
-    }
-
-    std::string displayStr = displayText.str();
-    char buffer[256];
-    strncpy_s(buffer, displayStr.c_str(), sizeof(buffer) - 1);
-
-    if (ImGui::InputText("##input", buffer, sizeof(buffer)))
-    {
-        // Parse comma-separated values
-        std::stringstream ss(buffer);
-        std::string token;
-        int idx = 0;
-        while (std::getline(ss, token, ',') && idx < arraySize)
-        {
-            int val = atoi(token.c_str());
-            if (val >= 0 && val <= 255)
-            {
-                array[idx] = (BYTE)val;
-            }
-            idx++;
-        }
-
-        std::stringstream logSs;
-        logSs << "Changed item " << itemIndex << " " << columnName;
-        g_MuEditorConsoleUI.LogEditor(logSs.str());
+        MultiByteToWideChar(CP_UTF8, 0, editableBuffer, -1, value, arraySize);
+        std::string logMsg = i18n::FormatEditor("log_changed_item", {
+            std::to_string(itemIndex),
+            columnName,
+            editableBuffer
+        });
+        g_MuEditorConsoleUI.LogEditor(logMsg);
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
     ImGui::PopID();
 }
+
+// ===== SPECIAL COLUMNS =====
 
 void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible)
 {
     if (!isVisible) return;
 
     ImGui::TableSetColumnIndex(colIdx++);
-    ImGui::PushID(itemIndex * 100 + 100);
+    ImGui::PushID(itemIndex * 100000 + 999999);
     ImGui::SetNextItemWidth(-FLT_MIN);
 
     int newIndex = itemIndex;
@@ -173,52 +221,21 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
                 ITEM_ATTRIBUTE temp = ItemAttribute[itemIndex];
                 ItemAttribute[itemIndex] = ItemAttribute[newIndex];
                 ItemAttribute[newIndex] = temp;
-                g_MuEditorConsoleUI.LogEditor("Moved item from index " + std::to_string(itemIndex) + " to " + std::to_string(newIndex));
+
+                std::string logMsg = i18n::FormatEditor("log_moved_item", {
+                    std::to_string(itemIndex),
+                    std::to_string(newIndex)
+                });
+                g_MuEditorConsoleUI.LogEditor(logMsg);
             }
             else
             {
-                g_MuEditorConsoleUI.LogEditor("Error: Index " + std::to_string(newIndex) + " already in use!");
+                std::string errorMsg = i18n::FormatEditor("error_index_in_use", {
+                    std::to_string(newIndex)
+                });
+                g_MuEditorConsoleUI.LogEditor(errorMsg);
             }
         }
-    }
-
-    if (ImGui::IsItemActivated()) rowInteracted = true;
-    ImGui::PopID();
-}
-
-void CItemEditorColumns::RenderNameColumn(int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible)
-{
-    if (!isVisible) return;
-
-    ImGui::TableSetColumnIndex(colIdx++);
-    ImGui::PushID(itemIndex * 100 + 101);
-    ImGui::SetNextItemWidth(-FLT_MIN);
-
-    char editableNameBuffer[128];
-    WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[itemIndex].Name, -1, editableNameBuffer, sizeof(editableNameBuffer), NULL, NULL);
-
-    if (ImGui::InputText("##name", editableNameBuffer, sizeof(editableNameBuffer)))
-    {
-        MultiByteToWideChar(CP_UTF8, 0, editableNameBuffer, -1, ItemAttribute[itemIndex].Name, MAX_ITEM_NAME);
-        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(itemIndex) + " Name to " + editableNameBuffer);
-    }
-
-    if (ImGui::IsItemActivated()) rowInteracted = true;
-    ImGui::PopID();
-}
-
-void CItemEditorColumns::RenderTwoHandColumn(int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible)
-{
-    if (!isVisible) return;
-
-    ImGui::TableSetColumnIndex(colIdx++);
-    ImGui::PushID(itemIndex * 100 + 102);
-    ImGui::SetNextItemWidth(-FLT_MIN);
-
-    if (ImGui::Checkbox("##twohand", &ItemAttribute[itemIndex].TwoHand))
-    {
-        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(itemIndex) + " TwoHand to " +
-                                     std::string(ItemAttribute[itemIndex].TwoHand ? "true" : "false"));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;

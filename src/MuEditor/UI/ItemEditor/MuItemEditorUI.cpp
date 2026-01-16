@@ -6,7 +6,9 @@
 #include "ItemEditorTable.h"
 #include "ItemEditorActions.h"
 #include "ItemEditorPopups.h"
+#include "GameData/ItemData/ItemFieldMetadata.h"
 #include "MuEditor/Core/MuEditorCore.h"
+#include "Translation/i18n.h"
 #include "imgui.h"
 #include <algorithm>
 #include <cctype>
@@ -24,45 +26,37 @@ CMuItemEditorUI::CMuItemEditorUI()
     memset(m_szItemSearchBuffer, 0, sizeof(m_szItemSearchBuffer));
     m_pTable = new CItemEditorTable();
 
-    // Initialize column visibility - default to commonly used columns
-    m_columnVisibility["Index"] = true;
-    m_columnVisibility["Name"] = true;
-    m_columnVisibility["TwoHand"] = false;
-    m_columnVisibility["Level"] = true;
-    m_columnVisibility["Slot"] = false;
-    m_columnVisibility["Skill"] = false;
-    m_columnVisibility["Width"] = false;
-    m_columnVisibility["Height"] = false;
-    m_columnVisibility["DamageMin"] = true;
-    m_columnVisibility["DamageMax"] = true;
-    m_columnVisibility["SuccessfulBlocking"] = false;
-    m_columnVisibility["Defense"] = true;
-    m_columnVisibility["MagicDefense"] = false;
-    m_columnVisibility["WeaponSpeed"] = true;
-    m_columnVisibility["WalkSpeed"] = false;
-    m_columnVisibility["Durability"] = true;
-    m_columnVisibility["MagicDur"] = false;
-    m_columnVisibility["MagicPower"] = false;
-    m_columnVisibility["ReqStr"] = true;
-    m_columnVisibility["ReqDex"] = true;
-    m_columnVisibility["ReqEne"] = true;
-    m_columnVisibility["ReqVit"] = true;
-    m_columnVisibility["ReqCha"] = true;
-    m_columnVisibility["ReqLevel"] = false;
-    m_columnVisibility["Value"] = false;
-    m_columnVisibility["Zen"] = false;
-    m_columnVisibility["AttType"] = false;
+    // Initialize column visibility - AUTO-GENERATED from metadata
+    m_columnVisibility["Index"] = true;  // Special column (not in metadata)
 
-    // RequireClass array (7 classes) - these are the class restrictions
-    m_columnVisibility["DW/SM"] = false;
-    m_columnVisibility["DK/BK"] = false;
-    m_columnVisibility["ELF/ME"] = false;
-    m_columnVisibility["MG"] = false;
-    m_columnVisibility["DL"] = false;
-    m_columnVisibility["SUM"] = false;
-    m_columnVisibility["RF"] = false;
+    // Get all fields from metadata and set default visibility
+    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
+    for (const auto& meta : fields)
+    {
+        // Default commonly used columns to visible, rest to hidden
+        bool defaultVisible = false;
 
-    // Load column preferences from file
+        // Check for commonly used fields
+        if (strcmp(meta.fieldName, "Name") == 0 ||
+            strcmp(meta.fieldName, "Level") == 0 ||
+            strcmp(meta.fieldName, "DamageMin") == 0 ||
+            strcmp(meta.fieldName, "DamageMax") == 0 ||
+            strcmp(meta.fieldName, "Defense") == 0 ||
+            strcmp(meta.fieldName, "WeaponSpeed") == 0 ||
+            strcmp(meta.fieldName, "Durability") == 0 ||
+            strcmp(meta.fieldName, "RequireStrength") == 0 ||
+            strcmp(meta.fieldName, "RequireDexterity") == 0 ||
+            strcmp(meta.fieldName, "RequireEnergy") == 0 ||
+            strcmp(meta.fieldName, "RequireVitality") == 0 ||
+            strcmp(meta.fieldName, "RequireCharisma") == 0)
+        {
+            defaultVisible = true;
+        }
+
+        m_columnVisibility[meta.fieldName] = defaultVisible;
+    }
+
+    // Load column preferences from file (will override defaults if file exists)
     LoadColumnPreferences();
 }
 
@@ -220,62 +214,19 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
         }
         ImGui::Separator();
 
-        // Group related columns - track if any checkbox changed
+        // METADATA-DRIVEN: Render all columns using metadata with translations
         bool changed = false;
 
-        ImGui::Text("Basic Info:");
-        changed |= ImGui::Checkbox("Index", &m_columnVisibility["Index"]);
-        changed |= ImGui::Checkbox("Name", &m_columnVisibility["Name"]);
-        changed |= ImGui::Checkbox("TwoHand", &m_columnVisibility["TwoHand"]);
-        changed |= ImGui::Checkbox("Level", &m_columnVisibility["Level"]);
-        changed |= ImGui::Checkbox("Slot", &m_columnVisibility["Slot"]);
-        changed |= ImGui::Checkbox("Skill", &m_columnVisibility["Skill"]);
+        // Index column (special case, not in metadata)
+        changed |= ImGui::Checkbox(EDITOR_TEXT("label_index"), &m_columnVisibility["Index"]);
 
-        ImGui::Separator();
-        ImGui::Text("Dimensions:");
-        changed |= ImGui::Checkbox("Width", &m_columnVisibility["Width"]);
-        changed |= ImGui::Checkbox("Height", &m_columnVisibility["Height"]);
-
-        ImGui::Separator();
-        ImGui::Text("Combat Stats:");
-        changed |= ImGui::Checkbox("DamageMin", &m_columnVisibility["DamageMin"]);
-        changed |= ImGui::Checkbox("DamageMax", &m_columnVisibility["DamageMax"]);
-        changed |= ImGui::Checkbox("SuccessfulBlocking", &m_columnVisibility["SuccessfulBlocking"]);
-        changed |= ImGui::Checkbox("Defense", &m_columnVisibility["Defense"]);
-        changed |= ImGui::Checkbox("MagicDefense", &m_columnVisibility["MagicDefense"]);
-        changed |= ImGui::Checkbox("WeaponSpeed", &m_columnVisibility["WeaponSpeed"]);
-        changed |= ImGui::Checkbox("WalkSpeed", &m_columnVisibility["WalkSpeed"]);
-
-        ImGui::Separator();
-        ImGui::Text("Durability & Magic:");
-        changed |= ImGui::Checkbox("Durability", &m_columnVisibility["Durability"]);
-        changed |= ImGui::Checkbox("MagicDur", &m_columnVisibility["MagicDur"]);
-        changed |= ImGui::Checkbox("MagicPower", &m_columnVisibility["MagicPower"]);
-
-        ImGui::Separator();
-        ImGui::Text("Requirements:");
-        changed |= ImGui::Checkbox("ReqStr", &m_columnVisibility["ReqStr"]);
-        changed |= ImGui::Checkbox("ReqDex", &m_columnVisibility["ReqDex"]);
-        changed |= ImGui::Checkbox("ReqEne", &m_columnVisibility["ReqEne"]);
-        changed |= ImGui::Checkbox("ReqVit", &m_columnVisibility["ReqVit"]);
-        changed |= ImGui::Checkbox("ReqCha", &m_columnVisibility["ReqCha"]);
-        changed |= ImGui::Checkbox("ReqLevel", &m_columnVisibility["ReqLevel"]);
-
-        ImGui::Separator();
-        ImGui::Text("Other:");
-        changed |= ImGui::Checkbox("Value", &m_columnVisibility["Value"]);
-        changed |= ImGui::Checkbox("Zen", &m_columnVisibility["Zen"]);
-        changed |= ImGui::Checkbox("AttType", &m_columnVisibility["AttType"]);
-
-        ImGui::Separator();
-        ImGui::Text("Class Requirements:");
-        changed |= ImGui::Checkbox("DW/SM", &m_columnVisibility["DW/SM"]);
-        changed |= ImGui::Checkbox("DK/BK", &m_columnVisibility["DK/BK"]);
-        changed |= ImGui::Checkbox("ELF/ME", &m_columnVisibility["ELF/ME"]);
-        changed |= ImGui::Checkbox("MG", &m_columnVisibility["MG"]);
-        changed |= ImGui::Checkbox("DL", &m_columnVisibility["DL"]);
-        changed |= ImGui::Checkbox("SUM", &m_columnVisibility["SUM"]);
-        changed |= ImGui::Checkbox("RF", &m_columnVisibility["RF"]);
+        // Get all fields from metadata and render checkboxes
+        const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
+        for (const auto& meta : fields)
+        {
+            const char* displayName = meta.GetDisplayName();
+            changed |= ImGui::Checkbox(displayName, &m_columnVisibility[meta.fieldName]);
+        }
 
         // Save immediately when any checkbox changes
         if (changed)
