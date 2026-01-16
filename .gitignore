@@ -32,3 +32,5 @@ build-mingw/
 
 # ImGui
 **/imgui.ini
+
+!bin/Translations/
