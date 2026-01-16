@@ -191,37 +191,35 @@ void CMuItemEditorUI::RenderSaveButton()
 
     ImGui::SameLine();
 
-    // Save as S6E3 Legacy button
+    // Export as S6E3 Legacy button
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.4f, 0.8f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.5f, 0.9f, 1.0f));
-    if (ImGui::Button("Save as S6E3"))
+    if (ImGui::Button("Export as S6E3"))
     {
         extern std::wstring g_strSelectedML;
 
         wchar_t fileName[256];
         swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls_S6E3.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
-        // Note: Legacy format saving not yet implemented in ItemDataHandler
-        extern bool SaveItemScriptLegacy(wchar_t* FileName);
-        if (SaveItemScriptLegacy(fileName))
+        if (g_ItemDataHandler.SaveLegacy(fileName))
         {
-            g_MuEditorConsoleUI.LogEditor("Saved items in S6E3 legacy format: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd\n");
-            ImGui::OpenPopup("Save S6E3 Success");
+            g_MuEditorConsoleUI.LogEditor("Exported items in S6E3 legacy format: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd\n");
+            ImGui::OpenPopup("Export S6E3 Success");
         }
         else
         {
-            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to save item attributes in S6E3 format!\n");
-            ImGui::OpenPopup("Save S6E3 Failed");
+            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to export item attributes in S6E3 format!\n");
+            ImGui::OpenPopup("Export S6E3 Failed");
         }
     }
     ImGui::PopStyleColor(2);
 
     ImGui::SameLine();
 
-    // Export to CSV button
+    // Export as CSV button
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.9f, 0.7f, 1.0f));
-    if (ImGui::Button("Export to CSV"))
+    if (ImGui::Button("Export as CSV"))
     {
         extern std::wstring g_strSelectedML;
 
@@ -230,13 +228,13 @@ void CMuItemEditorUI::RenderSaveButton()
 
         if (g_ItemDataHandler.ExportToCsv(csvFileName))
         {
-            g_MuEditorConsoleUI.LogEditor("Exported items to CSV: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv");
-            ImGui::OpenPopup("Export Success");
+            g_MuEditorConsoleUI.LogEditor("Exported items as CSV: Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv\n");
+            ImGui::OpenPopup("Export CSV Success");
         }
         else
         {
-            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to export items to CSV!");
-            ImGui::OpenPopup("Export Failed");
+            g_MuEditorConsoleUI.LogEditor("ERROR: Failed to export item attributes as CSV!\n");
+            ImGui::OpenPopup("Export CSV Failed");
         }
     }
     ImGui::PopStyleColor(2);
@@ -263,10 +261,10 @@ void CMuItemEditorUI::RenderSaveButton()
         ImGui::EndPopup();
     }
 
-    // Export Success popup
-    if (ImGui::BeginPopupModal("Export Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // CSV Export Success popup
+    if (ImGui::BeginPopupModal("Export CSV Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Items exported to CSV successfully!");
+        ImGui::Text("Items exported as CSV successfully!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
@@ -274,10 +272,10 @@ void CMuItemEditorUI::RenderSaveButton()
         ImGui::EndPopup();
     }
 
-    // S6E3 Success popup
-    if (ImGui::BeginPopupModal("Save S6E3 Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // CSV Export Failed popup
+    if (ImGui::BeginPopupModal("Export CSV Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Items saved in S6E3 legacy format successfully!");
+        ImGui::Text("Failed to export item attributes as CSV!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
@@ -285,10 +283,10 @@ void CMuItemEditorUI::RenderSaveButton()
         ImGui::EndPopup();
     }
 
-    // S6E3 Failed popup
-    if (ImGui::BeginPopupModal("Save S6E3 Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // S6E3 Export Success popup
+    if (ImGui::BeginPopupModal("Export S6E3 Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Failed to save items in S6E3 format!");
+        ImGui::Text("Items exported as S6E3 legacy format successfully!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
@@ -296,10 +294,10 @@ void CMuItemEditorUI::RenderSaveButton()
         ImGui::EndPopup();
     }
 
-    // Export Failed popup (if missing)
-    if (ImGui::BeginPopupModal("Export Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // S6E3 Export Failed popup
+    if (ImGui::BeginPopupModal("Export S6E3 Failed", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Failed to export items to CSV!");
+        ImGui::Text("Failed to export item attributes as S6E3 format!");
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
