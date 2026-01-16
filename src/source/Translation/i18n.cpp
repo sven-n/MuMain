@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <cctype>
 
+#include "../../ThirdParty/json.hpp"
+
+using json = nlohmann::json;
+
 namespace i18n {
 
 Translator& Translator::GetInstance() {
@@ -18,60 +22,28 @@ bool Translator::ParseJsonFile(const std::wstring& filePath, std::map<std::strin
 
     outMap.clear();
 
-    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    file.close();
+    try {
+        json j;
+        file >> j;
+        file.close();
 
-    // Simple JSON parser for flat key-value pairs
-    // Format: { "key": "value", "key2": "value2" }
-
-    size_t pos = 0;
-    while (pos < content.length()) {
-        // Find next key
-        size_t keyStart = content.find('"', pos);
-        if (keyStart == std::string::npos) break;
-        keyStart++;
-
-        size_t keyEnd = content.find('"', keyStart);
-        if (keyEnd == std::string::npos) break;
-
-        std::string key = content.substr(keyStart, keyEnd - keyStart);
-
-        // Find colon
-        size_t colonPos = content.find(':', keyEnd);
-        if (colonPos == std::string::npos) break;
-
-        // Find value
-        size_t valueStart = content.find('"', colonPos);
-        if (valueStart == std::string::npos) break;
-        valueStart++;
-
-        size_t valueEnd = content.find('"', valueStart);
-        if (valueEnd == std::string::npos) break;
-
-        std::string value = content.substr(valueStart, valueEnd - valueStart);
-
-        // Handle escape sequences
-        size_t escapePos = 0;
-        while ((escapePos = value.find("\\n", escapePos)) != std::string::npos) {
-            value.replace(escapePos, 2, "\n");
-            escapePos++;
-        }
-        escapePos = 0;
-        while ((escapePos = value.find("\\t", escapePos)) != std::string::npos) {
-            value.replace(escapePos, 2, "\t");
-            escapePos++;
-        }
-        escapePos = 0;
-        while ((escapePos = value.find("\\\"", escapePos)) != std::string::npos) {
-            value.replace(escapePos, 2, "\"");
-            escapePos++;
+        // Expect a flat JSON object with string key-value pairs
+        if (!j.is_object()) {
+            return false;
         }
 
-        outMap[key] = value;
-        pos = valueEnd + 1;
+        for (auto& [key, value] : j.items()) {
+            if (value.is_string()) {
+                outMap[key] = value.get<std::string>();
+            }
+        }
+
+        return !outMap.empty();
     }
-
-    return !outMap.empty();
+    catch (const json::exception&) {
+        // JSON parsing failed
+        return false;
+    }
 }
 
 bool Translator::LoadTranslations(Domain domain, const std::wstring& filePath) {
