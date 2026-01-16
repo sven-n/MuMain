@@ -278,15 +278,7 @@ bool MoveMainCamera()
             }
         }
 
-        if (g_fCameraCustomDistance > 0)
-        {
-            vec3_t angle = { 0.f, 0.f, -45.f };
-            Vector(0.f, g_fCameraCustomDistance, 0.f, Position);
-            AngleMatrix(angle, Matrix);
-            VectorIRotate(Position, Matrix, TransformPosition);
-            VectorAdd(CameraPosition, TransformPosition, CameraPosition);
-        }
-        else if (g_fCameraCustomDistance < 0)
+        if (g_fCameraCustomDistance != 0.f)
         {
             vec3_t angle = { 0.f, 0.f, -45.f };
             Vector(0.f, g_fCameraCustomDistance, 0.f, Position);
