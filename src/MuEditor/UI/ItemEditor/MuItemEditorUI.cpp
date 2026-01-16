@@ -139,18 +139,15 @@ void CMuItemEditorUI::Render(bool& showEditor)
             g_MuEditorCore.SetHoveringUI(true);
         }
 
-        ImGui::Text("Edit Item Attributes - Total Items: %d", MAX_ITEM);
-        ImGui::SameLine();
-
         // Render action buttons (Save, Export S6E3, Export CSV)
-        CItemEditorActions::RenderAllButtons();
+        CItemEditorActions::RenderAllButtons();;
         ImGui::Separator();
-
+        
         RenderSearchBar();
         ImGui::SameLine();
         RenderColumnVisibilityMenu();
         ImGui::SameLine();
-        ImGui::Checkbox("Freeze Index/Name", &m_bFreezeColumns);
+        ImGui::Checkbox(EDITOR_TEXT("label_freeze_columns"), &m_bFreezeColumns);
         ImGui::Separator();
 
         // Convert search to lowercase for case-insensitive search
@@ -172,7 +169,7 @@ void CMuItemEditorUI::Render(bool& showEditor)
 void CMuItemEditorUI::RenderSearchBar()
 {
     // Search bar
-    ImGui::Text("Search:");
+    ImGui::Text(EDITOR_TEXT("label_search_text"));
     ImGui::SameLine();
     ImGui::SetNextItemWidth(300);
     ImGui::InputText("##ItemSearch", m_szItemSearchBuffer, sizeof(m_szItemSearchBuffer));
@@ -180,7 +177,7 @@ void CMuItemEditorUI::RenderSearchBar()
 
 void CMuItemEditorUI::RenderColumnVisibilityMenu()
 {
-    if (ImGui::Button("Columns"))
+    if (ImGui::Button(EDITOR_TEXT("btn_columns")))
     {
         ImGui::OpenPopup("ColumnVisibility");
     }
@@ -191,11 +188,11 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
 
     if (ImGui::BeginPopup("ColumnVisibility"))
     {
-        ImGui::Text("Toggle Column Visibility:");
+        ImGui::Text(EDITOR_TEXT("popup_toggle_columns"));
         ImGui::Separator();
 
         // Select All / Unselect All buttons
-        if (ImGui::Button("Select All"))
+        if (ImGui::Button(EDITOR_TEXT("btn_select_all")))
         {
             for (auto& col : m_columnVisibility)
             {
@@ -204,7 +201,7 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
             SaveColumnPreferences();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Unselect All"))
+        if (ImGui::Button(EDITOR_TEXT("btn_unselect_all")))
         {
             for (auto& col : m_columnVisibility)
             {

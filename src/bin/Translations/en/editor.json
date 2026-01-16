@@ -4,6 +4,10 @@
   "btn_save": "Save Items",
   "btn_export_s6e3": "Export as S6E3",
   "btn_export_csv": "Export as CSV",
+  "btn_columns": "Columns",
+  "btn_select_all": "Select All",
+  "btn_unselect_all": "Unselect All",
+  "btn_ok": "OK",
 
   "msg_save_success": "Save completed successfully!",
   "msg_save_failed": "Failed to save items!",
@@ -16,9 +20,16 @@
   "error_invalid_index": "Invalid index: {0}",
   "error_index_in_use": "Error: Index {0} already in use!",
 
-  "label_search": "Search",
-  "label_columns": "Columns",
-  "label_freeze_columns": "Freeze Columns",
+  "label_search_text": "Search:",
+  "label_freeze_columns": "Freeze Index/Name",
   "label_no_columns": "No columns selected. Click 'Columns' to show columns.",
-  "label_index": "Index"
+  "label_index": "Index",
+
+  "popup_toggle_columns": "Toggle Column Visibility:",
+  "popup_save_success": "Items saved successfully!",
+  "popup_save_failed": "Failed to save items!",
+  "popup_export_csv_success": "Items exported as CSV successfully!",
+  "popup_export_csv_failed": "Failed to export item attributes as CSV!",
+  "popup_export_s6e3_success": "Items exported as S6E3 legacy format successfully!",
+  "popup_export_s6e3_failed": "Failed to export item attributes as S6E3 format!"
 }
