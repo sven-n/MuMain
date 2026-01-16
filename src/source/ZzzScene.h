@@ -3,6 +3,13 @@
 #include "ZzzInfomation.h"
 #include "SpinLock.h"
 
+// Include refactored scene headers
+#ifdef USE_REFACTORED_SCENES
+#include "Scenes/SceneCommon.h"
+#include "Scenes/SceneManager.h"
+#include "Camera/CameraUtility.h"
+#endif
+
 extern EGameScene SceneFlag;
 
 extern int  ErrorMessage;
