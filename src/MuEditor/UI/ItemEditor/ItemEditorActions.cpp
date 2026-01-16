@@ -20,15 +20,15 @@ void CItemEditorActions::ConvertItemName(char* outBuffer, size_t bufferSize, con
     WideCharToMultiByte(CP_UTF8, 0, name, -1, outBuffer, (int)bufferSize, NULL, NULL);
 }
 
-std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const ItemFieldMetadata& meta)
+std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const FieldDescriptor& desc)
 {
     std::stringstream ss;
 
     // Get pointer to the field using offset
     const BYTE* itemPtr = reinterpret_cast<const BYTE*>(&item);
-    const void* fieldPtr = itemPtr + meta.offset;
+    const void* fieldPtr = itemPtr + desc.offset;
 
-    switch (meta.type)
+    switch (desc.type)
     {
     case EItemFieldType::Bool:
         ss << (*reinterpret_cast<const bool*>(fieldPtr) ? 1 : 0);
@@ -53,10 +53,6 @@ std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item
         ss << buffer;
         break;
     }
-
-    case EItemFieldType::ByteArray:
-        // Not currently used
-        break;
     }
 
     return ss.str();
@@ -67,12 +63,12 @@ std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item
 std::string CItemEditorActions::GetCSVHeader()
 {
     std::stringstream ss;
-    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
+    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     ss << "Index";
-    for (const auto& meta : fields)
+    for (int i = 0; i < fieldCount; ++i)
     {
-        ss << "," << meta.GetDisplayName();
+        ss << "," << GetFieldDisplayName(fields[i].name);
     }
 
     return ss.str();
@@ -81,15 +77,15 @@ std::string CItemEditorActions::GetCSVHeader()
 std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBUTE& item)
 {
     std::stringstream ss;
-    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
+    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     ss << "Row " << itemIndex << "\n";
     ss << "Index = " << itemIndex;
 
-    for (const auto& meta : fields)
+    for (int i = 0; i < fieldCount; ++i)
     {
-        ss << ", " << meta.GetDisplayName() << " = ";
-        ss << GetFieldValueAsString(item, meta);
+        ss << ", " << GetFieldDisplayName(fields[i].name) << " = ";
+        ss << GetFieldValueAsString(item, fields[i]);
     }
 
     return ss.str();
@@ -98,22 +94,22 @@ std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBU
 std::string CItemEditorActions::ExportItemToCSV(int itemIndex, ITEM_ATTRIBUTE& item)
 {
     std::stringstream ss;
-    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
+    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     ss << itemIndex;
 
-    for (const auto& meta : fields)
+    for (int i = 0; i < fieldCount; ++i)
     {
         ss << ",";
 
         // Quote strings for CSV
-        if (meta.type == EItemFieldType::WCharArray)
+        if (fields[i].type == EItemFieldType::WCharArray)
         {
-            ss << "\"" << GetFieldValueAsString(item, meta) << "\"";
+            ss << "\"" << GetFieldValueAsString(item, fields[i]) << "\"";
         }
         else
         {
-            ss << GetFieldValueAsString(item, meta);
+            ss << GetFieldValueAsString(item, fields[i]);
         }
     }
 

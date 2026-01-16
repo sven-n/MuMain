@@ -33,8 +33,8 @@ private:
     // Helper to convert item name to UTF-8
     static void ConvertItemName(char* outBuffer, size_t bufferSize, const wchar_t* name);
 
-    // Get field value as string (metadata-driven)
-    static std::string GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const struct ItemFieldMetadata& meta);
+    // Get field value as string (descriptor-driven)
+    static std::string GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const struct FieldDescriptor& desc);
 };
 
 #endif // _EDITOR

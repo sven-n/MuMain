@@ -4,7 +4,7 @@
 
 #include "ItemDataSaverLegacy.h"
 #include "ItemDataFileIO.h"
-#include "GameData/ItemData/ItemAttributeHelpers.h"
+#include "GameData/ItemData/ItemStructs.h"
 #include "_struct.h"
 #include "_define.h"
 #include "ZzzInfomation.h"
