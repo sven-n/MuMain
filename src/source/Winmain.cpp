@@ -461,9 +461,13 @@ extern bool EnableFastInput;
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 #ifdef _EDITOR
-    // Always forward messages to ImGui (for "Open Editor" button when closed, or full UI when open)
-    if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
-        return true;
+    // Only forward messages to ImGui when editor is open
+    // When editor is closed, we handle button clicks manually in RenderToolbarOpen
+    if (g_MuEditor.IsEnabled())
+    {
+        if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+            return true;
+    }
 #endif
 
     switch (msg)
@@ -576,7 +580,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     break;
     case WM_SETCURSOR:
-        ShowCursor(false);
+#ifdef _EDITOR
+        // When hovering UI (including Open Editor button), let Windows show cursor
+        // Otherwise hide Windows cursor for game cursor
+        if (g_MuEditor.IsHoveringUI())
+        {
+            // Let Windows cursor show - don't hide it
+            return DefWindowProc(hwnd, msg, wParam, lParam);
+        }
+        else
+#endif
+        {
+            ShowCursor(false);
+        }
         break;
         //-----------------------------
     default:
