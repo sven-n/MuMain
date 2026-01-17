@@ -10,7 +10,31 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x86" ],
-      "variables": []
+      "variables": [
+        {
+          "name": "ENABLE_EDITOR",
+          "value": "OFF",
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "name": "x86-Debug-MuEditor",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x86" ],
+      "variables": [
+        {
+          "name": "ENABLE_EDITOR",
+          "value": "ON",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "x86-Release",
@@ -22,7 +46,31 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x86" ],
-      "variables": []
+      "variables": [
+        {
+          "name": "ENABLE_EDITOR",
+          "value": "OFF",
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "name": "x86-Release-MuEditor",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x86" ],
+      "variables": [
+        {
+          "name": "ENABLE_EDITOR",
+          "value": "ON",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "x64-Debug",
@@ -34,7 +82,31 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": []
+      "variables": [
+        {
+          "name": "ENABLE_EDITOR",
+          "value": "OFF",
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "name": "x64-Debug-MuEditor",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "ENABLE_EDITOR",
+          "value": "ON",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "x64-Release",
@@ -46,7 +118,31 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": []
+      "variables": [
+        {
+          "name": "ENABLE_EDITOR",
+          "value": "OFF",
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "name": "x64-Release-MuEditor",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "ENABLE_EDITOR",
+          "value": "ON",
+          "type": "BOOL"
+        }
+      ]
     }
   ]
 }
