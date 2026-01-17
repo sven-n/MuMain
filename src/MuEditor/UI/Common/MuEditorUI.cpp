@@ -1,0 +1,297 @@
+#include "stdafx.h"
+
+#ifdef _EDITOR
+
+#include "../MuEditor\UI\Common\MuEditorUI.h"
+#include "imgui.h"
+#include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/Config/MuEditorConfig.h"
+#include "Translation/i18n.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include <filesystem>
+
+// UI Layout constants
+constexpr float TOOLBAR_HEIGHT = 40.0f;
+constexpr float TOOLBAR_PADDING = 8.0f;
+constexpr float TOOLBAR_INDENT = 10.0f;
+constexpr float BUTTON_WIDTH_OFFSET = 110.0f;
+constexpr int MOUSE_BUTTON_LEFT = 0;
+
+CMuEditorUI& CMuEditorUI::GetInstance()
+{
+    static CMuEditorUI instance;
+    return instance;
+}
+
+void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor)
+{
+    if (editorEnabled)
+    {
+        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor);
+    }
+    else
+    {
+        RenderToolbarOpen(editorEnabled);
+    }
+}
+
+void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
+{
+    // When editor is disabled, show only "Open Editor" button
+    // Use NoInputs flag to allow game mouse to pass through, but handle button clicks manually
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Prevent ImGui from wanting mouse input when editor is closed
+    io.WantCaptureMouse = false;
+    io.WantCaptureKeyboard = false;
+
+    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, TOOLBAR_HEIGHT), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+
+    // NoInputs prevents ImGui from capturing mouse/keyboard, allowing game cursor to work
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoInputs;
+
+    // Use same window background and border as Toolbar but fully transparent
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.15f, 0.15f, 0.15f, 0.0f));
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(TOOLBAR_PADDING, TOOLBAR_PADDING));
+
+    if (ImGui::Begin("ToolbarClosed", nullptr, flags))
+    {
+        ImGui::Spacing();
+        ImGui::Indent(TOOLBAR_INDENT);
+
+        // Open button on the far right (same position as Close button)
+        ImGui::SameLine(ImGui::GetWindowWidth() - BUTTON_WIDTH_OFFSET);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.3f, 1.0f));
+
+        // Draw the button (won't be interactive due to NoInputs flag)
+        ImGui::Button("Open Editor");
+
+        // Get button rect for manual click detection
+        ImVec2 buttonMin = ImGui::GetItemRectMin();
+        ImVec2 buttonMax = ImGui::GetItemRectMax();
+
+        ImGui::PopStyleColor(2);
+
+        // Check if mouse is hovering over the button specifically
+        bool isHoveringButton = (io.MousePos.x >= buttonMin.x && io.MousePos.x <= buttonMax.x &&
+                                 io.MousePos.y >= buttonMin.y && io.MousePos.y <= buttonMax.y);
+
+        if (isHoveringButton)
+        {
+            g_MuEditorCore.SetHoveringUI(true);
+
+            if (ImGui::IsMouseClicked(MOUSE_BUTTON_LEFT))
+            {
+                editorEnabled = true;
+
+                // Clear game mouse button states to prevent click from going through to game
+                extern bool MouseLButton, MouseLButtonPop, MouseLButtonPush, MouseLButtonDBClick;
+                MouseLButton = false;
+                MouseLButtonPop = false;
+                MouseLButtonPush = false;
+                MouseLButtonDBClick = false;
+            }
+        }
+
+        ImGui::Unindent(10.0f);
+    }
+    ImGui::End();
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor(2);
+}
+
+void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor)
+{
+    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, TOOLBAR_HEIGHT), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.15f, 0.15f, 0.15f, 0.95f));
+
+    if (ImGui::Begin("Toolbar", nullptr, flags))
+    {
+        // Check if hovering this window
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+        {
+            g_MuEditorCore.SetHoveringUI(true);
+        }
+
+        ImGui::Spacing();
+        ImGui::Indent(10.0f);
+
+        ImGui::Text("MU Editor");
+        ImGui::SameLine();
+
+        if (ImGui::Button("Item Editor"))
+        {
+            showItemEditor = !showItemEditor;
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Skill Editor"))
+        {
+            showSkillEditor = !showSkillEditor;
+        }
+
+        // Language selector
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(120.0f);
+
+        i18n::Translator& translator = i18n::Translator::GetInstance();
+        const std::string& currentLocale = translator.GetLocale();
+
+        // Auto-detect available languages from Translations directory
+        static std::vector<std::pair<std::string, std::string>> availableLanguages;
+        static bool languagesInitialized = false;
+
+        if (!languagesInitialized)
+        {
+            // Helper lambda to read language name from JSON file
+            auto ReadLanguageName = [](const std::wstring& editorJsonPath) -> std::string {
+                std::ifstream file(editorJsonPath);
+                if (!file.is_open()) return "";
+
+                std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+                file.close();
+
+                // Simple JSON parsing for "_language_info" -> "native_name"
+                size_t infoPos = content.find("\"_language_info\"");
+                if (infoPos == std::string::npos) return "";
+
+                size_t nativePos = content.find("\"native_name\"", infoPos);
+                if (nativePos == std::string::npos) return "";
+
+                size_t colonPos = content.find(":", nativePos);
+                if (colonPos == std::string::npos) return "";
+
+                size_t quoteStart = content.find("\"", colonPos);
+                if (quoteStart == std::string::npos) return "";
+                quoteStart++;
+
+                size_t quoteEnd = content.find("\"", quoteStart);
+                if (quoteEnd == std::string::npos) return "";
+
+                return content.substr(quoteStart, quoteEnd - quoteStart);
+            };
+
+            // Scan Translations directory for available languages
+            namespace fs = std::filesystem;
+            const std::wstring paths[] = {L"Translations", L"bin/Translations"};
+
+            for (const std::wstring& basePath : paths)
+            {
+                std::error_code ec;
+                if (fs::exists(basePath, ec) && fs::is_directory(basePath, ec))
+                {
+                    for (const auto& entry : fs::directory_iterator(basePath, ec))
+                    {
+                        if (entry.is_directory(ec))
+                        {
+                            std::string locale = entry.path().filename().string();
+
+                            // Build path to editor.json
+                            fs::path editorJsonPath = entry.path() / "editor.json";
+
+                            // Read language name from JSON file
+                            std::string displayName = ReadLanguageName(editorJsonPath.wstring());
+
+                            // Fallback to locale code if reading failed
+                            if (displayName.empty())
+                            {
+                                displayName = locale;
+                            }
+
+                            availableLanguages.push_back({locale, displayName});
+                        }
+                    }
+
+                    // If we found languages, no need to try alternate path
+                    if (!availableLanguages.empty())
+                    {
+                        break;
+                    }
+                }
+            }
+
+            languagesInitialized = true;
+
+            if (availableLanguages.empty())
+            {
+                // Fallback if scanning failed
+                availableLanguages.push_back({"en", "English"});
+            }
+        }
+
+        // Find current language index
+        int currentIndex = 0;
+        for (size_t i = 0; i < availableLanguages.size(); i++)
+        {
+            if (currentLocale == availableLanguages[i].first)
+            {
+                currentIndex = (int)i;
+                break;
+            }
+        }
+
+        // Create display string for combo
+        if (ImGui::BeginCombo("##Language", availableLanguages[currentIndex].second.c_str()))
+        {
+            for (size_t i = 0; i < availableLanguages.size(); i++)
+            {
+                bool isSelected = (currentIndex == (int)i);
+                if (ImGui::Selectable(availableLanguages[i].second.c_str(), isSelected))
+                {
+                    // Language changed
+                    if (translator.SwitchLanguage(availableLanguages[i].first))
+                    {
+                        // Save language preference to config
+                        g_MuEditorConfig.SetLanguage(availableLanguages[i].first);
+                        g_MuEditorConfig.Save();
+
+                        g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + availableLanguages[i].second);
+                    }
+                    else
+                    {
+                        g_MuEditorConsoleUI.LogEditor(std::string("Failed to load translations for: ") + availableLanguages[i].second);
+                    }
+                }
+
+                if (isSelected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        // Close button on the far right
+        ImGui::SameLine(ImGui::GetWindowWidth() - 110);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+        if (ImGui::Button("Close Editor"))
+        {
+            editorEnabled = false;
+        }
+        ImGui::PopStyleColor(2);
+
+        ImGui::Unindent(10.0f);
+    }
+    ImGui::End();
+    ImGui::PopStyleColor();
+}
+
+void CMuEditorUI::RenderCenterViewport()
+{
+    // The game renders automatically in the full window
+    // The ImGui toolbar and console are overlays on top
+    // No need to render anything here
+}
+
+#endif // _EDITOR
