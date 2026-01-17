@@ -107,16 +107,31 @@ endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   # Build as a Windows GUI application (no console window) and let CMake
   # add the default system libraries like kernel32, user32, gdi32, etc.
-  set(WORKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-  message(STATUS "Setting debugger working directory to: ${WORKING_DIR}")
+  set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+  message(STATUS "=== DEBUG: CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
+  message(STATUS "=== DEBUG: CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}")
+  message(STATUS "=== DEBUG: CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
+  message(STATUS "=== DEBUG: Assets directory: ${ASSETS_DIR}")
+  message(STATUS "=== DEBUG: Executable will be at: $<TARGET_FILE:Main>")
+  message(STATUS "=== DEBUG: Executable directory: $<TARGET_FILE_DIR:Main>")
   set_target_properties(Main PROPERTIES
     WIN32_EXECUTABLE TRUE
-    VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}"
   )
 
   enable_language(RC)
   target_sources(Main PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/source/resource.rc"
+  )
+
+  # Copy assets directory next to executable (portable, IDE-agnostic solution)
+  add_custom_command(
+    TARGET Main
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying assets from ${ASSETS_DIR} to $<TARGET_FILE_DIR:Main>"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${ASSETS_DIR}"
+            "$<TARGET_FILE_DIR:Main>"
+    COMMENT "Copying game assets to executable directory"
   )
 endif()
 
@@ -203,6 +218,7 @@ if (MSVC)
 
   # Copy required DLLs to build directory for MSVC builds
   add_custom_command(TARGET Main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying DLLs to: $<TARGET_FILE_DIR:Main>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
       ${REQUIRED_DLLS}
       $<TARGET_FILE_DIR:Main>
@@ -257,6 +273,17 @@ if (MSVC)
   add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
   add_dependencies(Main ClientLibrary)
   set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+  # Copy ClientLibrary DLL to the executable's output directory
+  add_custom_command(TARGET Main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL from: ${DOTNET_DLL_PATH}"
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL to: $<TARGET_FILE_DIR:Main>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${DOTNET_DLL_PATH}"
+      $<TARGET_FILE_DIR:Main>
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: ClientLibrary DLL copy complete"
+    COMMENT "Copying ClientLibrary DLL to build directory"
+  )
 
   # ConstantsReplacer build target
   set(CONSTANTS_REPLACER_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/ConstantsReplacer.csproj")
