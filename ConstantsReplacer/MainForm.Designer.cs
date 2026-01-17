@@ -58,7 +58,7 @@
             _folderTextBox.Name = "_folderTextBox";
             _folderTextBox.Size = new Size(653, 23);
             _folderTextBox.TabIndex = 1;
-            _folderTextBox.Text = "C:\\Users\\Sven\\Documents\\GitHub\\MuMain\\src\\source\\";
+            _folderTextBox.Text = "..\\..\\..\\src\\source\\";
             // 
             // _fileNamePatternTextBox
             // 
