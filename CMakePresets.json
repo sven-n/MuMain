@@ -10,7 +10,7 @@
       "name": "windows-base",
       "hidden": true,
       "generator": "Ninja Multi-Config",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       },
@@ -29,6 +29,7 @@
         "value": "x86",
         "strategy": "external"
       },
+      "toolchainFile": "${sourceDir}/toolchain-x86.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF"
       }
@@ -42,6 +43,7 @@
         "value": "x86",
         "strategy": "external"
       },
+      "toolchainFile": "${sourceDir}/toolchain-x86.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "ON"
       }
@@ -55,6 +57,7 @@
         "value": "x64",
         "strategy": "external"
       },
+      "toolchainFile": "${sourceDir}/toolchain-x64.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF"
       }
@@ -68,6 +71,7 @@
         "value": "x64",
         "strategy": "external"
       },
+      "toolchainFile": "${sourceDir}/toolchain-x64.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "ON"
       }
