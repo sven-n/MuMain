@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.25)
 
 project(MuMain)
 
@@ -129,11 +129,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     dl
     m
   )
-
-  # Link ImGui only when editor is enabled
-  if(ENABLE_EDITOR)
-    target_link_libraries(Main PRIVATE imgui)
-  endif()
 endif()
 
 target_include_directories(Main PRIVATE
@@ -190,11 +185,6 @@ if (MSVC)
     turbojpeg-static
     wzAudio
   )
-
-  # Link ImGui only when editor is enabled
-  if(ENABLE_EDITOR)
-    target_link_libraries(Main PRIVATE imgui)
-  endif()
 
   # Locate required DLLs in bin directory
   set(DLL_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
@@ -351,9 +341,9 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
     ${MU_TURBOJPEG_STATIC_LIB}
     wzAudio
   )
+endif()
 
-  # Link ImGui only when editor is enabled
-  if(ENABLE_EDITOR)
-    target_link_libraries(Main PRIVATE imgui)
-  endif()
+# Link ImGui for all platforms when editor is enabled
+if(ENABLE_EDITOR)
+  target_link_libraries(Main PRIVATE imgui)
 endif()
