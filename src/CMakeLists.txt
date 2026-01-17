@@ -67,6 +67,9 @@ if (NOT CMAKE_BUILD_TYPE)
       "Build type (default RelWithDebInfo for useful symbols)" FORCE)
 endif()
 
+# Editor mode option (for admin builds)
+option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -77,8 +80,9 @@ file(GLOB_RECURSE MU_MAIN_SOURCES
   "source/*.cpp"
 )
 
-# ImGui static library (required when _EDITOR is defined)
-add_library(imgui STATIC EXCLUDE_FROM_ALL
+# ImGui static library (required when editor is enabled)
+if(ENABLE_EDITOR)
+add_library(imgui STATIC
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp"
@@ -91,6 +95,7 @@ target_include_directories(imgui PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends"
 )
+endif()
 
 add_executable(Main ${MU_MAIN_SOURCES})
 
@@ -124,6 +129,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     dl
     m
   )
+
+  # Link ImGui only when editor is enabled
+  if(ENABLE_EDITOR)
+    target_link_libraries(Main PRIVATE imgui)
+  endif()
 endif()
 
 target_include_directories(Main PRIVATE
@@ -139,8 +149,9 @@ target_compile_definitions(Main PRIVATE
   _LANGUAGE_ENG
   UNICODE
   $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:_USE_32BIT_TIME_T>  # Use 32-bit time_t only for 32-bit builds
-  $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG;_EDITOR>
+  $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
+  $<$<BOOL:${ENABLE_EDITOR}>:_EDITOR>  # Editor features for admin builds
 )
 
 if (MSVC)
@@ -178,8 +189,12 @@ if (MSVC)
     urlmon
     turbojpeg-static
     wzAudio
-    imgui
   )
+
+  # Link ImGui only when editor is enabled
+  if(ENABLE_EDITOR)
+    target_link_libraries(Main PRIVATE imgui)
+  endif()
 
   # Locate required DLLs in bin directory
   set(DLL_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
@@ -335,6 +350,10 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
     advapi32
     ${MU_TURBOJPEG_STATIC_LIB}
     wzAudio
-    imgui
   )
+
+  # Link ImGui only when editor is enabled
+  if(ENABLE_EDITOR)
+    target_link_libraries(Main PRIVATE imgui)
+  endif()
 endif()
