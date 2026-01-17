@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.25)
 
 project(MuMain)
 
@@ -67,6 +67,9 @@ if (NOT CMAKE_BUILD_TYPE)
       "Build type (default RelWithDebInfo for useful symbols)" FORCE)
 endif()
 
+# Editor mode option (for admin builds)
+option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -77,8 +80,9 @@ file(GLOB_RECURSE MU_MAIN_SOURCES
   "source/*.cpp"
 )
 
-# ImGui static library (required when _EDITOR is defined)
-add_library(imgui STATIC EXCLUDE_FROM_ALL
+# ImGui static library (required when editor is enabled)
+if(ENABLE_EDITOR)
+add_library(imgui STATIC
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp"
@@ -91,6 +95,7 @@ target_include_directories(imgui PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui"
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends"
 )
+endif()
 
 add_executable(Main ${MU_MAIN_SOURCES})
 
@@ -102,16 +107,31 @@ endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   # Build as a Windows GUI application (no console window) and let CMake
   # add the default system libraries like kernel32, user32, gdi32, etc.
-  set(WORKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-  message(STATUS "Setting debugger working directory to: ${WORKING_DIR}")
+  set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+  message(STATUS "=== DEBUG: CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
+  message(STATUS "=== DEBUG: CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}")
+  message(STATUS "=== DEBUG: CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
+  message(STATUS "=== DEBUG: Assets directory: ${ASSETS_DIR}")
+  message(STATUS "=== DEBUG: Executable will be at: $<TARGET_FILE:Main>")
+  message(STATUS "=== DEBUG: Executable directory: $<TARGET_FILE_DIR:Main>")
   set_target_properties(Main PROPERTIES
     WIN32_EXECUTABLE TRUE
-    VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}"
   )
 
   enable_language(RC)
   target_sources(Main PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/source/resource.rc"
+  )
+
+  # Copy assets directory next to executable (portable, IDE-agnostic solution)
+  add_custom_command(
+    TARGET Main
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying assets from ${ASSETS_DIR} to $<TARGET_FILE_DIR:Main>"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${ASSETS_DIR}"
+            "$<TARGET_FILE_DIR:Main>"
+    COMMENT "Copying game assets to executable directory"
   )
 endif()
 
@@ -139,8 +159,9 @@ target_compile_definitions(Main PRIVATE
   _LANGUAGE_ENG
   UNICODE
   $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:_USE_32BIT_TIME_T>  # Use 32-bit time_t only for 32-bit builds
-  $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG;_EDITOR>
+  $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
+  $<$<BOOL:${ENABLE_EDITOR}>:_EDITOR>  # Editor features for admin builds
 )
 
 if (MSVC)
@@ -178,7 +199,6 @@ if (MSVC)
     urlmon
     turbojpeg-static
     wzAudio
-    imgui
   )
 
   # Locate required DLLs in bin directory
@@ -198,6 +218,7 @@ if (MSVC)
 
   # Copy required DLLs to build directory for MSVC builds
   add_custom_command(TARGET Main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying DLLs to: $<TARGET_FILE_DIR:Main>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
       ${REQUIRED_DLLS}
       $<TARGET_FILE_DIR:Main>
@@ -252,6 +273,17 @@ if (MSVC)
   add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
   add_dependencies(Main ClientLibrary)
   set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+  # Copy ClientLibrary DLL to the executable's output directory
+  add_custom_command(TARGET Main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL from: ${DOTNET_DLL_PATH}"
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL to: $<TARGET_FILE_DIR:Main>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${DOTNET_DLL_PATH}"
+      $<TARGET_FILE_DIR:Main>
+    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: ClientLibrary DLL copy complete"
+    COMMENT "Copying ClientLibrary DLL to build directory"
+  )
 
   # ConstantsReplacer build target
   set(CONSTANTS_REPLACER_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/ConstantsReplacer.csproj")
@@ -335,6 +367,10 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
     advapi32
     ${MU_TURBOJPEG_STATIC_LIB}
     wzAudio
-    imgui
   )
+endif()
+
+# Link ImGui for all platforms when editor is enabled
+if(ENABLE_EDITOR)
+  target_link_libraries(Main PRIVATE imgui)
 endif()
