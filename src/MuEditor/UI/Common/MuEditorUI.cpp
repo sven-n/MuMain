@@ -8,6 +8,7 @@
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "Translation/i18n.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include <filesystem>
 
 // UI Layout constants
 constexpr float TOOLBAR_HEIGHT = 40.0f;
@@ -22,11 +23,11 @@ CMuEditorUI& CMuEditorUI::GetInstance()
     return instance;
 }
 
-void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor)
+void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor)
 {
     if (editorEnabled)
     {
-        RenderToolbarFull(editorEnabled, showItemEditor);
+        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor);
     }
     else
     {
@@ -104,7 +105,7 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
     ImGui::PopStyleColor(2);
 }
 
-void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor)
+void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor)
 {
     ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, TOOLBAR_HEIGHT), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
@@ -133,43 +134,141 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor)
             showItemEditor = !showItemEditor;
         }
 
+        ImGui::SameLine();
+        if (ImGui::Button("Skill Editor"))
+        {
+            showSkillEditor = !showSkillEditor;
+        }
+
         // Language selector
         ImGui::SameLine();
-        ImGui::SetNextItemWidth(100.0f);
-        
+        ImGui::SetNextItemWidth(120.0f);
+
         i18n::Translator& translator = i18n::Translator::GetInstance();
         const std::string& currentLocale = translator.GetLocale();
-        
-        // Language options
-        const char* languages[] = { "English", "Español", "Português" };
-        const char* locales[] = { "en", "es", "pt" };
-        int currentIndex = 0;
-        
-        // Find current language index
-        for (int i = 0; i < 3; i++)
+
+        // Auto-detect available languages from Translations directory
+        static std::vector<std::pair<std::string, std::string>> availableLanguages;
+        static bool languagesInitialized = false;
+
+        if (!languagesInitialized)
         {
-            if (currentLocale == locales[i])
+            // Helper lambda to read language name from JSON file
+            auto ReadLanguageName = [](const std::wstring& editorJsonPath) -> std::string {
+                std::ifstream file(editorJsonPath);
+                if (!file.is_open()) return "";
+
+                std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+                file.close();
+
+                // Simple JSON parsing for "_language_info" -> "native_name"
+                size_t infoPos = content.find("\"_language_info\"");
+                if (infoPos == std::string::npos) return "";
+
+                size_t nativePos = content.find("\"native_name\"", infoPos);
+                if (nativePos == std::string::npos) return "";
+
+                size_t colonPos = content.find(":", nativePos);
+                if (colonPos == std::string::npos) return "";
+
+                size_t quoteStart = content.find("\"", colonPos);
+                if (quoteStart == std::string::npos) return "";
+                quoteStart++;
+
+                size_t quoteEnd = content.find("\"", quoteStart);
+                if (quoteEnd == std::string::npos) return "";
+
+                return content.substr(quoteStart, quoteEnd - quoteStart);
+            };
+
+            // Scan Translations directory for available languages
+            namespace fs = std::filesystem;
+            const std::wstring paths[] = {L"Translations", L"bin/Translations"};
+
+            for (const std::wstring& basePath : paths)
             {
-                currentIndex = i;
+                std::error_code ec;
+                if (fs::exists(basePath, ec) && fs::is_directory(basePath, ec))
+                {
+                    for (const auto& entry : fs::directory_iterator(basePath, ec))
+                    {
+                        if (entry.is_directory(ec))
+                        {
+                            std::string locale = entry.path().filename().string();
+
+                            // Build path to editor.json
+                            fs::path editorJsonPath = entry.path() / "editor.json";
+
+                            // Read language name from JSON file
+                            std::string displayName = ReadLanguageName(editorJsonPath.wstring());
+
+                            // Fallback to locale code if reading failed
+                            if (displayName.empty())
+                            {
+                                displayName = locale;
+                            }
+
+                            availableLanguages.push_back({locale, displayName});
+                        }
+                    }
+
+                    // If we found languages, no need to try alternate path
+                    if (!availableLanguages.empty())
+                    {
+                        break;
+                    }
+                }
+            }
+
+            languagesInitialized = true;
+
+            if (availableLanguages.empty())
+            {
+                // Fallback if scanning failed
+                availableLanguages.push_back({"en", "English"});
+            }
+        }
+
+        // Find current language index
+        int currentIndex = 0;
+        for (size_t i = 0; i < availableLanguages.size(); i++)
+        {
+            if (currentLocale == availableLanguages[i].first)
+            {
+                currentIndex = (int)i;
                 break;
             }
         }
-        
-        if (ImGui::Combo("##Language", &currentIndex, languages, 3))
-        {
-            // Language changed
-            if (translator.SwitchLanguage(locales[currentIndex]))
-            {
-                // Save language preference to config
-                g_MuEditorConfig.SetLanguage(locales[currentIndex]);
-                g_MuEditorConfig.Save();
 
-                g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + languages[currentIndex]);
-            }
-            else
+        // Create display string for combo
+        if (ImGui::BeginCombo("##Language", availableLanguages[currentIndex].second.c_str()))
+        {
+            for (size_t i = 0; i < availableLanguages.size(); i++)
             {
-                g_MuEditorConsoleUI.LogEditor(std::string("Failed to load translations for: ") + languages[currentIndex]);
+                bool isSelected = (currentIndex == (int)i);
+                if (ImGui::Selectable(availableLanguages[i].second.c_str(), isSelected))
+                {
+                    // Language changed
+                    if (translator.SwitchLanguage(availableLanguages[i].first))
+                    {
+                        // Save language preference to config
+                        g_MuEditorConfig.SetLanguage(availableLanguages[i].first);
+                        g_MuEditorConfig.Save();
+
+                        g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + availableLanguages[i].second);
+                    }
+                    else
+                    {
+                        g_MuEditorConsoleUI.LogEditor(std::string("Failed to load translations for: ") + availableLanguages[i].second);
+                    }
+                }
+
+                if (isSelected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
+            ImGui::EndCombo();
         }
 
         // Close button on the far right

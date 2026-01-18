@@ -17,11 +17,11 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 
 // ===== X-MACRO-DRIVEN RENDERING =====
 
-void CItemEditorColumns::RenderFieldByDescriptor(const FieldDescriptor& desc, int& colIdx, int itemIndex,
+void CItemEditorColumns::RenderFieldByDescriptor(const ItemFieldDescriptor& desc, int& colIdx, int itemIndex,
                                                   ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible)
 {
-    // Use the template helper function from ItemFieldDefs.h
-    ::RenderFieldByDescriptor(desc, this, item, colIdx, itemIndex, rowInteracted, isVisible);
+    // Use the template helper function from ItemFieldMetadata.h
+    ::RenderFieldByDescriptor(desc, this, item, colIdx, itemIndex, rowInteracted, isVisible, MAX_ITEM_NAME);
 }
 
 // ===== LOW-LEVEL TYPE-SPECIFIC RENDERING =====
@@ -85,6 +85,33 @@ void CItemEditorColumns::RenderIntColumn(
     ImGui::SetNextItemWidth(-FLT_MIN);
 
     if (ImGui::InputInt("##input", &value, 0, 0))
+    {
+        std::string logMsg = i18n::FormatEditor("log_changed_item", {
+            std::to_string(itemIndex),
+            columnName,
+            std::to_string(value)
+        });
+        g_MuEditorConsoleUI.LogEditor(logMsg);
+    }
+
+    if (ImGui::IsItemActivated()) rowInteracted = true;
+    ImGui::PopID();
+}
+
+void CItemEditorColumns::RenderDWordColumn(
+    const char* columnName, int& colIdx, int itemIndex, int uniqueId,
+    DWORD& value, bool& rowInteracted, bool isVisible)
+{
+    if (!isVisible) return;
+
+    ImGui::TableSetColumnIndex(colIdx++);
+    ImGui::PushID(itemIndex * 100000 + uniqueId);
+    ImGui::SetNextItemWidth(-FLT_MIN);
+
+    // DWORD is unsigned, range 0 to 4294967295
+    // Use int64_t for ImGui input to safely handle the full range
+    long long llValue = value;
+    if (ImGui::InputScalar("##input", ImGuiDataType_U32, &value, nullptr, nullptr, "%u"))
     {
         std::string logMsg = i18n::FormatEditor("log_changed_item", {
             std::to_string(itemIndex),

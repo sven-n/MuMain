@@ -21,16 +21,16 @@ public:
     void SetTable(CItemEditorTable* table) { m_pTable = table; }
 
     // X-macro-driven rendering - automatically renders any field based on descriptor
-    void RenderFieldByDescriptor(const FieldDescriptor& desc, int& colIdx, int itemIndex,
+    void RenderFieldByDescriptor(const ItemFieldDescriptor& desc, int& colIdx, int itemIndex,
                                  ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible);
 
     // Render Index column (special - not part of ITEM_ATTRIBUTE fields)
     void RenderIndexColumn(int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible);
 
-    // Friend declaration for template helper in ItemFieldMetadata.h
-    template<typename TColumns>
-    friend void ::RenderFieldByDescriptor(const FieldDescriptor& desc, TColumns* cols, ITEM_ATTRIBUTE& item,
-                                          int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible);
+    // Friend declaration for template helper in FieldMetadataHelper.h
+    template<typename TColumns, typename TStruct>
+    friend void ::RenderFieldByDescriptor(const FieldDescriptor<TStruct>& desc, TColumns* cols, TStruct& data,
+                                          int& colIdx, int dataIndex, bool& rowInteracted, bool isVisible, int maxStringLength);
 
 private:
     // Low-level type-specific rendering helpers
@@ -40,6 +40,8 @@ private:
                          WORD& value, bool& rowInteracted, bool isVisible);
     void RenderIntColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
                         int& value, bool& rowInteracted, bool isVisible);
+    void RenderDWordColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
+                          DWORD& value, bool& rowInteracted, bool isVisible);
     void RenderBoolColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
                          bool& value, bool& rowInteracted, bool isVisible);
     void RenderWCharArrayColumn(const char* columnName, int& colIdx, int itemIndex, int uniqueId,
