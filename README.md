@@ -171,65 +171,62 @@ Rider doesn't have full CMake support for C++ projects, so you need to generate 
 
 #### Option 4: Command Line Build (Windows)
 
+Using CMakePresets.json with Ninja (same as IDEs, much faster than MSBuild):
+
 ```powershell
-# Configure (first time only, or when CMakeLists.txt changes)
-cmake -B build -G "Visual Studio 17 2022" -A Win32
+# Configure x86 build (first time only, or when CMakeLists.txt changes)
+cmake --preset windows-x86
 
-# Build and run Debug
-cmake --build build --config Debug --target run
+# Build Debug
+cmake --build --preset windows-x86-debug
 
-# Or build and run Release
-cmake --build build --config Release --target run
+# Build Release
+cmake --build --preset windows-x86-release
+
+# For x64 builds, use windows-x64 presets instead
+cmake --preset windows-x64
+cmake --build --preset windows-x64-debug
 ```
 
-**Note:** You can switch between Debug and Release without reconfiguring. The `run` target automatically builds the project and runs it from the correct working directory (`src/bin`).
+**Note:** Ninja Multi-Config allows switching between Debug and Release without reconfiguring. Assets are automatically copied to the build output directory during compilation.
 
 **To start fresh (clean build):**
 ```powershell
-Remove-Item -Recurse -Force build
-cmake -B build -G "Visual Studio 17 2022" -A Win32
+Remove-Item -Recurse -Force out
 ```
 
-**Manual execution (if needed):**
+**Run the executable:**
 ```powershell
-# Build only
-cmake --build build --config Debug
+# x86 Debug
+./out/build/windows-x86/src/Debug/Main.exe
 
-# Run manually
-cd "src/bin"
-../../build/"src"/Debug/Main.exe
+# x86 Release
+./out/build/windows-x86/src/Release/Main.exe
 ```
 
-#### Option 5: Command Line Build (Linux)
-
-For native Linux builds or when using Unix Makefiles/Ninja generators:
+#### Option 5: Command Line Build (Linux) !Not Working Yet!
+For Linux builds, you'll need to add Linux presets to CMakePresets.json. Example workflow:
 
 ```bash
-# Configure for Debug (first time or when switching build types)
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
+# Configure for Debug with Ninja (recommended)
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DENABLE_EDITOR=OFF
 
-# Build and run
-cmake --build build --target run
+# Build
+cmake --build build
 
 # To switch to Release, reconfigure:
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target run
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_EDITOR=OFF
+cmake --build build
 ```
 
 **To start fresh (clean build):**
 ```bash
 rm -rf build
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
 ```
 
-**Manual execution (if needed):**
+**Run the executable:**
 ```bash
-# Build only
-cmake --build build
-
-# Run manually
-cd "src/bin"
-../../build/Main
+./build/src/Main
 ```
 
 ---

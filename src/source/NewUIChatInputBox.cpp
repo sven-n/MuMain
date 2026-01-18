@@ -12,7 +12,6 @@
 
 #ifdef _EDITOR
 #include "imgui.h"
-#include "../MuEditor/Core/MuEditorCore.h"
 #endif
 
 using namespace SEASON3B;
