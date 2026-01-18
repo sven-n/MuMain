@@ -21,7 +21,6 @@ build-mingw/
 /Win32/
 
 # .NET build outputs
-**/bin/
 **/obj/
 *.user
 *.suo
@@ -32,3 +31,5 @@ build-mingw/
 
 # ImGui
 **/imgui.ini
+
+**/*.log
