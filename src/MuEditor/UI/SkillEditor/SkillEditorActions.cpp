@@ -4,13 +4,14 @@
 
 #include "SkillEditorActions.h"
 #include "SkillEditorPopups.h"
-#include "DataHandler/SkillData/SkillDataHandler.h"
 #include "GameData/SkillData/SkillFieldMetadata.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Translation/i18n.h"
 #include "imgui.h"
 #include <string>
 #include <sstream>
+
+#include "../../../source/DataHandler/SkillData/SkillDataHandler.h"
 
 extern std::wstring g_strSelectedML;
 

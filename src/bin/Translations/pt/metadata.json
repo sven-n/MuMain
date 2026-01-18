@@ -1,5 +1,5 @@
 {
-  "_comment": "Field Names and Metadata Translations - Portuguese",
+  "_comment": "Traduções de Nomes de Campos e Metadados - Português",
 
   "field_Name": "Nome",
   "field_TwoHand": "Duas Mãos",
@@ -8,8 +8,8 @@
   "field_m_wSkillIndex": "Habilidade",
   "field_Width": "Largura",
   "field_Height": "Altura",
-  "field_DamageMin": "Dano Mín",
-  "field_DamageMax": "Dano Máx",
+  "field_DamageMin": "Dano Mínimo",
+  "field_DamageMax": "Dano Máximo",
   "field_SuccessfulBlocking": "Taxa de Bloqueio",
   "field_Defense": "Defesa",
   "field_MagicDefense": "Defesa Mágica",
@@ -43,5 +43,30 @@
   "field_Resistance[4]": "Resistência à Terra",
   "field_Resistance[5]": "Resistência ao Vento",
   "field_Resistance[6]": "Resistência à Água",
-  "field_Resistance[7]": "Resistência 7"
+  "field_Resistance[7]": "Resistência 7",
+
+  "_comment_skills": "Traduções de Campos de Habilidade",
+  "field_Damage": "Dano",
+  "field_Mana": "Mana",
+  "field_AbilityGuage": "Custo de AG",
+  "field_Distance": "Alcance",
+  "field_Delay": "Recarga",
+  "field_Energy": "Req Energia",
+  "field_Charisma": "Req Liderança",
+  "field_MasteryType": "Tipo de Maestria",
+  "field_SkillUseType": "Tipo de Uso",
+  "field_SkillBrand": "Marca",
+  "field_KillCount": "Contagem de Mortes",
+  "field_SkillRank": "Classificação",
+  "field_Magic_Icon": "Ícone",
+  "field_TypeSkill": "Tipo",
+  "field_Strength": "Req Força",
+  "field_Dexterity": "Req Destreza",
+  "field_ItemSkill": "Habilidade de Item",
+  "field_IsDamage": "É Dano",
+  "field_Effect": "Efeito",
+
+  "field_RequireDutyClass[0]": "Dever 0",
+  "field_RequireDutyClass[1]": "Dever 1",
+  "field_RequireDutyClass[2]": "Dever 2"
 }
