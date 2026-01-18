@@ -9,31 +9,62 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
     message(FATAL_ERROR "Git not found. Please run 'git submodule update --init' manually from repository root.")
   endif()
 
-  # Use CMake's file(LOCK) for atomic locking across processes
-  set(LOCK_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/.cmake_init_lock")
+  message(STATUS "Initializing imgui submodule...")
 
-  message(STATUS "Initializing imgui submodule (without --recursive to exclude examples)...")
-  file(LOCK "${LOCK_FILE}" GUARD PROCESS TIMEOUT 60)
+  # Get repository root (parent of src/)
+  cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH REPO_ROOT)
 
-  # Check again inside lock - another process may have initialized it
-  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
-    # Clean any stale git state, then initialize
-    execute_process(COMMAND ${GIT_EXECUTABLE} submodule deinit -f "src/ThirdParty/imgui"
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.. OUTPUT_QUIET ERROR_QUIET)
-    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init "src/ThirdParty/imgui"
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
-                    RESULT_VARIABLE GIT_RESULT ERROR_VARIABLE GIT_ERROR)
-
-    if(NOT GIT_RESULT EQUAL "0")
-      message(FATAL_ERROR "Submodule initialization failed:\n${GIT_ERROR}\nPlease run 'git submodule update --init' manually.")
-    endif()
-    message(STATUS "ImGui submodule initialized successfully")
+  # If directory exists but is incomplete, remove it first
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui")
+    message(STATUS "Removing incomplete imgui directory...")
+    file(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui")
   endif()
 
-  # Lock is automatically released here
+  # Check if submodule is registered in git index
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} ls-files -s src/ThirdParty/imgui
+    WORKING_DIRECTORY ${REPO_ROOT}
+    OUTPUT_VARIABLE SUBMODULE_IN_INDEX
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
 
+  if(SUBMODULE_IN_INDEX STREQUAL "")
+    # Submodule not in index - need to add it
+    message(STATUS "Submodule not in git index, adding it...")
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} submodule add --force https://github.com/ocornut/imgui.git src/ThirdParty/imgui
+      WORKING_DIRECTORY ${REPO_ROOT}
+      RESULT_VARIABLE GIT_ADD_RESULT
+      ERROR_VARIABLE GIT_ADD_ERROR
+      OUTPUT_VARIABLE GIT_ADD_OUTPUT
+    )
+    if(NOT GIT_ADD_RESULT EQUAL "0")
+      message(FATAL_ERROR "Failed to add submodule:\n${GIT_ADD_ERROR}${GIT_ADD_OUTPUT}")
+    endif()
+  else()
+    # Submodule in index - just update it
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} submodule sync
+      WORKING_DIRECTORY ${REPO_ROOT}
+      OUTPUT_QUIET ERROR_QUIET
+    )
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} submodule update --init
+      WORKING_DIRECTORY ${REPO_ROOT}
+      RESULT_VARIABLE GIT_RESULT
+      ERROR_VARIABLE GIT_ERROR
+      OUTPUT_VARIABLE GIT_OUTPUT
+    )
+    if(NOT GIT_RESULT EQUAL "0")
+      message(FATAL_ERROR "Submodule initialization failed:\n${GIT_ERROR}${GIT_OUTPUT}")
+    endif()
+  endif()
+
+  message(STATUS "ImGui submodule initialized successfully")
+
+  # Verify it worked
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
-    message(FATAL_ERROR "ImGui submodule missing. Please run 'git submodule update --init' manually.")
+    message(FATAL_ERROR "ImGui submodule initialization appeared to succeed but imgui.cpp is still missing.")
   endif()
 endif()
 
