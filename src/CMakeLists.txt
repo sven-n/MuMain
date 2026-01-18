@@ -294,7 +294,6 @@ if (MSVC)
                   "TMP=${DOTNET_TEMP_DIR}"
                   dotnet publish "${DOTNET_PROJ}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT}" --nologo
           COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${CMAKE_CURRENT_SOURCE_DIR}/bin/MUnique.Client.Library.dll"
           DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
           COMMENT "Checking for .NET Client Library updates..."
           VERBATIM
