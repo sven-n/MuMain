@@ -2,12 +2,17 @@
 #include "NewUIChatInputBox.h"
 
 #include "DSPlaySound.h"
+
 #include "NewUIChatLogWindow.h"
 #include "UIControls.h"
 #include "NewUISystem.h"
 #include "ZzzOpenData.h"
 #include "MapManager.h"
 #include "ZzzInterface.h"
+
+#ifdef _EDITOR
+#include "imgui.h"
+#endif
 
 using namespace SEASON3B;
 
