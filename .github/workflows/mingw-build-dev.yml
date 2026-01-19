@@ -1,18 +1,18 @@
-name: MinGW Cross-Compilation Build
+name: MinGW Cross-Compilation Build (Dev)
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
 
 jobs:
   build-mingw:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Install MinGW-w64 toolchain
         run: |
           sudo apt-get update
@@ -23,7 +23,7 @@ jobs:
         with:
           path: _deps/mingw-i686
           key: libjpeg-turbo-mingw-i686-3.1.3-v1
-      
+
       - name: Build libjpeg-turbo (MinGW i686 static)
         run: |
           if [ -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a" ]; then
@@ -47,7 +47,7 @@ jobs:
           fi
 
           test -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a"
-      
+
       - name: Configure CMake
         run: |
           cmake -S . -B build-mingw \
@@ -55,11 +55,11 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-i686.cmake" \
             -DCMAKE_BUILD_TYPE=Release \
             -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a"
-      
+
       - name: Build
         run: |
           cmake --build build-mingw -j$(nproc)
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
