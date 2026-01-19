@@ -231,7 +231,7 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffStatus(BUFF_RENDER renderstate)
         }
         else if (renderstate == BUFF_RENDER_TOOLTIP)
         {
-            // ¹öÇÁ ÅøÆÁ ·»´õ¸µ
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if (SEASON3B::CheckMouseIn(x, y, BUFF_IMG_WIDTH, BUFF_IMG_HEIGHT)) {
                 float fTooltip_x = x + (BUFF_IMG_WIDTH / 2);
                 float fTooltip_y = y + BUFF_IMG_WIDTH;
@@ -289,7 +289,7 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
     {
         std::wstring& temp = *iter;
 
-        swprintf(TextList[TextNum], temp.c_str());
+        mu_swprintf(TextList[TextNum], temp.c_str());
 
         if (TextNum == 0)
         {
@@ -310,7 +310,7 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
 
     if (bufftime.size() != 0)
     {
-        swprintf(TextList[TextNum], GlobalText[2533], bufftime.c_str());
+        mu_swprintf(TextList[TextNum], GlobalText[2533], bufftime.c_str());
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum += 1;

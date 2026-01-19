@@ -94,14 +94,14 @@ void CMsgBoxIGSGiftStorageItemInfo::Initialize(int iStorageSeq, int iStorageItem
     wcscpy(m_szName, pszName);
 
     // Num
-    swprintf(m_szNum, GlobalText[3040], pszNum);		// "���� : %ls"
+    mu_swprintf(m_szNum, GlobalText[3040], pszNum);		// "���� : %ls"
 
     // Period
-    swprintf(m_szPeriod, GlobalText[3039], pszPeriod);	// "�Ⱓ : %ls"
+    mu_swprintf(m_szPeriod, GlobalText[3039], pszPeriod);	// "�Ⱓ : %ls"
 
     // ID Info
     // "\'%ls\' ���� ���� �����Դϴ�."
-    swprintf(m_szIDInfo, GlobalText[3041], pszID);
+    mu_swprintf(m_szIDInfo, GlobalText[3041], pszID);
 
     m_MessageInputBox.SetText(pszMessage);
 }
@@ -275,16 +275,16 @@ void CMsgBoxIGSGiftStorageItemInfo::RenderTexts()
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        swprintf(szText, L"Package item information is not available.");
+        mu_swprintf(szText, L"Package item information is not available.");
     }
     else
     {
-        swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+        mu_swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
     }
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"Storage Seq : %d", m_iStorageSeq);
+    mu_swprintf(szText, L"Storage Seq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"Storage ItemSeq : %d", m_iStorageItemSeq);
+    mu_swprintf(szText, L"Storage ItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }

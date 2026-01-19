@@ -276,11 +276,11 @@ void CNewUITrade::RenderText()
     ConvertYourLevel(nLevel, dwColor);
     if (nLevel == 400)
     {
-        swprintf(szTemp, L"%d", nLevel);
+        mu_swprintf(szTemp, L"%d", nLevel);
     }
     else
     {
-        swprintf(szTemp, GlobalText[369], nLevel);
+        mu_swprintf(szTemp, GlobalText[369], nLevel);
     }
     g_pRenderText->SetTextColor(dwColor);
     g_pRenderText->RenderText(m_Pos.x + 134, m_Pos.y + 48, L"Lv.");

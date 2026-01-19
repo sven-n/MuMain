@@ -22,7 +22,7 @@ void ReportDotNetError(const char* detail)
     g_dotnetErrorDisplayed = true;
 
     wchar_t buffer[512];
-    swprintf(buffer, std::size(buffer),
+    std::swprintf(buffer, std::size(buffer),
         L"Failed to initialize the managed client library (%hs). The game client cannot connect to the server.",
         detail ? detail : "unknown error");
 #ifdef _WIN32

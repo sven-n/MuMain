@@ -192,7 +192,7 @@ bool GetUseLostMap(bool bDrawAlert)
     if (bDrawAlert)
     {
         wchar_t Text[100];
-        swprintf(Text, GlobalText[1123], g_iKalimaLevel[startIndex][0]);
+        mu_swprintf(Text, GlobalText[1123], g_iKalimaLevel[startIndex][0]);
         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
     }
 
@@ -217,10 +217,10 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
         int ItemLevel = ip->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        swprintf(TextList[TextNum], L"%ls %ls       %ls    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        mu_swprintf(TextList[TextNum], L"%ls %ls       %ls    ", GlobalText[58], GlobalText[368], GlobalText[935]); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         for (int i = 0; i < NUM_HELLAS; i++)
         {
-            swprintf(TextList[TextNum], L"        %d             %3d~%3d     ", i + 1, g_iKalimaLevel[startIndex + i][0], std::min<int>(400, g_iKalimaLevel[startIndex + i][1]));
+            mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     ", i + 1, g_iKalimaLevel[startIndex + i][0], std::min<int>(400, g_iKalimaLevel[startIndex + i][1]));
 
             if (ItemLevel == i + 1)
             {
@@ -233,27 +233,27 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
             TextBold[TextNum] = false; TextNum++;
         }
 
-        swprintf(TextList[TextNum], L"\n"); TextNum++;
-        swprintf(TextList[TextNum], GlobalText[1184]);  TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
+        mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
+        mu_swprintf(TextList[TextNum], GlobalText[1184]);  TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
 
         if (HeroLevel < g_iKalimaLevel[startIndex][0])
         {
-            swprintf(TextList[TextNum], L"\n"); TextNum++;
-            swprintf(TextList[TextNum], GlobalText[1123], g_iKalimaLevel[startIndex][0]);  TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextNum++;
+            mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
+            mu_swprintf(TextList[TextNum], GlobalText[1123], g_iKalimaLevel[startIndex][0]);  TextListColor[TextNum] = TEXT_COLOR_DARKRED; TextNum++;
         }
     }
     break;
 
     case ITEM_SYMBOL_OF_KUNDUN:
     {
-        swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5); TextNum++;
+        mu_swprintf(TextList[TextNum], GlobalText[1181], ip->Durability, 5); TextNum++;
         if (ip->Durability >= 5)
         {
-            swprintf(TextList[TextNum], GlobalText[1182]); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
+            mu_swprintf(TextList[TextNum], GlobalText[1182]); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
         }
         else
         {
-            swprintf(TextList[TextNum], GlobalText[1183], (5 - ip->Durability)); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
+            mu_swprintf(TextList[TextNum], GlobalText[1183], (5 - ip->Durability)); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;
         }
     }
     break;

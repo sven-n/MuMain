@@ -98,7 +98,7 @@ int OpenTerrainAttribute(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%ls file not found.", FileName);
+        mu_swprintf(Text, L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -204,7 +204,7 @@ bool SaveTerrainAttribute(wchar_t* FileName, int iMap)
     FILE* fp = _wfopen(FileName, L"wb");
     if (fp == NULL) {
         wchar_t Text[256];
-        swprintf_s(Text, std::size(Text), L"%ls file not found.", FileName);
+        mu_swprintf_s(Text, std::size(Text), L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -626,7 +626,7 @@ bool OpenTerrainHeight(wchar_t* filename)
     if (err != 0 || fp == NULL)
     {
         wchar_t Text[256];
-        swprintf_s(Text, std::size(Text), L"%ls file not found.", FileName);
+        mu_swprintf_s(Text, std::size(Text), L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -638,7 +638,7 @@ bool OpenTerrainHeight(wchar_t* filename)
     {
         fclose(fp);
         wchar_t Text[256];
-        swprintf_s(Text, std::size(Text), L"Failed to seek in %ls.", FileName);
+        mu_swprintf_s(Text, std::size(Text), L"Failed to seek in %ls.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -652,7 +652,7 @@ bool OpenTerrainHeight(wchar_t* filename)
     {
         fclose(fp);
         wchar_t Text[256];
-        swprintf_s(Text, std::size(Text), L"%ls is too small (%ld bytes, needs %ld).", FileName, fileSize, RequiredSize);
+        mu_swprintf_s(Text, std::size(Text), L"%ls is too small (%ld bytes, needs %ld).", FileName, fileSize, RequiredSize);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -664,7 +664,7 @@ bool OpenTerrainHeight(wchar_t* filename)
     {
         fclose(fp);
         wchar_t Text[256];
-        swprintf_s(Text, std::size(Text), L"Failed to rewind %ls.", FileName);
+        mu_swprintf_s(Text, std::size(Text), L"Failed to rewind %ls.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -680,7 +680,7 @@ bool OpenTerrainHeight(wchar_t* filename)
     {
         delete[] Buffer;
         wchar_t Text[256];
-        swprintf_s(Text, std::size(Text), L"Failed to read %ls (expected %d bytes, got %zu).", FileName, Size, readBytes);
+        mu_swprintf_s(Text, std::size(Text), L"Failed to read %ls (expected %d bytes, got %zu).", FileName, Size, readBytes);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);
@@ -756,7 +756,7 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
     if (!fp)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%ls file not found.", FileName);
+        mu_swprintf(Text, L"%ls file not found.", FileName);
         g_ErrorReport.Write(Text);
         g_ErrorReport.Write(L"\r\n");
         MessageBox(g_hWnd, Text, NULL, MB_OK);

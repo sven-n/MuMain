@@ -70,11 +70,11 @@ void SEASON3B::CNewUICharacterInfoWindow::SetButtonInfo()
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    swprintf(strText, GlobalText[927], L"C");
+    mu_swprintf(strText, GlobalText[927], L"C");
     m_BtnExit.ChangeToolTipText(strText, true);
     m_BtnQuest.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_QUEST, false);
     m_BtnQuest.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 392, 36, 29);
-    swprintf(strText, L"%ls(%ls)", GlobalText[1140], L"T");
+    mu_swprintf(strText, L"%ls(%ls)", GlobalText[1140], L"T");
     m_BtnQuest.ChangeToolTipText(strText, true);
     m_BtnPet.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_PET, false);
     m_BtnPet.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 392, 36, 29);
@@ -263,9 +263,9 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTexts()
 void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
 {
     wchar_t strID[256];
-    swprintf(strID, L"%ls", CharacterAttribute->Name);
+    mu_swprintf(strID, L"%ls", CharacterAttribute->Name);
     wchar_t strClassName[256];
-    swprintf(strClassName, L"(%ls)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
+    mu_swprintf(strClassName, L"(%ls)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(20, 20, 20, 20);
@@ -276,7 +276,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
 
     const wchar_t* apszGlobalText[4]
         = { GlobalText[461], GlobalText[460], GlobalText[3130], GlobalText[3131] };
-    swprintf(strServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
+    mu_swprintf(strServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
         g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
 
     float fAlpha = sinf(WorldTime * 0.001f) + 1.f;
@@ -292,8 +292,8 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
     wchar_t strExp[128];
     wchar_t strPoint[128];
 
-    swprintf(strLevel, GlobalText[200], CharacterAttribute->Level);
-    swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperience);
+    mu_swprintf(strLevel, GlobalText[200], CharacterAttribute->Level);
+    mu_swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperience);
 
     if (CharacterAttribute->Level > 9)
     {
@@ -309,13 +309,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 
         iMaxMinus = -CharacterAttribute->wMaxMinusPoint;
 
-        swprintf(strPoint, L"%ls %d/%d | %ls %d/%d",
+        mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d",
             GlobalText[1412], CharacterAttribute->AddPoint, CharacterAttribute->MaxAddPoint,
             GlobalText[1903], iMinus, iMaxMinus);
     }
     else
     {
-        swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", GlobalText[1412], 0, 0, GlobalText[1903], 0, 0);
+        mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", GlobalText[1412], 0, 0, GlobalText[1903], 0, 0);
     }
 
     g_pRenderText->SetFont(g_hFontBold);
@@ -329,10 +329,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
 
         if (gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == false || CharacterAttribute->LevelUpPoint > 0)
         {
-            swprintf(strLevelUpPoint, GlobalText[217], CharacterAttribute->LevelUpPoint);
+            mu_swprintf(strLevelUpPoint, GlobalText[217], CharacterAttribute->LevelUpPoint);
         }
         else
-            swprintf(strLevelUpPoint, L"");
+            mu_swprintf(strLevelUpPoint, L"");
         g_pRenderText->SetFont(g_hFontBold);
         g_pRenderText->SetTextColor(255, 138, 0, 255);
         g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -406,7 +406,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
     }
 
     wchar_t strPointProbability[128];
-    swprintf(strPointProbability, GlobalText[1907], iAddPoint, iMinusPoint);
+    mu_swprintf(strPointProbability, GlobalText[1907], iAddPoint, iMinusPoint);
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(76, 197, 254, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -440,7 +440,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         }
 
     wchar_t strStrength[32];
-    swprintf(strStrength, L"%d", wStrength);
+    mu_swprintf(strStrength, L"%d", wStrength);
 
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_STRENGTH + 6, GlobalText[166], 74, 0, RT3_SORT_CENTER);
@@ -766,22 +766,22 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     {
         if (iAttackDamageMin + iMinIndex >= iAttackDamageMax + iMaxIndex)
         {
-            swprintf(strAttakMamage, GlobalText[203], iAttackDamageMax + iMaxIndex, iAttackDamageMax + iMaxIndex, iAttackRating);
+            mu_swprintf(strAttakMamage, GlobalText[203], iAttackDamageMax + iMaxIndex, iAttackDamageMax + iMaxIndex, iAttackRating);
         }
         else
         {
-            swprintf(strAttakMamage, GlobalText[203], iAttackDamageMin + iMinIndex, iAttackDamageMax + iMaxIndex, iAttackRating);
+            mu_swprintf(strAttakMamage, GlobalText[203], iAttackDamageMin + iMinIndex, iAttackDamageMax + iMaxIndex, iAttackRating);
         }
     }
     else
     {
         if (iAttackDamageMin + iMinIndex >= iAttackDamageMax + iMaxIndex)
         {
-            swprintf(strAttakMamage, GlobalText[204], iAttackDamageMax + iMaxIndex, iAttackDamageMax + iMaxIndex);
+            mu_swprintf(strAttakMamage, GlobalText[204], iAttackDamageMax + iMaxIndex, iAttackDamageMax + iMaxIndex);
         }
         else
         {
-            swprintf(strAttakMamage, GlobalText[204], iAttackDamageMin + iMinIndex, iAttackDamageMax + iMaxIndex);
+            mu_swprintf(strAttakMamage, GlobalText[204], iAttackDamageMin + iMinIndex, iAttackDamageMax + iMaxIndex);
         }
     }
 
@@ -819,11 +819,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     {
         if (itemoption380Attack != 0 || iAttackPowerRate != 0)
         {
-            swprintf(strAttakMamage, GlobalText[2109], iAttackRatingPK, itemoption380Attack + iAttackPowerRate);
+            mu_swprintf(strAttakMamage, GlobalText[2109], iAttackRatingPK, itemoption380Attack + iAttackPowerRate);
         }
         else
         {
-            swprintf(strAttakMamage, GlobalText[2044], iAttackRatingPK);
+            mu_swprintf(strAttakMamage, GlobalText[2044], iAttackRatingPK);
         }
 
         iY += 13;
@@ -849,7 +849,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     wchar_t strDexterity[32];
     WORD wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-    swprintf(strDexterity, L"%d", wDexterity);
+    mu_swprintf(strDexterity, L"%d", wDexterity);
     g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_DEXTERITY + 6, GlobalText[167], 74, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_DEXTERITY + 6, strDexterity, 86, 0, RT3_SORT_CENTER);
 
@@ -1004,18 +1004,18 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         {
             if (nAdd_FulBlocking)
             {
-                swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,
+                mu_swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,
                     CharacterAttribute->SuccessfulBlocking, (CharacterAttribute->SuccessfulBlocking) / 10 + nAdd_FulBlocking);
             }
             else
             {
-                swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,
+                mu_swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,
                     CharacterAttribute->SuccessfulBlocking, (CharacterAttribute->SuccessfulBlocking) / 10);
             }
         }
         else
         {
-            swprintf(strBlocking, GlobalText[207], t_adjdef + maxdefense + iChangeRingAddDefense, (t_adjdef + iChangeRingAddDefense) / 10);
+            mu_swprintf(strBlocking, GlobalText[207], t_adjdef + maxdefense + iChangeRingAddDefense, (t_adjdef + iChangeRingAddDefense) / 10);
         }
     }
     else
@@ -1024,17 +1024,17 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         {
             if (nAdd_FulBlocking)
             {
-                swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense, CharacterAttribute->SuccessfulBlocking, nAdd_FulBlocking);
+                mu_swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense, CharacterAttribute->SuccessfulBlocking, nAdd_FulBlocking);
             }
             else
             {
-                swprintf(strBlocking, GlobalText[208], t_adjdef + maxdefense + iChangeRingAddDefense, CharacterAttribute->SuccessfulBlocking);
+                mu_swprintf(strBlocking, GlobalText[208], t_adjdef + maxdefense + iChangeRingAddDefense, CharacterAttribute->SuccessfulBlocking);
             }
         }
         else
         {
             // 209
-            swprintf(strBlocking, GlobalText[209],
+            mu_swprintf(strBlocking, GlobalText[209],
                 t_adjdef + maxdefense + iChangeRingAddDefense
             );
         }
@@ -1062,7 +1062,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     WORD wAttackSpeed = CLASS_WIZARD == iBaseClass || CLASS_SUMMONER == iBaseClass
         ? CharacterAttribute->MagicSpeed : CharacterAttribute->AttackSpeed;
 
-    swprintf(strBlocking, GlobalText[64], wAttackSpeed);
+    mu_swprintf(strBlocking, GlobalText[64], wAttackSpeed);
     iY += 13;
 
     g_pRenderText->SetFont(g_hFont);
@@ -1095,11 +1095,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (itemoption380Defense != 0 || iDefenseRate != 0)
     {
-        swprintf(strBlocking, GlobalText[2110], CharacterAttribute->SuccessfulBlockingPK + add_defense_success_rate_pvp, itemoption380Defense + iDefenseRate);
+        mu_swprintf(strBlocking, GlobalText[2110], CharacterAttribute->SuccessfulBlockingPK + add_defense_success_rate_pvp, itemoption380Defense + iDefenseRate);
     }
     else
     {
-        swprintf(strBlocking, GlobalText[2045], CharacterAttribute->SuccessfulBlockingPK + add_defense_success_rate_pvp);
+        mu_swprintf(strBlocking, GlobalText[2045], CharacterAttribute->SuccessfulBlockingPK + add_defense_success_rate_pvp);
     }
 
     iY += 13;
@@ -1132,7 +1132,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     }
 
     wchar_t strVitality[256];
-    swprintf(strVitality, L"%d", wVitality);
+    mu_swprintf(strVitality, L"%d", wVitality);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_VITALITY + 6, GlobalText[169], 74, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_VITALITY + 6, strVitality, 86, 0, RT3_SORT_CENTER);
@@ -1141,11 +1141,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
-        swprintf(strVitality, GlobalText[211], CharacterAttribute->Life, Master_Level_Data.wMaxLife);
+        mu_swprintf(strVitality, GlobalText[211], CharacterAttribute->Life, Master_Level_Data.wMaxLife);
     }
     else
     {
-        swprintf(strVitality, GlobalText[211], CharacterAttribute->Life, CharacterAttribute->LifeMax);
+        mu_swprintf(strVitality, GlobalText[211], CharacterAttribute->Life, CharacterAttribute->LifeMax);
     }
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
@@ -1182,7 +1182,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     {
         iY += 13;
         //물리공격력
-        swprintf(strVitality, GlobalText[3155], 50 + (wVitality / 10));
+        mu_swprintf(strVitality, GlobalText[3155], 50 + (wVitality / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strVitality);
     }
 
@@ -1205,7 +1205,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         }
 
     wchar_t strEnergy[256];
-    swprintf(strEnergy, L"%d", wEnergy);
+    mu_swprintf(strEnergy, L"%d", wEnergy);
 
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_ENERGY + 6, GlobalText[168], 74, 0, RT3_SORT_CENTER);
@@ -1215,10 +1215,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
-        swprintf(strEnergy, GlobalText[213], CharacterAttribute->Mana, Master_Level_Data.wMaxMana);
+        mu_swprintf(strEnergy, GlobalText[213], CharacterAttribute->Mana, Master_Level_Data.wMaxMana);
     }
     else
-        swprintf(strEnergy, GlobalText[213], CharacterAttribute->Mana, CharacterAttribute->ManaMax);
+        mu_swprintf(strEnergy, GlobalText[213], CharacterAttribute->Mana, CharacterAttribute->ManaMax);
 
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -1372,11 +1372,11 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             float   percent = CalcDurabilityPercent(pWeaponRight->Durability, p->MagicDur, pWeaponRight->Level, pWeaponRight->ExcellentFlags, pWeaponRight->AncientDiscriminator);
 
             magicPercent = magicPercent - magicPercent * percent;
-            swprintf(strEnergy, GlobalText[215], iMagicDamageMin + maxMg, iMagicDamageMax + maxMg, (int)((iMagicDamageMaxInitial + maxMg) * magicPercent));
+            mu_swprintf(strEnergy, GlobalText[215], iMagicDamageMin + maxMg, iMagicDamageMax + maxMg, (int)((iMagicDamageMaxInitial + maxMg) * magicPercent));
         }
         else
         {
-            swprintf(strEnergy, GlobalText[216], iMagicDamageMin + maxMg, iMagicDamageMax + maxMg);
+            mu_swprintf(strEnergy, GlobalText[216], iMagicDamageMin + maxMg, iMagicDamageMax + maxMg);
         }
 
         iY += 13;
@@ -1475,13 +1475,13 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
                 pWeaponLeft->AncientDiscriminator);
 
             fCursePercent -= fCursePercent * fPercent;
-            swprintf(strEnergy, GlobalText[1693],
+            mu_swprintf(strEnergy, GlobalText[1693],
                 iCurseDamageMin, iCurseDamageMax,
                 (int)((iCurseDamageMax)*fCursePercent));
         }
         else
         {
-            swprintf(strEnergy, GlobalText[1694],
+            mu_swprintf(strEnergy, GlobalText[1694],
                 iCurseDamageMin, iCurseDamageMax);
         }
 
@@ -1492,28 +1492,28 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     iY += 13;
     if (iBaseClass == CLASS_KNIGHT)
     {
-        swprintf(strEnergy, GlobalText[582], 200 + (wEnergy / 10));
+        mu_swprintf(strEnergy, GlobalText[582], 200 + (wEnergy / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
     }
     if (iBaseClass == CLASS_DARK)
     {
-        swprintf(strEnergy, GlobalText[582], 200);
+        mu_swprintf(strEnergy, GlobalText[582], 200);
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
     }
     if (iBaseClass == CLASS_DARK_LORD)
     {
-        swprintf(strEnergy, GlobalText[582], 200 + (wEnergy / 20));
+        mu_swprintf(strEnergy, GlobalText[582], 200 + (wEnergy / 20));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
     }
 
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
         //마법공격력
-        swprintf(strEnergy, GlobalText[3156], 50 + (wEnergy / 10));
+        mu_swprintf(strEnergy, GlobalText[3156], 50 + (wEnergy / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
         iY += 13;
         //범위공격력
-        swprintf(strEnergy, GlobalText[3157], 100 + (wDexterity / 8 + wEnergy / 10));
+        mu_swprintf(strEnergy, GlobalText[3157], 100 + (wDexterity / 8 + wEnergy / 10));
         g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
     }
 
@@ -1542,7 +1542,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             }
 
         wchar_t strCharisma[256];
-        swprintf(strCharisma, L"%d", wCharisma);
+        mu_swprintf(strCharisma, L"%d", wCharisma);
         g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_CHARISMA + 6, GlobalText[1900], 74, 0, RT3_SORT_CENTER);
         g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_CHARISMA + 6, strCharisma, 86, 0, RT3_SORT_CENTER);
     }

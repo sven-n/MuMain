@@ -215,31 +215,31 @@ void CNewUIGoldBowmanLena::RenderTexts()
     memset(&Text, 0, sizeof(wchar_t) * 100);
     for (int i = 0; i < 3; ++i) {
         memset(&Text, 0, sizeof(wchar_t) * 100);
-        swprintf(Text, GlobalText[700 + i]);
+        mu_swprintf(Text, GlobalText[700 + i]);
         RenderText(Text, m_Pos.x, m_Pos.y + 100 + (i * 15), 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     }
 
     int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    swprintf(Text, L"%ls", GlobalText[245]);
+    mu_swprintf(Text, L"%ls", GlobalText[245]);
     RenderText(Text, m_Pos.x + 20, m_Pos.y + 180, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    swprintf(Text, L"    X    %d", registerItem);
+    mu_swprintf(Text, L"    X    %d", registerItem);
     RenderText(Text, m_Pos.x + 5, m_Pos.y + 202, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    swprintf(Text, L"%ls", GlobalText[246]);
+    mu_swprintf(Text, L"%ls", GlobalText[246]);
     RenderText(Text, m_Pos.x + 20, m_Pos.y + 225, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    swprintf(Text, L"    X    %d", g_shEventChipCount);
+    mu_swprintf(Text, L"    X    %d", g_shEventChipCount);
     RenderText(Text, m_Pos.x + 5, m_Pos.y + 245, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     for (int j = 0; j < 2; ++j) {
         memset(&Text, 0, sizeof(wchar_t) * 100);
-        swprintf(Text, GlobalText[703 + j]);
+        mu_swprintf(Text, GlobalText[703 + j]);
         RenderText(Text, m_Pos.x, m_Pos.y + 350 + (j * 15), 190, 0, 0xFFFA47D6, 0x00000000, RT3_SORT_CENTER);
     }
 }

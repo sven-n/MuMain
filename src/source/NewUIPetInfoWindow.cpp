@@ -146,7 +146,7 @@ bool CNewUIPetInfoWindow::Render()
             g_pRenderText->SetTextColor(0xFF0000FF);
             g_pRenderText->SetFont(g_hFontBold);
             wchar_t szText[256] = { 0, };
-            swprintf(szText, GlobalText[1233], GlobalText[1187]);
+            mu_swprintf(szText, GlobalText[1233], GlobalText[1187]);
             g_pRenderText->RenderText(m_Pos.x + 15, m_Pos.y + 100, szText, 160, 30, RT3_SORT_CENTER);
         }
         else
@@ -197,22 +197,22 @@ bool CNewUIPetInfoWindow::RenderDarkHorseInfo(PET_INFO* pPetInfo)
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
 
-    swprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
+    mu_swprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
     g_pRenderText->RenderText(iPosX + 2, iPosY + 8, szText, 70 - 14, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
+    mu_swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 28, szText, 0, 0, RT3_SORT_CENTER);
     RenderImage(IMAGE_PETINFO_LIFEBAR, iPosX + 7, iPosY + 40, 151, 12);
     int iHP = (std::min<int>(pPetInfo->m_wLife, 255) * 147) / 255;
     RenderImage(IMAGE_PETINFO_LIFE, iPosX + 9, iPosY + 42, iHP, 8);
-    swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
+    mu_swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 59, szText, 0, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1], pPetInfo->m_wAttackSuccess);
+    mu_swprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1], pPetInfo->m_wAttackSuccess);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 72, szText, 0, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
+    mu_swprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 85, szText, 0, 0, RT3_SORT_CENTER);
     return true;
 }
@@ -236,26 +236,26 @@ bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
 
-    swprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
+    mu_swprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
     g_pRenderText->RenderText(iGBox1PosX + 2, iGBox1PosY + 8, szText, 70 - 14, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(iGBox2PosX + 2, iGBox2PosY + 8, GlobalText[1218], 70 - 14, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
+    mu_swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 28, szText, 0, 0, RT3_SORT_CENTER);
     RenderImage(IMAGE_PETINFO_LIFEBAR, iGBox1PosX + 7, iGBox1PosY + 40, 151, 12);
     int iHP = (std::min<int>(pPetInfo->m_wLife, 255) * 147) / 255;
     RenderImage(IMAGE_PETINFO_LIFE, iGBox1PosX + 9, iGBox1PosY + 42, iHP, 8);
-    swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
+    mu_swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 59, szText, 0, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1],
+    mu_swprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1],
         pPetInfo->m_wAttackSuccess);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 72, szText, 0, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
+    mu_swprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 85, szText, 0, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[698], (185 + (pPetInfo->m_wLevel * 15)));
+    mu_swprintf(szText, GlobalText[698], (185 + (pPetInfo->m_wLevel * 15)));
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 98, szText, 0, 0, RT3_SORT_CENTER);
 
     // SkillBox

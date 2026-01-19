@@ -414,7 +414,7 @@ void CNewUIGuildMakeWindow::RenderGMInfo()
     wchar_t Text[100];
 
     memset(&Text, 0, sizeof(char) * 100);
-    swprintf(Text, GlobalText[181]);
+    mu_swprintf(Text, GlobalText[181]);
     RenderText(Text, m_Pos.x, m_Pos.y + 50, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     m_Button[GUILDMAKEBUTTON_INFO_MAKE].Render();
@@ -427,7 +427,7 @@ void CNewUIGuildMakeWindow::RenderGMMark()
     //edit box
     wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    swprintf(Text, GlobalText[182]);
+    mu_swprintf(Text, GlobalText[182]);
     RenderText(Text, m_Pos.x + 10, m_Pos.y + 66, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_LEFT);
 
     RenderImage(IMAGE_GUILDMAKE_EDITBOX, m_Pos.x + 45, m_Pos.y + 60, 108.f, 23.f);
@@ -449,7 +449,7 @@ void CNewUIGuildMakeWindow::RenderGMResultInfo()
 
     wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    swprintf(Text, L"%ls : %ls", GlobalText[182], GuildMark[MARK_EDIT].GuildName);
+    mu_swprintf(Text, L"%ls : %ls", GlobalText[182], GuildMark[MARK_EDIT].GuildName);
     RenderText(Text, m_Pos.x, m_Pos.y + 140, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 
     m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].Render();
@@ -466,7 +466,7 @@ void CNewUIGuildMakeWindow::RenderFrame()
 
     wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    swprintf(Text, GlobalText[180]);
+    mu_swprintf(Text, GlobalText[180]);
     RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 

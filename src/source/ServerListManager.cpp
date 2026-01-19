@@ -42,7 +42,7 @@ void CServerListManager::LoadServerListScript()
     if (fp == NULL)
     {
         wchar_t szMessage[256];
-        ::swprintf(szMessage, L"Data\\Local\\ServerList.bmd file not found.\r\n");
+        ::mu_swprintf(szMessage, L"Data\\Local\\ServerList.bmd file not found.\r\n");
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -183,22 +183,22 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     switch (pServerInfo->m_byNonPvP)
     {
     case 0:
-        swprintf(pServerInfo->m_bName, L"%ls-%d %ls", pServerGroup->m_szName,
+        mu_swprintf(pServerInfo->m_bName, L"%ls-%d %ls", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 1:
-        swprintf(pServerInfo->m_bName, L"%ls-%d(Non-PVP) %ls", pServerGroup->m_szName,
+        mu_swprintf(pServerInfo->m_bName, L"%ls-%d(Non-PVP) %ls", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 2:
-        swprintf(pServerInfo->m_bName, L"%ls-%d(Gold PVP) %ls", pServerGroup->m_szName,
+        mu_swprintf(pServerInfo->m_bName, L"%ls-%d(Gold PVP) %ls", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
 
     case 3:
-        swprintf(pServerInfo->m_bName, L"%ls-%d(Gold) %ls", pServerGroup->m_szName,
+        mu_swprintf(pServerInfo->m_bName, L"%ls-%d(Gold) %ls", pServerGroup->m_szName,
             pServerInfo->m_iIndex, GlobalText[iTextIndex]);
         break;
     }

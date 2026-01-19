@@ -341,11 +341,11 @@ void RenderIME_Status()
     wchar_t    Text[100];
     if ((g_dwOldConv & IME_CMODE_NATIVE) == IME_CMODE_NATIVE)
     {
-        swprintf(Text, L"ENGLISH");
+        mu_swprintf(Text, L"ENGLISH");
     }
     else
     {
-        swprintf(Text, L"ENGLISH");
+        mu_swprintf(Text, L"ENGLISH");
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -360,13 +360,13 @@ void RenderIME_Status()
     ::ImmGetConversionStatus(data, &dwConv, &dwSent);
     ::ImmReleaseContext(g_hWnd, data);
 
-    swprintf(Text, L"Sentence Mode = %d", dwSent);
+    mu_swprintf(Text, L"Sentence Mode = %d", dwSent);
     g_pRenderText->RenderText(100, 110, Text);
 
-    swprintf(Text, L"Old Sentence Mode = %d", g_dwOldSent);
+    mu_swprintf(Text, L"Old Sentence Mode = %d", g_dwOldSent);
     g_pRenderText->RenderText(100, 120, Text);
 
-    swprintf(Text, L"LockInputStatus=%d", LockInputStatus);
+    mu_swprintf(Text, L"LockInputStatus=%d", LockInputStatus);
     g_pRenderText->RenderText(100, 130, Text);
 }
 
@@ -1035,25 +1035,25 @@ void AddGuildName(CHAT* c, CHARACTER* Owner)
     if (Owner->GuildMarkIndex >= 0 && GuildMark[Owner->GuildMarkIndex].UnionName[0])
     {
         if (Owner->GuildRelationShip == GR_UNION)
-            swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
+            mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
         if (Owner->GuildRelationShip == GR_UNIONMASTER)
         {
             if (Owner->GuildStatus == G_MASTER)
-                swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1296]);
+                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1296]);
             else
-                swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
+                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
         }
         else if (Owner->GuildRelationShip == GR_RIVAL)
         {
             if (Owner->GuildStatus == G_MASTER)
-                swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1298]);
+                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1298]);
             else
-                swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1297]);
+                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1297]);
         }
         else if (Owner->GuildRelationShip == GR_RIVALUNION)
-            swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1299]);
+            mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1299]);
         else
-            swprintf(c->Union, L"<%ls>", GuildMark[Owner->GuildMarkIndex].UnionName);
+            mu_swprintf(c->Union, L"<%ls>", GuildMark[Owner->GuildMarkIndex].UnionName);
     }
     else
         c->Union[0] = NULL;
@@ -1063,15 +1063,15 @@ void AddGuildName(CHAT* c, CHARACTER* Owner)
         c->GuildColor = Owner->GuildTeam;
 
         if (Owner->GuildStatus == G_PERSON)
-            swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1330]);
+            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1330]);
         else if (Owner->GuildStatus == G_MASTER)
-            swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1300]);
+            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1300]);
         else if (Owner->GuildStatus == G_SUB_MASTER)
-            swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1301]);
+            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1301]);
         else if (Owner->GuildStatus == G_BATTLE_MASTER)
-            swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1302]);
+            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1302]);
         else
-            swprintf(c->Guild, L"[%ls]", GuildMark[Owner->GuildMarkIndex].GuildName);
+            mu_swprintf(c->Guild, L"[%ls]", GuildMark[Owner->GuildMarkIndex].GuildName);
     }
     else
     {
@@ -1281,12 +1281,12 @@ int RenderDebugText(int y)
             SIZE TextSize;
             if (Hex)
             {
-                swprintf(Text, L"%0.2x", DebugText[i][j]);
+                mu_swprintf(Text, L"%0.2x", DebugText[i][j]);
                 g_pRenderText->RenderText(x, y, Text, 0, 0, RT3_SORT_CENTER, &TextSize);
             }
             else
             {
-                swprintf(Text, L"%c", DebugText[i][j]);
+                mu_swprintf(Text, L"%c", DebugText[i][j]);
                 g_pRenderText->RenderText(x, y, Text, 0, 0, RT3_SORT_CENTER, &TextSize);
             }
             if (Hex)
@@ -3555,7 +3555,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         else if (g_pMyInventory->FindEmptySlot(&Items[ItemKey].Item) == -1)
         {
             wchar_t Text[256];
-            swprintf(Text, GlobalText[375]);
+            mu_swprintf(Text, GlobalText[375]);
 
             g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
@@ -3594,7 +3594,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 				if (monsterIndex == MONSTER_CHAOS_GOBLIN && level < 10)
 				{
 					wchar_t text[100];
-					swprintf(text, GlobalText[663], CHAOS_MIX_LEVEL);
+					mu_swprintf(text, GlobalText[663], CHAOS_MIX_LEVEL);
 					g_pSystemLogBox->AddText(text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 					break;
 				}
@@ -3668,9 +3668,9 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
 					wchar_t temp[32] = { 0 };
 					if (monsterIndex == MONSTER_LITTLE_SANTA_RED)
-						swprintf(temp, GlobalText[2596], 100);
+						mu_swprintf(temp, GlobalText[2596], 100);
 					else if (monsterIndex == MONSTER_LITTLE_SANTA_BLUE)
-						swprintf(temp, GlobalText[2597], 100);
+						mu_swprintf(temp, GlobalText[2597], 100);
 
 					g_pSystemLogBox->AddText(temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				}
@@ -4047,7 +4047,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
                         SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                         wchar_t message[100]{};
-                        swprintf(message, GlobalText[475], c->ID);
+                        mu_swprintf(message, GlobalText[475], c->ID);
                         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                 }
@@ -4071,7 +4071,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         if (abs(Dir1 - Dir2) == 4) {
                             SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                             wchar_t message[100]{};
-                            swprintf(message, GlobalText[475], c->ID);
+                            mu_swprintf(message, GlobalText[475], c->ID);
                             g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
                             break;
                         }
@@ -4102,7 +4102,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             else
             {
                 wchar_t szError[48] = L"";
-                swprintf(szError, GlobalText[1123], 6);
+                mu_swprintf(szError, GlobalText[1123], 6);
                 g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             return true;
@@ -4203,7 +4203,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 if (iLevel < 30)
                 {
                     wchar_t szError[48] = L"";
-                    swprintf(szError, GlobalText[2704], 30);
+                    mu_swprintf(szError, GlobalText[2704], 30);
                     g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_ERROR_MESSAGE);
                     return 3;
                 }
@@ -4280,7 +4280,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     GuildPlayerKey = c->Key;
                     SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                     wchar_t Text[100];
-                    swprintf(Text, GlobalText[477], c->ID);
+                    mu_swprintf(Text, GlobalText[477], c->ID);
                     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
             }
@@ -4300,7 +4300,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         GuildPlayerKey = c->Key;
                         SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                         wchar_t Text[100];
-                        swprintf(Text, GlobalText[477], c->ID);
+                        mu_swprintf(Text, GlobalText[477], c->ID);
                         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
@@ -4407,7 +4407,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     PartyKey = c->Key;
                     SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                     wchar_t Text[100];
-                    swprintf(Text, GlobalText[476], c->ID);
+                    mu_swprintf(Text, GlobalText[476], c->ID);
                     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
             }
@@ -4424,7 +4424,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         PartyKey = c->Key;
                         SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                         wchar_t Text[100];
-                        swprintf(Text, GlobalText[476], c->ID);
+                        mu_swprintf(Text, GlobalText[476], c->ID);
                         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
@@ -4445,9 +4445,9 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             wchar_t Name[256];
             if (i != 9)
-                swprintf(Name, L"/%d", i + 1);
+                mu_swprintf(Name, L"/%d", i + 1);
             else
-                swprintf(Name, L"/%d", 0);
+                mu_swprintf(Name, L"/%d", 0);
             if (Text[0] == Name[0] && Text[1] == Name[1])
             {
                 if (CheckMacroLimit(Text) == true)
@@ -4508,7 +4508,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         if (p->Width != 0)
         {
             wchar_t Name[256];
-            swprintf(Name, L"/%ls", p->Name);
+            mu_swprintf(Name, L"/%ls", p->Name);
 
             if (wcsicmp(Text, Name) == NULL)
             {
@@ -7246,7 +7246,7 @@ void CheckGate()
                             if (CharacterAttribute->Level < Level)
                             {
                                 wchar_t Text[100];
-                                swprintf(Text, GlobalText[350], Level);
+                                mu_swprintf(Text, GlobalText[350], Level);
                                 g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
                             }
                         }
@@ -7259,7 +7259,7 @@ void CheckGate()
                         {
                             LoadingWorld = 50;
                             wchar_t Text[100];
-                            swprintf(Text, GlobalText[350], Level);
+                            mu_swprintf(Text, GlobalText[350], Level);
                             g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
                             //							return;
                         }
@@ -8334,17 +8334,17 @@ void GetTime(DWORD time, std::wstring& timeText, bool isSecond)
 
         if (day != 0)
         {
-            swprintf(buff, L"%d %ls %d %ls %d %ls %d %ls", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            mu_swprintf(buff, L"%d %ls %d %ls %d %ls %d %ls", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buff;
         }
         else if (day == 0 && oClock != 0)
         {
-            swprintf(buff, L"%d %ls %d %ls %d %ls", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            mu_swprintf(buff, L"%d %ls %d %ls %d %ls", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buff;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            swprintf(buff, L"%d %ls %d %ls", minutes, GlobalText[2300], second, GlobalText[2301]);
+            mu_swprintf(buff, L"%d %ls %d %ls", minutes, GlobalText[2300], second, GlobalText[2301]);
             timeText = buff;
         }
         else if (day == 0 && oClock == 0 && minutes == 0)
@@ -8360,17 +8360,17 @@ void GetTime(DWORD time, std::wstring& timeText, bool isSecond)
 
         if (day != 0)
         {
-            swprintf(buff, L"%d %ls %d %ls %d %ls", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            mu_swprintf(buff, L"%d %ls %d %ls %d %ls", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
             timeText = buff;
         }
         else if (day == 0 && oClock != 0)
         {
-            swprintf(buff, L"%d %ls %d %ls", oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            mu_swprintf(buff, L"%d %ls %d %ls", oClock, GlobalText[2299], minutes, GlobalText[2300]);
             timeText = buff;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            swprintf(buff, L"%d %ls", minutes, GlobalText[2300]);
+            mu_swprintf(buff, L"%d %ls", minutes, GlobalText[2300]);
             timeText = buff;
         }
     }
@@ -8430,7 +8430,7 @@ void RenderSwichState()
     {
         if (Switch_Info[i].m_bySwitchState > 0)
         {
-            swprintf(Buff, L"%ls%d / %ls / %ls", GlobalText[1981], i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
+            mu_swprintf(Buff, L"%ls%d / %ls / %ls", GlobalText[1981], i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
             g_pRenderText->SetFont(g_hFont);
             g_pRenderText->SetTextColor(255, 255, 255, 255);
             g_pRenderText->SetBgColor(0);
@@ -8599,7 +8599,7 @@ void RenderTournamentInterface()
             if (g_wtMatchTimeLeft.m_Type == 3)
             {
                 g_pRenderText->SetTextColor(255, 255, 10, 255);
-                swprintf(t_Str, GlobalText[1392], t_valueSec);
+                mu_swprintf(t_Str, GlobalText[1392], t_valueSec);
             }
             else
             {
@@ -8609,11 +8609,11 @@ void RenderTournamentInterface()
                 }
                 if (t_valueSec < 10)
                 {
-                    swprintf(t_Str, GlobalText[1390], t_valueMin, t_valueSec);
+                    mu_swprintf(t_Str, GlobalText[1390], t_valueMin, t_valueSec);
                 }
                 else
                 {
-                    swprintf(t_Str, GlobalText[1391], t_valueMin, t_valueSec);
+                    mu_swprintf(t_Str, GlobalText[1391], t_valueMin, t_valueSec);
                 }
             }
             x += (float)GetScreenWidth() / 2; y += 350;
@@ -8649,33 +8649,33 @@ void RenderTournamentInterface()
     glColor4f(1.f, 1.f, 1.f, 1.f);
     g_pRenderText->SetFont(g_hFontBig);
     g_pRenderText->SetTextColor(200, 240, 255, 255);
-    swprintf(t_Str, GlobalText[1393]);
+    mu_swprintf(t_Str, GlobalText[1393]);
     g_pRenderText->RenderText(WindowX + Width / 2 - 50, WindowY + 20, t_Str);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    swprintf(t_Str, GlobalText[1394]);
+    mu_swprintf(t_Str, GlobalText[1394]);
     g_pRenderText->SetTextColor(255, 255, 10, 255);
     g_pRenderText->RenderText(WindowX + Width / 2 - 13, WindowY + 50, t_Str);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
     float t_temp = 0.0f;
-    swprintf(t_Str, L"%ls", g_wtMatchResult.m_MatchTeamName1);
+    mu_swprintf(t_Str, L"%ls", g_wtMatchResult.m_MatchTeamName1);
     t_temp = (MAX_ID_SIZE - wcslen(t_Str)) * 5;
     g_pRenderText->RenderText(WindowX + 10 + t_temp, WindowY + 50, t_Str);
-    swprintf(t_Str, L"%ls", g_wtMatchResult.m_MatchTeamName2);
+    mu_swprintf(t_Str, L"%ls", g_wtMatchResult.m_MatchTeamName2);
     t_temp = (MAX_ID_SIZE - wcslen(t_Str)) * 5;
     g_pRenderText->RenderText(WindowX + Width - 120 + t_temp, WindowY + 50, t_Str);
 
-    swprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score1);
+    mu_swprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score1);
     g_pRenderText->RenderText(WindowX + 45, WindowY + 75, t_Str);
-    swprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score2);
+    mu_swprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score2);
     g_pRenderText->RenderText(WindowX + Width - 85, WindowY + 75, t_Str);
 
     if (g_wtMatchResult.m_Score1 == g_wtMatchResult.m_Score2)
     {
         g_pRenderText->SetFont(g_hFontBig);
         g_pRenderText->SetTextColor(255, 255, 10, 255);
-        swprintf(t_Str, GlobalText[1395]);
+        mu_swprintf(t_Str, GlobalText[1395]);
         g_pRenderText->RenderText(WindowX + Width / 2 - 35, WindowY + 115, t_Str);
         g_pRenderText->SetFont(g_hFont);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -8684,10 +8684,10 @@ void RenderTournamentInterface()
     {
         g_pRenderText->SetFont(g_hFontBig);
         g_pRenderText->SetTextColor(255, 255, 10, 10);
-        swprintf(t_Str, GlobalText[1396]);
+        mu_swprintf(t_Str, GlobalText[1396]);
         g_pRenderText->RenderText(WindowX + 47, WindowY + 115, t_Str);
         g_pRenderText->SetTextColor(255, 10, 10, 255);
-        swprintf(t_Str, GlobalText[1397]);
+        mu_swprintf(t_Str, GlobalText[1397]);
         g_pRenderText->RenderText(WindowX + Width - 82, WindowY + 115, t_Str);
         g_pRenderText->SetFont(g_hFont);
     }
@@ -8695,10 +8695,10 @@ void RenderTournamentInterface()
     {
         g_pRenderText->SetFont(g_hFontBig);
         g_pRenderText->SetTextColor(255, 255, 10, 10);
-        swprintf(t_Str, GlobalText[1397]);
+        mu_swprintf(t_Str, GlobalText[1397]);
         g_pRenderText->RenderText(WindowX + 47, WindowY + 115, t_Str);
         g_pRenderText->SetTextColor(255, 10, 10, 255);
-        swprintf(t_Str, GlobalText[1396]);
+        mu_swprintf(t_Str, GlobalText[1396]);
         g_pRenderText->RenderText(WindowX + Width - 82, WindowY + 115, t_Str);
         g_pRenderText->SetFont(g_hFont);
     }
@@ -8742,7 +8742,7 @@ void RenderPartyHP()
 
         if ((MouseX >= ScreenX && MouseX < ScreenX + Width && MouseY >= ScreenY - 2 && MouseY < ScreenY + 6))
         {
-            swprintf(Text, L"HP : %d0%%", p->stepHP);
+            mu_swprintf(Text, L"HP : %d0%%", p->stepHP);
             g_pRenderText->SetTextColor(255, 230, 210, 255);
             g_pRenderText->RenderText(ScreenX, ScreenY - 6, Text);
         }
@@ -9310,7 +9310,7 @@ void RenderDebugWindow()
             g_pRenderText->RenderText(640 - 100, sy, L"Background");
         else
             g_pRenderText->RenderText(640 - 100, sy, L"Layer1");
-        swprintf(Text, L"Brush Size: %d", BrushSize * 2 + 1);
+        mu_swprintf(Text, L"Brush Size: %d", BrushSize * 2 + 1);
         g_pRenderText->RenderText(640 - 100, sy + 11, Text);
     }
     glColor3f(1.f, 1.f, 1.f);
@@ -9329,7 +9329,7 @@ void RenderDebugWindow()
             else
                 glColor3f(1.f, 1.f, 1.f);
 
-            swprintf(Text, L"%2d: %ls", MonsterScript[i].Type, MonsterScript[i].Name);
+            mu_swprintf(Text, L"%2d: %ls", MonsterScript[i].Type, MonsterScript[i].Name);
             g_pRenderText->RenderText(640 - 100, i * 10, Text);
         }
     }

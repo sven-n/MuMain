@@ -310,12 +310,12 @@ void SEASON3B::CNewUICursedTempleSystem::LoadImages()
     //score
     for (int i = 0; i < 10; ++i)
     {
-        swprintf(buff, L"Interface\\newui_ctscorealliednum%d.tga", i);
+        mu_swprintf(buff, L"Interface\\newui_ctscorealliednum%d.tga", i);
         LoadBitmap(buff, IMAGE_CURSEDTEMPLESYSTEM_SCORE_ALLIED_NUMBER + i, GL_LINEAR);
     }
     for (int j = 0; j < 10; ++j)
     {
-        swprintf(buff, L"Interface\\newui_ctscoreillusionnum%d.tga", j);
+        mu_swprintf(buff, L"Interface\\newui_ctscoreillusionnum%d.tga", j);
         LoadBitmap(buff, IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_NUMBER + j, GL_LINEAR);
     }
     LoadBitmap(L"Interface\\newui_ctscorevs0.tga", IMAGE_CURSEDTEMPLESYSTEM_SCORE_VS0, GL_LINEAR);
@@ -787,12 +787,12 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 
         SKILL_ATTRIBUTE* p = &SkillAttribute[CursedTempleCurSkillType];
         wcscpy(skillname, p->Name);
-        swprintf(TextList[TextNum], L"%ls", skillname);
+        mu_swprintf(TextList[TextNum], L"%ls", skillname);
         TextListColor[TextNum] = TEXT_COLOR_BLUE; TextNum++;
 
-        swprintf(TextList[TextNum], L"\n"); TextNum++;
+        mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
 
-        swprintf(TextList[TextNum], L"%ls", GlobalText[2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)]);
+        mu_swprintf(TextList[TextNum], L"%ls", GlobalText[2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)]);
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
 
         RenderTipTextList(x, y - 20, TextNum, 0);
@@ -808,7 +808,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = NULL;
         }
 
-        swprintf(TextList[TextNum], L"%ls", GlobalText[2378]);
+        mu_swprintf(TextList[TextNum], L"%ls", GlobalText[2378]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
@@ -825,7 +825,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = NULL;
         }
 
-        swprintf(TextList[TextNum], L"%ls", GlobalText[2377]);
+        mu_swprintf(TextList[TextNum], L"%ls", GlobalText[2377]);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
@@ -1042,7 +1042,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
     {
         wcscpy(TextList[TextNum], GlobalText[2400]);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        swprintf(TextList[TextNum], L"");
+        mu_swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
         wcscpy(TextList[TextNum], GlobalText[2401]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
@@ -1055,7 +1055,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
     {
         wcscpy(TextList[TextNum], GlobalText[2404]);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        swprintf(TextList[TextNum], L"");
+        mu_swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
         wcscpy(TextList[TextNum], GlobalText[2405]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
@@ -1068,7 +1068,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
     {
         wcscpy(TextList[TextNum], GlobalText[2408]);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
-        swprintf(TextList[TextNum], L"");
+        mu_swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
         wcscpy(TextList[TextNum], GlobalText[2409]);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
@@ -1425,7 +1425,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE*
     {
         wchar_t message[100];
         memset(&message, 0, sizeof(char));
-        swprintf(message, GlobalText[2391], data->btSkillPoint - m_SkillPoint);
+        mu_swprintf(message, GlobalText[2391], data->btSkillPoint - m_SkillPoint);
         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 

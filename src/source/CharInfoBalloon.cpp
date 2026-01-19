@@ -164,8 +164,8 @@ void CCharInfoBalloon::SetInfo()
     CopyWideString(m_szName, m_pCharInfo->ID);
 
     const int guildTextIndex = ResolveGuildTextIndex(m_pCharInfo->GuildStatus);
-    swprintf_s(m_szGuild, L"(%ls)", GlobalText[guildTextIndex]);
-    swprintf_s(m_szClass, L"%ls %d",
+    mu_swprintf_s(m_szGuild, L"(%ls)", GlobalText[guildTextIndex]);
+    mu_swprintf_s(m_szClass, L"%ls %d",
         gCharacterManager.GetCharacterClassText(m_pCharInfo->Class),
         m_pCharInfo->Level);
 }

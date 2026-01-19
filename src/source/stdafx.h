@@ -47,6 +47,11 @@
 
 #include <windows.h>
 
+// MinGW workaround: Allow swprintf usage
+#if defined(__MINGW32__) || defined(__MINGW64__)
+#undef swprintf
+#endif
+
 //windows
 #include <winsock2.h>
 #include <mmsystem.h>
@@ -74,6 +79,48 @@
 #include <queue>
 
 #pragma warning( pop )
+
+// Cross-platform swprintf replacement
+// MinGW blocks swprintf, so we provide mu_swprintf as a safe cross-platform alternative
+
+// Undefine MinGW's blocking macro first
+#undef swprintf
+#undef swprintf_instead_use_StringCbPrintfW_or_StringCchPrintfW
+
+// Use inline template functions instead of macros to avoid issues with #ifdef in arguments
+#ifdef _MSC_VER
+  // MSVC: swprintf doesn't need buffer size
+  template<typename... Args>
+  inline int mu_swprintf(wchar_t* buffer, const wchar_t* format, Args... args) {
+      return swprintf(buffer, format, args...);
+  }
+  // mu_swprintf_s with explicit size
+  template<typename... Args>
+  inline int mu_swprintf_s(wchar_t* buffer, size_t size, const wchar_t* format, Args... args) {
+      return swprintf_s(buffer, size, format, args...);
+  }
+  // mu_swprintf_s with array - auto-deduce size (like MSVC's swprintf_s)
+  template<size_t N, typename... Args>
+  inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... args) {
+      return swprintf_s(buffer, N, format, args...);
+  }
+#else
+  // GCC/MinGW/Clang: use std::swprintf with explicit buffer size
+  template<typename... Args>
+  inline int mu_swprintf(wchar_t* buffer, const wchar_t* format, Args... args) {
+      return std::swprintf(buffer, 1024, format, args...);
+  }
+  // mu_swprintf_s with explicit size
+  template<typename... Args>
+  inline int mu_swprintf_s(wchar_t* buffer, size_t size, const wchar_t* format, Args... args) {
+      return std::swprintf(buffer, size, format, args...);
+  }
+  // mu_swprintf_s with array - auto-deduce size (compatible with MSVC swprintf_s)
+  template<size_t N, typename... Args>
+  inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... args) {
+      return std::swprintf(buffer, N, format, args...);
+  }
+#endif
 
 //opengl
 #include <gl/glew.h>

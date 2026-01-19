@@ -471,7 +471,7 @@ bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
     switch (option + AT_SET_OPTION_IMPROVE_STRENGTH)
     {
     case AT_SET_OPTION_IMPROVE_MAGIC_POWER:
-        swprintf(text, GlobalText[632], value);
+        mu_swprintf(text, GlobalText[632], value);
         return true;
 
     case AT_SET_OPTION_IMPROVE_STRENGTH:
@@ -481,7 +481,7 @@ bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
     case AT_SET_OPTION_IMPROVE_CHARISMA:
     case AT_SET_OPTION_IMPROVE_ATTACK_MIN:
     case AT_SET_OPTION_IMPROVE_ATTACK_MAX:
-        swprintf(text, GlobalText[950 + option], value);
+        mu_swprintf(text, GlobalText[950 + option], value);
         return true;
 
     case AT_SET_OPTION_IMPROVE_DAMAGE:
@@ -497,19 +497,19 @@ bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
     case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE:
     case AT_SET_OPTION_IMPROVE_SKILL_ATTACK:
     case AT_SET_OPTION_DOUBLE_DAMAGE:
-        swprintf(text, GlobalText[949 + option], value);
+        mu_swprintf(text, GlobalText[949 + option], value);
         return true;
 
     case AT_SET_OPTION_DISABLE_DEFENCE:
-        swprintf(text, GlobalText[970], value);
+        mu_swprintf(text, GlobalText[970], value);
         return true;
 
     case AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE:
-        swprintf(text, GlobalText[983], value);
+        mu_swprintf(text, GlobalText[983], value);
         return true;
 
     case AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE:
-        swprintf(text, GlobalText[984], value);
+        mu_swprintf(text, GlobalText[984], value);
         return true;
 
     case AT_SET_OPTION_IMPROVE_ATTACK_1:
@@ -526,7 +526,7 @@ bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
     case AT_SET_OPTION_WATER_MASTERY:
     case AT_SET_OPTION_WIND_MASTERY:
     case AT_SET_OPTION_EARTH_MASTERY:
-        swprintf(text, GlobalText[971 + (option + AT_SET_OPTION_IMPROVE_STRENGTH - AT_SET_OPTION_IMPROVE_ATTACK_2)], value);
+        mu_swprintf(text, GlobalText[971 + (option + AT_SET_OPTION_IMPROVE_STRENGTH - AT_SET_OPTION_IMPROVE_ATTACK_2)], value);
         return true;
     default:
         return false;
@@ -659,19 +659,19 @@ bool CSItemOption::GetDefaultOptionText(const ITEM* ip, wchar_t* Text)
     switch (ItemAttribute[ip->Type].AttType)
     {
     case SET_OPTION_STRENGTH:
-        swprintf(Text, GlobalText[950], ip->AncientBonusOption * 5);
+        mu_swprintf(Text, GlobalText[950], ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_DEXTERITY:
-        swprintf(Text, GlobalText[951], ip->AncientBonusOption * 5);
+        mu_swprintf(Text, GlobalText[951], ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_ENERGY:
-        swprintf(Text, GlobalText[952], ip->AncientBonusOption * 5);
+        mu_swprintf(Text, GlobalText[952], ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_VITALITY:
-        swprintf(Text, GlobalText[953], ip->AncientBonusOption * 5);
+        mu_swprintf(Text, GlobalText[953], ip->AncientBonusOption * 5);
         break;
 
     default:
@@ -735,7 +735,7 @@ int CSItemOption::RenderDefaultOptionText(const ITEM* ip, int TextNum)
 
         if ((ip->Type >= ITEM_RING_OF_ICE && ip->Type <= ITEM_RING_OF_POISON) || (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type <= ITEM_PENDANT_OF_FIRE) || (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_PENDANT_OF_WATER))
         {
-            swprintf(TextList[TNum], GlobalText[1165]); // "Increase Attribute Damage"
+            mu_swprintf(TextList[TNum], GlobalText[1165]); // "Increase Attribute Damage"
             TextListColor[TNum] = TEXT_COLOR_BLUE;
             TNum++;
         }
@@ -986,7 +986,7 @@ void CSItemOption::RenderSetOptionButton(const int StartX, const int StartY)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0, 0, 0, 255);
     g_pRenderText->SetBgColor(100, 0, 0, 0);
-    swprintf(Text, L"[%ls]", GlobalText[989]);
+    mu_swprintf(Text, L"[%ls]", GlobalText[989]);
     g_pRenderText->RenderText(StartX + 96, (int)(y + 3), Text, 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetTextColor(0xffffffff);
@@ -1014,9 +1014,9 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
         std::uint8_t SkipNum = 0;
         std::uint8_t setIndex = 0;
 
-        swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
+        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
+        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
+        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
 
         int		iCurSetItemTypeSequence = 0, iCurSetItemType = -1;
 
@@ -1025,7 +1025,7 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
             const auto& set = m_SetSearchResult[i];
 
             // print set name:
-            swprintf(TextList[TextNum], L"%ls %ls", set.SetName, GlobalText[1089]);
+            mu_swprintf(TextList[TextNum], L"%ls %ls", set.SetName, GlobalText[1089]);
             TextListColor[TextNum] = TEXT_COLOR_YELLOW;
             TextBold[TextNum] = true;
             TextNum++;
@@ -1050,7 +1050,7 @@ void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
         ITEM_SET_OPTION& setOption = m_ItemSetOption[i];
         if (setOption.byOptionCount < 255)
         {
-            swprintf(Name, L"/%ls", setOption.strSetName);
+            mu_swprintf(Name, L"/%ls", setOption.strSetName);
 
             const auto Length2 = wcslen(Name);
 
@@ -1087,13 +1087,13 @@ void CSItemOption::RenderOptionHelper(void)
         return;
     }
 
-    swprintf(TextList[TextNum], L"\n"); TextNum++;
-    swprintf(TextList[TextNum], L"%ls %ls %ls", setOption.strSetName, GlobalText[1089], GlobalText[159]);
+    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
+    mu_swprintf(TextList[TextNum], L"%ls %ls %ls", setOption.strSetName, GlobalText[1089], GlobalText[159]);
     TextListColor[TextNum] = TEXT_COLOR_YELLOW;
     TextNum++;
 
-    swprintf(TextList[TextNum], L"\n"); TextNum++;
-    swprintf(TextList[TextNum], L"\n"); TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
 
     for (int o = 0; o < MAX_ITEM_SET_STANDARD_OPTION_COUNT; ++o)
     {
@@ -1128,8 +1128,8 @@ void CSItemOption::RenderOptionHelper(void)
         }
     }
 
-    swprintf(TextList[TextNum], L"\n"); TextNum++;
-    swprintf(TextList[TextNum], L"\n"); TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
 
     SIZE TextSize = { 0, 0 };
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
@@ -1159,13 +1159,13 @@ int CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bI
     }
 
 
-    swprintf(TextList[TNum], L"\n"); TNum++;
-    swprintf(TextList[TNum], L"%ls %ls", GlobalText[1089], GlobalText[159]);
+    mu_swprintf(TextList[TNum], L"\n"); TNum++;
+    mu_swprintf(TextList[TNum], L"%ls %ls", GlobalText[1089], GlobalText[159]);
     TextListColor[TNum] = TEXT_COLOR_YELLOW;
     TNum++;
 
-    swprintf(TextList[TNum], L"\n"); TNum++;
-    swprintf(TextList[TNum], L"\n"); TNum++;
+    mu_swprintf(TextList[TNum], L"\n"); TNum++;
+    mu_swprintf(TextList[TNum], L"\n"); TNum++;
 
 
     for (int i = 0; i < m_SetSearchResultCount; i++)
@@ -1179,8 +1179,8 @@ int CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bI
         }
     }
 
-    swprintf(TextList[TNum], L"\n"); TNum++;
-    swprintf(TextList[TNum], L"\n"); TNum++;
+    mu_swprintf(TextList[TNum], L"\n"); TNum++;
+    mu_swprintf(TextList[TNum], L"\n"); TNum++;
 
     return TNum;
 }
@@ -1218,7 +1218,7 @@ std::uint8_t  CSItemOption::RenderSetOptionList(const SET_SEARCH_RESULT_OPT& set
         }
     }
 
-    swprintf(TextList[textIndex], L"\n");
+    mu_swprintf(TextList[textIndex], L"\n");
     textIndex++;
 
     return textIndex;

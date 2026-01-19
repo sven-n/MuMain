@@ -205,7 +205,7 @@ void CNewUIStorageInventory::RenderText()
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
 
-    swprintf(
+    mu_swprintf(
         szTemp, L"%ls (%ls)", GlobalText[234], GlobalText[m_bLock ? 241 : 240]);
     if (m_bLock)
         g_pRenderText->SetTextColor(240, 32, 32, 255);

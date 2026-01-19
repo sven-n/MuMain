@@ -296,7 +296,7 @@ bool SEASON3B::CNewUICryWolf::Render()
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 148, 21, 255);
     g_pRenderText->SetBgColor(0);
-    swprintf(Text, GlobalText[1948], Dark_elf_Num);
+    mu_swprintf(Text, GlobalText[1948], Dark_elf_Num);
     g_pRenderText->RenderText(582, 359, Text, 0, 0, RT3_WRITE_CENTER);
 
     if (View_Bal == true)
@@ -309,7 +309,7 @@ bool SEASON3B::CNewUICryWolf::Render()
         {
             g_pCryWolfInterface->Render(Val_Icon[0], Val_Icon[1], Val_Icon[2], Val_Icon[3], 0.f, 0.f, Val_Icon[4], Val_Icon[5], 4);
 
-            swprintf(Text, GlobalText[1949]);
+            mu_swprintf(Text, GlobalText[1949]);
             g_pRenderText->RenderText(600, 380, Text, 0, 0, RT3_WRITE_CENTER);
 
             float Hp = ((67.f / 100.f) * (float)Val_Hp);

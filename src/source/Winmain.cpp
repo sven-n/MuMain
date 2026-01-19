@@ -891,7 +891,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         if (GetFileVersion(lpszFile, wVersion))
         {
-            swprintf(lpszExeVersion, L"%d.%02d", wVersion[0], wVersion[1]);
+            mu_swprintf(lpszExeVersion, L"%d.%02d", wVersion[0], wVersion[1]);
             if (wVersion[2] > 0)
             {
                 wchar_t lpszMinorVersion[2] = L"a";
