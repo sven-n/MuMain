@@ -27,6 +27,57 @@ extern float CameraDistance;
 extern float Camera3DFov;
 extern bool Camera3DRoll;
 
+static float CalculateCameraViewFar(int sceneFlag)
+{
+    if (battleCastle::InBattleCastle2(Hero->Object.Position))
+    {
+        return 3000.f;
+    }
+
+    if (gMapManager.InBattleCastle() && sceneFlag == MAIN_SCENE)
+    {
+        return 2500.f;
+    }
+
+    if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
+    {
+        return 2800.f * 1.15f;
+    }
+
+    if (gMapManager.IsPKField() || IsDoppelGanger2())
+    {
+        return 3700.0f;
+    }
+
+    // Handle camera level based view distance
+    switch (g_shCameraLevel)
+    {
+    case 0:
+        if (sceneFlag == LOG_IN_SCENE)
+        {
+            return CameraViewFar; // Use existing value
+        }
+        else if (sceneFlag == CHARACTER_SCENE)
+        {
+            return 3500.f;
+        }
+        else if (g_Direction.m_CKanturu.IsMayaScene())
+        {
+            return 2000.f * 10.0f * 0.115f;
+        }
+        else
+        {
+            return 2000.f;
+        }
+    case 1: return 2500.f;
+    case 2: return 2600.f;
+    case 3: return 2950.f;
+    case 4:
+    case 5: return 3200.f;
+    default: return 2000.f;
+    }
+}
+
 bool MoveMainCamera()
 {
     bool bLockCamera = false;
@@ -146,52 +197,7 @@ bool MoveMainCamera()
         vec3_t Position, TransformPosition;
         float Matrix[3][4];
 
-        if (battleCastle::InBattleCastle2(Hero->Object.Position))
-        {
-            CameraViewFar = 3000.f;
-        }
-        else if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
-        {
-            CameraViewFar = 2500.f;
-        }
-        else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
-        {
-            CameraViewFar = 2800.f * 1.15f;
-        }
-        else if (gMapManager.IsPKField() || IsDoppelGanger2())
-        {
-            CameraViewFar = 3700.0f;
-        }
-        else
-        {
-            switch (g_shCameraLevel)
-            {
-            case 0:
-                // Login scene uses default CameraViewFar set earlier in function
-                if (SceneFlag == LOG_IN_SCENE)
-                {
-                    // No-op: CameraViewFar already set
-                }
-                else if (SceneFlag == CHARACTER_SCENE)
-                {
-                    CameraViewFar = 3500.f;
-                }
-                else if (g_Direction.m_CKanturu.IsMayaScene())
-                {
-                    CameraViewFar = 2000.f * 10.0f * 0.115f;
-                }
-                else
-                {
-                    CameraViewFar = 2000.f;
-                }
-                break;
-            case 1: CameraViewFar = 2500.f; break;
-            case 2: CameraViewFar = 2600.f; break;
-            case 3: CameraViewFar = 2950.f; break;
-            case 5:
-            case 4: CameraViewFar = 3200.f; break;
-            }
-        }
+        CameraViewFar = CalculateCameraViewFar(SceneFlag);
 
         Vector(0.f, -CameraDistance, 0.f, Position);//-750
         AngleMatrix(CameraAngle, Matrix);
