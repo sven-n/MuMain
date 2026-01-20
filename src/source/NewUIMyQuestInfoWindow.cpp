@@ -330,10 +330,10 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderCastleInfo()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
     wchar_t strText[256];
-    swprintf(strText, GlobalText[868], g_csQuest.GetEventCount(2));
+    mu_swprintf(strText, GlobalText[868], g_csQuest.GetEventCount(2));
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 125, strText, 190, 0, RT3_SORT_CENTER);
 
-    swprintf(strText, GlobalText[829], 6);
+    mu_swprintf(strText, GlobalText[829], 6);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 145, strText, 190, 0, RT3_SORT_CENTER);
 }
 
@@ -350,10 +350,10 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderTempleInfo()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
     wchar_t strText[256];
-    swprintf(strText, GlobalText[868], g_csQuest.GetEventCount(3));
+    mu_swprintf(strText, GlobalText[868], g_csQuest.GetEventCount(3));
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 305, strText, 190, 0, RT3_SORT_CENTER);
 
-    swprintf(strText, GlobalText[829], 6);
+    mu_swprintf(strText, GlobalText[829], 6);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 325, strText, 190, 0, RT3_SORT_CENTER);
 }
 
@@ -460,7 +460,7 @@ void CNewUIMyQuestInfoWindow::SetCurQuestList(DWordList* pDWordList)
     DWordList::iterator iter;
     for (iter = pDWordList->begin(), i = 1; iter != pDWordList->end(); advance(iter, 1), ++i)
     {
-        ::swprintf(szInput, L"%d.%ls", i, g_QuestMng.GetSubject(*iter));
+        ::mu_swprintf(szInput, L"%d.%ls", i, g_QuestMng.GetSubject(*iter));
         ::ReduceStringByPixel(szOutput, 64, szInput, 150);
         m_CurQuestListBox.AddText(*iter, szOutput);
     }

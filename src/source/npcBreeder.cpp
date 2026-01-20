@@ -30,7 +30,7 @@ namespace npcBreeder
             ip = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
             if (ip->Type != ITEM_DARK_HORSE_ITEM)
             {
-                swprintf(Text, GlobalText[1229]);
+                mu_swprintf(Text, GlobalText[1229]);
                 return -1;
             }
             break;
@@ -39,12 +39,12 @@ namespace npcBreeder
             ip = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
             if (ip->Type != ITEM_DARK_RAVEN_ITEM)
             {
-                swprintf(Text, GlobalText[1229]);
+                mu_swprintf(Text, GlobalText[1229]);
                 return -1;
             }
             break;
         default:
-            swprintf(Text, GlobalText[1229]);
+            mu_swprintf(Text, GlobalText[1229]);
             return -1;
         }
 
@@ -64,7 +64,7 @@ namespace npcBreeder
         switch (Gold)
         {
         case 0:
-            swprintf(Text, GlobalText[1230]);
+            mu_swprintf(Text, GlobalText[1230]);
             break;
 
         default:
@@ -75,11 +75,11 @@ namespace npcBreeder
             if ((int)CharacterMachine->Gold < Gold)
             {
                 ConvertGold((double)Gold - CharacterMachine->Gold, Text);
-                swprintf(Text2, GlobalText[1231], Text);
+                mu_swprintf(Text2, GlobalText[1231], Text);
             }
             else
             {
-                swprintf(Text2, GlobalText[1232], Text);
+                mu_swprintf(Text2, GlobalText[1232], Text);
             }
 
             int Length = wcslen(Text2);

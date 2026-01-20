@@ -73,7 +73,7 @@ JewelHarmonyInfo::JewelHarmonyInfo()
     if (!Result)
     {
         wchar_t szMessage[256];
-        ::swprintf(szMessage, L"%ls file not found.\r\n", L"JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd");
+        ::mu_swprintf(szMessage, L"%ls file not found.\r\n", L"JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd");
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);

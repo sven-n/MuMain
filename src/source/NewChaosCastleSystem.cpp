@@ -185,12 +185,12 @@ void CNewChaosCastleSystem::RenderMatchResult(void)
     {
         g_pRenderText->RenderText(x, yPos, GlobalText[1151], 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
-        swprintf(lpszStr, L"%ls %ls", GlobalText[1152], GlobalText[858]);
+        mu_swprintf(lpszStr, L"%ls %ls", GlobalText[1152], GlobalText[858]);
         g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
     }
     else
     {
-        swprintf(lpszStr, L"%ls %ls", GlobalText[1152], GlobalText[860]);
+        mu_swprintf(lpszStr, L"%ls %ls", GlobalText[1152], GlobalText[860]);
         g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
         g_pRenderText->RenderText(x, yPos, GlobalText[1153], 0, 0, RT3_WRITE_CENTER);
@@ -202,13 +202,13 @@ void CNewChaosCastleSystem::RenderMatchResult(void)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(210, 255, 210, 255);
 
-    swprintf(lpszStr, GlobalText[861], pResult->m_dwExp);
+    mu_swprintf(lpszStr, GlobalText[861], pResult->m_dwExp);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
 
-    swprintf(lpszStr, GlobalText[1162], pResult->m_iScore);
+    mu_swprintf(lpszStr, GlobalText[1162], pResult->m_iScore);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 20;
 
-    swprintf(lpszStr, GlobalText[1163], pResult->m_iZen);
+    mu_swprintf(lpszStr, GlobalText[1163], pResult->m_iZen);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER); yPos += 24;
 
     DisableAlphaBlend();

@@ -386,7 +386,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM
     int iMaxDurability = CalcMaxDurability(pItem, pItemAtt, iLevel);
 
     wchar_t szText[256] = { NULL, };
-    swprintf(szText, L"%ls (%d/%d)", pItemAtt->Name, pItem->Durability, iMaxDurability);
+    mu_swprintf(szText, L"%ls (%d/%d)", pItemAtt->Name, pItem->Durability, iMaxDurability);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), szText, 1, &TextSize);
 
     g_pRenderText->SetBgColor(0, 0, 0, 128);
@@ -421,63 +421,63 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
         {
         case MODEL_HELPER:
         {
-            swprintf(szText, GlobalText[353]);
+            mu_swprintf(szText, GlobalText[353]);
         }
         break;
         case MODEL_IMP:
         {
             ITEM_ATTRIBUTE* p = &ItemAttribute[Hero->Helper.Type - MODEL_SWORD];
-            swprintf(szText, p->Name);
+            mu_swprintf(szText, p->Name);
         }
         break;
         case MODEL_HORN_OF_UNIRIA:
         {
-            swprintf(szText, GlobalText[355]);
+            mu_swprintf(szText, GlobalText[355]);
         }
         break;
         case MODEL_HORN_OF_DINORANT:
         {
-            swprintf(szText, GlobalText[354]);
+            mu_swprintf(szText, GlobalText[354]);
         }
         break;
         case MODEL_DARK_HORSE_ITEM:
         {
-            swprintf(szText, GlobalText[1187]);
+            mu_swprintf(szText, GlobalText[1187]);
         }
         break;
         case MODEL_HORN_OF_FENRIR:
         {
-            swprintf(szText, GlobalText[1916]);
+            mu_swprintf(szText, GlobalText[1916]);
         }
         break;
         case MODEL_DEMON:
         {
-            swprintf(szText, ItemAttribute[ITEM_DEMON].Name);
+            mu_swprintf(szText, ItemAttribute[ITEM_DEMON].Name);
         }
         break;
         case MODEL_SPIRIT_OF_GUARDIAN:
         {
-            swprintf(szText, ItemAttribute[ITEM_SPIRIT_OF_GUARDIAN].Name);
+            mu_swprintf(szText, ItemAttribute[ITEM_SPIRIT_OF_GUARDIAN].Name);
         }
         break;
         case MODEL_PET_RUDOLF:
         {
-            swprintf(szText, ItemAttribute[ITEM_PET_RUDOLF].Name);
+            mu_swprintf(szText, ItemAttribute[ITEM_PET_RUDOLF].Name);
         }
         break;
         case MODEL_PET_PANDA:
         {
-            swprintf(szText, ItemAttribute[ITEM_PET_PANDA].Name);
+            mu_swprintf(szText, ItemAttribute[ITEM_PET_PANDA].Name);
         }
         break;
         case MODEL_PET_UNICORN:
         {
-            swprintf(szText, ItemAttribute[ITEM_PET_UNICORN].Name);
+            mu_swprintf(szText, ItemAttribute[ITEM_PET_UNICORN].Name);
         }
         break;
         case MODEL_PET_SKELETON:
         {
-            swprintf(szText, ItemAttribute[ITEM_PET_SKELETON].Name);
+            mu_swprintf(szText, ItemAttribute[ITEM_PET_SKELETON].Name);
         }
         break;
         }
@@ -498,7 +498,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedPetLife(int iX, int iY)
         return false;
 
     wchar_t szText[256] = { NULL, };
-    swprintf(szText, GlobalText[1214]);
+    mu_swprintf(szText, GlobalText[1214]);
 
     int iLife = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability;
 
@@ -512,7 +512,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderSummonMonsterLife(int iX, int iY)
         return false;
 
     wchar_t szText[256] = { NULL, };
-    swprintf(szText, GlobalText[356]);
+    mu_swprintf(szText, GlobalText[356]);
 
     RenderHPUI(iX, iY, szText, SummonLife, 100);
 
@@ -540,7 +540,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
         if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_ARROWS))
             return false;
 
-        swprintf(szText, GlobalText[351], iNumEquipedArrowDurability, iNumArrowSetInInven);
+        mu_swprintf(szText, GlobalText[351], iNumEquipedArrowDurability, iNumArrowSetInInven);
     }
     else if (m_iCurArrowType == ARROWTYPE_CROSSBOW)
     {
@@ -554,7 +554,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
         if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOLT))
             return false;
 
-        swprintf(szText, GlobalText[352], iNumEquipedArrowDurability, iNumArrowSetInInven);
+        mu_swprintf(szText, GlobalText[352], iNumEquipedArrowDurability, iNumArrowSetInInven);
     }
 
     g_pRenderText->SetBgColor(0, 0, 0, 180);

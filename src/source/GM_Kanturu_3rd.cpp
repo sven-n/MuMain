@@ -73,17 +73,17 @@ void M39Kanturu3rd::CheckSuccessBattle(BYTE State, BYTE DetailState)
 
     wchar_t FileName[64];
     wchar_t WorldName[32];
-    swprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
+    mu_swprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
 
     //
     if (KanturuSuccessMap)
     {
         PlayBuffer(SOUND_KANTURU_3RD_MAP_SOUND02);
-        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
+        mu_swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
     }
     else
     {
-        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
+        mu_swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
     }
 
     OpenTerrainAttribute(FileName);

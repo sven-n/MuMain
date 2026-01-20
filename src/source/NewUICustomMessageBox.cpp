@@ -675,7 +675,7 @@ bool SEASON3B::CNewUIKeyPadMsgBox::IsAllSameNumber()
 void SEASON3B::CNewUIKeyPadMsgBox::KeyPadInput(int iInput)
 {
     wchar_t strInput[4] = { 0, };
-    swprintf(strInput, L"%d", iInput);
+    mu_swprintf(strInput, L"%d", iInput);
     wcscat(m_strKeyPadInput, strInput);
 }
 
@@ -906,25 +906,25 @@ bool SEASON3B::CUseFruitCheckMsgBox::Create(float fPriority)
         switch (pItem->Level)
         {
         case 0:
-            swprintf(strName, L"%ls", GlobalText[168]);
+            mu_swprintf(strName, L"%ls", GlobalText[168]);
             break;
         case 1:
-            swprintf(strName, L"%ls", GlobalText[169]);
+            mu_swprintf(strName, L"%ls", GlobalText[169]);
             break;
         case 2:
-            swprintf(strName, L"%ls", GlobalText[167]);
+            mu_swprintf(strName, L"%ls", GlobalText[167]);
             break;
         case 3:
-            swprintf(strName, L"%ls", GlobalText[166]);
+            mu_swprintf(strName, L"%ls", GlobalText[166]);
             break;
         case 4:
-            swprintf(strName, L"%ls", GlobalText[1900]);
+            mu_swprintf(strName, L"%ls", GlobalText[1900]);
             break;
         }
     }
 
     wchar_t strText[128] = { 0, };
-    swprintf(strText, L"( %ls%ls )", strName, GlobalText[1901]);
+    mu_swprintf(strText, L"( %ls%ls )", strName, GlobalText[1901]);
     AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
     AddMsg(GlobalText[1902], RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
 
@@ -1558,7 +1558,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
     {
         cButton.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x + 50.0f, y + (height + 10.0f) * k, MSGBOX_BTN_EMPTY_WIDTH + 20, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
         // 1808 "%d개 조합(%d젠 소요)"
-        swprintf(szTemp, GlobalText[1808], 10 * (k + 1), 500000 * (k + 1));
+        mu_swprintf(szTemp, GlobalText[1808], 10 * (k + 1), 500000 * (k + 1));
         cButton.SetText(szTemp);
         m_cMixButton.push_back(cButton);
     }
@@ -1714,10 +1714,10 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CNe
     if (pMsgBox)
     {
         wchar_t strText[256] = { 0, };
-        swprintf(strText, GlobalText[COMGEM::GetJewelIndex(COMGEM::m_cGemType, 0)], GlobalText[1807], COMGEM::m_cCount);
+        mu_swprintf(strText, GlobalText[COMGEM::GetJewelIndex(COMGEM::m_cGemType, 0)], GlobalText[1807], COMGEM::m_cCount);
         pMsgBox->AddMsg(strText, CLRDW_YELLOW, MSGBOX_FONT_BOLD);
 
-        swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
+        mu_swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
         pMsgBox->AddMsg(strText, CLRDW_YELLOW, MSGBOX_FONT_BOLD);
     }
 
@@ -1740,14 +1740,14 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TenBtnDown(class CNewUIMes
             wchar_t strText[256] = { 0, };
             if (COMGEM::m_cGemType == COMGEM::CELE)
             {
-                swprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+                mu_swprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
             }
             else if (COMGEM::m_cGemType == COMGEM::SOUL)
             {
-                swprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+                mu_swprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
             }
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-            swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
+            mu_swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
         }
 
@@ -1780,14 +1780,14 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TwentyBtnDown(class CNewUI
             wchar_t strText[256] = { 0, };
             if (COMGEM::m_cGemType == COMGEM::CELE)
             {
-                swprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+                mu_swprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
             }
             else if (COMGEM::m_cGemType == COMGEM::SOUL)
             {
-                swprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+                mu_swprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
             }
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-            swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
+            mu_swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
         }
 
@@ -1820,14 +1820,14 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class CNewUI
             wchar_t strText[256] = { 0, };
             if (COMGEM::m_cGemType == COMGEM::CELE)
             {
-                swprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+                mu_swprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
             }
             else if (COMGEM::m_cGemType == COMGEM::SOUL)
             {
-                swprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+                mu_swprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
             }
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-            swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
+            mu_swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
         }
 
@@ -2080,10 +2080,10 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
             ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(pUT->m_iInvenIdx);
             int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
             COMGEM::SetGem(nIdx);
-            swprintf(strText, GlobalText[1813], GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], iGemLevel);
+            mu_swprintf(strText, GlobalText[1813], GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], iGemLevel);
 
             pMsgBox->AddMsg(strText, CLRDW_DARKYELLOW, MSGBOX_FONT_BOLD);
-            swprintf(strText, GlobalText[1814], COMGEM::m_iValue);
+            mu_swprintf(strText, GlobalText[1814], COMGEM::m_iValue);
             pMsgBox->AddMsg(strText, CLRDW_DARKYELLOW, MSGBOX_FONT_BOLD);
         }
     }
@@ -3002,28 +3002,28 @@ void SEASON3B::CChaosMixMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 128, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(szText, GlobalText[734]);
+    mu_swprintf(szText, GlobalText[734]);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFont);
 
-    swprintf(szText, GlobalText[872]);
+    mu_swprintf(szText, GlobalText[872]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[873], Hero->ID);
+    mu_swprintf(szText, GlobalText[873], Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[1680], Hero->ID);
+    mu_swprintf(szText, GlobalText[1680], Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 3 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 100;
-    swprintf(szText, GlobalText[870], Hero->ID);
+    mu_swprintf(szText, GlobalText[870], Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[871], Hero->ID);
+    mu_swprintf(szText, GlobalText[871], Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 85;
-    swprintf(szText, GlobalText[2194], Hero->ID);
+    mu_swprintf(szText, GlobalText[2194], Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -3985,7 +3985,7 @@ void SEASON3B::CDuelMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(strDuelID, L"[%ls]", g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
+    mu_swprintf(strDuelID, L"[%ls]", g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 115, strDuelID, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -4147,9 +4147,9 @@ void SEASON3B::CDuelResultMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFont);
-    swprintf(strDuelID, GlobalText[2695], m_szWinnerID);
+    mu_swprintf(strDuelID, GlobalText[2695], m_szWinnerID);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 120, strDuelID, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
-    swprintf(strDuelID, GlobalText[2696], m_szLoserID);
+    mu_swprintf(strDuelID, GlobalText[2696], m_szLoserID);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 135, strDuelID, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 151, GlobalText[2697], MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 }
@@ -4386,14 +4386,14 @@ void CCherryBlossomMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(title, L"%ls", m->Name);
+    mu_swprintf(title, L"%ls", m->Name);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 10, title, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 
     wchar_t titleinfo[256];
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(titleinfo, L"%ls", GlobalText[2544]);
+    mu_swprintf(titleinfo, L"%ls", GlobalText[2544]);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 70, titleinfo, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 }
 
@@ -4676,7 +4676,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
         if (lpMsgBox)
         {
             wchar_t strText2[MAX_TEXT_LENGTH] = { 0, };
-            swprintf(strText2, GlobalText[1132], strText);
+            mu_swprintf(strText2, GlobalText[1132], strText);
             lpMsgBox->AddMsg(strText2, RGBA(255, 0, 0, 255), MSGBOX_FONT_BOLD);
             lpMsgBox->AddMsg(GlobalText[1133]);
             lpMsgBox->SetItemValue(iInputZen);
@@ -5891,12 +5891,12 @@ void SEASON3B::CLuckyTradeMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(szText, L"럭키아이템 교환NPC");	// "LuckyItem Trade NPC"
+    mu_swprintf(szText, L"럭키아이템 교환NPC");	// "LuckyItem Trade NPC"
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetFont(g_hFont);
-    swprintf(szText, L"럭키아이템으로 교환하거나 제련할 수 있습니?");
+    mu_swprintf(szText, L"럭키아이템으로 교환하거나 제련할 수 있습니?");
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -6081,14 +6081,14 @@ void SEASON3B::CTrainerMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(szText, GlobalText[1227]);
+    mu_swprintf(szText, GlobalText[1227]);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetFont(g_hFont);
-    swprintf(szText, GlobalText[1202]);
+    mu_swprintf(szText, GlobalText[1202]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[1203], Hero->ID);
+    mu_swprintf(szText, GlobalText[1203], Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -6274,12 +6274,12 @@ void SEASON3B::CTrainerRecoverMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(szText, GlobalText[1227]);
+    mu_swprintf(szText, GlobalText[1227]);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetFont(g_hFont);
-    swprintf(szText, GlobalText[1228]);
+    mu_swprintf(szText, GlobalText[1228]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(206, 192, 146, 255);
@@ -6499,7 +6499,7 @@ void SEASON3B::CElpisMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(szText, GlobalText[2206]);
+    mu_swprintf(szText, GlobalText[2206]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
@@ -6508,7 +6508,7 @@ void SEASON3B::CElpisMsgBox::RenderTexts()
     switch (m_iMessageType)
     {
     case 0:
-        swprintf(szText, GlobalText[2074]);
+        mu_swprintf(szText, GlobalText[2074]);
         g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
         break;
     case MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY:
@@ -6717,14 +6717,14 @@ void SEASON3B::CSeedMasterMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(szText, GlobalText[2666]);
+    mu_swprintf(szText, GlobalText[2666]);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetFont(g_hFont);
-    swprintf(szText, GlobalText[2667]);
+    mu_swprintf(szText, GlobalText[2667]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[2668]);
+    mu_swprintf(szText, GlobalText[2668]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -6908,14 +6908,14 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(szText, GlobalText[2671]);
+    mu_swprintf(szText, GlobalText[2671]);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetFont(g_hFont);
-    swprintf(szText, GlobalText[2672]);
+    mu_swprintf(szText, GlobalText[2672]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[2673]);
+    mu_swprintf(szText, GlobalText[2673]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -7056,12 +7056,12 @@ void SEASON3B::CResetCharacterPointMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(szText, GlobalText[1885]);
+    mu_swprintf(szText, GlobalText[1885]);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 25;
     g_pRenderText->SetFont(g_hFont);
-    swprintf(szText, GlobalText[1886]);
+    mu_swprintf(szText, GlobalText[1886]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -7363,7 +7363,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
     wchar_t strText[256];
     if (COMGEM::m_cGemType == COMGEM::CELE)
     {
-        swprintf(strText, GlobalText[1314], GuildList[DeleteIndex].Name, GlobalText[1301]);
+        mu_swprintf(strText, GlobalText[1314], GuildList[DeleteIndex].Name, GlobalText[1301]);
         AppointType = SUBGUILDMASTER;
         AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
         glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
@@ -7377,7 +7377,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
 
     if (COMGEM::m_cGemType == COMGEM::SOUL)
     {
-        swprintf(strText, GlobalText[1314], GuildList[DeleteIndex].Name, GlobalText[1302]);
+        mu_swprintf(strText, GlobalText[1314], GuildList[DeleteIndex].Name, GlobalText[1302]);
         AppointType = BATTLEMASTER;
         AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
         glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
@@ -7646,16 +7646,16 @@ void SEASON3B::CDelgardoMainMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    swprintf(szText, GlobalText[1890]);
+    mu_swprintf(szText, GlobalText[1890]);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 26;
     g_pRenderText->SetFont(g_hFont);
-    swprintf(szText, GlobalText[1932]);
+    mu_swprintf(szText, GlobalText[1932]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[1933]);
+    mu_swprintf(szText, GlobalText[1933]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    swprintf(szText, GlobalText[1934]);
+    mu_swprintf(szText, GlobalText[1934]);
     g_pRenderText->RenderText(fPos_x, fPos_y + 3 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 

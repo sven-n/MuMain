@@ -404,7 +404,7 @@ void CNewUIMuHelper::InitTextboxInput()
     m_DistanceTimeInput.SetFont(g_hFont);
     m_DistanceTimeInput.SetState(UISTATE_NORMAL);
     m_DistanceTimeInput.SetOption(UIOPTION_NUMBERONLY);
-    swprintf(wsInitText, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iMaxSecondsAway);
+    std::swprintf(wsInitText, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iMaxSecondsAway);
     m_DistanceTimeInput.SetText(wsInitText);
 
     m_Skill2DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
@@ -414,7 +414,7 @@ void CNewUIMuHelper::InitTextboxInput()
     m_Skill2DelayInput.SetFont(g_hFont);
     m_Skill2DelayInput.SetState(UISTATE_NORMAL);
     m_Skill2DelayInput.SetOption(UIOPTION_NUMBERONLY);
-    swprintf(wsInitText, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[1]);
+    std::swprintf(wsInitText, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[1]);
     m_Skill2DelayInput.SetText(wsInitText);
 
     m_Skill3DelayInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
@@ -424,7 +424,7 @@ void CNewUIMuHelper::InitTextboxInput()
     m_Skill3DelayInput.SetFont(g_hFont);
     m_Skill3DelayInput.SetState(UISTATE_NORMAL);
     m_Skill3DelayInput.SetOption(UIOPTION_NUMBERONLY);
-    swprintf(wsInitText, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[2]);
+    std::swprintf(wsInitText, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[2]);
     m_Skill3DelayInput.SetText(wsInitText);
 
     m_ItemInput.Init(g_hWnd, 88, 15, MAX_ITEM_NAME, false);
@@ -1046,15 +1046,15 @@ void CNewUIMuHelper::ApplyConfig()
 
     wchar_t wsTempNum[MAX_NUMBER_DIGITS + 1];
     memset(wsTempNum, 0, sizeof(wsTempNum));
-    swprintf(wsTempNum, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iMaxSecondsAway);
+    std::swprintf(wsTempNum, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iMaxSecondsAway);
     m_DistanceTimeInput.SetText(wsTempNum);
 
     memset(wsTempNum, 0, sizeof(wsTempNum));
-    swprintf(wsTempNum, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[1]);
+    std::swprintf(wsTempNum, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[1]);
     m_Skill2DelayInput.SetText(wsTempNum);
 
     memset(wsTempNum, 0, sizeof(wsTempNum));
-    swprintf(wsTempNum, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[2]);
+    std::swprintf(wsTempNum, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.aiSkillInterval[2]);
     m_Skill3DelayInput.SetText(wsTempNum);
 
     m_CheckBoxList[CHECKBOX_ID_BUFF_DURATION].box->RegisterBoxState(_TempConfig.bBuffDuration);
@@ -2905,7 +2905,7 @@ void CNewUIMuHelperExt::Toggle(int iPageId)
         m_iCurrentPartyHealThreshold = _TempConfig.iHealPartyThreshold / 10;
 
         wchar_t wsBuffTime[MAX_NUMBER_DIGITS + 1] = { 0 };
-        swprintf(wsBuffTime, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iBuffCastInterval);
+        std::swprintf(wsBuffTime, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iBuffCastInterval);
         m_BuffTimeInput.SetText(wsBuffTime);
         m_BuffTimeInput.SetPosition(m_Pos.x + 127, m_Pos.y + 97);
     }
@@ -2918,7 +2918,7 @@ void CNewUIMuHelperExt::Toggle(int iPageId)
         m_iCurrentPartyHealThreshold = _TempConfig.iHealPartyThreshold / 10;
 
         wchar_t wsBuffTime[MAX_NUMBER_DIGITS + 1] = { 0 };
-        swprintf(wsBuffTime, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iBuffCastInterval);
+        std::swprintf(wsBuffTime, MAX_NUMBER_DIGITS + 1, L"%d", _TempConfig.iBuffCastInterval);
         m_BuffTimeInput.SetText(wsBuffTime);
         m_BuffTimeInput.SetPosition(m_Pos.x + 127, m_Pos.y + 187);
     }

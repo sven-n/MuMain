@@ -2342,7 +2342,7 @@ void CUIPhotoViewer::ChangeAnimation(int iMoveDir)
 void CUIPhotoViewer::SetID(const wchar_t* pszID)
 {
     if (pszID == NULL) return;
-    swprintf(m_PhotoChar.ID, pszID);
+    mu_swprintf(m_PhotoChar.ID, pszID);
 }
 
 extern bool EquipmentSuccess;
@@ -2497,9 +2497,9 @@ void CUIPhotoViewer::Render()
             glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
             TextNum = 0;
-            swprintf(TextList[TextNum], GlobalText[997]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            swprintf(TextList[TextNum], GlobalText[998]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            swprintf(TextList[TextNum], GlobalText[999]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+            mu_swprintf(TextList[TextNum], GlobalText[997]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+            mu_swprintf(TextList[TextNum], GlobalText[998]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+            mu_swprintf(TextList[TextNum], GlobalText[999]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
             SIZE TextSize;
             GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Z", 1, &TextSize);
             TextSize.cy /= g_fScreenRate_y;
@@ -3034,7 +3034,7 @@ void CUILetterReadWindow::RenderSub()
     EndRenderColor();
 
     wchar_t szMailFrom[256] = { 0 };
-    swprintf(szMailFrom, GlobalText[1014], m_LetterHead.m_szID, m_LetterHead.m_szDate, m_LetterHead.m_szTime);
+    mu_swprintf(szMailFrom, GlobalText[1014], m_LetterHead.m_szID, m_LetterHead.m_szDate, m_LetterHead.m_szTime);
     g_pRenderText->RenderText(RPos_x(3), RPos_y(3), szMailFrom);
 
     m_ReplyButton.Render();
@@ -3069,13 +3069,13 @@ BOOL CUILetterReadWindow::HandleMessage()
         case 1:
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            swprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            mu_swprintf(temp, GlobalText[1071], g_cdwLetterCost);
 
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
             if (dwUIID == 0) break;
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText(m_LetterHead.m_szID);
             wchar_t szMailTitle[MAX_TEXT_LENGTH + 1] = { 0 };
-            swprintf(szMailTitle, GlobalText[1016], m_LetterHead.m_szText);
+            mu_swprintf(szMailTitle, GlobalText[1016], m_LetterHead.m_szText);
             wchar_t szMailTitleResult[32 + 1] = { 0 };
             CutText4(szMailTitle, szMailTitleResult, NULL, 32);
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMainTitleText(szMailTitleResult);
@@ -3469,7 +3469,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
         {
             if (GetCurrentSelectedFriend() == NULL) break;
             wchar_t tempTxt[MAX_TEXT_LENGTH + 1] = { 0 };
-            swprintf(tempTxt, L"%ls %ls", GlobalText[1024], GetCurrentSelectedFriend()); // "Do you really wish to delete this friend?"
+            mu_swprintf(tempTxt, L"%ls %ls", GlobalText[1024], GetCurrentSelectedFriend()); // "Do you really wish to delete this friend?"
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, tempTxt, GetUIID());
         }
         break;
@@ -3502,7 +3502,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
         case 4:		// 편지쓰기
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            swprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            mu_swprintf(temp, GlobalText[1071], g_cdwLetterCost);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);	// "편지쓰기"
             if (dwUIID == 0) break;
             if (GetCurrentSelectedFriend() != NULL)
@@ -4420,7 +4420,7 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
         case 1:
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            swprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            mu_swprintf(temp, GlobalText[1071], g_cdwLetterCost);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
         }
         break;
@@ -4453,12 +4453,12 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
         {
             if (GetCurrentSelectedLetter() == NULL) break;
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            swprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            mu_swprintf(temp, GlobalText[1071], g_cdwLetterCost);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
             if (dwUIID == 0) break;
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText(GetCurrentSelectedLetter()->m_szID);
             wchar_t szMailTitle[MAX_TEXT_LENGTH + 1] = { 0 };
-            swprintf(szMailTitle, GlobalText[1016], GetCurrentSelectedLetter()->m_szText);
+            mu_swprintf(szMailTitle, GlobalText[1016], GetCurrentSelectedLetter()->m_szText);
             wchar_t szMailTitleResult[32 + 1] = { 0 };
             CutText4(szMailTitle, szMailTitleResult, NULL, 32);
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMainTitleText(szMailTitleResult);

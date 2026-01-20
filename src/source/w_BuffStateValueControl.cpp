@@ -139,7 +139,7 @@ void BuffStateValueControl::GetBuffValueString(std::wstring& outstr, eBuffState 
 
     if (tempvalueinfo.s_Value1 != 0)
     {
-        swprintf(buff, L"%d", tempvalueinfo.s_Value1);
+        mu_swprintf(buff, L"%d", tempvalueinfo.s_Value1);
         outstr = buff;
     }
     else

@@ -216,11 +216,11 @@ void CMsgBoxIGSDeleteItemConfirm::RenderTexts()
 #ifdef FOR_WORK
     wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
-    swprintf(szText, L"m_iStorageSeq : %d", m_iStorageSeq);
+    mu_swprintf(szText, L"m_iStorageSeq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"m_iStorageItemSeq : %d", m_iStorageItemSeq);
+    mu_swprintf(szText, L"m_iStorageItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"m_szItemType : %c", m_szItemType);
+    mu_swprintf(szText, L"m_szItemType : %c", m_szItemType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }

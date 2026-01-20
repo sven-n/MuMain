@@ -317,7 +317,7 @@ void SEASON3B::CNewUIPartyListWindow::RenderPartyHPOnHead()
 
         if ((MouseX >= ScreenX && MouseX < ScreenX + Width && MouseY >= ScreenY - 2 && MouseY < ScreenY + 6))
         {
-            swprintf(Text, L"HP : %d0%%", p->stepHP);
+            mu_swprintf(Text, L"HP : %d0%%", p->stepHP);
             g_pRenderText->SetTextColor(255, 230, 210, 255);
             g_pRenderText->RenderText(ScreenX, ScreenY - 6, Text);
         }

@@ -47,7 +47,7 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
     {
         if (bSpaceInsert)
         {
-            swprintf(szWorkToken, L" %ls", pszToken);
+            mu_swprintf(szWorkToken, L" %ls", pszToken);
             nLine += CutText3(szWorkToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
         else

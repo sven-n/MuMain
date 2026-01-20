@@ -1225,14 +1225,14 @@ BOOL CUIGuildListBox::RenderDataLine(int iLineNumber)
     }
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->m_szID);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     if (m_TextListIter->m_Server != 255/* && m_TextListIter->m_Number != 0*/)
     {
         g_pRenderText->SetBgColor(255, 196, 0, 255);
         g_pRenderText->SetTextColor(0x00000000);
-        swprintf(Text, L"(%d)", m_TextListIter->m_Server + 1);
+        mu_swprintf(Text, L"(%d)", m_TextListIter->m_Server + 1);
         g_pRenderText->RenderText(m_iPos_x + m_iWidth - 60, iPos_y, Text);
     }
 
@@ -1529,7 +1529,7 @@ BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
         }
 
         EnableAlphaTest();
-        swprintf(Text, L"%ls: ", m_TextListIter->m_szID);
+        mu_swprintf(Text, L"%ls: ", m_TextListIter->m_szID);
         g_pRenderText->RenderText(m_iPos_x + 8, m_iPos_y - 16 - iLineNumber * 13, Text, 0, 0, RT3_SORT_LEFT, &TextSize);
         DisableAlphaBlend();
     }
@@ -1563,7 +1563,7 @@ BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
     }
 
     EnableAlphaTest();
-    swprintf(Text, L"%ls", m_TextListIter->m_szText);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szText);
     g_pRenderText->RenderText(m_iPos_x + 8 + TextSize.cx, m_iPos_y - 16 - iLineNumber * 13, Text);
     DisableAlphaBlend();
 
@@ -1764,34 +1764,34 @@ BOOL CUIChatPalListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->m_szID);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x + GetColumnPos_x(0), iPos_y, Text);
 
     if (m_iLayoutType == 1)
     {
         if (m_TextListIter->m_Server == 0xFF)
         {
-            swprintf(Text, GlobalText[1039]);
+            mu_swprintf(Text, GlobalText[1039]);
         }
         else if (m_TextListIter->m_Server == 0xFE)
         {
-            swprintf(Text, GlobalText[1039]);
+            mu_swprintf(Text, GlobalText[1039]);
         }
         else if (m_TextListIter->m_Server == 0xFD)
         {
-            swprintf(Text, GlobalText[1041]);
+            mu_swprintf(Text, GlobalText[1041]);
         }
         else if (m_TextListIter->m_Server == 0xFC)
         {
-            swprintf(Text, GlobalText[1039]);
+            mu_swprintf(Text, GlobalText[1039]);
         }
         //		else if (m_TextListIter->m_Server == 0xFB)
         //		{
-        //			swprintf(Text,GlobalText[1040]);
+        //			mu_swprintf(Text,GlobalText[1040]);
         //		}
         else
         {
-            swprintf(Text, GlobalText[1042], m_TextListIter->m_Server + 1);
+            mu_swprintf(Text, GlobalText[1042], m_TextListIter->m_Server + 1);
         }
         g_pRenderText->RenderText(iPos_x + 4 + GetColumnPos_x(1), iPos_y, Text);
     }
@@ -1942,7 +1942,7 @@ BOOL CUIWindowListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->m_szTitle);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szTitle);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     DisableAlphaBlend();
@@ -2374,7 +2374,7 @@ BOOL CUILetterTextListBox::RenderDataLine(int iLineNumber)
     g_pRenderText->SetTextColor(230, 220, 200, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    swprintf(Text, L"%ls", m_TextListIter->m_szText);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szText);
     int iPos_x = m_iPos_x + 10;
     int iPos_y = GetRenderLinePos_y(iLineNumber);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
@@ -2488,7 +2488,7 @@ BOOL CUISocketListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->m_szText);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szText);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     DisableAlphaBlend();
@@ -4409,7 +4409,7 @@ void CSlideHelpMgr::OpenSlideTextFile(const wchar_t* szFileName)
     if (fp == nullptr)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%ls - File not exist.", szFileName);
+        mu_swprintf(Text, L"%ls - File not exist.", szFileName);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -4836,7 +4836,7 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->m_szID);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     if (iCharacterLevel == 0) g_pRenderText->RenderText(iPos_x + 45, iPos_y, GlobalText[1300], 70, 0, RT3_SORT_CENTER);
@@ -4848,7 +4848,7 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
         g_pRenderText->SetBgColor(0);
         g_pRenderText->SetTextColor(255, 196, 0, 255);
 
-        swprintf(Text, L"%d", m_TextListIter->m_Server + 1);
+        mu_swprintf(Text, L"%d", m_TextListIter->m_Server + 1);
         g_pRenderText->RenderText(m_iPos_x + m_iWidth - 30, iPos_y, Text);
     }
 
@@ -5034,10 +5034,10 @@ BOOL CUIUnionGuildListBox::RenderDataLine(int iLineNumber)
         memset(GuildMark[MARK_EDIT].Mark, 0, 64);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->szName);
+    mu_swprintf(Text, L"%ls", m_TextListIter->szName);
     g_pRenderText->RenderText(iPos_x + 12, iPos_y, Text);
 
-    swprintf(Text, L"%d", m_TextListIter->nMemberCount);
+    mu_swprintf(Text, L"%d", m_TextListIter->nMemberCount);
     g_pRenderText->RenderText(iPos_x + 138, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     DisableAlphaBlend();
@@ -5204,7 +5204,7 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
     if (pItem)
     {
         int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
-        swprintf(oText, L"%ls,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
+        mu_swprintf(oText, L"%ls,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
     }
 
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, oText);
@@ -5352,7 +5352,7 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
 {
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
 
-    swprintf(Text, L"%ls", m_TextListIter->szName);
+    mu_swprintf(Text, L"%ls", m_TextListIter->szName);
 
     if ((wcscmp(GuildMark[Hero->GuildMarkIndex].UnionName, Text) != NULL && wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, Text) != NULL))
     {
@@ -5380,16 +5380,16 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
 
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, Text);
 
-    swprintf(Text, L"%d", m_TextListIter->nCount);
+    mu_swprintf(Text, L"%d", m_TextListIter->nCount);
     g_pRenderText->RenderText(iPos_x + 70, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     if (m_TextListIter->byIsGiveUp)
-        swprintf(Text, L"%ls", GlobalText[1531]);
+        mu_swprintf(Text, L"%ls", GlobalText[1531]);
     else
-        swprintf(Text, L"%ls", GlobalText[1532]);
+        mu_swprintf(Text, L"%ls", GlobalText[1532]);
     g_pRenderText->RenderText(iPos_x + 120, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
-    swprintf(Text, L"%u", m_TextListIter->bySeqNum);
+    mu_swprintf(Text, L"%u", m_TextListIter->bySeqNum);
     g_pRenderText->RenderText(iPos_x + 140, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     DisableAlphaBlend();
@@ -5545,19 +5545,19 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->szName);
+    mu_swprintf(Text, L"%ls", m_TextListIter->szName);
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, Text);
 
     if (m_TextListIter->byJoinSide == 1)
-        swprintf(Text, L"%ls", GlobalText[1606]);
+        mu_swprintf(Text, L"%ls", GlobalText[1606]);
     else
-        swprintf(Text, L"%ls", GlobalText[1605]);
+        mu_swprintf(Text, L"%ls", GlobalText[1605]);
     g_pRenderText->RenderText(iPos_x + 100, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     if (m_TextListIter->byGuildInvolved == 1)
-        swprintf(Text, L"%ls", GlobalText[1607]);
+        mu_swprintf(Text, L"%ls", GlobalText[1607]);
     else
-        swprintf(Text, L"%ls", GlobalText[1608]);
+        mu_swprintf(Text, L"%ls", GlobalText[1608]);
 
     g_pRenderText->RenderText(iPos_x + 137, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
@@ -5565,9 +5565,9 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
     wchar_t Dummy[300];	if (Select_Guild == iLineNumber)
     {
         if (m_TextListIter->byJoinSide == 1)
-            swprintf(Dummy, L"--");
+            mu_swprintf(Dummy, L"--");
         else
-            swprintf(Dummy, L"%ls :     %d", m_TextListIter->szName, m_TextListIter->iGuildScore);
+            mu_swprintf(Dummy, L"%ls :     %d", m_TextListIter->szName, m_TextListIter->iGuildScore);
         g_pRenderText->RenderText(m_iPos_x + 60, m_iPos_y + 31 - 1, Dummy);
     }
 
@@ -5786,7 +5786,7 @@ BOOL CUICurQuestListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->m_szText);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szText);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     return TRUE;
@@ -5947,7 +5947,7 @@ BOOL CUIQuestContentsListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->m_szText);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szText);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text, GetWidth() - 18, 0, m_TextListIter->m_nSort);
 
     return TRUE;
@@ -6100,7 +6100,7 @@ BOOL CUIInGameShopListBox::RenderDataLine(int iLineNumber)
     wchar_t szItemName[MAX_TEXT_LENGTH];
     if (m_TextListIter->m_iNum > 1)
     {
-        swprintf(szItemName, L"%ls(%d)", m_TextListIter->m_szName, m_TextListIter->m_iNum);
+        mu_swprintf(szItemName, L"%ls(%d)", m_TextListIter->m_szName, m_TextListIter->m_iNum);
         g_pRenderText->RenderText(iPos_x, iPos_y, szItemName, 98, 0, RT3_SORT_LEFT);
     }
     else
@@ -6246,7 +6246,7 @@ BOOL CUIBuyingListBox::RenderDataLine(int iLineNumber)
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
     if (m_TextListIter->m_pszItemExplanation != nullptr)
     {
-        swprintf(Text, L"%ls", m_TextListIter->m_pszItemExplanation);
+        mu_swprintf(Text, L"%ls", m_TextListIter->m_pszItemExplanation);
         g_pRenderText->RenderText(iPos_x, iPos_y, Text);
     }
     DisableAlphaBlend();
@@ -6402,11 +6402,11 @@ BOOL CUIPackCheckBuyingListBox::RenderDataLine(int nLine)
         m_TextListIter->m_RadioBtn.RadiobuttonBoxRender();
 
         g_pRenderText->SetFont(g_hFontBold);
-        swprintf(Text, L"%ls", m_TextListIter->m_szItemName);
+        mu_swprintf(Text, L"%ls", m_TextListIter->m_szItemName);
         g_pRenderText->RenderText(iPos_x + 20, iPos_y + 5, Text);
 
         g_pRenderText->SetFont(g_hFont);
-        swprintf(Text, L"%ls", m_TextListIter->m_szAttribute);
+        mu_swprintf(Text, L"%ls", m_TextListIter->m_szAttribute);
         g_pRenderText->RenderText(iPos_x + 20, iPos_y + 17, Text);
     }
     DisableAlphaBlend();
@@ -6654,7 +6654,7 @@ BOOL CUIExtraItemListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    swprintf(Text, L"%ls", m_TextListIter->m_szPattern);
+    mu_swprintf(Text, L"%ls", m_TextListIter->m_szPattern);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
     DisableAlphaBlend();

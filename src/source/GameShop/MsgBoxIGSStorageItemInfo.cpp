@@ -60,8 +60,8 @@ void CMsgBoxIGSStorageItemInfo::Initialize(int iStorageSeq, int iStorageItemSeq,
     m_szItemType = szItemType;
 
     wcscpy(m_szName, pszName);
-    swprintf(m_szNum, GlobalText[3040], pszNum);
-    swprintf(m_szPeriod, GlobalText[3039], pszPeriod);
+    mu_swprintf(m_szNum, GlobalText[3040], pszNum);
+    mu_swprintf(m_szPeriod, GlobalText[3039], pszPeriod);
 }
 
 void CMsgBoxIGSStorageItemInfo::Release()
@@ -193,16 +193,16 @@ void CMsgBoxIGSStorageItemInfo::RenderTexts()
     g_pRenderText->SetTextColor(255, 0, 0, 255);
     if (m_wItemCode == 65535)
     {
-        swprintf(szText, L"Bad Item Index");
+        mu_swprintf(szText, L"Bad Item Index");
     }
     else
     {
-        swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+        mu_swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
     }
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 150, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"Storage Seq : %d", m_iStorageSeq);
+    mu_swprintf(szText, L"Storage Seq : %d", m_iStorageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 150, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"Storage ItemSeq : %d", m_iStorageItemSeq);
+    mu_swprintf(szText, L"Storage ItemSeq : %d", m_iStorageItemSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 150, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }

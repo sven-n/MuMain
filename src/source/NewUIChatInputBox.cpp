@@ -752,7 +752,7 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
         1681, 1682, 1683, 3321,
         1684, 1685, 750, 1686, 751, 752 };
 
-    swprintf(strTooltip, L"%ls", GlobalText[iTextIndex[m_iTooltipType]]);
+    mu_swprintf(strTooltip, L"%ls", GlobalText[iTextIndex[m_iTooltipType]]);
 
     SIZE fontsize;
     g_pRenderText->SetFont(g_hFont);

@@ -152,18 +152,18 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
     wchar_t FileName[64];
     wchar_t WorldName[32];
 
-    swprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
+    mu_swprintf(WorldName, L"World%d", gMapManager.WorldActive + 1);
 
     switch (m_OccupationState)
     {
     case CRYWOLF_OCCUPATION_STATE_PEACE:
-        swprintf(FileName, L"%ls\\TerrainLight.jpg", WorldName);
+        mu_swprintf(FileName, L"%ls\\TerrainLight.jpg", WorldName);
         break;
     case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
-        swprintf(FileName, L"%ls\\TerrainLight1.jpg", WorldName);
+        mu_swprintf(FileName, L"%ls\\TerrainLight1.jpg", WorldName);
         break;
     case CRYWOLF_OCCUPATION_STATE_WAR:
-        swprintf(FileName, L"%ls\\TerrainLight2.jpg", WorldName);
+        mu_swprintf(FileName, L"%ls\\TerrainLight2.jpg", WorldName);
         break;
     }
     OpenTerrainLight(FileName);
@@ -171,13 +171,13 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
     switch (m_OccupationState)
     {
     case CRYWOLF_OCCUPATION_STATE_PEACE:
-        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
+        mu_swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, gMapManager.WorldActive + 1);
         break;
     case CRYWOLF_OCCUPATION_STATE_OCCUPIED:
-        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
+        mu_swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 1);
         break;
     case CRYWOLF_OCCUPATION_STATE_WAR:
-        swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
+        mu_swprintf(FileName, L"Data\\%ls\\EncTerrain%d.att", WorldName, (gMapManager.WorldActive + 1) * 10 + 2);
         break;
     }
     OpenTerrainAttribute(FileName);
@@ -257,7 +257,7 @@ void M34CryWolf1st::RenderNoticesCryWolf()
         nText = 1957 + i + iTemp;
         if (1966 == nText || 1967 == nText)
         {
-            swprintf(szText, GlobalText[nText]);
+            mu_swprintf(szText, GlobalText[nText]);
             g_pRenderText->RenderText(190, 63 + i * 13, szText);
         }
         else
@@ -2171,7 +2171,7 @@ void M34CryWolf1st::Set_Message_Box(int Str, int Num, int Key, int ObjNum)
     if (Str == 56)
     {
         BYTE State = (m_AltarState[ObjNum] & 0x0f);
-        swprintf(Box_String[Num], GlobalText[1950 + Str], State);
+        mu_swprintf(Box_String[Num], GlobalText[1950 + Str], State);
     }
     else
         wcscpy(Box_String[Num], GlobalText[1950 + Str]);
@@ -2414,13 +2414,13 @@ bool M34CryWolf1st::Render_Mvp_Interface()
         g_pRenderText->SetTextColor(255, 148, 21, 255);
         g_pRenderText->SetBgColor(0x00000000);
 
-        swprintf(Text, L"%ls", GlobalText[680]);
+        mu_swprintf(Text, L"%ls", GlobalText[680]);
         g_pRenderText->RenderText(240, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        swprintf(Text, L"%ls", GlobalText[681]);
+        mu_swprintf(Text, L"%ls", GlobalText[681]);
         g_pRenderText->RenderText(285, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        swprintf(Text, L"%ls", GlobalText[1973]);
+        mu_swprintf(Text, L"%ls", GlobalText[1973]);
         g_pRenderText->RenderText(333, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        swprintf(Text, L"%ls", GlobalText[1977]);
+        mu_swprintf(Text, L"%ls", GlobalText[1977]);
         g_pRenderText->RenderText(387, 160, Text, 0, 0, RT3_WRITE_CENTER);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetBgColor(0x00000000);
@@ -2432,15 +2432,15 @@ bool M34CryWolf1st::Render_Mvp_Interface()
             if (HeroScore[i] == -1)
                 continue;
 
-            swprintf(Text, L"%d", i + 1);
+            mu_swprintf(Text, L"%d", i + 1);
             g_pRenderText->RenderText(240, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
-            swprintf(Text, L"%ls", HeroName[i]);
+            mu_swprintf(Text, L"%ls", HeroName[i]);
             g_pRenderText->RenderText(285, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
 
-            swprintf(Text, L"%ls", gCharacterManager.GetCharacterClassText(HeroClass[i]));
+            mu_swprintf(Text, L"%ls", gCharacterManager.GetCharacterClassText(HeroClass[i]));
 
             g_pRenderText->RenderText(335, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
-            swprintf(Text, L"%d", HeroScore[i]);
+            mu_swprintf(Text, L"%d", HeroScore[i]);
             g_pRenderText->RenderText(385, 175 + i * 15, Text, 0, 0, RT3_WRITE_CENTER);
         }
 
@@ -2619,7 +2619,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 148, 21, 255);
     g_pRenderText->SetBgColor(0);
-    swprintf(Text, GlobalText[1948], Dark_elf_Num);
+    mu_swprintf(Text, GlobalText[1948], Dark_elf_Num);
     g_pRenderText->RenderText(582, 359, Text, 0, 0, RT3_WRITE_CENTER);
 
     if (View_Bal == true)
@@ -2630,7 +2630,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
         {
             g_pCryWolfInterface->Render(bar[0], bar[1], bar[2], bar[3], 0.f, 0.f, bar[4], bar[5], 0);
             g_pCryWolfInterface->Render(Val_Icon[0], Val_Icon[1], Val_Icon[2], Val_Icon[3], 0.f, 0.f, Val_Icon[4], Val_Icon[5], 4);
-            swprintf(Text, GlobalText[1949]);
+            mu_swprintf(Text, GlobalText[1949]);
             g_pRenderText->RenderText(38, 101, Text, 0, 0, RT3_WRITE_CENTER);
 
             float Hp = ((67.f / 100.f) * (float)Val_Hp);

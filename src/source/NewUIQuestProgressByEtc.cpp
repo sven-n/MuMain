@@ -44,7 +44,7 @@ bool CNewUIQuestProgressByEtc::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_btnProgressR.ChangeButtonImgState(true, IMAGE_QPE_BTN_R);
     m_btnProgressR.ChangeButtonInfo(x + 153, y + 165, 17, 18);
 
-    m_btnComplete.ChangeText(GlobalText[2811]);	// "È®     ÀÎ"
+    m_btnComplete.ChangeText(GlobalText[2811]);	// "È®     ï¿½ï¿½"
     m_btnComplete.ChangeButtonImgState(true, IMAGE_QPE_BTN_COMPLETE, true);
     m_btnComplete.ChangeButtonInfo(x + (QPE_WIDTH - 108) / 2, y + 362, 108, 29);
 
@@ -416,7 +416,7 @@ void CNewUIQuestProgressByEtc::SetCurPlayerWords()
     int i;
     for (i = 0; i < QM_MAX_ANSWER; ++i)
     {
-        ::swprintf(szAnswer, L"%d.", i + 1);
+        ::mu_swprintf(szAnswer, L"%d.", i + 1);
         pszAnswer = g_QuestMng.GetAnswer(m_dwCurQuestIndex, i);
         if (NULL == pszAnswer)
             break;

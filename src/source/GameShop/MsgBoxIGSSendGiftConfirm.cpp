@@ -206,15 +206,15 @@ void CMsgBoxIGSSendGiftConfirm::RenderTexts()
 #ifdef FOR_WORK
     wchar_t szText[256] = { 0, };
     g_pRenderText->SetTextColor(255, 0, 0, 255);
-    swprintf(szText, L"Package Seq : %d", m_iPackageSeq);
+    mu_swprintf(szText, L"Package Seq : %d", m_iPackageSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 200, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
+    mu_swprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 200, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"Price Seq : %d", m_iPriceSeq);
+    mu_swprintf(szText, L"Price Seq : %d", m_iPriceSeq);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 200, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"ItemCode : %d", m_wItemCode);
+    mu_swprintf(szText, L"ItemCode : %d", m_wItemCode);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 200, 0, RT3_SORT_LEFT);
-    swprintf(szText, L"CashType : %d", m_iCashType);
+    mu_swprintf(szText, L"CashType : %d", m_iCashType);
     g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 50, szText, 200, 0, RT3_SORT_LEFT);
 #endif // FOR_WORK
 }

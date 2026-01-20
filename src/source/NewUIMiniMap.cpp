@@ -209,7 +209,7 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
 {
     wchar_t Fname[300];
     int i = 0;
-    swprintf(Fname, L"Data\\%ls\\mini_map.ozt", Filename);
+    mu_swprintf(Fname, L"Data\\%ls\\mini_map.ozt", Filename);
     FILE* pFile = _wfopen(Fname, L"rb");
 
     if (pFile == NULL)
@@ -221,11 +221,11 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
     {
         m_bSuccess = true;
         fclose(pFile);
-        swprintf(Fname, L"%ls\\mini_map.tga", Filename);
+        mu_swprintf(Fname, L"%ls\\mini_map.tga", Filename);
         LoadBitmap(Fname, IMAGE_MINIMAP_INTERFACE, GL_LINEAR);
     }
 
-    swprintf(Fname, L"Data\\Local\\%ls\\Minimap\\Minimap_%ls_%ls.bmd", g_strSelectedML.c_str(), Filename, g_strSelectedML.c_str());
+    mu_swprintf(Fname, L"Data\\Local\\%ls\\Minimap\\Minimap_%ls_%ls.bmd", g_strSelectedML.c_str(), Filename, g_strSelectedML.c_str());
 
     for (i = 0; i < MAX_MINI_MAP_DATA; i++)
     {
@@ -247,7 +247,7 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
         if (dwCheckSum != GenerateCheckSum2(Buffer, (Size * MAX_MINI_MAP_DATA) + 45, 0x2BC1))
         {
             wchar_t Text[256];
-            swprintf(Text, L"%ls - File corrupted.", Fname);
+            mu_swprintf(Text, L"%ls - File corrupted.", Fname);
             g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);

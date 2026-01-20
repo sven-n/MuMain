@@ -245,7 +245,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
         if (src.find(GlobalText[260]) != std::wstring::npos) {
             std::wstring temp = GlobalText[260];
             temp += ' ';
-            swprintf(lpszStr1, src.c_str());
+            mu_swprintf(lpszStr1, src.c_str());
             wchar_t* context = nullptr;
             lpszStr2 = wcstok_s(lpszStr1, temp.c_str(), &context);
             if (lpszStr2 == NULL) return false;
@@ -264,7 +264,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
         else if (src.find(L"/move") != std::wstring::npos) {
             std::wstring temp = L"/move";
             temp += ' ';
-            swprintf(lpszStr1, src.c_str());
+            mu_swprintf(lpszStr1, src.c_str());
             wchar_t* context = nullptr;
             lpszStr2 = wcstok_s(lpszStr1, temp.c_str(), &context);
             if (lpszStr2 == NULL) return false;

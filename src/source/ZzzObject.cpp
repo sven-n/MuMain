@@ -4880,7 +4880,7 @@ int OpenObjects(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%ls file not found.", FileName);
+        mu_swprintf(Text, L"%ls file not found.", FileName);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);
@@ -4923,7 +4923,7 @@ int OpenObjectsEnc(wchar_t* FileName)
     if (fp == NULL)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%ls file not found.", FileName);
+        mu_swprintf(Text, L"%ls file not found.", FileName);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);

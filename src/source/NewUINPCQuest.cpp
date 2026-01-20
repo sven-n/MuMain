@@ -344,7 +344,7 @@ bool CNewUINPCQuest::RenderItemMobText()
 
             wchar_t szItemName[128];
             GetItemName(nItemType, nItemLevel, szItemName);
-            swprintf(szTemp, L"%ls x %d", szItemName, nItemNum);
+            mu_swprintf(szTemp, L"%ls x %d", szItemName, nItemNum);
             g_pRenderText->RenderText(m_Pos.x + 60, nPosY, szTemp);
         }
         break;
@@ -366,7 +366,7 @@ bool CNewUINPCQuest::RenderItemMobText()
             }
 
             auto name = getMonsterName(int(pQuest->QuestAct[i].wItemType));
-            swprintf(szTemp, L"%ls x %d/%d", name, nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
+            mu_swprintf(szTemp, L"%ls x %d/%d", name, nKillMobCount, int(pQuest->QuestAct[i].byItemNum));
 
             g_pRenderText->RenderText(m_Pos.x + 50, nPosY, szTemp);
         }

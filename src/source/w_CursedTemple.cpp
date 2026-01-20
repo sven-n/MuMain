@@ -978,7 +978,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 void CursedTemple::UpdateTempleSystemMsg(int _Value)
 {
     wchar_t szText[256] = { 0, };
-    swprintf(szText, GlobalText[2367]);
+    mu_swprintf(szText, GlobalText[2367]);
     switch (_Value)
     {
     case 0:
@@ -994,7 +994,7 @@ void CursedTemple::UpdateTempleSystemMsg(int _Value)
         g_pSystemLogBox->AddText(GlobalText[2368], SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 5:
-        swprintf(szText, GlobalText[829], 6);
+        mu_swprintf(szText, GlobalText[829], 6);
         g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 6:
