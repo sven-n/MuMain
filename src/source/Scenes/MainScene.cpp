@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "MainScene.h"
 #include "SceneCommon.h"
-#include "SceneCore.h"
 #include "../Camera/CameraUtility.h"
 #include "../ZzzOpenglUtil.h"
 #include "../ZzzObject.h"
@@ -87,114 +86,111 @@ static bool ShouldRenderLeaves()
            IsUnitedMarketPlace();
 }
 
-void MoveMainScene()
+static void InitializeMainScene()
 {
-    if (!InitMainScene)
+    g_pMainFrame->ResetSkillHotKey();
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Join the game with the following character: %ls", CharactersClient[SelectedHero].ID);
+    g_ErrorReport.Write(L"> Character selected <%d> \"%ls\"\r\n", SelectedHero + 1, CharactersClient[SelectedHero].ID);
+
+    InitMainScene = true;
+
+    g_ConsoleDebug->Write(MCD_SEND, L"SendRequestJoinMapServer");
+
+    CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
+    SocketClient->ToGameServer()->SendSelectCharacter(CharactersClient[SelectedHero].ID);
+
+    CUIMng::Instance().CreateMainScene();
+
+    CameraAngle[2] = -45.f;
+
+    ClearInput();
+    InputEnable = false;
+    TabInputEnable = false;
+    InputTextWidth = 256;
+    InputTextMax[0] = 42;
+    InputTextMax[1] = 10;
+    InputNumber = 2;
+    for (int i = 0; i < MAX_WHISPER; i++)
     {
-        g_pMainFrame->ResetSkillHotKey();
-
-        g_ConsoleDebug->Write(MCD_NORMAL, L"Join the game with the following character: %ls", CharactersClient[SelectedHero].ID);
-
-        g_ErrorReport.Write(L"> Character selected <%d> \"%ls\"\r\n", SelectedHero + 1, CharactersClient[SelectedHero].ID);
-
-        InitMainScene = true;
-
-        g_ConsoleDebug->Write(MCD_SEND, L"SendRequestJoinMapServer");
-
-        CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
-        SocketClient->ToGameServer()->SendSelectCharacter(CharactersClient[SelectedHero].ID);
-        // SendRequestJoinMapServer(CharactersClient[SelectedHero].ID);
-
-        CUIMng::Instance().CreateMainScene();
-
-        CameraAngle[2] = -45.f;
-
-        ClearInput();
-        InputEnable = false;
-        TabInputEnable = false;
-        InputTextWidth = 256;
-        InputTextMax[0] = 42;
-        InputTextMax[1] = 10;
-        InputNumber = 2;
-        for (int i = 0; i < MAX_WHISPER; i++)
-        {
-            g_pChatListBox->AddText(L"", L"", SEASON3B::TYPE_WHISPER_MESSAGE);
-        }
-
-        g_GuildNotice[0][0] = '\0';
-        g_GuildNotice[1][0] = '\0';
-
-        g_pPartyManager->Create();
-
-        g_pChatListBox->ClearAll();
-        g_pSystemLogBox->ClearAll();
-
-        g_pSlideHelpMgr->Init();
-        g_pUIMapName->Init();
-        g_pNewUIMuHelper->Reset();
-
-        g_GuildCache.Reset();
-
-        g_PortalMgr.Reset();
-
-        ClearAllObjectBlurs();
-
-        SetFocus(g_hWnd);
-
-        g_ErrorReport.Write(L"> Main Scene init success. ");
-        g_ErrorReport.WriteCurrentTime();
-
-        g_ConsoleDebug->Write(MCD_NORMAL, L"MainScene Init Success");
+        g_pChatListBox->AddText(L"", L"", SEASON3B::TYPE_WHISPER_MESSAGE);
     }
 
-    if (CurrentProtocolState == RECEIVE_JOIN_MAP_SERVER)
-    {
-        EnableMainRender = true;
-    }
-    if (EnableMainRender == false)
-    {
-        return;
-    }
-    //init
+    g_GuildNotice[0][0] = '\0';
+    g_GuildNotice[1][0] = '\0';
+
+    g_pPartyManager->Create();
+
+    g_pChatListBox->ClearAll();
+    g_pSystemLogBox->ClearAll();
+
+    g_pSlideHelpMgr->Init();
+    g_pUIMapName->Init();
+    g_pNewUIMuHelper->Reset();
+
+    g_GuildCache.Reset();
+    g_PortalMgr.Reset();
+
+    ClearAllObjectBlurs();
+
+    SetFocus(g_hWnd);
+
+    g_ErrorReport.Write(L"> Main Scene init success. ");
+    g_ErrorReport.WriteCurrentTime();
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"MainScene Init Success");
+}
+
+static void InitializeSceneFrame()
+{
     EarthQuake *= 0.2f;
-
     InitTerrainLight();
 
     CheckInventory = NULL;
     CheckSkill = -1;
     MouseOnWindow = false;
+}
 
-    if (!CameraTopViewEnable && LoadingWorld < 30)
-    {
-        if (MouseY >= (int)(480 - 48))
-            MouseOnWindow = true;
+static void UpdateUIAndInput()
+{
+    if (CameraTopViewEnable || LoadingWorld >= 30)
+        return;
 
-        g_pPartyManager->Update();
-        g_pNewUISystem->Update();
-
-        if (MouseLButton == true && false == g_pNewUISystem->CheckMouseUse() && g_dwMouseUseUIID == 0 && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHATINPUTBOX) == false)
-        {
-            g_pWindowMgr->SetWindowsEnable(FALSE);
-            g_pFriendMenu->HideMenu();
-            g_dwKeyFocusUIID = 0;
-            if (GetFocus() != g_hWnd)
-            {
-                SaveIMEStatus();
-                SetFocus(g_hWnd);
-            }
-        }
-        MoveInterface();
-        MoveTournamentInterface();
-        if (ErrorMessage != MESSAGE_LOG_OUT)
-            g_pUIManager->UpdateInput();
-    }
-
-    if (ErrorMessage != NULL)
+    if (MouseY >= (int)(480 - 48))
         MouseOnWindow = true;
 
+    g_pPartyManager->Update();
+    g_pNewUISystem->Update();
+
+    if (MouseLButton == true &&
+        false == g_pNewUISystem->CheckMouseUse() &&
+        g_dwMouseUseUIID == 0 &&
+        g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHATINPUTBOX) == false)
+    {
+        g_pWindowMgr->SetWindowsEnable(FALSE);
+        g_pFriendMenu->HideMenu();
+        g_dwKeyFocusUIID = 0;
+        if (GetFocus() != g_hWnd)
+        {
+            SaveIMEStatus();
+            SetFocus(g_hWnd);
+        }
+    }
+
+    MoveInterface();
+    MoveTournamentInterface();
+
+    if (ErrorMessage != MESSAGE_LOG_OUT)
+        g_pUIManager->UpdateInput();
+}
+
+static void UpdateGameEntities()
+{
     MoveObjects();
+
     if (!CameraTopViewEnable)
         MoveItems();
+
     if (RequireLeavesEffect())
     {
         MoveLeaves();
@@ -219,6 +215,32 @@ void MoveMainScene()
 #ifdef ENABLE_EDIT
     EditObjects();
 #endif //ENABLE_EDIT
+}
+
+void MoveMainScene()
+{
+    if (!InitMainScene)
+    {
+        InitializeMainScene();
+    }
+
+    if (CurrentProtocolState == RECEIVE_JOIN_MAP_SERVER)
+    {
+        EnableMainRender = true;
+    }
+
+    if (EnableMainRender == false)
+    {
+        return;
+    }
+
+    InitializeSceneFrame();
+    UpdateUIAndInput();
+
+    if (ErrorMessage != NULL)
+        MouseOnWindow = true;
+
+    UpdateGameEntities();
 
     g_ConsoleDebug->UpdateMainScene();
 }
