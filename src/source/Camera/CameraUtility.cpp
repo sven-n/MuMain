@@ -34,9 +34,13 @@ bool MoveMainCamera()
     if (
         gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
         && CCameraMove::GetInstancePtr()->IsTourMode())
+    {
         CameraFOV = 65.0f;
+    }
     else
+    {
         CameraFOV = 30.f;
+    }
 
 #ifdef ENABLE_EDIT2
     {
