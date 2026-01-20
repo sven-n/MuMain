@@ -12,7 +12,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzOpenData.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"

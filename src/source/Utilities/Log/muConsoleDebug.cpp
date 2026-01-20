@@ -14,7 +14,7 @@
 
 #include "GlobalBitmap.h"
 #include "ZzzTexture.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #ifdef CSK_DEBUG_MAP_PATHFINDING
 #include "ZzzPath.h"
 #endif // CSK_DEBUG_MAP_PATHFINDING

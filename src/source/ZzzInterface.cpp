@@ -16,7 +16,7 @@
 #include "ZzzInventory.h"
 #include "ZzzOpenData.h"
 #include "ZzzEffect.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzPath.h"
 #include "DSPlaySound.h"
 

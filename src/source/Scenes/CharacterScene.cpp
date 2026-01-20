@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "CharacterScene.h"
-#include "../ZzzScene.h"
+#include "SceneCore.h"
 #include "../CharacterManager.h"
 #include "../MapManager.h"
 #include "../ZzzOpenglUtil.h"

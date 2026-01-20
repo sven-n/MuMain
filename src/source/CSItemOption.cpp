@@ -7,7 +7,7 @@
 #include "ZzzBMD.h"
 #include "ZzzTexture.h"
 #include "ZzzCharacter.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "CharacterManager.h"

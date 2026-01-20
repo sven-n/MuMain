@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "LoginScene.h"
-#include "../ZzzScene.h"
+#include "SceneCore.h"
 #include "../Camera/CameraUtility.h"
 #include "../CameraMove.h"
 #include "../DSPlaySound.h"

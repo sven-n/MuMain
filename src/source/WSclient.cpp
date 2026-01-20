@@ -15,7 +15,7 @@
 #include "ZzzEffect.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzOpenData.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 
 #include "DSPlaySound.h"
 

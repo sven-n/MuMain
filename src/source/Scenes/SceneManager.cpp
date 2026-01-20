@@ -21,7 +21,7 @@ FrameTimingState g_frameTiming;
 #include "LoginScene.h"
 #include "CharacterScene.h"
 #include "MainScene.h"
-#include "../ZzzScene.h"
+#include "SceneCore.h"
 #include "../LoadingScene.h"
 #include "../DSPlaySound.h"
 #include "../ZzzOpenglUtil.h"

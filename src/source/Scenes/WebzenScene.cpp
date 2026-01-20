@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "WebzenScene.h"
-#include "../ZzzScene.h"
+#include "SceneCore.h"
 #include "../ZzzOpenglUtil.h"
 #include "../ZzzTexture.h"
 #include "../ZzzInterface.h"

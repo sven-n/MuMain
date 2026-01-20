@@ -9,7 +9,7 @@
 #include "UIMng.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzInterface.h"
 #include "Scenes/SceneCommon.h"
 

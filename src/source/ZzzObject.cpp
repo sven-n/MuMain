@@ -12,7 +12,7 @@
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "ZzzEffect.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzOpenData.h"
 #include "DSPlaySound.h"
 

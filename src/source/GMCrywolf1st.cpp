@@ -4,7 +4,7 @@
 #include "ZzzTexture.h"
 #include "ZzzBMD.h"
 #include "ZzzLodTerrain.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzEffect.h"
 #include "ZzzAI.h"
 #include "ZzzOpenData.h"

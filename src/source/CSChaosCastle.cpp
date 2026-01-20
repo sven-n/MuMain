@@ -9,7 +9,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzBMD.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzEffect.h"
 #include "UIManager.h"
 #include "CSChaosCastle.h"

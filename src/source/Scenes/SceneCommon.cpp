@@ -5,7 +5,7 @@
 
 #include "stdafx.h"
 #include "SceneCommon.h"
-#include "../ZzzScene.h"
+#include "SceneCore.h"
 
 //=============================================================================
 // Character Selection State Implementation

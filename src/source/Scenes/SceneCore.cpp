@@ -6,7 +6,7 @@
 #include "ZzzInfomation.h"
 #include "ZzzInterface.h"
 #include "ZzzTexture.h"
-#include "ZzzScene.h"
+#include "SceneCore.h"
 
 
 #include "PhysicsManager.h"

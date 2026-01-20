@@ -10,7 +10,7 @@
 #include "ZzzCharacter.h"
 #include "UIControls.h"
 #include "ZzzInterface.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzInventory.h"
 #include "SkillManager.h"
 #include "UIJewelHarmony.h"

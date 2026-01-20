@@ -13,7 +13,7 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "GOBoid.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "DSPlaySound.h"
 
 #include "UIControls.h"

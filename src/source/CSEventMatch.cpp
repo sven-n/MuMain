@@ -6,7 +6,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzLodTerrain.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzAI.h"
 #include "CSEventMatch.h"
 

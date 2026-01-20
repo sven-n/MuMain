@@ -4,7 +4,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzLodTerrain.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "MatchEvent.h"
 #include "MapManager.h"
 #include "w_CursedTemple.h"

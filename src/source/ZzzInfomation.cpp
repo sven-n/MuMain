@@ -9,7 +9,7 @@
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzInterface.h"
 #include "ReadScript.h"
 #include "ZzzInventory.h"

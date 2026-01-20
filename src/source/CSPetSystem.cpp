@@ -23,7 +23,7 @@
 #include "ZzzLodTerrain.h"
 #include "ZzzObject.h"
 #include "ZzzOpenglUtil.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzTexture.h"
 #include "DSPlaySound.h"
 

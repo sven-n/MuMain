@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "CameraUtility.h"
-#include "../ZzzScene.h"
+#include "../Scenes/SceneCore.h"
 #include "../ZzzInterface.h"
 #include "../ZzzOpenglUtil.h"
 #include "../ZzzObject.h"

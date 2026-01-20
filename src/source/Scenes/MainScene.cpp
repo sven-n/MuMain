@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "MainScene.h"
 #include "SceneCommon.h"
-#include "../ZzzScene.h"
+#include "SceneCore.h"
 #include "../Camera/CameraUtility.h"
 #include "../ZzzOpenglUtil.h"
 #include "../ZzzObject.h"

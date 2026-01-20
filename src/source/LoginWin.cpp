@@ -12,7 +12,7 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "UIControls.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
