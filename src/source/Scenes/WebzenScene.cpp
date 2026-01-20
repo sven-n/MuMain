@@ -16,6 +16,10 @@
 extern EGameScene SceneFlag;
 extern CErrorReport g_ErrorReport;
 
+// Constants for background image selection
+constexpr int BACKGROUND_SELECTION_PERCENTAGE = 100;
+constexpr int CLASSIC_BACKGROUND_PROBABILITY = 70;
+
 void WebzenScene(HDC hDC)
 {
     CUIMng& rUIMng = CUIMng::Instance();
@@ -32,7 +36,7 @@ void WebzenScene(HDC hDC)
     LoadBitmap(L"Interface\\lo_lo.jpg", BITMAP_TITLE + 5, GL_LINEAR, GL_REPEAT);
     LoadBitmap(L"Interface\\lo_back_s5_03.jpg", BITMAP_TITLE + 6, GL_LINEAR);
     LoadBitmap(L"Interface\\lo_back_s5_04.jpg", BITMAP_TITLE + 7, GL_LINEAR);
-    if (rand() % 100 <= 70)
+    if (rand() % BACKGROUND_SELECTION_PERCENTAGE <= CLASSIC_BACKGROUND_PROBABILITY)
     {
         LoadBitmap(L"Interface\\lo_back_im01.jpg", BITMAP_TITLE + 8, GL_LINEAR);
         LoadBitmap(L"Interface\\lo_back_im02.jpg", BITMAP_TITLE + 9, GL_LINEAR);
