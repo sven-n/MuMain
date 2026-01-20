@@ -28,23 +28,29 @@ constexpr int TITLE_BITMAP_PATTERN = BITMAP_TITLE + 5;
 constexpr int TITLE_BITMAP_DYNAMIC_START = BITMAP_TITLE + 6;
 constexpr int TITLE_BITMAP_DYNAMIC_END = BITMAP_TITLE + 14;
 
-void WebzenScene(HDC hDC)
+enum class BackgroundTheme
 {
-    CUIMng& rUIMng = CUIMng::Instance();
+    Classic,
+    Season5
+};
 
-    if (!OpenFont())
-    {
-        return;
-    }
-    ClearInput();
+/**
+ * @brief Determines which background theme to use based on configured probability.
+ * @return BackgroundTheme::Classic or BackgroundTheme::Season5
+ */
+static BackgroundTheme SelectBackgroundTheme()
+{
+    int roll = rand() % BACKGROUND_SELECTION_PERCENTAGE;
+    return (roll <= CLASSIC_BACKGROUND_PROBABILITY) ? BackgroundTheme::Classic : BackgroundTheme::Season5;
+}
 
-    LoadBitmap(L"Interface\\New_lo_back_01.jpg", BITMAP_TITLE, GL_LINEAR);
-    LoadBitmap(L"Interface\\New_lo_back_02.jpg", BITMAP_TITLE + 1, GL_LINEAR);
-    LoadBitmap(L"Interface\\lo_121518.tga", BITMAP_TITLE + 3, GL_LINEAR);
-    LoadBitmap(L"Interface\\lo_lo.jpg", BITMAP_TITLE + 5, GL_LINEAR, GL_REPEAT);
-    LoadBitmap(L"Interface\\lo_back_s5_03.jpg", BITMAP_TITLE + 6, GL_LINEAR);
-    LoadBitmap(L"Interface\\lo_back_s5_04.jpg", BITMAP_TITLE + 7, GL_LINEAR);
-    if (rand() % BACKGROUND_SELECTION_PERCENTAGE <= CLASSIC_BACKGROUND_PROBABILITY)
+/**
+ * @brief Loads the appropriate background image set based on theme.
+ * @param theme The background theme to load (Classic or Season5)
+ */
+static void LoadBackgroundTheme(BackgroundTheme theme)
+{
+    if (theme == BackgroundTheme::Classic)
     {
         LoadBitmap(L"Interface\\lo_back_im01.jpg", BITMAP_TITLE + 8, GL_LINEAR);
         LoadBitmap(L"Interface\\lo_back_im02.jpg", BITMAP_TITLE + 9, GL_LINEAR);
@@ -62,6 +68,54 @@ void WebzenScene(HDC hDC)
         LoadBitmap(L"Interface\\lo_back_s5_im05.jpg", BITMAP_TITLE + 12, GL_LINEAR);
         LoadBitmap(L"Interface\\lo_back_s5_im06.jpg", BITMAP_TITLE + 13, GL_LINEAR);
     }
+}
+
+/**
+ * @brief Loads all common title scene bitmaps.
+ */
+static void LoadCommonTitleBitmaps()
+{
+    LoadBitmap(L"Interface\\New_lo_back_01.jpg", BITMAP_TITLE, GL_LINEAR);
+    LoadBitmap(L"Interface\\New_lo_back_02.jpg", BITMAP_TITLE + 1, GL_LINEAR);
+    LoadBitmap(L"Interface\\lo_121518.tga", BITMAP_TITLE + 3, GL_LINEAR);
+    LoadBitmap(L"Interface\\lo_lo.jpg", BITMAP_TITLE + 5, GL_LINEAR, GL_REPEAT);
+    LoadBitmap(L"Interface\\lo_back_s5_03.jpg", BITMAP_TITLE + 6, GL_LINEAR);
+    LoadBitmap(L"Interface\\lo_back_s5_04.jpg", BITMAP_TITLE + 7, GL_LINEAR);
+}
+
+/**
+ * @brief Unloads all title scene bitmaps.
+ */
+static void UnloadTitleBitmaps()
+{
+    DeleteBitmap(TITLE_BITMAP_BASE);
+    DeleteBitmap(TITLE_BITMAP_BACK_02);
+    DeleteBitmap(TITLE_BITMAP_LOGO);
+    DeleteBitmap(TITLE_BITMAP_PATTERN);
+
+    for (int i = TITLE_BITMAP_DYNAMIC_START; i < TITLE_BITMAP_DYNAMIC_END; ++i)
+    {
+        DeleteBitmap(i);
+    }
+}
+
+/**
+ * @brief Webzen title/intro scene - displays loading screen and transitions to login.
+ * @param hDC Device context for rendering
+ */
+void WebzenScene(HDC hDC)
+{
+    CUIMng& rUIMng = CUIMng::Instance();
+
+    if (!OpenFont())
+    {
+        return;
+    }
+    ClearInput();
+
+    LoadCommonTitleBitmaps();
+    BackgroundTheme theme = SelectBackgroundTheme();
+    LoadBackgroundTheme(theme);
 
     rUIMng.CreateTitleSceneUI();
 
@@ -75,17 +129,9 @@ void WebzenScene(HDC hDC)
     CUIMng::Instance().RenderTitleSceneUI(hDC, 11, 11);
 
     rUIMng.ReleaseTitleSceneUI();
-    DeleteBitmap(TITLE_BITMAP_BASE);
-    DeleteBitmap(TITLE_BITMAP_BACK_02);
-    DeleteBitmap(TITLE_BITMAP_LOGO);
-    DeleteBitmap(TITLE_BITMAP_PATTERN);
-
-    for (int i = TITLE_BITMAP_DYNAMIC_START; i < TITLE_BITMAP_DYNAMIC_END; ++i)
-    {
-        DeleteBitmap(i);
-    }
+    UnloadTitleBitmaps();
 
     g_ErrorReport.Write(L"> Loading ok.\r\n");
 
-    SceneFlag = LOG_IN_SCENE;	//
+    SceneFlag = LOG_IN_SCENE;
 }
