@@ -232,60 +232,67 @@ void NewMoveCharacterScene()
     g_ConsoleDebug->UpdateMainScene();
 }
 
-bool NewRenderCharacterScene(HDC hDC)
+/**
+ * @brief Sets up viewport and character positioning for character selection scene.
+ *
+ * @param outWidth Output screen width
+ * @param outHeight Output screen height
+ */
+static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
 {
-    if (!InitCharacterScene)
-    {
-        return false;
-    }
-    if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
-    {
-        return false;
-    }
-
-    FogEnable = false;
     vec3_t pos;
     Vector(9758.0f, 18913.0f, 675.0f, pos);
 
     MoveMainCamera();
 
-    int Width, Height;
-
     glColor3f(1.f, 1.f, 1.f);
-    Height = 480;
-    Width = GetScreenWidth();
+    outHeight = 480;
+    outWidth = GetScreenWidth();
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(0, 25, 640, 430);
 
-    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
-
-    OBJECT* o = &CharactersClient[SelectedHero].Object;
-
+    CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, pos);
     CreateScreenVector(MouseX, MouseY, MouseTarget);
+
+    // Reset character positions and lighting
     for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; i++)
     {
         CharactersClient[i].Object.Position[2] = 163.0f;
         Vector(0.0f, 0.0f, 0.0f, CharactersClient[i].Object.Light);
     }
+}
 
-    if (SelectedHero != -1 && o->Live)
-    {
-        EnableAlphaBlend();
-        vec3_t Light;
-        Vector(1.0f, 1.0f, 1.0f, Light);
-        Vector(1.0f, 1.0f, 1.0f, o->Light);
-        AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
-        DisableAlphaBlend();
-    }
+/**
+ * @brief Applies lighting to the currently selected character.
+ */
+static void ApplySelectedCharacterLighting()
+{
+    if (SelectedHero == -1)
+        return;
 
-    CHARACTER* pCha = NULL;
-    OBJECT* pObj = NULL;
+    OBJECT* o = &CharactersClient[SelectedHero].Object;
+    if (!o->Live)
+        return;
 
+    EnableAlphaBlend();
+    vec3_t Light;
+    Vector(1.0f, 1.0f, 1.0f, Light);
+    Vector(1.0f, 1.0f, 1.0f, o->Light);
+    AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
+    DisableAlphaBlend();
+}
+
+/**
+ * @brief Adjusts character heights based on their mount/helper type.
+ */
+static void AdjustCharacterHeights()
+{
     for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; ++i)
     {
-        pCha = &CharactersClient[i];
-        pObj = &pCha->Object;
+        CHARACTER* pCha = &CharactersClient[i];
+        OBJECT* pObj = &pCha->Object;
+
         if (pCha->Helper.Type == MODEL_HORN_OF_DINORANT)
         {
             pObj->Position[2] = 194.5f;
@@ -295,7 +302,13 @@ bool NewRenderCharacterScene(HDC hDC)
             pObj->Position[2] = 169.5f;
         }
     }
+}
 
+/**
+ * @brief Renders all 3D elements for the character selection scene.
+ */
+static void RenderCharacterScene3D()
+{
     RenderTerrain(false);
     RenderObjects();
     RenderCharactersClient();
@@ -311,33 +324,49 @@ bool NewRenderCharacterScene(HDC hDC)
     RenderBoids();
     RenderObjects_AfterCharacter();
     CheckSprites();
+}
 
-    if (SelectedHero != -1 && o->Live)
-    {
-        vec3_t vLight;
+/**
+ * @brief Renders special effects for the selected character (aurora, particles).
+ */
+static void RenderSelectedCharacterEffects()
+{
+    if (SelectedHero == -1)
+        return;
 
-        Vector(1.0f, 1.0f, 1.f, vLight);
-        float fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
-        Vector(fLumi * vLight[0], fLumi * vLight[1], fLumi * vLight[2], vLight);
+    OBJECT* o = &CharactersClient[SelectedHero].Object;
+    if (!o->Live)
+        return;
 
-        EnableAlphaBlend();
-        RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.8f, 1.8f, vLight, WorldTime * 0.01f);
-        RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.2f, 1.2f, vLight, -WorldTime * 0.01f);
-        DisableAlphaBlend();
+    vec3_t vLight;
+    Vector(1.0f, 1.0f, 1.f, vLight);
+    float fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
+    Vector(fLumi * vLight[0], fLumi * vLight[1], fLumi * vLight[2], vLight);
 
-        float Rotation = (int)WorldTime % 3600 / (float)10.f;
-        Vector(0.15f, 0.15f, 0.15f, o->Light);
-        CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 4);
-        CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 5);
+    EnableAlphaBlend();
+    RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.8f, 1.8f, vLight, WorldTime * 0.01f);
+    RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.2f, 1.2f, vLight, -WorldTime * 0.01f);
+    DisableAlphaBlend();
 
-        g_csMapServer.SetHeroID((wchar_t*)CharactersClient[SelectedHero].ID);
-    }
+    float Rotation = (int)WorldTime % 3600 / (float)10.f;
+    Vector(0.15f, 0.15f, 0.15f, o->Light);
+    CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 4);
+    CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 5);
 
+    g_csMapServer.SetHeroID((wchar_t*)CharactersClient[SelectedHero].ID);
+}
+
+/**
+ * @brief Renders UI elements for character selection scene.
+ */
+static void RenderCharacterSceneUI()
+{
     BeginSprite();
     RenderSprites();
     RenderParticles();
     RenderPoints();
     EndSprite();
+
     BeginBitmap();
     RenderInfomation();
 
@@ -346,6 +375,42 @@ bool NewRenderCharacterScene(HDC hDC)
 #endif
 
     EndBitmap();
+}
+
+/**
+ * @brief Main rendering function for the character selection scene.
+ *
+ * Orchestrates the complete rendering pipeline:
+ * 1. Viewport setup and character positioning
+ * 2. Character lighting application
+ * 3. Character height adjustment
+ * 4. 3D world rendering
+ * 5. Selected character effects
+ * 6. UI rendering
+ *
+ * @param hDC Device context (unused but required by interface)
+ * @return true if rendering succeeded, false if scene not initialized
+ */
+bool NewRenderCharacterScene(HDC hDC)
+{
+    if (!InitCharacterScene)
+    {
+        return false;
+    }
+    if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
+    {
+        return false;
+    }
+
+    FogEnable = false;
+
+    int width, height;
+    SetupCharacterSceneViewport(width, height);
+    ApplySelectedCharacterLighting();
+    AdjustCharacterHeights();
+    RenderCharacterScene3D();
+    RenderSelectedCharacterEffects();
+    RenderCharacterSceneUI();
 
     EndOpengl();
 
