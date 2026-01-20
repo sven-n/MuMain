@@ -68,12 +68,77 @@ double GetTargetFps()
     return g_frameTiming.GetTargetFps();
 }
 
-void UpdateSceneState()
+/**
+ * @brief Generates a timestamped filename and message for screenshot capture.
+ * @param outFileName Buffer to receive the filename
+ * @param outMessage Buffer to receive the log message
+ */
+static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage)
 {
-    g_pNewKeyInput->ScanAsyncKeyState();
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg",
+        st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
+    swprintf(outMessage, GlobalText[459], outFileName);
 
-    g_dwMouseUseUIID = 0;
+    wchar_t lpszTemp[64];
+    swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
+    wcscat(outMessage, lpszTemp);
+}
 
+/**
+ * @brief Captures the current frame buffer and saves it as a JPEG screenshot.
+ */
+static void CaptureScreenshot()
+{
+    std::vector<unsigned char> Buffer(WindowWidth * WindowHeight * 3);
+    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, Buffer.data());
+    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100);
+
+    GrabScreen++;
+    GrabScreen %= 10000;
+}
+
+/**
+ * @brief Handles screenshot capture toggle and execution.
+ */
+static void HandleScreenshotCapture()
+{
+    if (PressKey(VK_SNAPSHOT))
+    {
+        GrabEnable = !GrabEnable;
+    }
+
+    if (!GrabEnable)
+    {
+        return;
+    }
+
+    const bool addTimeStampToCapture = !HIBYTE(GetAsyncKeyState(VK_SHIFT));
+    wchar_t screenshotText[256];
+
+    GenerateScreenshotFilename(GrabFileName, screenshotText);
+
+    if (addTimeStampToCapture)
+    {
+        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
+
+    CaptureScreenshot();
+
+    if (!addTimeStampToCapture)
+    {
+        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
+
+    GrabEnable = false;
+}
+
+/**
+ * @brief Updates the active scene based on current scene flag.
+ */
+static void UpdateActiveScene()
+{
     switch (SceneFlag)
     {
     case LOG_IN_SCENE:
@@ -88,49 +153,19 @@ void UpdateSceneState()
         MoveMainScene();
         break;
     }
+}
 
+/**
+ * @brief Updates scene state, handles input, and manages screenshot capture.
+ */
+void UpdateSceneState()
+{
+    g_pNewKeyInput->ScanAsyncKeyState();
+    g_dwMouseUseUIID = 0;
+
+    UpdateActiveScene();
     MoveNotices();
-
-    if (PressKey(VK_SNAPSHOT))
-    {
-        if (GrabEnable)
-            GrabEnable = false;
-        else
-            GrabEnable = true;
-    }
-
-    const bool addTimeStampToCapture = !HIBYTE(GetAsyncKeyState(VK_SHIFT));
-    wchar_t screenshotText[256];
-    if (GrabEnable)
-    {
-        SYSTEMTIME st;
-        GetLocalTime(&st);
-        swprintf(GrabFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
-        swprintf(screenshotText, GlobalText[459], GrabFileName);
-        wchar_t lpszTemp[64];
-        swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
-        wcscat(screenshotText, lpszTemp);
-        if (addTimeStampToCapture)
-        {
-            g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-        }
-
-        std::vector<unsigned char> Buffer(WindowWidth * WindowHeight * 3);
-
-        glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, Buffer.data());
-
-        WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100);
-
-        GrabScreen++;
-        GrabScreen %= 10000;
-    }
-
-    if (GrabEnable && !addTimeStampToCapture)
-    {
-        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-    }
-
-    GrabEnable = false;
+    HandleScreenshotCapture();
 }
 
 /**
