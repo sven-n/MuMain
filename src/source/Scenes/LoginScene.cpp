@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "LoginScene.h"
-#include "SceneCore.h"
 #include "../Camera/CameraUtility.h"
 #include "../CameraMove.h"
 #include "../DSPlaySound.h"
@@ -136,6 +135,109 @@ void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle)
     CameraAngle[0] = Angle[0];
 }
 
+/**
+ * @brief Initializes login camera to starting position and angle.
+ */
+static void InitializeLoginCamera()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        g_loginCamera.currentPosition[i] = LoginCameraState::WALK_PATHS[0][i];
+        g_loginCamera.currentAngle[i] = LoginCameraState::WALK_PATHS[0][i + 3];
+    }
+    g_loginCamera.currentNumber = 1;
+    g_loginCamera.currentWalkType = 1;
+
+    for (int i = 0; i < 3; i++)
+    {
+        g_loginCamera.currentWalkDelta[i] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 128;
+        g_loginCamera.currentWalkDelta[i + 3] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 128;
+    }
+}
+
+/**
+ * @brief Calculates movement delta for transitioning to target waypoint.
+ */
+static void CalculateWalkDelta()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        g_loginCamera.currentWalkDelta[i] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 128;
+        g_loginCamera.currentWalkDelta[i + 3] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 128;
+    }
+}
+
+/**
+ * @brief Selects next camera waypoint based on scene state.
+ */
+static void SelectNextWaypoint()
+{
+    if (SceneFlag == LOG_IN_SCENE)
+    {
+        g_loginCamera.currentNumber = rand() % 4 + 1;
+        g_loginCamera.currentWalkType = rand() % 2;
+    }
+    else
+    {
+        g_loginCamera.currentNumber = 5;
+        g_loginCamera.currentWalkType = 0;
+    }
+}
+
+/**
+ * @brief Updates camera waypoint transition timing and selection.
+ */
+static void UpdateCameraWaypoint()
+{
+    g_loginCamera.currentCount++;
+
+    bool shouldTransition = (g_loginCamera.walkCut == 0 && g_loginCamera.currentCount >= 40) ||
+                           (g_loginCamera.walkCut > 0 && g_loginCamera.currentCount >= 128);
+
+    if (shouldTransition)
+    {
+        g_loginCamera.currentCount = 0;
+
+        if (g_loginCamera.walkCut == 0)
+        {
+            g_loginCamera.walkCut = 1;
+        }
+        else
+        {
+            SelectNextWaypoint();
+        }
+
+        CalculateWalkDelta();
+    }
+}
+
+/**
+ * @brief Interpolates camera position/angle towards target waypoint.
+ */
+static void InterpolateCameraMovement()
+{
+    if (g_loginCamera.currentWalkType == 0)
+    {
+        // Smooth interpolation
+        for (int i = 0; i < 3; i++)
+        {
+            g_loginCamera.currentPosition[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 6;
+            g_loginCamera.currentAngle[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 6;
+        }
+    }
+    else
+    {
+        // Linear movement using delta
+        for (int i = 0; i < 2; i++)
+        {
+            g_loginCamera.currentPosition[i] += g_loginCamera.currentWalkDelta[i];
+        }
+    }
+}
+
+/**
+ * @brief Updates login scene camera animation along predefined waypoint path.
+ */
 void MoveCamera()
 {
     if (CCameraMove::GetInstancePtr()->IsTourMode())
@@ -145,62 +247,12 @@ void MoveCamera()
 
     if (g_loginCamera.currentCount == -1)
     {
-        for (int i = 0; i < 3; i++)
-        {
-            g_loginCamera.currentPosition[i] = LoginCameraState::WALK_PATHS[0][i];
-            g_loginCamera.currentAngle[i] = LoginCameraState::WALK_PATHS[0][i + 3];
-        }
-        g_loginCamera.currentNumber = 1;
-        g_loginCamera.currentWalkType = 1;
+        InitializeLoginCamera();
+    }
 
-        for (int i = 0; i < 3; i++)
-        {
-            g_loginCamera.currentWalkDelta[i] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 128;
-            g_loginCamera.currentWalkDelta[i + 3] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 128;
-        }
-    }
-    g_loginCamera.currentCount++;
-    if ((g_loginCamera.walkCut == 0 && g_loginCamera.currentCount >= 40) || (g_loginCamera.walkCut > 0 && g_loginCamera.currentCount >= 128))
-    {
-        g_loginCamera.currentCount = 0;
-        if (g_loginCamera.walkCut == 0)
-        {
-            g_loginCamera.walkCut = 1;
-        }
-        else
-        {
-            if (SceneFlag == LOG_IN_SCENE)
-            {
-                g_loginCamera.currentNumber = rand() % 4 + 1;
-                g_loginCamera.currentWalkType = rand() % 2;
-            }
-            else
-            {
-                g_loginCamera.currentNumber = 5;
-                g_loginCamera.currentWalkType = 0;
-            }
-        }
-        for (int i = 0; i < 3; i++)
-        {
-            g_loginCamera.currentWalkDelta[i] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 128;
-            g_loginCamera.currentWalkDelta[i + 3] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 128;
-        }
-    }
-    if (g_loginCamera.currentWalkType == 0)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            g_loginCamera.currentPosition[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 6;
-            g_loginCamera.currentAngle[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 6;
-        }
-    }
-    else
-    {
-        for (int i = 0; i < 2; i++)
-        {
-            g_loginCamera.currentPosition[i] += g_loginCamera.currentWalkDelta[i];
-        }
-    }
+    UpdateCameraWaypoint();
+    InterpolateCameraMovement();
+
     CameraFOV = 45.f;
     vec3_t Position;
     Vector(0.f, 0.f, 0.f, Position);
