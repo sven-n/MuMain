@@ -89,7 +89,6 @@ extern int HeroKey;
 int DeleteGuildIndex = -1;
 
 int  ErrorMessage = NULL;
-int	 ErrorMessageNext = NULL;
 extern bool g_bEnterPressed;
 
 int    CameraWalkCut;
@@ -109,13 +108,10 @@ float  CameraWalk[] =
     200.f,-800.f,250.f,-87.f,0.f, -10.f,
 };
 
-bool MenuCancel = true;
 bool InitLogIn = false;
 bool InitLoading = false;
 bool InitCharacterScene = false;
 bool InitMainScene = false;
-int  MenuY = 480;
-int  MenuX = -200;
 extern wchar_t LogInID[MAX_ID_SIZE + 1];
 extern wchar_t m_ExeVersion[11];
 
